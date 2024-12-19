@@ -1,6 +1,6 @@
 cabal-version: 2.2
 
--- This file has been generated from package.yaml by hpack version 0.36.0.
+-- This file has been generated from package.yaml by hpack version 0.37.0.
 --
 -- see: https://github.com/sol/hpack
 
@@ -13,7 +13,6 @@ author:         Author name here
 maintainer:     example@example.com
 copyright:      2024 Author name here
 license:        BSD-3-Clause
-license-file:   LICENSE
 build-type:     Simple
 extra-source-files:
     README.md
@@ -26,6 +25,13 @@ source-repository head
 library
   exposed-modules:
       Lib
+      Noll.Language
+      Noll.Language.Expression
+      Noll.Language.Module
+      Noll.Language.Pattern
+      Noll.Language.Primitive
+      Noll.Language.Trait
+      Noll.Language.Type
   other-modules:
       Paths_noll
   autogen-modules:
@@ -35,6 +41,7 @@ library
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
       base >=4.7 && <5
+    , text
   default-language: Haskell2010
 
 executable noll-exe
@@ -49,6 +56,7 @@ executable noll-exe
   build-depends:
       base >=4.7 && <5
     , noll
+    , text
   default-language: Haskell2010
 
 test-suite noll-test
@@ -64,4 +72,5 @@ test-suite noll-test
   build-depends:
       base >=4.7 && <5
     , noll
+    , text
   default-language: Haskell2010
