@@ -25,6 +25,11 @@ source-repository head
 library
   exposed-modules:
       Lib
+      Noll.Kernel.Language.Type
+      Noll.Kernel.LLVM.IR
+      Noll.Kernel.LLVM.IRInstruction
+      Noll.Kernel.LLVM.IRType
+      Noll.Kernel.LLVM.IRValue
       Noll.Language
       Noll.Language.Expression
       Noll.Language.Module
@@ -32,6 +37,9 @@ library
       Noll.Language.Primitive
       Noll.Language.Trait
       Noll.Language.Type
+      Noll.Library
+      Noll.Library.Environment
+      Noll.TypeSystem.Constraint
   other-modules:
       Paths_noll
   autogen-modules:
@@ -41,6 +49,7 @@ library
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
       base >=4.7 && <5
+    , containers
     , text
   default-language: Haskell2010
 
@@ -55,6 +64,7 @@ executable noll-exe
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
+    , containers
     , noll
     , text
   default-language: Haskell2010
@@ -71,6 +81,7 @@ test-suite noll-test
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
+    , containers
     , noll
     , text
   default-language: Haskell2010
