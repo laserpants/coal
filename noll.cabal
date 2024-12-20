@@ -36,6 +36,7 @@ library
       Noll.Language.Module.DataConstructor
       Noll.Language.Module.Function
       Noll.Language.Module.Global
+      Noll.Language.Module.Path
       Noll.Language.Pattern
       Noll.Language.Primitive
       Noll.Language.Trait
