@@ -49,6 +49,7 @@ library
       Noll.Library
       Noll.Library.Environment
       Noll.TypeSystem.Constraint
+      Noll.TypeSystem.Constraint.Collect
       Noll.TypeSystem.Constraint.Solver
       Noll.TypeSystem.Substitution
   other-modules:
