@@ -41,6 +41,7 @@ library
       Noll.Language.Trait
       Noll.Language.Type
       Noll.Language.Type.Annotation
+      Noll.Language.Type.Intrinsic
       Noll.Language.Type.Kind
       Noll.Language.Type.Row
       Noll.Language.Type.Scheme
