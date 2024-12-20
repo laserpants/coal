@@ -2,6 +2,8 @@
 
 module Noll.TypeSystem.Assumption (Assumption (..)) where
 
+import Noll.Language (Name)
+
 data Assumption t = Assumption
   { assumptionName :: Name
   , assumptionType :: t

@@ -14,6 +14,7 @@ data Type o k
   | Intrinsic (Intrinsic (Type o k))
   | Row (Row o k (Type o k))
   | Variable (o k)
+  | Alias Name [o k] (Type o k)
   deriving (Show, Eq, Ord, Read)
 
 infix 1 `Arrow`

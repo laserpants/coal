@@ -49,6 +49,7 @@ library
       Noll.Language.Type.Scheme
       Noll.Library
       Noll.Library.Environment
+      Noll.TypeSystem.Assumption
       Noll.TypeSystem.Constraint
       Noll.TypeSystem.Constraint.Collect
       Noll.TypeSystem.Constraint.Solver
