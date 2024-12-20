@@ -50,6 +50,7 @@ library
       Noll.Library.Environment
       Noll.TypeSystem.Constraint
       Noll.TypeSystem.Constraint.Solver
+      Noll.TypeSystem.Substitution
   other-modules:
       Paths_noll
   autogen-modules:

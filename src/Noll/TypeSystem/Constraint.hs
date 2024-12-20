@@ -3,7 +3,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.TypeSystem.Constraint where
+module Noll.TypeSystem.Constraint (Monomorphic (..), TypeConstraint (..)) where
 
 import Data.Set (Set)
 import Noll.Language.Type.Scheme (Scheme (..))
@@ -13,7 +13,7 @@ newtype Monomorphic o k = Monomorphic {monomorphicSet :: Set (o k)}
   deriving (Show, Eq, Ord, Read, Semigroup, Monoid)
 
 data TypeConstraint o k t
-  = EqualityConstraint t t
-  | ImplicitConstraint t t (Monomorphic o k)
-  | ExplicitConstraint t (Scheme o k t)
+  = Equality t t
+  | Implicit t t (Monomorphic o k)
+  | Explicit t (Scheme o k t)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)

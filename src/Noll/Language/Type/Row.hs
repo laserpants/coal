@@ -6,7 +6,7 @@ module Noll.Language.Type.Row (Row (..)) where
 import Noll.Language (Name)
 
 data Row o k t
-  = RExtend Name t (Row o k t)
-  | RVariable (o k)
-  | RNil
+  = Extend Name t (Row o k t)
+  | Variable (o k)
+  | Nil
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
