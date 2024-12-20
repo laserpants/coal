@@ -33,10 +33,17 @@ library
       Noll.Language
       Noll.Language.Expression
       Noll.Language.Module
+      Noll.Language.Module.DataConstructor
+      Noll.Language.Module.Function
+      Noll.Language.Module.Global
       Noll.Language.Pattern
       Noll.Language.Primitive
       Noll.Language.Trait
       Noll.Language.Type
+      Noll.Language.Type.Annotation
+      Noll.Language.Type.Kind
+      Noll.Language.Type.Row
+      Noll.Language.Type.Scheme
       Noll.Library
       Noll.Library.Environment
       Noll.TypeSystem.Constraint
