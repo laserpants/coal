@@ -1,7 +1,7 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Language.Type.Scheme where
+module Noll.Language.Type.Scheme (Scheme (..)) where
 
 import Data.Set (Set)
 import Noll.Language.Trait (Trait (..))
