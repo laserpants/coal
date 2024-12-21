@@ -32,7 +32,6 @@ library
       Noll.Core.LLVM.IRValue
       Noll.Language.Expression
       Noll.Language.Module
-      Noll.Language.Module.DataConstructor
       Noll.Language.Module.Function
       Noll.Language.Module.Global
       Noll.Language.Module.Path
