@@ -29,6 +29,7 @@ library
       Noll.Core.LLVM.IR
       Noll.Core.LLVM.IRInstruction
       Noll.Core.LLVM.IRType
+      Noll.Core.LLVM.IRType.IRTypeOf
       Noll.Core.LLVM.IRValue
       Noll.Label
       Noll.Language.Expression

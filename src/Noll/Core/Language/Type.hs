@@ -9,7 +9,7 @@ data Type
   = -- | Type constructor
     Con Name [Type]
   | -- | Opaque type
-    Opq
+    Opaque
   | -- | Row extension
     RExt Name Type Type
   | -- | Empty row
