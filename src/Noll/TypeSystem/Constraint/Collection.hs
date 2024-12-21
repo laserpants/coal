@@ -4,16 +4,16 @@
 
 module Noll.TypeSystem.Constraint.Collection where
 
-import Control.Monad.RWS (MonadReader, MonadWriter, MonadState, MonadRWS, RWS)
+import Control.Monad.RWS (MonadRWS, MonadReader, MonadState, MonadWriter, RWS)
 import Noll.TypeSystem.Constraint (MonomorphicSet (..), TypeConstraint (..))
 
 data ConstraintsContext o k = ConstraintsContext
-  { contextMonomorphicSet :: MonomorphicSet o k
+  { contextMonomorphicSet :: MonomorphicSet (o k)
   }
   deriving (Show, Eq, Ord, Read)
 
 {-# INLINE overContextMonomorphicSet #-}
-overContextMonomorphicSet :: (MonomorphicSet o k -> MonomorphicSet o k) -> ConstraintsContext o k -> ConstraintsContext o k
+overContextMonomorphicSet :: (MonomorphicSet (o k) -> MonomorphicSet (o k)) -> ConstraintsContext o k -> ConstraintsContext o k
 overContextMonomorphicSet fn ConstraintsContext{..} = ConstraintsContext{contextMonomorphicSet = fn contextMonomorphicSet, ..}
 
 newtype Constraints o k t a = Constraints {constraintsMonad :: RWS (ConstraintsContext o k) [TypeConstraint o k t] () a}
