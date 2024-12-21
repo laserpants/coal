@@ -33,6 +33,7 @@ library
       Noll.Core.LLVM.IRValue
       Noll.Label
       Noll.Language.Expression
+      Noll.Language.Expression.Binding
       Noll.Language.Module
       Noll.Language.Module.Function
       Noll.Language.Module.Global
