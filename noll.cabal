@@ -50,7 +50,7 @@ library
       Noll.Library.Environment
       Noll.TypeSystem.Assumption
       Noll.TypeSystem.Constraint
-      Noll.TypeSystem.Constraint.Collect
+      Noll.TypeSystem.Constraint.Collection
       Noll.TypeSystem.Constraint.Solver
       Noll.TypeSystem.Substitution
       Noll.Utils
