@@ -1,6 +1,6 @@
 {-# LANGUAGE StrictData #-}
 
-module Noll.TypeSystem.Constraint.Collect where
+module Noll.TypeSystem.Constraint.Collection where
 
 import Noll.TypeSystem.Constraint (MonomorphicSet (..))
 

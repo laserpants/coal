@@ -19,8 +19,8 @@ data Primitive
     Float Float
   | -- | Double-precision floating point numbers
     Double Double
-  | -- | Chars
-    Char Char
+  | -- | Unicode character type
+    Char Int32
   | -- | Strings
     String Text
   deriving (Show, Eq, Ord, Read)
