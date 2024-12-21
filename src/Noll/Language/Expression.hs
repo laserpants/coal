@@ -3,7 +3,7 @@
 
 module Noll.Language.Expression where
 
-import Noll.Library (Some)
+import Noll.Utils (Some)
 
 -- TODO
 data Annotation a = Annotation a

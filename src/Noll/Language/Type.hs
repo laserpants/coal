@@ -4,8 +4,7 @@ module Noll.Language.Type (Type (..)) where
 
 import Noll.Language.Type.Intrinsic (Intrinsic (..))
 import Noll.Language.Type.Row (Row (..))
-import Noll.Library (Some)
-import Noll.Utils (Name)
+import Noll.Utils (Name, Some)
 
 data Type o k
   = Application k (Type o k) (Some (Type o k))
