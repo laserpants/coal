@@ -25,11 +25,11 @@ source-repository head
 library
   exposed-modules:
       Lib
-      Noll.Kernel.Language.Type
-      Noll.Kernel.LLVM.IR
-      Noll.Kernel.LLVM.IRInstruction
-      Noll.Kernel.LLVM.IRType
-      Noll.Kernel.LLVM.IRValue
+      Noll.Core.Language.Type
+      Noll.Core.LLVM.IR
+      Noll.Core.LLVM.IRInstruction
+      Noll.Core.LLVM.IRType
+      Noll.Core.LLVM.IRValue
       Noll.Language
       Noll.Language.Expression
       Noll.Language.Module

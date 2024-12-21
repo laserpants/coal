@@ -1,6 +1,6 @@
 {-# LANGUAGE StrictData #-}
 
-module Noll.Kernel.LLVM.IRType (IRType (..)) where
+module Noll.Core.LLVM.IRType (IRType (..)) where
 
 import Noll.Language (Name)
 
