@@ -2,7 +2,7 @@
 
 module Noll.Core.LLVM.IRType (IRType (..)) where
 
-import Noll.Language (Name)
+import Noll.Utils (Name)
 
 -- | LLVM IR language types
 data IRType

@@ -2,7 +2,7 @@
 
 module Noll.Core.Language.Type where
 
-import Noll.Language (Name)
+import Noll.Utils (Name)
 
 -- | Core language types
 data Type

@@ -2,7 +2,7 @@
 
 module Noll.TypeSystem.Assumption (Assumption (..)) where
 
-import Noll.Language (Name)
+import Noll.Utils (Name)
 
 data Assumption t = Assumption
   { assumptionName :: Name

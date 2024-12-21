@@ -1,7 +1,7 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Language (Label (..), Name) where
+module Noll.Utils (Label (..), Name) where
 
 import Data.Text (Text)
 

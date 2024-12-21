@@ -3,7 +3,7 @@
 
 module Noll.Language.Type.Row (Row (..)) where
 
-import Noll.Language (Name)
+import Noll.Utils (Name)
 
 data Row o k t
   = Extend Name t (Row o k t)

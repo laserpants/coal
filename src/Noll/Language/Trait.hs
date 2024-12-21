@@ -3,7 +3,7 @@
 
 module Noll.Language.Trait (Trait (..)) where
 
-import Noll.Language (Name)
+import Noll.Utils (Name)
 
 -- | Standalone type trait
 data Trait t = Trait Name t

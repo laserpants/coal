@@ -30,7 +30,6 @@ library
       Noll.Core.LLVM.IRInstruction
       Noll.Core.LLVM.IRType
       Noll.Core.LLVM.IRValue
-      Noll.Language
       Noll.Language.Expression
       Noll.Language.Module
       Noll.Language.Module.DataConstructor
@@ -54,6 +53,7 @@ library
       Noll.TypeSystem.Constraint.Collect
       Noll.TypeSystem.Constraint.Solver
       Noll.TypeSystem.Substitution
+      Noll.Utils
   other-modules:
       Paths_noll
   autogen-modules:

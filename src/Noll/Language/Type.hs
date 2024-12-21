@@ -2,10 +2,10 @@
 
 module Noll.Language.Type (Type (..)) where
 
-import Noll.Language (Name)
 import Noll.Language.Type.Intrinsic (Intrinsic (..))
 import Noll.Language.Type.Row (Row (..))
 import Noll.Library (Some)
+import Noll.Utils (Name)
 
 data Type o k
   = Application k (Type o k) (Some (Type o k))

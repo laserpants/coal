@@ -2,7 +2,7 @@
 
 module Noll.Language.Module.Path (Path (..)) where
 
-import Noll.Language (Name)
+import Noll.Utils (Name)
 
 newtype Path = Path {pathComponents :: [Name]}
   deriving (Show, Eq, Ord, Read)
