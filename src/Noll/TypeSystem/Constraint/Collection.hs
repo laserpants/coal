@@ -11,5 +11,5 @@ data ConstraintsContext o k = ConstraintsContext
   deriving (Show, Eq, Ord, Read)
 
 {-# INLINE overContextMonomorphicSet #-}
-overContextMonomorphicSet :: (MonomorphicSet v k -> MonomorphicSet v k) -> ConstraintsContext v k -> ConstraintsContext v k
+overContextMonomorphicSet :: (MonomorphicSet o k -> MonomorphicSet o k) -> ConstraintsContext o k -> ConstraintsContext o k
 overContextMonomorphicSet fn ConstraintsContext{..} = ConstraintsContext{contextMonomorphicSet = fn contextMonomorphicSet, ..}
