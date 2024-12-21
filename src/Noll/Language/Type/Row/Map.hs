@@ -1,6 +1,6 @@
 {-# LANGUAGE StrictData #-}
 
-module Noll.Language.Type.Row.Map where
+module Noll.Language.Type.Row.Map (RowMap (..)) where
 
 import Noll.Language.Type.Row (Row (..))
 import Noll.Utils (Dictionary)

@@ -1,7 +1,7 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Language.Expression where
+module Noll.Language.Expression (Expression (..)) where
 
 import Noll.Utils (Some)
 

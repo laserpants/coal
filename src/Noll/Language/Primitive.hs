@@ -1,6 +1,6 @@
 {-# LANGUAGE StrictData #-}
 
-module Noll.Language.Primitive where
+module Noll.Language.Primitive (Primitive (..)) where
 
 import Data.Text (Text)
 import GHC.Int (Int32, Int64)

@@ -2,7 +2,11 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.TypeSystem.Constraint.Collection where
+module Noll.TypeSystem.Constraint.Collection (
+  ConstraintsContext (..),
+  Constraints (..),
+)
+where
 
 import Control.Monad.RWS (MonadRWS, MonadReader, MonadState, MonadWriter, RWS)
 import Noll.TypeSystem.Constraint (MonomorphicSet (..), TypeConstraint (..))
@@ -16,7 +20,9 @@ data ConstraintsContext o k = ConstraintsContext
 overContextMonomorphicSet :: (MonomorphicSet (o k) -> MonomorphicSet (o k)) -> ConstraintsContext o k -> ConstraintsContext o k
 overContextMonomorphicSet fn ConstraintsContext{..} = ConstraintsContext{contextMonomorphicSet = fn contextMonomorphicSet, ..}
 
-newtype Constraints o k t a = Constraints {constraintsMonad :: RWS (ConstraintsContext o k) [TypeConstraint o k t] () a}
+type ConstraintsMonad o k t = RWS (ConstraintsContext o k) [TypeConstraint o k t] ()
+
+newtype Constraints o k t a = Constraints {constraintsMonad :: ConstraintsMonad o k t a}
   deriving
     ( Functor
     , Applicative

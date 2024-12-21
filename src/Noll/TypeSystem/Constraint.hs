@@ -4,7 +4,11 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.TypeSystem.Constraint (MonomorphicSet (..), TypeConstraint (..)) where
+module Noll.TypeSystem.Constraint (
+  MonomorphicSet (..),
+  TypeConstraint (..),
+)
+where
 
 import Data.Set (Set)
 import Noll.Language.Type.Scheme (Scheme (..))
