@@ -1,6 +1,6 @@
 {-# LANGUAGE StrictData #-}
 
-module Noll.Core.Language.Type where
+module Noll.Core.Language.Type (Type (..)) where
 
 import Noll.Utils (Name)
 

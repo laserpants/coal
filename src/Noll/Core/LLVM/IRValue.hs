@@ -1,4 +1,4 @@
-module Noll.Core.LLVM.IRValue where
+module Noll.Core.LLVM.IRValue (IRValue (..)) where
 
 import Data.Int (Int32, Int64)
 import Noll.Core.LLVM.IRType (IRType)
