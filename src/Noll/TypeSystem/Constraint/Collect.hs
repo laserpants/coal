@@ -79,6 +79,7 @@ runCollectConstraints cc cs = evalRWS (constraintsMonad cs) cc ()
 evalCollectConstraints :: ConstraintsContext o k -> Constraints o k t a -> [TypeConstraint o k t]
 evalCollectConstraints = snd <$$> runCollectConstraints
 
+{-# INLINE assertEquality #-}
 assertEquality :: (HasType TypeIndex () a, HasType TypeIndex () b) => a -> b -> CollectConstraints ()
 assertEquality a1 a2 = tell [Equality (typeOf a1) (typeOf a2)]
 
