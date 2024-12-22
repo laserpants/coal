@@ -15,7 +15,6 @@ import qualified Noll.Language.Pattern as Pattern
 import Noll.Language.Trait (Trait (..))
 import Noll.Language.Type (Type)
 import qualified Noll.Language.Type as Type
-import Noll.Language.Type.Index (TypeIndex)
 import Noll.Language.Type.Row (Row)
 import qualified Noll.Language.Type.Row as Row
 
@@ -49,7 +48,7 @@ instance (HasTypeIndexes o k t) => HasTypeIndexes o k (Label t) where
       Label t _ ->
         typeIndexesIn t
 
-instance (Ord k, Ord (o k), HasTypeIndexes o k (o k), HasTypeIndexes o k t) => HasTypeIndexes o k (Row o k t) where
+instance (Ord (o k), HasTypeIndexes o k (o k), HasTypeIndexes o k t) => HasTypeIndexes o k (Row o k t) where
   typeIndexesIn =
     \case
       Row.Extend _ t row ->
@@ -59,7 +58,7 @@ instance (Ord k, Ord (o k), HasTypeIndexes o k (o k), HasTypeIndexes o k t) => H
       Row.Nil ->
         mempty
 
-instance (Ord k, Ord (o k), HasTypeIndexes o k (o k)) => HasTypeIndexes o k (Type o k) where
+instance (Ord (o k), HasTypeIndexes o k (o k)) => HasTypeIndexes o k (Type o k) where
   typeIndexesIn =
     \case
       Type.Application _ t ts ->

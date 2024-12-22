@@ -13,9 +13,7 @@ where
 import Control.Monad (forM)
 import Control.Monad.RWS (MonadRWS, MonadReader, MonadState, MonadWriter, RWS, asks, local, tell)
 import Data.List (partition)
-import qualified Data.List.NonEmpty as NonEmptyList
 import qualified Data.Set as Set
-import Data.Tuple.Extra (first)
 import Noll.Label (Label (..))
 import Noll.Language.Expression (Expression (..))
 import qualified Noll.Language.Expression as Expr
@@ -30,7 +28,7 @@ import qualified Noll.Language.Type.Intrinsic as Intrinsic
 import Noll.Language.Type.Opaque (OpaqueType)
 import Noll.TypeSystem.Assumption (Assumption (..), assumptionNameIs)
 import Noll.TypeSystem.Constraint (MonomorphicSet (..), TypeConstraint (..), overMonomorphicSet)
-import Noll.Utils (Some, (<$$>))
+import Noll.Utils ((<$$>))
 
 data ConstraintsContext o k = ConstraintsContext
   { contextMonomorphicSet :: MonomorphicSet (o k)
