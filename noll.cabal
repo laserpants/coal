@@ -25,10 +25,10 @@ source-repository head
 library
   exposed-modules:
       Noll.Core.Language.Type
+      Noll.Core.LLVM.HasIRType
       Noll.Core.LLVM.IR
       Noll.Core.LLVM.IRInstruction
       Noll.Core.LLVM.IRType
-      Noll.Core.LLVM.IRType.IRTypeOf
       Noll.Core.LLVM.IRValue
       Noll.Label
       Noll.Language.Expression
@@ -42,6 +42,7 @@ library
       Noll.Language.Trait
       Noll.Language.Type
       Noll.Language.Type.Annotation
+      Noll.Language.Type.Index
       Noll.Language.Type.Intrinsic
       Noll.Language.Type.Kind
       Noll.Language.Type.Row

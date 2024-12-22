@@ -1,18 +1,18 @@
 {-# LANGUAGE LambdaCase #-}
 
-module Noll.Core.LLVM.IRType.IRTypeOf (IRTypeOf (..)) where
+module Noll.Core.LLVM.HasIRType (HasIRType (..)) where
 
 import Noll.Core.LLVM.IRType (IRType (..))
 import Noll.Core.LLVM.IRValue (IRValue)
 import qualified Noll.Core.LLVM.IRValue as IR
 
-class IRTypeOf t where
+class HasIRType t where
   irTypeOf :: t -> IRType
 
-instance IRTypeOf IRType where
+instance HasIRType IRType where
   irTypeOf = id
 
-instance IRTypeOf IRValue where
+instance HasIRType IRValue where
   irTypeOf =
     \case
       IR.Local t _ ->
