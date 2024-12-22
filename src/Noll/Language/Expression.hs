@@ -9,7 +9,7 @@ import Noll.Language.Expression.Operator.Binary (BinaryOperator)
 import Noll.Language.Expression.Operator.Unary (UnaryOperator)
 import Noll.Language.Pattern (Pattern (..))
 import Noll.Language.Primitive (Primitive (..))
-import Noll.Utils (Some)
+import Noll.Utils (Dictionary, Some)
 
 data Expression t
   = -- | Function application
@@ -30,4 +30,6 @@ data Expression t
     UnaryOperator (t, UnaryOperator)
   | -- | Binary operators
     BinaryOperator (t, BinaryOperator)
+  | -- | Record
+    Record t (Dictionary (Expression t)) (Maybe (Expression t))
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
