@@ -32,4 +32,8 @@ data Expression t
     BinaryOperator (t, BinaryOperator)
   | -- | Record
     Record t (Dictionary (Expression t)) (Maybe (Expression t))
+  | -- | List cons-operator
+    ListCons t (Expression t) (Expression t)
+  | -- | List literal
+    ListLiteral t [Expression t]
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)

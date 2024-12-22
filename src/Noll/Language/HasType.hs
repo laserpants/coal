@@ -79,12 +79,12 @@ instance HasType o k (Expression (Type o k)) where
         typeOf t
       Expr.Record t _ _ ->
         typeOf t
+      Expr.ListCons t _ _ ->
+        typeOf t
+      Expr.ListLiteral t _ ->
+        typeOf t
 
 --      Expr.Match t _ _ _ ->
 --        typeOf t
 --      Expr.Fold t _ _ _ ->
---        typeOf t
---      Expr.ListCons t _ _ ->
---        typeOf t
---      Expr.ListLiteral t _ ->
 --        typeOf t
