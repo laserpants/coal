@@ -22,4 +22,6 @@ data Expression t
     Constructor (Label t)
   | -- | Literal expression
     Literal Primitive
+  | -- | If-else statement
+    If (Expression t) (Expression t) (Expression t)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)

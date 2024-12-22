@@ -1,6 +1,6 @@
 {-# LANGUAGE StrictData #-}
 
-module Noll.Language.Type (Type (..)) where
+module Noll.Language.Type (Type (..), foldType) where
 
 import Noll.Language.Type.Intrinsic (Intrinsic (..))
 import Noll.Language.Type.Row (Row (..))
@@ -17,3 +17,7 @@ data Type o k
   deriving (Show, Eq, Ord, Read)
 
 infix 1 `Arrow`
+
+{-# INLINE foldType #-}
+foldType :: (Foldable f) => Type o k -> f (Type o k) -> Type o k
+foldType = foldr Arrow
