@@ -1,6 +1,7 @@
+{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.TypeSystem.Assumption (Assumption (..)) where
+module Noll.TypeSystem.Assumption (Assumption (..), assumptionNameIs) where
 
 import Noll.Utils (Name)
 
@@ -9,3 +10,7 @@ data Assumption t = Assumption
   , assumptionType :: t
   }
   deriving (Show, Eq, Ord, Read)
+
+{-# INLINE assumptionNameIs #-}
+assumptionNameIs :: Name -> Assumption t -> Bool
+assumptionNameIs name Assumption{..} = assumptionName == name

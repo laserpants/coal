@@ -34,6 +34,10 @@ library
       Noll.Label
       Noll.Language.Expression
       Noll.Language.Expression.Binding
+      Noll.Language.Expression.Operator.Binary
+      Noll.Language.Expression.Operator.Unary
+      Noll.Language.HasType
+      Noll.Language.HasTypeIndexes
       Noll.Language.Module
       Noll.Language.Module.Function
       Noll.Language.Module.Global
@@ -53,7 +57,7 @@ library
       Noll.Library.Environment
       Noll.TypeSystem.Assumption
       Noll.TypeSystem.Constraint
-      Noll.TypeSystem.Constraint.Collection
+      Noll.TypeSystem.Constraint.Collect
       Noll.TypeSystem.Constraint.Solver
       Noll.TypeSystem.Substitution
       Noll.Utils
@@ -67,6 +71,7 @@ library
   build-depends:
       base >=4.7 && <5
     , containers
+    , extra
     , mtl
     , text
   default-language: Haskell2010
@@ -83,6 +88,7 @@ executable noll-exe
   build-depends:
       base >=4.7 && <5
     , containers
+    , extra
     , mtl
     , noll
     , text
@@ -101,6 +107,7 @@ test-suite noll-test
   build-depends:
       base >=4.7 && <5
     , containers
+    , extra
     , mtl
     , noll
     , text

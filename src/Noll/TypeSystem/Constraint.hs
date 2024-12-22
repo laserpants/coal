@@ -7,6 +7,7 @@
 module Noll.TypeSystem.Constraint (
   MonomorphicSet (..),
   TypeConstraint (..),
+  overMonomorphicSet,
 )
 where
 

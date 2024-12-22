@@ -13,7 +13,6 @@ import qualified Noll.Language.Pattern as Pattern
 import Noll.Language.Primitive (Primitive)
 import qualified Noll.Language.Primitive as Prim
 import Noll.Language.Type (Type (..), foldType)
-import Noll.Language.Type.Index (TypeIndex)
 import Noll.Language.Type.Intrinsic (Intrinsic (..))
 
 class HasType o k t where
@@ -83,8 +82,3 @@ instance HasType o k (Expression (Type o k)) where
         typeOf t
       Expr.ListLiteral t _ ->
         typeOf t
-
---      Expr.Match t _ _ _ ->
---        typeOf t
---      Expr.Fold t _ _ _ ->
---        typeOf t

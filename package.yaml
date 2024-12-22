@@ -24,6 +24,7 @@ dependencies:
 - text
 - containers
 - mtl
+- extra
 
 ghc-options:
 - -Wall
