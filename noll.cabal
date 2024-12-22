@@ -24,6 +24,7 @@ source-repository head
 
 library
   exposed-modules:
+      Noll.Core.Language.HasType
       Noll.Core.Language.Type
       Noll.Core.LLVM.HasIRType
       Noll.Core.LLVM.IR
@@ -45,6 +46,7 @@ library
       Noll.Language.Type.Index
       Noll.Language.Type.Intrinsic
       Noll.Language.Type.Kind
+      Noll.Language.Type.Opaque
       Noll.Language.Type.Row
       Noll.Language.Type.Row.Map
       Noll.Language.Type.Scheme
