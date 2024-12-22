@@ -15,8 +15,11 @@ import qualified Noll.Language.Pattern as Pattern
 import Noll.Language.Trait (Trait (..))
 import Noll.Language.Type (Type)
 import qualified Noll.Language.Type as Type
+import Noll.Language.Type.Index (TypeIndex (..))
 import Noll.Language.Type.Row (Row)
 import qualified Noll.Language.Type.Row as Row
+import Noll.Language.Type.Scheme (Scheme (..))
+import Noll.TypeSystem.Constraint (MonomorphicSet (..))
 
 class HasTypeIndexes o k t where
   typeIndexesIn :: t -> Set (o k)
@@ -25,23 +28,19 @@ instance HasTypeIndexes o k (o k) where
   typeIndexesIn = singleton
 
 instance (Ord (o k), HasTypeIndexes o k t) => HasTypeIndexes o k (Map a t) where
-  typeIndexesIn = mapTypeIndexesIn
+  typeIndexesIn = Set.unions . fmap typeIndexesIn
 
 instance (Ord (o k), HasTypeIndexes o k t) => HasTypeIndexes o k (Maybe t) where
-  typeIndexesIn = mapTypeIndexesIn
+  typeIndexesIn = Set.unions . fmap typeIndexesIn
 
 instance (Ord (o k), HasTypeIndexes o k t) => HasTypeIndexes o k [t] where
-  typeIndexesIn = mapTypeIndexesIn
+  typeIndexesIn = Set.unions . fmap typeIndexesIn
 
 instance (Ord (o k), HasTypeIndexes o k t) => HasTypeIndexes o k (NonEmpty t) where
-  typeIndexesIn = mapTypeIndexesIn
+  typeIndexesIn = Set.unions . fmap typeIndexesIn
 
 instance (Ord (o k), HasTypeIndexes o k t) => HasTypeIndexes o k (Trait t) where
-  typeIndexesIn = mapTypeIndexesIn
-
-{-# INLINE mapTypeIndexesIn #-}
-mapTypeIndexesIn :: (Functor f, Foldable f, HasTypeIndexes o k t, Ord (o k)) => f t -> Set (o k)
-mapTypeIndexesIn = Set.unions . fmap typeIndexesIn
+  typeIndexesIn = Set.unions . fmap typeIndexesIn
 
 instance (HasTypeIndexes o k t) => HasTypeIndexes o k (Label t) where
   typeIndexesIn =
@@ -82,3 +81,29 @@ instance (HasTypeIndexes o k t) => HasTypeIndexes o k (Pattern t) where
     \case
       Pattern.Variable (Label t _) ->
         typeIndexesIn t
+
+instance (Ord (o k), HasTypeIndexes o k t) => HasTypeIndexes o k (Scheme o k t) where
+  typeIndexesIn =
+    \case
+      Forall qs ps t ->
+        undefined
+
+-- (typeIndexesIn t <> typeIndexesIn ps) \\. qs
+-- (\\.) (typeIndexesIn t <> typeIndexesIn ps) qs
+--        Set.filter (tork qs) (typeIndexesIn t <> typeIndexesIn ps)
+
+----(\\.) :: Set (o k) -> Set (o k) -> Set (o k)
+----(\\.) s1 s2 = Set.filter (fork s2) s1
+--
+-- tork :: Set a -> a -> Bool
+-- tork = undefined
+--
+----fnork s2 s = tork s2 s
+----
+----fork s2 s = tork s2 s -- knork s `notElem` Set.map knork s2
+----
+----knork :: o k -> Int
+----knork = undefined
+
+instance HasTypeIndexes o k (MonomorphicSet (o k)) where
+  typeIndexesIn = monomorphicSet
