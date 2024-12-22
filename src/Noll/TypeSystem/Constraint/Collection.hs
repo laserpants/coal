@@ -9,6 +9,11 @@ module Noll.TypeSystem.Constraint.Collection (
 where
 
 import Control.Monad.RWS (MonadRWS, MonadReader, MonadState, MonadWriter, RWS)
+import Noll.Language.Expression (Expression (..))
+import Noll.Language.Type (Type (..))
+import Noll.Language.Type.Index (TypeIndex (..))
+import Noll.Language.Type.Opaque (OpaqueType)
+import Noll.TypeSystem.Assumption (Assumption (..))
 import Noll.TypeSystem.Constraint (MonomorphicSet (..), TypeConstraint (..))
 
 data ConstraintsContext o k = ConstraintsContext
@@ -32,3 +37,9 @@ newtype Constraints o k t a = Constraints {constraintsMonad :: ConstraintsMonad 
     , MonadState ()
     , MonadRWS (ConstraintsContext o k) [TypeConstraint o k t] ()
     )
+
+collectConstraints ::
+  Expression OpaqueType ->
+  Constraints TypeIndex () OpaqueType ([Assumption OpaqueType], Expression OpaqueType)
+collectConstraints =
+  undefined

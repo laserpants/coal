@@ -1,5 +1,5 @@
-{-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE DeriveFoldable #-}
+{-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE StrictData #-}
 
 module Noll.Language.Type.Index (TypeIndex (..)) where
