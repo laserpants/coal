@@ -98,6 +98,7 @@ test-suite noll-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      Noll.TypeSystem.Constraint.CollectSpec
       Paths_noll
   autogen-modules:
       Paths_noll
@@ -108,6 +109,7 @@ test-suite noll-test
       base >=4.7 && <5
     , containers
     , extra
+    , hspec
     , mtl
     , noll
     , text

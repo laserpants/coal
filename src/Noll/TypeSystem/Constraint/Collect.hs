@@ -7,11 +7,14 @@
 module Noll.TypeSystem.Constraint.Collect (
   ConstraintsContext (..),
   Constraints (..),
+  CollectConstraints,
+  collectConstraints,
+  runCollectConstraints,
 )
 where
 
 import Control.Monad (forM)
-import Control.Monad.RWS (MonadRWS, MonadReader, MonadState, MonadWriter, RWS, asks, local, tell)
+import Control.Monad.RWS (MonadRWS, MonadReader, MonadState, MonadWriter, RWS, asks, evalRWS, local, tell)
 import Data.List (partition)
 import qualified Data.Set as Set
 import Noll.Label (Label (..))
@@ -65,6 +68,10 @@ localMonoset :: (MonomorphicSet (o k) -> MonomorphicSet (o k)) -> Constraints o 
 localMonoset = local . overContextMonomorphicSet
 
 type CollectConstraints = Constraints TypeIndex () OpaqueType
+
+{-# INLINE runCollectConstraints #-}
+runCollectConstraints :: ConstraintsContext o k -> Constraints o k t a -> (a, [TypeConstraint o k t])
+runCollectConstraints cc cs = evalRWS (constraintsMonad cs) cc ()
 
 assertEquality :: (HasType TypeIndex () a, HasType TypeIndex () b) => a -> b -> CollectConstraints ()
 assertEquality a1 a2 = tell [Equality (typeOf a1) (typeOf a2)]
