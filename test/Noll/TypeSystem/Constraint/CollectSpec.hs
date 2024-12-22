@@ -1,28 +1,74 @@
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Noll.TypeSystem.Constraint.CollectSpec where
 
 import Data.List.NonEmpty (NonEmpty (..))
+import qualified Data.Set as Set
 import Noll.Label (Label (..))
 import Noll.Language.Expression (Expression)
 import qualified Noll.Language.Expression as Expr
 import qualified Noll.Language.Expression.Binding as Binding
 import qualified Noll.Language.Pattern as Pattern
 import qualified Noll.Language.Primitive as Prim
+import Noll.Language.Type (Type)
 import qualified Noll.Language.Type as Type
 import Noll.Language.Type.Index (TypeIndex (..))
+import qualified Noll.Language.Type.Intrinsic as Intrinsic
 import Noll.Language.Type.Opaque (OpaqueType)
+import Noll.TypeSystem.Constraint (MonomorphicSet (..), TypeConstraint (..))
 import Noll.TypeSystem.Constraint.Collect
 import Test.Hspec (Spec, describe, it)
 
 spec :: Spec
 spec =
   describe "Noll.TypeSystem.Constraint.Collect" $ do
-    it "" $ do
-      1 == 1
+    it "" $
+      hasConstraint
+        fixture_1
+        (Equality (typeVariable 2) (typeBool `Type.Arrow` typeVariable 3))
+    it "" $
+      hasConstraint
+        fixture_1
+        (Equality (typeVariable 5) (typeVariable 1))
+    it "" $
+      hasConstraint
+        fixture_1
+        (Equality (typeVariable 6) (typeVariable 1))
+    it "" $
+      hasConstraint
+        fixture_1
+        (Equality (typeVariable 7) (typeVariable 3))
+    it "" $
+      hasConstraint
+        fixture_1
+        (Implicit (typeVariable 4) (typeVariable 7) (MonomorphicSet (Set.fromList [TypeIndex () 5])))
+    it "" $
+      hasConstraint
+        fixture_1
+        (Implicit (typeVariable 2) (typeVariable 6) (MonomorphicSet (Set.fromList [TypeIndex () 5])))
 
-collectFixture_1 :: Expression Int
-collectFixture_1 =
+hasConstraint :: Expression Int -> TypeConstraint TypeIndex () OpaqueType -> Bool
+hasConstraint e =
+  \case
+    Equality t1 t2 ->
+      elem (Equality t1 t2) constraints || elem (Equality t2 t1) constraints
+    c ->
+      elem c constraints
+ where
+  constraints =
+    evalCollectConstraints
+      (ConstraintsContext mempty)
+      (collectConstraints (fmap typeVariable e))
+
+typeVariable :: Int -> OpaqueType
+typeVariable = Type.Variable . TypeIndex ()
+
+typeBool :: OpaqueType
+typeBool = Type.Intrinsic Intrinsic.Bool
+
+fixture_1 :: Expression Int
+fixture_1 =
   Expr.Lambda
     (Pattern.Variable (Label 5 "m") :| [])
     ( Expr.Let
@@ -45,12 +91,3 @@ collectFixture_1 =
             )
         )
     )
-
-collectFixture_2 :: Expression OpaqueType
-collectFixture_2 = fmap (Type.Variable . TypeIndex ()) collectFixture_1
-
--- collectFixture_3 :: (([Assumption OpaqueType], Expression OpaqueType), [TypeConstraint TypeIndex () OpaqueType])
-collectFixture_3 =
-  runCollectConstraints
-    (ConstraintsContext mempty)
-    (collectConstraints collectFixture_2)

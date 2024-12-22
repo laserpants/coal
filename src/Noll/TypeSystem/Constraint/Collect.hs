@@ -10,6 +10,7 @@ module Noll.TypeSystem.Constraint.Collect (
   CollectConstraints,
   collectConstraints,
   runCollectConstraints,
+  evalCollectConstraints,
 )
 where
 
@@ -73,6 +74,10 @@ type CollectConstraints = Constraints TypeIndex () OpaqueType
 runCollectConstraints :: ConstraintsContext o k -> Constraints o k t a -> (a, [TypeConstraint o k t])
 runCollectConstraints cc cs = evalRWS (constraintsMonad cs) cc ()
 
+{-# INLINE evalCollectConstraints #-}
+evalCollectConstraints :: ConstraintsContext o k -> Constraints o k t a -> [TypeConstraint o k t]
+evalCollectConstraints = snd <$$> runCollectConstraints
+
 assertEquality :: (HasType TypeIndex () a, HasType TypeIndex () b) => a -> b -> CollectConstraints ()
 assertEquality a1 a2 = tell [Equality (typeOf a1) (typeOf a2)]
 
@@ -97,25 +102,24 @@ patternAssumptions ms =
       assertEqualityAssumptions t ls
       pure rs
 
-collectConstraints :: Expression OpaqueType -> CollectConstraints ([Assumption OpaqueType], Expression OpaqueType)
+collectConstraints :: Expression OpaqueType -> CollectConstraints [Assumption OpaqueType]
 collectConstraints =
   \case
     Expr.Constructor (Label _ name) -> do
       undefined
     Expr.Variable (Label t name) -> do
-      pure ([Assumption name t], Expr.Variable (Label t name))
+      pure [Assumption name t]
     Expr.Lambda ps e -> do
-      let ts = typeIndexesIn ps
-      (ms1, a1) <- localMonoset (monosetInsertMany ts) (collectConstraints e)
+      ms1 <- localMonoset (monosetInsertMany (typeIndexesIn ps)) (collectConstraints e)
       ms2 <- concat <$> forM ps (patternAssumptions ms1)
-      pure (ms2, Expr.Lambda ps a1)
+      pure ms2
     Expr.Let ds e1 -> do
-      (ms1, a1) <- collectConstraints e1
+      ms1 <- collectConstraints e1
       ms2 <- concat <$$> forM ds $
         \case
           Binding.Pattern (Pattern.Variable (Label t name)) e -> do
-            (ms, a) <- collectConstraints e
-            assertEquality t a
+            ms <- collectConstraints e
+            assertEquality t e
             pure ms
       ms3 <- concat <$$> forM ds $
         \case
@@ -123,18 +127,18 @@ collectConstraints =
             let (ls, rs) = partition (assumptionNameIs name) ms1
             assertImplicitAssumptions t ls
             pure rs
-      pure (ms1 <> ms2 <> ms3, Expr.Let ds a1)
+      pure (ms1 <> ms2 <> ms3)
     Expr.If e1 e2 e3 -> do
-      (ms1, a1) <- collectConstraints e1
-      (ms2, a2) <- collectConstraints e2
-      (ms3, a3) <- collectConstraints e3
-      assertEquality a1 (Intrinsic Intrinsic.Bool :: OpaqueType)
-      assertEquality a2 a3
-      pure (ms1 <> ms2 <> ms3, Expr.If a1 a2 a3)
+      ms1 <- collectConstraints e1
+      ms2 <- collectConstraints e2
+      ms3 <- collectConstraints e3
+      assertEquality e1 (Intrinsic Intrinsic.Bool :: OpaqueType)
+      assertEquality e2 e3
+      pure (ms1 <> ms2 <> ms3)
     Expr.Application t e1 es -> do
-      (ms1, a1) <- collectConstraints e1
-      (ms2, as) <- sequence <$> traverse collectConstraints es
-      assertEquality a1 (foldType t (typeOf <$> as))
-      pure (ms1 <> ms2, Expr.Application t a1 as)
-    lit@Expr.Literal{} ->
-      pure ([], lit)
+      ms1 <- collectConstraints e1
+      ms2 <- concat <$> traverse collectConstraints es
+      assertEquality e1 (foldType t (typeOf <$> es))
+      pure (ms1 <> ms2)
+    Expr.Literal{} ->
+      pure []
