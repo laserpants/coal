@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
@@ -10,7 +11,7 @@ module Noll.TypeSystem.Constraint.Collect (
 where
 
 import Control.Monad (forM)
-import Control.Monad.RWS (MonadRWS, MonadReader, MonadState, MonadWriter, RWS)
+import Control.Monad.RWS (MonadRWS, MonadReader, MonadState, MonadWriter, RWS, asks, local, tell)
 import Data.List (partition)
 import qualified Data.List.NonEmpty as NonEmptyList
 import qualified Data.Set as Set
@@ -20,6 +21,7 @@ import Noll.Language.Expression (Expression (..))
 import qualified Noll.Language.Expression as Expr
 import qualified Noll.Language.Expression.Binding as Binding
 import Noll.Language.HasType (HasType (..))
+import Noll.Language.HasTypeIndexes (HasTypeIndexes (..))
 import Noll.Language.Pattern (Pattern (..))
 import qualified Noll.Language.Pattern as Pattern
 import Noll.Language.Type (Type (..), foldType)
@@ -52,21 +54,35 @@ newtype Constraints o k t a = Constraints {constraintsMonad :: ConstraintsMonad 
     , MonadRWS (ConstraintsContext o k) [TypeConstraint o k t] ()
     )
 
-localMonoset = undefined
-
+{-# INLINE monosetInsert #-}
 monosetInsert :: TypeIndex () -> MonomorphicSet (TypeIndex ()) -> MonomorphicSet (TypeIndex ())
 monosetInsert = overMonomorphicSet . Set.insert
 
+{-# INLINE monosetInsertMany #-}
 monosetInsertMany :: (Foldable f) => f (TypeIndex ()) -> MonomorphicSet (TypeIndex ()) -> MonomorphicSet (TypeIndex ())
-monosetInsertMany a b = foldr monosetInsert b a
+monosetInsertMany = flip (foldr monosetInsert)
 
-assertEquality = undefined
-
-assertEqualityAssumptions = undefined
-
-assertImplicitAssumptions = undefined
+{-# INLINE localMonoset #-}
+localMonoset :: (MonomorphicSet (o k) -> MonomorphicSet (o k)) -> Constraints o k t a -> Constraints o k t a
+localMonoset = local . overContextMonomorphicSet
 
 type CollectConstraints = Constraints TypeIndex () OpaqueType
+
+assertEquality :: (HasType TypeIndex () a, HasType TypeIndex () b) => a -> b -> CollectConstraints ()
+assertEquality a1 a2 = tell [Equality (typeOf a1) (typeOf a2)]
+
+assertEqualityAssumptions :: OpaqueType -> [Assumption OpaqueType] -> CollectConstraints ()
+assertEqualityAssumptions t ms =
+  tell $ do
+    Assumption{..} <- ms
+    pure (Equality assumptionType t)
+
+assertImplicitAssumptions :: OpaqueType -> [Assumption OpaqueType] -> CollectConstraints ()
+assertImplicitAssumptions t ms = do
+  set <- asks contextMonomorphicSet
+  tell $ do
+    Assumption{..} <- ms
+    pure (Implicit assumptionType t set)
 
 patternAssumptions :: [Assumption OpaqueType] -> Pattern OpaqueType -> CollectConstraints [Assumption OpaqueType]
 patternAssumptions ms =
@@ -84,7 +100,7 @@ collectConstraints =
     Expr.Variable (Label t name) -> do
       pure ([Assumption name t], Expr.Variable (Label t name))
     Expr.Lambda ps e -> do
-      let ts = undefined :: [TypeIndex ()]
+      let ts = typeIndexesIn ps
       (ms1, a1) <- localMonoset (monosetInsertMany ts) (collectConstraints e)
       ms2 <- concat <$> forM ps (patternAssumptions ms1)
       pure (ms2, Expr.Lambda ps a1)
@@ -107,7 +123,7 @@ collectConstraints =
       (ms1, a1) <- collectConstraints e1
       (ms2, a2) <- collectConstraints e2
       (ms3, a3) <- collectConstraints e3
-      assertEquality a1 (Intrinsic Intrinsic.Bool)
+      assertEquality a1 (Intrinsic Intrinsic.Bool :: OpaqueType)
       assertEquality a2 a3
       pure (ms1 <> ms2 <> ms3, Expr.If a1 a2 a3)
     Expr.Application t e1 es -> do
