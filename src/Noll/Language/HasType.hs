@@ -9,6 +9,7 @@ import Noll.Label (Label (..))
 import Noll.Language.Expression (Expression)
 import qualified Noll.Language.Expression as Expr
 import Noll.Language.Pattern (Pattern (..))
+import qualified Noll.Language.Pattern as Pattern
 import Noll.Language.Primitive (Primitive)
 import qualified Noll.Language.Primitive as Prim
 import Noll.Language.Type (Type (..), foldType)
@@ -49,7 +50,11 @@ instance HasType o k Primitive where
 
 instance HasType o k (Pattern (Type o k)) where
   typeOf =
-    undefined
+    \case
+      Pattern.Variable t ->
+        typeOf t
+      Pattern.Constructor t _ ->
+        typeOf t
 
 instance HasType o k (Expression (Type o k)) where
   typeOf =
@@ -68,11 +73,11 @@ instance HasType o k (Expression (Type o k)) where
         typeOf t
       Expr.Lambda ts t ->
         foldType (typeOf t) (typeOf <$> ts)
+      Expr.BinaryOperator (t, _) ->
+        typeOf t
+      Expr.UnaryOperator (t, _) ->
+        typeOf t
 
---      Expr.BinaryOperator (t, _) ->
---        typeOf t
---      Expr.UnaryOperator (t, _) ->
---        typeOf t
 --      Expr.Match t _ _ _ ->
 --        typeOf t
 --      Expr.Fold t _ _ _ ->

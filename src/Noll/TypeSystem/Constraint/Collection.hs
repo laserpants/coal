@@ -14,7 +14,7 @@ import Noll.Label (Label (..))
 import Noll.Language.Expression (Expression (..))
 import qualified Noll.Language.Expression as Expr
 import Noll.Language.HasType (HasType (..))
-import Noll.Language.Type (Type (..))
+import Noll.Language.Type (Type (..), foldType)
 import Noll.Language.Type.Index (TypeIndex (..))
 import Noll.Language.Type.Opaque (OpaqueType)
 import Noll.TypeSystem.Assumption (Assumption (..))
@@ -44,9 +44,6 @@ newtype Constraints o k t a = Constraints {constraintsMonad :: ConstraintsMonad 
     )
 
 assertEquality = undefined
-
-foldType :: OpaqueType -> Some OpaqueType -> OpaqueType
-foldType = undefined
 
 collectConstraints ::
   Expression OpaqueType ->
