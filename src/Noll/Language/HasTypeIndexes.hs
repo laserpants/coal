@@ -39,6 +39,7 @@ instance (Ord (o k), HasTypeIndexes o k t) => HasTypeIndexes o k (NonEmpty t) wh
 instance (Ord (o k), HasTypeIndexes o k t) => HasTypeIndexes o k (Trait t) where
   typeIndexesIn = mapTypeIndexesIn
 
+{-# INLINE mapTypeIndexesIn #-}
 mapTypeIndexesIn :: (Functor f, Foldable f, HasTypeIndexes o k t, Ord (o k)) => f t -> Set (o k)
 mapTypeIndexesIn = Set.unions . fmap typeIndexesIn
 
