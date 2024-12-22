@@ -21,6 +21,7 @@ import qualified Data.Set as Set
 import Noll.Label (Label (..))
 import Noll.Language.Expression (Expression (..))
 import qualified Noll.Language.Expression as Expr
+import Noll.Language.Expression.Binding (Binding)
 import qualified Noll.Language.Expression.Binding as Binding
 import Noll.Language.HasType (HasType (..))
 import Noll.Language.HasTypeIndexes (HasTypeIndexes (..))
@@ -113,15 +114,15 @@ collectConstraints =
       ms1 <- localMonoset (monosetInsertMany (typeIndexesIn ps)) (collectConstraints e)
       ms2 <- concat <$> forM ps (patternAssumptions ms1)
       pure ms2
-    Expr.Let ds e1 -> do
+    Expr.Let gs e1 -> do
       ms1 <- collectConstraints e1
-      ms2 <- concat <$$> forM ds $
+      ms2 <- forEachBinding gs $
         \case
           Binding.Pattern (Pattern.Variable (Label t name)) e -> do
             ms <- collectConstraints e
             assertEquality t e
             pure ms
-      ms3 <- concat <$$> forM ds $
+      ms3 <- forEachBinding gs $
         \case
           Binding.Pattern (Pattern.Variable (Label t name)) e -> do
             let (ls, rs) = partition (assumptionNameIs name) ms1
@@ -142,3 +143,10 @@ collectConstraints =
       pure (ms1 <> ms2)
     Expr.Literal{} ->
       pure []
+
+forEachBinding ::
+  (Traversable f) =>
+  f (Binding Expression OpaqueType) ->
+  (Binding Expression OpaqueType -> CollectConstraints [a]) ->
+  CollectConstraints [a]
+forEachBinding gs = concat <$$> forM gs

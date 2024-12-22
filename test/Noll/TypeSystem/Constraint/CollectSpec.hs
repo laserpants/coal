@@ -11,7 +11,6 @@ import qualified Noll.Language.Expression as Expr
 import qualified Noll.Language.Expression.Binding as Binding
 import qualified Noll.Language.Pattern as Pattern
 import qualified Noll.Language.Primitive as Prim
-import Noll.Language.Type (Type)
 import qualified Noll.Language.Type as Type
 import Noll.Language.Type.Index (TypeIndex (..))
 import qualified Noll.Language.Type.Intrinsic as Intrinsic
