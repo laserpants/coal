@@ -12,6 +12,7 @@ import Noll.Language.HasTypeIndexes (HasTypeIndexes, typeIdsIn)
 import Noll.Language.Type.Index (TypeIndex (..))
 import Noll.TypeSystem.Constraint (MonomorphicSet (..), TypeConstraint (..))
 import Noll.TypeSystem.Substitution (TypeSubstitutable (..), TypeSubstitution (..), mapsTo)
+import Noll.TypeSystem.Unification (TypeUnifiable (..))
 
 isSolvable ::
   (Ord k, HasTypeIndexes k t) =>
@@ -43,6 +44,7 @@ solveTypes ::
   , Eq t
   , HasTypeIndexes k t
   , TypeSubstitutable (TypeConstraint TypeIndex k t) t
+  , TypeUnifiable t t
   , Monad m
   ) =>
   [TypeConstraint TypeIndex k t] ->
@@ -51,7 +53,7 @@ solveTypes [] = pure (TypeSubstitution mempty)
 solveTypes constraints =
   case choice constraints of
     NoneFound ->
-      undefined
+      pure mempty
     Choice cs (Equality t1 t2) -> do
       sub1 <- unify t1 t2
       sub2 <- solveTypes (apply sub1 cs)
@@ -66,8 +68,5 @@ solveTypes constraints =
 instantiate =
   undefined
 
-generalize =
-  undefined
-
-unify =
+generalize (MonomorphicSet m) t =
   undefined
