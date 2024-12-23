@@ -30,7 +30,6 @@ import qualified Noll.Language.Pattern as Pattern
 import Noll.Language.Type (Type (..), foldType)
 import Noll.Language.Type.Index (TypeIndex (..))
 import qualified Noll.Language.Type.Intrinsic as Intrinsic
-import Noll.Language.Type.Opaque (OpaqueType)
 import Noll.TypeSystem.Assumption (Assumption (..), assumptionNameIs)
 import Noll.TypeSystem.Constraint (MonomorphicSet (..), TypeConstraint (..), overMonomorphicSet)
 import Noll.Utils ((<$$>))
@@ -69,7 +68,7 @@ monosetInsertMany = flip (foldr monosetInsert)
 localMonoset :: (MonomorphicSet (o k) -> MonomorphicSet (o k)) -> Constraints o k t a -> Constraints o k t a
 localMonoset = local . overContextMonomorphicSet
 
-type CollectConstraints = Constraints TypeIndex () OpaqueType
+type CollectConstraints k = Constraints TypeIndex k (Type TypeIndex k)
 
 {-# INLINE runCollectConstraints #-}
 runCollectConstraints :: ConstraintsContext o k -> Constraints o k t a -> (a, [TypeConstraint o k t])
@@ -80,23 +79,23 @@ evalCollectConstraints :: ConstraintsContext o k -> Constraints o k t a -> [Type
 evalCollectConstraints = snd <$$> runCollectConstraints
 
 {-# INLINE assertEquality #-}
-assertEquality :: (HasType TypeIndex () a, HasType TypeIndex () b) => a -> b -> CollectConstraints ()
-assertEquality a1 a2 = tell [Equality (typeOf a1) (typeOf a2)]
+assertEquality :: Type TypeIndex k -> Type TypeIndex k -> CollectConstraints k ()
+assertEquality t1 t2 = tell [Equality t1 t2]
 
-assertEqualityAssumptions :: OpaqueType -> [Assumption OpaqueType] -> CollectConstraints ()
+assertEqualityAssumptions :: (Ord k) => Type TypeIndex k -> [Assumption (Type TypeIndex k)] -> CollectConstraints k ()
 assertEqualityAssumptions t ms =
   tell $ do
     Assumption{..} <- ms
     pure (Equality assumptionType t)
 
-assertImplicitAssumptions :: OpaqueType -> [Assumption OpaqueType] -> CollectConstraints ()
+assertImplicitAssumptions :: (Ord k) => Type TypeIndex k -> [Assumption (Type TypeIndex k)] -> CollectConstraints k ()
 assertImplicitAssumptions t ms = do
   set <- asks contextMonomorphicSet
   tell $ do
     Assumption{..} <- ms
     pure (Implicit assumptionType t set)
 
-patternAssumptions :: [Assumption OpaqueType] -> Pattern OpaqueType -> CollectConstraints [Assumption OpaqueType]
+patternAssumptions :: (Ord k) => [Assumption (Type TypeIndex k)] -> Pattern (Type TypeIndex k) -> CollectConstraints k [Assumption (Type TypeIndex k)]
 patternAssumptions ms =
   \case
     Pattern.Variable (Label t name) -> do
@@ -104,7 +103,7 @@ patternAssumptions ms =
       assertEqualityAssumptions t ls
       pure rs
 
-collectConstraints :: Expression OpaqueType -> CollectConstraints [Assumption OpaqueType]
+collectConstraints :: (Ord k) => Expression (Type TypeIndex k) -> CollectConstraints k [Assumption (Type TypeIndex k)]
 collectConstraints =
   \case
     Expr.Constructor (Label _ name) -> do
@@ -121,7 +120,7 @@ collectConstraints =
         \case
           Binding.Pattern (Pattern.Variable (Label t name)) e -> do
             ms <- collectConstraints e
-            assertEquality t e
+            assertEquality t (typeOf e)
             pure ms
       ms3 <- forEachBinding gs $
         \case
@@ -134,20 +133,20 @@ collectConstraints =
       ms1 <- collectConstraints e1
       ms2 <- collectConstraints e2
       ms3 <- collectConstraints e3
-      assertEquality e1 (Intrinsic Intrinsic.Bool :: OpaqueType)
-      assertEquality e2 e3
+      assertEquality (typeOf e1) (Intrinsic Intrinsic.Bool)
+      assertEquality (typeOf e2) (typeOf e3)
       pure (ms1 <> ms2 <> ms3)
     Expr.Application t e1 es -> do
       ms1 <- collectConstraints e1
       ms2 <- concat <$> traverse collectConstraints es
-      assertEquality e1 (foldType t (typeOf <$> es))
+      assertEquality (typeOf e1) (foldType t (typeOf <$> es))
       pure (ms1 <> ms2)
     Expr.Literal{} ->
       pure []
 
 forEachBinding ::
   (Traversable f) =>
-  f (Binding Expression OpaqueType) ->
-  (Binding Expression OpaqueType -> CollectConstraints [a]) ->
-  CollectConstraints [a]
+  f (Binding Expression (Type TypeIndex k)) ->
+  (Binding Expression (Type TypeIndex k) -> CollectConstraints k [a]) ->
+  CollectConstraints k [a]
 forEachBinding gs = concat <$$> forM gs
