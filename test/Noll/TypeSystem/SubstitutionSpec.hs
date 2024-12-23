@@ -17,5 +17,5 @@ spec =
     it "" $
       apply sub (Type.Variable (TypeIndex () 0)) == (Type.Variable (TypeIndex () 0))
 
-sub :: TypeSubstitution
+sub :: TypeSubstitution ()
 sub = mapsTo 1 (Type.Intrinsic Intrinsic.Bool)
