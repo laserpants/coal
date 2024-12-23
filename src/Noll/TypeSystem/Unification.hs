@@ -1,10 +1,14 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
 module Noll.TypeSystem.Unification (TypeUnifiable (..)) where
 
 import qualified Data.List.NonEmpty as NonEmpty
+import Data.Set (member)
+import Noll.Language.HasTypeIndexes (typeIdsIn)
 import Noll.Language.Type (Type)
 import qualified Noll.Language.Type as Type
 import Noll.Language.Type.Index (TypeIndex (..))
@@ -12,7 +16,7 @@ import Noll.Language.Type.Intrinsic (Intrinsic)
 import qualified Noll.Language.Type.Intrinsic as Intrinsic
 import Noll.Language.Type.Kind (Kind)
 import Noll.Language.Type.Row (Row (..))
-import Noll.TypeSystem.Substitution (TypeSubstitutable (..), TypeSubstitution (..))
+import Noll.TypeSystem.Substitution (TypeSubstitutable (..), TypeSubstitution (..), mapsTo)
 
 class TypeUnifiable u where
   unify :: (Monad m) => u -> u -> m TypeSubstitution
@@ -71,5 +75,14 @@ instance TypeUnifiable (Intrinsic (Type TypeIndex (Kind Int))) where
   unify _ _ =
     error "Cannot unify"
 
-bindType =
-  undefined
+bindType :: (Monad m) => TypeIndex (Kind Int) -> Type TypeIndex (Kind Int) -> m TypeSubstitution
+bindType (TypeIndex _ index) =
+  \case
+    Type.Variable (TypeIndex _ index2)
+      | index == index2 ->
+          pure mempty
+    t
+      | member index (typeIdsIn t) ->
+          error "Infinite type"
+      | otherwise ->
+          pure (index `mapsTo` t)
