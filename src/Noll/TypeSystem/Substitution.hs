@@ -5,7 +5,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.TypeSystem.Substitution where
+module Noll.TypeSystem.Substitution (TypeSubstitution (..), TypeSubstitutable (..), apply, mapsTo) where
 
 import Data.List.NonEmpty (NonEmpty)
 import Data.Map.Strict (Map)
