@@ -92,7 +92,7 @@ instance (Ord k, HasTypeIndexes k t) => HasTypeIndexes k (Scheme TypeIndex k t) 
       Forall qs ps t ->
         Set.filter notBound (typeIndexesIn t <> typeIndexesIn ps)
        where
-        notBound ix = indexId ix `notElem` Set.map indexId qs
+        notBound index = indexId index `notElem` Set.map indexId qs
 
 instance HasTypeIndexes k (MonomorphicSet (TypeIndex k)) where
   typeIndexesIn = monomorphicSet
