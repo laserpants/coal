@@ -99,6 +99,7 @@ test-suite noll-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      Noll.Language.HasTypeIndexesSpec
       Noll.TypeSystem.Constraint.CollectSpec
       Paths_noll
   autogen-modules:

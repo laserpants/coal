@@ -16,8 +16,17 @@ import Test.Hspec (Spec, describe, it)
 spec :: Spec
 spec =
   describe "Noll.Language.HasTypeIndexes" $ do
-    it "" $
-      1 == 1
+    describe "Scheme" $ do
+      it "" $
+        typeIndexesIn fixture_1 == (Set.fromList [TypeIndex () 3] :: Set (TypeIndex ()))
+      it "" $
+        typeIndexesIn fixture_2 == (Set.fromList [TypeIndex () 0, TypeIndex () 3] :: Set (TypeIndex ()))
+      it "" $
+        typeIndexesIn fixture_3 == (mempty :: Set (TypeIndex ()))
+      it "" $
+        typeIndexesIn fixture_4 == (mempty :: Set (TypeIndex (Kind Int)))
+      it "" $
+        typeIndexesIn fixture_5 == (Set.fromList [TypeIndex Kind.Type 1] :: Set (TypeIndex (Kind Int)))
 
 fixture_1 :: Scheme TypeIndex () (Type TypeIndex ())
 fixture_1 =
@@ -53,6 +62,3 @@ fixture_5 =
     (Set.fromList [TypeIndex Kind.Type 0])
     []
     (Type.Variable (TypeIndex Kind.Row 0) `Type.Arrow` Type.Variable (TypeIndex Kind.Type 1) `Type.Arrow` Type.Variable (TypeIndex Kind.Trait 0))
-
-boz :: Set (TypeIndex (Kind Int))
-boz = typeIndexesIn fixture_5
