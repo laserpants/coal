@@ -14,7 +14,6 @@ import qualified Noll.Language.Primitive as Prim
 import qualified Noll.Language.Type as Type
 import Noll.Language.Type.Index (TypeIndex (..))
 import qualified Noll.Language.Type.Intrinsic as Intrinsic
-import Noll.Language.Type.Opaque (OpaqueType)
 import Noll.TypeSystem.Constraint (MonomorphicSet (..), TypeConstraint (..))
 import Noll.TypeSystem.Constraint.Collect
 import Test.Hspec (Spec, describe, it)
@@ -47,7 +46,7 @@ spec =
         fixture_1
         (Implicit (typeVariable 2) (typeVariable 6) (MonomorphicSet (Set.fromList [TypeIndex () 5])))
 
-hasConstraint :: Expression Int -> TypeConstraint TypeIndex () OpaqueType -> Bool
+hasConstraint :: Expression Int -> TypeConstraint TypeIndex () Type TypeIndex () -> Bool
 hasConstraint e =
   \case
     Equality t1 t2 ->
@@ -60,10 +59,10 @@ hasConstraint e =
       (ConstraintsContext mempty)
       (collectConstraints (fmap typeVariable e))
 
-typeVariable :: Int -> OpaqueType
+typeVariable :: Int -> Type TypeIndex ()
 typeVariable = Type.Variable . TypeIndex ()
 
-typeBool :: OpaqueType
+typeBool :: Type TypeIndex ()
 typeBool = Type.Intrinsic Intrinsic.Bool
 
 fixture_1 :: Expression Int
