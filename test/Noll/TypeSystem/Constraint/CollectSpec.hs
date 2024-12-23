@@ -12,6 +12,7 @@ import qualified Noll.Language.Expression.Binding as Binding
 import qualified Noll.Language.Pattern as Pattern
 import qualified Noll.Language.Primitive as Prim
 import qualified Noll.Language.Type as Type
+import Noll.Language.Type (Type)
 import Noll.Language.Type.Index (TypeIndex (..))
 import qualified Noll.Language.Type.Intrinsic as Intrinsic
 import Noll.TypeSystem.Constraint (MonomorphicSet (..), TypeConstraint (..))
@@ -46,7 +47,7 @@ spec =
         fixture_1
         (Implicit (typeVariable 2) (typeVariable 6) (MonomorphicSet (Set.fromList [TypeIndex () 5])))
 
-hasConstraint :: Expression Int -> TypeConstraint TypeIndex () Type TypeIndex () -> Bool
+hasConstraint :: Expression Int -> TypeConstraint TypeIndex () (Type TypeIndex ()) -> Bool
 hasConstraint e =
   \case
     Equality t1 t2 ->
