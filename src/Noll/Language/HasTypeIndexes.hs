@@ -3,6 +3,8 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StrictData #-}
+{-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 module Noll.Language.HasTypeIndexes (HasTypeIndexes (..), typeIdsIn) where
 
@@ -23,7 +25,7 @@ import qualified Noll.Language.Type.Row as Row
 import Noll.Language.Type.Scheme (Scheme (..))
 import Noll.TypeSystem.Constraint (MonomorphicSet (..))
 
-class HasTypeIndexes k t where
+class HasTypeIndexes k t | t -> k where
   typeIndexesIn :: t -> Set (TypeIndex k)
 
 instance HasTypeIndexes k (TypeIndex k) where
@@ -95,5 +97,5 @@ instance (Ord k, HasTypeIndexes k t) => HasTypeIndexes k (Scheme TypeIndex k t) 
 instance HasTypeIndexes k (MonomorphicSet (TypeIndex k)) where
   typeIndexesIn = monomorphicSet
 
-typeIdsIn :: (HasTypeIndexes () t) => t -> Set Int
-typeIdsIn t = Set.map indexId (typeIndexesIn t :: Set (TypeIndex ()))
+typeIdsIn :: (HasTypeIndexes k t) => t -> Set Int
+typeIdsIn t = Set.map indexId (typeIndexesIn t)

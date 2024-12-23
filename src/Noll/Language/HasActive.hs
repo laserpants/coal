@@ -3,6 +3,8 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StrictData #-}
+{-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 module Noll.Language.HasActive (HasActive (..), activeIdsIn) where
 
@@ -14,7 +16,7 @@ import Noll.Language.HasTypeIndexes (HasTypeIndexes (..))
 import Noll.Language.Type.Index (TypeIndex (..))
 import Noll.TypeSystem.Constraint (TypeConstraint (..))
 
-class HasActive k t where
+class HasActive k t | t -> k where
   activeIn :: t -> Set (TypeIndex k)
 
 instance (Ord k, HasActive k t) => HasActive k (Map a t) where
@@ -36,5 +38,5 @@ instance (Ord k, HasTypeIndexes k t) => HasActive k (TypeConstraint TypeIndex k 
       Explicit t s ->
         typeIndexesIn t `union` typeIndexesIn s
 
-activeIdsIn :: (HasActive () t) => t -> Set Int
-activeIdsIn t = Set.map indexId (activeIn t :: Set (TypeIndex ()))
+activeIdsIn :: (HasActive k t) => t -> Set Int
+activeIdsIn t = Set.map indexId (activeIn t)
