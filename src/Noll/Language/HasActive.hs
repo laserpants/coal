@@ -10,21 +10,22 @@ import Data.Map.Strict (Map)
 import Data.Set (Set, intersection, union)
 import qualified Data.Set as Set
 import Noll.Language.HasTypeIndexes (HasTypeIndexes (..))
+import Noll.Language.Type.Index (TypeIndex (..))
 import Noll.TypeSystem.Constraint (TypeConstraint (..))
 
-class HasActive o k t where
-  activeIn :: t -> Set (o k)
+class HasActive k t where
+  activeIn :: t -> Set (TypeIndex k)
 
-instance (Ord (o k), HasActive o k t) => HasActive o k (Map a t) where
+instance (Ord k, HasActive k t) => HasActive k (Map a t) where
   activeIn = Set.unions . fmap activeIn
 
-instance (Ord (o k), HasActive o k t) => HasActive o k [t] where
+instance (Ord k, HasActive k t) => HasActive k [t] where
   activeIn = Set.unions . fmap activeIn
 
-instance (Ord (o k), HasActive o k t) => HasActive o k (NonEmpty t) where
+instance (Ord k, HasActive k t) => HasActive k (NonEmpty t) where
   activeIn = Set.unions . fmap activeIn
 
-instance (Ord (o k), HasTypeIndexes o k t) => HasActive o k (TypeConstraint o k t) where
+instance (Ord k, HasTypeIndexes k t) => HasActive k (TypeConstraint TypeIndex k t) where
   activeIn =
     \case
       Equality t1 t2 ->

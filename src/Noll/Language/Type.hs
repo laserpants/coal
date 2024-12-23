@@ -16,7 +16,7 @@ data Type o k
   | Alias Name [o k] (Type o k)
   deriving (Show, Eq, Ord, Read)
 
-infix 1 `Arrow`
+infixr 1 `Arrow`
 
 {-# INLINE foldType #-}
 foldType :: (Foldable f) => Type o k -> f (Type o k) -> Type o k

@@ -21,34 +21,34 @@ import qualified Noll.Language.Type.Row as Row
 import Noll.Language.Type.Scheme (Scheme (..))
 import Noll.TypeSystem.Constraint (MonomorphicSet (..))
 
-class HasTypeIndexes o k t where
-  typeIndexesIn :: t -> Set (o k)
+class HasTypeIndexes k t where
+  typeIndexesIn :: t -> Set (TypeIndex k)
 
-instance HasTypeIndexes o k (o k) where
+instance HasTypeIndexes k (TypeIndex k) where
   typeIndexesIn = singleton
 
-instance (Ord (o k), HasTypeIndexes o k t) => HasTypeIndexes o k (Map a t) where
+instance (Ord k, HasTypeIndexes k t) => HasTypeIndexes k (Map a t) where
   typeIndexesIn = Set.unions . fmap typeIndexesIn
 
-instance (Ord (o k), HasTypeIndexes o k t) => HasTypeIndexes o k (Maybe t) where
+instance (Ord k, HasTypeIndexes k t) => HasTypeIndexes k (Maybe t) where
   typeIndexesIn = Set.unions . fmap typeIndexesIn
 
-instance (Ord (o k), HasTypeIndexes o k t) => HasTypeIndexes o k [t] where
+instance (Ord k, HasTypeIndexes k t) => HasTypeIndexes k [t] where
   typeIndexesIn = Set.unions . fmap typeIndexesIn
 
-instance (Ord (o k), HasTypeIndexes o k t) => HasTypeIndexes o k (NonEmpty t) where
+instance (Ord k, HasTypeIndexes k t) => HasTypeIndexes k (NonEmpty t) where
   typeIndexesIn = Set.unions . fmap typeIndexesIn
 
-instance (Ord (o k), HasTypeIndexes o k t) => HasTypeIndexes o k (Trait t) where
+instance (Ord k, HasTypeIndexes k t) => HasTypeIndexes k (Trait t) where
   typeIndexesIn = Set.unions . fmap typeIndexesIn
 
-instance (HasTypeIndexes o k t) => HasTypeIndexes o k (Label t) where
+instance (HasTypeIndexes k t) => HasTypeIndexes k (Label t) where
   typeIndexesIn =
     \case
       Label t _ ->
         typeIndexesIn t
 
-instance (Ord (o k), HasTypeIndexes o k (o k), HasTypeIndexes o k t) => HasTypeIndexes o k (Row o k t) where
+instance (Ord k, HasTypeIndexes k t) => HasTypeIndexes k (Row TypeIndex k t) where
   typeIndexesIn =
     \case
       Row.Extend _ t row ->
@@ -58,7 +58,7 @@ instance (Ord (o k), HasTypeIndexes o k (o k), HasTypeIndexes o k t) => HasTypeI
       Row.Nil ->
         mempty
 
-instance (Ord (o k), HasTypeIndexes o k (o k)) => HasTypeIndexes o k (Type o k) where
+instance (Ord k) => HasTypeIndexes k (Type TypeIndex k) where
   typeIndexesIn =
     \case
       Type.Application _ t ts ->
@@ -76,34 +76,23 @@ instance (Ord (o k), HasTypeIndexes o k (o k)) => HasTypeIndexes o k (Type o k) 
       Type.Alias _ _ t ->
         typeIndexesIn t
 
-instance (HasTypeIndexes o k t) => HasTypeIndexes o k (Pattern t) where
+instance (Ord k, HasTypeIndexes k t) => HasTypeIndexes k (Pattern t) where
   typeIndexesIn =
     \case
       Pattern.Variable (Label t _) ->
         typeIndexesIn t
 
-instance (Ord (o k), HasTypeIndexes o k t) => HasTypeIndexes o k (Scheme o k t) where
+instance (Ord k, HasTypeIndexes k t) => HasTypeIndexes k (Scheme TypeIndex k t) where
   typeIndexesIn =
     \case
       Forall qs ps t ->
-        undefined
+        Set.filter notBound (typeIndexesIn t <> typeIndexesIn ps)
+       where
+        notBound ix = typeIndex ix `notElem` Set.map typeIndex qs
 
--- (typeIndexesIn t <> typeIndexesIn ps) \\. qs
--- (\\.) (typeIndexesIn t <> typeIndexesIn ps) qs
---        Set.filter (tork qs) (typeIndexesIn t <> typeIndexesIn ps)
+-- TODO: move
+typeIndex :: TypeIndex k -> Int
+typeIndex (TypeIndex _ i) = i
 
-----(\\.) :: Set (o k) -> Set (o k) -> Set (o k)
-----(\\.) s1 s2 = Set.filter (fork s2) s1
---
--- tork :: Set a -> a -> Bool
--- tork = undefined
---
-----fnork s2 s = tork s2 s
-----
-----fork s2 s = tork s2 s -- knork s `notElem` Set.map knork s2
-----
-----knork :: o k -> Int
-----knork = undefined
-
-instance HasTypeIndexes o k (MonomorphicSet (o k)) where
+instance HasTypeIndexes k (MonomorphicSet (TypeIndex k)) where
   typeIndexesIn = monomorphicSet
