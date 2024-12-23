@@ -32,7 +32,10 @@ data SolverChoice c
   deriving (Show, Eq, Ord, Read)
 
 choice ::
-  (Ord k, Eq t, HasTypeIndexes k t) =>
+  ( Ord k
+  , Eq t
+  , HasTypeIndexes k t
+  ) =>
   [TypeConstraint TypeIndex k t] ->
   SolverChoice (TypeConstraint TypeIndex k t)
 choice cs = findChoice [(delete c cs, c) | c <- cs]

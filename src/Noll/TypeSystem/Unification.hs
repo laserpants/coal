@@ -47,8 +47,8 @@ instance TypeUnifiable (Type TypeIndex (Kind Int)) where
   unify (Type.Constructor _ c1) (Type.Constructor _ c2)
     | c1 == c2 =
         pure mempty
-  --  unify (Type.Row r1) (Type.Row r2) =
-  --    unify r1 r2
+  unify (Type.Row r1) (Type.Row r2) =
+    unify r1 r2
   unify (Type.Intrinsic t1) (Type.Intrinsic t2) =
     unify t1 t2
   unify _ _ =
