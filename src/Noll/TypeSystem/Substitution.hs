@@ -1,7 +1,5 @@
-{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
@@ -17,35 +15,36 @@ import Noll.Language.Trait (Trait (..))
 import Noll.Language.Type (Type)
 import qualified Noll.Language.Type as Type
 import Noll.Language.Type.Index (TypeIndex (..))
+import Noll.Language.Type.Kind (Kind)
 import Noll.Language.Type.Row (Row (..))
 import Noll.Utils (IndexMap)
 
-class TypeSubstitutable s k where
-  apply :: TypeSubstitution k -> s -> s
+class TypeSubstitutable s where
+  apply :: TypeSubstitution -> s -> s
 
-instance (TypeSubstitutable s k) => TypeSubstitutable (Map a s) k where
+instance (TypeSubstitutable s) => TypeSubstitutable (Map k s) where
   apply = fmap . apply
 
-instance (TypeSubstitutable s k) => TypeSubstitutable [s] k where
+instance (TypeSubstitutable s) => TypeSubstitutable [s] where
   apply = fmap . apply
 
-instance (TypeSubstitutable s k) => TypeSubstitutable (NonEmpty s) k where
+instance (TypeSubstitutable s) => TypeSubstitutable (NonEmpty s) where
   apply = fmap . apply
 
-instance (TypeSubstitutable s k) => TypeSubstitutable (Maybe s) k where
+instance (TypeSubstitutable s) => TypeSubstitutable (Maybe s) where
   apply = fmap . apply
 
-instance (TypeSubstitutable s k) => TypeSubstitutable (Trait s) k where
+instance (TypeSubstitutable s) => TypeSubstitutable (Trait s) where
   apply = fmap . apply
 
-instance (Ord s, TypeSubstitutable s k) => TypeSubstitutable (Set s) k where
+instance (Ord s, TypeSubstitutable s) => TypeSubstitutable (Set s) where
   apply = Set.map . apply
 
-instance TypeSubstitutable (Row TypeIndex k (Type TypeIndex k)) k where
+instance TypeSubstitutable (Row TypeIndex (Kind Int) (Type TypeIndex (Kind Int))) where
   apply sub =
     undefined
 
-instance TypeSubstitutable (Type TypeIndex k) k where
+instance TypeSubstitutable (Type TypeIndex (Kind Int)) where
   apply sub =
     \case
       Type.Alias name ts t -> do
@@ -63,21 +62,21 @@ instance TypeSubstitutable (Type TypeIndex k) k where
       t@Type.Constructor{} ->
         t
 
-newtype TypeSubstitution k = TypeSubstitution {typeSubstitutionMap :: IndexMap (Type TypeIndex k)}
+newtype TypeSubstitution = TypeSubstitution {typeSubstitutionMap :: IndexMap (Type TypeIndex (Kind Int))}
   deriving (Show, Eq, Ord, Read)
 
-instance Semigroup (TypeSubstitution k) where
+instance Semigroup TypeSubstitution where
   s1 <> s2 = TypeSubstitution (s3 <> typeSubstitutionMap s1)
    where
     s3 = apply s1 (typeSubstitutionMap s2)
 
-instance Monoid (TypeSubstitution k) where
+instance Monoid TypeSubstitution where
   mempty = TypeSubstitution mempty
 
 {-# INLINE substitutionIndex #-}
-substitutionIndex :: TypeIndex k -> TypeSubstitution k -> Maybe (Type TypeIndex k)
+substitutionIndex :: TypeIndex k -> TypeSubstitution -> Maybe (Type TypeIndex (Kind Int))
 substitutionIndex TypeIndex{..} sub = Map.lookup indexId (typeSubstitutionMap sub)
 
 {-# INLINE mapsTo #-}
-mapsTo :: Int -> Type TypeIndex k -> TypeSubstitution k
+mapsTo :: Int -> Type TypeIndex (Kind Int) -> TypeSubstitution
 mapsTo index = TypeSubstitution . Map.singleton index

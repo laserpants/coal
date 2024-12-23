@@ -43,12 +43,12 @@ solveTypes ::
   ( Ord k
   , Eq t
   , HasTypeIndexes k t
-  , TypeSubstitutable (TypeConstraint TypeIndex k t) t
-  , TypeUnifiable t t
+  , TypeSubstitutable (TypeConstraint TypeIndex k t)
+  , TypeUnifiable t
   , Monad m
   ) =>
   [TypeConstraint TypeIndex k t] ->
-  m (TypeSubstitution t)
+  m TypeSubstitution
 solveTypes [] = pure (TypeSubstitution mempty)
 solveTypes constraints =
   case choice constraints of
