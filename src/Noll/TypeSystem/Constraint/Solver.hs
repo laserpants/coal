@@ -42,7 +42,8 @@ choice ::
   SolverChoice (TypeConstraint TypeIndex k t)
 choice cs = findChoice [(delete c cs, c) | c <- cs]
  where
-  findChoice ps = maybe NoneFound (uncurry Choice) (find (uncurry isSolvable) ps)
+  findChoice ps =
+    maybe NoneFound (uncurry Choice) (find (uncurry isSolvable) ps)
 
 solveTypes ::
   ( Ord k
