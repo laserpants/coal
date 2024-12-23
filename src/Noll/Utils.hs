@@ -3,6 +3,7 @@
 module Noll.Utils (
   Name,
   Dictionary,
+  IndexMap,
   Some,
   (<$$>),
   (<$$$>),
@@ -15,6 +16,8 @@ import Data.Text (Text)
 type Name = Text
 
 type Dictionary = Map Name
+
+type IndexMap = Map Int
 
 type Some = NonEmpty
 
