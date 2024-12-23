@@ -101,6 +101,7 @@ test-suite noll-test
   other-modules:
       Noll.Language.HasTypeIndexesSpec
       Noll.TypeSystem.Constraint.CollectSpec
+      Noll.TypeSystem.SubstitutionSpec
       Paths_noll
   autogen-modules:
       Paths_noll
