@@ -1,9 +1,10 @@
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Language.HasActive (HasActive (..)) where
+module Noll.Language.HasActive (HasActive (..), activeIdsIn) where
 
 import Data.List.NonEmpty (NonEmpty)
 import Data.Map.Strict (Map)
@@ -34,3 +35,6 @@ instance (Ord k, HasTypeIndexes k t) => HasActive k (TypeConstraint TypeIndex k 
         typeIndexesIn t1 `union` (typeIndexesIn t2 `intersection` typeIndexesIn m)
       Explicit t s ->
         typeIndexesIn t `union` typeIndexesIn s
+
+activeIdsIn :: (HasActive () t) => t -> Set Int
+activeIdsIn t = Set.map indexId (activeIn t :: Set (TypeIndex ()))

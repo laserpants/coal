@@ -1,9 +1,10 @@
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Language.HasTypeIndexes (HasTypeIndexes (..)) where
+module Noll.Language.HasTypeIndexes (HasTypeIndexes (..), typeIdsIn) where
 
 import Data.List.NonEmpty (NonEmpty)
 import Data.Map.Strict (Map)
@@ -16,6 +17,7 @@ import Noll.Language.Trait (Trait (..))
 import Noll.Language.Type (Type)
 import qualified Noll.Language.Type as Type
 import Noll.Language.Type.Index (TypeIndex (..))
+import Noll.Language.Type.Kind (Kind)
 import Noll.Language.Type.Row (Row)
 import qualified Noll.Language.Type.Row as Row
 import Noll.Language.Type.Scheme (Scheme (..))
@@ -92,3 +94,6 @@ instance (Ord k, HasTypeIndexes k t) => HasTypeIndexes k (Scheme TypeIndex k t) 
 
 instance HasTypeIndexes k (MonomorphicSet (TypeIndex k)) where
   typeIndexesIn = monomorphicSet
+
+typeIdsIn :: (HasTypeIndexes () t) => t -> Set Int
+typeIdsIn t = Set.map indexId (typeIndexesIn t :: Set (TypeIndex ()))
