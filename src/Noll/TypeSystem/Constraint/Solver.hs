@@ -15,7 +15,9 @@ import Noll.TypeSystem.Substitution (TypeSubstitutable (..), TypeSubstitution (.
 import Noll.TypeSystem.Unification (TypeUnifiable (..))
 
 isSolvable ::
-  (Ord k, HasTypeIndexes k t) =>
+  ( Ord k
+  , HasTypeIndexes k t
+  ) =>
   [TypeConstraint TypeIndex k t] ->
   TypeConstraint TypeIndex k t ->
   Bool
