@@ -4,27 +4,55 @@
 
 module Noll.TypeSystem.Unification (TypeUnifiable (..)) where
 
+import qualified Data.List.NonEmpty as NonEmpty
 import Noll.Language.Type (Type)
+import qualified Noll.Language.Type as Type
 import Noll.Language.Type.Index (TypeIndex (..))
 import Noll.Language.Type.Intrinsic (Intrinsic)
 import qualified Noll.Language.Type.Intrinsic as Intrinsic
 import Noll.Language.Type.Kind (Kind)
+import Noll.Language.Type.Row (Row (..))
 import Noll.TypeSystem.Substitution (TypeSubstitutable (..), TypeSubstitution (..))
 
 class TypeUnifiable u where
   unify :: (Monad m) => u -> u -> m TypeSubstitution
 
 instance (TypeSubstitutable u, TypeUnifiable u) => TypeUnifiable [u] where
-  unify [] [] = pure mempty
+  unify [] [] =
+    pure mempty
   unify (u1 : us1) (u2 : us2) = do
     sub1 <- unify u1 u2
     sub2 <- unify (apply sub1 us1) (apply sub1 us2)
     pure (sub2 <> sub1)
-  unify _ _ = error "Implementation error"
+  unify _ _ =
+    error "Implementation error"
 
-instance TypeUnifiable (Type TypeIndex (Kind Int)) where
+instance TypeUnifiable (Row TypeIndex (Kind Int) (Type TypeIndex (Kind Int))) where
   unify =
     undefined
+
+instance TypeUnifiable (Type TypeIndex (Kind Int)) where
+  unify (Type.Alias _ _ t1) t2 =
+    unify t1 t2
+  unify t1 (Type.Alias _ _ t2) =
+    unify t1 t2
+  unify (Type.Variable t) t2 =
+    bindType t t2
+  unify t1 (Type.Variable t) =
+    bindType t t1
+  unify (Type.Arrow t1 u1) (Type.Arrow t2 u2) =
+    unify [t1, u1] [t2, u2]
+  unify (Type.Application _ t1 ts1) (Type.Application _ t2 ts2) =
+    unify (t1 : NonEmpty.toList ts1) (t2 : NonEmpty.toList ts2)
+  unify (Type.Constructor _ c1) (Type.Constructor _ c2)
+    | c1 == c2 =
+        pure mempty
+  --  unify (Type.Row r1) (Type.Row r2) =
+  --    unify r1 r2
+  unify (Type.Intrinsic t1) (Type.Intrinsic t2) =
+    unify t1 t2
+  unify _ _ =
+    error "Cannot unify"
 
 instance TypeUnifiable (Intrinsic (Type TypeIndex (Kind Int))) where
   unify (Intrinsic.List t1) (Intrinsic.List t2) =
@@ -43,5 +71,5 @@ instance TypeUnifiable (Intrinsic (Type TypeIndex (Kind Int))) where
   unify _ _ =
     error "Cannot unify"
 
---  unify _ _ =
---    unificationError Error.CannotUnify
+bindType =
+  undefined
