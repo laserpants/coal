@@ -58,11 +58,11 @@ newtype Constraints o k t a = Constraints {constraintsMonad :: ConstraintsMonad 
     )
 
 {-# INLINE monosetInsert #-}
-monosetInsert :: TypeIndex () -> MonomorphicSet (TypeIndex ()) -> MonomorphicSet (TypeIndex ())
+monosetInsert :: (Ord k) => TypeIndex k -> MonomorphicSet (TypeIndex k) -> MonomorphicSet (TypeIndex k)
 monosetInsert = overMonomorphicSet . Set.insert
 
 {-# INLINE monosetInsertMany #-}
-monosetInsertMany :: (Foldable f) => f (TypeIndex ()) -> MonomorphicSet (TypeIndex ()) -> MonomorphicSet (TypeIndex ())
+monosetInsertMany :: (Ord k, Foldable f) => f (TypeIndex k) -> MonomorphicSet (TypeIndex k) -> MonomorphicSet (TypeIndex k)
 monosetInsertMany = flip (foldr monosetInsert)
 
 {-# INLINE localMonoset #-}
