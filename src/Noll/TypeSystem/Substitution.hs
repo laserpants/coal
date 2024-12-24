@@ -164,8 +164,6 @@ mapsTo index = TypeSubstitution . Map.singleton index
 typeSubstitutionFromList :: [(Int, Type TypeIndex (Kind Int))] -> TypeSubstitution
 typeSubstitutionFromList = TypeSubstitution . Map.fromList
 
---
-
 class KindSubstitutable s where
   kindApply :: KindSubstitution -> s -> s
 
