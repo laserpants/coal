@@ -9,6 +9,7 @@ import qualified Noll.Language.Expression as Expr
 import qualified Noll.Language.Expression.Binding as Binding
 import qualified Noll.Language.Pattern as Pattern
 import qualified Noll.Language.Primitive as Prim
+import qualified Noll.Language.Primitive as Primitive
 import Noll.Language.Type (Type)
 import qualified Noll.Language.Type as Type
 import Noll.Language.Type.Index (TypeIndex (..))
@@ -26,11 +27,14 @@ spec =
     it "" $
       apply (1 `mapsTo` Type.Intrinsic Intrinsic.Bool) t2 == t2
     it "" $
-      x123 fixture_1 $
+      applySubstitutionEquals fixture_1 $
+        Expr.Variable (Label (typeVariable 0) "f")
+    it "" $
+      applySubstitutionEquals fixture_2 $
         Expr.Variable (Label (typeVariable 0) "f")
 
-x123 (e, sub) res =
-  apply sub e == res
+applySubstitutionEquals :: (Expression (Type TypeIndex (Kind Int)), TypeSubstitution) -> Expression (Type TypeIndex (Kind Int)) -> Bool
+applySubstitutionEquals (e, sub) res = apply sub e == res
 
 t1 :: Type TypeIndex (Kind Int)
 t1 = Type.Variable (TypeIndex Kind.Type 1)
@@ -67,6 +71,43 @@ fixture_1 =
       , (2, typeBool `Type.Arrow` typeVariable 3)
       , (4, typeVariable 3)
       , (5, typeBool `Type.Arrow` typeVariable 3)
+      ]
+  )
+
+fixture_2 :: (Expression (Type TypeIndex (Kind Int)), TypeSubstitution)
+fixture_2 =
+  ( Expr.Let
+      ( Binding.Pattern
+          (Pattern.Variable (Label (typeVariable 1) "f"))
+          ( Expr.Lambda
+              (Pattern.Variable (Label (typeVariable 2) "x") :| [])
+              (Expr.Variable (Label (typeVariable 3) "x"))
+          )
+          :| []
+      )
+      ( Expr.Application
+          (typeVariable 4)
+          ( Expr.Application
+              (typeVariable 5)
+              (Expr.Variable (Label (typeVariable 6) "f"))
+              (Expr.Variable (Label (typeVariable 7) "f") :| [])
+          )
+          ( Expr.Application
+              (typeVariable 8)
+              (Expr.Variable (Label (typeVariable 9) "f"))
+              (Expr.Literal (Primitive.Int32 1) :| [])
+              :| []
+          )
+      )
+  , substitutionFromList
+      [ (1, typeVariable 3 `Type.Arrow` typeVariable 3)
+      , (2, typeVariable 3)
+      , (4, typeInt32)
+      , (5, typeInt32 `Type.Arrow` typeInt32)
+      , (6, (typeInt32 `Type.Arrow` typeInt32) `Type.Arrow` typeInt32 `Type.Arrow` typeInt32)
+      , (7, typeInt32 `Type.Arrow` typeInt32)
+      , (8, typeInt32)
+      , (9, typeInt32 `Type.Arrow` typeInt32)
       ]
   )
 
