@@ -28,27 +28,27 @@ typeVariable :: Int -> Type TypeIndex (Kind KindIndex)
 typeVariable n = Type.Variable (TypeIndex (Kind.Variable (KindIndex n)) n)
 
 -- let f = fn(x) => x in (f f)(f 1)
-fixture_1 :: Expression Int
+fixture_1 :: Expression (Type TypeIndex (Kind KindIndex))
 fixture_1 =
   Expr.Let
     ( Binding.Pattern
-        (Pattern.Variable (Label 1 "f"))
+        (Pattern.Variable (Label (typeVariable 1) "f"))
         ( Expr.Lambda
-            (Pattern.Variable (Label 2 "x") :| [])
-            (Expr.Variable (Label 3 "x"))
+            (Pattern.Variable (Label (typeVariable 2) "x") :| [])
+            (Expr.Variable (Label (typeVariable 3) "x"))
         )
         :| []
     )
     ( Expr.Application
-        4
+        (typeVariable 4)
         ( Expr.Application
-            5
-            (Expr.Variable (Label 6 "f"))
-            (Expr.Variable (Label 7 "f") :| [])
+            (typeVariable 5)
+            (Expr.Variable (Label (typeVariable 6) "f"))
+            (Expr.Variable (Label (typeVariable 7) "f") :| [])
         )
         ( Expr.Application
-            8
-            (Expr.Variable (Label 9 "f"))
+            (typeVariable 8)
+            (Expr.Variable (Label (typeVariable 9) "f"))
             (Expr.Literal (Primitive.Int32 1) :| [])
             :| []
         )
