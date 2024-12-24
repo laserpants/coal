@@ -58,6 +58,7 @@ library
       Noll.Library.Environment
       Noll.Library.Supply
       Noll.TypeSystem.KindConstraint
+      Noll.TypeSystem.KindConstraint.Solver
       Noll.TypeSystem.KindSubstitution
       Noll.TypeSystem.KindUnification
       Noll.TypeSystem.TypeConstraint
@@ -66,6 +67,7 @@ library
       Noll.TypeSystem.TypeConstraint.Solver
       Noll.TypeSystem.TypeSubstitution
       Noll.TypeSystem.TypeUnification
+      Noll.TypeSystem.Unifier
       Noll.Utils
   other-modules:
       Paths_noll
