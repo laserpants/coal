@@ -6,7 +6,7 @@
 {-# LANGUAGE StrictData #-}
 {-# LANGUAGE UndecidableInstances #-}
 
-module Noll.Language.HasTypeIndexes (HasTypeIndexes (..), typeIdsIn) where
+module Noll.Language.HasTypeIndexes (HasTypeIndexes (..), typeIdsIn, notBoundIn) where
 
 import Data.List.NonEmpty (NonEmpty)
 import Data.Map.Strict (Map)
@@ -80,7 +80,7 @@ instance (Ord k) => HasTypeIndexes k (Type TypeIndex k) where
       Type.Alias _ _ t ->
         typeIndexesIn t
 
-instance (Ord k, HasTypeIndexes k t) => HasTypeIndexes k (Pattern t) where
+instance (HasTypeIndexes k t) => HasTypeIndexes k (Pattern t) where
   typeIndexesIn =
     \case
       Pattern.Variable (Label t _) ->
@@ -90,9 +90,12 @@ instance (Ord k, HasTypeIndexes k t) => HasTypeIndexes k (Scheme TypeIndex k t) 
   typeIndexesIn =
     \case
       Forall qs ps t ->
-        Set.filter notBound (typeIndexesIn t <> typeIndexesIn ps)
-       where
-        notBound index = indexId index `notElem` Set.map indexId qs
+        notBoundIn qs (typeIndexesIn t <> typeIndexesIn ps)
+
+notBoundIn :: Set (TypeIndex k) -> Set (TypeIndex k) -> Set (TypeIndex k)
+notBoundIn s = Set.filter notBound
+ where
+  notBound index = indexId index `notElem` Set.map indexId s
 
 instance HasTypeIndexes k (MonomorphicSet (TypeIndex k)) where
   typeIndexesIn = monomorphicSet
