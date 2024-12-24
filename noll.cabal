@@ -39,6 +39,7 @@ library
       Noll.Language.HasActive
       Noll.Language.HasType
       Noll.Language.HasTypeIndexes
+      Noll.Language.Kind.Index
       Noll.Language.Module
       Noll.Language.Module.Function
       Noll.Language.Module.Global
@@ -56,6 +57,7 @@ library
       Noll.Language.Type.Row.Map
       Noll.Language.Type.Scheme
       Noll.Library.Environment
+      Noll.Library.Supply
       Noll.TypeSystem.Assumption
       Noll.TypeSystem.Constraint
       Noll.TypeSystem.Constraint.Collect
@@ -102,6 +104,7 @@ test-suite noll-test
   other-modules:
       Noll.Language.HasTypeIndexesSpec
       Noll.TypeSystem.Constraint.CollectSpec
+      Noll.TypeSystem.Constraint.SolverSpec
       Noll.TypeSystem.SubstitutionSpec
       Paths_noll
   autogen-modules:

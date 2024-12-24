@@ -1,6 +1,8 @@
 {-# LANGUAGE StrictData #-}
 
 module Noll.Utils (
+  module Data.Set,
+  module Data.Map.Strict,
   Name,
   Dictionary,
   IndexMap,
@@ -11,6 +13,7 @@ module Noll.Utils (
 
 import Data.List.NonEmpty (NonEmpty)
 import Data.Map.Strict (Map)
+import Data.Set (Set)
 import Data.Text (Text)
 
 type Name = Text
