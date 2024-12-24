@@ -4,14 +4,11 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.TypeSystem.Substitution (
+module Noll.TypeSystem.TypeSubstitution (
   TypeSubstitution (..),
   TypeSubstitutable (..),
-  KindSubstitution (..),
-  KindSubstitutable (..),
   mapsTo,
   typeSubstitutionFromList,
-  mapsToKind,
 ) where
 
 import Data.List.NonEmpty (NonEmpty)
@@ -104,7 +101,7 @@ instance TypeSubstitutable (Type TypeIndex (Kind KindIndex)) where
       Type.Row row ->
         Type.Row (apply sub row)
       Type.Variable t ->
-        fromMaybe (Type.Variable t) (typeSubstitutionIndex t sub)
+        fromMaybe (Type.Variable t) (substitutionIndex t sub)
       t@Type.Constructor{} ->
         t
 
@@ -149,9 +146,9 @@ instance Semigroup TypeSubstitution where
 instance Monoid TypeSubstitution where
   mempty = TypeSubstitution mempty
 
-{-# INLINE typeSubstitutionIndex #-}
-typeSubstitutionIndex :: TypeIndex (Kind KindIndex) -> TypeSubstitution -> Maybe (Type TypeIndex (Kind KindIndex))
-typeSubstitutionIndex TypeIndex{..} sub = Map.lookup indexId (typeSubstitutionMap sub)
+{-# INLINE substitutionIndex #-}
+substitutionIndex :: TypeIndex (Kind KindIndex) -> TypeSubstitution -> Maybe (Type TypeIndex (Kind KindIndex))
+substitutionIndex TypeIndex{..} sub = Map.lookup indexId (typeSubstitutionMap sub)
 
 {-# INLINE removeTypeSubstitution #-}
 removeTypeSubstitution :: TypeIndex (Kind KindIndex) -> TypeSubstitution -> TypeSubstitution
@@ -164,84 +161,3 @@ mapsTo index = TypeSubstitution . Map.singleton index
 {-# INLINE typeSubstitutionFromList #-}
 typeSubstitutionFromList :: [(Int, Type TypeIndex (Kind KindIndex))] -> TypeSubstitution
 typeSubstitutionFromList = TypeSubstitution . Map.fromList
-
-class KindSubstitutable s where
-  kindApply :: KindSubstitution -> s -> s
-
-instance (KindSubstitutable s) => KindSubstitutable (Map k s) where
-  kindApply = fmap . kindApply
-
-instance (KindSubstitutable s) => KindSubstitutable [s] where
-  kindApply = fmap . kindApply
-
-instance (KindSubstitutable s) => KindSubstitutable (NonEmpty s) where
-  kindApply = fmap . kindApply
-
-instance (KindSubstitutable s) => KindSubstitutable (Maybe s) where
-  kindApply = fmap . kindApply
-
-instance (KindSubstitutable s) => KindSubstitutable (Trait s) where
-  kindApply = fmap . kindApply
-
-instance (Ord s, KindSubstitutable s) => KindSubstitutable (Set s) where
-  kindApply = Set.map . kindApply
-
-instance KindSubstitutable (Kind KindIndex) where
-  kindApply sub =
-    \case
-      Kind.Arrow k1 k2 ->
-        Kind.Arrow (kindApply sub k1) (kindApply sub k2)
-      Kind.Variable k ->
-        fromMaybe (Kind.Variable k) (kindSubstitutionIndex k sub)
-      k ->
-        k
-
-instance KindSubstitutable (TypeIndex (Kind KindIndex)) where
-  kindApply sub =
-    \case
-      TypeIndex k index ->
-        TypeIndex (kindApply sub k) index
-
-instance KindSubstitutable (Row TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))) where
-  kindApply sub =
-    undefined
-
-instance KindSubstitutable (Type TypeIndex (Kind KindIndex)) where
-  kindApply sub =
-    \case
-      Type.Alias name ts t -> do
-        Type.Alias name (kindApply sub ts) (kindApply sub t)
-      Type.Application k t1 ts ->
-        Type.Application (kindApply sub k) (kindApply sub t1) (kindApply sub ts)
-      Type.Arrow t1 t2 ->
-        Type.Arrow (kindApply sub t1) (kindApply sub t2)
-      Type.Intrinsic t ->
-        Type.Intrinsic (kindApply sub <$> t)
-      Type.Row row ->
-        Type.Row (kindApply sub row)
-      Type.Variable t ->
-        Type.Variable (kindApply sub t)
-      Type.Constructor k name ->
-        Type.Constructor (kindApply sub k) name
-
-instance KindSubstitutable (Expression (Type TypeIndex (Kind KindIndex))) where
-  kindApply = fmap . kindApply
-
-newtype KindSubstitution = KindSubstitution {kindSubstitutionMap :: IndexMap (Kind KindIndex)}
-  deriving (Show, Eq, Ord, Read)
-
-instance Semigroup KindSubstitution where
-  s1 <> s2 = KindSubstitution (s3 <> kindSubstitutionMap s1)
-   where
-    s3 = kindApply s1 (kindSubstitutionMap s2)
-
-instance Monoid KindSubstitution where
-  mempty = KindSubstitution mempty
-
-{-# INLINE kindSubstitutionIndex #-}
-kindSubstitutionIndex :: KindIndex -> KindSubstitution -> Maybe (Kind KindIndex)
-kindSubstitutionIndex (KindIndex index) sub = Map.lookup index (kindSubstitutionMap sub)
-
-{-# INLINE mapsToKind #-}
-mapsToKind :: Int -> Kind KindIndex -> KindSubstitution
-mapsToKind index = KindSubstitution . Map.singleton index

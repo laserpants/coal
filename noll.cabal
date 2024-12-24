@@ -59,11 +59,12 @@ library
       Noll.Library.Environment
       Noll.Library.Supply
       Noll.TypeSystem.KindConstraint
-      Noll.TypeSystem.Substitution
+      Noll.TypeSystem.KindSubstitution
       Noll.TypeSystem.TypeConstraint
       Noll.TypeSystem.TypeConstraint.Assumption
       Noll.TypeSystem.TypeConstraint.Collect
       Noll.TypeSystem.TypeConstraint.Solver
+      Noll.TypeSystem.TypeSubstitution
       Noll.TypeSystem.Unification
       Noll.Utils
   other-modules:

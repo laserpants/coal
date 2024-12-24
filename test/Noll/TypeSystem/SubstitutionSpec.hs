@@ -17,7 +17,8 @@ import Noll.Language.Type.Index (TypeIndex (..))
 import qualified Noll.Language.Type.Intrinsic as Intrinsic
 import Noll.Language.Type.Kind (Kind)
 import qualified Noll.Language.Type.Kind as Kind
-import Noll.TypeSystem.Substitution
+import Noll.TypeSystem.TypeSubstitution
+import Noll.TypeSystem.KindSubstitution (mapsToKind, kindApply)
 import Test.Hspec (Spec, describe, it)
 
 spec :: Spec
