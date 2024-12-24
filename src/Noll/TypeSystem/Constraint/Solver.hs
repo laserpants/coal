@@ -14,6 +14,7 @@ import Noll.Language.HasTypeIndexes (HasTypeIndexes (..), notBoundIn, typeIdsIn)
 import Noll.Language.Type (Type (..))
 import qualified Noll.Language.Type as Type
 import Noll.Language.Type.Index (TypeIndex (..))
+import Noll.Language.Type.Kind (Kind (..))
 import Noll.Language.Type.Scheme (Scheme (..))
 import Noll.TypeSystem.Constraint (MonomorphicSet (..), TypeConstraint (..))
 import Noll.TypeSystem.Substitution (TypeSubstitutable (..), TypeSubstitution (..), mapsTo)
@@ -53,13 +54,10 @@ choice cs = findChoice [(delete c cs, c) | c <- cs]
     maybe NoneFound (uncurry Choice) (find (uncurry isSolvable) ps)
 
 solveTypes ::
-  ( Ord k
-  , TypeSubstitutable (TypeConstraint TypeIndex k (Type TypeIndex k))
-  , TypeSubstitutable (Type TypeIndex k)
-  , TypeUnifiable (Type TypeIndex k)
+  ( TypeSubstitutable (TypeConstraint TypeIndex (Kind Int) (Type TypeIndex (Kind Int)))
   , MonadState Int m
   ) =>
-  [SolverConstraint k (Type TypeIndex k)] ->
+  [SolverConstraint (Kind Int) (Type TypeIndex (Kind Int))] ->
   m TypeSubstitution
 solveTypes [] = pure (TypeSubstitution mempty)
 solveTypes constraints =
@@ -77,22 +75,16 @@ solveTypes constraints =
       solveTypes (Equality t1 t2 : cs)
 
 instantiate ::
-  ( MonadState Int m
-  , TypeSubstitutable (Type TypeIndex k)
-  ) =>
-  Scheme TypeIndex k (Type TypeIndex k) ->
-  m (Type TypeIndex k)
+  (MonadState Int m) =>
+  Scheme TypeIndex (Kind Int) (Type TypeIndex (Kind Int)) ->
+  m (Type TypeIndex (Kind Int))
 instantiate (Forall qs ps t) = do
   sub <- foldrM go mempty qs
   pure (apply sub t)
-
--- where
-
-go :: (MonadState Int m) => TypeIndex k -> TypeSubstitution -> m TypeSubstitution
-go (TypeIndex _ index) a = do
-  s <- get
-  undefined
-  pure (index `mapsTo` Type.Variable (TypeIndex undefined s) <> a)
+ where
+  go (TypeIndex k index) sub = do
+    s <- get
+    pure (index `mapsTo` Type.Variable (TypeIndex k s) <> sub)
 
 generalize ::
   (HasTypeIndexes k t) =>

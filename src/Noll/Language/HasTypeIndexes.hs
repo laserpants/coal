@@ -46,6 +46,9 @@ instance (Ord k, HasTypeIndexes k t) => HasTypeIndexes k (NonEmpty t) where
 instance (Ord k, HasTypeIndexes k t) => HasTypeIndexes k (Trait t) where
   typeIndexesIn = Set.unions . fmap typeIndexesIn
 
+instance (Ord k, HasTypeIndexes k t) => HasTypeIndexes k (Set t) where
+  typeIndexesIn = Set.unions . Set.map typeIndexesIn
+
 instance (HasTypeIndexes k t) => HasTypeIndexes k (Label t) where
   typeIndexesIn =
     \case

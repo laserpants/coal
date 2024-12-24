@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
@@ -11,12 +12,15 @@ import qualified Data.Map.Strict as Map
 import Data.Maybe (fromMaybe)
 import Data.Set (Set)
 import qualified Data.Set as Set
+import Noll.Language.HasTypeIndexes (HasTypeIndexes (..))
 import Noll.Language.Trait (Trait (..))
 import Noll.Language.Type (Type)
 import qualified Noll.Language.Type as Type
 import Noll.Language.Type.Index (TypeIndex (..))
 import Noll.Language.Type.Kind (Kind)
 import Noll.Language.Type.Row (Row (..))
+import Noll.Language.Type.Scheme (Scheme (..))
+import Noll.TypeSystem.Constraint (MonomorphicSet (..), TypeConstraint (..))
 import Noll.Utils (IndexMap)
 
 class TypeSubstitutable s where
@@ -43,6 +47,31 @@ instance (Ord s, TypeSubstitutable s) => TypeSubstitutable (Set s) where
 instance TypeSubstitutable (Row TypeIndex (Kind Int) (Type TypeIndex (Kind Int))) where
   apply sub =
     undefined
+
+instance TypeSubstitutable (MonomorphicSet (TypeIndex (Kind Int))) where
+  apply sub =
+    \case
+      MonomorphicSet m ->
+        MonomorphicSet (typeIndexesIn (Set.map (apply sub . Type.Variable) m))
+
+instance TypeSubstitutable (Scheme TypeIndex (Kind Int) (Type TypeIndex (Kind Int))) where
+  apply sub =
+    \case
+      Forall qs ps t ->
+        let
+          sub1 = foldr removeSubstitution sub qs
+         in
+          Forall qs (apply sub1 ps) (apply sub1 t)
+
+instance TypeSubstitutable (TypeConstraint TypeIndex (Kind Int) (Type TypeIndex (Kind Int))) where
+  apply sub =
+    \case
+      Equality t1 t2 ->
+        Equality (apply sub t1) (apply sub t2)
+      Implicit t1 t2 m ->
+        Implicit (apply sub t1) (apply sub t2) (apply sub m)
+      Explicit t1 s ->
+        Explicit (apply sub t1) (apply sub s)
 
 instance TypeSubstitutable (Type TypeIndex (Kind Int)) where
   apply sub =
@@ -76,6 +105,10 @@ instance Monoid TypeSubstitution where
 {-# INLINE substitutionIndex #-}
 substitutionIndex :: TypeIndex k -> TypeSubstitution -> Maybe (Type TypeIndex (Kind Int))
 substitutionIndex TypeIndex{..} sub = Map.lookup indexId (typeSubstitutionMap sub)
+
+{-# INLINE removeSubstitution #-}
+removeSubstitution :: TypeIndex k -> TypeSubstitution -> TypeSubstitution
+removeSubstitution TypeIndex{..} (TypeSubstitution sub) = TypeSubstitution (Map.delete indexId sub)
 
 {-# INLINE mapsTo #-}
 mapsTo :: Int -> Type TypeIndex (Kind Int) -> TypeSubstitution
