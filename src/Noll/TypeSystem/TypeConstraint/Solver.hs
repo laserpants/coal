@@ -9,12 +9,11 @@ import Data.Foldable (foldrM)
 import Data.List (delete, find)
 import Data.Set (intersection, (\\))
 import qualified Data.Set as Set
-import Noll.Language.HasActive (activeIdsIn)
 import Noll.Language.HasTypeIndexes (HasTypeIndexes (..), notBoundIn, typeIdsIn)
 import Noll.Language.Kind.Index (KindIndex (..))
 import Noll.Language.Type (Type (..))
 import qualified Noll.Language.Type as Type
-import Noll.Language.Type.Index (TypeIndex (..))
+import Noll.Language.Type.Index (TypeIndex (..), activeIdsIn)
 import Noll.Language.Type.Kind (Kind (..))
 import Noll.Language.Type.Scheme (Scheme (..))
 import Noll.Library.Supply (supply)

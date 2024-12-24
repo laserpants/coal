@@ -36,7 +36,6 @@ library
       Noll.Language.Expression.Binding
       Noll.Language.Expression.Operator.Binary
       Noll.Language.Expression.Operator.Unary
-      Noll.Language.HasActive
       Noll.Language.HasType
       Noll.Language.HasTypeIndexes
       Noll.Language.Kind.Index

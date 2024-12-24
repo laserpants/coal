@@ -13,9 +13,9 @@ module Noll.TypeSystem.TypeConstraint (
 )
 where
 
-import Data.Set (Set)
+import Data.Set (Set, intersection, union)
 import Noll.Language.HasTypeIndexes (HasTypeIndexes (..))
-import Noll.Language.Type.Index (TypeIndex (..))
+import Noll.Language.Type.Index (HasActive (..), TypeIndex (..))
 import Noll.Language.Type.Scheme (Scheme (..))
 
 -- | Monomorphic type variable set
@@ -44,3 +44,13 @@ instance (Ord k, HasTypeIndexes k t) => HasTypeIndexes k (TypeConstraint TypeInd
         typeIndexesIn t1 <> typeIndexesIn t2 <> typeIndexesIn m
       Explicit t s ->
         typeIndexesIn t <> typeIndexesIn s
+
+instance (Ord k, HasTypeIndexes k t) => HasActive k (TypeConstraint TypeIndex k t) where
+  activeIn =
+    \case
+      Equality t1 t2 ->
+        typeIndexesIn t1 `union` typeIndexesIn t2
+      Implicit t1 t2 m ->
+        typeIndexesIn t1 `union` (typeIndexesIn t2 `intersection` typeIndexesIn m)
+      Explicit t s ->
+        typeIndexesIn t `union` typeIndexesIn s
