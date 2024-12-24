@@ -10,7 +10,7 @@ module Noll.TypeSystem.Substitution (
   KindSubstitution (..),
   KindSubstitutable (..),
   mapsTo,
-  substitutionFromList,
+  typeSubstitutionFromList,
   mapsToKind,
 ) where
 
@@ -75,7 +75,7 @@ instance TypeSubstitutable (Scheme TypeIndex (Kind Int) (Type TypeIndex (Kind In
     \case
       Forall qs ps t ->
         let
-          sub1 = foldr removeSubstitution sub qs
+          sub1 = foldr removeTypeSubstitution sub qs
          in
           Forall qs (apply sub1 ps) (apply sub1 t)
 
@@ -152,17 +152,17 @@ instance Monoid TypeSubstitution where
 typeSubstitutionIndex :: TypeIndex (Kind Int) -> TypeSubstitution -> Maybe (Type TypeIndex (Kind Int))
 typeSubstitutionIndex TypeIndex{..} sub = Map.lookup indexId (typeSubstitutionMap sub)
 
-{-# INLINE removeSubstitution #-}
-removeSubstitution :: TypeIndex (Kind Int) -> TypeSubstitution -> TypeSubstitution
-removeSubstitution TypeIndex{..} (TypeSubstitution sub) = TypeSubstitution (Map.delete indexId sub)
+{-# INLINE removeTypeSubstitution #-}
+removeTypeSubstitution :: TypeIndex (Kind Int) -> TypeSubstitution -> TypeSubstitution
+removeTypeSubstitution TypeIndex{..} (TypeSubstitution sub) = TypeSubstitution (Map.delete indexId sub)
 
 {-# INLINE mapsTo #-}
 mapsTo :: Int -> Type TypeIndex (Kind Int) -> TypeSubstitution
 mapsTo index = TypeSubstitution . Map.singleton index
 
-{-# INLINE substitutionFromList #-}
-substitutionFromList :: [(Int, Type TypeIndex (Kind Int))] -> TypeSubstitution
-substitutionFromList = TypeSubstitution . Map.fromList
+{-# INLINE typeSubstitutionFromList #-}
+typeSubstitutionFromList :: [(Int, Type TypeIndex (Kind Int))] -> TypeSubstitution
+typeSubstitutionFromList = TypeSubstitution . Map.fromList
 
 --
 

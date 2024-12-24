@@ -122,7 +122,7 @@ fixture_1 =
               )
           )
       )
-  , substitutionFromList
+  , typeSubstitutionFromList
       [ (1, typeBool `Type.Arrow` typeVariable 3)
       , (2, typeBool `Type.Arrow` typeVariable 3)
       , (4, typeVariable 3)
@@ -157,7 +157,7 @@ fixture_2 =
               :| []
           )
       )
-  , substitutionFromList
+  , typeSubstitutionFromList
       [ (1, typeVariable 3 `Type.Arrow` typeVariable 3)
       , (2, typeVariable 3)
       , (4, typeInt32)
