@@ -5,9 +5,9 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.TypeSystem.TypeUnification (TypeUnifiable (..), runUnifier, evalUnifier) where
+module Noll.TypeSystem.TypeUnification (TypeUnifiable (..)) where
 
-import Control.Monad.State (MonadState, State, runState)
+import Control.Monad.State (MonadState)
 import Data.List.NonEmpty (NonEmpty)
 import qualified Data.List.NonEmpty as NonEmpty
 import Data.Set (member)
@@ -93,19 +93,3 @@ bindType (TypeIndex _ index) =
           error "Infinite type"
       | otherwise ->
           pure (index `mapsTo` t)
-
-newtype Unifier a = Unifier {unifierState :: State Int a}
-  deriving
-    ( Functor
-    , Applicative
-    , Monad
-    , MonadState Int
-    )
-
-{-# INLINE runUnifier #-}
-runUnifier :: Int -> Unifier a -> (a, Int)
-runUnifier n u = runState (unifierState u) n
-
-{-# INLINE evalUnifier #-}
-evalUnifier :: Int -> Unifier a -> a
-evalUnifier n u = fst (runUnifier n u)
