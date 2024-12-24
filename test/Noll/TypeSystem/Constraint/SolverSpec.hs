@@ -20,26 +20,15 @@ spec :: Spec
 spec =
   describe "Noll.TypeSystem.Constraint.Solver" $ do
     it "" $
-      hasSubstitution
+      hasSubstitutions
         fixture_1
-        1
-        (typeBool `Type.Arrow` typeVariable 3)
-    it "" $
-      hasSubstitution
-        fixture_1
-        2
-        (typeBool `Type.Arrow` typeVariable 3)
-    it "" $
-      hasSubstitution
-        fixture_1
-        4
-        (typeVariable 3)
-    it "" $
-      hasSubstitution
-        fixture_1
-        5
-        (typeBool `Type.Arrow` typeVariable 3)
+        [ (1, typeBool `Type.Arrow` typeVariable 3)
+        , (2, typeBool `Type.Arrow` typeVariable 3)
+        , (4, typeVariable 3)
+        , (5, typeBool `Type.Arrow` typeVariable 3)
+        ]
 
+-- fn(m) => let y = m in let x = y(true) in x
 fixture_1 :: [TypeConstraint TypeIndex (Kind Int) (Type TypeIndex (Kind Int))]
 fixture_1 =
   [ (Equality (typeVariable 2) (typeBool `Type.Arrow` typeVariable 3))
@@ -50,6 +39,22 @@ fixture_1 =
   , (Implicit (typeVariable 2) (typeVariable 6) (MonomorphicSet (Set.fromList [TypeIndex Kind.Type 5])))
   ]
 
+fixture_2 :: [TypeConstraint TypeIndex (Kind Int) (Type TypeIndex (Kind Int))]
+fixture_2 =
+  [ (Implicit (typeVariable 6) (typeVariable 1) (MonomorphicSet mempty))
+  , (Implicit (typeVariable 7) (typeVariable 1) (MonomorphicSet mempty))
+  , (Implicit (typeVariable 9) (typeVariable 1) (MonomorphicSet mempty))
+  , (Equality (typeVariable 2) (typeVariable 3))
+  , (Equality (typeVariable 6) (typeVariable 7 `Type.Arrow` typeVariable 5))
+  , (Equality (typeVariable 9) (typeInt32 `Type.Arrow` typeVariable 8))
+  , (Equality (typeVariable 1) (typeVariable 2 `Type.Arrow` typeVariable 3))
+  , (Equality (typeVariable 5) (typeVariable 8 `Type.Arrow` typeVariable 4))
+  ]
+
+hasSubstitutions :: [SolverConstraint (Kind Int) (Type TypeIndex (Kind Int))] -> [(Int, Type TypeIndex (Kind Int))] -> Bool
+hasSubstitutions = all . uncurry . hasSubstitution
+
+hasSubstitution :: [SolverConstraint (Kind Int) (Type TypeIndex (Kind Int))] -> Int -> Type TypeIndex (Kind Int) -> Bool
 hasSubstitution cs k s = Map.lookup k result == Just s
  where
   result =
@@ -59,5 +64,8 @@ hasSubstitution cs k s = Map.lookup k result == Just s
 typeVariable :: Int -> Type TypeIndex (Kind Int)
 typeVariable = Type.Variable . TypeIndex Kind.Type
 
-typeBool :: Type TypeIndex (Kind Int)
+typeBool :: Type TypeIndex k
 typeBool = Type.Intrinsic Intrinsic.Bool
+
+typeInt32 :: Type TypeIndex k
+typeInt32 = Type.Intrinsic Intrinsic.Int32

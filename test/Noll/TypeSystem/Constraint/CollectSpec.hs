@@ -23,30 +23,33 @@ import Test.Hspec (Spec, describe, it)
 spec :: Spec
 spec =
   describe "Noll.TypeSystem.Constraint.Collect" $ do
-    it "" $
-      hasConstraint
-        fixture_1
-        (Equality (typeVariable 2) (typeBool `Type.Arrow` typeVariable 3))
-    it "" $
-      hasConstraint
-        fixture_1
-        (Equality (typeVariable 5) (typeVariable 1))
-    it "" $
-      hasConstraint
-        fixture_1
-        (Equality (typeVariable 6) (typeVariable 1))
-    it "" $
-      hasConstraint
-        fixture_1
-        (Equality (typeVariable 7) (typeVariable 3))
-    it "" $
-      hasConstraint
-        fixture_1
-        (Implicit (typeVariable 4) (typeVariable 7) (MonomorphicSet (Set.fromList [TypeIndex () 5])))
-    it "" $
-      hasConstraint
-        fixture_1
-        (Implicit (typeVariable 2) (typeVariable 6) (MonomorphicSet (Set.fromList [TypeIndex () 5])))
+    describe "fixture_1" $ do
+      it "" $
+        hasConstraints
+          fixture_1
+          [ (Equality (typeVariable 2) (typeBool `Type.Arrow` typeVariable 3))
+          , (Equality (typeVariable 5) (typeVariable 1))
+          , (Equality (typeVariable 6) (typeVariable 1))
+          , (Equality (typeVariable 7) (typeVariable 3))
+          , (Implicit (typeVariable 4) (typeVariable 7) (MonomorphicSet (Set.fromList [TypeIndex () 5])))
+          , (Implicit (typeVariable 2) (typeVariable 6) (MonomorphicSet (Set.fromList [TypeIndex () 5])))
+          ]
+    describe "fixture_2" $ do
+      it "" $
+        hasConstraints
+          fixture_2
+          [ (Implicit (typeVariable 6) (typeVariable 1) (MonomorphicSet mempty))
+          , (Implicit (typeVariable 7) (typeVariable 1) (MonomorphicSet mempty))
+          , (Implicit (typeVariable 9) (typeVariable 1) (MonomorphicSet mempty))
+          , (Equality (typeVariable 2) (typeVariable 3))
+          , (Equality (typeVariable 6) (typeVariable 7 `Type.Arrow` typeVariable 5))
+          , (Equality (typeVariable 9) (typeInt32 `Type.Arrow` typeVariable 8))
+          , (Equality (typeVariable 1) (typeVariable 2 `Type.Arrow` typeVariable 3))
+          , (Equality (typeVariable 5) (typeVariable 8 `Type.Arrow` typeVariable 4))
+          ]
+
+hasConstraints :: Expression Int -> [TypeConstraint TypeIndex () (Type TypeIndex ())] -> Bool
+hasConstraints = all . hasConstraint
 
 hasConstraint :: Expression Int -> TypeConstraint TypeIndex () (Type TypeIndex ()) -> Bool
 hasConstraint e =
@@ -64,8 +67,11 @@ hasConstraint e =
 typeVariable :: Int -> Type TypeIndex ()
 typeVariable = Type.Variable . TypeIndex ()
 
-typeBool :: Type TypeIndex ()
+typeBool :: Type TypeIndex k
 typeBool = Type.Intrinsic Intrinsic.Bool
+
+typeInt32 :: Type TypeIndex k
+typeInt32 = Type.Intrinsic Intrinsic.Int32
 
 -- fn(m) => let y = m in let x = y(true) in x
 fixture_1 :: Expression Int

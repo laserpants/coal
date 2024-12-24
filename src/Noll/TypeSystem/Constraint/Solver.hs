@@ -4,7 +4,7 @@
 
 module Noll.TypeSystem.Constraint.Solver where
 
-import Control.Monad.State (MonadState, get)
+import Control.Monad.State (MonadState, get, put)
 import Data.Foldable (foldrM)
 import Data.List (delete, find)
 import Data.Set (intersection, (\\))
@@ -74,6 +74,13 @@ solveTypes constraints =
       t2 <- instantiate s
       solveTypes (Equality t1 t2 : cs)
 
+-- TODO: move
+next :: (Num n, MonadState n m) => m n
+next = do
+  s <- get
+  put (s + 1)
+  return s
+
 instantiate ::
   (MonadState Int m) =>
   Scheme TypeIndex (Kind Int) (Type TypeIndex (Kind Int)) ->
@@ -83,7 +90,7 @@ instantiate (Forall qs ps t) = do
   pure (apply sub t)
  where
   go (TypeIndex k index) sub = do
-    s <- get
+    s <- next
     pure (index `mapsTo` Type.Variable (TypeIndex k s) <> sub)
 
 generalize ::
