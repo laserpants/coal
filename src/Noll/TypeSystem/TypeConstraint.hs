@@ -6,7 +6,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.TypeSystem.Constraint (
+module Noll.TypeSystem.TypeConstraint (
   MonomorphicSet (..),
   TypeConstraint (..),
   overMonomorphicSet,

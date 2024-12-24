@@ -12,7 +12,7 @@ import Noll.Language.Type.Index (TypeIndex (..))
 import qualified Noll.Language.Type.Intrinsic as Intrinsic
 import Noll.Language.Type.Kind (Kind)
 import qualified Noll.Language.Type.Kind as Kind
-import Noll.TypeSystem.Constraint (MonomorphicSet (..), TypeConstraint (..))
+import Noll.TypeSystem.TypeConstraint (MonomorphicSet (..), TypeConstraint (..))
 import Noll.TypeSystem.Constraint.Solver
 import Noll.TypeSystem.Substitution (TypeSubstitution (..))
 import Noll.TypeSystem.Unification (evalUnifier)

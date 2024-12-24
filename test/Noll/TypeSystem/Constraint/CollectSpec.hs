@@ -16,7 +16,7 @@ import Noll.Language.Type (Type)
 import qualified Noll.Language.Type as Type
 import Noll.Language.Type.Index (TypeIndex (..))
 import qualified Noll.Language.Type.Intrinsic as Intrinsic
-import Noll.TypeSystem.Constraint (MonomorphicSet (..), TypeConstraint (..))
+import Noll.TypeSystem.TypeConstraint (MonomorphicSet (..), TypeConstraint (..))
 import Noll.TypeSystem.Constraint.Collect
 import Test.Hspec (Spec, describe, it)
 

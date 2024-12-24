@@ -18,7 +18,7 @@ import Noll.Language.Type.Index (TypeIndex (..))
 import Noll.Language.Type.Kind (Kind (..))
 import Noll.Language.Type.Scheme (Scheme (..))
 import Noll.Library.Supply (supply)
-import Noll.TypeSystem.Constraint (MonomorphicSet (..), TypeConstraint (..))
+import Noll.TypeSystem.TypeConstraint (MonomorphicSet (..), TypeConstraint (..))
 import Noll.TypeSystem.Substitution (TypeSubstitutable (..), TypeSubstitution (..), mapsTo)
 import Noll.TypeSystem.Unification (TypeUnifiable (..))
 

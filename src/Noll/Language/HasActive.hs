@@ -14,7 +14,7 @@ import Data.Set (Set, intersection, union)
 import qualified Data.Set as Set
 import Noll.Language.HasTypeIndexes (HasTypeIndexes (..))
 import Noll.Language.Type.Index (TypeIndex (..))
-import Noll.TypeSystem.Constraint (TypeConstraint (..))
+import Noll.TypeSystem.TypeConstraint (TypeConstraint (..))
 
 class HasActive k t | t -> k where
   activeIn :: t -> Set (TypeIndex k)

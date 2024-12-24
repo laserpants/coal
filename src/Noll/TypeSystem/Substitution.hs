@@ -37,7 +37,7 @@ import Noll.Language.Type.Kind (Kind)
 import qualified Noll.Language.Type.Kind as Kind
 import Noll.Language.Type.Row (Row (..))
 import Noll.Language.Type.Scheme (Scheme (..))
-import Noll.TypeSystem.Constraint (MonomorphicSet (..), TypeConstraint (..))
+import Noll.TypeSystem.TypeConstraint (MonomorphicSet (..), TypeConstraint (..))
 import Noll.Utils (IndexMap)
 
 class TypeSubstitutable s where

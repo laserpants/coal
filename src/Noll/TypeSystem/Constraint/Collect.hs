@@ -31,7 +31,7 @@ import Noll.Language.Type (Type (..), foldType)
 import Noll.Language.Type.Index (TypeIndex (..))
 import qualified Noll.Language.Type.Intrinsic as Intrinsic
 import Noll.TypeSystem.Assumption (Assumption (..), assumptionNameIs)
-import Noll.TypeSystem.Constraint (MonomorphicSet (..), TypeConstraint (..), overMonomorphicSet)
+import Noll.TypeSystem.TypeConstraint (MonomorphicSet (..), TypeConstraint (..), overMonomorphicSet)
 import Noll.Utils ((<$$>))
 
 data ConstraintsContext o k = ConstraintsContext
