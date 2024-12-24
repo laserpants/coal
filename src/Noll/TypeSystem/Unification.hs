@@ -5,7 +5,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.TypeSystem.Unification (TypeUnifiable (..)) where
+module Noll.TypeSystem.Unification (TypeUnifiable (..), runUnifier, evalUnifier) where
 
 import Control.Monad.State (MonadState, State, runState)
 import qualified Data.List.NonEmpty as NonEmpty
