@@ -11,6 +11,7 @@ import Data.Set (intersection, (\\))
 import qualified Data.Set as Set
 import Noll.Language.HasActive (activeIdsIn)
 import Noll.Language.HasTypeIndexes (HasTypeIndexes (..), notBoundIn, typeIdsIn)
+import Noll.Language.Kind.Index (KindIndex (..))
 import Noll.Language.Type (Type (..))
 import qualified Noll.Language.Type as Type
 import Noll.Language.Type.Index (TypeIndex (..))
@@ -55,10 +56,10 @@ choice cs = findChoice [(delete c cs, c) | c <- cs]
     maybe NoneFound (uncurry Choice) (find (uncurry isSolvable) ps)
 
 solveTypes ::
-  ( TypeSubstitutable (TypeConstraint TypeIndex (Kind Int) (Type TypeIndex (Kind Int)))
+  ( TypeSubstitutable (TypeConstraint TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex)))
   , MonadState Int m
   ) =>
-  [SolverConstraint (Kind Int) (Type TypeIndex (Kind Int))] ->
+  [SolverConstraint (Kind KindIndex) (Type TypeIndex (Kind KindIndex))] ->
   m TypeSubstitution
 solveTypes [] = pure (TypeSubstitution mempty)
 solveTypes constraints =
@@ -77,8 +78,8 @@ solveTypes constraints =
 
 instantiate ::
   (MonadState Int m) =>
-  Scheme TypeIndex (Kind Int) (Type TypeIndex (Kind Int)) ->
-  m (Type TypeIndex (Kind Int))
+  Scheme TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex)) ->
+  m (Type TypeIndex (Kind KindIndex))
 instantiate (Forall qs ps t) = do
   sub <- foldrM go mempty qs
   pure (apply sub t)

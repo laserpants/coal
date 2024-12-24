@@ -11,6 +11,7 @@ import Control.Monad.State (MonadState, State, runState)
 import qualified Data.List.NonEmpty as NonEmpty
 import Data.Set (member)
 import Noll.Language.HasTypeIndexes (typeIdsIn)
+import Noll.Language.Kind.Index (KindIndex (..))
 import Noll.Language.Type (Type)
 import qualified Noll.Language.Type as Type
 import Noll.Language.Type.Index (TypeIndex (..))
@@ -33,11 +34,11 @@ instance (TypeSubstitutable u, TypeUnifiable u) => TypeUnifiable [u] where
   unify _ _ =
     error "Implementation error"
 
-instance TypeUnifiable (Row TypeIndex (Kind Int) (Type TypeIndex (Kind Int))) where
+instance TypeUnifiable (Row TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))) where
   unify =
     undefined
 
-instance TypeUnifiable (Type TypeIndex (Kind Int)) where
+instance TypeUnifiable (Type TypeIndex (Kind KindIndex)) where
   unify (Type.Alias _ _ t1) t2 =
     unify t1 t2
   unify t1 (Type.Alias _ _ t2) =
@@ -60,7 +61,7 @@ instance TypeUnifiable (Type TypeIndex (Kind Int)) where
   unify _ _ =
     error "Cannot unify"
 
-instance TypeUnifiable (Intrinsic (Type TypeIndex (Kind Int))) where
+instance TypeUnifiable (Intrinsic (Type TypeIndex (Kind KindIndex))) where
   unify (Intrinsic.List t1) (Intrinsic.List t2) =
     unify t1 t2
   unify (Intrinsic.Option t1) (Intrinsic.Option t2) =
@@ -77,7 +78,7 @@ instance TypeUnifiable (Intrinsic (Type TypeIndex (Kind Int))) where
   unify _ _ =
     error "Cannot unify"
 
-bindType :: (Monad m) => TypeIndex (Kind Int) -> Type TypeIndex (Kind Int) -> m TypeSubstitution
+bindType :: (Monad m) => TypeIndex (Kind KindIndex) -> Type TypeIndex (Kind KindIndex) -> m TypeSubstitution
 bindType (TypeIndex _ index) =
   \case
     Type.Variable (TypeIndex _ index2)

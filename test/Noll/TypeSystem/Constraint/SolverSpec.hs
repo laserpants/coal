@@ -5,6 +5,7 @@ module Noll.TypeSystem.Constraint.SolverSpec where
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import Noll.Language.HasTypeIndexes (freshIdIn)
+import Noll.Language.Kind.Index (KindIndex (..))
 import Noll.Language.Type (Type)
 import qualified Noll.Language.Type as Type
 import Noll.Language.Type.Index (TypeIndex (..))
@@ -43,7 +44,7 @@ spec =
         ]
 
 -- fn(m) => let y = m in let x = y(true) in x
-fixture_1 :: [TypeConstraint TypeIndex (Kind Int) (Type TypeIndex (Kind Int))]
+fixture_1 :: [TypeConstraint TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))]
 fixture_1 =
   [ (Equality (typeVariable 2) (typeBool `Type.Arrow` typeVariable 3))
   , (Equality (typeVariable 5) (typeVariable 1))
@@ -54,7 +55,7 @@ fixture_1 =
   ]
 
 -- let f = fn(x) => x in (f f)(f 1)
-fixture_2 :: [TypeConstraint TypeIndex (Kind Int) (Type TypeIndex (Kind Int))]
+fixture_2 :: [TypeConstraint TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))]
 fixture_2 =
   [ (Implicit (typeVariable 6) (typeVariable 1) (MonomorphicSet mempty))
   , (Implicit (typeVariable 7) (typeVariable 1) (MonomorphicSet mempty))
@@ -66,16 +67,16 @@ fixture_2 =
   , (Equality (typeVariable 5) (typeVariable 8 `Type.Arrow` typeVariable 4))
   ]
 
-hasSubstitutions :: [SolverConstraint (Kind Int) (Type TypeIndex (Kind Int))] -> [(Int, Type TypeIndex (Kind Int))] -> Bool
+hasSubstitutions :: [SolverConstraint (Kind KindIndex) (Type TypeIndex (Kind KindIndex))] -> [(Int, Type TypeIndex (Kind KindIndex))] -> Bool
 hasSubstitutions = all . uncurry . hasSubstitution
 
-hasSubstitution :: [SolverConstraint (Kind Int) (Type TypeIndex (Kind Int))] -> Int -> Type TypeIndex (Kind Int) -> Bool
+hasSubstitution :: [SolverConstraint (Kind KindIndex) (Type TypeIndex (Kind KindIndex))] -> Int -> Type TypeIndex (Kind KindIndex) -> Bool
 hasSubstitution cs k s = Map.lookup k result == Just s
  where
   result =
     typeSubstitutionMap (evalUnifier (freshIdIn cs) (solveTypes cs))
 
-typeVariable :: Int -> Type TypeIndex (Kind Int)
+typeVariable :: Int -> Type TypeIndex (Kind KindIndex)
 typeVariable = Type.Variable . TypeIndex Kind.Type
 
 typeBool :: Type TypeIndex k

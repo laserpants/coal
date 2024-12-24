@@ -7,6 +7,7 @@ import Noll.Label (Label (..))
 import Noll.Language.Expression (Expression)
 import qualified Noll.Language.Expression as Expr
 import qualified Noll.Language.Expression.Binding as Binding
+import Noll.Language.Kind.Index (KindIndex (..))
 import qualified Noll.Language.Pattern as Pattern
 import qualified Noll.Language.Primitive as Prim
 import qualified Noll.Language.Primitive as Primitive
@@ -86,19 +87,19 @@ spec =
       it "" $
         kindApply (2 `mapsToKind` Kind.Type) t3 == t3
 
-applySubstitutionEquals :: (Expression (Type TypeIndex (Kind Int)), TypeSubstitution) -> Expression (Type TypeIndex (Kind Int)) -> Bool
+applySubstitutionEquals :: (Expression (Type TypeIndex (Kind KindIndex)), TypeSubstitution) -> Expression (Type TypeIndex (Kind KindIndex)) -> Bool
 applySubstitutionEquals (e, sub) res = apply sub e == res
 
-t1 :: Type TypeIndex (Kind Int)
+t1 :: Type TypeIndex (Kind KindIndex)
 t1 = Type.Variable (TypeIndex Kind.Type 1)
 
-t2 :: Type TypeIndex (Kind Int)
+t2 :: Type TypeIndex (Kind KindIndex)
 t2 = Type.Variable (TypeIndex Kind.Type 0)
 
-t3 :: Type TypeIndex (Kind Int)
-t3 = Type.Variable (TypeIndex (Kind.Variable 1) 1)
+t3 :: Type TypeIndex (Kind KindIndex)
+t3 = Type.Variable (TypeIndex (Kind.Variable (KindIndex 1)) 1)
 
-fixture_1 :: (Expression (Type TypeIndex (Kind Int)), TypeSubstitution)
+fixture_1 :: (Expression (Type TypeIndex (Kind KindIndex)), TypeSubstitution)
 fixture_1 =
   ( Expr.Lambda
       (Pattern.Variable (Label (typeVariable 5) "m") :| [])
@@ -132,7 +133,7 @@ fixture_1 =
       ]
   )
 
-fixture_2 :: (Expression (Type TypeIndex (Kind Int)), TypeSubstitution)
+fixture_2 :: (Expression (Type TypeIndex (Kind KindIndex)), TypeSubstitution)
 fixture_2 =
   ( Expr.Let
       ( Binding.Pattern
@@ -169,7 +170,7 @@ fixture_2 =
       ]
   )
 
-typeVariable :: Int -> Type TypeIndex (Kind Int)
+typeVariable :: Int -> Type TypeIndex (Kind KindIndex)
 typeVariable = Type.Variable . TypeIndex Kind.Type
 
 typeBool :: Type TypeIndex k
