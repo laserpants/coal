@@ -4,7 +4,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.TypeSystem.Substitution (TypeSubstitution (..), TypeSubstitutable (..), apply, mapsTo) where
+module Noll.TypeSystem.Substitution (TypeSubstitution (..), TypeSubstitutable (..), apply, mapsTo, substitutionFromList) where
 
 import Data.List.NonEmpty (NonEmpty)
 import Data.Map.Strict (Map)
@@ -12,7 +12,14 @@ import qualified Data.Map.Strict as Map
 import Data.Maybe (fromMaybe)
 import Data.Set (Set)
 import qualified Data.Set as Set
+import Noll.Label (Label (..))
+import Noll.Language.Expression (Expression (..))
+import qualified Noll.Language.Expression as Expr
+import Noll.Language.Expression.Binding (Binding (..))
+import qualified Noll.Language.Expression.Binding as Binding
 import Noll.Language.HasTypeIndexes (HasTypeIndexes (..))
+import Noll.Language.Pattern (Pattern)
+import qualified Noll.Language.Pattern as Pattern
 import Noll.Language.Trait (Trait (..))
 import Noll.Language.Type (Type)
 import qualified Noll.Language.Type as Type
@@ -91,6 +98,36 @@ instance TypeSubstitutable (Type TypeIndex (Kind Int)) where
       t@Type.Constructor{} ->
         t
 
+instance TypeSubstitutable (Pattern (Type TypeIndex (Kind Int))) where
+  apply sub =
+    \case
+      Pattern.Variable (Label t name) ->
+        Pattern.Variable (Label (apply sub t) name)
+
+instance TypeSubstitutable (Binding Expression (Type TypeIndex (Kind Int))) where
+  apply sub =
+    \case
+      Binding.Pattern p e ->
+        Binding.Pattern (apply sub p) (apply sub e)
+
+instance TypeSubstitutable (Expression (Type TypeIndex (Kind Int))) where
+  apply sub =
+    \case
+      Expr.Constructor (Label t name) -> do
+        Expr.Constructor (Label (apply sub t) name)
+      Expr.Variable (Label t name) -> do
+        Expr.Variable (Label (apply sub t) name)
+      Expr.Lambda ps e -> do
+        Expr.Lambda (apply sub ps) (apply sub e)
+      Expr.Let gs e1 -> do
+        Expr.Let (apply sub gs) (apply sub e1)
+      Expr.If e1 e2 e3 -> do
+        Expr.If (apply sub e1) (apply sub e2) (apply sub e3)
+      Expr.Application t e1 es -> do
+        Expr.Application (apply sub t) (apply sub e1) (apply sub es)
+      e@Expr.Literal{} ->
+        e
+
 newtype TypeSubstitution = TypeSubstitution {typeSubstitutionMap :: IndexMap (Type TypeIndex (Kind Int))}
   deriving (Show, Eq, Ord, Read)
 
@@ -113,3 +150,7 @@ removeSubstitution TypeIndex{..} (TypeSubstitution sub) = TypeSubstitution (Map.
 {-# INLINE mapsTo #-}
 mapsTo :: Int -> Type TypeIndex (Kind Int) -> TypeSubstitution
 mapsTo index = TypeSubstitution . Map.singleton index
+
+{-# INLINE substitutionFromList #-}
+substitutionFromList :: [(Int, Type TypeIndex (Kind Int))] -> TypeSubstitution
+substitutionFromList = TypeSubstitution . Map.fromList
