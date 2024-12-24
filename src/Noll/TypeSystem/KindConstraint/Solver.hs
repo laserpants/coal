@@ -10,6 +10,7 @@ import Noll.TypeSystem.KindUnification (KindUnifiable (..))
 
 solveKinds ::
   ( KindSubstitutable (KindConstraint k)
+  , KindUnifiable k
   , MonadState Int m
   ) =>
   [KindConstraint k] ->
