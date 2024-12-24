@@ -1,4 +1,5 @@
 import qualified Noll.Language.HasTypeIndexesSpec
+import qualified Noll.TypeSystem.KindConstraint.CollectSpec
 import qualified Noll.TypeSystem.SubstitutionSpec
 import qualified Noll.TypeSystem.TypeConstraint.CollectSpec
 import qualified Noll.TypeSystem.TypeConstraint.SolverSpec
@@ -11,3 +12,4 @@ main =
     Noll.Language.HasTypeIndexesSpec.spec
     Noll.TypeSystem.SubstitutionSpec.spec
     Noll.TypeSystem.TypeConstraint.SolverSpec.spec
+    Noll.TypeSystem.KindConstraint.CollectSpec.spec

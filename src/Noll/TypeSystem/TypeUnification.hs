@@ -7,18 +7,17 @@
 
 module Noll.TypeSystem.TypeUnification (TypeUnifiable (..)) where
 
-import Control.Monad.State (MonadState)
 import Data.List.NonEmpty (NonEmpty)
 import qualified Data.List.NonEmpty as NonEmpty
 import Data.Set (member)
 import Noll.Language.HasTypeIndexes (typeIdsIn)
-import Noll.Language.Kind.Index (KindIndex (..))
 import Noll.Language.Type (Type)
 import qualified Noll.Language.Type as Type
 import Noll.Language.Type.Index (TypeIndex (..))
 import Noll.Language.Type.Intrinsic (Intrinsic)
 import qualified Noll.Language.Type.Intrinsic as Intrinsic
 import Noll.Language.Type.Kind (Kind)
+import Noll.Language.Type.Kind.Index (KindIndex (..))
 import Noll.Language.Type.Row (Row (..))
 import Noll.TypeSystem.TypeSubstitution (TypeSubstitutable (..), TypeSubstitution (..), mapsTo)
 

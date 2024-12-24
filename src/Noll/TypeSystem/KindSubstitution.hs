@@ -15,13 +15,13 @@ import Data.Maybe (fromMaybe)
 import Data.Set (Set)
 import qualified Data.Set as Set
 import Noll.Language.Expression (Expression (..))
-import Noll.Language.Kind.Index (KindIndex (..))
 import Noll.Language.Trait (Trait (..))
 import Noll.Language.Type (Type)
 import qualified Noll.Language.Type as Type
 import Noll.Language.Type.Index (TypeIndex (..))
 import Noll.Language.Type.Kind (Kind)
 import qualified Noll.Language.Type.Kind as Kind
+import Noll.Language.Type.Kind.Index (KindIndex (..))
 import Noll.Language.Type.Row (Row (..))
 import Noll.Utils (IndexMap)
 

@@ -38,7 +38,6 @@ library
       Noll.Language.Expression.Operator.Unary
       Noll.Language.HasType
       Noll.Language.HasTypeIndexes
-      Noll.Language.Kind.Index
       Noll.Language.Module
       Noll.Language.Module.Function
       Noll.Language.Module.Global
@@ -51,6 +50,7 @@ library
       Noll.Language.Type.Index
       Noll.Language.Type.Intrinsic
       Noll.Language.Type.Kind
+      Noll.Language.Type.Kind.Index
       Noll.Language.Type.Opaque
       Noll.Language.Type.Row
       Noll.Language.Type.Row.Map
@@ -58,6 +58,7 @@ library
       Noll.Library.Environment
       Noll.Library.Supply
       Noll.TypeSystem.KindConstraint
+      Noll.TypeSystem.KindConstraint.Collect
       Noll.TypeSystem.KindConstraint.Solver
       Noll.TypeSystem.KindSubstitution
       Noll.TypeSystem.KindUnification
@@ -107,6 +108,7 @@ test-suite noll-test
   main-is: Spec.hs
   other-modules:
       Noll.Language.HasTypeIndexesSpec
+      Noll.TypeSystem.KindConstraint.CollectSpec
       Noll.TypeSystem.SubstitutionSpec
       Noll.TypeSystem.TypeConstraint.CollectSpec
       Noll.TypeSystem.TypeConstraint.SolverSpec

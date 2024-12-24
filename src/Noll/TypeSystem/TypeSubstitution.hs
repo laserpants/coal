@@ -23,7 +23,6 @@ import qualified Noll.Language.Expression as Expr
 import Noll.Language.Expression.Binding (Binding (..))
 import qualified Noll.Language.Expression.Binding as Binding
 import Noll.Language.HasTypeIndexes (HasTypeIndexes (..))
-import Noll.Language.Kind.Index (KindIndex (..))
 import Noll.Language.Pattern (Pattern)
 import qualified Noll.Language.Pattern as Pattern
 import Noll.Language.Trait (Trait (..))
@@ -31,6 +30,7 @@ import Noll.Language.Type (Type)
 import qualified Noll.Language.Type as Type
 import Noll.Language.Type.Index (TypeIndex (..))
 import Noll.Language.Type.Kind (Kind)
+import Noll.Language.Type.Kind.Index (KindIndex (..))
 import Noll.Language.Type.Row (Row (..))
 import Noll.Language.Type.Scheme (Scheme (..))
 import Noll.TypeSystem.TypeConstraint (MonomorphicSet (..), TypeConstraint (..))

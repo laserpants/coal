@@ -2,13 +2,13 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.TypeSystem.KindUnification where
+module Noll.TypeSystem.KindUnification (KindUnifiable (..)) where
 
 import Data.List.NonEmpty (NonEmpty)
 import qualified Data.List.NonEmpty as NonEmpty
-import Noll.Language.Kind.Index (KindIndex (..))
 import Noll.Language.Type.Kind (Kind)
 import qualified Noll.Language.Type.Kind as Kind
+import Noll.Language.Type.Kind.Index (KindIndex (..))
 import Noll.TypeSystem.KindSubstitution (KindSubstitutable (..), KindSubstitution (..), applyKindSub, mapsToKindSub)
 
 class KindUnifiable u where

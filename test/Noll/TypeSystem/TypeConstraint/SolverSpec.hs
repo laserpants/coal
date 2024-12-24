@@ -5,13 +5,13 @@ module Noll.TypeSystem.TypeConstraint.SolverSpec where
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import Noll.Language.HasTypeIndexes (freshIdIn)
-import Noll.Language.Kind.Index (KindIndex (..))
 import Noll.Language.Type (Type)
 import qualified Noll.Language.Type as Type
 import Noll.Language.Type.Index (TypeIndex (..))
 import qualified Noll.Language.Type.Intrinsic as Intrinsic
 import Noll.Language.Type.Kind (Kind)
 import qualified Noll.Language.Type.Kind as Kind
+import Noll.Language.Type.Kind.Index (KindIndex (..))
 import Noll.TypeSystem.TypeConstraint (MonomorphicSet (..), TypeConstraint (..))
 import Noll.TypeSystem.TypeConstraint.Solver
 import Noll.TypeSystem.TypeSubstitution (TypeSubstitution (..))

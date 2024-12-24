@@ -7,7 +7,6 @@ import Noll.Label (Label (..))
 import Noll.Language.Expression (Expression)
 import qualified Noll.Language.Expression as Expr
 import qualified Noll.Language.Expression.Binding as Binding
-import Noll.Language.Kind.Index (KindIndex (..))
 import qualified Noll.Language.Pattern as Pattern
 import qualified Noll.Language.Primitive as Prim
 import qualified Noll.Language.Primitive as Primitive
@@ -17,6 +16,7 @@ import Noll.Language.Type.Index (TypeIndex (..))
 import qualified Noll.Language.Type.Intrinsic as Intrinsic
 import Noll.Language.Type.Kind (Kind)
 import qualified Noll.Language.Type.Kind as Kind
+import Noll.Language.Type.Kind.Index (KindIndex (..))
 import Noll.TypeSystem.KindSubstitution (applyKindSub, mapsToKindSub)
 import Noll.TypeSystem.TypeSubstitution (TypeSubstitution (..), apply, mapsTo, typeSubstitutionFromList)
 import Test.Hspec (Spec, describe, it)
