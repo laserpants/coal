@@ -32,7 +32,7 @@ import Noll.Language.Type.Index (TypeIndex (..))
 import qualified Noll.Language.Type.Intrinsic as Intrinsic
 import Noll.TypeSystem.TypeConstraint (MonomorphicSet (..), TypeConstraint (..), overMonomorphicSet)
 import Noll.TypeSystem.TypeConstraint.Assumption (Assumption (..), assumptionNameIs)
-import Noll.Utils ((<$$>))
+import Noll.Utils (concatMapM, (<$$>))
 
 data ConstraintsContext o k = ConstraintsContext
   { contextMonomorphicSet :: MonomorphicSet (o k)
@@ -116,13 +116,13 @@ collectConstraints =
       pure ms2
     Expr.Let gs e1 -> do
       ms1 <- collectConstraints e1
-      ms2 <- forEachBinding gs $
+      ms2 <- flip concatMapM gs $
         \case
           Binding.Pattern (Pattern.Variable (Label t name)) e -> do
             ms <- collectConstraints e
             assertEquality t (typeOf e)
             pure ms
-      ms3 <- forEachBinding gs $
+      ms3 <- flip concatMapM gs $
         \case
           Binding.Pattern (Pattern.Variable (Label t name)) e -> do
             let (ls, rs) = partition (assumptionNameIs name) ms1
@@ -143,10 +143,3 @@ collectConstraints =
       pure (ms1 <> ms2)
     Expr.Literal{} ->
       pure []
-
-forEachBinding ::
-  (Traversable f) =>
-  f (Binding Expression (Type TypeIndex k)) ->
-  (Binding Expression (Type TypeIndex k) -> CollectConstraints k [a]) ->
-  CollectConstraints k [a]
-forEachBinding gs = concat <$$> forM gs

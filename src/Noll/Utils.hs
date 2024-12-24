@@ -9,8 +9,10 @@ module Noll.Utils (
   Some,
   (<$$>),
   (<$$$>),
+  concatMapM,
 ) where
 
+import Control.Monad (liftM)
 import Data.List.NonEmpty (NonEmpty)
 import Data.Map.Strict (Map)
 import Data.Set (Set)
@@ -35,3 +37,7 @@ infixr 8 <$$>
 (<$$$>) = fmap . fmap . fmap
 
 infixr 8 <$$$>
+
+-- | Monadic version of concatMap
+concatMapM :: (Monad m, Traversable f) => (a -> m [b]) -> f a -> m [b]
+concatMapM f xs = liftM concat (mapM f xs)
