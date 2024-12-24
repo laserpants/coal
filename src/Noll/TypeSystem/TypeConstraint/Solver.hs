@@ -19,7 +19,7 @@ import Noll.Language.Type.Scheme (Scheme (..))
 import Noll.Library.Supply (supply)
 import Noll.TypeSystem.TypeConstraint (MonomorphicSet (..), TypeConstraint (..))
 import Noll.TypeSystem.TypeSubstitution (TypeSubstitutable (..), TypeSubstitution (..), mapsTo)
-import Noll.TypeSystem.Unification (TypeUnifiable (..))
+import Noll.TypeSystem.TypeUnification (TypeUnifiable (..))
 
 type SolverConstraint k t = TypeConstraint TypeIndex k t
 

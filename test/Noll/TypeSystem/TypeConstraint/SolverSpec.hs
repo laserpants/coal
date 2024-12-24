@@ -15,7 +15,7 @@ import qualified Noll.Language.Type.Kind as Kind
 import Noll.TypeSystem.TypeConstraint (MonomorphicSet (..), TypeConstraint (..))
 import Noll.TypeSystem.TypeConstraint.Solver
 import Noll.TypeSystem.TypeSubstitution (TypeSubstitution (..))
-import Noll.TypeSystem.Unification (evalUnifier)
+import Noll.TypeSystem.TypeUnification (evalUnifier)
 import Test.Hspec (Spec, describe, it)
 
 spec :: Spec

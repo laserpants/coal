@@ -64,7 +64,7 @@ library
       Noll.TypeSystem.TypeConstraint.Collect
       Noll.TypeSystem.TypeConstraint.Solver
       Noll.TypeSystem.TypeSubstitution
-      Noll.TypeSystem.Unification
+      Noll.TypeSystem.TypeUnification
       Noll.Utils
   other-modules:
       Paths_noll
