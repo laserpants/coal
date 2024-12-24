@@ -2,17 +2,17 @@
 
 module Noll.TypeSystem.Constraint.SolverSpec where
 
+import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import Noll.Language.Type (Type)
 import qualified Noll.Language.Type as Type
 import Noll.Language.Type.Index (TypeIndex (..))
 import qualified Noll.Language.Type.Intrinsic as Intrinsic
-import Noll.TypeSystem.Substitution (TypeSubstitution (..))
 import Noll.Language.Type.Kind (Kind)
-import qualified Data.Map.Strict as Map
 import qualified Noll.Language.Type.Kind as Kind
 import Noll.TypeSystem.Constraint (MonomorphicSet (..), TypeConstraint (..))
 import Noll.TypeSystem.Constraint.Solver
+import Noll.TypeSystem.Substitution (TypeSubstitution (..))
 import Noll.TypeSystem.Unification (evalUnifier)
 import Test.Hspec (Spec, describe, it)
 
@@ -22,22 +22,22 @@ spec =
     it "" $
       hasSubstitution
         fixture_1
-        1 
+        1
         (typeBool `Type.Arrow` typeVariable 3)
     it "" $
       hasSubstitution
         fixture_1
-        2 
+        2
         (typeBool `Type.Arrow` typeVariable 3)
     it "" $
       hasSubstitution
         fixture_1
-        4 
+        4
         (typeVariable 3)
     it "" $
       hasSubstitution
         fixture_1
-        5 
+        5
         (typeBool `Type.Arrow` typeVariable 3)
 
 fixture_1 :: [TypeConstraint TypeIndex (Kind Int) (Type TypeIndex (Kind Int))]

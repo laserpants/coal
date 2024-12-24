@@ -11,6 +11,7 @@ import qualified Noll.Language.Expression as Expr
 import qualified Noll.Language.Expression.Binding as Binding
 import qualified Noll.Language.Pattern as Pattern
 import qualified Noll.Language.Primitive as Prim
+import qualified Noll.Language.Primitive as Primitive
 import Noll.Language.Type (Type)
 import qualified Noll.Language.Type as Type
 import Noll.Language.Type.Index (TypeIndex (..))
@@ -96,10 +97,25 @@ fixture_1 =
 fixture_2 :: Expression Int
 fixture_2 =
   Expr.Let
-    undefined
-    (
-      Expr.Application
-        undefined
-        undefined
-        undefined
+    ( Binding.Pattern
+        (Pattern.Variable (Label 1 "f"))
+        ( Expr.Lambda
+            (Pattern.Variable (Label 2 "x") :| [])
+            (Expr.Variable (Label 3 "x"))
+        )
+        :| []
+    )
+    ( Expr.Application
+        4
+        ( Expr.Application
+            5
+            (Expr.Variable (Label 6 "f"))
+            (Expr.Variable (Label 7 "f") :| [])
+        )
+        ( Expr.Application
+            8
+            (Expr.Variable (Label 9 "f"))
+            (Expr.Literal (Primitive.Int32 1) :| [])
+            :| []
+        )
     )
