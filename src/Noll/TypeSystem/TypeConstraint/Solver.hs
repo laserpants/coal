@@ -4,7 +4,7 @@
 
 module Noll.TypeSystem.TypeConstraint.Solver where
 
-import Control.Monad.State (MonadState, get, put)
+import Control.Monad.State (MonadState)
 import Data.Foldable (foldrM)
 import Data.List (delete, find)
 import Data.Set (intersection, (\\))

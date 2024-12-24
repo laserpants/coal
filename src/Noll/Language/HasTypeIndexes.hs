@@ -24,7 +24,6 @@ import Noll.Language.Trait (Trait (..))
 import Noll.Language.Type (Type)
 import qualified Noll.Language.Type as Type
 import Noll.Language.Type.Index (TypeIndex (..))
-import Noll.Language.Type.Kind (Kind)
 import Noll.Language.Type.Row (Row)
 import qualified Noll.Language.Type.Row as Row
 import Noll.Language.Type.Scheme (Scheme (..))
