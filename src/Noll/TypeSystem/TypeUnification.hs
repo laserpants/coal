@@ -8,6 +8,7 @@
 module Noll.TypeSystem.TypeUnification (TypeUnifiable (..), runUnifier, evalUnifier) where
 
 import Control.Monad.State (MonadState, State, runState)
+import Data.List.NonEmpty (NonEmpty)
 import qualified Data.List.NonEmpty as NonEmpty
 import Data.Set (member)
 import Noll.Language.HasTypeIndexes (typeIdsIn)
@@ -33,6 +34,9 @@ instance (TypeSubstitutable u, TypeUnifiable u) => TypeUnifiable [u] where
     pure (sub2 <> sub1)
   unify _ _ =
     error "Implementation error"
+
+instance (TypeSubstitutable u, TypeUnifiable u) => TypeUnifiable (NonEmpty u) where
+  unify u1 u2 = unify (NonEmpty.toList u1) (NonEmpty.toList u2)
 
 instance TypeUnifiable (Row TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))) where
   unify =

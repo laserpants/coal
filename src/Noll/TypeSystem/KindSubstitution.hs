@@ -5,7 +5,7 @@
 module Noll.TypeSystem.KindSubstitution (
   KindSubstitution (..),
   KindSubstitutable (..),
-  kindMapsTo,
+  mapsToKindSub,
 ) where
 
 import Data.List.NonEmpty (NonEmpty)
@@ -102,6 +102,6 @@ instance Monoid KindSubstitution where
 substitutionIndex :: KindIndex -> KindSubstitution -> Maybe (Kind KindIndex)
 substitutionIndex (KindIndex index) sub = Map.lookup index (kindSubstitutionMap sub)
 
-{-# INLINE kindMapsTo #-}
-kindMapsTo :: Int -> Kind KindIndex -> KindSubstitution
-kindMapsTo index = KindSubstitution . Map.singleton index
+{-# INLINE mapsToKindSub #-}
+mapsToKindSub :: Int -> Kind KindIndex -> KindSubstitution
+mapsToKindSub index = KindSubstitution . Map.singleton index

@@ -59,6 +59,7 @@ library
       Noll.Library.Supply
       Noll.TypeSystem.KindConstraint
       Noll.TypeSystem.KindSubstitution
+      Noll.TypeSystem.KindUnification
       Noll.TypeSystem.TypeConstraint
       Noll.TypeSystem.TypeConstraint.Assumption
       Noll.TypeSystem.TypeConstraint.Collect

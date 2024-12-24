@@ -17,7 +17,7 @@ import Noll.Language.Type.Index (TypeIndex (..))
 import qualified Noll.Language.Type.Intrinsic as Intrinsic
 import Noll.Language.Type.Kind (Kind)
 import qualified Noll.Language.Type.Kind as Kind
-import Noll.TypeSystem.KindSubstitution (applyKindSub, kindMapsTo)
+import Noll.TypeSystem.KindSubstitution (applyKindSub, mapsToKindSub)
 import Noll.TypeSystem.TypeSubstitution (TypeSubstitution (..), apply, mapsTo, typeSubstitutionFromList)
 import Test.Hspec (Spec, describe, it)
 
@@ -84,9 +84,9 @@ spec =
           )
     describe "KindSubstitution" $ do
       it "" $
-        applyKindSub (1 `kindMapsTo` Kind.Type) t3 == Type.Variable (TypeIndex Kind.Type 1)
+        applyKindSub (1 `mapsToKindSub` Kind.Type) t3 == Type.Variable (TypeIndex Kind.Type 1)
       it "" $
-        applyKindSub (2 `kindMapsTo` Kind.Type) t3 == t3
+        applyKindSub (2 `mapsToKindSub` Kind.Type) t3 == t3
 
 applySubstitutionEquals :: (Expression (Type TypeIndex (Kind KindIndex)), TypeSubstitution) -> Expression (Type TypeIndex (Kind KindIndex)) -> Bool
 applySubstitutionEquals (e, sub) res = apply sub e == res
