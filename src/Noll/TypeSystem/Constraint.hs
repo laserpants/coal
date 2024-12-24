@@ -1,5 +1,7 @@
 {-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
@@ -12,6 +14,8 @@ module Noll.TypeSystem.Constraint (
 where
 
 import Data.Set (Set)
+import Noll.Language.HasTypeIndexes (HasTypeIndexes (..))
+import Noll.Language.Type.Index (TypeIndex (..))
 import Noll.Language.Type.Scheme (Scheme (..))
 
 -- | Monomorphic type variable set
@@ -27,3 +31,16 @@ data TypeConstraint o k t
   | Implicit t t (MonomorphicSet (o k))
   | Explicit t (Scheme o k t)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
+
+instance HasTypeIndexes k (MonomorphicSet (TypeIndex k)) where
+  typeIndexesIn = monomorphicSet
+
+instance (Ord k, HasTypeIndexes k t) => HasTypeIndexes k (TypeConstraint TypeIndex k t) where
+  typeIndexesIn =
+    \case
+      Equality t1 t2 ->
+        typeIndexesIn t1 <> typeIndexesIn t2
+      Implicit t1 t2 m ->
+        typeIndexesIn t1 <> typeIndexesIn t2 <> typeIndexesIn m
+      Explicit t s ->
+        typeIndexesIn t <> typeIndexesIn s

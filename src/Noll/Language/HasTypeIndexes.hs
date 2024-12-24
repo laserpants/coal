@@ -6,7 +6,7 @@
 {-# LANGUAGE StrictData #-}
 {-# LANGUAGE UndecidableInstances #-}
 
-module Noll.Language.HasTypeIndexes (HasTypeIndexes (..), typeIdsIn, notBoundIn) where
+module Noll.Language.HasTypeIndexes (HasTypeIndexes (..), typeIdsIn, notBoundIn, freshIdIn) where
 
 import Data.List.NonEmpty (NonEmpty)
 import Data.Map.Strict (Map)
@@ -23,7 +23,6 @@ import Noll.Language.Type.Kind (Kind)
 import Noll.Language.Type.Row (Row)
 import qualified Noll.Language.Type.Row as Row
 import Noll.Language.Type.Scheme (Scheme (..))
-import Noll.TypeSystem.Constraint (MonomorphicSet (..))
 
 class HasTypeIndexes k t | t -> k where
   typeIndexesIn :: t -> Set (TypeIndex k)
@@ -100,8 +99,13 @@ notBoundIn s = Set.filter notBound
  where
   notBound index = indexId index `notElem` Set.map indexId s
 
-instance HasTypeIndexes k (MonomorphicSet (TypeIndex k)) where
-  typeIndexesIn = monomorphicSet
-
 typeIdsIn :: (HasTypeIndexes k t) => t -> Set Int
-typeIdsIn t = Set.map indexId (typeIndexesIn t)
+typeIdsIn = Set.map indexId . typeIndexesIn
+
+freshIdIn :: (HasTypeIndexes k t) => t -> Int
+freshIdIn t =
+  if null typeIdSet
+    then 0
+    else succ (maximum typeIdSet)
+ where
+  typeIdSet = typeIdsIn t

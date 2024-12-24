@@ -4,6 +4,7 @@ module Noll.TypeSystem.Constraint.SolverSpec where
 
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
+import Noll.Language.HasTypeIndexes (freshIdIn)
 import Noll.Language.Type (Type)
 import qualified Noll.Language.Type as Type
 import Noll.Language.Type.Index (TypeIndex (..))
@@ -27,6 +28,19 @@ spec =
         , (4, typeVariable 3)
         , (5, typeBool `Type.Arrow` typeVariable 3)
         ]
+    -- TODO
+    it "" $
+      hasSubstitutions
+        fixture_2
+        [ (1, typeVariable 3 `Type.Arrow` typeVariable 3)
+        , (2, typeVariable 3)
+        , (4, typeInt32)
+        , (5, typeInt32 `Type.Arrow` typeInt32)
+        , (6, (typeInt32 `Type.Arrow` typeInt32) `Type.Arrow` typeInt32 `Type.Arrow` typeInt32)
+        , (7, typeInt32 `Type.Arrow` typeInt32)
+        , (8, typeInt32)
+        , (9, typeInt32 `Type.Arrow` typeInt32)
+        ]
 
 -- fn(m) => let y = m in let x = y(true) in x
 fixture_1 :: [TypeConstraint TypeIndex (Kind Int) (Type TypeIndex (Kind Int))]
@@ -39,6 +53,7 @@ fixture_1 =
   , (Implicit (typeVariable 2) (typeVariable 6) (MonomorphicSet (Set.fromList [TypeIndex Kind.Type 5])))
   ]
 
+-- let f = fn(x) => x in (f f)(f 1)
 fixture_2 :: [TypeConstraint TypeIndex (Kind Int) (Type TypeIndex (Kind Int))]
 fixture_2 =
   [ (Implicit (typeVariable 6) (typeVariable 1) (MonomorphicSet mempty))
@@ -58,8 +73,7 @@ hasSubstitution :: [SolverConstraint (Kind Int) (Type TypeIndex (Kind Int))] -> 
 hasSubstitution cs k s = Map.lookup k result == Just s
  where
   result =
-    -- TODO
-    typeSubstitutionMap (evalUnifier 100 (solveTypes cs))
+    typeSubstitutionMap (evalUnifier (freshIdIn cs) (solveTypes cs))
 
 typeVariable :: Int -> Type TypeIndex (Kind Int)
 typeVariable = Type.Variable . TypeIndex Kind.Type
