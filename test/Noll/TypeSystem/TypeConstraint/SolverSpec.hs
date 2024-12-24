@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.TypeSystem.Constraint.SolverSpec where
+module Noll.TypeSystem.TypeConstraint.SolverSpec where
 
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
@@ -13,14 +13,14 @@ import qualified Noll.Language.Type.Intrinsic as Intrinsic
 import Noll.Language.Type.Kind (Kind)
 import qualified Noll.Language.Type.Kind as Kind
 import Noll.TypeSystem.TypeConstraint (MonomorphicSet (..), TypeConstraint (..))
-import Noll.TypeSystem.Constraint.Solver
+import Noll.TypeSystem.TypeConstraint.Solver
 import Noll.TypeSystem.Substitution (TypeSubstitution (..))
 import Noll.TypeSystem.Unification (evalUnifier)
 import Test.Hspec (Spec, describe, it)
 
 spec :: Spec
 spec =
-  describe "Noll.TypeSystem.Constraint.Solver" $ do
+  describe "Noll.TypeSystem.TypeConstraint.Solver" $ do
     it "" $
       hasSubstitutions
         fixture_1

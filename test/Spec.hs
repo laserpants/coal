@@ -1,13 +1,13 @@
 import qualified Noll.Language.HasTypeIndexesSpec
-import qualified Noll.TypeSystem.Constraint.CollectSpec
-import qualified Noll.TypeSystem.Constraint.SolverSpec
+import qualified Noll.TypeSystem.TypeConstraint.CollectSpec
+import qualified Noll.TypeSystem.TypeConstraint.SolverSpec
 import qualified Noll.TypeSystem.SubstitutionSpec
 import Test.Hspec (hspec)
 
 main :: IO ()
 main =
   hspec $ do
-    Noll.TypeSystem.Constraint.CollectSpec.spec
+    Noll.TypeSystem.TypeConstraint.CollectSpec.spec
     Noll.Language.HasTypeIndexesSpec.spec
     Noll.TypeSystem.SubstitutionSpec.spec
-    Noll.TypeSystem.Constraint.SolverSpec.spec
+    Noll.TypeSystem.TypeConstraint.SolverSpec.spec

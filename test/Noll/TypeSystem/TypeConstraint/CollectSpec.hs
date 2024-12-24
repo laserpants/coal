@@ -1,7 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.TypeSystem.Constraint.CollectSpec where
+module Noll.TypeSystem.TypeConstraint.CollectSpec where
 
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Set as Set
@@ -17,12 +17,12 @@ import qualified Noll.Language.Type as Type
 import Noll.Language.Type.Index (TypeIndex (..))
 import qualified Noll.Language.Type.Intrinsic as Intrinsic
 import Noll.TypeSystem.TypeConstraint (MonomorphicSet (..), TypeConstraint (..))
-import Noll.TypeSystem.Constraint.Collect
+import Noll.TypeSystem.TypeConstraint.Collect
 import Test.Hspec (Spec, describe, it)
 
 spec :: Spec
 spec =
-  describe "Noll.TypeSystem.Constraint.Collect" $ do
+  describe "Noll.TypeSystem.TypeConstraint.Collect" $ do
     describe "fixture_1" $ do
       it "" $
         hasConstraints

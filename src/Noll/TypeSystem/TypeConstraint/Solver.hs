@@ -2,7 +2,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.TypeSystem.Constraint.Solver where
+module Noll.TypeSystem.TypeConstraint.Solver where
 
 import Control.Monad.State (MonadState, get, put)
 import Data.Foldable (foldrM)

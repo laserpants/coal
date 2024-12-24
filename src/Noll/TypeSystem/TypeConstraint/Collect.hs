@@ -4,7 +4,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.TypeSystem.Constraint.Collect (
+module Noll.TypeSystem.TypeConstraint.Collect (
   ConstraintsContext (..),
   Constraints (..),
   CollectConstraints,
