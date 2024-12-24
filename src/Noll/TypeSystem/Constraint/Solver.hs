@@ -14,12 +14,14 @@ import Noll.TypeSystem.Constraint (MonomorphicSet (..), TypeConstraint (..))
 import Noll.TypeSystem.Substitution (TypeSubstitutable (..), TypeSubstitution (..), mapsTo)
 import Noll.TypeSystem.Unification (TypeUnifiable (..))
 
+type SolverConstraint k t = TypeConstraint TypeIndex k t
+
 isSolvable ::
   ( Ord k
   , HasTypeIndexes k t
   ) =>
-  [TypeConstraint TypeIndex k t] ->
-  TypeConstraint TypeIndex k t ->
+  [SolverConstraint k t] ->
+  SolverConstraint k t ->
   Bool
 isSolvable constraints =
   \case
@@ -38,8 +40,8 @@ choice ::
   , Eq t
   , HasTypeIndexes k t
   ) =>
-  [TypeConstraint TypeIndex k t] ->
-  SolverChoice (TypeConstraint TypeIndex k t)
+  [SolverConstraint k t] ->
+  SolverChoice (SolverConstraint k t)
 choice cs = findChoice [(delete c cs, c) | c <- cs]
  where
   findChoice ps =
@@ -53,7 +55,7 @@ solveTypes ::
   , TypeUnifiable t
   , Monad m
   ) =>
-  [TypeConstraint TypeIndex k t] ->
+  [SolverConstraint k t] ->
   m TypeSubstitution
 solveTypes [] = pure (TypeSubstitution mempty)
 solveTypes constraints =
