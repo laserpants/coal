@@ -6,7 +6,12 @@
 {-# LANGUAGE StrictData #-}
 {-# LANGUAGE UndecidableInstances #-}
 
-module Noll.Language.HasTypeIndexes (HasTypeIndexes (..), typeIdsIn, notBoundIn, freshIdIn) where
+module Noll.Language.HasTypeIndexes (
+  HasTypeIndexes (..),
+  typeIdsIn,
+  notBoundIn,
+  freshIdIn,
+) where
 
 import Data.List.NonEmpty (NonEmpty)
 import Data.Map.Strict (Map)

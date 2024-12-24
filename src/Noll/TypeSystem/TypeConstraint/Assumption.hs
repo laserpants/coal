@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.TypeSystem.Assumption (Assumption (..), assumptionNameIs) where
+module Noll.TypeSystem.TypeConstraint.Assumption (Assumption (..), assumptionNameIs) where
 
 import Noll.Utils (Name)
 

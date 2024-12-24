@@ -58,10 +58,10 @@ library
       Noll.Language.Type.Scheme
       Noll.Library.Environment
       Noll.Library.Supply
-      Noll.TypeSystem.Assumption
       Noll.TypeSystem.KindConstraint
       Noll.TypeSystem.Substitution
       Noll.TypeSystem.TypeConstraint
+      Noll.TypeSystem.TypeConstraint.Assumption
       Noll.TypeSystem.TypeConstraint.Collect
       Noll.TypeSystem.TypeConstraint.Solver
       Noll.TypeSystem.Unification
