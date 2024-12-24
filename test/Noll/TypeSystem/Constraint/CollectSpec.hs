@@ -66,6 +66,7 @@ typeVariable = Type.Variable . TypeIndex ()
 typeBool :: Type TypeIndex ()
 typeBool = Type.Intrinsic Intrinsic.Bool
 
+-- fn(m) => let y = m in let x = y(true) in x
 fixture_1 :: Expression Int
 fixture_1 =
   Expr.Lambda
@@ -89,4 +90,16 @@ fixture_1 =
             ( Expr.Variable (Label 4 "x")
             )
         )
+    )
+
+-- let f = fn(x) => x in (f f)(f 1)
+fixture_2 :: Expression Int
+fixture_2 =
+  Expr.Let
+    undefined
+    (
+      Expr.Application
+        undefined
+        undefined
+        undefined
     )

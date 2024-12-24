@@ -84,7 +84,7 @@ bindType (TypeIndex _ index) =
       | index == index2 ->
           pure mempty
     t
-      | member index (typeIdsIn t) ->
+      | index `member` typeIdsIn t ->
           error "Infinite type"
       | otherwise ->
           pure (index `mapsTo` t)
