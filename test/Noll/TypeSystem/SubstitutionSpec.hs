@@ -27,11 +27,58 @@ spec =
     it "" $
       apply (1 `mapsTo` Type.Intrinsic Intrinsic.Bool) t2 == t2
     it "" $
-      applySubstitutionEquals fixture_1 $
-        Expr.Variable (Label (typeVariable 0) "f")
+      applySubstitutionEquals
+        fixture_1
+        ( Expr.Lambda
+            (Pattern.Variable (Label (typeBool `Type.Arrow` typeVariable 3) "m") :| [])
+            ( Expr.Let
+                ( Binding.Pattern
+                    (Pattern.Variable (Label (typeBool `Type.Arrow` typeVariable 3) "y"))
+                    (Expr.Variable (Label (typeBool `Type.Arrow` typeVariable 3) "m"))
+                    :| []
+                )
+                ( Expr.Let
+                    ( Binding.Pattern
+                        (Pattern.Variable (Label (typeVariable 3) "x"))
+                        ( Expr.Application
+                            (typeVariable 3)
+                            (Expr.Variable (Label (typeBool `Type.Arrow` typeVariable 3) "y"))
+                            (Expr.Literal (Prim.Bool True) :| [])
+                        )
+                        :| []
+                    )
+                    ( Expr.Variable (Label (typeVariable 3) "x")
+                    )
+                )
+            )
+        )
     it "" $
-      applySubstitutionEquals fixture_2 $
-        Expr.Variable (Label (typeVariable 0) "f")
+      applySubstitutionEquals
+        fixture_2
+        ( Expr.Let
+            ( Binding.Pattern
+                (Pattern.Variable (Label (typeVariable 3 `Type.Arrow` typeVariable 3) "f"))
+                ( Expr.Lambda
+                    (Pattern.Variable (Label (typeVariable 3) "x") :| [])
+                    (Expr.Variable (Label (typeVariable 3) "x"))
+                )
+                :| []
+            )
+            ( Expr.Application
+                typeInt32
+                ( Expr.Application
+                    (typeInt32 `Type.Arrow` typeInt32)
+                    (Expr.Variable (Label ((typeInt32 `Type.Arrow` typeInt32) `Type.Arrow` typeInt32 `Type.Arrow` typeInt32) "f"))
+                    (Expr.Variable (Label (typeInt32 `Type.Arrow` typeInt32) "f") :| [])
+                )
+                ( Expr.Application
+                    typeInt32
+                    (Expr.Variable (Label (typeInt32 `Type.Arrow` typeInt32) "f"))
+                    (Expr.Literal (Primitive.Int32 1) :| [])
+                    :| []
+                )
+            )
+        )
 
 applySubstitutionEquals :: (Expression (Type TypeIndex (Kind Int)), TypeSubstitution) -> Expression (Type TypeIndex (Kind Int)) -> Bool
 applySubstitutionEquals (e, sub) res = apply sub e == res
@@ -71,6 +118,8 @@ fixture_1 =
       , (2, typeBool `Type.Arrow` typeVariable 3)
       , (4, typeVariable 3)
       , (5, typeBool `Type.Arrow` typeVariable 3)
+      , (6, typeBool `Type.Arrow` typeVariable 3)
+      , (7, typeVariable 3)
       ]
   )
 

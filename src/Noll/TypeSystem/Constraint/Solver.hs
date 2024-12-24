@@ -19,6 +19,7 @@ import Noll.Language.Type.Scheme (Scheme (..))
 import Noll.TypeSystem.Constraint (MonomorphicSet (..), TypeConstraint (..))
 import Noll.TypeSystem.Substitution (TypeSubstitutable (..), TypeSubstitution (..), mapsTo)
 import Noll.TypeSystem.Unification (TypeUnifiable (..))
+import Noll.Library.Supply (supply)
 
 type SolverConstraint k t = TypeConstraint TypeIndex k t
 
@@ -74,13 +75,6 @@ solveTypes constraints =
       t2 <- instantiate s
       solveTypes (Equality t1 t2 : cs)
 
--- TODO: move
-next :: (Num n, MonadState n m) => m n
-next = do
-  s <- get
-  put (s + 1)
-  return s
-
 instantiate ::
   (MonadState Int m) =>
   Scheme TypeIndex (Kind Int) (Type TypeIndex (Kind Int)) ->
@@ -90,7 +84,7 @@ instantiate (Forall qs ps t) = do
   pure (apply sub t)
  where
   go (TypeIndex k index) sub = do
-    s <- next
+    s <- supply
     pure (index `mapsTo` Type.Variable (TypeIndex k s) <> sub)
 
 generalize ::
