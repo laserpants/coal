@@ -1,7 +1,7 @@
 import qualified Noll.Language.HasTypeIndexesSpec
+import qualified Noll.TypeSystem.SubstitutionSpec
 import qualified Noll.TypeSystem.TypeConstraint.CollectSpec
 import qualified Noll.TypeSystem.TypeConstraint.SolverSpec
-import qualified Noll.TypeSystem.SubstitutionSpec
 import Test.Hspec (hspec)
 
 main :: IO ()
