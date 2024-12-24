@@ -2,40 +2,40 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Library.Supply (Store (..), supply, supplyN, update, load, save, over) where
+module Noll.Library.Supply (Supply, supply, supplyN, update, load, save, over) where
 
 import Control.Monad (replicateM)
 import Control.Monad.State (MonadState, gets, modify)
 
-class Store v s where
-  obtain :: s -> v
-  inside :: (v -> v) -> s -> s
+class Supply v s where
+  count :: s -> v
+  overSupply :: (v -> v) -> s -> s
 
-instance Store s s where
-  obtain = id
-  inside = id
+instance Supply s s where
+  count = id
+  overSupply = id
 
 {-# INLINE update #-}
-update :: (Store v s) => v -> s -> s
-update = inside . const
+update :: (Supply v s) => v -> s -> s
+update = overSupply . const
 
 {-# INLINE load #-}
-load :: (MonadState s m, Store a s) => m a
-load = gets obtain
+load :: (MonadState s m, Supply a s) => m a
+load = gets count
 
 {-# INLINE save #-}
-save :: (MonadState s m, Store a s) => a -> m ()
+save :: (MonadState s m, Supply a s) => a -> m ()
 save = modify . update
 
 {-# INLINE over #-}
-over :: (MonadState s m, Store a s) => (a -> a) -> m ()
-over = modify . inside
+over :: (MonadState s m, Supply a s) => (a -> a) -> m ()
+over = modify . overSupply
 
-supply :: (Num n, MonadState s m, Store n s) => m n
+supply :: (Num n, MonadState s m, Supply n s) => m n
 supply = do
   n <- load
   save (n + 1)
   return n
 
-supplyN :: (Num n, MonadState s m, Store n s) => Int -> m [n]
+supplyN :: (Num n, MonadState s m, Supply n s) => Int -> m [n]
 supplyN n = replicateM n supply

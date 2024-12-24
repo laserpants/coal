@@ -55,9 +55,7 @@ choice cs = findChoice [(delete c cs, c) | c <- cs]
     maybe NoneFound (uncurry Choice) (find (uncurry isSolvable) ps)
 
 solveTypes ::
-  ( TypeSubstitutable (TypeConstraint TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex)))
-  , MonadState Int m
-  ) =>
+  (MonadState Int m) =>
   [SolverConstraint (Kind KindIndex) (Type TypeIndex (Kind KindIndex))] ->
   m TypeSubstitution
 solveTypes [] = pure (TypeSubstitution mempty)
@@ -79,7 +77,7 @@ instantiate ::
   (MonadState Int m) =>
   Scheme TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex)) ->
   m (Type TypeIndex (Kind KindIndex))
-instantiate (Forall qs ps t) = do
+instantiate (Forall qs _ t) = do
   sub <- foldrM go mempty qs
   pure (apply sub t)
  where
