@@ -4,8 +4,8 @@
 
 module Noll.Library.Supply (Store (..), supply, supplyN, update, load, save, over) where
 
-import Control.Monad.State (MonadState, gets, modify)
 import Control.Monad (replicateM)
+import Control.Monad.State (MonadState, gets, modify)
 
 class Store v s where
   obtain :: s -> v
