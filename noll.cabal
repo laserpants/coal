@@ -59,6 +59,7 @@ library
       Noll.Library.Environment
       Noll.Library.Supply
       Noll.TypeSystem.Assumption
+      Noll.TypeSystem.KindConstraint
       Noll.TypeSystem.Substitution
       Noll.TypeSystem.TypeConstraint
       Noll.TypeSystem.TypeConstraint.Collect
