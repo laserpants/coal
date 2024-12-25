@@ -1,9 +1,9 @@
-{-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE StrictData #-}
 
 module Noll.Language.Type.Intrinsic (Intrinsic (..)) where
 
--- | Built-in type constructors
+-- | Built-in types
 data Intrinsic t
   = Bool
   | Char
@@ -20,4 +20,4 @@ data Intrinsic t
   | Tuple [t]
   | Unit
   | Void
-  deriving (Show, Eq, Ord, Read, Functor)
+  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)

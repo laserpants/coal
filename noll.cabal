@@ -47,6 +47,7 @@ library
       Noll.Language.Trait
       Noll.Language.Type
       Noll.Language.Type.Annotation
+      Noll.Language.Type.HasKind
       Noll.Language.Type.Index
       Noll.Language.Type.Intrinsic
       Noll.Language.Type.Kind
