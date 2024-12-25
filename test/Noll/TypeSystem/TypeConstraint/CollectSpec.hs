@@ -6,14 +6,12 @@ module Noll.TypeSystem.TypeConstraint.CollectSpec where
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Set as Set
 import Noll.Label (Label (..))
-import Noll.Language.Expression (Expression)
+import Noll.Language (Expression, Type, TypeIndex (..))
 import qualified Noll.Language.Expression as Expr
 import qualified Noll.Language.Expression.Binding as Binding
 import qualified Noll.Language.Pattern as Pattern
-import qualified Noll.Language.Primitive as Primitive
-import Noll.Language.Type (Type)
+import qualified Noll.Language.Primitive as Prim
 import qualified Noll.Language.Type as Type
-import Noll.Language.Type.Index (TypeIndex (..))
 import qualified Noll.Language.Type.Intrinsic as Intrinsic
 import Noll.TypeSystem.TypeConstraint (MonomorphicSet (..), TypeConstraint (..))
 import Noll.TypeSystem.TypeConstraint.Collect
@@ -89,7 +87,7 @@ fixture_1 =
                 ( Expr.Application
                     3
                     (Expr.Variable (Label 2 "y"))
-                    (Expr.Literal (Primitive.Bool True) :| [])
+                    (Expr.Literal (Prim.Bool True) :| [])
                 )
                 :| []
             )
@@ -120,7 +118,7 @@ fixture_2 =
         ( Expr.Application
             8
             (Expr.Variable (Label 9 "f"))
-            (Expr.Literal (Primitive.Int32 1) :| [])
+            (Expr.Literal (Prim.Int32 1) :| [])
             :| []
         )
     )

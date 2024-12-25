@@ -1,8 +1,11 @@
 {-# LANGUAGE StrictData #-}
 
 module Noll.Utils (
+  module Control.Monad,
+  module Data.Foldable,
   module Data.Set,
   module Data.Map.Strict,
+  module Data.List.NonEmpty,
   Name,
   Dictionary,
   IndexMap,
@@ -12,7 +15,8 @@ module Noll.Utils (
   (<$$$>),
 ) where
 
-import Control.Monad (liftM)
+import Control.Monad (forM, forM_, liftM)
+import Data.Foldable (traverse_)
 import Data.List.NonEmpty (NonEmpty)
 import Data.Map.Strict (Map)
 import Data.Set (Set)

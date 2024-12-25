@@ -4,12 +4,11 @@
 
 module Noll.TypeSystem.KindUnification (KindUnifiable (..)) where
 
-import Data.List.NonEmpty (NonEmpty)
 import qualified Data.List.NonEmpty as NonEmpty
-import Noll.Language.Type.Kind (Kind)
+import Noll.Language (Kind, KindIndex (..))
 import qualified Noll.Language.Type.Kind as Kind
-import Noll.Language.Type.Kind.Index (KindIndex (..))
 import Noll.TypeSystem.KindSubstitution (KindSubstitutable (..), KindSubstitution (..), applyKindSub, mapsToKind)
+import Noll.Utils (NonEmpty)
 
 class KindUnifiable u where
   unifyKinds :: (Monad m) => u -> u -> m KindSubstitution

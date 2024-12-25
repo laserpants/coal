@@ -8,22 +8,13 @@ module Noll.TypeSystem.KindSubstitution (
   mapsToKind,
 ) where
 
-import Data.List.NonEmpty (NonEmpty)
-import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import Data.Maybe (fromMaybe)
-import Data.Set (Set)
 import qualified Data.Set as Set
-import Noll.Language.Expression (Expression (..))
-import Noll.Language.Trait (Trait (..))
-import Noll.Language.Type (Type)
+import Noll.Language (Expression, Kind, KindIndex (..), Row, Trait (..), Type, TypeIndex (..))
 import qualified Noll.Language.Type as Type
-import Noll.Language.Type.Index (TypeIndex (..))
-import Noll.Language.Type.Kind (Kind)
 import qualified Noll.Language.Type.Kind as Kind
-import Noll.Language.Type.Kind.Index (KindIndex (..))
-import Noll.Language.Type.Row (Row (..))
-import Noll.Utils (IndexMap)
+import Noll.Utils (IndexMap, Map, NonEmpty, Set)
 
 class KindSubstitutable s where
   applyKindSub :: KindSubstitution -> s -> s

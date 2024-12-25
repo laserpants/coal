@@ -10,16 +10,22 @@ module Noll.TypeSystem.TypeUnification (TypeUnifiable (..)) where
 import Data.List.NonEmpty (NonEmpty)
 import qualified Data.List.NonEmpty as NonEmpty
 import Data.Set (member)
-import Noll.Language.HasTypeIndexes (typeIdsIn)
-import Noll.Language.Type (Type)
+import Noll.Language (
+  Intrinsic,
+  Kind,
+  KindIndex (..),
+  Row,
+  Type,
+  TypeIndex (..),
+  typeIdsIn,
+ )
 import qualified Noll.Language.Type as Type
-import Noll.Language.Type.Index (TypeIndex (..))
-import Noll.Language.Type.Intrinsic (Intrinsic)
 import qualified Noll.Language.Type.Intrinsic as Intrinsic
-import Noll.Language.Type.Kind (Kind)
-import Noll.Language.Type.Kind.Index (KindIndex (..))
-import Noll.Language.Type.Row (Row (..))
-import Noll.TypeSystem.TypeSubstitution (TypeSubstitutable (..), TypeSubstitution (..), mapsToType)
+import Noll.TypeSystem.TypeSubstitution (
+  TypeSubstitutable (..),
+  TypeSubstitution (..),
+  mapsToType,
+ )
 
 class TypeUnifiable u where
   unify :: (Monad m) => u -> u -> m TypeSubstitution

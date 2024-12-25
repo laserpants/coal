@@ -32,6 +32,7 @@ library
       Noll.Core.LLVM.IRType
       Noll.Core.LLVM.IRValue
       Noll.Label
+      Noll.Language
       Noll.Language.DataConstructor
       Noll.Language.Expression
       Noll.Language.Expression.Binding

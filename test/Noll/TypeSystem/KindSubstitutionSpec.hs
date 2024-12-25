@@ -4,19 +4,14 @@ module Noll.TypeSystem.KindSubstitutionSpec where
 
 import Data.List.NonEmpty (NonEmpty (..))
 import Noll.Label (Label (..))
-import Noll.Language.Expression (Expression)
+import Noll.Language (Expression, Kind, KindIndex (..), Type, TypeIndex (..))
 import qualified Noll.Language.Expression as Expr
 import qualified Noll.Language.Expression.Binding as Binding
 import qualified Noll.Language.Pattern as Pattern
 import qualified Noll.Language.Primitive as Prim
-import qualified Noll.Language.Primitive as Primitive
-import Noll.Language.Type (Type)
 import qualified Noll.Language.Type as Type
-import Noll.Language.Type.Index (TypeIndex (..))
 import qualified Noll.Language.Type.Intrinsic as Intrinsic
-import Noll.Language.Type.Kind (Kind)
 import qualified Noll.Language.Type.Kind as Kind
-import Noll.Language.Type.Kind.Index (KindIndex (..))
 import Noll.TypeSystem.KindSubstitution (applyKindSub, mapsToKind)
 import Noll.TypeSystem.TypeSubstitution (TypeSubstitution (..), apply, typeSubstitutionFromList)
 import Test.Hspec (Spec, describe, it)
@@ -51,7 +46,7 @@ spec =
                   ( Expr.Application
                       (Type.Intrinsic Intrinsic.Int32)
                       (Expr.Variable (Label (Type.Intrinsic Intrinsic.Int32 `Type.Arrow` Type.Intrinsic Intrinsic.Int32) "f"))
-                      (Expr.Literal (Primitive.Int32 1) :| [])
+                      (Expr.Literal (Prim.Int32 1) :| [])
                       :| []
                   )
               )
@@ -78,7 +73,7 @@ fixture_1 =
         ( Expr.Application
             (Type.Intrinsic Intrinsic.Int32)
             (Expr.Variable (Label (Type.Intrinsic Intrinsic.Int32 `Type.Arrow` Type.Intrinsic Intrinsic.Int32) "f"))
-            (Expr.Literal (Primitive.Int32 1) :| [])
+            (Expr.Literal (Prim.Int32 1) :| [])
             :| []
         )
     )

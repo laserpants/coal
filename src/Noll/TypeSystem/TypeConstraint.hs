@@ -14,9 +14,7 @@ module Noll.TypeSystem.TypeConstraint (
 where
 
 import Data.Set (Set, intersection, union)
-import Noll.Language.HasTypeIndexes (HasTypeIndexes (..))
-import Noll.Language.Type.Index (HasActive (..), TypeIndex (..))
-import Noll.Language.Type.Scheme (Scheme (..))
+import Noll.Language (HasActive (..), HasTypeIndexes (..), Scheme (..), TypeIndex (..))
 
 -- | Monomorphic type variable set
 newtype MonomorphicSet m = MonomorphicSet {monomorphicSet :: Set m}

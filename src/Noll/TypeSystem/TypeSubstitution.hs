@@ -11,30 +11,29 @@ module Noll.TypeSystem.TypeSubstitution (
   typeSubstitutionFromList,
 ) where
 
-import Data.List.NonEmpty (NonEmpty)
-import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import Data.Maybe (fromMaybe)
-import Data.Set (Set)
 import qualified Data.Set as Set
 import Noll.Label (Label (..))
-import Noll.Language.Expression (Expression (..))
+import Noll.Language (
+  Binding (..),
+  Expression,
+  HasTypeIndexes (..),
+  Kind,
+  KindIndex (..),
+  Pattern,
+  Row,
+  Scheme (..),
+  Trait (..),
+  Type,
+  TypeIndex (..),
+ )
 import qualified Noll.Language.Expression as Expr
-import Noll.Language.Expression.Binding (Binding (..))
 import qualified Noll.Language.Expression.Binding as Binding
-import Noll.Language.HasTypeIndexes (HasTypeIndexes (..))
-import Noll.Language.Pattern (Pattern)
 import qualified Noll.Language.Pattern as Pattern
-import Noll.Language.Trait (Trait (..))
-import Noll.Language.Type (Type)
 import qualified Noll.Language.Type as Type
-import Noll.Language.Type.Index (TypeIndex (..))
-import Noll.Language.Type.Kind (Kind)
-import Noll.Language.Type.Kind.Index (KindIndex (..))
-import Noll.Language.Type.Row (Row (..))
-import Noll.Language.Type.Scheme (Scheme (..))
 import Noll.TypeSystem.TypeConstraint (MonomorphicSet (..), TypeConstraint (..))
-import Noll.Utils (IndexMap)
+import Noll.Utils (IndexMap, Map, NonEmpty, Set)
 
 class TypeSubstitutable s where
   apply :: TypeSubstitution -> s -> s

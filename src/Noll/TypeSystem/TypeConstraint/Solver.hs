@@ -9,16 +9,25 @@ import Data.Foldable (foldrM)
 import Data.List (delete, find)
 import Data.Set (intersection, (\\))
 import qualified Data.Set as Set
-import Noll.Language.HasTypeIndexes (HasTypeIndexes (..), notBoundIn, typeIdsIn)
-import Noll.Language.Type (Type (..))
+import Noll.Language (
+  HasTypeIndexes (..),
+  Kind,
+  KindIndex (..),
+  Scheme (..),
+  Type,
+  TypeIndex (..),
+  activeIdsIn,
+  notBoundIn,
+  typeIdsIn,
+ )
 import qualified Noll.Language.Type as Type
-import Noll.Language.Type.Index (TypeIndex (..), activeIdsIn)
-import Noll.Language.Type.Kind (Kind (..))
-import Noll.Language.Type.Kind.Index (KindIndex (..))
-import Noll.Language.Type.Scheme (Scheme (..))
 import Noll.Library.Supply (supply)
 import Noll.TypeSystem.TypeConstraint (MonomorphicSet (..), TypeConstraint (..))
-import Noll.TypeSystem.TypeSubstitution (TypeSubstitutable (..), TypeSubstitution (..), mapsToType)
+import Noll.TypeSystem.TypeSubstitution (
+  TypeSubstitutable (..),
+  TypeSubstitution (..),
+  mapsToType,
+ )
 import Noll.TypeSystem.TypeUnification (TypeUnifiable (..))
 
 type SolverConstraint k t = TypeConstraint TypeIndex k t

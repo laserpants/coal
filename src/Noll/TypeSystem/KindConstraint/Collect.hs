@@ -8,24 +8,25 @@ module Noll.TypeSystem.KindConstraint.Collect (
   runCollectKindConstraints,
 ) where
 
-import Control.Monad (forM_)
 import Control.Monad.RWS (MonadRWS, MonadReader, MonadState, MonadWriter, RWS, ask, execRWS, tell)
-import Data.Foldable (traverse_)
 import qualified Data.Map.Strict as Map
 import Noll.Label (Label (..))
-import Noll.Language.Expression (Expression (..))
+import Noll.Language (
+  Expression,
+  HasKind (..),
+  Kind,
+  KindIndex (..),
+  Type,
+  TypeIndex (..),
+  foldKind,
+ )
 import qualified Noll.Language.Expression as Expr
 import qualified Noll.Language.Expression.Binding as Binding
 import qualified Noll.Language.Pattern as Pattern
-import Noll.Language.Type (Type (..))
 import qualified Noll.Language.Type as Type
-import Noll.Language.Type.HasKind (HasKind (..))
-import Noll.Language.Type.Index (TypeIndex (..))
-import Noll.Language.Type.Kind (Kind (..), foldKind)
 import qualified Noll.Language.Type.Kind as Kind
-import Noll.Language.Type.Kind.Index (KindIndex (..))
 import Noll.TypeSystem.KindConstraint (KindConstraint (..))
-import Noll.Utils (Dictionary (..))
+import Noll.Utils (Dictionary (..), forM_, traverse_)
 
 type KindConstraintsMonad k = RWS (Dictionary k) [KindConstraint k] ()
 

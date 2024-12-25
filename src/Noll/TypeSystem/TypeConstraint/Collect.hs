@@ -14,26 +14,29 @@ module Noll.TypeSystem.TypeConstraint.Collect (
 )
 where
 
-import Control.Monad (forM)
 import Control.Monad.RWS (MonadRWS, MonadReader, MonadState, MonadWriter, RWS, asks, evalRWS, local, tell)
 import Data.List (partition)
 import qualified Data.Set as Set
 import Noll.Label (Label (..))
-import Noll.Language.DataConstructor (DataConstructor (..))
-import Noll.Language.Expression (Expression (..))
+import Noll.Language (
+  Binding,
+  DataConstructor (..),
+  Expression,
+  HasType (..),
+  HasTypeIndexes (..),
+  Pattern,
+  Type,
+  TypeIndex (..),
+  foldType,
+ )
 import qualified Noll.Language.Expression as Expr
-import Noll.Language.Expression.Binding (Binding)
 import qualified Noll.Language.Expression.Binding as Binding
-import Noll.Language.HasType (HasType (..))
-import Noll.Language.HasTypeIndexes (HasTypeIndexes (..))
-import Noll.Language.Pattern (Pattern (..))
 import qualified Noll.Language.Pattern as Pattern
-import Noll.Language.Type (Type (..), foldType)
-import Noll.Language.Type.Index (TypeIndex (..))
+import Noll.Language.Type (Type (Intrinsic))
 import qualified Noll.Language.Type.Intrinsic as Intrinsic
 import Noll.TypeSystem.TypeConstraint (MonomorphicSet (..), TypeConstraint (..), overMonomorphicSet)
 import Noll.TypeSystem.TypeConstraint.Assumption (Assumption (..), assumptionNameIs)
-import Noll.Utils (Dictionary (..), concatMapM, (<$$>))
+import Noll.Utils (Dictionary (..), concatMapM, forM, (<$$>))
 
 data TypeConstraintsContext o k = TypeConstraintsContext
   { contextMonomorphicSet :: MonomorphicSet (o k)

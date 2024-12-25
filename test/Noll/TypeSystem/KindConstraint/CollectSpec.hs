@@ -3,21 +3,16 @@
 
 module Noll.TypeSystem.KindConstraint.CollectSpec where
 
-import Control.Monad.Writer (execWriter)
 import Data.List.NonEmpty (NonEmpty (..))
 import Noll.Label (Label (..))
-import Noll.Language.Expression (Expression)
+import Noll.Language (Expression, Kind, KindIndex (..), Type, TypeIndex (..))
 import qualified Noll.Language.Expression as Expr
 import qualified Noll.Language.Expression.Binding as Binding
 import qualified Noll.Language.Pattern as Pattern
-import qualified Noll.Language.Primitive as Primitive
-import Noll.Language.Type (Type (..))
+import qualified Noll.Language.Primitive as Prim
 import qualified Noll.Language.Type as Type
-import Noll.Language.Type.Index (TypeIndex (..))
 import qualified Noll.Language.Type.Intrinsic as Intrinsic
-import Noll.Language.Type.Kind (Kind (..))
 import qualified Noll.Language.Type.Kind as Kind
-import Noll.Language.Type.Kind.Index (KindIndex (..))
 import Noll.TypeSystem.KindConstraint (KindConstraint (..))
 import Noll.TypeSystem.KindConstraint.Collect (collectKindConstraints, runCollectKindConstraints)
 import Test.Hspec (Spec, describe, it)
@@ -64,7 +59,7 @@ fixture_1 =
                 ( Expr.Application
                     (Type.Variable (TypeIndex (Kind.Variable (KindIndex 3)) 3))
                     (Expr.Variable (Label (Type.Intrinsic Intrinsic.Bool `Type.Arrow` Type.Variable (TypeIndex (Kind.Variable (KindIndex 3)) 3)) "y"))
-                    (Expr.Literal (Primitive.Bool True) :| [])
+                    (Expr.Literal (Prim.Bool True) :| [])
                 )
                 :| []
             )
@@ -95,7 +90,7 @@ fixture_2 =
         ( Expr.Application
             (Type.Intrinsic Intrinsic.Int32)
             (Expr.Variable (Label (Type.Intrinsic Intrinsic.Int32 `Type.Arrow` Type.Intrinsic Intrinsic.Int32) "f"))
-            (Expr.Literal (Primitive.Int32 1) :| [])
+            (Expr.Literal (Prim.Int32 1) :| [])
             :| []
         )
     )
