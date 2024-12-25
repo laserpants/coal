@@ -29,7 +29,6 @@ spec =
         , (4, typeVariable 3)
         , (5, typeBool `Type.Arrow` typeVariable 3)
         ]
-    -- TODO
     it "" $
       hasSubstitutions
         fixture_2
