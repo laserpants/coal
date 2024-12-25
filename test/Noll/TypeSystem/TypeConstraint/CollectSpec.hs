@@ -61,7 +61,7 @@ hasConstraint e =
  where
   constraints =
     evalCollectConstraints
-      (TypeConstraintsContext mempty)
+      (TypeConstraintsContext mempty mempty)
       (collectConstraints (fmap typeVariable e))
 
 typeVariable :: Int -> Type TypeIndex ()

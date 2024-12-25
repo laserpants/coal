@@ -19,6 +19,7 @@ import Control.Monad.RWS (MonadRWS, MonadReader, MonadState, MonadWriter, RWS, a
 import Data.List (partition)
 import qualified Data.Set as Set
 import Noll.Label (Label (..))
+import Noll.Language.DataConstructor (DataConstructor (..))
 import Noll.Language.Expression (Expression (..))
 import qualified Noll.Language.Expression as Expr
 import Noll.Language.Expression.Binding (Binding)
@@ -32,10 +33,11 @@ import Noll.Language.Type.Index (TypeIndex (..))
 import qualified Noll.Language.Type.Intrinsic as Intrinsic
 import Noll.TypeSystem.TypeConstraint (MonomorphicSet (..), TypeConstraint (..), overMonomorphicSet)
 import Noll.TypeSystem.TypeConstraint.Assumption (Assumption (..), assumptionNameIs)
-import Noll.Utils (concatMapM, (<$$>))
+import Noll.Utils (Dictionary (..), concatMapM, (<$$>))
 
 data TypeConstraintsContext o k = TypeConstraintsContext
   { contextMonomorphicSet :: MonomorphicSet (o k)
+  , contextDataConstructors :: Dictionary (DataConstructor o k (Type o k))
   }
   deriving (Show, Eq, Ord, Read)
 

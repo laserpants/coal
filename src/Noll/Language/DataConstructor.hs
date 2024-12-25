@@ -1,6 +1,6 @@
 {-# LANGUAGE StrictData #-}
 
-module Noll.Language.DataConstructor where
+module Noll.Language.DataConstructor (DataConstructor (..)) where
 
 import Noll.Language.Type.Scheme (Scheme (..))
 import Noll.Utils (Name)
