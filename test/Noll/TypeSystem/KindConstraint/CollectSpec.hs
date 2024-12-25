@@ -13,6 +13,7 @@ import qualified Noll.Language.Primitive as Primitive
 import Noll.Language.Type (Type (..))
 import qualified Noll.Language.Type as Type
 import Noll.Language.Type.Index (TypeIndex (..))
+import qualified Noll.Language.Type.Intrinsic as Intrinsic
 import Noll.Language.Type.Kind (Kind (..))
 import qualified Noll.Language.Type.Kind as Kind
 import Noll.Language.Type.Kind.Index (KindIndex (..))
@@ -24,31 +25,28 @@ spec =
     it "" $
       1 == 2
 
-typeVariable :: Int -> Type TypeIndex (Kind KindIndex)
-typeVariable n = Type.Variable (TypeIndex (Kind.Variable (KindIndex n)) n)
-
 -- let f = fn(x) => x in (f f)(f 1)
 fixture_1 :: Expression (Type TypeIndex (Kind KindIndex))
 fixture_1 =
   Expr.Let
     ( Binding.Pattern
-        (Pattern.Variable (Label (typeVariable 1) "f"))
+        (Pattern.Variable (Label (Type.Variable (TypeIndex (Kind.Variable (KindIndex 3)) 3) `Type.Arrow` Type.Variable (TypeIndex (Kind.Variable (KindIndex 3)) 3)) "f"))
         ( Expr.Lambda
-            (Pattern.Variable (Label (typeVariable 2) "x") :| [])
-            (Expr.Variable (Label (typeVariable 3) "x"))
+            (Pattern.Variable (Label (Type.Variable (TypeIndex (Kind.Variable (KindIndex 3)) 3)) "x") :| [])
+            (Expr.Variable (Label (Type.Variable (TypeIndex (Kind.Variable (KindIndex 3)) 3)) "x"))
         )
         :| []
     )
     ( Expr.Application
-        (typeVariable 4)
+        (Type.Intrinsic Intrinsic.Int32)
         ( Expr.Application
-            (typeVariable 5)
-            (Expr.Variable (Label (typeVariable 6) "f"))
-            (Expr.Variable (Label (typeVariable 7) "f") :| [])
+            (Type.Intrinsic Intrinsic.Int32 `Type.Arrow` Type.Intrinsic Intrinsic.Int32)
+            (Expr.Variable (Label ((Type.Intrinsic Intrinsic.Int32 `Type.Arrow` Type.Intrinsic Intrinsic.Int32) `Type.Arrow` Type.Intrinsic Intrinsic.Int32 `Type.Arrow` Type.Intrinsic Intrinsic.Int32) "f"))
+            (Expr.Variable (Label (Type.Intrinsic Intrinsic.Int32 `Type.Arrow` Type.Intrinsic Intrinsic.Int32) "f") :| [])
         )
         ( Expr.Application
-            (typeVariable 8)
-            (Expr.Variable (Label (typeVariable 9) "f"))
+            (Type.Intrinsic Intrinsic.Int32)
+            (Expr.Variable (Label (Type.Intrinsic Intrinsic.Int32 `Type.Arrow` Type.Intrinsic Intrinsic.Int32) "f"))
             (Expr.Literal (Primitive.Int32 1) :| [])
             :| []
         )

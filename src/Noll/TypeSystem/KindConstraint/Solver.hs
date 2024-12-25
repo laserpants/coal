@@ -15,7 +15,8 @@ solveKinds ::
   ) =>
   [KindConstraint k] ->
   m KindSubstitution
-solveKinds [] = pure mempty
+solveKinds [] =
+  pure mempty
 solveKinds (KindEquality k1 k2 : cs) = do
   sub1 <- unifyKinds k1 k2
   sub2 <- solveKinds (applyKindSub sub1 cs)
