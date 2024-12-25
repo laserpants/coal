@@ -24,10 +24,12 @@ import Test.Hspec (Spec, describe, it)
 spec :: Spec
 spec =
   describe "Noll.TypeSystem.KindSubstitution" $ do
-    it "" $
-      applyKindSub (1 `mapsToKind` Kind.Type) t3 == Type.Variable (TypeIndex Kind.Type 1)
-    it "" $
-      applyKindSub (2 `mapsToKind` Kind.Type) t3 == t3
+    it "" $ do
+      let t = Type.Variable (TypeIndex (Kind.Variable (KindIndex 1)) 1) :: Type TypeIndex (Kind KindIndex)
+      applyKindSub (1 `mapsToKind` Kind.Type) t == Type.Variable (TypeIndex Kind.Type 1)
+    it "" $ do
+      let t = Type.Variable (TypeIndex (Kind.Variable (KindIndex 1)) 1) :: Type TypeIndex (Kind KindIndex)
+      applyKindSub (2 `mapsToKind` Kind.Type) t == t
     it "" $
       applyKindSub (3 `mapsToKind` Kind.Type) fixture_1
         == ( Expr.Let
@@ -54,9 +56,6 @@ spec =
                   )
               )
            )
-
-t3 :: Type TypeIndex (Kind KindIndex)
-t3 = Type.Variable (TypeIndex (Kind.Variable (KindIndex 1)) 1)
 
 fixture_1 :: Expression (Type TypeIndex (Kind KindIndex))
 fixture_1 =

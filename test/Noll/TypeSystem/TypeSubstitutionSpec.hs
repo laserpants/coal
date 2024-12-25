@@ -23,10 +23,12 @@ import Test.Hspec (Spec, describe, it)
 spec :: Spec
 spec =
   describe "Noll.TypeSystem.TypeSubstitution" $ do
-    it "" $
-      apply (1 `mapsToType` Type.Intrinsic Intrinsic.Bool) t1 == Type.Intrinsic Intrinsic.Bool
-    it "" $
-      apply (1 `mapsToType` Type.Intrinsic Intrinsic.Bool) t2 == t2
+    it "" $ do
+      let t = Type.Variable (TypeIndex Kind.Type 1) :: Type TypeIndex (Kind KindIndex)
+      apply (1 `mapsToType` Type.Intrinsic Intrinsic.Bool) t == Type.Intrinsic Intrinsic.Bool
+    it "" $ do
+      let t = Type.Variable (TypeIndex Kind.Type 0) :: Type TypeIndex (Kind KindIndex)
+      apply (1 `mapsToType` Type.Intrinsic Intrinsic.Bool) t == t
     it "" $
       applySubstitutionEquals
         fixture_1
@@ -83,12 +85,6 @@ spec =
 
 applySubstitutionEquals :: (Expression (Type TypeIndex (Kind KindIndex)), TypeSubstitution) -> Expression (Type TypeIndex (Kind KindIndex)) -> Bool
 applySubstitutionEquals (e, sub) res = apply sub e == res
-
-t1 :: Type TypeIndex (Kind KindIndex)
-t1 = Type.Variable (TypeIndex Kind.Type 1)
-
-t2 :: Type TypeIndex (Kind KindIndex)
-t2 = Type.Variable (TypeIndex Kind.Type 0)
 
 fixture_1 :: (Expression (Type TypeIndex (Kind KindIndex)), TypeSubstitution)
 fixture_1 =
