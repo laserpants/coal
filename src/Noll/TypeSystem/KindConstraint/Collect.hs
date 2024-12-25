@@ -12,6 +12,7 @@ import Noll.Language.Type.Kind (Kind (..))
 import Noll.Language.Type.Kind.Index (KindIndex (..))
 import Noll.TypeSystem.TypeConstraint.Assumption (Assumption (..))
 
+-- TODO
 collectKindConstraints :: (Monad m) => Expression (Type TypeIndex (Kind KindIndex)) -> m [Assumption (Type TypeIndex (Kind KindIndex))]
 collectKindConstraints =
   \case

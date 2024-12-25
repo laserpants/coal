@@ -17,19 +17,19 @@ import qualified Noll.Language.Type.Intrinsic as Intrinsic
 import Noll.Language.Type.Kind (Kind)
 import qualified Noll.Language.Type.Kind as Kind
 import Noll.Language.Type.Kind.Index (KindIndex (..))
-import Noll.TypeSystem.KindSubstitution (applyKindSub, mapsToKindSub)
-import Noll.TypeSystem.TypeSubstitution (TypeSubstitution (..), apply, mapsTo, typeSubstitutionFromList)
+import Noll.TypeSystem.KindSubstitution (applyKindSub, mapsToKind)
+import Noll.TypeSystem.TypeSubstitution (TypeSubstitution (..), apply, typeSubstitutionFromList)
 import Test.Hspec (Spec, describe, it)
 
 spec :: Spec
 spec =
   describe "Noll.TypeSystem.KindSubstitution" $ do
     it "" $
-      applyKindSub (1 `mapsToKindSub` Kind.Type) t3 == Type.Variable (TypeIndex Kind.Type 1)
+      applyKindSub (1 `mapsToKind` Kind.Type) t3 == Type.Variable (TypeIndex Kind.Type 1)
     it "" $
-      applyKindSub (2 `mapsToKindSub` Kind.Type) t3 == t3
+      applyKindSub (2 `mapsToKind` Kind.Type) t3 == t3
     it "" $
-      applyKindSub (3 `mapsToKindSub` Kind.Type) fixture_1
+      applyKindSub (3 `mapsToKind` Kind.Type) fixture_1
         == ( Expr.Let
               ( Binding.Pattern
                   (Pattern.Variable (Label (Type.Variable (TypeIndex Kind.Type 3) `Type.Arrow` Type.Variable (TypeIndex Kind.Type 3)) "f"))

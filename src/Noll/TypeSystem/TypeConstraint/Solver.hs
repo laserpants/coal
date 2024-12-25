@@ -18,7 +18,7 @@ import Noll.Language.Type.Kind.Index (KindIndex (..))
 import Noll.Language.Type.Scheme (Scheme (..))
 import Noll.Library.Supply (supply)
 import Noll.TypeSystem.TypeConstraint (MonomorphicSet (..), TypeConstraint (..))
-import Noll.TypeSystem.TypeSubstitution (TypeSubstitutable (..), TypeSubstitution (..), mapsTo)
+import Noll.TypeSystem.TypeSubstitution (TypeSubstitutable (..), TypeSubstitution (..), mapsToType)
 import Noll.TypeSystem.TypeUnification (TypeUnifiable (..))
 
 type SolverConstraint k t = TypeConstraint TypeIndex k t
@@ -83,7 +83,7 @@ instantiate (Forall qs _ t) = do
  where
   go (TypeIndex k index) sub = do
     s <- supply
-    pure (index `mapsTo` Type.Variable (TypeIndex k s) <> sub)
+    pure (index `mapsToType` Type.Variable (TypeIndex k s) <> sub)
 
 generalize ::
   (HasTypeIndexes k t) =>

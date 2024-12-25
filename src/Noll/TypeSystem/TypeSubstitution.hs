@@ -7,7 +7,7 @@
 module Noll.TypeSystem.TypeSubstitution (
   TypeSubstitution (..),
   TypeSubstitutable (..),
-  mapsTo,
+  mapsToType,
   typeSubstitutionFromList,
 ) where
 
@@ -104,6 +104,10 @@ instance TypeSubstitutable (Type TypeIndex (Kind KindIndex)) where
       t@Type.Constructor{} ->
         t
 
+{-# INLINE substitutionIndex #-}
+substitutionIndex :: TypeIndex (Kind KindIndex) -> TypeSubstitution -> Maybe (Type TypeIndex (Kind KindIndex))
+substitutionIndex TypeIndex{..} sub = Map.lookup indexId (typeSubstitutionMap sub)
+
 instance TypeSubstitutable (Pattern (Type TypeIndex (Kind KindIndex))) where
   apply sub =
     \case
@@ -145,17 +149,13 @@ instance Semigroup TypeSubstitution where
 instance Monoid TypeSubstitution where
   mempty = TypeSubstitution mempty
 
-{-# INLINE substitutionIndex #-}
-substitutionIndex :: TypeIndex (Kind KindIndex) -> TypeSubstitution -> Maybe (Type TypeIndex (Kind KindIndex))
-substitutionIndex TypeIndex{..} sub = Map.lookup indexId (typeSubstitutionMap sub)
+{-# INLINE mapsToType #-}
+mapsToType :: Int -> Type TypeIndex (Kind KindIndex) -> TypeSubstitution
+mapsToType index = TypeSubstitution . Map.singleton index
 
 {-# INLINE removeTypeSubstitution #-}
 removeTypeSubstitution :: TypeIndex (Kind KindIndex) -> TypeSubstitution -> TypeSubstitution
 removeTypeSubstitution TypeIndex{..} (TypeSubstitution sub) = TypeSubstitution (Map.delete indexId sub)
-
-{-# INLINE mapsTo #-}
-mapsTo :: Int -> Type TypeIndex (Kind KindIndex) -> TypeSubstitution
-mapsTo index = TypeSubstitution . Map.singleton index
 
 {-# INLINE typeSubstitutionFromList #-}
 typeSubstitutionFromList :: [(Int, Type TypeIndex (Kind KindIndex))] -> TypeSubstitution

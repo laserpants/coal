@@ -17,16 +17,16 @@ import qualified Noll.Language.Type.Intrinsic as Intrinsic
 import Noll.Language.Type.Kind (Kind)
 import qualified Noll.Language.Type.Kind as Kind
 import Noll.Language.Type.Kind.Index (KindIndex (..))
-import Noll.TypeSystem.TypeSubstitution (TypeSubstitution (..), apply, mapsTo, typeSubstitutionFromList)
+import Noll.TypeSystem.TypeSubstitution (TypeSubstitution (..), apply, mapsToType, typeSubstitutionFromList)
 import Test.Hspec (Spec, describe, it)
 
 spec :: Spec
 spec =
   describe "Noll.TypeSystem.TypeSubstitution" $ do
     it "" $
-      apply (1 `mapsTo` Type.Intrinsic Intrinsic.Bool) t1 == Type.Intrinsic Intrinsic.Bool
+      apply (1 `mapsToType` Type.Intrinsic Intrinsic.Bool) t1 == Type.Intrinsic Intrinsic.Bool
     it "" $
-      apply (1 `mapsTo` Type.Intrinsic Intrinsic.Bool) t2 == t2
+      apply (1 `mapsToType` Type.Intrinsic Intrinsic.Bool) t2 == t2
     it "" $
       applySubstitutionEquals
         fixture_1

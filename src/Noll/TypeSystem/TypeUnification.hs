@@ -19,7 +19,7 @@ import qualified Noll.Language.Type.Intrinsic as Intrinsic
 import Noll.Language.Type.Kind (Kind)
 import Noll.Language.Type.Kind.Index (KindIndex (..))
 import Noll.Language.Type.Row (Row (..))
-import Noll.TypeSystem.TypeSubstitution (TypeSubstitutable (..), TypeSubstitution (..), mapsTo)
+import Noll.TypeSystem.TypeSubstitution (TypeSubstitutable (..), TypeSubstitution (..), mapsToType)
 
 class TypeUnifiable u where
   unify :: (Monad m) => u -> u -> m TypeSubstitution
@@ -91,4 +91,4 @@ bindType (TypeIndex _ index) =
       | index `member` typeIdsIn t ->
           error "Infinite type"
       | otherwise ->
-          pure (index `mapsTo` t)
+          pure (index `mapsToType` t)

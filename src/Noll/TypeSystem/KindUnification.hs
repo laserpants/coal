@@ -9,7 +9,7 @@ import qualified Data.List.NonEmpty as NonEmpty
 import Noll.Language.Type.Kind (Kind)
 import qualified Noll.Language.Type.Kind as Kind
 import Noll.Language.Type.Kind.Index (KindIndex (..))
-import Noll.TypeSystem.KindSubstitution (KindSubstitutable (..), KindSubstitution (..), applyKindSub, mapsToKindSub)
+import Noll.TypeSystem.KindSubstitution (KindSubstitutable (..), KindSubstitution (..), applyKindSub, mapsToKind)
 
 class KindUnifiable u where
   unifyKinds :: (Monad m) => u -> u -> m KindSubstitution
@@ -48,4 +48,4 @@ bindKind (KindIndex index) =
       | index2 == index ->
           mempty
     kind ->
-      index `mapsToKindSub` kind
+      index `mapsToKind` kind
