@@ -7,9 +7,9 @@ module Noll.Utils (
   Dictionary,
   IndexMap,
   Some,
+  concatMapM,
   (<$$>),
   (<$$$>),
-  concatMapM,
 ) where
 
 import Control.Monad (liftM)
