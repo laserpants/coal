@@ -9,8 +9,9 @@ module Noll.TypeSystem.KindConstraint.Collect (
 ) where
 
 import Control.Monad (forM_)
-import Control.Monad.Writer (MonadWriter, tell)
+import Control.Monad.RWS (MonadRWS, MonadReader, MonadState, MonadWriter, RWS, ask, execRWS, tell)
 import Data.Foldable (traverse_)
+import qualified Data.Map.Strict as Map
 import Noll.Label (Label (..))
 import Noll.Language.Expression (Expression (..))
 import qualified Noll.Language.Expression as Expr
@@ -24,12 +25,11 @@ import Noll.Language.Type.Kind (Kind (..), foldKind)
 import qualified Noll.Language.Type.Kind as Kind
 import Noll.Language.Type.Kind.Index (KindIndex (..))
 import Noll.TypeSystem.KindConstraint (KindConstraint (..))
-import Control.Monad.RWS (MonadRWS, MonadReader, MonadState, MonadWriter, RWS, asks, execRWS, local, tell)
 import Noll.Utils (Dictionary (..))
 
 type KindConstraintsMonad k = RWS (Dictionary k) [KindConstraint k] ()
 
-newtype KindConstraints k a = KindConstraints {constraintsMonad :: KindConstraintsMonad k a }
+newtype KindConstraints k a = KindConstraints {constraintsMonad :: KindConstraintsMonad k a}
   deriving
     ( Functor
     , Applicative
@@ -62,8 +62,13 @@ collectConstraintsInType =
       undefined
     Type.Alias _ _ t ->
       collectConstraintsInType t
-    Type.Constructor k name ->
-      -- TODO
+    Type.Constructor k name -> do
+      env <- ask
+      case Map.lookup name env of
+        Nothing ->
+          error "TODO"
+        Just k1 ->
+          tell [KindEquality k k1]
       pure ()
     Type.Variable (TypeIndex k _) ->
       pure ()
