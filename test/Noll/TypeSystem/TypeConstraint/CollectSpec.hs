@@ -10,7 +10,6 @@ import Noll.Language.Expression (Expression)
 import qualified Noll.Language.Expression as Expr
 import qualified Noll.Language.Expression.Binding as Binding
 import qualified Noll.Language.Pattern as Pattern
-import qualified Noll.Language.Primitive as Prim
 import qualified Noll.Language.Primitive as Primitive
 import Noll.Language.Type (Type)
 import qualified Noll.Language.Type as Type
@@ -60,7 +59,7 @@ hasConstraint e =
       elem c constraints
  where
   constraints =
-    evalCollectConstraints
+    evalCollectTypeConstraints
       (TypeConstraintsContext mempty mempty)
       (collectConstraints (fmap typeVariable e))
 
@@ -90,7 +89,7 @@ fixture_1 =
                 ( Expr.Application
                     3
                     (Expr.Variable (Label 2 "y"))
-                    (Expr.Literal (Prim.Bool True) :| [])
+                    (Expr.Literal (Primitive.Bool True) :| [])
                 )
                 :| []
             )

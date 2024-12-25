@@ -9,8 +9,8 @@ module Noll.TypeSystem.TypeConstraint.Collect (
   TypeConstraints (..),
   CollectConstraints,
   collectConstraints,
-  runCollectConstraints,
-  evalCollectConstraints,
+  runCollectTypeConstraints,
+  evalCollectTypeConstraints,
 )
 where
 
@@ -72,13 +72,13 @@ localMonoset = local . overContextMonomorphicSet
 
 type CollectConstraints k = TypeConstraints TypeIndex k (Type TypeIndex k)
 
-{-# INLINE runCollectConstraints #-}
-runCollectConstraints :: TypeConstraintsContext o k -> TypeConstraints o k t a -> (a, [TypeConstraint o k t])
-runCollectConstraints cc cs = evalRWS (constraintsMonad cs) cc ()
+{-# INLINE runCollectTypeConstraints #-}
+runCollectTypeConstraints :: TypeConstraintsContext o k -> TypeConstraints o k t a -> (a, [TypeConstraint o k t])
+runCollectTypeConstraints cc cs = evalRWS (constraintsMonad cs) cc ()
 
-{-# INLINE evalCollectConstraints #-}
-evalCollectConstraints :: TypeConstraintsContext o k -> TypeConstraints o k t a -> [TypeConstraint o k t]
-evalCollectConstraints = snd <$$> runCollectConstraints
+{-# INLINE evalCollectTypeConstraints #-}
+evalCollectTypeConstraints :: TypeConstraintsContext o k -> TypeConstraints o k t a -> [TypeConstraint o k t]
+evalCollectTypeConstraints = snd <$$> runCollectTypeConstraints
 
 {-# INLINE assertEquality #-}
 assertEquality :: Type TypeIndex k -> Type TypeIndex k -> CollectConstraints k ()
@@ -109,6 +109,7 @@ collectConstraints :: (Ord k) => Expression (Type TypeIndex k) -> CollectConstra
 collectConstraints =
   \case
     Expr.Constructor (Label _ name) -> do
+      -- TODO
       undefined
     Expr.Variable (Label t name) -> do
       pure [Assumption name t]

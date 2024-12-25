@@ -18,6 +18,8 @@ data Expression t
     Lambda (Some (Pattern t)) (Expression t)
   | -- | Let binding
     Let (Some (Binding Expression t)) (Expression t)
+  | -- | Recursive let binding
+    RecursiveLet (Pattern t) (Expression t) (Expression t)
   | -- | Variable
     Variable (Label t)
   | -- | Data constructor
