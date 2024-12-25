@@ -9,6 +9,7 @@ module Noll.TypeSystem.TypeSubstitution (
   TypeSubstitutable (..),
   mapsToType,
   typeSubstitutionFromList,
+  normalizeTypeIndexes,
 ) where
 
 import qualified Data.Map.Strict as Map
@@ -159,3 +160,9 @@ removeTypeSubstitution TypeIndex{..} (TypeSubstitution sub) = TypeSubstitution (
 {-# INLINE typeSubstitutionFromList #-}
 typeSubstitutionFromList :: [(Int, Type TypeIndex (Kind KindIndex))] -> TypeSubstitution
 typeSubstitutionFromList = TypeSubstitution . Map.fromList
+
+normalizeTypeIndexes :: (Ord s) => (TypeSubstitutable s, HasTypeIndexes (Kind KindIndex) s) => s -> s
+normalizeTypeIndexes e = apply (typeSubstitutionFromList sub) e
+ where
+  ixs = Set.toList (typeIndexesIn e)
+  sub = [(ix, Type.Variable (TypeIndex k n)) | (n, TypeIndex k ix) <- zip [0 ..] ixs]

@@ -18,6 +18,10 @@ import Data.Map.Strict (Map)
 import Data.Set (Set, singleton)
 import qualified Data.Set as Set
 import Noll.Label (Label (..))
+import Noll.Language.Expression (Expression)
+import qualified Noll.Language.Expression as Expr
+import Noll.Language.Expression.Binding (Binding)
+import qualified Noll.Language.Expression.Binding as Binding
 import Noll.Language.Pattern (Pattern)
 import qualified Noll.Language.Pattern as Pattern
 import Noll.Language.Trait (Trait (..))
@@ -97,6 +101,30 @@ instance (Ord k, HasTypeIndexes k t) => HasTypeIndexes k (Scheme TypeIndex k t) 
     \case
       Forall qs ps t ->
         notBoundIn qs (typeIndexesIn t <> typeIndexesIn ps)
+
+instance (Ord k) => HasTypeIndexes k (Binding Expression (Type TypeIndex k)) where
+  typeIndexesIn =
+    \case
+      Binding.Pattern p e ->
+        typeIndexesIn p <> typeIndexesIn e
+
+instance (Ord k) => HasTypeIndexes k (Expression (Type TypeIndex k)) where
+  typeIndexesIn =
+    \case
+      Expr.Constructor (Label t _) ->
+        typeIndexesIn t
+      Expr.Variable (Label t _) ->
+        typeIndexesIn t
+      Expr.Lambda ps e ->
+        typeIndexesIn ps <> typeIndexesIn e
+      Expr.Let gs e1 ->
+        typeIndexesIn gs <> typeIndexesIn e1
+      Expr.If e1 e2 e3 ->
+        typeIndexesIn e1 <> typeIndexesIn e2 <> typeIndexesIn e3
+      Expr.Application t e1 es ->
+        typeIndexesIn t <> typeIndexesIn e1 <> typeIndexesIn es
+      Expr.Literal{} ->
+        mempty
 
 notBoundIn :: Set (TypeIndex k) -> Set (TypeIndex k) -> Set (TypeIndex k)
 notBoundIn s = Set.filter notBound
