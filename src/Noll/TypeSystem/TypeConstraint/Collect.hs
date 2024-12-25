@@ -5,8 +5,8 @@
 {-# LANGUAGE StrictData #-}
 
 module Noll.TypeSystem.TypeConstraint.Collect (
-  ConstraintsContext (..),
-  Constraints (..),
+  TypeConstraintsContext (..),
+  TypeConstraints (..),
   CollectConstraints,
   collectConstraints,
   runCollectConstraints,
@@ -34,26 +34,26 @@ import Noll.TypeSystem.TypeConstraint (MonomorphicSet (..), TypeConstraint (..),
 import Noll.TypeSystem.TypeConstraint.Assumption (Assumption (..), assumptionNameIs)
 import Noll.Utils (concatMapM, (<$$>))
 
-data ConstraintsContext o k = ConstraintsContext
+data TypeConstraintsContext o k = TypeConstraintsContext
   { contextMonomorphicSet :: MonomorphicSet (o k)
   }
   deriving (Show, Eq, Ord, Read)
 
 {-# INLINE overContextMonomorphicSet #-}
-overContextMonomorphicSet :: (MonomorphicSet (o k) -> MonomorphicSet (o k)) -> ConstraintsContext o k -> ConstraintsContext o k
-overContextMonomorphicSet fn ConstraintsContext{..} = ConstraintsContext{contextMonomorphicSet = fn contextMonomorphicSet, ..}
+overContextMonomorphicSet :: (MonomorphicSet (o k) -> MonomorphicSet (o k)) -> TypeConstraintsContext o k -> TypeConstraintsContext o k
+overContextMonomorphicSet fn TypeConstraintsContext{..} = TypeConstraintsContext{contextMonomorphicSet = fn contextMonomorphicSet, ..}
 
-type ConstraintsMonad o k t = RWS (ConstraintsContext o k) [TypeConstraint o k t] ()
+type TypeConstraintsMonad o k t = RWS (TypeConstraintsContext o k) [TypeConstraint o k t] ()
 
-newtype Constraints o k t a = Constraints {constraintsMonad :: ConstraintsMonad o k t a}
+newtype TypeConstraints o k t a = TypeConstraints {constraintsMonad :: TypeConstraintsMonad o k t a}
   deriving
     ( Functor
     , Applicative
     , Monad
-    , MonadReader (ConstraintsContext o k)
+    , MonadReader (TypeConstraintsContext o k)
     , MonadWriter [TypeConstraint o k t]
     , MonadState ()
-    , MonadRWS (ConstraintsContext o k) [TypeConstraint o k t] ()
+    , MonadRWS (TypeConstraintsContext o k) [TypeConstraint o k t] ()
     )
 
 {-# INLINE monosetInsert #-}
@@ -65,17 +65,17 @@ monosetInsertMany :: (Ord k, Foldable f) => f (TypeIndex k) -> MonomorphicSet (T
 monosetInsertMany = flip (foldr monosetInsert)
 
 {-# INLINE localMonoset #-}
-localMonoset :: (MonomorphicSet (o k) -> MonomorphicSet (o k)) -> Constraints o k t a -> Constraints o k t a
+localMonoset :: (MonomorphicSet (o k) -> MonomorphicSet (o k)) -> TypeConstraints o k t a -> TypeConstraints o k t a
 localMonoset = local . overContextMonomorphicSet
 
-type CollectConstraints k = Constraints TypeIndex k (Type TypeIndex k)
+type CollectConstraints k = TypeConstraints TypeIndex k (Type TypeIndex k)
 
 {-# INLINE runCollectConstraints #-}
-runCollectConstraints :: ConstraintsContext o k -> Constraints o k t a -> (a, [TypeConstraint o k t])
+runCollectConstraints :: TypeConstraintsContext o k -> TypeConstraints o k t a -> (a, [TypeConstraint o k t])
 runCollectConstraints cc cs = evalRWS (constraintsMonad cs) cc ()
 
 {-# INLINE evalCollectConstraints #-}
-evalCollectConstraints :: ConstraintsContext o k -> Constraints o k t a -> [TypeConstraint o k t]
+evalCollectConstraints :: TypeConstraintsContext o k -> TypeConstraints o k t a -> [TypeConstraint o k t]
 evalCollectConstraints = snd <$$> runCollectConstraints
 
 {-# INLINE assertEquality #-}

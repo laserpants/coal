@@ -30,25 +30,27 @@ hello =
     Type.Arrow t1 t2 -> do
       hello t1
       hello t2
-    Type.Constructor k _ ->
-      pure ()
     Type.Intrinsic t -> do
       traverse hello t
       pure ()
-    Type.Row row ->
+    --    Type.Row row ->
+    --      pure ()
+    Type.Alias _ _ t ->
+      hello t
+    Type.Constructor k _ ->
       pure ()
     Type.Variable (TypeIndex k _) ->
       pure ()
-    Type.Alias _ _ t ->
-      hello t
 
 -- TODO
 collectKindConstraints :: (MonadWriter [KindConstraint (Kind KindIndex)] m) => Expression (Type TypeIndex (Kind KindIndex)) -> m [X]
 collectKindConstraints =
   \case
     Expr.Constructor (Label t name) -> do
+      hello t
       pure []
     Expr.Variable (Label t name) -> do
+      hello t
       pure []
     Expr.Lambda ps e -> do
       pure []
@@ -61,6 +63,8 @@ collectKindConstraints =
       pure []
     Expr.Application t e1 es -> do
       hello t
+      collectKindConstraints e1
+      traverse collectKindConstraints es
       pure []
     Expr.Literal{} ->
       pure []
