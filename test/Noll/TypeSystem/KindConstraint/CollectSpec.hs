@@ -19,7 +19,7 @@ import Noll.Language.Type.Kind (Kind (..))
 import qualified Noll.Language.Type.Kind as Kind
 import Noll.Language.Type.Kind.Index (KindIndex (..))
 import Noll.TypeSystem.KindConstraint (KindConstraint (..))
-import Noll.TypeSystem.KindConstraint.Collect (collectKindConstraints)
+import Noll.TypeSystem.KindConstraint.Collect (collectKindConstraints, runCollectKindConstraints)
 import Test.Hspec (Spec, describe, it)
 
 spec :: Spec
@@ -45,7 +45,7 @@ hasConstraint e =
     KindEquality k1 k2 ->
       elem (KindEquality k1 k2) constraints || elem (KindEquality k2 k1) constraints
  where
-  constraints = execWriter (collectKindConstraints e)
+  constraints = runCollectKindConstraints mempty (collectKindConstraints e)
 
 -- fn(m) => let y = m in let x = y(true) in x
 fixture_1 :: Expression (Type TypeIndex (Kind KindIndex))

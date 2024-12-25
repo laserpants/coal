@@ -1,9 +1,11 @@
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
 module Noll.TypeSystem.KindConstraint.Collect (
   collectKindConstraints,
+  runCollectKindConstraints,
 ) where
 
 import Control.Monad (forM_)
@@ -22,8 +24,27 @@ import Noll.Language.Type.Kind (Kind (..), foldKind)
 import qualified Noll.Language.Type.Kind as Kind
 import Noll.Language.Type.Kind.Index (KindIndex (..))
 import Noll.TypeSystem.KindConstraint (KindConstraint (..))
+import Control.Monad.RWS (MonadRWS, MonadReader, MonadState, MonadWriter, RWS, asks, execRWS, local, tell)
+import Noll.Utils (Dictionary (..))
 
-collectConstraintsInType :: (MonadWriter [KindConstraint (Kind KindIndex)] m) => Type TypeIndex (Kind KindIndex) -> m ()
+type KindConstraintsMonad k = RWS (Dictionary k) [KindConstraint k] ()
+
+newtype KindConstraints k a = KindConstraints {constraintsMonad :: KindConstraintsMonad k a }
+  deriving
+    ( Functor
+    , Applicative
+    , Monad
+    , MonadReader (Dictionary k)
+    , MonadWriter [KindConstraint k]
+    , MonadState ()
+    , MonadRWS (Dictionary k) [KindConstraint k] ()
+    )
+
+{-# INLINE runCollectKindConstraints #-}
+runCollectKindConstraints :: Dictionary k -> KindConstraints k a -> [KindConstraint k]
+runCollectKindConstraints d cs = snd (execRWS (constraintsMonad cs) d ())
+
+collectConstraintsInType :: Type TypeIndex (Kind KindIndex) -> KindConstraints (Kind KindIndex) ()
 collectConstraintsInType =
   \case
     Type.Application k t ts -> do
@@ -47,7 +68,7 @@ collectConstraintsInType =
     Type.Variable (TypeIndex k _) ->
       pure ()
 
-collectKindConstraints :: (MonadWriter [KindConstraint (Kind KindIndex)] m) => Expression (Type TypeIndex (Kind KindIndex)) -> m ()
+collectKindConstraints :: Expression (Type TypeIndex (Kind KindIndex)) -> KindConstraints (Kind KindIndex) ()
 collectKindConstraints =
   \case
     Expr.Constructor (Label t name) -> do
