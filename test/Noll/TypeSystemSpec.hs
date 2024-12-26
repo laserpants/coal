@@ -8,7 +8,7 @@ import Data.List.NonEmpty (NonEmpty (..))
 import Noll.Label (Label (..))
 import Noll.Language (Binding (..), Expression (..), Intrinsic (..), Kind (..), KindIndex (..), Pattern (..), Primitive (..), Type (..), TypeIndex (..), freshIdIn)
 import Noll.Library.Supply (supply)
-import Noll.TypeSystem.ConstraintSolver (SolverError, evalSolver, solveKinds, solveTypes)
+import Noll.TypeSystem.ConstraintSolver (SolverError (..), evalSolver, solveKinds, solveTypes)
 import Noll.TypeSystem.KindConstraint (KindConstraint (..), KindConstraintMetadata (..))
 import Noll.TypeSystem.KindConstraint.Collect (collectKindConstraints, runCollectKindConstraints)
 import Noll.TypeSystem.KindSubstitution (KindSubstitution (..), applyKindSub)
@@ -20,42 +20,59 @@ import Test.Hspec (Spec, describe, it)
 spec :: Spec
 spec =
   describe "Noll.TypeSystem" $ do
-    it "" $ testAddTypes fixture1 == fixture1Typed
-    it "" $ testAddTypes fixture2 == fixture2Typed
+    it "" $ hasTypedExpression fixture1 == fixture1Typed
+    it "" $ hasTypedExpression fixture2 == fixture2Typed
+    it "" $ hasSolverTypeError fixture4 (SolverError (ConstraintIfCondition "if"))
+    it "" $ hasSolverTypeError fixture5 (SolverError (ConstraintIfBranches "if"))
 
-testAddTypes :: Expression () () -> Expression () (Type TypeIndex (Kind KindIndex))
-testAddTypes e = normalizeTypeIndexes e3
+hasSolverTypeError :: (Eq a) => Expression a () -> SolverError (TypeConstraintMetadata a) -> Bool
+hasSolverTypeError e err = let (_, errs, _) = addTypes e in err `elem` errs
+
+hasSolverKindError :: (Eq a) => Expression a () -> SolverError KindConstraintMetadata -> Bool
+hasSolverKindError e err = let (_, _, errs) = addTypes e in err `elem` errs
+
+hasTypedExpression :: Expression () () -> Expression () (Type TypeIndex (Kind KindIndex))
+hasTypedExpression e = let (a, _, _) = addTypes e in a
+
+addTypes ::
+  (Eq a) =>
+  Expression a () ->
+  ( Expression a (Type TypeIndex (Kind KindIndex))
+  , [SolverError (TypeConstraintMetadata a)]
+  , [SolverError KindConstraintMetadata]
+  )
+addTypes e = (normalizeTypeIndexes e3, errs1, errs2)
  where
-  e3 :: Expression () (Type TypeIndex (Kind KindIndex))
+  --  e3 :: Expression () (Type TypeIndex (Kind KindIndex))
   e3 = applyKindSub kindSub e2
 
-  (kindSub, _) = res2
+  (kindSub, errs2) = res2
 
   -- TODO
-  res2 :: (KindSubstitution, [SolverError KindConstraintMetadata])
+  --  res2 :: (KindSubstitution, [SolverError KindConstraintMetadata])
   res2 = evalSolver 0 (solveKinds kindConstraints)
 
-  kindConstraints :: [KindConstraint KindConstraintMetadata (Kind KindIndex)]
+  --  kindConstraints :: [KindConstraint KindConstraintMetadata (Kind KindIndex)]
   kindConstraints = runCollectKindConstraints mempty (collectKindConstraints e2)
 
-  e2 :: Expression () (Type TypeIndex (Kind KindIndex))
+  --  e2 :: Expression () (Type TypeIndex (Kind KindIndex))
   e2 = apply typeSub e1
 
-  (typeSub, _) = res1
+  (typeSub, errs1) = res1
 
-  res1 :: (TypeSubstitution, [SolverError TypeConstraintMetadata])
+  --  res1 :: (TypeSubstitution, [SolverError (TypeConstraintMetadata ())])
   res1 = evalSolver (freshIdIn typeConstraints) (solveTypes typeConstraints)
 
-  typeConstraints :: [TypeConstraint TypeConstraintMetadata TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))]
+  --  typeConstraints :: [TypeConstraint (TypeConstraintMetadata ()) TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))]
   typeConstraints =
     evalCollectTypeConstraints
       (TypeConstraintsContext mempty mempty)
       (collectConstraints e1)
 
-  e1 :: Expression () (Type TypeIndex (Kind KindIndex))
+  --  e1 :: Expression () (Type TypeIndex (Kind KindIndex))
   e1 = fmap typeVariable e0
 
-  e0 :: Expression () Int
+  --  e0 :: Expression () Int
   e0 = evalState (traverse (const supply) e) (0 :: Int)
 
 typeVariable :: Int -> Type TypeIndex (Kind KindIndex)
@@ -200,4 +217,35 @@ fixture3 =
         ()
         (EVariable () (Label () "x"))
         (EVariable () (Label () "x") :| [])
+    )
+
+-- if 1 then 2 else 3
+fixture4 :: Expression String ()
+fixture4 =
+  EIf
+    "if"
+    (ELiteral "b" (LInt32 1))
+    (ELiteral "c" (LInt32 2))
+    (ELiteral "d" (LInt32 3))
+
+-- if true then 2 else false
+fixture5 :: Expression String ()
+fixture5 =
+  EIf
+    "if"
+    (ELiteral "b" (LBool True))
+    (ELiteral "c" (LInt32 2))
+    (ELiteral "d" (LBool False))
+
+fixture6 :: Expression String ()
+fixture6 =
+  EIf
+    "if-1"
+    (ELiteral "b" (LInt32 1))
+    (ELiteral "c" (LInt32 2))
+    ( EIf
+        "if-2"
+        (ELiteral "d" (LBool True))
+        (ELiteral "e" (LInt32 2))
+        (ELiteral "f" (LBool False))
     )

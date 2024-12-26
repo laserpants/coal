@@ -80,23 +80,25 @@ evalCollectTypeConstraints :: TypeConstraintsContext o k -> TypeConstraints c o 
 evalCollectTypeConstraints = snd <$$> runCollectTypeConstraints
 
 {-# INLINE assertEquality #-}
-assertEquality :: Type TypeIndex k -> Type TypeIndex k -> CollectConstraints TypeConstraintMetadata k ()
-assertEquality t1 t2 = tell [Equality TypeConstraintMetadata t1 t2]
+assertEquality :: TypeConstraintMetadata a -> Type TypeIndex k -> Type TypeIndex k -> CollectConstraints (TypeConstraintMetadata a) k ()
+assertEquality meta t1 t2 = tell [Equality meta t1 t2]
 
-assertEqualityAssumptions :: Type TypeIndex k -> [Assumption (Type TypeIndex k)] -> CollectConstraints TypeConstraintMetadata k ()
+assertEqualityAssumptions :: Type TypeIndex k -> [Assumption (Type TypeIndex k)] -> CollectConstraints (TypeConstraintMetadata a) k ()
 assertEqualityAssumptions t ms =
   tell $ do
     Assumption{..} <- ms
+    -- TODO
     pure (Equality TypeConstraintMetadata assumptionType t)
 
-assertImplicitAssumptions :: Type TypeIndex k -> [Assumption (Type TypeIndex k)] -> CollectConstraints TypeConstraintMetadata k ()
+assertImplicitAssumptions :: Type TypeIndex k -> [Assumption (Type TypeIndex k)] -> CollectConstraints (TypeConstraintMetadata a) k ()
 assertImplicitAssumptions t ms = do
   set <- asks contextMonomorphicSet
   tell $ do
     Assumption{..} <- ms
+    -- TODO
     pure (Implicit TypeConstraintMetadata assumptionType t set)
 
-patternAssumptions :: [Assumption (Type TypeIndex k)] -> Pattern a (Type TypeIndex k) -> CollectConstraints TypeConstraintMetadata k [Assumption (Type TypeIndex k)]
+patternAssumptions :: [Assumption (Type TypeIndex k)] -> Pattern a (Type TypeIndex k) -> CollectConstraints (TypeConstraintMetadata a) k [Assumption (Type TypeIndex k)]
 patternAssumptions ms =
   \case
     PVariable _ (Label t name) -> do
@@ -104,7 +106,7 @@ patternAssumptions ms =
       assertEqualityAssumptions t ls
       pure rs
 
-collectConstraints :: (Ord k) => Expression a (Type TypeIndex k) -> CollectConstraints TypeConstraintMetadata k [Assumption (Type TypeIndex k)]
+collectConstraints :: (Ord k) => Expression a (Type TypeIndex k) -> CollectConstraints (TypeConstraintMetadata a) k [Assumption (Type TypeIndex k)]
 collectConstraints =
   \case
     EConstructor _ (Label _ name) -> do
@@ -122,7 +124,8 @@ collectConstraints =
         \case
           BPattern (PVariable _ (Label t name)) e -> do
             ms <- collectConstraints e
-            assertEquality t (typeOf e)
+            -- TODO
+            assertEquality TypeConstraintMetadata t (typeOf e)
             pure ms
       ms3 <- flip concatMapM gs $
         \case
@@ -131,17 +134,21 @@ collectConstraints =
             assertImplicitAssumptions t ls
             pure rs
       pure (ms1 <> ms2 <> ms3)
-    EIf _ e1 e2 e3 -> do
+    EIf loc e1 e2 e3 -> do
       ms1 <- collectConstraints e1
       ms2 <- collectConstraints e2
       ms3 <- collectConstraints e3
-      assertEquality (typeOf e1) (TIntrinsic IBool)
-      assertEquality (typeOf e2) (typeOf e3)
+      let t1 = typeOf e1
+          t2 = typeOf e2
+          t3 = typeOf e3
+      assertEquality (ConstraintIfCondition loc) t1 (TIntrinsic IBool)
+      assertEquality (ConstraintIfBranches loc) t2 t3
       pure (ms1 <> ms2 <> ms3)
     EApplication _ t e1 es -> do
       ms1 <- collectConstraints e1
       ms2 <- concat <$> traverse collectConstraints es
-      assertEquality (typeOf e1) (foldType t (typeOf <$> es))
+      -- TODO
+      assertEquality TypeConstraintMetadata (typeOf e1) (foldType t (typeOf <$> es))
       pure (ms1 <> ms2)
     ELiteral{} ->
       pure []

@@ -29,8 +29,8 @@ import Noll.TypeSystem.TypeUnification (TypeUnifiable (..))
 import Noll.Utils (foldrM)
 
 data SolverError c = SolverError
-    { errorContext :: c
-    }
+  { errorContext :: c
+  }
   deriving (Show, Eq, Ord, Read)
 
 newtype Solver c a = Solver {solverMonad :: RWS () [SolverError c] Int a}

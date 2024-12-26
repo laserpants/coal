@@ -31,7 +31,10 @@ data TypeConstraint c o k t
   | Explicit c t (Scheme o k t)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
 
-data TypeConstraintMetadata = TypeConstraintMetadata
+data TypeConstraintMetadata a
+  = TypeConstraintMetadata
+  | ConstraintIfCondition a
+  | ConstraintIfBranches a
   deriving (Show, Eq, Ord, Read)
 
 instance HasTypeIndexes k (MonomorphicSet (TypeIndex k)) where

@@ -48,10 +48,10 @@ spec =
           , (Implicit TypeConstraintMetadata (typeVariable 3) (typeVariable 0) (MonomorphicSet mempty))
           ]
 
-hasConstraints :: Expression a Int -> [TypeConstraint TypeConstraintMetadata TypeIndex () (Type TypeIndex ())] -> Bool
+hasConstraints :: (Eq a) => Expression a Int -> [TypeConstraint (TypeConstraintMetadata a) TypeIndex () (Type TypeIndex ())] -> Bool
 hasConstraints = all . hasConstraint
 
-hasConstraint :: Expression a Int -> TypeConstraint TypeConstraintMetadata TypeIndex () (Type TypeIndex ()) -> Bool
+hasConstraint :: (Eq a) => Expression a Int -> TypeConstraint (TypeConstraintMetadata a) TypeIndex () (Type TypeIndex ()) -> Bool
 hasConstraint e =
   \case
     Equality x t1 t2 ->
