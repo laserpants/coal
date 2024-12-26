@@ -14,8 +14,7 @@ module Noll.TypeSystem.ConstraintSolver (
 ) where
 
 import Control.Monad.Except (runExceptT)
-import Control.Monad.State (MonadState, State, runState)
-import Control.Monad.Writer (MonadWriter, WriterT, runWriterT, tell)
+import Control.Monad.RWS (MonadState, MonadWriter, RWS, runRWS, tell)
 import Data.List (delete, find)
 import Data.Set (intersection, (\\))
 import qualified Data.Set as Set
@@ -32,7 +31,7 @@ import Noll.Utils (foldrM)
 data SolverError = SolverError
   deriving (Show, Eq, Ord, Read)
 
-newtype Solver a = Solver {solverMonad :: WriterT [SolverError] (State Int) a}
+newtype Solver a = Solver {solverMonad :: RWS () [SolverError] Int a}
   deriving
     ( Functor
     , Applicative
@@ -42,12 +41,12 @@ newtype Solver a = Solver {solverMonad :: WriterT [SolverError] (State Int) a}
     )
 
 {-# INLINE runSolver #-}
-runSolver :: Int -> Solver a -> ((a, [SolverError]), Int)
-runSolver n u = runState (runWriterT (solverMonad u)) n
+runSolver :: Int -> Solver a -> (a, Int, [SolverError])
+runSolver n u = runRWS (solverMonad u) () n
 
 {-# INLINE evalSolver #-}
 evalSolver :: Int -> Solver a -> (a, [SolverError])
-evalSolver n u = fst (runSolver n u)
+evalSolver n u = let (a, _, w) = runSolver n u in (a, w)
 
 isSolvable ::
   ( Ord k

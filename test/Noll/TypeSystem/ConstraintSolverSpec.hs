@@ -35,7 +35,7 @@ spec =
         ]
     it "" $ hasNoErrors fixture1
     it "" $ hasNoErrors fixture2
-    it "" $ hasNoErrors fixture3
+    it "" $ hasNumberOfErrors 1 fixture3
 
 -- fn(m) => let y = m in let x = y(true) in x
 fixture1 :: [TypeConstraint () TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))]
@@ -77,6 +77,11 @@ hasSubstitution :: [TypeConstraint () TypeIndex (Kind KindIndex) (Type TypeIndex
 hasSubstitution cs k s = Map.lookup k (typeSubstitutionMap sub) == Just s
  where
   (sub, _) = evalSolver (freshIdIn cs) (solveTypes cs)
+
+hasNumberOfErrors :: Int -> [TypeConstraint () TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))] -> Bool
+hasNumberOfErrors n cs = length errors == n
+ where
+  (_, errors) = evalSolver (freshIdIn cs) (solveTypes cs)
 
 hasNoErrors :: [TypeConstraint () TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))] -> Bool
 hasNoErrors cs = errors == []

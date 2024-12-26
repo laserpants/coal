@@ -16,7 +16,7 @@ module Noll.Utils (
 ) where
 
 import Control.Monad (forM, forM_, liftM)
-import Data.Foldable (traverse_, foldrM)
+import Data.Foldable (foldrM, traverse_)
 import Data.List.NonEmpty (NonEmpty)
 import Data.Map.Strict (Map)
 import Data.Set (Set)
