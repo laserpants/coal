@@ -6,7 +6,6 @@ import Data.List.NonEmpty (NonEmpty (..))
 import Noll.Label (Label (..))
 import Noll.Language (Binding (..), Expression (..), Intrinsic (..), Kind (..), KindIndex (..), Pattern (..), Primitive (..), Type (..), TypeIndex (..))
 import Noll.TypeSystem.KindSubstitution (applyKindSub, mapsToKind)
-import Noll.TypeSystem.TypeSubstitution (TypeSubstitution (..), apply, typeSubstitutionFromList)
 import Test.Hspec (Spec, describe, it)
 
 spec :: Spec
