@@ -3,6 +3,7 @@
 
 module Noll.TypeSystemSpec where
 
+import Control.Monad.Identity (runIdentity)
 import Control.Monad.State (evalState)
 import Data.List.NonEmpty (NonEmpty (..))
 import Noll.Label (Label (..))
@@ -32,7 +33,7 @@ testAddTypes e = normalizeTypeIndexes e3
   e3 = applyKindSub kindSub e2
 
   kindSub :: KindSubstitution
-  kindSub = evalState (solveKinds kindConstraints) 1
+  kindSub = runIdentity (solveKinds kindConstraints)
 
   kindConstraints :: [KindConstraint (Kind KindIndex)]
   kindConstraints = runCollectKindConstraints mempty (collectKindConstraints e2)

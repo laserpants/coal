@@ -3,7 +3,6 @@
 
 module Noll.TypeSystem.KindConstraint.Solver (solveKinds) where
 
-import Control.Monad.State (MonadState)
 import Noll.TypeSystem.KindConstraint (KindConstraint (..))
 import Noll.TypeSystem.KindSubstitution (KindSubstitutable (..), KindSubstitution (..))
 import Noll.TypeSystem.KindUnification (KindUnifiable (..))
@@ -11,7 +10,7 @@ import Noll.TypeSystem.KindUnification (KindUnifiable (..))
 solveKinds ::
   ( KindSubstitutable k
   , KindUnifiable k
-  , MonadState Int m
+  , Monad m
   ) =>
   [KindConstraint k] ->
   m KindSubstitution
