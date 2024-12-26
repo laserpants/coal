@@ -8,7 +8,7 @@ import Noll.Language (Intrinsic (..), Kind (..), KindIndex (..), Type (..), Type
 import Noll.TypeSystem.TypeConstraint (MonomorphicSet (..), TypeConstraint (..))
 import Noll.TypeSystem.TypeConstraint.Solver
 import Noll.TypeSystem.TypeSubstitution (TypeSubstitution (..))
-import Noll.TypeSystem.Unifier (evalUnifier)
+import Noll.TypeSystem.Solver (evalSolver)
 import Test.Hspec (Spec, describe, it)
 
 spec :: Spec
@@ -23,6 +23,8 @@ spec =
         , (5, typeBool `TArrow` typeVariable 3)
         ]
     it "" $
+      hasNoErrors fixture1
+    it "" $
       hasSubstitutions
         fixture2
         [ (1, typeVariable 3 `TArrow` typeVariable 3)
@@ -34,6 +36,8 @@ spec =
         , (8, typeInt32)
         , (9, typeInt32 `TArrow` typeInt32)
         ]
+    it "" $
+      hasNoErrors fixture2
 
 -- fn(m) => let y = m in let x = y(true) in x
 fixture1 :: [TypeConstraint () TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))]
@@ -63,10 +67,14 @@ hasSubstitutions :: [SolverConstraint () (Kind KindIndex) (Type TypeIndex (Kind 
 hasSubstitutions = all . uncurry . hasSubstitution
 
 hasSubstitution :: [SolverConstraint () (Kind KindIndex) (Type TypeIndex (Kind KindIndex))] -> Int -> Type TypeIndex (Kind KindIndex) -> Bool
-hasSubstitution cs k s = Map.lookup k result == Just s
+hasSubstitution cs k s = Map.lookup k (typeSubstitutionMap sub) == Just s
  where
-  result =
-    typeSubstitutionMap (evalUnifier (freshIdIn cs) (solveTypes cs))
+  (sub, _) = evalSolver (freshIdIn cs) (solveTypes cs)
+
+hasNoErrors :: [SolverConstraint () (Kind KindIndex) (Type TypeIndex (Kind KindIndex))] -> Bool
+hasNoErrors cs = errors == []
+ where
+  (_, errors) = evalSolver (freshIdIn cs) (solveTypes cs)
 
 typeVariable :: Int -> Type TypeIndex (Kind KindIndex)
 typeVariable = TVariable . TypeIndex KType

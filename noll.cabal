@@ -61,13 +61,14 @@ library
       Noll.TypeSystem.KindConstraint.Solver
       Noll.TypeSystem.KindSubstitution
       Noll.TypeSystem.KindUnification
+      Noll.TypeSystem.Solver
       Noll.TypeSystem.TypeConstraint
       Noll.TypeSystem.TypeConstraint.Assumption
       Noll.TypeSystem.TypeConstraint.Collect
       Noll.TypeSystem.TypeConstraint.Solver
       Noll.TypeSystem.TypeSubstitution
       Noll.TypeSystem.TypeUnification
-      Noll.TypeSystem.Unifier
+      Noll.TypeSystem.TypeUnification.Error
       Noll.Utils
   other-modules:
       Paths_noll

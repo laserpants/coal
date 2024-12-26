@@ -3,8 +3,8 @@
 
 module Noll.TypeSystemSpec where
 
-import Control.Monad.Identity (runIdentity)
 import Control.Monad.State (evalState)
+import Control.Monad.Writer (runWriter)
 import Data.List.NonEmpty (NonEmpty (..))
 import Noll.Label (Label (..))
 import Noll.Language (Binding (..), Expression (..), Intrinsic (..), Kind (..), KindIndex (..), Pattern (..), Primitive (..), Type (..), TypeIndex (..), freshIdIn)
@@ -17,7 +17,7 @@ import Noll.TypeSystem.TypeConstraint (TypeConstraint (..), TypeConstraintMetada
 import Noll.TypeSystem.TypeConstraint.Collect (TypeConstraintsContext (..), collectConstraints, evalCollectTypeConstraints)
 import Noll.TypeSystem.TypeConstraint.Solver (solveTypes)
 import Noll.TypeSystem.TypeSubstitution (TypeSubstitutable (..), TypeSubstitution, normalizeTypeIndexes)
-import Noll.TypeSystem.Unifier (evalUnifier)
+import Noll.TypeSystem.Solver (SolverError, evalSolver)
 import Test.Hspec (Spec, describe, it)
 
 spec :: Spec
@@ -32,8 +32,10 @@ testAddTypes e = normalizeTypeIndexes e3
   e3 :: Expression () (Type TypeIndex (Kind KindIndex))
   e3 = applyKindSub kindSub e2
 
-  kindSub :: KindSubstitution
-  kindSub = runIdentity (solveKinds kindConstraints)
+  (kindSub, _) = res2
+
+  res2 :: (KindSubstitution, [SolverError])
+  res2 = runWriter (solveKinds kindConstraints)
 
   kindConstraints :: [KindConstraint KindConstraintMetadata (Kind KindIndex)]
   kindConstraints = runCollectKindConstraints mempty (collectKindConstraints e2)
@@ -41,8 +43,10 @@ testAddTypes e = normalizeTypeIndexes e3
   e2 :: Expression () (Type TypeIndex (Kind KindIndex))
   e2 = apply typeSub e1
 
-  typeSub :: TypeSubstitution
-  typeSub = evalUnifier (freshIdIn typeConstraints) (solveTypes typeConstraints)
+  (typeSub, _) = res1
+
+  res1 :: (TypeSubstitution, [SolverError])
+  res1 = evalSolver (freshIdIn typeConstraints) (solveTypes typeConstraints)
 
   typeConstraints :: [TypeConstraint TypeConstraintMetadata TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))]
   typeConstraints =

@@ -7,6 +7,7 @@
 
 module Noll.TypeSystem.TypeUnification (TypeUnifiable (..)) where
 
+import Control.Monad.Except
 import Data.List.NonEmpty (NonEmpty)
 import qualified Data.List.NonEmpty as NonEmpty
 import Data.Set (member)
@@ -24,9 +25,11 @@ import Noll.TypeSystem.TypeSubstitution (
   TypeSubstitution (..),
   mapsToType,
  )
+import Noll.TypeSystem.TypeUnification.Error (UnificationError (..))
+import qualified Noll.TypeSystem.TypeUnification.Error as Error
 
 class TypeUnifiable u where
-  unify :: (Monad m) => u -> u -> m TypeSubstitution
+  unify :: (MonadError UnificationError m) => u -> u -> m TypeSubstitution
 
 instance (TypeSubstitutable u, TypeUnifiable u) => TypeUnifiable [u] where
   unify [] [] =
@@ -66,7 +69,7 @@ instance TypeUnifiable (Type TypeIndex (Kind KindIndex)) where
   unify (TIntrinsic t1) (TIntrinsic t2) =
     unify t1 t2
   unify _ _ =
-    error "Cannot unify"
+    throwError Error.CannotUnify
 
 instance TypeUnifiable (Intrinsic (Type TypeIndex (Kind KindIndex))) where
   unify (IList t1) (IList t2) =
@@ -83,9 +86,9 @@ instance TypeUnifiable (Intrinsic (Type TypeIndex (Kind KindIndex))) where
     | t1 == t2 =
         pure mempty
   unify _ _ =
-    error "Cannot unify"
+    throwError Error.CannotUnify
 
-bindType :: (Monad m) => TypeIndex (Kind KindIndex) -> Type TypeIndex (Kind KindIndex) -> m TypeSubstitution
+bindType :: (MonadError UnificationError m) => TypeIndex (Kind KindIndex) -> Type TypeIndex (Kind KindIndex) -> m TypeSubstitution
 bindType (TypeIndex _ index) =
   \case
     TVariable (TypeIndex _ index2)
@@ -93,6 +96,6 @@ bindType (TypeIndex _ index) =
           pure mempty
     t
       | index `member` typeIdsIn t ->
-          error "Infinite type"
+          throwError Error.InfiniteType
       | otherwise ->
           pure (index `mapsToType` t)

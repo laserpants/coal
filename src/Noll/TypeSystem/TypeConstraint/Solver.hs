@@ -4,10 +4,13 @@
 
 module Noll.TypeSystem.TypeConstraint.Solver (SolverConstraint, solveTypes) where
 
+import Control.Monad.Except (runExceptT)
 import Control.Monad.State (MonadState)
+import Control.Monad.Writer (MonadWriter)
 import Data.Foldable (foldrM)
 import Data.List (delete, find)
 import Data.Set (intersection, (\\))
+import Noll.TypeSystem.Solver (SolverError (..))
 import qualified Data.Set as Set
 import Noll.Language (
   HasTypeIndexes (..),
@@ -64,7 +67,10 @@ choice cs = findChoice [(delete c cs, c) | c <- cs]
     maybe NoneFound (uncurry Choice) (find (uncurry isSolvable) ps)
 
 solveTypes ::
-  (MonadState Int m, Eq c) =>
+  ( MonadState Int m
+  , MonadWriter [SolverError] m
+  , Eq c
+  ) =>
   [SolverConstraint c (Kind KindIndex) (Type TypeIndex (Kind KindIndex))] ->
   m TypeSubstitution
 solveTypes [] = pure (TypeSubstitution mempty)
@@ -73,9 +79,14 @@ solveTypes constraints =
     NoneFound ->
       pure mempty
     Choice cs (Equality _ t1 t2) -> do
-      sub1 <- unify t1 t2
-      sub2 <- solveTypes (apply sub1 cs)
-      pure (sub2 <> sub1)
+      res <- runExceptT (unify t1 t2)
+      case res of
+        Left err ->
+          -- error "TODO"
+          solveTypes cs
+        Right sub1 -> do
+          sub2 <- solveTypes (apply sub1 cs)
+          pure (sub2 <> sub1)
     Choice cs (Implicit x t1 t2 m) -> do
       solveTypes (Explicit x t1 (generalize m t2) : cs)
     Choice cs (Explicit x t1 s) -> do

@@ -3,14 +3,16 @@
 
 module Noll.TypeSystem.KindConstraint.Solver (solveKinds) where
 
+import Control.Monad.Writer (MonadWriter)
 import Noll.TypeSystem.KindConstraint (KindConstraint (..))
+import Noll.TypeSystem.Solver (SolverError (..))
 import Noll.TypeSystem.KindSubstitution (KindSubstitutable (..), KindSubstitution (..))
 import Noll.TypeSystem.KindUnification (KindUnifiable (..))
 
 solveKinds ::
   ( KindSubstitutable k
   , KindUnifiable k
-  , Monad m
+  , MonadWriter [SolverError] m
   ) =>
   [KindConstraint c k] ->
   m KindSubstitution
