@@ -7,8 +7,8 @@ import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Set as Set
 import Noll.Label (Label (..))
 import Noll.Language (Binding (..), Expression (..), Intrinsic (..), Pattern (..), Primitive (..), Type (..), TypeIndex (..))
-import Noll.TypeSystem.TypeConstraint (MonomorphicSet (..), TypeConstraint (..))
-import Noll.TypeSystem.TypeConstraint.Collect
+import Noll.TypeSystem.TypeConstraint (MonomorphicSet (..), TypeConstraint (..), TypeConstraintMetadata (..))
+import Noll.TypeSystem.TypeConstraint.Collect (TypeConstraintsContext (..), collectConstraints, evalCollectTypeConstraints)
 import Test.Hspec (Spec, describe, it)
 
 spec :: Spec
@@ -18,35 +18,35 @@ spec =
       it "" $
         hasConstraints
           fixture1
-          [ (Equality (typeVariable 2) (typeBool `TArrow` typeVariable 3))
-          , (Equality (typeVariable 5) (typeVariable 1))
-          , (Equality (typeVariable 6) (typeVariable 1))
-          , (Equality (typeVariable 7) (typeVariable 3))
-          , (Implicit (typeVariable 4) (typeVariable 7) (MonomorphicSet (Set.fromList [TypeIndex () 5])))
-          , (Implicit (typeVariable 2) (typeVariable 6) (MonomorphicSet (Set.fromList [TypeIndex () 5])))
+          [ (Equality TypeConstraintMetadata (typeVariable 2) (typeBool `TArrow` typeVariable 3))
+          , (Equality TypeConstraintMetadata (typeVariable 5) (typeVariable 1))
+          , (Equality TypeConstraintMetadata (typeVariable 6) (typeVariable 1))
+          , (Equality TypeConstraintMetadata (typeVariable 7) (typeVariable 3))
+          , (Implicit TypeConstraintMetadata (typeVariable 4) (typeVariable 7) (MonomorphicSet (Set.fromList [TypeIndex () 5])))
+          , (Implicit TypeConstraintMetadata (typeVariable 2) (typeVariable 6) (MonomorphicSet (Set.fromList [TypeIndex () 5])))
           ]
     describe "fixture2" $ do
       it "" $
         hasConstraints
           fixture2
-          [ (Implicit (typeVariable 6) (typeVariable 1) (MonomorphicSet mempty))
-          , (Implicit (typeVariable 7) (typeVariable 1) (MonomorphicSet mempty))
-          , (Implicit (typeVariable 9) (typeVariable 1) (MonomorphicSet mempty))
-          , (Equality (typeVariable 2) (typeVariable 3))
-          , (Equality (typeVariable 6) (typeVariable 7 `TArrow` typeVariable 5))
-          , (Equality (typeVariable 9) (typeInt32 `TArrow` typeVariable 8))
-          , (Equality (typeVariable 1) (typeVariable 2 `TArrow` typeVariable 3))
-          , (Equality (typeVariable 5) (typeVariable 8 `TArrow` typeVariable 4))
+          [ (Implicit TypeConstraintMetadata (typeVariable 6) (typeVariable 1) (MonomorphicSet mempty))
+          , (Implicit TypeConstraintMetadata (typeVariable 7) (typeVariable 1) (MonomorphicSet mempty))
+          , (Implicit TypeConstraintMetadata (typeVariable 9) (typeVariable 1) (MonomorphicSet mempty))
+          , (Equality TypeConstraintMetadata (typeVariable 2) (typeVariable 3))
+          , (Equality TypeConstraintMetadata (typeVariable 6) (typeVariable 7 `TArrow` typeVariable 5))
+          , (Equality TypeConstraintMetadata (typeVariable 9) (typeInt32 `TArrow` typeVariable 8))
+          , (Equality TypeConstraintMetadata (typeVariable 1) (typeVariable 2 `TArrow` typeVariable 3))
+          , (Equality TypeConstraintMetadata (typeVariable 5) (typeVariable 8 `TArrow` typeVariable 4))
           ]
 
-hasConstraints :: Expression a Int -> [TypeConstraint TypeIndex () (Type TypeIndex ())] -> Bool
+hasConstraints :: Expression a Int -> [TypeConstraint TypeConstraintMetadata TypeIndex () (Type TypeIndex ())] -> Bool
 hasConstraints = all . hasConstraint
 
-hasConstraint :: Expression a Int -> TypeConstraint TypeIndex () (Type TypeIndex ()) -> Bool
+hasConstraint :: Expression a Int -> TypeConstraint TypeConstraintMetadata TypeIndex () (Type TypeIndex ()) -> Bool
 hasConstraint e =
   \case
-    Equality t1 t2 ->
-      elem (Equality t1 t2) constraints || elem (Equality t2 t1) constraints
+    Equality x t1 t2 ->
+      elem (Equality x t1 t2) constraints || elem (Equality x t2 t1) constraints
     c ->
       elem c constraints
  where

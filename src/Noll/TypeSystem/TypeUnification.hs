@@ -43,7 +43,7 @@ instance (TypeSubstitutable u, TypeUnifiable u) => TypeUnifiable (NonEmpty u) wh
 
 instance TypeUnifiable (Row TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))) where
   unify =
-    undefined
+    error "TODO"
 
 instance TypeUnifiable (Type TypeIndex (Kind KindIndex)) where
   unify (TAlias _ _ t1) t2 =

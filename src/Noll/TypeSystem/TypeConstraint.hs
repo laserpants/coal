@@ -7,6 +7,7 @@
 {-# LANGUAGE StrictData #-}
 
 module Noll.TypeSystem.TypeConstraint (
+  TypeConstraintMetadata (..),
   MonomorphicSet (..),
   TypeConstraint (..),
   overMonomorphicSet,
@@ -24,31 +25,34 @@ newtype MonomorphicSet m = MonomorphicSet {monomorphicSet :: Set m}
 overMonomorphicSet :: (Set m -> Set m) -> MonomorphicSet m -> MonomorphicSet m
 overMonomorphicSet fn MonomorphicSet{..} = MonomorphicSet{monomorphicSet = fn monomorphicSet}
 
-data TypeConstraint o k t
-  = Equality t t
-  | Implicit t t (MonomorphicSet (o k))
-  | Explicit t (Scheme o k t)
+data TypeConstraint c o k t
+  = Equality c t t
+  | Implicit c t t (MonomorphicSet (o k))
+  | Explicit c t (Scheme o k t)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
+
+data TypeConstraintMetadata = TypeConstraintMetadata
+  deriving (Show, Eq, Ord, Read)
 
 instance HasTypeIndexes k (MonomorphicSet (TypeIndex k)) where
   typeIndexesIn = monomorphicSet
 
-instance (Ord k, HasTypeIndexes k t) => HasTypeIndexes k (TypeConstraint TypeIndex k t) where
+instance (Ord k, HasTypeIndexes k t) => HasTypeIndexes k (TypeConstraint c TypeIndex k t) where
   typeIndexesIn =
     \case
-      Equality t1 t2 ->
+      Equality _ t1 t2 ->
         typeIndexesIn t1 <> typeIndexesIn t2
-      Implicit t1 t2 m ->
+      Implicit _ t1 t2 m ->
         typeIndexesIn t1 <> typeIndexesIn t2 <> typeIndexesIn m
-      Explicit t s ->
+      Explicit _ t s ->
         typeIndexesIn t <> typeIndexesIn s
 
-instance (Ord k, HasTypeIndexes k t) => HasActive k (TypeConstraint TypeIndex k t) where
+instance (Ord k, HasTypeIndexes k t) => HasActive k (TypeConstraint c TypeIndex k t) where
   activeIn =
     \case
-      Equality t1 t2 ->
+      Equality _ t1 t2 ->
         typeIndexesIn t1 `union` typeIndexesIn t2
-      Implicit t1 t2 m ->
+      Implicit _ t1 t2 m ->
         typeIndexesIn t1 `union` (typeIndexesIn t2 `intersection` typeIndexesIn m)
-      Explicit t s ->
+      Explicit _ t s ->
         typeIndexesIn t `union` typeIndexesIn s

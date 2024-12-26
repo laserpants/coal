@@ -55,7 +55,7 @@ instance (Ord s, TypeSubstitutable s) => TypeSubstitutable (Set s) where
 
 instance TypeSubstitutable (Row TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))) where
   apply sub =
-    undefined
+    error "TODO"
 
 instance TypeSubstitutable (MonomorphicSet (TypeIndex (Kind KindIndex))) where
   apply sub =
@@ -72,15 +72,15 @@ instance TypeSubstitutable (Scheme TypeIndex (Kind KindIndex) (Type TypeIndex (K
          in
           Forall qs (apply sub1 ps) (apply sub1 t)
 
-instance TypeSubstitutable (TypeConstraint TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))) where
+instance TypeSubstitutable (TypeConstraint c TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))) where
   apply sub =
     \case
-      Equality t1 t2 ->
-        Equality (apply sub t1) (apply sub t2)
-      Implicit t1 t2 m ->
-        Implicit (apply sub t1) (apply sub t2) (apply sub m)
-      Explicit t1 s ->
-        Explicit (apply sub t1) (apply sub s)
+      Equality x t1 t2 ->
+        Equality x (apply sub t1) (apply sub t2)
+      Implicit x t1 t2 m ->
+        Implicit x (apply sub t1) (apply sub t2) (apply sub m)
+      Explicit x t1 s ->
+        Explicit x (apply sub t1) (apply sub s)
 
 instance TypeSubstitutable (Type TypeIndex (Kind KindIndex)) where
   apply sub =

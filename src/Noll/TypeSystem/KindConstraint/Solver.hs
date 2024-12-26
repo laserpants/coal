@@ -12,11 +12,11 @@ solveKinds ::
   , KindUnifiable k
   , Monad m
   ) =>
-  [KindConstraint k] ->
+  [KindConstraint c k] ->
   m KindSubstitution
 solveKinds [] =
   pure mempty
-solveKinds (KindEquality k1 k2 : cs) = do
+solveKinds (KindEquality _ k1 k2 : cs) = do
   sub1 <- unifyKinds k1 k2
   sub2 <- solveKinds (applyKindSub sub1 cs)
   pure (sub2 <> sub1)

@@ -58,7 +58,7 @@ instance KindSubstitutable (TypeIndex (Kind KindIndex)) where
 
 instance KindSubstitutable (Row TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))) where
   applyKindSub sub =
-    undefined
+    error "TODO"
 
 instance KindSubstitutable (Type TypeIndex (Kind KindIndex)) where
   applyKindSub sub =
@@ -78,11 +78,11 @@ instance KindSubstitutable (Type TypeIndex (Kind KindIndex)) where
       TConstructor k name ->
         TConstructor (applyKindSub sub k) name
 
-instance (KindSubstitutable k) => KindSubstitutable (KindConstraint k) where
+instance (KindSubstitutable k) => KindSubstitutable (KindConstraint c k) where
   applyKindSub sub =
     \case
-      KindEquality k1 k2 ->
-        KindEquality (applyKindSub sub k1) (applyKindSub sub k2)
+      KindEquality x k1 k2 ->
+        KindEquality x (applyKindSub sub k1) (applyKindSub sub k2)
 
 instance KindSubstitutable (Expression a (Type TypeIndex (Kind KindIndex))) where
   applyKindSub = fmap . applyKindSub

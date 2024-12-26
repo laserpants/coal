@@ -36,33 +36,33 @@ spec =
         ]
 
 -- fn(m) => let y = m in let x = y(true) in x
-fixture1 :: [TypeConstraint TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))]
+fixture1 :: [TypeConstraint () TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))]
 fixture1 =
-  [ (Equality (typeVariable 2) (typeBool `TArrow` typeVariable 3))
-  , (Equality (typeVariable 5) (typeVariable 1))
-  , (Equality (typeVariable 6) (typeVariable 1))
-  , (Equality (typeVariable 7) (typeVariable 3))
-  , (Implicit (typeVariable 4) (typeVariable 7) (MonomorphicSet (Set.fromList [TypeIndex KType 5])))
-  , (Implicit (typeVariable 2) (typeVariable 6) (MonomorphicSet (Set.fromList [TypeIndex KType 5])))
+  [ (Equality () (typeVariable 2) (typeBool `TArrow` typeVariable 3))
+  , (Equality () (typeVariable 5) (typeVariable 1))
+  , (Equality () (typeVariable 6) (typeVariable 1))
+  , (Equality () (typeVariable 7) (typeVariable 3))
+  , (Implicit () (typeVariable 4) (typeVariable 7) (MonomorphicSet (Set.fromList [TypeIndex KType 5])))
+  , (Implicit () (typeVariable 2) (typeVariable 6) (MonomorphicSet (Set.fromList [TypeIndex KType 5])))
   ]
 
 -- let f = fn(x) => x in (f f)(f 1)
-fixture2 :: [TypeConstraint TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))]
+fixture2 :: [TypeConstraint () TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))]
 fixture2 =
-  [ (Implicit (typeVariable 6) (typeVariable 1) (MonomorphicSet mempty))
-  , (Implicit (typeVariable 7) (typeVariable 1) (MonomorphicSet mempty))
-  , (Implicit (typeVariable 9) (typeVariable 1) (MonomorphicSet mempty))
-  , (Equality (typeVariable 2) (typeVariable 3))
-  , (Equality (typeVariable 6) (typeVariable 7 `TArrow` typeVariable 5))
-  , (Equality (typeVariable 9) (typeInt32 `TArrow` typeVariable 8))
-  , (Equality (typeVariable 1) (typeVariable 2 `TArrow` typeVariable 3))
-  , (Equality (typeVariable 5) (typeVariable 8 `TArrow` typeVariable 4))
+  [ (Implicit () (typeVariable 6) (typeVariable 1) (MonomorphicSet mempty))
+  , (Implicit () (typeVariable 7) (typeVariable 1) (MonomorphicSet mempty))
+  , (Implicit () (typeVariable 9) (typeVariable 1) (MonomorphicSet mempty))
+  , (Equality () (typeVariable 2) (typeVariable 3))
+  , (Equality () (typeVariable 6) (typeVariable 7 `TArrow` typeVariable 5))
+  , (Equality () (typeVariable 9) (typeInt32 `TArrow` typeVariable 8))
+  , (Equality () (typeVariable 1) (typeVariable 2 `TArrow` typeVariable 3))
+  , (Equality () (typeVariable 5) (typeVariable 8 `TArrow` typeVariable 4))
   ]
 
-hasSubstitutions :: [SolverConstraint (Kind KindIndex) (Type TypeIndex (Kind KindIndex))] -> [(Int, Type TypeIndex (Kind KindIndex))] -> Bool
+hasSubstitutions :: [SolverConstraint () (Kind KindIndex) (Type TypeIndex (Kind KindIndex))] -> [(Int, Type TypeIndex (Kind KindIndex))] -> Bool
 hasSubstitutions = all . uncurry . hasSubstitution
 
-hasSubstitution :: [SolverConstraint (Kind KindIndex) (Type TypeIndex (Kind KindIndex))] -> Int -> Type TypeIndex (Kind KindIndex) -> Bool
+hasSubstitution :: [SolverConstraint () (Kind KindIndex) (Type TypeIndex (Kind KindIndex))] -> Int -> Type TypeIndex (Kind KindIndex) -> Bool
 hasSubstitution cs k s = Map.lookup k result == Just s
  where
   result =

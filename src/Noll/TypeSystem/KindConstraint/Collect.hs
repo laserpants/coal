@@ -22,33 +22,33 @@ import Noll.Language (
   TypeIndex (..),
   foldKind,
  )
-import Noll.TypeSystem.KindConstraint (KindConstraint (..))
+import Noll.TypeSystem.KindConstraint (KindConstraint (..), KindConstraintMetadata (..))
 import Noll.Utils (Dictionary, forM_, traverse_)
 
-type KindConstraintsMonad k = RWS (Dictionary k) [KindConstraint k] ()
+type KindConstraintsMonad c k = RWS (Dictionary k) [KindConstraint c k] ()
 
-newtype KindConstraints k a = KindConstraints {constraintsMonad :: KindConstraintsMonad k a}
+newtype KindConstraints c k a = KindConstraints {constraintsMonad :: KindConstraintsMonad c k a}
   deriving
     ( Functor
     , Applicative
     , Monad
     , MonadReader (Dictionary k)
-    , MonadWriter [KindConstraint k]
+    , MonadWriter [KindConstraint c k]
     , MonadState ()
-    , MonadRWS (Dictionary k) [KindConstraint k] ()
+    , MonadRWS (Dictionary k) [KindConstraint c k] ()
     )
 
 {-# INLINE runCollectKindConstraints #-}
-runCollectKindConstraints :: Dictionary k -> KindConstraints k a -> [KindConstraint k]
+runCollectKindConstraints :: Dictionary k -> KindConstraints c k a -> [KindConstraint c k]
 runCollectKindConstraints d cs = snd (execRWS (constraintsMonad cs) d ())
 
-collectConstraintsInType :: Type TypeIndex (Kind KindIndex) -> KindConstraints (Kind KindIndex) ()
+collectConstraintsInType :: Type TypeIndex (Kind KindIndex) -> KindConstraints KindConstraintMetadata (Kind KindIndex) ()
 collectConstraintsInType =
   \case
     TApplication k t ts -> do
       collectConstraintsInType t
       traverse_ collectConstraintsInType ts
-      tell [KindEquality k (foldKind (kindOf t) (kindOf <$> ts))]
+      tell [KindEquality KindConstraintMetadata k (foldKind (kindOf t) (kindOf <$> ts))]
     TArrow t1 t2 -> do
       collectConstraintsInType t1
       collectConstraintsInType t2
@@ -66,18 +66,18 @@ collectConstraintsInType =
         Nothing ->
           error "TODO"
         Just k1 ->
-          tell [KindEquality k k1]
+          tell [KindEquality KindConstraintMetadata k k1]
       pure ()
     TVariable (TypeIndex k _) ->
       pure ()
 
-collectKindConstraints :: Expression a (Type TypeIndex (Kind KindIndex)) -> KindConstraints (Kind KindIndex) ()
+collectKindConstraints :: Expression a (Type TypeIndex (Kind KindIndex)) -> KindConstraints KindConstraintMetadata (Kind KindIndex) ()
 collectKindConstraints =
   \case
     EConstructor _ (Label t name) -> do
       collectConstraintsInType t
     EVariable _ (Label t _) -> do
-      tell [KindEquality (kindOf t) KType]
+      tell [KindEquality KindConstraintMetadata (kindOf t) KType]
       collectConstraintsInType t
     ELambda _ _ e -> do
       collectKindConstraints e

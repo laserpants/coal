@@ -29,18 +29,18 @@ import Noll.TypeSystem.TypeSubstitution (
  )
 import Noll.TypeSystem.TypeUnification (TypeUnifiable (..))
 
-type SolverConstraint k t = TypeConstraint TypeIndex k t
+type SolverConstraint c k t = TypeConstraint c TypeIndex k t
 
 isSolvable ::
   ( Ord k
   , HasTypeIndexes k t
   ) =>
-  [SolverConstraint k t] ->
-  SolverConstraint k t ->
+  [SolverConstraint c k t] ->
+  SolverConstraint c k t ->
   Bool
 isSolvable constraints =
   \case
-    Implicit _ t2 m ->
+    Implicit _ _ t2 m ->
       Set.null (typeIdsIn t2 \\ typeIdsIn m `intersection` activeIdsIn constraints)
     _ ->
       True
@@ -53,33 +53,34 @@ data SolverChoice c
 choice ::
   ( Ord k
   , Eq t
+  , Eq c
   , HasTypeIndexes k t
   ) =>
-  [SolverConstraint k t] ->
-  SolverChoice (SolverConstraint k t)
+  [SolverConstraint c k t] ->
+  SolverChoice (SolverConstraint c k t)
 choice cs = findChoice [(delete c cs, c) | c <- cs]
  where
   findChoice ps =
     maybe NoneFound (uncurry Choice) (find (uncurry isSolvable) ps)
 
 solveTypes ::
-  (MonadState Int m) =>
-  [SolverConstraint (Kind KindIndex) (Type TypeIndex (Kind KindIndex))] ->
+  (MonadState Int m, Eq c) =>
+  [SolverConstraint c (Kind KindIndex) (Type TypeIndex (Kind KindIndex))] ->
   m TypeSubstitution
 solveTypes [] = pure (TypeSubstitution mempty)
 solveTypes constraints =
   case choice constraints of
     NoneFound ->
       pure mempty
-    Choice cs (Equality t1 t2) -> do
+    Choice cs (Equality _ t1 t2) -> do
       sub1 <- unify t1 t2
       sub2 <- solveTypes (apply sub1 cs)
       pure (sub2 <> sub1)
-    Choice cs (Implicit t1 t2 m) -> do
-      solveTypes (Explicit t1 (generalize m t2) : cs)
-    Choice cs (Explicit t1 s) -> do
+    Choice cs (Implicit x t1 t2 m) -> do
+      solveTypes (Explicit x t1 (generalize m t2) : cs)
+    Choice cs (Explicit x t1 s) -> do
       t2 <- instantiate s
-      solveTypes (Equality t1 t2 : cs)
+      solveTypes (Equality x t1 t2 : cs)
 
 instantiate ::
   (MonadState Int m) =>

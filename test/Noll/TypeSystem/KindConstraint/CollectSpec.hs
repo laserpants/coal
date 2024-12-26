@@ -6,7 +6,7 @@ module Noll.TypeSystem.KindConstraint.CollectSpec where
 import Data.List.NonEmpty (NonEmpty (..))
 import Noll.Label (Label (..))
 import Noll.Language (Binding (..), Expression (..), Intrinsic (..), Kind (..), KindIndex (..), Pattern (..), Primitive (..), Type (..), TypeIndex (..))
-import Noll.TypeSystem.KindConstraint (KindConstraint (..))
+import Noll.TypeSystem.KindConstraint (KindConstraint (..), KindConstraintMetadata (..))
 import Noll.TypeSystem.KindConstraint.Collect (collectKindConstraints, runCollectKindConstraints)
 import Test.Hspec (Spec, describe, it)
 
@@ -16,22 +16,22 @@ spec =
     it "" $
       hasConstraints
         fixture1
-        [ KindEquality (KVariable (KindIndex 3)) KType
+        [ KindEquality KindConstraintMetadata (KVariable (KindIndex 3)) KType
         ]
     it "" $
       hasConstraints
         fixture2
-        [ KindEquality (KVariable (KindIndex 3)) KType
+        [ KindEquality KindConstraintMetadata (KVariable (KindIndex 3)) KType
         ]
 
-hasConstraints :: Expression a (Type TypeIndex (Kind KindIndex)) -> [KindConstraint (Kind KindIndex)] -> Bool
+hasConstraints :: Expression a (Type TypeIndex (Kind KindIndex)) -> [KindConstraint KindConstraintMetadata (Kind KindIndex)] -> Bool
 hasConstraints = all . hasConstraint
 
-hasConstraint :: Expression a (Type TypeIndex (Kind KindIndex)) -> KindConstraint (Kind KindIndex) -> Bool
+hasConstraint :: Expression a (Type TypeIndex (Kind KindIndex)) -> KindConstraint KindConstraintMetadata (Kind KindIndex) -> Bool
 hasConstraint e =
   \case
-    KindEquality k1 k2 ->
-      elem (KindEquality k1 k2) constraints || elem (KindEquality k2 k1) constraints
+    KindEquality x k1 k2 ->
+      elem (KindEquality x k1 k2) constraints || elem (KindEquality x k2 k1) constraints
  where
   constraints = runCollectKindConstraints mempty (collectKindConstraints e)
 

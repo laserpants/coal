@@ -30,7 +30,7 @@ import Noll.Language (
   TypeIndex (..),
   foldType,
  )
-import Noll.TypeSystem.TypeConstraint (MonomorphicSet (..), TypeConstraint (..), overMonomorphicSet)
+import Noll.TypeSystem.TypeConstraint (MonomorphicSet (..), TypeConstraint (..), TypeConstraintMetadata (..), overMonomorphicSet)
 import Noll.TypeSystem.TypeConstraint.Assumption (Assumption (..), assumptionNameIs)
 import Noll.Utils (Dictionary, concatMapM, forM, (<$$>))
 
@@ -44,17 +44,17 @@ data TypeConstraintsContext o k = TypeConstraintsContext
 overContextMonomorphicSet :: (MonomorphicSet (o k) -> MonomorphicSet (o k)) -> TypeConstraintsContext o k -> TypeConstraintsContext o k
 overContextMonomorphicSet fn TypeConstraintsContext{..} = TypeConstraintsContext{contextMonomorphicSet = fn contextMonomorphicSet, ..}
 
-type TypeConstraintsMonad o k t = RWS (TypeConstraintsContext o k) [TypeConstraint o k t] ()
+type TypeConstraintsMonad c o k t = RWS (TypeConstraintsContext o k) [TypeConstraint c o k t] ()
 
-newtype TypeConstraints o k t a = TypeConstraints {constraintsMonad :: TypeConstraintsMonad o k t a}
+newtype TypeConstraints c o k t a = TypeConstraints {constraintsMonad :: TypeConstraintsMonad c o k t a}
   deriving
     ( Functor
     , Applicative
     , Monad
     , MonadReader (TypeConstraintsContext o k)
-    , MonadWriter [TypeConstraint o k t]
+    , MonadWriter [TypeConstraint c o k t]
     , MonadState ()
-    , MonadRWS (TypeConstraintsContext o k) [TypeConstraint o k t] ()
+    , MonadRWS (TypeConstraintsContext o k) [TypeConstraint c o k t] ()
     )
 
 {-# INLINE monosetInsert #-}
@@ -66,37 +66,37 @@ monosetInsertMany :: (Ord k, Foldable f) => f (TypeIndex k) -> MonomorphicSet (T
 monosetInsertMany = flip (foldr monosetInsert)
 
 {-# INLINE localMonoset #-}
-localMonoset :: (MonomorphicSet (o k) -> MonomorphicSet (o k)) -> TypeConstraints o k t a -> TypeConstraints o k t a
+localMonoset :: (MonomorphicSet (o k) -> MonomorphicSet (o k)) -> TypeConstraints c o k t a -> TypeConstraints c o k t a
 localMonoset = local . overContextMonomorphicSet
 
-type CollectConstraints k = TypeConstraints TypeIndex k (Type TypeIndex k)
+type CollectConstraints c k = TypeConstraints c TypeIndex k (Type TypeIndex k)
 
 {-# INLINE runCollectTypeConstraints #-}
-runCollectTypeConstraints :: TypeConstraintsContext o k -> TypeConstraints o k t a -> (a, [TypeConstraint o k t])
+runCollectTypeConstraints :: TypeConstraintsContext o k -> TypeConstraints c o k t a -> (a, [TypeConstraint c o k t])
 runCollectTypeConstraints cc cs = evalRWS (constraintsMonad cs) cc ()
 
 {-# INLINE evalCollectTypeConstraints #-}
-evalCollectTypeConstraints :: TypeConstraintsContext o k -> TypeConstraints o k t a -> [TypeConstraint o k t]
+evalCollectTypeConstraints :: TypeConstraintsContext o k -> TypeConstraints c o k t a -> [TypeConstraint c o k t]
 evalCollectTypeConstraints = snd <$$> runCollectTypeConstraints
 
 {-# INLINE assertEquality #-}
-assertEquality :: Type TypeIndex k -> Type TypeIndex k -> CollectConstraints k ()
-assertEquality t1 t2 = tell [Equality t1 t2]
+assertEquality :: Type TypeIndex k -> Type TypeIndex k -> CollectConstraints TypeConstraintMetadata k ()
+assertEquality t1 t2 = tell [Equality TypeConstraintMetadata t1 t2]
 
-assertEqualityAssumptions :: Type TypeIndex k -> [Assumption (Type TypeIndex k)] -> CollectConstraints k ()
+assertEqualityAssumptions :: Type TypeIndex k -> [Assumption (Type TypeIndex k)] -> CollectConstraints TypeConstraintMetadata k ()
 assertEqualityAssumptions t ms =
   tell $ do
     Assumption{..} <- ms
-    pure (Equality assumptionType t)
+    pure (Equality TypeConstraintMetadata assumptionType t)
 
-assertImplicitAssumptions :: Type TypeIndex k -> [Assumption (Type TypeIndex k)] -> CollectConstraints k ()
+assertImplicitAssumptions :: Type TypeIndex k -> [Assumption (Type TypeIndex k)] -> CollectConstraints TypeConstraintMetadata k ()
 assertImplicitAssumptions t ms = do
   set <- asks contextMonomorphicSet
   tell $ do
     Assumption{..} <- ms
-    pure (Implicit assumptionType t set)
+    pure (Implicit TypeConstraintMetadata assumptionType t set)
 
-patternAssumptions :: [Assumption (Type TypeIndex k)] -> Pattern a (Type TypeIndex k) -> CollectConstraints k [Assumption (Type TypeIndex k)]
+patternAssumptions :: [Assumption (Type TypeIndex k)] -> Pattern a (Type TypeIndex k) -> CollectConstraints TypeConstraintMetadata k [Assumption (Type TypeIndex k)]
 patternAssumptions ms =
   \case
     PVariable _ (Label t name) -> do
@@ -104,7 +104,7 @@ patternAssumptions ms =
       assertEqualityAssumptions t ls
       pure rs
 
-collectConstraints :: (Ord k) => Expression a (Type TypeIndex k) -> CollectConstraints k [Assumption (Type TypeIndex k)]
+collectConstraints :: (Ord k) => Expression a (Type TypeIndex k) -> CollectConstraints TypeConstraintMetadata k [Assumption (Type TypeIndex k)]
 collectConstraints =
   \case
     EConstructor _ (Label _ name) -> do

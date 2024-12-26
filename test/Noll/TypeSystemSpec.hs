@@ -9,12 +9,12 @@ import Data.List.NonEmpty (NonEmpty (..))
 import Noll.Label (Label (..))
 import Noll.Language (Binding (..), Expression (..), Intrinsic (..), Kind (..), KindIndex (..), Pattern (..), Primitive (..), Type (..), TypeIndex (..), freshIdIn)
 import Noll.Library.Supply (supply)
-import Noll.TypeSystem.KindConstraint (KindConstraint (..))
+import Noll.TypeSystem.KindConstraint (KindConstraint (..), KindConstraintMetadata (..))
 import Noll.TypeSystem.KindConstraint.Collect (collectKindConstraints, runCollectKindConstraints)
 import Noll.TypeSystem.KindConstraint.Solver (solveKinds)
 import Noll.TypeSystem.KindSubstitution (KindSubstitution (..), applyKindSub)
-import Noll.TypeSystem.TypeConstraint (TypeConstraint (..))
-import Noll.TypeSystem.TypeConstraint.Collect
+import Noll.TypeSystem.TypeConstraint (TypeConstraint (..), TypeConstraintMetadata (..))
+import Noll.TypeSystem.TypeConstraint.Collect (TypeConstraintsContext (..), collectConstraints, evalCollectTypeConstraints)
 import Noll.TypeSystem.TypeConstraint.Solver (solveTypes)
 import Noll.TypeSystem.TypeSubstitution (TypeSubstitutable (..), TypeSubstitution, normalizeTypeIndexes)
 import Noll.TypeSystem.Unifier (evalUnifier)
@@ -35,7 +35,7 @@ testAddTypes e = normalizeTypeIndexes e3
   kindSub :: KindSubstitution
   kindSub = runIdentity (solveKinds kindConstraints)
 
-  kindConstraints :: [KindConstraint (Kind KindIndex)]
+  kindConstraints :: [KindConstraint KindConstraintMetadata (Kind KindIndex)]
   kindConstraints = runCollectKindConstraints mempty (collectKindConstraints e2)
 
   e2 :: Expression () (Type TypeIndex (Kind KindIndex))
@@ -44,7 +44,7 @@ testAddTypes e = normalizeTypeIndexes e3
   typeSub :: TypeSubstitution
   typeSub = evalUnifier (freshIdIn typeConstraints) (solveTypes typeConstraints)
 
-  typeConstraints :: [TypeConstraint TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))]
+  typeConstraints :: [TypeConstraint TypeConstraintMetadata TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))]
   typeConstraints =
     evalCollectTypeConstraints
       (TypeConstraintsContext mempty mempty)

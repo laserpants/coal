@@ -1,7 +1,13 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.TypeSystem.KindConstraint (KindConstraint (..)) where
+module Noll.TypeSystem.KindConstraint (
+  KindConstraint (..),
+  KindConstraintMetadata (..),
+) where
 
-data KindConstraint k = KindEquality k k
+data KindConstraint c k = KindEquality c k k
   deriving (Show, Eq, Ord, Read, Functor, Foldable)
+
+data KindConstraintMetadata = KindConstraintMetadata
+  deriving (Show, Eq, Ord, Read)
