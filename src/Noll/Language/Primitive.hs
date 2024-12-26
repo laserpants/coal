@@ -8,19 +8,19 @@ import GHC.Int (Int32, Int64)
 -- | Language primitives
 data Primitive
   = -- | Unit value
-    AUnit
+    LUnit
   | -- | Booleans
-    ABool Bool
+    LBool Bool
   | -- | 32-bit integers
-    AInt32 Int32
+    LInt32 Int32
   | -- | 64-bit integers
-    AInt64 Int64
+    LInt64 Int64
   | -- | Single-precision floating point numbers
-    AFloat Float
+    LFloat Float
   | -- | Double-precision floating point numbers
-    ADouble Double
+    LDouble Double
   | -- | Unicode character type
-    AChar Int32
+    LChar Int32
   | -- | Strings
-    AString Text
+    LString Text
   deriving (Show, Eq, Ord, Read)

@@ -81,7 +81,7 @@ fixture1 =
                 ( EApplication
                     3
                     (EVariable (Label 2 "y"))
-                    (ELiteral (ABool True) :| [])
+                    (ELiteral (LBool True) :| [])
                 )
                 :| []
             )
@@ -112,7 +112,7 @@ fixture2 =
         ( EApplication
             8
             (EVariable (Label 9 "f"))
-            (ELiteral (AInt32 1) :| [])
+            (ELiteral (LInt32 1) :| [])
             :| []
         )
     )

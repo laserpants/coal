@@ -27,21 +27,21 @@ instance (HasType o k t) => HasType o k (Label t) where
 instance HasType o k Primitive where
   typeOf =
     \case
-      AUnit ->
+      LUnit ->
         TIntrinsic IUnit
-      ABool{} ->
+      LBool{} ->
         TIntrinsic IBool
-      AInt32{} ->
+      LInt32{} ->
         TIntrinsic IInt32
-      AInt64{} ->
+      LInt64{} ->
         TIntrinsic IInt64
-      AFloat{} ->
+      LFloat{} ->
         TIntrinsic IFloat
-      ADouble{} ->
+      LDouble{} ->
         TIntrinsic IDouble
-      AChar{} ->
+      LChar{} ->
         TIntrinsic IChar
-      AString{} ->
+      LString{} ->
         TIntrinsic IString
 
 instance HasType o k (Pattern (Type o k)) where

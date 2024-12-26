@@ -51,7 +51,7 @@ spec =
                           ( EApplication
                               (typeVariable 3)
                               (EVariable (Label (typeBool `TArrow` typeVariable 3) "y"))
-                              (ELiteral (ABool True) :| [])
+                              (ELiteral (LBool True) :| [])
                           )
                           :| []
                       )
@@ -82,7 +82,7 @@ spec =
                   ( EApplication
                       typeInt32
                       (EVariable (Label (typeInt32 `TArrow` typeInt32) "f"))
-                      (ELiteral (AInt32 1) :| [])
+                      (ELiteral (LInt32 1) :| [])
                       :| []
                   )
               )
@@ -104,7 +104,7 @@ spec =
                             ( EApplication
                                 (typeVariableKind 3 0)
                                 (EVariable (Label (typeBool `TArrow` typeVariableKind 3 0) "y"))
-                                (ELiteral (ABool True) :| [])
+                                (ELiteral (LBool True) :| [])
                             )
                             :| []
                         )
@@ -133,7 +133,7 @@ fixture1 =
                   ( EApplication
                       (typeVariable 3)
                       (EVariable (Label (typeVariable 2) "y"))
-                      (ELiteral (ABool True) :| [])
+                      (ELiteral (LBool True) :| [])
                   )
                   :| []
               )
@@ -172,7 +172,7 @@ fixture2 =
           ( EApplication
               (typeVariable 8)
               (EVariable (Label (typeVariable 9) "f"))
-              (ELiteral (AInt32 1) :| [])
+              (ELiteral (LInt32 1) :| [])
               :| []
           )
       )
@@ -204,7 +204,7 @@ fixture3 =
                 ( EApplication
                     (typeVariable 3)
                     (EVariable (Label (typeBool `TArrow` typeVariable 3) "y"))
-                    (ELiteral (ABool True) :| [])
+                    (ELiteral (LBool True) :| [])
                 )
                 :| []
             )

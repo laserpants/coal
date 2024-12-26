@@ -76,7 +76,7 @@ fixture1 =
                 ( EApplication
                     ()
                     (EVariable (Label () "y"))
-                    (ELiteral (ABool True) :| [])
+                    (ELiteral (LBool True) :| [])
                 )
                 :| []
             )
@@ -101,7 +101,7 @@ fixture1Typed =
                   ( EApplication
                       (TVariable (TypeIndex KType 0))
                       (EVariable (Label (TIntrinsic IBool `TArrow` TVariable (TypeIndex KType 0)) "y"))
-                      (ELiteral (ABool True) :| [])
+                      (ELiteral (LBool True) :| [])
                   )
                   :| []
               )
@@ -133,7 +133,7 @@ fixture2 =
         ( EApplication
             ()
             (EVariable (Label () "f"))
-            (ELiteral (AInt32 1) :| [])
+            (ELiteral (LInt32 1) :| [])
             :| []
         )
     )
@@ -144,7 +144,7 @@ fixture3 =
   ELet
     ( BPattern
         (PVariable (Label () "x"))
-        (ELiteral (AInt32 1))
+        (ELiteral (LInt32 1))
         :| []
     )
     (
@@ -175,7 +175,7 @@ fixture2Typed =
           ( EApplication
               (TIntrinsic IInt32)
               (EVariable (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "f"))
-              (ELiteral (AInt32 1) :| [])
+              (ELiteral (LInt32 1) :| [])
               :| []
           )
       )

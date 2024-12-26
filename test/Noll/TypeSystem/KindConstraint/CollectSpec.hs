@@ -52,7 +52,7 @@ fixture1 =
                 ( EApplication
                     (TVariable (TypeIndex (KVariable (KindIndex 3)) 3))
                     (EVariable (Label (TIntrinsic IBool `TArrow` TVariable (TypeIndex (KVariable (KindIndex 3)) 3)) "y"))
-                    (ELiteral (ABool True) :| [])
+                    (ELiteral (LBool True) :| [])
                 )
                 :| []
             )
@@ -83,7 +83,7 @@ fixture2 =
         ( EApplication
             (TIntrinsic IInt32)
             (EVariable (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "f"))
-            (ELiteral (AInt32 1) :| [])
+            (ELiteral (LInt32 1) :| [])
             :| []
         )
     )
