@@ -5,8 +5,7 @@
 
 module Noll.Language.Type.HasKind (HasKind (..)) where
 
-import Noll.Language.Type (Type (..))
-import Noll.Language.Type.Index (TypeIndex (..))
+import Noll.Language.Type (Type (..), TypeIndex (..))
 import Noll.Language.Type.Kind (Kind (..))
 
 class HasKind p k where

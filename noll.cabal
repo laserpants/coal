@@ -50,13 +50,9 @@ library
       Noll.Language.Type
       Noll.Language.Type.Annotation
       Noll.Language.Type.HasKind
-      Noll.Language.Type.Index
       Noll.Language.Type.Intrinsic
       Noll.Language.Type.Kind
-      Noll.Language.Type.Kind.Index
-      Noll.Language.Type.Opaque
       Noll.Language.Type.Row
-      Noll.Language.Type.Row.Map
       Noll.Language.Type.Scheme
       Noll.Library.Environment
       Noll.Library.Supply

@@ -138,6 +138,8 @@ fixture2 =
         )
     )
 
+-- let x = 1 in x(x)
+
 fixture2Typed :: Expression (Type TypeIndex (Kind KindIndex))
 fixture2Typed =
   ( ELet

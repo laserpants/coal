@@ -1,6 +1,6 @@
 {-# LANGUAGE StrictData #-}
 
-module Noll.Language.Type.Kind (Kind (..), foldKind) where
+module Noll.Language.Type.Kind (Kind (..), KindIndex (..), foldKind) where
 
 data Kind o
   = KType
@@ -11,6 +11,9 @@ data Kind o
   deriving (Show, Eq, Ord, Read)
 
 infixr 1 `KArrow`
+
+newtype KindIndex = KindIndex Int
+  deriving (Show, Eq, Ord, Read)
 
 {-# INLINE foldKind #-}
 foldKind :: (Foldable f) => Kind o -> f (Kind o) -> Kind o

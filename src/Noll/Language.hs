@@ -4,11 +4,9 @@ module Noll.Language (
   module Noll.Language.Type.HasKind,
   module Noll.Language.HasType,
   module Noll.Language.Type,
-  module Noll.Language.Type.Index,
   module Noll.Language.Type.Intrinsic,
   module Noll.Language.Type.Kind,
   module Noll.Language.Type.Scheme,
-  module Noll.Language.Type.Kind.Index,
   module Noll.Language.Type.Row,
   module Noll.Language.Trait,
   module Noll.Language.Pattern,
@@ -27,9 +25,7 @@ import Noll.Language.Primitive
 import Noll.Language.Trait
 import Noll.Language.Type
 import Noll.Language.Type.HasKind
-import Noll.Language.Type.Index
 import Noll.Language.Type.Intrinsic
 import Noll.Language.Type.Kind
-import Noll.Language.Type.Kind.Index
 import Noll.Language.Type.Row
 import Noll.Language.Type.Scheme
