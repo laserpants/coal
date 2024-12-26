@@ -23,9 +23,9 @@ spec =
     it "" $ hasTypedExpression fixture1 == fixture1Typed
     it "" $ hasTypedExpression fixture2 == fixture2Typed
     it "" $ hasSolverTypeError fixture4 (SolverError (ConstraintIfCondition "if"))
-    it "" $ hasSolverTypeError fixture5 (SolverError (ConstraintIfBranches "if"))
+    it "" $ hasSolverTypeError fixture5 (SolverError (ConstraintIfBranches "if" (TIntrinsic IInt32) (TIntrinsic IBool)))
 
-hasSolverTypeError :: (Eq a) => Expression a () -> SolverError (TypeConstraintMetadata a) -> Bool
+hasSolverTypeError :: (Eq a) => Expression a () -> SolverError (TypeConstraintMetadata (Kind KindIndex) a) -> Bool
 hasSolverTypeError e err = let (_, errs, _) = addTypes e in err `elem` errs
 
 hasSolverKindError :: (Eq a) => Expression a () -> SolverError KindConstraintMetadata -> Bool
@@ -38,7 +38,7 @@ addTypes ::
   (Eq a) =>
   Expression a () ->
   ( Expression a (Type TypeIndex (Kind KindIndex))
-  , [SolverError (TypeConstraintMetadata a)]
+  , [SolverError (TypeConstraintMetadata (Kind KindIndex) a)]
   , [SolverError KindConstraintMetadata]
   )
 addTypes e = (normalizeTypeIndexes e3, errs1, errs2)

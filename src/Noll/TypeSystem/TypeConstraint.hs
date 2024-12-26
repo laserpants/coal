@@ -15,7 +15,7 @@ module Noll.TypeSystem.TypeConstraint (
 where
 
 import Data.Set (Set, intersection, union)
-import Noll.Language (HasActive (..), HasTypeIndexes (..), Scheme (..), TypeIndex (..))
+import Noll.Language (HasActive (..), HasTypeIndexes (..), Scheme (..), Type (..), TypeIndex (..))
 
 -- | Monomorphic type variable set
 newtype MonomorphicSet m = MonomorphicSet {monomorphicSet :: Set m}
@@ -31,10 +31,10 @@ data TypeConstraint c o k t
   | Explicit c t (Scheme o k t)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
 
-data TypeConstraintMetadata a
+data TypeConstraintMetadata k a
   = TypeConstraintMetadata
   | ConstraintIfCondition a
-  | ConstraintIfBranches a
+  | ConstraintIfBranches a (Type TypeIndex k) (Type TypeIndex k)
   deriving (Show, Eq, Ord, Read)
 
 instance HasTypeIndexes k (MonomorphicSet (TypeIndex k)) where
