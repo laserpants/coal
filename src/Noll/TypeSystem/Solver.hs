@@ -137,6 +137,11 @@ solveKinds ::
 solveKinds [] =
   pure mempty
 solveKinds (KindEquality _ k1 k2 : cs) = do
-  sub1 <- unifyKinds k1 k2
-  sub2 <- solveKinds (applyKindSub sub1 cs)
-  pure (sub2 <> sub1)
+  res <- runExceptT (unifyKinds k1 k2)
+  case res of
+    Left err ->
+      -- error "TODO"
+      solveKinds cs
+    Right sub1 -> do
+      sub2 <- solveKinds (applyKindSub sub1 cs)
+      pure (sub2 <> sub1)

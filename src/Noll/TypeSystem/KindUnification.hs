@@ -1,16 +1,20 @@
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
 module Noll.TypeSystem.KindUnification (KindUnifiable (..)) where
 
+import Control.Monad.Except
 import qualified Data.List.NonEmpty as NonEmpty
 import Noll.Language (Kind (..), KindIndex (..))
 import Noll.TypeSystem.KindSubstitution (KindSubstitutable (..), KindSubstitution (..), applyKindSub, mapsToKind)
+import Noll.TypeSystem.TypeUnification.Error (UnificationError (..))
+import qualified Noll.TypeSystem.TypeUnification.Error as Error
 import Noll.Utils (NonEmpty)
 
 class KindUnifiable u where
-  unifyKinds :: (Monad m) => u -> u -> m KindSubstitution
+  unifyKinds :: (MonadError UnificationError m) => u -> u -> m KindSubstitution
 
 instance (KindSubstitutable u, KindUnifiable u) => KindUnifiable [u] where
   unifyKinds [] [] =
@@ -37,7 +41,7 @@ instance KindUnifiable (Kind KindIndex) where
   unifyKinds (KArrow k1 m1) (KArrow k2 m2) =
     unifyKinds [k1, m1] [k2, m2]
   unifyKinds _ _ =
-    error "Cannot unify" -- unificationError Error.CannotUnify
+    throwError Error.CannotUnifyKinds
 
 bindKind :: KindIndex -> Kind KindIndex -> KindSubstitution
 bindKind (KindIndex index) =
