@@ -53,7 +53,7 @@ collectConstraintsInType =
       collectConstraintsInType t1
       collectConstraintsInType t2
     TIntrinsic t -> do
-      traverse collectConstraintsInType t
+      traverse_ collectConstraintsInType t
       pure ()
     TRow row ->
       -- TODO

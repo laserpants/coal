@@ -96,7 +96,7 @@ assertImplicitAssumptions t ms = do
     Assumption{..} <- ms
     pure (Implicit assumptionType t set)
 
-patternAssumptions :: (Ord k) => [Assumption (Type TypeIndex k)] -> Pattern (Type TypeIndex k) -> CollectConstraints k [Assumption (Type TypeIndex k)]
+patternAssumptions :: [Assumption (Type TypeIndex k)] -> Pattern (Type TypeIndex k) -> CollectConstraints k [Assumption (Type TypeIndex k)]
 patternAssumptions ms =
   \case
     PVariable (Label t name) -> do
