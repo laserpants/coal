@@ -56,11 +56,11 @@ library
       Noll.Language.Type.Scheme
       Noll.Library.Environment
       Noll.Library.Supply
+      Noll.TypeSystem.ConstraintSolver
       Noll.TypeSystem.KindConstraint
       Noll.TypeSystem.KindConstraint.Collect
       Noll.TypeSystem.KindSubstitution
       Noll.TypeSystem.KindUnification
-      Noll.TypeSystem.Solver
       Noll.TypeSystem.TypeConstraint
       Noll.TypeSystem.TypeConstraint.Assumption
       Noll.TypeSystem.TypeConstraint.Collect
@@ -106,9 +106,9 @@ test-suite noll-test
   main-is: Spec.hs
   other-modules:
       Noll.Language.HasTypeIndexesSpec
+      Noll.TypeSystem.ConstraintSolverSpec
       Noll.TypeSystem.KindConstraint.CollectSpec
       Noll.TypeSystem.KindSubstitutionSpec
-      Noll.TypeSystem.SolverSpec
       Noll.TypeSystem.TypeConstraint.CollectSpec
       Noll.TypeSystem.TypeSubstitutionSpec
       Noll.TypeSystemSpec

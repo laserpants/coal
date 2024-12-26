@@ -4,7 +4,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.TypeSystem.Solver (
+module Noll.TypeSystem.ConstraintSolver (
   Solver (..),
   SolverError (..),
   runSolver,
