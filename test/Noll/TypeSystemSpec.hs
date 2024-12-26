@@ -33,7 +33,7 @@ testAddTypes e = normalizeTypeIndexes e3
 
   -- TODO
   res2 :: (KindSubstitution, [SolverError])
-  res2 = evalSolver 1 (solveKinds kindConstraints)
+  res2 = evalSolver 0 (solveKinds kindConstraints)
 
   kindConstraints :: [KindConstraint KindConstraintMetadata (Kind KindIndex)]
   kindConstraints = runCollectKindConstraints mempty (collectKindConstraints e2)
