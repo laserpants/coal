@@ -32,7 +32,7 @@ testAddTypes e = normalizeTypeIndexes e3
   (kindSub, _) = res2
 
   -- TODO
-  res2 :: (KindSubstitution, [SolverError])
+  res2 :: (KindSubstitution, [SolverError KindConstraintMetadata])
   res2 = evalSolver 0 (solveKinds kindConstraints)
 
   kindConstraints :: [KindConstraint KindConstraintMetadata (Kind KindIndex)]
@@ -43,7 +43,7 @@ testAddTypes e = normalizeTypeIndexes e3
 
   (typeSub, _) = res1
 
-  res1 :: (TypeSubstitution, [SolverError])
+  res1 :: (TypeSubstitution, [SolverError TypeConstraintMetadata])
   res1 = evalSolver (freshIdIn typeConstraints) (solveTypes typeConstraints)
 
   typeConstraints :: [TypeConstraint TypeConstraintMetadata TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))]

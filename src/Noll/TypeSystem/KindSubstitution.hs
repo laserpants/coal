@@ -81,8 +81,8 @@ instance KindSubstitutable (Type TypeIndex (Kind KindIndex)) where
 instance (KindSubstitutable k) => KindSubstitutable (KindConstraint c k) where
   applyKindSub sub =
     \case
-      KindEquality x k1 k2 ->
-        KindEquality x (applyKindSub sub k1) (applyKindSub sub k2)
+      KindEquality meta k1 k2 ->
+        KindEquality meta (applyKindSub sub k1) (applyKindSub sub k2)
 
 instance KindSubstitutable (Expression a (Type TypeIndex (Kind KindIndex))) where
   applyKindSub = fmap . applyKindSub
