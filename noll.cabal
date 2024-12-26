@@ -58,14 +58,12 @@ library
       Noll.Library.Supply
       Noll.TypeSystem.KindConstraint
       Noll.TypeSystem.KindConstraint.Collect
-      Noll.TypeSystem.KindConstraint.Solver
       Noll.TypeSystem.KindSubstitution
       Noll.TypeSystem.KindUnification
       Noll.TypeSystem.Solver
       Noll.TypeSystem.TypeConstraint
       Noll.TypeSystem.TypeConstraint.Assumption
       Noll.TypeSystem.TypeConstraint.Collect
-      Noll.TypeSystem.TypeConstraint.Solver
       Noll.TypeSystem.TypeSubstitution
       Noll.TypeSystem.TypeUnification
       Noll.TypeSystem.TypeUnification.Error

@@ -11,13 +11,11 @@ import Noll.Language (Binding (..), Expression (..), Intrinsic (..), Kind (..), 
 import Noll.Library.Supply (supply)
 import Noll.TypeSystem.KindConstraint (KindConstraint (..), KindConstraintMetadata (..))
 import Noll.TypeSystem.KindConstraint.Collect (collectKindConstraints, runCollectKindConstraints)
-import Noll.TypeSystem.KindConstraint.Solver (solveKinds)
 import Noll.TypeSystem.KindSubstitution (KindSubstitution (..), applyKindSub)
+import Noll.TypeSystem.Solver (SolverError, evalSolver, solveKinds, solveTypes)
 import Noll.TypeSystem.TypeConstraint (TypeConstraint (..), TypeConstraintMetadata (..))
 import Noll.TypeSystem.TypeConstraint.Collect (TypeConstraintsContext (..), collectConstraints, evalCollectTypeConstraints)
-import Noll.TypeSystem.TypeConstraint.Solver (solveTypes)
 import Noll.TypeSystem.TypeSubstitution (TypeSubstitutable (..), TypeSubstitution, normalizeTypeIndexes)
-import Noll.TypeSystem.Solver (SolverError, evalSolver)
 import Test.Hspec (Spec, describe, it)
 
 spec :: Spec

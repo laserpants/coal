@@ -5,10 +5,9 @@ module Noll.TypeSystem.TypeConstraint.SolverSpec where
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import Noll.Language (Intrinsic (..), Kind (..), KindIndex (..), Type (..), TypeIndex (..), freshIdIn)
+import Noll.TypeSystem.Solver (evalSolver, solveTypes)
 import Noll.TypeSystem.TypeConstraint (MonomorphicSet (..), TypeConstraint (..))
-import Noll.TypeSystem.TypeConstraint.Solver
 import Noll.TypeSystem.TypeSubstitution (TypeSubstitution (..))
-import Noll.TypeSystem.Solver (evalSolver)
 import Test.Hspec (Spec, describe, it)
 
 spec :: Spec
@@ -63,15 +62,15 @@ fixture2 =
   , (Equality () (typeVariable 5) (typeVariable 8 `TArrow` typeVariable 4))
   ]
 
-hasSubstitutions :: [SolverConstraint () (Kind KindIndex) (Type TypeIndex (Kind KindIndex))] -> [(Int, Type TypeIndex (Kind KindIndex))] -> Bool
+hasSubstitutions :: [TypeConstraint () TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))] -> [(Int, Type TypeIndex (Kind KindIndex))] -> Bool
 hasSubstitutions = all . uncurry . hasSubstitution
 
-hasSubstitution :: [SolverConstraint () (Kind KindIndex) (Type TypeIndex (Kind KindIndex))] -> Int -> Type TypeIndex (Kind KindIndex) -> Bool
+hasSubstitution :: [TypeConstraint () TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))] -> Int -> Type TypeIndex (Kind KindIndex) -> Bool
 hasSubstitution cs k s = Map.lookup k (typeSubstitutionMap sub) == Just s
  where
   (sub, _) = evalSolver (freshIdIn cs) (solveTypes cs)
 
-hasNoErrors :: [SolverConstraint () (Kind KindIndex) (Type TypeIndex (Kind KindIndex))] -> Bool
+hasNoErrors :: [TypeConstraint () TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))] -> Bool
 hasNoErrors cs = errors == []
  where
   (_, errors) = evalSolver (freshIdIn cs) (solveTypes cs)
