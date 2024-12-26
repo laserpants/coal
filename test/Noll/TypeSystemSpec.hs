@@ -139,6 +139,20 @@ fixture2 =
     )
 
 -- let x = 1 in x(x)
+fixture3 :: Expression ()
+fixture3 =
+  ELet
+    ( BPattern
+        (PVariable (Label () "x"))
+        (ELiteral (AInt32 1))
+        :| []
+    )
+    (
+      EApplication
+        ()
+        (EVariable (Label () "x"))
+        (EVariable (Label () "x") :| [])
+    )
 
 fixture2Typed :: Expression (Type TypeIndex (Kind KindIndex))
 fixture2Typed =
