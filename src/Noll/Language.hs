@@ -1,5 +1,5 @@
 module Noll.Language (
-  module Noll.Language.DataConstructor,
+  module Noll.Language.Constructor,
   module Noll.Language.HasTypeIndexes,
   module Noll.Language.Type.HasKind,
   module Noll.Language.HasType,
@@ -15,7 +15,7 @@ module Noll.Language (
   module Noll.Language.Expression.Binding,
 ) where
 
-import Noll.Language.DataConstructor
+import Noll.Language.Constructor
 import Noll.Language.Expression
 import Noll.Language.Expression.Binding
 import Noll.Language.HasType

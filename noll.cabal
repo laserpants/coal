@@ -33,7 +33,7 @@ library
       Noll.Core.LLVM.IRValue
       Noll.Label
       Noll.Language
-      Noll.Language.DataConstructor
+      Noll.Language.Constructor
       Noll.Language.Expression
       Noll.Language.Expression.Binding
       Noll.Language.Expression.Operator.Binary

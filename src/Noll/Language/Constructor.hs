@@ -1,11 +1,11 @@
 {-# LANGUAGE StrictData #-}
 
-module Noll.Language.DataConstructor (DataConstructor (..)) where
+module Noll.Language.Constructor (Constructor (..)) where
 
 import Noll.Language.Type.Scheme (Scheme (..))
 import Noll.Utils (Name)
 
-data DataConstructor o k t = DataConstructor
+data Constructor o k t = Constructor
   { constructorName :: Name
   , constructorScheme :: Scheme o k t
   }

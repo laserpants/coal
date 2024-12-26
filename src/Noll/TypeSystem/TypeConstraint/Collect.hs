@@ -20,7 +20,7 @@ import qualified Data.Set as Set
 import Noll.Label (Label (..))
 import Noll.Language (
   Binding (..),
-  DataConstructor (..),
+  Constructor (..),
   Expression (..),
   HasType (..),
   HasTypeIndexes (..),
@@ -36,7 +36,7 @@ import Noll.Utils (Dictionary, concatMapM, forM, (<$$>))
 
 data TypeConstraintsContext o k = TypeConstraintsContext
   { contextMonomorphicSet :: MonomorphicSet (o k)
-  , contextDataConstructors :: Dictionary (DataConstructor o k (Type o k))
+  , contextConstructors :: Dictionary (Constructor o k (Type o k))
   }
   deriving (Show, Eq, Ord, Read)
 
