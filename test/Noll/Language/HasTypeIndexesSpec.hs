@@ -16,46 +16,46 @@ spec =
   describe "Noll.Language.HasTypeIndexes" $ do
     describe "Scheme" $ do
       it "" $
-        typeIndexesIn fixture_1 == (Set.fromList [TypeIndex () 3] :: Set (TypeIndex ()))
+        typeIndexesIn fixture1 == (Set.fromList [TypeIndex () 3] :: Set (TypeIndex ()))
       it "" $
-        typeIndexesIn fixture_2 == (Set.fromList [TypeIndex () 0, TypeIndex () 3] :: Set (TypeIndex ()))
+        typeIndexesIn fixture2 == (Set.fromList [TypeIndex () 0, TypeIndex () 3] :: Set (TypeIndex ()))
       it "" $
-        typeIndexesIn fixture_3 == (mempty :: Set (TypeIndex ()))
+        typeIndexesIn fixture3 == (mempty :: Set (TypeIndex ()))
       it "" $
-        typeIndexesIn fixture_4 == (mempty :: Set (TypeIndex (Kind Int)))
+        typeIndexesIn fixture4 == (mempty :: Set (TypeIndex (Kind Int)))
       it "" $
-        typeIndexesIn fixture_5 == (Set.fromList [TypeIndex KType 1] :: Set (TypeIndex (Kind Int)))
+        typeIndexesIn fixture5 == (Set.fromList [TypeIndex KType 1] :: Set (TypeIndex (Kind Int)))
 
-fixture_1 :: Scheme TypeIndex () (Type TypeIndex ())
-fixture_1 =
+fixture1 :: Scheme TypeIndex () (Type TypeIndex ())
+fixture1 =
   Forall
     (Set.fromList [TypeIndex () 0])
     []
     (TVariable (TypeIndex () 3) `TArrow` TVariable (TypeIndex () 0) `TArrow` TVariable (TypeIndex () 0))
 
-fixture_2 :: Scheme TypeIndex () (Type TypeIndex ())
-fixture_2 =
+fixture2 :: Scheme TypeIndex () (Type TypeIndex ())
+fixture2 =
   Forall
     (Set.fromList [])
     []
     (TVariable (TypeIndex () 3) `TArrow` TVariable (TypeIndex () 0) `TArrow` TVariable (TypeIndex () 0))
 
-fixture_3 :: Scheme TypeIndex () (Type TypeIndex ())
-fixture_3 =
+fixture3 :: Scheme TypeIndex () (Type TypeIndex ())
+fixture3 =
   Forall
     (Set.fromList [TypeIndex () 0])
     []
     (TVariable (TypeIndex () 0) `TArrow` TVariable (TypeIndex () 0) `TArrow` TVariable (TypeIndex () 0))
 
-fixture_4 :: Scheme TypeIndex (Kind Int) (Type TypeIndex (Kind Int))
-fixture_4 =
+fixture4 :: Scheme TypeIndex (Kind Int) (Type TypeIndex (Kind Int))
+fixture4 =
   Forall
     (Set.fromList [TypeIndex KType 0])
     []
     (TVariable (TypeIndex KRow 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KTrait 0))
 
-fixture_5 :: Scheme TypeIndex (Kind Int) (Type TypeIndex (Kind Int))
-fixture_5 =
+fixture5 :: Scheme TypeIndex (Kind Int) (Type TypeIndex (Kind Int))
+fixture5 =
   Forall
     (Set.fromList [TypeIndex KType 0])
     []

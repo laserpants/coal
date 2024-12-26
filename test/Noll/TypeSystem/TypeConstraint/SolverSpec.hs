@@ -16,7 +16,7 @@ spec =
   describe "Noll.TypeSystem.TypeConstraint.Solver" $ do
     it "" $
       hasSubstitutions
-        fixture_1
+        fixture1
         [ (1, typeBool `TArrow` typeVariable 3)
         , (2, typeBool `TArrow` typeVariable 3)
         , (4, typeVariable 3)
@@ -24,7 +24,7 @@ spec =
         ]
     it "" $
       hasSubstitutions
-        fixture_2
+        fixture2
         [ (1, typeVariable 3 `TArrow` typeVariable 3)
         , (2, typeVariable 3)
         , (4, typeInt32)
@@ -36,8 +36,8 @@ spec =
         ]
 
 -- fn(m) => let y = m in let x = y(true) in x
-fixture_1 :: [TypeConstraint TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))]
-fixture_1 =
+fixture1 :: [TypeConstraint TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))]
+fixture1 =
   [ (Equality (typeVariable 2) (typeBool `TArrow` typeVariable 3))
   , (Equality (typeVariable 5) (typeVariable 1))
   , (Equality (typeVariable 6) (typeVariable 1))
@@ -47,8 +47,8 @@ fixture_1 =
   ]
 
 -- let f = fn(x) => x in (f f)(f 1)
-fixture_2 :: [TypeConstraint TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))]
-fixture_2 =
+fixture2 :: [TypeConstraint TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))]
+fixture2 =
   [ (Implicit (typeVariable 6) (typeVariable 1) (MonomorphicSet mempty))
   , (Implicit (typeVariable 7) (typeVariable 1) (MonomorphicSet mempty))
   , (Implicit (typeVariable 9) (typeVariable 1) (MonomorphicSet mempty))

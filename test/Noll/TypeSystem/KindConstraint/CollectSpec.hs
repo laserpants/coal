@@ -15,12 +15,12 @@ spec =
   describe "Noll.TypeSystem.KindConstraint.Collect" $ do
     it "" $
       hasConstraints
-        fixture_1
+        fixture1
         [ KindEquality (KVariable (KindIndex 3)) KType
         ]
     it "" $
       hasConstraints
-        fixture_2
+        fixture2
         [ KindEquality (KVariable (KindIndex 3)) KType
         ]
 
@@ -36,8 +36,8 @@ hasConstraint e =
   constraints = runCollectKindConstraints mempty (collectKindConstraints e)
 
 -- fn(m) => let y = m in let x = y(true) in x
-fixture_1 :: Expression (Type TypeIndex (Kind KindIndex))
-fixture_1 =
+fixture1 :: Expression (Type TypeIndex (Kind KindIndex))
+fixture1 =
   ELambda
     (PVariable (Label (TIntrinsic IBool `TArrow` TVariable (TypeIndex (KVariable (KindIndex 3)) 3)) "m") :| [])
     ( ELet
@@ -62,8 +62,8 @@ fixture_1 =
     )
 
 -- let f = fn(x) => x in (f f)(f 1)
-fixture_2 :: Expression (Type TypeIndex (Kind KindIndex))
-fixture_2 =
+fixture2 :: Expression (Type TypeIndex (Kind KindIndex))
+fixture2 =
   ELet
     ( BPattern
         (PVariable (Label (TVariable (TypeIndex (KVariable (KindIndex 3)) 3) `TArrow` TVariable (TypeIndex (KVariable (KindIndex 3)) 3)) "f"))

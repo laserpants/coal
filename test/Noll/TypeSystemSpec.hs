@@ -22,62 +22,12 @@ import Test.Hspec (Spec, describe, it)
 spec :: Spec
 spec =
   describe "Noll.TypeSystem" $ do
-    it "" $
-      spock fixture_1
-        == ( ELambda
-              (PVariable (Label (TIntrinsic IBool `TArrow` TVariable (TypeIndex KType 0)) "m") :| [])
-              ( ELet
-                  ( BPattern
-                      (PVariable (Label (TIntrinsic IBool `TArrow` TVariable (TypeIndex KType 0)) "y"))
-                      (EVariable (Label (TIntrinsic IBool `TArrow` TVariable (TypeIndex KType 0)) "m"))
-                      :| []
-                  )
-                  ( ELet
-                      ( BPattern
-                          (PVariable (Label (TVariable (TypeIndex KType 0)) "x"))
-                          ( EApplication
-                              (TVariable (TypeIndex KType 0))
-                              (EVariable (Label (TIntrinsic IBool `TArrow` TVariable (TypeIndex KType 0)) "y"))
-                              (ELiteral (ABool True) :| [])
-                          )
-                          :| []
-                      )
-                      ( EVariable (Label (TVariable (TypeIndex KType 0)) "x")
-                      )
-                  )
-              )
-           )
-    it "" $
-      spock fixture_2
-        == ( ELet
-              ( BPattern
-                  (PVariable (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0)) "f"))
-                  ( ELambda
-                      (PVariable (Label (TVariable (TypeIndex KType 0)) "x") :| [])
-                      (EVariable (Label (TVariable (TypeIndex KType 0)) "x"))
-                  )
-                  :| []
-              )
-              ( EApplication
-                  (TIntrinsic IInt32)
-                  ( EApplication
-                      (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
-                      (EVariable (Label ((TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "f"))
-                      (EVariable (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "f") :| [])
-                  )
-                  ( EApplication
-                      (TIntrinsic IInt32)
-                      (EVariable (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "f"))
-                      (ELiteral (AInt32 1) :| [])
-                      :| []
-                  )
-              )
-           )
+    it "" $ testAddTypes fixture1 == fixture1Typed
+    it "" $ testAddTypes fixture2 == fixture2Typed
 
-spock e = e4 -- undefined
+testAddTypes :: Expression () -> Expression (Type TypeIndex (Kind KindIndex))
+testAddTypes e = normalizeTypeIndexes e3
  where
-  e4 = normalizeTypeIndexes e3
-
   e3 :: Expression (Type TypeIndex (Kind KindIndex))
   e3 = applyKindSub kindSub e2
 
@@ -91,23 +41,26 @@ spock e = e4 -- undefined
   e2 = apply typeSub e1
 
   typeSub :: TypeSubstitution
-  typeSub = evalUnifier (freshIdIn constraints) (solveTypes constraints)
+  typeSub = evalUnifier (freshIdIn typeConstraints) (solveTypes typeConstraints)
 
-  constraints :: [TypeConstraint TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))]
-  constraints =
+  typeConstraints :: [TypeConstraint TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))]
+  typeConstraints =
     evalCollectTypeConstraints
       (TypeConstraintsContext mempty mempty)
       (collectConstraints e1)
 
+  e1 :: Expression (Type TypeIndex (Kind KindIndex))
   e1 = fmap typeVariable e0
+
+  e0 :: Expression Int
   e0 = evalState (traverse (const supply) e) (0 :: Int)
 
 typeVariable :: Int -> Type TypeIndex (Kind KindIndex)
 typeVariable n = TVariable (TypeIndex (KVariable (KindIndex n)) n)
 
 -- fn(m) => let y = m in let x = y(true) in x
-fixture_1 :: Expression ()
-fixture_1 =
+fixture1 :: Expression ()
+fixture1 =
   ELambda
     (PVariable (Label () "m") :| [])
     ( ELet
@@ -131,9 +84,35 @@ fixture_1 =
         )
     )
 
+fixture1Typed :: Expression (Type TypeIndex (Kind KindIndex))
+fixture1Typed =
+  ( ELambda
+      (PVariable (Label (TIntrinsic IBool `TArrow` TVariable (TypeIndex KType 0)) "m") :| [])
+      ( ELet
+          ( BPattern
+              (PVariable (Label (TIntrinsic IBool `TArrow` TVariable (TypeIndex KType 0)) "y"))
+              (EVariable (Label (TIntrinsic IBool `TArrow` TVariable (TypeIndex KType 0)) "m"))
+              :| []
+          )
+          ( ELet
+              ( BPattern
+                  (PVariable (Label (TVariable (TypeIndex KType 0)) "x"))
+                  ( EApplication
+                      (TVariable (TypeIndex KType 0))
+                      (EVariable (Label (TIntrinsic IBool `TArrow` TVariable (TypeIndex KType 0)) "y"))
+                      (ELiteral (ABool True) :| [])
+                  )
+                  :| []
+              )
+              ( EVariable (Label (TVariable (TypeIndex KType 0)) "x")
+              )
+          )
+      )
+  )
+
 -- let f = fn(x) => x in (f f)(f 1)
-fixture_2 :: Expression ()
-fixture_2 =
+fixture2 :: Expression ()
+fixture2 =
   ELet
     ( BPattern
         (PVariable (Label () "f"))
@@ -157,3 +136,30 @@ fixture_2 =
             :| []
         )
     )
+
+fixture2Typed :: Expression (Type TypeIndex (Kind KindIndex))
+fixture2Typed =
+  ( ELet
+      ( BPattern
+          (PVariable (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0)) "f"))
+          ( ELambda
+              (PVariable (Label (TVariable (TypeIndex KType 0)) "x") :| [])
+              (EVariable (Label (TVariable (TypeIndex KType 0)) "x"))
+          )
+          :| []
+      )
+      ( EApplication
+          (TIntrinsic IInt32)
+          ( EApplication
+              (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
+              (EVariable (Label ((TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "f"))
+              (EVariable (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "f") :| [])
+          )
+          ( EApplication
+              (TIntrinsic IInt32)
+              (EVariable (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "f"))
+              (ELiteral (AInt32 1) :| [])
+              :| []
+          )
+      )
+  )

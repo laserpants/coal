@@ -19,7 +19,7 @@ spec =
       let t = TVariable (TypeIndex (KVariable (KindIndex 1)) 1) :: Type TypeIndex (Kind KindIndex)
       applyKindSub (2 `mapsToKind` KType) t == t
     it "" $
-      applyKindSub (3 `mapsToKind` KType) fixture_1
+      applyKindSub (3 `mapsToKind` KType) fixture1
         == ( ELet
               ( BPattern
                   (PVariable (Label (TVariable (TypeIndex KType 3) `TArrow` TVariable (TypeIndex KType 3)) "f"))
@@ -45,8 +45,8 @@ spec =
               )
            )
 
-fixture_1 :: Expression (Type TypeIndex (Kind KindIndex))
-fixture_1 =
+fixture1 :: Expression (Type TypeIndex (Kind KindIndex))
+fixture1 =
   ELet
     ( BPattern
         (PVariable (Label (TVariable (TypeIndex (KVariable (KindIndex 3)) 3) `TArrow` TVariable (TypeIndex (KVariable (KindIndex 3)) 3)) "f"))

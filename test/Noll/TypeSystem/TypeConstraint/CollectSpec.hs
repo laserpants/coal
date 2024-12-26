@@ -14,10 +14,10 @@ import Test.Hspec (Spec, describe, it)
 spec :: Spec
 spec =
   describe "Noll.TypeSystem.TypeConstraint.Collect" $ do
-    describe "fixture_1" $ do
+    describe "fixture1" $ do
       it "" $
         hasConstraints
-          fixture_1
+          fixture1
           [ (Equality (typeVariable 2) (typeBool `TArrow` typeVariable 3))
           , (Equality (typeVariable 5) (typeVariable 1))
           , (Equality (typeVariable 6) (typeVariable 1))
@@ -25,10 +25,10 @@ spec =
           , (Implicit (typeVariable 4) (typeVariable 7) (MonomorphicSet (Set.fromList [TypeIndex () 5])))
           , (Implicit (typeVariable 2) (typeVariable 6) (MonomorphicSet (Set.fromList [TypeIndex () 5])))
           ]
-    describe "fixture_2" $ do
+    describe "fixture2" $ do
       it "" $
         hasConstraints
-          fixture_2
+          fixture2
           [ (Implicit (typeVariable 6) (typeVariable 1) (MonomorphicSet mempty))
           , (Implicit (typeVariable 7) (typeVariable 1) (MonomorphicSet mempty))
           , (Implicit (typeVariable 9) (typeVariable 1) (MonomorphicSet mempty))
@@ -65,8 +65,8 @@ typeInt32 :: Type TypeIndex k
 typeInt32 = TIntrinsic IInt32
 
 -- fn(m) => let y = m in let x = y(true) in x
-fixture_1 :: Expression Int
-fixture_1 =
+fixture1 :: Expression Int
+fixture1 =
   ELambda
     (PVariable (Label 5 "m") :| [])
     ( ELet
@@ -91,8 +91,8 @@ fixture_1 =
     )
 
 -- let f = fn(x) => x in (f f)(f 1)
-fixture_2 :: Expression Int
-fixture_2 =
+fixture2 :: Expression Int
+fixture2 =
   ELet
     ( BPattern
         (PVariable (Label 1 "f"))

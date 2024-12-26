@@ -36,7 +36,7 @@ spec =
         apply (1 `mapsToType` TIntrinsic IBool) t == t
       it "" $
         applySubstitutionEquals
-          fixture_1
+          fixture1
           ( ELambda
               (PVariable (Label (typeBool `TArrow` typeVariable 3) "m") :| [])
               ( ELet
@@ -62,7 +62,7 @@ spec =
           )
       it "" $
         applySubstitutionEquals
-          fixture_2
+          fixture2
           ( ELet
               ( BPattern
                   (PVariable (Label (typeVariable 3 `TArrow` typeVariable 3) "f"))
@@ -89,7 +89,7 @@ spec =
           )
     describe "normalizeTypeIndexes" $ do
       it "" $
-        normalizeTypeIndexes fixture_3
+        normalizeTypeIndexes fixture3
           == ( ELambda
                 (PVariable (Label (typeBool `TArrow` typeVariableKind 3 0) "m") :| [])
                 ( ELet
@@ -117,8 +117,8 @@ spec =
 applySubstitutionEquals :: (Expression (Type TypeIndex (Kind KindIndex)), TypeSubstitution) -> Expression (Type TypeIndex (Kind KindIndex)) -> Bool
 applySubstitutionEquals (e, sub) res = apply sub e == res
 
-fixture_1 :: (Expression (Type TypeIndex (Kind KindIndex)), TypeSubstitution)
-fixture_1 =
+fixture1 :: (Expression (Type TypeIndex (Kind KindIndex)), TypeSubstitution)
+fixture1 =
   ( ELambda
       (PVariable (Label (typeVariable 5) "m") :| [])
       ( ELet
@@ -151,8 +151,8 @@ fixture_1 =
       ]
   )
 
-fixture_2 :: (Expression (Type TypeIndex (Kind KindIndex)), TypeSubstitution)
-fixture_2 =
+fixture2 :: (Expression (Type TypeIndex (Kind KindIndex)), TypeSubstitution)
+fixture2 =
   ( ELet
       ( BPattern
           (PVariable (Label (typeVariable 1) "f"))
@@ -188,8 +188,8 @@ fixture_2 =
       ]
   )
 
-fixture_3 :: Expression (Type TypeIndex (Kind KindIndex))
-fixture_3 =
+fixture3 :: Expression (Type TypeIndex (Kind KindIndex))
+fixture3 =
   ELambda
     (PVariable (Label (typeBool `TArrow` typeVariable 3) "m") :| [])
     ( ELet
