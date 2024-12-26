@@ -4,7 +4,6 @@
 module Noll.TypeSystemSpec where
 
 import Control.Monad.State (evalState)
-import Control.Monad.Writer (runWriter)
 import Data.List.NonEmpty (NonEmpty (..))
 import Noll.Label (Label (..))
 import Noll.Language (Binding (..), Expression (..), Intrinsic (..), Kind (..), KindIndex (..), Pattern (..), Primitive (..), Type (..), TypeIndex (..), freshIdIn)
@@ -32,8 +31,9 @@ testAddTypes e = normalizeTypeIndexes e3
 
   (kindSub, _) = res2
 
+  -- TODO
   res2 :: (KindSubstitution, [SolverError])
-  res2 = runWriter (solveKinds kindConstraints)
+  res2 = evalSolver 1 (solveKinds kindConstraints)
 
   kindConstraints :: [KindConstraint KindConstraintMetadata (Kind KindIndex)]
   kindConstraints = runCollectKindConstraints mempty (collectKindConstraints e2)
