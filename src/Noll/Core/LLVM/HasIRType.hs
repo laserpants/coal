@@ -20,14 +20,14 @@ instance HasIRType IRValue where
       IR.Global t _ ->
         t
       IR.I1{} ->
-        Int1
+        TInt1
       IR.I32{} ->
-        Int32
+        TInt32
       IR.I64{} ->
-        Int64
+        TInt64
       IR.Float{} ->
-        Float
+        TFloat
       IR.Double{} ->
-        Double
+        TDouble
       IR.Null ->
-        Ptr Int8
+        TPtr TInt8

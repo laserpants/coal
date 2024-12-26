@@ -7,9 +7,9 @@ import Noll.Utils (Name)
 -- | Core language types
 data Type
   = -- | Type constructor
-    Con Name [Type]
+    TCon Name [Type]
   | -- | Opaque type
-    Opaque
+    TOpq
   | -- | Row extension
     RExt Name Type Type
   | -- | Empty row
