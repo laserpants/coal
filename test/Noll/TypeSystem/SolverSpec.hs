@@ -22,8 +22,6 @@ spec =
         , (5, typeBool `TArrow` typeVariable 3)
         ]
     it "" $
-      hasNoErrors fixture1
-    it "" $
       hasSubstitutions
         fixture2
         [ (1, typeVariable 3 `TArrow` typeVariable 3)
@@ -35,8 +33,8 @@ spec =
         , (8, typeInt32)
         , (9, typeInt32 `TArrow` typeInt32)
         ]
-    it "" $
-      hasNoErrors fixture2
+    it "" $ hasNoErrors fixture1
+    it "" $ hasNoErrors fixture2
 
 -- fn(m) => let y = m in let x = y(true) in x
 fixture1 :: [TypeConstraint () TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))]
