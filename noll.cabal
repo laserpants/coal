@@ -108,8 +108,8 @@ test-suite noll-test
       Noll.Language.HasTypeIndexesSpec
       Noll.TypeSystem.KindConstraint.CollectSpec
       Noll.TypeSystem.KindSubstitutionSpec
+      Noll.TypeSystem.SolverSpec
       Noll.TypeSystem.TypeConstraint.CollectSpec
-      Noll.TypeSystem.TypeConstraint.SolverSpec
       Noll.TypeSystem.TypeSubstitutionSpec
       Noll.TypeSystemSpec
       Paths_noll

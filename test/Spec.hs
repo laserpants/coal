@@ -1,8 +1,8 @@
 import qualified Noll.Language.HasTypeIndexesSpec
 import qualified Noll.TypeSystem.KindConstraint.CollectSpec
 import qualified Noll.TypeSystem.KindSubstitutionSpec
+import qualified Noll.TypeSystem.SolverSpec
 import qualified Noll.TypeSystem.TypeConstraint.CollectSpec
-import qualified Noll.TypeSystem.TypeConstraint.SolverSpec
 import qualified Noll.TypeSystem.TypeSubstitutionSpec
 import qualified Noll.TypeSystemSpec
 import Test.Hspec (hspec)
@@ -14,6 +14,6 @@ main =
     Noll.Language.HasTypeIndexesSpec.spec
     Noll.TypeSystem.TypeSubstitutionSpec.spec
     Noll.TypeSystem.KindSubstitutionSpec.spec
-    Noll.TypeSystem.TypeConstraint.SolverSpec.spec
+    Noll.TypeSystem.SolverSpec.spec
     Noll.TypeSystem.KindConstraint.CollectSpec.spec
     Noll.TypeSystemSpec.spec
