@@ -38,6 +38,15 @@ spec =
           , (Equality TypeConstraintMetadata (typeVariable 1) (typeVariable 2 `TArrow` typeVariable 3))
           , (Equality TypeConstraintMetadata (typeVariable 5) (typeVariable 8 `TArrow` typeVariable 4))
           ]
+    describe "fixture3" $ do
+      it "" $
+        hasConstraints
+          fixture3
+          [ (Equality TypeConstraintMetadata (typeVariable 2) (typeVariable 3 `TArrow` typeVariable 1))
+          , (Equality TypeConstraintMetadata (typeVariable 0) typeInt32)
+          , (Implicit TypeConstraintMetadata (typeVariable 2) (typeVariable 0) (MonomorphicSet mempty))
+          , (Implicit TypeConstraintMetadata (typeVariable 3) (typeVariable 0) (MonomorphicSet mempty))
+          ]
 
 hasConstraints :: Expression a Int -> [TypeConstraint TypeConstraintMetadata TypeIndex () (Type TypeIndex ())] -> Bool
 hasConstraints = all . hasConstraint
@@ -124,4 +133,21 @@ fixture2 =
             (ELiteral () (LInt32 1) :| [])
             :| []
         )
+    )
+
+-- let x = 1 in x(x)
+fixture3 :: Expression () Int
+fixture3 =
+  ELet
+    ()
+    ( BPattern
+        (PVariable () (Label 0 "x"))
+        (ELiteral () (LInt32 1))
+        :| []
+    )
+    ( EApplication
+        ()
+        1
+        (EVariable () (Label 2 "x"))
+        (EVariable () (Label 3 "x") :| [])
     )

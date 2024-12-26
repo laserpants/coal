@@ -35,6 +35,7 @@ spec =
         ]
     it "" $ hasNoErrors fixture1
     it "" $ hasNoErrors fixture2
+    it "" $ hasNoErrors fixture3
 
 -- fn(m) => let y = m in let x = y(true) in x
 fixture1 :: [TypeConstraint () TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))]
@@ -58,6 +59,15 @@ fixture2 =
   , (Equality () (typeVariable 9) (typeInt32 `TArrow` typeVariable 8))
   , (Equality () (typeVariable 1) (typeVariable 2 `TArrow` typeVariable 3))
   , (Equality () (typeVariable 5) (typeVariable 8 `TArrow` typeVariable 4))
+  ]
+
+-- let x = 1 in x(x)
+fixture3 :: [TypeConstraint () TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))]
+fixture3 =
+  [ (Equality () (typeVariable 2) (typeVariable 3 `TArrow` typeVariable 1))
+  , (Equality () (typeVariable 0) typeInt32)
+  , (Implicit () (typeVariable 2) (typeVariable 0) (MonomorphicSet mempty))
+  , (Implicit () (typeVariable 3) (typeVariable 0) (MonomorphicSet mempty))
   ]
 
 hasSubstitutions :: [TypeConstraint () TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))] -> [(Int, Type TypeIndex (Kind KindIndex))] -> Bool

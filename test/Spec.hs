@@ -1,7 +1,7 @@
 import qualified Noll.Language.HasTypeIndexesSpec
+import qualified Noll.TypeSystem.ConstraintSolverSpec
 import qualified Noll.TypeSystem.KindConstraint.CollectSpec
 import qualified Noll.TypeSystem.KindSubstitutionSpec
-import qualified Noll.TypeSystem.ConstraintSolverSpec
 import qualified Noll.TypeSystem.TypeConstraint.CollectSpec
 import qualified Noll.TypeSystem.TypeSubstitutionSpec
 import qualified Noll.TypeSystemSpec

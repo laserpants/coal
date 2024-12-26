@@ -15,8 +15,7 @@ module Noll.TypeSystem.ConstraintSolver (
 
 import Control.Monad.Except (runExceptT)
 import Control.Monad.State (MonadState, State, runState)
-import Control.Monad.Writer (MonadWriter, WriterT, runWriterT)
-import Data.Foldable (foldrM)
+import Control.Monad.Writer (MonadWriter, WriterT, runWriterT, tell)
 import Data.List (delete, find)
 import Data.Set (intersection, (\\))
 import qualified Data.Set as Set
@@ -28,6 +27,7 @@ import Noll.TypeSystem.KindUnification (KindUnifiable (..))
 import Noll.TypeSystem.TypeConstraint (MonomorphicSet (..), TypeConstraint (..))
 import Noll.TypeSystem.TypeSubstitution (TypeSubstitutable (..), TypeSubstitution (..), mapsToType)
 import Noll.TypeSystem.TypeUnification (TypeUnifiable (..))
+import Noll.Utils (foldrM)
 
 data SolverError = SolverError
   deriving (Show, Eq, Ord, Read)
@@ -96,8 +96,8 @@ solveTypes constraints =
     Choice cs (Equality _ t1 t2) -> do
       res <- runExceptT (unify t1 t2)
       case res of
-        Left err ->
-          -- error "TODO"
+        Left err -> do
+          tell [SolverError]
           solveTypes cs
         Right sub1 -> do
           sub2 <- solveTypes (apply sub1 cs)
@@ -139,8 +139,8 @@ solveKinds [] =
 solveKinds (KindEquality _ k1 k2 : cs) = do
   res <- runExceptT (unifyKinds k1 k2)
   case res of
-    Left err ->
-      -- error "TODO"
+    Left err -> do
+      tell [SolverError]
       solveKinds cs
     Right sub1 -> do
       sub2 <- solveKinds (applyKindSub sub1 cs)
