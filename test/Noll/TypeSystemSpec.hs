@@ -131,6 +131,7 @@ fixture_1 =
         )
     )
 
+-- let f = fn(x) => x in (f f)(f 1)
 fixture_2 :: Expression ()
 fixture_2 =
   ELet
