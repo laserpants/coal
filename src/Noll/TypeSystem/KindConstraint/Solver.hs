@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.TypeSystem.KindConstraint.Solver where
+module Noll.TypeSystem.KindConstraint.Solver (solveKinds) where
 
 import Control.Monad.State (MonadState)
 import Noll.TypeSystem.KindConstraint (KindConstraint (..))
@@ -9,7 +9,7 @@ import Noll.TypeSystem.KindSubstitution (KindSubstitutable (..), KindSubstitutio
 import Noll.TypeSystem.KindUnification (KindUnifiable (..))
 
 solveKinds ::
-  ( KindSubstitutable (KindConstraint k)
+  ( KindSubstitutable k
   , KindUnifiable k
   , MonadState Int m
   ) =>

@@ -6,12 +6,9 @@
 module Noll.Language.HasType (HasType (..)) where
 
 import Noll.Label (Label (..))
-import Noll.Language.Expression (Expression)
-import qualified Noll.Language.Expression as Expr
+import Noll.Language.Expression (Expression (..))
 import Noll.Language.Pattern (Pattern (..))
-import qualified Noll.Language.Pattern as Pattern
-import Noll.Language.Primitive (Primitive)
-import qualified Noll.Language.Primitive as Prim
+import Noll.Language.Primitive (Primitive (..))
 import Noll.Language.Type (Type (..), foldType)
 import Noll.Language.Type.Intrinsic (Intrinsic (..))
 
@@ -30,55 +27,55 @@ instance (HasType o k t) => HasType o k (Label t) where
 instance HasType o k Primitive where
   typeOf =
     \case
-      Prim.Unit ->
-        Intrinsic Unit
-      Prim.Bool{} ->
-        Intrinsic Bool
-      Prim.Int32{} ->
-        Intrinsic Int32
-      Prim.Int64{} ->
-        Intrinsic Int64
-      Prim.Float{} ->
-        Intrinsic Float
-      Prim.Double{} ->
-        Intrinsic Double
-      Prim.Char{} ->
-        Intrinsic Char
-      Prim.String{} ->
-        Intrinsic String
+      AUnit ->
+        TIntrinsic IUnit
+      ABool{} ->
+        TIntrinsic IBool
+      AInt32{} ->
+        TIntrinsic IInt32
+      AInt64{} ->
+        TIntrinsic IInt64
+      AFloat{} ->
+        TIntrinsic IFloat
+      ADouble{} ->
+        TIntrinsic IDouble
+      AChar{} ->
+        TIntrinsic IChar
+      AString{} ->
+        TIntrinsic IString
 
 instance HasType o k (Pattern (Type o k)) where
   typeOf =
     \case
-      Pattern.Variable t ->
+      PVariable t ->
         typeOf t
-      Pattern.Constructor t _ ->
+      PConstructor t _ ->
         typeOf t
 
 instance HasType o k (Expression (Type o k)) where
   typeOf =
     \case
-      Expr.Literal t ->
+      ELiteral t ->
         typeOf t
-      Expr.Constructor t ->
+      EConstructor t ->
         typeOf t
-      Expr.Variable t ->
+      EVariable t ->
         typeOf t
-      Expr.Application t _ _ ->
+      EApplication t _ _ ->
         typeOf t
-      Expr.If _ _ t ->
+      EIf _ _ t ->
         typeOf t
-      Expr.Let _ t ->
+      ELet _ t ->
         typeOf t
-      Expr.Lambda ts t ->
+      ELambda ts t ->
         foldType (typeOf t) (typeOf <$> ts)
-      Expr.BinaryOperator (t, _) ->
+      EBinaryOperator (t, _) ->
         typeOf t
-      Expr.UnaryOperator (t, _) ->
+      EUnaryOperator (t, _) ->
         typeOf t
-      Expr.Record t _ _ ->
+      ERecord t _ _ ->
         typeOf t
-      Expr.ListCons t _ _ ->
+      EListCons t _ _ ->
         typeOf t
-      Expr.ListLiteral t _ ->
+      EListLiteral t _ ->
         typeOf t

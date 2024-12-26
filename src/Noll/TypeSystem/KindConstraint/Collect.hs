@@ -12,21 +12,18 @@ import Control.Monad.RWS (MonadRWS, MonadReader, MonadState, MonadWriter, RWS, a
 import qualified Data.Map.Strict as Map
 import Noll.Label (Label (..))
 import Noll.Language (
-  Expression,
+  Binding (..),
+  Expression (..),
   HasKind (..),
-  Kind,
+  Kind (..),
   KindIndex (..),
-  Type,
+  Pattern (..),
+  Type (..),
   TypeIndex (..),
   foldKind,
  )
-import qualified Noll.Language.Expression as Expr
-import qualified Noll.Language.Expression.Binding as Binding
-import qualified Noll.Language.Pattern as Pattern
-import qualified Noll.Language.Type as Type
-import qualified Noll.Language.Type.Kind as Kind
 import Noll.TypeSystem.KindConstraint (KindConstraint (..))
-import Noll.Utils (Dictionary (..), forM_, traverse_)
+import Noll.Utils (Dictionary, forM_, traverse_)
 
 type KindConstraintsMonad k = RWS (Dictionary k) [KindConstraint k] ()
 
@@ -48,22 +45,22 @@ runCollectKindConstraints d cs = snd (execRWS (constraintsMonad cs) d ())
 collectConstraintsInType :: Type TypeIndex (Kind KindIndex) -> KindConstraints (Kind KindIndex) ()
 collectConstraintsInType =
   \case
-    Type.Application k t ts -> do
+    TApplication k t ts -> do
       collectConstraintsInType t
       traverse_ collectConstraintsInType ts
       tell [KindEquality k (foldKind (kindOf t) (kindOf <$> ts))]
-    Type.Arrow t1 t2 -> do
+    TArrow t1 t2 -> do
       collectConstraintsInType t1
       collectConstraintsInType t2
-    Type.Intrinsic t -> do
+    TIntrinsic t -> do
       traverse collectConstraintsInType t
       pure ()
-    Type.Row row ->
+    TRow row ->
       -- TODO
       undefined
-    Type.Alias _ _ t ->
+    TAlias _ _ t ->
       collectConstraintsInType t
-    Type.Constructor k name -> do
+    TConstructor k name -> do
       env <- ask
       case Map.lookup name env of
         Nothing ->
@@ -71,33 +68,33 @@ collectConstraintsInType =
         Just k1 ->
           tell [KindEquality k k1]
       pure ()
-    Type.Variable (TypeIndex k _) ->
+    TVariable (TypeIndex k _) ->
       pure ()
 
 collectKindConstraints :: Expression (Type TypeIndex (Kind KindIndex)) -> KindConstraints (Kind KindIndex) ()
 collectKindConstraints =
   \case
-    Expr.Constructor (Label t name) -> do
+    EConstructor (Label t name) -> do
       collectConstraintsInType t
-    Expr.Variable (Label t _) -> do
-      tell [KindEquality (kindOf t) Kind.Type]
+    EVariable (Label t _) -> do
+      tell [KindEquality (kindOf t) KType]
       collectConstraintsInType t
-    Expr.Lambda _ e -> do
+    ELambda _ e -> do
       collectKindConstraints e
-    Expr.Let gs e1 -> do
+    ELet gs e1 -> do
       forM_ gs $
         \case
-          Binding.Pattern (Pattern.Variable (Label t _)) e -> do
+          BPattern (PVariable (Label t _)) e -> do
             collectConstraintsInType t
             collectKindConstraints e
       collectKindConstraints e1
-    Expr.If e1 e2 e3 -> do
+    EIf e1 e2 e3 -> do
       collectKindConstraints e1
       collectKindConstraints e2
       collectKindConstraints e3
-    Expr.Application t e1 es -> do
+    EApplication t e1 es -> do
       collectConstraintsInType t
       collectKindConstraints e1
       traverse_ collectKindConstraints es
-    Expr.Literal{} ->
+    ELiteral{} ->
       pure ()

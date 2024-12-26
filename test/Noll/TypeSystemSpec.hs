@@ -6,14 +6,7 @@ module Noll.TypeSystemSpec where
 import Control.Monad.State (evalState)
 import Data.List.NonEmpty (NonEmpty (..))
 import Noll.Label (Label (..))
-import Noll.Language (Expression, Kind, KindIndex (..), Type, TypeIndex (..), freshIdIn)
-import qualified Noll.Language.Expression as Expr
-import qualified Noll.Language.Expression.Binding as Binding
-import qualified Noll.Language.Pattern as Pattern
-import qualified Noll.Language.Primitive as Prim
-import qualified Noll.Language.Type as Type
-import qualified Noll.Language.Type.Intrinsic as Intrinsic
-import qualified Noll.Language.Type.Kind as Kind
+import Noll.Language (Binding (..), Expression (..), Intrinsic (..), Kind (..), KindIndex (..), Pattern (..), Primitive (..), Type (..), TypeIndex (..), freshIdIn)
 import Noll.Library.Supply (supply)
 import Noll.TypeSystem.KindConstraint (KindConstraint (..))
 import Noll.TypeSystem.KindConstraint.Collect (collectKindConstraints, runCollectKindConstraints)
@@ -31,51 +24,51 @@ spec =
   describe "Noll.TypeSystem" $ do
     it "" $
       spock fixture_1
-        == ( Expr.Lambda
-              (Pattern.Variable (Label (Type.Intrinsic Intrinsic.Bool `Type.Arrow` Type.Variable (TypeIndex Kind.Type 0)) "m") :| [])
-              ( Expr.Let
-                  ( Binding.Pattern
-                      (Pattern.Variable (Label (Type.Intrinsic Intrinsic.Bool `Type.Arrow` Type.Variable (TypeIndex Kind.Type 0)) "y"))
-                      (Expr.Variable (Label (Type.Intrinsic Intrinsic.Bool `Type.Arrow` Type.Variable (TypeIndex Kind.Type 0)) "m"))
+        == ( ELambda
+              (PVariable (Label (TIntrinsic IBool `TArrow` TVariable (TypeIndex KType 0)) "m") :| [])
+              ( ELet
+                  ( BPattern
+                      (PVariable (Label (TIntrinsic IBool `TArrow` TVariable (TypeIndex KType 0)) "y"))
+                      (EVariable (Label (TIntrinsic IBool `TArrow` TVariable (TypeIndex KType 0)) "m"))
                       :| []
                   )
-                  ( Expr.Let
-                      ( Binding.Pattern
-                          (Pattern.Variable (Label (Type.Variable (TypeIndex Kind.Type 0)) "x"))
-                          ( Expr.Application
-                              (Type.Variable (TypeIndex Kind.Type 0))
-                              (Expr.Variable (Label (Type.Intrinsic Intrinsic.Bool `Type.Arrow` Type.Variable (TypeIndex Kind.Type 0)) "y"))
-                              (Expr.Literal (Prim.Bool True) :| [])
+                  ( ELet
+                      ( BPattern
+                          (PVariable (Label (TVariable (TypeIndex KType 0)) "x"))
+                          ( EApplication
+                              (TVariable (TypeIndex KType 0))
+                              (EVariable (Label (TIntrinsic IBool `TArrow` TVariable (TypeIndex KType 0)) "y"))
+                              (ELiteral (ABool True) :| [])
                           )
                           :| []
                       )
-                      ( Expr.Variable (Label (Type.Variable (TypeIndex Kind.Type 0)) "x")
+                      ( EVariable (Label (TVariable (TypeIndex KType 0)) "x")
                       )
                   )
               )
            )
     it "" $
       spock fixture_2
-        == ( Expr.Let
-              ( Binding.Pattern
-                  (Pattern.Variable (Label (Type.Variable (TypeIndex Kind.Type 0) `Type.Arrow` Type.Variable (TypeIndex Kind.Type 0)) "f"))
-                  ( Expr.Lambda
-                      (Pattern.Variable (Label (Type.Variable (TypeIndex Kind.Type 0)) "x") :| [])
-                      (Expr.Variable (Label (Type.Variable (TypeIndex Kind.Type 0)) "x"))
+        == ( ELet
+              ( BPattern
+                  (PVariable (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0)) "f"))
+                  ( ELambda
+                      (PVariable (Label (TVariable (TypeIndex KType 0)) "x") :| [])
+                      (EVariable (Label (TVariable (TypeIndex KType 0)) "x"))
                   )
                   :| []
               )
-              ( Expr.Application
-                  (Type.Intrinsic Intrinsic.Int32)
-                  ( Expr.Application
-                      (Type.Intrinsic Intrinsic.Int32 `Type.Arrow` Type.Intrinsic Intrinsic.Int32)
-                      (Expr.Variable (Label ((Type.Intrinsic Intrinsic.Int32 `Type.Arrow` Type.Intrinsic Intrinsic.Int32) `Type.Arrow` Type.Intrinsic Intrinsic.Int32 `Type.Arrow` Type.Intrinsic Intrinsic.Int32) "f"))
-                      (Expr.Variable (Label (Type.Intrinsic Intrinsic.Int32 `Type.Arrow` Type.Intrinsic Intrinsic.Int32) "f") :| [])
+              ( EApplication
+                  (TIntrinsic IInt32)
+                  ( EApplication
+                      (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
+                      (EVariable (Label ((TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "f"))
+                      (EVariable (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "f") :| [])
                   )
-                  ( Expr.Application
-                      (Type.Intrinsic Intrinsic.Int32)
-                      (Expr.Variable (Label (Type.Intrinsic Intrinsic.Int32 `Type.Arrow` Type.Intrinsic Intrinsic.Int32) "f"))
-                      (Expr.Literal (Prim.Int32 1) :| [])
+                  ( EApplication
+                      (TIntrinsic IInt32)
+                      (EVariable (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "f"))
+                      (ELiteral (AInt32 1) :| [])
                       :| []
                   )
               )
@@ -110,56 +103,56 @@ spock e = e4 -- undefined
   e0 = evalState (traverse (const supply) e) (0 :: Int)
 
 typeVariable :: Int -> Type TypeIndex (Kind KindIndex)
-typeVariable n = Type.Variable (TypeIndex (Kind.Variable (KindIndex n)) n)
+typeVariable n = TVariable (TypeIndex (KVariable (KindIndex n)) n)
 
 -- fn(m) => let y = m in let x = y(true) in x
 fixture_1 :: Expression ()
 fixture_1 =
-  Expr.Lambda
-    (Pattern.Variable (Label () "m") :| [])
-    ( Expr.Let
-        ( Binding.Pattern
-            (Pattern.Variable (Label () "y"))
-            (Expr.Variable (Label () "m"))
+  ELambda
+    (PVariable (Label () "m") :| [])
+    ( ELet
+        ( BPattern
+            (PVariable (Label () "y"))
+            (EVariable (Label () "m"))
             :| []
         )
-        ( Expr.Let
-            ( Binding.Pattern
-                (Pattern.Variable (Label () "x"))
-                ( Expr.Application
+        ( ELet
+            ( BPattern
+                (PVariable (Label () "x"))
+                ( EApplication
                     ()
-                    (Expr.Variable (Label () "y"))
-                    (Expr.Literal (Prim.Bool True) :| [])
+                    (EVariable (Label () "y"))
+                    (ELiteral (ABool True) :| [])
                 )
                 :| []
             )
-            ( Expr.Variable (Label () "x")
+            ( EVariable (Label () "x")
             )
         )
     )
 
 fixture_2 :: Expression ()
 fixture_2 =
-  Expr.Let
-    ( Binding.Pattern
-        (Pattern.Variable (Label () "f"))
-        ( Expr.Lambda
-            (Pattern.Variable (Label () "x") :| [])
-            (Expr.Variable (Label () "x"))
+  ELet
+    ( BPattern
+        (PVariable (Label () "f"))
+        ( ELambda
+            (PVariable (Label () "x") :| [])
+            (EVariable (Label () "x"))
         )
         :| []
     )
-    ( Expr.Application
+    ( EApplication
         ()
-        ( Expr.Application
+        ( EApplication
             ()
-            (Expr.Variable (Label () "f"))
-            (Expr.Variable (Label () "f") :| [])
+            (EVariable (Label () "f"))
+            (EVariable (Label () "f") :| [])
         )
-        ( Expr.Application
+        ( EApplication
             ()
-            (Expr.Variable (Label () "f"))
-            (Expr.Literal (Prim.Int32 1) :| [])
+            (EVariable (Label () "f"))
+            (ELiteral (AInt32 1) :| [])
             :| []
         )
     )

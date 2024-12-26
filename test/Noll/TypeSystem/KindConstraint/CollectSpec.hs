@@ -5,14 +5,7 @@ module Noll.TypeSystem.KindConstraint.CollectSpec where
 
 import Data.List.NonEmpty (NonEmpty (..))
 import Noll.Label (Label (..))
-import Noll.Language (Expression, Kind, KindIndex (..), Type, TypeIndex (..))
-import qualified Noll.Language.Expression as Expr
-import qualified Noll.Language.Expression.Binding as Binding
-import qualified Noll.Language.Pattern as Pattern
-import qualified Noll.Language.Primitive as Prim
-import qualified Noll.Language.Type as Type
-import qualified Noll.Language.Type.Intrinsic as Intrinsic
-import qualified Noll.Language.Type.Kind as Kind
+import Noll.Language (Binding (..), Expression (..), Intrinsic (..), Kind (..), KindIndex (..), Pattern (..), Primitive (..), Type (..), TypeIndex (..))
 import Noll.TypeSystem.KindConstraint (KindConstraint (..))
 import Noll.TypeSystem.KindConstraint.Collect (collectKindConstraints, runCollectKindConstraints)
 import Test.Hspec (Spec, describe, it)
@@ -23,12 +16,12 @@ spec =
     it "" $
       hasConstraints
         fixture_1
-        [ KindEquality (Kind.Variable (KindIndex 3)) Kind.Type
+        [ KindEquality (KVariable (KindIndex 3)) KType
         ]
     it "" $
       hasConstraints
         fixture_2
-        [ KindEquality (Kind.Variable (KindIndex 3)) Kind.Type
+        [ KindEquality (KVariable (KindIndex 3)) KType
         ]
 
 hasConstraints :: Expression (Type TypeIndex (Kind KindIndex)) -> [KindConstraint (Kind KindIndex)] -> Bool
@@ -45,25 +38,25 @@ hasConstraint e =
 -- fn(m) => let y = m in let x = y(true) in x
 fixture_1 :: Expression (Type TypeIndex (Kind KindIndex))
 fixture_1 =
-  Expr.Lambda
-    (Pattern.Variable (Label (Type.Intrinsic Intrinsic.Bool `Type.Arrow` Type.Variable (TypeIndex (Kind.Variable (KindIndex 3)) 3)) "m") :| [])
-    ( Expr.Let
-        ( Binding.Pattern
-            (Pattern.Variable (Label (Type.Intrinsic Intrinsic.Bool `Type.Arrow` Type.Variable (TypeIndex (Kind.Variable (KindIndex 3)) 3)) "y"))
-            (Expr.Variable (Label (Type.Intrinsic Intrinsic.Bool `Type.Arrow` Type.Variable (TypeIndex (Kind.Variable (KindIndex 3)) 3)) "m"))
+  ELambda
+    (PVariable (Label (TIntrinsic IBool `TArrow` TVariable (TypeIndex (KVariable (KindIndex 3)) 3)) "m") :| [])
+    ( ELet
+        ( BPattern
+            (PVariable (Label (TIntrinsic IBool `TArrow` TVariable (TypeIndex (KVariable (KindIndex 3)) 3)) "y"))
+            (EVariable (Label (TIntrinsic IBool `TArrow` TVariable (TypeIndex (KVariable (KindIndex 3)) 3)) "m"))
             :| []
         )
-        ( Expr.Let
-            ( Binding.Pattern
-                (Pattern.Variable (Label (Type.Variable (TypeIndex (Kind.Variable (KindIndex 3)) 3)) "x"))
-                ( Expr.Application
-                    (Type.Variable (TypeIndex (Kind.Variable (KindIndex 3)) 3))
-                    (Expr.Variable (Label (Type.Intrinsic Intrinsic.Bool `Type.Arrow` Type.Variable (TypeIndex (Kind.Variable (KindIndex 3)) 3)) "y"))
-                    (Expr.Literal (Prim.Bool True) :| [])
+        ( ELet
+            ( BPattern
+                (PVariable (Label (TVariable (TypeIndex (KVariable (KindIndex 3)) 3)) "x"))
+                ( EApplication
+                    (TVariable (TypeIndex (KVariable (KindIndex 3)) 3))
+                    (EVariable (Label (TIntrinsic IBool `TArrow` TVariable (TypeIndex (KVariable (KindIndex 3)) 3)) "y"))
+                    (ELiteral (ABool True) :| [])
                 )
                 :| []
             )
-            ( Expr.Variable (Label (Type.Variable (TypeIndex (Kind.Variable (KindIndex 3)) 3)) "x")
+            ( EVariable (Label (TVariable (TypeIndex (KVariable (KindIndex 3)) 3)) "x")
             )
         )
     )
@@ -71,26 +64,26 @@ fixture_1 =
 -- let f = fn(x) => x in (f f)(f 1)
 fixture_2 :: Expression (Type TypeIndex (Kind KindIndex))
 fixture_2 =
-  Expr.Let
-    ( Binding.Pattern
-        (Pattern.Variable (Label (Type.Variable (TypeIndex (Kind.Variable (KindIndex 3)) 3) `Type.Arrow` Type.Variable (TypeIndex (Kind.Variable (KindIndex 3)) 3)) "f"))
-        ( Expr.Lambda
-            (Pattern.Variable (Label (Type.Variable (TypeIndex (Kind.Variable (KindIndex 3)) 3)) "x") :| [])
-            (Expr.Variable (Label (Type.Variable (TypeIndex (Kind.Variable (KindIndex 3)) 3)) "x"))
+  ELet
+    ( BPattern
+        (PVariable (Label (TVariable (TypeIndex (KVariable (KindIndex 3)) 3) `TArrow` TVariable (TypeIndex (KVariable (KindIndex 3)) 3)) "f"))
+        ( ELambda
+            (PVariable (Label (TVariable (TypeIndex (KVariable (KindIndex 3)) 3)) "x") :| [])
+            (EVariable (Label (TVariable (TypeIndex (KVariable (KindIndex 3)) 3)) "x"))
         )
         :| []
     )
-    ( Expr.Application
-        (Type.Intrinsic Intrinsic.Int32)
-        ( Expr.Application
-            (Type.Intrinsic Intrinsic.Int32 `Type.Arrow` Type.Intrinsic Intrinsic.Int32)
-            (Expr.Variable (Label ((Type.Intrinsic Intrinsic.Int32 `Type.Arrow` Type.Intrinsic Intrinsic.Int32) `Type.Arrow` Type.Intrinsic Intrinsic.Int32 `Type.Arrow` Type.Intrinsic Intrinsic.Int32) "f"))
-            (Expr.Variable (Label (Type.Intrinsic Intrinsic.Int32 `Type.Arrow` Type.Intrinsic Intrinsic.Int32) "f") :| [])
+    ( EApplication
+        (TIntrinsic IInt32)
+        ( EApplication
+            (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
+            (EVariable (Label ((TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "f"))
+            (EVariable (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "f") :| [])
         )
-        ( Expr.Application
-            (Type.Intrinsic Intrinsic.Int32)
-            (Expr.Variable (Label (Type.Intrinsic Intrinsic.Int32 `Type.Arrow` Type.Intrinsic Intrinsic.Int32) "f"))
-            (Expr.Literal (Prim.Int32 1) :| [])
+        ( EApplication
+            (TIntrinsic IInt32)
+            (EVariable (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "f"))
+            (ELiteral (AInt32 1) :| [])
             :| []
         )
     )

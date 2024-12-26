@@ -9,17 +9,17 @@ import Noll.Utils (Dictionary)
 
 data Pattern t
   = -- | Wildcard pattern
-    Any t
+    PAny t
   | -- | Variable pattern
-    Variable (Label t)
+    PVariable (Label t)
   | -- | Data constructor pattern
-    Constructor (Label t) [Pattern t]
+    PConstructor (Label t) [Pattern t]
   | -- | Literal pattern
-    Literal Primitive
+    PLiteral Primitive
   | -- | Record pattern
-    Record t (Dictionary (Pattern t)) (Maybe (Pattern t))
+    PRecord t (Dictionary (Pattern t)) (Maybe (Pattern t))
   | -- | List cons-operator
-    ListCons t (Pattern t) (Pattern t)
+    PListCons t (Pattern t) (Pattern t)
   | -- | List literal
-    ListLiteral t [Pattern t]
+    PListLiteral t [Pattern t]
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)

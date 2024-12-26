@@ -19,24 +19,20 @@ import Data.List (partition)
 import qualified Data.Set as Set
 import Noll.Label (Label (..))
 import Noll.Language (
-  Binding,
+  Binding (..),
   DataConstructor (..),
-  Expression,
+  Expression (..),
   HasType (..),
   HasTypeIndexes (..),
-  Pattern,
-  Type,
+  Intrinsic (..),
+  Pattern (..),
+  Type (..),
   TypeIndex (..),
   foldType,
  )
-import qualified Noll.Language.Expression as Expr
-import qualified Noll.Language.Expression.Binding as Binding
-import qualified Noll.Language.Pattern as Pattern
-import Noll.Language.Type (Type (Intrinsic))
-import qualified Noll.Language.Type.Intrinsic as Intrinsic
 import Noll.TypeSystem.TypeConstraint (MonomorphicSet (..), TypeConstraint (..), overMonomorphicSet)
 import Noll.TypeSystem.TypeConstraint.Assumption (Assumption (..), assumptionNameIs)
-import Noll.Utils (Dictionary (..), concatMapM, forM, (<$$>))
+import Noll.Utils (Dictionary, concatMapM, forM, (<$$>))
 
 data TypeConstraintsContext o k = TypeConstraintsContext
   { contextMonomorphicSet :: MonomorphicSet (o k)
@@ -87,13 +83,13 @@ evalCollectTypeConstraints = snd <$$> runCollectTypeConstraints
 assertEquality :: Type TypeIndex k -> Type TypeIndex k -> CollectConstraints k ()
 assertEquality t1 t2 = tell [Equality t1 t2]
 
-assertEqualityAssumptions :: (Ord k) => Type TypeIndex k -> [Assumption (Type TypeIndex k)] -> CollectConstraints k ()
+assertEqualityAssumptions :: Type TypeIndex k -> [Assumption (Type TypeIndex k)] -> CollectConstraints k ()
 assertEqualityAssumptions t ms =
   tell $ do
     Assumption{..} <- ms
     pure (Equality assumptionType t)
 
-assertImplicitAssumptions :: (Ord k) => Type TypeIndex k -> [Assumption (Type TypeIndex k)] -> CollectConstraints k ()
+assertImplicitAssumptions :: Type TypeIndex k -> [Assumption (Type TypeIndex k)] -> CollectConstraints k ()
 assertImplicitAssumptions t ms = do
   set <- asks contextMonomorphicSet
   tell $ do
@@ -103,7 +99,7 @@ assertImplicitAssumptions t ms = do
 patternAssumptions :: (Ord k) => [Assumption (Type TypeIndex k)] -> Pattern (Type TypeIndex k) -> CollectConstraints k [Assumption (Type TypeIndex k)]
 patternAssumptions ms =
   \case
-    Pattern.Variable (Label t name) -> do
+    PVariable (Label t name) -> do
       let (ls, rs) = partition (assumptionNameIs name) ms
       assertEqualityAssumptions t ls
       pure rs
@@ -111,41 +107,41 @@ patternAssumptions ms =
 collectConstraints :: (Ord k) => Expression (Type TypeIndex k) -> CollectConstraints k [Assumption (Type TypeIndex k)]
 collectConstraints =
   \case
-    Expr.Constructor (Label _ name) -> do
+    EConstructor (Label _ name) -> do
       -- TODO
       undefined
-    Expr.Variable (Label t name) -> do
+    EVariable (Label t name) -> do
       pure [Assumption name t]
-    Expr.Lambda ps e -> do
+    ELambda ps e -> do
       ms1 <- localMonoset (monosetInsertMany (typeIndexesIn ps)) (collectConstraints e)
       ms2 <- concat <$> forM ps (patternAssumptions ms1)
       pure ms2
-    Expr.Let gs e1 -> do
+    ELet gs e1 -> do
       ms1 <- collectConstraints e1
       ms2 <- flip concatMapM gs $
         \case
-          Binding.Pattern (Pattern.Variable (Label t name)) e -> do
+          BPattern (PVariable (Label t name)) e -> do
             ms <- collectConstraints e
             assertEquality t (typeOf e)
             pure ms
       ms3 <- flip concatMapM gs $
         \case
-          Binding.Pattern (Pattern.Variable (Label t name)) e -> do
+          BPattern (PVariable (Label t name)) e -> do
             let (ls, rs) = partition (assumptionNameIs name) ms1
             assertImplicitAssumptions t ls
             pure rs
       pure (ms1 <> ms2 <> ms3)
-    Expr.If e1 e2 e3 -> do
+    EIf e1 e2 e3 -> do
       ms1 <- collectConstraints e1
       ms2 <- collectConstraints e2
       ms3 <- collectConstraints e3
-      assertEquality (typeOf e1) (Intrinsic Intrinsic.Bool)
+      assertEquality (typeOf e1) (TIntrinsic IBool)
       assertEquality (typeOf e2) (typeOf e3)
       pure (ms1 <> ms2 <> ms3)
-    Expr.Application t e1 es -> do
+    EApplication t e1 es -> do
       ms1 <- collectConstraints e1
       ms2 <- concat <$> traverse collectConstraints es
       assertEquality (typeOf e1) (foldType t (typeOf <$> es))
       pure (ms1 <> ms2)
-    Expr.Literal{} ->
+    ELiteral{} ->
       pure []

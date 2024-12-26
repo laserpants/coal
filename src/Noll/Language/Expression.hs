@@ -13,29 +13,29 @@ import Noll.Utils (Dictionary, Some)
 
 data Expression t
   = -- | Function application
-    Application t (Expression t) (Some (Expression t))
+    EApplication t (Expression t) (Some (Expression t))
   | -- | Lambda function expression
-    Lambda (Some (Pattern t)) (Expression t)
+    ELambda (Some (Pattern t)) (Expression t)
   | -- | Let binding
-    Let (Some (Binding Expression t)) (Expression t)
+    ELet (Some (Binding Expression t)) (Expression t)
   | -- | Recursive let binding
-    RecursiveLet (Pattern t) (Expression t) (Expression t)
+    ERecursiveLet (Pattern t) (Expression t) (Expression t)
   | -- | Variable
-    Variable (Label t)
+    EVariable (Label t)
   | -- | Data constructor
-    Constructor (Label t)
+    EConstructor (Label t)
   | -- | Literal expression
-    Literal Primitive
+    ELiteral Primitive
   | -- | If-else statement
-    If (Expression t) (Expression t) (Expression t)
+    EIf (Expression t) (Expression t) (Expression t)
   | -- | Unary operator
-    UnaryOperator (t, UnaryOperator)
+    EUnaryOperator (t, UnaryOperator)
   | -- | Binary operators
-    BinaryOperator (t, BinaryOperator)
+    EBinaryOperator (t, BinaryOperator)
   | -- | Record
-    Record t (Dictionary (Expression t)) (Maybe (Expression t))
+    ERecord t (Dictionary (Expression t)) (Maybe (Expression t))
   | -- | List cons-operator
-    ListCons t (Expression t) (Expression t)
+    EListCons t (Expression t) (Expression t)
   | -- | List literal
-    ListLiteral t [Expression t]
+    EListLiteral t [Expression t]
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)

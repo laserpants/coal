@@ -11,16 +11,14 @@ import Data.List.NonEmpty (NonEmpty)
 import qualified Data.List.NonEmpty as NonEmpty
 import Data.Set (member)
 import Noll.Language (
-  Intrinsic,
-  Kind,
+  Intrinsic (..),
+  Kind (..),
   KindIndex (..),
   Row,
-  Type,
+  Type (..),
   TypeIndex (..),
   typeIdsIn,
  )
-import qualified Noll.Language.Type as Type
-import qualified Noll.Language.Type.Intrinsic as Intrinsic
 import Noll.TypeSystem.TypeSubstitution (
   TypeSubstitutable (..),
   TypeSubstitution (..),
@@ -48,38 +46,38 @@ instance TypeUnifiable (Row TypeIndex (Kind KindIndex) (Type TypeIndex (Kind Kin
     undefined
 
 instance TypeUnifiable (Type TypeIndex (Kind KindIndex)) where
-  unify (Type.Alias _ _ t1) t2 =
+  unify (TAlias _ _ t1) t2 =
     unify t1 t2
-  unify t1 (Type.Alias _ _ t2) =
+  unify t1 (TAlias _ _ t2) =
     unify t1 t2
-  unify (Type.Variable t) t2 =
+  unify (TVariable t) t2 =
     bindType t t2
-  unify t1 (Type.Variable t) =
+  unify t1 (TVariable t) =
     bindType t t1
-  unify (Type.Arrow t1 u1) (Type.Arrow t2 u2) =
+  unify (TArrow t1 u1) (TArrow t2 u2) =
     unify [t1, u1] [t2, u2]
-  unify (Type.Application _ t1 ts1) (Type.Application _ t2 ts2) =
+  unify (TApplication _ t1 ts1) (TApplication _ t2 ts2) =
     unify (t1 : NonEmpty.toList ts1) (t2 : NonEmpty.toList ts2)
-  unify (Type.Constructor _ c1) (Type.Constructor _ c2)
+  unify (TConstructor _ c1) (TConstructor _ c2)
     | c1 == c2 =
         pure mempty
-  unify (Type.Row r1) (Type.Row r2) =
+  unify (TRow r1) (TRow r2) =
     unify r1 r2
-  unify (Type.Intrinsic t1) (Type.Intrinsic t2) =
+  unify (TIntrinsic t1) (TIntrinsic t2) =
     unify t1 t2
   unify _ _ =
     error "Cannot unify"
 
 instance TypeUnifiable (Intrinsic (Type TypeIndex (Kind KindIndex))) where
-  unify (Intrinsic.List t1) (Intrinsic.List t2) =
+  unify (IList t1) (IList t2) =
     unify t1 t2
-  unify (Intrinsic.Option t1) (Intrinsic.Option t2) =
+  unify (IOption t1) (IOption t2) =
     unify t1 t2
-  unify (Intrinsic.Record t1) (Intrinsic.Record t2) =
+  unify (IRecord t1) (IRecord t2) =
     unify t1 t2
-  unify (Intrinsic.Result t1) (Intrinsic.Result t2) =
+  unify (IResult t1) (IResult t2) =
     unify t1 t2
-  unify (Intrinsic.Tuple ts1) (Intrinsic.Tuple ts2) =
+  unify (ITuple ts1) (ITuple ts2) =
     unify ts1 ts2
   unify t1 t2
     | t1 == t2 =
@@ -90,7 +88,7 @@ instance TypeUnifiable (Intrinsic (Type TypeIndex (Kind KindIndex))) where
 bindType :: (Monad m) => TypeIndex (Kind KindIndex) -> Type TypeIndex (Kind KindIndex) -> m TypeSubstitution
 bindType (TypeIndex _ index) =
   \case
-    Type.Variable (TypeIndex _ index2)
+    TVariable (TypeIndex _ index2)
       | index == index2 ->
           pure mempty
     t

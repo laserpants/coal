@@ -18,18 +18,13 @@ import Data.Map.Strict (Map)
 import Data.Set (Set, singleton)
 import qualified Data.Set as Set
 import Noll.Label (Label (..))
-import Noll.Language.Expression (Expression)
-import qualified Noll.Language.Expression as Expr
-import Noll.Language.Expression.Binding (Binding)
-import qualified Noll.Language.Expression.Binding as Binding
-import Noll.Language.Pattern (Pattern)
-import qualified Noll.Language.Pattern as Pattern
+import Noll.Language.Expression (Expression (..))
+import Noll.Language.Expression.Binding (Binding (..))
+import Noll.Language.Pattern (Pattern (..))
 import Noll.Language.Trait (Trait (..))
-import Noll.Language.Type (Type)
-import qualified Noll.Language.Type as Type
+import Noll.Language.Type (Type (..))
 import Noll.Language.Type.Index (TypeIndex (..))
-import Noll.Language.Type.Row (Row)
-import qualified Noll.Language.Type.Row as Row
+import Noll.Language.Type.Row (Row (..))
 import Noll.Language.Type.Scheme (Scheme (..))
 
 class HasTypeIndexes k t | t -> k where
@@ -65,35 +60,35 @@ instance (HasTypeIndexes k t) => HasTypeIndexes k (Label t) where
 instance (Ord k, HasTypeIndexes k t) => HasTypeIndexes k (Row TypeIndex k t) where
   typeIndexesIn =
     \case
-      Row.Extend _ t row ->
+      RExtend _ t row ->
         typeIndexesIn t <> typeIndexesIn row
-      Row.Variable t ->
+      RVariable t ->
         typeIndexesIn t
-      Row.Nil ->
+      RNil ->
         mempty
 
 instance (Ord k) => HasTypeIndexes k (Type TypeIndex k) where
   typeIndexesIn =
     \case
-      Type.Application _ t ts ->
+      TApplication _ t ts ->
         typeIndexesIn t <> typeIndexesIn ts
-      Type.Arrow t1 t2 ->
+      TArrow t1 t2 ->
         typeIndexesIn t1 <> typeIndexesIn t2
-      Type.Constructor{} ->
+      TConstructor{} ->
         mempty
-      Type.Intrinsic{} ->
+      TIntrinsic{} ->
         mempty
-      Type.Row row ->
+      TRow row ->
         typeIndexesIn row
-      Type.Variable t ->
+      TVariable t ->
         typeIndexesIn t
-      Type.Alias _ _ t ->
+      TAlias _ _ t ->
         typeIndexesIn t
 
 instance (HasTypeIndexes k t) => HasTypeIndexes k (Pattern t) where
   typeIndexesIn =
     \case
-      Pattern.Variable (Label t _) ->
+      PVariable (Label t _) ->
         typeIndexesIn t
 
 instance (Ord k, HasTypeIndexes k t) => HasTypeIndexes k (Scheme TypeIndex k t) where
@@ -105,25 +100,25 @@ instance (Ord k, HasTypeIndexes k t) => HasTypeIndexes k (Scheme TypeIndex k t) 
 instance (Ord k) => HasTypeIndexes k (Binding Expression (Type TypeIndex k)) where
   typeIndexesIn =
     \case
-      Binding.Pattern p e ->
+      BPattern p e ->
         typeIndexesIn p <> typeIndexesIn e
 
 instance (Ord k) => HasTypeIndexes k (Expression (Type TypeIndex k)) where
   typeIndexesIn =
     \case
-      Expr.Constructor (Label t _) ->
+      EConstructor (Label t _) ->
         typeIndexesIn t
-      Expr.Variable (Label t _) ->
+      EVariable (Label t _) ->
         typeIndexesIn t
-      Expr.Lambda ps e ->
+      ELambda ps e ->
         typeIndexesIn ps <> typeIndexesIn e
-      Expr.Let gs e1 ->
+      ELet gs e1 ->
         typeIndexesIn gs <> typeIndexesIn e1
-      Expr.If e1 e2 e3 ->
+      EIf e1 e2 e3 ->
         typeIndexesIn e1 <> typeIndexesIn e2 <> typeIndexesIn e3
-      Expr.Application t e1 es ->
+      EApplication t e1 es ->
         typeIndexesIn t <> typeIndexesIn e1 <> typeIndexesIn es
-      Expr.Literal{} ->
+      ELiteral{} ->
         mempty
 
 notBoundIn :: Set (TypeIndex k) -> Set (TypeIndex k) -> Set (TypeIndex k)

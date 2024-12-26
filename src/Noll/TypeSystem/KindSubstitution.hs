@@ -11,9 +11,7 @@ module Noll.TypeSystem.KindSubstitution (
 import qualified Data.Map.Strict as Map
 import Data.Maybe (fromMaybe)
 import qualified Data.Set as Set
-import Noll.Language (Expression, Kind, KindIndex (..), Row, Trait (..), Type, TypeIndex (..))
-import qualified Noll.Language.Type as Type
-import qualified Noll.Language.Type.Kind as Kind
+import Noll.Language (Expression (..), Kind (..), KindIndex (..), Row, Trait (..), Type (..), TypeIndex (..))
 import Noll.TypeSystem.KindConstraint (KindConstraint (..))
 import Noll.Utils (IndexMap, Map, NonEmpty, Set)
 
@@ -41,10 +39,10 @@ instance (Ord s, KindSubstitutable s) => KindSubstitutable (Set s) where
 instance KindSubstitutable (Kind KindIndex) where
   applyKindSub sub =
     \case
-      Kind.Arrow k1 k2 ->
-        Kind.Arrow (applyKindSub sub k1) (applyKindSub sub k2)
-      Kind.Variable k ->
-        fromMaybe (Kind.Variable k) (substitutionIndex k sub)
+      KArrow k1 k2 ->
+        KArrow (applyKindSub sub k1) (applyKindSub sub k2)
+      KVariable k ->
+        fromMaybe (KVariable k) (substitutionIndex k sub)
       k ->
         k
 
@@ -65,20 +63,20 @@ instance KindSubstitutable (Row TypeIndex (Kind KindIndex) (Type TypeIndex (Kind
 instance KindSubstitutable (Type TypeIndex (Kind KindIndex)) where
   applyKindSub sub =
     \case
-      Type.Alias name ts t -> do
-        Type.Alias name (applyKindSub sub ts) (applyKindSub sub t)
-      Type.Application k t1 ts ->
-        Type.Application (applyKindSub sub k) (applyKindSub sub t1) (applyKindSub sub ts)
-      Type.Arrow t1 t2 ->
-        Type.Arrow (applyKindSub sub t1) (applyKindSub sub t2)
-      Type.Intrinsic t ->
-        Type.Intrinsic (applyKindSub sub <$> t)
-      Type.Row row ->
-        Type.Row (applyKindSub sub row)
-      Type.Variable t ->
-        Type.Variable (applyKindSub sub t)
-      Type.Constructor k name ->
-        Type.Constructor (applyKindSub sub k) name
+      TAlias name ts t -> do
+        TAlias name (applyKindSub sub ts) (applyKindSub sub t)
+      TApplication k t1 ts ->
+        TApplication (applyKindSub sub k) (applyKindSub sub t1) (applyKindSub sub ts)
+      TArrow t1 t2 ->
+        TArrow (applyKindSub sub t1) (applyKindSub sub t2)
+      TIntrinsic t ->
+        TIntrinsic (applyKindSub sub <$> t)
+      TRow row ->
+        TRow (applyKindSub sub row)
+      TVariable t ->
+        TVariable (applyKindSub sub t)
+      TConstructor k name ->
+        TConstructor (applyKindSub sub k) name
 
 instance (KindSubstitutable k) => KindSubstitutable (KindConstraint k) where
   applyKindSub sub =

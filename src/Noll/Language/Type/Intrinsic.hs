@@ -5,19 +5,19 @@ module Noll.Language.Type.Intrinsic (Intrinsic (..)) where
 
 -- | Built-in types
 data Intrinsic t
-  = Bool
-  | Char
-  | Double
-  | Float
-  | Int32
-  | Int64
-  | List t
-  | Nat
-  | Option t
-  | Record t
-  | Result t
-  | String
-  | Tuple [t]
-  | Unit
-  | Void
+  = IBool
+  | IChar
+  | IDouble
+  | IFloat
+  | IInt32
+  | IInt64
+  | IList t
+  | INat
+  | IOption t
+  | IRecord t
+  | IResult t
+  | IString
+  | ITuple [t]
+  | IUnit
+  | IVoid
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)

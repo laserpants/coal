@@ -5,7 +5,7 @@ module Noll.Language.Expression.Operator.Unary (UnaryOperator (..)) where
 -- | Unary operators
 data UnaryOperator
   = -- | Logical NOT (!)
-    LogicalNot
+    OLogicalNot
   | -- | Negation (-)
-    Negate
+    ONegate
   deriving (Show, Eq, Ord, Read)

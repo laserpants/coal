@@ -5,45 +5,45 @@ module Noll.Language.Expression.Operator.Binary (BinaryOperator (..)) where
 -- | Binary operators
 data BinaryOperator
   = -- | Equality (==)
-    EqualTo
+    OEqualTo
   | -- | Inequality (!=)
-    NotEqualTo
+    ONotEqualTo
   | -- | Less than (<)
-    LessThan
+    OLessThan
   | -- | Greater than (>)
-    GreaterThan
+    OGreaterThan
   | -- | Less than or equal (<=)
-    LessThanOrEqual
+    OLessThanOrEqual
   | -- | Greater than or equal (>=)
-    GreaterThanOrEqual
+    OGreaterThanOrEqual
   | -- | Addition (+)
-    Addition
+    OAddition
   | -- | Subtraction (-)
-    Subtraction
+    OSubtraction
   | -- | Multiplication (*)
-    Multiplication
+    OMultiplication
   | -- | Exponentiation (^)
-    Exponentiation
+    OExponentiation
   | -- | Division (/)
-    Division
+    ODivision
   | -- | Logical OR (||)
-    LogicalOr
+    OLogicalOr
   | -- | Logical AND (&&)
-    LogicalAnd
+    OLogicalAnd
   | -- | Forward application (|.)
-    ForwardApplication
+    OForwardApplication
   | -- | Reverse application (.|)
-    ReverseApplication
+    OReverseApplication
   | -- | Flipped forward application ($.)
-    FlippedForwardApplication
+    OFlippedForwardApplication
   | -- | Flipped reverse application (.$)
-    FlippedReverseApplication
+    OFlippedReverseApplication
   | -- | Forward composition (>>)
-    ForwardComposition
+    OForwardComposition
   | -- | Reverse composition (<<)
-    ReverseComposition
+    OReverseComposition
   | -- | String concatenation (+++)
-    StringConcatenation
+    OStringConcatenation
   | -- | List concatenation (++)
-    ListConcatenation
+    OListConcatenation
   deriving (Show, Eq, Ord, Read)

@@ -18,21 +18,17 @@ import qualified Data.Set as Set
 import Noll.Label (Label (..))
 import Noll.Language (
   Binding (..),
-  Expression,
+  Expression (..),
   HasTypeIndexes (..),
-  Kind,
+  Kind (..),
   KindIndex (..),
-  Pattern,
-  Row,
+  Pattern (..),
+  Row (..),
   Scheme (..),
   Trait (..),
-  Type,
+  Type (..),
   TypeIndex (..),
  )
-import qualified Noll.Language.Expression as Expr
-import qualified Noll.Language.Expression.Binding as Binding
-import qualified Noll.Language.Pattern as Pattern
-import qualified Noll.Language.Type as Type
 import Noll.TypeSystem.TypeConstraint (MonomorphicSet (..), TypeConstraint (..))
 import Noll.Utils (IndexMap, Map, NonEmpty, Set)
 
@@ -65,7 +61,7 @@ instance TypeSubstitutable (MonomorphicSet (TypeIndex (Kind KindIndex))) where
   apply sub =
     \case
       MonomorphicSet m ->
-        MonomorphicSet (typeIndexesIn (Set.map (apply sub . Type.Variable) m))
+        MonomorphicSet (typeIndexesIn (Set.map (apply sub . TVariable) m))
 
 instance TypeSubstitutable (Scheme TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))) where
   apply sub =
@@ -89,19 +85,19 @@ instance TypeSubstitutable (TypeConstraint TypeIndex (Kind KindIndex) (Type Type
 instance TypeSubstitutable (Type TypeIndex (Kind KindIndex)) where
   apply sub =
     \case
-      Type.Alias name ts t -> do
-        Type.Alias name (apply sub ts) (apply sub t)
-      Type.Application k t1 ts ->
-        Type.Application k (apply sub t1) (apply sub ts)
-      Type.Arrow t1 t2 ->
-        Type.Arrow (apply sub t1) (apply sub t2)
-      Type.Intrinsic t ->
-        Type.Intrinsic (apply sub <$> t)
-      Type.Row row ->
-        Type.Row (apply sub row)
-      Type.Variable t ->
-        fromMaybe (Type.Variable t) (substitutionIndex t sub)
-      t@Type.Constructor{} ->
+      TAlias name ts t -> do
+        TAlias name (apply sub ts) (apply sub t)
+      TApplication k t1 ts ->
+        TApplication k (apply sub t1) (apply sub ts)
+      TArrow t1 t2 ->
+        TArrow (apply sub t1) (apply sub t2)
+      TIntrinsic t ->
+        TIntrinsic (apply sub <$> t)
+      TRow row ->
+        TRow (apply sub row)
+      TVariable t ->
+        fromMaybe (TVariable t) (substitutionIndex t sub)
+      t@TConstructor{} ->
         t
 
 {-# INLINE substitutionIndex #-}
@@ -111,31 +107,31 @@ substitutionIndex TypeIndex{..} sub = Map.lookup indexId (typeSubstitutionMap su
 instance TypeSubstitutable (Pattern (Type TypeIndex (Kind KindIndex))) where
   apply sub =
     \case
-      Pattern.Variable (Label t name) ->
-        Pattern.Variable (Label (apply sub t) name)
+      PVariable (Label t name) ->
+        PVariable (Label (apply sub t) name)
 
 instance TypeSubstitutable (Binding Expression (Type TypeIndex (Kind KindIndex))) where
   apply sub =
     \case
-      Binding.Pattern p e ->
-        Binding.Pattern (apply sub p) (apply sub e)
+      BPattern p e ->
+        BPattern (apply sub p) (apply sub e)
 
 instance TypeSubstitutable (Expression (Type TypeIndex (Kind KindIndex))) where
   apply sub =
     \case
-      Expr.Constructor (Label t name) -> do
-        Expr.Constructor (Label (apply sub t) name)
-      Expr.Variable (Label t name) -> do
-        Expr.Variable (Label (apply sub t) name)
-      Expr.Lambda ps e -> do
-        Expr.Lambda (apply sub ps) (apply sub e)
-      Expr.Let gs e1 -> do
-        Expr.Let (apply sub gs) (apply sub e1)
-      Expr.If e1 e2 e3 -> do
-        Expr.If (apply sub e1) (apply sub e2) (apply sub e3)
-      Expr.Application t e1 es -> do
-        Expr.Application (apply sub t) (apply sub e1) (apply sub es)
-      e@Expr.Literal{} ->
+      EConstructor (Label t name) -> do
+        EConstructor (Label (apply sub t) name)
+      EVariable (Label t name) -> do
+        EVariable (Label (apply sub t) name)
+      ELambda ps e -> do
+        ELambda (apply sub ps) (apply sub e)
+      ELet gs e1 -> do
+        ELet (apply sub gs) (apply sub e1)
+      EIf e1 e2 e3 -> do
+        EIf (apply sub e1) (apply sub e2) (apply sub e3)
+      EApplication t e1 es -> do
+        EApplication (apply sub t) (apply sub e1) (apply sub es)
+      e@ELiteral{} ->
         e
 
 newtype TypeSubstitution = TypeSubstitution {typeSubstitutionMap :: IndexMap (Type TypeIndex (Kind KindIndex))}
@@ -161,8 +157,8 @@ removeTypeSubstitution TypeIndex{..} (TypeSubstitution sub) = TypeSubstitution (
 typeSubstitutionFromList :: [(Int, Type TypeIndex (Kind KindIndex))] -> TypeSubstitution
 typeSubstitutionFromList = TypeSubstitution . Map.fromList
 
-normalizeTypeIndexes :: (Ord s) => (TypeSubstitutable s, HasTypeIndexes (Kind KindIndex) s) => s -> s
+normalizeTypeIndexes :: (TypeSubstitutable s, HasTypeIndexes (Kind KindIndex) s) => s -> s
 normalizeTypeIndexes e = apply (typeSubstitutionFromList sub) e
  where
   ixs = Set.toList (typeIndexesIn e)
-  sub = [(ix, Type.Variable (TypeIndex k n)) | (n, TypeIndex k ix) <- zip [0 ..] ixs]
+  sub = [(ix, TVariable (TypeIndex k n)) | (n, TypeIndex k ix) <- zip [0 ..] ixs]

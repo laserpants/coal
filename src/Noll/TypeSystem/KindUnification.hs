@@ -5,8 +5,7 @@
 module Noll.TypeSystem.KindUnification (KindUnifiable (..)) where
 
 import qualified Data.List.NonEmpty as NonEmpty
-import Noll.Language (Kind, KindIndex (..))
-import qualified Noll.Language.Type.Kind as Kind
+import Noll.Language (Kind (..), KindIndex (..))
 import Noll.TypeSystem.KindSubstitution (KindSubstitutable (..), KindSubstitution (..), applyKindSub, mapsToKind)
 import Noll.Utils (NonEmpty)
 
@@ -27,15 +26,15 @@ instance (KindSubstitutable u, KindUnifiable u) => KindUnifiable (NonEmpty u) wh
   unifyKinds u1 u2 = unifyKinds (NonEmpty.toList u1) (NonEmpty.toList u2)
 
 instance KindUnifiable (Kind KindIndex) where
-  unifyKinds (Kind.Variable k) k2 =
+  unifyKinds (KVariable k) k2 =
     pure (bindKind k k2)
-  unifyKinds k1 (Kind.Variable k) =
+  unifyKinds k1 (KVariable k) =
     pure (bindKind k k1)
-  unifyKinds Kind.Type Kind.Type =
+  unifyKinds KType KType =
     pure mempty
-  unifyKinds Kind.Row Kind.Row =
+  unifyKinds KRow KRow =
     pure mempty
-  unifyKinds (Kind.Arrow k1 m1) (Kind.Arrow k2 m2) =
+  unifyKinds (KArrow k1 m1) (KArrow k2 m2) =
     unifyKinds [k1, m1] [k2, m2]
   unifyKinds _ _ =
     error "Cannot unify" -- unificationError Error.CannotUnify
@@ -43,7 +42,7 @@ instance KindUnifiable (Kind KindIndex) where
 bindKind :: KindIndex -> Kind KindIndex -> KindSubstitution
 bindKind (KindIndex index) =
   \case
-    Kind.Variable (KindIndex index2)
+    KVariable (KindIndex index2)
       | index2 == index ->
           mempty
     kind ->

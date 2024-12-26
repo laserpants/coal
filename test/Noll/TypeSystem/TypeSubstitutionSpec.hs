@@ -5,19 +5,16 @@ module Noll.TypeSystem.TypeSubstitutionSpec where
 import Data.List.NonEmpty (NonEmpty (..))
 import Noll.Label (Label (..))
 import Noll.Language (
-  Expression,
-  Kind,
+  Binding (..),
+  Expression (..),
+  Intrinsic (..),
+  Kind (..),
   KindIndex (..),
-  Type,
+  Pattern (..),
+  Primitive (..),
+  Type (..),
   TypeIndex (..),
  )
-import qualified Noll.Language.Expression as Expr
-import qualified Noll.Language.Expression.Binding as Binding
-import qualified Noll.Language.Pattern as Pattern
-import qualified Noll.Language.Primitive as Prim
-import qualified Noll.Language.Type as Type
-import qualified Noll.Language.Type.Intrinsic as Intrinsic
-import qualified Noll.Language.Type.Kind as Kind
 import Noll.TypeSystem.TypeSubstitution (
   TypeSubstitution (..),
   apply,
@@ -32,33 +29,33 @@ spec =
   describe "Noll.TypeSystem.TypeSubstitution" $ do
     describe "apply" $ do
       it "" $ do
-        let t = Type.Variable (TypeIndex Kind.Type 1) :: Type TypeIndex (Kind KindIndex)
-        apply (1 `mapsToType` Type.Intrinsic Intrinsic.Bool) t == Type.Intrinsic Intrinsic.Bool
+        let t = TVariable (TypeIndex KType 1) :: Type TypeIndex (Kind KindIndex)
+        apply (1 `mapsToType` TIntrinsic IBool) t == TIntrinsic IBool
       it "" $ do
-        let t = Type.Variable (TypeIndex Kind.Type 0) :: Type TypeIndex (Kind KindIndex)
-        apply (1 `mapsToType` Type.Intrinsic Intrinsic.Bool) t == t
+        let t = TVariable (TypeIndex KType 0) :: Type TypeIndex (Kind KindIndex)
+        apply (1 `mapsToType` TIntrinsic IBool) t == t
       it "" $
         applySubstitutionEquals
           fixture_1
-          ( Expr.Lambda
-              (Pattern.Variable (Label (typeBool `Type.Arrow` typeVariable 3) "m") :| [])
-              ( Expr.Let
-                  ( Binding.Pattern
-                      (Pattern.Variable (Label (typeBool `Type.Arrow` typeVariable 3) "y"))
-                      (Expr.Variable (Label (typeBool `Type.Arrow` typeVariable 3) "m"))
+          ( ELambda
+              (PVariable (Label (typeBool `TArrow` typeVariable 3) "m") :| [])
+              ( ELet
+                  ( BPattern
+                      (PVariable (Label (typeBool `TArrow` typeVariable 3) "y"))
+                      (EVariable (Label (typeBool `TArrow` typeVariable 3) "m"))
                       :| []
                   )
-                  ( Expr.Let
-                      ( Binding.Pattern
-                          (Pattern.Variable (Label (typeVariable 3) "x"))
-                          ( Expr.Application
+                  ( ELet
+                      ( BPattern
+                          (PVariable (Label (typeVariable 3) "x"))
+                          ( EApplication
                               (typeVariable 3)
-                              (Expr.Variable (Label (typeBool `Type.Arrow` typeVariable 3) "y"))
-                              (Expr.Literal (Prim.Bool True) :| [])
+                              (EVariable (Label (typeBool `TArrow` typeVariable 3) "y"))
+                              (ELiteral (ABool True) :| [])
                           )
                           :| []
                       )
-                      ( Expr.Variable (Label (typeVariable 3) "x")
+                      ( EVariable (Label (typeVariable 3) "x")
                       )
                   )
               )
@@ -66,26 +63,26 @@ spec =
       it "" $
         applySubstitutionEquals
           fixture_2
-          ( Expr.Let
-              ( Binding.Pattern
-                  (Pattern.Variable (Label (typeVariable 3 `Type.Arrow` typeVariable 3) "f"))
-                  ( Expr.Lambda
-                      (Pattern.Variable (Label (typeVariable 3) "x") :| [])
-                      (Expr.Variable (Label (typeVariable 3) "x"))
+          ( ELet
+              ( BPattern
+                  (PVariable (Label (typeVariable 3 `TArrow` typeVariable 3) "f"))
+                  ( ELambda
+                      (PVariable (Label (typeVariable 3) "x") :| [])
+                      (EVariable (Label (typeVariable 3) "x"))
                   )
                   :| []
               )
-              ( Expr.Application
+              ( EApplication
                   typeInt32
-                  ( Expr.Application
-                      (typeInt32 `Type.Arrow` typeInt32)
-                      (Expr.Variable (Label ((typeInt32 `Type.Arrow` typeInt32) `Type.Arrow` typeInt32 `Type.Arrow` typeInt32) "f"))
-                      (Expr.Variable (Label (typeInt32 `Type.Arrow` typeInt32) "f") :| [])
+                  ( EApplication
+                      (typeInt32 `TArrow` typeInt32)
+                      (EVariable (Label ((typeInt32 `TArrow` typeInt32) `TArrow` typeInt32 `TArrow` typeInt32) "f"))
+                      (EVariable (Label (typeInt32 `TArrow` typeInt32) "f") :| [])
                   )
-                  ( Expr.Application
+                  ( EApplication
                       typeInt32
-                      (Expr.Variable (Label (typeInt32 `Type.Arrow` typeInt32) "f"))
-                      (Expr.Literal (Prim.Int32 1) :| [])
+                      (EVariable (Label (typeInt32 `TArrow` typeInt32) "f"))
+                      (ELiteral (AInt32 1) :| [])
                       :| []
                   )
               )
@@ -93,25 +90,25 @@ spec =
     describe "normalizeTypeIndexes" $ do
       it "" $
         normalizeTypeIndexes fixture_3
-          == ( Expr.Lambda
-                (Pattern.Variable (Label (typeBool `Type.Arrow` typeVariableKind 3 0) "m") :| [])
-                ( Expr.Let
-                    ( Binding.Pattern
-                        (Pattern.Variable (Label (typeBool `Type.Arrow` typeVariableKind 3 0) "y"))
-                        (Expr.Variable (Label (typeBool `Type.Arrow` typeVariableKind 3 0) "m"))
+          == ( ELambda
+                (PVariable (Label (typeBool `TArrow` typeVariableKind 3 0) "m") :| [])
+                ( ELet
+                    ( BPattern
+                        (PVariable (Label (typeBool `TArrow` typeVariableKind 3 0) "y"))
+                        (EVariable (Label (typeBool `TArrow` typeVariableKind 3 0) "m"))
                         :| []
                     )
-                    ( Expr.Let
-                        ( Binding.Pattern
-                            (Pattern.Variable (Label (typeVariableKind 3 0) "x"))
-                            ( Expr.Application
+                    ( ELet
+                        ( BPattern
+                            (PVariable (Label (typeVariableKind 3 0) "x"))
+                            ( EApplication
                                 (typeVariableKind 3 0)
-                                (Expr.Variable (Label (typeBool `Type.Arrow` typeVariableKind 3 0) "y"))
-                                (Expr.Literal (Prim.Bool True) :| [])
+                                (EVariable (Label (typeBool `TArrow` typeVariableKind 3 0) "y"))
+                                (ELiteral (ABool True) :| [])
                             )
                             :| []
                         )
-                        ( Expr.Variable (Label (typeVariableKind 3 0) "x")
+                        ( EVariable (Label (typeVariableKind 3 0) "x")
                         )
                     )
                 )
@@ -122,108 +119,108 @@ applySubstitutionEquals (e, sub) res = apply sub e == res
 
 fixture_1 :: (Expression (Type TypeIndex (Kind KindIndex)), TypeSubstitution)
 fixture_1 =
-  ( Expr.Lambda
-      (Pattern.Variable (Label (typeVariable 5) "m") :| [])
-      ( Expr.Let
-          ( Binding.Pattern
-              (Pattern.Variable (Label (typeVariable 6) "y"))
-              (Expr.Variable (Label (typeVariable 1) "m"))
+  ( ELambda
+      (PVariable (Label (typeVariable 5) "m") :| [])
+      ( ELet
+          ( BPattern
+              (PVariable (Label (typeVariable 6) "y"))
+              (EVariable (Label (typeVariable 1) "m"))
               :| []
           )
-          ( Expr.Let
-              ( Binding.Pattern
-                  (Pattern.Variable (Label (typeVariable 7) "x"))
-                  ( Expr.Application
+          ( ELet
+              ( BPattern
+                  (PVariable (Label (typeVariable 7) "x"))
+                  ( EApplication
                       (typeVariable 3)
-                      (Expr.Variable (Label (typeVariable 2) "y"))
-                      (Expr.Literal (Prim.Bool True) :| [])
+                      (EVariable (Label (typeVariable 2) "y"))
+                      (ELiteral (ABool True) :| [])
                   )
                   :| []
               )
-              ( Expr.Variable (Label (typeVariable 4) "x")
+              ( EVariable (Label (typeVariable 4) "x")
               )
           )
       )
   , typeSubstitutionFromList
-      [ (1, typeBool `Type.Arrow` typeVariable 3)
-      , (2, typeBool `Type.Arrow` typeVariable 3)
+      [ (1, typeBool `TArrow` typeVariable 3)
+      , (2, typeBool `TArrow` typeVariable 3)
       , (4, typeVariable 3)
-      , (5, typeBool `Type.Arrow` typeVariable 3)
-      , (6, typeBool `Type.Arrow` typeVariable 3)
+      , (5, typeBool `TArrow` typeVariable 3)
+      , (6, typeBool `TArrow` typeVariable 3)
       , (7, typeVariable 3)
       ]
   )
 
 fixture_2 :: (Expression (Type TypeIndex (Kind KindIndex)), TypeSubstitution)
 fixture_2 =
-  ( Expr.Let
-      ( Binding.Pattern
-          (Pattern.Variable (Label (typeVariable 1) "f"))
-          ( Expr.Lambda
-              (Pattern.Variable (Label (typeVariable 2) "x") :| [])
-              (Expr.Variable (Label (typeVariable 3) "x"))
+  ( ELet
+      ( BPattern
+          (PVariable (Label (typeVariable 1) "f"))
+          ( ELambda
+              (PVariable (Label (typeVariable 2) "x") :| [])
+              (EVariable (Label (typeVariable 3) "x"))
           )
           :| []
       )
-      ( Expr.Application
+      ( EApplication
           (typeVariable 4)
-          ( Expr.Application
+          ( EApplication
               (typeVariable 5)
-              (Expr.Variable (Label (typeVariable 6) "f"))
-              (Expr.Variable (Label (typeVariable 7) "f") :| [])
+              (EVariable (Label (typeVariable 6) "f"))
+              (EVariable (Label (typeVariable 7) "f") :| [])
           )
-          ( Expr.Application
+          ( EApplication
               (typeVariable 8)
-              (Expr.Variable (Label (typeVariable 9) "f"))
-              (Expr.Literal (Prim.Int32 1) :| [])
+              (EVariable (Label (typeVariable 9) "f"))
+              (ELiteral (AInt32 1) :| [])
               :| []
           )
       )
   , typeSubstitutionFromList
-      [ (1, typeVariable 3 `Type.Arrow` typeVariable 3)
+      [ (1, typeVariable 3 `TArrow` typeVariable 3)
       , (2, typeVariable 3)
       , (4, typeInt32)
-      , (5, typeInt32 `Type.Arrow` typeInt32)
-      , (6, (typeInt32 `Type.Arrow` typeInt32) `Type.Arrow` typeInt32 `Type.Arrow` typeInt32)
-      , (7, typeInt32 `Type.Arrow` typeInt32)
+      , (5, typeInt32 `TArrow` typeInt32)
+      , (6, (typeInt32 `TArrow` typeInt32) `TArrow` typeInt32 `TArrow` typeInt32)
+      , (7, typeInt32 `TArrow` typeInt32)
       , (8, typeInt32)
-      , (9, typeInt32 `Type.Arrow` typeInt32)
+      , (9, typeInt32 `TArrow` typeInt32)
       ]
   )
 
 fixture_3 :: Expression (Type TypeIndex (Kind KindIndex))
 fixture_3 =
-  Expr.Lambda
-    (Pattern.Variable (Label (typeBool `Type.Arrow` typeVariable 3) "m") :| [])
-    ( Expr.Let
-        ( Binding.Pattern
-            (Pattern.Variable (Label (typeBool `Type.Arrow` typeVariable 3) "y"))
-            (Expr.Variable (Label (typeBool `Type.Arrow` typeVariable 3) "m"))
+  ELambda
+    (PVariable (Label (typeBool `TArrow` typeVariable 3) "m") :| [])
+    ( ELet
+        ( BPattern
+            (PVariable (Label (typeBool `TArrow` typeVariable 3) "y"))
+            (EVariable (Label (typeBool `TArrow` typeVariable 3) "m"))
             :| []
         )
-        ( Expr.Let
-            ( Binding.Pattern
-                (Pattern.Variable (Label (typeVariable 3) "x"))
-                ( Expr.Application
+        ( ELet
+            ( BPattern
+                (PVariable (Label (typeVariable 3) "x"))
+                ( EApplication
                     (typeVariable 3)
-                    (Expr.Variable (Label (typeBool `Type.Arrow` typeVariable 3) "y"))
-                    (Expr.Literal (Prim.Bool True) :| [])
+                    (EVariable (Label (typeBool `TArrow` typeVariable 3) "y"))
+                    (ELiteral (ABool True) :| [])
                 )
                 :| []
             )
-            ( Expr.Variable (Label (typeVariable 3) "x")
+            ( EVariable (Label (typeVariable 3) "x")
             )
         )
     )
 
 typeVariable :: Int -> Type TypeIndex (Kind KindIndex)
-typeVariable n = Type.Variable (TypeIndex (Kind.Variable (KindIndex n)) n)
+typeVariable n = TVariable (TypeIndex (KVariable (KindIndex n)) n)
 
 typeVariableKind :: Int -> Int -> Type TypeIndex (Kind KindIndex)
-typeVariableKind m n = Type.Variable (TypeIndex (Kind.Variable (KindIndex m)) n)
+typeVariableKind m n = TVariable (TypeIndex (KVariable (KindIndex m)) n)
 
 typeBool :: Type TypeIndex k
-typeBool = Type.Intrinsic Intrinsic.Bool
+typeBool = TIntrinsic IBool
 
 typeInt32 :: Type TypeIndex k
-typeInt32 = Type.Intrinsic Intrinsic.Int32
+typeInt32 = TIntrinsic IInt32

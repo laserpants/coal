@@ -2,7 +2,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.TypeSystem.TypeConstraint.Solver (SolverConstraint (..), solveTypes) where
+module Noll.TypeSystem.TypeConstraint.Solver (SolverConstraint, solveTypes) where
 
 import Control.Monad.State (MonadState)
 import Data.Foldable (foldrM)
@@ -11,16 +11,15 @@ import Data.Set (intersection, (\\))
 import qualified Data.Set as Set
 import Noll.Language (
   HasTypeIndexes (..),
-  Kind,
+  Kind (..),
   KindIndex (..),
   Scheme (..),
-  Type,
+  Type (..),
   TypeIndex (..),
   activeIdsIn,
   notBoundIn,
   typeIdsIn,
  )
-import qualified Noll.Language.Type as Type
 import Noll.Library.Supply (supply)
 import Noll.TypeSystem.TypeConstraint (MonomorphicSet (..), TypeConstraint (..))
 import Noll.TypeSystem.TypeSubstitution (
@@ -92,7 +91,7 @@ instantiate (Forall qs _ t) = do
  where
   go (TypeIndex k index) sub = do
     s <- supply
-    pure (index `mapsToType` Type.Variable (TypeIndex k s) <> sub)
+    pure (index `mapsToType` TVariable (TypeIndex k s) <> sub)
 
 generalize ::
   (HasTypeIndexes k t) =>
