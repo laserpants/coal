@@ -14,6 +14,7 @@ import qualified Data.Set as Set
 import Noll.Language (Expression, Kind, KindIndex (..), Row, Trait (..), Type, TypeIndex (..))
 import qualified Noll.Language.Type as Type
 import qualified Noll.Language.Type.Kind as Kind
+import Noll.TypeSystem.KindConstraint (KindConstraint (..))
 import Noll.Utils (IndexMap, Map, NonEmpty, Set)
 
 class KindSubstitutable s where
@@ -78,6 +79,12 @@ instance KindSubstitutable (Type TypeIndex (Kind KindIndex)) where
         Type.Variable (applyKindSub sub t)
       Type.Constructor k name ->
         Type.Constructor (applyKindSub sub k) name
+
+instance (KindSubstitutable k) => KindSubstitutable (KindConstraint k) where
+  applyKindSub sub =
+    \case
+      KindEquality k1 k2 ->
+        KindEquality (applyKindSub sub k1) (applyKindSub sub k2)
 
 instance KindSubstitutable (Expression (Type TypeIndex (Kind KindIndex))) where
   applyKindSub = fmap . applyKindSub

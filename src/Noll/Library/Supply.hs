@@ -2,22 +2,22 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Library.Supply (Supply, supply, supplyN, update, load, save, over) where
+module Noll.Library.Supply (Supply, supply, supplyN) where
 
 import Control.Monad (replicateM)
 import Control.Monad.State (MonadState, gets, modify)
 
 class Supply v s where
   count :: s -> v
-  overSupply :: (v -> v) -> s -> s
+  updateSupply :: (v -> v) -> s -> s
 
 instance Supply s s where
   count = id
-  overSupply = id
+  updateSupply = id
 
 {-# INLINE update #-}
 update :: (Supply v s) => v -> s -> s
-update = overSupply . const
+update = updateSupply . const
 
 {-# INLINE load #-}
 load :: (MonadState s m, Supply a s) => m a
@@ -29,7 +29,7 @@ save = modify . update
 
 {-# INLINE over #-}
 over :: (MonadState s m, Supply a s) => (a -> a) -> m ()
-over = modify . overSupply
+over = modify . updateSupply
 
 supply :: (Num n, MonadState s m, Supply n s) => m n
 supply = do

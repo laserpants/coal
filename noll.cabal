@@ -116,6 +116,7 @@ test-suite noll-test
       Noll.TypeSystem.TypeConstraint.CollectSpec
       Noll.TypeSystem.TypeConstraint.SolverSpec
       Noll.TypeSystem.TypeSubstitutionSpec
+      Noll.TypeSystemSpec
       Paths_noll
   autogen-modules:
       Paths_noll
