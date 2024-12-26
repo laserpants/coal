@@ -84,7 +84,7 @@ instance (KindSubstitutable k) => KindSubstitutable (KindConstraint k) where
       KindEquality k1 k2 ->
         KindEquality (applyKindSub sub k1) (applyKindSub sub k2)
 
-instance KindSubstitutable (Expression (Type TypeIndex (Kind KindIndex))) where
+instance KindSubstitutable (Expression a (Type TypeIndex (Kind KindIndex))) where
   applyKindSub = fmap . applyKindSub
 
 newtype KindSubstitution = KindSubstitution {kindSubstitutionMap :: IndexMap (Kind KindIndex)}

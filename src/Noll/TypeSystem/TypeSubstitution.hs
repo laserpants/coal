@@ -104,33 +104,33 @@ instance TypeSubstitutable (Type TypeIndex (Kind KindIndex)) where
 substitutionIndex :: TypeIndex (Kind KindIndex) -> TypeSubstitution -> Maybe (Type TypeIndex (Kind KindIndex))
 substitutionIndex TypeIndex{..} sub = Map.lookup indexId (typeSubstitutionMap sub)
 
-instance TypeSubstitutable (Pattern (Type TypeIndex (Kind KindIndex))) where
+instance TypeSubstitutable (Pattern a (Type TypeIndex (Kind KindIndex))) where
   apply sub =
     \case
-      PVariable (Label t name) ->
-        PVariable (Label (apply sub t) name)
+      PVariable a (Label t name) ->
+        PVariable a (Label (apply sub t) name)
 
-instance TypeSubstitutable (Binding Expression (Type TypeIndex (Kind KindIndex))) where
+instance TypeSubstitutable (Binding Expression a (Type TypeIndex (Kind KindIndex))) where
   apply sub =
     \case
       BPattern p e ->
         BPattern (apply sub p) (apply sub e)
 
-instance TypeSubstitutable (Expression (Type TypeIndex (Kind KindIndex))) where
+instance TypeSubstitutable (Expression a (Type TypeIndex (Kind KindIndex))) where
   apply sub =
     \case
-      EConstructor (Label t name) -> do
-        EConstructor (Label (apply sub t) name)
-      EVariable (Label t name) -> do
-        EVariable (Label (apply sub t) name)
-      ELambda ps e -> do
-        ELambda (apply sub ps) (apply sub e)
-      ELet gs e1 -> do
-        ELet (apply sub gs) (apply sub e1)
-      EIf e1 e2 e3 -> do
-        EIf (apply sub e1) (apply sub e2) (apply sub e3)
-      EApplication t e1 es -> do
-        EApplication (apply sub t) (apply sub e1) (apply sub es)
+      EConstructor a (Label t name) -> do
+        EConstructor a (Label (apply sub t) name)
+      EVariable a (Label t name) -> do
+        EVariable a (Label (apply sub t) name)
+      ELambda a ps e -> do
+        ELambda a (apply sub ps) (apply sub e)
+      ELet a gs e1 -> do
+        ELet a (apply sub gs) (apply sub e1)
+      EIf a e1 e2 e3 -> do
+        EIf a (apply sub e1) (apply sub e2) (apply sub e3)
+      EApplication a t e1 es -> do
+        EApplication a (apply sub t) (apply sub e1) (apply sub es)
       e@ELiteral{} ->
         e
 

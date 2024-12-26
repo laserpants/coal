@@ -7,19 +7,19 @@ import Noll.Label (Label (..))
 import Noll.Language.Primitive (Primitive (..))
 import Noll.Utils (Dictionary)
 
-data Pattern t
+data Pattern a t
   = -- | Wildcard pattern
-    PAny t
+    PAny a t
   | -- | Variable pattern
-    PVariable (Label t)
+    PVariable a (Label t)
   | -- | Data constructor pattern
-    PConstructor (Label t) [Pattern t]
+    PConstructor a (Label t) [Pattern a t]
   | -- | Literal pattern
-    PLiteral Primitive
+    PLiteral a Primitive
   | -- | Record pattern
-    PRecord t (Dictionary (Pattern t)) (Maybe (Pattern t))
+    PRecord a t (Dictionary (Pattern a t)) (Maybe (Pattern a t))
   | -- | List cons-operator
-    PListCons t (Pattern t) (Pattern t)
+    PListCons a t (Pattern a t) (Pattern a t)
   | -- | List literal
-    PListLiteral t [Pattern t]
+    PListLiteral a t [Pattern a t]
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)

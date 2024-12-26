@@ -39,10 +39,10 @@ spec =
           , (Equality (typeVariable 5) (typeVariable 8 `TArrow` typeVariable 4))
           ]
 
-hasConstraints :: Expression Int -> [TypeConstraint TypeIndex () (Type TypeIndex ())] -> Bool
+hasConstraints :: Expression a Int -> [TypeConstraint TypeIndex () (Type TypeIndex ())] -> Bool
 hasConstraints = all . hasConstraint
 
-hasConstraint :: Expression Int -> TypeConstraint TypeIndex () (Type TypeIndex ()) -> Bool
+hasConstraint :: Expression a Int -> TypeConstraint TypeIndex () (Type TypeIndex ()) -> Bool
 hasConstraint e =
   \case
     Equality t1 t2 ->
@@ -65,54 +65,63 @@ typeInt32 :: Type TypeIndex k
 typeInt32 = TIntrinsic IInt32
 
 -- fn(m) => let y = m in let x = y(true) in x
-fixture1 :: Expression Int
+fixture1 :: Expression () Int
 fixture1 =
   ELambda
-    (PVariable (Label 5 "m") :| [])
+    ()
+    (PVariable () (Label 5 "m") :| [])
     ( ELet
+        ()
         ( BPattern
-            (PVariable (Label 6 "y"))
-            (EVariable (Label 1 "m"))
+            (PVariable () (Label 6 "y"))
+            (EVariable () (Label 1 "m"))
             :| []
         )
         ( ELet
+            ()
             ( BPattern
-                (PVariable (Label 7 "x"))
+                (PVariable () (Label 7 "x"))
                 ( EApplication
+                    ()
                     3
-                    (EVariable (Label 2 "y"))
-                    (ELiteral (LBool True) :| [])
+                    (EVariable () (Label 2 "y"))
+                    (ELiteral () (LBool True) :| [])
                 )
                 :| []
             )
-            ( EVariable (Label 4 "x")
+            ( EVariable () (Label 4 "x")
             )
         )
     )
 
 -- let f = fn(x) => x in (f f)(f 1)
-fixture2 :: Expression Int
+fixture2 :: Expression () Int
 fixture2 =
   ELet
+    ()
     ( BPattern
-        (PVariable (Label 1 "f"))
+        (PVariable () (Label 1 "f"))
         ( ELambda
-            (PVariable (Label 2 "x") :| [])
-            (EVariable (Label 3 "x"))
+            ()
+            (PVariable () (Label 2 "x") :| [])
+            (EVariable () (Label 3 "x"))
         )
         :| []
     )
     ( EApplication
+        ()
         4
         ( EApplication
+            ()
             5
-            (EVariable (Label 6 "f"))
-            (EVariable (Label 7 "f") :| [])
+            (EVariable () (Label 6 "f"))
+            (EVariable () (Label 7 "f") :| [])
         )
         ( EApplication
+            ()
             8
-            (EVariable (Label 9 "f"))
-            (ELiteral (LInt32 1) :| [])
+            (EVariable () (Label 9 "f"))
+            (ELiteral () (LInt32 1) :| [])
             :| []
         )
     )

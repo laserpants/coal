@@ -71,28 +71,28 @@ collectConstraintsInType =
     TVariable (TypeIndex k _) ->
       pure ()
 
-collectKindConstraints :: Expression (Type TypeIndex (Kind KindIndex)) -> KindConstraints (Kind KindIndex) ()
+collectKindConstraints :: Expression a (Type TypeIndex (Kind KindIndex)) -> KindConstraints (Kind KindIndex) ()
 collectKindConstraints =
   \case
-    EConstructor (Label t name) -> do
+    EConstructor _ (Label t name) -> do
       collectConstraintsInType t
-    EVariable (Label t _) -> do
+    EVariable _ (Label t _) -> do
       tell [KindEquality (kindOf t) KType]
       collectConstraintsInType t
-    ELambda _ e -> do
+    ELambda _ _ e -> do
       collectKindConstraints e
-    ELet gs e1 -> do
+    ELet _ gs e1 -> do
       forM_ gs $
         \case
-          BPattern (PVariable (Label t _)) e -> do
+          BPattern (PVariable _ (Label t _)) e -> do
             collectConstraintsInType t
             collectKindConstraints e
       collectKindConstraints e1
-    EIf e1 e2 e3 -> do
+    EIf _ e1 e2 e3 -> do
       collectKindConstraints e1
       collectKindConstraints e2
       collectKindConstraints e3
-    EApplication t e1 es -> do
+    EApplication _ t e1 es -> do
       collectConstraintsInType t
       collectKindConstraints e1
       traverse_ collectKindConstraints es

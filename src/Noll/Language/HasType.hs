@@ -44,38 +44,38 @@ instance HasType o k Primitive where
       LString{} ->
         TIntrinsic IString
 
-instance HasType o k (Pattern (Type o k)) where
+instance HasType o k (Pattern a (Type o k)) where
   typeOf =
     \case
-      PVariable t ->
+      PVariable _ t ->
         typeOf t
-      PConstructor t _ ->
+      PConstructor _ t _ ->
         typeOf t
 
-instance HasType o k (Expression (Type o k)) where
+instance HasType o k (Expression a (Type o k)) where
   typeOf =
     \case
-      ELiteral t ->
+      ELiteral _ t ->
         typeOf t
-      EConstructor t ->
+      EConstructor _ t ->
         typeOf t
-      EVariable t ->
+      EVariable _ t ->
         typeOf t
-      EApplication t _ _ ->
+      EApplication _ t _ _ ->
         typeOf t
-      EIf _ _ t ->
+      EIf _ _ _ t ->
         typeOf t
-      ELet _ t ->
+      ELet _ _ t ->
         typeOf t
-      ELambda ts t ->
+      ELambda _ ts t ->
         foldType (typeOf t) (typeOf <$> ts)
-      EBinaryOperator (t, _) ->
+      EBinaryOperator _ (t, _) ->
         typeOf t
-      EUnaryOperator (t, _) ->
+      EUnaryOperator _ (t, _) ->
         typeOf t
-      ERecord t _ _ ->
+      ERecord _ t _ _ ->
         typeOf t
-      EListCons t _ _ ->
+      EListCons _ t _ _ ->
         typeOf t
-      EListLiteral t _ ->
+      EListLiteral _ t _ ->
         typeOf t

@@ -84,10 +84,10 @@ instance (Ord k) => HasTypeIndexes k (Type TypeIndex k) where
       TAlias _ _ t ->
         typeIndexesIn t
 
-instance (HasTypeIndexes k t) => HasTypeIndexes k (Pattern t) where
+instance (HasTypeIndexes k t) => HasTypeIndexes k (Pattern a t) where
   typeIndexesIn =
     \case
-      PVariable (Label t _) ->
+      PVariable _ (Label t _) ->
         typeIndexesIn t
 
 instance (Ord k, HasTypeIndexes k t) => HasTypeIndexes k (Scheme TypeIndex k t) where
@@ -96,26 +96,26 @@ instance (Ord k, HasTypeIndexes k t) => HasTypeIndexes k (Scheme TypeIndex k t) 
       Forall qs ps t ->
         notBoundIn qs (typeIndexesIn t <> typeIndexesIn ps)
 
-instance (Ord k) => HasTypeIndexes k (Binding Expression (Type TypeIndex k)) where
+instance (Ord k) => HasTypeIndexes k (Binding Expression a (Type TypeIndex k)) where
   typeIndexesIn =
     \case
       BPattern p e ->
         typeIndexesIn p <> typeIndexesIn e
 
-instance (Ord k) => HasTypeIndexes k (Expression (Type TypeIndex k)) where
+instance (Ord k) => HasTypeIndexes k (Expression a (Type TypeIndex k)) where
   typeIndexesIn =
     \case
-      EConstructor (Label t _) ->
+      EConstructor _ (Label t _) ->
         typeIndexesIn t
-      EVariable (Label t _) ->
+      EVariable _ (Label t _) ->
         typeIndexesIn t
-      ELambda ps e ->
+      ELambda _ ps e ->
         typeIndexesIn ps <> typeIndexesIn e
-      ELet gs e1 ->
+      ELet _ gs e1 ->
         typeIndexesIn gs <> typeIndexesIn e1
-      EIf e1 e2 e3 ->
+      EIf _ e1 e2 e3 ->
         typeIndexesIn e1 <> typeIndexesIn e2 <> typeIndexesIn e3
-      EApplication t e1 es ->
+      EApplication _ t e1 es ->
         typeIndexesIn t <> typeIndexesIn e1 <> typeIndexesIn es
       ELiteral{} ->
         mempty

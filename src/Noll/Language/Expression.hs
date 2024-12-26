@@ -11,31 +11,31 @@ import Noll.Language.Pattern (Pattern (..))
 import Noll.Language.Primitive (Primitive (..))
 import Noll.Utils (Dictionary, Some)
 
-data Expression t
+data Expression a t
   = -- | Function application
-    EApplication t (Expression t) (Some (Expression t))
+    EApplication a t (Expression a t) (Some (Expression a t))
   | -- | Lambda function expression
-    ELambda (Some (Pattern t)) (Expression t)
+    ELambda a (Some (Pattern a t)) (Expression a t)
   | -- | Let binding
-    ELet (Some (Binding Expression t)) (Expression t)
+    ELet a (Some (Binding Expression a t)) (Expression a t)
   | -- | Recursive let binding
-    ERecursiveLet (Pattern t) (Expression t) (Expression t)
+    ERecursiveLet a (Pattern a t) (Expression a t) (Expression a t)
   | -- | Variable
-    EVariable (Label t)
+    EVariable a (Label t)
   | -- | Data constructor
-    EConstructor (Label t)
+    EConstructor a (Label t)
   | -- | Literal expression
-    ELiteral Primitive
+    ELiteral a Primitive
   | -- | If-else statement
-    EIf (Expression t) (Expression t) (Expression t)
+    EIf a (Expression a t) (Expression a t) (Expression a t)
   | -- | Unary operator
-    EUnaryOperator (t, UnaryOperator)
+    EUnaryOperator a (t, UnaryOperator)
   | -- | Binary operators
-    EBinaryOperator (t, BinaryOperator)
+    EBinaryOperator a (t, BinaryOperator)
   | -- | Record
-    ERecord t (Dictionary (Expression t)) (Maybe (Expression t))
+    ERecord a t (Dictionary (Expression a t)) (Maybe (Expression a t))
   | -- | List cons-operator
-    EListCons t (Expression t) (Expression t)
+    EListCons a t (Expression a t) (Expression a t)
   | -- | List literal
-    EListLiteral t [Expression t]
+    EListLiteral a t [Expression a t]
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)

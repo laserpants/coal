@@ -38,24 +38,28 @@ spec =
         applySubstitutionEquals
           fixture1
           ( ELambda
-              (PVariable (Label (typeBool `TArrow` typeVariable 3) "m") :| [])
+              ()
+              (PVariable () (Label (typeBool `TArrow` typeVariable 3) "m") :| [])
               ( ELet
+                  ()
                   ( BPattern
-                      (PVariable (Label (typeBool `TArrow` typeVariable 3) "y"))
-                      (EVariable (Label (typeBool `TArrow` typeVariable 3) "m"))
+                      (PVariable () (Label (typeBool `TArrow` typeVariable 3) "y"))
+                      (EVariable () (Label (typeBool `TArrow` typeVariable 3) "m"))
                       :| []
                   )
                   ( ELet
+                      ()
                       ( BPattern
-                          (PVariable (Label (typeVariable 3) "x"))
+                          (PVariable () (Label (typeVariable 3) "x"))
                           ( EApplication
+                              ()
                               (typeVariable 3)
-                              (EVariable (Label (typeBool `TArrow` typeVariable 3) "y"))
-                              (ELiteral (LBool True) :| [])
+                              (EVariable () (Label (typeBool `TArrow` typeVariable 3) "y"))
+                              (ELiteral () (LBool True) :| [])
                           )
                           :| []
                       )
-                      ( EVariable (Label (typeVariable 3) "x")
+                      ( EVariable () (Label (typeVariable 3) "x")
                       )
                   )
               )
@@ -64,25 +68,30 @@ spec =
         applySubstitutionEquals
           fixture2
           ( ELet
+              ()
               ( BPattern
-                  (PVariable (Label (typeVariable 3 `TArrow` typeVariable 3) "f"))
+                  (PVariable () (Label (typeVariable 3 `TArrow` typeVariable 3) "f"))
                   ( ELambda
-                      (PVariable (Label (typeVariable 3) "x") :| [])
-                      (EVariable (Label (typeVariable 3) "x"))
+                      ()
+                      (PVariable () (Label (typeVariable 3) "x") :| [])
+                      (EVariable () (Label (typeVariable 3) "x"))
                   )
                   :| []
               )
               ( EApplication
+                  ()
                   typeInt32
                   ( EApplication
+                      ()
                       (typeInt32 `TArrow` typeInt32)
-                      (EVariable (Label ((typeInt32 `TArrow` typeInt32) `TArrow` typeInt32 `TArrow` typeInt32) "f"))
-                      (EVariable (Label (typeInt32 `TArrow` typeInt32) "f") :| [])
+                      (EVariable () (Label ((typeInt32 `TArrow` typeInt32) `TArrow` typeInt32 `TArrow` typeInt32) "f"))
+                      (EVariable () (Label (typeInt32 `TArrow` typeInt32) "f") :| [])
                   )
                   ( EApplication
+                      ()
                       typeInt32
-                      (EVariable (Label (typeInt32 `TArrow` typeInt32) "f"))
-                      (ELiteral (LInt32 1) :| [])
+                      (EVariable () (Label (typeInt32 `TArrow` typeInt32) "f"))
+                      (ELiteral () (LInt32 1) :| [])
                       :| []
                   )
               )
@@ -91,53 +100,65 @@ spec =
       it "" $
         normalizeTypeIndexes fixture3
           == ( ELambda
-                (PVariable (Label (typeBool `TArrow` typeVariableKind 3 0) "m") :| [])
+                ()
+                (PVariable () (Label (typeBool `TArrow` typeVariableKind 3 0) "m") :| [])
                 ( ELet
+                    ()
                     ( BPattern
-                        (PVariable (Label (typeBool `TArrow` typeVariableKind 3 0) "y"))
-                        (EVariable (Label (typeBool `TArrow` typeVariableKind 3 0) "m"))
+                        (PVariable () (Label (typeBool `TArrow` typeVariableKind 3 0) "y"))
+                        (EVariable () (Label (typeBool `TArrow` typeVariableKind 3 0) "m"))
                         :| []
                     )
                     ( ELet
+                        ()
                         ( BPattern
-                            (PVariable (Label (typeVariableKind 3 0) "x"))
+                            (PVariable () (Label (typeVariableKind 3 0) "x"))
                             ( EApplication
+                                ()
                                 (typeVariableKind 3 0)
-                                (EVariable (Label (typeBool `TArrow` typeVariableKind 3 0) "y"))
-                                (ELiteral (LBool True) :| [])
+                                (EVariable () (Label (typeBool `TArrow` typeVariableKind 3 0) "y"))
+                                (ELiteral () (LBool True) :| [])
                             )
                             :| []
                         )
-                        ( EVariable (Label (typeVariableKind 3 0) "x")
+                        ( EVariable () (Label (typeVariableKind 3 0) "x")
                         )
                     )
                 )
              )
 
-applySubstitutionEquals :: (Expression (Type TypeIndex (Kind KindIndex)), TypeSubstitution) -> Expression (Type TypeIndex (Kind KindIndex)) -> Bool
+applySubstitutionEquals ::
+  (Eq a) =>
+  (Expression a (Type TypeIndex (Kind KindIndex)), TypeSubstitution) ->
+  Expression a (Type TypeIndex (Kind KindIndex)) ->
+  Bool
 applySubstitutionEquals (e, sub) res = apply sub e == res
 
-fixture1 :: (Expression (Type TypeIndex (Kind KindIndex)), TypeSubstitution)
+fixture1 :: (Expression () (Type TypeIndex (Kind KindIndex)), TypeSubstitution)
 fixture1 =
   ( ELambda
-      (PVariable (Label (typeVariable 5) "m") :| [])
+      ()
+      (PVariable () (Label (typeVariable 5) "m") :| [])
       ( ELet
+          ()
           ( BPattern
-              (PVariable (Label (typeVariable 6) "y"))
-              (EVariable (Label (typeVariable 1) "m"))
+              (PVariable () (Label (typeVariable 6) "y"))
+              (EVariable () (Label (typeVariable 1) "m"))
               :| []
           )
           ( ELet
+              ()
               ( BPattern
-                  (PVariable (Label (typeVariable 7) "x"))
+                  (PVariable () (Label (typeVariable 7) "x"))
                   ( EApplication
+                      ()
                       (typeVariable 3)
-                      (EVariable (Label (typeVariable 2) "y"))
-                      (ELiteral (LBool True) :| [])
+                      (EVariable () (Label (typeVariable 2) "y"))
+                      (ELiteral () (LBool True) :| [])
                   )
                   :| []
               )
-              ( EVariable (Label (typeVariable 4) "x")
+              ( EVariable () (Label (typeVariable 4) "x")
               )
           )
       )
@@ -151,28 +172,33 @@ fixture1 =
       ]
   )
 
-fixture2 :: (Expression (Type TypeIndex (Kind KindIndex)), TypeSubstitution)
+fixture2 :: (Expression () (Type TypeIndex (Kind KindIndex)), TypeSubstitution)
 fixture2 =
   ( ELet
+      ()
       ( BPattern
-          (PVariable (Label (typeVariable 1) "f"))
+          (PVariable () (Label (typeVariable 1) "f"))
           ( ELambda
-              (PVariable (Label (typeVariable 2) "x") :| [])
-              (EVariable (Label (typeVariable 3) "x"))
+              ()
+              (PVariable () (Label (typeVariable 2) "x") :| [])
+              (EVariable () (Label (typeVariable 3) "x"))
           )
           :| []
       )
       ( EApplication
+          ()
           (typeVariable 4)
           ( EApplication
+              ()
               (typeVariable 5)
-              (EVariable (Label (typeVariable 6) "f"))
-              (EVariable (Label (typeVariable 7) "f") :| [])
+              (EVariable () (Label (typeVariable 6) "f"))
+              (EVariable () (Label (typeVariable 7) "f") :| [])
           )
           ( EApplication
+              ()
               (typeVariable 8)
-              (EVariable (Label (typeVariable 9) "f"))
-              (ELiteral (LInt32 1) :| [])
+              (EVariable () (Label (typeVariable 9) "f"))
+              (ELiteral () (LInt32 1) :| [])
               :| []
           )
       )
@@ -188,27 +214,31 @@ fixture2 =
       ]
   )
 
-fixture3 :: Expression (Type TypeIndex (Kind KindIndex))
+fixture3 :: Expression () (Type TypeIndex (Kind KindIndex))
 fixture3 =
   ELambda
-    (PVariable (Label (typeBool `TArrow` typeVariable 3) "m") :| [])
+    ()
+    (PVariable () (Label (typeBool `TArrow` typeVariable 3) "m") :| [])
     ( ELet
+        ()
         ( BPattern
-            (PVariable (Label (typeBool `TArrow` typeVariable 3) "y"))
-            (EVariable (Label (typeBool `TArrow` typeVariable 3) "m"))
+            (PVariable () (Label (typeBool `TArrow` typeVariable 3) "y"))
+            (EVariable () (Label (typeBool `TArrow` typeVariable 3) "m"))
             :| []
         )
         ( ELet
+            ()
             ( BPattern
-                (PVariable (Label (typeVariable 3) "x"))
+                (PVariable () (Label (typeVariable 3) "x"))
                 ( EApplication
+                    ()
                     (typeVariable 3)
-                    (EVariable (Label (typeBool `TArrow` typeVariable 3) "y"))
-                    (ELiteral (LBool True) :| [])
+                    (EVariable () (Label (typeBool `TArrow` typeVariable 3) "y"))
+                    (ELiteral () (LBool True) :| [])
                 )
                 :| []
             )
-            ( EVariable (Label (typeVariable 3) "x")
+            ( EVariable () (Label (typeVariable 3) "x")
             )
         )
     )

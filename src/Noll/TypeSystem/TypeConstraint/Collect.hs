@@ -96,49 +96,49 @@ assertImplicitAssumptions t ms = do
     Assumption{..} <- ms
     pure (Implicit assumptionType t set)
 
-patternAssumptions :: [Assumption (Type TypeIndex k)] -> Pattern (Type TypeIndex k) -> CollectConstraints k [Assumption (Type TypeIndex k)]
+patternAssumptions :: [Assumption (Type TypeIndex k)] -> Pattern a (Type TypeIndex k) -> CollectConstraints k [Assumption (Type TypeIndex k)]
 patternAssumptions ms =
   \case
-    PVariable (Label t name) -> do
+    PVariable _ (Label t name) -> do
       let (ls, rs) = partition (assumptionNameIs name) ms
       assertEqualityAssumptions t ls
       pure rs
 
-collectConstraints :: (Ord k) => Expression (Type TypeIndex k) -> CollectConstraints k [Assumption (Type TypeIndex k)]
+collectConstraints :: (Ord k) => Expression a (Type TypeIndex k) -> CollectConstraints k [Assumption (Type TypeIndex k)]
 collectConstraints =
   \case
-    EConstructor (Label _ name) -> do
+    EConstructor _ (Label _ name) -> do
       -- TODO
       undefined
-    EVariable (Label t name) -> do
+    EVariable _ (Label t name) -> do
       pure [Assumption name t]
-    ELambda ps e -> do
+    ELambda _ ps e -> do
       ms1 <- localMonoset (monosetInsertMany (typeIndexesIn ps)) (collectConstraints e)
       ms2 <- concat <$> forM ps (patternAssumptions ms1)
       pure ms2
-    ELet gs e1 -> do
+    ELet _ gs e1 -> do
       ms1 <- collectConstraints e1
       ms2 <- flip concatMapM gs $
         \case
-          BPattern (PVariable (Label t name)) e -> do
+          BPattern (PVariable _ (Label t name)) e -> do
             ms <- collectConstraints e
             assertEquality t (typeOf e)
             pure ms
       ms3 <- flip concatMapM gs $
         \case
-          BPattern (PVariable (Label t name)) e -> do
+          BPattern (PVariable _ (Label t name)) e -> do
             let (ls, rs) = partition (assumptionNameIs name) ms1
             assertImplicitAssumptions t ls
             pure rs
       pure (ms1 <> ms2 <> ms3)
-    EIf e1 e2 e3 -> do
+    EIf _ e1 e2 e3 -> do
       ms1 <- collectConstraints e1
       ms2 <- collectConstraints e2
       ms3 <- collectConstraints e3
       assertEquality (typeOf e1) (TIntrinsic IBool)
       assertEquality (typeOf e2) (typeOf e3)
       pure (ms1 <> ms2 <> ms3)
-    EApplication t e1 es -> do
+    EApplication _ t e1 es -> do
       ms1 <- collectConstraints e1
       ms2 <- concat <$> traverse collectConstraints es
       assertEquality (typeOf e1) (foldType t (typeOf <$> es))
