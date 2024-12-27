@@ -6,7 +6,7 @@
 {-# LANGUAGE StrictData #-}
 {-# LANGUAGE UndecidableInstances #-}
 
-module Noll.Language.Type (Type (..), TypeIndex (..), HasActive (..), OpaqueType, foldType, activeIdsIn) where
+module Noll.Language.Type (Type (..), TypeIndex (..), HasActive (..), foldType, activeIdsIn) where
 
 import Data.List.NonEmpty (NonEmpty)
 import qualified Data.Set as Set
@@ -43,8 +43,6 @@ instance (Ord k, HasActive k t) => HasActive k [t] where
 
 instance (Ord k, HasActive k t) => HasActive k (NonEmpty t) where
   activeIn = Set.unions . fmap activeIn
-
-type OpaqueType = Type TypeIndex ()
 
 {-# INLINE activeIdsIn #-}
 activeIdsIn :: (HasActive k t) => t -> Set Int
