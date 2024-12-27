@@ -3,6 +3,7 @@
 
 module Noll.TypeSystem.TypeConstraint.CollectSpec (spec) where
 
+import Data.List (sort)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Set as Set
 import Noll.Label (Label (..))
@@ -18,10 +19,10 @@ spec =
       it "fn(m) => let y = m in let x = y(true) in x" $
         typeConstraintsIncludeAll
           fixture1
-          [ (Equality TypeConstraintMetadata (typeVariable 2) (typeBool `TArrow` typeVariable 3))
-          , (Equality TypeConstraintMetadata (typeVariable 5) (typeVariable 1))
-          , (Equality TypeConstraintMetadata (typeVariable 6) (typeVariable 1))
-          , (Equality TypeConstraintMetadata (typeVariable 7) (typeVariable 3))
+          [ (Equality TypeConstraintMetadata [typeVariable 2, typeBool `TArrow` typeVariable 3])
+          , (Equality TypeConstraintMetadata [typeVariable 5, typeVariable 1])
+          , (Equality TypeConstraintMetadata [typeVariable 6, typeVariable 1])
+          , (Equality TypeConstraintMetadata [typeVariable 7, typeVariable 3])
           , (Implicit TypeConstraintMetadata (typeVariable 4) (typeVariable 7) (MonomorphicSet (Set.fromList [TypeIndex () 5])))
           , (Implicit TypeConstraintMetadata (typeVariable 2) (typeVariable 6) (MonomorphicSet (Set.fromList [TypeIndex () 5])))
           ]
@@ -31,17 +32,17 @@ spec =
           [ (Implicit TypeConstraintMetadata (typeVariable 6) (typeVariable 1) (MonomorphicSet mempty))
           , (Implicit TypeConstraintMetadata (typeVariable 7) (typeVariable 1) (MonomorphicSet mempty))
           , (Implicit TypeConstraintMetadata (typeVariable 9) (typeVariable 1) (MonomorphicSet mempty))
-          , (Equality TypeConstraintMetadata (typeVariable 2) (typeVariable 3))
-          , (Equality TypeConstraintMetadata (typeVariable 6) (typeVariable 7 `TArrow` typeVariable 5))
-          , (Equality TypeConstraintMetadata (typeVariable 9) (typeInt32 `TArrow` typeVariable 8))
-          , (Equality TypeConstraintMetadata (typeVariable 1) (typeVariable 2 `TArrow` typeVariable 3))
-          , (Equality TypeConstraintMetadata (typeVariable 5) (typeVariable 8 `TArrow` typeVariable 4))
+          , (Equality TypeConstraintMetadata [typeVariable 2, typeVariable 3])
+          , (Equality TypeConstraintMetadata [typeVariable 6, typeVariable 7 `TArrow` typeVariable 5])
+          , (Equality TypeConstraintMetadata [typeVariable 9, typeInt32 `TArrow` typeVariable 8])
+          , (Equality TypeConstraintMetadata [typeVariable 1, typeVariable 2 `TArrow` typeVariable 3])
+          , (Equality TypeConstraintMetadata [typeVariable 5, typeVariable 8 `TArrow` typeVariable 4])
           ]
       it "let x = 1 in x(x)" $ do
         typeConstraintsIncludeAll
           fixture3
-          [ (Equality TypeConstraintMetadata (typeVariable 2) (typeVariable 3 `TArrow` typeVariable 1))
-          , (Equality TypeConstraintMetadata (typeVariable 0) typeInt32)
+          [ (Equality TypeConstraintMetadata [typeVariable 2, typeVariable 3 `TArrow` typeVariable 1])
+          , (Equality TypeConstraintMetadata [typeVariable 0, typeInt32])
           , (Implicit TypeConstraintMetadata (typeVariable 2) (typeVariable 0) (MonomorphicSet mempty))
           , (Implicit TypeConstraintMetadata (typeVariable 3) (typeVariable 0) (MonomorphicSet mempty))
           ]
@@ -49,11 +50,19 @@ spec =
 typeConstraintsIncludeAll :: (Eq a) => Expression a Int -> [TypeConstraint (TypeConstraintMetadata () a) TypeIndex () (Type TypeIndex ())] -> Bool
 typeConstraintsIncludeAll = all . typeConstraintsInclude
 
+sorted :: TypeConstraint (TypeConstraintMetadata () a) TypeIndex () (Type TypeIndex ()) -> TypeConstraint (TypeConstraintMetadata () a) TypeIndex () (Type TypeIndex ())
+sorted =
+  \case
+    Equality meta ts ->
+      Equality meta (sort ts)
+    c ->
+      c
+
 typeConstraintsInclude :: (Eq a) => Expression a Int -> TypeConstraint (TypeConstraintMetadata () a) TypeIndex () (Type TypeIndex ()) -> Bool
 typeConstraintsInclude e =
   \case
-    Equality meta t1 t2 ->
-      elem (Equality meta t1 t2) constraints || elem (Equality meta t2 t1) constraints
+    Equality meta ts ->
+      elem (normalized (Equality meta ts)) (normalized <$> constraints)
     c ->
       elem c constraints
  where
@@ -61,6 +70,12 @@ typeConstraintsInclude e =
     evalCollectTypeConstraints
       (TypeConstraintsContext mempty mempty)
       (collectTypeConstraints (fmap typeVariable e))
+  normalized =
+    \case
+      Equality meta ts ->
+        Equality meta (sort ts)
+      c ->
+        c
 
 typeVariable :: Int -> Type TypeIndex ()
 typeVariable = TVariable . TypeIndex ()

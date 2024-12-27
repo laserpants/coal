@@ -75,8 +75,8 @@ instance TypeSubstitutable (Scheme TypeIndex (Kind KindIndex) (Type TypeIndex (K
 instance TypeSubstitutable (TypeConstraint c TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))) where
   apply sub =
     \case
-      Equality meta t1 t2 ->
-        Equality meta (apply sub t1) (apply sub t2)
+      Equality meta ts ->
+        Equality meta (apply sub ts)
       Implicit meta t1 t2 m ->
         Implicit meta (apply sub t1) (apply sub t2) (apply sub m)
       Explicit meta t1 s ->

@@ -27,6 +27,8 @@ spec =
     it "" $
       validateResult fixture2 == fixture2Typed
     it "" $
+      validateResult fixture9 == fixture9Typed
+    it "" $
       typeErrorsInclude fixture4 (SolverError (ConstraintIfCondition "if"))
     it "" $
       typeErrorsInclude
@@ -39,20 +41,20 @@ spec =
         , SolverError (ConstraintIfCondition "if-1")
         ]
 
-typeErrorsIncludeAll :: (Eq a) => Expression a () -> [SolverError (TypeConstraintMetadata (Kind KindIndex) a)] -> Bool
+typeErrorsIncludeAll :: (Show a, Eq a) => Expression a () -> [SolverError (TypeConstraintMetadata (Kind KindIndex) a)] -> Bool
 typeErrorsIncludeAll e = all (typeErrorsInclude e)
 
-typeErrorsInclude :: (Eq a) => Expression a () -> SolverError (TypeConstraintMetadata (Kind KindIndex) a) -> Bool
+typeErrorsInclude :: (Show a, Eq a) => Expression a () -> SolverError (TypeConstraintMetadata (Kind KindIndex) a) -> Bool
 typeErrorsInclude e err = err `elem` errs
  where
   (_, errs, _) = testInferTypes e
 
-kindErrorsInclude :: (Eq a) => Expression a () -> SolverError KindConstraintMetadata -> Bool
+kindErrorsInclude :: (Show a, Eq a) => Expression a () -> SolverError KindConstraintMetadata -> Bool
 kindErrorsInclude e err = err `elem` errs
  where
   (_, _, errs) = testInferTypes e
 
-validateResult :: Expression () () -> Expression () (Type TypeIndex (Kind KindIndex))
+validateResult :: (Show a, Eq a) => Expression a () -> Expression a (Type TypeIndex (Kind KindIndex))
 validateResult e = let (a, _, _) = testInferTypes e in a
 
 type Result a =
@@ -61,7 +63,7 @@ type Result a =
   , [SolverError KindConstraintMetadata]
   )
 
-testInferTypes :: forall a. (Eq a) => Expression a () -> Result a
+testInferTypes :: forall a. (Show a, Eq a) => Expression a () -> Result a
 testInferTypes e =
   let
     e0 :: Expression a Int
@@ -344,6 +346,15 @@ fixture9 =
   EIf
     "if"
     ()
+    (ELiteral "a" (LBool True))
+    (ELiteral "b" (LInt32 2))
+    (ELiteral "c" (LInt32 3))
+
+fixture9Typed :: Expression String (Type TypeIndex (Kind KindIndex))
+fixture9Typed =
+  EIf
+    "if"
+    (TIntrinsic IInt32)
     (ELiteral "a" (LBool True))
     (ELiteral "b" (LInt32 2))
     (ELiteral "c" (LInt32 3))

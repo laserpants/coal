@@ -5,7 +5,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.TypeSystem.TypeUnification (TypeUnifiable (..)) where
+module Noll.TypeSystem.TypeUnification (TypeUnifiable (..), unifyAll) where
 
 import Control.Monad.Except
 import Data.List.NonEmpty (NonEmpty)
@@ -27,6 +27,7 @@ import Noll.TypeSystem.TypeSubstitution (
  )
 import Noll.TypeSystem.TypeUnification.Error (UnificationError (..))
 import qualified Noll.TypeSystem.TypeUnification.Error as Error
+import Noll.Utils (foldrM)
 
 class TypeUnifiable u where
   unify :: (MonadError UnificationError m) => u -> u -> m TypeSubstitution
@@ -99,3 +100,14 @@ bindType (TypeIndex _ index) =
           throwError Error.InfiniteType
       | otherwise ->
           pure (index `mapsToType` t)
+
+unifyAll :: (MonadError UnificationError m, TypeUnifiable u) => [u] -> m TypeSubstitution
+unifyAll [] = pure mempty
+unifyAll (t : ts) = do
+  sub1 <- foldrM go mempty ts
+  sub2 <- unifyAll ts
+  pure (sub2 <> sub1)
+ where
+  go t1 sub1 = do
+    sub2 <- unify t t1
+    pure (sub2 <> sub1)

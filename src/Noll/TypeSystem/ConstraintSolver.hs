@@ -25,7 +25,7 @@ import Noll.TypeSystem.KindSubstitution (KindSubstitutable (..), KindSubstitutio
 import Noll.TypeSystem.KindUnification (KindUnifiable (..))
 import Noll.TypeSystem.TypeConstraint (MonomorphicSet (..), TypeConstraint (..))
 import Noll.TypeSystem.TypeSubstitution (TypeSubstitutable (..), TypeSubstitution (..), mapsToType)
-import Noll.TypeSystem.TypeUnification (TypeUnifiable (..))
+import Noll.TypeSystem.TypeUnification (TypeUnifiable (..), unifyAll)
 import Noll.Utils (foldrM)
 
 data SolverError c = SolverError
@@ -94,8 +94,8 @@ solveTypes constraints =
   case choice constraints of
     NoneFound ->
       pure mempty
-    Choice cs (Equality meta t1 t2) -> do
-      res <- runExceptT (unify t1 t2)
+    Choice cs (Equality meta ts) -> do
+      res <- runExceptT (unifyAll ts)
       case res of
         Left err -> do
           tell [SolverError meta]
@@ -107,7 +107,7 @@ solveTypes constraints =
       solveTypes (Explicit meta t1 (generalize m t2) : cs)
     Choice cs (Explicit meta t1 s) -> do
       t2 <- instantiate s
-      solveTypes (Equality meta t1 t2 : cs)
+      solveTypes (Equality meta [t1, t2] : cs)
 
 instantiate ::
   (MonadState Int m) =>

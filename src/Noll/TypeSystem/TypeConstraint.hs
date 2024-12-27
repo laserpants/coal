@@ -26,7 +26,7 @@ overMonomorphicSet :: (Set m -> Set m) -> MonomorphicSet m -> MonomorphicSet m
 overMonomorphicSet fn MonomorphicSet{..} = MonomorphicSet{monomorphicSet = fn monomorphicSet}
 
 data TypeConstraint c o k t
-  = Equality c t t
+  = Equality c [t]
   | Implicit c t t (MonomorphicSet (o k))
   | Explicit c t (Scheme o k t)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
@@ -43,8 +43,8 @@ instance HasTypeIndexes k (MonomorphicSet (TypeIndex k)) where
 instance (Ord k, HasTypeIndexes k t) => HasTypeIndexes k (TypeConstraint c TypeIndex k t) where
   typeIndexesIn =
     \case
-      Equality _ t1 t2 ->
-        typeIndexesIn t1 <> typeIndexesIn t2
+      Equality _ ts ->
+        typeIndexesIn ts
       Implicit _ t1 t2 m ->
         typeIndexesIn t1 <> typeIndexesIn t2 <> typeIndexesIn m
       Explicit _ t s ->
@@ -53,8 +53,8 @@ instance (Ord k, HasTypeIndexes k t) => HasTypeIndexes k (TypeConstraint c TypeI
 instance (Ord k, HasTypeIndexes k t) => HasActive k (TypeConstraint c TypeIndex k t) where
   activeIn =
     \case
-      Equality _ t1 t2 ->
-        typeIndexesIn t1 `union` typeIndexesIn t2
+      Equality _ ts ->
+        typeIndexesIn ts
       Implicit _ t1 t2 m ->
         typeIndexesIn t1 `union` (typeIndexesIn t2 `intersection` typeIndexesIn m)
       Explicit _ t s ->

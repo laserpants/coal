@@ -18,8 +18,8 @@ module Noll.Language (
 
 import Noll.Language.Constructor
 import Noll.Language.Expression
-import Noll.Language.Expression.Choice
 import Noll.Language.Expression.Binding
+import Noll.Language.Expression.Choice
 import Noll.Language.HasType
 import Noll.Language.HasTypeIndexes
 import Noll.Language.Pattern

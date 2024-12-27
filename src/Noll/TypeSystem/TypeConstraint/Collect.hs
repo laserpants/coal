@@ -80,15 +80,15 @@ evalCollectTypeConstraints :: TypeConstraintsContext o k -> TypeConstraints c o 
 evalCollectTypeConstraints = snd <$$> runCollectTypeConstraints
 
 {-# INLINE assertEquality #-}
-assertEquality :: TypeConstraintMetadata k a -> Type TypeIndex k -> Type TypeIndex k -> CollectConstraints (TypeConstraintMetadata k a) k ()
-assertEquality meta t1 t2 = tell [Equality meta t1 t2]
+assertEquality :: TypeConstraintMetadata k a -> [Type TypeIndex k] -> CollectConstraints (TypeConstraintMetadata k a) k ()
+assertEquality meta ts = tell [Equality meta ts]
 
 assertEqualityAssumptions :: Type TypeIndex k -> [Assumption (Type TypeIndex k)] -> CollectConstraints (TypeConstraintMetadata k a) k ()
 assertEqualityAssumptions t ms =
   tell $ do
     Assumption{..} <- ms
     -- TODO
-    pure (Equality TypeConstraintMetadata assumptionType t)
+    pure (Equality TypeConstraintMetadata [assumptionType, t])
 
 assertImplicitAssumptions :: Type TypeIndex k -> [Assumption (Type TypeIndex k)] -> CollectConstraints (TypeConstraintMetadata k a) k ()
 assertImplicitAssumptions t ms = do
@@ -125,7 +125,7 @@ collectTypeConstraints =
           BPattern _ (PVariable _ (Label t name)) e -> do
             ms <- collectTypeConstraints e
             -- TODO
-            assertEquality TypeConstraintMetadata t (typeOf e)
+            assertEquality TypeConstraintMetadata [t, typeOf e]
             pure ms
       ms3 <- flip concatMapM gs $
         \case
@@ -134,21 +134,21 @@ collectTypeConstraints =
             assertImplicitAssumptions t ls
             pure rs
       pure (ms1 <> ms2 <> ms3)
-    EIf loc _ e1 e2 e3 -> do
+    EIf loc t e1 e2 e3 -> do
       ms1 <- collectTypeConstraints e1
       ms2 <- collectTypeConstraints e2
       ms3 <- collectTypeConstraints e3
       let t1 = typeOf e1
           t2 = typeOf e2
           t3 = typeOf e3
-      assertEquality (ConstraintIfCondition loc) t1 (TIntrinsic IBool)
-      assertEquality (ConstraintIfBranches loc t2 t3) t2 t3
+      assertEquality (ConstraintIfCondition loc) [t1, TIntrinsic IBool]
+      assertEquality (ConstraintIfBranches loc t2 t3) [t, t2, t3]
       pure (ms1 <> ms2 <> ms3)
     EApplication _ t e1 es -> do
       ms1 <- collectTypeConstraints e1
       ms2 <- concat <$> traverse collectTypeConstraints es
       -- TODO
-      assertEquality TypeConstraintMetadata (typeOf e1) (foldType t (typeOf <$> es))
+      assertEquality TypeConstraintMetadata [typeOf e1, foldType t (typeOf <$> es)]
       pure (ms1 <> ms2)
     ELiteral{} ->
       pure []
