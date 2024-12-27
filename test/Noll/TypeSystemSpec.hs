@@ -1,5 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 module Noll.TypeSystemSpec where
 
@@ -25,13 +27,14 @@ spec =
     it "" $ hasSolverTypeError fixture4 (SolverError (ConstraintIfCondition "if"))
     it "" $ hasSolverTypeError fixture5 (SolverError (ConstraintIfBranches "if" (TIntrinsic IInt32) (TIntrinsic IBool)))
     it "" $
-      hasSolverTypeError
+      hasSolverTypeErrors
         fixture6
-        (SolverError (ConstraintIfBranches "if-2" (TIntrinsic IBool) (TIntrinsic IInt32)))
-    it "" $
-      hasSolverTypeError
-        fixture6
-        (SolverError (ConstraintIfCondition "if-1"))
+        [ SolverError (ConstraintIfBranches "if-2" (TIntrinsic IBool) (TIntrinsic IInt32))
+        , SolverError (ConstraintIfCondition "if-1")
+        ]
+
+hasSolverTypeErrors :: (Eq a) => Expression a () -> [SolverError (TypeConstraintMetadata (Kind KindIndex) a)] -> Bool
+hasSolverTypeErrors e = all (hasSolverTypeError e)
 
 hasSolverTypeError :: (Eq a) => Expression a () -> SolverError (TypeConstraintMetadata (Kind KindIndex) a) -> Bool
 hasSolverTypeError e err = let (_, errs, _) = addTypes e in err `elem` errs
@@ -42,45 +45,47 @@ hasSolverKindError e err = let (_, _, errs) = addTypes e in err `elem` errs
 hasTypedExpression :: Expression () () -> Expression () (Type TypeIndex (Kind KindIndex))
 hasTypedExpression e = let (a, _, _) = addTypes e in a
 
-addTypes ::
-  (Eq a) =>
-  Expression a () ->
+type Result a =
   ( Expression a (Type TypeIndex (Kind KindIndex))
   , [SolverError (TypeConstraintMetadata (Kind KindIndex) a)]
   , [SolverError KindConstraintMetadata]
   )
-addTypes e = (normalizeTypeIndexes e3, errs1, errs2)
- where
-  -- e3 :: forall a. Expression a (Type TypeIndex (Kind KindIndex))
-  e3 = applyKindSub kindSub e2
 
-  (kindSub, errs2) = res2
+addTypes :: forall a. (Eq a) => Expression a () -> Result a
+addTypes e =
+  let
+    e0 :: Expression a Int
+    e0 = evalState (traverse (const supply) e) (0 :: Int)
 
-  -- res2 :: (KindSubstitution, [SolverError KindConstraintMetadata])
-  res2 = evalSolver 0 (solveKinds kindConstraints)
+    e1 :: Expression a (Type TypeIndex (Kind KindIndex))
+    e1 = fmap typeVariable e0
 
-  -- kindConstraints :: [KindConstraint KindConstraintMetadata (Kind KindIndex)]
-  kindConstraints = runCollectKindConstraints mempty (collectKindConstraints e2)
+    typeConstraints :: [TypeConstraint (TypeConstraintMetadata (Kind KindIndex) a) TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))]
+    typeConstraints =
+      evalCollectTypeConstraints
+        (TypeConstraintsContext mempty mempty)
+        (collectConstraints e1)
 
-  -- e2 :: Expression () (Type TypeIndex (Kind KindIndex))
-  e2 = apply typeSub e1
+    res1 :: (TypeSubstitution, [SolverError (TypeConstraintMetadata (Kind KindIndex) a)])
+    res1 = evalSolver (freshIdIn typeConstraints) (solveTypes typeConstraints)
 
-  (typeSub, errs1) = res1
+    (typeSub, errs1) = res1
 
-  -- res1 :: (TypeSubstitution, [SolverError (TypeConstraintMetadata ())])
-  res1 = evalSolver (freshIdIn typeConstraints) (solveTypes typeConstraints)
+    e2 :: Expression a (Type TypeIndex (Kind KindIndex))
+    e2 = apply typeSub e1
 
-  -- typeConstraints :: [TypeConstraint (TypeConstraintMetadata ()) TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))]
-  typeConstraints =
-    evalCollectTypeConstraints
-      (TypeConstraintsContext mempty mempty)
-      (collectConstraints e1)
+    kindConstraints :: [KindConstraint KindConstraintMetadata (Kind KindIndex)]
+    kindConstraints = runCollectKindConstraints mempty (collectKindConstraints e2)
 
-  -- e1 :: Expression () (Type TypeIndex (Kind KindIndex))
-  e1 = fmap typeVariable e0
+    res2 :: (KindSubstitution, [SolverError KindConstraintMetadata])
+    res2 = evalSolver 0 (solveKinds kindConstraints)
 
-  -- e0 :: Expression () Int
-  e0 = evalState (traverse (const supply) e) (0 :: Int)
+    (kindSub, errs2) = res2
+
+    e3 :: Expression a (Type TypeIndex (Kind KindIndex))
+    e3 = applyKindSub kindSub e2
+   in
+    (normalizeTypeIndexes e3, errs1, errs2)
 
 typeVariable :: Int -> Type TypeIndex (Kind KindIndex)
 typeVariable n = TVariable (TypeIndex (KVariable (KindIndex n)) n)
