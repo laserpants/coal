@@ -54,7 +54,6 @@ collectConstraintsInType =
       collectConstraintsInType t2
     TIntrinsic t -> do
       traverse_ collectConstraintsInType t
-      pure ()
     TRow row ->
       -- TODO
       undefined
