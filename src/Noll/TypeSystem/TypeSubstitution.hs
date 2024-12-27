@@ -113,8 +113,8 @@ instance TypeSubstitutable (Pattern a (Type TypeIndex (Kind KindIndex))) where
 instance TypeSubstitutable (Binding Expression a (Type TypeIndex (Kind KindIndex))) where
   apply sub =
     \case
-      BPattern p e ->
-        BPattern (apply sub p) (apply sub e)
+      BPattern a p e ->
+        BPattern a (apply sub p) (apply sub e)
 
 instance TypeSubstitutable (Expression a (Type TypeIndex (Kind KindIndex))) where
   apply sub =

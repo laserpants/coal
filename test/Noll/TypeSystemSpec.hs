@@ -6,9 +6,9 @@
 module Noll.TypeSystemSpec where
 
 import Control.Monad.State (evalState)
-import Data.List.NonEmpty (NonEmpty (..))
+import Data.List.NonEmpty (NonEmpty (..), (<|))
 import Noll.Label (Label (..))
-import Noll.Language (Binding (..), Expression (..), Intrinsic (..), Kind (..), KindIndex (..), Pattern (..), Primitive (..), Type (..), TypeIndex (..), freshIdIn)
+import Noll.Language (Binding (..), Choice (..), Clause (..), Expression (..), Intrinsic (..), Kind (..), KindIndex (..), Pattern (..), Primitive (..), Type (..), TypeIndex (..), freshIdIn)
 import Noll.Library.Supply (supply)
 import Noll.TypeSystem.ConstraintSolver (SolverError (..), evalSolver, solveKinds, solveTypes)
 import Noll.TypeSystem.KindConstraint (KindConstraint (..), KindConstraintMetadata (..))
@@ -109,6 +109,7 @@ fixture1 =
     ( ELet
         ()
         ( BPattern
+            ()
             (PVariable () (Label () "y"))
             (EVariable () (Label () "m"))
             :| []
@@ -116,6 +117,7 @@ fixture1 =
         ( ELet
             ()
             ( BPattern
+                ()
                 (PVariable () (Label () "x"))
                 ( EApplication
                     ()
@@ -138,6 +140,7 @@ fixture1Typed =
       ( ELet
           ()
           ( BPattern
+              ()
               (PVariable () (Label (TIntrinsic IBool `TArrow` TVariable (TypeIndex KType 0)) "y"))
               (EVariable () (Label (TIntrinsic IBool `TArrow` TVariable (TypeIndex KType 0)) "m"))
               :| []
@@ -145,6 +148,7 @@ fixture1Typed =
           ( ELet
               ()
               ( BPattern
+                  ()
                   (PVariable () (Label (TVariable (TypeIndex KType 0)) "x"))
                   ( EApplication
                       ()
@@ -166,6 +170,7 @@ fixture2 =
   ELet
     ()
     ( BPattern
+        ()
         (PVariable () (Label () "f"))
         ( ELambda
             ()
@@ -197,6 +202,7 @@ fixture2Typed =
   ( ELet
       ()
       ( BPattern
+          ()
           (PVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0)) "f"))
           ( ELambda
               ()
@@ -230,6 +236,7 @@ fixture3 =
   ELet
     ()
     ( BPattern
+        ()
         (PVariable () (Label () "x"))
         (ELiteral () (LInt32 1))
         :| []
@@ -276,3 +283,67 @@ fixture6 =
         (ELiteral "f" (LBool False))
         (ELiteral "e" (LInt32 2))
     )
+
+fixture7 :: Expression () ()
+fixture7 =
+  ( EMatch
+      ()
+      ()
+      (EVariable () (Label () "x") :| [])
+      ( EClause
+          ()
+          (PConstructor () (Label () "Yes") [] :| [])
+          (CPlain () [] (ELiteral () (LBool True)) :| [])
+          :| []
+      )
+  )
+
+fixture8 :: Expression () ()
+fixture8 =
+  ELet
+    ()
+    ( BPattern
+        ()
+        (PVariable () (Label () "f"))
+        ( ELambda
+            ()
+            (PVariable () (Label () "x") :| [])
+            ( ELambda
+                ()
+                (PVariable () (Label () "y") :| [])
+                ( EMatch
+                    ()
+                    ()
+                    ( EApplication
+                        ()
+                        ()
+                        (EVariable () (Label () "equals"))
+                        (EVariable () (Label () "x") <| EVariable () (Label () "y") :| [])
+                        :| []
+                    )
+                    ( EClause
+                        ()
+                        (PConstructor () (Label () "Yes") [] :| [])
+                        (CPlain () [] (ELiteral () (LBool True)) :| [])
+                        <| EClause
+                          ()
+                          (PConstructor () (Label () "No") [] :| [])
+                          (CPlain () [] (ELiteral () (LBool False)) :| [])
+                          :| []
+                    )
+                )
+            )
+        )
+        :| []
+    )
+    (EVariable () (Label () "f"))
+
+-- if true then 2 else 3
+fixture9 :: Expression String ()
+fixture9 =
+  EIf
+    "if"
+    ()
+    (ELiteral "a" (LBool True))
+    (ELiteral "b" (LInt32 2))
+    (ELiteral "c" (LInt32 3))

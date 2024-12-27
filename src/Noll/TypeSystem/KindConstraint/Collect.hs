@@ -83,7 +83,7 @@ collectKindConstraints =
     ELet _ gs e1 -> do
       forM_ gs $
         \case
-          BPattern (PVariable _ (Label t _)) e -> do
+          BPattern _ (PVariable _ (Label t _)) e -> do
             collectConstraintsInType t
             collectKindConstraints e
       collectKindConstraints e1

@@ -45,6 +45,7 @@ spec =
                 ( ELet
                     ()
                     ( BPattern
+                        ()
                         (PVariable () (Label (typeBool `TArrow` typeVariableKind 3 0) "y"))
                         (EVariable () (Label (typeBool `TArrow` typeVariableKind 3 0) "m"))
                         :| []
@@ -52,6 +53,7 @@ spec =
                     ( ELet
                         ()
                         ( BPattern
+                            ()
                             (PVariable () (Label (typeVariableKind 3 0) "x"))
                             ( EApplication
                                 ()
@@ -82,6 +84,7 @@ fixture1 =
       ( ELet
           ()
           ( BPattern
+              ()
               (PVariable () (Label (typeVariable 6) "y"))
               (EVariable () (Label (typeVariable 1) "m"))
               :| []
@@ -89,6 +92,7 @@ fixture1 =
           ( ELet
               ()
               ( BPattern
+                  ()
                   (PVariable () (Label (typeVariable 7) "x"))
                   ( EApplication
                       ()
@@ -120,6 +124,7 @@ fixture1Result =
     ( ELet
         ()
         ( BPattern
+            ()
             (PVariable () (Label (typeBool `TArrow` typeVariable 3) "y"))
             (EVariable () (Label (typeBool `TArrow` typeVariable 3) "m"))
             :| []
@@ -127,6 +132,7 @@ fixture1Result =
         ( ELet
             ()
             ( BPattern
+                ()
                 (PVariable () (Label (typeVariable 3) "x"))
                 ( EApplication
                     ()
@@ -146,6 +152,7 @@ fixture2 =
   ( ELet
       ()
       ( BPattern
+          ()
           (PVariable () (Label (typeVariable 1) "f"))
           ( ELambda
               ()
@@ -188,6 +195,7 @@ fixture2Result =
   ELet
     ()
     ( BPattern
+        ()
         (PVariable () (Label (typeVariable 3 `TArrow` typeVariable 3) "f"))
         ( ELambda
             ()
@@ -222,6 +230,7 @@ fixture3 =
     ( ELet
         ()
         ( BPattern
+            ()
             (PVariable () (Label (typeBool `TArrow` typeVariable 3) "y"))
             (EVariable () (Label (typeBool `TArrow` typeVariable 3) "m"))
             :| []
@@ -229,6 +238,7 @@ fixture3 =
         ( ELet
             ()
             ( BPattern
+                ()
                 (PVariable () (Label (typeVariable 3) "x"))
                 ( EApplication
                     ()

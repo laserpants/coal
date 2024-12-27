@@ -45,6 +45,7 @@ fixture1 =
     ( ELet
         ()
         ( BPattern
+            ()
             (PVariable () (Label (TIntrinsic IBool `TArrow` TVariable (TypeIndex (KVariable (KindIndex 3)) 3)) "y"))
             (EVariable () (Label (TIntrinsic IBool `TArrow` TVariable (TypeIndex (KVariable (KindIndex 3)) 3)) "m"))
             :| []
@@ -52,6 +53,7 @@ fixture1 =
         ( ELet
             ()
             ( BPattern
+                ()
                 (PVariable () (Label (TVariable (TypeIndex (KVariable (KindIndex 3)) 3)) "x"))
                 ( EApplication
                     ()
@@ -72,6 +74,7 @@ fixture2 =
   ELet
     ()
     ( BPattern
+        ()
         (PVariable () (Label (TVariable (TypeIndex (KVariable (KindIndex 3)) 3) `TArrow` TVariable (TypeIndex (KVariable (KindIndex 3)) 3)) "f"))
         ( ELambda
             ()

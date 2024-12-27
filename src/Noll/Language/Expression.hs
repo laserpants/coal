@@ -1,7 +1,7 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Language.Expression (Expression (..)) where
+module Noll.Language.Expression (Expression (..), Clause (..)) where
 
 import Noll.Label (Label (..))
 import Noll.Language.Expression.Binding (Binding (..))
@@ -12,7 +12,7 @@ import Noll.Language.Pattern (Pattern (..))
 import Noll.Language.Primitive (Primitive (..))
 import Noll.Utils (Dictionary, Some)
 
-data Clause e a t = EClause (Some (Pattern a t)) (Some (Choice e a t))
+data Clause e a t = EClause a (Some (Pattern a t)) (Some (Choice e a t))
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
 
 data Expression a t

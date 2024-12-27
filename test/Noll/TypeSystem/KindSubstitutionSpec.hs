@@ -26,6 +26,7 @@ fixture1 =
   ELet
     ()
     ( BPattern
+        ()
         (PVariable () (Label (TVariable (TypeIndex (KVariable (KindIndex 3)) 3) `TArrow` TVariable (TypeIndex (KVariable (KindIndex 3)) 3)) "f"))
         ( ELambda
             ()
@@ -57,6 +58,7 @@ fixture1Result =
   ( ELet
       ()
       ( BPattern
+          ()
           (PVariable () (Label (TVariable (TypeIndex KType 3) `TArrow` TVariable (TypeIndex KType 3)) "f"))
           ( ELambda
               ()

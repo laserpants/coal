@@ -99,7 +99,7 @@ instance (Ord k, HasTypeIndexes k t) => HasTypeIndexes k (Scheme TypeIndex k t) 
 instance (Ord k) => HasTypeIndexes k (Binding Expression a (Type TypeIndex k)) where
   typeIndexesIn =
     \case
-      BPattern p e ->
+      BPattern _ p e ->
         typeIndexesIn p <> typeIndexesIn e
 
 instance (Ord k) => HasTypeIndexes k (Expression a (Type TypeIndex k)) where

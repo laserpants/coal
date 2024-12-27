@@ -80,6 +80,7 @@ fixture1 =
     ( ELet
         ()
         ( BPattern
+            ()
             (PVariable () (Label 6 "y"))
             (EVariable () (Label 1 "m"))
             :| []
@@ -87,6 +88,7 @@ fixture1 =
         ( ELet
             ()
             ( BPattern
+                ()
                 (PVariable () (Label 7 "x"))
                 ( EApplication
                     ()
@@ -107,6 +109,7 @@ fixture2 =
   ELet
     ()
     ( BPattern
+        ()
         (PVariable () (Label 1 "f"))
         ( ELambda
             ()
@@ -139,6 +142,7 @@ fixture3 =
   ELet
     ()
     ( BPattern
+        ()
         (PVariable () (Label 0 "x"))
         (ELiteral () (LInt32 1))
         :| []

@@ -122,14 +122,14 @@ collectTypeConstraints =
       ms1 <- collectTypeConstraints e1
       ms2 <- flip concatMapM gs $
         \case
-          BPattern (PVariable _ (Label t name)) e -> do
+          BPattern _ (PVariable _ (Label t name)) e -> do
             ms <- collectTypeConstraints e
             -- TODO
             assertEquality TypeConstraintMetadata t (typeOf e)
             pure ms
       ms3 <- flip concatMapM gs $
         \case
-          BPattern (PVariable _ (Label t name)) e -> do
+          BPattern _ (PVariable _ (Label t name)) e -> do
             let (ls, rs) = partition (assumptionNameIs name) ms1
             assertImplicitAssumptions t ls
             pure rs
