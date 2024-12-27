@@ -47,9 +47,19 @@ instance HasType o k Primitive where
 instance HasType o k (Pattern a (Type o k)) where
   typeOf =
     \case
+      PAny _ t ->
+        typeOf t
       PVariable _ t ->
         typeOf t
       PConstructor _ t _ ->
+        typeOf t
+      PLiteral _ t ->
+        typeOf t
+      PRecord _ t _ _ ->
+        typeOf t
+      PListCons _ t _ _ ->
+        typeOf t
+      PListLiteral _ t _ ->
         typeOf t
 
 instance HasType o k (Expression a (Type o k)) where
@@ -66,6 +76,8 @@ instance HasType o k (Expression a (Type o k)) where
       EIf _ t _ _ _ ->
         typeOf t
       ELet _ _ t ->
+        typeOf t
+      ERecursiveLet _ _ _ t ->
         typeOf t
       ELambda _ ts t ->
         foldType (typeOf t) (typeOf <$> ts)
