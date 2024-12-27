@@ -15,7 +15,7 @@ import Noll.TypeSystem.KindConstraint (KindConstraint (..), KindConstraintMetada
 import Noll.TypeSystem.KindConstraint.Collect (collectKindConstraints, runCollectKindConstraints)
 import Noll.TypeSystem.KindSubstitution (KindSubstitution (..), applyKindSub)
 import Noll.TypeSystem.TypeConstraint (TypeConstraint (..), TypeConstraintMetadata (..))
-import Noll.TypeSystem.TypeConstraint.Collect (TypeConstraintsContext (..), collectConstraints, evalCollectTypeConstraints)
+import Noll.TypeSystem.TypeConstraint.Collect (TypeConstraintsContext (..), collectTypeConstraints, evalCollectTypeConstraints)
 import Noll.TypeSystem.TypeSubstitution (TypeSubstitutable (..), TypeSubstitution, normalizeTypeIndexes)
 import Test.Hspec (Spec, describe, it)
 
@@ -74,7 +74,7 @@ testInferTypes e =
     typeConstraints =
       evalCollectTypeConstraints
         (TypeConstraintsContext mempty mempty)
-        (collectConstraints e1)
+        (collectTypeConstraints e1)
 
     res1 :: (TypeSubstitution, [SolverError (TypeConstraintMetadata (Kind KindIndex) a)])
     res1 = evalSolver (freshIdIn typeConstraints) (solveTypes typeConstraints)

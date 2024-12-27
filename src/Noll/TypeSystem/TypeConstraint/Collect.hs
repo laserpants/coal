@@ -8,7 +8,7 @@ module Noll.TypeSystem.TypeConstraint.Collect (
   TypeConstraintsContext (..),
   TypeConstraints (..),
   CollectConstraints,
-  collectConstraints,
+  collectTypeConstraints,
   runCollectTypeConstraints,
   evalCollectTypeConstraints,
 )
@@ -106,8 +106,8 @@ patternAssumptions ms =
       assertEqualityAssumptions t ls
       pure rs
 
-collectConstraints :: (Ord k) => Expression a (Type TypeIndex k) -> CollectConstraints (TypeConstraintMetadata k a) k [Assumption (Type TypeIndex k)]
-collectConstraints =
+collectTypeConstraints :: (Ord k) => Expression a (Type TypeIndex k) -> CollectConstraints (TypeConstraintMetadata k a) k [Assumption (Type TypeIndex k)]
+collectTypeConstraints =
   \case
     EConstructor _ (Label _ name) -> do
       -- TODO
@@ -115,15 +115,15 @@ collectConstraints =
     EVariable _ (Label t name) -> do
       pure [Assumption name t]
     ELambda _ ps e -> do
-      ms1 <- localMonoset (monosetInsertMany (typeIndexesIn ps)) (collectConstraints e)
+      ms1 <- localMonoset (monosetInsertMany (typeIndexesIn ps)) (collectTypeConstraints e)
       ms2 <- concat <$> forM ps (patternAssumptions ms1)
       pure ms2
     ELet _ gs e1 -> do
-      ms1 <- collectConstraints e1
+      ms1 <- collectTypeConstraints e1
       ms2 <- flip concatMapM gs $
         \case
           BPattern (PVariable _ (Label t name)) e -> do
-            ms <- collectConstraints e
+            ms <- collectTypeConstraints e
             -- TODO
             assertEquality TypeConstraintMetadata t (typeOf e)
             pure ms
@@ -135,9 +135,9 @@ collectConstraints =
             pure rs
       pure (ms1 <> ms2 <> ms3)
     EIf loc _ e1 e2 e3 -> do
-      ms1 <- collectConstraints e1
-      ms2 <- collectConstraints e2
-      ms3 <- collectConstraints e3
+      ms1 <- collectTypeConstraints e1
+      ms2 <- collectTypeConstraints e2
+      ms3 <- collectTypeConstraints e3
       let t1 = typeOf e1
           t2 = typeOf e2
           t3 = typeOf e3
@@ -145,8 +145,8 @@ collectConstraints =
       assertEquality (ConstraintIfBranches loc t2 t3) t2 t3
       pure (ms1 <> ms2 <> ms3)
     EApplication _ t e1 es -> do
-      ms1 <- collectConstraints e1
-      ms2 <- concat <$> traverse collectConstraints es
+      ms1 <- collectTypeConstraints e1
+      ms2 <- concat <$> traverse collectTypeConstraints es
       -- TODO
       assertEquality TypeConstraintMetadata (typeOf e1) (foldType t (typeOf <$> es))
       pure (ms1 <> ms2)

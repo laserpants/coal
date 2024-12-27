@@ -8,13 +8,13 @@ import qualified Data.Set as Set
 import Noll.Label (Label (..))
 import Noll.Language (Binding (..), Expression (..), Intrinsic (..), Pattern (..), Primitive (..), Type (..), TypeIndex (..))
 import Noll.TypeSystem.TypeConstraint (MonomorphicSet (..), TypeConstraint (..), TypeConstraintMetadata (..))
-import Noll.TypeSystem.TypeConstraint.Collect (TypeConstraintsContext (..), collectConstraints, evalCollectTypeConstraints)
+import Noll.TypeSystem.TypeConstraint.Collect (TypeConstraintsContext (..), collectTypeConstraints, evalCollectTypeConstraints)
 import Test.Hspec (Spec, describe, it)
 
 spec :: Spec
 spec =
   describe "Noll.TypeSystem.TypeConstraint.Collect" $ do
-    describe "collectConstraints" $ do
+    describe "collectTypeConstraints" $ do
       it "fn(m) => let y = m in let x = y(true) in x" $
         typeConstraintsIncludeAll
           fixture1
@@ -60,7 +60,7 @@ typeConstraintsInclude e =
   constraints =
     evalCollectTypeConstraints
       (TypeConstraintsContext mempty mempty)
-      (collectConstraints (fmap typeVariable e))
+      (collectTypeConstraints (fmap typeVariable e))
 
 typeVariable :: Int -> Type TypeIndex ()
 typeVariable = TVariable . TypeIndex ()
