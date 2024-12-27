@@ -51,36 +51,35 @@ addTypes ::
   )
 addTypes e = (normalizeTypeIndexes e3, errs1, errs2)
  where
-  --  e3 :: Expression () (Type TypeIndex (Kind KindIndex))
+  -- e3 :: forall a. Expression a (Type TypeIndex (Kind KindIndex))
   e3 = applyKindSub kindSub e2
 
   (kindSub, errs2) = res2
 
-  -- TODO
-  --  res2 :: (KindSubstitution, [SolverError KindConstraintMetadata])
+  -- res2 :: (KindSubstitution, [SolverError KindConstraintMetadata])
   res2 = evalSolver 0 (solveKinds kindConstraints)
 
-  --  kindConstraints :: [KindConstraint KindConstraintMetadata (Kind KindIndex)]
+  -- kindConstraints :: [KindConstraint KindConstraintMetadata (Kind KindIndex)]
   kindConstraints = runCollectKindConstraints mempty (collectKindConstraints e2)
 
-  --  e2 :: Expression () (Type TypeIndex (Kind KindIndex))
+  -- e2 :: Expression () (Type TypeIndex (Kind KindIndex))
   e2 = apply typeSub e1
 
   (typeSub, errs1) = res1
 
-  --  res1 :: (TypeSubstitution, [SolverError (TypeConstraintMetadata ())])
+  -- res1 :: (TypeSubstitution, [SolverError (TypeConstraintMetadata ())])
   res1 = evalSolver (freshIdIn typeConstraints) (solveTypes typeConstraints)
 
-  --  typeConstraints :: [TypeConstraint (TypeConstraintMetadata ()) TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))]
+  -- typeConstraints :: [TypeConstraint (TypeConstraintMetadata ()) TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))]
   typeConstraints =
     evalCollectTypeConstraints
       (TypeConstraintsContext mempty mempty)
       (collectConstraints e1)
 
-  --  e1 :: Expression () (Type TypeIndex (Kind KindIndex))
+  -- e1 :: Expression () (Type TypeIndex (Kind KindIndex))
   e1 = fmap typeVariable e0
 
-  --  e0 :: Expression () Int
+  -- e0 :: Expression () Int
   e0 = evalState (traverse (const supply) e) (0 :: Int)
 
 typeVariable :: Int -> Type TypeIndex (Kind KindIndex)
@@ -247,6 +246,7 @@ fixture5 =
     (ELiteral "c" (LInt32 2))
     (ELiteral "d" (LBool False))
 
+-- if 1 then 2 else (if true then false else 2)
 fixture6 :: Expression String ()
 fixture6 =
   EIf
