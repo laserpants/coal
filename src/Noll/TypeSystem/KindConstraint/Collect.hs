@@ -98,3 +98,7 @@ collectKindConstraints =
       traverse_ collectKindConstraints es
     ELiteral{} ->
       pure ()
+    EMatch _ t es cs -> do
+      traverse_ collectKindConstraints es
+      -- TODO
+      pure ()

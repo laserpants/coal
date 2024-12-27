@@ -7,8 +7,10 @@ module Noll.TypeSystemSpec where
 
 import Control.Monad.State (evalState)
 import Data.List.NonEmpty (NonEmpty (..), (<|))
+import Debug.Trace
 import Noll.Label (Label (..))
-import Noll.Language (Binding (..), Choice (..), Clause (..), Expression (..), Intrinsic (..), Kind (..), KindIndex (..), Pattern (..), Primitive (..), Type (..), TypeIndex (..), freshIdIn)
+import Noll.Language (Binding (..), Choice (..), Clause (..), Constructor (..), Expression (..), Intrinsic (..), Kind (..), KindIndex (..), Pattern (..), Primitive (..), Scheme (..), Type (..), TypeIndex (..), freshIdIn)
+import qualified Noll.Library.Environment as Environment
 import Noll.Library.Supply (supply)
 import Noll.TypeSystem.ConstraintSolver (SolverError (..), evalSolver, solveKinds, solveTypes)
 import Noll.TypeSystem.KindConstraint (KindConstraint (..), KindConstraintMetadata (..))
@@ -26,6 +28,8 @@ spec =
       validateResult fixture1 == fixture1Typed
     it "" $
       validateResult fixture2 == fixture2Typed
+    it "" $
+      validateResult fixture7 == fixture7Typed
     it "" $
       validateResult fixture9 == fixture9Typed
     it "" $
@@ -72,10 +76,18 @@ testInferTypes e =
     e1 :: Expression a (Type TypeIndex (Kind KindIndex))
     e1 = fmap typeVariable e0
 
+    constructorEnv =
+      Environment.fromList
+        [
+          ( "Yes"
+          , Constructor "Yes" (Forall mempty [] (TConstructor KType "Answer"))
+          )
+        ]
+
     typeConstraints :: [TypeConstraint (TypeConstraintMetadata (Kind KindIndex) a) TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))]
     typeConstraints =
       evalCollectTypeConstraints
-        (TypeConstraintsContext mempty mempty)
+        (TypeConstraintsContext mempty constructorEnv)
         (collectTypeConstraints e1)
 
     res1 :: (TypeSubstitution, [SolverError (TypeConstraintMetadata (Kind KindIndex) a)])
@@ -97,7 +109,8 @@ testInferTypes e =
     e3 :: Expression a (Type TypeIndex (Kind KindIndex))
     e3 = applyKindSub kindSub e2
    in
-    (normalizeTypeIndexes e3, errs1, errs2)
+    traceShow typeConstraints $
+      (normalizeTypeIndexes e3, errs1, errs2)
 
 typeVariable :: Int -> Type TypeIndex (Kind KindIndex)
 typeVariable n = TVariable (TypeIndex (KVariable (KindIndex n)) n)
@@ -296,6 +309,20 @@ fixture7 =
       ( EClause
           ()
           (PConstructor () (Label () "Yes") [] :| [])
+          (CPlain () [] (ELiteral () (LBool True)) :| [])
+          :| []
+      )
+  )
+
+fixture7Typed :: Expression () (Type TypeIndex (Kind KindIndex))
+fixture7Typed =
+  ( EMatch
+      ()
+      (TIntrinsic IBool)
+      (EVariable () (Label (TConstructor KType "Answer") "x") :| [])
+      ( EClause
+          ()
+          (PConstructor () (Label (TConstructor KType "Answer") "Yes") [] :| [])
           (CPlain () [] (ELiteral () (LBool True)) :| [])
           :| []
       )

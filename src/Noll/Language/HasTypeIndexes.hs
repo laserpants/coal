@@ -18,8 +18,9 @@ import Data.Map.Strict (Map)
 import Data.Set (Set, singleton)
 import qualified Data.Set as Set
 import Noll.Label (Label (..))
-import Noll.Language.Expression (Expression (..))
+import Noll.Language.Expression (Clause (..), Expression (..))
 import Noll.Language.Expression.Binding (Binding (..))
+import Noll.Language.Expression.Choice (Choice (..), Guard (..))
 import Noll.Language.Pattern (Pattern (..))
 import Noll.Language.Trait (Trait (..))
 import Noll.Language.Type (Type (..), TypeIndex (..))
@@ -84,11 +85,13 @@ instance (Ord k) => HasTypeIndexes k (Type TypeIndex k) where
       TAlias _ _ t ->
         typeIndexesIn t
 
-instance (HasTypeIndexes k t) => HasTypeIndexes k (Pattern a t) where
+instance (Ord k, HasTypeIndexes k t) => HasTypeIndexes k (Pattern a t) where
   typeIndexesIn =
     \case
       PVariable _ (Label t _) ->
         typeIndexesIn t
+      PConstructor _ (Label t _) ps ->
+        typeIndexesIn t <> typeIndexesIn ps
 
 instance (Ord k, HasTypeIndexes k t) => HasTypeIndexes k (Scheme TypeIndex k t) where
   typeIndexesIn =
@@ -101,6 +104,24 @@ instance (Ord k) => HasTypeIndexes k (Binding Expression a (Type TypeIndex k)) w
     \case
       BPattern _ p e ->
         typeIndexesIn p <> typeIndexesIn e
+
+instance (Ord k) => HasTypeIndexes k (Guard Expression a (Type TypeIndex k)) where
+  typeIndexesIn =
+    \case
+      CGuard e ->
+        typeIndexesIn e
+
+instance (Ord k) => HasTypeIndexes k (Choice Expression a (Type TypeIndex k)) where
+  typeIndexesIn =
+    \case
+      CPlain _ gs e ->
+        typeIndexesIn gs <> typeIndexesIn e
+
+instance (Ord k) => HasTypeIndexes k (Clause Expression a (Type TypeIndex k)) where
+  typeIndexesIn =
+    \case
+      EClause _ ps ds ->
+        typeIndexesIn ps <> typeIndexesIn ds
 
 instance (Ord k) => HasTypeIndexes k (Expression a (Type TypeIndex k)) where
   typeIndexesIn =
@@ -119,6 +140,8 @@ instance (Ord k) => HasTypeIndexes k (Expression a (Type TypeIndex k)) where
         typeIndexesIn t <> typeIndexesIn e1 <> typeIndexesIn es
       ELiteral{} ->
         mempty
+      EMatch _ t es cs ->
+        typeIndexesIn t <> typeIndexesIn es <> typeIndexesIn cs
 
 notBoundIn :: Set (TypeIndex k) -> Set (TypeIndex k) -> Set (TypeIndex k)
 notBoundIn s = Set.filter notBound

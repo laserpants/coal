@@ -35,6 +35,7 @@ data TypeConstraintMetadata k a
   = TypeConstraintMetadata
   | ConstraintIfCondition a
   | ConstraintIfBranches a (Type TypeIndex k) (Type TypeIndex k)
+  | ConstraintClauseGuard
   deriving (Show, Eq, Ord, Read)
 
 instance HasTypeIndexes k (MonomorphicSet (TypeIndex k)) where

@@ -18,6 +18,7 @@ import qualified Data.Set as Set
 import Noll.Label (Label (..))
 import Noll.Language (
   Binding (..),
+  Clause (..),
   Expression (..),
   HasTypeIndexes (..),
   Kind (..),
@@ -29,6 +30,7 @@ import Noll.Language (
   Type (..),
   TypeIndex (..),
  )
+import Noll.Language.Expression.Choice (Choice (..), Guard (..))
 import Noll.TypeSystem.TypeConstraint (MonomorphicSet (..), TypeConstraint (..))
 import Noll.Utils (IndexMap, Map, NonEmpty, Set)
 
@@ -109,12 +111,32 @@ instance TypeSubstitutable (Pattern a (Type TypeIndex (Kind KindIndex))) where
     \case
       PVariable a (Label t name) ->
         PVariable a (Label (apply sub t) name)
+      PConstructor a (Label t name) ps ->
+        PConstructor a (Label (apply sub t) name) (apply sub ps)
 
 instance TypeSubstitutable (Binding Expression a (Type TypeIndex (Kind KindIndex))) where
   apply sub =
     \case
       BPattern a p e ->
         BPattern a (apply sub p) (apply sub e)
+
+instance TypeSubstitutable (Guard Expression a (Type TypeIndex (Kind KindIndex))) where
+  apply sub =
+    \case
+      CGuard e ->
+        CGuard (apply sub e)
+
+instance TypeSubstitutable (Choice Expression a (Type TypeIndex (Kind KindIndex))) where
+  apply sub =
+    \case
+      CPlain a gs e ->
+        CPlain a (apply sub gs) (apply sub e)
+
+instance TypeSubstitutable (Clause Expression a (Type TypeIndex (Kind KindIndex))) where
+  apply sub =
+    \case
+      EClause a ps ds ->
+        EClause a (apply sub ps) (apply sub ds)
 
 instance TypeSubstitutable (Expression a (Type TypeIndex (Kind KindIndex))) where
   apply sub =
@@ -133,6 +155,8 @@ instance TypeSubstitutable (Expression a (Type TypeIndex (Kind KindIndex))) wher
         EApplication a (apply sub t) (apply sub e1) (apply sub es)
       e@ELiteral{} ->
         e
+      EMatch a t es cs ->
+        EMatch a (apply sub t) (apply sub es) (apply sub cs)
 
 newtype TypeSubstitution = TypeSubstitution {typeSubstitutionMap :: IndexMap (Type TypeIndex (Kind KindIndex))}
   deriving (Show, Eq, Ord, Read)

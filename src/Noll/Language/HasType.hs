@@ -7,6 +7,7 @@ module Noll.Language.HasType (HasType (..)) where
 
 import Noll.Label (Label (..))
 import Noll.Language.Expression (Expression (..))
+import Noll.Language.Expression.Choice (Choice (..), Guard (..))
 import Noll.Language.Pattern (Pattern (..))
 import Noll.Language.Primitive (Primitive (..))
 import Noll.Language.Type (Type (..), foldType)
@@ -61,6 +62,12 @@ instance HasType o k (Pattern a (Type o k)) where
         typeOf t
       PListLiteral _ t _ ->
         typeOf t
+
+instance HasType o k (Guard Expression a (Type o k)) where
+  typeOf =
+    \case
+      CGuard e ->
+        typeOf e
 
 instance HasType o k (Expression a (Type o k)) where
   typeOf =
