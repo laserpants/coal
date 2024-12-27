@@ -286,6 +286,7 @@ fixture6 =
         (ELiteral "e" (LInt32 2))
     )
 
+-- match x { | Yes => true }
 fixture7 :: Expression () ()
 fixture7 =
   ( EMatch
