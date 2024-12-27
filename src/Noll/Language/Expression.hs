@@ -27,7 +27,7 @@ data Expression a t
   | -- | Literal expression
     ELiteral a Primitive
   | -- | If-else statement
-    EIf a (Expression a t) (Expression a t) (Expression a t)
+    EIf a t (Expression a t) (Expression a t) (Expression a t)
   | -- | Unary operator
     EUnaryOperator a (t, UnaryOperator)
   | -- | Binary operators

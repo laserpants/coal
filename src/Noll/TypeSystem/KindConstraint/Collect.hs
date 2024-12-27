@@ -88,7 +88,8 @@ collectKindConstraints =
             collectConstraintsInType t
             collectKindConstraints e
       collectKindConstraints e1
-    EIf _ e1 e2 e3 -> do
+    EIf _ t e1 e2 e3 -> do
+      collectConstraintsInType t
       collectKindConstraints e1
       collectKindConstraints e2
       collectKindConstraints e3

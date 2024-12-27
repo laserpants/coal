@@ -24,6 +24,14 @@ spec =
     it "" $ hasTypedExpression fixture2 == fixture2Typed
     it "" $ hasSolverTypeError fixture4 (SolverError (ConstraintIfCondition "if"))
     it "" $ hasSolverTypeError fixture5 (SolverError (ConstraintIfBranches "if" (TIntrinsic IInt32) (TIntrinsic IBool)))
+    it "" $
+      hasSolverTypeError
+        fixture6
+        (SolverError (ConstraintIfBranches "if-2" (TIntrinsic IBool) (TIntrinsic IInt32)))
+    it "" $
+      hasSolverTypeError
+        fixture6
+        (SolverError (ConstraintIfCondition "if-1"))
 
 hasSolverTypeError :: (Eq a) => Expression a () -> SolverError (TypeConstraintMetadata (Kind KindIndex) a) -> Bool
 hasSolverTypeError e err = let (_, errs, _) = addTypes e in err `elem` errs
@@ -224,6 +232,7 @@ fixture4 :: Expression String ()
 fixture4 =
   EIf
     "if"
+    ()
     (ELiteral "b" (LInt32 1))
     (ELiteral "c" (LInt32 2))
     (ELiteral "d" (LInt32 3))
@@ -233,6 +242,7 @@ fixture5 :: Expression String ()
 fixture5 =
   EIf
     "if"
+    ()
     (ELiteral "b" (LBool True))
     (ELiteral "c" (LInt32 2))
     (ELiteral "d" (LBool False))
@@ -241,10 +251,12 @@ fixture6 :: Expression String ()
 fixture6 =
   EIf
     "if-1"
+    ()
     (ELiteral "b" (LInt32 1))
     (ELiteral "c" (LInt32 2))
     ( EIf
         "if-2"
+        ()
         (ELiteral "d" (LBool True))
         (ELiteral "f" (LBool False))
         (ELiteral "e" (LInt32 2))

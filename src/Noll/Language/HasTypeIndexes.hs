@@ -113,8 +113,8 @@ instance (Ord k) => HasTypeIndexes k (Expression a (Type TypeIndex k)) where
         typeIndexesIn ps <> typeIndexesIn e
       ELet _ gs e1 ->
         typeIndexesIn gs <> typeIndexesIn e1
-      EIf _ e1 e2 e3 ->
-        typeIndexesIn e1 <> typeIndexesIn e2 <> typeIndexesIn e3
+      EIf _ t e1 e2 e3 ->
+        typeIndexesIn t <> typeIndexesIn e1 <> typeIndexesIn e2 <> typeIndexesIn e3
       EApplication _ t e1 es ->
         typeIndexesIn t <> typeIndexesIn e1 <> typeIndexesIn es
       ELiteral{} ->

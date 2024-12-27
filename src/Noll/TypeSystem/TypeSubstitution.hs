@@ -127,8 +127,8 @@ instance TypeSubstitutable (Expression a (Type TypeIndex (Kind KindIndex))) wher
         ELambda a (apply sub ps) (apply sub e)
       ELet a gs e1 -> do
         ELet a (apply sub gs) (apply sub e1)
-      EIf a e1 e2 e3 -> do
-        EIf a (apply sub e1) (apply sub e2) (apply sub e3)
+      EIf a t e1 e2 e3 -> do
+        EIf a (apply sub t) (apply sub e1) (apply sub e2) (apply sub e3)
       EApplication a t e1 es -> do
         EApplication a (apply sub t) (apply sub e1) (apply sub es)
       e@ELiteral{} ->

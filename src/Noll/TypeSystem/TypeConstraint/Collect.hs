@@ -134,7 +134,7 @@ collectConstraints =
             assertImplicitAssumptions t ls
             pure rs
       pure (ms1 <> ms2 <> ms3)
-    EIf loc e1 e2 e3 -> do
+    EIf loc _ e1 e2 e3 -> do
       ms1 <- collectConstraints e1
       ms2 <- collectConstraints e2
       ms3 <- collectConstraints e3
