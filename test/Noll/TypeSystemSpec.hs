@@ -22,28 +22,38 @@ import Test.Hspec (Spec, describe, it)
 spec :: Spec
 spec =
   describe "Noll.TypeSystem" $ do
-    it "" $ hasTypedExpression fixture1 == fixture1Typed
-    it "" $ hasTypedExpression fixture2 == fixture2Typed
-    it "" $ hasSolverTypeError fixture4 (SolverError (ConstraintIfCondition "if"))
-    it "" $ hasSolverTypeError fixture5 (SolverError (ConstraintIfBranches "if" (TIntrinsic IInt32) (TIntrinsic IBool)))
     it "" $
-      hasSolverTypeErrors
+      validateResult fixture1 == fixture1Typed
+    it "" $
+      validateResult fixture2 == fixture2Typed
+    it "" $
+      typeErrorsInclude fixture4 (SolverError (ConstraintIfCondition "if"))
+    it "" $
+      typeErrorsInclude
+        fixture5
+        (SolverError (ConstraintIfBranches "if" (TIntrinsic IInt32) (TIntrinsic IBool)))
+    it "" $
+      typeErrorsIncludeAll
         fixture6
         [ SolverError (ConstraintIfBranches "if-2" (TIntrinsic IBool) (TIntrinsic IInt32))
         , SolverError (ConstraintIfCondition "if-1")
         ]
 
-hasSolverTypeErrors :: (Eq a) => Expression a () -> [SolverError (TypeConstraintMetadata (Kind KindIndex) a)] -> Bool
-hasSolverTypeErrors e = all (hasSolverTypeError e)
+typeErrorsIncludeAll :: (Eq a) => Expression a () -> [SolverError (TypeConstraintMetadata (Kind KindIndex) a)] -> Bool
+typeErrorsIncludeAll e = all (typeErrorsInclude e)
 
-hasSolverTypeError :: (Eq a) => Expression a () -> SolverError (TypeConstraintMetadata (Kind KindIndex) a) -> Bool
-hasSolverTypeError e err = let (_, errs, _) = addTypes e in err `elem` errs
+typeErrorsInclude :: (Eq a) => Expression a () -> SolverError (TypeConstraintMetadata (Kind KindIndex) a) -> Bool
+typeErrorsInclude e err = err `elem` errs
+ where
+  (_, errs, _) = testInferTypes e
 
-hasSolverKindError :: (Eq a) => Expression a () -> SolverError KindConstraintMetadata -> Bool
-hasSolverKindError e err = let (_, _, errs) = addTypes e in err `elem` errs
+kindErrorsInclude :: (Eq a) => Expression a () -> SolverError KindConstraintMetadata -> Bool
+kindErrorsInclude e err = err `elem` errs
+ where
+  (_, _, errs) = testInferTypes e
 
-hasTypedExpression :: Expression () () -> Expression () (Type TypeIndex (Kind KindIndex))
-hasTypedExpression e = let (a, _, _) = addTypes e in a
+validateResult :: Expression () () -> Expression () (Type TypeIndex (Kind KindIndex))
+validateResult e = let (a, _, _) = testInferTypes e in a
 
 type Result a =
   ( Expression a (Type TypeIndex (Kind KindIndex))
@@ -51,8 +61,8 @@ type Result a =
   , [SolverError KindConstraintMetadata]
   )
 
-addTypes :: forall a. (Eq a) => Expression a () -> Result a
-addTypes e =
+testInferTypes :: forall a. (Eq a) => Expression a () -> Result a
+testInferTypes e =
   let
     e0 :: Expression a Int
     e0 = evalState (traverse (const supply) e) (0 :: Int)
@@ -150,7 +160,7 @@ fixture1Typed =
       )
   )
 
--- let f = fn(x) => x in (f f)(f 1)
+-- let f = fn(x) => x in (f(f))(f(1))
 fixture2 :: Expression () ()
 fixture2 =
   ELet

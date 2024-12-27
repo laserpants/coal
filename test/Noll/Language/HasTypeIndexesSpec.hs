@@ -13,17 +13,18 @@ import Test.Hspec (Spec, describe, it)
 spec :: Spec
 spec =
   describe "Noll.Language.HasTypeIndexes" $ do
-    describe "Scheme" $ do
-      it "" $
-        typeIndexesIn fixture1 == (Set.fromList [TypeIndex () 3] :: Set (TypeIndex ()))
-      it "" $
-        typeIndexesIn fixture2 == (Set.fromList [TypeIndex () 0, TypeIndex () 3] :: Set (TypeIndex ()))
-      it "" $
-        typeIndexesIn fixture3 == (mempty :: Set (TypeIndex ()))
-      it "" $
-        typeIndexesIn fixture4 == (mempty :: Set (TypeIndex (Kind Int)))
-      it "" $
-        typeIndexesIn fixture5 == (Set.fromList [TypeIndex KType 1] :: Set (TypeIndex (Kind Int)))
+    describe "typeIndexesIn" $ do
+      describe "Scheme" $ do
+        it "" $
+          typeIndexesIn fixture1 == (Set.fromList [TypeIndex () 3] :: Set (TypeIndex ()))
+        it "" $
+          typeIndexesIn fixture2 == (Set.fromList [TypeIndex () 0, TypeIndex () 3] :: Set (TypeIndex ()))
+        it "" $
+          typeIndexesIn fixture3 == (mempty :: Set (TypeIndex ()))
+        it "" $
+          typeIndexesIn fixture4 == (mempty :: Set (TypeIndex (Kind Int)))
+        it "" $
+          typeIndexesIn fixture5 == (Set.fromList [TypeIndex KType 1] :: Set (TypeIndex (Kind Int)))
 
 fixture1 :: Scheme TypeIndex () (Type TypeIndex ())
 fixture1 =

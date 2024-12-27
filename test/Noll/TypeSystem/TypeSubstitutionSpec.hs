@@ -34,68 +34,8 @@ spec =
       it "" $ do
         let t = TVariable (TypeIndex KType 0) :: Type TypeIndex (Kind KindIndex)
         apply (1 `mapsToType` TIntrinsic IBool) t == t
-      it "" $
-        applySubstitutionEquals
-          fixture1
-          ( ELambda
-              ()
-              (PVariable () (Label (typeBool `TArrow` typeVariable 3) "m") :| [])
-              ( ELet
-                  ()
-                  ( BPattern
-                      (PVariable () (Label (typeBool `TArrow` typeVariable 3) "y"))
-                      (EVariable () (Label (typeBool `TArrow` typeVariable 3) "m"))
-                      :| []
-                  )
-                  ( ELet
-                      ()
-                      ( BPattern
-                          (PVariable () (Label (typeVariable 3) "x"))
-                          ( EApplication
-                              ()
-                              (typeVariable 3)
-                              (EVariable () (Label (typeBool `TArrow` typeVariable 3) "y"))
-                              (ELiteral () (LBool True) :| [])
-                          )
-                          :| []
-                      )
-                      ( EVariable () (Label (typeVariable 3) "x")
-                      )
-                  )
-              )
-          )
-      it "" $
-        applySubstitutionEquals
-          fixture2
-          ( ELet
-              ()
-              ( BPattern
-                  (PVariable () (Label (typeVariable 3 `TArrow` typeVariable 3) "f"))
-                  ( ELambda
-                      ()
-                      (PVariable () (Label (typeVariable 3) "x") :| [])
-                      (EVariable () (Label (typeVariable 3) "x"))
-                  )
-                  :| []
-              )
-              ( EApplication
-                  ()
-                  typeInt32
-                  ( EApplication
-                      ()
-                      (typeInt32 `TArrow` typeInt32)
-                      (EVariable () (Label ((typeInt32 `TArrow` typeInt32) `TArrow` typeInt32 `TArrow` typeInt32) "f"))
-                      (EVariable () (Label (typeInt32 `TArrow` typeInt32) "f") :| [])
-                  )
-                  ( EApplication
-                      ()
-                      typeInt32
-                      (EVariable () (Label (typeInt32 `TArrow` typeInt32) "f"))
-                      (ELiteral () (LInt32 1) :| [])
-                      :| []
-                  )
-              )
-          )
+      it "" $ validateResult fixture1 fixture1Result
+      it "" $ validateResult fixture2 fixture2Result
     describe "normalizeTypeIndexes" $ do
       it "" $
         normalizeTypeIndexes fixture3
@@ -127,12 +67,12 @@ spec =
                 )
              )
 
-applySubstitutionEquals ::
+validateResult ::
   (Eq a) =>
   (Expression a (Type TypeIndex (Kind KindIndex)), TypeSubstitution) ->
   Expression a (Type TypeIndex (Kind KindIndex)) ->
   Bool
-applySubstitutionEquals (e, sub) res = apply sub e == res
+validateResult (e, sub) res = apply sub e == res
 
 fixture1 :: (Expression () (Type TypeIndex (Kind KindIndex)), TypeSubstitution)
 fixture1 =
@@ -171,6 +111,35 @@ fixture1 =
       , (7, typeVariable 3)
       ]
   )
+
+fixture1Result :: Expression () (Type TypeIndex (Kind KindIndex))
+fixture1Result =
+  ELambda
+    ()
+    (PVariable () (Label (typeBool `TArrow` typeVariable 3) "m") :| [])
+    ( ELet
+        ()
+        ( BPattern
+            (PVariable () (Label (typeBool `TArrow` typeVariable 3) "y"))
+            (EVariable () (Label (typeBool `TArrow` typeVariable 3) "m"))
+            :| []
+        )
+        ( ELet
+            ()
+            ( BPattern
+                (PVariable () (Label (typeVariable 3) "x"))
+                ( EApplication
+                    ()
+                    (typeVariable 3)
+                    (EVariable () (Label (typeBool `TArrow` typeVariable 3) "y"))
+                    (ELiteral () (LBool True) :| [])
+                )
+                :| []
+            )
+            ( EVariable () (Label (typeVariable 3) "x")
+            )
+        )
+    )
 
 fixture2 :: (Expression () (Type TypeIndex (Kind KindIndex)), TypeSubstitution)
 fixture2 =
@@ -213,6 +182,37 @@ fixture2 =
       , (9, typeInt32 `TArrow` typeInt32)
       ]
   )
+
+fixture2Result :: Expression () (Type TypeIndex (Kind KindIndex))
+fixture2Result =
+  ELet
+    ()
+    ( BPattern
+        (PVariable () (Label (typeVariable 3 `TArrow` typeVariable 3) "f"))
+        ( ELambda
+            ()
+            (PVariable () (Label (typeVariable 3) "x") :| [])
+            (EVariable () (Label (typeVariable 3) "x"))
+        )
+        :| []
+    )
+    ( EApplication
+        ()
+        typeInt32
+        ( EApplication
+            ()
+            (typeInt32 `TArrow` typeInt32)
+            (EVariable () (Label ((typeInt32 `TArrow` typeInt32) `TArrow` typeInt32 `TArrow` typeInt32) "f"))
+            (EVariable () (Label (typeInt32 `TArrow` typeInt32) "f") :| [])
+        )
+        ( EApplication
+            ()
+            typeInt32
+            (EVariable () (Label (typeInt32 `TArrow` typeInt32) "f"))
+            (ELiteral () (LInt32 1) :| [])
+            :| []
+        )
+    )
 
 fixture3 :: Expression () (Type TypeIndex (Kind KindIndex))
 fixture3 =

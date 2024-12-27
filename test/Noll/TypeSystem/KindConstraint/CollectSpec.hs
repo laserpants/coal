@@ -13,22 +13,23 @@ import Test.Hspec (Spec, describe, it)
 spec :: Spec
 spec =
   describe "Noll.TypeSystem.KindConstraint.Collect" $ do
-    it "" $
-      hasConstraints
-        fixture1
-        [ KindEquality KindConstraintMetadata (KVariable (KindIndex 3)) KType
-        ]
-    it "" $
-      hasConstraints
-        fixture2
-        [ KindEquality KindConstraintMetadata (KVariable (KindIndex 3)) KType
-        ]
+    describe "collectKindConstraints" $ do
+      it "" $
+        kindConstraintsIncludeAll
+          fixture1
+          [ KindEquality KindConstraintMetadata (KVariable (KindIndex 3)) KType
+          ]
+      it "" $
+        kindConstraintsIncludeAll
+          fixture2
+          [ KindEquality KindConstraintMetadata (KVariable (KindIndex 3)) KType
+          ]
 
-hasConstraints :: Expression a (Type TypeIndex (Kind KindIndex)) -> [KindConstraint KindConstraintMetadata (Kind KindIndex)] -> Bool
-hasConstraints = all . hasConstraint
+kindConstraintsIncludeAll :: Expression a (Type TypeIndex (Kind KindIndex)) -> [KindConstraint KindConstraintMetadata (Kind KindIndex)] -> Bool
+kindConstraintsIncludeAll = all . kindConstraintsInclude
 
-hasConstraint :: Expression a (Type TypeIndex (Kind KindIndex)) -> KindConstraint KindConstraintMetadata (Kind KindIndex) -> Bool
-hasConstraint e =
+kindConstraintsInclude :: Expression a (Type TypeIndex (Kind KindIndex)) -> KindConstraint KindConstraintMetadata (Kind KindIndex) -> Bool
+kindConstraintsInclude e =
   \case
     KindEquality x k1 k2 ->
       elem (KindEquality x k1 k2) constraints || elem (KindEquality x k2 k1) constraints
@@ -65,7 +66,7 @@ fixture1 =
         )
     )
 
--- let f = fn(x) => x in (f f)(f 1)
+-- let f = fn(x) => x in (f(f))(f(1))
 fixture2 :: Expression () (Type TypeIndex (Kind KindIndex))
 fixture2 =
   ELet

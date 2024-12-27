@@ -13,29 +13,30 @@ import Test.Hspec (Spec, describe, it)
 spec :: Spec
 spec =
   describe "Noll.TypeSystem.ConstraintSolver" $ do
-    it "" $
-      hasSubstitutions
-        fixture1
-        [ (1, typeBool `TArrow` typeVariable 3)
-        , (2, typeBool `TArrow` typeVariable 3)
-        , (4, typeVariable 3)
-        , (5, typeBool `TArrow` typeVariable 3)
-        ]
-    it "" $
-      hasSubstitutions
-        fixture2
-        [ (1, typeVariable 3 `TArrow` typeVariable 3)
-        , (2, typeVariable 3)
-        , (4, typeInt32)
-        , (5, typeInt32 `TArrow` typeInt32)
-        , (6, (typeInt32 `TArrow` typeInt32) `TArrow` typeInt32 `TArrow` typeInt32)
-        , (7, typeInt32 `TArrow` typeInt32)
-        , (8, typeInt32)
-        , (9, typeInt32 `TArrow` typeInt32)
-        ]
-    it "" $ hasNoErrors fixture1
-    it "" $ hasNoErrors fixture2
-    it "" $ hasNumberOfErrors 1 fixture3
+    describe "solveTypes" $ do
+      it "" $
+        substitutionsIncludeAll
+          fixture1
+          [ (1, typeBool `TArrow` typeVariable 3)
+          , (2, typeBool `TArrow` typeVariable 3)
+          , (4, typeVariable 3)
+          , (5, typeBool `TArrow` typeVariable 3)
+          ]
+      it "" $
+        substitutionsIncludeAll
+          fixture2
+          [ (1, typeVariable 3 `TArrow` typeVariable 3)
+          , (2, typeVariable 3)
+          , (4, typeInt32)
+          , (5, typeInt32 `TArrow` typeInt32)
+          , (6, (typeInt32 `TArrow` typeInt32) `TArrow` typeInt32 `TArrow` typeInt32)
+          , (7, typeInt32 `TArrow` typeInt32)
+          , (8, typeInt32)
+          , (9, typeInt32 `TArrow` typeInt32)
+          ]
+      it "" $ hasNoErrors fixture1
+      it "" $ hasNoErrors fixture2
+      it "" $ hasNumberOfErrors 1 fixture3
 
 -- fn(m) => let y = m in let x = y(true) in x
 fixture1 :: [TypeConstraint () TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))]
@@ -48,7 +49,7 @@ fixture1 =
   , (Implicit () (typeVariable 2) (typeVariable 6) (MonomorphicSet (Set.fromList [TypeIndex KType 5])))
   ]
 
--- let f = fn(x) => x in (f f)(f 1)
+-- let f = fn(x) => x in (f(f))(f(1))
 fixture2 :: [TypeConstraint () TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))]
 fixture2 =
   [ (Implicit () (typeVariable 6) (typeVariable 1) (MonomorphicSet mempty))
@@ -70,11 +71,11 @@ fixture3 =
   , (Implicit () (typeVariable 3) (typeVariable 0) (MonomorphicSet mempty))
   ]
 
-hasSubstitutions :: [TypeConstraint () TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))] -> [(Int, Type TypeIndex (Kind KindIndex))] -> Bool
-hasSubstitutions = all . uncurry . hasSubstitution
+substitutionsIncludeAll :: [TypeConstraint () TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))] -> [(Int, Type TypeIndex (Kind KindIndex))] -> Bool
+substitutionsIncludeAll = all . uncurry . substitutionsInclude
 
-hasSubstitution :: [TypeConstraint () TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))] -> Int -> Type TypeIndex (Kind KindIndex) -> Bool
-hasSubstitution cs k s = Map.lookup k (typeSubstitutionMap sub) == Just s
+substitutionsInclude :: [TypeConstraint () TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))] -> Int -> Type TypeIndex (Kind KindIndex) -> Bool
+substitutionsInclude cs k s = Map.lookup k (typeSubstitutionMap sub) == Just s
  where
   (sub, _) = evalSolver (freshIdIn cs) (solveTypes cs)
 

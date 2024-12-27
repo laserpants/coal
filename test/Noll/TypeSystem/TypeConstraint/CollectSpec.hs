@@ -14,9 +14,9 @@ import Test.Hspec (Spec, describe, it)
 spec :: Spec
 spec =
   describe "Noll.TypeSystem.TypeConstraint.Collect" $ do
-    describe "fixture1" $ do
-      it "" $
-        hasConstraints
+    describe "collectConstraints" $ do
+      it "fn(m) => let y = m in let x = y(true) in x" $
+        typeConstraintsIncludeAll
           fixture1
           [ (Equality TypeConstraintMetadata (typeVariable 2) (typeBool `TArrow` typeVariable 3))
           , (Equality TypeConstraintMetadata (typeVariable 5) (typeVariable 1))
@@ -25,9 +25,8 @@ spec =
           , (Implicit TypeConstraintMetadata (typeVariable 4) (typeVariable 7) (MonomorphicSet (Set.fromList [TypeIndex () 5])))
           , (Implicit TypeConstraintMetadata (typeVariable 2) (typeVariable 6) (MonomorphicSet (Set.fromList [TypeIndex () 5])))
           ]
-    describe "fixture2" $ do
-      it "" $
-        hasConstraints
+      it "let f = fn(x) => x in (f(f))(f(1))" $ do
+        typeConstraintsIncludeAll
           fixture2
           [ (Implicit TypeConstraintMetadata (typeVariable 6) (typeVariable 1) (MonomorphicSet mempty))
           , (Implicit TypeConstraintMetadata (typeVariable 7) (typeVariable 1) (MonomorphicSet mempty))
@@ -38,9 +37,8 @@ spec =
           , (Equality TypeConstraintMetadata (typeVariable 1) (typeVariable 2 `TArrow` typeVariable 3))
           , (Equality TypeConstraintMetadata (typeVariable 5) (typeVariable 8 `TArrow` typeVariable 4))
           ]
-    describe "fixture3" $ do
-      it "" $
-        hasConstraints
+      it "let x = 1 in x(x)" $ do
+        typeConstraintsIncludeAll
           fixture3
           [ (Equality TypeConstraintMetadata (typeVariable 2) (typeVariable 3 `TArrow` typeVariable 1))
           , (Equality TypeConstraintMetadata (typeVariable 0) typeInt32)
@@ -48,11 +46,11 @@ spec =
           , (Implicit TypeConstraintMetadata (typeVariable 3) (typeVariable 0) (MonomorphicSet mempty))
           ]
 
-hasConstraints :: (Eq a) => Expression a Int -> [TypeConstraint (TypeConstraintMetadata () a) TypeIndex () (Type TypeIndex ())] -> Bool
-hasConstraints = all . hasConstraint
+typeConstraintsIncludeAll :: (Eq a) => Expression a Int -> [TypeConstraint (TypeConstraintMetadata () a) TypeIndex () (Type TypeIndex ())] -> Bool
+typeConstraintsIncludeAll = all . typeConstraintsInclude
 
-hasConstraint :: (Eq a) => Expression a Int -> TypeConstraint (TypeConstraintMetadata () a) TypeIndex () (Type TypeIndex ()) -> Bool
-hasConstraint e =
+typeConstraintsInclude :: (Eq a) => Expression a Int -> TypeConstraint (TypeConstraintMetadata () a) TypeIndex () (Type TypeIndex ()) -> Bool
+typeConstraintsInclude e =
   \case
     Equality x t1 t2 ->
       elem (Equality x t1 t2) constraints || elem (Equality x t2 t1) constraints
@@ -103,7 +101,7 @@ fixture1 =
         )
     )
 
--- let f = fn(x) => x in (f f)(f 1)
+-- let f = fn(x) => x in (f(f))(f(1))
 fixture2 :: Expression () Int
 fixture2 =
   ELet

@@ -11,14 +11,15 @@ import Test.Hspec (Spec, describe, it)
 spec :: Spec
 spec =
   describe "Noll.TypeSystem.KindSubstitution" $ do
-    it "" $ do
-      let t = TVariable (TypeIndex (KVariable (KindIndex 1)) 1) :: Type TypeIndex (Kind KindIndex)
-      applyKindSub (1 `mapsToKind` KType) t == TVariable (TypeIndex KType 1)
-    it "" $ do
-      let t = TVariable (TypeIndex (KVariable (KindIndex 1)) 1) :: Type TypeIndex (Kind KindIndex)
-      applyKindSub (2 `mapsToKind` KType) t == t
-    it "" $
-      applyKindSub (3 `mapsToKind` KType) fixture1 == fixture1Result
+    describe "applyKindSub" $ do
+      it "" $ do
+        let t = TVariable (TypeIndex (KVariable (KindIndex 1)) 1) :: Type TypeIndex (Kind KindIndex)
+        applyKindSub (1 `mapsToKind` KType) t == TVariable (TypeIndex KType 1)
+      it "" $ do
+        let t = TVariable (TypeIndex (KVariable (KindIndex 1)) 1) :: Type TypeIndex (Kind KindIndex)
+        applyKindSub (2 `mapsToKind` KType) t == t
+      it "" $
+        applyKindSub (3 `mapsToKind` KType) fixture1 == fixture1Result
 
 fixture1 :: Expression () (Type TypeIndex (Kind KindIndex))
 fixture1 =
