@@ -1,7 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.TypeSystem.TypeConstraint.CollectSpec where
+module Noll.TypeSystem.TypeConstraint.CollectSpec (spec) where
 
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Set as Set
@@ -52,8 +52,8 @@ typeConstraintsIncludeAll = all . typeConstraintsInclude
 typeConstraintsInclude :: (Eq a) => Expression a Int -> TypeConstraint (TypeConstraintMetadata () a) TypeIndex () (Type TypeIndex ()) -> Bool
 typeConstraintsInclude e =
   \case
-    Equality x t1 t2 ->
-      elem (Equality x t1 t2) constraints || elem (Equality x t2 t1) constraints
+    Equality meta t1 t2 ->
+      elem (Equality meta t1 t2) constraints || elem (Equality meta t2 t1) constraints
     c ->
       elem c constraints
  where

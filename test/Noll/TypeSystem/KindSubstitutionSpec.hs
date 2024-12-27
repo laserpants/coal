@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.TypeSystem.KindSubstitutionSpec where
+module Noll.TypeSystem.KindSubstitutionSpec (spec) where
 
 import Data.List.NonEmpty (NonEmpty (..))
 import Noll.Label (Label (..))

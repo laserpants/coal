@@ -1,7 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.TypeSystem.KindConstraint.CollectSpec where
+module Noll.TypeSystem.KindConstraint.CollectSpec (spec) where
 
 import Data.List.NonEmpty (NonEmpty (..))
 import Noll.Label (Label (..))
@@ -31,8 +31,8 @@ kindConstraintsIncludeAll = all . kindConstraintsInclude
 kindConstraintsInclude :: Expression a (Type TypeIndex (Kind KindIndex)) -> KindConstraint KindConstraintMetadata (Kind KindIndex) -> Bool
 kindConstraintsInclude e =
   \case
-    KindEquality x k1 k2 ->
-      elem (KindEquality x k1 k2) constraints || elem (KindEquality x k2 k1) constraints
+    KindEquality meta k1 k2 ->
+      elem (KindEquality meta k1 k2) constraints || elem (KindEquality meta k2 k1) constraints
  where
   constraints = runCollectKindConstraints mempty (collectKindConstraints e)
 
