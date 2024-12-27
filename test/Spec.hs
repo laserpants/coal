@@ -4,6 +4,7 @@ import qualified Noll.TypeSystem.KindConstraint.CollectSpec
 import qualified Noll.TypeSystem.KindSubstitutionSpec
 import qualified Noll.TypeSystem.TypeConstraint.CollectSpec
 import qualified Noll.TypeSystem.TypeSubstitutionSpec
+import qualified Noll.TypeSystem.TypeUnificationSpec
 import qualified Noll.TypeSystemSpec
 import Test.Hspec (hspec)
 
@@ -16,4 +17,5 @@ main =
     Noll.TypeSystem.KindSubstitutionSpec.spec
     Noll.TypeSystem.ConstraintSolverSpec.spec
     Noll.TypeSystem.KindConstraint.CollectSpec.spec
+    Noll.TypeSystem.TypeUnificationSpec.spec
     Noll.TypeSystemSpec.spec
