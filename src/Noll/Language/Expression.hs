@@ -5,11 +5,15 @@ module Noll.Language.Expression (Expression (..)) where
 
 import Noll.Label (Label (..))
 import Noll.Language.Expression.Binding (Binding (..))
+import Noll.Language.Expression.Choice (Choice (..))
 import Noll.Language.Expression.Operator.Binary (BinaryOperator)
 import Noll.Language.Expression.Operator.Unary (UnaryOperator)
 import Noll.Language.Pattern (Pattern (..))
 import Noll.Language.Primitive (Primitive (..))
 import Noll.Utils (Dictionary, Some)
+
+data Clause e a t = EClause (Some (Pattern a t)) (Some (Choice e a t))
+  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
 
 data Expression a t
   = -- | Function application
@@ -38,4 +42,6 @@ data Expression a t
     EListCons a t (Expression a t) (Expression a t)
   | -- | List literal
     EListLiteral a t [Expression a t]
+  | -- | Pattern matching expression
+    EMatch t (Some (Expression a t)) (Some (Clause Expression a t))
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
