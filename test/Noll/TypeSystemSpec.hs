@@ -246,6 +246,6 @@ fixture6 =
     ( EIf
         "if-2"
         (ELiteral "d" (LBool True))
-        (ELiteral "e" (LInt32 2))
         (ELiteral "f" (LBool False))
+        (ELiteral "e" (LInt32 2))
     )

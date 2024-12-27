@@ -63,7 +63,7 @@ instance HasType o k (Expression a (Type o k)) where
         typeOf t
       EApplication _ t _ _ ->
         typeOf t
-      EIf _ _ _ t ->
+      EIf _ _ t _ ->
         typeOf t
       ELet _ _ t ->
         typeOf t
