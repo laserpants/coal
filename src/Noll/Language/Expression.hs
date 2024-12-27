@@ -43,5 +43,5 @@ data Expression a t
   | -- | List literal
     EListLiteral a t [Expression a t]
   | -- | Pattern matching expression
-    EMatch t (Some (Expression a t)) (Some (Clause Expression a t))
+    EMatch a t (Some (Expression a t)) (Some (Clause Expression a t))
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
