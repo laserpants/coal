@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -18,8 +19,11 @@ where
 
 import Control.Monad (join)
 import Control.Monad.RWS (MonadRWS, MonadReader, MonadState, MonadWriter, RWS, ask, asks, evalRWS, local, tell)
+import Control.Monad.State (StateT, evalStateT, get, modify)
+import Control.Monad.Trans (lift)
 import Data.List (partition)
 import qualified Data.List.NonEmpty as NonEmpty
+import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import qualified Data.Text as Text
 import Data.Tuple.Extra (second)
@@ -33,7 +37,10 @@ import Noll.Language (
   Expression (..),
   HasType (..),
   Intrinsic (..),
+  Kind (..),
+  KindIndex (..),
   Pattern (..),
+  Row (..),
   Type (..),
   TypeId (..),
   TypeIndex (..),
@@ -43,10 +50,10 @@ import Noll.Language (
 import Noll.Language.Type.Scheme (Scheme (..))
 import Noll.Library.Environment (Environment (..))
 import qualified Noll.Library.Environment as Environment
-import Noll.Library.Supply (supplyN)
+import Noll.Library.Supply (supply, supplyN)
 import Noll.TypeSystem.TypeConstraint (MonomorphicSet (..), TypeConstraint (..), TypeConstraintMetadata (..), overMonomorphicSet)
 import Noll.TypeSystem.TypeConstraint.Assumption (Assumption (..), assumptionNameIs)
-import Noll.Utils (Name, concatMapM, forM, forM_, (<$$>))
+import Noll.Utils (Dictionary, Name, concatMapM, forM, forM_, (<$$>))
 
 data TypeConstraintsContext o k = TypeConstraintsContext
   { contextMonomorphicSet :: MonomorphicSet (o k)
@@ -125,20 +132,21 @@ patternAssumptions ms =
       pure rs
 
 withMonomorphic ::
-  (Ord k, TypeIndexed k s) =>
+  (Ord k, TypeIndexed k s, KindRep k) =>
   s ->
   TypeConstraints c TypeIndex k t a ->
   TypeConstraints c TypeIndex k t a
 withMonomorphic ps = localMonoset (monosetInsertMany (typeIndexesIn ps))
 
 collectTypeConstraints ::
-  (Ord k, Show k) =>
+  (Ord k, Show k, KindRep k) =>
   Expression a (Type TypeIndex k) ->
   CollectConstraints (TypeConstraintMetadata k a) k [Assumption (Type TypeIndex k)]
 collectTypeConstraints =
   \case
     EAnnotation a e -> do
-      --      tell [Explicit TypeConstraintMetadata (typeOf e) (annotationScheme a)]
+      s <- annotationScheme a
+      tell [Explicit TypeConstraintMetadata (typeOf e) s]
       collectTypeConstraints e
     EConstructor _ (Label t name) -> do
       r <- lookupContextConstructor name
@@ -200,7 +208,7 @@ collectTypeConstraints =
       pure (ms1 <> ms2)
 
 collectClauseTypeConstraints ::
-  (Ord k, Show k) =>
+  (Ord k, Show k, KindRep k) =>
   [Type TypeIndex k] ->
   Clause Expression a (Type TypeIndex k) ->
   CollectConstraints (TypeConstraintMetadata k a) k ([Type TypeIndex k], [Assumption (Type TypeIndex k)])
@@ -232,24 +240,63 @@ collectClauseTypeConstraints ys (EClause _ ps cs) = do
         ms1 <- collectTypeConstraints e
         pure (typeOf e, ms1)
 
-annotationScheme :: Type TypeId () -> CollectConstraints (TypeConstraintMetadata k a) k (Scheme TypeIndex k t)
-annotationScheme = undefined
+class KindRep k where
+  kindRep :: Kind KindIndex -> k
 
--- TODO
-box :: Type TypeId () -> CollectConstraints (TypeConstraintMetadata k a) k (Type TypeIndex (Type TypeIndex k))
-box =
+instance KindRep () where
+  kindRep = const ()
+
+instance KindRep (Kind KindIndex) where
+  kindRep = id
+
+annotationScheme :: (MonadState Int m, Ord k, KindRep k) => Type TypeId () -> m (Scheme TypeIndex k (Type TypeIndex k))
+annotationScheme t = do
+  s <- evalStateT (instantiateAnnotation t) mempty
+  pure (Forall (typeIndexesIn s) [] s)
+
+type Annotation m k = StateT (Dictionary (TypeIndex k)) m
+
+instantiateAnnotation :: (MonadState Int m, KindRep k) => Type TypeId () -> Annotation m k (Type TypeIndex k)
+instantiateAnnotation =
   \case
-    TApplication k t ts ->
-      TApplication undefined <$> box t <*> traverse box ts
+    TApplication _ t ts ->
+      TApplication <$> freshRep <*> instantiateAnnotation t <*> traverse instantiateAnnotation ts
     TArrow t1 t2 ->
-      undefined
-    TConstructor{} ->
-      undefined
-    TIntrinsic{} ->
-      undefined
+      TArrow <$> instantiateAnnotation t1 <*> instantiateAnnotation t2
+    TConstructor _ name ->
+      TConstructor <$> freshRep <*> pure name
+    TIntrinsic t ->
+      TIntrinsic <$> traverse instantiateAnnotation t
     TRow row ->
-      undefined
-    TVariable (TypeId _ name) ->
-      undefined
-    TAlias _ _ t ->
-      undefined
+      TRow <$> instantiateAnnotationRow row
+    TVariable v ->
+      TVariable <$> instantiateAnnotationTypeId v
+    TAlias name ts t ->
+      TAlias name <$> traverse instantiateAnnotation ts <*> instantiateAnnotation t
+
+freshRep :: (MonadState Int m, KindRep k) => Annotation m k k
+freshRep = do
+  i <- lift supply
+  pure (kindRep (KVariable (KindIndex i)))
+
+instantiateAnnotationRow :: (MonadState Int m, KindRep k) => Row TypeId () (Type TypeId ()) -> Annotation m k (Row TypeIndex k (Type TypeIndex k))
+instantiateAnnotationRow =
+  \case
+    RExtend name t row ->
+      RExtend name <$> instantiateAnnotation t <*> instantiateAnnotationRow row
+    RVariable v ->
+      RVariable <$> instantiateAnnotationTypeId v
+    RNil ->
+      pure RNil
+
+instantiateAnnotationTypeId :: (MonadState Int m, KindRep k) => TypeId () -> Annotation m k (TypeIndex k)
+instantiateAnnotationTypeId (TypeId _ name) = do
+  dict <- get
+  case Map.lookup name dict of
+    Nothing -> do
+      i <- lift supply
+      let k = TypeIndex (kindRep (KVariable (KindIndex i))) i
+      modify (Map.insert name k)
+      pure k
+    Just k ->
+      pure k
