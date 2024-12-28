@@ -36,6 +36,7 @@ import Noll.Language (
   Intrinsic (..),
   Pattern (..),
   Type (..),
+  TypeId (..),
   TypeIndex (..),
   foldType,
  )
@@ -136,8 +137,9 @@ collectTypeConstraints ::
   CollectConstraints (TypeConstraintMetadata k a) k [Assumption (Type TypeIndex k)]
 collectTypeConstraints =
   \case
-    EAnnotation t e ->
-      undefined
+    EAnnotation a e -> do
+      --      tell [Explicit TypeConstraintMetadata (typeOf e) (annotationScheme a)]
+      collectTypeConstraints e
     EConstructor _ (Label t name) -> do
       r <- lookupContextConstructor name
       case r of
@@ -229,3 +231,24 @@ collectClauseTypeConstraints ys (EClause _ ps cs) = do
           assertEquality ConstraintClauseGuard [typeOf g, TIntrinsic IBool]
         ms1 <- collectTypeConstraints e
         pure (typeOf e, ms1)
+
+annotationScheme :: Type TypeId () -> Scheme TypeIndex k t
+annotationScheme = undefined
+
+box :: (Monad m) => Type TypeId () -> m (Type TypeIndex (Type TypeIndex k))
+box =
+  \case
+    TApplication k t ts ->
+      TApplication undefined <$> box t <*> traverse box ts
+    TArrow t1 t2 ->
+      undefined
+    TConstructor{} ->
+      undefined
+    TIntrinsic{} ->
+      undefined
+    TRow row ->
+      undefined
+    TVariable (TypeId _ name) ->
+      undefined
+    TAlias _ _ t ->
+      undefined

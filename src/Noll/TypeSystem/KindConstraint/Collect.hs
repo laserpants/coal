@@ -77,6 +77,8 @@ collectConstraintsInType =
 collectKindConstraints :: Expression a (Type TypeIndex (Kind KindIndex)) -> KindConstraints KindConstraintMetadata (Kind KindIndex) ()
 collectKindConstraints =
   \case
+    EAnnotation _ e ->
+      collectKindConstraints e
     EConstructor _ (Label t name) -> do
       collectConstraintsInType t
     EVariable _ (Label t _) -> do

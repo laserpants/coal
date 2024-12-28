@@ -72,6 +72,8 @@ instance HasType o k (Guard Expression a (Type o k)) where
 instance HasType o k (Expression a (Type o k)) where
   typeOf =
     \case
+      EAnnotation _ t ->
+        typeOf t
       ELiteral _ t ->
         typeOf t
       EConstructor _ t ->

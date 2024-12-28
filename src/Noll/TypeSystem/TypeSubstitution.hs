@@ -141,6 +141,8 @@ instance TypeSubstitutable (Clause Expression a (Type TypeIndex (Kind KindIndex)
 instance TypeSubstitutable (Expression a (Type TypeIndex (Kind KindIndex))) where
   apply sub =
     \case
+      EAnnotation a e ->
+        EAnnotation a (apply sub e)
       EConstructor a (Label t name) -> do
         EConstructor a (Label (apply sub t) name)
       EVariable a (Label t name) -> do
