@@ -5,10 +5,13 @@ module Noll.Language.Pattern (Pattern (..)) where
 
 import Noll.Label (Label (..))
 import Noll.Language.Primitive (Primitive (..))
+import Noll.Language.Type (Type, TypeId (..))
 import Noll.Utils (Dictionary)
 
 data Pattern a t
-  = -- | Wildcard pattern
+  = -- | Type-annotated pattern
+    PAnnotation (Type TypeId ()) (Pattern a t)
+  | -- | Wildcard pattern
     PAny a t
   | -- | Variable pattern
     PVariable a (Label t)

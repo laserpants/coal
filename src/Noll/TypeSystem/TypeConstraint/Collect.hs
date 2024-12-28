@@ -136,6 +136,8 @@ collectTypeConstraints ::
   CollectConstraints (TypeConstraintMetadata k a) k [Assumption (Type TypeIndex k)]
 collectTypeConstraints =
   \case
+    EAnnotation t e ->
+      undefined
     EConstructor _ (Label t name) -> do
       r <- lookupContextConstructor name
       case r of

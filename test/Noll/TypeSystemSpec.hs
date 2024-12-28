@@ -10,7 +10,7 @@ import Data.List.NonEmpty (NonEmpty (..), (<|))
 import qualified Data.Set as Set
 import Debug.Trace
 import Noll.Label (Label (..))
-import Noll.Language (Binding (..), Choice (..), Clause (..), Constructor (..), Expression (..), Intrinsic (..), Kind (..), KindIndex (..), Pattern (..), Primitive (..), Scheme (..), Type (..), TypeIndex (..), freshIdIn)
+import Noll.Language (Binding (..), Choice (..), Clause (..), Constructor (..), Expression (..), Intrinsic (..), Kind (..), KindIndex (..), Pattern (..), Primitive (..), Scheme (..), Type (..), TypeId (..), TypeIndex (..), freshIdIn)
 import Noll.Library.Environment (Environment (..))
 import qualified Noll.Library.Environment as Environment
 import Noll.Library.Supply (supply)
@@ -50,6 +50,18 @@ spec =
       validateResult fixture11 == fixture11Typed
     it "" $
       hasNoErrors fixture11
+    it "" $
+      validateResult fixture12 == fixture12Typed
+    it "" $
+      hasNoErrors fixture12
+    it "" $
+      validateResult fixture13 == fixture13Typed
+    it "" $
+      hasNoErrors fixture13
+    it "" $
+      validateResult fixture14 == fixture14Typed
+    it "" $
+      hasNoErrors fixture14
     it "" $
       typeErrorsInclude fixture4 (SolverError (ConstraintIfCondition "if"))
     it "" $
@@ -530,6 +542,125 @@ fixture11Typed =
               [ PVariable () (Label (TVariable (TypeIndex KType 0)) "fst")
               , PVariable () (Label (TVariable (TypeIndex KType 0)) "snd")
               ]
+              :| []
+          )
+          (CPlain () [] (ELiteral () (LBool True)) :| [])
+          :| []
+      )
+  )
+
+-- match(p) { | MkPair(fst, snd) => true }
+fixture12 :: Expression () ()
+fixture12 =
+  ( EMatch
+      ()
+      ()
+      (EVariable () (Label () "p") :| [])
+      ( EClause
+          ()
+          (PConstructor () (Label () "MkPair") [PVariable () (Label () "fst"), PVariable () (Label () "snd")] :| [])
+          (CPlain () [] (ELiteral () (LBool True)) :| [])
+          :| []
+      )
+  )
+
+fixture12Typed :: Expression () (Type TypeIndex (Kind KindIndex))
+fixture12Typed =
+  ( EMatch
+      ()
+      (TIntrinsic IBool)
+      (EVariable () (Label (TApplication KType (TConstructor (KArrow KType (KArrow KType KType)) "Pair") (TVariable (TypeIndex KType 1) :| [TVariable (TypeIndex KType 0)])) "p") :| [])
+      ( EClause
+          ()
+          ( PConstructor
+              ()
+              ( Label
+                  (TVariable (TypeIndex KType 1) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TApplication KType (TConstructor (KArrow KType (KArrow KType KType)) "Pair") (TVariable (TypeIndex KType 1) <| TVariable (TypeIndex KType 0) :| []))
+                  "MkPair"
+              )
+              [PVariable () (Label (TVariable (TypeIndex KType 1)) "fst"), PVariable () (Label (TVariable (TypeIndex KType 0)) "snd")]
+              :| []
+          )
+          (CPlain () [] (ELiteral () (LBool True)) :| [])
+          :| []
+      )
+  )
+
+-- match(p : Pair(int32, bool)) { | MkPair(fst, snd) => true }
+fixture13 :: Expression () ()
+fixture13 =
+  ( EMatch
+      ()
+      ()
+      ( EAnnotation
+          (TApplication () (TConstructor () "Pair") (TIntrinsic IInt32 <| TIntrinsic IBool :| []))
+          (EVariable () (Label () "p"))
+          :| []
+      )
+      ( EClause
+          ()
+          (PConstructor () (Label () "MkPair") [PVariable () (Label () "fst"), PVariable () (Label () "snd")] :| [])
+          (CPlain () [] (ELiteral () (LBool True)) :| [])
+          :| []
+      )
+  )
+
+fixture13Typed :: Expression () (Type TypeIndex (Kind KindIndex))
+fixture13Typed =
+  ( EMatch
+      ()
+      (TIntrinsic IBool)
+      (EVariable () (Label (TApplication KType (TConstructor (KArrow KType (KArrow KType KType)) "Pair") (TVariable (TypeIndex KType 1) :| [TVariable (TypeIndex KType 0)])) "p") :| [])
+      ( EClause
+          ()
+          ( PConstructor
+              ()
+              ( Label
+                  (TVariable (TypeIndex KType 1) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TApplication KType (TConstructor (KArrow KType (KArrow KType KType)) "Pair") (TVariable (TypeIndex KType 1) <| TVariable (TypeIndex KType 0) :| []))
+                  "MkPair"
+              )
+              [PVariable () (Label (TVariable (TypeIndex KType 1)) "fst"), PVariable () (Label (TVariable (TypeIndex KType 0)) "snd")]
+              :| []
+          )
+          (CPlain () [] (ELiteral () (LBool True)) :| [])
+          :| []
+      )
+  )
+
+-- match(p : Pair(a, b)) { | MkPair(fst, snd) => true }
+fixture14 :: Expression () ()
+fixture14 =
+  ( EMatch
+      ()
+      ()
+      ( EAnnotation
+          (TApplication () (TConstructor () "Pair") (TVariable (TypeId () "a") <| TVariable (TypeId () "b") :| []))
+          (EVariable () (Label () "p"))
+          :| []
+      )
+      ( EClause
+          ()
+          (PConstructor () (Label () "MkPair") [PVariable () (Label () "fst"), PVariable () (Label () "snd")] :| [])
+          (CPlain () [] (ELiteral () (LBool True)) :| [])
+          :| []
+      )
+  )
+
+fixture14Typed :: Expression () (Type TypeIndex (Kind KindIndex))
+fixture14Typed =
+  ( EMatch
+      ()
+      (TIntrinsic IBool)
+      (EVariable () (Label (TApplication KType (TConstructor (KArrow KType (KArrow KType KType)) "Pair") (TVariable (TypeIndex KType 1) :| [TVariable (TypeIndex KType 0)])) "p") :| [])
+      ( EClause
+          ()
+          ( PConstructor
+              ()
+              ( Label
+                  (TVariable (TypeIndex KType 1) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TApplication KType (TConstructor (KArrow KType (KArrow KType KType)) "Pair") (TVariable (TypeIndex KType 1) <| TVariable (TypeIndex KType 0) :| []))
+                  "MkPair"
+              )
+              [PVariable () (Label (TVariable (TypeIndex KType 1)) "fst"), PVariable () (Label (TVariable (TypeIndex KType 0)) "snd")]
               :| []
           )
           (CPlain () [] (ELiteral () (LBool True)) :| [])

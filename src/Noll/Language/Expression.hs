@@ -10,13 +10,16 @@ import Noll.Language.Expression.Operator.Binary (BinaryOperator)
 import Noll.Language.Expression.Operator.Unary (UnaryOperator)
 import Noll.Language.Pattern (Pattern (..))
 import Noll.Language.Primitive (Primitive (..))
+import Noll.Language.Type (Type, TypeId (..))
 import Noll.Utils (Dictionary, Some)
 
 data Clause e a t = EClause a (Some (Pattern a t)) (Some (Choice e a t))
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
 
 data Expression a t
-  = -- | Function application
+  = -- | Type-annotated expression
+    EAnnotation (Type TypeId ()) (Expression a t)
+  | -- | Function application
     EApplication a t (Expression a t) (Some (Expression a t))
   | -- | Lambda function expression
     ELambda a (Some (Pattern a t)) (Expression a t)

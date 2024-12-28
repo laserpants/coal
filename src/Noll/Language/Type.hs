@@ -6,7 +6,7 @@
 {-# LANGUAGE StrictData #-}
 {-# LANGUAGE UndecidableInstances #-}
 
-module Noll.Language.Type (Type (..), TypeIndex (..), HasActive (..), foldType, activeIdsIn) where
+module Noll.Language.Type (Type (..), TypeIndex (..), TypeId (..), HasActive (..), foldType, activeIdsIn) where
 
 import Data.List.NonEmpty (NonEmpty)
 import qualified Data.Set as Set
@@ -29,6 +29,12 @@ infixr 1 `TArrow`
 data TypeIndex k = TypeIndex
   { indexKind :: k
   , indexId :: Int
+  }
+  deriving (Show, Eq, Ord, Read, Functor, Foldable)
+
+data TypeId k = TypeId
+  { idKind :: k
+  , idName :: Name
   }
   deriving (Show, Eq, Ord, Read, Functor, Foldable)
 
