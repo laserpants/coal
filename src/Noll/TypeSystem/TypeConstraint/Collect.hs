@@ -235,6 +235,7 @@ collectClauseTypeConstraints ys (EClause _ ps cs) = do
 annotationScheme :: Type TypeId () -> Scheme TypeIndex k t
 annotationScheme = undefined
 
+-- TODO
 box :: (Monad m) => Type TypeId () -> m (Type TypeIndex (Type TypeIndex k))
 box =
   \case
