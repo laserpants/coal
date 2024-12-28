@@ -12,6 +12,7 @@ module Noll.TypeSystem.TypeConstraint.Collect (
   collectTypeConstraints,
   runCollectTypeConstraints,
   evalCollectTypeConstraints,
+  withMonomorphic,
 )
 where
 
@@ -22,6 +23,7 @@ import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Set as Set
 import qualified Data.Text as Text
 import Data.Tuple.Extra (second)
+import Debug.Trace
 import Noll.Label (Label (..))
 import Noll.Language (
   Binding (..),
@@ -40,13 +42,14 @@ import Noll.Language (
 import Noll.Language.Type.Scheme (Scheme (..))
 import Noll.Library.Environment (Environment (..))
 import qualified Noll.Library.Environment as Environment
+import Noll.Library.Supply (supplyN)
 import Noll.TypeSystem.TypeConstraint (MonomorphicSet (..), TypeConstraint (..), TypeConstraintMetadata (..), overMonomorphicSet)
 import Noll.TypeSystem.TypeConstraint.Assumption (Assumption (..), assumptionNameIs)
 import Noll.Utils (Name, concatMapM, forM, forM_, (<$$>))
 
 data TypeConstraintsContext o k = TypeConstraintsContext
   { contextMonomorphicSet :: MonomorphicSet (o k)
-  , contextConstructors :: Environment (Constructor o k (Type o k))
+  , contextConstructorEnv :: Environment (Constructor o k (Type o k))
   }
   deriving (Show, Eq, Ord, Read)
 
@@ -54,7 +57,7 @@ data TypeConstraintsContext o k = TypeConstraintsContext
 overContextMonomorphicSet :: (MonomorphicSet (o k) -> MonomorphicSet (o k)) -> TypeConstraintsContext o k -> TypeConstraintsContext o k
 overContextMonomorphicSet fn TypeConstraintsContext{..} = TypeConstraintsContext{contextMonomorphicSet = fn contextMonomorphicSet, ..}
 
-type TypeConstraintsMonad c o k t = RWS (TypeConstraintsContext o k) [TypeConstraint c o k t] ()
+type TypeConstraintsMonad c o k t = RWS (TypeConstraintsContext o k) [TypeConstraint c o k t] Int
 
 newtype TypeConstraints c o k t a = TypeConstraints {constraintsMonad :: TypeConstraintsMonad c o k t a}
   deriving
@@ -63,8 +66,8 @@ newtype TypeConstraints c o k t a = TypeConstraints {constraintsMonad :: TypeCon
     , Monad
     , MonadReader (TypeConstraintsContext o k)
     , MonadWriter [TypeConstraint c o k t]
-    , MonadState ()
-    , MonadRWS (TypeConstraintsContext o k) [TypeConstraint c o k t] ()
+    , MonadState Int
+    , MonadRWS (TypeConstraintsContext o k) [TypeConstraint c o k t] Int
     )
 
 {-# INLINE monosetInsert #-}
@@ -81,19 +84,17 @@ localMonoset = local . overContextMonomorphicSet
 
 {-# INLINE lookupContextConstructor #-}
 lookupContextConstructor :: Name -> TypeConstraints c o k t (Maybe (Constructor o k (Type o k)))
-lookupContextConstructor name = do
-  TypeConstraintsContext _ env <- ask
-  pure (Environment.lookup name env)
+lookupContextConstructor name = Environment.lookup name <$> asks contextConstructorEnv
 
 type CollectConstraints c k = TypeConstraints c TypeIndex k (Type TypeIndex k)
 
 {-# INLINE runCollectTypeConstraints #-}
-runCollectTypeConstraints :: TypeConstraintsContext o k -> TypeConstraints c o k t a -> (a, [TypeConstraint c o k t])
-runCollectTypeConstraints cc cs = evalRWS (constraintsMonad cs) cc ()
+runCollectTypeConstraints :: Int -> TypeConstraintsContext o k -> TypeConstraints c o k t a -> (a, [TypeConstraint c o k t])
+runCollectTypeConstraints n cc cs = evalRWS (constraintsMonad cs) cc n
 
 {-# INLINE evalCollectTypeConstraints #-}
-evalCollectTypeConstraints :: TypeConstraintsContext o k -> TypeConstraints c o k t a -> [TypeConstraint c o k t]
-evalCollectTypeConstraints = snd <$$> runCollectTypeConstraints
+evalCollectTypeConstraints :: Int -> TypeConstraintsContext o k -> TypeConstraints c o k t a -> [TypeConstraint c o k t]
+evalCollectTypeConstraints n = snd <$$> runCollectTypeConstraints n
 
 {-# INLINE assertEquality #-}
 assertEquality :: TypeConstraintMetadata k a -> [Type TypeIndex k] -> CollectConstraints (TypeConstraintMetadata k a) k ()
@@ -114,15 +115,6 @@ assertImplicitAssumptions t ms = do
     -- TODO
     pure (Implicit TypeConstraintMetadata assumptionType t set)
 
-assertConstructor :: Type TypeIndex k -> Name -> CollectConstraints (TypeConstraintMetadata k a) k ()
-assertConstructor t name =
-  lookupContextConstructor name
-    >>= \case
-      Nothing ->
-        error ("No constructor '" <> Text.unpack name <> "'")
-      Just (Constructor _ s) ->
-        tell [Explicit TypeConstraintMetadata t s]
-
 patternAssumptions :: [Assumption (Type TypeIndex k)] -> Pattern a (Type TypeIndex k) -> CollectConstraints (TypeConstraintMetadata k a) k [Assumption (Type TypeIndex k)]
 patternAssumptions ms =
   \case
@@ -131,16 +123,31 @@ patternAssumptions ms =
       assertEqualityAssumptions t ls
       pure rs
 
-collectTypeConstraints :: (Ord k) => Expression a (Type TypeIndex k) -> CollectConstraints (TypeConstraintMetadata k a) k [Assumption (Type TypeIndex k)]
+withMonomorphic ::
+  (Ord k, HasTypeIndexes k s) =>
+  s ->
+  TypeConstraints c TypeIndex k t a ->
+  TypeConstraints c TypeIndex k t a
+withMonomorphic ps = localMonoset (monosetInsertMany (typeIndexesIn ps))
+
+collectTypeConstraints ::
+  (Ord k, Show k) =>
+  Expression a (Type TypeIndex k) ->
+  CollectConstraints (TypeConstraintMetadata k a) k [Assumption (Type TypeIndex k)]
 collectTypeConstraints =
   \case
     EConstructor _ (Label t name) -> do
-      assertConstructor t name
+      r <- lookupContextConstructor name
+      case r of
+        Nothing ->
+          error ("No constructor '" <> Text.unpack name <> "'")
+        Just Constructor{..} ->
+          tell [Explicit TypeConstraintMetadata t constructorScheme]
       pure []
     EVariable _ (Label t name) ->
       pure [Assumption name t]
     ELambda _ ps e -> do
-      ms1 <- localMonoset (monosetInsertMany (typeIndexesIn ps)) (collectTypeConstraints e)
+      ms1 <- withMonomorphic ps (collectTypeConstraints e)
       ms2 <- concat <$> forM ps (patternAssumptions ms1)
       pure ms2
     ELet _ gs e1 -> do
@@ -179,19 +186,38 @@ collectTypeConstraints =
       pure []
     EMatch _ t es cs -> do
       ms1 <- concat <$> traverse collectTypeConstraints (NonEmpty.toList es)
-      (tss, ms2) <- second concat . unzip <$> forM (NonEmpty.toList cs) collectClauseTypeConstraints
-      assertEquality TypeConstraintMetadata (t : concat tss)
+      let ts = NonEmpty.toList (typeOf <$> es)
+      (ts1, ms2) <-
+        second concat . unzip
+          <$> forM
+            (NonEmpty.toList cs)
+            (collectClauseTypeConstraints ts)
+      assertEquality TypeConstraintMetadata (t : concat ts1)
       pure (ms1 <> ms2)
 
-collectClauseTypeConstraints :: (Ord k) => Clause Expression a (Type TypeIndex k) -> CollectConstraints (TypeConstraintMetadata k a) k ([Type TypeIndex k], [Assumption (Type TypeIndex k)])
-collectClauseTypeConstraints (EClause _ ps ds) = do
-  (ts, ms1) <- second concat . unzip <$> localMonoset (monosetInsertMany (typeIndexesIn ps)) (traverse go (NonEmpty.toList ds))
-  forM_ ps $
+collectClauseTypeConstraints ::
+  (Ord k, Show k) =>
+  [Type TypeIndex k] ->
+  Clause Expression a (Type TypeIndex k) ->
+  CollectConstraints (TypeConstraintMetadata k a) k ([Type TypeIndex k], [Assumption (Type TypeIndex k)])
+collectClauseTypeConstraints ys (EClause _ ps cs) = do
+  (ts, ms1) <- second concat . unzip <$> withMonomorphic ps (traverse go (NonEmpty.toList cs))
+  forM_ (zip ys (NonEmpty.toList ps)) $
     \case
-      PVariable _ (Label t name) -> do
+      (_, PVariable _ (Label t name)) -> do
         undefined
-      PConstructor _ (Label t name) qs ->
-        assertConstructor t name
+      (t1, PConstructor _ (Label t name) qs) -> do
+        r <- lookupContextConstructor name
+        case r of
+          Nothing ->
+            error ("No constructor '" <> Text.unpack name <> "'")
+          Just Constructor{..}
+            | constructorArity /= length qs ->
+                error ("Constructor arity mismatch")
+          Just Constructor{..} -> do
+            assertEquality TypeConstraintMetadata [t, foldType t1 (typeOf <$> qs)]
+            tell [Explicit TypeConstraintMetadata t constructorScheme]
+        pure []
   pure (ts, ms1)
  where
   go =

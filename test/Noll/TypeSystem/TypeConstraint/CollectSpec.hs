@@ -7,7 +7,7 @@ import Data.List (sort)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Set as Set
 import Noll.Label (Label (..))
-import Noll.Language (Binding (..), Expression (..), Intrinsic (..), Pattern (..), Primitive (..), Type (..), TypeIndex (..))
+import Noll.Language (Binding (..), Expression (..), Intrinsic (..), Pattern (..), Primitive (..), Type (..), TypeIndex (..), freshIdIn)
 import Noll.TypeSystem.TypeConstraint (MonomorphicSet (..), TypeConstraint (..), TypeConstraintMetadata (..))
 import Noll.TypeSystem.TypeConstraint.Collect (TypeConstraintsContext (..), collectTypeConstraints, evalCollectTypeConstraints)
 import Test.Hspec (Spec, describe, it)
@@ -50,14 +50,6 @@ spec =
 typeConstraintsIncludeAll :: (Eq a) => Expression a Int -> [TypeConstraint (TypeConstraintMetadata () a) TypeIndex () (Type TypeIndex ())] -> Bool
 typeConstraintsIncludeAll = all . typeConstraintsInclude
 
-sorted :: TypeConstraint (TypeConstraintMetadata () a) TypeIndex () (Type TypeIndex ()) -> TypeConstraint (TypeConstraintMetadata () a) TypeIndex () (Type TypeIndex ())
-sorted =
-  \case
-    Equality meta ts ->
-      Equality meta (sort ts)
-    c ->
-      c
-
 typeConstraintsInclude :: (Eq a) => Expression a Int -> TypeConstraint (TypeConstraintMetadata () a) TypeIndex () (Type TypeIndex ()) -> Bool
 typeConstraintsInclude e =
   \case
@@ -67,9 +59,11 @@ typeConstraintsInclude e =
       elem c constraints
  where
   constraints =
-    evalCollectTypeConstraints
-      (TypeConstraintsContext mempty mempty)
-      (collectTypeConstraints (fmap typeVariable e))
+    let e' = fmap typeVariable e
+     in evalCollectTypeConstraints
+          (freshIdIn e')
+          (TypeConstraintsContext mempty mempty)
+          (collectTypeConstraints e')
   normalized =
     \case
       Equality meta ts ->

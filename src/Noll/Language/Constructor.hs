@@ -7,6 +7,7 @@ import Noll.Utils (Name)
 
 data Constructor o k t = Constructor
   { constructorName :: Name
+  , constructorArity :: Int
   , constructorScheme :: Scheme o k t
   }
   deriving (Show, Eq, Ord, Read)

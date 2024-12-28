@@ -7,9 +7,11 @@ module Noll.TypeSystemSpec where
 
 import Control.Monad.State (evalState)
 import Data.List.NonEmpty (NonEmpty (..), (<|))
+import qualified Data.Set as Set
 import Debug.Trace
 import Noll.Label (Label (..))
 import Noll.Language (Binding (..), Choice (..), Clause (..), Constructor (..), Expression (..), Intrinsic (..), Kind (..), KindIndex (..), Pattern (..), Primitive (..), Scheme (..), Type (..), TypeIndex (..), freshIdIn)
+import Noll.Library.Environment (Environment (..))
 import qualified Noll.Library.Environment as Environment
 import Noll.Library.Supply (supply)
 import Noll.TypeSystem.ConstraintSolver (SolverError (..), evalSolver, solveKinds, solveTypes)
@@ -27,11 +29,27 @@ spec =
     it "" $
       validateResult fixture1 == fixture1Typed
     it "" $
+      hasNoErrors fixture1
+    it "" $
       validateResult fixture2 == fixture2Typed
+    it "" $
+      hasNoErrors fixture2
     it "" $
       validateResult fixture7 == fixture7Typed
     it "" $
+      hasNoErrors fixture7
+    it "" $
       validateResult fixture9 == fixture9Typed
+    it "" $
+      hasNoErrors fixture9
+    it "" $
+      validateResult fixture10 == fixture10Typed
+    it "" $
+      hasNoErrors fixture10
+    it "" $
+      validateResult fixture11 == fixture11Typed
+    it "" $
+      hasNoErrors fixture11
     it "" $
       typeErrorsInclude fixture4 (SolverError (ConstraintIfCondition "if"))
     it "" $
@@ -58,6 +76,15 @@ kindErrorsInclude e err = err `elem` errs
  where
   (_, _, errs) = testInferTypes e
 
+hasNoErrors :: (Show a, Eq a) => Expression a () -> Bool
+hasNoErrors e = hasNoTypeErrors e && hasNoKindErrors e
+
+hasNoTypeErrors :: (Show a, Eq a) => Expression a () -> Bool
+hasNoTypeErrors e = let (_, errs, _) = testInferTypes e in null errs
+
+hasNoKindErrors :: (Show a, Eq a) => Expression a () -> Bool
+hasNoKindErrors e = let (_, _, errs) = testInferTypes e in null errs
+
 validateResult :: (Show a, Eq a) => Expression a () -> Expression a (Type TypeIndex (Kind KindIndex))
 validateResult e = let (a, _, _) = testInferTypes e in a
 
@@ -76,17 +103,60 @@ testInferTypes e =
     e1 :: Expression a (Type TypeIndex (Kind KindIndex))
     e1 = fmap typeVariable e0
 
+    constructorEnv :: Environment (Constructor TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex)))
     constructorEnv =
       Environment.fromList
         [
           ( "Yes"
-          , Constructor "Yes" (Forall mempty [] (TConstructor KType "Answer"))
+          , Constructor "Yes" 0 (Forall mempty [] (TConstructor KType "Answer"))
+          )
+        ,
+          ( "No"
+          , Constructor "No" 0 (Forall mempty [] (TConstructor KType "Answer"))
+          )
+        ,
+          ( "MkPair1"
+          , Constructor
+              "MkPair1"
+              2
+              ( Forall
+                  (Set.fromList [TypeIndex KType 0])
+                  []
+                  ( TVariable (TypeIndex KType 0)
+                      `TArrow` TVariable (TypeIndex KType 0)
+                      `TArrow` TApplication -- '0 -> Pair1('0)
+                        KType
+                        (TConstructor (KArrow KType KType) "Pair1")
+                        (TVariable (TypeIndex KType 0) :| [])
+                  )
+              )
+          )
+        ,
+          ( "MkPair"
+          , Constructor
+              "MkPair"
+              2
+              ( Forall
+                  (Set.fromList [TypeIndex KType 0, TypeIndex KType 1])
+                  []
+                  ( TVariable (TypeIndex KType 0)
+                      `TArrow` TVariable (TypeIndex KType 1)
+                      `TArrow` TApplication -- '0 -> '1 -> Pair('0, '1)
+                        KType
+                        (TConstructor (KArrow KType (KArrow KType KType)) "Pair")
+                        ( TVariable (TypeIndex KType 0)
+                            <| TVariable (TypeIndex KType 1)
+                              :| []
+                        )
+                  )
+              )
           )
         ]
 
     typeConstraints :: [TypeConstraint (TypeConstraintMetadata (Kind KindIndex) a) TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))]
     typeConstraints =
       evalCollectTypeConstraints
+        (freshIdIn e1)
         (TypeConstraintsContext mempty constructorEnv)
         (collectTypeConstraints e1)
 
@@ -98,8 +168,16 @@ testInferTypes e =
     e2 :: Expression a (Type TypeIndex (Kind KindIndex))
     e2 = apply typeSub e1
 
+    typeConstructorEnv :: Environment (Kind KindIndex)
+    typeConstructorEnv =
+      Environment.fromList
+        [ ("Answer", KType)
+        , ("Pair1", KArrow KType KType) -- Homogeneous pair type
+        , ("Pair", KArrow KType (KArrow KType KType))
+        ]
+
     kindConstraints :: [KindConstraint KindConstraintMetadata (Kind KindIndex)]
-    kindConstraints = runCollectKindConstraints mempty (collectKindConstraints e2)
+    kindConstraints = runCollectKindConstraints typeConstructorEnv (collectKindConstraints e2)
 
     res2 :: (KindSubstitution, [SolverError KindConstraintMetadata])
     res2 = evalSolver 0 (solveKinds kindConstraints)
@@ -109,8 +187,8 @@ testInferTypes e =
     e3 :: Expression a (Type TypeIndex (Kind KindIndex))
     e3 = applyKindSub kindSub e2
    in
-    traceShow typeConstraints $
-      (normalizeTypeIndexes e3, errs1, errs2)
+    --    traceShow e1 $
+    (normalizeTypeIndexes e3, errs1, errs2)
 
 typeVariable :: Int -> Type TypeIndex (Kind KindIndex)
 typeVariable n = TVariable (TypeIndex (KVariable (KindIndex n)) n)
@@ -328,6 +406,7 @@ fixture7Typed =
       )
   )
 
+-- TODO
 fixture8 :: Expression () ()
 fixture8 =
   ELet
@@ -386,3 +465,74 @@ fixture9Typed =
     (ELiteral "a" (LBool True))
     (ELiteral "b" (LInt32 2))
     (ELiteral "c" (LInt32 3))
+
+fixture10 :: Expression () ()
+fixture10 =
+  ( EMatch
+      ()
+      ()
+      (EVariable () (Label () "x") :| [])
+      ( EClause
+          ()
+          (PConstructor () (Label () "Yes") [] :| [])
+          (CPlain () [] (ELiteral () (LBool True)) :| [])
+          <| EClause
+            ()
+            (PConstructor () (Label () "No") [] :| [])
+            (CPlain () [] (ELiteral () (LBool False)) :| [])
+            :| []
+      )
+  )
+
+fixture10Typed :: Expression () (Type TypeIndex (Kind KindIndex))
+fixture10Typed =
+  ( EMatch
+      ()
+      (TIntrinsic IBool)
+      (EVariable () (Label (TConstructor KType "Answer") "x") :| [])
+      ( EClause
+          ()
+          (PConstructor () (Label (TConstructor KType "Answer") "Yes") [] :| [])
+          (CPlain () [] (ELiteral () (LBool True)) :| [])
+          <| EClause
+            ()
+            (PConstructor () (Label (TConstructor KType "Answer") "No") [] :| [])
+            (CPlain () [] (ELiteral () (LBool False)) :| [])
+            :| []
+      )
+  )
+
+fixture11 :: Expression () ()
+fixture11 =
+  ( EMatch
+      ()
+      ()
+      (EVariable () (Label () "p") :| [])
+      ( EClause
+          ()
+          (PConstructor () (Label () "MkPair1") [PVariable () (Label () "fst"), PVariable () (Label () "snd")] :| [])
+          (CPlain () [] (ELiteral () (LBool True)) :| [])
+          :| []
+      )
+  )
+
+fixture11Typed :: Expression () (Type TypeIndex (Kind KindIndex))
+fixture11Typed =
+  ( EMatch
+      ()
+      (TIntrinsic IBool)
+      (EVariable () (Label (TApplication KType (TConstructor (KArrow KType KType) "Pair1") (TVariable (TypeIndex KType 0) :| [])) "p") :| [])
+      ( EClause
+          ()
+          ( PConstructor
+              ()
+              (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TApplication KType (TConstructor (KArrow KType KType) "Pair1") (TVariable (TypeIndex KType 0) :| [])) "MkPair1")
+              [ PVariable () (Label (TVariable (TypeIndex KType 0)) "fst")
+              , PVariable () (Label (TVariable (TypeIndex KType 0)) "snd")
+              ]
+              :| []
+          )
+          (CPlain () [] (ELiteral () (LBool True)) :| [])
+          :| []
+      )
+  )

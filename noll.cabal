@@ -36,6 +36,7 @@ library
       Noll.Language.Constructor
       Noll.Language.Expression
       Noll.Language.Expression.Binding
+      Noll.Language.Expression.Choice
       Noll.Language.Expression.Operator.Binary
       Noll.Language.Expression.Operator.Unary
       Noll.Language.HasType
@@ -111,6 +112,7 @@ test-suite noll-test
       Noll.TypeSystem.KindSubstitutionSpec
       Noll.TypeSystem.TypeConstraint.CollectSpec
       Noll.TypeSystem.TypeSubstitutionSpec
+      Noll.TypeSystem.TypeUnificationSpec
       Noll.TypeSystemSpec
       Paths_noll
   autogen-modules:

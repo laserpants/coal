@@ -10,6 +10,8 @@ module Noll.TypeSystem.KindConstraint.Collect (
 
 import Control.Monad.RWS (MonadRWS, MonadReader, MonadState, MonadWriter, RWS, ask, execRWS, tell)
 import qualified Data.Map.Strict as Map
+import qualified Data.Text as Text
+import Debug.Trace
 import Noll.Label (Label (..))
 import Noll.Language (
   Binding (..),
@@ -22,24 +24,26 @@ import Noll.Language (
   TypeIndex (..),
   foldKind,
  )
+import Noll.Library.Environment (Environment (..))
+import qualified Noll.Library.Environment as Environment
 import Noll.TypeSystem.KindConstraint (KindConstraint (..), KindConstraintMetadata (..))
 import Noll.Utils (Dictionary, forM_, traverse_)
 
-type KindConstraintsMonad c k = RWS (Dictionary k) [KindConstraint c k] ()
+type KindConstraintsMonad c k = RWS (Environment k) [KindConstraint c k] ()
 
 newtype KindConstraints c k a = KindConstraints {constraintsMonad :: KindConstraintsMonad c k a}
   deriving
     ( Functor
     , Applicative
     , Monad
-    , MonadReader (Dictionary k)
+    , MonadReader (Environment k)
     , MonadWriter [KindConstraint c k]
     , MonadState ()
-    , MonadRWS (Dictionary k) [KindConstraint c k] ()
+    , MonadRWS (Environment k) [KindConstraint c k] ()
     )
 
 {-# INLINE runCollectKindConstraints #-}
-runCollectKindConstraints :: Dictionary k -> KindConstraints c k a -> [KindConstraint c k]
+runCollectKindConstraints :: Environment k -> KindConstraints c k a -> [KindConstraint c k]
 runCollectKindConstraints d cs = snd (execRWS (constraintsMonad cs) d ())
 
 collectConstraintsInType :: Type TypeIndex (Kind KindIndex) -> KindConstraints KindConstraintMetadata (Kind KindIndex) ()
@@ -48,7 +52,7 @@ collectConstraintsInType =
     TApplication k t ts -> do
       collectConstraintsInType t
       traverse_ collectConstraintsInType ts
-      tell [KindEquality KindConstraintMetadata k (foldKind (kindOf t) (kindOf <$> ts))]
+      tell [KindEquality KindConstraintMetadata (kindOf t) (foldKind k (kindOf <$> ts))]
     TArrow t1 t2 -> do
       collectConstraintsInType t1
       collectConstraintsInType t2
@@ -61,9 +65,9 @@ collectConstraintsInType =
       collectConstraintsInType t
     TConstructor k name -> do
       env <- ask
-      case Map.lookup name env of
+      case Environment.lookup name env of
         Nothing ->
-          error "TODO"
+          error ("No type constructor '" <> Text.unpack name <> "'")
         Just k1 ->
           tell [KindEquality KindConstraintMetadata k k1]
       pure ()
