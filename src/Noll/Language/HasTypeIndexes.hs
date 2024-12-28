@@ -24,8 +24,10 @@ import Noll.Language.Expression.Choice (Choice (..), Guard (..))
 import Noll.Language.Pattern (Pattern (..))
 import Noll.Language.Trait (Trait (..))
 import Noll.Language.Type (Type (..), TypeIndex (..))
+import Noll.Language.Type.Kind (Kind (..), KindIndex (..))
 import Noll.Language.Type.Row (Row (..))
 import Noll.Language.Type.Scheme (Scheme (..))
+import Noll.Utils (unionMap)
 
 class HasTypeIndexes k t | t -> k where
   typeIndexesIn :: t -> Set (TypeIndex k)
@@ -143,18 +145,54 @@ instance (Ord k) => HasTypeIndexes k (Expression a (Type TypeIndex k)) where
       EMatch _ t es cs ->
         typeIndexesIn t <> typeIndexesIn es <> typeIndexesIn cs
 
+class HasKindIndexes k where
+  kindIndexesIn :: k -> Set KindIndex
+
+instance (HasKindIndexes k) => HasKindIndexes [k] where
+  kindIndexesIn = Set.unions . fmap kindIndexesIn
+
+instance (HasKindIndexes k) => HasKindIndexes (NonEmpty k) where
+  kindIndexesIn = Set.unions . fmap kindIndexesIn
+
+instance (Ord k, HasKindIndexes k) => HasKindIndexes (Set k) where
+  kindIndexesIn = Set.unions . Set.map kindIndexesIn
+
+instance HasKindIndexes (Kind KindIndex) where
+  kindIndexesIn =
+    \case
+      KVariable v ->
+        Set.singleton v
+      _ ->
+        mempty
+
+instance HasKindIndexes (TypeIndex (Kind KindIndex)) where
+  kindIndexesIn =
+    \case
+      TypeIndex k _ ->
+        kindIndexesIn k
+
+instance HasKindIndexes KindIndex where
+  kindIndexesIn = Set.singleton
+
+instance HasKindIndexes (TypeIndex ()) where
+  kindIndexesIn = mempty
+
 notBoundIn :: Set (TypeIndex k) -> Set (TypeIndex k) -> Set (TypeIndex k)
 notBoundIn s = Set.filter notBound
  where
-  notBound index = indexId index `notElem` Set.map indexId s
+  notBound index = typeIndexId index `notElem` Set.map typeIndexId s
 
 typeIdsIn :: (HasTypeIndexes k t) => t -> Set Int
-typeIdsIn = Set.map indexId . typeIndexesIn
+typeIdsIn = Set.map typeIndexId . typeIndexesIn
 
-freshIdIn :: (HasTypeIndexes k t) => t -> Int
+kindIdsIn :: (HasKindIndexes k) => k -> Set Int
+kindIdsIn = Set.map kindIndexId . kindIndexesIn
+
+freshIdIn :: (Ord k, HasTypeIndexes k t, HasKindIndexes (TypeIndex k)) => t -> Int
 freshIdIn t =
-  if null typeIdSet
+  if null typeIndexSet
     then 0
-    else succ (maximum typeIdSet)
+    else succ (maximum (typeIdsIn typeIndexSet <> kindIdsIn kindIndexSet))
  where
-  typeIdSet = typeIdsIn t
+  typeIndexSet = typeIndexesIn t
+  kindIndexSet = unionMap kindIndexesIn typeIndexSet

@@ -12,7 +12,7 @@ data Kind o
 
 infixr 1 `KArrow`
 
-newtype KindIndex = KindIndex Int
+newtype KindIndex = KindIndex {kindIndexId :: Int}
   deriving (Show, Eq, Ord, Read)
 
 {-# INLINE foldKind #-}

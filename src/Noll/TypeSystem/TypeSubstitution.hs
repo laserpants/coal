@@ -104,7 +104,7 @@ instance TypeSubstitutable (Type TypeIndex (Kind KindIndex)) where
 
 {-# INLINE substitutionIndex #-}
 substitutionIndex :: TypeIndex (Kind KindIndex) -> TypeSubstitution -> Maybe (Type TypeIndex (Kind KindIndex))
-substitutionIndex TypeIndex{..} sub = Map.lookup indexId (typeSubstitutionMap sub)
+substitutionIndex TypeIndex{..} sub = Map.lookup typeIndexId (typeSubstitutionMap sub)
 
 instance TypeSubstitutable (Pattern a (Type TypeIndex (Kind KindIndex))) where
   apply sub =
@@ -177,7 +177,7 @@ mapsToType index = TypeSubstitution . Map.singleton index
 
 {-# INLINE removeTypeSubstitution #-}
 removeTypeSubstitution :: TypeIndex (Kind KindIndex) -> TypeSubstitution -> TypeSubstitution
-removeTypeSubstitution TypeIndex{..} (TypeSubstitution sub) = TypeSubstitution (Map.delete indexId sub)
+removeTypeSubstitution TypeIndex{..} (TypeSubstitution sub) = TypeSubstitution (Map.delete typeIndexId sub)
 
 {-# INLINE typeSubstitutionFromList #-}
 typeSubstitutionFromList :: [(Int, Type TypeIndex (Kind KindIndex))] -> TypeSubstitution

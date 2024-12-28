@@ -28,7 +28,7 @@ infixr 1 `TArrow`
 
 data TypeIndex k = TypeIndex
   { indexKind :: k
-  , indexId :: Int
+  , typeIndexId :: Int
   }
   deriving (Show, Eq, Ord, Read, Functor, Foldable)
 
@@ -52,7 +52,7 @@ instance (Ord k, HasActive k t) => HasActive k (NonEmpty t) where
 
 {-# INLINE activeIdsIn #-}
 activeIdsIn :: (HasActive k t) => t -> Set Int
-activeIdsIn t = Set.map indexId (activeIn t)
+activeIdsIn t = Set.map typeIndexId (activeIn t)
 
 {-# INLINE foldType #-}
 foldType :: (Foldable f) => Type o k -> f (Type o k) -> Type o k
