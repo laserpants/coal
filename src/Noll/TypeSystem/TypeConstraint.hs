@@ -15,7 +15,7 @@ module Noll.TypeSystem.TypeConstraint (
 where
 
 import Data.Set (Set, intersection, union)
-import Noll.Language (HasActive (..), HasTypeIndexes (..), Scheme (..), Type (..), TypeIndex (..))
+import Noll.Language (HasActive (..), Scheme (..), Type (..), TypeIndex (..), TypeIndexed (..))
 
 -- | Monomorphic type variable set
 newtype MonomorphicSet m = MonomorphicSet {monomorphicSet :: Set m}
@@ -38,10 +38,10 @@ data TypeConstraintMetadata k a
   | ConstraintClauseGuard
   deriving (Show, Eq, Ord, Read)
 
-instance HasTypeIndexes k (MonomorphicSet (TypeIndex k)) where
+instance TypeIndexed k (MonomorphicSet (TypeIndex k)) where
   typeIndexesIn = monomorphicSet
 
-instance (Ord k, HasTypeIndexes k t) => HasTypeIndexes k (TypeConstraint c TypeIndex k t) where
+instance (Ord k, TypeIndexed k t) => TypeIndexed k (TypeConstraint c TypeIndex k t) where
   typeIndexesIn =
     \case
       Equality _ ts ->
@@ -51,7 +51,7 @@ instance (Ord k, HasTypeIndexes k t) => HasTypeIndexes k (TypeConstraint c TypeI
       Explicit _ t s ->
         typeIndexesIn t <> typeIndexesIn s
 
-instance (Ord k, HasTypeIndexes k t) => HasActive k (TypeConstraint c TypeIndex k t) where
+instance (Ord k, TypeIndexed k t) => HasActive k (TypeConstraint c TypeIndex k t) where
   activeIn =
     \case
       Equality _ ts ->

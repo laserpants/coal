@@ -20,7 +20,6 @@ import Noll.Language (
   Binding (..),
   Clause (..),
   Expression (..),
-  HasTypeIndexes (..),
   Kind (..),
   KindIndex (..),
   Pattern (..),
@@ -29,6 +28,7 @@ import Noll.Language (
   Trait (..),
   Type (..),
   TypeIndex (..),
+  TypeIndexed (..),
  )
 import Noll.Language.Expression.Choice (Choice (..), Guard (..))
 import Noll.TypeSystem.TypeConstraint (MonomorphicSet (..), TypeConstraint (..))
@@ -183,7 +183,7 @@ removeTypeSubstitution TypeIndex{..} (TypeSubstitution sub) = TypeSubstitution (
 typeSubstitutionFromList :: [(Int, Type TypeIndex (Kind KindIndex))] -> TypeSubstitution
 typeSubstitutionFromList = TypeSubstitution . Map.fromList
 
-normalizeTypeIndexes :: (TypeSubstitutable s, HasTypeIndexes (Kind KindIndex) s) => s -> s
+normalizeTypeIndexes :: (TypeSubstitutable s, TypeIndexed (Kind KindIndex) s) => s -> s
 normalizeTypeIndexes e = apply (typeSubstitutionFromList sub) e
  where
   ixs = Set.toList (typeIndexesIn e)

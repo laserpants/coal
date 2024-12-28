@@ -32,12 +32,12 @@ import Noll.Language (
   Constructor (..),
   Expression (..),
   HasType (..),
-  HasTypeIndexes (..),
   Intrinsic (..),
   Pattern (..),
   Type (..),
   TypeId (..),
   TypeIndex (..),
+  TypeIndexed (..),
   foldType,
  )
 import Noll.Language.Type.Scheme (Scheme (..))
@@ -125,7 +125,7 @@ patternAssumptions ms =
       pure rs
 
 withMonomorphic ::
-  (Ord k, HasTypeIndexes k s) =>
+  (Ord k, TypeIndexed k s) =>
   s ->
   TypeConstraints c TypeIndex k t a ->
   TypeConstraints c TypeIndex k t a
@@ -232,11 +232,11 @@ collectClauseTypeConstraints ys (EClause _ ps cs) = do
         ms1 <- collectTypeConstraints e
         pure (typeOf e, ms1)
 
-annotationScheme :: Type TypeId () -> Scheme TypeIndex k t
+annotationScheme :: Type TypeId () -> CollectConstraints (TypeConstraintMetadata k a) k (Scheme TypeIndex k t)
 annotationScheme = undefined
 
 -- TODO
-box :: (Monad m) => Type TypeId () -> m (Type TypeIndex (Type TypeIndex k))
+box :: Type TypeId () -> CollectConstraints (TypeConstraintMetadata k a) k (Type TypeIndex (Type TypeIndex k))
 box =
   \case
     TApplication k t ts ->

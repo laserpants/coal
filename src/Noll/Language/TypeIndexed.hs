@@ -6,8 +6,8 @@
 {-# LANGUAGE StrictData #-}
 {-# LANGUAGE UndecidableInstances #-}
 
-module Noll.Language.HasTypeIndexes (
-  HasTypeIndexes (..),
+module Noll.Language.TypeIndexed (
+  TypeIndexed (..),
   typeIdsIn,
   notBoundIn,
   freshIdIn,
@@ -29,37 +29,37 @@ import Noll.Language.Type.Row (Row (..))
 import Noll.Language.Type.Scheme (Scheme (..))
 import Noll.Utils (unionMap)
 
-class HasTypeIndexes k t | t -> k where
+class TypeIndexed k t | t -> k where
   typeIndexesIn :: t -> Set (TypeIndex k)
 
-instance HasTypeIndexes k (TypeIndex k) where
+instance TypeIndexed k (TypeIndex k) where
   typeIndexesIn = singleton
 
-instance (Ord k, HasTypeIndexes k t) => HasTypeIndexes k (Map a t) where
+instance (Ord k, TypeIndexed k t) => TypeIndexed k (Map a t) where
   typeIndexesIn = Set.unions . fmap typeIndexesIn
 
-instance (Ord k, HasTypeIndexes k t) => HasTypeIndexes k (Maybe t) where
+instance (Ord k, TypeIndexed k t) => TypeIndexed k (Maybe t) where
   typeIndexesIn = Set.unions . fmap typeIndexesIn
 
-instance (Ord k, HasTypeIndexes k t) => HasTypeIndexes k [t] where
+instance (Ord k, TypeIndexed k t) => TypeIndexed k [t] where
   typeIndexesIn = Set.unions . fmap typeIndexesIn
 
-instance (Ord k, HasTypeIndexes k t) => HasTypeIndexes k (NonEmpty t) where
+instance (Ord k, TypeIndexed k t) => TypeIndexed k (NonEmpty t) where
   typeIndexesIn = Set.unions . fmap typeIndexesIn
 
-instance (Ord k, HasTypeIndexes k t) => HasTypeIndexes k (Trait t) where
+instance (Ord k, TypeIndexed k t) => TypeIndexed k (Trait t) where
   typeIndexesIn = Set.unions . fmap typeIndexesIn
 
-instance (Ord k, HasTypeIndexes k t) => HasTypeIndexes k (Set t) where
+instance (Ord k, TypeIndexed k t) => TypeIndexed k (Set t) where
   typeIndexesIn = Set.unions . Set.map typeIndexesIn
 
-instance (HasTypeIndexes k t) => HasTypeIndexes k (Label t) where
+instance (TypeIndexed k t) => TypeIndexed k (Label t) where
   typeIndexesIn =
     \case
       Label t _ ->
         typeIndexesIn t
 
-instance (Ord k, HasTypeIndexes k t) => HasTypeIndexes k (Row TypeIndex k t) where
+instance (Ord k, TypeIndexed k t) => TypeIndexed k (Row TypeIndex k t) where
   typeIndexesIn =
     \case
       RExtend _ t row ->
@@ -69,7 +69,7 @@ instance (Ord k, HasTypeIndexes k t) => HasTypeIndexes k (Row TypeIndex k t) whe
       RNil ->
         mempty
 
-instance (Ord k) => HasTypeIndexes k (Type TypeIndex k) where
+instance (Ord k) => TypeIndexed k (Type TypeIndex k) where
   typeIndexesIn =
     \case
       TApplication _ t ts ->
@@ -87,7 +87,7 @@ instance (Ord k) => HasTypeIndexes k (Type TypeIndex k) where
       TAlias _ _ t ->
         typeIndexesIn t
 
-instance (Ord k, HasTypeIndexes k t) => HasTypeIndexes k (Pattern a t) where
+instance (Ord k, TypeIndexed k t) => TypeIndexed k (Pattern a t) where
   typeIndexesIn =
     \case
       PVariable _ (Label t _) ->
@@ -95,37 +95,37 @@ instance (Ord k, HasTypeIndexes k t) => HasTypeIndexes k (Pattern a t) where
       PConstructor _ (Label t _) ps ->
         typeIndexesIn t <> typeIndexesIn ps
 
-instance (Ord k, HasTypeIndexes k t) => HasTypeIndexes k (Scheme TypeIndex k t) where
+instance (Ord k, TypeIndexed k t) => TypeIndexed k (Scheme TypeIndex k t) where
   typeIndexesIn =
     \case
       Forall qs ps t ->
         notBoundIn qs (typeIndexesIn t <> typeIndexesIn ps)
 
-instance (Ord k) => HasTypeIndexes k (Binding Expression a (Type TypeIndex k)) where
+instance (Ord k) => TypeIndexed k (Binding Expression a (Type TypeIndex k)) where
   typeIndexesIn =
     \case
       BPattern _ p e ->
         typeIndexesIn p <> typeIndexesIn e
 
-instance (Ord k) => HasTypeIndexes k (Guard Expression a (Type TypeIndex k)) where
+instance (Ord k) => TypeIndexed k (Guard Expression a (Type TypeIndex k)) where
   typeIndexesIn =
     \case
       CGuard e ->
         typeIndexesIn e
 
-instance (Ord k) => HasTypeIndexes k (Choice Expression a (Type TypeIndex k)) where
+instance (Ord k) => TypeIndexed k (Choice Expression a (Type TypeIndex k)) where
   typeIndexesIn =
     \case
       CPlain _ gs e ->
         typeIndexesIn gs <> typeIndexesIn e
 
-instance (Ord k) => HasTypeIndexes k (Clause Expression a (Type TypeIndex k)) where
+instance (Ord k) => TypeIndexed k (Clause Expression a (Type TypeIndex k)) where
   typeIndexesIn =
     \case
       EClause _ ps ds ->
         typeIndexesIn ps <> typeIndexesIn ds
 
-instance (Ord k) => HasTypeIndexes k (Expression a (Type TypeIndex k)) where
+instance (Ord k) => TypeIndexed k (Expression a (Type TypeIndex k)) where
   typeIndexesIn =
     \case
       EConstructor _ (Label t _) ->
@@ -145,19 +145,19 @@ instance (Ord k) => HasTypeIndexes k (Expression a (Type TypeIndex k)) where
       EMatch _ t es cs ->
         typeIndexesIn t <> typeIndexesIn es <> typeIndexesIn cs
 
-class HasKindIndexes k where
+class KindIndexed k where
   kindIndexesIn :: k -> Set KindIndex
 
-instance (HasKindIndexes k) => HasKindIndexes [k] where
+instance (KindIndexed k) => KindIndexed [k] where
   kindIndexesIn = Set.unions . fmap kindIndexesIn
 
-instance (HasKindIndexes k) => HasKindIndexes (NonEmpty k) where
+instance (KindIndexed k) => KindIndexed (NonEmpty k) where
   kindIndexesIn = Set.unions . fmap kindIndexesIn
 
-instance (Ord k, HasKindIndexes k) => HasKindIndexes (Set k) where
+instance (Ord k, KindIndexed k) => KindIndexed (Set k) where
   kindIndexesIn = Set.unions . Set.map kindIndexesIn
 
-instance HasKindIndexes (Kind KindIndex) where
+instance KindIndexed (Kind KindIndex) where
   kindIndexesIn =
     \case
       KVariable v ->
@@ -165,16 +165,16 @@ instance HasKindIndexes (Kind KindIndex) where
       _ ->
         mempty
 
-instance HasKindIndexes (TypeIndex (Kind KindIndex)) where
+instance KindIndexed (TypeIndex (Kind KindIndex)) where
   kindIndexesIn =
     \case
       TypeIndex k _ ->
         kindIndexesIn k
 
-instance HasKindIndexes KindIndex where
+instance KindIndexed KindIndex where
   kindIndexesIn = Set.singleton
 
-instance HasKindIndexes (TypeIndex ()) where
+instance KindIndexed (TypeIndex ()) where
   kindIndexesIn = mempty
 
 notBoundIn :: Set (TypeIndex k) -> Set (TypeIndex k) -> Set (TypeIndex k)
@@ -182,13 +182,13 @@ notBoundIn s = Set.filter notBound
  where
   notBound index = typeIndexId index `notElem` Set.map typeIndexId s
 
-typeIdsIn :: (HasTypeIndexes k t) => t -> Set Int
+typeIdsIn :: (TypeIndexed k t) => t -> Set Int
 typeIdsIn = Set.map typeIndexId . typeIndexesIn
 
-kindIdsIn :: (HasKindIndexes k) => k -> Set Int
+kindIdsIn :: (KindIndexed k) => k -> Set Int
 kindIdsIn = Set.map kindIndexId . kindIndexesIn
 
-freshIdIn :: (Ord k, HasTypeIndexes k t, HasKindIndexes (TypeIndex k)) => t -> Int
+freshIdIn :: (Ord k, TypeIndexed k t, KindIndexed (TypeIndex k)) => t -> Int
 freshIdIn t =
   if null typeIndexSet
     then 0

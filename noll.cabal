@@ -40,7 +40,6 @@ library
       Noll.Language.Expression.Operator.Binary
       Noll.Language.Expression.Operator.Unary
       Noll.Language.HasType
-      Noll.Language.HasTypeIndexes
       Noll.Language.Module
       Noll.Language.Module.Function
       Noll.Language.Module.Global
@@ -54,6 +53,7 @@ library
       Noll.Language.Type.Kind
       Noll.Language.Type.Row
       Noll.Language.Type.Scheme
+      Noll.Language.TypeIndexed
       Noll.Library.Environment
       Noll.Library.Supply
       Noll.TypeSystem.ConstraintSolver
@@ -105,7 +105,7 @@ test-suite noll-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
-      Noll.Language.HasTypeIndexesSpec
+      Noll.Language.TypeIndexedSpec
       Noll.TypeSystem.ConstraintSolverSpec
       Noll.TypeSystem.KindConstraint.CollectSpec
       Noll.TypeSystem.KindSubstitutionSpec

@@ -18,7 +18,7 @@ import Control.Monad.RWS (MonadState, MonadWriter, RWS, runRWS, tell)
 import Data.List (delete, find)
 import Data.Set (intersection, (\\))
 import qualified Data.Set as Set
-import Noll.Language (HasTypeIndexes (..), Kind (..), KindIndex (..), Scheme (..), Type (..), TypeIndex (..), activeIdsIn, notBoundIn, typeIdsIn)
+import Noll.Language (Kind (..), KindIndex (..), Scheme (..), Type (..), TypeIndex (..), TypeIndexed (..), activeIdsIn, notBoundIn, typeIdsIn)
 import Noll.Library.Supply (supply)
 import Noll.TypeSystem.KindConstraint (KindConstraint (..))
 import Noll.TypeSystem.KindSubstitution (KindSubstitutable (..), KindSubstitution)
@@ -52,7 +52,7 @@ evalSolver n u = let (a, _, w) = runSolver n u in (a, w)
 
 isSolvable ::
   ( Ord k
-  , HasTypeIndexes k t
+  , TypeIndexed k t
   ) =>
   [TypeConstraint c TypeIndex k t] ->
   TypeConstraint c TypeIndex k t ->
@@ -73,7 +73,7 @@ choice ::
   ( Ord k
   , Eq t
   , Eq c
-  , HasTypeIndexes k t
+  , TypeIndexed k t
   ) =>
   [TypeConstraint c TypeIndex k t] ->
   SolverChoice (TypeConstraint c TypeIndex k t)
@@ -122,7 +122,7 @@ instantiate (Forall qs _ t) = do
     pure (index `mapsToType` TVariable (TypeIndex k s) <> sub)
 
 generalize ::
-  (HasTypeIndexes k t) =>
+  (TypeIndexed k t) =>
   MonomorphicSet (TypeIndex k) ->
   t ->
   Scheme TypeIndex k t
