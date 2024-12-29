@@ -67,6 +67,14 @@ spec =
     it "" $
       hasNoErrors fixture15
     it "" $
+      validateResult fixture17 == fixture17Typed
+    it "" $
+      hasNoErrors fixture17
+    it "" $
+      validateResult fixture18 == fixture18Typed
+    it "" $
+      hasNoErrors fixture18
+    it "" $
       typeErrorsInclude fixture4 (SolverError (ConstraintIfCondition "if"))
     it "" $
       typeErrorsInclude
@@ -78,6 +86,10 @@ spec =
         [ SolverError (ConstraintIfBranches "if-2" (TIntrinsic IBool) (TIntrinsic IInt32))
         , SolverError (ConstraintIfCondition "if-1")
         ]
+    it "" $
+      typeErrorsInclude
+        fixture16
+        (SolverError (ConstraintMatchClausePatterns ()))
 
 typeErrorsIncludeAll :: (Show a, Eq a) => Expression a () -> [SolverError (TypeConstraintMetadata (Kind KindIndex) a)] -> Bool
 typeErrorsIncludeAll e = all (typeErrorsInclude e)
@@ -131,6 +143,26 @@ testInferTypes e =
           , Constructor "No" 0 (Forall mempty [] (TConstructor KType "Answer"))
           )
         ,
+          ( "Foo"
+          , Constructor "Foo" 0 (Forall mempty [] (TConstructor KType "Foo"))
+          )
+        ,
+          ( "Id"
+          , Constructor
+              "Id"
+              1
+              ( Forall
+                  mempty
+                  []
+                  ( TVariable (TypeIndex KType 0)
+                      `TArrow` TApplication
+                        KType
+                        (TConstructor (KArrow KType KType) "Id")
+                        (TVariable (TypeIndex KType 0) :| [])
+                  )
+              )
+          )
+        ,
           ( "MkPair1"
           , Constructor
               "MkPair1"
@@ -167,6 +199,17 @@ testInferTypes e =
                   )
               )
           )
+        ,
+          ( "MkIntPair"
+          , Constructor
+              "MkIntPair"
+              2
+              ( Forall
+                  mempty
+                  []
+                  (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TConstructor KType "IntPair")
+              )
+          )
         ]
 
     typeConstraints :: [TypeConstraint (TypeConstraintMetadata (Kind KindIndex) a) TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))]
@@ -190,6 +233,7 @@ testInferTypes e =
         [ ("Answer", KType)
         , ("Pair1", KArrow KType KType) -- Homogeneous pair type
         , ("Pair", KArrow KType (KArrow KType KType))
+        , ("IntPair", KType)
         ]
 
     kindConstraints :: [KindConstraint KindConstraintMetadata (Kind KindIndex)]
@@ -721,6 +765,115 @@ fixture15Typed =
               :| []
           )
           (CPlain () [] (ELiteral () (LBool True)) :| [])
+          :| []
+      )
+  )
+
+fixture16 :: Expression () ()
+fixture16 =
+  ( EMatch
+      ()
+      ()
+      (EVariable () (Label () "x") :| [])
+      ( EClause
+          ()
+          (PConstructor () (Label () "Yes") [] :| [])
+          (CPlain () [] (ELiteral () (LBool True)) :| [])
+          <| EClause
+            ()
+            (PConstructor () (Label () "Foo") [] :| [])
+            (CPlain () [] (ELiteral () (LBool False)) :| [])
+            :| []
+      )
+  )
+
+-- match(p) { | MkIntPair(fst, snd) => fst }
+fixture17 :: Expression () ()
+fixture17 =
+  ( EMatch
+      ()
+      ()
+      (EVariable () (Label () "p") :| [])
+      ( EClause
+          ()
+          (PConstructor () (Label () "MkIntPair") [PVariable () (Label () "fst"), PVariable () (Label () "snd")] :| [])
+          (CPlain () [] (EVariable () (Label () "fst")) :| [])
+          :| []
+      )
+  )
+
+fixture17Typed :: Expression () (Type TypeIndex (Kind KindIndex))
+fixture17Typed =
+  ( EMatch
+      ()
+      (TIntrinsic IInt32)
+      (EVariable () (Label (TConstructor KType "IntPair") "p") :| [])
+      ( EClause
+          ()
+          (PConstructor () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TConstructor KType "IntPair") "MkIntPair") [PVariable () (Label (TIntrinsic IInt32) "fst"), PVariable () (Label (TIntrinsic IInt32) "snd")] :| [])
+          (CPlain () [] (EVariable () (Label (TIntrinsic IInt32) "fst")) :| [])
+          :| []
+      )
+  )
+
+-- match(MkIntPair(1, 2)) { | MkIntPair(fst, snd) => fst }
+fixture18 :: Expression () ()
+fixture18 =
+  ( EMatch
+      ()
+      ()
+      ( EApplication
+          ()
+          ()
+          (EConstructor () (Label () "MkIntPair"))
+          (ELiteral () (LInt32 1) <| ELiteral () (LInt32 2) :| [])
+          :| []
+      )
+      ( EClause
+          ()
+          (PConstructor () (Label () "MkIntPair") [PVariable () (Label () "fst"), PVariable () (Label () "snd")] :| [])
+          (CPlain () [] (EVariable () (Label () "fst")) :| [])
+          :| []
+      )
+  )
+
+fixture18Typed :: Expression () (Type TypeIndex (Kind KindIndex))
+fixture18Typed =
+  ( EMatch
+      ()
+      (TIntrinsic IInt32)
+      ( EApplication
+          ()
+          (TConstructor KType "IntPair")
+          (EConstructor () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TConstructor KType "IntPair") "MkIntPair"))
+          (ELiteral () (LInt32 1) <| ELiteral () (LInt32 2) :| [])
+          :| []
+      )
+      ( EClause
+          ()
+          (PConstructor () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TConstructor KType "IntPair") "MkIntPair") [PVariable () (Label (TIntrinsic IInt32) "fst"), PVariable () (Label (TIntrinsic IInt32) "snd")] :| [])
+          (CPlain () [] (EVariable () (Label (TIntrinsic IInt32) "fst")) :| [])
+          :| []
+      )
+  )
+
+-- match(MkIntPair(false, 2)) { | MkIntPair(fst, snd) => fst }
+fixture19 :: Expression String ()
+fixture19 =
+  ( EMatch
+      "a"
+      ()
+      ( EApplication
+          "b"
+          ()
+          (EConstructor "c" (Label () "MkIntPair"))
+          (ELiteral "d" (LBool False) <| ELiteral "e" (LInt32 2) :| [])
+          :| []
+      )
+      ( EClause
+          "f"
+          (PConstructor "g" (Label () "MkIntPair") [PVariable "h" (Label () "fst"), PVariable "i" (Label () "snd")] :| [])
+          (CPlain "j" [] (EVariable "k" (Label () "fst")) :| [])
           :| []
       )
   )

@@ -33,9 +33,16 @@ data TypeConstraint c o k t
 
 data TypeConstraintMetadata k a
   = TypeConstraintMetadata
-  | ConstraintIfCondition a
-  | ConstraintIfBranches a (Type TypeIndex k) (Type TypeIndex k)
-  | ConstraintClauseGuard
+  | -- | Function application
+    ConstraintApplication a (Type TypeIndex k) (Type TypeIndex k)
+  | -- | Type of if condition is bool
+    ConstraintIfCondition a
+  | -- | If expression 'then' and 'else' branches have identical types
+    ConstraintIfBranches a (Type TypeIndex k) (Type TypeIndex k)
+  | -- | Pattern guards are of type bool
+    ConstraintMatchClauseGuard
+  | ConstraintMatchClauseExpressions a
+  | ConstraintMatchClausePatterns a
   deriving (Show, Eq, Ord, Read)
 
 instance TypeIndexed k (MonomorphicSet (TypeIndex k)) where

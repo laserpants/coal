@@ -21,16 +21,17 @@ import Control.Monad (join)
 import Control.Monad.RWS (MonadRWS, MonadReader, MonadState, MonadWriter, RWS, ask, asks, evalRWS, local, tell)
 import Control.Monad.State (StateT, evalStateT, get, modify)
 import Control.Monad.Trans (lift)
-import Data.List (partition)
+import Data.List (partition, transpose)
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import qualified Data.Text as Text
-import Data.Tuple.Extra (second)
+import Data.Tuple.Extra (second, third3)
 import Debug.Trace
 import Noll.Label (Label (..))
 import Noll.Language (
   Binding (..),
+  BoundNames (..),
   Choice (..),
   Clause (..),
   Constructor (..),
@@ -39,6 +40,7 @@ import Noll.Language (
   Intrinsic (..),
   Kind (..),
   KindIndex (..),
+  KindRep (..),
   Pattern (..),
   Row (..),
   Type (..),
@@ -188,66 +190,80 @@ collectTypeConstraints =
       assertEquality (ConstraintIfCondition loc) [t1, TIntrinsic IBool]
       assertEquality (ConstraintIfBranches loc t2 t3) [t, t2, t3]
       pure (ms1 <> ms2 <> ms3)
-    EApplication _ t e1 es -> do
+    EApplication loc t e1 es -> do
       ms1 <- collectTypeConstraints e1
       ms2 <- concat <$> traverse collectTypeConstraints es
-      -- TODO
-      assertEquality TypeConstraintMetadata [typeOf e1, foldType t (typeOf <$> es)]
+      let t1 = typeOf e1
+          t2 = foldType t (typeOf <$> es)
+      assertEquality (ConstraintApplication loc t1 t2) [t1, t2]
       pure (ms1 <> ms2)
     ELiteral{} ->
       pure []
-    EMatch _ t es cs -> do
+    EMatch loc t es cs -> do
       ms1 <- concat <$> traverse collectTypeConstraints (NonEmpty.toList es)
-      let ts = NonEmpty.toList (typeOf <$> es)
-      (ts1, ms2) <-
-        second concat . unzip
-          <$> forM
-            (NonEmpty.toList cs)
-            (collectClauseTypeConstraints ts)
-      assertEquality TypeConstraintMetadata (t : concat ts1)
+      (ets, pts, ms2) <- third3 concat . unzip3 <$> forM (NonEmpty.toList cs) collectClauseTypeConstraints
+      -- Expression types
+      assertEquality (ConstraintMatchClauseExpressions loc) (t : concat ets)
+      -- Pattern types
+      forM
+        (transpose (NonEmpty.toList (typeOf <$> es) : pts))
+        (assertEquality (ConstraintMatchClausePatterns loc))
       pure (ms1 <> ms2)
+
+freshType :: (Ord k, Show k, KindRep k) => CollectConstraints (TypeConstraintMetadata k a) k (Type TypeIndex k)
+freshType = do
+  i <- supply
+  pure (TVariable (TypeIndex (kindRep (KVariable (KindIndex i))) i))
+
+assertBound ::
+  (Ord k, Show k, KindRep k) =>
+  (Dictionary (Type TypeIndex k)) ->
+  [Assumption (Type TypeIndex k)] ->
+  CollectConstraints (TypeConstraintMetadata k a) k [Assumption (Type TypeIndex k)]
+assertBound dict ms =
+  concat <$$> forM ms $
+    \a@Assumption{..} ->
+      case Map.lookup assumptionName dict of
+        Nothing ->
+          pure [a]
+        Just t -> do
+          assertEquality TypeConstraintMetadata [t, assumptionType]
+          pure []
 
 collectClauseTypeConstraints ::
   (Ord k, Show k, KindRep k) =>
-  [Type TypeIndex k] ->
   Clause Expression a (Type TypeIndex k) ->
-  CollectConstraints (TypeConstraintMetadata k a) k ([Type TypeIndex k], [Assumption (Type TypeIndex k)])
-collectClauseTypeConstraints ys (EClause _ ps cs) = do
-  (ts, ms1) <- second concat . unzip <$> withMonomorphic ps (traverse go (NonEmpty.toList cs))
-  forM_ (zip ys (NonEmpty.toList ps)) $
+  CollectConstraints (TypeConstraintMetadata k a) k ([Type TypeIndex k], [Type TypeIndex k], [Assumption (Type TypeIndex k)])
+collectClauseTypeConstraints (EClause _ ps cs) = do
+  (ts1, ms1) <- second concat . unzip <$$> withMonomorphic ps $
+    forM (NonEmpty.toList cs) $
+      \case
+        CPlain _ gs e -> do
+          forM gs $ \g ->
+            assertEquality ConstraintMatchClauseGuard [typeOf g, TIntrinsic IBool]
+          ms <- collectTypeConstraints e
+          pure (typeOf e, ms)
+  (ts2, ms2) <- second concat . unzip <$$> forM (NonEmpty.toList ps) $
     \case
-      (_, PVariable _ (Label t name)) -> do
+      PVariable _ (Label t name) -> do
         undefined
-      (t1, PConstructor _ (Label t name) qs) -> do
-        r <- lookupContextConstructor name
-        case r of
-          Nothing ->
-            error ("No constructor '" <> Text.unpack name <> "'")
-          Just Constructor{..}
-            | constructorArity /= length qs ->
-                error ("Constructor arity mismatch")
-          Just Constructor{..} -> do
-            assertEquality TypeConstraintMetadata [t, foldType t1 (typeOf <$> qs)]
-            tell [Explicit TypeConstraintMetadata t constructorScheme]
-        pure []
-  pure (ts, ms1)
- where
-  go =
-    \case
-      CPlain _ gs e -> do
-        forM gs $ \g ->
-          assertEquality ConstraintClauseGuard [typeOf g, TIntrinsic IBool]
-        ms1 <- collectTypeConstraints e
-        pure (typeOf e, ms1)
-
-class KindRep k where
-  kindRep :: Kind KindIndex -> k
-
-instance KindRep () where
-  kindRep = const ()
-
-instance KindRep (Kind KindIndex) where
-  kindRep = id
+      PConstructor _ (Label t name) qs -> do
+        t1 <- freshType
+        -- TODO: Check for duplicate names in patterns
+        let dict = Map.fromList (boundNames qs)
+        ms <- assertBound dict ms1
+        lookupContextConstructor name
+          >>= \case
+            Nothing ->
+              error ("No constructor '" <> Text.unpack name <> "'")
+            Just Constructor{..}
+              | constructorArity /= length qs ->
+                  error ("Constructor arity mismatch")
+            Just Constructor{..} -> do
+              assertEquality TypeConstraintMetadata [t, foldType t1 (typeOf <$> qs)]
+              tell [Explicit TypeConstraintMetadata t constructorScheme]
+        pure (t1, ms)
+  pure (ts1, ts2, ms1 <> ms2)
 
 annotationScheme :: (MonadState Int m, Ord k, KindRep k) => Type TypeId () -> m (Scheme TypeIndex k (Type TypeIndex k))
 annotationScheme t = do
@@ -260,19 +276,31 @@ instantiateAnnotation :: (MonadState Int m, KindRep k) => Type TypeId () -> Anno
 instantiateAnnotation =
   \case
     TApplication _ t ts ->
-      TApplication <$> freshRep <*> instantiateAnnotation t <*> traverse instantiateAnnotation ts
+      TApplication
+        <$> freshRep
+        <*> instantiateAnnotation t
+        <*> traverse instantiateAnnotation ts
     TArrow t1 t2 ->
-      TArrow <$> instantiateAnnotation t1 <*> instantiateAnnotation t2
+      TArrow
+        <$> instantiateAnnotation t1
+        <*> instantiateAnnotation t2
     TConstructor _ name ->
-      TConstructor <$> freshRep <*> pure name
+      TConstructor
+        <$> freshRep
+        <*> pure name
     TIntrinsic t ->
-      TIntrinsic <$> traverse instantiateAnnotation t
+      TIntrinsic
+        <$> traverse instantiateAnnotation t
     TRow row ->
-      TRow <$> instantiateAnnotationRow row
+      TRow
+        <$> instantiateAnnotationRow row
     TVariable v ->
-      TVariable <$> instantiateAnnotationTypeId v
+      TVariable
+        <$> instantiateAnnotationTypeId v
     TAlias name ts t ->
-      TAlias name <$> traverse instantiateAnnotation ts <*> instantiateAnnotation t
+      TAlias name
+        <$> traverse instantiateAnnotation ts
+        <*> instantiateAnnotation t
 
 freshRep :: (MonadState Int m, KindRep k) => Annotation m k k
 freshRep = do
@@ -283,9 +311,12 @@ instantiateAnnotationRow :: (MonadState Int m, KindRep k) => Row TypeId () (Type
 instantiateAnnotationRow =
   \case
     RExtend name t row ->
-      RExtend name <$> instantiateAnnotation t <*> instantiateAnnotationRow row
+      RExtend name
+        <$> instantiateAnnotation t
+        <*> instantiateAnnotationRow row
     RVariable v ->
-      RVariable <$> instantiateAnnotationTypeId v
+      RVariable
+        <$> instantiateAnnotationTypeId v
     RNil ->
       pure RNil
 
