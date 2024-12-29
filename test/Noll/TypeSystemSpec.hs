@@ -90,6 +90,10 @@ spec =
       typeErrorsInclude
         fixture16
         (SolverError (ConstraintMatchClausePatterns ()))
+    it "" $
+      typeErrorsInclude
+        fixture19
+        (SolverError (ConstraintApplication "b" (typeVariable 2) (TIntrinsic IBool `TArrow` TIntrinsic IInt32 `TArrow` typeVariable 1)))
 
 typeErrorsIncludeAll :: (Show a, Eq a) => Expression a () -> [SolverError (TypeConstraintMetadata (Kind KindIndex) a)] -> Bool
 typeErrorsIncludeAll e = all (typeErrorsInclude e)
