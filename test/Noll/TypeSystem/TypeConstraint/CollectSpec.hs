@@ -11,7 +11,7 @@ import Noll.Label (Label (..))
 import Noll.Language (Binding (..), Choice (..), Clause (..), Constructor (..), Expression (..), Intrinsic (..), Kind (..), KindIndex (..), Pattern (..), Primitive (..), Scheme (..), Type (..), TypeIndex (..), freshIdIn)
 import Noll.Library.Environment (Environment)
 import qualified Noll.Library.Environment as Environment
-import Noll.TypeSystem.TypeConstraint (MonomorphicSet (..), RuleDescriptor (..), TypeConstraint (..))
+import Noll.TypeSystem.TypeConstraint (MonomorphicSet (..), Descriptor (..), TypeConstraint (..))
 import Noll.TypeSystem.TypeConstraint.Collect (TypeConstraintsContext (..), collectTypeConstraints, evalCollectTypeConstraints)
 import Test.Hspec (Spec, describe, it)
 
@@ -26,19 +26,19 @@ spec =
                 (RuleApplication () (typeVariable 2) (typeBool `TArrow` typeVariable 3))
                 [typeVariable 2, typeBool `TArrow` typeVariable 3]
             )
-          , (Equality RuleDescriptor [typeVariable 5, typeVariable 1])
-          , (Equality RuleDescriptor [typeVariable 6, typeVariable 1])
-          , (Equality RuleDescriptor [typeVariable 7, typeVariable 3])
-          , (Implicit RuleDescriptor (typeVariable 4) (typeVariable 7) (MonomorphicSet (Set.fromList [TypeIndex () 5])))
-          , (Implicit RuleDescriptor (typeVariable 2) (typeVariable 6) (MonomorphicSet (Set.fromList [TypeIndex () 5])))
+          , (Equality Descriptor [typeVariable 5, typeVariable 1])
+          , (Equality Descriptor [typeVariable 6, typeVariable 1])
+          , (Equality Descriptor [typeVariable 7, typeVariable 3])
+          , (Implicit Descriptor (typeVariable 4) (typeVariable 7) (MonomorphicSet (Set.fromList [TypeIndex () 5])))
+          , (Implicit Descriptor (typeVariable 2) (typeVariable 6) (MonomorphicSet (Set.fromList [TypeIndex () 5])))
           ]
       it "let f = fn(x) => x in (f(f))(f(1))" $ do
         typeConstraintsIncludeAll
           fixture2
-          [ (Implicit RuleDescriptor (typeVariable 6) (typeVariable 1) (MonomorphicSet mempty))
-          , (Implicit RuleDescriptor (typeVariable 7) (typeVariable 1) (MonomorphicSet mempty))
-          , (Implicit RuleDescriptor (typeVariable 9) (typeVariable 1) (MonomorphicSet mempty))
-          , (Equality RuleDescriptor [typeVariable 2, typeVariable 3])
+          [ (Implicit Descriptor (typeVariable 6) (typeVariable 1) (MonomorphicSet mempty))
+          , (Implicit Descriptor (typeVariable 7) (typeVariable 1) (MonomorphicSet mempty))
+          , (Implicit Descriptor (typeVariable 9) (typeVariable 1) (MonomorphicSet mempty))
+          , (Equality Descriptor [typeVariable 2, typeVariable 3])
           , ( Equality
                 (RuleApplication () (typeVariable 6) (typeVariable 7 `TArrow` typeVariable 5))
                 [typeVariable 6, typeVariable 7 `TArrow` typeVariable 5]
@@ -47,7 +47,7 @@ spec =
                 (RuleApplication () (typeVariable 9) (typeInt32 `TArrow` typeVariable 8))
                 [typeVariable 9, typeInt32 `TArrow` typeVariable 8]
             )
-          , (Equality RuleDescriptor [typeVariable 1, typeVariable 2 `TArrow` typeVariable 3])
+          , (Equality Descriptor [typeVariable 1, typeVariable 2 `TArrow` typeVariable 3])
           , ( Equality
                 (RuleApplication () (typeVariable 5) (typeVariable 8 `TArrow` typeVariable 4))
                 [typeVariable 5, typeVariable 8 `TArrow` typeVariable 4]
@@ -60,22 +60,22 @@ spec =
                 (RuleApplication () (typeVariable 2) (typeVariable 3 `TArrow` typeVariable 1))
                 [typeVariable 2, typeVariable 3 `TArrow` typeVariable 1]
             )
-          , (Equality RuleDescriptor [typeVariable 0, typeInt32])
-          , (Implicit RuleDescriptor (typeVariable 2) (typeVariable 0) (MonomorphicSet mempty))
-          , (Implicit RuleDescriptor (typeVariable 3) (typeVariable 0) (MonomorphicSet mempty))
+          , (Equality Descriptor [typeVariable 0, typeInt32])
+          , (Implicit Descriptor (typeVariable 2) (typeVariable 0) (MonomorphicSet mempty))
+          , (Implicit Descriptor (typeVariable 3) (typeVariable 0) (MonomorphicSet mempty))
           ]
       it "match x { | Yes => true }" $ do
         typeConstraintsIncludeAll
           fixture4
           [ Equality (RuleMatchClauseExpressions ()) [typeVariable 0, TIntrinsic IBool]
           , Equality (RuleMatchClausePatterns ()) [typeVariable 1, typeVariable 2]
-          , Explicit RuleDescriptor (typeVariable 2) (Forall mempty [] (TConstructor () "Answer"))
+          , Explicit Descriptor (typeVariable 2) (Forall mempty [] (TConstructor () "Answer"))
           ]
 
-typeConstraintsIncludeAll :: (Show a, Eq a) => Expression a Int -> [TypeConstraint (RuleDescriptor () a) TypeIndex () (Type TypeIndex ())] -> Bool
+typeConstraintsIncludeAll :: (Show a, Eq a) => Expression a Int -> [TypeConstraint (Descriptor () a) TypeIndex () (Type TypeIndex ())] -> Bool
 typeConstraintsIncludeAll = all . typeConstraintsInclude
 
-typeConstraintsInclude :: (Show a, Eq a) => Expression a Int -> TypeConstraint (RuleDescriptor () a) TypeIndex () (Type TypeIndex ()) -> Bool
+typeConstraintsInclude :: (Show a, Eq a) => Expression a Int -> TypeConstraint (Descriptor () a) TypeIndex () (Type TypeIndex ()) -> Bool
 typeConstraintsInclude e =
   --  traceShow constraints $
   \case

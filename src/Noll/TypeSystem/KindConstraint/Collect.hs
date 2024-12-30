@@ -61,7 +61,8 @@ collectConstraintsInType =
     TRow row ->
       -- TODO
       undefined
-    TAlias _ _ t ->
+    TAlias _ ts t -> do
+      traverse_ collectConstraintsInType ts
       collectConstraintsInType t
     TConstructor k name -> do
       env <- ask
@@ -80,6 +81,7 @@ collectKindConstraints =
     EAnnotation _ e ->
       collectKindConstraints e
     EConstructor _ (Label t name) -> do
+      tell [KindEquality KindConstraintMetadata (kindOf t) KType]
       collectConstraintsInType t
     EVariable _ (Label t _) -> do
       tell [KindEquality KindConstraintMetadata (kindOf t) KType]
@@ -90,21 +92,26 @@ collectKindConstraints =
       forM_ gs $
         \case
           BPattern _ (PVariable _ (Label t _)) e -> do
+            tell [KindEquality KindConstraintMetadata (kindOf t) KType]
             collectConstraintsInType t
             collectKindConstraints e
       collectKindConstraints e1
     EIf _ t e1 e2 e3 -> do
+      tell [KindEquality KindConstraintMetadata (kindOf t) KType]
       collectConstraintsInType t
       collectKindConstraints e1
       collectKindConstraints e2
       collectKindConstraints e3
     EApplication _ t e1 es -> do
+      tell [KindEquality KindConstraintMetadata (kindOf t) KType]
       collectConstraintsInType t
       collectKindConstraints e1
       traverse_ collectKindConstraints es
     ELiteral{} ->
       pure ()
     EMatch _ t e cs -> do
+      tell [KindEquality KindConstraintMetadata (kindOf t) KType]
+      collectConstraintsInType t
       collectKindConstraints e
       -- TODO
       --      forM_ cs $

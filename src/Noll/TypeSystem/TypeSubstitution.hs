@@ -155,8 +155,8 @@ instance TypeSubstitutable (Expression a (Type TypeIndex (Kind KindIndex))) wher
         EIf a (apply sub t) (apply sub e1) (apply sub e2) (apply sub e3)
       EApplication a t e1 es -> do
         EApplication a (apply sub t) (apply sub e1) (apply sub es)
-      EMatch a t es cs ->
-        EMatch a (apply sub t) (apply sub es) (apply sub cs)
+      EMatch a t e cs ->
+        EMatch a (apply sub t) (apply sub e) (apply sub cs)
       e@ELiteral{} ->
         e
 

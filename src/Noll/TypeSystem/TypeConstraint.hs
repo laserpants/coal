@@ -7,7 +7,7 @@
 {-# LANGUAGE StrictData #-}
 
 module Noll.TypeSystem.TypeConstraint (
-  RuleDescriptor (..),
+  Descriptor (..),
   MonomorphicSet (..),
   TypeConstraint (..),
   overMonomorphicSet,
@@ -25,14 +25,14 @@ newtype MonomorphicSet m = MonomorphicSet {monomorphicSet :: Set m}
 overMonomorphicSet :: (Set m -> Set m) -> MonomorphicSet m -> MonomorphicSet m
 overMonomorphicSet fn MonomorphicSet{..} = MonomorphicSet{monomorphicSet = fn monomorphicSet}
 
-data TypeConstraint c o k t
-  = Equality c [t]
-  | Implicit c t t (MonomorphicSet (o k))
-  | Explicit c t (Scheme o k t)
+data TypeConstraint y o k t
+  = Equality y [t]
+  | Implicit y t t (MonomorphicSet (o k))
+  | Explicit y t (Scheme o k t)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
 
-data RuleDescriptor k a
-  = RuleDescriptor
+data Descriptor k a
+  = Descriptor
   | -- | Function application
     RuleApplication a (Type TypeIndex k) (Type TypeIndex k)
   | -- | Type of if condition is bool

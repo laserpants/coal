@@ -53,7 +53,7 @@ import Noll.Language.Type.Scheme (Scheme (..))
 import Noll.Library.Environment (Environment (..))
 import qualified Noll.Library.Environment as Environment
 import Noll.Library.Supply (supply, supplyN)
-import Noll.TypeSystem.TypeConstraint (MonomorphicSet (..), RuleDescriptor (..), TypeConstraint (..), overMonomorphicSet)
+import Noll.TypeSystem.TypeConstraint (Descriptor (..), MonomorphicSet (..), TypeConstraint (..), overMonomorphicSet)
 import Noll.TypeSystem.TypeConstraint.Assumption (Assumption (..), assumptionNameIs)
 import Noll.Utils (Dictionary, Name, concatMapM, forM, forM_, (<$$>))
 
@@ -67,17 +67,17 @@ data TypeConstraintsContext o k = TypeConstraintsContext
 overContextMonomorphicSet :: (MonomorphicSet (o k) -> MonomorphicSet (o k)) -> TypeConstraintsContext o k -> TypeConstraintsContext o k
 overContextMonomorphicSet fn TypeConstraintsContext{..} = TypeConstraintsContext{contextMonomorphicSet = fn contextMonomorphicSet, ..}
 
-type TypeConstraintsMonad c o k t = RWS (TypeConstraintsContext o k) [TypeConstraint c o k t] Int
+type TypeConstraintsMonad y o k t = RWS (TypeConstraintsContext o k) [TypeConstraint y o k t] Int
 
-newtype TypeConstraints c o k t a = TypeConstraints {constraintsMonad :: TypeConstraintsMonad c o k t a}
+newtype TypeConstraints y o k t a = TypeConstraints {constraintsMonad :: TypeConstraintsMonad y o k t a}
   deriving
     ( Functor
     , Applicative
     , Monad
     , MonadReader (TypeConstraintsContext o k)
-    , MonadWriter [TypeConstraint c o k t]
+    , MonadWriter [TypeConstraint y o k t]
     , MonadState Int
-    , MonadRWS (TypeConstraintsContext o k) [TypeConstraint c o k t] Int
+    , MonadRWS (TypeConstraintsContext o k) [TypeConstraint y o k t] Int
     )
 
 {-# INLINE monosetInsert #-}
@@ -89,47 +89,47 @@ monosetInsertMany :: (Ord k, Foldable f) => f (TypeIndex k) -> MonomorphicSet (T
 monosetInsertMany = flip (foldr monosetInsert)
 
 {-# INLINE localMonoset #-}
-localMonoset :: (MonomorphicSet (o k) -> MonomorphicSet (o k)) -> TypeConstraints c o k t a -> TypeConstraints c o k t a
+localMonoset :: (MonomorphicSet (o k) -> MonomorphicSet (o k)) -> TypeConstraints y o k t a -> TypeConstraints y o k t a
 localMonoset = local . overContextMonomorphicSet
 
 {-# INLINE lookupContextConstructor #-}
-lookupContextConstructor :: Name -> TypeConstraints c o k t (Maybe (Constructor o k (Type o k)))
+lookupContextConstructor :: Name -> TypeConstraints y o k t (Maybe (Constructor o k (Type o k)))
 lookupContextConstructor name = Environment.lookup name <$> asks contextConstructorEnv
 
 type CollectConstraints c k = TypeConstraints c TypeIndex k (Type TypeIndex k)
 
 {-# INLINE runCollectTypeConstraints #-}
-runCollectTypeConstraints :: Int -> TypeConstraintsContext o k -> TypeConstraints c o k t a -> (a, [TypeConstraint c o k t])
+runCollectTypeConstraints :: Int -> TypeConstraintsContext o k -> TypeConstraints y o k t a -> (a, [TypeConstraint y o k t])
 runCollectTypeConstraints n cc cs = evalRWS (constraintsMonad cs) cc n
 
 {-# INLINE evalCollectTypeConstraints #-}
-evalCollectTypeConstraints :: Int -> TypeConstraintsContext o k -> TypeConstraints c o k t a -> [TypeConstraint c o k t]
+evalCollectTypeConstraints :: Int -> TypeConstraintsContext o k -> TypeConstraints y o k t a -> [TypeConstraint y o k t]
 evalCollectTypeConstraints n = snd <$$> runCollectTypeConstraints n
 
 {-# INLINE assertEquality #-}
-assertEquality :: RuleDescriptor k a -> [Type TypeIndex k] -> CollectConstraints (RuleDescriptor k a) k ()
+assertEquality :: Descriptor k a -> [Type TypeIndex k] -> CollectConstraints (Descriptor k a) k ()
 assertEquality meta ts = tell [Equality meta ts]
 
-assertEqualityAssumptions :: Type TypeIndex k -> [Assumption (Type TypeIndex k)] -> CollectConstraints (RuleDescriptor k a) k ()
+assertEqualityAssumptions :: Type TypeIndex k -> [Assumption (Type TypeIndex k)] -> CollectConstraints (Descriptor k a) k ()
 assertEqualityAssumptions t ms =
   tell $ do
     Assumption{..} <- ms
     -- TODO
-    pure (Equality RuleDescriptor [assumptionType, t])
+    pure (Equality Descriptor [assumptionType, t])
 
-assertImplicitAssumptions :: Type TypeIndex k -> [Assumption (Type TypeIndex k)] -> CollectConstraints (RuleDescriptor k a) k ()
+assertImplicitAssumptions :: Type TypeIndex k -> [Assumption (Type TypeIndex k)] -> CollectConstraints (Descriptor k a) k ()
 assertImplicitAssumptions t ms = do
   set <- asks contextMonomorphicSet
   tell $ do
     Assumption{..} <- ms
     -- TODO
-    pure (Implicit RuleDescriptor assumptionType t set)
+    pure (Implicit Descriptor assumptionType t set)
 
 patternAssumptions ::
   (Ord k, Show k, KindRep k) =>
   [Assumption (Type TypeIndex k)] ->
   Pattern a (Type TypeIndex k) ->
-  CollectConstraints (RuleDescriptor k a) k [Assumption (Type TypeIndex k)]
+  CollectConstraints (Descriptor k a) k [Assumption (Type TypeIndex k)]
 patternAssumptions ms =
   \case
     PVariable _ (Label t name) -> do
@@ -145,7 +145,7 @@ patternAssumptions ms =
             | constructorArity /= length ps ->
                 error ("Constructor arity mismatch")
           Just Constructor{..} ->
-            tell [Explicit RuleDescriptor (foldType t (typeOf <$> ps)) constructorScheme]
+            tell [Explicit Descriptor (foldType t (typeOf <$> ps)) constructorScheme]
       concat <$> traverse (patternAssumptions ms) ps
 
 withMonomorphic ::
@@ -158,12 +158,12 @@ withMonomorphic p = localMonoset (monosetInsertMany (typeIndexesIn p))
 collectTypeConstraints ::
   (Ord k, Show k, KindRep k) =>
   Expression a (Type TypeIndex k) ->
-  CollectConstraints (RuleDescriptor k a) k [Assumption (Type TypeIndex k)]
+  CollectConstraints (Descriptor k a) k [Assumption (Type TypeIndex k)]
 collectTypeConstraints =
   \case
     EAnnotation a e -> do
       s <- annotationScheme a
-      tell [Explicit RuleDescriptor (typeOf e) s]
+      tell [Explicit Descriptor (typeOf e) s]
       collectTypeConstraints e
     EConstructor _ (Label t name) -> do
       lookupContextConstructor name
@@ -171,7 +171,7 @@ collectTypeConstraints =
           Nothing ->
             error ("No constructor '" <> Text.unpack name <> "'")
           Just Constructor{..} ->
-            tell [Explicit RuleDescriptor t constructorScheme]
+            tell [Explicit Descriptor t constructorScheme]
       pure []
     EVariable _ (Label t name) ->
       pure [Assumption name t]
@@ -185,7 +185,7 @@ collectTypeConstraints =
           BPattern _ (PVariable _ (Label t name)) e -> do
             ms <- collectTypeConstraints e
             -- TODO
-            assertEquality RuleDescriptor [t, typeOf e]
+            assertEquality Descriptor [t, typeOf e]
             pure ms
       ms3 <- flip concatMapM gs $
         \case
@@ -225,7 +225,7 @@ collectTypeConstraints =
 collectClauseTypeConstraints ::
   (Ord k, Show k, KindRep k) =>
   [Clause Expression a (Type TypeIndex k)] ->
-  CollectConstraints (RuleDescriptor k a) k ([Type TypeIndex k], [[Type TypeIndex k]], [Assumption (Type TypeIndex k)])
+  CollectConstraints (Descriptor k a) k ([Type TypeIndex k], [[Type TypeIndex k]], [Assumption (Type TypeIndex k)])
 collectClauseTypeConstraints = third3 concat . unzip3 <$$> traverse go
  where
   go (EClause _ p cs) = do

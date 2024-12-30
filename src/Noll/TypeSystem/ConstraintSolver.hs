@@ -117,9 +117,10 @@ instantiate (Forall qs _ t) = do
   sub <- foldrM go mempty qs
   pure (apply sub t)
  where
-  go (TypeIndex k index) sub = do
+  go (TypeIndex _ index) sub = do
     s <- supply
-    pure (index `mapsToType` TVariable (TypeIndex k s) <> sub)
+    k <- supply
+    pure (index `mapsToType` TVariable (TypeIndex (KVariable (KindIndex k)) s) <> sub)
 
 generalize ::
   (TypeIndexed k t) =>

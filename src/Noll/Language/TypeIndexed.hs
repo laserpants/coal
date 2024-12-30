@@ -144,8 +144,8 @@ instance (Ord k) => TypeIndexed k (Expression a (Type TypeIndex k)) where
         typeIndexesIn t <> typeIndexesIn e1 <> typeIndexesIn es
       ELiteral{} ->
         mempty
-      EMatch _ t es cs ->
-        typeIndexesIn t <> typeIndexesIn es <> typeIndexesIn cs
+      EMatch _ t e cs ->
+        typeIndexesIn t <> typeIndexesIn e <> typeIndexesIn cs
 
 class KindIndexed k where
   kindIndexesIn :: k -> Set KindIndex
