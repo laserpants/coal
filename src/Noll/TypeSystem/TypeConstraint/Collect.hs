@@ -100,7 +100,7 @@ type CollectConstraints c k = TypeConstraints c TypeIndex k (Type TypeIndex k)
 
 {-# INLINE runCollectTypeConstraints #-}
 runCollectTypeConstraints :: Int -> TypeConstraintsContext o k -> TypeConstraints y o k t a -> (a, [TypeConstraint y o k t])
-runCollectTypeConstraints n cc cs = evalRWS (constraintsMonad cs) cc n
+runCollectTypeConstraints n ctx cs = evalRWS (constraintsMonad cs) ctx n
 
 {-# INLINE evalCollectTypeConstraints #-}
 evalCollectTypeConstraints :: Int -> TypeConstraintsContext o k -> TypeConstraints y o k t a -> [TypeConstraint y o k t]

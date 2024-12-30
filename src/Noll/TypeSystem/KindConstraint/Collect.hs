@@ -44,7 +44,7 @@ newtype KindConstraints c k a = KindConstraints {constraintsMonad :: KindConstra
 
 {-# INLINE runCollectKindConstraints #-}
 runCollectKindConstraints :: Environment k -> KindConstraints c k a -> [KindConstraint c k]
-runCollectKindConstraints d cs = snd (execRWS (constraintsMonad cs) d ())
+runCollectKindConstraints env cs = snd (execRWS (constraintsMonad cs) env ())
 
 collectConstraintsInType :: Type TypeIndex (Kind KindIndex) -> KindConstraints KindConstraintMetadata (Kind KindIndex) ()
 collectConstraintsInType =
@@ -87,6 +87,7 @@ collectKindConstraints =
       tell [KindEquality KindConstraintMetadata (kindOf t) KType]
       collectConstraintsInType t
     ELambda _ _ e -> do
+      -- TODO
       collectKindConstraints e
     ELet _ gs e1 -> do
       forM_ gs $
