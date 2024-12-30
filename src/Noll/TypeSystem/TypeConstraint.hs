@@ -41,8 +41,10 @@ data RuleDescriptor k a
     RuleIfBranches a (Type TypeIndex k) (Type TypeIndex k)
   | -- | Pattern guards are of type bool
     RuleMatchClauseGuard
-  | RuleMatchClauseExpressions a
-  | RuleMatchClausePatterns a
+  | -- | Match clauses all have the same type as expression
+    RuleMatchClauseExpressions a
+  | -- | Match clause patterns have identical types
+    RuleMatchClausePatterns a
   deriving (Show, Eq, Ord, Read)
 
 instance TypeIndexed k (MonomorphicSet (TypeIndex k)) where
