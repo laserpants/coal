@@ -9,8 +9,8 @@ import Control.Monad.Except
 import qualified Data.List.NonEmpty as NonEmpty
 import Noll.Language (Kind (..), KindIndex (..))
 import Noll.TypeSystem.KindSubstitution (KindSubstitutable (..), KindSubstitution (..), applyKindSub, mapsToKind)
-import Noll.TypeSystem.TypeUnification.Error (UnificationError (..))
-import qualified Noll.TypeSystem.TypeUnification.Error as Error
+import Noll.TypeSystem.Unification.Error (UnificationError (..))
+import qualified Noll.TypeSystem.Unification.Error as Error
 import Noll.Utils (NonEmpty)
 
 class KindUnifiable u where

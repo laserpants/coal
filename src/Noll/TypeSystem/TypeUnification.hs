@@ -25,8 +25,8 @@ import Noll.TypeSystem.TypeSubstitution (
   TypeSubstitution (..),
   mapsToType,
  )
-import Noll.TypeSystem.TypeUnification.Error (UnificationError (..))
-import qualified Noll.TypeSystem.TypeUnification.Error as Error
+import Noll.TypeSystem.Unification.Error (UnificationError (..))
+import qualified Noll.TypeSystem.Unification.Error as Error
 import Noll.Utils (foldrM)
 
 class TypeUnifiable u where

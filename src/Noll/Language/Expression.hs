@@ -13,7 +13,7 @@ import Noll.Language.Primitive (Primitive (..))
 import Noll.Language.Type (Type, TypeId (..))
 import Noll.Utils (Dictionary, Some)
 
-data Clause e a t = EClause a (Some (Pattern a t)) (Some (Choice e a t))
+data Clause e a t = EClause a (Pattern a t) (Some (Choice e a t))
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
 
 data Expression a t
@@ -46,5 +46,5 @@ data Expression a t
   | -- | List literal
     EListLiteral a t [Expression a t]
   | -- | Pattern matching expression
-    EMatch a t (Some (Expression a t)) (Some (Clause Expression a t))
+    EMatch a t (Expression a t) (Some (Clause Expression a t))
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)

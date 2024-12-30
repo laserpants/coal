@@ -22,20 +22,20 @@ import Control.Monad.RWS (MonadRWS, MonadReader, MonadState, MonadWriter, RWS, a
 import Control.Monad.State (StateT, evalStateT, get, modify)
 import Control.Monad.Trans (lift)
 import Data.List (partition, transpose)
+import Data.List.NonEmpty (NonEmpty)
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import qualified Data.Text as Text
 import Data.Tuple.Extra (second, third3)
-import Debug.Trace
 import Noll.Label (Label (..))
 import Noll.Language (
   Binding (..),
-  BoundNames (..),
   Choice (..),
   Clause (..),
   Constructor (..),
   Expression (..),
+  Guard (..),
   HasType (..),
   Intrinsic (..),
   Kind (..),
@@ -125,20 +125,35 @@ assertImplicitAssumptions t ms = do
     -- TODO
     pure (Implicit TypeConstraintMetadata assumptionType t set)
 
-patternAssumptions :: [Assumption (Type TypeIndex k)] -> Pattern a (Type TypeIndex k) -> CollectConstraints (TypeConstraintMetadata k a) k [Assumption (Type TypeIndex k)]
+patternAssumptions ::
+  (Ord k, Show k, KindRep k) =>
+  [Assumption (Type TypeIndex k)] ->
+  Pattern a (Type TypeIndex k) ->
+  CollectConstraints (TypeConstraintMetadata k a) k [Assumption (Type TypeIndex k)]
 patternAssumptions ms =
   \case
     PVariable _ (Label t name) -> do
       let (ls, rs) = partition (assumptionNameIs name) ms
       assertEqualityAssumptions t ls
       pure rs
+    PConstructor _ (Label t name) ps -> do
+      lookupContextConstructor name
+        >>= \case
+          Nothing ->
+            error ("No constructor '" <> Text.unpack name <> "'")
+          Just Constructor{..}
+            | constructorArity /= length ps ->
+                error ("Constructor arity mismatch")
+          Just Constructor{..} ->
+            tell [Explicit TypeConstraintMetadata (foldType t (typeOf <$> ps)) constructorScheme]
+      concat <$> traverse (patternAssumptions ms) ps
 
 withMonomorphic ::
   (Ord k, TypeIndexed k s, KindRep k) =>
   s ->
   TypeConstraints c TypeIndex k t a ->
   TypeConstraints c TypeIndex k t a
-withMonomorphic ps = localMonoset (monosetInsertMany (typeIndexesIn ps))
+withMonomorphic p = localMonoset (monosetInsertMany (typeIndexesIn p))
 
 collectTypeConstraints ::
   (Ord k, Show k, KindRep k) =>
@@ -151,19 +166,18 @@ collectTypeConstraints =
       tell [Explicit TypeConstraintMetadata (typeOf e) s]
       collectTypeConstraints e
     EConstructor _ (Label t name) -> do
-      r <- lookupContextConstructor name
-      case r of
-        Nothing ->
-          error ("No constructor '" <> Text.unpack name <> "'")
-        Just Constructor{..} ->
-          tell [Explicit TypeConstraintMetadata t constructorScheme]
+      lookupContextConstructor name
+        >>= \case
+          Nothing ->
+            error ("No constructor '" <> Text.unpack name <> "'")
+          Just Constructor{..} ->
+            tell [Explicit TypeConstraintMetadata t constructorScheme]
       pure []
     EVariable _ (Label t name) ->
       pure [Assumption name t]
     ELambda _ ps e -> do
       ms1 <- withMonomorphic ps (collectTypeConstraints e)
-      ms2 <- concat <$> forM ps (patternAssumptions ms1)
-      pure ms2
+      concat <$> forM ps (patternAssumptions ms1)
     ELet _ gs e1 -> do
       ms1 <- collectTypeConstraints e1
       ms2 <- flip concatMapM gs $
@@ -199,71 +213,33 @@ collectTypeConstraints =
       pure (ms1 <> ms2)
     ELiteral{} ->
       pure []
-    EMatch loc t es cs -> do
-      ms1 <- concat <$> traverse collectTypeConstraints (NonEmpty.toList es)
-      (ets, pts, ms2) <- third3 concat . unzip3 <$> forM (NonEmpty.toList cs) collectClauseTypeConstraints
-      -- Expression types
-      assertEquality (ConstraintMatchClauseExpressions loc) (t : concat ets)
+    EMatch loc t e cs -> do
+      ms1 <- collectTypeConstraints e
+      (ts1, ts2, ms2) <- collectClauseTypeConstraints (NonEmpty.toList cs)
       -- Pattern types
-      forM
-        (transpose (NonEmpty.toList (typeOf <$> es) : pts))
-        (assertEquality (ConstraintMatchClausePatterns loc))
+      assertEquality (ConstraintMatchClausePatterns loc) (typeOf e : ts1)
+      -- Expression types
+      assertEquality (ConstraintMatchClauseExpressions loc) (t : concat ts2)
       pure (ms1 <> ms2)
-
-freshType :: (Ord k, Show k, KindRep k) => CollectConstraints (TypeConstraintMetadata k a) k (Type TypeIndex k)
-freshType = do
-  i <- supply
-  pure (TVariable (TypeIndex (kindRep (KVariable (KindIndex i))) i))
-
-assertBound ::
-  (Ord k, Show k, KindRep k) =>
-  (Dictionary (Type TypeIndex k)) ->
-  [Assumption (Type TypeIndex k)] ->
-  CollectConstraints (TypeConstraintMetadata k a) k [Assumption (Type TypeIndex k)]
-assertBound dict ms =
-  concat <$$> forM ms $
-    \a@Assumption{..} ->
-      case Map.lookup assumptionName dict of
-        Nothing ->
-          pure [a]
-        Just t -> do
-          assertEquality TypeConstraintMetadata [t, assumptionType]
-          pure []
 
 collectClauseTypeConstraints ::
   (Ord k, Show k, KindRep k) =>
-  Clause Expression a (Type TypeIndex k) ->
-  CollectConstraints (TypeConstraintMetadata k a) k ([Type TypeIndex k], [Type TypeIndex k], [Assumption (Type TypeIndex k)])
-collectClauseTypeConstraints (EClause _ ps cs) = do
-  (ts1, ms1) <- second concat . unzip <$$> withMonomorphic ps $
-    forM (NonEmpty.toList cs) $
-      \case
-        CPlain _ gs e -> do
-          forM gs $ \g ->
-            assertEquality ConstraintMatchClauseGuard [typeOf g, TIntrinsic IBool]
-          ms <- collectTypeConstraints e
-          pure (typeOf e, ms)
-  (ts2, ms2) <- second concat . unzip <$$> forM (NonEmpty.toList ps) $
-    \case
-      PVariable _ (Label t name) -> do
-        undefined
-      PConstructor _ (Label t name) qs -> do
-        t1 <- freshType
-        -- TODO: Check for duplicate names in patterns
-        let dict = Map.fromList (boundNames qs)
-        ms <- assertBound dict ms1
-        lookupContextConstructor name
-          >>= \case
-            Nothing ->
-              error ("No constructor '" <> Text.unpack name <> "'")
-            Just Constructor{..}
-              | constructorArity /= length qs ->
-                  error ("Constructor arity mismatch")
-            Just Constructor{..} -> do
-              assertEquality TypeConstraintMetadata [t, foldType t1 (typeOf <$> qs)]
-              tell [Explicit TypeConstraintMetadata t constructorScheme]
-        pure (t1, ms)
-  pure (ts1, ts2, ms1 <> ms2)
+  [Clause Expression a (Type TypeIndex k)] ->
+  CollectConstraints (TypeConstraintMetadata k a) k ([Type TypeIndex k], [[Type TypeIndex k]], [Assumption (Type TypeIndex k)])
+collectClauseTypeConstraints = third3 concat . unzip3 <$$> traverse go
+ where
+  go (EClause _ p cs) = do
+    (ts1, ms1) <- second concat . unzip <$$> withMonomorphic p $
+      forM (NonEmpty.toList cs) $
+        \case
+          CPlain _ gs e -> do
+            ns1 <- concat <$$> forM gs $ \(CGuard g) -> do
+              assertEquality ConstraintMatchClauseGuard [typeOf g, TIntrinsic IBool]
+              collectTypeConstraints g
+            ns2 <- collectTypeConstraints e
+            pure (typeOf e, ns1 <> ns2)
+    ms2 <- patternAssumptions ms1 p
+    pure (typeOf p, ts1, ms2)
 
 annotationScheme :: (MonadState Int m, Ord k, KindRep k) => Type TypeId () -> m (Scheme TypeIndex k (Type TypeIndex k))
 annotationScheme t = do

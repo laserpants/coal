@@ -4,8 +4,8 @@ import Control.Monad.Except (runExcept)
 import Noll.Language (Intrinsic (..), Kind (..), KindIndex (..), Type (..), TypeIndex (..))
 import Noll.TypeSystem.TypeSubstitution (TypeSubstitution (..), mapsToType)
 import Noll.TypeSystem.TypeUnification (TypeUnifiable (..), unifyAll)
-import Noll.TypeSystem.TypeUnification.Error (UnificationError (..))
-import qualified Noll.TypeSystem.TypeUnification.Error as Error
+import Noll.TypeSystem.Unification.Error (UnificationError (..))
+import qualified Noll.TypeSystem.Unification.Error as Error
 import Test.Hspec (Spec, describe, it)
 
 spec :: Spec

@@ -1,10 +1,7 @@
 {-# LANGUAGE DeriveTraversable #-}
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Language.Pattern (Pattern (..), BoundNames (..)) where
+module Noll.Language.Pattern (Pattern (..)) where
 
 import Noll.Label (Label (..))
 import Noll.Language.Primitive (Primitive (..))
@@ -29,35 +26,3 @@ data Pattern a t
   | -- | List literal
     PListLiteral a t [Pattern a t]
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
-
-class BoundNames p t where
-  boundNames :: p -> [(Name, t)]
-
-instance (BoundNames p t) => BoundNames [p] t where
-  boundNames = concatMap boundNames
-
-instance (BoundNames p t) => BoundNames (Maybe p) t where
-  boundNames = concatMap boundNames
-
-instance (BoundNames p t) => BoundNames (Map a p) t where
-  boundNames = concatMap boundNames
-
-instance BoundNames (Pattern a t) t where
-  boundNames =
-    \case
-      PVariable _ (Label t name) ->
-        [(name, t)]
-      PAnnotation _ p ->
-        boundNames p
-      PConstructor _ _ ps ->
-        boundNames ps
-      PListLiteral _ _ ps ->
-        boundNames ps
-      PRecord _ _ p1 p2 ->
-        boundNames p1 <> boundNames p2
-      PListCons _ _ p1 p2 ->
-        boundNames p1 <> boundNames p2
-      PAny{} ->
-        []
-      PLiteral{} ->
-        []

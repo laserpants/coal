@@ -104,7 +104,10 @@ collectKindConstraints =
       traverse_ collectKindConstraints es
     ELiteral{} ->
       pure ()
-    EMatch _ t es cs -> do
-      traverse_ collectKindConstraints es
+    EMatch _ t e cs -> do
+      collectKindConstraints e
       -- TODO
+      --      forM_ cs $
+      --        \(EClause _ _) ->
+      --          undefined
       pure ()

@@ -3,7 +3,7 @@
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module Noll.TypeSystemSpec where
+module Noll.TypeSystemSpec (spec) where
 
 import Control.Monad.State (evalState)
 import Data.List.NonEmpty (NonEmpty (..), (<|))
@@ -251,7 +251,7 @@ testInferTypes e =
     e3 :: Expression a (Type TypeIndex (Kind KindIndex))
     e3 = applyKindSub kindSub e2
    in
-    --    traceShow e1 $
+    -- traceShow e1 $
     (normalizeTypeIndexes e3, errs1, errs2)
 
 typeVariable :: Int -> Type TypeIndex (Kind KindIndex)
@@ -447,10 +447,10 @@ fixture7 =
   ( EMatch
       ()
       ()
-      (EVariable () (Label () "x") :| [])
+      (EVariable () (Label () "x"))
       ( EClause
           ()
-          (PConstructor () (Label () "Yes") [] :| [])
+          (PConstructor () (Label () "Yes") [])
           (CPlain () [] (ELiteral () (LBool True)) :| [])
           :| []
       )
@@ -461,10 +461,10 @@ fixture7Typed =
   ( EMatch
       ()
       (TIntrinsic IBool)
-      (EVariable () (Label (TConstructor KType "Answer") "x") :| [])
+      (EVariable () (Label (TConstructor KType "Answer") "x"))
       ( EClause
           ()
-          (PConstructor () (Label (TConstructor KType "Answer") "Yes") [] :| [])
+          (PConstructor () (Label (TConstructor KType "Answer") "Yes") [])
           (CPlain () [] (ELiteral () (LBool True)) :| [])
           :| []
       )
@@ -492,15 +492,14 @@ fixture8 =
                         ()
                         (EVariable () (Label () "equals"))
                         (EVariable () (Label () "x") <| EVariable () (Label () "y") :| [])
-                        :| []
                     )
                     ( EClause
                         ()
-                        (PConstructor () (Label () "Yes") [] :| [])
+                        (PConstructor () (Label () "Yes") [])
                         (CPlain () [] (ELiteral () (LBool True)) :| [])
                         <| EClause
                           ()
-                          (PConstructor () (Label () "No") [] :| [])
+                          (PConstructor () (Label () "No") [])
                           (CPlain () [] (ELiteral () (LBool False)) :| [])
                           :| []
                     )
@@ -535,14 +534,14 @@ fixture10 =
   ( EMatch
       ()
       ()
-      (EVariable () (Label () "x") :| [])
+      (EVariable () (Label () "x"))
       ( EClause
           ()
-          (PConstructor () (Label () "Yes") [] :| [])
+          (PConstructor () (Label () "Yes") [])
           (CPlain () [] (ELiteral () (LBool True)) :| [])
           <| EClause
             ()
-            (PConstructor () (Label () "No") [] :| [])
+            (PConstructor () (Label () "No") [])
             (CPlain () [] (ELiteral () (LBool False)) :| [])
             :| []
       )
@@ -553,14 +552,14 @@ fixture10Typed =
   ( EMatch
       ()
       (TIntrinsic IBool)
-      (EVariable () (Label (TConstructor KType "Answer") "x") :| [])
+      (EVariable () (Label (TConstructor KType "Answer") "x"))
       ( EClause
           ()
-          (PConstructor () (Label (TConstructor KType "Answer") "Yes") [] :| [])
+          (PConstructor () (Label (TConstructor KType "Answer") "Yes") [])
           (CPlain () [] (ELiteral () (LBool True)) :| [])
           <| EClause
             ()
-            (PConstructor () (Label (TConstructor KType "Answer") "No") [] :| [])
+            (PConstructor () (Label (TConstructor KType "Answer") "No") [])
             (CPlain () [] (ELiteral () (LBool False)) :| [])
             :| []
       )
@@ -571,10 +570,10 @@ fixture11 =
   ( EMatch
       ()
       ()
-      (EVariable () (Label () "p") :| [])
+      (EVariable () (Label () "p"))
       ( EClause
           ()
-          (PConstructor () (Label () "MkPair1") [PVariable () (Label () "fst"), PVariable () (Label () "snd")] :| [])
+          (PConstructor () (Label () "MkPair1") [PVariable () (Label () "fst"), PVariable () (Label () "snd")])
           (CPlain () [] (ELiteral () (LBool True)) :| [])
           :| []
       )
@@ -585,16 +584,15 @@ fixture11Typed =
   ( EMatch
       ()
       (TIntrinsic IBool)
-      (EVariable () (Label (TApplication KType (TConstructor (KArrow KType KType) "Pair1") (TVariable (TypeIndex KType 0) :| [])) "p") :| [])
+      (EVariable () (Label (TApplication KType (TConstructor (KArrow KType KType) "Pair1") (TVariable (TypeIndex KType 0) :| [])) "p"))
       ( EClause
           ()
           ( PConstructor
               ()
-              (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TApplication KType (TConstructor (KArrow KType KType) "Pair1") (TVariable (TypeIndex KType 0) :| [])) "MkPair1")
+              (Label (TApplication KType (TConstructor (KArrow KType KType) "Pair1") (TVariable (TypeIndex KType 0) :| [])) "MkPair1")
               [ PVariable () (Label (TVariable (TypeIndex KType 0)) "fst")
               , PVariable () (Label (TVariable (TypeIndex KType 0)) "snd")
               ]
-              :| []
           )
           (CPlain () [] (ELiteral () (LBool True)) :| [])
           :| []
@@ -607,10 +605,10 @@ fixture12 =
   ( EMatch
       ()
       ()
-      (EVariable () (Label () "p") :| [])
+      (EVariable () (Label () "p"))
       ( EClause
           ()
-          (PConstructor () (Label () "MkPair") [PVariable () (Label () "fst"), PVariable () (Label () "snd")] :| [])
+          (PConstructor () (Label () "MkPair") [PVariable () (Label () "fst"), PVariable () (Label () "snd")])
           (CPlain () [] (ELiteral () (LBool True)) :| [])
           :| []
       )
@@ -621,17 +619,16 @@ fixture12Typed =
   ( EMatch
       ()
       (TIntrinsic IBool)
-      (EVariable () (Label (TApplication KType (TConstructor (KArrow KType (KArrow KType KType)) "Pair") (TVariable (TypeIndex KType 1) :| [TVariable (TypeIndex KType 0)])) "p") :| [])
+      (EVariable () (Label (TApplication KType (TConstructor (KArrow KType (KArrow KType KType)) "Pair") (TVariable (TypeIndex KType 1) :| [TVariable (TypeIndex KType 0)])) "p"))
       ( EClause
           ()
           ( PConstructor
               ()
               ( Label
-                  (TVariable (TypeIndex KType 1) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TApplication KType (TConstructor (KArrow KType (KArrow KType KType)) "Pair") (TVariable (TypeIndex KType 1) <| TVariable (TypeIndex KType 0) :| []))
+                  (TApplication KType (TConstructor (KArrow KType (KArrow KType KType)) "Pair") (TVariable (TypeIndex KType 1) <| TVariable (TypeIndex KType 0) :| []))
                   "MkPair"
               )
               [PVariable () (Label (TVariable (TypeIndex KType 1)) "fst"), PVariable () (Label (TVariable (TypeIndex KType 0)) "snd")]
-              :| []
           )
           (CPlain () [] (ELiteral () (LBool True)) :| [])
           :| []
@@ -647,11 +644,10 @@ fixture13 =
       ( EAnnotation
           (TApplication () (TConstructor () "Pair") (TIntrinsic IInt32 <| TIntrinsic IBool :| []))
           (EVariable () (Label () "p"))
-          :| []
       )
       ( EClause
           ()
-          (PConstructor () (Label () "MkPair") [PVariable () (Label () "fst"), PVariable () (Label () "snd")] :| [])
+          (PConstructor () (Label () "MkPair") [PVariable () (Label () "fst"), PVariable () (Label () "snd")])
           (CPlain () [] (ELiteral () (LBool True)) :| [])
           :| []
       )
@@ -665,18 +661,16 @@ fixture13Typed =
       ( EAnnotation
           (TApplication () (TConstructor () "Pair") (TIntrinsic IInt32 <| TIntrinsic IBool :| []))
           (EVariable () (Label (TApplication KType (TConstructor (KArrow KType (KArrow KType KType)) "Pair") (TIntrinsic IInt32 :| [TIntrinsic IBool])) "p"))
-          :| []
       )
       ( EClause
           ()
           ( PConstructor
               ()
               ( Label
-                  (TIntrinsic IInt32 `TArrow` TIntrinsic IBool `TArrow` TApplication KType (TConstructor (KArrow KType (KArrow KType KType)) "Pair") (TIntrinsic IInt32 <| TIntrinsic IBool :| []))
+                  (TApplication KType (TConstructor (KArrow KType (KArrow KType KType)) "Pair") (TIntrinsic IInt32 <| TIntrinsic IBool :| []))
                   "MkPair"
               )
               [PVariable () (Label (TIntrinsic IInt32) "fst"), PVariable () (Label (TIntrinsic IBool) "snd")]
-              :| []
           )
           (CPlain () [] (ELiteral () (LBool True)) :| [])
           :| []
@@ -692,11 +686,10 @@ fixture14 =
       ( EAnnotation
           (TApplication () (TConstructor () "Pair") (TVariable (TypeId () "a") <| TVariable (TypeId () "b") :| []))
           (EVariable () (Label () "p"))
-          :| []
       )
       ( EClause
           ()
-          (PConstructor () (Label () "MkPair") [PVariable () (Label () "fst"), PVariable () (Label () "snd")] :| [])
+          (PConstructor () (Label () "MkPair") [PVariable () (Label () "fst"), PVariable () (Label () "snd")])
           (CPlain () [] (ELiteral () (LBool True)) :| [])
           :| []
       )
@@ -710,18 +703,16 @@ fixture14Typed =
       ( EAnnotation
           (TApplication () (TConstructor () "Pair") (TVariable (TypeId () "a") <| TVariable (TypeId () "b") :| []))
           (EVariable () (Label (TApplication KType (TConstructor (KArrow KType (KArrow KType KType)) "Pair") (TVariable (TypeIndex KType 1) :| [TVariable (TypeIndex KType 0)])) "p"))
-          :| []
       )
       ( EClause
           ()
           ( PConstructor
               ()
               ( Label
-                  (TVariable (TypeIndex KType 1) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TApplication KType (TConstructor (KArrow KType (KArrow KType KType)) "Pair") (TVariable (TypeIndex KType 1) <| TVariable (TypeIndex KType 0) :| []))
+                  (TApplication KType (TConstructor (KArrow KType (KArrow KType KType)) "Pair") (TVariable (TypeIndex KType 1) <| TVariable (TypeIndex KType 0) :| []))
                   "MkPair"
               )
               [PVariable () (Label (TVariable (TypeIndex KType 1)) "fst"), PVariable () (Label (TVariable (TypeIndex KType 0)) "snd")]
-              :| []
           )
           (CPlain () [] (ELiteral () (LBool True)) :| [])
           :| []
@@ -737,11 +728,10 @@ fixture15 =
       ( EAnnotation
           (TApplication () (TConstructor () "Pair") (TVariable (TypeId () "a") <| TVariable (TypeId () "a") :| []))
           (EVariable () (Label () "p"))
-          :| []
       )
       ( EClause
           ()
-          (PConstructor () (Label () "MkPair") [PVariable () (Label () "fst"), PVariable () (Label () "snd")] :| [])
+          (PConstructor () (Label () "MkPair") [PVariable () (Label () "fst"), PVariable () (Label () "snd")])
           (CPlain () [] (ELiteral () (LBool True)) :| [])
           :| []
       )
@@ -755,18 +745,16 @@ fixture15Typed =
       ( EAnnotation
           (TApplication () (TConstructor () "Pair") (TVariable (TypeId () "a") <| TVariable (TypeId () "a") :| []))
           (EVariable () (Label (TApplication KType (TConstructor (KArrow KType (KArrow KType KType)) "Pair") (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 0)])) "p"))
-          :| []
       )
       ( EClause
           ()
           ( PConstructor
               ()
               ( Label
-                  (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TApplication KType (TConstructor (KArrow KType (KArrow KType KType)) "Pair") (TVariable (TypeIndex KType 0) <| TVariable (TypeIndex KType 0) :| []))
+                  (TApplication KType (TConstructor (KArrow KType (KArrow KType KType)) "Pair") (TVariable (TypeIndex KType 0) <| TVariable (TypeIndex KType 0) :| []))
                   "MkPair"
               )
               [PVariable () (Label (TVariable (TypeIndex KType 0)) "fst"), PVariable () (Label (TVariable (TypeIndex KType 0)) "snd")]
-              :| []
           )
           (CPlain () [] (ELiteral () (LBool True)) :| [])
           :| []
@@ -778,14 +766,14 @@ fixture16 =
   ( EMatch
       ()
       ()
-      (EVariable () (Label () "x") :| [])
+      (EVariable () (Label () "x"))
       ( EClause
           ()
-          (PConstructor () (Label () "Yes") [] :| [])
+          (PConstructor () (Label () "Yes") [])
           (CPlain () [] (ELiteral () (LBool True)) :| [])
           <| EClause
             ()
-            (PConstructor () (Label () "Foo") [] :| [])
+            (PConstructor () (Label () "Foo") [])
             (CPlain () [] (ELiteral () (LBool False)) :| [])
             :| []
       )
@@ -797,10 +785,10 @@ fixture17 =
   ( EMatch
       ()
       ()
-      (EVariable () (Label () "p") :| [])
+      (EVariable () (Label () "p"))
       ( EClause
           ()
-          (PConstructor () (Label () "MkIntPair") [PVariable () (Label () "fst"), PVariable () (Label () "snd")] :| [])
+          (PConstructor () (Label () "MkIntPair") [PVariable () (Label () "fst"), PVariable () (Label () "snd")])
           (CPlain () [] (EVariable () (Label () "fst")) :| [])
           :| []
       )
@@ -811,10 +799,10 @@ fixture17Typed =
   ( EMatch
       ()
       (TIntrinsic IInt32)
-      (EVariable () (Label (TConstructor KType "IntPair") "p") :| [])
+      (EVariable () (Label (TConstructor KType "IntPair") "p"))
       ( EClause
           ()
-          (PConstructor () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TConstructor KType "IntPair") "MkIntPair") [PVariable () (Label (TIntrinsic IInt32) "fst"), PVariable () (Label (TIntrinsic IInt32) "snd")] :| [])
+          (PConstructor () (Label (TConstructor KType "IntPair") "MkIntPair") [PVariable () (Label (TIntrinsic IInt32) "fst"), PVariable () (Label (TIntrinsic IInt32) "snd")])
           (CPlain () [] (EVariable () (Label (TIntrinsic IInt32) "fst")) :| [])
           :| []
       )
@@ -831,11 +819,10 @@ fixture18 =
           ()
           (EConstructor () (Label () "MkIntPair"))
           (ELiteral () (LInt32 1) <| ELiteral () (LInt32 2) :| [])
-          :| []
       )
       ( EClause
           ()
-          (PConstructor () (Label () "MkIntPair") [PVariable () (Label () "fst"), PVariable () (Label () "snd")] :| [])
+          (PConstructor () (Label () "MkIntPair") [PVariable () (Label () "fst"), PVariable () (Label () "snd")])
           (CPlain () [] (EVariable () (Label () "fst")) :| [])
           :| []
       )
@@ -851,11 +838,10 @@ fixture18Typed =
           (TConstructor KType "IntPair")
           (EConstructor () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TConstructor KType "IntPair") "MkIntPair"))
           (ELiteral () (LInt32 1) <| ELiteral () (LInt32 2) :| [])
-          :| []
       )
       ( EClause
           ()
-          (PConstructor () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TConstructor KType "IntPair") "MkIntPair") [PVariable () (Label (TIntrinsic IInt32) "fst"), PVariable () (Label (TIntrinsic IInt32) "snd")] :| [])
+          (PConstructor () (Label (TConstructor KType "IntPair") "MkIntPair") [PVariable () (Label (TIntrinsic IInt32) "fst"), PVariable () (Label (TIntrinsic IInt32) "snd")])
           (CPlain () [] (EVariable () (Label (TIntrinsic IInt32) "fst")) :| [])
           :| []
       )
@@ -872,11 +858,10 @@ fixture19 =
           ()
           (EConstructor "c" (Label () "MkIntPair"))
           (ELiteral "d" (LBool False) <| ELiteral "e" (LInt32 2) :| [])
-          :| []
       )
       ( EClause
           "f"
-          (PConstructor "g" (Label () "MkIntPair") [PVariable "h" (Label () "fst"), PVariable "i" (Label () "snd")] :| [])
+          (PConstructor "g" (Label () "MkIntPair") [PVariable "h" (Label () "fst"), PVariable "i" (Label () "snd")])
           (CPlain "j" [] (EVariable "k" (Label () "fst")) :| [])
           :| []
       )

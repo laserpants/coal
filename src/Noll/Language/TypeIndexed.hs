@@ -122,8 +122,8 @@ instance (Ord k) => TypeIndexed k (Choice Expression a (Type TypeIndex k)) where
 instance (Ord k) => TypeIndexed k (Clause Expression a (Type TypeIndex k)) where
   typeIndexesIn =
     \case
-      EClause _ ps ds ->
-        typeIndexesIn ps <> typeIndexesIn ds
+      EClause _ p cs ->
+        typeIndexesIn p <> typeIndexesIn cs
 
 instance (Ord k) => TypeIndexed k (Expression a (Type TypeIndex k)) where
   typeIndexesIn =

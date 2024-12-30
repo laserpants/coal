@@ -1,6 +1,6 @@
 {-# LANGUAGE StrictData #-}
 
-module Noll.TypeSystem.TypeUnification.Error (UnificationError (..)) where
+module Noll.TypeSystem.Unification.Error (UnificationError (..)) where
 
 data UnificationError
   = CannotUnify

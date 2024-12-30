@@ -31,6 +31,7 @@ data TypeConstraint c o k t
   | Explicit c t (Scheme o k t)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
 
+-- TODO: naming
 data TypeConstraintMetadata k a
   = TypeConstraintMetadata
   | -- | Function application

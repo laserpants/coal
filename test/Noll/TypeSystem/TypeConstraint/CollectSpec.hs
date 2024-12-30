@@ -1,7 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.TypeSystem.TypeConstraint.CollectSpec where -- (spec) where
+module Noll.TypeSystem.TypeConstraint.CollectSpec (spec) where
 
 import Data.List (sort)
 import Data.List.NonEmpty (NonEmpty (..), (<|))
@@ -67,9 +67,8 @@ spec =
       it "match x { | Yes => true }" $ do
         typeConstraintsIncludeAll
           fixture4
-          [ Equality TypeConstraintMetadata [typeVariable 2, typeVariable 3]
-          , Equality (ConstraintMatchClauseExpressions ()) [typeVariable 0, TIntrinsic IBool]
-          , Equality (ConstraintMatchClausePatterns ()) [typeVariable 1, typeVariable 3]
+          [ Equality (ConstraintMatchClauseExpressions ()) [typeVariable 0, TIntrinsic IBool]
+          , Equality (ConstraintMatchClausePatterns ()) [typeVariable 1, typeVariable 2]
           , Explicit TypeConstraintMetadata (typeVariable 2) (Forall mempty [] (TConstructor () "Answer"))
           ]
 
@@ -78,12 +77,12 @@ typeConstraintsIncludeAll = all . typeConstraintsInclude
 
 typeConstraintsInclude :: (Show a, Eq a) => Expression a Int -> TypeConstraint (TypeConstraintMetadata () a) TypeIndex () (Type TypeIndex ()) -> Bool
 typeConstraintsInclude e =
-  traceShow constraints $
-    \case
-      Equality meta ts ->
-        elem (normalized (Equality meta ts)) (normalized <$> constraints)
-      c ->
-        elem c constraints
+  --  traceShow constraints $
+  \case
+    Equality meta ts ->
+      elem (normalized (Equality meta ts)) (normalized <$> constraints)
+    c ->
+      elem c constraints
  where
   constraints =
     let e' = fmap typeVariable e
@@ -229,10 +228,10 @@ fixture4 =
   ( EMatch
       ()
       0
-      (EVariable () (Label 1 "x") :| [])
+      (EVariable () (Label 1 "x"))
       ( EClause
           ()
-          (PConstructor () (Label 2 "Yes") [] :| [])
+          (PConstructor () (Label 2 "Yes") [])
           (CPlain () [] (ELiteral () (LBool True)) :| [])
           :| []
       )

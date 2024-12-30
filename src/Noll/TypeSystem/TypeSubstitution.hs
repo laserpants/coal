@@ -135,8 +135,8 @@ instance TypeSubstitutable (Choice Expression a (Type TypeIndex (Kind KindIndex)
 instance TypeSubstitutable (Clause Expression a (Type TypeIndex (Kind KindIndex))) where
   apply sub =
     \case
-      EClause a ps ds ->
-        EClause a (apply sub ps) (apply sub ds)
+      EClause a p cs ->
+        EClause a (apply sub p) (apply sub cs)
 
 instance TypeSubstitutable (Expression a (Type TypeIndex (Kind KindIndex))) where
   apply sub =
@@ -155,10 +155,10 @@ instance TypeSubstitutable (Expression a (Type TypeIndex (Kind KindIndex))) wher
         EIf a (apply sub t) (apply sub e1) (apply sub e2) (apply sub e3)
       EApplication a t e1 es -> do
         EApplication a (apply sub t) (apply sub e1) (apply sub es)
-      e@ELiteral{} ->
-        e
       EMatch a t es cs ->
         EMatch a (apply sub t) (apply sub es) (apply sub cs)
+      e@ELiteral{} ->
+        e
 
 newtype TypeSubstitution = TypeSubstitution {typeSubstitutionMap :: IndexMap (Type TypeIndex (Kind KindIndex))}
   deriving (Show, Eq, Ord, Read)
