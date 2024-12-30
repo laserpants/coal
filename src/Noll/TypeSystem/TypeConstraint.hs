@@ -7,7 +7,7 @@
 {-# LANGUAGE StrictData #-}
 
 module Noll.TypeSystem.TypeConstraint (
-  TypeConstraintMetadata (..),
+  RuleDescriptor (..),
   MonomorphicSet (..),
   TypeConstraint (..),
   overMonomorphicSet,
@@ -31,19 +31,18 @@ data TypeConstraint c o k t
   | Explicit c t (Scheme o k t)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
 
--- TODO: naming
-data TypeConstraintMetadata k a
-  = TypeConstraintMetadata
+data RuleDescriptor k a
+  = RuleDescriptor
   | -- | Function application
-    ConstraintApplication a (Type TypeIndex k) (Type TypeIndex k)
+    RuleApplication a (Type TypeIndex k) (Type TypeIndex k)
   | -- | Type of if condition is bool
-    ConstraintIfCondition a
+    RuleIfCondition a
   | -- | If expression 'then' and 'else' branches have identical types
-    ConstraintIfBranches a (Type TypeIndex k) (Type TypeIndex k)
+    RuleIfBranches a (Type TypeIndex k) (Type TypeIndex k)
   | -- | Pattern guards are of type bool
-    ConstraintMatchClauseGuard
-  | ConstraintMatchClauseExpressions a
-  | ConstraintMatchClausePatterns a
+    RuleMatchClauseGuard
+  | RuleMatchClauseExpressions a
+  | RuleMatchClausePatterns a
   deriving (Show, Eq, Ord, Read)
 
 instance TypeIndexed k (MonomorphicSet (TypeIndex k)) where

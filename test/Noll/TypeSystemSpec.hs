@@ -18,7 +18,7 @@ import Noll.TypeSystem.ConstraintSolver (SolverError (..), evalSolver, solveKind
 import Noll.TypeSystem.KindConstraint (KindConstraint (..), KindConstraintMetadata (..))
 import Noll.TypeSystem.KindConstraint.Collect (collectKindConstraints, runCollectKindConstraints)
 import Noll.TypeSystem.KindSubstitution (KindSubstitution (..), applyKindSub)
-import Noll.TypeSystem.TypeConstraint (TypeConstraint (..), TypeConstraintMetadata (..))
+import Noll.TypeSystem.TypeConstraint (RuleDescriptor (..), TypeConstraint (..))
 import Noll.TypeSystem.TypeConstraint.Collect (TypeConstraintsContext (..), collectTypeConstraints, evalCollectTypeConstraints)
 import Noll.TypeSystem.TypeSubstitution (TypeSubstitutable (..), TypeSubstitution, normalizeTypeIndexes)
 import Test.Hspec (Spec, describe, it)
@@ -75,30 +75,30 @@ spec =
     it "" $
       hasNoErrors fixture18
     it "" $
-      typeErrorsInclude fixture4 (SolverError (ConstraintIfCondition "if"))
+      typeErrorsInclude fixture4 (SolverError (RuleIfCondition "if"))
     it "" $
       typeErrorsInclude
         fixture5
-        (SolverError (ConstraintIfBranches "if" (TIntrinsic IInt32) (TIntrinsic IBool)))
+        (SolverError (RuleIfBranches "if" (TIntrinsic IInt32) (TIntrinsic IBool)))
     it "" $
       typeErrorsIncludeAll
         fixture6
-        [ SolverError (ConstraintIfBranches "if-2" (TIntrinsic IBool) (TIntrinsic IInt32))
-        , SolverError (ConstraintIfCondition "if-1")
+        [ SolverError (RuleIfBranches "if-2" (TIntrinsic IBool) (TIntrinsic IInt32))
+        , SolverError (RuleIfCondition "if-1")
         ]
     it "" $
       typeErrorsInclude
         fixture16
-        (SolverError (ConstraintMatchClausePatterns ()))
+        (SolverError (RuleMatchClausePatterns ()))
     it "" $
       typeErrorsInclude
         fixture19
-        (SolverError (ConstraintApplication "b" (typeVariable 2) (TIntrinsic IBool `TArrow` TIntrinsic IInt32 `TArrow` typeVariable 1)))
+        (SolverError (RuleApplication "b" (typeVariable 2) (TIntrinsic IBool `TArrow` TIntrinsic IInt32 `TArrow` typeVariable 1)))
 
-typeErrorsIncludeAll :: (Show a, Eq a) => Expression a () -> [SolverError (TypeConstraintMetadata (Kind KindIndex) a)] -> Bool
+typeErrorsIncludeAll :: (Show a, Eq a) => Expression a () -> [SolverError (RuleDescriptor (Kind KindIndex) a)] -> Bool
 typeErrorsIncludeAll e = all (typeErrorsInclude e)
 
-typeErrorsInclude :: (Show a, Eq a) => Expression a () -> SolverError (TypeConstraintMetadata (Kind KindIndex) a) -> Bool
+typeErrorsInclude :: (Show a, Eq a) => Expression a () -> SolverError (RuleDescriptor (Kind KindIndex) a) -> Bool
 typeErrorsInclude e err = err `elem` errs
  where
   (_, errs, _) = testInferTypes e
@@ -122,7 +122,7 @@ validateResult e = let (a, _, _) = testInferTypes e in a
 
 type Result a =
   ( Expression a (Type TypeIndex (Kind KindIndex))
-  , [SolverError (TypeConstraintMetadata (Kind KindIndex) a)]
+  , [SolverError (RuleDescriptor (Kind KindIndex) a)]
   , [SolverError KindConstraintMetadata]
   )
 
@@ -216,14 +216,14 @@ testInferTypes e =
           )
         ]
 
-    typeConstraints :: [TypeConstraint (TypeConstraintMetadata (Kind KindIndex) a) TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))]
+    typeConstraints :: [TypeConstraint (RuleDescriptor (Kind KindIndex) a) TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))]
     typeConstraints =
       evalCollectTypeConstraints
         (freshIdIn e1)
         (TypeConstraintsContext mempty constructorEnv)
         (collectTypeConstraints e1)
 
-    res1 :: (TypeSubstitution, [SolverError (TypeConstraintMetadata (Kind KindIndex) a)])
+    res1 :: (TypeSubstitution, [SolverError (RuleDescriptor (Kind KindIndex) a)])
     res1 = evalSolver (freshIdIn typeConstraints) (solveTypes typeConstraints)
 
     (typeSub, errs1) = res1

@@ -53,7 +53,7 @@ import Noll.Language.Type.Scheme (Scheme (..))
 import Noll.Library.Environment (Environment (..))
 import qualified Noll.Library.Environment as Environment
 import Noll.Library.Supply (supply, supplyN)
-import Noll.TypeSystem.TypeConstraint (MonomorphicSet (..), TypeConstraint (..), TypeConstraintMetadata (..), overMonomorphicSet)
+import Noll.TypeSystem.TypeConstraint (MonomorphicSet (..), RuleDescriptor (..), TypeConstraint (..), overMonomorphicSet)
 import Noll.TypeSystem.TypeConstraint.Assumption (Assumption (..), assumptionNameIs)
 import Noll.Utils (Dictionary, Name, concatMapM, forM, forM_, (<$$>))
 
@@ -107,29 +107,29 @@ evalCollectTypeConstraints :: Int -> TypeConstraintsContext o k -> TypeConstrain
 evalCollectTypeConstraints n = snd <$$> runCollectTypeConstraints n
 
 {-# INLINE assertEquality #-}
-assertEquality :: TypeConstraintMetadata k a -> [Type TypeIndex k] -> CollectConstraints (TypeConstraintMetadata k a) k ()
+assertEquality :: RuleDescriptor k a -> [Type TypeIndex k] -> CollectConstraints (RuleDescriptor k a) k ()
 assertEquality meta ts = tell [Equality meta ts]
 
-assertEqualityAssumptions :: Type TypeIndex k -> [Assumption (Type TypeIndex k)] -> CollectConstraints (TypeConstraintMetadata k a) k ()
+assertEqualityAssumptions :: Type TypeIndex k -> [Assumption (Type TypeIndex k)] -> CollectConstraints (RuleDescriptor k a) k ()
 assertEqualityAssumptions t ms =
   tell $ do
     Assumption{..} <- ms
     -- TODO
-    pure (Equality TypeConstraintMetadata [assumptionType, t])
+    pure (Equality RuleDescriptor [assumptionType, t])
 
-assertImplicitAssumptions :: Type TypeIndex k -> [Assumption (Type TypeIndex k)] -> CollectConstraints (TypeConstraintMetadata k a) k ()
+assertImplicitAssumptions :: Type TypeIndex k -> [Assumption (Type TypeIndex k)] -> CollectConstraints (RuleDescriptor k a) k ()
 assertImplicitAssumptions t ms = do
   set <- asks contextMonomorphicSet
   tell $ do
     Assumption{..} <- ms
     -- TODO
-    pure (Implicit TypeConstraintMetadata assumptionType t set)
+    pure (Implicit RuleDescriptor assumptionType t set)
 
 patternAssumptions ::
   (Ord k, Show k, KindRep k) =>
   [Assumption (Type TypeIndex k)] ->
   Pattern a (Type TypeIndex k) ->
-  CollectConstraints (TypeConstraintMetadata k a) k [Assumption (Type TypeIndex k)]
+  CollectConstraints (RuleDescriptor k a) k [Assumption (Type TypeIndex k)]
 patternAssumptions ms =
   \case
     PVariable _ (Label t name) -> do
@@ -145,7 +145,7 @@ patternAssumptions ms =
             | constructorArity /= length ps ->
                 error ("Constructor arity mismatch")
           Just Constructor{..} ->
-            tell [Explicit TypeConstraintMetadata (foldType t (typeOf <$> ps)) constructorScheme]
+            tell [Explicit RuleDescriptor (foldType t (typeOf <$> ps)) constructorScheme]
       concat <$> traverse (patternAssumptions ms) ps
 
 withMonomorphic ::
@@ -158,12 +158,12 @@ withMonomorphic p = localMonoset (monosetInsertMany (typeIndexesIn p))
 collectTypeConstraints ::
   (Ord k, Show k, KindRep k) =>
   Expression a (Type TypeIndex k) ->
-  CollectConstraints (TypeConstraintMetadata k a) k [Assumption (Type TypeIndex k)]
+  CollectConstraints (RuleDescriptor k a) k [Assumption (Type TypeIndex k)]
 collectTypeConstraints =
   \case
     EAnnotation a e -> do
       s <- annotationScheme a
-      tell [Explicit TypeConstraintMetadata (typeOf e) s]
+      tell [Explicit RuleDescriptor (typeOf e) s]
       collectTypeConstraints e
     EConstructor _ (Label t name) -> do
       lookupContextConstructor name
@@ -171,7 +171,7 @@ collectTypeConstraints =
           Nothing ->
             error ("No constructor '" <> Text.unpack name <> "'")
           Just Constructor{..} ->
-            tell [Explicit TypeConstraintMetadata t constructorScheme]
+            tell [Explicit RuleDescriptor t constructorScheme]
       pure []
     EVariable _ (Label t name) ->
       pure [Assumption name t]
@@ -185,7 +185,7 @@ collectTypeConstraints =
           BPattern _ (PVariable _ (Label t name)) e -> do
             ms <- collectTypeConstraints e
             -- TODO
-            assertEquality TypeConstraintMetadata [t, typeOf e]
+            assertEquality RuleDescriptor [t, typeOf e]
             pure ms
       ms3 <- flip concatMapM gs $
         \case
@@ -201,15 +201,15 @@ collectTypeConstraints =
       let t1 = typeOf e1
           t2 = typeOf e2
           t3 = typeOf e3
-      assertEquality (ConstraintIfCondition loc) [t1, TIntrinsic IBool]
-      assertEquality (ConstraintIfBranches loc t2 t3) [t, t2, t3]
+      assertEquality (RuleIfCondition loc) [t1, TIntrinsic IBool]
+      assertEquality (RuleIfBranches loc t2 t3) [t, t2, t3]
       pure (ms1 <> ms2 <> ms3)
     EApplication loc t e1 es -> do
       ms1 <- collectTypeConstraints e1
       ms2 <- concat <$> traverse collectTypeConstraints es
       let t1 = typeOf e1
           t2 = foldType t (typeOf <$> es)
-      assertEquality (ConstraintApplication loc t1 t2) [t1, t2]
+      assertEquality (RuleApplication loc t1 t2) [t1, t2]
       pure (ms1 <> ms2)
     ELiteral{} ->
       pure []
@@ -217,15 +217,15 @@ collectTypeConstraints =
       ms1 <- collectTypeConstraints e
       (ts1, ts2, ms2) <- collectClauseTypeConstraints (NonEmpty.toList cs)
       -- Pattern types
-      assertEquality (ConstraintMatchClausePatterns loc) (typeOf e : ts1)
+      assertEquality (RuleMatchClausePatterns loc) (typeOf e : ts1)
       -- Expression types
-      assertEquality (ConstraintMatchClauseExpressions loc) (t : concat ts2)
+      assertEquality (RuleMatchClauseExpressions loc) (t : concat ts2)
       pure (ms1 <> ms2)
 
 collectClauseTypeConstraints ::
   (Ord k, Show k, KindRep k) =>
   [Clause Expression a (Type TypeIndex k)] ->
-  CollectConstraints (TypeConstraintMetadata k a) k ([Type TypeIndex k], [[Type TypeIndex k]], [Assumption (Type TypeIndex k)])
+  CollectConstraints (RuleDescriptor k a) k ([Type TypeIndex k], [[Type TypeIndex k]], [Assumption (Type TypeIndex k)])
 collectClauseTypeConstraints = third3 concat . unzip3 <$$> traverse go
  where
   go (EClause _ p cs) = do
@@ -234,7 +234,7 @@ collectClauseTypeConstraints = third3 concat . unzip3 <$$> traverse go
         \case
           CPlain _ gs e -> do
             ns1 <- concat <$$> forM gs $ \(CGuard g) -> do
-              assertEquality ConstraintMatchClauseGuard [typeOf g, TIntrinsic IBool]
+              assertEquality RuleMatchClauseGuard [typeOf g, TIntrinsic IBool]
               collectTypeConstraints g
             ns2 <- collectTypeConstraints e
             pure (typeOf e, ns1 <> ns2)
