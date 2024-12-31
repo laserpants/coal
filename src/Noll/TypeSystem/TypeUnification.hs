@@ -15,6 +15,8 @@ import Noll.Language (
   Intrinsic (..),
   Kind (..),
   KindIndex (..),
+  OpaqueRow,
+  OpaqueType,
   Row,
   Type (..),
   TypeIndex (..),
@@ -45,11 +47,11 @@ instance (TypeSubstitutable u, TypeUnifiable u) => TypeUnifiable [u] where
 instance (TypeSubstitutable u, TypeUnifiable u) => TypeUnifiable (NonEmpty u) where
   unify u1 u2 = unify (NonEmpty.toList u1) (NonEmpty.toList u2)
 
-instance TypeUnifiable (Row TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))) where
+instance TypeUnifiable OpaqueRow where
   unify =
     error "TODO"
 
-instance TypeUnifiable (Type TypeIndex (Kind KindIndex)) where
+instance TypeUnifiable OpaqueType where
   unify (TAlias _ _ t1) t2 =
     unify t1 t2
   unify t1 (TAlias _ _ t2) =
@@ -72,7 +74,7 @@ instance TypeUnifiable (Type TypeIndex (Kind KindIndex)) where
   unify _ _ =
     throwError Error.CannotUnify
 
-instance TypeUnifiable (Intrinsic (Type TypeIndex (Kind KindIndex))) where
+instance TypeUnifiable (Intrinsic OpaqueType) where
   unify (IList t1) (IList t2) =
     unify t1 t2
   unify (IOption t1) (IOption t2) =
@@ -89,7 +91,7 @@ instance TypeUnifiable (Intrinsic (Type TypeIndex (Kind KindIndex))) where
   unify _ _ =
     throwError Error.CannotUnify
 
-bindType :: (MonadError UnificationError m) => TypeIndex (Kind KindIndex) -> Type TypeIndex (Kind KindIndex) -> m TypeSubstitution
+bindType :: (MonadError UnificationError m) => TypeIndex () -> OpaqueType -> m TypeSubstitution
 bindType (TypeIndex _ index) =
   \case
     TVariable (TypeIndex _ index2)

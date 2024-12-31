@@ -187,14 +187,10 @@ notBoundIn s = Set.filter notBound
 typeIdsIn :: (TypeIndexed k t) => t -> Set Int
 typeIdsIn = Set.map typeIndexId . typeIndexesIn
 
-kindIdsIn :: (KindIndexed k) => k -> Set Int
-kindIdsIn = Set.map kindIndexId . kindIndexesIn
-
-freshIdIn :: (Ord k, TypeIndexed k t, KindIndexed (TypeIndex k)) => t -> Int
+freshIdIn :: (Ord k, TypeIndexed k t) => t -> Int
 freshIdIn t =
   if null typeIndexSet
     then 0
-    else succ (maximum (typeIdsIn typeIndexSet <> kindIdsIn kindIndexSet))
+    else succ (maximum (typeIdsIn typeIndexSet))
  where
   typeIndexSet = typeIndexesIn t
-  kindIndexSet = unionMap kindIndexesIn typeIndexSet

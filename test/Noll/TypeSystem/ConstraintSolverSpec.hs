@@ -39,18 +39,18 @@ spec =
       it "" $ hasNumberOfErrors 1 fixture3
 
 -- fn(m) => let y = m in let x = y(true) in x
-fixture1 :: [TypeConstraint () TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))]
+fixture1 :: [TypeConstraint () TypeIndex () (Type TypeIndex ())]
 fixture1 =
   [ (Equality () [typeVariable 2, typeBool `TArrow` typeVariable 3])
   , (Equality () [typeVariable 5, typeVariable 1])
   , (Equality () [typeVariable 6, typeVariable 1])
   , (Equality () [typeVariable 7, typeVariable 3])
-  , (Implicit () (typeVariable 4) (typeVariable 7) (MonomorphicSet (Set.fromList [TypeIndex KType 5])))
-  , (Implicit () (typeVariable 2) (typeVariable 6) (MonomorphicSet (Set.fromList [TypeIndex KType 5])))
+  , (Implicit () (typeVariable 4) (typeVariable 7) (MonomorphicSet (Set.fromList [TypeIndex () 5])))
+  , (Implicit () (typeVariable 2) (typeVariable 6) (MonomorphicSet (Set.fromList [TypeIndex () 5])))
   ]
 
 -- let f = fn(x) => x in (f(f))(f(1))
-fixture2 :: [TypeConstraint () TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))]
+fixture2 :: [TypeConstraint () TypeIndex () (Type TypeIndex ())]
 fixture2 =
   [ (Implicit () (typeVariable 6) (typeVariable 1) (MonomorphicSet mempty))
   , (Implicit () (typeVariable 7) (typeVariable 1) (MonomorphicSet mempty))
@@ -63,7 +63,7 @@ fixture2 =
   ]
 
 -- let x = 1 in x(x)
-fixture3 :: [TypeConstraint () TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))]
+fixture3 :: [TypeConstraint () TypeIndex () (Type TypeIndex ())]
 fixture3 =
   [ (Equality () [typeVariable 2, typeVariable 3 `TArrow` typeVariable 1])
   , (Equality () [typeVariable 0, typeInt32])
@@ -71,26 +71,26 @@ fixture3 =
   , (Implicit () (typeVariable 3) (typeVariable 0) (MonomorphicSet mempty))
   ]
 
-substitutionsIncludeAll :: [TypeConstraint () TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))] -> [(Int, Type TypeIndex (Kind KindIndex))] -> Bool
+substitutionsIncludeAll :: [TypeConstraint () TypeIndex () (Type TypeIndex ())] -> [(Int, Type TypeIndex ())] -> Bool
 substitutionsIncludeAll = all . uncurry . substitutionsInclude
 
-substitutionsInclude :: [TypeConstraint () TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))] -> Int -> Type TypeIndex (Kind KindIndex) -> Bool
+substitutionsInclude :: [TypeConstraint () TypeIndex () (Type TypeIndex ())] -> Int -> Type TypeIndex () -> Bool
 substitutionsInclude cs k s = Map.lookup k (typeSubstitutionMap sub) == Just s
  where
   (sub, _) = evalSolver (freshIdIn cs) (solveTypes cs)
 
-hasNumberOfErrors :: Int -> [TypeConstraint () TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))] -> Bool
+hasNumberOfErrors :: Int -> [TypeConstraint () TypeIndex () (Type TypeIndex ())] -> Bool
 hasNumberOfErrors n cs = length errors == n
  where
   (_, errors) = evalSolver (freshIdIn cs) (solveTypes cs)
 
-hasNoErrors :: [TypeConstraint () TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))] -> Bool
+hasNoErrors :: [TypeConstraint () TypeIndex () (Type TypeIndex ())] -> Bool
 hasNoErrors cs = errors == []
  where
   (_, errors) = evalSolver (freshIdIn cs) (solveTypes cs)
 
-typeVariable :: Int -> Type TypeIndex (Kind KindIndex)
-typeVariable = TVariable . TypeIndex KType
+typeVariable :: Int -> Type TypeIndex ()
+typeVariable = TVariable . TypeIndex ()
 
 typeBool :: Type TypeIndex k
 typeBool = TIntrinsic IBool

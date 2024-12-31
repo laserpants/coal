@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Language.TypeIndexedSpec where
+module Noll.Language.TypeIndexedSpec (spec) where
 
 import Data.Set (Set)
 import qualified Data.Set as Set

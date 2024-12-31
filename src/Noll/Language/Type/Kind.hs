@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Language.Type.Kind (Kind (..), KindIndex (..), KindRep (..), foldKind) where
+module Noll.Language.Type.Kind (Kind (..), KindIndex (..), foldKind) where
 
 data Kind o
   = KType
@@ -15,15 +15,6 @@ infixr 1 `KArrow`
 
 newtype KindIndex = KindIndex {kindIndexId :: Int}
   deriving (Show, Eq, Ord, Read)
-
-class KindRep k where
-  kindRep :: Kind KindIndex -> k
-
-instance KindRep () where
-  kindRep = const ()
-
-instance KindRep (Kind KindIndex) where
-  kindRep = id
 
 {-# INLINE foldKind #-}
 foldKind :: (Foldable f) => Kind o -> f (Kind o) -> Kind o

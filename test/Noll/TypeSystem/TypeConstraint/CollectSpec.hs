@@ -3,16 +3,17 @@
 
 module Noll.TypeSystem.TypeConstraint.CollectSpec (spec) where
 
+import Control.Monad.Identity (runIdentity)
 import Data.List (sort)
 import Data.List.NonEmpty (NonEmpty (..), (<|))
 import qualified Data.Set as Set
 import Debug.Trace
 import Noll.Label (Label (..))
-import Noll.Language (Binding (..), Choice (..), Clause (..), Constructor (..), Expression (..), Intrinsic (..), Kind (..), KindIndex (..), Pattern (..), Primitive (..), Scheme (..), Type (..), TypeIndex (..), freshIdIn)
+import Noll.Language (Binding (..), Choice (..), Clause (..), Constructor (..), Expression (..), Intrinsic (..), Kind (..), KindIndex (..), Pattern (..), Primitive (..), Scheme (..), Type (..), TypeIndex (..), TypeVariable (..), freshIdIn)
 import Noll.Library.Environment (Environment)
 import qualified Noll.Library.Environment as Environment
-import Noll.TypeSystem.TypeConstraint (MonomorphicSet (..), Descriptor (..), TypeConstraint (..))
-import Noll.TypeSystem.TypeConstraint.Collect (TypeConstraintsContext (..), collectTypeConstraints, evalCollectTypeConstraints)
+import Noll.TypeSystem.TypeConstraint (Descriptor (..), MonomorphicSet (..), TypeConstraint (..))
+import Noll.TypeSystem.TypeConstraint.Collect (TypeConstraintsContext (..), annotationScheme, collectTypeConstraints, evalCollectTypeConstraints)
 import Test.Hspec (Spec, describe, it)
 
 spec :: Spec
@@ -71,6 +72,15 @@ spec =
           , Equality (RuleMatchClausePatterns ()) [typeVariable 1, typeVariable 2]
           , Explicit Descriptor (typeVariable 2) (Forall mempty [] (TConstructor () "Answer"))
           ]
+    describe "annotationScheme" $ do
+      it "" $ do
+        runIdentity
+          (annotationScheme (TVariable (TypeVariable () "a") `TArrow` TVariable (TypeVariable () "a")))
+          == Forall (Set.fromList [TypeIndex () 0]) [] (TVariable (TypeIndex () 0) `TArrow` TVariable (TypeIndex () 0))
+      it "" $ do
+        runIdentity
+          (annotationScheme (TVariable (TypeVariable () "a") `TArrow` TVariable (TypeVariable () "b")))
+          == Forall (Set.fromList [TypeIndex () 0, TypeIndex () 1]) [] (TVariable (TypeIndex () 0) `TArrow` TVariable (TypeIndex () 1))
 
 typeConstraintsIncludeAll :: (Show a, Eq a) => Expression a Int -> [TypeConstraint (Descriptor () a) TypeIndex () (Type TypeIndex ())] -> Bool
 typeConstraintsIncludeAll = all . typeConstraintsInclude
@@ -87,7 +97,6 @@ typeConstraintsInclude e =
   constraints =
     let e' = fmap typeVariable e
      in evalCollectTypeConstraints
-          (freshIdIn e')
           (TypeConstraintsContext mempty constructorEnv)
           (collectTypeConstraints e')
   normalized =

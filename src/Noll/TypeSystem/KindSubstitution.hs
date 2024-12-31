@@ -11,7 +11,7 @@ module Noll.TypeSystem.KindSubstitution (
 import qualified Data.Map.Strict as Map
 import Data.Maybe (fromMaybe)
 import qualified Data.Set as Set
-import Noll.Language (Expression (..), Kind (..), KindIndex (..), Row, Trait (..), Type (..), TypeIndex (..))
+import Noll.Language (Expression (..), IndexedType, Kind (..), KindIndex (..), Row, Trait (..), Type (..), TypeIndex (..))
 import Noll.TypeSystem.KindConstraint (KindConstraint (..))
 import Noll.Utils (IndexMap, Map, NonEmpty, Set)
 
@@ -56,11 +56,11 @@ instance KindSubstitutable (TypeIndex (Kind KindIndex)) where
       TypeIndex k index ->
         TypeIndex (applyKindSub sub k) index
 
-instance KindSubstitutable (Row TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))) where
+instance KindSubstitutable (Row TypeIndex (Kind KindIndex) IndexedType) where
   applyKindSub sub =
     error "TODO"
 
-instance KindSubstitutable (Type TypeIndex (Kind KindIndex)) where
+instance KindSubstitutable IndexedType where
   applyKindSub sub =
     \case
       TAlias name ts t -> do
@@ -84,7 +84,7 @@ instance (KindSubstitutable k) => KindSubstitutable (KindConstraint c k) where
       KindEquality meta k1 k2 ->
         KindEquality meta (applyKindSub sub k1) (applyKindSub sub k2)
 
-instance KindSubstitutable (Expression a (Type TypeIndex (Kind KindIndex))) where
+instance KindSubstitutable (Expression a IndexedType) where
   applyKindSub = fmap . applyKindSub
 
 newtype KindSubstitution = KindSubstitution {kindSubstitutionMap :: IndexMap (Kind KindIndex)}

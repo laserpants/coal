@@ -6,7 +6,7 @@ import qualified Noll.TypeSystem.TypeConstraint.CollectSpec
 import qualified Noll.TypeSystem.TypeSubstitutionSpec
 import qualified Noll.TypeSystem.TypeUnificationSpec
 import qualified Noll.TypeSystemSpec
-import Test.Hspec (hspec)
+import Test.Hspec (hspec, it)
 
 main :: IO ()
 main =

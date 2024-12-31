@@ -87,7 +87,7 @@ solveTypes ::
   , MonadWriter [SolverError c] m
   , Eq c
   ) =>
-  [TypeConstraint c TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))] ->
+  [TypeConstraint c TypeIndex () (Type TypeIndex ())] ->
   m TypeSubstitution
 solveTypes [] = pure (TypeSubstitution mempty)
 solveTypes constraints =
@@ -111,16 +111,15 @@ solveTypes constraints =
 
 instantiate ::
   (MonadState Int m) =>
-  Scheme TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex)) ->
-  m (Type TypeIndex (Kind KindIndex))
+  Scheme TypeIndex () (Type TypeIndex ()) ->
+  m (Type TypeIndex ())
 instantiate (Forall qs _ t) = do
   sub <- foldrM go mempty qs
   pure (apply sub t)
  where
   go (TypeIndex _ index) sub = do
     s <- supply
-    k <- supply
-    pure (index `mapsToType` TVariable (TypeIndex (KVariable (KindIndex k)) s) <> sub)
+    pure (index `mapsToType` TVariable (TypeIndex () s) <> sub)
 
 generalize ::
   (TypeIndexed k t) =>

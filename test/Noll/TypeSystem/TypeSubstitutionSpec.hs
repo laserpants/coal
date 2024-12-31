@@ -29,10 +29,10 @@ spec =
   describe "Noll.TypeSystem.TypeSubstitution" $ do
     describe "apply" $ do
       it "" $ do
-        let t = TVariable (TypeIndex KType 1) :: Type TypeIndex (Kind KindIndex)
+        let t = TVariable (TypeIndex () 1) :: Type TypeIndex ()
         apply (1 `mapsToType` TIntrinsic IBool) t == TIntrinsic IBool
       it "" $ do
-        let t = TVariable (TypeIndex KType 0) :: Type TypeIndex (Kind KindIndex)
+        let t = TVariable (TypeIndex () 0) :: Type TypeIndex ()
         apply (1 `mapsToType` TIntrinsic IBool) t == t
       it "" $ validateResult fixture1 fixture1Result
       it "" $ validateResult fixture2 fixture2Result
@@ -41,29 +41,29 @@ spec =
         normalizeTypeIndexes fixture3
           == ( ELambda
                 ()
-                (PVariable () (Label (typeBool `TArrow` typeVariableKind 3 0) "m") :| [])
+                (PVariable () (Label (typeBool `TArrow` typeVariable 0) "m") :| [])
                 ( ELet
                     ()
                     ( BPattern
                         ()
-                        (PVariable () (Label (typeBool `TArrow` typeVariableKind 3 0) "y"))
-                        (EVariable () (Label (typeBool `TArrow` typeVariableKind 3 0) "m"))
+                        (PVariable () (Label (typeBool `TArrow` typeVariable 0) "y"))
+                        (EVariable () (Label (typeBool `TArrow` typeVariable 0) "m"))
                         :| []
                     )
                     ( ELet
                         ()
                         ( BPattern
                             ()
-                            (PVariable () (Label (typeVariableKind 3 0) "x"))
+                            (PVariable () (Label (typeVariable 0) "x"))
                             ( EApplication
                                 ()
-                                (typeVariableKind 3 0)
-                                (EVariable () (Label (typeBool `TArrow` typeVariableKind 3 0) "y"))
+                                (typeVariable 0)
+                                (EVariable () (Label (typeBool `TArrow` typeVariable 0) "y"))
                                 (ELiteral () (LBool True) :| [])
                             )
                             :| []
                         )
-                        ( EVariable () (Label (typeVariableKind 3 0) "x")
+                        ( EVariable () (Label (typeVariable 0) "x")
                         )
                     )
                 )
@@ -71,12 +71,12 @@ spec =
 
 validateResult ::
   (Eq a) =>
-  (Expression a (Type TypeIndex (Kind KindIndex)), TypeSubstitution) ->
-  Expression a (Type TypeIndex (Kind KindIndex)) ->
+  (Expression a (Type TypeIndex ()), TypeSubstitution) ->
+  Expression a (Type TypeIndex ()) ->
   Bool
 validateResult (e, sub) res = apply sub e == res
 
-fixture1 :: (Expression () (Type TypeIndex (Kind KindIndex)), TypeSubstitution)
+fixture1 :: (Expression () (Type TypeIndex ()), TypeSubstitution)
 fixture1 =
   ( ELambda
       ()
@@ -116,7 +116,7 @@ fixture1 =
       ]
   )
 
-fixture1Result :: Expression () (Type TypeIndex (Kind KindIndex))
+fixture1Result :: Expression () (Type TypeIndex ())
 fixture1Result =
   ELambda
     ()
@@ -147,7 +147,7 @@ fixture1Result =
         )
     )
 
-fixture2 :: (Expression () (Type TypeIndex (Kind KindIndex)), TypeSubstitution)
+fixture2 :: (Expression () (Type TypeIndex ()), TypeSubstitution)
 fixture2 =
   ( ELet
       ()
@@ -190,7 +190,7 @@ fixture2 =
       ]
   )
 
-fixture2Result :: Expression () (Type TypeIndex (Kind KindIndex))
+fixture2Result :: Expression () (Type TypeIndex ())
 fixture2Result =
   ELet
     ()
@@ -222,7 +222,7 @@ fixture2Result =
         )
     )
 
-fixture3 :: Expression () (Type TypeIndex (Kind KindIndex))
+fixture3 :: Expression () (Type TypeIndex ())
 fixture3 =
   ELambda
     ()
@@ -253,11 +253,8 @@ fixture3 =
         )
     )
 
-typeVariable :: Int -> Type TypeIndex (Kind KindIndex)
-typeVariable n = TVariable (TypeIndex (KVariable (KindIndex n)) n)
-
-typeVariableKind :: Int -> Int -> Type TypeIndex (Kind KindIndex)
-typeVariableKind m n = TVariable (TypeIndex (KVariable (KindIndex m)) n)
+typeVariable :: Int -> Type TypeIndex ()
+typeVariable n = TVariable (TypeIndex () n)
 
 typeBool :: Type TypeIndex k
 typeBool = TIntrinsic IBool

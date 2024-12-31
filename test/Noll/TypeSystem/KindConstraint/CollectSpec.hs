@@ -1,11 +1,11 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.TypeSystem.KindConstraint.CollectSpec (spec) where
+module Noll.TypeSystem.KindConstraint.CollectSpec where -- (spec) where
 
 import Data.List.NonEmpty (NonEmpty (..))
 import Noll.Label (Label (..))
-import Noll.Language (Binding (..), Expression (..), Intrinsic (..), Kind (..), KindIndex (..), Pattern (..), Primitive (..), Type (..), TypeIndex (..))
+import Noll.Language (Binding (..), Expression (..), Intrinsic (..), Kind (..), KindIndex (..), Pattern (..), Primitive (..), Type (..), TypeIndex (..), freshIdIn)
 import Noll.TypeSystem.KindConstraint (KindConstraint (..), KindConstraintMetadata (..))
 import Noll.TypeSystem.KindConstraint.Collect (collectKindConstraints, runCollectKindConstraints)
 import Test.Hspec (Spec, describe, it)
@@ -25,61 +25,61 @@ spec =
           [ KindEquality KindConstraintMetadata (KVariable (KindIndex 3)) KType
           ]
 
-kindConstraintsIncludeAll :: Expression a (Type TypeIndex (Kind KindIndex)) -> [KindConstraint KindConstraintMetadata (Kind KindIndex)] -> Bool
+kindConstraintsIncludeAll :: Expression a (Type TypeIndex ()) -> [KindConstraint KindConstraintMetadata (Kind KindIndex)] -> Bool
 kindConstraintsIncludeAll = all . kindConstraintsInclude
 
-kindConstraintsInclude :: Expression a (Type TypeIndex (Kind KindIndex)) -> KindConstraint KindConstraintMetadata (Kind KindIndex) -> Bool
+kindConstraintsInclude :: Expression a (Type TypeIndex ()) -> KindConstraint KindConstraintMetadata (Kind KindIndex) -> Bool
 kindConstraintsInclude e =
   \case
     KindEquality meta k1 k2 ->
       elem (KindEquality meta k1 k2) constraints || elem (KindEquality meta k2 k1) constraints
  where
-  constraints = runCollectKindConstraints mempty (collectKindConstraints e)
+  constraints = snd $ runCollectKindConstraints mempty (freshIdIn e) (collectKindConstraints e)
 
 -- fn(m) => let y = m in let x = y(true) in x
-fixture1 :: Expression () (Type TypeIndex (Kind KindIndex))
+fixture1 :: Expression () (Type TypeIndex ())
 fixture1 =
   ELambda
     ()
-    (PVariable () (Label (TIntrinsic IBool `TArrow` TVariable (TypeIndex (KVariable (KindIndex 3)) 3)) "m") :| [])
+    (PVariable () (Label (TIntrinsic IBool `TArrow` TVariable (TypeIndex () 3)) "m") :| [])
     ( ELet
         ()
         ( BPattern
             ()
-            (PVariable () (Label (TIntrinsic IBool `TArrow` TVariable (TypeIndex (KVariable (KindIndex 3)) 3)) "y"))
-            (EVariable () (Label (TIntrinsic IBool `TArrow` TVariable (TypeIndex (KVariable (KindIndex 3)) 3)) "m"))
+            (PVariable () (Label (TIntrinsic IBool `TArrow` TVariable (TypeIndex () 3)) "y"))
+            (EVariable () (Label (TIntrinsic IBool `TArrow` TVariable (TypeIndex () 3)) "m"))
             :| []
         )
         ( ELet
             ()
             ( BPattern
                 ()
-                (PVariable () (Label (TVariable (TypeIndex (KVariable (KindIndex 3)) 3)) "x"))
+                (PVariable () (Label (TVariable (TypeIndex () 3)) "x"))
                 ( EApplication
                     ()
-                    (TVariable (TypeIndex (KVariable (KindIndex 3)) 3))
-                    (EVariable () (Label (TIntrinsic IBool `TArrow` TVariable (TypeIndex (KVariable (KindIndex 3)) 3)) "y"))
+                    (TVariable (TypeIndex () 3))
+                    (EVariable () (Label (TIntrinsic IBool `TArrow` TVariable (TypeIndex () 3)) "y"))
                     (ELiteral () (LBool True) :| [])
                 )
                 :| []
             )
-            ( EVariable () (Label (TVariable (TypeIndex (KVariable (KindIndex 3)) 3)) "x")
+            ( EVariable () (Label (TVariable (TypeIndex () 3)) "x")
             )
         )
     )
 
 -- let f = fn(x) => x in (f(f))(f(1))
-fixture2 :: Expression () (Type TypeIndex (Kind KindIndex))
+fixture2 :: Expression () (Type TypeIndex ())
 fixture2 =
   ELet
     ()
     ( BPattern
         ()
-        (PVariable () (Label (TVariable (TypeIndex (KVariable (KindIndex 3)) 3) `TArrow` TVariable (TypeIndex (KVariable (KindIndex 3)) 3)) "f"))
+        (PVariable () (Label (TVariable (TypeIndex () 3) `TArrow` TVariable (TypeIndex () 3)) "f"))
         ( ELambda
             ()
-            (PVariable () (Label (TVariable (TypeIndex (KVariable (KindIndex 3)) 3)) "x") :| [])
-            (EVariable () (Label (TVariable (TypeIndex (KVariable (KindIndex 3)) 3)) "x"))
+            (PVariable () (Label (TVariable (TypeIndex () 3)) "x") :| [])
+            (EVariable () (Label (TVariable (TypeIndex () 3)) "x"))
         )
         :| []
     )

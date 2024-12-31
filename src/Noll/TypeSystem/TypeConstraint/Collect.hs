@@ -13,13 +13,14 @@ module Noll.TypeSystem.TypeConstraint.Collect (
   collectTypeConstraints,
   runCollectTypeConstraints,
   evalCollectTypeConstraints,
+  annotationScheme,
   withMonomorphic,
 )
 where
 
 import Control.Monad (join)
 import Control.Monad.RWS (MonadRWS, MonadReader, MonadState, MonadWriter, RWS, ask, asks, evalRWS, local, tell)
-import Control.Monad.State (StateT, evalStateT, get, modify)
+import Control.Monad.State (StateT, evalStateT, get, modify, put)
 import Control.Monad.Trans (lift)
 import Data.List (partition, transpose)
 import Data.List.NonEmpty (NonEmpty)
@@ -40,13 +41,14 @@ import Noll.Language (
   Intrinsic (..),
   Kind (..),
   KindIndex (..),
-  KindRep (..),
+  OpaqueRow,
+  OpaqueType,
   Pattern (..),
   Row (..),
   Type (..),
-  TypeId (..),
   TypeIndex (..),
   TypeIndexed (..),
+  TypeVariable (..),
   foldType,
  )
 import Noll.Language.Type.Scheme (Scheme (..))
@@ -67,7 +69,7 @@ data TypeConstraintsContext o k = TypeConstraintsContext
 overContextMonomorphicSet :: (MonomorphicSet (o k) -> MonomorphicSet (o k)) -> TypeConstraintsContext o k -> TypeConstraintsContext o k
 overContextMonomorphicSet fn TypeConstraintsContext{..} = TypeConstraintsContext{contextMonomorphicSet = fn contextMonomorphicSet, ..}
 
-type TypeConstraintsMonad y o k t = RWS (TypeConstraintsContext o k) [TypeConstraint y o k t] Int
+type TypeConstraintsMonad y o k t = RWS (TypeConstraintsContext o k) [TypeConstraint y o k t] ()
 
 newtype TypeConstraints y o k t a = TypeConstraints {constraintsMonad :: TypeConstraintsMonad y o k t a}
   deriving
@@ -76,8 +78,8 @@ newtype TypeConstraints y o k t a = TypeConstraints {constraintsMonad :: TypeCon
     , Monad
     , MonadReader (TypeConstraintsContext o k)
     , MonadWriter [TypeConstraint y o k t]
-    , MonadState Int
-    , MonadRWS (TypeConstraintsContext o k) [TypeConstraint y o k t] Int
+    , MonadState ()
+    , MonadRWS (TypeConstraintsContext o k) [TypeConstraint y o k t] ()
     )
 
 {-# INLINE monosetInsert #-}
@@ -96,28 +98,28 @@ localMonoset = local . overContextMonomorphicSet
 lookupContextConstructor :: Name -> TypeConstraints y o k t (Maybe (Constructor o k (Type o k)))
 lookupContextConstructor name = Environment.lookup name <$> asks contextConstructorEnv
 
-type CollectConstraints c k = TypeConstraints c TypeIndex k (Type TypeIndex k)
+type CollectConstraints c = TypeConstraints c TypeIndex () OpaqueType
 
 {-# INLINE runCollectTypeConstraints #-}
-runCollectTypeConstraints :: Int -> TypeConstraintsContext o k -> TypeConstraints y o k t a -> (a, [TypeConstraint y o k t])
-runCollectTypeConstraints n ctx cs = evalRWS (constraintsMonad cs) ctx n
+runCollectTypeConstraints :: TypeConstraintsContext o k -> TypeConstraints y o k t a -> (a, [TypeConstraint y o k t])
+runCollectTypeConstraints ctx cs = evalRWS (constraintsMonad cs) ctx ()
 
 {-# INLINE evalCollectTypeConstraints #-}
-evalCollectTypeConstraints :: Int -> TypeConstraintsContext o k -> TypeConstraints y o k t a -> [TypeConstraint y o k t]
-evalCollectTypeConstraints n = snd <$$> runCollectTypeConstraints n
+evalCollectTypeConstraints :: TypeConstraintsContext o k -> TypeConstraints y o k t a -> [TypeConstraint y o k t]
+evalCollectTypeConstraints = snd <$$> runCollectTypeConstraints
 
 {-# INLINE assertEquality #-}
-assertEquality :: Descriptor k a -> [Type TypeIndex k] -> CollectConstraints (Descriptor k a) k ()
+assertEquality :: Descriptor () a -> [OpaqueType] -> CollectConstraints (Descriptor () a) ()
 assertEquality meta ts = tell [Equality meta ts]
 
-assertEqualityAssumptions :: Type TypeIndex k -> [Assumption (Type TypeIndex k)] -> CollectConstraints (Descriptor k a) k ()
+assertEqualityAssumptions :: OpaqueType -> [Assumption OpaqueType] -> CollectConstraints (Descriptor () a) ()
 assertEqualityAssumptions t ms =
   tell $ do
     Assumption{..} <- ms
     -- TODO
     pure (Equality Descriptor [assumptionType, t])
 
-assertImplicitAssumptions :: Type TypeIndex k -> [Assumption (Type TypeIndex k)] -> CollectConstraints (Descriptor k a) k ()
+assertImplicitAssumptions :: OpaqueType -> [Assumption OpaqueType] -> CollectConstraints (Descriptor () a) ()
 assertImplicitAssumptions t ms = do
   set <- asks contextMonomorphicSet
   tell $ do
@@ -126,10 +128,9 @@ assertImplicitAssumptions t ms = do
     pure (Implicit Descriptor assumptionType t set)
 
 patternAssumptions ::
-  (Ord k, Show k, KindRep k) =>
-  [Assumption (Type TypeIndex k)] ->
-  Pattern a (Type TypeIndex k) ->
-  CollectConstraints (Descriptor k a) k [Assumption (Type TypeIndex k)]
+  [Assumption OpaqueType] ->
+  Pattern a OpaqueType ->
+  CollectConstraints (Descriptor () a) [Assumption OpaqueType]
 patternAssumptions ms =
   \case
     PVariable _ (Label t name) -> do
@@ -149,16 +150,15 @@ patternAssumptions ms =
       concat <$> traverse (patternAssumptions ms) ps
 
 withMonomorphic ::
-  (Ord k, TypeIndexed k s, KindRep k) =>
+  (Ord k, TypeIndexed k s) =>
   s ->
   TypeConstraints c TypeIndex k t a ->
   TypeConstraints c TypeIndex k t a
 withMonomorphic p = localMonoset (monosetInsertMany (typeIndexesIn p))
 
 collectTypeConstraints ::
-  (Ord k, Show k, KindRep k) =>
-  Expression a (Type TypeIndex k) ->
-  CollectConstraints (Descriptor k a) k [Assumption (Type TypeIndex k)]
+  Expression a OpaqueType ->
+  CollectConstraints (Descriptor () a) [Assumption OpaqueType]
 collectTypeConstraints =
   \case
     EAnnotation a e -> do
@@ -223,9 +223,8 @@ collectTypeConstraints =
       pure (ms1 <> ms2)
 
 collectClauseTypeConstraints ::
-  (Ord k, Show k, KindRep k) =>
-  [Clause Expression a (Type TypeIndex k)] ->
-  CollectConstraints (Descriptor k a) k ([Type TypeIndex k], [[Type TypeIndex k]], [Assumption (Type TypeIndex k)])
+  [Clause Expression a OpaqueType] ->
+  CollectConstraints (Descriptor () a) ([OpaqueType], [[OpaqueType]], [Assumption OpaqueType])
 collectClauseTypeConstraints = third3 concat . unzip3 <$$> traverse go
  where
   go (EClause _ p cs) = do
@@ -241,69 +240,53 @@ collectClauseTypeConstraints = third3 concat . unzip3 <$$> traverse go
     ms2 <- patternAssumptions ms1 p
     pure (typeOf p, ts1, ms2)
 
-annotationScheme :: (MonadState Int m, Ord k, KindRep k) => Type TypeId () -> m (Scheme TypeIndex k (Type TypeIndex k))
+annotationScheme :: (Monad m) => Type TypeVariable () -> m (Scheme TypeIndex () OpaqueType)
 annotationScheme t = do
-  s <- evalStateT (instantiateAnnotation t) mempty
+  s <- evalStateT (instantiateType t) (0, mempty)
   pure (Forall (typeIndexesIn s) [] s)
 
-type Annotation m k = StateT (Dictionary (TypeIndex k)) m
-
-instantiateAnnotation :: (MonadState Int m, KindRep k) => Type TypeId () -> Annotation m k (Type TypeIndex k)
-instantiateAnnotation =
+instantiateType :: (MonadState (Int, Dictionary OpaqueType) m) => Type TypeVariable () -> m OpaqueType
+instantiateType =
   \case
     TApplication _ t ts ->
-      TApplication
-        <$> freshRep
-        <*> instantiateAnnotation t
-        <*> traverse instantiateAnnotation ts
+      TApplication () <$> instantiateType t <*> traverse instantiateType ts
     TArrow t1 t2 ->
-      TArrow
-        <$> instantiateAnnotation t1
-        <*> instantiateAnnotation t2
+      TArrow <$> instantiateType t1 <*> instantiateType t2
     TConstructor _ name ->
-      TConstructor
-        <$> freshRep
-        <*> pure name
+      pure (TConstructor () name)
     TIntrinsic t ->
-      TIntrinsic
-        <$> traverse instantiateAnnotation t
+      TIntrinsic <$> traverse instantiateType t
     TRow row ->
-      TRow
-        <$> instantiateAnnotationRow row
-    TVariable v ->
-      TVariable
-        <$> instantiateAnnotationTypeId v
+      TRow <$> instantiateRow row
+    TVariable (TypeVariable _ name) -> do
+      (n, dict) <- get
+      case Map.lookup name dict of
+        Nothing -> do
+          let t = TVariable (TypeIndex () n)
+          put (n + 1, Map.insert name t dict)
+          pure t
+        Just t@TVariable{} ->
+          pure t
+        Just _ ->
+          error "TODO"
     TAlias name ts t ->
-      TAlias name
-        <$> traverse instantiateAnnotation ts
-        <*> instantiateAnnotation t
+      TAlias name <$> traverse instantiateType ts <*> instantiateType t
 
-freshRep :: (MonadState Int m, KindRep k) => Annotation m k k
-freshRep = do
-  i <- lift supply
-  pure (kindRep (KVariable (KindIndex i)))
-
-instantiateAnnotationRow :: (MonadState Int m, KindRep k) => Row TypeId () (Type TypeId ()) -> Annotation m k (Row TypeIndex k (Type TypeIndex k))
-instantiateAnnotationRow =
+instantiateRow :: (MonadState (Int, Dictionary OpaqueType) m) => Row TypeVariable () (Type TypeVariable ()) -> m OpaqueRow
+instantiateRow =
   \case
     RExtend name t row ->
-      RExtend name
-        <$> instantiateAnnotation t
-        <*> instantiateAnnotationRow row
-    RVariable v ->
-      RVariable
-        <$> instantiateAnnotationTypeId v
+      RExtend name <$> instantiateType t <*> instantiateRow row
+    RVariable (TypeVariable _ name) -> do
+      (n, dict) <- get
+      case Map.lookup name dict of
+        Nothing -> do
+          let r = RVariable (TypeIndex () n)
+          put (n + 1, Map.insert name (TRow r) dict)
+          pure r
+        Just (TRow row) ->
+          pure row
+        Just _ ->
+          error "TODO"
     RNil ->
       pure RNil
-
-instantiateAnnotationTypeId :: (MonadState Int m, KindRep k) => TypeId () -> Annotation m k (TypeIndex k)
-instantiateAnnotationTypeId (TypeId _ name) = do
-  dict <- get
-  case Map.lookup name dict of
-    Nothing -> do
-      i <- lift supply
-      let k = TypeIndex (kindRep (KVariable (KindIndex i))) i
-      modify (Map.insert name k)
-      pure k
-    Just k ->
-      pure k

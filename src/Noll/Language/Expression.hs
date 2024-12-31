@@ -10,7 +10,7 @@ import Noll.Language.Expression.Operator.Binary (BinaryOperator)
 import Noll.Language.Expression.Operator.Unary (UnaryOperator)
 import Noll.Language.Pattern (Pattern (..))
 import Noll.Language.Primitive (Primitive (..))
-import Noll.Language.Type (Type, TypeId (..))
+import Noll.Language.Type (Type, TypeVariable (..))
 import Noll.Utils (Dictionary, Some)
 
 data Clause e a t = EClause a (Pattern a t) (Some (Choice e a t))
@@ -18,7 +18,7 @@ data Clause e a t = EClause a (Pattern a t) (Some (Choice e a t))
 
 data Expression a t
   = -- | Type-annotated expression
-    EAnnotation (Type TypeId ()) (Expression a t)
+    EAnnotation (Type TypeVariable ()) (Expression a t)
   | -- | Function application
     EApplication a t (Expression a t) (Some (Expression a t))
   | -- | Lambda function expression
@@ -37,7 +37,7 @@ data Expression a t
     EIf a t (Expression a t) (Expression a t) (Expression a t)
   | -- | Unary operator
     EUnaryOperator a (t, UnaryOperator)
-  | -- | Binary operators
+  | -- | Binary operator
     EBinaryOperator a (t, BinaryOperator)
   | -- | Record
     ERecord a t (Dictionary (Expression a t)) (Maybe (Expression a t))

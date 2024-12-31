@@ -6,11 +6,22 @@
 {-# LANGUAGE StrictData #-}
 {-# LANGUAGE UndecidableInstances #-}
 
-module Noll.Language.Type (Type (..), TypeIndex (..), TypeId (..), HasActive (..), foldType, activeIdsIn) where
+module Noll.Language.Type (
+  Type (..),
+  OpaqueType,
+  OpaqueRow,
+  IndexedType,
+  TypeIndex (..),
+  TypeVariable (..),
+  HasActive (..),
+  foldType,
+  activeIdsIn,
+) where
 
 import Data.List.NonEmpty (NonEmpty)
 import qualified Data.Set as Set
 import Noll.Language.Type.Intrinsic (Intrinsic (..))
+import Noll.Language.Type.Kind (Kind, KindIndex)
 import Noll.Language.Type.Row (Row (..))
 import Noll.Utils (Map, Name, Set, Some)
 
@@ -26,15 +37,21 @@ data Type o k
 
 infixr 1 `TArrow`
 
+type OpaqueType = Type TypeIndex ()
+
+type IndexedType = Type TypeIndex (Kind KindIndex)
+
+type OpaqueRow = Row TypeIndex () OpaqueType
+
 data TypeIndex k = TypeIndex
-  { indexKind :: k
+  { typeIndexKind :: k
   , typeIndexId :: Int
   }
   deriving (Show, Eq, Ord, Read, Functor, Foldable)
 
-data TypeId k = TypeId
-  { idKind :: k
-  , idName :: Name
+data TypeVariable k = TypeVariable
+  { typeVariableKind :: k
+  , typeVariableName :: Name
   }
   deriving (Show, Eq, Ord, Read, Functor, Foldable)
 
