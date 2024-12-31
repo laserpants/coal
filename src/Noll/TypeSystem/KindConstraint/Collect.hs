@@ -42,7 +42,7 @@ import Noll.Library.Supply (supply)
 import Noll.TypeSystem.KindConstraint (KindConstraint (..), KindConstraintMetadata (..))
 import Noll.Utils (Dictionary, forM_, traverse_)
 
-type KindConstraintsMonad c k = RWS (Environment k) [KindConstraint c k] Int
+type KindConstraintsMonad c k = RWS (Environment k) [KindConstraint c k] KindIndex
 
 newtype KindConstraints c k a = KindConstraints {constraintsMonad :: KindConstraintsMonad c k a}
   deriving
@@ -51,15 +51,15 @@ newtype KindConstraints c k a = KindConstraints {constraintsMonad :: KindConstra
     , Monad
     , MonadReader (Environment k)
     , MonadWriter [KindConstraint c k]
-    , MonadState Int
-    , MonadRWS (Environment k) [KindConstraint c k] Int
+    , MonadState KindIndex
+    , MonadRWS (Environment k) [KindConstraint c k] KindIndex
     )
 
 type CollectConstraints = KindConstraints KindConstraintMetadata (Kind KindIndex)
 
 {-# INLINE runCollectKindConstraints #-}
 runCollectKindConstraints :: Environment k -> Int -> KindConstraints c k a -> (a, [KindConstraint c k])
-runCollectKindConstraints env n cs = evalRWS (constraintsMonad cs) env n
+runCollectKindConstraints env n cs = evalRWS (constraintsMonad cs) env (KindIndex n)
 
 -- TODO: rename
 class TranslateKinds o n | o -> n where
@@ -167,7 +167,7 @@ instance TranslateKinds OpaqueType IndexedType where
       TAlias name ts t ->
         TAlias name <$> traverse collectKindConstraints ts <*> collectKindConstraints t
       TApplication _ t ts -> do
-        k <- freshKind
+        k <- KVariable <$> supply
         t1 <- collectKindConstraints t
         ts1 <- traverse collectKindConstraints ts
         tell [KindEquality KindConstraintMetadata (kindOf t1) (foldKind k (kindOf <$> ts1))]
@@ -207,6 +207,3 @@ valueType t = do
       return t1
     _ ->
       return t1
-
-freshKind :: KindConstraints c (Kind KindIndex) (Kind KindIndex)
-freshKind = KVariable . KindIndex <$> supply

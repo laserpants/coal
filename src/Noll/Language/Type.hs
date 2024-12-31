@@ -23,6 +23,7 @@ import qualified Data.Set as Set
 import Noll.Language.Type.Intrinsic (Intrinsic (..))
 import Noll.Language.Type.Kind (Kind, KindIndex)
 import Noll.Language.Type.Row (Row (..))
+import Noll.Library.Supply (Supply (..))
 import Noll.Utils (Map, Name, Set, Some)
 
 data Type o k
@@ -54,6 +55,9 @@ data TypeVariable k = TypeVariable
   , typeVariableName :: Name
   }
   deriving (Show, Eq, Ord, Read, Functor, Foldable)
+
+instance Supply Int (TypeIndex k) where
+  updateSupply f (TypeIndex k t) = TypeIndex k (f t)
 
 class HasActive k t | t -> k where
   activeIn :: t -> Set (TypeIndex k)

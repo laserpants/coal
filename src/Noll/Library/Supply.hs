@@ -1,41 +1,24 @@
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Library.Supply (Supply, supply, supplyN) where
+module Noll.Library.Supply (Supply (..), supply, supplyN) where
 
 import Control.Monad (replicateM)
-import Control.Monad.State (MonadState, gets, modify)
+import Control.Monad.State (MonadState, get, gets, modify, put)
 
 class Supply v s where
-  count :: s -> v
   updateSupply :: (v -> v) -> s -> s
 
 instance Supply s s where
-  count = id
   updateSupply = id
 
-{-# INLINE update #-}
-update :: (Supply v s) => v -> s -> s
-update = updateSupply . const
-
-{-# INLINE load #-}
-load :: (MonadState s m, Supply a s) => m a
-load = gets count
-
-{-# INLINE save #-}
-save :: (MonadState s m, Supply a s) => a -> m ()
-save = modify . update
-
-{-# INLINE over #-}
-over :: (MonadState s m, Supply a s) => (a -> a) -> m ()
-over = modify . updateSupply
-
-supply :: (Num n, MonadState s m, Supply n s) => m n
+supply :: (MonadState s m, Supply Int s) => m s
 supply = do
-  n <- load
-  save (n + 1)
-  return n
+  n <- get
+  modify (updateSupply ((+ 1) :: Int -> Int))
+  pure n
 
-supplyN :: (Num n, MonadState s m, Supply n s) => Int -> m [n]
+supplyN :: (MonadState s m, Supply Int s) => Int -> m [s]
 supplyN n = replicateM n supply

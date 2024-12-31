@@ -33,18 +33,18 @@ data SolverError c = SolverError
   }
   deriving (Show, Eq, Ord, Read)
 
-newtype Solver c a = Solver {solverMonad :: RWS () [SolverError c] Int a}
+newtype Solver c a = Solver {solverMonad :: RWS () [SolverError c] (TypeIndex ()) a}
   deriving
     ( Functor
     , Applicative
     , Monad
-    , MonadState Int
+    , MonadState (TypeIndex ())
     , MonadWriter [SolverError c]
     )
 
 {-# INLINE runSolver #-}
-runSolver :: Int -> Solver c a -> (a, Int, [SolverError c])
-runSolver n u = runRWS (solverMonad u) () n
+runSolver :: Int -> Solver c a -> (a, TypeIndex (), [SolverError c])
+runSolver n u = runRWS (solverMonad u) () (TypeIndex () n)
 
 {-# INLINE evalSolver #-}
 evalSolver :: Int -> Solver c a -> (a, [SolverError c])
@@ -83,7 +83,7 @@ choice cs = findChoice [(delete c cs, c) | c <- cs]
     maybe NoneFound (uncurry Choice) (find (uncurry isSolvable) ps)
 
 solveTypes ::
-  ( MonadState Int m
+  ( MonadState (TypeIndex ()) m
   , MonadWriter [SolverError c] m
   , Eq c
   ) =>
@@ -110,7 +110,7 @@ solveTypes constraints =
       solveTypes (Equality meta [t1, t2] : cs)
 
 instantiate ::
-  (MonadState Int m) =>
+  (MonadState (TypeIndex ()) m) =>
   Scheme TypeIndex () (Type TypeIndex ()) ->
   m (Type TypeIndex ())
 instantiate (Forall qs _ t) = do
@@ -119,7 +119,7 @@ instantiate (Forall qs _ t) = do
  where
   go (TypeIndex _ index) sub = do
     s <- supply
-    pure (index `mapsToType` TVariable (TypeIndex () s) <> sub)
+    pure (index `mapsToType` TVariable s <> sub)
 
 generalize ::
   (TypeIndexed k t) =>

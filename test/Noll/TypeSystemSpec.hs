@@ -97,6 +97,9 @@ spec =
       typeErrorsInclude
         fixture19
         (SolverError (RuleApplication "b" (typeVariable 2) (TIntrinsic IBool `TArrow` TIntrinsic IInt32 `TArrow` typeVariable 1)))
+    it "" $
+      evalState (traverse (const supply) fixture20) (0 :: Int)
+        == fixture20Tagged
 
 typeErrorsIncludeAll :: (Show a, Eq a) => Expression a () -> [SolverError (Descriptor () a)] -> Bool
 typeErrorsIncludeAll e = all (typeErrorsInclude e)
@@ -860,5 +863,43 @@ fixture19 =
           (PConstructor "g" (Label () "MkIntPair") [PVariable "h" (Label () "fst"), PVariable "i" (Label () "snd")])
           (CPlain "j" [] (EVariable "k" (Label () "fst")) :| [])
           :| []
+      )
+  )
+
+fixture20 :: Expression () ()
+fixture20 =
+  ( ELet
+      ()
+      ( BPattern
+          ()
+          (PVariable () (Label () "x"))
+          ( EApplication
+              ()
+              ()
+              (EVariable () (Label () "y"))
+              (ELiteral () (LBool True) :| [])
+          )
+          :| []
+      )
+      ( EVariable () (Label () "x")
+      )
+  )
+
+fixture20Tagged :: Expression () Int
+fixture20Tagged =
+  ( ELet
+      ()
+      ( BPattern
+          ()
+          (PVariable () (Label 0 "x"))
+          ( EApplication
+              ()
+              1
+              (EVariable () (Label 2 "y"))
+              (ELiteral () (LBool True) :| [])
+          )
+          :| []
+      )
+      ( EVariable () (Label 3 "x")
       )
   )
