@@ -8,7 +8,7 @@
 module Noll.TypeSystem.TypeUnification (TypeUnifiable (unify), unifyAll) where
 
 import Control.Monad.Except
-import Data.List.NonEmpty (NonEmpty)
+import Data.List.NonEmpty (NonEmpty, (<|))
 import qualified Data.List.NonEmpty as NonEmpty
 import Data.Set (member)
 import Noll.Language (
@@ -63,7 +63,7 @@ instance TypeUnifiable OpaqueType where
   unify (TArrow t1 u1) (TArrow t2 u2) =
     unify [t1, u1] [t2, u2]
   unify (TApplication _ t1 ts1) (TApplication _ t2 ts2) =
-    unify (t1 : NonEmpty.toList ts1) (t2 : NonEmpty.toList ts2)
+    unify (t1 <| ts1) (t2 <| ts2)
   unify (TConstructor _ c1) (TConstructor _ c2)
     | c1 == c2 =
         pure mempty
