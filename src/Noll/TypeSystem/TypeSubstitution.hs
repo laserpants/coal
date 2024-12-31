@@ -20,6 +20,7 @@ import Noll.Language (
   Binding (..),
   Clause (..),
   Expression (..),
+  Intrinsic (..),
   Kind (..),
   KindIndex (..),
   OpaqueRow,
@@ -86,6 +87,9 @@ instance TypeSubstitutable (TypeConstraint c TypeIndex () OpaqueType) where
       Explicit meta t1 s ->
         Explicit meta (apply sub t1) (apply sub s)
 
+instance (TypeSubstitutable s) => TypeSubstitutable (Intrinsic s) where
+  apply = fmap . apply
+
 instance TypeSubstitutable OpaqueType where
   apply sub =
     \case
@@ -96,7 +100,7 @@ instance TypeSubstitutable OpaqueType where
       TArrow t1 t2 ->
         TArrow (apply sub t1) (apply sub t2)
       TIntrinsic t ->
-        TIntrinsic (apply sub <$> t)
+        TIntrinsic (apply sub t)
       TRow row ->
         TRow (apply sub row)
       TVariable t ->
