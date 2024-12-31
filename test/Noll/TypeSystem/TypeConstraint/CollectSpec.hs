@@ -80,6 +80,11 @@ spec =
           [ Implicit Descriptor (typeVariable 2) (typeVariable 1) (MonomorphicSet mempty)
           , Equality Descriptor [typeVariable 1, typeInt32]
           ]
+      it "let x = 5 in if true then x else x" $ do
+        typeConstraintsIncludeAll
+          fixture8
+          [ Equality (RuleIfBranches () (typeVariable 3) (typeVariable 4)) [typeVariable 2, typeVariable 3, typeVariable 4]
+          ]
     describe "annotationScheme" $ do
       it "" $ do
         runIdentity
@@ -319,3 +324,21 @@ fixture7 =
         :| []
     )
     (EVariable () (Label 2 "x"))
+
+-- let x = 5 in if true then x else x
+fixture8 :: Expression () Int
+fixture8 =
+  ELet
+    ()
+    ( BPattern
+        ()
+        (PVariable () (Label 1 "x"))
+        (ELiteral () (LInt32 5))
+        :| []
+    )
+    ( EIf ()
+        2
+        (ELiteral () (LBool True))
+        (EVariable () (Label 3 "x"))
+        (EVariable () (Label 4 "x"))
+    )
