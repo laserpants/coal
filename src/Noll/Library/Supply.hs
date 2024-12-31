@@ -6,7 +6,7 @@
 module Noll.Library.Supply (Supply (..), supply, supplyN) where
 
 import Control.Monad (replicateM)
-import Control.Monad.State (MonadState, get, gets, modify, put)
+import Control.Monad.State (MonadState, get, modify)
 
 class Supply v s where
   updateSupply :: (v -> v) -> s -> s
