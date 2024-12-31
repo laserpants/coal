@@ -84,6 +84,9 @@ spec =
         typeConstraintsIncludeAll
           fixture8
           [ Equality (RuleIfBranches () (typeVariable 3) (typeVariable 4)) [typeVariable 2, typeVariable 3, typeVariable 4]
+          , Equality Descriptor [typeVariable 1, typeInt32]
+          , Implicit Descriptor (typeVariable 3) (typeVariable 1) (MonomorphicSet mempty)
+          , Implicit Descriptor (typeVariable 4) (typeVariable 1) (MonomorphicSet mempty)
           ]
     describe "annotationScheme" $ do
       it "" $ do
