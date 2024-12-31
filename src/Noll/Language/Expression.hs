@@ -18,7 +18,7 @@ data Clause e a t = EClause a (Pattern a t) (Some (Choice e a t))
 
 data Expression a t
   = -- | Type-annotated expression
-    EAnnotation (Type TypeVariable ()) (Expression a t)
+    EAnnotation a (Type TypeVariable ()) (Expression a t)
   | -- | Function application
     EApplication a t (Expression a t) (Some (Expression a t))
   | -- | Lambda function expression

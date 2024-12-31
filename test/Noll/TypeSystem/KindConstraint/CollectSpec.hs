@@ -1,5 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 module Noll.TypeSystem.KindConstraint.CollectSpec where -- (spec) where
 
@@ -7,7 +9,7 @@ import Data.List.NonEmpty (NonEmpty (..))
 import Noll.Label (Label (..))
 import Noll.Language (Binding (..), Expression (..), Intrinsic (..), Kind (..), KindIndex (..), Pattern (..), Primitive (..), Type (..), TypeIndex (..), freshIdIn)
 import Noll.TypeSystem.KindConstraint (KindConstraint (..), KindConstraintMetadata (..))
-import Noll.TypeSystem.KindConstraint.Collect (collectKindConstraints, runCollectKindConstraints)
+import Noll.TypeSystem.KindConstraint.Collect (KindCollectError, collectKindConstraints, runCollectKindConstraints)
 import Test.Hspec (Spec, describe, it)
 
 spec :: Spec
@@ -28,13 +30,16 @@ spec =
 kindConstraintsIncludeAll :: Expression a (Type TypeIndex ()) -> [KindConstraint KindConstraintMetadata (Kind KindIndex)] -> Bool
 kindConstraintsIncludeAll = all . kindConstraintsInclude
 
-kindConstraintsInclude :: Expression a (Type TypeIndex ()) -> KindConstraint KindConstraintMetadata (Kind KindIndex) -> Bool
+kindConstraintsInclude :: forall a. Expression a (Type TypeIndex ()) -> KindConstraint KindConstraintMetadata (Kind KindIndex) -> Bool
 kindConstraintsInclude e =
   \case
     KindEquality meta k1 k2 ->
       elem (KindEquality meta k1 k2) constraints || elem (KindEquality meta k2 k1) constraints
  where
-  constraints = snd $ runCollectKindConstraints mempty (freshIdIn e) (collectKindConstraints e)
+  res :: (Expression a (Type TypeIndex (Kind KindIndex)), [KindCollectError a], [KindConstraint KindConstraintMetadata (Kind KindIndex)])
+  res = runCollectKindConstraints mempty (freshIdIn e) (collectKindConstraints e)
+
+  (_, _, constraints) = res
 
 -- fn(m) => let y = m in let x = y(true) in x
 fixture1 :: Expression () (Type TypeIndex ())

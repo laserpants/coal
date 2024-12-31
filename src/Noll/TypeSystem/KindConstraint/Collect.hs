@@ -7,11 +7,13 @@
 {-# LANGUAGE StrictData #-}
 
 module Noll.TypeSystem.KindConstraint.Collect (
+  KindCollectError,
   collectKindConstraints,
   runCollectKindConstraints,
 ) where
 
 import Control.Monad.RWS (MonadRWS, MonadReader, MonadState, MonadWriter, RWS, ask, evalRWS, runRWS, tell)
+import Data.Either.Extra (lefts, rights)
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
 import Debug.Trace
@@ -40,38 +42,45 @@ import Noll.Library.Environment (Environment (..))
 import qualified Noll.Library.Environment as Environment
 import Noll.Library.Supply (supply)
 import Noll.TypeSystem.KindConstraint (KindConstraint (..), KindConstraintMetadata (..))
-import Noll.Utils (Dictionary, forM_, traverse_)
+import Noll.Utils (Dictionary, Name, forM_, tellLeft, tellRight, traverse_)
 
-type KindConstraintsMonad c k = RWS (Environment k) [KindConstraint c k] KindIndex
+data KindCollectError a
+  = MissingTypeConstructor Name
+  deriving (Show, Eq, Ord, Read)
 
-newtype KindConstraints c k a = KindConstraints {constraintsMonad :: KindConstraintsMonad c k a}
+type KindCollectOutput a c k = Either (KindCollectError a) (KindConstraint c k)
+
+type KindConstraintsMonad a c k = RWS (Environment k) [KindCollectOutput a c k] KindIndex
+
+newtype KindConstraints a c k e = KindConstraints {constraintsMonad :: KindConstraintsMonad a c k e}
   deriving
     ( Functor
     , Applicative
     , Monad
     , MonadReader (Environment k)
-    , MonadWriter [KindConstraint c k]
+    , MonadWriter [KindCollectOutput a c k]
     , MonadState KindIndex
-    , MonadRWS (Environment k) [KindConstraint c k] KindIndex
+    , MonadRWS (Environment k) [KindCollectOutput a c k] KindIndex
     )
 
-type CollectConstraints = KindConstraints KindConstraintMetadata (Kind KindIndex)
+type CollectConstraints a = KindConstraints a KindConstraintMetadata (Kind KindIndex)
 
 {-# INLINE runCollectKindConstraints #-}
-runCollectKindConstraints :: Environment k -> Int -> KindConstraints c k a -> (a, [KindConstraint c k])
-runCollectKindConstraints env n cs = evalRWS (constraintsMonad cs) env (KindIndex n)
+runCollectKindConstraints :: Environment k -> Int -> KindConstraints a c k e -> (e, [KindCollectError a], [KindConstraint c k])
+runCollectKindConstraints env n cs = (a, lefts outp, rights outp)
+ where
+  (a, outp) = evalRWS (constraintsMonad cs) env (KindIndex n)
 
--- TODO: rename
-class TranslateKinds o n | o -> n where
-  collectKindConstraints :: o -> CollectConstraints n
+class TranslateKinds a o n | o -> n where
+  collectKindConstraints :: o -> CollectConstraints a n
 
-instance TranslateKinds (Binding Expression a OpaqueType) (Binding Expression a IndexedType) where
+instance TranslateKinds a (Binding Expression a OpaqueType) (Binding Expression a IndexedType) where
   collectKindConstraints =
     \case
       BPattern a p e ->
         BPattern a <$> collectKindConstraints p <*> collectKindConstraints e
 
-instance TranslateKinds (Pattern a OpaqueType) (Pattern a IndexedType) where
+instance TranslateKinds a (Pattern a OpaqueType) (Pattern a IndexedType) where
   collectKindConstraints =
     \case
       PVariable a (Label t name) -> do
@@ -82,19 +91,19 @@ instance TranslateKinds (Pattern a OpaqueType) (Pattern a IndexedType) where
         PConstructor a (Label t1 name)
           <$> traverse collectKindConstraints ps
 
-instance TranslateKinds (Guard Expression a OpaqueType) (Guard Expression a IndexedType) where
+instance TranslateKinds a (Guard Expression a OpaqueType) (Guard Expression a IndexedType) where
   collectKindConstraints =
     \case
       CGuard e ->
         CGuard <$> collectKindConstraints e
 
-instance TranslateKinds (Choice Expression a OpaqueType) (Choice Expression a IndexedType) where
+instance TranslateKinds a (Choice Expression a OpaqueType) (Choice Expression a IndexedType) where
   collectKindConstraints =
     \case
       CPlain a gs e ->
         CPlain a <$> traverse collectKindConstraints gs <*> collectKindConstraints e
 
-instance TranslateKinds (Clause Expression a OpaqueType) (Clause Expression a IndexedType) where
+instance TranslateKinds a (Clause Expression a OpaqueType) (Clause Expression a IndexedType) where
   collectKindConstraints =
     \case
       EClause a p cs ->
@@ -102,11 +111,11 @@ instance TranslateKinds (Clause Expression a OpaqueType) (Clause Expression a In
           <$> collectKindConstraints p
           <*> traverse collectKindConstraints cs
 
-instance TranslateKinds (Expression a OpaqueType) (Expression a IndexedType) where
+instance TranslateKinds a (Expression a OpaqueType) (Expression a IndexedType) where
   collectKindConstraints =
     \case
-      EAnnotation a e ->
-        EAnnotation a <$> collectKindConstraints e
+      EAnnotation a t e ->
+        EAnnotation a t <$> collectKindConstraints e
       ELiteral a prim ->
         pure (ELiteral a prim)
       EConstructor a (Label t name) -> do
@@ -161,7 +170,7 @@ instance TranslateKinds (Expression a OpaqueType) (Expression a IndexedType) whe
           <$> collectKindConstraints e
           <*> traverse collectKindConstraints cs
 
-instance TranslateKinds OpaqueType IndexedType where
+instance TranslateKinds a OpaqueType IndexedType where
   collectKindConstraints =
     \case
       TAlias name ts t ->
@@ -170,7 +179,7 @@ instance TranslateKinds OpaqueType IndexedType where
         k <- KVariable <$> supply
         t1 <- collectKindConstraints t
         ts1 <- traverse collectKindConstraints ts
-        tell [KindEquality KindConstraintMetadata (kindOf t1) (foldKind k (kindOf <$> ts1))]
+        tellRight [KindEquality KindConstraintMetadata (kindOf t1) (foldKind k (kindOf <$> ts1))]
         pure (TApplication k t1 ts1)
       TArrow t1 t2 ->
         TArrow <$> collectKindConstraints t1 <*> collectKindConstraints t2
@@ -182,13 +191,15 @@ instance TranslateKinds OpaqueType IndexedType where
         pure (TVariable (TypeIndex (KVariable (KindIndex index)) index))
       TConstructor _ name -> do
         env <- ask
-        case Environment.lookup name env of
-          Nothing ->
-            error "Type not in scope"
+        k <- case Environment.lookup name env of
+          Nothing -> do
+            tellLeft [MissingTypeConstructor name]
+            KVariable <$> supply
           Just k ->
-            pure (TConstructor k name)
+            pure k
+        pure (TConstructor k name)
 
-instance TranslateKinds OpaqueRow (Row TypeIndex (Kind KindIndex) IndexedType) where
+instance TranslateKinds a OpaqueRow (Row TypeIndex (Kind KindIndex) IndexedType) where
   collectKindConstraints =
     \case
       RExtend name t row ->
@@ -198,12 +209,12 @@ instance TranslateKinds OpaqueRow (Row TypeIndex (Kind KindIndex) IndexedType) w
       RNil ->
         pure RNil
 
-valueType :: Type TypeIndex () -> CollectConstraints IndexedType
+valueType :: Type TypeIndex () -> CollectConstraints a IndexedType
 valueType t = do
   t1 <- collectKindConstraints t
   case kindOf t1 of
     k@KVariable{} -> do
-      tell [KindEquality KindConstraintMetadata k KType]
+      tellRight [KindEquality KindConstraintMetadata k KType]
       return t1
     _ ->
       return t1

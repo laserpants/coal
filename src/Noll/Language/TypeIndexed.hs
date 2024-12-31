@@ -128,7 +128,7 @@ instance (Ord k) => TypeIndexed k (Clause Expression a (Type TypeIndex k)) where
 instance (Ord k) => TypeIndexed k (Expression a (Type TypeIndex k)) where
   typeIndexesIn =
     \case
-      EAnnotation _ e ->
+      EAnnotation _ _ e ->
         typeIndexesIn e
       EConstructor _ (Label t _) ->
         typeIndexesIn t

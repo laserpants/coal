@@ -1,7 +1,9 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
-module Noll.TypeSystem.TypeConstraint.CollectSpec (spec) where
+module Noll.TypeSystem.TypeConstraint.CollectSpec where -- (spec) where
 
 import Control.Monad.Identity (runIdentity)
 import Data.List (sort)
@@ -13,7 +15,7 @@ import Noll.Language (Binding (..), Choice (..), Clause (..), Constructor (..), 
 import Noll.Library.Environment (Environment)
 import qualified Noll.Library.Environment as Environment
 import Noll.TypeSystem.TypeConstraint (Descriptor (..), MonomorphicSet (..), TypeConstraint (..))
-import Noll.TypeSystem.TypeConstraint.Collect (TypeConstraintsContext (..), annotationScheme, collectTypeConstraints, evalCollectTypeConstraints)
+import Noll.TypeSystem.TypeConstraint.Collect (TypeCollectError (..), TypeConstraintsContext (..), annotationScheme, collectTypeConstraints, evalCollectTypeConstraints)
 import Test.Hspec (Spec, describe, it)
 
 spec :: Spec
@@ -76,35 +78,58 @@ spec =
       it "" $ do
         runIdentity
           (annotationScheme (TVariable (TypeVariable () "a") `TArrow` TVariable (TypeVariable () "a")))
-          == Forall (Set.fromList [TypeIndex () 0]) [] (TVariable (TypeIndex () 0) `TArrow` TVariable (TypeIndex () 0))
+          == Just (Forall (Set.fromList [TypeIndex () 0]) [] (TVariable (TypeIndex () 0) `TArrow` TVariable (TypeIndex () 0)))
       it "" $ do
         runIdentity
           (annotationScheme (TVariable (TypeVariable () "a") `TArrow` TVariable (TypeVariable () "b")))
-          == Forall (Set.fromList [TypeIndex () 0, TypeIndex () 1]) [] (TVariable (TypeIndex () 0) `TArrow` TVariable (TypeIndex () 1))
+          == Just (Forall (Set.fromList [TypeIndex () 0, TypeIndex () 1]) [] (TVariable (TypeIndex () 0) `TArrow` TVariable (TypeIndex () 1)))
+    describe "" $ do
+      it "" $ do
+        hasError fixture5 (MissingDataConstructor "a2" "Baz")
+      it "" $ do
+        hasError fixture6 (ConstructorArityMismatch "a4" "Yes" 0 1)
 
 typeConstraintsIncludeAll :: (Show a, Eq a) => Expression a Int -> [TypeConstraint (Descriptor () a) TypeIndex () (Type TypeIndex ())] -> Bool
 typeConstraintsIncludeAll = all . typeConstraintsInclude
 
-typeConstraintsInclude :: (Show a, Eq a) => Expression a Int -> TypeConstraint (Descriptor () a) TypeIndex () (Type TypeIndex ()) -> Bool
-typeConstraintsInclude e =
-  --  traceShow constraints $
-  \case
-    Equality meta ts ->
-      elem (normalized (Equality meta ts)) (normalized <$> constraints)
-    c ->
-      elem c constraints
+typeConstraintsInclude :: forall a. (Show a, Eq a) => Expression a Int -> TypeConstraint (Descriptor () a) TypeIndex () (Type TypeIndex ()) -> Bool
+typeConstraintsInclude e sample =
+  let
+    e1 = fmap typeVariable e
+
+    res0 :: ([TypeCollectError a], [TypeConstraint (Descriptor () a) TypeIndex () (Type TypeIndex ())])
+    res0 =
+      evalCollectTypeConstraints
+        (TypeConstraintsContext mempty constructorEnv)
+        (collectTypeConstraints e1)
+
+    (_, constraints) = res0
+   in
+    case sample of
+      Equality meta ts ->
+        elem (normalized (Equality meta ts)) (normalized <$> constraints)
+      c ->
+        elem c constraints
  where
-  constraints =
-    let e' = fmap typeVariable e
-     in evalCollectTypeConstraints
-          (TypeConstraintsContext mempty constructorEnv)
-          (collectTypeConstraints e')
   normalized =
     \case
       Equality meta ts ->
         Equality meta (sort ts)
       c ->
         c
+
+hasError :: (Show a, Eq a) => Expression a (Type TypeIndex ()) -> TypeCollectError a -> Bool
+hasError e sample =
+  let
+    res0 =
+      evalCollectTypeConstraints
+        (TypeConstraintsContext mempty constructorEnv)
+        (collectTypeConstraints e)
+
+    (errs, _) = res0
+   in
+    traceShow errs $
+      sample `elem` errs
 
 constructorEnv :: Environment (Constructor TypeIndex () (Type TypeIndex ()))
 constructorEnv =
@@ -242,6 +267,35 @@ fixture4 =
           ()
           (PConstructor () (Label 2 "Yes") [])
           (CPlain () [] (ELiteral () (LBool True)) :| [])
+          :| []
+      )
+  )
+
+-- Data constructor Baz is not defined
+fixture5 :: Expression String (Type TypeIndex ())
+fixture5 =
+  ( EApplication
+      "a1"
+      (TVariable (TypeIndex () 0))
+      (EConstructor "a2" (Label (TVariable (TypeIndex () 1)) "Baz"))
+      (EVariable "a3" (Label (TVariable (TypeIndex () 2)) "x") :| [])
+  )
+
+fixture6 :: Expression String (Type TypeIndex ())
+fixture6 =
+  ( EMatch
+      "a1"
+      (TVariable (TypeIndex () 0))
+      (EVariable "a2" (Label (TVariable (TypeIndex () 1)) "x"))
+      ( EClause
+          "a3"
+          ( PConstructor
+              "a4"
+              (Label (TVariable (TypeIndex () 3)) "Yes")
+              [ PVariable "a5" (Label (TVariable (TypeIndex () 4)) "b")
+              ]
+          )
+          (CPlain "a6" [] (ELiteral "a6" (LBool True)) :| [])
           :| []
       )
   )

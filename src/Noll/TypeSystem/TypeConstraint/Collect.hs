@@ -10,6 +10,7 @@ module Noll.TypeSystem.TypeConstraint.Collect (
   TypeConstraintsContext (..),
   TypeConstraints (..),
   CollectConstraints,
+  TypeCollectError (..),
   collectTypeConstraints,
   runCollectTypeConstraints,
   evalCollectTypeConstraints,
@@ -19,9 +20,11 @@ module Noll.TypeSystem.TypeConstraint.Collect (
 where
 
 import Control.Monad (join)
+import Control.Monad.Except (MonadError, runExceptT, throwError)
 import Control.Monad.RWS (MonadRWS, MonadReader, MonadState, MonadWriter, RWS, ask, asks, evalRWS, local, tell)
 import Control.Monad.State (StateT, evalStateT, get, modify, put)
 import Control.Monad.Trans (lift)
+import Data.Either.Extra (lefts, rights)
 import Data.List (partition, transpose)
 import Data.List.NonEmpty (NonEmpty)
 import qualified Data.List.NonEmpty as NonEmpty
@@ -57,29 +60,37 @@ import qualified Noll.Library.Environment as Environment
 import Noll.Library.Supply (supply, supplyN)
 import Noll.TypeSystem.TypeConstraint (Descriptor (..), MonomorphicSet (..), TypeConstraint (..), overMonomorphicSet)
 import Noll.TypeSystem.TypeConstraint.Assumption (Assumption (..), assumptionNameIs)
-import Noll.Utils (Dictionary, Name, concatMapM, forM, forM_, (<$$>))
+import Noll.Utils (Dictionary, Name, concatMapM, forM, forM_, tellLeft, tellRight, (<$$>))
 
-data TypeConstraintsContext o k = TypeConstraintsContext
+data TypeConstraintsContext o k t = TypeConstraintsContext
   { contextMonomorphicSet :: MonomorphicSet (o k)
-  , contextConstructorEnv :: Environment (Constructor o k (Type o k))
+  , contextConstructorEnv :: Environment (Constructor o k t)
   }
   deriving (Show, Eq, Ord, Read)
 
 {-# INLINE overContextMonomorphicSet #-}
-overContextMonomorphicSet :: (MonomorphicSet (o k) -> MonomorphicSet (o k)) -> TypeConstraintsContext o k -> TypeConstraintsContext o k
+overContextMonomorphicSet :: (MonomorphicSet (o k) -> MonomorphicSet (o k)) -> TypeConstraintsContext o k t -> TypeConstraintsContext o k t
 overContextMonomorphicSet fn TypeConstraintsContext{..} = TypeConstraintsContext{contextMonomorphicSet = fn contextMonomorphicSet, ..}
 
-type TypeConstraintsMonad y o k t = RWS (TypeConstraintsContext o k) [TypeConstraint y o k t] ()
+data TypeCollectError a
+  = MissingDataConstructor a Name
+  | ConstructorArityMismatch a Name Int Int
+  | IllFormedTypeAnnotation a
+  deriving (Show, Eq, Ord, Read)
 
-newtype TypeConstraints y o k t a = TypeConstraints {constraintsMonad :: TypeConstraintsMonad y o k t a}
+type TypeCollectOutput a o k t = Either (TypeCollectError a) (TypeConstraint (Descriptor k a) o k t)
+
+type TypeConstraintsMonad a o k t = RWS (TypeConstraintsContext o k t) [TypeCollectOutput a o k t] ()
+
+newtype TypeConstraints a o k t e = TypeConstraints {constraintsMonad :: TypeConstraintsMonad a o k t e}
   deriving
     ( Functor
     , Applicative
     , Monad
-    , MonadReader (TypeConstraintsContext o k)
-    , MonadWriter [TypeConstraint y o k t]
+    , MonadReader (TypeConstraintsContext o k t)
+    , MonadWriter [TypeCollectOutput a o k t]
     , MonadState ()
-    , MonadRWS (TypeConstraintsContext o k) [TypeConstraint y o k t] ()
+    , MonadRWS (TypeConstraintsContext o k t) [TypeCollectOutput a o k t] ()
     )
 
 {-# INLINE monosetInsert #-}
@@ -91,108 +102,104 @@ monosetInsertMany :: (Ord k, Foldable f) => f (TypeIndex k) -> MonomorphicSet (T
 monosetInsertMany = flip (foldr monosetInsert)
 
 {-# INLINE localMonoset #-}
-localMonoset :: (MonomorphicSet (o k) -> MonomorphicSet (o k)) -> TypeConstraints y o k t a -> TypeConstraints y o k t a
+localMonoset :: (MonomorphicSet (o k) -> MonomorphicSet (o k)) -> TypeConstraints a o k t e -> TypeConstraints a o k t e
 localMonoset = local . overContextMonomorphicSet
 
 {-# INLINE lookupContextConstructor #-}
-lookupContextConstructor :: Name -> TypeConstraints y o k t (Maybe (Constructor o k (Type o k)))
+lookupContextConstructor :: Name -> TypeConstraints a o k t (Maybe (Constructor o k t))
 lookupContextConstructor name = Environment.lookup name <$> asks contextConstructorEnv
 
-type CollectConstraints c = TypeConstraints c TypeIndex () OpaqueType
+type CollectConstraints a = TypeConstraints a TypeIndex () OpaqueType
 
 {-# INLINE runCollectTypeConstraints #-}
-runCollectTypeConstraints :: TypeConstraintsContext o k -> TypeConstraints y o k t a -> (a, [TypeConstraint y o k t])
-runCollectTypeConstraints ctx cs = evalRWS (constraintsMonad cs) ctx ()
+runCollectTypeConstraints :: TypeConstraintsContext o k t -> TypeConstraints a o k t e -> (e, [TypeCollectError a], [TypeConstraint (Descriptor k a) o k t])
+runCollectTypeConstraints ctx v = (a, lefts outp, rights outp)
+ where
+  (a, outp) = evalRWS (constraintsMonad v) ctx ()
 
 {-# INLINE evalCollectTypeConstraints #-}
-evalCollectTypeConstraints :: TypeConstraintsContext o k -> TypeConstraints y o k t a -> [TypeConstraint y o k t]
-evalCollectTypeConstraints = snd <$$> runCollectTypeConstraints
+evalCollectTypeConstraints :: TypeConstraintsContext o k t -> TypeConstraints a o k t e -> ([TypeCollectError a], [TypeConstraint (Descriptor k a) o k t])
+evalCollectTypeConstraints ctx v = let (_, es, cs) = runCollectTypeConstraints ctx v in (es, cs)
 
 {-# INLINE assertEquality #-}
-assertEquality :: Descriptor () a -> [OpaqueType] -> CollectConstraints (Descriptor () a) ()
-assertEquality meta ts = tell [Equality meta ts]
+assertEquality :: Descriptor () a -> [OpaqueType] -> CollectConstraints a ()
+assertEquality meta ts = tellRight [Equality meta ts]
 
-assertEqualityAssumptions :: OpaqueType -> [Assumption OpaqueType] -> CollectConstraints (Descriptor () a) ()
+assertEqualityAssumptions :: OpaqueType -> [Assumption OpaqueType] -> CollectConstraints a ()
 assertEqualityAssumptions t ms =
-  tell $ do
+  tellRight $ do
     Assumption{..} <- ms
     -- TODO
     pure (Equality Descriptor [assumptionType, t])
 
-assertImplicitAssumptions :: OpaqueType -> [Assumption OpaqueType] -> CollectConstraints (Descriptor () a) ()
+assertImplicitAssumptions :: OpaqueType -> [Assumption OpaqueType] -> CollectConstraints a ()
 assertImplicitAssumptions t ms = do
   set <- asks contextMonomorphicSet
-  tell $ do
+  tellRight $ do
     Assumption{..} <- ms
     -- TODO
     pure (Implicit Descriptor assumptionType t set)
 
-patternAssumptions ::
-  [Assumption OpaqueType] ->
-  Pattern a OpaqueType ->
-  CollectConstraints (Descriptor () a) [Assumption OpaqueType]
-patternAssumptions ms =
+type AssertFn a = OpaqueType -> [Assumption OpaqueType] -> CollectConstraints a ()
+
+patternAssumptions :: AssertFn a -> [Assumption OpaqueType] -> Pattern a OpaqueType -> CollectConstraints a [Assumption OpaqueType]
+patternAssumptions assertFn ms =
   \case
     PVariable _ (Label t name) -> do
       let (ls, rs) = partition (assumptionNameIs name) ms
-      assertEqualityAssumptions t ls
+      assertFn t ls
       pure rs
-    PConstructor _ (Label t name) ps -> do
-      lookupContextConstructor name
-        >>= \case
-          Nothing ->
-            error ("No constructor '" <> Text.unpack name <> "'")
-          Just Constructor{..}
-            | constructorArity /= length ps ->
-                error ("Constructor arity mismatch")
-          Just Constructor{..} ->
-            tell [Explicit Descriptor (foldType t (typeOf <$> ps)) constructorScheme]
-      concat <$> traverse (patternAssumptions ms) ps
+    PConstructor loc (Label t name) ps -> do
+      r <- lookupContextConstructor name
+      case r of
+        Nothing ->
+          tellLeft [MissingDataConstructor loc name]
+        Just Constructor{..}
+          | constructorArity /= length ps ->
+              tellLeft [ConstructorArityMismatch loc name constructorArity (length ps)]
+        Just Constructor{..} ->
+          tellRight [Explicit Descriptor (foldType t (typeOf <$> ps)) constructorScheme]
+      concat <$> traverse (patternAssumptions assertFn ms) ps
 
-withMonomorphic ::
-  (Ord k, TypeIndexed k s) =>
-  s ->
-  TypeConstraints c TypeIndex k t a ->
-  TypeConstraints c TypeIndex k t a
+withMonomorphic :: (TypeIndexed () s) => s -> CollectConstraints a v -> CollectConstraints a v
 withMonomorphic p = localMonoset (monosetInsertMany (typeIndexesIn p))
 
-collectTypeConstraints ::
-  Expression a OpaqueType ->
-  CollectConstraints (Descriptor () a) [Assumption OpaqueType]
+collectTypeConstraints :: Expression a OpaqueType -> CollectConstraints a [Assumption OpaqueType]
 collectTypeConstraints =
   \case
-    EAnnotation a e -> do
-      s <- annotationScheme a
-      tell [Explicit Descriptor (typeOf e) s]
+    EAnnotation a t e -> do
+      r <- annotationScheme t
+      case r of
+        Nothing ->
+          tellLeft [IllFormedTypeAnnotation a]
+        Just s ->
+          tellRight [Explicit Descriptor (typeOf e) s]
       collectTypeConstraints e
-    EConstructor _ (Label t name) -> do
-      lookupContextConstructor name
-        >>= \case
-          Nothing ->
-            error ("No constructor '" <> Text.unpack name <> "'")
-          Just Constructor{..} ->
-            tell [Explicit Descriptor t constructorScheme]
+    EConstructor loc (Label t name) -> do
+      r <- lookupContextConstructor name
+      case r of
+        Nothing ->
+          tellLeft [MissingDataConstructor loc name]
+        Just Constructor{..} ->
+          tellRight [Explicit Descriptor t constructorScheme]
       pure []
     EVariable _ (Label t name) ->
       pure [Assumption name t]
-    ELambda _ ps e -> do
+    ELambda loc ps e -> do
       ms1 <- withMonomorphic ps (collectTypeConstraints e)
-      concat <$> forM ps (patternAssumptions ms1)
+      concat <$> forM ps (patternAssumptions assertEqualityAssumptions ms1)
     ELet _ gs e1 -> do
       ms1 <- collectTypeConstraints e1
       ms2 <- flip concatMapM gs $
         \case
-          BPattern _ (PVariable _ (Label t name)) e -> do
+          BPattern _ p e -> do
             ms <- collectTypeConstraints e
-            -- TODO
-            assertEquality Descriptor [t, typeOf e]
+            assertEquality Descriptor [typeOf p, typeOf e]
             pure ms
       ms3 <- flip concatMapM gs $
         \case
-          BPattern _ (PVariable _ (Label t name)) e -> do
-            let (ls, rs) = partition (assumptionNameIs name) ms1
-            assertImplicitAssumptions t ls
-            pure rs
+          BPattern _ p _ ->
+            patternAssumptions assertImplicitAssumptions ms1 p
       pure (ms1 <> ms2 <> ms3)
     EIf loc t e1 e2 e3 -> do
       ms1 <- collectTypeConstraints e1
@@ -222,9 +229,7 @@ collectTypeConstraints =
       assertEquality (RuleMatchClauseExpressions loc) (t : concat ts2)
       pure (ms1 <> ms2)
 
-collectClauseTypeConstraints ::
-  [Clause Expression a OpaqueType] ->
-  CollectConstraints (Descriptor () a) ([OpaqueType], [[OpaqueType]], [Assumption OpaqueType])
+collectClauseTypeConstraints :: [Clause Expression a OpaqueType] -> CollectConstraints a ([OpaqueType], [[OpaqueType]], [Assumption OpaqueType])
 collectClauseTypeConstraints = third3 concat . unzip3 <$$> traverse go
  where
   go (EClause _ p cs) = do
@@ -237,15 +242,19 @@ collectClauseTypeConstraints = third3 concat . unzip3 <$$> traverse go
               collectTypeConstraints g
             ns2 <- collectTypeConstraints e
             pure (typeOf e, ns1 <> ns2)
-    ms2 <- patternAssumptions ms1 p
+    ms2 <- patternAssumptions assertEqualityAssumptions ms1 p
     pure (typeOf p, ts1, ms2)
 
-annotationScheme :: (Monad m) => Type TypeVariable () -> m (Scheme TypeIndex () OpaqueType)
+annotationScheme :: (Monad m) => Type TypeVariable () -> m (Maybe (Scheme TypeIndex () OpaqueType))
 annotationScheme t = do
-  s <- evalStateT (instantiateType t) (0, mempty)
-  pure (Forall (typeIndexesIn s) [] s)
+  r <- runExceptT (evalStateT (instantiateType t) (0, mempty))
+  case r of
+    Left{} ->
+      pure Nothing
+    Right s ->
+      pure (Just (Forall (typeIndexesIn s) [] s))
 
-instantiateType :: (MonadState (Int, Dictionary OpaqueType) m) => Type TypeVariable () -> m OpaqueType
+instantiateType :: (MonadError () m, MonadState (Int, Dictionary OpaqueType) m) => Type TypeVariable () -> m OpaqueType
 instantiateType =
   \case
     TApplication _ t ts ->
@@ -268,11 +277,11 @@ instantiateType =
         Just t@TVariable{} ->
           pure t
         Just _ ->
-          error "TODO"
+          throwError ()
     TAlias name ts t ->
       TAlias name <$> traverse instantiateType ts <*> instantiateType t
 
-instantiateRow :: (MonadState (Int, Dictionary OpaqueType) m) => Row TypeVariable () (Type TypeVariable ()) -> m OpaqueRow
+instantiateRow :: (MonadError () m, MonadState (Int, Dictionary OpaqueType) m) => Row TypeVariable () (Type TypeVariable ()) -> m OpaqueRow
 instantiateRow =
   \case
     RExtend name t row ->
@@ -287,6 +296,6 @@ instantiateRow =
         Just (TRow row) ->
           pure row
         Just _ ->
-          error "TODO"
+          throwError ()
     RNil ->
       pure RNil

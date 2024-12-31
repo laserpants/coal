@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE StrictData #-}
 
 module Noll.Utils (
@@ -12,11 +13,14 @@ module Noll.Utils (
   Some,
   concatMapM,
   unionMap,
+  tellLeft,
+  tellRight,
   (<$$>),
   (<$$$>),
 ) where
 
 import Control.Monad (forM, forM_, liftM)
+import Control.Monad.Writer (MonadWriter, tell)
 import Data.Foldable (foldrM, traverse_)
 import Data.List.NonEmpty (NonEmpty)
 import Data.Map.Strict (Map)
@@ -51,3 +55,11 @@ concatMapM f xs = liftM concat (mapM f xs)
 {-# INLINE unionMap #-}
 unionMap :: (Ord b) => (a -> Set b) -> Set a -> Set b
 unionMap f = unions . Set.map f
+
+{-# INLINE tellLeft #-}
+tellLeft :: (MonadWriter [Either e a] m) => [e] -> m ()
+tellLeft = tell . fmap Left
+
+{-# INLINE tellRight #-}
+tellRight :: (MonadWriter [Either e a] m) => [a] -> m ()
+tellRight = tell . fmap Right

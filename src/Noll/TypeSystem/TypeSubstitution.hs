@@ -147,8 +147,8 @@ instance TypeSubstitutable (Clause Expression a OpaqueType) where
 instance TypeSubstitutable (Expression a OpaqueType) where
   apply sub =
     \case
-      EAnnotation a e ->
-        EAnnotation a (apply sub e)
+      EAnnotation a t e ->
+        EAnnotation a t (apply sub e)
       EConstructor a (Label t name) -> do
         EConstructor a (Label (apply sub t) name)
       EVariable a (Label t name) -> do

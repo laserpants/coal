@@ -19,10 +19,10 @@ import qualified Noll.Library.Environment as Environment
 import Noll.Library.Supply (supply)
 import Noll.TypeSystem.ConstraintSolver (SolverError (..), evalSolver, solveKinds, solveTypes)
 import Noll.TypeSystem.KindConstraint (KindConstraint (..), KindConstraintMetadata (..))
-import Noll.TypeSystem.KindConstraint.Collect (collectKindConstraints, runCollectKindConstraints)
+import Noll.TypeSystem.KindConstraint.Collect (KindCollectError, collectKindConstraints, runCollectKindConstraints)
 import Noll.TypeSystem.KindSubstitution (KindSubstitution (..), applyKindSub)
 import Noll.TypeSystem.TypeConstraint (Descriptor (..), TypeConstraint (..))
-import Noll.TypeSystem.TypeConstraint.Collect (TypeConstraintsContext (..), collectTypeConstraints, evalCollectTypeConstraints)
+import Noll.TypeSystem.TypeConstraint.Collect (TypeCollectError, TypeConstraintsContext (..), collectTypeConstraints, evalCollectTypeConstraints)
 import Noll.TypeSystem.TypeSubstitution (TypeSubstitutable (..), TypeSubstitution, normalizeTypeIndexes)
 import Test.Hspec (Spec, describe, it)
 
@@ -214,11 +214,13 @@ testInferTypes e =
           )
         ]
 
-    typeConstraints :: [TypeConstraint (Descriptor () a) TypeIndex () (Type TypeIndex ())]
-    typeConstraints =
+    res0 :: ([TypeCollectError a], [TypeConstraint (Descriptor () a) TypeIndex () (Type TypeIndex ())])
+    res0 =
       evalCollectTypeConstraints
         (TypeConstraintsContext mempty constructorEnv)
         (collectTypeConstraints e1)
+
+    (_, typeConstraints) = res0
 
     res1 :: (TypeSubstitution, [SolverError (Descriptor () a)])
     res1 = evalSolver (freshIdIn typeConstraints) (solveTypes typeConstraints)
@@ -237,10 +239,10 @@ testInferTypes e =
         , ("IntPair", KType)
         ]
 
-    res2 :: (Expression a (Type TypeIndex (Kind KindIndex)), [KindConstraint KindConstraintMetadata (Kind KindIndex)])
+    res2 :: (Expression a (Type TypeIndex (Kind KindIndex)), [KindCollectError a], [KindConstraint KindConstraintMetadata (Kind KindIndex)])
     res2 = runCollectKindConstraints typeConstructorEnv (freshIdIn e2) (collectKindConstraints e2)
 
-    (e3, kindConstraints) = res2
+    (e3, _, kindConstraints) = res2
 
     res3 :: (KindSubstitution, [SolverError KindConstraintMetadata])
     res3 = evalSolver 0 (solveKinds kindConstraints)
@@ -641,6 +643,7 @@ fixture13 =
       ()
       ()
       ( EAnnotation
+          ()
           (TApplication () (TConstructor () "Pair") (TIntrinsic IInt32 <| TIntrinsic IBool :| []))
           (EVariable () (Label () "p"))
       )
@@ -658,6 +661,7 @@ fixture13Typed =
       ()
       (TIntrinsic IBool)
       ( EAnnotation
+          ()
           (TApplication () (TConstructor () "Pair") (TIntrinsic IInt32 <| TIntrinsic IBool :| []))
           (EVariable () (Label (TApplication KType (TConstructor (KArrow KType (KArrow KType KType)) "Pair") (TIntrinsic IInt32 :| [TIntrinsic IBool])) "p"))
       )
@@ -683,6 +687,7 @@ fixture14 =
       ()
       ()
       ( EAnnotation
+          ()
           (TApplication () (TConstructor () "Pair") (TVariable (TypeVariable () "a") <| TVariable (TypeVariable () "b") :| []))
           (EVariable () (Label () "p"))
       )
@@ -700,6 +705,7 @@ fixture14Typed =
       ()
       (TIntrinsic IBool)
       ( EAnnotation
+          ()
           (TApplication () (TConstructor () "Pair") (TVariable (TypeVariable () "a") <| TVariable (TypeVariable () "b") :| []))
           (EVariable () (Label (TApplication KType (TConstructor (KArrow KType (KArrow KType KType)) "Pair") (TVariable (TypeIndex KType 1) :| [TVariable (TypeIndex KType 0)])) "p"))
       )
@@ -725,6 +731,7 @@ fixture15 =
       ()
       ()
       ( EAnnotation
+          ()
           (TApplication () (TConstructor () "Pair") (TVariable (TypeVariable () "a") <| TVariable (TypeVariable () "a") :| []))
           (EVariable () (Label () "p"))
       )
@@ -742,6 +749,7 @@ fixture15Typed =
       ()
       (TIntrinsic IBool)
       ( EAnnotation
+          ()
           (TApplication () (TConstructor () "Pair") (TVariable (TypeVariable () "a") <| TVariable (TypeVariable () "a") :| []))
           (EVariable () (Label (TApplication KType (TConstructor (KArrow KType (KArrow KType KType)) "Pair") (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 0)])) "p"))
       )
