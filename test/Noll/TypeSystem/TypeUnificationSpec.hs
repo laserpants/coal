@@ -20,6 +20,8 @@ spec =
         validateResult (TIntrinsic IInt32) fixture1 == Right (0 `mapsToType` TIntrinsic IInt32)
       it "int32 ~ int32" $ do
         validateResult (TIntrinsic IInt32 :: Type TypeIndex ()) (TIntrinsic IInt32) == Right mempty
+      it "'0 ~ '1" $ do
+        validateResult fixture1 fixture2 == Right (0 `mapsToType` fixture2)
     describe "unifyAll" $ do
       it "" $ do
         validateResultUnifyAll
@@ -33,8 +35,12 @@ spec =
 fixture1 :: Type TypeIndex ()
 fixture1 = TVariable (TypeIndex () 0)
 
+fixture2 :: Type TypeIndex ()
+fixture2 = TVariable (TypeIndex () 1)
+
 validateResult :: (TypeUnifiable a) => a -> a -> Either UnificationError TypeSubstitution
 validateResult t1 t2 = runExcept (unify t1 t2)
 
 validateResultUnifyAll :: (TypeUnifiable a) => [a] -> Either UnificationError TypeSubstitution
 validateResultUnifyAll ts = runExcept (unifyAll ts)
+
