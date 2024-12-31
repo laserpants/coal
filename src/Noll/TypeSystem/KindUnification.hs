@@ -3,7 +3,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.TypeSystem.KindUnification (KindUnifiable (..)) where
+module Noll.TypeSystem.KindUnification (KindUnifiable (unifyKinds)) where
 
 import Control.Monad.Except
 import qualified Data.List.NonEmpty as NonEmpty
