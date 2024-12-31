@@ -162,7 +162,7 @@ patternAssumptions assertFn ms =
       concat <$> traverse (patternAssumptions assertFn ms) ps
 
 withMonomorphic :: (TypeIndexed () s) => s -> CollectConstraints a v -> CollectConstraints a v
-withMonomorphic p = localMonoset (monosetInsertMany (typeIndexesIn p))
+withMonomorphic s = localMonoset (monosetInsertMany (typeIndexesIn s))
 
 collectTypeConstraints :: Expression a OpaqueType -> CollectConstraints a [Assumption OpaqueType]
 collectTypeConstraints =

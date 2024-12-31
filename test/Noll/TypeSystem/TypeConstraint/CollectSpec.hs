@@ -74,6 +74,12 @@ spec =
           , Equality (RuleMatchClausePatterns ()) [typeVariable 1, typeVariable 2]
           , Explicit Descriptor (typeVariable 2) (Forall mempty [] (TConstructor () "Answer"))
           ]
+      it "let x = 5 in x" $ do
+        typeConstraintsIncludeAll
+          fixture7
+          [ Implicit Descriptor (typeVariable 2) (typeVariable 1) (MonomorphicSet mempty)
+          , Equality Descriptor [typeVariable 1, typeInt32]
+          ]
     describe "annotationScheme" $ do
       it "" $ do
         runIdentity
@@ -105,11 +111,12 @@ typeConstraintsInclude e sample =
 
     (_, constraints) = res0
    in
-    case sample of
-      Equality meta ts ->
-        elem (normalized (Equality meta ts)) (normalized <$> constraints)
-      c ->
-        elem c constraints
+    traceShow constraints $
+      case sample of
+        Equality meta ts ->
+          elem (normalized (Equality meta ts)) (normalized <$> constraints)
+        c ->
+          elem c constraints
  where
   normalized =
     \case
@@ -299,3 +306,16 @@ fixture6 =
           :| []
       )
   )
+
+-- let x = 5 in x
+fixture7 :: Expression () Int
+fixture7 =
+  ELet
+    ()
+    ( BPattern
+        ()
+        (PVariable () (Label 1 "x"))
+        (ELiteral () (LInt32 5))
+        :| []
+    )
+    (EVariable () (Label 2 "x"))
