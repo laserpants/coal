@@ -88,8 +88,7 @@ instance TranslateKinds a (Pattern a OpaqueType) (Pattern a IndexedType) where
         pure (PVariable a (Label t1 name))
       PConstructor a (Label t name) ps -> do
         t1 <- valueType t
-        PConstructor a (Label t1 name)
-          <$> traverse collectKindConstraints ps
+        PConstructor a (Label t1 name) <$> traverse collectKindConstraints ps
 
 instance TranslateKinds a (Guard Expression a OpaqueType) (Guard Expression a IndexedType) where
   collectKindConstraints =
