@@ -80,7 +80,7 @@ spec =
           [ Implicit Descriptor (typeVariable 2) (typeVariable 1) (MonomorphicSet mempty)
           , Equality Descriptor [typeVariable 1, typeInt32]
           ]
-      it "let x = 5 in if true then x else x" $ do
+      it "let x = 5 in (if true then x else x)" $ do
         typeConstraintsIncludeAll
           fixture8
           [ Equality (RuleIfBranches () (typeVariable 3) (typeVariable 4)) [typeVariable 2, typeVariable 3, typeVariable 4]
@@ -328,7 +328,7 @@ fixture7 =
     )
     (EVariable () (Label 2 "x"))
 
--- let x = 5 in if true then x else x
+-- let x = 5 in (if true then x else x)
 fixture8 :: Expression () Int
 fixture8 =
   ELet

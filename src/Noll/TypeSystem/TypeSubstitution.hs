@@ -178,7 +178,7 @@ instance Monoid TypeSubstitution where
   mempty = TypeSubstitution mempty
 
 {-# INLINE mapsToType #-}
-mapsToType :: Int -> Type TypeIndex () -> TypeSubstitution
+mapsToType :: Int -> OpaqueType -> TypeSubstitution
 mapsToType index = TypeSubstitution . Map.singleton index
 
 {-# INLINE removeTypeSubstitution #-}
@@ -186,7 +186,7 @@ removeTypeSubstitution :: TypeIndex () -> TypeSubstitution -> TypeSubstitution
 removeTypeSubstitution TypeIndex{..} (TypeSubstitution sub) = TypeSubstitution (Map.delete typeIndexId sub)
 
 {-# INLINE typeSubstitutionFromList #-}
-typeSubstitutionFromList :: [(Int, Type TypeIndex ())] -> TypeSubstitution
+typeSubstitutionFromList :: [(Int, OpaqueType)] -> TypeSubstitution
 typeSubstitutionFromList = TypeSubstitution . Map.fromList
 
 normalizeTypeIndexes :: (TypeSubstitutable s, TypeIndexed () s) => s -> s
