@@ -23,11 +23,12 @@ import qualified Data.Set as Set
 import Noll.Language.Type.Intrinsic (Intrinsic (..))
 import Noll.Language.Type.Kind (Kind, KindIndex)
 import Noll.Language.Type.Row (Row (..))
+import Noll.Library.List1 (List1)
 import Noll.Library.Supply (Supply (..))
-import Noll.Utils (Map, Name, Set, Some)
+import Noll.Utils (Map, Name, Set)
 
 data Type o k
-  = TApplication k (Type o k) (Some (Type o k))
+  = TApplication k (Type o k) (List1 (Type o k))
   | TArrow (Type o k) (Type o k)
   | TConstructor k Name
   | TIntrinsic (Intrinsic (Type o k))

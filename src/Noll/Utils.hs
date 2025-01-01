@@ -6,11 +6,9 @@ module Noll.Utils (
   module Data.Foldable,
   module Data.Set,
   module Data.Map.Strict,
-  module Data.List.NonEmpty,
   Name,
   Dictionary,
   IndexMap,
-  Some,
   concatMapM,
   unionMap,
   tellLeft,
@@ -22,7 +20,6 @@ module Noll.Utils (
 import Control.Monad (forM, forM_, liftM)
 import Control.Monad.Writer (MonadWriter, tell)
 import Data.Foldable (foldrM, traverse_)
-import Data.List.NonEmpty (NonEmpty)
 import Data.Map.Strict (Map)
 import Data.Set (Set, unions)
 import qualified Data.Set as Set
@@ -33,8 +30,6 @@ type Name = Text
 type Dictionary = Map Name
 
 type IndexMap = Map Int
-
-type Some = NonEmpty
 
 {-# INLINE (<$$>) #-}
 (<$$>) :: (Functor f, Functor g) => (a -> b) -> f (g a) -> f (g b)

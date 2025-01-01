@@ -12,6 +12,7 @@ module Noll.TypeSystem.TypeSubstitution (
   normalizeTypeIndexes,
 ) where
 
+import Data.List.NonEmpty (NonEmpty)
 import qualified Data.Map.Strict as Map
 import Data.Maybe (fromMaybe)
 import qualified Data.Set as Set
@@ -35,7 +36,7 @@ import Noll.Language (
  )
 import Noll.Language.Expression.Choice (Choice (..), Guard (..))
 import Noll.TypeSystem.TypeConstraint (Descriptor (..), MonomorphicSet (..), TypeConstraint (..))
-import Noll.Utils (IndexMap, Map, NonEmpty, Set)
+import Noll.Utils (IndexMap, Map, Set)
 
 class TypeSubstitutable s where
   apply :: TypeSubstitution -> s -> s

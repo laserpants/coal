@@ -6,12 +6,12 @@
 module Noll.TypeSystem.KindUnification (KindUnifiable (unifyKinds)) where
 
 import Control.Monad.Except
+import Data.List.NonEmpty (NonEmpty)
 import qualified Data.List.NonEmpty as NonEmpty
 import Noll.Language (Kind (..), KindIndex (..))
 import Noll.TypeSystem.KindSubstitution (KindSubstitutable (..), KindSubstitution (..), applyKindSub, mapsToKind)
 import Noll.TypeSystem.Unification.Error (UnificationError (..))
 import qualified Noll.TypeSystem.Unification.Error as Error
-import Noll.Utils (NonEmpty)
 
 class KindUnifiable u where
   unifyKinds :: (MonadError UnificationError m) => u -> u -> m KindSubstitution

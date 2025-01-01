@@ -14,7 +14,6 @@ module Noll.TypeSystem.KindConstraint.Collect (
 
 import Control.Monad.RWS (MonadRWS, MonadReader, MonadState, MonadWriter, RWS, ask, evalRWS, runRWS, tell)
 import Data.Either.Extra (lefts, rights)
-import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
 import Debug.Trace
@@ -41,6 +40,7 @@ import Noll.Language (
  )
 import Noll.Library.Environment (Environment (..))
 import qualified Noll.Library.Environment as Environment
+import Noll.Library.List1 (list1ToList)
 import Noll.Library.Supply (supply)
 import Noll.TypeSystem.KindConstraint (KindConstraint (..), KindConstraintMetadata (..))
 import Noll.Utils (Dictionary, Name, forM_, tellLeft, tellRight, traverse_)
@@ -179,7 +179,7 @@ instance TranslateKinds a OpaqueType IndexedType where
         k <- KVariable <$> supply
         t1 <- collectKindConstraints t
         ts1 <- traverse collectKindConstraints ts
-        tellRight [KindEquality (RuleTypeApplication t (NonEmpty.toList ts)) (kindOf t1) (foldKind k (kindOf <$> ts1))]
+        tellRight [KindEquality (RuleTypeApplication t (list1ToList ts)) (kindOf t1) (foldKind k (kindOf <$> ts1))]
         pure (TApplication k t1 ts1)
       TArrow t1 t2 ->
         TArrow <$> collectKindConstraints t1 <*> collectKindConstraints t2

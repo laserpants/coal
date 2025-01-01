@@ -26,8 +26,6 @@ import Control.Monad.State (StateT, evalStateT, get, modify, put)
 import Control.Monad.Trans (lift)
 import Data.Either.Extra (lefts, rights)
 import Data.List (partition, transpose)
-import Data.List.NonEmpty (NonEmpty)
-import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import qualified Data.Text as Text
@@ -57,6 +55,7 @@ import Noll.Language (
 import Noll.Language.Type.Scheme (Scheme (..))
 import Noll.Library.Environment (Environment (..))
 import qualified Noll.Library.Environment as Environment
+import Noll.Library.List1 (list1ToList)
 import Noll.Library.Supply (supply, supplyN)
 import Noll.TypeSystem.TypeConstraint (Descriptor (..), MonomorphicSet (..), TypeConstraint (..), overMonomorphicSet)
 import Noll.TypeSystem.TypeConstraint.Assumption (Assumption (..), assumptionNameIs)
@@ -216,13 +215,13 @@ collectTypeConstraints =
       ms2 <- concat <$> traverse collectTypeConstraints es
       let t1 = typeOf e1
           t2 = foldType t (typeOf <$> es)
-      assertEquality (RuleApplication loc t1 (NonEmpty.toList (typeOf <$> es))) [t1, t2]
+      assertEquality (RuleApplication loc t1 (list1ToList (typeOf <$> es))) [t1, t2]
       pure (ms1 <> ms2)
     ELiteral{} ->
       pure []
     EMatch loc t e cs -> do
       ms1 <- collectTypeConstraints e
-      (ts1, ts2, ms2) <- collectClauseTypeConstraints (NonEmpty.toList cs)
+      (ts1, ts2, ms2) <- collectClauseTypeConstraints (list1ToList cs)
       -- Pattern types
       assertEquality (RuleMatchClausePatterns loc) (typeOf e : ts1)
       -- Expression types
@@ -234,7 +233,7 @@ collectClauseTypeConstraints = third3 concat . unzip3 <$$> traverse go
  where
   go (EClause _ p cs) = do
     (ts1, ms1) <- second concat . unzip <$$> withMonomorphic p $
-      forM (NonEmpty.toList cs) $
+      forM (list1ToList cs) $
         \case
           CPlain _ gs e -> do
             ns1 <- concat <$$> forM gs $ \(CGuard g) -> do

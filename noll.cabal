@@ -55,6 +55,7 @@ library
       Noll.Language.Type.Row
       Noll.Language.Type.Scheme
       Noll.Library.Environment
+      Noll.Library.List1
       Noll.Library.Supply
       Noll.TypeSystem.ConstraintSolver
       Noll.TypeSystem.KindConstraint

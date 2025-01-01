@@ -11,20 +11,21 @@ import Noll.Language.Expression.Operator.Unary (UnaryOperator)
 import Noll.Language.Pattern (Pattern (..))
 import Noll.Language.Primitive (Primitive (..))
 import Noll.Language.Type (Type, TypeVariable (..))
-import Noll.Utils (Dictionary, Some)
+import Noll.Library.List1 (List1)
+import Noll.Utils (Dictionary)
 
-data Clause e a t = EClause a (Pattern a t) (Some (Choice e a t))
+data Clause e a t = EClause a (Pattern a t) (List1 (Choice e a t))
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
 
 data Expression a t
   = -- | Type-annotated expression
     EAnnotation a (Type TypeVariable ()) (Expression a t)
   | -- | Function application
-    EApplication a t (Expression a t) (Some (Expression a t))
+    EApplication a t (Expression a t) (List1 (Expression a t))
   | -- | Lambda function expression
-    ELambda a (Some (Pattern a t)) (Expression a t)
+    ELambda a (List1 (Pattern a t)) (Expression a t)
   | -- | Let binding
-    ELet a (Some (Binding Expression a t)) (Expression a t)
+    ELet a (List1 (Binding Expression a t)) (Expression a t)
   | -- | Recursive let binding
     ERecursiveLet a (Pattern a t) (Expression a t) (Expression a t)
   | -- | Variable
@@ -46,5 +47,5 @@ data Expression a t
   | -- | List literal
     EListLiteral a t [Expression a t]
   | -- | Pattern matching expression
-    EMatch a t (Expression a t) (Some (Clause Expression a t))
+    EMatch a t (Expression a t) (List1 (Clause Expression a t))
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
