@@ -13,7 +13,7 @@ import qualified Data.Map.Strict as Map
 import Data.Maybe (fromMaybe)
 import qualified Data.Set as Set
 import Noll.Language (Expression (..), IndexedType, Kind (..), KindIndex (..), Row, Trait (..), Type (..), TypeIndex (..))
-import Noll.TypeSystem.KindConstraint (KindConstraint (..), KindRule (..))
+import Noll.TypeSystem.KindConstraint (KindConstraint (..))
 import Noll.Utils (IndexMap, Map, Set)
 
 class KindSubstitutable s where
@@ -87,10 +87,6 @@ instance (KindSubstitutable k) => KindSubstitutable (KindConstraint c k) where
 
 instance KindSubstitutable (Expression a IndexedType) where
   applyKindSub = fmap . applyKindSub
-
--- TODO: move
-instance KindSubstitutable KindRule where
-  applyKindSub = undefined -- TODO
 
 newtype KindSubstitution = KindSubstitution {kindSubstitutionMap :: IndexMap (Kind KindIndex)}
   deriving (Show, Eq, Ord, Read)

@@ -7,7 +7,6 @@
 {-# LANGUAGE StrictData #-}
 
 module Noll.TypeSystem.TypeConstraint (
-  TypeRule (..),
   MonomorphicSet (..),
   TypeConstraint (..),
   overMonomorphicSet,
@@ -16,7 +15,6 @@ where
 
 import Data.Set (Set, intersection, union)
 import Noll.Language (HasActive (..), Scheme (..), Type (..), TypeIndex (..), TypeIndexed (..))
-import Noll.TypeSystem.TypeConstraint.Rule (TypeRule (..))
 
 -- | Monomorphic type variable set
 newtype MonomorphicSet m = MonomorphicSet {monomorphicSet :: Set m}

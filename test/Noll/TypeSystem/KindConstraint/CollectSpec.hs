@@ -8,8 +8,9 @@ module Noll.TypeSystem.KindConstraint.CollectSpec where -- (spec) where
 import Data.List.NonEmpty (NonEmpty (..))
 import Noll.Label (Label (..))
 import Noll.Language (Binding (..), Expression (..), Intrinsic (..), Kind (..), KindIndex (..), Pattern (..), Primitive (..), Type (..), TypeIndex (..), freshIdIn)
-import Noll.TypeSystem.KindConstraint (KindConstraint (..), KindRule (..))
+import Noll.TypeSystem.KindConstraint (KindConstraint (..))
 import Noll.TypeSystem.KindConstraint.Collect (KindCollectError (..), collectKindConstraints, runCollectKindConstraints)
+import Noll.TypeSystem.KindConstraint.Rule (KindRule (..))
 import Test.Hspec (Spec, describe, it)
 
 spec :: Spec

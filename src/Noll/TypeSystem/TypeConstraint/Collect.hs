@@ -57,8 +57,9 @@ import Noll.Library.Environment (Environment (..))
 import qualified Noll.Library.Environment as Environment
 import Noll.Library.List1 (list1ToList)
 import Noll.Library.Supply (supply, supplyN)
-import Noll.TypeSystem.TypeConstraint (MonomorphicSet (..), TypeConstraint (..), TypeRule (..), overMonomorphicSet)
+import Noll.TypeSystem.TypeConstraint (MonomorphicSet (..), TypeConstraint (..), overMonomorphicSet)
 import Noll.TypeSystem.TypeConstraint.Assumption (Assumption (..), assumptionNameIs)
+import Noll.TypeSystem.TypeConstraint.Rule (TypeRule (..))
 import Noll.Utils (Dictionary, Name, concatMapM, forM, forM_, tellLeft, tellRight, (<$$>))
 
 data TypeConstraintsContext o k t = TypeConstraintsContext

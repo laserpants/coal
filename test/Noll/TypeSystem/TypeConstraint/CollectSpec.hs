@@ -14,8 +14,9 @@ import Noll.Label (Label (..))
 import Noll.Language (Binding (..), Choice (..), Clause (..), Constructor (..), Expression (..), Intrinsic (..), Kind (..), KindIndex (..), Pattern (..), Primitive (..), Scheme (..), Type (..), TypeIndex (..), TypeVariable (..), freshIdIn)
 import Noll.Library.Environment (Environment)
 import qualified Noll.Library.Environment as Environment
-import Noll.TypeSystem.TypeConstraint (MonomorphicSet (..), TypeConstraint (..), TypeRule (..))
+import Noll.TypeSystem.TypeConstraint (MonomorphicSet (..), TypeConstraint (..))
 import Noll.TypeSystem.TypeConstraint.Collect (TypeCollectError (..), TypeConstraintsContext (..), annotationScheme, collectTypeConstraints, evalCollectTypeConstraints)
+import Noll.TypeSystem.TypeConstraint.Rule (TypeRule (..))
 import Test.Hspec (Spec, describe, it)
 
 spec :: Spec

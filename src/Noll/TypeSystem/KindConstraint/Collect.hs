@@ -42,7 +42,8 @@ import Noll.Library.Environment (Environment (..))
 import qualified Noll.Library.Environment as Environment
 import Noll.Library.List1 (list1ToList)
 import Noll.Library.Supply (supply)
-import Noll.TypeSystem.KindConstraint (KindConstraint (..), KindRule (..))
+import Noll.TypeSystem.KindConstraint (KindConstraint (..))
+import Noll.TypeSystem.KindConstraint.Rule (KindRule (..))
 import Noll.Utils (Dictionary, Name, forM_, tellLeft, tellRight, traverse_)
 
 data KindCollectError a
