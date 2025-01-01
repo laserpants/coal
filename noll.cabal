@@ -58,6 +58,7 @@ library
       Noll.Library.List1
       Noll.Library.Supply
       Noll.TypeSystem.Constraint
+      Noll.TypeSystem.Constraint.Rule
       Noll.TypeSystem.Constraint.Solver
       Noll.TypeSystem.Substitution
       Noll.TypeSystem.Unification
