@@ -119,7 +119,7 @@ typeConstraintsInclude e sample =
 
     (_, constraints) = res0
    in
-    traceShow constraints $
+--    traceShow constraints $
       case sample of
         Equality meta ts ->
           elem (normalized (Equality meta ts)) (normalized <$> constraints)
@@ -143,7 +143,7 @@ hasError e sample =
 
     (errs, _) = res0
    in
-    traceShow errs $
+--    traceShow errs $
       sample `elem` errs
 
 constructorEnv :: Environment (Constructor TypeIndex () (Type TypeIndex ()))

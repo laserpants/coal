@@ -114,5 +114,6 @@ fixture2 =
         )
     )
 
+-- x : Nope('0)
 fixture3 :: Expression () (Type TypeIndex ())
 fixture3 = EVariable () (Label (TApplication () (TConstructor () "Nope") (TVariable (TypeIndex () 0) :| [])) "x") 
