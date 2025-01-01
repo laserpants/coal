@@ -167,13 +167,14 @@ withMonomorphic s = localMonoset (monosetInsertMany (typeIndexesIn s))
 collectTypeConstraints :: Expression a OpaqueType -> CollectConstraints a [Assumption OpaqueType]
 collectTypeConstraints =
   \case
-    EAnnotation a t e -> do
+    EAnnotation loc t e -> do
       r <- annotationScheme t
       case r of
         Nothing ->
-          tellLeft [IllFormedTypeAnnotation a]
-        Just s ->
-          tellRight [Explicit TypeRule (typeOf e) s]
+          tellLeft [IllFormedTypeAnnotation loc]
+        Just s -> do
+          let t1 = typeOf e
+          tellRight [Explicit (RuleAnnotation loc t1 s) t1 s]
       collectTypeConstraints e
     EConstructor loc (Label t name) -> do
       r <- lookupContextConstructor name

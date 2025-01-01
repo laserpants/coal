@@ -98,6 +98,30 @@ spec =
         runIdentity
           (annotationScheme (TVariable (TypeVariable () "a") `TArrow` TVariable (TypeVariable () "b")))
           == Just (Forall (Set.fromList [TypeIndex () 0, TypeIndex () 1]) [] (TVariable (TypeIndex () 0) `TArrow` TVariable (TypeIndex () 1)))
+      it "" $ do
+        runIdentity
+          ( annotationScheme
+              ( TApplication
+                  ()
+                  (TVariable (TypeVariable () "f"))
+                  ( TVariable
+                      (TypeVariable () "a")
+                      :| []
+                  )
+                  `TArrow` TApplication () (TVariable (TypeVariable () "f")) (TVariable (TypeVariable () "b") :| [])
+              )
+          )
+          == Just
+            ( Forall
+                (Set.fromList [TypeIndex () 0, TypeIndex () 1, TypeIndex () 2])
+                []
+                ( TApplication
+                    ()
+                    (TVariable (TypeIndex () 0))
+                    (TVariable (TypeIndex () 1) :| [])
+                    `TArrow` TApplication () (TVariable (TypeIndex () 0)) (TVariable (TypeIndex () 2) :| [])
+                )
+            )
     describe "" $ do
       it "" $ do
         hasError fixture5 (MissingDataConstructor "a2" "Baz")

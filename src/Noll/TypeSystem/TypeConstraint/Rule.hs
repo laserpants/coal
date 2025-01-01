@@ -4,11 +4,13 @@
 
 module Noll.TypeSystem.TypeConstraint.Rule (TypeRule (..)) where
 
-import Noll.Language (Type, TypeIndex)
+import Noll.Language (OpaqueType, Scheme, Type, TypeIndex)
 import Noll.TypeSystem.TypeSubstitution (TypeSubstitutable (..))
 
 data TypeRule k a
   = TypeRule
+  | -- | Type annotation
+    RuleAnnotation a (Type TypeIndex k) (Scheme TypeIndex () OpaqueType)
   | -- | Function application
     RuleApplication a (Type TypeIndex k) [Type TypeIndex k]
   | -- | Type of if condition is bool
