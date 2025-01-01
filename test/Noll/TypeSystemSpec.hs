@@ -100,7 +100,7 @@ spec =
     it "" $
       typeErrorsInclude
         fixture19
-        (SolverError (RuleApplication "b" (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TConstructor () "IntPair") [TIntrinsic IBool, TIntrinsic IInt32]))
+        (SolverError (RuleApplication "EApplication" (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TConstructor () "IntPair") [TIntrinsic IBool, TIntrinsic IInt32]))
     it "" $
       evalState (traverse (const supply) fixture20) (0 :: Int)
         == fixture20Tagged
@@ -877,18 +877,18 @@ fixture18Typed =
 fixture19 :: Expression String ()
 fixture19 =
   ( EMatch
-      "a"
+      "EMatch"
       ()
       ( EApplication
-          "b"
+          "EApplication"
           ()
-          (EConstructor "c" (Label () "MkIntPair"))
-          (ELiteral "d" (LBool False) <| ELiteral "e" (LInt32 2) :| [])
+          (EConstructor "EConstructor" (Label () "MkIntPair"))
+          (ELiteral "ELiteral" (LBool False) <| ELiteral "e" (LInt32 2) :| [])
       )
       ( EClause
-          "f"
-          (PConstructor "g" (Label () "MkIntPair") [PVariable "h" (Label () "fst"), PVariable "i" (Label () "snd")])
-          (CPlain "j" [] (EVariable "k" (Label () "fst")) :| [])
+          "EClause"
+          (PConstructor "PConstructor" (Label () "MkIntPair") [PVariable "PVariable" (Label () "fst"), PVariable "PVariable" (Label () "snd")])
+          (CPlain "CPlain" [] (EVariable "EVariable" (Label () "fst")) :| [])
           :| []
       )
   )
