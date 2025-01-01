@@ -8,19 +8,19 @@ module Noll.Language.Type.HasKind (HasKind (..)) where
 import Noll.Language.Type (Type (..), TypeIndex (..))
 import Noll.Language.Type.Kind (Kind (..))
 
-class HasKind u k where
-  kindOf :: k -> Kind u
+class HasKind o k where
+  kindOf :: k -> Kind o
 
-instance HasKind u (Kind u) where
+instance HasKind o (Kind o) where
   kindOf = id
 
-instance HasKind u (TypeIndex (Kind u)) where
+instance HasKind o (TypeIndex (Kind o)) where
   kindOf =
     \case
       TypeIndex k _ ->
         kindOf k
 
-instance (HasKind u (o (Kind u))) => HasKind u (Type o (Kind u)) where
+instance (HasKind o (a (Kind o))) => HasKind o (Type a (Kind o)) where
   kindOf =
     \case
       TAlias _ _ t -> do
