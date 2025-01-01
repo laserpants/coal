@@ -5,6 +5,7 @@
 
 module Noll.TypeSystem.KindConstraint.CollectSpec where -- (spec) where
 
+import Noll.TypeSystem.KindConstraint.Collect (KindCollectError (..))
 import Data.List.NonEmpty (NonEmpty (..))
 import Noll.Label (Label (..))
 import Noll.Language (Binding (..), Expression (..), Intrinsic (..), Kind (..), KindIndex (..), Pattern (..), Primitive (..), Type (..), TypeIndex (..), freshIdIn)
@@ -26,6 +27,8 @@ spec =
           fixture2
           [ KindEquality KindConstraintMetadata (KVariable (KindIndex 3)) KType
           ]
+      it "" $
+        hasError fixture3 (MissingTypeConstructor "Nope")
 
 kindConstraintsIncludeAll :: Expression a (Type TypeIndex ()) -> [KindConstraint KindConstraintMetadata (Kind KindIndex)] -> Bool
 kindConstraintsIncludeAll = all . kindConstraintsInclude
@@ -36,10 +39,15 @@ kindConstraintsInclude e =
     KindEquality meta k1 k2 ->
       elem (KindEquality meta k1 k2) constraints || elem (KindEquality meta k2 k1) constraints
  where
-  res :: (Expression a (Type TypeIndex (Kind KindIndex)), [KindCollectError a], [KindConstraint KindConstraintMetadata (Kind KindIndex)])
-  res = runCollectKindConstraints mempty (freshIdIn e) (collectKindConstraints e)
+  (_, _, constraints) = getResultsFor e
 
-  (_, _, constraints) = res
+hasError :: forall a. Expression a (Type TypeIndex ()) -> KindCollectError a -> Bool
+hasError e err = err `elem` errs
+ where
+  (_, errs, _) = getResultsFor e
+
+getResultsFor :: Expression a (Type TypeIndex ()) -> (Expression a (Type TypeIndex (Kind KindIndex)), [KindCollectError a], [KindConstraint KindConstraintMetadata (Kind KindIndex)])
+getResultsFor e = runCollectKindConstraints mempty (freshIdIn e) (collectKindConstraints e)
 
 -- fn(m) => let y = m in let x = y(true) in x
 fixture1 :: Expression () (Type TypeIndex ())
@@ -105,3 +113,6 @@ fixture2 =
             :| []
         )
     )
+
+fixture3 :: Expression () (Type TypeIndex ())
+fixture3 = EVariable () (Label (TApplication () (TConstructor () "Nope") (TVariable (TypeIndex () 0) :| [])) "x") 

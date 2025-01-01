@@ -5,6 +5,7 @@ import Noll.Language (Intrinsic (..), Kind (..), KindIndex (..), Type (..), Type
 import Noll.TypeSystem.TypeSubstitution (TypeSubstitution (..), mapsToType)
 import Noll.TypeSystem.TypeUnification (TypeUnifiable (..), unifyAll)
 import Noll.TypeSystem.Unification.Error (UnificationError (..))
+import Data.List.NonEmpty (NonEmpty (..))
 import qualified Noll.TypeSystem.Unification.Error as Error
 import Test.Hspec (Spec, describe, it)
 
@@ -22,6 +23,8 @@ spec =
         validateResult (TIntrinsic IInt32 :: Type TypeIndex ()) (TIntrinsic IInt32) == Right mempty
       it "'0 ~ '1" $ do
         validateResult fixture1 fixture2 == Right (0 `mapsToType` fixture2)
+      it "C('0) ~ C(int32)" $ do
+        validateResult fixture3 fixture4 == Right (0 `mapsToType` TIntrinsic IInt32)
     describe "unifyAll" $ do
       it "" $ do
         validateResultUnifyAll
@@ -37,6 +40,12 @@ fixture1 = TVariable (TypeIndex () 0)
 
 fixture2 :: Type TypeIndex ()
 fixture2 = TVariable (TypeIndex () 1)
+
+fixture3 :: Type TypeIndex ()
+fixture3 = TApplication () (TConstructor () "C") (TVariable (TypeIndex () 0) :| [])
+
+fixture4 :: Type TypeIndex ()
+fixture4 = TApplication () (TConstructor () "C") (TIntrinsic IInt32 :| [])
 
 validateResult :: (TypeUnifiable a) => a -> a -> Either UnificationError TypeSubstitution
 validateResult t1 t2 = runExcept (unify t1 t2)

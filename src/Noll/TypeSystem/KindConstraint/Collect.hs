@@ -7,7 +7,7 @@
 {-# LANGUAGE StrictData #-}
 
 module Noll.TypeSystem.KindConstraint.Collect (
-  KindCollectError,
+  KindCollectError (..),
   collectKindConstraints,
   runCollectKindConstraints,
 ) where
@@ -153,7 +153,7 @@ instance TranslateKinds a (Expression a OpaqueType) (Expression a IndexedType) w
       EUnaryOperator a (t, op) -> do
         t1 <- valueType t
         pure (EUnaryOperator a (t1, op))
-      ERecord _ t _ _ ->
+      ERecord a t _ _ ->
         error "TODO"
       EListCons a t e1 e2 -> do
         t1 <- valueType t
