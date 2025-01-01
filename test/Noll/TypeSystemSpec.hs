@@ -107,28 +107,30 @@ typeErrorsIncludeAll e = all (typeErrorsInclude e)
 typeErrorsInclude :: (Show a, Eq a) => Expression a () -> SolverError (Descriptor () a) -> Bool
 typeErrorsInclude e err = err `elem` errs
  where
-  (_, errs, _) = testInferTypes e
+  (_, _, errs, _, _) = testInferTypes e
 
 kindErrorsInclude :: (Show a, Eq a) => Expression a () -> SolverError KindConstraintMetadata -> Bool
 kindErrorsInclude e err = err `elem` errs
  where
-  (_, _, errs) = testInferTypes e
+  (_, _, _, _, errs) = testInferTypes e
 
 hasNoErrors :: (Show a, Eq a) => Expression a () -> Bool
 hasNoErrors e = hasNoTypeErrors e && hasNoKindErrors e
 
 hasNoTypeErrors :: (Show a, Eq a) => Expression a () -> Bool
-hasNoTypeErrors e = let (_, errs, _) = testInferTypes e in null errs
+hasNoTypeErrors e = let (_, _, errs, _, _) = testInferTypes e in null errs
 
 hasNoKindErrors :: (Show a, Eq a) => Expression a () -> Bool
-hasNoKindErrors e = let (_, _, errs) = testInferTypes e in null errs
+hasNoKindErrors e = let (_, _, _, _, errs) = testInferTypes e in null errs
 
 validateResult :: (Show a, Eq a) => Expression a () -> Expression a (Type TypeIndex (Kind KindIndex))
-validateResult e = let (a, _, _) = testInferTypes e in a
+validateResult e = let (a, _, _, _, _) = testInferTypes e in a
 
 type Result a =
   ( Expression a (Type TypeIndex (Kind KindIndex))
+  , [TypeCollectError a]
   , [SolverError (Descriptor () a)]
+  , [KindCollectError a]
   , [SolverError KindConstraintMetadata]
   )
 
@@ -220,7 +222,7 @@ testInferTypes e =
         (TypeConstraintsContext mempty constructorEnv)
         (collectTypeConstraints e1)
 
-    (_, typeConstraints) = res0
+    (errs0, typeConstraints) = res0
 
     res1 :: (TypeSubstitution, [SolverError (Descriptor () a)])
     res1 = evalSolver (freshIdIn typeConstraints) (solveTypes typeConstraints)
@@ -242,18 +244,18 @@ testInferTypes e =
     res2 :: (Expression a (Type TypeIndex (Kind KindIndex)), [KindCollectError a], [KindConstraint KindConstraintMetadata (Kind KindIndex)])
     res2 = runCollectKindConstraints typeConstructorEnv (freshIdIn e2) (collectKindConstraints e2)
 
-    (e3, _, kindConstraints) = res2
+    (e3, errs2, kindConstraints) = res2
 
     res3 :: (KindSubstitution, [SolverError KindConstraintMetadata])
     res3 = evalSolver 0 (solveKinds kindConstraints)
 
-    (kindSub, errs2) = res3
+    (kindSub, errs3) = res3
 
     e4 :: Expression a (Type TypeIndex (Kind KindIndex))
     e4 = applyKindSub kindSub e3
    in
     -- traceShow e1 $
-    (e4, errs1, errs2)
+    (e4, errs0, errs1, errs2, errs3)
 
 typeVariable :: Int -> Type TypeIndex ()
 typeVariable n = TVariable (TypeIndex () n)
@@ -911,3 +913,6 @@ fixture20Tagged =
       ( EVariable () (Label 3 "x")
       )
   )
+
+fixture21 :: Expression String ()
+fixture21 = EAnnotation "EAnnotation" (TConstructor () "Baz") (EVariable "EVariable" (Label () "x"))
