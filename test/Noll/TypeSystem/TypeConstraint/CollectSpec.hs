@@ -130,9 +130,9 @@ spec =
             )
     describe "" $ do
       it "" $ do
-        hasError fixture5 (MissingDataConstructor "a2" "Baz")
+        hasError fixture5 (MissingDataConstructor "EConstructor" "Baz")
       it "" $ do
-        hasError fixture6 (ConstructorArityMismatch "a4" "Yes" 0 1)
+        hasError fixture6 (ConstructorArityMismatch "PConstructor" "Yes" 0 1)
 
 typeConstraintsIncludeAll :: (Show a, Eq a) => Expression a Int -> [TypeConstraint (TypeRule () a) TypeIndex () (Type TypeIndex ())] -> Bool
 typeConstraintsIncludeAll = all . typeConstraintsInclude
@@ -321,27 +321,27 @@ fixture4 =
 fixture5 :: Expression String (Type TypeIndex ())
 fixture5 =
   ( EApplication
-      "a1"
+      "EApplication"
       (TVariable (TypeIndex () 0))
-      (EConstructor "a2" (Label (TVariable (TypeIndex () 1)) "Baz"))
-      (EVariable "a3" (Label (TVariable (TypeIndex () 2)) "x") :| [])
+      (EConstructor "EConstructor" (Label (TVariable (TypeIndex () 1)) "Baz"))
+      (EVariable "EVariable" (Label (TVariable (TypeIndex () 2)) "x") :| [])
   )
 
 fixture6 :: Expression String (Type TypeIndex ())
 fixture6 =
   ( EMatch
-      "a1"
+      "EMatch"
       (TVariable (TypeIndex () 0))
-      (EVariable "a2" (Label (TVariable (TypeIndex () 1)) "x"))
+      (EVariable "EVariable" (Label (TVariable (TypeIndex () 1)) "x"))
       ( EClause
-          "a3"
+          "EClause"
           ( PConstructor
-              "a4"
+              "PConstructor"
               (Label (TVariable (TypeIndex () 3)) "Yes")
-              [ PVariable "a5" (Label (TVariable (TypeIndex () 4)) "b")
+              [ PVariable "PVariable" (Label (TVariable (TypeIndex () 4)) "b")
               ]
           )
-          (CPlain "a6" [] (ELiteral "a6" (LBool True)) :| [])
+          (CPlain "CPlain" [] (ELiteral "ELiteral" (LBool True)) :| [])
           :| []
       )
   )
