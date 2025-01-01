@@ -1,16 +1,31 @@
-{-# LANGUAGE StrictData #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE StrictData #-}
 
 module Noll.TypeSystem.Substitution where
 
-import Noll.Language (Type (..), Scheme (..), Expression (..), Guard (..), Choice (..), Clause (..), Binding (..), Pattern (..), Intrinsic (..), TypeIndex (..), Row (..), Trait (..), Kind, KindIndex)
-import Noll.Utils (IndexMap, Map, Set, fromMaybe)
 import Data.List.NonEmpty (NonEmpty)
-import Noll.Label (Label (..))
-import qualified Data.Set as Set
 import qualified Data.Map.Strict as Map
+import qualified Data.Set as Set
+import Noll.Label (Label (..))
+import Noll.Language (
+  Binding (..),
+  Choice (..),
+  Clause (..),
+  Expression (..),
+  Guard (..),
+  Intrinsic (..),
+  Kind,
+  KindIndex,
+  Pattern (..),
+  Row (..),
+  Scheme (..),
+  Trait (..),
+  Type (..),
+  TypeIndex (..),
+ )
+import Noll.Utils (IndexMap, Map, Set, fromMaybe)
 
 class Substitutable s where
   apply :: Substitution -> s -> s
@@ -33,7 +48,7 @@ instance (Substitutable s) => Substitutable (Trait s) where
 instance (Ord s, Substitutable s) => Substitutable (Set s) where
   apply = Set.map . apply
 
---instance Substitutable (MonomorphicSet (TypeIndex (Kind KindIndex))) where
+-- instance Substitutable (MonomorphicSet (TypeIndex (Kind KindIndex))) where
 --  apply sub =
 --    \case
 --      MonomorphicSet m ->
@@ -48,7 +63,7 @@ instance Substitutable (Scheme TypeIndex (Kind KindIndex) (Type TypeIndex (Kind 
          in
           Forall qs (apply sub1 ps) (apply sub1 t)
 
---instance Substitutable (TypeConstraint c TypeIndex () (Type TypeIndex (Kind KindIndex))) where
+-- instance Substitutable (TypeConstraint c TypeIndex () (Type TypeIndex (Kind KindIndex))) where
 --  apply sub =
 --    \case
 --      Equality meta ts ->
