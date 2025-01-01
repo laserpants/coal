@@ -173,10 +173,10 @@ instance Monoid Substitution where
 substitutionIndex :: TypeIndex (Kind KindIndex) -> Substitution -> Maybe (Type TypeIndex (Kind KindIndex))
 substitutionIndex TypeIndex{..} sub = Map.lookup typeIndexId (substitutionMap sub)
 
-{-# INLINE mapsTo #-}
-mapsTo :: Int -> Type TypeIndex (Kind KindIndex) -> Substitution
-mapsTo index = Substitution . Map.singleton index
-
 {-# INLINE removeSubstitution #-}
 removeSubstitution :: TypeIndex (Kind KindIndex) -> Substitution -> Substitution
 removeSubstitution TypeIndex{..} (Substitution sub) = Substitution (Map.delete typeIndexId sub)
+
+{-# INLINE mapsTo #-}
+mapsTo :: Int -> Type TypeIndex (Kind KindIndex) -> Substitution
+mapsTo index = Substitution . Map.singleton index

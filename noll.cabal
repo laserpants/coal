@@ -57,7 +57,9 @@ library
       Noll.Library.Environment
       Noll.Library.List1
       Noll.Library.Supply
+      Noll.TypeSystem.Constraint
       Noll.TypeSystem.Substitution
+      Noll.TypeSystem.Unification
       Noll.Utils
   other-modules:
       Paths_noll
