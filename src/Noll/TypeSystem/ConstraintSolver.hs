@@ -110,7 +110,7 @@ solveTypes constraints =
         Right sub1 -> do
           sub2 <- solveTypes (TypeSubstitution.apply sub1 cs)
           pure (sub2 <> sub1)
-    Choice cs (Implicit meta t1 t2 m) -> do
+    Choice cs (Implicit meta t1 t2 m) ->
       solveTypes (Explicit meta t1 (generalize m t2) : cs)
     Choice cs (Explicit meta t1 s) -> do
       t2 <- instantiate s
