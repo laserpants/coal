@@ -57,19 +57,6 @@ library
       Noll.Library.Environment
       Noll.Library.List1
       Noll.Library.Supply
-      Noll.TypeSystem.ConstraintSolver
-      Noll.TypeSystem.KindConstraint
-      Noll.TypeSystem.KindConstraint.Collect
-      Noll.TypeSystem.KindConstraint.Rule
-      Noll.TypeSystem.KindSubstitution
-      Noll.TypeSystem.KindUnification
-      Noll.TypeSystem.TypeConstraint
-      Noll.TypeSystem.TypeConstraint.Assumption
-      Noll.TypeSystem.TypeConstraint.Collect
-      Noll.TypeSystem.TypeConstraint.Rule
-      Noll.TypeSystem.TypeSubstitution
-      Noll.TypeSystem.TypeUnification
-      Noll.TypeSystem.Unification.Error
       Noll.Utils
   other-modules:
       Paths_noll
@@ -109,13 +96,6 @@ test-suite noll-test
   main-is: Spec.hs
   other-modules:
       Noll.Language.IndexedSpec
-      Noll.TypeSystem.ConstraintSolverSpec
-      Noll.TypeSystem.KindConstraint.CollectSpec
-      Noll.TypeSystem.KindSubstitutionSpec
-      Noll.TypeSystem.TypeConstraint.CollectSpec
-      Noll.TypeSystem.TypeSubstitutionSpec
-      Noll.TypeSystem.TypeUnificationSpec
-      Noll.TypeSystemSpec
       Paths_noll
   autogen-modules:
       Paths_noll
