@@ -935,14 +935,17 @@ fixture20Tagged =
       )
   )
 
+-- TODO
 -- Type constructor missing
 fixture21 :: Expression String ()
 fixture21 = EAnnotation "EAnnotation" (TConstructor () "Baz") (EVariable "EVariable" (Label () "x"))
 
+-- TODO
 -- Over-saturated type constructor
 fixture22 :: Expression String ()
 fixture22 = EAnnotation "EAnnotation" (TApplication () (TConstructor () "Id") (TIntrinsic IInt32 <| TIntrinsic IInt32 :| [])) (EVariable "EVariable" (Label () "x"))
 
+-- TODO
 -- Under-saturated type constructor
 fixture23 :: Expression String ()
 fixture23 = EAnnotation "EAnnotation" (TConstructor () "Id") (EVariable "EVariable" (Label () "x"))
