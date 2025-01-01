@@ -6,8 +6,9 @@
 {-# LANGUAGE StrictData #-}
 {-# LANGUAGE UndecidableInstances #-}
 
-module Noll.Language.TypeIndexed (
+module Noll.Language.Indexed (
   TypeIndexed (..),
+  KindIndexed (..),
   typeIdsIn,
   notBoundIn,
   freshIdIn,

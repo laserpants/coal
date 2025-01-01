@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Noll.TypeSystem.TypeUnificationSpec where
 
 import Control.Monad.Except (runExcept)

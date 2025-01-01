@@ -1,6 +1,6 @@
 module Noll.Language (
   module Noll.Language.Constructor,
-  module Noll.Language.TypeIndexed,
+  module Noll.Language.Indexed,
   module Noll.Language.Type.HasKind,
   module Noll.Language.HasType,
   module Noll.Language.Type,
@@ -30,4 +30,4 @@ import Noll.Language.Type.Intrinsic
 import Noll.Language.Type.Kind
 import Noll.Language.Type.Row
 import Noll.Language.Type.Scheme
-import Noll.Language.TypeIndexed
+import Noll.Language.Indexed

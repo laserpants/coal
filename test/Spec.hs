@@ -1,4 +1,4 @@
-import qualified Noll.Language.TypeIndexedSpec
+import qualified Noll.Language.IndexedSpec
 import qualified Noll.TypeSystem.ConstraintSolverSpec
 import qualified Noll.TypeSystem.KindConstraint.CollectSpec
 import qualified Noll.TypeSystem.KindSubstitutionSpec
@@ -12,7 +12,7 @@ main :: IO ()
 main =
   hspec $ do
     Noll.TypeSystem.TypeConstraint.CollectSpec.spec
-    Noll.Language.TypeIndexedSpec.spec
+    Noll.Language.IndexedSpec.spec
     Noll.TypeSystem.TypeSubstitutionSpec.spec
     Noll.TypeSystem.KindSubstitutionSpec.spec
     Noll.TypeSystem.ConstraintSolverSpec.spec
