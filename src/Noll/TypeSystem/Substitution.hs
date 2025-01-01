@@ -3,7 +3,11 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.TypeSystem.Substitution where
+module Noll.TypeSystem.Substitution (
+  Substitutable (..),
+  Substitution (..),
+  mapsTo,
+) where
 
 import Data.List.NonEmpty (NonEmpty)
 import qualified Data.Map.Strict as Map
@@ -24,7 +28,9 @@ import Noll.Language (
   Trait (..),
   Type (..),
   TypeIndex (..),
+  TypeIndexed (..),
  )
+import Noll.TypeSystem.Constraint (Constraint (..), MonomorphicSet (..))
 import Noll.Utils (IndexMap, Map, Set, fromMaybe)
 
 class Substitutable s where
@@ -48,11 +54,11 @@ instance (Substitutable s) => Substitutable (Trait s) where
 instance (Ord s, Substitutable s) => Substitutable (Set s) where
   apply = Set.map . apply
 
--- instance Substitutable (MonomorphicSet (TypeIndex (Kind KindIndex))) where
---  apply sub =
---    \case
---      MonomorphicSet m ->
---        MonomorphicSet (typeIndexesIn (Set.map (apply sub . TVariable) m))
+instance Substitutable (MonomorphicSet (TypeIndex (Kind KindIndex))) where
+  apply sub =
+    \case
+      MonomorphicSet m ->
+        MonomorphicSet (typeIndexesIn (Set.map (apply sub . TVariable) m))
 
 instance Substitutable (Scheme TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))) where
   apply sub =
@@ -63,15 +69,15 @@ instance Substitutable (Scheme TypeIndex (Kind KindIndex) (Type TypeIndex (Kind 
          in
           Forall qs (apply sub1 ps) (apply sub1 t)
 
--- instance Substitutable (TypeConstraint c TypeIndex () (Type TypeIndex (Kind KindIndex))) where
---  apply sub =
---    \case
---      Equality meta ts ->
---        Equality meta (apply sub ts)
---      Implicit meta t1 t2 m ->
---        Implicit meta (apply sub t1) (apply sub t2) (apply sub m)
---      Explicit meta t1 s ->
---        Explicit meta (apply sub t1) (apply sub s)
+instance Substitutable (Constraint c TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))) where
+  apply sub =
+    \case
+      Equality c ts ->
+        Equality c (apply sub ts)
+      Implicit c t1 t2 m ->
+        Implicit c (apply sub t1) (apply sub t2) (apply sub m)
+      Explicit c t1 s ->
+        Explicit c (apply sub t1) (apply sub s)
 
 instance (Substitutable s) => Substitutable (Intrinsic s) where
   apply = fmap . apply

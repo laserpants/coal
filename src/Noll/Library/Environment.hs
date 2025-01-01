@@ -1,4 +1,5 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module Noll.Library.Environment (
   Environment (..),
@@ -20,7 +21,7 @@ newtype Environment e = Environment {environmentDictionary :: Dictionary e}
 
 {-# INLINE overEnvironment #-}
 overEnvironment :: (Dictionary e -> Dictionary e) -> Environment e -> Environment e
-overEnvironment f (Environment d) = Environment (f d)
+overEnvironment fn Environment{..} = Environment{environmentDictionary = fn environmentDictionary, ..}
 
 {-# INLINE new #-}
 new :: Environment a
