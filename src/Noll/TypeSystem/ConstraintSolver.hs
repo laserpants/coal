@@ -23,9 +23,11 @@ import Noll.Language (Kind (..), KindIndex (..), Scheme (..), Type (..), TypeInd
 import Noll.Library.Supply (supply)
 import Noll.TypeSystem.KindConstraint (KindConstraint (..))
 import Noll.TypeSystem.KindSubstitution (KindSubstitutable (..), KindSubstitution)
+import qualified Noll.TypeSystem.KindSubstitution as KindSubstitution
 import Noll.TypeSystem.KindUnification (KindUnifiable (..))
 import Noll.TypeSystem.TypeConstraint (MonomorphicSet (..), TypeConstraint (..))
 import Noll.TypeSystem.TypeSubstitution (TypeSubstitutable (..), TypeSubstitution (..), mapsToType)
+import qualified Noll.TypeSystem.TypeSubstitution as TypeSubstitution
 import Noll.TypeSystem.TypeUnification (TypeUnifiable (..), unifyAll)
 import Noll.Utils (foldrM)
 
@@ -35,12 +37,12 @@ data SolverError c = SolverError
   deriving (Show, Eq, Ord, Read)
 
 instance (TypeSubstitutable c) => TypeSubstitutable (SolverError c) where
-  applyTypeSub sub SolverError{..} =
-    SolverError{errorContext = applyTypeSub sub errorContext, ..}
+  apply sub SolverError{..} =
+    SolverError{errorContext = TypeSubstitution.apply sub errorContext, ..}
 
 instance (KindSubstitutable c) => KindSubstitutable (SolverError c) where
-  applyKindSub sub SolverError{..} =
-    SolverError{errorContext = applyKindSub sub errorContext, ..}
+  apply sub SolverError{..} =
+    SolverError{errorContext = KindSubstitution.apply sub errorContext, ..}
 
 newtype Solver c a = Solver {solverMonad :: RWS () [SolverError c] (TypeIndex ()) a}
   deriving
@@ -110,7 +112,7 @@ solveTypes constraints =
           tell [SolverError meta]
           solveTypes cs
         Right sub1 -> do
-          sub2 <- solveTypes (applyTypeSub sub1 cs)
+          sub2 <- solveTypes (TypeSubstitution.apply sub1 cs)
           pure (sub2 <> sub1)
     Choice cs (Implicit meta t1 t2 m) -> do
       solveTypes (Explicit meta t1 (generalize m t2) : cs)
@@ -124,7 +126,7 @@ instantiate ::
   m (Type TypeIndex ())
 instantiate (Forall qs _ t) = do
   sub <- foldrM go mempty qs
-  pure (applyTypeSub sub t)
+  pure (TypeSubstitution.apply sub t)
  where
   go (TypeIndex _ index) sub = do
     s <- supply
@@ -153,5 +155,5 @@ solveKinds (KindEquality meta k1 k2 : cs) = do
       tell [SolverError meta]
       solveKinds cs
     Right sub1 -> do
-      sub2 <- solveKinds (applyKindSub sub1 cs)
+      sub2 <- solveKinds (KindSubstitution.apply sub1 cs)
       pure (sub2 <> sub1)

@@ -21,11 +21,13 @@ import Noll.TypeSystem.ConstraintSolver (SolverError (..), evalSolver, solveKind
 import Noll.TypeSystem.KindConstraint (KindConstraint (..))
 import Noll.TypeSystem.KindConstraint.Collect (KindCollectError, collectKindConstraints, runCollectKindConstraints)
 import Noll.TypeSystem.KindConstraint.Rule (KindRule (..))
-import Noll.TypeSystem.KindSubstitution (KindSubstitution (..), applyKindSub)
+import Noll.TypeSystem.KindSubstitution (KindSubstitution (..))
+import qualified Noll.TypeSystem.KindSubstitution as KindSubstitution
 import Noll.TypeSystem.TypeConstraint (TypeConstraint (..))
 import Noll.TypeSystem.TypeConstraint.Collect (TypeCollectError, TypeConstraintsContext (..), collectTypeConstraints, evalCollectTypeConstraints)
 import Noll.TypeSystem.TypeConstraint.Rule (TypeRule (..))
 import Noll.TypeSystem.TypeSubstitution (TypeSubstitutable (..), TypeSubstitution, normalizeTypeIndexes)
+import qualified Noll.TypeSystem.TypeSubstitution as TypeSubstitution
 import Test.Hspec (Spec, describe, it)
 
 spec :: Spec
@@ -240,10 +242,10 @@ testInferTypes e =
     res1 = evalSolver (freshIdIn typeConstraints) (solveTypes typeConstraints)
 
     typeSub = fst res1
-    errs1 = applyTypeSub typeSub (snd res1)
+    errs1 = TypeSubstitution.apply typeSub (snd res1)
 
     e2 :: Expression a (Type TypeIndex ())
-    e2 = normalizeTypeIndexes (applyTypeSub typeSub e1)
+    e2 = normalizeTypeIndexes (TypeSubstitution.apply typeSub e1)
 
     typeConstructorEnv :: Environment (Kind KindIndex)
     typeConstructorEnv =
@@ -266,7 +268,7 @@ testInferTypes e =
     (kindSub, errs3) = res3
 
     e4 :: Expression a (Type TypeIndex (Kind KindIndex))
-    e4 = applyKindSub kindSub e3
+    e4 = KindSubstitution.apply kindSub e3
    in
     (e4, errs0, errs1, errs2, errs3)
 
@@ -274,10 +276,10 @@ typeVariable :: Int -> Type TypeIndex ()
 typeVariable n = TVariable (TypeIndex () n)
 
 instance TypeSubstitutable Char where
-  applyTypeSub _ = id
+  apply _ = id
 
 instance TypeSubstitutable () where
-  applyTypeSub _ = id
+  apply _ = id
 
 -- fn(m) => let y = m in let x = y(true) in x
 fixture1 :: Expression () ()

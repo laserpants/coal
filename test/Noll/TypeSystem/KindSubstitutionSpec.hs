@@ -5,21 +5,22 @@ module Noll.TypeSystem.KindSubstitutionSpec (spec) where
 import Data.List.NonEmpty (NonEmpty (..))
 import Noll.Label (Label (..))
 import Noll.Language (Binding (..), Expression (..), Intrinsic (..), Kind (..), KindIndex (..), Pattern (..), Primitive (..), Type (..), TypeIndex (..))
-import Noll.TypeSystem.KindSubstitution (applyKindSub, mapsToKind)
+import Noll.TypeSystem.KindSubstitution (mapsToKind)
+import qualified Noll.TypeSystem.KindSubstitution as KindSubstitution
 import Test.Hspec (Spec, describe, it)
 
 spec :: Spec
 spec =
   describe "Noll.TypeSystem.KindSubstitution" $ do
-    describe "applyKindSub" $ do
+    describe "apply" $ do
       it "" $ do
         let t = TVariable (TypeIndex (KVariable (KindIndex 1)) 1) :: Type TypeIndex (Kind KindIndex)
-        applyKindSub (1 `mapsToKind` KType) t == TVariable (TypeIndex KType 1)
+        KindSubstitution.apply (1 `mapsToKind` KType) t == TVariable (TypeIndex KType 1)
       it "" $ do
         let t = TVariable (TypeIndex (KVariable (KindIndex 1)) 1) :: Type TypeIndex (Kind KindIndex)
-        applyKindSub (2 `mapsToKind` KType) t == t
+        KindSubstitution.apply (2 `mapsToKind` KType) t == t
       it "" $
-        applyKindSub (3 `mapsToKind` KType) fixture1 == fixture1Result
+        KindSubstitution.apply (3 `mapsToKind` KType) fixture1 == fixture1Result
 
 fixture1 :: Expression () (Type TypeIndex (Kind KindIndex))
 fixture1 =

@@ -17,11 +17,11 @@ import Noll.Language (
  )
 import Noll.TypeSystem.TypeSubstitution (
   TypeSubstitution (..),
-  applyTypeSub,
   mapsToType,
   normalizeTypeIndexes,
   typeSubstitutionFromList,
  )
+import qualified Noll.TypeSystem.TypeSubstitution as TypeSubstitution
 import Test.Hspec (Spec, describe, it)
 
 spec :: Spec
@@ -30,10 +30,10 @@ spec =
     describe "apply" $ do
       it "" $ do
         let t = TVariable (TypeIndex () 1) :: Type TypeIndex ()
-        applyTypeSub (1 `mapsToType` TIntrinsic IBool) t == TIntrinsic IBool
+        TypeSubstitution.apply (1 `mapsToType` TIntrinsic IBool) t == TIntrinsic IBool
       it "" $ do
         let t = TVariable (TypeIndex () 0) :: Type TypeIndex ()
-        applyTypeSub (1 `mapsToType` TIntrinsic IBool) t == t
+        TypeSubstitution.apply (1 `mapsToType` TIntrinsic IBool) t == t
       it "" $ validateResult fixture1 fixture1Result
       it "" $ validateResult fixture2 fixture2Result
     describe "normalizeTypeIndexes" $ do
@@ -74,7 +74,7 @@ validateResult ::
   (Expression a (Type TypeIndex ()), TypeSubstitution) ->
   Expression a (Type TypeIndex ()) ->
   Bool
-validateResult (e, sub) res = applyTypeSub sub e == res
+validateResult (e, sub) res = TypeSubstitution.apply sub e == res
 
 fixture1 :: (Expression () (Type TypeIndex ()), TypeSubstitution)
 fixture1 =

@@ -24,16 +24,16 @@ data TypeRule k a
   deriving (Show, Eq, Ord, Read)
 
 instance TypeSubstitutable (TypeRule () c) where
-  applyTypeSub sub =
+  apply sub =
     \case
       TypeRule ->
         TypeRule
       RuleApplication a t ts ->
-        RuleApplication a (applyTypeSub sub t) (applyTypeSub sub ts)
+        RuleApplication a (apply sub t) (apply sub ts)
       RuleIfCondition a ->
         RuleIfCondition a
       RuleIfBranches a t1 t2 ->
-        RuleIfBranches a (applyTypeSub sub t1) (applyTypeSub sub t2)
+        RuleIfBranches a (apply sub t1) (apply sub t2)
       RuleMatchClauseGuard ->
         RuleMatchClauseGuard
       RuleMatchClauseExpressions a ->

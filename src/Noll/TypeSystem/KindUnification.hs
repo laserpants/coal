@@ -9,7 +9,7 @@ import Control.Monad.Except
 import Data.List.NonEmpty (NonEmpty)
 import qualified Data.List.NonEmpty as NonEmpty
 import Noll.Language (Kind (..), KindIndex (..))
-import Noll.TypeSystem.KindSubstitution (KindSubstitutable (..), KindSubstitution (..), applyKindSub, mapsToKind)
+import Noll.TypeSystem.KindSubstitution (KindSubstitutable (..), KindSubstitution (..), apply, mapsToKind)
 import Noll.TypeSystem.Unification.Error (UnificationError (..))
 import qualified Noll.TypeSystem.Unification.Error as Error
 
@@ -21,7 +21,7 @@ instance (KindSubstitutable u, KindUnifiable u) => KindUnifiable [u] where
     pure mempty
   unifyKinds (u1 : us1) (u2 : us2) = do
     sub1 <- unifyKinds u1 u2
-    sub2 <- unifyKinds (applyKindSub sub1 us1) (applyKindSub sub1 us2)
+    sub2 <- unifyKinds (apply sub1 us1) (apply sub1 us2)
     pure (sub2 <> sub1)
   unifyKinds _ _ =
     error "Implementation error"

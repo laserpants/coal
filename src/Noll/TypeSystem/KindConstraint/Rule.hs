@@ -12,7 +12,7 @@ data KindRule
   deriving (Show, Eq, Ord, Read)
 
 instance KindSubstitutable KindRule where
-  applyKindSub sub =
+  apply sub =
     \case
       KindRule ->
         KindRule
