@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
 module Noll.TypeSystem.KindConstraint.Rule (KindRule (..)) where
@@ -11,4 +12,9 @@ data KindRule
   deriving (Show, Eq, Ord, Read)
 
 instance KindSubstitutable KindRule where
-  applyKindSub = undefined -- TODO
+  applyKindSub sub =
+    \case
+      KindRule ->
+        KindRule
+      RuleTypeApplication t ts ->
+        RuleTypeApplication t ts
