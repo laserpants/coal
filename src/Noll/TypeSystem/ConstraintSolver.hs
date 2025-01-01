@@ -2,6 +2,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
 module Noll.TypeSystem.ConstraintSolver (
@@ -32,6 +33,12 @@ data SolverError c = SolverError
   { errorContext :: c
   }
   deriving (Show, Eq, Ord, Read)
+
+instance (TypeSubstitutable c) => TypeSubstitutable (SolverError c) where
+  apply sub SolverError{..} = SolverError{errorContext = apply sub errorContext, ..}
+
+instance (KindSubstitutable c) => KindSubstitutable (SolverError c) where
+  applyKindSub sub SolverError{..} = SolverError{errorContext = applyKindSub sub errorContext, ..}
 
 newtype Solver c a = Solver {solverMonad :: RWS () [SolverError c] (TypeIndex ()) a}
   deriving

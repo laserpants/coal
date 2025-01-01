@@ -100,40 +100,40 @@ spec =
     it "" $
       typeErrorsInclude
         fixture19
-        (SolverError (RuleApplication "b" (typeVariable 2) [TIntrinsic IBool, TIntrinsic IInt32]))
+        (SolverError (RuleApplication "b" (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TConstructor () "IntPair") [TIntrinsic IBool, TIntrinsic IInt32]))
     it "" $
       evalState (traverse (const supply) fixture20) (0 :: Int)
         == fixture20Tagged
     it "" $
       typeErrorsInclude
         fixture25
-        (SolverError (RuleApplication "EApplication" (typeVariable 1) [TIntrinsic IInt32, TIntrinsic IInt32, TIntrinsic IInt32]))
+        (SolverError (RuleApplication "EApplication" (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TConstructor () "IntPair") [TIntrinsic IInt32, TIntrinsic IInt32, TIntrinsic IInt32]))
 
-typeErrorsIncludeAll :: (Show a, Eq a) => Expression a () -> [SolverError (Descriptor () a)] -> Bool
+typeErrorsIncludeAll :: (TypeSubstitutable a, Show a, Eq a) => Expression a () -> [SolverError (Descriptor () a)] -> Bool
 typeErrorsIncludeAll e = all (typeErrorsInclude e)
 
-typeErrorsInclude :: (Show a, Eq a) => Expression a () -> SolverError (Descriptor () a) -> Bool
+typeErrorsInclude :: (TypeSubstitutable a, Show a, Eq a) => Expression a () -> SolverError (Descriptor () a) -> Bool
 typeErrorsInclude e err = err `elem` errs
  where
   (_, _, errs, _, _) = testInferTypes e
 
-kindErrorsInclude :: (Show a, Eq a) => Expression a () -> SolverError KindConstraintMetadata -> Bool
+kindErrorsInclude :: (TypeSubstitutable a, Show a, Eq a) => Expression a () -> SolverError KindConstraintMetadata -> Bool
 kindErrorsInclude e err = err `elem` errs
  where
   (_, _, _, _, errs) = testInferTypes e
 
-hasNoErrors :: (Show a, Eq a) => Expression a () -> Bool
+hasNoErrors :: (TypeSubstitutable a, Show a, Eq a) => Expression a () -> Bool
 hasNoErrors e = null errs1 && null errs2 && null errs3 && null errs4
  where
   (_, errs1, errs2, errs3, errs4) = testInferTypes e
 
-hasNoTypeErrors :: (Show a, Eq a) => Expression a () -> Bool
+hasNoTypeErrors :: (TypeSubstitutable a, Show a, Eq a) => Expression a () -> Bool
 hasNoTypeErrors e = let (_, _, errs, _, _) = testInferTypes e in null errs
 
-hasNoKindErrors :: (Show a, Eq a) => Expression a () -> Bool
+hasNoKindErrors :: (TypeSubstitutable a, Show a, Eq a) => Expression a () -> Bool
 hasNoKindErrors e = let (_, _, _, _, errs) = testInferTypes e in null errs
 
-validateResult :: (Show a, Eq a) => Expression a () -> Expression a (Type TypeIndex (Kind KindIndex))
+validateResult :: (TypeSubstitutable a, Show a, Eq a) => Expression a () -> Expression a (Type TypeIndex (Kind KindIndex))
 validateResult e = let (a, _, _, _, _) = testInferTypes e in a
 
 type Result a =
@@ -144,7 +144,7 @@ type Result a =
   , [SolverError KindConstraintMetadata]
   )
 
-testInferTypes :: forall a. (Show a, Eq a) => Expression a () -> Result a
+testInferTypes :: forall a. (TypeSubstitutable a, Show a, Eq a) => Expression a () -> Result a
 testInferTypes e =
   let
     e0 :: Expression a Int
@@ -237,7 +237,8 @@ testInferTypes e =
     res1 :: (TypeSubstitution, [SolverError (Descriptor () a)])
     res1 = evalSolver (freshIdIn typeConstraints) (solveTypes typeConstraints)
 
-    (typeSub, errs1) = res1
+    typeSub = fst res1
+    errs1 = apply typeSub (snd res1)
 
     e2 :: Expression a (Type TypeIndex ())
     e2 = normalizeTypeIndexes (apply typeSub e1)
@@ -265,11 +266,16 @@ testInferTypes e =
     e4 :: Expression a (Type TypeIndex (Kind KindIndex))
     e4 = applyKindSub kindSub e3
    in
-    -- traceShow e1 $
     (e4, errs0, errs1, errs2, errs3)
 
 typeVariable :: Int -> Type TypeIndex ()
 typeVariable n = TVariable (TypeIndex () n)
+
+instance TypeSubstitutable Char where
+  apply _ = id
+
+instance TypeSubstitutable () where
+  apply _ = id
 
 -- fn(m) => let y = m in let x = y(true) in x
 fixture1 :: Expression () ()

@@ -34,7 +34,7 @@ import Noll.Language (
   TypeIndexed (..),
  )
 import Noll.Language.Expression.Choice (Choice (..), Guard (..))
-import Noll.TypeSystem.TypeConstraint (MonomorphicSet (..), TypeConstraint (..))
+import Noll.TypeSystem.TypeConstraint (Descriptor (..), MonomorphicSet (..), TypeConstraint (..))
 import Noll.Utils (IndexMap, Map, NonEmpty, Set)
 
 class TypeSubstitutable s where
@@ -165,6 +165,25 @@ instance TypeSubstitutable (Expression a OpaqueType) where
         EMatch a (apply sub t) (apply sub e) (apply sub cs)
       e@ELiteral{} ->
         e
+
+-- TODO: move
+instance TypeSubstitutable (Descriptor () c) where
+  apply sub =
+    \case
+      Descriptor ->
+        Descriptor
+      RuleApplication a t ts ->
+        RuleApplication a (apply sub t) (apply sub ts)
+      RuleIfCondition a ->
+        RuleIfCondition a
+      RuleIfBranches a t1 t2 ->
+        RuleIfBranches a (apply sub t1) (apply sub t2)
+      RuleMatchClauseGuard ->
+        RuleMatchClauseGuard
+      RuleMatchClauseExpressions a ->
+        RuleMatchClauseExpressions a
+      RuleMatchClausePatterns a ->
+        RuleMatchClausePatterns a
 
 newtype TypeSubstitution = TypeSubstitution {typeSubstitutionMap :: IndexMap OpaqueType}
   deriving (Show, Eq, Ord, Read)
