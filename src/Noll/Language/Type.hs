@@ -56,7 +56,7 @@ data TypeVariable k = TypeVariable
   }
   deriving (Show, Eq, Ord, Read, Functor, Foldable)
 
-instance Supply Int (TypeIndex k) where
+instance Supply (TypeIndex k) where
   updateSupply f (TypeIndex k t) = TypeIndex k (f t)
 
 class HasActive k t | t -> k where

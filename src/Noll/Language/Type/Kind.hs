@@ -19,7 +19,7 @@ infixr 1 `KArrow`
 newtype KindIndex = KindIndex {kindIndexId :: Int}
   deriving (Show, Eq, Ord, Read)
 
-instance Supply Int KindIndex where
+instance Supply KindIndex where
   updateSupply f (KindIndex k) = KindIndex (f k)
 
 {-# INLINE foldKind #-}
