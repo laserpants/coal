@@ -3,7 +3,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.TypeSystem.KindUnification (KindUnifiable (unifyKinds)) where
+module Noll.TypeSystem.KindUnification (KindUnifiable (unify)) where
 
 import Control.Monad.Except
 import Data.List.NonEmpty (NonEmpty)
@@ -14,33 +14,33 @@ import Noll.TypeSystem.Unification.Error (UnificationError (..))
 import qualified Noll.TypeSystem.Unification.Error as Error
 
 class KindUnifiable u where
-  unifyKinds :: (MonadError UnificationError m) => u -> u -> m KindSubstitution
+  unify :: (MonadError UnificationError m) => u -> u -> m KindSubstitution
 
 instance (KindSubstitutable u, KindUnifiable u) => KindUnifiable [u] where
-  unifyKinds [] [] =
+  unify [] [] =
     pure mempty
-  unifyKinds (u1 : us1) (u2 : us2) = do
-    sub1 <- unifyKinds u1 u2
-    sub2 <- unifyKinds (apply sub1 us1) (apply sub1 us2)
+  unify (u1 : us1) (u2 : us2) = do
+    sub1 <- unify u1 u2
+    sub2 <- unify (apply sub1 us1) (apply sub1 us2)
     pure (sub2 <> sub1)
-  unifyKinds _ _ =
+  unify _ _ =
     error "Implementation error"
 
 instance (KindSubstitutable u, KindUnifiable u) => KindUnifiable (NonEmpty u) where
-  unifyKinds u1 u2 = unifyKinds (NonEmpty.toList u1) (NonEmpty.toList u2)
+  unify u1 u2 = unify (NonEmpty.toList u1) (NonEmpty.toList u2)
 
 instance KindUnifiable (Kind KindIndex) where
-  unifyKinds (KVariable k) k2 =
+  unify (KVariable k) k2 =
     pure (bindKind k k2)
-  unifyKinds k1 (KVariable k) =
+  unify k1 (KVariable k) =
     pure (bindKind k k1)
-  unifyKinds KType KType =
+  unify KType KType =
     pure mempty
-  unifyKinds KRow KRow =
+  unify KRow KRow =
     pure mempty
-  unifyKinds (KArrow k1 m1) (KArrow k2 m2) =
-    unifyKinds [k1, m1] [k2, m2]
-  unifyKinds _ _ =
+  unify (KArrow k1 m1) (KArrow k2 m2) =
+    unify [k1, m1] [k2, m2]
+  unify _ _ =
     throwError Error.CannotUnifyKinds
 
 bindKind :: KindIndex -> Kind KindIndex -> KindSubstitution

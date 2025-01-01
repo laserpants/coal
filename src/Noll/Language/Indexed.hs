@@ -168,7 +168,7 @@ instance KindIndexed (Kind KindIndex) where
       _ ->
         mempty
 
-instance KindIndexed (Kind k) => KindIndexed (TypeIndex (Kind k)) where
+instance (KindIndexed (Kind k)) => KindIndexed (TypeIndex (Kind k)) where
   kindIndexesIn =
     \case
       TypeIndex k _ ->

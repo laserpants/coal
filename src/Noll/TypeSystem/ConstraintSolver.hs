@@ -25,10 +25,11 @@ import Noll.TypeSystem.KindConstraint (KindConstraint (..))
 import Noll.TypeSystem.KindSubstitution (KindSubstitutable (..), KindSubstitution)
 import qualified Noll.TypeSystem.KindSubstitution as KindSubstitution
 import Noll.TypeSystem.KindUnification (KindUnifiable (..))
+import qualified Noll.TypeSystem.KindUnification as KindUnification
 import Noll.TypeSystem.TypeConstraint (MonomorphicSet (..), TypeConstraint (..))
 import Noll.TypeSystem.TypeSubstitution (TypeSubstitutable (..), TypeSubstitution (..), mapsToType)
 import qualified Noll.TypeSystem.TypeSubstitution as TypeSubstitution
-import Noll.TypeSystem.TypeUnification (TypeUnifiable (..), unifyAll)
+import qualified Noll.TypeSystem.TypeUnification as TypeUnification
 import Noll.Utils (foldrM)
 
 data SolverError c = SolverError
@@ -106,7 +107,7 @@ solveTypes constraints =
     NoneFound ->
       pure mempty
     Choice cs (Equality meta ts) -> do
-      res <- runExceptT (unifyAll ts)
+      res <- runExceptT (TypeUnification.unifyAll ts)
       case res of
         Left err -> do
           tell [SolverError meta]
@@ -149,7 +150,7 @@ solveKinds ::
 solveKinds [] =
   pure mempty
 solveKinds (KindEquality meta k1 k2 : cs) = do
-  res <- runExceptT (unifyKinds k1 k2)
+  res <- runExceptT (KindUnification.unify k1 k2)
   case res of
     Left err -> do
       tell [SolverError meta]
