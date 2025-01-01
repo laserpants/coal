@@ -35,10 +35,12 @@ data SolverError c = SolverError
   deriving (Show, Eq, Ord, Read)
 
 instance (TypeSubstitutable c) => TypeSubstitutable (SolverError c) where
-  apply sub SolverError{..} = SolverError{errorContext = apply sub errorContext, ..}
+  applyTypeSub sub SolverError{..} =
+    SolverError{errorContext = applyTypeSub sub errorContext, ..}
 
 instance (KindSubstitutable c) => KindSubstitutable (SolverError c) where
-  applyKindSub sub SolverError{..} = SolverError{errorContext = applyKindSub sub errorContext, ..}
+  applyKindSub sub SolverError{..} =
+    SolverError{errorContext = applyKindSub sub errorContext, ..}
 
 newtype Solver c a = Solver {solverMonad :: RWS () [SolverError c] (TypeIndex ()) a}
   deriving
@@ -108,7 +110,7 @@ solveTypes constraints =
           tell [SolverError meta]
           solveTypes cs
         Right sub1 -> do
-          sub2 <- solveTypes (apply sub1 cs)
+          sub2 <- solveTypes (applyTypeSub sub1 cs)
           pure (sub2 <> sub1)
     Choice cs (Implicit meta t1 t2 m) -> do
       solveTypes (Explicit meta t1 (generalize m t2) : cs)
@@ -122,7 +124,7 @@ instantiate ::
   m (Type TypeIndex ())
 instantiate (Forall qs _ t) = do
   sub <- foldrM go mempty qs
-  pure (apply sub t)
+  pure (applyTypeSub sub t)
  where
   go (TypeIndex _ index) sub = do
     s <- supply

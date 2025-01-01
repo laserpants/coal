@@ -39,7 +39,7 @@ instance (TypeSubstitutable u, TypeUnifiable u) => TypeUnifiable [u] where
     pure mempty
   unify (u1 : us1) (u2 : us2) = do
     sub1 <- unify u1 u2
-    sub2 <- unify (apply sub1 us1) (apply sub1 us2)
+    sub2 <- unify (applyTypeSub sub1 us1) (applyTypeSub sub1 us2)
     pure (sub2 <> sub1)
   unify _ _ =
     error "Implementation error"

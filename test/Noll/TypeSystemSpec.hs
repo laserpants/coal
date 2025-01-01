@@ -240,10 +240,10 @@ testInferTypes e =
     res1 = evalSolver (freshIdIn typeConstraints) (solveTypes typeConstraints)
 
     typeSub = fst res1
-    errs1 = apply typeSub (snd res1)
+    errs1 = applyTypeSub typeSub (snd res1)
 
     e2 :: Expression a (Type TypeIndex ())
-    e2 = normalizeTypeIndexes (apply typeSub e1)
+    e2 = normalizeTypeIndexes (applyTypeSub typeSub e1)
 
     typeConstructorEnv :: Environment (Kind KindIndex)
     typeConstructorEnv =
@@ -274,10 +274,10 @@ typeVariable :: Int -> Type TypeIndex ()
 typeVariable n = TVariable (TypeIndex () n)
 
 instance TypeSubstitutable Char where
-  apply _ = id
+  applyTypeSub _ = id
 
 instance TypeSubstitutable () where
-  apply _ = id
+  applyTypeSub _ = id
 
 -- fn(m) => let y = m in let x = y(true) in x
 fixture1 :: Expression () ()
