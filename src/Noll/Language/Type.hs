@@ -8,9 +8,6 @@
 
 module Noll.Language.Type (
   Type (..),
-  OpaqueType,
-  OpaqueRow,
-  IndexedType,
   TypeIndex (..),
   TypeVariable (..),
   HasActive (..),
@@ -38,12 +35,6 @@ data Type o k
   deriving (Show, Eq, Ord, Read)
 
 infixr 1 `TArrow`
-
-type OpaqueType = Type TypeIndex ()
-
-type IndexedType = Type TypeIndex (Kind KindIndex)
-
-type OpaqueRow = Row TypeIndex () OpaqueType
 
 data TypeIndex k = TypeIndex
   { typeIndexKind :: k
