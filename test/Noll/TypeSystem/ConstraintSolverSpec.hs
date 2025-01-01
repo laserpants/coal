@@ -5,7 +5,7 @@ module Noll.TypeSystem.ConstraintSolverSpec (spec) where
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import Noll.Language (Intrinsic (..), Kind (..), KindIndex (..), Type (..), TypeIndex (..), freshIdIn)
-import Noll.TypeSystem.ConstraintSolver (evalSolver, solveTypes)
+import Noll.TypeSystem.ConstraintSolver (runSolver, solveTypes)
 import Noll.TypeSystem.TypeConstraint (MonomorphicSet (..), TypeConstraint (..))
 import Noll.TypeSystem.TypeSubstitution (TypeSubstitution (..))
 import Test.Hspec (Spec, describe, it)
@@ -77,17 +77,17 @@ substitutionsIncludeAll = all . uncurry . substitutionsInclude
 substitutionsInclude :: [TypeConstraint () TypeIndex () (Type TypeIndex ())] -> Int -> Type TypeIndex () -> Bool
 substitutionsInclude cs k s = Map.lookup k (typeSubstitutionMap sub) == Just s
  where
-  (sub, _) = evalSolver (freshIdIn cs) (solveTypes cs)
+  (sub, _) = runSolver (freshIdIn cs) (solveTypes cs)
 
 hasNumberOfErrors :: Int -> [TypeConstraint () TypeIndex () (Type TypeIndex ())] -> Bool
 hasNumberOfErrors n cs = length errors == n
  where
-  (_, errors) = evalSolver (freshIdIn cs) (solveTypes cs)
+  (_, errors) = runSolver (freshIdIn cs) (solveTypes cs)
 
 hasNoErrors :: [TypeConstraint () TypeIndex () (Type TypeIndex ())] -> Bool
 hasNoErrors cs = errors == []
  where
-  (_, errors) = evalSolver (freshIdIn cs) (solveTypes cs)
+  (_, errors) = runSolver (freshIdIn cs) (solveTypes cs)
 
 typeVariable :: Int -> Type TypeIndex ()
 typeVariable = TVariable . TypeIndex ()

@@ -17,7 +17,7 @@ import Noll.Language (Binding (..), Choice (..), Clause (..), Constructor (..), 
 import Noll.Library.Environment (Environment (..))
 import qualified Noll.Library.Environment as Environment
 import Noll.Library.Supply (supply)
-import Noll.TypeSystem.ConstraintSolver (SolverError (..), evalSolver, solveKinds, solveTypes)
+import Noll.TypeSystem.ConstraintSolver (SolverError (..), runSolver, solveKinds, solveTypes)
 import Noll.TypeSystem.KindConstraint (KindConstraint (..))
 import Noll.TypeSystem.KindConstraint.Collect (KindCollectError, collectKindConstraints, runCollectKindConstraints)
 import Noll.TypeSystem.KindConstraint.Rule (KindRule (..))
@@ -239,7 +239,7 @@ testInferTypes e =
     (errs0, typeConstraints) = res0
 
     res1 :: (TypeSubstitution, [SolverError (TypeRule () a)])
-    res1 = evalSolver (freshIdIn typeConstraints) (solveTypes typeConstraints)
+    res1 = runSolver (freshIdIn typeConstraints) (solveTypes typeConstraints)
 
     typeSub = fst res1
     errs1 = TypeSubstitution.apply typeSub (snd res1)
@@ -263,7 +263,7 @@ testInferTypes e =
     (e3, errs2, kindConstraints) = res2
 
     res3 :: (KindSubstitution, [SolverError KindRule])
-    res3 = evalSolver 0 (solveKinds kindConstraints)
+    res3 = runSolver 0 (solveKinds kindConstraints)
 
     (kindSub, errs3) = res3
 

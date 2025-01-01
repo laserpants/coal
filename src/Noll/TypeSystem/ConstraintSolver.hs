@@ -9,7 +9,6 @@ module Noll.TypeSystem.ConstraintSolver (
   Solver (..),
   SolverError (..),
   runSolver,
-  evalSolver,
   solveTypes,
   solveKinds,
 ) where
@@ -55,12 +54,8 @@ newtype Solver c a = Solver {solverMonad :: RWS () [SolverError c] (TypeIndex ()
     )
 
 {-# INLINE runSolver #-}
-runSolver :: Int -> Solver c a -> (a, TypeIndex (), [SolverError c])
-runSolver n u = runRWS (solverMonad u) () (TypeIndex () n)
-
-{-# INLINE evalSolver #-}
-evalSolver :: Int -> Solver c a -> (a, [SolverError c])
-evalSolver n u = let (a, _, w) = runSolver n u in (a, w)
+runSolver :: Int -> Solver c a -> (a, [SolverError c])
+runSolver n u = let (a, _, w) = runRWS (solverMonad u) () (TypeIndex () n) in (a, w)
 
 isSolvable ::
   ( Ord k
