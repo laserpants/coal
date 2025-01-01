@@ -9,7 +9,7 @@
 module Noll.Language.Type (
   Type (..),
   TypeIndex (..),
-  TypeVariable (..),
+  TypeParam (..),
   HasActive (..),
   foldType,
   activeIdsIn,
@@ -42,9 +42,9 @@ data TypeIndex k = TypeIndex
   }
   deriving (Show, Eq, Ord, Read, Functor, Foldable)
 
-data TypeVariable k = TypeVariable
-  { typeVariableKind :: k
-  , typeVariableName :: Name
+data TypeParam k = TypeParam
+  { typeParamKind :: k
+  , typeParamName :: Name
   }
   deriving (Show, Eq, Ord, Read, Functor, Foldable)
 
