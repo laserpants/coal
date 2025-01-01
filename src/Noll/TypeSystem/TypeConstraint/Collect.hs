@@ -216,7 +216,7 @@ collectTypeConstraints =
       ms2 <- concat <$> traverse collectTypeConstraints es
       let t1 = typeOf e1
           t2 = foldType t (typeOf <$> es)
-      assertEquality (RuleApplication loc t1 t2) [t1, t2]
+      assertEquality (RuleApplication loc t1 (NonEmpty.toList (typeOf <$> es))) [t1, t2]
       pure (ms1 <> ms2)
     ELiteral{} ->
       pure []

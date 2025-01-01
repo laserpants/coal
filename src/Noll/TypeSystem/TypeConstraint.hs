@@ -34,7 +34,7 @@ data TypeConstraint y o k t
 data Descriptor k a
   = Descriptor
   | -- | Function application
-    RuleApplication a (Type TypeIndex k) (Type TypeIndex k)
+    RuleApplication a (Type TypeIndex k) [Type TypeIndex k]
   | -- | Type of if condition is bool
     RuleIfCondition a
   | -- | If expression 'then' and 'else' branches have identical types

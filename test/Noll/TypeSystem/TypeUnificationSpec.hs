@@ -1,11 +1,11 @@
 module Noll.TypeSystem.TypeUnificationSpec where
 
 import Control.Monad.Except (runExcept)
+import Data.List.NonEmpty (NonEmpty (..))
 import Noll.Language (Intrinsic (..), Kind (..), KindIndex (..), Type (..), TypeIndex (..))
 import Noll.TypeSystem.TypeSubstitution (TypeSubstitution (..), mapsToType)
 import Noll.TypeSystem.TypeUnification (TypeUnifiable (..), unifyAll)
 import Noll.TypeSystem.Unification.Error (UnificationError (..))
-import Data.List.NonEmpty (NonEmpty (..))
 import qualified Noll.TypeSystem.Unification.Error as Error
 import Test.Hspec (Spec, describe, it)
 
@@ -52,4 +52,3 @@ validateResult t1 t2 = runExcept (unify t1 t2)
 
 validateResultUnifyAll :: (TypeUnifiable a) => [a] -> Either UnificationError TypeSubstitution
 validateResultUnifyAll ts = runExcept (unifyAll ts)
-

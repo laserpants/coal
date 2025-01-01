@@ -14,6 +14,7 @@ module Noll.TypeSystem.KindConstraint.Collect (
 
 import Control.Monad.RWS (MonadRWS, MonadReader, MonadState, MonadWriter, RWS, ask, evalRWS, runRWS, tell)
 import Data.Either.Extra (lefts, rights)
+import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
 import Debug.Trace
@@ -178,7 +179,7 @@ instance TranslateKinds a OpaqueType IndexedType where
         k <- KVariable <$> supply
         t1 <- collectKindConstraints t
         ts1 <- traverse collectKindConstraints ts
-        tellRight [KindEquality KindConstraintMetadata (kindOf t1) (foldKind k (kindOf <$> ts1))]
+        tellRight [KindEquality (RuleTypeApplication t (NonEmpty.toList ts)) (kindOf t1) (foldKind k (kindOf <$> ts1))]
         pure (TApplication k t1 ts1)
       TArrow t1 t2 ->
         TArrow <$> collectKindConstraints t1 <*> collectKindConstraints t2
@@ -211,9 +212,5 @@ instance TranslateKinds a OpaqueRow (Row TypeIndex (Kind KindIndex) IndexedType)
 valueType :: Type TypeIndex () -> CollectConstraints a IndexedType
 valueType t = do
   t1 <- collectKindConstraints t
-  case kindOf t1 of
-    k@KVariable{} -> do
-      tellRight [KindEquality KindConstraintMetadata k KType]
-      return t1
-    _ ->
-      return t1
+  tellRight [KindEquality KindConstraintMetadata (kindOf t1) KType]
+  pure t1

@@ -26,7 +26,7 @@ spec =
         typeConstraintsIncludeAll
           fixture1
           [ ( Equality
-                (RuleApplication () (typeVariable 2) (typeBool `TArrow` typeVariable 3))
+                (RuleApplication () (typeVariable 2) [typeBool])
                 [typeVariable 2, typeBool `TArrow` typeVariable 3]
             )
           , (Equality Descriptor [typeVariable 5, typeVariable 1])
@@ -43,16 +43,16 @@ spec =
           , (Implicit Descriptor (typeVariable 9) (typeVariable 1) (MonomorphicSet mempty))
           , (Equality Descriptor [typeVariable 2, typeVariable 3])
           , ( Equality
-                (RuleApplication () (typeVariable 6) (typeVariable 7 `TArrow` typeVariable 5))
+                (RuleApplication () (typeVariable 6) [typeVariable 7])
                 [typeVariable 6, typeVariable 7 `TArrow` typeVariable 5]
             )
           , ( Equality
-                (RuleApplication () (typeVariable 9) (typeInt32 `TArrow` typeVariable 8))
+                (RuleApplication () (typeVariable 9) [typeInt32])
                 [typeVariable 9, typeInt32 `TArrow` typeVariable 8]
             )
           , (Equality Descriptor [typeVariable 1, typeVariable 2 `TArrow` typeVariable 3])
           , ( Equality
-                (RuleApplication () (typeVariable 5) (typeVariable 8 `TArrow` typeVariable 4))
+                (RuleApplication () (typeVariable 5) [typeVariable 8])
                 [typeVariable 5, typeVariable 8 `TArrow` typeVariable 4]
             )
           ]
@@ -60,7 +60,7 @@ spec =
         typeConstraintsIncludeAll
           fixture3
           [ ( Equality
-                (RuleApplication () (typeVariable 2) (typeVariable 3 `TArrow` typeVariable 1))
+                (RuleApplication () (typeVariable 2) [typeVariable 3])
                 [typeVariable 2, typeVariable 3 `TArrow` typeVariable 1]
             )
           , (Equality Descriptor [typeVariable 0, typeInt32])
@@ -119,12 +119,12 @@ typeConstraintsInclude e sample =
 
     (_, constraints) = res0
    in
---    traceShow constraints $
-      case sample of
-        Equality meta ts ->
-          elem (normalized (Equality meta ts)) (normalized <$> constraints)
-        c ->
-          elem c constraints
+    --    traceShow constraints $
+    case sample of
+      Equality meta ts ->
+        elem (normalized (Equality meta ts)) (normalized <$> constraints)
+      c ->
+        elem c constraints
  where
   normalized =
     \case
@@ -143,8 +143,8 @@ hasError e sample =
 
     (errs, _) = res0
    in
---    traceShow errs $
-      sample `elem` errs
+    --    traceShow errs $
+    sample `elem` errs
 
 constructorEnv :: Environment (Constructor TypeIndex () (Type TypeIndex ()))
 constructorEnv =
@@ -339,7 +339,8 @@ fixture8 =
         (ELiteral () (LInt32 5))
         :| []
     )
-    ( EIf ()
+    ( EIf
+        ()
         2
         (ELiteral () (LBool True))
         (EVariable () (Label 3 "x"))

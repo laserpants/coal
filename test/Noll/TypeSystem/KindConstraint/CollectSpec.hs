@@ -5,12 +5,11 @@
 
 module Noll.TypeSystem.KindConstraint.CollectSpec where -- (spec) where
 
-import Noll.TypeSystem.KindConstraint.Collect (KindCollectError (..))
 import Data.List.NonEmpty (NonEmpty (..))
 import Noll.Label (Label (..))
 import Noll.Language (Binding (..), Expression (..), Intrinsic (..), Kind (..), KindIndex (..), Pattern (..), Primitive (..), Type (..), TypeIndex (..), freshIdIn)
 import Noll.TypeSystem.KindConstraint (KindConstraint (..), KindConstraintMetadata (..))
-import Noll.TypeSystem.KindConstraint.Collect (KindCollectError, collectKindConstraints, runCollectKindConstraints)
+import Noll.TypeSystem.KindConstraint.Collect (KindCollectError (..), collectKindConstraints, runCollectKindConstraints)
 import Test.Hspec (Spec, describe, it)
 
 spec :: Spec
@@ -116,4 +115,4 @@ fixture2 =
 
 -- x : Nope('0)
 fixture3 :: Expression () (Type TypeIndex ())
-fixture3 = EVariable () (Label (TApplication () (TConstructor () "Nope") (TVariable (TypeIndex () 0) :| [])) "x") 
+fixture3 = EVariable () (Label (TApplication () (TConstructor () "Nope") (TVariable (TypeIndex () 0) :| [])) "x")

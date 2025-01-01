@@ -6,8 +6,12 @@ module Noll.TypeSystem.KindConstraint (
   KindConstraintMetadata (..),
 ) where
 
+import Noll.Language (OpaqueType (..))
+
 data KindConstraint c k = KindEquality c k k
   deriving (Show, Eq, Ord, Read, Functor, Foldable)
 
-data KindConstraintMetadata = KindConstraintMetadata
+data KindConstraintMetadata
+  = KindConstraintMetadata
+  | RuleTypeApplication OpaqueType [OpaqueType]
   deriving (Show, Eq, Ord, Read)

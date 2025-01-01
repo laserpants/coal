@@ -78,6 +78,10 @@ spec =
     it "" $
       hasNoErrors fixture18
     it "" $
+      validateResult fixture24 == fixture24Typed
+    it "" $
+      hasNoErrors fixture24
+    it "" $
       typeErrorsInclude fixture4 (SolverError (RuleIfCondition "if"))
     it "" $
       typeErrorsInclude
@@ -96,10 +100,14 @@ spec =
     it "" $
       typeErrorsInclude
         fixture19
-        (SolverError (RuleApplication "b" (typeVariable 2) (TIntrinsic IBool `TArrow` TIntrinsic IInt32 `TArrow` typeVariable 1)))
+        (SolverError (RuleApplication "b" (typeVariable 2) [TIntrinsic IBool, TIntrinsic IInt32]))
     it "" $
       evalState (traverse (const supply) fixture20) (0 :: Int)
         == fixture20Tagged
+    it "" $
+      typeErrorsInclude
+        fixture25
+        (SolverError (RuleApplication "EApplication" (typeVariable 1) [TIntrinsic IInt32, TIntrinsic IInt32, TIntrinsic IInt32]))
 
 typeErrorsIncludeAll :: (Show a, Eq a) => Expression a () -> [SolverError (Descriptor () a)] -> Bool
 typeErrorsIncludeAll e = all (typeErrorsInclude e)
@@ -115,7 +123,9 @@ kindErrorsInclude e err = err `elem` errs
   (_, _, _, _, errs) = testInferTypes e
 
 hasNoErrors :: (Show a, Eq a) => Expression a () -> Bool
-hasNoErrors e = hasNoTypeErrors e && hasNoKindErrors e
+hasNoErrors e = null errs1 && null errs2 && null errs3 && null errs4
+ where
+  (_, errs1, errs2, errs3, errs4) = testInferTypes e
 
 hasNoTypeErrors :: (Show a, Eq a) => Expression a () -> Bool
 hasNoTypeErrors e = let (_, _, errs, _, _) = testInferTypes e in null errs
@@ -239,6 +249,7 @@ testInferTypes e =
         , ("Pair1", KArrow KType KType) -- Homogeneous pair type
         , ("Pair", KArrow KType (KArrow KType KType))
         , ("IntPair", KType)
+        , ("Id", KArrow KType KType)
         ]
 
     res2 :: (Expression a (Type TypeIndex (Kind KindIndex)), [KindCollectError a], [KindConstraint KindConstraintMetadata (Kind KindIndex)])
@@ -914,5 +925,40 @@ fixture20Tagged =
       )
   )
 
+-- Type constructor missing
 fixture21 :: Expression String ()
 fixture21 = EAnnotation "EAnnotation" (TConstructor () "Baz") (EVariable "EVariable" (Label () "x"))
+
+-- Over-saturated type constructor
+fixture22 :: Expression String ()
+fixture22 = EAnnotation "EAnnotation" (TApplication () (TConstructor () "Id") (TIntrinsic IInt32 <| TIntrinsic IInt32 :| [])) (EVariable "EVariable" (Label () "x"))
+
+-- Under-saturated type constructor
+fixture23 :: Expression String ()
+fixture23 = EAnnotation "EAnnotation" (TConstructor () "Id") (EVariable "EVariable" (Label () "x"))
+
+-- MkIntPair(2)
+fixture24 :: Expression String ()
+fixture24 =
+  EApplication
+    "EApplication"
+    ()
+    (EConstructor "EConstructor" (Label () "MkIntPair"))
+    (ELiteral "e" (LInt32 2) :| [])
+
+fixture24Typed :: Expression String (Type TypeIndex (Kind KindIndex))
+fixture24Typed =
+  EApplication
+    "EApplication"
+    (TIntrinsic IInt32 `TArrow` TConstructor KType "IntPair")
+    (EConstructor "EConstructor" (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TConstructor KType "IntPair") "MkIntPair"))
+    (ELiteral "e" (LInt32 2) :| [])
+
+-- MkIntPair(2, 2, 2)
+fixture25 :: Expression String ()
+fixture25 =
+  EApplication
+    "EApplication"
+    ()
+    (EConstructor "EConstructor" (Label () "MkIntPair"))
+    (ELiteral "e" (LInt32 2) <| ELiteral "e" (LInt32 2) <| ELiteral "e" (LInt32 2) :| [])
