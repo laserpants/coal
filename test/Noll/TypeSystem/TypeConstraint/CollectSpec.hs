@@ -108,7 +108,10 @@ spec =
                       (TypeVariable () "a")
                       :| []
                   )
-                  `TArrow` TApplication () (TVariable (TypeVariable () "f")) (TVariable (TypeVariable () "b") :| [])
+                  `TArrow` TApplication
+                    ()
+                    (TVariable (TypeVariable () "f"))
+                    (TVariable (TypeVariable () "b") :| [])
               )
           )
           == Just
@@ -119,7 +122,10 @@ spec =
                     ()
                     (TVariable (TypeIndex () 0))
                     (TVariable (TypeIndex () 1) :| [])
-                    `TArrow` TApplication () (TVariable (TypeIndex () 0)) (TVariable (TypeIndex () 2) :| [])
+                    `TArrow` TApplication
+                      ()
+                      (TVariable (TypeIndex () 0))
+                      (TVariable (TypeIndex () 2) :| [])
                 )
             )
     describe "" $ do
