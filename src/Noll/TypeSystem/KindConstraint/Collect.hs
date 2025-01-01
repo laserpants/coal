@@ -42,7 +42,7 @@ import Noll.Library.Environment (Environment (..))
 import qualified Noll.Library.Environment as Environment
 import Noll.Library.List1 (list1ToList)
 import Noll.Library.Supply (supply)
-import Noll.TypeSystem.KindConstraint (KindConstraint (..), KindConstraintMetadata (..))
+import Noll.TypeSystem.KindConstraint (KindConstraint (..), KindRule (..))
 import Noll.Utils (Dictionary, Name, forM_, tellLeft, tellRight, traverse_)
 
 data KindCollectError a
@@ -64,7 +64,7 @@ newtype KindConstraints a c k e = KindConstraints {constraintsMonad :: KindConst
     , MonadRWS (Environment k) [KindCollectOutput a c k] KindIndex
     )
 
-type CollectConstraints a = KindConstraints a KindConstraintMetadata (Kind KindIndex)
+type CollectConstraints a = KindConstraints a KindRule (Kind KindIndex)
 
 {-# INLINE runCollectKindConstraints #-}
 runCollectKindConstraints :: Environment k -> Int -> KindConstraints a c k e -> (e, [KindCollectError a], [KindConstraint c k])
@@ -212,5 +212,5 @@ instance TranslateKinds a OpaqueRow (Row TypeIndex (Kind KindIndex) IndexedType)
 valueType :: Type TypeIndex () -> CollectConstraints a IndexedType
 valueType t = do
   t1 <- collectKindConstraints t
-  tellRight [KindEquality KindConstraintMetadata (kindOf t1) KType]
+  tellRight [KindEquality KindRule (kindOf t1) KType]
   pure t1

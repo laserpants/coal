@@ -57,7 +57,7 @@ import Noll.Library.Environment (Environment (..))
 import qualified Noll.Library.Environment as Environment
 import Noll.Library.List1 (list1ToList)
 import Noll.Library.Supply (supply, supplyN)
-import Noll.TypeSystem.TypeConstraint (Descriptor (..), MonomorphicSet (..), TypeConstraint (..), overMonomorphicSet)
+import Noll.TypeSystem.TypeConstraint (MonomorphicSet (..), TypeConstraint (..), TypeRule (..), overMonomorphicSet)
 import Noll.TypeSystem.TypeConstraint.Assumption (Assumption (..), assumptionNameIs)
 import Noll.Utils (Dictionary, Name, concatMapM, forM, forM_, tellLeft, tellRight, (<$$>))
 
@@ -77,7 +77,7 @@ data TypeCollectError a
   | IllFormedTypeAnnotation a
   deriving (Show, Eq, Ord, Read)
 
-type TypeCollectOutput a o k t = Either (TypeCollectError a) (TypeConstraint (Descriptor k a) o k t)
+type TypeCollectOutput a o k t = Either (TypeCollectError a) (TypeConstraint (TypeRule k a) o k t)
 
 type TypeConstraintsMonad a o k t = RWS (TypeConstraintsContext o k t) [TypeCollectOutput a o k t] ()
 
@@ -111,17 +111,17 @@ lookupContextConstructor name = Environment.lookup name <$> asks contextConstruc
 type CollectConstraints a = TypeConstraints a TypeIndex () OpaqueType
 
 {-# INLINE runCollectTypeConstraints #-}
-runCollectTypeConstraints :: TypeConstraintsContext o k t -> TypeConstraints a o k t e -> (e, [TypeCollectError a], [TypeConstraint (Descriptor k a) o k t])
+runCollectTypeConstraints :: TypeConstraintsContext o k t -> TypeConstraints a o k t e -> (e, [TypeCollectError a], [TypeConstraint (TypeRule k a) o k t])
 runCollectTypeConstraints ctx v = (a, lefts outp, rights outp)
  where
   (a, outp) = evalRWS (constraintsMonad v) ctx ()
 
 {-# INLINE evalCollectTypeConstraints #-}
-evalCollectTypeConstraints :: TypeConstraintsContext o k t -> TypeConstraints a o k t e -> ([TypeCollectError a], [TypeConstraint (Descriptor k a) o k t])
+evalCollectTypeConstraints :: TypeConstraintsContext o k t -> TypeConstraints a o k t e -> ([TypeCollectError a], [TypeConstraint (TypeRule k a) o k t])
 evalCollectTypeConstraints ctx v = let (_, es, cs) = runCollectTypeConstraints ctx v in (es, cs)
 
 {-# INLINE assertEquality #-}
-assertEquality :: Descriptor () a -> [OpaqueType] -> CollectConstraints a ()
+assertEquality :: TypeRule () a -> [OpaqueType] -> CollectConstraints a ()
 assertEquality meta ts = tellRight [Equality meta ts]
 
 assertEqualityAssumptions :: OpaqueType -> [Assumption OpaqueType] -> CollectConstraints a ()
@@ -129,7 +129,7 @@ assertEqualityAssumptions t ms =
   tellRight $ do
     Assumption{..} <- ms
     -- TODO
-    pure (Equality Descriptor [assumptionType, t])
+    pure (Equality TypeRule [assumptionType, t])
 
 assertImplicitAssumptions :: OpaqueType -> [Assumption OpaqueType] -> CollectConstraints a ()
 assertImplicitAssumptions t ms = do
@@ -137,7 +137,7 @@ assertImplicitAssumptions t ms = do
   tellRight $ do
     Assumption{..} <- ms
     -- TODO
-    pure (Implicit Descriptor assumptionType t set)
+    pure (Implicit TypeRule assumptionType t set)
 
 type AssertFn a = OpaqueType -> [Assumption OpaqueType] -> CollectConstraints a ()
 
@@ -157,7 +157,7 @@ patternAssumptions assertFn ms =
           | constructorArity /= length ps ->
               tellLeft [ConstructorArityMismatch loc name constructorArity (length ps)]
         Just Constructor{..} ->
-          tellRight [Explicit Descriptor (foldType t (typeOf <$> ps)) constructorScheme]
+          tellRight [Explicit TypeRule (foldType t (typeOf <$> ps)) constructorScheme]
       concat <$> traverse (patternAssumptions assertFn ms) ps
 
 withMonomorphic :: (TypeIndexed () s) => s -> CollectConstraints a v -> CollectConstraints a v
@@ -172,7 +172,7 @@ collectTypeConstraints =
         Nothing ->
           tellLeft [IllFormedTypeAnnotation a]
         Just s ->
-          tellRight [Explicit Descriptor (typeOf e) s]
+          tellRight [Explicit TypeRule (typeOf e) s]
       collectTypeConstraints e
     EConstructor loc (Label t name) -> do
       r <- lookupContextConstructor name
@@ -180,7 +180,7 @@ collectTypeConstraints =
         Nothing ->
           tellLeft [MissingDataConstructor loc name]
         Just Constructor{..} ->
-          tellRight [Explicit Descriptor t constructorScheme]
+          tellRight [Explicit TypeRule t constructorScheme]
       pure []
     EVariable _ (Label t name) ->
       pure [Assumption name t]
@@ -193,7 +193,7 @@ collectTypeConstraints =
         \case
           BPattern _ p e -> do
             ms <- collectTypeConstraints e
-            assertEquality Descriptor [typeOf p, typeOf e]
+            assertEquality TypeRule [typeOf p, typeOf e]
             pure ms
       ms3 <- flip concatMapM gs $
         \case

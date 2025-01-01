@@ -7,7 +7,7 @@
 {-# LANGUAGE StrictData #-}
 
 module Noll.TypeSystem.TypeConstraint (
-  Descriptor (..),
+  TypeRule (..),
   MonomorphicSet (..),
   TypeConstraint (..),
   overMonomorphicSet,
@@ -16,6 +16,7 @@ where
 
 import Data.Set (Set, intersection, union)
 import Noll.Language (HasActive (..), Scheme (..), Type (..), TypeIndex (..), TypeIndexed (..))
+import Noll.TypeSystem.TypeConstraint.Rule (TypeRule (..))
 
 -- | Monomorphic type variable set
 newtype MonomorphicSet m = MonomorphicSet {monomorphicSet :: Set m}
@@ -30,22 +31,6 @@ data TypeConstraint y o k t
   | Implicit y t t (MonomorphicSet (o k))
   | Explicit y t (Scheme o k t)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
-
-data Descriptor k a
-  = Descriptor
-  | -- | Function application
-    RuleApplication a (Type TypeIndex k) [Type TypeIndex k]
-  | -- | Type of if condition is bool
-    RuleIfCondition a
-  | -- | If expression 'then' and 'else' branches have identical types
-    RuleIfBranches a (Type TypeIndex k) (Type TypeIndex k)
-  | -- | Pattern guards are of type bool
-    RuleMatchClauseGuard
-  | -- | Match clauses all have the same type as expression
-    RuleMatchClauseExpressions a
-  | -- | Match clause patterns have identical types
-    RuleMatchClausePatterns a
-  deriving (Show, Eq, Ord, Read)
 
 instance TypeIndexed k (MonomorphicSet (TypeIndex k)) where
   typeIndexesIn = monomorphicSet

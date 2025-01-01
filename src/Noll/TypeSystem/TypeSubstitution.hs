@@ -35,7 +35,7 @@ import Noll.Language (
   TypeIndexed (..),
  )
 import Noll.Language.Expression.Choice (Choice (..), Guard (..))
-import Noll.TypeSystem.TypeConstraint (Descriptor (..), MonomorphicSet (..), TypeConstraint (..))
+import Noll.TypeSystem.TypeConstraint (MonomorphicSet (..), TypeConstraint (..), TypeRule (..))
 import Noll.Utils (IndexMap, Map, Set)
 
 class TypeSubstitutable s where
@@ -168,11 +168,11 @@ instance TypeSubstitutable (Expression a OpaqueType) where
         e
 
 -- TODO: move
-instance TypeSubstitutable (Descriptor () c) where
+instance TypeSubstitutable (TypeRule () c) where
   apply sub =
     \case
-      Descriptor ->
-        Descriptor
+      TypeRule ->
+        TypeRule
       RuleApplication a t ts ->
         RuleApplication a (apply sub t) (apply sub ts)
       RuleIfCondition a ->

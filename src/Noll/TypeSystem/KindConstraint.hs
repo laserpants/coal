@@ -3,15 +3,11 @@
 
 module Noll.TypeSystem.KindConstraint (
   KindConstraint (..),
-  KindConstraintMetadata (..),
+  KindRule (..),
 ) where
 
 import Noll.Language (OpaqueType (..))
+import Noll.TypeSystem.KindConstraint.Rule (KindRule (..))
 
 data KindConstraint c k = KindEquality c k k
   deriving (Show, Eq, Ord, Read, Functor, Foldable)
-
-data KindConstraintMetadata
-  = KindConstraintMetadata
-  | RuleTypeApplication OpaqueType [OpaqueType]
-  deriving (Show, Eq, Ord, Read)

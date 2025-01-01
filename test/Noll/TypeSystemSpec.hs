@@ -18,10 +18,10 @@ import Noll.Library.Environment (Environment (..))
 import qualified Noll.Library.Environment as Environment
 import Noll.Library.Supply (supply)
 import Noll.TypeSystem.ConstraintSolver (SolverError (..), evalSolver, solveKinds, solveTypes)
-import Noll.TypeSystem.KindConstraint (KindConstraint (..), KindConstraintMetadata (..))
+import Noll.TypeSystem.KindConstraint (KindConstraint (..), KindRule (..))
 import Noll.TypeSystem.KindConstraint.Collect (KindCollectError, collectKindConstraints, runCollectKindConstraints)
 import Noll.TypeSystem.KindSubstitution (KindSubstitution (..), applyKindSub)
-import Noll.TypeSystem.TypeConstraint (Descriptor (..), TypeConstraint (..))
+import Noll.TypeSystem.TypeConstraint (TypeConstraint (..), TypeRule (..))
 import Noll.TypeSystem.TypeConstraint.Collect (TypeCollectError, TypeConstraintsContext (..), collectTypeConstraints, evalCollectTypeConstraints)
 import Noll.TypeSystem.TypeSubstitution (TypeSubstitutable (..), TypeSubstitution, normalizeTypeIndexes)
 import Test.Hspec (Spec, describe, it)
@@ -109,15 +109,15 @@ spec =
         fixture25
         (SolverError (RuleApplication "EApplication" (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TConstructor () "IntPair") [TIntrinsic IInt32, TIntrinsic IInt32, TIntrinsic IInt32]))
 
-typeErrorsIncludeAll :: (TypeSubstitutable a, Show a, Eq a) => Expression a () -> [SolverError (Descriptor () a)] -> Bool
+typeErrorsIncludeAll :: (TypeSubstitutable a, Show a, Eq a) => Expression a () -> [SolverError (TypeRule () a)] -> Bool
 typeErrorsIncludeAll e = all (typeErrorsInclude e)
 
-typeErrorsInclude :: (TypeSubstitutable a, Show a, Eq a) => Expression a () -> SolverError (Descriptor () a) -> Bool
+typeErrorsInclude :: (TypeSubstitutable a, Show a, Eq a) => Expression a () -> SolverError (TypeRule () a) -> Bool
 typeErrorsInclude e err = err `elem` errs
  where
   (_, _, errs, _, _) = testInferTypes e
 
-kindErrorsInclude :: (TypeSubstitutable a, Show a, Eq a) => Expression a () -> SolverError KindConstraintMetadata -> Bool
+kindErrorsInclude :: (TypeSubstitutable a, Show a, Eq a) => Expression a () -> SolverError KindRule -> Bool
 kindErrorsInclude e err = err `elem` errs
  where
   (_, _, _, _, errs) = testInferTypes e
@@ -139,9 +139,9 @@ validateResult e = let (a, _, _, _, _) = testInferTypes e in a
 type Result a =
   ( Expression a (Type TypeIndex (Kind KindIndex))
   , [TypeCollectError a]
-  , [SolverError (Descriptor () a)]
+  , [SolverError (TypeRule () a)]
   , [KindCollectError a]
-  , [SolverError KindConstraintMetadata]
+  , [SolverError KindRule]
   )
 
 testInferTypes :: forall a. (TypeSubstitutable a, Show a, Eq a) => Expression a () -> Result a
@@ -226,7 +226,7 @@ testInferTypes e =
           )
         ]
 
-    res0 :: ([TypeCollectError a], [TypeConstraint (Descriptor () a) TypeIndex () (Type TypeIndex ())])
+    res0 :: ([TypeCollectError a], [TypeConstraint (TypeRule () a) TypeIndex () (Type TypeIndex ())])
     res0 =
       evalCollectTypeConstraints
         (TypeConstraintsContext mempty constructorEnv)
@@ -234,7 +234,7 @@ testInferTypes e =
 
     (errs0, typeConstraints) = res0
 
-    res1 :: (TypeSubstitution, [SolverError (Descriptor () a)])
+    res1 :: (TypeSubstitution, [SolverError (TypeRule () a)])
     res1 = evalSolver (freshIdIn typeConstraints) (solveTypes typeConstraints)
 
     typeSub = fst res1
@@ -253,12 +253,12 @@ testInferTypes e =
         , ("Id", KArrow KType KType)
         ]
 
-    res2 :: (Expression a (Type TypeIndex (Kind KindIndex)), [KindCollectError a], [KindConstraint KindConstraintMetadata (Kind KindIndex)])
+    res2 :: (Expression a (Type TypeIndex (Kind KindIndex)), [KindCollectError a], [KindConstraint KindRule (Kind KindIndex)])
     res2 = runCollectKindConstraints typeConstructorEnv (freshIdIn e2) (collectKindConstraints e2)
 
     (e3, errs2, kindConstraints) = res2
 
-    res3 :: (KindSubstitution, [SolverError KindConstraintMetadata])
+    res3 :: (KindSubstitution, [SolverError KindRule])
     res3 = evalSolver 0 (solveKinds kindConstraints)
 
     (kindSub, errs3) = res3

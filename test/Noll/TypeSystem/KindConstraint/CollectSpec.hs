@@ -8,7 +8,7 @@ module Noll.TypeSystem.KindConstraint.CollectSpec where -- (spec) where
 import Data.List.NonEmpty (NonEmpty (..))
 import Noll.Label (Label (..))
 import Noll.Language (Binding (..), Expression (..), Intrinsic (..), Kind (..), KindIndex (..), Pattern (..), Primitive (..), Type (..), TypeIndex (..), freshIdIn)
-import Noll.TypeSystem.KindConstraint (KindConstraint (..), KindConstraintMetadata (..))
+import Noll.TypeSystem.KindConstraint (KindConstraint (..), KindRule (..))
 import Noll.TypeSystem.KindConstraint.Collect (KindCollectError (..), collectKindConstraints, runCollectKindConstraints)
 import Test.Hspec (Spec, describe, it)
 
@@ -19,20 +19,20 @@ spec =
       it "" $
         kindConstraintsIncludeAll
           fixture1
-          [ KindEquality KindConstraintMetadata (KVariable (KindIndex 3)) KType
+          [ KindEquality KindRule (KVariable (KindIndex 3)) KType
           ]
       it "" $
         kindConstraintsIncludeAll
           fixture2
-          [ KindEquality KindConstraintMetadata (KVariable (KindIndex 3)) KType
+          [ KindEquality KindRule (KVariable (KindIndex 3)) KType
           ]
       it "" $
         hasError fixture3 (MissingTypeConstructor "Nope")
 
-kindConstraintsIncludeAll :: Expression a (Type TypeIndex ()) -> [KindConstraint KindConstraintMetadata (Kind KindIndex)] -> Bool
+kindConstraintsIncludeAll :: Expression a (Type TypeIndex ()) -> [KindConstraint KindRule (Kind KindIndex)] -> Bool
 kindConstraintsIncludeAll = all . kindConstraintsInclude
 
-kindConstraintsInclude :: forall a. Expression a (Type TypeIndex ()) -> KindConstraint KindConstraintMetadata (Kind KindIndex) -> Bool
+kindConstraintsInclude :: forall a. Expression a (Type TypeIndex ()) -> KindConstraint KindRule (Kind KindIndex) -> Bool
 kindConstraintsInclude e =
   \case
     KindEquality meta k1 k2 ->
@@ -45,7 +45,7 @@ hasError e err = err `elem` errs
  where
   (_, errs, _) = getResultsFor e
 
-getResultsFor :: Expression a (Type TypeIndex ()) -> (Expression a (Type TypeIndex (Kind KindIndex)), [KindCollectError a], [KindConstraint KindConstraintMetadata (Kind KindIndex)])
+getResultsFor :: Expression a (Type TypeIndex ()) -> (Expression a (Type TypeIndex (Kind KindIndex)), [KindCollectError a], [KindConstraint KindRule (Kind KindIndex)])
 getResultsFor e = runCollectKindConstraints mempty (freshIdIn e) (collectKindConstraints e)
 
 -- fn(m) => let y = m in let x = y(true) in x
