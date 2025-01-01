@@ -57,6 +57,7 @@ library
       Noll.Library.Environment
       Noll.Library.List1
       Noll.Library.Supply
+      Noll.TypeSystem.Substitution
       Noll.Utils
   other-modules:
       Paths_noll

@@ -13,6 +13,7 @@ module Noll.Utils (
   unionMap,
   tellLeft,
   tellRight,
+  fromMaybe,
   (<$$>),
   (<$$$>),
 ) where
@@ -21,6 +22,7 @@ import Control.Monad (forM, forM_, liftM)
 import Control.Monad.Writer (MonadWriter, tell)
 import Data.Foldable (foldrM, traverse_)
 import Data.Map.Strict (Map)
+import Data.Maybe (fromMaybe)
 import Data.Set (Set, unions)
 import qualified Data.Set as Set
 import Data.Text (Text)

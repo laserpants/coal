@@ -189,9 +189,8 @@ typeIdsIn :: (TypeIndexed k t) => t -> Set Int
 typeIdsIn = Set.map typeIndexId . typeIndexesIn
 
 freshIdIn :: (Ord k, TypeIndexed k t) => t -> Int
-freshIdIn t =
-  if null typeIndexSet
-    then 0
-    else succ (maximum (typeIdsIn typeIndexSet))
+freshIdIn t
+  | null typeIndexSet = 0
+  | otherwise = succ (maximum (typeIdsIn typeIndexSet))
  where
   typeIndexSet = typeIndexesIn t
