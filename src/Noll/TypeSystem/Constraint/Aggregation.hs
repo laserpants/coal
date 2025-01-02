@@ -12,6 +12,7 @@ module Noll.TypeSystem.Constraint.Aggregation (
   instantiateAnnotation,
 ) where
 
+import Debug.Trace
 import Control.Monad.RWS (
   MonadRWS,
   MonadReader,
@@ -225,29 +226,22 @@ aggregateConstraints =
 
 instantiateAnnotation :: Type TypeParam () -> ConstraintsAggregation a (Maybe (Scheme TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))))
 instantiateAnnotation t = do
-  -- r <- runExceptT (evalStateT (instantiateType t) (0, mempty))
-  s <- evalStateT (bork t) (0, mempty)
+  s <- evalStateT (insertKinds =<< translateToIndexed t) (0, mempty)
   pure (Just (Forall (typeIndexesIn s) [] s))
 
-type Instantiate a = StateT (Int, Dictionary (Type TypeIndex (Kind KindIndex))) (ConstraintsAggregation a)
+type Instantiate a = StateT (Int, Dictionary (Type TypeIndex ())) (ConstraintsAggregation a)
 
-znork :: List1 (Type TypeIndex (Kind KindIndex)) -> Type TypeParam () -> Instantiate a (Type TypeIndex (Kind KindIndex))
-znork ts =
+insertKinds :: Type TypeIndex () -> Instantiate a (Type TypeIndex (Kind KindIndex))
+insertKinds = 
   \case
-    TVariable (TypeParam _ name) ->
-      gork (foldKind KType (kindOf <$> ts)) name
-    t -> do
-      bork t
-
-bork :: Type TypeParam () -> Instantiate a (Type TypeIndex (Kind KindIndex))
-bork =
-  \case
-    TApplication _ t ts -> do
-      xs <- traverse bork ts
-      f <- znork xs t
-      pure (TApplication KType f xs)
+    TApplication _ (TVariable (TypeIndex _ n)) ts -> do
+      ts1 <- traverse insertKinds ts
+      let k = foldKind KType (kindOf <$> ts1)
+      pure (TApplication KType (TVariable (TypeIndex k n)) ts1)
+    TApplication _ t ts ->
+      TApplication KType <$> insertKinds t <*> traverse insertKinds ts
     TArrow t1 t2 ->
-      TArrow <$> bork t1 <*> bork t2
+      TArrow <$> insertKinds t1 <*> insertKinds t2
     TConstructor _ name -> do
       c <- lift (lookupTypeConstructor name)
       case c of
@@ -256,24 +250,59 @@ bork =
         Just k ->
           pure (TConstructor k name)
     TIntrinsic t ->
-      TIntrinsic <$> traverse bork t
+      TIntrinsic <$> traverse insertKinds t
     TRow row ->
-      TRow <$> borkRow row
-    TVariable (TypeParam _ name) -> do
-      gork KType name
+      TRow <$> insertKindsRow row
+    TVariable (TypeIndex _ n) -> 
+      pure (TVariable (TypeIndex KType n))
     TAlias name ts t ->
-      TAlias name <$> traverse bork ts <*> bork t
+      TAlias name <$> traverse insertKinds ts <*> insertKinds t 
 
-borkRow :: Row TypeParam () (Type TypeParam ()) -> Instantiate a (Row TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex)))
-borkRow =
+insertKindsRow :: Row TypeIndex () (Type TypeIndex ()) -> Instantiate a (Row TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex)))
+insertKindsRow =
   \case
     RExtend name t row ->
-      RExtend name <$> bork t <*> borkRow row
+      RExtend name <$> insertKinds t <*> insertKindsRow row
+    RVariable (TypeIndex _ n) -> do
+      pure (RVariable (TypeIndex KRow n))
+    RNil ->
+      pure RNil
+
+translateToIndexed :: Type TypeParam () -> Instantiate a (Type TypeIndex ())
+translateToIndexed =
+  \case
+    TApplication _ t ts ->
+      TApplication () <$> translateToIndexed t <*> traverse translateToIndexed ts
+    TArrow t1 t2 ->
+      TArrow <$> translateToIndexed t1 <*> translateToIndexed t2
+    TConstructor _ name ->
+      pure (TConstructor () name)
+    TIntrinsic t ->
+      TIntrinsic <$> traverse translateToIndexed t
+    TRow row ->
+      TRow <$> translateToIndexedRow row
+    TVariable (TypeParam _ name) -> do
+      (n, dict) <- get
+      case Map.lookup name dict of
+        Nothing -> do
+          let t = TVariable (TypeIndex () n)
+          put (n + 1, Map.insert name t dict)
+          pure t
+        Just t ->
+          pure t
+    TAlias name ts t ->
+      TAlias name <$> traverse translateToIndexed ts <*> translateToIndexed t
+
+translateToIndexedRow :: Row TypeParam () (Type TypeParam ()) -> Instantiate a (Row TypeIndex () (Type TypeIndex ()))
+translateToIndexedRow =
+  \case
+    RExtend name t row ->
+      RExtend name <$> translateToIndexed t <*> translateToIndexedRow row
     RVariable (TypeParam _ name) -> do
       (n, dict) <- get
       case Map.lookup name dict of
         Nothing -> do
-          let r = RVariable (TypeIndex KRow n)
+          let r = RVariable (TypeIndex () n)
           put (n + 1, Map.insert name (TRow r) dict)
           pure r
         Just (TRow row) ->
@@ -282,17 +311,3 @@ borkRow =
           error "TODO"
     RNil ->
       pure RNil
-
-gork :: Kind (KindIndex) -> Name -> Instantiate a (Type TypeIndex (Kind KindIndex))
-gork k name = do
-  (n, dict) <- get
-  case Map.lookup name dict of
-    Nothing -> do
-      let t = TVariable (TypeIndex k n)
-      put (n + 1, Map.insert name t dict)
-      pure t
-    Just t@TVariable{} ->
-      pure t
-    Just{} ->
-      error "TODO"
-  pure (TVariable (TypeIndex KType n))

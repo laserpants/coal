@@ -1,7 +1,9 @@
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Noll.TypeSystem.Constraint.AggregationSpec where
 
+import Data.List (sortOn)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Set as Set
 import Noll.Label (Label (..))
@@ -16,9 +18,11 @@ import Noll.Language (
   Type (..),
   TypeIndex (..),
   TypeParam (..),
+  typeIndexesIn,
  )
 import Noll.TypeSystem.Constraint.Aggregation
 import Noll.TypeSystem.Constraint.Rule (Assumption (..))
+import Noll.TypeSystem.Substitution (apply, substitutionFromList)
 import Test.Hspec (Spec, describe, it)
 
 spec :: Spec
@@ -29,10 +33,39 @@ spec =
     --        it "" $
     --          1 == 0
     describe "instantiateAnnotation" $ do
-      it "" $
+      it "a -> b" $
         testCase2
           (TArrow (TVariable (TypeParam () "a")) (TVariable (TypeParam () "b")))
           == Just (Forall (Set.fromList [TypeIndex KType 0, TypeIndex KType 1]) [] (TArrow (TVariable (TypeIndex KType 0)) (TVariable (TypeIndex KType 1))))
+      it "a -> a" $
+        testCase2
+          (TArrow (TVariable (TypeParam () "a")) (TVariable (TypeParam () "a")))
+          == Just (Forall (Set.fromList [TypeIndex KType 0]) [] (TArrow (TVariable (TypeIndex KType 0)) (TVariable (TypeIndex KType 0))))
+      it "f(a) -> f(b)" $
+        testCase2
+          fixture10
+          == Just
+            ( Forall
+                (Set.fromList [TypeIndex (KArrow KType KType) 0, TypeIndex (KType) 1, TypeIndex KType 2])
+                []
+                ( TArrow
+                    (TApplication KType (TVariable (TypeIndex (KArrow KType KType) 0)) (TVariable (TypeIndex KType 1) :| []))
+                    (TApplication KType (TVariable (TypeIndex (KArrow KType KType) 0)) (TVariable (TypeIndex KType 2) :| []))
+                )
+            )
+      it "f(a) -> f(a)" $
+        testCase2
+          fixture11
+          == Just
+            ( Forall
+                (Set.fromList [TypeIndex (KArrow KType KType) 0, TypeIndex (KType) 1])
+                []
+                ( TArrow
+                    (TApplication KType (TVariable (TypeIndex (KArrow KType KType) 0)) (TVariable (TypeIndex KType 1) :| []))
+                    (TApplication KType (TVariable (TypeIndex (KArrow KType KType) 0)) (TVariable (TypeIndex KType 1) :| []))
+                )
+            )
+
 
 testCase ::
   Expression a Int ->
@@ -93,3 +126,15 @@ fixture9 =
         :| []
     )
     (ELiteral "ELiteral" (LInt32 1))
+
+fixture10 :: Type TypeParam ()
+fixture10 =
+  TArrow
+    (TApplication () (TVariable (TypeParam () "f")) (TVariable (TypeParam () "a") :| []))
+    (TApplication () (TVariable (TypeParam () "f")) (TVariable (TypeParam () "b") :| []))
+
+fixture11 :: Type TypeParam ()
+fixture11 =
+  TArrow
+    (TApplication () (TVariable (TypeParam () "f")) (TVariable (TypeParam () "a") :| []))
+    (TApplication () (TVariable (TypeParam () "f")) (TVariable (TypeParam () "a") :| []))

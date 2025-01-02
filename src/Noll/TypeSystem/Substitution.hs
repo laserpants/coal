@@ -7,6 +7,7 @@ module Noll.TypeSystem.Substitution (
   Substitutable (..),
   Substitution (..),
   mapsTo,
+  substitutionFromList,
 ) where
 
 import Data.List.NonEmpty (NonEmpty)
@@ -180,3 +181,7 @@ removeSubstitution TypeIndex{..} (Substitution sub) = Substitution (Map.delete t
 {-# INLINE mapsTo #-}
 mapsTo :: Int -> Type TypeIndex (Kind KindIndex) -> Substitution
 mapsTo index = Substitution . Map.singleton index
+
+{-# INLINE substitutionFromList #-}
+substitutionFromList :: [(Int, Type TypeIndex (Kind KindIndex))] -> Substitution
+substitutionFromList = Substitution . Map.fromList
