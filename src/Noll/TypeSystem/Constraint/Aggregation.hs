@@ -12,7 +12,6 @@ module Noll.TypeSystem.Constraint.Aggregation (
   instantiateAnnotation,
 ) where
 
-import Debug.Trace
 import Control.Monad.RWS (
   MonadRWS,
   MonadReader,
@@ -25,11 +24,12 @@ import Control.Monad.RWS (
   local,
   put,
  )
-import Control.Monad.State (StateT, evalStateT)
+import Control.Monad.State (StateT, evalStateT, gets)
 import Control.Monad.Trans (lift)
 import Data.List (partition)
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
+import Debug.Trace
 import Noll.Label (Label (..))
 import Noll.Language (
   Binding (..),
@@ -232,7 +232,7 @@ instantiateAnnotation t = do
 type Instantiate a = StateT (Int, Dictionary (Type TypeIndex ())) (ConstraintsAggregation a)
 
 insertKinds :: Type TypeIndex () -> Instantiate a (Type TypeIndex (Kind KindIndex))
-insertKinds = 
+insertKinds =
   \case
     TApplication _ (TVariable (TypeIndex _ n)) ts -> do
       ts1 <- traverse insertKinds ts
@@ -253,10 +253,10 @@ insertKinds =
       TIntrinsic <$> traverse insertKinds t
     TRow row ->
       TRow <$> insertKindsRow row
-    TVariable (TypeIndex _ n) -> 
+    TVariable (TypeIndex _ n) ->
       pure (TVariable (TypeIndex KType n))
     TAlias name ts t ->
-      TAlias name <$> traverse insertKinds ts <*> insertKinds t 
+      TAlias name <$> traverse insertKinds ts <*> insertKinds t
 
 insertKindsRow :: Row TypeIndex () (Type TypeIndex ()) -> Instantiate a (Row TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex)))
 insertKindsRow =
@@ -267,6 +267,8 @@ insertKindsRow =
       pure (RVariable (TypeIndex KRow n))
     RNil ->
       pure RNil
+
+--
 
 translateToIndexed :: Type TypeParam () -> Instantiate a (Type TypeIndex ())
 translateToIndexed =
@@ -282,32 +284,41 @@ translateToIndexed =
     TRow row ->
       TRow <$> translateToIndexedRow row
     TVariable (TypeParam _ name) -> do
-      (n, dict) <- get
+      dict <- gets snd
       case Map.lookup name dict of
         Nothing -> do
-          let t = TVariable (TypeIndex () n)
-          put (n + 1, Map.insert name t dict)
+          nextVar name id TVariable
+        Just t@TVariable{} ->
           pure t
-        Just t ->
-          pure t
+        Just _ ->
+          error "TODO"
     TAlias name ts t ->
-      TAlias name <$> traverse translateToIndexed ts <*> translateToIndexed t
+      TAlias name
+        <$> traverse translateToIndexed ts
+        <*> translateToIndexed t
 
 translateToIndexedRow :: Row TypeParam () (Type TypeParam ()) -> Instantiate a (Row TypeIndex () (Type TypeIndex ()))
 translateToIndexedRow =
   \case
     RExtend name t row ->
-      RExtend name <$> translateToIndexed t <*> translateToIndexedRow row
+      RExtend name
+        <$> translateToIndexed t
+        <*> translateToIndexedRow row
     RVariable (TypeParam _ name) -> do
-      (n, dict) <- get
+      dict <- gets snd
       case Map.lookup name dict of
-        Nothing -> do
-          let r = RVariable (TypeIndex () n)
-          put (n + 1, Map.insert name (TRow r) dict)
-          pure r
+        Nothing ->
+          nextVar name TRow RVariable
         Just (TRow row) ->
           pure row
         Just _ ->
           error "TODO"
     RNil ->
       pure RNil
+
+nextVar :: Name -> (t -> Type TypeIndex ()) -> (TypeIndex () -> t) -> Instantiate a t
+nextVar name fn con = do
+  (n, dict) <- get
+  let t = con (TypeIndex () n)
+  put (succ n, Map.insert name (fn t) dict)
+  pure t

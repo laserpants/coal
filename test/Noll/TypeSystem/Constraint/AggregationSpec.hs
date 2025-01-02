@@ -138,3 +138,9 @@ fixture11 =
   TArrow
     (TApplication () (TVariable (TypeParam () "f")) (TVariable (TypeParam () "a") :| []))
     (TApplication () (TVariable (TypeParam () "f")) (TVariable (TypeParam () "a") :| []))
+
+fixture12 :: Type TypeParam ()
+fixture12 =
+  TArrow
+    (TVariable (TypeParam () "f"))
+    (TApplication () (TVariable (TypeParam () "f")) (TVariable (TypeParam () "a") :| []))
