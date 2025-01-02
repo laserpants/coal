@@ -18,11 +18,9 @@ import Noll.Language (
   Type (..),
   TypeIndex (..),
   TypeParam (..),
-  typeIndexesIn,
  )
 import Noll.TypeSystem.Constraint.Aggregation
 import Noll.TypeSystem.Constraint.Rule (Assumption (..))
-import Noll.TypeSystem.Substitution (apply, substitutionFromList)
 import Test.Hspec (Spec, describe, it)
 
 spec :: Spec
@@ -36,15 +34,15 @@ spec =
       it "a -> b" $
         testCase2
           (TArrow (TVariable (TypeParam () "a")) (TVariable (TypeParam () "b")))
-          == Just (Forall (Set.fromList [TypeIndex KType 0, TypeIndex KType 1]) [] (TArrow (TVariable (TypeIndex KType 0)) (TVariable (TypeIndex KType 1))))
+          == Right (Forall (Set.fromList [TypeIndex KType 0, TypeIndex KType 1]) [] (TArrow (TVariable (TypeIndex KType 0)) (TVariable (TypeIndex KType 1))))
       it "a -> a" $
         testCase2
           (TArrow (TVariable (TypeParam () "a")) (TVariable (TypeParam () "a")))
-          == Just (Forall (Set.fromList [TypeIndex KType 0]) [] (TArrow (TVariable (TypeIndex KType 0)) (TVariable (TypeIndex KType 0))))
+          == Right (Forall (Set.fromList [TypeIndex KType 0]) [] (TArrow (TVariable (TypeIndex KType 0)) (TVariable (TypeIndex KType 0))))
       it "f(a) -> f(b)" $
         testCase2
           fixture10
-          == Just
+          == Right
             ( Forall
                 (Set.fromList [TypeIndex (KArrow KType KType) 0, TypeIndex (KType) 1, TypeIndex KType 2])
                 []
@@ -56,7 +54,7 @@ spec =
       it "f(a) -> f(a)" $
         testCase2
           fixture11
-          == Just
+          == Right
             ( Forall
                 (Set.fromList [TypeIndex (KArrow KType KType) 0, TypeIndex (KType) 1])
                 []
@@ -65,7 +63,8 @@ spec =
                     (TApplication KType (TVariable (TypeIndex (KArrow KType KType) 0)) (TVariable (TypeIndex KType 1) :| []))
                 )
             )
-
+      it "f -> f(a)" $
+        testCase2 fixture12 == Left KindMismatch
 
 testCase ::
   Expression a Int ->
@@ -77,7 +76,7 @@ testCase e =
     (AggregationContext mempty mempty mempty)
     (aggregateConstraints (toIndexed e))
 
-testCase2 :: Type TypeParam () -> Maybe (Scheme TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex)))
+testCase2 :: Type TypeParam () -> Either TypeAnnotationError (Scheme TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex)))
 testCase2 t = s
  where
   (s, _) =

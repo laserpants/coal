@@ -7,11 +7,14 @@
 module Noll.TypeSystem.Constraint.Aggregation (
   AggregationContext (..),
   AggregationOutput (..),
+  AggregationError (..),
+  TypeAnnotationError (..),
   aggregateConstraints,
   runAggregationStack,
   instantiateAnnotation,
 ) where
 
+import Control.Monad.Except (ExceptT, runExceptT, throwError)
 import Control.Monad.RWS (
   MonadRWS,
   MonadReader,
@@ -24,7 +27,7 @@ import Control.Monad.RWS (
   local,
   put,
  )
-import Control.Monad.State (StateT, evalStateT, gets)
+import Control.Monad.State (StateT, evalStateT, gets, modify)
 import Control.Monad.Trans (lift)
 import Data.List (partition)
 import qualified Data.Map.Strict as Map
@@ -57,12 +60,17 @@ import Noll.Library.List1 (List1, NonEmpty ((:|)), fromList1)
 import qualified Noll.Library.List1 as List1
 import Noll.TypeSystem.Constraint (Constraint (..), MonomorphicSet (..), overMonomorphicSet)
 import Noll.TypeSystem.Constraint.Rule (Assumption (..), InferenceRule (..), assumptionNameIs)
-import Noll.Utils (Dictionary, Name, concatMapM, forM, tellLeft, tellRight)
+import Noll.Utils (Dictionary, Map, Name, concatMapM, forM, tellLeft, tellRight)
+
+data TypeAnnotationError
+  = KindMismatch
+  | TypeConstructorMissing Name
+  deriving (Show, Eq, Ord, Read)
 
 data AggregationError a
   = MissingDataConstructor a Name
   | DataConstructorArityMismatch a Name Int Int
-  | IllFormedTypeAnnotation a
+  | IllFormedTypeAnnotation a TypeAnnotationError
   deriving (Show, Eq, Ord, Read)
 
 type AggregationOutput a o k t =
@@ -168,11 +176,11 @@ aggregateConstraints ::
 aggregateConstraints =
   \case
     EAnnotation loc t e -> do
-      a <- instantiateAnnotation t
-      case a of
-        Nothing ->
-          tellLeft [IllFormedTypeAnnotation loc]
-        Just s ->
+      r <- instantiateAnnotation t
+      case r of
+        Left err ->
+          tellLeft [IllFormedTypeAnnotation loc err]
+        Right s ->
           tellRight [Explicit (InferAnnotation loc s) (typeOf e) s]
       aggregateConstraints e
     EConstructor loc (Label t name) -> do
@@ -224,52 +232,70 @@ aggregateConstraints =
     EMatch loc t e cs -> do
       undefined
 
-instantiateAnnotation :: Type TypeParam () -> ConstraintsAggregation a (Maybe (Scheme TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))))
+instantiateAnnotation :: Type TypeParam () -> ConstraintsAggregation a (Either TypeAnnotationError (Scheme TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))))
 instantiateAnnotation t = do
-  r <- evalStateT (translateToIndexed t) (0, mempty)
-  s <- insertKinds r
-  pure (Just (Forall (typeIndexesIn s) [] s))
+  r <- runExceptT $ do
+    t1 <- evalStateT (translateToIndexed t) (0, mempty)
+    evalStateT (addKinds t1) mempty
+  pure (scheme <$> r)
+ where
+  scheme t = Forall (typeIndexesIn t) [] t
 
-insertKinds :: Type TypeIndex () -> ConstraintsAggregation a (Type TypeIndex (Kind KindIndex))
-insertKinds =
+type AddKinds a = StateT (Map Int (Kind KindIndex)) (ExceptT TypeAnnotationError (ConstraintsAggregation a))
+
+typeIndex :: Kind KindIndex -> Int -> AddKinds a (TypeIndex (Kind KindIndex))
+typeIndex k n = do
+  map <- get
+  case Map.lookup n map of
+    Nothing -> do
+      modify (Map.insert n k)
+      pure (TypeIndex k n)
+    Just k1
+      | k1 /= k ->
+          throwError KindMismatch
+    Just{} ->
+      pure (TypeIndex k n)
+
+addKinds :: Type TypeIndex () -> AddKinds a (Type TypeIndex (Kind KindIndex))
+addKinds =
   \case
     TApplication _ (TVariable (TypeIndex _ n)) ts -> do
-      ts1 <- traverse insertKinds ts
-      let k = foldKind KType (kindOf <$> ts1)
-      pure (TApplication KType (TVariable (TypeIndex k n)) ts1)
+      ts1 <- traverse addKinds ts
+      var <- typeIndex (foldKind KType (kindOf <$> ts1)) n
+      pure (TApplication KType (TVariable var) ts1)
     TApplication _ t ts ->
-      TApplication KType <$> insertKinds t <*> traverse insertKinds ts
+      TApplication KType
+        <$> addKinds t
+        <*> traverse addKinds ts
+    TVariable (TypeIndex _ n) ->
+      TVariable <$> typeIndex KType n
     TArrow t1 t2 ->
-      TArrow <$> insertKinds t1 <*> insertKinds t2
+      TArrow <$> addKinds t1 <*> addKinds t2
     TConstructor _ name -> do
-      c <- lookupTypeConstructor name
+      c <- lift (lift (lookupTypeConstructor name))
       case c of
         Nothing ->
-          error "TODO"
+          throwError (TypeConstructorMissing name)
         Just k ->
           pure (TConstructor k name)
     TIntrinsic t ->
-      TIntrinsic <$> traverse insertKinds t
+      TIntrinsic <$> traverse addKinds t
     TRow row ->
-      TRow <$> insertKindsRow row
-    TVariable (TypeIndex _ n) ->
-      pure (TVariable (TypeIndex KType n))
+      TRow <$> addKindsRow row
     TAlias name ts t ->
-      TAlias name <$> traverse insertKinds ts <*> insertKinds t
+      TAlias name <$> traverse addKinds ts <*> addKinds t
 
-insertKindsRow :: Row TypeIndex () (Type TypeIndex ()) -> ConstraintsAggregation a (Row TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex)))
-insertKindsRow =
+addKindsRow :: Row TypeIndex () (Type TypeIndex ()) -> AddKinds a (Row TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex)))
+addKindsRow =
   \case
+    RVariable (TypeIndex _ n) ->
+      RVariable <$> typeIndex KRow n
     RExtend name t row ->
-      RExtend name <$> insertKinds t <*> insertKindsRow row
-    RVariable (TypeIndex _ n) -> do
-      pure (RVariable (TypeIndex KRow n))
+      RExtend name <$> addKinds t <*> addKindsRow row
     RNil ->
       pure RNil
 
---
-
-type Instantiate a = StateT (Int, Dictionary (Type TypeIndex ())) (ConstraintsAggregation a)
+type Instantiate a = StateT (Int, Dictionary (Type TypeIndex ())) (ExceptT TypeAnnotationError (ConstraintsAggregation a))
 
 translateToIndexed :: Type TypeParam () -> Instantiate a (Type TypeIndex ())
 translateToIndexed =
@@ -287,12 +313,12 @@ translateToIndexed =
     TVariable (TypeParam _ name) -> do
       dict <- gets snd
       case Map.lookup name dict of
-        Nothing -> do
-          nextVar name id TVariable
+        Nothing ->
+          freshVariable name id TVariable
         Just t@TVariable{} ->
           pure t
         Just _ ->
-          error "TODO"
+          throwError KindMismatch
     TAlias name ts t ->
       TAlias name <$> traverse translateToIndexed ts <*> translateToIndexed t
 
@@ -307,17 +333,17 @@ translateToIndexedRow =
       dict <- gets snd
       case Map.lookup name dict of
         Nothing ->
-          nextVar name TRow RVariable
+          freshVariable name TRow RVariable
         Just (TRow row) ->
           pure row
         Just _ ->
-          error "TODO"
+          throwError KindMismatch
     RNil ->
       pure RNil
 
-nextVar :: Name -> (t -> Type TypeIndex ()) -> (TypeIndex () -> t) -> Instantiate a t
-nextVar name fn con = do
+freshVariable :: Name -> (t -> Type TypeIndex ()) -> (TypeIndex () -> t) -> Instantiate a t
+freshVariable name from to = do
   (n, dict) <- get
-  let t = con (TypeIndex () n)
-  put (succ n, Map.insert name (fn t) dict)
+  let t = to (TypeIndex () n)
+  put (succ n, Map.insert name (from t) dict)
   pure t
