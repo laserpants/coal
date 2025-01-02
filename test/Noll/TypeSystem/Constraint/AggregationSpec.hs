@@ -31,53 +31,55 @@ spec =
     --        it "" $
     --          1 == 0
     describe "instantiateAnnotation" $ do
-      it "a -> b" $
-        testCase2
-          (TArrow (TVariable (TypeParam () "a")) (TVariable (TypeParam () "b")))
-          == Right (Forall (Set.fromList [TypeIndex KType 0, TypeIndex KType 1]) [] (TArrow (TVariable (TypeIndex KType 0)) (TVariable (TypeIndex KType 1))))
-      it "a -> a" $
-        testCase2
-          (TArrow (TVariable (TypeParam () "a")) (TVariable (TypeParam () "a")))
-          == Right (Forall (Set.fromList [TypeIndex KType 0]) [] (TArrow (TVariable (TypeIndex KType 0)) (TVariable (TypeIndex KType 0))))
-      it "f(a) -> f(b)" $
-        testCase2
-          fixture10
-          == Right
-            ( Forall
-                (Set.fromList [TypeIndex (KArrow KType KType) 0, TypeIndex (KType) 1, TypeIndex KType 2])
-                []
-                ( TArrow
-                    (TApplication KType (TVariable (TypeIndex (KArrow KType KType) 0)) (TVariable (TypeIndex KType 1) :| []))
-                    (TApplication KType (TVariable (TypeIndex (KArrow KType KType) 0)) (TVariable (TypeIndex KType 2) :| []))
-                )
-            )
-      it "f(a) -> f(a)" $
-        testCase2
-          fixture11
-          == Right
-            ( Forall
-                (Set.fromList [TypeIndex (KArrow KType KType) 0, TypeIndex (KType) 1])
-                []
-                ( TArrow
-                    (TApplication KType (TVariable (TypeIndex (KArrow KType KType) 0)) (TVariable (TypeIndex KType 1) :| []))
-                    (TApplication KType (TVariable (TypeIndex (KArrow KType KType) 0)) (TVariable (TypeIndex KType 1) :| []))
-                )
-            )
-      it "f -> f(a)" $
-        testCase2 fixture12 == Left KindMismatch
+      describe "Valid" $ do
+        it "a -> b" $
+          testRunner2
+            fixture13
+            == Right (Forall (Set.fromList [TypeIndex KType 0, TypeIndex KType 1]) [] (TArrow (TVariable (TypeIndex KType 0)) (TVariable (TypeIndex KType 1))))
+        it "a -> a" $
+          testRunner2
+            fixture14
+            == Right (Forall (Set.fromList [TypeIndex KType 0]) [] (TArrow (TVariable (TypeIndex KType 0)) (TVariable (TypeIndex KType 0))))
+        it "f(a) -> f(b)" $
+          testRunner2
+            fixture10
+            == Right
+              ( Forall
+                  (Set.fromList [TypeIndex (KArrow KType KType) 0, TypeIndex (KType) 1, TypeIndex KType 2])
+                  []
+                  ( TArrow
+                      (TApplication KType (TVariable (TypeIndex (KArrow KType KType) 0)) (TVariable (TypeIndex KType 1) :| []))
+                      (TApplication KType (TVariable (TypeIndex (KArrow KType KType) 0)) (TVariable (TypeIndex KType 2) :| []))
+                  )
+              )
+        it "f(a) -> f(a)" $
+          testRunner2
+            fixture11
+            == Right
+              ( Forall
+                  (Set.fromList [TypeIndex (KArrow KType KType) 0, TypeIndex (KType) 1])
+                  []
+                  ( TArrow
+                      (TApplication KType (TVariable (TypeIndex (KArrow KType KType) 0)) (TVariable (TypeIndex KType 1) :| []))
+                      (TApplication KType (TVariable (TypeIndex (KArrow KType KType) 0)) (TVariable (TypeIndex KType 1) :| []))
+                  )
+              )
+      describe "Kind mismatch" $ do
+        it "f -> f(a)" $
+          testRunner2 fixture12 == Left KindMismatch
 
-testCase ::
+testRunner ::
   Expression a Int ->
   ( [Assumption (Type TypeIndex (Kind KindIndex))]
   , [AggregationOutput a TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))]
   )
-testCase e =
+testRunner e =
   runAggregationStack
     (AggregationContext mempty mempty mempty)
     (aggregateConstraints (toIndexed e))
 
-testCase2 :: Type TypeParam () -> Either TypeAnnotationError (Scheme TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex)))
-testCase2 t = s
+testRunner2 :: Type TypeParam () -> Either TypeAnnotationError (Scheme TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex)))
+testRunner2 t = s
  where
   (s, _) =
     runAggregationStack
@@ -143,3 +145,11 @@ fixture12 =
   TArrow
     (TVariable (TypeParam () "f"))
     (TApplication () (TVariable (TypeParam () "f")) (TVariable (TypeParam () "a") :| []))
+
+-- a -> b
+fixture13 :: Type TypeParam ()
+fixture13 = TArrow (TVariable (TypeParam () "a")) (TVariable (TypeParam () "b"))
+
+-- a -> a
+fixture14 :: Type TypeParam ()
+fixture14 = TArrow (TVariable (TypeParam () "a")) (TVariable (TypeParam () "a"))
