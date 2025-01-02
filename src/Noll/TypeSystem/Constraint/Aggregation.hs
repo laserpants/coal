@@ -226,12 +226,11 @@ aggregateConstraints =
 
 instantiateAnnotation :: Type TypeParam () -> ConstraintsAggregation a (Maybe (Scheme TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))))
 instantiateAnnotation t = do
-  s <- evalStateT (insertKinds =<< translateToIndexed t) (0, mempty)
+  r <- evalStateT (translateToIndexed t) (0, mempty)
+  s <- insertKinds r
   pure (Just (Forall (typeIndexesIn s) [] s))
 
-type Instantiate a = StateT (Int, Dictionary (Type TypeIndex ())) (ConstraintsAggregation a)
-
-insertKinds :: Type TypeIndex () -> Instantiate a (Type TypeIndex (Kind KindIndex))
+insertKinds :: Type TypeIndex () -> ConstraintsAggregation a (Type TypeIndex (Kind KindIndex))
 insertKinds =
   \case
     TApplication _ (TVariable (TypeIndex _ n)) ts -> do
@@ -243,7 +242,7 @@ insertKinds =
     TArrow t1 t2 ->
       TArrow <$> insertKinds t1 <*> insertKinds t2
     TConstructor _ name -> do
-      c <- lift (lookupTypeConstructor name)
+      c <- lookupTypeConstructor name
       case c of
         Nothing ->
           error "TODO"
@@ -258,7 +257,7 @@ insertKinds =
     TAlias name ts t ->
       TAlias name <$> traverse insertKinds ts <*> insertKinds t
 
-insertKindsRow :: Row TypeIndex () (Type TypeIndex ()) -> Instantiate a (Row TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex)))
+insertKindsRow :: Row TypeIndex () (Type TypeIndex ()) -> ConstraintsAggregation a (Row TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex)))
 insertKindsRow =
   \case
     RExtend name t row ->
@@ -269,6 +268,8 @@ insertKindsRow =
       pure RNil
 
 --
+
+type Instantiate a = StateT (Int, Dictionary (Type TypeIndex ())) (ConstraintsAggregation a)
 
 translateToIndexed :: Type TypeParam () -> Instantiate a (Type TypeIndex ())
 translateToIndexed =
