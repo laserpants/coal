@@ -3,7 +3,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.TypeSystem.Constraint.Rule (InferenceRule (..), Assumption (..)) where
+module Noll.TypeSystem.Constraint.Rule (InferenceRule (..), Assumption (..), assumptionNameIs) where
 
 import Noll.Language (Kind (..), KindIndex, Scheme (..), Type (..), TypeIndex (..))
 import Noll.TypeSystem.Substitution (Substitutable (..))
@@ -16,7 +16,7 @@ data InferenceRule k a
   | -- | Function application
     InferApplication a (Type TypeIndex k) [Type TypeIndex k]
   | -- | Type of if condition is bool
-    InferIfCondition a
+    InferIfCondition a (Type TypeIndex k)
   | -- | If expression 'then' and 'else' branches have identical types
     InferIfBranches a (Type TypeIndex k) (Type TypeIndex k)
   | -- | Pattern guards are of type bool
@@ -36,8 +36,8 @@ instance Substitutable (InferenceRule (Kind KindIndex) c) where
         InferAnnotation a (apply sub t)
       InferApplication a t ts ->
         InferApplication a (apply sub t) (apply sub ts)
-      InferIfCondition a ->
-        InferIfCondition a
+      InferIfCondition a t ->
+        InferIfCondition a (apply sub t)
       InferIfBranches a t1 t2 ->
         InferIfBranches a (apply sub t1) (apply sub t2)
       InferMatchClauseGuard ->

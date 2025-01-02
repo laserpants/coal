@@ -3,7 +3,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.TypeSystem.Constraint.Solver where
+module Noll.TypeSystem.Constraint.Solver (runSolver, solve, solveConstraints) where
 
 import Control.Monad.Except (runExceptT)
 import Control.Monad.RWS (MonadState, MonadWriter, RWS, runRWS, tell)
@@ -22,6 +22,7 @@ import Noll.Language (
   typeIdsIn,
  )
 import Noll.Library.Supply (supply)
+import Noll.Language (freshIdIn)
 import Noll.TypeSystem.Constraint (Constraint (..), MonomorphicSet (..))
 import Noll.TypeSystem.Substitution (Substitutable (..), Substitution (..), mapsTo)
 import Noll.TypeSystem.Unification (unifyAll)
@@ -35,6 +36,10 @@ newtype Solver c a = Solver {solverMonad :: RWS () [c] (TypeIndex (Kind KindInde
     , MonadState (TypeIndex (Kind KindIndex))
     , MonadWriter [c]
     )
+
+{-# INLINE solveConstraints #-}
+solveConstraints :: (Eq c) => [Constraint c TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))] -> (Substitution, [c])
+solveConstraints cs = runSolver (freshIdIn cs) (solve cs)
 
 {-# INLINE runSolver #-}
 runSolver :: Int -> Solver c a -> (a, [c])
