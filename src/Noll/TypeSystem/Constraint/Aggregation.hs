@@ -4,11 +4,19 @@
 
 module Noll.TypeSystem.Constraint.Aggregation (aggregateConstraints) where
 
-import Control.Monad.RWS (MonadRWS, MonadReader, MonadState, MonadWriter, RWS)
+import Control.Monad.RWS (
+  MonadRWS,
+  MonadReader,
+  MonadState,
+  MonadWriter,
+  RWS,
+  evalRWS,
+ )
 import Noll.Label (Label (..))
 import Noll.Language (
   Constructor (..),
   Expression (..),
+  HasType (..),
   Kind (..),
   KindIndex,
   Type (..),
@@ -47,6 +55,10 @@ newtype AggregationStack a o k t c = AggregationStack {aggregationMonad :: Aggre
     , MonadRWS (AggregationContext o k t) [AggregationOutput a o k t] ()
     )
 
+{-# INLINE runAggregationStack #-}
+runAggregationStack :: AggregationContext o k t -> AggregationStack a o k t c -> (c, [AggregationOutput a o k t])
+runAggregationStack ctx m = evalRWS (aggregationMonad m) ctx ()
+
 type Aggregation a = AggregationStack a TypeIndex (Kind Int) (Type TypeIndex (Kind KindIndex))
 
 aggregateConstraints ::
@@ -59,13 +71,20 @@ aggregateConstraints =
     EConstructor loc (Label t name) -> do
       undefined
     EVariable loc (Label t name) ->
-      undefined
+      pure [Assumption name t]
     ELambda loc ps e -> do
       undefined
     ELet loc gs e1 -> do
       undefined
     EIf loc t e1 e2 e3 -> do
-      undefined
+      ms1 <- aggregateConstraints e1
+      ms2 <- aggregateConstraints e2
+      ms3 <- aggregateConstraints e3
+      let t1 = typeOf e1
+          t2 = typeOf e2
+          t3 = typeOf e3
+      -- Asserts
+      pure (ms1 <> ms2 <> ms3)
     EApplication loc t e1 es -> do
       undefined
     ELiteral{} ->

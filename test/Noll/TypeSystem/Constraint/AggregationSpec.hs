@@ -4,7 +4,7 @@ module Noll.TypeSystem.Constraint.AggregationSpec where
 
 import Data.List.NonEmpty (NonEmpty (..))
 import Noll.Label (Label (..))
-import Noll.Language (Binding (..), Expression (..), Pattern (..), Primitive (..))
+import Noll.Language (Binding (..), Expression (..), Kind (..), Pattern (..), Primitive (..), TypeIndex (..))
 import Noll.TypeSystem.Constraint.Aggregation
 import Test.Hspec (Spec, describe, it)
 
@@ -13,6 +13,14 @@ spec =
   describe "Noll.TypeSystem.Constraint.Aggregation" $ do
     it "" $
       1 == 0
+
+-- testCase :: Expression String Int ->
+testCase e =
+  let
+    e1 =
+      fmap (TypeIndex KType) e
+   in
+    undefined
 
 -- let x = 5 in x
 fixture7 :: Expression String Int
