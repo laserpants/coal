@@ -10,19 +10,8 @@ import Control.Monad.RWS (MonadState, MonadWriter, RWS, runRWS, tell)
 import Data.List (delete, find)
 import Data.Set (intersection, (\\))
 import qualified Data.Set as Set
-import Noll.Language (
-  Kind (..),
-  KindIndex,
-  Scheme (..),
-  Type (..),
-  TypeIndex (..),
-  TypeIndexed (..),
-  activeIdsIn,
-  notBoundIn,
-  typeIdsIn,
- )
+import Noll.Language (Kind (..), KindIndex, Scheme (..), Type (..), TypeIndex (..), TypeIndexed (..), activeIdsIn, freshIdIn, notBoundIn, typeIdsIn)
 import Noll.Library.Supply (supply)
-import Noll.Language (freshIdIn)
 import Noll.TypeSystem.Constraint (Constraint (..), MonomorphicSet (..))
 import Noll.TypeSystem.Substitution (Substitutable (..), Substitution (..), mapsTo)
 import Noll.TypeSystem.Unification (unifyAll)

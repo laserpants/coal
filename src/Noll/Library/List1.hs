@@ -4,7 +4,7 @@ module Noll.Library.List1 (
   fromList1,
 ) where
 
-import Data.List.NonEmpty (NonEmpty (..), (<|))
+import Data.List.NonEmpty (NonEmpty (..), reverse, (<|))
 import qualified Data.List.NonEmpty as NonEmpty
 
 type List1 = NonEmpty

@@ -12,7 +12,7 @@ import Noll.Utils (Name)
 data InferenceRule k a
   = InferenceRule
   | -- | Type annotation
-    InferAnnotation a (Type TypeIndex k)
+    InferAnnotation a (Scheme TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex)))
   | -- | Function application
     InferApplication a (Type TypeIndex k) [Type TypeIndex k]
   | -- | Type of if condition is bool
@@ -32,8 +32,8 @@ instance Substitutable (InferenceRule (Kind KindIndex) c) where
     \case
       InferenceRule ->
         InferenceRule
-      InferAnnotation a t ->
-        InferAnnotation a (apply sub t)
+      InferAnnotation a s ->
+        InferAnnotation a s
       InferApplication a t ts ->
         InferApplication a (apply sub t) (apply sub ts)
       InferIfCondition a t ->

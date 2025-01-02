@@ -9,6 +9,7 @@ module Noll.TypeSystem.Constraint.Aggregation (
   AggregationOutput (..),
   aggregateConstraints,
   runAggregationStack,
+  instantiateAnnotation,
 ) where
 
 import Control.Monad.RWS (
@@ -19,9 +20,14 @@ import Control.Monad.RWS (
   RWS,
   asks,
   evalRWS,
+  get,
   local,
+  put,
  )
+import Control.Monad.State (StateT, evalStateT)
+import Control.Monad.Trans (lift)
 import Data.List (partition)
+import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import Noll.Label (Label (..))
 import Noll.Language (
@@ -33,18 +39,24 @@ import Noll.Language (
   Kind (..),
   KindIndex,
   Pattern (..),
+  Row (..),
+  Scheme (..),
   Type (..),
   TypeIndex (..),
   TypeIndexed (..),
+  TypeParam (..),
+  foldKind,
   foldType,
+  kindOf,
   typeIndexesIn,
  )
 import Noll.Library.Environment (Environment (..))
 import qualified Noll.Library.Environment as Environment
-import Noll.Library.List1 (fromList1)
+import Noll.Library.List1 (List1, NonEmpty ((:|)), fromList1)
+import qualified Noll.Library.List1 as List1
 import Noll.TypeSystem.Constraint (Constraint (..), MonomorphicSet (..), overMonomorphicSet)
 import Noll.TypeSystem.Constraint.Rule (Assumption (..), InferenceRule (..), assumptionNameIs)
-import Noll.Utils (Name, concatMapM, forM, tellLeft, tellRight)
+import Noll.Utils (Dictionary, Name, concatMapM, forM, tellLeft, tellRight)
 
 data AggregationError a
   = MissingDataConstructor a Name
@@ -57,7 +69,8 @@ type AggregationOutput a o k t =
 
 data AggregationContext o k t = AggregationContext
   { aggregationMonomorphicSet :: MonomorphicSet (o k)
-  , aggregationConstructorEnv :: Environment (Constructor o k t)
+  , aggregationDataConstructorEnv :: Environment (Constructor o k t)
+  , aggregationTypeConstructorEnv :: Environment k
   }
   deriving (Show, Eq, Ord, Read)
 
@@ -94,9 +107,13 @@ monosetInsertMany = flip (foldr monosetInsert)
 localMonoset :: (MonomorphicSet (o k) -> MonomorphicSet (o k)) -> AggregationStack a o k t c -> AggregationStack a o k t c
 localMonoset = local . overAggregationMonomorphicSet
 
-{-# INLINE lookupContextConstructor #-}
-lookupContextConstructor :: Name -> AggregationStack a o k t (Maybe (Constructor o k t))
-lookupContextConstructor name = Environment.lookup name <$> asks aggregationConstructorEnv
+{-# INLINE lookupDataConstructor #-}
+lookupDataConstructor :: Name -> AggregationStack a o k t (Maybe (Constructor o k t))
+lookupDataConstructor name = Environment.lookup name <$> asks aggregationDataConstructorEnv
+
+{-# INLINE lookupTypeConstructor #-}
+lookupTypeConstructor :: Name -> AggregationStack a o k t (Maybe k)
+lookupTypeConstructor name = Environment.lookup name <$> asks aggregationTypeConstructorEnv
 
 type ConstraintsAggregation a =
   AggregationStack a TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))
@@ -130,7 +147,7 @@ patternAssumptions assert ms =
       assert t ls
       pure rs
     PConstructor loc (Label t name) ps -> do
-      r <- lookupContextConstructor name
+      r <- lookupDataConstructor name
       case r of
         Nothing ->
           tellLeft [MissingDataConstructor loc name]
@@ -150,10 +167,15 @@ aggregateConstraints ::
 aggregateConstraints =
   \case
     EAnnotation loc t e -> do
-      -- TODO
+      a <- instantiateAnnotation t
+      case a of
+        Nothing ->
+          tellLeft [IllFormedTypeAnnotation loc]
+        Just s ->
+          tellRight [Explicit (InferAnnotation loc s) (typeOf e) s]
       aggregateConstraints e
     EConstructor loc (Label t name) -> do
-      r <- lookupContextConstructor name
+      r <- lookupDataConstructor name
       case r of
         Nothing ->
           tellLeft [MissingDataConstructor loc name]
@@ -200,3 +222,77 @@ aggregateConstraints =
       pure []
     EMatch loc t e cs -> do
       undefined
+
+instantiateAnnotation :: Type TypeParam () -> ConstraintsAggregation a (Maybe (Scheme TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))))
+instantiateAnnotation t = do
+  -- r <- runExceptT (evalStateT (instantiateType t) (0, mempty))
+  s <- evalStateT (bork t) (0, mempty)
+  pure (Just (Forall (typeIndexesIn s) [] s))
+
+type Instantiate a = StateT (Int, Dictionary (Type TypeIndex (Kind KindIndex))) (ConstraintsAggregation a)
+
+znork :: List1 (Type TypeIndex (Kind KindIndex)) -> Type TypeParam () -> Instantiate a (Type TypeIndex (Kind KindIndex))
+znork ts =
+  \case
+    TVariable (TypeParam _ name) ->
+      gork (foldKind KType (kindOf <$> ts)) name
+    t -> do
+      bork t
+
+bork :: Type TypeParam () -> Instantiate a (Type TypeIndex (Kind KindIndex))
+bork =
+  \case
+    TApplication _ t ts -> do
+      xs <- traverse bork ts
+      f <- znork xs t
+      pure (TApplication KType f xs)
+    TArrow t1 t2 ->
+      TArrow <$> bork t1 <*> bork t2
+    TConstructor _ name -> do
+      c <- lift (lookupTypeConstructor name)
+      case c of
+        Nothing ->
+          error "TODO"
+        Just k ->
+          pure (TConstructor k name)
+    TIntrinsic t ->
+      TIntrinsic <$> traverse bork t
+    TRow row ->
+      TRow <$> borkRow row
+    TVariable (TypeParam _ name) -> do
+      gork KType name
+    TAlias name ts t ->
+      TAlias name <$> traverse bork ts <*> bork t
+
+borkRow :: Row TypeParam () (Type TypeParam ()) -> Instantiate a (Row TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex)))
+borkRow =
+  \case
+    RExtend name t row ->
+      RExtend name <$> bork t <*> borkRow row
+    RVariable (TypeParam _ name) -> do
+      (n, dict) <- get
+      case Map.lookup name dict of
+        Nothing -> do
+          let r = RVariable (TypeIndex KRow n)
+          put (n + 1, Map.insert name (TRow r) dict)
+          pure r
+        Just (TRow row) ->
+          pure row
+        Just _ ->
+          error "TODO"
+    RNil ->
+      pure RNil
+
+gork :: Kind (KindIndex) -> Name -> Instantiate a (Type TypeIndex (Kind KindIndex))
+gork k name = do
+  (n, dict) <- get
+  case Map.lookup name dict of
+    Nothing -> do
+      let t = TVariable (TypeIndex k n)
+      put (n + 1, Map.insert name t dict)
+      pure t
+    Just t@TVariable{} ->
+      pure t
+    Just{} ->
+      error "TODO"
+  pure (TVariable (TypeIndex KType n))

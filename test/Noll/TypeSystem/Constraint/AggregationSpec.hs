@@ -3,8 +3,20 @@
 module Noll.TypeSystem.Constraint.AggregationSpec where
 
 import Data.List.NonEmpty (NonEmpty (..))
+import qualified Data.Set as Set
 import Noll.Label (Label (..))
-import Noll.Language (Binding (..), Expression (..), Kind (..), KindIndex, Pattern (..), Primitive (..), Type (..), TypeIndex (..))
+import Noll.Language (
+  Binding (..),
+  Expression (..),
+  Kind (..),
+  KindIndex,
+  Pattern (..),
+  Primitive (..),
+  Scheme (..),
+  Type (..),
+  TypeIndex (..),
+  TypeParam (..),
+ )
 import Noll.TypeSystem.Constraint.Aggregation
 import Noll.TypeSystem.Constraint.Rule (Assumption (..))
 import Test.Hspec (Spec, describe, it)
@@ -12,9 +24,15 @@ import Test.Hspec (Spec, describe, it)
 spec :: Spec
 spec =
   describe "Noll.TypeSystem.Constraint.Aggregation" $ do
-    describe "ELet" $ do
+    --    describe "aggregateConstraints" $ do
+    --      describe "ELet" $ do
+    --        it "" $
+    --          1 == 0
+    describe "instantiateAnnotation" $ do
       it "" $
-        1 == 0
+        testCase2
+          (TArrow (TVariable (TypeParam () "a")) (TVariable (TypeParam () "b")))
+          == Just (Forall (Set.fromList [TypeIndex KType 0, TypeIndex KType 1]) [] (TArrow (TVariable (TypeIndex KType 0)) (TVariable (TypeIndex KType 1))))
 
 testCase ::
   Expression a Int ->
@@ -22,13 +40,17 @@ testCase ::
   , [AggregationOutput a TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))]
   )
 testCase e =
-  let
-    e1 =
-      toIndexed e
-   in
+  runAggregationStack
+    (AggregationContext mempty mempty mempty)
+    (aggregateConstraints (toIndexed e))
+
+testCase2 :: Type TypeParam () -> Maybe (Scheme TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex)))
+testCase2 t = s
+ where
+  (s, _) =
     runAggregationStack
-      (AggregationContext mempty mempty)
-      (aggregateConstraints e1)
+      (AggregationContext mempty mempty mempty)
+      (instantiateAnnotation t)
 
 toIndexed :: Expression a Int -> Expression a (Type TypeIndex (Kind KindIndex))
 toIndexed = fmap (TVariable . TypeIndex KType)
