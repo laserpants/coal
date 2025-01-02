@@ -3,7 +3,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.TypeSystem.Constraint.Rule (InferenceRule (..)) where
+module Noll.TypeSystem.Constraint.Rule (InferenceRule (..), Assumption (..)) where
 
 import Noll.Language (Kind (..), KindIndex, Scheme (..), Type (..), TypeIndex (..))
 import Noll.TypeSystem.Substitution (Substitutable (..))

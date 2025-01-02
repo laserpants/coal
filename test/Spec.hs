@@ -7,12 +7,14 @@ import qualified Noll.Language.IndexedSpec
 -- import qualified Noll.TypeSystem.TypeSubstitutionSpec
 -- import qualified Noll.TypeSystem.TypeUnificationSpec
 -- import qualified Noll.TypeSystemSpec
+import qualified Noll.TypeSystem.Constraint.AggregationSpec
 import Test.Hspec (hspec, it)
 
 main :: IO ()
 main =
   hspec $ do
     Noll.Language.IndexedSpec.spec
+    Noll.TypeSystem.Constraint.AggregationSpec.spec
 
 --    Noll.TypeSystem.TypeConstraint.CollectSpec.spec
 --    Noll.TypeSystem.TypeSubstitutionSpec.spec

@@ -58,6 +58,7 @@ library
       Noll.Library.List1
       Noll.Library.Supply
       Noll.TypeSystem.Constraint
+      Noll.TypeSystem.Constraint.Aggregation
       Noll.TypeSystem.Constraint.Rule
       Noll.TypeSystem.Constraint.Solver
       Noll.TypeSystem.Substitution
@@ -101,6 +102,7 @@ test-suite noll-test
   main-is: Spec.hs
   other-modules:
       Noll.Language.IndexedSpec
+      Noll.TypeSystem.Constraint.AggregationSpec
       Paths_noll
   autogen-modules:
       Paths_noll
