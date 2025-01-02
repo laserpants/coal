@@ -293,9 +293,7 @@ translateToIndexed =
         Just _ ->
           error "TODO"
     TAlias name ts t ->
-      TAlias name
-        <$> traverse translateToIndexed ts
-        <*> translateToIndexed t
+      TAlias name <$> traverse translateToIndexed ts <*> translateToIndexed t
 
 translateToIndexedRow :: Row TypeParam () (Type TypeParam ()) -> Instantiate a (Row TypeIndex () (Type TypeIndex ()))
 translateToIndexedRow =
