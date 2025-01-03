@@ -64,6 +64,10 @@ spec =
       validateResult fixture15 == fixture15Typed
     it "" $
       validateNoErrors fixture15
+    it "" $ do
+      validateResult fixture17 == fixture17Typed
+    it "" $
+      validateNoErrors fixture17
 
 -- validateSolverErrors :: Expression () () -> Expression () (Type TypeIndex Kind)
 -- validateSolverErrors ::
@@ -618,3 +622,48 @@ fixture16 =
             :| []
       )
   )
+
+-- let f = fn(g, x) => g(x) in f
+fixture17 :: Expression () ()
+fixture17 =
+  ELet
+    ()
+    ( BPattern
+        ()
+        (PVariable () (Label () "f"))
+        ( ELambda
+            ()
+            (PVariable () (Label () "g") :| [PVariable () (Label () "x")])
+            ( EApplication
+                ()
+                ()
+                (EVariable () (Label () "g"))
+                (EVariable () (Label () "x") :| [])
+            )
+        )
+        :| []
+    )
+    (EVariable () (Label () "f"))
+
+fixture17Typed :: Expression () (Type TypeIndex Kind)
+fixture17Typed =
+  ELet
+    ()
+    ( BPattern
+        ()
+        (PVariable () (Label ((TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 1)) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 1)) "f"))
+        ( ELambda
+            ()
+            ( PVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 1)) "g")
+                :| [PVariable () (Label (TVariable (TypeIndex KType 0)) "x")]
+            )
+            ( EApplication
+                ()
+                (TVariable (TypeIndex KType 1))
+                (EVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 1)) "g"))
+                (EVariable () (Label (TVariable (TypeIndex KType 0)) "x") :| [])
+            )
+        )
+        :| []
+    )
+    (EVariable () (Label ((TVariable (TypeIndex KType 3) `TArrow` TVariable (TypeIndex KType 2)) `TArrow` TVariable (TypeIndex KType 3) `TArrow` TVariable (TypeIndex KType 2)) "f"))
