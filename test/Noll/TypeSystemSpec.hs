@@ -17,9 +17,9 @@ import Test.Hspec (Spec, describe, hspec, it)
 spec :: Spec
 spec =
   describe "Noll.TypeSystem" $ do
-    it "" $
+    it "fn(m) => let y = m in let x = y(true) in x" $
       validateResult fixture1 == fixture1Typed
-    it "" $
+    it "let f = fn(x) => x in (f(f))(f(1))" $
       validateResult fixture2 == fixture2Typed
 
 -- validateSolverErrors :: Expression () () -> Expression () (Type TypeIndex Kind)
@@ -194,6 +194,7 @@ fixture2Typed =
       )
   )
 
+-- TODO
 -- let x = 1 in x(x)
 fixture3 :: Expression () ()
 fixture3 =

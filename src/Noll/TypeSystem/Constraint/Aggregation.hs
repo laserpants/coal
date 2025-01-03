@@ -154,4 +154,5 @@ aggregateConstraints =
     ELiteral{} ->
       pure []
     EMatch loc t e cs -> do
+      ms1 <- aggregateConstraints e
       undefined
