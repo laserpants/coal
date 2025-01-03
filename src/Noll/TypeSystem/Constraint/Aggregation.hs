@@ -32,7 +32,6 @@ import Control.Monad.Trans (lift)
 import Data.List (partition)
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
-import Debug.Trace
 import Noll.Label (Label (..))
 import Noll.Language (
   Binding (..),
