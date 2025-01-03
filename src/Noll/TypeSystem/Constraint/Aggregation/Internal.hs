@@ -1,0 +1,115 @@
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE StrictData #-}
+
+module Noll.TypeSystem.Constraint.Aggregation.Internal where
+
+--import Control.Monad.Except (ExceptT, runExceptT, throwError)
+--import Control.Monad.RWS (
+--  MonadRWS,
+--  MonadReader,
+--  MonadState,
+--  MonadWriter,
+--  RWS,
+--  asks,
+--  evalRWS,
+--  get,
+--  local,
+--  put,
+-- )
+import Control.Monad.RWS (
+  MonadRWS,
+  MonadState,
+  MonadWriter,
+  MonadReader,
+  RWS,
+  local,
+  evalRWS,
+  )
+import qualified Data.Set as Set
+--import Control.Monad.State (StateT, evalStateT, gets, modify)
+--import Control.Monad.Trans (lift)
+--import Data.List (partition)
+--import qualified Data.Map.Strict as Map
+--import Noll.Label (Label (..))
+import Noll.Language (
+  Binding (..),
+  Constructor (..),
+  Expression (..),
+  HasType (..),
+  IndexedType,
+  Intrinsic (..),
+  Kind (..),
+  OpaqueType,
+  Pattern (..),
+  Row (..),
+  Scheme (..),
+  Type (..),
+  TypeIndex (..),
+  TypeIndexed (..),
+  TypeParam (..),
+  foldKind,
+  foldType,
+  kindOf,
+  typeIndexesIn,
+ )
+import Noll.Library.Environment (Environment (..))
+--import qualified Noll.Library.0Environment as Environment
+--import Noll.Library.List1 (List1, NonEmpty ((:|)), fromList1)
+import qualified Noll.Library.List1 as List1
+import Noll.TypeSystem.Constraint (Constraint (..), MonomorphicSet (..), overMonomorphicSet)
+import Noll.TypeSystem.Constraint.Rule (Assumption (..), InferenceRule (..), assumptionNameIs)
+import Noll.Utils (Dictionary, IndexMap, Name, concatMapM, forM, tellLeft, tellRight)
+
+data TypeAnnotationError
+  = KindMismatch
+  | TypeConstructorMissing Name
+  deriving (Show, Eq, Ord, Read)
+
+data AggregationError a
+  = MissingDataConstructor a Name
+  | DataConstructorArityMismatch a Name Int Int
+  | IllFormedTypeAnnotation a TypeAnnotationError
+  deriving (Show, Eq, Ord, Read)
+
+data AggregationContext o k t = AggregationContext
+  { aggregationMonomorphicSet :: MonomorphicSet (o k)
+  , aggregationDataConstructorEnv :: Environment (Constructor o k t)
+  , aggregationTypeConstructorEnv :: Environment k
+  }
+  deriving (Show, Eq, Ord, Read)
+
+type AggregationOutput w o k t = Either (AggregationError w) (Constraint (InferenceRule k w) o k t)
+
+type AggregationMonad w o k t = RWS (AggregationContext o k t) [AggregationOutput w o k t] ()
+
+newtype AggregationStack w o k t a = AggregationStack {aggregationMonad :: AggregationMonad w o k t a}
+  deriving
+    ( Functor
+    , Applicative
+    , Monad
+    , MonadReader (AggregationContext o k t)
+    , MonadWriter [AggregationOutput w o k t]
+    , MonadState ()
+    , MonadRWS (AggregationContext o k t) [AggregationOutput w o k t] ()
+    )
+
+{-# INLINE runAggregationStack #-}
+runAggregationStack :: AggregationContext o k t -> AggregationStack w o k t a -> (a, [AggregationOutput w o k t])
+runAggregationStack ctx m = evalRWS (aggregationMonad m) ctx ()
+
+{-# INLINE overAggregationMonomorphicSet #-}
+overAggregationMonomorphicSet :: (MonomorphicSet (o k) -> MonomorphicSet (o k)) -> AggregationContext o k t -> AggregationContext o k t
+overAggregationMonomorphicSet fn AggregationContext{..} = AggregationContext{aggregationMonomorphicSet = fn aggregationMonomorphicSet, ..}
+
+{-# INLINE monosetInsert #-}
+monosetInsert :: (Ord k) => TypeIndex k -> MonomorphicSet (TypeIndex k) -> MonomorphicSet (TypeIndex k)
+monosetInsert = overMonomorphicSet . Set.insert
+
+{-# INLINE monosetInsertMany #-}
+monosetInsertMany :: (Ord k, Foldable f) => f (TypeIndex k) -> MonomorphicSet (TypeIndex k) -> MonomorphicSet (TypeIndex k)
+monosetInsertMany = flip (foldr monosetInsert)
+
+{-# INLINE localMonoset #-}
+localMonoset :: (MonomorphicSet (o k) -> MonomorphicSet (o k)) -> AggregationStack w o k t a -> AggregationStack w o k t a
+localMonoset = local . overAggregationMonomorphicSet

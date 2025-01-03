@@ -59,6 +59,8 @@ library
       Noll.Library.Supply
       Noll.TypeSystem.Constraint
       Noll.TypeSystem.Constraint.Aggregation
+      Noll.TypeSystem.Constraint.Aggregation.Internal
+      Noll.TypeSystem.Constraint.Aggregation.TypeAnnotation
       Noll.TypeSystem.Constraint.Rule
       Noll.TypeSystem.Constraint.Solver
       Noll.TypeSystem.Substitution

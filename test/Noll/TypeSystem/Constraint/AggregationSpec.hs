@@ -19,6 +19,8 @@ import Noll.Language (
   TypeParam (..),
  )
 import Noll.TypeSystem.Constraint.Aggregation
+import Noll.TypeSystem.Constraint.Aggregation.Internal
+import Noll.TypeSystem.Constraint.Aggregation.TypeAnnotation
 import Noll.TypeSystem.Constraint.Rule (Assumption (..))
 import Test.Hspec (Spec, describe, it)
 
