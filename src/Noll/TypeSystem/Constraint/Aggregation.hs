@@ -1,68 +1,40 @@
 {-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.TypeSystem.Constraint.Aggregation where -- (
---  AggregationContext (..),
---  AggregationOutput (..),
---  AggregationError (..),
---  TypeAnnotationError (..),
---  aggregateConstraints,
---  runAggregationStack,
---  instantiateAnnotation,
---) where
+module Noll.TypeSystem.Constraint.Aggregation (aggregateConstraints) where
 
-import Noll.TypeSystem.Constraint.Aggregation.Internal
-import Noll.TypeSystem.Constraint.Aggregation.TypeAnnotation 
-import Control.Monad.Except (ExceptT, runExceptT, throwError)
-import Control.Monad.RWS (
-  MonadRWS,
-  MonadReader,
-  MonadState,
-  MonadWriter,
-  RWS,
-  asks,
-  evalRWS,
-  get,
-  local,
-  put,
- )
-import Control.Monad.State (StateT, evalStateT, gets, modify)
-import Control.Monad.Trans (lift)
+import Control.Monad.Reader (asks)
 import Data.List (partition)
-import qualified Data.Map.Strict as Map
-import qualified Data.Set as Set
 import Noll.Label (Label (..))
 import Noll.Language (
-   Binding (..),
-   Constructor (..),
+  Binding (..),
+  Constructor (..),
   Expression (..),
-  HasType (..),
   IndexedType,
   Intrinsic (..),
   Kind (..),
-  OpaqueType,
   Pattern (..),
-  Row (..),
-  Scheme (..),
   Type (..),
   TypeIndex (..),
   TypeIndexed (..),
-  TypeParam (..),
-  foldKind,
   foldType,
-  kindOf,
-  typeIndexesIn,
+  typeOf,
  )
-import Noll.Library.Environment (Environment (..))
 import qualified Noll.Library.Environment as Environment
-import Noll.Library.List1 (List1, NonEmpty ((:|)), fromList1)
-import qualified Noll.Library.List1 as List1
-import Noll.TypeSystem.Constraint (Constraint (..), MonomorphicSet (..), overMonomorphicSet)
+import Noll.Library.List1 (fromList1)
+import Noll.TypeSystem.Constraint (Constraint (..))
+import Noll.TypeSystem.Constraint.Aggregation.Internal (
+  AggregationContext (..),
+  AggregationError (..),
+  AggregationStack (..),
+  localMonoset,
+  monosetInsertMany,
+ )
+import Noll.TypeSystem.Constraint.Aggregation.TypeAnnotation (instantiateAnnotation)
 import Noll.TypeSystem.Constraint.Rule (Assumption (..), InferenceRule (..), assumptionNameIs)
-import Noll.Utils (Dictionary, IndexMap, Name, concatMapM, forM, tellLeft, tellRight)
+import Noll.Utils (Name, concatMapM, forM, tellLeft, tellRight)
 
 type ConstraintsAggregation a = AggregationStack a TypeIndex Kind IndexedType
 

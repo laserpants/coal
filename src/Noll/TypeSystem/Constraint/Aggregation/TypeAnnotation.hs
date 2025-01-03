@@ -1,59 +1,29 @@
 {-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.TypeSystem.Constraint.Aggregation.TypeAnnotation where
+module Noll.TypeSystem.Constraint.Aggregation.TypeAnnotation (instantiateAnnotation) where
 
 import Control.Monad.Except (ExceptT, runExceptT, throwError)
-import Control.Monad.RWS (
-  MonadRWS,
-  MonadReader,
-  MonadState,
-  MonadWriter,
-  RWS,
-  asks,
-  evalRWS,
-  get,
-  local,
-  put,
- )
+import Control.Monad.RWS (MonadReader, asks, get, put)
 import Control.Monad.State (StateT, evalStateT, gets, modify)
-import Control.Monad.Trans (lift)
-import Data.List (partition)
 import qualified Data.Map.Strict as Map
-import qualified Data.Set as Set
-import Noll.Label (Label (..))
 import Noll.Language (
-  Binding (..),
-  Constructor (..),
-  Expression (..),
-  HasType (..),
   IndexedType,
-  Intrinsic (..),
   Kind (..),
   OpaqueType,
-  Pattern (..),
   Row (..),
   Scheme (..),
   Type (..),
   TypeIndex (..),
-  TypeIndexed (..),
   TypeParam (..),
   foldKind,
-  foldType,
   kindOf,
   typeIndexesIn,
  )
-import Noll.Library.Environment (Environment (..))
 import qualified Noll.Library.Environment as Environment
-import Noll.Library.List1 (List1, NonEmpty ((:|)), fromList1)
-import qualified Noll.Library.List1 as List1
-import Noll.TypeSystem.Constraint (Constraint (..), MonomorphicSet (..), overMonomorphicSet)
-import Noll.TypeSystem.Constraint.Rule (Assumption (..), InferenceRule (..), assumptionNameIs)
-import Noll.Utils (Dictionary, IndexMap, Name, concatMapM, forM, tellLeft, tellRight)
-import Noll.TypeSystem.Constraint.Aggregation.Internal
+import Noll.TypeSystem.Constraint.Aggregation.Internal (AggregationContext (..), TypeAnnotationError (..))
+import Noll.Utils (Dictionary, IndexMap, Name)
 
 type TypeAnnotationContext = AggregationContext TypeIndex Kind IndexedType
 
@@ -124,7 +94,7 @@ addKindsRow =
     RNil ->
       pure RNil
 
-type Instantiate m = StateT (Int, Dictionary OpaqueType) (ExceptT TypeAnnotationError m) 
+type Instantiate m = StateT (Int, Dictionary OpaqueType) (ExceptT TypeAnnotationError m)
 
 translateToIndexed :: (Monad m) => Type TypeParam () -> Instantiate m OpaqueType
 translateToIndexed =
