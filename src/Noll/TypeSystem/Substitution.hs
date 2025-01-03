@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
@@ -8,6 +9,7 @@ module Noll.TypeSystem.Substitution (
   Substitution (..),
   mapsTo,
   substitutionFromList,
+  normalizeTypeIndexes,
 ) where
 
 import Data.List.NonEmpty (NonEmpty)
@@ -184,3 +186,9 @@ mapsTo index = Substitution . Map.singleton index
 {-# INLINE substitutionFromList #-}
 substitutionFromList :: [(Int, Type TypeIndex Kind)] -> Substitution
 substitutionFromList = Substitution . Map.fromList
+
+normalizeTypeIndexes :: (Substitutable s, TypeIndexed Kind s) => s -> s
+normalizeTypeIndexes e = apply (substitutionFromList sub) e
+ where
+  ixs = Set.toList (typeIndexesIn e)
+  sub = [(ix, TVariable (TypeIndex k n)) | (n, TypeIndex k ix) <- zip [0 ..] ixs]

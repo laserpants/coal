@@ -3,7 +3,11 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.TypeSystem.Constraint.Aggregation (aggregateConstraints) where
+module Noll.TypeSystem.Constraint.Aggregation (
+  AggregationContext (..),
+  aggregateConstraints,
+  runAggregationStack,
+) where
 
 import Control.Monad.Reader (asks)
 import Data.List (partition)
@@ -31,6 +35,7 @@ import Noll.TypeSystem.Constraint.Aggregation.Internal (
   AggregationStack (..),
   localMonoset,
   monosetInsertMany,
+  runAggregationStack,
  )
 import Noll.TypeSystem.Constraint.Aggregation.TypeAnnotation (instantiateAnnotation)
 import Noll.TypeSystem.Constraint.Rule (Assumption (..), InferenceRule (..), assumptionNameIs)
