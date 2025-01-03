@@ -5,10 +5,11 @@ module Noll.TypeSystemSpec where
 import Control.Monad.State (evalState)
 import Data.Either.Extra (lefts, rights)
 import Noll.Label (Label (..))
-import Noll.Language (Binding (..), Expression (..), Intrinsic (..), Kind (..), Pattern (..), Primitive (..), Type (..), TypeIndex (..))
+import Noll.Language (Binding (..), Expression (..), IndexedType, Intrinsic (..), Kind (..), Pattern (..), Primitive (..), Type (..), TypeIndex (..))
 import Noll.Library.List1 (NonEmpty (..))
 import Noll.Library.Supply (supply)
 import Noll.TypeSystem.Constraint.Aggregation
+import Noll.TypeSystem.Constraint.Rule (Assumption (..), InferenceRule (..))
 import Noll.TypeSystem.Constraint.Solver (solveConstraints)
 import Noll.TypeSystem.Substitution (apply, normalizeTypeIndexes)
 import Test.Hspec (Spec, describe, hspec, it)
@@ -29,7 +30,13 @@ validateResult e = e1
  where
   (e1, _, _, _) = testRunner e
 
--- testRunner :: Expression () () -> Expression () (Type TypeIndex Kind)
+testRunner ::
+  Expression () () ->
+  ( Expression () (Type TypeIndex Kind)
+  , [Assumption IndexedType]
+  , [AggregationError ()]
+  , [InferenceRule Kind ()]
+  )
 testRunner e =
   let
     e0 = evalState (traverse (const supply) e) (0 :: Int)

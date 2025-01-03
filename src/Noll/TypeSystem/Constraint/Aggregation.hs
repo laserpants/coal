@@ -5,6 +5,7 @@
 
 module Noll.TypeSystem.Constraint.Aggregation (
   AggregationContext (..),
+  AggregationError (..),
   aggregateConstraints,
   runAggregationStack,
 ) where
