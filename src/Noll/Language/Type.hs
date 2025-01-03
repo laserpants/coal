@@ -20,7 +20,7 @@ module Noll.Language.Type (
 import Data.List.NonEmpty (NonEmpty)
 import qualified Data.Set as Set
 import Noll.Language.Type.Intrinsic (Intrinsic (..))
-import Noll.Language.Type.Kind (Kind, KindIndex)
+import Noll.Language.Type.Kind (Kind)
 import Noll.Language.Type.Row (Row (..))
 import Noll.Library.List1 (List1)
 import Noll.Library.Supply (Supply (..))
@@ -50,7 +50,7 @@ data TypeParam k = TypeParam
   }
   deriving (Show, Eq, Ord, Read, Functor, Foldable)
 
-type IndexedType = Type TypeIndex (Kind KindIndex)
+type IndexedType = Type TypeIndex Kind
 
 type OpaqueType = Type TypeIndex ()
 

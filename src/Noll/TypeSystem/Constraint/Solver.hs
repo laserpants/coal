@@ -10,24 +10,35 @@ import Control.Monad.RWS (MonadState, MonadWriter, RWS, runRWS, tell)
 import Data.List (delete, find)
 import Data.Set (intersection, (\\))
 import qualified Data.Set as Set
-import Noll.Language (Kind (..), KindIndex, Scheme (..), Type (..), TypeIndex (..), TypeIndexed (..), activeIdsIn, freshIdIn, notBoundIn, typeIdsIn)
+import Noll.Language (
+  IndexedType,
+  Kind (..),
+  Scheme (..),
+  Type (..),
+  TypeIndex (..),
+  TypeIndexed (..),
+  activeIdsIn,
+  freshIdIn,
+  notBoundIn,
+  typeIdsIn,
+ )
 import Noll.Library.Supply (supply)
 import Noll.TypeSystem.Constraint (Constraint (..), MonomorphicSet (..))
 import Noll.TypeSystem.Substitution (Substitutable (..), Substitution (..), mapsTo)
 import Noll.TypeSystem.Unification (unifyAll)
 import Noll.Utils (foldrM)
 
-newtype Solver c a = Solver {solverMonad :: RWS () [c] (TypeIndex (Kind KindIndex)) a}
+newtype Solver c a = Solver {solverMonad :: RWS () [c] (TypeIndex Kind) a}
   deriving
     ( Functor
     , Applicative
     , Monad
-    , MonadState (TypeIndex (Kind KindIndex))
+    , MonadState (TypeIndex Kind)
     , MonadWriter [c]
     )
 
 {-# INLINE solveConstraints #-}
-solveConstraints :: (Eq c) => [Constraint c TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))] -> (Substitution, [c])
+solveConstraints :: (Eq c) => [Constraint c TypeIndex Kind IndexedType] -> (Substitution, [c])
 solveConstraints cs = runSolver (freshIdIn cs) (solve cs)
 
 {-# INLINE runSolver #-}
@@ -53,7 +64,7 @@ choice cs = findChoice [(delete c cs, c) | c <- cs]
   findChoice ps =
     maybe ChoiceNotFound (uncurry Choice) (find (uncurry isSolvable) ps)
 
-solve :: (Eq c) => [Constraint c TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))] -> Solver c Substitution
+solve :: (Eq c) => [Constraint c TypeIndex Kind IndexedType] -> Solver c Substitution
 solve [] = pure (Substitution mempty)
 solve constraints =
   case choice constraints of
@@ -78,7 +89,7 @@ solve constraints =
 generalize :: (TypeIndexed k t) => MonomorphicSet (TypeIndex k) -> t -> Scheme TypeIndex k t
 generalize (MonomorphicSet m) t = Forall (notBoundIn m (typeIndexesIn t)) [] t
 
-instantiate :: Scheme TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex)) -> Solver c (Type TypeIndex (Kind KindIndex))
+instantiate :: Scheme TypeIndex Kind IndexedType -> Solver c IndexedType
 instantiate (Forall qs _ t) = do
   sub <- foldrM go mempty qs
   pure (apply sub t)

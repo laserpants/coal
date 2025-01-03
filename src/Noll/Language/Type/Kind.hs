@@ -2,26 +2,19 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Language.Type.Kind (Kind (..), KindIndex (..), foldKind) where
+module Noll.Language.Type.Kind (Kind (..), foldKind) where
 
 import Noll.Library.Supply (Supply (..))
 
-data Kind o
+data Kind
   = KType
   | KRow
-  | KArrow (Kind o) (Kind o)
+  | KArrow Kind Kind
   | KTrait
-  | KVariable o
   deriving (Show, Eq, Ord, Read)
 
 infixr 1 `KArrow`
 
-newtype KindIndex = KindIndex {kindIndexId :: Int}
-  deriving (Show, Eq, Ord, Read)
-
-instance Supply KindIndex where
-  updateSupply f (KindIndex k) = KindIndex (f k)
-
 {-# INLINE foldKind #-}
-foldKind :: (Foldable f) => Kind o -> f (Kind o) -> Kind o
+foldKind :: (Foldable f) => Kind -> f Kind -> Kind
 foldKind = foldr KArrow

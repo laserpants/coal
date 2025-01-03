@@ -22,7 +22,6 @@ import Noll.Language (
   Guard (..),
   Intrinsic (..),
   Kind,
-  KindIndex,
   Pattern (..),
   Row (..),
   Scheme (..),
@@ -55,13 +54,13 @@ instance (Substitutable s) => Substitutable (Trait s) where
 instance (Ord s, Substitutable s) => Substitutable (Set s) where
   apply = Set.map . apply
 
-instance Substitutable (MonomorphicSet (TypeIndex (Kind KindIndex))) where
+instance Substitutable (MonomorphicSet (TypeIndex Kind)) where
   apply sub =
     \case
       MonomorphicSet m ->
         MonomorphicSet (typeIndexesIn (Set.map (apply sub . TVariable) m))
 
-instance Substitutable (Scheme TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))) where
+instance Substitutable (Scheme TypeIndex Kind (Type TypeIndex Kind)) where
   apply sub =
     \case
       Forall qs ps t ->
@@ -70,7 +69,7 @@ instance Substitutable (Scheme TypeIndex (Kind KindIndex) (Type TypeIndex (Kind 
          in
           Forall qs (apply sub1 ps) (apply sub1 t)
 
-instance Substitutable (Constraint c TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))) where
+instance Substitutable (Constraint c TypeIndex Kind (Type TypeIndex Kind)) where
   apply sub =
     \case
       Equality c ts ->
@@ -83,11 +82,11 @@ instance Substitutable (Constraint c TypeIndex (Kind KindIndex) (Type TypeIndex 
 instance (Substitutable s) => Substitutable (Intrinsic s) where
   apply = fmap . apply
 
-instance Substitutable (Row TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))) where
+instance Substitutable (Row TypeIndex Kind (Type TypeIndex Kind)) where
   apply sub =
     error "TODO"
 
-instance Substitutable (Type TypeIndex (Kind KindIndex)) where
+instance Substitutable (Type TypeIndex Kind) where
   apply sub =
     \case
       TAlias name ts t -> do
@@ -105,7 +104,7 @@ instance Substitutable (Type TypeIndex (Kind KindIndex)) where
       t@TConstructor{} ->
         t
 
-instance Substitutable (Pattern a (Type TypeIndex (Kind KindIndex))) where
+instance Substitutable (Pattern a (Type TypeIndex Kind)) where
   apply sub =
     \case
       PVariable a (Label t name) ->
@@ -113,31 +112,31 @@ instance Substitutable (Pattern a (Type TypeIndex (Kind KindIndex))) where
       PConstructor a (Label t name) ps ->
         PConstructor a (Label (apply sub t) name) (apply sub ps)
 
-instance Substitutable (Binding Expression a (Type TypeIndex (Kind KindIndex))) where
+instance Substitutable (Binding Expression a (Type TypeIndex Kind)) where
   apply sub =
     \case
       BPattern a p e ->
         BPattern a (apply sub p) (apply sub e)
 
-instance Substitutable (Guard Expression a (Type TypeIndex (Kind KindIndex))) where
+instance Substitutable (Guard Expression a (Type TypeIndex Kind)) where
   apply sub =
     \case
       CGuard e ->
         CGuard (apply sub e)
 
-instance Substitutable (Choice Expression a (Type TypeIndex (Kind KindIndex))) where
+instance Substitutable (Choice Expression a (Type TypeIndex Kind)) where
   apply sub =
     \case
       CPlain a gs e ->
         CPlain a (apply sub gs) (apply sub e)
 
-instance Substitutable (Clause Expression a (Type TypeIndex (Kind KindIndex))) where
+instance Substitutable (Clause Expression a (Type TypeIndex Kind)) where
   apply sub =
     \case
       EClause a p cs ->
         EClause a (apply sub p) (apply sub cs)
 
-instance Substitutable (Expression a (Type TypeIndex (Kind KindIndex))) where
+instance Substitutable (Expression a (Type TypeIndex Kind)) where
   apply sub =
     \case
       EAnnotation a t e ->
@@ -159,7 +158,7 @@ instance Substitutable (Expression a (Type TypeIndex (Kind KindIndex))) where
       e@ELiteral{} ->
         e
 
-newtype Substitution = Substitution {substitutionMap :: IndexMap (Type TypeIndex (Kind KindIndex))}
+newtype Substitution = Substitution {substitutionMap :: IndexMap (Type TypeIndex Kind)}
   deriving (Show, Eq, Ord, Read)
 
 instance Semigroup Substitution where
@@ -171,17 +170,17 @@ instance Monoid Substitution where
   mempty = Substitution mempty
 
 {-# INLINE substitutionIndex #-}
-substitutionIndex :: TypeIndex (Kind KindIndex) -> Substitution -> Maybe (Type TypeIndex (Kind KindIndex))
+substitutionIndex :: TypeIndex Kind -> Substitution -> Maybe (Type TypeIndex Kind)
 substitutionIndex TypeIndex{..} sub = Map.lookup typeIndexId (substitutionMap sub)
 
 {-# INLINE removeSubstitution #-}
-removeSubstitution :: TypeIndex (Kind KindIndex) -> Substitution -> Substitution
+removeSubstitution :: TypeIndex Kind -> Substitution -> Substitution
 removeSubstitution TypeIndex{..} (Substitution sub) = Substitution (Map.delete typeIndexId sub)
 
 {-# INLINE mapsTo #-}
-mapsTo :: Int -> Type TypeIndex (Kind KindIndex) -> Substitution
+mapsTo :: Int -> Type TypeIndex Kind -> Substitution
 mapsTo index = Substitution . Map.singleton index
 
 {-# INLINE substitutionFromList #-}
-substitutionFromList :: [(Int, Type TypeIndex (Kind KindIndex))] -> Substitution
+substitutionFromList :: [(Int, Type TypeIndex Kind)] -> Substitution
 substitutionFromList = Substitution . Map.fromList

@@ -11,7 +11,6 @@ import Noll.Language (
   Binding (..),
   Expression (..),
   Kind (..),
-  KindIndex,
   Pattern (..),
   Primitive (..),
   Scheme (..),
@@ -70,15 +69,15 @@ spec =
 
 testRunner ::
   Expression a Int ->
-  ( [Assumption (Type TypeIndex (Kind KindIndex))]
-  , [AggregationOutput a TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))]
+  ( [Assumption (Type TypeIndex Kind)]
+  , [AggregationOutput a TypeIndex Kind (Type TypeIndex Kind)]
   )
 testRunner e =
   runAggregationStack
     (AggregationContext mempty mempty mempty)
     (aggregateConstraints (toIndexed e))
 
-testRunner2 :: Type TypeParam () -> Either TypeAnnotationError (Scheme TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex)))
+testRunner2 :: Type TypeParam () -> Either TypeAnnotationError (Scheme TypeIndex Kind (Type TypeIndex Kind))
 testRunner2 t = s
  where
   (s, _) =
@@ -86,7 +85,7 @@ testRunner2 t = s
       (AggregationContext mempty mempty mempty)
       (instantiateAnnotation t)
 
-toIndexed :: Expression a Int -> Expression a (Type TypeIndex (Kind KindIndex))
+toIndexed :: Expression a Int -> Expression a (Type TypeIndex Kind)
 toIndexed = fmap (TVariable . TypeIndex KType)
 
 -- let x = 5 in x

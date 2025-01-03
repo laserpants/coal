@@ -42,7 +42,6 @@ import Noll.Language (
   IndexedType,
   Intrinsic (..),
   Kind (..),
-  KindIndex,
   OpaqueType,
   Pattern (..),
   Row (..),
@@ -126,7 +125,7 @@ lookupTypeConstructor :: Name -> AggregationStack w o k t (Maybe k)
 lookupTypeConstructor name = Environment.lookup name <$> asks aggregationTypeConstructorEnv
 
 type ConstraintsAggregation a =
-  AggregationStack a TypeIndex (Kind KindIndex) IndexedType
+  AggregationStack a TypeIndex Kind IndexedType
 
 assertEqualityAssumptions :: IndexedType -> [Assumption IndexedType] -> ConstraintsAggregation a ()
 assertEqualityAssumptions t ms =
@@ -168,7 +167,7 @@ patternAssumptions assert ms =
           tellRight [Explicit InferenceRule (foldType t (typeOf <$> ps)) constructorScheme]
       concat <$> traverse (patternAssumptions assert ms) ps
 
-withMonomorphic :: (TypeIndexed (Kind KindIndex) t) => t -> ConstraintsAggregation a c -> ConstraintsAggregation a c
+withMonomorphic :: (TypeIndexed Kind t) => t -> ConstraintsAggregation a c -> ConstraintsAggregation a c
 withMonomorphic a = localMonoset (monosetInsertMany (typeIndexesIn a))
 
 aggregateConstraints ::
@@ -233,7 +232,7 @@ aggregateConstraints =
     EMatch loc t e cs -> do
       undefined
 
-instantiateAnnotation :: Type TypeParam () -> ConstraintsAggregation a (Either TypeAnnotationError (Scheme TypeIndex (Kind KindIndex) IndexedType))
+instantiateAnnotation :: Type TypeParam () -> ConstraintsAggregation a (Either TypeAnnotationError (Scheme TypeIndex Kind IndexedType))
 instantiateAnnotation t = do
   r <- runExceptT $ do
     t1 <- evalStateT (translateToIndexed t) (0, mempty)
@@ -242,9 +241,9 @@ instantiateAnnotation t = do
  where
   scheme t = Forall (typeIndexesIn t) [] t
 
-type AddKinds a = StateT (IndexMap (Kind KindIndex)) (ExceptT TypeAnnotationError (ConstraintsAggregation a))
+type AddKinds a = StateT (IndexMap Kind) (ExceptT TypeAnnotationError (ConstraintsAggregation a))
 
-typeIndex :: Kind KindIndex -> Int -> AddKinds a (TypeIndex (Kind KindIndex))
+typeIndex :: Kind -> Int -> AddKinds a (TypeIndex Kind)
 typeIndex k n = do
   map <- get
   case Map.lookup n map of
@@ -286,7 +285,7 @@ addKinds =
     TAlias name ts t ->
       TAlias name <$> traverse addKinds ts <*> addKinds t
 
-addKindsRow :: Row TypeIndex () OpaqueType -> AddKinds a (Row TypeIndex (Kind KindIndex) IndexedType)
+addKindsRow :: Row TypeIndex () OpaqueType -> AddKinds a (Row TypeIndex Kind IndexedType)
 addKindsRow =
   \case
     RVariable (TypeIndex _ n) ->

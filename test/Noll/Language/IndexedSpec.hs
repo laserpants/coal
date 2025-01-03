@@ -22,9 +22,9 @@ spec =
         it "" $
           typeIndexesIn fixture3 == (mempty :: Set (TypeIndex ()))
         it "" $
-          typeIndexesIn fixture4 == (mempty :: Set (TypeIndex (Kind Int)))
+          typeIndexesIn fixture4 == (mempty :: Set (TypeIndex Kind))
         it "" $
-          typeIndexesIn fixture5 == (Set.fromList [TypeIndex KType 1] :: Set (TypeIndex (Kind Int)))
+          typeIndexesIn fixture5 == (Set.fromList [TypeIndex KType 1] :: Set (TypeIndex Kind))
 
 fixture1 :: Scheme TypeIndex () (Type TypeIndex ())
 fixture1 =
@@ -47,14 +47,14 @@ fixture3 =
     []
     (TVariable (TypeIndex () 0) `TArrow` TVariable (TypeIndex () 0) `TArrow` TVariable (TypeIndex () 0))
 
-fixture4 :: Scheme TypeIndex (Kind Int) (Type TypeIndex (Kind Int))
+fixture4 :: Scheme TypeIndex Kind (Type TypeIndex Kind)
 fixture4 =
   Forall
     (Set.fromList [TypeIndex KType 0])
     []
     (TVariable (TypeIndex KRow 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KTrait 0))
 
-fixture5 :: Scheme TypeIndex (Kind Int) (Type TypeIndex (Kind Int))
+fixture5 :: Scheme TypeIndex Kind (Type TypeIndex Kind)
 fixture5 =
   Forall
     (Set.fromList [TypeIndex KType 0])

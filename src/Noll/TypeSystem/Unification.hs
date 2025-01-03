@@ -3,7 +3,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.TypeSystem.Unification where
+module Noll.TypeSystem.Unification (Unifiable (..), unifyAll) where
 
 import Control.Monad.Except (MonadError, throwError)
 import Data.List.NonEmpty (NonEmpty, (<|))
@@ -12,7 +12,6 @@ import Data.Set (member)
 import Noll.Language (
   Intrinsic (..),
   Kind (..),
-  KindIndex,
   Row (..),
   Type (..),
   TypeIndex (..),
@@ -47,7 +46,7 @@ instance (Substitutable u, Unifiable u) => Unifiable [u] where
 instance (Substitutable u, Unifiable u) => Unifiable (NonEmpty u) where
   unify u1 u2 = unify (NonEmpty.toList u1) (NonEmpty.toList u2)
 
-instance Unifiable (Intrinsic (Type TypeIndex (Kind KindIndex))) where
+instance Unifiable (Intrinsic (Type TypeIndex Kind)) where
   unify (IList t1) (IList t2) =
     unify t1 t2
   unify (IOption t1) (IOption t2) =
@@ -64,11 +63,11 @@ instance Unifiable (Intrinsic (Type TypeIndex (Kind KindIndex))) where
   unify _ _ =
     throwError CannotUnify
 
-instance Unifiable (Row TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))) where
+instance Unifiable (Row TypeIndex Kind (Type TypeIndex Kind)) where
   unify =
     error "TODO"
 
-instance Unifiable (Type TypeIndex (Kind KindIndex)) where
+instance Unifiable (Type TypeIndex Kind) where
   unify (TAlias _ _ t1) t2 =
     unify t1 t2
   unify t1 (TAlias _ _ t2) =
@@ -91,7 +90,7 @@ instance Unifiable (Type TypeIndex (Kind KindIndex)) where
   unify _ _ =
     throwError CannotUnify
 
-bindType :: (MonadError UnificationError m) => TypeIndex (Kind KindIndex) -> Type TypeIndex (Kind KindIndex) -> m Substitution
+bindType :: (MonadError UnificationError m) => TypeIndex Kind -> Type TypeIndex Kind -> m Substitution
 bindType (TypeIndex _ index) =
   \case
     TVariable (TypeIndex _ index2)

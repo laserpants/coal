@@ -8,7 +8,6 @@
 
 module Noll.Language.Indexed (
   TypeIndexed (..),
-  KindIndexed (..),
   typeIdsIn,
   notBoundIn,
   freshIdIn,
@@ -25,7 +24,7 @@ import Noll.Language.Expression.Choice (Choice (..), Guard (..))
 import Noll.Language.Pattern (Pattern (..))
 import Noll.Language.Trait (Trait (..))
 import Noll.Language.Type (Type (..), TypeIndex (..))
-import Noll.Language.Type.Kind (Kind (..), KindIndex (..))
+import Noll.Language.Type.Kind (Kind (..))
 import Noll.Language.Type.Row (Row (..))
 import Noll.Language.Type.Scheme (Scheme (..))
 import Noll.Utils (unionMap)
@@ -147,38 +146,6 @@ instance (Ord k) => TypeIndexed k (Expression a (Type TypeIndex k)) where
         mempty
       EMatch _ t e cs ->
         typeIndexesIn t <> typeIndexesIn e <> typeIndexesIn cs
-
-class KindIndexed k where
-  kindIndexesIn :: k -> Set KindIndex
-
-instance (KindIndexed k) => KindIndexed [k] where
-  kindIndexesIn = Set.unions . fmap kindIndexesIn
-
-instance (KindIndexed k) => KindIndexed (NonEmpty k) where
-  kindIndexesIn = Set.unions . fmap kindIndexesIn
-
-instance (Ord k, KindIndexed k) => KindIndexed (Set k) where
-  kindIndexesIn = Set.unions . Set.map kindIndexesIn
-
-instance KindIndexed (Kind KindIndex) where
-  kindIndexesIn =
-    \case
-      KVariable v ->
-        Set.singleton v
-      _ ->
-        mempty
-
-instance (KindIndexed (Kind k)) => KindIndexed (TypeIndex (Kind k)) where
-  kindIndexesIn =
-    \case
-      TypeIndex k _ ->
-        kindIndexesIn k
-
-instance KindIndexed KindIndex where
-  kindIndexesIn = Set.singleton
-
-instance KindIndexed (TypeIndex ()) where
-  kindIndexesIn = mempty
 
 notBoundIn :: Set (TypeIndex k) -> Set (TypeIndex k) -> Set (TypeIndex k)
 notBoundIn s = Set.filter notBound

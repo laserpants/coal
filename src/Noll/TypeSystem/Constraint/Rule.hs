@@ -3,16 +3,20 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.TypeSystem.Constraint.Rule (InferenceRule (..), Assumption (..), assumptionNameIs) where
+module Noll.TypeSystem.Constraint.Rule (
+  InferenceRule (..),
+  Assumption (..),
+  assumptionNameIs,
+) where
 
-import Noll.Language (Kind (..), KindIndex, Scheme (..), Type (..), TypeIndex (..))
+import Noll.Language (Kind (..), Scheme (..), Type (..), TypeIndex (..))
 import Noll.TypeSystem.Substitution (Substitutable (..))
 import Noll.Utils (Name)
 
 data InferenceRule k a
   = InferenceRule
   | -- | Type annotation
-    InferAnnotation a (Scheme TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex)))
+    InferAnnotation a (Scheme TypeIndex Kind (Type TypeIndex Kind))
   | -- | Function application
     InferApplication a (Type TypeIndex k) [Type TypeIndex k]
   | -- | Type of if condition is bool
@@ -27,7 +31,7 @@ data InferenceRule k a
     InferMatchClausePatterns a
   deriving (Show, Eq, Ord, Read)
 
-instance Substitutable (InferenceRule (Kind KindIndex) c) where
+instance Substitutable (InferenceRule Kind c) where
   apply sub =
     \case
       InferenceRule ->
