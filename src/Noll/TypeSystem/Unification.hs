@@ -3,7 +3,11 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.TypeSystem.Unification (Unifiable (..), unifyAll) where
+module Noll.TypeSystem.Unification (
+  Unifiable (..),
+  UnificationError (..),
+  unifyAll,
+) where
 
 import Control.Monad.Except (MonadError, throwError)
 import Data.List.NonEmpty (NonEmpty, (<|))

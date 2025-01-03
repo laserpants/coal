@@ -105,6 +105,7 @@ test-suite noll-test
   other-modules:
       Noll.Language.IndexedSpec
       Noll.TypeSystem.Constraint.AggregationSpec
+      Noll.TypeSystem.UnificationSpec
       Noll.TypeSystemSpec
       Paths_noll
   autogen-modules:
