@@ -25,6 +25,8 @@ data InferenceRule k a
     InferIfBranches a (Type TypeIndex k) (Type TypeIndex k)
   | -- Let type of body matches binding pattern
     InferLetBindingPattern a (Type TypeIndex k) (Type TypeIndex k)
+  | -- TODO
+    InferLetImplicit a Name (Type TypeIndex k) (Type TypeIndex k)
   | -- | Pattern guards are of type bool
     InferMatchClauseGuard
   | -- | Match clauses all have the same type as expression
@@ -46,6 +48,10 @@ instance Substitutable (InferenceRule Kind c) where
         InferIfCondition a (apply sub t)
       InferIfBranches a t1 t2 ->
         InferIfBranches a (apply sub t1) (apply sub t2)
+      InferLetBindingPattern a t1 t2 ->
+        InferLetBindingPattern a (apply sub t1) (apply sub t2)
+      InferLetImplicit a name t1 t2 ->
+        InferLetImplicit a name (apply sub t1) (apply sub t2)
       InferMatchClauseGuard ->
         InferMatchClauseGuard
       InferMatchClauseExpressions a ->

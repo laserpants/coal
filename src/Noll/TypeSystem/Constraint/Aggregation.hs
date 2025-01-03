@@ -9,9 +9,9 @@ module Noll.TypeSystem.Constraint.Aggregation (
   runAggregationStack,
 ) where
 
-import Debug.Trace
 import Control.Monad.Reader (asks)
 import Data.List (partition)
+import Debug.Trace
 import Noll.Label (Label (..))
 import Noll.Language (
   Binding (..),
@@ -48,20 +48,20 @@ type ConstraintsAggregation a = AggregationStack a TypeIndex Kind IndexedType
 lookupDataConstructor :: Name -> AggregationStack w o k t (Maybe (Constructor o k t))
 lookupDataConstructor name = Environment.lookup name <$> asks aggregationDataConstructorEnv
 
-assertEqualityAssumptions :: IndexedType -> [Assumption IndexedType] -> ConstraintsAggregation a ()
-assertEqualityAssumptions t ms =
+assertEqualityAssumptions :: a -> IndexedType -> [Assumption IndexedType] -> ConstraintsAggregation a ()
+assertEqualityAssumptions loc t ms =
   tellRight $ do
     Assumption{..} <- ms
     -- TODO
     pure (Equality (InferenceRule 1) [assumptionType, t])
 
-assertImplicitAssumptions :: IndexedType -> [Assumption IndexedType] -> ConstraintsAggregation a ()
-assertImplicitAssumptions t ms = do
+assertImplicitAssumptions :: a -> IndexedType -> [Assumption IndexedType] -> ConstraintsAggregation a ()
+assertImplicitAssumptions loc t ms = do
   set <- asks aggregationMonomorphicSet
   tellRight $ do
     Assumption{..} <- ms
     -- TODO
-    pure (Implicit (InferenceRule 2) assumptionType t set)
+    pure (Implicit (InferLetImplicit loc assumptionName assumptionType t) assumptionType t set)
 
 withMonomorphic :: (TypeIndexed Kind t) => t -> ConstraintsAggregation a c -> ConstraintsAggregation a c
 withMonomorphic a = localMonoset (monosetInsertMany (typeIndexesIn a))
@@ -116,7 +116,7 @@ aggregateConstraints =
       pure [Assumption name t]
     ELambda loc ps e -> do
       ms1 <- withMonomorphic ps (aggregateConstraints e)
-      concat <$> forM ps (patternAssumptions assertEqualityAssumptions ms1)
+      concat <$> forM ps (patternAssumptions (assertEqualityAssumptions loc) ms1)
     ELet loc gs e1 -> do
       ms1 <- aggregateConstraints e1
       ms2 <- flip concatMapM gs $
@@ -130,7 +130,7 @@ aggregateConstraints =
       ms3 <- flip concatMapM gs $
         \case
           BPattern _ p _ ->
-            patternAssumptions assertImplicitAssumptions ms1 p
+            patternAssumptions (assertImplicitAssumptions loc) ms1 p
       pure (ms1 <> ms2 <> ms3)
     EIf loc t e1 e2 e3 -> do
       ms1 <- aggregateConstraints e1

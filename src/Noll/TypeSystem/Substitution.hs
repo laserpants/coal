@@ -22,6 +22,7 @@ import Noll.Language (
   Clause (..),
   Expression (..),
   Guard (..),
+  IndexedType,
   Intrinsic (..),
   Kind,
   Pattern (..),
@@ -31,7 +32,6 @@ import Noll.Language (
   Type (..),
   TypeIndex (..),
   TypeIndexed (..),
-  IndexedType,
  )
 import Noll.TypeSystem.Constraint (Constraint (..), MonomorphicSet (..))
 import Noll.Utils (IndexMap, Map, Set, fromMaybe)

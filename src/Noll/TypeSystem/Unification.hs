@@ -10,12 +10,12 @@ import Data.List.NonEmpty (NonEmpty, (<|))
 import qualified Data.List.NonEmpty as NonEmpty
 import Data.Set (member)
 import Noll.Language (
+  IndexedType,
   Intrinsic (..),
   Kind (..),
   Row (..),
   Type (..),
   TypeIndex (..),
-  IndexedType,
   typeIdsIn,
  )
 import Noll.TypeSystem.Substitution (

@@ -46,7 +46,7 @@ testRunner e =
 
     e3 = normalizeTypeIndexes e2
    in
-    (e3, asms, errors0, errors1)
+    (e3, asms, errors0, apply sub errors1)
 
 toIndexed :: Expression a Int -> Expression a (Type TypeIndex Kind)
 toIndexed = fmap (TVariable . TypeIndex KType)
