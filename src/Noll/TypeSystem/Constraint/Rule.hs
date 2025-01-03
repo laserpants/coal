@@ -14,7 +14,7 @@ import Noll.TypeSystem.Substitution (Substitutable (..))
 import Noll.Utils (Name)
 
 data InferenceRule k a
-  = InferenceRule
+  = InferenceRule Int
   | -- | Type annotation
     InferAnnotation a (Scheme TypeIndex Kind (Type TypeIndex Kind))
   | -- | Function application
@@ -23,6 +23,8 @@ data InferenceRule k a
     InferIfCondition a (Type TypeIndex k)
   | -- | If expression 'then' and 'else' branches have identical types
     InferIfBranches a (Type TypeIndex k) (Type TypeIndex k)
+  | -- Let type of body matches binding pattern
+    InferLetBindingPattern a (Type TypeIndex k) (Type TypeIndex k)
   | -- | Pattern guards are of type bool
     InferMatchClauseGuard
   | -- | Match clauses all have the same type as expression
@@ -34,8 +36,8 @@ data InferenceRule k a
 instance Substitutable (InferenceRule Kind c) where
   apply sub =
     \case
-      InferenceRule ->
-        InferenceRule
+      InferenceRule n ->
+        InferenceRule n
       InferAnnotation a s ->
         InferAnnotation a s
       InferApplication a t ts ->

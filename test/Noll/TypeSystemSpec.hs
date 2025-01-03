@@ -17,32 +17,36 @@ spec :: Spec
 spec =
   describe "Noll.TypeSystem" $ do
     it "" $
-      testRunner fixture1 == fixture1Typed
+      abc fixture1 == fixture1Typed
+    it "" $
+      abc fixture2 == fixture2Typed
 
-testRunner :: Expression () () -> Expression () (Type TypeIndex Kind)
+abc e = let (e1, _, _, _) = testRunner e in e1
+
+--testRunner :: Expression () () -> Expression () (Type TypeIndex Kind)
 testRunner e =
   let
     e0 = evalState (traverse (const supply) e) (0 :: Int)
 
     e1 = toIndexed e0
 
-    (_, out) =
+    (asms, out) =
       runAggregationStack
         (AggregationContext mempty mempty mempty)
         (aggregateConstraints e1)
 
-    errors = lefts out
+    errors0 = lefts out
     constraints = rights out
 
     res0 = solveConstraints constraints
 
-    (sub, _) = res0
+    (sub, errors1) = res0
 
     e2 = apply sub e1
 
     e3 = normalizeTypeIndexes e2
    in
-    e3
+    (e3, asms, errors0, errors1)
 
 toIndexed :: Expression a Int -> Expression a (Type TypeIndex Kind)
 toIndexed = fmap (TVariable . TypeIndex KType)
@@ -110,3 +114,88 @@ fixture1Typed =
           )
       )
   )
+
+-- let f = fn(x) => x in (f(f))(f(1))
+fixture2 :: Expression () ()
+fixture2 =
+  ELet
+    ()
+    ( BPattern
+        ()
+        (PVariable () (Label () "f"))
+        ( ELambda
+            ()
+            (PVariable () (Label () "x") :| [])
+            (EVariable () (Label () "x"))
+        )
+        :| []
+    )
+    ( EApplication
+        ()
+        ()
+        ( EApplication
+            ()
+            ()
+            (EVariable () (Label () "f"))
+            (EVariable () (Label () "f") :| [])
+        )
+        ( EApplication
+            ()
+            ()
+            (EVariable () (Label () "f"))
+            (ELiteral () (LInt32 1) :| [])
+            :| []
+        )
+    )
+
+fixture2Typed :: Expression () (Type TypeIndex Kind)
+fixture2Typed =
+  ( ELet
+      ()
+      ( BPattern
+          ()
+          (PVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0)) "f"))
+          ( ELambda
+              ()
+              (PVariable () (Label (TVariable (TypeIndex KType 0)) "x") :| [])
+              (EVariable () (Label (TVariable (TypeIndex KType 0)) "x"))
+          )
+          :| []
+      )
+      ( EApplication
+          ()
+          (TIntrinsic IInt32)
+          ( EApplication
+              ()
+              (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
+              (EVariable () (Label ((TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "f"))
+              (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "f") :| [])
+          )
+          ( EApplication
+              ()
+              (TIntrinsic IInt32)
+              (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "f"))
+              (ELiteral () (LInt32 1) :| [])
+              :| []
+          )
+      )
+  )
+
+-- let x = 1 in x(x)
+fixture3 :: Expression () ()
+fixture3 =
+  ELet
+    ()
+    ( BPattern
+        ()
+        (PVariable () (Label () "x"))
+        (ELiteral () (LInt32 1))
+        :| []
+    )
+    ( EApplication
+        ()
+        ()
+        (EVariable () (Label () "x"))
+        (EVariable () (Label () "x") :| [])
+    )
+

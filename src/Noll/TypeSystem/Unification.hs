@@ -15,6 +15,7 @@ import Noll.Language (
   Row (..),
   Type (..),
   TypeIndex (..),
+  IndexedType,
   typeIdsIn,
  )
 import Noll.TypeSystem.Substitution (
@@ -46,7 +47,7 @@ instance (Substitutable u, Unifiable u) => Unifiable [u] where
 instance (Substitutable u, Unifiable u) => Unifiable (NonEmpty u) where
   unify u1 u2 = unify (NonEmpty.toList u1) (NonEmpty.toList u2)
 
-instance Unifiable (Intrinsic (Type TypeIndex Kind)) where
+instance Unifiable (Intrinsic IndexedType) where
   unify (IList t1) (IList t2) =
     unify t1 t2
   unify (IOption t1) (IOption t2) =
@@ -63,11 +64,11 @@ instance Unifiable (Intrinsic (Type TypeIndex Kind)) where
   unify _ _ =
     throwError CannotUnify
 
-instance Unifiable (Row TypeIndex Kind (Type TypeIndex Kind)) where
+instance Unifiable (Row TypeIndex Kind IndexedType) where
   unify =
     error "TODO"
 
-instance Unifiable (Type TypeIndex Kind) where
+instance Unifiable IndexedType where
   unify (TAlias _ _ t1) t2 =
     unify t1 t2
   unify t1 (TAlias _ _ t2) =
@@ -90,7 +91,7 @@ instance Unifiable (Type TypeIndex Kind) where
   unify _ _ =
     throwError CannotUnify
 
-bindType :: (MonadError UnificationError m) => TypeIndex Kind -> Type TypeIndex Kind -> m Substitution
+bindType :: (MonadError UnificationError m) => TypeIndex Kind -> IndexedType -> m Substitution
 bindType (TypeIndex _ index) =
   \case
     TVariable (TypeIndex _ index2)

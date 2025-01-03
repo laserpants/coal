@@ -9,6 +9,7 @@ module Noll.TypeSystem.Constraint.Aggregation (
   runAggregationStack,
 ) where
 
+import Debug.Trace
 import Control.Monad.Reader (asks)
 import Data.List (partition)
 import Noll.Label (Label (..))
@@ -52,7 +53,7 @@ assertEqualityAssumptions t ms =
   tellRight $ do
     Assumption{..} <- ms
     -- TODO
-    pure (Equality InferenceRule [assumptionType, t])
+    pure (Equality (InferenceRule 1) [assumptionType, t])
 
 assertImplicitAssumptions :: IndexedType -> [Assumption IndexedType] -> ConstraintsAggregation a ()
 assertImplicitAssumptions t ms = do
@@ -60,7 +61,7 @@ assertImplicitAssumptions t ms = do
   tellRight $ do
     Assumption{..} <- ms
     -- TODO
-    pure (Implicit InferenceRule assumptionType t set)
+    pure (Implicit (InferenceRule 2) assumptionType t set)
 
 withMonomorphic :: (TypeIndexed Kind t) => t -> ConstraintsAggregation a c -> ConstraintsAggregation a c
 withMonomorphic a = localMonoset (monosetInsertMany (typeIndexesIn a))
@@ -87,7 +88,7 @@ patternAssumptions assert ms =
           | constructorArity /= length ps ->
               tellLeft [DataConstructorArityMismatch loc name constructorArity (length ps)]
         Just Constructor{..} ->
-          tellRight [Explicit InferenceRule (foldType t (typeOf <$> ps)) constructorScheme]
+          tellRight [Explicit (InferenceRule 3) (foldType t (typeOf <$> ps)) constructorScheme]
       concat <$> traverse (patternAssumptions assert ms) ps
 
 aggregateConstraints ::
@@ -109,7 +110,7 @@ aggregateConstraints =
         Nothing ->
           tellLeft [MissingDataConstructor loc name]
         Just Constructor{..} ->
-          tellRight [Explicit InferenceRule t constructorScheme]
+          tellRight [Explicit (InferenceRule 4) t constructorScheme]
       pure []
     EVariable loc (Label t name) ->
       pure [Assumption name t]
@@ -122,7 +123,9 @@ aggregateConstraints =
         \case
           BPattern _ p e -> do
             ms <- aggregateConstraints e
-            tellRight [Equality InferenceRule [typeOf p, typeOf e]]
+            let t1 = typeOf p
+                t2 = typeOf e
+            tellRight [Equality (InferLetBindingPattern loc t1 t2) [t1, t2]]
             pure ms
       ms3 <- flip concatMapM gs $
         \case

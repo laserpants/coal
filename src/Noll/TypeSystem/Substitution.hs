@@ -31,6 +31,7 @@ import Noll.Language (
   Type (..),
   TypeIndex (..),
   TypeIndexed (..),
+  IndexedType,
  )
 import Noll.TypeSystem.Constraint (Constraint (..), MonomorphicSet (..))
 import Noll.Utils (IndexMap, Map, Set, fromMaybe)
@@ -62,7 +63,7 @@ instance Substitutable (MonomorphicSet (TypeIndex Kind)) where
       MonomorphicSet m ->
         MonomorphicSet (typeIndexesIn (Set.map (apply sub . TVariable) m))
 
-instance Substitutable (Scheme TypeIndex Kind (Type TypeIndex Kind)) where
+instance Substitutable (Scheme TypeIndex Kind IndexedType) where
   apply sub =
     \case
       Forall qs ps t ->
@@ -71,7 +72,7 @@ instance Substitutable (Scheme TypeIndex Kind (Type TypeIndex Kind)) where
          in
           Forall qs (apply sub1 ps) (apply sub1 t)
 
-instance Substitutable (Constraint c TypeIndex Kind (Type TypeIndex Kind)) where
+instance Substitutable (Constraint c TypeIndex Kind IndexedType) where
   apply sub =
     \case
       Equality c ts ->
@@ -84,11 +85,11 @@ instance Substitutable (Constraint c TypeIndex Kind (Type TypeIndex Kind)) where
 instance (Substitutable s) => Substitutable (Intrinsic s) where
   apply = fmap . apply
 
-instance Substitutable (Row TypeIndex Kind (Type TypeIndex Kind)) where
+instance Substitutable (Row TypeIndex Kind IndexedType) where
   apply sub =
     error "TODO"
 
-instance Substitutable (Type TypeIndex Kind) where
+instance Substitutable IndexedType where
   apply sub =
     \case
       TAlias name ts t -> do
@@ -106,7 +107,7 @@ instance Substitutable (Type TypeIndex Kind) where
       t@TConstructor{} ->
         t
 
-instance Substitutable (Pattern a (Type TypeIndex Kind)) where
+instance Substitutable (Pattern a IndexedType) where
   apply sub =
     \case
       PVariable a (Label t name) ->
@@ -114,31 +115,31 @@ instance Substitutable (Pattern a (Type TypeIndex Kind)) where
       PConstructor a (Label t name) ps ->
         PConstructor a (Label (apply sub t) name) (apply sub ps)
 
-instance Substitutable (Binding Expression a (Type TypeIndex Kind)) where
+instance Substitutable (Binding Expression a IndexedType) where
   apply sub =
     \case
       BPattern a p e ->
         BPattern a (apply sub p) (apply sub e)
 
-instance Substitutable (Guard Expression a (Type TypeIndex Kind)) where
+instance Substitutable (Guard Expression a IndexedType) where
   apply sub =
     \case
       CGuard e ->
         CGuard (apply sub e)
 
-instance Substitutable (Choice Expression a (Type TypeIndex Kind)) where
+instance Substitutable (Choice Expression a IndexedType) where
   apply sub =
     \case
       CPlain a gs e ->
         CPlain a (apply sub gs) (apply sub e)
 
-instance Substitutable (Clause Expression a (Type TypeIndex Kind)) where
+instance Substitutable (Clause Expression a IndexedType) where
   apply sub =
     \case
       EClause a p cs ->
         EClause a (apply sub p) (apply sub cs)
 
-instance Substitutable (Expression a (Type TypeIndex Kind)) where
+instance Substitutable (Expression a IndexedType) where
   apply sub =
     \case
       EAnnotation a t e ->
@@ -160,7 +161,7 @@ instance Substitutable (Expression a (Type TypeIndex Kind)) where
       e@ELiteral{} ->
         e
 
-newtype Substitution = Substitution {substitutionMap :: IndexMap (Type TypeIndex Kind)}
+newtype Substitution = Substitution {substitutionMap :: IndexMap IndexedType}
   deriving (Show, Eq, Ord, Read)
 
 instance Semigroup Substitution where
@@ -172,7 +173,7 @@ instance Monoid Substitution where
   mempty = Substitution mempty
 
 {-# INLINE substitutionIndex #-}
-substitutionIndex :: TypeIndex Kind -> Substitution -> Maybe (Type TypeIndex Kind)
+substitutionIndex :: TypeIndex Kind -> Substitution -> Maybe IndexedType
 substitutionIndex TypeIndex{..} sub = Map.lookup typeIndexId (substitutionMap sub)
 
 {-# INLINE removeSubstitution #-}
@@ -180,11 +181,11 @@ removeSubstitution :: TypeIndex Kind -> Substitution -> Substitution
 removeSubstitution TypeIndex{..} (Substitution sub) = Substitution (Map.delete typeIndexId sub)
 
 {-# INLINE mapsTo #-}
-mapsTo :: Int -> Type TypeIndex Kind -> Substitution
+mapsTo :: Int -> IndexedType -> Substitution
 mapsTo index = Substitution . Map.singleton index
 
 {-# INLINE substitutionFromList #-}
-substitutionFromList :: [(Int, Type TypeIndex Kind)] -> Substitution
+substitutionFromList :: [(Int, IndexedType)] -> Substitution
 substitutionFromList = Substitution . Map.fromList
 
 normalizeTypeIndexes :: (Substitutable s, TypeIndexed Kind s) => s -> s
