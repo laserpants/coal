@@ -39,9 +39,11 @@ import Noll.Language (
   Constructor (..),
   Expression (..),
   HasType (..),
+  IndexedType,
   Intrinsic (..),
   Kind (..),
   KindIndex,
+  OpaqueType,
   Pattern (..),
   Row (..),
   Scheme (..),
@@ -60,7 +62,7 @@ import Noll.Library.List1 (List1, NonEmpty ((:|)), fromList1)
 import qualified Noll.Library.List1 as List1
 import Noll.TypeSystem.Constraint (Constraint (..), MonomorphicSet (..), overMonomorphicSet)
 import Noll.TypeSystem.Constraint.Rule (Assumption (..), InferenceRule (..), assumptionNameIs)
-import Noll.Utils (Dictionary, Map, Name, concatMapM, forM, tellLeft, tellRight)
+import Noll.Utils (Dictionary, IndexMap, Name, concatMapM, forM, tellLeft, tellRight)
 
 data TypeAnnotationError
   = KindMismatch
@@ -73,8 +75,7 @@ data AggregationError a
   | IllFormedTypeAnnotation a TypeAnnotationError
   deriving (Show, Eq, Ord, Read)
 
-type AggregationOutput w o k t =
-  Either (AggregationError w) (Constraint (InferenceRule k w) o k t)
+type AggregationOutput w o k t = Either (AggregationError w) (Constraint (InferenceRule k w) o k t)
 
 data AggregationContext o k t = AggregationContext
   { aggregationMonomorphicSet :: MonomorphicSet (o k)
@@ -125,16 +126,16 @@ lookupTypeConstructor :: Name -> AggregationStack w o k t (Maybe k)
 lookupTypeConstructor name = Environment.lookup name <$> asks aggregationTypeConstructorEnv
 
 type ConstraintsAggregation a =
-  AggregationStack a TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))
+  AggregationStack a TypeIndex (Kind KindIndex) IndexedType
 
-assertEqualityAssumptions :: Type TypeIndex (Kind KindIndex) -> [Assumption (Type TypeIndex (Kind KindIndex))] -> ConstraintsAggregation a ()
+assertEqualityAssumptions :: IndexedType -> [Assumption IndexedType] -> ConstraintsAggregation a ()
 assertEqualityAssumptions t ms =
   tellRight $ do
     Assumption{..} <- ms
     -- TODO
     pure (Equality InferenceRule [assumptionType, t])
 
-assertImplicitAssumptions :: Type TypeIndex (Kind KindIndex) -> [Assumption (Type TypeIndex (Kind KindIndex))] -> ConstraintsAggregation a ()
+assertImplicitAssumptions :: IndexedType -> [Assumption IndexedType] -> ConstraintsAggregation a ()
 assertImplicitAssumptions t ms = do
   set <- asks aggregationMonomorphicSet
   tellRight $ do
@@ -142,13 +143,13 @@ assertImplicitAssumptions t ms = do
     -- TODO
     pure (Implicit InferenceRule assumptionType t set)
 
-type Assert a = Type TypeIndex (Kind KindIndex) -> [Assumption (Type TypeIndex (Kind KindIndex))] -> ConstraintsAggregation a ()
+type Assert a = IndexedType -> [Assumption IndexedType] -> ConstraintsAggregation a ()
 
 patternAssumptions ::
   Assert a ->
-  [Assumption (Type TypeIndex (Kind KindIndex))] ->
-  Pattern a (Type TypeIndex (Kind KindIndex)) ->
-  ConstraintsAggregation a [Assumption (Type TypeIndex (Kind KindIndex))]
+  [Assumption IndexedType] ->
+  Pattern a IndexedType ->
+  ConstraintsAggregation a [Assumption IndexedType]
 patternAssumptions assert ms =
   \case
     PVariable _ (Label t name) -> do
@@ -171,8 +172,8 @@ withMonomorphic :: (TypeIndexed (Kind KindIndex) t) => t -> ConstraintsAggregati
 withMonomorphic a = localMonoset (monosetInsertMany (typeIndexesIn a))
 
 aggregateConstraints ::
-  Expression a (Type TypeIndex (Kind KindIndex)) ->
-  ConstraintsAggregation a [Assumption (Type TypeIndex (Kind KindIndex))]
+  Expression a IndexedType ->
+  ConstraintsAggregation a [Assumption IndexedType]
 aggregateConstraints =
   \case
     EAnnotation loc t e -> do
@@ -232,7 +233,7 @@ aggregateConstraints =
     EMatch loc t e cs -> do
       undefined
 
-instantiateAnnotation :: Type TypeParam () -> ConstraintsAggregation a (Either TypeAnnotationError (Scheme TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex))))
+instantiateAnnotation :: Type TypeParam () -> ConstraintsAggregation a (Either TypeAnnotationError (Scheme TypeIndex (Kind KindIndex) IndexedType))
 instantiateAnnotation t = do
   r <- runExceptT $ do
     t1 <- evalStateT (translateToIndexed t) (0, mempty)
@@ -241,7 +242,7 @@ instantiateAnnotation t = do
  where
   scheme t = Forall (typeIndexesIn t) [] t
 
-type AddKinds a = StateT (Map Int (Kind KindIndex)) (ExceptT TypeAnnotationError (ConstraintsAggregation a))
+type AddKinds a = StateT (IndexMap (Kind KindIndex)) (ExceptT TypeAnnotationError (ConstraintsAggregation a))
 
 typeIndex :: Kind KindIndex -> Int -> AddKinds a (TypeIndex (Kind KindIndex))
 typeIndex k n = do
@@ -256,7 +257,7 @@ typeIndex k n = do
     Just{} ->
       pure (TypeIndex k n)
 
-addKinds :: Type TypeIndex () -> AddKinds a (Type TypeIndex (Kind KindIndex))
+addKinds :: OpaqueType -> AddKinds a IndexedType
 addKinds =
   \case
     TApplication _ (TVariable (TypeIndex _ n)) ts -> do
@@ -272,7 +273,7 @@ addKinds =
     TArrow t1 t2 ->
       TArrow <$> addKinds t1 <*> addKinds t2
     TConstructor _ name -> do
-      c <- lift (lift (lookupTypeConstructor name))
+      c <- (lift . lift) (lookupTypeConstructor name)
       case c of
         Nothing ->
           throwError (TypeConstructorMissing name)
@@ -285,7 +286,7 @@ addKinds =
     TAlias name ts t ->
       TAlias name <$> traverse addKinds ts <*> addKinds t
 
-addKindsRow :: Row TypeIndex () (Type TypeIndex ()) -> AddKinds a (Row TypeIndex (Kind KindIndex) (Type TypeIndex (Kind KindIndex)))
+addKindsRow :: Row TypeIndex () OpaqueType -> AddKinds a (Row TypeIndex (Kind KindIndex) IndexedType)
 addKindsRow =
   \case
     RVariable (TypeIndex _ n) ->
@@ -295,9 +296,11 @@ addKindsRow =
     RNil ->
       pure RNil
 
-type Instantiate a = StateT (Int, Dictionary (Type TypeIndex ())) (ExceptT TypeAnnotationError (ConstraintsAggregation a))
+type InstantiateState = (Int, Dictionary OpaqueType)
 
-translateToIndexed :: Type TypeParam () -> Instantiate a (Type TypeIndex ())
+type Instantiate a = StateT InstantiateState (ExceptT TypeAnnotationError (ConstraintsAggregation a))
+
+translateToIndexed :: Type TypeParam () -> Instantiate a OpaqueType
 translateToIndexed =
   \case
     TApplication _ t ts ->
@@ -322,7 +325,7 @@ translateToIndexed =
     TAlias name ts t ->
       TAlias name <$> traverse translateToIndexed ts <*> translateToIndexed t
 
-translateToIndexedRow :: Row TypeParam () (Type TypeParam ()) -> Instantiate a (Row TypeIndex () (Type TypeIndex ()))
+translateToIndexedRow :: Row TypeParam () (Type TypeParam ()) -> Instantiate a (Row TypeIndex () OpaqueType)
 translateToIndexedRow =
   \case
     RExtend name t row ->
@@ -341,7 +344,7 @@ translateToIndexedRow =
     RNil ->
       pure RNil
 
-freshVariable :: Name -> (t -> Type TypeIndex ()) -> (TypeIndex () -> t) -> Instantiate a t
+freshVariable :: Name -> (t -> OpaqueType) -> (TypeIndex () -> t) -> Instantiate a t
 freshVariable name from to = do
   (n, dict) <- get
   let t = to (TypeIndex () n)

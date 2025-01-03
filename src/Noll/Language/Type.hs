@@ -11,6 +11,8 @@ module Noll.Language.Type (
   TypeIndex (..),
   TypeParam (..),
   HasActive (..),
+  IndexedType,
+  OpaqueType,
   foldType,
   activeIdsIn,
 ) where
@@ -47,6 +49,10 @@ data TypeParam k = TypeParam
   , typeParamName :: Name
   }
   deriving (Show, Eq, Ord, Read, Functor, Foldable)
+
+type IndexedType = Type TypeIndex (Kind KindIndex)
+
+type OpaqueType = Type TypeIndex ()
 
 instance Supply (TypeIndex k) where
   updateSupply f (TypeIndex k t) = TypeIndex k (f t)
