@@ -28,7 +28,7 @@ data InferenceRule k a
   | -- TODO
     InferLetImplicit a Name (Type TypeIndex k) (Type TypeIndex k)
   | -- | Pattern guards are of type bool
-    InferMatchClauseGuard
+    InferMatchClauseGuard a
   | -- | Match clauses all have the same type as expression
     InferMatchClauseExpressions a
   | -- | Match clause patterns have identical types
@@ -52,8 +52,8 @@ instance Substitutable (InferenceRule Kind c) where
         InferLetBindingPattern a (apply sub t1) (apply sub t2)
       InferLetImplicit a name t1 t2 ->
         InferLetImplicit a name (apply sub t1) (apply sub t2)
-      InferMatchClauseGuard ->
-        InferMatchClauseGuard
+      InferMatchClauseGuard a ->
+        InferMatchClauseGuard a
       InferMatchClauseExpressions a ->
         InferMatchClauseExpressions a
       InferMatchClausePatterns a ->
