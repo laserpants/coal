@@ -73,8 +73,8 @@ data AggregationError a
   | IllFormedTypeAnnotation a TypeAnnotationError
   deriving (Show, Eq, Ord, Read)
 
-type AggregationOutput a o k t =
-  Either (AggregationError a) (Constraint (InferenceRule k a) o k t)
+type AggregationOutput w o k t =
+  Either (AggregationError w) (Constraint (InferenceRule k w) o k t)
 
 data AggregationContext o k t = AggregationContext
   { aggregationMonomorphicSet :: MonomorphicSet (o k)
@@ -87,21 +87,21 @@ data AggregationContext o k t = AggregationContext
 overAggregationMonomorphicSet :: (MonomorphicSet (o k) -> MonomorphicSet (o k)) -> AggregationContext o k t -> AggregationContext o k t
 overAggregationMonomorphicSet fn AggregationContext{..} = AggregationContext{aggregationMonomorphicSet = fn aggregationMonomorphicSet, ..}
 
-type AggregationMonad a o k t = RWS (AggregationContext o k t) [AggregationOutput a o k t] ()
+type AggregationMonad w o k t = RWS (AggregationContext o k t) [AggregationOutput w o k t] ()
 
-newtype AggregationStack a o k t c = AggregationStack {aggregationMonad :: AggregationMonad a o k t c}
+newtype AggregationStack w o k t a = AggregationStack {aggregationMonad :: AggregationMonad w o k t a}
   deriving
     ( Functor
     , Applicative
     , Monad
     , MonadReader (AggregationContext o k t)
-    , MonadWriter [AggregationOutput a o k t]
+    , MonadWriter [AggregationOutput w o k t]
     , MonadState ()
-    , MonadRWS (AggregationContext o k t) [AggregationOutput a o k t] ()
+    , MonadRWS (AggregationContext o k t) [AggregationOutput w o k t] ()
     )
 
 {-# INLINE runAggregationStack #-}
-runAggregationStack :: AggregationContext o k t -> AggregationStack a o k t c -> (c, [AggregationOutput a o k t])
+runAggregationStack :: AggregationContext o k t -> AggregationStack w o k t a -> (a, [AggregationOutput w o k t])
 runAggregationStack ctx m = evalRWS (aggregationMonad m) ctx ()
 
 {-# INLINE monosetInsert #-}
@@ -113,15 +113,15 @@ monosetInsertMany :: (Ord k, Foldable f) => f (TypeIndex k) -> MonomorphicSet (T
 monosetInsertMany = flip (foldr monosetInsert)
 
 {-# INLINE localMonoset #-}
-localMonoset :: (MonomorphicSet (o k) -> MonomorphicSet (o k)) -> AggregationStack a o k t c -> AggregationStack a o k t c
+localMonoset :: (MonomorphicSet (o k) -> MonomorphicSet (o k)) -> AggregationStack w o k t a -> AggregationStack w o k t a
 localMonoset = local . overAggregationMonomorphicSet
 
 {-# INLINE lookupDataConstructor #-}
-lookupDataConstructor :: Name -> AggregationStack a o k t (Maybe (Constructor o k t))
+lookupDataConstructor :: Name -> AggregationStack w o k t (Maybe (Constructor o k t))
 lookupDataConstructor name = Environment.lookup name <$> asks aggregationDataConstructorEnv
 
 {-# INLINE lookupTypeConstructor #-}
-lookupTypeConstructor :: Name -> AggregationStack a o k t (Maybe k)
+lookupTypeConstructor :: Name -> AggregationStack w o k t (Maybe k)
 lookupTypeConstructor name = Environment.lookup name <$> asks aggregationTypeConstructorEnv
 
 type ConstraintsAggregation a =
