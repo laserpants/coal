@@ -17,13 +17,19 @@ spec :: Spec
 spec =
   describe "Noll.TypeSystem" $ do
     it "" $
-      abc fixture1 == fixture1Typed
+      validateResult fixture1 == fixture1Typed
     it "" $
-      abc fixture2 == fixture2Typed
+      validateResult fixture2 == fixture2Typed
 
-abc e = let (e1, _, _, _) = testRunner e in e1
+-- validateSolverErrors :: Expression () () -> Expression () (Type TypeIndex Kind)
+-- validateSolverErrors ::
 
---testRunner :: Expression () () -> Expression () (Type TypeIndex Kind)
+validateResult :: Expression () () -> Expression () (Type TypeIndex Kind)
+validateResult e = e1
+ where
+  (e1, _, _, _) = testRunner e
+
+-- testRunner :: Expression () () -> Expression () (Type TypeIndex Kind)
 testRunner e =
   let
     e0 = evalState (traverse (const supply) e) (0 :: Int)
@@ -198,4 +204,3 @@ fixture3 =
         (EVariable () (Label () "x"))
         (EVariable () (Label () "x") :| [])
     )
-
