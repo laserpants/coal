@@ -18,7 +18,7 @@ module Noll.Utils (
   (<$$$>),
 ) where
 
-import Control.Monad (forM, forM_, liftM)
+import Control.Monad (forM, forM_)
 import Control.Monad.Writer (MonadWriter, tell)
 import Data.Foldable (foldrM, traverse_)
 import Data.Map.Strict (Map)
@@ -47,7 +47,7 @@ infixr 8 <$$$>
 
 -- | Monadic version of concatMap
 concatMapM :: (Monad m, Traversable f) => (a -> m [b]) -> f a -> m [b]
-concatMapM f xs = liftM concat (mapM f xs)
+concatMapM f xs = fmap concat (mapM f xs)
 
 {-# INLINE unionMap #-}
 unionMap :: (Ord b) => (a -> Set b) -> Set a -> Set b

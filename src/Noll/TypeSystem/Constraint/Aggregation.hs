@@ -51,7 +51,7 @@ type ConstraintsAggregation a = AggregationStack a TypeIndex Kind IndexedType
 
 {-# INLINE lookupDataConstructor #-}
 lookupDataConstructor :: Name -> AggregationStack w o k t (Maybe (Constructor o k t))
-lookupDataConstructor name = Environment.lookup name <$> asks aggregationDataConstructorEnv
+lookupDataConstructor name = asks (Environment.lookup name . aggregationDataConstructorEnv)
 
 assertEqualityAssumptions :: a -> IndexedType -> [Assumption IndexedType] -> ConstraintsAggregation a ()
 assertEqualityAssumptions loc t ms =
@@ -95,6 +95,22 @@ patternAssumptions assert ms =
         Just Constructor{..} ->
           tellRight [Explicit (InferenceRule 3) (foldType t (typeOf <$> ps)) constructorScheme]
       concat <$> traverse (patternAssumptions assert ms) ps
+
+clauseAssumptions ::
+  Clause Expression a IndexedType ->
+  ConstraintsAggregation a (IndexedType, [IndexedType], [Assumption IndexedType])
+clauseAssumptions (EClause loc p cs) = do
+  (ts1, ms1) <- second concat . unzip <$$> withMonomorphic p $
+    forM (fromList1 cs) $
+      \case
+        CPlain _ gs e -> do
+          ns1 <- concat <$$> forM gs $ \(CGuard g) -> do
+            tellRight [Equality (InferMatchClauseGuard loc) [typeOf g, TIntrinsic IBool]]
+            aggregateConstraints g
+          ns2 <- aggregateConstraints e
+          pure (typeOf e, ns1 <> ns2)
+  ms2 <- patternAssumptions (assertEqualityAssumptions loc) ms1 p
+  pure (typeOf p, ts1, ms2)
 
 aggregateConstraints ::
   Expression a IndexedType ->
@@ -144,7 +160,7 @@ aggregateConstraints =
       let t1 = typeOf e1
           t2 = typeOf e2
           t3 = typeOf e3
-      tellRight [Equality (InferIfCondition loc t1) [t1, (TIntrinsic IBool)]]
+      tellRight [Equality (InferIfCondition loc t1) [t1, TIntrinsic IBool]]
       tellRight [Equality (InferIfBranches loc t2 t3) [t, t2, t3]]
       pure (ms1 <> ms2 <> ms3)
     EApplication loc t e1 es -> do
@@ -159,26 +175,9 @@ aggregateConstraints =
       pure []
     EMatch loc t e cs -> do
       ms1 <- aggregateConstraints e
-      (ts1, ts2, ms2) <- collectClauseTypeConstraints (fromList1 cs)
+      (ts1, ts2, ms2) <- (third3 concat . unzip3 <$$> traverse clauseAssumptions) (fromList1 cs)
       -- Pattern types
       tellRight [Equality (InferMatchClausePatterns loc) (typeOf e : ts1)]
       -- Expression types
       tellRight [Equality (InferMatchClauseExpressions loc) (t : concat ts2)]
       pure (ms1 <> ms2)
-
-collectClauseTypeConstraints :: [Clause Expression a IndexedType] -> ConstraintsAggregation a ([IndexedType], [[IndexedType]], [Assumption IndexedType])
-collectClauseTypeConstraints = third3 concat . unzip3 <$$> traverse collectClauseTypeConstraint
-
-collectClauseTypeConstraint :: Clause Expression a IndexedType -> ConstraintsAggregation a (IndexedType, [IndexedType], [Assumption IndexedType])
-collectClauseTypeConstraint (EClause loc p cs) = do
-  (ts1, ms1) <- second concat . unzip <$$> withMonomorphic p $
-    forM (fromList1 cs) $
-      \case
-        CPlain _ gs e -> do
-          ns1 <- concat <$$> forM gs $ \(CGuard g) -> do
-            tellRight [Equality (InferMatchClauseGuard loc) [typeOf g, TIntrinsic IBool]]
-            aggregateConstraints g
-          ns2 <- aggregateConstraints e
-          pure (typeOf e, ns1 <> ns2)
-  ms2 <- patternAssumptions (assertEqualityAssumptions loc) ms1 p
-  pure (typeOf p, ts1, ms2)
