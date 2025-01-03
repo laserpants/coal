@@ -4,15 +4,15 @@ module Noll.TypeSystem.UnificationSpec where
 
 import Control.Monad.Except (runExcept)
 import Data.List.NonEmpty (NonEmpty (..))
-import Test.Hspec (Spec, describe, it)
-import Noll.TypeSystem.Substitution
-import Noll.TypeSystem.Unification 
 import Noll.Language (
-  Type (..),
-  Kind (..),
   Intrinsic (..),
+  Kind (..),
+  Type (..),
   TypeIndex (..),
  )
+import Noll.TypeSystem.Substitution
+import Noll.TypeSystem.Unification
+import Test.Hspec (Spec, describe, it)
 
 spec :: Spec
 spec =
@@ -59,4 +59,3 @@ validateUnifyResult t1 t2 = runExcept (unify t1 t2)
 
 validateUnifyAllResult :: (Unifiable a) => [a] -> Either UnificationError Substitution
 validateUnifyAllResult ts = runExcept (unifyAll ts)
-

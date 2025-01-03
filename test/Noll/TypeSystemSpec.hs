@@ -38,31 +38,31 @@ spec =
   describe "Noll.TypeSystem" $ do
     it "fn(m) => let y = m in let x = y(true) in x" $ do
       validateResult fixture1 == fixture1Typed
-    it "" $ 
+    it "" $
       validateNoErrors fixture1
     it "let f = fn(x) => x in (f(f))(f(1))" $ do
       validateResult fixture2 == fixture2Typed
-    it "" $ 
+    it "" $
       validateNoErrors fixture2
     it "match x { | Yes => true }" $ do
       validateResult fixture7 == fixture7Typed
-    it "" $ 
+    it "" $
       validateNoErrors fixture7
     it "match(p) { | MkPair(fst, snd) => true }" $ do
       validateResult fixture12 == fixture12Typed
-    it "" $ 
+    it "" $
       validateNoErrors fixture12
     it "match(p : Pair(int32, bool)) { | MkPair(fst, snd) => true }" $ do
       validateResult fixture13 == fixture13Typed
-    it "" $ 
+    it "" $
       validateNoErrors fixture13
     it "match(p : Pair(a, b)) { | MkPair(fst, snd) => true }" $ do
       validateResult fixture14 == fixture14Typed
-    it "" $ 
+    it "" $
       validateNoErrors fixture14
     it "match(p : Pair(a, a)) { | MkPair(fst, snd) => true }" $ do
       validateResult fixture15 == fixture15Typed
-    it "" $ 
+    it "" $
       validateNoErrors fixture15
 
 -- validateSolverErrors :: Expression () () -> Expression () (Type TypeIndex Kind)
@@ -78,14 +78,13 @@ validateNoErrors e = null es0 && null es1
  where
   (_, _, es0, es1) = testRunner e
 
-
--- testRunner ::
---  Expression () () ->
---  ( Expression () (Type TypeIndex Kind)
---  , [Assumption IndexedType]
---  , [AggregationError ()]
---  , [InferenceRule Kind ()]
---  )
+testRunner ::
+  Expression () () ->
+  ( Expression () (Type TypeIndex Kind)
+  , [Assumption IndexedType]
+  , [AggregationError ()]
+  , [InferenceRule Kind ()]
+  )
 testRunner e =
   let
     e0 = evalState (traverse (const supply) e) (0 :: Int)
@@ -108,7 +107,11 @@ testRunner e =
 
     e3 = normalizeTypeIndexes e2
    in
-    (e3, asms, errors0, apply sub errors1)
+    ( e3
+    , asms
+    , errors0
+    , apply sub errors1
+    )
 
 toIndexed :: Expression a Int -> Expression a (Type TypeIndex Kind)
 toIndexed = fmap (TVariable . TypeIndex KType)
@@ -124,10 +127,11 @@ testConstructorEnv =
       ( "No"
       , Constructor "No" 0 (Forall mempty [] (TConstructor KType "Answer"))
       )
-    ,       ( "Foo"
-            , Constructor "Foo" 0 (Forall mempty [] (TConstructor KType "Foo"))
-            )
-          ,
+    ,
+      ( "Foo"
+      , Constructor "Foo" 0 (Forall mempty [] (TConstructor KType "Foo"))
+      )
+    ,
       ( "Id"
       , Constructor
           "Id"
@@ -135,24 +139,24 @@ testConstructorEnv =
           ( Forall (Set.fromList [TypeIndex KType 0]) [] (TVariable (TypeIndex KType 0) `TArrow` TApplication KType (TConstructor (KArrow KType KType) "Id") (TVariable (TypeIndex KType 0) :| []))
           )
       )
-    , --    ,
-      --      ( "MkPair1"
-      --      , Constructor
-      --          "MkPair1"
-      --          2
-      --          ( Forall
-      --              (Set.fromList [TypeIndex () 0])
-      --              []
-      --              ( TVariable (TypeIndex () 0)
-      --                  `TArrow` TVariable (TypeIndex () 0)
-      --                  `TArrow` TApplication -- '0 -> Pair1('0)
-      --                    ()
-      --                    (TConstructor () "Pair1")
-      --                    (TVariable (TypeIndex () 0) :| [])
-      --              )
-      --          )
-      --      )
-
+    ,
+      ( "MkPair1"
+      , Constructor
+          "MkPair1"
+          2
+          ( Forall
+              (Set.fromList [TypeIndex KType 0])
+              []
+              ( TVariable (TypeIndex KType 0)
+                  `TArrow` TVariable (TypeIndex KType 0)
+                  `TArrow` TApplication -- '0 -> Pair1('0)
+                    KType
+                    (TConstructor (KArrow KType KType) "Pair1")
+                    (TVariable (TypeIndex KType 0) :| [])
+              )
+          )
+      )
+    ,
       ( "MkPair"
       , Constructor
           "MkPair"
@@ -172,17 +176,17 @@ testConstructorEnv =
               )
           )
       )
-      --    ,
-      --      ( "MkIntPair"
-      --      , Constructor
-      --          "MkIntPair"
-      --          2
-      --          ( Forall
-      --              mempty
-      --              []
-      --              (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TConstructor () "IntPair")
-      --          )
-      --      )
+    ,
+      ( "MkIntPair"
+      , Constructor
+          "MkIntPair"
+          2
+          ( Forall
+              mempty
+              []
+              (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TConstructor KType "IntPair")
+          )
+      )
     ]
 
 testTypeConstructorEnv :: Environment Kind
@@ -614,4 +618,3 @@ fixture16 =
             :| []
       )
   )
-

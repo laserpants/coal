@@ -7,8 +7,8 @@ import qualified Noll.Language.IndexedSpec
 -- import qualified Noll.TypeSystem.TypeSubstitutionSpec
 
 import qualified Noll.TypeSystem.Constraint.AggregationSpec
-import qualified Noll.TypeSystemSpec
 import qualified Noll.TypeSystem.UnificationSpec
+import qualified Noll.TypeSystemSpec
 import Test.Hspec (hspec, it)
 
 main :: IO ()
