@@ -12,12 +12,16 @@ module Noll.TypeSystem.Constraint.Aggregation (
 
 import Control.Monad.Reader (asks)
 import Data.List (partition)
+import Data.Tuple.Extra (second, third3)
 import Debug.Trace
 import Noll.Label (Label (..))
 import Noll.Language (
   Binding (..),
+  Choice (..),
+  Clause (..),
   Constructor (..),
   Expression (..),
+  Guard (..),
   IndexedType,
   Intrinsic (..),
   Kind (..),
@@ -41,7 +45,7 @@ import Noll.TypeSystem.Constraint.Aggregation.Internal (
  )
 import Noll.TypeSystem.Constraint.Aggregation.TypeAnnotation (instantiateAnnotation)
 import Noll.TypeSystem.Constraint.Rule (Assumption (..), InferenceRule (..), assumptionNameIs)
-import Noll.Utils (Name, concatMapM, forM, tellLeft, tellRight)
+import Noll.Utils (Name, concatMapM, forM, tellLeft, tellRight, (<$$>))
 
 type ConstraintsAggregation a = AggregationStack a TypeIndex Kind IndexedType
 
@@ -155,4 +159,26 @@ aggregateConstraints =
       pure []
     EMatch loc t e cs -> do
       ms1 <- aggregateConstraints e
-      undefined
+      (ts1, ts2, ms2) <- collectClauseTypeConstraints (fromList1 cs)
+      -- Pattern types
+      tellRight [Equality (InferMatchClausePatterns loc) (typeOf e : ts1)]
+      -- Expression types
+      tellRight [Equality (InferMatchClauseExpressions loc) (t : concat ts2)]
+      pure (ms1 <> ms2)
+
+collectClauseTypeConstraints :: [Clause Expression a IndexedType] -> ConstraintsAggregation a ([IndexedType], [[IndexedType]], [Assumption IndexedType])
+collectClauseTypeConstraints = third3 concat . unzip3 <$$> traverse collectClauseTypeConstraint
+
+collectClauseTypeConstraint :: Clause Expression a IndexedType -> ConstraintsAggregation a (IndexedType, [IndexedType], [Assumption IndexedType])
+collectClauseTypeConstraint (EClause loc p cs) = do
+  (ts1, ms1) <- second concat . unzip <$$> withMonomorphic p $
+    forM (fromList1 cs) $
+      \case
+        CPlain _ gs e -> do
+          ns1 <- concat <$$> forM gs $ \(CGuard g) -> do
+            tellRight [Equality (InferMatchClauseGuard loc) [typeOf g, TIntrinsic IBool]]
+            aggregateConstraints g
+          ns2 <- aggregateConstraints e
+          pure (typeOf e, ns1 <> ns2)
+  ms2 <- patternAssumptions (assertEqualityAssumptions loc) ms1 p
+  pure (typeOf p, ts1, ms2)
