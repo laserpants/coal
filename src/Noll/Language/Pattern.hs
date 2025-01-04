@@ -25,4 +25,6 @@ data Pattern a t
     PListCons a t (Pattern a t) (Pattern a t)
   | -- | List literal
     PListLiteral a t [Pattern a t]
+  | -- | Or-pattern
+    POr a t (Pattern a t) (Pattern a t)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
