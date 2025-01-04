@@ -6,7 +6,7 @@ module Noll.TypeSystem.Constraint.Aggregation.TypeAnnotation (instantiateAnnotat
 
 import Control.Monad.Except (ExceptT, runExceptT, throwError)
 import Control.Monad.RWS (MonadReader, asks, get, put)
-import Control.Monad.State (StateT, evalStateT, gets, modify)
+import Control.Monad.State (MonadState, StateT, evalStateT, gets, modify)
 import qualified Data.Map.Strict as Map
 import Noll.Language (
   IndexedType,
@@ -23,7 +23,7 @@ import Noll.Language (
  )
 import qualified Noll.Library.Environment as Environment
 import Noll.TypeSystem.Constraint.Aggregation.Internal (AggregationContext (..), TypeAnnotationError (..))
-import Noll.Utils (Dictionary, IndexMap, Name)
+import Noll.Utils (Dictionary, IndexMap, Name, lexOrderRank)
 
 type TypeAnnotationContext = AggregationContext TypeIndex Kind IndexedType
 
@@ -31,14 +31,12 @@ type TypeAnnotationContext = AggregationContext TypeIndex Kind IndexedType
 lookupTypeConstructor :: (MonadReader TypeAnnotationContext m) => Name -> m (Maybe Kind)
 lookupTypeConstructor name = Environment.lookup name <$> asks aggregationTypeConstructorEnv
 
-instantiateAnnotation :: (MonadReader TypeAnnotationContext m) => Type TypeParam () -> m (Either TypeAnnotationError (Scheme TypeIndex Kind IndexedType))
+instantiateAnnotation :: (MonadState (TypeIndex ()) m, MonadReader TypeAnnotationContext m) => Type TypeParam () -> m (Either TypeAnnotationError (Type TypeIndex Kind))
 instantiateAnnotation t = do
-  r <- runExceptT $ do
-    t1 <- evalStateT (translateToIndexed t) (0, mempty)
+  TypeIndex _ n <- get
+  runExceptT $ do
+    t1 <- translateToIndexed t
     evalStateT (addKinds t1) mempty
-  pure (scheme <$> r)
- where
-  scheme t = Forall (typeIndexesIn t) [] t
 
 type AddKinds m a = StateT (IndexMap Kind) (ExceptT TypeAnnotationError m) a
 
@@ -74,7 +72,7 @@ addKinds =
       c <- lookupTypeConstructor name
       case c of
         Nothing ->
-          throwError (TypeConstructorMissing name)
+          throwError (NoTypeConstructor name)
         Just k ->
           pure (TConstructor k name)
     TIntrinsic t ->
@@ -94,9 +92,7 @@ addKindsRow =
     RNil ->
       pure RNil
 
-type Instantiate m = StateT (Int, Dictionary OpaqueType) (ExceptT TypeAnnotationError m)
-
-translateToIndexed :: (Monad m) => Type TypeParam () -> Instantiate m OpaqueType
+translateToIndexed :: (MonadState (TypeIndex ()) m) => Type TypeParam () -> m OpaqueType
 translateToIndexed =
   \case
     TApplication _ t ts ->
@@ -109,40 +105,22 @@ translateToIndexed =
       TIntrinsic <$> traverse translateToIndexed t
     TRow row ->
       TRow <$> translateToIndexedRow row
-    TVariable (TypeParam _ name) -> do
-      dict <- gets snd
-      case Map.lookup name dict of
-        Nothing ->
-          freshVariable name id TVariable
-        Just t@TVariable{} ->
-          pure t
-        Just _ ->
-          throwError KindMismatch
+    TVariable (TypeParam _ name) ->
+      TVariable <$> toTypeIndex name
     TAlias name ts t ->
       TAlias name <$> traverse translateToIndexed ts <*> translateToIndexed t
 
-translateToIndexedRow :: (Monad m) => Row TypeParam () (Type TypeParam ()) -> Instantiate m (Row TypeIndex () OpaqueType)
+translateToIndexedRow :: (MonadState (TypeIndex ()) m) => Row TypeParam () (Type TypeParam ()) -> m (Row TypeIndex () OpaqueType)
 translateToIndexedRow =
   \case
     RExtend name t row ->
-      RExtend name
-        <$> translateToIndexed t
-        <*> translateToIndexedRow row
-    RVariable (TypeParam _ name) -> do
-      dict <- gets snd
-      case Map.lookup name dict of
-        Nothing ->
-          freshVariable name TRow RVariable
-        Just (TRow row) ->
-          pure row
-        Just _ ->
-          throwError KindMismatch
+      RExtend name <$> translateToIndexed t <*> translateToIndexedRow row
+    RVariable (TypeParam _ name) ->
+      RVariable <$> toTypeIndex name
     RNil ->
       pure RNil
 
-freshVariable :: (Monad m) => Name -> (t -> OpaqueType) -> (TypeIndex () -> t) -> Instantiate m t
-freshVariable name from to = do
-  (n, dict) <- get
-  let t = to (TypeIndex () n)
-  put (succ n, Map.insert name (from t) dict)
-  pure t
+toTypeIndex :: (MonadState (TypeIndex ()) m) => Name -> m (TypeIndex ())
+toTypeIndex name = do
+  TypeIndex _ n <- get
+  pure (TypeIndex () (n + lexOrderRank name))

@@ -10,7 +10,7 @@ import Noll.Utils (Dictionary, Map, Name)
 
 data Pattern a t
   = -- | Type-annotated pattern
-    PAnnotation (Type TypeParam ()) (Pattern a t)
+    PAnnotation a (Type TypeParam ()) (Pattern a t)
   | -- | Wildcard pattern
     PAny a t
   | -- | Variable pattern

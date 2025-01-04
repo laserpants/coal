@@ -16,7 +16,7 @@ import Noll.Utils (Name)
 data InferenceRule k a
   = InferenceRule Int
   | -- | Type annotation
-    InferAnnotation a (Scheme TypeIndex Kind (Type TypeIndex Kind))
+    InferAnnotation a (Type TypeIndex Kind)
   | -- | Function application
     InferApplication a (Type TypeIndex k) [Type TypeIndex k]
   | -- | Type of if condition is bool
@@ -64,6 +64,10 @@ data Assumption t = Assumption
   , assumptionType :: t
   }
   deriving (Show, Eq, Ord, Read)
+
+instance (Substitutable t) => Substitutable (Assumption t) where
+  apply sub (Assumption name t) = 
+    Assumption name (apply sub t)
 
 {-# INLINE assumptionNameIs #-}
 assumptionNameIs :: Name -> Assumption t -> Bool

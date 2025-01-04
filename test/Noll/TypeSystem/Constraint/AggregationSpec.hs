@@ -17,6 +17,7 @@ import Noll.Language (
   Type (..),
   TypeIndex (..),
   TypeParam (..),
+  freshIdIn,
  )
 import Noll.TypeSystem.Constraint.Aggregation
 import Noll.TypeSystem.Constraint.Aggregation.Internal
@@ -36,34 +37,26 @@ spec =
         it "a -> b" $
           testRunner2
             fixture13
-            == Right (Forall (Set.fromList [TypeIndex KType 0, TypeIndex KType 1]) [] (TArrow (TVariable (TypeIndex KType 0)) (TVariable (TypeIndex KType 1))))
+            == Right (TArrow (TVariable (TypeIndex KType 0)) (TVariable (TypeIndex KType 1)))
         it "a -> a" $
           testRunner2
             fixture14
-            == Right (Forall (Set.fromList [TypeIndex KType 0]) [] (TArrow (TVariable (TypeIndex KType 0)) (TVariable (TypeIndex KType 0))))
+            == Right (TArrow (TVariable (TypeIndex KType 0)) (TVariable (TypeIndex KType 0)))
         it "f(a) -> f(b)" $
           testRunner2
             fixture10
             == Right
-              ( Forall
-                  (Set.fromList [TypeIndex (KArrow KType KType) 0, TypeIndex (KType) 1, TypeIndex KType 2])
-                  []
-                  ( TArrow
-                      (TApplication KType (TVariable (TypeIndex (KArrow KType KType) 0)) (TVariable (TypeIndex KType 1) :| []))
-                      (TApplication KType (TVariable (TypeIndex (KArrow KType KType) 0)) (TVariable (TypeIndex KType 2) :| []))
-                  )
+              ( TArrow
+                  (TApplication KType (TVariable (TypeIndex (KArrow KType KType) 5)) (TVariable (TypeIndex KType 0) :| []))
+                  (TApplication KType (TVariable (TypeIndex (KArrow KType KType) 5)) (TVariable (TypeIndex KType 1) :| []))
               )
         it "f(a) -> f(a)" $
           testRunner2
             fixture11
             == Right
-              ( Forall
-                  (Set.fromList [TypeIndex (KArrow KType KType) 0, TypeIndex (KType) 1])
-                  []
-                  ( TArrow
-                      (TApplication KType (TVariable (TypeIndex (KArrow KType KType) 0)) (TVariable (TypeIndex KType 1) :| []))
-                      (TApplication KType (TVariable (TypeIndex (KArrow KType KType) 0)) (TVariable (TypeIndex KType 1) :| []))
-                  )
+              ( TArrow
+                  (TApplication KType (TVariable (TypeIndex (KArrow KType KType) 5)) (TVariable (TypeIndex KType 0) :| []))
+                  (TApplication KType (TVariable (TypeIndex (KArrow KType KType) 5)) (TVariable (TypeIndex KType 0) :| []))
               )
       describe "Kind mismatch" $ do
         it "f -> f(a)" $
@@ -75,15 +68,20 @@ testRunner ::
   , [AggregationOutput a TypeIndex Kind (Type TypeIndex Kind)]
   )
 testRunner e =
-  runAggregationStack
-    (AggregationContext mempty mempty mempty)
-    (aggregateConstraints (toIndexed e))
+  let
+    e0 = toIndexed e
+   in
+    runAggregationStack
+      (freshIdIn e0)
+      (AggregationContext mempty mempty mempty)
+      (aggregateConstraints e0)
 
-testRunner2 :: Type TypeParam () -> Either TypeAnnotationError (Scheme TypeIndex Kind (Type TypeIndex Kind))
+testRunner2 :: Type TypeParam () -> Either TypeAnnotationError (Type TypeIndex Kind)
 testRunner2 t = s
  where
   (s, _) =
     runAggregationStack
+      0
       (AggregationContext mempty mempty mempty)
       (instantiateAnnotation t)
 

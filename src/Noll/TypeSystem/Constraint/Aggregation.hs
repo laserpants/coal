@@ -80,6 +80,14 @@ patternAssumptions ::
   ConstraintsAggregation a [Assumption IndexedType]
 patternAssumptions assert ms =
   \case
+    PAnnotation loc t p -> do
+      r <- instantiateAnnotation t
+      case r of
+        Left err ->
+          tellLeft [IllFormedTypeAnnotation loc err]
+        Right t1 ->
+          tellRight [Equality (InferAnnotation loc t1) [typeOf p, t1]]
+      patternAssumptions assert ms p
     PVariable _ (Label t name) -> do
       let (ls, rs) = partition (assumptionNameIs name) ms
       assert t ls
@@ -88,7 +96,7 @@ patternAssumptions assert ms =
       r <- lookupDataConstructor name
       case r of
         Nothing ->
-          tellLeft [MissingDataConstructor loc name]
+          tellLeft [NoDataConstructor loc name]
         Just Constructor{..}
           | constructorArity /= length ps ->
               tellLeft [DataConstructorArityMismatch loc name constructorArity (length ps)]
@@ -122,14 +130,14 @@ aggregateConstraints =
       case r of
         Left err ->
           tellLeft [IllFormedTypeAnnotation loc err]
-        Right s ->
-          tellRight [Explicit (InferAnnotation loc s) (typeOf e) s]
+        Right t1 ->
+          tellRight [Equality (InferAnnotation loc t1) [typeOf e, t1]]
       aggregateConstraints e
     EConstructor loc (Label t name) -> do
       r <- lookupDataConstructor name
       case r of
         Nothing ->
-          tellLeft [MissingDataConstructor loc name]
+          tellLeft [NoDataConstructor loc name]
         Just Constructor{..} ->
           tellRight [Explicit (InferenceRule 4) t constructorScheme]
       pure []

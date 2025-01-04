@@ -89,6 +89,8 @@ instance (Ord k) => TypeIndexed k (Type TypeIndex k) where
 instance (Ord k, TypeIndexed k t) => TypeIndexed k (Pattern a t) where
   typeIndexesIn =
     \case
+      PAnnotation _ _ p ->
+        typeIndexesIn p
       PVariable _ (Label t _) ->
         typeIndexesIn t
       PConstructor _ (Label t _) ps ->

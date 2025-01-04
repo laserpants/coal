@@ -33,11 +33,11 @@ import Noll.Utils (Name)
 
 data TypeAnnotationError
   = KindMismatch
-  | TypeConstructorMissing Name
+  | NoTypeConstructor Name
   deriving (Show, Eq, Ord, Read)
 
 data AggregationError a
-  = MissingDataConstructor a Name
+  = NoDataConstructor a Name
   | DataConstructorArityMismatch a Name Int Int
   | IllFormedTypeAnnotation a TypeAnnotationError
   deriving (Show, Eq, Ord, Read)
@@ -51,7 +51,7 @@ data AggregationContext o k t = AggregationContext
 
 type AggregationOutput w o k t = Either (AggregationError w) (Constraint (InferenceRule k w) o k t)
 
-type AggregationMonad w o k t = RWS (AggregationContext o k t) [AggregationOutput w o k t] ()
+type AggregationMonad w o k t = RWS (AggregationContext o k t) [AggregationOutput w o k t] (TypeIndex ())
 
 newtype AggregationStack w o k t a = AggregationStack {aggregationMonad :: AggregationMonad w o k t a}
   deriving
@@ -60,13 +60,13 @@ newtype AggregationStack w o k t a = AggregationStack {aggregationMonad :: Aggre
     , Monad
     , MonadReader (AggregationContext o k t)
     , MonadWriter [AggregationOutput w o k t]
-    , MonadState ()
-    , MonadRWS (AggregationContext o k t) [AggregationOutput w o k t] ()
+    , MonadState (TypeIndex ())
+    , MonadRWS (AggregationContext o k t) [AggregationOutput w o k t] (TypeIndex ())
     )
 
 {-# INLINE runAggregationStack #-}
-runAggregationStack :: AggregationContext o k t -> AggregationStack w o k t a -> (a, [AggregationOutput w o k t])
-runAggregationStack ctx m = evalRWS (aggregationMonad m) ctx ()
+runAggregationStack :: Int -> AggregationContext o k t -> AggregationStack w o k t a -> (a, [AggregationOutput w o k t])
+runAggregationStack n ctx m = evalRWS (aggregationMonad m) ctx (TypeIndex () n)
 
 {-# INLINE overAggregationMonomorphicSet #-}
 overAggregationMonomorphicSet :: (MonomorphicSet (o k) -> MonomorphicSet (o k)) -> AggregationContext o k t -> AggregationContext o k t

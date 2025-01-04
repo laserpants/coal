@@ -14,18 +14,21 @@ module Noll.Utils (
   tellLeft,
   tellRight,
   fromMaybe,
+  lexOrderRank,
   (<$$>),
   (<$$$>),
 ) where
 
 import Control.Monad (forM, forM_)
 import Control.Monad.Writer (MonadWriter, tell)
+import Data.Char (ord)
 import Data.Foldable (foldrM, traverse_)
 import Data.Map.Strict (Map)
 import Data.Maybe (fromMaybe)
 import Data.Set (Set, unions)
 import qualified Data.Set as Set
 import Data.Text (Text)
+import qualified Data.Text as Text
 
 type Name = Text
 
@@ -60,3 +63,9 @@ tellLeft = tell . fmap Left
 {-# INLINE tellRight #-}
 tellRight :: (MonadWriter [Either e a] m) => [a] -> m ()
 tellRight = tell . fmap Right
+
+lexOrderRank :: Text -> Int
+lexOrderRank txt = sum [36 ^ i | i <- [1 .. len - 1]] + Text.foldl' go 0 txt
+ where
+  len = Text.length txt
+  go acc c = acc * 36 + (ord c - if c `elem` ['0' .. '9'] then 22 else ord 'a')

@@ -110,6 +110,8 @@ instance Substitutable IndexedType where
 instance Substitutable (Pattern a IndexedType) where
   apply sub =
     \case
+      PAnnotation a t p ->
+        PAnnotation a t (apply sub p)
       PVariable a (Label t name) ->
         PVariable a (Label (apply sub t) name)
       PConstructor a (Label t name) ps ->

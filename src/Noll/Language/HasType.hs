@@ -48,6 +48,8 @@ instance HasType o k Primitive where
 instance HasType o k (Pattern a (Type o k)) where
   typeOf =
     \case
+      PAnnotation _ _ t ->
+        typeOf t
       PAny _ t ->
         typeOf t
       PVariable _ t ->
