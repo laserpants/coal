@@ -100,7 +100,7 @@ testRunner e =
       runAggregationStack
         (freshIdIn e1)
         (AggregationContext mempty testConstructorEnv testTypeConstructorEnv)
-        (aggregateConstraints e1)
+        (collectConstraints e1)
 
     errors0 = lefts out
     constraints = rights out

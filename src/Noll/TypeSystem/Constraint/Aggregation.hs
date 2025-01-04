@@ -6,7 +6,7 @@
 module Noll.TypeSystem.Constraint.Aggregation (
   AggregationContext (..),
   AggregationError (..),
-  aggregateConstraints,
+  collectConstraints,
   runAggregationStack,
 ) where
 
@@ -114,16 +114,16 @@ clauseAssumptions (EClause loc p cs) = do
         CPlain _ gs e -> do
           ns1 <- concat <$$> forM gs $ \(CGuard g) -> do
             tellRight [Equality (InferMatchClauseGuard loc) [typeOf g, TIntrinsic IBool]]
-            aggregateConstraints g
-          ns2 <- aggregateConstraints e
+            collectConstraints g
+          ns2 <- collectConstraints e
           pure (typeOf e, ns1 <> ns2)
   ms2 <- patternAssumptions (assertEqualityAssumptions loc) ms1 p
   pure (typeOf p, ts1, ms2)
 
-aggregateConstraints ::
+collectConstraints ::
   Expression a IndexedType ->
   ConstraintsAggregation a [Assumption IndexedType]
-aggregateConstraints =
+collectConstraints =
   \case
     EAnnotation loc t e -> do
       r <- instantiateAnnotation t
@@ -132,7 +132,7 @@ aggregateConstraints =
           tellLeft [IllFormedTypeAnnotation loc err]
         Right t1 ->
           tellRight [Equality (InferAnnotation loc t1) [typeOf e, t1]]
-      aggregateConstraints e
+      collectConstraints e
     EConstructor loc (Label t name) -> do
       r <- lookupDataConstructor name
       case r of
@@ -144,14 +144,14 @@ aggregateConstraints =
     EVariable loc (Label t name) ->
       pure [Assumption name t]
     ELambda loc ps e -> do
-      ms1 <- withMonomorphic ps (aggregateConstraints e)
+      ms1 <- withMonomorphic ps (collectConstraints e)
       concat <$> forM ps (patternAssumptions (assertEqualityAssumptions loc) ms1)
     ELet loc gs e1 -> do
-      ms1 <- aggregateConstraints e1
+      ms1 <- collectConstraints e1
       ms2 <- flip concatMapM gs $
         \case
           BPattern _ p e -> do
-            ms <- aggregateConstraints e
+            ms <- collectConstraints e
             let t1 = typeOf p
                 t2 = typeOf e
             tellRight [Equality (InferLetBindingPattern loc t1 t2) [t1, t2]]
@@ -162,9 +162,9 @@ aggregateConstraints =
             patternAssumptions (assertImplicitAssumptions loc) ms1 p
       pure (ms1 <> ms2 <> ms3)
     EIf loc t e1 e2 e3 -> do
-      ms1 <- aggregateConstraints e1
-      ms2 <- aggregateConstraints e2
-      ms3 <- aggregateConstraints e3
+      ms1 <- collectConstraints e1
+      ms2 <- collectConstraints e2
+      ms3 <- collectConstraints e3
       let t1 = typeOf e1
           t2 = typeOf e2
           t3 = typeOf e3
@@ -172,8 +172,8 @@ aggregateConstraints =
       tellRight [Equality (InferIfBranches loc t2 t3) [t, t2, t3]]
       pure (ms1 <> ms2 <> ms3)
     EApplication loc t e1 es -> do
-      ms1 <- aggregateConstraints e1
-      ms2 <- concat <$> traverse aggregateConstraints es
+      ms1 <- collectConstraints e1
+      ms2 <- concat <$> traverse collectConstraints es
       let t1 = typeOf e1
           t2 = foldType t ts
           ts = typeOf <$> es
@@ -182,7 +182,7 @@ aggregateConstraints =
     ELiteral{} ->
       pure []
     EMatch loc t e cs -> do
-      ms1 <- aggregateConstraints e
+      ms1 <- collectConstraints e
       (ts1, ts2, ms2) <- (third3 concat . unzip3 <$$> traverse clauseAssumptions) (fromList1 cs)
       -- Pattern types
       tellRight [Equality (InferMatchClausePatterns loc) (typeOf e : ts1)]

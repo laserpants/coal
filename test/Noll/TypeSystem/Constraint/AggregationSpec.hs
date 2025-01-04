@@ -28,7 +28,7 @@ import Test.Hspec (Spec, describe, it)
 spec :: Spec
 spec =
   describe "Noll.TypeSystem.Constraint.Aggregation" $ do
-    --    describe "aggregateConstraints" $ do
+    --    describe "collectConstraints" $ do
     --      describe "ELet" $ do
     --        it "" $
     --          1 == 0
@@ -74,7 +74,7 @@ testRunner e =
     runAggregationStack
       (freshIdIn e0)
       (AggregationContext mempty mempty mempty)
-      (aggregateConstraints e0)
+      (collectConstraints e0)
 
 testRunner2 :: Type TypeParam () -> Either TypeAnnotationError (Type TypeIndex Kind)
 testRunner2 t = s
