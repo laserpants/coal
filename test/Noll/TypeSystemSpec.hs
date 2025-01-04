@@ -797,7 +797,6 @@ fixture23 =
     )
     (EVariable () (Label () "f"))
 
-
 -- let
 --   f =
 --     fn(g : a -> b, x : c) =>

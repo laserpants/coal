@@ -66,7 +66,7 @@ data Assumption t = Assumption
   deriving (Show, Eq, Ord, Read)
 
 instance (Substitutable t) => Substitutable (Assumption t) where
-  apply sub (Assumption name t) = 
+  apply sub (Assumption name t) =
     Assumption name (apply sub t)
 
 {-# INLINE assumptionNameIs #-}
