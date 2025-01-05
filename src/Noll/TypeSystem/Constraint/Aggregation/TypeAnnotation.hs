@@ -2,12 +2,20 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.TypeSystem.Constraint.Aggregation.TypeAnnotation (instantiateAnnotation) where
+module Noll.TypeSystem.Constraint.Aggregation.TypeAnnotation (
+  TypeAnnotationError (..),
+  instantiateAnnotation,
+  checkTypeVariables,
+) where
 
 import Control.Monad.Except (ExceptT, runExceptT, throwError)
-import Control.Monad.RWS (MonadReader, asks, get, put)
-import Control.Monad.State (MonadState, StateT, evalStateT, gets, modify)
+import Control.Monad.RWS (MonadReader, ask, asks, get, put)
+import Control.Monad.Reader (runReaderT)
+import Control.Monad.State (MonadState, StateT, evalStateT, gets, modify, runStateT)
+import Control.Monad.Writer (MonadWriter, tell)
+import Data.List.Extra (groupSortOn)
 import qualified Data.Map.Strict as Map
+import Debug.Trace
 import Noll.Language (
   IndexedType,
   Kind (..),
@@ -23,7 +31,8 @@ import Noll.Language (
  )
 import qualified Noll.Library.Environment as Environment
 import Noll.TypeSystem.Constraint.Aggregation.Internal (AggregationContext (..), TypeAnnotationError (..))
-import Noll.Utils (Dictionary, IndexMap, Name, lexOrderRank)
+import Noll.TypeSystem.Substitution
+import Noll.Utils (Dictionary, IndexMap, Name, concatMapM, lexOrderRank, (<$$$>))
 
 type TypeAnnotationContext = AggregationContext TypeIndex Kind IndexedType
 
@@ -31,14 +40,13 @@ type TypeAnnotationContext = AggregationContext TypeIndex Kind IndexedType
 lookupTypeConstructor :: (MonadReader TypeAnnotationContext m) => Name -> m (Maybe Kind)
 lookupTypeConstructor name = Environment.lookup name <$> asks aggregationTypeConstructorEnv
 
-instantiateAnnotation :: (MonadState (TypeIndex ()) m, MonadReader TypeAnnotationContext m) => Type TypeParam () -> m (Either TypeAnnotationError (Type TypeIndex Kind))
+instantiateAnnotation :: (MonadReader TypeAnnotationContext m, MonadState (Dictionary Int) m) => Type TypeParam () -> m (Either TypeAnnotationError (Type TypeIndex Kind))
 instantiateAnnotation t = do
-  TypeIndex _ n <- get
   runExceptT $ do
     t1 <- translateToIndexed t
     evalStateT (addKinds t1) mempty
 
-type AddKinds m a = StateT (IndexMap Kind) (ExceptT TypeAnnotationError m) a
+type AddKinds m = StateT (IndexMap Kind) (ExceptT TypeAnnotationError m)
 
 typeIndex :: (MonadReader TypeAnnotationContext m) => Kind -> Int -> AddKinds m (TypeIndex Kind)
 typeIndex k n = do
@@ -92,7 +100,7 @@ addKindsRow =
     RNil ->
       pure RNil
 
-translateToIndexed :: (MonadState (TypeIndex ()) m) => Type TypeParam () -> m OpaqueType
+translateToIndexed :: (MonadReader TypeAnnotationContext m, MonadState (Dictionary Int) m) => Type TypeParam () -> m OpaqueType
 translateToIndexed =
   \case
     TApplication _ t ts ->
@@ -110,7 +118,7 @@ translateToIndexed =
     TAlias name ts t ->
       TAlias name <$> traverse translateToIndexed ts <*> translateToIndexed t
 
-translateToIndexedRow :: (MonadState (TypeIndex ()) m) => Row TypeParam () (Type TypeParam ()) -> m (Row TypeIndex () OpaqueType)
+translateToIndexedRow :: (MonadReader TypeAnnotationContext m, MonadState (Dictionary Int) m) => Row TypeParam () (Type TypeParam ()) -> m (Row TypeIndex () OpaqueType)
 translateToIndexedRow =
   \case
     RExtend name t row ->
@@ -120,7 +128,29 @@ translateToIndexedRow =
     RNil ->
       pure RNil
 
-toTypeIndex :: (MonadState (TypeIndex ()) m) => Name -> m (TypeIndex ())
+toTypeIndex :: (MonadReader TypeAnnotationContext m, MonadState (Dictionary Int) m) => Name -> m (TypeIndex ())
 toTypeIndex name = do
-  TypeIndex _ n <- get
-  pure (TypeIndex () (n + lexOrderRank name))
+  n <- asks aggregationIndexTreshold
+  let t = n + lexOrderRank name
+  modify (Map.insert name t)
+  pure (TypeIndex () t)
+
+checkTypeVariables :: (MonadWriter [TypeAnnotationError] m) => [(Name, Int)] -> Substitution -> m ()
+checkTypeVariables ps (Substitution sub) = do
+  params <- snd <$$$> groupSortOn fst <$> concatMapM go ps
+  let twoOreMore xs = length xs > 1
+  case filter twoOreMore params of
+    [] ->
+      pure ()
+    ps ->
+      tell [NonDistinctTypeParameters ps]
+ where
+  go (name, index) =
+    case Map.lookup index sub of
+      Just (TVariable (TypeIndex _ m)) ->
+        pure [(m, name)]
+      Just t -> do
+        tell [ResolvesToConcreteType name t]
+        pure []
+      Nothing ->
+        pure [(index, name)]

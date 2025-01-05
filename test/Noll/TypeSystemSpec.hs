@@ -3,9 +3,12 @@
 module Noll.TypeSystemSpec where
 
 import Control.Monad.State (evalState)
+import Control.Monad.Writer (execWriter)
 import Data.Either.Extra (lefts, rights)
 import Data.List.NonEmpty ((<|))
+import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
+import Debug.Trace
 import Noll.Label (Label (..))
 import Noll.Language (
   Binding (..),
@@ -29,6 +32,7 @@ import qualified Noll.Library.Environment as Environment
 import Noll.Library.List1 (NonEmpty (..))
 import Noll.Library.Supply (supply)
 import Noll.TypeSystem.Constraint.Aggregation
+import Noll.TypeSystem.Constraint.Aggregation.TypeAnnotation (TypeAnnotationError (..), checkTypeVariables)
 import Noll.TypeSystem.Constraint.Rule (Assumption (..), InferenceRule (..))
 import Noll.TypeSystem.Constraint.Solver (solveConstraints)
 import Noll.TypeSystem.Substitution (apply, normalizeTypeIndexes)
@@ -76,17 +80,18 @@ spec =
 validateResult :: Expression () () -> Expression () (Type TypeIndex Kind)
 validateResult e = e1
  where
-  (e1, _, _, _) = testRunner e
+  (e1, _, _, _, _) = testRunner e
 
 validateNoErrors :: Expression () () -> Bool
 validateNoErrors e = null es0 && null es1
  where
-  (_, _, es0, es1) = testRunner e
+  (_, _, es0, es1, _) = testRunner e
 
 testRunner ::
   Expression () () ->
   ( Expression () (Type TypeIndex Kind)
   , [Assumption IndexedType]
+  , [TypeAnnotationError]
   , [AggregationError ()]
   , [InferenceRule Kind ()]
   )
@@ -96,13 +101,14 @@ testRunner e =
 
     e1 = toIndexed e0
 
-    (asms, out) =
+    (asms, xx, out) =
       runAggregationStack
-        (freshIdIn e1)
-        (AggregationContext mempty testConstructorEnv testTypeConstructorEnv)
+        (AggregationContext mempty testConstructorEnv testTypeConstructorEnv (freshIdIn e1))
         (collectConstraints e1)
 
-    errors0 = lefts out
+    yy = execWriter (checkTypeVariables (Map.toList xx) sub)
+
+    errors0 = lefts out <> fmap (IllFormedTypeAnnotation ()) yy 
     constraints = rights out
 
     res0 = solveConstraints constraints
@@ -113,11 +119,12 @@ testRunner e =
 
     e3 = normalizeTypeIndexes e2
    in
-    ( e3
-    , apply sub asms
-    , errors0
-    , apply sub errors1
-    )
+        ( e3
+        , apply sub asms
+        , yy
+        , errors0
+        , apply sub errors1
+        )
 
 toIndexed :: Expression a Int -> Expression a (Type TypeIndex Kind)
 toIndexed = fmap (TVariable . TypeIndex KType)
@@ -670,161 +677,224 @@ fixture17Typed =
     )
     (EVariable () (Label ((TVariable (TypeIndex KType 3) `TArrow` TVariable (TypeIndex KType 2)) `TArrow` TVariable (TypeIndex KType 3) `TArrow` TVariable (TypeIndex KType 2)) "f"))
 
--- -- let f = fn(x : int32) => 1 in f
--- fixture18 :: Expression () ()
--- fixture18 =
---   ELet
---     ()
---     ( BPattern
---         ()
---         (PVariable () (Label () "f"))
---         ( ELambda
---             ()
---             ( ( PAnnotation
---                   ()
---                   (TIntrinsic IInt32)
---                   (PVariable () (Label () "x"))
---               )
---                 :| []
---             )
---             (ELiteral () (LInt32 1))
---         )
---         :| []
---     )
---     (EVariable () (Label () "f"))
--- 
--- -- let f = fn(x : bool) => 1 in f
--- fixture19 :: Expression () ()
--- fixture19 =
---   ELet
---     ()
---     ( BPattern
---         ()
---         (PVariable () (Label () "f"))
---         ( ELambda
---             ()
---             ( ( PAnnotation
---                   ()
---                   (TIntrinsic IBool)
---                   (PVariable () (Label () "x"))
---               )
---                 :| []
---             )
---             (ELiteral () (LInt32 1))
---         )
---         :| []
---     )
---     (EVariable () (Label () "f"))
--- 
--- -- let f = fn(x : bool) => x : bool in f
--- fixture21 :: Expression () ()
--- fixture21 =
---   ELet
---     ()
---     ( BPattern
---         ()
---         (PVariable () (Label () "f"))
---         ( ELambda
---             ()
---             ( ( PAnnotation
---                   ()
---                   (TIntrinsic IBool)
---                   (PVariable () (Label () "x"))
---               )
---                 :| []
---             )
---             ( EAnnotation
---                 ()
---                 (TIntrinsic IBool)
---                 (EVariable () (Label () "x"))
---             )
---         )
---         :| []
---     )
---     (EVariable () (Label () "f"))
--- 
--- -- let f = fn(x : bool) => x : int32 in f
--- fixture22 :: Expression () ()
--- fixture22 =
---   ELet
---     ()
---     ( BPattern
---         ()
---         (PVariable () (Label () "f"))
---         ( ELambda
---             ()
---             ( ( PAnnotation
---                   ()
---                   (TIntrinsic IBool)
---                   (PVariable () (Label () "x"))
---               )
---                 :| []
---             )
---             ( EAnnotation
---                 ()
---                 (TIntrinsic IInt32)
---                 (EVariable () (Label () "x"))
---             )
---         )
---         :| []
---     )
---     (EVariable () (Label () "f"))
--- 
--- -- let f = fn(x : a) => x : int32 in f
--- fixture23 :: Expression () ()
--- fixture23 =
---   ELet
---     ()
---     ( BPattern
---         ()
---         (PVariable () (Label () "f"))
---         ( ELambda
---             ()
---             ( ( PAnnotation
---                   ()
---                   (TVariable (TypeParam () "a"))
---                   (PVariable () (Label () "x"))
---               )
---                 :| []
---             )
---             ( EAnnotation
---                 ()
---                 (TIntrinsic IInt32)
---                 (EVariable () (Label () "x"))
---             )
---         )
---         :| []
---     )
---     (EVariable () (Label () "f"))
--- 
--- -- let f = fn(x : bool) => x : a in f
--- fixture24 :: Expression () ()
--- fixture24 =
---   ELet
---     ()
---     ( BPattern
---         ()
---         (PVariable () (Label () "f"))
---         ( ELambda
---             ()
---             ( ( PAnnotation
---                   ()
---                   (TIntrinsic IBool)
---                   (PVariable () (Label () "x"))
---               )
---                 :| []
---             )
---             ( EAnnotation
---                 ()
---                 (TVariable (TypeParam () "a"))
---                 (EVariable () (Label () "x"))
---             )
---         )
---         :| []
---     )
---     (EVariable () (Label () "f"))
--- 
--- 
+-- let f = fn(x : int32) => 1 in f
+fixture18 :: Expression () ()
+fixture18 =
+  ELet
+    ()
+    ( BPattern
+        ()
+        (PVariable () (Label () "f"))
+        ( ELambda
+            ()
+            ( ( PAnnotation
+                  ()
+                  (TIntrinsic IInt32)
+                  (PVariable () (Label () "x"))
+              )
+                :| []
+            )
+            (ELiteral () (LInt32 1))
+        )
+        :| []
+    )
+    (EVariable () (Label () "f"))
+
+-- let f = fn(x : bool) => 1 in f
+fixture19 :: Expression () ()
+fixture19 =
+  ELet
+    ()
+    ( BPattern
+        ()
+        (PVariable () (Label () "f"))
+        ( ELambda
+            ()
+            ( ( PAnnotation
+                  ()
+                  (TIntrinsic IBool)
+                  (PVariable () (Label () "x"))
+              )
+                :| []
+            )
+            (ELiteral () (LInt32 1))
+        )
+        :| []
+    )
+    (EVariable () (Label () "f"))
+
+-- let f = fn(x : bool) => x : bool in f
+fixture21 :: Expression () ()
+fixture21 =
+  ELet
+    ()
+    ( BPattern
+        ()
+        (PVariable () (Label () "f"))
+        ( ELambda
+            ()
+            ( ( PAnnotation
+                  ()
+                  (TIntrinsic IBool)
+                  (PVariable () (Label () "x"))
+              )
+                :| []
+            )
+            ( EAnnotation
+                ()
+                (TIntrinsic IBool)
+                (EVariable () (Label () "x"))
+            )
+        )
+        :| []
+    )
+    (EVariable () (Label () "f"))
+
+-- let f = fn(x : bool) => x : int32 in f
+fixture22 :: Expression () ()
+fixture22 =
+  ELet
+    ()
+    ( BPattern
+        ()
+        (PVariable () (Label () "f"))
+        ( ELambda
+            ()
+            ( ( PAnnotation
+                  ()
+                  (TIntrinsic IBool)
+                  (PVariable () (Label () "x"))
+              )
+                :| []
+            )
+            ( EAnnotation
+                ()
+                (TIntrinsic IInt32)
+                (EVariable () (Label () "x"))
+            )
+        )
+        :| []
+    )
+    (EVariable () (Label () "f"))
+
+-- let f = fn(x : a) => x : int32 in f
+fixture23 :: Expression () ()
+fixture23 =
+  ELet
+    ()
+    ( BPattern
+        ()
+        (PVariable () (Label () "f"))
+        ( ELambda
+            ()
+            ( ( PAnnotation
+                  ()
+                  (TVariable (TypeParam () "a"))
+                  (PVariable () (Label () "x"))
+              )
+                :| []
+            )
+            ( EAnnotation
+                ()
+                (TIntrinsic IInt32)
+                (EVariable () (Label () "x"))
+            )
+        )
+        :| []
+    )
+    (EVariable () (Label () "f"))
+
+-- let f = fn(x : bool) => x : a in f
+fixture24 :: Expression () ()
+fixture24 =
+  ELet
+    ()
+    ( BPattern
+        ()
+        (PVariable () (Label () "f"))
+        ( ELambda
+            ()
+            ( ( PAnnotation
+                  ()
+                  (TIntrinsic IBool)
+                  (PVariable () (Label () "x"))
+              )
+                :| []
+            )
+            ( EAnnotation
+                ()
+                (TVariable (TypeParam () "a"))
+                (EVariable () (Label () "x"))
+            )
+        )
+        :| []
+    )
+    (EVariable () (Label () "f"))
+
+-- let f = fn(x : b) => x : a in f
+fixture25 :: Expression () ()
+fixture25 =
+  ELet
+    ()
+    ( BPattern
+        ()
+        (PVariable () (Label () "f"))
+        ( ELambda
+            ()
+            ( ( PAnnotation
+                  ()
+                  (TVariable (TypeParam () "b"))
+                  (PVariable () (Label () "x"))
+              )
+                :| []
+            )
+            ( EAnnotation
+                ()
+                (TVariable (TypeParam () "a"))
+                (EVariable () (Label () "x"))
+            )
+        )
+        :| []
+    )
+    (EVariable () (Label () "f"))
+
+-- let
+--   f =
+--     fn(g : a -> b, x : c) =>
+--       g(x)
+--   in
+--     f
+fixture26 =
+  ELet
+    ()
+    ( BPattern
+        ()
+        (PVariable () (Label () "f"))
+        ( ELambda
+            ()
+            ( ( PAnnotation
+                  ()
+                  (TVariable (TypeParam () "a") `TArrow` TVariable (TypeParam () "b"))
+                  (PVariable () (Label () "g"))
+              )
+                <| ( PAnnotation
+                      ()
+                      (TVariable (TypeParam () "c"))
+                      (PVariable () (Label () "x"))
+                   )
+                  :| []
+            )
+            ( EApplication
+                ()
+                ()
+                (EVariable () (Label () "g"))
+                (EVariable () (Label () "x") :| [])
+            )
+        )
+        :| []
+    )
+    (EVariable () (Label () "f"))
+
 -- -- let
 -- --   f =
 -- --     fn(g : a -> b, x : c) =>
