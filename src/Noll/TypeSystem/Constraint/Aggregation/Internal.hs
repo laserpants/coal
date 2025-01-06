@@ -61,27 +61,27 @@ data AggregationContext o k t = AggregationContext
   }
   deriving (Show, Eq, Ord, Read)
 
-type AggregationOutput w o k t = Either (AggregationError w) (Constraint (InferenceRule k w) o k t)
+type AggregationOutput c o k t = Either (AggregationError c) (Constraint (InferenceRule k c) o k t)
 
-type AggregationMonad w o k t = RWS (AggregationContext o k t) [AggregationOutput w o k t] (Dictionary (w, TypeIndex Kind))
+type AggregationMonad c o k t = RWS (AggregationContext o k t) [AggregationOutput c o k t] (Dictionary (c, TypeIndex Kind))
 
-newtype AggregationStack w o k t a = AggregationStack {aggregationMonad :: AggregationMonad w o k t a}
+newtype AggregationStack c o k t a = AggregationStack {aggregationMonad :: AggregationMonad c o k t a}
   deriving
     ( Functor
     , Applicative
     , Monad
     , MonadReader (AggregationContext o k t)
-    , MonadWriter [AggregationOutput w o k t]
-    , MonadState (Dictionary (w, TypeIndex Kind))
-    , MonadRWS (AggregationContext o k t) [AggregationOutput w o k t] (Dictionary (w, TypeIndex Kind))
+    , MonadWriter [AggregationOutput c o k t]
+    , MonadState (Dictionary (c, TypeIndex Kind))
+    , MonadRWS (AggregationContext o k t) [AggregationOutput c o k t] (Dictionary (c, TypeIndex Kind))
     )
 
 {-# INLINE evalAggregationStack #-}
-evalAggregationStack :: AggregationContext o k t -> AggregationStack w o k t a -> (a, [AggregationOutput w o k t])
+evalAggregationStack :: AggregationContext o k t -> AggregationStack c o k t a -> (a, [AggregationOutput c o k t])
 evalAggregationStack ctx a = evalRWS (aggregationMonad a) ctx mempty
 
 {-# INLINE runAggregationStack #-}
-runAggregationStack :: AggregationContext o k t -> AggregationStack w o k t a -> (a, Dictionary (w, TypeIndex Kind), [AggregationOutput w o k t])
+runAggregationStack :: AggregationContext o k t -> AggregationStack c o k t a -> (a, Dictionary (c, TypeIndex Kind), [AggregationOutput c o k t])
 runAggregationStack ctx a = runRWS (aggregationMonad a) ctx mempty
 
 {-# INLINE overAggregationMonomorphicSet #-}
@@ -97,5 +97,5 @@ monosetInsertMany :: (Ord k, Foldable f) => f (TypeIndex k) -> MonomorphicSet (T
 monosetInsertMany = flip (foldr monosetInsert)
 
 {-# INLINE localMonoset #-}
-localMonoset :: (MonomorphicSet (o k) -> MonomorphicSet (o k)) -> AggregationStack w o k t a -> AggregationStack w o k t a
+localMonoset :: (MonomorphicSet (o k) -> MonomorphicSet (o k)) -> AggregationStack c o k t a -> AggregationStack c o k t a
 localMonoset = local . overAggregationMonomorphicSet

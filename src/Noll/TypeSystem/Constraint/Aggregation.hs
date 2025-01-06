@@ -58,7 +58,7 @@ import qualified Noll.Library.Environment as Environment
 type ConstraintsAggregation a = AggregationStack a TypeIndex Kind IndexedType
 
 {-# INLINE lookupDataConstructor #-}
-lookupDataConstructor :: Name -> AggregationStack w o k t (Maybe (Constructor o k t))
+lookupDataConstructor :: Name -> AggregationStack c o k t (Maybe (Constructor o k t))
 lookupDataConstructor name = asks (Environment.lookup name . aggregationDataConstructorEnv)
 
 assertEqualityAssumptions :: a -> IndexedType -> [Assumption IndexedType] -> ConstraintsAggregation a ()
