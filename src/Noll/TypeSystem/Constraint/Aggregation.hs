@@ -127,9 +127,7 @@ clauseAssumptions (EClause loc p cs) = do
   names <- patternConstraints (assertEqualityAssumptions loc) ms p
   pure (typeOf p, ts1, filter (assumptionNameIsNotOneOf names) ms)
 
-collectConstraints ::
-  Expression a IndexedType ->
-  ConstraintsAggregation a [Assumption IndexedType]
+collectConstraints :: Expression a IndexedType -> ConstraintsAggregation a [Assumption IndexedType]
 collectConstraints =
   \case
     EAnnotation loc t e -> do
