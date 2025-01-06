@@ -81,10 +81,10 @@ patternAssumptions ::
 patternAssumptions assert ms =
   \case
     PAnnotation loc t p -> do
-      r <- instantiateAnnotation t
+      r <- instantiateAnnotation loc t
       case r of
         Left err ->
-          tellLeft [IllFormedTypeAnnotation loc err]
+          tellLeft [IllFormedTypeAnnotation err]
         Right t1 ->
           tellRight [Equality (InferAnnotation loc t1) [typeOf p, t1]]
       patternAssumptions assert ms p
@@ -126,10 +126,10 @@ collectConstraints ::
 collectConstraints =
   \case
     EAnnotation loc t e -> do
-      r <- instantiateAnnotation t
+      r <- instantiateAnnotation loc t
       case r of
         Left err ->
-          tellLeft [IllFormedTypeAnnotation loc err]
+          tellLeft [IllFormedTypeAnnotation err]
         Right t1 ->
           tellRight [Equality (InferAnnotation loc t1) [typeOf e, t1]]
       collectConstraints e

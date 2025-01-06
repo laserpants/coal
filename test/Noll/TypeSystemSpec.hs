@@ -73,6 +73,14 @@ spec =
       validateResult fixture17 == fixture17Typed
     it "" $
       validateNoErrors fixture17
+    it "" $
+      validateErrorsCount fixture22 == 1
+    it "" $
+      validateErrorsCount fixture23 == 1
+    it "" $
+      validateErrorsCount fixture25 == 1
+    it "" $
+      validateErrorsCount fixture26 == 1
 
 -- validateSolverErrors :: Expression () () -> Expression () (Type TypeIndex Kind)
 -- validateSolverErrors ::
@@ -80,18 +88,22 @@ spec =
 validateResult :: Expression () () -> Expression () (Type TypeIndex Kind)
 validateResult e = e1
  where
-  (e1, _, _, _, _) = testRunner e
+  (e1, _, _, _) = testRunner e
 
 validateNoErrors :: Expression () () -> Bool
 validateNoErrors e = null es0 && null es1
  where
-  (_, _, es0, es1, _) = testRunner e
+  (_, _, es0, es1) = testRunner e
+
+validateErrorsCount :: Expression () () -> Int
+validateErrorsCount e = length es0 + length es1
+ where
+  (_, _, es0, es1) = testRunner e
 
 testRunner ::
   Expression () () ->
   ( Expression () (Type TypeIndex Kind)
   , [Assumption IndexedType]
-  , [TypeAnnotationError]
   , [AggregationError ()]
   , [InferenceRule Kind ()]
   )
@@ -108,7 +120,7 @@ testRunner e =
 
     yy = execWriter (checkTypeVariables (Map.toList xx) sub)
 
-    errors0 = lefts out <> fmap (IllFormedTypeAnnotation ()) yy 
+    errors0 = lefts out <> fmap IllFormedTypeAnnotation yy
     constraints = rights out
 
     res0 = solveConstraints constraints
@@ -119,12 +131,11 @@ testRunner e =
 
     e3 = normalizeTypeIndexes e2
    in
-        ( e3
-        , apply sub asms
-        , yy
-        , errors0
-        , apply sub errors1
-        )
+    ( e3
+    , apply sub asms
+    , errors0
+    , apply sub errors1
+    )
 
 toIndexed :: Expression a Int -> Expression a (Type TypeIndex Kind)
 toIndexed = fmap (TVariable . TypeIndex KType)
@@ -864,6 +875,7 @@ fixture25 =
 --       g(x)
 --   in
 --     f
+fixture26 :: Expression () ()
 fixture26 =
   ELet
     ()
@@ -894,10 +906,3 @@ fixture26 =
         :| []
     )
     (EVariable () (Label () "f"))
-
--- -- let
--- --   f =
--- --     fn(g : a -> b, x : c) =>
--- --       g(x)
--- --   in
--- --     f

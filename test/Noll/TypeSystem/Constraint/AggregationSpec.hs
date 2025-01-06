@@ -60,7 +60,7 @@ spec =
               )
       describe "Kind mismatch" $ do
         it "f -> f(a)" $
-          testRunner2 fixture12 == Left KindMismatch
+          testRunner2 fixture12 == Left (KindMismatch ())
 
 testRunner ::
   Expression a Int ->
@@ -75,13 +75,13 @@ testRunner e =
       (AggregationContext mempty mempty mempty (freshIdIn e0))
       (collectConstraints e0)
 
-testRunner2 :: Type TypeParam () -> Either TypeAnnotationError (Type TypeIndex Kind)
+testRunner2 :: Type TypeParam () -> Either (TypeAnnotationError ()) (Type TypeIndex Kind)
 testRunner2 t = s
  where
   (s, _) =
     evalAggregationStack
       (AggregationContext mempty mempty mempty 0)
-      (instantiateAnnotation t)
+      (instantiateAnnotation () t)
 
 toIndexed :: Expression a Int -> Expression a (Type TypeIndex Kind)
 toIndexed = fmap (TVariable . TypeIndex KType)

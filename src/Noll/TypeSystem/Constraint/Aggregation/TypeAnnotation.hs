@@ -6,10 +6,11 @@ module Noll.TypeSystem.Constraint.Aggregation.TypeAnnotation (
   TypeAnnotationError (..),
   instantiateAnnotation,
   checkTypeVariables,
+  runTypeAnnotationM,
 ) where
 
-import Control.Monad.Except (ExceptT, runExceptT, throwError)
-import Control.Monad.RWS (MonadReader, ask, asks, get, put)
+import Control.Monad.Except (ExceptT, runExceptT, throwError, withExceptT)
+import Control.Monad.RWS (MonadReader, asks, get)
 import Control.Monad.Reader (runReaderT)
 import Control.Monad.State (MonadState, StateT, evalStateT, gets, modify, runStateT)
 import Control.Monad.Writer (MonadWriter, tell)
@@ -32,7 +33,7 @@ import Noll.Language (
 import qualified Noll.Library.Environment as Environment
 import Noll.TypeSystem.Constraint.Aggregation.Internal (AggregationContext (..), TypeAnnotationError (..))
 import Noll.TypeSystem.Substitution
-import Noll.Utils (Dictionary, IndexMap, Name, concatMapM, lexOrderRank, (<$$$>))
+import Noll.Utils (Dictionary, IndexMap, Name, concatMapM, forM, lexOrderRank, (<$$>))
 
 type TypeAnnotationContext = AggregationContext TypeIndex Kind IndexedType
 
@@ -40,117 +41,92 @@ type TypeAnnotationContext = AggregationContext TypeIndex Kind IndexedType
 lookupTypeConstructor :: (MonadReader TypeAnnotationContext m) => Name -> m (Maybe Kind)
 lookupTypeConstructor name = Environment.lookup name <$> asks aggregationTypeConstructorEnv
 
-instantiateAnnotation :: (MonadReader TypeAnnotationContext m, MonadState (Dictionary Int) m) => Type TypeParam () -> m (Either TypeAnnotationError (Type TypeIndex Kind))
-instantiateAnnotation t = do
-  runExceptT $ do
-    t1 <- translateToIndexed t
-    evalStateT (addKinds t1) mempty
+instantiateAnnotation ::
+  (MonadReader TypeAnnotationContext m, MonadState (Dictionary (a, TypeIndex Kind)) m) =>
+  a ->
+  Type TypeParam () ->
+  m (Either (TypeAnnotationError a) (Type TypeIndex Kind))
+instantiateAnnotation loc t = do
+  (t, s) <- runTypeAnnotationM loc (instantiate t)
+  forM (Map.toList s) $ \(n, k) -> modify (Map.insert n (loc, k))
+  return t
 
-type AddKinds m = StateT (IndexMap Kind) (ExceptT TypeAnnotationError m)
+type TypeAnnotationM a m = ExceptT (a -> TypeAnnotationError a) (StateT (Dictionary (TypeIndex Kind)) m)
 
-typeIndex :: (MonadReader TypeAnnotationContext m) => Kind -> Int -> AddKinds m (TypeIndex Kind)
-typeIndex k n = do
-  map <- get
-  case Map.lookup n map of
-    Nothing -> do
-      modify (Map.insert n k)
-      pure (TypeIndex k n)
-    Just k1
-      | k1 /= k ->
-          throwError KindMismatch
-    Just{} ->
-      pure (TypeIndex k n)
+runTypeAnnotationM :: (Monad m) => a -> TypeAnnotationM a m t -> m (Either (TypeAnnotationError a) t, Dictionary (TypeIndex Kind))
+runTypeAnnotationM loc v = runStateT (runExceptT (withExceptT ($ loc) v)) mempty
 
-addKinds :: (MonadReader TypeAnnotationContext m) => OpaqueType -> AddKinds m IndexedType
-addKinds =
+instantiate :: (MonadReader TypeAnnotationContext m) => Type TypeParam () -> TypeAnnotationM a m IndexedType
+instantiate =
   \case
-    TApplication _ (TVariable (TypeIndex _ n)) ts -> do
-      ts1 <- traverse addKinds ts
-      var <- typeIndex (foldKind KType (kindOf <$> ts1)) n
-      pure (TApplication KType (TVariable var) ts1)
+    TApplication _ (TVariable (TypeParam _ v)) ts -> do
+      ts1 <- traverse instantiate ts
+      let k = foldKind KType (kindOf <$> ts1)
+      t1 <- TVariable <$> toTypeIndex k v
+      pure (TApplication KType t1 ts1)
     TApplication _ t ts ->
       TApplication KType
-        <$> addKinds t
-        <*> traverse addKinds ts
-    TVariable (TypeIndex _ n) ->
-      TVariable <$> typeIndex KType n
+        <$> instantiate t
+        <*> traverse instantiate ts
+    TVariable (TypeParam _ v) ->
+      TVariable <$> toTypeIndex KType v
     TArrow t1 t2 ->
-      TArrow <$> addKinds t1 <*> addKinds t2
+      TArrow <$> instantiate t1 <*> instantiate t2
     TConstructor _ name -> do
       c <- lookupTypeConstructor name
       case c of
         Nothing ->
-          throwError (NoTypeConstructor name)
+          throwError (\a -> NoTypeConstructor a name)
         Just k ->
           pure (TConstructor k name)
     TIntrinsic t ->
-      TIntrinsic <$> traverse addKinds t
+      TIntrinsic <$> traverse instantiate t
     TRow row ->
-      TRow <$> addKindsRow row
+      TRow <$> instantiateRow row
     TAlias name ts t ->
-      TAlias name <$> traverse addKinds ts <*> addKinds t
+      TAlias name <$> traverse instantiate ts <*> instantiate t
 
-addKindsRow :: (MonadReader TypeAnnotationContext m) => Row TypeIndex () OpaqueType -> AddKinds m (Row TypeIndex Kind IndexedType)
-addKindsRow =
+instantiateRow :: (MonadReader TypeAnnotationContext m) => Row TypeParam () (Type TypeParam ()) -> TypeAnnotationM a m (Row TypeIndex Kind IndexedType)
+instantiateRow =
   \case
-    RVariable (TypeIndex _ n) ->
-      RVariable <$> typeIndex KRow n
+    RVariable (TypeParam _ v) ->
+      RVariable <$> toTypeIndex KRow v
     RExtend name t row ->
-      RExtend name <$> addKinds t <*> addKindsRow row
+      RExtend name <$> instantiate t <*> instantiateRow row
     RNil ->
       pure RNil
 
-translateToIndexed :: (MonadReader TypeAnnotationContext m, MonadState (Dictionary Int) m) => Type TypeParam () -> m OpaqueType
-translateToIndexed =
-  \case
-    TApplication _ t ts ->
-      TApplication () <$> translateToIndexed t <*> traverse translateToIndexed ts
-    TArrow t1 t2 ->
-      TArrow <$> translateToIndexed t1 <*> translateToIndexed t2
-    TConstructor _ name ->
-      pure (TConstructor () name)
-    TIntrinsic t ->
-      TIntrinsic <$> traverse translateToIndexed t
-    TRow row ->
-      TRow <$> translateToIndexedRow row
-    TVariable (TypeParam _ name) ->
-      TVariable <$> toTypeIndex name
-    TAlias name ts t ->
-      TAlias name <$> traverse translateToIndexed ts <*> translateToIndexed t
-
-translateToIndexedRow :: (MonadReader TypeAnnotationContext m, MonadState (Dictionary Int) m) => Row TypeParam () (Type TypeParam ()) -> m (Row TypeIndex () OpaqueType)
-translateToIndexedRow =
-  \case
-    RExtend name t row ->
-      RExtend name <$> translateToIndexed t <*> translateToIndexedRow row
-    RVariable (TypeParam _ name) ->
-      RVariable <$> toTypeIndex name
-    RNil ->
-      pure RNil
-
-toTypeIndex :: (MonadReader TypeAnnotationContext m, MonadState (Dictionary Int) m) => Name -> m (TypeIndex ())
-toTypeIndex name = do
+toTypeIndex :: (MonadReader TypeAnnotationContext m) => Kind -> Name -> TypeAnnotationM a m (TypeIndex Kind)
+toTypeIndex k name = do
   n <- asks aggregationIndexTreshold
-  let t = n + lexOrderRank name
-  modify (Map.insert name t)
-  pure (TypeIndex () t)
+  let index = TypeIndex k (n + lexOrderRank name)
+  dict <- get
+  case Map.lookup name dict of
+    Nothing -> do
+      modify (Map.insert name index)
+      pure index
+    Just (TypeIndex k1 _)
+      | k1 /= k ->
+          throwError KindMismatch
+    Just{} ->
+      pure index
 
-checkTypeVariables :: (MonadWriter [TypeAnnotationError] m) => [(Name, Int)] -> Substitution -> m ()
+checkTypeVariables :: (MonadWriter [TypeAnnotationError a] m) => [(Name, (a, TypeIndex Kind))] -> Substitution -> m ()
 checkTypeVariables ps (Substitution sub) = do
-  params <- snd <$$$> groupSortOn fst <$> concatMapM go ps
+  params <- groupSortOn fst <$> concatMapM go ps
   let twoOreMore xs = length xs > 1
   case filter twoOreMore params of
     [] ->
       pure ()
-    ps ->
-      tell [NonDistinctTypeParameters ps]
+    qs ->
+      tell [NonDistinctTypeParameters (snd <$$> qs)]
  where
-  go (name, index) =
+  go (name, (loc, TypeIndex _ index)) =
     case Map.lookup index sub of
-      Just (TVariable (TypeIndex _ m)) ->
-        pure [(m, name)]
+      Just (TVariable (TypeIndex _ n)) ->
+        pure [(n, (name, loc))]
       Just t -> do
         tell [ResolvesToConcreteType name t]
         pure []
       Nothing ->
-        pure [(index, name)]
+        pure [(index, (name, loc))]
