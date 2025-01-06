@@ -191,7 +191,8 @@ substitutionFromList :: [(Int, IndexedType)] -> Substitution
 substitutionFromList = Substitution . Map.fromList
 
 normalizeTypeIndexes :: (Substitutable s, TypeIndexed Kind s) => s -> s
-normalizeTypeIndexes e = apply (substitutionFromList sub) e
+normalizeTypeIndexes a = apply (substitutionFromList sub) a
  where
-  ixs = Set.toList (typeIndexesIn e)
-  sub = [(ix, TVariable (TypeIndex k n)) | (n, TypeIndex k ix) <- zip [0 ..] ixs]
+  sub = do
+    (n, TypeIndex k t) <- zip [0 ..] (Set.toList (typeIndexesIn a))
+    pure (t, TVariable (TypeIndex k n))
