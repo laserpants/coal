@@ -17,7 +17,6 @@ import Control.Monad.State (evalState)
 import Data.List.NonEmpty (NonEmpty)
 import Data.Map.Strict (Map)
 import Data.Set (Set, singleton)
-import qualified Data.Set as Set
 import Noll.Label (Label (..))
 import Noll.Language.Expression (Clause (..), Expression (..))
 import Noll.Language.Expression.Binding (Binding (..))
@@ -30,6 +29,8 @@ import Noll.Language.Type.Row (Row (..))
 import Noll.Language.Type.Scheme (Scheme (..))
 import Noll.Library.Supply (supply)
 import Noll.Utils (unionMap)
+
+import qualified Data.Set as Set
 
 class TypeIndexed k t | t -> k where
   typeIndexesIn :: t -> Set (TypeIndex k)

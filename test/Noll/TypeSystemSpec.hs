@@ -87,9 +87,6 @@ spec =
     it "" $
       validateErrorsCount fixture26 == 1
 
--- validateSolverErrors :: Expression () () -> Expression () (Type TypeIndex Kind)
--- validateSolverErrors ::
-
 validateResult :: Expression () () -> Expression () (Type TypeIndex Kind)
 validateResult e = e1
  where
