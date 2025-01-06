@@ -7,6 +7,7 @@ import Control.Monad.Writer (execWriter)
 import Data.Either.Extra (lefts, rights)
 import Data.List.NonEmpty ((<|))
 import Debug.Trace
+import Noll.Compiler (Compiler (..), CompilerEnvironment (..), runCompiler)
 import Noll.Label (Label (..))
 import Noll.Language (
   Binding (..),
@@ -30,16 +31,15 @@ import Noll.Library.Environment (Environment)
 import Noll.Library.List1 (NonEmpty (..))
 import Noll.Library.Supply (supply)
 import Noll.TypeSystem.Constraint.Aggregation
+import Noll.TypeSystem.Constraint.Aggregation.Internal (InferenceRule (..))
 import Noll.TypeSystem.Constraint.Aggregation.TypeAnnotation (
   TypeAnnotationError (..),
   checkTypeAnnotationParameters,
  )
-import Noll.TypeSystem.Constraint.Rule (InferenceRule (..))
 import Noll.TypeSystem.Constraint.Assumption (Assumption (..))
 import Noll.TypeSystem.Constraint.Solver (solveConstraints)
 import Noll.TypeSystem.Substitution (apply, normalizeTypeIndexes)
 import Test.Hspec (Spec, describe, hspec, it)
-import Noll.Compiler (Compiler (..), CompilerEnvironment (..), runCompiler)
 
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
@@ -113,9 +113,9 @@ testRunner2 ::
   )
 testRunner2 e = do
   undefined
-    where
-      zz = runCompiler (CompilerEnvironment mempty mempty) $ do 
-        undefined
+ where
+  zz = runCompiler (CompilerEnvironment mempty mempty) $ do
+    undefined
 
 testRunner ::
   Expression () () ->

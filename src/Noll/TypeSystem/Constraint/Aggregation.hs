@@ -38,6 +38,7 @@ import Noll.TypeSystem.Constraint.Aggregation.Internal (
   AggregationContext (..),
   AggregationStack (..),
   ConstraintsGenerationError (..),
+  InferenceRule (..),
   localMonoset,
   monosetInsertMany,
   runAggregationStack,
@@ -50,7 +51,6 @@ import Noll.TypeSystem.Constraint.Assumption (
   assumptionNameIs,
   assumptionNameIsNotOneOf,
  )
-import Noll.TypeSystem.Constraint.Rule (InferenceRule (..))
 import Noll.Utils (Name, concatForM, concatMapM, forM, tellLeft, tellRight, (<$$>))
 
 import qualified Noll.Library.Environment as Environment

@@ -29,10 +29,11 @@ import Noll.TypeSystem.Constraint.Aggregation.Internal (
   AggregationOutput (..),
   AggregationStack (..),
   ConstraintsGenerationError (..),
+  InferenceRule (..),
   runAggregationStack,
  )
 import Noll.TypeSystem.Constraint.Assumption (Assumption (..))
-import Noll.TypeSystem.Constraint.Rule (InferenceRule (..))
+import Noll.TypeSystem.Constraint.Solver (Solver (..))
 import Noll.TypeSystem.Substitution (Substitution (..))
 import Noll.Utils (Dictionary, (<$$>))
 
@@ -113,6 +114,10 @@ generateConstraintsC e = do
   compilerReportConstraintsGenerationErrors errors
   compilerSetTypeAnnotationParameters params
   pure (assumptions, constraints)
+
+runSolverC :: Solver c o k t -> Compiler a r
+runSolverC =
+  undefined
 
 solveConstraintsC :: [Constraint (InferenceRule Kind a) TypeIndex Kind IndexedType] -> Compiler a Substitution
 solveConstraintsC constraints = undefined

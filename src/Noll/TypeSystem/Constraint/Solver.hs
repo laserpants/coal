@@ -4,6 +4,7 @@
 {-# LANGUAGE StrictData #-}
 
 module Noll.TypeSystem.Constraint.Solver (
+  Solver (..),
   runSolver,
   solve,
   solveConstraints,
