@@ -25,7 +25,7 @@ import Noll.Library.Environment (Environment (..))
 import Noll.TypeSystem.Constraint (Constraint (..))
 import Noll.TypeSystem.Constraint.Aggregation (collectConstraints)
 import Noll.TypeSystem.Constraint.Aggregation.Internal (
-  AggregationContext (..),
+  ConstraintsGenerationContext (..),
   AggregationOutput (..),
   AggregationStack (..),
   ConstraintsGenerationError (..),
@@ -100,7 +100,7 @@ runConstraintsGenerationC index stack = do
   pure (runAggregationStack (context env) stack)
  where
   context CompilerEnvironment{..} =
-    AggregationContext
+    ConstraintsGenerationContext
       { aggregationMonomorphicSet = mempty
       , aggregationDataConstructorEnv = compilerDataConstructorEnv
       , aggregationTypeConstructorEnv = compilerTypeConstructorEnv

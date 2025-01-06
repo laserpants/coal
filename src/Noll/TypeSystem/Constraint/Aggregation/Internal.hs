@@ -9,7 +9,7 @@ module Noll.TypeSystem.Constraint.Aggregation.Internal (
   ConstraintsGenerationError (..),
   InferenceRule (..),
   TypeAnnotationError (..),
-  AggregationContext (..),
+  ConstraintsGenerationContext (..),
   AggregationStack (..),
   AggregationOutput (..),
   monosetInsert,
@@ -106,7 +106,7 @@ data ConstraintsGenerationError a
   | IllFormedTypeAnnotation (TypeAnnotationError a)
   deriving (Show, Eq, Ord, Read)
 
-data AggregationContext o k t = AggregationContext
+data ConstraintsGenerationContext o k t = ConstraintsGenerationContext
   { aggregationMonomorphicSet :: MonomorphicSet (o k)
   , aggregationDataConstructorEnv :: Environment (Constructor o k t)
   , aggregationTypeConstructorEnv :: Environment k
@@ -116,30 +116,30 @@ data AggregationContext o k t = AggregationContext
 
 type AggregationOutput c o k t = Either (ConstraintsGenerationError c) (Constraint (InferenceRule k c) o k t)
 
-type AggregationMonad c o k t = RWS (AggregationContext o k t) [AggregationOutput c o k t] (Dictionary (c, TypeIndex Kind))
+type AggregationMonad c o k t = RWS (ConstraintsGenerationContext o k t) [AggregationOutput c o k t] (Dictionary (c, TypeIndex Kind))
 
 newtype AggregationStack c o k t a = AggregationStack {aggregationMonad :: AggregationMonad c o k t a}
   deriving
     ( Functor
     , Applicative
     , Monad
-    , MonadReader (AggregationContext o k t)
+    , MonadReader (ConstraintsGenerationContext o k t)
     , MonadWriter [AggregationOutput c o k t]
     , MonadState (Dictionary (c, TypeIndex Kind))
-    , MonadRWS (AggregationContext o k t) [AggregationOutput c o k t] (Dictionary (c, TypeIndex Kind))
+    , MonadRWS (ConstraintsGenerationContext o k t) [AggregationOutput c o k t] (Dictionary (c, TypeIndex Kind))
     )
 
 {-# INLINE evalAggregationStack #-}
-evalAggregationStack :: AggregationContext o k t -> AggregationStack c o k t a -> (a, [AggregationOutput c o k t])
+evalAggregationStack :: ConstraintsGenerationContext o k t -> AggregationStack c o k t a -> (a, [AggregationOutput c o k t])
 evalAggregationStack ctx a = evalRWS (aggregationMonad a) ctx mempty
 
 {-# INLINE runAggregationStack #-}
-runAggregationStack :: AggregationContext o k t -> AggregationStack c o k t a -> (a, Dictionary (c, TypeIndex Kind), [AggregationOutput c o k t])
+runAggregationStack :: ConstraintsGenerationContext o k t -> AggregationStack c o k t a -> (a, Dictionary (c, TypeIndex Kind), [AggregationOutput c o k t])
 runAggregationStack ctx a = runRWS (aggregationMonad a) ctx mempty
 
 {-# INLINE overAggregationMonomorphicSet #-}
-overAggregationMonomorphicSet :: (MonomorphicSet (o k) -> MonomorphicSet (o k)) -> AggregationContext o k t -> AggregationContext o k t
-overAggregationMonomorphicSet fn AggregationContext{..} = AggregationContext{aggregationMonomorphicSet = fn aggregationMonomorphicSet, ..}
+overAggregationMonomorphicSet :: (MonomorphicSet (o k) -> MonomorphicSet (o k)) -> ConstraintsGenerationContext o k t -> ConstraintsGenerationContext o k t
+overAggregationMonomorphicSet fn ConstraintsGenerationContext{..} = ConstraintsGenerationContext{aggregationMonomorphicSet = fn aggregationMonomorphicSet, ..}
 
 {-# INLINE monosetInsert #-}
 monosetInsert :: (Ord k) => TypeIndex k -> MonomorphicSet (TypeIndex k) -> MonomorphicSet (TypeIndex k)

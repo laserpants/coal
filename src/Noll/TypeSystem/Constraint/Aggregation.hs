@@ -4,7 +4,7 @@
 {-# LANGUAGE StrictData #-}
 
 module Noll.TypeSystem.Constraint.Aggregation (
-  AggregationContext (..),
+  ConstraintsGenerationContext (..),
   ConstraintsGenerationError (..),
   collectConstraints,
   runAggregationStack,
@@ -35,7 +35,7 @@ import Noll.Language (
 import Noll.Library.List1 (fromList1)
 import Noll.TypeSystem.Constraint (Constraint (..))
 import Noll.TypeSystem.Constraint.Aggregation.Internal (
-  AggregationContext (..),
+  ConstraintsGenerationContext (..),
   AggregationStack (..),
   ConstraintsGenerationError (..),
   InferenceRule (..),

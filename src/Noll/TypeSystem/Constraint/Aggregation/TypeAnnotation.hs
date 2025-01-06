@@ -29,14 +29,14 @@ import Noll.Language (
   kindOf,
   typeIndexesIn,
  )
-import Noll.TypeSystem.Constraint.Aggregation.Internal (AggregationContext (..), TypeAnnotationError (..))
+import Noll.TypeSystem.Constraint.Aggregation.Internal (ConstraintsGenerationContext (..), TypeAnnotationError (..))
 import Noll.TypeSystem.Substitution
 import Noll.Utils (Dictionary, IndexMap, Name, concatMapM, forM_, lexOrderRank, (<$$>))
 
 import qualified Data.Map.Strict as Map
 import qualified Noll.Library.Environment as Environment
 
-type TypeAnnotationContext = AggregationContext TypeIndex Kind IndexedType
+type TypeAnnotationContext = ConstraintsGenerationContext TypeIndex Kind IndexedType
 
 {-# INLINE lookupTypeConstructor #-}
 lookupTypeConstructor :: (MonadReader TypeAnnotationContext m) => Name -> m (Maybe Kind)
@@ -66,9 +66,7 @@ instantiate =
       t1 <- TVariable <$> toTypeIndex k v
       pure (TApplication KType t1 ts1)
     TApplication _ t ts ->
-      TApplication KType
-        <$> instantiate t
-        <*> traverse instantiate ts
+      TApplication KType <$> instantiate t <*> traverse instantiate ts
     TVariable (TypeParam _ v) ->
       TVariable <$> toTypeIndex KType v
     TArrow t1 t2 ->

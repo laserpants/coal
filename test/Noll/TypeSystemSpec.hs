@@ -130,7 +130,7 @@ testRunner e =
 
     (asms, xx, out) =
       runAggregationStack
-        (AggregationContext mempty testConstructorEnv testTypeConstructorEnv (freshIdIn e1))
+        (ConstraintsGenerationContext mempty testConstructorEnv testTypeConstructorEnv (freshIdIn e1))
         (collectConstraints e1)
 
     yy = execWriter (checkTypeAnnotationParameters (Map.toList xx) sub)
