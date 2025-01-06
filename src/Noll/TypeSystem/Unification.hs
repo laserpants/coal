@@ -11,7 +11,6 @@ module Noll.TypeSystem.Unification (
 
 import Control.Monad.Except (MonadError, throwError)
 import Data.List.NonEmpty (NonEmpty, (<|))
-import qualified Data.List.NonEmpty as NonEmpty
 import Data.Set (member)
 import Noll.Language (
   IndexedType,
@@ -28,6 +27,8 @@ import Noll.TypeSystem.Substitution (
   mapsTo,
  )
 import Noll.Utils (foldrM)
+
+import qualified Data.List.NonEmpty as NonEmpty
 
 data UnificationError
   = CannotUnify

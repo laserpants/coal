@@ -8,13 +8,11 @@ module Noll.TypeSystem.Substitution (
   Substitutable (..),
   Substitution (..),
   mapsTo,
-  substitutionFromList,
+  fromList,
   normalizeTypeIndexes,
 ) where
 
 import Data.List.NonEmpty (NonEmpty)
-import qualified Data.Map.Strict as Map
-import qualified Data.Set as Set
 import Noll.Label (Label (..))
 import Noll.Language (
   Binding (..),
@@ -35,6 +33,9 @@ import Noll.Language (
  )
 import Noll.TypeSystem.Constraint (Constraint (..), MonomorphicSet (..))
 import Noll.Utils (IndexMap, Map, Set, fromMaybe)
+
+import qualified Data.Map.Strict as Map
+import qualified Data.Set as Set
 
 class Substitutable s where
   apply :: Substitution -> s -> s
@@ -186,12 +187,12 @@ removeSubstitution TypeIndex{..} (Substitution sub) = Substitution (Map.delete t
 mapsTo :: Int -> IndexedType -> Substitution
 mapsTo index = Substitution . Map.singleton index
 
-{-# INLINE substitutionFromList #-}
-substitutionFromList :: [(Int, IndexedType)] -> Substitution
-substitutionFromList = Substitution . Map.fromList
+{-# INLINE fromList #-}
+fromList :: [(Int, IndexedType)] -> Substitution
+fromList = Substitution . Map.fromList
 
 normalizeTypeIndexes :: (Substitutable s, TypeIndexed Kind s) => s -> s
-normalizeTypeIndexes a = apply (substitutionFromList sub) a
+normalizeTypeIndexes a = apply (fromList sub) a
  where
   sub = do
     (n, TypeIndex k t) <- zip [0 ..] (Set.toList (typeIndexesIn a))

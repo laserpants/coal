@@ -6,10 +6,10 @@ module Noll.TypeSystem.Constraint.Assumption (
   assumptionNameIs,
   assumptionNameIsOneOf,
   assumptionNameIsNotOneOf,
-  ) where
+) where
 
-import Noll.Utils (Name)
 import Noll.TypeSystem.Substitution (Substitutable (..))
+import Noll.Utils (Name)
 
 data Assumption t = Assumption
   { assumptionName :: Name

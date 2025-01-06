@@ -22,7 +22,6 @@ import Noll.Language (
   freshIdIn,
  )
 import Noll.Library.Environment (Environment (..))
-import Noll.TypeSystem.Substitution (Substitution (..))
 import Noll.TypeSystem.Constraint (Constraint (..))
 import Noll.TypeSystem.Constraint.Aggregation (collectConstraints)
 import Noll.TypeSystem.Constraint.Aggregation.Internal (
@@ -34,6 +33,7 @@ import Noll.TypeSystem.Constraint.Aggregation.Internal (
  )
 import Noll.TypeSystem.Constraint.Assumption (Assumption (..))
 import Noll.TypeSystem.Constraint.Rule (InferenceRule (..))
+import Noll.TypeSystem.Substitution (Substitution (..))
 import Noll.Utils (Dictionary, (<$$>))
 
 import qualified Data.Map.Strict as Map
