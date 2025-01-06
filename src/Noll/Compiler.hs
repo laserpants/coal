@@ -6,7 +6,7 @@ module Noll.Compiler (
   CompilerEnvironment (..),
   Compiler (..),
   runCompiler,
-  runAggregationStackInCompiler,
+  runConstraintsGenerationInCompiler,
 ) where
 
 import Control.Monad.Reader (MonadReader, ReaderT, ask, runReaderT)
@@ -56,13 +56,13 @@ newtype Compiler a = Compiler {compilerStack :: ReaderT CompilerEnvironment (Sta
 runCompiler :: CompilerEnvironment -> Compiler a -> (a, CompilerState)
 runCompiler env com = runState (runReaderT (compilerStack com) env) initialCompilerState
 
-type AggregationStackResult a o k t c = (c, Dictionary (a, o k), [AggregationOutput a o k t])
+type ConstraintsGenerationResult a o k t c = (c, Dictionary (a, o k), [AggregationOutput a o k t])
 
-runAggregationStackInCompiler ::
+runConstraintsGenerationInCompiler ::
   Int ->
   AggregationStack a TypeIndex Kind IndexedType c ->
-  Compiler (AggregationStackResult a TypeIndex Kind IndexedType c)
-runAggregationStackInCompiler index stack = do
+  Compiler (ConstraintsGenerationResult a TypeIndex Kind IndexedType c)
+runConstraintsGenerationInCompiler index stack = do
   env <- ask
   pure (runAggregationStack (context env) stack)
  where
