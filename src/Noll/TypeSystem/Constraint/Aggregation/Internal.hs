@@ -77,11 +77,11 @@ newtype AggregationStack w o k t a = AggregationStack {aggregationMonad :: Aggre
 
 {-# INLINE evalAggregationStack #-}
 evalAggregationStack :: AggregationContext o k t -> AggregationStack w o k t a -> (a, [AggregationOutput w o k t])
-evalAggregationStack ctx m = evalRWS (aggregationMonad m) ctx mempty
+evalAggregationStack ctx a = evalRWS (aggregationMonad a) ctx mempty
 
 {-# INLINE runAggregationStack #-}
 runAggregationStack :: AggregationContext o k t -> AggregationStack w o k t a -> (a, Dictionary (w, TypeIndex Kind), [AggregationOutput w o k t])
-runAggregationStack ctx m = runRWS (aggregationMonad m) ctx mempty
+runAggregationStack ctx a = runRWS (aggregationMonad a) ctx mempty
 
 {-# INLINE overAggregationMonomorphicSet #-}
 overAggregationMonomorphicSet :: (MonomorphicSet (o k) -> MonomorphicSet (o k)) -> AggregationContext o k t -> AggregationContext o k t

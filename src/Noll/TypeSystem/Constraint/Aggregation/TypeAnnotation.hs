@@ -33,7 +33,7 @@ import Noll.Language (
 import qualified Noll.Library.Environment as Environment
 import Noll.TypeSystem.Constraint.Aggregation.Internal (AggregationContext (..), TypeAnnotationError (..))
 import Noll.TypeSystem.Substitution
-import Noll.Utils (Dictionary, IndexMap, Name, concatMapM, forM, lexOrderRank, (<$$>))
+import Noll.Utils (Dictionary, IndexMap, Name, concatMapM, forM_, lexOrderRank, (<$$>))
 
 type TypeAnnotationContext = AggregationContext TypeIndex Kind IndexedType
 
@@ -48,7 +48,7 @@ instantiateAnnotation ::
   m (Either (TypeAnnotationError a) (Type TypeIndex Kind))
 instantiateAnnotation loc t = do
   (t, s) <- runTypeAnnotationM loc (instantiate t)
-  forM (Map.toList s) $ \(n, k) -> modify (Map.insert n (loc, k))
+  forM_ (Map.toList s) $ \(n, k) -> modify (Map.insert n (loc, k))
   return t
 
 type TypeAnnotationM a m = ExceptT (a -> TypeAnnotationError a) (StateT (Dictionary (TypeIndex Kind)) m)
@@ -76,7 +76,7 @@ instantiate =
       c <- lookupTypeConstructor name
       case c of
         Nothing ->
-          throwError (\a -> NoTypeConstructor a name)
+          throwError (`NoTypeConstructor` name)
         Just k ->
           pure (TConstructor k name)
     TIntrinsic t ->
