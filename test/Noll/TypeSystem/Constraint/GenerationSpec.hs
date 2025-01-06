@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.TypeSystem.Constraint.AggregationSpec where
+module Noll.TypeSystem.Constraint.GenerationSpec where
 
 import Data.List (sortOn)
 import Data.List.NonEmpty (NonEmpty (..))
@@ -18,17 +18,17 @@ import Noll.Language (
   TypeParam (..),
   freshIdIn,
  )
-import Noll.TypeSystem.Constraint.Aggregation
-import Noll.TypeSystem.Constraint.Aggregation.Internal
-import Noll.TypeSystem.Constraint.Aggregation.TypeAnnotation
 import Noll.TypeSystem.Constraint.Assumption (Assumption (..))
+import Noll.TypeSystem.Constraint.Generation
+import Noll.TypeSystem.Constraint.Generation.Internal
+import Noll.TypeSystem.Constraint.Generation.TypeAnnotation
 import Test.Hspec (Spec, describe, it)
 
 import qualified Data.Set as Set
 
 spec :: Spec
 spec =
-  describe "Noll.TypeSystem.Constraint.Aggregation" $ do
+  describe "Noll.TypeSystem.Constraint.Generation" $ do
     --    describe "collectConstraints" $ do
     --      describe "ELet" $ do
     --        it "" $
@@ -95,13 +95,13 @@ typeConstraintsInclude e r =
 testRunner ::
   Expression a Int ->
   ( [Assumption (Type TypeIndex Kind)]
-  , [AggregationOutput a TypeIndex Kind (Type TypeIndex Kind)]
+  , [ConstraintsGenerationOutput a TypeIndex Kind (Type TypeIndex Kind)]
   )
 testRunner e =
   let
     e0 = toIndexed e
    in
-    evalAggregationStack
+    evalConstraintsGenerationStack
       (ConstraintsGenerationContext mempty mempty mempty (freshIdIn e0))
       (collectConstraints e0)
 
@@ -109,7 +109,7 @@ testRunner2 :: Type TypeParam () -> Either (TypeAnnotationError ()) (Type TypeIn
 testRunner2 t = s
  where
   (s, _) =
-    evalAggregationStack
+    evalConstraintsGenerationStack
       (ConstraintsGenerationContext mempty mempty mempty 0)
       (instantiateAnnotation () t)
 

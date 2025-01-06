@@ -23,16 +23,16 @@ import Noll.Language (
  )
 import Noll.Library.Environment (Environment (..))
 import Noll.TypeSystem.Constraint (Constraint (..))
-import Noll.TypeSystem.Constraint.Aggregation (collectConstraints)
-import Noll.TypeSystem.Constraint.Aggregation.Internal (
-  ConstraintsGenerationContext (..),
-  AggregationOutput (..),
-  AggregationStack (..),
-  ConstraintsGenerationError (..),
-  InferenceRule (..),
-  runAggregationStack,
- )
 import Noll.TypeSystem.Constraint.Assumption (Assumption (..))
+import Noll.TypeSystem.Constraint.Generation (collectConstraints)
+import Noll.TypeSystem.Constraint.Generation.Internal (
+  ConstraintsGenerationContext (..),
+  ConstraintsGenerationError (..),
+  ConstraintsGenerationOutput (..),
+  ConstraintsGenerationStack (..),
+  InferenceRule (..),
+  runConstraintsGenerationStack,
+ )
 import Noll.TypeSystem.Constraint.Solver (Solver (..))
 import Noll.TypeSystem.Substitution (Substitution (..))
 import Noll.Utils (Dictionary, (<$$>))
@@ -92,19 +92,19 @@ runCompiler env com = runState (runReaderT (compilerStack com) env) initialCompi
 evalCompiler :: CompilerEnvironment -> Compiler a c -> c
 evalCompiler = fst <$$> runCompiler
 
-type ConstraintsGenerationResult c o k t r = (r, Dictionary (c, o k), [AggregationOutput c o k t])
+type ConstraintsGenerationResult c o k t r = (r, Dictionary (c, o k), [ConstraintsGenerationOutput c o k t])
 
-runConstraintsGenerationC :: Int -> AggregationStack c TypeIndex Kind IndexedType r -> Compiler a (ConstraintsGenerationResult c TypeIndex Kind IndexedType r)
+runConstraintsGenerationC :: Int -> ConstraintsGenerationStack c TypeIndex Kind IndexedType r -> Compiler a (ConstraintsGenerationResult c TypeIndex Kind IndexedType r)
 runConstraintsGenerationC index stack = do
   env <- ask
-  pure (runAggregationStack (context env) stack)
+  pure (runConstraintsGenerationStack (context env) stack)
  where
   context CompilerEnvironment{..} =
     ConstraintsGenerationContext
-      { aggregationMonomorphicSet = mempty
-      , aggregationDataConstructorEnv = compilerDataConstructorEnv
-      , aggregationTypeConstructorEnv = compilerTypeConstructorEnv
-      , aggregationIndexTreshold = index
+      { constraintsGenerationMonomorphicSet = mempty
+      , constraintsGenerationDataConstructorEnv = compilerDataConstructorEnv
+      , constraintsGenerationTypeConstructorEnv = compilerTypeConstructorEnv
+      , constraintsGenerationIndexTreshold = index
       }
 
 generateConstraintsC :: Expression a IndexedType -> Compiler a ([Assumption IndexedType], [Constraint (InferenceRule Kind a) TypeIndex Kind IndexedType])

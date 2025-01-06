@@ -30,13 +30,13 @@ import Noll.Language (
 import Noll.Library.Environment (Environment)
 import Noll.Library.List1 (NonEmpty (..))
 import Noll.Library.Supply (supply)
-import Noll.TypeSystem.Constraint.Aggregation
-import Noll.TypeSystem.Constraint.Aggregation.Internal (InferenceRule (..))
-import Noll.TypeSystem.Constraint.Aggregation.TypeAnnotation (
+import Noll.TypeSystem.Constraint.Assumption (Assumption (..))
+import Noll.TypeSystem.Constraint.Generation
+import Noll.TypeSystem.Constraint.Generation.Internal (InferenceRule (..))
+import Noll.TypeSystem.Constraint.Generation.TypeAnnotation (
   TypeAnnotationError (..),
   checkTypeAnnotationParameters,
  )
-import Noll.TypeSystem.Constraint.Assumption (Assumption (..))
 import Noll.TypeSystem.Constraint.Solver (solveConstraints)
 import Noll.TypeSystem.Substitution (apply, normalizeTypeIndexes)
 import Test.Hspec (Spec, describe, hspec, it)
@@ -129,7 +129,7 @@ testRunner e =
     e1 = indexed e
 
     (asms, xx, out) =
-      runAggregationStack
+      runConstraintsGenerationStack
         (ConstraintsGenerationContext mempty testConstructorEnv testTypeConstructorEnv (freshIdIn e1))
         (collectConstraints e1)
 

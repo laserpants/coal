@@ -4,19 +4,19 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.TypeSystem.Constraint.Aggregation.Internal (
+module Noll.TypeSystem.Constraint.Generation.Internal (
   TypeAnnotationError,
   ConstraintsGenerationError (..),
   InferenceRule (..),
   TypeAnnotationError (..),
   ConstraintsGenerationContext (..),
-  AggregationStack (..),
-  AggregationOutput (..),
+  ConstraintsGenerationStack (..),
+  ConstraintsGenerationOutput (..),
   monosetInsert,
   monosetInsertMany,
   localMonoset,
-  runAggregationStack,
-  evalAggregationStack,
+  runConstraintsGenerationStack,
+  evalConstraintsGenerationStack,
 ) where
 
 import Control.Monad.RWS (
@@ -107,39 +107,39 @@ data ConstraintsGenerationError a
   deriving (Show, Eq, Ord, Read)
 
 data ConstraintsGenerationContext o k t = ConstraintsGenerationContext
-  { aggregationMonomorphicSet :: MonomorphicSet (o k)
-  , aggregationDataConstructorEnv :: Environment (Constructor o k t)
-  , aggregationTypeConstructorEnv :: Environment k
-  , aggregationIndexTreshold :: Int
+  { constraintsGenerationMonomorphicSet :: MonomorphicSet (o k)
+  , constraintsGenerationDataConstructorEnv :: Environment (Constructor o k t)
+  , constraintsGenerationTypeConstructorEnv :: Environment k
+  , constraintsGenerationIndexTreshold :: Int
   }
   deriving (Show, Eq, Ord, Read)
 
-type AggregationOutput c o k t = Either (ConstraintsGenerationError c) (Constraint (InferenceRule k c) o k t)
+type ConstraintsGenerationOutput c o k t = Either (ConstraintsGenerationError c) (Constraint (InferenceRule k c) o k t)
 
-type AggregationMonad c o k t = RWS (ConstraintsGenerationContext o k t) [AggregationOutput c o k t] (Dictionary (c, TypeIndex Kind))
+type ConstraintsGenerationMonad c o k t = RWS (ConstraintsGenerationContext o k t) [ConstraintsGenerationOutput c o k t] (Dictionary (c, TypeIndex Kind))
 
-newtype AggregationStack c o k t a = AggregationStack {aggregationMonad :: AggregationMonad c o k t a}
+newtype ConstraintsGenerationStack c o k t a = ConstraintsGenerationStack {constraintsGenerationMonad :: ConstraintsGenerationMonad c o k t a}
   deriving
     ( Functor
     , Applicative
     , Monad
     , MonadReader (ConstraintsGenerationContext o k t)
-    , MonadWriter [AggregationOutput c o k t]
+    , MonadWriter [ConstraintsGenerationOutput c o k t]
     , MonadState (Dictionary (c, TypeIndex Kind))
-    , MonadRWS (ConstraintsGenerationContext o k t) [AggregationOutput c o k t] (Dictionary (c, TypeIndex Kind))
+    , MonadRWS (ConstraintsGenerationContext o k t) [ConstraintsGenerationOutput c o k t] (Dictionary (c, TypeIndex Kind))
     )
 
-{-# INLINE evalAggregationStack #-}
-evalAggregationStack :: ConstraintsGenerationContext o k t -> AggregationStack c o k t a -> (a, [AggregationOutput c o k t])
-evalAggregationStack ctx a = evalRWS (aggregationMonad a) ctx mempty
+{-# INLINE evalConstraintsGenerationStack #-}
+evalConstraintsGenerationStack :: ConstraintsGenerationContext o k t -> ConstraintsGenerationStack c o k t a -> (a, [ConstraintsGenerationOutput c o k t])
+evalConstraintsGenerationStack ctx a = evalRWS (constraintsGenerationMonad a) ctx mempty
 
-{-# INLINE runAggregationStack #-}
-runAggregationStack :: ConstraintsGenerationContext o k t -> AggregationStack c o k t a -> (a, Dictionary (c, TypeIndex Kind), [AggregationOutput c o k t])
-runAggregationStack ctx a = runRWS (aggregationMonad a) ctx mempty
+{-# INLINE runConstraintsGenerationStack #-}
+runConstraintsGenerationStack :: ConstraintsGenerationContext o k t -> ConstraintsGenerationStack c o k t a -> (a, Dictionary (c, TypeIndex Kind), [ConstraintsGenerationOutput c o k t])
+runConstraintsGenerationStack ctx a = runRWS (constraintsGenerationMonad a) ctx mempty
 
 {-# INLINE overAggregationMonomorphicSet #-}
 overAggregationMonomorphicSet :: (MonomorphicSet (o k) -> MonomorphicSet (o k)) -> ConstraintsGenerationContext o k t -> ConstraintsGenerationContext o k t
-overAggregationMonomorphicSet fn ConstraintsGenerationContext{..} = ConstraintsGenerationContext{aggregationMonomorphicSet = fn aggregationMonomorphicSet, ..}
+overAggregationMonomorphicSet fn ConstraintsGenerationContext{..} = ConstraintsGenerationContext{constraintsGenerationMonomorphicSet = fn constraintsGenerationMonomorphicSet, ..}
 
 {-# INLINE monosetInsert #-}
 monosetInsert :: (Ord k) => TypeIndex k -> MonomorphicSet (TypeIndex k) -> MonomorphicSet (TypeIndex k)
@@ -150,5 +150,5 @@ monosetInsertMany :: (Ord k, Foldable f) => f (TypeIndex k) -> MonomorphicSet (T
 monosetInsertMany = flip (foldr monosetInsert)
 
 {-# INLINE localMonoset #-}
-localMonoset :: (MonomorphicSet (o k) -> MonomorphicSet (o k)) -> AggregationStack c o k t a -> AggregationStack c o k t a
+localMonoset :: (MonomorphicSet (o k) -> MonomorphicSet (o k)) -> ConstraintsGenerationStack c o k t a -> ConstraintsGenerationStack c o k t a
 localMonoset = local . overAggregationMonomorphicSet

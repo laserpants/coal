@@ -60,10 +60,10 @@ library
       Noll.Library.Supply
       Noll.TypeSystem
       Noll.TypeSystem.Constraint
-      Noll.TypeSystem.Constraint.Aggregation
-      Noll.TypeSystem.Constraint.Aggregation.Internal
-      Noll.TypeSystem.Constraint.Aggregation.TypeAnnotation
       Noll.TypeSystem.Constraint.Assumption
+      Noll.TypeSystem.Constraint.Generation
+      Noll.TypeSystem.Constraint.Generation.Internal
+      Noll.TypeSystem.Constraint.Generation.TypeAnnotation
       Noll.TypeSystem.Constraint.Solver
       Noll.TypeSystem.Substitution
       Noll.TypeSystem.Unification
@@ -106,7 +106,7 @@ test-suite noll-test
   main-is: Spec.hs
   other-modules:
       Noll.Language.IndexedSpec
-      Noll.TypeSystem.Constraint.AggregationSpec
+      Noll.TypeSystem.Constraint.GenerationSpec
       Noll.TypeSystem.UnificationSpec
       Noll.TypeSystemSpec
       Paths_noll

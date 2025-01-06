@@ -3,11 +3,11 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.TypeSystem.Constraint.Aggregation (
+module Noll.TypeSystem.Constraint.Generation (
   ConstraintsGenerationContext (..),
   ConstraintsGenerationError (..),
   collectConstraints,
-  runAggregationStack,
+  runConstraintsGenerationStack,
 ) where
 
 import Control.Monad.Reader (asks)
@@ -34,32 +34,32 @@ import Noll.Language (
  )
 import Noll.Library.List1 (fromList1)
 import Noll.TypeSystem.Constraint (Constraint (..))
-import Noll.TypeSystem.Constraint.Aggregation.Internal (
-  ConstraintsGenerationContext (..),
-  AggregationStack (..),
-  ConstraintsGenerationError (..),
-  InferenceRule (..),
-  localMonoset,
-  monosetInsertMany,
-  runAggregationStack,
- )
-import Noll.TypeSystem.Constraint.Aggregation.TypeAnnotation (
-  instantiateAnnotation,
- )
 import Noll.TypeSystem.Constraint.Assumption (
   Assumption (..),
   assumptionNameIs,
   assumptionNameIsNotOneOf,
  )
+import Noll.TypeSystem.Constraint.Generation.Internal (
+  ConstraintsGenerationContext (..),
+  ConstraintsGenerationError (..),
+  ConstraintsGenerationStack (..),
+  InferenceRule (..),
+  localMonoset,
+  monosetInsertMany,
+  runConstraintsGenerationStack,
+ )
+import Noll.TypeSystem.Constraint.Generation.TypeAnnotation (
+  instantiateAnnotation,
+ )
 import Noll.Utils (Name, concatForM, concatMapM, forM, tellLeft, tellRight, (<$$>))
 
 import qualified Noll.Library.Environment as Environment
 
-type ConstraintsAggregation a = AggregationStack a TypeIndex Kind IndexedType
+type ConstraintsAggregation a = ConstraintsGenerationStack a TypeIndex Kind IndexedType
 
 {-# INLINE lookupDataConstructor #-}
-lookupDataConstructor :: Name -> AggregationStack c o k t (Maybe (Constructor o k t))
-lookupDataConstructor name = asks (Environment.lookup name . aggregationDataConstructorEnv)
+lookupDataConstructor :: Name -> ConstraintsGenerationStack c o k t (Maybe (Constructor o k t))
+lookupDataConstructor name = asks (Environment.lookup name . constraintsGenerationDataConstructorEnv)
 
 assertEqualityAssumptions :: a -> IndexedType -> [Assumption IndexedType] -> ConstraintsAggregation a ()
 assertEqualityAssumptions loc t ms =
@@ -70,7 +70,7 @@ assertEqualityAssumptions loc t ms =
 
 assertImplicitAssumptions :: a -> IndexedType -> [Assumption IndexedType] -> ConstraintsAggregation a ()
 assertImplicitAssumptions loc t ms = do
-  set <- asks aggregationMonomorphicSet
+  set <- asks constraintsGenerationMonomorphicSet
   tellRight $ do
     Assumption{..} <- ms
     -- TODO

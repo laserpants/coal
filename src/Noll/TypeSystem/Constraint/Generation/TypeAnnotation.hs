@@ -2,7 +2,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.TypeSystem.Constraint.Aggregation.TypeAnnotation (
+module Noll.TypeSystem.Constraint.Generation.TypeAnnotation (
   TypeAnnotationError (..),
   instantiateAnnotation,
   checkTypeAnnotationParameters,
@@ -29,7 +29,7 @@ import Noll.Language (
   kindOf,
   typeIndexesIn,
  )
-import Noll.TypeSystem.Constraint.Aggregation.Internal (ConstraintsGenerationContext (..), TypeAnnotationError (..))
+import Noll.TypeSystem.Constraint.Generation.Internal (ConstraintsGenerationContext (..), TypeAnnotationError (..))
 import Noll.TypeSystem.Substitution
 import Noll.Utils (Dictionary, IndexMap, Name, concatMapM, forM_, lexOrderRank, (<$$>))
 
@@ -40,7 +40,7 @@ type TypeAnnotationContext = ConstraintsGenerationContext TypeIndex Kind Indexed
 
 {-# INLINE lookupTypeConstructor #-}
 lookupTypeConstructor :: (MonadReader TypeAnnotationContext m) => Name -> m (Maybe Kind)
-lookupTypeConstructor name = Environment.lookup name <$> asks aggregationTypeConstructorEnv
+lookupTypeConstructor name = Environment.lookup name <$> asks constraintsGenerationTypeConstructorEnv
 
 instantiateAnnotation ::
   (MonadReader TypeAnnotationContext m, MonadState (Dictionary (a, TypeIndex Kind)) m) =>
@@ -97,7 +97,7 @@ instantiateRow =
 
 toTypeIndex :: (MonadReader TypeAnnotationContext m) => Kind -> Name -> TypeAnnotation a m (TypeIndex Kind)
 toTypeIndex k name = do
-  n <- asks aggregationIndexTreshold
+  n <- asks constraintsGenerationIndexTreshold
   let index = TypeIndex k (n + lexOrderRank name)
   dict <- get
   case Map.lookup name dict of
