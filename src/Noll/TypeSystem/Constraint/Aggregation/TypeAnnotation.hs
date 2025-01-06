@@ -126,7 +126,7 @@ checkTypeVariables ps (Substitution sub) = do
       Just (TVariable (TypeIndex _ n)) ->
         pure [(n, (name, loc))]
       Just t -> do
-        tell [ResolvesToConcreteType name t]
+        tell [ResolvesToMonomorphicType name t]
         pure []
       Nothing ->
         pure [(index, (name, loc))]

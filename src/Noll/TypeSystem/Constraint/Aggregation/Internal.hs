@@ -34,10 +34,16 @@ import Noll.TypeSystem.Constraint.Rule (InferenceRule (..))
 import Noll.Utils (Dictionary, Name)
 
 data TypeAnnotationError a
-  = KindMismatch a
-  | NoTypeConstructor a Name
-  | NonDistinctTypeParameters [[(Name, a)]]
-  | ResolvesToConcreteType Name (Type TypeIndex Kind)
+  = -- Kind error
+    KindMismatch a
+  | -- | Type constructor is not in scope
+    NoTypeConstructor a Name
+  | -- | Two or more named parameters refer to the same inferred type variable.
+    -- E.g., the annotation reads (a -> b) -> c -> b, but the function is
+    -- fn(f, x) => f(x), which requires 'a' and 'c' to be the same type.
+    NonDistinctTypeParameters [[(Name, a)]]
+  | -- | Type parameter resolves to an actual type. E.g., fn(x : a, y : int32) => x + y
+    ResolvesToMonomorphicType Name (Type TypeIndex Kind)
   deriving (Show, Eq, Ord, Read)
 
 data AggregationError a
