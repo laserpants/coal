@@ -5,7 +5,6 @@ module Noll.TypeSystem.Constraint.AggregationSpec where
 
 import Data.List (sortOn)
 import Data.List.NonEmpty (NonEmpty (..))
-import qualified Data.Set as Set
 import Noll.Label (Label (..))
 import Noll.Language (
   Binding (..),
@@ -24,6 +23,8 @@ import Noll.TypeSystem.Constraint.Aggregation.Internal
 import Noll.TypeSystem.Constraint.Aggregation.TypeAnnotation
 import Noll.TypeSystem.Constraint.Rule (Assumption (..))
 import Test.Hspec (Spec, describe, it)
+
+import qualified Data.Set as Set
 
 spec :: Spec
 spec =

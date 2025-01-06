@@ -51,7 +51,7 @@ import Noll.TypeSystem.Constraint.Rule (
   assumptionNameIs,
   assumptionNameIsNotOneOf,
  )
-import Noll.Utils (Name, concatForM, forM, tellLeft, tellRight, (<$$>))
+import Noll.Utils (Name, concatForM, concatMapM, forM, tellLeft, tellRight, (<$$>))
 
 import qualified Noll.Library.Environment as Environment
 
@@ -109,7 +109,7 @@ patternConstraints assert ms =
               tellLeft [DataConstructorArityMismatch loc name constructorArity (length ps)]
         Just Constructor{..} ->
           tellRight [Explicit (InferenceRule 3) (foldType t (typeOf <$> ps)) constructorScheme]
-      concat <$> traverse (patternConstraints assert ms) ps
+      concatForM ps (patternConstraints assert ms)
 
 clauseAssumptions ::
   Clause Expression a IndexedType ->
@@ -119,7 +119,7 @@ clauseAssumptions (EClause loc p cs) = do
     forM (fromList1 cs) $
       \case
         CPlain _ gs e -> do
-          ms1 <- concat <$$> forM gs $ \(CGuard g) -> do
+          ms1 <- concatForM gs $ \(CGuard g) -> do
             tellRight [Equality (InferMatchClauseGuard loc) [typeOf g, TIntrinsic IBool]]
             collectConstraints g
           ms2 <- collectConstraints e
@@ -180,7 +180,7 @@ collectConstraints =
       pure (ms1 <> ms2 <> ms3)
     EApplication loc t e1 es -> do
       ms1 <- collectConstraints e1
-      ms2 <- concat <$> traverse collectConstraints es
+      ms2 <- concatMapM collectConstraints es
       let t1 = typeOf e1
           t2 = foldType t ts
           ts = typeOf <$> es
