@@ -6,7 +6,7 @@ module Noll.TypeSystem.Constraint.Aggregation.TypeAnnotation (
   TypeAnnotationError (..),
   instantiateAnnotation,
   checkTypeVariables,
-  runTypeAnnotationM,
+  runTypeAnnotation,
 ) where
 
 import Control.Monad.Except (ExceptT, runExceptT, throwError, withExceptT)
@@ -47,16 +47,16 @@ instantiateAnnotation ::
   Type TypeParam () ->
   m (Either (TypeAnnotationError a) (Type TypeIndex Kind))
 instantiateAnnotation loc t = do
-  (t, s) <- runTypeAnnotationM loc (instantiate t)
+  (t, s) <- runTypeAnnotation loc (instantiate t)
   forM_ (Map.toList s) $ \(n, k) -> modify (Map.insert n (loc, k))
   return t
 
-type TypeAnnotationM a m = ExceptT (a -> TypeAnnotationError a) (StateT (Dictionary (TypeIndex Kind)) m)
+type TypeAnnotation a m = ExceptT (a -> TypeAnnotationError a) (StateT (Dictionary (TypeIndex Kind)) m)
 
-runTypeAnnotationM :: (Monad m) => a -> TypeAnnotationM a m t -> m (Either (TypeAnnotationError a) t, Dictionary (TypeIndex Kind))
-runTypeAnnotationM loc v = runStateT (runExceptT (withExceptT ($ loc) v)) mempty
+runTypeAnnotation :: (Monad m) => a -> TypeAnnotation a m t -> m (Either (TypeAnnotationError a) t, Dictionary (TypeIndex Kind))
+runTypeAnnotation loc v = runStateT (runExceptT (withExceptT ($ loc) v)) mempty
 
-instantiate :: (MonadReader TypeAnnotationContext m) => Type TypeParam () -> TypeAnnotationM a m IndexedType
+instantiate :: (MonadReader TypeAnnotationContext m) => Type TypeParam () -> TypeAnnotation a m IndexedType
 instantiate =
   \case
     TApplication _ (TVariable (TypeParam _ v)) ts -> do
@@ -86,7 +86,7 @@ instantiate =
     TAlias name ts t ->
       TAlias name <$> traverse instantiate ts <*> instantiate t
 
-instantiateRow :: (MonadReader TypeAnnotationContext m) => Row TypeParam () (Type TypeParam ()) -> TypeAnnotationM a m (Row TypeIndex Kind IndexedType)
+instantiateRow :: (MonadReader TypeAnnotationContext m) => Row TypeParam () (Type TypeParam ()) -> TypeAnnotation a m (Row TypeIndex Kind IndexedType)
 instantiateRow =
   \case
     RVariable (TypeParam _ v) ->
@@ -96,7 +96,7 @@ instantiateRow =
     RNil ->
       pure RNil
 
-toTypeIndex :: (MonadReader TypeAnnotationContext m) => Kind -> Name -> TypeAnnotationM a m (TypeIndex Kind)
+toTypeIndex :: (MonadReader TypeAnnotationContext m) => Kind -> Name -> TypeAnnotation a m (TypeIndex Kind)
 toTypeIndex k name = do
   n <- asks aggregationIndexTreshold
   let index = TypeIndex k (n + lexOrderRank name)

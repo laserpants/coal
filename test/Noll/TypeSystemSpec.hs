@@ -906,3 +906,19 @@ fixture26 =
         :| []
     )
     (EVariable () (Label () "f"))
+
+-- fn(g, x) => g(x)
+fixture27 :: Expression () ()
+fixture27 =
+  ELambda
+    ()
+    ( PVariable () (Label () "g")
+        <| PVariable () (Label () "x")
+          :| []
+    )
+    ( EApplication
+        ()
+        ()
+        (EVariable () (Label () "g"))
+        (EVariable () (Label () "x") :| [])
+    )

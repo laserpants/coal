@@ -10,6 +10,7 @@ module Noll.Utils (
   Dictionary,
   IndexMap,
   concatMapM,
+  concatForM,
   unionMap,
   tellLeft,
   tellRight,
@@ -51,6 +52,9 @@ infixr 8 <$$$>
 -- | Monadic version of concatMap
 concatMapM :: (Monad m, Traversable f) => (a -> m [b]) -> f a -> m [b]
 concatMapM f xs = fmap concat (mapM f xs)
+
+concatForM :: (Monad m, Traversable f) => f a -> (a -> m [b]) -> m [b]
+concatForM = flip concatMapM
 
 {-# INLINE unionMap #-}
 unionMap :: (Ord b) => (a -> Set b) -> Set a -> Set b

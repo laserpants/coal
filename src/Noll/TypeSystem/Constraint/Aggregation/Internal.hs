@@ -42,7 +42,7 @@ data TypeAnnotationError a
     -- E.g., the annotation reads (a -> b) -> c -> b, but the function is
     -- fn(f, x) => f(x), which requires 'a' and 'c' to be the same type.
     NonDistinctTypeParameters [[(Name, a)]]
-  | -- | Type parameter resolves to an actual type. E.g., fn(x : a, y : int32) => x + y
+  | -- | Type parameter resolves to a concrete type; e.g., fn(x : a, y : int32) => x + y
     ResolvesToMonomorphicType Name (Type TypeIndex Kind)
   deriving (Show, Eq, Ord, Read)
 

@@ -7,6 +7,8 @@ module Noll.TypeSystem.Constraint.Rule (
   InferenceRule (..),
   Assumption (..),
   assumptionNameIs,
+  assumptionNameIsOneOf,
+  assumptionNameIsNotOneOf,
 ) where
 
 import Noll.Language (Kind (..), Scheme (..), Type (..), TypeIndex (..))
@@ -21,9 +23,9 @@ data InferenceRule k a
     InferApplication a (Type TypeIndex k) [Type TypeIndex k]
   | -- | Type of if condition is bool
     InferIfCondition a (Type TypeIndex k)
-  | -- | If expression 'then' and 'else' branches have identical types
+  | -- | If expression 'then' and 'else' branches must have the same type
     InferIfBranches a (Type TypeIndex k) (Type TypeIndex k)
-  | -- Let type of body matches binding pattern
+  | -- Type of binding expression matches binding pattern
     InferLetBindingPattern a (Type TypeIndex k) (Type TypeIndex k)
   | -- TODO
     InferLetImplicit a Name (Type TypeIndex k) (Type TypeIndex k)
@@ -72,3 +74,11 @@ instance (Substitutable t) => Substitutable (Assumption t) where
 {-# INLINE assumptionNameIs #-}
 assumptionNameIs :: Name -> Assumption t -> Bool
 assumptionNameIs name Assumption{..} = assumptionName == name
+
+{-# INLINE assumptionNameIsOneOf #-}
+assumptionNameIsOneOf :: [Name] -> Assumption t -> Bool
+assumptionNameIsOneOf names Assumption{..} = assumptionName `elem` names
+
+{-# INLINE assumptionNameIsNotOneOf #-}
+assumptionNameIsNotOneOf :: [Name] -> Assumption t -> Bool
+assumptionNameIsNotOneOf names Assumption{..} = assumptionName `notElem` names

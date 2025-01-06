@@ -44,8 +44,8 @@ import Noll.TypeSystem.Constraint.Aggregation.Internal (
   runAggregationStack,
  )
 import Noll.TypeSystem.Constraint.Aggregation.TypeAnnotation (instantiateAnnotation)
-import Noll.TypeSystem.Constraint.Rule (Assumption (..), InferenceRule (..), assumptionNameIs)
-import Noll.Utils (Name, concatMapM, forM, tellLeft, tellRight, (<$$>))
+import Noll.TypeSystem.Constraint.Rule (Assumption (..), InferenceRule (..), assumptionNameIs, assumptionNameIsNotOneOf)
+import Noll.Utils (Name, concatForM, forM, tellLeft, tellRight, (<$$>))
 
 type ConstraintsAggregation a = AggregationStack a TypeIndex Kind IndexedType
 
@@ -71,14 +71,14 @@ assertImplicitAssumptions loc t ms = do
 withMonomorphic :: (TypeIndexed Kind t) => t -> ConstraintsAggregation a c -> ConstraintsAggregation a c
 withMonomorphic a = localMonoset (monosetInsertMany (typeIndexesIn a))
 
-type Assert a = IndexedType -> [Assumption IndexedType] -> ConstraintsAggregation a ()
+type Assertion a = IndexedType -> [Assumption IndexedType] -> ConstraintsAggregation a ()
 
-patternAssumptions ::
-  Assert a ->
+patternConstraints ::
+  Assertion a ->
   [Assumption IndexedType] ->
   Pattern a IndexedType ->
-  ConstraintsAggregation a [Assumption IndexedType]
-patternAssumptions assert ms =
+  ConstraintsAggregation a [Name]
+patternConstraints assert ms =
   \case
     PAnnotation loc t p -> do
       r <- instantiateAnnotation loc t
@@ -87,11 +87,10 @@ patternAssumptions assert ms =
           tellLeft [IllFormedTypeAnnotation err]
         Right t1 ->
           tellRight [Equality (InferAnnotation loc t1) [typeOf p, t1]]
-      patternAssumptions assert ms p
+      patternConstraints assert ms p
     PVariable _ (Label t name) -> do
-      let (ls, rs) = partition (assumptionNameIs name) ms
-      assert t ls
-      pure rs
+      assert t (filter (assumptionNameIs name) ms)
+      pure [name]
     PConstructor loc (Label t name) ps -> do
       r <- lookupDataConstructor name
       case r of
@@ -102,23 +101,23 @@ patternAssumptions assert ms =
               tellLeft [DataConstructorArityMismatch loc name constructorArity (length ps)]
         Just Constructor{..} ->
           tellRight [Explicit (InferenceRule 3) (foldType t (typeOf <$> ps)) constructorScheme]
-      concat <$> traverse (patternAssumptions assert ms) ps
+      concat <$> traverse (patternConstraints assert ms) ps
 
 clauseAssumptions ::
   Clause Expression a IndexedType ->
   ConstraintsAggregation a (IndexedType, [IndexedType], [Assumption IndexedType])
 clauseAssumptions (EClause loc p cs) = do
-  (ts1, ms1) <- second concat . unzip <$$> withMonomorphic p $
+  (ts1, ms) <- second concat . unzip <$$> withMonomorphic p $
     forM (fromList1 cs) $
       \case
         CPlain _ gs e -> do
-          ns1 <- concat <$$> forM gs $ \(CGuard g) -> do
+          ms1 <- concat <$$> forM gs $ \(CGuard g) -> do
             tellRight [Equality (InferMatchClauseGuard loc) [typeOf g, TIntrinsic IBool]]
             collectConstraints g
-          ns2 <- collectConstraints e
-          pure (typeOf e, ns1 <> ns2)
-  ms2 <- patternAssumptions (assertEqualityAssumptions loc) ms1 p
-  pure (typeOf p, ts1, ms2)
+          ms2 <- collectConstraints e
+          pure (typeOf e, ms1 <> ms2)
+  names <- patternConstraints (assertEqualityAssumptions loc) ms p
+  pure (typeOf p, ts1, filter (assumptionNameIsNotOneOf names) ms)
 
 collectConstraints ::
   Expression a IndexedType ->
@@ -144,23 +143,23 @@ collectConstraints =
     EVariable loc (Label t name) ->
       pure [Assumption name t]
     ELambda loc ps e -> do
-      ms1 <- withMonomorphic ps (collectConstraints e)
-      concat <$> forM ps (patternAssumptions (assertEqualityAssumptions loc) ms1)
+      ms <- withMonomorphic ps (collectConstraints e)
+      names <- concatForM ps (patternConstraints (assertEqualityAssumptions loc) ms)
+      pure (filter (assumptionNameIsNotOneOf names) ms)
     ELet loc gs e1 -> do
       ms1 <- collectConstraints e1
-      ms2 <- flip concatMapM gs $
+      ms2 <- concatForM gs $
         \case
           BPattern _ p e -> do
-            ms <- collectConstraints e
             let t1 = typeOf p
                 t2 = typeOf e
             tellRight [Equality (InferLetBindingPattern loc t1 t2) [t1, t2]]
-            pure ms
-      ms3 <- flip concatMapM gs $
+            collectConstraints e
+      names <- concatForM gs $
         \case
           BPattern _ p _ ->
-            patternAssumptions (assertImplicitAssumptions loc) ms1 p
-      pure (ms1 <> ms2 <> ms3)
+            patternConstraints (assertImplicitAssumptions loc) ms1 p
+      pure (filter (assumptionNameIsNotOneOf names) ms1 <> ms2)
     EIf loc t e1 e2 e3 -> do
       ms1 <- collectConstraints e1
       ms2 <- collectConstraints e2
