@@ -21,7 +21,7 @@ import Noll.Language (
 import Noll.TypeSystem.Constraint.Aggregation
 import Noll.TypeSystem.Constraint.Aggregation.Internal
 import Noll.TypeSystem.Constraint.Aggregation.TypeAnnotation
-import Noll.TypeSystem.Constraint.Rule (Assumption (..))
+import Noll.TypeSystem.Constraint.Assumption (Assumption (..))
 import Test.Hspec (Spec, describe, it)
 
 import qualified Data.Set as Set

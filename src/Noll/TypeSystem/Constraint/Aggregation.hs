@@ -45,12 +45,12 @@ import Noll.TypeSystem.Constraint.Aggregation.Internal (
 import Noll.TypeSystem.Constraint.Aggregation.TypeAnnotation (
   instantiateAnnotation,
  )
-import Noll.TypeSystem.Constraint.Rule (
+import Noll.TypeSystem.Constraint.Assumption (
   Assumption (..),
-  InferenceRule (..),
   assumptionNameIs,
   assumptionNameIsNotOneOf,
  )
+import Noll.TypeSystem.Constraint.Rule (InferenceRule (..))
 import Noll.Utils (Name, concatForM, concatMapM, forM, tellLeft, tellRight, (<$$>))
 
 import qualified Noll.Library.Environment as Environment

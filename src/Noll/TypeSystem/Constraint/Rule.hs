@@ -5,10 +5,6 @@
 
 module Noll.TypeSystem.Constraint.Rule (
   InferenceRule (..),
-  Assumption (..),
-  assumptionNameIs,
-  assumptionNameIsOneOf,
-  assumptionNameIsNotOneOf,
 ) where
 
 import Noll.Language (Kind (..), Scheme (..), Type (..), TypeIndex (..))
@@ -60,25 +56,3 @@ instance Substitutable (InferenceRule Kind a) where
         InferMatchClauseExpressions a
       InferMatchClausePatterns a ->
         InferMatchClausePatterns a
-
-data Assumption t = Assumption
-  { assumptionName :: Name
-  , assumptionType :: t
-  }
-  deriving (Show, Eq, Ord, Read)
-
-instance (Substitutable t) => Substitutable (Assumption t) where
-  apply sub (Assumption name t) =
-    Assumption name (apply sub t)
-
-{-# INLINE assumptionNameIs #-}
-assumptionNameIs :: Name -> Assumption t -> Bool
-assumptionNameIs name Assumption{..} = assumptionName == name
-
-{-# INLINE assumptionNameIsOneOf #-}
-assumptionNameIsOneOf :: [Name] -> Assumption t -> Bool
-assumptionNameIsOneOf names Assumption{..} = assumptionName `elem` names
-
-{-# INLINE assumptionNameIsNotOneOf #-}
-assumptionNameIsNotOneOf :: [Name] -> Assumption t -> Bool
-assumptionNameIsNotOneOf names Assumption{..} = assumptionName `notElem` names

@@ -34,7 +34,8 @@ import Noll.TypeSystem.Constraint.Aggregation.TypeAnnotation (
   TypeAnnotationError (..),
   checkTypeAnnotationParameters,
  )
-import Noll.TypeSystem.Constraint.Rule (Assumption (..), InferenceRule (..))
+import Noll.TypeSystem.Constraint.Rule (InferenceRule (..))
+import Noll.TypeSystem.Constraint.Assumption (Assumption (..))
 import Noll.TypeSystem.Constraint.Solver (solveConstraints)
 import Noll.TypeSystem.Substitution (apply, normalizeTypeIndexes)
 import Test.Hspec (Spec, describe, hspec, it)

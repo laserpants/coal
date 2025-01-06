@@ -32,7 +32,8 @@ import Noll.TypeSystem.Constraint.Aggregation.Internal (
   ConstraintsGenerationError (..),
   runAggregationStack,
  )
-import Noll.TypeSystem.Constraint.Rule (Assumption (..), InferenceRule (..))
+import Noll.TypeSystem.Constraint.Assumption (Assumption (..))
+import Noll.TypeSystem.Constraint.Rule (InferenceRule (..))
 import Noll.Utils (Dictionary, (<$$>))
 
 import qualified Data.Map.Strict as Map

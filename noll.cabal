@@ -58,10 +58,12 @@ library
       Noll.Library.Environment
       Noll.Library.List1
       Noll.Library.Supply
+      Noll.TypeSystem
       Noll.TypeSystem.Constraint
       Noll.TypeSystem.Constraint.Aggregation
       Noll.TypeSystem.Constraint.Aggregation.Internal
       Noll.TypeSystem.Constraint.Aggregation.TypeAnnotation
+      Noll.TypeSystem.Constraint.Assumption
       Noll.TypeSystem.Constraint.Rule
       Noll.TypeSystem.Constraint.Solver
       Noll.TypeSystem.Substitution
