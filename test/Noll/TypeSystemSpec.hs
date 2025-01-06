@@ -26,6 +26,7 @@ import Noll.Language (
   TypeIndex (..),
   TypeParam (..),
   freshIdIn,
+  indexed,
  )
 import Noll.Library.Environment (Environment)
 import qualified Noll.Library.Environment as Environment
@@ -109,9 +110,7 @@ testRunner ::
   )
 testRunner e =
   let
-    e0 = evalState (traverse (const supply) e) (0 :: Int)
-
-    e1 = toIndexed e0
+    e1 = indexed e
 
     (asms, xx, out) =
       runAggregationStack

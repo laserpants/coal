@@ -62,6 +62,35 @@ spec =
         it "f -> f(a)" $
           testRunner2 fixture12 == Left (KindMismatch ())
 
+-- typeConstraintsInclude :: forall a. (Show a, Eq a) => Expression a Int -> TypeConstraint (TypeRule () a) TypeIndex () (Type TypeIndex ()) -> Bool
+typeConstraintsInclude e r =
+  undefined
+
+--  let
+--    e1 = fmap typeVariable e
+--
+--    res0 :: ([TypeCollectError a], [TypeConstraint (TypeRule () a) TypeIndex () (Type TypeIndex ())])
+--    res0 =
+--      evalCollectTypeConstraints
+--        (TypeConstraintsContext mempty constructorEnv)
+--        (collectTypeConstraints e1)
+--
+--    (_, constraints) = res0
+--   in
+--    --    traceShow constraints $
+--    case sample of
+--      Equality meta ts ->
+--        elem (normalized (Equality meta ts)) (normalized <$> constraints)
+--      c ->
+--        elem c constraints
+-- where
+--  normalized =
+--    \case
+--      Equality meta ts ->
+--        Equality meta (sort ts)
+--      c ->
+--        c
+
 testRunner ::
   Expression a Int ->
   ( [Assumption (Type TypeIndex Kind)]
@@ -85,6 +114,38 @@ testRunner2 t = s
 
 toIndexed :: Expression a Int -> Expression a (Type TypeIndex Kind)
 toIndexed = fmap (TVariable . TypeIndex KType)
+
+-- fn(m) => let y = m in let x = y(true) in x
+fixture1 :: Expression () Int
+fixture1 =
+  ELambda
+    ()
+    (PVariable () (Label 5 "m") :| [])
+    ( ELet
+        ()
+        ( BPattern
+            ()
+            (PVariable () (Label 6 "y"))
+            (EVariable () (Label 1 "m"))
+            :| []
+        )
+        ( ELet
+            ()
+            ( BPattern
+                ()
+                (PVariable () (Label 7 "x"))
+                ( EApplication
+                    ()
+                    3
+                    (EVariable () (Label 2 "y"))
+                    (ELiteral () (LBool True) :| [])
+                )
+                :| []
+            )
+            ( EVariable () (Label 4 "x")
+            )
+        )
+    )
 
 -- let x = 5 in x
 fixture7 :: Expression String Int

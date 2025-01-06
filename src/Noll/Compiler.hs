@@ -6,12 +6,11 @@ module Noll.Compiler (
   CompilerEnvironment (..),
   Compiler (..),
   runCompiler,
-  indexedExpression,
   runAggregationStackInCompiler,
 ) where
 
 import Control.Monad.Reader (MonadReader, ReaderT, ask, runReaderT)
-import Control.Monad.State (MonadState, State, evalState, runState)
+import Control.Monad.State (MonadState, State, runState)
 import Noll.Language (
   Constructor (..),
   Expression (..),
@@ -21,7 +20,6 @@ import Noll.Language (
   TypeIndex (..),
  )
 import Noll.Library.Environment (Environment (..))
-import Noll.Library.Supply (supply)
 import Noll.TypeSystem.Constraint.Aggregation.Internal (AggregationContext (..), AggregationOutput (..), AggregationStack (..), runAggregationStack)
 import Noll.Utils (Dictionary)
 
@@ -56,12 +54,7 @@ newtype Compiler a = Compiler {compilerStack :: ReaderT CompilerEnvironment (Sta
     )
 
 runCompiler :: CompilerEnvironment -> Compiler a -> (a, CompilerState)
-runCompiler env comp = runState (runReaderT (compilerStack comp) env) initialCompilerState
-
-indexedExpression :: Expression a () -> Compiler (Expression a (Type TypeIndex Kind))
-indexedExpression expr = pure (evalState (traverse (fmap tVar . const supply) expr) 0)
- where
-  tVar = TVariable . TypeIndex KType
+runCompiler env com = runState (runReaderT (compilerStack com) env) initialCompilerState
 
 type AggregationStackResult a o k t c = (c, Dictionary (a, o k), [AggregationOutput a o k t])
 
