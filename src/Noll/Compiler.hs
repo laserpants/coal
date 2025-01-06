@@ -56,12 +56,12 @@ newtype Compiler a = Compiler {compilerStack :: ReaderT CompilerEnvironment (Sta
 runCompiler :: CompilerEnvironment -> Compiler a -> (a, CompilerState)
 runCompiler env com = runState (runReaderT (compilerStack com) env) initialCompilerState
 
-type ConstraintsGenerationResult a o k t c = (c, Dictionary (a, o k), [AggregationOutput a o k t])
+type ConstraintsGenerationResult c o k t r = (r, Dictionary (c, o k), [AggregationOutput c o k t])
 
 runConstraintsGenerationInCompiler ::
   Int ->
-  AggregationStack a TypeIndex Kind IndexedType c ->
-  Compiler (ConstraintsGenerationResult a TypeIndex Kind IndexedType c)
+  AggregationStack c TypeIndex Kind IndexedType r ->
+  Compiler (ConstraintsGenerationResult c TypeIndex Kind IndexedType r)
 runConstraintsGenerationInCompiler index stack = do
   env <- ask
   pure (runAggregationStack (context env) stack)
