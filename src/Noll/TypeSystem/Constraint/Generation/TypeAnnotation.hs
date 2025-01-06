@@ -29,9 +29,19 @@ import Noll.Language (
   kindOf,
   typeIndexesIn,
  )
-import Noll.TypeSystem.Constraint.Generation.Internal (ConstraintsGenerationContext (..), TypeAnnotationError (..))
-import Noll.TypeSystem.Substitution
-import Noll.Utils (Dictionary, IndexMap, Name, concatMapM, forM_, lexOrderRank, (<$$>))
+import Noll.TypeSystem.Constraint.Generation.Internal (
+  ConstraintsGenerationContext (..),
+  TypeAnnotationError (..),
+ )
+import Noll.TypeSystem.Substitution (Substitution (..))
+import Noll.Utils (
+  Dictionary,
+  Name,
+  concatMapM,
+  forM_,
+  lexOrderRank,
+  (<$$>),
+ )
 
 import qualified Data.Map.Strict as Map
 import qualified Noll.Library.Environment as Environment
