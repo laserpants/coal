@@ -4,7 +4,7 @@
 
 module Noll.TypeSystem.Constraint.Aggregation.Internal (
   TypeAnnotationError,
-  AggregationError (..),
+  ConstraintsGenerationError (..),
   TypeAnnotationError (..),
   AggregationContext (..),
   AggregationStack (..),
@@ -28,7 +28,11 @@ import Control.Monad.RWS (
  )
 import Noll.Language (Constructor (..), Kind (..), Type (..), TypeIndex (..))
 import Noll.Library.Environment (Environment (..))
-import Noll.TypeSystem.Constraint (Constraint (..), MonomorphicSet (..), overMonomorphicSet)
+import Noll.TypeSystem.Constraint (
+  Constraint (..),
+  MonomorphicSet (..),
+  overMonomorphicSet,
+ )
 import Noll.TypeSystem.Constraint.Rule (InferenceRule (..))
 import Noll.Utils (Dictionary, Name)
 
@@ -47,7 +51,7 @@ data TypeAnnotationError a
     ResolvesToMonomorphicType Name (Type TypeIndex Kind)
   deriving (Show, Eq, Ord, Read)
 
-data AggregationError a
+data ConstraintsGenerationError a
   = NoDataConstructor a Name
   | DataConstructorArityMismatch a Name Int Int
   | IllFormedTypeAnnotation (TypeAnnotationError a)
@@ -61,7 +65,7 @@ data AggregationContext o k t = AggregationContext
   }
   deriving (Show, Eq, Ord, Read)
 
-type AggregationOutput c o k t = Either (AggregationError c) (Constraint (InferenceRule k c) o k t)
+type AggregationOutput c o k t = Either (ConstraintsGenerationError c) (Constraint (InferenceRule k c) o k t)
 
 type AggregationMonad c o k t = RWS (AggregationContext o k t) [AggregationOutput c o k t] (Dictionary (c, TypeIndex Kind))
 

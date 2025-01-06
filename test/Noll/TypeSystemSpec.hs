@@ -32,12 +32,13 @@ import Noll.Library.Supply (supply)
 import Noll.TypeSystem.Constraint.Aggregation
 import Noll.TypeSystem.Constraint.Aggregation.TypeAnnotation (
   TypeAnnotationError (..),
-  checkTypeVariables,
+  checkTypeAnnotationParameters,
  )
 import Noll.TypeSystem.Constraint.Rule (Assumption (..), InferenceRule (..))
 import Noll.TypeSystem.Constraint.Solver (solveConstraints)
 import Noll.TypeSystem.Substitution (apply, normalizeTypeIndexes)
 import Test.Hspec (Spec, describe, hspec, it)
+import Noll.Compiler (Compiler (..), CompilerEnvironment (..), runCompiler)
 
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
@@ -102,11 +103,24 @@ validateErrorsCount e = length es0 + length es1
  where
   (_, _, es0, es1) = testRunner e
 
+testRunner2 ::
+  Expression () () ->
+  ( Expression () (Type TypeIndex Kind)
+  , [Assumption IndexedType]
+  , [ConstraintsGenerationError ()]
+  , [InferenceRule Kind ()]
+  )
+testRunner2 e = do
+  undefined
+    where
+      zz = runCompiler (CompilerEnvironment mempty mempty) $ do 
+        undefined
+
 testRunner ::
   Expression () () ->
   ( Expression () (Type TypeIndex Kind)
   , [Assumption IndexedType]
-  , [AggregationError ()]
+  , [ConstraintsGenerationError ()]
   , [InferenceRule Kind ()]
   )
 testRunner e =
@@ -118,7 +132,7 @@ testRunner e =
         (AggregationContext mempty testConstructorEnv testTypeConstructorEnv (freshIdIn e1))
         (collectConstraints e1)
 
-    yy = execWriter (checkTypeVariables (Map.toList xx) sub)
+    yy = execWriter (checkTypeAnnotationParameters (Map.toList xx) sub)
 
     errors0 = lefts out <> fmap IllFormedTypeAnnotation yy
     constraints = rights out

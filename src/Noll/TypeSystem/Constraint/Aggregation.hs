@@ -5,7 +5,7 @@
 
 module Noll.TypeSystem.Constraint.Aggregation (
   AggregationContext (..),
-  AggregationError (..),
+  ConstraintsGenerationError (..),
   collectConstraints,
   runAggregationStack,
 ) where
@@ -36,8 +36,8 @@ import Noll.Library.List1 (fromList1)
 import Noll.TypeSystem.Constraint (Constraint (..))
 import Noll.TypeSystem.Constraint.Aggregation.Internal (
   AggregationContext (..),
-  AggregationError (..),
   AggregationStack (..),
+  ConstraintsGenerationError (..),
   localMonoset,
   monosetInsertMany,
   runAggregationStack,

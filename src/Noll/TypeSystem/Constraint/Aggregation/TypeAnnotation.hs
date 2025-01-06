@@ -5,7 +5,7 @@
 module Noll.TypeSystem.Constraint.Aggregation.TypeAnnotation (
   TypeAnnotationError (..),
   instantiateAnnotation,
-  checkTypeVariables,
+  checkTypeAnnotationParameters,
   runTypeAnnotation,
 ) where
 
@@ -112,8 +112,8 @@ toTypeIndex k name = do
     Just{} ->
       pure index
 
-checkTypeVariables :: (MonadWriter [TypeAnnotationError a] m) => [(Name, (a, TypeIndex Kind))] -> Substitution -> m ()
-checkTypeVariables ps (Substitution sub) = do
+checkTypeAnnotationParameters :: (MonadWriter [TypeAnnotationError a] m) => [(Name, (a, TypeIndex Kind))] -> Substitution -> m ()
+checkTypeAnnotationParameters ps (Substitution sub) = do
   params <- groupSortOn fst <$> concatMapM go ps
   let twoOreMore xs = length xs > 1
   case filter twoOreMore params of

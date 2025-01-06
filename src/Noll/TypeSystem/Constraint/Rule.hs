@@ -21,9 +21,9 @@ data InferenceRule k a
     InferAnnotation a (Type TypeIndex k)
   | -- | Function application
     InferApplication a (Type TypeIndex k) [Type TypeIndex k]
-  | -- | Type of if condition is bool
+  | -- | Type of if-condition is bool
     InferIfCondition a (Type TypeIndex k)
-  | -- | If expression 'then' and 'else' branches must have the same type
+  | -- | If-expression 'then' and 'else' branches must have the same type
     InferIfBranches a (Type TypeIndex k) (Type TypeIndex k)
   | -- Type of binding expression matches binding pattern
     InferLetBindingPattern a (Type TypeIndex k) (Type TypeIndex k)
