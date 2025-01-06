@@ -10,8 +10,10 @@ module Noll.Compiler (
 ) where
 
 import Control.Monad.Reader (MonadReader, ReaderT, ask, runReaderT)
-import Control.Monad.State (MonadState, State, modify, runState)
+import Control.Monad.State (MonadState, State, gets, modify, runState)
+import Control.Monad.Writer (execWriter)
 import Data.Either.Extra (partitionEithers)
+import Data.Tuple.Extra (first)
 import Noll.Language (
   Constructor (..),
   Expression (..),
@@ -22,19 +24,22 @@ import Noll.Language (
   freshIdIn,
  )
 import Noll.Library.Environment (Environment (..))
-import Noll.TypeSystem.Constraint (Constraint (..))
-import Noll.TypeSystem.Constraint.Assumption (Assumption (..))
-import Noll.TypeSystem.Constraint.Generation (collectConstraints)
-import Noll.TypeSystem.Constraint.Generation.Internal (
+import Noll.TypeSystem (
+  Assumption (..),
+  Constraint (..),
   ConstraintsGenerationContext (..),
   ConstraintsGenerationError (..),
   ConstraintsGenerationOutput (..),
   ConstraintsGenerationStack (..),
   InferenceRule (..),
+  Solver (..),
+  Substitutable (..),
+  Substitution (..),
+  checkTypeAnnotationParameters,
+  collectConstraints,
   runConstraintsGenerationStack,
+  solveConstraints,
  )
-import Noll.TypeSystem.Constraint.Solver (Solver (..))
-import Noll.TypeSystem.Substitution (Substitution (..))
 import Noll.Utils (Dictionary, (<$$>))
 
 import qualified Data.Map.Strict as Map
@@ -48,6 +53,7 @@ data CompilerEnvironment = CompilerEnvironment
 data CompilerState a = CompilerState
   { compilerConstraintsGenerationErrors :: [ConstraintsGenerationError a]
   , compilerTypeAnnotationParameters :: Dictionary (a, TypeIndex Kind)
+  , compilerSolverRuleViolations :: [InferenceRule Kind a]
   }
   deriving (Show, Eq, Ord, Read)
 
@@ -59,12 +65,17 @@ overCompilerStateConstraintsGenerationErrors fn CompilerState{..} = CompilerStat
 overCompilerTypeAnnotationParameters :: (Dictionary (a, TypeIndex Kind) -> Dictionary (a, TypeIndex Kind)) -> CompilerState a -> CompilerState a
 overCompilerTypeAnnotationParameters fn CompilerState{..} = CompilerState{compilerTypeAnnotationParameters = fn compilerTypeAnnotationParameters, ..}
 
+{-# INLINE overCompilerSolverRuleViolations #-}
+overCompilerSolverRuleViolations :: ([InferenceRule Kind a] -> [InferenceRule Kind a]) -> CompilerState a -> CompilerState a
+overCompilerSolverRuleViolations fn CompilerState{..} = CompilerState{compilerSolverRuleViolations = fn compilerSolverRuleViolations, ..}
+
 {-# INLINE initialCompilerState #-}
 initialCompilerState :: CompilerState a
 initialCompilerState =
   CompilerState
     { compilerConstraintsGenerationErrors = []
     , compilerTypeAnnotationParameters = mempty
+    , compilerSolverRuleViolations = []
     }
 
 newtype Compiler a c = Compiler {compilerStack :: ReaderT CompilerEnvironment (State (CompilerState a)) c}
@@ -83,6 +94,10 @@ compilerReportConstraintsGenerationErrors errors = modify (overCompilerStateCons
 {-# INLINE compilerSetTypeAnnotationParameters #-}
 compilerSetTypeAnnotationParameters :: Dictionary (a, TypeIndex Kind) -> Compiler a ()
 compilerSetTypeAnnotationParameters params = modify (overCompilerTypeAnnotationParameters (const params))
+
+{-# INLINE compilerReportSolverRuleViolations #-}
+compilerReportSolverRuleViolations :: [InferenceRule Kind a] -> Compiler a ()
+compilerReportSolverRuleViolations errors = modify (overCompilerSolverRuleViolations (<> errors))
 
 {-# INLINE runCompiler #-}
 runCompiler :: CompilerEnvironment -> Compiler a c -> (c, CompilerState a)
@@ -115,9 +130,11 @@ generateConstraintsC e = do
   compilerSetTypeAnnotationParameters params
   pure (assumptions, constraints)
 
-runSolverC :: Solver c o k t -> Compiler a r
-runSolverC =
-  undefined
-
-solveConstraintsC :: [Constraint (InferenceRule Kind a) TypeIndex Kind IndexedType] -> Compiler a Substitution
-solveConstraintsC constraints = undefined
+solveConstraintsC :: (Eq a) => [Constraint (InferenceRule Kind a) TypeIndex Kind IndexedType] -> Compiler a Substitution
+solveConstraintsC cs = do
+  dict <- gets compilerTypeAnnotationParameters
+  let (sub, rs) = solveConstraints cs
+      errors = execWriter (checkTypeAnnotationParameters (Map.toList dict) sub)
+  compilerReportSolverRuleViolations (apply sub rs)
+  compilerReportConstraintsGenerationErrors (IllFormedTypeAnnotation <$> errors)
+  pure sub
