@@ -26,12 +26,13 @@ import Control.Monad.RWS (
   local,
   runRWS,
  )
-import qualified Data.Set as Set
 import Noll.Language (Constructor (..), Kind (..), Type (..), TypeIndex (..))
 import Noll.Library.Environment (Environment (..))
 import Noll.TypeSystem.Constraint (Constraint (..), MonomorphicSet (..), overMonomorphicSet)
 import Noll.TypeSystem.Constraint.Rule (InferenceRule (..))
 import Noll.Utils (Dictionary, Name)
+
+import qualified Data.Set as Set
 
 data TypeAnnotationError a
   = -- Kind error

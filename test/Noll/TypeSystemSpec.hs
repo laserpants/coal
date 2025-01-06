@@ -6,8 +6,6 @@ import Control.Monad.State (evalState)
 import Control.Monad.Writer (execWriter)
 import Data.Either.Extra (lefts, rights)
 import Data.List.NonEmpty ((<|))
-import qualified Data.Map.Strict as Map
-import qualified Data.Set as Set
 import Debug.Trace
 import Noll.Label (Label (..))
 import Noll.Language (
@@ -29,15 +27,21 @@ import Noll.Language (
   indexed,
  )
 import Noll.Library.Environment (Environment)
-import qualified Noll.Library.Environment as Environment
 import Noll.Library.List1 (NonEmpty (..))
 import Noll.Library.Supply (supply)
 import Noll.TypeSystem.Constraint.Aggregation
-import Noll.TypeSystem.Constraint.Aggregation.TypeAnnotation (TypeAnnotationError (..), checkTypeVariables)
+import Noll.TypeSystem.Constraint.Aggregation.TypeAnnotation (
+  TypeAnnotationError (..),
+  checkTypeVariables,
+ )
 import Noll.TypeSystem.Constraint.Rule (Assumption (..), InferenceRule (..))
 import Noll.TypeSystem.Constraint.Solver (solveConstraints)
 import Noll.TypeSystem.Substitution (apply, normalizeTypeIndexes)
 import Test.Hspec (Spec, describe, hspec, it)
+
+import qualified Data.Map.Strict as Map
+import qualified Data.Set as Set
+import qualified Noll.Library.Environment as Environment
 
 spec :: Spec
 spec =

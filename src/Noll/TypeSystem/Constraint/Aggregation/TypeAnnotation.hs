@@ -15,7 +15,6 @@ import Control.Monad.Reader (runReaderT)
 import Control.Monad.State (MonadState, StateT, evalStateT, gets, modify, runStateT)
 import Control.Monad.Writer (MonadWriter, tell)
 import Data.List.Extra (groupSortOn)
-import qualified Data.Map.Strict as Map
 import Debug.Trace
 import Noll.Language (
   IndexedType,
@@ -30,10 +29,12 @@ import Noll.Language (
   kindOf,
   typeIndexesIn,
  )
-import qualified Noll.Library.Environment as Environment
 import Noll.TypeSystem.Constraint.Aggregation.Internal (AggregationContext (..), TypeAnnotationError (..))
 import Noll.TypeSystem.Substitution
 import Noll.Utils (Dictionary, IndexMap, Name, concatMapM, forM_, lexOrderRank, (<$$>))
+
+import qualified Data.Map.Strict as Map
+import qualified Noll.Library.Environment as Environment
 
 type TypeAnnotationContext = AggregationContext TypeIndex Kind IndexedType
 

@@ -32,7 +32,6 @@ import Noll.Language (
   foldType,
   typeOf,
  )
-import qualified Noll.Library.Environment as Environment
 import Noll.Library.List1 (fromList1)
 import Noll.TypeSystem.Constraint (Constraint (..))
 import Noll.TypeSystem.Constraint.Aggregation.Internal (
@@ -43,9 +42,18 @@ import Noll.TypeSystem.Constraint.Aggregation.Internal (
   monosetInsertMany,
   runAggregationStack,
  )
-import Noll.TypeSystem.Constraint.Aggregation.TypeAnnotation (instantiateAnnotation)
-import Noll.TypeSystem.Constraint.Rule (Assumption (..), InferenceRule (..), assumptionNameIs, assumptionNameIsNotOneOf)
+import Noll.TypeSystem.Constraint.Aggregation.TypeAnnotation (
+  instantiateAnnotation,
+ )
+import Noll.TypeSystem.Constraint.Rule (
+  Assumption (..),
+  InferenceRule (..),
+  assumptionNameIs,
+  assumptionNameIsNotOneOf,
+ )
 import Noll.Utils (Name, concatForM, forM, tellLeft, tellRight, (<$$>))
+
+import qualified Noll.Library.Environment as Environment
 
 type ConstraintsAggregation a = AggregationStack a TypeIndex Kind IndexedType
 

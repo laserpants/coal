@@ -18,7 +18,7 @@ import Noll.Utils (Name)
 data InferenceRule k a
   = InferenceRule Int
   | -- | Type annotation
-    InferAnnotation a (Type TypeIndex Kind)
+    InferAnnotation a (Type TypeIndex k)
   | -- | Function application
     InferApplication a (Type TypeIndex k) [Type TypeIndex k]
   | -- | Type of if condition is bool
@@ -37,7 +37,7 @@ data InferenceRule k a
     InferMatchClausePatterns a
   deriving (Show, Eq, Ord, Read)
 
-instance Substitutable (InferenceRule Kind c) where
+instance Substitutable (InferenceRule Kind a) where
   apply sub =
     \case
       InferenceRule n ->

@@ -3,13 +3,16 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.TypeSystem.Constraint.Solver (runSolver, solve, solveConstraints) where
+module Noll.TypeSystem.Constraint.Solver (
+  runSolver,
+  solve,
+  solveConstraints,
+) where
 
 import Control.Monad.Except (runExceptT)
 import Control.Monad.RWS (MonadState, MonadWriter, RWS, runRWS, tell)
 import Data.List (delete, find)
 import Data.Set (intersection, (\\))
-import qualified Data.Set as Set
 import Noll.Language (
   IndexedType,
   Kind (..),
@@ -28,12 +31,14 @@ import Noll.TypeSystem.Substitution (Substitutable (..), Substitution (..), maps
 import Noll.TypeSystem.Unification (unifyAll)
 import Noll.Utils (foldrM)
 
-newtype Solver c a = Solver {solverMonad :: RWS () [c] (TypeIndex Kind) a}
+import qualified Data.Set as Set
+
+newtype Solver c o k t = Solver {solverMonad :: RWS () [c] (o k) t}
   deriving
     ( Functor
     , Applicative
     , Monad
-    , MonadState (TypeIndex Kind)
+    , MonadState (o k)
     , MonadWriter [c]
     )
 
@@ -42,10 +47,10 @@ solveConstraints :: (Eq c) => [Constraint c TypeIndex Kind IndexedType] -> (Subs
 solveConstraints cs = runSolver (freshIdIn cs) (solve cs)
 
 {-# INLINE runSolver #-}
-runSolver :: Int -> Solver c a -> (a, [c])
-runSolver n u = (a, w)
+runSolver :: Int -> Solver c TypeIndex Kind t -> (t, [c])
+runSolver n u = (a, o)
  where
-  (a, _, w) = runRWS (solverMonad u) () (TypeIndex KType n)
+  (a, _, o) = runRWS (solverMonad u) () (TypeIndex KType n)
 
 isSolvable :: (Ord k, TypeIndexed k t) => [Constraint c TypeIndex k t] -> Constraint c TypeIndex k t -> Bool
 isSolvable constraints =
@@ -64,7 +69,7 @@ choice cs = findChoice [(delete c cs, c) | c <- cs]
   findChoice ps =
     maybe ChoiceNotFound (uncurry Choice) (find (uncurry isSolvable) ps)
 
-solve :: (Eq c) => [Constraint c TypeIndex Kind IndexedType] -> Solver c Substitution
+solve :: (Eq c) => [Constraint c TypeIndex Kind IndexedType] -> Solver c TypeIndex Kind Substitution
 solve [] = pure (Substitution mempty)
 solve constraints =
   case choice constraints of
@@ -89,7 +94,7 @@ solve constraints =
 generalize :: (TypeIndexed k t) => MonomorphicSet (TypeIndex k) -> t -> Scheme TypeIndex k t
 generalize (MonomorphicSet m) t = Forall (notBoundIn m (typeIndexesIn t)) [] t
 
-instantiate :: Scheme TypeIndex Kind IndexedType -> Solver c IndexedType
+instantiate :: Scheme TypeIndex Kind IndexedType -> Solver c TypeIndex Kind IndexedType
 instantiate (Forall qs _ t) = do
   sub <- foldrM go mempty qs
   pure (apply sub t)
