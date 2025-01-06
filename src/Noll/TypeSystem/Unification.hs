@@ -4,7 +4,7 @@
 {-# LANGUAGE StrictData #-}
 
 module Noll.TypeSystem.Unification (
-  Unifiable (..),
+  Unifiable (unify),
   UnificationError (..),
   unifyAll,
 ) where
