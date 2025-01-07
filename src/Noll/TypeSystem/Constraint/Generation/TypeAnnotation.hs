@@ -9,13 +9,13 @@ module Noll.TypeSystem.Constraint.Generation.TypeAnnotation (
   runTypeAnnotation,
 ) where
 
+import Control.Arrow ((>>>))
 import Control.Monad.Except (ExceptT, runExceptT, throwError, withExceptT)
 import Control.Monad.RWS (MonadReader, asks, get)
 import Control.Monad.Reader (runReaderT)
 import Control.Monad.State (MonadState, StateT, evalStateT, gets, modify, runStateT)
 import Control.Monad.Writer (MonadWriter, tell)
 import Data.List.Extra (groupSortOn)
-import Debug.Trace
 import Noll.Language (
   IndexedType,
   Kind (..),
@@ -107,9 +107,9 @@ instantiateRow =
 
 typeIndex :: (MonadReader TypeAnnotationContext m) => Kind -> Name -> TypeAnnotation a m (TypeIndex Kind)
 typeIndex k name = do
+  dict <- get
   n <- asks constraintsGenerationIndexTreshold
   let index = TypeIndex k (n + lexOrderRank name)
-  dict <- get
   case Map.lookup name dict of
     Nothing -> do
       modify (Map.insert name index)
@@ -123,13 +123,13 @@ typeIndex k name = do
 checkTypeAnnotationParameters :: (MonadWriter [TypeAnnotationError a] m) => [(Name, (a, TypeIndex Kind))] -> Substitution -> m ()
 checkTypeAnnotationParameters ps (Substitution sub) = do
   params <- groupSortOn fst <$> concatMapM go ps
-  let twoOreMore xs = length xs > 1
-  case filter twoOreMore params of
+  case filter (lengthMoreThan 1) params of
     [] ->
       pure ()
     qs ->
       tell [NonDistinctTypeParameters (snd <$$> qs)]
  where
+  lengthMoreThan n = length >>> (> n)
   go (name, (loc, TypeIndex _ index)) =
     case Map.lookup index sub of
       Just (TVariable (TypeIndex _ n)) ->
