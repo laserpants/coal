@@ -4,7 +4,7 @@
 
 module Noll.Language.Type.Kind (Kind (..), foldKind) where
 
-import Noll.Library.Supply (Supply (..))
+import Noll.Lib.Supply (Supply (..))
 
 data Kind
   = KType

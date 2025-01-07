@@ -4,7 +4,7 @@
 module Noll.Language.Expression.Choice (Choice (..), Guard (..)) where
 
 import Noll.Language.Pattern (Pattern)
-import Noll.Library.List1 (List1)
+import Noll.Lib.List1 (List1)
 
 newtype Guard e a t = CGuard (e a t)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)

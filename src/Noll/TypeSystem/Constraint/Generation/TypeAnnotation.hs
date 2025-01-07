@@ -44,7 +44,7 @@ import Noll.Utils (
  )
 
 import qualified Data.Map.Strict as Map
-import qualified Noll.Library.Environment as Environment
+import qualified Noll.Lib.Environment as Environment
 
 type TypeAnnotationContext = ConstraintsGenerationContext TypeIndex Kind IndexedType
 

@@ -1,4 +1,4 @@
-module Noll.Library.List1 (
+module Noll.Lib.List1 (
   module Data.List.NonEmpty,
   List1,
   fromList1,

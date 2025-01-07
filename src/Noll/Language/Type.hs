@@ -20,8 +20,8 @@ import Data.List.NonEmpty (NonEmpty)
 import Noll.Language.Type.Intrinsic (Intrinsic (..))
 import Noll.Language.Type.Kind (Kind)
 import Noll.Language.Type.Row (Row (..))
-import Noll.Library.List1 (List1)
-import Noll.Library.Supply (Supply (..))
+import Noll.Lib.List1 (List1)
+import Noll.Lib.Supply (Supply (..))
 import Noll.Utils (Map, Name, Set)
 
 import qualified Data.Set as Set

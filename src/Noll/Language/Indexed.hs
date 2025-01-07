@@ -27,7 +27,7 @@ import Noll.Language.Type (Type (..), TypeIndex (..))
 import Noll.Language.Type.Kind (Kind (..))
 import Noll.Language.Type.Row (Row (..))
 import Noll.Language.Type.Scheme (Scheme (..))
-import Noll.Library.Supply (supply)
+import Noll.Lib.Supply (supply)
 import Noll.Utils (unionMap)
 
 import qualified Data.Set as Set

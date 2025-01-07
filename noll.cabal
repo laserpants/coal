@@ -55,9 +55,9 @@ library
       Noll.Language.Type.Kind
       Noll.Language.Type.Row
       Noll.Language.Type.Scheme
-      Noll.Library.Environment
-      Noll.Library.List1
-      Noll.Library.Supply
+      Noll.Lib.Environment
+      Noll.Lib.List1
+      Noll.Lib.Supply
       Noll.TypeSystem
       Noll.TypeSystem.Constraint
       Noll.TypeSystem.Constraint.Assumption

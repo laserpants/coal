@@ -1,7 +1,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module Noll.Library.Environment (
+module Noll.Lib.Environment (
   Environment (..),
   new,
   insert,

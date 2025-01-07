@@ -32,7 +32,7 @@ import Noll.Language (
   foldType,
   typeOf,
  )
-import Noll.Library.List1 (fromList1)
+import Noll.Lib.List1 (fromList1)
 import Noll.TypeSystem.Constraint (Constraint (..))
 import Noll.TypeSystem.Constraint.Assumption (
   Assumption (..),
@@ -53,7 +53,7 @@ import Noll.TypeSystem.Constraint.Generation.TypeAnnotation (
  )
 import Noll.Utils (Name, concatForM, concatMapM, forM, tellLeft, tellRight, (<$$>))
 
-import qualified Noll.Library.Environment as Environment
+import qualified Noll.Lib.Environment as Environment
 
 type ConstraintsAggregation a = ConstraintsGenerationStack a TypeIndex Kind IndexedType
 

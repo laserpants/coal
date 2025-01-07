@@ -27,7 +27,7 @@ import Noll.Language (
   TypeIndex (..),
   freshIdIn,
  )
-import Noll.Library.Environment (Environment (..))
+import Noll.Lib.Environment (Environment (..))
 import Noll.TypeSystem (
   Assumption (..),
   Constraint (..),

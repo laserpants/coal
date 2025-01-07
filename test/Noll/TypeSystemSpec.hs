@@ -37,9 +37,9 @@ import Noll.Language (
   freshIdIn,
   indexed,
  )
-import Noll.Library.Environment (Environment)
-import Noll.Library.List1 (NonEmpty (..))
-import Noll.Library.Supply (supply)
+import Noll.Lib.Environment (Environment)
+import Noll.Lib.List1 (NonEmpty (..))
+import Noll.Lib.Supply (supply)
 import Noll.TypeSystem.Constraint.Assumption (Assumption (..))
 import Noll.TypeSystem.Constraint.Generation
 import Noll.TypeSystem.Constraint.Generation.Internal (InferenceRule (..))
@@ -53,7 +53,7 @@ import Test.Hspec (Spec, describe, hspec, it)
 
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
-import qualified Noll.Library.Environment as Environment
+import qualified Noll.Lib.Environment as Environment
 
 spec :: Spec
 spec =
