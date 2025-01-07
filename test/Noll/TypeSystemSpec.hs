@@ -62,38 +62,38 @@ spec =
       it "" $ do
         validateExpression fixture7 == fixture7Typed
       it "" $
-        validateNoErrors fixture7
+        hasNoErrors fixture7
       it "" $
         validateAssumptions fixture7 == [Assumption "x" (TConstructor KType "Answer")]
 
     it "fn(m) => let y = m in let x = y(true) in x" $ do
       validateExpression fixture1 == fixture1Typed
     it "" $
-      validateNoErrors fixture1
+      hasNoErrors fixture1
     it "let f = fn(x) => x in (f(f))(f(1))" $ do
       validateExpression fixture2 == fixture2Typed
     it "" $
-      validateNoErrors fixture2
+      hasNoErrors fixture2
     it "match(p) { | MkPair(fst, snd) => true }" $ do
       validateExpression fixture12 == fixture12Typed
     it "" $
-      validateNoErrors fixture12
+      hasNoErrors fixture12
     it "match(p : Pair(int32, bool)) { | MkPair(fst, snd) => true }" $ do
       validateExpression fixture13 == fixture13Typed
     it "" $
-      validateNoErrors fixture13
+      hasNoErrors fixture13
     it "match(p : Pair(a, b)) { | MkPair(fst, snd) => true }" $ do
       validateExpression fixture14 == fixture14Typed
     it "" $
-      validateNoErrors fixture14
+      hasNoErrors fixture14
     it "match(p : Pair(a, a)) { | MkPair(fst, snd) => true }" $ do
       validateExpression fixture15 == fixture15Typed
     it "" $
-      validateNoErrors fixture15
+      hasNoErrors fixture15
     it "" $ do
       validateExpression fixture17 == fixture17Typed
     it "" $
-      validateNoErrors fixture17
+      hasNoErrors fixture17
     it "" $
       validateErrorsCount fixture22 == 1
     it "" $
@@ -115,15 +115,15 @@ validateAssumptions e = as
  where
   (_, as, _, _) = testRunner e
 
-validateNoErrors :: Expression () () -> Bool
-validateNoErrors e = null es0 && null es1
+hasNoErrors :: Expression () () -> Bool
+hasNoErrors e = null errs0 && null errs1
  where
-  (_, _, es0, es1) = testRunner e
+  (_, _, errs0, errs1) = testRunner e
 
 validateErrorsCount :: Expression () () -> Int
-validateErrorsCount e = length es0 + length es1
+validateErrorsCount e = length errs0 + length errs1
  where
-  (_, _, es0, es1) = testRunner e
+  (_, _, errs0, errs1) = testRunner e
 
 testRunner ::
   Expression () () ->

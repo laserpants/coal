@@ -17,6 +17,7 @@ import Noll.Language (
   TypeIndex (..),
   TypeParam (..),
   freshIdIn,
+  indexed,
  )
 import Noll.TypeSystem.Constraint.Assumption (Assumption (..))
 import Noll.TypeSystem.Constraint.Generation
@@ -36,15 +37,15 @@ spec =
     describe "instantiateAnnotation" $ do
       describe "Valid" $ do
         it "a -> b" $
-          testRunner2
+          testInstantiateAnnotation
             fixture13
             == Right (TArrow (TVariable (TypeIndex KType 0)) (TVariable (TypeIndex KType 1)))
         it "a -> a" $
-          testRunner2
+          testInstantiateAnnotation
             fixture14
             == Right (TArrow (TVariable (TypeIndex KType 0)) (TVariable (TypeIndex KType 0)))
         it "f(a) -> f(b)" $
-          testRunner2
+          testInstantiateAnnotation
             fixture10
             == Right
               ( TArrow
@@ -52,7 +53,7 @@ spec =
                   (TApplication KType (TVariable (TypeIndex (KArrow KType KType) 5)) (TVariable (TypeIndex KType 1) :| []))
               )
         it "f(a) -> f(a)" $
-          testRunner2
+          testInstantiateAnnotation
             fixture11
             == Right
               ( TArrow
@@ -61,7 +62,7 @@ spec =
               )
       describe "Kind mismatch" $ do
         it "f -> f(a)" $
-          testRunner2 fixture12 == Left (KindMismatch ())
+          testInstantiateAnnotation fixture12 == Left (KindMismatch ())
 
 -- typeConstraintsInclude :: forall a. (Show a, Eq a) => Expression a Int -> TypeConstraint (TypeRule () a) TypeIndex () (Type TypeIndex ()) -> Bool
 typeConstraintsInclude e r =
@@ -92,29 +93,27 @@ typeConstraintsInclude e r =
 --      c ->
 --        c
 
-testRunner ::
+-- testCollectConstraints
+testCollectConstraints ::
   Expression a Int ->
   ( [Assumption (Type TypeIndex Kind)]
   , [ConstraintsGenerationOutput a TypeIndex Kind (Type TypeIndex Kind)]
   )
-testRunner e =
+testCollectConstraints e =
   let
-    e0 = toIndexed e
+    e0 = indexed e
    in
     evalConstraintsGenerationStack
       (ConstraintsGenerationContext mempty mempty mempty (freshIdIn e0))
       (collectConstraints e0)
 
-testRunner2 :: Type TypeParam () -> Either (TypeAnnotationError ()) (Type TypeIndex Kind)
-testRunner2 t = s
+testInstantiateAnnotation :: Type TypeParam () -> Either (TypeAnnotationError ()) (Type TypeIndex Kind)
+testInstantiateAnnotation t = s
  where
   (s, _) =
     evalConstraintsGenerationStack
       (ConstraintsGenerationContext mempty mempty mempty 0)
       (instantiateAnnotation () t)
-
-toIndexed :: Expression a Int -> Expression a (Type TypeIndex Kind)
-toIndexed = fmap (TVariable . TypeIndex KType)
 
 -- fn(m) => let y = m in let x = y(true) in x
 fixture1 :: Expression () Int
