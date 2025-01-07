@@ -53,6 +53,7 @@ infixr 8 <$$$>
 concatMapM :: (Monad m, Traversable f) => (a -> m [b]) -> f a -> m [b]
 concatMapM f xs = fmap concat (mapM f xs)
 
+{-# INLINE concatForM #-}
 concatForM :: (Monad m, Traversable f) => f a -> (a -> m [b]) -> m [b]
 concatForM = flip concatMapM
 

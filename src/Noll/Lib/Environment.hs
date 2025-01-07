@@ -36,7 +36,7 @@ insertMany :: (Foldable f) => f (Name, a) -> Environment a -> Environment a
 insertMany = flip (foldr (uncurry insert))
 
 {-# INLINE fromList #-}
-fromList :: (Foldable f) => f (Name, a) -> Environment a
+fromList :: [(Name, a)] -> Environment a
 fromList = (`insertMany` new)
 
 {-# INLINE lookup #-}
