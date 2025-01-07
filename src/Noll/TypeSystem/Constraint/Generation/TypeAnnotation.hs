@@ -72,8 +72,7 @@ instantiate =
   \case
     TApplication _ (TVariable (TypeParam _ v)) ts -> do
       ts1 <- traverse instantiate ts
-      let k = foldKind KType (kindOf <$> ts1)
-      t1 <- TVariable <$> typeIndex k v
+      t1 <- TVariable <$> typeIndex (foldKind KType (kindOf <$> ts1)) v
       pure (TApplication KType t1 ts1)
     TApplication _ t ts ->
       TApplication KType <$> instantiate t <*> traverse instantiate ts
