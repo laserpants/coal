@@ -19,6 +19,7 @@ import Noll.Language (
   Row (..),
   Type (..),
   TypeIndex (..),
+  kindOf,
   typeIdsIn,
  )
 import Noll.TypeSystem.Substitution (
@@ -97,14 +98,18 @@ instance Unifiable IndexedType where
     throwError CannotUnify
 
 bindType :: (MonadError UnificationError m) => TypeIndex Kind -> IndexedType -> m Substitution
-bindType (TypeIndex _ index) =
+bindType (TypeIndex k index) =
   \case
-    TVariable (TypeIndex _ index2)
+    TVariable (TypeIndex k2 index2)
       | index == index2 ->
-          pure mempty
+          if k /= k2
+            then throwError CannotUnifyKinds
+            else pure mempty
     t
       | index `member` typeIdsIn t ->
           throwError InfiniteType
+      | k /= kindOf t ->
+          throwError CannotUnifyKinds
       | otherwise ->
           pure (index `mapsTo` t)
 
