@@ -6,7 +6,7 @@ import Data.List.NonEmpty (NonEmpty (..), (<|))
 import Noll.Label (Label (..))
 import Noll.Language
 
--- 
+--
 -- data List
 -- let
 --   lte =

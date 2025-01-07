@@ -2,8 +2,8 @@
 
 module Noll.TypeSystemSpec.TestRunner where
 
-import Debug.Trace
 import Data.List.NonEmpty ((<|))
+import Debug.Trace
 import Noll.Compiler (
   CompilerEnvironment (..),
   evalCompiler,
