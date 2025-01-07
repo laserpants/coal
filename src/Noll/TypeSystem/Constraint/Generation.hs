@@ -55,20 +55,20 @@ import Noll.Utils (Name, concatForM, concatMapM, forM, tellLeft, tellRight, (<$$
 
 import qualified Noll.Lib.Environment as Environment
 
-type ConstraintsAggregation a = ConstraintsGenerationStack a TypeIndex Kind IndexedType
+type ConstraintsGeneration a = ConstraintsGenerationStack a TypeIndex Kind IndexedType
 
 {-# INLINE lookupDataConstructor #-}
 lookupDataConstructor :: Name -> ConstraintsGenerationStack c o k t (Maybe (Constructor o k t))
 lookupDataConstructor name = asks (Environment.lookup name . constraintsGenerationDataConstructorEnv)
 
-assertEqualityAssumptions :: a -> IndexedType -> [Assumption IndexedType] -> ConstraintsAggregation a ()
+assertEqualityAssumptions :: a -> IndexedType -> [Assumption IndexedType] -> ConstraintsGeneration a ()
 assertEqualityAssumptions loc t ms =
   tellRight $ do
     Assumption{..} <- ms
     -- TODO
     pure (Equality (InferenceRule 1) [assumptionType, t])
 
-assertImplicitAssumptions :: a -> IndexedType -> [Assumption IndexedType] -> ConstraintsAggregation a ()
+assertImplicitAssumptions :: a -> IndexedType -> [Assumption IndexedType] -> ConstraintsGeneration a ()
 assertImplicitAssumptions loc t ms = do
   set <- asks constraintsGenerationMonomorphicSet
   tellRight $ do
@@ -76,16 +76,12 @@ assertImplicitAssumptions loc t ms = do
     -- TODO
     pure (Implicit (InferLetImplicit loc assumptionName assumptionType t) assumptionType t set)
 
-withMonomorphic :: (TypeIndexed Kind t) => t -> ConstraintsAggregation a c -> ConstraintsAggregation a c
+withMonomorphic :: (TypeIndexed Kind t) => t -> ConstraintsGeneration a c -> ConstraintsGeneration a c
 withMonomorphic a = localMonoset (monosetInsertMany (typeIndexesIn a))
 
-type Assertion a = IndexedType -> [Assumption IndexedType] -> ConstraintsAggregation a ()
+type Assertion a = IndexedType -> [Assumption IndexedType] -> ConstraintsGeneration a ()
 
-patternConstraints ::
-  Assertion a ->
-  [Assumption IndexedType] ->
-  Pattern a IndexedType ->
-  ConstraintsAggregation a [Name]
+patternConstraints :: Assertion a -> [Assumption IndexedType] -> Pattern a IndexedType -> ConstraintsGeneration a [Name]
 patternConstraints assert ms =
   \case
     PAnnotation loc t p -> do
@@ -111,9 +107,7 @@ patternConstraints assert ms =
           tellRight [Explicit (InferenceRule 3) (foldType t (typeOf <$> ps)) constructorScheme]
       concatForM ps (patternConstraints assert ms)
 
-clauseAssumptions ::
-  Clause Expression a IndexedType ->
-  ConstraintsAggregation a (IndexedType, [IndexedType], [Assumption IndexedType])
+clauseAssumptions :: Clause Expression a IndexedType -> ConstraintsGeneration a (IndexedType, [IndexedType], [Assumption IndexedType])
 clauseAssumptions (EClause loc p cs) = do
   (ts1, ms) <- second concat . unzip <$$> withMonomorphic p $
     forM (fromList1 cs) $
@@ -127,7 +121,7 @@ clauseAssumptions (EClause loc p cs) = do
   names <- patternConstraints (assertEqualityAssumptions loc) ms p
   pure (typeOf p, ts1, filter (assumptionNameIsNotOneOf names) ms)
 
-collectConstraints :: Expression a IndexedType -> ConstraintsAggregation a [Assumption IndexedType]
+collectConstraints :: Expression a IndexedType -> ConstraintsGeneration a [Assumption IndexedType]
 collectConstraints =
   \case
     EAnnotation loc t e -> do

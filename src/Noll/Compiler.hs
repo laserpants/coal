@@ -102,9 +102,11 @@ compilerSetTypeAnnotationParameters params = modify (overCompilerTypeAnnotationP
 compilerReportSolverRuleViolations :: [InferenceRule Kind a] -> Compiler a ()
 compilerReportSolverRuleViolations errors = modify (overCompilerSolverRuleViolations (<> errors))
 
+{-# INLINE getConstraintsGenerationErrorsC #-}
 getConstraintsGenerationErrorsC :: Compiler a [ConstraintsGenerationError a]
 getConstraintsGenerationErrorsC = gets compilerConstraintsGenerationErrors
 
+{-# INLINE getSolverRuleViolationsC #-}
 getSolverRuleViolationsC :: Compiler a [InferenceRule Kind a]
 getSolverRuleViolationsC = gets compilerSolverRuleViolations
 

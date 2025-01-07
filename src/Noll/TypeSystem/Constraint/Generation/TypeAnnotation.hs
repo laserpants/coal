@@ -73,12 +73,12 @@ instantiate =
     TApplication _ (TVariable (TypeParam _ v)) ts -> do
       ts1 <- traverse instantiate ts
       let k = foldKind KType (kindOf <$> ts1)
-      t1 <- TVariable <$> toTypeIndex k v
+      t1 <- TVariable <$> typeIndex k v
       pure (TApplication KType t1 ts1)
     TApplication _ t ts ->
       TApplication KType <$> instantiate t <*> traverse instantiate ts
     TVariable (TypeParam _ v) ->
-      TVariable <$> toTypeIndex KType v
+      TVariable <$> typeIndex KType v
     TArrow t1 t2 ->
       TArrow <$> instantiate t1 <*> instantiate t2
     TConstructor _ name -> do
@@ -99,14 +99,14 @@ instantiateRow :: (MonadReader TypeAnnotationContext m) => Row TypeParam () (Typ
 instantiateRow =
   \case
     RVariable (TypeParam _ v) ->
-      RVariable <$> toTypeIndex KRow v
+      RVariable <$> typeIndex KRow v
     RExtend name t row ->
       RExtend name <$> instantiate t <*> instantiateRow row
     RNil ->
       pure RNil
 
-toTypeIndex :: (MonadReader TypeAnnotationContext m) => Kind -> Name -> TypeAnnotation a m (TypeIndex Kind)
-toTypeIndex k name = do
+typeIndex :: (MonadReader TypeAnnotationContext m) => Kind -> Name -> TypeAnnotation a m (TypeIndex Kind)
+typeIndex k name = do
   n <- asks constraintsGenerationIndexTreshold
   let index = TypeIndex k (n + lexOrderRank name)
   dict <- get

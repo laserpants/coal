@@ -137,9 +137,9 @@ evalConstraintsGenerationStack ctx a = evalRWS (constraintsGenerationMonad a) ct
 runConstraintsGenerationStack :: ConstraintsGenerationContext o k t -> ConstraintsGenerationStack c o k t a -> (a, Dictionary (c, TypeIndex Kind), [ConstraintsGenerationOutput c o k t])
 runConstraintsGenerationStack ctx a = runRWS (constraintsGenerationMonad a) ctx mempty
 
-{-# INLINE overAggregationMonomorphicSet #-}
-overAggregationMonomorphicSet :: (MonomorphicSet (o k) -> MonomorphicSet (o k)) -> ConstraintsGenerationContext o k t -> ConstraintsGenerationContext o k t
-overAggregationMonomorphicSet fn ConstraintsGenerationContext{..} = ConstraintsGenerationContext{constraintsGenerationMonomorphicSet = fn constraintsGenerationMonomorphicSet, ..}
+{-# INLINE overConstraintsGenerationMonomorphicSet #-}
+overConstraintsGenerationMonomorphicSet :: (MonomorphicSet (o k) -> MonomorphicSet (o k)) -> ConstraintsGenerationContext o k t -> ConstraintsGenerationContext o k t
+overConstraintsGenerationMonomorphicSet fn ConstraintsGenerationContext{..} = ConstraintsGenerationContext{constraintsGenerationMonomorphicSet = fn constraintsGenerationMonomorphicSet, ..}
 
 {-# INLINE monosetInsert #-}
 monosetInsert :: (Ord k) => TypeIndex k -> MonomorphicSet (TypeIndex k) -> MonomorphicSet (TypeIndex k)
@@ -151,4 +151,4 @@ monosetInsertMany = flip (foldr monosetInsert)
 
 {-# INLINE localMonoset #-}
 localMonoset :: (MonomorphicSet (o k) -> MonomorphicSet (o k)) -> ConstraintsGenerationStack c o k t a -> ConstraintsGenerationStack c o k t a
-localMonoset = local . overAggregationMonomorphicSet
+localMonoset = local . overConstraintsGenerationMonomorphicSet
