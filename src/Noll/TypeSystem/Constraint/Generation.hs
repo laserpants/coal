@@ -106,6 +106,11 @@ patternConstraints assert ms =
         Just Constructor{..} ->
           tellRight [Explicit (InferenceRule 3) (foldType t (typeOf <$> ps)) constructorScheme]
       concatForM ps (patternConstraints assert ms)
+    POr _ t p1 p2 -> do
+      tellRight [Equality (InferenceRule 11) [t, typeOf p1, typeOf p2]]
+      ps1 <- patternConstraints assert ms p1
+      ps2 <- patternConstraints assert ms p2
+      pure (ps1 <> ps2)
 
 clauseAssumptions :: Clause Expression a IndexedType -> ConstraintsGeneration a (IndexedType, [IndexedType], [Assumption IndexedType])
 clauseAssumptions (EClause loc p cs) = do

@@ -57,6 +57,7 @@ data CompilerState a = CompilerState
   { compilerConstraintsGenerationErrors :: [ConstraintsGenerationError a]
   , compilerTypeAnnotationParameters :: Dictionary (a, TypeIndex Kind)
   , compilerSolverRuleViolations :: [InferenceRule Kind a]
+  , compilerNames :: Dictionary IndexedType
   }
   deriving (Show, Eq, Ord, Read)
 
@@ -79,6 +80,7 @@ initialCompilerState =
     { compilerConstraintsGenerationErrors = []
     , compilerTypeAnnotationParameters = mempty
     , compilerSolverRuleViolations = []
+    , compilerNames = mempty
     }
 
 newtype Compiler a c = Compiler {compilerStack :: ReaderT CompilerEnvironment (State (CompilerState a)) c}

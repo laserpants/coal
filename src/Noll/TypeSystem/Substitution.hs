@@ -115,6 +115,8 @@ instance Substitutable (Pattern a IndexedType) where
         PVariable a (Label (apply sub t) name)
       PConstructor a (Label t name) ps ->
         PConstructor a (Label (apply sub t) name) (apply sub ps)
+      POr a t p1 p2 ->
+        POr a (apply sub t) (apply sub p1) (apply sub p2)
 
 instance Substitutable (Binding Expression a IndexedType) where
   apply sub =

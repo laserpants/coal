@@ -99,6 +99,8 @@ instance (Ord k, TypeIndexed k t) => TypeIndexed k (Pattern a t) where
         typeIndexesIn t
       PConstructor _ (Label t _) ps ->
         typeIndexesIn t <> typeIndexesIn ps
+      POr _ t p1 p2 ->
+        typeIndexesIn t <> typeIndexesIn p1 <> typeIndexesIn p2
 
 instance (Ord k, TypeIndexed k t) => TypeIndexed k (Scheme TypeIndex k t) where
   typeIndexesIn =

@@ -49,6 +49,7 @@ import Noll.TypeSystem.Constraint.Generation.TypeAnnotation (
  )
 import Noll.TypeSystem.Constraint.Solver (solveConstraints)
 import Noll.TypeSystem.Substitution (apply, normalizeTypeIndexes)
+import Noll.TypeSystemSpec.TestRunner
 import Test.Hspec (Spec, describe, hspec, it)
 
 import qualified Data.Map.Strict as Map
@@ -60,58 +61,76 @@ spec =
   describe "Noll.TypeSystem" $ do
     describe "match x { | Yes => true }" $ do
       it "" $ do
-        validateExpression fixture7 == fixture7Typed
+        typedExpressionShouldMatch fixture7Typed fixture7
       it "" $
         hasNoErrors fixture7
       it "" $
-        validateAssumptions fixture7 == [Assumption "x" (TConstructor KType "Answer")]
+        assumptions fixture7 == [Assumption "x" (TConstructor KType "Answer")]
+    describe "fn(m) => let y = m in let x = y(true) in x" $ do
+      it "" $
+        typedExpressionShouldMatch fixture1Typed fixture1
+      it "" $
+        hasNoErrors fixture1
+      it "" $
+        hasNoAssumptions fixture1
+    describe "match x { | Yes => y }" $ do
+      it "" $
+        assumptions fixture28 == [Assumption "x" (TConstructor KType "Answer"), Assumption "y" (TVariable (TypeIndex KType 3))]
 
-    it "fn(m) => let y = m in let x = y(true) in x" $ do
-      validateExpression fixture1 == fixture1Typed
     it "" $
       hasNoErrors fixture1
     it "let f = fn(x) => x in (f(f))(f(1))" $ do
-      validateExpression fixture2 == fixture2Typed
+      typedExpression fixture2 == fixture2Typed
     it "" $
       hasNoErrors fixture2
     it "match(p) { | MkPair(fst, snd) => true }" $ do
-      validateExpression fixture12 == fixture12Typed
+      typedExpression fixture12 == fixture12Typed
     it "" $
       hasNoErrors fixture12
     it "match(p : Pair(int32, bool)) { | MkPair(fst, snd) => true }" $ do
-      validateExpression fixture13 == fixture13Typed
+      typedExpression fixture13 == fixture13Typed
     it "" $
       hasNoErrors fixture13
     it "match(p : Pair(a, b)) { | MkPair(fst, snd) => true }" $ do
-      validateExpression fixture14 == fixture14Typed
+      typedExpression fixture14 == fixture14Typed
     it "" $
       hasNoErrors fixture14
     it "match(p : Pair(a, a)) { | MkPair(fst, snd) => true }" $ do
-      validateExpression fixture15 == fixture15Typed
+      typedExpression fixture15 == fixture15Typed
     it "" $
       hasNoErrors fixture15
     it "" $ do
-      validateExpression fixture17 == fixture17Typed
+      typedExpression fixture17 == fixture17Typed
     it "" $
       hasNoErrors fixture17
     it "" $
-      validateErrorsCount fixture22 == 1
+      numberOfErrors fixture22 == 1
     it "" $
-      validateErrorsCount fixture23 == 1
+      numberOfErrors fixture23 == 1
     it "" $
-      validateErrorsCount fixture25 == 1
+      numberOfErrors fixture25 == 1
     it "" $
-      validateErrorsCount fixture26 == 1
+      numberOfErrors fixture26 == 1
     it "" $
-      validateAssumptions fixture27 == []
+      assumptions fixture27 == []
 
-validateExpression :: Expression () () -> Expression () (Type TypeIndex Kind)
-validateExpression e = e1
+typedExpression :: Expression () () -> Expression () (Type TypeIndex Kind)
+typedExpression e = e1
  where
   (e1, _, _, _) = testRunner e
 
-validateAssumptions :: Expression () () -> [Assumption IndexedType]
-validateAssumptions e = as
+typedExpressionShouldMatch :: Expression () (Type TypeIndex Kind) -> Expression () () -> Bool
+typedExpressionShouldMatch e0 e = e1 == e0
+ where
+  (e1, _, _, _) = testRunner e
+
+assumptions :: Expression () () -> [Assumption IndexedType]
+assumptions e = as
+ where
+  (_, as, _, _) = testRunner e
+
+hasNoAssumptions :: Expression () () -> Bool
+hasNoAssumptions e = null as
  where
   (_, as, _, _) = testRunner e
 
@@ -120,114 +139,10 @@ hasNoErrors e = null errs0 && null errs1
  where
   (_, _, errs0, errs1) = testRunner e
 
-validateErrorsCount :: Expression () () -> Int
-validateErrorsCount e = length errs0 + length errs1
+numberOfErrors :: Expression () () -> Int
+numberOfErrors e = length errs0 + length errs1
  where
   (_, _, errs0, errs1) = testRunner e
-
-testRunner ::
-  Expression () () ->
-  ( Expression () (Type TypeIndex Kind)
-  , [Assumption IndexedType]
-  , [ConstraintsGenerationError ()]
-  , [InferenceRule Kind ()]
-  )
-testRunner e =
-  evalCompiler (CompilerEnvironment testConstructorEnv testTypeConstructorEnv) $ do
-    let e1 = indexed e
-    (as, cs) <- generateConstraintsC e1
-    sub <- solveConstraintsC cs
-    errs0 <- getConstraintsGenerationErrorsC
-    errs1 <- getSolverRuleViolationsC
-    pure
-      ( normalizeTypeIndexes (apply sub e1)
-      , apply sub as
-      , errs0
-      , errs1
-      )
-
-testConstructorEnv :: Environment (Constructor TypeIndex Kind (Type TypeIndex Kind))
-testConstructorEnv =
-  Environment.fromList
-    [
-      ( "Yes"
-      , Constructor "Yes" 0 (Forall mempty [] (TConstructor KType "Answer"))
-      )
-    ,
-      ( "No"
-      , Constructor "No" 0 (Forall mempty [] (TConstructor KType "Answer"))
-      )
-    ,
-      ( "Foo"
-      , Constructor "Foo" 0 (Forall mempty [] (TConstructor KType "Foo"))
-      )
-    ,
-      ( "Id"
-      , Constructor
-          "Id"
-          1
-          ( Forall (Set.fromList [TypeIndex KType 0]) [] (TVariable (TypeIndex KType 0) `TArrow` TApplication KType (TConstructor (KArrow KType KType) "Id") (TVariable (TypeIndex KType 0) :| []))
-          )
-      )
-    ,
-      ( "MkPair1"
-      , Constructor
-          "MkPair1"
-          2
-          ( Forall
-              (Set.fromList [TypeIndex KType 0])
-              []
-              ( TVariable (TypeIndex KType 0)
-                  `TArrow` TVariable (TypeIndex KType 0)
-                  `TArrow` TApplication -- '0 -> Pair1('0)
-                    KType
-                    (TConstructor (KArrow KType KType) "Pair1")
-                    (TVariable (TypeIndex KType 0) :| [])
-              )
-          )
-      )
-    ,
-      ( "MkPair"
-      , Constructor
-          "MkPair"
-          2
-          ( Forall
-              (Set.fromList [TypeIndex KType 0, TypeIndex KType 1])
-              []
-              ( TVariable (TypeIndex KType 0)
-                  `TArrow` TVariable (TypeIndex KType 1)
-                  `TArrow` TApplication -- '0 -> '1 -> Pair('0, '1)
-                    KType
-                    (TConstructor (KArrow KType (KArrow KType KType)) "Pair")
-                    ( TVariable (TypeIndex KType 0)
-                        <| TVariable (TypeIndex KType 1)
-                          :| []
-                    )
-              )
-          )
-      )
-    ,
-      ( "MkIntPair"
-      , Constructor
-          "MkIntPair"
-          2
-          ( Forall
-              mempty
-              []
-              (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TConstructor KType "IntPair")
-          )
-      )
-    ]
-
-testTypeConstructorEnv :: Environment Kind
-testTypeConstructorEnv =
-  Environment.fromList
-    [ ("Answer", KType)
-    , ("Pair1", KArrow KType KType) -- Homogeneous pair type
-    , ("Pair", KArrow KType (KArrow KType KType))
-    , ("IntPair", KType)
-    , ("Id", KArrow KType KType)
-    ]
 
 -- fn(m) => let y = m in let x = y(true) in x
 fixture1 :: Expression () ()
@@ -928,3 +843,18 @@ fixture27 =
         (EVariable () (Label () "g"))
         (EVariable () (Label () "x") :| [])
     )
+
+-- match x { | Yes => y }
+fixture28 :: Expression () ()
+fixture28 =
+  ( EMatch
+      ()
+      ()
+      (EVariable () (Label () "x"))
+      ( EClause
+          ()
+          (PConstructor () (Label () "Yes") [])
+          (CPlain () [] (EVariable () (Label () "y")) :| [])
+          :| []
+      )
+  )

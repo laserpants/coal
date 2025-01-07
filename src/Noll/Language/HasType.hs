@@ -64,6 +64,8 @@ instance HasType o k (Pattern a (Type o k)) where
         typeOf t
       PListLiteral _ t _ ->
         typeOf t
+      POr _ t _ _ ->
+        typeOf t
 
 instance HasType o k (Guard Expression a (Type o k)) where
   typeOf =
@@ -101,4 +103,6 @@ instance HasType o k (Expression a (Type o k)) where
       EListCons _ t _ _ ->
         typeOf t
       EListLiteral _ t _ ->
+        typeOf t
+      EMatch _ t _ _ ->
         typeOf t

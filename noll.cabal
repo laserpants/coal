@@ -108,7 +108,9 @@ test-suite noll-test
       Noll.Language.IndexedSpec
       Noll.TypeSystem.Constraint.GenerationSpec
       Noll.TypeSystem.UnificationSpec
+      Noll.TypeSystemFixtures.Expression
       Noll.TypeSystemSpec
+      Noll.TypeSystemSpec.TestRunner
       Paths_noll
   autogen-modules:
       Paths_noll
