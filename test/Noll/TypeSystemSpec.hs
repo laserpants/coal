@@ -2,12 +2,22 @@
 
 module Noll.TypeSystemSpec where
 
-import Control.Monad.State (evalState)
+import Control.Monad.State (evalState, gets)
 import Control.Monad.Writer (execWriter)
 import Data.Either.Extra (lefts, rights)
 import Data.List.NonEmpty ((<|))
 import Debug.Trace
-import Noll.Compiler (Compiler (..), CompilerEnvironment (..), runCompiler)
+import Noll.Compiler (
+  Compiler (..),
+  CompilerEnvironment (..),
+  CompilerState (..),
+  evalCompiler,
+  generateConstraintsC,
+  getConstraintsGenerationErrorsC,
+  getSolverRuleViolationsC,
+  runCompiler,
+  solveConstraintsC,
+ )
 import Noll.Label (Label (..))
 import Noll.Language (
   Binding (..),
@@ -48,36 +58,40 @@ import qualified Noll.Library.Environment as Environment
 spec :: Spec
 spec =
   describe "Noll.TypeSystem" $ do
+    describe "match x { | Yes => true }" $ do
+      it "" $ do
+        validateExpression fixture7 == fixture7Typed
+      it "" $
+        validateNoErrors fixture7
+      it "" $
+        validateAssumptions fixture7 == [Assumption "x" (TConstructor KType "Answer")]
+
     it "fn(m) => let y = m in let x = y(true) in x" $ do
-      validateResult fixture1 == fixture1Typed
+      validateExpression fixture1 == fixture1Typed
     it "" $
       validateNoErrors fixture1
     it "let f = fn(x) => x in (f(f))(f(1))" $ do
-      validateResult fixture2 == fixture2Typed
+      validateExpression fixture2 == fixture2Typed
     it "" $
       validateNoErrors fixture2
-    it "match x { | Yes => true }" $ do
-      validateResult fixture7 == fixture7Typed
-    it "" $
-      validateNoErrors fixture7
     it "match(p) { | MkPair(fst, snd) => true }" $ do
-      validateResult fixture12 == fixture12Typed
+      validateExpression fixture12 == fixture12Typed
     it "" $
       validateNoErrors fixture12
     it "match(p : Pair(int32, bool)) { | MkPair(fst, snd) => true }" $ do
-      validateResult fixture13 == fixture13Typed
+      validateExpression fixture13 == fixture13Typed
     it "" $
       validateNoErrors fixture13
     it "match(p : Pair(a, b)) { | MkPair(fst, snd) => true }" $ do
-      validateResult fixture14 == fixture14Typed
+      validateExpression fixture14 == fixture14Typed
     it "" $
       validateNoErrors fixture14
     it "match(p : Pair(a, a)) { | MkPair(fst, snd) => true }" $ do
-      validateResult fixture15 == fixture15Typed
+      validateExpression fixture15 == fixture15Typed
     it "" $
       validateNoErrors fixture15
     it "" $ do
-      validateResult fixture17 == fixture17Typed
+      validateExpression fixture17 == fixture17Typed
     it "" $
       validateNoErrors fixture17
     it "" $
@@ -88,11 +102,18 @@ spec =
       validateErrorsCount fixture25 == 1
     it "" $
       validateErrorsCount fixture26 == 1
+    it "" $
+      validateAssumptions fixture27 == []
 
-validateResult :: Expression () () -> Expression () (Type TypeIndex Kind)
-validateResult e = e1
+validateExpression :: Expression () () -> Expression () (Type TypeIndex Kind)
+validateExpression e = e1
  where
   (e1, _, _, _) = testRunner e
+
+validateAssumptions :: Expression () () -> [Assumption IndexedType]
+validateAssumptions e = as
+ where
+  (_, as, _, _) = testRunner e
 
 validateNoErrors :: Expression () () -> Bool
 validateNoErrors e = null es0 && null es1
@@ -104,19 +125,6 @@ validateErrorsCount e = length es0 + length es1
  where
   (_, _, es0, es1) = testRunner e
 
-testRunner2 ::
-  Expression () () ->
-  ( Expression () (Type TypeIndex Kind)
-  , [Assumption IndexedType]
-  , [ConstraintsGenerationError ()]
-  , [InferenceRule Kind ()]
-  )
-testRunner2 e = do
-  undefined
- where
-  zz = runCompiler (CompilerEnvironment mempty mempty) $ do
-    undefined
-
 testRunner ::
   Expression () () ->
   ( Expression () (Type TypeIndex Kind)
@@ -125,35 +133,18 @@ testRunner ::
   , [InferenceRule Kind ()]
   )
 testRunner e =
-  let
-    e1 = indexed e
-
-    (asms, xx, out) =
-      runConstraintsGenerationStack
-        (ConstraintsGenerationContext mempty testConstructorEnv testTypeConstructorEnv (freshIdIn e1))
-        (collectConstraints e1)
-
-    yy = execWriter (checkTypeAnnotationParameters (Map.toList xx) sub)
-
-    errors0 = lefts out <> fmap IllFormedTypeAnnotation yy
-    constraints = rights out
-
-    res0 = solveConstraints constraints
-
-    (sub, errors1) = res0
-
-    e2 = apply sub e1
-
-    e3 = normalizeTypeIndexes e2
-   in
-    ( e3
-    , apply sub asms
-    , errors0
-    , apply sub errors1
-    )
-
-toIndexed :: Expression a Int -> Expression a (Type TypeIndex Kind)
-toIndexed = fmap (TVariable . TypeIndex KType)
+  evalCompiler (CompilerEnvironment testConstructorEnv testTypeConstructorEnv) $ do
+    let e1 = indexed e
+    (as, cs) <- generateConstraintsC e1
+    sub <- solveConstraintsC cs
+    errs0 <- getConstraintsGenerationErrorsC
+    errs1 <- getSolverRuleViolationsC
+    pure
+      ( normalizeTypeIndexes (apply sub e1)
+      , apply sub as
+      , errs0
+      , errs1
+      )
 
 testConstructorEnv :: Environment (Constructor TypeIndex Kind (Type TypeIndex Kind))
 testConstructorEnv =

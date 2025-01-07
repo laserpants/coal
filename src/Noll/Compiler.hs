@@ -5,21 +5,25 @@
 module Noll.Compiler (
   CompilerEnvironment (..),
   Compiler (..),
+  CompilerState (..),
   runCompiler,
+  evalCompiler,
   runConstraintsGenerationC,
+  generateConstraintsC,
+  solveConstraintsC,
+  getConstraintsGenerationErrorsC,
+  getSolverRuleViolationsC,
 ) where
 
 import Control.Monad.Reader (MonadReader, ReaderT, ask, runReaderT)
 import Control.Monad.State (MonadState, State, gets, modify, runState)
 import Control.Monad.Writer (execWriter)
 import Data.Either.Extra (partitionEithers)
-import Data.Tuple.Extra (first)
 import Noll.Language (
   Constructor (..),
   Expression (..),
   IndexedType,
   Kind (..),
-  Type (..),
   TypeIndex (..),
   freshIdIn,
  )
@@ -29,10 +33,9 @@ import Noll.TypeSystem (
   Constraint (..),
   ConstraintsGenerationContext (..),
   ConstraintsGenerationError (..),
-  ConstraintsGenerationOutput (..),
+  ConstraintsGenerationOutput,
   ConstraintsGenerationStack (..),
   InferenceRule (..),
-  Solver (..),
   Substitutable (..),
   Substitution (..),
   checkTypeAnnotationParameters,
@@ -98,6 +101,12 @@ compilerSetTypeAnnotationParameters params = modify (overCompilerTypeAnnotationP
 {-# INLINE compilerReportSolverRuleViolations #-}
 compilerReportSolverRuleViolations :: [InferenceRule Kind a] -> Compiler a ()
 compilerReportSolverRuleViolations errors = modify (overCompilerSolverRuleViolations (<> errors))
+
+getConstraintsGenerationErrorsC :: Compiler a [ConstraintsGenerationError a]
+getConstraintsGenerationErrorsC = gets compilerConstraintsGenerationErrors
+
+getSolverRuleViolationsC :: Compiler a [InferenceRule Kind a]
+getSolverRuleViolationsC = gets compilerSolverRuleViolations
 
 {-# INLINE runCompiler #-}
 runCompiler :: CompilerEnvironment -> Compiler a c -> (c, CompilerState a)
