@@ -8,6 +8,7 @@ import qualified Noll.Language.IndexedSpec
 
 import qualified Noll.TypeSystem.Constraint.GenerationSpec
 import qualified Noll.TypeSystem.UnificationSpec
+import qualified Noll.TypeSystemExamples.Test1
 import qualified Noll.TypeSystemSpec
 import Test.Hspec (hspec, it)
 
@@ -18,6 +19,7 @@ main =
     Noll.TypeSystem.Constraint.GenerationSpec.spec
     Noll.TypeSystemSpec.spec
     Noll.TypeSystem.UnificationSpec.spec
+    Noll.TypeSystemExamples.Test1.spec
 
 --    Noll.TypeSystem.TypeConstraint.CollectSpec.spec
 --    Noll.TypeSystem.TypeSubstitutionSpec.spec

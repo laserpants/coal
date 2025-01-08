@@ -57,51 +57,6 @@ import qualified Data.Set as Set
 import qualified Noll.Lib.Environment as Environment
 import qualified Noll.TypeSystemFixtures.Expression
 
-dev1 =
-  testResultExpression $
-    testRunnerEnv
-      (CompilerEnvironment env1 env2)
-      [
-        ( "compare"
-        , Forall
-            (Set.fromList [TypeIndex KType 0])
-            []
-            ( TVariable (TypeIndex KType 0)
-                `TArrow` TVariable (TypeIndex KType 0)
-                `TArrow` TConstructor KType "Ordering"
-            )
-        )
-      ]
-      Noll.TypeSystemFixtures.Expression.expression1
- where
-  env1 =
-    Environment.fromList
-      [
-        ( "EqualTo"
-        , Constructor
-            "EqualTo"
-            0
-            (Forall mempty [] (TConstructor KType "Ordering"))
-        )
-      ,
-        ( "GreaterThan"
-        , Constructor
-            "GreaterThan"
-            0
-            (Forall mempty [] (TConstructor KType "Ordering"))
-        )
-      ,
-        ( "LessThan"
-        , Constructor
-            "LessThan"
-            0
-            (Forall mempty [] (TConstructor KType "Ordering"))
-        )
-      ]
-  env2 =
-    Environment.fromList
-      []
-
 spec :: Spec
 spec =
   describe "Noll.TypeSystem" $ do

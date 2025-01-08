@@ -43,13 +43,13 @@ data TestResult a = TestResult
   , testResultErrors2 :: [InferenceRule Kind a]
   }
 
-testRunnerEnv ::
+runTypedExpressionTest ::
   (Eq a) =>
   CompilerEnvironment ->
   [(Name, Scheme TypeIndex Kind IndexedType)] ->
   Expression a () ->
   TestResult a
-testRunnerEnv env names e =
+runTypedExpressionTest env names e =
   evalCompiler env $ do
     insertNamesC names
     (e2, as) <- typedExpressionC (indexed e)
@@ -58,29 +58,7 @@ testRunnerEnv env names e =
     pure (TestResult e2 as errs0 errs1)
 
 testRunner :: (Eq a) => [(Name, Scheme TypeIndex Kind IndexedType)] -> Expression a () -> TestResult a
-testRunner = testRunnerEnv (CompilerEnvironment testDataConstructorEnv testTypeConstructorEnv)
-
--- testRunner ::
---  (Eq a) =>
---  Expression a () ->
---  ( Expression a (Type TypeIndex Kind)
---  , [Assumption IndexedType]
---  , [ConstraintsGenerationError a]
---  , [InferenceRule Kind a]
---  )
--- testRunner e =
---  evalCompiler (CompilerEnvironment testDataConstructorEnv testTypeConstructorEnv) $ do
---    let e1 = indexed e
---    (as, cs) <- generateConstraintsC e1
---    sub <- solveConstraintsC cs
---    errs0 <- getConstraintsGenerationErrorsC
---    errs1 <- getSolverRuleViolationsC
---    pure
---      ( normalizeTypeIndexes (apply sub e1)
---      , apply sub as
---      , errs0
---      , errs1
---      )
+testRunner = runTypedExpressionTest (CompilerEnvironment testDataConstructorEnv testTypeConstructorEnv)
 
 testDataConstructorEnv :: Environment (Constructor TypeIndex Kind (Type TypeIndex Kind))
 testDataConstructorEnv =
