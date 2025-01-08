@@ -119,6 +119,17 @@ runTest =
       [ ("Ordering", KType)
       ]
 
+-- 
+-- let 
+--   lte = 
+--     fn(x) => 
+--        fn(y) => 
+--          match(compare(x, y)) { 
+--            | LessThan or EqualTo => true 
+--            | GreaterThan => false 
+--   in 
+--     lte
+--
 fixture :: Expression () ()
 fixture =
   ( ELet
