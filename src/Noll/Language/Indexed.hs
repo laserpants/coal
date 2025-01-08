@@ -153,6 +153,10 @@ instance (Ord k) => TypeIndexed k (Expression a (Type TypeIndex k)) where
         mempty
       EMatch _ t e cs ->
         typeIndexesIn t <> typeIndexesIn e <> typeIndexesIn cs
+      EUnaryOperator _ (t, _) ->
+        typeIndexesIn t
+      EBinaryOperator _ (t, _) ->
+        typeIndexesIn t
 
 notBoundIn :: Set (TypeIndex k) -> Set (TypeIndex k) -> Set (TypeIndex k)
 notBoundIn s = Set.filter notBound

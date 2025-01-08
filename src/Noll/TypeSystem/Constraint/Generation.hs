@@ -16,6 +16,7 @@ import Data.Tuple.Extra (second, third3)
 import Debug.Trace
 import Noll.Label (Label (..))
 import Noll.Language (
+  BinaryOperator (..),
   Binding (..),
   Choice (..),
   Clause (..),
@@ -26,6 +27,7 @@ import Noll.Language (
   Intrinsic (..),
   Kind (..),
   Pattern (..),
+  Scheme (..),
   Type (..),
   TypeIndex (..),
   TypeIndexed (..),
@@ -54,6 +56,7 @@ import Noll.TypeSystem.Constraint.Generation.TypeAnnotation (
 import Noll.Utils (Name, concatForM, concatMapM, forM, tellLeft, tellRight, (<$$>))
 
 import qualified Noll.Lib.Environment as Environment
+import qualified Data.Set as Set
 
 type ConstraintsGeneration a = ConstraintsGenerationStack a TypeIndex Kind IndexedType
 
@@ -193,3 +196,19 @@ collectConstraints =
       -- Expression types
       tellRight [Equality (InferMatchClauseExpressions loc) (t : concat ts2)]
       pure (ms1 <> ms2)
+    EBinaryOperator loc (t, op) -> do
+      tellRight [Explicit (InferBinaryOperator loc) t (binaryOperatorType op)]
+      pure []
+
+binaryOperatorType :: BinaryOperator -> Scheme TypeIndex Kind IndexedType
+binaryOperatorType =
+  \case
+    OReverseComposition ->
+      Forall
+        (Set.fromList [TypeIndex KType 0, TypeIndex KType 1, TypeIndex KType 2])
+        []
+        ( (TVariable (TypeIndex KType 1) `TArrow` TVariable (TypeIndex KType 2))
+            `TArrow` (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 1))
+            `TArrow` TVariable (TypeIndex KType 0)
+            `TArrow` TVariable (TypeIndex KType 2)
+        )

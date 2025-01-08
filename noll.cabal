@@ -109,6 +109,7 @@ test-suite noll-test
       Noll.TypeSystem.Constraint.GenerationSpec
       Noll.TypeSystem.UnificationSpec
       Noll.TypeSystemExamples.Test1
+      Noll.TypeSystemExamples.Test2
       Noll.TypeSystemFixtures.Expression
       Noll.TypeSystemSpec
       Noll.TypeSystemSpec.TestRunner

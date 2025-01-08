@@ -14,12 +14,16 @@ module Noll.Language (
   module Noll.Language.Expression,
   module Noll.Language.Expression.Choice,
   module Noll.Language.Expression.Binding,
+  module Noll.Language.Expression.Operator.Unary,
+  module Noll.Language.Expression.Operator.Binary,
 ) where
 
 import Noll.Language.Constructor
 import Noll.Language.Expression
 import Noll.Language.Expression.Binding
 import Noll.Language.Expression.Choice
+import Noll.Language.Expression.Operator.Binary
+import Noll.Language.Expression.Operator.Unary
 import Noll.Language.HasType
 import Noll.Language.Indexed
 import Noll.Language.Pattern

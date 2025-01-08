@@ -61,6 +61,8 @@ data InferenceRule k a
     InferMatchClauseExpressions a
   | -- | Match clause patterns have identical types
     InferMatchClausePatterns a
+  | -- | TODO
+    InferBinaryOperator a
   deriving (Show, Eq, Ord, Read)
 
 instance Substitutable (InferenceRule Kind a) where
@@ -86,6 +88,8 @@ instance Substitutable (InferenceRule Kind a) where
         InferMatchClauseExpressions a
       InferMatchClausePatterns a ->
         InferMatchClausePatterns a
+      InferBinaryOperator a ->
+        InferBinaryOperator a
 
 data TypeAnnotationError a
   = -- Kind error

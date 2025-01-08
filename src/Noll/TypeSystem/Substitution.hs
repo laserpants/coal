@@ -161,6 +161,10 @@ instance Substitutable (Expression a IndexedType) where
         EApplication a (apply sub t) (apply sub e1) (apply sub es)
       EMatch a t e cs ->
         EMatch a (apply sub t) (apply sub e) (apply sub cs)
+      EUnaryOperator a (t, op) ->
+        EUnaryOperator a (apply sub t, op)
+      EBinaryOperator a (t, op) ->
+        EBinaryOperator a (apply sub t, op)
       e@ELiteral{} ->
         e
 
