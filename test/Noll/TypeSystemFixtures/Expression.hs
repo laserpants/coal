@@ -7,7 +7,6 @@ import Noll.Label (Label (..))
 import Noll.Language
 
 --
--- data List
 -- let
 --   lte =
 --     fn(x) =>
@@ -18,7 +17,6 @@ import Noll.Language
 --         }
 --   in
 --     lte
---
 --
 expression1 :: Expression () ()
 expression1 =
@@ -63,3 +61,47 @@ expression1 =
         :| []
     )
     (EVariable () (Label () "lte"))
+
+expression2 :: Expression () (Type TypeIndex Kind)
+expression2 =
+  ELet
+    ()
+    ( BPattern
+        ()
+        (PVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool) "lte"))
+        ( ELambda
+            ()
+            (PVariable () (Label (TVariable (TypeIndex KType 0)) "x") :| [])
+            ( ELambda
+                ()
+                (PVariable () (Label (TVariable (TypeIndex KType 0)) "y") :| [])
+                ( EMatch
+                    ()
+                    (TIntrinsic IBool)
+                    ( EApplication
+                        ()
+                        (TConstructor KType "Ordering")
+                        (EVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TConstructor KType "Ordering") "compare"))
+                        (EVariable () (Label (TVariable (TypeIndex KType 0)) "x") <| EVariable () (Label (TVariable (TypeIndex KType 0)) "y") :| [])
+                    )
+                    ( EClause
+                        ()
+                        ( POr
+                            ()
+                            (TConstructor KType "Ordering")
+                            (PConstructor () (Label (TConstructor KType "Ordering") "LessThan") [])
+                            (PConstructor () (Label (TConstructor KType "Ordering") "EqualTo") [])
+                        )
+                        (CPlain () [] (ELiteral () (LBool True)) :| [])
+                        <| EClause
+                          ()
+                          (PConstructor () (Label (TConstructor KType "Ordering") "GreaterThan") [])
+                          (CPlain () [] (ELiteral () (LBool False)) :| [])
+                          :| []
+                    )
+                )
+            )
+        )
+        :| []
+    )
+    (EVariable () (Label (TVariable (TypeIndex KType 1) `TArrow` TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool) "lte"))

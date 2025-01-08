@@ -55,6 +55,52 @@ import Test.Hspec (Spec, describe, hspec, it)
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import qualified Noll.Lib.Environment as Environment
+import qualified Noll.TypeSystemFixtures.Expression
+
+dev1 =
+  testResultExpression $
+    testRunnerEnv
+      (CompilerEnvironment env1 env2)
+      [
+        ( "compare"
+        , Forall
+            (Set.fromList [TypeIndex KType 0])
+            []
+            ( TVariable (TypeIndex KType 0)
+                `TArrow` TVariable (TypeIndex KType 0)
+                `TArrow` TConstructor KType "Ordering"
+            )
+        )
+      ]
+      Noll.TypeSystemFixtures.Expression.expression1
+ where
+  env1 =
+    Environment.fromList
+      [
+        ( "EqualTo"
+        , Constructor
+            "EqualTo"
+            0
+            (Forall mempty [] (TConstructor KType "Ordering"))
+        )
+      ,
+        ( "GreaterThan"
+        , Constructor
+            "GreaterThan"
+            0
+            (Forall mempty [] (TConstructor KType "Ordering"))
+        )
+      ,
+        ( "LessThan"
+        , Constructor
+            "LessThan"
+            0
+            (Forall mempty [] (TConstructor KType "Ordering"))
+        )
+      ]
+  env2 =
+    Environment.fromList
+      []
 
 spec :: Spec
 spec =
@@ -115,34 +161,30 @@ spec =
       assumptions fixture27 == []
 
 typedExpression :: Expression () () -> Expression () (Type TypeIndex Kind)
-typedExpression e = e1
- where
-  (e1, _, _, _) = testRunner e
+typedExpression e = testResultExpression (testRunner mempty e)
 
 typedExpressionShouldMatch :: Expression () (Type TypeIndex Kind) -> Expression () () -> Bool
-typedExpressionShouldMatch e0 e = e1 == e0
- where
-  (e1, _, _, _) = testRunner e
+typedExpressionShouldMatch e0 e = testResultExpression (testRunner mempty e) == e0
 
 assumptions :: Expression () () -> [Assumption IndexedType]
-assumptions e = as
- where
-  (_, as, _, _) = testRunner e
+assumptions e = testResultAssumptions (testRunner mempty e)
 
 hasNoAssumptions :: Expression () () -> Bool
-hasNoAssumptions e = null as
- where
-  (_, as, _, _) = testRunner e
+hasNoAssumptions e = null (testResultAssumptions (testRunner mempty e))
 
 hasNoErrors :: Expression () () -> Bool
-hasNoErrors e = null errs0 && null errs1
+hasNoErrors e = null errs1 && null errs2
  where
-  (_, _, errs0, errs1) = testRunner e
+  errs1 = testResultErrors1 result
+  errs2 = testResultErrors2 result
+  result = testRunner mempty e
 
 numberOfErrors :: Expression () () -> Int
-numberOfErrors e = length errs0 + length errs1
+numberOfErrors e = length errs1 + length errs2
  where
-  (_, _, errs0, errs1) = testRunner e
+  errs1 = testResultErrors1 result
+  errs2 = testResultErrors2 result
+  result = testRunner mempty e
 
 -- fn(m) => let y = m in let x = y(true) in x
 fixture1 :: Expression () ()

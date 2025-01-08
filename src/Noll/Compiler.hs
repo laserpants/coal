@@ -4,12 +4,14 @@
 
 module Noll.Compiler (
   CompilerEnvironment (..),
+  insertNamesC,
   Compiler (..),
   CompilerState (..),
   runCompiler,
   evalCompiler,
   runConstraintsGenerationC,
   generateConstraintsC,
+  typedExpressionC,
   solveConstraintsC,
   getConstraintsGenerationErrorsC,
   getSolverRuleViolationsC,
@@ -24,6 +26,7 @@ import Noll.Language (
   Expression (..),
   IndexedType,
   Kind (..),
+  Scheme (..),
   TypeIndex (..),
   freshIdIn,
  )
@@ -40,12 +43,14 @@ import Noll.TypeSystem (
   Substitution (..),
   checkTypeAnnotationParameters,
   collectConstraints,
+  normalizeTypeIndexes,
   runConstraintsGenerationStack,
   solveConstraints,
  )
-import Noll.Utils (Dictionary, (<$$>))
+import Noll.Utils (Dictionary, Name, (<$$>))
 
 import qualified Data.Map.Strict as Map
+import qualified Noll.Lib.Environment as Environment
 
 data CompilerEnvironment = CompilerEnvironment
   { compilerDataConstructorEnv :: Environment (Constructor TypeIndex Kind IndexedType)
@@ -57,7 +62,7 @@ data CompilerState a = CompilerState
   { compilerConstraintsGenerationErrors :: [ConstraintsGenerationError a]
   , compilerTypeAnnotationParameters :: Dictionary (a, TypeIndex Kind)
   , compilerSolverRuleViolations :: [InferenceRule Kind a]
-  , compilerNames :: Dictionary IndexedType
+  , compilerNames :: Environment (Scheme TypeIndex Kind IndexedType)
   }
   deriving (Show, Eq, Ord, Read)
 
@@ -72,6 +77,10 @@ overCompilerTypeAnnotationParameters fn CompilerState{..} = CompilerState{compil
 {-# INLINE overCompilerSolverRuleViolations #-}
 overCompilerSolverRuleViolations :: ([InferenceRule Kind a] -> [InferenceRule Kind a]) -> CompilerState a -> CompilerState a
 overCompilerSolverRuleViolations fn CompilerState{..} = CompilerState{compilerSolverRuleViolations = fn compilerSolverRuleViolations, ..}
+
+{-# INLINE overCompilerNames #-}
+overCompilerNames :: (Environment (Scheme TypeIndex Kind IndexedType) -> Environment (Scheme TypeIndex Kind IndexedType)) -> CompilerState a -> CompilerState a
+overCompilerNames fn CompilerState{..} = CompilerState{compilerNames = fn compilerNames, ..}
 
 {-# INLINE initialCompilerState #-}
 initialCompilerState :: CompilerState a
@@ -112,6 +121,10 @@ getConstraintsGenerationErrorsC = gets compilerConstraintsGenerationErrors
 getSolverRuleViolationsC :: Compiler a [InferenceRule Kind a]
 getSolverRuleViolationsC = gets compilerSolverRuleViolations
 
+{-# INLINE insertNamesC #-}
+insertNamesC :: [(Name, Scheme TypeIndex Kind IndexedType)] -> Compiler a ()
+insertNamesC names = modify (overCompilerNames (Environment.insertMany names))
+
 {-# INLINE runCompiler #-}
 runCompiler :: CompilerEnvironment -> Compiler a c -> (c, CompilerState a)
 runCompiler env com = runState (runReaderT (compilerStack com) env) initialCompilerState
@@ -135,7 +148,11 @@ runConstraintsGenerationC index stack = do
       , constraintsGenerationIndexTreshold = index
       }
 
-generateConstraintsC :: Expression a IndexedType -> Compiler a ([Assumption IndexedType], [Constraint (InferenceRule Kind a) TypeIndex Kind IndexedType])
+type CompilerAssumption = Assumption IndexedType
+
+type CompilerConstraint a = Constraint (InferenceRule Kind a) TypeIndex Kind IndexedType
+
+generateConstraintsC :: Expression a IndexedType -> Compiler a ([CompilerAssumption], [CompilerConstraint a])
 generateConstraintsC e = do
   (assumptions, params, result) <- runConstraintsGenerationC (freshIdIn e) (collectConstraints e)
   let (errors, constraints) = partitionEithers result
@@ -143,7 +160,16 @@ generateConstraintsC e = do
   compilerSetTypeAnnotationParameters params
   pure (assumptions, constraints)
 
-solveConstraintsC :: (Eq a) => [Constraint (InferenceRule Kind a) TypeIndex Kind IndexedType] -> Compiler a Substitution
+assumptionConstraints :: CompilerAssumption -> Compiler a (Either CompilerAssumption (CompilerConstraint a))
+assumptionConstraints Assumption{..} = do
+  names <- gets compilerNames
+  case Environment.lookup assumptionName names of
+    Nothing ->
+      pure $ Left Assumption{..}
+    Just s ->
+      pure $ Right (Explicit (InferenceRule 200) assumptionType s)
+
+solveConstraintsC :: (Eq a) => [CompilerConstraint a] -> Compiler a Substitution
 solveConstraintsC cs = do
   dict <- gets compilerTypeAnnotationParameters
   let (sub, rs) = solveConstraints cs
@@ -151,3 +177,13 @@ solveConstraintsC cs = do
   compilerReportSolverRuleViolations (apply sub rs)
   compilerReportConstraintsGenerationErrors (IllFormedTypeAnnotation <$> errors)
   pure sub
+
+typedExpressionC ::
+  (Eq a) =>
+  Expression a IndexedType ->
+  Compiler a (Expression a IndexedType, [CompilerAssumption])
+typedExpressionC e = do
+  (as0, cs0) <- generateConstraintsC e
+  (as1, cs1) <- partitionEithers <$> traverse assumptionConstraints as0
+  sub <- solveConstraintsC (cs0 <> cs1)
+  pure (normalizeTypeIndexes (apply sub e), apply sub as1)
