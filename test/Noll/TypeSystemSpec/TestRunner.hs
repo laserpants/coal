@@ -42,6 +42,7 @@ data TestResult a = TestResult
   , testResultErrors1 :: [ConstraintsGenerationError a]
   , testResultErrors2 :: [InferenceRule Kind a]
   }
+  deriving (Show, Eq, Ord)
 
 runTypedExpressionTest ::
   (Eq a) =>

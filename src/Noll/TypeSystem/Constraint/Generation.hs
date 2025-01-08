@@ -55,8 +55,8 @@ import Noll.TypeSystem.Constraint.Generation.TypeAnnotation (
  )
 import Noll.Utils (Name, concatForM, concatMapM, forM, tellLeft, tellRight, (<$$>))
 
-import qualified Noll.Lib.Environment as Environment
 import qualified Data.Set as Set
+import qualified Noll.Lib.Environment as Environment
 
 type ConstraintsGeneration a = ConstraintsGenerationStack a TypeIndex Kind IndexedType
 
