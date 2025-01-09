@@ -66,6 +66,8 @@ instance HasType o k (Pattern a (Type o k)) where
         typeOf t
       POr _ t _ _ ->
         typeOf t
+      PShorthand _ t ->
+        typeOf t
 
 instance HasType o k (Guard Expression a (Type o k)) where
   typeOf =

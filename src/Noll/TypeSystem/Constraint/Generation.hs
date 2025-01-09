@@ -131,8 +131,22 @@ patternConstraints assert ms =
     PShorthand _ (Label t name) -> do
       assert t (filter (assumptionNameIs name) ms)
       pure [name]
-    PRecord _ t d p ->
+    PRecord _ t d p -> do
+      let d0 = pure . typeOf <$> d
+          p0 = extractRow . typeOf <$> p
+          t1 = TIntrinsic (IRecord (TRow (fromDictionary d0 (fromMaybe RNil p0))))
+      tellRight [Equality (InferenceRule 300) [t, t1]]
       concatForM (Map.elems d <> maybeToList p) (patternConstraints assert ms)
+
+extractRow :: Type TypeIndex Kind -> Row TypeIndex Kind (Type TypeIndex Kind)
+extractRow =
+  \case
+    TIntrinsic (IRecord r) ->
+      extractRow r
+    TRow r ->
+      r
+    _ ->
+      error "TODO"
 
 clauseAssumptions :: Clause Expression a IndexedType -> ConstraintsGeneration a (IndexedType, [IndexedType], [Assumption IndexedType])
 clauseAssumptions (EClause loc p cs) = do

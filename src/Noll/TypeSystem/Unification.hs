@@ -21,6 +21,8 @@ import Noll.Language (
   TypeIndex (..),
   kindOf,
   typeIdsIn,
+  extractField,
+  updateTail,
  )
 import Noll.TypeSystem.Substitution (
   Substitutable (..),
@@ -71,8 +73,34 @@ instance Unifiable (Intrinsic IndexedType) where
     throwError CannotUnify
 
 instance Unifiable (Row TypeIndex Kind IndexedType) where
-  unify =
-    error "TODO"
+  unify RNil RNil =
+    pure mempty
+  unify (RVariable v) row2 =
+    bindType v (TRow row2)
+  unify row1 (RVariable v) =
+    bindType v (TRow row1)
+  unify row1@(RExtend name _ _) row2@(RExtend _ _ q1) =
+    case extractField name row1 of
+      Just (t1, r1) ->
+        case extractField name row2 of
+          Just (t2, r2) -> do
+            sub1 <- unify r1 r2
+            sub2 <- unify (apply sub1 t1) (apply sub1 t2)
+            pure (sub2 <> sub1)
+          Nothing -> do
+            r2 <- freshRow
+            sub1 <- unify q1 (RExtend name t1 r2)
+            sub2 <- unify (apply sub1 r1) (apply sub1 (updateTail r2 row2))
+            pure (sub2 <> sub1)
+      Nothing ->
+        error "Implementation error"
+  unify _ _ =
+    throwError CannotUnify
+
+freshRow :: (Monad m) => m (Row TypeIndex Kind IndexedType)
+freshRow = do
+  --ti <- TypeIndex <$> fresh <*> fresh
+  pure (RVariable (TypeIndex KRow 0))
 
 instance Unifiable IndexedType where
   unify (TAlias _ _ t1) t2 =

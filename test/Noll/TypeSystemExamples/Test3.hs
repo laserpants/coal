@@ -43,9 +43,9 @@ spec =
                       ( Label
                           ( TIntrinsic
                               ( IRecord
-                                  (TRow (RExtend "max" (TVariable (TypeIndex KType 0)) (RExtend "min" (TVariable (TypeIndex KType 0)) RNil)))
+                                  (TRow (RExtend "max" (TVariable (TypeIndex KType 3)) (RExtend "min" (TVariable (TypeIndex KType 3)) RNil)))
                               )
-                              `TArrow` TVariable (TypeIndex KType 0)
+                              `TArrow` TVariable (TypeIndex KType 3)
                               `TArrow` TIntrinsic IBool
                           )
                           "in_range"
@@ -60,7 +60,7 @@ spec =
                               [TVariable (TypeParam () "a")]
                               ( TIntrinsic
                                   ( IRecord
-                                      (TRow (RExtend "min" (TVariable (TypeParam () "a")) (RExtend "max" (TVariable (TypeParam () "a")) RNil)))
+                                      (TRow (RExtend "max" (TVariable (TypeParam () "a")) (RExtend "min" (TVariable (TypeParam () "a")) RNil)))
                                   )
                               )
                           )
@@ -68,23 +68,23 @@ spec =
                               ()
                               ( TIntrinsic
                                   ( IRecord
-                                      (TRow (RExtend "max" (TVariable (TypeIndex KType 0)) (RExtend "min" (TVariable (TypeIndex KType 0)) RNil)))
+                                      (TRow (RExtend "max" (TVariable (TypeIndex KType 3)) (RExtend "min" (TVariable (TypeIndex KType 3)) RNil)))
                                   )
                               )
                               ( Map.fromList
                                   [
                                     ( "max"
-                                    , PShorthand () (Label (TVariable (TypeIndex KType 0)) "max")
+                                    , PShorthand () (Label (TVariable (TypeIndex KType 3)) "max")
                                     )
                                   ,
                                     ( "min"
-                                    , PShorthand () (Label (TVariable (TypeIndex KType 0)) "max")
+                                    , PShorthand () (Label (TVariable (TypeIndex KType 3)) "max")
                                     )
                                   ]
                               )
                               Nothing
                           )
-                          <| PAnnotation () (TVariable (TypeParam () "a")) (PVariable () (Label (TVariable (TypeIndex KType 0)) "n"))
+                          <| PAnnotation () (TVariable (TypeParam () "a")) (PVariable () (Label (TVariable (TypeIndex KType 3)) "n"))
                             :| []
                       )
                       ( EApplication
@@ -104,14 +104,14 @@ spec =
                               ( EVariable
                                   ()
                                   ( Label
-                                      ( TVariable (TypeIndex KType 0)
-                                          `TArrow` TVariable (TypeIndex KType 0)
+                                      ( TVariable (TypeIndex KType 3)
+                                          `TArrow` TVariable (TypeIndex KType 3)
                                           `TArrow` TIntrinsic IBool
                                       )
                                       "gt"
                                   )
                               )
-                              (EVariable () (Label (TVariable (TypeIndex KType 0)) "n") <| EVariable () (Label (TVariable (TypeIndex KType 0)) "min") :| [])
+                              (EVariable () (Label (TVariable (TypeIndex KType 3)) "n") <| EVariable () (Label (TVariable (TypeIndex KType 3)) "min") :| [])
                               <| EApplication
                                 ()
                                 (TIntrinsic IBool)
@@ -129,28 +129,28 @@ spec =
                                     ( EVariable
                                         ()
                                         ( Label
-                                            ( TVariable (TypeIndex KType 0)
-                                                `TArrow` TVariable (TypeIndex KType 0)
+                                            ( TVariable (TypeIndex KType 3)
+                                                `TArrow` TVariable (TypeIndex KType 3)
                                                 `TArrow` TIntrinsic IBool
                                             )
                                             "gt"
                                         )
                                     )
-                                    (EVariable () (Label (TVariable (TypeIndex KType 0)) "min") <| EVariable () (Label (TVariable (TypeIndex KType 0)) "max") :| [])
+                                    (EVariable () (Label (TVariable (TypeIndex KType 3)) "min") <| EVariable () (Label (TVariable (TypeIndex KType 3)) "max") :| [])
                                     <| EApplication
                                       ()
                                       (TIntrinsic IBool)
                                       ( EVariable
                                           ()
                                           ( Label
-                                              ( TVariable (TypeIndex KType 0)
-                                                  `TArrow` TVariable (TypeIndex KType 0)
+                                              ( TVariable (TypeIndex KType 3)
+                                                  `TArrow` TVariable (TypeIndex KType 3)
                                                   `TArrow` TIntrinsic IBool
                                               )
                                               "lte"
                                           )
                                       )
-                                      (EVariable () (Label (TVariable (TypeIndex KType 0)) "n") <| EVariable () (Label (TVariable (TypeIndex KType 0)) "max") :| [])
+                                      (EVariable () (Label (TVariable (TypeIndex KType 3)) "n") <| EVariable () (Label (TVariable (TypeIndex KType 3)) "max") :| [])
                                       :| []
                                 )
                                 :| []
@@ -209,7 +209,7 @@ fixture =
                       [TVariable (TypeParam () "a")]
                       ( TIntrinsic
                           ( IRecord
-                              (TRow (RExtend "min" (TVariable (TypeParam () "a")) (RExtend "max" (TVariable (TypeParam () "a")) RNil)))
+                              (TRow (RExtend "max" (TVariable (TypeParam () "a")) (RExtend "min" (TVariable (TypeParam () "a")) RNil)))
                           )
                       )
                   )
