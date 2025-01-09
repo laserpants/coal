@@ -9,6 +9,7 @@ import Noll.Language (
   Kind (..),
   Type (..),
   TypeIndex (..),
+  freshIdIn,
  )
 import Noll.TypeSystem.Substitution
 import Noll.TypeSystem.Unification
@@ -19,26 +20,26 @@ spec =
   describe "Noll.TypeSystem.Unification" $ do
     describe "unify" $ do
       it "'0 ~ '0" $ do
-        validateUnifyResult fixture1 fixture1 == Right mempty
+        testUnifyTypes fixture1 fixture1 == Right mempty
       it "'0 ~ int32" $ do
-        validateUnifyResult fixture1 (TIntrinsic IInt32) == Right (0 `mapsTo` TIntrinsic IInt32)
+        testUnifyTypes fixture1 (TIntrinsic IInt32) == Right (0 `mapsTo` TIntrinsic IInt32)
       it "int32 ~ '0" $ do
-        validateUnifyResult (TIntrinsic IInt32) fixture1 == Right (0 `mapsTo` TIntrinsic IInt32)
+        testUnifyTypes (TIntrinsic IInt32) fixture1 == Right (0 `mapsTo` TIntrinsic IInt32)
       it "int32 ~ int32" $ do
-        validateUnifyResult (TIntrinsic IInt32 :: Type TypeIndex Kind) (TIntrinsic IInt32) == Right mempty
+        testUnifyTypes (TIntrinsic IInt32 :: Type TypeIndex Kind) (TIntrinsic IInt32) == Right mempty
       it "'0 ~ '1" $ do
-        validateUnifyResult fixture1 fixture2 == Right (0 `mapsTo` fixture2)
+        testUnifyTypes fixture1 fixture2 == Right (0 `mapsTo` fixture2)
       it "C('0) ~ C(int32)" $ do
-        validateUnifyResult fixture3 fixture4 == Right (0 `mapsTo` TIntrinsic IInt32)
+        testUnifyTypes fixture3 fixture4 == Right (0 `mapsTo` TIntrinsic IInt32)
       it "int32 ~ bool" $ do
-        validateUnifyResult (TIntrinsic IInt32 :: Type TypeIndex Kind) (TIntrinsic IBool) == Left CannotUnify
+        testUnifyTypes (TIntrinsic IInt32 :: Type TypeIndex Kind) (TIntrinsic IBool) == Left CannotUnify
     describe "unifyAll" $ do
       it "'0 ~ int32 ~ bool" $ do
-        validateUnifyAllResult
+        testUnifyAllTypes
           [TVariable (TypeIndex KType 0), TIntrinsic IInt32, TIntrinsic IBool :: Type TypeIndex Kind]
           == Left CannotUnify
       it "'0 ~ bool ~ bool" $ do
-        validateUnifyAllResult
+        testUnifyAllTypes
           [TVariable (TypeIndex KType 0), TIntrinsic IBool, TIntrinsic IBool :: Type TypeIndex Kind]
           == Right (0 `mapsTo` TIntrinsic IBool)
 
@@ -54,8 +55,8 @@ fixture3 = TApplication KType (TConstructor (KArrow KType KType) "C") (TVariable
 fixture4 :: Type TypeIndex Kind
 fixture4 = TApplication KType (TConstructor (KArrow KType KType) "C") (TIntrinsic IInt32 :| [])
 
-validateUnifyResult :: (Unifiable a) => a -> a -> Either UnificationError Substitution
-validateUnifyResult t1 t2 = runExcept (unify t1 t2)
+testUnifyTypes :: Type TypeIndex Kind -> Type TypeIndex Kind -> Either UnificationError Substitution
+testUnifyTypes t1 t2 = runUnifier (freshIdIn [t1, t2]) (unify t1 t2)
 
-validateUnifyAllResult :: (Unifiable a) => [a] -> Either UnificationError Substitution
-validateUnifyAllResult ts = runExcept (unifyAll ts)
+testUnifyAllTypes :: [Type TypeIndex Kind] -> Either UnificationError Substitution
+testUnifyAllTypes ts = runUnifier (freshIdIn ts) (unifyAll ts)

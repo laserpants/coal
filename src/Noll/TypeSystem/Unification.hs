@@ -1,16 +1,19 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
 module Noll.TypeSystem.Unification (
+  Unifier (..),
   Unifiable (unify),
   UnificationError (..),
   unifyAll,
+  runUnifier,
 ) where
 
-import Noll.Lib.Supply (supply)
 import Control.Monad.Except (MonadError, throwError)
+import Control.Monad.State (MonadState, StateT, evalStateT)
 import Data.List.NonEmpty (NonEmpty, (<|))
 import Data.Set (member)
 import Noll.Language (
@@ -20,11 +23,12 @@ import Noll.Language (
   Row (..),
   Type (..),
   TypeIndex (..),
+  extractField,
   kindOf,
   typeIdsIn,
-  extractField,
   updateTail,
  )
+import Noll.Lib.Supply (supply)
 import Noll.TypeSystem.Substitution (
   Substitutable (..),
   Substitution (..),
@@ -34,6 +38,19 @@ import Noll.Utils (foldrM)
 
 import qualified Data.List.NonEmpty as NonEmpty
 
+newtype Unifier a = Unifier {unifierStack :: StateT Int (Either UnificationError) a}
+  deriving
+    ( Functor
+    , Applicative
+    , Monad
+    , MonadState Int
+    , MonadError UnificationError
+    )
+
+{-# INLINE runUnifier #-}
+runUnifier :: Int -> Unifier a -> Either UnificationError a
+runUnifier n u = evalStateT (unifierStack u) n
+
 data UnificationError
   = CannotUnify
   | InfiniteType
@@ -41,7 +58,7 @@ data UnificationError
   deriving (Show, Eq, Ord, Read)
 
 class Unifiable u where
-  unify :: (MonadError UnificationError m) => u -> u -> m Substitution
+  unify :: (MonadState Int m, MonadError UnificationError m) => u -> u -> m Substitution
 
 instance (Substitutable u, Unifiable u) => Unifiable [u] where
   unify [] [] =
@@ -89,7 +106,7 @@ instance Unifiable (Row TypeIndex Kind IndexedType) where
             sub2 <- unify (apply sub1 t1) (apply sub1 t2)
             pure (sub2 <> sub1)
           Nothing -> do
-            r2 <- freshRow
+            r2 <- RVariable . TypeIndex KRow <$> supply
             sub1 <- unify q1 (RExtend name t1 r2)
             sub2 <- unify (apply sub1 r1) (apply sub1 (updateTail r2 row2))
             pure (sub2 <> sub1)
@@ -97,12 +114,6 @@ instance Unifiable (Row TypeIndex Kind IndexedType) where
         error "Implementation error"
   unify _ _ =
     throwError CannotUnify
-
-freshRow :: (Monad m) => m (Row TypeIndex Kind IndexedType)
-freshRow = do
---  s <- supply
-  --ti <- TypeIndex <$> fresh <*> fresh
-  pure (RVariable (TypeIndex KRow 0))
 
 instance Unifiable IndexedType where
   unify (TAlias _ _ t1) t2 =
@@ -143,7 +154,7 @@ bindType (TypeIndex k index) =
       | otherwise ->
           pure (index `mapsTo` t)
 
-unifyAll :: (MonadError UnificationError m, Unifiable u) => [u] -> m Substitution
+unifyAll :: (MonadState Int m, MonadError UnificationError m, Unifiable u) => [u] -> m Substitution
 unifyAll [] = pure mempty
 unifyAll (t : ts) = do
   sub1 <- foldrM go mempty ts

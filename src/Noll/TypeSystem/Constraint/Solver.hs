@@ -101,5 +101,5 @@ instantiate (Forall qs _ t) = do
   pure (apply sub t)
  where
   go (TypeIndex k index) sub = do
-      s <- supply
-      pure (index `mapsTo` TVariable (TypeIndex k s) <> sub)
+    s <- supply
+    pure (index `mapsTo` TVariable (TypeIndex k s) <> sub)

@@ -10,9 +10,9 @@ module Noll.TypeSystem.Constraint.Generation (
   runConstraintsGenerationStack,
 ) where
 
-import Data.Maybe (maybeToList)
 import Control.Monad.Reader (asks)
 import Data.List (partition)
+import Data.Maybe (maybeToList)
 import Data.Tuple.Extra (second, third3)
 import Debug.Trace
 import Noll.Label (Label (..))
@@ -57,6 +57,7 @@ import Noll.TypeSystem.Constraint.Generation.TypeAnnotation (
   instantiateAnnotation,
  )
 import Noll.Utils (
+  Map,
   Name,
   concatForM,
   concatMapM,
@@ -65,7 +66,6 @@ import Noll.Utils (
   tellLeft,
   tellRight,
   (<$$>),
-  Map,
  )
 
 import qualified Data.Map.Strict as Map
@@ -132,9 +132,9 @@ patternConstraints assert ms =
       assert t (filter (assumptionNameIs name) ms)
       pure [name]
     PRecord _ t d p -> do
-      let d0 = pure . typeOf <$> d
-          p0 = extractRow . typeOf <$> p
-          t1 = TIntrinsic (IRecord (TRow (fromDictionary d0 (fromMaybe RNil p0))))
+      let d1 = pure . typeOf <$> d
+          p1 = extractRow . typeOf <$> p
+          t1 = TIntrinsic (IRecord (TRow (fromDictionary d1 (fromMaybe RNil p1))))
       tellRight [Equality (InferenceRule 300) [t, t1]]
       concatForM (Map.elems d <> maybeToList p) (patternConstraints assert ms)
 
