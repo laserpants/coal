@@ -9,6 +9,7 @@ module Noll.TypeSystem.Unification (
   unifyAll,
 ) where
 
+import Noll.Lib.Supply (supply)
 import Control.Monad.Except (MonadError, throwError)
 import Data.List.NonEmpty (NonEmpty, (<|))
 import Data.Set (member)
@@ -99,6 +100,7 @@ instance Unifiable (Row TypeIndex Kind IndexedType) where
 
 freshRow :: (Monad m) => m (Row TypeIndex Kind IndexedType)
 freshRow = do
+--  s <- supply
   --ti <- TypeIndex <$> fresh <*> fresh
   pure (RVariable (TypeIndex KRow 0))
 

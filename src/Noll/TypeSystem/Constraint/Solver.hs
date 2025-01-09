@@ -34,12 +34,12 @@ import Noll.Utils (foldrM)
 
 import qualified Data.Set as Set
 
-newtype Solver c o k t = Solver {solverMonad :: RWS () [c] (o k) t}
+newtype Solver c t = Solver {solverMonad :: RWS () [c] Int t}
   deriving
     ( Functor
     , Applicative
     , Monad
-    , MonadState (o k)
+    , MonadState Int
     , MonadWriter [c]
     )
 
@@ -48,10 +48,10 @@ solveConstraints :: (Eq c) => [Constraint c TypeIndex Kind IndexedType] -> (Subs
 solveConstraints cs = runSolver (freshIdIn cs) (solve cs)
 
 {-# INLINE runSolver #-}
-runSolver :: Int -> Solver c TypeIndex Kind t -> (t, [c])
+runSolver :: Int -> Solver c t -> (t, [c])
 runSolver n u = (a, o)
  where
-  (a, _, o) = runRWS (solverMonad u) () (TypeIndex KType n)
+  (a, _, o) = runRWS (solverMonad u) () n
 
 isSolvable :: (Ord k, TypeIndexed k t) => [Constraint c TypeIndex k t] -> Constraint c TypeIndex k t -> Bool
 isSolvable constraints =
@@ -70,7 +70,7 @@ choice cs = findChoice [(delete c cs, c) | c <- cs]
   findChoice ps =
     maybe ChoiceNotFound (uncurry Choice) (find (uncurry isSolvable) ps)
 
-solve :: (Eq c) => [Constraint c TypeIndex Kind IndexedType] -> Solver c TypeIndex Kind Substitution
+solve :: (Eq c) => [Constraint c TypeIndex Kind IndexedType] -> Solver c Substitution
 solve [] = pure (Substitution mempty)
 solve constraints =
   case choice constraints of
@@ -95,11 +95,11 @@ solve constraints =
 generalize :: (TypeIndexed k t) => MonomorphicSet (TypeIndex k) -> t -> Scheme TypeIndex k t
 generalize (MonomorphicSet m) t = Forall (notBoundIn m (typeIndexesIn t)) [] t
 
-instantiate :: Scheme TypeIndex Kind IndexedType -> Solver c TypeIndex Kind IndexedType
+instantiate :: Scheme TypeIndex Kind IndexedType -> Solver c IndexedType
 instantiate (Forall qs _ t) = do
   sub <- foldrM go mempty qs
   pure (apply sub t)
  where
-  go (TypeIndex _ index) sub = do
-    s <- supply
-    pure (index `mapsTo` TVariable s <> sub)
+  go (TypeIndex k index) sub = do
+      s <- supply
+      pure (index `mapsTo` TVariable (TypeIndex k s) <> sub)
