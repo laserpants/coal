@@ -114,6 +114,11 @@ patternConstraints assert ms =
       ps1 <- patternConstraints assert ms p1
       ps2 <- patternConstraints assert ms p2
       pure (ps1 <> ps2)
+    PShorthand _ (Label t name) -> do
+      assert t (filter (assumptionNameIs name) ms)
+      pure [name]
+    PRecord _ t d row ->
+      undefined
 
 clauseAssumptions :: Clause Expression a IndexedType -> ConstraintsGeneration a (IndexedType, [IndexedType], [Assumption IndexedType])
 clauseAssumptions (EClause loc p cs) = do

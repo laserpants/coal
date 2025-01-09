@@ -31,8 +31,7 @@ spec =
   describe "let gt = fn(x) => not <<< lte(x) in gt" $
     it "" $ do
       runTest fixture
-        == 
-          ( ELet
+        == ( ELet
               ()
               ( BPattern
                   ()
@@ -45,7 +44,8 @@ spec =
                           (TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
                           (EBinaryOperator () ((TIntrinsic IBool `TArrow` TIntrinsic IBool) `TArrow` (TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool, OReverseComposition))
                           ( EVariable () (Label (TIntrinsic IBool `TArrow` TIntrinsic IBool) "not")
-                              <| EApplication ()
+                              <| EApplication
+                                ()
                                 (TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
                                 (EVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool) "lte"))
                                 (EVariable () (Label (TVariable (TypeIndex KType 0)) "x") :| [])
@@ -56,7 +56,7 @@ spec =
                   :| []
               )
               (EVariable () (Label (TVariable (TypeIndex KType 1) `TArrow` TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool) "gt"))
-          )
+           )
 
 runTest :: (Eq a) => Expression a () -> Expression a (Type TypeIndex Kind)
 runTest =
@@ -68,7 +68,7 @@ runTest =
         , Forall
             mempty
             []
-            ( TIntrinsic IBool `TArrow` TIntrinsic IBool )
+            (TIntrinsic IBool `TArrow` TIntrinsic IBool)
         )
       ,
         ( "lte"
@@ -84,8 +84,7 @@ runTest =
  where
   env1 =
     Environment.fromList
-      [
-      ]
+      []
   env2 =
     Environment.fromList
       [ ("Ordering", KType)

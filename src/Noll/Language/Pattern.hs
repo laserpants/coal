@@ -27,4 +27,6 @@ data Pattern a t
     PListLiteral a t [Pattern a t]
   | -- | Or-pattern
     POr a t (Pattern a t) (Pattern a t)
+  | -- | TODO
+    PShorthand a (Label t)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
