@@ -86,7 +86,17 @@ instance (Substitutable s) => Substitutable (Intrinsic s) where
 
 instance Substitutable (Row TypeIndex Kind IndexedType) where
   apply sub =
-    error "TODO"
+    \case
+      RExtend name t row ->
+        RExtend name (apply sub t) (apply sub row)
+      RVariable r ->
+        case substitutionIndex r sub of
+          Just (TRow row) ->
+            row
+          _ ->
+            RVariable r
+      RNil ->
+        RNil
 
 instance Substitutable IndexedType where
   apply sub =
@@ -117,6 +127,10 @@ instance Substitutable (Pattern a IndexedType) where
         PConstructor a (Label (apply sub t) name) (apply sub ps)
       POr a t p1 p2 ->
         POr a (apply sub t) (apply sub p1) (apply sub p2)
+      PRecord a t d p ->
+        PRecord a (apply sub t) (apply sub d) (apply sub p)
+      PShorthand a (Label t name) ->
+        PShorthand a (Label (apply sub t) name)
 
 instance Substitutable (Binding Expression a IndexedType) where
   apply sub =

@@ -101,6 +101,10 @@ instance (Ord k, TypeIndexed k t) => TypeIndexed k (Pattern a t) where
         typeIndexesIn t <> typeIndexesIn ps
       POr _ t p1 p2 ->
         typeIndexesIn t <> typeIndexesIn p1 <> typeIndexesIn p2
+      PRecord _ t d p ->
+        typeIndexesIn t <> typeIndexesIn d <> typeIndexesIn p
+      PShorthand _ (Label t _) ->
+        typeIndexesIn t
 
 instance (Ord k, TypeIndexed k t) => TypeIndexed k (Scheme TypeIndex k t) where
   typeIndexesIn =

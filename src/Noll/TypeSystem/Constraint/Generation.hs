@@ -10,6 +10,7 @@ module Noll.TypeSystem.Constraint.Generation (
   runConstraintsGenerationStack,
 ) where
 
+import Data.Maybe (maybeToList)
 import Control.Monad.Reader (asks)
 import Data.List (partition)
 import Data.Tuple.Extra (second, third3)
@@ -27,11 +28,13 @@ import Noll.Language (
   Intrinsic (..),
   Kind (..),
   Pattern (..),
+  Row (..),
   Scheme (..),
   Type (..),
   TypeIndex (..),
   TypeIndexed (..),
   foldType,
+  fromDictionary,
   typeOf,
  )
 import Noll.Lib.List1 (fromList1)
@@ -53,8 +56,19 @@ import Noll.TypeSystem.Constraint.Generation.Internal (
 import Noll.TypeSystem.Constraint.Generation.TypeAnnotation (
   instantiateAnnotation,
  )
-import Noll.Utils (Name, concatForM, concatMapM, forM, tellLeft, tellRight, (<$$>))
+import Noll.Utils (
+  Name,
+  concatForM,
+  concatMapM,
+  forM,
+  fromMaybe,
+  tellLeft,
+  tellRight,
+  (<$$>),
+  Map,
+ )
 
+import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import qualified Noll.Lib.Environment as Environment
 
@@ -117,8 +131,8 @@ patternConstraints assert ms =
     PShorthand _ (Label t name) -> do
       assert t (filter (assumptionNameIs name) ms)
       pure [name]
-    PRecord _ t d row ->
-      undefined
+    PRecord _ t d p ->
+      concatForM (Map.elems d <> maybeToList p) (patternConstraints assert ms)
 
 clauseAssumptions :: Clause Expression a IndexedType -> ConstraintsGeneration a (IndexedType, [IndexedType], [Assumption IndexedType])
 clauseAssumptions (EClause loc p cs) = do
@@ -217,3 +231,13 @@ binaryOperatorType =
             `TArrow` TVariable (TypeIndex KType 0)
             `TArrow` TVariable (TypeIndex KType 2)
         )
+    OLogicalOr ->
+      Forall
+        mempty
+        []
+        (TIntrinsic IBool `TArrow` TIntrinsic IBool `TArrow` TIntrinsic IBool)
+    OLogicalAnd ->
+      Forall
+        mempty
+        []
+        (TIntrinsic IBool `TArrow` TIntrinsic IBool `TArrow` TIntrinsic IBool)
