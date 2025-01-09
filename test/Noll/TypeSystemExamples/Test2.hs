@@ -30,7 +30,7 @@ spec :: Spec
 spec =
   describe "let gt = fn(x) => not <<< lte(x) in gt" $
     it "" $ do
-      runTest fixture
+      testResultExpression (runTest fixture)
         == ( ELet
               ()
               ( BPattern
@@ -58,29 +58,28 @@ spec =
               (EVariable () (Label (TVariable (TypeIndex KType 1) `TArrow` TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool) "gt"))
            )
 
-runTest :: (Eq a) => Expression a () -> Expression a (Type TypeIndex Kind)
+runTest :: (Eq a) => Expression a () -> TestResult a
 runTest =
-  testResultExpression
-    . runTypedExpressionTest
-      (CompilerEnvironment env1 env2)
-      [
-        ( "not"
-        , Forall
-            mempty
-            []
-            (TIntrinsic IBool `TArrow` TIntrinsic IBool)
-        )
-      ,
-        ( "lte"
-        , Forall
-            (Set.fromList [TypeIndex KType 0])
-            []
-            ( TVariable (TypeIndex KType 0)
-                `TArrow` TVariable (TypeIndex KType 0)
-                `TArrow` TIntrinsic IBool
-            )
-        )
-      ]
+  runTypedExpressionTest
+    (CompilerEnvironment env1 env2)
+    [
+      ( "not"
+      , Forall
+          mempty
+          []
+          (TIntrinsic IBool `TArrow` TIntrinsic IBool)
+      )
+    ,
+      ( "lte"
+      , Forall
+          (Set.fromList [TypeIndex KType 0])
+          []
+          ( TVariable (TypeIndex KType 0)
+              `TArrow` TVariable (TypeIndex KType 0)
+              `TArrow` TIntrinsic IBool
+          )
+      )
+    ]
  where
   env1 =
     Environment.fromList

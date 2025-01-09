@@ -33,7 +33,7 @@ spec :: Spec
 spec =
   describe "let in_range = fn({ max, min } : Range(a), n : a) => gt(n, min) && (gt(min, max) || lte(n, max)) in in_range" $
     it "" $ do
-      runTest fixture
+      testResultExpression (runTest fixture)
         == ( ELet
               ()
               ( BPattern
@@ -174,32 +174,31 @@ spec =
               )
            )
 
-runTest :: (Eq a) => Expression a () -> Expression a (Type TypeIndex Kind)
+runTest :: (Eq a) => Expression a () -> TestResult a
 runTest =
-  testResultExpression
-    . runTypedExpressionTest
-      (CompilerEnvironment env1 env2)
-      [
-        ( "lte"
-        , Forall
-            (Set.fromList [TypeIndex KType 0])
-            []
-            ( TVariable (TypeIndex KType 0)
-                `TArrow` TVariable (TypeIndex KType 0)
-                `TArrow` TIntrinsic IBool
-            )
-        )
-      ,
-        ( "gt"
-        , Forall
-            (Set.fromList [TypeIndex KType 0])
-            []
-            ( TVariable (TypeIndex KType 0)
-                `TArrow` TVariable (TypeIndex KType 0)
-                `TArrow` TIntrinsic IBool
-            )
-        )
-      ]
+  runTypedExpressionTest
+    (CompilerEnvironment env1 env2)
+    [
+      ( "lte"
+      , Forall
+          (Set.fromList [TypeIndex KType 0])
+          []
+          ( TVariable (TypeIndex KType 0)
+              `TArrow` TVariable (TypeIndex KType 0)
+              `TArrow` TIntrinsic IBool
+          )
+      )
+    ,
+      ( "gt"
+      , Forall
+          (Set.fromList [TypeIndex KType 0])
+          []
+          ( TVariable (TypeIndex KType 0)
+              `TArrow` TVariable (TypeIndex KType 0)
+              `TArrow` TIntrinsic IBool
+          )
+      )
+    ]
  where
   env1 =
     Environment.fromList

@@ -29,7 +29,7 @@ spec :: Spec
 spec =
   describe "let lte = fn(x) => fn(y) => match(compare(x, y)) { LessThan or EqualTo => true | GreaterThan => false } in lte" $
     it "" $ do
-      runTest fixture
+      testResultExpression (runTest fixture)
         == ( ELet
               ()
               ( BPattern
@@ -73,22 +73,21 @@ spec =
               (EVariable () (Label (TVariable (TypeIndex KType 1) `TArrow` TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool) "lte"))
            )
 
-runTest :: (Eq a) => Expression a () -> Expression a (Type TypeIndex Kind)
+runTest :: (Eq a) => Expression a () -> TestResult a
 runTest =
-  testResultExpression
-    . runTypedExpressionTest
-      (CompilerEnvironment env1 env2)
-      [
-        ( "compare"
-        , Forall
-            (Set.fromList [TypeIndex KType 0])
-            []
-            ( TVariable (TypeIndex KType 0)
-                `TArrow` TVariable (TypeIndex KType 0)
-                `TArrow` TConstructor KType "Ordering"
-            )
-        )
-      ]
+  runTypedExpressionTest
+    (CompilerEnvironment env1 env2)
+    [
+      ( "compare"
+      , Forall
+          (Set.fromList [TypeIndex KType 0])
+          []
+          ( TVariable (TypeIndex KType 0)
+              `TArrow` TVariable (TypeIndex KType 0)
+              `TArrow` TConstructor KType "Ordering"
+          )
+      )
+    ]
  where
   env1 =
     Environment.fromList
