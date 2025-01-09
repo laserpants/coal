@@ -2,11 +2,16 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Language.Type.Row (Row (..)) where
+module Noll.Language.Type.Row (
+  Row (..),
+  fromDictionary,
+  normalizeRow,
+  extractField,
+  updateTail,
+) where
 
 import Data.Tuple.Extra (second)
-import Noll.Utils (Dictionary, Name)
-import Noll.Utils ((<$$>))
+import Noll.Utils (Dictionary, Name, (<$$>))
 
 import qualified Data.Map.Strict as Map
 
@@ -16,36 +21,36 @@ data Row o k t
   | RNil
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
 
-data RowMap o k t = RowMap (Dictionary [t]) (Row o k t)
+data RowData o k t = RowData (Dictionary [t]) (Row o k t)
   deriving (Show, Eq, Ord, Read)
 
-toRowMap :: Row o k t -> RowMap o k t
-toRowMap = go mempty
+toRowData :: Row o k t -> RowData o k t
+toRowData = go mempty
  where
   go m =
     \case
       RExtend name t r ->
         go (Map.insertWith (<>) name [t] m) r
       r ->
-        RowMap m r
+        RowData m r
 
-{-# INLINE fromRowMap #-}
-fromRowMap :: RowMap o k t -> Row o k t
-fromRowMap (RowMap d row) = Map.foldrWithKey (flip . foldr . RExtend) row d
+{-# INLINE fromRowData #-}
+fromRowData :: RowData o k t -> Row o k t
+fromRowData (RowData d row) = Map.foldrWithKey (flip . foldr . RExtend) row d
 
 {-# INLINE fromDictionary #-}
 fromDictionary :: Dictionary [t] -> Row o k t -> Row o k t
-fromDictionary = fromRowMap <$$> RowMap
+fromDictionary = fromRowData <$$> RowData
 
 {-# INLINE normalizeRow #-}
 normalizeRow :: Row o k t -> Row o k t
-normalizeRow = fromRowMap . toRowMap
+normalizeRow = fromRowData . toRowData
 
 extractField :: Name -> Row o k t -> Maybe (t, Row o k t)
 extractField name row =
-  second (fromRowMap . (`RowMap` r)) <$> extractFieldImpl
+  second (fromRowData . (`RowData` r)) <$> extractFieldImpl
  where
-  RowMap dict r = toRowMap row
+  RowData dict r = toRowData row
   extractFieldImpl =
     case Map.lookup name dict of
       Just (t : ts) ->
