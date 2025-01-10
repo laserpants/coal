@@ -215,127 +215,143 @@ fixture =
                       )
                       :| []
                 )
-                    ( Just
-                        ( ELet ()
-                            ( BPattern ()
-                                (PVariable () (Label () "$fold:1"))
-                                ( ELambda ()
-                                    (PVariable () (Label () "$fold:1:expr") :| [])
-                                    ( EMatch
-                                        () ()
-                                        (EVariable () (Label () "$fold:1:expr") :| [])
-                                        ( EClause
+                ( Just
+                    ( ELet
+                        ()
+                        ( BPattern
+                            ()
+                            (PVariable () (Label () "$fold:1"))
+                            ( ELambda
+                                ()
+                                (PVariable () (Label () "$fold:1:expr") :| [])
+                                ( EMatch
+                                    ()
+                                    ()
+                                    (EVariable () (Label () "$fold:1:expr"))
+                                    ( EClause
+                                        ()
+                                        (PListCons () () (PVariable () (Label () "p")) (PVariable () (Label () "g")))
+                                        ( CPlain
                                             ()
-                                            (PListCons () (PVariable () (Label () "p")) 
-                                                   (PVariable () (Label () "g")) :| [])
-                                            ( CPlain ()
-                                                []
-                                                ( ELambda ()
-                                                    (PVariable () (Label () "range") :| [])
-                                                    ( EIf ()
-                                                        ( EApplication ()
-                                                            ()
-                                                            (EBinaryOperator () ((), OForwardApplication))
-                                                            ( EVariable () (Label () "p")
-                                                                :| [ EApplication ()
-                                                                      ()
-                                                                      (EVariable () (Label () "in_range"))
-                                                                      (EVariable () (Label () "range") :| [])
-                                                                   ]
-                                                            )
-                                                        )
-                                                        ( EApplication ()
-                                                            ()
-                                                            (EConstructor () (Label () "Node"))
-                                                            ( EVariable () (Label () "p")
-                                                                <| EApplication ()
+                                            []
+                                            ( ELambda
+                                                ()
+                                                (PVariable () (Label () "range") :| [])
+                                                ( EIf
+                                                    ()
+                                                    ()
+                                                    ( EApplication
+                                                        ()
+                                                        ()
+                                                        (EBinaryOperator () ((), OForwardApplication))
+                                                        ( EVariable () (Label () "p")
+                                                            :| [ EApplication
                                                                   ()
-                                                                  (EVariable () (Label () "$fold:1"))
-                                                                  ( EVariable () (Label () "g")
-                                                                      <| ERecord ()
-                                                                        ()
-                                                                        ( Map.fromList
-                                                                            [ ("max", EVariable () (Label () "p"))
-                                                                            , ("min", ESelect () "min" (EVariable () (Label () "range")))
-                                                                            ]
-                                                                        )
-                                                                        Nothing
-                                                                        :| []
-                                                                  )
-                                                                <| EApplication ()
                                                                   ()
-                                                                  (EVariable () (Label () "$fold:1"))
-                                                                  ( EVariable () (Label () "g")
-                                                                      <| ERecord 
-                                                                        ()
-                                                                        ()
-                                                                        undefined
-                                                                        --( Map.fromList
-                                                                        --    [ ("max", ESelect () () (Label () "max") (EVariable () (Label () "range")))
-                                                                        --    , ("min", EVariable () (Label () "p"))
-                                                                        --    ]
-                                                                        --)
-                                                                        Nothing
-                                                                        :| []
-                                                                  )
-                                                                  :| []
-                                                            )
+                                                                  (EVariable () (Label () "in_range"))
+                                                                  (EVariable () (Label () "range") :| [])
+                                                               ]
                                                         )
-                                                        undefined
-                                                        --( EApplication
-                                                        --    ()
-                                                        --    ()
-                                                        --    (EVariable () (Label () "$fold:1"))
-                                                        --    (EVariable () (Label () "g") <| EVariable () (Label () "range") :| [])
-                                                        --)
+                                                    )
+                                                    ( EApplication
+                                                        ()
+                                                        ()
+                                                        (EConstructor () (Label () "Node"))
+                                                        ( EVariable () (Label () "p")
+                                                            <| EApplication
+                                                              ()
+                                                              ()
+                                                              (EVariable () (Label () "$fold:1"))
+                                                              ( EVariable () (Label () "g")
+                                                                  <| ERecord
+                                                                    ()
+                                                                    ()
+                                                                    ( Map.fromList
+                                                                        [ ("max", EVariable () (Label () "p"))
+                                                                        , ("min", ESelect () () (Label () "min") (EVariable () (Label () "range")))
+                                                                        ]
+                                                                    )
+                                                                    Nothing
+                                                                    :| []
+                                                              )
+                                                            <| EApplication
+                                                              ()
+                                                              ()
+                                                              (EVariable () (Label () "$fold:1"))
+                                                              ( EVariable () (Label () "g")
+                                                                  <| ERecord
+                                                                    ()
+                                                                    ()
+                                                                    ( Map.fromList
+                                                                        [ ("max", ESelect () () (Label () "max") (EVariable () (Label () "range")))
+                                                                        , ("min", EVariable () (Label () "p"))
+                                                                        ]
+                                                                    )
+                                                                    Nothing
+                                                                    :| []
+                                                              )
+                                                              :| []
+                                                        )
+                                                    )
+                                                    ( EApplication
+                                                        ()
+                                                        ()
+                                                        (EVariable () (Label () "$fold:1"))
+                                                        (EVariable () (Label () "g") <| EVariable () (Label () "range") :| [])
                                                     )
                                                 )
-                                                :| []
                                             )
-                                            <| EClause ()
-                                              (PListLiteral () () [])
-                                              ( CPlain ()
-                                                  []
-                                                  (ELambda () (PAny () () :| []) (EConstructor () (Label () "Leaf")))
-                                                  :| []
-                                              )
-                                              :| []
+                                            :| []
                                         )
-                                        Nothing
+                                        <| EClause
+                                          ()
+                                          (PListLiteral () () [])
+                                          ( CPlain
+                                              ()
+                                              []
+                                              (ELambda () (PAny () () :| []) (EConstructor () (Label () "Leaf")))
+                                              :| []
+                                          )
+                                          :| []
                                     )
                                 )
-                                :| []
                             )
-                            ( EApplication
-                                () ()
-                                (EVariable () (Label () "$fold:1"))
-                                ( EVariable () (Label () "list")
-                                    <| ERecord
-                                      () ()
-                                      ( Map.fromList
-                                          [
-                                            ( "max"
-                                            , EApplication
-                                                () ()
-                                                (EVariable () (Label () "from_int32"))
-                                                (ELiteral () (LInt32 (-1)) :| [])
-                                            )
-                                          ,
-                                            ( "min"
-                                            , EApplication ()
-                                                ()
-                                                (EVariable () (Label () "from_int32"))
-                                                (ELiteral () (LInt32 0) :| [])
-                                            )
-                                          ]
-                                      )
-                                      Nothing
-                                      :| []
-                                )
+                            :| []
+                        )
+                        ( EApplication
+                            ()
+                            ()
+                            (EVariable () (Label () "$fold:1"))
+                            ( EVariable () (Label () "list")
+                                <| ERecord
+                                  ()
+                                  ()
+                                  ( Map.fromList
+                                      [
+                                        ( "max"
+                                        , EApplication
+                                            ()
+                                            ()
+                                            (EVariable () (Label () "from_int32"))
+                                            (ELiteral () (LInt32 (-1)) :| [])
+                                        )
+                                      ,
+                                        ( "min"
+                                        , EApplication
+                                            ()
+                                            ()
+                                            (EVariable () (Label () "from_int32"))
+                                            (ELiteral () (LInt32 0) :| [])
+                                        )
+                                      ]
+                                  )
+                                  Nothing
+                                  :| []
                             )
                         )
                     )
                 )
+            )
         )
         :| []
     )
