@@ -48,4 +48,8 @@ data Expression a t
     EListLiteral a t [Expression a t]
   | -- | Pattern matching expression
     EMatch a t (Expression a t) (List1 (Clause Expression a t))
+  | -- | TODO
+    EFold a t (List1 (Expression a t)) (List1 (Clause Expression a t)) (Maybe (Expression a t))
+  | -- | Record field access selector
+    ESelect a t (Label t) (Expression a t)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)

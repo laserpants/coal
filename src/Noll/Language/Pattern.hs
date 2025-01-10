@@ -29,4 +29,6 @@ data Pattern a t
     POr a t (Pattern a t) (Pattern a t)
   | -- | TODO
     PShorthand a (Label t)
+  | -- | TODO
+    PAtVariable a (Label t)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
