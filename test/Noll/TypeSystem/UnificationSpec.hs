@@ -17,6 +17,9 @@ import Noll.TypeSystem.Substitution
 import Noll.TypeSystem.Unification
 import Test.Hspec (Spec, describe, it)
 
+import qualified Data.Map.Strict as Map
+import qualified Noll.TypeSystem.Substitution as Substitution
+
 spec :: Spec
 spec =
   describe "Noll.TypeSystem.Unification" $ do
@@ -91,6 +94,36 @@ spec =
           fixture7
           fixture9
           == Right (2 `mapsTo` TRow (RExtend "two" (TVariable (TypeIndex KType 1)) RNil))
+      it "{one : int32 | two : '1 | {}} ~ {one : '0 | '2}" $ do
+        testUnifyRows
+          fixture10
+          fixture9
+          == Right
+            ( Substitution.fromList
+                [ (0, TIntrinsic IInt32)
+                , (2, TRow (RExtend "two" (TVariable (TypeIndex KType 1)) RNil))
+                ]
+            )
+      it "{one : int32 | two : '1 | {}} ~ {one : int32 | '2}" $ do
+        testUnifyRows
+          fixture10
+          fixture11
+          == Right
+            ( Substitution.fromList
+                [ (2, TRow (RExtend "two" (TVariable (TypeIndex KType 1)) RNil))
+                ]
+            )
+      it "{two : '1 | one : int32 | {}} ~ {one : int32 | '2}" $ do
+        testUnifyRows fixture12 fixture11
+          `shouldInclude` (2, TRow (RExtend "two" (TVariable (TypeIndex KType 1)) RNil))
+
+shouldInclude :: Either UnificationError Substitution -> (Int, Type TypeIndex Kind) -> Bool
+shouldInclude result sub =
+  case result of
+    Left{} ->
+      False
+    Right subs ->
+      sub `elem` Map.toList (substitutionMap subs)
 
 fixture1 :: Type TypeIndex Kind
 fixture1 = TVariable (TypeIndex KType 0)
@@ -118,6 +151,15 @@ fixture8 = RExtend "two" (TVariable (TypeIndex KType 1)) (RExtend "one" (TVariab
 
 fixture9 :: Row TypeIndex Kind IndexedType
 fixture9 = RExtend "one" (TVariable (TypeIndex KType 0)) (RVariable (TypeIndex KRow 2))
+
+fixture10 :: Row TypeIndex Kind IndexedType
+fixture10 = RExtend "one" (TIntrinsic IInt32) (RExtend "two" (TVariable (TypeIndex KType 1)) RNil)
+
+fixture11 :: Row TypeIndex Kind IndexedType
+fixture11 = RExtend "one" (TIntrinsic IInt32) (RVariable (TypeIndex KRow 2))
+
+fixture12 :: Row TypeIndex Kind IndexedType
+fixture12 = RExtend "two" (TVariable (TypeIndex KType 1)) (RExtend "one" (TIntrinsic IInt32) RNil)
 
 testUnifyTypes :: Type TypeIndex Kind -> Type TypeIndex Kind -> Either UnificationError Substitution
 testUnifyTypes t1 t2 = runUnifier (freshIdIn [t1, t2]) (unify t1 t2)
