@@ -111,13 +111,13 @@ fixture6 :: Row TypeIndex Kind IndexedType
 fixture6 = RExtend "field" (TVariable (TypeIndex KType 0)) RNil
 
 fixture7 :: Row TypeIndex Kind IndexedType
-fixture7 = RExtend "one" (TVariable (TypeIndex KType 0)) (RExtend "two" (TVariable (TypeIndex KType 1)) RNil) 
+fixture7 = RExtend "one" (TVariable (TypeIndex KType 0)) (RExtend "two" (TVariable (TypeIndex KType 1)) RNil)
 
 fixture8 :: Row TypeIndex Kind IndexedType
-fixture8 = RExtend "two" (TVariable (TypeIndex KType 1)) (RExtend "one" (TVariable (TypeIndex KType 0)) RNil) 
+fixture8 = RExtend "two" (TVariable (TypeIndex KType 1)) (RExtend "one" (TVariable (TypeIndex KType 0)) RNil)
 
 fixture9 :: Row TypeIndex Kind IndexedType
-fixture9 = RExtend "one" (TVariable (TypeIndex KType 0)) (RVariable (TypeIndex KRow 2)) 
+fixture9 = RExtend "one" (TVariable (TypeIndex KType 0)) (RVariable (TypeIndex KRow 2))
 
 testUnifyTypes :: Type TypeIndex Kind -> Type TypeIndex Kind -> Either UnificationError Substitution
 testUnifyTypes t1 t2 = runUnifier (freshIdIn [t1, t2]) (unify t1 t2)
