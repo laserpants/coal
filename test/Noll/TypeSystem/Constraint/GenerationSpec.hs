@@ -5,6 +5,7 @@ module Noll.TypeSystem.Constraint.GenerationSpec where
 
 import Data.List (sortOn)
 import Data.List.NonEmpty (NonEmpty (..))
+import Debug.Trace
 import Noll.Label (Label (..))
 import Noll.Language (
   Binding (..),
@@ -25,6 +26,7 @@ import Noll.TypeSystem.Constraint.Generation.Internal
 import Noll.TypeSystem.Constraint.Generation.TypeAnnotation
 import Test.Hspec (Spec, describe, it)
 
+import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 
 spec :: Spec
@@ -95,7 +97,8 @@ typeConstraintsInclude e r =
 
 -- testCollectConstraints
 testCollectConstraints ::
-  Expression a Int ->
+  (Show a) =>
+  Expression a a ->
   ( [Assumption (Type TypeIndex Kind)]
   , [ConstraintsGenerationOutput a TypeIndex Kind (Type TypeIndex Kind)]
   )
@@ -103,10 +106,11 @@ testCollectConstraints e =
   let
     e0 = indexed e
    in
-    evalConstraintsGenerationStack
-      (freshIdIn e0)
-      (ConstraintsGenerationContext mempty mempty mempty)
-      (collectConstraints e0)
+    traceShow e0 $
+      evalConstraintsGenerationStack
+        (freshIdIn e0)
+        (ConstraintsGenerationContext mempty mempty mempty)
+        (collectConstraints e0)
 
 testInstantiateAnnotation :: Type TypeParam () -> Either (TypeAnnotationError ()) (Type TypeIndex Kind)
 testInstantiateAnnotation t = s
@@ -213,3 +217,24 @@ fixture13 = TArrow (TVariable (TypeParam () "a")) (TVariable (TypeParam () "b"))
 -- a -> a
 fixture14 :: Type TypeParam ()
 fixture14 = TArrow (TVariable (TypeParam () "a")) (TVariable (TypeParam () "a"))
+
+-- fn({ foo = 1 }) => foo
+fixture15 :: Expression () ()
+fixture15 =
+  ELambda
+    ()
+    ( PRecord
+        ()
+        ()
+        ( Map.fromList
+            [
+              ( "foo"
+              , PLiteral () (LInt32 1)
+              )
+            ]
+        )
+        Nothing
+        :| []
+    )
+    ( EVariable () (Label () "foo")
+    )

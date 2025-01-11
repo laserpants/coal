@@ -219,15 +219,120 @@ spec =
               )
           )
 
-runTest :: (Eq a) => Expression a () -> TestResult a
+runTest :: (Show a, Eq a) => Expression a () -> TestResult a
 runTest =
   runTypedExpressionTest
     (CompilerEnvironment env1 env2)
-    []
+    [
+      ( "list"
+      , Forall
+          (Set.fromList [TypeIndex KType 0])
+          []
+          ( TIntrinsic (IList tvariable0)
+          )
+      )
+    ,
+      ( "from_int32"
+      , Forall
+          (Set.fromList [TypeIndex KType 0])
+          []
+          ( TIntrinsic IInt32
+              `TArrow` TIntrinsic (IList tvariable0)
+          )
+      )
+    ,
+      ( "in_range"
+      , ( Forall
+            (Set.fromList [TypeIndex KType 0])
+            []
+            ( TIntrinsic
+                ( IRecord
+                    ( TRow
+                        ( RExtend
+                            "max"
+                            (TVariable (TypeIndex KType 0))
+                            ( RExtend "min" (TVariable (TypeIndex KType 0)) RNil
+                            )
+                        )
+                    )
+                )
+                `TArrow` TVariable (TypeIndex KType 0)
+                `TArrow` TIntrinsic IBool
+            )
+        )
+      )
+    ,
+      ( "$fold:1"
+      , Forall
+          (Set.fromList [TypeIndex KType 0])
+          []
+          ( TIntrinsic (IList (TVariable (TypeIndex KType 0)))
+              `TArrow` ( TIntrinsic
+                          ( IRecord
+                              ( TRow
+                                  ( RExtend
+                                      "max"
+                                      (TVariable (TypeIndex KType 0))
+                                      ( RExtend "min" (TVariable (TypeIndex KType 0)) RNil
+                                      )
+                                  )
+                              )
+                          )
+                       )
+              `TArrow` ( TApplication
+                          KType
+                          (TConstructor (KArrow KType KType) "Tree")
+                          (TVariable (TypeIndex KType 0) :| [])
+                       )
+          )
+      )
+    ]
  where
   env1 =
     Environment.fromList
-      []
+      [
+        ( "Leaf"
+        , Constructor
+            "Leaf"
+            0
+            ( Forall
+                (Set.fromList [TypeIndex KType 0])
+                []
+                ( TApplication
+                    KType
+                    (TConstructor (KArrow KType KType) "Tree")
+                    (TVariable (TypeIndex KType 0) :| [])
+                )
+            )
+        )
+      ,
+        ( "Node"
+        , Constructor
+            "Node"
+            3
+            ( Forall
+                (Set.fromList [TypeIndex KType 0])
+                []
+                ( TVariable (TypeIndex KType 0)
+                    `TArrow` ( TApplication
+                                KType
+                                (TConstructor (KArrow KType KType) "Tree")
+                                (TVariable (TypeIndex KType 0) :| [])
+                             )
+                    `TArrow` ( TApplication
+                                KType
+                                (TConstructor (KArrow KType KType) "Tree")
+                                (TVariable (TypeIndex KType 0) :| [])
+                             )
+                    `TArrow` ( TApplication
+                                KType
+                                (TConstructor (KArrow KType KType) "Tree")
+                                (TVariable (TypeIndex KType 0) :| [])
+                             )
+                )
+            )
+        )
+      ]
   env2 =
     Environment.fromList
       [ ("Ordering", KType)

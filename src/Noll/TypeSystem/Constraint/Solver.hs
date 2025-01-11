@@ -14,6 +14,7 @@ import Control.Monad.Except (runExceptT)
 import Control.Monad.RWS (MonadState, MonadWriter, RWS, runRWS, tell)
 import Data.List (delete, find)
 import Data.Set (intersection, (\\))
+import Debug.Trace
 import Noll.Language (
   IndexedType,
   Kind (..),
@@ -44,7 +45,7 @@ newtype Solver c t = Solver {solverMonad :: RWS () [c] Int t}
     )
 
 {-# INLINE solveConstraints #-}
-solveConstraints :: (Eq c) => [Constraint c TypeIndex Kind IndexedType] -> (Substitution, [c])
+solveConstraints :: (Show c, Eq c) => [Constraint c TypeIndex Kind IndexedType] -> (Substitution, [c])
 solveConstraints cs = runSolver (freshIdIn cs) (solve cs)
 
 {-# INLINE runSolver #-}
@@ -70,7 +71,7 @@ choice cs = findChoice [(delete c cs, c) | c <- cs]
   findChoice ps =
     maybe ChoiceNotFound (uncurry Choice) (find (uncurry isSolvable) ps)
 
-solve :: (Eq c) => [Constraint c TypeIndex Kind IndexedType] -> Solver c Substitution
+solve :: (Show c, Eq c) => [Constraint c TypeIndex Kind IndexedType] -> Solver c Substitution
 solve [] = pure (Substitution mempty)
 solve constraints =
   case choice constraints of

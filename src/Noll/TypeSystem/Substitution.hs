@@ -131,6 +131,18 @@ instance Substitutable (Pattern a IndexedType) where
         PRecord a (apply sub t) (apply sub d) (apply sub p)
       PShorthand a (Label t name) ->
         PShorthand a (Label (apply sub t) name)
+      PAny a t ->
+        PAny a (apply sub t)
+      PRecord a t d p ->
+        PRecord a (apply sub t) (apply sub d) (apply sub p)
+      PListCons a t p1 p2 ->
+        PListCons a (apply sub t) (apply sub p1) (apply sub p2)
+      PListLiteral a t ps ->
+        PListLiteral a (apply sub t) (apply sub ps)
+      PAtVariable a (Label t name) ->
+        PAtVariable a (Label (apply sub t) name)
+      p@PLiteral{} ->
+        p
 
 instance Substitutable (Binding Expression a IndexedType) where
   apply sub =
@@ -179,6 +191,14 @@ instance Substitutable (Expression a IndexedType) where
         EUnaryOperator a (apply sub t, op)
       EBinaryOperator a (t, op) ->
         EBinaryOperator a (apply sub t, op)
+      ESelect a (Label t name) e ->
+        ESelect a (Label (apply sub t) name) (apply sub e)
+      ERecord a t d e ->
+        ERecord a (apply sub t) (apply sub d) (apply sub e)
+      EListCons a t e1 e2 ->
+        EListCons a (apply sub t) (apply sub e1) (apply sub e2)
+      EListLiteral a t es ->
+        EListLiteral a (apply sub t) (apply sub es)
       e@ELiteral{} ->
         e
 

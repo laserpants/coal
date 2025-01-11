@@ -45,7 +45,7 @@ data TestResult a = TestResult
   deriving (Show, Eq, Ord)
 
 runTypedExpressionTest ::
-  (Eq a) =>
+  (Show a, Eq a) =>
   CompilerEnvironment ->
   [(Name, Scheme TypeIndex Kind IndexedType)] ->
   Expression a () ->
@@ -58,7 +58,7 @@ runTypedExpressionTest env names e =
     errs1 <- getSolverRuleViolationsC
     pure (TestResult e2 as errs0 errs1)
 
-testRunner :: (Eq a) => [(Name, Scheme TypeIndex Kind IndexedType)] -> Expression a () -> TestResult a
+testRunner :: (Show a, Eq a) => [(Name, Scheme TypeIndex Kind IndexedType)] -> Expression a () -> TestResult a
 testRunner = runTypedExpressionTest (CompilerEnvironment testDataConstructorEnv testTypeConstructorEnv)
 
 testDataConstructorEnv :: Environment (Constructor TypeIndex Kind (Type TypeIndex Kind))

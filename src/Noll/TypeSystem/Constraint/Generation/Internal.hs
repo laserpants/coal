@@ -12,11 +12,14 @@ module Noll.TypeSystem.Constraint.Generation.Internal (
   ConstraintsGenerationContext (..),
   ConstraintsGenerationStack (..),
   ConstraintsGenerationOutput (..),
+  ConstraintsGenerationState (..),
   monosetInsert,
   monosetInsertMany,
   localMonoset,
   runConstraintsGenerationStack,
   evalConstraintsGenerationStack,
+  overConstraintsGenerationStateTypeIndexes,
+  updateConstraintsGenerationSupply,
 ) where
 
 import Control.Monad.RWS (
@@ -26,11 +29,14 @@ import Control.Monad.RWS (
   MonadWriter,
   RWS,
   evalRWS,
+  gets,
   local,
+  modify,
   runRWS,
  )
 import Noll.Language (Constructor (..), Kind (..), Type (..), TypeIndex (..))
 import Noll.Lib.Environment (Environment (..))
+import Noll.Lib.Supply (Supply (..))
 import Noll.TypeSystem.Constraint (
   Constraint (..),
   MonomorphicSet (..),
@@ -98,7 +104,9 @@ data TypeAnnotationError a
     NoTypeConstructor a Name
   | -- | Two or more named parameters refer to the same inferred type variable.
     -- E.g., the annotation reads (a -> b) -> c -> b, but the function is
-    -- fn(f, x) => f(x), which requires 'a' and 'c' to be the same type.
+    -- fn(f, x) => f(x), which forces 'a' and 'c' to be the same type.
+    -- The type signature claims that the function is polymorphic with respect
+    -- to any choice of variables a, b, and c, and is therefore incorrect.
     NonDistinctTypeParameters [[(Name, a)]]
   | -- | Type parameter resolves to a concrete type; e.g., fn(x : a, y : int32) => x + y
     ResolvesToMonomorphicType Name (Type TypeIndex Kind)
@@ -111,15 +119,33 @@ data ConstraintsGenerationError a
   deriving (Show, Eq, Ord, Read)
 
 data ConstraintsGenerationContext o k t = ConstraintsGenerationContext
-  { constraintsGenerationMonomorphicSet :: MonomorphicSet (o k)
-  , constraintsGenerationDataConstructorEnv :: Environment (Constructor o k t)
-  , constraintsGenerationTypeConstructorEnv :: Environment k
+  { constraintsGenerationContextMonomorphicSet :: MonomorphicSet (o k)
+  , constraintsGenerationContextDataConstructorEnv :: Environment (Constructor o k t)
+  , constraintsGenerationContextTypeConstructorEnv :: Environment k
   }
   deriving (Show, Eq, Ord, Read)
 
+data ConstraintsGenerationState c = ConstraintsGenerationState
+  { constraintsGenerationStateTypeIndexes :: Dictionary (c, TypeIndex Kind)
+  , constraintsGenerationStateSupply :: Int
+  }
+  deriving (Show, Eq, Ord, Read)
+
+{-# INLINE overConstraintsGenerationStateTypeIndexes #-}
+overConstraintsGenerationStateTypeIndexes :: (Dictionary (c, TypeIndex Kind) -> Dictionary (c, TypeIndex Kind)) -> ConstraintsGenerationState c -> ConstraintsGenerationState c
+overConstraintsGenerationStateTypeIndexes fn ConstraintsGenerationState{..} = ConstraintsGenerationState{constraintsGenerationStateTypeIndexes = fn constraintsGenerationStateTypeIndexes, ..}
+
+{-# INLINE overConstraintsGenerationStateSupply #-}
+overConstraintsGenerationStateSupply :: (Int -> Int) -> ConstraintsGenerationState c -> ConstraintsGenerationState c
+overConstraintsGenerationStateSupply fn ConstraintsGenerationState{..} = ConstraintsGenerationState{constraintsGenerationStateSupply = fn constraintsGenerationStateSupply, ..}
+
+instance Supply (ConstraintsGenerationState c) where
+  updateSupply = overConstraintsGenerationStateSupply
+  getSupply = constraintsGenerationStateSupply
+
 type ConstraintsGenerationOutput c o k t = Either (ConstraintsGenerationError c) (Constraint (InferenceRule k c) o k t)
 
-type ConstraintsGenerationMonad c o k t = RWS (ConstraintsGenerationContext o k t) [ConstraintsGenerationOutput c o k t] (Dictionary (c, TypeIndex Kind))
+type ConstraintsGenerationMonad c o k t = RWS (ConstraintsGenerationContext o k t) [ConstraintsGenerationOutput c o k t] (ConstraintsGenerationState c)
 
 newtype ConstraintsGenerationStack c o k t a = ConstraintsGenerationStack {constraintsGenerationMonad :: ConstraintsGenerationMonad c o k t a}
   deriving
@@ -128,21 +154,29 @@ newtype ConstraintsGenerationStack c o k t a = ConstraintsGenerationStack {const
     , Monad
     , MonadReader (ConstraintsGenerationContext o k t)
     , MonadWriter [ConstraintsGenerationOutput c o k t]
-    , MonadState (Dictionary (c, TypeIndex Kind))
-    , MonadRWS (ConstraintsGenerationContext o k t) [ConstraintsGenerationOutput c o k t] (Dictionary (c, TypeIndex Kind))
+    , MonadState (ConstraintsGenerationState c)
+    , MonadRWS (ConstraintsGenerationContext o k t) [ConstraintsGenerationOutput c o k t] (ConstraintsGenerationState c)
     )
 
 {-# INLINE evalConstraintsGenerationStack #-}
 evalConstraintsGenerationStack :: Int -> ConstraintsGenerationContext o k t -> ConstraintsGenerationStack c o k t a -> (a, [ConstraintsGenerationOutput c o k t])
-evalConstraintsGenerationStack n ctx a = evalRWS (constraintsGenerationMonad a) ctx mempty
+evalConstraintsGenerationStack supply ctx a = evalRWS (constraintsGenerationMonad a) ctx (ConstraintsGenerationState mempty supply)
 
 {-# INLINE runConstraintsGenerationStack #-}
-runConstraintsGenerationStack :: Int -> ConstraintsGenerationContext o k t -> ConstraintsGenerationStack c o k t a -> (a, Dictionary (c, TypeIndex Kind), [ConstraintsGenerationOutput c o k t])
-runConstraintsGenerationStack n ctx a = runRWS (constraintsGenerationMonad a) ctx mempty
+runConstraintsGenerationStack :: Int -> ConstraintsGenerationContext o k t -> ConstraintsGenerationStack c o k t a -> (a, ConstraintsGenerationState c, [ConstraintsGenerationOutput c o k t])
+runConstraintsGenerationStack supply ctx a = runRWS (constraintsGenerationMonad a) ctx (ConstraintsGenerationState mempty supply)
+
+{-# INLINE updateConstraintsGenerationSupply #-}
+updateConstraintsGenerationSupply :: Int -> ConstraintsGenerationStack c o k t ()
+updateConstraintsGenerationSupply supply = modify (overConstraintsGenerationStateSupply (const supply))
+
+{-# INLINE getConstraintsGenerationSupply #-}
+getConstraintsGenerationSupply :: ConstraintsGenerationStack c o k t Int
+getConstraintsGenerationSupply = gets constraintsGenerationStateSupply
 
 {-# INLINE overConstraintsGenerationMonomorphicSet #-}
 overConstraintsGenerationMonomorphicSet :: (MonomorphicSet (o k) -> MonomorphicSet (o k)) -> ConstraintsGenerationContext o k t -> ConstraintsGenerationContext o k t
-overConstraintsGenerationMonomorphicSet fn ConstraintsGenerationContext{..} = ConstraintsGenerationContext{constraintsGenerationMonomorphicSet = fn constraintsGenerationMonomorphicSet, ..}
+overConstraintsGenerationMonomorphicSet fn ConstraintsGenerationContext{..} = ConstraintsGenerationContext{constraintsGenerationContextMonomorphicSet = fn constraintsGenerationContextMonomorphicSet, ..}
 
 {-# INLINE monosetInsert #-}
 monosetInsert :: (Ord k) => TypeIndex k -> MonomorphicSet (TypeIndex k) -> MonomorphicSet (TypeIndex k)

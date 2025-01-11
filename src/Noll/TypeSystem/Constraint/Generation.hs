@@ -38,6 +38,7 @@ import Noll.Language (
   typeOf,
  )
 import Noll.Lib.List1 (fromList1)
+import Noll.Lib.Supply (supplied)
 import Noll.TypeSystem.Constraint (Constraint (..))
 import Noll.TypeSystem.Constraint.Assumption (
   Assumption (..),
@@ -67,7 +68,6 @@ import Noll.Utils (
   tellRight,
   (<$$>),
  )
-import Noll.Lib.Supply (supply)
 
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
@@ -77,7 +77,7 @@ type ConstraintsGeneration a = ConstraintsGenerationStack a TypeIndex Kind Index
 
 {-# INLINE lookupDataConstructor #-}
 lookupDataConstructor :: Name -> ConstraintsGenerationStack c o k t (Maybe (Constructor o k t))
-lookupDataConstructor name = asks (Environment.lookup name . constraintsGenerationDataConstructorEnv)
+lookupDataConstructor name = asks (Environment.lookup name . constraintsGenerationContextDataConstructorEnv)
 
 assertEqualityAssumptions :: a -> IndexedType -> [Assumption IndexedType] -> ConstraintsGeneration a ()
 assertEqualityAssumptions loc t ms =
@@ -88,7 +88,7 @@ assertEqualityAssumptions loc t ms =
 
 assertImplicitAssumptions :: a -> IndexedType -> [Assumption IndexedType] -> ConstraintsGeneration a ()
 assertImplicitAssumptions loc t ms = do
-  set <- asks constraintsGenerationMonomorphicSet
+  set <- asks constraintsGenerationContextMonomorphicSet
   tellRight $ do
     Assumption{..} <- ms
     -- TODO
@@ -136,8 +136,11 @@ patternConstraints assert ms =
       let d1 = pure . typeOf <$> d
           p1 = extractRow . typeOf <$> p
           t1 = TIntrinsic (IRecord (TRow (fromDictionary d1 (fromMaybe RNil p1))))
+      forM (Map.toList d) $ \(name, e) ->
+        assert (typeOf e) (filter (assumptionNameIs name) ms)
       tellRight [Equality (InferenceRule 300) [t, t1]]
-      concatForM (Map.elems d <> maybeToList p) (patternConstraints assert ms)
+      ps1 <- concatForM (Map.elems d <> maybeToList p) (patternConstraints assert ms)
+      pure (ps1 <> Map.keys d)
     PShorthand _ (Label t name) -> do
       assert t (filter (assumptionNameIs name) ms)
       pure [name]
@@ -151,6 +154,8 @@ patternConstraints assert ms =
     PListLiteral _ t ps -> do
       tellRight [Equality (InferenceRule 3) (t : (typeOf <$> ps))]
       concatForM ps (patternConstraints assert ms)
+    PLiteral{} ->
+      pure []
 
 listScheme :: Scheme TypeIndex Kind (Type TypeIndex Kind)
 listScheme =
@@ -256,11 +261,11 @@ collectConstraints =
     EBinaryOperator loc (t, op) -> do
       tellRight [Explicit (InferBinaryOperator loc) t (binaryOperatorType op)]
       pure []
-    -- baz.name
-    ESelect _ (Label t name) e -> do
-      --x <- supply
-      let t1 = TIntrinsic (IRecord undefined)
-      undefined
+    ESelect loc (Label t name) e -> do
+      rvar <- supplied (RVariable . TypeIndex KRow)
+      let t1 = TIntrinsic (IRecord (TRow (RExtend name t rvar)))
+      tellRight [Equality (InferenceRule 302) [t1, typeOf e]]
+      collectConstraints e
     EFold{} ->
       error "EFold"
     ERecord loc t d e -> do
@@ -275,6 +280,14 @@ collectConstraints =
 binaryOperatorType :: BinaryOperator -> Scheme TypeIndex Kind IndexedType
 binaryOperatorType =
   \case
+    OForwardApplication ->
+      Forall
+        (Set.fromList [TypeIndex KType 0, TypeIndex KType 1])
+        []
+        ( TVariable (TypeIndex KType 0)
+            `TArrow` (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 1))
+            `TArrow` TVariable (TypeIndex KType 1)
+        )
     OReverseComposition ->
       Forall
         (Set.fromList [TypeIndex KType 0, TypeIndex KType 1, TypeIndex KType 2])

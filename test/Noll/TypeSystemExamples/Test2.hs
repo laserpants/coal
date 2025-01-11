@@ -58,7 +58,7 @@ spec =
               (EVariable () (Label (TVariable (TypeIndex KType 1) `TArrow` TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool) "gt"))
            )
 
-runTest :: (Eq a) => Expression a () -> TestResult a
+runTest :: (Show a, Eq a) => Expression a () -> TestResult a
 runTest =
   runTypedExpressionTest
     (CompilerEnvironment env1 env2)

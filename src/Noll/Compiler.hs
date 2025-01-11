@@ -29,6 +29,7 @@ import Noll.Language (
   Scheme (..),
   TypeIndex (..),
   freshIdIn,
+  normalizeRowTypes,
  )
 import Noll.Lib.Environment (Environment (..))
 import Noll.TypeSystem (
@@ -38,6 +39,7 @@ import Noll.TypeSystem (
   ConstraintsGenerationError (..),
   ConstraintsGenerationOutput,
   ConstraintsGenerationStack (..),
+  ConstraintsGenerationState (..),
   InferenceRule (..),
   Substitutable (..),
   Substitution (..),
@@ -62,7 +64,8 @@ data CompilerState a = CompilerState
   { compilerConstraintsGenerationErrors :: [ConstraintsGenerationError a]
   , compilerTypeAnnotationParameters :: Dictionary (a, TypeIndex Kind)
   , compilerSolverRuleViolations :: [InferenceRule Kind a]
-  , compilerNames :: Environment (Scheme TypeIndex Kind IndexedType)
+  , compilerNameEnvironment :: Environment (Scheme TypeIndex Kind IndexedType)
+  , compilerSupply :: Int
   }
   deriving (Show, Eq, Ord, Read)
 
@@ -78,9 +81,13 @@ overCompilerTypeAnnotationParameters fn CompilerState{..} = CompilerState{compil
 overCompilerSolverRuleViolations :: ([InferenceRule Kind a] -> [InferenceRule Kind a]) -> CompilerState a -> CompilerState a
 overCompilerSolverRuleViolations fn CompilerState{..} = CompilerState{compilerSolverRuleViolations = fn compilerSolverRuleViolations, ..}
 
-{-# INLINE overCompilerNames #-}
-overCompilerNames :: (Environment (Scheme TypeIndex Kind IndexedType) -> Environment (Scheme TypeIndex Kind IndexedType)) -> CompilerState a -> CompilerState a
-overCompilerNames fn CompilerState{..} = CompilerState{compilerNames = fn compilerNames, ..}
+{-# INLINE overCompilerNameEnvironment #-}
+overCompilerNameEnvironment :: (Environment (Scheme TypeIndex Kind IndexedType) -> Environment (Scheme TypeIndex Kind IndexedType)) -> CompilerState a -> CompilerState a
+overCompilerNameEnvironment fn CompilerState{..} = CompilerState{compilerNameEnvironment = fn compilerNameEnvironment, ..}
+
+{-# INLINE overCompilerSupply #-}
+overCompilerSupply :: (Int -> Int) -> CompilerState a -> CompilerState a
+overCompilerSupply fn CompilerState{..} = CompilerState{compilerSupply = fn compilerSupply, ..}
 
 {-# INLINE initialCompilerState #-}
 initialCompilerState :: CompilerState a
@@ -89,7 +96,8 @@ initialCompilerState =
     { compilerConstraintsGenerationErrors = []
     , compilerTypeAnnotationParameters = mempty
     , compilerSolverRuleViolations = []
-    , compilerNames = mempty
+    , compilerNameEnvironment = mempty
+    , compilerSupply = 0
     }
 
 newtype Compiler a c = Compiler {compilerStack :: ReaderT CompilerEnvironment (State (CompilerState a)) c}
@@ -123,7 +131,11 @@ getSolverRuleViolationsC = gets compilerSolverRuleViolations
 
 {-# INLINE insertNamesC #-}
 insertNamesC :: [(Name, Scheme TypeIndex Kind IndexedType)] -> Compiler a ()
-insertNamesC names = modify (overCompilerNames (Environment.insertMany names))
+insertNamesC names = modify (overCompilerNameEnvironment (Environment.insertMany names))
+
+{-# INLINE updateSupplyC #-}
+updateSupplyC :: Int -> Compiler a ()
+updateSupplyC supply = modify (overCompilerSupply (const supply))
 
 {-# INLINE runCompiler #-}
 runCompiler :: CompilerEnvironment -> Compiler a c -> (c, CompilerState a)
@@ -138,13 +150,15 @@ type ConstraintsGenerationResult c o k t r = (r, Dictionary (c, o k), [Constrain
 runConstraintsGenerationC :: Int -> ConstraintsGenerationStack c TypeIndex Kind IndexedType r -> Compiler a (ConstraintsGenerationResult c TypeIndex Kind IndexedType r)
 runConstraintsGenerationC index stack = do
   env <- ask
-  pure (runConstraintsGenerationStack index (context env) stack)
+  let (result, ConstraintsGenerationState{..}, output) = runConstraintsGenerationStack index (context env) stack
+  updateSupplyC constraintsGenerationStateSupply
+  pure (result, constraintsGenerationStateTypeIndexes, output)
  where
   context CompilerEnvironment{..} =
     ConstraintsGenerationContext
-      { constraintsGenerationMonomorphicSet = mempty
-      , constraintsGenerationDataConstructorEnv = compilerDataConstructorEnv
-      , constraintsGenerationTypeConstructorEnv = compilerTypeConstructorEnv
+      { constraintsGenerationContextMonomorphicSet = mempty
+      , constraintsGenerationContextDataConstructorEnv = compilerDataConstructorEnv
+      , constraintsGenerationContextTypeConstructorEnv = compilerTypeConstructorEnv
       }
 
 type CompilerAssumption = Assumption IndexedType
@@ -161,14 +175,14 @@ generateConstraintsC e = do
 
 assumptionConstraints :: CompilerAssumption -> Compiler a (Either CompilerAssumption (CompilerConstraint a))
 assumptionConstraints Assumption{..} = do
-  names <- gets compilerNames
+  names <- gets compilerNameEnvironment
   case Environment.lookup assumptionName names of
     Nothing ->
       pure $ Left Assumption{..}
     Just s ->
       pure $ Right (Explicit (InferenceRule 200) assumptionType s)
 
-solveConstraintsC :: (Eq a) => [CompilerConstraint a] -> Compiler a Substitution
+solveConstraintsC :: (Show a, Eq a) => [CompilerConstraint a] -> Compiler a Substitution
 solveConstraintsC cs = do
   dict <- gets compilerTypeAnnotationParameters
   let (sub, rs) = solveConstraints cs
@@ -178,11 +192,12 @@ solveConstraintsC cs = do
   pure sub
 
 typedExpressionC ::
-  (Eq a) =>
+  (Show a, Eq a) =>
   Expression a IndexedType ->
   Compiler a (Expression a IndexedType, [CompilerAssumption])
 typedExpressionC e = do
   (as0, cs0) <- generateConstraintsC e
   (as1, cs1) <- partitionEithers <$> traverse assumptionConstraints as0
   sub <- solveConstraintsC (cs0 <> cs1)
-  pure (normalizeTypeIndexes (apply sub e), apply sub as1)
+  let e1 = normalizeRowTypes <$> apply sub e
+  pure (normalizeTypeIndexes e1, apply sub as1)

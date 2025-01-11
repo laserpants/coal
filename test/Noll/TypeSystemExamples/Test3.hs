@@ -174,7 +174,7 @@ spec =
               )
            )
 
-runTest :: (Eq a) => Expression a () -> TestResult a
+runTest :: (Show a, Eq a) => Expression a () -> TestResult a
 runTest =
   runTypedExpressionTest
     (CompilerEnvironment env1 env2)

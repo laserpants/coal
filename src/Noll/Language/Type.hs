@@ -2,6 +2,7 @@
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 {-# LANGUAGE UndecidableInstances #-}
 
@@ -14,12 +15,13 @@ module Noll.Language.Type (
   OpaqueType,
   foldType,
   activeIdsIn,
+  normalizeRowTypes,
 ) where
 
 import Data.List.NonEmpty (NonEmpty)
 import Noll.Language.Type.Intrinsic (Intrinsic (..))
 import Noll.Language.Type.Kind (Kind)
-import Noll.Language.Type.Row (Row (..))
+import Noll.Language.Type.Row (Row (..), normalizeRow)
 import Noll.Lib.List1 (List1)
 import Noll.Lib.Supply (Supply (..))
 import Noll.Utils (Map, Name, Set)
@@ -76,3 +78,20 @@ activeIdsIn t = Set.map typeIndexId (activeIn t)
 {-# INLINE foldType #-}
 foldType :: (Foldable f) => Type o k -> f (Type o k) -> Type o k
 foldType = foldr TArrow
+
+{-# INLINE normalizeRowTypes #-}
+normalizeRowTypes :: Type o k -> Type o k
+normalizeRowTypes =
+  \case
+    TRow r ->
+      TRow (normalizeRow r)
+    TApplication k t1 ts ->
+      TApplication k (normalizeRowTypes t1) (fmap normalizeRowTypes ts)
+    TArrow t1 t2 ->
+      TArrow (normalizeRowTypes t1) (normalizeRowTypes t2)
+    TIntrinsic t ->
+      TIntrinsic (fmap normalizeRowTypes t)
+    TAlias name ts t ->
+      TAlias name (fmap normalizeRowTypes ts) (normalizeRowTypes t)
+    t ->
+      t

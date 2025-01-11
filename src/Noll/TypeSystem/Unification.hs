@@ -16,6 +16,7 @@ import Control.Monad.Except (MonadError, throwError)
 import Control.Monad.State (MonadState, StateT, evalStateT)
 import Data.List.NonEmpty (NonEmpty, (<|))
 import Data.Set (member)
+import Debug.Trace
 import Noll.Language (
   IndexedType,
   Intrinsic (..),
@@ -154,9 +155,10 @@ bindType (TypeIndex k index) =
       | otherwise ->
           pure (index `mapsTo` t)
 
-unifyAll :: (MonadState Int m, MonadError UnificationError m, Unifiable u) => [u] -> m Substitution
+unifyAll :: (Show u, MonadState Int m, MonadError UnificationError m, Unifiable u) => [u] -> m Substitution
 unifyAll [] = pure mempty
 unifyAll (t : ts) = do
+  --  traceShowM (t : ts)
   sub1 <- foldrM go mempty ts
   sub2 <- unifyAll ts
   pure (sub2 <> sub1)
