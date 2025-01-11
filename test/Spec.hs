@@ -11,9 +11,9 @@ import qualified Noll.TypeSystem.UnificationSpec
 import qualified Noll.TypeSystemExamples.Test1
 import qualified Noll.TypeSystemExamples.Test2
 import qualified Noll.TypeSystemExamples.Test3
-import qualified Noll.TypeSystemExamples.Test35
 import qualified Noll.TypeSystemExamples.Test4
 import qualified Noll.TypeSystemExamples.Test5
+import qualified Noll.TypeSystemExamples.Test6
 import qualified Noll.TypeSystemSpec
 import Test.Hspec (hspec, it)
 
@@ -27,8 +27,9 @@ main =
     Noll.TypeSystemExamples.Test1.spec
     Noll.TypeSystemExamples.Test2.spec
     Noll.TypeSystemExamples.Test3.spec
-    Noll.TypeSystemExamples.Test35.spec
     Noll.TypeSystemExamples.Test4.spec
+    Noll.TypeSystemExamples.Test5.spec
+    Noll.TypeSystemExamples.Test6.spec
 
 --    Noll.TypeSystem.TypeConstraint.CollectSpec.spec
 --    Noll.TypeSystem.TypeSubstitutionSpec.spec
