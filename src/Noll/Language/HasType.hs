@@ -108,3 +108,5 @@ instance HasType o k (Expression a (Type o k)) where
         typeOf t
       EMatch _ t _ _ ->
         typeOf t
+      ESelect _ t _ ->
+        typeOf t

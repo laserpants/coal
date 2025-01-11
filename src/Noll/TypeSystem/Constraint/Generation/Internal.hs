@@ -114,7 +114,6 @@ data ConstraintsGenerationContext o k t = ConstraintsGenerationContext
   { constraintsGenerationMonomorphicSet :: MonomorphicSet (o k)
   , constraintsGenerationDataConstructorEnv :: Environment (Constructor o k t)
   , constraintsGenerationTypeConstructorEnv :: Environment k
-  , constraintsGenerationIndexTreshold :: Int
   }
   deriving (Show, Eq, Ord, Read)
 
@@ -134,12 +133,12 @@ newtype ConstraintsGenerationStack c o k t a = ConstraintsGenerationStack {const
     )
 
 {-# INLINE evalConstraintsGenerationStack #-}
-evalConstraintsGenerationStack :: ConstraintsGenerationContext o k t -> ConstraintsGenerationStack c o k t a -> (a, [ConstraintsGenerationOutput c o k t])
-evalConstraintsGenerationStack ctx a = evalRWS (constraintsGenerationMonad a) ctx mempty
+evalConstraintsGenerationStack :: Int -> ConstraintsGenerationContext o k t -> ConstraintsGenerationStack c o k t a -> (a, [ConstraintsGenerationOutput c o k t])
+evalConstraintsGenerationStack n ctx a = evalRWS (constraintsGenerationMonad a) ctx mempty
 
 {-# INLINE runConstraintsGenerationStack #-}
-runConstraintsGenerationStack :: ConstraintsGenerationContext o k t -> ConstraintsGenerationStack c o k t a -> (a, Dictionary (c, TypeIndex Kind), [ConstraintsGenerationOutput c o k t])
-runConstraintsGenerationStack ctx a = runRWS (constraintsGenerationMonad a) ctx mempty
+runConstraintsGenerationStack :: Int -> ConstraintsGenerationContext o k t -> ConstraintsGenerationStack c o k t a -> (a, Dictionary (c, TypeIndex Kind), [ConstraintsGenerationOutput c o k t])
+runConstraintsGenerationStack n ctx a = runRWS (constraintsGenerationMonad a) ctx mempty
 
 {-# INLINE overConstraintsGenerationMonomorphicSet #-}
 overConstraintsGenerationMonomorphicSet :: (MonomorphicSet (o k) -> MonomorphicSet (o k)) -> ConstraintsGenerationContext o k t -> ConstraintsGenerationContext o k t

@@ -138,14 +138,13 @@ type ConstraintsGenerationResult c o k t r = (r, Dictionary (c, o k), [Constrain
 runConstraintsGenerationC :: Int -> ConstraintsGenerationStack c TypeIndex Kind IndexedType r -> Compiler a (ConstraintsGenerationResult c TypeIndex Kind IndexedType r)
 runConstraintsGenerationC index stack = do
   env <- ask
-  pure (runConstraintsGenerationStack (context env) stack)
+  pure (runConstraintsGenerationStack index (context env) stack)
  where
   context CompilerEnvironment{..} =
     ConstraintsGenerationContext
       { constraintsGenerationMonomorphicSet = mempty
       , constraintsGenerationDataConstructorEnv = compilerDataConstructorEnv
       , constraintsGenerationTypeConstructorEnv = compilerTypeConstructorEnv
-      , constraintsGenerationIndexTreshold = index
       }
 
 type CompilerAssumption = Assumption IndexedType

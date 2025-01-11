@@ -39,26 +39,26 @@ spec =
         it "a -> b" $
           testInstantiateAnnotation
             fixture13
-            == Right (TArrow (TVariable (TypeIndex KType 0)) (TVariable (TypeIndex KType 1)))
+            == Right (TArrow (TVariable (TypeIndex KType (-1))) (TVariable (TypeIndex KType (-2))))
         it "a -> a" $
           testInstantiateAnnotation
             fixture14
-            == Right (TArrow (TVariable (TypeIndex KType 0)) (TVariable (TypeIndex KType 0)))
+            == Right (TArrow (TVariable (TypeIndex KType (-1))) (TVariable (TypeIndex KType (-1))))
         it "f(a) -> f(b)" $
           testInstantiateAnnotation
             fixture10
             == Right
               ( TArrow
-                  (TApplication KType (TVariable (TypeIndex (KArrow KType KType) 5)) (TVariable (TypeIndex KType 0) :| []))
-                  (TApplication KType (TVariable (TypeIndex (KArrow KType KType) 5)) (TVariable (TypeIndex KType 1) :| []))
+                  (TApplication KType (TVariable (TypeIndex (KArrow KType KType) (-6))) (TVariable (TypeIndex KType (-1)) :| []))
+                  (TApplication KType (TVariable (TypeIndex (KArrow KType KType) (-6))) (TVariable (TypeIndex KType (-2)) :| []))
               )
         it "f(a) -> f(a)" $
           testInstantiateAnnotation
             fixture11
             == Right
               ( TArrow
-                  (TApplication KType (TVariable (TypeIndex (KArrow KType KType) 5)) (TVariable (TypeIndex KType 0) :| []))
-                  (TApplication KType (TVariable (TypeIndex (KArrow KType KType) 5)) (TVariable (TypeIndex KType 0) :| []))
+                  (TApplication KType (TVariable (TypeIndex (KArrow KType KType) (-6))) (TVariable (TypeIndex KType (-1)) :| []))
+                  (TApplication KType (TVariable (TypeIndex (KArrow KType KType) (-6))) (TVariable (TypeIndex KType (-1)) :| []))
               )
       describe "Kind mismatch" $ do
         it "f -> f(a)" $
@@ -104,7 +104,8 @@ testCollectConstraints e =
     e0 = indexed e
    in
     evalConstraintsGenerationStack
-      (ConstraintsGenerationContext mempty mempty mempty (freshIdIn e0))
+      (freshIdIn e0)
+      (ConstraintsGenerationContext mempty mempty mempty)
       (collectConstraints e0)
 
 testInstantiateAnnotation :: Type TypeParam () -> Either (TypeAnnotationError ()) (Type TypeIndex Kind)
@@ -112,7 +113,8 @@ testInstantiateAnnotation t = s
  where
   (s, _) =
     evalConstraintsGenerationStack
-      (ConstraintsGenerationContext mempty mempty mempty 0)
+      0
+      (ConstraintsGenerationContext mempty mempty mempty)
       (instantiateAnnotation () t)
 
 -- fn(m) => let y = m in let x = y(true) in x

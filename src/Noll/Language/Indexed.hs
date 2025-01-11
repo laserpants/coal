@@ -105,6 +105,12 @@ instance (Ord k, TypeIndexed k t) => TypeIndexed k (Pattern a t) where
         typeIndexesIn t <> typeIndexesIn d <> typeIndexesIn p
       PShorthand _ (Label t _) ->
         typeIndexesIn t
+      PListCons _ t p1 p2 ->
+        typeIndexesIn t <> typeIndexesIn p1 <> typeIndexesIn p2
+      PListLiteral _ t ps ->
+        typeIndexesIn t <> typeIndexesIn ps
+      PAny _ t ->
+        typeIndexesIn t
 
 instance (Ord k, TypeIndexed k t) => TypeIndexed k (Scheme TypeIndex k t) where
   typeIndexesIn =
@@ -161,6 +167,12 @@ instance (Ord k) => TypeIndexed k (Expression a (Type TypeIndex k)) where
         typeIndexesIn t
       EBinaryOperator _ (t, _) ->
         typeIndexesIn t
+      ERecord _ t d e ->
+        typeIndexesIn t <> typeIndexesIn d <> typeIndexesIn e
+      ESelect _ (Label t _) e ->
+        typeIndexesIn t <> typeIndexesIn e
+      EFold{} ->
+        error "EFold"
 
 notBoundIn :: Set (TypeIndex k) -> Set (TypeIndex k) -> Set (TypeIndex k)
 notBoundIn s = Set.filter notBound

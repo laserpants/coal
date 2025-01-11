@@ -107,8 +107,7 @@ instantiateRow =
 typeIndex :: (MonadReader TypeAnnotationContext m) => Kind -> Name -> TypeAnnotation a m (TypeIndex Kind)
 typeIndex k name = do
   dict <- get
-  n <- asks constraintsGenerationIndexTreshold
-  let index = TypeIndex k (n + lexOrderRank name)
+  let index = TypeIndex k (0 - lexOrderRank name - 1)
   case Map.lookup name dict of
     Nothing -> do
       modify (Map.insert name index)

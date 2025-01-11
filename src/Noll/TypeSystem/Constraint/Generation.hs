@@ -67,6 +67,7 @@ import Noll.Utils (
   tellRight,
   (<$$>),
  )
+import Noll.Lib.Supply (supply)
 
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
@@ -137,7 +138,30 @@ patternConstraints assert ms =
           t1 = TIntrinsic (IRecord (TRow (fromDictionary d1 (fromMaybe RNil p1))))
       tellRight [Equality (InferenceRule 300) [t, t1]]
       concatForM (Map.elems d <> maybeToList p) (patternConstraints assert ms)
+    PShorthand _ (Label t name) -> do
+      assert t (filter (assumptionNameIs name) ms)
+      pure [name]
+    PAny{} ->
+      pure []
+    PListCons _ t p1 p2 -> do
+      ms1 <- patternConstraints assert ms p1
+      ms2 <- patternConstraints assert ms p2
+      tellRight [Explicit (InferenceRule 3) (foldType t [typeOf p1, typeOf p2]) listScheme]
+      pure (ms1 <> ms2)
+    PListLiteral _ t ps -> do
+      tellRight [Equality (InferenceRule 3) (t : (typeOf <$> ps))]
+      concatForM ps (patternConstraints assert ms)
 
+listScheme :: Scheme TypeIndex Kind (Type TypeIndex Kind)
+listScheme =
+  Forall
+    (Set.fromList [TypeIndex KType 0])
+    []
+    (t0 `TArrow` TIntrinsic (IList t0) `TArrow` TIntrinsic (IList t0))
+ where
+  t0 = TVariable (TypeIndex KType 0)
+
+-- TODO: move
 extractRow :: Type TypeIndex Kind -> Row TypeIndex Kind (Type TypeIndex Kind)
 extractRow =
   \case
@@ -232,6 +256,21 @@ collectConstraints =
     EBinaryOperator loc (t, op) -> do
       tellRight [Explicit (InferBinaryOperator loc) t (binaryOperatorType op)]
       pure []
+    -- baz.name
+    ESelect _ (Label t name) e -> do
+      --x <- supply
+      let t1 = TIntrinsic (IRecord undefined)
+      undefined
+    EFold{} ->
+      error "EFold"
+    ERecord loc t d e -> do
+      ms1 <- concatMapM collectConstraints e
+      ms2 <- concatMapM collectConstraints d
+      let d1 = pure . typeOf <$> d
+          e1 = extractRow . typeOf <$> e
+          t1 = TIntrinsic (IRecord (TRow (fromDictionary d1 (fromMaybe RNil e1))))
+      tellRight [Equality (InferenceRule 301) [t, t1]]
+      pure (ms1 <> ms2)
 
 binaryOperatorType :: BinaryOperator -> Scheme TypeIndex Kind IndexedType
 binaryOperatorType =
