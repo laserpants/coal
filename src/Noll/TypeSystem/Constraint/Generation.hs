@@ -216,6 +216,14 @@ collectConstraints =
       ms <- withMonomorphic ps (collectConstraints e)
       names <- concatForM ps (patternConstraints (assertEqualityAssumptions loc) ms)
       pure (filter (assumptionNameIsNotOneOf names) ms)
+    ERecursiveLet loc p e1 e2 -> do
+      ms1 <- collectConstraints e2
+      let t1 = typeOf p
+          t2 = typeOf e1
+      tellRight [Equality (InferLetBindingPattern loc t1 t2) [t1, t2]]
+      ms2 <- collectConstraints e1
+      names <- patternConstraints (assertImplicitAssumptions loc) ms1 p
+      pure (filter (assumptionNameIsNotOneOf names) (ms1 <> ms2))
     ELet loc gs e1 -> do
       ms1 <- collectConstraints e1
       ms2 <- concatForM gs $

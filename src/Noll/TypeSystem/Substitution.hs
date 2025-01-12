@@ -179,6 +179,8 @@ instance Substitutable (Expression a IndexedType) where
         EVariable a (Label (apply sub t) name)
       ELambda a ps e -> do
         ELambda a (apply sub ps) (apply sub e)
+      ERecursiveLet a p e1 e2 -> do
+        ERecursiveLet a (apply sub p) (apply sub e1) (apply sub e2)
       ELet a gs e1 -> do
         ELet a (apply sub gs) (apply sub e1)
       EIf a t e1 e2 e3 -> do

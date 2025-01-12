@@ -153,6 +153,8 @@ instance (Ord k) => TypeIndexed k (Expression a (Type TypeIndex k)) where
         typeIndexesIn t
       ELambda _ ps e ->
         typeIndexesIn ps <> typeIndexesIn e
+      ERecursiveLet _ p e1 e2 ->
+        typeIndexesIn p <> typeIndexesIn e1 <> typeIndexesIn e2
       ELet _ gs e1 ->
         typeIndexesIn gs <> typeIndexesIn e1
       EIf _ t e1 e2 e3 ->
