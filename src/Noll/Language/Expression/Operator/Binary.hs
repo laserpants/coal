@@ -30,13 +30,13 @@ data BinaryOperator
     OLogicalOr
   | -- | Logical AND (&&)
     OLogicalAnd
-  | -- | Forward application (|.)
+  | -- | Forward application (.|)
     OForwardApplication
-  | -- | Reverse application (.|)
+  | -- | Reverse application (|.)
     OReverseApplication
-  | -- | Flipped forward application ($.)
+  | -- | Flipped forward application (.$)
     OFlippedForwardApplication
-  | -- | Flipped reverse application (.$)
+  | -- | Flipped reverse application ($.)
     OFlippedReverseApplication
   | -- | Forward composition (>>)
     OForwardComposition
