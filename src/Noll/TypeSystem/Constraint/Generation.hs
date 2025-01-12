@@ -285,7 +285,8 @@ collectConstraints =
       tellRight [Equality (InferenceRule 401) (typeOf e : ts1)]
       -- Expression types
       tellRight [Equality (InferenceRule 402) (foldType t (typeOf <$> es) : concat ts2)]
-      pure (ms1 <> ms2 <> ms3)
+      ms4 <- concatMapM collectConstraints e1
+      pure (ms1 <> ms2 <> ms3 <> ms4)
     ERecord loc t d e -> do
       ms1 <- concatMapM collectConstraints e
       ms2 <- concatMapM collectConstraints d
