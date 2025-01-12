@@ -29,7 +29,7 @@ import Noll.Language (
   typeIdsIn,
   updateTail,
  )
-import Noll.Lib.Supply (supply)
+import Noll.Lib.Supply (supplied)
 import Noll.TypeSystem.Substitution (
   Substitutable (..),
   Substitution (..),
@@ -107,7 +107,7 @@ instance Unifiable (Row TypeIndex Kind IndexedType) where
             sub2 <- unify (apply sub1 t1) (apply sub1 t2)
             pure (sub2 <> sub1)
           Nothing -> do
-            r2 <- RVariable . TypeIndex KRow <$> supply
+            r2 <- supplied (RVariable . TypeIndex KRow)
             sub1 <- unify q1 (RExtend name t1 r2)
             sub2 <- unify (apply sub1 r1) (apply sub1 (updateTail r2 row2))
             pure (sub2 <> sub1)
