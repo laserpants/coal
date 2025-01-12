@@ -157,6 +157,10 @@ runTest =
   env2 =
     Environment.fromList
       [ ("Ordering", KType)
+      ,
+        ( "Tree"
+        , KArrow KType KType
+        )
       ]
 
 fixture :: Expression () ()

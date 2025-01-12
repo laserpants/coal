@@ -261,6 +261,16 @@ collectConstraints =
       pure (ms1 <> ms2)
     ELiteral{} ->
       pure []
+    EListCons loc t e1 e2 -> do
+      ms1 <- collectConstraints e1
+      ms2 <- collectConstraints e2
+      let t1 = typeOf e1 `TArrow` typeOf e2 `TArrow` t
+      tellRight [Explicit (InferenceRule 402) t1 listConstructor]
+      pure (ms1 <> ms2)
+    EListLiteral loc t es -> do
+      ms1 <- concatMapM collectConstraints es
+      tellRight [Equality (InferenceRule 555) (t : (typeOf <$> es))]
+      pure ms1
     EMatch loc t e cs -> do
       ms1 <- collectConstraints e
       (ts1, ts2, ms2) <- (third3 concat . unzip3 <$$> traverse clauseAssumptions) (fromList1 cs)
@@ -296,6 +306,16 @@ collectConstraints =
       tellRight [Equality (InferenceRule 301) [t, t1]]
       pure (ms1 <> ms2)
 
+listConstructor :: Scheme TypeIndex Kind IndexedType
+listConstructor =
+  Forall
+    (Set.fromList [TypeIndex KType 0])
+    []
+    ( TVariable (TypeIndex KType 0)
+        `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 0)))
+        `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 0)))
+    )
+
 binaryOperatorType :: BinaryOperator -> Scheme TypeIndex Kind IndexedType
 binaryOperatorType =
   \case
@@ -326,3 +346,11 @@ binaryOperatorType =
         mempty
         []
         (TIntrinsic IBool `TArrow` TIntrinsic IBool `TArrow` TIntrinsic IBool)
+    OListConcatenation ->
+      Forall
+        (Set.fromList [TypeIndex KType 0])
+        []
+        ( TIntrinsic (IList (TVariable (TypeIndex KType 0)))
+            `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 0)))
+            `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 0)))
+        )

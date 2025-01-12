@@ -170,6 +170,10 @@ instance (Ord k) => TypeIndexed k (Expression a (Type TypeIndex k)) where
         typeIndexesIn t <> typeIndexesIn e1 <> typeIndexesIn es
       ELiteral{} ->
         mempty
+      EListCons _ t e1 e2 ->
+        typeIndexesIn t <> typeIndexesIn e1 <> typeIndexesIn e2
+      EListLiteral _ t es ->
+        typeIndexesIn t <> typeIndexesIn es
       EMatch _ t e cs ->
         typeIndexesIn t <> typeIndexesIn e <> typeIndexesIn cs
       EUnaryOperator _ (t, _) ->
