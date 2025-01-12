@@ -107,31 +107,6 @@ runTest =
             )
         )
       )
-    ,
-      ( "$fold:1"
-      , Forall
-          (Set.fromList [TypeIndex KType 0])
-          []
-          ( TIntrinsic (IList (TVariable (TypeIndex KType 0)))
-              `TArrow` ( TIntrinsic
-                          ( IRecord
-                              ( TRow
-                                  ( RExtend
-                                      "max"
-                                      (TVariable (TypeIndex KType 0))
-                                      ( RExtend "min" (TVariable (TypeIndex KType 0)) RNil
-                                      )
-                                  )
-                              )
-                          )
-                       )
-              `TArrow` ( TApplication
-                          KType
-                          (TConstructor (KArrow KType KType) "Tree")
-                          (TVariable (TypeIndex KType 0) :| [])
-                       )
-          )
-      )
     ]
  where
   env1 =
