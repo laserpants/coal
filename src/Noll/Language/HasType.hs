@@ -68,6 +68,8 @@ instance HasType o k (Pattern a (Type o k)) where
         typeOf t
       PShorthand _ t ->
         typeOf t
+      PAtVariable _ t ->
+        typeOf t
 
 instance HasType o k (Guard Expression a (Type o k)) where
   typeOf =
@@ -109,4 +111,6 @@ instance HasType o k (Expression a (Type o k)) where
       EMatch _ t _ _ ->
         typeOf t
       ESelect _ t _ ->
+        typeOf t
+      EFold _ t _ _ _ ->
         typeOf t

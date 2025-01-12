@@ -201,6 +201,8 @@ instance Substitutable (Expression a IndexedType) where
         EListCons a (apply sub t) (apply sub e1) (apply sub e2)
       EListLiteral a t es ->
         EListLiteral a (apply sub t) (apply sub es)
+      EFold a t es cs e ->
+        EFold a (apply sub t) (apply sub es) (apply sub cs) (apply sub e)
       e@ELiteral{} ->
         e
 

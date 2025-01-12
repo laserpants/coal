@@ -2,6 +2,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Noll.TypeSystem.Constraint.Generation (
   ConstraintsGenerationContext (..),
@@ -37,7 +38,7 @@ import Noll.Language (
   fromDictionary,
   typeOf,
  )
-import Noll.Lib.List1 (fromList1)
+import Noll.Lib.List1 (NonEmpty ((:|)), fromList1)
 import Noll.Lib.Supply (supplied)
 import Noll.TypeSystem.Constraint (Constraint (..))
 import Noll.TypeSystem.Constraint.Assumption (
@@ -154,6 +155,16 @@ patternConstraints assert ms =
     PListLiteral _ t ps -> do
       tellRight [Equality (InferenceRule 3) (t : (typeOf <$> ps))]
       concatForM ps (patternConstraints assert ms)
+    PAtVariable _ (Label t name) -> do
+      --tellRight [Equality (InferenceRule 333) undefined]
+
+--      let zs = filter (assumptionNameIs name) ms
+--      let t1 = TIntrinsic (IRecord (TRow (RExtend "max" (TVariable (TypeIndex KType 900)) (RExtend "min" (TVariable (TypeIndex KType 900)) RNil)))) `TArrow` (TApplication KType (TConstructor (KArrow KType KType) "Tree") (TVariable (TypeIndex KType 900) :| []))
+--
+--      assert t1 zs
+
+      pure [name]
+
     PLiteral{} ->
       pure []
 
@@ -274,8 +285,15 @@ collectConstraints =
       let t1 = TIntrinsic (IRecord (TRow (RExtend name t rvar)))
       tellRight [Equality (InferenceRule 302) [t1, typeOf e]]
       collectConstraints e
-    EFold{} ->
-      error "EFold"
+    EFold loc t (e :| es) cs e1 -> do
+      ms1 <- collectConstraints e
+      ms2 <- concatMapM collectConstraints es
+      (ts1, ts2, ms3) <- (third3 concat . unzip3 <$$> traverse clauseAssumptions) (fromList1 cs)
+      -- Pattern types
+      tellRight [Equality (InferenceRule 401) (typeOf e : ts1)]
+      -- Expression types
+      tellRight [Equality (InferenceRule 402) (foldType t (typeOf <$> es) : concat ts2)]
+      pure (ms1 <> ms2 <> ms3)
     ERecord loc t d e -> do
       ms1 <- concatMapM collectConstraints e
       ms2 <- concatMapM collectConstraints d
