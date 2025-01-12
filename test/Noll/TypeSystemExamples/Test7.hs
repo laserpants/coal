@@ -136,6 +136,8 @@ runTest =
 --          | Leaf =>
 --              []
 --        }
+--    in
+--      flatten
 --
 fixture :: Expression () ()
 fixture =
@@ -186,7 +188,75 @@ fixture =
                       )
                       :| []
                 )
-                Nothing
+                ( Just
+                    ( ERecursiveLet
+                        ()
+                        (PVariable () (Label () "$fold:1"))
+                        ( ELambda
+                            ()
+                            (PVariable () (Label () "$fold:1:expr") :| [])
+                            ( EMatch
+                                ()
+                                ()
+                                (EVariable () (Label () "$fold:1:expr"))
+                                ( EClause
+                                    ()
+                                    ( PConstructor
+                                        ()
+                                        (Label () "Node")
+                                        [ PVariable () (Label () "y")
+                                        , PVariable () (Label () "lhs")
+                                        , PVariable () (Label () "rhs")
+                                        ]
+                                    )
+                                    ( CPlain
+                                        ()
+                                        []
+                                        ( EApplication
+                                            ()
+                                            ()
+                                            ( EBinaryOperator
+                                                ()
+                                                ( ()
+                                                , OListConcatenation
+                                                )
+                                            )
+                                            ( EApplication
+                                                ()
+                                                ()
+                                                (EVariable () (Label () "$fold:1"))
+                                                (EVariable () (Label () "lhs") :| [])
+                                                <| EListCons
+                                                  ()
+                                                  ()
+                                                  (EVariable () (Label () "y"))
+                                                  ( EApplication
+                                                      ()
+                                                      ()
+                                                      (EVariable () (Label () "$fold:1"))
+                                                      (EVariable () (Label () "rhs") :| [])
+                                                  )
+                                                  :| []
+                                            )
+                                        )
+                                        :| []
+                                    )
+                                    <| EClause
+                                      ()
+                                      (PConstructor () (Label () "Leaf") [])
+                                      (CPlain () [] (EListLiteral () () []) :| [])
+                                      :| []
+                                )
+                            )
+                        )
+                        ( EApplication
+                            ()
+                            ()
+                            (EVariable () (Label () "$fold:1"))
+                            (EVariable () (Label () "tree") :| [])
+                        )
+                    )
+                )
             )
         )
         :| []
@@ -242,9 +312,77 @@ fixture1 =
                       )
                       :| []
                 )
-                Nothing
+                ( Just
+                    ( ERecursiveLet
+                        ()
+                        (PVariable () (Label (treeType 1 `TArrow` listType 1) "$fold:1"))
+                        ( ELambda
+                            ()
+                            (PVariable () (Label (treeType 1) "$fold:1:expr") :| [])
+                            ( EMatch
+                                ()
+                                (listType 1)
+                                (EVariable () (Label (treeType 1) "$fold:1:expr"))
+                                ( EClause
+                                    ()
+                                    ( PConstructor
+                                        ()
+                                        (Label (treeType 1) "Node")
+                                        [ PVariable () (Label (tvariable 1) "y")
+                                        , PVariable () (Label (treeType 1) "lhs")
+                                        , PVariable () (Label (treeType 1) "rhs")
+                                        ]
+                                    )
+                                    ( CPlain
+                                        ()
+                                        []
+                                        ( EApplication
+                                            ()
+                                            (listType 1)
+                                            ( EBinaryOperator
+                                                ()
+                                                ( listType 1 `TArrow` listType 1 `TArrow` listType 1
+                                                , OListConcatenation
+                                                )
+                                            )
+                                            ( EApplication
+                                                ()
+                                                (listType 1)
+                                                (EVariable () (Label (treeType 1 `TArrow` listType 1) "$fold:1"))
+                                                (EVariable () (Label (treeType 1) "lhs") :| [])
+                                                <| EListCons
+                                                  ()
+                                                  (listType 1)
+                                                  (EVariable () (Label (tvariable 1) "y"))
+                                                  ( EApplication
+                                                      ()
+                                                      (listType 1)
+                                                      (EVariable () (Label (treeType 1 `TArrow` listType 1) "$fold:1"))
+                                                      (EVariable () (Label (treeType 1) "rhs") :| [])
+                                                  )
+                                                  :| []
+                                            )
+                                        )
+                                        :| []
+                                    )
+                                    <| EClause
+                                      ()
+                                      (PConstructor () (Label (treeType 1) "Leaf") [])
+                                      (CPlain () [] (EListLiteral () (listType 1) []) :| [])
+                                      :| []
+                                )
+                            )
+                        )
+                        ( EApplication
+                            ()
+                            (listType 0)
+                            (EVariable () (Label (treeType 0 `TArrow` listType 0) "$fold:1"))
+                            (EVariable () (Label (treeType 0) "tree") :| [])
+                        )
+                    )
+                )
             )
         )
         :| []
     )
-    (EVariable () (Label (treeType 1 `TArrow` listType 1) "flatten"))
+    (EVariable () (Label (treeType 2 `TArrow` listType 2) "flatten"))
