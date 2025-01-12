@@ -156,15 +156,7 @@ patternConstraints assert ms =
       tellRight [Equality (InferenceRule 3) (t : (typeOf <$> ps))]
       concatForM ps (patternConstraints assert ms)
     PAtVariable _ (Label t name) -> do
-      --tellRight [Equality (InferenceRule 333) undefined]
-
---      let zs = filter (assumptionNameIs name) ms
---      let t1 = TIntrinsic (IRecord (TRow (RExtend "max" (TVariable (TypeIndex KType 900)) (RExtend "min" (TVariable (TypeIndex KType 900)) RNil)))) `TArrow` (TApplication KType (TConstructor (KArrow KType KType) "Tree") (TVariable (TypeIndex KType 900) :| []))
---
---      assert t1 zs
-
       pure [name]
-
     PLiteral{} ->
       pure []
 
