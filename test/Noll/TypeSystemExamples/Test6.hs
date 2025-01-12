@@ -317,142 +317,138 @@ fixture =
                       )
                       :| []
                 )
-                                ( Just
-                                    ( ELet
+                ( Just
+                    ( ERecursiveLet
+                        ()
+                        (PVariable () (Label () "$fold:1"))
+                        ( ELambda
+                            ()
+                            (PVariable () (Label () "$fold:1:expr") :| [])
+                            ( EMatch
+                                ()
+                                ()
+                                (EVariable () (Label () "$fold:1:expr"))
+                                ( EClause
+                                    ()
+                                    (PListCons () () (PVariable () (Label () "p")) (PVariable () (Label () "g")))
+                                    ( CPlain
                                         ()
-                                        ( BPattern
+                                        []
+                                        ( ELambda
                                             ()
-                                            (PVariable () (Label () "$fold:1"))
-                                            ( ELambda
+                                            (PVariable () (Label () "range") :| [])
+                                            ( EIf
                                                 ()
-                                                (PVariable () (Label () "$fold:1:expr") :| [])
-                                                ( EMatch
+                                                ()
+                                                ( EApplication
                                                     ()
                                                     ()
-                                                    (EVariable () (Label () "$fold:1:expr"))
-                                                    ( EClause
-                                                        ()
-                                                        (PListCons () () (PVariable () (Label () "p")) (PVariable () (Label () "g")))
-                                                        ( CPlain
-                                                            ()
-                                                            []
-                                                            ( ELambda
-                                                                ()
-                                                                (PVariable () (Label () "range") :| [])
-                                                                ( EIf
-                                                                    ()
-                                                                    ()
-                                                                    ( EApplication
-                                                                        ()
-                                                                        ()
-                                                                        (EBinaryOperator () ((), OForwardApplication))
-                                                                        ( EVariable () (Label () "p")
-                                                                            :| [ EApplication
-                                                                                  ()
-                                                                                  ()
-                                                                                  (EVariable () (Label () "in_range"))
-                                                                                  (EVariable () (Label () "range") :| [])
-                                                                               ]
-                                                                        )
-                                                                    )
-                                                                    ( EApplication
-                                                                        ()
-                                                                        ()
-                                                                        (EConstructor () (Label () "Node"))
-                                                                        ( EVariable () (Label () "p")
-                                                                            <| EApplication
-                                                                              ()
-                                                                              ()
-                                                                              (EVariable () (Label () "$fold:1"))
-                                                                              ( EVariable () (Label () "g")
-                                                                                  <| ERecord
-                                                                                    ()
-                                                                                    ()
-                                                                                    ( Map.fromList
-                                                                                        [ ("max", EVariable () (Label () "p"))
-                                                                                        , ("min", ESelect () (Label () "min") (EVariable () (Label () "range")))
-                                                                                        ]
-                                                                                    )
-                                                                                    Nothing
-                                                                                    :| []
-                                                                              )
-                                                                            <| EApplication
-                                                                              ()
-                                                                              ()
-                                                                              (EVariable () (Label () "$fold:1"))
-                                                                              ( EVariable () (Label () "g")
-                                                                                  <| ERecord
-                                                                                    ()
-                                                                                    ()
-                                                                                    ( Map.fromList
-                                                                                        [ ("max", ESelect () (Label () "max") (EVariable () (Label () "range")))
-                                                                                        , ("min", EVariable () (Label () "p"))
-                                                                                        ]
-                                                                                    )
-                                                                                    Nothing
-                                                                                    :| []
-                                                                              )
-                                                                              :| []
-                                                                        )
-                                                                    )
-                                                                    ( EApplication
-                                                                        ()
-                                                                        ()
-                                                                        (EVariable () (Label () "$fold:1"))
-                                                                        (EVariable () (Label () "g") <| EVariable () (Label () "range") :| [])
-                                                                    )
-                                                                )
-                                                            )
-                                                            :| []
-                                                        )
-                                                        <| EClause
-                                                          ()
-                                                          (PListLiteral () () [])
-                                                          ( CPlain
+                                                    (EBinaryOperator () ((), OForwardApplication))
+                                                    ( EVariable () (Label () "p")
+                                                        :| [ EApplication
                                                               ()
-                                                              []
-                                                              (ELambda () (PAny () () :| []) (EConstructor () (Label () "Leaf")))
-                                                              :| []
+                                                              ()
+                                                              (EVariable () (Label () "in_range"))
+                                                              (EVariable () (Label () "range") :| [])
+                                                           ]
+                                                    )
+                                                )
+                                                ( EApplication
+                                                    ()
+                                                    ()
+                                                    (EConstructor () (Label () "Node"))
+                                                    ( EVariable () (Label () "p")
+                                                        <| EApplication
+                                                          ()
+                                                          ()
+                                                          (EVariable () (Label () "$fold:1"))
+                                                          ( EVariable () (Label () "g")
+                                                              <| ERecord
+                                                                ()
+                                                                ()
+                                                                ( Map.fromList
+                                                                    [ ("max", EVariable () (Label () "p"))
+                                                                    , ("min", ESelect () (Label () "min") (EVariable () (Label () "range")))
+                                                                    ]
+                                                                )
+                                                                Nothing
+                                                                :| []
+                                                          )
+                                                        <| EApplication
+                                                          ()
+                                                          ()
+                                                          (EVariable () (Label () "$fold:1"))
+                                                          ( EVariable () (Label () "g")
+                                                              <| ERecord
+                                                                ()
+                                                                ()
+                                                                ( Map.fromList
+                                                                    [ ("max", ESelect () (Label () "max") (EVariable () (Label () "range")))
+                                                                    , ("min", EVariable () (Label () "p"))
+                                                                    ]
+                                                                )
+                                                                Nothing
+                                                                :| []
                                                           )
                                                           :| []
                                                     )
                                                 )
-                                            )
-                                            :| []
-                                        )
-                                        ( EApplication
-                                            ()
-                                            ()
-                                            (EVariable () (Label () "$fold:1"))
-                                            ( EVariable () (Label () "list")
-                                                <| ERecord
-                                                  ()
-                                                  ()
-                                                  ( Map.fromList
-                                                      [
-                                                        ( "max"
-                                                        , EApplication
-                                                            ()
-                                                            ()
-                                                            (EVariable () (Label () "from_int32"))
-                                                            (ELiteral () (LInt32 (-1)) :| [])
-                                                        )
-                                                      ,
-                                                        ( "min"
-                                                        , EApplication
-                                                            ()
-                                                            ()
-                                                            (EVariable () (Label () "from_int32"))
-                                                            (ELiteral () (LInt32 0) :| [])
-                                                        )
-                                                      ]
-                                                  )
-                                                  Nothing
-                                                  :| []
+                                                ( EApplication
+                                                    ()
+                                                    ()
+                                                    (EVariable () (Label () "$fold:1"))
+                                                    (EVariable () (Label () "g") <| EVariable () (Label () "range") :| [])
+                                                )
                                             )
                                         )
+                                        :| []
                                     )
+                                    <| EClause
+                                      ()
+                                      (PListLiteral () () [])
+                                      ( CPlain
+                                          ()
+                                          []
+                                          (ELambda () (PAny () () :| []) (EConstructor () (Label () "Leaf")))
+                                          :| []
+                                      )
+                                      :| []
                                 )
+                            )
+                        )
+                        ( EApplication
+                            ()
+                            ()
+                            (EVariable () (Label () "$fold:1"))
+                            ( EVariable () (Label () "list")
+                                <| ERecord
+                                  ()
+                                  ()
+                                  ( Map.fromList
+                                      [
+                                        ( "max"
+                                        , EApplication
+                                            ()
+                                            ()
+                                            (EVariable () (Label () "from_int32"))
+                                            (ELiteral () (LInt32 (-1)) :| [])
+                                        )
+                                      ,
+                                        ( "min"
+                                        , EApplication
+                                            ()
+                                            ()
+                                            (EVariable () (Label () "from_int32"))
+                                            (ELiteral () (LInt32 0) :| [])
+                                        )
+                                      ]
+                                  )
+                                  Nothing
+                                  :| []
+                            )
+                        )
+                    )
+                )
             )
         )
         :| []
@@ -465,37 +461,37 @@ fixture1 =
       ()
       ( BPattern
           ()
-          (PVariable () (Label (list0Type `TArrow` tree0Type) "from_list"))
+          (PVariable () (Label (listType 1 `TArrow` treeType 1) "from_list"))
           ( ELambda
               ()
               ( PAnnotation
                   ()
                   (TIntrinsic (IList (TVariable (TypeParam () "a"))))
-                  (PVariable () (Label list0Type "list"))
+                  (PVariable () (Label (listType 1) "list"))
                   :| []
               )
               ( EFold
                   ()
-                  tree0Type
-                  ( EVariable () (Label list0Type "list")
+                  (treeType 1)
+                  ( EVariable () (Label (listType 1) "list")
                       <| ERecord
                         ()
-                        maxMin0Type
+                        (maxMinType 1)
                         ( Map.fromList
                             [
                               ( "max"
                               , EApplication
                                   ()
-                                  tvariable0
-                                  (EVariable () (Label (int32 `TArrow` tvariable0) "from_int32"))
+                                  (tvariable 1)
+                                  (EVariable () (Label (int32 `TArrow` (tvariable 1)) "from_int32"))
                                   (ELiteral () (LInt32 (-1)) :| [])
                               )
                             ,
                               ( "min"
                               , EApplication
                                   ()
-                                  tvariable0
-                                  (EVariable () (Label (int32 `TArrow` tvariable0) "from_int32"))
+                                  (tvariable 1)
+                                  (EVariable () (Label (int32 `TArrow` (tvariable 1)) "from_int32"))
                                   (ELiteral () (LInt32 0) :| [])
                               )
                             ]
@@ -507,42 +503,42 @@ fixture1 =
                       ()
                       ( PListCons
                           ()
-                          list0Type
-                          (PVariable () (Label tvariable0 "p"))
-                          (PAtVariable () (Label list0Type "g"))
+                          (listType 1)
+                          (PVariable () (Label (tvariable 1) "p"))
+                          (PAtVariable () (Label (listType 1) "g"))
                       )
                       ( CPlain
                           ()
                           []
                           ( ELambda
                               ()
-                              (PVariable () (Label maxMin0Type "range") :| [])
+                              (PVariable () (Label (maxMinType 1) "range") :| [])
                               ( EIf
                                   ()
-                                  tree0Type
+                                  (treeType 1)
                                   ( EApplication
                                       ()
                                       bool
                                       ( EBinaryOperator
                                           ()
-                                          ( tvariable0 `TArrow` (tvariable0 `TArrow` bool) `TArrow` bool
+                                          ( (tvariable 1) `TArrow` ((tvariable 1) `TArrow` bool) `TArrow` bool
                                           , OForwardApplication
                                           )
                                       )
-                                      ( EVariable () (Label tvariable0 "p")
+                                      ( EVariable () (Label (tvariable 1) "p")
                                           <| EApplication
                                             ()
-                                            (tvariable0 `TArrow` bool)
+                                            ((tvariable 1) `TArrow` bool)
                                             ( EVariable
                                                 ()
                                                 ( Label
-                                                    (maxMin0Type `TArrow` tvariable0 `TArrow` bool)
+                                                    (maxMinType 1 `TArrow` (tvariable 1) `TArrow` bool)
                                                     "in_range"
                                                 )
                                             )
                                             ( EVariable
                                                 ()
-                                                (Label maxMin0Type "range")
+                                                (Label (maxMinType 1) "range")
                                                 :| []
                                             )
                                             :| []
@@ -550,33 +546,33 @@ fixture1 =
                                   )
                                   ( EApplication
                                       ()
-                                      tree0Type
+                                      (treeType 1)
                                       ( EConstructor
                                           ()
                                           ( Label
-                                              (tvariable0 `TArrow` tree0Type `TArrow` tree0Type `TArrow` tree0Type)
+                                              ((tvariable 1) `TArrow` treeType 1 `TArrow` treeType 1 `TArrow` treeType 1)
                                               "Node"
                                           )
                                       )
-                                      ( EVariable () (Label tvariable0 "p")
+                                      ( EVariable () (Label (tvariable 1) "p")
                                           <| EApplication
                                             ()
-                                            tree0Type
-                                            (EVariable () (Label (maxMin0Type `TArrow` tree0Type) "g"))
+                                            (treeType 1)
+                                            (EVariable () (Label (maxMinType 1 `TArrow` treeType 1) "g"))
                                             ( ERecord
                                                 ()
-                                                maxMin0Type
+                                                (maxMinType 1)
                                                 ( Map.fromList
                                                     [
                                                       ( "max"
-                                                      , EVariable () (Label tvariable0 "p")
+                                                      , EVariable () (Label (tvariable 1) "p")
                                                       )
                                                     ,
                                                       ( "min"
                                                       , ESelect
                                                           ()
-                                                          (Label tvariable0 "min")
-                                                          (EVariable () (Label maxMin0Type "range"))
+                                                          (Label (tvariable 1) "min")
+                                                          (EVariable () (Label (maxMinType 1) "range"))
                                                       )
                                                     ]
                                                 )
@@ -585,22 +581,22 @@ fixture1 =
                                             )
                                           <| EApplication
                                             ()
-                                            tree0Type
+                                            (treeType 1)
                                             ( EVariable
                                                 ()
-                                                (Label (maxMin0Type `TArrow` tree0Type) "g")
+                                                (Label (maxMinType 1 `TArrow` treeType 1) "g")
                                             )
                                             ( ERecord
                                                 ()
-                                                maxMin0Type
+                                                (maxMinType 1)
                                                 ( Map.fromList
                                                     [
                                                       ( "max"
-                                                      , ESelect () (Label tvariable0 "max") (EVariable () (Label maxMin0Type "range"))
+                                                      , ESelect () (Label (tvariable 1) "max") (EVariable () (Label (maxMinType 1) "range"))
                                                       )
                                                     ,
                                                       ( "min"
-                                                      , EVariable () (Label tvariable0 "p")
+                                                      , EVariable () (Label (tvariable 1) "p")
                                                       )
                                                     ]
                                                 )
@@ -612,9 +608,9 @@ fixture1 =
                                   )
                                   ( EApplication
                                       ()
-                                      tree0Type
-                                      (EVariable () (Label (maxMin0Type `TArrow` tree0Type) "g"))
-                                      (EVariable () (Label maxMin0Type "range") :| [])
+                                      (treeType 1)
+                                      (EVariable () (Label (maxMinType 1 `TArrow` treeType 1) "g"))
+                                      (EVariable () (Label (maxMinType 1) "range") :| [])
                                   )
                               )
                           )
@@ -622,219 +618,186 @@ fixture1 =
                       )
                       <| EClause
                         ()
-                        (PListLiteral () list0Type [])
+                        (PListLiteral () (listType 1) [])
                         ( CPlain
                             ()
                             []
                             ( ELambda
                                 ()
-                                (PAny () maxMin0Type :| [])
-                                (EConstructor () (Label tree0Type "Leaf"))
+                                (PAny () (maxMinType 1) :| [])
+                                (EConstructor () (Label (treeType 1) "Leaf"))
                             )
                             :| []
                         )
                         :| []
                   )
-                                    ( Just
-                                        ( ELet
-                                            ()
-                                            ( BPattern
-                                                ()
-                                                (PVariable () (Label (list0Type `TArrow` maxMin0Type `TArrow` tree0Type) "$fold:1"))
-                                                ( ELambda
-                                                    ()
-                                                    (PVariable () (Label list0Type "$fold:1:expr") :| [])
-                                                    ( EMatch
-                                                        ()
-                                                        (maxMin0Type `TArrow` tree0Type)
-                                                        (EVariable () (Label list0Type "$fold:1:expr"))
-                                                        ( EClause
-                                                            ()
-                                                            ( PListCons
+                  ( Just
+                      ( ERecursiveLet
+                          ()
+                          (PVariable () (Label (list0Type `TArrow` maxMin0Type `TArrow` tree0Type) "$fold:1"))
+                          ( ELambda
+                              ()
+                              (PVariable () (Label list0Type "$fold:1:expr") :| [])
+                              ( EMatch
+                                  ()
+                                  (maxMin0Type `TArrow` tree0Type)
+                                  (EVariable () (Label list0Type "$fold:1:expr"))
+                                  ( EClause
+                                      ()
+                                      ( PListCons
+                                          ()
+                                          list0Type
+                                          (PVariable () (Label tvariable0 "p"))
+                                          (PVariable () (Label list0Type "g"))
+                                      )
+                                      ( CPlain
+                                          ()
+                                          []
+                                          ( ELambda
+                                              ()
+                                              ( PVariable
+                                                  ()
+                                                  (Label maxMin0Type "range")
+                                                  :| []
+                                              )
+                                              ( EIf
+                                                  ()
+                                                  tree0Type
+                                                  ( EApplication
+                                                      ()
+                                                      bool
+                                                      ( EBinaryOperator
+                                                          ()
+                                                          ( tvariable0 `TArrow` (tvariable0 `TArrow` bool) `TArrow` bool
+                                                          , OForwardApplication
+                                                          )
+                                                      )
+                                                      ( EVariable () (Label tvariable0 "p")
+                                                          :| [ EApplication
                                                                 ()
-                                                                list0Type
-                                                                (PVariable () (Label tvariable0 "p"))
-                                                                (PVariable () (Label list0Type "g"))
-                                                            )
-                                                            ( CPlain
-                                                                ()
-                                                                []
-                                                                ( ELambda
+                                                                (tvariable0 `TArrow` bool)
+                                                                ( EVariable
                                                                     ()
-                                                                    ( PVariable
-                                                                        ()
-                                                                        (Label maxMin0Type "range")
-                                                                        :| []
-                                                                    )
-                                                                    ( EIf
-                                                                        ()
-                                                                        tree0Type
-                                                                        ( EApplication
-                                                                            ()
-                                                                            bool
-                                                                            ( EBinaryOperator
-                                                                                ()
-                                                                                ( tvariable0 `TArrow` (tvariable0 `TArrow` bool) `TArrow` bool
-                                                                                , OForwardApplication
-                                                                                )
-                                                                            )
-                                                                            ( EVariable () (Label tvariable0 "p")
-                                                                                :| [ EApplication
-                                                                                      ()
-                                                                                      (tvariable0 `TArrow` bool)
-                                                                                      ( EVariable
-                                                                                          ()
-                                                                                          ( Label
-                                                                                              (maxMin0Type `TArrow` tvariable0 `TArrow` bool)
-                                                                                              "in_range"
-                                                                                          )
-                                                                                      )
-                                                                                      (EVariable () (Label maxMin0Type "range") :| [])
-                                                                                   ]
-                                                                            )
-                                                                        )
-                                                                        ( EApplication
-                                                                            ()
-                                                                            tree0Type
-                                                                            (EConstructor () (Label (tvariable0 `TArrow` tree0Type `TArrow` tree0Type `TArrow` tree0Type) "Node"))
-                                                                            ( EVariable () (Label tvariable0 "p")
-                                                                                <| EApplication
-                                                                                  ()
-                                                                                  tree0Type
-                                                                                  ( EVariable
-                                                                                      ()
-                                                                                      ( Label
-                                                                                          (list0Type `TArrow` maxMin0Type `TArrow` tree0Type)
-                                                                                          "$fold:1"
-                                                                                      )
-                                                                                  )
-                                                                                  ( EVariable () (Label list0Type "g")
-                                                                                      <| ERecord
-                                                                                        ()
-                                                                                        maxMin0Type
-                                                                                        ( Map.fromList
-                                                                                            [ ("max", EVariable () (Label tvariable0 "p"))
-                                                                                            ,
-                                                                                              ( "min"
-                                                                                              , ESelect
-                                                                                                  ()
-                                                                                                  (Label tvariable0 "min")
-                                                                                                  (EVariable () (Label maxMin0Type "range"))
-                                                                                              )
-                                                                                            ]
-                                                                                        )
-                                                                                        Nothing
-                                                                                        :| []
-                                                                                  )
-                                                                                <| EApplication
-                                                                                  ()
-                                                                                  tree0Type
-                                                                                  (EVariable () (Label (list0Type `TArrow` maxMin0Type `TArrow` tree0Type) "$fold:1"))
-                                                                                  ( EVariable () (Label list0Type "g")
-                                                                                      <| ERecord
-                                                                                        ()
-                                                                                        maxMin0Type
-                                                                                        ( Map.fromList
-                                                                                            [ ("max", ESelect () (Label tvariable0 "max") (EVariable () (Label maxMin0Type "range")))
-                                                                                            , ("min", EVariable () (Label tvariable0 "p"))
-                                                                                            ]
-                                                                                        )
-                                                                                        Nothing
-                                                                                        :| []
-                                                                                  )
-                                                                                  :| []
-                                                                            )
-                                                                        )
-                                                                        ( EApplication
-                                                                            ()
-                                                                            tree0Type
-                                                                            (EVariable () (Label (list0Type `TArrow` maxMin0Type `TArrow` tree0Type) "$fold:1"))
-                                                                            (EVariable () (Label list0Type "g") <| EVariable () (Label maxMin0Type "range") :| [])
-                                                                        )
+                                                                    ( Label
+                                                                        (maxMin0Type `TArrow` tvariable0 `TArrow` bool)
+                                                                        "in_range"
                                                                     )
                                                                 )
-                                                                :| []
-                                                            )
-                                                            <| EClause
-                                                              ()
-                                                              (PListLiteral () list0Type [])
-                                                              ( CPlain
-                                                                  ()
-                                                                  []
-                                                                  (ELambda () (PAny () maxMin0Type :| []) (EConstructor () (Label tree0Type "Leaf")))
-                                                                  :| []
-                                                              )
-                                                              :| []
-                                                        )
-                                                    )
-                                                )
-                                                :| []
-                                            )
-                                            ( EApplication
-                                                ()
-                                                (treeType 1)
-                                                (EVariable () (Label (listType 1 `TArrow` maxMinType 1 `TArrow` treeType 1) "$fold:1"))
-                                                ( EVariable () (Label (listType 1) "list")
-                                                    <| ERecord
-                                                      ()
-                                                      (maxMinType 1)
-                                                      ( Map.fromList
-                                                          [
-                                                            ( "max"
-                                                            , EApplication
-                                                                ()
-                                                                (tvariable 1)
-                                                                (EVariable () (Label (int32 `TArrow` tvariable 1) "from_int32"))
-                                                                (ELiteral () (LInt32 (-1)) :| [])
-                                                            )
-                                                          ,
-                                                            ( "min"
-                                                            , EApplication
-                                                                ()
-                                                                (tvariable 1)
-                                                                (EVariable () (Label (int32 `TArrow` tvariable 1) "from_int32"))
-                                                                (ELiteral () (LInt32 0) :| [])
-                                                            )
-                                                          ]
+                                                                (EVariable () (Label maxMin0Type "range") :| [])
+                                                             ]
                                                       )
-                                                      Nothing
-                                                      :| []
-                                                )
-                                            )
+                                                  )
+                                                  ( EApplication
+                                                      ()
+                                                      tree0Type
+                                                      (EConstructor () (Label (tvariable0 `TArrow` tree0Type `TArrow` tree0Type `TArrow` tree0Type) "Node"))
+                                                      ( EVariable () (Label tvariable0 "p")
+                                                          <| EApplication
+                                                            ()
+                                                            tree0Type
+                                                            ( EVariable
+                                                                ()
+                                                                ( Label
+                                                                    (list0Type `TArrow` maxMin0Type `TArrow` tree0Type)
+                                                                    "$fold:1"
+                                                                )
+                                                            )
+                                                            ( EVariable () (Label list0Type "g")
+                                                                <| ERecord
+                                                                  ()
+                                                                  maxMin0Type
+                                                                  ( Map.fromList
+                                                                      [ ("max", EVariable () (Label tvariable0 "p"))
+                                                                      ,
+                                                                        ( "min"
+                                                                        , ESelect
+                                                                            ()
+                                                                            (Label tvariable0 "min")
+                                                                            (EVariable () (Label maxMin0Type "range"))
+                                                                        )
+                                                                      ]
+                                                                  )
+                                                                  Nothing
+                                                                  :| []
+                                                            )
+                                                          <| EApplication
+                                                            ()
+                                                            tree0Type
+                                                            (EVariable () (Label (list0Type `TArrow` maxMin0Type `TArrow` tree0Type) "$fold:1"))
+                                                            ( EVariable () (Label list0Type "g")
+                                                                <| ERecord
+                                                                  ()
+                                                                  maxMin0Type
+                                                                  ( Map.fromList
+                                                                      [ ("max", ESelect () (Label tvariable0 "max") (EVariable () (Label maxMin0Type "range")))
+                                                                      , ("min", EVariable () (Label tvariable0 "p"))
+                                                                      ]
+                                                                  )
+                                                                  Nothing
+                                                                  :| []
+                                                            )
+                                                            :| []
+                                                      )
+                                                  )
+                                                  ( EApplication
+                                                      ()
+                                                      tree0Type
+                                                      (EVariable () (Label (list0Type `TArrow` maxMin0Type `TArrow` tree0Type) "$fold:1"))
+                                                      (EVariable () (Label list0Type "g") <| EVariable () (Label maxMin0Type "range") :| [])
+                                                  )
+                                              )
+                                          )
+                                          :| []
+                                      )
+                                      <| EClause
+                                        ()
+                                        (PListLiteral () list0Type [])
+                                        ( CPlain
+                                            ()
+                                            []
+                                            (ELambda () (PAny () maxMin0Type :| []) (EConstructor () (Label tree0Type "Leaf")))
+                                            :| []
                                         )
+                                        :| []
+                                  )
+                              )
+                          )
+                          ( EApplication
+                              ()
+                              (treeType 1)
+                              (EVariable () (Label (listType 1 `TArrow` maxMinType 1 `TArrow` treeType 1) "$fold:1"))
+                              ( EVariable () (Label (listType 1) "list")
+                                  <| ERecord
+                                    ()
+                                    (maxMinType 1)
+                                    ( Map.fromList
+                                        [
+                                          ( "max"
+                                          , EApplication
+                                              ()
+                                              (tvariable 1)
+                                              (EVariable () (Label (int32 `TArrow` tvariable 1) "from_int32"))
+                                              (ELiteral () (LInt32 (-1)) :| [])
+                                          )
+                                        ,
+                                          ( "min"
+                                          , EApplication
+                                              ()
+                                              (tvariable 1)
+                                              (EVariable () (Label (int32 `TArrow` tvariable 1) "from_int32"))
+                                              (ELiteral () (LInt32 0) :| [])
+                                          )
+                                        ]
                                     )
+                                    Nothing
+                                    :| []
+                              )
+                          )
+                      )
+                  )
               )
           )
           :| []
       )
-      (EVariable () (Label (listType 1 `TArrow` treeType 1) "from_list"))
+      (EVariable () (Label (listType 2 `TArrow` treeType 2) "from_list"))
   )
-
---
--- fold(x) {
---   | y :: @ys => ys
--- }
---
-fixture2 :: Expression () ()
-fixture2 =
-  EFold
-    ()
-    ()
-    (EVariable () (Label () "x") :| [])
-    ( EClause
-        ()
-        ( PListCons
-            ()
-            ()
-            (PVariable () (Label () "y"))
-            (PAtVariable () (Label () "ys"))
-        )
-        ( CPlain
-            ()
-            []
-            (EVariable () (Label () "ys"))
-            :| []
-        )
-        :| []
-    )
-    Nothing

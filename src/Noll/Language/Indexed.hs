@@ -24,6 +24,7 @@ import Noll.Language.Expression.Choice (Choice (..), Guard (..))
 import Noll.Language.Pattern (Pattern (..))
 import Noll.Language.Trait (Trait (..))
 import Noll.Language.Type (Type (..), TypeIndex (..))
+import Noll.Language.Type.Intrinsic (Intrinsic (..))
 import Noll.Language.Type.Kind (Kind (..))
 import Noll.Language.Type.Row (Row (..))
 import Noll.Language.Type.Scheme (Scheme (..))
@@ -72,6 +73,10 @@ instance (Ord k, TypeIndexed k t) => TypeIndexed k (Row TypeIndex k t) where
       RNil ->
         mempty
 
+instance (Ord k, TypeIndexed k t) => TypeIndexed k (Intrinsic t) where
+  typeIndexesIn =
+    Set.unions . fmap typeIndexesIn
+
 instance (Ord k) => TypeIndexed k (Type TypeIndex k) where
   typeIndexesIn =
     \case
@@ -81,8 +86,8 @@ instance (Ord k) => TypeIndexed k (Type TypeIndex k) where
         typeIndexesIn t1 <> typeIndexesIn t2
       TConstructor{} ->
         mempty
-      TIntrinsic{} ->
-        mempty
+      TIntrinsic t -> do
+        typeIndexesIn t
       TRow row ->
         typeIndexesIn row
       TVariable t ->
