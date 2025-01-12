@@ -327,6 +327,15 @@ binaryOperatorType =
             `TArrow` (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 1))
             `TArrow` TVariable (TypeIndex KType 1)
         )
+    OForwardComposition ->
+      Forall
+        (Set.fromList [TypeIndex KType 0, TypeIndex KType 1, TypeIndex KType 2])
+        []
+        ( (TVariable (TypeIndex KType 1) `TArrow` TVariable (TypeIndex KType 2))
+            `TArrow` (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 1))
+            `TArrow` TVariable (TypeIndex KType 0)
+            `TArrow` TVariable (TypeIndex KType 2)
+        )
     OReverseComposition ->
       Forall
         (Set.fromList [TypeIndex KType 0, TypeIndex KType 1, TypeIndex KType 2])

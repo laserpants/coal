@@ -115,6 +115,7 @@ test-suite noll-test
       Noll.TypeSystemExamples.Test5
       Noll.TypeSystemExamples.Test6
       Noll.TypeSystemExamples.Test7
+      Noll.TypeSystemExamples.Test8
       Noll.TypeSystemFixtures.Expression
       Noll.TypeSystemSpec
       Noll.TypeSystemSpec.TestRunner
