@@ -190,7 +190,7 @@ fixture =
                             ( EApplication
                                 ()
                                 ()
-                                (EBinaryOperator () ((), OForwardApplication))
+                                (EBinaryOperator () ((), OReverseApplication))
                                 ( EVariable () (Label () "p")
                                     :| [ EApplication
                                           ()
@@ -334,7 +334,7 @@ fixture1 =
                                 ( EBinaryOperator
                                     ()
                                     ( tvariable0 `TArrow` (tvariable0 `TArrow` bool) `TArrow` bool
-                                    , OForwardApplication
+                                    , OReverseApplication
                                     )
                                 )
                                 ( EVariable () (Label tvariable0 "p")

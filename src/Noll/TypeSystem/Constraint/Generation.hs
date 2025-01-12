@@ -319,7 +319,7 @@ listConstructor =
 binaryOperatorType :: BinaryOperator -> Scheme TypeIndex Kind IndexedType
 binaryOperatorType =
   \case
-    OForwardApplication ->
+    OReverseApplication ->
       Forall
         (Set.fromList [TypeIndex KType 0, TypeIndex KType 1])
         []
@@ -327,7 +327,15 @@ binaryOperatorType =
             `TArrow` (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 1))
             `TArrow` TVariable (TypeIndex KType 1)
         )
-    OForwardComposition ->
+    OForwardApplication ->
+      Forall
+        (Set.fromList [TypeIndex KType 0, TypeIndex KType 1])
+        []
+        ( (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 1))
+            `TArrow` TVariable (TypeIndex KType 0)
+            `TArrow` TVariable (TypeIndex KType 1)
+        )
+    OReverseComposition ->
       Forall
         (Set.fromList [TypeIndex KType 0, TypeIndex KType 1, TypeIndex KType 2])
         []
@@ -336,12 +344,12 @@ binaryOperatorType =
             `TArrow` TVariable (TypeIndex KType 0)
             `TArrow` TVariable (TypeIndex KType 2)
         )
-    OReverseComposition ->
+    OForwardComposition ->
       Forall
         (Set.fromList [TypeIndex KType 0, TypeIndex KType 1, TypeIndex KType 2])
         []
-        ( (TVariable (TypeIndex KType 1) `TArrow` TVariable (TypeIndex KType 2))
-            `TArrow` (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 1))
+        ( (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 1))
+            `TArrow` (TVariable (TypeIndex KType 1) `TArrow` TVariable (TypeIndex KType 2))
             `TArrow` TVariable (TypeIndex KType 0)
             `TArrow` TVariable (TypeIndex KType 2)
         )

@@ -236,7 +236,7 @@ fixture =
                                 ( EApplication
                                     ()
                                     ()
-                                    (EBinaryOperator () ((), OForwardApplication))
+                                    (EBinaryOperator () ((), OReverseApplication))
                                     ( EVariable () (Label () "p")
                                         <| EApplication
                                           ()
@@ -347,7 +347,7 @@ fixture =
                                                 ( EApplication
                                                     ()
                                                     ()
-                                                    (EBinaryOperator () ((), OForwardApplication))
+                                                    (EBinaryOperator () ((), OReverseApplication))
                                                     ( EVariable () (Label () "p")
                                                         :| [ EApplication
                                                               ()
@@ -526,7 +526,7 @@ fixture1 =
                                       ( EBinaryOperator
                                           ()
                                           ( (tvariable 1) `TArrow` ((tvariable 1) `TArrow` bool) `TArrow` bool
-                                          , OForwardApplication
+                                          , OReverseApplication
                                           )
                                       )
                                       ( EVariable () (Label (tvariable 1) "p")
@@ -673,7 +673,7 @@ fixture1 =
                                                       ( EBinaryOperator
                                                           ()
                                                           ( tvariable0 `TArrow` (tvariable0 `TArrow` bool) `TArrow` bool
-                                                          , OForwardApplication
+                                                          , OReverseApplication
                                                           )
                                                       )
                                                       ( EVariable () (Label tvariable0 "p")

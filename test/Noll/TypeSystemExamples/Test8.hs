@@ -110,7 +110,7 @@ fixture =
         ( EApplication
             ()
             ()
-            (EBinaryOperator () ((), OForwardComposition))
+            (EBinaryOperator () ((), OReverseComposition))
             (EVariable () (Label () "flatten") <| EVariable () (Label () "from_list") :| [])
         )
         :| []
@@ -133,7 +133,7 @@ fixture1 =
                     `TArrow` (list0Type `TArrow` tree0Type)
                     `TArrow` list0Type
                     `TArrow` list0Type
-                , OForwardComposition
+                , OReverseComposition
                 )
             )
             ( EVariable () (Label (tree0Type `TArrow` list0Type) "flatten")
