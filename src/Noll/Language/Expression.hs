@@ -24,9 +24,9 @@ data Expression a t
     EApplication a t (Expression a t) (List1 (Expression a t))
   | -- | Lambda function expression
     ELambda a (List1 (Pattern a t)) (Expression a t)
-  | -- | Let binding
+  | -- | Let-binding
     ELet a (List1 (Binding Expression a t)) (Expression a t)
-  | -- | Recursive let binding
+  | -- | Recursive let-binding
     ERecursiveLet a (Pattern a t) (Expression a t) (Expression a t)
   | -- | Variable
     EVariable a (Label t)
@@ -48,7 +48,7 @@ data Expression a t
     EListLiteral a t [Expression a t]
   | -- | Pattern matching expression
     EMatch a t (Expression a t) (List1 (Clause Expression a t))
-  | -- | TODO
+  | -- | Fold expression
     EFold a t (List1 (Expression a t)) (List1 (Clause Expression a t)) (Maybe (Expression a t))
   | -- | Record field access selector
     ESelect a (Label t) (Expression a t)
