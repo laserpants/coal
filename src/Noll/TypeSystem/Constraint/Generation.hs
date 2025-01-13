@@ -236,10 +236,16 @@ collectConstraints =
                 t2 = typeOf e
             tellRight [Equality (InferLetBindingPattern loc t1 t2) [t1, t2]]
             collectConstraints e
+          BFunction _ _ ps e -> do
+            ms <- withMonomorphic ps (collectConstraints e)
+            concatForM ps (patternConstraints (assertEqualityAssumptions loc) ms)
+            pure ms
       names <- concatForM gs $
         \case
           BPattern _ p _ ->
             patternConstraints (assertImplicitAssumptions loc) ms1 p
+          BFunction _ _ ps e ->
+            concatMapM (patternConstraints (assertImplicitAssumptions loc) ms1) ps
       pure (filter (assumptionNameIsNotOneOf names) ms1 <> ms2)
     EIf loc t e1 e2 e3 -> do
       ms1 <- collectConstraints e1

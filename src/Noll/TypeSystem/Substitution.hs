@@ -19,6 +19,7 @@ import Noll.Language (
   Choice (..),
   Clause (..),
   Expression (..),
+  Function (..),
   Guard (..),
   IndexedType,
   Intrinsic (..),
@@ -30,6 +31,7 @@ import Noll.Language (
   Type (..),
   TypeIndex (..),
   TypeIndexed (..),
+  Uses (..),
  )
 import Noll.TypeSystem.Constraint (Constraint (..), MonomorphicSet (..))
 import Noll.Utils (IndexMap, Map, Set, fromMaybe)
@@ -205,6 +207,12 @@ instance Substitutable (Expression a IndexedType) where
         EFold a (apply sub t) (apply sub es) (apply sub cs) (apply sub e)
       e@ELiteral{} ->
         e
+
+instance Substitutable (Function Expression a IndexedType) where
+  apply sub =
+    \case
+      Function loc (Uses ts t) ps e ->
+        Function loc (Uses (apply sub ts) (apply sub t)) (apply sub ps) (apply sub e)
 
 newtype Substitution = Substitution {substitutionMap :: IndexMap IndexedType}
   deriving (Show, Eq, Ord, Read)

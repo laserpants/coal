@@ -21,8 +21,9 @@ import Noll.Label (Label (..))
 import Noll.Language.Expression (Clause (..), Expression (..))
 import Noll.Language.Expression.Binding (Binding (..))
 import Noll.Language.Expression.Choice (Choice (..), Guard (..))
+import Noll.Language.Module.Function (Function (..))
 import Noll.Language.Pattern (Pattern (..))
-import Noll.Language.Trait (Trait (..))
+import Noll.Language.Trait (Trait (..), Uses (..))
 import Noll.Language.Type (Type (..), TypeIndex (..))
 import Noll.Language.Type.Intrinsic (Intrinsic (..))
 import Noll.Language.Type.Kind (Kind (..))
@@ -130,6 +131,8 @@ instance (Ord k) => TypeIndexed k (Binding Expression a (Type TypeIndex k)) wher
     \case
       BPattern _ p e ->
         typeIndexesIn p <> typeIndexesIn e
+      BFunction _ _ ps e ->
+        typeIndexesIn ps <> typeIndexesIn e
 
 instance (Ord k) => TypeIndexed k (Guard Expression a (Type TypeIndex k)) where
   typeIndexesIn =
@@ -186,6 +189,12 @@ instance (Ord k) => TypeIndexed k (Expression a (Type TypeIndex k)) where
         typeIndexesIn t <> typeIndexesIn e
       EFold _ t es cs e ->
         typeIndexesIn t <> typeIndexesIn es <> typeIndexesIn cs <> typeIndexesIn e
+
+instance (Ord k) => TypeIndexed k (Function Expression a (Type TypeIndex k)) where
+  typeIndexesIn =
+    \case
+      Function _ (Uses ts t) ps e ->
+        typeIndexesIn ts <> typeIndexesIn t <> typeIndexesIn ps <> typeIndexesIn e
 
 notBoundIn :: Set (TypeIndex k) -> Set (TypeIndex k) -> Set (TypeIndex k)
 notBoundIn s = Set.filter notBound

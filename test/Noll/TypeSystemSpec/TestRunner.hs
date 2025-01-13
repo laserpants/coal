@@ -13,10 +13,12 @@ import Noll.Compiler (
   insertNamesC,
   solveConstraintsC,
   typedExpressionC,
+  typedFunctionC,
  )
 import Noll.Language (
   Constructor (..),
   Expression (..),
+  Function (..),
   IndexedType,
   Intrinsic (..),
   Kind (..),
@@ -36,20 +38,34 @@ import Noll.Utils (Name)
 import qualified Data.Set as Set
 import qualified Noll.Lib.Environment as Environment
 
-data TestResult a = TestResult
-  { testResultExpression :: Expression a (Type TypeIndex Kind)
+data TestResult r a = TestResult
+  { testResultExpression :: r
   , testResultAssumptions :: [Assumption IndexedType]
   , testResultErrors1 :: [ConstraintsGenerationError a]
   , testResultErrors2 :: [InferenceRule Kind a]
   }
   deriving (Show, Eq, Ord)
 
+runTypedFunctionTest ::
+  (Show a, Eq a) =>
+  CompilerEnvironment ->
+  [(Name, Scheme TypeIndex Kind IndexedType)] ->
+  Function Expression a () ->
+  TestResult (Function Expression a (Type TypeIndex Kind)) a
+runTypedFunctionTest env names f =
+  evalCompiler env $ do
+    insertNamesC names
+    (f2, as) <- typedFunctionC (indexed f)
+    errs0 <- getConstraintsGenerationErrorsC
+    errs1 <- getSolverRuleViolationsC
+    pure (TestResult f2 as errs0 errs1)
+
 runTypedExpressionTest ::
   (Show a, Eq a) =>
   CompilerEnvironment ->
   [(Name, Scheme TypeIndex Kind IndexedType)] ->
   Expression a () ->
-  TestResult a
+  TestResult (Expression a (Type TypeIndex Kind)) a
 runTypedExpressionTest env names e =
   evalCompiler env $ do
     insertNamesC names
@@ -58,7 +74,7 @@ runTypedExpressionTest env names e =
     errs1 <- getSolverRuleViolationsC
     pure (TestResult e2 as errs0 errs1)
 
-testRunner :: (Show a, Eq a) => [(Name, Scheme TypeIndex Kind IndexedType)] -> Expression a () -> TestResult a
+testRunner :: (Show a, Eq a) => [(Name, Scheme TypeIndex Kind IndexedType)] -> Expression a () -> TestResult (Expression a (Type TypeIndex Kind)) a
 testRunner = runTypedExpressionTest (CompilerEnvironment testDataConstructorEnv testTypeConstructorEnv)
 
 testDataConstructorEnv :: Environment (Constructor TypeIndex Kind (Type TypeIndex Kind))

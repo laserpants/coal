@@ -15,7 +15,7 @@ data Object a k t
   = -- | Codata type definition
     DCotype a Name -- TODO
   | -- | Function definition
-    DFunction a Name (Function Expression a t)
+    DFunction Name (Function Expression a t)
   | -- | TODO
     DGlobal Name (Global Expression a t)
   | --  | -- | Type signature

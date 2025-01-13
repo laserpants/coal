@@ -1,4 +1,5 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
@@ -12,6 +13,7 @@ module Noll.Compiler (
   runConstraintsGenerationC,
   generateConstraintsC,
   typedExpressionC,
+  typedFunctionC,
   solveConstraintsC,
   getConstraintsGenerationErrorsC,
   getSolverRuleViolationsC,
@@ -24,12 +26,16 @@ import Data.Either.Extra (partitionEithers)
 import Noll.Language (
   Constructor (..),
   Expression (..),
+  Function (..),
   IndexedType,
   Kind (..),
   Scheme (..),
   TypeIndex (..),
+  Uses (..),
+  foldType,
   freshIdIn,
   normalizeRowTypes,
+  typeOf,
  )
 import Noll.Lib.Environment (Environment (..))
 import Noll.TypeSystem (
@@ -52,6 +58,7 @@ import Noll.TypeSystem (
 import Noll.Utils (Dictionary, Name, (<$$>))
 
 import qualified Data.Map.Strict as Map
+import qualified Noll.Language.Module.Function as Function
 import qualified Noll.Lib.Environment as Environment
 
 data CompilerEnvironment = CompilerEnvironment
@@ -201,3 +208,15 @@ typedExpressionC e = do
   sub <- solveConstraintsC (cs0 <> cs1)
   let e1 = normalizeRowTypes <$> apply sub e
   pure (normalizeTypeIndexes e1, apply sub as1)
+
+typedFunctionC ::
+  (Show a, Eq a) =>
+  Function Expression a IndexedType ->
+  Compiler a (Function Expression a IndexedType, [CompilerAssumption])
+typedFunctionC f@(Function a (Uses _ t) ps e) = do
+  (as0, cs0) <- generateConstraintsC (Function.expressionRep "$.internal" f)
+  let t1 = (foldType t (typeOf <$> ps))
+  (as1, cs1) <- partitionEithers <$> traverse assumptionConstraints (Assumption "$.internal" t1 : as0)
+  sub <- solveConstraintsC (Equality (InferenceRule 999) [t1, typeOf e] : cs0 <> cs1)
+  let f1 = normalizeRowTypes <$> apply sub f
+  pure (normalizeTypeIndexes f1, apply sub as1)

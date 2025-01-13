@@ -32,11 +32,11 @@ spec :: Spec
 spec =
   describe "" $
     it "" $ do
-      1 == 2 -- undefined
+      testResultExpression (runTest fixture) == fixture1
 
-runTest :: (Show a, Eq a) => Expression a () -> TestResult a
+runTest :: (Show a, Eq a) => Function Expression a () -> TestResult (Function Expression a (Type TypeIndex Kind)) a
 runTest =
-  runTypedExpressionTest
+  runTypedFunctionTest
     (CompilerEnvironment env1 env2)
     [
       ( "compare"
@@ -85,42 +85,80 @@ runTest =
 --     match(compare(x, y)) {
 --       | LessThan or EqualTo => true
 --       | GreaterThan => false
+--     }
 --
-fixture :: Object () () ()
+fixture :: Function Expression () ()
 fixture =
-  DFunction
-    ()
-    "lte"
-    ( Function
-        (Uses [] ())
-        (PVariable () (Label () "x") :| [])
-        ( ELambda
-            ()
-            (PVariable () (Label () "y") :| [])
-            ( EMatch
-                ()
-                ()
-                ( EApplication
-                    ()
-                    ()
-                    (EVariable () (Label () "compare"))
-                    (EVariable () (Label () "x") <| EVariable () (Label () "y") :| [])
-                )
-                ( EClause
-                    ()
-                    ( POr
-                        ()
-                        ()
-                        (PConstructor () (Label () "LessThan") [])
-                        (PConstructor () (Label () "EqualTo") [])
-                    )
-                    (CPlain () [] (ELiteral () (LBool True)) :| [])
-                    <| EClause
+  --  DFunction
+  --    "lte"
+  ( Function
+      ()
+      (Uses [] ())
+      (PVariable () (Label () "x") :| [])
+      ( ELambda
+          ()
+          (PVariable () (Label () "y") :| [])
+          ( EMatch
+              ()
+              ()
+              ( EApplication
+                  ()
+                  ()
+                  (EVariable () (Label () "compare"))
+                  (EVariable () (Label () "x") <| EVariable () (Label () "y") :| [])
+              )
+              ( EClause
+                  ()
+                  ( POr
                       ()
-                      (PConstructor () (Label () "GreaterThan") [])
-                      (CPlain () [] (ELiteral () (LBool False)) :| [])
-                      :| []
-                )
-            )
-        )
-    )
+                      ()
+                      (PConstructor () (Label () "LessThan") [])
+                      (PConstructor () (Label () "EqualTo") [])
+                  )
+                  (CPlain () [] (ELiteral () (LBool True)) :| [])
+                  <| EClause
+                    ()
+                    (PConstructor () (Label () "GreaterThan") [])
+                    (CPlain () [] (ELiteral () (LBool False)) :| [])
+                    :| []
+              )
+          )
+      )
+  )
+
+fixture1 :: Function Expression () (Type TypeIndex Kind)
+fixture1 =
+  ( Function
+      ()
+      (Uses [] (TIntrinsic IBool))
+      (PVariable () (Label (TVariable (TypeIndex KType 0)) "x") :| [])
+      ( ELambda
+          ()
+          (PVariable () (Label (TVariable (TypeIndex KType 0)) "y") :| [])
+          ( EMatch
+              ()
+              (TIntrinsic IBool)
+              ( EApplication
+                  ()
+                  (TConstructor KType "Ordering")
+                  (EVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TConstructor KType "Ordering") "compare"))
+                  (EVariable () (Label (TVariable (TypeIndex KType 0)) "x") <| EVariable () (Label (TVariable (TypeIndex KType 0)) "y") :| [])
+              )
+              ( EClause
+                  ()
+                  ( POr
+                      ()
+                      (TConstructor KType "Ordering")
+                      (PConstructor () (Label (TConstructor KType "Ordering") "LessThan") [])
+                      (PConstructor () (Label (TConstructor KType "Ordering") "EqualTo") [])
+                  )
+                  (CPlain () [] (ELiteral () (LBool True)) :| [])
+                  <| EClause
+                    ()
+                    (PConstructor () (Label (TConstructor KType "Ordering") "GreaterThan") [])
+                    (CPlain () [] (ELiteral () (LBool False)) :| [])
+                    :| []
+              )
+          )
+      )
+  )
