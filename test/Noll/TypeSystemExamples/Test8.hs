@@ -99,6 +99,11 @@ runTest =
       ]
 
 --
+-- let
+--   qsort =
+--     flatten << from_list
+--   in
+--     qsort
 --
 fixture :: Expression () ()
 fixture =
