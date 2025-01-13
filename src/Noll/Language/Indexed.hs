@@ -17,11 +17,13 @@ import Control.Monad.State (evalState)
 import Data.List.NonEmpty (NonEmpty)
 import Data.Map.Strict (Map)
 import Data.Set (Set, singleton)
+import Noll.Common.Supply (supply)
 import Noll.Label (Label (..))
 import Noll.Language.Expression (Clause (..), Expression (..))
 import Noll.Language.Expression.Binding (Binding (..))
 import Noll.Language.Expression.Choice (Choice (..), Guard (..))
 import Noll.Language.Module.Function (Function (..))
+import Noll.Language.Module.Global (Global (..))
 import Noll.Language.Pattern (Pattern (..))
 import Noll.Language.Trait (Trait (..), Uses (..))
 import Noll.Language.Type (Type (..), TypeIndex (..))
@@ -29,7 +31,6 @@ import Noll.Language.Type.Intrinsic (Intrinsic (..))
 import Noll.Language.Type.Kind (Kind (..))
 import Noll.Language.Type.Row (Row (..))
 import Noll.Language.Type.Scheme (Scheme (..))
-import Noll.Common.Supply (supply)
 import Noll.Utils (unionMap)
 
 import qualified Data.Set as Set
@@ -195,6 +196,12 @@ instance (Ord k) => TypeIndexed k (Function Expression a (Type TypeIndex k)) whe
     \case
       Function _ (Uses ts t) ps e ->
         typeIndexesIn ts <> typeIndexesIn t <> typeIndexesIn ps <> typeIndexesIn e
+
+instance (Ord k) => TypeIndexed k (Global Expression a (Type TypeIndex k)) where
+  typeIndexesIn =
+    \case
+      Global _ (Uses ts t) e ->
+        typeIndexesIn ts <> typeIndexesIn t <> typeIndexesIn e
 
 notBoundIn :: Set (TypeIndex k) -> Set (TypeIndex k) -> Set (TypeIndex k)
 notBoundIn s = Set.filter notBound

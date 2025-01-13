@@ -15,6 +15,7 @@ import Control.Monad.RWS (MonadState, MonadWriter, RWS, runRWS, tell)
 import Data.List (delete, find)
 import Data.Set (intersection, (\\))
 import Debug.Trace
+import Noll.Common.Supply (supply)
 import Noll.Language (
   IndexedType,
   Kind (..),
@@ -27,7 +28,6 @@ import Noll.Language (
   notBoundIn,
   typeIdsIn,
  )
-import Noll.Common.Supply (supply)
 import Noll.TypeSystem.Constraint (Constraint (..), MonomorphicSet (..))
 import Noll.TypeSystem.Substitution (Substitutable (..), Substitution (..), mapsTo)
 import Noll.TypeSystem.Unification (unifyAll)

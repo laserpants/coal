@@ -10,6 +10,10 @@ import qualified Noll.TypeSystem.Constraint.GenerationSpec
 import qualified Noll.TypeSystem.UnificationSpec
 import qualified Noll.TypeSystemExamples.Test1
 import qualified Noll.TypeSystemExamples.Test10
+import qualified Noll.TypeSystemExamples.Test11
+import qualified Noll.TypeSystemExamples.Test12
+import qualified Noll.TypeSystemExamples.Test13
+import qualified Noll.TypeSystemExamples.Test14
 import qualified Noll.TypeSystemExamples.Test2
 import qualified Noll.TypeSystemExamples.Test3
 import qualified Noll.TypeSystemExamples.Test4
@@ -38,6 +42,10 @@ main =
     Noll.TypeSystemExamples.Test8.spec
     Noll.TypeSystemExamples.Test9.spec
     Noll.TypeSystemExamples.Test10.spec
+    Noll.TypeSystemExamples.Test11.spec
+    Noll.TypeSystemExamples.Test12.spec
+    Noll.TypeSystemExamples.Test13.spec
+    Noll.TypeSystemExamples.Test14.spec
 
 --    Noll.TypeSystem.TypeConstraint.CollectSpec.spec
 --    Noll.TypeSystem.TypeSubstitutionSpec.spec

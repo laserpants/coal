@@ -7,6 +7,9 @@ import Control.Monad.Writer (execWriter)
 import Data.Either.Extra (lefts, rights)
 import Data.List.NonEmpty ((<|))
 import Debug.Trace
+import Noll.Common.Environment (Environment)
+import Noll.Common.List1 (NonEmpty (..))
+import Noll.Common.Supply (supply)
 import Noll.Compiler (
   Compiler (..),
   CompilerEnvironment (..),
@@ -37,9 +40,6 @@ import Noll.Language (
   freshIdIn,
   indexed,
  )
-import Noll.Common.Environment (Environment)
-import Noll.Common.List1 (NonEmpty (..))
-import Noll.Common.Supply (supply)
 import Noll.TypeSystem.Constraint.Assumption (Assumption (..))
 import Noll.TypeSystem.Constraint.Generation
 import Noll.TypeSystem.Constraint.Generation.Internal (InferenceRule (..))

@@ -4,6 +4,8 @@ module Noll.TypeSystemSpec.TestRunner where
 
 import Data.List.NonEmpty ((<|))
 import Debug.Trace
+import Noll.Common.Environment (Environment)
+import Noll.Common.List1 (NonEmpty (..))
 import Noll.Compiler (
   CompilerEnvironment (..),
   evalCompiler,
@@ -14,11 +16,13 @@ import Noll.Compiler (
   solveConstraintsC,
   typedExpressionC,
   typedFunctionC,
+  typedGlobalC,
  )
 import Noll.Language (
   Constructor (..),
   Expression (..),
   Function (..),
+  Global (..),
   IndexedType,
   Intrinsic (..),
   Kind (..),
@@ -27,8 +31,6 @@ import Noll.Language (
   TypeIndex (..),
   indexed,
  )
-import Noll.Common.Environment (Environment)
-import Noll.Common.List1 (NonEmpty (..))
 import Noll.TypeSystem.Constraint.Assumption (Assumption (..))
 import Noll.TypeSystem.Constraint.Generation (ConstraintsGenerationError)
 import Noll.TypeSystem.Constraint.Generation.Internal (InferenceRule (..))
@@ -45,6 +47,20 @@ data TestResult r a = TestResult
   , testResultErrors2 :: [InferenceRule Kind a]
   }
   deriving (Show, Eq, Ord)
+
+runTypedGlobalTest ::
+  (Show a, Eq a) =>
+  CompilerEnvironment ->
+  [(Name, Scheme TypeIndex Kind IndexedType)] ->
+  Global Expression a () ->
+  TestResult (Global Expression a (Type TypeIndex Kind)) a
+runTypedGlobalTest env names g =
+  evalCompiler env $ do
+    insertNamesC names
+    (g2, as) <- typedGlobalC (indexed g)
+    errs0 <- getConstraintsGenerationErrorsC
+    errs1 <- getSolverRuleViolationsC
+    pure (TestResult g2 as errs0 errs1)
 
 runTypedFunctionTest ::
   (Show a, Eq a) =>

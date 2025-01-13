@@ -3,8 +3,8 @@
 
 module Noll.Language.Expression.Binding (Binding (..)) where
 
-import Noll.Language.Pattern (Pattern (..))
 import Noll.Common.List1 (List1)
+import Noll.Language.Pattern (Pattern (..))
 import Noll.Utils (Name)
 
 data Binding e a t

@@ -17,6 +17,7 @@ import Control.Monad.State (MonadState, StateT, evalStateT)
 import Data.List.NonEmpty (NonEmpty, (<|))
 import Data.Set (member)
 import Debug.Trace
+import Noll.Common.Supply (supplied)
 import Noll.Language (
   IndexedType,
   Intrinsic (..),
@@ -29,7 +30,6 @@ import Noll.Language (
   typeIdsIn,
   updateTail,
  )
-import Noll.Common.Supply (supplied)
 import Noll.TypeSystem.Substitution (
   Substitutable (..),
   Substitution (..),

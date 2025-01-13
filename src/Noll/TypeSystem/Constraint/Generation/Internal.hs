@@ -34,9 +34,9 @@ import Control.Monad.RWS (
   modify,
   runRWS,
  )
-import Noll.Language (Constructor (..), Kind (..), Type (..), TypeIndex (..))
 import Noll.Common.Environment (Environment (..))
 import Noll.Common.Supply (Supply (..))
+import Noll.Language (Constructor (..), Kind (..), Type (..), TypeIndex (..))
 import Noll.TypeSystem.Constraint (
   Constraint (..),
   MonomorphicSet (..),

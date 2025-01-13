@@ -3,6 +3,7 @@
 
 module Noll.Language.Expression (Expression (..), Clause (..)) where
 
+import Noll.Common.List1 (List1)
 import Noll.Label (Label (..))
 import Noll.Language.Expression.Binding (Binding (..))
 import Noll.Language.Expression.Choice (Choice (..))
@@ -11,7 +12,6 @@ import Noll.Language.Expression.Operator.Unary (UnaryOperator)
 import Noll.Language.Pattern (Pattern (..))
 import Noll.Language.Primitive (Primitive (..))
 import Noll.Language.Type (Type, TypeParam (..))
-import Noll.Common.List1 (List1)
 import Noll.Utils (Dictionary)
 
 data Clause e a t = EClause a (Pattern a t) (List1 (Choice e a t))

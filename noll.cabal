@@ -110,6 +110,10 @@ test-suite noll-test
       Noll.TypeSystem.UnificationSpec
       Noll.TypeSystemExamples.Test1
       Noll.TypeSystemExamples.Test10
+      Noll.TypeSystemExamples.Test11
+      Noll.TypeSystemExamples.Test12
+      Noll.TypeSystemExamples.Test13
+      Noll.TypeSystemExamples.Test14
       Noll.TypeSystemExamples.Test2
       Noll.TypeSystemExamples.Test3
       Noll.TypeSystemExamples.Test4

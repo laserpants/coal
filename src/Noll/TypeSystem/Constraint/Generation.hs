@@ -16,6 +16,8 @@ import Data.List (partition)
 import Data.Maybe (maybeToList)
 import Data.Tuple.Extra (second, third3)
 import Debug.Trace
+import Noll.Common.List1 (NonEmpty ((:|)), fromList1)
+import Noll.Common.Supply (supplied)
 import Noll.Label (Label (..))
 import Noll.Language (
   BinaryOperator (..),
@@ -38,8 +40,6 @@ import Noll.Language (
   fromDictionary,
   typeOf,
  )
-import Noll.Common.List1 (NonEmpty ((:|)), fromList1)
-import Noll.Common.Supply (supplied)
 import Noll.TypeSystem.Constraint (Constraint (..))
 import Noll.TypeSystem.Constraint.Assumption (
   Assumption (..),

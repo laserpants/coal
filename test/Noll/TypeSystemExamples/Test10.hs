@@ -93,7 +93,7 @@ fixture1 :: Function Expression () (Type TypeIndex Kind)
 fixture1 =
   Function
     ()
-    (Uses [] (TIntrinsic IBool))
+    (Uses [] (TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool))
     (PVariable () (Label (TVariable (TypeIndex KType 0)) "x") :| [])
     ( EApplication
         ()

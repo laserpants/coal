@@ -19,11 +19,11 @@ module Noll.Language.Type (
 ) where
 
 import Data.List.NonEmpty (NonEmpty)
+import Noll.Common.List1 (List1)
+import Noll.Common.Supply (Supply (..))
 import Noll.Language.Type.Intrinsic (Intrinsic (..))
 import Noll.Language.Type.Kind (Kind)
 import Noll.Language.Type.Row (Row (..), normalizeRow)
-import Noll.Common.List1 (List1)
-import Noll.Common.Supply (Supply (..))
 import Noll.Utils (Map, Name, Set)
 
 import qualified Data.Set as Set
