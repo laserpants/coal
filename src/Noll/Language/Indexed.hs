@@ -29,7 +29,7 @@ import Noll.Language.Type.Intrinsic (Intrinsic (..))
 import Noll.Language.Type.Kind (Kind (..))
 import Noll.Language.Type.Row (Row (..))
 import Noll.Language.Type.Scheme (Scheme (..))
-import Noll.Lib.Supply (supply)
+import Noll.Common.Supply (supply)
 import Noll.Utils (unionMap)
 
 import qualified Data.Set as Set

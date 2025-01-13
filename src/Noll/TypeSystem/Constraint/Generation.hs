@@ -38,8 +38,8 @@ import Noll.Language (
   fromDictionary,
   typeOf,
  )
-import Noll.Lib.List1 (NonEmpty ((:|)), fromList1)
-import Noll.Lib.Supply (supplied)
+import Noll.Common.List1 (NonEmpty ((:|)), fromList1)
+import Noll.Common.Supply (supplied)
 import Noll.TypeSystem.Constraint (Constraint (..))
 import Noll.TypeSystem.Constraint.Assumption (
   Assumption (..),
@@ -72,7 +72,7 @@ import Noll.Utils (
 
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
-import qualified Noll.Lib.Environment as Environment
+import qualified Noll.Common.Environment as Environment
 
 type ConstraintsGeneration a = ConstraintsGenerationStack a TypeIndex Kind IndexedType
 

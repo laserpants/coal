@@ -27,8 +27,8 @@ import Noll.Language (
   TypeIndex (..),
   indexed,
  )
-import Noll.Lib.Environment (Environment)
-import Noll.Lib.List1 (NonEmpty (..))
+import Noll.Common.Environment (Environment)
+import Noll.Common.List1 (NonEmpty (..))
 import Noll.TypeSystem.Constraint.Assumption (Assumption (..))
 import Noll.TypeSystem.Constraint.Generation (ConstraintsGenerationError)
 import Noll.TypeSystem.Constraint.Generation.Internal (InferenceRule (..))
@@ -36,7 +36,7 @@ import Noll.TypeSystem.Substitution (apply, normalizeTypeIndexes)
 import Noll.Utils (Name)
 
 import qualified Data.Set as Set
-import qualified Noll.Lib.Environment as Environment
+import qualified Noll.Common.Environment as Environment
 
 data TestResult r a = TestResult
   { testResultExpression :: r

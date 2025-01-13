@@ -28,7 +28,7 @@ import Test.Hspec (Spec, describe, hspec, it)
 
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
-import qualified Noll.Lib.Environment as Environment
+import qualified Noll.Common.Environment as Environment
 
 tvariable0 :: IndexedType
 tvariable0 = TVariable (TypeIndex KType 0)

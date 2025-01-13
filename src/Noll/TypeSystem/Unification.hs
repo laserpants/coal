@@ -29,7 +29,7 @@ import Noll.Language (
   typeIdsIn,
   updateTail,
  )
-import Noll.Lib.Supply (supplied)
+import Noll.Common.Supply (supplied)
 import Noll.TypeSystem.Substitution (
   Substitutable (..),
   Substitution (..),

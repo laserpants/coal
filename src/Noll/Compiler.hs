@@ -37,7 +37,7 @@ import Noll.Language (
   normalizeRowTypes,
   typeOf,
  )
-import Noll.Lib.Environment (Environment (..))
+import Noll.Common.Environment (Environment (..))
 import Noll.TypeSystem (
   Assumption (..),
   Constraint (..),
@@ -59,7 +59,7 @@ import Noll.Utils (Dictionary, Name, (<$$>))
 
 import qualified Data.Map.Strict as Map
 import qualified Noll.Language.Module.Function as Function
-import qualified Noll.Lib.Environment as Environment
+import qualified Noll.Common.Environment as Environment
 
 data CompilerEnvironment = CompilerEnvironment
   { compilerDataConstructorEnv :: Environment (Constructor TypeIndex Kind IndexedType)

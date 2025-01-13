@@ -10,7 +10,7 @@ import Noll.Language.HasType (HasType (..))
 import Noll.Language.Pattern (Pattern)
 import Noll.Language.Trait (Uses (..))
 import Noll.Language.Type (IndexedType, foldType)
-import Noll.Lib.List1 (List1, NonEmpty ((:|)))
+import Noll.Common.List1 (List1, NonEmpty ((:|)))
 import Noll.Utils (Name)
 
 data Function e a t = Function a (Uses t) (List1 (Pattern a t)) (e a t)

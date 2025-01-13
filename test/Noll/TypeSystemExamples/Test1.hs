@@ -23,7 +23,7 @@ import Noll.TypeSystemSpec.TestRunner
 import Test.Hspec (Spec, describe, hspec, it)
 
 import qualified Data.Set as Set
-import qualified Noll.Lib.Environment as Environment
+import qualified Noll.Common.Environment as Environment
 
 spec :: Spec
 spec =

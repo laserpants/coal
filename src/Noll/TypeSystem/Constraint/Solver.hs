@@ -27,7 +27,7 @@ import Noll.Language (
   notBoundIn,
   typeIdsIn,
  )
-import Noll.Lib.Supply (supply)
+import Noll.Common.Supply (supply)
 import Noll.TypeSystem.Constraint (Constraint (..), MonomorphicSet (..))
 import Noll.TypeSystem.Substitution (Substitutable (..), Substitution (..), mapsTo)
 import Noll.TypeSystem.Unification (unifyAll)

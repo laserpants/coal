@@ -24,6 +24,9 @@ source-repository head
 
 library
   exposed-modules:
+      Noll.Common.Environment
+      Noll.Common.List1
+      Noll.Common.Supply
       Noll.Compiler
       Noll.Core.Language.HasType
       Noll.Core.Language.Type
@@ -55,9 +58,6 @@ library
       Noll.Language.Type.Kind
       Noll.Language.Type.Row
       Noll.Language.Type.Scheme
-      Noll.Lib.Environment
-      Noll.Lib.List1
-      Noll.Lib.Supply
       Noll.TypeSystem
       Noll.TypeSystem.Constraint
       Noll.TypeSystem.Constraint.Assumption
@@ -109,6 +109,7 @@ test-suite noll-test
       Noll.TypeSystem.Constraint.GenerationSpec
       Noll.TypeSystem.UnificationSpec
       Noll.TypeSystemExamples.Test1
+      Noll.TypeSystemExamples.Test10
       Noll.TypeSystemExamples.Test2
       Noll.TypeSystemExamples.Test3
       Noll.TypeSystemExamples.Test4

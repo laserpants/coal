@@ -3,7 +3,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Lib.Supply (Supply (..), supply, supplyN, supplied) where
+module Noll.Common.Supply (Supply (..), supply, supplyN, supplied) where
 
 import Control.Monad (replicateM)
 import Control.Monad.State (MonadState, get, modify)

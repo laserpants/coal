@@ -4,7 +4,7 @@
 module Noll.Language.Expression.Binding (Binding (..)) where
 
 import Noll.Language.Pattern (Pattern (..))
-import Noll.Lib.List1 (List1)
+import Noll.Common.List1 (List1)
 import Noll.Utils (Name)
 
 data Binding e a t
