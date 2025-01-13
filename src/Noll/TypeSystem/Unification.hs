@@ -158,7 +158,6 @@ bindType (TypeIndex k index) =
 unifyAll :: (Show u, MonadState Int m, MonadError UnificationError m, Unifiable u) => [u] -> m Substitution
 unifyAll [] = pure mempty
 unifyAll (t : ts) = do
-  --  traceShowM (t : ts)
   sub1 <- foldrM go mempty ts
   sub2 <- unifyAll ts
   pure (sub2 <> sub1)
