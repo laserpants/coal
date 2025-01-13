@@ -70,9 +70,10 @@ instance Substitutable (MonomorphicSet (TypeIndex Kind)) where
 instance Substitutable (Scheme TypeIndex Kind IndexedType) where
   apply sub =
     \case
-      Forall qs ps t -> do
-        let sub1 = foldr removeSubstitution sub qs
+      Forall qs ps t ->
         Forall qs (apply sub1 ps) (apply sub1 t)
+       where
+        sub1 = foldr removeSubstitution sub qs
 
 instance Substitutable (Constraint c TypeIndex Kind IndexedType) where
   apply sub =
