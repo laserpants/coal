@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
@@ -26,7 +27,10 @@ import Control.Monad.Writer (execWriter)
 import Data.Either.Extra (partitionEithers)
 import Debug.Trace
 import Noll.Common.Environment (Environment (..))
+import Noll.Common.List1 (NonEmpty ((:|)))
+import Noll.Label (Label (..))
 import Noll.Language (
+  Binding (..),
   Constructor (..),
   Expression (..),
   Function (..),
@@ -34,9 +38,10 @@ import Noll.Language (
   IndexedType,
   Kind (..),
   Pattern (..),
-  Binding (..),
   Scheme (..),
+  Type (..),
   TypeIndex (..),
+  TypeIndexed (..),
   Uses (..),
   foldType,
   freshIdIn,
@@ -61,8 +66,6 @@ import Noll.TypeSystem (
   solveConstraints,
  )
 import Noll.Utils (Dictionary, Name, (<$$>))
-import Noll.Label (Label (..))
-import Noll.Common.List1 (NonEmpty ((:|)))
 
 import qualified Data.Map.Strict as Map
 import qualified Noll.Common.Environment as Environment
@@ -204,29 +207,35 @@ solveConstraintsC cs = do
   compilerReportConstraintsGenerationErrors (IllFormedTypeAnnotation <$> errors)
   pure sub
 
-baz cs2 e x = do
+compileConstraintsC ::
+  ( Functor f
+  , Substitutable (f IndexedType)
+  , TypeIndexed Kind (f IndexedType)
+  , Show a
+  , Eq a
+  ) =>
+  [CompilerConstraint a] ->
+  f IndexedType ->
+  Expression a IndexedType ->
+  Compiler a (f IndexedType, [CompilerAssumption])
+compileConstraintsC cs o e = do
   (as0, cs0) <- generateConstraintsC e
   (as1, cs1) <- partitionEithers <$> traverse assumptionConstraints as0
-  sub <- solveConstraintsC (cs0 <> cs1 <> cs2)
-  pure (normalizeRowTypes <$> apply sub x, apply sub as1)
+  sub <- solveConstraintsC (cs <> cs0 <> cs1)
+  pure (normalizeTypeIndexes (normalizeRowTypes <$> apply sub o), apply sub as1)
 
 typedExpressionC ::
   (Show a, Eq a) =>
   Expression a IndexedType ->
   Compiler a (Expression a IndexedType, [CompilerAssumption])
-typedExpressionC e = do
-  (e1, as1) <- baz [] e e
-  pure (normalizeTypeIndexes e1, as1)
+typedExpressionC e = compileConstraintsC [] e e
 
 typedFunctionC ::
   (Show a, Eq a) =>
   Function Expression a IndexedType ->
   Compiler a (Function Expression a IndexedType, [CompilerAssumption])
 typedFunctionC f@(Function loc (Uses _ t) ps e) = do
-  (f1, as1) <- baz [Equality (InferenceRule 999) [t, typeOf e]] expr f 
-  pure (normalizeTypeIndexes f1, as1)
- where
-  expr =
+  compileConstraintsC [Equality (InferenceRule 999) [t, typeOf e]] f $
     ELet
       loc
       (BFunction loc "$.function" ps e :| [])
@@ -237,10 +246,8 @@ typedGlobalC ::
   Global Expression a IndexedType ->
   Compiler a (Global Expression a IndexedType, [CompilerAssumption])
 typedGlobalC g@(Global loc (Uses _ t) e) = do
-  (g1, as1) <- baz [Equality (InferenceRule 999) [t, typeOf e]] expr g 
-  pure (normalizeTypeIndexes g1, as1)
- where
-  expr =
-    ELet loc
+  compileConstraintsC [Equality (InferenceRule 999) [t, typeOf e]] g $
+    ELet
+      loc
       (BPattern loc (PVariable loc (Label t "$.global")) e :| [])
       (EVariable loc (Label t "$.global"))
