@@ -46,7 +46,6 @@ library
       Noll.Language.Module.Function
       Noll.Language.Module.Global
       Noll.Language.Module.Object
-      Noll.Language.Module.Path
       Noll.Language.Pattern
       Noll.Language.Primitive
       Noll.Language.Trait
@@ -117,6 +116,7 @@ test-suite noll-test
       Noll.TypeSystemExamples.Test6
       Noll.TypeSystemExamples.Test7
       Noll.TypeSystemExamples.Test8
+      Noll.TypeSystemExamples.Test9
       Noll.TypeSystemFixtures.Expression
       Noll.TypeSystemSpec
       Noll.TypeSystemSpec.TestRunner

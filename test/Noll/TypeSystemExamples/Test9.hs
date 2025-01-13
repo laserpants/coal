@@ -11,13 +11,16 @@ import Noll.Language (
   Clause (..),
   Constructor (..),
   Expression (..),
+  Function (..),
   Intrinsic (..),
   Kind (..),
+  Object (..),
   Pattern (..),
   Primitive (..),
   Scheme (..),
   Type (..),
   TypeIndex (..),
+  Uses (..),
  )
 import Noll.TypeSystemSpec.TestRunner
 import Test.Hspec (Spec, describe, hspec, it)
@@ -29,7 +32,7 @@ spec :: Spec
 spec =
   describe "" $
     it "" $ do
-      undefined
+      1 == 2 -- undefined
 
 runTest :: (Show a, Eq a) => Expression a () -> TestResult a
 runTest =
@@ -76,55 +79,48 @@ runTest =
       [ ("Ordering", KType)
       ]
 
--- 
--- fun lte(x) =
+--
+-- lte(x) =
 --   fn(y) =>
 --     match(compare(x, y)) {
 --       | LessThan or EqualTo => true
 --       | GreaterThan => false
 --
-fixture :: Expression () ()
+fixture :: Object () () ()
 fixture =
-  undefined
---  ( ELet
---      ()
---      ( BPattern
---          ()
---          (PVariable () (Label () "lte"))
---          ( ELambda
---              ()
---              (PVariable () (Label () "x") :| [])
---              ( ELambda
---                  ()
---                  (PVariable () (Label () "y") :| [])
---                  ( EMatch
---                      ()
---                      ()
---                      ( EApplication
---                          ()
---                          ()
---                          (EVariable () (Label () "compare"))
---                          (EVariable () (Label () "x") <| EVariable () (Label () "y") :| [])
---                      )
---                      ( EClause
---                          ()
---                          ( POr
---                              ()
---                              ()
---                              (PConstructor () (Label () "LessThan") [])
---                              (PConstructor () (Label () "EqualTo") [])
---                          )
---                          (CPlain () [] (ELiteral () (LBool True)) :| [])
---                          <| EClause
---                            ()
---                            (PConstructor () (Label () "GreaterThan") [])
---                            (CPlain () [] (ELiteral () (LBool False)) :| [])
---                            :| []
---                      )
---                  )
---              )
---          )
---          :| []
---      )
---      (EVariable () (Label () "lte"))
---  )
+  DFunction
+    ()
+    "lte"
+    ( Function
+        (Uses [] ())
+        (PVariable () (Label () "x") :| [])
+        ( ELambda
+            ()
+            (PVariable () (Label () "y") :| [])
+            ( EMatch
+                ()
+                ()
+                ( EApplication
+                    ()
+                    ()
+                    (EVariable () (Label () "compare"))
+                    (EVariable () (Label () "x") <| EVariable () (Label () "y") :| [])
+                )
+                ( EClause
+                    ()
+                    ( POr
+                        ()
+                        ()
+                        (PConstructor () (Label () "LessThan") [])
+                        (PConstructor () (Label () "EqualTo") [])
+                    )
+                    (CPlain () [] (ELiteral () (LBool True)) :| [])
+                    <| EClause
+                      ()
+                      (PConstructor () (Label () "GreaterThan") [])
+                      (CPlain () [] (ELiteral () (LBool False)) :| [])
+                      :| []
+                )
+            )
+        )
+    )
