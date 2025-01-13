@@ -62,7 +62,7 @@ maxMin0Type = maxMinType 0
 
 spec :: Spec
 spec =
-  describe "" $
+  describe "let from_list = fn(list : List(a)) => fold(list, { max = from_int32(-1), min = from_int32(0) }) { | p :: @g => fn(range) => if p |.in_range(range) then Node(p , g({ min = range.min, max = p }) , g({ min = p, max = range.max })) else g(range) | [] => fn(_) => Leaf } in from_list" $
     it "" $ do
       testResultExpression (runTest fixture) == fixture1
 

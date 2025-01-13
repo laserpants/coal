@@ -62,7 +62,7 @@ maxMin0Type = maxMinType 0
 
 spec :: Spec
 spec =
-  describe "" $
+  describe "let qsort = flatten << from_list in qsort" $
     it "" $ do
       testResultExpression (runTest fixture) == fixture1
 

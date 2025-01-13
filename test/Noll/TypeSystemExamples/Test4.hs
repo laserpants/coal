@@ -50,7 +50,7 @@ maxMin0Type = TIntrinsic (IRecord (TRow (RExtend "max" tvariable0 (RExtend "min"
 
 spec :: Spec
 spec =
-  describe "" $
+  describe "fn(range) => if p |.in_range(range) then Node(p , g({ min = range.min, max = p }) , g({ min = p, max = range.max })) else g(range)" $
     it "" $ do
       testResultExpression (runTest fixture)
         == ELambda

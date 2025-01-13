@@ -45,6 +45,7 @@ library
       Noll.Language.Module
       Noll.Language.Module.Function
       Noll.Language.Module.Global
+      Noll.Language.Module.Object
       Noll.Language.Module.Path
       Noll.Language.Pattern
       Noll.Language.Primitive

@@ -62,7 +62,7 @@ maxMin0Type = maxMinType 0
 
 spec :: Spec
 spec =
-  describe "" $
+  describe "let flatten = fn(tree : Tree(a)) => fold(tree) { | Node(y, @lhs, @rhs) => lhs ++ (y :: rhs) | Leaf => [] } in flatten" $
     it "" $ do
       testResultExpression (runTest fixture) == fixture1
 
