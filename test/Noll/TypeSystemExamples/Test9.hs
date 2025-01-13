@@ -89,8 +89,6 @@ runTest =
 --
 fixture :: Function Expression () ()
 fixture =
-  --  DFunction
-  --    "lte"
   ( Function
       ()
       (Uses [] ())
