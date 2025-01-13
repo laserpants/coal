@@ -33,13 +33,13 @@ import Noll.Language (
   Global (..),
   IndexedType,
   Kind (..),
+  Pattern (..),
+  Binding (..),
   Scheme (..),
   TypeIndex (..),
   Uses (..),
   foldType,
   freshIdIn,
-  functionExpressionRep,
-  globalExpressionRep,
   normalizeRowTypes,
   typeOf,
  )
@@ -61,6 +61,8 @@ import Noll.TypeSystem (
   solveConstraints,
  )
 import Noll.Utils (Dictionary, Name, (<$$>))
+import Noll.Label (Label (..))
+import Noll.Common.List1 (NonEmpty ((:|)))
 
 import qualified Data.Map.Strict as Map
 import qualified Noll.Common.Environment as Environment
@@ -202,35 +204,43 @@ solveConstraintsC cs = do
   compilerReportConstraintsGenerationErrors (IllFormedTypeAnnotation <$> errors)
   pure sub
 
+baz cs2 e x = do
+  (as0, cs0) <- generateConstraintsC e
+  (as1, cs1) <- partitionEithers <$> traverse assumptionConstraints as0
+  sub <- solveConstraintsC (cs0 <> cs1 <> cs2)
+  pure (normalizeRowTypes <$> apply sub x, apply sub as1)
+
 typedExpressionC ::
   (Show a, Eq a) =>
   Expression a IndexedType ->
   Compiler a (Expression a IndexedType, [CompilerAssumption])
 typedExpressionC e = do
-  (as0, cs0) <- generateConstraintsC e
-  (as1, cs1) <- partitionEithers <$> traverse assumptionConstraints as0
-  sub <- solveConstraintsC (cs0 <> cs1)
-  let e1 = normalizeRowTypes <$> apply sub e
-  pure (normalizeTypeIndexes e1, apply sub as1)
+  (e1, as1) <- baz [] e e
+  pure (normalizeTypeIndexes e1, as1)
 
 typedFunctionC ::
   (Show a, Eq a) =>
   Function Expression a IndexedType ->
   Compiler a (Function Expression a IndexedType, [CompilerAssumption])
-typedFunctionC f@(Function a (Uses _ t) ps e) = do
-  (as0, cs0) <- generateConstraintsC (functionExpressionRep "$.internal" f)
-  (as1, cs1) <- partitionEithers <$> traverse assumptionConstraints as0
-  sub <- solveConstraintsC (Equality (InferenceRule 999) [t, typeOf e] : cs0 <> cs1)
-  let f1 = normalizeRowTypes <$> apply sub f
-  pure (normalizeTypeIndexes f1, apply sub as1)
+typedFunctionC f@(Function loc (Uses _ t) ps e) = do
+  (f1, as1) <- baz [Equality (InferenceRule 999) [t, typeOf e]] expr f 
+  pure (normalizeTypeIndexes f1, as1)
+ where
+  expr =
+    ELet
+      loc
+      (BFunction loc "$.function" ps e :| [])
+      (EVariable loc (Label (foldType t (typeOf <$> ps)) "$.function"))
 
 typedGlobalC ::
   (Show a, Eq a) =>
   Global Expression a IndexedType ->
   Compiler a (Global Expression a IndexedType, [CompilerAssumption])
-typedGlobalC g@(Global a (Uses _ t) e) = do
-  (as0, cs0) <- generateConstraintsC (globalExpressionRep "$.internal" g)
-  (as1, cs1) <- partitionEithers <$> traverse assumptionConstraints as0
-  sub <- solveConstraintsC (Equality (InferenceRule 999) [t, typeOf e] : cs0 <> cs1)
-  let g1 = normalizeRowTypes <$> apply sub g
-  pure (normalizeTypeIndexes g1, apply sub as1)
+typedGlobalC g@(Global loc (Uses _ t) e) = do
+  (g1, as1) <- baz [Equality (InferenceRule 999) [t, typeOf e]] expr g 
+  pure (normalizeTypeIndexes g1, as1)
+ where
+  expr =
+    ELet loc
+      (BPattern loc (PVariable loc (Label t "$.global")) e :| [])
+      (EVariable loc (Label t "$.global"))
