@@ -9,6 +9,7 @@ import qualified Noll.Language.IndexedSpec
 import qualified Noll.TypeSystem.Constraint.GenerationSpec
 import qualified Noll.TypeSystem.UnificationSpec
 import qualified Noll.TypeSystemExamples.Test1
+import qualified Noll.TypeSystemExamples.Test10
 import qualified Noll.TypeSystemExamples.Test2
 import qualified Noll.TypeSystemExamples.Test3
 import qualified Noll.TypeSystemExamples.Test4
@@ -36,6 +37,7 @@ main =
     Noll.TypeSystemExamples.Test7.spec
     Noll.TypeSystemExamples.Test8.spec
     Noll.TypeSystemExamples.Test9.spec
+    Noll.TypeSystemExamples.Test10.spec
 
 --    Noll.TypeSystem.TypeConstraint.CollectSpec.spec
 --    Noll.TypeSystem.TypeSubstitutionSpec.spec

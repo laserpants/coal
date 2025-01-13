@@ -30,7 +30,7 @@ import qualified Noll.Lib.Environment as Environment
 
 spec :: Spec
 spec =
-  describe "" $
+  describe "lte(x) = fn(y) => match(compare(x, y)) { LessThan or EqualTo => true | GreaterThan => false }" $
     it "" $ do
       testResultExpression (runTest fixture) == fixture1
 
