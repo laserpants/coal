@@ -219,7 +219,7 @@ typedFunctionC ::
   Compiler a (Function Expression a IndexedType, [CompilerAssumption])
 typedFunctionC f@(Function a (Uses _ t) ps e) = do
   (as0, cs0) <- generateConstraintsC (functionExpressionRep "$.internal" f)
-  (as1, cs1) <- partitionEithers <$> traverse assumptionConstraints (Assumption "$.internal" (foldType t (typeOf <$> ps)) : as0)
+  (as1, cs1) <- partitionEithers <$> traverse assumptionConstraints as0
   sub <- solveConstraintsC (Equality (InferenceRule 999) [t, typeOf e] : cs0 <> cs1)
   let f1 = normalizeRowTypes <$> apply sub f
   pure (normalizeTypeIndexes f1, apply sub as1)
@@ -230,7 +230,7 @@ typedGlobalC ::
   Compiler a (Global Expression a IndexedType, [CompilerAssumption])
 typedGlobalC g@(Global a (Uses _ t) e) = do
   (as0, cs0) <- generateConstraintsC (globalExpressionRep "$.internal" g)
-  (as1, cs1) <- partitionEithers <$> traverse assumptionConstraints (Assumption "$.internal" t : as0)
+  (as1, cs1) <- partitionEithers <$> traverse assumptionConstraints as0
   sub <- solveConstraintsC (Equality (InferenceRule 999) [t, typeOf e] : cs0 <> cs1)
   let g1 = normalizeRowTypes <$> apply sub g
   pure (normalizeTypeIndexes g1, apply sub as1)
