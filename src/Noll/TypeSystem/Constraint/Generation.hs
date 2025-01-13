@@ -64,6 +64,7 @@ import Noll.Utils (
   concatForM,
   concatMapM,
   forM,
+  forM_,
   fromMaybe,
   tellLeft,
   tellRight,
@@ -137,7 +138,7 @@ patternConstraints assert ms =
       let d1 = pure . typeOf <$> d
           p1 = extractRow . typeOf <$> p
           t1 = TIntrinsic (IRecord (TRow (fromDictionary d1 (fromMaybe RNil p1))))
-      forM (Map.toList d) $ \(name, e) ->
+      forM_ (Map.toList d) $ \(name, e) ->
         assert (typeOf e) (filter (assumptionNameIs name) ms)
       tellRight [Equality (InferenceRule 300) [t, t1]]
       ps1 <- concatForM (Map.elems d <> maybeToList p) (patternConstraints assert ms)

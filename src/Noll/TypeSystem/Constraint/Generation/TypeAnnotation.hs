@@ -109,7 +109,7 @@ instantiateRow =
 typeIndex :: (MonadReader TypeAnnotationContext m) => Kind -> Name -> TypeAnnotation a m (TypeIndex Kind)
 typeIndex k name = do
   dict <- get
-  let index = TypeIndex k (0 - lexOrderRank name - 1)
+  let index = TypeIndex k (negate (lexOrderRank name) - 1)
   case Map.lookup name dict of
     Nothing -> do
       modify (Map.insert name index)
