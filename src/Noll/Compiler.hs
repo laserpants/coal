@@ -13,9 +13,9 @@ module Noll.Compiler (
   evalCompiler,
   runConstraintsGenerationC,
   generateConstraintsC,
-  typedExpressionC,
-  typedFunctionC,
-  typedGlobalC,
+  typeCheckExpressionC,
+  typeCheckFunctionC,
+  typeCheckGlobalC,
   solveConstraintsC,
   getConstraintsGenerationErrorsC,
   getSolverRuleViolationsC,
@@ -224,28 +224,28 @@ compileConstraintsC cs o e = do
   sub <- solveConstraintsC (cs <> cs0 <> cs1)
   pure (normalizeTypeIndexes (normalizeRowTypes <$> apply sub o), apply sub as1)
 
-typedExpressionC ::
+typeCheckExpressionC ::
   (Show a, Eq a) =>
   Expression a IndexedType ->
   Compiler a (Expression a IndexedType, [CompilerAssumption])
-typedExpressionC e = compileConstraintsC [] e e
+typeCheckExpressionC e = compileConstraintsC [] e e
 
-typedFunctionC ::
+typeCheckFunctionC ::
   (Show a, Eq a) =>
   Function Expression a IndexedType ->
   Compiler a (Function Expression a IndexedType, [CompilerAssumption])
-typedFunctionC f@(Function loc (Uses _ t) ps e) = do
+typeCheckFunctionC f@(Function loc (Uses _ t) ps e) = do
   compileConstraintsC [Equality (InferenceRule 999) [t, typeOf e]] f $
     ELet
       loc
       (BFunction loc "$.function" ps e :| [])
       (EVariable loc (Label (foldType t (typeOf <$> ps)) "$.function"))
 
-typedGlobalC ::
+typeCheckGlobalC ::
   (Show a, Eq a) =>
   Global Expression a IndexedType ->
   Compiler a (Global Expression a IndexedType, [CompilerAssumption])
-typedGlobalC g@(Global loc (Uses _ t) e) = do
+typeCheckGlobalC g@(Global loc (Uses _ t) e) = do
   compileConstraintsC [Equality (InferenceRule 999) [t, typeOf e]] g $
     ELet
       loc

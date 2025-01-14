@@ -114,6 +114,7 @@ test-suite noll-test
       Noll.TypeSystemExamples.Test12
       Noll.TypeSystemExamples.Test13
       Noll.TypeSystemExamples.Test14
+      Noll.TypeSystemExamples.Test15
       Noll.TypeSystemExamples.Test2
       Noll.TypeSystemExamples.Test3
       Noll.TypeSystemExamples.Test4

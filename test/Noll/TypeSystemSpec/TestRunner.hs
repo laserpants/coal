@@ -14,9 +14,9 @@ import Noll.Compiler (
   getSolverRuleViolationsC,
   insertNamesC,
   solveConstraintsC,
-  typedExpressionC,
-  typedFunctionC,
-  typedGlobalC,
+  typeCheckExpressionC,
+  typeCheckFunctionC,
+  typeCheckGlobalC,
  )
 import Noll.Language (
   Constructor (..),
@@ -57,7 +57,7 @@ runTypedGlobalTest ::
 runTypedGlobalTest env names g =
   evalCompiler env $ do
     insertNamesC names
-    (g2, as) <- typedGlobalC (indexed g)
+    (g2, as) <- typeCheckGlobalC (indexed g)
     errs0 <- getConstraintsGenerationErrorsC
     errs1 <- getSolverRuleViolationsC
     pure (TestResult g2 as errs0 errs1)
@@ -71,7 +71,7 @@ runTypedFunctionTest ::
 runTypedFunctionTest env names f =
   evalCompiler env $ do
     insertNamesC names
-    (f2, as) <- typedFunctionC (indexed f)
+    (f2, as) <- typeCheckFunctionC (indexed f)
     errs0 <- getConstraintsGenerationErrorsC
     errs1 <- getSolverRuleViolationsC
     pure (TestResult f2 as errs0 errs1)
@@ -85,7 +85,7 @@ runTypedExpressionTest ::
 runTypedExpressionTest env names e =
   evalCompiler env $ do
     insertNamesC names
-    (e2, as) <- typedExpressionC (indexed e)
+    (e2, as) <- typeCheckExpressionC (indexed e)
     errs0 <- getConstraintsGenerationErrorsC
     errs1 <- getSolverRuleViolationsC
     pure (TestResult e2 as errs0 errs1)
