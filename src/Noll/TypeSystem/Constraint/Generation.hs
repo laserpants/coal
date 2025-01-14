@@ -174,9 +174,7 @@ listScheme =
 extractRow :: Type TypeIndex Kind -> Row TypeIndex Kind (Type TypeIndex Kind)
 extractRow =
   \case
-    TIntrinsic (IRecord r) ->
-      extractRow r
-    TRow r ->
+    TIntrinsic (IRecord (TRow r)) ->
       r
     _ ->
       error "TODO"
