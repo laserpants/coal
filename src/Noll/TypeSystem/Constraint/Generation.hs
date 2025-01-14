@@ -376,3 +376,11 @@ binaryOperatorType =
             `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 0)))
             `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 0)))
         )
+    OAddition ->
+      Forall
+        (Set.fromList [TypeIndex KType 0])
+        []
+        ( TVariable (TypeIndex KType 0)
+            `TArrow` TVariable (TypeIndex KType 0)
+            `TArrow` TVariable (TypeIndex KType 0)
+        )

@@ -6,6 +6,7 @@ import Data.List.NonEmpty (NonEmpty (..), (<|))
 import Noll.Compiler
 import Noll.Label (Label (..))
 import Noll.Language (
+  BinaryOperator (..),
   Binding (..),
   Choice (..),
   Clause (..),
@@ -27,147 +28,170 @@ import qualified Noll.Common.Environment as Environment
 
 spec :: Spec
 spec =
-  describe "let lte = fn(x) => fn(y) => match(compare(x, y)) { LessThan or EqualTo => true | GreaterThan => false } in lte" $
+  describe "" $
     it "" $ do
-      testResultExpression (runTest fixture)
-        == ( ELet
-              ()
-              ( BPattern
-                  ()
-                  (PVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool) "lte"))
-                  ( ELambda
-                      ()
-                      (PVariable () (Label (TVariable (TypeIndex KType 0)) "x") :| [])
-                      ( ELambda
-                          ()
-                          (PVariable () (Label (TVariable (TypeIndex KType 0)) "y") :| [])
-                          ( EMatch
-                              ()
-                              (TIntrinsic IBool)
-                              ( EApplication
-                                  ()
-                                  (TConstructor KType "Ordering")
-                                  (EVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TConstructor KType "Ordering") "compare"))
-                                  (EVariable () (Label (TVariable (TypeIndex KType 0)) "x") <| EVariable () (Label (TVariable (TypeIndex KType 0)) "y") :| [])
-                              )
-                              ( EClause
-                                  ()
-                                  ( POr
-                                      ()
-                                      (TConstructor KType "Ordering")
-                                      (PConstructor () (Label (TConstructor KType "Ordering") "LessThan") [])
-                                      (PConstructor () (Label (TConstructor KType "Ordering") "EqualTo") [])
-                                  )
-                                  (CPlain () [] (ELiteral () (LBool True)) :| [])
-                                  <| EClause
-                                    ()
-                                    (PConstructor () (Label (TConstructor KType "Ordering") "GreaterThan") [])
-                                    (CPlain () [] (ELiteral () (LBool False)) :| [])
-                                    :| []
-                              )
-                          )
-                      )
-                  )
-                  :| []
-              )
-              (EVariable () (Label (TVariable (TypeIndex KType 1) `TArrow` TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool) "lte"))
-           )
+      testResultExpression (runTest fixture) == fixture1
 
 runTest :: (Show a, Eq a) => Expression a () -> TestResult (Expression a (Type TypeIndex Kind)) a
 runTest =
   runTypedExpressionTest
     (CompilerEnvironment env1 env2)
-    [
-      ( "compare"
-      , Forall
-          (Set.fromList [TypeIndex KType 0])
-          []
-          ( TVariable (TypeIndex KType 0)
-              `TArrow` TVariable (TypeIndex KType 0)
-              `TArrow` TConstructor KType "Ordering"
-          )
-      )
-    ]
+    []
  where
   env1 =
     Environment.fromList
       [
-        ( "EqualTo"
+        ( "More"
         , Constructor
-            "EqualTo"
-            0
-            (Forall mempty [] (TConstructor KType "Ordering"))
+            "More"
+            2
+            (Forall mempty [] (TIntrinsic IInt32 `TArrow` TConstructor KType "Ints" `TArrow` TConstructor KType "Ints"))
         )
       ,
-        ( "GreaterThan"
+        ( "Nope"
         , Constructor
-            "GreaterThan"
+            "Nope"
             0
-            (Forall mempty [] (TConstructor KType "Ordering"))
-        )
-      ,
-        ( "LessThan"
-        , Constructor
-            "LessThan"
-            0
-            (Forall mempty [] (TConstructor KType "Ordering"))
+            (Forall mempty [] (TConstructor KType "Ints"))
         )
       ]
   env2 =
     Environment.fromList
-      [ ("Ordering", KType)
+      [ ("Ints", KType)
       ]
 
 -- type Ints
 --   = Nope
 --   | More(int32, Ints)
 --
--- let
---   len =
---     fold(n) {
---       | Nope =>
---           0
---       | More(m, @ms) =>
---           1 + ms
---   in
---     len(More(1, More(2, Nope)))
+-- fold(More(1, More(2, Nope))) {
+--   | Nope =>
+--       0
+--   | More(m, @ms) =>
+--       1 + ms
 --
 fixture :: Expression () ()
 fixture =
-  ( ELet
+  ( EFold
       ()
-      ( BPattern
-          ()
-          (PVariable () (Label () "len"))
-          (
-            EFold
-              ()
-              ()
-              (EVariable () (Label () "n") :| [])
-              undefined
-              Nothing
-          )
-          :| []
-      )
+      ()
       ( EApplication
           ()
           ()
-          (EVariable () (Label () "len"))
-          ( EApplication
+          (EConstructor () (Label () "More"))
+          ( ELiteral () (LInt32 1)
+              <| EApplication
+                ()
+                ()
+                (EConstructor () (Label () "More"))
+                ( ELiteral () (LInt32 2)
+                    <| EConstructor () (Label () "Nope") :| []
+                )
+                :| []
+          )
+          :| []
+      )
+      ( EClause
+          ()
+          (PConstructor () (Label () "Nope") [])
+          ( CPlain
               ()
-              ()
-              (EConstructor () (Label () "More"))
-              ( ELiteral () (LInt32 1)
-                  <| EApplication
-                    ()
-                    ()
-                    (EConstructor () (Label () "More"))
-                    ( ELiteral () (LInt32 2)
-                        <| EConstructor () (Label () "Nope") :| []
-                    )
-                    :| []
-              )
+              []
+              (ELiteral () (LInt32 0))
               :| []
           )
+          <| EClause
+            ()
+            ( PConstructor
+                ()
+                (Label () "More")
+                [ PVariable () (Label () "m")
+                , PAtVariable () (Label () "ms")
+                ]
+            )
+            ( CPlain
+                ()
+                []
+                ( EApplication
+                    ()
+                    ()
+                    (EBinaryOperator () ((), OAddition))
+                    ( ELiteral () (LInt32 0)
+                        <| (EVariable () (Label () "ms"))
+                          :| []
+                    )
+                )
+                :| []
+            )
+            :| []
       )
+      Nothing
+  )
+
+-- type Ints
+--   = Nope
+--   | More(int32, Ints)
+--
+-- fold(More(1, More(2, Nope))) {
+--   | Nope =>
+--       0
+--   | More(m, @ms) =>
+--       1 + ms
+--
+fixture1 :: Expression () (Type TypeIndex Kind)
+fixture1 =
+  ( EFold
+      ()
+      (TIntrinsic IInt32)
+      ( EApplication
+          ()
+          (TConstructor KType "Ints")
+          (EConstructor () (Label (TIntrinsic IInt32 `TArrow` TConstructor KType "Ints" `TArrow` TConstructor KType "Ints") "More"))
+          ( ELiteral () (LInt32 1)
+              <| EApplication
+                ()
+                (TConstructor KType "Ints")
+                (EConstructor () (Label (TIntrinsic IInt32 `TArrow` TConstructor KType "Ints" `TArrow` TConstructor KType "Ints") "More"))
+                ( ELiteral () (LInt32 2)
+                    <| EConstructor () (Label (TConstructor KType "Ints") "Nope") :| []
+                )
+                :| []
+          )
+          :| []
+      )
+      ( EClause
+          ()
+          (PConstructor () (Label (TConstructor KType "Ints") "Nope") [])
+          ( CPlain
+              ()
+              []
+              (ELiteral () (LInt32 0))
+              :| []
+          )
+          <| EClause
+            ()
+            ( PConstructor
+                ()
+                (Label (TConstructor KType "Ints") "More")
+                [ PVariable () (Label (TIntrinsic IInt32) "m")
+                , PAtVariable () (Label (TConstructor KType "Ints") "ms")
+                ]
+            )
+            ( CPlain
+                ()
+                []
+                ( EApplication
+                    ()
+                    (TIntrinsic IInt32)
+                    (EBinaryOperator () (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32, OAddition))
+                    ( ELiteral () (LInt32 0)
+                        <| (EVariable () (Label (TIntrinsic IInt32) "ms"))
+                          :| []
+                    )
+                )
+                :| []
+            )
+            :| []
+      )
+      Nothing
   )
