@@ -6,6 +6,7 @@ import qualified Noll.Language.IndexedSpec
 -- import qualified Noll.TypeSystem.TypeConstraint.CollectSpec
 -- import qualified Noll.TypeSystem.TypeSubstitutionSpec
 
+import qualified Noll.Compiler.Transform.PatternTranslationSpec
 import qualified Noll.TypeSystem.Constraint.GenerationSpec
 import qualified Noll.TypeSystem.UnificationSpec
 import qualified Noll.TypeSystemExamples.Test1
@@ -23,7 +24,6 @@ import qualified Noll.TypeSystemExamples.Test6
 import qualified Noll.TypeSystemExamples.Test7
 import qualified Noll.TypeSystemExamples.Test8
 import qualified Noll.TypeSystemExamples.Test9
-import qualified Noll.Compiler.Transform.PatternTranslationSpec
 import qualified Noll.TypeSystemSpec
 import Test.Hspec (hspec, it)
 
