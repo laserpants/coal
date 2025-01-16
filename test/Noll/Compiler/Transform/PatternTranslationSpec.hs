@@ -3,7 +3,7 @@
 module Noll.Compiler.Transform.PatternTranslationSpec where
 
 import Noll.Common.List1 (NonEmpty ((:|)))
-import Noll.Compiler.Transform.PatternTranslation (runTranslate, translate)
+import Noll.Compiler.Transform.PatternTranslation (runTranslatable, translate)
 import Noll.Label (Label (..))
 import Noll.Language (Binding (..), Choice (..), Clause (..), Expression (..), Intrinsic (..), Pattern (..), Type (..), TypeIndex (..))
 import Test.Hspec (Spec, describe, it)
@@ -12,17 +12,11 @@ spec :: Spec
 spec =
   describe "" $ do
     it "" $
-      runTranslate "v" 0 (translate fixture1) == fixture2
+      runTranslatable "v" 0 (translate fixture1) == fixture2
     it "" $
-      runTranslate "v" 0 (translate fixture3) == fixture4
+      runTranslatable "v" 0 (translate fixture3) == fixture4
     it "" $
-      runTranslate "v" 0 (translate fixture5) == fixture6
-
-bazSpec :: Expression () (Type TypeIndex ())
-bazSpec =
-  runTranslate "foo" 0 $
-    translate
-      fixture1
+      runTranslatable "v" 0 (translate fixture5) == fixture6
 
 -- let
 --  Some(p) =       Option(int32)
