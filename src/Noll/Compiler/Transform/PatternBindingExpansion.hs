@@ -6,7 +6,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Compiler.Transform.PatternTranslation where
+module Noll.Compiler.Transform.PatternBindingExpansion where
 
 import Control.Monad.Reader (MonadReader, ReaderT, ask, runReaderT)
 import Control.Monad.State (MonadState, State, evalState)
@@ -35,6 +35,8 @@ instance Translatable a o k (Pattern a (Type o k)) where
   translate =
     \case
       p@PVariable{} ->
+        pure p
+      p@(PAnnotation _ _ PVariable{}) ->
         pure p
       p -> do
         prefix <- ask

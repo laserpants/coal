@@ -6,16 +6,10 @@ import qualified Noll.Language.IndexedSpec
 -- import qualified Noll.SystemF.TypeConstraint.CollectSpec
 -- import qualified Noll.SystemF.TypeSubstitutionSpec
 
-import qualified Noll.Compiler.Transform.PatternTranslationSpec
+import qualified Noll.Compiler.Transform.PatternBindingExpansionSpec
 import qualified Noll.SystemF.Constraint.GenerationSpec
 import qualified Noll.SystemF.UnificationSpec
 import qualified Noll.SystemFExamples.Test01
-import qualified Noll.SystemFExamples.Test10
-import qualified Noll.SystemFExamples.Test11
-import qualified Noll.SystemFExamples.Test12
-import qualified Noll.SystemFExamples.Test13
-import qualified Noll.SystemFExamples.Test14
-import qualified Noll.SystemFExamples.Test15
 import qualified Noll.SystemFExamples.Test02
 import qualified Noll.SystemFExamples.Test03
 import qualified Noll.SystemFExamples.Test04
@@ -24,6 +18,12 @@ import qualified Noll.SystemFExamples.Test06
 import qualified Noll.SystemFExamples.Test07
 import qualified Noll.SystemFExamples.Test08
 import qualified Noll.SystemFExamples.Test09
+import qualified Noll.SystemFExamples.Test10
+import qualified Noll.SystemFExamples.Test11
+import qualified Noll.SystemFExamples.Test12
+import qualified Noll.SystemFExamples.Test13
+import qualified Noll.SystemFExamples.Test14
+import qualified Noll.SystemFExamples.Test15
 import qualified Noll.SystemFSpec
 import Test.Hspec (hspec, it)
 
@@ -32,7 +32,7 @@ main =
   hspec $ do
     Noll.Language.IndexedSpec.spec
     Noll.SystemF.Constraint.GenerationSpec.spec
-    Noll.Compiler.Transform.PatternTranslationSpec.spec
+    Noll.Compiler.Transform.PatternBindingExpansionSpec.spec
     Noll.SystemFSpec.spec
     Noll.SystemF.UnificationSpec.spec
     Noll.SystemFExamples.Test01.spec
