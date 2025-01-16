@@ -48,7 +48,7 @@ import Noll.Language (
   normalizeRowTypes,
   typeOf,
  )
-import Noll.TypeSystem (
+import Noll.SystemF (
   Assumption (..),
   Constraint (..),
   ConstraintsGenerationContext (..),
