@@ -6,8 +6,8 @@
 module Noll.Compiler.Transform.PatternTranslation where
 
 import Control.Monad.Reader (MonadReader, ReaderT, ask, runReaderT)
-import Control.Monad.Writer (MonadWriter, runWriterT, WriterT, tell)
 import Control.Monad.State (MonadState, State, evalState)
+import Control.Monad.Writer (MonadWriter, WriterT, runWriterT, tell)
 import Noll.Common.List1 (List1, NonEmpty ((:|)))
 import Noll.Common.Supply (supplied)
 import Noll.Label (Label (..))
@@ -16,6 +16,7 @@ import Noll.Language.Expression.Binding (Binding (..))
 import Noll.Language.Expression.Choice (Choice (..))
 import Noll.Language.HasType (HasType (..))
 import Noll.Language.Pattern (Pattern (..))
+import Noll.Language.Tagged (Tagged (..))
 import Noll.Language.Type (Type (..))
 import Noll.Utils (Name, foldrM)
 
@@ -24,8 +25,8 @@ import qualified Data.Text as Text
 runTranslate :: Name -> Int -> WriterT [(Name, Pattern b (Type o k))] (ReaderT Name (State Int)) a -> a
 runTranslate r s e = fst $ evalState (runReaderT (runWriterT e) r) s
 
-translatePattern :: (MonadWriter [(Name, Pattern a (Type o k))] m, MonadReader Name m, MonadState Int m) => a -> Pattern a (Type o k) -> m (Pattern a (Type o k))
-translatePattern loc =
+translatePattern :: (MonadWriter [(Name, Pattern a (Type o k))] m, MonadReader Name m, MonadState Int m) => Pattern a (Type o k) -> m (Pattern a (Type o k))
+translatePattern =
   \case
     p@PVariable{} ->
       pure p
@@ -34,15 +35,15 @@ translatePattern loc =
       n <- supplied id
       let name = Text.pack ("$" <> Text.unpack prefix <> "." <> show n)
       tell [(name, p)]
-      pure (PVariable loc (Label (typeOf p) name))
+      pure (PVariable (tag p) (Label (typeOf p) name))
 
 translateBinding :: (MonadWriter [(Name, Pattern a (Type o k))] m, MonadReader Name m, MonadState Int m) => Binding Expression a (Type o k) -> m (Binding Expression a (Type o k))
 translateBinding =
   \case
     BPattern a p e ->
-      BPattern a <$> translatePattern a p <*> translate e
+      BPattern a <$> translatePattern p <*> translate e
     BFunction a name ps e -> do
-      BFunction a name <$> traverse (translatePattern a) ps <*> translate e
+      BFunction a name <$> traverse translatePattern ps <*> translate e
 
 translate :: (MonadWriter [(Name, Pattern a (Type o k))] m, MonadReader Name m, MonadState Int m) => Expression a (Type o k) -> m (Expression a (Type o k))
 translate =
@@ -80,12 +81,12 @@ translate =
       (gs1, e3) <- runWriterT (traverse translateBinding gs)
       pure $ (ELet a gs1) (foldr (unrollMatch a) e2 e3)
     ERecursiveLet a p e1 e2 -> do
-      (gs1, e3) <- runWriterT (translatePattern a p)
+      (gs1, e3) <- runWriterT (translatePattern p)
       p1 <- BPattern a gs1 <$> translate e1
       pure $ (ELet a (p1 :| [])) (foldr (unrollMatch a) e2 e3)
     ELambda a ps e -> do
       e1 <- translate e
-      (ps1, e2) <- runWriterT (traverse (translatePattern a) ps)
+      (ps1, e2) <- runWriterT (traverse translatePattern ps)
       pure $ ELambda a ps1 (foldr (unrollMatch a) e1 e2)
 
 unrollMatch :: a -> (Name, Pattern a (Type o k)) -> Expression a (Type o k) -> Expression a (Type o k)

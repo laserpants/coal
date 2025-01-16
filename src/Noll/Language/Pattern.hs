@@ -1,5 +1,4 @@
 {-# LANGUAGE DeriveTraversable #-}
-{-# LANGUAGE StrictData #-}
 
 module Noll.Language.Pattern (Pattern (..)) where
 
