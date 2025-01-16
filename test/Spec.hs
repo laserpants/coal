@@ -23,6 +23,7 @@ import qualified Noll.TypeSystemExamples.Test6
 import qualified Noll.TypeSystemExamples.Test7
 import qualified Noll.TypeSystemExamples.Test8
 import qualified Noll.TypeSystemExamples.Test9
+import qualified Noll.Compiler.Transform.PatternTranslationSpec
 import qualified Noll.TypeSystemSpec
 import Test.Hspec (hspec, it)
 
@@ -31,6 +32,7 @@ main =
   hspec $ do
     Noll.Language.IndexedSpec.spec
     Noll.TypeSystem.Constraint.GenerationSpec.spec
+    Noll.Compiler.Transform.PatternTranslationSpec.spec
     Noll.TypeSystemSpec.spec
     Noll.TypeSystem.UnificationSpec.spec
     Noll.TypeSystemExamples.Test1.spec

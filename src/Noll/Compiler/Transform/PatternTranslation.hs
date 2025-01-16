@@ -6,8 +6,8 @@
 module Noll.Compiler.Transform.PatternTranslation where
 
 import Control.Monad.Reader (MonadReader, ReaderT, ask, runReaderT)
+import Control.Monad.Writer (MonadWriter, runWriterT, WriterT, tell)
 import Control.Monad.State (MonadState, State, evalState)
-import Control.Monad.Writer (MonadWriter, runWriterT, tell)
 import Noll.Common.List1 (List1, NonEmpty ((:|)))
 import Noll.Common.Supply (supplied)
 import Noll.Label (Label (..))
@@ -21,8 +21,8 @@ import Noll.Utils (Name, foldrM)
 
 import qualified Data.Text as Text
 
-runTranslate :: Name -> Int -> ReaderT Name (State Int) a -> a
-runTranslate r s e = evalState (runReaderT e r) s
+runTranslate :: Name -> Int -> WriterT [(Name, Pattern b (Type o k))] (ReaderT Name (State Int)) a -> a
+runTranslate r s e = fst $ evalState (runReaderT (runWriterT e) r) s
 
 translatePattern :: (MonadWriter [(Name, Pattern a (Type o k))] m, MonadReader Name m, MonadState Int m) => a -> Pattern a (Type o k) -> m (Pattern a (Type o k))
 translatePattern loc =
@@ -44,7 +44,7 @@ translateBinding =
     BFunction a name ps e -> do
       BFunction a name <$> traverse (translatePattern a) ps <*> translate e
 
-translate :: (MonadReader Name m, MonadState Int m) => Expression a (Type o k) -> m (Expression a (Type o k))
+translate :: (MonadWriter [(Name, Pattern a (Type o k))] m, MonadReader Name m, MonadState Int m) => Expression a (Type o k) -> m (Expression a (Type o k))
 translate =
   \case
     EAnnotation a t e ->
