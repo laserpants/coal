@@ -28,6 +28,7 @@ library
       Noll.Common.List1
       Noll.Common.Supply
       Noll.Compiler
+      Noll.Compiler.Transform.PatternTranslation
       Noll.Core.Language.HasType
       Noll.Core.Language.Type
       Noll.Core.LLVM.HasIRType
@@ -105,6 +106,7 @@ test-suite noll-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      Noll.Compiler.Transform.PatternTranslationSpec
       Noll.Language.IndexedSpec
       Noll.TypeSystem.Constraint.GenerationSpec
       Noll.TypeSystem.UnificationSpec

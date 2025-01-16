@@ -1,0 +1,97 @@
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE StrictData #-}
+
+module Noll.Compiler.Transform.PatternTranslation where
+
+import Control.Monad.Reader (MonadReader, ReaderT, ask, runReaderT)
+import Control.Monad.State (MonadState, State, evalState)
+import Control.Monad.Writer (MonadWriter, runWriterT, tell)
+import Noll.Common.List1 (List1, NonEmpty ((:|)))
+import Noll.Common.Supply (supplied)
+import Noll.Label (Label (..))
+import Noll.Language.Expression (Clause (..), Expression (..))
+import Noll.Language.Expression.Binding (Binding (..))
+import Noll.Language.Expression.Choice (Choice (..))
+import Noll.Language.HasType (HasType (..))
+import Noll.Language.Pattern (Pattern (..))
+import Noll.Language.Type (Type (..))
+import Noll.Utils (Name, foldrM)
+
+import qualified Data.Text as Text
+
+runTranslate :: Name -> Int -> ReaderT Name (State Int) a -> a
+runTranslate r s e = evalState (runReaderT e r) s
+
+translatePattern :: (MonadWriter [(Name, Pattern a (Type o k))] m, MonadReader Name m, MonadState Int m) => a -> Pattern a (Type o k) -> m (Pattern a (Type o k))
+translatePattern loc =
+  \case
+    p@PVariable{} ->
+      pure p
+    p -> do
+      prefix <- ask
+      n <- supplied id
+      let name = Text.pack ("$" <> Text.unpack prefix <> "." <> show n)
+      tell [(name, p)]
+      pure (PVariable loc (Label (typeOf p) name))
+
+translateBinding :: (MonadWriter [(Name, Pattern a (Type o k))] m, MonadReader Name m, MonadState Int m) => Binding Expression a (Type o k) -> m (Binding Expression a (Type o k))
+translateBinding =
+  \case
+    BPattern a p e ->
+      BPattern a <$> translatePattern a p <*> translate e
+    BFunction a name ps e -> do
+      BFunction a name <$> traverse (translatePattern a) ps <*> translate e
+
+translate :: (MonadReader Name m, MonadState Int m) => Expression a (Type o k) -> m (Expression a (Type o k))
+translate =
+  \case
+    EAnnotation a t e ->
+      EAnnotation a t <$> translate e
+    EApplication a t e1 es ->
+      EApplication a t <$> translate e1 <*> traverse translate es
+    EIf a t e1 e2 e3 ->
+      EIf a t <$> translate e1 <*> translate e2 <*> translate e3
+    ERecord a t d e ->
+      ERecord a t <$> traverse translate d <*> traverse translate e
+    EListCons a t e1 e2 ->
+      EListCons a t <$> translate e1 <*> translate e2
+    EListLiteral a t es ->
+      EListLiteral a t <$> traverse translate es
+    EMatch a t e cs ->
+      EMatch a t <$> translate e <*> pure cs
+    ESelect a (Label t name) e ->
+      ESelect a (Label t name) <$> translate e
+    EFold a t es cs e ->
+      EFold a t <$> traverse translate es <*> pure cs <*> traverse translate e
+    e@EUnaryOperator{} ->
+      pure e
+    e@EBinaryOperator{} ->
+      pure e
+    e@EVariable{} ->
+      pure e
+    e@EConstructor{} ->
+      pure e
+    e@ELiteral{} ->
+      pure e
+    ELet a gs e1 -> do
+      e2 <- translate e1
+      (gs1, e3) <- runWriterT (traverse translateBinding gs)
+      pure $ (ELet a gs1) (foldr (unrollMatch a) e2 e3)
+    ERecursiveLet a p e1 e2 -> do
+      (gs1, e3) <- runWriterT (translatePattern a p)
+      p1 <- BPattern a gs1 <$> translate e1
+      pure $ (ELet a (p1 :| [])) (foldr (unrollMatch a) e2 e3)
+    ELambda a ps e -> do
+      e1 <- translate e
+      (ps1, e2) <- runWriterT (traverse (translatePattern a) ps)
+      pure $ ELambda a ps1 (foldr (unrollMatch a) e1 e2)
+
+unrollMatch :: a -> (Name, Pattern a (Type o k)) -> Expression a (Type o k) -> Expression a (Type o k)
+unrollMatch a (name, p) e =
+  EMatch
+    a
+    (typeOf e)
+    (EVariable a (Label (typeOf p) name))
+    (EClause a p (CPlain a [] e :| []) :| [])
