@@ -6,7 +6,7 @@ import qualified Noll.Language.IndexedSpec
 -- import qualified Noll.SystemF.TypeConstraint.CollectSpec
 -- import qualified Noll.SystemF.TypeSubstitutionSpec
 
-import qualified Noll.Compiler.Transform.PatternBindingExpansionSpec
+import qualified Noll.Compiler.Transform.Pattern.BindingExpansionSpec
 import qualified Noll.SystemF.Constraint.GenerationSpec
 import qualified Noll.SystemF.UnificationSpec
 import qualified Noll.SystemFExamples.Test01
@@ -32,7 +32,7 @@ main =
   hspec $ do
     Noll.Language.IndexedSpec.spec
     Noll.SystemF.Constraint.GenerationSpec.spec
-    Noll.Compiler.Transform.PatternBindingExpansionSpec.spec
+    Noll.Compiler.Transform.Pattern.BindingExpansionSpec.spec
     Noll.SystemFSpec.spec
     Noll.SystemF.UnificationSpec.spec
     Noll.SystemFExamples.Test01.spec
