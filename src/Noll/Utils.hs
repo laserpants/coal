@@ -50,6 +50,7 @@ infixr 8 <$$>
 infixr 8 <$$$>
 
 -- | Monadic version of concatMap
+{-# INLINE concatMapM #-}
 concatMapM :: (Monad m, Traversable f) => (a -> m [b]) -> f a -> m [b]
 concatMapM f xs = fmap concat (mapM f xs)
 

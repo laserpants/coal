@@ -19,7 +19,7 @@ instance Supply Int where
 supply :: (MonadState s m, Supply s) => m s
 supply = do
   n <- get
-  modify (updateSupply (+ 1))
+  modify (updateSupply succ)
   pure n
 
 supplyN :: (MonadState s m, Supply s) => Int -> m [s]
