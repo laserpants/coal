@@ -28,7 +28,7 @@ import qualified Data.Text as Text
 type NamedPattern a o k = (Name, Pattern a (Type o k))
 
 runTranslatable :: Name -> Int -> WriterT [NamedPattern a o k] (ReaderT Name (State Int)) e -> e
-runTranslatable r s e = fst $ evalState (runReaderT (runWriterT e) r) s
+runTranslatable r s e = fst (evalState (runReaderT (runWriterT e) r) s)
 
 class Translatable a o k e | e -> a, e -> o k where
   translate :: (MonadWriter [NamedPattern a o k] m, MonadReader Name m, MonadState Int m) => e -> m e
