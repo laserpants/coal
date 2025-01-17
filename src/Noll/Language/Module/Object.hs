@@ -18,7 +18,7 @@ data Object a k t
   = -- | Type definition
     DType Name [Type TypeIndex k] [Constructor TypeIndex k (Type TypeIndex k)]
   | -- | Codata type definition
-    DCotype a Name -- TODO
+    DCodata a Name -- TODO
   | -- | Function definition
     DFunction Name (Function Expression a t)
   | -- | TODO
