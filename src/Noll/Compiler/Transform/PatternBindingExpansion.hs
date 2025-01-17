@@ -41,15 +41,12 @@ instance Translatable a o k (Pattern a (Type o k)) where
       p@(PAnnotation _ _ PVariable{}) ->
         pure p
       p -> do
-        name <- freshVar
+        name <- supplied . freshName =<< ask
         tell [(name, p)]
         pure (PVariable (tag p) (Label (typeOf p) name))
 
-freshVar :: (MonadWriter [NamedPattern a o k] m, MonadReader Name m, MonadState Int m) => m Name
-freshVar = do
-  prefix <- ask
-  n <- supplied id
-  pure (Text.pack ("$" <> Text.unpack prefix <> "." <> show n))
+freshName :: Name -> Int -> Name
+freshName prefix index = Text.pack ("$" <> Text.unpack prefix <> "." <> show index)
 
 instance Translatable a o k (Binding Expression a (Type o k)) where
   translate =
