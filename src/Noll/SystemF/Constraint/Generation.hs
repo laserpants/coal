@@ -36,9 +36,12 @@ import Noll.Language (
   Type (..),
   TypeIndex (..),
   TypeIndexed (..),
+  binaryOperatorTypeScheme,
   foldType,
+  forall1,
   fromDictionary,
   typeOf,
+  (~>),
  )
 import Noll.SystemF.Constraint (Constraint (..))
 import Noll.SystemF.Constraint.Assumption (
@@ -151,7 +154,7 @@ patternConstraints assert ms =
     PListCons _ t p1 p2 -> do
       ms1 <- patternConstraints assert ms p1
       ms2 <- patternConstraints assert ms p2
-      tellRight [Explicit (InferenceRule 3) (foldType t [typeOf p1, typeOf p2]) listScheme]
+      tellRight [Explicit (InferenceRule 3) (foldType t [typeOf p1, typeOf p2]) listConstructorTypeScheme]
       pure (ms1 <> ms2)
     PListLiteral _ t ps -> do
       tellRight [Equality (InferenceRule 3) (t : (typeOf <$> ps))]
@@ -160,15 +163,6 @@ patternConstraints assert ms =
       pure [name]
     PLiteral{} ->
       pure []
-
-listScheme :: Scheme TypeIndex Kind (Type TypeIndex Kind)
-listScheme =
-  Forall
-    (Set.fromList [TypeIndex KType 0])
-    []
-    (t0 `TArrow` TIntrinsic (IList t0) `TArrow` TIntrinsic (IList t0))
- where
-  t0 = TVariable (TypeIndex KType 0)
 
 -- TODO: move
 extractRow :: Type TypeIndex Kind -> Row TypeIndex Kind (Type TypeIndex Kind)
@@ -270,7 +264,7 @@ collectConstraints =
       ms1 <- collectConstraints e1
       ms2 <- collectConstraints e2
       let t1 = typeOf e1 `TArrow` typeOf e2 `TArrow` t
-      tellRight [Explicit (InferenceRule 402) t1 listConstructor]
+      tellRight [Explicit (InferenceRule 402) t1 listConstructorTypeScheme]
       pure (ms1 <> ms2)
     EListLiteral loc t es -> do
       ms1 <- concatMapM collectConstraints es
@@ -285,7 +279,7 @@ collectConstraints =
       tellRight [Equality (InferMatchClauseExpressions loc) (t : concat ts2)]
       pure (ms1 <> ms2)
     EBinaryOperator loc (t, op) -> do
-      tellRight [Explicit (InferBinaryOperator loc) t (binaryOperatorType op)]
+      tellRight [Explicit (InferBinaryOperator loc) t (binaryOperatorTypeScheme op)]
       pure []
     ESelect loc (Label t name) e -> do
       rvar <- supplied (RVariable . TypeIndex KRow)
@@ -311,76 +305,5 @@ collectConstraints =
       tellRight [Equality (InferenceRule 301) [t, t1]]
       pure (ms1 <> ms2)
 
-listConstructor :: Scheme TypeIndex Kind IndexedType
-listConstructor =
-  Forall
-    (Set.fromList [TypeIndex KType 0])
-    []
-    ( TVariable (TypeIndex KType 0)
-        `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 0)))
-        `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 0)))
-    )
-
-binaryOperatorType :: BinaryOperator -> Scheme TypeIndex Kind IndexedType
-binaryOperatorType =
-  \case
-    OReverseApplication ->
-      Forall
-        (Set.fromList [TypeIndex KType 0, TypeIndex KType 1])
-        []
-        ( TVariable (TypeIndex KType 0)
-            `TArrow` (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 1))
-            `TArrow` TVariable (TypeIndex KType 1)
-        )
-    OForwardApplication ->
-      Forall
-        (Set.fromList [TypeIndex KType 0, TypeIndex KType 1])
-        []
-        ( (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 1))
-            `TArrow` TVariable (TypeIndex KType 0)
-            `TArrow` TVariable (TypeIndex KType 1)
-        )
-    OReverseComposition ->
-      Forall
-        (Set.fromList [TypeIndex KType 0, TypeIndex KType 1, TypeIndex KType 2])
-        []
-        ( (TVariable (TypeIndex KType 1) `TArrow` TVariable (TypeIndex KType 2))
-            `TArrow` (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 1))
-            `TArrow` TVariable (TypeIndex KType 0)
-            `TArrow` TVariable (TypeIndex KType 2)
-        )
-    OForwardComposition ->
-      Forall
-        (Set.fromList [TypeIndex KType 0, TypeIndex KType 1, TypeIndex KType 2])
-        []
-        ( (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 1))
-            `TArrow` (TVariable (TypeIndex KType 1) `TArrow` TVariable (TypeIndex KType 2))
-            `TArrow` TVariable (TypeIndex KType 0)
-            `TArrow` TVariable (TypeIndex KType 2)
-        )
-    OLogicalOr ->
-      Forall
-        mempty
-        []
-        (TIntrinsic IBool `TArrow` TIntrinsic IBool `TArrow` TIntrinsic IBool)
-    OLogicalAnd ->
-      Forall
-        mempty
-        []
-        (TIntrinsic IBool `TArrow` TIntrinsic IBool `TArrow` TIntrinsic IBool)
-    OListConcatenation ->
-      Forall
-        (Set.fromList [TypeIndex KType 0])
-        []
-        ( TIntrinsic (IList (TVariable (TypeIndex KType 0)))
-            `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 0)))
-            `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 0)))
-        )
-    OAddition ->
-      Forall
-        (Set.fromList [TypeIndex KType 0])
-        []
-        ( TVariable (TypeIndex KType 0)
-            `TArrow` TVariable (TypeIndex KType 0)
-            `TArrow` TVariable (TypeIndex KType 0)
-        )
+listConstructorTypeScheme :: Scheme TypeIndex Kind IndexedType
+listConstructorTypeScheme = forall1 (\a -> a ~> TIntrinsic (IList a) ~> TIntrinsic (IList a))

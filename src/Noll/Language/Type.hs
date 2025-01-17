@@ -16,6 +16,7 @@ module Noll.Language.Type (
   foldType,
   activeIdsIn,
   normalizeRowTypes,
+  (~>),
 ) where
 
 import Data.List.NonEmpty (NonEmpty)
@@ -39,6 +40,11 @@ data Type o k
   deriving (Show, Eq, Ord, Read)
 
 infixr 1 `TArrow`
+
+(~>) :: Type o k -> Type o k -> Type o k
+(~>) = TArrow
+
+infixr 1 ~>
 
 data TypeIndex k = TypeIndex
   { typeIndexKind :: k
