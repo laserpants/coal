@@ -45,6 +45,7 @@ instance Translatable a o k (Pattern a (Type o k)) where
         tell [(name, p)]
         pure (PVariable (tag p) (Label (typeOf p) name))
 
+{-# INLINE freshName #-}
 freshName :: Name -> Int -> Name
 freshName prefix index = Text.pack ("$" <> Text.unpack prefix <> "." <> show index)
 
