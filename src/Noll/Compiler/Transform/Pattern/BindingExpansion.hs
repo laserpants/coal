@@ -8,6 +8,8 @@
 
 module Noll.Compiler.Transform.Pattern.BindingExpansion where
 
+import Noll.Language.Module.Global (Global (..))
+import Noll.Language.Module.Function (Function (..))
 import Control.Monad.Reader (MonadReader, ReaderT, ask, runReaderT)
 import Control.Monad.State (MonadState, State, evalState)
 import Control.Monad.Writer (MonadWriter, WriterT, runWriterT, tell)
@@ -110,3 +112,17 @@ unrollMatch (name, p) e =
     (EClause a p (CPlain a [] e :| []) :| [])
  where
   a = tag p
+
+instance Translatable a o k (Function Expression a (Type o k)) where
+  translate =
+    \case
+      Function a u ps e -> do
+        e1 <- translate e
+        (qs, ps) <- runWriterT (traverse translate ps)
+        pure $ Function a u qs (foldr unrollMatch e1 ps)
+
+instance Translatable a o k (Global Expression a (Type o k)) where
+  translate =
+    \case
+      Global a u e ->
+        Global a u <$> translate e
