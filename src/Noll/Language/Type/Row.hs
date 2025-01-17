@@ -48,15 +48,16 @@ normalizeRow = fromRowData . toRowData
 
 extractField :: Name -> Row o k t -> Maybe (t, Row o k t)
 extractField name row =
-  second (fromRowData . (`RowData` r)) <$> extractFieldImpl
+  second (fromRowData . (`RowData` r)) <$> go
  where
-  RowData dict r = toRowData row
-  extractFieldImpl =
+  go =
     case Map.lookup name dict of
       Just (t : ts) ->
         Just (t, Map.filter (not . null) (Map.insert name ts dict))
       _ ->
         Nothing
+  RowData dict r =
+    toRowData row
 
 updateTail :: Row o k t -> Row o k t -> Row o k t
 updateTail r =
