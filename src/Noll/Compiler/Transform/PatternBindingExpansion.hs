@@ -25,11 +25,13 @@ import Noll.Utils (Name, foldrM)
 
 import qualified Data.Text as Text
 
-runTranslatable :: Name -> Int -> WriterT [(Name, Pattern a (Type o k))] (ReaderT Name (State Int)) e -> e
+type NamedPattern a o k = (Name, Pattern a (Type o k))
+
+runTranslatable :: Name -> Int -> WriterT [NamedPattern a o k] (ReaderT Name (State Int)) e -> e
 runTranslatable r s e = fst $ evalState (runReaderT (runWriterT e) r) s
 
 class Translatable a o k e | e -> a, e -> o k where
-  translate :: (MonadWriter [(Name, Pattern a (Type o k))] m, MonadReader Name m, MonadState Int m) => e -> m e
+  translate :: (MonadWriter [NamedPattern a o k] m, MonadReader Name m, MonadState Int m) => e -> m e
 
 instance Translatable a o k (Pattern a (Type o k)) where
   translate =
@@ -39,11 +41,15 @@ instance Translatable a o k (Pattern a (Type o k)) where
       p@(PAnnotation _ _ PVariable{}) ->
         pure p
       p -> do
-        prefix <- ask
-        n <- supplied id
-        let name = Text.pack ("$" <> Text.unpack prefix <> "." <> show n)
+        name <- freshVar
         tell [(name, p)]
         pure (PVariable (tag p) (Label (typeOf p) name))
+
+freshVar :: (MonadWriter [NamedPattern a o k] m, MonadReader Name m, MonadState Int m) => m Name
+freshVar = do
+  prefix <- ask
+  n <- supplied id
+  pure (Text.pack ("$" <> Text.unpack prefix <> "." <> show n))
 
 instance Translatable a o k (Binding Expression a (Type o k)) where
   translate =
@@ -86,21 +92,22 @@ instance Translatable a o k (Expression a (Type o k)) where
         pure e
       ELet a gs e1 -> do
         e2 <- translate e1
-        (gs1, e3) <- runWriterT (traverse translate gs)
-        pure $ (ELet a gs1) (foldr (unrollMatch a) e2 e3)
+        (hs, ps) <- runWriterT (traverse translate gs)
+        pure $ ELet a hs (foldr unrollMatch e2 ps)
       ERecursiveLet a p e1 e2 -> do
-        (gs1, e3) <- runWriterT (translate p)
-        p1 <- BPattern a gs1 <$> translate e1
-        pure $ (ELet a (p1 :| [])) (foldr (unrollMatch a) e2 e3)
+        (p1, ps) <- runWriterT (translate p)
+        q1 <- BPattern a p1 <$> translate e1
+        pure $ ELet a (q1 :| []) (foldr unrollMatch e2 ps)
       ELambda a ps e -> do
         e1 <- translate e
-        (ps1, e2) <- runWriterT (traverse translate ps)
-        pure $ ELambda a ps1 (foldr (unrollMatch a) e1 e2)
+        (qs, ps) <- runWriterT (traverse translate ps)
+        pure $ ELambda a qs (foldr unrollMatch e1 ps)
 
-unrollMatch :: a -> (Name, Pattern a (Type o k)) -> Expression a (Type o k) -> Expression a (Type o k)
-unrollMatch a (name, p) e =
+unrollMatch :: (Name, Pattern a (Type o k)) -> Expression a (Type o k) -> Expression a (Type o k)
+unrollMatch (name, p) e =
   EMatch
-    a
-    (typeOf e)
+    (tag e) (typeOf e)
     (EVariable a (Label (typeOf p) name))
     (EClause a p (CPlain a [] e :| []) :| [])
+ where
+  a = tag p

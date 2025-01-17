@@ -29,6 +29,7 @@ library
       Noll.Common.Supply
       Noll.Compiler
       Noll.Compiler.Transform.PatternBindingExpansion
+      Noll.Core.Language.Expr
       Noll.Core.Language.HasType
       Noll.Core.Language.Type
       Noll.Core.LLVM.HasIRType
@@ -80,6 +81,7 @@ library
   build-depends:
       base >=4.7 && <5
     , containers
+    , data-fix
     , extra
     , mtl
     , text
@@ -97,6 +99,7 @@ executable noll-exe
   build-depends:
       base >=4.7 && <5
     , containers
+    , data-fix
     , extra
     , mtl
     , noll
@@ -138,6 +141,7 @@ test-suite noll-test
   build-depends:
       base >=4.7 && <5
     , containers
+    , data-fix
     , extra
     , hspec
     , mtl
