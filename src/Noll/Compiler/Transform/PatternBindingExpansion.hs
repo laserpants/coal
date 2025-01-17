@@ -106,7 +106,8 @@ instance Translatable a o k (Expression a (Type o k)) where
 unrollMatch :: (Name, Pattern a (Type o k)) -> Expression a (Type o k) -> Expression a (Type o k)
 unrollMatch (name, p) e =
   EMatch
-    (tag e) (typeOf e)
+    (tag e)
+    (typeOf e)
     (EVariable a (Label (typeOf p) name))
     (EClause a p (CPlain a [] e :| []) :| [])
  where
