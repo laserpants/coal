@@ -5,7 +5,22 @@ module Noll.Compiler.Transform.Pattern.BindingExpansionSpec where
 import Noll.Common.List1 (NonEmpty ((:|)), (<|))
 import Noll.Compiler.Transform.Pattern.BindingExpansion (runTranslatable, translate)
 import Noll.Label (Label (..))
-import Noll.Language (BinaryOperator (..), Binding (..), Choice (..), Clause (..), Expression (..), Intrinsic (..), Kind (..), Pattern (..), Row (..), Type (..), TypeIndex (..), TypeParam (..))
+import Noll.Language (
+  BinaryOperator (..),
+  Binding (..),
+  Choice (..),
+  Clause (..),
+  Expression (..),
+  Intrinsic (..),
+  Kind (..),
+  Pattern (..),
+  Row (..),
+  Type (..),
+  TypeIndex (..),
+  TypeParam (..),
+  Uses (..),
+ )
+import Noll.Language.Module.Function (Function (..))
 import Test.Hspec (Spec, describe, it)
 
 import qualified Data.Map.Strict as Map
@@ -23,6 +38,8 @@ spec =
       runTranslatable "v" 0 (translate fixture7) == fixture8
     it "" $
       runTranslatable "v" 0 (translate fixture9) == fixture10
+    it "" $
+      runTranslatable "v" 0 (translate fixture11) == fixture12
 
 -- let
 --  Some(p) = x     Option(int32)
@@ -610,145 +627,263 @@ fixture10 =
 --   gt(n, min) &&
 --     (gt(min, max) || lte(n, max))
 --
-fixture11 :: Expression () (Type TypeIndex Kind)
+fixture11 :: Function Expression () (Type TypeIndex Kind)
 fixture11 =
-  undefined
---  ELet
---    ()
---    ( BPattern
---        ()
---        ( PVariable
---            ()
---            ( Label
---                ( TIntrinsic
---                    ( IRecord
---                        (TRow (RExtend "max" (TVariable (TypeIndex KType 0)) (RExtend "min" (TVariable (TypeIndex KType 0)) RNil)))
---                    )
---                    `TArrow` TVariable (TypeIndex KType 0)
---                    `TArrow` TIntrinsic IBool
---                )
---                "in_range"
---            )
---        )
---        ( ELambda
---            ()
---            ( PAnnotation
---                ()
---                ( TAlias
---                    "Range"
---                    [TVariable (TypeParam () "a")]
---                    ( TIntrinsic
---                        ( IRecord
---                            (TRow (RExtend "max" (TVariable (TypeParam () "a")) (RExtend "min" (TVariable (TypeParam () "a")) RNil)))
---                        )
---                    )
---                )
---                ( PRecord
---                    ()
---                    ( TIntrinsic
---                        ( IRecord
---                            (TRow (RExtend "max" (TVariable (TypeIndex KType 0)) (RExtend "min" (TVariable (TypeIndex KType 0)) RNil)))
---                        )
---                    )
---                    ( Map.fromList
---                        [
---                          ( "max"
---                          , PShorthand () (Label (TVariable (TypeIndex KType 0)) "max")
---                          )
---                        ,
---                          ( "min"
---                          , PShorthand () (Label (TVariable (TypeIndex KType 0)) "min")
---                          )
---                        ]
---                    )
---                    Nothing
---                )
---                <| PAnnotation () (TVariable (TypeParam () "a")) (PVariable () (Label (TVariable (TypeIndex KType 0)) "n"))
---                :| []
---            )
---            ( EApplication
---                ()
---                (TIntrinsic IBool)
---                ( EBinaryOperator
---                    ()
---                    ( TIntrinsic IBool
---                        `TArrow` TIntrinsic IBool
---                        `TArrow` TIntrinsic IBool
---                    , OLogicalAnd
---                    )
---                )
---                ( EApplication
---                    ()
---                    (TIntrinsic IBool)
---                    ( EVariable
---                        ()
---                        ( Label
---                            ( TVariable (TypeIndex KType 0)
---                                `TArrow` TVariable (TypeIndex KType 0)
---                                `TArrow` TIntrinsic IBool
---                            )
---                            "gt"
---                        )
---                    )
---                    (EVariable () (Label (TVariable (TypeIndex KType 0)) "n") <| EVariable () (Label (TVariable (TypeIndex KType 0)) "min") :| [])
---                    <| EApplication
---                      ()
---                      (TIntrinsic IBool)
---                      ( EBinaryOperator
---                          ()
---                          ( TIntrinsic IBool
---                              `TArrow` TIntrinsic IBool
---                              `TArrow` TIntrinsic IBool
---                          , OLogicalOr
---                          )
---                      )
---                      ( EApplication
---                          ()
---                          (TIntrinsic IBool)
---                          ( EVariable
---                              ()
---                              ( Label
---                                  ( TVariable (TypeIndex KType 0)
---                                      `TArrow` TVariable (TypeIndex KType 0)
---                                      `TArrow` TIntrinsic IBool
---                                  )
---                                  "gt"
---                              )
---                          )
---                          (EVariable () (Label (TVariable (TypeIndex KType 0)) "min") <| EVariable () (Label (TVariable (TypeIndex KType 0)) "max") :| [])
---                          <| EApplication
---                            ()
---                            (TIntrinsic IBool)
---                            ( EVariable
---                                ()
---                                ( Label
---                                    ( TVariable (TypeIndex KType 0)
---                                        `TArrow` TVariable (TypeIndex KType 0)
---                                        `TArrow` TIntrinsic IBool
---                                    )
---                                    "lte"
---                                )
---                            )
---                            (EVariable () (Label (TVariable (TypeIndex KType 0)) "n") <| EVariable () (Label (TVariable (TypeIndex KType 0)) "max") :| [])
---                          :| []
---                      )
---                    :| []
---                )
---            )
---        )
---        :| []
---    )
---    ( EVariable
---        ()
---        ( Label
---            ( TIntrinsic
---                ( IRecord
---                    (TRow (RExtend "max" (TVariable (TypeIndex KType 1)) (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)))
---                )
---                `TArrow` TVariable (TypeIndex KType 1)
---                `TArrow` TIntrinsic IBool
---            )
---            "in_range"
---        )
---    )
+  Function
+    ()
+    (Uses [] (TIntrinsic IBool))
+    ( PAnnotation
+        ()
+        ( TAlias
+            "Range"
+            [TVariable (TypeParam () "a")]
+            ( TIntrinsic
+                ( IRecord
+                    (TRow (RExtend "max" (TVariable (TypeParam () "a")) (RExtend "min" (TVariable (TypeParam () "a")) RNil)))
+                )
+            )
+        )
+        ( PRecord
+            ()
+            ( TIntrinsic
+                ( IRecord
+                    (TRow (RExtend "max" (TVariable (TypeIndex KType 0)) (RExtend "min" (TVariable (TypeIndex KType 0)) RNil)))
+                )
+            )
+            ( Map.fromList
+                [
+                  ( "max"
+                  , PShorthand () (Label (TVariable (TypeIndex KType 0)) "max")
+                  )
+                ,
+                  ( "min"
+                  , PShorthand () (Label (TVariable (TypeIndex KType 0)) "min")
+                  )
+                ]
+            )
+            Nothing
+        )
+        <| PAnnotation () (TVariable (TypeParam () "a")) (PVariable () (Label (TVariable (TypeIndex KType 0)) "n"))
+        :| []
+    )
+    ( EApplication
+        ()
+        (TIntrinsic IBool)
+        ( EBinaryOperator
+            ()
+            ( TIntrinsic IBool
+                `TArrow` TIntrinsic IBool
+                `TArrow` TIntrinsic IBool
+            , OLogicalAnd
+            )
+        )
+        ( EApplication
+            ()
+            (TIntrinsic IBool)
+            ( EVariable
+                ()
+                ( Label
+                    ( TVariable (TypeIndex KType 0)
+                        `TArrow` TVariable (TypeIndex KType 0)
+                        `TArrow` TIntrinsic IBool
+                    )
+                    "gt"
+                )
+            )
+            (EVariable () (Label (TVariable (TypeIndex KType 0)) "n") <| EVariable () (Label (TVariable (TypeIndex KType 0)) "min") :| [])
+            <| EApplication
+              ()
+              (TIntrinsic IBool)
+              ( EBinaryOperator
+                  ()
+                  ( TIntrinsic IBool
+                      `TArrow` TIntrinsic IBool
+                      `TArrow` TIntrinsic IBool
+                  , OLogicalOr
+                  )
+              )
+              ( EApplication
+                  ()
+                  (TIntrinsic IBool)
+                  ( EVariable
+                      ()
+                      ( Label
+                          ( TVariable (TypeIndex KType 0)
+                              `TArrow` TVariable (TypeIndex KType 0)
+                              `TArrow` TIntrinsic IBool
+                          )
+                          "gt"
+                      )
+                  )
+                  (EVariable () (Label (TVariable (TypeIndex KType 0)) "min") <| EVariable () (Label (TVariable (TypeIndex KType 0)) "max") :| [])
+                  <| EApplication
+                    ()
+                    (TIntrinsic IBool)
+                    ( EVariable
+                        ()
+                        ( Label
+                            ( TVariable (TypeIndex KType 0)
+                                `TArrow` TVariable (TypeIndex KType 0)
+                                `TArrow` TIntrinsic IBool
+                            )
+                            "lte"
+                        )
+                    )
+                    (EVariable () (Label (TVariable (TypeIndex KType 0)) "n") <| EVariable () (Label (TVariable (TypeIndex KType 0)) "max") :| [])
+                  :| []
+              )
+            :| []
+        )
+    )
+
 --
+-- in_range($v.0, n : a) =
+--   match($v.0) {
+--     | { max, min } : Range(a) =>
+--         gt(n, min) &&
+--           (gt(min, max) || lte(n, max))
+--   }
+--
+fixture12 :: Function Expression () (Type TypeIndex Kind)
+fixture12 =
+  Function
+    ()
+    (Uses [] (TIntrinsic IBool))
+    ( PVariable
+        ()
+        ( Label
+            ( TIntrinsic
+                ( IRecord
+                    (TRow (RExtend "max" (TVariable (TypeIndex KType 0)) (RExtend "min" (TVariable (TypeIndex KType 0)) RNil)))
+                )
+            )
+            "$v.0"
+        )
+        <| PAnnotation () (TVariable (TypeParam () "a")) (PVariable () (Label (TVariable (TypeIndex KType 0)) "n"))
+        :| []
+    )
+    ( EMatch
+        ()
+        (TIntrinsic IBool)
+        ( EVariable
+            ()
+            ( Label
+                ( TIntrinsic
+                    ( IRecord
+                        (TRow (RExtend "max" (TVariable (TypeIndex KType 0)) (RExtend "min" (TVariable (TypeIndex KType 0)) RNil)))
+                    )
+                )
+                "$v.0"
+            )
+        )
+        ( EClause
+            ()
+            ( PAnnotation
+                ()
+                ( TAlias
+                    "Range"
+                    [TVariable (TypeParam () "a")]
+                    ( TIntrinsic
+                        ( IRecord
+                            (TRow (RExtend "max" (TVariable (TypeParam () "a")) (RExtend "min" (TVariable (TypeParam () "a")) RNil)))
+                        )
+                    )
+                )
+                ( PRecord
+                    ()
+                    ( TIntrinsic
+                        ( IRecord
+                            (TRow (RExtend "max" (TVariable (TypeIndex KType 0)) (RExtend "min" (TVariable (TypeIndex KType 0)) RNil)))
+                        )
+                    )
+                    ( Map.fromList
+                        [
+                          ( "max"
+                          , PShorthand () (Label (TVariable (TypeIndex KType 0)) "max")
+                          )
+                        ,
+                          ( "min"
+                          , PShorthand () (Label (TVariable (TypeIndex KType 0)) "min")
+                          )
+                        ]
+                    )
+                    Nothing
+                )
+            )
+            ( CPlain
+                ()
+                []
+                ( EApplication
+                    ()
+                    (TIntrinsic IBool)
+                    ( EBinaryOperator
+                        ()
+                        ( TIntrinsic IBool
+                            `TArrow` TIntrinsic IBool
+                            `TArrow` TIntrinsic IBool
+                        , OLogicalAnd
+                        )
+                    )
+                    ( EApplication
+                        ()
+                        (TIntrinsic IBool)
+                        ( EVariable
+                            ()
+                            ( Label
+                                ( TVariable (TypeIndex KType 0)
+                                    `TArrow` TVariable (TypeIndex KType 0)
+                                    `TArrow` TIntrinsic IBool
+                                )
+                                "gt"
+                            )
+                        )
+                        (EVariable () (Label (TVariable (TypeIndex KType 0)) "n") <| EVariable () (Label (TVariable (TypeIndex KType 0)) "min") :| [])
+                        <| EApplication
+                          ()
+                          (TIntrinsic IBool)
+                          ( EBinaryOperator
+                              ()
+                              ( TIntrinsic IBool
+                                  `TArrow` TIntrinsic IBool
+                                  `TArrow` TIntrinsic IBool
+                              , OLogicalOr
+                              )
+                          )
+                          ( EApplication
+                              ()
+                              (TIntrinsic IBool)
+                              ( EVariable
+                                  ()
+                                  ( Label
+                                      ( TVariable (TypeIndex KType 0)
+                                          `TArrow` TVariable (TypeIndex KType 0)
+                                          `TArrow` TIntrinsic IBool
+                                      )
+                                      "gt"
+                                  )
+                              )
+                              (EVariable () (Label (TVariable (TypeIndex KType 0)) "min") <| EVariable () (Label (TVariable (TypeIndex KType 0)) "max") :| [])
+                              <| EApplication
+                                ()
+                                (TIntrinsic IBool)
+                                ( EVariable
+                                    ()
+                                    ( Label
+                                        ( TVariable (TypeIndex KType 0)
+                                            `TArrow` TVariable (TypeIndex KType 0)
+                                            `TArrow` TIntrinsic IBool
+                                        )
+                                        "lte"
+                                    )
+                                )
+                                (EVariable () (Label (TVariable (TypeIndex KType 0)) "n") <| EVariable () (Label (TVariable (TypeIndex KType 0)) "max") :| [])
+                              :| []
+                          )
+                        :| []
+                    )
+                )
+                :| []
+            )
+            :| []
+        )
+    )
