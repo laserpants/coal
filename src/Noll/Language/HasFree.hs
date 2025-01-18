@@ -139,6 +139,7 @@ instance (Ord t) => HasFree (Expression a t) t where
       EMatch _ _ e cs ->
         freeIn e <> freeIn cs
 
+{-# INLINE exceptNames #-}
 exceptNames :: (Foldable f) => Set (Label a) -> f Name -> Set (Label a)
 exceptNames free bound = Set.filter (`notInNames` bound) free
 
