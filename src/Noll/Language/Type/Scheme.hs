@@ -17,6 +17,7 @@ data Scheme o k t = Forall (Set (o k)) [Trait t] t
 index :: Int -> TypeIndex Kind
 index = TypeIndex KType
 
+{-# INLINE forall0 #-}
 forall0 :: t -> Scheme TypeIndex Kind t
 forall0 f = Forall mempty [] f
 
