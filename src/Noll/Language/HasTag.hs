@@ -3,15 +3,15 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Language.Tagged (Tagged (..)) where
+module Noll.Language.HasTag (HasTag (..)) where
 
 import Noll.Language.Expression (Expression (..))
 import Noll.Language.Pattern (Pattern (..))
 
-class Tagged t a where
+class HasTag t a where
   tag :: t -> a
 
-instance Tagged (Expression a t) a where
+instance HasTag (Expression a t) a where
   tag =
     \case
       EAnnotation a _ _ ->
@@ -49,7 +49,7 @@ instance Tagged (Expression a t) a where
       ESelect a _ _ ->
         a
 
-instance Tagged (Pattern a t) a where
+instance HasTag (Pattern a t) a where
   tag =
     \case
       PAnnotation a _ _ ->

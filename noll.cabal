@@ -46,6 +46,7 @@ library
       Noll.Language.Expression.Choice
       Noll.Language.Expression.Operator.Binary
       Noll.Language.Expression.Operator.Unary
+      Noll.Language.HasTag
       Noll.Language.HasType
       Noll.Language.Indexed
       Noll.Language.Module
@@ -54,7 +55,6 @@ library
       Noll.Language.Module.Object
       Noll.Language.Pattern
       Noll.Language.Primitive
-      Noll.Language.Tagged
       Noll.Language.Trait
       Noll.Language.Type
       Noll.Language.Type.HasKind
