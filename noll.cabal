@@ -46,6 +46,7 @@ library
       Noll.Language.Expression.Choice
       Noll.Language.Expression.Operator.Binary
       Noll.Language.Expression.Operator.Unary
+      Noll.Language.HasFree
       Noll.Language.HasTag
       Noll.Language.HasType
       Noll.Language.Indexed
