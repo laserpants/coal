@@ -12,12 +12,12 @@ module Noll.Language.HasFree (
 
 import Data.Set (Set)
 import Noll.Common.List1 (NonEmpty)
-import Noll.Label (Label (..))
+import Noll.Label (Label (..), labelName)
 import Noll.Language.Expression (Clause (..), Expression (..))
 import Noll.Language.Expression.Binding (Binding (..))
 import Noll.Language.Expression.Choice (Choice (..), Guard (..))
 import Noll.Language.Pattern (Pattern (..))
-import Noll.Utils (Dictionary (..), Map, Name)
+import Noll.Utils (Dictionary (..), Map, Name, unionMap, (<$$>))
 
 import qualified Data.Set as Set
 
@@ -52,6 +52,26 @@ instance (Ord t) => HasBound (Pattern a t) where
     \case
       PVariable _ (Label _ name) ->
         Set.singleton name
+      PShorthand _ (Label _ name) ->
+        Set.singleton name
+      PAtVariable _ (Label _ name) ->
+        Set.singleton name
+      PAnnotation _ _ p ->
+        boundIn p
+      PConstructor _ _ ps ->
+        boundIn ps
+      PRecord a _ d p ->
+        boundIn d <> boundIn p
+      PListCons _ _ p1 p2 ->
+        boundIn p1 <> boundIn p2
+      PListLiteral _ _ ps ->
+        boundIn ps
+      POr _ _ p1 p2 ->
+        boundIn p1 <> boundIn p2
+      PAny{} ->
+        mempty
+      PLiteral{} ->
+        mempty
 
 class HasFree f t where
   freeIn :: f -> Set (Label t)
@@ -74,17 +94,57 @@ instance (Ord t) => HasFree (Guard Expression a t) t where
       CGuard e ->
         freeIn e
 
+instance (Ord t) => HasFree (Choice Expression a t) t where
+  freeIn =
+    \case
+      CPlain _ gs e ->
+        freeIn gs <> freeIn e
+      CLambda{} ->
+        error "TODO"
+
 instance (Ord t) => HasFree (Clause Expression a t) t where
   freeIn =
-    undefined
+    \case
+      EClause _ p cs ->
+        a -- cs `freeExceptBound` p
+       where
+        --            a :: Set (Label t)
+        a = freeIn cs
+        b :: Set Name
+        b = boundIn p
 
 instance (Ord t) => HasFree (Binding Expression a t) t where
   freeIn =
-    undefined
+    \case
+      BPattern _ _ e ->
+        freeIn e
+      BFunction _ _ ps e ->
+        freeIn e `exceptNames` boundIn ps
 
 instance (Ord t) => HasFree (Expression a t) t where
   freeIn =
-    undefined
+    \case
+      EVariable _ ll ->
+        Set.singleton ll
+      EIf _ _ e1 e2 e3 ->
+        freeIn e1 <> freeIn e2 <> freeIn e3
+      ELambda _ ps e ->
+        freeIn e `exceptNames` boundIn ps
+      EApplication _ _ e es ->
+        freeIn e <> freeIn es
+      ELet _ gs e1 ->
+        freeIn gs <> (freeIn e1 `exceptNames` boundIn gs)
+      ELiteral{} ->
+        mempty
+      EConstructor{} ->
+        mempty
+
+exceptNames :: (Foldable f) => Set (Label a) -> f Name -> Set (Label a)
+exceptNames free bound = Set.filter (`notInNames` bound) free
+
+{-# INLINE notInNames #-}
+notInNames :: (Foldable f) => Label b -> f Name -> Bool
+notInNames = notElem . labelName
 
 {-# INLINE isBoundIn #-}
 isBoundIn :: (HasBound b) => Name -> b -> Bool
