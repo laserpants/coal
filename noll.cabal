@@ -29,6 +29,7 @@ library
       Noll.Common.Supply
       Noll.Compiler
       Noll.Compiler.Transform.Pattern.Expansion
+      Noll.Compiler.Transform.PatternMatching
       Noll.Core.Language.Expr
       Noll.Core.Language.HasType
       Noll.Core.Language.Type
