@@ -15,13 +15,13 @@ import Noll.Language (
   Function (..),
   Intrinsic (..),
   Kind (..),
+  Parameter (..),
   Pattern (..),
   Primitive (..),
   Row (..),
   Scheme (..),
   Type (..),
   TypeIndex (..),
-  Parameter (..),
   Uses (..),
  )
 import Noll.SystemFSpec.TestRunner

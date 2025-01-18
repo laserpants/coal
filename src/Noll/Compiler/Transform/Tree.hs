@@ -13,12 +13,48 @@ module Noll.Compiler.Transform.Tree (
 
 import Control.Monad.Identity (runIdentity)
 import Noll.Label (Label (..))
-import Noll.Language (Expression (..))
-import Noll.Language.HasFree (appearsFreeIn)
+import Noll.Language (
+  Binding (..),
+  Choice (..),
+  Clause (..),
+  Expression (..),
+  Guard (..),
+ )
+import Noll.Language.HasFree (appearsFreeIn, isNotBoundIn)
 import Noll.Utils (Name, const2, (<$$>))
 
 class TreeTransform e t where
   transform :: (Monad m, Ord t) => Name -> (a -> t -> m (Expression a t)) -> e a t -> m (e a t)
+
+instance TreeTransform (Binding Expression) t where
+  transform name f =
+    \case
+      BPattern a p e ->
+        BPattern a p <$> transform name f e
+      BFunction a name ps e ->
+        BFunction a name ps <$> transform name f e
+
+instance TreeTransform (Guard Expression) t where
+  transform name f =
+    \case
+      CGuard e ->
+        CGuard <$> transform name f e
+
+instance TreeTransform (Choice Expression) t where
+  transform name f =
+    \case
+      CPlain a gs e ->
+        CPlain a
+          <$> traverse (transform name f) gs
+          <*> transform name f e
+      CLambda{} ->
+        error "TODO"
+
+instance TreeTransform (Clause Expression) t where
+  transform name f =
+    \case
+      EClause a ps cs ->
+        EClause a ps <$> traverse (transform name f) cs
 
 instance TreeTransform Expression t where
   transform name f =
@@ -33,6 +69,30 @@ instance TreeTransform Expression t where
             ELambda a ps <$> transform name f e
         | otherwise ->
             pure expr
+      ELet a gs e1 ->
+        ELet a
+          <$> traverse (transform name f) gs
+          <*> ( if name `isNotBoundIn` gs
+                  then transform name f e1
+                  else pure e1
+              )
+      EIf a t e1 e2 e3 ->
+        EIf a t
+          <$> transform name f e1
+          <*> transform name f e2
+          <*> transform name f e3
+      expr@ELiteral{} ->
+        pure expr
+      expr@EConstructor{} ->
+        pure expr
+      EApplication a t e1 es ->
+        EApplication a t
+          <$> transform name f e1
+          <*> traverse (transform name f) es
+      EListCons a t e1 e2 ->
+        EListCons a t
+          <$> transform name f e1
+          <*> transform name f e2
 
 replace :: (Ord t) => Name -> (a -> t -> Expression a t) -> Expression a t -> Expression a t
 replace name f = runIdentity . transform name (pure <$$> f)

@@ -31,12 +31,12 @@ import Noll.Language (
   IndexedType,
   Intrinsic (..),
   Kind (..),
+  Parameter (..),
   Pattern (..),
   Primitive (..),
   Scheme (..),
   Type (..),
   TypeIndex (..),
-  Parameter (..),
   freshIdIn,
   indexed,
  )

@@ -14,13 +14,13 @@ import Noll.Language (
   Expression (..),
   Intrinsic (..),
   Kind (..),
+  Parameter (..),
   Pattern (..),
   Primitive (..),
   Row (..),
   Scheme (..),
   Type (..),
   TypeIndex (..),
-  Parameter (..),
  )
 import Noll.SystemFSpec.TestRunner
 import Test.Hspec (Spec, describe, hspec, it)

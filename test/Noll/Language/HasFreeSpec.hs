@@ -228,9 +228,6 @@ spec =
             )
             == (Set.fromList [Label () "a"])
 
-
-
-
 --      describe "EUnaryOperator" $
 --        it "!x" $
 --          freeIn (EApplication () (EUnaryOperator ((), OLogicalNot)) (EVariable (Label () "x") :| [])) == Set.fromList [Label () "x"]

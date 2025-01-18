@@ -13,11 +13,11 @@ import Noll.Language (
   Expression (..),
   Intrinsic (..),
   Kind (..),
+  Parameter (..),
   Pattern (..),
   Row (..),
   Type (..),
   TypeIndex (..),
-  Parameter (..),
   Uses (..),
  )
 import Noll.Language.Module.Function (Function (..))

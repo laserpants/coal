@@ -11,12 +11,12 @@ import Noll.Language (
   Binding (..),
   Expression (..),
   Kind (..),
+  Parameter (..),
   Pattern (..),
   Primitive (..),
   Scheme (..),
   Type (..),
   TypeIndex (..),
-  Parameter (..),
   freshIdIn,
   indexed,
  )

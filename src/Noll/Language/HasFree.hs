@@ -80,7 +80,7 @@ class HasFree f t | f -> t where
   freeIn :: f -> Set (Label t)
 
 instance (Ord t, HasFree f t) => HasFree (Maybe f) t where
-  freeIn = undefined -- Set.unions . fmap freeIn
+  freeIn = Set.unions . fmap freeIn
 
 instance (Ord t, HasFree f t) => HasFree [f] t where
   freeIn = Set.unions . fmap freeIn
@@ -144,7 +144,7 @@ exceptNames :: (Foldable f) => Set (Label a) -> f Name -> Set (Label a)
 exceptNames free bound = Set.filter (`notInNames` bound) free
 
 {-# INLINE notInNames #-}
-notInNames :: (Foldable f) => Label b -> f Name -> Bool
+notInNames :: (Foldable f) => Label a -> f Name -> Bool
 notInNames = notElem . labelName
 
 {-# INLINE isBoundIn #-}
@@ -160,5 +160,5 @@ appearsFreeIn :: (HasFree a t) => Name -> a -> Bool
 appearsFreeIn name = appearsIn name . freeIn
 
 {-# INLINE appearsIn #-}
-appearsIn :: Name -> Set (Label t) -> Bool
+appearsIn :: Name -> Set (Label a) -> Bool
 appearsIn name set = name `elem` Set.map labelName set
