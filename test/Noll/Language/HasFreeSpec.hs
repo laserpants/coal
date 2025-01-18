@@ -59,7 +59,7 @@ spec =
         it "Cons" $
           freeIn (EConstructor () (Label () "Cons")) == (mempty :: Set (Label ()))
       describe "EMatch" $ do
-        it "" $
+        it "match(x) { | Cons(x, xs) => z | Cons(y, ys) => z }" $
           freeIn
             ( EMatch
                 ()
@@ -87,6 +87,149 @@ spec =
                 )
             )
             == (Set.fromList [Label () "x", Label () "z"])
+        it "match(x) { | Cons(z, xs) => z | Cons(y, ys) => z }" $
+          freeIn
+            ( EMatch
+                ()
+                ()
+                (EVariable () (Label () "x"))
+                ( EClause
+                    ()
+                    (PConstructor () (Label () "Cons") [PVariable () (Label () "z"), PVariable () (Label () "xs")])
+                    ( CPlain
+                        ()
+                        []
+                        (EVariable () (Label () "z"))
+                        :| []
+                    )
+                    <| EClause
+                      ()
+                      (PConstructor () (Label () "Cons") [PVariable () (Label () "y"), PVariable () (Label () "ys")])
+                      ( CPlain
+                          ()
+                          []
+                          (EVariable () (Label () "z"))
+                          :| []
+                      )
+                      :| []
+                )
+            )
+            == (Set.fromList [Label () "x", Label () "z"])
+        it "match(x) { | Cons(z, xs) => z | Cons(z, ys) => z }" $
+          freeIn
+            ( EMatch
+                ()
+                ()
+                (EVariable () (Label () "x"))
+                ( EClause
+                    ()
+                    (PConstructor () (Label () "Cons") [PVariable () (Label () "z"), PVariable () (Label () "xs")])
+                    ( CPlain
+                        ()
+                        []
+                        (EVariable () (Label () "z"))
+                        :| []
+                    )
+                    <| EClause
+                      ()
+                      (PConstructor () (Label () "Cons") [PVariable () (Label () "z"), PVariable () (Label () "ys")])
+                      ( CPlain
+                          ()
+                          []
+                          (EVariable () (Label () "z"))
+                          :| []
+                      )
+                      :| []
+                )
+            )
+            == (Set.fromList [Label () "x"])
+        it "match(z) { | Cons(z, xs) => z | Cons(z, ys) => z }" $
+          freeIn
+            ( EMatch
+                ()
+                ()
+                (EVariable () (Label () "z"))
+                ( EClause
+                    ()
+                    (PConstructor () (Label () "Cons") [PVariable () (Label () "z"), PVariable () (Label () "xs")])
+                    ( CPlain
+                        ()
+                        []
+                        (EVariable () (Label () "z"))
+                        :| []
+                    )
+                    <| EClause
+                      ()
+                      (PConstructor () (Label () "Cons") [PVariable () (Label () "z"), PVariable () (Label () "ys")])
+                      ( CPlain
+                          ()
+                          []
+                          (EVariable () (Label () "z"))
+                          :| []
+                      )
+                      :| []
+                )
+            )
+            == (Set.fromList [Label () "z"])
+        it "match(1) { | Cons(z, xs) => z | Cons(z, ys) => z }" $
+          freeIn
+            ( EMatch
+                ()
+                ()
+                (ELiteral () (LInt32 1))
+                ( EClause
+                    ()
+                    (PConstructor () (Label () "Cons") [PVariable () (Label () "z"), PVariable () (Label () "xs")])
+                    ( CPlain
+                        ()
+                        []
+                        (EVariable () (Label () "z"))
+                        :| []
+                    )
+                    <| EClause
+                      ()
+                      (PConstructor () (Label () "Cons") [PVariable () (Label () "z"), PVariable () (Label () "ys")])
+                      ( CPlain
+                          ()
+                          []
+                          (EVariable () (Label () "z"))
+                          :| []
+                      )
+                      :| []
+                )
+            )
+            == (mempty :: Set (Label ()))
+        it "match(1) { | Cons(z, xs) => z | Cons(z, ys) => a }" $
+          freeIn
+            ( EMatch
+                ()
+                ()
+                (ELiteral () (LInt32 1))
+                ( EClause
+                    ()
+                    (PConstructor () (Label () "Cons") [PVariable () (Label () "z"), PVariable () (Label () "xs")])
+                    ( CPlain
+                        ()
+                        []
+                        (EVariable () (Label () "z"))
+                        :| []
+                    )
+                    <| EClause
+                      ()
+                      (PConstructor () (Label () "Cons") [PVariable () (Label () "z"), PVariable () (Label () "ys")])
+                      ( CPlain
+                          ()
+                          []
+                          (EVariable () (Label () "a"))
+                          :| []
+                      )
+                      :| []
+                )
+            )
+            == (Set.fromList [Label () "a"])
+
+
+
 
 --      describe "EUnaryOperator" $
 --        it "!x" $
