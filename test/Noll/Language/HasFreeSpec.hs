@@ -2,17 +2,18 @@
 
 module Noll.Language.HasFreeSpec where
 
-import Test.Hspec (Spec, describe, it)
-import Noll.Language.Expression (Expression (..))
-import Noll.Language.Pattern (Pattern (..))
-import Noll.Language.Type (Type (..), TypeIndex (..))
-import Noll.Language.Expression.Binding (Binding (..))
-import Noll.Language.Primitive (Primitive (..))
-import Noll.Language.Type.Kind (Kind)
-import Noll.Label (Label (..))
-import Noll.Language.HasFree
-import Data.List.NonEmpty (NonEmpty(..))
+import Data.List.NonEmpty (NonEmpty (..), (<|))
 import Data.Set (Set)
+import Noll.Label (Label (..))
+import Noll.Language.Expression (Clause (..), Expression (..))
+import Noll.Language.Expression.Binding (Binding (..))
+import Noll.Language.Expression.Choice (Choice (..), Guard (..))
+import Noll.Language.HasFree
+import Noll.Language.Pattern (Pattern (..))
+import Noll.Language.Primitive (Primitive (..))
+import Noll.Language.Type (Type (..), TypeIndex (..))
+import Noll.Language.Type.Kind (Kind)
+import Test.Hspec (Spec, describe, it)
 
 import qualified Data.Set as Set
 
@@ -37,16 +38,16 @@ spec =
       describe "ELet" $ do
         it "let a = 1 in a" $
           freeIn (ELet () (BPattern () (PVariable () (Label () "a")) (ELiteral () (LInt32 1)) :| []) (EVariable () (Label () "a")) :: (Expression ()) ()) == (mempty :: Set (Label ()))
---        it "let a = 1 in b" $
---          freeIn (ELet (BPattern (PVariable (Label () "a")) (ELiteral (LInt32 1)) :| []) (EVariable (Label () "b")) :: Expression ()) == Set.fromList [Label () "b"]
---        it "let a = a in a" $
---          freeIn (ELet (BPattern (PVariable (Label () "a")) (EVariable (Label () "a")) :| []) (EVariable (Label () "a")) :: Expression ()) == Set.fromList [Label () "a"]
---        it "let a = b in a" $
---          freeIn (ELet (BPattern (PVariable (Label () "a")) (EVariable (Label () "b")) :| []) (EVariable (Label () "a")) :: Expression ()) == Set.fromList [Label () "b"]
---        it "let a = b in c" $
---          freeIn (ELet (BPattern (PVariable (Label () "a")) (EVariable (Label () "b")) :| []) (EVariable (Label () "c")) :: Expression ()) == Set.fromList [Label () "b", Label () "c"]
---        it "let a = b in b" $
---          freeIn (ELet (BPattern (PVariable (Label () "a")) (EVariable (Label () "b")) :| []) (EVariable (Label () "b")) :: Expression ()) == Set.fromList [Label () "b"]
+        it "let a = 1 in b" $
+          freeIn (ELet () (BPattern () (PVariable () (Label () "a")) (ELiteral () (LInt32 1)) :| []) (EVariable () (Label () "b")) :: (Expression ()) ()) == Set.fromList [Label () "b"]
+        it "let a = a in a" $
+          freeIn (ELet () (BPattern () (PVariable () (Label () "a")) (EVariable () (Label () "a")) :| []) (EVariable () (Label () "a")) :: (Expression ()) ()) == Set.fromList [Label () "a"]
+        it "let a = b in a" $
+          freeIn (ELet () (BPattern () (PVariable () (Label () "a")) (EVariable () (Label () "b")) :| []) (EVariable () (Label () "a")) :: (Expression ()) ()) == Set.fromList [Label () "b"]
+        it "let a = b in c" $
+          freeIn (ELet () (BPattern () (PVariable () (Label () "a")) (EVariable () (Label () "b")) :| []) (EVariable () (Label () "c")) :: (Expression ()) ()) == Set.fromList [Label () "b", Label () "c"]
+        it "let a = b in b" $
+          freeIn (ELet () (BPattern () (PVariable () (Label () "a")) (EVariable () (Label () "b")) :| []) (EVariable () (Label () "b")) :: (Expression ()) ()) == Set.fromList [Label () "b"]
       describe "EApp" $ do
         it "f(x)" $
           freeIn (EApplication () () (EVariable () (Label () "f")) (EVariable () (Label () "x") :| [])) == Set.fromList [Label () "f", Label () "x"]
@@ -57,11 +58,40 @@ spec =
       describe "EConstructor" $ do
         it "Cons" $
           freeIn (EConstructor () (Label () "Cons")) == (mempty :: Set (Label ()))
+      describe "EMatch" $ do
+        it "" $
+          freeIn
+            ( EMatch
+                ()
+                ()
+                (EVariable () (Label () "x"))
+                ( EClause
+                    ()
+                    (PConstructor () (Label () "Cons") [PVariable () (Label () "x"), PVariable () (Label () "xs")])
+                    ( CPlain
+                        ()
+                        []
+                        (EVariable () (Label () "z"))
+                        :| []
+                    )
+                    <| EClause
+                      ()
+                      (PConstructor () (Label () "Cons") [PVariable () (Label () "y"), PVariable () (Label () "ys")])
+                      ( CPlain
+                          ()
+                          []
+                          (EVariable () (Label () "z"))
+                          :| []
+                      )
+                      :| []
+                )
+            )
+            == (Set.fromList [Label () "x", Label () "z"])
+
 --      describe "EUnaryOperator" $
 --        it "!x" $
 --          freeIn (EApplication () (EUnaryOperator ((), OLogicalNot)) (EVariable (Label () "x") :| [])) == Set.fromList [Label () "x"]
 --      describe "EBinaryOperator" $
 --        it "x + y" $
 --          freeIn (EApplication () (EBinaryOperator ((), OAddition)) (EVariable (Label () "x") <| EVariable (Label () "y") :| [])) == Set.fromList [Label () "x", Label () "y"]
---
 --

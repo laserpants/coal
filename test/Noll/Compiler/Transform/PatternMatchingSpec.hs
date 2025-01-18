@@ -2,10 +2,10 @@
 
 module Noll.Compiler.Transform.PatternMatchingSpec where
 
-import Noll.Language (Expression (..))
-import Noll.Label (Label (..))
-import Test.Hspec (Spec, describe, it)
 import Noll.Compiler.Transform.PatternMatching
+import Noll.Label (Label (..))
+import Noll.Language (Expression (..))
+import Test.Hspec (Spec, describe, it)
 
 spec :: Spec
 spec =
@@ -57,4 +57,3 @@ testGroupByConstructor = do
              [ HeadConstructorEquation (Label () "C") [MVariable (Label () "6")] (PatternEquationBody [] MFail)
              ]
            ]
-

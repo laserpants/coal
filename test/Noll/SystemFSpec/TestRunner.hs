@@ -14,15 +14,15 @@ import Noll.Compiler (
   getSolverRuleViolationsC,
   insertNamesC,
   solveConstraintsC,
+  typeCheckConstantC,
   typeCheckExpressionC,
   typeCheckFunctionC,
-  typeCheckConstantC,
  )
 import Noll.Language (
+  Constant (..),
   Constructor (..),
   Expression (..),
   Function (..),
-  Constant (..),
   IndexedType,
   Intrinsic (..),
   Kind (..),

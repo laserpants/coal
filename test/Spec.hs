@@ -6,8 +6,9 @@ import qualified Noll.Language.IndexedSpec
 -- import qualified Noll.SystemF.TypeConstraint.CollectSpec
 -- import qualified Noll.SystemF.TypeSubstitutionSpec
 
-import qualified Noll.Language.HasFreeSpec
 import qualified Noll.Compiler.Transform.Pattern.ExpansionSpec
+import qualified Noll.Compiler.Transform.PatternMatchingSpec
+import qualified Noll.Language.HasFreeSpec
 import qualified Noll.SystemF.Constraint.GenerationSpec
 import qualified Noll.SystemF.UnificationSpec
 import qualified Noll.SystemFExamples.Test01
@@ -26,7 +27,6 @@ import qualified Noll.SystemFExamples.Test13
 import qualified Noll.SystemFExamples.Test14
 import qualified Noll.SystemFExamples.Test15
 import qualified Noll.SystemFSpec
-import qualified Noll.Compiler.Transform.PatternMatchingSpec
 import Test.Hspec (hspec, it)
 
 main :: IO ()

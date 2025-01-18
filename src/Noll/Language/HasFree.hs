@@ -106,12 +106,7 @@ instance (Ord t) => HasFree (Clause Expression a t) t where
   freeIn =
     \case
       EClause _ p cs ->
-        a -- cs `freeExceptBound` p
-       where
-        --            a :: Set (Label t)
-        a = freeIn cs
-        b :: Set Name
-        b = boundIn p
+        freeIn cs `exceptNames` boundIn p
 
 instance (Ord t) => HasFree (Binding Expression a t) t where
   freeIn =
@@ -138,6 +133,8 @@ instance (Ord t) => HasFree (Expression a t) t where
         mempty
       EConstructor{} ->
         mempty
+      EMatch _ _ e cs ->
+        freeIn e <> freeIn cs
 
 exceptNames :: (Foldable f) => Set (Label a) -> f Name -> Set (Label a)
 exceptNames free bound = Set.filter (`notInNames` bound) free
