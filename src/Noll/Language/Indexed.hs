@@ -23,7 +23,7 @@ import Noll.Language.Expression (Clause (..), Expression (..))
 import Noll.Language.Expression.Binding (Binding (..))
 import Noll.Language.Expression.Choice (Choice (..), Guard (..))
 import Noll.Language.Module.Function (Function (..))
-import Noll.Language.Module.Global (Global (..))
+import Noll.Language.Module.Constant (Constant (..))
 import Noll.Language.Pattern (Pattern (..))
 import Noll.Language.Trait (Trait (..), Uses (..))
 import Noll.Language.Type (Type (..), TypeIndex (..))
@@ -197,10 +197,10 @@ instance (Ord k) => TypeIndexed k (Function Expression a (Type TypeIndex k)) whe
       Function _ (Uses ts t) ps e ->
         typeIndexesIn ts <> typeIndexesIn t <> typeIndexesIn ps <> typeIndexesIn e
 
-instance (Ord k) => TypeIndexed k (Global Expression a (Type TypeIndex k)) where
+instance (Ord k) => TypeIndexed k (Constant Expression a (Type TypeIndex k)) where
   typeIndexesIn =
     \case
-      Global _ (Uses ts t) e ->
+      Constant _ (Uses ts t) e ->
         typeIndexesIn ts <> typeIndexesIn t <> typeIndexesIn e
 
 notBoundIn :: Set (TypeIndex k) -> Set (TypeIndex k) -> Set (TypeIndex k)

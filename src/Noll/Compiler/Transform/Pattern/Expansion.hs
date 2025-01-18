@@ -20,7 +20,7 @@ import Noll.Language.Expression.Binding (Binding (..))
 import Noll.Language.Expression.Choice (Choice (..))
 import Noll.Language.HasType (HasType (..))
 import Noll.Language.Module.Function (Function (..))
-import Noll.Language.Module.Global (Global (..))
+import Noll.Language.Module.Constant (Constant (..))
 import Noll.Language.Module.Object (Object (..))
 import Noll.Language.Pattern (Pattern (..))
 import Noll.Language.Tagged (Tagged (..))
@@ -136,18 +136,18 @@ instance Expandable a o k (Function Expression a (Type o k)) where
         (qs, ps) <- runWriterT (traverse expandPatterns ps)
         pure (Function a u qs (foldr unrollMatch e1 ps))
 
-instance Expandable a o k (Global Expression a (Type o k)) where
+instance Expandable a o k (Constant Expression a (Type o k)) where
   expandPatterns =
     \case
-      Global a u e ->
-        Global a u <$> expandPatterns e
+      Constant a u e ->
+        Constant a u <$> expandPatterns e
 
 instance Expandable a o k (Object a k (Type o k)) where
   expandPatterns =
     \case
       DFunction name f ->
         DFunction name <$> expandPatterns f
-      DGlobal name g ->
-        DGlobal name <$> expandPatterns g
+      DConstant name g ->
+        DConstant name <$> expandPatterns g
       d ->
         pure d

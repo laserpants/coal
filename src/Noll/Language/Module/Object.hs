@@ -6,7 +6,7 @@ module Noll.Language.Module.Object (Object (..), Path (..)) where
 import Noll.Language.Constructor (Constructor (..))
 import Noll.Language.Expression (Expression (..))
 import Noll.Language.Module.Function (Function (..))
-import Noll.Language.Module.Global (Global (..))
+import Noll.Language.Module.Constant (Constant (..))
 import Noll.Language.Trait (Trait (..), Uses (..))
 import Noll.Language.Type (Type (..), TypeIndex)
 import Noll.Utils (Name)
@@ -22,7 +22,7 @@ data Object a k t
   | -- | Function definition
     DFunction Name (Function Expression a t)
   | -- | TODO
-    DGlobal Name (Global Expression a t)
+    DConstant Name (Constant Expression a t)
   | -- | Type signature
     DSignature Name (Uses (Type TypeIndex k))
   | -- | Import statement

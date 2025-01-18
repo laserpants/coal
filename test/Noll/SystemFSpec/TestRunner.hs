@@ -16,13 +16,13 @@ import Noll.Compiler (
   solveConstraintsC,
   typeCheckExpressionC,
   typeCheckFunctionC,
-  typeCheckGlobalC,
+  typeCheckConstantC,
  )
 import Noll.Language (
   Constructor (..),
   Expression (..),
   Function (..),
-  Global (..),
+  Constant (..),
   IndexedType,
   Intrinsic (..),
   Kind (..),
@@ -48,16 +48,16 @@ data TestResult r a = TestResult
   }
   deriving (Show, Eq, Ord)
 
-runTypedGlobalTest ::
+runTypedConstantTest ::
   (Show a, Eq a) =>
   CompilerEnvironment ->
   [(Name, Scheme TypeIndex Kind IndexedType)] ->
-  Global Expression a () ->
-  TestResult (Global Expression a (Type TypeIndex Kind)) a
-runTypedGlobalTest env names g =
+  Constant Expression a () ->
+  TestResult (Constant Expression a (Type TypeIndex Kind)) a
+runTypedConstantTest env names g =
   evalCompiler env $ do
     insertNamesC names
-    (g2, as) <- typeCheckGlobalC (indexed g)
+    (g2, as) <- typeCheckConstantC (indexed g)
     errs0 <- getConstraintsGenerationErrorsC
     errs1 <- getSolverRuleViolationsC
     pure (TestResult g2 as errs0 errs1)

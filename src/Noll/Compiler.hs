@@ -15,7 +15,7 @@ module Noll.Compiler (
   generateConstraintsC,
   typeCheckExpressionC,
   typeCheckFunctionC,
-  typeCheckGlobalC,
+  typeCheckConstantC,
   solveConstraintsC,
   getConstraintsGenerationErrorsC,
   getSolverRuleViolationsC,
@@ -34,7 +34,7 @@ import Noll.Language (
   Constructor (..),
   Expression (..),
   Function (..),
-  Global (..),
+  Constant (..),
   IndexedType,
   Kind (..),
   Pattern (..),
@@ -241,11 +241,11 @@ typeCheckFunctionC f@(Function loc (Uses _ t) ps e) = do
       (BFunction loc "$.function" ps e :| [])
       (EVariable loc (Label (foldType t (typeOf <$> ps)) "$.function"))
 
-typeCheckGlobalC ::
+typeCheckConstantC ::
   (Show a, Eq a) =>
-  Global Expression a IndexedType ->
-  Compiler a (Global Expression a IndexedType, [CompilerAssumption])
-typeCheckGlobalC g@(Global loc (Uses _ t) e) = do
+  Constant Expression a IndexedType ->
+  Compiler a (Constant Expression a IndexedType, [CompilerAssumption])
+typeCheckConstantC g@(Constant loc (Uses _ t) e) = do
   compileConstraintsC [Equality (InferenceRule 999) [t, typeOf e]] g $
     ELet
       loc

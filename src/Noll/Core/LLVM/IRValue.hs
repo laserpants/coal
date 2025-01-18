@@ -6,7 +6,7 @@ import Noll.Utils (Name)
 
 data IRValue
   = Local IRType Name
-  | Global IRType Name
+  | Constant IRType Name
   | I1 Bool
   | I32 Int32
   | I64 Int64

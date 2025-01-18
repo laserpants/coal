@@ -12,7 +12,7 @@ import Noll.Language (
   Clause (..),
   Constructor (..),
   Expression (..),
-  Global (..),
+  Constant (..),
   IndexedType,
   Intrinsic (..),
   Kind (..),
@@ -69,9 +69,9 @@ spec =
       testResultExpression (runTest fixture)
         == fixture1
 
-runTest :: (Show a, Eq a) => Global Expression a () -> TestResult (Global Expression a (Type TypeIndex Kind)) a
+runTest :: (Show a, Eq a) => Constant Expression a () -> TestResult (Constant Expression a (Type TypeIndex Kind)) a
 runTest =
-  runTypedGlobalTest
+  runTypedConstantTest
     (CompilerEnvironment env1 env2)
     [
       ( "flatten"
@@ -104,9 +104,9 @@ runTest =
 --
 --  qsort = flatten << from_list
 --
-fixture :: Global Expression () ()
+fixture :: Constant Expression () ()
 fixture =
-  Global
+  Constant
     ()
     (Uses [] ())
     ( EApplication
@@ -116,9 +116,9 @@ fixture =
         (EVariable () (Label () "flatten") <| EVariable () (Label () "from_list") :| [])
     )
 
-fixture1 :: Global Expression () (Type TypeIndex Kind)
+fixture1 :: Constant Expression () (Type TypeIndex Kind)
 fixture1 =
-  Global
+  Constant
     ()
     (Uses [] (list0Type `TArrow` list0Type))
     ( EApplication

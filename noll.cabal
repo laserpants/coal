@@ -49,8 +49,8 @@ library
       Noll.Language.HasType
       Noll.Language.Indexed
       Noll.Language.Module
+      Noll.Language.Module.Constant
       Noll.Language.Module.Function
-      Noll.Language.Module.Global
       Noll.Language.Module.Object
       Noll.Language.Pattern
       Noll.Language.Primitive

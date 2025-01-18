@@ -17,7 +17,7 @@ instance HasIRType IRValue where
     \case
       IR.Local t _ ->
         t
-      IR.Global t _ ->
+      IR.Constant t _ ->
         t
       IR.I1{} ->
         TInt1

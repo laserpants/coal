@@ -34,3 +34,8 @@ forall3 :: (Type TypeIndex Kind -> Type TypeIndex Kind -> Type TypeIndex Kind ->
 forall3 f = Forall (Set.fromList [a0, a1, a2]) [] (f (TVariable a0) (TVariable a1) (TVariable a2))
  where
   (a0, a1, a2) = (index 0, index 1, index 2)
+
+forall4 :: (Type TypeIndex Kind -> Type TypeIndex Kind -> Type TypeIndex Kind -> Type TypeIndex Kind -> t) -> Scheme TypeIndex Kind t
+forall4 f = Forall (Set.fromList [a0, a1, a2, a3]) [] (f (TVariable a0) (TVariable a1) (TVariable a2) (TVariable a3))
+ where
+  (a0, a1, a2, a3) = (index 0, index 1, index 2, index 3)

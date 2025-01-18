@@ -20,7 +20,7 @@ import Noll.Language (
   Clause (..),
   Expression (..),
   Function (..),
-  Global (..),
+  Constant (..),
   Guard (..),
   IndexedType,
   Intrinsic (..),
@@ -216,11 +216,11 @@ instance Substitutable (Function Expression a IndexedType) where
       Function loc (Uses ts t) ps e ->
         Function loc (Uses (apply sub ts) (apply sub t)) (apply sub ps) (apply sub e)
 
-instance Substitutable (Global Expression a IndexedType) where
+instance Substitutable (Constant Expression a IndexedType) where
   apply sub =
     \case
-      Global loc (Uses ts t) e ->
-        Global loc (Uses (apply sub ts) (apply sub t)) (apply sub e)
+      Constant loc (Uses ts t) e ->
+        Constant loc (Uses (apply sub ts) (apply sub t)) (apply sub e)
 
 newtype Substitution = Substitution {substitutionMap :: IndexMap IndexedType}
   deriving (Show, Eq, Ord, Read)
