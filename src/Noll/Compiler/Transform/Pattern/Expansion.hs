@@ -43,6 +43,7 @@ newtype PatternExpansion a o k e = PatternExpansion {patternExpansionStack :: Pa
     , MonadWriter [NamedPattern a o k]
     )
 
+{-# INLINE runExpandPatterns #-}
 runExpandPatterns :: Name -> Int -> PatternExpansion a o k e -> e
 runExpandPatterns r s e = fst (evalState (runReaderT (runWriterT (patternExpansionStack e)) r) s)
 
@@ -107,15 +108,15 @@ instance Expandable a o k (Expression a (Type o k)) where
       ELet a gs e1 -> do
         e2 <- expandPatterns e1
         (hs, ps) <- runWriterT (traverse expandPatterns gs)
-        pure $ ELet a hs (foldr unrollMatch e2 ps)
+        pure (ELet a hs (foldr unrollMatch e2 ps))
       ERecursiveLet a p e1 e2 -> do
         (p1, ps) <- runWriterT (expandPatterns p)
         q1 <- BPattern a p1 <$> expandPatterns e1
-        pure $ ELet a (q1 :| []) (foldr unrollMatch e2 ps)
+        pure (ELet a (q1 :| []) (foldr unrollMatch e2 ps))
       ELambda a ps e -> do
         e1 <- expandPatterns e
         (qs, ps) <- runWriterT (traverse expandPatterns ps)
-        pure $ ELambda a qs (foldr unrollMatch e1 ps)
+        pure (ELambda a qs (foldr unrollMatch e1 ps))
 
 unrollMatch :: (Name, Pattern a (Type o k)) -> Expression a (Type o k) -> Expression a (Type o k)
 unrollMatch (name, p) e =
