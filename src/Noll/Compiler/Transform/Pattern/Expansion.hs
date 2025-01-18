@@ -1,6 +1,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -8,8 +9,6 @@
 
 module Noll.Compiler.Transform.Pattern.Expansion where
 
-import Noll.Language.Module.Global (Global (..))
-import Noll.Language.Module.Function (Function (..))
 import Control.Monad.Reader (MonadReader, ReaderT, ask, runReaderT)
 import Control.Monad.State (MonadState, State, evalState)
 import Control.Monad.Writer (MonadWriter, WriterT, runWriterT, tell)
@@ -20,6 +19,8 @@ import Noll.Language.Expression (Clause (..), Expression (..))
 import Noll.Language.Expression.Binding (Binding (..))
 import Noll.Language.Expression.Choice (Choice (..))
 import Noll.Language.HasType (HasType (..))
+import Noll.Language.Module.Function (Function (..))
+import Noll.Language.Module.Global (Global (..))
 import Noll.Language.Pattern (Pattern (..))
 import Noll.Language.Tagged (Tagged (..))
 import Noll.Language.Type (Type (..))
@@ -29,21 +30,33 @@ import qualified Data.Text as Text
 
 type NamedPattern a o k = (Name, Pattern a (Type o k))
 
-runTranslatable :: Name -> Int -> WriterT [NamedPattern a o k] (ReaderT Name (State Int)) e -> e
-runTranslatable r s e = fst (evalState (runReaderT (runWriterT e) r) s)
+type PatternExpansionStack a o k = WriterT [NamedPattern a o k] (ReaderT Name (State Int))
 
-class Translatable a o k e | e -> a, e -> o k where
-  translate :: (MonadWriter [NamedPattern a o k] m, MonadReader Name m, MonadState Int m) => e -> m e
+newtype PatternExpansion a o k e = PatternExpansion {patternExpansionStack :: PatternExpansionStack a o k e}
+  deriving
+    ( Functor
+    , Applicative
+    , Monad
+    , MonadReader Name
+    , MonadState Int
+    , MonadWriter [NamedPattern a o k]
+    )
 
-instance Translatable a o k (Pattern a (Type o k)) where
-  translate =
+runExpandPatterns :: Name -> Int -> PatternExpansion a o k e -> e
+runExpandPatterns r s e = fst (evalState (runReaderT (runWriterT (patternExpansionStack e)) r) s)
+
+class Expandable a o k e | e -> a, e -> o k where
+  expandPatterns :: (MonadWriter [NamedPattern a o k] m, MonadReader Name m, MonadState Int m) => e -> m e
+
+instance Expandable a o k (Pattern a (Type o k)) where
+  expandPatterns =
     \case
       p@PVariable{} ->
         pure p
       p@(PAnnotation _ _ PVariable{}) ->
         pure p
       p -> do
-        name <- supplied . freshName =<< ask
+        name <- ask >>= supplied . freshName
         tell [(name, p)]
         pure (PVariable (tag p) (Label (typeOf p) name))
 
@@ -51,35 +64,35 @@ instance Translatable a o k (Pattern a (Type o k)) where
 freshName :: Name -> Int -> Name
 freshName prefix index = Text.pack ("$" <> Text.unpack prefix <> "." <> show index)
 
-instance Translatable a o k (Binding Expression a (Type o k)) where
-  translate =
+instance Expandable a o k (Binding Expression a (Type o k)) where
+  expandPatterns =
     \case
       BPattern a p e ->
-        BPattern a <$> translate p <*> translate e
+        BPattern a <$> expandPatterns p <*> expandPatterns e
       BFunction a name ps e -> do
-        BFunction a name <$> traverse translate ps <*> translate e
+        BFunction a name <$> traverse expandPatterns ps <*> expandPatterns e
 
-instance Translatable a o k (Expression a (Type o k)) where
-  translate =
+instance Expandable a o k (Expression a (Type o k)) where
+  expandPatterns =
     \case
       EAnnotation a t e ->
-        EAnnotation a t <$> translate e
+        EAnnotation a t <$> expandPatterns e
       EApplication a t e1 es ->
-        EApplication a t <$> translate e1 <*> traverse translate es
+        EApplication a t <$> expandPatterns e1 <*> traverse expandPatterns es
       EIf a t e1 e2 e3 ->
-        EIf a t <$> translate e1 <*> translate e2 <*> translate e3
+        EIf a t <$> expandPatterns e1 <*> expandPatterns e2 <*> expandPatterns e3
       ERecord a t d e ->
-        ERecord a t <$> traverse translate d <*> traverse translate e
+        ERecord a t <$> traverse expandPatterns d <*> traverse expandPatterns e
       EListCons a t e1 e2 ->
-        EListCons a t <$> translate e1 <*> translate e2
+        EListCons a t <$> expandPatterns e1 <*> expandPatterns e2
       EListLiteral a t es ->
-        EListLiteral a t <$> traverse translate es
+        EListLiteral a t <$> traverse expandPatterns es
       EMatch a t e cs ->
-        EMatch a t <$> translate e <*> pure cs
+        EMatch a t <$> expandPatterns e <*> pure cs
       ESelect a (Label t name) e ->
-        ESelect a (Label t name) <$> translate e
+        ESelect a (Label t name) <$> expandPatterns e
       EFold a t es cs e ->
-        EFold a t <$> traverse translate es <*> pure cs <*> traverse translate e
+        EFold a t <$> traverse expandPatterns es <*> pure cs <*> traverse expandPatterns e
       e@EUnaryOperator{} ->
         pure e
       e@EBinaryOperator{} ->
@@ -91,16 +104,16 @@ instance Translatable a o k (Expression a (Type o k)) where
       e@ELiteral{} ->
         pure e
       ELet a gs e1 -> do
-        e2 <- translate e1
-        (hs, ps) <- runWriterT (traverse translate gs)
+        e2 <- expandPatterns e1
+        (hs, ps) <- runWriterT (traverse expandPatterns gs)
         pure $ ELet a hs (foldr unrollMatch e2 ps)
       ERecursiveLet a p e1 e2 -> do
-        (p1, ps) <- runWriterT (translate p)
-        q1 <- BPattern a p1 <$> translate e1
+        (p1, ps) <- runWriterT (expandPatterns p)
+        q1 <- BPattern a p1 <$> expandPatterns e1
         pure $ ELet a (q1 :| []) (foldr unrollMatch e2 ps)
       ELambda a ps e -> do
-        e1 <- translate e
-        (qs, ps) <- runWriterT (traverse translate ps)
+        e1 <- expandPatterns e
+        (qs, ps) <- runWriterT (traverse expandPatterns ps)
         pure $ ELambda a qs (foldr unrollMatch e1 ps)
 
 unrollMatch :: (Name, Pattern a (Type o k)) -> Expression a (Type o k) -> Expression a (Type o k)
@@ -113,16 +126,16 @@ unrollMatch (name, p) e =
  where
   a = tag p
 
-instance Translatable a o k (Function Expression a (Type o k)) where
-  translate =
+instance Expandable a o k (Function Expression a (Type o k)) where
+  expandPatterns =
     \case
       Function a u ps e -> do
-        e1 <- translate e
-        (qs, ps) <- runWriterT (traverse translate ps)
+        e1 <- expandPatterns e
+        (qs, ps) <- runWriterT (traverse expandPatterns ps)
         pure $ Function a u qs (foldr unrollMatch e1 ps)
 
-instance Translatable a o k (Global Expression a (Type o k)) where
-  translate =
+instance Expandable a o k (Global Expression a (Type o k)) where
+  expandPatterns =
     \case
       Global a u e ->
-        Global a u <$> translate e
+        Global a u <$> expandPatterns e
