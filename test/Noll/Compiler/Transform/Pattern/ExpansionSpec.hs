@@ -3,7 +3,7 @@
 module Noll.Compiler.Transform.Pattern.ExpansionSpec where
 
 import Noll.Common.List1 (NonEmpty ((:|)), (<|))
-import Noll.Compiler.Transform.Pattern.Expansion (expandPatterns, runExpandPatterns)
+import Noll.Compiler.Transform.Pattern.Expansion (expandPatterns, runPatternExpansion)
 import Noll.Label (Label (..))
 import Noll.Language (
   BinaryOperator (..),
@@ -29,17 +29,17 @@ spec :: Spec
 spec =
   describe "" $ do
     it "" $
-      runExpandPatterns "v" 0 (expandPatterns fixture1) == fixture2
+      runPatternExpansion "v" 0 (expandPatterns fixture1) == fixture2
     it "" $
-      runExpandPatterns "v" 0 (expandPatterns fixture3) == fixture4
+      runPatternExpansion "v" 0 (expandPatterns fixture3) == fixture4
     it "" $
-      runExpandPatterns "v" 0 (expandPatterns fixture5) == fixture6
+      runPatternExpansion "v" 0 (expandPatterns fixture5) == fixture6
     it "" $
-      runExpandPatterns "v" 0 (expandPatterns fixture7) == fixture8
+      runPatternExpansion "v" 0 (expandPatterns fixture7) == fixture8
     it "" $
-      runExpandPatterns "v" 0 (expandPatterns fixture9) == fixture10
+      runPatternExpansion "v" 0 (expandPatterns fixture9) == fixture10
     it "" $
-      runExpandPatterns "v" 0 (expandPatterns fixture11) == fixture12
+      runPatternExpansion "v" 0 (expandPatterns fixture11) == fixture12
 
 -- let
 --  Some(p) = x     Option(int32)

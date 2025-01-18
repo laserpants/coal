@@ -43,9 +43,9 @@ newtype PatternExpansion a o k e = PatternExpansion {patternExpansionStack :: Pa
     , MonadWriter [NamedPattern a o k]
     )
 
-{-# INLINE runExpandPatterns #-}
-runExpandPatterns :: Name -> Int -> PatternExpansion a o k e -> e
-runExpandPatterns r s e = fst (evalState (runReaderT (runWriterT (patternExpansionStack e)) r) s)
+{-# INLINE runPatternExpansion #-}
+runPatternExpansion :: Name -> Int -> PatternExpansion a o k e -> e
+runPatternExpansion r s e = fst (evalState (runReaderT (runWriterT (patternExpansionStack e)) r) s)
 
 class Expandable a o k e | e -> a, e -> o k where
   expandPatterns :: (MonadWriter [NamedPattern a o k] m, MonadReader Name m, MonadState Int m) => e -> m e
