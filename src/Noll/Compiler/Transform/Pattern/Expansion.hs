@@ -6,7 +6,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Compiler.Transform.Pattern.BindingExpansion where
+module Noll.Compiler.Transform.Pattern.Expansion where
 
 import Noll.Language.Module.Global (Global (..))
 import Noll.Language.Module.Function (Function (..))

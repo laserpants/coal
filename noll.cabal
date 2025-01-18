@@ -28,7 +28,7 @@ library
       Noll.Common.List1
       Noll.Common.Supply
       Noll.Compiler
-      Noll.Compiler.Transform.Pattern.BindingExpansion
+      Noll.Compiler.Transform.Pattern.Expansion
       Noll.Core.Language.Expr
       Noll.Core.Language.HasType
       Noll.Core.Language.Type
@@ -110,7 +110,7 @@ test-suite noll-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
-      Noll.Compiler.Transform.Pattern.BindingExpansionSpec
+      Noll.Compiler.Transform.Pattern.ExpansionSpec
       Noll.Language.IndexedSpec
       Noll.SystemF.Constraint.GenerationSpec
       Noll.SystemF.UnificationSpec

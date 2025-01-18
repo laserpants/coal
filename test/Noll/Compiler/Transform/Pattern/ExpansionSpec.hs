@@ -1,9 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Compiler.Transform.Pattern.BindingExpansionSpec where
+module Noll.Compiler.Transform.Pattern.ExpansionSpec where
 
 import Noll.Common.List1 (NonEmpty ((:|)), (<|))
-import Noll.Compiler.Transform.Pattern.BindingExpansion (runTranslatable, translate)
+import Noll.Compiler.Transform.Pattern.Expansion (runTranslatable, translate)
 import Noll.Label (Label (..))
 import Noll.Language (
   BinaryOperator (..),
