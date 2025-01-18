@@ -134,7 +134,7 @@ instance Expandable a o k (Function Expression a (Type o k)) where
       Function a u ps e -> do
         e1 <- expandPatterns e
         (qs, ps) <- runWriterT (traverse expandPatterns ps)
-        pure $ Function a u qs (foldr unrollMatch e1 ps)
+        pure (Function a u qs (foldr unrollMatch e1 ps))
 
 instance Expandable a o k (Global Expression a (Type o k)) where
   expandPatterns =
