@@ -21,6 +21,7 @@ import Noll.Language.Expression.Choice (Choice (..))
 import Noll.Language.HasType (HasType (..))
 import Noll.Language.Module.Function (Function (..))
 import Noll.Language.Module.Global (Global (..))
+import Noll.Language.Module.Object (Object (..))
 import Noll.Language.Pattern (Pattern (..))
 import Noll.Language.Tagged (Tagged (..))
 import Noll.Language.Type (Type (..))
@@ -69,7 +70,7 @@ instance Expandable a o k (Binding Expression a (Type o k)) where
     \case
       BPattern a p e ->
         BPattern a <$> expandPatterns p <*> expandPatterns e
-      BFunction a name ps e -> do
+      BFunction a name ps e ->
         BFunction a name <$> traverse expandPatterns ps <*> expandPatterns e
 
 instance Expandable a o k (Expression a (Type o k)) where
@@ -139,3 +140,13 @@ instance Expandable a o k (Global Expression a (Type o k)) where
     \case
       Global a u e ->
         Global a u <$> expandPatterns e
+
+instance Expandable a o k (Object a k (Type o k)) where
+  expandPatterns =
+    \case
+      DFunction name f ->
+        DFunction name <$> expandPatterns f
+      DGlobal name g ->
+        DGlobal name <$> expandPatterns g
+      d ->
+        pure d
