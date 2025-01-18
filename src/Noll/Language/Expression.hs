@@ -11,7 +11,7 @@ import Noll.Language.Expression.Operator.Binary (BinaryOperator)
 import Noll.Language.Expression.Operator.Unary (UnaryOperator)
 import Noll.Language.Pattern (Pattern (..))
 import Noll.Language.Primitive (Primitive (..))
-import Noll.Language.Type (Type, TypeParam (..))
+import Noll.Language.Type (Type, Parameter (..))
 import Noll.Utils (Dictionary)
 
 data Clause e a t = EClause a (Pattern a t) (List1 (Choice e a t))
@@ -19,7 +19,7 @@ data Clause e a t = EClause a (Pattern a t) (List1 (Choice e a t))
 
 data Expression a t
   = -- | Type-annotated expression
-    EAnnotation a (Type TypeParam ()) (Expression a t)
+    EAnnotation a (Type Parameter ()) (Expression a t)
   | -- | Function application
     EApplication a t (Expression a t) (List1 (Expression a t))
   | -- | Lambda function expression

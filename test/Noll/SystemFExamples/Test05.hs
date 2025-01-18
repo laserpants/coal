@@ -21,7 +21,7 @@ import Noll.Language (
   Scheme (..),
   Type (..),
   TypeIndex (..),
-  TypeParam (..),
+  Parameter (..),
  )
 import Noll.SystemFSpec.TestRunner
 import Test.Hspec (Spec, describe, hspec, it)

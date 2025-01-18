@@ -22,7 +22,7 @@ import Noll.Language (
   Scheme (..),
   Type (..),
   TypeIndex (..),
-  TypeParam (..),
+  Parameter (..),
   Uses (..),
  )
 import Noll.SystemFSpec.TestRunner

@@ -107,7 +107,7 @@ data TypeAnnotationError a
     -- fn(f, x) => f(x), which forces 'a' and 'c' to be the same type.
     -- The type signature claims that the function is polymorphic with respect
     -- to any choice of variables a, b, and c, and is therefore incorrect.
-    NonDistinctTypeParameters [[(Name, a)]]
+    NonDistinctParametereters [[(Name, a)]]
   | -- | Type parameter resolves to a concrete type; e.g., fn(x : a, y : int32) => x + y
     ResolvesToMonomorphicType Name (Type TypeIndex Kind)
   deriving (Show, Eq, Ord, Read)

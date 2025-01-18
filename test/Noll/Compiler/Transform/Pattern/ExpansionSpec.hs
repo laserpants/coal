@@ -17,7 +17,7 @@ import Noll.Language (
   Row (..),
   Type (..),
   TypeIndex (..),
-  TypeParam (..),
+  Parameter (..),
   Uses (..),
  )
 import Noll.Language.Module.Function (Function (..))
@@ -223,10 +223,10 @@ fixture7 =
                 ()
                 ( TAlias
                     "Range"
-                    [TVariable (TypeParam () "a")]
+                    [TVariable (Parameter () "a")]
                     ( TIntrinsic
                         ( IRecord
-                            (TRow (RExtend "max" (TVariable (TypeParam () "a")) (RExtend "min" (TVariable (TypeParam () "a")) RNil)))
+                            (TRow (RExtend "max" (TVariable (Parameter () "a")) (RExtend "min" (TVariable (Parameter () "a")) RNil)))
                         )
                     )
                 )
@@ -250,7 +250,7 @@ fixture7 =
                     )
                     Nothing
                 )
-                <| PAnnotation () (TVariable (TypeParam () "a")) (PVariable () (Label (TVariable (TypeIndex KType 0)) "n"))
+                <| PAnnotation () (TVariable (Parameter () "a")) (PVariable () (Label (TVariable (TypeIndex KType 0)) "n"))
                 :| []
             )
             ( EApplication
@@ -381,7 +381,7 @@ fixture8 =
                     )
                     "$v.0"
                 )
-                <| PAnnotation () (TVariable (TypeParam () "a")) (PVariable () (Label (TVariable (TypeIndex KType 0)) "n"))
+                <| PAnnotation () (TVariable (Parameter () "a")) (PVariable () (Label (TVariable (TypeIndex KType 0)) "n"))
                 :| []
             )
             ( EMatch
@@ -404,10 +404,10 @@ fixture8 =
                         ()
                         ( TAlias
                             "Range"
-                            [TVariable (TypeParam () "a")]
+                            [TVariable (Parameter () "a")]
                             ( TIntrinsic
                                 ( IRecord
-                                    (TRow (RExtend "max" (TVariable (TypeParam () "a")) (RExtend "min" (TVariable (TypeParam () "a")) RNil)))
+                                    (TRow (RExtend "max" (TVariable (Parameter () "a")) (RExtend "min" (TVariable (Parameter () "a")) RNil)))
                                 )
                             )
                         )
@@ -636,10 +636,10 @@ fixture11 =
         ()
         ( TAlias
             "Range"
-            [TVariable (TypeParam () "a")]
+            [TVariable (Parameter () "a")]
             ( TIntrinsic
                 ( IRecord
-                    (TRow (RExtend "max" (TVariable (TypeParam () "a")) (RExtend "min" (TVariable (TypeParam () "a")) RNil)))
+                    (TRow (RExtend "max" (TVariable (Parameter () "a")) (RExtend "min" (TVariable (Parameter () "a")) RNil)))
                 )
             )
         )
@@ -663,7 +663,7 @@ fixture11 =
             )
             Nothing
         )
-        <| PAnnotation () (TVariable (TypeParam () "a")) (PVariable () (Label (TVariable (TypeIndex KType 0)) "n"))
+        <| PAnnotation () (TVariable (Parameter () "a")) (PVariable () (Label (TVariable (TypeIndex KType 0)) "n"))
         :| []
     )
     ( EApplication
@@ -759,7 +759,7 @@ fixture12 =
             )
             "$v.0"
         )
-        <| PAnnotation () (TVariable (TypeParam () "a")) (PVariable () (Label (TVariable (TypeIndex KType 0)) "n"))
+        <| PAnnotation () (TVariable (Parameter () "a")) (PVariable () (Label (TVariable (TypeIndex KType 0)) "n"))
         :| []
     )
     ( EMatch
@@ -782,10 +782,10 @@ fixture12 =
                 ()
                 ( TAlias
                     "Range"
-                    [TVariable (TypeParam () "a")]
+                    [TVariable (Parameter () "a")]
                     ( TIntrinsic
                         ( IRecord
-                            (TRow (RExtend "max" (TVariable (TypeParam () "a")) (RExtend "min" (TVariable (TypeParam () "a")) RNil)))
+                            (TRow (RExtend "max" (TVariable (Parameter () "a")) (RExtend "min" (TVariable (Parameter () "a")) RNil)))
                         )
                     )
                 )

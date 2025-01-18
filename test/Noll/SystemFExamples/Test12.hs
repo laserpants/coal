@@ -22,7 +22,7 @@ import Noll.Language (
   Scheme (..),
   Type (..),
   TypeIndex (..),
-  TypeParam (..),
+  Parameter (..),
   Uses (..),
  )
 import Noll.SystemFSpec.TestRunner
@@ -181,7 +181,7 @@ fixture =
   Function
     ()
     (Uses [] ())
-    (PAnnotation () (TIntrinsic (IList (TVariable (TypeParam () "a")))) (PVariable () (Label () "list")) :| [])
+    (PAnnotation () (TIntrinsic (IList (TVariable (Parameter () "a")))) (PVariable () (Label () "list")) :| [])
     ( EFold
         ()
         ()
@@ -457,7 +457,7 @@ fixture1 =
     (Uses [] (treeType 1))
     ( PAnnotation
         ()
-        (TIntrinsic (IList (TVariable (TypeParam () "a"))))
+        (TIntrinsic (IList (TVariable (Parameter () "a"))))
         (PVariable () (Label (listType 1) "list"))
         :| []
     )

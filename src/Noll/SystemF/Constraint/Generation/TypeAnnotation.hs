@@ -24,7 +24,7 @@ import Noll.Language (
   Scheme (..),
   Type (..),
   TypeIndex (..),
-  TypeParam (..),
+  Parameter (..),
   foldKind,
   kindOf,
   typeIndexesIn,
@@ -57,7 +57,7 @@ lookupTypeConstructor name = Environment.lookup name <$> asks constraintsGenerat
 instantiateAnnotation ::
   (MonadReader TypeAnnotationContext m, MonadState (ConstraintsGenerationState a) m) =>
   a ->
-  Type TypeParam () ->
+  Type Parameter () ->
   m (Either (TypeAnnotationError a) (Type TypeIndex Kind))
 instantiateAnnotation loc t = do
   (t, s) <- runTypeAnnotation loc (instantiate t)
@@ -69,16 +69,16 @@ type TypeAnnotation a m = ExceptT (a -> TypeAnnotationError a) (StateT (Dictiona
 runTypeAnnotation :: (Monad m) => a -> TypeAnnotation a m t -> m (Either (TypeAnnotationError a) t, Dictionary (TypeIndex Kind))
 runTypeAnnotation loc v = runStateT (runExceptT (withExceptT ($ loc) v)) mempty
 
-instantiate :: (MonadReader TypeAnnotationContext m) => Type TypeParam () -> TypeAnnotation a m IndexedType
+instantiate :: (MonadReader TypeAnnotationContext m) => Type Parameter () -> TypeAnnotation a m IndexedType
 instantiate =
   \case
-    TApplication _ (TVariable (TypeParam _ v)) ts -> do
+    TApplication _ (TVariable (Parameter _ v)) ts -> do
       ts1 <- traverse instantiate ts
       t1 <- TVariable <$> typeIndex (foldKind KType (kindOf <$> ts1)) v
       pure (TApplication KType t1 ts1)
     TApplication _ t ts ->
       TApplication KType <$> instantiate t <*> traverse instantiate ts
-    TVariable (TypeParam _ v) ->
+    TVariable (Parameter _ v) ->
       TVariable <$> typeIndex KType v
     TArrow t1 t2 ->
       TArrow <$> instantiate t1 <*> instantiate t2
@@ -96,10 +96,10 @@ instantiate =
     TAlias name ts t ->
       TAlias name <$> traverse instantiate ts <*> instantiate t
 
-instantiateRow :: (MonadReader TypeAnnotationContext m) => Row TypeParam () (Type TypeParam ()) -> TypeAnnotation a m (Row TypeIndex Kind IndexedType)
+instantiateRow :: (MonadReader TypeAnnotationContext m) => Row Parameter () (Type Parameter ()) -> TypeAnnotation a m (Row TypeIndex Kind IndexedType)
 instantiateRow =
   \case
-    RVariable (TypeParam _ v) ->
+    RVariable (Parameter _ v) ->
       RVariable <$> typeIndex KRow v
     RExtend name t row ->
       RExtend name <$> instantiate t <*> instantiateRow row
@@ -127,7 +127,7 @@ checkTypeAnnotationParameters ps (Substitution sub) = do
     [] ->
       pure ()
     qs ->
-      tell [NonDistinctTypeParameters (snd <$$> qs)]
+      tell [NonDistinctParametereters (snd <$$> qs)]
  where
   lengthMoreThan n = length >>> (> n)
   go (name, (loc, TypeIndex _ index)) =

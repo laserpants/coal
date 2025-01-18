@@ -21,7 +21,7 @@ import Noll.Language (
   Scheme (..),
   Type (..),
   TypeIndex (..),
-  TypeParam (..),
+  Parameter (..),
   Uses (..),
  )
 import Noll.SystemFSpec.TestRunner
@@ -84,10 +84,10 @@ fixture =
         ()
         ( TAlias
             "Range"
-            [TVariable (TypeParam () "a")]
+            [TVariable (Parameter () "a")]
             ( TIntrinsic
                 ( IRecord
-                    (TRow (RExtend "max" (TVariable (TypeParam () "a")) (RExtend "min" (TVariable (TypeParam () "a")) RNil)))
+                    (TRow (RExtend "max" (TVariable (Parameter () "a")) (RExtend "min" (TVariable (Parameter () "a")) RNil)))
                 )
             )
         )
@@ -107,7 +107,7 @@ fixture =
             )
             Nothing
         )
-        <| PAnnotation () (TVariable (TypeParam () "a")) (PVariable () (Label () "n"))
+        <| PAnnotation () (TVariable (Parameter () "a")) (PVariable () (Label () "n"))
           :| []
     )
     ( EApplication
@@ -148,10 +148,10 @@ fixture1 =
         ()
         ( TAlias
             "Range"
-            [TVariable (TypeParam () "a")]
+            [TVariable (Parameter () "a")]
             ( TIntrinsic
                 ( IRecord
-                    (TRow (RExtend "max" (TVariable (TypeParam () "a")) (RExtend "min" (TVariable (TypeParam () "a")) RNil)))
+                    (TRow (RExtend "max" (TVariable (Parameter () "a")) (RExtend "min" (TVariable (Parameter () "a")) RNil)))
                 )
             )
         )
@@ -175,7 +175,7 @@ fixture1 =
             )
             Nothing
         )
-        <| PAnnotation () (TVariable (TypeParam () "a")) (PVariable () (Label (TVariable (TypeIndex KType 0)) "n"))
+        <| PAnnotation () (TVariable (Parameter () "a")) (PVariable () (Label (TVariable (TypeIndex KType 0)) "n"))
           :| []
     )
     ( EApplication

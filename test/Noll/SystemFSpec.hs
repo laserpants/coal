@@ -36,7 +36,7 @@ import Noll.Language (
   Scheme (..),
   Type (..),
   TypeIndex (..),
-  TypeParam (..),
+  Parameter (..),
   freshIdIn,
   indexed,
  )
@@ -462,7 +462,7 @@ fixture14 =
       ()
       ( EAnnotation
           ()
-          (TApplication () (TConstructor () "Pair") (TVariable (TypeParam () "a") <| TVariable (TypeParam () "b") :| []))
+          (TApplication () (TConstructor () "Pair") (TVariable (Parameter () "a") <| TVariable (Parameter () "b") :| []))
           (EVariable () (Label () "p"))
       )
       ( EClause
@@ -480,7 +480,7 @@ fixture14Typed =
       (TIntrinsic IBool)
       ( EAnnotation
           ()
-          (TApplication () (TConstructor () "Pair") (TVariable (TypeParam () "a") <| TVariable (TypeParam () "b") :| []))
+          (TApplication () (TConstructor () "Pair") (TVariable (Parameter () "a") <| TVariable (Parameter () "b") :| []))
           (EVariable () (Label (TApplication KType (TConstructor (KArrow KType (KArrow KType KType)) "Pair") (TVariable (TypeIndex KType 1) :| [TVariable (TypeIndex KType 0)])) "p"))
       )
       ( EClause
@@ -506,7 +506,7 @@ fixture15 =
       ()
       ( EAnnotation
           ()
-          (TApplication () (TConstructor () "Pair") (TVariable (TypeParam () "a") <| TVariable (TypeParam () "a") :| []))
+          (TApplication () (TConstructor () "Pair") (TVariable (Parameter () "a") <| TVariable (Parameter () "a") :| []))
           (EVariable () (Label () "p"))
       )
       ( EClause
@@ -524,7 +524,7 @@ fixture15Typed =
       (TIntrinsic IBool)
       ( EAnnotation
           ()
-          (TApplication () (TConstructor () "Pair") (TVariable (TypeParam () "a") <| TVariable (TypeParam () "a") :| []))
+          (TApplication () (TConstructor () "Pair") (TVariable (Parameter () "a") <| TVariable (Parameter () "a") :| []))
           (EVariable () (Label (TApplication KType (TConstructor (KArrow KType (KArrow KType KType)) "Pair") (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 0)])) "p"))
       )
       ( EClause
@@ -718,7 +718,7 @@ fixture23 =
             ()
             ( ( PAnnotation
                   ()
-                  (TVariable (TypeParam () "a"))
+                  (TVariable (Parameter () "a"))
                   (PVariable () (Label () "x"))
               )
                 :| []
@@ -752,7 +752,7 @@ fixture24 =
             )
             ( EAnnotation
                 ()
-                (TVariable (TypeParam () "a"))
+                (TVariable (Parameter () "a"))
                 (EVariable () (Label () "x"))
             )
         )
@@ -772,14 +772,14 @@ fixture25 =
             ()
             ( ( PAnnotation
                   ()
-                  (TVariable (TypeParam () "b"))
+                  (TVariable (Parameter () "b"))
                   (PVariable () (Label () "x"))
               )
                 :| []
             )
             ( EAnnotation
                 ()
-                (TVariable (TypeParam () "a"))
+                (TVariable (Parameter () "a"))
                 (EVariable () (Label () "x"))
             )
         )
@@ -804,12 +804,12 @@ fixture26 =
             ()
             ( ( PAnnotation
                   ()
-                  (TVariable (TypeParam () "a") `TArrow` TVariable (TypeParam () "b"))
+                  (TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "b"))
                   (PVariable () (Label () "g"))
               )
                 <| ( PAnnotation
                       ()
-                      (TVariable (TypeParam () "c"))
+                      (TVariable (Parameter () "c"))
                       (PVariable () (Label () "x"))
                    )
                   :| []

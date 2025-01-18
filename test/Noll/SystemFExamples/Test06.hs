@@ -21,7 +21,7 @@ import Noll.Language (
   Scheme (..),
   Type (..),
   TypeIndex (..),
-  TypeParam (..),
+  Parameter (..),
  )
 import Noll.SystemFSpec.TestRunner
 import Test.Hspec (Spec, describe, hspec, it)
@@ -186,7 +186,7 @@ fixture =
         (PVariable () (Label () "from_list"))
         ( ELambda
             ()
-            (PAnnotation () (TIntrinsic (IList (TVariable (TypeParam () "a")))) (PVariable () (Label () "list")) :| [])
+            (PAnnotation () (TIntrinsic (IList (TVariable (Parameter () "a")))) (PVariable () (Label () "list")) :| [])
             ( EFold
                 ()
                 ()
@@ -470,7 +470,7 @@ fixture1 =
               ()
               ( PAnnotation
                   ()
-                  (TIntrinsic (IList (TVariable (TypeParam () "a"))))
+                  (TIntrinsic (IList (TVariable (Parameter () "a"))))
                   (PVariable () (Label (listType 1) "list"))
                   :| []
               )

@@ -20,7 +20,7 @@ import Noll.Language (
   Scheme (..),
   Type (..),
   TypeIndex (..),
-  TypeParam (..),
+  Parameter (..),
  )
 import Noll.SystemFSpec.TestRunner
 import Test.Hspec (Spec, describe, hspec, it)
@@ -57,10 +57,10 @@ spec =
                           ()
                           ( TAlias
                               "Range"
-                              [TVariable (TypeParam () "a")]
+                              [TVariable (Parameter () "a")]
                               ( TIntrinsic
                                   ( IRecord
-                                      (TRow (RExtend "max" (TVariable (TypeParam () "a")) (RExtend "min" (TVariable (TypeParam () "a")) RNil)))
+                                      (TRow (RExtend "max" (TVariable (Parameter () "a")) (RExtend "min" (TVariable (Parameter () "a")) RNil)))
                                   )
                               )
                           )
@@ -84,7 +84,7 @@ spec =
                               )
                               Nothing
                           )
-                          <| PAnnotation () (TVariable (TypeParam () "a")) (PVariable () (Label (TVariable (TypeIndex KType 0)) "n"))
+                          <| PAnnotation () (TVariable (Parameter () "a")) (PVariable () (Label (TVariable (TypeIndex KType 0)) "n"))
                             :| []
                       )
                       ( EApplication
@@ -229,10 +229,10 @@ fixture =
                   ()
                   ( TAlias
                       "Range"
-                      [TVariable (TypeParam () "a")]
+                      [TVariable (Parameter () "a")]
                       ( TIntrinsic
                           ( IRecord
-                              (TRow (RExtend "max" (TVariable (TypeParam () "a")) (RExtend "min" (TVariable (TypeParam () "a")) RNil)))
+                              (TRow (RExtend "max" (TVariable (Parameter () "a")) (RExtend "min" (TVariable (Parameter () "a")) RNil)))
                           )
                       )
                   )
@@ -252,7 +252,7 @@ fixture =
                       )
                       Nothing
                   )
-                  <| PAnnotation () (TVariable (TypeParam () "a")) (PVariable () (Label () "n"))
+                  <| PAnnotation () (TVariable (Parameter () "a")) (PVariable () (Label () "n"))
                     :| []
               )
               ( EApplication

@@ -16,7 +16,7 @@ import Noll.Language (
   Scheme (..),
   Type (..),
   TypeIndex (..),
-  TypeParam (..),
+  Parameter (..),
   freshIdIn,
   indexed,
  )
@@ -112,7 +112,7 @@ testCollectConstraints e =
         (ConstraintsGenerationContext mempty mempty mempty)
         (collectConstraints e0)
 
-testInstantiateAnnotation :: Type TypeParam () -> Either (TypeAnnotationError ()) (Type TypeIndex Kind)
+testInstantiateAnnotation :: Type Parameter () -> Either (TypeAnnotationError ()) (Type TypeIndex Kind)
 testInstantiateAnnotation t = s
  where
   (s, _) =
@@ -192,31 +192,31 @@ fixture9 =
     )
     (ELiteral "ELiteral" (LInt32 1))
 
-fixture10 :: Type TypeParam ()
+fixture10 :: Type Parameter ()
 fixture10 =
   TArrow
-    (TApplication () (TVariable (TypeParam () "f")) (TVariable (TypeParam () "a") :| []))
-    (TApplication () (TVariable (TypeParam () "f")) (TVariable (TypeParam () "b") :| []))
+    (TApplication () (TVariable (Parameter () "f")) (TVariable (Parameter () "a") :| []))
+    (TApplication () (TVariable (Parameter () "f")) (TVariable (Parameter () "b") :| []))
 
-fixture11 :: Type TypeParam ()
+fixture11 :: Type Parameter ()
 fixture11 =
   TArrow
-    (TApplication () (TVariable (TypeParam () "f")) (TVariable (TypeParam () "a") :| []))
-    (TApplication () (TVariable (TypeParam () "f")) (TVariable (TypeParam () "a") :| []))
+    (TApplication () (TVariable (Parameter () "f")) (TVariable (Parameter () "a") :| []))
+    (TApplication () (TVariable (Parameter () "f")) (TVariable (Parameter () "a") :| []))
 
-fixture12 :: Type TypeParam ()
+fixture12 :: Type Parameter ()
 fixture12 =
   TArrow
-    (TVariable (TypeParam () "f"))
-    (TApplication () (TVariable (TypeParam () "f")) (TVariable (TypeParam () "a") :| []))
+    (TVariable (Parameter () "f"))
+    (TApplication () (TVariable (Parameter () "f")) (TVariable (Parameter () "a") :| []))
 
 -- a -> b
-fixture13 :: Type TypeParam ()
-fixture13 = TArrow (TVariable (TypeParam () "a")) (TVariable (TypeParam () "b"))
+fixture13 :: Type Parameter ()
+fixture13 = TArrow (TVariable (Parameter () "a")) (TVariable (Parameter () "b"))
 
 -- a -> a
-fixture14 :: Type TypeParam ()
-fixture14 = TArrow (TVariable (TypeParam () "a")) (TVariable (TypeParam () "a"))
+fixture14 :: Type Parameter ()
+fixture14 = TArrow (TVariable (Parameter () "a")) (TVariable (Parameter () "a"))
 
 -- fn({ foo = 1 }) => foo
 fixture15 :: Expression () ()
