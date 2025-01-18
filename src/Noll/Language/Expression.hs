@@ -11,7 +11,7 @@ import Noll.Language.Expression.Operator.Binary (BinaryOperator)
 import Noll.Language.Expression.Operator.Unary (UnaryOperator)
 import Noll.Language.Pattern (Pattern (..))
 import Noll.Language.Primitive (Primitive (..))
-import Noll.Language.Type (Type, Parameter (..))
+import Noll.Language.Type (Parameter (..), Type)
 import Noll.Utils (Dictionary)
 
 data Clause e a t = EClause a (Pattern a t) (List1 (Choice e a t))

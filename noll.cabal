@@ -30,6 +30,7 @@ library
       Noll.Compiler
       Noll.Compiler.Transform.Pattern.Expansion
       Noll.Compiler.Transform.PatternMatching
+      Noll.Compiler.Transform.Tree
       Noll.Core.Language.Expr
       Noll.Core.Language.HasType
       Noll.Core.Language.Type
@@ -114,6 +115,7 @@ test-suite noll-test
   other-modules:
       Noll.Compiler.Transform.Pattern.ExpansionSpec
       Noll.Compiler.Transform.PatternMatchingSpec
+      Noll.Compiler.Transform.TreeSpec
       Noll.Language.HasFreeSpec
       Noll.Language.IndexedSpec
       Noll.SystemF.Constraint.GenerationSpec

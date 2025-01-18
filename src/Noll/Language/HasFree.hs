@@ -2,12 +2,15 @@
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 module Noll.Language.HasFree (
   HasBound (..),
   HasFree (..),
   isBoundIn,
   isNotBoundIn,
+  appearsFreeIn,
+  appearsIn,
 ) where
 
 import Data.Set (Set)
@@ -73,11 +76,11 @@ instance (Ord t) => HasBound (Pattern a t) where
       PLiteral{} ->
         mempty
 
-class HasFree f t where
+class HasFree f t | f -> t where
   freeIn :: f -> Set (Label t)
 
 instance (Ord t, HasFree f t) => HasFree (Maybe f) t where
-  freeIn = Set.unions . fmap freeIn
+  freeIn = undefined -- Set.unions . fmap freeIn
 
 instance (Ord t, HasFree f t) => HasFree [f] t where
   freeIn = Set.unions . fmap freeIn
@@ -150,3 +153,11 @@ isBoundIn name obj = name `elem` boundIn obj
 {-# INLINE isNotBoundIn #-}
 isNotBoundIn :: (HasBound b) => Name -> b -> Bool
 isNotBoundIn name obj = name `notElem` boundIn obj
+
+{-# INLINE appearsFreeIn #-}
+appearsFreeIn :: (HasFree a t) => Name -> a -> Bool
+appearsFreeIn name = appearsIn name . freeIn
+
+{-# INLINE appearsIn #-}
+appearsIn :: Name -> Set (Label t) -> Bool
+appearsIn name set = name `elem` Set.map labelName set

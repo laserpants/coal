@@ -4,7 +4,7 @@ module Noll.Language.Pattern (Pattern (..)) where
 
 import Noll.Label (Label (..))
 import Noll.Language.Primitive (Primitive (..))
-import Noll.Language.Type (Type, Parameter (..))
+import Noll.Language.Type (Parameter (..), Type)
 import Noll.Utils (Dictionary, Map, Name)
 
 data Pattern a t
