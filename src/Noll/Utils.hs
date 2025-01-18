@@ -17,6 +17,7 @@ module Noll.Utils (
   fromMaybe,
   lexOrderRank,
   groupByEq,
+  const2,
   (<$$>),
   (<$$$>),
 ) where
@@ -76,6 +77,10 @@ tellLeft = tell . fmap Left
 {-# INLINE tellRight #-}
 tellRight :: (MonadWriter [Either e a] m) => [a] -> m ()
 tellRight = tell . fmap Right
+
+{-# INLINE const2 #-}
+const2 :: a -> b -> c -> a
+const2 a _ _ = a
 
 lexOrderRank :: Text -> Int
 lexOrderRank txt = sum [36 ^ i | i <- [1 .. len - 1]] + Text.foldl' go 0 txt
