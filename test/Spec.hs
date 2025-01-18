@@ -25,6 +25,7 @@ import qualified Noll.SystemFExamples.Test13
 import qualified Noll.SystemFExamples.Test14
 import qualified Noll.SystemFExamples.Test15
 import qualified Noll.SystemFSpec
+import qualified Noll.Compiler.Transform.PatternMatchingSpec
 import Test.Hspec (hspec, it)
 
 main :: IO ()
@@ -50,6 +51,7 @@ main =
     Noll.SystemFExamples.Test13.spec
     Noll.SystemFExamples.Test14.spec
     Noll.SystemFExamples.Test15.spec
+    Noll.Compiler.Transform.PatternMatchingSpec.spec
 
 --    Noll.SystemF.TypeConstraint.CollectSpec.spec
 --    Noll.SystemF.TypeSubstitutionSpec.spec

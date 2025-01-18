@@ -31,8 +31,8 @@ import Noll.Language.Expression.Operator.Unary
 import Noll.Language.HasType
 import Noll.Language.Indexed
 import Noll.Language.Module
-import Noll.Language.Module.Function
 import Noll.Language.Module.Constant
+import Noll.Language.Module.Function
 import Noll.Language.Module.Object
 import Noll.Language.Pattern
 import Noll.Language.Primitive

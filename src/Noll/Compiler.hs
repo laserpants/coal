@@ -31,10 +31,10 @@ import Noll.Common.List1 (NonEmpty ((:|)))
 import Noll.Label (Label (..))
 import Noll.Language (
   Binding (..),
+  Constant (..),
   Constructor (..),
   Expression (..),
   Function (..),
-  Constant (..),
   IndexedType,
   Kind (..),
   Pattern (..),

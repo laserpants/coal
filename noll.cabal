@@ -112,6 +112,7 @@ test-suite noll-test
   main-is: Spec.hs
   other-modules:
       Noll.Compiler.Transform.Pattern.ExpansionSpec
+      Noll.Compiler.Transform.PatternMatchingSpec
       Noll.Language.IndexedSpec
       Noll.SystemF.Constraint.GenerationSpec
       Noll.SystemF.UnificationSpec

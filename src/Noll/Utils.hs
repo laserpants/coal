@@ -16,6 +16,7 @@ module Noll.Utils (
   tellRight,
   fromMaybe,
   lexOrderRank,
+  groupByEq,
   (<$$>),
   (<$$$>),
 ) where
@@ -24,6 +25,8 @@ import Control.Monad (forM, forM_)
 import Control.Monad.Writer (MonadWriter, tell)
 import Data.Char (ord)
 import Data.Foldable (foldrM, traverse_)
+import Data.Function (on)
+import Data.List (groupBy)
 import Data.Map.Strict (Map)
 import Data.Maybe (fromMaybe)
 import Data.Set (Set, unions)
@@ -48,6 +51,10 @@ infixr 8 <$$>
 (<$$$>) = fmap . fmap . fmap
 
 infixr 8 <$$$>
+
+{-# INLINE groupByEq #-}
+groupByEq :: (Eq b) => (a -> b) -> [a] -> [[a]]
+groupByEq = groupBy . on (==)
 
 -- | Monadic version of concatMap
 {-# INLINE concatMapM #-}
