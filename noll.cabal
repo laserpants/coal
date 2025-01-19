@@ -28,8 +28,8 @@ library
       Noll.Common.List1
       Noll.Common.Supply
       Noll.Compiler
+      Noll.Compiler.PatternMatching
       Noll.Compiler.Transform.Pattern.Expansion
-      Noll.Compiler.Transform.PatternMatching
       Noll.Compiler.Transform.Tree
       Noll.Core.Language.Expr
       Noll.Core.Language.HasType
@@ -113,8 +113,8 @@ test-suite noll-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      Noll.Compiler.PatternMatchingSpec
       Noll.Compiler.Transform.Pattern.ExpansionSpec
-      Noll.Compiler.Transform.PatternMatchingSpec
       Noll.Compiler.Transform.TreeSpec
       Noll.Language.HasFreeSpec
       Noll.Language.IndexedSpec

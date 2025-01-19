@@ -5,7 +5,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Compiler.Transform.PatternMatching where
+module Noll.Compiler.PatternMatching where
 
 import Control.Monad.State (MonadState, evalState)
 import Data.Function (on)

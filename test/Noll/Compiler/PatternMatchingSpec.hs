@@ -1,8 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Compiler.Transform.PatternMatchingSpec where
+module Noll.Compiler.PatternMatchingSpec where
 
-import Noll.Compiler.Transform.PatternMatching
+import Noll.Compiler.PatternMatching
 import Noll.Label (Label (..))
 import Noll.Language (Expression (..))
 import Test.Hspec (Spec, describe, it)

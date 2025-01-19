@@ -7,7 +7,7 @@ import qualified Noll.Language.IndexedSpec
 -- import qualified Noll.SystemF.TypeSubstitutionSpec
 
 import qualified Noll.Compiler.Transform.Pattern.ExpansionSpec
-import qualified Noll.Compiler.Transform.PatternMatchingSpec
+import qualified Noll.Compiler.PatternMatchingSpec
 import qualified Noll.Compiler.Transform.TreeSpec
 import qualified Noll.Language.HasFreeSpec
 import qualified Noll.SystemF.Constraint.GenerationSpec
@@ -53,7 +53,7 @@ main =
     Noll.SystemFExamples.Test13.spec
     Noll.SystemFExamples.Test14.spec
     Noll.SystemFExamples.Test15.spec
-    Noll.Compiler.Transform.PatternMatchingSpec.spec
+    Noll.Compiler.PatternMatchingSpec.spec
     Noll.Language.HasFreeSpec.spec
     Noll.Compiler.Transform.TreeSpec.spec
 
