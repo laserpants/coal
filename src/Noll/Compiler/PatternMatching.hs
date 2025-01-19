@@ -15,8 +15,16 @@ import Noll.Common.List1 (List1, NonEmpty (..))
 import Noll.Common.Supply (supplyN)
 import Noll.Compiler.Transform.Tree (rename)
 import Noll.Label (Label (..))
-import Noll.Language (BinaryOperator (..), CompiledClause (..), Expression (..), HasType (..), Intrinsic (..), Type (..))
-import Noll.Utils (Name, foldrM, groupByEq)
+import Noll.Language (
+  BinaryOperator (..),
+  CompiledClause (..),
+  Expression (..),
+  HasType (..),
+  Intrinsic (..),
+  Type (..),
+  (~>),
+ )
+import Noll.Utils (Name, foldrM, groupByEq, (<$$>))
 
 import qualified Data.Text as Text
 
@@ -42,11 +50,40 @@ class EnvelopeHost e t where
 instance (Ord t) => EnvelopeHost (Expression a) t where
   replace = rename
 
-instance (Ord t) => EnvelopeHost (EnvelopeClause a) t where
-  replace = undefined
+instance (EnvelopeHost a t, Ord t) => EnvelopeHost (EnvelopeClause a) t where
+  replace var new (EnvelopeClause l1 ls e) =
+    EnvelopeClause l1 ls (replace var new e)
 
-instance (Ord t) => EnvelopeHost (EnvelopeExpression a) t where
-  replace = undefined
+instance (EnvelopeHost a t, Ord t) => EnvelopeHost (EnvelopeExpression a) t where
+  replace _ _ MFail =
+    MFail
+  replace var new (MExpression e) =
+    MExpression (replace var new e)
+
+instance (HasType o k (e t)) => HasType o k (EnvelopeClause e t) where
+  typeOf =
+    \case
+      EnvelopeClause _ _ t ->
+        typeOf t
+
+instance (HasType o k (e t)) => HasType o k (EnvelopeExpression e t) where
+  typeOf =
+    \case
+      MFail ->
+        error "TODO"
+      MExpression t ->
+        typeOf t
+      MCase _ [] ->
+        error "Implementation error"
+      MCase _ (t : _) ->
+        typeOf t
+      MConditional _ _ t _ ->
+        typeOf t
+
+{-# INLINE fails #-}
+fails :: EnvelopeClause e t -> Bool
+fails (EnvelopeClause _ _ MFail) = True
+fails EnvelopeClause{} = False
 
 --
 
@@ -243,31 +280,57 @@ freshVar n =
 
 --
 
-compileEnvelope :: (EnvelopeHost (Expression a) t, Monoid a, Eq t) => EnvelopeExpression (Expression a) t -> Expression a t
+class Proxy a t where
+  proxyEqualToType :: Expression a t -> t
+  proxyTypeOf :: EnvelopeExpression (Expression a) t -> t
+  proxyBool :: EnvelopeExpression (Expression a) t -> t
+
+instance Proxy a () where
+  proxyEqualToType = const ()
+  proxyTypeOf = const ()
+  proxyBool = const ()
+
+instance Proxy a (Type o k) where
+  proxyEqualToType e =
+    typeOf e ~> typeOf e ~> TIntrinsic IBool
+  proxyTypeOf =
+    typeOf
+  proxyBool _ =
+    TIntrinsic IBool
+
+compileEnvelope :: (EnvelopeHost (Expression a) t, Monoid a, Eq t, Proxy a t) => EnvelopeExpression (Expression a) t -> Expression a t
 compileEnvelope =
   \case
     MFail ->
       error "Pattern matching failure"
     MExpression expr ->
       expr
-    MCase ll cs ->
+    e@(MCase ll cs) ->
       ECompiledMatch
         mempty
-        undefined
+        (proxyTypeOf e)
         (EVariable mempty ll)
         (clauseList cs)
     MConditional ll e1 e2 e3 ->
       EIf
         mempty
-        undefined
+        (proxyTypeOf e2)
         ( EApplication
             mempty
-            undefined
-            (EBinaryOperator mempty (undefined, OEqualTo))
+            (proxyBool e2)
+            (EBinaryOperator mempty (proxyEqualToType e1, OEqualTo))
             (EVariable mempty ll :| [e1])
         )
         (compileEnvelope e2)
         (compileEnvelope e3)
 
-clauseList :: (EnvelopeHost (Expression a) t, Eq t) => [EnvelopeClause (Expression a) t] -> List1 (CompiledClause Expression a t)
-clauseList = undefined
+compileEnvelopeClause :: (EnvelopeHost (Expression a) t, Monoid a, Eq t, Proxy a t) => EnvelopeClause (Expression a) t -> CompiledClause Expression a t
+compileEnvelopeClause (EnvelopeClause l1 ls e) = ECompiledClause (l1 :| ls) (compileEnvelope e)
+
+clauseList :: (EnvelopeHost (Expression a) t, Monoid a, Eq t, Proxy a t) => [EnvelopeClause (Expression a) t] -> List1 (CompiledClause Expression a t)
+clauseList ecs =
+  case filter (not . fails) ecs of
+    c : cs ->
+      compileEnvelopeClause <$> (c :| cs)
+    [] ->
+      error "Implementation error"
