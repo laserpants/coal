@@ -76,6 +76,13 @@ instance TreeTransform Expression t where
                   then transform name f e1
                   else pure e1
               )
+      expr@(ERecursiveLet a p e1 e2) ->
+        if (name `isNotBoundIn` p)
+          then
+            ERecursiveLet a p
+              <$> transform name f e1
+              <*> transform name f e2
+          else pure expr
       EIf a t e1 e2 e3 ->
         EIf a t
           <$> transform name f e1
