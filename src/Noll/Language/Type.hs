@@ -85,7 +85,6 @@ activeIdsIn t = Set.map typeIndexId (activeIn t)
 foldType :: (Foldable f) => Type o k -> f (Type o k) -> Type o k
 foldType = foldr TArrow
 
-{-# INLINE normalizeRowTypes #-}
 normalizeRowTypes :: Type o k -> Type o k
 normalizeRowTypes =
   \case
