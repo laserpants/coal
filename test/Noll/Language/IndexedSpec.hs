@@ -3,12 +3,13 @@
 module Noll.Language.IndexedSpec (spec) where
 
 import Data.Set (Set)
-import qualified Data.Set as Set
 import Noll.Language.Indexed
 import Noll.Language.Type (Type (..), TypeIndex (..))
 import Noll.Language.Type.Kind (Kind (..))
 import Noll.Language.Type.Scheme (Scheme (..))
 import Test.Hspec (Spec, describe, it)
+
+import qualified Data.Set as Set
 
 spec :: Spec
 spec =
