@@ -6,8 +6,8 @@ import qualified Noll.Language.IndexedSpec
 -- import qualified Noll.SystemF.TypeConstraint.CollectSpec
 -- import qualified Noll.SystemF.TypeSubstitutionSpec
 
-import qualified Noll.Compiler.Transform.Pattern.ExpansionSpec
 import qualified Noll.Compiler.PatternMatchingSpec
+import qualified Noll.Compiler.Transform.Pattern.ExpansionSpec
 import qualified Noll.Compiler.Transform.TreeSpec
 import qualified Noll.Language.HasFreeSpec
 import qualified Noll.SystemF.Constraint.GenerationSpec
