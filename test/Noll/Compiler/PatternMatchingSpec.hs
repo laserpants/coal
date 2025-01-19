@@ -3,6 +3,8 @@
 module Noll.Compiler.PatternMatchingSpec where
 
 import Noll.Compiler.PatternMatching
+import Noll.Eval (Value (..), eval)
+import Noll.Common.Environment (Environment (..))
 import Noll.Label (Label (..))
 import Noll.Language (Expression (..), Primitive (..))
 import Test.Hspec (Spec, describe, it)
@@ -74,280 +76,279 @@ testCompileEnvelopeExpression =
             MFail
         )
         == EVariable () (Label () "u3")
-
---    it "" $
---      eval
---        ( Environment
---            ( Map.fromList
---                [
---                  ( "u1"
---                  , VCons "Cons" [VLit (LInt32 1), VCons "Nil" []]
---                  )
---                ,
---                  ( "u2"
---                  , VLit (LInt32 1)
---                  )
---                ,
---                  ( "u3"
---                  , VLit (LInt32 2)
---                  )
---                ]
---            )
---        )
---        ( compileEnvelope
---            ( matchPatterns
---                [Label () "u1", Label () "u2", Label () "u3"]
---                [ patternEquation
---                    [ MConstructor (Label () "Cons") [MVariable (Label () "x"), MVariable (Label () "a")]
---                    , MVariable (Label () "y")
---                    , MVariable (Label () "z")
---                    ]
---                    (MExpression (EVariable () (Label () "y")))
---                ]
---                MFail
---            )
---        )
---        == VLit (LInt32 1)
---    it "" $
---      eval
---        ( Environment
---            ( Map.fromList
---                [
---                  ( "u1"
---                  , VCons "Cons" [VLit (LInt32 100), VCons "Nil" []]
---                  )
---                ,
---                  ( "u2"
---                  , VLit (LInt32 1)
---                  )
---                ,
---                  ( "u3"
---                  , VLit (LInt32 2)
---                  )
---                ]
---            )
---        )
---        ( compileEnvelope
---            ( matchPatterns
---                [Label () "u1", Label () "u2", Label () "u3"]
---                [ patternEquation
---                    [ MConstructor (Label () "Cons") [MVariable (Label () "x"), MVariable (Label () "_")]
---                    , MVariable (Label () "y")
---                    , MVariable (Label () "z")
---                    ]
---                    (MExpression (EVariable (Label () "x")))
---                ]
---                MFail
---            )
---        )
---        == VLit (LInt32 100)
---    it "" $
---      eval
---        ( Environment
---            ( Map.fromList
---                [
---                  ( "u1"
---                  , VCons "Cons" [VLit (LInt32 100), VCons "Nil" []]
---                  )
---                ,
---                  ( "u2"
---                  , VLit (LInt32 1)
---                  )
---                ,
---                  ( "u3"
---                  , VLit (LInt32 2)
---                  )
---                ]
---            )
---        )
---        ( compileEnvelope
---            ( matchPatterns
---                [Label () "u1", Label () "u2", Label () "u3"]
---                [ patternEquation
---                    [ MConstructor (Label () "Cons") [MVariable (Label () "_"), MVariable (Label () "x")]
---                    , MVariable (Label () "y")
---                    , MVariable (Label () "z")
---                    ]
---                    (MExpression (EVariable (Label () "x")))
---                ]
---                MFail
---            )
---        )
---        == VCons "Nil" []
---    it "" $
---      eval
---        ( Environment
---            ( Map.fromList
---                [
---                  ( "u1"
---                  , VCons "Cons" [VLit (LInt32 100), VCons "Nil" []]
---                  )
---                ,
---                  ( "u2"
---                  , VLit (LInt32 1)
---                  )
---                ,
---                  ( "u3"
---                  , VLit (LInt32 2)
---                  )
---                ]
---            )
---        )
---        ( compileEnvelope
---            ( matchPatterns
---                [Label () "u1", Label () "u2", Label () "u3"]
---                [ patternEquation
---                    [ MConstructor (Label () "Nil") []
---                    , MVariable (Label () "y")
---                    , MVariable (Label () "z")
---                    ]
---                    (MExpression (ELiteral (LInt32 1)))
---                , patternEquation
---                    [ MConstructor (Label () "Cons") [MVariable (Label () "_"), MVariable (Label () "x")]
---                    , MVariable (Label () "y")
---                    , MVariable (Label () "z")
---                    ]
---                    (MExpression (ELiteral (LInt32 2)))
---                ]
---                MFail
---            )
---        )
---        == VLit (LInt32 2)
---    it "" $
---      eval
---        ( Environment
---            ( Map.fromList
---                [
---                  ( "u1"
---                  , VCons "Cons" [VLit (LInt32 100), VCons "Nil" []]
---                  )
---                ,
---                  ( "u2"
---                  , VLit (LInt32 1)
---                  )
---                ,
---                  ( "u3"
---                  , VLit (LInt32 2)
---                  )
---                ]
---            )
---        )
---        ( compileEnvelope
---            ( matchPatterns
---                [Label () "u1", Label () "u2", Label () "u3"]
---                [ patternEquation
---                    [ MConstructor (Label () "Nil") []
---                    , MVariable (Label () "y")
---                    , MVariable (Label () "z")
---                    ]
---                    (MExpression (ELiteral (LInt32 1)))
---                , patternEquation
---                    [ MConstructor (Label () "Cons") [MVariable (Label () "_"), MConstructor (Label () "Cons") [MVariable (Label () "_"), MVariable (Label () "_")]]
---                    , MVariable (Label () "y")
---                    , MVariable (Label () "z")
---                    ]
---                    (MExpression (ELiteral (LInt32 2)))
---                , patternEquation
---                    [ MConstructor (Label () "Cons") [MVariable (Label () "_"), MVariable (Label () "_")]
---                    , MVariable (Label () "y")
---                    , MVariable (Label () "z")
---                    ]
---                    (MExpression (ELiteral (LInt32 3)))
---                ]
---                MFail
---            )
---        )
---        == VLit (LInt32 3)
---    it "" $
---      eval
---        ( Environment
---            ( Map.fromList
---                [
---                  ( "u1"
---                  , VCons "Cons" [VLit (LInt32 100), VCons "Nil" []]
---                  )
---                ,
---                  ( "u2"
---                  , VLit (LInt32 1)
---                  )
---                ,
---                  ( "u3"
---                  , VLit (LInt32 2)
---                  )
---                ]
---            )
---        )
---        ( compileEnvelope
---            ( matchPatterns
---                [Label () "u1", Label () "u2", Label () "u3"]
---                [ patternEquation
---                    [ MConstructor (Label () "Nil") []
---                    , MVariable (Label () "y")
---                    , MVariable (Label () "z")
---                    ]
---                    (MExpression (ELiteral (LInt32 1)))
---                , patternEquation
---                    [ MConstructor (Label () "Cons") [MLiteral () (ELiteral (LInt32 100)), MVariable (Label () "_")]
---                    , MVariable (Label () "y")
---                    , MVariable (Label () "z")
---                    ]
---                    (MExpression (ELiteral (LInt32 2)))
---                , patternEquation
---                    [ MConstructor (Label () "Cons") [MVariable (Label () "_"), MVariable (Label () "_")]
---                    , MVariable (Label () "y")
---                    , MVariable (Label () "z")
---                    ]
---                    (MExpression (ELiteral (LInt32 3)))
---                ]
---                MFail
---            )
---        )
---        == VLit (LInt32 2)
---    it "" $
---      eval
---        ( Environment
---            ( Map.fromList
---                [
---                  ( "u1"
---                  , VCons "Cons" [VLit (LInt32 100), VCons "Nil" []]
---                  )
---                ,
---                  ( "u2"
---                  , VLit (LInt32 1)
---                  )
---                ,
---                  ( "u3"
---                  , VLit (LInt32 2)
---                  )
---                ]
---            )
---        )
---        ( compileEnvelope
---            ( matchPatterns
---                [Label () "u1", Label () "u2", Label () "u3"]
---                [ patternEquation
---                    [ MConstructor (Label () "Nil") []
---                    , MVariable (Label () "y")
---                    , MVariable (Label () "z")
---                    ]
---                    (MExpression (ELiteral (LInt32 1)))
---                , patternEquation
---                    [ MConstructor (Label () "Cons") [MLiteral () (ELiteral (LInt32 200)), MVariable (Label () "_")]
---                    , MVariable (Label () "y")
---                    , MVariable (Label () "z")
---                    ]
---                    (MExpression (ELiteral (LInt32 2)))
---                , patternEquation
---                    [ MConstructor (Label () "Cons") [MVariable (Label () "_"), MVariable (Label () "_")]
---                    , MVariable (Label () "y")
---                    , MVariable (Label () "z")
---                    ]
---                    (MExpression (ELiteral (LInt32 3)))
---                ]
---                MFail
---            )
---        )
---        == VLit (LInt32 3)
+    it "" $
+      eval
+        ( Environment
+            ( Map.fromList
+                [
+                  ( "u1"
+                  , VData "Cons" [VLiteral (LInt32 1), VData "Nil" []]
+                  )
+                ,
+                  ( "u2"
+                  , VLiteral (LInt32 1)
+                  )
+                ,
+                  ( "u3"
+                  , VLiteral (LInt32 2)
+                  )
+                ]
+            )
+        )
+        ( compileEnvelope
+            ( matchPatterns
+                [Label () "u1", Label () "u2", Label () "u3"]
+                [ patternEquation
+                    [ MConstructor (Label () "Cons") [MVariable (Label () "x"), MVariable (Label () "a")]
+                    , MVariable (Label () "y")
+                    , MVariable (Label () "z")
+                    ]
+                    (MExpression (EVariable () (Label () "y")))
+                ]
+                MFail
+            )
+        )
+        == VLiteral (LInt32 1)
+    it "" $
+      eval
+        ( Environment
+            ( Map.fromList
+                [
+                  ( "u1"
+                  , VData "Cons" [VLiteral (LInt32 100), VData "Nil" []]
+                  )
+                ,
+                  ( "u2"
+                  , VLiteral (LInt32 1)
+                  )
+                ,
+                  ( "u3"
+                  , VLiteral (LInt32 2)
+                  )
+                ]
+            )
+        )
+        ( compileEnvelope
+            ( matchPatterns
+                [Label () "u1", Label () "u2", Label () "u3"]
+                [ patternEquation
+                    [ MConstructor (Label () "Cons") [MVariable (Label () "x"), MVariable (Label () "_")]
+                    , MVariable (Label () "y")
+                    , MVariable (Label () "z")
+                    ]
+                    (MExpression (EVariable () (Label () "x")))
+                ]
+                MFail
+            )
+        )
+        == VLiteral (LInt32 100)
+    it "" $
+      eval
+        ( Environment
+            ( Map.fromList
+                [
+                  ( "u1"
+                  , VData "Cons" [VLiteral (LInt32 100), VData "Nil" []]
+                  )
+                ,
+                  ( "u2"
+                  , VLiteral (LInt32 1)
+                  )
+                ,
+                  ( "u3"
+                  , VLiteral (LInt32 2)
+                  )
+                ]
+            )
+        )
+        ( compileEnvelope
+            ( matchPatterns
+                [Label () "u1", Label () "u2", Label () "u3"]
+                [ patternEquation
+                    [ MConstructor (Label () "Cons") [MVariable (Label () "_"), MVariable (Label () "x")]
+                    , MVariable (Label () "y")
+                    , MVariable (Label () "z")
+                    ]
+                    (MExpression (EVariable () (Label () "x")))
+                ]
+                MFail
+            )
+        )
+        == VData "Nil" []
+    it "" $
+      eval
+        ( Environment
+            ( Map.fromList
+                [
+                  ( "u1"
+                  , VData "Cons" [VLiteral (LInt32 100), VData "Nil" []]
+                  )
+                ,
+                  ( "u2"
+                  , VLiteral (LInt32 1)
+                  )
+                ,
+                  ( "u3"
+                  , VLiteral (LInt32 2)
+                  )
+                ]
+            )
+        )
+        ( compileEnvelope
+            ( matchPatterns
+                [Label () "u1", Label () "u2", Label () "u3"]
+                [ patternEquation
+                    [ MConstructor (Label () "Nil") []
+                    , MVariable (Label () "y")
+                    , MVariable (Label () "z")
+                    ]
+                    (MExpression (ELiteral () (LInt32 1)))
+                , patternEquation
+                    [ MConstructor (Label () "Cons") [MVariable (Label () "_"), MVariable (Label () "x")]
+                    , MVariable (Label () "y")
+                    , MVariable (Label () "z")
+                    ]
+                    (MExpression (ELiteral () (LInt32 2)))
+                ]
+                MFail
+            )
+        )
+        == VLiteral (LInt32 2)
+    it "" $
+      eval
+        ( Environment
+            ( Map.fromList
+                [
+                  ( "u1"
+                  , VData "Cons" [VLiteral (LInt32 100), VData "Nil" []]
+                  )
+                ,
+                  ( "u2"
+                  , VLiteral (LInt32 1)
+                  )
+                ,
+                  ( "u3"
+                  , VLiteral (LInt32 2)
+                  )
+                ]
+            )
+        )
+        ( compileEnvelope
+            ( matchPatterns
+                [Label () "u1", Label () "u2", Label () "u3"]
+                [ patternEquation
+                    [ MConstructor (Label () "Nil") []
+                    , MVariable (Label () "y")
+                    , MVariable (Label () "z")
+                    ]
+                    (MExpression (ELiteral () (LInt32 1)))
+                , patternEquation
+                    [ MConstructor (Label () "Cons") [MVariable (Label () "_"), MConstructor (Label () "Cons") [MVariable (Label () "_"), MVariable (Label () "_")]]
+                    , MVariable (Label () "y")
+                    , MVariable (Label () "z")
+                    ]
+                    (MExpression (ELiteral () (LInt32 2)))
+                , patternEquation
+                    [ MConstructor (Label () "Cons") [MVariable (Label () "_"), MVariable (Label () "_")]
+                    , MVariable (Label () "y")
+                    , MVariable (Label () "z")
+                    ]
+                    (MExpression (ELiteral () (LInt32 3)))
+                ]
+                MFail
+            )
+        )
+        == VLiteral (LInt32 3)
+    it "" $
+      eval
+        ( Environment
+            ( Map.fromList
+                [
+                  ( "u1"
+                  , VData "Cons" [VLiteral (LInt32 100), VData "Nil" []]
+                  )
+                ,
+                  ( "u2"
+                  , VLiteral (LInt32 1)
+                  )
+                ,
+                  ( "u3"
+                  , VLiteral (LInt32 2)
+                  )
+                ]
+            )
+        )
+        ( compileEnvelope
+            ( matchPatterns
+                [Label () "u1", Label () "u2", Label () "u3"]
+                [ patternEquation
+                    [ MConstructor (Label () "Nil") []
+                    , MVariable (Label () "y")
+                    , MVariable (Label () "z")
+                    ]
+                    (MExpression (ELiteral () (LInt32 1)))
+                , patternEquation
+                    [ MConstructor (Label () "Cons") [MLiteral () (ELiteral () (LInt32 100)), MVariable (Label () "_")]
+                    , MVariable (Label () "y")
+                    , MVariable (Label () "z")
+                    ]
+                    (MExpression (ELiteral () (LInt32 2)))
+                , patternEquation
+                    [ MConstructor (Label () "Cons") [MVariable (Label () "_"), MVariable (Label () "_")]
+                    , MVariable (Label () "y")
+                    , MVariable (Label () "z")
+                    ]
+                    (MExpression (ELiteral () (LInt32 3)))
+                ]
+                MFail
+            )
+        )
+        == VLiteral (LInt32 2)
+    it "" $
+      eval
+        ( Environment
+            ( Map.fromList
+                [
+                  ( "u1"
+                  , VData "Cons" [VLiteral (LInt32 100), VData "Nil" []]
+                  )
+                ,
+                  ( "u2"
+                  , VLiteral (LInt32 1)
+                  )
+                ,
+                  ( "u3"
+                  , VLiteral (LInt32 2)
+                  )
+                ]
+            )
+        )
+        ( compileEnvelope
+            ( matchPatterns
+                [Label () "u1", Label () "u2", Label () "u3"]
+                [ patternEquation
+                    [ MConstructor (Label () "Nil") []
+                    , MVariable (Label () "y")
+                    , MVariable (Label () "z")
+                    ]
+                    (MExpression (ELiteral () (LInt32 1)))
+                , patternEquation
+                    [ MConstructor (Label () "Cons") [MLiteral () (ELiteral () (LInt32 200)), MVariable (Label () "_")]
+                    , MVariable (Label () "y")
+                    , MVariable (Label () "z")
+                    ]
+                    (MExpression (ELiteral () (LInt32 2)))
+                , patternEquation
+                    [ MConstructor (Label () "Cons") [MVariable (Label () "_"), MVariable (Label () "_")]
+                    , MVariable (Label () "y")
+                    , MVariable (Label () "z")
+                    ]
+                    (MExpression (ELiteral () (LInt32 3)))
+                ]
+                MFail
+            )
+        )
+        == VLiteral (LInt32 3)
 
 testGroupByConstructor :: Spec
 testGroupByConstructor = do
