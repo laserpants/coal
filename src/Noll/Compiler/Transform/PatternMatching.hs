@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
@@ -8,7 +9,9 @@ import Data.Function (on)
 import Data.List (sortBy)
 import Data.Maybe (mapMaybe)
 import Noll.Label (Label (..))
+import Noll.Language (Expression (..), Type (..))
 import Noll.Utils (Name, groupByEq)
+import Noll.Compiler.Transform.Tree (rename)
 
 data EnvelopeClause e t = EnvelopeClause (Label t) [Label t] (EnvelopeExpression e t)
   deriving (Show, Eq, Ord, Read)
@@ -25,6 +28,18 @@ data EnvelopeExpression e t
   | MCase (Label t) [EnvelopeClause e t]
   | MConditional (Label t) (e t) (EnvelopeExpression e t) (EnvelopeExpression e t)
   deriving (Show, Eq, Ord, Read)
+
+class EnvelopeHost e t where
+  replace :: Name -> Name -> e t -> e t
+
+instance (Ord t) => EnvelopeHost (Expression a) t where
+  replace = rename
+
+instance (Ord t) => EnvelopeHost (EnvelopeClause a) t where
+  replace = undefined
+
+instance (Ord t) => EnvelopeHost (EnvelopeExpression a) t where
+  replace = undefined
 
 --
 
