@@ -92,7 +92,7 @@ evalExpr =
       v1 <- evalExpr e1
       vs <- traverse evalExpr es
       case v1 of
-        VFun names f -> do
+        VFun names f ->
           local (Environment.insertMany (names `zip` fromList1 vs)) f
     EBinaryOperator _ (_, OEqualTo) -> do
       pure $ VFun ["$$.0", "$$.1"] $ do
