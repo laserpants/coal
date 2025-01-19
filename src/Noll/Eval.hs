@@ -87,7 +87,7 @@ evalExpr =
         VLiteral (LBool False) ->
           evalExpr e3
         _ ->
-          error "If-condition is not a boolean"
+          error "Non-boolean if-condition"
     EApplication _ _ e1 es -> do
       v1 <- evalExpr e1
       vs <- traverse evalExpr es
