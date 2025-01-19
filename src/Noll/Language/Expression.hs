@@ -1,7 +1,11 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Language.Expression (Expression (..), Clause (..)) where
+module Noll.Language.Expression (
+  Expression (..),
+  Clause (..),
+  CompiledClause (..),
+) where
 
 import Noll.Common.List1 (List1)
 import Noll.Label (Label (..))
@@ -12,9 +16,14 @@ import Noll.Language.Expression.Operator.Unary (UnaryOperator)
 import Noll.Language.Pattern (Pattern (..))
 import Noll.Language.Primitive (Primitive (..))
 import Noll.Language.Type (Parameter (..), Type)
-import Noll.Utils (Dictionary)
+import Noll.Utils (Dictionary, Name)
 
 data Clause e a t = EClause a (Pattern a t) (List1 (Choice e a t))
+  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
+
+data CompiledClause e a t
+  = ECompiledClause (List1 (Label t)) (e a t)
+  | ECompiledField Name (Label t) (Label t) (e a t)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
 
 data Expression a t
@@ -48,6 +57,8 @@ data Expression a t
     EListLiteral a t [Expression a t]
   | -- | Pattern matching expression
     EMatch a t (Expression a t) (List1 (Clause Expression a t))
+  | -- | TODO
+    ECompiledMatch a t (Expression a t) (List1 (CompiledClause Expression a t))
   | -- | Fold expression
     EFold a t (List1 (Expression a t)) (List1 (Clause Expression a t)) (Maybe (Expression a t))
   | -- | Record field access selector
