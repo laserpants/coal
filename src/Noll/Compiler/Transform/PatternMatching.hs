@@ -1,17 +1,23 @@
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
 module Noll.Compiler.Transform.PatternMatching where
 
+import Control.Monad.State (MonadState, evalState)
 import Data.Function (on)
 import Data.List (sortBy)
 import Data.Maybe (mapMaybe)
+import Noll.Common.Supply (supplyN)
+import Noll.Compiler.Transform.Tree (rename)
 import Noll.Label (Label (..))
 import Noll.Language (Expression (..), Type (..))
-import Noll.Utils (Name, groupByEq)
-import Noll.Compiler.Transform.Tree (rename)
+import Noll.Utils (Name, foldrM, groupByEq)
+
+import qualified Data.Text as Text
 
 data EnvelopeClause e t = EnvelopeClause (Label t) [Label t] (EnvelopeExpression e t)
   deriving (Show, Eq, Ord, Read)
@@ -159,3 +165,101 @@ patternEquationSet equations =
 
 groupByHeadConstructor :: [HeadConstructorEquation e t] -> [[HeadConstructorEquation e t]]
 groupByHeadConstructor = groupByEq headConstructorName . sortBy (compare `on` headConstructorName)
+
+--
+
+-- TODO: newtype?
+type MatchRule m p e t = [Label t] -> [p e t] -> EnvelopeExpression e t -> m (EnvelopeExpression e t)
+
+{-# INLINE matchPatterns #-}
+matchPatterns :: (Ord t, EnvelopeHost e t) => [Label t] -> [PatternEquation e t] -> EnvelopeExpression e t -> EnvelopeExpression e t
+matchPatterns us qs e = evalState (matchPatternsM us qs e) 0
+
+matchPatternsM :: (Ord t, MonadState Int m, EnvelopeHost e t) => MatchRule m PatternEquation e t
+matchPatternsM us qs e =
+  case patternEquationSet qs of
+    AllEmpty ees ->
+      emptyRule us ees e
+    AllHeadLiteral eqs ->
+      literalRule us eqs e
+    AllHeadVariable eqs ->
+      variableRule us eqs e
+    AllHeadConstructor eqs ->
+      constructorRule us eqs e
+    Mixed eqss ->
+      foldrM (matchPatternsM us) e eqss
+
+emptyRule :: (MonadState Int m, EnvelopeHost e t) => MatchRule m EnvelopeExpression e t
+emptyRule us eqs e =
+  case eqs of
+    (MFail : es) ->
+      emptyRule us es e
+    (e1 : _) ->
+      pure e1
+    [] ->
+      pure e
+
+literalRule :: (Ord t, MonadState Int m, EnvelopeHost e t) => MatchRule m HeadLiteralEquation e t
+literalRule [] _ _ = error "Implementation error"
+literalRule (u : us) eqs ex = foldrM go ex eqs
+ where
+  go (HeadLiteralEquation lit (PatternEquationBody qs e)) e1 = do
+    e2 <- matchPatternsM us [patternEquation qs e] e1
+    pure (MConditional u lit e2 e1)
+
+variableRule :: (Ord t, MonadState Int m, EnvelopeHost e t) => MatchRule m HeadVariableEquation e t
+variableRule [] _ _ = error "Implementation error"
+variableRule (Label _ u : us) eqs ex = matchPatternsM us (updateEq <$> eqs) ex
+ where
+  updateEq (HeadVariableEquation (Label _ name) (PatternEquationBody ps e)) =
+    patternEquation ps (replace name u e)
+
+constructorRule :: (Ord t, MonadState Int m, EnvelopeHost e t) => MatchRule m HeadConstructorEquation e t
+constructorRule [] _ _ = error "Implementation error"
+constructorRule (u@(Label t _) : us) eqs ex = do
+  cs <- traverse processGroup (groupByHeadConstructor eqs)
+  pure (MCase u (cs <> [EnvelopeClause (Label t "_") [] ex]))
+ where
+  processGroup qs@(HeadConstructorEquation con ps _ : _) = do
+    ns <- supplyN (length ps)
+    let vs = uncurry freshVar <$> zip ns ps
+    EnvelopeClause con vs <$> matchPatternsM (vs <> us) (shift <$> qs) ex
+  shift (HeadConstructorEquation _ ps (PatternEquationBody qs e)) =
+    patternEquation (ps <> qs) e
+
+-- TODO: ??
+freshVar :: Int -> EnvelopePattern e t -> Label t
+freshVar n =
+  \case
+    MVariable (Label t name) ->
+      Label t (prefix <> ":" <> name)
+    MConstructor (Label t _) _ ->
+      Label t prefix
+    MLiteral t _ ->
+      Label t prefix
+ where
+  prefix = Text.pack ("$p:" <> show n)
+
+--
+
+compileEnvelope :: (EnvelopeHost (Expression a) t, Eq t) => EnvelopeExpression (Expression a) t -> Expression a t
+compileEnvelope =
+  \case
+    MFail ->
+      error "Pattern matching failure"
+    MExpression expr ->
+      expr
+    MCase ll cs ->
+      undefined -- ESimplifiedMatch (fromJust (tag e)) (EVariable ll) (NonEmpty.fromList (clauseList cs))
+    MConditional ll e1 e2 e3 ->
+      EIf
+        undefined
+        undefined
+        ( EApplication
+            undefined
+            undefined -- booleanTypeTag
+            undefined -- (EBinaryOperator (equalToTypeTag (fromJust (tag e1)), OEqualTo))
+            undefined -- (EVariable ll :| [e1])
+        )
+        (compileEnvelope e2)
+        (compileEnvelope e3)
