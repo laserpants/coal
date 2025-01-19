@@ -79,7 +79,7 @@ instance (Ord k, HasActive k t) => HasActive k (NonEmpty t) where
 
 {-# INLINE activeIdsIn #-}
 activeIdsIn :: (HasActive k t) => t -> Set Int
-activeIdsIn t = Set.map typeIndexId (activeIn t)
+activeIdsIn = Set.map typeIndexId . activeIn
 
 {-# INLINE foldType #-}
 foldType :: (Foldable f) => Type o k -> f (Type o k) -> Type o k
