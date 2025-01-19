@@ -11,10 +11,11 @@ import Control.Monad.State (MonadState, evalState)
 import Data.Function (on)
 import Data.List (sortBy)
 import Data.Maybe (mapMaybe)
+import Noll.Common.List1 (List1, NonEmpty (..))
 import Noll.Common.Supply (supplyN)
 import Noll.Compiler.Transform.Tree (rename)
 import Noll.Label (Label (..))
-import Noll.Language (Expression (..), Type (..))
+import Noll.Language (BinaryOperator (..), CompiledClause (..), Expression (..), HasType (..), Intrinsic (..), Type (..))
 import Noll.Utils (Name, foldrM, groupByEq)
 
 import qualified Data.Text as Text
@@ -242,7 +243,7 @@ freshVar n =
 
 --
 
-compileEnvelope :: (EnvelopeHost (Expression a) t, Eq t) => EnvelopeExpression (Expression a) t -> Expression a t
+compileEnvelope :: (EnvelopeHost (Expression a) t, Monoid a, Eq t) => EnvelopeExpression (Expression a) t -> Expression a t
 compileEnvelope =
   \case
     MFail ->
@@ -250,16 +251,23 @@ compileEnvelope =
     MExpression expr ->
       expr
     MCase ll cs ->
-      undefined -- ESimplifiedMatch (fromJust (tag e)) (EVariable ll) (NonEmpty.fromList (clauseList cs))
+      ECompiledMatch
+        mempty
+        undefined
+        (EVariable mempty ll)
+        (clauseList cs)
     MConditional ll e1 e2 e3 ->
       EIf
-        undefined
+        mempty
         undefined
         ( EApplication
+            mempty
             undefined
-            undefined -- booleanTypeTag
-            undefined -- (EBinaryOperator (equalToTypeTag (fromJust (tag e1)), OEqualTo))
-            undefined -- (EVariable ll :| [e1])
+            (EBinaryOperator mempty (undefined, OEqualTo))
+            (EVariable mempty ll :| [e1])
         )
         (compileEnvelope e2)
         (compileEnvelope e3)
+
+clauseList :: (EnvelopeHost (Expression a) t, Eq t) => [EnvelopeClause (Expression a) t] -> List1 (CompiledClause Expression a t)
+clauseList = undefined
