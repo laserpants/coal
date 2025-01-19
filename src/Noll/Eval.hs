@@ -18,7 +18,7 @@ import Noll.Label (Label (..), labelName)
 import Noll.Language.Expression (CompiledClause (..), Expression (..))
 import Noll.Language.Expression.Operator.Binary (BinaryOperator (..))
 import Noll.Language.Primitive (Primitive (..))
-import Noll.Utils (Name)
+import Noll.Utils (Name, forM)
 
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
@@ -74,7 +74,10 @@ evalExpr =
       evalVar name
     ECompiledMatch _ _ e cs -> do
       v1 <- evalExpr e
-      vs <- traverse (evalClause v1) cs
+      vs <- forM cs $
+        \case
+          ECompiledClause ls e ->
+            matchClause (fromList1 (labelName <$> ls)) [v1] e
       pure $ fromMaybe VFail (find (/= VFail) vs)
     EIf _ _ e1 e2 e3 -> do
       v1 <- evalExpr e1
@@ -99,18 +102,15 @@ evalExpr =
           (VLiteral (LInt32 a), VLiteral (LInt32 b)) ->
             pure (VLiteral (LBool (a == b)))
 
-evalClause :: (Show a, Show t) => Value -> CompiledClause Expression a t -> Eval Value
-evalClause v (ECompiledClause ls e) = evalMaybeMatch (fromList1 (labelName <$> ls)) [v] e
-
-evalMaybeMatch :: (Show a, Show t) => [Name] -> [Value] -> Expression a t -> Eval Value
-evalMaybeMatch (name : names) (VData name1 vs1 : vs2) e
+matchClause :: (Show a, Show t) => [Name] -> [Value] -> Expression a t -> Eval Value
+matchClause (name : names) (VData name1 vs1 : vs2) e
   | isUpper (Text.head name) =
       if name == name1
-        then evalMaybeMatch names (vs1 <> vs2) e
+        then matchClause names (vs1 <> vs2) e
         else pure VFail
-evalMaybeMatch (name : names) (v : vs) e =
-  local (Environment.insert name v) (evalMaybeMatch names vs e)
-evalMaybeMatch [] [] e =
+matchClause (name : names) (v : vs) e =
+  local (Environment.insert name v) (matchClause names vs e)
+matchClause [] [] e =
   evalExpr e
 
 {-# INLINE eval #-}
