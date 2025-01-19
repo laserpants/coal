@@ -114,6 +114,7 @@ test-suite noll-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      Noll.Compiler.PatternMatchingExamples.Test01
       Noll.Compiler.PatternMatchingSpec
       Noll.Compiler.Transform.Pattern.ExpansionSpec
       Noll.Compiler.Transform.TreeSpec

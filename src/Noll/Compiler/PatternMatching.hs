@@ -11,20 +11,34 @@ import Control.Monad.State (MonadState, evalState)
 import Data.Function (on)
 import Data.List (sortBy)
 import Data.Maybe (mapMaybe)
-import Noll.Common.List1 (List1, NonEmpty (..))
+import Noll.Common.List1 (List1, NonEmpty (..), fromList1)
 import Noll.Common.Supply (supplyN)
-import Noll.Compiler.Transform.Tree (rename)
+import Noll.Compiler.Transform.Tree (rename, replaceWith)
 import Noll.Label (Label (..))
 import Noll.Language (
   BinaryOperator (..),
+  Binding (..),
+  Choice (..),
+  Clause (..),
   CompiledClause (..),
+  Constant (..),
   Expression (..),
+  Function (..),
   HasType (..),
   Intrinsic (..),
+  Module (..),
+  Object (..),
+  Pattern (..),
   Type (..),
   (~>),
  )
-import Noll.Utils (Name, foldrM, groupByEq, (<$$>))
+import Noll.Utils (
+  Dictionary (..),
+  Name,
+  foldrM,
+  groupByEq,
+  (<$$>),
+ )
 
 import qualified Data.Text as Text
 
@@ -281,22 +295,36 @@ freshVar n =
 --
 
 class Proxy a t where
-  proxyEqualToType :: Expression a t -> t
-  proxyTypeOf :: EnvelopeExpression (Expression a) t -> t
-  proxyBool :: EnvelopeExpression (Expression a) t -> t
+  equalToOpTypeProxy :: Expression a t -> t
+  envelopeExprTypeProxy :: EnvelopeExpression (Expression a) t -> t
+  booleanTypeProxy :: EnvelopeExpression (Expression a) t -> t
+  expressionTypeProxy :: Expression a t -> t
+  patternTypeProxy :: Pattern a t -> t
 
 instance Proxy a () where
-  proxyEqualToType = const ()
-  proxyTypeOf = const ()
-  proxyBool = const ()
+  equalToOpTypeProxy =
+    const ()
+  envelopeExprTypeProxy =
+    const ()
+  booleanTypeProxy =
+    const ()
+  expressionTypeProxy =
+    const ()
+  patternTypeProxy =
+    const ()
 
+-- TODO
 instance Proxy a (Type o k) where
-  proxyEqualToType e =
+  equalToOpTypeProxy e =
     typeOf e ~> typeOf e ~> TIntrinsic IBool
-  proxyTypeOf =
+  envelopeExprTypeProxy =
     typeOf
-  proxyBool _ =
+  booleanTypeProxy _ =
     TIntrinsic IBool
+  expressionTypeProxy =
+    typeOf
+  patternTypeProxy =
+    typeOf
 
 compileEnvelope :: (EnvelopeHost (Expression a) t, Monoid a, Eq t, Proxy a t) => EnvelopeExpression (Expression a) t -> Expression a t
 compileEnvelope =
@@ -308,17 +336,17 @@ compileEnvelope =
     e@(MCase ll cs) ->
       ECompiledMatch
         mempty
-        (proxyTypeOf e)
+        (envelopeExprTypeProxy e)
         (EVariable mempty ll)
         (clauseList cs)
     MConditional ll e1 e2 e3 ->
       EIf
         mempty
-        (proxyTypeOf e2)
+        (envelopeExprTypeProxy e2)
         ( EApplication
             mempty
-            (proxyBool e2)
-            (EBinaryOperator mempty (proxyEqualToType e1, OEqualTo))
+            (booleanTypeProxy e2)
+            (EBinaryOperator mempty (equalToOpTypeProxy e1, OEqualTo))
             (EVariable mempty ll :| [e1])
         )
         (compileEnvelope e2)
@@ -334,3 +362,122 @@ clauseList ecs =
       compileEnvelopeClause <$> (c :| cs)
     [] ->
       error "Implementation error"
+
+--
+
+class MatchExpressionContext a where
+  compileMatchExprs :: a -> a
+
+instance (MatchExpressionContext a) => MatchExpressionContext [a] where
+  compileMatchExprs = fmap compileMatchExprs
+
+instance (MatchExpressionContext a) => MatchExpressionContext (Maybe a) where
+  compileMatchExprs = fmap compileMatchExprs
+
+instance (MatchExpressionContext a) => MatchExpressionContext (List1 a) where
+  compileMatchExprs = fmap compileMatchExprs
+
+instance (MatchExpressionContext a) => MatchExpressionContext (Dictionary a) where
+  compileMatchExprs = fmap compileMatchExprs
+
+instance (Show a, Show t, Ord t, Proxy a t, Monoid a) => MatchExpressionContext (Module a k t) where
+  compileMatchExprs =
+    \case
+      Module p ns os ->
+        Module p ns (compileMatchExprs os)
+
+instance (Show a, Show t, Ord t, Proxy a t, Monoid a) => MatchExpressionContext (Object a k t) where
+  compileMatchExprs =
+    \case
+      DFunction name f -> do
+        DFunction name (compileMatchExprs f)
+      DConstant name c -> do
+        DConstant name (compileMatchExprs c)
+
+instance (MatchExpressionContext (e a t)) => MatchExpressionContext (Function e a t) where
+  compileMatchExprs =
+    \case
+      Function a u ps e ->
+        Function a u ps (compileMatchExprs e)
+
+instance (MatchExpressionContext (e a t)) => MatchExpressionContext (Constant e a t) where
+  compileMatchExprs =
+    \case
+      Constant a u e ->
+        Constant a u (compileMatchExprs e)
+
+instance MatchExpressionContext (Clause Expression a t) where
+  compileMatchExprs =
+    \case
+      EClause a p cs ->
+        EClause a p cs
+
+instance (Show a, Show t, Ord t, Proxy a t, Monoid a) => MatchExpressionContext (Binding Expression a t) where
+  compileMatchExprs =
+    \case
+      BPattern a p e ->
+        BPattern a p (compileMatchExprs e)
+
+instance (Show a, Show t, Ord t, Proxy a t, Monoid a) => MatchExpressionContext (Expression a t) where
+  compileMatchExprs =
+    \case
+      EAnnotation a t e ->
+        EAnnotation a t (compileMatchExprs e)
+      EMatch a t e cs ->
+        replaceWith name (compileMatchExprs e) (compileClauses ll (compileMatchExprs cs))
+       where
+        name = "$match:expr:1"
+        ll = Label (expressionTypeProxy e) name
+      ELambda a ps e ->
+        ELambda a ps (compileMatchExprs e)
+      ERecursiveLet a p e1 e2 ->
+        ERecursiveLet a p (compileMatchExprs e1) (compileMatchExprs e2)
+      ELet a gs e1 ->
+        ELet a (compileMatchExprs gs) (compileMatchExprs e1)
+      EIf a t e1 e2 e3 ->
+        EIf a t (compileMatchExprs e1) (compileMatchExprs e2) (compileMatchExprs e2)
+      EApplication a t e1 es ->
+        EApplication a t (compileMatchExprs e1) (compileMatchExprs es)
+      EListCons a t e1 e2 ->
+        EListCons a t (compileMatchExprs e1) (compileMatchExprs e2)
+      EListLiteral a t es ->
+        EListLiteral a t (compileMatchExprs es)
+      ERecord a t d e ->
+        ERecord a t (compileMatchExprs d) (compileMatchExprs e)
+      ESelect a ll e ->
+        undefined
+      EFold a t es cs e ->
+        undefined
+      e@EUnaryOperator{} ->
+        e
+      e@EBinaryOperator{} ->
+        e
+      e@EVariable{} ->
+        e
+      e@EConstructor{} ->
+        e
+      e@ELiteral{} ->
+        e
+
+compileClauses :: (Show a, Show t, Proxy a t, Monoid a, Ord t) => Label t -> List1 (Clause Expression a t) -> Expression a t
+compileClauses ll cs = compileEnvelope (matchPatterns [ll] eqs MFail)
+ where
+  eqs = uncurry patternEquation . translateClause <$> fromList1 cs
+
+translateClause :: (Show a, Show t, Proxy a t) => Clause Expression a t -> ([EnvelopePattern (Expression a) t], EnvelopeExpression (Expression a) t)
+translateClause (EClause _ p (CPlain _ _ e :| [])) =
+  ([translatePattern p], MExpression e)
+translateClause _ =
+  error "TODO"
+
+translatePattern :: (Show a, Show t, Proxy a t) => Pattern a t -> EnvelopePattern (Expression a) t
+translatePattern =
+  \case
+    PVariable _ ll ->
+      MVariable ll
+    PConstructor _ ll ps ->
+      MConstructor ll (translatePattern <$> ps)
+    p@(PLiteral a prim) ->
+      MLiteral (patternTypeProxy p) (ELiteral a prim)
+    q ->
+      error (show q)

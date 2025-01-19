@@ -2,9 +2,9 @@
 
 module Noll.Compiler.PatternMatchingSpec where
 
+import Noll.Common.Environment (Environment (..))
 import Noll.Compiler.PatternMatching
 import Noll.Eval (Value (..), eval)
-import Noll.Common.Environment (Environment (..))
 import Noll.Label (Label (..))
 import Noll.Language (Expression (..), Primitive (..))
 import Test.Hspec (Spec, describe, it)

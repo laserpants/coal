@@ -17,6 +17,7 @@ import Noll.Language (
   Binding (..),
   Choice (..),
   Clause (..),
+  CompiledClause (..),
   Expression (..),
   Guard (..),
  )
@@ -55,6 +56,12 @@ instance TreeTransform (Clause Expression) t where
     \case
       EClause a ps cs ->
         EClause a ps <$> traverse (transform name f) cs
+
+instance TreeTransform (CompiledClause Expression) t where
+  transform name f =
+    \case
+      ECompiledClause lls e ->
+        ECompiledClause lls <$> transform name f e
 
 instance TreeTransform Expression t where
   transform name f =
@@ -100,6 +107,14 @@ instance TreeTransform Expression t where
         EListCons a t
           <$> transform name f e1
           <*> transform name f e2
+      EMatch a t e cs ->
+        EMatch a t
+          <$> transform name f e
+          <*> traverse (transform name f) cs
+      ECompiledMatch a t e cs ->
+        ECompiledMatch a t
+          <$> transform name f e
+          <*> traverse (transform name f) cs
 
 replace :: (Ord t) => Name -> (a -> t -> Expression a t) -> Expression a t -> Expression a t
 replace name f = runIdentity . transform name (pure <$$> f)
