@@ -1,5 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -7,7 +8,7 @@
 
 module Noll.Compiler.PatternMatching where
 
-import Control.Monad.State (MonadState, evalState)
+import Control.Monad.State (MonadState, State, evalState)
 import Data.Function (on)
 import Data.List (sortBy)
 import Data.Maybe (mapMaybe)
@@ -220,14 +221,21 @@ groupByHeadConstructor = groupByEq headConstructorName . sortBy (compare `on` he
 
 --
 
--- TODO: newtype?
-type MatchRule m p e t = [Label t] -> [p e t] -> EnvelopeExpression e t -> m (EnvelopeExpression e t)
+newtype MatchMonad a = MatchMonad {monadMatchStack :: State Int a}
+  deriving
+    ( Functor
+    , Applicative
+    , Monad
+    , MonadState Int
+    )
+
+type MatchRule p e t = [Label t] -> [p e t] -> EnvelopeExpression e t -> MatchMonad (EnvelopeExpression e t)
 
 {-# INLINE matchPatterns #-}
 matchPatterns :: (Ord t, EnvelopeHost e t) => [Label t] -> [PatternEquation e t] -> EnvelopeExpression e t -> EnvelopeExpression e t
-matchPatterns us qs e = evalState (matchPatternsM us qs e) 0
+matchPatterns us qs e = evalState (monadMatchStack (matchPatternsM us qs e)) 0
 
-matchPatternsM :: (Ord t, MonadState Int m, EnvelopeHost e t) => MatchRule m PatternEquation e t
+matchPatternsM :: (Ord t, EnvelopeHost e t) => MatchRule PatternEquation e t
 matchPatternsM us qs e =
   case patternEquationSet qs of
     AllEmpty ees ->
@@ -241,7 +249,7 @@ matchPatternsM us qs e =
     Mixed eqss ->
       foldrM (matchPatternsM us) e eqss
 
-emptyRule :: (MonadState Int m, EnvelopeHost e t) => MatchRule m EnvelopeExpression e t
+emptyRule :: (EnvelopeHost e t) => MatchRule EnvelopeExpression e t
 emptyRule us eqs e =
   case eqs of
     (MFail : es) ->
@@ -251,7 +259,7 @@ emptyRule us eqs e =
     [] ->
       pure e
 
-literalRule :: (Ord t, MonadState Int m, EnvelopeHost e t) => MatchRule m HeadLiteralEquation e t
+literalRule :: (Ord t, EnvelopeHost e t) => MatchRule HeadLiteralEquation e t
 literalRule [] _ _ = error "Implementation error"
 literalRule (u : us) eqs ex = foldrM go ex eqs
  where
@@ -259,14 +267,14 @@ literalRule (u : us) eqs ex = foldrM go ex eqs
     e2 <- matchPatternsM us [patternEquation qs e] e1
     pure (MConditional u lit e2 e1)
 
-variableRule :: (Ord t, MonadState Int m, EnvelopeHost e t) => MatchRule m HeadVariableEquation e t
+variableRule :: (Ord t, EnvelopeHost e t) => MatchRule HeadVariableEquation e t
 variableRule [] _ _ = error "Implementation error"
 variableRule (Label _ u : us) eqs ex = matchPatternsM us (updateEq <$> eqs) ex
  where
   updateEq (HeadVariableEquation (Label _ name) (PatternEquationBody ps e)) =
     patternEquation ps (replace name u e)
 
-constructorRule :: (Ord t, MonadState Int m, EnvelopeHost e t) => MatchRule m HeadConstructorEquation e t
+constructorRule :: (Ord t, EnvelopeHost e t) => MatchRule HeadConstructorEquation e t
 constructorRule [] _ _ = error "Implementation error"
 constructorRule (u@(Label t _) : us) eqs ex = do
   cs <- traverse processGroup (groupByHeadConstructor eqs)
