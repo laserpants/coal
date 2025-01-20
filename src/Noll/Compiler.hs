@@ -78,7 +78,7 @@ data CompilerEnvironment = CompilerEnvironment
 
 data CompilerState a = CompilerState
   { compilerConstraintsGenerationErrors :: [ConstraintsGenerationError a]
-  , compilerTypeAnnotationParameters :: Dictionary (a, TypeIndex Kind)
+  , compilerTypeAnnotationParams :: Dictionary (a, TypeIndex Kind)
   , compilerSolverRuleViolations :: [InferenceRule Kind a]
   , compilerNameEnvironment :: Environment (Scheme TypeIndex Kind IndexedType)
   , compilerSupply :: Int
@@ -89,9 +89,9 @@ data CompilerState a = CompilerState
 overCompilerStateConstraintsGenerationErrors :: ([ConstraintsGenerationError a] -> [ConstraintsGenerationError a]) -> CompilerState a -> CompilerState a
 overCompilerStateConstraintsGenerationErrors fn CompilerState{..} = CompilerState{compilerConstraintsGenerationErrors = fn compilerConstraintsGenerationErrors, ..}
 
-{-# INLINE overCompilerTypeAnnotationParameters #-}
-overCompilerTypeAnnotationParameters :: (Dictionary (a, TypeIndex Kind) -> Dictionary (a, TypeIndex Kind)) -> CompilerState a -> CompilerState a
-overCompilerTypeAnnotationParameters fn CompilerState{..} = CompilerState{compilerTypeAnnotationParameters = fn compilerTypeAnnotationParameters, ..}
+{-# INLINE overCompilerTypeAnnotationParams #-}
+overCompilerTypeAnnotationParams :: (Dictionary (a, TypeIndex Kind) -> Dictionary (a, TypeIndex Kind)) -> CompilerState a -> CompilerState a
+overCompilerTypeAnnotationParams fn CompilerState{..} = CompilerState{compilerTypeAnnotationParams = fn compilerTypeAnnotationParams, ..}
 
 {-# INLINE overCompilerSolverRuleViolations #-}
 overCompilerSolverRuleViolations :: ([InferenceRule Kind a] -> [InferenceRule Kind a]) -> CompilerState a -> CompilerState a
@@ -110,7 +110,7 @@ initialCompilerState :: CompilerState a
 initialCompilerState =
   CompilerState
     { compilerConstraintsGenerationErrors = []
-    , compilerTypeAnnotationParameters = mempty
+    , compilerTypeAnnotationParams = mempty
     , compilerSolverRuleViolations = []
     , compilerNameEnvironment = mempty
     , compilerSupply = 0
@@ -129,9 +129,9 @@ newtype Compiler a c = Compiler {compilerStack :: ReaderT CompilerEnvironment (S
 compilerReportConstraintsGenerationErrors :: [ConstraintsGenerationError a] -> Compiler a ()
 compilerReportConstraintsGenerationErrors errors = modify (overCompilerStateConstraintsGenerationErrors (<> errors))
 
-{-# INLINE compilerSetTypeAnnotationParameters #-}
-compilerSetTypeAnnotationParameters :: Dictionary (a, TypeIndex Kind) -> Compiler a ()
-compilerSetTypeAnnotationParameters params = modify (overCompilerTypeAnnotationParameters (const params))
+{-# INLINE compilerSetTypeAnnotationParams #-}
+compilerSetTypeAnnotationParams :: Dictionary (a, TypeIndex Kind) -> Compiler a ()
+compilerSetTypeAnnotationParams params = modify (overCompilerTypeAnnotationParams (const params))
 
 {-# INLINE compilerReportSolverRuleViolations #-}
 compilerReportSolverRuleViolations :: [InferenceRule Kind a] -> Compiler a ()
@@ -186,7 +186,7 @@ generateConstraintsC e = do
   (assumptions, params, result) <- runConstraintsGenerationC (freshIdIn e) (collectConstraints e)
   let (errors, constraints) = partitionEithers result
   compilerReportConstraintsGenerationErrors errors
-  compilerSetTypeAnnotationParameters params
+  compilerSetTypeAnnotationParams params
   pure (assumptions, constraints)
 
 assumptionConstraints :: CompilerAssumption -> Compiler a (Either CompilerAssumption (CompilerConstraint a))
@@ -200,7 +200,7 @@ assumptionConstraints Assumption{..} = do
 
 solveConstraintsC :: (Show a, Eq a) => [CompilerConstraint a] -> Compiler a Substitution
 solveConstraintsC cs = do
-  dict <- gets compilerTypeAnnotationParameters
+  dict <- gets compilerTypeAnnotationParams
   let (sub, rs) = solveConstraints cs
       errors = execWriter (checkTypeAnnotationParameters (Map.toList dict) sub)
   compilerReportSolverRuleViolations (apply sub rs)
