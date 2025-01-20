@@ -236,12 +236,8 @@ runMatchMonad name n e = evalState (runReaderT (matchMonadStack e) name) n
 
 type MatchRule p e t = [Label t] -> [p e t] -> EnvelopeExpression e t -> MatchMonad (EnvelopeExpression e t)
 
-{-# INLINE matchPatterns #-}
-matchPatterns :: (Ord t, EnvelopeHost e t) => [Label t] -> [PatternEquation e t] -> EnvelopeExpression e t -> EnvelopeExpression e t
-matchPatterns us qs e = evalState (runReaderT (matchMonadStack (matchPatternsM us qs e)) "") 0
-
-matchPatternsM :: (Ord t, EnvelopeHost e t) => MatchRule PatternEquation e t
-matchPatternsM us qs e =
+matchPatterns :: (Ord t, EnvelopeHost e t) => MatchRule PatternEquation e t
+matchPatterns us qs e =
   case patternEquationSet qs of
     AllEmpty ees ->
       emptyRule us ees e
@@ -252,7 +248,7 @@ matchPatternsM us qs e =
     AllHeadConstructor eqs ->
       constructorRule us eqs e
     Mixed eqss ->
-      foldrM (matchPatternsM us) e eqss
+      foldrM (matchPatterns us) e eqss
 
 emptyRule :: (EnvelopeHost e t) => MatchRule EnvelopeExpression e t
 emptyRule us eqs e =
@@ -269,12 +265,12 @@ literalRule [] _ _ = error "Implementation error"
 literalRule (u : us) eqs ex = foldrM go ex eqs
  where
   go (HeadLiteralEquation lit (PatternEquationBody qs e)) e1 = do
-    e2 <- matchPatternsM us [patternEquation qs e] e1
+    e2 <- matchPatterns us [patternEquation qs e] e1
     pure (MConditional u lit e2 e1)
 
 variableRule :: (Ord t, EnvelopeHost e t) => MatchRule HeadVariableEquation e t
 variableRule [] _ _ = error "Implementation error"
-variableRule (Label _ u : us) eqs ex = matchPatternsM us (updateEq <$> eqs) ex
+variableRule (Label _ u : us) eqs ex = matchPatterns us (updateEq <$> eqs) ex
  where
   updateEq (HeadVariableEquation (Label _ name) (PatternEquationBody ps e)) =
     patternEquation ps (replace name u e)
@@ -288,7 +284,7 @@ constructorRule (u@(Label t _) : us) eqs ex = do
   processGroup qs@(HeadConstructorEquation con ps _ : _) = do
     ns <- supplyN (length ps)
     let vs = uncurry freshVar <$> zip ns ps
-    EnvelopeClause con vs <$> matchPatternsM (vs <> us) (shift <$> qs) ex
+    EnvelopeClause con vs <$> matchPatterns (vs <> us) (shift <$> qs) ex
   shift (HeadConstructorEquation _ ps (PatternEquationBody qs e)) =
     patternEquation (ps <> qs) e
 
@@ -313,6 +309,7 @@ class Proxy a t where
   booleanTypeProxy :: EnvelopeExpression (Expression a) t -> t
   expressionTypeProxy :: Expression a t -> t
   patternTypeProxy :: Pattern a t -> t
+  foo :: a -> t
 
 instance Proxy a () where
   equalToOpTypeProxy =
@@ -470,7 +467,7 @@ instance (Show a, Show t, Ord t, Proxy a t, Monoid a) => MatchExpressionContext 
         pure e
 
 compileClauses :: (Show a, Show t, Proxy a t, Monoid a, Ord t) => Label t -> List1 (Clause Expression a t) -> MatchMonad (Expression a t)
-compileClauses ll cs = compileEnvelope <$> matchPatternsM [ll] eqs MFail
+compileClauses ll cs = compileEnvelope <$> matchPatterns [ll] eqs MFail
  where
   eqs = uncurry patternEquation . translateClause <$> fromList1 cs
 

@@ -21,59 +21,71 @@ testCompileEnvelopeExpression :: Spec
 testCompileEnvelopeExpression =
   describe "compileEnvelope" $ do
     it "" $
-      compileEnvelope
-        ( matchPatterns
-            [Label () "u1", Label () "u2", Label () "u3"]
-            [ patternEquation
-                [ MVariable (Label () "v1")
-                , MVariable (Label () "v2")
-                , MVariable (Label () "v3")
-                ]
-                (MExpression (ELiteral () (LInt32 1)))
-            ]
-            MFail
+      runMatchMonad
+        "$match"
+        0
+        ( compileEnvelope
+            <$> matchPatterns
+              [Label () "u1", Label () "u2", Label () "u3"]
+              [ patternEquation
+                  [ MVariable (Label () "v1")
+                  , MVariable (Label () "v2")
+                  , MVariable (Label () "v3")
+                  ]
+                  (MExpression (ELiteral () (LInt32 1)))
+              ]
+              MFail
         )
         == (ELiteral () (LInt32 1) :: (Expression ()) ())
     it "" $
-      compileEnvelope
-        ( matchPatterns
-            [Label () "u1", Label () "u2", Label () "u3"]
-            [ patternEquation
-                [ MVariable (Label () "v1")
-                , MVariable (Label () "v2")
-                , MVariable (Label () "v3")
-                ]
-                (MExpression (EVariable () (Label () "v1")))
-            ]
-            MFail
+      runMatchMonad
+        "$match"
+        0
+        ( compileEnvelope
+            <$> matchPatterns
+              [Label () "u1", Label () "u2", Label () "u3"]
+              [ patternEquation
+                  [ MVariable (Label () "v1")
+                  , MVariable (Label () "v2")
+                  , MVariable (Label () "v3")
+                  ]
+                  (MExpression (EVariable () (Label () "v1")))
+              ]
+              MFail
         )
         == EVariable () (Label () "u1")
     it "" $
-      compileEnvelope
-        ( matchPatterns
-            [Label () "u1", Label () "u2", Label () "u3"]
-            [ patternEquation
-                [ MVariable (Label () "v1")
-                , MVariable (Label () "v2")
-                , MVariable (Label () "v3")
-                ]
-                (MExpression (EVariable () (Label () "v2")))
-            ]
-            MFail
+      runMatchMonad
+        "$match"
+        0
+        ( compileEnvelope
+            <$> matchPatterns
+              [Label () "u1", Label () "u2", Label () "u3"]
+              [ patternEquation
+                  [ MVariable (Label () "v1")
+                  , MVariable (Label () "v2")
+                  , MVariable (Label () "v3")
+                  ]
+                  (MExpression (EVariable () (Label () "v2")))
+              ]
+              MFail
         )
         == EVariable () (Label () "u2")
     it "" $
-      compileEnvelope
-        ( matchPatterns
-            [Label () "u1", Label () "u2", Label () "u3"]
-            [ patternEquation
-                [ MVariable (Label () "v1")
-                , MVariable (Label () "v2")
-                , MVariable (Label () "v3")
-                ]
-                (MExpression (EVariable () (Label () "v3")))
-            ]
-            MFail
+      runMatchMonad
+        "$match"
+        0
+        ( compileEnvelope
+            <$> matchPatterns
+              [Label () "u1", Label () "u2", Label () "u3"]
+              [ patternEquation
+                  [ MVariable (Label () "v1")
+                  , MVariable (Label () "v2")
+                  , MVariable (Label () "v3")
+                  ]
+                  (MExpression (EVariable () (Label () "v3")))
+              ]
+              MFail
         )
         == EVariable () (Label () "u3")
     it "" $
@@ -95,17 +107,20 @@ testCompileEnvelopeExpression =
                 ]
             )
         )
-        ( compileEnvelope
-            ( matchPatterns
-                [Label () "u1", Label () "u2", Label () "u3"]
-                [ patternEquation
-                    [ MConstructor (Label () "Cons") [MVariable (Label () "x"), MVariable (Label () "a")]
-                    , MVariable (Label () "y")
-                    , MVariable (Label () "z")
-                    ]
-                    (MExpression (EVariable () (Label () "y")))
-                ]
-                MFail
+        ( runMatchMonad
+            "$match"
+            0
+            ( compileEnvelope
+                <$> matchPatterns
+                  [Label () "u1", Label () "u2", Label () "u3"]
+                  [ patternEquation
+                      [ MConstructor (Label () "Cons") [MVariable (Label () "x"), MVariable (Label () "a")]
+                      , MVariable (Label () "y")
+                      , MVariable (Label () "z")
+                      ]
+                      (MExpression (EVariable () (Label () "y")))
+                  ]
+                  MFail
             )
         )
         == VLiteral (LInt32 1)
@@ -128,17 +143,20 @@ testCompileEnvelopeExpression =
                 ]
             )
         )
-        ( compileEnvelope
-            ( matchPatterns
-                [Label () "u1", Label () "u2", Label () "u3"]
-                [ patternEquation
-                    [ MConstructor (Label () "Cons") [MVariable (Label () "x"), MVariable (Label () "_")]
-                    , MVariable (Label () "y")
-                    , MVariable (Label () "z")
-                    ]
-                    (MExpression (EVariable () (Label () "x")))
-                ]
-                MFail
+        ( runMatchMonad
+            "$match"
+            0
+            ( compileEnvelope
+                <$> matchPatterns
+                  [Label () "u1", Label () "u2", Label () "u3"]
+                  [ patternEquation
+                      [ MConstructor (Label () "Cons") [MVariable (Label () "x"), MVariable (Label () "_")]
+                      , MVariable (Label () "y")
+                      , MVariable (Label () "z")
+                      ]
+                      (MExpression (EVariable () (Label () "x")))
+                  ]
+                  MFail
             )
         )
         == VLiteral (LInt32 100)
@@ -161,17 +179,20 @@ testCompileEnvelopeExpression =
                 ]
             )
         )
-        ( compileEnvelope
-            ( matchPatterns
-                [Label () "u1", Label () "u2", Label () "u3"]
-                [ patternEquation
-                    [ MConstructor (Label () "Cons") [MVariable (Label () "_"), MVariable (Label () "x")]
-                    , MVariable (Label () "y")
-                    , MVariable (Label () "z")
-                    ]
-                    (MExpression (EVariable () (Label () "x")))
-                ]
-                MFail
+        ( runMatchMonad
+            "$match"
+            0
+            ( compileEnvelope
+                <$> matchPatterns
+                  [Label () "u1", Label () "u2", Label () "u3"]
+                  [ patternEquation
+                      [ MConstructor (Label () "Cons") [MVariable (Label () "_"), MVariable (Label () "x")]
+                      , MVariable (Label () "y")
+                      , MVariable (Label () "z")
+                      ]
+                      (MExpression (EVariable () (Label () "x")))
+                  ]
+                  MFail
             )
         )
         == VData "Nil" []
@@ -194,23 +215,26 @@ testCompileEnvelopeExpression =
                 ]
             )
         )
-        ( compileEnvelope
-            ( matchPatterns
-                [Label () "u1", Label () "u2", Label () "u3"]
-                [ patternEquation
-                    [ MConstructor (Label () "Nil") []
-                    , MVariable (Label () "y")
-                    , MVariable (Label () "z")
-                    ]
-                    (MExpression (ELiteral () (LInt32 1)))
-                , patternEquation
-                    [ MConstructor (Label () "Cons") [MVariable (Label () "_"), MVariable (Label () "x")]
-                    , MVariable (Label () "y")
-                    , MVariable (Label () "z")
-                    ]
-                    (MExpression (ELiteral () (LInt32 2)))
-                ]
-                MFail
+        ( runMatchMonad
+            "$match"
+            0
+            ( compileEnvelope
+                <$> matchPatterns
+                  [Label () "u1", Label () "u2", Label () "u3"]
+                  [ patternEquation
+                      [ MConstructor (Label () "Nil") []
+                      , MVariable (Label () "y")
+                      , MVariable (Label () "z")
+                      ]
+                      (MExpression (ELiteral () (LInt32 1)))
+                  , patternEquation
+                      [ MConstructor (Label () "Cons") [MVariable (Label () "_"), MVariable (Label () "x")]
+                      , MVariable (Label () "y")
+                      , MVariable (Label () "z")
+                      ]
+                      (MExpression (ELiteral () (LInt32 2)))
+                  ]
+                  MFail
             )
         )
         == VLiteral (LInt32 2)
@@ -233,29 +257,32 @@ testCompileEnvelopeExpression =
                 ]
             )
         )
-        ( compileEnvelope
-            ( matchPatterns
-                [Label () "u1", Label () "u2", Label () "u3"]
-                [ patternEquation
-                    [ MConstructor (Label () "Nil") []
-                    , MVariable (Label () "y")
-                    , MVariable (Label () "z")
-                    ]
-                    (MExpression (ELiteral () (LInt32 1)))
-                , patternEquation
-                    [ MConstructor (Label () "Cons") [MVariable (Label () "_"), MConstructor (Label () "Cons") [MVariable (Label () "_"), MVariable (Label () "_")]]
-                    , MVariable (Label () "y")
-                    , MVariable (Label () "z")
-                    ]
-                    (MExpression (ELiteral () (LInt32 2)))
-                , patternEquation
-                    [ MConstructor (Label () "Cons") [MVariable (Label () "_"), MVariable (Label () "_")]
-                    , MVariable (Label () "y")
-                    , MVariable (Label () "z")
-                    ]
-                    (MExpression (ELiteral () (LInt32 3)))
-                ]
-                MFail
+        ( runMatchMonad
+            "$match"
+            0
+            ( compileEnvelope
+                <$> matchPatterns
+                  [Label () "u1", Label () "u2", Label () "u3"]
+                  [ patternEquation
+                      [ MConstructor (Label () "Nil") []
+                      , MVariable (Label () "y")
+                      , MVariable (Label () "z")
+                      ]
+                      (MExpression (ELiteral () (LInt32 1)))
+                  , patternEquation
+                      [ MConstructor (Label () "Cons") [MVariable (Label () "_"), MConstructor (Label () "Cons") [MVariable (Label () "_"), MVariable (Label () "_")]]
+                      , MVariable (Label () "y")
+                      , MVariable (Label () "z")
+                      ]
+                      (MExpression (ELiteral () (LInt32 2)))
+                  , patternEquation
+                      [ MConstructor (Label () "Cons") [MVariable (Label () "_"), MVariable (Label () "_")]
+                      , MVariable (Label () "y")
+                      , MVariable (Label () "z")
+                      ]
+                      (MExpression (ELiteral () (LInt32 3)))
+                  ]
+                  MFail
             )
         )
         == VLiteral (LInt32 3)
@@ -278,29 +305,32 @@ testCompileEnvelopeExpression =
                 ]
             )
         )
-        ( compileEnvelope
-            ( matchPatterns
-                [Label () "u1", Label () "u2", Label () "u3"]
-                [ patternEquation
-                    [ MConstructor (Label () "Nil") []
-                    , MVariable (Label () "y")
-                    , MVariable (Label () "z")
-                    ]
-                    (MExpression (ELiteral () (LInt32 1)))
-                , patternEquation
-                    [ MConstructor (Label () "Cons") [MLiteral () (ELiteral () (LInt32 100)), MVariable (Label () "_")]
-                    , MVariable (Label () "y")
-                    , MVariable (Label () "z")
-                    ]
-                    (MExpression (ELiteral () (LInt32 2)))
-                , patternEquation
-                    [ MConstructor (Label () "Cons") [MVariable (Label () "_"), MVariable (Label () "_")]
-                    , MVariable (Label () "y")
-                    , MVariable (Label () "z")
-                    ]
-                    (MExpression (ELiteral () (LInt32 3)))
-                ]
-                MFail
+        ( runMatchMonad
+            "$match"
+            0
+            ( compileEnvelope
+                <$> matchPatterns
+                  [Label () "u1", Label () "u2", Label () "u3"]
+                  [ patternEquation
+                      [ MConstructor (Label () "Nil") []
+                      , MVariable (Label () "y")
+                      , MVariable (Label () "z")
+                      ]
+                      (MExpression (ELiteral () (LInt32 1)))
+                  , patternEquation
+                      [ MConstructor (Label () "Cons") [MLiteral () (ELiteral () (LInt32 100)), MVariable (Label () "_")]
+                      , MVariable (Label () "y")
+                      , MVariable (Label () "z")
+                      ]
+                      (MExpression (ELiteral () (LInt32 2)))
+                  , patternEquation
+                      [ MConstructor (Label () "Cons") [MVariable (Label () "_"), MVariable (Label () "_")]
+                      , MVariable (Label () "y")
+                      , MVariable (Label () "z")
+                      ]
+                      (MExpression (ELiteral () (LInt32 3)))
+                  ]
+                  MFail
             )
         )
         == VLiteral (LInt32 2)
@@ -323,29 +353,32 @@ testCompileEnvelopeExpression =
                 ]
             )
         )
-        ( compileEnvelope
-            ( matchPatterns
-                [Label () "u1", Label () "u2", Label () "u3"]
-                [ patternEquation
-                    [ MConstructor (Label () "Nil") []
-                    , MVariable (Label () "y")
-                    , MVariable (Label () "z")
-                    ]
-                    (MExpression (ELiteral () (LInt32 1)))
-                , patternEquation
-                    [ MConstructor (Label () "Cons") [MLiteral () (ELiteral () (LInt32 200)), MVariable (Label () "_")]
-                    , MVariable (Label () "y")
-                    , MVariable (Label () "z")
-                    ]
-                    (MExpression (ELiteral () (LInt32 2)))
-                , patternEquation
-                    [ MConstructor (Label () "Cons") [MVariable (Label () "_"), MVariable (Label () "_")]
-                    , MVariable (Label () "y")
-                    , MVariable (Label () "z")
-                    ]
-                    (MExpression (ELiteral () (LInt32 3)))
-                ]
-                MFail
+        ( runMatchMonad
+            "$match"
+            0
+            ( compileEnvelope
+                <$> matchPatterns
+                  [Label () "u1", Label () "u2", Label () "u3"]
+                  [ patternEquation
+                      [ MConstructor (Label () "Nil") []
+                      , MVariable (Label () "y")
+                      , MVariable (Label () "z")
+                      ]
+                      (MExpression (ELiteral () (LInt32 1)))
+                  , patternEquation
+                      [ MConstructor (Label () "Cons") [MLiteral () (ELiteral () (LInt32 200)), MVariable (Label () "_")]
+                      , MVariable (Label () "y")
+                      , MVariable (Label () "z")
+                      ]
+                      (MExpression (ELiteral () (LInt32 2)))
+                  , patternEquation
+                      [ MConstructor (Label () "Cons") [MVariable (Label () "_"), MVariable (Label () "_")]
+                      , MVariable (Label () "y")
+                      , MVariable (Label () "z")
+                      ]
+                      (MExpression (ELiteral () (LInt32 3)))
+                  ]
+                  MFail
             )
         )
         == VLiteral (LInt32 3)
