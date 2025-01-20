@@ -8,6 +8,7 @@
 
 module Noll.Compiler.PatternMatching where
 
+import Control.Monad.Reader (MonadReader, ReaderT, runReaderT)
 import Control.Monad.State (MonadState, State, evalState)
 import Data.Function (on)
 import Data.List (sortBy)
@@ -221,19 +222,23 @@ groupByHeadConstructor = groupByEq headConstructorName . sortBy (compare `on` he
 
 --
 
-newtype MatchMonad a = MatchMonad {monadMatchStack :: State Int a}
+newtype MatchMonad a = MatchMonad {matchMonadStack :: ReaderT Name (State Int) a}
   deriving
     ( Functor
     , Applicative
     , Monad
     , MonadState Int
+    , MonadReader Name
     )
+
+runMatchMonad :: Name -> Int -> MatchMonad a -> a
+runMatchMonad name n e = evalState (runReaderT (matchMonadStack e) name) n
 
 type MatchRule p e t = [Label t] -> [p e t] -> EnvelopeExpression e t -> MatchMonad (EnvelopeExpression e t)
 
 {-# INLINE matchPatterns #-}
 matchPatterns :: (Ord t, EnvelopeHost e t) => [Label t] -> [PatternEquation e t] -> EnvelopeExpression e t -> EnvelopeExpression e t
-matchPatterns us qs e = evalState (monadMatchStack (matchPatternsM us qs e)) 0
+matchPatterns us qs e = evalState (runReaderT (matchMonadStack (matchPatternsM us qs e)) "") 0
 
 matchPatternsM :: (Ord t, EnvelopeHost e t) => MatchRule PatternEquation e t
 matchPatternsM us qs e =
@@ -342,11 +347,7 @@ compileEnvelope =
     MExpression expr ->
       expr
     e@(MCase ll cs) ->
-      ECompiledMatch
-        mempty
-        (envelopeExprTypeProxy e)
-        (EVariable mempty ll)
-        (clauseList cs)
+      ECompiledMatch mempty (envelopeExprTypeProxy e) (EVariable mempty ll) (clauseList cs)
     MConditional ll e1 e2 e3 ->
       EIf
         mempty
@@ -374,101 +375,102 @@ clauseList ecs =
 --
 
 class MatchExpressionContext a where
-  compileMatchExprs :: a -> a
+  compileMatchExprs :: a -> MatchMonad a
 
 instance (MatchExpressionContext a) => MatchExpressionContext [a] where
-  compileMatchExprs = fmap compileMatchExprs
+  compileMatchExprs = traverse compileMatchExprs
 
 instance (MatchExpressionContext a) => MatchExpressionContext (Maybe a) where
-  compileMatchExprs = fmap compileMatchExprs
+  compileMatchExprs = traverse compileMatchExprs
 
 instance (MatchExpressionContext a) => MatchExpressionContext (List1 a) where
-  compileMatchExprs = fmap compileMatchExprs
+  compileMatchExprs = traverse compileMatchExprs
 
 instance (MatchExpressionContext a) => MatchExpressionContext (Dictionary a) where
-  compileMatchExprs = fmap compileMatchExprs
+  compileMatchExprs = traverse compileMatchExprs
 
 instance (Show a, Show t, Ord t, Proxy a t, Monoid a) => MatchExpressionContext (Module a k t) where
   compileMatchExprs =
     \case
       Module p ns os ->
-        Module p ns (compileMatchExprs os)
+        Module p ns <$> compileMatchExprs os
 
 instance (Show a, Show t, Ord t, Proxy a t, Monoid a) => MatchExpressionContext (Object a k t) where
   compileMatchExprs =
     \case
       DFunction name f -> do
-        DFunction name (compileMatchExprs f)
+        DFunction name <$> compileMatchExprs f
       DConstant name c -> do
-        DConstant name (compileMatchExprs c)
+        DConstant name <$> compileMatchExprs c
 
 instance (MatchExpressionContext (e a t)) => MatchExpressionContext (Function e a t) where
   compileMatchExprs =
     \case
       Function a u ps e ->
-        Function a u ps (compileMatchExprs e)
+        Function a u ps <$> compileMatchExprs e
 
 instance (MatchExpressionContext (e a t)) => MatchExpressionContext (Constant e a t) where
   compileMatchExprs =
     \case
       Constant a u e ->
-        Constant a u (compileMatchExprs e)
+        Constant a u <$> compileMatchExprs e
 
 instance MatchExpressionContext (Clause Expression a t) where
   compileMatchExprs =
     \case
       EClause a p cs ->
-        EClause a p cs
+        pure (EClause a p cs)
 
 instance (Show a, Show t, Ord t, Proxy a t, Monoid a) => MatchExpressionContext (Binding Expression a t) where
   compileMatchExprs =
     \case
       BPattern a p e ->
-        BPattern a p (compileMatchExprs e)
+        BPattern a p <$> compileMatchExprs e
 
 instance (Show a, Show t, Ord t, Proxy a t, Monoid a) => MatchExpressionContext (Expression a t) where
   compileMatchExprs =
     \case
       EAnnotation a t e ->
-        EAnnotation a t (compileMatchExprs e)
-      EMatch a t e cs ->
-        replaceWith name (compileMatchExprs e) (compileClauses ll (compileMatchExprs cs))
+        EAnnotation a t <$> compileMatchExprs e
+      EMatch a t e cs -> do
+        cs1 <- compileMatchExprs cs
+        replaceWith name <$> compileMatchExprs e <*> compileClauses ll cs1
        where
         name = "$match:expr:1"
         ll = Label (expressionTypeProxy e) name
       ELambda a ps e ->
-        ELambda a ps (compileMatchExprs e)
+        ELambda a ps <$> compileMatchExprs e
       ERecursiveLet a p e1 e2 ->
-        ERecursiveLet a p (compileMatchExprs e1) (compileMatchExprs e2)
+        ERecursiveLet a p <$> compileMatchExprs e1 <*> compileMatchExprs e2
       ELet a gs e1 ->
-        ELet a (compileMatchExprs gs) (compileMatchExprs e1)
+        ELet a <$> compileMatchExprs gs <*> compileMatchExprs e1
       EIf a t e1 e2 e3 ->
-        EIf a t (compileMatchExprs e1) (compileMatchExprs e2) (compileMatchExprs e2)
+        EIf a t <$> compileMatchExprs e1 <*> compileMatchExprs e2 <*> compileMatchExprs e2
       EApplication a t e1 es ->
-        EApplication a t (compileMatchExprs e1) (compileMatchExprs es)
+        EApplication a t <$> compileMatchExprs e1 <*> compileMatchExprs es
       EListCons a t e1 e2 ->
-        EListCons a t (compileMatchExprs e1) (compileMatchExprs e2)
+        EListCons a t <$> compileMatchExprs e1 <*> compileMatchExprs e2
       EListLiteral a t es ->
-        EListLiteral a t (compileMatchExprs es)
+        EListLiteral a t <$> compileMatchExprs es
       ERecord a t d e ->
-        ERecord a t (compileMatchExprs d) (compileMatchExprs e)
+        ERecord a t <$> compileMatchExprs d <*> compileMatchExprs e
       ESelect a ll e ->
         undefined
       EFold a t es cs e ->
         undefined
       e@EUnaryOperator{} ->
-        e
+        pure e
       e@EBinaryOperator{} ->
-        e
+        pure e
       e@EVariable{} ->
-        e
+        pure e
       e@EConstructor{} ->
-        e
+        pure e
       e@ELiteral{} ->
-        e
+        pure e
 
-compileClauses :: (Show a, Show t, Proxy a t, Monoid a, Ord t) => Label t -> List1 (Clause Expression a t) -> Expression a t
-compileClauses ll cs = compileEnvelope (matchPatterns [ll] eqs MFail)
+compileClauses :: (Show a, Show t, Proxy a t, Monoid a, Ord t) => Label t -> List1 (Clause Expression a t) -> MatchMonad (Expression a t)
+compileClauses ll cs = compileEnvelope <$> matchPatternsM [ll] eqs MFail
  where
   eqs = uncurry patternEquation . translateClause <$> fromList1 cs
 
