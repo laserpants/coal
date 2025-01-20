@@ -92,15 +92,31 @@ evalExpr =
       v1 <- evalExpr e1
       vs <- traverse evalExpr es
       case v1 of
-        VFun names f ->
-          local (Environment.insertMany (names `zip` fromList1 vs)) f
+        VFun names f
+          | arity == length vs ->
+              local (Environment.insertMany (names `zip` fromList1 vs)) f
+         where
+          arity = length names
     EBinaryOperator _ (_, OEqualTo) -> do
-      pure $ VFun ["$$$.0", "$$$.1"] $ do
-        a0 <- evalVar "$$$.0"
-        a1 <- evalVar "$$$.1"
+      pure $ args2 $ \a0 a1 ->
         case (a0, a1) of
           (VLiteral (LInt32 a), VLiteral (LInt32 b)) ->
             pure (VLiteral (LBool (a == b)))
+
+{-# INLINE argn #-}
+argn :: Int -> Name
+argn n = Text.pack ("$$$." <> show n)
+
+args1 :: (Value -> Eval Value) -> Value
+args1 f = VFun [argn 0] $ do
+  a0 <- evalVar (argn 0)
+  f a0
+
+args2 :: (Value -> Value -> Eval Value) -> Value
+args2 f = VFun [argn 0, argn 1] $ do
+  a0 <- evalVar (argn 0)
+  a1 <- evalVar (argn 1)
+  f a0 a1
 
 matchClause :: (Show a, Show t) => [Name] -> [Value] -> Expression a t -> Eval Value
 matchClause (name : names) (VData name1 vs1 : vs2) e
