@@ -18,7 +18,6 @@ import Noll.Label (Label (..))
 import Noll.Language.Expression (Clause (..), Expression (..))
 import Noll.Language.Expression.Binding (Binding (..))
 import Noll.Language.Expression.Choice (Choice (..))
-import Noll.Language.HasTag (HasTag (..))
 import Noll.Language.HasType (HasType (..))
 import Noll.Language.Module.Constant (Constant (..))
 import Noll.Language.Module.Function (Function (..))
@@ -50,7 +49,7 @@ runPatternExpansion r s e = fst (evalState (runReaderT (runWriterT (patternExpan
 class Expandable a o k e | e -> a, e -> o k where
   expandPatterns :: (MonadWriter [NamedPattern a o k] m, MonadReader Name m, MonadState Int m) => e -> m e
 
-instance Expandable a o k (Pattern a (Type o k)) where
+instance (Monoid a) => Expandable a o k (Pattern a (Type o k)) where
   expandPatterns =
     \case
       p@PVariable{} ->
@@ -60,13 +59,13 @@ instance Expandable a o k (Pattern a (Type o k)) where
       p -> do
         name <- ask >>= supplied . freshName
         tell [(name, p)]
-        pure (PVariable (tag p) (Label (typeOf p) name))
+        pure (PVariable mempty (Label (typeOf p) name))
 
 {-# INLINE freshName #-}
 freshName :: Name -> Int -> Name
 freshName prefix index = Text.pack ("$" <> Text.unpack prefix <> "." <> show index)
 
-instance Expandable a o k (Binding Expression a (Type o k)) where
+instance (Monoid a) => Expandable a o k (Binding Expression a (Type o k)) where
   expandPatterns =
     \case
       BPattern a p e ->
@@ -74,7 +73,7 @@ instance Expandable a o k (Binding Expression a (Type o k)) where
       BFunction a name ps e ->
         BFunction a name <$> traverse expandPatterns ps <*> expandPatterns e
 
-instance Expandable a o k (Expression a (Type o k)) where
+instance (Monoid a) => Expandable a o k (Expression a (Type o k)) where
   expandPatterns =
     \case
       EAnnotation a t e ->
@@ -118,17 +117,15 @@ instance Expandable a o k (Expression a (Type o k)) where
         (qs, ps) <- runWriterT (traverse expandPatterns ps)
         pure (ELambda a qs (foldr unrollMatch e1 ps))
 
-unrollMatch :: (Name, Pattern a (Type o k)) -> Expression a (Type o k) -> Expression a (Type o k)
+unrollMatch :: (Monoid a) => (Name, Pattern a (Type o k)) -> Expression a (Type o k) -> Expression a (Type o k)
 unrollMatch (name, p) e =
   EMatch
-    (tag e)
+    mempty
     (typeOf e)
-    (EVariable a (Label (typeOf p) name))
-    (EClause a p (CPlain a [] e :| []) :| [])
- where
-  a = tag p
+    (EVariable mempty (Label (typeOf p) name))
+    (EClause mempty p (CPlain mempty [] e :| []) :| [])
 
-instance Expandable a o k (Function Expression a (Type o k)) where
+instance (Monoid a) => Expandable a o k (Function Expression a (Type o k)) where
   expandPatterns =
     \case
       Function a u ps e -> do
@@ -136,13 +133,13 @@ instance Expandable a o k (Function Expression a (Type o k)) where
         (qs, ps) <- runWriterT (traverse expandPatterns ps)
         pure (Function a u qs (foldr unrollMatch e1 ps))
 
-instance Expandable a o k (Constant Expression a (Type o k)) where
+instance (Monoid a) => Expandable a o k (Constant Expression a (Type o k)) where
   expandPatterns =
     \case
       Constant a u e ->
         Constant a u <$> expandPatterns e
 
-instance Expandable a o k (Object a k (Type o k)) where
+instance (Monoid a) => Expandable a o k (Object a k (Type o k)) where
   expandPatterns =
     \case
       DFunction name f ->

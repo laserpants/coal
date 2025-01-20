@@ -238,8 +238,8 @@ typeCheckFunctionC f@(Function loc (Uses _ t) ps e) = do
   compileConstraintsC [Equality (InferenceRule 999) [t, typeOf e]] f $
     ELet
       loc
-      (BFunction loc "$.function" ps e :| [])
-      (EVariable loc (Label (foldType t (typeOf <$> ps)) "$.function"))
+      (BFunction loc "$$$.function" ps e :| [])
+      (EVariable loc (Label (foldType t (typeOf <$> ps)) "$$$.function"))
 
 typeCheckConstantC ::
   (Show a, Eq a) =>
@@ -249,5 +249,5 @@ typeCheckConstantC g@(Constant loc (Uses _ t) e) = do
   compileConstraintsC [Equality (InferenceRule 999) [t, typeOf e]] g $
     ELet
       loc
-      (BPattern loc (PVariable loc (Label t "$.global")) e :| [])
-      (EVariable loc (Label t "$.global"))
+      (BPattern loc (PVariable loc (Label t "$$$.global")) e :| [])
+      (EVariable loc (Label t "$$$.global"))

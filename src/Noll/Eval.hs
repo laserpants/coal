@@ -95,9 +95,9 @@ evalExpr =
         VFun names f ->
           local (Environment.insertMany (names `zip` fromList1 vs)) f
     EBinaryOperator _ (_, OEqualTo) -> do
-      pure $ VFun ["$$.0", "$$.1"] $ do
-        a0 <- evalVar "$$.0"
-        a1 <- evalVar "$$.1"
+      pure $ VFun ["$$$.0", "$$$.1"] $ do
+        a0 <- evalVar "$$$.0"
+        a1 <- evalVar "$$$.1"
         case (a0, a1) of
           (VLiteral (LInt32 a), VLiteral (LInt32 b)) ->
             pure (VLiteral (LBool (a == b)))
