@@ -249,5 +249,5 @@ typeCheckConstantC g@(Constant loc (Uses _ t) e) = do
   compileConstraintsC [Equality (InferenceRule 999) [t, typeOf e]] g $
     ELet
       loc
-      (BPattern loc (PVariable loc (Label t "$$$.global")) e :| [])
-      (EVariable loc (Label t "$$$.global"))
+      (BPattern loc (PVariable loc (Label t "$$$.constant")) e :| [])
+      (EVariable loc (Label t "$$$.constant"))
