@@ -12,9 +12,10 @@ module Noll.Common.Environment (
 )
 where
 
-import qualified Data.Map.Strict as Map
 import Noll.Utils (Dictionary, Name)
 import Prelude hiding (lookup)
+
+import qualified Data.Map.Strict as Map
 
 newtype Environment e = Environment {environmentDictionary :: Dictionary e}
   deriving (Show, Eq, Ord, Read, Semigroup, Monoid)
