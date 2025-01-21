@@ -30,6 +30,11 @@ data Value
   | VFail
   | VFun [Name] (Eval Value)
 
+--instance Show Value where
+--  show (VData name vs) = show (name, vs)
+--  show (VLiteral p) = show p
+--  show (VFail) = "VFail"
+
 instance Eq Value where
   VData c1 vs1 == VData c2 vs2 =
     c1 == c2 && vs1 == vs2
@@ -70,8 +75,10 @@ evalExpr =
   \case
     ELiteral _ p ->
       pure (VLiteral p)
-    EVariable _ (Label _ name) -> do
+    EVariable _ (Label _ name) ->
       evalVar name
+    EConstructor _ (Label _ name) ->
+      pure (VData name [])
     ECompiledMatch _ _ e cs -> do
       v1 <- evalExpr e
       vs <- forM cs $
@@ -97,6 +104,8 @@ evalExpr =
               local (Environment.insertMany (names `zip` fromList1 vs)) f
          where
           arity = length names
+        VData con vs1 ->
+          pure (VData con (vs1 <> fromList1 vs))
     EBinaryOperator _ (_, OEqualTo) -> do
       pure $ args2 $ \a0 a1 ->
         case (a0, a1) of

@@ -3,19 +3,150 @@
 module Noll.Compiler.PatternMatchingSpec where
 
 import Noll.Common.Environment (Environment (..))
+import Noll.Common.List1 (NonEmpty (..), (<|))
 import Noll.Compiler.PatternMatching
+import Noll.Compiler.PatternMatchingSpec.TestRunner (compilePatterns)
 import Noll.Eval (Value (..), eval)
 import Noll.Label (Label (..))
-import Noll.Language (Expression (..), Primitive (..))
+import Noll.Language (CompiledClause (..), Expression (..), Primitive (..))
 import Test.Hspec (Spec, describe, it)
 
 import qualified Data.Map.Strict as Map
+import qualified Noll.Common.Environment as Environment
 
 spec :: Spec
 spec =
   describe "" $ do
     testGroupByConstructor
     testCompileEnvelopeExpression
+    testCompilePatterns
+
+testCompilePatterns :: Spec
+testCompilePatterns =
+  describe "" $
+    it "" $
+      ( runMatchMonad
+          "$match"
+          0
+          ( compilePatterns
+              [Label () "u2", Label () "u3"]
+              [ patternEquation
+                  [ MConstructor (Label () "Nil") []
+                  , MVariable (Label () "ys")
+                  ]
+                  ( MExpression
+                      ( EApplication
+                          ()
+                          ()
+                          (EConstructor () (Label () "A"))
+                          (EVariable () (Label () "u1") <| EVariable () (Label () "ys") :| [])
+                      )
+                  )
+              , patternEquation
+                  [ MVariable (Label () "xs")
+                  , MConstructor (Label () "Nil") []
+                  ]
+                  ( MExpression
+                      ( EApplication
+                          ()
+                          ()
+                          (EConstructor () (Label () "B"))
+                          (EVariable () (Label () "u1") <| EVariable () (Label () "xs") :| [])
+                      )
+                  )
+              , patternEquation
+                  [ MConstructor
+                      (Label () "Cons")
+                      [ MVariable (Label () "x")
+                      , MVariable (Label () "xs")
+                      ]
+                  , MConstructor
+                      (Label () "Cons")
+                      [ MVariable (Label () "y")
+                      , MVariable (Label () "ys")
+                      ]
+                  ]
+                  ( MExpression
+                      ( EApplication
+                          ()
+                          ()
+                          (EConstructor () (Label () "C"))
+                          ( EVariable () (Label () "u1")
+                              <| EVariable () (Label () "x")
+                              <| EVariable () (Label () "xs")
+                              <| EVariable () (Label () "y")
+                              <| EVariable () (Label () "ys")
+                              :| []
+                          )
+                      )
+                  )
+              ]
+              MFail
+          )
+      )
+        == ECompiledMatch
+          ()
+          ()
+          (EVariable () (Label () "u2"))
+          ( ECompiledClause
+              (Label () "Nil" :| [])
+              ( EApplication
+                  ()
+                  ()
+                  (EConstructor () (Label () "A"))
+                  (EVariable () (Label () "u1") :| [EVariable () (Label () "u3")])
+              )
+              :| [ ECompiledClause
+                    (Label () "_" :| [])
+                    ( ECompiledMatch
+                        ()
+                        ()
+                        (EVariable () (Label () "u3"))
+                        ( ECompiledClause
+                            (Label () "Nil" :| [])
+                            ( EApplication
+                                ()
+                                ()
+                                (EConstructor () (Label () "B"))
+                                (EVariable () (Label () "u1") :| [EVariable () (Label () "u2")])
+                            )
+                            :| [ ECompiledClause
+                                  (Label () "_" :| [])
+                                  ( ECompiledMatch
+                                      ()
+                                      ()
+                                      (EVariable () (Label () "u2"))
+                                      ( ECompiledClause
+                                          (Label () "Cons" :| [Label () "$p:0:x", Label () "$p:1:xs"])
+                                          ( ECompiledMatch
+                                              ()
+                                              ()
+                                              (EVariable () (Label () "u3"))
+                                              ( ECompiledClause
+                                                  (Label () "Cons" :| [Label () "$p:2:y", Label () "$p:3:ys"])
+                                                  ( EApplication
+                                                      ()
+                                                      ()
+                                                      (EConstructor () (Label () "C"))
+                                                      ( EVariable () (Label () "u1")
+                                                          :| [ EVariable () (Label () "$p:0:x")
+                                                             , EVariable () (Label () "$p:1:xs")
+                                                             , EVariable () (Label () "$p:2:y")
+                                                             , EVariable () (Label () "$p:3:ys")
+                                                             ]
+                                                      )
+                                                  )
+                                                  :| []
+                                              )
+                                          )
+                                          :| []
+                                      )
+                                  )
+                               ]
+                        )
+                    )
+                 ]
+          )
 
 testCompileEnvelopeExpression :: Spec
 testCompileEnvelopeExpression =

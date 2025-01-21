@@ -483,5 +483,3 @@ translatePattern =
       MConstructor ll (translatePattern <$> ps)
     p@(PLiteral a prim) ->
       MLiteral (patternType p) (ELiteral a prim)
-    q ->
-      error (show q)
