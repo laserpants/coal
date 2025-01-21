@@ -87,7 +87,7 @@ instance (HasType o k (e t)) => HasType o k (EnvelopeExpression e t) where
   typeOf =
     \case
       MFail ->
-        error "TODO"
+        error "MFail"
       MExpression t ->
         typeOf t
       MCase _ [] ->
