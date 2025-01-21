@@ -8,13 +8,13 @@
 
 module Noll.Compiler.PatternMatching where
 
-import Control.Monad.Reader (MonadReader, ReaderT, runReaderT)
+import Control.Monad.Reader (MonadReader, ReaderT, ask, runReaderT)
 import Control.Monad.State (MonadState, State, evalState)
 import Data.Function (on)
 import Data.List (sortBy)
 import Data.Maybe (mapMaybe)
 import Noll.Common.List1 (List1, NonEmpty (..), fromList1)
-import Noll.Common.Supply (supplyN)
+import Noll.Common.Supply (supplied, suppliedName, supplyN)
 import Noll.Compiler.Transform.Tree (rename, replaceWith)
 import Noll.Label (Label (..))
 import Noll.Language (
@@ -430,9 +430,8 @@ instance (Show a, Show t, TypeProxy t, Ord t, Monoid a) => MatchExpressionContex
         EAnnotation a t <$> compileMatchExprs e
       EMatch a t e cs -> do
         cs1 <- compileMatchExprs cs
+        name <- suppliedName
         replaceWith name <$> compileMatchExprs e <*> compileClauses (Label (expressionType e) name) cs1
-       where
-        name = "$match:expr:1"
       ELambda a ps e ->
         ELambda a ps <$> compileMatchExprs e
       ERecursiveLet a p e1 e2 ->

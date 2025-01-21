@@ -3,10 +3,20 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Common.Supply (Supply (..), supply, supplyN, supplied) where
+module Noll.Common.Supply (
+  Supply (..),
+  supply,
+  supplyN,
+  supplied,
+  suppliedName,
+) where
 
 import Control.Monad (replicateM)
+import Control.Monad.Reader (MonadReader, ask)
 import Control.Monad.State (MonadState, get, modify)
+import Noll.Utils (Name)
+
+import qualified Data.Text as Text
 
 class Supply s where
   updateSupply :: (Int -> Int) -> s -> s
@@ -27,3 +37,10 @@ supplyN n = replicateM n supply
 
 supplied :: (MonadState s m, Supply s) => (Int -> a) -> m a
 supplied f = f . getSupply <$> supply
+
+suppliedName :: (MonadReader Name m, MonadState s m, Supply s) => m Name
+suppliedName = ask >>= supplied . freshName
+
+{-# INLINE freshName #-}
+freshName :: Name -> Int -> Name
+freshName prefix index = Text.pack ("$" <> Text.unpack prefix <> "." <> show index)

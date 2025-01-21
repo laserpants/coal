@@ -13,7 +13,7 @@ import Control.Monad.Reader (MonadReader, ReaderT, ask, runReaderT)
 import Control.Monad.State (MonadState, State, evalState)
 import Control.Monad.Writer (MonadWriter, WriterT, runWriterT, tell)
 import Noll.Common.List1 (List1, NonEmpty ((:|)))
-import Noll.Common.Supply (supplied)
+import Noll.Common.Supply (supplied, suppliedName)
 import Noll.Label (Label (..))
 import Noll.Language.Expression (Clause (..), Expression (..))
 import Noll.Language.Expression.Binding (Binding (..))
@@ -57,13 +57,9 @@ instance (Monoid a) => Expandable a o k (Pattern a (Type o k)) where
       p@(PAnnotation _ _ PVariable{}) ->
         pure p
       p -> do
-        name <- ask >>= supplied . freshName
+        name <- suppliedName
         tell [(name, p)]
         pure (PVariable mempty (Label (typeOf p) name))
-
-{-# INLINE freshName #-}
-freshName :: Name -> Int -> Name
-freshName prefix index = Text.pack ("$" <> Text.unpack prefix <> "." <> show index)
 
 instance (Monoid a) => Expandable a o k (Binding Expression a (Type o k)) where
   expandPatterns =
