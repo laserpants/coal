@@ -394,9 +394,9 @@ instance (Show a, Show t, TypeProxy t, Ord t, Monoid a) => MatchExpressionContex
 instance (Show a, Show t, TypeProxy t, Ord t, Monoid a) => MatchExpressionContext (Object a k t) where
   compileMatchExprs =
     \case
-      DFunction name f -> do
+      DFunction name f ->
         DFunction name <$> compileMatchExprs f
-      DConstant name c -> do
+      DConstant name c ->
         DConstant name <$> compileMatchExprs c
 
 instance (MatchExpressionContext (e a t)) => MatchExpressionContext (Function e a t) where
