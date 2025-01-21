@@ -40,6 +40,7 @@ import Noll.Utils (
   const2,
   foldrM,
   groupByEq,
+  mapM,
   (<$$>),
  )
 
@@ -283,24 +284,21 @@ constructorRule (u@(Label t _) : us) eqs ex = do
   pure (MCase u (cs <> [EnvelopeClause (Label t "_") [] ex]))
  where
   processGroup qs@(HeadConstructorEquation con ps _ : _) = do
-    ns <- supplyN (length ps)
-    let vs = uncurry freshVar <$> zip ns ps
+    vs <- mapM suppliedLabel ps
     EnvelopeClause con vs <$> matchPatterns (vs <> us) (shift <$> qs) ex
   shift (HeadConstructorEquation _ ps (PatternEquationBody qs e)) =
     patternEquation (ps <> qs) e
 
--- TODO: ??
-freshVar :: Int -> EnvelopePattern e t -> Label t
-freshVar n =
+suppliedLabel :: EnvelopePattern e t -> MatchMonad (Label t)
+suppliedLabel =
   \case
-    MVariable (Label t name) ->
-      Label t (prefix <> ":" <> name)
+    MVariable (Label t name) -> do
+      prefix <- suppliedName
+      pure (Label t (prefix <> "." <> name))
     MConstructor (Label t _) _ ->
-      Label t prefix
+      Label t <$> suppliedName
     MLiteral t _ ->
-      Label t prefix
- where
-  prefix = Text.pack ("$p:" <> show n)
+      Label t <$> suppliedName
 
 --
 

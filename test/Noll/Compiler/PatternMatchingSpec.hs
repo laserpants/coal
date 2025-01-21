@@ -21,12 +21,73 @@ spec =
     testCompileEnvelopeExpression
     testCompilePatterns
 
+bork =
+  ( runMatchMonad
+      "match"
+      0
+      ( compilePatterns
+          [Label () "u2", Label () "u3"]
+          [ patternEquation
+              [ MConstructor (Label () "Nil") []
+              , MVariable (Label () "ys")
+              ]
+              ( MExpression
+                  ( EApplication
+                      ()
+                      ()
+                      (EConstructor () (Label () "A"))
+                      (EVariable () (Label () "u1") <| EVariable () (Label () "ys") :| [])
+                  )
+              )
+          , patternEquation
+              [ MVariable (Label () "xs")
+              , MConstructor (Label () "Nil") []
+              ]
+              ( MExpression
+                  ( EApplication
+                      ()
+                      ()
+                      (EConstructor () (Label () "B"))
+                      (EVariable () (Label () "u1") <| EVariable () (Label () "xs") :| [])
+                  )
+              )
+          , patternEquation
+              [ MConstructor
+                  (Label () "Cons")
+                  [ MVariable (Label () "x")
+                  , MVariable (Label () "xs")
+                  ]
+              , MConstructor
+                  (Label () "Cons")
+                  [ MVariable (Label () "y")
+                  , MVariable (Label () "ys")
+                  ]
+              ]
+              ( MExpression
+                  ( EApplication
+                      ()
+                      ()
+                      (EConstructor () (Label () "C"))
+                      ( EVariable () (Label () "u1")
+                          <| EVariable () (Label () "x")
+                          <| EVariable () (Label () "xs")
+                          <| EVariable () (Label () "y")
+                          <| EVariable () (Label () "ys")
+                          :| []
+                      )
+                  )
+              )
+          ]
+          MFail
+      )
+  )
+
 testCompilePatterns :: Spec
 testCompilePatterns =
   describe "" $
     it "" $
       ( runMatchMonad
-          "$match"
+          "match"
           0
           ( compilePatterns
               [Label () "u2", Label () "u3"]
@@ -117,22 +178,22 @@ testCompilePatterns =
                                       ()
                                       (EVariable () (Label () "u2"))
                                       ( ECompiledClause
-                                          (Label () "Cons" :| [Label () "$p:0:x", Label () "$p:1:xs"])
+                                          (Label () "Cons" :| [Label () "$match.0.x", Label () "$match.1.xs"])
                                           ( ECompiledMatch
                                               ()
                                               ()
                                               (EVariable () (Label () "u3"))
                                               ( ECompiledClause
-                                                  (Label () "Cons" :| [Label () "$p:2:y", Label () "$p:3:ys"])
+                                                  (Label () "Cons" :| [Label () "$match.2.y", Label () "$match.3.ys"])
                                                   ( EApplication
                                                       ()
                                                       ()
                                                       (EConstructor () (Label () "C"))
                                                       ( EVariable () (Label () "u1")
-                                                          :| [ EVariable () (Label () "$p:0:x")
-                                                             , EVariable () (Label () "$p:1:xs")
-                                                             , EVariable () (Label () "$p:2:y")
-                                                             , EVariable () (Label () "$p:3:ys")
+                                                          :| [ EVariable () (Label () "$match.0.x")
+                                                             , EVariable () (Label () "$match.1.xs")
+                                                             , EVariable () (Label () "$match.2.y")
+                                                             , EVariable () (Label () "$match.3.ys")
                                                              ]
                                                       )
                                                   )
@@ -153,7 +214,7 @@ testCompileEnvelopeExpression =
   describe "compileEnvelope" $ do
     it "" $
       runMatchMonad
-        "$match"
+        "match"
         0
         ( compileEnvelope
             <$> matchPatterns
@@ -170,7 +231,7 @@ testCompileEnvelopeExpression =
         == (ELiteral () (LInt32 1) :: (Expression ()) ())
     it "" $
       runMatchMonad
-        "$match"
+        "match"
         0
         ( compileEnvelope
             <$> matchPatterns
@@ -187,7 +248,7 @@ testCompileEnvelopeExpression =
         == EVariable () (Label () "u1")
     it "" $
       runMatchMonad
-        "$match"
+        "match"
         0
         ( compileEnvelope
             <$> matchPatterns
@@ -204,7 +265,7 @@ testCompileEnvelopeExpression =
         == EVariable () (Label () "u2")
     it "" $
       runMatchMonad
-        "$match"
+        "match"
         0
         ( compileEnvelope
             <$> matchPatterns
@@ -239,7 +300,7 @@ testCompileEnvelopeExpression =
             )
         )
         ( runMatchMonad
-            "$match"
+            "match"
             0
             ( compileEnvelope
                 <$> matchPatterns
@@ -275,7 +336,7 @@ testCompileEnvelopeExpression =
             )
         )
         ( runMatchMonad
-            "$match"
+            "match"
             0
             ( compileEnvelope
                 <$> matchPatterns
@@ -311,7 +372,7 @@ testCompileEnvelopeExpression =
             )
         )
         ( runMatchMonad
-            "$match"
+            "match"
             0
             ( compileEnvelope
                 <$> matchPatterns
@@ -347,7 +408,7 @@ testCompileEnvelopeExpression =
             )
         )
         ( runMatchMonad
-            "$match"
+            "match"
             0
             ( compileEnvelope
                 <$> matchPatterns
@@ -389,7 +450,7 @@ testCompileEnvelopeExpression =
             )
         )
         ( runMatchMonad
-            "$match"
+            "match"
             0
             ( compileEnvelope
                 <$> matchPatterns
@@ -437,7 +498,7 @@ testCompileEnvelopeExpression =
             )
         )
         ( runMatchMonad
-            "$match"
+            "match"
             0
             ( compileEnvelope
                 <$> matchPatterns
@@ -485,7 +546,7 @@ testCompileEnvelopeExpression =
             )
         )
         ( runMatchMonad
-            "$match"
+            "match"
             0
             ( compileEnvelope
                 <$> matchPatterns

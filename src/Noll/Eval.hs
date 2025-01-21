@@ -30,7 +30,7 @@ data Value
   | VFail
   | VFun [Name] (Eval Value)
 
---instance Show Value where
+-- instance Show Value where
 --  show (VData name vs) = show (name, vs)
 --  show (VLiteral p) = show p
 --  show (VFail) = "VFail"

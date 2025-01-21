@@ -93,7 +93,7 @@ spec =
 fixture :: Expression () ()
 fixture =
   runMatchMonad
-    "$match"
+    "match"
     0
     ( compilePatterns
         [Label () "u2", Label () "u3"]

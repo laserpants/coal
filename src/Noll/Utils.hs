@@ -22,7 +22,7 @@ module Noll.Utils (
   (<$$$>),
 ) where
 
-import Control.Monad (forM, forM_)
+import Control.Monad (forM, forM_, mapM)
 import Control.Monad.Writer (MonadWriter, tell)
 import Data.Char (ord)
 import Data.Foldable (foldrM, traverse_)
