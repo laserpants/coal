@@ -29,6 +29,7 @@ library
       Noll.Common.Supply
       Noll.Compiler
       Noll.Compiler.PatternMatching
+      Noll.Compiler.Transform.Pattern.AnyOrExpansion
       Noll.Compiler.Transform.Pattern.Expansion
       Noll.Compiler.Transform.Tree
       Noll.Core.Language.Expr
@@ -118,6 +119,7 @@ test-suite noll-test
       Noll.Compiler.PatternMatchingExamples.Test02
       Noll.Compiler.PatternMatchingSpec
       Noll.Compiler.PatternMatchingSpec.TestRunner
+      Noll.Compiler.Transform.Pattern.AnyOrExpansionSpec
       Noll.Compiler.Transform.Pattern.ExpansionSpec
       Noll.Compiler.Transform.TreeSpec
       Noll.Language.HasFreeSpec
