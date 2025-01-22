@@ -25,20 +25,25 @@ class PatternContext o p where
 
 instance PatternContext (Pattern a t) (Pattern a t) where
   overPattern f =
-    f
-      <=< \case
-        PAnnotation a t p1 ->
-          PAnnotation a t <$> overPattern f p1
-        PConstructor a ll ps ->
-          PConstructor a ll <$> overPattern f ps
-        PListCons a t p1 p2 ->
-          PListCons a t <$> overPattern f p1 <*> overPattern f p2
-        PListLiteral a t ps ->
-          PListLiteral a t <$> overPattern f ps
-        PRecord a t d p ->
-          PRecord a t <$> overPattern f d <*> overPattern f p
-        POr a t p1 p2 ->
-          POr a t <$> overPattern f p1 <*> overPattern f p2
+    \case
+      PAnnotation a t p1 ->
+        PAnnotation a t <$> (overPattern f =<< f p1)
+      PConstructor a ll ps ->
+        PConstructor a ll <$> (overPattern f =<< traverse f ps)
+      PListCons a t p1 p2 ->
+        PListCons a t
+          <$> (overPattern f =<< f p1)
+          <*> (overPattern f =<< f p2)
+      PListLiteral a t ps ->
+        PListLiteral a t <$> (overPattern f =<< traverse f ps)
+      PRecord a t d p ->
+        PRecord a t
+          <$> (overPattern f =<< traverse f d)
+          <*> (overPattern f =<< traverse f p)
+      POr a t p1 p2 ->
+        POr a t
+          <$> (overPattern f =<< f p1)
+          <*> (overPattern f =<< f p1)
 
 instance (PatternContext d p) => PatternContext d [p] where
   overPattern = traverse . overPattern

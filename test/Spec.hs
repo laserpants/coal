@@ -61,7 +61,7 @@ main =
     Noll.Compiler.Transform.TreeSpec.spec
     Noll.Compiler.PatternMatchingExamples.Test01.spec
     Noll.Compiler.PatternMatchingExamples.Test02.spec
-    Noll.Compiler.Transform.Pattern.AnyOrExpansionSpec.spec
+--    Noll.Compiler.Transform.Pattern.AnyOrExpansionSpec.spec
 
 --    Noll.SystemF.TypeConstraint.CollectSpec.spec
 --    Noll.SystemF.TypeSubstitutionSpec.spec

@@ -15,6 +15,7 @@ import Data.List (sortBy)
 import Data.Maybe (mapMaybe)
 import Noll.Common.List1 (List1, NonEmpty (..), fromList1)
 import Noll.Common.Supply (supplied, suppliedName, supplyN)
+import Noll.Compiler.Transform.Expression (mapMOverExpression)
 import Noll.Compiler.Transform.Tree (rename, replaceWith)
 import Noll.Label (Label (..))
 import Noll.Language (
@@ -424,42 +425,12 @@ instance (Show a, Show t, TypeProxy t, Ord t, Monoid a) => MatchExpressionContex
 instance (Show a, Show t, TypeProxy t, Ord t, Monoid a) => MatchExpressionContext (Expression a t) where
   compileMatchExprs =
     \case
-      EAnnotation a t e ->
-        EAnnotation a t <$> compileMatchExprs e
       EMatch a t e cs -> do
         cs1 <- compileMatchExprs cs
         name <- suppliedName
         replaceWith name <$> compileMatchExprs e <*> compileClauses (Label (expressionType e) name) cs1
-      ELambda a ps e ->
-        ELambda a ps <$> compileMatchExprs e
-      ERecursiveLet a p e1 e2 ->
-        ERecursiveLet a p <$> compileMatchExprs e1 <*> compileMatchExprs e2
-      ELet a gs e1 ->
-        ELet a <$> compileMatchExprs gs <*> compileMatchExprs e1
-      EIf a t e1 e2 e3 ->
-        EIf a t <$> compileMatchExprs e1 <*> compileMatchExprs e2 <*> compileMatchExprs e2
-      EApplication a t e1 es ->
-        EApplication a t <$> compileMatchExprs e1 <*> compileMatchExprs es
-      EListCons a t e1 e2 ->
-        EListCons a t <$> compileMatchExprs e1 <*> compileMatchExprs e2
-      EListLiteral a t es ->
-        EListLiteral a t <$> compileMatchExprs es
-      ERecord a t d e ->
-        ERecord a t <$> compileMatchExprs d <*> compileMatchExprs e
-      ESelect a ll e ->
-        undefined
-      EFold a t es cs e ->
-        undefined
-      e@EUnaryOperator{} ->
-        pure e
-      e@EBinaryOperator{} ->
-        pure e
-      e@EVariable{} ->
-        pure e
-      e@EConstructor{} ->
-        pure e
-      e@ELiteral{} ->
-        pure e
+      e ->
+        mapMOverExpression compileMatchExprs e
 
 compileClauses :: (Show a, Show t, TypeProxy t, Monoid a, Ord t) => Label t -> List1 (Clause Expression a t) -> MatchMonad (Expression a t)
 compileClauses ll cs = compileEnvelope <$> matchPatterns [ll] eqs MFail
