@@ -16,5 +16,3 @@ expandAnyOrExpansion =
       undefined
     POr a t p1 p2 ->
       undefined
-
-

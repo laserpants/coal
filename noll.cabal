@@ -29,6 +29,8 @@ library
       Noll.Common.Supply
       Noll.Compiler
       Noll.Compiler.PatternMatching
+      Noll.Compiler.Transform.Expression
+      Noll.Compiler.Transform.Pattern
       Noll.Compiler.Transform.Pattern.AnyOrExpansion
       Noll.Compiler.Transform.Pattern.Expansion
       Noll.Compiler.Transform.Tree
