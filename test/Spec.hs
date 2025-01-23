@@ -30,6 +30,7 @@ import qualified Noll.SystemFExamples.Test12
 import qualified Noll.SystemFExamples.Test13
 import qualified Noll.SystemFExamples.Test14
 import qualified Noll.SystemFExamples.Test15
+import Noll.Compiler.Transform.ExpressionSpec
 import qualified Noll.SystemFSpec
 import Test.Hspec (hspec, it)
 
@@ -62,6 +63,7 @@ main =
     Noll.Compiler.PatternMatchingExamples.Test01.spec
     Noll.Compiler.PatternMatchingExamples.Test02.spec
     Noll.Compiler.Transform.Pattern.OrExpansionSpec.spec
+    Noll.Compiler.Transform.ExpressionSpec.spec
 
 --    Noll.SystemF.TypeConstraint.CollectSpec.spec
 --    Noll.SystemF.TypeSubstitutionSpec.spec
