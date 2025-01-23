@@ -2,9 +2,15 @@ module Noll.Common.List1 (
   module Data.List.NonEmpty,
   List1,
   fromList1,
+  concat,
 ) where
 
-import Data.List.NonEmpty (NonEmpty (..), reverse, (<|))
+import Data.List.NonEmpty (
+  NonEmpty (..),
+  reverse,
+  singleton,
+  (<|),
+ )
 
 import qualified Data.List.NonEmpty as NonEmpty
 
