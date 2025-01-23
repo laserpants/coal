@@ -1,14 +1,14 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Compiler.Transform.Pattern.AnyOrExpansion where
+module Noll.Compiler.Transform.Pattern.AnyAndOrExpansion where
 
 import Noll.Language (
   Pattern (..),
  )
 
-expandAnyOrExpansion :: (Monad m) => Pattern a t -> m (Pattern a t)
-expandAnyOrExpansion =
+expandOrPatterns :: (Monad m) => Pattern a t -> m (Pattern a t)
+expandOrPatterns =
   \case
     PAnnotation a _ _ ->
       undefined
