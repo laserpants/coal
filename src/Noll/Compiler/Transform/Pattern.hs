@@ -5,6 +5,7 @@
 module Noll.Compiler.Transform.Pattern (
   mapOverPattern,
   mapMOverPattern,
+  overPattern,
 ) where
 
 import Control.Arrow ((<<<))
@@ -12,7 +13,16 @@ import Control.Monad ((<=<))
 import Control.Monad.Identity (runIdentity)
 import Data.Map.Strict (Map)
 import Noll.Common.List1 (NonEmpty)
-import Noll.Language (Pattern (..))
+import Noll.Language (
+  Binding (..),
+  Clause (..),
+  CompiledClause (..),
+  Expression (..),
+  Pattern (..),
+ )
+import Noll.Language.Module.Constant (Constant (..))
+import Noll.Language.Module.Function (Function (..))
+import Noll.Language.Module.Object (Object (..))
 
 mapOverPattern :: (Pattern a t -> Pattern a t) -> Pattern a t -> Pattern a t
 mapOverPattern f = runIdentity . overPattern (pure . f)
@@ -56,3 +66,72 @@ instance (PatternContext d d) => PatternContext d (Map p d) where
 
 instance (PatternContext d d) => PatternContext d (Maybe d) where
   overPattern = traverse . overPattern
+
+instance PatternContext (Pattern a t) (Binding Expression a t) where
+  overPattern f =
+    undefined
+
+--    \case
+--      BPattern a p e ->
+--        BPattern a p <$> (overPattern f =<< f e)
+--      BFunction{} ->
+--        error "TODO"
+
+instance PatternContext (Pattern a t) (Clause Expression a t) where
+  overPattern f =
+    undefined
+
+--    \case
+--      EClause a p cs ->
+--        EClause a p <$> overPattern f cs
+
+instance PatternContext (Pattern a t) (CompiledClause Expression a t) where
+  overPattern f =
+    undefined
+
+--    \case
+--      ECompiledClause lls e -> do
+--        ECompiledClause lls <$> (overPattern f =<< f e)
+
+instance PatternContext (Pattern a t) (Expression a t) where
+  overPattern f =
+    \case
+      EAnnotation a t e1 -> do
+        EAnnotation a t <$> overPattern f e1
+      EApplication a t e1 es ->
+        EApplication a t
+          <$> overPattern f e1
+          <*> overPattern f es
+      EIf a t e1 e2 e3 ->
+        EIf a t
+          <$> overPattern f e1
+          <*> overPattern f e2
+          <*> overPattern f e3
+      ELet a gs e ->
+        ELet a
+          <$> overPattern f gs
+          <*> overPattern f e
+
+instance PatternContext (Pattern a t) (Constant Expression a t) where
+  overPattern f =
+    \case
+      Constant a u e ->
+        Constant a u <$> overPattern f e
+
+instance PatternContext (Pattern a t) (Function Expression a t) where
+  overPattern f =
+    \case
+      Function a u ps e ->
+        Function a u
+          <$> (overPattern f =<< traverse f ps)
+          <*> overPattern f e
+
+instance PatternContext (Pattern a t) (Object a k t) where
+  overPattern h =
+    \case
+      DFunction name f ->
+        DFunction name <$> overPattern h f
+      DConstant name g ->
+        DConstant name <$> overPattern h g
+      d ->
+        pure d

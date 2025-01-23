@@ -6,6 +6,7 @@
 module Noll.Compiler.Transform.Expression (
   mapOverExpression,
   mapMOverExpression,
+  overExpression,
 ) where
 
 import Control.Monad ((<=<))
@@ -20,6 +21,9 @@ import Noll.Language (
   Expression (..),
   Guard (..),
  )
+import Noll.Language.Module.Constant (Constant (..))
+import Noll.Language.Module.Function (Function (..))
+import Noll.Language.Module.Object (Object (..))
 
 mapOverExpression :: (Expression a t -> Expression a t) -> Expression a t -> Expression a t
 mapOverExpression f = runIdentity . overExpression (pure . f)
@@ -137,3 +141,25 @@ instance ExpressionContext (Expression a t) (Guard Expression a t) where
     \case
       CGuard e ->
         CGuard <$> (overExpression f =<< f e)
+
+instance ExpressionContext (Expression a t) (Constant Expression a t) where
+  overExpression f =
+    \case
+      Constant a u e ->
+        Constant a u <$> (overExpression f =<< f e)
+
+instance ExpressionContext (Expression a t) (Function Expression a t) where
+  overExpression f =
+    \case
+      Function a u ps es ->
+        Function a u ps <$> (overExpression f =<< f es)
+
+instance ExpressionContext (Expression a t) (Object a k t) where
+  overExpression h =
+    \case
+      DFunction name f ->
+        DFunction name <$> overExpression h f
+      DConstant name g ->
+        DConstant name <$> overExpression h g
+      d ->
+        pure d

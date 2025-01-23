@@ -15,8 +15,8 @@ import Noll.Utils (concatMapM)
 
 import qualified Noll.Common.List1 as List1
 
---expandOrPatterns :: (Monad m) => Pattern a t -> m (Pattern a t)
---expandOrPatterns =
+-- expandOrPatterns :: (Monad m) => Pattern a t -> m (Pattern a t)
+-- expandOrPatterns =
 --  undefined
 
 bazExpression :: (Monad m) => Expression a t -> m (Expression a t)
@@ -35,7 +35,7 @@ class OrPattern a where
   expandOrPatterns :: (Monad m) => a -> m (List1 a)
 
 instance OrPattern (Clause e a t) where
-  expandOrPatterns = 
+  expandOrPatterns =
     \case
       EClause a p cs -> do
         q1 :| qs <- expandOrPatterns p
