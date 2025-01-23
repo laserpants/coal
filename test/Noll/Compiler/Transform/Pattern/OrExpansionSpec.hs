@@ -1,10 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Compiler.Transform.Pattern.AnyAndOrExpansionSpec where
+module Noll.Compiler.Transform.Pattern.OrExpansionSpec where
 
 import Control.Monad.Identity (runIdentity)
 import Noll.Common.List1 (NonEmpty (..), fromList1)
-import Noll.Compiler.Transform.Pattern.AnyAndOrExpansion
+import Noll.Compiler.Transform.Pattern.OrExpansion
 import Noll.Label (Label (..))
 import Noll.Language (
   Choice (..),

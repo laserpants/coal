@@ -31,8 +31,8 @@ library
       Noll.Compiler.PatternMatching
       Noll.Compiler.Transform.Expression
       Noll.Compiler.Transform.Pattern
-      Noll.Compiler.Transform.Pattern.AnyAndOrExpansion
       Noll.Compiler.Transform.Pattern.Expansion
+      Noll.Compiler.Transform.Pattern.OrExpansion
       Noll.Compiler.Transform.Tree
       Noll.Core.Language.Expr
       Noll.Core.Language.HasType
@@ -121,8 +121,8 @@ test-suite noll-test
       Noll.Compiler.PatternMatchingExamples.Test02
       Noll.Compiler.PatternMatchingSpec
       Noll.Compiler.PatternMatchingSpec.TestRunner
-      Noll.Compiler.Transform.Pattern.AnyAndOrExpansionSpec
       Noll.Compiler.Transform.Pattern.ExpansionSpec
+      Noll.Compiler.Transform.Pattern.OrExpansionSpec
       Noll.Compiler.Transform.TreeSpec
       Noll.Language.HasFreeSpec
       Noll.Language.IndexedSpec

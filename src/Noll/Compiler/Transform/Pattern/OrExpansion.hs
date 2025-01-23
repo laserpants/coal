@@ -1,7 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Compiler.Transform.Pattern.AnyAndOrExpansion where
+module Noll.Compiler.Transform.Pattern.OrExpansion where
 
 import Data.Semigroup (sconcat)
 import Noll.Common.List1 (List1, NonEmpty (..))
