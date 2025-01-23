@@ -59,7 +59,11 @@ data UnificationError
   deriving (Show, Eq, Ord, Read)
 
 class Unifiable u where
-  unify :: (MonadState Int m, MonadError UnificationError m) => u -> u -> m Substitution
+  unify ::
+    (MonadState Int m, MonadError UnificationError m) =>
+    u ->
+    u ->
+    m Substitution
 
 instance (Substitutable u, Unifiable u) => Unifiable [u] where
   unify [] [] =
