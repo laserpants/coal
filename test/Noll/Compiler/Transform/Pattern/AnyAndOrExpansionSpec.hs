@@ -19,14 +19,14 @@ import Test.Hspec (Spec, describe, it)
 
 spec :: Spec
 spec = do
-  describe "baz" $ do
+  describe "expandOrPatterns" $ do
     it "" $
-      fromList1 (runIdentity (baz fixture)) == fixture1
+      fromList1 (runIdentity (expandOrPatterns fixture)) == fixture1
     it "" $
-      fromList1 (runIdentity (baz fixture2)) == fixture3
-  describe "bazClause" $ do
+      fromList1 (runIdentity (expandOrPatterns fixture2)) == fixture3
+  describe "expandOrPatterns" $ do
     it "" $
-      fromList1 (runIdentity (bazClause fixture4)) == fixture5
+      fromList1 (runIdentity (expandOrPatterns fixture4)) == fixture5
 
 fixture :: Pattern () ()
 fixture =
