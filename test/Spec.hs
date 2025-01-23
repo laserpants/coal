@@ -69,3 +69,36 @@ main =
 --    Noll.SystemF.ConstraintSolverSpec.spec
 --    Noll.SystemF.KindConstraint.CollectSpec.spec
 --    Noll.SystemFSpec.spec
+
+
+-- greater_than = @todo
+-- 
+-- less_than_or_equal = @todo
+-- 
+-- 
+-- module BinarySearch(Tree, build_tree, flatten)
+-- 
+-- type Tree(a)
+--   = Node(a, Tree(a), Tree(a))
+--   | Leaf
+-- 
+-- type_alias Range(a) = { min : a, max : a }
+-- 
+-- in_range = @todo
+-- 
+-- build_tree(list : [a]) : Tree(a) uses Ordered(a) =
+-- 
+-- flatten_tree(tree : Tree(a)) : [a] =
+-- 
+-- sort : [a] -> [a]
+-- sort = flatten_tree <<< build_tree
+--   
+-- 
+-- module Main
+-- 
+-- import BinarySearch
+-- 
+-- main() : Result(int32) = do {
+--   Ok
+-- }
+-- 
