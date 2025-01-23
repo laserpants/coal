@@ -2,8 +2,10 @@
 
 module Noll.Compiler.Transform.Pattern.AnyAndOrExpansionSpec where
 
+import Control.Monad.Identity (runIdentity)
 import Noll.Compiler.Transform.Pattern.AnyAndOrExpansion
 import Noll.Label (Label (..))
+import Noll.Compiler.Transform.Pattern.AnyAndOrExpansion
 import Noll.Language (
   Pattern (..),
  )
@@ -13,6 +15,79 @@ spec :: Spec
 spec =
   describe "" $ do
     it "" $
-      1 > 2
+      runIdentity (baz fixture) == fixture1
+    it "" $
+      runIdentity (baz fixture2) == fixture3
 
-fixture = PConstructor () (Label () "Foo") [PVariable () (Label () "a"), PVariable () (Label () "b")]
+fixture :: Pattern () ()
+fixture =
+  PConstructor
+    ()
+    (Label () "Foo")
+    [ POr () () (PVariable () (Label () "a")) (PVariable () (Label () "b"))
+    , PVariable () (Label () "c")
+    ]
+
+fixture1 :: [Pattern () ()]
+fixture1 =
+  [ PConstructor
+      ()
+      (Label () "Foo")
+      [ PVariable () (Label () "a")
+      , PVariable () (Label () "c")
+      ]
+  , PConstructor
+      ()
+      (Label () "Foo")
+      [ PVariable () (Label () "b")
+      , PVariable () (Label () "c")
+      ]
+  ]
+
+-- Foo(a or Baz(b or c), d)
+--
+-- Foo(a, d)
+-- Foo(Baz(b), d)
+-- Foo(Baz(c), d)
+--
+fixture2 :: Pattern () ()
+fixture2 =
+  PConstructor
+    ()
+    (Label () "Foo")
+    [ POr () () (PVariable () (Label () "a")) 
+        ( PConstructor
+            ()
+            (Label () "Baz")
+            [ 
+              POr () () (PVariable () (Label () "b")) (PVariable () (Label () "c"))
+            ]
+        )
+    , PVariable () (Label () "d")
+    ]
+
+fixture3 :: [Pattern () ()]
+fixture3 =
+  [
+    PConstructor
+      ()
+      (Label () "Foo")
+      [ PVariable () (Label () "a")
+      , PVariable () (Label () "d")
+      ]
+  ,
+    PConstructor
+      ()
+      (Label () "Foo")
+      [ PConstructor () (Label () "Baz") [PVariable () (Label () "b")], PVariable () (Label () "d")
+      ]
+  ,
+    PConstructor
+      ()
+      (Label () "Foo")
+      [ PConstructor () (Label () "Baz") [PVariable () (Label () "c")], PVariable () (Label () "d")
+      ]
+  ]
+
+
+
