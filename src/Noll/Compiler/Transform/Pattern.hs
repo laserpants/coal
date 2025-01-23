@@ -83,7 +83,9 @@ instance PatternContext (Pattern a t) (Clause Expression a t) where
   overPattern f =
     \case
       EClause a p cs ->
-        EClause a <$> (overPattern f =<< f p) <*> overPattern f cs
+        EClause a
+          <$> (overPattern f =<< f p)
+          <*> overPattern f cs
 
 instance PatternContext (Pattern a t) (CompiledClause Expression a t) where
   overPattern f =

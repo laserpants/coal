@@ -9,8 +9,9 @@ import qualified Noll.Language.IndexedSpec
 import qualified Noll.Compiler.PatternMatchingExamples.Test01
 import qualified Noll.Compiler.PatternMatchingExamples.Test02
 import qualified Noll.Compiler.PatternMatchingSpec
-import qualified Noll.Compiler.Transform.Pattern.OrExpansionSpec
+import Noll.Compiler.Transform.ExpressionSpec
 import qualified Noll.Compiler.Transform.Pattern.ExpansionSpec
+import qualified Noll.Compiler.Transform.Pattern.OrExpansionSpec
 import qualified Noll.Compiler.Transform.TreeSpec
 import qualified Noll.Language.HasFreeSpec
 import qualified Noll.SystemF.Constraint.GenerationSpec
@@ -30,7 +31,6 @@ import qualified Noll.SystemFExamples.Test12
 import qualified Noll.SystemFExamples.Test13
 import qualified Noll.SystemFExamples.Test14
 import qualified Noll.SystemFExamples.Test15
-import Noll.Compiler.Transform.ExpressionSpec
 import qualified Noll.SystemFSpec
 import Test.Hspec (hspec, it)
 
@@ -71,4 +71,3 @@ main =
 --    Noll.SystemF.ConstraintSolverSpec.spec
 --    Noll.SystemF.KindConstraint.CollectSpec.spec
 --    Noll.SystemFSpec.spec
-

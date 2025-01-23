@@ -121,6 +121,7 @@ test-suite noll-test
       Noll.Compiler.PatternMatchingExamples.Test02
       Noll.Compiler.PatternMatchingSpec
       Noll.Compiler.PatternMatchingSpec.TestRunner
+      Noll.Compiler.Transform.ExpressionSpec
       Noll.Compiler.Transform.Pattern.ExpansionSpec
       Noll.Compiler.Transform.Pattern.OrExpansionSpec
       Noll.Compiler.Transform.TreeSpec
