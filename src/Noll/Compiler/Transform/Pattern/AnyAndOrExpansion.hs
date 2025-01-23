@@ -31,17 +31,17 @@ bazExpression =
     e ->
       mapMOverExpression bazExpression e
 
-class Faz a where
+class OrPattern a where
   expandOrPatterns :: (Monad m) => a -> m (List1 a)
 
-instance Faz (Clause e a t) where
+instance OrPattern (Clause e a t) where
   expandOrPatterns = 
     \case
       EClause a p cs -> do
         q1 :| qs <- expandOrPatterns p
         pure (EClause a q1 cs :| [EClause a q cs | q <- qs])
 
-instance Faz (Pattern a t) where
+instance OrPattern (Pattern a t) where
   expandOrPatterns =
     \case
       PAnnotation a t p -> do
