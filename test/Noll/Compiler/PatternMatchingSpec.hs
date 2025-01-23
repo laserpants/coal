@@ -3,14 +3,14 @@
 module Noll.Compiler.PatternMatchingSpec where
 
 import Control.Monad.Identity (runIdentity)
-import Noll.Compiler.Transform.Pattern
 import Noll.Common.Environment (Environment (..))
 import Noll.Common.List1 (NonEmpty (..), (<|))
 import Noll.Compiler.PatternMatching
 import Noll.Compiler.PatternMatchingSpec.TestRunner (compilePatterns)
+import Noll.Compiler.Transform.Pattern
 import Noll.Eval (Value (..), eval)
 import Noll.Label (Label (..))
-import Noll.Language (CompiledClause (..), Expression (..), Primitive (..), Constant (..), Uses (..), Pattern (..))
+import Noll.Language (CompiledClause (..), Constant (..), Expression (..), Pattern (..), Primitive (..), Uses (..))
 import Test.Hspec (Spec, describe, it)
 
 import qualified Data.Map.Strict as Map
@@ -622,12 +622,3 @@ testGroupByConstructor = do
              [ HeadConstructorEquation (Label () "C") [MVariable (Label () "6")] (PatternEquationBody [] MFail)
              ]
            ]
-
-zzz1 :: Constant Expression () ()
-zzz1 = Constant () (Uses [] ()) (ELiteral () (LInt32 1))
-
-faz :: (Monad m) => Pattern () () -> m (Pattern () ())
-faz = undefined
-
-zzz2 :: Constant Expression () ()
-zzz2 = runIdentity (overPattern faz zzz1)

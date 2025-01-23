@@ -15,9 +15,11 @@ import Data.Map.Strict (Map)
 import Noll.Common.List1 (NonEmpty)
 import Noll.Language (
   Binding (..),
+  Choice (..),
   Clause (..),
   CompiledClause (..),
   Expression (..),
+  Guard (..),
   Pattern (..),
  )
 import Noll.Language.Module.Constant (Constant (..))
@@ -69,29 +71,44 @@ instance (PatternContext d d) => PatternContext d (Maybe d) where
 
 instance PatternContext (Pattern a t) (Binding Expression a t) where
   overPattern f =
-    undefined
-
---    \case
---      BPattern a p e ->
---        BPattern a p <$> (overPattern f =<< f e)
---      BFunction{} ->
---        error "TODO"
+    \case
+      BPattern a p e ->
+        BPattern a
+          <$> (overPattern f =<< f p)
+          <*> overPattern f e
+      BFunction{} ->
+        error "TODO"
 
 instance PatternContext (Pattern a t) (Clause Expression a t) where
   overPattern f =
-    undefined
-
---    \case
---      EClause a p cs ->
---        EClause a p <$> overPattern f cs
+    \case
+      EClause a p cs ->
+        EClause a <$> (overPattern f =<< f p) <*> overPattern f cs
 
 instance PatternContext (Pattern a t) (CompiledClause Expression a t) where
   overPattern f =
-    undefined
+    \case
+      ECompiledClause lls e -> do
+        ECompiledClause lls <$> overPattern f e
 
---    \case
---      ECompiledClause lls e -> do
---        ECompiledClause lls <$> (overPattern f =<< f e)
+instance PatternContext (Pattern a t) (Choice Expression a t) where
+  overPattern f =
+    \case
+      CPlain a gs e ->
+        CPlain a
+          <$> overPattern f gs
+          <*> overPattern f e
+      CLambda a ps gs e ->
+        CLambda a
+          <$> (overPattern f =<< traverse f ps)
+          <*> traverse (overPattern f) gs
+          <*> overPattern f e
+
+instance PatternContext (Pattern a t) (Guard Expression a t) where
+  overPattern f =
+    \case
+      CGuard e ->
+        CGuard <$> overPattern f e
 
 instance PatternContext (Pattern a t) (Expression a t) where
   overPattern f =

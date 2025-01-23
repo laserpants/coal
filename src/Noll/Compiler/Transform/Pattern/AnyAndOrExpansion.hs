@@ -15,12 +15,8 @@ import Noll.Utils (concatMapM)
 
 import qualified Noll.Common.List1 as List1
 
--- expandOrPatterns :: (Monad m) => Pattern a t -> m (Pattern a t)
--- expandOrPatterns =
---  undefined
-
-bazExpression :: (Monad m) => Expression a t -> m (Expression a t)
-bazExpression =
+expandExpressionOrPatterns :: (Monad m) => Expression a t -> m (Expression a t)
+expandExpressionOrPatterns =
   \case
     EMatch a t e cs -> do
       cs1 <- sconcat <$> traverse expandOrPatterns cs
@@ -29,7 +25,7 @@ bazExpression =
       cs1 <- sconcat <$> traverse expandOrPatterns cs
       pure (EFold a t es cs1 e)
     e ->
-      mapMOverExpression bazExpression e
+      mapMOverExpression expandExpressionOrPatterns e
 
 class OrPattern a where
   expandOrPatterns :: (Monad m) => a -> m (List1 a)
