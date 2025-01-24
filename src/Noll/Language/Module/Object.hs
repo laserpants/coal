@@ -16,7 +16,7 @@ newtype Path = Path {pathComponents :: [Name]}
 
 data Object a k t
   = -- | TODO
-    DAnnotation (Uses (Type Parameter k)) (Object a k t)
+    DAnnotation (Uses (Type Parameter ())) (Object a k t)
   | -- | Type definition
     DType Name [Type TypeIndex k] [Constructor TypeIndex k (Type TypeIndex k)]
   | -- | Codata type definition

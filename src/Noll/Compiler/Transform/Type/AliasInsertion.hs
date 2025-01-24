@@ -78,18 +78,40 @@ instance (AliasContext t) => AliasContext (Expression a t) where
           pure e
 
 instance (AliasContext t) => AliasContext (Module e a t) where
-  insertAliases = undefined
+  insertAliases =
+    \case
+      Module p ns o ->
+        Module p ns <$> insertAliases o
 
 instance (AliasContext (e a t), AliasContext t) => AliasContext (Function e a t) where
-  insertAliases = undefined
+  insertAliases =
+    \case
+      Function a u ps e ->
+        Function a
+          <$> insertAliases u
+          <*> insertAliases ps
+          <*> insertAliases e
 
 instance (AliasContext (e a t), AliasContext t) => AliasContext (Constant e a t) where
-  insertAliases = undefined
+  insertAliases =
+    \case
+      Constant a u e ->
+        Constant a
+          <$> insertAliases u
+          <*> insertAliases e
 
 instance (AliasContext t) => AliasContext (Object a k t) where
-  insertAliases = undefined
+  insertAliases =
+    \case
+      DAnnotation u o ->
+        DAnnotation <$> insertAliases u <*> insertAliases o
+      DFunction name f ->
+        DFunction name <$> insertAliases f
+      -- TODO
+      o ->
+        pure o
 
-instance AliasContext (ParameterizedType) where
+instance AliasContext ParameterizedType where
   insertAliases =
     \case
       t@(TApplication _ (TVariable (Parameter _ name)) ts) -> do
