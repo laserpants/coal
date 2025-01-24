@@ -29,31 +29,31 @@ import Noll.Utils (Name, foldrM)
 
 import qualified Data.Text as Text
 
-type NamedPattern a o k = (Name, Pattern a (Type o k))
+type NamedPattern c o k = (Name, Pattern c (Type o k))
 
-type PatternDesugaringStack a o k = WriterT [NamedPattern a o k] (ReaderT Name (State Int))
+type PatternDesugaringStack c o k = WriterT [NamedPattern c o k] (ReaderT Name (State Int))
 
-newtype PatternDesugaring a o k e = PatternDesugaring {patternDesugaringStack :: PatternDesugaringStack a o k e}
+newtype PatternDesugaring c o k e = PatternDesugaring {patternDesugaringStack :: PatternDesugaringStack c o k e}
   deriving
     ( Functor
     , Applicative
     , Monad
     , MonadReader Name
     , MonadState Int
-    , MonadWriter [NamedPattern a o k]
+    , MonadWriter [NamedPattern c o k]
     )
 
 {-# INLINE runPatternDesugaring #-}
-runPatternDesugaring :: Name -> Int -> PatternDesugaring a o k e -> e
+runPatternDesugaring :: Name -> Int -> PatternDesugaring c o k e -> e
 runPatternDesugaring r s e = fst (evalState (runReaderT (runWriterT (patternDesugaringStack e)) r) s)
 
-class Expandable a o k e | e -> a, e -> o k where
+class Sugared c o k e | e -> c, e -> o k where
   expandPatterns ::
-    (MonadWriter [NamedPattern a o k] m, MonadReader Name m, MonadState Int m) =>
+    (MonadWriter [NamedPattern c o k] m, MonadReader Name m, MonadState Int m) =>
     e ->
     m e
 
-instance (Monoid a) => Expandable a o k (Pattern a (Type o k)) where
+instance (Monoid c) => Sugared c o k (Pattern c (Type o k)) where
   expandPatterns =
     \case
       p@PVariable{} ->
@@ -65,7 +65,7 @@ instance (Monoid a) => Expandable a o k (Pattern a (Type o k)) where
         tell [(name, p)]
         pure (PVariable mempty (Label (typeOf p) name))
 
-instance (Monoid a) => Expandable a o k (Binding Expression a (Type o k)) where
+instance (Monoid c) => Sugared c o k (Binding Expression c (Type o k)) where
   expandPatterns =
     \case
       BPattern a p e ->
@@ -73,7 +73,7 @@ instance (Monoid a) => Expandable a o k (Binding Expression a (Type o k)) where
       BFunction a name ps e ->
         BFunction a name <$> traverse expandPatterns ps <*> expandPatterns e
 
-instance (Monoid a) => Expandable a o k (Expression a (Type o k)) where
+instance (Monoid c) => Sugared c o k (Expression c (Type o k)) where
   expandPatterns =
     \case
       ELet a gs e1 -> do
@@ -91,7 +91,7 @@ instance (Monoid a) => Expandable a o k (Expression a (Type o k)) where
       e ->
         mapMOverExpression expandPatterns e
 
-unrollMatch :: (Monoid a) => (Name, Pattern a (Type o k)) -> Expression a (Type o k) -> Expression a (Type o k)
+unrollMatch :: (Monoid c) => (Name, Pattern c (Type o k)) -> Expression c (Type o k) -> Expression c (Type o k)
 unrollMatch (name, p) e =
   EMatch
     mempty
@@ -99,7 +99,7 @@ unrollMatch (name, p) e =
     (EVariable mempty (Label (typeOf p) name))
     (EClause mempty p (CPlain mempty [] e :| []) :| [])
 
-instance (Monoid a) => Expandable a o k (Function Expression a (Type o k)) where
+instance (Monoid c) => Sugared c o k (Function Expression c (Type o k)) where
   expandPatterns =
     \case
       Function a u ps e -> do
@@ -107,13 +107,13 @@ instance (Monoid a) => Expandable a o k (Function Expression a (Type o k)) where
         (qs, ps) <- runWriterT (traverse expandPatterns ps)
         pure (Function a u qs (foldr unrollMatch e1 ps))
 
-instance (Monoid a) => Expandable a o k (Constant Expression a (Type o k)) where
+instance (Monoid c) => Sugared c o k (Constant Expression c (Type o k)) where
   expandPatterns =
     \case
       Constant a u e ->
         Constant a u <$> expandPatterns e
 
-instance (Monoid a) => Expandable a o k (Object a k (Type o k)) where
+instance (Monoid c) => Sugared c o k (Object c k (Type o k)) where
   expandPatterns =
     \case
       DFunction name f ->
