@@ -48,13 +48,13 @@ runPatternDesugaring :: Name -> Int -> PatternDesugaring c o k e -> e
 runPatternDesugaring r s e = fst (evalState (runReaderT (runWriterT (patternDesugaringStack e)) r) s)
 
 class Sugared c o k e | e -> c, e -> o k where
-  expandPatterns ::
+  desugarPatterns ::
     (MonadWriter [NamedPattern c o k] m, MonadReader Name m, MonadState Int m) =>
     e ->
     m e
 
 instance (Monoid c) => Sugared c o k (Pattern c (Type o k)) where
-  expandPatterns =
+  desugarPatterns =
     \case
       p@PVariable{} ->
         pure p
@@ -66,30 +66,30 @@ instance (Monoid c) => Sugared c o k (Pattern c (Type o k)) where
         pure (PVariable mempty (Label (typeOf p) name))
 
 instance (Monoid c) => Sugared c o k (Binding Expression c (Type o k)) where
-  expandPatterns =
+  desugarPatterns =
     \case
       BPattern a p e ->
-        BPattern a <$> expandPatterns p <*> expandPatterns e
+        BPattern a <$> desugarPatterns p <*> desugarPatterns e
       BFunction a name ps e ->
-        BFunction a name <$> traverse expandPatterns ps <*> expandPatterns e
+        BFunction a name <$> traverse desugarPatterns ps <*> desugarPatterns e
 
 instance (Monoid c) => Sugared c o k (Expression c (Type o k)) where
-  expandPatterns =
+  desugarPatterns =
     \case
       ELet a gs e1 -> do
-        e2 <- expandPatterns e1
-        (hs, ps) <- runWriterT (traverse expandPatterns gs)
+        e2 <- desugarPatterns e1
+        (hs, ps) <- runWriterT (traverse desugarPatterns gs)
         pure (ELet a hs (foldr unrollMatch e2 ps))
       ERecursiveLet a p e1 e2 -> do
-        (p1, ps) <- runWriterT (expandPatterns p)
-        q1 <- BPattern a p1 <$> expandPatterns e1
+        (p1, ps) <- runWriterT (desugarPatterns p)
+        q1 <- BPattern a p1 <$> desugarPatterns e1
         pure (ELet a (q1 :| []) (foldr unrollMatch e2 ps))
       ELambda a ps e -> do
-        e1 <- expandPatterns e
-        (qs, ps) <- runWriterT (traverse expandPatterns ps)
+        e1 <- desugarPatterns e
+        (qs, ps) <- runWriterT (traverse desugarPatterns ps)
         pure (ELambda a qs (foldr unrollMatch e1 ps))
       e ->
-        mapMOverExpression expandPatterns e
+        mapMOverExpression desugarPatterns e
 
 unrollMatch :: (Monoid c) => (Name, Pattern c (Type o k)) -> Expression c (Type o k) -> Expression c (Type o k)
 unrollMatch (name, p) e =
@@ -100,25 +100,25 @@ unrollMatch (name, p) e =
     (EClause mempty p (CPlain mempty [] e :| []) :| [])
 
 instance (Monoid c) => Sugared c o k (Function Expression c (Type o k)) where
-  expandPatterns =
+  desugarPatterns =
     \case
       Function a u ps e -> do
-        e1 <- expandPatterns e
-        (qs, ps) <- runWriterT (traverse expandPatterns ps)
+        e1 <- desugarPatterns e
+        (qs, ps) <- runWriterT (traverse desugarPatterns ps)
         pure (Function a u qs (foldr unrollMatch e1 ps))
 
 instance (Monoid c) => Sugared c o k (Constant Expression c (Type o k)) where
-  expandPatterns =
+  desugarPatterns =
     \case
       Constant a u e ->
-        Constant a u <$> expandPatterns e
+        Constant a u <$> desugarPatterns e
 
 instance (Monoid c) => Sugared c o k (Object c k (Type o k)) where
-  expandPatterns =
+  desugarPatterns =
     \case
       DFunction name f ->
-        DFunction name <$> expandPatterns f
+        DFunction name <$> desugarPatterns f
       DConstant name g ->
-        DConstant name <$> expandPatterns g
+        DConstant name <$> desugarPatterns g
       d ->
         pure d

@@ -3,7 +3,7 @@
 module Noll.Compiler.Transform.Pattern.DesugaringSpec where
 
 import Noll.Common.List1 (NonEmpty ((:|)), (<|))
-import Noll.Compiler.Transform.Pattern.Desugaring (expandPatterns, runPatternDesugaring)
+import Noll.Compiler.Transform.Pattern.Desugaring (desugarPatterns, runPatternDesugaring)
 import Noll.Label (Label (..))
 import Noll.Language (
   BinaryOperator (..),
@@ -29,17 +29,17 @@ spec :: Spec
 spec =
   describe "" $ do
     it "" $
-      runPatternDesugaring "v" 0 (expandPatterns fixture1) == fixture2
+      runPatternDesugaring "v" 0 (desugarPatterns fixture1) == fixture2
     it "" $
-      runPatternDesugaring "v" 0 (expandPatterns fixture3) == fixture4
+      runPatternDesugaring "v" 0 (desugarPatterns fixture3) == fixture4
     it "" $
-      runPatternDesugaring "v" 0 (expandPatterns fixture5) == fixture6
+      runPatternDesugaring "v" 0 (desugarPatterns fixture5) == fixture6
     it "" $
-      runPatternDesugaring "v" 0 (expandPatterns fixture7) == fixture8
+      runPatternDesugaring "v" 0 (desugarPatterns fixture7) == fixture8
     it "" $
-      runPatternDesugaring "v" 0 (expandPatterns fixture9) == fixture10
+      runPatternDesugaring "v" 0 (desugarPatterns fixture9) == fixture10
     it "" $
-      runPatternDesugaring "v" 0 (expandPatterns fixture11) == fixture12
+      runPatternDesugaring "v" 0 (desugarPatterns fixture11) == fixture12
 
 -- let
 --  Some(p) = x     Option(int32)
