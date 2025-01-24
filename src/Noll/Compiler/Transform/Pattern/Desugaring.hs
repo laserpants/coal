@@ -7,7 +7,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Compiler.Transform.Pattern.Expansion where
+module Noll.Compiler.Transform.Pattern.Desugaring where
 
 import Control.Monad.Reader (MonadReader, ReaderT, ask, runReaderT)
 import Control.Monad.State (MonadState, State, evalState)
@@ -31,9 +31,9 @@ import qualified Data.Text as Text
 
 type NamedPattern a o k = (Name, Pattern a (Type o k))
 
-type PatternExpansionStack a o k = WriterT [NamedPattern a o k] (ReaderT Name (State Int))
+type PatternDesugaringStack a o k = WriterT [NamedPattern a o k] (ReaderT Name (State Int))
 
-newtype PatternExpansion a o k e = PatternExpansion {patternExpansionStack :: PatternExpansionStack a o k e}
+newtype PatternDesugaring a o k e = PatternDesugaring {patternDesugaringStack :: PatternDesugaringStack a o k e}
   deriving
     ( Functor
     , Applicative
@@ -43,9 +43,9 @@ newtype PatternExpansion a o k e = PatternExpansion {patternExpansionStack :: Pa
     , MonadWriter [NamedPattern a o k]
     )
 
-{-# INLINE runPatternExpansion #-}
-runPatternExpansion :: Name -> Int -> PatternExpansion a o k e -> e
-runPatternExpansion r s e = fst (evalState (runReaderT (runWriterT (patternExpansionStack e)) r) s)
+{-# INLINE runPatternDesugaring #-}
+runPatternDesugaring :: Name -> Int -> PatternDesugaring a o k e -> e
+runPatternDesugaring r s e = fst (evalState (runReaderT (runWriterT (patternDesugaringStack e)) r) s)
 
 class Expandable a o k e | e -> a, e -> o k where
   expandPatterns ::

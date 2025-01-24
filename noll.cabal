@@ -31,7 +31,7 @@ library
       Noll.Compiler.PatternMatching
       Noll.Compiler.Transform.Expression
       Noll.Compiler.Transform.Pattern
-      Noll.Compiler.Transform.Pattern.Expansion
+      Noll.Compiler.Transform.Pattern.Desugaring
       Noll.Compiler.Transform.Pattern.OrExpansion
       Noll.Compiler.Transform.Tree
       Noll.Core.Language.Expr
@@ -124,7 +124,7 @@ test-suite noll-test
       Noll.Compiler.PatternMatchingSpec
       Noll.Compiler.PatternMatchingSpec.TestRunner
       Noll.Compiler.Transform.ExpressionSpec
-      Noll.Compiler.Transform.Pattern.ExpansionSpec
+      Noll.Compiler.Transform.Pattern.DesugaringSpec
       Noll.Compiler.Transform.Pattern.OrExpansionSpec
       Noll.Compiler.Transform.TreeSpec
       Noll.Language.HasFreeSpec

@@ -10,7 +10,7 @@ import qualified Noll.Compiler.PatternMatchingExamples.Test01
 import qualified Noll.Compiler.PatternMatchingExamples.Test02
 import qualified Noll.Compiler.PatternMatchingSpec
 import Noll.Compiler.Transform.ExpressionSpec
-import qualified Noll.Compiler.Transform.Pattern.ExpansionSpec
+import qualified Noll.Compiler.Transform.Pattern.DesugaringSpec
 import qualified Noll.Compiler.Transform.Pattern.OrExpansionSpec
 import qualified Noll.Compiler.Transform.TreeSpec
 import qualified Noll.Language.HasFreeSpec
@@ -39,7 +39,7 @@ main =
   hspec $ do
     Noll.Language.IndexedSpec.spec
     Noll.SystemF.Constraint.GenerationSpec.spec
-    Noll.Compiler.Transform.Pattern.ExpansionSpec.spec
+    Noll.Compiler.Transform.Pattern.DesugaringSpec.spec
     Noll.SystemFSpec.spec
     Noll.SystemF.UnificationSpec.spec
     Noll.SystemFExamples.Test01.spec

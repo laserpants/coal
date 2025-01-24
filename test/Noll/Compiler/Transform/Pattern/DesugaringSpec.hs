@@ -1,9 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Compiler.Transform.Pattern.ExpansionSpec where
+module Noll.Compiler.Transform.Pattern.DesugaringSpec where
 
 import Noll.Common.List1 (NonEmpty ((:|)), (<|))
-import Noll.Compiler.Transform.Pattern.Expansion (expandPatterns, runPatternExpansion)
+import Noll.Compiler.Transform.Pattern.Desugaring (expandPatterns, runPatternDesugaring)
 import Noll.Label (Label (..))
 import Noll.Language (
   BinaryOperator (..),
@@ -29,17 +29,17 @@ spec :: Spec
 spec =
   describe "" $ do
     it "" $
-      runPatternExpansion "v" 0 (expandPatterns fixture1) == fixture2
+      runPatternDesugaring "v" 0 (expandPatterns fixture1) == fixture2
     it "" $
-      runPatternExpansion "v" 0 (expandPatterns fixture3) == fixture4
+      runPatternDesugaring "v" 0 (expandPatterns fixture3) == fixture4
     it "" $
-      runPatternExpansion "v" 0 (expandPatterns fixture5) == fixture6
+      runPatternDesugaring "v" 0 (expandPatterns fixture5) == fixture6
     it "" $
-      runPatternExpansion "v" 0 (expandPatterns fixture7) == fixture8
+      runPatternDesugaring "v" 0 (expandPatterns fixture7) == fixture8
     it "" $
-      runPatternExpansion "v" 0 (expandPatterns fixture9) == fixture10
+      runPatternDesugaring "v" 0 (expandPatterns fixture9) == fixture10
     it "" $
-      runPatternExpansion "v" 0 (expandPatterns fixture11) == fixture12
+      runPatternDesugaring "v" 0 (expandPatterns fixture11) == fixture12
 
 -- let
 --  Some(p) = x     Option(int32)
