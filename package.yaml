@@ -26,6 +26,8 @@ dependencies:
 - text-show
 - containers
 - mtl
+- data-fix
+- free
 - extra
 
 ghc-options:

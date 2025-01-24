@@ -90,6 +90,7 @@ library
     , containers
     , data-fix
     , extra
+    , free
     , mtl
     , text
     , text-show
@@ -109,6 +110,7 @@ executable noll-exe
     , containers
     , data-fix
     , extra
+    , free
     , mtl
     , noll
     , text
@@ -160,6 +162,7 @@ test-suite noll-test
     , containers
     , data-fix
     , extra
+    , free
     , hspec
     , mtl
     , noll
