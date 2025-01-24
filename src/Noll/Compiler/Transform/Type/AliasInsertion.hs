@@ -111,7 +111,7 @@ instance AliasContext (ParameterizedType) where
       t@(TConstructor _ name) ->
         lookupAlias t [] name
 
-lookupAlias :: (MonadReader AliasEnvironment m) => ParameterizedType -> [ParameterizedType] -> Name -> m (ParameterizedType)
+lookupAlias :: (MonadReader AliasEnvironment m) => ParameterizedType -> [ParameterizedType] -> Name -> m ParameterizedType
 lookupAlias t ts name = do
   env <- ask
   case Environment.lookup name env of
