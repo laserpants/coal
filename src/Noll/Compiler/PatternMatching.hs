@@ -306,7 +306,7 @@ suppliedLabel =
 class TypeProxy t where
   expressionType :: Expression a t -> t
   patternType :: Pattern a t -> t
-  envelopeType :: EnvelopeExpression (Expression a) t -> t
+  envelopeExprType :: EnvelopeExpression (Expression a) t -> t
   arrow :: t -> t -> t
   boolean :: t
 
@@ -315,7 +315,7 @@ instance TypeProxy () where
     const ()
   patternType =
     const ()
-  envelopeType =
+  envelopeExprType =
     const ()
   arrow =
     const2 ()
@@ -327,7 +327,7 @@ instance TypeProxy (Type o k) where
     typeOf
   patternType =
     typeOf
-  envelopeType =
+  envelopeExprType =
     typeOf
   arrow =
     TArrow
@@ -342,11 +342,11 @@ compileEnvelope =
     MExpression expr ->
       expr
     e@(MCase ll cs) ->
-      ECompiledMatch mempty (envelopeType e) (EVariable mempty ll) (clauseList cs)
+      ECompiledMatch mempty (envelopeExprType e) (EVariable mempty ll) (clauseList cs)
     MConditional ll e1 e2 e3 ->
       EIf
         mempty
-        (envelopeType e2)
+        (envelopeExprType e2)
         ( EApplication
             mempty
             boolean
