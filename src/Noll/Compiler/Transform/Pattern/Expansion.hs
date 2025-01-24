@@ -48,7 +48,10 @@ runPatternExpansion :: Name -> Int -> PatternExpansion a o k e -> e
 runPatternExpansion r s e = fst (evalState (runReaderT (runWriterT (patternExpansionStack e)) r) s)
 
 class Expandable a o k e | e -> a, e -> o k where
-  expandPatterns :: (MonadWriter [NamedPattern a o k] m, MonadReader Name m, MonadState Int m) => e -> m e
+  expandPatterns ::
+    (MonadWriter [NamedPattern a o k] m, MonadReader Name m, MonadState Int m) =>
+    e ->
+    m e
 
 instance (Monoid a) => Expandable a o k (Pattern a (Type o k)) where
   expandPatterns =

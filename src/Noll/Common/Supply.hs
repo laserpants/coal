@@ -1,13 +1,13 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
 module Noll.Common.Supply (
   Supply (..),
   supply,
---  supplyN,
+  --  supplyN,
   supplied,
   suppliedName,
 ) where
@@ -32,8 +32,8 @@ supply = do
   modify (updateSupply succ)
   pure n
 
---supplyN :: (MonadState s m, Supply s) => Int -> m [s]
---supplyN n = replicateM n supply
+-- supplyN :: (MonadState s m, Supply s) => Int -> m [s]
+-- supplyN n = replicateM n supply
 
 supplied :: (MonadState s m, Supply s) => (Int -> a) -> m a
 supplied f = f . getSupply <$> supply
