@@ -5,6 +5,7 @@ module Noll.Compiler.PatternMatchingExamples.Test01 where
 import Data.List.NonEmpty (NonEmpty (..), (<|))
 import Noll.Compiler
 import Noll.Compiler.PatternMatching
+import Noll.Compiler.PatternMatching.Compiler
 import Noll.Label (Label (..))
 import Noll.Language (
   Binding (..),

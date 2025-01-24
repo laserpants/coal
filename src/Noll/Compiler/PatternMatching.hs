@@ -1,20 +1,25 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Compiler.PatternMatching where
+module Noll.Compiler.PatternMatching (
+  TypeProxy (..),
+  compileEnvelope,
+  compileMatchExprs,
+) where
 
-import Control.Monad.Reader (MonadReader, ReaderT, ask, runReaderT)
-import Control.Monad.State (MonadState, State, evalState)
-import Data.Function (on)
-import Data.List (sortBy)
-import Data.Maybe (mapMaybe)
 import Noll.Common.List1 (List1, NonEmpty (..), fromList1)
 import Noll.Common.Supply (supplied, suppliedName)
+import Noll.Compiler.PatternMatching.Compiler (MatchMonad (..), matchPatterns)
+import Noll.Compiler.PatternMatching.Envelope (
+  EnvelopeClause (..),
+  EnvelopeExpression (..),
+  EnvelopeHost (..),
+  EnvelopePattern (..),
+  fails,
+ )
+import Noll.Compiler.PatternMatching.Equation (patternEquation)
 import Noll.Compiler.Transform.Expression (mapMOverExpression)
 import Noll.Compiler.Transform.Tree (rename, replaceWith)
 import Noll.Label (Label (..))
@@ -33,275 +38,8 @@ import Noll.Language (
   Object (..),
   Pattern (..),
   Type (..),
-  (~>),
  )
-import Noll.Utils (
-  Dictionary (..),
-  Name,
-  const2,
-  foldrM,
-  groupByEq,
-  mapM,
-  (<$$>),
- )
-
-import qualified Data.Text as Text
-
-data EnvelopeClause e t = EnvelopeClause (Label t) [Label t] (EnvelopeExpression e t)
-  deriving (Show, Eq, Ord, Read)
-
-data EnvelopePattern e t
-  = MConstructor (Label t) [EnvelopePattern e t]
-  | MVariable (Label t)
-  | MLiteral t (e t)
-  deriving (Show, Eq, Ord, Read)
-
-data EnvelopeExpression e t
-  = MFail
-  | MExpression (e t)
-  | MCase (Label t) [EnvelopeClause e t]
-  | MConditional (Label t) (e t) (EnvelopeExpression e t) (EnvelopeExpression e t)
-  deriving (Show, Eq, Ord, Read)
-
-class EnvelopeHost e t where
-  replace :: Name -> Name -> e t -> e t
-
-instance (Ord t) => EnvelopeHost (Expression a) t where
-  replace = rename
-
-instance (EnvelopeHost a t, Ord t) => EnvelopeHost (EnvelopeClause a) t where
-  replace var new (EnvelopeClause l1 ls e) =
-    EnvelopeClause l1 ls (replace var new e)
-
-instance (EnvelopeHost a t, Ord t) => EnvelopeHost (EnvelopeExpression a) t where
-  replace _ _ MFail =
-    MFail
-  replace var new (MExpression e) =
-    MExpression (replace var new e)
-
-instance (HasType o k (e t)) => HasType o k (EnvelopeClause e t) where
-  typeOf =
-    \case
-      EnvelopeClause _ _ t ->
-        typeOf t
-
-instance (HasType o k (e t)) => HasType o k (EnvelopeExpression e t) where
-  typeOf =
-    \case
-      MFail ->
-        error "MFail"
-      MExpression t ->
-        typeOf t
-      MCase _ [] ->
-        error "Implementation error"
-      MCase _ (t : _) ->
-        typeOf t
-      MConditional _ _ t _ ->
-        typeOf t
-
-{-# INLINE fails #-}
-fails :: EnvelopeClause e t -> Bool
-fails (EnvelopeClause _ _ MFail) = True
-fails EnvelopeClause{} = False
-
---
-
-data PatternEquationBody e t = PatternEquationBody [EnvelopePattern e t] (EnvelopeExpression e t)
-  deriving (Show, Eq, Ord, Read)
-
-data HeadLiteralEquation e t = HeadLiteralEquation (e t) (PatternEquationBody e t)
-  deriving (Show, Eq, Ord, Read)
-
-data HeadVariableEquation e t = HeadVariableEquation (Label t) (PatternEquationBody e t)
-  deriving (Show, Eq, Ord, Read)
-
-data HeadConstructorEquation e t = HeadConstructorEquation (Label t) [EnvelopePattern e t] (PatternEquationBody e t)
-  deriving (Show, Eq, Ord, Read)
-
-{-# INLINE headConstructorName #-}
-headConstructorName :: HeadConstructorEquation e t -> Name
-headConstructorName (HeadConstructorEquation (Label _ name) _ _) = name
-
-data PatternEquation e t
-  = HeadLiteral (HeadLiteralEquation e t)
-  | HeadVariable (HeadVariableEquation e t)
-  | HeadConstructor (HeadConstructorEquation e t)
-  | EmptyEquation (EnvelopeExpression e t)
-  deriving (Show, Eq, Ord, Read)
-
-patternEquation :: [EnvelopePattern e t] -> EnvelopeExpression e t -> PatternEquation e t
-patternEquation [] ee = EmptyEquation ee
-patternEquation (p : ps) ee =
-  case p of
-    MConstructor name qs ->
-      HeadConstructor (HeadConstructorEquation name qs body)
-    MVariable name ->
-      HeadVariable (HeadVariableEquation name body)
-    MLiteral _ e ->
-      HeadLiteral (HeadLiteralEquation e body)
- where
-  body = PatternEquationBody ps ee
-
-maybeHeadLiteralEquation :: PatternEquation e t -> Maybe (HeadLiteralEquation e t)
-maybeHeadLiteralEquation =
-  \case
-    HeadLiteral eq -> Just eq
-    _ -> Nothing
-
-maybeHeadVariableEquation :: PatternEquation e t -> Maybe (HeadVariableEquation e t)
-maybeHeadVariableEquation =
-  \case
-    HeadVariable eq -> Just eq
-    _ -> Nothing
-
-maybeHeadConstructorEquation :: PatternEquation e t -> Maybe (HeadConstructorEquation e t)
-maybeHeadConstructorEquation =
-  \case
-    HeadConstructor eq -> Just eq
-    _ -> Nothing
-
-maybeEmptyEquation :: PatternEquation e t -> Maybe (EnvelopeExpression e t)
-maybeEmptyEquation =
-  \case
-    EmptyEquation ee -> Just ee
-    _ -> Nothing
-
-data PatternEquationType
-  = HeadLiteralType
-  | HeadVariableType
-  | HeadConstructorType
-  | EmptyEquationType
-  deriving (Show, Eq, Ord, Read)
-
-{-# INLINE equationType #-}
-equationType :: PatternEquation e t -> PatternEquationType
-equationType =
-  \case
-    HeadLiteral{} ->
-      HeadLiteralType
-    HeadVariable{} ->
-      HeadVariableType
-    HeadConstructor{} ->
-      HeadConstructorType
-    EmptyEquation{} ->
-      EmptyEquationType
-
-{-# INLINE equationGroups #-}
-equationGroups :: [PatternEquation e t] -> [[PatternEquation e t]]
-equationGroups = groupByEq equationType
-
-data PatternEquationSet e t
-  = AllHeadLiteral [HeadLiteralEquation e t]
-  | AllHeadVariable [HeadVariableEquation e t]
-  | AllHeadConstructor [HeadConstructorEquation e t]
-  | AllEmpty [EnvelopeExpression e t]
-  | Mixed [[PatternEquation e t]]
-  deriving (Show, Eq, Ord, Read)
-
-patternEquationSet :: [PatternEquation e t] -> PatternEquationSet e t
-patternEquationSet equations =
-  case equationGroups equations of
-    [eqs] ->
-      case ( mapMaybe maybeHeadLiteralEquation eqs
-           , mapMaybe maybeHeadVariableEquation eqs
-           , mapMaybe maybeHeadConstructorEquation eqs
-           , mapMaybe maybeEmptyEquation eqs
-           ) of
-        (qs, [], [], []) ->
-          AllHeadLiteral qs
-        ([], qs, [], []) ->
-          AllHeadVariable qs
-        ([], [], qs, []) ->
-          AllHeadConstructor qs
-        ([], [], [], ees) ->
-          AllEmpty ees
-        _ ->
-          error "Compiler error"
-    eqss ->
-      Mixed eqss
-
-groupByHeadConstructor :: [HeadConstructorEquation e t] -> [[HeadConstructorEquation e t]]
-groupByHeadConstructor = groupByEq headConstructorName . sortBy (compare `on` headConstructorName)
-
---
-
-newtype MatchMonad a = MatchMonad {matchMonadStack :: ReaderT Name (State Int) a}
-  deriving
-    ( Functor
-    , Applicative
-    , Monad
-    , MonadState Int
-    , MonadReader Name
-    )
-
-runMatchMonad :: Name -> Int -> MatchMonad a -> a
-runMatchMonad name n e = evalState (runReaderT (matchMonadStack e) name) n
-
-type MatchRule p e t = [Label t] -> [p e t] -> EnvelopeExpression e t -> MatchMonad (EnvelopeExpression e t)
-
-matchPatterns :: (Ord t, EnvelopeHost e t) => MatchRule PatternEquation e t
-matchPatterns us qs e =
-  case patternEquationSet qs of
-    AllEmpty ees ->
-      emptyRule us ees e
-    AllHeadLiteral eqs ->
-      literalRule us eqs e
-    AllHeadVariable eqs ->
-      variableRule us eqs e
-    AllHeadConstructor eqs ->
-      constructorRule us eqs e
-    Mixed eqss ->
-      foldrM (matchPatterns us) e eqss
-
-emptyRule :: (EnvelopeHost e t) => MatchRule EnvelopeExpression e t
-emptyRule us eqs e =
-  case eqs of
-    (MFail : es) ->
-      emptyRule us es e
-    (e1 : _) ->
-      pure e1
-    [] ->
-      pure e
-
-literalRule :: (Ord t, EnvelopeHost e t) => MatchRule HeadLiteralEquation e t
-literalRule [] _ _ = error "Implementation error"
-literalRule (u : us) eqs ex = foldrM go ex eqs
- where
-  go (HeadLiteralEquation lit (PatternEquationBody qs e)) e1 = do
-    e2 <- matchPatterns us [patternEquation qs e] e1
-    pure (MConditional u lit e2 e1)
-
-variableRule :: (Ord t, EnvelopeHost e t) => MatchRule HeadVariableEquation e t
-variableRule [] _ _ = error "Implementation error"
-variableRule (Label _ u : us) eqs ex = matchPatterns us (updateEq <$> eqs) ex
- where
-  updateEq (HeadVariableEquation (Label _ name) (PatternEquationBody ps e)) =
-    patternEquation ps (replace name u e)
-
-constructorRule :: (Ord t, EnvelopeHost e t) => MatchRule HeadConstructorEquation e t
-constructorRule [] _ _ = error "Implementation error"
-constructorRule (u@(Label t _) : us) eqs ex = do
-  cs <- traverse processGroup (groupByHeadConstructor eqs)
-  pure (MCase u (cs <> [EnvelopeClause (Label t "_") [] ex]))
- where
-  processGroup qs@(HeadConstructorEquation con ps _ : _) = do
-    vs <- mapM suppliedLabel ps
-    EnvelopeClause con vs <$> matchPatterns (vs <> us) (shift <$> qs) ex
-  shift (HeadConstructorEquation _ ps (PatternEquationBody qs e)) =
-    patternEquation (ps <> qs) e
-
-suppliedLabel :: EnvelopePattern e t -> MatchMonad (Label t)
-suppliedLabel =
-  \case
-    MVariable (Label t name) -> do
-      prefix <- suppliedName
-      pure (Label t (prefix <> "." <> name))
-    MConstructor (Label t _) _ ->
-      Label t <$> suppliedName
-    MLiteral t _ ->
-      Label t <$> suppliedName
-
---
+import Noll.Utils (Dictionary (..), const2)
 
 class TypeProxy t where
   expressionType :: Expression a t -> t

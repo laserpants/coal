@@ -6,6 +6,9 @@ import Control.Monad.Identity (runIdentity)
 import Noll.Common.Environment (Environment (..))
 import Noll.Common.List1 (NonEmpty (..), (<|))
 import Noll.Compiler.PatternMatching
+import Noll.Compiler.PatternMatching.Compiler
+import Noll.Compiler.PatternMatching.Envelope
+import Noll.Compiler.PatternMatching.Equation
 import Noll.Compiler.PatternMatchingSpec.TestRunner (compilePatterns)
 import Noll.Compiler.Transform.Pattern
 import Noll.Eval (Value (..), eval)

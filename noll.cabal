@@ -29,6 +29,9 @@ library
       Noll.Common.Supply
       Noll.Compiler
       Noll.Compiler.PatternMatching
+      Noll.Compiler.PatternMatching.Compiler
+      Noll.Compiler.PatternMatching.Envelope
+      Noll.Compiler.PatternMatching.Equation
       Noll.Compiler.Transform.Expression
       Noll.Compiler.Transform.Pattern
       Noll.Compiler.Transform.Pattern.Desugaring
