@@ -19,6 +19,8 @@ data IRInstrOpF v t i next
   | IAnd             t v v        (v -> next)
   | IOr              t v v        (v -> next)
   | ILoad            t v          (v -> next)
+  | IStore           v v          next
+  | IRet             t v          next
   -- TODO
   deriving (Functor)
 {- FOURMOLU_ENABLE -}
