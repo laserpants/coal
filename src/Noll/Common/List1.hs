@@ -16,5 +16,6 @@ import qualified Data.List.NonEmpty as NonEmpty
 
 type List1 = NonEmpty
 
+{-# INLINE fromList1 #-}
 fromList1 :: List1 a -> [a]
 fromList1 = NonEmpty.toList
