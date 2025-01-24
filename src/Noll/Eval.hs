@@ -19,6 +19,7 @@ import Noll.Language.Expression (CompiledClause (..), Expression (..))
 import Noll.Language.Expression.Operator.Binary (BinaryOperator (..))
 import Noll.Language.Primitive (Primitive (..))
 import Noll.Utils (Name, forM)
+import TextShow (showt)
 
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
@@ -114,7 +115,7 @@ evalExpr =
 
 {-# INLINE argn #-}
 argn :: Int -> Name
-argn n = Text.pack ("$$$." <> show n)
+argn n = "$$$." <> showt n
 
 args1 :: (Value -> Eval Value) -> Value
 args1 f = VFun [argn 0] $ do

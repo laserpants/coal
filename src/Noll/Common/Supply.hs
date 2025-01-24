@@ -1,5 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StrictData #-}
 
@@ -15,8 +16,7 @@ import Control.Monad (replicateM)
 import Control.Monad.Reader (MonadReader, ask)
 import Control.Monad.State (MonadState, get, modify)
 import Noll.Utils (Name)
-
-import qualified Data.Text as Text
+import TextShow (showt)
 
 class Supply s where
   updateSupply :: (Int -> Int) -> s -> s
@@ -43,4 +43,4 @@ suppliedName = ask >>= supplied . freshName
 
 {-# INLINE freshName #-}
 freshName :: Name -> Int -> Name
-freshName prefix index = Text.pack ("$" <> Text.unpack prefix <> "." <> show index)
+freshName prefix index = "$" <> prefix <> "." <> showt index

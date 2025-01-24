@@ -23,6 +23,7 @@ dependencies:
 - base >= 4.7 && < 5
 - data-fix
 - text
+- text-show
 - containers
 - mtl
 - extra
