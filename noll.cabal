@@ -34,6 +34,8 @@ library
       Noll.Compiler.Transform.Pattern.Desugaring
       Noll.Compiler.Transform.Pattern.OrExpansion
       Noll.Compiler.Transform.Tree
+      Noll.Compiler.Transform.Type.AliasInsertion
+      Noll.Compiler.Transform.Type.AliasInsertionSpec
       Noll.Core.Language.Expr
       Noll.Core.Language.HasType
       Noll.Core.Language.Type
@@ -129,6 +131,7 @@ test-suite noll-test
       Noll.Compiler.Transform.Pattern.DesugaringSpec
       Noll.Compiler.Transform.Pattern.OrExpansionSpec
       Noll.Compiler.Transform.TreeSpec
+      Noll.Compiler.Transform.Type.AliasInsertionSpec
       Noll.Language.HasFreeSpec
       Noll.Language.IndexedSpec
       Noll.SystemF.Constraint.GenerationSpec
