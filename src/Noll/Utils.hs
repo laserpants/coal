@@ -31,8 +31,9 @@ import Data.List (groupBy)
 import Data.Map.Strict (Map)
 import Data.Maybe (fromMaybe)
 import Data.Set (Set, unions)
-import qualified Data.Set as Set
 import Data.Text (Text)
+
+import qualified Data.Set as Set
 import qualified Data.Text as Text
 
 type Name = Text
