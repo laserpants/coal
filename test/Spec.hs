@@ -13,6 +13,7 @@ import Noll.Compiler.Transform.ExpressionSpec
 import qualified Noll.Compiler.Transform.Pattern.DesugaringSpec
 import qualified Noll.Compiler.Transform.Pattern.OrExpansionSpec
 import qualified Noll.Compiler.Transform.TreeSpec
+import qualified Noll.Compiler.Transform.Type.AliasInsertionSpec
 import qualified Noll.Language.HasFreeSpec
 import qualified Noll.SystemF.Constraint.GenerationSpec
 import qualified Noll.SystemF.UnificationSpec
@@ -64,6 +65,7 @@ main =
     Noll.Compiler.PatternMatchingExamples.Test02.spec
     Noll.Compiler.Transform.Pattern.OrExpansionSpec.spec
     Noll.Compiler.Transform.ExpressionSpec.spec
+    Noll.Compiler.Transform.Type.AliasInsertionSpec.spec
 
 --    Noll.SystemF.TypeConstraint.CollectSpec.spec
 --    Noll.SystemF.TypeSubstitutionSpec.spec

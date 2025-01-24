@@ -35,7 +35,6 @@ library
       Noll.Compiler.Transform.Pattern.OrExpansion
       Noll.Compiler.Transform.Tree
       Noll.Compiler.Transform.Type.AliasInsertion
-      Noll.Compiler.Transform.Type.AliasInsertionSpec
       Noll.Core.Language.Expr
       Noll.Core.Language.HasType
       Noll.Core.Language.Type
