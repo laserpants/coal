@@ -8,14 +8,16 @@ import Noll.Language.Expression (Expression (..))
 import Noll.Language.Module.Constant (Constant (..))
 import Noll.Language.Module.Function (Function (..))
 import Noll.Language.Trait (Trait (..), Uses (..))
-import Noll.Language.Type (Type (..), TypeIndex)
+import Noll.Language.Type (Parameter, Type (..), TypeIndex)
 import Noll.Utils (Name)
 
 newtype Path = Path {pathComponents :: [Name]}
   deriving (Show, Eq, Ord, Read)
 
 data Object a k t
-  = -- | Type definition
+  = -- | TODO
+    DAnnotation (Uses (Type Parameter k)) (Object a k t)
+  | -- | Type definition
     DType Name [Type TypeIndex k] [Constructor TypeIndex k (Type TypeIndex k)]
   | -- | Codata type definition
     DCodata a Name -- TODO
@@ -33,6 +35,4 @@ data Object a k t
     DInstance Name (Type TypeIndex k) [Object a k t]
   | -- | Type alias
     DTypeAlias Name [Type TypeIndex k] (Type TypeIndex k)
-  --  | -- | TODO
-  --    DType TypeIndex (Uses (Type TypeIndex k)) (Object k t)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
