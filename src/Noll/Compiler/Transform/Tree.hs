@@ -54,14 +54,20 @@ instance TreeTransform (Choice Expression) t where
 instance TreeTransform (Clause Expression) t where
   transform name f =
     \case
-      EClause a ps cs ->
-        EClause a ps <$> traverse (transform name f) cs
+      EClause a ps cs
+        | name `isNotBoundIn` ps ->
+            EClause a ps <$> traverse (transform name f) cs
+        | otherwise ->
+            pure (EClause a ps cs)
 
 instance TreeTransform (CompiledClause Expression) t where
   transform name f =
     \case
-      ECompiledClause lls e ->
-        ECompiledClause lls <$> transform name f e
+      ECompiledClause lls e
+        | name `isNotBoundIn` lls ->
+            ECompiledClause lls <$> transform name f e
+        | otherwise ->
+            pure (ECompiledClause lls e)
 
 instance TreeTransform Expression t where
   transform name f =
@@ -72,7 +78,7 @@ instance TreeTransform Expression t where
         | otherwise ->
             pure (EVariable a ll)
       expr@(ELambda a ps e)
-        | name `appearsFreeIn` expr ->
+        | name `isNotBoundIn` ps ->
             ELambda a ps <$> transform name f e
         | otherwise ->
             pure expr

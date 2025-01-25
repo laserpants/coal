@@ -86,3 +86,75 @@ spec =
                 )
                 (EVariable () (Label () "x"))
              )
+      it "match(a) { | b => a }" $
+        rename
+          "a"
+          "x"
+          ( EMatch
+              ()
+              ()
+              (EVariable () (Label () "a"))
+              ( EClause
+                  ()
+                  (PVariable () (Label () "b"))
+                  ( CPlain
+                      ()
+                      []
+                      (EVariable () (Label () "a"))
+                      :| []
+                  )
+                  :| []
+              )
+          )
+          == ( EMatch
+                ()
+                ()
+                (EVariable () (Label () "x"))
+                ( EClause
+                    ()
+                    (PVariable () (Label () "b"))
+                    ( CPlain
+                        ()
+                        []
+                        (EVariable () (Label () "x"))
+                        :| []
+                    )
+                    :| []
+                )
+             )
+      it "match(a) { | a => a }" $
+        rename
+          "a"
+          "x"
+          ( EMatch
+              ()
+              ()
+              (EVariable () (Label () "a"))
+              ( EClause
+                  ()
+                  (PVariable () (Label () "a"))
+                  ( CPlain
+                      ()
+                      []
+                      (EVariable () (Label () "a"))
+                      :| []
+                  )
+                  :| []
+              )
+          )
+          == ( EMatch
+                ()
+                ()
+                (EVariable () (Label () "x"))
+                ( EClause
+                    ()
+                    (PVariable () (Label () "a"))
+                    ( CPlain
+                        ()
+                        []
+                        (EVariable () (Label () "a"))
+                        :| []
+                    )
+                    :| []
+                )
+             )
