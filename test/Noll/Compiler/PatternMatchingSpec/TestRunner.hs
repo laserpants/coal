@@ -1,7 +1,7 @@
 module Noll.Compiler.PatternMatchingSpec.TestRunner where
 
 import Noll.Compiler.PatternMatching
-import Noll.Compiler.PatternMatching.Compiler
+import Noll.Compiler.PatternMatching.Rule
 import Noll.Compiler.PatternMatching.Envelope
 import Noll.Compiler.PatternMatching.Equation
 import Noll.Label (Label (..))

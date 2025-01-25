@@ -1,109 +1,90 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
 module Noll.Compiler.PatternMatching.Compiler (
-  MatchMonad (..),
-  matchPatterns,
-  runMatchMonad,
+  TypeProxy (..),
+  compileEnvelope,
 ) where
 
-import Control.Monad.Reader (MonadReader, ReaderT, ask, runReaderT)
-import Control.Monad.State (MonadState, State, evalState)
-import Noll.Common.Supply (supplied, suppliedName)
+import Noll.Common.List1 (List1, NonEmpty (..))
 import Noll.Compiler.PatternMatching.Envelope (
   EnvelopeClause (..),
   EnvelopeExpression (..),
   EnvelopeHost (..),
-  EnvelopePattern (..),
+  fails,
  )
-import Noll.Compiler.PatternMatching.Equation (
-  HeadConstructorEquation (..),
-  HeadLiteralEquation (..),
-  HeadVariableEquation (..),
-  PatternEquation (..),
-  PatternEquationBody (..),
-  PatternEquationSet (..),
-  groupByHeadConstructor,
-  patternEquation,
-  patternEquationSet,
+import Noll.Language (
+  BinaryOperator (..),
+  CompiledClause (..),
+  Expression (..),
+  HasType (..),
+  Intrinsic (..),
+  Pattern (..),
+  Type (..),
  )
-import Noll.Label (Label (..))
-import Noll.Utils (Name, foldrM)
+import Noll.Utils (const2)
 
-newtype MatchMonad a = MatchMonad {matchMonadStack :: ReaderT Name (State Int) a}
-  deriving
-    ( Functor
-    , Applicative
-    , Monad
-    , MonadState Int
-    , MonadReader Name
-    )
+class TypeProxy t where
+  expressionType :: Expression a t -> t
+  patternType :: Pattern a t -> t
+  envelopeExprType :: EnvelopeExpression (Expression a) t -> t
+  arrow :: t -> t -> t
+  boolean :: t
 
-runMatchMonad :: Name -> Int -> MatchMonad a -> a
-runMatchMonad name n e = evalState (runReaderT (matchMonadStack e) name) n
+instance TypeProxy () where
+  expressionType =
+    const ()
+  patternType =
+    const ()
+  envelopeExprType =
+    const ()
+  arrow =
+    const2 ()
+  boolean =
+    ()
 
-type MatchRule p e t = [Label t] -> [p e t] -> EnvelopeExpression e t -> MatchMonad (EnvelopeExpression e t)
+instance TypeProxy (Type o k) where
+  expressionType =
+    typeOf
+  patternType =
+    typeOf
+  envelopeExprType =
+    typeOf
+  arrow =
+    TArrow
+  boolean =
+    TIntrinsic IBool
 
-matchPatterns :: (Ord t, EnvelopeHost e t) => MatchRule PatternEquation e t
-matchPatterns us qs e =
-  case patternEquationSet qs of
-    AllEmpty ees ->
-      emptyRule us ees e
-    AllHeadLiteral eqs ->
-      literalRule us eqs e
-    AllHeadVariable eqs ->
-      variableRule us eqs e
-    AllHeadConstructor eqs ->
-      constructorRule us eqs e
-    Mixed eqss ->
-      foldrM (matchPatterns us) e eqss
-
-emptyRule :: (EnvelopeHost e t) => MatchRule EnvelopeExpression e t
-emptyRule us eqs e =
-  case eqs of
-    (MFail : es) ->
-      emptyRule us es e
-    (e1 : _) ->
-      pure e1
-    [] ->
-      pure e
-
-literalRule :: (Ord t, EnvelopeHost e t) => MatchRule HeadLiteralEquation e t
-literalRule [] _ _ = error "Implementation error"
-literalRule (u : us) eqs ex = foldrM go ex eqs
- where
-  go (HeadLiteralEquation lit (PatternEquationBody qs e)) e1 = do
-    e2 <- matchPatterns us [patternEquation qs e] e1
-    pure (MConditional u lit e2 e1)
-
-variableRule :: (Ord t, EnvelopeHost e t) => MatchRule HeadVariableEquation e t
-variableRule [] _ _ = error "Implementation error"
-variableRule (Label _ u : us) eqs ex = matchPatterns us (updateEq <$> eqs) ex
- where
-  updateEq (HeadVariableEquation (Label _ name) (PatternEquationBody ps e)) =
-    patternEquation ps (replace name u e)
-
-constructorRule :: (Ord t, EnvelopeHost e t) => MatchRule HeadConstructorEquation e t
-constructorRule [] _ _ = error "Implementation error"
-constructorRule (u@(Label t _) : us) eqs ex = do
-  cs <- traverse processGroup (groupByHeadConstructor eqs)
-  pure (MCase u (cs <> [EnvelopeClause (Label t "_") [] ex]))
- where
-  processGroup qs@(HeadConstructorEquation con ps _ : _) = do
-    vs <- mapM suppliedLabel ps
-    EnvelopeClause con vs <$> matchPatterns (vs <> us) (shift <$> qs) ex
-  shift (HeadConstructorEquation _ ps (PatternEquationBody qs e)) =
-    patternEquation (ps <> qs) e
-
-suppliedLabel :: EnvelopePattern e t -> MatchMonad (Label t)
-suppliedLabel =
+compileEnvelope :: (TypeProxy t, EnvelopeHost (Expression a) t, Monoid a, Eq t) => EnvelopeExpression (Expression a) t -> Expression a t
+compileEnvelope =
   \case
-    MVariable (Label t name) -> do
-      prefix <- suppliedName
-      pure (Label t (prefix <> "." <> name))
-    MConstructor (Label t _) _ ->
-      Label t <$> suppliedName
-    MLiteral t _ ->
-      Label t <$> suppliedName
+    MFail ->
+      error "Pattern matching failure"
+    MExpression expr ->
+      expr
+    e@(MCase ll cs) ->
+      ECompiledMatch mempty (envelopeExprType e) (EVariable mempty ll) (clauseList cs)
+    MConditional ll e1 e2 e3 ->
+      EIf
+        mempty
+        (envelopeExprType e2)
+        ( EApplication
+            mempty
+            boolean
+            (EBinaryOperator mempty (expressionType e1 `arrow` expressionType e1 `arrow` boolean, OEqualTo))
+            (EVariable mempty ll :| [e1])
+        )
+        (compileEnvelope e2)
+        (compileEnvelope e3)
+
+compileEnvelopeClause :: (TypeProxy t, EnvelopeHost (Expression a) t, Monoid a, Eq t) => EnvelopeClause (Expression a) t -> CompiledClause Expression a t
+compileEnvelopeClause (EnvelopeClause l1 ls e) = ECompiledClause (l1 :| ls) (compileEnvelope e)
+
+clauseList :: (TypeProxy t, EnvelopeHost (Expression a) t, Monoid a, Eq t) => [EnvelopeClause (Expression a) t] -> List1 (CompiledClause Expression a t)
+clauseList ecs =
+  case filter (not . fails) ecs of
+    c : cs ->
+      compileEnvelopeClause <$> (c :| cs)
+    [] ->
+      error "Implementation error"

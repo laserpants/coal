@@ -11,7 +11,7 @@ module Noll.Compiler.PatternMatching (
 
 import Noll.Common.List1 (List1, NonEmpty (..), fromList1)
 import Noll.Common.Supply (supplied, suppliedName)
-import Noll.Compiler.PatternMatching.Compiler (MatchMonad (..), matchPatterns)
+import Noll.Compiler.PatternMatching.Compiler (TypeProxy (..), compileEnvelope)
 import Noll.Compiler.PatternMatching.Envelope (
   EnvelopeClause (..),
   EnvelopeExpression (..),
@@ -20,6 +20,7 @@ import Noll.Compiler.PatternMatching.Envelope (
   fails,
  )
 import Noll.Compiler.PatternMatching.Equation (patternEquation)
+import Noll.Compiler.PatternMatching.Rule (MatchMonad (..), matchPatterns)
 import Noll.Compiler.Transform.Expression (mapMOverExpression)
 import Noll.Compiler.Transform.Tree (rename, replaceWith)
 import Noll.Label (Label (..))
@@ -39,73 +40,7 @@ import Noll.Language (
   Pattern (..),
   Type (..),
  )
-import Noll.Utils (Dictionary (..), const2)
-
-class TypeProxy t where
-  expressionType :: Expression a t -> t
-  patternType :: Pattern a t -> t
-  envelopeExprType :: EnvelopeExpression (Expression a) t -> t
-  arrow :: t -> t -> t
-  boolean :: t
-
-instance TypeProxy () where
-  expressionType =
-    const ()
-  patternType =
-    const ()
-  envelopeExprType =
-    const ()
-  arrow =
-    const2 ()
-  boolean =
-    ()
-
-instance TypeProxy (Type o k) where
-  expressionType =
-    typeOf
-  patternType =
-    typeOf
-  envelopeExprType =
-    typeOf
-  arrow =
-    TArrow
-  boolean =
-    TIntrinsic IBool
-
-compileEnvelope :: (TypeProxy t, EnvelopeHost (Expression a) t, Monoid a, Eq t) => EnvelopeExpression (Expression a) t -> Expression a t
-compileEnvelope =
-  \case
-    MFail ->
-      error "Pattern matching failure"
-    MExpression expr ->
-      expr
-    e@(MCase ll cs) ->
-      ECompiledMatch mempty (envelopeExprType e) (EVariable mempty ll) (clauseList cs)
-    MConditional ll e1 e2 e3 ->
-      EIf
-        mempty
-        (envelopeExprType e2)
-        ( EApplication
-            mempty
-            boolean
-            (EBinaryOperator mempty (expressionType e1 `arrow` expressionType e1 `arrow` boolean, OEqualTo))
-            (EVariable mempty ll :| [e1])
-        )
-        (compileEnvelope e2)
-        (compileEnvelope e3)
-
-compileEnvelopeClause :: (TypeProxy t, EnvelopeHost (Expression a) t, Monoid a, Eq t) => EnvelopeClause (Expression a) t -> CompiledClause Expression a t
-compileEnvelopeClause (EnvelopeClause l1 ls e) = ECompiledClause (l1 :| ls) (compileEnvelope e)
-
-clauseList :: (TypeProxy t, EnvelopeHost (Expression a) t, Monoid a, Eq t) => [EnvelopeClause (Expression a) t] -> List1 (CompiledClause Expression a t)
-clauseList ecs =
-  case filter (not . fails) ecs of
-    c : cs ->
-      compileEnvelopeClause <$> (c :| cs)
-    [] ->
-      error "Implementation error"
-
---
+import Noll.Utils (Dictionary (..))
 
 class MatchExpressionContext a where
   compileMatchExprs :: a -> MatchMonad a
