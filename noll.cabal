@@ -138,6 +138,7 @@ test-suite noll-test
       Noll.Compiler.Transform.Pattern.OrExpansionSpec
       Noll.Compiler.Transform.TreeSpec
       Noll.Compiler.Transform.Type.AliasInsertionSpec
+      Noll.Examples.Test01
       Noll.Language.HasFreeSpec
       Noll.Language.IndexedSpec
       Noll.SystemF.Constraint.GenerationSpec

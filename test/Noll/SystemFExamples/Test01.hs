@@ -20,7 +20,7 @@ import Noll.Language (
   TypeIndex (..),
  )
 import Noll.SystemFSpec.TestRunner
-import Test.Hspec (Spec, describe, hspec, it)
+import Test.Hspec (Spec, describe, it)
 
 import qualified Data.Set as Set
 import qualified Noll.Common.Environment as Environment

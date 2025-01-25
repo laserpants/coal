@@ -101,7 +101,9 @@ instance (Show a, Show t, TypeProxy t, Ord t, Monoid a) => MatchExpressionContex
       EMatch a t e cs -> do
         cs1 <- compileMatchExprs cs
         name <- suppliedName
-        replaceWith name <$> compileMatchExprs e <*> compileClauses (Label (expressionType e) name) cs1
+        replaceWith name
+          <$> compileMatchExprs e
+          <*> compileClauses (Label (expressionType e) name) cs1
       e ->
         mapMOverExpression compileMatchExprs e
 

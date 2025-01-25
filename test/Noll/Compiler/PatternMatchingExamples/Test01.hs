@@ -3,7 +3,6 @@
 module Noll.Compiler.PatternMatchingExamples.Test01 where
 
 import Data.List.NonEmpty (NonEmpty (..), (<|))
-import Noll.Compiler
 import Noll.Compiler.PatternMatching
 import Noll.Compiler.PatternMatching.Rule
 import Noll.Label (Label (..))
@@ -12,27 +11,17 @@ import Noll.Language (
   Choice (..),
   Clause (..),
   CompiledClause (..),
-  Constructor (..),
   Expression (..),
-  Intrinsic (..),
-  Kind (..),
   Pattern (..),
   Primitive (..),
-  Scheme (..),
-  Type (..),
-  TypeIndex (..),
  )
-import Noll.SystemFSpec.TestRunner
-import Test.Hspec (Spec, describe, hspec, it)
-
-import qualified Data.Set as Set
-import qualified Noll.Common.Environment as Environment
+import Test.Hspec (Spec, describe, it)
 
 spec :: Spec
 spec =
   describe "" $
     it "" $ do
-      runMatchMonad "$.0" 0 (compileMatchExprs fixture) == fixture1
+      runMatchMonad "???" 0 (compileMatchExprs fixture) == fixture1
 
 --
 -- let
@@ -42,6 +31,7 @@ spec =
 --          match(compare(x, y)) {
 --            | LessThan or EqualTo => true
 --            | GreaterThan => false
+--          }
 --   in
 --     lte
 --
