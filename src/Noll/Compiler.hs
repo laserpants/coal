@@ -25,7 +25,6 @@ import Control.Monad.Reader (MonadReader, ReaderT, ask, runReaderT)
 import Control.Monad.State (MonadState, State, gets, modify, runState)
 import Control.Monad.Writer (execWriter)
 import Data.Either.Extra (partitionEithers)
-import Debug.Trace
 import Noll.Common.Environment (Environment (..))
 import Noll.Common.List1 (NonEmpty ((:|)))
 import Noll.Label (Label (..))
@@ -39,7 +38,6 @@ import Noll.Language (
   Kind (..),
   Pattern (..),
   Scheme (..),
-  Type (..),
   TypeIndex (..),
   TypeIndexed (..),
   Uses (..),

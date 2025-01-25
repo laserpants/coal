@@ -34,7 +34,7 @@ import qualified Noll.SystemFExamples.Test13
 import qualified Noll.SystemFExamples.Test14
 import qualified Noll.SystemFExamples.Test15
 import qualified Noll.SystemFSpec
-import Test.Hspec (hspec, it)
+import Test.Hspec (hspec)
 
 main :: IO ()
 main =
