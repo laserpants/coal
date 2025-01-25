@@ -34,6 +34,7 @@ library
       Noll.Compiler.PatternMatching.Equation
       Noll.Compiler.PatternMatching.Rule
       Noll.Compiler.Transform.Expression
+      Noll.Compiler.Transform.Fold
       Noll.Compiler.Transform.Pattern
       Noll.Compiler.Transform.Pattern.Desugaring
       Noll.Compiler.Transform.Pattern.OrExpansion
@@ -131,6 +132,7 @@ test-suite noll-test
       Noll.Compiler.PatternMatchingSpec
       Noll.Compiler.PatternMatchingSpec.TestRunner
       Noll.Compiler.Transform.ExpressionSpec
+      Noll.Compiler.Transform.FoldSpec
       Noll.Compiler.Transform.Pattern.DesugaringSpec
       Noll.Compiler.Transform.Pattern.OrExpansionSpec
       Noll.Compiler.Transform.TreeSpec

@@ -10,6 +10,7 @@ import qualified Noll.Compiler.PatternMatchingExamples.Test01
 import qualified Noll.Compiler.PatternMatchingExamples.Test02
 import qualified Noll.Compiler.PatternMatchingSpec
 import Noll.Compiler.Transform.ExpressionSpec
+import qualified Noll.Compiler.Transform.FoldSpec
 import qualified Noll.Compiler.Transform.Pattern.DesugaringSpec
 import qualified Noll.Compiler.Transform.Pattern.OrExpansionSpec
 import qualified Noll.Compiler.Transform.TreeSpec
@@ -32,7 +33,6 @@ import qualified Noll.SystemFExamples.Test12
 import qualified Noll.SystemFExamples.Test13
 import qualified Noll.SystemFExamples.Test14
 import qualified Noll.SystemFExamples.Test15
-import qualified Noll.Compiler.Transform.FoldSpec
 import qualified Noll.SystemFSpec
 import Test.Hspec (hspec, it)
 
