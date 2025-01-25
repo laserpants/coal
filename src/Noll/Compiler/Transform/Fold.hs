@@ -1,8 +1,118 @@
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE StrictData #-}
+
 module Noll.Compiler.Transform.Fold where
 
-import Noll.Common.List1 (List1 (..))
-import Noll.Language (Clause (..), Expression (..))
+import Control.Monad.Reader (MonadReader, ReaderT, runReaderT)
+import Control.Monad.State (MonadState, State, evalState)
+import Control.Monad.Writer (execWriter, tell)
+import Noll.Common.List1 (List1 (..), NonEmpty (..), (<|))
+import Noll.Common.Supply (suppliedName)
+import Noll.Compiler.Transform (flattenApplications)
+import Noll.Compiler.Transform.Expression (mapOverExpression)
+import Noll.Compiler.Transform.Pattern (mapMOverPattern, mapOverPattern)
+import Noll.Compiler.Transform.Tree (replace)
+import Noll.Label (Label (..), labelName)
+import Noll.Language (Choice (..), Clause (..), Expression (..), Pattern (..))
+import Noll.Utils (Name, const2)
 
-expandFoldExpression :: List1 (Expression a t) -> List1 (Clause Expression a t) -> Expression a t
-expandFoldExpression =
-  undefined
+newtype FoldExpansion a = FoldExpansion {foldExpansionStack :: ReaderT Name (State Int) a}
+  deriving
+    ( Functor
+    , Applicative
+    , Monad
+    , MonadReader Name
+    , MonadState Int
+    )
+
+runFoldTransform :: Name -> Int -> FoldExpansion a -> a
+runFoldTransform r s e = evalState (runReaderT (foldExpansionStack e) r) s
+
+class FoldContext e where
+  expandFolds :: Name -> [Label ()] -> e -> e
+
+instance (FoldContext e) => FoldContext [e] where
+  expandFolds name = fmap . expandFolds name
+
+instance (FoldContext e) => FoldContext (NonEmpty e) where
+  expandFolds name = fmap . expandFolds name
+
+instance (Monoid a) => FoldContext (Clause Expression a ()) where
+  expandFolds name _ =
+    \case
+      EClause a p cs ->
+        EClause
+          a
+          (mapOverPattern eliminateAtPatterns p)
+          (expandFolds name (atLabels p) cs)
+
+instance (Monoid a) => FoldContext (Choice Expression a ()) where
+  expandFolds name lls =
+    \case
+      CPlain a gs e ->
+        CPlain a gs (expandFolds name lls e)
+      CLambda{} ->
+        error "TODO"
+
+instance (Monoid a) => FoldContext (Expression a ()) where
+  expandFolds = flip . foldr . updateName
+
+updateName :: (Monoid a) => Name -> Label () -> Expression a () -> Expression a ()
+updateName name label =
+  replace (labelName label) $
+    const2 $
+      EApplication
+        mempty
+        ()
+        (EVariable mempty (Label () name))
+        (EVariable mempty label :| [])
+
+eliminateAtPatterns :: Pattern a () -> Pattern a ()
+eliminateAtPatterns =
+  \case
+    PAtVariable a ll ->
+      PVariable a ll
+    p ->
+      p
+
+atLabels :: Pattern a t -> [Label t]
+atLabels =
+  execWriter
+    . mapMOverPattern
+      ( \case
+          p@(PAtVariable _ label) -> do
+            tell [label]
+            pure p
+          p ->
+            pure p
+      )
+
+expandFoldExpr :: (Monoid a, MonadState Int m, MonadReader Name m) => List1 (Expression a ()) -> List1 (Clause Expression a ()) -> m (Expression a ())
+expandFoldExpr args clauses = do
+  name <- suppliedName
+  let var = name <> ".expr"
+  pure $
+    mapOverExpression flattenApplications $
+      ERecursiveLet
+        mempty
+        (PVariable mempty (Label () name))
+        ( ELambda
+            mempty
+            (PVariable mempty (Label () var) :| [])
+            ( EMatch
+                mempty
+                ()
+                (EVariable mempty (Label () var))
+                (expandFolds name [] <$> clauses)
+            )
+        )
+        ( EApplication
+            mempty
+            ()
+            (EVariable mempty (Label () name))
+            args
+        )

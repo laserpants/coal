@@ -132,12 +132,22 @@ instance (Ord t) => HasFree (Expression a t) t where
         freeIn e <> freeIn es
       ELet _ gs e1 ->
         freeIn gs <> (freeIn e1 `exceptNames` boundIn gs)
+      ERecursiveLet _ p e1 e2 ->
+        (freeIn e1 <> freeIn e2) `exceptNames` boundIn p
+      EMatch _ _ e cs ->
+        freeIn e <> freeIn cs
+      ERecord _ _ d e ->
+        freeIn d <> freeIn e
+      ESelect _ _ e ->
+        freeIn e
       ELiteral{} ->
         mempty
       EConstructor{} ->
         mempty
-      EMatch _ _ e cs ->
-        freeIn e <> freeIn cs
+      EUnaryOperator{} ->
+        mempty
+      EBinaryOperator{} ->
+        mempty
 
 {-# INLINE exceptNames #-}
 exceptNames :: (Foldable f) => Set (Label a) -> f Name -> Set (Label a)

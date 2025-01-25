@@ -56,6 +56,10 @@ instance PatternContext (Pattern a t) (Pattern a t) where
         POr a t
           <$> (overPattern f =<< f p1)
           <*> (overPattern f =<< f p1)
+      p@PVariable{} ->
+        pure p
+      p@PAtVariable{} ->
+        pure p
 
 instance (PatternContext d p) => PatternContext d [p] where
   overPattern = traverse . overPattern

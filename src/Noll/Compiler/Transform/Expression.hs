@@ -81,6 +81,8 @@ instance ExpressionContext (Expression a t) (Expression a t) where
         ERecord a t
           <$> (overExpression f =<< traverse f d)
           <*> (overExpression f =<< traverse f e)
+      ESelect a ll e ->
+        ESelect a ll <$> (overExpression f =<< f e)
       e@EUnaryOperator{} ->
         pure e
       e@EBinaryOperator{} ->

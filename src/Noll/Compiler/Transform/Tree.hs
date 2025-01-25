@@ -90,6 +90,12 @@ instance TreeTransform Expression t where
               <$> transform name f e1
               <*> transform name f e2
           else pure expr
+      ERecord a t d e ->
+        ERecord a t
+          <$> traverse (transform name f) d
+          <*> traverse (transform name f) e
+      ESelect a ll e ->
+        ESelect a ll <$> transform name f e
       EIf a t e1 e2 e3 ->
         EIf a t
           <$> transform name f e1
@@ -115,6 +121,12 @@ instance TreeTransform Expression t where
         ECompiledMatch a t
           <$> transform name f e
           <*> traverse (transform name f) cs
+      EFold{} ->
+        error "EFold"
+      expr@EUnaryOperator{} ->
+        pure expr
+      expr@EBinaryOperator{} ->
+        pure expr
 
 replace :: (Ord t) => Name -> (a -> t -> Expression a t) -> Expression a t -> Expression a t
 replace name f = runIdentity . transform name (pure <$$> f)

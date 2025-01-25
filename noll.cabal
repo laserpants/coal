@@ -33,6 +33,7 @@ library
       Noll.Compiler.PatternMatching.Envelope
       Noll.Compiler.PatternMatching.Equation
       Noll.Compiler.PatternMatching.Rule
+      Noll.Compiler.Transform
       Noll.Compiler.Transform.Expression
       Noll.Compiler.Transform.Fold
       Noll.Compiler.Transform.Pattern
