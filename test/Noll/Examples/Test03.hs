@@ -136,7 +136,75 @@ moduleBinarySearch =
                             )
                           :| []
                       )
-                      Nothing
+                      ( Just
+                          ( ERecursiveLet
+                              ()
+                              (PVariable () (Label () "$fold.1"))
+                              ( ELambda
+                                  ()
+                                  (PVariable () (Label () "$fold.1.expr") :| [])
+                                  ( EMatch
+                                      ()
+                                      ()
+                                      (EVariable () (Label () "$fold.1.expr"))
+                                      ( EClause
+                                          ()
+                                          ( PConstructor
+                                              ()
+                                              (Label () "Node")
+                                              [ PVariable () (Label () "y")
+                                              , PVariable () (Label () "lhs")
+                                              , PVariable () (Label () "rhs")
+                                              ]
+                                          )
+                                          ( CPlain
+                                              ()
+                                              []
+                                              ( EApplication
+                                                  ()
+                                                  ()
+                                                  ( EBinaryOperator
+                                                      ()
+                                                      ( ()
+                                                      , OListConcatenation
+                                                      )
+                                                  )
+                                                  ( EApplication
+                                                      ()
+                                                      ()
+                                                      (EVariable () (Label () "$fold:1"))
+                                                      (EVariable () (Label () "lhs") :| [])
+                                                      <| EListCons
+                                                        ()
+                                                        ()
+                                                        (EVariable () (Label () "y"))
+                                                        ( EApplication
+                                                            ()
+                                                            ()
+                                                            (EVariable () (Label () "$fold:1"))
+                                                            (EVariable () (Label () "rhs") :| [])
+                                                        )
+                                                      :| []
+                                                  )
+                                              )
+                                              :| []
+                                          )
+                                          <| EClause
+                                            ()
+                                            (PConstructor () (Label () "Leaf") [])
+                                            (CPlain () [] (EListLiteral () () []) :| [])
+                                          :| []
+                                      )
+                                  )
+                              )
+                              ( EApplication
+                                  ()
+                                  ()
+                                  (EVariable () (Label () "$fold.1"))
+                                  (EVariable () (Label () "tree") :| [])
+                              )
+                          )
+                      )
                   )
               )
           )
