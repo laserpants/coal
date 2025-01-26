@@ -15,7 +15,7 @@ data Module a k t = Module Path [Name] [Definition a k t]
 
 {-# INLINE overModuleDefinitions #-}
 overModuleDefinitions :: ([Definition a k t] -> [Definition a k t]) -> Module a k t -> Module a k t
-overModuleDefinitions fn (Module path names om) = Module path names (fn om)
+overModuleDefinitions fn (Module path names defs) = Module path names (fn defs)
 
 {-# INLINE insertDefinition #-}
 insertDefinition :: Definition a k t -> Module a k t -> Module a k t
