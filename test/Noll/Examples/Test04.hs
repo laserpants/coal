@@ -15,6 +15,7 @@ import Noll.Language (
   Clause (..),
   Expression (..),
   Function (..),
+  IndexedType,
   Intrinsic (..),
   Module (..),
   Object (..),
@@ -24,7 +25,6 @@ import Noll.Language (
   Trait (..),
   Type (..),
   Uses (..),
-  IndexedType,
  )
 
 import qualified Noll.Language.Module as Module

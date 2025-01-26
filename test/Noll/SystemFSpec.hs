@@ -46,27 +46,27 @@ spec =
       it "" $
         hasNoErrors fixture1
       it "let f = fn(x) => x in (f(f))(f(1))" $ do
-        typedExpression fixture2 == fixture2Typed
+        typedExpressionShouldMatch fixture2Typed fixture2
       it "" $
         hasNoErrors fixture2
       it "match(p) { | MkPair(fst, snd) => true }" $ do
-        typedExpression fixture12 == fixture12Typed
+        typedExpressionShouldMatch fixture12Typed fixture12
       it "" $
         hasNoErrors fixture12
       it "match(p : Pair(int32, bool)) { | MkPair(fst, snd) => true }" $ do
-        typedExpression fixture13 == fixture13Typed
+        typedExpressionShouldMatch fixture13Typed fixture13
       it "" $
         hasNoErrors fixture13
       it "match(p : Pair(a, b)) { | MkPair(fst, snd) => true }" $ do
-        typedExpression fixture14 == fixture14Typed
+        typedExpressionShouldMatch fixture14Typed fixture14
       it "" $
         hasNoErrors fixture14
       it "match(p : Pair(a, a)) { | MkPair(fst, snd) => true }" $ do
-        typedExpression fixture15 == fixture15Typed
+        typedExpressionShouldMatch fixture15Typed fixture15
       it "" $
         hasNoErrors fixture15
       it "" $ do
-        typedExpression fixture17 == fixture17Typed
+        typedExpressionShouldMatch fixture17Typed fixture17
       it "" $
         hasNoErrors fixture17
       it "" $
