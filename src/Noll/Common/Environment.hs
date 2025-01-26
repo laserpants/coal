@@ -22,7 +22,7 @@ newtype Environment e = Environment {environmentDictionary :: Dictionary e}
 
 {-# INLINE overEnvironment #-}
 overEnvironment :: (Dictionary e -> Dictionary e) -> Environment e -> Environment e
-overEnvironment fn Environment{..} = Environment{environmentDictionary = fn environmentDictionary, ..}
+overEnvironment fn (Environment e) = Environment (fn e)
 
 {-# INLINE new #-}
 new :: Environment a
