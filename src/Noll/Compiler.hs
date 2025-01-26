@@ -79,6 +79,7 @@ data CompilerState a = CompilerState
   , compilerTypeAnnotationParams :: Dictionary (a, TypeIndex Kind)
   , compilerSolverRuleViolations :: [InferenceRule Kind a]
   , compilerNameEnvironment :: Environment (Scheme TypeIndex Kind IndexedType)
+  , compilerSubstitution :: Substitution
   , compilerSupply :: Int
   }
   deriving (Show, Eq, Ord, Read)
@@ -111,6 +112,7 @@ initialCompilerState =
     , compilerTypeAnnotationParams = mempty
     , compilerSolverRuleViolations = []
     , compilerNameEnvironment = mempty
+    , compilerSubstitution = mempty
     , compilerSupply = 0
     }
 
@@ -142,6 +144,10 @@ getConstraintsGenerationErrorsC = gets compilerConstraintsGenerationErrors
 {-# INLINE getSolverRuleViolationsC #-}
 getSolverRuleViolationsC :: Compiler a [InferenceRule Kind a]
 getSolverRuleViolationsC = gets compilerSolverRuleViolations
+
+{-# INLINE insertNameC #-}
+insertNameC :: Name -> Scheme TypeIndex Kind IndexedType -> Compiler a ()
+insertNameC name scheme = modify (overCompilerNameEnvironment (Environment.insert name scheme))
 
 {-# INLINE insertNamesC #-}
 insertNamesC :: [(Name, Scheme TypeIndex Kind IndexedType)] -> Compiler a ()
@@ -253,3 +259,7 @@ typeCheckConstantC g@(Constant loc (Uses _ t) e) = do
       (EVariable loc (Label t placeholder))
  where
   placeholder = "$$$.constant"
+
+typeCheckModuleC = do
+  undefined
+

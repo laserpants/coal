@@ -125,6 +125,10 @@ data ConstraintsGenerationContext o k t = ConstraintsGenerationContext
   }
   deriving (Show, Eq, Ord, Read)
 
+{-# INLINE overConstraintsGenerationMonomorphicSet #-}
+overConstraintsGenerationMonomorphicSet :: (MonomorphicSet (o k) -> MonomorphicSet (o k)) -> ConstraintsGenerationContext o k t -> ConstraintsGenerationContext o k t
+overConstraintsGenerationMonomorphicSet fn ConstraintsGenerationContext{..} = ConstraintsGenerationContext{constraintsGenerationContextMonomorphicSet = fn constraintsGenerationContextMonomorphicSet, ..}
+
 data ConstraintsGenerationState c = ConstraintsGenerationState
   { constraintsGenerationStateTypeIndexes :: Dictionary (c, TypeIndex Kind)
   , constraintsGenerationStateSupply :: Int
@@ -173,10 +177,6 @@ updateConstraintsGenerationSupply supply = modify (overConstraintsGenerationStat
 {-# INLINE getConstraintsGenerationSupply #-}
 getConstraintsGenerationSupply :: ConstraintsGenerationStack c o k t Int
 getConstraintsGenerationSupply = gets constraintsGenerationStateSupply
-
-{-# INLINE overConstraintsGenerationMonomorphicSet #-}
-overConstraintsGenerationMonomorphicSet :: (MonomorphicSet (o k) -> MonomorphicSet (o k)) -> ConstraintsGenerationContext o k t -> ConstraintsGenerationContext o k t
-overConstraintsGenerationMonomorphicSet fn ConstraintsGenerationContext{..} = ConstraintsGenerationContext{constraintsGenerationContextMonomorphicSet = fn constraintsGenerationContextMonomorphicSet, ..}
 
 {-# INLINE monosetInsert #-}
 monosetInsert :: (Ord k) => TypeIndex k -> MonomorphicSet (TypeIndex k) -> MonomorphicSet (TypeIndex k)
