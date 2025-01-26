@@ -23,7 +23,7 @@ data Definition a k t
     DCodata a Name -- TODO
   | -- | Function definition
     DFunction Name (Function Expression a t)
-  | -- | Other top-level definitions
+  | -- | Other (constant) top-level definitions
     DConstant Name (Constant Expression a t)
   | -- | Type signature
     DSignature Name (Uses (Type TypeIndex k))

@@ -57,7 +57,7 @@ data Expression a t
     EListLiteral a t [Expression a t]
   | -- | Pattern matching expression
     EMatch a t (Expression a t) (List1 (Clause Expression a t))
-  | -- | TODO
+  | -- | Compiled match expression
     ECompiledMatch a t (Expression a t) (List1 (CompiledClause Expression a t))
   | -- | Fold expression
     EFold a t (List1 (Expression a t)) (List1 (Clause Expression a t)) (Maybe (Expression a t))
