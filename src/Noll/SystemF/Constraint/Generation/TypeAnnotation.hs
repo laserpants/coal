@@ -52,7 +52,7 @@ type TypeAnnotationContext = ConstraintsGenContext TypeIndex Kind IndexedType
 
 {-# INLINE lookupTypeConstructor #-}
 lookupTypeConstructor :: (MonadReader TypeAnnotationContext m) => Name -> m (Maybe Kind)
-lookupTypeConstructor name = Environment.lookup name <$> asks constraintsGenerationContextTypeConstructorEnv
+lookupTypeConstructor name = Environment.lookup name <$> asks constraintsGenContextTypeConstructorEnv
 
 instantiateAnnotation ::
   (MonadReader TypeAnnotationContext m, MonadState (ConstraintsGenState a) m) =>

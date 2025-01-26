@@ -171,14 +171,14 @@ runConstraintsGenC :: Int -> ConstraintsGenStack c TypeIndex Kind IndexedType r 
 runConstraintsGenC index stack = do
   env <- ask
   let (result, ConstraintsGenState{..}, output) = runConstraintsGenStack index (context env) stack
-  updateSupplyC constraintsGenerationStateSupply
-  pure (result, constraintsGenerationStateTypeIndexes, output)
+  updateSupplyC constraintsGenStateSupply
+  pure (result, constraintsGenStateTypeIndexes, output)
  where
   context CompilerEnvironment{..} =
     ConstraintsGenContext
-      { constraintsGenerationContextMonomorphicSet = mempty
-      , constraintsGenerationContextDataConstructorEnv = compilerDataConstructorEnv
-      , constraintsGenerationContextTypeConstructorEnv = compilerTypeConstructorEnv
+      { constraintsGenContextMonomorphicSet = mempty
+      , constraintsGenContextDataConstructorEnv = compilerDataConstructorEnv
+      , constraintsGenContextTypeConstructorEnv = compilerTypeConstructorEnv
       }
 
 type CompilerAssumption = Assumption IndexedType

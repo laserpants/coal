@@ -119,39 +119,39 @@ data ConstraintsGenError a
   deriving (Show, Eq, Ord, Read)
 
 data ConstraintsGenContext o k t = ConstraintsGenContext
-  { constraintsGenerationContextMonomorphicSet :: MonomorphicSet (o k)
-  , constraintsGenerationContextDataConstructorEnv :: Environment (Constructor o k t)
-  , constraintsGenerationContextTypeConstructorEnv :: Environment k
+  { constraintsGenContextMonomorphicSet :: MonomorphicSet (o k)
+  , constraintsGenContextDataConstructorEnv :: Environment (Constructor o k t)
+  , constraintsGenContextTypeConstructorEnv :: Environment k
   }
   deriving (Show, Eq, Ord, Read)
 
 {-# INLINE overConstraintsGenMonomorphicSet #-}
 overConstraintsGenMonomorphicSet :: (MonomorphicSet (o k) -> MonomorphicSet (o k)) -> ConstraintsGenContext o k t -> ConstraintsGenContext o k t
-overConstraintsGenMonomorphicSet fn ConstraintsGenContext{..} = ConstraintsGenContext{constraintsGenerationContextMonomorphicSet = fn constraintsGenerationContextMonomorphicSet, ..}
+overConstraintsGenMonomorphicSet fn ConstraintsGenContext{..} = ConstraintsGenContext{constraintsGenContextMonomorphicSet = fn constraintsGenContextMonomorphicSet, ..}
 
 data ConstraintsGenState c = ConstraintsGenState
-  { constraintsGenerationStateTypeIndexes :: Dictionary (c, TypeIndex Kind)
-  , constraintsGenerationStateSupply :: Int
+  { constraintsGenStateTypeIndexes :: Dictionary (c, TypeIndex Kind)
+  , constraintsGenStateSupply :: Int
   }
   deriving (Show, Eq, Ord, Read)
 
 {-# INLINE overConstraintsGenStateTypeIndexes #-}
 overConstraintsGenStateTypeIndexes :: (Dictionary (c, TypeIndex Kind) -> Dictionary (c, TypeIndex Kind)) -> ConstraintsGenState c -> ConstraintsGenState c
-overConstraintsGenStateTypeIndexes fn ConstraintsGenState{..} = ConstraintsGenState{constraintsGenerationStateTypeIndexes = fn constraintsGenerationStateTypeIndexes, ..}
+overConstraintsGenStateTypeIndexes fn ConstraintsGenState{..} = ConstraintsGenState{constraintsGenStateTypeIndexes = fn constraintsGenStateTypeIndexes, ..}
 
 {-# INLINE overConstraintsGenStateSupply #-}
 overConstraintsGenStateSupply :: (Int -> Int) -> ConstraintsGenState c -> ConstraintsGenState c
-overConstraintsGenStateSupply fn ConstraintsGenState{..} = ConstraintsGenState{constraintsGenerationStateSupply = fn constraintsGenerationStateSupply, ..}
+overConstraintsGenStateSupply fn ConstraintsGenState{..} = ConstraintsGenState{constraintsGenStateSupply = fn constraintsGenStateSupply, ..}
 
 instance Supply (ConstraintsGenState c) where
   updateSupply = overConstraintsGenStateSupply
-  getSupply = constraintsGenerationStateSupply
+  getSupply = constraintsGenStateSupply
 
 type ConstraintsGenOutput c o k t = Either (ConstraintsGenError c) (Constraint (InferenceRule k c) o k t)
 
 type ConstraintsGenMonad c o k t = RWS (ConstraintsGenContext o k t) [ConstraintsGenOutput c o k t] (ConstraintsGenState c)
 
-newtype ConstraintsGenStack c o k t a = ConstraintsGenStack {constraintsGenerationMonad :: ConstraintsGenMonad c o k t a}
+newtype ConstraintsGenStack c o k t a = ConstraintsGenStack {constraintsGenMonad :: ConstraintsGenMonad c o k t a}
   deriving
     ( Functor
     , Applicative
@@ -164,11 +164,11 @@ newtype ConstraintsGenStack c o k t a = ConstraintsGenStack {constraintsGenerati
 
 {-# INLINE evalConstraintsGenStack #-}
 evalConstraintsGenStack :: Int -> ConstraintsGenContext o k t -> ConstraintsGenStack c o k t a -> (a, [ConstraintsGenOutput c o k t])
-evalConstraintsGenStack supply ctx a = evalRWS (constraintsGenerationMonad a) ctx (ConstraintsGenState mempty supply)
+evalConstraintsGenStack supply ctx a = evalRWS (constraintsGenMonad a) ctx (ConstraintsGenState mempty supply)
 
 {-# INLINE runConstraintsGenStack #-}
 runConstraintsGenStack :: Int -> ConstraintsGenContext o k t -> ConstraintsGenStack c o k t a -> (a, ConstraintsGenState c, [ConstraintsGenOutput c o k t])
-runConstraintsGenStack supply ctx a = runRWS (constraintsGenerationMonad a) ctx (ConstraintsGenState mempty supply)
+runConstraintsGenStack supply ctx a = runRWS (constraintsGenMonad a) ctx (ConstraintsGenState mempty supply)
 
 {-# INLINE updateConstraintsGenSupply #-}
 updateConstraintsGenSupply :: Int -> ConstraintsGenStack c o k t ()
@@ -176,7 +176,7 @@ updateConstraintsGenSupply supply = modify (overConstraintsGenStateSupply (const
 
 {-# INLINE getConstraintsGenSupply #-}
 getConstraintsGenSupply :: ConstraintsGenStack c o k t Int
-getConstraintsGenSupply = gets constraintsGenerationStateSupply
+getConstraintsGenSupply = gets constraintsGenStateSupply
 
 {-# INLINE monosetInsert #-}
 monosetInsert :: (Ord k) => TypeIndex k -> MonomorphicSet (TypeIndex k) -> MonomorphicSet (TypeIndex k)

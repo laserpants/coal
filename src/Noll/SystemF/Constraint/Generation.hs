@@ -80,7 +80,7 @@ type ConstraintsGen a = ConstraintsGenStack a TypeIndex Kind IndexedType
 
 {-# INLINE lookupDataConstructor #-}
 lookupDataConstructor :: Name -> ConstraintsGenStack c o k t (Maybe (Constructor o k t))
-lookupDataConstructor name = asks (Environment.lookup name . constraintsGenerationContextDataConstructorEnv)
+lookupDataConstructor name = asks (Environment.lookup name . constraintsGenContextDataConstructorEnv)
 
 assertEqualityAssumptions :: a -> IndexedType -> [Assumption IndexedType] -> ConstraintsGen a ()
 assertEqualityAssumptions loc t ms =
@@ -91,7 +91,7 @@ assertEqualityAssumptions loc t ms =
 
 assertImplicitAssumptions :: a -> IndexedType -> [Assumption IndexedType] -> ConstraintsGen a ()
 assertImplicitAssumptions loc t ms = do
-  set <- asks constraintsGenerationContextMonomorphicSet
+  set <- asks constraintsGenContextMonomorphicSet
   tellRight $ do
     Assumption{..} <- ms
     -- TODO
