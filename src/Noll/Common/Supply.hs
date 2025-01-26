@@ -7,7 +7,6 @@
 module Noll.Common.Supply (
   Supply (..),
   supply,
-  --  supplyN,
   supplied,
   suppliedName,
 ) where
@@ -31,9 +30,6 @@ supply = do
   n <- get
   modify (updateSupply succ)
   pure n
-
--- supplyN :: (MonadState s m, Supply s) => Int -> m [s]
--- supplyN n = replicateM n supply
 
 supplied :: (MonadState s m, Supply s) => (Int -> a) -> m a
 supplied f = f . getSupply <$> supply
