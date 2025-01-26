@@ -9,8 +9,7 @@ module Noll.Common.Environment (
   fromList,
   lookup,
   elems,
-)
-where
+) where
 
 import Noll.Utils (Dictionary, Name)
 import Prelude hiding (lookup)
