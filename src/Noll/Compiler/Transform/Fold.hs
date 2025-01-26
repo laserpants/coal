@@ -5,7 +5,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Compiler.Transform.Fold where
+module Noll.Compiler.Transform.Fold (
+  CompileFoldsContext (..),
+  runFoldTransform,
+  expandFoldExpr,
+) where
 
 import Control.Monad.Reader (MonadReader, ReaderT, runReaderT)
 import Control.Monad.State (MonadState, State, evalState)
