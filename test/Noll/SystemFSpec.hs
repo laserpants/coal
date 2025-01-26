@@ -1,15 +1,18 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.SystemFSpec (spec) where
+-- module Noll.SystemFSpec (spec) where
+module Noll.SystemFSpec where
 
 import Data.List.NonEmpty ((<|))
 import Noll.Common.List1 (NonEmpty (..))
 import Noll.Label (Label (..))
 import Noll.Language (
+  BinaryOperator (..),
   Binding (..),
   Choice (..),
   Clause (..),
   Expression (..),
+  Function (..),
   IndexedType,
   Intrinsic (..),
   Kind (..),
@@ -18,6 +21,7 @@ import Noll.Language (
   Primitive (..),
   Type (..),
   TypeIndex (..),
+  Uses (..),
  )
 import Noll.SystemF.Constraint.Assumption (Assumption (..))
 import Noll.SystemFSpec.TestRunner
@@ -79,32 +83,51 @@ spec =
         numberOfErrors fixture26 == 1
       it "" $
         assumptions fixture27 == []
+    describe "" $ do
+      it "" $ do
+        typedFunctionShouldMatch fixture29Typed fixture29
+      it "" $ do
+        typedExpressionShouldMatch fixture30Typed fixture30
+      it "" $ do
+        typedExpressionShouldMatch fixture31Typed fixture31
+
+-- typedExpression_ :: Function Expression () () -> Function Expression () (Type TypeIndex Kind)
+typedExpression_ e = testRunner runTypedExpressionTest mempty e
+
+-- typedFunction_ :: Function Expression () () -> Function Expression () (Type TypeIndex Kind)
+typedFunction_ f = testRunner runTypedFunctionTest mempty f
+
+typedFunction :: Function Expression () () -> Function Expression () (Type TypeIndex Kind)
+typedFunction f = testResultExpression (testRunner runTypedFunctionTest mempty f)
+
+typedFunctionShouldMatch :: Function Expression () (Type TypeIndex Kind) -> Function Expression () () -> Bool
+typedFunctionShouldMatch f0 f = testResultExpression (testRunner runTypedFunctionTest mempty f) == f0
 
 typedExpression :: Expression () () -> Expression () (Type TypeIndex Kind)
-typedExpression e = testResultExpression (testRunner mempty e)
+typedExpression e = testResultExpression (testRunner runTypedExpressionTest mempty e)
 
 typedExpressionShouldMatch :: Expression () (Type TypeIndex Kind) -> Expression () () -> Bool
-typedExpressionShouldMatch e0 e = testResultExpression (testRunner mempty e) == e0
+typedExpressionShouldMatch e0 e = testResultExpression (testRunner runTypedExpressionTest mempty e) == e0
 
 assumptions :: Expression () () -> [Assumption IndexedType]
-assumptions e = testResultAssumptions (testRunner mempty e)
+assumptions e = testResultAssumptions (testRunner runTypedExpressionTest mempty e)
 
 hasNoAssumptions :: Expression () () -> Bool
-hasNoAssumptions e = null (testResultAssumptions (testRunner mempty e))
+hasNoAssumptions e = null (testResultAssumptions (testRunner runTypedExpressionTest mempty e))
 
 hasNoErrors :: Expression () () -> Bool
 hasNoErrors e = null errs1 && null errs2
  where
   errs1 = testResultErrors1 result
   errs2 = testResultErrors2 result
-  result = testRunner mempty e
+  result = testRunner runTypedExpressionTest mempty e
 
 numberOfErrors :: Expression () () -> Int
 numberOfErrors e = length errs1 + length errs2
  where
   errs1 = testResultErrors1 result
   errs2 = testResultErrors2 result
-  result = testRunner mempty e
+  result = testRunner runTypedExpressionTest mempty e
 
 -- fn(m) => let y = m in let x = y(true) in x
 fixture1 :: Expression () ()
@@ -820,3 +843,147 @@ fixture28 =
           :| []
       )
   )
+
+fixture29 :: Function Expression () ()
+fixture29 =
+  Function
+    ()
+    (Uses [] ())
+    ( PAnnotation
+        ()
+        (TVariable (Parameter () "a"))
+        (PVariable () (Label () "n"))
+        :| []
+    )
+    ( EApplication
+        ()
+        ()
+        (EBinaryOperator () ((), OReverseComposition))
+        ( EVariable () (Label () "not")
+            <| EApplication
+              ()
+              ()
+              (EVariable () (Label () "less_than_or_equal_to"))
+              (EVariable () (Label () "n") :| [])
+              :| []
+        )
+    )
+
+fixture29Typed :: Function Expression () (Type TypeIndex Kind)
+fixture29Typed =
+  Function
+    ()
+    (Uses [] undefined)
+    ( PAnnotation
+        ()
+        (TVariable (Parameter () "a"))
+        (PVariable () (Label undefined "n"))
+        :| []
+    )
+    ( EApplication
+        ()
+        undefined
+        (EBinaryOperator () (undefined, OReverseComposition))
+        ( EVariable () (Label undefined "not")
+            <| EApplication
+              ()
+              undefined
+              (EVariable () (Label undefined "less_than_or_equal_to"))
+              (EVariable () (Label undefined "n") :| [])
+              :| []
+        )
+    )
+
+--
+-- let
+--   f =
+--     fn(x) =>
+--       x
+--   in
+--     f(1)
+--
+fixture30 :: Expression () ()
+fixture30 =
+  ELet
+    ()
+    ( BPattern
+        ()
+        (PVariable () (Label () "f"))
+        ( ELambda
+            ()
+            (PVariable () (Label () "x") :| [])
+            (EVariable () (Label () "x"))
+        )
+        :| []
+    )
+    ( EApplication
+        ()
+        ()
+        (EVariable () (Label () "f"))
+        (ELiteral () (LInt32 1) :| [])
+    )
+
+fixture30Typed :: Expression () IndexedType
+fixture30Typed =
+  ELet
+    ()
+    ( BPattern
+        ()
+        (PVariable () (Label undefined "f"))
+        ( ELambda
+            ()
+            (PVariable () (Label undefined "x") :| [])
+            (EVariable () (Label undefined "x"))
+        )
+        :| []
+    )
+    ( EApplication
+        ()
+        undefined
+        (EVariable () (Label undefined "f"))
+        (ELiteral () (LInt32 1) :| [])
+    )
+
+-- let
+--   f(x) = x
+--   in
+--     f(1)
+--
+fixture31 :: Expression () ()
+fixture31 =
+  ELet
+    ()
+    ( BFunction
+        ()
+        "f"
+        (PVariable () (Label () "x") :| [])
+        (EVariable () (Label () "x"))
+        :| []
+    )
+    ( EApplication
+        ()
+        ()
+        (EVariable () (Label () "f"))
+        (ELiteral () (LInt32 1) :| [])
+    )
+
+fixture31Typed :: Expression () IndexedType
+fixture31Typed =
+  ELet
+    ()
+    ( BFunction
+        ()
+        "f"
+        (PVariable () (Label undefined "x") :| [])
+        (EVariable () (Label undefined "x"))
+        :| []
+    )
+    ( EApplication
+        ()
+        undefined
+        (EVariable () (Label undefined "f"))
+        (ELiteral () (LInt32 1) :| [])
+    )
+
+baz =
+  mapM_ print $ testResultAssumptions $ Noll.SystemFSpec.typedFunction_ Noll.SystemFSpec.fixture29

@@ -231,14 +231,17 @@ collectConstraints =
             collectConstraints e
           BFunction _ _ ps e -> do
             ms <- withMonomorphic ps (collectConstraints e)
-            concatForM ps (patternConstraints (assertEqualityAssumptions loc) ms)
-            pure ms
+            names <- concatForM ps (patternConstraints (assertEqualityAssumptions loc) ms)
+            pure (filter (assumptionNameIsNotOneOf names) ms)
       names <- concatForM gs $
         \case
           BPattern _ p _ ->
             patternConstraints (assertImplicitAssumptions loc) ms1 p
-          BFunction _ _ ps e ->
-            concatMapM (patternConstraints (assertImplicitAssumptions loc) ms1) ps
+          BFunction _ name ps e -> do
+            let t1 = foldType (typeOf e) (typeOf <$> ps)
+            assertImplicitAssumptions loc t1 (filter (assumptionNameIs name) ms1)
+            names <- concatMapM (patternConstraints (assertEqualityAssumptions loc) ms1) ps
+            pure (name : names)
       pure (filter (assumptionNameIsNotOneOf names) ms1 <> ms2)
     EIf loc t e1 e2 e3 -> do
       ms1 <- collectConstraints e1

@@ -153,6 +153,8 @@ instance Substitutable (Binding Expression a IndexedType) where
     \case
       BPattern a p e ->
         BPattern a (apply sub p) (apply sub e)
+      BFunction a name ps e ->
+        BFunction a name (apply sub ps) (apply sub e)
 
 instance Substitutable (Guard Expression a IndexedType) where
   apply sub =

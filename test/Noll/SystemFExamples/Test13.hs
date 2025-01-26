@@ -62,6 +62,18 @@ tree0Type = treeType 0
 maxMin0Type :: IndexedType
 maxMin0Type = maxMinType 0
 
+tvariable1 :: IndexedType
+tvariable1 = tvariable 1
+
+list1Type :: IndexedType
+list1Type = listType 1
+
+tree1Type :: IndexedType
+tree1Type = treeType 1
+
+maxMin1Type :: IndexedType
+maxMin1Type = maxMinType 1
+
 spec :: Spec
 spec =
   describe "" $
@@ -258,20 +270,20 @@ fixture1 :: Function Expression () (Type TypeIndex Kind)
 fixture1 =
   Function
     ()
-    (Uses [] (list0Type))
-    (PAnnotation () (TApplication () (TConstructor () "Tree") (TVariable (Parameter () "a") :| [])) (PVariable () (Label tree0Type "tree")) :| [])
+    (Uses [] (list1Type))
+    (PAnnotation () (TApplication () (TConstructor () "Tree") (TVariable (Parameter () "a") :| [])) (PVariable () (Label tree1Type "tree")) :| [])
     ( EFold
         ()
-        list0Type
-        (EVariable () (Label tree0Type "tree") :| [])
+        list1Type
+        (EVariable () (Label tree1Type "tree") :| [])
         ( EClause
             ()
             ( PConstructor
                 ()
-                (Label tree0Type "Node")
-                [ PVariable () (Label tvariable0 "y")
-                , PAtVariable () (Label tree0Type "lhs")
-                , PAtVariable () (Label tree0Type "rhs")
+                (Label tree1Type "Node")
+                [ PVariable () (Label tvariable1 "y")
+                , PAtVariable () (Label tree1Type "lhs")
+                , PAtVariable () (Label tree1Type "rhs")
                 ]
             )
             ( CPlain
@@ -279,10 +291,10 @@ fixture1 =
                 []
                 ( EApplication
                     ()
-                    list0Type
-                    (EBinaryOperator () (list0Type `TArrow` list0Type `TArrow` list0Type, OListConcatenation))
-                    ( EVariable () (Label list0Type "lhs")
-                        <| EListCons () list0Type (EVariable () (Label tvariable0 "y")) (EVariable () (Label list0Type "rhs"))
+                    list1Type
+                    (EBinaryOperator () (list1Type `TArrow` list1Type `TArrow` list1Type, OListConcatenation))
+                    ( EVariable () (Label list1Type "lhs")
+                        <| EListCons () list1Type (EVariable () (Label tvariable1 "y")) (EVariable () (Label list1Type "rhs"))
                           :| []
                     )
                 )
@@ -290,11 +302,11 @@ fixture1 =
             )
             <| EClause
               ()
-              (PConstructor () (Label tree0Type "Leaf") [])
+              (PConstructor () (Label tree1Type "Leaf") [])
               ( CPlain
                   ()
                   []
-                  (EListLiteral () list0Type [])
+                  (EListLiteral () list1Type [])
                   :| []
               )
               :| []
@@ -302,22 +314,22 @@ fixture1 =
         ( Just
             ( ERecursiveLet
                 ()
-                (PVariable () (Label (treeType 1 `TArrow` listType 1) "$fold:1"))
+                (PVariable () (Label (tree0Type `TArrow` list0Type) "$fold:1"))
                 ( ELambda
                     ()
-                    (PVariable () (Label (treeType 1) "$fold:1:expr") :| [])
+                    (PVariable () (Label (tree0Type) "$fold:1:expr") :| [])
                     ( EMatch
                         ()
-                        (listType 1)
-                        (EVariable () (Label (treeType 1) "$fold:1:expr"))
+                        (list0Type)
+                        (EVariable () (Label (tree0Type) "$fold:1:expr"))
                         ( EClause
                             ()
                             ( PConstructor
                                 ()
-                                (Label (treeType 1) "Node")
-                                [ PVariable () (Label (tvariable 1) "y")
-                                , PVariable () (Label (treeType 1) "lhs")
-                                , PVariable () (Label (treeType 1) "rhs")
+                                (Label (tree0Type) "Node")
+                                [ PVariable () (Label (tvariable0) "y")
+                                , PVariable () (Label (tree0Type) "lhs")
+                                , PVariable () (Label (tree0Type) "rhs")
                                 ]
                             )
                             ( CPlain
@@ -325,27 +337,27 @@ fixture1 =
                                 []
                                 ( EApplication
                                     ()
-                                    (listType 1)
+                                    (list0Type)
                                     ( EBinaryOperator
                                         ()
-                                        ( listType 1 `TArrow` listType 1 `TArrow` listType 1
+                                        ( list0Type `TArrow` list0Type `TArrow` list0Type
                                         , OListConcatenation
                                         )
                                     )
                                     ( EApplication
                                         ()
-                                        (listType 1)
-                                        (EVariable () (Label (treeType 1 `TArrow` listType 1) "$fold:1"))
-                                        (EVariable () (Label (treeType 1) "lhs") :| [])
+                                        (list0Type)
+                                        (EVariable () (Label (tree0Type `TArrow` list0Type) "$fold:1"))
+                                        (EVariable () (Label (tree0Type) "lhs") :| [])
                                         <| EListCons
                                           ()
-                                          (listType 1)
-                                          (EVariable () (Label (tvariable 1) "y"))
+                                          (list0Type)
+                                          (EVariable () (Label (tvariable0) "y"))
                                           ( EApplication
                                               ()
-                                              (listType 1)
-                                              (EVariable () (Label (treeType 1 `TArrow` listType 1) "$fold:1"))
-                                              (EVariable () (Label (treeType 1) "rhs") :| [])
+                                              (list0Type)
+                                              (EVariable () (Label (tree0Type `TArrow` list0Type) "$fold:1"))
+                                              (EVariable () (Label (tree0Type) "rhs") :| [])
                                           )
                                           :| []
                                     )
@@ -354,17 +366,17 @@ fixture1 =
                             )
                             <| EClause
                               ()
-                              (PConstructor () (Label (treeType 1) "Leaf") [])
-                              (CPlain () [] (EListLiteral () (listType 1) []) :| [])
+                              (PConstructor () (Label (tree0Type) "Leaf") [])
+                              (CPlain () [] (EListLiteral () (list0Type) []) :| [])
                               :| []
                         )
                     )
                 )
                 ( EApplication
                     ()
-                    (listType 0)
-                    (EVariable () (Label (treeType 0 `TArrow` listType 0) "$fold:1"))
-                    (EVariable () (Label (treeType 0) "tree") :| [])
+                    (listType 1)
+                    (EVariable () (Label (treeType 1 `TArrow` listType 1) "$fold:1"))
+                    (EVariable () (Label (treeType 1) "tree") :| [])
                 )
             )
         )

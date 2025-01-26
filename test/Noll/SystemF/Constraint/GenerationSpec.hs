@@ -106,11 +106,11 @@ testCollectConstraints e =
   let
     e0 = indexed e
    in
-    traceShow e0 $
-      evalConstraintsGenerationStack
-        (freshIdIn e0)
-        (ConstraintsGenerationContext mempty mempty mempty)
-        (collectConstraints e0)
+    --    traceShow e0 $
+    evalConstraintsGenerationStack
+      (freshIdIn e0)
+      (ConstraintsGenerationContext mempty mempty mempty)
+      (collectConstraints e0)
 
 testInstantiateAnnotation :: Type Parameter () -> Either (TypeAnnotationError ()) (Type TypeIndex Kind)
 testInstantiateAnnotation t = s
