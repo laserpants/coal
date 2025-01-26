@@ -7,7 +7,6 @@
 module Noll.Language.HasFree (
   HasBound (..),
   HasFree (..),
-  isBoundIn,
   isNotBoundIn,
   appearsFreeIn,
   appearsIn,
@@ -156,10 +155,6 @@ exceptNames free bound = Set.filter (`notInNames` bound) free
 {-# INLINE notInNames #-}
 notInNames :: (Foldable f) => Label a -> f Name -> Bool
 notInNames = notElem . labelName
-
-{-# INLINE isBoundIn #-}
-isBoundIn :: (HasBound b) => Name -> b -> Bool
-isBoundIn name obj = name `elem` boundIn obj
 
 {-# INLINE isNotBoundIn #-}
 isNotBoundIn :: (HasBound b) => Name -> b -> Bool
