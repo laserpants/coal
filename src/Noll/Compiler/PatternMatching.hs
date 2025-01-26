@@ -97,15 +97,16 @@ instance (Show a, Show t, TypeProxy t, Ord t, Monoid a) => MatchExpressionContex
 
 instance (Show a, Show t, TypeProxy t, Ord t, Monoid a) => MatchExpressionContext (Expression a t) where
   compileMatchExprs =
-    \case
-      EMatch a t e cs -> do
-        cs1 <- compileMatchExprs cs
-        name <- suppliedName
-        replaceWith name
-          <$> compileMatchExprs e
-          <*> compileClauses (Label (expressionType e) name) cs1
-      e ->
-        mapMOverExpression compileMatchExprs e
+    mapMOverExpression $
+      \case
+        EMatch a t e cs -> do
+          cs1 <- compileMatchExprs cs
+          name <- suppliedName
+          replaceWith name
+            <$> compileMatchExprs e
+            <*> compileClauses (Label (expressionType e) name) cs1
+        e ->
+          pure e
 
 compileClauses :: (Show a, Show t, TypeProxy t, Monoid a, Ord t) => Label t -> List1 (Clause Expression a t) -> MatchMonad (Expression a t)
 compileClauses ll cs = compileEnvelope <$> matchPatterns [ll] eqs MFail

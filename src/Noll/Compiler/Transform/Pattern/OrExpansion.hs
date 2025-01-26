@@ -17,15 +17,16 @@ import qualified Noll.Common.List1 as List1
 
 expandExpressionOrPatterns :: (Monad m) => Expression a t -> m (Expression a t)
 expandExpressionOrPatterns =
-  \case
-    EMatch a t e cs -> do
-      cs1 <- sconcat <$> traverse expandOrPatterns cs
-      pure (EMatch a t e cs1)
-    EFold a t es cs e -> do
-      cs1 <- sconcat <$> traverse expandOrPatterns cs
-      pure (EFold a t es cs1 e)
-    e ->
-      mapMOverExpression expandExpressionOrPatterns e
+  mapMOverExpression $
+    \case
+      EMatch a t e cs -> do
+        cs1 <- sconcat <$> traverse expandOrPatterns cs
+        pure (EMatch a t e cs1)
+      EFold a t es cs e -> do
+        cs1 <- sconcat <$> traverse expandOrPatterns cs
+        pure (EFold a t es cs1 e)
+      e ->
+        pure e
 
 class OrPattern a where
   expandOrPatterns :: (Monad m) => a -> m (List1 a)

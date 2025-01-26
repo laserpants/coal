@@ -30,7 +30,7 @@ mapOverPattern :: (Pattern a t -> Pattern a t) -> Pattern a t -> Pattern a t
 mapOverPattern f = runIdentity . overPattern (pure . f)
 
 mapMOverPattern :: (Monad m) => (Pattern a t -> m (Pattern a t)) -> Pattern a t -> m (Pattern a t)
-mapMOverPattern = overPattern
+mapMOverPattern f p = (overPattern f =<< f p)
 
 class PatternContext o p where
   overPattern :: (Monad m) => (o -> m o) -> p -> m p

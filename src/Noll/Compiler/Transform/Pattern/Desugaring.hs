@@ -75,21 +75,22 @@ instance (Monoid c) => Sugared c o k (Binding Expression c (Type o k)) where
 
 instance (Monoid c) => Sugared c o k (Expression c (Type o k)) where
   desugarPatterns =
-    \case
-      ELet a gs e1 -> do
-        e2 <- desugarPatterns e1
-        (hs, ps) <- runWriterT (traverse desugarPatterns gs)
-        pure (ELet a hs (foldr unrollMatch e2 ps))
-      ERecursiveLet a p e1 e2 -> do
-        (p1, ps) <- runWriterT (desugarPatterns p)
-        q1 <- BPattern a p1 <$> desugarPatterns e1
-        pure (ELet a (q1 :| []) (foldr unrollMatch e2 ps))
-      ELambda a ps e -> do
-        e1 <- desugarPatterns e
-        (qs, ps) <- runWriterT (traverse desugarPatterns ps)
-        pure (ELambda a qs (foldr unrollMatch e1 ps))
-      e ->
-        mapMOverExpression desugarPatterns e
+    mapMOverExpression $
+      \case
+        ELet a gs e1 -> do
+          e2 <- desugarPatterns e1
+          (hs, ps) <- runWriterT (traverse desugarPatterns gs)
+          pure (ELet a hs (foldr unrollMatch e2 ps))
+        ERecursiveLet a p e1 e2 -> do
+          (p1, ps) <- runWriterT (desugarPatterns p)
+          q1 <- BPattern a p1 <$> desugarPatterns e1
+          pure (ELet a (q1 :| []) (foldr unrollMatch e2 ps))
+        ELambda a ps e -> do
+          e1 <- desugarPatterns e
+          (qs, ps) <- runWriterT (traverse desugarPatterns ps)
+          pure (ELambda a qs (foldr unrollMatch e1 ps))
+        e ->
+          pure e
 
 unrollMatch :: (Monoid c) => (Name, Pattern c (Type o k)) -> Expression c (Type o k) -> Expression c (Type o k)
 unrollMatch (name, p) e =

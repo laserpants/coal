@@ -11,9 +11,9 @@ import Noll.Common.List1 (NonEmpty (..), (<|))
 import Noll.Label (Label (..))
 import Noll.Language (
   BinaryOperator (..),
-  Expression (..),
-  Clause (..),
   Choice (..),
+  Clause (..),
+  Expression (..),
   Function (..),
   Intrinsic (..),
   Module (..),
@@ -76,8 +76,7 @@ moduleBinarySearch =
   Module.fromObjectList
     (Path ["BinarySearch"])
     ["Tree", "build_tree", "flatten_tree"]
-    [
-      ( DAnnotation
+    [ ( DAnnotation
           (Uses [] (TIntrinsic (IList (TVariable (Parameter () "a")))))
           ( DFunction
               "flatten_tree"
