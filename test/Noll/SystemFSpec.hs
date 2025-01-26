@@ -43,43 +43,42 @@ spec =
     describe "match x { | Yes => y }" $ do
       it "" $
         assumptions fixture28 == [Assumption "x" (TConstructor KType "Answer"), Assumption "y" (TVariable (TypeIndex KType 3))]
-
-    it "" $
-      hasNoErrors fixture1
-    it "let f = fn(x) => x in (f(f))(f(1))" $ do
-      typedExpression fixture2 == fixture2Typed
-    it "" $
-      hasNoErrors fixture2
-    it "match(p) { | MkPair(fst, snd) => true }" $ do
-      typedExpression fixture12 == fixture12Typed
-    it "" $
-      hasNoErrors fixture12
-    it "match(p : Pair(int32, bool)) { | MkPair(fst, snd) => true }" $ do
-      typedExpression fixture13 == fixture13Typed
-    it "" $
-      hasNoErrors fixture13
-    it "match(p : Pair(a, b)) { | MkPair(fst, snd) => true }" $ do
-      typedExpression fixture14 == fixture14Typed
-    it "" $
-      hasNoErrors fixture14
-    it "match(p : Pair(a, a)) { | MkPair(fst, snd) => true }" $ do
-      typedExpression fixture15 == fixture15Typed
-    it "" $
-      hasNoErrors fixture15
-    it "" $ do
-      typedExpression fixture17 == fixture17Typed
-    it "" $
-      hasNoErrors fixture17
-    it "" $
-      numberOfErrors fixture22 == 1
-    it "" $
-      numberOfErrors fixture23 == 1
-    it "" $
-      numberOfErrors fixture25 == 1
-    it "" $
-      numberOfErrors fixture26 == 1
-    it "" $
-      assumptions fixture27 == []
+      it "" $
+        hasNoErrors fixture1
+      it "let f = fn(x) => x in (f(f))(f(1))" $ do
+        typedExpression fixture2 == fixture2Typed
+      it "" $
+        hasNoErrors fixture2
+      it "match(p) { | MkPair(fst, snd) => true }" $ do
+        typedExpression fixture12 == fixture12Typed
+      it "" $
+        hasNoErrors fixture12
+      it "match(p : Pair(int32, bool)) { | MkPair(fst, snd) => true }" $ do
+        typedExpression fixture13 == fixture13Typed
+      it "" $
+        hasNoErrors fixture13
+      it "match(p : Pair(a, b)) { | MkPair(fst, snd) => true }" $ do
+        typedExpression fixture14 == fixture14Typed
+      it "" $
+        hasNoErrors fixture14
+      it "match(p : Pair(a, a)) { | MkPair(fst, snd) => true }" $ do
+        typedExpression fixture15 == fixture15Typed
+      it "" $
+        hasNoErrors fixture15
+      it "" $ do
+        typedExpression fixture17 == fixture17Typed
+      it "" $
+        hasNoErrors fixture17
+      it "" $
+        numberOfErrors fixture22 == 1
+      it "" $
+        numberOfErrors fixture23 == 1
+      it "" $
+        numberOfErrors fixture25 == 1
+      it "" $
+        numberOfErrors fixture26 == 1
+      it "" $
+        assumptions fixture27 == []
 
 typedExpression :: Expression () () -> Expression () (Type TypeIndex Kind)
 typedExpression e = testResultExpression (testRunner mempty e)

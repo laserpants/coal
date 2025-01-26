@@ -139,6 +139,9 @@ test-suite noll-test
       Noll.Compiler.Transform.TreeSpec
       Noll.Compiler.Transform.Type.AliasInsertionSpec
       Noll.Examples.Test01
+      Noll.Examples.Test02
+      Noll.Examples.Test03
+      Noll.Examples.Test04
       Noll.Language.HasFreeSpec
       Noll.Language.IndexedSpec
       Noll.SystemF.Constraint.GenerationSpec
