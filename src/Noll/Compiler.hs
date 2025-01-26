@@ -262,4 +262,3 @@ typeCheckConstantC g@(Constant loc (Uses _ t) e) = do
 
 typeCheckModuleC = do
   undefined
-
