@@ -18,6 +18,7 @@ module Noll.Utils (
   lexOrderRank,
   groupByEq,
   const2,
+  Over,
   (<$$>),
   (<$$$>),
 ) where
@@ -41,6 +42,8 @@ type Name = Text
 type Dictionary = Map Name
 
 type IndexMap = Map Int
+
+type Over o n = (n -> n) -> o -> o
 
 {-# INLINE (<$$>) #-}
 (<$$>) :: (Functor f, Functor g) => (a -> b) -> f (g a) -> f (g b)
