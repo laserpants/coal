@@ -172,7 +172,7 @@ moduleBinarySearch =
                                                   ( EApplication
                                                       ()
                                                       ()
-                                                      (EVariable () (Label () "$fold:1"))
+                                                      (EVariable () (Label () "$fold.1"))
                                                       (EVariable () (Label () "lhs") :| [])
                                                       <| EListCons
                                                         ()
@@ -181,7 +181,7 @@ moduleBinarySearch =
                                                         ( EApplication
                                                             ()
                                                             ()
-                                                            (EVariable () (Label () "$fold:1"))
+                                                            (EVariable () (Label () "$fold.1"))
                                                             (EVariable () (Label () "rhs") :| [])
                                                         )
                                                       :| []

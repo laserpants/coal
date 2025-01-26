@@ -10,7 +10,9 @@ import Noll.Label (Label (..))
 import Noll.Language (BinaryOperator (..), Binding (..), Choice (..), Clause (..), Expression (..), Pattern (..), Primitive (..))
 import Test.Hspec (Spec, describe, it)
 
-import Data.Map.Strict as Map
+import qualified Data.Map.Strict as Map
+import qualified Noll.Examples.Test02 as Test02
+import qualified Noll.Examples.Test03 as Test03
 
 spec :: Spec
 spec =
@@ -18,6 +20,8 @@ spec =
     describe "" $ do
       it "" $ do
         runFoldTransform "fold" 1 (expandFoldExpr exprs1 clauses1) == result1
+      it "" $ do
+        runFoldTransform "fold" 1 (compileFolds Test02.moduleBinarySearch) == Test03.moduleBinarySearch
       it "" $ do
         runFoldTransform "fold" 1 (compileFolds test02) == test03
 
