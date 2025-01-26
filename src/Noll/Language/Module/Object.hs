@@ -15,7 +15,7 @@ newtype Path = Path {pathComponents :: [Name]}
   deriving (Show, Eq, Ord, Read)
 
 data Object a k t
-  = -- | TODO
+  = -- | Type-annotated definition
     DAnnotation (Uses (Type Parameter ())) (Object a k t)
   | -- | Type definition
     DType Name [Type TypeIndex k] [Constructor TypeIndex k (Type TypeIndex k)]
@@ -23,7 +23,7 @@ data Object a k t
     DCodata a Name -- TODO
   | -- | Function definition
     DFunction Name (Function Expression a t)
-  | -- | TODO
+  | -- | Other top-level definitions
     DConstant Name (Constant Expression a t)
   | -- | Type signature
     DSignature Name (Uses (Type TypeIndex k))
