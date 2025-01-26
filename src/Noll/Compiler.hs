@@ -63,7 +63,7 @@ import Noll.SystemF (
   runConstraintsGenStack,
   solveConstraints,
  )
-import Noll.Utils (Dictionary, Name, (<$$>))
+import Noll.Utils (Dictionary, Name, Over, (<$$>))
 
 import qualified Data.Map.Strict as Map
 import qualified Noll.Common.Environment as Environment
@@ -85,23 +85,23 @@ data CompilerState a = CompilerState
   deriving (Show, Eq, Ord, Read)
 
 {-# INLINE overCompilerStateConstraintsGenErrors #-}
-overCompilerStateConstraintsGenErrors :: ([ConstraintsGenError a] -> [ConstraintsGenError a]) -> CompilerState a -> CompilerState a
+overCompilerStateConstraintsGenErrors :: Over (CompilerState a) [ConstraintsGenError a]
 overCompilerStateConstraintsGenErrors fn CompilerState{..} = CompilerState{compilerConstraintsGenErrors = fn compilerConstraintsGenErrors, ..}
 
 {-# INLINE overCompilerTypeAnnotationParams #-}
-overCompilerTypeAnnotationParams :: (Dictionary (a, TypeIndex Kind) -> Dictionary (a, TypeIndex Kind)) -> CompilerState a -> CompilerState a
+overCompilerTypeAnnotationParams :: Over (CompilerState a) (Dictionary (a, TypeIndex Kind))
 overCompilerTypeAnnotationParams fn CompilerState{..} = CompilerState{compilerTypeAnnotationParams = fn compilerTypeAnnotationParams, ..}
 
 {-# INLINE overCompilerSolverRuleViolations #-}
-overCompilerSolverRuleViolations :: ([InferenceRule Kind a] -> [InferenceRule Kind a]) -> CompilerState a -> CompilerState a
+overCompilerSolverRuleViolations :: Over (CompilerState a) [InferenceRule Kind a]
 overCompilerSolverRuleViolations fn CompilerState{..} = CompilerState{compilerSolverRuleViolations = fn compilerSolverRuleViolations, ..}
 
 {-# INLINE overCompilerNameEnvironment #-}
-overCompilerNameEnvironment :: (Environment (Scheme TypeIndex Kind IndexedType) -> Environment (Scheme TypeIndex Kind IndexedType)) -> CompilerState a -> CompilerState a
+overCompilerNameEnvironment :: Over (CompilerState a) (Environment (Scheme TypeIndex Kind IndexedType))
 overCompilerNameEnvironment fn CompilerState{..} = CompilerState{compilerNameEnvironment = fn compilerNameEnvironment, ..}
 
 {-# INLINE overCompilerSupply #-}
-overCompilerSupply :: (Int -> Int) -> CompilerState a -> CompilerState a
+overCompilerSupply :: Over (CompilerState a) Int
 overCompilerSupply fn CompilerState{..} = CompilerState{compilerSupply = fn compilerSupply, ..}
 
 {-# INLINE initialCompilerState #-}
