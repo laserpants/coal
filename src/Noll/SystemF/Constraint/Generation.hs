@@ -55,7 +55,7 @@ import Noll.SystemF.Constraint.Generation.Internal (
   ConstraintsGenStack (..),
   InferenceRule (..),
   localMonoset,
-  monosetInsertMany,
+  monosetInsertMultiple,
   runConstraintsGenStack,
  )
 import Noll.SystemF.Constraint.Generation.TypeAnnotation (instantiateAnnotation)
@@ -98,7 +98,7 @@ assertImplicitAssumptions loc t ms = do
     pure (Implicit (InferLetImplicit loc assumptionName assumptionType t) assumptionType t set)
 
 withMonomorphic :: (TypeIndexed Kind t) => t -> ConstraintsGen a c -> ConstraintsGen a c
-withMonomorphic = localMonoset . monosetInsertMany . typeIndexesIn
+withMonomorphic = localMonoset . monosetInsertMultiple . typeIndexesIn
 
 type Assertion a = IndexedType -> [Assumption IndexedType] -> ConstraintsGen a ()
 

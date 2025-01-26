@@ -5,7 +5,7 @@ module Noll.Common.Environment (
   Environment (..),
   new,
   insert,
-  insertMany,
+  insertMultiple,
   fromList,
   lookup,
   elems,
@@ -32,13 +32,13 @@ new = mempty
 insert :: Name -> a -> Environment a -> Environment a
 insert name val = overEnvironment (Map.insert name val)
 
-{-# INLINE insertMany #-}
-insertMany :: (Foldable f) => f (Name, a) -> Environment a -> Environment a
-insertMany = flip (foldr (uncurry insert))
+{-# INLINE insertMultiple #-}
+insertMultiple :: (Foldable f) => f (Name, a) -> Environment a -> Environment a
+insertMultiple = flip (foldr (uncurry insert))
 
 {-# INLINE fromList #-}
 fromList :: [(Name, a)] -> Environment a
-fromList = (`insertMany` new)
+fromList = (`insertMultiple` new)
 
 {-# INLINE lookup #-}
 lookup :: Name -> Environment a -> Maybe a

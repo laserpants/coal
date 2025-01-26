@@ -151,7 +151,7 @@ insertNameC name scheme = modify (overCompilerNameEnvironment (Environment.inser
 
 {-# INLINE insertNamesC #-}
 insertNamesC :: [(Name, Scheme TypeIndex Kind IndexedType)] -> Compiler a ()
-insertNamesC names = modify (overCompilerNameEnvironment (Environment.insertMany names))
+insertNamesC names = modify (overCompilerNameEnvironment (Environment.insertMultiple names))
 
 {-# INLINE updateSupplyC #-}
 updateSupplyC :: Int -> Compiler a ()

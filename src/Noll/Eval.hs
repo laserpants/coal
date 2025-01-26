@@ -102,7 +102,7 @@ evalExpr =
       case v1 of
         VFun names f
           | arity == length vs ->
-              local (Environment.insertMany (names `zip` fromList1 vs)) f
+              local (Environment.insertMultiple (names `zip` fromList1 vs)) f
          where
           arity = length names
         VData con vs1 ->

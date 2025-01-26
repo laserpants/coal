@@ -14,7 +14,7 @@ module Noll.SystemF.Constraint.Generation.Internal (
   ConstraintsGenOutput (..),
   ConstraintsGenState (..),
   monosetInsert,
-  monosetInsertMany,
+  monosetInsertMultiple,
   localMonoset,
   runConstraintsGenStack,
   evalConstraintsGenStack,
@@ -182,9 +182,9 @@ getConstraintsGenSupply = gets constraintsGenStateSupply
 monosetInsert :: (Ord k) => TypeIndex k -> MonomorphicSet (TypeIndex k) -> MonomorphicSet (TypeIndex k)
 monosetInsert = overMonomorphicSet . Set.insert
 
-{-# INLINE monosetInsertMany #-}
-monosetInsertMany :: (Ord k, Foldable f) => f (TypeIndex k) -> MonomorphicSet (TypeIndex k) -> MonomorphicSet (TypeIndex k)
-monosetInsertMany = flip (foldr monosetInsert)
+{-# INLINE monosetInsertMultiple #-}
+monosetInsertMultiple :: (Ord k, Foldable f) => f (TypeIndex k) -> MonomorphicSet (TypeIndex k) -> MonomorphicSet (TypeIndex k)
+monosetInsertMultiple = flip (foldr monosetInsert)
 
 {-# INLINE localMonoset #-}
 localMonoset :: (MonomorphicSet (o k) -> MonomorphicSet (o k)) -> ConstraintsGenStack c o k t a -> ConstraintsGenStack c o k t a

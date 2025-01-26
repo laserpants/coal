@@ -7,7 +7,7 @@ module Noll.Compiler.Transform.Tree (
   TreeTransform (..),
   replace,
   replaceWith,
-  replaceManyWith,
+  replaceMultipleWith,
   rename,
 ) where
 
@@ -140,8 +140,8 @@ replace name f = runIdentity . transform name (pure <$$> f)
 replaceWith :: (Ord t) => Name -> Expression a t -> Expression a t -> Expression a t
 replaceWith name = replace name . const2
 
-replaceManyWith :: (Ord t) => [(Name, Expression a t)] -> Expression a t -> Expression a t
-replaceManyWith = flip $ foldr (uncurry replaceWith)
+replaceMultipleWith :: (Ord t) => [(Name, Expression a t)] -> Expression a t -> Expression a t
+replaceMultipleWith = flip $ foldr (uncurry replaceWith)
 
 rename :: (Ord t) => Name -> Name -> Expression a t -> Expression a t
 rename old name = replace old var where var a t = EVariable a (Label t name)
