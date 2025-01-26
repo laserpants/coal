@@ -34,6 +34,7 @@ import qualified Noll.SystemFExamples.Test13
 import qualified Noll.SystemFExamples.Test14
 import qualified Noll.SystemFExamples.Test15
 import qualified Noll.SystemFSpec
+import qualified Noll.UtilsSpec
 import Test.Hspec (hspec)
 
 main :: IO ()
@@ -68,6 +69,7 @@ main =
     Noll.Compiler.Transform.ExpressionSpec.spec
     Noll.Compiler.Transform.Type.AliasInsertionSpec.spec
     Noll.Compiler.Transform.FoldSpec.spec
+    Noll.UtilsSpec.spec
 
 --    Noll.SystemF.TypeConstraint.CollectSpec.spec
 --    Noll.SystemF.TypeSubstitutionSpec.spec
