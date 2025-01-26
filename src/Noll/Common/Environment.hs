@@ -11,16 +11,23 @@ module Noll.Common.Environment (
   elems,
 ) where
 
-import Noll.Utils (Dictionary, Name)
+import Noll.Utils (Dictionary, Name, Over)
 import Prelude hiding (lookup)
 
 import qualified Data.Map.Strict as Map
 
 newtype Environment e = Environment {environmentDictionary :: Dictionary e}
-  deriving (Show, Eq, Ord, Read, Semigroup, Monoid)
+  deriving
+    ( Show
+    , Eq
+    , Ord
+    , Read
+    , Semigroup
+    , Monoid
+    )
 
 {-# INLINE overEnvironment #-}
-overEnvironment :: (Dictionary e -> Dictionary e) -> Environment e -> Environment e
+overEnvironment :: Over (Environment e) (Dictionary e)
 overEnvironment fn (Environment e) = Environment (fn e)
 
 {-# INLINE new #-}
@@ -29,7 +36,7 @@ new = mempty
 
 {-# INLINE insert #-}
 insert :: Name -> a -> Environment a -> Environment a
-insert name val = overEnvironment (Map.insert name val)
+insert name = overEnvironment . Map.insert name
 
 {-# INLINE insertMultiple #-}
 insertMultiple :: (Foldable f) => f (Name, a) -> Environment a -> Environment a
