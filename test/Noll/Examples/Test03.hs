@@ -1,0 +1,160 @@
+{-# LANGUAGE OverloadedStrings #-}
+
+module Noll.Examples.Test03 (
+  test03,
+  moduleOrdered,
+  moduleBinarySearch,
+  moduleMain,
+) where
+
+import Noll.Common.List1 (NonEmpty (..), (<|))
+import Noll.Label (Label (..))
+import Noll.Language (
+  BinaryOperator (..),
+  Expression (..),
+  Clause (..),
+  Choice (..),
+  Function (..),
+  Intrinsic (..),
+  Module (..),
+  Object (..),
+  Parameter (..),
+  Path (..),
+  Pattern (..),
+  Trait (..),
+  Type (..),
+  Uses (..),
+ )
+
+import qualified Noll.Language.Module as Module
+
+moduleOrdered :: Module () () ()
+moduleOrdered =
+  Module.fromObjectList
+    (Path ["Ordered"])
+    []
+    [ ( DAnnotation
+          ( Uses
+              [Trait "Ordered" (TVariable (Parameter () "a"))]
+              ( TAlias
+                  "Predicate"
+                  [TVariable (Parameter () "a")]
+                  (TVariable (Parameter () "a") `TArrow` TIntrinsic IBool)
+              )
+          )
+          ( DFunction
+              "greater_than"
+              ( Function
+                  ()
+                  (Uses [] ())
+                  ( PAnnotation
+                      ()
+                      (TVariable (Parameter () "a"))
+                      (PVariable () (Label () "n"))
+                      :| []
+                  )
+                  ( EApplication
+                      ()
+                      ()
+                      (EBinaryOperator () ((), OReverseComposition))
+                      ( EVariable () (Label () "not")
+                          <| EApplication
+                            ()
+                            ()
+                            (EVariable () (Label () "less_than_or_equal_to"))
+                            (EVariable () (Label () "n") :| [])
+                          :| []
+                      )
+                  )
+              )
+          )
+      )
+    ]
+
+moduleBinarySearch :: Module () () ()
+moduleBinarySearch =
+  Module.fromObjectList
+    (Path ["BinarySearch"])
+    ["Tree", "build_tree", "flatten_tree"]
+    [
+      ( DAnnotation
+          (Uses [] (TIntrinsic (IList (TVariable (Parameter () "a")))))
+          ( DFunction
+              "flatten_tree"
+              ( Function
+                  ()
+                  (Uses [] ())
+                  ( PAnnotation
+                      ()
+                      ( TApplication
+                          ()
+                          (TConstructor () "Tree")
+                          (TVariable (Parameter () "a") :| [])
+                      )
+                      (PVariable () (Label () "tree"))
+                      :| []
+                  )
+                  ( EFold
+                      ()
+                      ()
+                      (EVariable () (Label () "tree") :| [])
+                      ( EClause
+                          ()
+                          ( PConstructor
+                              ()
+                              (Label () "Node")
+                              [ PVariable () (Label () "y")
+                              , PAtVariable () (Label () "lhs")
+                              , PAtVariable () (Label () "rhs")
+                              ]
+                          )
+                          ( CPlain
+                              ()
+                              []
+                              ( EApplication
+                                  ()
+                                  ()
+                                  (EBinaryOperator () ((), OListConcatenation))
+                                  ( EVariable () (Label () "lhs")
+                                      <| EListCons
+                                        ()
+                                        ()
+                                        (EVariable () (Label () "y"))
+                                        (EVariable () (Label () "rhs"))
+                                      :| []
+                                  )
+                              )
+                              :| []
+                          )
+                          <| EClause
+                            ()
+                            (PConstructor () (Label () "Leaf") [])
+                            ( CPlain
+                                ()
+                                []
+                                (EListLiteral () () [])
+                                :| []
+                            )
+                          :| []
+                      )
+                      Nothing
+                  )
+              )
+          )
+      )
+    ]
+
+moduleMain :: Module () () ()
+moduleMain =
+  Module.fromObjectList
+    (Path ["Main"])
+    []
+    []
+
+-- Expand folds
+test03 :: [Module () () ()]
+test03 =
+  [ moduleOrdered
+  , moduleBinarySearch
+  , moduleMain
+  ]

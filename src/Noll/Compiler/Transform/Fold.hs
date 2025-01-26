@@ -13,12 +13,21 @@ import Control.Monad.Writer (execWriter, tell)
 import Noll.Common.List1 (List1 (..), NonEmpty (..), (<|))
 import Noll.Common.Supply (suppliedName)
 import Noll.Compiler.Transform (flattenApplications)
-import Noll.Compiler.Transform.Expression (mapOverExpression)
+import Noll.Compiler.Transform.Expression (mapMOverExpression, mapOverExpression)
 import Noll.Compiler.Transform.Pattern (mapMOverPattern, mapOverPattern)
 import Noll.Compiler.Transform.Tree (replace)
 import Noll.Label (Label (..), labelName)
-import Noll.Language (Choice (..), Clause (..), Expression (..), Pattern (..))
-import Noll.Utils (Name, const2)
+import Noll.Language (
+  Choice (..),
+  Clause (..),
+  Constant (..),
+  Expression (..),
+  Function (..),
+  Module (..),
+  Object (..),
+  Pattern (..),
+ )
+import Noll.Utils (Dictionary, Name, const2)
 
 newtype FoldExpansion a = FoldExpansion {foldExpansionStack :: ReaderT Name (State Int) a}
   deriving
@@ -116,3 +125,56 @@ expandFoldExpr args clauses = do
             (EVariable mempty (Label () name))
             args
         )
+
+class CompileFoldsContext a where
+  compileFolds :: a -> FoldExpansion a
+
+instance (CompileFoldsContext a) => CompileFoldsContext [a] where
+  compileFolds = traverse compileFolds
+
+instance (CompileFoldsContext a) => CompileFoldsContext (NonEmpty a) where
+  compileFolds = traverse compileFolds
+
+instance (CompileFoldsContext a) => CompileFoldsContext (Dictionary a) where
+  compileFolds = traverse compileFolds
+
+instance (Monoid a) => CompileFoldsContext (Expression a ()) where
+  compileFolds =
+    mapMOverExpression $
+      \case
+        EFold a t es cs Nothing -> do
+          e1 <- expandFoldExpr es cs
+          pure (EFold a t es cs (Just e1))
+        e ->
+          pure e
+
+instance (Monoid a) => CompileFoldsContext (Module a k ()) where
+  compileFolds =
+    \case
+      Module p ns o ->
+        Module p ns <$> compileFolds o
+
+instance (Monoid a) => CompileFoldsContext (Function Expression a ()) where
+  compileFolds =
+    \case
+      Function a u ps e ->
+        Function a u ps <$> compileFolds e
+
+instance (Monoid a) => CompileFoldsContext (Constant Expression a ()) where
+  compileFolds =
+    \case
+      Constant a u e ->
+        Constant a u <$> compileFolds e
+
+instance (Monoid a) => CompileFoldsContext (Object a k ()) where
+  compileFolds =
+    \case
+      DAnnotation u o -> do
+        DAnnotation u <$> compileFolds o
+      DFunction name f -> do
+        DFunction name <$> compileFolds f
+      DConstant name g -> do
+        DConstant name <$> compileFolds g
+      -- TODO
+      o ->
+        pure o
