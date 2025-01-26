@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Examples.Test01 (
-  test01,
+module Noll.Examples.Test02 (
+  test02,
   moduleOrdered,
   moduleBinarySearch,
   moduleMain,
@@ -11,9 +11,9 @@ import Noll.Common.List1 (NonEmpty (..), (<|))
 import Noll.Label (Label (..))
 import Noll.Language (
   BinaryOperator (..),
-  Choice (..),
-  Clause (..),
   Expression (..),
+  Clause (..),
+  Choice (..),
   Function (..),
   Intrinsic (..),
   Module (..),
@@ -32,23 +32,14 @@ moduleOrdered :: Module () () ()
 moduleOrdered =
   Module.fromObjectList
     (Path ["Ordered"])
-    -- Exports
     []
-    -- Objects
-    [ -- type Ordering
-      -- trait Ordered
-      -- instance Ordered(int32)
-      -- less_than_or_equal_to
-      -- greater_than
-      ( DAnnotation
+    [ ( DAnnotation
           ( Uses
               [Trait "Ordered" (TVariable (Parameter () "a"))]
-              ( TApplication
-                  ()
-                  (TConstructor () "Predicate")
-                  ( TVariable (Parameter () "a")
-                      :| []
-                  )
+              ( TAlias
+                  "Predicate"
+                  [TVariable (Parameter () "a")]
+                  (TVariable (Parameter () "a") `TArrow` TIntrinsic IBool)
               )
           )
           ( DFunction
@@ -84,16 +75,8 @@ moduleBinarySearch :: Module () () ()
 moduleBinarySearch =
   Module.fromObjectList
     (Path ["BinarySearch"])
-    -- Exports
     ["Tree", "build_tree", "flatten_tree"]
-    -- Objects
-    [ -- type Tree
-      -- type_alias Range
-      -- invalid_range
-      -- is_invalid
-      -- in_range
-      -- build_tree
-      -- flatten_tree
+    [
       ( DAnnotation
           (Uses [] (TIntrinsic (IList (TVariable (Parameter () "a")))))
           ( DFunction
@@ -159,21 +142,18 @@ moduleBinarySearch =
               )
           )
       )
-      -- sort
     ]
 
 moduleMain :: Module () () ()
 moduleMain =
   Module.fromObjectList
     (Path ["Main"])
-    -- Exports
     []
-    -- Objects
     []
 
--- Untyped source tree
-test01 :: [Module () () ()]
-test01 =
+-- Expand type aliases
+test02 :: [Module () () ()]
+test02 =
   [ moduleOrdered
   , moduleBinarySearch
   , moduleMain
