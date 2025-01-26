@@ -23,8 +23,8 @@ import Noll.Language (
   Pattern (..),
  )
 import Noll.Language.Module.Constant (Constant (..))
+import Noll.Language.Module.Definition (Definition (..))
 import Noll.Language.Module.Function (Function (..))
-import Noll.Language.Module.Object (Object (..))
 
 mapOverPattern :: (Pattern a t -> Pattern a t) -> Pattern a t -> Pattern a t
 mapOverPattern f = runIdentity . overPattern (pure . f)
@@ -149,7 +149,7 @@ instance PatternContext (Pattern a t) (Function Expression a t) where
           <$> (overPattern f =<< traverse f ps)
           <*> overPattern f e
 
-instance PatternContext (Pattern a t) (Object a k t) where
+instance PatternContext (Pattern a t) (Definition a k t) where
   overPattern h =
     \case
       DFunction name f ->

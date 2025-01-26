@@ -64,8 +64,8 @@ library
       Noll.Language.Indexed
       Noll.Language.Module
       Noll.Language.Module.Constant
+      Noll.Language.Module.Definition
       Noll.Language.Module.Function
-      Noll.Language.Module.Object
       Noll.Language.Pattern
       Noll.Language.Primitive
       Noll.Language.Trait

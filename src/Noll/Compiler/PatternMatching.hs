@@ -31,12 +31,12 @@ import Noll.Language (
   Clause (..),
   CompiledClause (..),
   Constant (..),
+  Definition (..),
   Expression (..),
   Function (..),
   HasType (..),
   Intrinsic (..),
   Module (..),
-  Object (..),
   Pattern (..),
   Type (..),
  )
@@ -63,7 +63,7 @@ instance (Show a, Show t, TypeProxy t, Ord t, Monoid a) => MatchExpressionContex
       Module p ns os ->
         Module p ns <$> compileMatchExprs os
 
-instance (Show a, Show t, TypeProxy t, Ord t, Monoid a) => MatchExpressionContext (Object a k t) where
+instance (Show a, Show t, TypeProxy t, Ord t, Monoid a) => MatchExpressionContext (Definition a k t) where
   compileMatchExprs =
     \case
       DFunction name f ->

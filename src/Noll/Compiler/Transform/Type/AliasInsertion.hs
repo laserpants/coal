@@ -15,11 +15,11 @@ import Noll.Compiler.Transform.Expression (mapMOverExpression)
 import Noll.Compiler.Transform.Pattern (mapMOverPattern)
 import Noll.Language (
   Constant (..),
+  Definition (..),
   Expression (..),
   Function (..),
   IndexedType,
   Module (..),
-  Object (..),
   Parameter (..),
   Pattern (..),
   Row (..),
@@ -100,7 +100,7 @@ instance (AliasContext (e a t), AliasContext t) => AliasContext (Constant e a t)
           <$> insertAliases u
           <*> insertAliases e
 
-instance (AliasContext t) => AliasContext (Object a k t) where
+instance (AliasContext t) => AliasContext (Definition a k t) where
   insertAliases =
     \case
       DAnnotation u o ->

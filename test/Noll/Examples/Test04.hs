@@ -13,12 +13,12 @@ import Noll.Language (
   BinaryOperator (..),
   Choice (..),
   Clause (..),
+  Definition (..),
   Expression (..),
   Function (..),
   IndexedType,
   Intrinsic (..),
   Module (..),
-  Object (..),
   Parameter (..),
   Path (..),
   Pattern (..),
@@ -31,7 +31,7 @@ import qualified Noll.Language.Module as Module
 
 moduleOrdered :: Module () () IndexedType
 moduleOrdered =
-  Module.fromObjectList
+  Module.fromDefinitionList
     (Path ["Ordered"])
     []
     [ ( DAnnotation
@@ -74,7 +74,7 @@ moduleOrdered =
 
 moduleBinarySearch :: Module () () IndexedType
 moduleBinarySearch =
-  Module.fromObjectList
+  Module.fromDefinitionList
     (Path ["BinarySearch"])
     ["Tree", "build_tree", "flatten_tree"]
     [ ( DAnnotation
@@ -214,7 +214,7 @@ moduleBinarySearch =
 
 moduleMain :: Module () () IndexedType
 moduleMain =
-  Module.fromObjectList
+  Module.fromDefinitionList
     (Path ["Main"])
     []
     []

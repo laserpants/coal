@@ -22,8 +22,8 @@ import Noll.Language (
   Guard (..),
  )
 import Noll.Language.Module.Constant (Constant (..))
+import Noll.Language.Module.Definition (Definition (..))
 import Noll.Language.Module.Function (Function (..))
-import Noll.Language.Module.Object (Object (..))
 
 mapOverExpression :: (Expression a t -> Expression a t) -> Expression a t -> Expression a t
 mapOverExpression f = runIdentity . overExpression (pure . f)
@@ -161,7 +161,7 @@ instance ExpressionContext (Expression a t) (Function Expression a t) where
       Function a u ps es ->
         Function a u ps <$> (overExpression f =<< f es)
 
-instance ExpressionContext (Expression a t) (Object a k t) where
+instance ExpressionContext (Expression a t) (Definition a k t) where
   overExpression h =
     \case
       DFunction name f ->

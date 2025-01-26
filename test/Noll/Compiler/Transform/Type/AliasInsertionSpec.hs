@@ -10,10 +10,10 @@ import Noll.Examples.Test02 (test02)
 import Noll.Label (Label (..))
 import Noll.Language (
   BinaryOperator (..),
+  Definition (..),
   Expression (..),
   Function (..),
   Intrinsic (..),
-  Object (..),
   Parameter (..),
   Pattern (..),
   Row (..),
@@ -49,7 +49,7 @@ result1 =
     [TIntrinsic IInt32]
     (TIntrinsic IInt32 `TArrow` TIntrinsic IBool)
 
-object1 :: Object () () ()
+object1 :: Definition () () ()
 object1 =
   DAnnotation
     ( Uses
@@ -89,7 +89,7 @@ object1 =
         )
     )
 
-result2 :: Object () () ()
+result2 :: Definition () () ()
 result2 =
   DAnnotation
     ( Uses

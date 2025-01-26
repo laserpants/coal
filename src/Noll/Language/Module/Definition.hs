@@ -1,7 +1,7 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Language.Module.Object (Object (..), Path (..)) where
+module Noll.Language.Module.Definition (Definition (..), Path (..)) where
 
 import Noll.Language.Constructor (Constructor (..))
 import Noll.Language.Expression (Expression (..))
@@ -14,9 +14,9 @@ import Noll.Utils (Name)
 newtype Path = Path {pathComponents :: [Name]}
   deriving (Show, Eq, Ord, Read)
 
-data Object a k t
+data Definition a k t
   = -- | Type-annotated definition
-    DAnnotation (Uses (Type Parameter ())) (Object a k t)
+    DAnnotation (Uses (Type Parameter ())) (Definition a k t)
   | -- | Type definition
     DType Name [Type TypeIndex k] [Constructor TypeIndex k (Type TypeIndex k)]
   | -- | Codata type definition
@@ -32,7 +32,7 @@ data Object a k t
   | -- | Trait
     DTrait Name [Trait t] (Type TypeIndex k) [TypeIndex (Type TypeIndex k)]
   | -- | Trait instance
-    DInstance Name (Type TypeIndex k) [Object a k t]
+    DInstance Name (Type TypeIndex k) [Definition a k t]
   | -- | Type alias
     DTypeAlias Name [Type TypeIndex k] (Type TypeIndex k)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)

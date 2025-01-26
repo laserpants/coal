@@ -21,8 +21,8 @@ import Noll.Language.Expression.Binding (Binding (..))
 import Noll.Language.Expression.Choice (Choice (..))
 import Noll.Language.HasType (HasType (..))
 import Noll.Language.Module.Constant (Constant (..))
+import Noll.Language.Module.Definition (Definition (..))
 import Noll.Language.Module.Function (Function (..))
-import Noll.Language.Module.Object (Object (..))
 import Noll.Language.Pattern (Pattern (..))
 import Noll.Language.Type (Type (..))
 import Noll.Utils (Name, foldrM)
@@ -114,7 +114,7 @@ instance (Monoid c) => Sugared c o k (Constant Expression c (Type o k)) where
       Constant a u e ->
         Constant a u <$> desugarPatterns e
 
-instance (Monoid c) => Sugared c o k (Object c k (Type o k)) where
+instance (Monoid c) => Sugared c o k (Definition c k (Type o k)) where
   desugarPatterns =
     \case
       DFunction name f ->

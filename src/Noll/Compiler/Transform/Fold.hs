@@ -21,10 +21,10 @@ import Noll.Language (
   Choice (..),
   Clause (..),
   Constant (..),
+  Definition (..),
   Expression (..),
   Function (..),
   Module (..),
-  Object (..),
   Pattern (..),
  )
 import Noll.Utils (Dictionary, Name, const2)
@@ -166,7 +166,7 @@ instance (Monoid a) => CompileFoldsContext (Constant Expression a ()) where
       Constant a u e ->
         Constant a u <$> compileFolds e
 
-instance (Monoid a) => CompileFoldsContext (Object a k ()) where
+instance (Monoid a) => CompileFoldsContext (Definition a k ()) where
   compileFolds =
     \case
       DAnnotation u o -> do

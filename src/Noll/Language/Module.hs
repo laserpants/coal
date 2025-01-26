@@ -3,24 +3,24 @@
 
 module Noll.Language.Module (
   Module (..),
-  overModuleObjects,
-  fromObjectList,
+  overModuleDefinitions,
+  fromDefinitionList,
 ) where
 
-import Noll.Language.Module.Object (Object (..), Path (..))
+import Noll.Language.Module.Definition (Definition (..), Path (..))
 import Noll.Utils (Name)
 
-data Module a k t = Module Path [Name] [Object a k t]
+data Module a k t = Module Path [Name] [Definition a k t]
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
 
-{-# INLINE overModuleObjects #-}
-overModuleObjects :: ([Object a k t] -> [Object a k t]) -> Module a k t -> Module a k t
-overModuleObjects fn (Module path names om) = Module path names (fn om)
+{-# INLINE overModuleDefinitions #-}
+overModuleDefinitions :: ([Definition a k t] -> [Definition a k t]) -> Module a k t -> Module a k t
+overModuleDefinitions fn (Module path names om) = Module path names (fn om)
 
-{-# INLINE insertObject #-}
-insertObject :: Object a k t -> Module a k t -> Module a k t
-insertObject obj = overModuleObjects (obj :)
+{-# INLINE insertDefinition #-}
+insertDefinition :: Definition a k t -> Module a k t -> Module a k t
+insertDefinition obj = overModuleDefinitions (obj :)
 
-{-# INLINE fromObjectList #-}
-fromObjectList :: Path -> [Name] -> [Object a k t] -> Module a k t
-fromObjectList path names = foldr insertObject (Module path names mempty)
+{-# INLINE fromDefinitionList #-}
+fromDefinitionList :: Path -> [Name] -> [Definition a k t] -> Module a k t
+fromDefinitionList path names = foldr insertDefinition (Module path names mempty)

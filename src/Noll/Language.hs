@@ -17,7 +17,7 @@ module Noll.Language (
   module Noll.Language.Expression.Operator.Unary,
   module Noll.Language.Expression.Operator.Binary,
   module Noll.Language.Module,
-  module Noll.Language.Module.Object,
+  module Noll.Language.Module.Definition,
   module Noll.Language.Module.Function,
   module Noll.Language.Module.Constant,
 ) where
@@ -32,8 +32,8 @@ import Noll.Language.HasType
 import Noll.Language.Indexed
 import Noll.Language.Module
 import Noll.Language.Module.Constant
+import Noll.Language.Module.Definition
 import Noll.Language.Module.Function
-import Noll.Language.Module.Object
 import Noll.Language.Pattern
 import Noll.Language.Primitive
 import Noll.Language.Trait
