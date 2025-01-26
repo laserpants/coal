@@ -5,10 +5,10 @@
 {-# LANGUAGE StrictData #-}
 
 module Noll.SystemF.Constraint.Generation (
-  ConstraintsGenerationContext (..),
-  ConstraintsGenerationError (..),
+  ConstraintsGenContext (..),
+  ConstraintsGenError (..),
   collectConstraints,
-  runConstraintsGenerationStack,
+  runConstraintsGenStack,
 ) where
 
 import Control.Monad.Reader (asks)
@@ -50,13 +50,13 @@ import Noll.SystemF.Constraint.Assumption (
   assumptionNameIsNotOneOf,
  )
 import Noll.SystemF.Constraint.Generation.Internal (
-  ConstraintsGenerationContext (..),
-  ConstraintsGenerationError (..),
-  ConstraintsGenerationStack (..),
+  ConstraintsGenContext (..),
+  ConstraintsGenError (..),
+  ConstraintsGenStack (..),
   InferenceRule (..),
   localMonoset,
   monosetInsertMany,
-  runConstraintsGenerationStack,
+  runConstraintsGenStack,
  )
 import Noll.SystemF.Constraint.Generation.TypeAnnotation (
   instantiateAnnotation,
@@ -78,20 +78,20 @@ import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import qualified Noll.Common.Environment as Environment
 
-type ConstraintsGeneration a = ConstraintsGenerationStack a TypeIndex Kind IndexedType
+type ConstraintsGen a = ConstraintsGenStack a TypeIndex Kind IndexedType
 
 {-# INLINE lookupDataConstructor #-}
-lookupDataConstructor :: Name -> ConstraintsGenerationStack c o k t (Maybe (Constructor o k t))
+lookupDataConstructor :: Name -> ConstraintsGenStack c o k t (Maybe (Constructor o k t))
 lookupDataConstructor name = asks (Environment.lookup name . constraintsGenerationContextDataConstructorEnv)
 
-assertEqualityAssumptions :: a -> IndexedType -> [Assumption IndexedType] -> ConstraintsGeneration a ()
+assertEqualityAssumptions :: a -> IndexedType -> [Assumption IndexedType] -> ConstraintsGen a ()
 assertEqualityAssumptions loc t ms =
   tellRight $ do
     Assumption{..} <- ms
     -- TODO
     pure (Equality (InferenceRule 1) [assumptionType, t])
 
-assertImplicitAssumptions :: a -> IndexedType -> [Assumption IndexedType] -> ConstraintsGeneration a ()
+assertImplicitAssumptions :: a -> IndexedType -> [Assumption IndexedType] -> ConstraintsGen a ()
 assertImplicitAssumptions loc t ms = do
   set <- asks constraintsGenerationContextMonomorphicSet
   tellRight $ do
@@ -99,12 +99,12 @@ assertImplicitAssumptions loc t ms = do
     -- TODO
     pure (Implicit (InferLetImplicit loc assumptionName assumptionType t) assumptionType t set)
 
-withMonomorphic :: (TypeIndexed Kind t) => t -> ConstraintsGeneration a c -> ConstraintsGeneration a c
+withMonomorphic :: (TypeIndexed Kind t) => t -> ConstraintsGen a c -> ConstraintsGen a c
 withMonomorphic a = localMonoset (monosetInsertMany (typeIndexesIn a))
 
-type Assertion a = IndexedType -> [Assumption IndexedType] -> ConstraintsGeneration a ()
+type Assertion a = IndexedType -> [Assumption IndexedType] -> ConstraintsGen a ()
 
-patternConstraints :: Assertion a -> [Assumption IndexedType] -> Pattern a IndexedType -> ConstraintsGeneration a [Name]
+patternConstraints :: Assertion a -> [Assumption IndexedType] -> Pattern a IndexedType -> ConstraintsGen a [Name]
 patternConstraints assert ms =
   \case
     PAnnotation loc t p -> do
@@ -173,7 +173,7 @@ extractRow =
     _ ->
       error "TODO"
 
-clauseAssumptions :: Clause Expression a IndexedType -> ConstraintsGeneration a (IndexedType, [IndexedType], [Assumption IndexedType])
+clauseAssumptions :: Clause Expression a IndexedType -> ConstraintsGen a (IndexedType, [IndexedType], [Assumption IndexedType])
 clauseAssumptions (EClause loc p cs) = do
   (ts1, ms) <- second concat . unzip <$$> withMonomorphic p $
     forM (fromList1 cs) $
@@ -187,7 +187,7 @@ clauseAssumptions (EClause loc p cs) = do
   names <- patternConstraints (assertEqualityAssumptions loc) ms p
   pure (typeOf p, ts1, filter (assumptionNameIsNotOneOf names) ms)
 
-collectConstraints :: Expression a IndexedType -> ConstraintsGeneration a [Assumption IndexedType]
+collectConstraints :: Expression a IndexedType -> ConstraintsGen a [Assumption IndexedType]
 collectConstraints =
   \case
     EAnnotation loc t e -> do

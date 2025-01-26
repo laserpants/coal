@@ -10,7 +10,7 @@ import Noll.Compiler (
   CompilerEnvironment (..),
   evalCompiler,
   generateConstraintsC,
-  getConstraintsGenerationErrorsC,
+  getConstraintsGenErrorsC,
   getSolverRuleViolationsC,
   insertNamesC,
   solveConstraintsC,
@@ -32,7 +32,7 @@ import Noll.Language (
   indexed,
  )
 import Noll.SystemF.Constraint.Assumption (Assumption (..))
-import Noll.SystemF.Constraint.Generation (ConstraintsGenerationError)
+import Noll.SystemF.Constraint.Generation (ConstraintsGenError)
 import Noll.SystemF.Constraint.Generation.Internal (InferenceRule (..))
 import Noll.SystemF.Substitution (apply, normalizeTypeIndexes)
 import Noll.Utils (Name)
@@ -43,7 +43,7 @@ import qualified Noll.Common.Environment as Environment
 data TestResult r a = TestResult
   { testResultExpression :: r
   , testResultAssumptions :: [Assumption IndexedType]
-  , testResultErrors1 :: [ConstraintsGenerationError a]
+  , testResultErrors1 :: [ConstraintsGenError a]
   , testResultErrors2 :: [InferenceRule Kind a]
   }
   deriving (Show, Eq, Ord)
@@ -58,7 +58,7 @@ runTypedConstantTest env names g =
   evalCompiler env $ do
     insertNamesC names
     (g2, as) <- typeCheckConstantC (indexed g)
-    errs0 <- getConstraintsGenerationErrorsC
+    errs0 <- getConstraintsGenErrorsC
     errs1 <- getSolverRuleViolationsC
     pure (TestResult g2 as errs0 errs1)
 
@@ -72,7 +72,7 @@ runTypedFunctionTest env names f =
   evalCompiler env $ do
     insertNamesC names
     (f2, as) <- typeCheckFunctionC (indexed f)
-    errs0 <- getConstraintsGenerationErrorsC
+    errs0 <- getConstraintsGenErrorsC
     errs1 <- getSolverRuleViolationsC
     pure (TestResult f2 as errs0 errs1)
 
@@ -86,7 +86,7 @@ runTypedExpressionTest env names e =
   evalCompiler env $ do
     insertNamesC names
     (e2, as) <- typeCheckExpressionC (indexed e)
-    errs0 <- getConstraintsGenerationErrorsC
+    errs0 <- getConstraintsGenErrorsC
     errs1 <- getSolverRuleViolationsC
     pure (TestResult e2 as errs0 errs1)
 

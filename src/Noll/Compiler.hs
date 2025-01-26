@@ -11,13 +11,13 @@ module Noll.Compiler (
   CompilerState (..),
   runCompiler,
   evalCompiler,
-  runConstraintsGenerationC,
+  runConstraintsGenC,
   generateConstraintsC,
   typeCheckExpressionC,
   typeCheckFunctionC,
   typeCheckConstantC,
   solveConstraintsC,
-  getConstraintsGenerationErrorsC,
+  getConstraintsGenErrorsC,
   getSolverRuleViolationsC,
 ) where
 
@@ -49,18 +49,18 @@ import Noll.Language (
 import Noll.SystemF (
   Assumption (..),
   Constraint (..),
-  ConstraintsGenerationContext (..),
-  ConstraintsGenerationError (..),
-  ConstraintsGenerationOutput,
-  ConstraintsGenerationStack (..),
-  ConstraintsGenerationState (..),
+  ConstraintsGenContext (..),
+  ConstraintsGenError (..),
+  ConstraintsGenOutput,
+  ConstraintsGenStack (..),
+  ConstraintsGenState (..),
   InferenceRule (..),
   Substitutable (..),
   Substitution (..),
   checkTypeAnnotationParameters,
   collectConstraints,
   normalizeTypeIndexes,
-  runConstraintsGenerationStack,
+  runConstraintsGenStack,
   solveConstraints,
  )
 import Noll.Utils (Dictionary, Name, (<$$>))
@@ -75,7 +75,7 @@ data CompilerEnvironment = CompilerEnvironment
   deriving (Show, Eq, Ord, Read)
 
 data CompilerState a = CompilerState
-  { compilerConstraintsGenerationErrors :: [ConstraintsGenerationError a]
+  { compilerConstraintsGenErrors :: [ConstraintsGenError a]
   , compilerTypeAnnotationParams :: Dictionary (a, TypeIndex Kind)
   , compilerSolverRuleViolations :: [InferenceRule Kind a]
   , compilerNameEnvironment :: Environment (Scheme TypeIndex Kind IndexedType)
@@ -84,9 +84,9 @@ data CompilerState a = CompilerState
   }
   deriving (Show, Eq, Ord, Read)
 
-{-# INLINE overCompilerStateConstraintsGenerationErrors #-}
-overCompilerStateConstraintsGenerationErrors :: ([ConstraintsGenerationError a] -> [ConstraintsGenerationError a]) -> CompilerState a -> CompilerState a
-overCompilerStateConstraintsGenerationErrors fn CompilerState{..} = CompilerState{compilerConstraintsGenerationErrors = fn compilerConstraintsGenerationErrors, ..}
+{-# INLINE overCompilerStateConstraintsGenErrors #-}
+overCompilerStateConstraintsGenErrors :: ([ConstraintsGenError a] -> [ConstraintsGenError a]) -> CompilerState a -> CompilerState a
+overCompilerStateConstraintsGenErrors fn CompilerState{..} = CompilerState{compilerConstraintsGenErrors = fn compilerConstraintsGenErrors, ..}
 
 {-# INLINE overCompilerTypeAnnotationParams #-}
 overCompilerTypeAnnotationParams :: (Dictionary (a, TypeIndex Kind) -> Dictionary (a, TypeIndex Kind)) -> CompilerState a -> CompilerState a
@@ -108,7 +108,7 @@ overCompilerSupply fn CompilerState{..} = CompilerState{compilerSupply = fn comp
 initialCompilerState :: CompilerState a
 initialCompilerState =
   CompilerState
-    { compilerConstraintsGenerationErrors = []
+    { compilerConstraintsGenErrors = []
     , compilerTypeAnnotationParams = mempty
     , compilerSolverRuleViolations = []
     , compilerNameEnvironment = mempty
@@ -125,9 +125,9 @@ newtype Compiler a c = Compiler {compilerStack :: ReaderT CompilerEnvironment (S
     , MonadState (CompilerState a)
     )
 
-{-# INLINE compilerReportConstraintsGenerationErrors #-}
-compilerReportConstraintsGenerationErrors :: [ConstraintsGenerationError a] -> Compiler a ()
-compilerReportConstraintsGenerationErrors errors = modify (overCompilerStateConstraintsGenerationErrors (<> errors))
+{-# INLINE compilerReportConstraintsGenErrors #-}
+compilerReportConstraintsGenErrors :: [ConstraintsGenError a] -> Compiler a ()
+compilerReportConstraintsGenErrors errors = modify (overCompilerStateConstraintsGenErrors (<> errors))
 
 {-# INLINE compilerSetTypeAnnotationParams #-}
 compilerSetTypeAnnotationParams :: Dictionary (a, TypeIndex Kind) -> Compiler a ()
@@ -137,9 +137,9 @@ compilerSetTypeAnnotationParams params = modify (overCompilerTypeAnnotationParam
 compilerReportSolverRuleViolations :: [InferenceRule Kind a] -> Compiler a ()
 compilerReportSolverRuleViolations errors = modify (overCompilerSolverRuleViolations (<> errors))
 
-{-# INLINE getConstraintsGenerationErrorsC #-}
-getConstraintsGenerationErrorsC :: Compiler a [ConstraintsGenerationError a]
-getConstraintsGenerationErrorsC = gets compilerConstraintsGenerationErrors
+{-# INLINE getConstraintsGenErrorsC #-}
+getConstraintsGenErrorsC :: Compiler a [ConstraintsGenError a]
+getConstraintsGenErrorsC = gets compilerConstraintsGenErrors
 
 {-# INLINE getSolverRuleViolationsC #-}
 getSolverRuleViolationsC :: Compiler a [InferenceRule Kind a]
@@ -165,17 +165,17 @@ runCompiler env com = runState (runReaderT (compilerStack com) env) initialCompi
 evalCompiler :: CompilerEnvironment -> Compiler a c -> c
 evalCompiler = fst <$$> runCompiler
 
-type ConstraintsGenerationResult c o k t r = (r, Dictionary (c, o k), [ConstraintsGenerationOutput c o k t])
+type ConstraintsGenResult c o k t r = (r, Dictionary (c, o k), [ConstraintsGenOutput c o k t])
 
-runConstraintsGenerationC :: Int -> ConstraintsGenerationStack c TypeIndex Kind IndexedType r -> Compiler a (ConstraintsGenerationResult c TypeIndex Kind IndexedType r)
-runConstraintsGenerationC index stack = do
+runConstraintsGenC :: Int -> ConstraintsGenStack c TypeIndex Kind IndexedType r -> Compiler a (ConstraintsGenResult c TypeIndex Kind IndexedType r)
+runConstraintsGenC index stack = do
   env <- ask
-  let (result, ConstraintsGenerationState{..}, output) = runConstraintsGenerationStack index (context env) stack
+  let (result, ConstraintsGenState{..}, output) = runConstraintsGenStack index (context env) stack
   updateSupplyC constraintsGenerationStateSupply
   pure (result, constraintsGenerationStateTypeIndexes, output)
  where
   context CompilerEnvironment{..} =
-    ConstraintsGenerationContext
+    ConstraintsGenContext
       { constraintsGenerationContextMonomorphicSet = mempty
       , constraintsGenerationContextDataConstructorEnv = compilerDataConstructorEnv
       , constraintsGenerationContextTypeConstructorEnv = compilerTypeConstructorEnv
@@ -187,9 +187,9 @@ type CompilerConstraint a = Constraint (InferenceRule Kind a) TypeIndex Kind Ind
 
 generateConstraintsC :: Expression a IndexedType -> Compiler a ([CompilerAssumption], [CompilerConstraint a])
 generateConstraintsC e = do
-  (assumptions, params, result) <- runConstraintsGenerationC (freshIdIn e) (collectConstraints e)
+  (assumptions, params, result) <- runConstraintsGenC (freshIdIn e) (collectConstraints e)
   let (errors, constraints) = partitionEithers result
-  compilerReportConstraintsGenerationErrors errors
+  compilerReportConstraintsGenErrors errors
   compilerSetTypeAnnotationParams params
   pure (assumptions, constraints)
 
@@ -208,7 +208,7 @@ solveConstraintsC cs = do
   let (sub, rs) = solveConstraints cs
       errors = execWriter (checkTypeAnnotationParameters (Map.toList dict) sub)
   compilerReportSolverRuleViolations (apply sub rs)
-  compilerReportConstraintsGenerationErrors (IllFormedTypeAnnotation <$> errors)
+  compilerReportConstraintsGenErrors (IllFormedTypeAnnotation <$> errors)
   pure sub
 
 compileConstraintsC ::

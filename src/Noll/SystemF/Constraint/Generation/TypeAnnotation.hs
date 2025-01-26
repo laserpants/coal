@@ -30,10 +30,10 @@ import Noll.Language (
   typeIndexesIn,
  )
 import Noll.SystemF.Constraint.Generation.Internal (
-  ConstraintsGenerationContext (..),
-  ConstraintsGenerationState (..),
+  ConstraintsGenContext (..),
+  ConstraintsGenState (..),
   TypeAnnotationError (..),
-  overConstraintsGenerationStateTypeIndexes,
+  overConstraintsGenStateTypeIndexes,
  )
 import Noll.SystemF.Substitution (Substitution (..))
 import Noll.Utils (
@@ -48,20 +48,20 @@ import Noll.Utils (
 import qualified Data.Map.Strict as Map
 import qualified Noll.Common.Environment as Environment
 
-type TypeAnnotationContext = ConstraintsGenerationContext TypeIndex Kind IndexedType
+type TypeAnnotationContext = ConstraintsGenContext TypeIndex Kind IndexedType
 
 {-# INLINE lookupTypeConstructor #-}
 lookupTypeConstructor :: (MonadReader TypeAnnotationContext m) => Name -> m (Maybe Kind)
 lookupTypeConstructor name = Environment.lookup name <$> asks constraintsGenerationContextTypeConstructorEnv
 
 instantiateAnnotation ::
-  (MonadReader TypeAnnotationContext m, MonadState (ConstraintsGenerationState a) m) =>
+  (MonadReader TypeAnnotationContext m, MonadState (ConstraintsGenState a) m) =>
   a ->
   Type Parameter () ->
   m (Either (TypeAnnotationError a) (Type TypeIndex Kind))
 instantiateAnnotation loc t = do
   (t, s) <- runTypeAnnotation loc (instantiate t)
-  forM_ (Map.toList s) $ \(n, k) -> modify (overConstraintsGenerationStateTypeIndexes (Map.insert n (loc, k)))
+  forM_ (Map.toList s) $ \(n, k) -> modify (overConstraintsGenStateTypeIndexes (Map.insert n (loc, k)))
   return t
 
 type TypeAnnotation a m = ExceptT (a -> TypeAnnotationError a) (StateT (Dictionary (TypeIndex Kind)) m)

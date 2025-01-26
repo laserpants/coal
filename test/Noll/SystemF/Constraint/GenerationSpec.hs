@@ -100,25 +100,25 @@ testCollectConstraints ::
   (Show a) =>
   Expression a a ->
   ( [Assumption (Type TypeIndex Kind)]
-  , [ConstraintsGenerationOutput a TypeIndex Kind (Type TypeIndex Kind)]
+  , [ConstraintsGenOutput a TypeIndex Kind (Type TypeIndex Kind)]
   )
 testCollectConstraints e =
   let
     e0 = indexed e
    in
     --    traceShow e0 $
-    evalConstraintsGenerationStack
+    evalConstraintsGenStack
       (freshIdIn e0)
-      (ConstraintsGenerationContext mempty mempty mempty)
+      (ConstraintsGenContext mempty mempty mempty)
       (collectConstraints e0)
 
 testInstantiateAnnotation :: Type Parameter () -> Either (TypeAnnotationError ()) (Type TypeIndex Kind)
 testInstantiateAnnotation t = s
  where
   (s, _) =
-    evalConstraintsGenerationStack
+    evalConstraintsGenStack
       0
-      (ConstraintsGenerationContext mempty mempty mempty)
+      (ConstraintsGenContext mempty mempty mempty)
       (instantiateAnnotation () t)
 
 -- fn(m) => let y = m in let x = y(true) in x
