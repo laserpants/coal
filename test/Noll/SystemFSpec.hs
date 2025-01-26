@@ -19,6 +19,7 @@ import Noll.Language (
   Parameter (..),
   Pattern (..),
   Primitive (..),
+  Scheme (..),
   Type (..),
   TypeIndex (..),
   Uses (..),
@@ -26,6 +27,8 @@ import Noll.Language (
 import Noll.SystemF.Constraint.Assumption (Assumption (..))
 import Noll.SystemFSpec.TestRunner
 import Test.Hspec (Spec, describe, it)
+
+import qualified Data.Set as Set
 
 spec :: Spec
 spec =
@@ -85,23 +88,43 @@ spec =
         assumptions fixture27 == []
     describe "" $ do
       it "" $ do
-        typedFunctionShouldMatch fixture29Typed fixture29
+        typedFunctionShouldMatch
+          [
+            ( "not"
+            , Forall
+                mempty
+                []
+                (TIntrinsic IBool `TArrow` TIntrinsic IBool)
+            )
+          ,
+            ( "less_than_or_equal_to"
+            , Forall
+                (Set.fromList [TypeIndex KType 0])
+                []
+                ( TVariable (TypeIndex KType 0)
+                    `TArrow` TVariable (TypeIndex KType 0)
+                    `TArrow` TIntrinsic IBool
+                )
+            )
+          ]
+          fixture29Typed
+          fixture29
       it "" $ do
         typedExpressionShouldMatch fixture30Typed fixture30
       it "" $ do
         typedExpressionShouldMatch fixture31Typed fixture31
 
 -- typedExpression_ :: Function Expression () () -> Function Expression () (Type TypeIndex Kind)
-typedExpression_ e = testRunner runTypedExpressionTest mempty e
+typedExpression_ names e = testRunner runTypedExpressionTest names e
 
 -- typedFunction_ :: Function Expression () () -> Function Expression () (Type TypeIndex Kind)
-typedFunction_ f = testRunner runTypedFunctionTest mempty f
+typedFunction_ names f = testRunner runTypedFunctionTest names f
 
 typedFunction :: Function Expression () () -> Function Expression () (Type TypeIndex Kind)
 typedFunction f = testResultExpression (testRunner runTypedFunctionTest mempty f)
 
-typedFunctionShouldMatch :: Function Expression () (Type TypeIndex Kind) -> Function Expression () () -> Bool
-typedFunctionShouldMatch f0 f = testResultExpression (testRunner runTypedFunctionTest mempty f) == f0
+-- typedFunctionShouldMatch :: Function Expression () (Type TypeIndex Kind) -> Function Expression () () -> Bool
+typedFunctionShouldMatch names f0 f = testResultExpression (testRunner runTypedFunctionTest names f) == f0
 
 typedExpression :: Expression () () -> Expression () (Type TypeIndex Kind)
 typedExpression e = testResultExpression (testRunner runTypedExpressionTest mempty e)
@@ -873,23 +896,28 @@ fixture29Typed :: Function Expression () (Type TypeIndex Kind)
 fixture29Typed =
   Function
     ()
-    (Uses [] undefined)
+    (Uses [] (TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool))
     ( PAnnotation
         ()
         (TVariable (Parameter () "a"))
-        (PVariable () (Label undefined "n"))
+        (PVariable () (Label (TVariable (TypeIndex KType 0)) "n"))
         :| []
     )
     ( EApplication
         ()
-        undefined
-        (EBinaryOperator () (undefined, OReverseComposition))
-        ( EVariable () (Label undefined "not")
+        (TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
+        ( EBinaryOperator
+            ()
+            ( TArrow (TIntrinsic IBool `TArrow` TIntrinsic IBool) (TArrow (TArrow (TVariable (TypeIndex KType 0)) (TIntrinsic IBool)) (TArrow (TVariable (TypeIndex KType 0)) (TIntrinsic IBool)))
+            , OReverseComposition
+            )
+        )
+        ( EVariable () (Label (TIntrinsic IBool `TArrow` TIntrinsic IBool) "not")
             <| EApplication
               ()
-              undefined
-              (EVariable () (Label undefined "less_than_or_equal_to"))
-              (EVariable () (Label undefined "n") :| [])
+              (TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
+              (EVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool) "less_than_or_equal_to"))
+              (EVariable () (Label (TVariable (TypeIndex KType 0)) "n") :| [])
               :| []
         )
     )
@@ -929,18 +957,18 @@ fixture30Typed =
     ()
     ( BPattern
         ()
-        (PVariable () (Label undefined "f"))
+        (PVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0)) "f"))
         ( ELambda
             ()
-            (PVariable () (Label undefined "x") :| [])
-            (EVariable () (Label undefined "x"))
+            (PVariable () (Label (TVariable (TypeIndex KType 0)) "x") :| [])
+            (EVariable () (Label (TVariable (TypeIndex KType 0)) "x"))
         )
         :| []
     )
     ( EApplication
         ()
-        undefined
-        (EVariable () (Label undefined "f"))
+        (TIntrinsic IInt32)
+        (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "f"))
         (ELiteral () (LInt32 1) :| [])
     )
 
@@ -974,16 +1002,35 @@ fixture31Typed =
     ( BFunction
         ()
         "f"
-        (PVariable () (Label undefined "x") :| [])
-        (EVariable () (Label undefined "x"))
+        (PVariable () (Label (TVariable (TypeIndex KType 0)) "x") :| [])
+        (EVariable () (Label (TVariable (TypeIndex KType 0)) "x"))
         :| []
     )
     ( EApplication
         ()
-        undefined
-        (EVariable () (Label undefined "f"))
+        (TIntrinsic IInt32)
+        (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "f"))
         (ELiteral () (LInt32 1) :| [])
     )
 
-baz =
-  mapM_ print $ testResultAssumptions $ Noll.SystemFSpec.typedFunction_ Noll.SystemFSpec.fixture29
+-- baz =
+--  Noll.SystemFSpec.typedExpression_
+--    []
+--    --      ( "not"
+--    --      , Forall
+--    --          mempty
+--    --          []
+--    --          (TIntrinsic IBool `TArrow` TIntrinsic IBool)
+--    --      )
+--    --    ,
+--    --      ( "less_than_or_equal_to"
+--    --      , Forall
+--    --          (Set.fromList [TypeIndex KType 0])
+--    --          []
+--    --          ( TVariable (TypeIndex KType 0)
+--    --              `TArrow` TVariable (TypeIndex KType 0)
+--    --              `TArrow` TIntrinsic IBool
+--    --          )
+--    --      )
+--
+--    Noll.SystemFSpec.fixture30
