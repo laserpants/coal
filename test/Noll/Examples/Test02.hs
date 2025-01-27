@@ -21,6 +21,7 @@ import Noll.Language (
   Parameter (..),
   Path (..),
   Pattern (..),
+  Primitive (..),
   Trait (..),
   Type (..),
   Uses (..),
@@ -34,6 +35,56 @@ moduleOrdered =
     (Path ["Ordered"])
     []
     [ ( DAnnotation
+          ( Uses
+              [Trait "Ordered" (TVariable (Parameter () "a"))]
+              ( TAlias
+                  "Predicate"
+                  [TVariable (Parameter () "a")]
+                  (TVariable (Parameter () "a") `TArrow` TIntrinsic IBool)
+              )
+          )
+          ( DFunction
+              "less_than_or_equal_to"
+              ( Function
+                  ()
+                  (Uses [] ())
+                  (PVariable () (Label () "m") :| [])
+                  ( ELambda
+                      ()
+                      (PVariable () (Label () "n") :| [])
+                      ( EMatch
+                          ()
+                          ()
+                          ( EApplication
+                              ()
+                              ()
+                              (EVariable () (Label () "compare"))
+                              ( EVariable () (Label () "m")
+                                  <| EVariable () (Label () "n")
+                                  :| []
+                              )
+                          )
+                          ( EClause
+                              ()
+                              ( POr
+                                  ()
+                                  ()
+                                  (PConstructor () (Label () "LessThan") [])
+                                  (PConstructor () (Label () "EqualTo") [])
+                              )
+                              (CPlain () [] (ELiteral () (LBool True)) :| [])
+                              <| EClause
+                                ()
+                                (PConstructor () (Label () "GreaterThan") [])
+                                (CPlain () [] (ELiteral () (LBool False)) :| [])
+                              :| []
+                          )
+                      )
+                  )
+              )
+          )
+      )
+    , ( DAnnotation
           ( Uses
               [Trait "Ordered" (TVariable (Parameter () "a"))]
               ( TAlias
