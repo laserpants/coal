@@ -67,10 +67,19 @@ moduleOrdered =
                           (TIntrinsic IBool)
                           ( EApplication
                               ()
-                              undefined
-                              (EVariable () (Label undefined "compare"))
-                              ( EVariable () (Label undefined "m")
-                                  <| EVariable () (Label undefined "n")
+                              (TConstructor KType "Ordering")
+                              ( EVariable
+                                  ()
+                                  ( Label
+                                      ( TVariable (TypeIndex KType 0)
+                                          `TArrow` TVariable (TypeIndex KType 0)
+                                          `TArrow` TConstructor KType "Ordering"
+                                      )
+                                      "compare"
+                                  )
+                              )
+                              ( EVariable () (Label (TVariable (TypeIndex KType 0)) "m")
+                                  <| EVariable () (Label (TVariable (TypeIndex KType 0)) "n")
                                   :| []
                               )
                           )
@@ -79,13 +88,13 @@ moduleOrdered =
                               ( POr
                                   ()
                                   undefined
-                                  (PConstructor () (Label undefined "LessThan") [])
-                                  (PConstructor () (Label undefined "EqualTo") [])
+                                  (PConstructor () (Label (TConstructor KType "Ordering") "LessThan") [])
+                                  (PConstructor () (Label (TConstructor KType "Ordering") "EqualTo") [])
                               )
                               (CPlain () [] (ELiteral () (LBool True)) :| [])
                               <| EClause
                                 ()
-                                (PConstructor () (Label undefined "GreaterThan") [])
+                                (PConstructor () (Label (TConstructor KType "Ordering") "GreaterThan") [])
                                 (CPlain () [] (ELiteral () (LBool False)) :| [])
                               :| []
                           )
@@ -107,23 +116,47 @@ moduleOrdered =
               "greater_than"
               ( Function
                   ()
-                  (Uses [] undefined)
+                  ( Uses
+                      []
+                      ( TAlias
+                          "Predicate"
+                          [TVariable (TypeIndex KType 0)]
+                          (TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
+                      )
+                  )
                   ( PAnnotation
                       ()
                       (TVariable (Parameter () "a"))
-                      (PVariable () (Label undefined "n"))
+                      (PVariable () (Label (TVariable (TypeIndex KType 0)) "n"))
                       :| []
                   )
                   ( EApplication
                       ()
-                      undefined
-                      (EBinaryOperator () (undefined, OReverseComposition))
-                      ( EVariable () (Label undefined "not")
+                      (TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
+                      ( EBinaryOperator
+                          ()
+                          ( (TIntrinsic IBool `TArrow` TIntrinsic IBool)
+                              `TArrow` (TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
+                              `TArrow` TVariable (TypeIndex KType 0)
+                              `TArrow` TIntrinsic IBool
+                          , OReverseComposition
+                          )
+                      )
+                      ( EVariable () (Label (TIntrinsic IBool `TArrow` TIntrinsic IBool) "not")
                           <| EApplication
                             ()
-                            undefined
-                            (EVariable () (Label undefined "less_than_or_equal_to"))
-                            (EVariable () (Label undefined "n") :| [])
+                            (TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
+                            ( EVariable
+                                ()
+                                ( Label
+                                    ( TVariable (TypeIndex KType 0)
+                                        `TArrow` TVariable (TypeIndex KType 0)
+                                        `TArrow` TIntrinsic IBool
+                                    )
+                                    "less_than_or_equal_to"
+                                )
+                            )
+                            (EVariable () (Label (TVariable (TypeIndex KType 0)) "n") :| [])
                           :| []
                       )
                   )
