@@ -42,9 +42,7 @@ library
       Noll.Compiler.Transform.Tree
       Noll.Compiler.Transform.Type.AliasInsertion
       Noll.Core.Language.Expr
-      Noll.Core.Language.HasType
       Noll.Core.Language.Type
-      Noll.Core.LLVM.HasIRType
       Noll.Core.LLVM.IR
       Noll.Core.LLVM.IRInstruction
       Noll.Core.LLVM.IRType

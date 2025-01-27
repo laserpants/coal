@@ -1,6 +1,6 @@
 {-# LANGUAGE StrictData #-}
 
-module Noll.Core.LLVM.IRType (IRType (..)) where
+module Noll.Core.LLVM.IRType (IRType (..), IRTyped (..)) where
 
 import Noll.Utils (Name)
 
@@ -31,3 +31,9 @@ data IRType
   | -- | Array type (elements sequentially arranged in memory)
     TArray Int IRType
   deriving (Show, Eq, Ord, Read)
+
+class IRTyped t where
+  irTypeOf :: t -> IRType
+
+instance IRTyped IRType where
+  irTypeOf = id
