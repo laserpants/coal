@@ -237,11 +237,11 @@ instance Monoid Substitution where
 
 {-# INLINE substitutionIndex #-}
 substitutionIndex :: TypeIndex Kind -> Substitution -> Maybe IndexedType
-substitutionIndex TypeIndex{..} sub = Map.lookup typeIndexId (substitutionMap sub)
+substitutionIndex TypeIndex{..} Substitution{..} = Map.lookup typeIndexId substitutionMap
 
 {-# INLINE removeSubstitution #-}
 removeSubstitution :: TypeIndex Kind -> Substitution -> Substitution
-removeSubstitution TypeIndex{..} (Substitution sub) = Substitution (Map.delete typeIndexId sub)
+removeSubstitution TypeIndex{..} Substitution{..} = Substitution (Map.delete typeIndexId substitutionMap)
 
 {-# INLINE mapsTo #-}
 mapsTo :: Int -> IndexedType -> Substitution

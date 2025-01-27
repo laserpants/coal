@@ -19,14 +19,15 @@ import Noll.Language (
   TypeIndex (..),
   TypeIndexed (..),
  )
+import Noll.Utils (Over)
 
 -- | Monomorphic type variable set
 newtype MonomorphicSet m = MonomorphicSet {monomorphicSet :: Set m}
   deriving (Show, Eq, Ord, Read, Semigroup, Monoid)
 
 {-# INLINE overMonomorphicSet #-}
-overMonomorphicSet :: (Set m -> Set m) -> MonomorphicSet m -> MonomorphicSet m
-overMonomorphicSet fn MonomorphicSet{..} = MonomorphicSet{monomorphicSet = fn monomorphicSet}
+overMonomorphicSet :: Over (MonomorphicSet m) (Set m)
+overMonomorphicSet fn (MonomorphicSet s) = MonomorphicSet (fn s)
 
 data Constraint c o k t
   = Equality c [t]
