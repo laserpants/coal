@@ -25,7 +25,7 @@ data Definition a k t
     DFunction Name (Function Expression a t)
   | -- | Other (constant) top-level definitions
     DConstant Name (Constant Expression a t)
-  | -- | Type signature
+  | -- | Stand-alone type signature
     DSignature Name (Uses (Type TypeIndex k))
   | -- | Import statement
     DImport Path [Name]
