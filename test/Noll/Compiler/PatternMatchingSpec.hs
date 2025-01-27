@@ -291,15 +291,15 @@ testCompileEnvelopeExpression =
             ( Map.fromList
                 [
                   ( "u1"
-                  , VData "Cons" [VLiteral (LInt32 1), VData "Nil" []]
+                  , VData "Cons" [VPrim (LInt32 1), VData "Nil" []]
                   )
                 ,
                   ( "u2"
-                  , VLiteral (LInt32 1)
+                  , VPrim (LInt32 1)
                   )
                 ,
                   ( "u3"
-                  , VLiteral (LInt32 2)
+                  , VPrim (LInt32 2)
                   )
                 ]
             )
@@ -320,22 +320,22 @@ testCompileEnvelopeExpression =
                   MFail
             )
         )
-        == VLiteral (LInt32 1)
+        == VPrim (LInt32 1)
     it "" $
       eval
         ( Environment
             ( Map.fromList
                 [
                   ( "u1"
-                  , VData "Cons" [VLiteral (LInt32 100), VData "Nil" []]
+                  , VData "Cons" [VPrim (LInt32 100), VData "Nil" []]
                   )
                 ,
                   ( "u2"
-                  , VLiteral (LInt32 1)
+                  , VPrim (LInt32 1)
                   )
                 ,
                   ( "u3"
-                  , VLiteral (LInt32 2)
+                  , VPrim (LInt32 2)
                   )
                 ]
             )
@@ -356,22 +356,22 @@ testCompileEnvelopeExpression =
                   MFail
             )
         )
-        == VLiteral (LInt32 100)
+        == VPrim (LInt32 100)
     it "" $
       eval
         ( Environment
             ( Map.fromList
                 [
                   ( "u1"
-                  , VData "Cons" [VLiteral (LInt32 100), VData "Nil" []]
+                  , VData "Cons" [VPrim (LInt32 100), VData "Nil" []]
                   )
                 ,
                   ( "u2"
-                  , VLiteral (LInt32 1)
+                  , VPrim (LInt32 1)
                   )
                 ,
                   ( "u3"
-                  , VLiteral (LInt32 2)
+                  , VPrim (LInt32 2)
                   )
                 ]
             )
@@ -399,15 +399,15 @@ testCompileEnvelopeExpression =
             ( Map.fromList
                 [
                   ( "u1"
-                  , VData "Cons" [VLiteral (LInt32 100), VData "Nil" []]
+                  , VData "Cons" [VPrim (LInt32 100), VData "Nil" []]
                   )
                 ,
                   ( "u2"
-                  , VLiteral (LInt32 1)
+                  , VPrim (LInt32 1)
                   )
                 ,
                   ( "u3"
-                  , VLiteral (LInt32 2)
+                  , VPrim (LInt32 2)
                   )
                 ]
             )
@@ -434,22 +434,22 @@ testCompileEnvelopeExpression =
                   MFail
             )
         )
-        == VLiteral (LInt32 2)
+        == VPrim (LInt32 2)
     it "" $
       eval
         ( Environment
             ( Map.fromList
                 [
                   ( "u1"
-                  , VData "Cons" [VLiteral (LInt32 100), VData "Nil" []]
+                  , VData "Cons" [VPrim (LInt32 100), VData "Nil" []]
                   )
                 ,
                   ( "u2"
-                  , VLiteral (LInt32 1)
+                  , VPrim (LInt32 1)
                   )
                 ,
                   ( "u3"
-                  , VLiteral (LInt32 2)
+                  , VPrim (LInt32 2)
                   )
                 ]
             )
@@ -482,22 +482,22 @@ testCompileEnvelopeExpression =
                   MFail
             )
         )
-        == VLiteral (LInt32 3)
+        == VPrim (LInt32 3)
     it "" $
       eval
         ( Environment
             ( Map.fromList
                 [
                   ( "u1"
-                  , VData "Cons" [VLiteral (LInt32 100), VData "Nil" []]
+                  , VData "Cons" [VPrim (LInt32 100), VData "Nil" []]
                   )
                 ,
                   ( "u2"
-                  , VLiteral (LInt32 1)
+                  , VPrim (LInt32 1)
                   )
                 ,
                   ( "u3"
-                  , VLiteral (LInt32 2)
+                  , VPrim (LInt32 2)
                   )
                 ]
             )
@@ -530,22 +530,22 @@ testCompileEnvelopeExpression =
                   MFail
             )
         )
-        == VLiteral (LInt32 2)
+        == VPrim (LInt32 2)
     it "" $
       eval
         ( Environment
             ( Map.fromList
                 [
                   ( "u1"
-                  , VData "Cons" [VLiteral (LInt32 100), VData "Nil" []]
+                  , VData "Cons" [VPrim (LInt32 100), VData "Nil" []]
                   )
                 ,
                   ( "u2"
-                  , VLiteral (LInt32 1)
+                  , VPrim (LInt32 1)
                   )
                 ,
                   ( "u3"
-                  , VLiteral (LInt32 2)
+                  , VPrim (LInt32 2)
                   )
                 ]
             )
@@ -578,7 +578,7 @@ testCompileEnvelopeExpression =
                   MFail
             )
         )
-        == VLiteral (LInt32 3)
+        == VPrim (LInt32 3)
 
 testGroupByConstructor :: Spec
 testGroupByConstructor = do

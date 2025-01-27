@@ -27,19 +27,14 @@ import qualified Noll.Common.Environment as Environment
 
 data Value
   = VData Name [Value]
-  | VLiteral Primitive
+  | VPrim Primitive
   | VFail
   | VFun [Name] (Eval Value)
-
--- instance Show Value where
---  show (VData name vs) = show (name, vs)
---  show (VLiteral p) = show p
---  show (VFail) = "VFail"
 
 instance Eq Value where
   VData c1 vs1 == VData c2 vs2 =
     c1 == c2 && vs1 == vs2
-  VLiteral p1 == VLiteral p2 =
+  VPrim p1 == VPrim p2 =
     p1 == p2
   VFail == VFail =
     True
@@ -49,6 +44,22 @@ instance Eq Value where
     False
   _ == _ =
     error "Not comparable"
+
+instance Show Value where
+  showsPrec d =
+    \case
+      VPrim prim ->
+        showParen
+          (d > 10)
+          (showString "VPrim " . showsPrec 11 prim)
+      VData name vals ->
+        showParen
+          (d > 10)
+          (showString ("VData " <> show name <> " ") . showsPrec 11 vals)
+      VFail{} ->
+        showString "VFail"
+      VFun{} ->
+        showString "<<function>>"
 
 newtype Eval e = Eval {evalMonad :: Reader (Environment Value) e}
   deriving
@@ -75,7 +86,7 @@ evalExpr :: (Show a, Show t) => Expression a t -> Eval Value
 evalExpr =
   \case
     ELiteral _ p ->
-      pure (VLiteral p)
+      pure (VPrim p)
     EVariable _ (Label _ name) ->
       evalVar name
     EConstructor _ (Label _ name) ->
@@ -90,9 +101,9 @@ evalExpr =
     EIf _ _ e1 e2 e3 -> do
       v1 <- evalExpr e1
       case v1 of
-        VLiteral (LBool True) ->
+        VPrim (LBool True) ->
           evalExpr e2
-        VLiteral (LBool False) ->
+        VPrim (LBool False) ->
           evalExpr e3
         _ ->
           error "Non-boolean if-condition"
@@ -110,8 +121,8 @@ evalExpr =
     EBinaryOperator _ (_, OEqualTo) -> do
       pure $ args2 $ \a0 a1 ->
         case (a0, a1) of
-          (VLiteral (LInt32 a), VLiteral (LInt32 b)) ->
-            pure (VLiteral (LBool (a == b)))
+          (VPrim (LInt32 a), VPrim (LInt32 b)) ->
+            pure (VPrim (LBool (a == b)))
 
 {-# INLINE argn #-}
 argn :: Int -> Name

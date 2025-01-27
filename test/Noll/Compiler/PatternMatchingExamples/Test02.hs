@@ -26,7 +26,7 @@ spec =
         ( Environment.fromList
             [
               ( "u1"
-              , VLiteral (LInt32 1)
+              , VPrim (LInt32 1)
               )
             ,
               ( "u2"
@@ -38,18 +38,18 @@ spec =
               )
             ]
         )
-        == VData "A" [VLiteral (LInt32 1), VData "Nil" []]
+        == VData "A" [VPrim (LInt32 1), VData "Nil" []]
     it "" $ do
       evalWithEnv
         fixture
         ( Environment.fromList
             [
               ( "u1"
-              , VLiteral (LInt32 1)
+              , VPrim (LInt32 1)
               )
             ,
               ( "u2"
-              , VData "Cons" [VLiteral (LInt32 1), VData "Nil" []]
+              , VData "Cons" [VPrim (LInt32 1), VData "Nil" []]
               )
             ,
               ( "u3"
@@ -57,31 +57,31 @@ spec =
               )
             ]
         )
-        == VData "B" [VLiteral (LInt32 1), VData "Cons" [VLiteral (LInt32 1), VData "Nil" []]]
+        == VData "B" [VPrim (LInt32 1), VData "Cons" [VPrim (LInt32 1), VData "Nil" []]]
     it "" $ do
       evalWithEnv
         fixture
         ( Environment.fromList
             [
               ( "u1"
-              , VLiteral (LInt32 1)
+              , VPrim (LInt32 1)
               )
             ,
               ( "u2"
-              , VData "Cons" [VLiteral (LInt32 2), VData "Nil" []]
+              , VData "Cons" [VPrim (LInt32 2), VData "Nil" []]
               )
             ,
               ( "u3"
-              , VData "Cons" [VLiteral (LInt32 3), VData "Nil" []]
+              , VData "Cons" [VPrim (LInt32 3), VData "Nil" []]
               )
             ]
         )
         == VData
           "C"
-          [ VLiteral (LInt32 1)
-          , VLiteral (LInt32 2)
+          [ VPrim (LInt32 1)
+          , VPrim (LInt32 2)
           , VData "Nil" []
-          , VLiteral (LInt32 3)
+          , VPrim (LInt32 3)
           , VData "Nil" []
           ]
 

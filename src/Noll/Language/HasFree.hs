@@ -12,7 +12,7 @@ module Noll.Language.HasFree (
   appearsIn,
 ) where
 
-import Data.Set (Set)
+import Data.Set (Set, singleton)
 import Noll.Common.List1 (NonEmpty)
 import Noll.Label (Label (..), labelName)
 import Noll.Language.Expression (Clause (..), Expression (..))
@@ -39,7 +39,7 @@ instance (HasBound b) => HasBound (NonEmpty b) where
   boundIn = Set.unions . fmap boundIn
 
 instance HasBound (Label t) where
-  boundIn (Label _ name) = Set.singleton name
+  boundIn (Label _ name) = singleton name
 
 instance (Ord t) => HasBound (Binding e a t) where
   boundIn =
@@ -53,11 +53,11 @@ instance (Ord t) => HasBound (Pattern a t) where
   boundIn =
     \case
       PVariable _ (Label _ name) ->
-        Set.singleton name
+        singleton name
       PShorthand _ (Label _ name) ->
-        Set.singleton name
+        singleton name
       PAtVariable _ (Label _ name) ->
-        Set.singleton name
+        singleton name
       PAnnotation _ _ p ->
         boundIn p
       PConstructor _ _ ps ->
@@ -122,7 +122,7 @@ instance (Ord t) => HasFree (Expression a t) t where
   freeIn =
     \case
       EVariable _ ll ->
-        Set.singleton ll
+        singleton ll
       EIf _ _ e1 e2 e3 ->
         freeIn e1 <> freeIn e2 <> freeIn e3
       ELambda _ ps e ->
