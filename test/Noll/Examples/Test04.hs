@@ -87,7 +87,7 @@ moduleOrdered =
                               ()
                               ( POr
                                   ()
-                                  undefined
+                                  (TConstructor KType "Ordering")
                                   (PConstructor () (Label (TConstructor KType "Ordering") "LessThan") [])
                                   (PConstructor () (Label (TConstructor KType "Ordering") "EqualTo") [])
                               )
@@ -165,6 +165,15 @@ moduleOrdered =
       )
     ]
 
+tree0 :: Type TypeIndex Kind
+tree0 = TApplication KType (TConstructor (KArrow KType KType) "Tree") (TVariable (TypeIndex KType 0) :| [])
+
+list0 :: Type TypeIndex Kind
+list0 = TIntrinsic (IList (TVariable (TypeIndex KType 0)))
+
+tvar0 :: Type TypeIndex Kind
+tvar0 = TVariable (TypeIndex KType 0)
+
 moduleBinarySearch :: Module () () IndexedType
 moduleBinarySearch =
   Module.fromDefinitionList
@@ -176,7 +185,7 @@ moduleBinarySearch =
               "flatten_tree"
               ( Function
                   ()
-                  (Uses [] undefined)
+                  (Uses [] list0)
                   ( PAnnotation
                       ()
                       ( TApplication
@@ -184,21 +193,35 @@ moduleBinarySearch =
                           (TConstructor () "Tree")
                           (TVariable (Parameter () "a") :| [])
                       )
-                      (PVariable () (Label undefined "tree"))
+                      ( PVariable
+                          ()
+                          (Label tree0 "tree")
+                      )
                       :| []
                   )
                   ( EFold
                       ()
-                      undefined
-                      (EVariable () (Label undefined "tree") :| [])
+                      list0
+                      ( EVariable
+                          ()
+                          (Label tree0 "tree")
+                          :| []
+                      )
                       ( EClause
                           ()
                           ( PConstructor
                               ()
-                              (Label undefined "Node")
-                              [ PVariable () (Label undefined "y")
-                              , PAtVariable () (Label undefined "lhs")
-                              , PAtVariable () (Label undefined "rhs")
+                              ( Label
+                                  (tvar0 `TArrow` tree0 `TArrow` tree0 `TArrow` tree0)
+                                  "Node"
+                              )
+                              [ PVariable () (Label tvar0 "y")
+                              , PAtVariable
+                                  ()
+                                  (Label tree0 "lhs")
+                              , PAtVariable
+                                  ()
+                                  (Label tree0 "rhs")
                               ]
                           )
                           ( CPlain
@@ -206,14 +229,19 @@ moduleBinarySearch =
                               []
                               ( EApplication
                                   ()
-                                  undefined
-                                  (EBinaryOperator () (undefined, OListConcatenation))
-                                  ( EVariable () (Label undefined "lhs")
+                                  list0
+                                  ( EBinaryOperator
+                                      ()
+                                      ( list0 `TArrow` list0 `TArrow` list0
+                                      , OListConcatenation
+                                      )
+                                  )
+                                  ( EVariable () (Label list0 "lhs")
                                       <| EListCons
                                         ()
-                                        undefined
-                                        (EVariable () (Label undefined "y"))
-                                        (EVariable () (Label undefined "rhs"))
+                                        list0
+                                        (EVariable () (Label tvar0 "y"))
+                                        (EVariable () (Label list0 "rhs"))
                                       :| []
                                   )
                               )
@@ -221,11 +249,15 @@ moduleBinarySearch =
                           )
                           <| EClause
                             ()
-                            (PConstructor () (Label undefined "Leaf") [])
+                            ( PConstructor
+                                ()
+                                (Label tree0 "Leaf")
+                                []
+                            )
                             ( CPlain
                                 ()
                                 []
-                                (EListLiteral () undefined [])
+                                (EListLiteral () list0 [])
                                 :| []
                             )
                           :| []
@@ -233,22 +265,26 @@ moduleBinarySearch =
                       ( Just
                           ( ERecursiveLet
                               ()
-                              (PVariable () (Label undefined "$fold.1"))
+                              (PVariable () (Label (tree0 `TArrow` list0) "$fold.1"))
                               ( ELambda
                                   ()
-                                  (PVariable () (Label undefined "$fold.1.expr") :| [])
+                                  ( PVariable
+                                      ()
+                                      (Label tree0 "$fold.1.expr")
+                                      :| []
+                                  )
                                   ( EMatch
                                       ()
-                                      undefined
-                                      (EVariable () (Label undefined "$fold.1.expr"))
+                                      list0
+                                      (EVariable () (Label tree0 "$fold.1.expr"))
                                       ( EClause
                                           ()
                                           ( PConstructor
                                               ()
-                                              (Label undefined "Node")
-                                              [ PVariable () (Label undefined "y")
-                                              , PVariable () (Label undefined "lhs")
-                                              , PVariable () (Label undefined "rhs")
+                                              (Label (tvar0 `TArrow` tree0 `TArrow` tree0 `TArrow` tree0) "Node")
+                                              [ PVariable () (Label tvar0 "y")
+                                              , PVariable () (Label tree0 "lhs")
+                                              , PVariable () (Label tree0 "rhs")
                                               ]
                                           )
                                           ( CPlain
@@ -256,27 +292,27 @@ moduleBinarySearch =
                                               []
                                               ( EApplication
                                                   ()
-                                                  undefined
+                                                  list0
                                                   ( EBinaryOperator
                                                       ()
-                                                      ( undefined
+                                                      ( list0 `TArrow` list0 `TArrow` list0
                                                       , OListConcatenation
                                                       )
                                                   )
                                                   ( EApplication
                                                       ()
-                                                      undefined
-                                                      (EVariable () (Label undefined "$fold.1"))
-                                                      (EVariable () (Label undefined "lhs") :| [])
+                                                      list0
+                                                      (EVariable () (Label (tree0 `TArrow` list0) "$fold.1"))
+                                                      (EVariable () (Label tree0 "lhs") :| [])
                                                       <| EListCons
                                                         ()
-                                                        undefined
-                                                        (EVariable () (Label undefined "y"))
+                                                        list0
+                                                        (EVariable () (Label tvar0 "y"))
                                                         ( EApplication
                                                             ()
-                                                            undefined
-                                                            (EVariable () (Label undefined "$fold.1"))
-                                                            (EVariable () (Label undefined "rhs") :| [])
+                                                            list0
+                                                            (EVariable () (Label (tree0 `TArrow` list0) "$fold.1"))
+                                                            (EVariable () (Label tree0 "rhs") :| [])
                                                         )
                                                       :| []
                                                   )
@@ -285,17 +321,27 @@ moduleBinarySearch =
                                           )
                                           <| EClause
                                             ()
-                                            (PConstructor () (Label undefined "Leaf") [])
-                                            (CPlain () [] (EListLiteral () undefined []) :| [])
+                                            (PConstructor () (Label tree0 "Leaf") [])
+                                            (CPlain () [] (EListLiteral () list0 []) :| [])
                                           :| []
                                       )
                                   )
                               )
                               ( EApplication
                                   ()
-                                  undefined
-                                  (EVariable () (Label undefined "$fold.1"))
-                                  (EVariable () (Label undefined "tree") :| [])
+                                  list0
+                                  ( EVariable
+                                      ()
+                                      ( Label
+                                          (tree0 `TArrow` list0)
+                                          "$fold.1"
+                                      )
+                                  )
+                                  ( EVariable
+                                      ()
+                                      (Label tree0 "tree")
+                                      :| []
+                                  )
                               )
                           )
                       )
