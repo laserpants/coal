@@ -18,6 +18,7 @@ import Noll.Language (
   Function (..),
   IndexedType,
   Intrinsic (..),
+  Kind (..),
   Module (..),
   Parameter (..),
   Path (..),
@@ -25,6 +26,7 @@ import Noll.Language (
   Primitive (..),
   Trait (..),
   Type (..),
+  TypeIndex (..),
   Uses (..),
  )
 
@@ -48,14 +50,21 @@ moduleOrdered =
               "less_than_or_equal_to"
               ( Function
                   ()
-                  (Uses [] undefined)
-                  (PVariable () (Label undefined "m") :| [])
+                  ( Uses
+                      []
+                      ( TAlias
+                          "Predicate"
+                          [TVariable (TypeIndex KType 0)]
+                          (TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
+                      )
+                  )
+                  (PVariable () (Label (TVariable (TypeIndex KType 0)) "m") :| [])
                   ( ELambda
                       ()
-                      (PVariable () (Label undefined "n") :| [])
+                      (PVariable () (Label (TVariable (TypeIndex KType 0)) "n") :| [])
                       ( EMatch
                           ()
-                          undefined
+                          (TIntrinsic IBool)
                           ( EApplication
                               ()
                               undefined

@@ -1,6 +1,6 @@
 {-# LANGUAGE StrictData #-}
 
-module Noll.Core.Language.Type (Type (..), CoreTyped (..)) where
+module Noll.Core.Language.Type (Type (..), Typed (..)) where
 
 import Noll.Utils (Name)
 
@@ -16,8 +16,8 @@ data Type
     RNil
   deriving (Show, Eq, Ord, Read)
 
-class CoreTyped t where
-  coreTypeOf :: t -> Type
+class Typed t where
+  typeOf :: t -> Type
 
-instance CoreTyped Type where
-  coreTypeOf = id
+instance Typed Type where
+  typeOf = id
