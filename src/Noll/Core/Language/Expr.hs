@@ -1,7 +1,7 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Core.Language.Expr where
+module Noll.Core.Language.Expr (Expr) where
 
 import Data.Fix (Fix (..))
 import Noll.Common.List1 (List1)

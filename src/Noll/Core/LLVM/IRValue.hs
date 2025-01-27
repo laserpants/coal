@@ -1,4 +1,5 @@
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE StrictData #-}
 
 module Noll.Core.LLVM.IRValue (IRValue (..)) where
 
