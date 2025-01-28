@@ -3,6 +3,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
+{-# LANGUAGE LambdaCase #-}
 
 module Noll.Compiler (
   CompilerEnvironment (..),
@@ -35,6 +36,7 @@ import Noll.Language (
   Expression (..),
   Function (..),
   IndexedType,
+  Definition (..),
   Kind (..),
   Pattern (..),
   Scheme (..),
@@ -104,6 +106,10 @@ overCompilerNameEnvironment fn CompilerState{..} = CompilerState{compilerNameEnv
 overCompilerSupply :: Over (CompilerState a) Int
 overCompilerSupply fn CompilerState{..} = CompilerState{compilerSupply = fn compilerSupply, ..}
 
+{-# INLINE overCompilerSubstitution #-}
+overCompilerSubstitution :: Over (CompilerState a) Substitution
+overCompilerSubstitution fn CompilerState{..} = CompilerState{compilerSubstitution = fn compilerSubstitution, ..}
+
 {-# INLINE initialCompilerState #-}
 initialCompilerState :: CompilerState a
 initialCompilerState =
@@ -156,6 +162,10 @@ insertNamesC names = modify (overCompilerNameEnvironment (Environment.insertMult
 {-# INLINE updateSupplyC #-}
 updateSupplyC :: (Monad m) => Int -> CompilerT a m ()
 updateSupplyC supply = modify (overCompilerSupply (const supply))
+
+{-# INLINE updateSubstitutionC #-}
+updateSubstitutionC :: (Monad m) => Substitution -> CompilerT a m ()
+updateSubstitutionC sub = modify (overCompilerSubstitution (const sub))
 
 {-# INLINE runCompilerT #-}
 runCompilerT :: (Monad m) => CompilerEnvironment -> CompilerT a m c -> m (c, CompilerState a)
@@ -263,3 +273,23 @@ typeCheckConstantC g@(Constant loc (Uses _ t) e) = do
 
 typeCheckModuleC = do
   undefined
+
+typeCheckiDefinitionsC = do
+  undefined
+
+solveC constraints = do
+  sub1 <- gets compilerSubstitution
+  sub2 <- solveConstraintsC constraints
+  let sub = sub2 <> sub1
+  updateSubstitutionC sub
+  return sub
+
+typeCheckiDefinitionC :: (Monad m, Show a, Eq a) => Definition a k IndexedType -> CompilerT a m (Definition a k IndexedType)
+typeCheckiDefinitionC = do
+  \case
+    DFunction name (Function a u ps e) -> do
+      (as0, cs0) <- generateConstraintsC e
+      (as1, cs1) <- partitionEithers <$> traverse assumptionConstraints as0
+      sub <- solveC (cs0 <> cs1)
+      undefined
+--      undefined
