@@ -81,6 +81,7 @@ data CompilerState a = CompilerState
   , compilerTypeAnnotationParams :: Dictionary (a, TypeIndex Kind)
   , compilerSolverRuleViolations :: [InferenceRule Kind a]
   , compilerNameEnvironment :: Environment (Scheme TypeIndex Kind IndexedType)
+  , compilerAssumptions :: [CompilerAssumption]
   , compilerSubstitution :: Substitution
   , compilerSupply :: Int
   }
@@ -106,6 +107,10 @@ overCompilerNameEnvironment fn CompilerState{..} = CompilerState{compilerNameEnv
 overCompilerSupply :: Over (CompilerState a) Int
 overCompilerSupply fn CompilerState{..} = CompilerState{compilerSupply = fn compilerSupply, ..}
 
+{-# INLINE overCompilerAssumptions #-}
+overCompilerAssumptions :: Over (CompilerState a) CompilerAssumption
+overCompilerAssumptions fn CompilerState{..} = CompilerState{compilerAssumptions = fn compilerAssumptions, ..}
+
 {-# INLINE overCompilerSubstitution #-}
 overCompilerSubstitution :: Over (CompilerState a) Substitution
 overCompilerSubstitution fn CompilerState{..} = CompilerState{compilerSubstitution = fn compilerSubstitution, ..}
@@ -118,6 +123,7 @@ initialCompilerState =
     , compilerTypeAnnotationParams = mempty
     , compilerSolverRuleViolations = []
     , compilerNameEnvironment = mempty
+    , compilerAssumptions = []
     , compilerSubstitution = mempty
     , compilerSupply = 0
     }
@@ -221,6 +227,12 @@ solveConstraintsC cs = do
   compilerReportConstraintsGenErrors (IllFormedTypeAnnotation <$> errors)
   pure sub
 
+solveC :: (Monad m, Show a, Eq a) => [CompilerConstraint a] -> CompilerT a m ()
+solveC constraints = do
+  sub1 <- gets compilerSubstitution
+  sub2 <- solveConstraintsC constraints
+  updateSubstitutionC (sub2 <> sub1)
+
 compileConstraintsC ::
   ( Functor f
   , Monad m
@@ -232,24 +244,28 @@ compileConstraintsC ::
   [CompilerConstraint a] ->
   f IndexedType ->
   Expression a IndexedType ->
-  CompilerT a m (f IndexedType, [CompilerAssumption])
+  CompilerT a m () -- (f IndexedType, [CompilerAssumption])
 compileConstraintsC cs o e = do
   (as0, cs0) <- generateConstraintsC e
   (as1, cs1) <- partitionEithers <$> traverse assumptionConstraints as0
-  sub <- solveConstraintsC (cs <> cs0 <> cs1)
-  pure (normalizeTypeIndexes (normalizeRowTypes <$> apply sub o), apply sub as1)
+  insertAssumptions
+  solveC (cs <> cs0 <> cs1)
+--  sub <- gets compilerSubstitution
+--  pure (normalizeTypeIndexes (normalizeRowTypes <$> apply sub o), apply sub as1)
 
 typeCheckExpressionC ::
   (Monad m, Show a, Eq a) =>
   Expression a IndexedType ->
   CompilerT a m (Expression a IndexedType, [CompilerAssumption])
-typeCheckExpressionC e = compileConstraintsC [] e e
+typeCheckExpressionC e = do
+  a <- compileConstraintsC [] e e
+  undefined
 
-typeCheckFunctionC ::
+compileFunctionC ::
   (Monad m, Show a, Eq a) =>
   Function Expression a IndexedType ->
-  CompilerT a m (Function Expression a IndexedType, [CompilerAssumption])
-typeCheckFunctionC f@(Function loc (Uses _ t) ps e) = do
+  CompilerT a m () -- (Function Expression a IndexedType, [CompilerAssumption])
+compileFunctionC f@(Function loc (Uses _ t) ps e) = do
   compileConstraintsC [Equality (InferenceRule 999) [t, typeOf e]] f $
     ELet
       loc
@@ -258,16 +274,28 @@ typeCheckFunctionC f@(Function loc (Uses _ t) ps e) = do
  where
   placeholder = "$$$.function"
 
+typeCheckFunctionC ::
+  (Monad m, Show a, Eq a) =>
+  Function Expression a IndexedType ->
+  CompilerT a m (Function Expression a IndexedType, [CompilerAssumption])
+typeCheckFunctionC f = do
+  a <- compileFunctionC f
+  sub <- gets compilerSubstitution
+  undefined -- pure (normalizeTypeIndexes (normalizeRowTypes <$> apply sub f), apply sub as1)
+ where
+  placeholder = "$$$.function"
+
 typeCheckConstantC ::
   (Monad m, Show a, Eq a) =>
   Constant Expression a IndexedType ->
   CompilerT a m (Constant Expression a IndexedType, [CompilerAssumption])
 typeCheckConstantC g@(Constant loc (Uses _ t) e) = do
-  compileConstraintsC [Equality (InferenceRule 999) [t, typeOf e]] g $
+  a <- compileConstraintsC [Equality (InferenceRule 999) [t, typeOf e]] g $
     ELet
       loc
       (BPattern loc (PVariable loc (Label t placeholder)) e :| [])
       (EVariable loc (Label t placeholder))
+  undefined
  where
   placeholder = "$$$.constant"
 
@@ -277,19 +305,13 @@ typeCheckModuleC = do
 typeCheckiDefinitionsC = do
   undefined
 
-solveC constraints = do
-  sub1 <- gets compilerSubstitution
-  sub2 <- solveConstraintsC constraints
-  let sub = sub2 <> sub1
-  updateSubstitutionC sub
-  return sub
-
 typeCheckiDefinitionC :: (Monad m, Show a, Eq a) => Definition a k IndexedType -> CompilerT a m (Definition a k IndexedType)
 typeCheckiDefinitionC = do
   \case
-    DFunction name (Function a u ps e) -> do
-      (as0, cs0) <- generateConstraintsC e
-      (as1, cs1) <- partitionEithers <$> traverse assumptionConstraints as0
-      sub <- solveC (cs0 <> cs1)
+    DFunction name f -> do
+      --(as0, cs0) <- generateConstraintsC e
+      --(as1, cs1) <- partitionEithers <$> traverse assumptionConstraints as0
+      --solveC (cs0 <> cs1)
       undefined
 --      undefined
+
