@@ -2,13 +2,14 @@
 
 module Noll.SystemFSpec.TestRunner where
 
+import Control.Monad.Identity (runIdentity)
 import Data.List.NonEmpty ((<|))
 import Debug.Trace
 import Noll.Common.Environment (Environment)
 import Noll.Common.List1 (NonEmpty (..))
 import Noll.Compiler (
   CompilerEnvironment (..),
-  evalCompiler,
+  evalCompilerT,
   generateConstraintsC,
   getConstraintsGenErrorsC,
   getSolverRuleViolationsC,
@@ -55,7 +56,7 @@ runTypedConstantTest ::
   Constant Expression a () ->
   TestResult (Constant Expression a (Type TypeIndex Kind)) a
 runTypedConstantTest env names g =
-  evalCompiler env $ do
+  runIdentity $ evalCompilerT env $ do
     insertNamesC names
     (g2, as) <- typeCheckConstantC (indexed g)
     errs0 <- getConstraintsGenErrorsC
@@ -69,7 +70,7 @@ runTypedFunctionTest ::
   Function Expression a () ->
   TestResult (Function Expression a (Type TypeIndex Kind)) a
 runTypedFunctionTest env names f =
-  evalCompiler env $ do
+  runIdentity $ evalCompilerT env $ do
     insertNamesC names
     (f2, as) <- typeCheckFunctionC (indexed f)
     errs0 <- getConstraintsGenErrorsC
@@ -83,7 +84,7 @@ runTypedExpressionTest ::
   Expression a () ->
   TestResult (Expression a (Type TypeIndex Kind)) a
 runTypedExpressionTest env names e =
-  evalCompiler env $ do
+  runIdentity $ evalCompilerT env $ do
     insertNamesC names
     (e2, as) <- typeCheckExpressionC (indexed e)
     errs0 <- getConstraintsGenErrorsC
