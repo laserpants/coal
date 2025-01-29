@@ -5,9 +5,10 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Compiler 
-  where
---module Noll.Compiler (
+module Noll.Compiler
+where
+
+-- module Noll.Compiler (
 --  CompilerEnvironment (..),
 --  insertNamesC,
 --  CompilerT (..),
@@ -22,10 +23,10 @@ module Noll.Compiler
 --  solveConstraintsC,
 --  getConstraintsGenErrorsC,
 --  getSolverRuleViolationsC,
---) where
+-- ) where
 
 import Control.Monad.Reader (MonadReader, ReaderT, ask, runReaderT)
-import Control.Monad.State (MonadState, StateT, gets, modify, runStateT)
+import Control.Monad.State (MonadState, StateT, gets, put, modify, runStateT, runState)
 import Control.Monad.Writer (execWriter)
 import Data.Either.Extra (partitionEithers)
 import Data.Foldable (traverse_)
@@ -37,6 +38,7 @@ import Noll.Language (
   Constant (..),
   Constructor (..),
   Definition (..),
+  Type (..),
   Expression (..),
   Function (..),
   IndexedType,
@@ -69,6 +71,7 @@ import Noll.SystemF (
   solveConstraints,
  )
 import Noll.Utils (Dictionary, Name, Over, (<$$$>))
+import Noll.Language.Indexed (indexed2)
 
 import qualified Data.Map.Strict as Map
 import qualified Noll.Common.Environment as Environment
@@ -271,28 +274,26 @@ typeCheckExpressionC e = do
 
 compileFunctionC ::
   (Monad m, Show a, Eq a) =>
-  Function Expression a () ->
+  Function Expression a IndexedType ->
   CompilerT a m ()
-compileFunctionC = undefined
---compileFunctionC f@(Function loc (Uses _ t) ps e) =
---  compileConstraintsC [Equality (InferenceRule 999) [t, typeOf e]] f $
---    ELet
---      loc
---      (BFunction loc placeholder ps e :| [])
---      (EVariable loc (Label (foldType t (typeOf <$> ps)) placeholder))
--- where
---  placeholder = "###.function"
+compileFunctionC f@(Function loc (Uses _ t) ps e) =
+  compileConstraintsC [Equality (InferenceRule 999) [t, typeOf e]] f $
+    ELet
+      loc
+      (BFunction loc placeholder ps e :| [])
+      (EVariable loc (Label (foldType t (typeOf <$> ps)) placeholder))
+ where
+  placeholder = "###.function"
 
 typeCheckFunctionC ::
   (Monad m, Show a, Eq a) =>
   Function Expression a IndexedType ->
-  CompilerT a m (Function Expression a (), [CompilerAssumption])
+  CompilerT a m (Function Expression a IndexedType, [CompilerAssumption])
 typeCheckFunctionC f = do
-  undefined
---  compileFunctionC f
---  ams <- gets compilerAssumptions
---  sub <- gets compilerSubstitution
---  pure (normalizeTypeIndexes (normalizeRowTypes <$> apply sub f), ams)
+  compileFunctionC f
+  ams <- gets compilerAssumptions
+  sub <- gets compilerSubstitution
+  pure (normalizeTypeIndexes (normalizeRowTypes <$> apply sub f), ams)
 
 compileConstantC ::
   (Monad m, Show a, Eq a) =>
@@ -320,11 +321,17 @@ typeCheckConstantC c = do
 typeCheckModuleC = do
   undefined
 
-typeCheckiDefinitionsC :: (Monad m, Show a, Eq a) => [Definition a k IndexedType] -> CompilerT a m ()
-typeCheckiDefinitionsC = traverse_ typeCheckDefinitionC
+typeCheckDefinitionsC :: (Monad m, Show a, Eq a) => [Definition a k IndexedType] -> CompilerT a m ()
+typeCheckDefinitionsC = traverse_ typeCheckDefinitionC
 
 typeCheckDefinitionC :: (Monad m, Show a, Eq a) => Definition a k IndexedType -> CompilerT a m ()
 typeCheckDefinitionC =
   \case
     DFunction _ f ->
       compileFunctionC f
+
+indexedC :: (Monad m, Traversable t) => t a -> CompilerT a m (t (Type TypeIndex Kind))
+indexedC t = do
+  (r, q) <- runState (indexed2 t) <$> gets compilerSupply
+  updateSupplyC q
+  return r

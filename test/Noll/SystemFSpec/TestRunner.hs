@@ -18,6 +18,7 @@ import Noll.Compiler (
   typeCheckConstantC,
   typeCheckExpressionC,
   typeCheckFunctionC,
+  indexedC,
  )
 import Noll.Language (
   Constant (..),
@@ -30,7 +31,7 @@ import Noll.Language (
   Scheme (..),
   Type (..),
   TypeIndex (..),
-  indexed,
+  indexed2,
  )
 import Noll.SystemF.Constraint.Assumption (Assumption (..))
 import Noll.SystemF.Constraint.Generation (ConstraintsGenError)
@@ -54,11 +55,12 @@ runTypedConstantTest ::
   CompilerEnvironment ->
   [(Name, Scheme TypeIndex Kind IndexedType)] ->
   Constant Expression a () ->
-  TestResult (Constant Expression a (Type TypeIndex Kind)) a
+  TestResult (Constant Expression () (Type TypeIndex Kind)) b
 runTypedConstantTest env names g =
   runIdentity $ evalCompilerT env $ do
     insertNamesC names
-    (g2, as) <- typeCheckConstantC (indexed g)
+    g1 <- indexedC g
+    (g2, as) <- typeCheckConstantC g1
     errs0 <- getConstraintsGenErrorsC
     errs1 <- getSolverRuleViolationsC
     pure (TestResult g2 as errs0 errs1)

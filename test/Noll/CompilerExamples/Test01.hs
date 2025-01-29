@@ -2,27 +2,34 @@
 
 module Noll.CompilerExamples.Test01 where
 
-import Noll.Compiler
+import Control.Monad.Identity (runIdentity)
 import Noll.Common.List1 (NonEmpty (..), (<|))
+import Noll.Compiler
 import Noll.Label (Label (..))
 import Noll.Language (
   BinaryOperator (..),
   Choice (..),
   Clause (..),
+  Constructor (..),
   Definition (..),
   Expression (..),
   Function (..),
+  IndexedType,
   Intrinsic (..),
+  Kind (..),
   Module (..),
   Parameter (..),
   Path (..),
   Pattern (..),
   Primitive (..),
+  Scheme (..),
   Trait (..),
   Type (..),
   Uses (..),
  )
 import Test.Hspec (Spec, describe, it)
+
+import qualified Noll.Common.Environment as Environment
 
 spec :: Spec
 spec =
@@ -30,7 +37,43 @@ spec =
     it "" $ do
       1 == 2
 
-baz = typeCheckiDefinitionsC fixture 
+baz =
+  runIdentity
+    ( runCompilerT
+        ( CompilerEnvironment
+            ( Environment.fromList
+                [
+                  ( "LessThan"
+                  , Constructor
+                      "LessThan"
+                      0
+                      (Forall mempty [] (TConstructor KType "Ordering"))
+                  )
+                ,
+                  ( "GreaterThan"
+                  , Constructor
+                      "GreaterThan"
+                      0
+                      (Forall mempty [] (TConstructor KType "Ordering"))
+                  )
+                ,
+                  ( "EqualTo"
+                  , Constructor
+                      "EqualTo"
+                      0
+                      (Forall mempty [] (TConstructor KType "Ordering"))
+                  )
+                ]
+            )
+            ( Environment.fromList
+                []
+            )
+        )
+        (typeCheckDefinitionsC fixture1)
+    )
+
+fixture1 :: [Definition () () IndexedType]
+fixture1 = undefined -- indexed fixture
 
 fixture :: [Definition () () ()]
 fixture =

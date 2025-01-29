@@ -10,10 +10,10 @@ module Noll.Language.Indexed (
   typeIdsIn,
   notBoundIn,
   freshIdIn,
-  indexed,
+  indexed2,
 ) where
 
-import Control.Monad.State (evalState)
+import Control.Monad.State (State, evalState)
 import Data.List.NonEmpty (NonEmpty)
 import Data.Map.Strict (Map)
 import Data.Set (Set, singleton)
@@ -218,7 +218,10 @@ freshIdIn t
  where
   typeIndexSet = typeIndexesIn t
 
-indexed :: (Traversable t) => t a -> t (Type TypeIndex Kind)
-indexed t = evalState (traverse (fmap tVar . const supply) t) 0
+indexed2 :: (Traversable t) => t a -> State Int (t (Type TypeIndex Kind))
+indexed2 t = traverse (fmap tVar . const supply) t
  where
   tVar = TVariable . TypeIndex KType
+
+--indexed :: (Traversable t) => t a -> t (Type TypeIndex Kind)
+--indexed a = evalState (indexed2 a) 0
