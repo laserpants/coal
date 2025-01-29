@@ -136,6 +136,7 @@ test-suite noll-test
       Noll.Compiler.Transform.Pattern.OrExpansionSpec
       Noll.Compiler.Transform.TreeSpec
       Noll.Compiler.Transform.Type.AliasInsertionSpec
+      Noll.CompilerExamples.Test01
       Noll.Examples.Test01
       Noll.Examples.Test02
       Noll.Examples.Test03

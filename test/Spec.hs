@@ -15,6 +15,7 @@ import qualified Noll.Compiler.Transform.Pattern.DesugaringSpec
 import qualified Noll.Compiler.Transform.Pattern.OrExpansionSpec
 import qualified Noll.Compiler.Transform.TreeSpec
 import qualified Noll.Compiler.Transform.Type.AliasInsertionSpec
+import qualified Noll.CompilerExamples.Test01
 import qualified Noll.Language.HasFreeSpec
 import qualified Noll.SystemF.Constraint.GenerationSpec
 import qualified Noll.SystemF.UnificationSpec
@@ -33,7 +34,6 @@ import qualified Noll.SystemFExamples.Test12
 import qualified Noll.SystemFExamples.Test13
 import qualified Noll.SystemFExamples.Test14
 import qualified Noll.SystemFExamples.Test15
-import qualified Noll.CompilerExamples.Test01
 import qualified Noll.SystemFSpec
 import qualified Noll.UtilsSpec
 import Test.Hspec (hspec)

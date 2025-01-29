@@ -5,22 +5,24 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Compiler (
-  CompilerEnvironment (..),
-  insertNamesC,
-  CompilerT (..),
-  CompilerState (..),
-  runCompilerT,
-  evalCompilerT,
-  runConstraintsGenC,
-  generateConstraintsC,
-  typeCheckExpressionC,
-  typeCheckFunctionC,
-  typeCheckConstantC,
-  solveConstraintsC,
-  getConstraintsGenErrorsC,
-  getSolverRuleViolationsC,
-) where
+module Noll.Compiler 
+  where
+--module Noll.Compiler (
+--  CompilerEnvironment (..),
+--  insertNamesC,
+--  CompilerT (..),
+--  CompilerState (..),
+--  runCompilerT,
+--  evalCompilerT,
+--  runConstraintsGenC,
+--  generateConstraintsC,
+--  typeCheckExpressionC,
+--  typeCheckFunctionC,
+--  typeCheckConstantC,
+--  solveConstraintsC,
+--  getConstraintsGenErrorsC,
+--  getSolverRuleViolationsC,
+--) where
 
 import Control.Monad.Reader (MonadReader, ReaderT, ask, runReaderT)
 import Control.Monad.State (MonadState, StateT, gets, modify, runStateT)
@@ -269,26 +271,28 @@ typeCheckExpressionC e = do
 
 compileFunctionC ::
   (Monad m, Show a, Eq a) =>
-  Function Expression a IndexedType ->
+  Function Expression a () ->
   CompilerT a m ()
-compileFunctionC f@(Function loc (Uses _ t) ps e) =
-  compileConstraintsC [Equality (InferenceRule 999) [t, typeOf e]] f $
-    ELet
-      loc
-      (BFunction loc placeholder ps e :| [])
-      (EVariable loc (Label (foldType t (typeOf <$> ps)) placeholder))
- where
-  placeholder = "###.function"
+compileFunctionC = undefined
+--compileFunctionC f@(Function loc (Uses _ t) ps e) =
+--  compileConstraintsC [Equality (InferenceRule 999) [t, typeOf e]] f $
+--    ELet
+--      loc
+--      (BFunction loc placeholder ps e :| [])
+--      (EVariable loc (Label (foldType t (typeOf <$> ps)) placeholder))
+-- where
+--  placeholder = "###.function"
 
 typeCheckFunctionC ::
   (Monad m, Show a, Eq a) =>
   Function Expression a IndexedType ->
-  CompilerT a m (Function Expression a IndexedType, [CompilerAssumption])
+  CompilerT a m (Function Expression a (), [CompilerAssumption])
 typeCheckFunctionC f = do
-  compileFunctionC f
-  ams <- gets compilerAssumptions
-  sub <- gets compilerSubstitution
-  pure (normalizeTypeIndexes (normalizeRowTypes <$> apply sub f), ams)
+  undefined
+--  compileFunctionC f
+--  ams <- gets compilerAssumptions
+--  sub <- gets compilerSubstitution
+--  pure (normalizeTypeIndexes (normalizeRowTypes <$> apply sub f), ams)
 
 compileConstantC ::
   (Monad m, Show a, Eq a) =>
