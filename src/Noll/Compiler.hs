@@ -26,6 +26,7 @@ import Control.Monad.Reader (MonadReader, ReaderT, ask, runReaderT)
 import Control.Monad.State (MonadState, StateT, gets, modify, runStateT)
 import Control.Monad.Writer (execWriter)
 import Data.Either.Extra (partitionEithers)
+import Data.Foldable (traverse_)
 import Noll.Common.Environment (Environment (..))
 import Noll.Common.List1 (NonEmpty ((:|)))
 import Noll.Label (Label (..))
@@ -177,6 +178,7 @@ updateSupplyC supply = modify (overCompilerSupply (const supply))
 updateSubstitutionC :: (Monad m) => Substitution -> CompilerT a m ()
 updateSubstitutionC sub = modify (overCompilerSubstitution (const sub))
 
+{-# INLINE insertAssumptionsC #-}
 insertAssumptionsC :: (Monad m) => [CompilerAssumption] -> CompilerT a m ()
 insertAssumptionsC as = modify (overCompilerAssumptions (<> as))
 
@@ -247,12 +249,12 @@ compileConstraintsC ::
   [CompilerConstraint a] ->
   f IndexedType ->
   Expression a IndexedType ->
-  CompilerT a m () -- (f IndexedType, [CompilerAssumption])
+  CompilerT a m ()
 compileConstraintsC cs o e = do
-  (as0, cs0) <- generateConstraintsC e
-  (as1, cs1) <- partitionEithers <$> traverse assumptionConstraints as0
+  (ms0, cs0) <- generateConstraintsC e
+  (ms1, cs1) <- partitionEithers <$> traverse assumptionConstraints ms0
   sub <- gets compilerSubstitution
-  insertAssumptionsC (apply sub as1)
+  insertAssumptionsC (apply sub ms1)
   solveC (cs <> cs0 <> cs1)
 
 typeCheckExpressionC ::
@@ -260,23 +262,23 @@ typeCheckExpressionC ::
   Expression a IndexedType ->
   CompilerT a m (Expression a IndexedType, [CompilerAssumption])
 typeCheckExpressionC e = do
-  a <- compileConstraintsC [] e e
-  as <- gets compilerAssumptions
+  compileConstraintsC [] e e
+  ams <- gets compilerAssumptions
   sub <- gets compilerSubstitution
-  pure (normalizeTypeIndexes (normalizeRowTypes <$> apply sub e), apply sub as)
+  pure (normalizeTypeIndexes (normalizeRowTypes <$> apply sub e), apply sub ams)
 
 compileFunctionC ::
   (Monad m, Show a, Eq a) =>
   Function Expression a IndexedType ->
   CompilerT a m ()
-compileFunctionC f@(Function loc (Uses _ t) ps e) = do
+compileFunctionC f@(Function loc (Uses _ t) ps e) =
   compileConstraintsC [Equality (InferenceRule 999) [t, typeOf e]] f $
     ELet
       loc
       (BFunction loc placeholder ps e :| [])
       (EVariable loc (Label (foldType t (typeOf <$> ps)) placeholder))
  where
-  placeholder = "$$$.function"
+  placeholder = "###.function"
 
 typeCheckFunctionC ::
   (Monad m, Show a, Eq a) =>
@@ -284,22 +286,22 @@ typeCheckFunctionC ::
   CompilerT a m (Function Expression a IndexedType, [CompilerAssumption])
 typeCheckFunctionC f = do
   compileFunctionC f
-  as <- gets compilerAssumptions
+  ams <- gets compilerAssumptions
   sub <- gets compilerSubstitution
-  pure (normalizeTypeIndexes (normalizeRowTypes <$> apply sub f), as)
+  pure (normalizeTypeIndexes (normalizeRowTypes <$> apply sub f), ams)
 
 compileConstantC ::
   (Monad m, Show a, Eq a) =>
   Constant Expression a IndexedType ->
   CompilerT a m ()
-compileConstantC g@(Constant loc (Uses _ t) e) = do
+compileConstantC g@(Constant loc (Uses _ t) e) =
   compileConstraintsC [Equality (InferenceRule 999) [t, typeOf e]] g $
     ELet
       loc
       (BPattern loc (PVariable loc (Label t placeholder)) e :| [])
       (EVariable loc (Label t placeholder))
  where
-  placeholder = "$$$.constant"
+  placeholder = "###.constant"
 
 typeCheckConstantC ::
   (Monad m, Show a, Eq a) =>
@@ -307,23 +309,18 @@ typeCheckConstantC ::
   CompilerT a m (Constant Expression a IndexedType, [CompilerAssumption])
 typeCheckConstantC c = do
   compileConstantC c
-  as <- gets compilerAssumptions
+  ams <- gets compilerAssumptions
   sub <- gets compilerSubstitution
-  pure (normalizeTypeIndexes (normalizeRowTypes <$> apply sub c), as)
+  pure (normalizeTypeIndexes (normalizeRowTypes <$> apply sub c), ams)
 
 typeCheckModuleC = do
   undefined
 
-typeCheckiDefinitionsC = do
-  undefined
+typeCheckiDefinitionsC :: (Monad m, Show a, Eq a) => [Definition a k IndexedType] -> CompilerT a m ()
+typeCheckiDefinitionsC = traverse_ typeCheckDefinitionC
 
-typeCheckiDefinitionC :: (Monad m, Show a, Eq a) => Definition a k IndexedType -> CompilerT a m (Definition a k IndexedType)
-typeCheckiDefinitionC = do
+typeCheckDefinitionC :: (Monad m, Show a, Eq a) => Definition a k IndexedType -> CompilerT a m ()
+typeCheckDefinitionC =
   \case
-    DFunction name f -> do
-      -- (as0, cs0) <- generateConstraintsC e
-      -- (as1, cs1) <- partitionEithers <$> traverse assumptionConstraints as0
-      -- solveC (cs0 <> cs1)
-      undefined
-
---      undefined
+    DFunction _ f ->
+      compileFunctionC f
