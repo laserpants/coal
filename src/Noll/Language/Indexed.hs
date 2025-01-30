@@ -25,6 +25,7 @@ import Noll.Language.Expression.Choice (Choice (..), Guard (..))
 import Noll.Language.Module.Constant (Constant (..))
 import Noll.Language.Module.Function (Function (..))
 import Noll.Language.Pattern (Pattern (..))
+import Noll.Language.Module.Definition (Definition (..))
 import Noll.Language.Trait (Trait (..), Uses (..))
 import Noll.Language.Type (Type (..), TypeIndex (..))
 import Noll.Language.Type.Intrinsic (Intrinsic (..))
@@ -202,6 +203,22 @@ instance (Ord k) => TypeIndexed k (Constant Expression a (Type TypeIndex k)) whe
     \case
       Constant _ (Uses ts t) e ->
         typeIndexesIn ts <> typeIndexesIn t <> typeIndexesIn e
+
+instance (Ord k, TypeIndexed k t) => TypeIndexed k (Uses t) where
+  typeIndexesIn =
+    \case
+      Uses ts t ->
+        typeIndexesIn ts <> typeIndexesIn t
+
+instance (Ord k) => TypeIndexed k (Definition a k (Type TypeIndex k)) where
+  typeIndexesIn =
+    \case
+      DFunction _ (Function _ u ps e) ->
+        typeIndexesIn u <> typeIndexesIn ps <> typeIndexesIn e
+      DConstant _ (Constant _ u e) ->
+        typeIndexesIn u <> typeIndexesIn e
+      d ->
+        error "TODO"
 
 notBoundIn :: Set (TypeIndex k) -> Set (TypeIndex k) -> Set (TypeIndex k)
 notBoundIn s = Set.filter notBound

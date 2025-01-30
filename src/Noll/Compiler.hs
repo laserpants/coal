@@ -321,14 +321,23 @@ typeCheckConstantC c = do
 typeCheckModuleC = do
   undefined
 
-typeCheckDefinitionsC :: (Monad m, Show a, Eq a) => [Definition a k IndexedType] -> CompilerT a m ()
-typeCheckDefinitionsC = traverse_ typeCheckDefinitionC
+--typeCheckDefinitionsC :: (Monad m, Show a, Eq a) => [Definition a k IndexedType] -> CompilerT a m ()
+--typeCheckDefinitionsC = traverse_ typeCheckDefinitionC
 
-typeCheckDefinitionC :: (Monad m, Show a, Eq a) => Definition a k IndexedType -> CompilerT a m ()
-typeCheckDefinitionC =
+compileDefinitionC :: (Monad m, Show a, Eq a) => Definition a Kind IndexedType -> CompilerT a m ()
+compileDefinitionC =
   \case
     DFunction _ f ->
       compileFunctionC f
+    DConstant _ c ->
+      compileConstantC c
+
+typeCheckDefinitionC :: (Monad m, Show a, Eq a) => Definition a Kind IndexedType -> CompilerT a m (Definition a Kind IndexedType, [CompilerAssumption])
+typeCheckDefinitionC d = do
+  compileDefinitionC d
+  ams <- gets compilerAssumptions
+  sub <- gets compilerSubstitution
+  pure (normalizeTypeIndexes (normalizeRowTypes <$> apply sub d), ams)
 
 indexedC :: (Monad m, Traversable t) => t e -> CompilerT a m (t (Type TypeIndex Kind))
 indexedC t = do

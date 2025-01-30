@@ -25,6 +25,7 @@ import Noll.Language (
   IndexedType,
   Intrinsic (..),
   Kind,
+  Definition (..),
   Pattern (..),
   Row (..),
   Scheme (..),
@@ -223,6 +224,22 @@ instance Substitutable (Constant Expression a IndexedType) where
     \case
       Constant loc (Uses ts t) e ->
         Constant loc (Uses (apply sub ts) (apply sub t)) (apply sub e)
+
+instance (Substitutable t) => Substitutable (Uses t) where
+  apply sub =
+    \case
+      Uses ts t ->
+        Uses (apply sub ts) (apply sub t)
+
+instance Substitutable (Definition a Kind IndexedType) where
+  apply sub =
+    \case
+      DFunction _ (Function _ u ps e) ->
+        undefined
+      DConstant a (Constant a1 u e) ->
+        DConstant a (Constant a1 (apply sub u) (apply sub e))
+      d ->
+        error "TODO"
 
 newtype Substitution = Substitution {substitutionMap :: IndexMap IndexedType}
   deriving (Show, Eq, Ord, Read)

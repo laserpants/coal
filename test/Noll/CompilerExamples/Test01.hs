@@ -25,10 +25,12 @@ import Noll.Language (
   Primitive (..),
   Scheme (..),
   Trait (..),
+  TypeIndex (..),
   Type (..),
   Uses (..),
  )
 import Test.Hspec (Spec, describe, it)
+import Noll.SystemFSpec.TestRunner
 
 import qualified Noll.Common.Environment as Environment
 
@@ -38,10 +40,10 @@ spec =
     it "" $ do
       1 == 2
 
+baz :: (Show a, Eq a) => TestResult (Expression a (Type TypeIndex Kind)) a
 baz =
-  runIdentity
-    ( runCompilerT
-        ( CompilerEnvironment
+    runTypedExpressionTest
+        (CompilerEnvironment
             ( Environment.fromList
                 [
                   ( "LessThan"
@@ -69,9 +71,10 @@ baz =
             ( Environment.fromList
                 []
             )
-        )
-        (typeCheckDefinitionsC =<< fixture1)
-    )
+          )
+          [
+          ]
+          undefined -- (traverse typeCheckDefinitionC =<< fixture1)
 
 fixture1 :: (Monad m) => CompilerT a m [Definition () () IndexedType]
 fixture1 = traverse indexedC fixture
