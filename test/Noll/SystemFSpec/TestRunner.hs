@@ -31,7 +31,7 @@ import Noll.Language (
   Scheme (..),
   Type (..),
   TypeIndex (..),
-  indexed2,
+  indexed,
  )
 import Noll.SystemF.Constraint.Assumption (Assumption (..))
 import Noll.SystemF.Constraint.Generation (ConstraintsGenError)
@@ -54,8 +54,8 @@ runTypedConstantTest ::
   (Show a, Eq a) =>
   CompilerEnvironment ->
   [(Name, Scheme TypeIndex Kind IndexedType)] ->
-  Constant Expression a () ->
-  TestResult (Constant Expression () (Type TypeIndex Kind)) b
+  Constant Expression a t ->
+  TestResult (Constant Expression a (Type TypeIndex Kind)) a
 runTypedConstantTest env names g =
   runIdentity $ evalCompilerT env $ do
     insertNamesC names
@@ -69,12 +69,13 @@ runTypedFunctionTest ::
   (Show a, Eq a) =>
   CompilerEnvironment ->
   [(Name, Scheme TypeIndex Kind IndexedType)] ->
-  Function Expression a () ->
+  Function Expression a t ->
   TestResult (Function Expression a (Type TypeIndex Kind)) a
 runTypedFunctionTest env names f =
   runIdentity $ evalCompilerT env $ do
     insertNamesC names
-    (f2, as) <- typeCheckFunctionC (indexed f)
+    f1 <- indexedC f
+    (f2, as) <- typeCheckFunctionC f1
     errs0 <- getConstraintsGenErrorsC
     errs1 <- getSolverRuleViolationsC
     pure (TestResult f2 as errs0 errs1)
@@ -83,17 +84,18 @@ runTypedExpressionTest ::
   (Show a, Eq a) =>
   CompilerEnvironment ->
   [(Name, Scheme TypeIndex Kind IndexedType)] ->
-  Expression a () ->
+  Expression a t ->
   TestResult (Expression a (Type TypeIndex Kind)) a
 runTypedExpressionTest env names e =
   runIdentity $ evalCompilerT env $ do
     insertNamesC names
-    (e2, as) <- typeCheckExpressionC (indexed e)
+    e1 <- indexedC e
+    (e2, as) <- typeCheckExpressionC e1
     errs0 <- getConstraintsGenErrorsC
     errs1 <- getSolverRuleViolationsC
     pure (TestResult e2 as errs0 errs1)
 
--- testRunner :: (Show a, Eq a) => Int -> [(Name, Scheme TypeIndex Kind IndexedType)] -> Expression a () -> TestResult (Expression a (Type TypeIndex Kind)) a
+testRunner :: (CompilerEnvironment -> t) -> t
 testRunner f = f (CompilerEnvironment testDataConstructorEnv testTypeConstructorEnv)
 
 testDataConstructorEnv :: Environment (Constructor TypeIndex Kind (Type TypeIndex Kind))

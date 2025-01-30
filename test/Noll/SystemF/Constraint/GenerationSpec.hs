@@ -3,6 +3,7 @@
 
 module Noll.SystemF.Constraint.GenerationSpec where
 
+import Control.Monad.State (evalState)
 import Data.List (sortOn)
 import Data.List.NonEmpty (NonEmpty (..))
 import Debug.Trace
@@ -104,7 +105,7 @@ testCollectConstraints ::
   )
 testCollectConstraints e =
   let
-    e0 = indexed e
+    e0 = evalState (indexed e) 0
    in
     --    traceShow e0 $
     evalConstraintsGenStack

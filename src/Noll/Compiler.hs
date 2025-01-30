@@ -71,7 +71,7 @@ import Noll.SystemF (
   solveConstraints,
  )
 import Noll.Utils (Dictionary, Name, Over, (<$$$>))
-import Noll.Language.Indexed (indexed2)
+import Noll.Language.Indexed (indexed)
 
 import qualified Data.Map.Strict as Map
 import qualified Noll.Common.Environment as Environment
@@ -330,8 +330,8 @@ typeCheckDefinitionC =
     DFunction _ f ->
       compileFunctionC f
 
-indexedC :: (Monad m, Traversable t) => t a -> CompilerT a m (t (Type TypeIndex Kind))
+indexedC :: (Monad m, Traversable t) => t e -> CompilerT a m (t (Type TypeIndex Kind))
 indexedC t = do
-  (r, q) <- runState (indexed2 t) <$> gets compilerSupply
+  (r, q) <- runState (indexed t) <$> gets compilerSupply
   updateSupplyC q
   return r

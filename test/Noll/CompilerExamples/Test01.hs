@@ -2,6 +2,7 @@
 
 module Noll.CompilerExamples.Test01 where
 
+import Control.Monad.State (evalState)
 import Control.Monad.Identity (runIdentity)
 import Noll.Common.List1 (NonEmpty (..), (<|))
 import Noll.Compiler
@@ -69,11 +70,11 @@ baz =
                 []
             )
         )
-        (typeCheckDefinitionsC fixture1)
+        (typeCheckDefinitionsC =<< fixture1)
     )
 
-fixture1 :: [Definition () () IndexedType]
-fixture1 = undefined -- indexed fixture
+fixture1 :: (Monad m) => CompilerT a m [Definition () () IndexedType]
+fixture1 = traverse indexedC fixture
 
 fixture :: [Definition () () ()]
 fixture =
