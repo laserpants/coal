@@ -90,16 +90,16 @@ baz =
           []
           (TIntrinsic IBool `TArrow` TIntrinsic IBool)
       )
-    ,
-      ( "less_than_or_equal_to"
-      , Forall
-          (Set.fromList [TypeIndex KType 0])
-          []
-          ( TVariable (TypeIndex KType 0)
-              `TArrow` TVariable (TypeIndex KType 0)
-              `TArrow` TIntrinsic IBool
-          )
-      )
+--    ,
+--      ( "less_than_or_equal_to"
+--      , Forall
+--          (Set.fromList [TypeIndex KType 0])
+--          []
+--          ( TVariable (TypeIndex KType 0)
+--              `TArrow` TVariable (TypeIndex KType 0)
+--              `TArrow` TIntrinsic IBool
+--          )
+--      )
     ]
 
 fixture :: [Definition () k ()]

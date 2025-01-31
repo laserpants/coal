@@ -7,6 +7,7 @@
 
 module Noll.Compiler (
   CompilerEnvironment (..),
+  CompilerAssumption,
   insertNamesC,
   CompilerT (..),
   CompilerState (..),
