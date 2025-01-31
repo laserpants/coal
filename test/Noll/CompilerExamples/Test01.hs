@@ -41,7 +41,7 @@ spec =
     it "" $ do
       testResultExpression (baz fixture) == fixture1
 
--- baz :: TestResult [Definition () Kind IndexedType] ()
+baz :: [Definition () Kind t] -> TestResult [Definition () Kind IndexedType] ()
 baz =
   runTypedDefinitionsTest
     ( CompilerEnvironment

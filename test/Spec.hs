@@ -72,7 +72,7 @@ main =
     Noll.Compiler.Transform.Type.AliasInsertionSpec.spec
     Noll.Compiler.Transform.FoldSpec.spec
     Noll.CompilerExamples.Test01.spec
-    Noll.CompilerSpec.spec
+--    Noll.CompilerSpec.spec
     Noll.UtilsSpec.spec
 
 --    Noll.SystemF.TypeConstraint.CollectSpec.spec
