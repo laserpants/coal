@@ -9,6 +9,9 @@ module Noll.Language.HasType (HasType (..)) where
 import Noll.Label (Label (..))
 import Noll.Language.Expression (Expression (..))
 import Noll.Language.Expression.Choice (Choice (..), Guard (..))
+import Noll.Language.Module.Constant (Constant (..))
+import Noll.Language.Module.Definition (Definition (..))
+import Noll.Language.Module.Function (Function (..))
 import Noll.Language.Pattern (Pattern (..))
 import Noll.Language.Primitive (Primitive (..))
 import Noll.Language.Type (Type (..), foldType)
@@ -115,3 +118,13 @@ instance HasType o k (Expression a (Type o k)) where
         typeOf t
       EFold _ t _ _ _ ->
         typeOf t
+
+instance HasType o k (Definition a k (Type o k)) where
+  typeOf =
+    \case
+      DFunction _ (Function _ _ ps e) ->
+        foldType (typeOf e) (typeOf <$> ps)
+      DConstant _ (Constant _ _ e) ->
+        typeOf e
+      d ->
+        error "TODO"

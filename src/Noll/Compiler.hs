@@ -42,6 +42,7 @@ import Noll.Language (
   Definition (..),
   Expression (..),
   Function (..),
+  HasType (..),
   IndexedType,
   Kind (..),
   Pattern (..),
@@ -93,6 +94,7 @@ data CompilerState a = CompilerState
   , compilerTypeAnnotationParams :: Dictionary (a, TypeIndex Kind)
   , compilerSolverRuleViolations :: [InferenceRule Kind a]
   , compilerNameEnvironment :: Environment (Scheme TypeIndex Kind IndexedType)
+  , compilerDefinitions :: Environment IndexedType
   , compilerAssumptions :: [CompilerAssumption]
   , compilerSubstitution :: Substitution
   , compilerSupply :: Int
@@ -115,6 +117,10 @@ overCompilerSolverRuleViolations fn CompilerState{..} = CompilerState{compilerSo
 overCompilerNameEnvironment :: Over (CompilerState a) (Environment (Scheme TypeIndex Kind IndexedType))
 overCompilerNameEnvironment fn CompilerState{..} = CompilerState{compilerNameEnvironment = fn compilerNameEnvironment, ..}
 
+{-# INLINE overCompilerDefinitions #-}
+overCompilerDefinitions :: Over (CompilerState a) (Environment IndexedType)
+overCompilerDefinitions fn CompilerState{..} = CompilerState{compilerDefinitions = fn compilerDefinitions, ..}
+
 {-# INLINE overCompilerSupply #-}
 overCompilerSupply :: Over (CompilerState a) Int
 overCompilerSupply fn CompilerState{..} = CompilerState{compilerSupply = fn compilerSupply, ..}
@@ -135,6 +141,7 @@ initialCompilerState =
     , compilerTypeAnnotationParams = mempty
     , compilerSolverRuleViolations = []
     , compilerNameEnvironment = mempty
+    , compilerDefinitions = mempty
     , compilerAssumptions = []
     , compilerSubstitution = mempty
     , compilerSupply = 0
@@ -176,6 +183,10 @@ getSolverRuleViolationsC = gets compilerSolverRuleViolations
 {-# INLINE insertNameC #-}
 insertNameC :: (Monad m) => Name -> Scheme TypeIndex Kind IndexedType -> CompilerT a m ()
 insertNameC name scheme = modify (overCompilerNameEnvironment (Environment.insert name scheme))
+
+{-# INLINE insertDefinitionC #-}
+insertCompilerDefinitionC :: (Monad m) => Name -> IndexedType -> CompilerT a m ()
+insertCompilerDefinitionC name t = modify (overCompilerDefinitions (Environment.insert name t))
 
 {-# INLINE insertNamesC #-}
 insertNamesC :: (Monad m) => [(Name, Scheme TypeIndex Kind IndexedType)] -> CompilerT a m ()
@@ -277,7 +288,7 @@ typeCheckExpressionC e = do
   compileConstraintsC [] e e
   ams <- gets compilerAssumptions
   sub <- gets compilerSubstitution
-  pure (normalizeTypeIndexes (normalizeRowTypes <$> apply sub e), apply sub ams)
+  pure (normalizeRowTypes <$> apply sub e, apply sub ams)
 
 compileFunctionC ::
   (Monad m, Show a, Eq a) =>
@@ -301,7 +312,7 @@ typeCheckFunctionC f = do
   compileFunctionC f
   ams <- gets compilerAssumptions
   sub <- gets compilerSubstitution
-  pure (normalizeTypeIndexes (normalizeRowTypes <$> apply sub f), ams)
+  pure (normalizeRowTypes <$> apply sub f, ams)
 
 compileConstantC ::
   (Monad m, Show a, Eq a) =>
@@ -324,7 +335,7 @@ typeCheckConstantC c = do
   compileConstantC c
   ams <- gets compilerAssumptions
   sub <- gets compilerSubstitution
-  pure (normalizeTypeIndexes (normalizeRowTypes <$> apply sub c), ams)
+  pure (normalizeRowTypes <$> apply sub c, ams)
 
 typeCheckModuleC = do
   undefined
@@ -337,15 +348,26 @@ compileDefinitionC =
     DConstant _ c ->
       compileConstantC c
 
+insertDefinitionC :: (Monad m, HasType TypeIndex Kind (Definition a k (Type TypeIndex Kind))) => Definition a k IndexedType -> CompilerT a m ()
+insertDefinitionC =
+  \case
+    d@(DFunction name _) -> do
+      insertNameC name (Forall (typeIndexesIn t) [] t)
+      insertCompilerDefinitionC name t
+     where
+      t = normalizeTypeIndexes (typeOf d)
+
 typeCheckDefinitionC ::
-  (Monad m, Show a, Eq a, TypeIndexed Kind (Definition a k IndexedType)) =>
+  (Monad m, Show a, Eq a, HasType TypeIndex Kind (Definition a k (Type TypeIndex Kind)), TypeIndexed Kind (Definition a k IndexedType)) =>
   Definition a k IndexedType ->
   CompilerT a m (Definition a k IndexedType, [CompilerAssumption])
 typeCheckDefinitionC d = do
   compileDefinitionC d
   ams <- gets compilerAssumptions
   sub <- gets compilerSubstitution
-  pure (normalizeTypeIndexes (normalizeRowTypes <$> apply sub d), ams)
+  let def = normalizeRowTypes <$> apply sub d
+  insertDefinitionC def
+  pure (def, ams)
 
 indexedC :: (Monad m, Traversable t) => t e -> CompilerT a m (t (Type TypeIndex Kind))
 indexedC t = do

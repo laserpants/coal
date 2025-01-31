@@ -16,6 +16,7 @@ import qualified Noll.Compiler.Transform.Pattern.OrExpansionSpec
 import qualified Noll.Compiler.Transform.TreeSpec
 import qualified Noll.Compiler.Transform.Type.AliasInsertionSpec
 import qualified Noll.CompilerExamples.Test01
+import qualified Noll.CompilerExamples.Test02
 import qualified Noll.CompilerSpec
 import qualified Noll.Language.HasFreeSpec
 import qualified Noll.SystemF.Constraint.GenerationSpec
@@ -72,6 +73,7 @@ main =
     Noll.Compiler.Transform.Type.AliasInsertionSpec.spec
     Noll.Compiler.Transform.FoldSpec.spec
     Noll.CompilerExamples.Test01.spec
+    Noll.CompilerExamples.Test02.spec
     --    Noll.CompilerSpec.spec
     Noll.UtilsSpec.spec
 

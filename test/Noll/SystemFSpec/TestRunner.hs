@@ -3,12 +3,14 @@
 module Noll.SystemFSpec.TestRunner where
 
 import Control.Monad.Identity (runIdentity)
+import Control.Monad.State (get)
 import Data.List.NonEmpty ((<|))
 import Debug.Trace
 import Noll.Common.Environment (Environment)
 import Noll.Common.List1 (NonEmpty (..))
 import Noll.Compiler (
   CompilerEnvironment (..),
+  CompilerState (..),
   evalCompilerT,
   generateConstraintsC,
   getConstraintsGenErrorsC,
@@ -65,7 +67,7 @@ runTypedConstantTest env names g =
     (g2, as) <- typeCheckConstantC g1
     errs0 <- getConstraintsGenErrorsC
     errs1 <- getSolverRuleViolationsC
-    pure (TestResult g2 as errs0 errs1)
+    pure (TestResult (normalizeTypeIndexes g2) as errs0 errs1)
 
 runTypedFunctionTest ::
   (Show a, Eq a) =>
@@ -80,7 +82,7 @@ runTypedFunctionTest env names f =
     (f2, as) <- typeCheckFunctionC f1
     errs0 <- getConstraintsGenErrorsC
     errs1 <- getSolverRuleViolationsC
-    pure (TestResult f2 as errs0 errs1)
+    pure (TestResult (normalizeTypeIndexes f2) as errs0 errs1)
 
 runTypedDefinitionsTest ::
   (Show a, Eq a) =>
@@ -95,7 +97,7 @@ runTypedDefinitionsTest env names ds =
     (ds2, as) <- unzip <$> traverse typeCheckDefinitionC ds1
     errs0 <- getConstraintsGenErrorsC
     errs1 <- getSolverRuleViolationsC
-    pure (TestResult ds2 (concat as) errs0 errs1)
+    pure (TestResult (normalizeTypeIndexes ds2) (concat as) errs0 errs1)
 
 runTypedExpressionTest ::
   (Show a, Eq a) =>
@@ -110,7 +112,7 @@ runTypedExpressionTest env names e =
     (e2, as) <- typeCheckExpressionC e1
     errs0 <- getConstraintsGenErrorsC
     errs1 <- getSolverRuleViolationsC
-    pure (TestResult e2 as errs0 errs1)
+    pure (TestResult (normalizeTypeIndexes e2) as errs0 errs1)
 
 testRunner :: (CompilerEnvironment -> t) -> t
 testRunner f = f (CompilerEnvironment testDataConstructorEnv testTypeConstructorEnv)
