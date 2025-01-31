@@ -24,8 +24,9 @@ import Noll.Language (
 import Noll.Language.Module.Constant (Constant (..))
 import Noll.Language.Module.Definition (Definition (..))
 import Noll.Language.Module.Function (Function (..))
+import Noll.Utils (Over)
 
-mapOverExpression :: (Expression a t -> Expression a t) -> Expression a t -> Expression a t
+mapOverExpression :: Over (Expression a t) (Expression a t)
 mapOverExpression f = runIdentity . overExpression (pure . f)
 
 mapMOverExpression :: (Monad m) => (Expression a t -> m (Expression a t)) -> Expression a t -> m (Expression a t)

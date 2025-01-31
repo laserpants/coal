@@ -25,8 +25,9 @@ import Noll.Language (
 import Noll.Language.Module.Constant (Constant (..))
 import Noll.Language.Module.Definition (Definition (..))
 import Noll.Language.Module.Function (Function (..))
+import Noll.Utils (Over)
 
-mapOverPattern :: (Pattern a t -> Pattern a t) -> Pattern a t -> Pattern a t
+mapOverPattern :: Over (Pattern a t) (Pattern a t)
 mapOverPattern f = runIdentity . overPattern (pure . f)
 
 mapMOverPattern :: (Monad m) => (Pattern a t -> m (Pattern a t)) -> Pattern a t -> m (Pattern a t)
