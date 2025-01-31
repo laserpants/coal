@@ -19,13 +19,13 @@ import Noll.Language (
   Choice (..),
   Clause (..),
   Constant (..),
+  Definition (..),
   Expression (..),
   Function (..),
   Guard (..),
   IndexedType,
   Intrinsic (..),
   Kind,
-  Definition (..),
   Pattern (..),
   Row (..),
   Scheme (..),
@@ -231,11 +231,11 @@ instance (Substitutable t) => Substitutable (Uses t) where
       Uses ts t ->
         Uses (apply sub ts) (apply sub t)
 
-instance Substitutable (Definition a Kind IndexedType) where
+instance Substitutable (Definition a k IndexedType) where
   apply sub =
     \case
-      DFunction _ (Function _ u ps e) ->
-        undefined
+      DFunction a (Function a1 u ps e) ->
+        DFunction a (Function a1 (apply sub u) (apply sub ps) (apply sub e))
       DConstant a (Constant a1 u e) ->
         DConstant a (Constant a1 (apply sub u) (apply sub e))
       d ->

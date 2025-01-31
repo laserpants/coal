@@ -13,16 +13,18 @@ import Noll.Compiler (
   generateConstraintsC,
   getConstraintsGenErrorsC,
   getSolverRuleViolationsC,
+  indexedC,
   insertNamesC,
   solveConstraintsC,
   typeCheckConstantC,
+  typeCheckDefinitionC,
   typeCheckExpressionC,
   typeCheckFunctionC,
-  indexedC,
  )
 import Noll.Language (
   Constant (..),
   Constructor (..),
+  Definition (..),
   Expression (..),
   Function (..),
   IndexedType,
@@ -79,6 +81,21 @@ runTypedFunctionTest env names f =
     errs0 <- getConstraintsGenErrorsC
     errs1 <- getSolverRuleViolationsC
     pure (TestResult f2 as errs0 errs1)
+
+runTypedDefinitionsTest ::
+  (Show a, Eq a) =>
+  CompilerEnvironment ->
+  [(Name, Scheme TypeIndex Kind IndexedType)] ->
+  [Definition a Kind t] ->
+  TestResult [Definition a Kind IndexedType] a
+runTypedDefinitionsTest env names ds =
+  runIdentity $ evalCompilerT env $ do
+    insertNamesC names
+    ds1 <- traverse indexedC ds
+    (ds2, as) <- unzip <$> traverse typeCheckDefinitionC ds1
+    errs0 <- getConstraintsGenErrorsC
+    errs1 <- getSolverRuleViolationsC
+    pure (TestResult ds2 (concat as) errs0 errs1)
 
 runTypedExpressionTest ::
   (Show a, Eq a) =>

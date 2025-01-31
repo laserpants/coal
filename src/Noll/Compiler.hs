@@ -26,7 +26,7 @@ where
 -- ) where
 
 import Control.Monad.Reader (MonadReader, ReaderT, ask, runReaderT)
-import Control.Monad.State (MonadState, StateT, gets, put, modify, runStateT, runState)
+import Control.Monad.State (MonadState, StateT, gets, modify, put, runState, runStateT)
 import Control.Monad.Writer (execWriter)
 import Data.Either.Extra (partitionEithers)
 import Data.Foldable (traverse_)
@@ -38,13 +38,13 @@ import Noll.Language (
   Constant (..),
   Constructor (..),
   Definition (..),
-  Type (..),
   Expression (..),
   Function (..),
   IndexedType,
   Kind (..),
   Pattern (..),
   Scheme (..),
+  Type (..),
   TypeIndex (..),
   TypeIndexed (..),
   Uses (..),
@@ -53,6 +53,7 @@ import Noll.Language (
   normalizeRowTypes,
   typeOf,
  )
+import Noll.Language.Indexed (indexed)
 import Noll.SystemF (
   Assumption (..),
   Constraint (..),
@@ -71,7 +72,6 @@ import Noll.SystemF (
   solveConstraints,
  )
 import Noll.Utils (Dictionary, Name, Over, (<$$$>))
-import Noll.Language.Indexed (indexed)
 
 import qualified Data.Map.Strict as Map
 import qualified Noll.Common.Environment as Environment
@@ -277,7 +277,7 @@ compileFunctionC ::
   Function Expression a IndexedType ->
   CompilerT a m ()
 compileFunctionC f@(Function loc (Uses _ t) ps e) =
-  compileConstraintsC [Equality (InferenceRule 999) [t, typeOf e]] f $
+  compileConstraintsC [] f $ -- [Equality (InferenceRule 999) [t, typeOf e]] f $
     ELet
       loc
       (BFunction loc placeholder ps e :| [])
@@ -321,10 +321,7 @@ typeCheckConstantC c = do
 typeCheckModuleC = do
   undefined
 
---typeCheckDefinitionsC :: (Monad m, Show a, Eq a) => [Definition a k IndexedType] -> CompilerT a m ()
---typeCheckDefinitionsC = traverse_ typeCheckDefinitionC
-
-compileDefinitionC :: (Monad m, Show a, Eq a) => Definition a Kind IndexedType -> CompilerT a m ()
+compileDefinitionC :: (Monad m, Show a, Eq a) => Definition a k IndexedType -> CompilerT a m ()
 compileDefinitionC =
   \case
     DFunction _ f ->
@@ -332,7 +329,10 @@ compileDefinitionC =
     DConstant _ c ->
       compileConstantC c
 
-typeCheckDefinitionC :: (Monad m, Show a, Eq a) => Definition a Kind IndexedType -> CompilerT a m (Definition a Kind IndexedType, [CompilerAssumption])
+typeCheckDefinitionC ::
+  (Monad m, Show a, Eq a, TypeIndexed Kind (Definition a k IndexedType)) =>
+  Definition a k IndexedType ->
+  CompilerT a m (Definition a k IndexedType, [CompilerAssumption])
 typeCheckDefinitionC d = do
   compileDefinitionC d
   ams <- gets compilerAssumptions
