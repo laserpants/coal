@@ -22,7 +22,7 @@ module Noll.Compiler (
   solveConstraintsC,
   getConstraintsGenErrorsC,
   getSolverRuleViolationsC,
- ) where
+) where
 
 import Control.Monad.Reader (MonadReader, ReaderT, ask, runReaderT)
 import Control.Monad.State (MonadState, StateT, gets, modify, put, runState, runStateT)
