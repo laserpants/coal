@@ -25,6 +25,7 @@ where
 --  getSolverRuleViolationsC,
 -- ) where
 
+import Debug.Trace
 import Control.Monad.Reader (MonadReader, ReaderT, ask, runReaderT)
 import Control.Monad.State (MonadState, StateT, gets, modify, put, runState, runStateT)
 import Control.Monad.Writer (execWriter)
@@ -72,6 +73,7 @@ import Noll.SystemF (
   solveConstraints,
  )
 import Noll.Utils (Dictionary, Name, Over, (<$$$>))
+import Noll.Common.Supply (Supply (..), supplied)
 
 import qualified Data.Map.Strict as Map
 import qualified Noll.Common.Environment as Environment
@@ -147,6 +149,10 @@ newtype CompilerT a m c = Compiler {compilerStack :: ReaderT CompilerEnvironment
     , MonadState (CompilerState a)
     )
 
+instance Supply (CompilerState a) where
+  updateSupply = overCompilerSupply
+  getSupply = compilerSupply
+
 {-# INLINE compilerReportConstraintsGenErrors #-}
 compilerReportConstraintsGenErrors :: (Monad m) => [ConstraintsGenError a] -> CompilerT a m ()
 compilerReportConstraintsGenErrors errors = modify (overCompilerStateConstraintsGenErrors (<> errors))
@@ -197,10 +203,11 @@ evalCompilerT = fst <$$$> runCompilerT
 
 type ConstraintsGenResult c o k t r = (r, Dictionary (c, o k), [ConstraintsGenOutput c o k t])
 
-runConstraintsGenC :: (Monad m) => Int -> ConstraintsGenStack c TypeIndex Kind IndexedType r -> CompilerT a m (ConstraintsGenResult c TypeIndex Kind IndexedType r)
-runConstraintsGenC index stack = do
+runConstraintsGenC :: (Monad m) => ConstraintsGenStack c TypeIndex Kind IndexedType r -> CompilerT a m (ConstraintsGenResult c TypeIndex Kind IndexedType r)
+runConstraintsGenC stack = do
   env <- ask
-  let (result, ConstraintsGenState{..}, output) = runConstraintsGenStack index (context env) stack
+  sup <- gets compilerSupply
+  let (result, ConstraintsGenState{..}, output) = runConstraintsGenStack sup (context env) stack
   updateSupplyC constraintsGenStateSupply
   pure (result, constraintsGenStateTypeIndexes, output)
  where
@@ -213,7 +220,8 @@ runConstraintsGenC index stack = do
 
 generateConstraintsC :: (Monad m) => Expression a IndexedType -> CompilerT a m ([CompilerAssumption], [CompilerConstraint a])
 generateConstraintsC e = do
-  (assumptions, params, result) <- runConstraintsGenC (freshIdIn e) (collectConstraints e)
+--  s <- gets compilerSupply
+  (assumptions, params, result) <- runConstraintsGenC (collectConstraints e)
   let (errors, constraints) = partitionEithers result
   compilerReportConstraintsGenErrors errors
   compilerSetTypeAnnotationParams params
@@ -270,20 +278,27 @@ typeCheckExpressionC e = do
   compileConstraintsC [] e e
   ams <- gets compilerAssumptions
   sub <- gets compilerSubstitution
-  pure (normalizeTypeIndexes (normalizeRowTypes <$> apply sub e), apply sub ams)
+--  pure (normalizeTypeIndexes (normalizeRowTypes <$> apply sub e), apply sub ams)
+  pure (normalizeRowTypes <$> apply sub e, apply sub ams)
 
 compileFunctionC ::
   (Monad m, Show a, Eq a) =>
   Function Expression a IndexedType ->
   CompilerT a m ()
-compileFunctionC f@(Function loc (Uses _ t) ps e) =
-  compileConstraintsC [] f $ -- [Equality (InferenceRule 999) [t, typeOf e]] f $
-    ELet
-      loc
-      (BFunction loc placeholder ps e :| [])
-      (EVariable loc (Label (foldType t (typeOf <$> ps)) placeholder))
- where
-  placeholder = "###.function"
+compileFunctionC f@(Function loc (Uses _ t) ps e) = do
+--  traceShow "--------->" $
+--    traceShow e $
+  t1 <- supplied (TVariable . TypeIndex KType)
+  let xx = foldType t1 (typeOf <$> ps)
+  compileConstraintsC [Equality (InferenceRule 999) [t, t1]] f $
+--    compileConstraintsC [] f $  -- Equality (InferenceRule 999) [t, typeOf e]] f $
+      ELet
+        loc
+        (BFunction loc placeholder ps e :| [])
+        (EVariable loc (Label xx placeholder))
+   where
+    placeholder = "###.function"
+--    xx = TVariable (TypeIndex KType 999999)
 
 typeCheckFunctionC ::
   (Monad m, Show a, Eq a) =>
@@ -293,7 +308,8 @@ typeCheckFunctionC f = do
   compileFunctionC f
   ams <- gets compilerAssumptions
   sub <- gets compilerSubstitution
-  pure (normalizeTypeIndexes (normalizeRowTypes <$> apply sub f), ams)
+--  pure (normalizeTypeIndexes (normalizeRowTypes <$> apply sub f), ams)
+  pure (normalizeRowTypes <$> apply sub f, ams)
 
 compileConstantC ::
   (Monad m, Show a, Eq a) =>
@@ -316,7 +332,8 @@ typeCheckConstantC c = do
   compileConstantC c
   ams <- gets compilerAssumptions
   sub <- gets compilerSubstitution
-  pure (normalizeTypeIndexes (normalizeRowTypes <$> apply sub c), ams)
+--  pure (normalizeTypeIndexes (normalizeRowTypes <$> apply sub c), ams)
+  pure (normalizeRowTypes <$> apply sub c, ams)
 
 typeCheckModuleC = do
   undefined
@@ -337,7 +354,8 @@ typeCheckDefinitionC d = do
   compileDefinitionC d
   ams <- gets compilerAssumptions
   sub <- gets compilerSubstitution
-  pure (normalizeTypeIndexes (normalizeRowTypes <$> apply sub d), ams)
+--  pure (normalizeTypeIndexes (normalizeRowTypes <$> apply sub d), ams)
+  pure (normalizeRowTypes <$> apply sub d, ams)
 
 indexedC :: (Monad m, Traversable t) => t e -> CompilerT a m (t (Type TypeIndex Kind))
 indexedC t = do
