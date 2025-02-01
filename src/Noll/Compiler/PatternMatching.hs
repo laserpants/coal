@@ -99,7 +99,7 @@ instance (Show a, Show t, TypeProxy t, Ord t, Monoid a) => MatchExpressionContex
   compileMatchExprs =
     mapMOverExpression $
       \case
-        EMatch a t e cs -> do
+        EMatch _ t e cs -> do
           cs1 <- compileMatchExprs cs
           name <- suppliedName
           replaceWith name
