@@ -69,6 +69,10 @@ data InferenceRule k a
     InferMatchClausePatterns a
   | -- | TODO
     InferBinaryOperator a
+  | -- | TODO
+    InferTopLevelFunction a
+  | -- | TODO
+    InferTopLevelConstant a
   deriving (Show, Eq, Ord, Read)
 
 instance Substitutable (InferenceRule Kind a) where
@@ -96,6 +100,10 @@ instance Substitutable (InferenceRule Kind a) where
         InferMatchClausePatterns a
       InferBinaryOperator a ->
         InferBinaryOperator a
+      InferTopLevelFunction a ->
+        InferTopLevelFunction a
+      InferTopLevelConstant a ->
+        InferTopLevelConstant a
 
 data TypeAnnotationError a
   = -- Kind error

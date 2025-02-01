@@ -3,16 +3,20 @@
 module Noll.SystemFSpec.TestRunner where
 
 import Control.Monad.Identity (runIdentity)
-import Control.Monad.State (get)
+import Control.Monad.State (get, gets)
 import Data.List.NonEmpty ((<|))
 import Debug.Trace
 import Noll.Common.Environment (Environment)
 import Noll.Common.List1 (NonEmpty (..))
 import Noll.Compiler (
+  CompilerAssumption (..),
   CompilerEnvironment (..),
   CompilerState (..),
+  CompilerT (..),
   evalCompilerT,
   generateConstraintsC,
+  --  lookupCompilerDefinitionC,
+
   getConstraintsGenErrorsC,
   getSolverRuleViolationsC,
   indexedC,
@@ -20,8 +24,10 @@ import Noll.Compiler (
   solveConstraintsC,
   typeCheckConstantC,
   typeCheckDefinitionC,
+  typeCheckDefinitionsC,
   typeCheckExpressionC,
   typeCheckFunctionC,
+  updateSubstitutionC,
  )
 import Noll.Language (
   Constant (..),
@@ -41,7 +47,7 @@ import Noll.SystemF.Constraint.Assumption (Assumption (..))
 import Noll.SystemF.Constraint.Generation (ConstraintsGenError)
 import Noll.SystemF.Constraint.Generation.Internal (InferenceRule (..))
 import Noll.SystemF.Substitution (apply, normalizeTypeIndexes)
-import Noll.Utils (Name)
+import Noll.Utils (Name, forM_)
 
 import qualified Data.Set as Set
 import qualified Noll.Common.Environment as Environment
@@ -94,10 +100,10 @@ runTypedDefinitionsTest env names ds =
   runIdentity $ evalCompilerT env $ do
     insertNamesC names
     ds1 <- traverse indexedC ds
-    (ds2, as) <- unzip <$> traverse typeCheckDefinitionC ds1
+    (ds2, as) <- typeCheckDefinitionsC ds1
     errs0 <- getConstraintsGenErrorsC
     errs1 <- getSolverRuleViolationsC
-    pure (TestResult (normalizeTypeIndexes ds2) (concat as) errs0 errs1)
+    pure (TestResult (normalizeTypeIndexes ds2) as errs0 errs1)
 
 runTypedExpressionTest ::
   (Show a, Eq a) =>

@@ -1,7 +1,8 @@
 {-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Language.Module.Definition (Definition (..), Path (..)) where
+module Noll.Language.Module.Definition (Definition (..), Path (..), definitionName) where
 
 import Noll.Language.Constructor (Constructor (..))
 import Noll.Language.Expression (Expression (..))
@@ -36,3 +37,13 @@ data Definition a k t
   | -- | Type alias
     DTypeAlias Name [Type TypeIndex k] (Type TypeIndex k)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
+
+definitionName :: Definition a k t -> Name
+definitionName =
+  \case
+    DFunction name _ ->
+      name
+    DConstant name _ ->
+      name
+    _ ->
+      error "TODO"

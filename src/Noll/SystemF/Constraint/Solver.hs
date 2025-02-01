@@ -45,14 +45,12 @@ newtype Solver c t = Solver {solverMonad :: RWS () [c] Int t}
     )
 
 {-# INLINE solveConstraints #-}
-solveConstraints :: (Show c, Eq c) => [Constraint c TypeIndex Kind IndexedType] -> (Substitution, [c])
-solveConstraints cs = runSolver (freshIdIn cs) (solve cs)
+solveConstraints :: (Show c, Eq c) => Int -> [Constraint c TypeIndex Kind IndexedType] -> (Substitution, Int, [c])
+solveConstraints sup cs = runSolver sup (solve cs)
 
 {-# INLINE runSolver #-}
-runSolver :: Int -> Solver c t -> (t, [c])
-runSolver n u = (a, o)
- where
-  (a, _, o) = runRWS (solverMonad u) () n
+runSolver :: Int -> Solver c t -> (t, Int, [c])
+runSolver sup s = runRWS (solverMonad s) () sup
 
 isSolvable :: (Ord k, TypeIndexed k t) => [Constraint c TypeIndex k t] -> Constraint c TypeIndex k t -> Bool
 isSolvable constraints =

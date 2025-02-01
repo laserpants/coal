@@ -90,16 +90,6 @@ baz =
           []
           (TIntrinsic IBool `TArrow` TIntrinsic IBool)
       )
-      --    ,
-      --      ( "less_than_or_equal_to"
-      --      , Forall
-      --          (Set.fromList [TypeIndex KType 0])
-      --          []
-      --          ( TVariable (TypeIndex KType 0)
-      --              `TArrow` TVariable (TypeIndex KType 0)
-      --              `TArrow` TIntrinsic IBool
-      --          )
-      --      )
     ]
 
 fixture :: [Definition () k ()]
@@ -175,6 +165,9 @@ fixture =
 tvariable0 :: IndexedType
 tvariable0 = TVariable (TypeIndex KType 0)
 
+tvariable1 :: IndexedType
+tvariable1 = TVariable (TypeIndex KType 1)
+
 bool :: IndexedType
 bool = TIntrinsic IBool
 
@@ -184,23 +177,23 @@ fixture1 =
         "greater_than"
         ( Function
             ()
-            (Uses [] (tvariable0 `TArrow` bool))
+            (Uses [] (tvariable1 `TArrow` bool))
             ( PAnnotation
                 ()
                 (TVariable (Parameter () "a"))
-                (PVariable () (Label tvariable0 "n"))
+                (PVariable () (Label tvariable1 "n"))
                 :| []
             )
             ( EApplication
                 ()
-                (tvariable0 `TArrow` bool)
-                (EBinaryOperator () ((bool `TArrow` bool) `TArrow` (tvariable0 `TArrow` bool) `TArrow` tvariable0 `TArrow` bool, OReverseComposition))
+                (tvariable1 `TArrow` bool)
+                (EBinaryOperator () ((bool `TArrow` bool) `TArrow` (tvariable1 `TArrow` bool) `TArrow` tvariable1 `TArrow` bool, OReverseComposition))
                 ( EVariable () (Label (bool `TArrow` bool) "not")
                     <| EApplication
                       ()
-                      (tvariable0 `TArrow` bool)
-                      (EVariable () (Label (tvariable0 `TArrow` tvariable0 `TArrow` bool) "less_than_or_equal_to"))
-                      (EVariable () (Label tvariable0 "n") :| [])
+                      (tvariable1 `TArrow` bool)
+                      (EVariable () (Label (tvariable1 `TArrow` tvariable1 `TArrow` bool) "less_than_or_equal_to"))
+                      (EVariable () (Label tvariable1 "n") :| [])
                     :| []
                 )
             )
