@@ -19,7 +19,7 @@ import Data.Map.Strict (Map)
 import Data.Set (Set, singleton)
 import Noll.Common.Supply (supply)
 import Noll.Label (Label (..))
-import Noll.Language.Expression (Clause (..), Expression (..))
+import Noll.Language.Expression (Clause (..), CompiledClause (..), Expression (..))
 import Noll.Language.Expression.Binding (Binding (..))
 import Noll.Language.Expression.Choice (Choice (..), Guard (..))
 import Noll.Language.Module.Constant (Constant (..))
@@ -154,6 +154,14 @@ instance (Ord k) => TypeIndexed k (Clause Expression a (Type TypeIndex k)) where
       EClause _ p cs ->
         typeIndexesIn p <> typeIndexesIn cs
 
+instance (Ord k) => TypeIndexed k (CompiledClause Expression a (Type TypeIndex k)) where
+  typeIndexesIn =
+    \case
+      ECompiledClause lls e ->
+        typeIndexesIn lls <> typeIndexesIn e
+      ECompiledField{} ->
+        error "TODO"
+
 instance (Ord k) => TypeIndexed k (Expression a (Type TypeIndex k)) where
   typeIndexesIn =
     \case
@@ -181,6 +189,8 @@ instance (Ord k) => TypeIndexed k (Expression a (Type TypeIndex k)) where
         typeIndexesIn t <> typeIndexesIn es
       EMatch _ t e cs ->
         typeIndexesIn t <> typeIndexesIn e <> typeIndexesIn cs
+      ECompiledMatch _ t e es ->
+        typeIndexesIn t <> typeIndexesIn e <> typeIndexesIn es
       EUnaryOperator _ (t, _) ->
         typeIndexesIn t
       EBinaryOperator _ (t, _) ->
