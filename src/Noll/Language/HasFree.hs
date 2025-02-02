@@ -19,7 +19,7 @@ import Noll.Language.Expression (Clause (..), Expression (..))
 import Noll.Language.Expression.Binding (Binding (..))
 import Noll.Language.Expression.Choice (Choice (..), Guard (..))
 import Noll.Language.Pattern (Pattern (..))
-import Noll.Utils (Dictionary (..), Map, Name, unionMap, (<$$>))
+import Noll.Utils (Dictionary, Map, Name)
 
 import qualified Data.Set as Set
 
@@ -62,7 +62,7 @@ instance (Ord t) => HasBound (Pattern a t) where
         boundIn p
       PConstructor _ _ ps ->
         boundIn ps
-      PRecord a _ d p ->
+      PRecord _ _ d p ->
         boundIn d <> boundIn p
       PListCons _ _ p1 p2 ->
         boundIn p1 <> boundIn p2
