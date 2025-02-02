@@ -53,11 +53,6 @@ moduleOrdered =
                   ( Uses
                       []
                       (TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
-                      -- ( TAlias
-                      --    "Predicate"
-                      --    [TVariable (TypeIndex KType 0)]
-                      --    (TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
-                      -- )
                   )
                   (PVariable () (Label (TVariable (TypeIndex KType 0)) "m") :| [])
                   ( ELambda
@@ -120,11 +115,6 @@ moduleOrdered =
                   ( Uses
                       []
                       (TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool)
-                      -- ( TAlias
-                      --    "Predicate"
-                      --    [TVariable (TypeIndex KType 1)]
-                      --    (TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool)
-                      -- )
                   )
                   ( PAnnotation
                       ()
