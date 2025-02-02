@@ -39,15 +39,17 @@ class EnvelopeHost e t where
 instance (Ord t) => EnvelopeHost (Expression a) t where
   replace = rename
 
-instance (EnvelopeHost a t, Ord t) => EnvelopeHost (EnvelopeClause a) t where
+instance (EnvelopeHost a t) => EnvelopeHost (EnvelopeClause a) t where
   replace var new (EnvelopeClause l1 ls e) =
     EnvelopeClause l1 ls (replace var new e)
 
-instance (EnvelopeHost a t, Ord t) => EnvelopeHost (EnvelopeExpression a) t where
+instance (EnvelopeHost a t) => EnvelopeHost (EnvelopeExpression a) t where
   replace _ _ MFail =
     MFail
   replace var new (MExpression e) =
     MExpression (replace var new e)
+  replace _ _ _ =
+    error "Implementation error"
 
 instance (HasType o k (e t)) => HasType o k (EnvelopeClause e t) where
   typeOf =
