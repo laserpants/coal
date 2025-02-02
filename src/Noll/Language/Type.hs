@@ -98,5 +98,7 @@ normalizeRowTypes =
       TIntrinsic (fmap normalizeRowTypes t)
     TAlias name ts t ->
       TAlias name (fmap normalizeRowTypes ts) (normalizeRowTypes t)
-    t ->
+    t@TVariable{} ->
+      t
+    t@TConstructor{} ->
       t
