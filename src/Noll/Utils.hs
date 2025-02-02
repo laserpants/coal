@@ -88,7 +88,17 @@ const2 :: a -> b -> c -> a
 const2 a _ _ = a
 
 lexOrderRank :: Text -> Int
-lexOrderRank txt = sum [36 ^ i | i <- [1 .. len - 1]] + Text.foldl' go 0 txt
+lexOrderRank text
+  | Text.null text =
+      error "Empty string"
+  | otherwise =
+      snd (Text.foldr f (0, 0) text) - 1
  where
-  len = Text.length txt
-  go acc c = acc * 36 + (ord c - if c `elem` ['0' .. '9'] then 22 else ord 'a')
+  f c (m, n) = (m + 1, n + (36 ^ m) + g (ord c))
+  g n
+    | n > 122 || n < 48 =
+        error "Invalid character"
+    | n >= 97 =
+        n - 97
+    | otherwise =
+        n - 22
