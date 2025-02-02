@@ -64,6 +64,7 @@ type OpaqueType = Type TypeIndex ()
 
 instance Supply (TypeIndex k) where
   updateSupply f (TypeIndex k t) = TypeIndex k (f t)
+  getSupply (TypeIndex _ t) = t
 
 class HasActive k t | t -> k where
   activeIn :: t -> Set (TypeIndex k)

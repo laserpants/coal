@@ -94,12 +94,14 @@ instance (Show a, Show t, TypeProxy t, Ord t, Monoid a) => MatchExpressionContex
     \case
       BPattern a p e ->
         BPattern a p <$> compileMatchExprs e
+      BFunction{} ->
+        error "TODO"
 
 instance (Show a, Show t, TypeProxy t, Ord t, Monoid a) => MatchExpressionContext (Expression a t) where
   compileMatchExprs =
     mapMOverExpression $
       \case
-        EMatch _ t e cs -> do
+        EMatch _ _ e cs -> do
           cs1 <- compileMatchExprs cs
           name <- suppliedName
           replaceWith name

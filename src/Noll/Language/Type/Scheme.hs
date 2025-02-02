@@ -1,7 +1,14 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Language.Type.Scheme (Scheme (..), forall0, forall1, forall2, forall3) where
+module Noll.Language.Type.Scheme (
+  Scheme (..),
+  forall0,
+  forall1,
+  forall2,
+  forall3,
+  forall4,
+) where
 
 import Data.Set (Set)
 import Noll.Language.Trait (Trait (..))
@@ -19,7 +26,7 @@ index = TypeIndex KType
 
 {-# INLINE forall0 #-}
 forall0 :: t -> Scheme TypeIndex Kind t
-forall0 f = Forall mempty [] f
+forall0 = Forall mempty []
 
 forall1 :: (Type TypeIndex Kind -> t) -> Scheme TypeIndex Kind t
 forall1 f = Forall (Set.singleton a0) [] (f (TVariable a0))

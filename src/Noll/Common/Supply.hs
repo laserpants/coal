@@ -11,7 +11,6 @@ module Noll.Common.Supply (
   suppliedName,
 ) where
 
-import Control.Monad (replicateM)
 import Control.Monad.Reader (MonadReader, ask)
 import Control.Monad.State (MonadState, get, modify)
 import Noll.Utils (Name)
