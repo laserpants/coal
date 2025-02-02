@@ -1,5 +1,4 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE RecordWildCards #-}
 
 module Noll.Common.Environment (
   Environment (..),
@@ -7,6 +6,7 @@ module Noll.Common.Environment (
   insert,
   insertMultiple,
   fromList,
+  toList,
   lookup,
   elems,
 ) where
