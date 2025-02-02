@@ -150,17 +150,17 @@ bindType ::
   TypeIndex Kind ->
   IndexedType ->
   m Substitution
-bindType (TypeIndex k index) =
+bindType (TypeIndex k1 index) =
   \case
     TVariable (TypeIndex k2 index2)
       | index == index2 ->
-          if k /= k2
+          if k1 /= k2
             then throwError CannotUnifyKinds
             else pure mempty
     t
       | index `member` typeIdsIn t ->
           throwError InfiniteType
-      | k /= kindOf t ->
+      | k1 /= kindOf t ->
           throwError CannotUnifyKinds
       | otherwise ->
           pure (index `mapsTo` t)
