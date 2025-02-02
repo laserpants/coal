@@ -5,7 +5,7 @@ module Noll.Language.Pattern (Pattern (..)) where
 import Noll.Label (Label (..))
 import Noll.Language.Primitive (Primitive (..))
 import Noll.Language.Type (Parameter (..), Type)
-import Noll.Utils (Dictionary, Map, Name)
+import Noll.Utils (Dictionary)
 
 data Pattern a t
   = -- | Type-annotated pattern
