@@ -16,7 +16,7 @@ import Control.Monad.State (MonadState, State, evalState)
 import Control.Monad.Writer (execWriter, tell)
 import Noll.Common.List1 (List1 (..), NonEmpty (..), (<|))
 import Noll.Common.Supply (suppliedName)
-import Noll.Compiler.Transform (flattenApplications)
+import Noll.Compiler.Transform (flattenApplication)
 import Noll.Compiler.Transform.Expression (mapMOverExpression, mapOverExpression)
 import Noll.Compiler.Transform.Pattern (mapMOverPattern, mapOverPattern)
 import Noll.Compiler.Transform.Tree (replace)
@@ -109,7 +109,7 @@ expandFoldExpr args clauses = do
   name <- suppliedName
   let var = name <> ".expr"
   pure $
-    mapOverExpression flattenApplications $
+    mapOverExpression flattenApplication $
       ERecursiveLet
         mempty
         (PVariable mempty (Label () name))
