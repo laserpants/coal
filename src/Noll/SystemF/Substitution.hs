@@ -18,6 +18,7 @@ import Noll.Language (
   Binding (..),
   Choice (..),
   Clause (..),
+  CompiledClause (..),
   Constant (..),
   Definition (..),
   Expression (..),
@@ -138,8 +139,6 @@ instance Substitutable (Pattern a IndexedType) where
         PShorthand a (Label (apply sub t) name)
       PAny a t ->
         PAny a (apply sub t)
-      PRecord a t d p ->
-        PRecord a (apply sub t) (apply sub d) (apply sub p)
       PListCons a t p1 p2 ->
         PListCons a (apply sub t) (apply sub p1) (apply sub p2)
       PListLiteral a t ps ->
@@ -168,12 +167,28 @@ instance Substitutable (Choice Expression a IndexedType) where
     \case
       CPlain a gs e ->
         CPlain a (apply sub gs) (apply sub e)
+      CLambda{} ->
+        error "TODO"
 
 instance Substitutable (Clause Expression a IndexedType) where
   apply sub =
     \case
       EClause a p cs ->
         EClause a (apply sub p) (apply sub cs)
+
+instance (Substitutable t) => Substitutable (Label t) where
+  apply sub =
+    \case
+      Label t name ->
+        Label (apply sub t) name
+
+instance Substitutable (CompiledClause Expression a IndexedType) where
+  apply sub =
+    \case
+      ECompiledClause lls e ->
+        ECompiledClause (apply sub lls) (apply sub e)
+      ECompiledField name ll1 ll2 e ->
+        ECompiledField name (apply sub ll1) (apply sub ll2) e
 
 instance Substitutable (Expression a IndexedType) where
   apply sub =
@@ -196,6 +211,8 @@ instance Substitutable (Expression a IndexedType) where
         EApplication a (apply sub t) (apply sub e1) (apply sub es)
       EMatch a t e cs ->
         EMatch a (apply sub t) (apply sub e) (apply sub cs)
+      ECompiledMatch a t e es ->
+        ECompiledMatch a (apply sub t) (apply sub e) (apply sub es)
       EUnaryOperator a (t, op) ->
         EUnaryOperator a (apply sub t, op)
       EBinaryOperator a (t, op) ->
@@ -240,7 +257,7 @@ instance Substitutable (Definition a k IndexedType) where
         DConstant a (Constant a1 (apply sub u) (apply sub e))
       DAnnotation a d ->
         DAnnotation a (apply sub d)
-      d ->
+      _ ->
         error "TODO"
 
 newtype Substitution = Substitution {substitutionMap :: IndexMap IndexedType}
