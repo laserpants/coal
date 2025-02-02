@@ -46,6 +46,10 @@ insertMultiple = flip (foldr (uncurry insert))
 fromList :: [(Name, a)] -> Environment a
 fromList = (`insertMultiple` new)
 
+{-# INLINE toList #-}
+toList :: Environment a -> [(Name, a)]
+toList = Map.toList . environmentDictionary 
+
 {-# INLINE lookup #-}
 lookup :: Name -> Environment a -> Maybe a
 lookup name = Map.lookup name . environmentDictionary
