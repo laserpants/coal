@@ -145,7 +145,11 @@ instance Unifiable IndexedType where
   unify _ _ =
     throwError CannotUnify
 
-bindType :: (MonadError UnificationError m) => TypeIndex Kind -> IndexedType -> m Substitution
+bindType ::
+  (MonadError UnificationError m) =>
+  TypeIndex Kind ->
+  IndexedType ->
+  m Substitution
 bindType (TypeIndex k index) =
   \case
     TVariable (TypeIndex k2 index2)
@@ -162,8 +166,7 @@ bindType (TypeIndex k index) =
           pure (index `mapsTo` t)
 
 unifyAll ::
-  ( Show u
-  , MonadState Int m
+  ( MonadState Int m
   , MonadError UnificationError m
   , Unifiable u
   ) =>
