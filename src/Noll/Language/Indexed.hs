@@ -13,7 +13,7 @@ module Noll.Language.Indexed (
   indexed,
 ) where
 
-import Control.Monad.State (State, evalState)
+import Control.Monad.State (State)
 import Data.List.NonEmpty (NonEmpty)
 import Data.Map.Strict (Map)
 import Data.Set (Set, singleton)
@@ -32,7 +32,6 @@ import Noll.Language.Type.Intrinsic (Intrinsic (..))
 import Noll.Language.Type.Kind (Kind (..))
 import Noll.Language.Type.Row (Row (..))
 import Noll.Language.Type.Scheme (Scheme (..))
-import Noll.Utils (unionMap)
 
 import qualified Data.Set as Set
 
@@ -147,6 +146,8 @@ instance (Ord k) => TypeIndexed k (Choice Expression a (Type TypeIndex k)) where
     \case
       CPlain _ gs e ->
         typeIndexesIn gs <> typeIndexesIn e
+      CLambda{} ->
+        error "TODO"
 
 instance (Ord k) => TypeIndexed k (Clause Expression a (Type TypeIndex k)) where
   typeIndexesIn =
@@ -229,7 +230,7 @@ instance (Ord k) => TypeIndexed k (Definition a k (Type TypeIndex k)) where
         typeIndexesIn u <> typeIndexesIn e
       DAnnotation _ d ->
         typeIndexesIn d
-      d ->
+      _ ->
         error "TODO"
 
 notBoundIn :: Set (TypeIndex k) -> Set (TypeIndex k) -> Set (TypeIndex k)
@@ -248,6 +249,6 @@ freshIdIn t
   typeIndexSet = typeIndexesIn t
 
 indexed :: (Traversable t) => t a -> State Int (t (Type TypeIndex Kind))
-indexed t = traverse (fmap tVar . const supply) t
+indexed = traverse (fmap tVar . const supply)
  where
   tVar = TVariable . TypeIndex KType
