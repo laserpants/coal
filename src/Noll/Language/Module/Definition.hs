@@ -1,5 +1,6 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
 module Noll.Language.Module.Definition (Definition (..), Path (..), definitionName) where
@@ -45,5 +46,7 @@ definitionName =
       name
     DConstant name _ ->
       name
+    DAnnotation _ d ->
+      definitionName d
     _ ->
-      error "TODO"
+      "" -- "TODO"

@@ -34,12 +34,67 @@ import Test.Hspec (Spec, describe, it)
 
 import qualified Data.Set as Set
 import qualified Noll.Common.Environment as Environment
+import qualified Noll.Examples.Test03 as Test03
+import qualified Noll.Examples.Test04 as Test04
 
 spec :: Spec
 spec =
   describe "Noll.Compiler" $ do
     it "" $ do
       testResultExpression (baz fixture) == fixture1
+    it "" $ do
+      testResultExpression (baz2 Test03.moduleOrdered) == Test04.moduleOrdered
+
+baz2 :: (Show a, Eq a) => Module a Kind t -> TestResult (Module a Kind (Type TypeIndex Kind)) a
+baz2 =
+  runTypedModuleTest
+    ( CompilerEnvironment
+        ( Environment.fromList
+            [
+              ( "LessThan"
+              , Constructor
+                  "LessThan"
+                  0
+                  (Forall mempty [] (TConstructor KType "Ordering"))
+              )
+            ,
+              ( "GreaterThan"
+              , Constructor
+                  "GreaterThan"
+                  0
+                  (Forall mempty [] (TConstructor KType "Ordering"))
+              )
+            ,
+              ( "EqualTo"
+              , Constructor
+                  "EqualTo"
+                  0
+                  (Forall mempty [] (TConstructor KType "Ordering"))
+              )
+            ]
+        )
+        ( Environment.fromList
+            []
+        )
+    )
+    [
+      ( "compare"
+      , Forall
+          (Set.fromList [TypeIndex KType 0])
+          []
+          ( TVariable (TypeIndex KType 0)
+              `TArrow` TVariable (TypeIndex KType 0)
+              `TArrow` TConstructor KType "Ordering"
+          )
+      )
+    ,
+      ( "not"
+      , Forall
+          mempty
+          []
+          (TIntrinsic IBool `TArrow` TIntrinsic IBool)
+      )
+    ]
 
 baz :: [Definition () Kind t] -> TestResult [Definition () Kind IndexedType] ()
 baz =

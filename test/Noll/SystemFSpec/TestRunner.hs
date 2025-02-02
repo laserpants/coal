@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Noll.SystemFSpec.TestRunner where
@@ -15,8 +16,6 @@ import Noll.Compiler (
   CompilerT (..),
   evalCompilerT,
   generateConstraintsC,
-  --  lookupCompilerDefinitionC,
-
   getConstraintsGenErrorsC,
   getSolverRuleViolationsC,
   indexedC,
@@ -35,12 +34,15 @@ import Noll.Language (
   Definition (..),
   Expression (..),
   Function (..),
+  HasType (..),
   IndexedType,
   Intrinsic (..),
   Kind (..),
+  Module (..),
   Scheme (..),
   Type (..),
   TypeIndex (..),
+  TypeIndexed (..),
   indexed,
  )
 import Noll.SystemF.Constraint.Assumption (Assumption (..))
@@ -90,12 +92,17 @@ runTypedFunctionTest env names f =
     errs1 <- getSolverRuleViolationsC
     pure (TestResult (normalizeTypeIndexes f2) as errs0 errs1)
 
-runTypedDefinitionsTest ::
-  (Show a, Eq a) =>
-  CompilerEnvironment ->
-  [(Name, Scheme TypeIndex Kind IndexedType)] ->
-  [Definition a Kind t] ->
-  TestResult [Definition a Kind IndexedType] a
+-- runTypedDefinitionsTest ::
+--  ( Show a
+--  , Eq a
+--  , Show k
+--  , HasType TypeIndex Kind (Definition a k (Type TypeIndex Kind))
+--  , TypeIndexed Kind (Definition a k IndexedType)
+--  ) =>
+--  CompilerEnvironment ->
+--  [(Name, Scheme TypeIndex Kind IndexedType)] ->
+--  [Definition a k t] ->
+--  TestResult [Definition a Kind IndexedType] a
 runTypedDefinitionsTest env names ds =
   runIdentity $ evalCompilerT env $ do
     insertNamesC names
@@ -104,6 +111,16 @@ runTypedDefinitionsTest env names ds =
     errs0 <- getConstraintsGenErrorsC
     errs1 <- getSolverRuleViolationsC
     pure (TestResult (normalizeTypeIndexes ds2) as errs0 errs1)
+
+-- runTypedModuleTest ::
+--  (Show a, Eq a) =>
+--  CompilerEnvironment ->
+--  [(Name, Scheme TypeIndex Kind IndexedType)] ->
+--  Module a k t ->
+--  TestResult (Module a Kind (Type TypeIndex Kind)) a
+runTypedModuleTest env names (Module p ns ds) = TestResult (Module p ns a) b c d
+ where
+  TestResult a b c d = runTypedDefinitionsTest env names ds
 
 runTypedExpressionTest ::
   (Show a, Eq a) =>

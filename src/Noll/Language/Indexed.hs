@@ -227,6 +227,8 @@ instance (Ord k) => TypeIndexed k (Definition a k (Type TypeIndex k)) where
         typeIndexesIn u <> typeIndexesIn ps <> typeIndexesIn e
       DConstant _ (Constant _ u e) ->
         typeIndexesIn u <> typeIndexesIn e
+      DAnnotation _ d ->
+        typeIndexesIn d
       d ->
         error "TODO"
 

@@ -32,7 +32,7 @@ import Noll.Language (
 
 import qualified Noll.Language.Module as Module
 
-moduleOrdered :: Module () () IndexedType
+moduleOrdered :: Module () Kind IndexedType
 moduleOrdered =
   Module.fromDefinitionList
     (Path ["Ordered"])
@@ -52,11 +52,12 @@ moduleOrdered =
                   ()
                   ( Uses
                       []
-                      ( TAlias
-                          "Predicate"
-                          [TVariable (TypeIndex KType 0)]
-                          (TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
-                      )
+                      (TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
+                      -- ( TAlias
+                      --    "Predicate"
+                      --    [TVariable (TypeIndex KType 0)]
+                      --    (TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
+                      -- )
                   )
                   (PVariable () (Label (TVariable (TypeIndex KType 0)) "m") :| [])
                   ( ELambda
@@ -118,26 +119,27 @@ moduleOrdered =
                   ()
                   ( Uses
                       []
-                      ( TAlias
-                          "Predicate"
-                          [TVariable (TypeIndex KType 0)]
-                          (TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
-                      )
+                      (TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool)
+                      -- ( TAlias
+                      --    "Predicate"
+                      --    [TVariable (TypeIndex KType 1)]
+                      --    (TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool)
+                      -- )
                   )
                   ( PAnnotation
                       ()
                       (TVariable (Parameter () "a"))
-                      (PVariable () (Label (TVariable (TypeIndex KType 0)) "n"))
+                      (PVariable () (Label (TVariable (TypeIndex KType 1)) "n"))
                       :| []
                   )
                   ( EApplication
                       ()
-                      (TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
+                      (TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool)
                       ( EBinaryOperator
                           ()
                           ( (TIntrinsic IBool `TArrow` TIntrinsic IBool)
-                              `TArrow` (TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
-                              `TArrow` TVariable (TypeIndex KType 0)
+                              `TArrow` (TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool)
+                              `TArrow` TVariable (TypeIndex KType 1)
                               `TArrow` TIntrinsic IBool
                           , OReverseComposition
                           )
@@ -145,18 +147,18 @@ moduleOrdered =
                       ( EVariable () (Label (TIntrinsic IBool `TArrow` TIntrinsic IBool) "not")
                           <| EApplication
                             ()
-                            (TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
+                            (TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool)
                             ( EVariable
                                 ()
                                 ( Label
-                                    ( TVariable (TypeIndex KType 0)
-                                        `TArrow` TVariable (TypeIndex KType 0)
+                                    ( TVariable (TypeIndex KType 1)
+                                        `TArrow` TVariable (TypeIndex KType 1)
                                         `TArrow` TIntrinsic IBool
                                     )
                                     "less_than_or_equal_to"
                                 )
                             )
-                            (EVariable () (Label (TVariable (TypeIndex KType 0)) "n") :| [])
+                            (EVariable () (Label (TVariable (TypeIndex KType 1)) "n") :| [])
                           :| []
                       )
                   )
@@ -174,7 +176,7 @@ list0 = TIntrinsic (IList (TVariable (TypeIndex KType 0)))
 tvar0 :: Type TypeIndex Kind
 tvar0 = TVariable (TypeIndex KType 0)
 
-moduleBinarySearch :: Module () () IndexedType
+moduleBinarySearch :: Module () Kind IndexedType
 moduleBinarySearch =
   Module.fromDefinitionList
     (Path ["BinarySearch"])
@@ -351,7 +353,7 @@ moduleBinarySearch =
       )
     ]
 
-moduleMain :: Module () () IndexedType
+moduleMain :: Module () Kind IndexedType
 moduleMain =
   Module.fromDefinitionList
     (Path ["Main"])
@@ -359,7 +361,7 @@ moduleMain =
     []
 
 -- Add type info
-test04 :: [Module () () IndexedType]
+test04 :: [Module () Kind IndexedType]
 test04 =
   [ moduleOrdered
   , moduleBinarySearch

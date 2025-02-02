@@ -29,7 +29,7 @@ import Noll.Language (
 
 import qualified Noll.Language.Module as Module
 
-moduleOrdered :: Module () () ()
+moduleOrdered :: Module () k ()
 moduleOrdered =
   Module.fromDefinitionList
     (Path ["Ordered"])

@@ -126,5 +126,7 @@ instance HasType o k (Definition a k (Type o k)) where
         foldType (typeOf e) (typeOf <$> ps)
       DConstant _ (Constant _ _ e) ->
         typeOf e
+      DAnnotation _ d ->
+        typeOf d
       d ->
         error "TODO"

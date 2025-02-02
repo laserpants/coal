@@ -29,6 +29,7 @@ module Noll.Compiler where
 --  getSolverRuleViolationsC,
 -- ) where
 
+import Control.Monad (when)
 import Control.Monad.Reader (MonadReader, ReaderT, ask, runReaderT)
 import Control.Monad.State (MonadState, StateT, gets, modify, put, runState, runStateT)
 import Control.Monad.Writer (execWriter)
@@ -327,6 +328,9 @@ compileDefinitionC2 = do
       compileFunctionC2 f
     DConstant _ c ->
       compileConstantC2 c
+    DAnnotation a d -> do
+      -- TODO
+      compileDefinitionC2 d
 
 solveC2 :: (Monad m, Show a, Eq a) => CompilerT a m Substitution
 solveC2 = do
@@ -455,30 +459,38 @@ typeCheckDefinitionC d = do
   insertDefinitionC def
   pure (def, ams)
 
-typeCheckDefinitionsC ::
-  ( Monad m
-  , Show a
-  , Show k
-  , Eq a
-  , HasType TypeIndex Kind (Definition a k (Type TypeIndex Kind))
-  , TypeIndexed Kind (Definition a k IndexedType)
-  ) =>
-  [Definition a k IndexedType] ->
-  CompilerT a m ([Definition a k IndexedType], [CompilerAssumption])
+-- typeCheckDefinitionsC ::
+--  ( Monad m
+--  , Show a
+--  , Show k
+--  , Eq a
+----  , HasType TypeIndex Kind (Definition a k IndexedType)
+--  ) =>
+--  [Definition a k IndexedType] ->
+--  CompilerT a m ([Definition a Kind IndexedType], [CompilerAssumption])
 typeCheckDefinitionsC ds = do
   forM_ ds $ \d -> do
     compileDefinitionC2 d
     sub <- solveC2
-    let t = normalizeTypeIndexes (typeOf (apply sub d))
-    insertNameC (definitionName d) (Forall (typeIndexesIn t) [] t)
+    defineC (definitionName d) (typeOf (apply sub d))
   sub <- gets compilerSubstitution
   ams <- gets compilerAssumptions
   Environment env <- gets compilerNameEnvironment
-  insertConstraintsC [Explicit (InferenceRule 200) (apply sub t) s | (n1, s) <- Map.toList env, Assumption n2 t <- ams, n1 == n2]
+  insertConstraintsC $ do
+    (n1, s) <- Map.toList env
+    Assumption n2 t <- ams
+    if n1 == n2
+      then [Explicit (InferenceRule 200) (apply sub t) s]
+      else []
   sub <- solveC2
   pure (fmap (fmap normalizeRowTypes) (apply sub ds), apply sub ams)
 
-indexedC :: (Monad m, Traversable t) => t e -> CompilerT a m (t (Type TypeIndex Kind))
+defineC :: (Monad m) => Name -> IndexedType -> CompilerT a m ()
+defineC name t = insertNameC name (Forall (typeIndexesIn s) [] s)
+ where
+  s = normalizeTypeIndexes t
+
+indexedC :: (Monad m, Traversable t) => t e -> CompilerT a m (t IndexedType)
 indexedC t = do
   (r, q) <- runState (indexed t) <$> gets compilerSupply
   updateSupplyC q
