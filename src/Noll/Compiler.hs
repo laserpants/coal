@@ -338,6 +338,7 @@ solveC2 = do
   sub1 <- gets compilerSubstitution
   sub2 <- solveConstraintsC constraints
   clearConstraintsC
+  -- TODO: clear typeAnnotationParameters ????
   updateSubstitutionC (sub2 <> sub1)
   gets compilerSubstitution
 
