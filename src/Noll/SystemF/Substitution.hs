@@ -240,9 +240,8 @@ instance Substitutable (Definition a k IndexedType) where
         DConstant a (Constant a1 (apply sub u) (apply sub e))
       DAnnotation a d ->
         DAnnotation a (apply sub d)
-      -- TODO
       d ->
-        d
+        error "TODO"
 
 newtype Substitution = Substitution {substitutionMap :: IndexMap IndexedType}
   deriving (Show, Eq, Ord, Read)

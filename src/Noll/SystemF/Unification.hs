@@ -60,7 +60,9 @@ data UnificationError
 
 class Unifiable u where
   unify ::
-    (MonadState Int m, MonadError UnificationError m) =>
+    ( MonadState Int m
+    , MonadError UnificationError m
+    ) =>
     u ->
     u ->
     m Substitution
@@ -159,7 +161,14 @@ bindType (TypeIndex k index) =
       | otherwise ->
           pure (index `mapsTo` t)
 
-unifyAll :: (Show u, MonadState Int m, MonadError UnificationError m, Unifiable u) => [u] -> m Substitution
+unifyAll ::
+  ( Show u
+  , MonadState Int m
+  , MonadError UnificationError m
+  , Unifiable u
+  ) =>
+  [u] ->
+  m Substitution
 unifyAll [] = pure mempty
 unifyAll (t : ts) = do
   sub1 <- foldrM go mempty ts
