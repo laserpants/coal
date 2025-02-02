@@ -48,7 +48,7 @@ fromList = (`insertMultiple` new)
 
 {-# INLINE toList #-}
 toList :: Environment a -> [(Name, a)]
-toList = Map.toList . environmentDictionary 
+toList = Map.toList . environmentDictionary
 
 {-# INLINE lookup #-}
 lookup :: Name -> Environment a -> Maybe a

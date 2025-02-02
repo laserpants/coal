@@ -31,11 +31,12 @@ supply = do
   modify (updateSupply succ)
   pure n
 
-supplied :: (MonadState s m, Supply s) => (Int -> a) -> m a
-supplied f = f . getSupply <$> supply
-
 suppliedName :: (MonadReader Name m, MonadState s m, Supply s) => m Name
 suppliedName = ask >>= supplied . freshName
+
+{-# INLINE supplied #-}
+supplied :: (MonadState s m, Supply s) => (Int -> a) -> m a
+supplied f = f . getSupply <$> supply
 
 {-# INLINE freshName #-}
 freshName :: Name -> Int -> Name
