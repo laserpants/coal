@@ -176,6 +176,15 @@ list0 = TIntrinsic (IList (TVariable (TypeIndex KType 0)))
 tvar0 :: Type TypeIndex Kind
 tvar0 = TVariable (TypeIndex KType 0)
 
+tree1 :: Type TypeIndex Kind
+tree1 = TApplication KType (TConstructor (KArrow KType KType) "Tree") (TVariable (TypeIndex KType 1) :| [])
+
+list1 :: Type TypeIndex Kind
+list1 = TIntrinsic (IList (TVariable (TypeIndex KType 1)))
+
+tvar1 :: Type TypeIndex Kind
+tvar1 = TVariable (TypeIndex KType 1)
+
 moduleBinarySearch :: Module () Kind IndexedType
 moduleBinarySearch =
   Module.fromDefinitionList
@@ -187,7 +196,7 @@ moduleBinarySearch =
               "flatten_tree"
               ( Function
                   ()
-                  (Uses [] list0)
+                  (Uses [] list1)
                   ( PAnnotation
                       ()
                       ( TApplication
@@ -197,16 +206,16 @@ moduleBinarySearch =
                       )
                       ( PVariable
                           ()
-                          (Label tree0 "tree")
+                          (Label tree1 "tree")
                       )
                       :| []
                   )
                   ( EFold
                       ()
-                      list0
+                      list1
                       ( EVariable
                           ()
-                          (Label tree0 "tree")
+                          (Label tree1 "tree")
                           :| []
                       )
                       ( EClause
@@ -214,16 +223,16 @@ moduleBinarySearch =
                           ( PConstructor
                               ()
                               ( Label
-                                  (tvar0 `TArrow` tree0 `TArrow` tree0 `TArrow` tree0)
+                                  tree1
                                   "Node"
                               )
-                              [ PVariable () (Label tvar0 "y")
+                              [ PVariable () (Label tvar1 "y")
                               , PAtVariable
                                   ()
-                                  (Label tree0 "lhs")
+                                  (Label tree1 "lhs")
                               , PAtVariable
                                   ()
-                                  (Label tree0 "rhs")
+                                  (Label tree1 "rhs")
                               ]
                           )
                           ( CPlain
@@ -231,19 +240,19 @@ moduleBinarySearch =
                               []
                               ( EApplication
                                   ()
-                                  list0
+                                  list1
                                   ( EBinaryOperator
                                       ()
-                                      ( list0 `TArrow` list0 `TArrow` list0
+                                      ( list1 `TArrow` list1 `TArrow` list1
                                       , OListConcatenation
                                       )
                                   )
-                                  ( EVariable () (Label list0 "lhs")
+                                  ( EVariable () (Label list1 "lhs")
                                       <| EListCons
                                         ()
-                                        list0
-                                        (EVariable () (Label tvar0 "y"))
-                                        (EVariable () (Label list0 "rhs"))
+                                        list1
+                                        (EVariable () (Label tvar1 "y"))
+                                        (EVariable () (Label list1 "rhs"))
                                       :| []
                                   )
                               )
@@ -253,13 +262,13 @@ moduleBinarySearch =
                             ()
                             ( PConstructor
                                 ()
-                                (Label tree0 "Leaf")
+                                (Label tree1 "Leaf")
                                 []
                             )
                             ( CPlain
                                 ()
                                 []
-                                (EListLiteral () list0 [])
+                                (EListLiteral () list1 [])
                                 :| []
                             )
                           :| []
@@ -283,7 +292,7 @@ moduleBinarySearch =
                                           ()
                                           ( PConstructor
                                               ()
-                                              (Label (tvar0 `TArrow` tree0 `TArrow` tree0 `TArrow` tree0) "Node")
+                                              (Label tree0 "Node")
                                               [ PVariable () (Label tvar0 "y")
                                               , PVariable () (Label tree0 "lhs")
                                               , PVariable () (Label tree0 "rhs")
@@ -331,17 +340,17 @@ moduleBinarySearch =
                               )
                               ( EApplication
                                   ()
-                                  list0
+                                  list1
                                   ( EVariable
                                       ()
                                       ( Label
-                                          (tree0 `TArrow` list0)
+                                          (tree1 `TArrow` list1)
                                           "$fold.1"
                                       )
                                   )
                                   ( EVariable
                                       ()
-                                      (Label tree0 "tree")
+                                      (Label tree1 "tree")
                                       :| []
                                   )
                               )

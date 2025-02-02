@@ -44,6 +44,67 @@ spec =
       testResultExpression (baz fixture) == fixture1
     it "" $ do
       testResultExpression (baz2 Test03.moduleOrdered) == Test04.moduleOrdered
+    it "" $ do
+      testResultExpression (baz3 Test03.moduleBinarySearch) == Test04.moduleBinarySearch
+
+tree0 :: IndexedType
+tree0 =
+  TApplication
+    KType
+    (TConstructor (KArrow KType KType) "Tree")
+    (TVariable (TypeIndex KType 0) :| [])
+
+tvariable0 :: IndexedType
+tvariable0 = TVariable (TypeIndex KType 0)
+
+tvariable1 :: IndexedType
+tvariable1 = TVariable (TypeIndex KType 1)
+
+bool :: IndexedType
+bool = TIntrinsic IBool
+
+baz3 :: (Show a, Eq a) => Module a Kind t -> TestResult (Module a Kind (Type TypeIndex Kind)) a
+baz3 =
+  runTypedModuleTest
+    ( CompilerEnvironment
+        ( Environment.fromList
+            [
+              ( "Node"
+              , Constructor
+                  "Node"
+                  3
+                  ( Forall
+                      (Set.fromList [TypeIndex KType 0])
+                      []
+                      ( tvariable0
+                          `TArrow` tree0
+                          `TArrow` tree0
+                          `TArrow` tree0
+                      )
+                  )
+              )
+            ,
+              ( "Leaf"
+              , Constructor
+                  "Leaf"
+                  0
+                  ( Forall
+                      (Set.fromList [TypeIndex KType 0])
+                      []
+                      tree0
+                  )
+              )
+            ]
+        )
+        ( Environment.fromList
+            [
+              ( "Tree"
+              , KArrow KType KType
+              )
+            ]
+        )
+    )
+    []
 
 baz2 :: (Show a, Eq a) => Module a Kind t -> TestResult (Module a Kind (Type TypeIndex Kind)) a
 baz2 =
@@ -216,15 +277,6 @@ fixture =
         )
     )
   ]
-
-tvariable0 :: IndexedType
-tvariable0 = TVariable (TypeIndex KType 0)
-
-tvariable1 :: IndexedType
-tvariable1 = TVariable (TypeIndex KType 1)
-
-bool :: IndexedType
-bool = TIntrinsic IBool
 
 fixture1 :: [Definition () Kind IndexedType]
 fixture1 =

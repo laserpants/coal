@@ -122,7 +122,7 @@ moduleOrdered =
       )
     ]
 
-moduleBinarySearch :: Module () () ()
+moduleBinarySearch :: Module () k ()
 moduleBinarySearch =
   Module.fromDefinitionList
     (Path ["BinarySearch"])
