@@ -48,7 +48,7 @@ newtype Solver s t = Solver {solverMonad :: RWS () [s] Int t}
     )
 
 {-# INLINE solveConstraints #-}
-solveConstraints :: (Show c, Eq c) => Int -> [Constraint c TypeIndex Kind IndexedType] -> (Substitution, Int, [c])
+solveConstraints :: (Show s, Eq s) => Int -> [Constraint s TypeIndex Kind IndexedType] -> (Substitution, Int, [s])
 solveConstraints sup cs = runSolver sup (solve cs)
 
 {-# INLINE runSolver #-}
@@ -72,7 +72,7 @@ choice cs = findChoice [(delete c cs, c) | c <- cs]
   findChoice ps =
     maybe ChoiceNotFound (uncurry Choice) (find (uncurry isSolvable) ps)
 
-solve :: (Show c, Eq c) => [Constraint c TypeIndex Kind IndexedType] -> Solver c Substitution
+solve :: (Show s, Eq s) => [Constraint s TypeIndex Kind IndexedType] -> Solver s Substitution
 solve [] = pure (Substitution mempty)
 solve constraints =
   case choice constraints of
