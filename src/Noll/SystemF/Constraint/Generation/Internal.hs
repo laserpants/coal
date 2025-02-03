@@ -5,13 +5,12 @@
 {-# LANGUAGE StrictData #-}
 
 module Noll.SystemF.Constraint.Generation.Internal (
-  TypeAnnotationError,
   ConstraintsGenError (..),
   InferenceRule (..),
   TypeAnnotationError (..),
   ConstraintsGenContext (..),
   ConstraintsGenStack (..),
-  ConstraintsGenOutput (..),
+  ConstraintsGenOutput,
   ConstraintsGenState (..),
   monosetInsert,
   monosetInsertMultiple,
@@ -29,7 +28,6 @@ import Control.Monad.RWS (
   MonadWriter,
   RWS,
   evalRWS,
-  gets,
   local,
   modify,
   runRWS,
@@ -182,9 +180,9 @@ runConstraintsGenStack supply ctx a = runRWS (constraintsGenMonad a) ctx (Constr
 updateConstraintsGenSupply :: Int -> ConstraintsGenStack c o k t ()
 updateConstraintsGenSupply supply = modify (overConstraintsGenStateSupply (const supply))
 
-{-# INLINE getConstraintsGenSupply #-}
-getConstraintsGenSupply :: ConstraintsGenStack c o k t Int
-getConstraintsGenSupply = gets constraintsGenStateSupply
+-- {-# INLINE getConstraintsGenSupply #-}
+-- getConstraintsGenSupply :: ConstraintsGenStack c o k t Int
+-- getConstraintsGenSupply = gets constraintsGenStateSupply
 
 {-# INLINE monosetInsert #-}
 monosetInsert :: (Ord k) => TypeIndex k -> MonomorphicSet (TypeIndex k) -> MonomorphicSet (TypeIndex k)

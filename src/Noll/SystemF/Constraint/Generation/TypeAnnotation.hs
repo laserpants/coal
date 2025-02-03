@@ -3,7 +3,7 @@
 {-# LANGUAGE StrictData #-}
 
 module Noll.SystemF.Constraint.Generation.TypeAnnotation (
-  TypeAnnotationError (..),
+  TypeAnnotationError,
   instantiateAnnotation,
   checkTypeAnnotationParameters,
   runTypeAnnotation,
@@ -12,22 +12,18 @@ module Noll.SystemF.Constraint.Generation.TypeAnnotation (
 import Control.Arrow ((>>>))
 import Control.Monad.Except (ExceptT, runExceptT, throwError, withExceptT)
 import Control.Monad.RWS (MonadReader, asks, get)
-import Control.Monad.Reader (runReaderT)
-import Control.Monad.State (MonadState, StateT, evalStateT, gets, modify, runStateT)
+import Control.Monad.State (MonadState, StateT, modify, runStateT)
 import Control.Monad.Writer (MonadWriter, tell)
 import Data.List.Extra (groupSortOn)
 import Noll.Language (
   IndexedType,
   Kind (..),
-  OpaqueType,
   Parameter (..),
   Row (..),
-  Scheme (..),
   Type (..),
   TypeIndex (..),
   foldKind,
   kindOf,
-  typeIndexesIn,
  )
 import Noll.SystemF.Constraint.Generation.Internal (
   ConstraintsGenContext (..),
@@ -59,8 +55,8 @@ instantiateAnnotation ::
   a ->
   Type Parameter () ->
   m (Either (TypeAnnotationError a) (Type TypeIndex Kind))
-instantiateAnnotation loc t = do
-  (t, s) <- runTypeAnnotation loc (instantiate t)
+instantiateAnnotation loc a = do
+  (t, s) <- runTypeAnnotation loc (instantiate a)
   forM_ (Map.toList s) $ \(n, k) -> modify (overConstraintsGenStateTypeIndexes (Map.insert n (loc, k)))
   return t
 
