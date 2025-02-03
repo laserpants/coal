@@ -32,8 +32,8 @@ import Noll.Utils (foldrM)
 
 import qualified Data.Set as Set
 
-liftUnifier :: Unifier a -> Solver s (Either UnificationError a)
-liftUnifier u = do
+transUnifier :: Unifier a -> Solver s (Either UnificationError a)
+transUnifier u = do
   (r, q) <- runUnifier <$> get <*> pure u
   put q
   pure r
@@ -69,8 +69,7 @@ data SolverChoice c = Choice [c] c | ChoiceNotFound
 choice :: (Ord k, Eq t, Eq s, TypeIndexed k t) => [Constraint s TypeIndex k t] -> SolverChoice (Constraint s TypeIndex k t)
 choice cs = findChoice [(delete c cs, c) | c <- cs]
  where
-  findChoice ps =
-    maybe ChoiceNotFound (uncurry Choice) (find (uncurry isSolvable) ps)
+  findChoice = maybe ChoiceNotFound (uncurry Choice) . find (uncurry isSolvable)
 
 solve :: (Show s, Eq s) => [Constraint s TypeIndex Kind IndexedType] -> Solver s Substitution
 solve [] = pure (Substitution mempty)
@@ -79,7 +78,7 @@ solve constraints =
     ChoiceNotFound ->
       pure mempty
     Choice cs (Equality c ts) -> do
-      res <- liftUnifier (unifyAll ts)
+      res <- transUnifier (unifyAll ts)
       case res of
         Left{} -> do
           tell [c]
