@@ -10,37 +10,29 @@ module Noll.Compiler.PatternMatching (
 ) where
 
 import Noll.Common.List1 (List1, NonEmpty (..), fromList1)
-import Noll.Common.Supply (supplied, suppliedName)
+import Noll.Common.Supply (suppliedName)
 import Noll.Compiler.PatternMatching.Compiler (TypeProxy (..), compileEnvelope)
 import Noll.Compiler.PatternMatching.Envelope (
-  EnvelopeClause (..),
   EnvelopeExpression (..),
-  EnvelopeHost (..),
   EnvelopePattern (..),
-  fails,
  )
 import Noll.Compiler.PatternMatching.Equation (patternEquation)
 import Noll.Compiler.PatternMatching.Rule (MatchMonad (..), matchPatterns)
 import Noll.Compiler.Transform.Expression (mapMOverExpression)
-import Noll.Compiler.Transform.Tree (rename, replaceWith)
+import Noll.Compiler.Transform.Tree (replaceWith)
 import Noll.Label (Label (..))
 import Noll.Language (
-  BinaryOperator (..),
   Binding (..),
   Choice (..),
   Clause (..),
-  CompiledClause (..),
   Constant (..),
   Definition (..),
   Expression (..),
   Function (..),
-  HasType (..),
-  Intrinsic (..),
   Module (..),
   Pattern (..),
-  Type (..),
  )
-import Noll.Utils (Dictionary (..))
+import Noll.Utils (Dictionary)
 
 class MatchExpressionContext a where
   compileMatchExprs :: a -> MatchMonad a

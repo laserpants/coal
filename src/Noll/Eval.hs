@@ -11,9 +11,8 @@ import Control.Monad.Reader (MonadReader, Reader, ask, local, runReader)
 import Data.Char (isUpper)
 import Data.List (find)
 import Data.Maybe (fromMaybe)
-import Debug.Trace
 import Noll.Common.Environment (Environment (..))
-import Noll.Common.List1 (NonEmpty (..), fromList1)
+import Noll.Common.List1 (fromList1)
 import Noll.Label (Label (..), labelName)
 import Noll.Language.Expression (CompiledClause (..), Expression (..))
 import Noll.Language.Expression.Operator.Binary (BinaryOperator (..))
@@ -149,6 +148,8 @@ matchClause (name : names) (v : vs) e =
   local (Environment.insert name v) (matchClause names vs e)
 matchClause [] [] e =
   evalExpr e
+matchClause _ _ _ =
+  error "error: matchClause"
 
 {-# INLINE eval #-}
 eval :: (Show a, Show t) => Environment Value -> Expression a t -> Value
