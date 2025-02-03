@@ -32,19 +32,19 @@ import Noll.Utils (foldrM)
 
 import qualified Data.Set as Set
 
-liftUnifier :: Unifier a -> Solver c (Either UnificationError a)
+liftUnifier :: Unifier a -> Solver s (Either UnificationError a)
 liftUnifier u = do
   (r, q) <- runUnifier <$> get <*> pure u
   put q
   pure r
 
-newtype Solver c t = Solver {solverMonad :: RWS () [c] Int t}
+newtype Solver s t = Solver {solverMonad :: RWS () [s] Int t}
   deriving
     ( Functor
     , Applicative
     , Monad
     , MonadState Int
-    , MonadWriter [c]
+    , MonadWriter [s]
     )
 
 {-# INLINE solveConstraints #-}
@@ -52,7 +52,7 @@ solveConstraints :: (Show c, Eq c) => Int -> [Constraint c TypeIndex Kind Indexe
 solveConstraints sup cs = runSolver sup (solve cs)
 
 {-# INLINE runSolver #-}
-runSolver :: Int -> Solver c t -> (t, Int, [c])
+runSolver :: Int -> Solver s t -> (t, Int, [s])
 runSolver sup s = runRWS (solverMonad s) () sup
 
 isSolvable :: (Ord k, TypeIndexed k t) => [Constraint c TypeIndex k t] -> Constraint c TypeIndex k t -> Bool
@@ -66,7 +66,7 @@ isSolvable constraints =
 data SolverChoice c = Choice [c] c | ChoiceNotFound
   deriving (Show, Eq, Ord, Read)
 
-choice :: (Ord k, Eq t, Eq c, TypeIndexed k t) => [Constraint c TypeIndex k t] -> SolverChoice (Constraint c TypeIndex k t)
+choice :: (Ord k, Eq t, Eq s, TypeIndexed k t) => [Constraint s TypeIndex k t] -> SolverChoice (Constraint s TypeIndex k t)
 choice cs = findChoice [(delete c cs, c) | c <- cs]
  where
   findChoice ps =
@@ -97,7 +97,7 @@ solve constraints =
 generalize :: (TypeIndexed k t) => MonomorphicSet (TypeIndex k) -> t -> Scheme TypeIndex k t
 generalize (MonomorphicSet m) t = Forall (notBoundIn m (typeIndexesIn t)) [] t
 
-instantiate :: Scheme TypeIndex Kind IndexedType -> Solver c IndexedType
+instantiate :: Scheme TypeIndex Kind IndexedType -> Solver s IndexedType
 instantiate (Forall qs _ t) = do
   sub <- foldrM go mempty qs
   pure (apply sub t)
