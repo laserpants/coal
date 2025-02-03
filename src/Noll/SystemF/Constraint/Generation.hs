@@ -12,15 +12,12 @@ module Noll.SystemF.Constraint.Generation (
 ) where
 
 import Control.Monad.Reader (asks)
-import Data.List (partition)
 import Data.Maybe (maybeToList)
 import Data.Tuple.Extra (second, third3)
-import Debug.Trace
 import Noll.Common.List1 (NonEmpty ((:|)), fromList1)
 import Noll.Common.Supply (supplied)
 import Noll.Label (Label (..))
 import Noll.Language (
-  BinaryOperator (..),
   Binding (..),
   Choice (..),
   Clause (..),
@@ -60,7 +57,6 @@ import Noll.SystemF.Constraint.Generation.Internal (
  )
 import Noll.SystemF.Constraint.Generation.TypeAnnotation (instantiateAnnotation)
 import Noll.Utils (
-  Map,
   Name,
   concatForM,
   concatMapM,
@@ -73,7 +69,6 @@ import Noll.Utils (
  )
 
 import qualified Data.Map.Strict as Map
-import qualified Data.Set as Set
 import qualified Noll.Common.Environment as Environment
 
 type ConstraintsGen a = ConstraintsGenStack a TypeIndex Kind IndexedType
@@ -83,7 +78,7 @@ lookupDataConstructor :: Name -> ConstraintsGenStack c o k t (Maybe (Constructor
 lookupDataConstructor name = asks (Environment.lookup name . constraintsGenContextDataConstructorEnv)
 
 assertEqualityAssumptions :: a -> IndexedType -> [Assumption IndexedType] -> ConstraintsGen a ()
-assertEqualityAssumptions loc t ms =
+assertEqualityAssumptions _ t ms =
   tellRight $ do
     Assumption{..} <- ms
     -- TODO
@@ -144,9 +139,6 @@ patternConstraints assert ms =
       tellRight [Equality (InferenceRule 300) [t, t1]]
       ps1 <- concatForM (Map.elems d <> maybeToList p) (patternConstraints assert ms)
       pure (ps1 <> Map.keys d)
-    PShorthand _ (Label t name) -> do
-      assert t (filter (assumptionNameIs name) ms)
-      pure [name]
     PAny{} ->
       pure []
     PListCons _ t p1 p2 -> do
@@ -157,7 +149,7 @@ patternConstraints assert ms =
     PListLiteral _ t ps -> do
       tellRight [Equality (InferenceRule 3) (t : (typeOf <$> ps))]
       concatForM ps (patternConstraints assert ms)
-    PAtVariable _ (Label t name) -> do
+    PAtVariable _ (Label _ name) -> do
       pure [name]
     PLiteral{} ->
       pure []
@@ -182,6 +174,8 @@ clauseAssumptions (EClause loc p cs) = do
             collectConstraints g
           ms2 <- collectConstraints e
           pure (typeOf e, ms1 <> ms2)
+        CLambda{} ->
+          error "TODO"
   names <- patternConstraints (assertEqualityAssumptions loc) ms p
   pure (typeOf p, ts1, filter (assumptionNameIsNotOneOf names) ms)
 
@@ -204,7 +198,7 @@ collectConstraints =
         Just Constructor{..} ->
           tellRight [Explicit (InferenceRule 4) t constructorScheme]
       pure []
-    EVariable loc (Label t name) ->
+    EVariable _ (Label t name) ->
       pure [Assumption name t]
     ELambda loc ps e -> do
       ms <- withMonomorphic ps (collectConstraints e)
@@ -261,13 +255,13 @@ collectConstraints =
       pure (ms1 <> ms2)
     ELiteral{} ->
       pure []
-    EListCons loc t e1 e2 -> do
+    EListCons _ t e1 e2 -> do
       ms1 <- collectConstraints e1
       ms2 <- collectConstraints e2
       let t1 = typeOf e1 `TArrow` typeOf e2 `TArrow` t
       tellRight [Explicit (InferenceRule 402) t1 listConstructorTypeScheme]
       pure (ms1 <> ms2)
-    EListLiteral loc t es -> do
+    EListLiteral _ t es -> do
       ms1 <- concatMapM collectConstraints es
       tellRight [Equality (InferenceRule 555) (t : (typeOf <$> es))]
       pure ms1
@@ -279,15 +273,19 @@ collectConstraints =
       -- Expression types
       tellRight [Equality (InferMatchClauseExpressions loc) (t : concat ts2)]
       pure (ms1 <> ms2)
+    ECompiledMatch{} ->
+      error "TODO"
+    EUnaryOperator{} ->
+      error "TODO"
     EBinaryOperator loc (t, op) -> do
       tellRight [Explicit (InferBinaryOperator loc) t (binaryOperatorTypeScheme op)]
       pure []
-    ESelect loc (Label t name) e -> do
+    ESelect _ (Label t name) e -> do
       rvar <- supplied (RVariable . TypeIndex KRow)
       let t1 = TIntrinsic (IRecord (TRow (RExtend name t rvar)))
       tellRight [Equality (InferenceRule 302) [t1, typeOf e]]
       collectConstraints e
-    EFold loc t (e :| es) cs e1 -> do
+    EFold _ t (e :| es) cs e1 -> do
       ms1 <- collectConstraints e
       ms2 <- concatMapM collectConstraints es
       (ts1, ts2, ms3) <- (third3 concat . unzip3 <$$> traverse clauseAssumptions) (fromList1 cs)
@@ -297,7 +295,7 @@ collectConstraints =
       tellRight [Equality (InferenceRule 402) (foldType t (typeOf <$> es) : concat ts2)]
       ms4 <- concatMapM collectConstraints e1
       pure (ms1 <> ms2 <> ms3 <> ms4)
-    ERecord loc t d e -> do
+    ERecord _ t d e -> do
       ms1 <- concatMapM collectConstraints e
       ms2 <- concatMapM collectConstraints d
       let d1 = pure . typeOf <$> d
