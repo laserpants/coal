@@ -84,6 +84,8 @@ evalVar name = do
 evalExpr :: (Show a, Show t) => Expression a t -> Eval Value
 evalExpr =
   \case
+    EAnnotation _ _ e ->
+      evalExpr e
     ELiteral _ p ->
       pure (VPrim p)
     EVariable _ (Label _ name) ->
@@ -122,6 +124,8 @@ evalExpr =
         case (a0, a1) of
           (VPrim (LInt32 a), VPrim (LInt32 b)) ->
             pure (VPrim (LBool (a == b)))
+    ELambda{} ->
+      error "TODO"
 
 {-# INLINE argn #-}
 argn :: Int -> Name
