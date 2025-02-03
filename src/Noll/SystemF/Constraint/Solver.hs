@@ -10,11 +10,9 @@ module Noll.SystemF.Constraint.Solver (
   solveConstraints,
 ) where
 
-import Control.Monad.Except (runExceptT)
-import Control.Monad.RWS (MonadState, MonadWriter, RWS, runRWS, tell)
+import Control.Monad.RWS (MonadState, MonadWriter, RWS, get, put, runRWS, tell)
 import Data.List (delete, find)
 import Data.Set (intersection, (\\))
-import Debug.Trace
 import Noll.Common.Supply (supply)
 import Noll.Language (
   IndexedType,
@@ -24,16 +22,21 @@ import Noll.Language (
   TypeIndex (..),
   TypeIndexed (..),
   activeIdsIn,
-  freshIdIn,
   notBoundIn,
   typeIdsIn,
  )
 import Noll.SystemF.Constraint (Constraint (..), MonomorphicSet (..))
 import Noll.SystemF.Substitution (Substitutable (..), Substitution (..), mapsTo)
-import Noll.SystemF.Unification (unifyAll)
+import Noll.SystemF.Unification (UnificationError, Unifier (..), runUnifier, unifyAll)
 import Noll.Utils (foldrM)
 
 import qualified Data.Set as Set
+
+liftUnifier :: Unifier a -> Solver c (Either UnificationError a)
+liftUnifier u = do
+  (r, q) <- runUnifier <$> get <*> pure u
+  put q
+  pure r
 
 newtype Solver c t = Solver {solverMonad :: RWS () [c] Int t}
   deriving
@@ -76,9 +79,9 @@ solve constraints =
     ChoiceNotFound ->
       pure mempty
     Choice cs (Equality c ts) -> do
-      res <- runExceptT (unifyAll ts)
+      res <- liftUnifier (unifyAll ts)
       case res of
-        Left err -> do
+        Left{} -> do
           tell [c]
           solve cs
         Right sub1 -> do

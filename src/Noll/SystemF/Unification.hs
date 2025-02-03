@@ -10,10 +10,11 @@ module Noll.SystemF.Unification (
   UnificationError (..),
   unifyAll,
   runUnifier,
+  evalUnifier,
 ) where
 
-import Control.Monad.Except (MonadError, throwError)
-import Control.Monad.State (MonadState, StateT, evalStateT)
+import Control.Monad.Except (ExceptT, MonadError, runExceptT, throwError)
+import Control.Monad.State (MonadState, State, runState)
 import Data.List.NonEmpty (NonEmpty, (<|))
 import Data.Set (member)
 import Noll.Common.Supply (supplied)
@@ -34,11 +35,11 @@ import Noll.SystemF.Substitution (
   Substitution (..),
   mapsTo,
  )
-import Noll.Utils (foldrM)
+import Noll.Utils (foldrM, (<$$>))
 
 import qualified Data.List.NonEmpty as NonEmpty
 
-newtype Unifier a = Unifier {unifierStack :: StateT Int (Either UnificationError) a}
+newtype Unifier a = Unifier {unifierStack :: ExceptT UnificationError (State Int) a}
   deriving
     ( Functor
     , Applicative
@@ -48,8 +49,12 @@ newtype Unifier a = Unifier {unifierStack :: StateT Int (Either UnificationError
     )
 
 {-# INLINE runUnifier #-}
-runUnifier :: Int -> Unifier a -> Either UnificationError a
-runUnifier n u = evalStateT (unifierStack u) n
+runUnifier :: Int -> Unifier a -> (Either UnificationError a, Int)
+runUnifier n u = runState (runExceptT (unifierStack u)) n
+
+{-# INLINE evalUnifier #-}
+evalUnifier :: Int -> Unifier a -> Either UnificationError a
+evalUnifier = fst <$$> runUnifier
 
 data UnificationError
   = CannotUnify
@@ -58,13 +63,7 @@ data UnificationError
   deriving (Show, Eq, Ord, Read)
 
 class Unifiable u where
-  unify ::
-    ( MonadState Int m
-    , MonadError UnificationError m
-    ) =>
-    u ->
-    u ->
-    m Substitution
+  unify :: u -> u -> Unifier Substitution
 
 instance (Substitutable u, Unifiable u) => Unifiable [u] where
   unify [] [] =
@@ -144,33 +143,23 @@ instance Unifiable IndexedType where
   unify _ _ =
     throwError CannotUnify
 
-bindType ::
-  (MonadError UnificationError m) =>
-  TypeIndex Kind ->
-  IndexedType ->
-  m Substitution
-bindType (TypeIndex k1 index) =
+bindType :: TypeIndex Kind -> IndexedType -> Unifier Substitution
+bindType (TypeIndex k1 ix1) =
   \case
-    TVariable (TypeIndex k2 index2)
-      | index == index2 ->
+    TVariable (TypeIndex k2 ix2)
+      | ix1 == ix2 ->
           if k1 /= k2
             then throwError CannotUnifyKinds
             else pure mempty
     t
-      | index `member` typeIdsIn t ->
+      | ix1 `member` typeIdsIn t ->
           throwError InfiniteType
       | k1 /= kindOf t ->
           throwError CannotUnifyKinds
       | otherwise ->
-          pure (index `mapsTo` t)
+          pure (ix1 `mapsTo` t)
 
-unifyAll ::
-  ( MonadState Int m
-  , MonadError UnificationError m
-  , Unifiable u
-  ) =>
-  [u] ->
-  m Substitution
+unifyAll :: (Unifiable u) => [u] -> Unifier Substitution
 unifyAll [] = pure mempty
 unifyAll (t : ts) = do
   sub1 <- foldrM go mempty ts

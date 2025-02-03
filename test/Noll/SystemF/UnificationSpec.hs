@@ -162,10 +162,10 @@ fixture12 :: Row TypeIndex Kind IndexedType
 fixture12 = RExtend "two" (TVariable (TypeIndex KType 1)) (RExtend "one" (TIntrinsic IInt32) RNil)
 
 testUnifyTypes :: Type TypeIndex Kind -> Type TypeIndex Kind -> Either UnificationError Substitution
-testUnifyTypes t1 t2 = runUnifier (freshIdIn [t1, t2]) (unify t1 t2)
+testUnifyTypes t1 t2 = evalUnifier (freshIdIn [t1, t2]) (unify t1 t2)
 
 testUnifyAllTypes :: [Type TypeIndex Kind] -> Either UnificationError Substitution
-testUnifyAllTypes ts = runUnifier (freshIdIn ts) (unifyAll ts)
+testUnifyAllTypes ts = evalUnifier (freshIdIn ts) (unifyAll ts)
 
 testUnifyRows :: Row TypeIndex Kind (Type TypeIndex Kind) -> Row TypeIndex Kind (Type TypeIndex Kind) -> Either UnificationError Substitution
-testUnifyRows r1 r2 = runUnifier (freshIdIn [r1, r2]) (unify r1 r2)
+testUnifyRows r1 r2 = evalUnifier (freshIdIn [r1, r2]) (unify r1 r2)
