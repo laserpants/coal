@@ -6,6 +6,7 @@ import qualified Noll.Language.IndexedSpec
 -- import qualified Noll.SystemF.TypeConstraint.CollectSpec
 -- import qualified Noll.SystemF.TypeSubstitutionSpec
 
+import qualified Noll.Compiler.NormalizeObjectsSpec
 import qualified Noll.Compiler.PatternMatchingExamples.Test01
 import qualified Noll.Compiler.PatternMatchingExamples.Test02
 import qualified Noll.Compiler.PatternMatchingSpec
@@ -76,6 +77,7 @@ main =
     Noll.CompilerExamples.Test02.spec
     --    Noll.CompilerSpec.spec
     Noll.UtilsSpec.spec
+    Noll.Compiler.NormalizeObjectsSpec.spec
 
 --    Noll.SystemF.TypeConstraint.CollectSpec.spec
 --    Noll.SystemF.TypeSubstitutionSpec.spec

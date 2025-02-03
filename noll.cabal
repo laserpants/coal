@@ -28,6 +28,7 @@ library
       Noll.Common.List1
       Noll.Common.Supply
       Noll.Compiler
+      Noll.Compiler.NormalizeObjects
       Noll.Compiler.PatternMatching
       Noll.Compiler.PatternMatching.Compiler
       Noll.Compiler.PatternMatching.Envelope
@@ -64,6 +65,7 @@ library
       Noll.Language.Module.Constant
       Noll.Language.Module.Definition
       Noll.Language.Module.Function
+      Noll.Language.Module.TraitInstance
       Noll.Language.Pattern
       Noll.Language.Primitive
       Noll.Language.Trait
@@ -126,6 +128,7 @@ test-suite noll-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      Noll.Compiler.NormalizeObjectsSpec
       Noll.Compiler.PatternMatchingExamples.Test01
       Noll.Compiler.PatternMatchingExamples.Test02
       Noll.Compiler.PatternMatchingSpec
