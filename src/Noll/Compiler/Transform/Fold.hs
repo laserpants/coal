@@ -14,7 +14,7 @@ module Noll.Compiler.Transform.Fold (
 import Control.Monad.Reader (MonadReader, ReaderT, runReaderT)
 import Control.Monad.State (MonadState, State, evalState)
 import Control.Monad.Writer (execWriter, tell)
-import Noll.Common.List1 (List1 (..), NonEmpty (..), (<|))
+import Noll.Common.List1 (List1, NonEmpty (..))
 import Noll.Common.Supply (suppliedName)
 import Noll.Compiler.Transform (flattenApplication)
 import Noll.Compiler.Transform.Expression (mapMOverExpression, mapOverExpression)
