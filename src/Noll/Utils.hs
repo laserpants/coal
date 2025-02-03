@@ -94,6 +94,7 @@ lexOrderRank text
   | otherwise =
       snd (Text.foldr f (0, 0) text) - 1
  where
+  f :: Char -> (Int, Int) -> (Int, Int)
   f c (m, n) = (m + 1, n + (36 ^ m) + g (ord c))
   g n
     | n > 122 || n < 48 =
