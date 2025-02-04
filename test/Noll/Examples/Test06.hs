@@ -364,6 +364,7 @@ moduleMain =
     []
     []
 
+-- Translate patterns to match statements
 test06 :: [Module () Kind IndexedType]
 test06 =
   [ moduleOrdered
