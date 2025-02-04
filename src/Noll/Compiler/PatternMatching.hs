@@ -58,10 +58,14 @@ instance (Show a, Show t, TypeProxy t, Ord t, Monoid a) => MatchExpressionContex
 instance (Show a, Show t, TypeProxy t, Ord t, Monoid a) => MatchExpressionContext (Definition a k t) where
   compileMatchExprs =
     \case
+      DAnnotation u d ->
+        DAnnotation u <$> compileMatchExprs d
       DFunction name f ->
         DFunction name <$> compileMatchExprs f
       DConstant name c ->
         DConstant name <$> compileMatchExprs c
+      _ ->
+        error "TODO"
 
 instance (MatchExpressionContext (e a t)) => MatchExpressionContext (Function e a t) where
   compileMatchExprs =
