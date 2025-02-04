@@ -30,7 +30,7 @@ mapOverExpression :: Over (Expression a t) (Expression a t)
 mapOverExpression f = runIdentity . overExpression (pure . f)
 
 mapMOverExpression :: (Monad m) => (Expression a t -> m (Expression a t)) -> Expression a t -> m (Expression a t)
-mapMOverExpression f e = (overExpression f =<< f e)
+mapMOverExpression f e = overExpression f =<< f e
 
 class ExpressionContext o e where
   overExpression :: (Monad m) => (o -> m o) -> e -> m e

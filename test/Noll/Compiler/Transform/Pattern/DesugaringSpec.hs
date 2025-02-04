@@ -23,6 +23,8 @@ import Noll.Language (
 import Noll.Language.Module.Function (Function (..))
 import Test.Hspec (Spec, describe, it)
 
+import qualified Noll.Examples.Test05
+import qualified Noll.Examples.Test06
 import qualified Data.Map.Strict as Map
 
 spec :: Spec
@@ -40,6 +42,10 @@ spec =
       runPatternDesugaring "v" 0 (desugarPatterns fixture9) == fixture10
     it "" $
       runPatternDesugaring "v" 0 (desugarPatterns fixture11) == fixture12
+    it "" $
+      runPatternDesugaring "v" 0 (desugarPatterns Noll.Examples.Test05.moduleOrdered) == Noll.Examples.Test06.moduleOrdered
+    it "" $
+      runPatternDesugaring "v" 0 (desugarPatterns Noll.Examples.Test05.moduleBinarySearch) == Noll.Examples.Test06.moduleBinarySearch
 
 -- let
 --  Some(p) = x     Option(int32)
@@ -48,7 +54,7 @@ spec =
 --
 fixture1 :: Expression () (Type TypeIndex ())
 fixture1 =
-  ( ELet
+  ELet
       ()
       ( BPattern
           ()
@@ -57,7 +63,6 @@ fixture1 =
           :| []
       )
       (EVariable () (Label (TIntrinsic IInt32) "p"))
-  )
 
 -- let
 --  $v.0 = x             Option(int32)
@@ -144,14 +149,13 @@ fixture4 =
 --
 fixture5 :: Expression () (Type TypeIndex ())
 fixture5 =
-  ( ERecursiveLet
+  ERecursiveLet
       ()
       (PConstructor () (Label (TApplication () (TConstructor () "Option") (TIntrinsic IInt32 :| [])) "Some") [PVariable () (Label (TIntrinsic IInt32) "p")])
       (EVariable () (Label (TApplication () (TConstructor () "Option") (TIntrinsic IInt32 :| [])) "x"))
       (EVariable () (Label (TIntrinsic IInt32) "p"))
-  )
 
--- let
+-- letrec
 --  $v.0 = x             Option(int32)
 --  in
 --    match(             int32
@@ -163,14 +167,10 @@ fixture5 =
 --
 fixture6 :: Expression () (Type TypeIndex ())
 fixture6 =
-  ( ELet
-      ()
-      ( BPattern
-          ()
-          (PVariable () (Label (TApplication () (TConstructor () "Option") (TIntrinsic IInt32 :| [])) "$v.0"))
-          (EVariable () (Label (TApplication () (TConstructor () "Option") (TIntrinsic IInt32 :| [])) "x"))
-          :| []
-      )
+  ERecursiveLet
+    ()
+    (PVariable () (Label (TApplication () (TConstructor () "Option") (TIntrinsic IInt32 :| [])) "$v.0"))
+    (EVariable () (Label (TApplication () (TConstructor () "Option") (TIntrinsic IInt32 :| [])) "x"))
       ( EMatch
           ()
           (TIntrinsic IInt32)
@@ -187,7 +187,6 @@ fixture6 =
               :| []
           )
       )
-  )
 
 --
 -- let

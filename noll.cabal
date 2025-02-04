@@ -147,6 +147,7 @@ test-suite noll-test
       Noll.Examples.Test03
       Noll.Examples.Test04
       Noll.Examples.Test05
+      Noll.Examples.Test06
       Noll.Language.HasFreeSpec
       Noll.Language.IndexedSpec
       Noll.SystemF.Constraint.GenerationSpec

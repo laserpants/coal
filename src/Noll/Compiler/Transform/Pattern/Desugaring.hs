@@ -3,16 +3,17 @@
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Compiler.Transform.Pattern.Desugaring where
+module Noll.Compiler.Transform.Pattern.Desugaring (
+  Sugared (..),
+  runPatternDesugaring,
+) where
 
-import Control.Monad.Reader (MonadReader, ReaderT, ask, runReaderT)
+import Control.Monad.Reader (MonadReader, ReaderT, runReaderT)
 import Control.Monad.State (MonadState, State, evalState)
 import Control.Monad.Writer (MonadWriter, WriterT, runWriterT, tell)
-import Noll.Common.List1 (List1, NonEmpty ((:|)))
+import Noll.Common.List1 (NonEmpty ((:|)))
 import Noll.Common.Supply (suppliedName)
 import Noll.Compiler.Transform.Expression (mapMOverExpression)
 import Noll.Label (Label (..))
@@ -20,14 +21,13 @@ import Noll.Language.Expression (Clause (..), Expression (..))
 import Noll.Language.Expression.Binding (Binding (..))
 import Noll.Language.Expression.Choice (Choice (..))
 import Noll.Language.HasType (HasType (..))
+import Noll.Language.Module (Module (..))
 import Noll.Language.Module.Constant (Constant (..))
 import Noll.Language.Module.Definition (Definition (..))
 import Noll.Language.Module.Function (Function (..))
 import Noll.Language.Pattern (Pattern (..))
 import Noll.Language.Type (Type (..))
-import Noll.Utils (Name, foldrM)
-
-import qualified Data.Text as Text
+import Noll.Utils (Name)
 
 type NamedPattern c o k = (Name, Pattern c (Type o k))
 
@@ -78,17 +78,18 @@ instance (Monoid c) => Sugared c o k (Expression c (Type o k)) where
     mapMOverExpression $
       \case
         ELet a gs e1 -> do
-          e2 <- desugarPatterns e1
+          d1 <- desugarPatterns e1
           (hs, ps) <- runWriterT (traverse desugarPatterns gs)
-          pure (ELet a hs (foldr unrollMatch e2 ps))
+          pure (ELet a hs (foldr unrollMatch d1 ps))
         ERecursiveLet a p e1 e2 -> do
-          (p1, ps) <- runWriterT (desugarPatterns p)
-          q1 <- BPattern a p1 <$> desugarPatterns e1
-          pure (ELet a (q1 :| []) (foldr unrollMatch e2 ps))
+          d1 <- desugarPatterns e1
+          d2 <- desugarPatterns e2
+          (q, ps) <- runWriterT (desugarPatterns p)
+          pure (ERecursiveLet a q d1 (foldr unrollMatch d2 ps))
         ELambda a ps e -> do
           e1 <- desugarPatterns e
-          (qs, ps) <- runWriterT (traverse desugarPatterns ps)
-          pure (ELambda a qs (foldr unrollMatch e1 ps))
+          (qs, rs) <- runWriterT (traverse desugarPatterns ps)
+          pure (ELambda a qs (foldr unrollMatch e1 rs))
         e ->
           pure e
 
@@ -105,8 +106,8 @@ instance (Monoid c) => Sugared c o k (Function Expression c (Type o k)) where
     \case
       Function a u ps e -> do
         e1 <- desugarPatterns e
-        (qs, ps) <- runWriterT (traverse desugarPatterns ps)
-        pure (Function a u qs (foldr unrollMatch e1 ps))
+        (qs, rs) <- runWriterT (traverse desugarPatterns ps)
+        pure (Function a u qs (foldr unrollMatch e1 rs))
 
 instance (Monoid c) => Sugared c o k (Constant Expression c (Type o k)) where
   desugarPatterns =
@@ -117,9 +118,17 @@ instance (Monoid c) => Sugared c o k (Constant Expression c (Type o k)) where
 instance (Monoid c) => Sugared c o k (Definition c k (Type o k)) where
   desugarPatterns =
     \case
+      DAnnotation u d ->
+        DAnnotation u <$> desugarPatterns d
       DFunction name f ->
         DFunction name <$> desugarPatterns f
       DConstant name g ->
         DConstant name <$> desugarPatterns g
       d ->
         pure d
+
+instance (Monoid c) => Sugared c o k (Module c k (Type o k)) where
+  desugarPatterns =
+    \case
+      Module p ns ds ->
+        Module p ns <$> traverse desugarPatterns ds
