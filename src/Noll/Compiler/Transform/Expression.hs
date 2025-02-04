@@ -9,7 +9,6 @@ module Noll.Compiler.Transform.Expression (
   overExpression,
 ) where
 
-import Control.Monad ((<=<))
 import Control.Monad.Identity (runIdentity)
 import Data.Map.Strict (Map)
 import Noll.Common.List1 (NonEmpty)
@@ -26,10 +25,10 @@ import Noll.Language.Module.Definition (Definition (..))
 import Noll.Language.Module.Function (Function (..))
 import Noll.Utils (Over)
 
-mapOverExpression :: Over (Expression a t) (Expression a t)
+mapOverExpression :: (ExpressionContext e e) => Over e e
 mapOverExpression f = runIdentity . overExpression (pure . f)
 
-mapMOverExpression :: (Monad m) => (Expression a t -> m (Expression a t)) -> Expression a t -> m (Expression a t)
+mapMOverExpression :: (Monad m, ExpressionContext e e) => (e -> m e) -> e -> m e
 mapMOverExpression f e = overExpression f =<< f e
 
 class ExpressionContext o e where
@@ -75,9 +74,6 @@ instance ExpressionContext (Expression a t) (Expression a t) where
         EListCons a t
           <$> (overExpression f =<< f e1)
           <*> (overExpression f =<< f e2)
-      EListLiteral a t es ->
-        EListLiteral a t
-          <$> (overExpression f =<< traverse f es)
       ERecord a t d e ->
         ERecord a t
           <$> (overExpression f =<< traverse f d)
@@ -131,6 +127,8 @@ instance ExpressionContext (Expression a t) (CompiledClause Expression a t) wher
     \case
       ECompiledClause lls e -> do
         ECompiledClause lls <$> (overExpression f =<< f e)
+      ECompiledField{} ->
+        error "TODO"
 
 instance ExpressionContext (Expression a t) (Choice Expression a t) where
   overExpression f =

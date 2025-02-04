@@ -1,7 +1,10 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Compiler.Transform.Pattern.OrExpansion where
+module Noll.Compiler.Transform.Pattern.OrExpansion (
+  OrPattern (..),
+  expandExpressionOrPatterns,
+) where
 
 import Data.Semigroup (sconcat)
 import Noll.Common.List1 (List1, NonEmpty (..))
@@ -11,7 +14,6 @@ import Noll.Language (
   Expression (..),
   Pattern (..),
  )
-import Noll.Utils (concatMapM)
 
 import qualified Noll.Common.List1 as List1
 
@@ -57,3 +59,13 @@ instance OrPattern (Pattern a t) where
         pure (List1.singleton p)
       p@PLiteral{} ->
         pure (List1.singleton p)
+      PRecord{} ->
+        error "TODO"
+      PListCons{} ->
+        error "TODO"
+      PListLiteral{} ->
+        error "TODO"
+      PShorthand{} ->
+        error "TODO"
+      PAtVariable{} ->
+        error "TODO"
