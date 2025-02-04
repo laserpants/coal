@@ -163,6 +163,8 @@ instance ExpressionContext (Expression a t) (Function Expression a t) where
 instance ExpressionContext (Expression a t) (Definition a k t) where
   overExpression h =
     \case
+      DAnnotation u d ->
+        DAnnotation u <$> overExpression h d
       DFunction name f ->
         DFunction name <$> overExpression h f
       DConstant name g ->
