@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Examples.Test07 (
-  test07,
+module Noll.Examples.Test08 (
+  test08,
   moduleOrdered,
   moduleBinarySearch,
   moduleMain,
@@ -364,9 +364,9 @@ moduleMain =
     []
     []
 
--- Translate or-patterns
-test07 :: [Module () Kind IndexedType]
-test07 =
+-- Compile match statements
+test08 :: [Module () Kind IndexedType]
+test08 =
   [ moduleOrdered
   , moduleBinarySearch
   , moduleMain

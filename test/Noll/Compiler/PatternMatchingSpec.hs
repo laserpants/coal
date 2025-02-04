@@ -27,7 +27,7 @@ spec =
     testCompilePatterns
 
 bork =
-  ( runMatchMonad
+  runMatchMonad
       "match"
       0
       ( compilePatterns
@@ -85,13 +85,12 @@ bork =
           ]
           MFail
       )
-  )
 
 testCompilePatterns :: Spec
 testCompilePatterns =
   describe "" $
     it "" $
-      ( runMatchMonad
+      runMatchMonad
           "match"
           0
           ( compilePatterns
@@ -149,7 +148,6 @@ testCompilePatterns =
               ]
               MFail
           )
-      )
         == ECompiledMatch
           ()
           ()
