@@ -56,7 +56,7 @@ instance TypeProxy (Type o k) where
   boolean =
     TIntrinsic IBool
 
-compileEnvelope :: (TypeProxy t, EnvelopeHost (Expression a) t, Monoid a, Eq t) => EnvelopeExpression (Expression a) t -> Expression a t
+compileEnvelope :: (TypeProxy t, Ord t, Monoid a) => EnvelopeExpression (Expression a) t -> Expression a t
 compileEnvelope =
   \case
     MFail ->
@@ -78,10 +78,10 @@ compileEnvelope =
         (compileEnvelope e2)
         (compileEnvelope e3)
 
-compileEnvelopeClause :: (TypeProxy t, EnvelopeHost (Expression a) t, Monoid a, Eq t) => EnvelopeClause (Expression a) t -> CompiledClause Expression a t
+compileEnvelopeClause :: (TypeProxy t, Ord t, Monoid a) => EnvelopeClause (Expression a) t -> CompiledClause Expression a t
 compileEnvelopeClause (EnvelopeClause l1 ls e) = ECompiledClause (l1 :| ls) (compileEnvelope e)
 
-clauseList :: (TypeProxy t, EnvelopeHost (Expression a) t, Monoid a, Eq t) => [EnvelopeClause (Expression a) t] -> List1 (CompiledClause Expression a t)
+clauseList :: (TypeProxy t, Ord t, Monoid a) => [EnvelopeClause (Expression a) t] -> List1 (CompiledClause Expression a t)
 clauseList ecs =
   case filter (not . fails) ecs of
     c : cs ->
