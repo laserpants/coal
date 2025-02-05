@@ -101,6 +101,7 @@ library
     , mtl
     , text
     , text-show
+    , uniplate
   default-language: Haskell2010
 
 executable noll-exe
@@ -122,6 +123,7 @@ executable noll-exe
     , noll
     , text
     , text-show
+    , uniplate
   default-language: Haskell2010
 
 test-suite noll-test
@@ -190,4 +192,5 @@ test-suite noll-test
     , noll
     , text
     , text-show
+    , uniplate
   default-language: Haskell2010

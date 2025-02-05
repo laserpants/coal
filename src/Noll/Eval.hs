@@ -75,7 +75,7 @@ runEval env a = runReader (evalMonad a) env
 evalVar :: Name -> Eval Value
 evalVar name = do
   env <- ask
-  case Map.lookup name (environmentDictionary env) of
+  case Map.lookup name (envDictionary env) of
     Nothing ->
       error ("Not in scope: " <> show name)
     Just v ->

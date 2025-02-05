@@ -16,7 +16,7 @@ import Prelude hiding (lookup)
 
 import qualified Data.Map.Strict as Map
 
-newtype Environment e = Environment {environmentDictionary :: Dictionary e}
+newtype Environment e = Environment {envDictionary :: Dictionary e}
   deriving
     ( Show
     , Eq
@@ -48,12 +48,12 @@ fromList = (`insertMultiple` new)
 
 {-# INLINE toList #-}
 toList :: Environment a -> [(Name, a)]
-toList = Map.toList . environmentDictionary
+toList = Map.toList . envDictionary
 
 {-# INLINE lookup #-}
 lookup :: Name -> Environment a -> Maybe a
-lookup name = Map.lookup name . environmentDictionary
+lookup name = Map.lookup name . envDictionary
 
 {-# INLINE elems #-}
 elems :: Environment a -> [a]
-elems = Map.elems . environmentDictionary
+elems = Map.elems . envDictionary
