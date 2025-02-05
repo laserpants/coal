@@ -54,7 +54,7 @@ instance PatternContext (Pattern a t) (Pattern a t) where
       POr a t p1 p2 ->
         POr a t
           <$> (overPattern f =<< f p1)
-          <*> (overPattern f =<< f p1)
+          <*> (overPattern f =<< f p2)
       p@PVariable{} ->
         pure p
       p@PAtVariable{} ->
@@ -62,6 +62,8 @@ instance PatternContext (Pattern a t) (Pattern a t) where
       PAny{} ->
         error "TODO"
       PLiteral{} ->
+        error "TODO"
+      PShorthand{} ->
         error "TODO"
 
 instance (PatternContext d p) => PatternContext d [p] where
