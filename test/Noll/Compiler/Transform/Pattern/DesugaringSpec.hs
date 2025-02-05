@@ -23,9 +23,9 @@ import Noll.Language (
 import Noll.Language.Module.Function (Function (..))
 import Test.Hspec (Spec, describe, it)
 
+import qualified Data.Map.Strict as Map
 import qualified Noll.Examples.Test05
 import qualified Noll.Examples.Test06
-import qualified Data.Map.Strict as Map
 
 spec :: Spec
 spec =
@@ -55,14 +55,14 @@ spec =
 fixture1 :: Expression () (Type TypeIndex ())
 fixture1 =
   ELet
-      ()
-      ( BPattern
-          ()
-          (PConstructor () (Label (TApplication () (TConstructor () "Option") (TIntrinsic IInt32 :| [])) "Some") [PVariable () (Label (TIntrinsic IInt32) "p")])
-          (EVariable () (Label (TApplication () (TConstructor () "Option") (TIntrinsic IInt32 :| [])) "x"))
-          :| []
-      )
-      (EVariable () (Label (TIntrinsic IInt32) "p"))
+    ()
+    ( BPattern
+        ()
+        (PConstructor () (Label (TApplication () (TConstructor () "Option") (TIntrinsic IInt32 :| [])) "Some") [PVariable () (Label (TIntrinsic IInt32) "p")])
+        (EVariable () (Label (TApplication () (TConstructor () "Option") (TIntrinsic IInt32 :| [])) "x"))
+        :| []
+    )
+    (EVariable () (Label (TIntrinsic IInt32) "p"))
 
 -- let
 --  $v.0 = x             Option(int32)
@@ -150,10 +150,10 @@ fixture4 =
 fixture5 :: Expression () (Type TypeIndex ())
 fixture5 =
   ERecursiveLet
-      ()
-      (PConstructor () (Label (TApplication () (TConstructor () "Option") (TIntrinsic IInt32 :| [])) "Some") [PVariable () (Label (TIntrinsic IInt32) "p")])
-      (EVariable () (Label (TApplication () (TConstructor () "Option") (TIntrinsic IInt32 :| [])) "x"))
-      (EVariable () (Label (TIntrinsic IInt32) "p"))
+    ()
+    (PConstructor () (Label (TApplication () (TConstructor () "Option") (TIntrinsic IInt32 :| [])) "Some") [PVariable () (Label (TIntrinsic IInt32) "p")])
+    (EVariable () (Label (TApplication () (TConstructor () "Option") (TIntrinsic IInt32 :| [])) "x"))
+    (EVariable () (Label (TIntrinsic IInt32) "p"))
 
 -- letrec
 --  $v.0 = x             Option(int32)
@@ -171,22 +171,22 @@ fixture6 =
     ()
     (PVariable () (Label (TApplication () (TConstructor () "Option") (TIntrinsic IInt32 :| [])) "$v.0"))
     (EVariable () (Label (TApplication () (TConstructor () "Option") (TIntrinsic IInt32 :| [])) "x"))
-      ( EMatch
-          ()
-          (TIntrinsic IInt32)
-          (EVariable () (Label (TApplication () (TConstructor () "Option") (TIntrinsic IInt32 :| [])) "$v.0"))
-          ( EClause
-              ()
-              (PConstructor () (Label (TApplication () (TConstructor () "Option") (TIntrinsic IInt32 :| [])) "Some") [PVariable () (Label (TIntrinsic IInt32) "p")])
-              ( CPlain
-                  ()
-                  []
-                  (EVariable () (Label (TIntrinsic IInt32) "p"))
-                  :| []
-              )
-              :| []
-          )
-      )
+    ( EMatch
+        ()
+        (TIntrinsic IInt32)
+        (EVariable () (Label (TApplication () (TConstructor () "Option") (TIntrinsic IInt32 :| [])) "$v.0"))
+        ( EClause
+            ()
+            (PConstructor () (Label (TApplication () (TConstructor () "Option") (TIntrinsic IInt32 :| [])) "Some") [PVariable () (Label (TIntrinsic IInt32) "p")])
+            ( CPlain
+                ()
+                []
+                (EVariable () (Label (TIntrinsic IInt32) "p"))
+                :| []
+            )
+            :| []
+        )
+    )
 
 --
 -- let

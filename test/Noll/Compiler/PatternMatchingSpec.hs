@@ -12,11 +12,11 @@ import Noll.Compiler.PatternMatching.Rule
 import Noll.Compiler.PatternMatchingSpec.TestRunner (compilePatterns)
 import Noll.Compiler.Transform.Pattern
 import Noll.Eval (Value (..), eval)
+import Noll.Examples.Test07 (test07)
+import Noll.Examples.Test08 (test08)
 import Noll.Label (Label (..))
 import Noll.Language (CompiledClause (..), Constant (..), Expression (..), Pattern (..), Primitive (..), Uses (..))
 import Test.Hspec (Spec, describe, it)
-import Noll.Examples.Test07 (test07)
-import Noll.Examples.Test08 (test08)
 
 import qualified Data.Map.Strict as Map
 import qualified Noll.Common.Environment as Environment
@@ -29,131 +29,134 @@ spec = do
     testCompilePatterns
   describe "" $ do
     it "" $ do
-      runMatchMonad "match" 0 
-        (compileMatchExprs test07) == test08
+      runMatchMonad
+        "match"
+        0
+        (compileMatchExprs test07)
+        == test08
 
 bork =
   runMatchMonad
-      "match"
-      0
-      ( compilePatterns
-          [Label () "u2", Label () "u3"]
-          [ patternEquation
-              [ MConstructor (Label () "Nil") []
-              , MVariable (Label () "ys")
-              ]
-              ( MExpression
-                  ( EApplication
-                      ()
-                      ()
-                      (EConstructor () (Label () "A"))
-                      (EVariable () (Label () "u1") <| EVariable () (Label () "ys") :| [])
-                  )
-              )
-          , patternEquation
-              [ MVariable (Label () "xs")
-              , MConstructor (Label () "Nil") []
-              ]
-              ( MExpression
-                  ( EApplication
-                      ()
-                      ()
-                      (EConstructor () (Label () "B"))
-                      (EVariable () (Label () "u1") <| EVariable () (Label () "xs") :| [])
-                  )
-              )
-          , patternEquation
-              [ MConstructor
-                  (Label () "Cons")
-                  [ MVariable (Label () "x")
-                  , MVariable (Label () "xs")
-                  ]
-              , MConstructor
-                  (Label () "Cons")
-                  [ MVariable (Label () "y")
-                  , MVariable (Label () "ys")
-                  ]
-              ]
-              ( MExpression
-                  ( EApplication
-                      ()
-                      ()
-                      (EConstructor () (Label () "C"))
-                      ( EVariable () (Label () "u1")
-                          <| EVariable () (Label () "x")
-                          <| EVariable () (Label () "xs")
-                          <| EVariable () (Label () "y")
-                          <| EVariable () (Label () "ys")
-                          :| []
-                      )
-                  )
-              )
-          ]
-          MFail
-      )
+    "match"
+    0
+    ( compilePatterns
+        [Label () "u2", Label () "u3"]
+        [ patternEquation
+            [ MConstructor (Label () "Nil") []
+            , MVariable (Label () "ys")
+            ]
+            ( MExpression
+                ( EApplication
+                    ()
+                    ()
+                    (EConstructor () (Label () "A"))
+                    (EVariable () (Label () "u1") <| EVariable () (Label () "ys") :| [])
+                )
+            )
+        , patternEquation
+            [ MVariable (Label () "xs")
+            , MConstructor (Label () "Nil") []
+            ]
+            ( MExpression
+                ( EApplication
+                    ()
+                    ()
+                    (EConstructor () (Label () "B"))
+                    (EVariable () (Label () "u1") <| EVariable () (Label () "xs") :| [])
+                )
+            )
+        , patternEquation
+            [ MConstructor
+                (Label () "Cons")
+                [ MVariable (Label () "x")
+                , MVariable (Label () "xs")
+                ]
+            , MConstructor
+                (Label () "Cons")
+                [ MVariable (Label () "y")
+                , MVariable (Label () "ys")
+                ]
+            ]
+            ( MExpression
+                ( EApplication
+                    ()
+                    ()
+                    (EConstructor () (Label () "C"))
+                    ( EVariable () (Label () "u1")
+                        <| EVariable () (Label () "x")
+                        <| EVariable () (Label () "xs")
+                        <| EVariable () (Label () "y")
+                        <| EVariable () (Label () "ys")
+                        :| []
+                    )
+                )
+            )
+        ]
+        MFail
+    )
 
 testCompilePatterns :: Spec
 testCompilePatterns =
   describe "" $
     it "" $
       runMatchMonad
-          "match"
-          0
-          ( compilePatterns
-              [Label () "u2", Label () "u3"]
-              [ patternEquation
-                  [ MConstructor (Label () "Nil") []
-                  , MVariable (Label () "ys")
-                  ]
-                  ( MExpression
-                      ( EApplication
-                          ()
-                          ()
-                          (EConstructor () (Label () "A"))
-                          (EVariable () (Label () "u1") <| EVariable () (Label () "ys") :| [])
-                      )
-                  )
-              , patternEquation
-                  [ MVariable (Label () "xs")
-                  , MConstructor (Label () "Nil") []
-                  ]
-                  ( MExpression
-                      ( EApplication
-                          ()
-                          ()
-                          (EConstructor () (Label () "B"))
-                          (EVariable () (Label () "u1") <| EVariable () (Label () "xs") :| [])
-                      )
-                  )
-              , patternEquation
-                  [ MConstructor
-                      (Label () "Cons")
-                      [ MVariable (Label () "x")
-                      , MVariable (Label () "xs")
-                      ]
-                  , MConstructor
-                      (Label () "Cons")
-                      [ MVariable (Label () "y")
-                      , MVariable (Label () "ys")
-                      ]
-                  ]
-                  ( MExpression
-                      ( EApplication
-                          ()
-                          ()
-                          (EConstructor () (Label () "C"))
-                          ( EVariable () (Label () "u1")
-                              <| EVariable () (Label () "x")
-                              <| EVariable () (Label () "xs")
-                              <| EVariable () (Label () "y")
-                              <| EVariable () (Label () "ys")
-                              :| []
-                          )
-                      )
-                  )
-              ]
-              MFail
-          )
+        "match"
+        0
+        ( compilePatterns
+            [Label () "u2", Label () "u3"]
+            [ patternEquation
+                [ MConstructor (Label () "Nil") []
+                , MVariable (Label () "ys")
+                ]
+                ( MExpression
+                    ( EApplication
+                        ()
+                        ()
+                        (EConstructor () (Label () "A"))
+                        (EVariable () (Label () "u1") <| EVariable () (Label () "ys") :| [])
+                    )
+                )
+            , patternEquation
+                [ MVariable (Label () "xs")
+                , MConstructor (Label () "Nil") []
+                ]
+                ( MExpression
+                    ( EApplication
+                        ()
+                        ()
+                        (EConstructor () (Label () "B"))
+                        (EVariable () (Label () "u1") <| EVariable () (Label () "xs") :| [])
+                    )
+                )
+            , patternEquation
+                [ MConstructor
+                    (Label () "Cons")
+                    [ MVariable (Label () "x")
+                    , MVariable (Label () "xs")
+                    ]
+                , MConstructor
+                    (Label () "Cons")
+                    [ MVariable (Label () "y")
+                    , MVariable (Label () "ys")
+                    ]
+                ]
+                ( MExpression
+                    ( EApplication
+                        ()
+                        ()
+                        (EConstructor () (Label () "C"))
+                        ( EVariable () (Label () "u1")
+                            <| EVariable () (Label () "x")
+                            <| EVariable () (Label () "xs")
+                            <| EVariable () (Label () "y")
+                            <| EVariable () (Label () "ys")
+                            :| []
+                        )
+                    )
+                )
+            ]
+            MFail
+        )
         == ECompiledMatch
           ()
           ()
