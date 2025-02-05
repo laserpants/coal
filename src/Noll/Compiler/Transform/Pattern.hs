@@ -3,9 +3,9 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 
 module Noll.Compiler.Transform.Pattern (
+  PatternContext (..),
   mapOverPattern,
   mapMOverPattern,
-  overPattern,
 ) where
 
 import Control.Monad.Identity (runIdentity)
