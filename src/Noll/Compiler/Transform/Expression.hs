@@ -17,6 +17,7 @@ import Noll.Language (
   Binding (..),
   Choice (..),
   Clause (..),
+  Module (..),
   CompiledClause (..),
   Expression (..),
   Guard (..),
@@ -172,3 +173,9 @@ instance ExpressionContext (Expression a t) (Definition a k t) where
         DConstant name <$> overExpression h g
       d ->
         pure d
+
+instance ExpressionContext (Expression a t) (Module a k t) where
+  overExpression h =
+    \case
+      Module path ns ds ->
+        Module path ns <$> traverse (overExpression h) ds

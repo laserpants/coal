@@ -28,10 +28,9 @@ spec = do
       fromList1 (runIdentity (expandOrPatterns fixture2)) == fixture3
     it "" $
       fromList1 (runIdentity (expandOrPatterns fixture4)) == fixture5
-
---  describe "expandOrPatterns" $ do
---    it "" $
---      1 == 2
+  describe "expandOrPatterns" $ do
+    it "" $
+      1 == 2
 
 fixture :: Pattern () ()
 fixture =

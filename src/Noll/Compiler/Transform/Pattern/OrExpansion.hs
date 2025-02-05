@@ -8,14 +8,36 @@ module Noll.Compiler.Transform.Pattern.OrExpansion (
 
 import Data.Semigroup (sconcat)
 import Noll.Common.List1 (List1, NonEmpty (..))
-import Noll.Compiler.Transform.Expression (mapMOverExpression)
+import Noll.Compiler.Transform.Expression (overExpression, mapMOverExpression)
 import Noll.Language (
   Clause (..),
+  Module (..),
   Expression (..),
+  Definition (..),
   Pattern (..),
+  Function (..),
+  Type (..),
  )
 
 import qualified Noll.Common.List1 as List1
+
+--baz :: (Monad m) => Module a k t -> m (Module a k t) 
+--baz = 
+
+baz :: (Monad m) => Definition a k t -> m (Definition a k t) 
+baz = 
+  \case
+      DAnnotation u d ->
+        DAnnotation u <$> baz d
+      DFunction name f ->
+        undefined -- DFunction name <$> foo f
+      DConstant name g ->
+        undefined
+      d ->
+        pure d
+
+--foo :: (Monad m) => Function e a t -> m (Function e a t) 
+--foo = overExpression expandExpressionOrPatterns
 
 expandExpressionOrPatterns :: (Monad m) => Expression a t -> m (Expression a t)
 expandExpressionOrPatterns = mapMOverExpression go
