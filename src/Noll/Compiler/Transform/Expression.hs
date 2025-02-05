@@ -17,10 +17,10 @@ import Noll.Language (
   Binding (..),
   Choice (..),
   Clause (..),
-  Module (..),
   CompiledClause (..),
   Expression (..),
   Guard (..),
+  Module (..),
  )
 import Noll.Language.Module.Constant (Constant (..))
 import Noll.Language.Module.Definition (Definition (..))
