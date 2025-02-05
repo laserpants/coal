@@ -6,6 +6,7 @@ module Noll.Compiler.Transform.Pattern.OrExpansion (
   expandExpressionOrPatterns,
 ) where
 
+import Control.Monad ((>=>))
 import Data.Semigroup (sconcat)
 import Noll.Common.List1 (List1, NonEmpty (..))
 import Noll.Compiler.Transform.Expression (mapMOverExpression)
@@ -18,8 +19,9 @@ import Noll.Language (
 import qualified Noll.Common.List1 as List1
 
 expandExpressionOrPatterns :: (Monad m) => Expression a t -> m (Expression a t)
-expandExpressionOrPatterns =
-  mapMOverExpression $
+expandExpressionOrPatterns = go >=> mapMOverExpression go
+ where
+  go =
     \case
       EMatch a t e cs -> do
         cs1 <- sconcat <$> traverse expandOrPatterns cs
