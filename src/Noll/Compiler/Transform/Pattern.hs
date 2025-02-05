@@ -61,6 +61,8 @@ instance PatternContext (Pattern a t) (Pattern a t) where
         pure p
       PAny{} ->
         error "TODO"
+      PLiteral{} ->
+        error "TODO"
 
 instance (PatternContext d p) => PatternContext d [p] where
   overPattern = traverse . overPattern
