@@ -126,3 +126,19 @@ translatePattern =
       MConstructor ll (translatePattern <$> ps)
     p@(PLiteral a prim) ->
       MLiteral (patternType p) (ELiteral a prim)
+    PAnnotation{} ->
+      error "TODO"
+    PAny{} ->
+      error "TODO"
+    PRecord{} ->
+      error "TODO"
+    PListCons{} ->
+      error "TODO"
+    PListLiteral{} ->
+      error "TODO"
+    POr{} ->
+      error "TODO"
+    PShorthand{} ->
+      error "TODO"
+    PAtVariable{} ->
+      error "TODO"

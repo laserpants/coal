@@ -98,12 +98,12 @@ moduleOrdered =
                         )
                         ( EClause
                             ()
-                            ( POr
-                                ()
-                                (TConstructor KType "Ordering")
-                                (PConstructor () (Label (TConstructor KType "Ordering") "LessThan") [])
-                                (PConstructor () (Label (TConstructor KType "Ordering") "EqualTo") [])
-                            )
+                            (PConstructor () (Label (TConstructor KType "Ordering") "LessThan") [])
+                            (CPlain () [] (ELiteral () (LBool True)) :| [])
+                            <|
+                          EClause
+                            ()
+                            (PConstructor () (Label (TConstructor KType "Ordering") "EqualTo") [])
                             (CPlain () [] (ELiteral () (LBool True)) :| [])
                             <| EClause
                               ()

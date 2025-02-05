@@ -4,9 +4,9 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 
 module Noll.Compiler.Transform.Expression (
+  ExpressionContext (..),
   mapOverExpression,
   mapMOverExpression,
-  overExpression,
 ) where
 
 import Control.Monad.Identity (runIdentity)

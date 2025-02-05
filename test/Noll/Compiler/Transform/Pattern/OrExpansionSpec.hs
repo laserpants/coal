@@ -2,6 +2,8 @@
 
 module Noll.Compiler.Transform.Pattern.OrExpansionSpec where
 
+import Noll.Examples.Test06 (test06)
+import Noll.Examples.Test07 (test07)
 import Control.Monad.Identity (runIdentity)
 import Noll.Common.List1 (NonEmpty (..), fromList1)
 import Noll.Compiler.Transform.Pattern.OrExpansion
@@ -26,6 +28,9 @@ spec = do
       fromList1 (runIdentity (expandOrPatterns fixture2)) == fixture3
     it "" $
       fromList1 (runIdentity (expandOrPatterns fixture4)) == fixture5
+  describe "expandOrPatterns" $ do
+    it "" $
+      1 == 2
 
 fixture :: Pattern () ()
 fixture =

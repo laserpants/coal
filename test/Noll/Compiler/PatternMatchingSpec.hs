@@ -15,16 +15,22 @@ import Noll.Eval (Value (..), eval)
 import Noll.Label (Label (..))
 import Noll.Language (CompiledClause (..), Constant (..), Expression (..), Pattern (..), Primitive (..), Uses (..))
 import Test.Hspec (Spec, describe, it)
+import Noll.Examples.Test07 (test07)
+import Noll.Examples.Test08 (test08)
 
 import qualified Data.Map.Strict as Map
 import qualified Noll.Common.Environment as Environment
 
 spec :: Spec
-spec =
+spec = do
   describe "" $ do
     testGroupByConstructor
     testCompileEnvelopeExpression
     testCompilePatterns
+  describe "" $ do
+    it "" $ do
+      runMatchMonad "match" 0 
+        (compileMatchExprs test07) == test08
 
 bork =
   runMatchMonad
