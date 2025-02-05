@@ -6,7 +6,6 @@ module Noll.Compiler.Transform.Pattern.OrExpansion (
   expandExpressionOrPatterns,
 ) where
 
-import Control.Monad ((>=>))
 import Data.Semigroup (sconcat)
 import Noll.Common.List1 (List1, NonEmpty (..))
 import Noll.Compiler.Transform.Expression (mapMOverExpression)

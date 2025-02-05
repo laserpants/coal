@@ -10,7 +10,6 @@ module Noll.Compiler.Transform.Pattern.Desugaring (
   runPatternDesugaring,
 ) where
 
-import Control.Monad ((>=>))
 import Control.Monad.Reader (MonadReader, ReaderT, runReaderT)
 import Control.Monad.State (MonadState, State, evalState)
 import Control.Monad.Writer (MonadWriter, WriterT, runWriterT, tell)

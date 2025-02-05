@@ -11,7 +11,6 @@ module Noll.Compiler.Transform.Fold (
   expandFoldExpr,
 ) where
 
-import Control.Monad ((>=>))
 import Control.Monad.Reader (MonadReader, ReaderT, runReaderT)
 import Control.Monad.State (MonadState, State, evalState)
 import Control.Monad.Writer (execWriter, tell)
@@ -143,7 +142,7 @@ instance (CompileFoldsContext a) => CompileFoldsContext (Dictionary a) where
   compileFolds = traverse compileFolds
 
 instance (Monoid a) => CompileFoldsContext (Expression a ()) where
-  compileFolds = go >=> mapMOverExpression go
+  compileFolds = mapMOverExpression go
    where
     go =
       \case
