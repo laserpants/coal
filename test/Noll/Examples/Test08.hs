@@ -13,6 +13,7 @@ import Noll.Language (
   BinaryOperator (..),
   Choice (..),
   Clause (..),
+  CompiledClause (..),
   Constant (..),
   Definition (..),
   Expression (..),
@@ -78,36 +79,27 @@ moduleOrdered =
                         <| PVariable () (Label tvar0 "n")
                         :| []
                     )
-                    ( EMatch
+                    ( ECompiledMatch
                         ()
                         (TIntrinsic IBool)
                         ( EApplication
                             ()
                             (TConstructor KType "Ordering")
-                            ( EVariable
-                                ()
-                                ( Label
-                                    (tvar0 `TArrow` tvar0 `TArrow` TConstructor KType "Ordering")
-                                    "compare"
-                                )
-                            )
-                            ( EVariable () (Label (TVariable (TypeIndex KType 0)) "m")
-                                <| EVariable () (Label (TVariable (TypeIndex KType 0)) "n")
+                            (EVariable () (Label (tvar0 `TArrow` tvar0 `TArrow` TConstructor KType "Ordering") "compare"))
+                            ( EVariable () (Label tvar0 "m")
+                                <| EVariable () (Label tvar0 "n")
                                 :| []
                             )
                         )
-                        ( EClause
-                            ()
-                            (PConstructor () (Label (TConstructor KType "Ordering") "LessThan") [])
-                            (CPlain () [] (ELiteral () (LBool True)) :| [])
-                            <| EClause
-                              ()
-                              (PConstructor () (Label (TConstructor KType "Ordering") "EqualTo") [])
-                              (CPlain () [] (ELiteral () (LBool True)) :| [])
-                            <| EClause
-                              ()
-                              (PConstructor () (Label (TConstructor KType "Ordering") "GreaterThan") [])
-                              (CPlain () [] (ELiteral () (LBool False)) :| [])
+                        ( ECompiledClause
+                            (Label (TConstructor KType "Ordering") "EqualTo" :| [])
+                            (ELiteral () (LBool True))
+                            <| ECompiledClause
+                              (Label (TConstructor KType "Ordering") "GreaterThan" :| [])
+                              (ELiteral () (LBool False))
+                            <| ECompiledClause
+                              (Label (TConstructor KType "Ordering") "LessThan" :| [])
+                              (ELiteral () (LBool True))
                             :| []
                         )
                     )
@@ -278,56 +270,47 @@ moduleBinarySearch =
                                         (Label tree0 "$fold.1.expr")
                                         :| []
                                     )
-                                    ( EMatch
+                                    ( ECompiledMatch
                                         ()
                                         list0
                                         (EVariable () (Label tree0 "$fold.1.expr"))
-                                        ( EClause
-                                            ()
-                                            ( PConstructor
-                                                ()
-                                                (Label tree0 "Node")
-                                                [ PVariable () (Label tvar0 "y")
-                                                , PVariable () (Label tree0 "lhs")
-                                                , PVariable () (Label tree0 "rhs")
-                                                ]
-                                            )
-                                            ( CPlain
-                                                ()
-                                                []
-                                                ( EApplication
-                                                    ()
-                                                    list0
-                                                    ( EBinaryOperator
-                                                        ()
-                                                        ( list0 `TArrow` list0 `TArrow` list0
-                                                        , OListConcatenation
-                                                        )
-                                                    )
-                                                    ( EApplication
+                                        ( ECompiledClause
+                                            (Label tree0 "Leaf" :| [])
+                                            (EListLiteral () list0 [])
+                                            <| ECompiledClause
+                                              ( Label tree0 "Node"
+                                                  <| Label tvar0 "$match.2.y"
+                                                  <| Label tree0 "$match.3.lhs"
+                                                  <| Label tree0 "$match.4.rhs"
+                                                  :| []
+                                              )
+                                              ( EApplication
+                                                  ()
+                                                  list0
+                                                  ( EBinaryOperator
+                                                      ()
+                                                      ( list0 `TArrow` list0 `TArrow` list0
+                                                      , OListConcatenation
+                                                      )
+                                                  )
+                                                  ( EApplication
+                                                      ()
+                                                      list0
+                                                      (EVariable () (Label (tree0 `TArrow` list0) "$fold.1"))
+                                                      (EVariable () (Label tree0 "$match.3.lhs") :| [])
+                                                      <| EListCons
                                                         ()
                                                         list0
-                                                        (EVariable () (Label (tree0 `TArrow` list0) "$fold.1"))
-                                                        (EVariable () (Label tree0 "lhs") :| [])
-                                                        <| EListCons
-                                                          ()
-                                                          list0
-                                                          (EVariable () (Label tvar0 "y"))
-                                                          ( EApplication
-                                                              ()
-                                                              list0
-                                                              (EVariable () (Label (tree0 `TArrow` list0) "$fold.1"))
-                                                              (EVariable () (Label tree0 "rhs") :| [])
-                                                          )
-                                                        :| []
-                                                    )
-                                                )
-                                                :| []
-                                            )
-                                            <| EClause
-                                              ()
-                                              (PConstructor () (Label tree0 "Leaf") [])
-                                              (CPlain () [] (EListLiteral () list0 []) :| [])
+                                                        (EVariable () (Label tvar0 "$match.2.y"))
+                                                        ( EApplication
+                                                            ()
+                                                            list0
+                                                            (EVariable () (Label (tree0 `TArrow` list0) "$fold.1"))
+                                                            (EVariable () (Label tree0 "$match.4.rhs") :| [])
+                                                        )
+                                                      :| []
+                                                  )
+                                              )
                                             :| []
                                         )
                                     )

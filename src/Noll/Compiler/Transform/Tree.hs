@@ -32,8 +32,8 @@ instance TreeTransform (Binding Expression) t where
     \case
       BPattern a p e ->
         BPattern a p <$> transform name f e
-      BFunction a name ps e ->
-        BFunction a name ps <$> transform name f e
+      BFunction a n ps e ->
+        BFunction a name ps <$> transform n f e -- TODO
 
 instance TreeTransform (Guard Expression) t where
   transform name f =
@@ -90,7 +90,7 @@ instance TreeTransform Expression t where
                   else pure e1
               )
       expr@(ERecursiveLet a p e1 e2) ->
-        if (name `isNotBoundIn` p)
+        if name `isNotBoundIn` p
           then
             ERecursiveLet a p
               <$> transform name f e1
@@ -133,6 +133,8 @@ instance TreeTransform Expression t where
         pure expr
       expr@EBinaryOperator{} ->
         pure expr
+      EListLiteral a t es ->
+        EListLiteral a t <$> traverse (transform name f) es
 
 replace :: (Ord t) => Name -> (a -> t -> Expression a t) -> Expression a t -> Expression a t
 replace name f = runIdentity . transform name (pure <$$> f)
