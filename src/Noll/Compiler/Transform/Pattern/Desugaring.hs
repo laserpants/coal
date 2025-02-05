@@ -10,6 +10,7 @@ module Noll.Compiler.Transform.Pattern.Desugaring (
   runPatternDesugaring,
 ) where
 
+import Control.Monad ((>=>))
 import Control.Monad.Reader (MonadReader, ReaderT, runReaderT)
 import Control.Monad.State (MonadState, State, evalState)
 import Control.Monad.Writer (MonadWriter, WriterT, runWriterT, tell)
@@ -74,8 +75,9 @@ instance (Monoid c) => Sugared c o k (Binding Expression c (Type o k)) where
         BFunction a name <$> traverse desugarPatterns ps <*> desugarPatterns e
 
 instance (Monoid c) => Sugared c o k (Expression c (Type o k)) where
-  desugarPatterns =
-    mapMOverExpression $
+  desugarPatterns = go >=> mapMOverExpression go
+   where
+    go =
       \case
         ELet a gs e1 -> do
           d1 <- desugarPatterns e1

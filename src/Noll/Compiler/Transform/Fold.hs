@@ -11,6 +11,7 @@ module Noll.Compiler.Transform.Fold (
   expandFoldExpr,
 ) where
 
+import Control.Monad ((>=>))
 import Control.Monad.Reader (MonadReader, ReaderT, runReaderT)
 import Control.Monad.State (MonadState, State, evalState)
 import Control.Monad.Writer (execWriter, tell)
@@ -93,16 +94,15 @@ eliminateAtPatterns =
       p
 
 atLabels :: Pattern a t -> [Label t]
-atLabels =
-  execWriter
-    . mapMOverPattern
-      ( \case
-          p@(PAtVariable _ label) -> do
-            tell [label]
-            pure p
-          p ->
-            pure p
-      )
+atLabels = execWriter . (go >=> mapMOverPattern go)
+ where
+  go =
+    \case
+      p@(PAtVariable _ label) -> do
+        tell [label]
+        pure p
+      p ->
+        pure p
 
 expandFoldExpr :: (Monoid a, MonadState Int m, MonadReader Name m) => List1 (Expression a ()) -> List1 (Clause Expression a ()) -> m (Expression a ())
 expandFoldExpr args clauses = do
@@ -143,8 +143,9 @@ instance (CompileFoldsContext a) => CompileFoldsContext (Dictionary a) where
   compileFolds = traverse compileFolds
 
 instance (Monoid a) => CompileFoldsContext (Expression a ()) where
-  compileFolds =
-    mapMOverExpression $
+  compileFolds = go >=> mapMOverExpression go
+   where
+    go =
       \case
         EFold a t es cs Nothing -> do
           e1 <- expandFoldExpr es cs
