@@ -101,6 +101,8 @@ instance PatternContext (Pattern a t) (CompiledClause Expression a t) where
     \case
       ECompiledClause lls e -> do
         ECompiledClause lls <$> overPattern f e
+      ECompiledField{} ->
+        error "TODO"
 
 instance PatternContext (Pattern a t) (Choice Expression a t) where
   overPattern f =
