@@ -19,7 +19,7 @@ import Noll.Language (
 import qualified Noll.Common.List1 as List1
 
 expandExpressionOrPatterns :: (Monad m) => Expression a t -> m (Expression a t)
-expandExpressionOrPatterns = go >=> mapMOverExpression go
+expandExpressionOrPatterns = mapMOverExpression go
  where
   go =
     \case

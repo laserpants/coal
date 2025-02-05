@@ -8,6 +8,7 @@ module Noll.Compiler.Transform.Pattern (
   mapMOverPattern,
 ) where
 
+import Control.Monad ((>=>))
 import Control.Monad.Identity (runIdentity)
 import Data.Map.Strict (Map)
 import Noll.Common.List1 (NonEmpty)
@@ -26,10 +27,10 @@ import Noll.Language.Module.Function (Function (..))
 import Noll.Utils (Over)
 
 mapOverPattern :: (PatternContext p p) => Over p p
-mapOverPattern f = runIdentity . overPattern (pure . f)
+mapOverPattern f = runIdentity . mapMOverPattern (pure . f)
 
 mapMOverPattern :: (Monad m, PatternContext p p) => (p -> m p) -> p -> m p
-mapMOverPattern = overPattern
+mapMOverPattern f = f >=> overPattern f
 
 class PatternContext o p where
   overPattern :: (Monad m) => (o -> m o) -> p -> m p

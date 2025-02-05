@@ -9,6 +9,7 @@ module Noll.Compiler.Transform.Expression (
   mapMOverExpression,
 ) where
 
+import Control.Monad ((>=>))
 import Control.Monad.Identity (runIdentity)
 import Data.Map.Strict (Map)
 import Noll.Common.List1 (NonEmpty)
@@ -26,10 +27,10 @@ import Noll.Language.Module.Function (Function (..))
 import Noll.Utils (Over)
 
 mapOverExpression :: (ExpressionContext e e) => Over e e
-mapOverExpression f = runIdentity . overExpression (pure . f)
+mapOverExpression f = runIdentity . mapMOverExpression (pure . f)
 
 mapMOverExpression :: (Monad m, ExpressionContext e e) => (e -> m e) -> e -> m e
-mapMOverExpression = overExpression
+mapMOverExpression f = f >=> overExpression f
 
 class ExpressionContext o e where
   overExpression :: (Monad m) => (o -> m o) -> e -> m e

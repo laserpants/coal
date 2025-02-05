@@ -94,7 +94,7 @@ eliminateAtPatterns =
       p
 
 atLabels :: Pattern a t -> [Label t]
-atLabels = execWriter . (go >=> mapMOverPattern go)
+atLabels = execWriter . mapMOverPattern go
  where
   go =
     \case

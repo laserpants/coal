@@ -75,7 +75,7 @@ instance (Monoid c) => Sugared c o k (Binding Expression c (Type o k)) where
         BFunction a name <$> traverse desugarPatterns ps <*> desugarPatterns e
 
 instance (Monoid c) => Sugared c o k (Expression c (Type o k)) where
-  desugarPatterns = go >=> mapMOverExpression go
+  desugarPatterns = mapMOverExpression go
    where
     go =
       \case
