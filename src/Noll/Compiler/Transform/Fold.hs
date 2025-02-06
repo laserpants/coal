@@ -3,8 +3,8 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE StrictData #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE StrictData #-}
 
 module Noll.Compiler.Transform.Fold (
   CompileFoldsContext (..),
@@ -12,15 +12,14 @@ module Noll.Compiler.Transform.Fold (
   expandFoldExpr,
 ) where
 
-import Data.Data (Data)
-import Data.Generics.Uniplate.Data (transform, transformM)
 import Control.Monad.Reader (MonadReader, ReaderT, runReaderT)
 import Control.Monad.State (MonadState, State, evalState)
 import Control.Monad.Writer (execWriter, tell)
+import Data.Data (Data)
+import Data.Generics.Uniplate.Data (transform, transformM)
 import Noll.Common.List1 (List1, NonEmpty (..))
 import Noll.Common.Supply (suppliedName)
 import Noll.Compiler.Transform (flattenApplication)
-import Noll.Compiler.Transform.Pattern (mapMOverPattern, mapOverPattern)
 import Noll.Compiler.Transform.Tree (replace)
 import Noll.Label (Label (..), labelName)
 import Noll.Language (
@@ -56,13 +55,13 @@ instance (FoldContext e) => FoldContext [e] where
 instance (FoldContext e) => FoldContext (NonEmpty e) where
   expandFolds name = fmap . expandFolds name
 
-instance (Monoid a) => FoldContext (Clause Expression a ()) where
+instance (Monoid a, Data a) => FoldContext (Clause Expression a ()) where
   expandFolds name _ =
     \case
       EClause a p cs ->
         EClause
           a
-          (mapOverPattern eliminateAtPatterns p)
+          (transform eliminateAtPatterns p)
           (expandFolds name (atLabels p) cs)
 
 instance (Monoid a) => FoldContext (Choice Expression a ()) where
@@ -94,8 +93,8 @@ eliminateAtPatterns =
     p ->
       p
 
-atLabels :: Pattern a t -> [Label t]
-atLabels = execWriter . mapMOverPattern go
+atLabels :: (Data a, Data t) => Pattern a t -> [Label t]
+atLabels = execWriter . transformM go
  where
   go =
     \case
