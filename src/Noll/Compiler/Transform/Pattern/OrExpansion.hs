@@ -58,8 +58,9 @@ instance OrPattern (Pattern a t) where
       PConstructor a ll ps -> do
         qs1 :| qss <- sequence <$> traverse expandOrPatterns ps
         pure (PConstructor a ll qs1 :| [PConstructor a ll qs | qs <- qss])
-      PListLiteral a t ps ->
-        error "TODO"
+      PListLiteral a t ps -> do
+        qs1 :| qss <- sequence <$> traverse expandOrPatterns ps
+        pure (PListLiteral a t qs1 :| [PListLiteral a t qs | qs <- qss])
       PListCons{} ->
         error "TODO"
       PRecord{} ->
