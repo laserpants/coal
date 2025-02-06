@@ -30,7 +30,7 @@ spec = do
       fromList1 (runIdentity (expandOrPatterns fixture4)) == fixture5
   describe "expandOrPatterns" $ do
     it "" $
-      runIdentity (traverse baz2 test06) == test07
+      runIdentity (traverse compileOrPatterns test06) == test07
 
 fixture :: Pattern () ()
 fixture =

@@ -43,7 +43,7 @@ spec =
     it "" $ do
       testResultExpression (baz fixture) == fixture1
     it "" $ do
-      testResultExpression (baz2 Test03.moduleOrdered) == Test04.moduleOrdered
+      testResultExpression (compileOrPatterns Test03.moduleOrdered) == Test04.moduleOrdered
     it "" $ do
       testResultExpression (baz3 Test03.moduleBinarySearch) == Test04.moduleBinarySearch
 
@@ -106,8 +106,8 @@ baz3 =
     )
     []
 
-baz2 :: (Show a, Eq a) => Module a Kind t -> TestResult (Module a Kind (Type TypeIndex Kind)) a
-baz2 =
+compileOrPatterns :: (Show a, Eq a) => Module a Kind t -> TestResult (Module a Kind (Type TypeIndex Kind)) a
+compileOrPatterns =
   runTypedModuleTest
     ( CompilerEnvironment
         ( Environment.fromList

@@ -3,11 +3,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Compiler.Transform.Pattern.OrExpansion (
-  OrPattern (..),
-  expandExpressionOrPatterns,
-  baz2,
-) where
+module Noll.Compiler.Transform.Pattern.OrExpansion (OrPattern (..), compileOrPatterns) where
 
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformBiM)
@@ -22,8 +18,8 @@ import Noll.Language (
 
 import qualified Noll.Common.List1 as List1
 
-baz2 :: forall m a k t. (Monad m, Data a, Data k, Ord k, Data t) => Module a k t -> m (Module a k t)
-baz2 = transformBiM (expandExpressionOrPatterns :: Expression a t -> m (Expression a t))
+compileOrPatterns :: forall m a k t. (Monad m, Data a, Data k, Ord k, Data t) => Module a k t -> m (Module a k t)
+compileOrPatterns = transformBiM (expandExpressionOrPatterns :: Expression a t -> m (Expression a t))
 
 expandExpressionOrPatterns :: (Monad m) => Expression a t -> m (Expression a t)
 expandExpressionOrPatterns =
