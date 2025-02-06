@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE StrictData #-}
 
 module Noll.Language.Constructor (Constructor (..)) where
@@ -13,4 +14,4 @@ data Constructor o k t = Constructor
   , constructorArity :: Int
   , constructorScheme :: Scheme o k t
   }
-  deriving (Show, Eq, Ord, Read, Data, Typeable)
+  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
