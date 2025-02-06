@@ -4,6 +4,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 module Noll.Compiler.Transform.Fold (
   CompileFoldsContext (..),
@@ -11,13 +12,14 @@ module Noll.Compiler.Transform.Fold (
   expandFoldExpr,
 ) where
 
+import Data.Data (Data)
+import Data.Generics.Uniplate.Data (transform, transformM)
 import Control.Monad.Reader (MonadReader, ReaderT, runReaderT)
 import Control.Monad.State (MonadState, State, evalState)
 import Control.Monad.Writer (execWriter, tell)
 import Noll.Common.List1 (List1, NonEmpty (..))
 import Noll.Common.Supply (suppliedName)
 import Noll.Compiler.Transform (flattenApplication)
-import Noll.Compiler.Transform.Expression (mapMOverExpression, mapOverExpression)
 import Noll.Compiler.Transform.Pattern (mapMOverPattern, mapOverPattern)
 import Noll.Compiler.Transform.Tree (replace)
 import Noll.Label (Label (..), labelName)
@@ -103,12 +105,12 @@ atLabels = execWriter . mapMOverPattern go
       p ->
         pure p
 
-expandFoldExpr :: (Monoid a, MonadState Int m, MonadReader Name m) => List1 (Expression a ()) -> List1 (Clause Expression a ()) -> m (Expression a ())
+expandFoldExpr :: forall m a. (Monoid a, Data a, MonadState Int m, MonadReader Name m) => List1 (Expression a ()) -> List1 (Clause Expression a ()) -> m (Expression a ())
 expandFoldExpr args clauses = do
   name <- suppliedName
   let var = name <> ".expr"
   pure $
-    mapOverExpression flattenApplication $
+    transform flattenApplication $
       ERecursiveLet
         mempty
         (PVariable mempty (Label () name))
@@ -141,8 +143,8 @@ instance (CompileFoldsContext a) => CompileFoldsContext (NonEmpty a) where
 instance (CompileFoldsContext a) => CompileFoldsContext (Dictionary a) where
   compileFolds = traverse compileFolds
 
-instance (Monoid a) => CompileFoldsContext (Expression a ()) where
-  compileFolds = mapMOverExpression go
+instance (Monoid a, Data a) => CompileFoldsContext (Expression a ()) where
+  compileFolds = transformM go
    where
     go =
       \case
@@ -152,25 +154,25 @@ instance (Monoid a) => CompileFoldsContext (Expression a ()) where
         e ->
           pure e
 
-instance (Monoid a) => CompileFoldsContext (Module a k ()) where
+instance (Monoid a, Data a) => CompileFoldsContext (Module a k ()) where
   compileFolds =
     \case
       Module p ns o ->
         Module p ns <$> compileFolds o
 
-instance (Monoid a) => CompileFoldsContext (Function Expression a ()) where
+instance (Monoid a, Data a) => CompileFoldsContext (Function Expression a ()) where
   compileFolds =
     \case
       Function a u ps e ->
         Function a u ps <$> compileFolds e
 
-instance (Monoid a) => CompileFoldsContext (Constant Expression a ()) where
+instance (Monoid a, Data a) => CompileFoldsContext (Constant Expression a ()) where
   compileFolds =
     \case
       Constant a u e ->
         Constant a u <$> compileFolds e
 
-instance (Monoid a) => CompileFoldsContext (Definition a k ()) where
+instance (Monoid a, Data a) => CompileFoldsContext (Definition a k ()) where
   compileFolds =
     \case
       DAnnotation u o -> do
