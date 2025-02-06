@@ -40,7 +40,8 @@ instance ExpressionContext (Expression a t) (Expression a t) where
   overExpression f =
     \case
       EAnnotation a t e1 -> do
-        EAnnotation a t <$> (overExpression f =<< f e1)
+        EAnnotation a t
+          <$> (overExpression f =<< f e1)
       EApplication a t e1 es ->
         EApplication a t
           <$> (overExpression f =<< f e1)
@@ -81,7 +82,8 @@ instance ExpressionContext (Expression a t) (Expression a t) where
           <$> (overExpression f =<< traverse f d)
           <*> (overExpression f =<< traverse f e)
       ESelect a ll e ->
-        ESelect a ll <$> (overExpression f =<< f e)
+        ESelect a ll
+          <$> (overExpression f =<< f e)
       EFold a t es cs e ->
         EFold a t
           <$> (overExpression f =<< traverse f es)

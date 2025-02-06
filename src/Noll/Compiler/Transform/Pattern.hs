@@ -39,15 +39,18 @@ instance PatternContext (Pattern a t) (Pattern a t) where
   overPattern f =
     \case
       PAnnotation a t p1 ->
-        PAnnotation a t <$> (overPattern f =<< f p1)
+        PAnnotation a t
+          <$> (overPattern f =<< f p1)
       PConstructor a ll ps ->
-        PConstructor a ll <$> (overPattern f =<< traverse f ps)
+        PConstructor a ll
+          <$> (overPattern f =<< traverse f ps)
       PListCons a t p1 p2 ->
         PListCons a t
           <$> (overPattern f =<< f p1)
           <*> (overPattern f =<< f p2)
       PListLiteral a t ps ->
-        PListLiteral a t <$> (overPattern f =<< traverse f ps)
+        PListLiteral a t
+          <$> (overPattern f =<< traverse f ps)
       PRecord a t d p ->
         PRecord a t
           <$> (overPattern f =<< traverse f d)
@@ -128,7 +131,8 @@ instance PatternContext (Pattern a t) (Expression a t) where
   overPattern f =
     \case
       EAnnotation a t e1 -> do
-        EAnnotation a t <$> overPattern f e1
+        EAnnotation a t
+          <$> overPattern f e1
       EApplication a t e1 es ->
         EApplication a t
           <$> overPattern f e1
