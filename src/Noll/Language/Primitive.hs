@@ -1,7 +1,9 @@
+{-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE StrictData #-}
 
 module Noll.Language.Primitive (Primitive (..)) where
 
+import Data.Data (Data, Typeable)
 import Data.Text (Text)
 import GHC.Int (Int32, Int64)
 
@@ -23,4 +25,4 @@ data Primitive
     LChar Int32
   | -- | Strings
     LString Text
-  deriving (Show, Eq, Ord, Read)
+  deriving (Show, Eq, Ord, Read, Data, Typeable)

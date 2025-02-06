@@ -1,7 +1,9 @@
+{-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveTraversable #-}
 
 module Noll.Language.Pattern (Pattern (..)) where
 
+import Data.Data (Data, Typeable)
 import Noll.Label (Label (..))
 import Noll.Language.Primitive (Primitive (..))
 import Noll.Language.Type (Parameter (..), Type)
@@ -30,4 +32,4 @@ data Pattern a t
     PShorthand a (Label t)
   | -- | TODO
     PAtVariable a (Label t)
-  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
+  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)

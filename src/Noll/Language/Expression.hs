@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE StrictData #-}
 
@@ -7,6 +8,7 @@ module Noll.Language.Expression (
   CompiledClause (..),
 ) where
 
+import Data.Data (Data, Typeable)
 import Noll.Common.List1 (List1)
 import Noll.Label (Label (..))
 import Noll.Language.Expression.Binding (Binding (..))
@@ -19,12 +21,12 @@ import Noll.Language.Type (Parameter (..), Type)
 import Noll.Utils (Dictionary, Name)
 
 data Clause e a t = EClause a (Pattern a t) (List1 (Choice e a t))
-  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
+  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
 
 data CompiledClause e a t
   = ECompiledClause (List1 (Label t)) (e a t)
   | ECompiledField Name (Label t) (Label t) (e a t)
-  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
+  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
 
 data Expression a t
   = -- | Type-annotated expression
@@ -63,4 +65,4 @@ data Expression a t
     EFold a t (List1 (Expression a t)) (List1 (Clause Expression a t)) (Maybe (Expression a t))
   | -- | Record field access selector
     ESelect a (Label t) (Expression a t)
-  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
+  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)

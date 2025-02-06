@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
@@ -10,6 +11,7 @@ module Noll.Language.Type.Row (
   updateTail,
 ) where
 
+import Data.Data (Data, Typeable)
 import Data.Tuple.Extra (second)
 import Noll.Utils (Dictionary, Name, (<$$>))
 
@@ -19,7 +21,7 @@ data Row o k t
   = RExtend Name t (Row o k t)
   | RVariable (o k)
   | RNil
-  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
+  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
 
 data RowData o k t = RowData (Dictionary [t]) (Row o k t)
   deriving (Show, Eq, Ord, Read)

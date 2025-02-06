@@ -1,8 +1,10 @@
+{-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
 module Noll.Language.Expression.Operator.Binary (BinaryOperator (..), binaryOperatorTypeScheme) where
 
+import Data.Data (Data, Typeable)
 import Noll.Language.Type (IndexedType, Type (..), TypeIndex, (~>))
 import Noll.Language.Type.Intrinsic (Intrinsic (..))
 import Noll.Language.Type.Kind (Kind)
@@ -52,7 +54,7 @@ data BinaryOperator
     OStringConcatenation
   | -- | List concatenation (++)
     OListConcatenation
-  deriving (Show, Eq, Ord, Read)
+  deriving (Show, Eq, Ord, Read, Data, Typeable)
 
 binaryOperatorTypeScheme :: BinaryOperator -> Scheme TypeIndex Kind IndexedType
 binaryOperatorTypeScheme =

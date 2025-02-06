@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveFoldable #-}
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE FlexibleInstances #-}
@@ -19,6 +20,7 @@ module Noll.Language.Type (
   (~>),
 ) where
 
+import Data.Data (Data, Typeable)
 import Data.List.NonEmpty (NonEmpty)
 import Noll.Common.List1 (List1)
 import Noll.Common.Supply (Supply (..))
@@ -37,7 +39,7 @@ data Type o k
   | TRow (Row o k (Type o k))
   | TVariable (o k)
   | TAlias Name [Type o k] (Type o k)
-  deriving (Show, Eq, Ord, Read)
+  deriving (Show, Eq, Ord, Read, Data, Typeable)
 
 infixr 1 `TArrow`
 
@@ -56,7 +58,7 @@ data Parameter k = Parameter
   { parameterKind :: k
   , parameterName :: Name
   }
-  deriving (Show, Eq, Ord, Read, Functor, Foldable)
+  deriving (Show, Eq, Ord, Read, Functor, Foldable, Data, Typeable)
 
 type IndexedType = Type TypeIndex Kind
 

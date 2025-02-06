@@ -1,7 +1,10 @@
+{-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE StrictData #-}
 
 module Noll.Language.Type.Intrinsic (Intrinsic (..)) where
+
+import Data.Data (Data, Typeable)
 
 -- | Built-in types
 data Intrinsic t
@@ -20,4 +23,4 @@ data Intrinsic t
   | ITuple [t]
   | IUnit
   | IVoid
-  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
+  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
