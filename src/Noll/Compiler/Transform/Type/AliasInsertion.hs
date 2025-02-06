@@ -9,16 +9,15 @@ module Noll.Compiler.Transform.Type.AliasInsertion (
 ) where
 
 import Control.Monad.Reader (MonadReader, ask)
+import Data.Data (Data)
+import Data.Generics.Uniplate.Data (transformM)
 import Noll.Common.Environment (Environment)
 import Noll.Common.List1 (NonEmpty (..), fromList1)
-import Noll.Compiler.Transform.Expression (mapMOverExpression)
-import Noll.Compiler.Transform.Pattern (mapMOverPattern)
 import Noll.Language (
   Constant (..),
   Definition (..),
   Expression (..),
   Function (..),
-  IndexedType,
   Module (..),
   Parameter (..),
   Pattern (..),
@@ -59,31 +58,31 @@ instance (AliasContext t) => AliasContext (Uses t) where
 instance (AliasContext t) => AliasContext (Row o k t) where
   insertAliases = traverse insertAliases
 
-instance (AliasContext t) => AliasContext (Pattern a t) where
+instance (AliasContext t, Data a, Data t) => AliasContext (Pattern a t) where
   insertAliases =
-    mapMOverPattern $
+    transformM $
       \case
         PAnnotation a t p ->
           PAnnotation a <$> insertAliases t <*> insertAliases p
         p ->
           pure p
 
-instance (AliasContext t) => AliasContext (Expression a t) where
+instance (AliasContext t, Data t, Data a) => AliasContext (Expression a t) where
   insertAliases =
-    mapMOverExpression $
+    transformM $
       \case
         EAnnotation a t e ->
           EAnnotation a <$> insertAliases t <*> insertAliases e
         e ->
           pure e
 
-instance (AliasContext t) => AliasContext (Module e a t) where
+instance (AliasContext t, Data e, Data t) => AliasContext (Module e a t) where
   insertAliases =
     \case
       Module p ns o ->
         Module p ns <$> insertAliases o
 
-instance (AliasContext (e a t), AliasContext t) => AliasContext (Function e a t) where
+instance (AliasContext (e a t), AliasContext t, Data a, Data t) => AliasContext (Function e a t) where
   insertAliases =
     \case
       Function a u ps e ->
@@ -100,7 +99,7 @@ instance (AliasContext (e a t), AliasContext t) => AliasContext (Constant e a t)
           <$> insertAliases u
           <*> insertAliases e
 
-instance (AliasContext t) => AliasContext (Definition a k t) where
+instance (AliasContext t, Data a, Data t) => AliasContext (Definition a k t) where
   insertAliases =
     \case
       DAnnotation u o ->
