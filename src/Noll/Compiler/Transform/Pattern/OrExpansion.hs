@@ -4,13 +4,18 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Compiler.Transform.Pattern.OrExpansion (OrPattern (..), compileOrPatterns) where
+module Noll.Compiler.Transform.Pattern.OrExpansion (
+  OrPattern (..),
+  compileOrPatterns,
+  expandExpression,
+) where
 
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformBiM)
 import Data.Semigroup (sconcat)
 import Noll.Common.List1 (List1, NonEmpty (..))
 import Noll.Language (Clause (..), Expression (..), Module (..), Pattern (..))
+import Noll.Label (Label (..))
 import Noll.Utils (Map, traverseM)
 
 import qualified Noll.Common.List1 as List1
@@ -60,9 +65,9 @@ instance OrPattern (Pattern a t) where
       PAnnotation a t p -> do
         q1 :| qs <- expandOrPatterns p
         pure (PAnnotation a t q1 :| [PAnnotation a t q | q <- qs])
-      PConstructor a ll ps -> do
+      PConstructor a (Label t name) ps -> do
         qs1 :| qss <- expandOrPatterns ps
-        pure (PConstructor a ll qs1 :| [PConstructor a ll qs | qs <- qss])
+        pure (PConstructor a (Label t name) qs1 :| [PConstructor a (Label t name) qs | qs <- qss])
       PListLiteral a t ps -> do
         qs1 :| qss <- expandOrPatterns ps
         pure (PListLiteral a t qs1 :| [PListLiteral a t qs | qs <- qss])
