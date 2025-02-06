@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE StrictData #-}
 
@@ -7,11 +8,12 @@ module Noll.Language.Module (
   fromDefinitionList,
 ) where
 
+import Data.Data (Data, Typeable)
 import Noll.Language.Module.Definition (Definition (..), Path (..))
 import Noll.Utils (Name, Over)
 
 data Module a k t = Module Path [Name] [Definition a k t]
-  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
+  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
 
 {-# INLINE overModuleDefinitions #-}
 overModuleDefinitions :: Over (Module a k t) [Definition a k t]

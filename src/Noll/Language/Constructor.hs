@@ -1,7 +1,9 @@
+{-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE StrictData #-}
 
 module Noll.Language.Constructor (Constructor (..)) where
 
+import Data.Data (Data, Typeable)
 import Noll.Language.Type.Scheme (Scheme (..))
 import Noll.Utils (Name)
 
@@ -11,4 +13,4 @@ data Constructor o k t = Constructor
   , constructorArity :: Int
   , constructorScheme :: Scheme o k t
   }
-  deriving (Show, Eq, Ord, Read)
+  deriving (Show, Eq, Ord, Read, Data, Typeable)

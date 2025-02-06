@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -5,6 +6,7 @@
 
 module Noll.Language.Module.Definition (Definition (..), Path (..), definitionName) where
 
+import Data.Data (Data, Typeable)
 import Noll.Language.Constructor (Constructor (..))
 import Noll.Language.Expression (Expression (..))
 import Noll.Language.Module.Constant (Constant (..))
@@ -14,7 +16,7 @@ import Noll.Language.Type (Parameter, Type (..), TypeIndex)
 import Noll.Utils (Name)
 
 newtype Path = Path {pathComponents :: [Name]}
-  deriving (Show, Eq, Ord, Read)
+  deriving (Show, Eq, Ord, Read, Data, Typeable)
 
 data Definition a k t
   = -- | Type-annotated definition
@@ -37,7 +39,7 @@ data Definition a k t
     DInstance Name (Type TypeIndex k) [Definition a k t]
   | -- | Type alias
     DTypeAlias Name [Type TypeIndex k] (Type TypeIndex k)
-  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
+  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
 
 definitionName :: Definition a k t -> Name
 definitionName =

@@ -7,9 +7,10 @@ module Noll.Compiler.Transform.Pattern.OrExpansion (
   baz2,
 ) where
 
+import Data.Data (Data)
+import Data.Generics.Uniplate.Data (descendBiM, descendM)
 import Data.Semigroup (sconcat)
 import Noll.Common.List1 (List1, NonEmpty (..))
-import Noll.Compiler.Transform.Expression (mapMOverExpression, overExpression)
 import Noll.Language (
   Clause (..),
   Constant (..),
@@ -22,13 +23,13 @@ import Noll.Language (
 
 import qualified Noll.Common.List1 as List1
 
-baz2 :: (Monad m) => Module a k t -> m (Module a k t)
+baz2 :: (Monad m, Data a, Data t, Ord k) => Module a k t -> m (Module a k t)
 baz2 =
   \case
     Module path ns ds ->
       Module path ns <$> traverse baz ds
 
-baz :: (Monad m) => Definition a k t -> m (Definition a k t)
+baz :: (Monad m, Data a, Data t, Ord k) => Definition a k t -> m (Definition a k t)
 baz =
   \case
     DAnnotation u d ->
@@ -40,29 +41,26 @@ baz =
     d ->
       pure d
 
-foo :: (Monad m) => Function Expression a t -> m (Function Expression a t)
+foo :: (Monad m, Data a, Data t) => Function Expression a t -> m (Function Expression a t)
 foo =
   \case
     Function a u ps e ->
       Function a u ps <$> expandExpressionOrPatterns e
 
-bar :: (Monad m) => Constant Expression a t -> m (Constant Expression a t)
+bar :: (Monad m, Data a, Data t) => Constant Expression a t -> m (Constant Expression a t)
 bar =
   \case
     Constant a u e ->
       Constant a u <$> expandExpressionOrPatterns e
 
-expandExpressionOrPatterns :: (Monad m) => Expression a t -> m (Expression a t)
-expandExpressionOrPatterns = mapMOverExpression go
- where
-  go =
+expandExpressionOrPatterns :: (Monad m, Data a, Data t) => Expression a t -> m (Expression a t)
+expandExpressionOrPatterns =
+  descendM $
     \case
-      EMatch a t e cs -> do
-        cs1 <- sconcat <$> traverse expandOrPatterns cs
-        pure (EMatch a t e cs1)
-      EFold a t es cs e -> do
-        cs1 <- sconcat <$> traverse expandOrPatterns cs
-        pure (EFold a t es cs1 e)
+      EMatch a t e cs ->
+        EMatch a t e . sconcat <$> traverse expandOrPatterns cs
+      EFold a t es cs e ->
+        EFold a t es . sconcat <$> traverse expandOrPatterns cs <*> pure e
       e ->
         pure e
 

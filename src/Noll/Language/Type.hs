@@ -52,7 +52,7 @@ data TypeIndex k = TypeIndex
   { typeIndexKind :: k
   , typeIndexId :: Int
   }
-  deriving (Show, Eq, Ord, Read, Functor, Foldable)
+  deriving (Show, Eq, Ord, Read, Functor, Foldable, Data, Typeable)
 
 data Parameter k = Parameter
   { parameterKind :: k
