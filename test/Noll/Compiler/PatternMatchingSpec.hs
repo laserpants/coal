@@ -10,7 +10,6 @@ import Noll.Compiler.PatternMatching.Envelope
 import Noll.Compiler.PatternMatching.Equation
 import Noll.Compiler.PatternMatching.Rule
 import Noll.Compiler.PatternMatchingSpec.TestRunner (compilePatterns)
-import Noll.Compiler.Transform.Pattern
 import Noll.Eval (Value (..), eval)
 import Noll.Examples.Test07 (test07)
 import Noll.Examples.Test08 (test08)

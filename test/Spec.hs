@@ -10,7 +10,6 @@ import qualified Noll.Compiler.NormalizeObjectsSpec
 import qualified Noll.Compiler.PatternMatchingExamples.Test01
 import qualified Noll.Compiler.PatternMatchingExamples.Test02
 import qualified Noll.Compiler.PatternMatchingSpec
-import Noll.Compiler.Transform.ExpressionSpec
 import qualified Noll.Compiler.Transform.FoldSpec
 import qualified Noll.Compiler.Transform.Pattern.DesugaringSpec
 import qualified Noll.Compiler.Transform.Pattern.OrExpansionSpec
@@ -70,7 +69,6 @@ main =
     Noll.Compiler.PatternMatchingExamples.Test01.spec
     Noll.Compiler.PatternMatchingExamples.Test02.spec
     Noll.Compiler.Transform.Pattern.OrExpansionSpec.spec
-    Noll.Compiler.Transform.ExpressionSpec.spec
     Noll.Compiler.Transform.Type.AliasInsertionSpec.spec
     Noll.Compiler.Transform.FoldSpec.spec
     Noll.CompilerExamples.Test01.spec
