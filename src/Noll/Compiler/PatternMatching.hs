@@ -9,6 +9,8 @@ module Noll.Compiler.PatternMatching (
   compileMatchExprs,
 ) where
 
+import Data.Data (Data)
+import Data.Generics.Uniplate.Data (transformM)
 import Noll.Common.List1 (List1, NonEmpty (..), fromList1)
 import Noll.Common.Supply (suppliedName)
 import Noll.Compiler.PatternMatching.Compiler (TypeProxy (..), compileEnvelope)
@@ -18,7 +20,6 @@ import Noll.Compiler.PatternMatching.Envelope (
  )
 import Noll.Compiler.PatternMatching.Equation (patternEquation)
 import Noll.Compiler.PatternMatching.Rule (MatchMonad (..), matchPatterns)
-import Noll.Compiler.Transform.Expression (mapMOverExpression)
 import Noll.Compiler.Transform.Tree (replaceWith)
 import Noll.Label (Label (..))
 import Noll.Language (
@@ -49,13 +50,13 @@ instance (MatchExpressionContext a) => MatchExpressionContext (List1 a) where
 instance (MatchExpressionContext a) => MatchExpressionContext (Dictionary a) where
   compileMatchExprs = traverse compileMatchExprs
 
-instance (Show a, Show t, TypeProxy t, Ord t, Monoid a) => MatchExpressionContext (Module a k t) where
+instance (Show a, Data a, Show t, Data t, TypeProxy t, Ord t, Monoid a) => MatchExpressionContext (Module a k t) where
   compileMatchExprs =
     \case
       Module p ns os ->
         Module p ns <$> compileMatchExprs os
 
-instance (Show a, Show t, TypeProxy t, Ord t, Monoid a) => MatchExpressionContext (Definition a k t) where
+instance (Show a, Data a, Data t, Show t, TypeProxy t, Ord t, Monoid a) => MatchExpressionContext (Definition a k t) where
   compileMatchExprs =
     \case
       DAnnotation u d ->
@@ -85,7 +86,7 @@ instance MatchExpressionContext (Clause Expression a t) where
       EClause a p cs ->
         pure (EClause a p cs)
 
-instance (Show a, Show t, TypeProxy t, Ord t, Monoid a) => MatchExpressionContext (Binding Expression a t) where
+instance (Show a, Data a, Show t, Data t, TypeProxy t, Ord t, Monoid a) => MatchExpressionContext (Binding Expression a t) where
   compileMatchExprs =
     \case
       BPattern a p e ->
@@ -93,9 +94,9 @@ instance (Show a, Show t, TypeProxy t, Ord t, Monoid a) => MatchExpressionContex
       BFunction{} ->
         error "TODO"
 
-instance (Show a, Show t, TypeProxy t, Ord t, Monoid a) => MatchExpressionContext (Expression a t) where
+instance (Show a, Show t, Data a, Data t, TypeProxy t, Ord t, Monoid a) => MatchExpressionContext (Expression a t) where
   compileMatchExprs =
-    mapMOverExpression $
+    transformM $
       \case
         EMatch _ _ e cs -> do
           cs1 <- compileMatchExprs cs

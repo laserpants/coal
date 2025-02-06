@@ -11,7 +11,6 @@ import Noll.Common.List1 (List1, NonEmpty (..))
 import Noll.Compiler.PatternMatching.Envelope (
   EnvelopeClause (..),
   EnvelopeExpression (..),
-  EnvelopeHost (..),
   fails,
  )
 import Noll.Language (
