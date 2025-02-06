@@ -18,6 +18,7 @@ module Noll.Utils (
   lexOrderRank,
   groupByEq,
   const2,
+  traverseM,
   Over,
   (<$$>),
   (<$$$>),
@@ -86,6 +87,10 @@ tellRight = tell . fmap Right
 {-# INLINE const2 #-}
 const2 :: a -> b -> c -> a
 const2 a _ _ = a
+
+{-# INLINE traverseM #-}
+traverseM :: (Monad m, Applicative f, Traversable t) => (a -> m (f a)) -> t a -> m (f (t a))
+traverseM = sequenceA <$$$> traverse
 
 lexOrderRank :: Text -> Int
 lexOrderRank text

@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
@@ -10,7 +11,7 @@ import Data.Generics.Uniplate.Data (transformBiM)
 import Data.Semigroup (sconcat)
 import Noll.Common.List1 (List1, NonEmpty (..))
 import Noll.Language (Clause (..), Expression (..), Module (..), Pattern (..))
-import Noll.Utils (Map, (<$$>))
+import Noll.Utils (Map, traverseM)
 
 import qualified Noll.Common.List1 as List1
 
@@ -31,16 +32,16 @@ class OrPattern a where
   expandOrPatterns :: (Monad m) => a -> m (List1 a)
 
 instance (OrPattern a) => OrPattern [a] where
-  expandOrPatterns = sequence <$$> traverse expandOrPatterns
+  expandOrPatterns = traverseM expandOrPatterns
 
-instance (OrPattern a) => OrPattern (NonEmpty a) where
-  expandOrPatterns = sequence <$$> traverse expandOrPatterns
+instance (OrPattern a) => OrPattern (List1 a) where
+  expandOrPatterns = traverseM expandOrPatterns
 
 instance (OrPattern a) => OrPattern (Map k a) where
-  expandOrPatterns = sequence <$$> traverse expandOrPatterns
+  expandOrPatterns = traverseM expandOrPatterns
 
 instance (OrPattern a) => OrPattern (Maybe a) where
-  expandOrPatterns = sequence <$$> traverse expandOrPatterns
+  expandOrPatterns = traverseM expandOrPatterns
 
 instance OrPattern (Clause e a t) where
   expandOrPatterns =
