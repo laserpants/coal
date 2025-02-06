@@ -13,9 +13,10 @@ module Noll.Compiler.Transform.Pattern.Desugaring (
 import Control.Monad.Reader (MonadReader, ReaderT, runReaderT)
 import Control.Monad.State (MonadState, State, evalState)
 import Control.Monad.Writer (MonadWriter, WriterT, runWriterT, tell)
+import Data.Data (Data, Typeable)
+import Data.Generics.Uniplate.Data (transformM)
 import Noll.Common.List1 (NonEmpty ((:|)))
 import Noll.Common.Supply (suppliedName)
-import Noll.Compiler.Transform.Expression (mapMOverExpression)
 import Noll.Label (Label (..))
 import Noll.Language.Expression (Clause (..), Expression (..))
 import Noll.Language.Expression.Binding (Binding (..))
@@ -65,7 +66,7 @@ instance (Monoid c) => Sugared c o k (Pattern c (Type o k)) where
         tell [(name, p)]
         pure (PVariable mempty (Label (typeOf p) name))
 
-instance (Monoid c) => Sugared c o k (Binding Expression c (Type o k)) where
+instance (Monoid c, Data c, Data k, Typeable o, Data (o k)) => Sugared c o k (Binding Expression c (Type o k)) where
   desugarPatterns =
     \case
       BPattern a p e ->
@@ -73,8 +74,8 @@ instance (Monoid c) => Sugared c o k (Binding Expression c (Type o k)) where
       BFunction a name ps e ->
         BFunction a name <$> traverse desugarPatterns ps <*> desugarPatterns e
 
-instance (Monoid c) => Sugared c o k (Expression c (Type o k)) where
-  desugarPatterns = mapMOverExpression go
+instance (Monoid c, Data c, Data k, Typeable o, Data (o k)) => Sugared c o k (Expression c (Type o k)) where
+  desugarPatterns = transformM go
    where
     go =
       \case
@@ -102,7 +103,7 @@ unrollMatch (name, p) e =
     (EVariable mempty (Label (typeOf p) name))
     (EClause mempty p (CPlain mempty [] e :| []) :| [])
 
-instance (Monoid c) => Sugared c o k (Function Expression c (Type o k)) where
+instance (Monoid c, Data c, Data k, Typeable o, Data (o k)) => Sugared c o k (Function Expression c (Type o k)) where
   desugarPatterns =
     \case
       Function a u ps e -> do
@@ -110,13 +111,13 @@ instance (Monoid c) => Sugared c o k (Function Expression c (Type o k)) where
         (qs, rs) <- runWriterT (traverse desugarPatterns ps)
         pure (Function a u qs (foldr unrollMatch e1 rs))
 
-instance (Monoid c) => Sugared c o k (Constant Expression c (Type o k)) where
+instance (Monoid c, Data c, Data k, Typeable o, Data (o k)) => Sugared c o k (Constant Expression c (Type o k)) where
   desugarPatterns =
     \case
       Constant a u e ->
         Constant a u <$> desugarPatterns e
 
-instance (Monoid c) => Sugared c o k (Definition c k (Type o k)) where
+instance (Monoid c, Data k, Data c, Data (o k), Typeable o) => Sugared c o k (Definition c k (Type o k)) where
   desugarPatterns =
     \case
       DAnnotation u d ->
@@ -128,7 +129,7 @@ instance (Monoid c) => Sugared c o k (Definition c k (Type o k)) where
       d ->
         pure d
 
-instance (Monoid c) => Sugared c o k (Module c k (Type o k)) where
+instance (Monoid c, Data k, Data c, Data (o k), Typeable o) => Sugared c o k (Module c k (Type o k)) where
   desugarPatterns =
     \case
       Module p ns ds ->
