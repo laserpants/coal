@@ -9,12 +9,8 @@ import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformBiM)
 import Data.Semigroup (sconcat)
 import Noll.Common.List1 (List1, NonEmpty (..))
-import Noll.Language (
-  Clause (..),
-  Expression (..),
-  Module (..),
-  Pattern (..),
- )
+import Noll.Language (Clause (..), Expression (..), Module (..), Pattern (..))
+import Noll.Utils (Map, (<$$>))
 
 import qualified Noll.Common.List1 as List1
 
@@ -34,6 +30,18 @@ expandExpressionOrPatterns =
 class OrPattern a where
   expandOrPatterns :: (Monad m) => a -> m (List1 a)
 
+instance (OrPattern a) => OrPattern [a] where
+  expandOrPatterns = sequence <$$> traverse expandOrPatterns
+
+instance (OrPattern a) => OrPattern (NonEmpty a) where
+  expandOrPatterns = sequence <$$> traverse expandOrPatterns
+
+instance (OrPattern a) => OrPattern (Map k a) where
+  expandOrPatterns = sequence <$$> traverse expandOrPatterns
+
+instance (OrPattern a) => OrPattern (Maybe a) where
+  expandOrPatterns = sequence <$$> traverse expandOrPatterns
+
 instance OrPattern (Clause e a t) where
   expandOrPatterns =
     \case
@@ -52,14 +60,18 @@ instance OrPattern (Pattern a t) where
         q1 :| qs <- expandOrPatterns p
         pure (PAnnotation a t q1 :| [PAnnotation a t q | q <- qs])
       PConstructor a ll ps -> do
-        qs1 :| qss <- sequence <$> traverse expandOrPatterns ps
+        qs1 :| qss <- expandOrPatterns ps
         pure (PConstructor a ll qs1 :| [PConstructor a ll qs | qs <- qss])
       PListLiteral a t ps -> do
-        qs1 :| qss <- sequence <$> traverse expandOrPatterns ps
+        qs1 :| qss <- expandOrPatterns ps
         pure (PListLiteral a t qs1 :| [PListLiteral a t qs | qs <- qss])
-      PListCons{} ->
+      PListCons a t p1 p2 -> do
+        q1 :| qs1 <- expandOrPatterns p1
+        q2 :| qs2 <- expandOrPatterns p2
         error "TODO"
-      PRecord{} ->
+      PRecord a t d p -> do
+        d1 :| ds <- expandOrPatterns d
+        q1 :| qs <- expandOrPatterns p
         error "TODO"
       p@PAny{} ->
         pure (List1.singleton p)
