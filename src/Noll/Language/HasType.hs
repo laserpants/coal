@@ -77,5 +77,5 @@ instance (Data a, Data k, Ord k, Data (o k), Typeable o) => HasType o k (Definit
         foldType (typeOf e) (typeOf <$> ps)
       DConstant _ (Constant _ _ e) ->
         typeOf e
-      _ ->
-        error "TODO"
+      d ->
+        head (universeBi d)
