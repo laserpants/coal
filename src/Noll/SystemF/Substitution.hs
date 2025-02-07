@@ -188,7 +188,7 @@ instance Substitutable (CompiledClause Expression a IndexedType) where
       ECompiledClause lls e ->
         ECompiledClause (apply sub lls) (apply sub e)
       ECompiledField name ll1 ll2 e ->
-        ECompiledField name (apply sub ll1) (apply sub ll2) e
+        ECompiledField name (apply sub ll1) (apply sub ll2) (apply sub e)
 
 instance Substitutable (Expression a IndexedType) where
   apply sub =
