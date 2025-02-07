@@ -1,5 +1,4 @@
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StrictData #-}
@@ -8,7 +7,7 @@ module Noll.Language.HasType (HasType (..)) where
 
 import Noll.Label (Label (..))
 import Noll.Language.Expression (Expression (..))
-import Noll.Language.Expression.Choice (Choice (..), Guard (..))
+import Noll.Language.Expression.Choice (Guard (..))
 import Noll.Language.Module.Constant (Constant (..))
 import Noll.Language.Module.Definition (Definition (..))
 import Noll.Language.Module.Function (Function (..))
@@ -114,6 +113,8 @@ instance HasType o k (Expression a (Type o k)) where
         typeOf t
       EMatch _ t _ _ ->
         typeOf t
+      ECompiledMatch _ t _ _ ->
+        typeOf t
       ESelect _ t _ ->
         typeOf t
       EFold _ t _ _ _ ->
@@ -128,5 +129,5 @@ instance HasType o k (Definition a k (Type o k)) where
         typeOf e
       DAnnotation _ d ->
         typeOf d
-      d ->
+      _ ->
         error "TODO"
