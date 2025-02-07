@@ -98,7 +98,7 @@ withMonomorphic = localMonoset . monosetInsertMultiple . typeIndexesIn
 
 type Assertion a = IndexedType -> [Assumption IndexedType] -> ConstraintsGen a ()
 
-patternConstraints :: Assertion a -> [Assumption IndexedType] -> Pattern a IndexedType -> ConstraintsGen a [Name]
+patternConstraints :: (Data a) => Assertion a -> [Assumption IndexedType] -> Pattern a IndexedType -> ConstraintsGen a [Name]
 patternConstraints assert ms =
   \case
     PAnnotation loc t p -> do

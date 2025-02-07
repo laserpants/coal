@@ -54,7 +54,7 @@ class Sugared c o k e | e -> c, e -> o k where
     e ->
     m e
 
-instance (Monoid c) => Sugared c o k (Pattern c (Type o k)) where
+instance (Monoid c, Data c, Data k, Data (o k), Typeable o) => Sugared c o k (Pattern c (Type o k)) where
   desugarPatterns =
     \case
       p@PVariable{} ->
@@ -95,7 +95,7 @@ instance (Monoid c, Data c, Data k, Typeable o, Data (o k)) => Sugared c o k (Ex
         e ->
           pure e
 
-unrollMatch :: (Monoid c) => (Name, Pattern c (Type o k)) -> Expression c (Type o k) -> Expression c (Type o k)
+unrollMatch :: (Monoid c, Data c, Data k, Typeable o, Data (o k)) => (Name, Pattern c (Type o k)) -> Expression c (Type o k) -> Expression c (Type o k)
 unrollMatch (name, p) e =
   EMatch
     mempty

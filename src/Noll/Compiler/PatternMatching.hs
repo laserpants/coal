@@ -107,18 +107,18 @@ instance (Show a, Show t, Data a, Data t, TypeProxy t, Ord t, Monoid a) => Match
         e ->
           pure e
 
-compileClauses :: (Show a, Show t, TypeProxy t, Monoid a, Ord t) => Label t -> List1 (Clause Expression a t) -> MatchMonad (Expression a t)
+compileClauses :: (Show a, Data a, Show t, TypeProxy t, Monoid a, Ord t) => Label t -> List1 (Clause Expression a t) -> MatchMonad (Expression a t)
 compileClauses ll cs = compileEnvelope <$> matchPatterns [ll] eqs MFail
  where
   eqs = uncurry patternEquation . translateClause <$> fromList1 cs
 
-translateClause :: (Show a, Show t, TypeProxy t) => Clause Expression a t -> ([EnvelopePattern (Expression a) t], EnvelopeExpression (Expression a) t)
+translateClause :: (Show a, Data a, Show t, TypeProxy t) => Clause Expression a t -> ([EnvelopePattern (Expression a) t], EnvelopeExpression (Expression a) t)
 translateClause (EClause _ p (CPlain _ _ e :| [])) =
   ([translatePattern p], MExpression e)
 translateClause _ =
   error "TODO"
 
-translatePattern :: (Show a, Show t, TypeProxy t) => Pattern a t -> EnvelopePattern (Expression a) t
+translatePattern :: (Show a, Data a, Show t, TypeProxy t) => Pattern a t -> EnvelopePattern (Expression a) t
 translatePattern =
   \case
     PVariable _ ll ->

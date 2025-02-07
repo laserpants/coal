@@ -3,6 +3,7 @@
 
 module Noll.Compiler.NormalizeObjects where
 
+import Data.Data (Data, Typeable)
 import Data.Map.Strict (Map)
 import Noll.Compiler.Transform
 import Noll.Language.Expression (Expression (..))
@@ -23,13 +24,13 @@ instance (NormalizeObjectsTransformContext a) => NormalizeObjectsTransformContex
 instance (NormalizeObjectsTransformContext a) => NormalizeObjectsTransformContext (Map k a) where
   normalizeObject = fmap normalizeObject
 
-instance (Monoid a) => NormalizeObjectsTransformContext (Module a k (Type o k)) where
+instance (Monoid a, Data a, Data k, Data (o k), Typeable o) => NormalizeObjectsTransformContext (Module a k (Type o k)) where
   normalizeObject =
     \case
       Module p ns d ->
         Module p ns (normalizeObject d)
 
-instance (Monoid a) => NormalizeObjectsTransformContext (Definition a k (Type o k)) where
+instance (Monoid a, Data a, Data k, Data (o k), Typeable o) => NormalizeObjectsTransformContext (Definition a k (Type o k)) where
   normalizeObject =
     \case
       DAnnotation u d ->

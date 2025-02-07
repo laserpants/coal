@@ -7,6 +7,7 @@ module Noll.Compiler.PatternMatching.Compiler (
   compileEnvelope,
 ) where
 
+import Data.Data (Data, Typeable)
 import Noll.Common.List1 (List1, NonEmpty (..))
 import Noll.Compiler.PatternMatching.Envelope (
   EnvelopeClause (..),
@@ -25,9 +26,9 @@ import Noll.Language (
 import Noll.Utils (const2)
 
 class TypeProxy t where
-  expressionType :: Expression a t -> t
-  patternType :: Pattern a t -> t
-  envelopeExprType :: EnvelopeExpression (Expression a) t -> t
+  expressionType :: (Data a) => Expression a t -> t
+  patternType :: (Data a) => Pattern a t -> t
+  envelopeExprType :: (Data a) => EnvelopeExpression (Expression a) t -> t
   arrow :: t -> t -> t
   boolean :: t
 
@@ -43,7 +44,7 @@ instance TypeProxy () where
   boolean =
     ()
 
-instance TypeProxy (Type o k) where
+instance (Data k, Data (o k), Typeable o) => TypeProxy (Type o k) where
   expressionType =
     typeOf
   patternType =
@@ -55,7 +56,7 @@ instance TypeProxy (Type o k) where
   boolean =
     TIntrinsic IBool
 
-compileEnvelope :: (TypeProxy t, Ord t, Monoid a) => EnvelopeExpression (Expression a) t -> Expression a t
+compileEnvelope :: (TypeProxy t, Ord t, Data a, Monoid a) => EnvelopeExpression (Expression a) t -> Expression a t
 compileEnvelope =
   \case
     MFail ->
@@ -77,10 +78,10 @@ compileEnvelope =
         (compileEnvelope e2)
         (compileEnvelope e3)
 
-compileEnvelopeClause :: (TypeProxy t, Ord t, Monoid a) => EnvelopeClause (Expression a) t -> CompiledClause Expression a t
+compileEnvelopeClause :: (TypeProxy t, Ord t, Data a, Monoid a) => EnvelopeClause (Expression a) t -> CompiledClause Expression a t
 compileEnvelopeClause (EnvelopeClause l1 ls e) = ECompiledClause (l1 :| ls) (compileEnvelope e)
 
-clauseList :: (TypeProxy t, Ord t, Monoid a) => [EnvelopeClause (Expression a) t] -> List1 (CompiledClause Expression a t)
+clauseList :: (TypeProxy t, Ord t, Data a, Monoid a) => [EnvelopeClause (Expression a) t] -> List1 (CompiledClause Expression a t)
 clauseList ecs =
   case filter (not . fails) ecs of
     c : cs ->

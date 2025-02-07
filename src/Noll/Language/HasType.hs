@@ -5,6 +5,8 @@
 
 module Noll.Language.HasType (HasType (..)) where
 
+import Data.Data (Data, Typeable)
+import Data.Generics.Uniplate.Data (universeBi)
 import Noll.Label (Label (..))
 import Noll.Language.Expression (Expression (..))
 import Noll.Language.Expression.Choice (Guard (..))
@@ -22,11 +24,8 @@ class HasType o k t where
 instance HasType o k (Type o k) where
   typeOf = id
 
-instance (HasType o k t) => HasType o k (Label t) where
-  typeOf =
-    \case
-      Label t _ ->
-        typeOf t
+instance (Data t, Data k, Data (o k), Typeable o) => HasType o k (Label t) where
+  typeOf = head . universeBi
 
 instance HasType o k Primitive where
   typeOf =
@@ -48,86 +47,35 @@ instance HasType o k Primitive where
       LString{} ->
         TIntrinsic IString
 
-instance HasType o k (Pattern a (Type o k)) where
+instance (Data a, Data k, Data (o k), Typeable o) => HasType o k (Pattern a (Type o k)) where
   typeOf =
     \case
-      PAnnotation _ _ t ->
-        typeOf t
-      PAny _ t ->
-        typeOf t
-      PVariable _ t ->
-        typeOf t
-      PConstructor _ t _ ->
-        typeOf t
       PLiteral _ t ->
         typeOf t
-      PRecord _ t _ _ ->
-        typeOf t
-      PListCons _ t _ _ ->
-        typeOf t
-      PListLiteral _ t _ ->
-        typeOf t
-      POr _ t _ _ ->
-        typeOf t
-      PShorthand _ t ->
-        typeOf t
-      PAtVariable _ t ->
-        typeOf t
+      p ->
+        head (universeBi p)
 
-instance HasType o k (Guard Expression a (Type o k)) where
+instance (Data a, Data k, Data (o k), Typeable o) => HasType o k (Guard Expression a (Type o k)) where
+  typeOf = head . universeBi
+
+instance (Data a, Data k, Data (o k), Typeable o) => HasType o k (Expression a (Type o k)) where
   typeOf =
     \case
-      CGuard e ->
-        typeOf e
-
-instance HasType o k (Expression a (Type o k)) where
-  typeOf =
-    \case
-      EAnnotation _ _ t ->
-        typeOf t
       ELiteral _ t ->
-        typeOf t
-      EConstructor _ t ->
-        typeOf t
-      EVariable _ t ->
-        typeOf t
-      EApplication _ t _ _ ->
-        typeOf t
-      EIf _ t _ _ _ ->
-        typeOf t
-      ELet _ _ t ->
-        typeOf t
-      ERecursiveLet _ _ _ t ->
         typeOf t
       ELambda _ ts t ->
         foldType (typeOf t) (typeOf <$> ts)
-      EBinaryOperator _ (t, _) ->
-        typeOf t
-      EUnaryOperator _ (t, _) ->
-        typeOf t
-      ERecord _ t _ _ ->
-        typeOf t
-      EListCons _ t _ _ ->
-        typeOf t
-      EListLiteral _ t _ ->
-        typeOf t
-      EMatch _ t _ _ ->
-        typeOf t
-      ECompiledMatch _ t _ _ ->
-        typeOf t
-      ESelect _ t _ ->
-        typeOf t
-      EFold _ t _ _ _ ->
-        typeOf t
+      e ->
+        head (universeBi e)
 
-instance HasType o k (Definition a k (Type o k)) where
+instance (Data a, Data k, Ord k, Data (o k), Typeable o) => HasType o k (Definition a k (Type o k)) where
   typeOf =
     \case
+      DAnnotation _ d ->
+        typeOf d
       DFunction _ (Function _ _ ps e) ->
         foldType (typeOf e) (typeOf <$> ps)
       DConstant _ (Constant _ _ e) ->
         typeOf e
-      DAnnotation _ d ->
-        typeOf d
       _ ->
         error "TODO"

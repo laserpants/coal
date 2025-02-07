@@ -1,11 +1,12 @@
-module Noll.Compiler.PatternMatchingSpec.TestRunner where
+module Noll.Compiler.PatternMatchingSpec.TestRunner (compilePatterns) where
 
+import Data.Data (Data)
 import Noll.Compiler.PatternMatching
 import Noll.Compiler.PatternMatching.Envelope
 import Noll.Compiler.PatternMatching.Equation
 import Noll.Compiler.PatternMatching.Rule
 import Noll.Label (Label (..))
-import Noll.Language (Expression (..), Primitive (..))
+import Noll.Language (Expression (..))
 
-compilePatterns :: (TypeProxy t, Ord t, Monoid a) => [Label t] -> [PatternEquation (Expression a) t] -> EnvelopeExpression (Expression a) t -> MatchMonad (Expression a t)
+compilePatterns :: (TypeProxy t, Ord t, Data a, Monoid a) => [Label t] -> [PatternEquation (Expression a) t] -> EnvelopeExpression (Expression a) t -> MatchMonad (Expression a t)
 compilePatterns ls ps e = compileEnvelope <$> matchPatterns ls ps e
