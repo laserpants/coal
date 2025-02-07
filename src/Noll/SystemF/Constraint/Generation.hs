@@ -12,6 +12,7 @@ module Noll.SystemF.Constraint.Generation (
 ) where
 
 import Control.Monad.Reader (asks)
+import Data.Data (Data)
 import Data.Maybe (maybeToList)
 import Data.Tuple.Extra (second, third3)
 import Noll.Common.List1 (NonEmpty ((:|)), fromList1)
@@ -163,7 +164,7 @@ extractRow =
     _ ->
       error "TODO"
 
-clauseAssumptions :: Clause Expression a IndexedType -> ConstraintsGen a (IndexedType, [IndexedType], [Assumption IndexedType])
+clauseAssumptions :: (Data a) => Clause Expression a IndexedType -> ConstraintsGen a (IndexedType, [IndexedType], [Assumption IndexedType])
 clauseAssumptions (EClause loc p cs) = do
   (ts1, ms) <- second concat . unzip <$$> withMonomorphic p $
     forM (fromList1 cs) $
@@ -179,7 +180,7 @@ clauseAssumptions (EClause loc p cs) = do
   names <- patternConstraints (assertEqualityAssumptions loc) ms p
   pure (typeOf p, ts1, filter (assumptionNameIsNotOneOf names) ms)
 
-collectConstraints :: Expression a IndexedType -> ConstraintsGen a [Assumption IndexedType]
+collectConstraints :: (Data a) => Expression a IndexedType -> ConstraintsGen a [Assumption IndexedType]
 collectConstraints =
   \case
     EAnnotation loc t e -> do

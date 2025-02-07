@@ -2,6 +2,7 @@
 
 module Noll.SystemFExamples.Test10 where
 
+import Data.Data (Data)
 import Data.List.NonEmpty (NonEmpty (..), (<|))
 import Noll.Compiler
 import Noll.Label (Label (..))
@@ -35,7 +36,7 @@ spec =
       testResultExpression (runTest fixture)
         == fixture1
 
-runTest :: (Show a, Eq a) => Function Expression a () -> TestResult (Function Expression a (Type TypeIndex Kind)) a
+runTest :: (Show a, Eq a, Data a) => Function Expression a () -> TestResult (Function Expression a (Type TypeIndex Kind)) a
 runTest =
   runTypedFunctionTest
     (CompilerEnvironment env1 env2)

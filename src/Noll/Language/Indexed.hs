@@ -14,6 +14,8 @@ module Noll.Language.Indexed (
 ) where
 
 import Control.Monad.State (State)
+import Data.Data (Data)
+import Data.Generics.Uniplate.Data (universeBi)
 import Data.List.NonEmpty (NonEmpty)
 import Data.Map.Strict (Map)
 import Data.Set (Set, singleton)
@@ -59,181 +61,56 @@ instance (Ord k, TypeIndexed k t) => TypeIndexed k (Trait t) where
 instance (Ord k, TypeIndexed k t) => TypeIndexed k (Set t) where
   typeIndexesIn = Set.unions . Set.map typeIndexesIn
 
-instance (TypeIndexed k t) => TypeIndexed k (Label t) where
-  typeIndexesIn =
-    \case
-      Label t _ ->
-        typeIndexesIn t
+instance (Ord k, Data t, Data k, TypeIndexed k t) => TypeIndexed k (Label t) where
+  typeIndexesIn = Set.fromList . universeBi
 
-instance (Ord k, TypeIndexed k t) => TypeIndexed k (Row TypeIndex k t) where
-  typeIndexesIn =
-    \case
-      RExtend _ t row ->
-        typeIndexesIn t <> typeIndexesIn row
-      RVariable t ->
-        typeIndexesIn t
-      RNil ->
-        mempty
+instance (Ord k, Data t, Data k, TypeIndexed k t) => TypeIndexed k (Row TypeIndex k t) where
+  typeIndexesIn = Set.fromList . universeBi
 
-instance (Ord k, TypeIndexed k t) => TypeIndexed k (Intrinsic t) where
-  typeIndexesIn =
-    Set.unions . fmap typeIndexesIn
+instance (Ord k, Data t, Data k, TypeIndexed k t) => TypeIndexed k (Intrinsic t) where
+  typeIndexesIn = Set.fromList . universeBi
 
-instance (Ord k) => TypeIndexed k (Type TypeIndex k) where
-  typeIndexesIn =
-    \case
-      TApplication _ t ts ->
-        typeIndexesIn t <> typeIndexesIn ts
-      TArrow t1 t2 ->
-        typeIndexesIn t1 <> typeIndexesIn t2
-      TConstructor{} ->
-        mempty
-      TIntrinsic t -> do
-        typeIndexesIn t
-      TRow row ->
-        typeIndexesIn row
-      TVariable t ->
-        typeIndexesIn t
-      TAlias _ _ t ->
-        typeIndexesIn t
+instance (Ord k, Data k) => TypeIndexed k (Type TypeIndex k) where
+  typeIndexesIn = Set.fromList . universeBi
 
-instance (Ord k, TypeIndexed k t) => TypeIndexed k (Pattern a t) where
-  typeIndexesIn =
-    \case
-      PAnnotation _ _ p ->
-        typeIndexesIn p
-      PVariable _ (Label t _) ->
-        typeIndexesIn t
-      PConstructor _ (Label t _) ps ->
-        typeIndexesIn t <> typeIndexesIn ps
-      POr _ t p1 p2 ->
-        typeIndexesIn t <> typeIndexesIn p1 <> typeIndexesIn p2
-      PRecord _ t d p ->
-        typeIndexesIn t <> typeIndexesIn d <> typeIndexesIn p
-      PShorthand _ (Label t _) ->
-        typeIndexesIn t
-      PListCons _ t p1 p2 ->
-        typeIndexesIn t <> typeIndexesIn p1 <> typeIndexesIn p2
-      PListLiteral _ t ps ->
-        typeIndexesIn t <> typeIndexesIn ps
-      PAny _ t ->
-        typeIndexesIn t
-      PAtVariable _ (Label t _) ->
-        typeIndexesIn t
-      PLiteral{} ->
-        mempty
+instance (Ord k, Data k, Data t, Data a, TypeIndexed k t) => TypeIndexed k (Pattern a t) where
+  typeIndexesIn = Set.fromList . universeBi
+
+instance (Ord k, Data a, Data k) => TypeIndexed k (Binding Expression a (Type TypeIndex k)) where
+  typeIndexesIn = Set.fromList . universeBi
+
+instance (Ord k, Data a, Data k) => TypeIndexed k (Guard Expression a (Type TypeIndex k)) where
+  typeIndexesIn = Set.fromList . universeBi
+
+instance (Ord k, Data a, Data k) => TypeIndexed k (Choice Expression a (Type TypeIndex k)) where
+  typeIndexesIn = Set.fromList . universeBi
+
+instance (Ord k, Data a, Data k) => TypeIndexed k (Clause Expression a (Type TypeIndex k)) where
+  typeIndexesIn = Set.fromList . universeBi
+
+instance (Ord k, Data a, Data k) => TypeIndexed k (CompiledClause Expression a (Type TypeIndex k)) where
+  typeIndexesIn = Set.fromList . universeBi
+
+instance (Ord k, Data k, Data a) => TypeIndexed k (Expression a (Type TypeIndex k)) where
+  typeIndexesIn = Set.fromList . universeBi
+
+instance (Ord k, Data a, Data k) => TypeIndexed k (Function Expression a (Type TypeIndex k)) where
+  typeIndexesIn = Set.fromList . universeBi
+
+instance (Ord k, Data a, Data k) => TypeIndexed k (Constant Expression a (Type TypeIndex k)) where
+  typeIndexesIn = Set.fromList . universeBi
+
+instance (Ord k, Data t, Data k, TypeIndexed k t) => TypeIndexed k (Uses t) where
+  typeIndexesIn = Set.fromList . universeBi
+
+instance (Ord k, Data a, Data k) => TypeIndexed k (Definition a k (Type TypeIndex k)) where
+  typeIndexesIn = Set.fromList . universeBi
 
 instance (Ord k, TypeIndexed k t) => TypeIndexed k (Scheme TypeIndex k t) where
   typeIndexesIn =
     \case
       Forall qs ps t ->
         notBoundIn qs (typeIndexesIn t <> typeIndexesIn ps)
-
-instance (Ord k) => TypeIndexed k (Binding Expression a (Type TypeIndex k)) where
-  typeIndexesIn =
-    \case
-      BPattern _ p e ->
-        typeIndexesIn p <> typeIndexesIn e
-      BFunction _ _ ps e ->
-        typeIndexesIn ps <> typeIndexesIn e
-
-instance (Ord k) => TypeIndexed k (Guard Expression a (Type TypeIndex k)) where
-  typeIndexesIn =
-    \case
-      CGuard e ->
-        typeIndexesIn e
-
-instance (Ord k) => TypeIndexed k (Choice Expression a (Type TypeIndex k)) where
-  typeIndexesIn =
-    \case
-      CPlain _ gs e ->
-        typeIndexesIn gs <> typeIndexesIn e
-      CLambda{} ->
-        error "TODO"
-
-instance (Ord k) => TypeIndexed k (Clause Expression a (Type TypeIndex k)) where
-  typeIndexesIn =
-    \case
-      EClause _ p cs ->
-        typeIndexesIn p <> typeIndexesIn cs
-
-instance (Ord k) => TypeIndexed k (CompiledClause Expression a (Type TypeIndex k)) where
-  typeIndexesIn =
-    \case
-      ECompiledClause lls e ->
-        typeIndexesIn lls <> typeIndexesIn e
-      ECompiledField{} ->
-        error "TODO"
-
-instance (Ord k) => TypeIndexed k (Expression a (Type TypeIndex k)) where
-  typeIndexesIn =
-    \case
-      EAnnotation _ _ e ->
-        typeIndexesIn e
-      EConstructor _ (Label t _) ->
-        typeIndexesIn t
-      EVariable _ (Label t _) ->
-        typeIndexesIn t
-      ELambda _ ps e ->
-        typeIndexesIn ps <> typeIndexesIn e
-      ERecursiveLet _ p e1 e2 ->
-        typeIndexesIn p <> typeIndexesIn e1 <> typeIndexesIn e2
-      ELet _ gs e1 ->
-        typeIndexesIn gs <> typeIndexesIn e1
-      EIf _ t e1 e2 e3 ->
-        typeIndexesIn t <> typeIndexesIn e1 <> typeIndexesIn e2 <> typeIndexesIn e3
-      EApplication _ t e1 es ->
-        typeIndexesIn t <> typeIndexesIn e1 <> typeIndexesIn es
-      ELiteral{} ->
-        mempty
-      EListCons _ t e1 e2 ->
-        typeIndexesIn t <> typeIndexesIn e1 <> typeIndexesIn e2
-      EListLiteral _ t es ->
-        typeIndexesIn t <> typeIndexesIn es
-      EMatch _ t e cs ->
-        typeIndexesIn t <> typeIndexesIn e <> typeIndexesIn cs
-      ECompiledMatch _ t e es ->
-        typeIndexesIn t <> typeIndexesIn e <> typeIndexesIn es
-      EUnaryOperator _ (t, _) ->
-        typeIndexesIn t
-      EBinaryOperator _ (t, _) ->
-        typeIndexesIn t
-      ERecord _ t d e ->
-        typeIndexesIn t <> typeIndexesIn d <> typeIndexesIn e
-      ESelect _ (Label t _) e ->
-        typeIndexesIn t <> typeIndexesIn e
-      EFold _ t es cs e ->
-        typeIndexesIn t <> typeIndexesIn es <> typeIndexesIn cs <> typeIndexesIn e
-
-instance (Ord k) => TypeIndexed k (Function Expression a (Type TypeIndex k)) where
-  typeIndexesIn =
-    \case
-      Function _ (Uses ts t) ps e ->
-        typeIndexesIn ts <> typeIndexesIn t <> typeIndexesIn ps <> typeIndexesIn e
-
-instance (Ord k) => TypeIndexed k (Constant Expression a (Type TypeIndex k)) where
-  typeIndexesIn =
-    \case
-      Constant _ (Uses ts t) e ->
-        typeIndexesIn ts <> typeIndexesIn t <> typeIndexesIn e
-
-instance (Ord k, TypeIndexed k t) => TypeIndexed k (Uses t) where
-  typeIndexesIn =
-    \case
-      Uses ts t ->
-        typeIndexesIn ts <> typeIndexesIn t
-
-instance (Ord k) => TypeIndexed k (Definition a k (Type TypeIndex k)) where
-  typeIndexesIn =
-    \case
-      DFunction _ (Function _ u ps e) ->
-        typeIndexesIn u <> typeIndexesIn ps <> typeIndexesIn e
-      DConstant _ (Constant _ u e) ->
-        typeIndexesIn u <> typeIndexesIn e
-      DAnnotation _ d ->
-        typeIndexesIn d
-      _ ->
-        error "TODO"
 
 notBoundIn :: Set (TypeIndex k) -> Set (TypeIndex k) -> Set (TypeIndex k)
 notBoundIn s = Set.filter notBound

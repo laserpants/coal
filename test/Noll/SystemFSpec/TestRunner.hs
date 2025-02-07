@@ -5,6 +5,7 @@ module Noll.SystemFSpec.TestRunner where
 
 import Control.Monad.Identity (runIdentity)
 import Control.Monad.State (get, gets)
+import Data.Data (Data)
 import Data.List.NonEmpty ((<|))
 import Debug.Trace
 import Noll.Common.Environment (Environment)
@@ -63,7 +64,7 @@ data TestResult r a = TestResult
   deriving (Show, Eq, Ord)
 
 runTypedConstantTest ::
-  (Show a, Eq a) =>
+  (Show a, Eq a, Data a) =>
   CompilerEnvironment ->
   [(Name, Scheme TypeIndex Kind IndexedType)] ->
   Constant Expression a t ->
@@ -78,7 +79,7 @@ runTypedConstantTest env names g =
     pure (TestResult (normalizeTypeIndexes g2) as errs0 errs1)
 
 runTypedFunctionTest ::
-  (Show a, Eq a) =>
+  (Show a, Eq a, Data a) =>
   CompilerEnvironment ->
   [(Name, Scheme TypeIndex Kind IndexedType)] ->
   Function Expression a t ->
@@ -123,7 +124,7 @@ runTypedModuleTest env names (Module p ns ds) = TestResult (Module p ns a) b c d
   TestResult a b c d = runTypedDefinitionsTest env names ds
 
 runTypedExpressionTest ::
-  (Show a, Eq a) =>
+  (Show a, Eq a, Data a) =>
   CompilerEnvironment ->
   [(Name, Scheme TypeIndex Kind IndexedType)] ->
   Expression a t ->

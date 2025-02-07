@@ -2,6 +2,7 @@
 
 module Noll.SystemFExamples.Test14 where
 
+import Data.Data (Data)
 import Data.List.NonEmpty (NonEmpty (..), (<|))
 import Noll.Compiler
 import Noll.Label (Label (..))
@@ -69,7 +70,7 @@ spec =
       testResultExpression (runTest fixture)
         == fixture1
 
-runTest :: (Show a, Eq a) => Constant Expression a () -> TestResult (Constant Expression a (Type TypeIndex Kind)) a
+runTest :: (Show a, Eq a, Data a) => Constant Expression a () -> TestResult (Constant Expression a (Type TypeIndex Kind)) a
 runTest =
   runTypedConstantTest
     (CompilerEnvironment env1 env2)

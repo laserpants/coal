@@ -4,6 +4,7 @@
 module Noll.SystemF.Constraint.GenerationSpec where
 
 import Control.Monad.State (evalState)
+import Data.Data (Data)
 import Data.List (sortOn)
 import Data.List.NonEmpty (NonEmpty (..))
 import Debug.Trace
@@ -98,7 +99,7 @@ typeConstraintsInclude e r =
 
 -- testCollectConstraints
 testCollectConstraints ::
-  (Show a) =>
+  (Show a, Data a) =>
   Expression a a ->
   ( [Assumption (Type TypeIndex Kind)]
   , [ConstraintsGenOutput a TypeIndex Kind (Type TypeIndex Kind)]

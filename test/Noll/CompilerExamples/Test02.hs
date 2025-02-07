@@ -4,6 +4,7 @@ module Noll.CompilerExamples.Test02 where
 
 import Control.Monad.Identity (runIdentity)
 import Control.Monad.State (evalState)
+import Data.Data (Data)
 import Noll.Common.List1 (NonEmpty (..), (<|))
 import Noll.Compiler
 import Noll.Label (Label (..))
@@ -63,7 +64,7 @@ tvariable1 = TVariable (TypeIndex KType 1)
 bool :: IndexedType
 bool = TIntrinsic IBool
 
-baz3 :: (Show a, Eq a) => Module a Kind t -> TestResult (Module a Kind (Type TypeIndex Kind)) a
+baz3 :: (Show a, Eq a, Data a) => Module a Kind t -> TestResult (Module a Kind (Type TypeIndex Kind)) a
 baz3 =
   runTypedModuleTest
     ( CompilerEnvironment
@@ -106,7 +107,7 @@ baz3 =
     )
     []
 
-compileOrPatterns :: (Show a, Eq a) => Module a Kind t -> TestResult (Module a Kind (Type TypeIndex Kind)) a
+compileOrPatterns :: (Data a, Show a, Eq a) => Module a Kind t -> TestResult (Module a Kind (Type TypeIndex Kind)) a
 compileOrPatterns =
   runTypedModuleTest
     ( CompilerEnvironment
@@ -210,140 +211,136 @@ baz =
 
 fixture :: [Definition () k ()]
 fixture =
-  [ ( DFunction
-        "greater_than"
-        ( Function
-            ()
-            (Uses [] ())
-            ( PAnnotation
-                ()
-                (TVariable (Parameter () "a"))
-                (PVariable () (Label () "n"))
-                :| []
-            )
-            ( EApplication
-                ()
-                ()
-                (EBinaryOperator () ((), OReverseComposition))
-                ( EVariable () (Label () "not")
-                    <| EApplication
-                      ()
-                      ()
-                      (EVariable () (Label () "less_than_or_equal_to"))
-                      (EVariable () (Label () "n") :| [])
-                    :| []
-                )
-            )
-        )
-    )
-  , ( DFunction
-        "less_than_or_equal_to"
-        ( Function
-            ()
-            (Uses [] ())
-            (PVariable () (Label () "m") :| [])
-            ( ELambda
-                ()
-                (PVariable () (Label () "n") :| [])
-                ( EMatch
+  [ DFunction
+      "greater_than"
+      ( Function
+          ()
+          (Uses [] ())
+          ( PAnnotation
+              ()
+              (TVariable (Parameter () "a"))
+              (PVariable () (Label () "n"))
+              :| []
+          )
+          ( EApplication
+              ()
+              ()
+              (EBinaryOperator () ((), OReverseComposition))
+              ( EVariable () (Label () "not")
+                  <| EApplication
                     ()
                     ()
-                    ( EApplication
-                        ()
-                        ()
-                        (EVariable () (Label () "compare"))
-                        ( EVariable () (Label () "m")
-                            <| EVariable () (Label () "n")
-                            :| []
-                        )
-                    )
-                    ( EClause
-                        ()
-                        ( POr
-                            ()
-                            ()
-                            (PConstructor () (Label () "LessThan") [])
-                            (PConstructor () (Label () "EqualTo") [])
-                        )
-                        (CPlain () [] (ELiteral () (LBool True)) :| [])
-                        <| EClause
+                    (EVariable () (Label () "less_than_or_equal_to"))
+                    (EVariable () (Label () "n") :| [])
+                  :| []
+              )
+          )
+      )
+  , DFunction
+      "less_than_or_equal_to"
+      ( Function
+          ()
+          (Uses [] ())
+          (PVariable () (Label () "m") :| [])
+          ( ELambda
+              ()
+              (PVariable () (Label () "n") :| [])
+              ( EMatch
+                  ()
+                  ()
+                  ( EApplication
+                      ()
+                      ()
+                      (EVariable () (Label () "compare"))
+                      ( EVariable () (Label () "m")
+                          <| EVariable () (Label () "n")
+                          :| []
+                      )
+                  )
+                  ( EClause
+                      ()
+                      ( POr
                           ()
-                          (PConstructor () (Label () "GreaterThan") [])
-                          (CPlain () [] (ELiteral () (LBool False)) :| [])
-                        :| []
-                    )
-                )
-            )
-        )
-    )
+                          ()
+                          (PConstructor () (Label () "LessThan") [])
+                          (PConstructor () (Label () "EqualTo") [])
+                      )
+                      (CPlain () [] (ELiteral () (LBool True)) :| [])
+                      <| EClause
+                        ()
+                        (PConstructor () (Label () "GreaterThan") [])
+                        (CPlain () [] (ELiteral () (LBool False)) :| [])
+                      :| []
+                  )
+              )
+          )
+      )
   ]
 
 fixture1 :: [Definition () Kind IndexedType]
 fixture1 =
-  [ ( DFunction
-        "greater_than"
-        ( Function
-            ()
-            (Uses [] (tvariable1 `TArrow` bool))
-            ( PAnnotation
-                ()
-                (TVariable (Parameter () "a"))
-                (PVariable () (Label tvariable1 "n"))
-                :| []
-            )
-            ( EApplication
-                ()
-                (tvariable1 `TArrow` bool)
-                (EBinaryOperator () ((bool `TArrow` bool) `TArrow` (tvariable1 `TArrow` bool) `TArrow` tvariable1 `TArrow` bool, OReverseComposition))
-                ( EVariable () (Label (bool `TArrow` bool) "not")
-                    <| EApplication
-                      ()
-                      (tvariable1 `TArrow` bool)
-                      (EVariable () (Label (tvariable1 `TArrow` tvariable1 `TArrow` bool) "less_than_or_equal_to"))
-                      (EVariable () (Label tvariable1 "n") :| [])
-                    :| []
-                )
-            )
-        )
-    )
-  , ( DFunction
-        "less_than_or_equal_to"
-        ( Function
-            ()
-            (Uses [] (tvariable0 `TArrow` bool))
-            (PVariable () (Label tvariable0 "m") :| [])
-            ( ELambda
-                ()
-                (PVariable () (Label tvariable0 "n") :| [])
-                ( EMatch
+  [ DFunction
+      "greater_than"
+      ( Function
+          ()
+          (Uses [] (tvariable1 `TArrow` bool))
+          ( PAnnotation
+              ()
+              (TVariable (Parameter () "a"))
+              (PVariable () (Label tvariable1 "n"))
+              :| []
+          )
+          ( EApplication
+              ()
+              (tvariable1 `TArrow` bool)
+              (EBinaryOperator () ((bool `TArrow` bool) `TArrow` (tvariable1 `TArrow` bool) `TArrow` tvariable1 `TArrow` bool, OReverseComposition))
+              ( EVariable () (Label (bool `TArrow` bool) "not")
+                  <| EApplication
                     ()
-                    bool
-                    ( EApplication
-                        ()
-                        (TConstructor KType "Ordering")
-                        (EVariable () (Label (tvariable0 `TArrow` tvariable0 `TArrow` TConstructor KType "Ordering") "compare"))
-                        ( EVariable () (Label tvariable0 "m")
-                            <| EVariable () (Label tvariable0 "n")
-                            :| []
-                        )
-                    )
-                    ( EClause
-                        ()
-                        ( POr
-                            ()
-                            (TConstructor KType "Ordering")
-                            (PConstructor () (Label (TConstructor KType "Ordering") "LessThan") [])
-                            (PConstructor () (Label (TConstructor KType "Ordering") "EqualTo") [])
-                        )
-                        (CPlain () [] (ELiteral () (LBool True)) :| [])
-                        <| EClause
+                    (tvariable1 `TArrow` bool)
+                    (EVariable () (Label (tvariable1 `TArrow` tvariable1 `TArrow` bool) "less_than_or_equal_to"))
+                    (EVariable () (Label tvariable1 "n") :| [])
+                  :| []
+              )
+          )
+      )
+  , DFunction
+      "less_than_or_equal_to"
+      ( Function
+          ()
+          (Uses [] (tvariable0 `TArrow` bool))
+          (PVariable () (Label tvariable0 "m") :| [])
+          ( ELambda
+              ()
+              (PVariable () (Label tvariable0 "n") :| [])
+              ( EMatch
+                  ()
+                  bool
+                  ( EApplication
+                      ()
+                      (TConstructor KType "Ordering")
+                      (EVariable () (Label (tvariable0 `TArrow` tvariable0 `TArrow` TConstructor KType "Ordering") "compare"))
+                      ( EVariable () (Label tvariable0 "m")
+                          <| EVariable () (Label tvariable0 "n")
+                          :| []
+                      )
+                  )
+                  ( EClause
+                      ()
+                      ( POr
                           ()
-                          (PConstructor () (Label (TConstructor KType "Ordering") "GreaterThan") [])
-                          (CPlain () [] (ELiteral () (LBool False)) :| [])
-                        :| []
-                    )
-                )
-            )
-        )
-    )
+                          (TConstructor KType "Ordering")
+                          (PConstructor () (Label (TConstructor KType "Ordering") "LessThan") [])
+                          (PConstructor () (Label (TConstructor KType "Ordering") "EqualTo") [])
+                      )
+                      (CPlain () [] (ELiteral () (LBool True)) :| [])
+                      <| EClause
+                        ()
+                        (PConstructor () (Label (TConstructor KType "Ordering") "GreaterThan") [])
+                        (CPlain () [] (ELiteral () (LBool False)) :| [])
+                      :| []
+                  )
+              )
+          )
+      )
   ]

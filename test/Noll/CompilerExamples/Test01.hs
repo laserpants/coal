@@ -105,72 +105,70 @@ baz =
 
 fixture :: [Definition () k ()]
 fixture =
-  [ ( DFunction
-        "less_than_or_equal_to"
-        ( Function
-            ()
-            (Uses [] ())
-            (PVariable () (Label () "m") :| [])
-            ( ELambda
-                ()
-                (PVariable () (Label () "n") :| [])
-                ( EMatch
-                    ()
-                    ()
-                    ( EApplication
-                        ()
-                        ()
-                        (EVariable () (Label () "compare"))
-                        ( EVariable () (Label () "m")
-                            <| EVariable () (Label () "n")
-                            :| []
-                        )
-                    )
-                    ( EClause
-                        ()
-                        ( POr
-                            ()
-                            ()
-                            (PConstructor () (Label () "LessThan") [])
-                            (PConstructor () (Label () "EqualTo") [])
-                        )
-                        (CPlain () [] (ELiteral () (LBool True)) :| [])
-                        <| EClause
+  [ DFunction
+      "less_than_or_equal_to"
+      ( Function
+          ()
+          (Uses [] ())
+          (PVariable () (Label () "m") :| [])
+          ( ELambda
+              ()
+              (PVariable () (Label () "n") :| [])
+              ( EMatch
+                  ()
+                  ()
+                  ( EApplication
+                      ()
+                      ()
+                      (EVariable () (Label () "compare"))
+                      ( EVariable () (Label () "m")
+                          <| EVariable () (Label () "n")
+                          :| []
+                      )
+                  )
+                  ( EClause
+                      ()
+                      ( POr
                           ()
-                          (PConstructor () (Label () "GreaterThan") [])
-                          (CPlain () [] (ELiteral () (LBool False)) :| [])
-                        :| []
-                    )
-                )
-            )
-        )
-    )
-  , ( DFunction
-        "greater_than"
-        ( Function
-            ()
-            (Uses [] ())
-            ( PAnnotation
-                ()
-                (TVariable (Parameter () "a"))
-                (PVariable () (Label () "n"))
-                :| []
-            )
-            ( EApplication
-                ()
-                ()
-                (EBinaryOperator () ((), OReverseComposition))
-                ( EVariable () (Label () "not")
-                    <| EApplication
-                      ()
-                      ()
-                      (EVariable () (Label () "less_than_or_equal_to"))
-                      (EVariable () (Label () "n") :| [])
-                    :| []
-                )
-            )
-        )
-    )
+                          ()
+                          (PConstructor () (Label () "LessThan") [])
+                          (PConstructor () (Label () "EqualTo") [])
+                      )
+                      (CPlain () [] (ELiteral () (LBool True)) :| [])
+                      <| EClause
+                        ()
+                        (PConstructor () (Label () "GreaterThan") [])
+                        (CPlain () [] (ELiteral () (LBool False)) :| [])
+                      :| []
+                  )
+              )
+          )
+      )
+  , DFunction
+      "greater_than"
+      ( Function
+          ()
+          (Uses [] ())
+          ( PAnnotation
+              ()
+              (TVariable (Parameter () "a"))
+              (PVariable () (Label () "n"))
+              :| []
+          )
+          ( EApplication
+              ()
+              ()
+              (EBinaryOperator () ((), OReverseComposition))
+              ( EVariable () (Label () "not")
+                  <| EApplication
+                    ()
+                    ()
+                    (EVariable () (Label () "less_than_or_equal_to"))
+                    (EVariable () (Label () "n") :| [])
+                  :| []
+              )
+          )
+      )
   ]
 
 tvariable0 :: IndexedType

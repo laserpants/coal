@@ -153,10 +153,10 @@ evalExpr =
 argn :: Int -> Name
 argn n = "$$$." <> showt n
 
-args1 :: (Value -> Eval Value) -> Value
-args1 f = VFun [argn 0] $ do
-  a0 <- evalVar (argn 0)
-  f a0
+-- args1 :: (Value -> Eval Value) -> Value
+-- args1 f = VFun [argn 0] $ do
+--  a0 <- evalVar (argn 0)
+--  f a0
 
 args2 :: (Value -> Value -> Eval Value) -> Value
 args2 f = VFun [argn 0, argn 1] $ do
