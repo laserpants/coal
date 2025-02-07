@@ -11,7 +11,6 @@ import Noll.Language.Module (Module (..))
 import Noll.Language.Module.Constant (Constant (..))
 import Noll.Language.Module.Definition (Definition (..))
 import Noll.Language.Module.Function (Function (..))
-import Noll.Language.Module.TraitInstance (TraitInstance (..))
 import Noll.Language.Trait (Uses (..))
 import Noll.Language.Type (Type (..), foldType)
 
@@ -40,10 +39,10 @@ instance (Monoid a) => NormalizeObjectsTransformContext (Definition a k (Type o 
       d ->
         d
 
-instance (Monoid a) => NormalizeObjectsTransformContext (TraitInstance Expression a (Type o k)) where
-  normalizeObject =
-    \case
-      TFunction (Function a (Uses ts t) ps e) ->
-        TConstant (Constant a (Uses ts (foldType t (typeOf <$> ps))) (flattenLambda (ELambda mempty ps e)))
-      t ->
-        t
+--instance (Monoid a) => NormalizeObjectsTransformContext (TraitInstance Expression a (Type o k)) where
+--  normalizeObject =
+--    \case
+--      TFunction (Function a (Uses ts t) ps e) ->
+--        TConstant (Constant a (Uses ts (foldType t (typeOf <$> ps))) (flattenLambda (ELambda mempty ps e)))
+--      t ->
+--        t
