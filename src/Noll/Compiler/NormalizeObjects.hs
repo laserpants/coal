@@ -4,7 +4,6 @@
 module Noll.Compiler.NormalizeObjects where
 
 import Data.Map.Strict (Map)
-import Data.Tuple.Extra (second)
 import Noll.Compiler.Transform
 import Noll.Language.Expression (Expression (..))
 import Noll.Language.HasType (HasType (..))
@@ -13,7 +12,6 @@ import Noll.Language.Module.Constant (Constant (..))
 import Noll.Language.Module.Definition (Definition (..))
 import Noll.Language.Module.Function (Function (..))
 import Noll.Language.Module.TraitInstance (TraitInstance (..))
-import Noll.Language.Pattern (Pattern (..))
 import Noll.Language.Trait (Uses (..))
 import Noll.Language.Type (Type (..), foldType)
 
