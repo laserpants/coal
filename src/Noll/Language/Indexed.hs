@@ -113,9 +113,9 @@ instance (Ord k, TypeIndexed k t) => TypeIndexed k (Scheme TypeIndex k t) where
         notBoundIn qs (typeIndexesIn t <> typeIndexesIn ps)
 
 notBoundIn :: Set (TypeIndex k) -> Set (TypeIndex k) -> Set (TypeIndex k)
-notBoundIn s = Set.filter notBound
+notBoundIn set = Set.filter notBound
  where
-  notBound index = typeIndexId index `notElem` Set.map typeIndexId s
+  notBound index = typeIndexId index `notElem` Set.map typeIndexId set
 
 typeIdsIn :: (TypeIndexed k t) => t -> Set Int
 typeIdsIn = Set.map typeIndexId . typeIndexesIn
