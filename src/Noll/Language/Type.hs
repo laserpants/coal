@@ -21,6 +21,7 @@ module Noll.Language.Type (
 ) where
 
 import Data.Data (Data, Typeable)
+import Data.Generics.Uniplate.Data (transform)
 import Data.List.NonEmpty (NonEmpty)
 import Noll.Common.List1 (List1)
 import Noll.Common.Supply (Supply (..))
@@ -88,20 +89,10 @@ activeIdsIn = Set.map typeIndexId . activeIn
 foldType :: (Foldable f) => Type o k -> f (Type o k) -> Type o k
 foldType = foldr TArrow
 
-normalizeRowTypes :: Type o k -> Type o k
-normalizeRowTypes =
+normalizeRowTypes :: (Typeable o, Data k, Data (o k)) => Type o k -> Type o k
+normalizeRowTypes = transform $
   \case
     TRow r ->
       TRow (normalizeRow r)
-    TApplication k t1 ts ->
-      TApplication k (normalizeRowTypes t1) (fmap normalizeRowTypes ts)
-    TArrow t1 t2 ->
-      TArrow (normalizeRowTypes t1) (normalizeRowTypes t2)
-    TIntrinsic t ->
-      TIntrinsic (fmap normalizeRowTypes t)
-    TAlias name ts t ->
-      TAlias name (fmap normalizeRowTypes ts) (normalizeRowTypes t)
-    t@TVariable{} ->
-      t
-    t@TConstructor{} ->
+    t ->
       t
