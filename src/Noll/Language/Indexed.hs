@@ -120,6 +120,8 @@ instance (Ord k, TypeIndexed k t) => TypeIndexed k (Pattern a t) where
         typeIndexesIn t
       PAtVariable _ (Label t _) ->
         typeIndexesIn t
+      PLiteral{} ->
+        mempty
 
 instance (Ord k, TypeIndexed k t) => TypeIndexed k (Scheme TypeIndex k t) where
   typeIndexesIn =
