@@ -23,8 +23,8 @@ instance HasKind (TypeIndex Kind) where
 instance (HasKind (o Kind)) => HasKind (Type o Kind) where
   kindOf =
     \case
-      TAlias _ _ t -> do
-        kindOf t
+      TAlias _ _ k -> do
+        kindOf k
       TApplication k _ _ ->
         kindOf k
       TArrow{} ->
@@ -33,7 +33,7 @@ instance (HasKind (o Kind)) => HasKind (Type o Kind) where
         KType
       TRow{} ->
         KRow
-      TVariable t ->
-        kindOf t
+      TVariable k ->
+        kindOf k
       TConstructor k _ ->
         kindOf k
