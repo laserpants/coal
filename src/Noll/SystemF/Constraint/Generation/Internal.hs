@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
@@ -32,6 +33,7 @@ import Control.Monad.RWS (
   modify,
   runRWS,
  )
+import Data.Data (Data, Typeable)
 import Noll.Common.Environment (Environment (..))
 import Noll.Common.Supply (Supply (..))
 import Noll.Language (Constructor (..), Kind (..), Type (..), TypeIndex (..))
@@ -71,7 +73,7 @@ data InferenceRule k a
     InferTopLevelFunction a
   | -- | TODO
     InferTopLevelConstant a
-  deriving (Show, Eq, Ord, Read)
+  deriving (Show, Eq, Ord, Read, Data, Typeable)
 
 instance Substitutable (InferenceRule Kind a) where
   apply sub =

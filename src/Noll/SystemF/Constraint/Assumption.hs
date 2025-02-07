@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
@@ -8,6 +9,7 @@ module Noll.SystemF.Constraint.Assumption (
   assumptionNameIsNotOneOf,
 ) where
 
+import Data.Data (Data, Typeable)
 import Noll.SystemF.Substitution (Substitutable (..))
 import Noll.Utils (Name)
 
@@ -15,7 +17,7 @@ data Assumption t = Assumption
   { assumptionName :: Name
   , assumptionType :: t
   }
-  deriving (Show, Eq, Ord, Read)
+  deriving (Show, Eq, Ord, Read, Data, Typeable)
 
 instance (Substitutable t) => Substitutable (Assumption t) where
   apply sub (Assumption name t) = Assumption name (apply sub t)
