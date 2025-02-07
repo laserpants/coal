@@ -44,6 +44,8 @@ instance HasTag (Expression a t) a where
         a
       EMatch a _ _ _ ->
         a
+      ECompiledMatch a _ _ _ ->
+        a
       EFold a _ _ _ _ ->
         a
       ESelect a _ _ ->
