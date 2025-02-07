@@ -39,7 +39,7 @@ instance (Monoid a) => NormalizeObjectsTransformContext (Definition a k (Type o 
       d ->
         d
 
---instance (Monoid a) => NormalizeObjectsTransformContext (TraitInstance Expression a (Type o k)) where
+-- instance (Monoid a) => NormalizeObjectsTransformContext (TraitInstance Expression a (Type o k)) where
 --  normalizeObject =
 --    \case
 --      TFunction (Function a (Uses ts t) ps e) ->

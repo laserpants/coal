@@ -98,6 +98,8 @@ evalExpr =
         \case
           ECompiledClause ls e ->
             matchClause (fromList1 (labelName <$> ls)) [v1] e
+          ECompiledField{} ->
+            error "TODO"
       pure $ fromMaybe VFail (find (/= VFail) vs)
     EIf _ _ e1 e2 e3 -> do
       v1 <- evalExpr e1
@@ -125,6 +127,26 @@ evalExpr =
           (VPrim (LInt32 a), VPrim (LInt32 b)) ->
             pure (VPrim (LBool (a == b)))
     ELambda{} ->
+      error "TODO"
+    ELet{} ->
+      error "TODO"
+    ERecursiveLet{} ->
+      error "TODO"
+    EUnaryOperator{} ->
+      error "TODO"
+    EBinaryOperator{} ->
+      error "TODO"
+    ERecord{} ->
+      error "TODO"
+    EListCons{} ->
+      error "TODO"
+    EMatch{} ->
+      error "TODO"
+    ESelect{} ->
+      error "TODO"
+    EFold{} ->
+      error "TODO"
+    EListLiteral{} ->
       error "TODO"
 
 {-# INLINE argn #-}
