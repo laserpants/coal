@@ -19,8 +19,8 @@ data Assumption t = Assumption
   }
   deriving (Show, Eq, Ord, Read, Data, Typeable)
 
-instance (Substitutable t) => Substitutable (Assumption t) where
-  apply sub (Assumption name t) = Assumption name (apply sub t)
+--instance (Substitutable t) => Substitutable (Assumption t) where
+--  apply = undefined -- transform . apply
 
 {-# INLINE assumptionNameIs #-}
 assumptionNameIs :: Name -> Assumption t -> Bool

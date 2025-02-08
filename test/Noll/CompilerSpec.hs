@@ -91,58 +91,59 @@ foo =
 
 baz :: (Monad m) => CompilerT () m (Function Expression () IndexedType, [CompilerAssumption])
 baz = do
-  insertNamesC
-    [
-      ( "compare"
-      , Forall
-          (Set.fromList [TypeIndex KType 0])
-          []
-          ( TVariable (TypeIndex KType 0)
-              `TArrow` TVariable (TypeIndex KType 0)
-              `TArrow` TConstructor KType "Ordering"
-          )
-      )
-    ,
-      ( "not"
-      , Forall
-          mempty
-          []
-          (TIntrinsic IBool `TArrow` TIntrinsic IBool)
-      )
-    ,
-      ( "less_than_or_equal_to"
-      , Forall
-          (Set.fromList [TypeIndex KType 0])
-          []
-          ( TVariable (TypeIndex KType 0)
-              `TArrow` TVariable (TypeIndex KType 0)
-              `TArrow` TIntrinsic IBool
-          )
-      )
-    ]
-  e <-
-    indexedC $
-      Function
-        ()
-        (Uses [] ())
-        ( PAnnotation
-            ()
-            (TVariable (Parameter () "a"))
-            (PVariable () (Label () "n"))
-            :| []
-        )
-        ( EApplication
-            ()
-            ()
-            (EBinaryOperator () ((), OReverseComposition))
-            ( EVariable () (Label () "not")
-                <| EApplication
-                  ()
-                  ()
-                  (EVariable () (Label () "less_than_or_equal_to"))
-                  (EVariable () (Label () "n") :| [])
-                :| []
-            )
-        )
-  (xx, yy) <- typeCheckFunctionC e
-  pure (normalizeTypeIndexes xx, yy)
+  undefined
+--  insertNamesC
+--    [
+--      ( "compare"
+--      , Forall
+--          (Set.fromList [TypeIndex KType 0])
+--          []
+--          ( TVariable (TypeIndex KType 0)
+--              `TArrow` TVariable (TypeIndex KType 0)
+--              `TArrow` TConstructor KType "Ordering"
+--          )
+--      )
+--    ,
+--      ( "not"
+--      , Forall
+--          mempty
+--          []
+--          (TIntrinsic IBool `TArrow` TIntrinsic IBool)
+--      )
+--    ,
+--      ( "less_than_or_equal_to"
+--      , Forall
+--          (Set.fromList [TypeIndex KType 0])
+--          []
+--          ( TVariable (TypeIndex KType 0)
+--              `TArrow` TVariable (TypeIndex KType 0)
+--              `TArrow` TIntrinsic IBool
+--          )
+--      )
+--    ]
+--  e <-
+--    indexedC $
+--      Function
+--        ()
+--        (Uses [] ())
+--        ( PAnnotation
+--            ()
+--            (TVariable (Parameter () "a"))
+--            (PVariable () (Label () "n"))
+--            :| []
+--        )
+--        ( EApplication
+--            ()
+--            ()
+--            (EBinaryOperator () ((), OReverseComposition))
+--            ( EVariable () (Label () "not")
+--                <| EApplication
+--                  ()
+--                  ()
+--                  (EVariable () (Label () "less_than_or_equal_to"))
+--                  (EVariable () (Label () "n") :| [])
+--                :| []
+--            )
+--        )
+--  (xx, yy) <- typeCheckFunctionC e
+--  pure (normalizeTypeIndexes xx, yy)

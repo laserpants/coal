@@ -70,13 +70,14 @@ runTypedConstantTest ::
   Constant Expression a t ->
   TestResult (Constant Expression a (Type TypeIndex Kind)) a
 runTypedConstantTest env names g =
-  runIdentity $ evalCompilerT env $ do
-    insertNamesC names
-    g1 <- indexedC g
-    (g2, as) <- typeCheckConstantC g1
-    errs0 <- getConstraintsGenErrorsC
-    errs1 <- getSolverRuleViolationsC
-    pure (TestResult (normalizeTypeIndexes g2) as errs0 errs1)
+  undefined
+--  runIdentity $ evalCompilerT env $ do
+--    insertNamesC names
+--    g1 <- indexedC g
+--    (g2, as) <- typeCheckConstantC g1
+--    errs0 <- getConstraintsGenErrorsC
+--    errs1 <- getSolverRuleViolationsC
+--    pure (TestResult (normalizeTypeIndexes g2) as errs0 errs1)
 
 runTypedFunctionTest ::
   (Show a, Eq a, Data a) =>
@@ -85,13 +86,14 @@ runTypedFunctionTest ::
   Function Expression a t ->
   TestResult (Function Expression a (Type TypeIndex Kind)) a
 runTypedFunctionTest env names f =
-  runIdentity $ evalCompilerT env $ do
-    insertNamesC names
-    f1 <- indexedC f
-    (f2, as) <- typeCheckFunctionC f1
-    errs0 <- getConstraintsGenErrorsC
-    errs1 <- getSolverRuleViolationsC
-    pure (TestResult (normalizeTypeIndexes f2) as errs0 errs1)
+  undefined
+--  runIdentity $ evalCompilerT env $ do
+--    insertNamesC names
+--    f1 <- indexedC f
+--    (f2, as) <- typeCheckFunctionC f1
+--    errs0 <- getConstraintsGenErrorsC
+--    errs1 <- getSolverRuleViolationsC
+--    pure (TestResult (normalizeTypeIndexes f2) as errs0 errs1)
 
 -- runTypedDefinitionsTest ::
 --  ( Show a
@@ -130,13 +132,14 @@ runTypedExpressionTest ::
   Expression a t ->
   TestResult (Expression a (Type TypeIndex Kind)) a
 runTypedExpressionTest env names e =
-  runIdentity $ evalCompilerT env $ do
-    insertNamesC names
-    e1 <- indexedC e
-    (e2, as) <- typeCheckExpressionC e1
-    errs0 <- getConstraintsGenErrorsC
-    errs1 <- getSolverRuleViolationsC
-    pure (TestResult (normalizeTypeIndexes e2) as errs0 errs1)
+  undefined
+--  runIdentity $ evalCompilerT env $ do
+--    insertNamesC names
+--    e1 <- indexedC e
+--    (e2, as) <- typeCheckExpressionC e1
+--    errs0 <- getConstraintsGenErrorsC
+--    errs1 <- getSolverRuleViolationsC
+--    pure (TestResult (normalizeTypeIndexes e2) as errs0 errs1)
 
 testRunner :: (CompilerEnvironment -> t) -> t
 testRunner f = f (CompilerEnvironment testDataConstructorEnv testTypeConstructorEnv)

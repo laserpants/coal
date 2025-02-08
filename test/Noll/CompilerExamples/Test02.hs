@@ -66,148 +66,151 @@ bool = TIntrinsic IBool
 
 baz3 :: (Show a, Eq a, Data a) => Module a Kind t -> TestResult (Module a Kind (Type TypeIndex Kind)) a
 baz3 =
-  runTypedModuleTest
-    ( CompilerEnvironment
-        ( Environment.fromList
-            [
-              ( "Node"
-              , Constructor
-                  "Node"
-                  3
-                  ( Forall
-                      (Set.fromList [TypeIndex KType 0])
-                      []
-                      ( tvariable0
-                          `TArrow` tree0
-                          `TArrow` tree0
-                          `TArrow` tree0
-                      )
-                  )
-              )
-            ,
-              ( "Leaf"
-              , Constructor
-                  "Leaf"
-                  0
-                  ( Forall
-                      (Set.fromList [TypeIndex KType 0])
-                      []
-                      tree0
-                  )
-              )
-            ]
-        )
-        ( Environment.fromList
-            [
-              ( "Tree"
-              , KArrow KType KType
-              )
-            ]
-        )
-    )
-    []
+  undefined
+--  runTypedModuleTest
+--    ( CompilerEnvironment
+--        ( Environment.fromList
+--            [
+--              ( "Node"
+--              , Constructor
+--                  "Node"
+--                  3
+--                  ( Forall
+--                      (Set.fromList [TypeIndex KType 0])
+--                      []
+--                      ( tvariable0
+--                          `TArrow` tree0
+--                          `TArrow` tree0
+--                          `TArrow` tree0
+--                      )
+--                  )
+--              )
+--            ,
+--              ( "Leaf"
+--              , Constructor
+--                  "Leaf"
+--                  0
+--                  ( Forall
+--                      (Set.fromList [TypeIndex KType 0])
+--                      []
+--                      tree0
+--                  )
+--              )
+--            ]
+--        )
+--        ( Environment.fromList
+--            [
+--              ( "Tree"
+--              , KArrow KType KType
+--              )
+--            ]
+--        )
+--    )
+--    []
 
 compileOrPatterns :: (Data a, Show a, Eq a) => Module a Kind t -> TestResult (Module a Kind (Type TypeIndex Kind)) a
 compileOrPatterns =
-  runTypedModuleTest
-    ( CompilerEnvironment
-        ( Environment.fromList
-            [
-              ( "LessThan"
-              , Constructor
-                  "LessThan"
-                  0
-                  (Forall mempty [] (TConstructor KType "Ordering"))
-              )
-            ,
-              ( "GreaterThan"
-              , Constructor
-                  "GreaterThan"
-                  0
-                  (Forall mempty [] (TConstructor KType "Ordering"))
-              )
-            ,
-              ( "EqualTo"
-              , Constructor
-                  "EqualTo"
-                  0
-                  (Forall mempty [] (TConstructor KType "Ordering"))
-              )
-            ]
-        )
-        ( Environment.fromList
-            []
-        )
-    )
-    [
-      ( "compare"
-      , Forall
-          (Set.fromList [TypeIndex KType 0])
-          []
-          ( TVariable (TypeIndex KType 0)
-              `TArrow` TVariable (TypeIndex KType 0)
-              `TArrow` TConstructor KType "Ordering"
-          )
-      )
-    ,
-      ( "not"
-      , Forall
-          mempty
-          []
-          (TIntrinsic IBool `TArrow` TIntrinsic IBool)
-      )
-    ]
+  undefined
+--  runTypedModuleTest
+--    ( CompilerEnvironment
+--        ( Environment.fromList
+--            [
+--              ( "LessThan"
+--              , Constructor
+--                  "LessThan"
+--                  0
+--                  (Forall mempty [] (TConstructor KType "Ordering"))
+--              )
+--            ,
+--              ( "GreaterThan"
+--              , Constructor
+--                  "GreaterThan"
+--                  0
+--                  (Forall mempty [] (TConstructor KType "Ordering"))
+--              )
+--            ,
+--              ( "EqualTo"
+--              , Constructor
+--                  "EqualTo"
+--                  0
+--                  (Forall mempty [] (TConstructor KType "Ordering"))
+--              )
+--            ]
+--        )
+--        ( Environment.fromList
+--            []
+--        )
+--    )
+--    [
+--      ( "compare"
+--      , Forall
+--          (Set.fromList [TypeIndex KType 0])
+--          []
+--          ( TVariable (TypeIndex KType 0)
+--              `TArrow` TVariable (TypeIndex KType 0)
+--              `TArrow` TConstructor KType "Ordering"
+--          )
+--      )
+--    ,
+--      ( "not"
+--      , Forall
+--          mempty
+--          []
+--          (TIntrinsic IBool `TArrow` TIntrinsic IBool)
+--      )
+--    ]
 
 baz :: [Definition () Kind t] -> TestResult [Definition () Kind IndexedType] ()
 baz =
-  runTypedDefinitionsTest
-    ( CompilerEnvironment
-        ( Environment.fromList
-            [
-              ( "LessThan"
-              , Constructor
-                  "LessThan"
-                  0
-                  (Forall mempty [] (TConstructor KType "Ordering"))
-              )
-            ,
-              ( "GreaterThan"
-              , Constructor
-                  "GreaterThan"
-                  0
-                  (Forall mempty [] (TConstructor KType "Ordering"))
-              )
-            ,
-              ( "EqualTo"
-              , Constructor
-                  "EqualTo"
-                  0
-                  (Forall mempty [] (TConstructor KType "Ordering"))
-              )
-            ]
-        )
-        ( Environment.fromList
-            []
-        )
-    )
-    [
-      ( "compare"
-      , Forall
-          (Set.fromList [TypeIndex KType 0])
-          []
-          ( TVariable (TypeIndex KType 0)
-              `TArrow` TVariable (TypeIndex KType 0)
-              `TArrow` TConstructor KType "Ordering"
-          )
-      )
-    ,
-      ( "not"
-      , Forall
-          mempty
-          []
-          (TIntrinsic IBool `TArrow` TIntrinsic IBool)
-      )
-    ]
+  undefined
+--  runTypedDefinitionsTest
+--    ( CompilerEnvironment
+--        ( Environment.fromList
+--            [
+--              ( "LessThan"
+--              , Constructor
+--                  "LessThan"
+--                  0
+--                  (Forall mempty [] (TConstructor KType "Ordering"))
+--              )
+--            ,
+--              ( "GreaterThan"
+--              , Constructor
+--                  "GreaterThan"
+--                  0
+--                  (Forall mempty [] (TConstructor KType "Ordering"))
+--              )
+--            ,
+--              ( "EqualTo"
+--              , Constructor
+--                  "EqualTo"
+--                  0
+--                  (Forall mempty [] (TConstructor KType "Ordering"))
+--              )
+--            ]
+--        )
+--        ( Environment.fromList
+--            []
+--        )
+--    )
+--    [
+--      ( "compare"
+--      , Forall
+--          (Set.fromList [TypeIndex KType 0])
+--          []
+--          ( TVariable (TypeIndex KType 0)
+--              `TArrow` TVariable (TypeIndex KType 0)
+--              `TArrow` TConstructor KType "Ordering"
+--          )
+--      )
+--    ,
+--      ( "not"
+--      , Forall
+--          mempty
+--          []
+--          (TIntrinsic IBool `TArrow` TIntrinsic IBool)
+--      )
+--    ]
 
 fixture :: [Definition () k ()]
 fixture =

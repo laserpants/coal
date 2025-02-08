@@ -272,18 +272,19 @@ assumptionConstraints Assumption{..} = do
     Just s ->
       pure $ Right (Explicit (InferenceRule 200) assumptionType s)
 
-solveConstraintsC :: (Monad m, Show a, Eq a) => [CompilerConstraint a] -> CompilerT a m Substitution
+solveConstraintsC :: (Monad m, Show a, Eq a, Data a) => [CompilerConstraint a] -> CompilerT a m Substitution
 solveConstraintsC cs = do
-  dict <- gets compilerTypeAnnotationParams
-  n <- gets compilerSupply
-  let (sub, m, rs) = solveConstraints n cs
-  updateSupplyC m
-  let errors = execWriter (checkTypeAnnotationParameters (Map.toList dict) sub)
-  compilerReportSolverRuleViolations (apply sub rs)
-  compilerReportConstraintsGenErrors (IllFormedTypeAnnotation <$> errors)
-  pure sub
+  undefined
+--  dict <- gets compilerTypeAnnotationParams
+--  n <- gets compilerSupply
+--  let (sub, m, rs) = solveConstraints n cs
+--  updateSupplyC m
+--  let errors = execWriter (checkTypeAnnotationParameters (Map.toList dict) sub)
+--  compilerReportSolverRuleViolations (apply sub rs)
+--  compilerReportConstraintsGenErrors (IllFormedTypeAnnotation <$> errors)
+--  pure sub
 
-solveC :: (Monad m, Show a, Eq a) => [CompilerConstraint a] -> CompilerT a m ()
+solveC :: (Monad m, Show a, Eq a, Data a) => [CompilerConstraint a] -> CompilerT a m ()
 solveC constraints = do
   sub1 <- gets compilerSubstitution
   sub2 <- solveConstraintsC constraints
@@ -293,11 +294,12 @@ solveC constraints = do
 
 compileConstraintsC2 :: (Monad m, Data a, Show a, Eq a) => Expression a IndexedType -> CompilerT a m ()
 compileConstraintsC2 expr = do
-  (ms1, cs1) <- generateConstraintsC expr
-  (ms2, cs2) <- partitionEithers <$> traverse assumptionConstraints ms1
-  sub <- gets compilerSubstitution
-  insertAssumptionsC (apply sub ms2)
-  insertConstraintsC (cs1 <> cs2)
+  undefined
+--  (ms1, cs1) <- generateConstraintsC expr
+--  (ms2, cs2) <- partitionEithers <$> traverse assumptionConstraints ms1
+--  sub <- gets compilerSubstitution
+--  insertAssumptionsC (apply sub ms2)
+--  insertConstraintsC (cs1 <> cs2)
 
 compileFunctionC2 :: (Monad m, Data a, Show a, Eq a) => Function Expression a IndexedType -> CompilerT a m ()
 compileFunctionC2 (Function loc (Uses _ t) ps e) = do
@@ -333,7 +335,7 @@ compileDefinitionC2 = do
       -- TODO
       compileDefinitionC2 d
 
-solveC2 :: (Monad m, Show a, Eq a) => CompilerT a m Substitution
+solveC2 :: (Monad m, Show a, Eq a, Data a) => CompilerT a m Substitution
 solveC2 = do
   constraints <- gets compilerConstraints
   sub1 <- gets compilerSubstitution
@@ -359,70 +361,76 @@ compileConstraintsC ::
   Expression a IndexedType ->
   CompilerT a m ()
 compileConstraintsC cs o e = do
-  (ms0, cs0) <- generateConstraintsC e
-  (ms1, cs1) <- partitionEithers <$> traverse assumptionConstraints ms0
-  sub <- gets compilerSubstitution
-  insertAssumptionsC (apply sub ms1)
-  solveC (cs <> cs0 <> cs1)
+  undefined
+--  (ms0, cs0) <- generateConstraintsC e
+--  (ms1, cs1) <- partitionEithers <$> traverse assumptionConstraints ms0
+--  sub <- gets compilerSubstitution
+--  insertAssumptionsC (apply sub ms1)
+--  solveC (cs <> cs0 <> cs1)
 
 typeCheckExpressionC ::
-  (Monad m, Data a, Show a, Eq a) =>
+  (Monad m, Data a, Show a, Eq a, Data a) =>
   Expression a IndexedType ->
   CompilerT a m (Expression a IndexedType, [CompilerAssumption])
 typeCheckExpressionC e = do
-  compileConstraintsC [] e e
-  ams <- gets compilerAssumptions
-  sub <- gets compilerSubstitution
-  pure (normalizeRowTypes <$> apply sub e, apply sub ams)
+  undefined
+--  compileConstraintsC [] e e
+--  ams <- gets compilerAssumptions
+--  sub <- gets compilerSubstitution
+--  pure (normalizeRowTypes <$> apply sub e, apply sub ams)
 
 compileFunctionC ::
   (Monad m, Data a, Show a, Eq a) =>
   Function Expression a IndexedType ->
   CompilerT a m ()
 compileFunctionC f@(Function loc (Uses _ t) ps e) = do
-  t1 <- supplied (TVariable . TypeIndex KType)
-  let t2 = foldType t1 (typeOf <$> ps)
-  compileConstraintsC [Equality (InferenceRule 999) [t, typeOf e]] f $
-    ELet
-      loc
-      (BFunction loc placeholder ps e :| [])
-      (EVariable loc (Label t2 placeholder))
- where
-  placeholder = "###.function"
+  undefined
+--  t1 <- supplied (TVariable . TypeIndex KType)
+--  let t2 = foldType t1 (typeOf <$> ps)
+--  compileConstraintsC [Equality (InferenceRule 999) [t, typeOf e]] f $
+--    ELet
+--      loc
+--      (BFunction loc placeholder ps e :| [])
+--      (EVariable loc (Label t2 placeholder))
+-- where
+--  placeholder = "###.function"
 
 typeCheckFunctionC ::
   (Monad m, Data a, Show a, Eq a) =>
   Function Expression a IndexedType ->
   CompilerT a m (Function Expression a IndexedType, [CompilerAssumption])
 typeCheckFunctionC f = do
-  compileFunctionC f
-  ams <- gets compilerAssumptions
-  sub <- gets compilerSubstitution
-  pure (normalizeRowTypes <$> apply sub f, ams)
+  undefined
+--  compileFunctionC f
+--  ams <- gets compilerAssumptions
+--  sub <- gets compilerSubstitution
+--  pure (normalizeRowTypes <$> apply sub f, ams)
 
 compileConstantC ::
   (Monad m, Data a, Show a, Eq a) =>
   Constant Expression a IndexedType ->
   CompilerT a m ()
 compileConstantC g@(Constant loc (Uses _ t) e) = do
-  sub <- gets compilerSubstitution
-  compileConstraintsC [Equality (InferenceRule 999) [t, typeOf e]] g $
-    ELet
-      loc
-      (BPattern loc (PVariable loc (Label t placeholder)) e :| [])
-      (EVariable loc (Label t placeholder))
- where
-  placeholder = "###.constant"
+  undefined
+--  sub <- gets compilerSubstitution
+--  compileConstraintsC [Equality (InferenceRule 999) [t, typeOf e]] g $
+--    ELet
+--      loc
+--      (BPattern loc (PVariable loc (Label t placeholder)) e :| [])
+--      (EVariable loc (Label t placeholder))
+-- where
+--  placeholder = "###.constant"
 
 typeCheckConstantC ::
   (Monad m, Data a, Show a, Eq a) =>
   Constant Expression a IndexedType ->
   CompilerT a m (Constant Expression a IndexedType, [CompilerAssumption])
 typeCheckConstantC c = do
-  compileConstantC c
-  ams <- gets compilerAssumptions
-  sub <- gets compilerSubstitution
-  pure (normalizeRowTypes <$> apply sub c, ams)
+  undefined
+--  compileConstantC c
+--  ams <- gets compilerAssumptions
+--  sub <- gets compilerSubstitution
+--  pure (normalizeRowTypes <$> apply sub c, ams)
 
 typeCheckModuleC = do
   undefined
@@ -437,31 +445,34 @@ compileDefinitionC = do
 
 insertDefinitionC :: (Monad m, HasType TypeIndex Kind (Definition a k (Type TypeIndex Kind))) => Definition a k IndexedType -> CompilerT a m ()
 insertDefinitionC =
-  \case
-    d@(DFunction name _) -> do
-      insertNameC name (Forall (typeIndexesIn t) [] t)
-     where
-      --      insertCompilerDefinitionC name t
-
-      t = normalizeTypeIndexes (typeOf d)
+  undefined
+--  \case
+--    d@(DFunction name _) -> do
+--      insertNameC name (Forall (typeIndexesIn t) [] t)
+--     where
+--      --      insertCompilerDefinitionC name t
+--
+--      t = normalizeTypeIndexes (typeOf d)
 
 typeCheckDefinitionC ::
   ( Monad m
   , Show a
   , Data a
+  , Data k
   , Eq a
+  , Ord k
   , HasType TypeIndex Kind (Definition a k (Type TypeIndex Kind))
-  , TypeIndexed Kind (Definition a k IndexedType)
   ) =>
   Definition a k IndexedType ->
   CompilerT a m (Definition a k IndexedType, [CompilerAssumption])
 typeCheckDefinitionC d = do
-  compileDefinitionC d
-  ams <- gets compilerAssumptions
-  sub <- gets compilerSubstitution
-  let def = normalizeRowTypes <$> apply sub d
-  insertDefinitionC def
-  pure (def, ams)
+  undefined
+--  compileDefinitionC d
+--  ams <- gets compilerAssumptions
+--  sub <- gets compilerSubstitution
+--  let def = normalizeRowTypes <$> apply sub d
+--  insertDefinitionC def
+--  pure (def, ams)
 
 -- typeCheckDefinitionsC ::
 --  ( Monad m
@@ -473,26 +484,27 @@ typeCheckDefinitionC d = do
 --  [Definition a k IndexedType] ->
 --  CompilerT a m ([Definition a Kind IndexedType], [CompilerAssumption])
 typeCheckDefinitionsC ds = do
-  forM_ ds $ \d -> do
-    compileDefinitionC2 d
-    sub <- solveC2
-    defineC (definitionName d) (typeOf (apply sub d))
-  sub <- gets compilerSubstitution
-  ams <- gets compilerAssumptions
-  Environment env <- gets compilerNameEnvironment
-  insertConstraintsC $ do
-    (n1, s) <- Map.toList env
-    Assumption n2 t <- ams
-    if n1 == n2
-      then [Explicit (InferenceRule 200) (apply sub t) s]
-      else []
-  sub <- solveC2
-  pure (fmap (fmap normalizeRowTypes) (apply sub ds), apply sub ams)
+  undefined
+--  forM_ ds $ \d -> do
+--    compileDefinitionC2 d
+--    sub <- solveC2
+--    defineC (definitionName d) (typeOf (apply sub d))
+--  sub <- gets compilerSubstitution
+--  ams <- gets compilerAssumptions
+--  Environment env <- gets compilerNameEnvironment
+--  insertConstraintsC $ do
+--    (n1, s) <- Map.toList env
+--    Assumption n2 t <- ams
+--    if n1 == n2
+--      then [Explicit (InferenceRule 200) (apply sub t) s]
+--      else []
+--  sub <- solveC2
+--  pure (fmap (fmap normalizeRowTypes) (apply sub ds), apply sub ams)
 
 defineC :: (Monad m) => Name -> IndexedType -> CompilerT a m ()
-defineC name t = insertNameC name (Forall (typeIndexesIn s) [] s)
- where
-  s = normalizeTypeIndexes t
+defineC name t = undefined -- insertNameC name (Forall (typeIndexesIn s) [] s)
+-- where
+--  s = normalizeTypeIndexes t
 
 indexedC :: (Monad m, Traversable t) => t e -> CompilerT a m (t IndexedType)
 indexedC t = do
