@@ -31,11 +31,7 @@ import Noll.Language (
   typeIdsIn,
   updateTail,
  )
-import Noll.SystemF.Substitution (
-  Substitutable (..),
-  Substitution (..),
-  mapsTo,
- )
+import Noll.SystemF.Substitution (Substitutable (..), Substitution (..), mapsTo)
 import Noll.Utils (foldrM, (<$$>))
 
 import qualified Data.List.NonEmpty as NonEmpty
