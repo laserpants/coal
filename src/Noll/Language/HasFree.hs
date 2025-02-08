@@ -61,8 +61,8 @@ instance (Ord t, HasFree f t) => HasFree [f] t where
 instance (Ord t, HasFree f t) => HasFree (NonEmpty f) t where
   freeIn = Set.unions . fmap freeIn
 
-instance (Ord a, Ord t, Data a, Data f, Data t, HasFree f t) => HasFree (Map a f) t where
-  freeIn = Set.fromList . universeBi
+instance (Ord t, HasFree f t) => HasFree (Map a f) t where
+  freeIn = Set.unions . fmap freeIn
 
 instance (Ord t, Data a, Data t) => HasFree (Guard Expression a t) t where
   freeIn = Set.fromList . universeBi
