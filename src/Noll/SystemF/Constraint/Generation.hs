@@ -164,7 +164,7 @@ extractRow =
     _ ->
       error "TODO"
 
-clauseAssumptions :: (Data a) => Clause Expression a IndexedType -> ConstraintsGen a (IndexedType, [IndexedType], [Assumption IndexedType])
+clauseAssumptions :: (Data a) => Clause a IndexedType -> ConstraintsGen a (IndexedType, [IndexedType], [Assumption IndexedType])
 clauseAssumptions (EClause loc p cs) = do
   (ts1, ms) <- second concat . unzip <$$> withMonomorphic p $
     forM (fromList1 cs) $

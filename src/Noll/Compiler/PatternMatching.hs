@@ -80,7 +80,7 @@ instance (MatchExpressionContext (e a t)) => MatchExpressionContext (Constant e 
       Constant a u e ->
         Constant a u <$> compileMatchExprs e
 
-instance MatchExpressionContext (Clause Expression a t) where
+instance MatchExpressionContext (Clause a t) where
   compileMatchExprs =
     \case
       EClause a p cs ->
@@ -107,12 +107,12 @@ instance (Show a, Show t, Data a, Data t, TypeProxy t, Ord t, Monoid a) => Match
         e ->
           pure e
 
-compileClauses :: (Show a, Data a, Show t, TypeProxy t, Monoid a, Ord t, Data t) => Label t -> List1 (Clause Expression a t) -> MatchMonad (Expression a t)
+compileClauses :: (Show a, Data a, Show t, TypeProxy t, Monoid a, Ord t, Data t) => Label t -> List1 (Clause a t) -> MatchMonad (Expression a t)
 compileClauses ll cs = compileEnvelope <$> matchPatterns [ll] eqs MFail
  where
   eqs = uncurry patternEquation . translateClause <$> fromList1 cs
 
-translateClause :: (Show a, Data a, Show t, TypeProxy t) => Clause Expression a t -> ([EnvelopePattern (Expression a) t], EnvelopeExpression (Expression a) t)
+translateClause :: (Show a, Data a, Show t, TypeProxy t) => Clause a t -> ([EnvelopePattern (Expression a) t], EnvelopeExpression (Expression a) t)
 translateClause (EClause _ p (CPlain _ _ e :| [])) =
   ([translatePattern p], MExpression e)
 translateClause _ =

@@ -55,7 +55,7 @@ instance (FoldContext e) => FoldContext [e] where
 instance (FoldContext e) => FoldContext (NonEmpty e) where
   expandFolds name = fmap . expandFolds name
 
-instance (Monoid a, Data a) => FoldContext (Clause Expression a ()) where
+instance (Monoid a, Data a) => FoldContext (Clause a ()) where
   expandFolds name _ =
     \case
       EClause a p cs ->
@@ -104,7 +104,7 @@ atLabels = execWriter . transformM go
       p ->
         pure p
 
-expandFoldExpr :: forall m a. (Monoid a, Data a, MonadState Int m, MonadReader Name m) => List1 (Expression a ()) -> List1 (Clause Expression a ()) -> m (Expression a ())
+expandFoldExpr :: forall m a. (Monoid a, Data a, MonadState Int m, MonadReader Name m) => List1 (Expression a ()) -> List1 (Clause a ()) -> m (Expression a ())
 expandFoldExpr args clauses = do
   name <- suppliedName
   let var = name <> ".expr"

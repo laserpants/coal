@@ -52,7 +52,7 @@ exprs1 =
 -- p :: @g => fn(range) => if p |.in_range(range) then Node(p, g({ min = range.min, max = p}), g({ min = p, max = range.max })) else g(range)
 -- [] => fn(_) => Leaf
 --
-clauses1 :: List1 (Clause Expression () ())
+clauses1 :: List1 (Clause () ())
 clauses1 =
   EClause
     ()

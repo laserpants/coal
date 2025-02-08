@@ -21,12 +21,12 @@ import Noll.Language.Trait (Trait (..))
 import Noll.Language.Type (Parameter (..), Type)
 import Noll.Utils (Dictionary, Name)
 
-data Clause e a t = EClause a (Pattern a t) (List1 (Choice e a t))
+data Clause a t = EClause a (Pattern a t) (List1 (Choice Expression a t))
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
 
-data CompiledClause e a t
-  = ECompiledClause (List1 (Label t)) (e a t)
-  | ECompiledField Name (Label t) (Label t) (e a t)
+data CompiledClause a t
+  = ECompiledClause (List1 (Label t)) (Expression a t)
+  | ECompiledField Name (Label t) (Label t) (Expression a t)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
 
 data Expression a t
@@ -59,11 +59,11 @@ data Expression a t
   | -- | List literal
     EListLiteral a t [Expression a t]
   | -- | Pattern matching expression
-    EMatch a t (Expression a t) (List1 (Clause Expression a t))
+    EMatch a t (Expression a t) (List1 (Clause a t))
   | -- | Compiled match expression
-    ECompiledMatch a t (Expression a t) (List1 (CompiledClause Expression a t))
+    ECompiledMatch a t (Expression a t) (List1 (CompiledClause a t))
   | -- | Fold expression
-    EFold a t (List1 (Expression a t)) (List1 (Clause Expression a t)) (Maybe (Expression a t))
+    EFold a t (List1 (Expression a t)) (List1 (Clause a t)) (Maybe (Expression a t))
   | -- | Record field access selector
     ESelect a (Label t) (Expression a t)
   | -- | TODO

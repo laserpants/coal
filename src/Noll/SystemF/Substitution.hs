@@ -139,7 +139,7 @@ instance (Data a) => Substitutable (Guard Expression a IndexedType) where
 instance (Data a) => Substitutable (Choice Expression a IndexedType) where
   apply = transformBi . applyT
 
-instance (Data a) => Substitutable (Clause Expression a IndexedType) where
+instance (Data a) => Substitutable (Clause a IndexedType) where
   apply = transformBi . applyT
 
 newtype Substitution = Substitution {substitutionMap :: IndexMap IndexedType}

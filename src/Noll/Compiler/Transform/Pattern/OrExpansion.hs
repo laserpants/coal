@@ -48,7 +48,7 @@ instance (OrPattern a) => OrPattern (Map k a) where
 instance (OrPattern a) => OrPattern (Maybe a) where
   expandOrPatterns = traverseM expandOrPatterns
 
-instance OrPattern (Clause e a t) where
+instance OrPattern (Clause a t) where
   expandOrPatterns =
     \case
       EClause a p cs -> do

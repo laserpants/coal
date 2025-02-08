@@ -70,7 +70,7 @@ instance (Ord t, Data a, Data t) => HasFree (Guard Expression a t) t where
 instance (Ord t, Data a, Data t) => HasFree (Choice Expression a t) t where
   freeIn = Set.fromList . universeBi
 
-instance (Ord t, Data a, Data t) => HasFree (Clause Expression a t) t where
+instance (Ord t, Data a, Data t) => HasFree (Clause a t) t where
   freeIn =
     \case
       EClause _ p cs ->

@@ -52,7 +52,7 @@ instance TreeTransform (Choice Expression) t where
       CLambda{} ->
         error "TODO"
 
-instance TreeTransform (Clause Expression) t where
+instance TreeTransform Clause t where
   transform name f =
     \case
       EClause a ps cs
@@ -61,7 +61,7 @@ instance TreeTransform (Clause Expression) t where
         | otherwise ->
             pure (EClause a ps cs)
 
-instance TreeTransform (CompiledClause Expression) t where
+instance TreeTransform CompiledClause t where
   transform name f =
     \case
       ECompiledClause lls e

@@ -78,10 +78,10 @@ compileEnvelope =
         (compileEnvelope e2)
         (compileEnvelope e3)
 
-compileEnvelopeClause :: (TypeProxy t, Ord t, Data a, Monoid a) => EnvelopeClause (Expression a) t -> CompiledClause Expression a t
+compileEnvelopeClause :: (TypeProxy t, Ord t, Data a, Monoid a) => EnvelopeClause (Expression a) t -> CompiledClause a t
 compileEnvelopeClause (EnvelopeClause l1 ls e) = ECompiledClause (l1 :| ls) (compileEnvelope e)
 
-clauseList :: (TypeProxy t, Ord t, Data a, Monoid a) => [EnvelopeClause (Expression a) t] -> List1 (CompiledClause Expression a t)
+clauseList :: (TypeProxy t, Ord t, Data a, Monoid a) => [EnvelopeClause (Expression a) t] -> List1 (CompiledClause a t)
 clauseList ecs =
   case filter (not . fails) ecs of
     c : cs ->

@@ -85,10 +85,10 @@ instance (Ord k, Data a, Data k) => TypeIndexed k (Guard Expression a (Type Type
 instance (Ord k, Data a, Data k) => TypeIndexed k (Choice Expression a (Type TypeIndex k)) where
   typeIndexesIn = Set.fromList . universeBi
 
-instance (Ord k, Data a, Data k) => TypeIndexed k (Clause Expression a (Type TypeIndex k)) where
+instance (Ord k, Data a, Data k) => TypeIndexed k (Clause a (Type TypeIndex k)) where
   typeIndexesIn = Set.fromList . universeBi
 
-instance (Ord k, Data a, Data k) => TypeIndexed k (CompiledClause Expression a (Type TypeIndex k)) where
+instance (Ord k, Data a, Data k) => TypeIndexed k (CompiledClause a (Type TypeIndex k)) where
   typeIndexesIn = Set.fromList . universeBi
 
 instance (Ord k, Data k, Data a) => TypeIndexed k (Expression a (Type TypeIndex k)) where
