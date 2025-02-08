@@ -80,7 +80,7 @@ instance (Ord t, Data a, Data t) => HasFree (Binding Expression a t) t where
       BFunction _ _ ps e ->
         freeIn e `exceptNames` boundIn ps
 
-instance (Ord t, Data t, Data a) => HasFree (Expression a t) t where
+instance (Ord t, Data a, Data t) => HasFree (Expression a t) t where
   freeIn =
     \case
       EConstructor{} ->
