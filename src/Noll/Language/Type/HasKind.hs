@@ -5,6 +5,8 @@
 
 module Noll.Language.Type.HasKind (HasKind (..)) where
 
+import Data.Data (Data, Typeable)
+import Data.Generics.Uniplate.Data (universeBi)
 import Noll.Language.Type (Type (..), TypeIndex (..))
 import Noll.Language.Type.Kind (Kind (..))
 
@@ -15,25 +17,16 @@ instance HasKind Kind where
   kindOf = id
 
 instance HasKind (TypeIndex Kind) where
-  kindOf =
-    \case
-      TypeIndex k _ ->
-        kindOf k
+  kindOf = head . universeBi
 
-instance (HasKind (o Kind)) => HasKind (Type o Kind) where
+instance (HasKind (o Kind), Data (o Kind), Typeable o) => HasKind (Type o Kind) where
   kindOf =
     \case
-      TAlias _ _ k -> do
-        kindOf k
-      TApplication k _ _ ->
-        kindOf k
+      TRow{} ->
+        KRow
       TArrow{} ->
         KType
       TIntrinsic{} ->
         KType
-      TRow{} ->
-        KRow
-      TVariable k ->
-        kindOf k
-      TConstructor k _ ->
-        kindOf k
+      k ->
+        head (universeBi k)
