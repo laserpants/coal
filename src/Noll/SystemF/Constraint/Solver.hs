@@ -75,24 +75,23 @@ choice cs = findChoice [(delete c cs, c) | c <- cs]
 solve :: (Show s, Eq s, Data s) => [Constraint s TypeIndex Kind IndexedType] -> Solver s Substitution
 solve [] = pure (Substitution mempty)
 solve constraints =
-  undefined
---  case choice constraints of
---    ChoiceNotFound ->
---      pure mempty
---    Choice cs (Equality c ts) -> do
---      res <- transUnifier (unifyAll ts)
---      case res of
---        Left{} -> do
---          tell [c]
---          solve cs
---        Right sub1 -> do
---          sub2 <- solve (apply sub1 cs)
---          pure (sub2 <> sub1)
---    Choice cs (Implicit c t1 t2 m) ->
---      solve (Explicit c t1 (generalize m t2) : cs)
---    Choice cs (Explicit c t1 s) -> do
---      t2 <- instantiate s
---      solve (Equality c [t1, t2] : cs)
+  case choice constraints of
+    ChoiceNotFound ->
+      pure mempty
+    Choice cs (Equality c ts) -> do
+      res <- transUnifier (unifyAll ts)
+      case res of
+        Left{} -> do
+          tell [c]
+          solve cs
+        Right sub1 -> do
+          sub2 <- solve (apply sub1 cs)
+          pure (sub2 <> sub1)
+    Choice cs (Implicit c t1 t2 m) ->
+      solve (Explicit c t1 (generalize m t2) : cs)
+    Choice cs (Explicit c t1 s) -> do
+      t2 <- instantiate s
+      solve (Equality c [t1, t2] : cs)
 
 {-# INLINE generalize #-}
 generalize :: (TypeIndexed k t) => MonomorphicSet (TypeIndex k) -> t -> Scheme TypeIndex k t
@@ -100,10 +99,9 @@ generalize (MonomorphicSet m) t = Forall (notBoundIn m (typeIndexesIn t)) [] t
 
 instantiate :: Scheme TypeIndex Kind IndexedType -> Solver s IndexedType
 instantiate (Forall qs _ t) = do
-  undefined
---  sub <- foldrM go mempty qs
---  pure (apply sub t)
--- where
---  go (TypeIndex k index) sub = do
---    s <- supply
---    pure (index `mapsTo` TVariable (TypeIndex k s) <> sub)
+  sub <- foldrM go mempty qs
+  pure (apply sub t)
+ where
+  go (TypeIndex k index) sub = do
+    s <- supply
+    pure (index `mapsTo` TVariable (TypeIndex k s) <> sub)
