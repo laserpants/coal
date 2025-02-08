@@ -12,8 +12,8 @@ module Noll.Common.Supply (
 ) where
 
 import Control.Monad.Reader (MonadReader, ask)
-import Control.Monad.State (MonadState, get, modify)
-import Noll.Utils (Name)
+import Control.Monad.State (MonadState)
+import Noll.Utils (Name, getAndModify)
 import TextShow (showt)
 
 class Supply s where
@@ -25,10 +25,7 @@ instance Supply Int where
   getSupply = id
 
 supply :: (MonadState s m, Supply s) => m s
-supply = do
-  n <- get
-  modify (updateSupply succ)
-  pure n
+supply = getAndModify (updateSupply succ)
 
 suppliedName :: (MonadReader Name m, MonadState s m, Supply s) => m Name
 suppliedName = ask >>= supplied . freshName

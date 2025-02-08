@@ -16,6 +16,7 @@ module Noll.Utils (
   tellRight,
   fromMaybe,
   lexOrderRank,
+  getAndModify,
   groupByEq,
   const2,
   traverseM,
@@ -25,6 +26,7 @@ module Noll.Utils (
 ) where
 
 import Control.Monad (forM, forM_, mapM)
+import Control.Monad.State (MonadState, get, modify)
 import Control.Monad.Writer (MonadWriter, tell)
 import Data.Char (ord)
 import Data.Foldable (foldrM, traverse_)
@@ -91,6 +93,12 @@ const2 a _ _ = a
 {-# INLINE traverseM #-}
 traverseM :: (Monad m, Applicative f, Traversable t) => (a -> m (f a)) -> t a -> m (f (t a))
 traverseM = sequenceA <$$$> traverse
+
+getAndModify :: (MonadState s m) => (s -> s) -> m s
+getAndModify f = do
+  s <- get
+  modify f
+  return s
 
 lexOrderRank :: Text -> Int
 lexOrderRank text
