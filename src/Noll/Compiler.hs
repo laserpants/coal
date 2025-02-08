@@ -73,7 +73,6 @@ import Noll.SystemF (
   InferenceRule (..),
   Substitutable (..),
   Substitution (..),
-  assumptionNameIs,
   checkTypeAnnotationParameters,
   collectConstraints,
   normalizeTypeIndexes,
