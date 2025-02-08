@@ -7,9 +7,8 @@
 module Noll.Language.HasFree (
   HasBound (..),
   HasFree (..),
-  isNotBoundIn,
-  appearsFreeIn,
-  appearsIn,
+  --  appearsFreeIn,
+  --  appearsIn,
 ) where
 
 import Data.Data (Data, Typeable)
@@ -110,14 +109,10 @@ exceptNames free bound = Set.filter (`notInNames` bound) free
 notInNames :: (Foldable f) => Label a -> f Name -> Bool
 notInNames = notElem . labelName
 
-{-# INLINE isNotBoundIn #-}
-isNotBoundIn :: (HasBound b) => Name -> b -> Bool
-isNotBoundIn name obj = name `notElem` boundIn obj
+-- {-# INLINE appearsFreeIn #-}
+-- appearsFreeIn :: (HasFree a t) => Name -> a -> Bool
+-- appearsFreeIn name = appearsIn name . freeIn
 
-{-# INLINE appearsFreeIn #-}
-appearsFreeIn :: (HasFree a t) => Name -> a -> Bool
-appearsFreeIn name = appearsIn name . freeIn
-
-{-# INLINE appearsIn #-}
-appearsIn :: Name -> Set (Label a) -> Bool
-appearsIn name set = name `elem` Set.map labelName set
+-- {-# INLINE appearsIn #-}
+-- appearsIn :: Name -> Set (Label a) -> Bool
+-- appearsIn name set = name `elem` Set.map labelName set

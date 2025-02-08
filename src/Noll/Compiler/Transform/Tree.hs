@@ -22,7 +22,7 @@ import Noll.Language (
   Expression (..),
   Guard (..),
  )
-import Noll.Language.HasFree (appearsFreeIn, isNotBoundIn)
+import Noll.Language.HasFree (HasBound (..))
 import Noll.Utils (Name, const2, (<$$>))
 
 class TreeTransform e t where
@@ -138,6 +138,10 @@ instance TreeTransform Expression t where
         pure expr
       EListLiteral a t es ->
         EListLiteral a t <$> traverse (transform name f) es
+
+{-# INLINE isNotBoundIn #-}
+isNotBoundIn :: (HasBound b) => Name -> b -> Bool
+isNotBoundIn name obj = name `notElem` boundIn obj
 
 replace :: (Ord t, Data a, Data t) => Name -> (a -> t -> Expression a t) -> Expression a t -> Expression a t
 replace name f = runIdentity . transform name (pure <$$> f)
