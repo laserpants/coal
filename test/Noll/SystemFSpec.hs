@@ -33,86 +33,86 @@ import qualified Data.Set as Set
 spec :: Spec
 spec =
   describe "Noll.SystemF" $ do
---    describe "match x { | Yes => true }" $ do
---      it "" $ do
---        typedExpressionShouldMatch fixture7Typed fixture7
---      it "" $
---        hasNoErrors fixture7
---      it "" $
---        assumptions fixture7 == [Assumption "x" (TConstructor KType "Answer")]
+    describe "match x { | Yes => true }" $ do
+      it "" $ do
+        typedExpressionShouldMatch fixture7Typed fixture7
+      it "" $
+        hasNoErrors fixture7
+      it "" $
+        assumptions fixture7 == [Assumption "x" (TConstructor KType "Answer")]
     describe "fn(m) => let y = m in let x = y(true) in x" $ do
       it "" $
         typedExpressionShouldMatch fixture1Typed fixture1
---      it "" $
---        hasNoErrors fixture1
---      it "" $
---        hasNoAssumptions fixture1
---    describe "match x { | Yes => y }" $ do
---      it "" $
---        assumptions fixture28 == [Assumption "x" (TConstructor KType "Answer"), Assumption "y" (TVariable (TypeIndex KType 3))]
---      it "" $
---        hasNoErrors fixture1
---      it "let f = fn(x) => x in (f(f))(f(1))" $ do
---        typedExpressionShouldMatch fixture2Typed fixture2
---      it "" $
---        hasNoErrors fixture2
---      it "match(p) { | MkPair(fst, snd) => true }" $ do
---        typedExpressionShouldMatch fixture12Typed fixture12
---      it "" $
---        hasNoErrors fixture12
---      it "match(p : Pair(int32, bool)) { | MkPair(fst, snd) => true }" $ do
---        typedExpressionShouldMatch fixture13Typed fixture13
---      it "" $
---        hasNoErrors fixture13
---      it "match(p : Pair(a, b)) { | MkPair(fst, snd) => true }" $ do
---        typedExpressionShouldMatch fixture14Typed fixture14
---      it "" $
---        hasNoErrors fixture14
---      it "match(p : Pair(a, a)) { | MkPair(fst, snd) => true }" $ do
---        typedExpressionShouldMatch fixture15Typed fixture15
---      it "" $
---        hasNoErrors fixture15
---      it "" $ do
---        typedExpressionShouldMatch fixture17Typed fixture17
---      it "" $
---        hasNoErrors fixture17
---      it "" $
---        numberOfErrors fixture22 == 1
---      it "" $
---        numberOfErrors fixture23 == 1
---      it "" $
---        numberOfErrors fixture25 == 1
---      it "" $
---        numberOfErrors fixture26 == 1
---      it "" $
---        assumptions fixture27 == []
---    describe "" $ do
---      it "" $ do
---        typedFunctionShouldMatch
---          [
---            ( "not"
---            , Forall
---                mempty
---                []
---                (TIntrinsic IBool `TArrow` TIntrinsic IBool)
---            )
---          ,
---            ( "less_than_or_equal_to"
---            , Forall
---                (Set.fromList [TypeIndex KType 0])
---                []
---                ( TVariable (TypeIndex KType 0)
---                    `TArrow` TVariable (TypeIndex KType 0)
---                    `TArrow` TIntrinsic IBool
---                )
---            )
---          ]
---          fixture29Typed
---          fixture29
---      it "" $ do
---        typedExpressionShouldMatch fixture30Typed fixture30
---      it "" $ do
---        typedExpressionShouldMatch fixture31Typed fixture31
+      it "" $
+        hasNoErrors fixture1
+      it "" $
+        hasNoAssumptions fixture1
+    describe "match x { | Yes => y }" $ do
+      it "" $
+        assumptions fixture28 == [Assumption "x" (TConstructor KType "Answer"), Assumption "y" (TVariable (TypeIndex KType 3))]
+      it "" $
+        hasNoErrors fixture1
+      it "let f = fn(x) => x in (f(f))(f(1))" $ do
+        typedExpressionShouldMatch fixture2Typed fixture2
+      it "" $
+        hasNoErrors fixture2
+      it "match(p) { | MkPair(fst, snd) => true }" $ do
+        typedExpressionShouldMatch fixture12Typed fixture12
+      it "" $
+        hasNoErrors fixture12
+      it "match(p : Pair(int32, bool)) { | MkPair(fst, snd) => true }" $ do
+        typedExpressionShouldMatch fixture13Typed fixture13
+      it "" $
+        hasNoErrors fixture13
+      it "match(p : Pair(a, b)) { | MkPair(fst, snd) => true }" $ do
+        typedExpressionShouldMatch fixture14Typed fixture14
+      it "" $
+        hasNoErrors fixture14
+      it "match(p : Pair(a, a)) { | MkPair(fst, snd) => true }" $ do
+        typedExpressionShouldMatch fixture15Typed fixture15
+      it "" $
+        hasNoErrors fixture15
+      it "" $ do
+        typedExpressionShouldMatch fixture17Typed fixture17
+      it "" $
+        hasNoErrors fixture17
+      it "" $
+        numberOfErrors fixture22 == 1
+      it "" $
+        numberOfErrors fixture23 == 1
+      it "" $
+        numberOfErrors fixture25 == 1
+      it "" $
+        numberOfErrors fixture26 == 1
+      it "" $
+        assumptions fixture27 == []
+    describe "" $ do
+      it "" $ do
+        typedFunctionShouldMatch
+          [
+            ( "not"
+            , Forall
+                mempty
+                []
+                (TIntrinsic IBool `TArrow` TIntrinsic IBool)
+            )
+          ,
+            ( "less_than_or_equal_to"
+            , Forall
+                (Set.fromList [TypeIndex KType 0])
+                []
+                ( TVariable (TypeIndex KType 0)
+                    `TArrow` TVariable (TypeIndex KType 0)
+                    `TArrow` TIntrinsic IBool
+                )
+            )
+          ]
+          fixture29Typed
+          fixture29
+      it "" $ do
+        typedExpressionShouldMatch fixture30Typed fixture30
+      it "" $ do
+        typedExpressionShouldMatch fixture31Typed fixture31
 
 -- typedExpression_ :: Function Expression () () -> Function Expression () (Type TypeIndex Kind)
 typedExpression_ names e = testRunner runTypedExpressionTest names e
@@ -187,33 +187,33 @@ fixture1 =
 fixture1Typed :: Expression () (Type TypeIndex Kind)
 fixture1Typed =
   ELambda
-      ()
-      (PVariable () (Label (TIntrinsic IBool `TArrow` TVariable (TypeIndex KType 0)) "m") :| [])
-      ( ELet
-          ()
-          ( BPattern
-              ()
-              (PVariable () (Label (TIntrinsic IBool `TArrow` TVariable (TypeIndex KType 0)) "y"))
-              (EVariable () (Label (TIntrinsic IBool `TArrow` TVariable (TypeIndex KType 0)) "m"))
-              :| []
-          )
-          ( ELet
-              ()
-              ( BPattern
-                  ()
-                  (PVariable () (Label (TVariable (TypeIndex KType 0)) "x"))
-                  ( EApplication
-                      ()
-                      (TVariable (TypeIndex KType 0))
-                      (EVariable () (Label (TIntrinsic IBool `TArrow` TVariable (TypeIndex KType 0)) "y"))
-                      (ELiteral () (LBool True) :| [])
-                  )
-                  :| []
-              )
-              ( EVariable () (Label (TVariable (TypeIndex KType 0)) "x")
-              )
-          )
-      )
+    ()
+    (PVariable () (Label (TIntrinsic IBool `TArrow` TVariable (TypeIndex KType 0)) "m") :| [])
+    ( ELet
+        ()
+        ( BPattern
+            ()
+            (PVariable () (Label (TIntrinsic IBool `TArrow` TVariable (TypeIndex KType 0)) "y"))
+            (EVariable () (Label (TIntrinsic IBool `TArrow` TVariable (TypeIndex KType 0)) "m"))
+            :| []
+        )
+        ( ELet
+            ()
+            ( BPattern
+                ()
+                (PVariable () (Label (TVariable (TypeIndex KType 0)) "x"))
+                ( EApplication
+                    ()
+                    (TVariable (TypeIndex KType 0))
+                    (EVariable () (Label (TIntrinsic IBool `TArrow` TVariable (TypeIndex KType 0)) "y"))
+                    (ELiteral () (LBool True) :| [])
+                )
+                :| []
+            )
+            ( EVariable () (Label (TVariable (TypeIndex KType 0)) "x")
+            )
+        )
+    )
 
 -- let f = fn(x) => x in (f(f))(f(1))
 fixture2 :: Expression () ()
@@ -357,191 +357,191 @@ fixture7 =
 fixture7Typed :: Expression () (Type TypeIndex Kind)
 fixture7Typed =
   EMatch
-      ()
-      (TIntrinsic IBool)
-      (EVariable () (Label (TConstructor KType "Answer") "x"))
-      ( EClause
-          ()
-          (PConstructor () (Label (TConstructor KType "Answer") "Yes") [])
-          (CPlain () [] (ELiteral () (LBool True)) :| [])
-          :| []
-      )
+    ()
+    (TIntrinsic IBool)
+    (EVariable () (Label (TConstructor KType "Answer") "x"))
+    ( EClause
+        ()
+        (PConstructor () (Label (TConstructor KType "Answer") "Yes") [])
+        (CPlain () [] (ELiteral () (LBool True)) :| [])
+        :| []
+    )
 
 -- match(p) { | MkPair(fst, snd) => true }
 fixture12 :: Expression () ()
 fixture12 =
   EMatch
-      ()
-      ()
-      (EVariable () (Label () "p"))
-      ( EClause
-          ()
-          (PConstructor () (Label () "MkPair") [PVariable () (Label () "fst"), PVariable () (Label () "snd")])
-          (CPlain () [] (ELiteral () (LBool True)) :| [])
-          :| []
-      )
+    ()
+    ()
+    (EVariable () (Label () "p"))
+    ( EClause
+        ()
+        (PConstructor () (Label () "MkPair") [PVariable () (Label () "fst"), PVariable () (Label () "snd")])
+        (CPlain () [] (ELiteral () (LBool True)) :| [])
+        :| []
+    )
 
 fixture12Typed :: Expression () (Type TypeIndex Kind)
 fixture12Typed =
   EMatch
-      ()
-      (TIntrinsic IBool)
-      ( EVariable
-          ()
-          ( Label
-              ( TApplication
-                  KType
-                  (TConstructor (KArrow KType (KArrow KType KType)) "Pair")
-                  (TVariable (TypeIndex KType 1) :| [TVariable (TypeIndex KType 0)])
-              )
-              "p"
-          )
-      )
-      ( EClause
-          ()
-          ( PConstructor
-              ()
-              ( Label
-                  ( TApplication
-                      KType
-                      (TConstructor (KArrow KType (KArrow KType KType)) "Pair")
-                      (TVariable (TypeIndex KType 1) <| TVariable (TypeIndex KType 0) :| [])
-                  )
-                  "MkPair"
-              )
-              [ PVariable () (Label (TVariable (TypeIndex KType 1)) "fst")
-              , PVariable () (Label (TVariable (TypeIndex KType 0)) "snd")
-              ]
-          )
-          (CPlain () [] (ELiteral () (LBool True)) :| [])
-          :| []
-      )
+    ()
+    (TIntrinsic IBool)
+    ( EVariable
+        ()
+        ( Label
+            ( TApplication
+                KType
+                (TConstructor (KArrow KType (KArrow KType KType)) "Pair")
+                (TVariable (TypeIndex KType 1) :| [TVariable (TypeIndex KType 0)])
+            )
+            "p"
+        )
+    )
+    ( EClause
+        ()
+        ( PConstructor
+            ()
+            ( Label
+                ( TApplication
+                    KType
+                    (TConstructor (KArrow KType (KArrow KType KType)) "Pair")
+                    (TVariable (TypeIndex KType 1) <| TVariable (TypeIndex KType 0) :| [])
+                )
+                "MkPair"
+            )
+            [ PVariable () (Label (TVariable (TypeIndex KType 1)) "fst")
+            , PVariable () (Label (TVariable (TypeIndex KType 0)) "snd")
+            ]
+        )
+        (CPlain () [] (ELiteral () (LBool True)) :| [])
+        :| []
+    )
 
 -- match(p : Pair(int32, bool)) { | MkPair(fst, snd) => true }
 fixture13 :: Expression () ()
 fixture13 =
   EMatch
-      ()
-      ()
-      ( EAnnotation
-          ()
-          (TApplication () (TConstructor () "Pair") (TIntrinsic IInt32 <| TIntrinsic IBool :| []))
-          (EVariable () (Label () "p"))
-      )
-      ( EClause
-          ()
-          (PConstructor () (Label () "MkPair") [PVariable () (Label () "fst"), PVariable () (Label () "snd")])
-          (CPlain () [] (ELiteral () (LBool True)) :| [])
-          :| []
-      )
+    ()
+    ()
+    ( EAnnotation
+        ()
+        (TApplication () (TConstructor () "Pair") (TIntrinsic IInt32 <| TIntrinsic IBool :| []))
+        (EVariable () (Label () "p"))
+    )
+    ( EClause
+        ()
+        (PConstructor () (Label () "MkPair") [PVariable () (Label () "fst"), PVariable () (Label () "snd")])
+        (CPlain () [] (ELiteral () (LBool True)) :| [])
+        :| []
+    )
 
 fixture13Typed :: Expression () (Type TypeIndex Kind)
 fixture13Typed =
   EMatch
-      ()
-      (TIntrinsic IBool)
-      ( EAnnotation
-          ()
-          (TApplication () (TConstructor () "Pair") (TIntrinsic IInt32 <| TIntrinsic IBool :| []))
-          (EVariable () (Label (TApplication KType (TConstructor (KArrow KType (KArrow KType KType)) "Pair") (TIntrinsic IInt32 :| [TIntrinsic IBool])) "p"))
-      )
-      ( EClause
-          ()
-          ( PConstructor
-              ()
-              ( Label
-                  (TApplication KType (TConstructor (KArrow KType (KArrow KType KType)) "Pair") (TIntrinsic IInt32 <| TIntrinsic IBool :| []))
-                  "MkPair"
-              )
-              [PVariable () (Label (TIntrinsic IInt32) "fst"), PVariable () (Label (TIntrinsic IBool) "snd")]
-          )
-          (CPlain () [] (ELiteral () (LBool True)) :| [])
-          :| []
-      )
+    ()
+    (TIntrinsic IBool)
+    ( EAnnotation
+        ()
+        (TApplication () (TConstructor () "Pair") (TIntrinsic IInt32 <| TIntrinsic IBool :| []))
+        (EVariable () (Label (TApplication KType (TConstructor (KArrow KType (KArrow KType KType)) "Pair") (TIntrinsic IInt32 :| [TIntrinsic IBool])) "p"))
+    )
+    ( EClause
+        ()
+        ( PConstructor
+            ()
+            ( Label
+                (TApplication KType (TConstructor (KArrow KType (KArrow KType KType)) "Pair") (TIntrinsic IInt32 <| TIntrinsic IBool :| []))
+                "MkPair"
+            )
+            [PVariable () (Label (TIntrinsic IInt32) "fst"), PVariable () (Label (TIntrinsic IBool) "snd")]
+        )
+        (CPlain () [] (ELiteral () (LBool True)) :| [])
+        :| []
+    )
 
 -- match(p : Pair(a, b)) { | MkPair(fst, snd) => true }
 fixture14 :: Expression () ()
 fixture14 =
   EMatch
-      ()
-      ()
-      ( EAnnotation
-          ()
-          (TApplication () (TConstructor () "Pair") (TVariable (Parameter () "a") <| TVariable (Parameter () "b") :| []))
-          (EVariable () (Label () "p"))
-      )
-      ( EClause
-          ()
-          (PConstructor () (Label () "MkPair") [PVariable () (Label () "fst"), PVariable () (Label () "snd")])
-          (CPlain () [] (ELiteral () (LBool True)) :| [])
-          :| []
-      )
+    ()
+    ()
+    ( EAnnotation
+        ()
+        (TApplication () (TConstructor () "Pair") (TVariable (Parameter () "a") <| TVariable (Parameter () "b") :| []))
+        (EVariable () (Label () "p"))
+    )
+    ( EClause
+        ()
+        (PConstructor () (Label () "MkPair") [PVariable () (Label () "fst"), PVariable () (Label () "snd")])
+        (CPlain () [] (ELiteral () (LBool True)) :| [])
+        :| []
+    )
 
 fixture14Typed :: Expression () (Type TypeIndex Kind)
 fixture14Typed =
   EMatch
-      ()
-      (TIntrinsic IBool)
-      ( EAnnotation
-          ()
-          (TApplication () (TConstructor () "Pair") (TVariable (Parameter () "a") <| TVariable (Parameter () "b") :| []))
-          (EVariable () (Label (TApplication KType (TConstructor (KArrow KType (KArrow KType KType)) "Pair") (TVariable (TypeIndex KType 1) :| [TVariable (TypeIndex KType 0)])) "p"))
-      )
-      ( EClause
-          ()
-          ( PConstructor
-              ()
-              ( Label
-                  (TApplication KType (TConstructor (KArrow KType (KArrow KType KType)) "Pair") (TVariable (TypeIndex KType 1) <| TVariable (TypeIndex KType 0) :| []))
-                  "MkPair"
-              )
-              [PVariable () (Label (TVariable (TypeIndex KType 1)) "fst"), PVariable () (Label (TVariable (TypeIndex KType 0)) "snd")]
-          )
-          (CPlain () [] (ELiteral () (LBool True)) :| [])
-          :| []
-      )
+    ()
+    (TIntrinsic IBool)
+    ( EAnnotation
+        ()
+        (TApplication () (TConstructor () "Pair") (TVariable (Parameter () "a") <| TVariable (Parameter () "b") :| []))
+        (EVariable () (Label (TApplication KType (TConstructor (KArrow KType (KArrow KType KType)) "Pair") (TVariable (TypeIndex KType 1) :| [TVariable (TypeIndex KType 0)])) "p"))
+    )
+    ( EClause
+        ()
+        ( PConstructor
+            ()
+            ( Label
+                (TApplication KType (TConstructor (KArrow KType (KArrow KType KType)) "Pair") (TVariable (TypeIndex KType 1) <| TVariable (TypeIndex KType 0) :| []))
+                "MkPair"
+            )
+            [PVariable () (Label (TVariable (TypeIndex KType 1)) "fst"), PVariable () (Label (TVariable (TypeIndex KType 0)) "snd")]
+        )
+        (CPlain () [] (ELiteral () (LBool True)) :| [])
+        :| []
+    )
 
 -- match(p : Pair(a, a)) { | MkPair(fst, snd) => true }
 fixture15 :: Expression () ()
 fixture15 =
   EMatch
-      ()
-      ()
-      ( EAnnotation
-          ()
-          (TApplication () (TConstructor () "Pair") (TVariable (Parameter () "a") <| TVariable (Parameter () "a") :| []))
-          (EVariable () (Label () "p"))
-      )
-      ( EClause
-          ()
-          (PConstructor () (Label () "MkPair") [PVariable () (Label () "fst"), PVariable () (Label () "snd")])
-          (CPlain () [] (ELiteral () (LBool True)) :| [])
-          :| []
-      )
+    ()
+    ()
+    ( EAnnotation
+        ()
+        (TApplication () (TConstructor () "Pair") (TVariable (Parameter () "a") <| TVariable (Parameter () "a") :| []))
+        (EVariable () (Label () "p"))
+    )
+    ( EClause
+        ()
+        (PConstructor () (Label () "MkPair") [PVariable () (Label () "fst"), PVariable () (Label () "snd")])
+        (CPlain () [] (ELiteral () (LBool True)) :| [])
+        :| []
+    )
 
 fixture15Typed :: Expression () (Type TypeIndex Kind)
 fixture15Typed =
   EMatch
-      ()
-      (TIntrinsic IBool)
-      ( EAnnotation
-          ()
-          (TApplication () (TConstructor () "Pair") (TVariable (Parameter () "a") <| TVariable (Parameter () "a") :| []))
-          (EVariable () (Label (TApplication KType (TConstructor (KArrow KType (KArrow KType KType)) "Pair") (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 0)])) "p"))
-      )
-      ( EClause
-          ()
-          ( PConstructor
-              ()
-              ( Label
-                  (TApplication KType (TConstructor (KArrow KType (KArrow KType KType)) "Pair") (TVariable (TypeIndex KType 0) <| TVariable (TypeIndex KType 0) :| []))
-                  "MkPair"
-              )
-              [PVariable () (Label (TVariable (TypeIndex KType 0)) "fst"), PVariable () (Label (TVariable (TypeIndex KType 0)) "snd")]
-          )
-          (CPlain () [] (ELiteral () (LBool True)) :| [])
-          :| []
-      )
+    ()
+    (TIntrinsic IBool)
+    ( EAnnotation
+        ()
+        (TApplication () (TConstructor () "Pair") (TVariable (Parameter () "a") <| TVariable (Parameter () "a") :| []))
+        (EVariable () (Label (TApplication KType (TConstructor (KArrow KType (KArrow KType KType)) "Pair") (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 0)])) "p"))
+    )
+    ( EClause
+        ()
+        ( PConstructor
+            ()
+            ( Label
+                (TApplication KType (TConstructor (KArrow KType (KArrow KType KType)) "Pair") (TVariable (TypeIndex KType 0) <| TVariable (TypeIndex KType 0) :| []))
+                "MkPair"
+            )
+            [PVariable () (Label (TVariable (TypeIndex KType 0)) "fst"), PVariable () (Label (TVariable (TypeIndex KType 0)) "snd")]
+        )
+        (CPlain () [] (ELiteral () (LBool True)) :| [])
+        :| []
+    )
 
 -- -- TODO
 -- fixture16 :: Expression () ()
@@ -1056,5 +1056,3 @@ fixture10 =
             )
         )
     )
-
-

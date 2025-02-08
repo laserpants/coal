@@ -36,7 +36,6 @@ import Control.Monad.Writer (execWriter)
 import Data.Data (Data)
 import Data.Either.Extra (partitionEithers)
 import Data.Foldable (traverse_)
-import Debug.Trace
 import Noll.Common.Environment (Environment (..))
 import Noll.Common.List1 (NonEmpty ((:|)))
 import Noll.Common.Supply (Supply (..), supplied)
@@ -373,10 +372,6 @@ typeCheckExpressionC e = do
   compileConstraintsC [] e e
   ams <- gets compilerAssumptions
   sub <- gets compilerSubstitution
-  traceShowM "-----------------"
-  traceShowM e
-  traceShowM sub
-  traceShowM "^^^^^^^^^^^^^^^^^"
   pure (normalizeRowTypes <$> apply sub e, apply sub ams)
 
 compileFunctionC ::

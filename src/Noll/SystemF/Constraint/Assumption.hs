@@ -9,8 +9,8 @@ module Noll.SystemF.Constraint.Assumption (
   assumptionNameIsNotOneOf,
 ) where
 
-import Data.Generics.Uniplate.Data (transformBi)
 import Data.Data (Data, Typeable)
+import Data.Generics.Uniplate.Data (transformBi)
 import Noll.SystemF.Substitution (Substitutable (..), applyT)
 import Noll.Utils (Name)
 

@@ -16,12 +16,10 @@ module Noll.SystemF.Substitution (
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transform, transformBi)
 import Data.List.NonEmpty (NonEmpty)
-import Noll.Label (Label (..))
 import Noll.Language (
   Binding (..),
   Choice (..),
   Clause (..),
-  CompiledClause (..),
   Constant (..),
   Definition (..),
   Expression (..),
@@ -37,7 +35,6 @@ import Noll.Language (
   Type (..),
   TypeIndex (..),
   TypeIndexed (..),
-  Uses (..),
  )
 import Noll.SystemF.Constraint (Constraint (..), MonomorphicSet (..))
 import Noll.Utils (IndexMap, Map, Set, fromMaybe)
@@ -48,8 +45,35 @@ import qualified Data.Set as Set
 class Substitutable s where
   apply :: Substitution -> s -> s
 
-applyR :: Substitution -> Row TypeIndex Kind IndexedType -> Row TypeIndex Kind IndexedType
-applyR sub =
+applyT :: Substitution -> IndexedType -> IndexedType
+applyT sub =
+  \case
+    TRow row ->
+      TRow (transform (apply sub) row)
+    TVariable t ->
+      fromMaybe (TVariable t) (substitutionIndex t sub)
+    t ->
+      t
+
+instance Substitutable IndexedType where
+  apply = transform . applyT
+
+instance Substitutable (MonomorphicSet (TypeIndex Kind)) where
+  apply sub =
+    \case
+      MonomorphicSet m ->
+        MonomorphicSet (typeIndexesIn (Set.map (apply sub . TVariable) m))
+
+instance Substitutable (Scheme TypeIndex Kind IndexedType) where
+  apply sub =
+    \case
+      Forall qs ps t ->
+        Forall qs (apply sub1 ps) (apply sub1 t)
+       where
+        sub1 = foldr removeSubstitution sub qs
+
+instance Substitutable (Row TypeIndex Kind IndexedType) where
+  apply sub =
     \case
       RVariable r ->
         case substitutionIndex r sub of
@@ -58,41 +82,35 @@ applyR sub =
           _ ->
             RVariable r
       r ->
-        r 
+        r
 
-applyT :: Substitution -> IndexedType -> IndexedType
-applyT sub =
+instance Substitutable (Constraint c TypeIndex Kind IndexedType) where
+  apply sub =
     \case
-      TRow row ->
-        TRow (transform (applyR sub) row)
-      TVariable t ->
-        fromMaybe (TVariable t) (substitutionIndex t sub)
-      t ->
-        t
+      Equality c ts ->
+        Equality c (apply sub ts)
+      Implicit c t1 t2 m ->
+        Implicit c (apply sub t1) (apply sub t2) (apply sub m)
+      Explicit c t1 s ->
+        Explicit c (apply sub t1) (apply sub s)
 
-instance Substitutable IndexedType where
-  apply = transform . applyT
+instance (Substitutable s) => Substitutable (Map k s) where
+  apply = fmap . apply
 
-instance Substitutable (Row TypeIndex Kind IndexedType) where
-  apply = transform . applyR
+instance (Substitutable s) => Substitutable [s] where
+  apply = fmap . apply
 
-instance (Data s, Data k, Ord k) => Substitutable (Map k s) where
-  apply = transformBi . applyT
+instance (Substitutable s) => Substitutable (NonEmpty s) where
+  apply = fmap . apply
 
-instance (Data c) => Substitutable (Constraint c TypeIndex Kind IndexedType) where
-  apply = transformBi . applyT
+instance (Substitutable s) => Substitutable (Maybe s) where
+  apply = fmap . apply
 
-instance (Data s) => Substitutable [s] where
-  apply = transformBi . applyT
+instance (Substitutable s) => Substitutable (Trait s) where
+  apply = fmap . apply
 
-instance (Data s) => Substitutable (NonEmpty s) where
-  apply = transformBi . applyT
-
-instance (Data s) => Substitutable (Maybe s) where
-  apply = transformBi . applyT
-
-instance (Data s) => Substitutable (Trait s) where
-  apply = transformBi . applyT
+instance (Ord s, Substitutable s) => Substitutable (Set s) where
+  apply = Set.map . apply
 
 instance (Data s) => Substitutable (Intrinsic s) where
   apply = transformBi . applyT
@@ -126,21 +144,6 @@ instance (Data a) => Substitutable (Clause Expression a IndexedType) where
 
 newtype Substitution = Substitution {substitutionMap :: IndexMap IndexedType}
   deriving (Show, Eq, Ord, Read)
-
-instance Substitutable (MonomorphicSet (TypeIndex Kind)) where
-  apply sub =
-    \case
-      MonomorphicSet m ->
-        MonomorphicSet (typeIndexesIn (Set.map (apply sub . TVariable) m))
-
-instance Substitutable (Scheme TypeIndex Kind IndexedType) where
-  apply sub =
-    undefined
---    \case
---      Forall qs ps t ->
---        Forall qs (apply sub1 ps) (apply sub1 t)
---       where
---        sub1 = foldr removeSubstitution sub qs
 
 instance Semigroup Substitution where
   s1 <> s2 = Substitution (s3 <> substitutionMap s1)

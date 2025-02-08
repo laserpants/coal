@@ -13,9 +13,9 @@ module Noll.SystemF.Unification (
   evalUnifier,
 ) where
 
-import Data.Data (Data)
 import Control.Monad.Except (ExceptT, MonadError, runExceptT, throwError)
 import Control.Monad.State (MonadState, State, runState)
+import Data.Data (Data)
 import Data.List.NonEmpty (NonEmpty, (<|))
 import Data.Set (member)
 import Noll.Common.Supply (supplied)

@@ -22,7 +22,6 @@ module Noll.SystemF.Constraint.Generation.Internal (
   updateConstraintsGenSupply,
 ) where
 
-import Data.Generics.Uniplate.Data (transformBi)
 import Control.Monad.RWS (
   MonadRWS,
   MonadReader,
@@ -35,6 +34,7 @@ import Control.Monad.RWS (
   runRWS,
  )
 import Data.Data (Data, Typeable)
+import Data.Generics.Uniplate.Data (transformBi)
 import Noll.Common.Environment (Environment (..))
 import Noll.Common.Supply (Supply (..))
 import Noll.Language (Constructor (..), Kind (..), Type (..), TypeIndex (..))
