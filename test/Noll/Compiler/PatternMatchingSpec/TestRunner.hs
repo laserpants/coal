@@ -8,5 +8,5 @@ import Noll.Compiler.PatternMatching.Rule
 import Noll.Label (Label (..))
 import Noll.Language (Expression (..))
 
-compilePatterns :: (TypeProxy t, Ord t, Data a, Monoid a) => [Label t] -> [PatternEquation (Expression a) t] -> EnvelopeExpression (Expression a) t -> MatchMonad (Expression a t)
+compilePatterns :: (TypeProxy t, Ord t, Data t, Data a, Monoid a) => [Label t] -> [PatternEquation (Expression a) t] -> EnvelopeExpression (Expression a) t -> MatchMonad (Expression a t)
 compilePatterns ls ps e = compileEnvelope <$> matchPatterns ls ps e

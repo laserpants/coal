@@ -107,7 +107,7 @@ instance (Show a, Show t, Data a, Data t, TypeProxy t, Ord t, Monoid a) => Match
         e ->
           pure e
 
-compileClauses :: (Show a, Data a, Show t, TypeProxy t, Monoid a, Ord t) => Label t -> List1 (Clause Expression a t) -> MatchMonad (Expression a t)
+compileClauses :: (Show a, Data a, Show t, TypeProxy t, Monoid a, Ord t, Data t) => Label t -> List1 (Clause Expression a t) -> MatchMonad (Expression a t)
 compileClauses ll cs = compileEnvelope <$> matchPatterns [ll] eqs MFail
  where
   eqs = uncurry patternEquation . translateClause <$> fromList1 cs

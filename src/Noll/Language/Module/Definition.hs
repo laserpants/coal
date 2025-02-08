@@ -51,4 +51,4 @@ definitionName =
     DAnnotation _ d ->
       definitionName d
     _ ->
-      "" -- "TODO"
+      error "TODO"

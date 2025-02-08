@@ -12,6 +12,7 @@ module Noll.Compiler.Transform.Tree (
 ) where
 
 import Control.Monad.Identity (runIdentity)
+import Data.Data (Data)
 import Noll.Label (Label (..))
 import Noll.Language (
   Binding (..),
@@ -25,7 +26,7 @@ import Noll.Language.HasFree (appearsFreeIn, isNotBoundIn)
 import Noll.Utils (Name, const2, (<$$>))
 
 class TreeTransform e t where
-  transform :: (Monad m, Ord t) => Name -> (a -> t -> m (Expression a t)) -> e a t -> m (e a t)
+  transform :: (Monad m, Data a, Data t, Ord t) => Name -> (a -> t -> m (Expression a t)) -> e a t -> m (e a t)
 
 instance TreeTransform (Binding Expression) t where
   transform name f =
@@ -138,14 +139,14 @@ instance TreeTransform Expression t where
       EListLiteral a t es ->
         EListLiteral a t <$> traverse (transform name f) es
 
-replace :: (Ord t) => Name -> (a -> t -> Expression a t) -> Expression a t -> Expression a t
+replace :: (Ord t, Data a, Data t) => Name -> (a -> t -> Expression a t) -> Expression a t -> Expression a t
 replace name f = runIdentity . transform name (pure <$$> f)
 
-replaceWith :: (Ord t) => Name -> Expression a t -> Expression a t -> Expression a t
+replaceWith :: (Ord t, Data a, Data t) => Name -> Expression a t -> Expression a t -> Expression a t
 replaceWith name = replace name . const2
 
-replaceMultipleWith :: (Ord t) => [(Name, Expression a t)] -> Expression a t -> Expression a t
+replaceMultipleWith :: (Ord t, Data a, Data t) => [(Name, Expression a t)] -> Expression a t -> Expression a t
 replaceMultipleWith = flip $ foldr (uncurry replaceWith)
 
-rename :: (Ord t) => Name -> Name -> Expression a t -> Expression a t
+rename :: (Ord t, Data a, Data t) => Name -> Name -> Expression a t -> Expression a t
 rename old name = replace old var where var a t = EVariable a (Label t name)

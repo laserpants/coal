@@ -64,7 +64,7 @@ instance (Monoid a, Data a) => FoldContext (Clause Expression a ()) where
           (transform eliminateAtPatterns p)
           (expandFolds name (atLabels p) cs)
 
-instance (Monoid a) => FoldContext (Choice Expression a ()) where
+instance (Monoid a, Data a) => FoldContext (Choice Expression a ()) where
   expandFolds name lls =
     \case
       CPlain a gs e ->
@@ -72,10 +72,10 @@ instance (Monoid a) => FoldContext (Choice Expression a ()) where
       CLambda{} ->
         error "TODO"
 
-instance (Monoid a) => FoldContext (Expression a ()) where
+instance (Monoid a, Data a) => FoldContext (Expression a ()) where
   expandFolds = flip . foldr . updateName
 
-updateName :: (Monoid a) => Name -> Label () -> Expression a () -> Expression a ()
+updateName :: (Monoid a, Data a) => Name -> Label () -> Expression a () -> Expression a ()
 updateName name label =
   replace (labelName label) $
     const2 $
