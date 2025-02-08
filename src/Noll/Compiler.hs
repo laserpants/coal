@@ -58,7 +58,6 @@ import Noll.Language (
   Uses (..),
   definitionName,
   foldType,
-  freshIdIn,
   normalizeRowTypes,
   typeOf,
  )
