@@ -52,11 +52,11 @@ type SolverConstraint s = Constraint s TypeIndex Kind IndexedType
 
 {-# INLINE solveConstraints #-}
 solveConstraints :: (Eq s, Data s) => Int -> [SolverConstraint s] -> (Substitution, Int, [s])
-solveConstraints sup cs = runSolver sup (solve cs)
+solveConstraints n cs = runSolver n (solve cs)
 
 {-# INLINE runSolver #-}
 runSolver :: Int -> Solver s t -> (t, Int, [s])
-runSolver sup s = runRWS (solverMonad s) () sup
+runSolver n s = runRWS (solverMonad s) () n
 
 isSolvable :: [SolverConstraint s] -> SolverConstraint s -> Bool
 isSolvable constraints =
