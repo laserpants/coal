@@ -1,14 +1,11 @@
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StrictData #-}
-{-# LANGUAGE UndecidableInstances #-}
 
 module Noll.Language.HasFree (
   HasBound (..),
   HasFree (..),
-  --  appearsFreeIn,
-  --  appearsIn,
 ) where
 
 import Data.Data (Data, Typeable)
@@ -48,7 +45,7 @@ instance (Data a, Data t, Typeable e, Data (e a t)) => HasBound (Binding e a t) 
 instance (Data a, Data t) => HasBound (Pattern a t) where
   boundIn = Set.fromList . universeBi
 
-class HasFree f t | f -> t where
+class HasFree f t where
   freeIn :: f -> Set (Label t)
 
 instance (Ord t, HasFree f t) => HasFree (Maybe f) t where
@@ -108,11 +105,3 @@ exceptNames free bound = Set.filter (`notInNames` bound) free
 {-# INLINE notInNames #-}
 notInNames :: (Foldable f) => Label a -> f Name -> Bool
 notInNames = notElem . labelName
-
--- {-# INLINE appearsFreeIn #-}
--- appearsFreeIn :: (HasFree a t) => Name -> a -> Bool
--- appearsFreeIn name = appearsIn name . freeIn
-
--- {-# INLINE appearsIn #-}
--- appearsIn :: Name -> Set (Label a) -> Bool
--- appearsIn name set = name `elem` Set.map labelName set
