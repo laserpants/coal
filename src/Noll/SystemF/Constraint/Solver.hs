@@ -48,17 +48,17 @@ newtype Solver s t = Solver {solverMonad :: RWS () [s] Int t}
     , MonadWriter [s]
     )
 
-type IndexedConstraint s = Constraint s TypeIndex Kind IndexedType
+type SolverConstraint s = Constraint s TypeIndex Kind IndexedType
 
 {-# INLINE solveConstraints #-}
-solveConstraints :: (Eq s, Data s) => Int -> [IndexedConstraint s] -> (Substitution, Int, [s])
+solveConstraints :: (Eq s, Data s) => Int -> [SolverConstraint s] -> (Substitution, Int, [s])
 solveConstraints sup cs = runSolver sup (solve cs)
 
 {-# INLINE runSolver #-}
 runSolver :: Int -> Solver s t -> (t, Int, [s])
 runSolver sup s = runRWS (solverMonad s) () sup
 
-isSolvable :: [IndexedConstraint s] -> IndexedConstraint s -> Bool
+isSolvable :: [SolverConstraint s] -> SolverConstraint s -> Bool
 isSolvable constraints =
   \case
     Implicit _ _ t2 m ->
@@ -69,12 +69,12 @@ isSolvable constraints =
 data SolverChoice c = Choice [c] c | ChoiceNotFound
   deriving (Show, Eq, Ord, Read)
 
-choice :: (Eq s) => [IndexedConstraint s] -> SolverChoice (IndexedConstraint s)
+choice :: (Eq s) => [SolverConstraint s] -> SolverChoice (SolverConstraint s)
 choice cs = findChoice [(delete c cs, c) | c <- cs]
  where
   findChoice = maybe ChoiceNotFound (uncurry Choice) . find (uncurry isSolvable)
 
-solve :: (Eq s, Data s) => [IndexedConstraint s] -> Solver s Substitution
+solve :: (Eq s, Data s) => [SolverConstraint s] -> Solver s Substitution
 solve [] = pure (Substitution mempty)
 solve constraints =
   case choice constraints of
