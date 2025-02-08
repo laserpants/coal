@@ -1,7 +1,6 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
@@ -51,7 +50,7 @@ import qualified Data.Set as Set
 data InferenceRule k a
   = InferenceRule Int
   | -- | Type annotation
-    InferAnnotation a (Type TypeIndex k)
+    InferAnnotation a (Type TypeIndex k) (Type TypeIndex k)
   | -- | Function application
     InferApplication a (Type TypeIndex k) [Type TypeIndex k]
   | -- | Type of if-condition is bool

@@ -25,6 +25,7 @@ import Noll.Language (
   Uses (..),
  )
 import Noll.SystemF.Constraint.Assumption (Assumption (..))
+import Noll.SystemF.Constraint.Generation.Internal (InferenceRule (..))
 import Noll.SystemFSpec.TestRunner
 import Test.Hspec (Spec, describe, it)
 
@@ -113,6 +114,13 @@ spec =
         typedExpressionShouldMatch fixture30Typed fixture30
       it "" $ do
         typedExpressionShouldMatch fixture31Typed fixture31
+    describe "" $ do
+      it "" $ do
+        typedExpressionShouldMatch fixture37 fixture36
+      it "" $ do
+        typedExpressionShouldMatch fixture39 fixture38
+      it "" $ do
+        typedExpressionErrors2Includes (InferAnnotation () (TIntrinsic IInt32) (TIntrinsic IBool)) fixture40
 
 -- typedExpression_ :: Function Expression () () -> Function Expression () (Type TypeIndex Kind)
 typedExpression_ names e = testRunner runTypedExpressionTest names e
@@ -125,6 +133,8 @@ typedFunction f = testResultExpression (testRunner runTypedFunctionTest mempty f
 
 -- typedFunctionShouldMatch :: Function Expression () (Type TypeIndex Kind) -> Function Expression () () -> Bool
 typedFunctionShouldMatch names f0 f = testResultExpression (testRunner runTypedFunctionTest names f) == f0
+
+typedExpressionErrors2Includes e f = e `elem` testResultErrors2 (testRunner runTypedExpressionTest mempty f)
 
 typedExpression :: Expression () () -> Expression () (Type TypeIndex Kind)
 typedExpression e = testResultExpression (testRunner runTypedExpressionTest mempty e)
@@ -1056,3 +1066,38 @@ fixture10 =
             )
         )
     )
+
+fixture36 :: Expression () ()
+fixture36 =
+  EAnnotation
+    ()
+    (TIntrinsic IBool)
+    (EVariable () (Label () "a"))
+
+fixture37 :: Expression () IndexedType
+fixture37 =
+  EAnnotation
+    ()
+    (TIntrinsic IBool)
+    (EVariable () (Label (TIntrinsic IBool) "a"))
+
+fixture38 :: Expression () ()
+fixture38 =
+  EAnnotation
+    ()
+    (TIntrinsic IBool)
+    (ELiteral () (LBool True))
+
+fixture39 :: Expression () IndexedType
+fixture39 =
+  EAnnotation
+    ()
+    (TIntrinsic IBool)
+    (ELiteral () (LBool True))
+
+fixture40 :: Expression () ()
+fixture40 =
+  EAnnotation
+    ()
+    (TIntrinsic IBool)
+    (ELiteral () (LInt32 1))

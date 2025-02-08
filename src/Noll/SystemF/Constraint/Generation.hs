@@ -107,7 +107,7 @@ patternConstraints assert ms =
         Left err ->
           tellLeft [IllFormedTypeAnnotation err]
         Right t1 ->
-          tellRight [Equality (InferAnnotation loc t1) [typeOf p, t1]]
+          tellRight [Equality (InferAnnotation loc (typeOf p) t1) [typeOf p, t1]]
       patternConstraints assert ms p
     PVariable _ (Label t name) -> do
       assert t (filter (assumptionNameIs name) ms)
@@ -189,7 +189,7 @@ collectConstraints =
         Left err ->
           tellLeft [IllFormedTypeAnnotation err]
         Right t1 ->
-          tellRight [Equality (InferAnnotation loc t1) [typeOf e, t1]]
+          tellRight [Equality (InferAnnotation loc (typeOf e) t1) [typeOf e, t1]]
       collectConstraints e
     EConstructor loc (Label t name) -> do
       r <- lookupDataConstructor name

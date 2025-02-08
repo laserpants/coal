@@ -12,6 +12,8 @@ import Noll.Label (Label (..))
 import Noll.Language (
   Binding (..),
   Expression (..),
+  IndexedType,
+  Intrinsic (..),
   Kind (..),
   Parameter (..),
   Pattern (..),
