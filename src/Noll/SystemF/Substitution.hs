@@ -64,7 +64,7 @@ applyT :: Substitution -> IndexedType -> IndexedType
 applyT sub =
     \case
       TRow row ->
-        TRow (applyR sub row)
+        TRow (transform (applyR sub) row)
       TVariable t ->
         fromMaybe (TVariable t) (substitutionIndex t sub)
       t ->
@@ -94,16 +94,22 @@ instance (Data s) => Substitutable (Maybe s) where
 instance (Data s) => Substitutable (Trait s) where
   apply = transformBi . applyT
 
-instance (Ord s, Data s) => Substitutable (Set s) where
-  apply = transformBi . applyT
-
-instance Substitutable (MonomorphicSet (TypeIndex Kind)) where
-  apply = transformBi . applyT
-
 instance (Data s) => Substitutable (Intrinsic s) where
   apply = transformBi . applyT
 
 instance (Data a) => Substitutable (Pattern a IndexedType) where
+  apply = transformBi . applyT
+
+instance (Data a) => Substitutable (Expression a IndexedType) where
+  apply = transformBi . applyT
+
+instance (Data a) => Substitutable (Function Expression a IndexedType) where
+  apply = transformBi . applyT
+
+instance (Data a) => Substitutable (Constant Expression a IndexedType) where
+  apply = transformBi . applyT
+
+instance (Data a, Data k, Ord k) => Substitutable (Definition a k IndexedType) where
   apply = transformBi . applyT
 
 instance (Data a) => Substitutable (Binding Expression a IndexedType) where
@@ -121,13 +127,20 @@ instance (Data a) => Substitutable (Clause Expression a IndexedType) where
 newtype Substitution = Substitution {substitutionMap :: IndexMap IndexedType}
   deriving (Show, Eq, Ord, Read)
 
-instance Substitutable (Scheme TypeIndex Kind IndexedType) where
+instance Substitutable (MonomorphicSet (TypeIndex Kind)) where
   apply sub =
     \case
-      Forall qs ps t ->
-        Forall qs (apply sub1 ps) (apply sub1 t)
-       where
-        sub1 = foldr removeSubstitution sub qs
+      MonomorphicSet m ->
+        MonomorphicSet (typeIndexesIn (Set.map (apply sub . TVariable) m))
+
+instance Substitutable (Scheme TypeIndex Kind IndexedType) where
+  apply sub =
+    undefined
+--    \case
+--      Forall qs ps t ->
+--        Forall qs (apply sub1 ps) (apply sub1 t)
+--       where
+--        sub1 = foldr removeSubstitution sub qs
 
 instance Semigroup Substitution where
   s1 <> s2 = Substitution (s3 <> substitutionMap s1)

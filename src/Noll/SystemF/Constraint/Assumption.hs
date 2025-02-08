@@ -9,8 +9,9 @@ module Noll.SystemF.Constraint.Assumption (
   assumptionNameIsNotOneOf,
 ) where
 
+import Data.Generics.Uniplate.Data (transformBi)
 import Data.Data (Data, Typeable)
-import Noll.SystemF.Substitution (Substitutable (..))
+import Noll.SystemF.Substitution (Substitutable (..), applyT)
 import Noll.Utils (Name)
 
 data Assumption t = Assumption
@@ -19,8 +20,8 @@ data Assumption t = Assumption
   }
   deriving (Show, Eq, Ord, Read, Data, Typeable)
 
---instance (Substitutable t) => Substitutable (Assumption t) where
---  apply = undefined -- transform . apply
+instance (Data t) => Substitutable (Assumption t) where
+  apply = transformBi . applyT
 
 {-# INLINE assumptionNameIs #-}
 assumptionNameIs :: Name -> Assumption t -> Bool

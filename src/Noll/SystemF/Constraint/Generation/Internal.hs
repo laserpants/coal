@@ -22,6 +22,7 @@ module Noll.SystemF.Constraint.Generation.Internal (
   updateConstraintsGenSupply,
 ) where
 
+import Data.Generics.Uniplate.Data (transformBi)
 import Control.Monad.RWS (
   MonadRWS,
   MonadReader,
@@ -42,7 +43,7 @@ import Noll.SystemF.Constraint (
   MonomorphicSet (..),
   overMonomorphicSet,
  )
-import Noll.SystemF.Substitution (Substitutable (..))
+import Noll.SystemF.Substitution (Substitutable (..), applyT)
 import Noll.Utils (Dictionary, Name)
 
 import qualified Data.Set as Set
@@ -75,36 +76,8 @@ data InferenceRule k a
     InferTopLevelConstant a
   deriving (Show, Eq, Ord, Read, Data, Typeable)
 
---instance Substitutable (InferenceRule Kind a) where
---  apply sub =
---    undefined
-----    \case
-----      InferenceRule n ->
-----        InferenceRule n
-----      InferAnnotation a s ->
-----        InferAnnotation a s
-----      InferApplication a t ts ->
-----        InferApplication a (apply sub t) (apply sub ts)
-----      InferIfCondition a t ->
-----        InferIfCondition a (apply sub t)
-----      InferIfBranches a t1 t2 ->
-----        InferIfBranches a (apply sub t1) (apply sub t2)
-----      InferLetBindingPattern a t1 t2 ->
-----        InferLetBindingPattern a (apply sub t1) (apply sub t2)
-----      InferLetImplicit a name t1 t2 ->
-----        InferLetImplicit a name (apply sub t1) (apply sub t2)
-----      InferMatchClauseGuard a ->
-----        InferMatchClauseGuard a
-----      InferMatchClauseExpressions a ->
-----        InferMatchClauseExpressions a
-----      InferMatchClausePatterns a ->
-----        InferMatchClausePatterns a
-----      InferBinaryOperator a ->
-----        InferBinaryOperator a
-----      InferTopLevelFunction a ->
-----        InferTopLevelFunction a
-----      InferTopLevelConstant a ->
-----        InferTopLevelConstant a
+instance (Data a) => Substitutable (InferenceRule Kind a) where
+  apply = transformBi . applyT
 
 data TypeAnnotationError a
   = -- Kind error
