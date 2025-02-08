@@ -12,6 +12,8 @@ module Noll.SystemF.Substitution (
   normalizeTypeIndexes,
 ) where
 
+import Data.Data (Data)
+import Data.Generics.Uniplate.Data (transformBi)
 import Data.List.NonEmpty (NonEmpty)
 import Noll.Label (Label (..))
 import Noll.Language (
@@ -67,9 +69,9 @@ applyT sub =
       t ->
         t
 
---instance (Substitutable s) => Substitutable (Map k s) where
---  apply = fmap . apply
---
+instance (Data s, Data k, Ord k) => Substitutable (Map k s) where
+  apply = transformBi . applyT
+
 --instance (Substitutable s) => Substitutable [s] where
 --  apply = fmap . apply
 --
@@ -288,7 +290,7 @@ newtype Substitution = Substitution {substitutionMap :: IndexMap IndexedType}
 instance Semigroup Substitution where
   s1 <> s2 = Substitution (s3 <> substitutionMap s1)
    where
-    s3 = undefined -- apply s1 (substitutionMap s2)
+    s3 = apply s1 (substitutionMap s2)
 
 instance Monoid Substitution where
   mempty = Substitution mempty
