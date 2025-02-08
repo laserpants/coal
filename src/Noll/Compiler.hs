@@ -29,13 +29,11 @@ module Noll.Compiler where
 --  getSolverRuleViolationsC,
 -- ) where
 
-import Control.Monad (when)
 import Control.Monad.Reader (MonadReader, ReaderT, ask, runReaderT)
 import Control.Monad.State (MonadState, StateT, gets, modify, put, runState, runStateT)
 import Control.Monad.Writer (execWriter)
 import Data.Data (Data)
 import Data.Either.Extra (partitionEithers)
-import Data.Foldable (traverse_)
 import Noll.Common.Environment (Environment (..))
 import Noll.Common.List1 (NonEmpty ((:|)))
 import Noll.Common.Supply (Supply (..), supplied)
@@ -57,10 +55,10 @@ import Noll.Language (
   TypeIndexed (..),
   Uses (..),
   definitionName,
-  foldType,
   normalizeRowTypes,
   typeOf,
  )
+import Noll.Language.HasType (foldTypeOf)
 import Noll.Language.Indexed (indexed)
 import Noll.SystemF (
   Assumption (..),
@@ -296,7 +294,7 @@ compileConstraintsC2 expr = do
   insertAssumptionsC (apply sub ms2)
   insertConstraintsC (cs1 <> cs2)
 
-compileFunctionC2 :: (Monad m, Data a, Show a, Eq a) => Function Expression a IndexedType -> CompilerT a m ()
+compileFunctionC2 :: (Monad m, Data a) => Function Expression a IndexedType -> CompilerT a m ()
 compileFunctionC2 (Function loc (Uses _ t) ps e) = do
   insertConstraintsC [Equality (InferTopLevelFunction loc) [t, typeOf e]]
   t1 <- supplied (TVariable . TypeIndex KType)
@@ -304,11 +302,11 @@ compileFunctionC2 (Function loc (Uses _ t) ps e) = do
     ELet
       loc
       (BFunction loc placeholder ps e :| [])
-      (EVariable loc (Label (foldType t1 (typeOf <$> ps)) placeholder))
+      (EVariable loc (Label (foldTypeOf t1 ps) placeholder))
  where
   placeholder = "###.function"
 
-compileConstantC2 :: (Monad m, Data a, Show a, Eq a) => Constant Expression a IndexedType -> CompilerT a m ()
+compileConstantC2 :: (Monad m, Data a) => Constant Expression a IndexedType -> CompilerT a m ()
 compileConstantC2 (Constant loc (Uses _ t) e) = do
   insertConstraintsC [Equality (InferTopLevelConstant loc) [t, typeOf e]]
   compileConstraintsC2 $
@@ -378,7 +376,7 @@ compileFunctionC ::
   CompilerT a m ()
 compileFunctionC f@(Function loc (Uses _ t) ps e) = do
   t1 <- supplied (TVariable . TypeIndex KType)
-  let t2 = foldType t1 (typeOf <$> ps)
+  let t2 = foldTypeOf t1 ps
   compileConstraintsC [Equality (InferenceRule 999) [t, typeOf e]] f $
     ELet
       loc

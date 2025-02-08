@@ -7,7 +7,7 @@ import Data.Data (Data, Typeable)
 import Data.Map.Strict (Map)
 import Noll.Compiler.Transform
 import Noll.Language.Expression (Expression (..))
-import Noll.Language.HasType (HasType (..))
+import Noll.Language.HasType (HasType (..), foldTypeOf)
 import Noll.Language.Module (Module (..))
 import Noll.Language.Module.Constant (Constant (..))
 import Noll.Language.Module.Definition (Definition (..))
@@ -36,7 +36,7 @@ instance (Monoid a, Data a, Data k, Data (o k), Typeable o) => NormalizeObjectsT
       DAnnotation u d ->
         DAnnotation u (normalizeObject d)
       DFunction name (Function a (Uses ts t) ps e) ->
-        DConstant name (Constant a (Uses ts (foldType t (typeOf <$> ps))) (flattenLambda (ELambda mempty ps e)))
+        DConstant name (Constant a (Uses ts (foldTypeOf t ps)) (flattenLambda (ELambda mempty ps e)))
       d ->
         d
 

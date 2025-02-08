@@ -41,6 +41,7 @@ import Noll.Language (
   typeOf,
   (~>),
  )
+import Noll.Language.HasType (foldTypeOf)
 import Noll.SystemF.Constraint (Constraint (..))
 import Noll.SystemF.Constraint.Assumption (
   Assumption (..),
@@ -121,7 +122,7 @@ patternConstraints assert ms =
           | constructorArity /= length ps ->
               tellLeft [DataConstructorArityMismatch loc name constructorArity (length ps)]
         Just Constructor{..} ->
-          tellRight [Explicit (InferenceRule 3) (foldType t (typeOf <$> ps)) constructorScheme]
+          tellRight [Explicit (InferenceRule 3) (foldTypeOf t ps) constructorScheme]
       concatForM ps (patternConstraints assert ms)
     POr _ t p1 p2 -> do
       tellRight [Equality (InferenceRule 11) [t, typeOf p1, typeOf p2]]
@@ -145,7 +146,7 @@ patternConstraints assert ms =
     PListCons _ t p1 p2 -> do
       ms1 <- patternConstraints assert ms p1
       ms2 <- patternConstraints assert ms p2
-      tellRight [Explicit (InferenceRule 3) (foldType t [typeOf p1, typeOf p2]) listConstructorTypeScheme]
+      tellRight [Explicit (InferenceRule 3) (foldTypeOf t [p1, p2]) listConstructorTypeScheme]
       pure (ms1 <> ms2)
     PListLiteral _ t ps -> do
       tellRight [Equality (InferenceRule 3) (t : (typeOf <$> ps))]
@@ -231,7 +232,7 @@ collectConstraints =
           BPattern _ p _ ->
             patternConstraints (assertImplicitAssumptions loc) ms1 p
           BFunction _ name ps e -> do
-            let t1 = foldType (typeOf e) (typeOf <$> ps)
+            let t1 = foldTypeOf e ps
             assertImplicitAssumptions loc t1 (filter (assumptionNameIs name) ms1)
             names <- concatMapM (patternConstraints (assertEqualityAssumptions loc) ms1) ps
             pure (name : names)
@@ -293,7 +294,7 @@ collectConstraints =
       -- Pattern types
       tellRight [Equality (InferenceRule 401) (typeOf e : ts1)]
       -- Expression types
-      tellRight [Equality (InferenceRule 402) (foldType t (typeOf <$> es) : concat ts2)]
+      tellRight [Equality (InferenceRule 402) (foldTypeOf t es : concat ts2)]
       ms4 <- concatMapM collectConstraints e1
       pure (ms1 <> ms2 <> ms3 <> ms4)
     ERecord _ t d e -> do

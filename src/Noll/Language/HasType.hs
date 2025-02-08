@@ -3,7 +3,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Language.HasType (HasType (..)) where
+module Noll.Language.HasType (HasType (..), foldTypeOf) where
 
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (universeBi)
@@ -60,7 +60,7 @@ instance (Data a, Data k, Data (o k), Typeable o) => HasType o k (Expression a (
       ELiteral _ t ->
         typeOf t
       ELambda _ ts t ->
-        foldType (typeOf t) (typeOf <$> ts)
+        foldTypeOf t ts
       e ->
         head (universeBi e)
 
@@ -70,8 +70,12 @@ instance (Data a, Data k, Ord k, Data (o k), Typeable o) => HasType o k (Definit
       DAnnotation _ d ->
         typeOf d
       DFunction _ (Function _ _ ps e) ->
-        foldType (typeOf e) (typeOf <$> ps)
+        foldTypeOf e ps
       DConstant _ (Constant _ _ e) ->
         typeOf e
       d ->
         head (universeBi d)
+
+{-# INLINE foldTypeOf #-}
+foldTypeOf :: (HasType o k t, HasType o k s, Functor f, Foldable f) => s -> f t -> Type o k
+foldTypeOf a as = foldType (typeOf a) (typeOf <$> as)
