@@ -7,7 +7,6 @@ module Noll.Language.HasType (HasType (..)) where
 
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (universeBi)
-import Noll.Label (Label (..))
 import Noll.Language.Expression (Expression (..))
 import Noll.Language.Expression.Choice (Guard (..))
 import Noll.Language.Module.Constant (Constant (..))
@@ -23,9 +22,6 @@ class HasType o k t where
 
 instance HasType o k (Type o k) where
   typeOf = id
-
-instance (Data t, Data k, Data (o k), Typeable o) => HasType o k (Label t) where
-  typeOf = head . universeBi
 
 instance HasType o k Primitive where
   typeOf =
