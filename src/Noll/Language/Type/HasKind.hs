@@ -19,7 +19,7 @@ instance HasKind Kind where
 instance HasKind (TypeIndex Kind) where
   kindOf = head . universeBi
 
-instance (HasKind (o Kind), Data (o Kind), Typeable o) => HasKind (Type o Kind) where
+instance (Data (o Kind), Typeable o) => HasKind (Type o Kind) where
   kindOf =
     \case
       TRow{} ->
