@@ -17,6 +17,7 @@ import Noll.Language.Expression.Operator.Binary (BinaryOperator)
 import Noll.Language.Expression.Operator.Unary (UnaryOperator)
 import Noll.Language.Pattern (Pattern (..))
 import Noll.Language.Primitive (Primitive (..))
+import Noll.Language.Trait (Trait (..))
 import Noll.Language.Type (Parameter (..), Type)
 import Noll.Utils (Dictionary, Name)
 
@@ -65,4 +66,8 @@ data Expression a t
     EFold a t (List1 (Expression a t)) (List1 (Clause Expression a t)) (Maybe (Expression a t))
   | -- | Record field access selector
     ESelect a (Label t) (Expression a t)
+  | -- | TODO
+    EDictionaryLambda a (List1 (Trait t)) (Expression a t)
+  | -- | TODO
+    EDictionaryApplication a t (Expression a t) (List1 (Trait t)) [Expression a t]
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
