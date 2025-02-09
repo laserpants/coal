@@ -1,5 +1,5 @@
-{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE ConstraintKinds #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE ScopedTypeVariables #-}
@@ -8,7 +8,7 @@
 module Noll.Compiler.PatternMatching (TypeProxy (..), compileEnvelope, compileMatchExprs) where
 
 import Data.Data (Data)
-import Data.Generics.Uniplate.Data (transformM, transformBiM)
+import Data.Generics.Uniplate.Data (transformBiM, transformM)
 import Noll.Common.List1 (List1, NonEmpty (..), fromList1)
 import Noll.Common.Supply (suppliedName)
 import Noll.Compiler.PatternMatching.Compiler (TypeProxy (..), compileEnvelope)
@@ -45,27 +45,33 @@ instance (MatchExpressionContext a) => MatchExpressionContext (List1 a) where
 instance (MatchExpressionContext a) => MatchExpressionContext (Dictionary a) where
   compileMatchExprs = traverse compileMatchExprs
 
-type MatchClasses a t = (Show a, Data a, Monoid a, Show t, Data t, TypeProxy t, Ord t)
-
-type CompileMatchExprsE a t = Expression a t -> MatchMonad (Expression a t)
+type MatchClasses a t =
+  ( Show a
+  , Data a
+  , Monoid a
+  , Show t
+  , Data t
+  , TypeProxy t
+  , Ord t
+  )
 
 instance (MatchClasses a t, Data k, Ord k) => MatchExpressionContext (Module a k t) where
-  compileMatchExprs = transformBiM (compileMatchExprsE :: CompileMatchExprsE a t)
+  compileMatchExprs = transformBiM (compileMatchExprsE :: Expression a t -> MatchMonad (Expression a t))
 
 instance (MatchClasses a t, Data k, Ord k) => MatchExpressionContext (Definition a k t) where
-  compileMatchExprs = transformBiM (compileMatchExprsE :: CompileMatchExprsE a t)
+  compileMatchExprs = transformBiM (compileMatchExprsE :: Expression a t -> MatchMonad (Expression a t))
 
 instance (MatchClasses a t) => MatchExpressionContext (Function Expression a t) where
-  compileMatchExprs = transformBiM (compileMatchExprsE :: CompileMatchExprsE a t)
+  compileMatchExprs = transformBiM (compileMatchExprsE :: Expression a t -> MatchMonad (Expression a t))
 
 instance (MatchClasses a t) => MatchExpressionContext (Constant Expression a t) where
-  compileMatchExprs = transformBiM (compileMatchExprsE :: CompileMatchExprsE a t)
+  compileMatchExprs = transformBiM (compileMatchExprsE :: Expression a t -> MatchMonad (Expression a t))
 
 instance (MatchClasses a t) => MatchExpressionContext (Clause a t) where
-  compileMatchExprs = transformBiM (compileMatchExprsE :: CompileMatchExprsE a t)
+  compileMatchExprs = transformBiM (compileMatchExprsE :: Expression a t -> MatchMonad (Expression a t))
 
 instance (MatchClasses a t) => MatchExpressionContext (Binding Expression a t) where
-  compileMatchExprs = transformBiM (compileMatchExprsE :: CompileMatchExprsE a t)
+  compileMatchExprs = transformBiM (compileMatchExprsE :: Expression a t -> MatchMonad (Expression a t))
 
 instance (MatchClasses a t) => MatchExpressionContext (Expression a t) where
   compileMatchExprs = transformM compileMatchExprsE
