@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE ScopedTypeVariables #-}
@@ -44,30 +45,32 @@ instance (MatchExpressionContext a) => MatchExpressionContext (List1 a) where
 instance (MatchExpressionContext a) => MatchExpressionContext (Dictionary a) where
   compileMatchExprs = traverse compileMatchExprs
 
+type MatchClasses a t = (Show a, Data a, Monoid a, Show t, Data t, TypeProxy t, Ord t)
+
 type CompileMatchExprsE a t = Expression a t -> MatchMonad (Expression a t)
 
-instance (Show a, Data a, Show t, Data t, Ord k, Data k, TypeProxy t, Ord t, Monoid a) => MatchExpressionContext (Module a k t) where
+instance (MatchClasses a t, Data k, Ord k) => MatchExpressionContext (Module a k t) where
   compileMatchExprs = transformBiM (compileMatchExprsE :: CompileMatchExprsE a t)
 
-instance (Show a, Data a, Data t, Show t, TypeProxy t, Ord t, Data k, Ord k, Monoid a) => MatchExpressionContext (Definition a k t) where
+instance (MatchClasses a t, Data k, Ord k) => MatchExpressionContext (Definition a k t) where
   compileMatchExprs = transformBiM (compileMatchExprsE :: CompileMatchExprsE a t)
 
-instance (Show a, Show t, Data a, Data t, TypeProxy t, Monoid a, Ord t) => MatchExpressionContext (Function Expression a t) where
+instance (MatchClasses a t) => MatchExpressionContext (Function Expression a t) where
   compileMatchExprs = transformBiM (compileMatchExprsE :: CompileMatchExprsE a t)
 
-instance (Show a, Show t, Data a, Data t, TypeProxy t, Monoid a, Ord t) => MatchExpressionContext (Constant Expression a t) where
+instance (MatchClasses a t) => MatchExpressionContext (Constant Expression a t) where
   compileMatchExprs = transformBiM (compileMatchExprsE :: CompileMatchExprsE a t)
 
-instance (Show a, Show t, Data a, Data t, Ord t, Monoid a, TypeProxy t) => MatchExpressionContext (Clause a t) where
+instance (MatchClasses a t) => MatchExpressionContext (Clause a t) where
   compileMatchExprs = transformBiM (compileMatchExprsE :: CompileMatchExprsE a t)
 
-instance (Show a, Data a, Show t, Data t, TypeProxy t, Ord t, Monoid a) => MatchExpressionContext (Binding Expression a t) where
+instance (MatchClasses a t) => MatchExpressionContext (Binding Expression a t) where
   compileMatchExprs = transformBiM (compileMatchExprsE :: CompileMatchExprsE a t)
 
-instance (Show a, Data a, Show t, Data t, TypeProxy t, Ord t, Monoid a) => MatchExpressionContext (Expression a t) where
+instance (MatchClasses a t) => MatchExpressionContext (Expression a t) where
   compileMatchExprs = transformM compileMatchExprsE
 
-compileMatchExprsE :: (Show a, Data a, Show t, TypeProxy t, Monoid a, Ord t, Data t) => Expression a t -> MatchMonad (Expression a t)
+compileMatchExprsE :: (MatchClasses a t) => Expression a t -> MatchMonad (Expression a t)
 compileMatchExprsE =
   \case
     EMatch _ _ e cs -> do
@@ -76,18 +79,18 @@ compileMatchExprsE =
     e ->
       pure e
 
-compileClauses :: (Show a, Data a, Show t, TypeProxy t, Monoid a, Ord t, Data t) => Label t -> List1 (Clause a t) -> MatchMonad (Expression a t)
+compileClauses :: (MatchClasses a t) => Label t -> List1 (Clause a t) -> MatchMonad (Expression a t)
 compileClauses ll cs = compileEnvelope <$> matchPatterns [ll] eqs MFail
  where
   eqs = uncurry patternEquation . translateClause <$> fromList1 cs
 
-translateClause :: (Show a, Data a, Show t, TypeProxy t) => Clause a t -> ([EnvelopePattern (Expression a) t], EnvelopeExpression (Expression a) t)
+translateClause :: (MatchClasses a t) => Clause a t -> ([EnvelopePattern (Expression a) t], EnvelopeExpression (Expression a) t)
 translateClause (EClause _ p (CPlain _ _ e :| [])) =
   ([translatePattern p], MExpression e)
 translateClause _ =
   error "TODO"
 
-translatePattern :: (Show a, Data a, Show t, TypeProxy t) => Pattern a t -> EnvelopePattern (Expression a) t
+translatePattern :: (MatchClasses a t) => Pattern a t -> EnvelopePattern (Expression a) t
 translatePattern =
   \case
     PVariable _ ll ->
