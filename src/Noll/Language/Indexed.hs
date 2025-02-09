@@ -1,9 +1,9 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StrictData #-}
-{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE TypeApplications #-}
 
 module Noll.Language.Indexed (
   TypeIndexed (..),
@@ -37,7 +37,7 @@ import Noll.Language.Type.Scheme (Scheme (..))
 
 import qualified Data.Set as Set
 
-class TypeIndexed k t | t -> k where
+class TypeIndexed k t where
   typeIndexesIn :: t -> Set (TypeIndex k)
 
 instance TypeIndexed k (TypeIndex k) where
@@ -61,19 +61,19 @@ instance (Ord k, TypeIndexed k t) => TypeIndexed k (Trait t) where
 instance (Ord k, TypeIndexed k t) => TypeIndexed k (Set t) where
   typeIndexesIn = Set.unions . Set.map typeIndexesIn
 
-instance (Ord k, Data t, Data k, TypeIndexed k t) => TypeIndexed k (Label t) where
+instance (Ord k, Data t, Data k) => TypeIndexed k (Label t) where
   typeIndexesIn = Set.fromList . universeBi
 
-instance (Ord k, Data t, Data k, TypeIndexed k t) => TypeIndexed k (Row TypeIndex k t) where
+instance (Ord k, Data t, Data k) => TypeIndexed k (Row TypeIndex k t) where
   typeIndexesIn = Set.fromList . universeBi
 
-instance (Ord k, Data t, Data k, TypeIndexed k t) => TypeIndexed k (Intrinsic t) where
+instance (Ord k, Data t, Data k) => TypeIndexed k (Intrinsic t) where
   typeIndexesIn = Set.fromList . universeBi
 
 instance (Ord k, Data k) => TypeIndexed k (Type TypeIndex k) where
   typeIndexesIn = Set.fromList . universeBi
 
-instance (Ord k, Data k, Data t, Data a, TypeIndexed k t) => TypeIndexed k (Pattern a t) where
+instance (Ord k, Data k, Data t, Data a) => TypeIndexed k (Pattern a t) where
   typeIndexesIn = Set.fromList . universeBi
 
 instance (Ord k, Data a, Data k) => TypeIndexed k (Binding Expression a (Type TypeIndex k)) where
@@ -100,7 +100,7 @@ instance (Ord k, Data a, Data k) => TypeIndexed k (Function Expression a (Type T
 instance (Ord k, Data a, Data k) => TypeIndexed k (Constant Expression a (Type TypeIndex k)) where
   typeIndexesIn = Set.fromList . universeBi
 
-instance (Ord k, Data t, Data k, TypeIndexed k t) => TypeIndexed k (Uses t) where
+instance (Ord k, Data t, Data k) => TypeIndexed k (Uses t) where
   typeIndexesIn = Set.fromList . universeBi
 
 instance (Ord k, Data a, Data k) => TypeIndexed k (Definition a k (Type TypeIndex k)) where
@@ -117,15 +117,15 @@ notBoundIn set = Set.filter notBound
  where
   notBound index = typeIndexId index `notElem` Set.map typeIndexId set
 
-typeIdsIn :: (TypeIndexed k t) => t -> Set Int
-typeIdsIn = Set.map typeIndexId . typeIndexesIn
+typeIdsIn :: (TypeIndexed Kind t) => t -> Set Int
+typeIdsIn = Set.map typeIndexId . (typeIndexesIn @Kind)
 
-freshIdIn :: (Ord k, TypeIndexed k t) => t -> Int
+freshIdIn :: (TypeIndexed Kind t) => t -> Int
 freshIdIn t
   | null typeIndexSet = 0
   | otherwise = succ (maximum (typeIdsIn typeIndexSet))
  where
-  typeIndexSet = typeIndexesIn t
+  typeIndexSet = typeIndexesIn @Kind t
 
 indexed :: (Traversable t) => t a -> State Int (t (Type TypeIndex Kind))
 indexed = traverse (fmap tVar . const supply)
