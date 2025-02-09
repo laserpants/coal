@@ -90,7 +90,9 @@ compileClauses ll cs = compileEnvelope <$> matchPatterns [ll] eqs MFail
  where
   eqs = uncurry patternEquation . translateClause <$> fromList1 cs
 
-translateClause :: (MatchClasses a t) => Clause a t -> ([EnvelopePattern (Expression a) t], EnvelopeExpression (Expression a) t)
+type TranslatedClause e a t = ([EnvelopePattern (e a) t], EnvelopeExpression (e a) t)
+
+translateClause :: (MatchClasses a t) => Clause a t -> TranslatedClause Expression a t
 translateClause (EClause _ p (CPlain _ _ e :| [])) =
   ([translatePattern p], MExpression e)
 translateClause _ =
