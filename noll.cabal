@@ -60,10 +60,6 @@ library
       Noll.Language.Expression.Choice
       Noll.Language.Expression.Operator.Binary
       Noll.Language.Expression.Operator.Unary
-      Noll.Language.Module
-      Noll.Language.Module.Constant
-      Noll.Language.Module.Definition
-      Noll.Language.Module.Function
       Noll.Language.Pattern
       Noll.Language.Primitive
       Noll.Language.Trait
@@ -72,6 +68,10 @@ library
       Noll.Language.Type.Kind
       Noll.Language.Type.Row
       Noll.Language.Type.Scheme
+      Noll.Module
+      Noll.Module.Constant
+      Noll.Module.Definition
+      Noll.Module.Function
       Noll.SystemF
       Noll.SystemF.Constraint
       Noll.SystemF.Constraint.Assumption

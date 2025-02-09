@@ -30,7 +30,7 @@ import Noll.Language (
   Uses (..),
  )
 
-import qualified Noll.Language.Module as Module
+import qualified Noll.Module as Module
 
 moduleOrdered :: Module () Kind IndexedType
 moduleOrdered =

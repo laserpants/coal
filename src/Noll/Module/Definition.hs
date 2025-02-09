@@ -4,13 +4,13 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Language.Module.Definition (Definition (..), Path (..), definitionName) where
+module Noll.Module.Definition (Definition (..), Path (..), definitionName) where
 
 import Data.Data (Data, Typeable)
 import Noll.Language.Constructor (Constructor (..))
 import Noll.Language.Expression (Expression (..))
-import Noll.Language.Module.Constant (Constant (..))
-import Noll.Language.Module.Function (Function (..))
+import Noll.Module.Constant (Constant (..))
+import Noll.Module.Function (Function (..))
 import Noll.Language.Trait (Trait (..), Uses (..))
 import Noll.Language.Type (Parameter, Type (..), TypeIndex)
 import Noll.Utils (Name)

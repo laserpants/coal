@@ -16,10 +16,10 @@ module Noll.Language (
   module Noll.Language.Expression.Binding,
   module Noll.Language.Expression.Operator.Unary,
   module Noll.Language.Expression.Operator.Binary,
-  module Noll.Language.Module,
-  module Noll.Language.Module.Definition,
-  module Noll.Language.Module.Function,
-  module Noll.Language.Module.Constant,
+  module Noll.Module,
+  module Noll.Module.Definition,
+  module Noll.Module.Function,
+  module Noll.Module.Constant,
 ) where
 
 import Noll.AST.HasKind
@@ -31,10 +31,10 @@ import Noll.Language.Expression.Binding
 import Noll.Language.Expression.Choice
 import Noll.Language.Expression.Operator.Binary
 import Noll.Language.Expression.Operator.Unary
-import Noll.Language.Module
-import Noll.Language.Module.Constant
-import Noll.Language.Module.Definition
-import Noll.Language.Module.Function
+import Noll.Module
+import Noll.Module.Constant
+import Noll.Module.Definition
+import Noll.Module.Function
 import Noll.Language.Pattern
 import Noll.Language.Primitive
 import Noll.Language.Trait

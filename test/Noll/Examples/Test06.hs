@@ -30,7 +30,7 @@ import Noll.Language (
   Uses (..),
  )
 
-import qualified Noll.Language.Module as Module
+import qualified Noll.Module as Module
 
 tree0 :: Type TypeIndex Kind
 tree0 = TApplication KType (TConstructor (KArrow KType KType) "Tree") (TVariable (TypeIndex KType 0) :| [])

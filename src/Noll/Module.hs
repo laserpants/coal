@@ -2,14 +2,14 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Language.Module (
+module Noll.Module (
   Module (..),
   overModuleDefinitions,
   fromDefinitionList,
 ) where
 
 import Data.Data (Data, Typeable)
-import Noll.Language.Module.Definition (Definition (..), Path (..))
+import Noll.Module.Definition (Definition (..), Path (..))
 import Noll.Utils (Name, Over)
 
 data Module a k t = Module Path [Name] [Definition a k t]
