@@ -63,7 +63,6 @@ library
       Noll.Language.Module.Constant
       Noll.Language.Module.Definition
       Noll.Language.Module.Function
-      Noll.Language.Module.TraitInstance
       Noll.Language.Pattern
       Noll.Language.Primitive
       Noll.Language.Trait
