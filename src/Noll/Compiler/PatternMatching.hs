@@ -53,8 +53,8 @@ instance (MatchExpressionContext a) => MatchExpressionContext (Dictionary a) whe
 instance (Show a, Data a, Show t, Data t, TypeProxy t, Ord t, Monoid a) => MatchExpressionContext (Module a k t) where
   compileMatchExprs =
     \case
-      Module p ns os ->
-        Module p ns <$> compileMatchExprs os
+      Module p ns ds ->
+        Module p ns <$> compileMatchExprs ds
 
 instance (Show a, Data a, Data t, Show t, TypeProxy t, Ord t, Monoid a) => MatchExpressionContext (Definition a k t) where
   compileMatchExprs =
