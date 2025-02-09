@@ -7,7 +7,7 @@
 module Noll.Compiler.PatternMatching (TypeProxy (..), compileEnvelope, compileMatchExprs) where
 
 import Data.Data (Data, Typeable)
-import Data.Generics.Uniplate.Data (transformBiM)
+import Data.Generics.Uniplate.Data (transformM, transformBiM)
 import Noll.Common.List1 (List1, NonEmpty (..), fromList1)
 import Noll.Common.Supply (suppliedName)
 import Noll.Compiler.PatternMatching.Compiler (TypeProxy (..), compileEnvelope)
@@ -65,7 +65,7 @@ instance (Show a, Data a, Show t, Data t, TypeProxy t, Ord t, Monoid a) => Match
   compileMatchExprs = transformBiM (compileMatchExprsE :: CompileMatchExprsE a t)
 
 instance (Show a, Data a, Show t, Data t, TypeProxy t, Ord t, Monoid a) => MatchExpressionContext (Expression a t) where
-  compileMatchExprs = transformBiM (compileMatchExprsE :: CompileMatchExprsE a t)
+  compileMatchExprs = transformM compileMatchExprsE
 
 compileMatchExprsE :: (Show a, Data a, Show t, TypeProxy t, Monoid a, Ord t, Data t) => Expression a t -> MatchMonad (Expression a t)
 compileMatchExprsE =
