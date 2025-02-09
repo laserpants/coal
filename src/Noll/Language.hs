@@ -16,10 +16,6 @@ module Noll.Language (
   module Noll.Language.Expression.Binding,
   module Noll.Language.Expression.Operator.Unary,
   module Noll.Language.Expression.Operator.Binary,
-  module Noll.Module,
-  module Noll.Module.Definition,
-  module Noll.Module.Function,
-  module Noll.Module.Constant,
 ) where
 
 import Noll.AST.HasKind
@@ -39,7 +35,3 @@ import Noll.Language.Type.Intrinsic
 import Noll.Language.Type.Kind
 import Noll.Language.Type.Row
 import Noll.Language.Type.Scheme
-import Noll.Module
-import Noll.Module.Constant
-import Noll.Module.Definition
-import Noll.Module.Function

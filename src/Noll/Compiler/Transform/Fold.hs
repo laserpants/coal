@@ -22,16 +22,8 @@ import Noll.Common.Supply (suppliedName)
 import Noll.Compiler.Transform (flattenApplication)
 import Noll.Compiler.Transform.Tree (replace)
 import Noll.Label (Label (..), labelName)
-import Noll.Language (
-  Choice (..),
-  Clause (..),
-  Constant (..),
-  Definition (..),
-  Expression (..),
-  Function (..),
-  Module (..),
-  Pattern (..),
- )
+import Noll.Language (Choice (..), Clause (..), Expression (..), Pattern (..))
+import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
 import Noll.Utils (Dictionary, Name, const2)
 
 newtype FoldExpansion a = FoldExpansion {foldExpansionStack :: ReaderT Name (State Int) a}

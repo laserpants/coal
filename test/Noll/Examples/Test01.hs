@@ -13,19 +13,16 @@ import Noll.Language (
   BinaryOperator (..),
   Choice (..),
   Clause (..),
-  Definition (..),
   Expression (..),
-  Function (..),
   Intrinsic (..),
-  Module (..),
   Parameter (..),
-  Path (..),
   Pattern (..),
   Primitive (..),
   Trait (..),
   Type (..),
   Uses (..),
  )
+import Noll.Module (Definition (..), Function (..), Module (..), Path (..))
 
 import qualified Noll.Module as Module
 

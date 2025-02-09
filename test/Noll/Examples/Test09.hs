@@ -14,15 +14,11 @@ import Noll.Language (
   Choice (..),
   Clause (..),
   CompiledClause (..),
-  Constant (..),
-  Definition (..),
   Expression (..),
   IndexedType,
   Intrinsic (..),
   Kind (..),
-  Module (..),
   Parameter (..),
-  Path (..),
   Pattern (..),
   Primitive (..),
   Trait (..),
@@ -30,6 +26,7 @@ import Noll.Language (
   TypeIndex (..),
   Uses (..),
  )
+import Noll.Module (Constant (..), Definition (..), Module (..), Path (..))
 
 import qualified Noll.Module as Module
 

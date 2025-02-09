@@ -12,7 +12,6 @@ import Noll.Language (
   Choice (..),
   Clause (..),
   Expression (..),
-  Function (..),
   IndexedType,
   Intrinsic (..),
   Kind (..),
@@ -24,6 +23,7 @@ import Noll.Language (
   TypeIndex (..),
   Uses (..),
  )
+import Noll.Module (Constant (..), Function (..), Module (..))
 import Noll.SystemF.Constraint.Assumption (Assumption (..))
 import Noll.SystemF.Constraint.Generation.Internal (InferenceRule (..))
 import Noll.SystemFSpec.TestRunner

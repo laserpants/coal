@@ -20,10 +20,7 @@ import Noll.Language (
   Binding (..),
   Choice (..),
   Clause (..),
-  Constant (..),
-  Definition (..),
   Expression (..),
-  Function (..),
   Guard (..),
   IndexedType,
   Intrinsic (..),
@@ -36,6 +33,7 @@ import Noll.Language (
   TypeIndex (..),
   TypeIndexed (..),
  )
+import Noll.Module (Constant (..), Definition (..), Function (..))
 import Noll.SystemF.Constraint (Constraint (..), MonomorphicSet (..))
 import Noll.Utils (IndexMap, Map, Set, fromMaybe)
 

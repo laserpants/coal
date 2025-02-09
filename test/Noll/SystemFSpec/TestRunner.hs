@@ -30,22 +30,19 @@ import Noll.Compiler (
   updateSubstitutionC,
  )
 import Noll.Language (
-  Constant (..),
   Constructor (..),
-  Definition (..),
   Expression (..),
-  Function (..),
   HasType (..),
   IndexedType,
   Intrinsic (..),
   Kind (..),
-  Module (..),
   Scheme (..),
   Type (..),
   TypeIndex (..),
   TypeIndexed (..),
   indexed,
  )
+import Noll.Module (Constant (..), Function (..), Module (..))
 import Noll.SystemF.Constraint.Assumption (Assumption (..))
 import Noll.SystemF.Constraint.Generation (ConstraintsGenError)
 import Noll.SystemF.Constraint.Generation.Internal (InferenceRule (..))

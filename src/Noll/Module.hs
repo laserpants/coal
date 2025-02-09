@@ -6,10 +6,15 @@ module Noll.Module (
   Module (..),
   overModuleDefinitions,
   fromDefinitionList,
+  module Noll.Module.Definition,
+  module Noll.Module.Function,
+  module Noll.Module.Constant,
 ) where
 
 import Data.Data (Data, Typeable)
-import Noll.Module.Definition (Definition (..), Path (..))
+import Noll.Module.Constant
+import Noll.Module.Definition (Definition (..), Path (..), definitionName)
+import Noll.Module.Function
 import Noll.Utils (Name, Over)
 
 data Module a k t = Module Path [Name] [Definition a k t]

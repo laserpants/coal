@@ -14,11 +14,7 @@ import Data.Generics.Uniplate.Data (transformM)
 import Noll.Common.Environment (Environment)
 import Noll.Common.List1 (NonEmpty (..), fromList1)
 import Noll.Language (
-  Constant (..),
-  Definition (..),
   Expression (..),
-  Function (..),
-  Module (..),
   Parameter (..),
   Pattern (..),
   Row (..),
@@ -26,6 +22,7 @@ import Noll.Language (
   Type (..),
   Uses (..),
  )
+import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
 import Noll.Utils (Dictionary, Name)
 
 import qualified Noll.Common.Environment as Environment

@@ -14,7 +14,8 @@ import Noll.Eval (Value (..), eval)
 import Noll.Examples.Test07 (test07)
 import Noll.Examples.Test08 (test08)
 import Noll.Label (Label (..))
-import Noll.Language (CompiledClause (..), Constant (..), Expression (..), Pattern (..), Primitive (..), Uses (..))
+import Noll.Language (CompiledClause (..), Expression (..), Pattern (..), Primitive (..), Uses (..))
+import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
 import Test.Hspec (Spec, describe, it)
 
 import qualified Data.Map.Strict as Map

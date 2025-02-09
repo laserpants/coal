@@ -17,17 +17,8 @@ import Noll.Compiler.PatternMatching.Equation (patternEquation)
 import Noll.Compiler.PatternMatching.Rule (MatchMonad (..), matchPatterns)
 import Noll.Compiler.Transform.Tree (replaceWith)
 import Noll.Label (Label (..))
-import Noll.Language (
-  Binding (..),
-  Choice (..),
-  Clause (..),
-  Constant (..),
-  Definition (..),
-  Expression (..),
-  Function (..),
-  Module (..),
-  Pattern (..),
- )
+import Noll.Language (Binding (..), Choice (..), Clause (..), Expression (..), Pattern (..))
+import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
 import Noll.Utils (Dictionary)
 
 class MatchExpressionContext a where

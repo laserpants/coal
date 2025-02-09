@@ -42,11 +42,8 @@ import Noll.Common.Supply (Supply (..), supplied)
 import Noll.Label (Label (..))
 import Noll.Language (
   Binding (..),
-  Constant (..),
   Constructor (..),
-  Definition (..),
   Expression (..),
-  Function (..),
   HasType (..),
   IndexedType,
   Kind (..),
@@ -56,10 +53,10 @@ import Noll.Language (
   TypeIndex (..),
   TypeIndexed (..),
   Uses (..),
-  definitionName,
   normalizeRowTypes,
   typeOf,
  )
+import Noll.Module (Constant (..), Definition (..), Function (..), definitionName)
 import Noll.SystemF (
   Assumption (..),
   Constraint (..),

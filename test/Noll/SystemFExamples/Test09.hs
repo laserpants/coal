@@ -11,9 +11,7 @@ import Noll.Language (
   Choice (..),
   Clause (..),
   Constructor (..),
-  Definition (..),
   Expression (..),
-  Function (..),
   Intrinsic (..),
   Kind (..),
   Pattern (..),
@@ -23,6 +21,7 @@ import Noll.Language (
   TypeIndex (..),
   Uses (..),
  )
+import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
 import Noll.SystemFSpec.TestRunner
 import Test.Hspec (Spec, describe, hspec, it)
 

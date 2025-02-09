@@ -13,15 +13,11 @@ import Noll.Language (
   Choice (..),
   Clause (..),
   Constructor (..),
-  Definition (..),
   Expression (..),
-  Function (..),
   IndexedType,
   Intrinsic (..),
   Kind (..),
-  Module (..),
   Parameter (..),
-  Path (..),
   Pattern (..),
   Primitive (..),
   Scheme (..),
@@ -30,6 +26,7 @@ import Noll.Language (
   TypeIndex (..),
   Uses (..),
  )
+import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
 import Noll.SystemF (
   Assumption (..),
   Constraint (..),

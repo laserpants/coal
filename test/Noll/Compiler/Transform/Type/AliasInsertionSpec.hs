@@ -10,9 +10,7 @@ import Noll.Examples.Test02 (test02)
 import Noll.Label (Label (..))
 import Noll.Language (
   BinaryOperator (..),
-  Definition (..),
   Expression (..),
-  Function (..),
   Intrinsic (..),
   Parameter (..),
   Pattern (..),
@@ -21,6 +19,7 @@ import Noll.Language (
   Type (..),
   Uses (..),
  )
+import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
 import Test.Hspec (Spec, describe, it)
 
 import qualified Noll.Common.Environment as Environment

@@ -11,7 +11,6 @@ import Noll.Language (
   Binding (..),
   Choice (..),
   Clause (..),
-  Constant (..),
   Constructor (..),
   Expression (..),
   IndexedType,
@@ -26,6 +25,7 @@ import Noll.Language (
   TypeIndex (..),
   Uses (..),
  )
+import Noll.Module (Constant (..), Function (..), Module (..))
 import Noll.SystemFSpec.TestRunner
 import Test.Hspec (Spec, describe, hspec, it)
 
