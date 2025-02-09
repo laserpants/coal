@@ -15,6 +15,7 @@ import Control.Monad.Reader (asks)
 import Data.Data (Data)
 import Data.Maybe (maybeToList)
 import Data.Tuple.Extra (second, third3)
+import Noll.AST.HasType (foldTypeOf)
 import Noll.Common.List1 (NonEmpty ((:|)), fromList1)
 import Noll.Common.Supply (supplied)
 import Noll.Label (Label (..))
@@ -41,7 +42,6 @@ import Noll.Language (
   typeOf,
   (~>),
  )
-import Noll.Language.HasType (foldTypeOf)
 import Noll.SystemF.Constraint (Constraint (..))
 import Noll.SystemF.Constraint.Assumption (
   Assumption (..),

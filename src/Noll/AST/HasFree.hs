@@ -3,7 +3,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Language.HasFree (
+module Noll.AST.HasFree (
   HasBound (..),
   HasFree (..),
 ) where

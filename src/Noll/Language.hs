@@ -1,8 +1,8 @@
 module Noll.Language (
   module Noll.Language.Constructor,
-  module Noll.Language.Indexed,
-  module Noll.Language.Type.HasKind,
-  module Noll.Language.HasType,
+  module Noll.AST.Indexed,
+  module Noll.AST.HasKind,
+  module Noll.AST.HasType,
   module Noll.Language.Type,
   module Noll.Language.Type.Intrinsic,
   module Noll.Language.Type.Kind,
@@ -22,14 +22,15 @@ module Noll.Language (
   module Noll.Language.Module.Constant,
 ) where
 
+import Noll.AST.HasKind
+import Noll.AST.HasType
+import Noll.AST.Indexed
 import Noll.Language.Constructor
 import Noll.Language.Expression
 import Noll.Language.Expression.Binding
 import Noll.Language.Expression.Choice
 import Noll.Language.Expression.Operator.Binary
 import Noll.Language.Expression.Operator.Unary
-import Noll.Language.HasType
-import Noll.Language.Indexed
 import Noll.Language.Module
 import Noll.Language.Module.Constant
 import Noll.Language.Module.Definition
@@ -38,7 +39,6 @@ import Noll.Language.Pattern
 import Noll.Language.Primitive
 import Noll.Language.Trait
 import Noll.Language.Type
-import Noll.Language.Type.HasKind
 import Noll.Language.Type.Intrinsic
 import Noll.Language.Type.Kind
 import Noll.Language.Type.Row

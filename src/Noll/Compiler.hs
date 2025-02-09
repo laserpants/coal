@@ -34,6 +34,8 @@ import Control.Monad.State (MonadState, StateT, gets, modify, put, runState, run
 import Control.Monad.Writer (execWriter)
 import Data.Data (Data)
 import Data.Either.Extra (partitionEithers)
+import Noll.AST.HasType (foldTypeOf)
+import Noll.AST.Indexed (indexed)
 import Noll.Common.Environment (Environment (..))
 import Noll.Common.List1 (NonEmpty ((:|)))
 import Noll.Common.Supply (Supply (..), supplied)
@@ -58,8 +60,6 @@ import Noll.Language (
   normalizeRowTypes,
   typeOf,
  )
-import Noll.Language.HasType (foldTypeOf)
-import Noll.Language.Indexed (indexed)
 import Noll.SystemF (
   Assumption (..),
   Constraint (..),

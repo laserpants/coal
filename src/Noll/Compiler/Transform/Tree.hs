@@ -13,6 +13,7 @@ module Noll.Compiler.Transform.Tree (
 
 import Control.Monad.Identity (runIdentity)
 import Data.Data (Data)
+import Noll.AST.HasFree (HasBound (..))
 import Noll.Label (Label (..))
 import Noll.Language (
   Binding (..),
@@ -22,7 +23,6 @@ import Noll.Language (
   Expression (..),
   Guard (..),
  )
-import Noll.Language.HasFree (HasBound (..))
 import Noll.Utils (Name, const2, (<$$>))
 
 class TreeTransform e t where

@@ -1,4 +1,4 @@
-import qualified Noll.Language.IndexedSpec
+import qualified Noll.AST.IndexedSpec
 
 -- import qualified Noll.SystemF.ConstraintSolverSpec
 -- import qualified Noll.SystemF.KindConstraint.CollectSpec
@@ -6,6 +6,7 @@ import qualified Noll.Language.IndexedSpec
 -- import qualified Noll.SystemF.TypeConstraint.CollectSpec
 -- import qualified Noll.SystemF.TypeSubstitutionSpec
 
+import qualified Noll.AST.HasFreeSpec
 import qualified Noll.Compiler.NormalizeObjectsSpec
 import qualified Noll.Compiler.PatternMatchingExamples.Test01
 import qualified Noll.Compiler.PatternMatchingExamples.Test02
@@ -18,7 +19,6 @@ import qualified Noll.Compiler.Transform.Type.AliasInsertionSpec
 import qualified Noll.CompilerExamples.Test01
 import qualified Noll.CompilerExamples.Test02
 import qualified Noll.CompilerSpec
-import qualified Noll.Language.HasFreeSpec
 import qualified Noll.SystemF.Constraint.GenerationSpec
 import qualified Noll.SystemF.UnificationSpec
 import qualified Noll.SystemFExamples.Test01
@@ -43,7 +43,7 @@ import Test.Hspec (hspec)
 main :: IO ()
 main =
   hspec $ do
-    Noll.Language.IndexedSpec.spec
+    Noll.AST.IndexedSpec.spec
     Noll.SystemF.Constraint.GenerationSpec.spec
     Noll.Compiler.Transform.Pattern.DesugaringSpec.spec
     Noll.SystemFSpec.spec
@@ -64,7 +64,7 @@ main =
     Noll.SystemFExamples.Test14.spec
     Noll.SystemFExamples.Test15.spec
     Noll.Compiler.PatternMatchingSpec.spec
-    Noll.Language.HasFreeSpec.spec
+    Noll.AST.HasFreeSpec.spec
     Noll.Compiler.Transform.TreeSpec.spec
     Noll.Compiler.PatternMatchingExamples.Test01.spec
     Noll.Compiler.PatternMatchingExamples.Test02.spec

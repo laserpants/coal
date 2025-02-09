@@ -2,7 +2,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Language.HasTag (HasTag (..)) where
+module Noll.AST.HasTag (HasTag (..)) where
 
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (universeBi)

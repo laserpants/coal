@@ -1,14 +1,14 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Language.HasFreeSpec where
+module Noll.AST.HasFreeSpec where
 
 import Data.List.NonEmpty (NonEmpty (..), (<|))
 import Data.Set (Set)
+import Noll.AST.HasFree
 import Noll.Label (Label (..))
 import Noll.Language.Expression (Clause (..), Expression (..))
 import Noll.Language.Expression.Binding (Binding (..))
 import Noll.Language.Expression.Choice (Choice (..), Guard (..))
-import Noll.Language.HasFree
 import Noll.Language.Pattern (Pattern (..))
 import Noll.Language.Primitive (Primitive (..))
 import Noll.Language.Type (Type (..), TypeIndex (..))
@@ -19,7 +19,7 @@ import qualified Data.Set as Set
 
 spec :: Spec
 spec =
-  describe "Noll.Language.HasFree" $ do
+  describe "Noll.AST.HasFree" $ do
     describe "freeIn" $ do
       describe "EVariable" $
         it "a" $

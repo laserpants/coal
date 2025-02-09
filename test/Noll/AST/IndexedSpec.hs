@@ -1,9 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Language.IndexedSpec (spec) where
+module Noll.AST.IndexedSpec (spec) where
 
 import Data.Set (Set)
-import Noll.Language.Indexed
+import Noll.AST.Indexed
 import Noll.Language.Type (Type (..), TypeIndex (..))
 import Noll.Language.Type.Kind (Kind (..))
 import Noll.Language.Type.Scheme (Scheme (..))
@@ -13,7 +13,7 @@ import qualified Data.Set as Set
 
 spec :: Spec
 spec =
-  describe "Noll.Language.Indexed" $ do
+  describe "Noll.AST.Indexed" $ do
     describe "typeIndexesIn" $ do
       describe "Scheme" $ do
         it "" $

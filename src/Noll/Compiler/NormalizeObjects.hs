@@ -5,9 +5,9 @@ module Noll.Compiler.NormalizeObjects where
 
 import Data.Data (Data, Typeable)
 import Data.Map.Strict (Map)
+import Noll.AST.HasType (HasType (..), foldTypeOf)
 import Noll.Compiler.Transform
 import Noll.Language.Expression (Expression (..))
-import Noll.Language.HasType (HasType (..), foldTypeOf)
 import Noll.Language.Module (Module (..))
 import Noll.Language.Module.Constant (Constant (..))
 import Noll.Language.Module.Definition (Definition (..))
