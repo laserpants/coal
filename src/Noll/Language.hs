@@ -31,10 +31,6 @@ import Noll.Language.Expression.Binding
 import Noll.Language.Expression.Choice
 import Noll.Language.Expression.Operator.Binary
 import Noll.Language.Expression.Operator.Unary
-import Noll.Module
-import Noll.Module.Constant
-import Noll.Module.Definition
-import Noll.Module.Function
 import Noll.Language.Pattern
 import Noll.Language.Primitive
 import Noll.Language.Trait
@@ -43,3 +39,7 @@ import Noll.Language.Type.Intrinsic
 import Noll.Language.Type.Kind
 import Noll.Language.Type.Row
 import Noll.Language.Type.Scheme
+import Noll.Module
+import Noll.Module.Constant
+import Noll.Module.Definition
+import Noll.Module.Function

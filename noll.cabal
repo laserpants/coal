@@ -76,6 +76,7 @@ library
       Noll.SystemF.Constraint
       Noll.SystemF.Constraint.Assumption
       Noll.SystemF.Constraint.Generation
+      Noll.SystemF.Constraint.Generation.InferenceRule
       Noll.SystemF.Constraint.Generation.Internal
       Noll.SystemF.Constraint.Generation.TypeAnnotation
       Noll.SystemF.Constraint.Solver

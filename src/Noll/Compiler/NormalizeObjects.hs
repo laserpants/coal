@@ -8,12 +8,12 @@ import Data.Map.Strict (Map)
 import Noll.AST.HasType (foldTypeOf)
 import Noll.Compiler.Transform
 import Noll.Language.Expression (Expression (..))
+import Noll.Language.Trait (Uses (..))
+import Noll.Language.Type (Type (..))
 import Noll.Module (Module (..))
 import Noll.Module.Constant (Constant (..))
 import Noll.Module.Definition (Definition (..))
 import Noll.Module.Function (Function (..))
-import Noll.Language.Trait (Uses (..))
-import Noll.Language.Type (Type (..))
 
 class NormalizeObjectsTransformContext a where
   normalizeObject :: a -> a
