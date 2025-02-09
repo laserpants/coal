@@ -3,10 +3,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.AST.HasFree (
-  HasBound (..),
-  HasFree (..),
-) where
+module Noll.AST.HasFree (HasBound (..), HasFree (..)) where
 
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (universeBi)
