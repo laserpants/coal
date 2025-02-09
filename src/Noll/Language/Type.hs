@@ -1,11 +1,11 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveFoldable #-}
 {-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
-{-# LANGUAGE UndecidableInstances #-}
 
 module Noll.Language.Type (
   Type (..),
@@ -72,13 +72,13 @@ instance Supply (TypeIndex k) where
 class HasActive k t | t -> k where
   activeIn :: t -> Set (TypeIndex k)
 
-instance (Ord k, HasActive k t) => HasActive k (Map a t) where
+instance (HasActive Kind t) => HasActive Kind (Map a t) where
   activeIn = Set.unions . fmap activeIn
 
-instance (Ord k, HasActive k t) => HasActive k [t] where
+instance (HasActive Kind t) => HasActive Kind [t] where
   activeIn = Set.unions . fmap activeIn
 
-instance (Ord k, HasActive k t) => HasActive k (NonEmpty t) where
+instance (HasActive Kind t) => HasActive Kind (NonEmpty t) where
   activeIn = Set.unions . fmap activeIn
 
 {-# INLINE activeIdsIn #-}
