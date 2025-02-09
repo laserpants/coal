@@ -11,9 +11,9 @@ module Noll.Language.HasFree (
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (universeBi)
 import Data.Set (Set, singleton)
-import Noll.Common.List1 (NonEmpty)
+import Noll.Common.List1 (NonEmpty ((:|)))
 import Noll.Label (Label (..), labelName)
-import Noll.Language.Expression (Clause (..), Expression (..))
+import Noll.Language.Expression (Clause (..), CompiledClause (..), Expression (..))
 import Noll.Language.Expression.Binding (Binding (..))
 import Noll.Language.Expression.Choice (Choice (..), Guard (..))
 import Noll.Language.Pattern (Pattern (..))
@@ -72,6 +72,14 @@ instance (Ord t, Data a, Data t) => HasFree (Clause a t) t where
       EClause _ p cs ->
         freeIn cs `exceptNames` boundIn p
 
+instance (Ord t, Data a, Data t) => HasFree (CompiledClause a t) t where
+  freeIn =
+    \case
+      ECompiledClause (_ :| lls) e ->
+        freeIn e `exceptNames` boundIn lls
+      ECompiledField{} ->
+        error "TODO"
+
 instance (Ord t, Data a, Data t) => HasFree (Binding Expression a t) t where
   freeIn =
     \case
@@ -93,8 +101,8 @@ instance (Ord t, Data a, Data t) => HasFree (Expression a t) t where
         (freeIn e1 <> freeIn e2) `exceptNames` boundIn p
       EMatch _ _ e cs ->
         freeIn e <> freeIn cs
-      ECompiledMatch{} ->
-        error " TODO"
+      ECompiledMatch _ _ e cs ->
+        freeIn e <> freeIn cs
       e ->
         Set.fromList (universeBi e)
 
