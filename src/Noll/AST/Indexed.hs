@@ -118,7 +118,7 @@ notBoundIn set = Set.filter notBound
   notBound index = typeIndexId index `notElem` Set.map typeIndexId set
 
 typeIdsIn :: (TypeIndexed Kind t) => t -> Set Int
-typeIdsIn = Set.map typeIndexId . typeIndexesIn @Kind
+typeIdsIn t = Set.map typeIndexId (typeIndexesIn @Kind t)
 
 freshIdIn :: (TypeIndexed Kind t) => t -> Int
 freshIdIn t
