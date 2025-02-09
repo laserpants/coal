@@ -122,10 +122,10 @@ typeIdsIn t = Set.map typeIndexId (typeIndexesIn @Kind t)
 
 freshIdIn :: (TypeIndexed Kind t) => t -> Int
 freshIdIn t
-  | null typeIndexSet = 0
-  | otherwise = succ (maximum (typeIdsIn typeIndexSet))
+  | null typeIdSet = 0
+  | otherwise = succ (maximum typeIdSet)
  where
-  typeIndexSet = typeIndexesIn @Kind t
+  typeIdSet = typeIdsIn t
 
 indexed :: (Traversable t) => t a -> State Int (t (Type TypeIndex Kind))
 indexed = traverse (fmap tVar . const supply)
