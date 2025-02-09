@@ -75,3 +75,5 @@ binaryOperatorTypeScheme =
       forall1 (\a -> TIntrinsic (IList a) ~> TIntrinsic (IList a) ~> TIntrinsic (IList a))
     OAddition ->
       forall1 (\a -> a ~> a ~> a)
+    _ ->
+      error "TODO"
