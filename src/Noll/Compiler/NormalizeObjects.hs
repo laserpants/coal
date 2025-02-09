@@ -5,7 +5,7 @@ module Noll.Compiler.NormalizeObjects where
 
 import Data.Data (Data, Typeable)
 import Data.Map.Strict (Map)
-import Noll.AST.HasType (HasType (..), foldTypeOf)
+import Noll.AST.HasType (foldTypeOf)
 import Noll.Compiler.Transform
 import Noll.Language.Expression (Expression (..))
 import Noll.Language.Module (Module (..))
@@ -13,7 +13,7 @@ import Noll.Language.Module.Constant (Constant (..))
 import Noll.Language.Module.Definition (Definition (..))
 import Noll.Language.Module.Function (Function (..))
 import Noll.Language.Trait (Uses (..))
-import Noll.Language.Type (Type (..), foldType)
+import Noll.Language.Type (Type (..))
 
 class NormalizeObjectsTransformContext a where
   normalizeObject :: a -> a
