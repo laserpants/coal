@@ -2,7 +2,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.SystemF.Constraint.Generation.InferenceRule where
+module Noll.SystemF.Constraint.Generation.InferenceRule (InferenceRule (..)) where
 
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (transformBi)
