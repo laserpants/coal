@@ -26,7 +26,7 @@ import Noll.Language (
   notBoundIn,
   typeIdsIn,
  )
-import Noll.SystemF.Constraint (Constraint (..), MonomorphicSet (..))
+import Noll.SystemF.Constraint (Constraint (..), Monomorphic (..))
 import Noll.SystemF.Substitution (Substitutable (..), Substitution (..), mapsTo)
 import Noll.SystemF.Unification (UnificationError, Unifier (..), runUnifier, unifyAll)
 import Noll.Utils (foldrM)
@@ -96,8 +96,8 @@ solve constraints =
       solve (Equality c [t1, t2] : cs)
 
 {-# INLINE generalize #-}
-generalize :: (TypeIndexed k t) => MonomorphicSet (TypeIndex k) -> t -> Scheme TypeIndex k t
-generalize (MonomorphicSet m) t = Forall (notBoundIn m (typeIndexesIn t)) [] t
+generalize :: (TypeIndexed k t) => Monomorphic (TypeIndex k) -> t -> Scheme TypeIndex k t
+generalize (Monomorphic m) t = Forall (notBoundIn m (typeIndexesIn t)) [] t
 
 instantiate :: Scheme TypeIndex Kind IndexedType -> Solver s IndexedType
 instantiate (Forall qs _ t) = do

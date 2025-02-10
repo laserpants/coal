@@ -34,7 +34,7 @@ import Noll.Language (
   TypeIndexed (..),
  )
 import Noll.Module (Constant (..), Definition (..), Function (..))
-import Noll.SystemF.Constraint (Constraint (..), MonomorphicSet (..))
+import Noll.SystemF.Constraint (Constraint (..), Monomorphic (..))
 import Noll.Utils (IndexMap, Map, Set, fromMaybe)
 
 import qualified Data.Map.Strict as Map
@@ -56,11 +56,11 @@ applyT sub =
 instance Substitutable IndexedType where
   apply = transform . applyT
 
-instance Substitutable (MonomorphicSet (TypeIndex Kind)) where
+instance Substitutable (Monomorphic (TypeIndex Kind)) where
   apply sub =
     \case
-      MonomorphicSet m ->
-        MonomorphicSet (typeIndexesIn (Set.map (apply sub . TVariable) m))
+      Monomorphic m ->
+        Monomorphic (typeIndexesIn (Set.map (apply sub . TVariable) m))
 
 instance Substitutable (Scheme TypeIndex Kind IndexedType) where
   apply sub =

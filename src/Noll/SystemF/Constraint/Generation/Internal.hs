@@ -38,7 +38,7 @@ import Noll.Common.Supply (Supply (..))
 import Noll.Language (Constructor (..), Kind (..), Type (..), TypeIndex (..))
 import Noll.SystemF.Constraint (
   Constraint (..),
-  MonomorphicSet (..),
+  Monomorphic (..),
   overMonomorphicSet,
  )
 import Noll.SystemF.Constraint.Generation.InferenceRule (InferenceRule (..))
@@ -69,14 +69,14 @@ data ConstraintsGenError a
   deriving (Show, Eq, Ord, Read)
 
 data ConstraintsGenContext o k t = ConstraintsGenContext
-  { constraintsGenContextMonomorphicSet :: MonomorphicSet (o k)
+  { constraintsGenContextMonomorphicSet :: Monomorphic (o k)
   , constraintsGenContextDataConstructorEnv :: Environment (Constructor o k t)
   , constraintsGenContextTypeConstructorEnv :: Environment k
   }
   deriving (Show, Eq, Ord, Read)
 
 {-# INLINE overConstraintsGenMonomorphicSet #-}
-overConstraintsGenMonomorphicSet :: (MonomorphicSet (o k) -> MonomorphicSet (o k)) -> ConstraintsGenContext o k t -> ConstraintsGenContext o k t
+overConstraintsGenMonomorphicSet :: (Monomorphic (o k) -> Monomorphic (o k)) -> ConstraintsGenContext o k t -> ConstraintsGenContext o k t
 overConstraintsGenMonomorphicSet fn ConstraintsGenContext{..} = ConstraintsGenContext{constraintsGenContextMonomorphicSet = fn constraintsGenContextMonomorphicSet, ..}
 
 data ConstraintsGenState c = ConstraintsGenState
@@ -129,13 +129,13 @@ updateConstraintsGenSupply supply = modify (overConstraintsGenStateSupply (const
 -- getConstraintsGenSupply = gets constraintsGenStateSupply
 
 {-# INLINE monosetInsert #-}
-monosetInsert :: (Ord k) => TypeIndex k -> MonomorphicSet (TypeIndex k) -> MonomorphicSet (TypeIndex k)
+monosetInsert :: (Ord k) => TypeIndex k -> Monomorphic (TypeIndex k) -> Monomorphic (TypeIndex k)
 monosetInsert = overMonomorphicSet . Set.insert
 
 {-# INLINE monosetInsertMultiple #-}
-monosetInsertMultiple :: (Ord k, Foldable f) => f (TypeIndex k) -> MonomorphicSet (TypeIndex k) -> MonomorphicSet (TypeIndex k)
+monosetInsertMultiple :: (Ord k, Foldable f) => f (TypeIndex k) -> Monomorphic (TypeIndex k) -> Monomorphic (TypeIndex k)
 monosetInsertMultiple = flip (foldr monosetInsert)
 
 {-# INLINE localMonoset #-}
-localMonoset :: (MonomorphicSet (o k) -> MonomorphicSet (o k)) -> ConstraintsGenStack c o k t a -> ConstraintsGenStack c o k t a
+localMonoset :: (Monomorphic (o k) -> Monomorphic (o k)) -> ConstraintsGenStack c o k t a -> ConstraintsGenStack c o k t a
 localMonoset = local . overConstraintsGenMonomorphicSet

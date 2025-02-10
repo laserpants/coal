@@ -7,7 +7,7 @@
 {-# LANGUAGE StrictData #-}
 
 module Noll.SystemF.Constraint (
-  MonomorphicSet (..),
+  Monomorphic (..),
   Constraint (..),
   overMonomorphicSet,
 ) where
@@ -23,20 +23,20 @@ import Noll.Language (
 import Noll.Utils (Over)
 
 -- | Monomorphic type variable set
-newtype MonomorphicSet m = MonomorphicSet {monomorphicSet :: Set m}
+newtype Monomorphic m = Monomorphic {monomorphicSet :: Set m}
   deriving (Show, Eq, Ord, Read, Semigroup, Monoid, Data, Typeable)
 
 {-# INLINE overMonomorphicSet #-}
-overMonomorphicSet :: Over (MonomorphicSet m) (Set m)
-overMonomorphicSet fn (MonomorphicSet s) = MonomorphicSet (fn s)
+overMonomorphicSet :: Over (Monomorphic m) (Set m)
+overMonomorphicSet fn (Monomorphic s) = Monomorphic (fn s)
 
 data Constraint c o k t
   = Equality c [t]
-  | Implicit c t t (MonomorphicSet (o k))
+  | Implicit c t t (Monomorphic (o k))
   | Explicit c t (Scheme o k t)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
 
-instance TypeIndexed k (MonomorphicSet (TypeIndex k)) where
+instance TypeIndexed k (Monomorphic (TypeIndex k)) where
   typeIndexesIn = monomorphicSet
 
 instance (Ord k, TypeIndexed k t) => TypeIndexed k (Constraint c TypeIndex k t) where
