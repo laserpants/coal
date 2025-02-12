@@ -4,6 +4,7 @@
 module Noll.Language.Pattern (Pattern (..)) where
 
 import Data.Data (Data, Typeable)
+import Noll.Common.List1 (List1)
 import Noll.Label (Label (..))
 import Noll.Language.Primitive (Primitive (..))
 import Noll.Language.Type (Parameter (..), Type)
@@ -27,6 +28,8 @@ data Pattern a t
   | -- | List literal
     PListLiteral a t [Pattern a t]
   | -- | Or-pattern
+    PTuple a t (List1 (Pattern a t))
+  | -- | Pattern matching expression
     POr a t (Pattern a t) (Pattern a t)
   | -- | TODO
     PShorthand a (Label t)

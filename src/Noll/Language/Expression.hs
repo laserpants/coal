@@ -58,6 +58,8 @@ data Expression a t
     EListCons a t (Expression a t) (Expression a t)
   | -- | List literal
     EListLiteral a t [Expression a t]
+  | -- | Tuples
+    ETuple a t (List1 (Expression a t))
   | -- | Pattern matching expression
     EMatch a t (Expression a t) (List1 (Clause a t))
   | -- | Compiled match expression
