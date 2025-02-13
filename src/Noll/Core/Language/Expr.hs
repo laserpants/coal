@@ -5,6 +5,8 @@ module Noll.Core.Language.Expr (Expr) where
 
 import Data.Fix (Fix (..))
 import Noll.Common.List1 (List1)
+import Noll.Core.Language.Op (Op (..))
+import Noll.Core.Language.Prim (Prim (..))
 import Noll.Label (Label (..))
 import Noll.Utils (Name)
 
@@ -14,20 +16,17 @@ data ExprF e t a
     EVar (Label t)
   | -- | Let-binding
     ELet (List1 (Label t, a)) a
-  | --  | -- | Literal value
-    --    ELit Prim
-
-    -- | Lambda abstraction
+  | -- | Literal value
+    ELit Prim
+  | -- | Lambda abstraction
     ELam (List1 (Label t)) a
   | -- | If-statement
     EIf a a a
   | -- | Function application
     EApp t a (List1 a)
-  | --  | -- | Unary operator
-    --    EOp1 (t, Op1) a
-    --  | -- | Binary operator
-    --    EOp2 (t, Op2) a a
-    --  | -- | Pattern match statement
+  | -- | Operator
+    EOp (Op a)
+  | --  | -- | Pattern match statement
     --    EPat a (List' (Clause e t a))
 
     -- | Record field extension
