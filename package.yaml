@@ -29,6 +29,7 @@ dependencies:
 - data-fix
 - free
 - extra
+- recursion-schemes
 - uniplate
 
 ghc-options:

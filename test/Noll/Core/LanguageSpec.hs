@@ -1,12 +1,12 @@
 module Noll.Core.LanguageSpec where
 
-import Noll.Core.Language.Expr.Syntax 
+import Noll.Core.Language.Expr.Syntax
 
 fixture =
-  ELet 
+  let_
     -- compose
     undefined
-    ( ELet
+    ( let_
         undefined
         undefined
     )

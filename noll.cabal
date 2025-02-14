@@ -86,6 +86,7 @@ library
       Noll.SystemF.Substitution
       Noll.SystemF.Unification
       Noll.Utils
+      Noll.Utils.Embed
   other-modules:
       Paths_noll
   autogen-modules:
@@ -100,6 +101,7 @@ library
     , extra
     , free
     , mtl
+    , recursion-schemes
     , text
     , text-show
     , uniplate
@@ -122,6 +124,7 @@ executable noll-exe
     , free
     , mtl
     , noll
+    , recursion-schemes
     , text
     , text-show
     , uniplate
@@ -192,6 +195,7 @@ test-suite noll-test
     , hspec
     , mtl
     , noll
+    , recursion-schemes
     , text
     , text-show
     , uniplate
