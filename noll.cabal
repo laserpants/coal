@@ -46,9 +46,10 @@ library
       Noll.Compiler.Transform.Tree
       Noll.Compiler.Transform.Type.AliasInsertion
       Noll.Core.Language.Expr
-      Noll.Core.Language.Expr.Syntax
       Noll.Core.Language.Op
       Noll.Core.Language.Prim
+      Noll.Core.Language.Syntax.Expr
+      Noll.Core.Language.Syntax.Type
       Noll.Core.Language.Type
       Noll.Core.LLVM.IR
       Noll.Core.LLVM.IRInstruction

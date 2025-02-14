@@ -1,10 +1,11 @@
-module Noll.Core.Language.Expr.Syntax (
+module Noll.Core.Language.Syntax.Expr (
   var,
   let_,
 ) where
 
 import Noll.Common.List1 (List1)
 import Noll.Core.Language.Expr (Expr, ExprF (..))
+import Noll.Core.Language.Prim (Prim)
 import Noll.Label (Label (..))
 import Noll.Utils.Embed (embed, embed1, embed2, embed3, embed4, embed5)
 
@@ -16,10 +17,10 @@ var = embed1 EVar
 let_ :: List1 (Label t, Expr e t) -> Expr e t -> Expr e t
 let_ = embed2 ELet
 
--- {-# INLINE lit #-}
--- lit :: Prim -> Expr e t
--- lit = embed1 ELit
---
+{-# INLINE lit #-}
+lit :: Prim -> Expr e t
+lit = embed1 ELit
+
 -- {-# INLINE if_ #-}
 -- if_ :: Expr e t -> Expr e t -> Expr e t -> Expr e t
 -- if_ = embed3 EIf
