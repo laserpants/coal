@@ -20,17 +20,17 @@ data ExprF e t a
     ELit Prim
   | -- | Lambda abstraction
     ELam (List1 (Label t)) a
-  | -- | If-statement
-    EIf a a a
   | -- | Function application
     EApp t a (List1 a)
+  | -- | If-statement
+    EIf t a a a
   | -- | Operator
-    EOp (Op a)
+    EOp t (Op a)
   | --  | -- | Pattern match statement
     --    EPat a (List' (Clause e t a))
 
     -- | Record field extension
-    EExt Name a a
+    EExt t Name a a
   | -- | Empty record
     ENil
   | --  | -- | Field selection operator

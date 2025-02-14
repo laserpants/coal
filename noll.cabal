@@ -46,6 +46,7 @@ library
       Noll.Compiler.Transform.Tree
       Noll.Compiler.Transform.Type.AliasInsertion
       Noll.Core.Language.Expr
+      Noll.Core.Language.Expr.Syntax
       Noll.Core.Language.Op
       Noll.Core.Language.Prim
       Noll.Core.Language.Type
@@ -145,6 +146,7 @@ test-suite noll-test
       Noll.CompilerExamples.Test01
       Noll.CompilerExamples.Test02
       Noll.CompilerSpec
+      Noll.Core.LanguageSpec
       Noll.Examples.Test01
       Noll.Examples.Test02
       Noll.Examples.Test03
