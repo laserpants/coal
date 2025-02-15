@@ -275,7 +275,7 @@ moduleBinarySearch =
                                             (Label tree0 "Leaf" :| [])
                                             (EListLiteral () list0 [])
                                             <| ECompiledClause
-                                              ( Label tree0 "Node"
+                                              ( Label (tvar0 `TArrow` tree0 `TArrow` tree0 `TArrow` tree0) "Node"
                                                   <| Label tvar0 "$match.2.y"
                                                   <| Label tree0 "$match.3.lhs"
                                                   <| Label tree0 "$match.4.rhs"

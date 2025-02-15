@@ -14,6 +14,7 @@ import Noll.Compiler.PatternMatching.Envelope (
   EnvelopeExpression (..),
   fails,
  )
+import Noll.Label (Label (..))
 import Noll.Language (
   BinaryOperator (..),
   CompiledClause (..),
@@ -22,6 +23,7 @@ import Noll.Language (
   Intrinsic (..),
   Pattern (..),
   Type (..),
+  foldType,
  )
 import Noll.Utils (const2)
 
@@ -30,6 +32,7 @@ class TypeProxy t where
   patternType :: (Data a) => Pattern a t -> t
   envelopeExprType :: (Data a) => EnvelopeExpression (Expression a) t -> t
   arrow :: t -> t -> t
+  folded :: t -> [Label t] -> t
   boolean :: t
 
 instance TypeProxy () where
@@ -43,6 +46,8 @@ instance TypeProxy () where
     const2 ()
   boolean =
     ()
+  folded =
+    const2 ()
 
 instance (Data k, Data (o k), Typeable o) => TypeProxy (Type o k) where
   expressionType =
@@ -55,6 +60,9 @@ instance (Data k, Data (o k), Typeable o) => TypeProxy (Type o k) where
     TArrow
   boolean =
     TIntrinsic IBool
+  folded t1 lls =
+    let untag (Label t _) = t
+     in foldType t1 (untag <$> lls)
 
 compileEnvelope :: (TypeProxy t, Ord t, Data a, Monoid a) => EnvelopeExpression (Expression a) t -> Expression a t
 compileEnvelope =
@@ -79,7 +87,8 @@ compileEnvelope =
         (compileEnvelope e3)
 
 compileEnvelopeClause :: (TypeProxy t, Ord t, Data a, Monoid a) => EnvelopeClause (Expression a) t -> CompiledClause a t
-compileEnvelopeClause (EnvelopeClause l1 ls e) = ECompiledClause (l1 :| ls) (compileEnvelope e)
+compileEnvelopeClause (EnvelopeClause (Label t name) ls e) =
+  ECompiledClause (Label (folded t ls) name :| ls) (compileEnvelope e)
 
 clauseList :: (TypeProxy t, Ord t, Data a, Monoid a) => [EnvelopeClause (Expression a) t] -> List1 (CompiledClause a t)
 clauseList ecs =

@@ -2,7 +2,8 @@
 
 module Noll.Core.LanguageSpec where
 
-import Noll.Common.List1 (List1, NonEmpty (..))
+import Noll.Common.List1 (NonEmpty (..))
+import Noll.Core.Language.Expr (Clause (..))
 import Noll.Core.Language.Syntax (opaque, (~>), list)
 import Noll.Label (Label (..))
 
@@ -64,7 +65,16 @@ fixture =
                 Core.match
                   (list opaque)
                   (Core.var (Label (list opaque) "a"))
-                  undefined
+                  (
+                    Clause
+                      undefined
+                      undefined
+                      :| [
+                    Clause
+                      undefined
+                      undefined
+                      ]
+                  )
               )
           )
             :| [
