@@ -8,15 +8,20 @@ module Noll.Core.Language.Syntax.Type (
   char,
   double,
   float,
+  opaque,
   foldType,
   int32,
   int64,
   string,
   unit,
+  (~>),
+  list,
+  tuple,
 ) where
 
 import Noll.Core.Language.Type (Type (..))
 import Noll.Utils (Name)
+import TextShow (showt)
 
 {-# INLINE tcon0 #-}
 tcon0 :: Name -> Type
@@ -29,6 +34,10 @@ tcon1 con t1 = TCon con [t1]
 {-# INLINE tcon2 #-}
 tcon2 :: Name -> Type -> Type -> Type
 tcon2 con t1 t2 = TCon con [t1, t2]
+
+{-# INLINE opaque #-}
+opaque :: Type
+opaque = TOpq
 
 {-# INLINE unit #-}
 unit :: Type
@@ -77,3 +86,11 @@ infixr 1 ~>
 {-# INLINE foldType #-}
 foldType :: (Foldable f) => Type -> f Type -> Type
 foldType = foldr arrow
+
+{-# INLINE list #-}
+list :: Type -> Type
+list = tcon1 "list"
+
+{-# INLINE tuple #-}
+tuple :: Int -> [Type] -> Type
+tuple n = TCon ("tuple" <> showt n)

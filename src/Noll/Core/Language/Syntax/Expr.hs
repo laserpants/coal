@@ -1,10 +1,15 @@
 module Noll.Core.Language.Syntax.Expr (
   var,
   let_,
+  lam,
+  app,
+  match,
+  if_,
 ) where
 
 import Noll.Common.List1 (List1)
-import Noll.Core.Language.Expr (Expr, ExprF (..))
+import Noll.Core.Language.Expr (Clause (..), Expr, ExprF (..))
+import Noll.Core.Language.Op (Op)
 import Noll.Core.Language.Prim (Prim)
 import Noll.Label (Label (..))
 import Noll.Utils.Embed (embed, embed1, embed2, embed3, embed4, embed5)
@@ -21,10 +26,14 @@ let_ = embed2 ELet
 lit :: Prim -> Expr e t
 lit = embed1 ELit
 
--- {-# INLINE if_ #-}
--- if_ :: Expr e t -> Expr e t -> Expr e t -> Expr e t
--- if_ = embed3 EIf
---
+{-# INLINE if_ #-}
+if_ :: t -> Expr e t -> Expr e t -> Expr e t -> Expr e t
+if_ = embed4 EIf
+
+{-# INLINE match #-}
+match :: t -> Expr e t -> (List1 (Clause e t (Expr e t))) -> Expr e t
+match = embed3 EPat
+
 -- {-# INLINE ext #-}
 -- ext :: Name -> Expr e t -> Expr e t -> Expr e t
 -- ext = embed3 EExt
@@ -56,13 +65,15 @@ lit = embed1 ELit
 -- {-# INLINE op2 #-}
 -- op2 :: (t, Op2) -> Expr e t -> Expr e t -> Expr e t
 -- op2 = embed3 EOp2
---
--- {-# INLINE lam #-}
--- lam :: List' (Label e t) -> Expr e t -> Expr e t
--- lam = embed2 ELam
---
--- {-# INLINE app #-}
--- app :: t -> Expr e t -> List' (Expr e t) -> Expr e t
--- app = embed3 EApp
---
---
+
+{-# INLINE op #-}
+op :: t -> Op (Expr e t) -> Expr e t
+op = embed2 EOp
+
+{-# INLINE lam #-}
+lam :: List1 (Label t) -> Expr e t -> Expr e t
+lam = embed2 ELam
+
+{-# INLINE app #-}
+app :: t -> Expr e t -> List1 (Expr e t) -> Expr e t
+app = embed3 EApp

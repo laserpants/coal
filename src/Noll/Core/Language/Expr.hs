@@ -1,7 +1,7 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Core.Language.Expr (ExprF (..), Expr) where
+module Noll.Core.Language.Expr (ExprF (..), Expr, Clause (..)) where
 
 import Data.Fix (Fix (..))
 import Noll.Common.List1 (List1)
@@ -9,6 +9,14 @@ import Noll.Core.Language.Op (Op (..))
 import Noll.Core.Language.Prim (Prim (..))
 import Noll.Label (Label (..))
 import Noll.Utils (Name)
+
+-- | Pattern matching clause
+data Clause e t a = Clause (List1 (Label t)) a
+  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
+
+-- | Field selector
+data Focus e t = Focus Name (Label t) (Label t)
+  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
 
 -- | Parameterized (non-recursive) expression grammar
 data ExprF e t a
@@ -26,17 +34,15 @@ data ExprF e t a
     EIf t a a a
   | -- | Operator
     EOp t (Op a)
-  | --  | -- | Pattern match statement
-    --    EPat a (List' (Clause e t a))
-
-    -- | Record field extension
-    EExt t Name a a
+  | -- | Pattern match statement
+    EPat t a (List1 (Clause e t a))
+  | -- | Record field extension
+    EExt (Label t) a a
   | -- | Empty record
     ENil
-  | --  | -- | Field selection operator
-    --    ESel (Focus e t) a a
-
-    -- | External C function call
+  | -- | Field selection operator
+    ESel (Focus e t) a a
+  | -- | External C function call
     ECall (Label t) [a] a
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
 
