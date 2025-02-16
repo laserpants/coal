@@ -7,10 +7,11 @@ module Noll.Core.Language.Syntax.Expr (
   if_,
   op,
   lit,
+  sel,
 ) where
 
 import Noll.Common.List1 (List1)
-import Noll.Core.Language.Expr (Clause (..), Expr, ExprF (..))
+import Noll.Core.Language.Expr (Clause (..), Expr, ExprF (..), Focus (..))
 import Noll.Core.Language.Op (Op)
 import Noll.Core.Language.Prim (Prim)
 import Noll.Label (Label (..))
@@ -29,8 +30,8 @@ lit :: Prim -> Expr t
 lit = embed1 ELit
 
 {-# INLINE if_ #-}
-if_ :: t -> Expr t -> Expr t -> Expr t -> Expr t
-if_ = embed4 EIf
+if_ :: Expr t -> Expr t -> Expr t -> Expr t
+if_ = embed3 EIf
 
 {-# INLINE match #-}
 match :: t -> Expr t -> List1 (Clause t (Expr t)) -> Expr t
@@ -43,11 +44,11 @@ match = embed3 EPat
 -- {-# INLINE nil #-}
 -- nil :: Expr t
 -- nil = embed ENil
---
--- {-# INLINE sel #-}
--- sel :: Focus e t -> Expr t -> Expr t -> Expr t
--- sel = embed3 ESel
---
+
+{-# INLINE sel #-}
+sel :: Focus t -> Expr t -> Expr t -> Expr t
+sel = embed3 ESel
+
 -- {-# INLINE call #-}
 -- call :: Label e t -> [Expr t] -> Expr t -> Expr t
 -- call = embed3 ECall

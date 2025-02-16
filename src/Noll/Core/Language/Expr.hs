@@ -1,7 +1,7 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Core.Language.Expr (ExprF (..), Expr, Clause (..)) where
+module Noll.Core.Language.Expr (ExprF (..), Expr, Focus (..), Clause (..)) where
 
 import Data.Fix (Fix (..))
 import Noll.Common.List1 (List1)
@@ -31,7 +31,7 @@ data ExprF t a
   | -- | Function application
     EApp t a (List1 a)
   | -- | If-statement
-    EIf t a a a
+    EIf a a a
   | -- | Operator
     EOp t (Op a)
   | -- | Pattern match statement

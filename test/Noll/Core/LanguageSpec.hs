@@ -10,12 +10,18 @@ import Noll.Label (Label (..))
 import qualified Noll.Core.Language.Prim as Core
 import qualified Noll.Core.Language.Syntax as Core
 
+compareRow :: Core.Type
+compareRow = Core.RExt "compare" (opaque ~> opaque ~> Core.TCon "Ordering" []) Core.RNil
+
 -- record({ compare : 0 -> 0 -> Ordering | 0 })
 compareDict :: Core.Type
-compareDict = Core.record (Core.RExt "compare" (opaque ~> opaque ~> Core.TCon "Ordering" []) Core.RNil)
+compareDict = Core.record compareRow
 
 ordering :: Core.Type
 ordering = Core.TCon "Ordering" []
+
+tree :: Core.Type -> Core.Type
+tree t = Core.TCon "Tree" [t]
 
 fixture :: Expr Core.Type
 fixture =
@@ -125,32 +131,36 @@ fixture =
                         Core.bool
                         (Core.var (Label compareDict "a_1"))
                         ( Clause
-                            (Label undefined undefined :| [])
+                            (Label (compareRow ~> compareDict) "$Record" <| Label compareRow "r_1" :| [])
                             undefined
                             :| []
                         )
                     )
                  )
                , --         from_int32 : record({ compare : 0 -> 0 -> Ordering | 0 }) -> int32 -> 0 =
-                 --           fn(a_1, a_2) =>
-                 --             match(a_1) {
+                 --           fn(a_1 : record({ compare : 0 -> 0 -> Ordering | 0 }), a_2 : int32) =>
+                 --             match : 0 (a_1 : record({ compare : 0 -> 0 -> Ordering | 0 })) {
                  --               | ($Record, r_1) =>
                  --                   select
                  --                     { from_int32 = f_1 | q_1 } =
                  --                       r_1
                  --                     in
-                 --                       @f_1(a_2)
+                 --                       @ : ? (f_1, a_2)
                  --             }
                  --           ;
                  --
 
-                 ( Label undefined "from_int32"
+                 ( Label (compareDict ~> Core.int32 ~> opaque) "from_int32"
                  , Core.lam
-                    ( Label undefined "a_1"
-                        <| Label undefined "a_2"
+                    ( Label compareDict "a_1"
+                        <| Label Core.int32 "a_2"
                         :| []
                     )
-                    undefined
+                    ( Core.match
+                        opaque
+                        undefined
+                        undefined
+                    )
                  )
                , --         _forward_application_ : 0 -> (0 -> 0) -> 0 =
                  --           fn(x : 0, f : 0 -> 0) =>
@@ -177,7 +187,6 @@ fixture =
                  , Core.lam
                     (Label Core.bool "a" :| [])
                     ( Core.if_
-                        Core.bool
                         (Core.var (Label Core.bool "a"))
                         (Core.lit (Core.PBool False))
                         (Core.lit (Core.PBool True))
@@ -185,15 +194,15 @@ fixture =
                  )
                , --         compare__int32 : int32 -> int32 -> Ordering =
                  --           fn(x : int32, y : int32) =>
-                 --             if : Ordering (x [< int32] y)
+                 --             if (x [< int32] y)
                  --               then
-                 --                 LessThan
+                 --                 LessThan : Ordering
                  --               else
-                 --                 if : Ordering (x [> int32] y)
+                 --                 if (x [> int32] y)
                  --                   then
-                 --                     GreaterThan
+                 --                     GreaterThan : Ordering
                  --                   else
-                 --                     EqualTo
+                 --                     EqualTo : Ordering
                  --           ;
                  --
 
@@ -205,9 +214,12 @@ fixture =
                     )
                     ( Core.if_
                         undefined
-                        undefined
-                        undefined
-                        undefined
+                        (Core.var (Label ordering "LessThan"))
+                        ( Core.if_
+                            undefined
+                            (Core.var (Label ordering "GreaterThan"))
+                            (Core.var (Label ordering "EqualTo"))
+                        )
                     )
                  )
                , --         from_int32__int32 : int32 -> int32 =
@@ -274,28 +286,51 @@ fixture =
                     )
                  )
                , --         in_range : ? =
+                 --           fn(d_1) =>
+                 --             fn(range, n) =>
+                 --               match(range) {
+                 --                 ($Record, row_1) =>
+                 --                   select
+                 --                     { min = min | row_2 } =
+                 --                       row_1
+                 --                     in
+                 --                       select
+                 --                         { max = max | z } =
+                 --                           row_2
+                 --                         in
+                 --                           ?
+                 --               }
+                 --           ;
                  --
 
                  ( Label undefined "in_range"
-                 , undefined
+                 , Core.lam
+                    undefined
+                    undefined
                  )
-               , --         from_list : ? =
+               , --         from_list : record({ compare : 0 -> 0 -> Ordering | 0 }) -> list(0) -> tree(0) =
                  --
 
                  ( Label undefined "from_list"
-                 , undefined
+                 , Core.lam
+                    undefined
+                    undefined
                  )
-               , --         flatten : ? =
+               , --         flatten : Tree(0) -> list(0) =
                  --
 
-                 ( Label undefined "flatten"
-                 , undefined
+                 ( Label (tree opaque ~> list opaque) "flatten"
+                 , Core.lam
+                    undefined
+                    undefined
                  )
                , --         qsort : ? =
                  --
 
                  ( Label undefined "qsort"
-                 , undefined
+                 , Core.lam
+                    undefined
+                    undefined
                  )
                ]
         )
