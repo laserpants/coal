@@ -2,15 +2,16 @@
 
 module Noll.Core.LanguageSpec where
 
-import Noll.Common.List1 (NonEmpty (..))
-import Noll.Core.Language.Expr (Clause (..))
-import Noll.Core.Language.Syntax (opaque, (~>), list)
+import Noll.Common.List1 (NonEmpty (..), (<|))
+import Noll.Core.Language.Expr (Clause (..), Expr)
+import Noll.Core.Language.Syntax (list, opaque, (~>))
 import Noll.Label (Label (..))
 
 import qualified Noll.Core.Language.Syntax as Core
 
+fixture :: Expr Core.Type
 fixture =
-  -- let 
+  -- let
   --   _compose_ : (0 -> 0) -> (0 -> 0) -> 0 -> 0 =
   --     fn(f : 0 -> 0, g : 0 -> 0, x : 0) =>
   --       @ : 0 (f : 0 -> 0, @ : 0 (g : 0 -> 0, x : 0))
@@ -43,50 +44,79 @@ fixture =
       )
         :| []
     )
-  --       let
-  --         _list_concat_ : list(0) -> list(0) -> list(0) =
-  --           fn(a : list(0), b : list(0)) =>
-  --             match(a : list(0)) : list(0) {
-  --               | $Nil : list(0) =>
-  --                   b : list(0)
-  --               | ($Cons : 0 -> list(0) -> list(0), x : 0, xs : list(0)) =>
-  --                   @ : list(0) ($Cons : 0 -> list(0) -> list(0), x : 0
-  --                     , @ : list(0) (_list_concat : list(0) -> list(0) -> list(0), xs : list(0), b : list(0)))
-  --             }
-  --           ;
-  --           
+    --       let
+    --         _list_concat_ : list(0) -> list(0) -> list(0) =
+    --           fn(a : list(0), b : list(0)) =>
+    --             match(a : list(0)) : list(0) {
+    --               | $Nil : list(0) =>
+    --                   b : list(0)
+    --               | ($Cons : 0 -> list(0) -> list(0), x : 0, xs : list(0)) =>
+    --                   @ : list(0) ($Cons : 0 -> list(0) -> list(0), x : 0
+    --                     , @ : list(0) (_list_concat : list(0) -> list(0) -> list(0), xs : list(0), b : list(0)))
+    --             }
+    --           ;
+    --
     ( Core.let_
         ( ( Label (list opaque ~> list opaque ~> list opaque) "_list_concat_"
           , Core.lam
-              (Label (list opaque) "a"
-                :| [ Label (list opaque) "b" ]
+              ( Label (list opaque) "a"
+                  :| [Label (list opaque) "b"]
               )
-              (
-                Core.match
+              ( Core.match
                   (list opaque)
                   (Core.var (Label (list opaque) "a"))
-                  (
-                    Clause
-                      undefined
-                      undefined
-                      :| [
-                    Clause
-                      undefined
-                      undefined
-                      ]
+                  ( Clause
+                      (Label (list opaque) "$Nil" :| [])
+                      (Core.var (Label (list opaque) "b"))
+                      :| [ Clause
+                            ( Label (opaque ~> list opaque ~> list opaque) "$Cons"
+                                <| Label opaque "x"
+                                <| Label (list opaque) "xs"
+                                :| []
+                            )
+                            ( Core.app
+                                (list opaque)
+                                (Core.var (Label (opaque ~> list opaque ~> list opaque) "$Cons"))
+                                ( Core.var (Label opaque "x")
+                                    <| Core.app
+                                      (list opaque)
+                                      (Core.var (Label (list opaque ~> list opaque ~> list opaque) "_list_concat_"))
+                                      ( Core.var (Label (list opaque) "xs")
+                                          <| Core.var (Label (list opaque) "b")
+                                          :| []
+                                      )
+                                    :| []
+                                )
+                            )
+                         ]
                   )
               )
           )
             :| [
-  --         compare =
-  --           fn(a_1, a_2, a_3) =>
-  --             match(a1) {
-  --               | ?
-  --             }
-  --           ;
-  --
+                 --         compare : $Record(compare : ? | ?) -> ? =
+                 --           fn(a_1, a_2, a_3) =>
+                 --             match(a1 : ?) : ? {
+                 --               | $Record(r_1) : ? =>
+                 --             }
+                 --           ;
+                 --
+
                  ( Label undefined "compare"
-                 , undefined
+                 , Core.lam
+                    ( Label undefined "a_1"
+                        <| Label undefined "a_2"
+                        <| Label undefined "a_3"
+                        :| []
+                    )
+                    ( Core.match
+                        undefined
+                        (Core.var (Label undefined "a_1"))
+                        ( Clause
+                            undefined
+                            undefined
+                            :| []
+                        )
+                    )
                  )
                ,
                  ( Label undefined "from_int32"

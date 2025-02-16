@@ -11,15 +11,15 @@ import Noll.Label (Label (..))
 import Noll.Utils (Name)
 
 -- | Pattern matching clause
-data Clause e t a = Clause (List1 (Label t)) a
+data Clause t a = Clause (List1 (Label t)) a
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
 
 -- | Field selector
-data Focus e t = Focus Name (Label t) (Label t)
+data Focus t = Focus Name (Label t) (Label t)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
 
 -- | Parameterized (non-recursive) expression grammar
-data ExprF e t a
+data ExprF t a
   = -- | Variable
     EVar (Label t)
   | -- | Let-binding
@@ -35,16 +35,16 @@ data ExprF e t a
   | -- | Operator
     EOp t (Op a)
   | -- | Pattern match statement
-    EPat t a (List1 (Clause e t a))
+    EPat t a (List1 (Clause t a))
   | -- | Record field extension
     EExt (Label t) a a
   | -- | Empty record
     ENil
   | -- | Field selection operator
-    ESel (Focus e t) a a
+    ESel (Focus t) a a
   | -- | External C function call
     ECall (Label t) [a] a
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
 
 -- | Main expression tree grammar
-type Expr e t = Fix (ExprF e t)
+type Expr t = Fix (ExprF t)
