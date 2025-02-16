@@ -16,6 +16,7 @@ module Noll.Core.Language.Syntax.Type (
   unit,
   list,
   tuple,
+  record,
 ) where
 
 import Noll.Core.Language.Type (Type (..))
@@ -93,3 +94,7 @@ list = tcon1 "list"
 {-# INLINE tuple #-}
 tuple :: Int -> [Type] -> Type
 tuple n = TCon ("tuple" <> showt n)
+
+{-# INLINE record #-}
+record :: Type -> Type
+record r = TCon "record" [r]
