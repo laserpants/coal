@@ -116,7 +116,7 @@ fixture =
                 ( EApplication
                     ()
                     ()
-                    (EBinaryOperator () ((), OAddition))
+                    (EBinaryOperator () () OAddition)
                     ( ELiteral () (LInt32 0)
                         <| (EVariable () (Label () "ms"))
                           :| []
@@ -184,7 +184,7 @@ fixture1 =
                 ( EApplication
                     ()
                     (TIntrinsic IInt32)
-                    (EBinaryOperator () (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32, OAddition))
+                    (EBinaryOperator () (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) OAddition)
                     ( ELiteral () (LInt32 0)
                         <| (EVariable () (Label (TIntrinsic IInt32) "ms"))
                           :| []

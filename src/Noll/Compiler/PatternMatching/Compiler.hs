@@ -80,7 +80,7 @@ compileEnvelope =
         ( EApplication
             mempty
             boolean
-            (EBinaryOperator mempty (expressionType e1 `arrow` expressionType e1 `arrow` boolean, OEqualTo))
+            (EBinaryOperator mempty (expressionType e1 `arrow` expressionType e1 `arrow` boolean) OEqualTo)
             (EVariable mempty ll :| [e1])
         )
         (compileEnvelope e2)

@@ -131,7 +131,7 @@ baz = do
         ( EApplication
             ()
             ()
-            (EBinaryOperator () ((), OReverseComposition))
+            (EBinaryOperator () () OReverseComposition)
             ( EVariable () (Label () "not")
                 <| EApplication
                   ()

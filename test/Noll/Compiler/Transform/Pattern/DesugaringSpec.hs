@@ -260,8 +260,8 @@ fixture7 =
                     ( TIntrinsic IBool
                         `TArrow` TIntrinsic IBool
                         `TArrow` TIntrinsic IBool
-                    , OLogicalAnd
                     )
+                    OLogicalAnd
                 )
                 ( EApplication
                     ()
@@ -285,8 +285,8 @@ fixture7 =
                           ( TIntrinsic IBool
                               `TArrow` TIntrinsic IBool
                               `TArrow` TIntrinsic IBool
-                          , OLogicalOr
                           )
+                          OLogicalOr
                       )
                       ( EApplication
                           ()
@@ -442,8 +442,8 @@ fixture8 =
                                 ( TIntrinsic IBool
                                     `TArrow` TIntrinsic IBool
                                     `TArrow` TIntrinsic IBool
-                                , OLogicalAnd
                                 )
+                                OLogicalAnd
                             )
                             ( EApplication
                                 ()
@@ -467,8 +467,8 @@ fixture8 =
                                       ( TIntrinsic IBool
                                           `TArrow` TIntrinsic IBool
                                           `TArrow` TIntrinsic IBool
-                                      , OLogicalOr
                                       )
+                                      OLogicalOr
                                   )
                                   ( EApplication
                                       ()
@@ -673,8 +673,8 @@ fixture11 =
             ( TIntrinsic IBool
                 `TArrow` TIntrinsic IBool
                 `TArrow` TIntrinsic IBool
-            , OLogicalAnd
             )
+            OLogicalAnd
         )
         ( EApplication
             ()
@@ -698,8 +698,8 @@ fixture11 =
                   ( TIntrinsic IBool
                       `TArrow` TIntrinsic IBool
                       `TArrow` TIntrinsic IBool
-                  , OLogicalOr
                   )
+                  OLogicalOr
               )
               ( EApplication
                   ()
@@ -820,8 +820,8 @@ fixture12 =
                         ( TIntrinsic IBool
                             `TArrow` TIntrinsic IBool
                             `TArrow` TIntrinsic IBool
-                        , OLogicalAnd
                         )
+                        OLogicalAnd
                     )
                     ( EApplication
                         ()
@@ -845,8 +845,8 @@ fixture12 =
                               ( TIntrinsic IBool
                                   `TArrow` TIntrinsic IBool
                                   `TArrow` TIntrinsic IBool
-                              , OLogicalOr
                               )
+                              OLogicalOr
                           )
                           ( EApplication
                               ()

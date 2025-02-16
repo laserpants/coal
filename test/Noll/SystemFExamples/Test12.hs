@@ -232,7 +232,7 @@ fixture =
                         ( EApplication
                             ()
                             ()
-                            (EBinaryOperator () ((), OReverseApplication))
+                            (EBinaryOperator () () OReverseApplication)
                             ( EVariable () (Label () "p")
                                 <| EApplication
                                   ()
@@ -343,7 +343,7 @@ fixture =
                                         ( EApplication
                                             ()
                                             ()
-                                            (EBinaryOperator () ((), OReverseApplication))
+                                            (EBinaryOperator () () OReverseApplication)
                                             ( EVariable () (Label () "p")
                                                 :| [ EApplication
                                                       ()
@@ -513,9 +513,8 @@ fixture1 =
                             bool
                             ( EBinaryOperator
                                 ()
-                                ( (tvariable 1) `TArrow` ((tvariable 1) `TArrow` bool) `TArrow` bool
-                                , OReverseApplication
-                                )
+                                ((tvariable 1) `TArrow` ((tvariable 1) `TArrow` bool) `TArrow` bool)
+                                OReverseApplication
                             )
                             ( EVariable () (Label (tvariable 1) "p")
                                 <| EApplication
@@ -660,9 +659,8 @@ fixture1 =
                                             bool
                                             ( EBinaryOperator
                                                 ()
-                                                ( tvariable0 `TArrow` (tvariable0 `TArrow` bool) `TArrow` bool
-                                                , OReverseApplication
-                                                )
+                                                (tvariable0 `TArrow` (tvariable0 `TArrow` bool) `TArrow` bool)
+                                                OReverseApplication
                                             )
                                             ( EVariable () (Label tvariable0 "p")
                                                 :| [ EApplication

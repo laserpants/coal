@@ -279,7 +279,7 @@ collectConstraints =
       error "TODO"
     EUnaryOperator{} ->
       error "TODO"
-    EBinaryOperator loc (t, op) -> do
+    EBinaryOperator loc t op -> do
       tellRight [Explicit (InferBinaryOperator loc) t (binaryOperatorTypeScheme op)]
       pure []
     ESelect _ (Label t name) e -> do

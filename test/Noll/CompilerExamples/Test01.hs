@@ -155,7 +155,7 @@ fixture =
           ( EApplication
               ()
               ()
-              (EBinaryOperator () ((), OReverseComposition))
+              (EBinaryOperator () () OReverseComposition)
               ( EVariable () (Label () "not")
                   <| EApplication
                     ()
@@ -233,7 +233,7 @@ fixture1 =
             ( EApplication
                 ()
                 (tvariable1 `TArrow` bool)
-                (EBinaryOperator () ((bool `TArrow` bool) `TArrow` (tvariable1 `TArrow` bool) `TArrow` tvariable1 `TArrow` bool, OReverseComposition))
+                (EBinaryOperator () ((bool `TArrow` bool) `TArrow` (tvariable1 `TArrow` bool) `TArrow` tvariable1 `TArrow` bool) OReverseComposition)
                 ( EVariable () (Label (bool `TArrow` bool) "not")
                     <| EApplication
                       ()

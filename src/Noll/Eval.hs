@@ -121,7 +121,7 @@ evalExpr =
           arity = length names
         VData con vs1 ->
           pure (VData con (vs1 <> fromList1 vs))
-    EBinaryOperator _ (_, OEqualTo) -> do
+    EBinaryOperator _ _ OEqualTo -> do
       pure $ args2 $ \a0 a1 ->
         case (a0, a1) of
           (VPrim (LInt32 a), VPrim (LInt32 b)) ->

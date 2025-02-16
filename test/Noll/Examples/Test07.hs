@@ -145,8 +145,8 @@ moduleOrdered =
                                 `TArrow` (TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool)
                                 `TArrow` TVariable (TypeIndex KType 1)
                                 `TArrow` TIntrinsic IBool
-                            , OReverseComposition
                             )
+                            OReverseComposition
                         )
                         ( EVariable () (Label (TIntrinsic IBool `TArrow` TIntrinsic IBool) "not")
                             <| EApplication
@@ -235,8 +235,8 @@ moduleBinarySearch =
                                     ( EBinaryOperator
                                         ()
                                         ( list1 `TArrow` list1 `TArrow` list1
-                                        , OListConcatenation
                                         )
+                                        OListConcatenation
                                     )
                                     ( EVariable () (Label list1 "lhs")
                                         <| EListCons
@@ -298,8 +298,8 @@ moduleBinarySearch =
                                                     ( EBinaryOperator
                                                         ()
                                                         ( list0 `TArrow` list0 `TArrow` list0
-                                                        , OListConcatenation
                                                         )
+                                                        OListConcatenation
                                                     )
                                                     ( EApplication
                                                         ()

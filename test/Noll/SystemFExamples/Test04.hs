@@ -70,8 +70,8 @@ spec =
                   ( EBinaryOperator
                       ()
                       ( tvariable0 `TArrow` (tvariable0 `TArrow` bool) `TArrow` bool
-                      , OReverseApplication
                       )
+                      OReverseApplication
                   )
                   ( EVariable () (Label tvariable0 "p")
                       :| [ EApplication
@@ -276,7 +276,7 @@ fixture =
         ( EApplication
             ()
             ()
-            (EBinaryOperator () ((), OReverseApplication))
+            (EBinaryOperator () () OReverseApplication)
             ( EVariable () (Label () "p")
                 :| [ EApplication
                       ()

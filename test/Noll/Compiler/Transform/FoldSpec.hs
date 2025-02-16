@@ -74,7 +74,7 @@ clauses1 =
                 ( EApplication
                     ()
                     ()
-                    (EBinaryOperator () ((), OForwardApplication))
+                    (EBinaryOperator () () OForwardApplication)
                     ( EVariable () (Label () "p")
                         <| EApplication
                           ()
@@ -213,7 +213,7 @@ result1 =
                             ( EApplication
                                 ()
                                 ()
-                                (EBinaryOperator () ((), OForwardApplication))
+                                (EBinaryOperator () () OForwardApplication)
                                 ( EVariable () (Label () "p")
                                     <| EApplication
                                       ()

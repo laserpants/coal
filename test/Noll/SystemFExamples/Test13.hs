@@ -177,7 +177,7 @@ fixture =
                 ( EApplication
                     ()
                     ()
-                    (EBinaryOperator () ((), OListConcatenation))
+                    (EBinaryOperator () () OListConcatenation)
                     ( EVariable () (Label () "lhs")
                         <| EListCons () () (EVariable () (Label () "y")) (EVariable () (Label () "rhs"))
                           :| []
@@ -225,9 +225,8 @@ fixture =
                                     ()
                                     ( EBinaryOperator
                                         ()
-                                        ( ()
-                                        , OListConcatenation
-                                        )
+                                        ()
+                                        OListConcatenation
                                     )
                                     ( EApplication
                                         ()
@@ -293,7 +292,7 @@ fixture1 =
                 ( EApplication
                     ()
                     list1Type
-                    (EBinaryOperator () (list1Type `TArrow` list1Type `TArrow` list1Type, OListConcatenation))
+                    (EBinaryOperator () (list1Type `TArrow` list1Type `TArrow` list1Type) OListConcatenation)
                     ( EVariable () (Label list1Type "lhs")
                         <| EListCons () list1Type (EVariable () (Label tvariable1 "y")) (EVariable () (Label list1Type "rhs"))
                           :| []
@@ -338,21 +337,20 @@ fixture1 =
                                 []
                                 ( EApplication
                                     ()
-                                    (list0Type)
+                                    list0Type
                                     ( EBinaryOperator
                                         ()
-                                        ( list0Type `TArrow` list0Type `TArrow` list0Type
-                                        , OListConcatenation
-                                        )
+                                        (list0Type `TArrow` list0Type `TArrow` list0Type)
+                                        OListConcatenation
                                     )
                                     ( EApplication
                                         ()
-                                        (list0Type)
+                                        list0Type
                                         (EVariable () (Label (tree0Type `TArrow` list0Type) "$fold:1"))
                                         (EVariable () (Label (tree0Type) "lhs") :| [])
                                         <| EListCons
                                           ()
-                                          (list0Type)
+                                          list0Type
                                           (EVariable () (Label (tvariable0) "y"))
                                           ( EApplication
                                               ()

@@ -112,7 +112,7 @@ moduleOrdered =
                 ( EApplication
                     ()
                     ()
-                    (EBinaryOperator () ((), OReverseComposition))
+                    (EBinaryOperator () () OReverseComposition)
                     ( EVariable () (Label () "not")
                         <| EApplication
                           ()
@@ -177,7 +177,7 @@ moduleBinarySearch =
                             ( EApplication
                                 ()
                                 ()
-                                (EBinaryOperator () ((), OListConcatenation))
+                                (EBinaryOperator () () OListConcatenation)
                                 ( EVariable () (Label () "lhs")
                                     <| EListCons
                                       ()

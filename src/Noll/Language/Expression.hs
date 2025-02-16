@@ -49,9 +49,9 @@ data Expression a t
   | -- | If-else statement
     EIf a t (Expression a t) (Expression a t) (Expression a t)
   | -- | Unary operator
-    EUnaryOperator a (t, UnaryOperator)
+    EUnaryOperator a t UnaryOperator
   | -- | Binary operator
-    EBinaryOperator a (t, BinaryOperator)
+    EBinaryOperator a t BinaryOperator
   | -- | Record
     ERecord a t (Dictionary (Expression a t)) (Maybe (Expression a t))
   | -- | List cons-operator

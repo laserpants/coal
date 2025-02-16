@@ -881,7 +881,7 @@ fixture29 =
     ( EApplication
         ()
         ()
-        (EBinaryOperator () ((), OReverseComposition))
+        (EBinaryOperator () () OReverseComposition)
         ( EVariable () (Label () "not")
             <| EApplication
               ()
@@ -908,9 +908,8 @@ fixture29Typed =
         (TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
         ( EBinaryOperator
             ()
-            ( TArrow (TIntrinsic IBool `TArrow` TIntrinsic IBool) (TArrow (TArrow (TVariable (TypeIndex KType 0)) (TIntrinsic IBool)) (TArrow (TVariable (TypeIndex KType 0)) (TIntrinsic IBool)))
-            , OReverseComposition
-            )
+            (TArrow (TIntrinsic IBool `TArrow` TIntrinsic IBool) (TArrow (TArrow (TVariable (TypeIndex KType 0)) (TIntrinsic IBool)) (TArrow (TVariable (TypeIndex KType 0)) (TIntrinsic IBool))))
+            OReverseComposition
         )
         ( EVariable () (Label (TIntrinsic IBool `TArrow` TIntrinsic IBool) "not")
             <| EApplication

@@ -114,7 +114,7 @@ fixture =
     ( EApplication
         ()
         ()
-        (EBinaryOperator () ((), OLogicalAnd))
+        (EBinaryOperator () () OLogicalAnd)
         ( EApplication
             ()
             ()
@@ -123,7 +123,7 @@ fixture =
             <| EApplication
               ()
               ()
-              (EBinaryOperator () ((), OLogicalOr))
+              (EBinaryOperator () () OLogicalOr)
               ( EApplication
                   ()
                   ()
@@ -187,8 +187,8 @@ fixture1 =
             ( TIntrinsic IBool
                 `TArrow` TIntrinsic IBool
                 `TArrow` TIntrinsic IBool
-            , OLogicalAnd
             )
+            OLogicalAnd
         )
         ( EApplication
             ()
@@ -212,8 +212,8 @@ fixture1 =
                   ( TIntrinsic IBool
                       `TArrow` TIntrinsic IBool
                       `TArrow` TIntrinsic IBool
-                  , OLogicalOr
                   )
+                  OLogicalOr
               )
               ( EApplication
                   ()

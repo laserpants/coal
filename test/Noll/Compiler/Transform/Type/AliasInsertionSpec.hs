@@ -75,7 +75,7 @@ object1 =
             ( EApplication
                 ()
                 ()
-                (EBinaryOperator () ((), OReverseComposition))
+                (EBinaryOperator () () OReverseComposition)
                 ( EVariable () (Label () "not")
                     <| EApplication
                       ()
@@ -113,7 +113,7 @@ result2 =
             ( EApplication
                 ()
                 ()
-                (EBinaryOperator () ((), OReverseComposition))
+                (EBinaryOperator () () OReverseComposition)
                 ( EVariable () (Label () "not")
                     <| EApplication
                       ()

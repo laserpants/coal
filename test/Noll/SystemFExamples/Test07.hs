@@ -170,7 +170,7 @@ fixture =
                         ( EApplication
                             ()
                             ()
-                            (EBinaryOperator () ((), OListConcatenation))
+                            (EBinaryOperator () () OListConcatenation)
                             ( EVariable () (Label () "lhs")
                                 <| EListCons () () (EVariable () (Label () "y")) (EVariable () (Label () "rhs"))
                                   :| []
@@ -218,9 +218,8 @@ fixture =
                                             ()
                                             ( EBinaryOperator
                                                 ()
-                                                ( ()
-                                                , OListConcatenation
-                                                )
+                                                ()
+                                                OListConcatenation
                                             )
                                             ( EApplication
                                                 ()
@@ -294,7 +293,7 @@ fixture1 =
                         ( EApplication
                             ()
                             list0Type
-                            (EBinaryOperator () (list0Type `TArrow` list0Type `TArrow` list0Type, OListConcatenation))
+                            (EBinaryOperator () (list0Type `TArrow` list0Type `TArrow` list0Type) OListConcatenation)
                             ( EVariable () (Label list0Type "lhs")
                                 <| EListCons () list0Type (EVariable () (Label tvariable0 "y")) (EVariable () (Label list0Type "rhs"))
                                   :| []
@@ -343,8 +342,8 @@ fixture1 =
                                             ( EBinaryOperator
                                                 ()
                                                 ( listType 1 `TArrow` listType 1 `TArrow` listType 1
-                                                , OListConcatenation
                                                 )
+                                                OListConcatenation
                                             )
                                             ( EApplication
                                                 ()
