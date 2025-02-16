@@ -7,6 +7,7 @@ import Noll.Core.Language.Expr (Clause (..), Expr)
 import Noll.Core.Language.Syntax (list, opaque, (~>))
 import Noll.Label (Label (..))
 
+import qualified Noll.Core.Language.Prim as Core
 import qualified Noll.Core.Language.Syntax as Core
 
 fixture :: Expr Core.Type
@@ -122,13 +123,30 @@ fixture =
                  ( Label undefined "from_int32"
                  , undefined
                  )
-               ,
+               , --         _forward_application_ =
+                 --           fn(x, f) =>
+                 --             @f(x)
+                 --           ;
+                 --
+
                  ( Label undefined "_forward_application_"
                  , undefined
                  )
-               ,
-                 ( Label undefined "_not_"
-                 , undefined
+               , --         _not_ =
+                 --           fn(a) =>
+                 --             if a then false else true
+                 --           ;
+                 --
+
+                 ( Label (Core.bool ~> Core.bool) "_not_"
+                 , Core.lam
+                    (Label Core.bool "a" :| [])
+                    ( Core.if_
+                        Core.bool
+                        (Core.var (Label Core.bool "a"))
+                        (Core.lit (Core.PBool False))
+                        (Core.lit (Core.PBool True))
+                    )
                  )
                ,
                  ( Label undefined "compare__int32"
@@ -142,9 +160,33 @@ fixture =
                  ( Label undefined "lte"
                  , undefined
                  )
-               ,
+               , --         gt =
+                 --           fn(d_1) =>
+                 --             fn(x) =>
+                 --               @_compose_(_not_, @lte(d_1, x))
+                 --           ;
+                 --
+
                  ( Label undefined "gt"
-                 , undefined
+                 , Core.lam
+                    (Label Core.bool "d_1" :| [])
+                    ( Core.lam
+                        (Label Core.bool "x" :| [])
+                        ( Core.app
+                            undefined
+                            (Core.var (Label undefined "_compose_"))
+                            ( Core.var (Label undefined "_not_")
+                                :| [ Core.app
+                                      undefined
+                                      (Core.var (Label undefined "lte"))
+                                      ( Core.var (Label undefined "d_1")
+                                          :| [ Core.var (Label undefined "x")
+                                             ]
+                                      )
+                                   ]
+                            )
+                        )
+                    )
                  )
                ]
         )
