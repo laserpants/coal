@@ -33,7 +33,7 @@ data ExprF t a
   | -- | If-statement
     EIf a a a
   | -- | Operator
-    EOp t (Op a)
+    EOp (Op a)
   | -- | Pattern match statement
     EPat t a (List1 (Clause t a))
   | -- | Record field extension

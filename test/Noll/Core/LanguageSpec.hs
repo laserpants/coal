@@ -9,6 +9,7 @@ import Noll.Label (Label (..))
 
 import qualified Noll.Core.Language.Prim as Core
 import qualified Noll.Core.Language.Syntax as Core
+import qualified Noll.Core.Language.Op as Core
 
 compareRow :: Core.Type
 compareRow = Core.RExt "compare" (opaque ~> opaque ~> Core.TCon "Ordering" []) Core.RNil
@@ -194,7 +195,7 @@ fixture =
                  )
                , --         compare__int32 : int32 -> int32 -> Ordering =
                  --           fn(x : int32, y : int32) =>
-                 --             if (x [< int32] y)
+                 --             if (x : int32 [< int32] y : int32)
                  --               then
                  --                 LessThan : Ordering
                  --               else
@@ -213,10 +214,22 @@ fixture =
                         :| []
                     )
                     ( Core.if_
-                        undefined
+                        (
+                          Core.op
+                            (Core.OLtInt32
+                              (Core.var (Label Core.int32 "x"))
+                              (Core.var (Label Core.int32 "y"))
+                            )
+                        )
                         (Core.var (Label ordering "LessThan"))
                         ( Core.if_
-                            undefined
+                            (
+                              Core.op
+                                (Core.OGtInt32
+                                  (Core.var (Label Core.int32 "x"))
+                                  (Core.var (Label Core.int32 "y"))
+                                )
+                            )
                             (Core.var (Label ordering "GreaterThan"))
                             (Core.var (Label ordering "EqualTo"))
                         )

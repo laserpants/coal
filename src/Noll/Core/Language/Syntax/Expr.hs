@@ -60,11 +60,10 @@ sel = embed3 ESel
 -- {-# INLINE mem #-}
 -- mem :: Expr t -> Expr t
 -- mem = embed1 EMem
---
 
 {-# INLINE op #-}
-op :: t -> Op (Expr t) -> Expr t
-op = embed2 EOp
+op :: Op (Expr t) -> Expr t
+op = embed1 EOp
 
 {-# INLINE lam #-}
 lam :: List1 (Label t) -> Expr t -> Expr t
