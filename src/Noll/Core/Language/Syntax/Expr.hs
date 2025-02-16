@@ -60,13 +60,6 @@ match = embed3 EPat
 -- mem :: Expr t -> Expr t
 -- mem = embed1 EMem
 --
--- {-# INLINE op1 #-}
--- op1 :: (t, Op1) -> Expr t -> Expr t
--- op1 = embed2 EOp1
---
--- {-# INLINE op2 #-}
--- op2 :: (t, Op2) -> Expr t -> Expr t -> Expr t
--- op2 = embed3 EOp2
 
 {-# INLINE op #-}
 op :: t -> Op (Expr t) -> Expr t

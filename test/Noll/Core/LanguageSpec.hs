@@ -10,6 +10,10 @@ import Noll.Label (Label (..))
 import qualified Noll.Core.Language.Prim as Core
 import qualified Noll.Core.Language.Syntax as Core
 
+-- $Record({ compare : 0 -> 0 -> Ordering | 0 })
+compareDict :: Core.Type
+compareDict = Core.TCon "$Record" [Core.RExt "compare" (opaque ~> opaque ~> Core.TCon "Ordering" []) Core.RNil]
+
 fixture :: Expr Core.Type
 fixture =
   -- let
@@ -94,45 +98,64 @@ fixture =
               )
           )
             :| [
-                 --         compare : $Record(compare : ? | ?) -> ? =
-                 --           fn(a_1, a_2, a_3) =>
-                 --             match(a1 : ?) : ? {
-                 --               | $Record(r_1) : ? =>
+                 --         compare : $Record({ compare : 0 -> 0 -> Ordering | 0 }) -> 0 -> 0 -> bool =
+                 --           fn(a_1 : $Record({ compare : 0 -> 0 -> Ordering | 0 }), a_2 : 0, a_3 : 0) =>
+                 --             match(a1 : $Record({ compare : 0 -> 0 -> Ordering | 0 })) : bool {
+                 --               | $Record(r_1 : { compare : 0 -> 0 -> Ordering | 0 }) : $Record({ compare : 0 -> 0 -> Ordering | 0 }) =>
+                 --                   select
+                 --                     { compare = f_1 : ? | q_1 : ? } =
+                 --                       r_1 : ?
+                 --                     in
+                 --                       @ : ? (f_1, a_2, a_3)
                  --             }
                  --           ;
                  --
 
-                 ( Label undefined "compare"
+                 ( Label (compareDict ~> opaque ~> opaque ~> Core.bool) "compare"
                  , Core.lam
-                    ( Label undefined "a_1"
-                        <| Label undefined "a_2"
-                        <| Label undefined "a_3"
+                    ( Label compareDict "a_1"
+                        <| Label opaque "a_2"
+                        <| Label opaque "a_3"
                         :| []
                     )
                     ( Core.match
-                        undefined
-                        (Core.var (Label undefined "a_1"))
+                        Core.bool
+                        (Core.var (Label compareDict "a_1"))
                         ( Clause
-                            undefined
+                            (Label undefined undefined :| [])
                             undefined
                             :| []
                         )
                     )
                  )
-               ,
+               , --         from_int32 =
+                 --           fn(a_1, a_2) =>
+                 --             match(a_1) {
+                 --               | $Record(r_1) =>
+                 --                   select
+                 --                     { from_int32 = f_1 | q_1 } =
+                 --                       r_1
+                 --                     in
+                 --                       @f_1(a_2)
+                 --             }
+                 --           ;
+                 --
+
                  ( Label undefined "from_int32"
                  , undefined
                  )
-               , --         _forward_application_ =
-                 --           fn(x, f) =>
-                 --             @f(x)
+               , --         _forward_application_ : 0 -> (0 -> 0) -> 0 =
+                 --           fn(x : 0, f : 0 -> 0) =>
+                 --             @ : 0 (f : 0 -> 0, x : 0)
                  --           ;
                  --
 
                  ( Label undefined "_forward_application_"
-                 , undefined
+                 , Core.lam
+                    undefined
+                    undefined
                  )
-               , --         _not_ =
+               , --         _not_ : bool -> bool =
                  --           fn(a) =>
                  --             if a then false else true
                  --           ;
@@ -148,22 +171,49 @@ fixture =
                         (Core.lit (Core.PBool True))
                     )
                  )
-               ,
+               , --         compare__int32 =
+                 --           fn(x, y) =>
+                 --           ;
+                 --
+
                  ( Label undefined "compare__int32"
                  , undefined
                  )
-               ,
+               , --         from_int32__int32 : int32 -> int32 =
+                 --           fn(n : int32) =>
+                 --             n : int32
+                 --           ;
+                 --
+
                  ( Label undefined "from_int32__int32"
                  , undefined
                  )
-               ,
+               , --         lte : $Record({ compare : 0 -> 0 -> Ordering | 0 }) -> 0 -> 0 -> bool =
+                 --           fn(d_1 : $Record({ compare : 0 -> 0 -> Ordering | 0 })) =>
+                 --             fn(x : 0) =>
+                 --               fn(y : 0) =>
+                 --                 match(@ : Ordering (compare : $Record({ compare : 0 -> 0 -> Ordering | 0 }) -> 0 -> 0 -> Ordering, d_1 : $Record({ compare : 0 -> 0 -> Ordering | 0 }), x : 0, y : 0)) : bool {
+                 --                   | LessThan : Ordering =>
+                 --                       true
+                 --                   | EqualTo : Ordering =>
+                 --                       true
+                 --                   | GreaterThan : Ordering =>
+                 --                       false
+                 --                 }
+                 --           ;
+                 --
+
                  ( Label undefined "lte"
                  , undefined
                  )
-               , --         gt =
-                 --           fn(d_1) =>
-                 --             fn(x) =>
-                 --               @_compose_(_not_, @lte(d_1, x))
+               , --         gt : $Record({ compare : 0 -> 0 -> Ordering | 0 }) -> 0 -> 0 -> bool =
+                 --           fn(d_1 : $Record({ compare : 0 -> 0 -> Ordering | 0 })) =>
+                 --             fn(x : 0) =>
+                 --               @ : 0 -> bool ( _compose_ : (bool -> bool) -> (0 -> bool) -> 0 -> bool
+                 --                             , _not_ : bool -> bool
+                 --                             , @ : 0 -> bool ( lte : $Record({ compare : 0 -> 0 -> Ordering | 0 }) -> 0 -> 0 -> bool
+                 --                                             , d_1 : $Record({ compare : 0 -> 0 -> Ordering | 0 })
+                 --                                             , x : 0))
                  --           ;
                  --
 

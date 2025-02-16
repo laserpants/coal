@@ -14,7 +14,6 @@ module Noll.Core.Language.Syntax.Type (
   int64,
   string,
   unit,
-  (~>),
   list,
   tuple,
 ) where
