@@ -14,9 +14,16 @@ import qualified Noll.Core.Language.Syntax as Core
 compareRow :: Core.Type
 compareRow = Core.RExt "compare" (opaque ~> opaque ~> Core.TCon "Ordering" []) Core.RNil
 
+fromInt32Row :: Core.Type
+fromInt32Row = Core.RExt "from_int32" (Core.int32 ~> opaque) Core.RNil
+
 -- record({ compare : 0 -> 0 -> Ordering | 0 })
 compareDict :: Core.Type
 compareDict = Core.record compareRow
+
+-- record({ from_int32 : int32 -> 0 | 0 })
+fromInt32Dict :: Core.Type
+fromInt32Dict = Core.record fromInt32Row
 
 ordering :: Core.Type
 ordering = Core.TCon "Ordering" []
@@ -33,13 +40,7 @@ fixture =
   --     in
   --
   Core.let_
-    ( ( Label
-          ( (opaque ~> opaque)
-              ~> (opaque ~> opaque)
-              ~> opaque
-              ~> opaque
-          )
-          "_compose_"
+    ( ( Label ((opaque ~> opaque) ~> (opaque ~> opaque) ~> opaque ~> opaque) "_compose_"
       , Core.lam
           ( Label (opaque ~> opaque) "f"
               :| [ Label (opaque ~> opaque) "g"
@@ -74,7 +75,7 @@ fixture =
     ( Core.let_
         ( ( Label (list opaque ~> list opaque ~> list opaque) "_list_concat_"
           , Core.lam
-              ( Label (list opaque) "a" :| [Label (list opaque) "b"])
+              (Label (list opaque) "a" :| [Label (list opaque) "b"])
               ( Core.match
                   (list opaque)
                   (Core.var (Label (list opaque) "a"))
@@ -106,20 +107,20 @@ fixture =
               )
           )
             :| [
-                 --         compare : record({ compare : 0 -> 0 -> Ordering | 0 }) -> 0 -> 0 -> bool =
+                 --         compare : record({ compare : 0 -> 0 -> Ordering | 0 }) -> 0 -> 0 -> Ordering =
                  --           fn(a_1 : record({ compare : 0 -> 0 -> Ordering | 0 }), a_2 : 0, a_3 : 0) =>
-                 --             match : bool (a1 : record({ compare : 0 -> 0 -> Ordering | 0 })) {
+                 --             match : Ordering (a1 : record({ compare : 0 -> 0 -> Ordering | 0 })) {
                  --               | ($Record : { compare : 0 -> 0 -> Ordering | 0 } -> record({ compare : 0 -> 0 -> Ordering | 0 }), r_1 : { compare : 0 -> 0 -> Ordering | 0 }) =>
                  --                   select
                  --                     { compare = f_1 : 0 -> 0 -> Ordering | q_1 : 0 } =
                  --                       r_1 : { compare : 0 -> 0 -> Ordering | 0 }
                  --                     in
-                 --                       @ : 0 (f_1 : 0 -> 0 -> Ordering, a_2 : 0, a_3 : 0)
+                 --                       @ : Ordering (f_1 : 0 -> 0 -> Ordering, a_2 : 0, a_3 : 0)
                  --             }
                  --           ;
                  --
 
-                 ( Label (compareDict ~> opaque ~> opaque ~> Core.bool) "compare"
+                 ( Label (compareDict ~> opaque ~> opaque ~> ordering) "compare"
                  , Core.lam
                     ( Label compareDict "a_1"
                         <| Label opaque "a_2"
@@ -127,22 +128,21 @@ fixture =
                         :| []
                     )
                     ( Core.match
-                        Core.bool
+                        ordering
                         (Core.var (Label compareDict "a_1"))
                         ( Clause
                             (Label (compareRow ~> compareDict) "$Record" <| Label compareRow "r_1" :| [])
                             ( Core.sel
                                 ( Focus
                                     "compare"
-                                    (Label (opaque ~> opaque ~> Core.TCon "Ordering" []) "f_1")
+                                    (Label (opaque ~> opaque ~> ordering) "f_1")
                                     (Label opaque "q_1")
                                 )
                                 (Core.var (Label compareRow "r_1"))
                                 ( Core.app
-                                    opaque
-                                    (Core.var (Label (opaque ~> opaque ~> Core.TCon "Ordering" []) "f_1"))
-                                    (
-                                      Core.var (Label opaque "a_2")
+                                    ordering
+                                    (Core.var (Label (opaque ~> opaque ~> ordering) "f_1"))
+                                    ( Core.var (Label opaque "a_2")
                                         <| Core.var (Label opaque "a_3")
                                         :| []
                                     )
@@ -152,38 +152,42 @@ fixture =
                         )
                     )
                  )
-               , --         from_int32 : record({ compare : 0 -> 0 -> Ordering | 0 }) -> int32 -> 0 =
-                 --           fn(a_1 : record({ compare : 0 -> 0 -> Ordering | 0 }), a_2 : int32) =>
-                 --             match : 0 (a_1 : record({ compare : 0 -> 0 -> Ordering | 0 })) {
-                 --               | ($Record, r_1) =>
+               , --         from_int32 : record({ from_int32 : int32 -> 0 | 0 }) -> int32 -> 0 =
+                 --           fn(a_1 : record({ from_int32 : int32 -> 0 | 0 }), a_2 : int32) =>
+                 --             match : 0 (a_1 : record({ from_int32 : int32 -> 0 | 0 })) {
+                 --               | ($Record : { from_int32 : int32 -> 0 | 0 } -> record({ from_int32 : int32 -> 0 | 0 }), r_1 : { from_int32 : int32 -> 0 | 0 }) =>
                  --                   select
-                 --                     { from_int32 = f_1 | q_1 } =
-                 --                       r_1
+                 --                     { from_int32 = f_1 : int32 -> 0 | q_1 : 0 } =
+                 --                       r_1 : { from_int32 : int32 -> 0 | 0 }
                  --                     in
-                 --                       @ : ? (f_1, a_2)
+                 --                       @ : 0 (f_1 : int32 -> 0, a_2 : int32)
                  --             }
                  --           ;
                  --
 
-                 ( Label (compareDict ~> Core.int32 ~> opaque) "from_int32"
+                 ( Label (fromInt32Dict ~> Core.int32 ~> opaque) "from_int32"
                  , Core.lam
-                    ( Label compareDict "a_1"
+                    ( Label fromInt32Dict "a_1"
                         <| Label Core.int32 "a_2"
                         :| []
                     )
                     ( Core.match
                         opaque
-                        (Core.var (Label compareDict "a_1"))
+                        (Core.var (Label fromInt32Dict "a_1"))
                         ( Clause
-                            (Label undefined "$Record" <| Label undefined "r_1" :| [])
+                            (Label (fromInt32Row ~> fromInt32Dict) "$Record" <| Label fromInt32Row "r_1" :| [])
                             ( Core.sel
                                 ( Focus
-                                    undefined
-                                    undefined
-                                    undefined
+                                    "from_int32"
+                                    (Label (Core.int32 ~> opaque) "f_1")
+                                    (Label opaque "q_1")
                                 )
-                                undefined
-                                undefined
+                                (Core.var (Label fromInt32Row "r_1"))
+                                ( Core.app
+                                    opaque
+                                    (Core.var (Label (Core.int32 ~> opaque) "f_1"))
+                                    (Core.var (Label Core.int32 "a_2") :| [])
+                                )
                             )
                             :| []
                         )
@@ -285,10 +289,38 @@ fixture =
                  --           ;
                  --
 
-                 ( Label undefined "lte"
+                 ( Label (compareDict ~> opaque ~> opaque ~> Core.bool) "lte"
                  , Core.lam
-                    undefined
-                    undefined
+                    (Label compareDict "d_1" :| [])
+                    ( Core.lam
+                        (Label opaque "x" :| [])
+                        ( Core.lam
+                            (Label opaque "y" :| [])
+                            ( Core.match
+                                Core.bool
+                                ( Core.app
+                                    ordering
+                                    (Core.var (Label (compareDict ~> opaque ~> opaque ~> ordering) "compare"))
+                                    ( Core.var (Label compareDict "d_1")
+                                        <| Core.var (Label opaque "x")
+                                        <| Core.var (Label opaque "y")
+                                        :| []
+                                    )
+                                )
+                                ( Clause
+                                    (Label ordering "LessThan" :| [])
+                                    (Core.lit (Core.PBool True))
+                                    <| Clause
+                                      (Label ordering "EqualTo" :| [])
+                                      (Core.lit (Core.PBool True))
+                                    <| Clause
+                                      (Label ordering "GreaterThan" :| [])
+                                      (Core.lit (Core.PBool False))
+                                    :| []
+                                )
+                            )
+                        )
+                    )
                  )
                , --         gt : record({ compare : 0 -> 0 -> Ordering | 0 }) -> 0 -> 0 -> bool =
                  --           fn(d_1 : record({ compare : 0 -> 0 -> Ordering | 0 })) =>
@@ -303,18 +335,18 @@ fixture =
 
                  ( Label (compareDict ~> opaque ~> opaque ~> Core.bool) "gt"
                  , Core.lam
-                    (Label Core.bool "d_1" :| [])
+                    (Label compareDict "d_1" :| [])
                     ( Core.lam
-                        (Label Core.bool "x" :| [])
+                        (Label opaque "x" :| [])
                         ( Core.app
-                            undefined
-                            (Core.var (Label undefined "_compose_"))
-                            ( Core.var (Label undefined "_not_")
+                            (opaque ~> Core.bool)
+                            (Core.var (Label ((Core.bool ~> Core.bool) ~> (opaque ~> Core.bool) ~> opaque ~> Core.bool) "_compose_"))
+                            ( Core.var (Label (Core.bool ~> Core.bool) "_not_")
                                 :| [ Core.app
-                                      undefined
-                                      (Core.var (Label undefined "lte"))
-                                      ( Core.var (Label undefined "d_1")
-                                          :| [ Core.var (Label undefined "x")
+                                      (opaque ~> Core.bool)
+                                      (Core.var (Label (compareDict ~> opaque ~> opaque ~> Core.bool) "lte"))
+                                      ( Core.var (Label compareDict "d_1")
+                                          :| [ Core.var (Label opaque "x")
                                              ]
                                       )
                                    ]
@@ -322,8 +354,12 @@ fixture =
                         )
                     )
                  )
-               , --         in_range : ? =
-                 --           fn(d_1) =>
+               , -- ///////////////////////////////////////////////////////////
+                 -- ///////////////////////////////////////////////////////////
+                 -- ///////////////////////////////////////////////////////////
+                 --
+                 --         in_range : record({ compare : 0 -> 0 -> Ordering | 0 }) -> ? =
+                 --           fn(d_1 : record({ compare : 0 -> 0 -> Ordering | 0 })) =>
                  --             fn(range, n) =>
                  --               match(range) {
                  --                 ($Record, row_1) =>
