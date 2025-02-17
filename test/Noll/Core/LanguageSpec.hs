@@ -3,13 +3,13 @@
 module Noll.Core.LanguageSpec (fixture) where
 
 import Noll.Common.List1 (NonEmpty (..), (<|))
-import Noll.Core.Language.Expr (Clause (..), Expr)
+import Noll.Core.Language.Expr (Clause (..), Expr, Focus (..))
 import Noll.Core.Language.Syntax (list, opaque, (~>))
 import Noll.Label (Label (..))
 
+import qualified Noll.Core.Language.Op as Core
 import qualified Noll.Core.Language.Prim as Core
 import qualified Noll.Core.Language.Syntax as Core
-import qualified Noll.Core.Language.Op as Core
 
 compareRow :: Core.Type
 compareRow = Core.RExt "compare" (opaque ~> opaque ~> Core.TCon "Ordering" []) Core.RNil
@@ -74,9 +74,7 @@ fixture =
     ( Core.let_
         ( ( Label (list opaque ~> list opaque ~> list opaque) "_list_concat_"
           , Core.lam
-              ( Label (list opaque) "a"
-                  :| [Label (list opaque) "b"]
-              )
+              ( Label (list opaque) "a" :| [Label (list opaque) "b"])
               ( Core.match
                   (list opaque)
                   (Core.var (Label (list opaque) "a"))
@@ -113,10 +111,10 @@ fixture =
                  --             match : bool (a1 : record({ compare : 0 -> 0 -> Ordering | 0 })) {
                  --               | ($Record : { compare : 0 -> 0 -> Ordering | 0 } -> record({ compare : 0 -> 0 -> Ordering | 0 }), r_1 : { compare : 0 -> 0 -> Ordering | 0 }) =>
                  --                   select
-                 --                     { compare = f_1 : ? | q_1 : ? } =
-                 --                       r_1 : ?
+                 --                     { compare = f_1 : 0 -> 0 -> Ordering | q_1 : 0 } =
+                 --                       r_1 : { compare : 0 -> 0 -> Ordering | 0 }
                  --                     in
-                 --                       @ : ? (f_1, a_2, a_3)
+                 --                       @ : 0 (f_1 : 0 -> 0 -> Ordering, a_2 : 0, a_3 : 0)
                  --             }
                  --           ;
                  --
@@ -133,7 +131,23 @@ fixture =
                         (Core.var (Label compareDict "a_1"))
                         ( Clause
                             (Label (compareRow ~> compareDict) "$Record" <| Label compareRow "r_1" :| [])
-                            undefined
+                            ( Core.sel
+                                ( Focus
+                                    "compare"
+                                    (Label (opaque ~> opaque ~> Core.TCon "Ordering" []) "f_1")
+                                    (Label opaque "q_1")
+                                )
+                                (Core.var (Label compareRow "r_1"))
+                                ( Core.app
+                                    opaque
+                                    (Core.var (Label (opaque ~> opaque ~> Core.TCon "Ordering" []) "f_1"))
+                                    (
+                                      Core.var (Label opaque "a_2")
+                                        <| Core.var (Label opaque "a_3")
+                                        :| []
+                                    )
+                                )
+                            )
                             :| []
                         )
                     )
@@ -159,8 +173,20 @@ fixture =
                     )
                     ( Core.match
                         opaque
-                        undefined
-                        undefined
+                        (Core.var (Label compareDict "a_1"))
+                        ( Clause
+                            (Label undefined "$Record" <| Label undefined "r_1" :| [])
+                            ( Core.sel
+                                ( Focus
+                                    undefined
+                                    undefined
+                                    undefined
+                                )
+                                undefined
+                                undefined
+                            )
+                            :| []
+                        )
                     )
                  )
                , --         _forward_application_ : 0 -> (0 -> 0) -> 0 =
@@ -179,8 +205,8 @@ fixture =
                     )
                  )
                , --         _not_ : bool -> bool =
-                 --           fn(a) =>
-                 --             if a then false else true
+                 --           fn(a : bool) =>
+                 --             if (a : bool) then false else true
                  --           ;
                  --
 
@@ -199,7 +225,7 @@ fixture =
                  --               then
                  --                 LessThan : Ordering
                  --               else
-                 --                 if (x [> int32] y)
+                 --                 if (x : int32 [> int32] y : int32)
                  --                   then
                  --                     GreaterThan : Ordering
                  --                   else
@@ -214,20 +240,18 @@ fixture =
                         :| []
                     )
                     ( Core.if_
-                        (
-                          Core.op
-                            (Core.OLtInt32
-                              (Core.var (Label Core.int32 "x"))
-                              (Core.var (Label Core.int32 "y"))
+                        ( Core.op
+                            ( Core.OLtInt32
+                                (Core.var (Label Core.int32 "x"))
+                                (Core.var (Label Core.int32 "y"))
                             )
                         )
                         (Core.var (Label ordering "LessThan"))
                         ( Core.if_
-                            (
-                              Core.op
-                                (Core.OGtInt32
-                                  (Core.var (Label Core.int32 "x"))
-                                  (Core.var (Label Core.int32 "y"))
+                            ( Core.op
+                                ( Core.OGtInt32
+                                    (Core.var (Label Core.int32 "x"))
+                                    (Core.var (Label Core.int32 "y"))
                                 )
                             )
                             (Core.var (Label ordering "GreaterThan"))
@@ -241,10 +265,10 @@ fixture =
                  --           ;
                  --
 
-                 ( Label undefined "from_int32__int32"
+                 ( Label (Core.int32 ~> Core.int32) "from_int32__int32"
                  , Core.lam
-                    undefined
-                    undefined
+                    (Label Core.int32 "n" :| [])
+                    (Core.var (Label Core.int32 "n"))
                  )
                , --         lte : record({ compare : 0 -> 0 -> Ordering | 0 }) -> 0 -> 0 -> bool =
                  --           fn(d_1 : record({ compare : 0 -> 0 -> Ordering | 0 })) =>
@@ -318,8 +342,18 @@ fixture =
 
                  ( Label undefined "in_range"
                  , Core.lam
-                    undefined
-                    undefined
+                    (Label undefined "d_1" :| [])
+                    ( Core.lam
+                        ( Label undefined "range"
+                            <| Label undefined "n"
+                            :| []
+                        )
+                        ( Core.match
+                            undefined
+                            undefined
+                            undefined
+                        )
+                    )
                  )
                , --         from_list : record({ compare : 0 -> 0 -> Ordering | 0 }) -> list(0) -> tree(0) =
                  --
@@ -334,15 +368,20 @@ fixture =
 
                  ( Label (tree opaque ~> list opaque) "flatten"
                  , Core.lam
-                    undefined
-                    undefined
+                    (Label undefined "tree" :| [])
+                    ( Core.let_
+                        undefined
+                        undefined
+                    )
                  )
-               , --         qsort : ? =
+               , --         qsort : record({ compare : 0 -> 0 -> Ordering | 0 }) -> list(0) -> list(0) =
+                 --           fn(d_1 : record({ compare : 0 -> 0 -> Ordering | 0 })) =>
+                 --             ?
                  --
 
-                 ( Label undefined "qsort"
+                 ( Label (compareDict ~> list opaque ~> list opaque) "qsort"
                  , Core.lam
-                    undefined
+                    (Label compareDict "d_1" :| [])
                     undefined
                  )
                ]
