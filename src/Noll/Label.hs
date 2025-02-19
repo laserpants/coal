@@ -1,8 +1,9 @@
 {-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Label (Label (..), labelName) where
+module Noll.Label (Label (..), labelName, setLabelName) where
 
 import Data.Data (Data, Typeable)
 import Noll.Utils (Name)
@@ -13,3 +14,7 @@ data Label t = Label t Name
 {-# INLINE labelName #-}
 labelName :: Label t -> Name
 labelName (Label _ name) = name
+
+{-# INLINE setLabelName #-}
+setLabelName :: Name -> Label t -> Label t
+setLabelName name (Label t _) = Label t name

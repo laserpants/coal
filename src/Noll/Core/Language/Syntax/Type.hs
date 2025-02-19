@@ -120,4 +120,4 @@ arity t = List1.length (unfoldType t) - 1
 
 {-# INLINE isFunction #-}
 isFunction :: (Typed t) => t -> Bool
-isFunction e = arity (typeOf e) > 0
+isFunction f = arity (typeOf f) > 0
