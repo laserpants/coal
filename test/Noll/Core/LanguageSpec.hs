@@ -12,10 +12,13 @@ import qualified Noll.Core.Language.Prim as Core
 import qualified Noll.Core.Language.Syntax as Core
 
 compareRow :: Core.Type
-compareRow = Core.RExt "compare" (opaque ~> opaque ~> Core.TCon "Ordering" []) Core.RNil
+compareRow = Core.RExt "compare" (opaque ~> opaque ~> Core.TCon "Ordering" []) opaque
 
 fromInt32Row :: Core.Type
-fromInt32Row = Core.RExt "from_int32" (Core.int32 ~> opaque) Core.RNil
+fromInt32Row = Core.RExt "from_int32" (Core.int32 ~> opaque) opaque
+
+maxMinRow :: Core.Type -> Core.Type
+maxMinRow r = Core.RExt "max" opaque (Core.RExt "min" opaque r)
 
 -- record({ compare : 0 -> 0 -> Ordering | 0 })
 compareDict :: Core.Type
@@ -28,25 +31,37 @@ fromInt32Dict = Core.record fromInt32Row
 ordering :: Core.Type
 ordering = Core.TCon "Ordering" []
 
+-- record({ max : 0 | min : 0 | r })
+maxMinRecord :: Core.Type -> Core.Type
+maxMinRecord r = Core.record (maxMinRow r)
+
 tree :: Core.Type -> Core.Type
 tree t = Core.TCon "Tree" [t]
 
 fixture :: Expr Core.Type
 fixture =
+  --
   -- let
   --   _compose_ : (0 -> 0) -> (0 -> 0) -> 0 -> 0 =
-  --     fn(f : 0 -> 0, g : 0 -> 0, x : 0) =>
-  --       @ : 0 (f : 0 -> 0, @ : 0 (g : 0 -> 0, x : 0))
-  --     in
   --
   Core.let_
     ( ( Label ((opaque ~> opaque) ~> (opaque ~> opaque) ~> opaque ~> opaque) "_compose_"
-      , Core.lam
+      , --
+        --     fn( f : 0 -> 0
+        --       , g : 0 -> 0
+        --       , x : 0 ) =>
+        --
+        Core.lam
           ( Label (opaque ~> opaque) "f"
               :| [ Label (opaque ~> opaque) "g"
                  , Label opaque "x"
                  ]
           )
+          --
+          --       @ : 0 ( f : 0 -> 0
+          --             , @ : 0 ( g : 0 -> 0
+          --                     , x : 0 ))
+          --
           ( Core.app
               opaque
               (Core.var (Label (opaque ~> opaque) "f"))
@@ -60,34 +75,47 @@ fixture =
       )
         :| []
     )
+    --
+    --     in
     --       let
     --         _list_concat_ : list(0) -> list(0) -> list(0) =
-    --           fn(a : list(0), b : list(0)) =>
-    --             match : list(0) (a : list(0)) {
-    --               | $Nil : list(0) =>
-    --                   b : list(0)
-    --               | ($Cons : 0 -> list(0) -> list(0), x : 0, xs : list(0)) =>
-    --                   @ : list(0) ($Cons : 0 -> list(0) -> list(0), x : 0
-    --                     , @ : list(0) (_list_concat : list(0) -> list(0) -> list(0), xs : list(0), b : list(0)))
-    --             }
-    --           ;
     --
     ( Core.let_
         ( ( Label (list opaque ~> list opaque ~> list opaque) "_list_concat_"
-          , Core.lam
+          , --
+            --           fn(a : list(0), b : list(0)) =>
+            --
+            Core.lam
               (Label (list opaque) "a" :| [Label (list opaque) "b"])
+              --
+              --             match : list(0) (a : list(0)) {
+              --
               ( Core.match
                   (list opaque)
                   (Core.var (Label (list opaque) "a"))
+                  --
+                  --               | $Nil : list(0) =>
+                  --                   b : list(0)
+                  --
                   ( Clause
                       (Label (list opaque) "$Nil" :| [])
                       (Core.var (Label (list opaque) "b"))
+                      --
+                      --               | ($Cons : 0 -> list(0) -> list(0), x : 0, xs : list(0)) =>
+                      --
                       :| [ Clause
                             ( Label (opaque ~> list opaque ~> list opaque) "$Cons"
                                 <| Label opaque "x"
                                 <| Label (list opaque) "xs"
                                 :| []
                             )
+                            --
+                            --                   @ : list(0) ( $Cons : 0 -> list(0) -> list(0)
+                            --                               , x : 0
+                            --                               , @ : list(0) ( _list_concat : list(0) -> list(0) -> list(0)
+                            --                                             , xs : list(0)
+                            --                                             , b : list(0)))
+                            --
                             ( Core.app
                                 (list opaque)
                                 (Core.var (Label (opaque ~> list opaque ~> list opaque) "$Cons"))
@@ -103,6 +131,10 @@ fixture =
                                 )
                             )
                          ]
+                         --
+                         --             }
+                         --           ;
+                         --
                   )
               )
           )
@@ -354,87 +386,354 @@ fixture =
                         )
                     )
                  )
-               , -- ///////////////////////////////////////////////////////////
-                 -- ///////////////////////////////////////////////////////////
-                 -- ///////////////////////////////////////////////////////////
-                 --
-                 --         in_range : record({ compare : 0 -> 0 -> Ordering | 0 }) -> ? =
-                 --           fn(d_1 : record({ compare : 0 -> 0 -> Ordering | 0 })) =>
-                 --             fn(range, n) =>
-                 --               match(range) {
-                 --                 ($Record, row_1) =>
-                 --                   select
-                 --                     { min = min | row_2 } =
-                 --                       row_1
-                 --                     in
-                 --                       select
-                 --                         { max = max | z } =
-                 --                           row_2
-                 --                         in
-                 --                           ?
-                 --               }
-                 --           ;
+               , --
+                 --         in_range : record({ compare : 0 -> 0 -> Ordering | 0 }) -> record({ max : 0 | min : 0 | 0 }) -> 0 -> bool =
                  --
 
-                 ( Label undefined "in_range"
-                 , Core.lam
-                    (Label undefined "d_1" :| [])
+                 ( Label (compareDict ~> maxMinRecord opaque ~> opaque ~> Core.bool) "in_range"
+                 , --
+                   --           fn(d_1 : record({ compare : 0 -> 0 -> Ordering | 0 })) =>
+                   --
+                   Core.lam
+                    (Label compareDict "d_1" :| [])
+                    --
+                    --             fn(range : record({ max : 0 | min : 0 | 0 }), n : 0) =>
+                    --
                     ( Core.lam
-                        ( Label undefined "range"
-                            <| Label undefined "n"
-                            :| []
-                        )
+                        (Label (maxMinRecord opaque) "range" <| Label opaque "n" :| [])
+                        --
+                        --               match : bool (range : record({ max : 0 | min : 0 | 0 })) {
+                        --
                         ( Core.match
-                            undefined
-                            undefined
-                            undefined
+                            Core.bool
+                            (Core.var (Label (maxMinRecord opaque) "range"))
+                            ( --
+                              --                 ( $Record : { max : 0 | min : 0 | 0 } -> record({ max : 0 | min : 0 | 0 })
+                              --                 , row_1 : { max : 0 | min : 0 | 0 } 
+                              --                 ) =>
+                              --                 
+                              Clause
+                                ( Label (maxMinRow opaque ~> maxMinRecord opaque) "$Record"
+                                    <| Label (maxMinRow opaque) "row_1"
+                                    :| []
+                                )
+                                --                   select
+                                --                     { min = min : 0 | row_2 : { max : 0 | 0 } } =
+                                --                       row_1 : { max : 0 | min : 0 | 0 }
+                                ( Core.sel
+                                    ( Focus
+                                        undefined
+                                        undefined
+                                        undefined
+                                    )
+                                    undefined
+                            --                     in
+                            --                       select
+                            --                         { max = max : 0 | z : 0 } =
+                            --                           row_2 : { max : 0 | 0 }
+                                    (
+                                      Core.sel
+                                        ( Focus
+                                            undefined
+                                            undefined
+                                            undefined
+                                        )
+                                        undefined
+                                        undefined
+                                    )
+                                )
+                                :| []
+                            )
+                            --                         in
+                            --                           @ : bool ( gt : record({ compare : 0 -> 0 -> Ordering | 0 }) -> 0 -> 0 -> bool
+                            --                                    , d_1 : record({ compare : 0 -> 0 -> Ordering | 0 })
+                            --                                    , n : 0
+                            --                                    , min : 0 )
+                            --                           &&
+                            --                           (
+                            --                             @ : bool ( gt : record({ compare : 0 -> 0 -> Ordering | 0 }) -> 0 -> 0 -> bool
+                            --                                      , d_1 : record({ compare : 0 -> 0 -> Ordering | 0 })
+                            --                                      , min : 0
+                            --                                      , max : 0 )
+                            --                             ||
+                            --                             @ : bool ( lte : record({ compare : 0 -> 0 -> Ordering | 0 }) -> 0 -> 0 -> bool
+                            --                                      , d_1 : record({ compare : 0 -> 0 -> Ordering | 0 })
+                            --                                      , n : 0
+                            --                                      , max : 0 )
+                            --                           )
+                            --               }
+                            --           ;
+                            --
                         )
                     )
                  )
-               , --         from_list : record({ compare : 0 -> 0 -> Ordering | 0 }) -> list(0) -> tree(0) =
+               , --         from_list : record({ compare : 0 -> 0 -> Ordering | 0 }) -> list(0) -> Tree(0) =
+                 --           fn(d_1 : record({ compare : 0 -> 0 -> Ordering | 0 })) =>
+                 --             fn(list : list(0)) =>
+                 --               let
+                 --                 fold_ : list(0) -> record({ max : 0 | min : 0 | 0 }) -> Tree(0) =
+                 --                   fn(a_0 : list(0)) =>
+                 --                     match(a_0 : list(0)) {
+                 --                       | ($cons : 0 -> list(0) -> list(0), p : 0, g : list(0)) =>
+                 --                           fn(range : record({ max : 0 | min : 0 | 0 })) =>
+                 --                             if ( @ : bool
+                 --                                  ( _forward_application_ : 0 -> (0 -> bool) -> bool
+                 --                                  , p : 0
+                 --                                  , @ : 0 -> bool
+                 --                                      ( in_range : record({ compare : 0 -> 0 -> Ordering | 0 }) -> record({ max : 0 | min : 0 | 0 }) -> 0 -> bool
+                 --                                      , d_1 : record({ compare : 0 -> 0 -> Ordering | 0 })
+                 --                                      , range : record({ max : 0 | min : 0 | 0 })
+                 --                                      )
+                 --                                  )
+                 --                                )
+                 --                               then
+                 --                                 @ : Tree(0)
+                 --                                   ( Node : 0 -> Tree(0) -> Tree(0) -> Tree(0)
+                 --                                   , p : 0
+                 --                                   , @ : Tree(0)
+                 --                                       ( fold_ : list(0) -> record({ max : 0 | min : 0 | {} }) -> Tree(0)
+                 --                                       , g : list(0)
+                 --                                       , @ : record({ max : 0 | min : 0 | {} })
+                 --                                         ( $Record : ?
+                 --                                         , { min =
+                 --                                               match(range : record({ max : 0 | min : 0 | 0 })) {
+                 --                                                 |
+                 --                                               }
+                 --                                           | max = p : 0
+                 --                                           | {}
+                 --                                           }
+                 --                                         )
+                 --                                       )
+                 --                                   , @ : Tree(0)
+                 --                                       ( fold_ : list(0) -> record({ max : 0 | min : 0 | {} }) -> Tree(0)
+                 --                                       , g : list(0)
+                 --                                       , @ : record({ max : 0 | min : 0 | {} })
+                 --                                         ( $Record : ?
+                 --                                         , { min = p : 0
+                 --                                           | max =
+                 --                                               match(range : record({ max : 0 | min : 0 | 0 })) {
+                 --                                                 |
+                 --                                               }
+                 --                                           | {}
+                 --                                           }
+                 --                                         )
+                 --                                       )
+                 --                                   )
+                 --                               else
+                 --                                 @ : ?
+                 --                                   ( fold_ : list(0) -> record({ max : 0 | min : 0 | 0 }) -> Tree(0)
+                 --                                   , g : list(0)
+                 --                                   , range : record({ max : 0 | min : 0 | 0 })
+                 --                                   )
+                 --                       | $Nil : list(0) =>
+                 --                           fn(_ : record({ max : 0 | min : 0 | 0 })) =>
+                 --                             Leaf : Tree(0)
+                 --                     }
+                 --                 in
+                 --                   @ : Tree(0)
+                 --                     ( fold_ : list(0) -> record({ max : 0 | min : 0 | {} }) -> Tree(0)
+                 --                     , list : list(0)
+                 --                     , @ : record({ max : 0 | min : 0 | {} })
+                 --                       ( $Record : record({ max : 0 | min : 0 | {} })
+                 --                       , { min = @ : 0 (from_int32 : int32 -> 0, d_1 : record({ compare : 0 -> 0 -> Ordering | 0 }), 0 : int32)
+                 --                         , max = @ : 0 (from_int32 : int32 -> 0, d_1 : record({ compare : 0 -> 0 -> Ordering | 0 }), -1 : int32)
+                 --                         , {}
+                 --                         }
+                 --                       )
+                 --                     )
+                 --           ;
                  --
 
-                 ( Label undefined "from_list"
+                 ( Label (compareDict ~> list opaque ~> tree opaque) "from_list"
                  , Core.lam
                     undefined
                     undefined
                  )
                , --         flatten : Tree(0) -> list(0) =
-                 --
+                 --           fn(tree : Tree(0)) =>
+                 --             let
+                 --               fold_ : Tree(0) -> list(0) =
+                 --                 fn(a_0 : Tree(0)) =>
+                 --                   match(a_0 : Tree(0)) {
+                 --                     | (Node : 0 -> Tree(0) -> Tree(0) -> Tree(0), y : 0, lhs : Tree(0), rhs : Tree(0)) =>
+                 --                         @ : list(0)
+                 --                           ( _list_concat_ : list(0) -> list(0) -> list(0)
+                 --                           , @ : list(0)
+                 --                               ( fold_ : Tree(0) -> list(0)
+                 --                               , lhs : Tree(0))
+                 --                           , @ : list(0)
+                 --                               ( $Cons : 0 -> list(0) -> list(0)
+                 --                               , y : 0
+                 --                               , @ : list(0)
+                 --                                 ( fold_ : Tree(0) -> list(0)
+                 --                                 , rhs : Tree(0))
+                 --                               )
+                 --                           )
+                 --                     | Leaf : Tree(0) =>
+                 --                         $Nil : list(0)
+                 --                   }
+                 --               in
+                 --                 @ : list(0)
+                 --                   ( fold_ : Tree(0) -> list(0)
+                 --                   , tree : Tree(0))
+                 --           ;
 
                  ( Label (tree opaque ~> list opaque) "flatten"
                  , Core.lam
-                    (Label undefined "tree" :| [])
+                    (Label (tree opaque) "tree" :| [])
                     ( Core.let_
-                        undefined
-                        undefined
+                        ( ( Label undefined "fold_"
+                          , Core.lam
+                              (Label undefined "a_0" :| [])
+                              undefined
+                          )
+                            :| []
+                        )
+                        ( Core.app
+                            undefined
+                            (Core.var (Label undefined "fold_"))
+                            (Core.var (Label undefined "tree") :| [])
+                        )
                     )
                  )
                , --         qsort : record({ compare : 0 -> 0 -> Ordering | 0 }) -> list(0) -> list(0) =
                  --           fn(d_1 : record({ compare : 0 -> 0 -> Ordering | 0 })) =>
-                 --             ?
-                 --
+                 --             @ : list(0) -> list(0) ( _compose_ : (Tree(0) -> list(0)) -> (list(0) -> Tree(0)) -> list(0) -> list(0)
+                 --                                    , flatten : Tree(0) -> list(0)
+                 --                                    , @ : list(0) -> Tree(0) ( from_list : record({ compare : 0 -> 0 -> Ordering | 0 }) -> list(0) -> Tree(0)
+                 --                                                             , d_1 : record({ compare : 0 -> 0 -> Ordering | 0 })
+                 --                                                             ))
+                 --           ;
 
                  ( Label (compareDict ~> list opaque ~> list opaque) "qsort"
                  , Core.lam
                     (Label compareDict "d_1" :| [])
-                    undefined
+                    ( Core.app
+                        (list opaque ~> list opaque)
+                        ( Core.var
+                            ( Label
+                                ( (tree opaque ~> list opaque)
+                                    ~> (list opaque ~> tree opaque)
+                                    ~> list opaque
+                                    ~> list opaque
+                                )
+                                "_compose_"
+                            )
+                        )
+                        ( Core.var (Label (tree opaque ~> list opaque) "flatten")
+                            <| Core.app
+                              (list opaque ~> tree opaque)
+                              (Core.var (Label (compareDict ~> list opaque ~> tree opaque) "from_list"))
+                              (Core.var (Label compareDict "d_1") :| [])
+                            :| []
+                        )
+                    )
                  )
                ]
         )
+        --
+        -- in
+        --   let
+        --     xs =
+        --       @ : list(int32)
+        --         ( $Cons
+        --         , 2 : int32
+        --         , @ : list(int32)
+        --             ( $Cons
+        --             , 105 : int32
+        --             , @ : list(int32)
+        --                 ( $Cons
+        --                 , 103 : int32
+        --                 , @ : list(int32)
+        --                   ( $Cons
+        --                   , 104 : int32
+        --                   , @ : list(int32)
+        --                     ( $Cons
+        --                     , 2 : int32
+        --                     , @ : list(int32)
+        --                       ( $Cons
+        --                       , 106 : int32
+        --                       , $Nil : list(int32)
+        --                       ))))))
+        --
         ( Core.let_
             ( ( Label undefined "xs"
-              , undefined
+              , Core.app
+                  undefined
+                  undefined
+                  ( Core.app
+                      undefined
+                      undefined
+                      ( Core.app
+                          undefined
+                          undefined
+                          ( Core.app
+                              undefined
+                              undefined
+                              ( Core.app
+                                  undefined
+                                  undefined
+                                  ( Core.app
+                                      undefined
+                                      undefined
+                                      undefined
+                                      :| []
+                                  )
+                                  :| []
+                              )
+                              :| []
+                          )
+                          :| []
+                      )
+                      :| []
+                  )
               )
                 :| []
             )
+            --
+            -- in
+            --   let
+            --     ys =
+            --       @ : list(int32)
+            --         ( qsort
+            --         , @ : ?
+            --             ( $Record
+            --             , ?
+            --             )
+            --         )
+            --
             ( Core.let_
                 ( ( Label undefined "ys"
-                  , undefined
+                  , Core.app
+                      undefined
+                      undefined
+                      undefined
                   )
                     :| []
                 )
-                undefined
+                --
+                -- in
+                --   match(ys : list(int32)) {
+                --     | ($Cons : ?, a : int32, b : list(int32)) =>
+                --         match() {
+                --         }
+                --     | $Nil =>
+                --         ?
+                --   }
+                --
+                --
+                ( Core.match
+                    undefined
+                    (Core.var (Label (list Core.int32) "ys"))
+                    ( Clause
+                        undefined
+                        undefined
+                        <| Clause
+                          undefined
+                          undefined
+                        :| []
+                    )
+                )
             )
         )
     )
