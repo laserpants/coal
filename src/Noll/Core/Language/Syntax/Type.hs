@@ -106,14 +106,6 @@ tuple n = TCon ("tuple" <> showt n)
 record :: Type -> Type
 record r = TCon "record" [r]
 
-unfoldType :: Type -> List1 Type
-unfoldType =
-  \case
-    TCon "->" [t1, t2] ->
-      t1 <| unfoldType t2
-    t ->
-      List1.singleton t
-
 {-# INLINE arity #-}
 arity :: Type -> Int
 arity t = List1.length (unfoldType t) - 1
@@ -121,3 +113,11 @@ arity t = List1.length (unfoldType t) - 1
 {-# INLINE isFunction #-}
 isFunction :: (Typed t) => t -> Bool
 isFunction f = arity (typeOf f) > 0
+
+unfoldType :: Type -> List1 Type
+unfoldType =
+  \case
+    TCon "->" [t1, t2] ->
+      t1 <| unfoldType t2
+    t ->
+      List1.singleton t

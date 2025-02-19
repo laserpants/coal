@@ -4,12 +4,10 @@ module Noll.Core.LanguageSpec (fixture) where
 
 import Noll.Common.List1 (NonEmpty (..), (<|))
 import Noll.Core.Language.Expr (Clause (..), Expr, Focus (..))
-import Noll.Core.Language.Syntax (list, opaque, (~>))
+import Noll.Core.Language (list, opaque, (~>))
 import Noll.Label (Label (..))
 
-import qualified Noll.Core.Language.Op as Core
-import qualified Noll.Core.Language.Prim as Core
-import qualified Noll.Core.Language.Syntax as Core
+import qualified Noll.Core.Language as Core
 
 compareRow :: Core.Type
 compareRow = Core.RExt "compare" (opaque ~> opaque ~> Core.TCon "Ordering" []) opaque

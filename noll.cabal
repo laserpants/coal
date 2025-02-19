@@ -50,7 +50,6 @@ library
       Noll.Core.Language.Expr
       Noll.Core.Language.Op
       Noll.Core.Language.Prim
-      Noll.Core.Language.Syntax
       Noll.Core.Language.Syntax.Expr
       Noll.Core.Language.Syntax.Type
       Noll.Core.Language.Type
