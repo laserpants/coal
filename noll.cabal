@@ -33,6 +33,7 @@ library
       Noll.Common.List1
       Noll.Common.Supply
       Noll.Compiler
+      Noll.Compiler.Core
       Noll.Compiler.NormalizeObjects
       Noll.Compiler.PatternMatching
       Noll.Compiler.PatternMatching.Compiler
@@ -100,6 +101,7 @@ library
       base >=4.7 && <5
     , containers
     , data-fix
+    , deriving-compat
     , extra
     , free
     , mtl
@@ -122,6 +124,7 @@ executable noll-exe
       base >=4.7 && <5
     , containers
     , data-fix
+    , deriving-compat
     , extra
     , free
     , mtl
@@ -192,6 +195,7 @@ test-suite noll-test
       base >=4.7 && <5
     , containers
     , data-fix
+    , deriving-compat
     , extra
     , free
     , hspec

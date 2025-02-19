@@ -31,6 +31,7 @@ dependencies:
 - extra
 - recursion-schemes
 - uniplate
+- deriving-compat
 
 ghc-options:
 - -Wall
