@@ -1,7 +1,11 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE StrictData #-}
+{-# LANGUAGE TemplateHaskell #-}
 
 module Noll.Core.Language.Op (Op (..)) where
+
+import Data.Eq.Deriving (deriveEq1)
+import Text.Show.Deriving (deriveShow1)
 
 -- | Binary operators
 data Op a
@@ -46,3 +50,6 @@ data Op a
   | -- | Logical NOT
     ONot a
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
+
+deriveShow1 ''Op
+deriveEq1 ''Op

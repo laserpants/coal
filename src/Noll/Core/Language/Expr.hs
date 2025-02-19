@@ -1,18 +1,24 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE StrictData #-}
+{-# LANGUAGE TemplateHaskell #-}
 
 module Noll.Core.Language.Expr (ExprF (..), Expr, Focus (..), Clause (..)) where
 
+import Data.Eq.Deriving (deriveEq1)
 import Data.Fix (Fix (..))
 import Noll.Common.List1 (List1)
 import Noll.Core.Language.Op (Op (..))
 import Noll.Core.Language.Prim (Prim (..))
 import Noll.Label (Label (..))
 import Noll.Utils (Name)
+import Text.Show.Deriving (deriveShow1)
 
 -- | Pattern matching clause
 data Clause t a = Clause (List1 (Label t)) a
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
+
+deriveShow1 ''Clause
+deriveEq1 ''Clause
 
 -- | Field selector
 data Focus t = Focus Name (Label t) (Label t)
@@ -48,3 +54,6 @@ data ExprF t a
 
 -- | Main expression tree grammar
 type Expr t = Fix (ExprF t)
+
+deriveShow1 ''ExprF
+deriveEq1 ''ExprF
