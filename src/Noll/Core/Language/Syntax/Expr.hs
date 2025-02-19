@@ -8,6 +8,9 @@ module Noll.Core.Language.Syntax.Expr (
   op,
   lit,
   sel,
+  ext,
+  nil,
+  call,
 ) where
 
 import Noll.Common.List1 (List1)
@@ -37,29 +40,21 @@ if_ = embed3 EIf
 match :: t -> Expr t -> List1 (Clause t (Expr t)) -> Expr t
 match = embed3 EPat
 
--- {-# INLINE ext #-}
--- ext :: Name -> Expr t -> Expr t -> Expr t
--- ext = embed3 EExt
---
--- {-# INLINE nil #-}
--- nil :: Expr t
--- nil = embed ENil
+{-# INLINE ext #-}
+ext :: Label t -> Expr t -> Expr t -> Expr t
+ext = embed3 EExt
+
+{-# INLINE nil #-}
+nil :: Expr t
+nil = embed ENil
 
 {-# INLINE sel #-}
 sel :: Focus t -> Expr t -> Expr t -> Expr t
 sel = embed3 ESel
 
--- {-# INLINE call #-}
--- call :: Label e t -> [Expr t] -> Expr t -> Expr t
--- call = embed3 ECall
---
--- {-# INLINE ann #-}
--- ann :: Type -> Expr t -> Expr t
--- ann = embed2 EAnn
---
--- {-# INLINE mem #-}
--- mem :: Expr t -> Expr t
--- mem = embed1 EMem
+{-# INLINE call #-}
+call :: Label t -> [Expr t] -> Expr t -> Expr t
+call = embed3 ECall
 
 {-# INLINE op #-}
 op :: Op (Expr t) -> Expr t
