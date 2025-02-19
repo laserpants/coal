@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Noll.Core.Language.Syntax.Type (
@@ -10,6 +11,8 @@ module Noll.Core.Language.Syntax.Type (
   float,
   opaque,
   foldType,
+  unfoldType,
+  arity,
   int32,
   int64,
   string,
@@ -19,9 +22,12 @@ module Noll.Core.Language.Syntax.Type (
   record,
 ) where
 
+import Noll.Common.List1 (List1, (<|))
 import Noll.Core.Language.Type (Type (..))
 import Noll.Utils (Name)
 import TextShow (showt)
+
+import qualified Noll.Common.List1 as List1
 
 {-# INLINE tcon0 #-}
 tcon0 :: Name -> Type
@@ -98,3 +104,15 @@ tuple n = TCon ("tuple" <> showt n)
 {-# INLINE record #-}
 record :: Type -> Type
 record r = TCon "record" [r]
+
+unfoldType :: Type -> List1 Type
+unfoldType =
+  \case
+    TCon "->" [t1, t2] ->
+      t1 <| unfoldType t2
+    t ->
+      List1.singleton t
+
+{-# INLINE arity #-}
+arity :: Type -> Int
+arity t = List1.length (unfoldType t) - 1

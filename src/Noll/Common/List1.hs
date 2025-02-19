@@ -7,9 +7,9 @@ module Noll.Common.List1 (
 
 import Data.List.NonEmpty (
   NonEmpty (..),
+  length,
   partition,
   reverse,
-  length,
   singleton,
   unzip,
   (<|),

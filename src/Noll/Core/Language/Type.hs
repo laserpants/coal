@@ -2,6 +2,7 @@
 
 module Noll.Core.Language.Type (Type (..), Typed (..)) where
 
+import Noll.Label (Label (..))
 import Noll.Utils (Name)
 
 -- | Core language types
@@ -21,3 +22,6 @@ class Typed t where
 
 instance Typed Type where
   typeOf = id
+
+instance (Typed t) => Typed (Label t) where
+  typeOf (Label t _) = typeOf t
