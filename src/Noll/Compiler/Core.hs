@@ -12,7 +12,7 @@ import Data.Functor.Foldable (cata, embed)
 import Noll.Common.List1 (List1, NonEmpty (..), (<|))
 import Noll.Common.Supply (supplied)
 import Noll.Core.Language (Clause (..), Expr, Focus (..), Type, isFunction)
-import Noll.Core.Language.Replace (substVars)
+import Noll.Core.Language.Replace (relabel)
 import Noll.Label (Label (..))
 import Noll.Utils (Dictionary, Name, isConstructor, (<$$>))
 import TextShow
@@ -46,16 +46,16 @@ transSuffixExpr =
       Core.ELet vs e -> do
         let (lls, es) = List1.unzip vs
         (lls1, sub) <- mapping lls
-        as <- sequence (substVars sub <$$> es)
-        Core.let_ (List1.zip lls1 as) . substVars sub <$> e
+        as <- sequence (relabel sub <$$> es)
+        Core.let_ (List1.zip lls1 as) . relabel sub <$> e
       Core.ELam lls e -> do
         (lls1, sub) <- mapping lls
-        Core.lam lls1 . substVars sub <$> e
+        Core.lam lls1 . relabel sub <$> e
       Core.ESel (Focus name ll2 ll3) e1 e2 -> do
         (lls1, sub) <- mapping (ll2 <| ll3 :| [])
         case lls1 of
           (lls4 :| lls5 : _) ->
-            Core.sel (Focus name lls4 lls5) <$> e1 <*> (substVars sub <$> e2)
+            Core.sel (Focus name lls4 lls5) <$> e1 <*> (relabel sub <$> e2)
           _ ->
             error "Implementation error"
       Core.EMat t e cs ->
@@ -70,7 +70,7 @@ transSuffixClause =
   \case
     Clause lls e -> do
       (lls1, sub) <- mapping lls
-      pure (Clause lls1 (substVars sub e))
+      pure (Clause lls1 (relabel sub e))
 
 mapping :: (MonadState Int m) => List1 (Label t) -> m (List1 (Label t), Dictionary Name)
 mapping lls = runStateT (traverse go lls) mempty

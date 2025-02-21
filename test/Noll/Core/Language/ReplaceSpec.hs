@@ -3,7 +3,7 @@
 module Noll.Core.Language.ReplaceSpec where
 
 import Noll.Common.List1 (NonEmpty (..), (<|))
-import Noll.Core.Language.Replace (substVar)
+import Noll.Core.Language.Replace (rewrite)
 import Noll.Label (Label (..))
 import Test.Hspec (Spec, describe, it, shouldBe)
 
@@ -40,7 +40,7 @@ spec =
     it "ECall" $ do
       error "TODO" == True
     it "" $ do
-      substVar
+      rewrite
         "y"
         "z"
         ( Core.let_
@@ -73,9 +73,9 @@ spec =
           )
           (Core.lit (Core.PInt32 1))
     it "" $ do
-      substVar "x" "z" fixture1 == fixture1
+      rewrite "x" "z" fixture1 == fixture1
     it "" $ do
-      substVar "y1" "y2" fixture2 == fixture3
+      rewrite "y1" "y2" fixture2 == fixture3
 
 fixture1 :: Core.Expr Core.Type
 fixture1 =

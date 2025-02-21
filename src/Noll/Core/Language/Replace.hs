@@ -1,14 +1,16 @@
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 
-module Noll.Core.Language.Replace (substVar, substVars) where
+module Noll.Core.Language.Replace (rewrite, Sub (..)) where
 
 import Control.Arrow ((>>>))
 import Control.Monad.Identity (runIdentity)
 import Data.Functor.Foldable (embed, para)
 import Data.Tuple.Extra (second)
+import Noll.Common.List1 (List1)
 import Noll.Core.Language (Clause (..), Expr, ExprF (..), Focus (..))
 import Noll.Label (Label (..), labelName, setLabelName)
-import Noll.Utils (Dictionary, Name)
+import Noll.Utils (Dictionary, Map, Name)
 
 import qualified Data.Map.Strict as Map
 import qualified Noll.Core.Language as Core
@@ -55,11 +57,23 @@ replaceVarM name fn =
 replaceVar :: Name -> (Label t -> Expr t) -> Expr t -> Expr t
 replaceVar name fn = runIdentity . replaceVarM name (pure . fn)
 
-substVars :: Dictionary Name -> Expr t -> Expr t
-substVars dict expr = foldr (uncurry substVar) expr (Map.toList dict)
+rewrite :: Name -> Name -> Expr t -> Expr t
+rewrite old new = replaceVar old (Core.var . setLabelName new)
 
-substVar :: Name -> Name -> Expr t -> Expr t
-substVar old new = replaceVar old (Core.var . setLabelName new)
+class Sub a where
+  relabel :: Dictionary Name -> a -> a
+
+instance (Sub s) => Sub [s] where
+  relabel = fmap . relabel
+
+instance (Sub s) => Sub (List1 s) where
+  relabel = fmap . relabel
+
+instance (Sub s) => Sub (Map k s) where
+  relabel = fmap . relabel
+
+instance Sub (Expr t) where
+  relabel dict expr = foldr (uncurry rewrite) expr (Map.toList dict)
 
 {-# INLINE matchesLabel #-}
 matchesLabel :: Name -> Label t -> Bool
