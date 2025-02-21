@@ -1,13 +1,11 @@
 {-# LANGUAGE LambdaCase #-}
 
-module Noll.Core.Language.Replace (relabeled, relabeled1, substVar, substVars) where
+module Noll.Core.Language.Replace (substVar, substVars) where
 
 import Control.Arrow ((>>>))
 import Control.Monad.Identity (runIdentity)
 import Data.Functor.Foldable (embed, para)
-import Data.Maybe (fromMaybe)
 import Data.Tuple.Extra (second)
-import Noll.Common.List1 (List1)
 import Noll.Core.Language (Clause (..), Expr, ExprF (..), Focus (..))
 import Noll.Label (Label (..), labelName, setLabelName)
 import Noll.Utils (Dictionary, Name)
@@ -56,13 +54,6 @@ replaceVarM name fn =
 
 replaceVar :: Name -> (Label t -> Expr t) -> Expr t -> Expr t
 replaceVar name fn = runIdentity . replaceVarM name (pure . fn)
-
-{-# INLINE relabeled #-}
-relabeled :: Dictionary Name -> List1 (Label t) -> List1 (Label t)
-relabeled = fmap . relabeled1
-
-relabeled1 :: Dictionary Name -> Label t -> Label t
-relabeled1 dict (Label t name) = Label t (fromMaybe name (Map.lookup name dict))
 
 substVars :: Dictionary Name -> Expr t -> Expr t
 substVars dict expr = foldr (uncurry substVar) expr (Map.toList dict)

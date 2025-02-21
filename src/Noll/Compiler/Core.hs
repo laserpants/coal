@@ -5,14 +5,14 @@
 
 module Noll.Compiler.Core where
 
-import Control.Monad.State (MonadState)
+import Control.Monad.State (MonadState, modify, runStateT)
+import Control.Monad.Trans (lift)
 import Control.Monad.Writer (MonadWriter, tell)
-import Data.Foldable (foldlM)
 import Data.Functor.Foldable (cata, embed)
 import Noll.Common.List1 (List1, NonEmpty (..), (<|))
 import Noll.Common.Supply (supplied)
 import Noll.Core.Language (Clause (..), Expr, Focus (..), Type, isFunction)
-import Noll.Core.Language.Replace (relabeled, relabeled1, substVars)
+import Noll.Core.Language.Replace (substVars)
 import Noll.Label (Label (..))
 import Noll.Utils (Dictionary, Name, isConstructor, (<$$>))
 import TextShow
@@ -45,17 +45,19 @@ transSuffixExpr =
     \case
       Core.ELet vs e -> do
         let (lls, es) = List1.unzip vs
-        sub <- mapping lls
+        (lls1, sub) <- mapping lls
         as <- sequence (substVars sub <$$> es)
-        Core.let_ (List1.zip (relabeled sub lls) as) . substVars sub <$> e
+        Core.let_ (List1.zip lls1 as) . substVars sub <$> e
       Core.ELam lls e -> do
-        sub <- mapping lls
-        Core.lam (relabeled sub lls) . substVars sub <$> e
+        (lls1, sub) <- mapping lls
+        Core.lam lls1 . substVars sub <$> e
       Core.ESel (Focus name ll2 ll3) e1 e2 -> do
-        sub <- mapping (ll2 <| ll3 :| [])
-        Core.sel (Focus name (relabeled1 sub ll2) (relabeled1 sub ll3))
-          <$> e1
-          <*> (substVars sub <$> e2)
+        (lls1, sub) <- mapping (ll2 <| ll3 :| [])
+        case lls1 of
+          (lls4 :| lls5 : _) ->
+            Core.sel (Focus name lls4 lls5) <$> e1 <*> (substVars sub <$> e2)
+          _ ->
+            error "Implementation error"
       Core.EMat t e cs ->
         Core.match t
           <$> e
@@ -67,15 +69,17 @@ transSuffixClause :: (MonadState Int m) => Clause t (Expr t) -> m (Clause t (Exp
 transSuffixClause =
   \case
     Clause lls e -> do
-      sub <- mapping lls
-      pure (Clause (relabeled sub lls) (substVars sub e))
+      (lls1, sub) <- mapping lls
+      pure (Clause lls1 (substVars sub e))
 
-mapping :: (MonadState Int m) => List1 (Label t) -> m (Dictionary Name)
-mapping = foldlM go mempty
+mapping :: (MonadState Int m) => List1 (Label t) -> m (List1 (Label t), Dictionary Name)
+mapping lls = runStateT (traverse go lls) mempty
  where
-  go dict (Label _ name) = do
-    if isConstructor name
-      then pure dict
-      else do
-        n <- supplied id
-        pure (Map.insert name (name <> ".[" <> showt n <> "]") dict)
+  go ll@(Label t name)
+    | isConstructor name =
+        pure ll
+    | otherwise = do
+        n <- lift (supplied id)
+        let name1 = name <> ".[" <> showt n <> "]"
+        modify (Map.insert name name1)
+        pure (Label t name1)
