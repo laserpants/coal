@@ -12,7 +12,6 @@ module Noll.Core.Language.Syntax.Type (
   opaque,
   foldType,
   unfoldType,
-  isFunction,
   arity,
   int32,
   int64,
@@ -24,7 +23,7 @@ module Noll.Core.Language.Syntax.Type (
 ) where
 
 import Noll.Common.List1 (List1, (<|))
-import Noll.Core.Language.Type (Type (..), Typed (..))
+import Noll.Core.Language.Type (Type (..))
 import Noll.Utils (Name)
 import TextShow (showt)
 
@@ -109,10 +108,6 @@ record r = TCon "record" [r]
 {-# INLINE arity #-}
 arity :: Type -> Int
 arity t = List1.length (unfoldType t) - 1
-
-{-# INLINE isFunction #-}
-isFunction :: (Typed t) => t -> Bool
-isFunction f = arity (typeOf f) > 0
 
 unfoldType :: Type -> List1 Type
 unfoldType =

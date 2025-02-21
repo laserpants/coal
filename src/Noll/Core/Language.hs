@@ -1,6 +1,7 @@
 module Noll.Core.Language (
   module Noll.Core.Language.Prim,
   module Noll.Core.Language.Type,
+  module Noll.Core.Language.Typed,
   module Noll.Core.Language.Op,
   module Noll.Core.Language.Expr,
   module Noll.Core.Language.Syntax.Expr,
@@ -13,3 +14,4 @@ import Noll.Core.Language.Prim
 import Noll.Core.Language.Syntax.Expr
 import Noll.Core.Language.Syntax.Type
 import Noll.Core.Language.Type
+import Noll.Core.Language.Typed

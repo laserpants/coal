@@ -54,6 +54,7 @@ library
       Noll.Core.Language.Syntax.Expr
       Noll.Core.Language.Syntax.Type
       Noll.Core.Language.Type
+      Noll.Core.Language.Typed
       Noll.Core.LLVM.IR
       Noll.Core.LLVM.IRInstruction
       Noll.Core.LLVM.IRType

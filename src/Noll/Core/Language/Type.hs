@@ -1,8 +1,7 @@
 {-# LANGUAGE StrictData #-}
 
-module Noll.Core.Language.Type (Type (..), Typed (..)) where
+module Noll.Core.Language.Type (Type (..)) where
 
-import Noll.Label (Label (..))
 import Noll.Utils (Name)
 
 -- | Core language types
@@ -16,12 +15,3 @@ data Type
   | -- | Empty row
     RNil
   deriving (Show, Eq, Ord, Read)
-
-class Typed t where
-  typeOf :: t -> Type
-
-instance Typed Type where
-  typeOf = id
-
-instance (Typed t) => Typed (Label t) where
-  typeOf (Label t _) = typeOf t

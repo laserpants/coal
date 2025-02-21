@@ -7,34 +7,68 @@
 module Noll.Compiler.Core where
 
 import Control.Arrow ((>>>))
-import Control.Monad.State (MonadState, modify, runStateT)
+import Control.Monad.State (MonadState, StateT, evalStateT, modify, runStateT)
 import Control.Monad.Trans (lift)
-import Control.Monad.Writer (MonadWriter, runWriter, tell)
+import Control.Monad.Writer (MonadWriter, Writer, runWriter, tell)
 import Data.Functor.Foldable (cata, embed, project)
-import qualified Data.Map.Strict as Map
 import Noll.Common.List1 (List1, NonEmpty (..), fromList1)
-import qualified Noll.Common.List1 as List1
 import Noll.Common.Supply (supplied)
-import Noll.Core.Language (Clause (..), Expr, Focus (..), Type, isFunction)
-import qualified Noll.Core.Language as Core
+import Noll.Core.Language (Clause (..), Expr, Focus (..), Type, Typed (..), foldType)
 import Noll.Core.Language.Replace (Sub, relabel)
+import Noll.Core.Language.Typed (isFunction)
 import Noll.Label (Label (..), labelName)
 import Noll.Utils (Dictionary, Name, applyM1, applyM2, isConstructor)
 import TextShow
 
-data BlockObject e t
+import qualified Data.Map.Strict as Map
+import qualified Noll.Common.List1 as List1
+import qualified Noll.Core.Language as Core
+
+data BlockObject t e
   = OFunction Name [Label t] e
   | OConstant Name e
   | OExternal Name t
   deriving (Show, Eq, Ord, Functor, Foldable, Traversable)
 
-letLiftFromExpression :: Name -> Expr Type -> [BlockObject (Expr Type) Type]
-letLiftFromExpression name expr = toBlockObject name e : fmap (uncurry bob) objs
+type ObjectList = [BlockObject Type (Expr Type)]
+
+-------------------------------------------------------------------------------
+
+runLifting :: StateT Int (Writer ObjectList) a -> (a, ObjectList)
+runLifting e = runWriter (evalStateT e 1)
+
+functionType :: (Functor f, Foldable f, Typed t, Typed u) => t -> f u -> Type
+functionType a as = foldType (typeOf a) (typeOf <$> as)
+
+liftLambdas :: ObjectList -> ObjectList
+liftLambdas objs = objs1 <> objs2
+ where
+  (objs1, objs2) =
+    runLifting (traverse (traverse go) objs)
+  go =
+    cata $
+      \case
+        Core.ELam vs e -> do
+          n <- supplied id
+          let name = "$anon." <> showt n
+          moveUp name vs =<< e
+        e ->
+          embed <$> sequence e
+
+moveUp :: (MonadWriter ObjectList m) => Name -> List1 (Label Type) -> Expr Type -> m (Expr Type)
+moveUp name vs f = do
+  tell [OFunction name (fromList1 vs) f]
+  pure (Core.var (Label (functionType f vs) name))
+
+-------------------------------------------------------------------------------
+
+letLiftFromExpression :: Name -> Expr Type -> ObjectList
+letLiftFromExpression name expr = toBlockObject name e : (uncurry bob <$> objs)
  where
   bob = toBlockObject . labelName
   (e, objs) = runWriter (transLetLifting expr)
 
-toBlockObject :: Name -> Expr Type -> BlockObject (Expr Type) Type
+toBlockObject :: Name -> Expr Type -> BlockObject Type (Expr Type)
 toBlockObject name =
   project
     >>> \case
@@ -58,6 +92,8 @@ transLetLifting =
             e
       e ->
         embed <$> sequence e
+
+-------------------------------------------------------------------------------
 
 transSuffixExpr :: (MonadState Int m) => Expr t -> m (Expr t)
 transSuffixExpr =

@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 {-# LANGUAGE TemplateHaskell #-}
 
