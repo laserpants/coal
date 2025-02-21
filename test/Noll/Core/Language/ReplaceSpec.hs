@@ -15,30 +15,30 @@ ordering = Core.TCon "Ordering" []
 spec :: Spec
 spec =
   describe "Noll.Core.Language.Replace" $ do
-    it "EVar" $ do
-      error "TODO" == True
-    it "ELet" $ do
-      error "TODO" == True
-    it "ELit" $ do
-      error "TODO" == True
-    it "ELam" $ do
-      error "TODO" == True
-    it "EApp" $ do
-      error "TODO" == True
-    it "EIf" $ do
-      error "TODO" == True
-    it "EOp" $ do
-      error "TODO" == True
-    it "EMat" $ do
-      error "TODO" == True
-    it "EExt" $ do
-      error "TODO" == True
-    it "ENil" $ do
-      error "TODO" == True
-    it "ESel" $ do
-      error "TODO" == True
-    it "ECall" $ do
-      error "TODO" == True
+    --    it "EVar" $ do
+    --      error "TODO" == True
+    --    it "ELet" $ do
+    --      error "TODO" == True
+    --    it "ELit" $ do
+    --      error "TODO" == True
+    --    it "ELam" $ do
+    --      error "TODO" == True
+    --    it "EApp" $ do
+    --      error "TODO" == True
+    --    it "EIf" $ do
+    --      error "TODO" == True
+    --    it "EOp" $ do
+    --      error "TODO" == True
+    --    it "EMat" $ do
+    --      error "TODO" == True
+    --    it "EExt" $ do
+    --      error "TODO" == True
+    --    it "ENil" $ do
+    --      error "TODO" == True
+    --    it "ESel" $ do
+    --      error "TODO" == True
+    --    it "ECall" $ do
+    --      error "TODO" == True
     it "" $ do
       rewrite
         "y"
