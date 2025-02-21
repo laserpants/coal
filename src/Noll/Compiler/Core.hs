@@ -9,17 +9,16 @@ import Control.Monad.State (MonadState, modify, runStateT)
 import Control.Monad.Trans (lift)
 import Control.Monad.Writer (MonadWriter, tell)
 import Data.Functor.Foldable (cata, embed)
-import Noll.Common.List1 (List1, NonEmpty (..), (<|))
+import qualified Data.Map.Strict as Map
+import Noll.Common.List1 (List1, NonEmpty (..))
+import qualified Noll.Common.List1 as List1
 import Noll.Common.Supply (supplied)
 import Noll.Core.Language (Clause (..), Expr, Focus (..), Type, isFunction)
+import qualified Noll.Core.Language as Core
 import Noll.Core.Language.Replace (Sub, relabel)
 import Noll.Label (Label (..))
-import Noll.Utils (Dictionary, Name, isConstructor)
+import Noll.Utils (Dictionary, Name, applyM1, applyM2, isConstructor)
 import TextShow
-
-import qualified Data.Map.Strict as Map
-import qualified Noll.Common.List1 as List1
-import qualified Noll.Core.Language as Core
 
 type Binding = (Label Type, Expr Type)
 
@@ -45,17 +44,14 @@ transSuffixExpr =
     \case
       Core.ELet vs e -> do
         let (lls, es) = List1.unzip vs
-        a <- e
-        as <- sequence es
-        (lls1, a1, a2) <- addSuffix2 lls as a
+        (lls1, a1, a2) <- applyM2 (addSuffix2 lls) (sequence es) e
         pure (Core.let_ (List1.zip lls1 a1) a2)
       Core.ELam lls e -> do
-        a <- e
-        (lls1, a1) <- addSuffix lls a
+        (lls1, a1) <- applyM1 (addSuffix lls) e
         pure (Core.lam lls1 a1)
       Core.ESel (Focus name ll2 ll3) e1 e2 -> do
         a1 <- e1
-        (lls1, a2) <- addSuffix (ll2 <| ll3 :| []) =<< e2
+        (lls1, a2) <- applyM1 (addSuffix (ll2 :| [ll3])) e2
         case lls1 of
           (lls4 :| lls5 : _) ->
             pure (Core.sel (Focus name lls4 lls5) a1 a2)

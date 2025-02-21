@@ -21,12 +21,15 @@ module Noll.Utils (
   const2,
   traverseM,
   isConstructor,
+  applyM1,
+  applyM2,
   Over,
   (<$$>),
   (<$$$>),
   (&&.),
   (||.),
-) where
+)
+where
 
 import Control.Monad (forM, forM_, mapM)
 import Control.Monad.State (MonadState, get, modify)
@@ -38,9 +41,8 @@ import Data.List (groupBy)
 import Data.Map.Strict (Map)
 import Data.Maybe (fromMaybe)
 import Data.Set (Set, unions)
-import Data.Text (Text)
-
 import qualified Data.Set as Set
+import Data.Text (Text)
 import qualified Data.Text as Text
 
 type Name = Text
@@ -143,3 +145,21 @@ isConstructor name
   | otherwise = isUpper (Text.head s)
  where
   s = dropWhileNot (isAlpha ||. ('_' ==)) name
+
+applyM1 :: (Monad m) => (a -> m b) -> m a -> m b
+applyM1 f a = do
+  a1 <- a
+  f a1
+
+applyM2 :: (Monad m) => (a -> b -> m c) -> m a -> m b -> m c
+applyM2 f a b = do
+  a1 <- a
+  b1 <- b
+  f a1 b1
+
+applyM3 :: (Monad m) => (a -> b -> c -> m d) -> m a -> m b -> m c -> m d
+applyM3 f a b c = do
+  a1 <- a
+  b1 <- b
+  c1 <- c
+  f a1 b1 c1
