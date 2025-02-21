@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -5,24 +6,44 @@
 
 module Noll.Compiler.Core where
 
+import Control.Arrow ((>>>))
 import Control.Monad.State (MonadState, modify, runStateT)
 import Control.Monad.Trans (lift)
-import Control.Monad.Writer (MonadWriter, tell)
-import Data.Functor.Foldable (cata, embed)
+import Control.Monad.Writer (MonadWriter, runWriter, tell)
+import Data.Functor.Foldable (cata, embed, project)
 import qualified Data.Map.Strict as Map
-import Noll.Common.List1 (List1, NonEmpty (..))
+import Noll.Common.List1 (List1, NonEmpty (..), fromList1)
 import qualified Noll.Common.List1 as List1
 import Noll.Common.Supply (supplied)
 import Noll.Core.Language (Clause (..), Expr, Focus (..), Type, isFunction)
 import qualified Noll.Core.Language as Core
 import Noll.Core.Language.Replace (Sub, relabel)
-import Noll.Label (Label (..))
+import Noll.Label (Label (..), labelName)
 import Noll.Utils (Dictionary, Name, applyM1, applyM2, isConstructor)
 import TextShow
 
-type Binding = (Label Type, Expr Type)
+data BlockObject e t
+  = OFunction Name [Label t] e
+  | OConstant Name e
+  | OExternal Name t
+  deriving (Show, Eq, Ord, Functor, Foldable, Traversable)
 
-transLetLifting :: (MonadWriter [Binding] m) => Expr Type -> m (Expr Type)
+letLiftFromExpression :: Name -> Expr Type -> [BlockObject (Expr Type) Type]
+letLiftFromExpression name expr = toBlockObject name e : fmap (uncurry bob) objs
+ where
+  bob = toBlockObject . labelName
+  (e, objs) = runWriter (transLetLifting expr)
+
+toBlockObject :: Name -> Expr Type -> BlockObject (Expr Type) Type
+toBlockObject name =
+  project
+    >>> \case
+      Core.ELam vs e ->
+        OFunction name (fromList1 vs) e
+      e ->
+        OConstant name (embed e)
+
+transLetLifting :: (MonadWriter [(Label Type, Expr Type)] m) => Expr Type -> m (Expr Type)
 transLetLifting =
   cata $
     \case

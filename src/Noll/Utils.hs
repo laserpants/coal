@@ -23,6 +23,7 @@ module Noll.Utils (
   isConstructor,
   applyM1,
   applyM2,
+  applyM3,
   Over,
   (<$$>),
   (<$$$>),
