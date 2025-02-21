@@ -12,9 +12,9 @@ import Data.Functor.Foldable (cata, embed)
 import Noll.Common.List1 (List1, NonEmpty (..), (<|))
 import Noll.Common.Supply (supplied)
 import Noll.Core.Language (Clause (..), Expr, Focus (..), Type, isFunction)
-import Noll.Core.Language.Replace (relabel)
+import Noll.Core.Language.Replace (Sub, relabel)
 import Noll.Label (Label (..))
-import Noll.Utils (Dictionary, Name, isConstructor, (<$$>))
+import Noll.Utils (Dictionary, Name, isConstructor)
 import TextShow
 
 import qualified Data.Map.Strict as Map
@@ -45,17 +45,20 @@ transSuffixExpr =
     \case
       Core.ELet vs e -> do
         let (lls, es) = List1.unzip vs
-        (lls1, sub) <- mapping lls
-        as <- sequence (relabel sub <$$> es)
-        Core.let_ (List1.zip lls1 as) . relabel sub <$> e
+        a <- e
+        as <- sequence es
+        (lls1, a1, a2) <- addSuffix2 lls as a
+        pure (Core.let_ (List1.zip lls1 a1) a2)
       Core.ELam lls e -> do
-        (lls1, sub) <- mapping lls
-        Core.lam lls1 . relabel sub <$> e
+        a <- e
+        (lls1, a1) <- addSuffix lls a
+        pure (Core.lam lls1 a1)
       Core.ESel (Focus name ll2 ll3) e1 e2 -> do
-        (lls1, sub) <- mapping (ll2 <| ll3 :| [])
+        a1 <- e1
+        (lls1, a2) <- addSuffix (ll2 <| ll3 :| []) =<< e2
         case lls1 of
           (lls4 :| lls5 : _) ->
-            Core.sel (Focus name lls4 lls5) <$> e1 <*> (relabel sub <$> e2)
+            pure (Core.sel (Focus name lls4 lls5) a1 a2)
           _ ->
             error "Implementation error"
       Core.EMat t e cs ->
@@ -69,8 +72,18 @@ transSuffixClause :: (MonadState Int m) => Clause t (Expr t) -> m (Clause t (Exp
 transSuffixClause =
   \case
     Clause lls e -> do
-      (lls1, sub) <- mapping lls
-      pure (Clause lls1 (relabel sub e))
+      (lls1, a) <- addSuffix lls e
+      pure (Clause lls1 a)
+
+addSuffix :: (MonadState Int m, Sub s) => List1 (Label t) -> s -> m (List1 (Label t), s)
+addSuffix lls e = do
+  (lls1, sub) <- mapping lls
+  pure (lls1, relabel sub e)
+
+addSuffix2 :: (MonadState Int m, Sub s1, Sub s2) => List1 (Label t) -> s1 -> s2 -> m (List1 (Label t), s1, s2)
+addSuffix2 lls e1 e2 = do
+  (lls1, sub) <- mapping lls
+  pure (lls1, relabel sub e1, relabel sub e2)
 
 mapping :: (MonadState Int m) => List1 (Label t) -> m (List1 (Label t), Dictionary Name)
 mapping lls = runStateT (traverse go lls) mempty
