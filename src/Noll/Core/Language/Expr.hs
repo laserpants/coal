@@ -41,7 +41,7 @@ data ExprF t a
   | -- | Operator
     EOp (Op a)
   | -- | Pattern match statement
-    EPat t a (List1 (Clause t a))
+    EMat t a (List1 (Clause t a))
   | -- | Record field extension
     EExt (Label t) a a
   | -- | Empty record

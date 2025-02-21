@@ -38,7 +38,7 @@ if_ = embed3 EIf
 
 {-# INLINE match #-}
 match :: t -> Expr t -> List1 (Clause t (Expr t)) -> Expr t
-match = embed3 EPat
+match = embed3 EMat
 
 {-# INLINE ext #-}
 ext :: Label t -> Expr t -> Expr t -> Expr t

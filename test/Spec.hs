@@ -19,6 +19,7 @@ import qualified Noll.Compiler.Transform.Type.AliasInsertionSpec
 import qualified Noll.CompilerExamples.Test01
 import qualified Noll.CompilerExamples.Test02
 import qualified Noll.CompilerSpec
+import qualified Noll.Core.Language.ReplaceSpec
 import qualified Noll.SystemF.Constraint.GenerationSpec
 import qualified Noll.SystemF.UnificationSpec
 import qualified Noll.SystemFExamples.Test01
@@ -76,6 +77,7 @@ main =
     --    Noll.CompilerSpec.spec
     Noll.UtilsSpec.spec
     Noll.Compiler.NormalizeObjectsSpec.spec
+    Noll.Core.Language.ReplaceSpec.spec
 
 --    Noll.SystemF.TypeConstraint.CollectSpec.spec
 --    Noll.SystemF.TypeSubstitutionSpec.spec

@@ -12,6 +12,8 @@ import Data.List.NonEmpty (
   reverse,
   singleton,
   unzip,
+  zip,
+  zipWith,
   (<|),
  )
 

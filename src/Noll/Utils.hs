@@ -20,15 +20,18 @@ module Noll.Utils (
   groupByEq,
   const2,
   traverseM,
+  isConstructor,
   Over,
   (<$$>),
   (<$$$>),
+  (&&.),
+  (||.),
 ) where
 
 import Control.Monad (forM, forM_, mapM)
 import Control.Monad.State (MonadState, get, modify)
 import Control.Monad.Writer (MonadWriter, tell)
-import Data.Char (ord)
+import Data.Char (isAlpha, isUpper, ord)
 import Data.Foldable (foldrM, traverse_)
 import Data.Function (on)
 import Data.List (groupBy)
@@ -59,6 +62,18 @@ infixr 8 <$$>
 (<$$$>) = fmap . fmap . fmap
 
 infixr 8 <$$$>
+
+{-# INLINE (&&.) #-}
+(&&.) :: (t -> Bool) -> (t -> Bool) -> t -> Bool
+f &&. g = h where h e = f e && g e
+
+infixr 3 &&.
+
+{-# INLINE (||.) #-}
+(||.) :: (t -> Bool) -> (t -> Bool) -> t -> Bool
+f ||. g = h where h e = f e || g e
+
+infixr 2 ||.
 
 {-# INLINE groupByEq #-}
 groupByEq :: (Eq b) => (a -> b) -> [a] -> [[a]]
@@ -116,3 +131,15 @@ lexOrderRank text
         n - 97
     | otherwise =
         n - 22
+
+{-# INLINE dropWhileNot #-}
+dropWhileNot :: (Char -> Bool) -> Text -> Text
+dropWhileNot = Text.dropWhile . fmap not
+
+isConstructor :: Name -> Bool
+isConstructor name
+  | Text.null name = error "Empty name"
+  | Text.null s = False
+  | otherwise = isUpper (Text.head s)
+ where
+  s = dropWhileNot (isAlpha ||. ('_' ==)) name

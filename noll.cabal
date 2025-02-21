@@ -50,6 +50,7 @@ library
       Noll.Core.Language.Expr
       Noll.Core.Language.Op
       Noll.Core.Language.Prim
+      Noll.Core.Language.Replace
       Noll.Core.Language.Syntax.Expr
       Noll.Core.Language.Syntax.Type
       Noll.Core.Language.Type
@@ -141,6 +142,7 @@ test-suite noll-test
   other-modules:
       Noll.AST.HasFreeSpec
       Noll.AST.IndexedSpec
+      Noll.Compiler.CoreSpec
       Noll.Compiler.NormalizeObjectsSpec
       Noll.Compiler.PatternMatchingExamples.Test01
       Noll.Compiler.PatternMatchingExamples.Test02
@@ -154,6 +156,7 @@ test-suite noll-test
       Noll.CompilerExamples.Test01
       Noll.CompilerExamples.Test02
       Noll.CompilerSpec
+      Noll.Core.Language.ReplaceSpec
       Noll.Core.LanguageSpec
       Noll.Examples.Test01
       Noll.Examples.Test02
