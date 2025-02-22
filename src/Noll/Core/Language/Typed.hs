@@ -8,8 +8,8 @@ import Data.Functor.Foldable (project)
 import Noll.Core.Language.Expr (Expr, ExprF (..))
 import Noll.Core.Language.Op (Op (..))
 import Noll.Core.Language.Prim (Prim (..))
-import Noll.Core.Language.Syntax.Type (arity)
-import Noll.Core.Language.Type (Type)
+import Noll.Core.Language.Type (Type (..))
+import Noll.Core.Language.Syntax.Type (arity, foldType)
 import Noll.Label (Label (..))
 
 import qualified Noll.Core.Language.Syntax.Type as Type
@@ -80,20 +80,18 @@ instance (Typed t, Typed a) => Typed (ExprF t a) where
         typeOf t
       --      EPat _ (t :| _) ->
       --        typeOf t
-      --      ESel _ _ t ->
-      --        typeOf t
+      ESel _ _ t ->
+        typeOf t
       EOp op ->
         typeOf op
       --      ECall _ _ t ->
       --        returnTypeOf t
-      --      ENil ->
-      --        Type.RNil
-      --      EMem t ->
-      --        typeOf t
-      --      ELam ts t ->
-      --        foldType (typeOf t) (typeOf <$> ts)
-      --      EExt n t1 t2 ->
-      --        error "TODO" -- normalizeRow (RExt n (typeOf t1) (typeOf t2))
+      ENil ->
+        Type.RNil
+      EExt (Label _ n) t1 t2 ->
+        RExt n (typeOf t1) (typeOf t2)  -- TODO: normalize?
+      ELam ts t ->
+        foldType (typeOf t) (typeOf <$> ts)
       _ ->
         error "TODO"
 
