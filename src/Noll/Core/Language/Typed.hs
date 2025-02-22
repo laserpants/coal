@@ -10,6 +10,7 @@ import Noll.Core.Language.Op (Op (..))
 import Noll.Core.Language.Prim (Prim (..))
 import Noll.Core.Language.Type (Type (..))
 import Noll.Core.Language.Syntax.Type (arity, foldType)
+import Noll.Common.List1 (NonEmpty (..))
 import Noll.Label (Label (..))
 
 import qualified Noll.Core.Language.Syntax.Type as Type
@@ -78,14 +79,12 @@ instance (Typed t, Typed a) => Typed (ExprF t a) where
         typeOf t
       EApp t _ _ ->
         typeOf t
-      --      EPat _ (t :| _) ->
-      --        typeOf t
+      EMat t _ _ ->
+        typeOf t
       ESel _ _ t ->
         typeOf t
       EOp op ->
         typeOf op
-      --      ECall _ _ t ->
-      --        returnTypeOf t
       ENil ->
         Type.RNil
       EExt (Label _ n) t1 t2 ->
