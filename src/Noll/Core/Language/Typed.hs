@@ -78,23 +78,24 @@ instance (Typed t, Typed a) => Typed (ExprF t a) where
         typeOf t
       EApp t _ _ ->
         typeOf t
-
---      EPat _ (t :| _) ->
---        typeOf t
---      ESel _ _ t ->
---        typeOf t
---      EOp op ->
---        typeOf op
---      ECall _ _ t ->
---        returnTypeOf t
---      ENil ->
---        Type.RNil
---      EMem t ->
---        typeOf t
---      ELam ts t ->
---        foldType (typeOf t) (typeOf <$> ts)
---      EExt n t1 t2 ->
---        error "TODO" -- normalizeRow (RExt n (typeOf t1) (typeOf t2))
+      --      EPat _ (t :| _) ->
+      --        typeOf t
+      --      ESel _ _ t ->
+      --        typeOf t
+      EOp op ->
+        typeOf op
+      --      ECall _ _ t ->
+      --        returnTypeOf t
+      --      ENil ->
+      --        Type.RNil
+      --      EMem t ->
+      --        typeOf t
+      --      ELam ts t ->
+      --        foldType (typeOf t) (typeOf <$> ts)
+      --      EExt n t1 t2 ->
+      --        error "TODO" -- normalizeRow (RExt n (typeOf t1) (typeOf t2))
+      _ ->
+        error "TODO"
 
 instance (Typed t) => Typed (Expr t) where
   typeOf = typeOf . project
