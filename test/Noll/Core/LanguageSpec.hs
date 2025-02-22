@@ -1,9 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Core.LanguageSpec (fixture, fixture2) where
+module Noll.Core.LanguageSpec (fixture, fixture2, blockObjects1) where
 
 import Noll.Common.List1 (NonEmpty (..), (<|))
-import Noll.Compiler.Core (ObjectList)
+import Noll.Compiler.Core (BlockObject (..), ObjectList)
 import Noll.Core.Language (list, opaque, (~>))
 import Noll.Core.Language.Expr (Clause (..), Expr, Focus (..))
 import Noll.Label (Label (..))
@@ -1699,4 +1699,8 @@ fixture2 =
 
 blockObjects1 :: ObjectList
 blockObjects1 =
-  []
+  [ OFunction
+      "main"
+      [Label Core.opaque "_"]
+      fixture
+  ]

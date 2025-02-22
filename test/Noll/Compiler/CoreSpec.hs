@@ -4,9 +4,10 @@ module Noll.Compiler.CoreSpec where
 
 import Control.Monad.Identity (runIdentity)
 import Control.Monad.State (evalState)
+import Data.Fix (Fix (..))
 import Noll.Common.List1 (NonEmpty (..), (<|))
 import Noll.Compiler.Core
-import Noll.Core.Language (list, opaque, (~>))
+import Noll.Core.Language (ExprF (..), Prim (..), list, opaque, (~>))
 import Noll.Core.Language.Expr (Clause (..), Focus (..))
 import Noll.Label (Label (..))
 import Test.Hspec (Spec, describe, it)
@@ -24,6 +25,9 @@ spec =
         liftLambdas test1 == test1Result
       it "" $ do
         liftLambdas test2 == test2Result
+    describe "simplifyLets" $ do
+      it "" $ do
+        simplifyLets fixture40 == fixture41
 
 --      it "" $ do
 --        liftLambdas test3 == test3Result
@@ -446,6 +450,27 @@ test2Result =
       ( Core.var (Label Core.int32 "m")
       )
   ]
+
+fixture40 :: Core.Expr ()
+fixture40 =
+  Core.let_
+    ( ( Label () "a"
+      , Core.var (Label () "b")
+      )
+        :| []
+    )
+    (Core.var (Label () "a"))
+
+fixture41 :: Core.Expr ()
+fixture41 = Core.var (Label () "b")
+
+fixture42 =
+  ( Fix
+      ( ELet
+          ((Label () "fold_.[48]", Fix (EVar (Label () "$anon.13"))) :| [])
+          (Fix (EApp () (Fix (EVar (Label () "fold_.[48]"))) (Fix (EVar (Label () "list.[49]")) :| [Fix (EApp () (Fix (EVar (Label () "$Record"))) (Fix (EExt (Label () "min") (Fix (EApp () (Fix (EVar (Label () "from_int32.[68]"))) (Fix (EVar (Label () "d_1.[50]")) :| [Fix (ELit (PInt32 0))]))) (Fix (EExt (Label () "max") (Fix (EApp () (Fix (EVar (Label () "from_int32.[68]"))) (Fix (EVar (Label () "d_1.[50]")) :| [Fix (ELit (PInt32 (-1)))]))) (Fix ENil)))) :| []))])))
+      )
+  )
 
 test3 =
   --  [ OFunction
