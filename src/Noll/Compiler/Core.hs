@@ -161,3 +161,7 @@ simplifyLams =
         Core.lam (vs1 <> vs2) e1
       e ->
         embed e
+
+-------------------------------------------------------------------------------
+
+data CorePipeline e = CorePipeline e
