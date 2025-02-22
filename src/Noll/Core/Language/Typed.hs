@@ -5,12 +5,12 @@
 module Noll.Core.Language.Typed (Typed (..), isFunction) where
 
 import Data.Functor.Foldable (project)
+import Noll.Common.List1 (NonEmpty (..))
 import Noll.Core.Language.Expr (Expr, ExprF (..))
 import Noll.Core.Language.Op (Op (..))
 import Noll.Core.Language.Prim (Prim (..))
-import Noll.Core.Language.Type (Type (..))
 import Noll.Core.Language.Syntax.Type (arity, foldType)
-import Noll.Common.List1 (NonEmpty (..))
+import Noll.Core.Language.Type (Type (..))
 import Noll.Label (Label (..))
 
 import qualified Noll.Core.Language.Syntax.Type as Type
@@ -88,7 +88,7 @@ instance (Typed t, Typed a) => Typed (ExprF t a) where
       ENil ->
         Type.RNil
       EExt (Label _ n) t1 t2 ->
-        RExt n (typeOf t1) (typeOf t2)  -- TODO: normalize?
+        RExt n (typeOf t1) (typeOf t2) -- TODO: normalize?
       ELam ts t ->
         foldType (typeOf t) (typeOf <$> ts)
       _ ->

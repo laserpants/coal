@@ -10,6 +10,7 @@ import Control.Arrow ((>>>))
 import Control.Monad.State (MonadState, StateT, evalStateT, modify, runStateT)
 import Control.Monad.Trans (lift)
 import Control.Monad.Writer (MonadWriter, Writer, runWriter, tell)
+import Data.Fix (Fix (..))
 import Data.Functor.Foldable (cata, embed, project)
 import Noll.Common.List1 (List1, NonEmpty (..), fromList1)
 import Noll.Common.Supply (supplied)
@@ -149,3 +150,14 @@ mapping lls = runStateT (traverse go lls) mempty
         let name1 = name <> ".[" <> showt n <> "]"
         modify (Map.insert name name1)
         pure (Label t name1)
+
+-------------------------------------------------------------------------------
+
+simplifyLams :: Expr Type -> Expr Type
+simplifyLams =
+  cata $
+    \case
+      Core.ELam vs1 (Fix (Core.ELam vs2 e1)) ->
+        Core.lam (vs1 <> vs2) e1
+      e ->
+        embed e
