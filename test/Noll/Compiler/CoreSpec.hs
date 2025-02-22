@@ -16,9 +16,17 @@ import qualified Noll.Core.Language as Core
 spec :: Spec
 spec =
   describe "Noll.Compiler.Core" $ do
-    describe "" $ do
+    describe "transSuffixExpr" $ do
       it "" $ do
         evalState (transSuffixExpr fixture3) 0 == fixture4
+    describe "liftLambdas" $ do
+      it "" $ do
+        liftLambdas test1 == test1Result
+      it "" $ do
+        liftLambdas test2 == test2Result
+
+--      it "" $ do
+--        liftLambdas test3 == test3Result
 
 fixture1 :: Core.Expr ()
 fixture1 =
@@ -177,20 +185,20 @@ fixture3 =
 fixture4 :: Core.Expr Core.Type
 fixture4 =
   Core.let_
-    ( ( Label ((opaque ~> opaque) ~> (opaque ~> opaque) ~> opaque ~> opaque) "_compose_.[0]"
+    ( ( Label ((opaque ~> opaque) ~> (opaque ~> opaque) ~> opaque ~> opaque) "_compose_.[15]"
       , Core.lam
-          ( Label (opaque ~> opaque) "f.[1]"
-              :| [ Label (opaque ~> opaque) "g.[2]"
-                 , Label opaque "x.[3]"
+          ( Label (opaque ~> opaque) "f.[0]"
+              :| [ Label (opaque ~> opaque) "g.[1]"
+                 , Label opaque "x.[2]"
                  ]
           )
           ( Core.app
               opaque
-              (Core.var (Label (opaque ~> opaque) "f.[1]"))
+              (Core.var (Label (opaque ~> opaque) "f.[0]"))
               ( Core.app
                   opaque
-                  (Core.var (Label (opaque ~> opaque) "g.[2]"))
-                  (Core.var (Label opaque "x.[3]") :| [])
+                  (Core.var (Label (opaque ~> opaque) "g.[1]"))
+                  (Core.var (Label opaque "x.[2]") :| [])
                   :| []
               )
           )
@@ -198,30 +206,30 @@ fixture4 =
         :| []
     )
     ( Core.let_
-        ( ( Label (list opaque ~> list opaque ~> list opaque) "_list_concat_.[4]"
+        ( ( Label (list opaque ~> list opaque ~> list opaque) "_list_concat_.[13]"
           , Core.lam
-              (Label (list opaque) "a.[6]" :| [Label (list opaque) "b.[7]"])
+              (Label (list opaque) "a.[5]" :| [Label (list opaque) "b.[6]"])
               ( Core.match
                   (list opaque)
-                  (Core.var (Label (list opaque) "a.[6]"))
+                  (Core.var (Label (list opaque) "a.[5]"))
                   ( Clause
                       (Label (list opaque) "$Nil" :| [])
-                      (Core.var (Label (list opaque) "b.[7]"))
+                      (Core.var (Label (list opaque) "b.[6]"))
                       :| [ Clause
                             ( Label (opaque ~> list opaque ~> list opaque) "$Cons"
-                                <| Label opaque "x.[8]"
-                                <| Label (list opaque) "xs.[9]"
+                                <| Label opaque "x.[3]"
+                                <| Label (list opaque) "xs.[4]"
                                 :| []
                             )
                             ( Core.app
                                 (list opaque)
                                 (Core.var (Label (opaque ~> list opaque ~> list opaque) "$Cons"))
-                                ( Core.var (Label opaque "x.[8]")
+                                ( Core.var (Label opaque "x.[3]")
                                     <| Core.app
                                       (list opaque)
-                                      (Core.var (Label (list opaque ~> list opaque ~> list opaque) "_list_concat_.[4]"))
-                                      ( Core.var (Label (list opaque) "xs.[9]")
-                                          <| Core.var (Label (list opaque) "b.[7]")
+                                      (Core.var (Label (list opaque ~> list opaque ~> list opaque) "_list_concat_.[13]"))
+                                      ( Core.var (Label (list opaque) "xs.[4]")
+                                          <| Core.var (Label (list opaque) "b.[6]")
                                           :| []
                                       )
                                     :| []
@@ -232,7 +240,7 @@ fixture4 =
               )
           )
             :| [
-                 ( Label (compareDict ~> opaque ~> opaque ~> ordering) "compare.[5]"
+                 ( Label (compareDict ~> opaque ~> opaque ~> ordering) "compare.[14]"
                  , Core.lam
                     ( Label compareDict "a_1.[10]"
                         <| Label opaque "a_2.[11]"
@@ -244,19 +252,19 @@ fixture4 =
                         (Core.var (Label compareDict "a_1.[10]"))
                         ( Clause
                             ( Label (compareRow ~> compareDict) "$Record"
-                                <| Label compareRow "r_1.[15]"
+                                <| Label compareRow "r_1.[9]"
                                 :| []
                             )
                             ( Core.sel
                                 ( Focus
                                     "compare"
-                                    (Label (opaque ~> opaque ~> ordering) "f_1.[13]")
-                                    (Label opaque "q_1.[14]")
+                                    (Label (opaque ~> opaque ~> ordering) "f_1.[7]")
+                                    (Label opaque "q_1.[8]")
                                 )
-                                (Core.var (Label compareRow "r_1.[15]"))
+                                (Core.var (Label compareRow "r_1.[9]"))
                                 ( Core.app
                                     ordering
-                                    (Core.var (Label (opaque ~> opaque ~> ordering) "f_1.[13]"))
+                                    (Core.var (Label (opaque ~> opaque ~> ordering) "f_1.[7]"))
                                     ( Core.var (Label opaque "a_2.[11]")
                                         <| Core.var (Label opaque "a_3.[12]")
                                         :| []
@@ -271,3 +279,1291 @@ fixture4 =
         )
         (Core.lit (Core.PInt32 1))
     )
+
+test1 :: ObjectList
+test1 =
+  [ OFunction "f" [Label Core.TOpq "x", Label Core.TOpq "n"] (Core.var (Label Core.TOpq "x"))
+  , OConstant
+      "h"
+      ( Core.app
+          (Core.TOpq `Core.arrow` Core.TOpq `Core.arrow` Core.int32)
+          ( Core.var
+              ( Label
+                  ((Core.TOpq `Core.arrow` Core.int32) `Core.arrow` Core.TOpq `Core.arrow` Core.TOpq `Core.arrow` Core.int32)
+                  "f"
+              )
+          )
+          ( Core.lam
+              (Label Core.TOpq "y" :| [])
+              (Core.lit (Core.PInt32 33))
+              :| []
+          )
+      )
+  ]
+
+test1Result :: ObjectList
+test1Result =
+  [ OFunction "f" [Label Core.TOpq "x", Label Core.TOpq "n"] (Core.var (Label Core.TOpq "x"))
+  , OConstant
+      "h"
+      ( Core.app
+          (Core.TOpq `Core.arrow` Core.TOpq `Core.arrow` Core.int32)
+          ( Core.var
+              ( Label
+                  ((Core.TOpq `Core.arrow` Core.int32) `Core.arrow` Core.TOpq `Core.arrow` Core.TOpq `Core.arrow` Core.int32)
+                  "f"
+              )
+          )
+          ( Core.var (Label (Core.TOpq `Core.arrow` Core.int32) "$anon.1")
+              :| []
+          )
+      )
+  , OFunction "$anon.1" [Label Core.TOpq "y"] (Core.lit (Core.PInt32 33))
+  ]
+
+test2 :: ObjectList
+test2 =
+  [ OFunction
+      "f"
+      [Label Core.int32 "x"]
+      ( Core.if_
+          ( Core.op
+              ( Core.OEqInt32
+                  (Core.var (Label Core.int32 "x"))
+                  (Core.lit (Core.PInt32 0))
+              )
+          )
+          (Core.var (Label Core.int32 "n"))
+          ( Core.let_
+              ( ( Label Core.int32 "m"
+                , Core.op
+                    ( Core.OMulInt32
+                        (Core.var (Label Core.int32 "x"))
+                        ( Core.app
+                            Core.int32
+                            (Core.var (Label (Core.int32 `Core.arrow` Core.int32) "f"))
+                            ( Core.op
+                                ( Core.OSubInt32
+                                    (Core.var (Label Core.int32 "x"))
+                                    (Core.lit (Core.PInt32 1))
+                                )
+                                :| []
+                            )
+                        )
+                    )
+                )
+                  :| []
+              )
+              ( Core.call
+                  (Label (Core.int32 `Core.arrow` Core.TOpq) "print_int32")
+                  [Core.var (Label Core.int32 "m")]
+                  ( Core.lam
+                      (Label Core.TOpq "_" :| [])
+                      (Core.var (Label Core.int32 "m"))
+                  )
+              )
+          )
+      )
+  , OFunction
+      "factorial"
+      [Label Core.int32 "z"]
+      ( Core.let_
+          ( ( Label Core.int32 "n"
+            , Core.lit (Core.PInt32 1)
+            )
+              :| []
+          )
+          ( Core.app
+              Core.int32
+              (Core.var (Label (Core.int32 `Core.arrow` Core.int32) "f"))
+              ( Core.var (Label Core.int32 "z")
+                  :| []
+              )
+          )
+      )
+  ]
+
+test2Result :: ObjectList
+test2Result =
+  [ OFunction
+      "f"
+      [Label Core.int32 "x"]
+      ( Core.if_
+          ( Core.op
+              ( Core.OEqInt32
+                  (Core.var (Label Core.int32 "x"))
+                  (Core.lit (Core.PInt32 0))
+              )
+          )
+          (Core.var (Label Core.int32 "n"))
+          ( Core.let_
+              ( ( Label Core.int32 "m"
+                , Core.op
+                    ( Core.OMulInt32
+                        (Core.var (Label Core.int32 "x"))
+                        ( Core.app
+                            Core.int32
+                            (Core.var (Label (Core.int32 `Core.arrow` Core.int32) "f"))
+                            ( Core.op
+                                ( Core.OSubInt32
+                                    (Core.var (Label Core.int32 "x"))
+                                    (Core.lit (Core.PInt32 1))
+                                )
+                                :| []
+                            )
+                        )
+                    )
+                )
+                  :| []
+              )
+              ( Core.call
+                  (Label (Core.int32 `Core.arrow` Core.TOpq) "print_int32")
+                  [Core.var (Label Core.int32 "m")]
+                  (Core.var (Label (Core.TOpq `Core.arrow` Core.int32) "$anon.1"))
+              )
+          )
+      )
+  , OFunction
+      "factorial"
+      [Label Core.int32 "z"]
+      ( Core.let_
+          ( ( Label Core.int32 "n"
+            , Core.lit (Core.PInt32 1)
+            )
+              :| []
+          )
+          ( Core.app
+              Core.int32
+              (Core.var (Label (Core.int32 `Core.arrow` Core.int32) "f"))
+              ( Core.var (Label Core.int32 "z")
+                  :| []
+              )
+          )
+      )
+  , OFunction
+      "$anon.1"
+      [Label Core.TOpq "_"]
+      ( Core.var (Label Core.int32 "m")
+      )
+  ]
+
+-- test3 =
+--  [ OFunction
+--      "lte"
+--      [ Label (Core.TCon "$Record" [Core.RExt "compare" (Core.TOpq `Core.arrow` Core.TOpq `Core.arrow` Core.TCon "Ordering" []) (Core.RExt "from_int32" (Core.int32 `Core.arrow` Core.TOpq) Core.RNil)]) "$dict:1"
+--      , Label Core.TOpq "x"
+--      , Label Core.TOpq "y"
+--      ]
+--      ( Core.match
+--          ( Core.app
+--              (Core.TCon "Ordering" [])
+--              ( Core.var
+--                  ( Label
+--                      ( Core.TCon "Ordered" [Core.TOpq]
+--                          `Core.arrow` Core.TOpq
+--                          `Core.arrow` Core.TOpq
+--                          `Core.arrow` Core.TCon "Ordering" []
+--                      )
+--                      "compare"
+--                  )
+--              )
+--              ( Core.var (Label (Core.TCon "$Record" [Core.RExt "compare" (Core.TOpq `Core.arrow` Core.TOpq `Core.arrow` Core.TCon "Ordering" []) (Core.RExt "from_int32" (Core.int32 `Core.arrow` Core.TOpq) Core.RNil)]) "$dict:1")
+--                  <| Core.var (Label Core.TOpq "x")
+--                  <| Core.var (Label Core.TOpq "y")
+--                  :| []
+--              )
+--          )
+--          ( Core.Clause
+--              (Label (Core.TCon "Ordering" []) "EqualTo" :| [])
+--              (Core.lit (Core.PBool True))
+--              <| Core.Clause
+--                (Label (Core.TCon "Ordering" []) "GreaterThan" :| [])
+--                (Core.lit (Core.PBool False))
+--              <| Core.Clause
+--                (Label (Core.TCon "Ordering" []) "LessThan" :| [])
+--                (Core.lit (Core.PBool True))
+--              :| []
+--          )
+--      )
+--  , OFunction
+--      "gt"
+--      [ Label (Core.TCon "$Record" [Core.RExt "compare" (Core.TOpq `Core.arrow` Core.TOpq `Core.arrow` Core.TCon "Ordering" []) (Core.RExt "from_int32" (Core.int32 `Core.arrow` Core.TOpq) Core.RNil)]) "$dict:1"
+--      , Label Core.TOpq "x"
+--      ]
+--      ( Core.app
+--          (Core.TOpq `Core.arrow` Core.bool)
+--          ( Core.var
+--              ( Label
+--                  ( (Core.bool `Core.arrow` Core.bool)
+--                      `Core.arrow` (Core.TOpq `Core.arrow` Core.bool)
+--                      `Core.arrow` (Core.TOpq `Core.arrow` Core.bool)
+--                  )
+--                  "(<<)"
+--              )
+--          )
+--          ( Core.var (Label (Core.bool `Core.arrow` Core.bool) "not")
+--              <| Core.app
+--                (Core.TOpq `Core.arrow` Core.bool)
+--                ( Core.var
+--                    ( Label
+--                        ( Core.TCon "Ordered" [Core.TOpq]
+--                            `Core.arrow` Core.TOpq
+--                            `Core.arrow` Core.TOpq
+--                            `Core.arrow` Core.bool
+--                        )
+--                        "lte"
+--                    )
+--                )
+--                ( Core.var (Label (Core.TCon "$Record" [Core.RExt "compare" (Core.TOpq `Core.arrow` Core.TOpq `Core.arrow` Core.TCon "Ordering" []) (Core.RExt "from_int32" (Core.int32 `Core.arrow` Core.TOpq) Core.RNil)]) "$dict:1")
+--                    <| Core.var (Label Core.TOpq "x")
+--                    :| []
+--                )
+--              :| []
+--          )
+--      )
+--  , OFunction
+--      "in_range"
+--      [ Label (Core.TCon "$Record" [Core.RExt "compare" (Core.TOpq `Core.arrow` Core.TOpq `Core.arrow` Core.TCon "Ordering" []) (Core.RExt "from_int32" (Core.int32 `Core.arrow` Core.TOpq) Core.RNil)]) "$dict:1"
+--      , Label (Core.TCon "$Record" [Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)]) "$record:expr:1"
+--      , Label Core.TOpq "n"
+--      ]
+--      ( Core.match
+--          (Core.var (Label (Core.TCon "$Record" [Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)]) "$record:expr:1"))
+--          ( Core.Clause
+--              ( Label
+--                  ( Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)
+--                      `Core.arrow` Core.TCon "$Record" [Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)]
+--                  )
+--                  "$Record"
+--                  <| Label (Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)) "$row"
+--                  :| []
+--              )
+--              ( Core.sel
+--                  ( Core.Focus
+--                      "min"
+--                      (Label Core.TOpq "min")
+--                      (Label (Core.RExt "max" Core.TOpq Core.RNil) "$tail:1")
+--                  )
+--                  (Core.var (Label (Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)) "$row"))
+--                  ( Core.sel
+--                      ( Core.Focus
+--                          "max"
+--                          (Label Core.TOpq "max")
+--                          (Label Core.RNil "$tail:2")
+--                      )
+--                      (Core.var (Label (Core.RExt "max" Core.TOpq Core.RNil) "$tail:1"))
+--                      ( Core.op
+--                          -- (&&)
+--                          ( Core.OAnd
+--                              ( Core.app
+--                                  Core.bool
+--                                  -- gt
+--                                  (Core.var (Label (Core.TCon "Ordered" [Core.TOpq] `Core.arrow` Core.TOpq `Core.arrow` Core.TOpq `Core.arrow` Core.bool) "gt"))
+--                                  ( Core.var (Label (Core.TCon "$Record" [Core.RExt "compare" (Core.TOpq `Core.arrow` Core.TOpq `Core.arrow` Core.TCon "Ordering" []) (Core.RExt "from_int32" (Core.int32 `Core.arrow` Core.TOpq) Core.RNil)]) "$dict:1")
+--                                      <| Core.var (Label Core.TOpq "n")
+--                                      <| Core.var (Label Core.TOpq "min")
+--                                      :| []
+--                                  )
+--                              )
+--                              ( Core.op
+--                                  -- (||)
+--                                  ( Core.OOr
+--                                      ( Core.app
+--                                          Core.bool
+--                                          -- gt
+--                                          (Core.var (Label (Core.TCon "Ordered" [Core.TOpq] `Core.arrow` Core.TOpq `Core.arrow` Core.TOpq `Core.arrow` Core.bool) "gt"))
+--                                          ( Core.var (Label (Core.TCon "$Record" [Core.RExt "compare" (Core.TOpq `Core.arrow` Core.TOpq `Core.arrow` Core.TCon "Ordering" []) (Core.RExt "from_int32" (Core.int32 `Core.arrow` Core.TOpq) Core.RNil)]) "$dict:1")
+--                                              <| Core.var (Label Core.TOpq "min")
+--                                              <| Core.var (Label Core.TOpq "max")
+--                                              :| []
+--                                          )
+--                                      )
+--                                      ( Core.app
+--                                          Core.bool
+--                                          -- lte
+--                                          (Core.var (Label (Core.TCon "Ordered" [Core.TOpq] `Core.arrow` Core.TOpq `Core.arrow` Core.TOpq `Core.arrow` Core.bool) "lte"))
+--                                          ( Core.var (Label (Core.TCon "$Record" [Core.RExt "compare" (Core.TOpq `Core.arrow` Core.TOpq `Core.arrow` Core.TCon "Ordering" []) (Core.RExt "from_int32" (Core.int32 `Core.arrow` Core.TOpq) Core.RNil)]) "$dict:1")
+--                                              <| Core.var (Label Core.TOpq "n")
+--                                              <| Core.var (Label Core.TOpq "max")
+--                                              :| []
+--                                          )
+--                                      )
+--                                  )
+--                              )
+--                          )
+--                      )
+--                  )
+--              )
+--              :| []
+--          )
+--      )
+--  , OFunction
+--      "from_list"
+--      [ Label (Core.TCon "$Record" [Core.RExt "compare" (Core.TOpq `Core.arrow` Core.TOpq `Core.arrow` Core.TCon "Ordering" []) (Core.RExt "from_int32" (Core.int32 `Core.arrow` Core.TOpq) Core.RNil)]) "$dict:1"
+--      , Label (Core.TCon "List" [Core.TOpq]) "list"
+--      ]
+--      ( Core.app
+--          (Core.TCon "Tree" [Core.TOpq])
+--          ( Core.var
+--              ( Label
+--                  ( Core.TCon "List" [Core.TOpq]
+--                      `Core.arrow` Core.TCon "$Record" [Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)]
+--                      `Core.arrow` Core.TCon "Tree" [Core.TOpq]
+--                  )
+--                  "$fold:1:a"
+--              )
+--          )
+--          ( Core.var (Label (Core.TCon "List" [Core.TOpq]) "list")
+--              <| Core.app
+--                (Core.TCon "$Record" [Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)])
+--                ( Core.var
+--                    ( Label
+--                        ( Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)
+--                            `Core.arrow` Core.TCon "$Record" [Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)]
+--                        )
+--                        "$Record"
+--                    )
+--                )
+--                ( Core.ext
+--                    "max"
+--                    ( Core.app
+--                        Core.TOpq
+--                        (Core.var (Label (Core.TCon "Ordered" [Core.TOpq] `Core.arrow` Core.int32 `Core.arrow` Core.TOpq) "from_int32"))
+--                        ( Core.var (Label (Core.TCon "$Record" [Core.RExt "compare" (Core.TOpq `Core.arrow` Core.TOpq `Core.arrow` Core.TCon "Ordering" []) (Core.RExt "from_int32" (Core.int32 `Core.arrow` Core.TOpq) Core.RNil)]) "$1")
+--                            <| Core.lit (Core.PInt32 (-1))
+--                            :| []
+--                        )
+--                    )
+--                    ( Core.ext
+--                        "min"
+--                        ( Core.app
+--                            Core.TOpq
+--                            (Core.var (Label (Core.TCon "Ordered" [Core.TOpq] `Core.arrow` Core.int32 `Core.arrow` Core.TOpq) "from_int32"))
+--                            ( Core.var (Label (Core.TCon "$Record" [Core.RExt "compare" (Core.TOpq `Core.arrow` Core.TOpq `Core.arrow` Core.TCon "Ordering" []) (Core.RExt "from_int32" (Core.int32 `Core.arrow` Core.TOpq) Core.RNil)]) "$1")
+--                                <| Core.lit (Core.PInt32 0)
+--                                :| []
+--                            )
+--                        )
+--                        Core.nil
+--                    )
+--                    :| []
+--                )
+--              :| []
+--          )
+--      )
+--  , OFunction
+--      "$fold:1:a"
+--      [ Label (Core.TCon "List" [Core.TOpq]) "$fold:1:expr"
+--      ]
+--      ( Core.match
+--          (Core.var (Label (Core.TCon "List" [Core.TOpq]) "$fold:1:expr"))
+--          ( Core.Clause
+--              ( Label (Core.TOpq `Core.arrow` Core.TCon "List" [Core.TOpq] `Core.arrow` Core.TCon "List" [Core.TOpq]) "$Cons"
+--                  <| Label Core.TOpq "$p:0:p"
+--                  <| Label (Core.TCon "List" [Core.TOpq]) "$p:1:g"
+--                  :| []
+--              )
+--              ( Core.lam
+--                  (Label (Core.TCon "$Record" [Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)]) "range" :| [])
+--                  ( Core.if_
+--                      ( Core.app
+--                          Core.bool
+--                          -- (|.)
+--                          ( Core.var
+--                              ( Label
+--                                  ( Core.TOpq
+--                                      `Core.arrow` (Core.TOpq `Core.arrow` Core.bool)
+--                                      `Core.arrow` Core.bool
+--                                  )
+--                                  "(|.)"
+--                              )
+--                          )
+--                          ( Core.var (Label Core.TOpq "$p:0:p")
+--                              <| Core.app
+--                                (Core.TOpq `Core.arrow` Core.bool)
+--                                -- in_range
+--                                ( Core.var
+--                                    ( Label
+--                                        ( Core.TCon "Ordered" [Core.TOpq]
+--                                            `Core.arrow` Core.TCon "$Record" [Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)]
+--                                            `Core.arrow` Core.TOpq
+--                                            `Core.arrow` Core.bool
+--                                        )
+--                                        "in_range"
+--                                    )
+--                                )
+--                                ( Core.var (Label (Core.TCon "$Record" [Core.RExt "compare" (Core.TOpq `Core.arrow` Core.TOpq `Core.arrow` Core.TCon "Ordering" []) (Core.RExt "from_int32" (Core.int32 `Core.arrow` Core.TOpq) Core.RNil)]) "$dict:1")
+--                                    <| Core.var (Label (Core.TCon "$Record" [Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)]) "range")
+--                                    :| []
+--                                )
+--                              :| []
+--                          )
+--                      )
+--                      ( Core.app
+--                          (Core.TCon "Tree" [Core.TOpq])
+--                          ( Core.var
+--                              ( Label
+--                                  ( Core.TOpq
+--                                      `Core.arrow` Core.TCon "Tree" [Core.TOpq]
+--                                      `Core.arrow` Core.TCon "Tree" [Core.TOpq]
+--                                      `Core.arrow` Core.TCon "Tree" [Core.TOpq]
+--                                  )
+--                                  "Node"
+--                              )
+--                          )
+--                          ( Core.var (Label Core.TOpq "$p:0:p")
+--                              <| Core.app
+--                                (Core.TCon "Tree" [Core.TOpq])
+--                                ( Core.var
+--                                    ( Label
+--                                        ( Core.TCon "List" [Core.TOpq]
+--                                            `Core.arrow` Core.TCon "$Record" [Core.RExt "max" Core.int32 (Core.RExt "min" Core.int32 Core.RNil)]
+--                                            `Core.arrow` Core.TCon "Tree" [Core.TOpq]
+--                                        )
+--                                        "$fold:1:a"
+--                                    )
+--                                )
+--                                ( Core.var (Label (Core.TCon "List" [Core.TOpq]) "$p:1:g")
+--                                    <| Core.app
+--                                      (Core.TCon "$Record" [Core.RExt "max" Core.int32 (Core.RExt "min" Core.int32 Core.RNil)])
+--                                      ( Core.var
+--                                          ( Label
+--                                              ( Core.RExt "max" Core.int32 (Core.RExt "min" Core.int32 Core.RNil)
+--                                                  `Core.arrow` Core.TCon "$Record" [Core.RExt "max" Core.int32 (Core.RExt "min" Core.int32 Core.RNil)]
+--                                              )
+--                                              "$Record"
+--                                          )
+--                                      )
+--                                      ( Core.ext
+--                                          "max"
+--                                          (Core.var (Label Core.TOpq "$p:0:p"))
+--                                          ( Core.ext
+--                                              "min"
+--                                              ( ( Core.match
+--                                                    (Core.var (Label (Core.TCon "$Record" [Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)]) "range"))
+--                                                    ( Core.Clause
+--                                                        ( Label
+--                                                            ( Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)
+--                                                                `Core.arrow` Core.TCon "$Record" [Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)]
+--                                                            )
+--                                                            "$Record"
+--                                                            <| Label (Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)) "$row"
+--                                                            :| []
+--                                                        )
+--                                                        ( Core.sel
+--                                                            ( Core.Focus
+--                                                                "min"
+--                                                                (Label Core.TOpq "$f-1")
+--                                                                (Label (Core.RExt "max" Core.TOpq Core.RNil) "_")
+--                                                            )
+--                                                            (Core.var (Label (Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)) "$row"))
+--                                                            (Core.var (Label Core.TOpq "$f-1"))
+--                                                        )
+--                                                        :| []
+--                                                    )
+--                                                )
+--                                              )
+--                                              Core.nil
+--                                          )
+--                                          :| []
+--                                      )
+--                                    :| []
+--                                )
+--                              <| Core.app
+--                                (Core.TCon "Tree" [Core.TOpq])
+--                                ( Core.var
+--                                    ( Label
+--                                        ( Core.TCon "List" [Core.TOpq]
+--                                            `Core.arrow` Core.TCon "$Record" [Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)]
+--                                            `Core.arrow` Core.TCon "Tree" [Core.TOpq]
+--                                        )
+--                                        "$fold:1:a"
+--                                    )
+--                                )
+--                                ( Core.var (Label (Core.TCon "List" [Core.TOpq]) "g")
+--                                    <| Core.app
+--                                      (Core.TCon "$Record" [Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)])
+--                                      ( Core.var
+--                                          ( Label
+--                                              ( Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)
+--                                                  `Core.arrow` Core.TCon "$Record" [Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)]
+--                                              )
+--                                              "$Record"
+--                                          )
+--                                      )
+--                                      ( Core.ext
+--                                          "max"
+--                                          ( ( Core.match
+--                                                (Core.var (Label (Core.TCon "$Record" [Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)]) "range"))
+--                                                ( Core.Clause
+--                                                    ( Label
+--                                                        ( Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)
+--                                                            `Core.arrow` Core.TCon "$Record" [Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)]
+--                                                        )
+--                                                        "$Record"
+--                                                        <| Label (Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)) "$row"
+--                                                        :| []
+--                                                    )
+--                                                    ( Core.sel
+--                                                        ( Core.Focus
+--                                                            "max"
+--                                                            (Label Core.TOpq "$f-1")
+--                                                            (Label (Core.RExt "min" Core.TOpq Core.RNil) "_")
+--                                                        )
+--                                                        (Core.var (Label (Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)) "$row"))
+--                                                        (Core.var (Label Core.TOpq "$f-1"))
+--                                                    )
+--                                                    :| []
+--                                                )
+--                                            )
+--                                          )
+--                                          ( Core.ext
+--                                              "min"
+--                                              (Core.var (Label Core.TOpq "p"))
+--                                              Core.nil
+--                                          )
+--                                          :| []
+--                                      )
+--                                    :| []
+--                                )
+--                              :| []
+--                          )
+--                      )
+--                      ( Core.app
+--                          (Core.TCon "Tree" [Core.TOpq])
+--                          ( Core.var
+--                              ( Label
+--                                  ( Core.TCon "List" [Core.TOpq]
+--                                      `Core.arrow` Core.TCon "$Record" [Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)]
+--                                      `Core.arrow` Core.TCon "Tree" [Core.TOpq]
+--                                  )
+--                                  "$fold:1:a"
+--                              )
+--                          )
+--                          ( Core.var (Label (Core.TCon "List" [Core.TOpq]) "g")
+--                              <| Core.var (Label (Core.TCon "$Record" [Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)]) "range")
+--                              :| []
+--                          )
+--                      )
+--                  )
+--              )
+--              <| Core.Clause
+--                (Label (Core.TCon "List" [Core.TOpq]) "$Nil" :| [])
+--                ( Core.lam
+--                    (Label (Core.TCon "$Record" [Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)]) "_" :| [])
+--                    (Core.var (Label (Core.TCon "Tree" [Core.TOpq]) "Leaf"))
+--                )
+--              :| []
+--          )
+--      )
+--  , OFunction
+--      "flatten"
+--      [ Label (Core.TCon "Tree" [Core.TOpq]) "tree"
+--      ]
+--      ( Core.app
+--          (Core.TCon "List" [Core.TOpq])
+--          ( Core.var
+--              ( Label
+--                  ( Core.TCon "Tree" [Core.TOpq]
+--                      `Core.arrow` Core.TCon "List" [Core.TOpq]
+--                  )
+--                  "$fold:1:b"
+--              )
+--          )
+--          (Core.var (Label (Core.TCon "Tree" [Core.TOpq]) "tree") :| [])
+--      )
+--  , OFunction
+--      "$fold:1:b"
+--      [ Label (Core.TCon "Tree" [Core.TOpq]) "$fold:1:expr"
+--      ]
+--      ( Core.match
+--          (Core.var (Label (Core.TCon "Tree" [Core.TOpq]) "$fold:1:expr"))
+--          ( Core.Clause
+--              ( Label
+--                  ( Core.TOpq
+--                      `Core.arrow` Core.TCon "Tree" [Core.TOpq]
+--                      `Core.arrow` Core.TCon "Tree" [Core.TOpq]
+--                      `Core.arrow` Core.TCon "Tree" [Core.TOpq]
+--                  )
+--                  "Node"
+--                  <| Label Core.TOpq "$p:0:y"
+--                  <| Label (Core.TCon "Tree" [Core.TOpq]) "$p:1:lhs"
+--                  <| Label (Core.TCon "Tree" [Core.TOpq]) "$p:2:rhs"
+--                  :| []
+--              )
+--              ( Core.app
+--                  (Core.TCon "List" [Core.TOpq])
+--                  -- (++)
+--                  ( Core.var
+--                      ( Label
+--                          ( Core.TCon "List" [Core.TOpq]
+--                              `Core.arrow` Core.TCon "List" [Core.TOpq]
+--                              `Core.arrow` Core.TCon "List" [Core.TOpq]
+--                          )
+--                          "(++)"
+--                      )
+--                  )
+--                  ( Core.app
+--                      (Core.TCon "List" [Core.TOpq])
+--                      ( Core.var
+--                          ( Label
+--                              ( Core.TCon "Tree" [Core.TOpq]
+--                                  `Core.arrow` Core.TCon "List" [Core.TOpq]
+--                              )
+--                              "$fold:1:b"
+--                          )
+--                      )
+--                      ( Core.var (Label (Core.TCon "Tree" [Core.TOpq]) "$p:1:lhs")
+--                          :| []
+--                      )
+--                      <|
+--                      -- y :: $fold:1(rhs)
+--                      ( Core.app
+--                          (Core.TCon "List" [Core.TOpq])
+--                          -- (::)
+--                          ( Core.var
+--                              ( Label
+--                                  ( Core.TOpq
+--                                      `Core.arrow` Core.TCon "List" [Core.TOpq]
+--                                      `Core.arrow` Core.TCon "List" [Core.TOpq]
+--                                  )
+--                                  "(::)"
+--                              )
+--                          )
+--                          ( Core.var (Label Core.TOpq "y")
+--                              <| Core.app
+--                                (Core.TCon "List" [Core.TOpq])
+--                                ( Core.var
+--                                    ( Label
+--                                        ( Core.TCon "Tree" [Core.TOpq]
+--                                            `Core.arrow` Core.TCon "List" [Core.TOpq]
+--                                        )
+--                                        "$fold:1:b"
+--                                    )
+--                                )
+--                                ( Core.var (Label (Core.TCon "Tree" [Core.TOpq]) "$p:2:rhs")
+--                                    :| []
+--                                )
+--                              :| []
+--                          )
+--                      )
+--                      :| []
+--                  )
+--              )
+--              <| Core.Clause
+--                ( Label (Core.TCon "Tree" [Core.TOpq]) "Leaf"
+--                    :| []
+--                )
+--                ( Core.var (Label (Core.TCon "List" [Core.TOpq]) "$Nil")
+--                )
+--              :| []
+--          )
+--      )
+--  , OFunction
+--      "qsort"
+--      [ Label (Core.TCon "Ordered" [Core.TOpq]) "$dict:1"
+--      ]
+--      ( Core.app
+--          ( Core.TCon "List" [Core.TOpq]
+--              `Core.arrow` Core.TCon "List" [Core.TOpq]
+--          )
+--          -- (<<)
+--          ( Core.var
+--              ( Label
+--                  ( (Core.TCon "Tree" [Core.TOpq] `Core.arrow` Core.TCon "List" [Core.TOpq])
+--                      `Core.arrow` (Core.TCon "List" [Core.TOpq] `Core.arrow` Core.TCon "Tree" [Core.TOpq])
+--                      `Core.arrow` (Core.TCon "List" [Core.TOpq] `Core.arrow` Core.TCon "List" [Core.TOpq])
+--                  )
+--                  "(<<)"
+--              )
+--          )
+--          ( Core.var
+--              ( Label
+--                  ( Core.TCon "Tree" [Core.TOpq]
+--                      `Core.arrow` Core.TCon "List" [Core.TOpq]
+--                  )
+--                  "flatten"
+--              )
+--              <| Core.app
+--                ( Core.TCon "List" [Core.TOpq]
+--                    `Core.arrow` Core.TCon "Tree" [Core.TOpq]
+--                )
+--                ( Core.var
+--                    ( Label
+--                        ( Core.TCon "Ordered" [Core.TOpq]
+--                            `Core.arrow` Core.TCon "List" [Core.TOpq]
+--                            `Core.arrow` Core.TCon "Tree" [Core.TOpq]
+--                        )
+--                        "from_list"
+--                    )
+--                )
+--                ( Core.var (Label (Core.TCon "Ordered" [Core.TOpq]) "$dict:1")
+--                    :| []
+--                )
+--              :| []
+--          )
+--      )
+--  ]
+--
+-- test3Result =
+--  [ OFunction
+--      "lte"
+--      [ Label (Core.TCon "$Record" [Core.RExt "compare" (Core.TOpq `Core.arrow` Core.TOpq `Core.arrow` Core.TCon "Ordering" []) (Core.RExt "from_int32" (Core.int32 `Core.arrow` Core.TOpq) Core.RNil)]) "$dict:1"
+--      , Label Core.TOpq "x"
+--      , Label Core.TOpq "y"
+--      ]
+--      ( Core.match
+--          ( Core.app
+--              (Core.TCon "Ordering" [])
+--              ( Core.var
+--                  ( Label
+--                      ( Core.TCon "Ordered" [Core.TOpq]
+--                          `Core.arrow` Core.TOpq
+--                          `Core.arrow` Core.TOpq
+--                          `Core.arrow` Core.TCon "Ordering" []
+--                      )
+--                      "compare"
+--                  )
+--              )
+--              ( Core.var (Label (Core.TCon "$Record" [Core.RExt "compare" (Core.TOpq `Core.arrow` Core.TOpq `Core.arrow` Core.TCon "Ordering" []) (Core.RExt "from_int32" (Core.int32 `Core.arrow` Core.TOpq) Core.RNil)]) "$dict:1")
+--                  <| Core.var (Label Core.TOpq "x")
+--                  <| Core.var (Label Core.TOpq "y")
+--                  :| []
+--              )
+--          )
+--          ( Core.Clause
+--              (Label (Core.TCon "Ordering" []) "EqualTo" :| [])
+--              (Core.lit (Core.PBool True))
+--              <| Core.Clause
+--                (Label (Core.TCon "Ordering" []) "GreaterThan" :| [])
+--                (Core.lit (Core.PBool False))
+--              <| Core.Clause
+--                (Label (Core.TCon "Ordering" []) "LessThan" :| [])
+--                (Core.lit (Core.PBool True))
+--              :| []
+--          )
+--      )
+--  , OFunction
+--      "gt"
+--      [ Label (Core.TCon "$Record" [Core.RExt "compare" (Core.TOpq `Core.arrow` Core.TOpq `Core.arrow` Core.TCon "Ordering" []) (Core.RExt "from_int32" (Core.int32 `Core.arrow` Core.TOpq) Core.RNil)]) "$dict:1"
+--      , Label Core.TOpq "x"
+--      ]
+--      ( Core.app
+--          (Core.TOpq `Core.arrow` Core.bool)
+--          ( Core.var
+--              ( Label
+--                  ( (Core.bool `Core.arrow` Core.bool)
+--                      `Core.arrow` (Core.TOpq `Core.arrow` Core.bool)
+--                      `Core.arrow` (Core.TOpq `Core.arrow` Core.bool)
+--                  )
+--                  "(<<)"
+--              )
+--          )
+--          ( Core.var (Label (Core.bool `Core.arrow` Core.bool) "not")
+--              <| Core.app
+--                (Core.TOpq `Core.arrow` Core.bool)
+--                ( Core.var
+--                    ( Label
+--                        ( Core.TCon "Ordered" [Core.TOpq]
+--                            `Core.arrow` Core.TOpq
+--                            `Core.arrow` Core.TOpq
+--                            `Core.arrow` Core.bool
+--                        )
+--                        "lte"
+--                    )
+--                )
+--                ( Core.var (Label (Core.TCon "$Record" [Core.RExt "compare" (Core.TOpq `Core.arrow` Core.TOpq `Core.arrow` Core.TCon "Ordering" []) (Core.RExt "from_int32" (Core.int32 `Core.arrow` Core.TOpq) Core.RNil)]) "$dict:1")
+--                    <| Core.var (Label Core.TOpq "x")
+--                    :| []
+--                )
+--              :| []
+--          )
+--      )
+--  , OFunction
+--      "in_range"
+--      [ Label (Core.TCon "$Record" [Core.RExt "compare" (Core.TOpq `Core.arrow` Core.TOpq `Core.arrow` Core.TCon "Ordering" []) (Core.RExt "from_int32" (Core.int32 `Core.arrow` Core.TOpq) Core.RNil)]) "$dict:1"
+--      , Label (Core.TCon "$Record" [Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)]) "$record:expr:1"
+--      , Label Core.TOpq "n"
+--      ]
+--      ( Core.match
+--          (Core.var (Label (Core.TCon "$Record" [Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)]) "$record:expr:1"))
+--          ( Core.Clause
+--              ( Label
+--                  ( Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)
+--                      `Core.arrow` Core.TCon "$Record" [Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)]
+--                  )
+--                  "$Record"
+--                  <| Label (Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)) "$row"
+--                  :| []
+--              )
+--              ( Core.sel
+--                  ( Core.Focus
+--                      "min"
+--                      (Label Core.TOpq "min")
+--                      (Label (Core.RExt "max" Core.TOpq Core.RNil) "$tail:1")
+--                  )
+--                  (Core.var (Label (Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)) "$row"))
+--                  ( Core.sel
+--                      ( Core.Focus
+--                          "max"
+--                          (Label Core.TOpq "max")
+--                          (Label Core.RNil "$tail:2")
+--                      )
+--                      (Core.var (Label (Core.RExt "max" Core.TOpq Core.RNil) "$tail:1"))
+--                      ( Core.op
+--                          -- (&&)
+--                          ( Core.OAnd
+--                              ( Core.app
+--                                  Core.bool
+--                                  -- gt
+--                                  (Core.var (Label (Core.TCon "Ordered" [Core.TOpq] `Core.arrow` Core.TOpq `Core.arrow` Core.TOpq `Core.arrow` Core.bool) "gt"))
+--                                  ( Core.var (Label (Core.TCon "$Record" [Core.RExt "compare" (Core.TOpq `Core.arrow` Core.TOpq `Core.arrow` Core.TCon "Ordering" []) (Core.RExt "from_int32" (Core.int32 `Core.arrow` Core.TOpq) Core.RNil)]) "$dict:1")
+--                                      <| Core.var (Label Core.TOpq "n")
+--                                      <| Core.var (Label Core.TOpq "min")
+--                                      :| []
+--                                  )
+--                              )
+--                              ( Core.op
+--                                  -- (||)
+--                                  ( Core.OOr
+--                                      ( Core.app
+--                                          Core.bool
+--                                          -- gt
+--                                          (Core.var (Label (Core.TCon "Ordered" [Core.TOpq] `Core.arrow` Core.TOpq `Core.arrow` Core.TOpq `Core.arrow` Core.bool) "gt"))
+--                                          ( Core.var (Label (Core.TCon "$Record" [Core.RExt "compare" (Core.TOpq `Core.arrow` Core.TOpq `Core.arrow` Core.TCon "Ordering" []) (Core.RExt "from_int32" (Core.int32 `Core.arrow` Core.TOpq) Core.RNil)]) "$dict:1")
+--                                              <| Core.var (Label Core.TOpq "min")
+--                                              <| Core.var (Label Core.TOpq "max")
+--                                              :| []
+--                                          )
+--                                      )
+--                                      ( Core.app
+--                                          Core.bool
+--                                          -- lte
+--                                          (Core.var (Label (Core.TCon "Ordered" [Core.TOpq] `Core.arrow` Core.TOpq `Core.arrow` Core.TOpq `Core.arrow` Core.bool) "lte"))
+--                                          ( Core.var (Label (Core.TCon "$Record" [Core.RExt "compare" (Core.TOpq `Core.arrow` Core.TOpq `Core.arrow` Core.TCon "Ordering" []) (Core.RExt "from_int32" (Core.int32 `Core.arrow` Core.TOpq) Core.RNil)]) "$dict:1")
+--                                              <| Core.var (Label Core.TOpq "n")
+--                                              <| Core.var (Label Core.TOpq "max")
+--                                              :| []
+--                                          )
+--                                      )
+--                                  )
+--                              )
+--                          )
+--                      )
+--                  )
+--              )
+--              :| []
+--          )
+--      )
+--  , OFunction
+--      "from_list"
+--      [ Label (Core.TCon "$Record" [Core.RExt "compare" (Core.TOpq `Core.arrow` Core.TOpq `Core.arrow` Core.TCon "Ordering" []) (Core.RExt "from_int32" (Core.int32 `Core.arrow` Core.TOpq) Core.RNil)]) "$dict:1"
+--      , Label (Core.TCon "List" [Core.TOpq]) "list"
+--      ]
+--      ( Core.app
+--          (Core.TCon "Tree" [Core.TOpq])
+--          ( Core.var
+--              ( Label
+--                  ( Core.TCon "List" [Core.TOpq]
+--                      `Core.arrow` Core.TCon "$Record" [Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)]
+--                      `Core.arrow` Core.TCon "Tree" [Core.TOpq]
+--                  )
+--                  "$fold:1:a"
+--              )
+--          )
+--          ( Core.var (Label (Core.TCon "List" [Core.TOpq]) "list")
+--              <| Core.app
+--                (Core.TCon "$Record" [Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)])
+--                ( Core.var
+--                    ( Label
+--                        ( Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)
+--                            `Core.arrow` Core.TCon "$Record" [Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)]
+--                        )
+--                        "$Record"
+--                    )
+--                )
+--                ( Core.ext
+--                    "max"
+--                    ( Core.app
+--                        Core.TOpq
+--                        (Core.var (Label (Core.TCon "Ordered" [Core.TOpq] `Core.arrow` Core.int32 `Core.arrow` Core.TOpq) "from_int32"))
+--                        ( Core.var (Label (Core.TCon "$Record" [Core.RExt "compare" (Core.TOpq `Core.arrow` Core.TOpq `Core.arrow` Core.TCon "Ordering" []) (Core.RExt "from_int32" (Core.int32 `Core.arrow` Core.TOpq) Core.RNil)]) "$1")
+--                            <| Core.lit (Core.PInt32 (-1))
+--                            :| []
+--                        )
+--                    )
+--                    ( Core.ext
+--                        "min"
+--                        ( Core.app
+--                            Core.TOpq
+--                            (Core.var (Label (Core.TCon "Ordered" [Core.TOpq] `Core.arrow` Core.int32 `Core.arrow` Core.TOpq) "from_int32"))
+--                            ( Core.var (Label (Core.TCon "$Record" [Core.RExt "compare" (Core.TOpq `Core.arrow` Core.TOpq `Core.arrow` Core.TCon "Ordering" []) (Core.RExt "from_int32" (Core.int32 `Core.arrow` Core.TOpq) Core.RNil)]) "$1")
+--                                <| Core.lit (Core.PInt32 0)
+--                                :| []
+--                            )
+--                        )
+--                        Core.nil
+--                    )
+--                    :| []
+--                )
+--              :| []
+--          )
+--      )
+--  , OFunction
+--      "$fold:1:a"
+--      [ Label (Core.TCon "List" [Core.TOpq]) "$fold:1:expr"
+--      ]
+--      ( Core.match
+--          (Core.var (Label (Core.TCon "List" [Core.TOpq]) "$fold:1:expr"))
+--          ( Core.Clause
+--              ( Label (Core.TOpq `Core.arrow` Core.TCon "List" [Core.TOpq] `Core.arrow` Core.TCon "List" [Core.TOpq]) "$Cons"
+--                  <| Label Core.TOpq "$p:0:p"
+--                  <| Label (Core.TCon "List" [Core.TOpq]) "$p:1:g"
+--                  :| []
+--              )
+--              (Core.var (Label (Core.TCon "$Record" [Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)] `Core.arrow` Core.TCon "Tree" [Core.TOpq]) "$anon.1"))
+--              <| Core.Clause
+--                (Label (Core.TCon "List" [Core.TOpq]) "$Nil" :| [])
+--                ( Core.var (Label (Core.TCon "$Record" [Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)] `Core.arrow` Core.TCon "Tree" [Core.TOpq]) "$anon.2")
+--                )
+--              :| []
+--          )
+--      )
+--  , OFunction
+--      "$anon.2"
+--      [ Label (Core.TCon "$Record" [Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)]) "_"
+--      ]
+--      (Core.var (Label (Core.TCon "Tree" [Core.TOpq]) "Leaf"))
+--  , OFunction
+--      "$anon.1"
+--      [ Label (Core.TCon "$Record" [Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)]) "range"
+--      ]
+--      ( Core.if_
+--          ( Core.app
+--              Core.bool
+--              -- (|.)
+--              ( Core.var
+--                  ( Label
+--                      ( Core.TOpq
+--                          `Core.arrow` (Core.TOpq `Core.arrow` Core.bool)
+--                          `Core.arrow` Core.bool
+--                      )
+--                      "(|.)"
+--                  )
+--              )
+--              ( Core.var (Label Core.TOpq "$p:0:p")
+--                  <| Core.app
+--                    (Core.TOpq `Core.arrow` Core.bool)
+--                    -- in_range
+--                    ( Core.var
+--                        ( Label
+--                            ( Core.TCon "Ordered" [Core.TOpq]
+--                                `Core.arrow` Core.TCon "$Record" [Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)]
+--                                `Core.arrow` Core.TOpq
+--                                `Core.arrow` Core.bool
+--                            )
+--                            "in_range"
+--                        )
+--                    )
+--                    ( Core.var (Label (Core.TCon "$Record" [Core.RExt "compare" (Core.TOpq `Core.arrow` Core.TOpq `Core.arrow` Core.TCon "Ordering" []) (Core.RExt "from_int32" (Core.int32 `Core.arrow` Core.TOpq) Core.RNil)]) "$dict:1")
+--                        <| Core.var (Label (Core.TCon "$Record" [Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)]) "range")
+--                        :| []
+--                    )
+--                  :| []
+--              )
+--          )
+--          ( Core.app
+--              (Core.TCon "Tree" [Core.TOpq])
+--              ( Core.var
+--                  ( Label
+--                      ( Core.TOpq
+--                          `Core.arrow` Core.TCon "Tree" [Core.TOpq]
+--                          `Core.arrow` Core.TCon "Tree" [Core.TOpq]
+--                          `Core.arrow` Core.TCon "Tree" [Core.TOpq]
+--                      )
+--                      "Node"
+--                  )
+--              )
+--              ( Core.var (Label Core.TOpq "$p:0:p")
+--                  <| Core.app
+--                    (Core.TCon "Tree" [Core.TOpq])
+--                    ( Core.var
+--                        ( Label
+--                            ( Core.TCon "List" [Core.TOpq]
+--                                `Core.arrow` Core.TCon "$Record" [Core.RExt "max" Core.int32 (Core.RExt "min" Core.int32 Core.RNil)]
+--                                `Core.arrow` Core.TCon "Tree" [Core.TOpq]
+--                            )
+--                            "$fold:1:a"
+--                        )
+--                    )
+--                    ( Core.var (Label (Core.TCon "List" [Core.TOpq]) "$p:1:g")
+--                        <| Core.app
+--                          (Core.TCon "$Record" [Core.RExt "max" Core.int32 (Core.RExt "min" Core.int32 Core.RNil)])
+--                          ( Core.var
+--                              ( Label
+--                                  ( Core.RExt "max" Core.int32 (Core.RExt "min" Core.int32 Core.RNil)
+--                                      `Core.arrow` Core.TCon "$Record" [Core.RExt "max" Core.int32 (Core.RExt "min" Core.int32 Core.RNil)]
+--                                  )
+--                                  "$Record"
+--                              )
+--                          )
+--                          ( Core.ext
+--                              "max"
+--                              (Core.var (Label Core.TOpq "$p:0:p"))
+--                              ( Core.ext
+--                                  "min"
+--                                  ( ( Core.match
+--                                        (Core.var (Label (Core.TCon "$Record" [Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)]) "range"))
+--                                        ( Core.Clause
+--                                            ( Label
+--                                                ( Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)
+--                                                    `Core.arrow` Core.TCon "$Record" [Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)]
+--                                                )
+--                                                "$Record"
+--                                                <| Label (Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)) "$row"
+--                                                :| []
+--                                            )
+--                                            ( Core.sel
+--                                                ( Core.Focus
+--                                                    "min"
+--                                                    (Label Core.TOpq "$f-1")
+--                                                    (Label (Core.RExt "max" Core.TOpq Core.RNil) "_")
+--                                                )
+--                                                (Core.var (Label (Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)) "$row"))
+--                                                (Core.var (Label Core.TOpq "$f-1"))
+--                                            )
+--                                            :| []
+--                                        )
+--                                    )
+--                                  )
+--                                  Core.nil
+--                              )
+--                              :| []
+--                          )
+--                        :| []
+--                    )
+--                  <| Core.app
+--                    (Core.TCon "Tree" [Core.TOpq])
+--                    ( Core.var
+--                        ( Label
+--                            ( Core.TCon "List" [Core.TOpq]
+--                                `Core.arrow` Core.TCon "$Record" [Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)]
+--                                `Core.arrow` Core.TCon "Tree" [Core.TOpq]
+--                            )
+--                            "$fold:1:a"
+--                        )
+--                    )
+--                    ( Core.var (Label (Core.TCon "List" [Core.TOpq]) "g")
+--                        <| Core.app
+--                          (Core.TCon "$Record" [Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)])
+--                          ( Core.var
+--                              ( Label
+--                                  ( Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)
+--                                      `Core.arrow` Core.TCon "$Record" [Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)]
+--                                  )
+--                                  "$Record"
+--                              )
+--                          )
+--                          ( Core.ext
+--                              "max"
+--                              ( ( Core.match
+--                                    (Core.var (Label (Core.TCon "$Record" [Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)]) "range"))
+--                                    ( Core.Clause
+--                                        ( Label
+--                                            ( Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)
+--                                                `Core.arrow` Core.TCon "$Record" [Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)]
+--                                            )
+--                                            "$Record"
+--                                            <| Label (Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)) "$row"
+--                                            :| []
+--                                        )
+--                                        ( Core.sel
+--                                            ( Core.Focus
+--                                                "max"
+--                                                (Label Core.TOpq "$f-1")
+--                                                (Label (Core.RExt "min" Core.TOpq Core.RNil) "_")
+--                                            )
+--                                            (Core.var (Label (Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)) "$row"))
+--                                            (Core.var (Label Core.TOpq "$f-1"))
+--                                        )
+--                                        :| []
+--                                    )
+--                                )
+--                              )
+--                              ( Core.ext
+--                                  "min"
+--                                  (Core.var (Label Core.TOpq "p"))
+--                                  Core.nil
+--                              )
+--                              :| []
+--                          )
+--                        :| []
+--                    )
+--                  :| []
+--              )
+--          )
+--          ( Core.app
+--              (Core.TCon "Tree" [Core.TOpq])
+--              ( Core.var
+--                  ( Label
+--                      ( Core.TCon "List" [Core.TOpq]
+--                          `Core.arrow` Core.TCon "$Record" [Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)]
+--                          `Core.arrow` Core.TCon "Tree" [Core.TOpq]
+--                      )
+--                      "$fold:1:a"
+--                  )
+--              )
+--              ( Core.var (Label (Core.TCon "List" [Core.TOpq]) "g")
+--                  <| Core.var (Label (Core.TCon "$Record" [Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)]) "range")
+--                  :| []
+--              )
+--          )
+--      )
+--  , OFunction
+--      "flatten"
+--      [ Label (Core.TCon "Tree" [Core.TOpq]) "tree"
+--      ]
+--      ( Core.app
+--          (Core.TCon "List" [Core.TOpq])
+--          ( Core.var
+--              ( Label
+--                  ( Core.TCon "Tree" [Core.TOpq]
+--                      `Core.arrow` Core.TCon "List" [Core.TOpq]
+--                  )
+--                  "$fold:1:b"
+--              )
+--          )
+--          (Core.var (Label (Core.TCon "Tree" [Core.TOpq]) "tree") :| [])
+--      )
+--  , OFunction
+--      "$fold:1:b"
+--      [ Label (Core.TCon "Tree" [Core.TOpq]) "$fold:1:expr"
+--      ]
+--      ( Core.match
+--          (Core.var (Label (Core.TCon "Tree" [Core.TOpq]) "$fold:1:expr"))
+--          ( Core.Clause
+--              ( Label
+--                  ( Core.TOpq
+--                      `Core.arrow` Core.TCon "Tree" [Core.TOpq]
+--                      `Core.arrow` Core.TCon "Tree" [Core.TOpq]
+--                      `Core.arrow` Core.TCon "Tree" [Core.TOpq]
+--                  )
+--                  "Node"
+--                  <| Label Core.TOpq "$p:0:y"
+--                  <| Label (Core.TCon "Tree" [Core.TOpq]) "$p:1:lhs"
+--                  <| Label (Core.TCon "Tree" [Core.TOpq]) "$p:2:rhs"
+--                  :| []
+--              )
+--              ( Core.app
+--                  (Core.TCon "List" [Core.TOpq])
+--                  -- (++)
+--                  ( Core.var
+--                      ( Label
+--                          ( Core.TCon "List" [Core.TOpq]
+--                              `Core.arrow` Core.TCon "List" [Core.TOpq]
+--                              `Core.arrow` Core.TCon "List" [Core.TOpq]
+--                          )
+--                          "(++)"
+--                      )
+--                  )
+--                  ( Core.app
+--                      (Core.TCon "List" [Core.TOpq])
+--                      ( Core.var
+--                          ( Label
+--                              ( Core.TCon "Tree" [Core.TOpq]
+--                                  `Core.arrow` Core.TCon "List" [Core.TOpq]
+--                              )
+--                              "$fold:1:b"
+--                          )
+--                      )
+--                      ( Core.var (Label (Core.TCon "Tree" [Core.TOpq]) "$p:1:lhs")
+--                          :| []
+--                      )
+--                      <|
+--                      -- y :: $fold:1(rhs)
+--                      ( Core.app
+--                          (Core.TCon "List" [Core.TOpq])
+--                          -- (::)
+--                          ( Core.var
+--                              ( Label
+--                                  ( Core.TOpq
+--                                      `Core.arrow` Core.TCon "List" [Core.TOpq]
+--                                      `Core.arrow` Core.TCon "List" [Core.TOpq]
+--                                  )
+--                                  "(::)"
+--                              )
+--                          )
+--                          ( Core.var (Label Core.TOpq "y")
+--                              <| Core.app
+--                                (Core.TCon "List" [Core.TOpq])
+--                                ( Core.var
+--                                    ( Label
+--                                        ( Core.TCon "Tree" [Core.TOpq]
+--                                            `Core.arrow` Core.TCon "List" [Core.TOpq]
+--                                        )
+--                                        "$fold:1:b"
+--                                    )
+--                                )
+--                                ( Core.var (Label (Core.TCon "Tree" [Core.TOpq]) "$p:2:rhs")
+--                                    :| []
+--                                )
+--                              :| []
+--                          )
+--                      )
+--                      :| []
+--                  )
+--              )
+--              <| Core.Clause
+--                ( Label (Core.TCon "Tree" [Core.TOpq]) "Leaf"
+--                    :| []
+--                )
+--                ( Core.var (Label (Core.TCon "List" [Core.TOpq]) "$Nil")
+--                )
+--              :| []
+--          )
+--      )
+--  , OFunction
+--      "qsort"
+--      [ Label (Core.TCon "Ordered" [Core.TOpq]) "$dict:1"
+--      ]
+--      ( Core.app
+--          ( Core.TCon "List" [Core.TOpq]
+--              `Core.arrow` Core.TCon "List" [Core.TOpq]
+--          )
+--          -- (<<)
+--          ( Core.var
+--              ( Label
+--                  ( (Core.TCon "Tree" [Core.TOpq] `Core.arrow` Core.TCon "List" [Core.TOpq])
+--                      `Core.arrow` (Core.TCon "List" [Core.TOpq] `Core.arrow` Core.TCon "Tree" [Core.TOpq])
+--                      `Core.arrow` (Core.TCon "List" [Core.TOpq] `Core.arrow` Core.TCon "List" [Core.TOpq])
+--                  )
+--                  "(<<)"
+--              )
+--          )
+--          ( Core.var
+--              ( Label
+--                  ( Core.TCon "Tree" [Core.TOpq]
+--                      `Core.arrow` Core.TCon "List" [Core.TOpq]
+--                  )
+--                  "flatten"
+--              )
+--              <| Core.app
+--                ( Core.TCon "List" [Core.TOpq]
+--                    `Core.arrow` Core.TCon "Tree" [Core.TOpq]
+--                )
+--                ( Core.var
+--                    ( Label
+--                        ( Core.TCon "Ordered" [Core.TOpq]
+--                            `Core.arrow` Core.TCon "List" [Core.TOpq]
+--                            `Core.arrow` Core.TCon "Tree" [Core.TOpq]
+--                        )
+--                        "from_list"
+--                    )
+--                )
+--                ( Core.var (Label (Core.TCon "Ordered" [Core.TOpq]) "$dict:1")
+--                    :| []
+--                )
+--              :| []
+--          )
+--      )
+--  ]

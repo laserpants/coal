@@ -7,6 +7,7 @@ import qualified Noll.AST.IndexedSpec
 -- import qualified Noll.SystemF.TypeSubstitutionSpec
 
 import qualified Noll.AST.HasFreeSpec
+import qualified Noll.Compiler.CoreSpec
 import qualified Noll.Compiler.NormalizeObjectsSpec
 import qualified Noll.Compiler.PatternMatchingExamples.Test01
 import qualified Noll.Compiler.PatternMatchingExamples.Test02
@@ -78,6 +79,7 @@ main =
     Noll.UtilsSpec.spec
     Noll.Compiler.NormalizeObjectsSpec.spec
     Noll.Core.Language.ReplaceSpec.spec
+    Noll.Compiler.CoreSpec.spec
 
 --    Noll.SystemF.TypeConstraint.CollectSpec.spec
 --    Noll.SystemF.TypeSubstitutionSpec.spec
