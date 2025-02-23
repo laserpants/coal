@@ -15,7 +15,7 @@ module Noll.Core.Language.Expr (
 import Data.Eq.Deriving (deriveEq1)
 import Data.Fix (Fix (..))
 import Data.Functor.Foldable (cata)
-import Data.Set (singleton)
+import Data.Set (Set, singleton)
 import Noll.AST.HasFree (HasBound (..), HasFree (..), exceptNames)
 import Noll.Common.List1 (List1, NonEmpty (..))
 import Noll.Core.Language.Op (Op (..))
@@ -36,12 +36,18 @@ deriveEq1 ''Clause
 instance (HasFree a t) => HasFree (Clause t a) t where
   freeIn (Clause (_ :| lls) e1) = freeIn e1 `exceptNames` boundIn lls
 
+instance (HasFree f t) => HasFree (Label t, f) t where
+  freeIn = freeIn . snd
+
 -- | Field selector
 data Focus t = Focus Name (Label t) (Label t)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
 
 instance (HasBound (Focus t)) where
   boundIn (Focus _ ll1 ll2) = boundIn ll1 <> boundIn ll2
+
+instance (HasBound b) => HasBound (b, Set (Label t)) where
+  boundIn = boundIn . fst
 
 -- | Parameterized (non-recursive) expression grammar
 data ExprF t a
@@ -99,7 +105,7 @@ instance (Ord t) => HasFree (Expr t) t where
           e1 <> e2
         ESel f e1 e2 ->
           e1 <> (e2 `exceptNames` boundIn f)
-        ELet lls e ->
-          error "ELet"
+        ELet vs e ->
+          (freeIn vs <> e) `exceptNames` boundIn vs
         ENil ->
           mempty

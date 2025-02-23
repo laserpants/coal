@@ -183,8 +183,8 @@ mapping lls = runStateT (traverse go lls) mempty
 
 -------------------------------------------------------------------------------
 
-simplifyLams :: Expr Type -> Expr Type
-simplifyLams =
+flattenELam :: Expr Type -> Expr Type
+flattenELam =
   cata $
     \case
       Core.ELam vs1 (Fix (Core.ELam vs2 e1)) ->
@@ -194,8 +194,8 @@ simplifyLams =
 
 -------------------------------------------------------------------------------
 
-simplifyApps :: Expr t -> Expr t
-simplifyApps =
+flattenEApp :: Expr t -> Expr t
+flattenEApp =
   cata $
     \case
       Core.EApp t (Fix (Core.EApp _ e1 es1)) es2 ->
@@ -205,8 +205,8 @@ simplifyApps =
 
 -------------------------------------------------------------------------------
 
-simplifyLets :: Expr t -> Expr t
-simplifyLets e = relabel (Map.fromList sub) e1
+simplifyELet :: Expr t -> Expr t
+simplifyELet e = relabel (Map.fromList sub) e1
  where
   subst =
     cata $
@@ -233,39 +233,39 @@ simplifyLets e = relabel (Map.fromList sub) e1
 runWS0 :: RWS () w Int a -> (a, w)
 runWS0 v = evalRWS v () 0
 
+{-# INLINE notConstructor #-}
 notConstructor :: Label t -> Bool
 notConstructor = not . isConstructor . labelName
+
+freeSet :: (Foldable f, HasFree e t) => f Name -> e -> Set (Label t)
+freeSet names obj = Set.filter notConstructor (freeIn obj `exceptNames` names)
 
 closeDefs :: ObjectList -> ObjectList
 closeDefs objs = uncurry app (runWS0 (traverse closed objs))
  where
-  app objs1 extra =
-    if null (snd =<< extra)
-      then
+  app objs1 args
+    | null (snd =<< args) =
         objs1
-      else
-        closeDefs (foldr (uncurry (fmap . fmap <$$> applyArgs)) objs1 extra)
+    | otherwise =
+        closeDefs (foldr (uncurry (fmap . fmap <$$> applyArgs)) objs1 args)
   names =
     Set.fromList (objectName <$> objs)
-  closed obj =
-    let
-      extra =
-        Set.toList (Set.filter notConstructor (freeIn obj `exceptNames` names))
-     in
-      case obj of
-        OFunction name lls expr -> do
-          tell [(name, extra)]
-          pure (OFunction name (extra <> lls) expr)
-        OConstant name expr -> do
-          tell [(name, extra)]
-          pure (OFunction name extra expr)
-        OExternal name t ->
-          pure (OExternal name t)
+  closed obj = do
+    let extra = Set.toList (freeSet names obj)
+    case obj of
+      OFunction name lls expr -> do
+        tell [(name, extra)]
+        pure (OFunction name (extra <> lls) expr)
+      OConstant name expr -> do
+        tell [(name, extra)]
+        pure (OFunction name extra expr)
+      OExternal name t ->
+        pure (OExternal name t)
 
 applyArgs :: Name -> [Label Type] -> Expr Type -> Expr Type
 applyArgs _ [] = id
 applyArgs name (a : as) =
-  simplifyApps
+  flattenEApp
     >>> cata
       ( \case
           Core.EVar (Label t n)
@@ -365,29 +365,30 @@ pure2 f = pure . (f <$>)
 pure3 :: (Applicative f1, Functor f2, Functor f3) => (a -> b) -> f2 (f3 a) -> f1 (f2 (f3 b))
 pure3 f = pure . (f <$$>)
 
--- simplifyLamsC :: ObjectList -> Core ObjectList
--- simplifyLamsC = pure3 simplifyLams
+-- flattenELamC :: ObjectList -> Core ObjectList
+-- flattenELamC = pure3 flattenELam
 --
 -- liftLambdasC :: ObjectList -> Core ObjectList
 -- liftLambdasC = pure1 liftLambdas
 --
--- simplifyLetsC :: ObjectList -> Core ObjectList
--- simplifyLetsC = pure3 simplifyLets
+-- simplifyELetC :: ObjectList -> Core ObjectList
+-- simplifyELetC = pure3 simplifyELet
 
 pipeline :: ObjectList -> Core ObjectList
 pipeline ol = do
   a1 <- suffixNamesC ol
-  a2 <- pure3 simplifyLams a1
+  a2 <- pure3 flattenELam a1
   a3 <- pure1 liftLambdas a2
-  a4 <- pure3 simplifyLets a3
+  a4 <- pure3 simplifyELet a3
+  a5 <- pure1 closeDefs a4
   -- close defs
   -- add implicit args
-  pure a4
+  pure a5
 
 runCore :: Core a -> (a, PipelineState)
 runCore p = runState (pipelineStack p) (PipelineState 0)
 
--- xx1 objs = mapM_ print $ muteObjectTypes <$> liftLambdas (simplifyLams <$$> evalState (traverse (traverse transSuffixExpr) objs) 0)
+-- xx1 objs = mapM_ print $ muteObjectTypes <$> liftLambdas (flattenELam <$$> evalState (traverse (traverse transSuffixExpr) objs) 0)
 
 xx2 objs = runCore (pipeline objs)
 

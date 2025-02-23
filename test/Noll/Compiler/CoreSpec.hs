@@ -25,9 +25,12 @@ spec =
         liftLambdas test1 == test1Result
       it "" $ do
         liftLambdas test2 == test2Result
-    describe "simplifyLets" $ do
+    describe "simplifyELet" $ do
       it "" $ do
-        simplifyLets fixture40 == fixture41
+        simplifyELet fixture40 == fixture41
+    describe "" $ do
+      it "" $ do
+        closeDefs foo1 == foo1Result
 
 --      it "" $ do
 --        liftLambdas test3 == test3Result

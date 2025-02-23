@@ -1052,7 +1052,7 @@ fixture =
         )
     )
 
--- simplifyLams
+-- flattenELam
 fixture2 :: Expr Core.Type
 fixture2 =
   Core.let_
