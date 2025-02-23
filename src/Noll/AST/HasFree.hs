@@ -45,6 +45,9 @@ instance (Data a, Data t) => HasBound (Pattern a t) where
 class HasFree f t where
   freeIn :: f -> Set (Label t)
 
+instance (HasFree (Label t) t) where
+  freeIn = Set.singleton
+
 instance (Ord t, HasFree f t) => HasFree (Maybe f) t where
   freeIn = Set.unions . fmap freeIn
 

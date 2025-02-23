@@ -1,7 +1,9 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
@@ -9,6 +11,7 @@
 module Noll.Compiler.Core where
 
 import Control.Arrow ((>>>))
+import Control.Monad.RWS (RWS, evalRWS)
 import Control.Monad.State (MonadState, State, StateT, evalState, evalStateT, gets, modify, runState, runStateT)
 import Control.Monad.Trans (lift)
 import Control.Monad.Writer (MonadWriter, Writer, runWriter, tell)
@@ -16,7 +19,8 @@ import Data.Fix (Fix (..))
 import Data.Functor.Foldable (cata, embed, project)
 import Data.Set (Set)
 import Data.Tuple.Extra (first)
-import Noll.AST.HasFree (HasFree (..), exceptNames)
+import Debug.Trace
+import Noll.AST.HasFree (HasFree (..), boundIn, exceptNames)
 import Noll.Common.List1 (List1, NonEmpty (..), fromList1)
 import Noll.Common.Supply (supplied)
 import Noll.Core.Language (Clause (..), Expr, ExprF (..), Focus (..), Type, Typed (..), foldType)
@@ -36,6 +40,16 @@ data BlockObject t e
   | OConstant Name e
   | OExternal Name t
   deriving (Show, Eq, Ord, Functor, Foldable, Traversable)
+
+instance (Ord t, HasFree e t) => HasFree (BlockObject t e) t where
+  freeIn =
+    \case
+      OFunction _ lls e ->
+        freeIn e `exceptNames` boundIn lls
+      OConstant _ e ->
+        freeIn e
+      OExternal{} ->
+        mempty
 
 objectName :: BlockObject t e -> Name
 objectName =
@@ -180,6 +194,17 @@ simplifyLams =
 
 -------------------------------------------------------------------------------
 
+simplifyApps :: Expr t -> Expr t
+simplifyApps =
+  cata $
+    \case
+      Core.EApp t (Fix (Core.EApp _ e1 es1)) es2 ->
+        Core.app t e1 (es1 <> es2)
+      e ->
+        embed e
+
+-------------------------------------------------------------------------------
+
 simplifyLets :: Expr t -> Expr t
 simplifyLets e = relabel (Map.fromList sub) e1
  where
@@ -205,22 +230,23 @@ simplifyLets e = relabel (Map.fromList sub) e1
 
 -------------------------------------------------------------------------------
 
--- closeDefs :: [BlockObject (Core.Expr () Core.Type)] -> [BlockObject (Core.Expr () Core.Type)]
--- closeDefs objs = uncurry app (runWS0 (traverse closed objs))
--- where
---  app objs1 extra =
---    if null (snd =<< extra)
---      then objs1
---      else closeDefs (foldr (uncurry (fmap . fmap <$$> applyArgs)) objs1 extra)
+runWS0 :: RWS () w Int a -> (a, w)
+runWS0 v = evalRWS v () 0
 
 notConstructor :: Label t -> Bool
 notConstructor = not . isConstructor . labelName
 
 closeDefs :: ObjectList -> ObjectList
-closeDefs objs =
-  undefined
+closeDefs objs = uncurry app (runWS0 (traverse closed objs))
  where
-  names = Set.fromList (objectName <$> objs)
+  app objs1 extra =
+    if null (snd =<< extra)
+      then
+        objs1
+      else
+        closeDefs (foldr (uncurry (fmap . fmap <$$> applyArgs)) objs1 extra)
+  names =
+    Set.fromList (objectName <$> objs)
   closed obj =
     let
       extra =
@@ -236,23 +262,21 @@ closeDefs objs =
         OExternal name t ->
           pure (OExternal name t)
 
-applyArgs = undefined
-
--- applyArgs :: Name -> [Label Core.Type] -> Core.Expr e Core.Type -> Core.Expr e Core.Type
--- applyArgs _ [] = id
--- applyArgs name (a : as) =
---  flattenApps
---    . cata
---      ( \case
---          Core.EVar (Label t n)
---            | name == n -> do
---                let expr = Core.var (Label (Core.foldType t (Core.typeOf <$> (a : as))) n)
---                Core.app t expr (Core.var <$> a :| as)
---            | otherwise ->
---                Core.var (Label t n)
---          e ->
---            embed e
---      )
+applyArgs :: Name -> [Label Type] -> Expr Type -> Expr Type
+applyArgs _ [] = id
+applyArgs name (a : as) =
+  simplifyApps
+    >>> cata
+      ( \case
+          Core.EVar (Label t n)
+            | name == n -> do
+                let expr = Core.var (Label (Core.foldType t (Core.typeOf <$> (a : as))) n)
+                Core.app t expr (Core.var <$> a :| as)
+            | otherwise ->
+                Core.var (Label t n)
+          e ->
+            embed e
+      )
 
 -------------------------------------------------------------------------------
 

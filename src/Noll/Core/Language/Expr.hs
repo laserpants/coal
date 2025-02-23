@@ -5,7 +5,12 @@
 {-# LANGUAGE StrictData #-}
 {-# LANGUAGE TemplateHaskell #-}
 
-module Noll.Core.Language.Expr (ExprF (..), Expr, Focus (..), Clause (..)) where
+module Noll.Core.Language.Expr (
+  ExprF (..),
+  Expr,
+  Focus (..),
+  Clause (..),
+) where
 
 import Data.Eq.Deriving (deriveEq1)
 import Data.Fix (Fix (..))
@@ -31,15 +36,12 @@ deriveEq1 ''Clause
 instance (HasFree a t) => HasFree (Clause t a) t where
   freeIn (Clause (_ :| lls) e1) = freeIn e1 `exceptNames` boundIn lls
 
-instance (HasFree (Label t) t) where
-  freeIn = Set.singleton
-
 -- | Field selector
 data Focus t = Focus Name (Label t) (Label t)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
 
 instance (HasBound (Focus t)) where
-  boundIn (Focus _ (Label _ name) _) = Set.singleton name
+  boundIn (Focus _ ll1 ll2) = boundIn ll1 <> boundIn ll2
 
 -- | Parameterized (non-recursive) expression grammar
 data ExprF t a
