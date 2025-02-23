@@ -25,6 +25,7 @@ import Noll.Utils (Dictionary, Name, Over, applyM1, applyM2, foldrM, isConstruct
 import TextShow
 
 import qualified Data.Map.Strict as Map
+import qualified Data.Set as Set
 import qualified Noll.Common.List1 as List1
 import qualified Noll.Core.Language as Core
 
@@ -192,6 +193,61 @@ simplifyLets e = relabel (Map.fromList sub) e1
 
 -------------------------------------------------------------------------------
 
+-- closeDefs :: [BlockObject (Core.Expr () Core.Type)] -> [BlockObject (Core.Expr () Core.Type)]
+-- closeDefs objs = uncurry app (runWS0 (traverse closed objs))
+-- where
+--  app objs1 extra =
+--    if null (snd =<< extra)
+--      then objs1
+--      else closeDefs (foldr (uncurry (fmap . fmap <$$> applyArgs)) objs1 extra)
+
+freeIn = undefined
+
+exceptNames = undefined
+
+notConstructor :: Label t -> Bool
+notConstructor = not . isConstructor . labelName
+
+closeDefs :: ObjectList -> ObjectList
+closeDefs objs =
+  undefined
+ where
+  names = undefined
+  closed obj =
+    let
+      extra =
+        Set.toList (Set.filter notConstructor (freeIn obj `exceptNames` names))
+     in
+      case obj of
+        OFunction name lls expr -> do
+          tell [(name, extra)]
+          pure (OFunction name (extra <> lls) expr)
+        OConstant name expr -> do
+          tell [(name, extra)]
+          pure (OFunction name extra expr)
+        OExternal name t ->
+          pure (OExternal name t)
+
+applyArgs = undefined
+
+-- applyArgs :: Name -> [Label Core.Type] -> Core.Expr e Core.Type -> Core.Expr e Core.Type
+-- applyArgs _ [] = id
+-- applyArgs name (a : as) =
+--  flattenApps
+--    . cata
+--      ( \case
+--          Core.EVar (Label t n)
+--            | name == n -> do
+--                let expr = Core.var (Label (Core.foldType t (Core.typeOf <$> (a : as))) n)
+--                Core.app t expr (Core.var <$> a :| as)
+--            | otherwise ->
+--                Core.var (Label t n)
+--          e ->
+--            embed e
+--      )
+
+-------------------------------------------------------------------------------
+
 muteTypes :: Expr Type -> Expr ()
 muteTypes =
   cata $
@@ -292,6 +348,8 @@ pipeline ol = do
   a2 <- pure3 simplifyLams a1
   a3 <- pure1 liftLambdas a2
   a4 <- pure3 simplifyLets a3
+  -- close defs
+  -- add implicit args
   pure a4
 
 runCore :: Core a -> (a, PipelineState)

@@ -1,11 +1,14 @@
 {-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StrictData #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 module Noll.Core.Language.Op (Op (..)) where
 
 import Data.Eq.Deriving (deriveEq1)
+import Noll.AST.HasFree (HasFree (..))
 import Text.Show.Deriving (deriveShow1)
 
 -- | Binary operators
@@ -54,3 +57,61 @@ data Op a
 
 deriveShow1 ''Op
 deriveEq1 ''Op
+
+instance (Ord t, HasFree a t) => HasFree (Op a) t where
+  freeIn =
+    \case
+      OEqInt32 e1 e2 ->
+        freeIn e1 <> freeIn e2
+      OEqInt64 e1 e2 ->
+        freeIn e1 <> freeIn e2
+      ONEqInt32 e1 e2 ->
+        freeIn e1 <> freeIn e2
+      ONEqInt64 e1 e2 ->
+        freeIn e1 <> freeIn e2
+      OLtInt32 e1 e2 ->
+        freeIn e1 <> freeIn e2
+      OLtInt64 e1 e2 ->
+        freeIn e1 <> freeIn e2
+      OGtInt32 e1 e2 ->
+        freeIn e1 <> freeIn e2
+      OGtInt64 e1 e2 ->
+        freeIn e1 <> freeIn e2
+      OLtEInt32 e1 e2 ->
+        freeIn e1 <> freeIn e2
+      OLtEInt64 e1 e2 ->
+        freeIn e1 <> freeIn e2
+      OGtEInt32 e1 e2 ->
+        freeIn e1 <> freeIn e2
+      OGtEInt64 e1 e2 ->
+        freeIn e1 <> freeIn e2
+      OAddInt32 e1 e2 ->
+        freeIn e1 <> freeIn e2
+      OAddInt64 e1 e2 ->
+        freeIn e1 <> freeIn e2
+      OSubInt32 e1 e2 ->
+        freeIn e1 <> freeIn e2
+      OSubInt64 e1 e2 ->
+        freeIn e1 <> freeIn e2
+      OMulInt32 e1 e2 ->
+        freeIn e1 <> freeIn e2
+      OMulInt64 e1 e2 ->
+        freeIn e1 <> freeIn e2
+      OMulFloat e1 e2 ->
+        freeIn e1 <> freeIn e2
+      OMulDouble e1 e2 ->
+        freeIn e1 <> freeIn e2
+      ODivInt32 e1 e2 ->
+        freeIn e1 <> freeIn e2
+      ODivInt64 e1 e2 ->
+        freeIn e1 <> freeIn e2
+      ODivFloat e1 e2 ->
+        freeIn e1 <> freeIn e2
+      ODivDouble e1 e2 ->
+        freeIn e1 <> freeIn e2
+      OOr e1 e2 ->
+        freeIn e1 <> freeIn e2
+      OAnd e1 e2 ->
+        freeIn e1 <> freeIn e2
+      ONot e ->
+        freeIn e

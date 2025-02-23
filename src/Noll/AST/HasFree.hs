@@ -3,7 +3,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.AST.HasFree (HasBound (..), HasFree (..)) where
+module Noll.AST.HasFree (HasBound (..), HasFree (..), exceptNames) where
 
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (universeBi)
@@ -56,6 +56,9 @@ instance (Ord t, HasFree f t) => HasFree (NonEmpty f) t where
 
 instance (Ord t, HasFree f t) => HasFree (Map a f) t where
   freeIn = Set.unions . fmap freeIn
+
+instance (Ord t, HasFree s t) => HasFree (Set s) t where
+  freeIn = Set.unions . Set.map freeIn
 
 instance (Ord t, Data a, Data t) => HasFree (Guard Expression a t) t where
   freeIn = Set.fromList . universeBi
