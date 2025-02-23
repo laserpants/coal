@@ -14,7 +14,9 @@ import Control.Monad.Trans (lift)
 import Control.Monad.Writer (MonadWriter, Writer, runWriter, tell)
 import Data.Fix (Fix (..))
 import Data.Functor.Foldable (cata, embed, project)
+import Data.Set (Set)
 import Data.Tuple.Extra (first)
+import Noll.AST.HasFree (HasFree (..), exceptNames)
 import Noll.Common.List1 (List1, NonEmpty (..), fromList1)
 import Noll.Common.Supply (supplied)
 import Noll.Core.Language (Clause (..), Expr, ExprF (..), Focus (..), Type, Typed (..), foldType)
@@ -34,6 +36,16 @@ data BlockObject t e
   | OConstant Name e
   | OExternal Name t
   deriving (Show, Eq, Ord, Functor, Foldable, Traversable)
+
+objectName :: BlockObject t e -> Name
+objectName =
+  \case
+    OFunction name _ _ ->
+      name
+    OConstant name _ ->
+      name
+    OExternal name _ ->
+      name
 
 type ObjectList = [BlockObject Type (Expr Type)]
 
@@ -201,10 +213,6 @@ simplifyLets e = relabel (Map.fromList sub) e1
 --      then objs1
 --      else closeDefs (foldr (uncurry (fmap . fmap <$$> applyArgs)) objs1 extra)
 
-freeIn = undefined
-
-exceptNames = undefined
-
 notConstructor :: Label t -> Bool
 notConstructor = not . isConstructor . labelName
 
@@ -212,7 +220,7 @@ closeDefs :: ObjectList -> ObjectList
 closeDefs objs =
   undefined
  where
-  names = undefined
+  names = Set.fromList (objectName <$> objs)
   closed obj =
     let
       extra =
