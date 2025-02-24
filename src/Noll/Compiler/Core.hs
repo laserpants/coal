@@ -63,6 +63,7 @@ type ObjectList = [BlockObject Type (Expr Type)]
 
 -------------------------------------------------------------------------------
 
+-- TODO: use RWS?
 runLifting :: StateT Int (Writer ObjectList) a -> (a, ObjectList)
 runLifting e = runWriter (evalStateT e 1)
 
