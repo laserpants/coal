@@ -381,7 +381,6 @@ pipeline ol = do
   a3 <- pure1 liftLambdas a2
   a4 <- pure3 simplifyELet a3
   a5 <- pure1 closeDefs a4
-  -- close defs
   -- add implicit args
   pure a5
 
