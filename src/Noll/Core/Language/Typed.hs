@@ -5,7 +5,6 @@
 module Noll.Core.Language.Typed (Typed (..), isFunction) where
 
 import Data.Functor.Foldable (project)
-import Noll.Common.List1 (NonEmpty (..))
 import Noll.Core.Language.Expr (Expr, ExprF (..))
 import Noll.Core.Language.Op (Op (..))
 import Noll.Core.Language.Prim (Prim (..))

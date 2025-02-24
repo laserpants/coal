@@ -7,6 +7,8 @@ module Noll.Common.List1 (
 
 import Data.List.NonEmpty (
   NonEmpty (..),
+  init,
+  last,
   length,
   partition,
   reverse,

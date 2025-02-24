@@ -280,6 +280,36 @@ applyArgs name (a : as) =
 
 -------------------------------------------------------------------------------
 
+addImplicitArgs :: BlockObject Type (Expr Type) -> BlockObject Type (Expr Type)
+addImplicitArgs =
+  \case
+    f@(OFunction name lls1 expr)
+      | exprIsFun ->
+          OFunction
+            name
+            (lls1 <> lls2)
+            (flattenEApp (Core.app (List1.last ts) expr (exprs lls2)))
+      | otherwise ->
+          f
+     where
+      exprIsFun =
+        length ts > 1
+      ts =
+        Core.unfoldType (typeOf expr)
+      lls2 =
+        labels (List1.init ts)
+    o ->
+      o
+
+exprs :: [Label t] -> List1 (Expr t)
+exprs (ll : lls) = Core.var <$> ll :| lls
+exprs _ = error "Implementation error"
+
+labels :: [a] -> [Label a]
+labels ts = zipWith Label ts ["$extra." <> showt i | i <- [0 :: Int ..]]
+
+-------------------------------------------------------------------------------
+
 muteTypes :: Expr Type -> Expr ()
 muteTypes =
   cata $
@@ -381,8 +411,8 @@ pipeline ol = do
   a3 <- pure1 liftLambdas a2
   a4 <- pure3 simplifyELet a3
   a5 <- pure1 closeDefs a4
-  -- add implicit args
-  pure a5
+  a6 <- pure (fmap addImplicitArgs a5)
+  pure a6
 
 runCore :: Core a -> (a, PipelineState)
 runCore p = runState (pipelineStack p) (PipelineState 0)
