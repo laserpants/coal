@@ -10,21 +10,28 @@ module Noll.Core.Language.Expr (
   Expr,
   Focus (..),
   Clause (..),
+  Binding (..),
+  bindingLabel,
+  bindingExpr,
+  overBindingLabel,
+  overBindingExpr,
+  unzipBindings,
 ) where
 
 import Data.Eq.Deriving (deriveEq1)
 import Data.Fix (Fix (..))
 import Data.Functor.Foldable (cata)
-import Data.Set (Set, singleton)
+import Data.Set (singleton)
 import Noll.AST.HasFree (HasBound (..), HasFree (..), exceptNames)
 import Noll.Common.List1 (List1, NonEmpty (..))
 import Noll.Core.Language.Op (Op (..))
 import Noll.Core.Language.Prim (Prim (..))
 import Noll.Label (Label (..))
-import Noll.Utils (Name)
+import Noll.Utils (Name, Over)
 import Text.Show.Deriving (deriveShow1)
 
 import qualified Data.Set as Set
+import qualified Noll.Common.List1 as List1
 
 -- | Pattern matching clause
 data Clause t a = Clause (List1 (Label t)) a
@@ -36,9 +43,6 @@ deriveEq1 ''Clause
 instance (HasFree a t) => HasFree (Clause t a) t where
   freeIn (Clause (_ :| lls) e1) = freeIn e1 `exceptNames` boundIn lls
 
-instance (HasFree f t) => HasFree (Label t, f) t where
-  freeIn = freeIn . snd
-
 -- | Field selector
 data Focus t = Focus Name (Label t) (Label t)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
@@ -46,15 +50,48 @@ data Focus t = Focus Name (Label t) (Label t)
 instance (HasBound (Focus t)) where
   boundIn (Focus _ ll1 ll2) = boundIn ll1 <> boundIn ll2
 
-instance (HasBound b) => HasBound (b, Set (Label t)) where
-  boundIn = boundIn . fst
+data Binding t a = Binding (Label t) a
+  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
+
+{-# INLINE bindingLabel #-}
+bindingLabel :: Binding t a -> Label t
+bindingLabel (Binding label _) = label
+
+{-# INLINE bindingExpr #-}
+bindingExpr :: Binding t a -> a
+bindingExpr (Binding _ e) = e
+
+{-# INLINE overBindingLabel #-}
+overBindingLabel :: (Label s -> Label t) -> Binding s a -> Binding t a
+overBindingLabel f (Binding ll e) = Binding (f ll) e
+
+{-# INLINE overBindingExpr #-}
+overBindingExpr :: Over (Binding t a) a
+overBindingExpr f (Binding ll e) = Binding ll (f e)
+
+{-# INLINE unpackBinding #-}
+unpackBinding :: Binding t a -> (Label t, a)
+unpackBinding (Binding ll e) = (ll, e)
+
+{-# INLINE unzipBindings #-}
+unzipBindings :: List1 (Binding t a) -> (List1 (Label t), List1 a)
+unzipBindings = List1.unzip . fmap unpackBinding
+
+deriveShow1 ''Binding
+deriveEq1 ''Binding
+
+instance (HasFree a t) => HasFree (Binding t a) t where
+  freeIn (Binding _ e) = freeIn e
+
+instance HasBound (Binding t a) where
+  boundIn (Binding ll _) = boundIn ll
 
 -- | Parameterized (non-recursive) expression grammar
 data ExprF t a
   = -- | Variable
     EVar (Label t)
   | -- | Let-binding
-    ELet (List1 (Label t, a)) a
+    ELet (List1 (Binding t a)) a
   | -- | Literal value
     ELit Prim
   | -- | Lambda abstraction

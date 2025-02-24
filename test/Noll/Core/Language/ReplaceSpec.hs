@@ -44,8 +44,9 @@ spec =
         "y"
         "z"
         ( Core.let_
-            ( ( Label () "f"
-              , Core.lam
+            ( Core.Binding
+              ( Label () "f")
+              ( Core.lam
                   (Label () "x" :| [])
                   ( Core.op
                       ( Core.OAddInt32
@@ -59,8 +60,9 @@ spec =
             (Core.lit (Core.PInt32 1))
         )
         == Core.let_
-          ( ( Label () "f"
-            , Core.lam
+          ( Core.Binding
+             ( Label () "f" )
+            ( Core.lam
                 (Label () "x" :| [])
                 ( Core.op
                     ( Core.OAddInt32

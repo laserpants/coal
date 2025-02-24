@@ -396,8 +396,9 @@ tree t = Core.TCon "Tree" [t]
 fixture :: Expr Core.Type
 fixture =
   Core.let_
-    ( ( Label ((opaque ~> opaque) ~> (opaque ~> opaque) ~> opaque ~> opaque) "_compose_"
-      , Core.lam
+    ( Core.Binding
+      ( Label ((opaque ~> opaque) ~> (opaque ~> opaque) ~> opaque ~> opaque) "_compose_" )
+      ( Core.lam
           ( Label (opaque ~> opaque) "f"
               :| [ Label (opaque ~> opaque) "g"
                  , Label opaque "x"
@@ -417,8 +418,9 @@ fixture =
         :| []
     )
     ( Core.let_
-        ( ( Label (list opaque ~> list opaque ~> list opaque) "_list_concat_"
-          , Core.lam
+        ( Core.Binding 
+          ( Label (list opaque ~> list opaque ~> list opaque) "_list_concat_" )
+          ( Core.lam
               (Label (list opaque) "a" :| [Label (list opaque) "b"])
               ( Core.match
                   (list opaque)
@@ -451,8 +453,9 @@ fixture =
               )
           )
             :| [
-                 ( Label (compareDict ~> opaque ~> opaque ~> ordering) "compare"
-                 , Core.lam
+                 Core.Binding
+                 ( Label (compareDict ~> opaque ~> opaque ~> ordering) "compare")
+                 ( Core.lam
                     ( Label compareDict "a_1"
                         <| Label opaque "a_2"
                         <| Label opaque "a_3"
@@ -487,8 +490,9 @@ fixture =
                     )
                  )
                ,
-                 ( Label (fromInt32Dict ~> Core.int32 ~> opaque) "from_int32"
-                 , Core.lam
+                 Core.Binding
+                 ( Label (fromInt32Dict ~> Core.int32 ~> opaque) "from_int32" )
+                 ( Core.lam
                     ( Label fromInt32Dict "a_1"
                         <| Label Core.int32 "a_2"
                         :| []
@@ -519,8 +523,9 @@ fixture =
                     )
                  )
                ,
-                 ( Label (opaque ~> (opaque ~> opaque) ~> opaque) "_forward_application_"
-                 , Core.lam
+                 Core.Binding
+                 ( Label (opaque ~> (opaque ~> opaque) ~> opaque) "_forward_application_" )
+                 ( Core.lam
                     (Label opaque "x" <| Label (opaque ~> opaque) "f" :| [])
                     ( Core.app
                         opaque
@@ -529,8 +534,9 @@ fixture =
                     )
                  )
                ,
-                 ( Label (Core.bool ~> Core.bool) "_not_"
-                 , Core.lam
+                 Core.Binding
+                 ( Label (Core.bool ~> Core.bool) "_not_")
+                 ( Core.lam
                     (Label Core.bool "a" :| [])
                     ( Core.if_
                         (Core.var (Label Core.bool "a"))
@@ -539,8 +545,9 @@ fixture =
                     )
                  )
                ,
-                 ( Label (Core.int32 ~> Core.int32 ~> ordering) "compare__int32"
-                 , Core.lam
+                 Core.Binding
+                 ( Label (Core.int32 ~> Core.int32 ~> ordering) "compare__int32" )
+                 ( Core.lam
                     ( Label Core.int32 "x"
                         <| Label Core.int32 "y"
                         :| []
@@ -566,14 +573,16 @@ fixture =
                     )
                  )
                ,
-                 ( Label (Core.int32 ~> Core.int32) "from_int32__int32"
-                 , Core.lam
+                 Core.Binding
+                 ( Label (Core.int32 ~> Core.int32) "from_int32__int32" )
+                 ( Core.lam
                     (Label Core.int32 "n" :| [])
                     (Core.var (Label Core.int32 "n"))
                  )
                ,
-                 ( Label (compareDict ~> opaque ~> opaque ~> Core.bool) "lte"
-                 , Core.lam
+                 Core.Binding
+                 ( Label (compareDict ~> opaque ~> opaque ~> Core.bool) "lte" )
+                 ( Core.lam
                     (Label compareDict "d_1" :| [])
                     ( Core.lam
                         (Label opaque "x" :| [])
@@ -606,8 +615,9 @@ fixture =
                     )
                  )
                ,
-                 ( Label (compareDict ~> opaque ~> opaque ~> Core.bool) "gt"
-                 , Core.lam
+                 Core.Binding
+                 ( Label (compareDict ~> opaque ~> opaque ~> Core.bool) "gt" )
+                 ( Core.lam
                     (Label compareDict "d_1" :| [])
                     ( Core.lam
                         (Label opaque "x" :| [])
@@ -628,8 +638,9 @@ fixture =
                     )
                  )
                ,
-                 ( Label (compareDict ~> maxMinRecord opaque ~> opaque ~> Core.bool) "in_range"
-                 , Core.lam
+                 Core.Binding
+                 ( Label (compareDict ~> maxMinRecord opaque ~> opaque ~> Core.bool) "in_range" )
+                 ( Core.lam
                     (Label compareDict "d_1" :| [])
                     ( Core.lam
                         (Label (maxMinRecord opaque) "range" <| Label opaque "n" :| [])
@@ -698,14 +709,16 @@ fixture =
                     )
                  )
                ,
-                 ( Label (orderedDict ~> list opaque ~> tree opaque) "from_list"
-                 , Core.lam
+                 Core.Binding
+                 ( Label (orderedDict ~> list opaque ~> tree opaque) "from_list" )
+                 ( Core.lam
                     (Label orderedDict "d_1" :| [])
                     ( Core.lam
                         (Label (list opaque) "list" :| [])
                         ( Core.let_
-                            ( ( Label (list opaque ~> maxMinRecord opaque ~> tree opaque) "fold_"
-                              , Core.lam
+                            ( Core.Binding
+                              ( Label (list opaque ~> maxMinRecord opaque ~> tree opaque) "fold_" )
+                              ( Core.lam
                                   (Label (list opaque) "a_0" :| [])
                                   ( Core.match
                                       (maxMinRecord opaque ~> tree opaque)
@@ -878,12 +891,14 @@ fixture =
                     )
                  )
                ,
-                 ( Label (tree opaque ~> list opaque) "flatten"
-                 , Core.lam
+                 Core.Binding
+                 ( Label (tree opaque ~> list opaque) "flatten" )
+                 ( Core.lam
                     (Label (tree opaque) "tree" :| [])
                     ( Core.let_
-                        ( ( Label (tree opaque ~> list opaque) "fold_"
-                          , Core.lam
+                        ( Core.Binding
+                          ( Label (tree opaque ~> list opaque) "fold_" )
+                          ( Core.lam
                               (Label (tree opaque) "a_0" :| [])
                               ( Core.match
                                   (list opaque)
@@ -932,8 +947,9 @@ fixture =
                     )
                  )
                ,
-                 ( Label (orderedDict ~> list opaque ~> list opaque) "qsort"
-                 , Core.lam
+                 Core.Binding
+                 ( Label (orderedDict ~> list opaque ~> list opaque) "qsort" )
+                 ( Core.lam
                     (Label orderedDict "d_1" :| [])
                     ( Core.app
                         (list opaque ~> list opaque)
@@ -959,8 +975,9 @@ fixture =
                ]
         )
         ( Core.let_
-            ( ( Label (list Core.int32) "xs"
-              , Core.app
+            ( Core.Binding
+              ( Label (list Core.int32) "xs" )
+              ( Core.app
                   (list Core.int32)
                   (Core.var (Label (Core.int32 ~> list Core.int32 ~> list Core.int32) "$Cons"))
                   ( Core.lit (Core.PInt32 2)
@@ -1000,8 +1017,10 @@ fixture =
                 :| []
             )
             ( Core.let_
-                ( ( Label (list Core.int32) "ys"
-                  , Core.app
+                ( 
+                  Core.Binding
+                  ( Label (list Core.int32) "ys" )
+                  ( Core.app
                       (list Core.int32)
                       (Core.var (Label (orderedInt32Dict ~> list Core.int32 ~> list Core.int32) "qsort"))
                       ( Core.app
@@ -1056,8 +1075,9 @@ fixture =
 fixture2 :: Expr Core.Type
 fixture2 =
   Core.let_
-    ( ( Label ((opaque ~> opaque) ~> (opaque ~> opaque) ~> opaque ~> opaque) "_compose_"
-      , Core.lam
+    ( Core.Binding
+      ( Label ((opaque ~> opaque) ~> (opaque ~> opaque) ~> opaque ~> opaque) "_compose_" )
+      ( Core.lam
           ( Label (opaque ~> opaque) "f"
               :| [ Label (opaque ~> opaque) "g"
                  , Label opaque "x"
@@ -1077,8 +1097,9 @@ fixture2 =
         :| []
     )
     ( Core.let_
-        ( ( Label (list opaque ~> list opaque ~> list opaque) "_list_concat_"
-          , Core.lam
+        ( Core.Binding
+          ( Label (list opaque ~> list opaque ~> list opaque) "_list_concat_" )
+          ( Core.lam
               (Label (list opaque) "a" :| [Label (list opaque) "b"])
               ( Core.match
                   (list opaque)
@@ -1111,8 +1132,9 @@ fixture2 =
               )
           )
             :| [
-                 ( Label (compareDict ~> opaque ~> opaque ~> ordering) "compare"
-                 , Core.lam
+                 Core.Binding
+                 ( Label (compareDict ~> opaque ~> opaque ~> ordering) "compare" )
+                 ( Core.lam
                     ( Label compareDict "a_1"
                         <| Label opaque "a_2"
                         <| Label opaque "a_3"
@@ -1147,8 +1169,9 @@ fixture2 =
                     )
                  )
                ,
-                 ( Label (fromInt32Dict ~> Core.int32 ~> opaque) "from_int32"
-                 , Core.lam
+                 Core.Binding
+                 ( Label (fromInt32Dict ~> Core.int32 ~> opaque) "from_int32" )
+                 ( Core.lam
                     ( Label fromInt32Dict "a_1"
                         <| Label Core.int32 "a_2"
                         :| []
@@ -1179,8 +1202,9 @@ fixture2 =
                     )
                  )
                ,
-                 ( Label (opaque ~> (opaque ~> opaque) ~> opaque) "_forward_application_"
-                 , Core.lam
+                 Core.Binding
+                 ( Label (opaque ~> (opaque ~> opaque) ~> opaque) "_forward_application_" )
+                 ( Core.lam
                     (Label opaque "x" <| Label (opaque ~> opaque) "f" :| [])
                     ( Core.app
                         opaque
@@ -1189,8 +1213,9 @@ fixture2 =
                     )
                  )
                ,
-                 ( Label (Core.bool ~> Core.bool) "_not_"
-                 , Core.lam
+                 Core.Binding
+                 ( Label (Core.bool ~> Core.bool) "_not_" )
+                 ( Core.lam
                     (Label Core.bool "a" :| [])
                     ( Core.if_
                         (Core.var (Label Core.bool "a"))
@@ -1199,8 +1224,9 @@ fixture2 =
                     )
                  )
                ,
-                 ( Label (Core.int32 ~> Core.int32 ~> ordering) "compare__int32"
-                 , Core.lam
+                 Core.Binding
+                 ( Label (Core.int32 ~> Core.int32 ~> ordering) "compare__int32" )
+                 ( Core.lam
                     ( Label Core.int32 "x"
                         <| Label Core.int32 "y"
                         :| []
@@ -1226,14 +1252,16 @@ fixture2 =
                     )
                  )
                ,
-                 ( Label (Core.int32 ~> Core.int32) "from_int32__int32"
-                 , Core.lam
+                 Core.Binding
+                 ( Label (Core.int32 ~> Core.int32) "from_int32__int32" )
+                 ( Core.lam
                     (Label Core.int32 "n" :| [])
                     (Core.var (Label Core.int32 "n"))
                  )
                ,
-                 ( Label (compareDict ~> opaque ~> opaque ~> Core.bool) "lte"
-                 , Core.lam
+                 Core.Binding
+                 ( Label (compareDict ~> opaque ~> opaque ~> Core.bool) "lte" )
+                 ( Core.lam
                     (Label compareDict "d_1" <| Label opaque "x" <| Label opaque "y" :| [])
                     ( Core.match
                         Core.bool
@@ -1260,8 +1288,9 @@ fixture2 =
                     )
                  )
                ,
-                 ( Label (compareDict ~> opaque ~> opaque ~> Core.bool) "gt"
-                 , Core.lam
+                 Core.Binding
+                 ( Label (compareDict ~> opaque ~> opaque ~> Core.bool) "gt" )
+                 ( Core.lam
                     (Label compareDict "d_1" <| Label opaque "x" :| [])
                     ( Core.app
                         (opaque ~> Core.bool)
@@ -1279,8 +1308,9 @@ fixture2 =
                     )
                  )
                ,
-                 ( Label (compareDict ~> maxMinRecord opaque ~> opaque ~> Core.bool) "in_range"
-                 , Core.lam
+                 Core.Binding
+                 ( Label (compareDict ~> maxMinRecord opaque ~> opaque ~> Core.bool) "in_range" )
+                 ( Core.lam
                     (Label compareDict "d_1" <| Label (maxMinRecord opaque) "range" <| Label opaque "n" :| [])
                     ( Core.match
                         Core.bool
@@ -1346,12 +1376,15 @@ fixture2 =
                     )
                  )
                ,
-                 ( Label (orderedDict ~> list opaque ~> tree opaque) "from_list"
-                 , Core.lam
+                 Core.Binding
+                 ( Label (orderedDict ~> list opaque ~> tree opaque) "from_list" )
+                 ( Core.lam
                     (Label orderedDict "d_1" <| Label (list opaque) "list" :| [])
                     ( Core.let_
-                        ( ( Label (list opaque ~> maxMinRecord opaque ~> tree opaque) "fold_"
-                          , Core.lam
+                        ( 
+                          Core.Binding
+                          ( Label (list opaque ~> maxMinRecord opaque ~> tree opaque) "fold_" )
+                          ( Core.lam
                               (Label (list opaque) "a_0" :| [])
                               ( Core.match
                                   (maxMinRecord opaque ~> tree opaque)
@@ -1523,12 +1556,14 @@ fixture2 =
                     )
                  )
                ,
-                 ( Label (tree opaque ~> list opaque) "flatten"
-                 , Core.lam
+                 Core.Binding
+                 ( Label (tree opaque ~> list opaque) "flatten" )
+                 ( Core.lam
                     (Label (tree opaque) "tree" :| [])
                     ( Core.let_
-                        ( ( Label (tree opaque ~> list opaque) "fold_"
-                          , Core.lam
+                        ( Core.Binding
+                          ( Label (tree opaque ~> list opaque) "fold_" )
+                          ( Core.lam
                               (Label (tree opaque) "a_0" :| [])
                               ( Core.match
                                   (list opaque)
@@ -1577,8 +1612,9 @@ fixture2 =
                     )
                  )
                ,
-                 ( Label (orderedDict ~> list opaque ~> list opaque) "qsort"
-                 , Core.lam
+                 Core.Binding
+                 ( Label (orderedDict ~> list opaque ~> list opaque) "qsort" )
+                 ( Core.lam
                     (Label orderedDict "d_1" :| [])
                     ( Core.app
                         (list opaque ~> list opaque)
@@ -1604,8 +1640,10 @@ fixture2 =
                ]
         )
         ( Core.let_
-            ( ( Label (list Core.int32) "xs"
-              , Core.app
+            ( 
+              Core.Binding
+              ( Label (list Core.int32) "xs" )
+              ( Core.app
                   (list Core.int32)
                   (Core.var (Label (Core.int32 ~> list Core.int32 ~> list Core.int32) "$Cons"))
                   ( Core.lit (Core.PInt32 2)
@@ -1645,8 +1683,10 @@ fixture2 =
                 :| []
             )
             ( Core.let_
-                ( ( Label (list Core.int32) "ys"
-                  , Core.app
+                ( 
+                  Core.Binding
+                  ( Label (list Core.int32) "ys" )
+                  ( Core.app
                       (list Core.int32)
                       (Core.var (Label (orderedInt32Dict ~> list Core.int32 ~> list Core.int32) "qsort"))
                       ( Core.app

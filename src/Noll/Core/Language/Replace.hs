@@ -8,9 +8,9 @@ import Control.Monad.Identity (runIdentity)
 import Data.Functor.Foldable (embed, para)
 import Data.Tuple.Extra (second)
 import Noll.Common.List1 (List1)
-import Noll.Core.Language (Clause (..), Expr, ExprF (..), Focus (..))
+import Noll.Core.Language (Binding (..), Clause (..), Expr, ExprF (..), Focus (..), bindingLabel, overBindingExpr)
 import Noll.Label (Label (..), labelName, setLabelName)
-import Noll.Utils (Dictionary, Map, Name)
+import Noll.Utils (Dictionary, Map, Name, (<$$>))
 
 import qualified Data.Map.Strict as Map
 import qualified Noll.Core.Language as Core
@@ -23,12 +23,11 @@ replaceVarM name fn =
         | var == name -> fn ll
         | otherwise -> pure (Core.var ll)
       ELet vs e1
-        | name `matchesAnyLabel` (fst <$> vs) ->
-            pure (Core.let_ (second fst <$> vs) (fst e1))
-        | otherwise ->
-            Core.let_
-              <$> traverse (sequence <$> second snd) vs
-              <*> snd e1
+        | name `matchesAnyLabel` (bindingLabel <$> vs) -> do
+            pure (Core.let_ (fst <$$> vs) (fst e1))
+        | otherwise -> do
+            ws <- traverse sequence (snd <$$> vs)
+            Core.let_ ws <$> snd e1
       ELam vs e1
         | name `matchesAnyLabel` vs ->
             pure (Core.lam vs (fst e1))

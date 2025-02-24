@@ -23,7 +23,7 @@ import Debug.Trace
 import Noll.AST.HasFree (HasFree (..), boundIn, exceptNames)
 import Noll.Common.List1 (List1, NonEmpty (..), fromList1)
 import Noll.Common.Supply (supplied)
-import Noll.Core.Language (Clause (..), Expr, ExprF (..), Focus (..), Type, Typed (..), foldType)
+import Noll.Core.Language (Binding (..), Clause (..), Expr, ExprF (..), Focus (..), Type, Typed (..), bindingLabel, foldType, overBindingLabel, unzipBindings)
 import Noll.Core.Language.Replace (Sub, relabel)
 import Noll.Core.Language.Typed (isFunction)
 import Noll.Label (Label (..), labelName)
@@ -94,9 +94,9 @@ moveUp name vs f = do
 -------------------------------------------------------------------------------
 
 letLiftFromExpression :: Name -> Expr Type -> ObjectList
-letLiftFromExpression name expr = toBlockObject name e : (uncurry bob <$> objs)
+letLiftFromExpression name expr = toBlockObject name e : (toBob <$> objs)
  where
-  bob = toBlockObject . labelName
+  toBob (Binding (Label _ name1) e1) = toBlockObject name1 e1
   (e, objs) = runWriter (transLetLifting expr)
 
 toBlockObject :: Name -> Expr Type -> BlockObject Type (Expr Type)
@@ -108,13 +108,13 @@ toBlockObject name =
       e ->
         OConstant name (embed e)
 
-transLetLifting :: (MonadWriter [(Label Type, Expr Type)] m) => Expr Type -> m (Expr Type)
+transLetLifting :: (MonadWriter [Binding Type (Expr Type)] m) => Expr Type -> m (Expr Type)
 transLetLifting =
   cata $
     \case
       Core.ELet vs e -> do
         as <- traverse sequence vs
-        let (fs, es) = List1.partition (isFunction . fst) as
+        let (fs, es) = List1.partition (isFunction . bindingLabel) as
         tell fs
         case es of
           w : ws ->
@@ -131,9 +131,9 @@ transSuffixExpr =
   cata $
     \case
       Core.ELet vs e -> do
-        let (lls, es) = List1.unzip vs
+        let (lls, es) = unzipBindings vs
         (lls1, a1, a2) <- applyM2 (addSuffix2 lls) (sequence es) e
-        pure (Core.let_ (List1.zip lls1 a1) a2)
+        pure (Core.let_ (List1.zipWith Binding lls1 a1) a2)
       Core.ELam lls e -> do
         (lls1, a1) <- applyM1 (addSuffix lls) e
         pure (Core.lam lls1 a1)
@@ -211,16 +211,17 @@ simplifyELet e = relabel (Map.fromList sub) e1
   subst =
     cata $
       \case
-        ELet vs e1 -> do
+        ELet vs f -> do
           binds <- foldrM go [] =<< traverse sequence vs
           case binds of
             a : as ->
-              Core.let_ (a :| as) <$> e1
+              Core.let_ (a :| as) <$> f
             [] ->
-              e1
-        e ->
-          embed <$> sequence e
-  go (ll1, Fix (Core.EVar ll2)) ls = do
+              f
+        f ->
+          embed <$> sequence f
+
+  go (Binding ll1 (Fix (Core.EVar ll2))) ls = do
     tell [(labelName ll1, labelName ll2)]
     pure ls
   go l ls =
@@ -287,7 +288,7 @@ muteTypes =
       EVar (Label _ name) ->
         Core.var (Label () name)
       ELet vs e ->
-        Core.let_ (first muteLabelTypes <$> vs) e
+        Core.let_ (overBindingLabel muteLabelTypes <$> vs) e
       ELit p ->
         Core.lit p
       ELam lls e ->

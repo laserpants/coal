@@ -38,9 +38,10 @@ spec =
 fixture1 :: Core.Expr ()
 fixture1 =
   Core.let_
-    ( ( Label () "a"
-      , Core.var (Label () "b")
-      )
+    ( 
+      Core.Binding
+      ( Label () "a" )
+      ( Core.var (Label () "b"))
         :| []
     )
     (Core.var (Label () "c"))
@@ -94,8 +95,9 @@ tree t = Core.TCon "Tree" [t]
 fixture3 :: Core.Expr Core.Type
 fixture3 =
   Core.let_
-    ( ( Label ((opaque ~> opaque) ~> (opaque ~> opaque) ~> opaque ~> opaque) "_compose_"
-      , Core.lam
+    ( Core.Binding
+     ( Label ((opaque ~> opaque) ~> (opaque ~> opaque) ~> opaque ~> opaque) "_compose_" )
+      ( Core.lam
           ( Label (opaque ~> opaque) "f"
               :| [ Label (opaque ~> opaque) "g"
                  , Label opaque "x"
@@ -115,8 +117,10 @@ fixture3 =
         :| []
     )
     ( Core.let_
-        ( ( Label (list opaque ~> list opaque ~> list opaque) "_list_concat_"
-          , Core.lam
+        ( 
+          Core.Binding
+          ( Label (list opaque ~> list opaque ~> list opaque) "_list_concat_" )
+          ( Core.lam
               (Label (list opaque) "a" :| [Label (list opaque) "b"])
               ( Core.match
                   (list opaque)
@@ -149,8 +153,9 @@ fixture3 =
               )
           )
             :| [
-                 ( Label (compareDict ~> opaque ~> opaque ~> ordering) "compare"
-                 , Core.lam
+                 Core.Binding
+                 ( Label (compareDict ~> opaque ~> opaque ~> ordering) "compare" )
+                 ( Core.lam
                     ( Label compareDict "a_1"
                         <| Label opaque "a_2"
                         <| Label opaque "a_3"
@@ -192,8 +197,10 @@ fixture3 =
 fixture4 :: Core.Expr Core.Type
 fixture4 =
   Core.let_
-    ( ( Label ((opaque ~> opaque) ~> (opaque ~> opaque) ~> opaque ~> opaque) "_compose_.[15]"
-      , Core.lam
+    ( 
+      Core.Binding
+      ( Label ((opaque ~> opaque) ~> (opaque ~> opaque) ~> opaque ~> opaque) "_compose_.[15]" )
+      ( Core.lam
           ( Label (opaque ~> opaque) "f.[0]"
               :| [ Label (opaque ~> opaque) "g.[1]"
                  , Label opaque "x.[2]"
@@ -213,8 +220,10 @@ fixture4 =
         :| []
     )
     ( Core.let_
-        ( ( Label (list opaque ~> list opaque ~> list opaque) "_list_concat_.[13]"
-          , Core.lam
+        ( 
+          Core.Binding
+          ( Label (list opaque ~> list opaque ~> list opaque) "_list_concat_.[13]" )
+          ( Core.lam
               (Label (list opaque) "a.[5]" :| [Label (list opaque) "b.[6]"])
               ( Core.match
                   (list opaque)
@@ -247,8 +256,9 @@ fixture4 =
               )
           )
             :| [
-                 ( Label (compareDict ~> opaque ~> opaque ~> ordering) "compare.[14]"
-                 , Core.lam
+                 Core.Binding
+                 ( Label (compareDict ~> opaque ~> opaque ~> ordering) "compare.[14]" )
+                 ( Core.lam
                     ( Label compareDict "a_1.[10]"
                         <| Label opaque "a_2.[11]"
                         <| Label opaque "a_3.[12]"
@@ -342,8 +352,10 @@ test2 =
           )
           (Core.var (Label Core.int32 "n"))
           ( Core.let_
-              ( ( Label Core.int32 "m"
-                , Core.op
+              ( 
+                Core.Binding
+                 ( Label Core.int32 "m" )
+                 ( Core.op
                     ( Core.OMulInt32
                         (Core.var (Label Core.int32 "x"))
                         ( Core.app
@@ -375,9 +387,10 @@ test2 =
       "factorial"
       [Label Core.int32 "z"]
       ( Core.let_
-          ( ( Label Core.int32 "n"
-            , Core.lit (Core.PInt32 1)
-            )
+          ( 
+            Core.Binding
+              ( Label Core.int32 "n" )
+              ( Core.lit (Core.PInt32 1) )
               :| []
           )
           ( Core.app
@@ -404,8 +417,9 @@ test2Result =
           )
           (Core.var (Label Core.int32 "n"))
           ( Core.let_
-              ( ( Label Core.int32 "m"
-                , Core.op
+              ( Core.Binding
+                ( Label Core.int32 "m" )
+                ( Core.op
                     ( Core.OMulInt32
                         (Core.var (Label Core.int32 "x"))
                         ( Core.app
@@ -434,9 +448,10 @@ test2Result =
       "factorial"
       [Label Core.int32 "z"]
       ( Core.let_
-          ( ( Label Core.int32 "n"
-            , Core.lit (Core.PInt32 1)
-            )
+          ( 
+            Core.Binding
+            ( Label Core.int32 "n")
+            ( Core.lit (Core.PInt32 1))
               :| []
           )
           ( Core.app
@@ -457,9 +472,9 @@ test2Result =
 fixture40 :: Core.Expr ()
 fixture40 =
   Core.let_
-    ( ( Label () "a"
-      , Core.var (Label () "b")
-      )
+    ( Core.Binding
+      ( Label () "a" )
+      ( Core.var (Label () "b"))
         :| []
     )
     (Core.var (Label () "a"))
@@ -470,7 +485,7 @@ fixture41 = Core.var (Label () "b")
 fixture42 =
   ( Fix
       ( ELet
-          ((Label () "fold_.[48]", Fix (EVar (Label () "$anon.13"))) :| [])
+          (Core.Binding (Label () "fold_.[48]") (Fix (EVar (Label () "$anon.13"))) :| [])
           (Fix (EApp () (Fix (EVar (Label () "fold_.[48]"))) (Fix (EVar (Label () "list.[49]")) :| [Fix (EApp () (Fix (EVar (Label () "$Record"))) (Fix (EExt (Label () "min") (Fix (EApp () (Fix (EVar (Label () "from_int32.[68]"))) (Fix (EVar (Label () "d_1.[50]")) :| [Fix (ELit (PInt32 0))]))) (Fix (EExt (Label () "max") (Fix (EApp () (Fix (EVar (Label () "from_int32.[68]"))) (Fix (EVar (Label () "d_1.[50]")) :| [Fix (ELit (PInt32 (-1)))]))) (Fix ENil)))) :| []))])))
       )
   )
