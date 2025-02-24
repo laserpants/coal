@@ -18,8 +18,6 @@ import Control.Monad.Writer (MonadWriter, Writer, runWriter, tell)
 import Data.Fix (Fix (..))
 import Data.Functor.Foldable (cata, embed, project)
 import Data.Set (Set)
-import Data.Tuple.Extra (first)
-import Debug.Trace
 import Noll.AST.HasFree (HasFree (..), boundIn, exceptNames)
 import Noll.Common.List1 (List1, NonEmpty (..), fromList1)
 import Noll.Common.Supply (supplied)
