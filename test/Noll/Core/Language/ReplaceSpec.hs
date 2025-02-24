@@ -45,32 +45,32 @@ spec =
         "z"
         ( Core.let_
             ( Core.Binding
-              ( Label () "f")
-              ( Core.lam
-                  (Label () "x" :| [])
-                  ( Core.op
-                      ( Core.OAddInt32
-                          (Core.var (Label () "x"))
-                          (Core.var (Label () "y"))
-                      )
-                  )
-              )
+                (Label () "f")
+                ( Core.lam
+                    (Label () "x" :| [])
+                    ( Core.op
+                        ( Core.OAddInt32
+                            (Core.var (Label () "x"))
+                            (Core.var (Label () "y"))
+                        )
+                    )
+                )
                 :| []
             )
             (Core.lit (Core.PInt32 1))
         )
         == Core.let_
           ( Core.Binding
-             ( Label () "f" )
-            ( Core.lam
-                (Label () "x" :| [])
-                ( Core.op
-                    ( Core.OAddInt32
-                        (Core.var (Label () "x"))
-                        (Core.var (Label () "z"))
-                    )
-                )
-            )
+              (Label () "f")
+              ( Core.lam
+                  (Label () "x" :| [])
+                  ( Core.op
+                      ( Core.OAddInt32
+                          (Core.var (Label () "x"))
+                          (Core.var (Label () "z"))
+                      )
+                  )
+              )
               :| []
           )
           (Core.lit (Core.PInt32 1))

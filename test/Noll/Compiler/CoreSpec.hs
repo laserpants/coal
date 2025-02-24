@@ -38,10 +38,9 @@ spec =
 fixture1 :: Core.Expr ()
 fixture1 =
   Core.let_
-    ( 
-      Core.Binding
-      ( Label () "a" )
-      ( Core.var (Label () "b"))
+    ( Core.Binding
+        (Label () "a")
+        (Core.var (Label () "b"))
         :| []
     )
     (Core.var (Label () "c"))
@@ -96,99 +95,97 @@ fixture3 :: Core.Expr Core.Type
 fixture3 =
   Core.let_
     ( Core.Binding
-     ( Label ((opaque ~> opaque) ~> (opaque ~> opaque) ~> opaque ~> opaque) "_compose_" )
-      ( Core.lam
-          ( Label (opaque ~> opaque) "f"
-              :| [ Label (opaque ~> opaque) "g"
-                 , Label opaque "x"
-                 ]
-          )
-          ( Core.app
-              opaque
-              (Core.var (Label (opaque ~> opaque) "f"))
-              ( Core.app
-                  opaque
-                  (Core.var (Label (opaque ~> opaque) "g"))
-                  (Core.var (Label opaque "x") :| [])
-                  :| []
-              )
-          )
-      )
+        (Label ((opaque ~> opaque) ~> (opaque ~> opaque) ~> opaque ~> opaque) "_compose_")
+        ( Core.lam
+            ( Label (opaque ~> opaque) "f"
+                :| [ Label (opaque ~> opaque) "g"
+                   , Label opaque "x"
+                   ]
+            )
+            ( Core.app
+                opaque
+                (Core.var (Label (opaque ~> opaque) "f"))
+                ( Core.app
+                    opaque
+                    (Core.var (Label (opaque ~> opaque) "g"))
+                    (Core.var (Label opaque "x") :| [])
+                    :| []
+                )
+            )
+        )
         :| []
     )
     ( Core.let_
-        ( 
-          Core.Binding
-          ( Label (list opaque ~> list opaque ~> list opaque) "_list_concat_" )
-          ( Core.lam
-              (Label (list opaque) "a" :| [Label (list opaque) "b"])
-              ( Core.match
-                  (list opaque)
-                  (Core.var (Label (list opaque) "a"))
-                  ( Clause
-                      (Label (list opaque) "$Nil" :| [])
-                      (Core.var (Label (list opaque) "b"))
-                      :| [ Clause
-                            ( Label (opaque ~> list opaque ~> list opaque) "$Cons"
-                                <| Label opaque "x"
-                                <| Label (list opaque) "xs"
-                                :| []
-                            )
-                            ( Core.app
-                                (list opaque)
-                                (Core.var (Label (opaque ~> list opaque ~> list opaque) "$Cons"))
-                                ( Core.var (Label opaque "x")
-                                    <| Core.app
-                                      (list opaque)
-                                      (Core.var (Label (list opaque ~> list opaque ~> list opaque) "_list_concat_"))
-                                      ( Core.var (Label (list opaque) "xs")
-                                          <| Core.var (Label (list opaque) "b")
+        ( Core.Binding
+            (Label (list opaque ~> list opaque ~> list opaque) "_list_concat_")
+            ( Core.lam
+                (Label (list opaque) "a" :| [Label (list opaque) "b"])
+                ( Core.match
+                    (list opaque)
+                    (Core.var (Label (list opaque) "a"))
+                    ( Clause
+                        (Label (list opaque) "$Nil" :| [])
+                        (Core.var (Label (list opaque) "b"))
+                        :| [ Clause
+                              ( Label (opaque ~> list opaque ~> list opaque) "$Cons"
+                                  <| Label opaque "x"
+                                  <| Label (list opaque) "xs"
+                                  :| []
+                              )
+                              ( Core.app
+                                  (list opaque)
+                                  (Core.var (Label (opaque ~> list opaque ~> list opaque) "$Cons"))
+                                  ( Core.var (Label opaque "x")
+                                      <| Core.app
+                                        (list opaque)
+                                        (Core.var (Label (list opaque ~> list opaque ~> list opaque) "_list_concat_"))
+                                        ( Core.var (Label (list opaque) "xs")
+                                            <| Core.var (Label (list opaque) "b")
+                                            :| []
+                                        )
+                                      :| []
+                                  )
+                              )
+                           ]
+                    )
+                )
+            )
+            :| [ Core.Binding
+                  (Label (compareDict ~> opaque ~> opaque ~> ordering) "compare")
+                  ( Core.lam
+                      ( Label compareDict "a_1"
+                          <| Label opaque "a_2"
+                          <| Label opaque "a_3"
+                          :| []
+                      )
+                      ( Core.match
+                          ordering
+                          (Core.var (Label compareDict "a_1"))
+                          ( Clause
+                              ( Label (compareRow ~> compareDict) "$Record"
+                                  <| Label compareRow "r_1"
+                                  :| []
+                              )
+                              ( Core.sel
+                                  ( Focus
+                                      "compare"
+                                      (Label (opaque ~> opaque ~> ordering) "f_1")
+                                      (Label opaque "q_1")
+                                  )
+                                  (Core.var (Label compareRow "r_1"))
+                                  ( Core.app
+                                      ordering
+                                      (Core.var (Label (opaque ~> opaque ~> ordering) "f_1"))
+                                      ( Core.var (Label opaque "a_2")
+                                          <| Core.var (Label opaque "a_3")
                                           :| []
                                       )
-                                    :| []
-                                )
-                            )
-                         ]
+                                  )
+                              )
+                              :| []
+                          )
+                      )
                   )
-              )
-          )
-            :| [
-                 Core.Binding
-                 ( Label (compareDict ~> opaque ~> opaque ~> ordering) "compare" )
-                 ( Core.lam
-                    ( Label compareDict "a_1"
-                        <| Label opaque "a_2"
-                        <| Label opaque "a_3"
-                        :| []
-                    )
-                    ( Core.match
-                        ordering
-                        (Core.var (Label compareDict "a_1"))
-                        ( Clause
-                            ( Label (compareRow ~> compareDict) "$Record"
-                                <| Label compareRow "r_1"
-                                :| []
-                            )
-                            ( Core.sel
-                                ( Focus
-                                    "compare"
-                                    (Label (opaque ~> opaque ~> ordering) "f_1")
-                                    (Label opaque "q_1")
-                                )
-                                (Core.var (Label compareRow "r_1"))
-                                ( Core.app
-                                    ordering
-                                    (Core.var (Label (opaque ~> opaque ~> ordering) "f_1"))
-                                    ( Core.var (Label opaque "a_2")
-                                        <| Core.var (Label opaque "a_3")
-                                        :| []
-                                    )
-                                )
-                            )
-                            :| []
-                        )
-                    )
-                 )
                ]
         )
         (Core.lit (Core.PInt32 1))
@@ -197,101 +194,98 @@ fixture3 =
 fixture4 :: Core.Expr Core.Type
 fixture4 =
   Core.let_
-    ( 
-      Core.Binding
-      ( Label ((opaque ~> opaque) ~> (opaque ~> opaque) ~> opaque ~> opaque) "_compose_.[15]" )
-      ( Core.lam
-          ( Label (opaque ~> opaque) "f.[0]"
-              :| [ Label (opaque ~> opaque) "g.[1]"
-                 , Label opaque "x.[2]"
-                 ]
-          )
-          ( Core.app
-              opaque
-              (Core.var (Label (opaque ~> opaque) "f.[0]"))
-              ( Core.app
-                  opaque
-                  (Core.var (Label (opaque ~> opaque) "g.[1]"))
-                  (Core.var (Label opaque "x.[2]") :| [])
-                  :| []
-              )
-          )
-      )
+    ( Core.Binding
+        (Label ((opaque ~> opaque) ~> (opaque ~> opaque) ~> opaque ~> opaque) "_compose_.[15]")
+        ( Core.lam
+            ( Label (opaque ~> opaque) "f.[0]"
+                :| [ Label (opaque ~> opaque) "g.[1]"
+                   , Label opaque "x.[2]"
+                   ]
+            )
+            ( Core.app
+                opaque
+                (Core.var (Label (opaque ~> opaque) "f.[0]"))
+                ( Core.app
+                    opaque
+                    (Core.var (Label (opaque ~> opaque) "g.[1]"))
+                    (Core.var (Label opaque "x.[2]") :| [])
+                    :| []
+                )
+            )
+        )
         :| []
     )
     ( Core.let_
-        ( 
-          Core.Binding
-          ( Label (list opaque ~> list opaque ~> list opaque) "_list_concat_.[13]" )
-          ( Core.lam
-              (Label (list opaque) "a.[5]" :| [Label (list opaque) "b.[6]"])
-              ( Core.match
-                  (list opaque)
-                  (Core.var (Label (list opaque) "a.[5]"))
-                  ( Clause
-                      (Label (list opaque) "$Nil" :| [])
-                      (Core.var (Label (list opaque) "b.[6]"))
-                      :| [ Clause
-                            ( Label (opaque ~> list opaque ~> list opaque) "$Cons"
-                                <| Label opaque "x.[3]"
-                                <| Label (list opaque) "xs.[4]"
-                                :| []
-                            )
-                            ( Core.app
-                                (list opaque)
-                                (Core.var (Label (opaque ~> list opaque ~> list opaque) "$Cons"))
-                                ( Core.var (Label opaque "x.[3]")
-                                    <| Core.app
-                                      (list opaque)
-                                      (Core.var (Label (list opaque ~> list opaque ~> list opaque) "_list_concat_.[13]"))
-                                      ( Core.var (Label (list opaque) "xs.[4]")
-                                          <| Core.var (Label (list opaque) "b.[6]")
+        ( Core.Binding
+            (Label (list opaque ~> list opaque ~> list opaque) "_list_concat_.[13]")
+            ( Core.lam
+                (Label (list opaque) "a.[5]" :| [Label (list opaque) "b.[6]"])
+                ( Core.match
+                    (list opaque)
+                    (Core.var (Label (list opaque) "a.[5]"))
+                    ( Clause
+                        (Label (list opaque) "$Nil" :| [])
+                        (Core.var (Label (list opaque) "b.[6]"))
+                        :| [ Clause
+                              ( Label (opaque ~> list opaque ~> list opaque) "$Cons"
+                                  <| Label opaque "x.[3]"
+                                  <| Label (list opaque) "xs.[4]"
+                                  :| []
+                              )
+                              ( Core.app
+                                  (list opaque)
+                                  (Core.var (Label (opaque ~> list opaque ~> list opaque) "$Cons"))
+                                  ( Core.var (Label opaque "x.[3]")
+                                      <| Core.app
+                                        (list opaque)
+                                        (Core.var (Label (list opaque ~> list opaque ~> list opaque) "_list_concat_.[13]"))
+                                        ( Core.var (Label (list opaque) "xs.[4]")
+                                            <| Core.var (Label (list opaque) "b.[6]")
+                                            :| []
+                                        )
+                                      :| []
+                                  )
+                              )
+                           ]
+                    )
+                )
+            )
+            :| [ Core.Binding
+                  (Label (compareDict ~> opaque ~> opaque ~> ordering) "compare.[14]")
+                  ( Core.lam
+                      ( Label compareDict "a_1.[10]"
+                          <| Label opaque "a_2.[11]"
+                          <| Label opaque "a_3.[12]"
+                          :| []
+                      )
+                      ( Core.match
+                          ordering
+                          (Core.var (Label compareDict "a_1.[10]"))
+                          ( Clause
+                              ( Label (compareRow ~> compareDict) "$Record"
+                                  <| Label compareRow "r_1.[9]"
+                                  :| []
+                              )
+                              ( Core.sel
+                                  ( Focus
+                                      "compare"
+                                      (Label (opaque ~> opaque ~> ordering) "f_1.[7]")
+                                      (Label opaque "q_1.[8]")
+                                  )
+                                  (Core.var (Label compareRow "r_1.[9]"))
+                                  ( Core.app
+                                      ordering
+                                      (Core.var (Label (opaque ~> opaque ~> ordering) "f_1.[7]"))
+                                      ( Core.var (Label opaque "a_2.[11]")
+                                          <| Core.var (Label opaque "a_3.[12]")
                                           :| []
                                       )
-                                    :| []
-                                )
-                            )
-                         ]
+                                  )
+                              )
+                              :| []
+                          )
+                      )
                   )
-              )
-          )
-            :| [
-                 Core.Binding
-                 ( Label (compareDict ~> opaque ~> opaque ~> ordering) "compare.[14]" )
-                 ( Core.lam
-                    ( Label compareDict "a_1.[10]"
-                        <| Label opaque "a_2.[11]"
-                        <| Label opaque "a_3.[12]"
-                        :| []
-                    )
-                    ( Core.match
-                        ordering
-                        (Core.var (Label compareDict "a_1.[10]"))
-                        ( Clause
-                            ( Label (compareRow ~> compareDict) "$Record"
-                                <| Label compareRow "r_1.[9]"
-                                :| []
-                            )
-                            ( Core.sel
-                                ( Focus
-                                    "compare"
-                                    (Label (opaque ~> opaque ~> ordering) "f_1.[7]")
-                                    (Label opaque "q_1.[8]")
-                                )
-                                (Core.var (Label compareRow "r_1.[9]"))
-                                ( Core.app
-                                    ordering
-                                    (Core.var (Label (opaque ~> opaque ~> ordering) "f_1.[7]"))
-                                    ( Core.var (Label opaque "a_2.[11]")
-                                        <| Core.var (Label opaque "a_3.[12]")
-                                        :| []
-                                    )
-                                )
-                            )
-                            :| []
-                        )
-                    )
-                 )
                ]
         )
         (Core.lit (Core.PInt32 1))
@@ -352,25 +346,24 @@ test2 =
           )
           (Core.var (Label Core.int32 "n"))
           ( Core.let_
-              ( 
-                Core.Binding
-                 ( Label Core.int32 "m" )
-                 ( Core.op
-                    ( Core.OMulInt32
-                        (Core.var (Label Core.int32 "x"))
-                        ( Core.app
-                            Core.int32
-                            (Core.var (Label (Core.int32 `Core.arrow` Core.int32) "f"))
-                            ( Core.op
-                                ( Core.OSubInt32
-                                    (Core.var (Label Core.int32 "x"))
-                                    (Core.lit (Core.PInt32 1))
-                                )
-                                :| []
-                            )
-                        )
-                    )
-                )
+              ( Core.Binding
+                  (Label Core.int32 "m")
+                  ( Core.op
+                      ( Core.OMulInt32
+                          (Core.var (Label Core.int32 "x"))
+                          ( Core.app
+                              Core.int32
+                              (Core.var (Label (Core.int32 `Core.arrow` Core.int32) "f"))
+                              ( Core.op
+                                  ( Core.OSubInt32
+                                      (Core.var (Label Core.int32 "x"))
+                                      (Core.lit (Core.PInt32 1))
+                                  )
+                                  :| []
+                              )
+                          )
+                      )
+                  )
                   :| []
               )
               ( Core.call
@@ -387,10 +380,9 @@ test2 =
       "factorial"
       [Label Core.int32 "z"]
       ( Core.let_
-          ( 
-            Core.Binding
-              ( Label Core.int32 "n" )
-              ( Core.lit (Core.PInt32 1) )
+          ( Core.Binding
+              (Label Core.int32 "n")
+              (Core.lit (Core.PInt32 1))
               :| []
           )
           ( Core.app
@@ -418,23 +410,23 @@ test2Result =
           (Core.var (Label Core.int32 "n"))
           ( Core.let_
               ( Core.Binding
-                ( Label Core.int32 "m" )
-                ( Core.op
-                    ( Core.OMulInt32
-                        (Core.var (Label Core.int32 "x"))
-                        ( Core.app
-                            Core.int32
-                            (Core.var (Label (Core.int32 `Core.arrow` Core.int32) "f"))
-                            ( Core.op
-                                ( Core.OSubInt32
-                                    (Core.var (Label Core.int32 "x"))
-                                    (Core.lit (Core.PInt32 1))
-                                )
-                                :| []
-                            )
-                        )
-                    )
-                )
+                  (Label Core.int32 "m")
+                  ( Core.op
+                      ( Core.OMulInt32
+                          (Core.var (Label Core.int32 "x"))
+                          ( Core.app
+                              Core.int32
+                              (Core.var (Label (Core.int32 `Core.arrow` Core.int32) "f"))
+                              ( Core.op
+                                  ( Core.OSubInt32
+                                      (Core.var (Label Core.int32 "x"))
+                                      (Core.lit (Core.PInt32 1))
+                                  )
+                                  :| []
+                              )
+                          )
+                      )
+                  )
                   :| []
               )
               ( Core.call
@@ -448,10 +440,9 @@ test2Result =
       "factorial"
       [Label Core.int32 "z"]
       ( Core.let_
-          ( 
-            Core.Binding
-            ( Label Core.int32 "n")
-            ( Core.lit (Core.PInt32 1))
+          ( Core.Binding
+              (Label Core.int32 "n")
+              (Core.lit (Core.PInt32 1))
               :| []
           )
           ( Core.app
@@ -473,8 +464,8 @@ fixture40 :: Core.Expr ()
 fixture40 =
   Core.let_
     ( Core.Binding
-      ( Label () "a" )
-      ( Core.var (Label () "b"))
+        (Label () "a")
+        (Core.var (Label () "b"))
         :| []
     )
     (Core.var (Label () "a"))

@@ -411,8 +411,7 @@ pipeline ol = do
   a3 <- pure1 liftLambdas a2
   a4 <- pure3 simplifyELet a3
   a5 <- pure1 closeDefs a4
-  a6 <- pure (fmap addImplicitArgs a5)
-  pure a6
+  pure (addImplicitArgs <$> a5)
 
 runCore :: Core a -> (a, PipelineState)
 runCore p = runState (pipelineStack p) (PipelineState 0)
