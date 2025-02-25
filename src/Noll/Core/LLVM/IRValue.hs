@@ -10,7 +10,7 @@ import Noll.Utils (Name)
 
 data IRValue
   = Local IRType Name
-  | Constant IRType Name
+  | Global IRType Name
   | I1 Bool
   | I32 Int32
   | I64 Int64
@@ -24,7 +24,7 @@ instance IRTyped IRValue where
     \case
       Local t _ ->
         t
-      Constant t _ ->
+      Global t _ ->
         t
       I1{} ->
         TInt1

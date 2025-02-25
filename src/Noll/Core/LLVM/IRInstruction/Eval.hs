@@ -27,7 +27,8 @@ import Noll.Core.LLVM.IRType (
  )
 import Noll.Core.LLVM.IRValue (IRValue (..), irPrimValue)
 import Noll.Label (Label (..))
-import Noll.Utils (Name, forM, isConstructor)
+import Noll.Utils (Name, forM, forM_, isConstructor)
+import TextShow (showt)
 
 import qualified Data.Text as Text
 import qualified Noll.Common.List1 as List1
@@ -92,56 +93,150 @@ irMalloc t = do
     r3 <- iCallGlobal i8Ptr "gc_malloc" [r2]
     iBCast r3 (ptr t)
 
-irEvalOp =
-  \case
-    Core.OAddInt32 e1 e2 ->
-      undefined
-    Core.OAddInt64 e1 e2 ->
-      undefined
-    Core.OSubInt32 e1 e2 ->
-      undefined
-    Core.OSubInt64 e1 e2 ->
-      undefined
-    Core.OMulInt32 e1 e2 ->
-      undefined
-    Core.OMulInt64 e1 e2 ->
-      undefined
-    Core.ODivInt32 e1 e2 ->
-      undefined
-    Core.ODivInt64 e1 e2 ->
-      undefined
-    Core.OEqInt32 e1 e2 ->
-      undefined
-    Core.OEqInt64 e1 e2 ->
-      undefined
-    Core.OAnd e1 e2 -> do
-      undefined
-    Core.OOr e1 e2 -> do
-      undefined
-    Core.OLtInt32 e1 e2 -> do
-      undefined
-    Core.OLtInt64 e1 e2 -> do
-      undefined
-    Core.ONot e -> do
-      undefined
-    Core.OLtEInt32 e1 e2 -> do
-      undefined
-    Core.OLtEInt64 e1 e2 -> do
-      undefined
-    Core.OGtInt32 e1 e2 -> do
-      undefined
-    Core.OGtInt64 e1 e2 -> do
-      undefined
-    Core.OGtEInt32 e1 e2 -> do
-      undefined
-    Core.OGtEInt64 e1 e2 -> do
-      undefined
+irClosureType :: Int -> IRType
+irClosureType n = struct $ [i32] <> replicate (n + 3) i8Ptr
+
+irPackClosure :: Name -> Int -> [IRValue] -> IRInstr IRValue
+irPackClosure fn m vs = do
+  (name, f1, f2, f3) <- iRuntimeClosure fn (length vs) m
+  let t = TNamed name (irClosureType (length vs))
+  r1 <- irMalloc t
+  r2 <- iGep t r1 (I32 0) (I32 0)
+  iComment ""
+  iComment (showt (length vs) <> " argument(s) supplied -- target function '" <> fn <> "' expects " <> showt m <> " additional argument(s)")
+  iComment ""
+  r3 <- iInttoptr (I32 (fromIntegral m)) i8Ptr
+  iStore r3 r2
+  r4 <- iGep t r1 (I32 0) (I32 1)
+  r5 <- iBCast f1 i8Ptr
+  iStore r5 r4
+  r6 <- iGep t r1 (I32 0) (I32 2)
+  r7 <- iBCast f2 i8Ptr
+  iStore r7 r6
+  r8 <- iGep t r1 (I32 0) (I32 3)
+  r9 <- iBCast f3 i8Ptr
+  iStore r9 r8
+  forM_ (zip vs [4 ..]) $ \(v, n) -> do
+    qn <- iGep t r1 (I32 0) (I32 n)
+    iStore v qn
+  iBCast r1 i8Ptr
 
 irApplyClosure :: IRValue -> List1 CoreExpr -> IRInstr IRValue
 irApplyClosure v es = do
   vs <- irEvalArgs es
   name <- iRuntimeApply (length es)
   iCallGlobal i8Ptr name (v : vs)
+
+irEvalOp :: Core.Op CoreExpr -> IRInstr IRValue
+irEvalOp =
+  \case
+    Core.OAddInt32 e1 e2 -> do
+      v3 <- irCommentBlock "OAddInt32" $ do
+        v1 <- irRevealExpr e1
+        v2 <- irRevealExpr e2
+        iAdd i32 v1 v2
+      irConceal v3
+    Core.OAddInt64 e1 e2 -> do
+      v3 <- irCommentBlock "OAddInt64" $ do
+        v1 <- irRevealExpr e1
+        v2 <- irRevealExpr e2
+        iAdd i64 v1 v2
+      irConceal v3
+    Core.OSubInt32 e1 e2 -> do
+      v3 <- irCommentBlock "OSubInt32" $ do
+        v1 <- irRevealExpr e1
+        v2 <- irRevealExpr e2
+        iSub i32 v1 v2
+      irConceal v3
+    Core.OSubInt64 e1 e2 -> do
+      v3 <- irCommentBlock "OSubInt64" $ do
+        v1 <- irRevealExpr e1
+        v2 <- irRevealExpr e2
+        iSub i64 v1 v2
+      irConceal v3
+    Core.OMulInt32 e1 e2 -> do
+      v3 <- irCommentBlock "OMulInt32" $ do
+        v1 <- irRevealExpr e1
+        v2 <- irRevealExpr e2
+        iMul i32 v1 v2
+      irConceal v3
+    Core.OMulInt64 e1 e2 -> do
+      v3 <- irCommentBlock "OMulInt64" $ do
+        v1 <- irRevealExpr e1
+        v2 <- irRevealExpr e2
+        iMul i64 v1 v2
+      irConceal v3
+    Core.ODivInt32 e1 e2 -> do
+      v3 <- irCommentBlock "ODivInt32" $ do
+        v1 <- irRevealExpr e1
+        v2 <- irRevealExpr e2
+        iDiv i32 v1 v2
+      irConceal v3
+    Core.ODivInt64 e1 e2 -> do
+      v3 <- irCommentBlock "ODivInt64" $ do
+        v1 <- irRevealExpr e1
+        v2 <- irRevealExpr e2
+        iDiv i64 v1 v2
+      irConceal v3
+    Core.OEqInt32 e1 e2 -> do
+      v3 <- irCommentBlock "OEqInt32" $ do
+        v1 <- irRevealExpr e1
+        v2 <- irRevealExpr e2
+        iCmpEq i1 v1 v2
+      irConceal v3
+    Core.OEqInt64 e1 e2 -> do
+      v3 <- irCommentBlock "OEqInt64" $ do
+        v1 <- irRevealExpr e1
+        v2 <- irRevealExpr e2
+        iCmpEq i1 v1 v2
+      irConceal v3
+    Core.OAnd e1 e2 -> do
+      v3 <- irCommentBlock "OAnd" $ do
+        v1 <- irRevealExpr e1
+        v2 <- irRevealExpr e2
+        iAnd i1 v1 v2
+      irConceal v3
+    Core.OOr e1 e2 -> do
+      v3 <- irCommentBlock "OOr" $ do
+        v1 <- irRevealExpr e1
+        v2 <- irRevealExpr e2
+        iOr i1 v1 v2
+      irConceal v3
+    Core.OLtInt32 e1 e2 -> do
+      v3 <- irCommentBlock "OLtInt32" $ do
+        v1 <- irRevealExpr e1
+        v2 <- irRevealExpr e2
+        iCmpSLt i1 v1 v2
+      irConceal v3
+    Core.OLtInt64 e1 e2 -> do
+      v3 <- irCommentBlock "OLtInt64" $ do
+        v1 <- irRevealExpr e1
+        v2 <- irRevealExpr e2
+        iCmpSLt i1 v1 v2
+      irConceal v3
+    Core.ONot e -> do
+      v2 <- irCommentBlock "ONot" $ do
+        v1 <- irRevealExpr e
+        iXOr i1 v1 (I1 True)
+      irConceal v2
+    Core.OLtEInt32 e1 e2 -> do
+      error "TODO"
+    Core.OLtEInt64 e1 e2 -> do
+      error "TODO"
+    Core.OGtInt32 e1 e2 -> do
+      v3 <- irCommentBlock "OGtInt32" $ do
+        v1 <- irRevealExpr e1
+        v2 <- irRevealExpr e2
+        iCmpSGt i1 v1 v2
+      irConceal v3
+    Core.OGtInt64 e1 e2 -> do
+      error "TODO"
+    Core.OGtEInt32 e1 e2 -> do
+      error "TODO"
+    Core.OGtEInt64 e1 e2 -> do
+      error "TODO"
+    _ ->
+      error "TODO"
 
 irEvalMatch :: CoreExpr -> List1 (Core.Clause Core.Type CoreExpr) -> IRInstr IRValue
 irEvalMatch e1 cs = do
@@ -172,8 +267,8 @@ irEvalMatch e1 cs = do
       iPhi (irTypeOf (snd b)) (b : bs)
   irConceal v
 
-irEvalVar :: Core.Type -> Name -> IRInstr IRValue
-irEvalVar t var
+irEvalVar :: Name -> IRInstr IRValue
+irEvalVar var
   | isConstructor var = do
       mapM_ iComment ["", "Data constructor: " <> var, "----------------- ^", ""]
       (i, t1) <- iDataConstructor (struct [i32]) var
@@ -186,18 +281,52 @@ irEvalVar t var
       mapM_ iComment ["", "Name: " <> Text.pack (show v), "----- ^", ""]
       undefined
 
-irEvalApp t e1 var es
+irEvalApp :: Core.Type -> CoreExpr -> List1 CoreExpr -> IRInstr IRValue
+irEvalApp t e1@(Fix (Core.EVar (Label _ var))) es
   | isConstructor var = do
-      undefined
+      mapM_ iComment ["", "Apply data constructor: " <> Text.pack (show var), "----------------------- ^", ""]
+      vs <- irEvalArgs es
+      (i, t1) <- iDataConstructor (struct (i32 : (i8Ptr <$ vs))) var
+      v1 <- irMalloc t1
+      v2 <- iGep t1 v1 (I32 0) (I32 0)
+      iStore (I32 (fromIntegral i)) v2
+      forM_ (zip vs [1 ..]) $ \(v, n) -> do
+        v3 <- iGep t1 v1 (I32 0) (I32 n)
+        iStore v v3
+      iBCast v1 i8Ptr
   | otherwise =
-      undefined
+      irCommentBlock "Function application" $ do
+        v <- iLookup var
+        case v of
+          Local{} ->
+            irApplyClosure v es
+          Global (TFun _ us) _
+            | length us == length es -> do
+                vs <- irEvalArgs es
+                iCall i8Ptr v vs
+            | length us > length es -> do
+                rs <- irEvalArgs es
+                irPackClosure var (length us - length rs) rs
+            | otherwise ->
+                case splitAt (length us) (fromList1 es) of
+                  (a : as, b : bs) -> do
+                    r1 <- eliminatePtrConversions (irEvalExpr (Core.app t e1 (a :| as)))
+                    irApplyClosure r1 (b :| bs)
+                  _ ->
+                    error "TODO"
+          _ ->
+            error "TODO"
+irEvalApp _ e1 es = do
+  v1 <- irEvalExpr e1
+  irApplyClosure v1 es
 
 irEvalExpr :: CoreExpr -> IRInstr IRValue
 irEvalExpr =
   project
     >>> \case
       Core.EOp op ->
-        irEvalOp op
+        irCommentBlock "EOp" $ do
+          irEvalOp op
       Core.ELit Core.PChar{} ->
         error "TODO"
       Core.ELit Core.PString{} ->
@@ -206,18 +335,16 @@ irEvalExpr =
         irConceal (irPrimValue prim)
       Core.EVar (Label t var) ->
         irCommentBlock "EVar" $ do
-          irEvalVar t var
+          irEvalVar var
       Core.ELet vs e1 ->
         irCommentBlock "ELet" $ do
           bound <- forM vs $ \(Core.Binding (Label _ name) e) -> do
             v <- eliminatePtrConversions (irEvalExpr e)
             pure (name, v)
           iBind (fromList1 bound) (eliminatePtrConversions (irEvalExpr e1))
-      Core.EApp t e1@(Fix (Core.EVar (Label _ var))) es ->
-        irEvalApp t e1 var es
-      Core.EApp _ e1 es -> do
-        v1 <- irEvalExpr e1
-        irApplyClosure v1 es
+      Core.EApp t e1 es ->
+        irCommentBlock "EApp" $ do
+          irEvalApp t e1 es
       Core.EIf e1 e2 e3 -> do
         irCommentBlock "EIf" $ do
           labelThen <- iLabel "then"
@@ -268,7 +395,7 @@ irEvalExpr =
           v1 <- eliminatePtrConversions (irEvalExpr e1)
           v2 <- iCallGlobal i8Ptr "hashmap_lookup" [v1, t2]
           iBind [(var, v2), (r, v1)] (eliminatePtrConversions (irEvalExpr e2))
-      e ->
+      _ ->
         error "TODO"
 
 eliminatePtrConversions :: IRInstr IRValue -> IRInstr IRValue

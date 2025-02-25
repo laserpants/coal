@@ -24,10 +24,14 @@ data IRInstrOpF v t i next
   | IAnd             t v v        (v -> next)
   | IOr              t v v        (v -> next)
   | ILoad            t v          (v -> next)
+  | ICmpEq           t v v        (v -> next)
+  | ICmpSLt          t v v        (v -> next)
+  | ICmpSGt          t v v        (v -> next)
   | IStore           v v          next
   | IRet             t v          next
   | IBr              v [Name]     next
   | IBr1             Name         next
+  | ICall            t v [v]      (v -> next)
   | ICallGlobal      t Name [v]   (v -> next)
   | IGep             t v v v      (v -> next)
   | IGepNull         t v          (v -> next)
@@ -40,13 +44,14 @@ data IRInstrOpF v t i next
   | IComment         Text         next
   --
   | ILabel           Name         (Name -> next)
+  | IIndex                        (Name -> next)
   | ILookup          Name         (v -> next)
   | IBind        [i] (IRInstr v)  (v -> next)
   | IBlock      Name (IRInstr v)  (i -> next)
   | IDataConstructor t Name       ((Int, t) -> next)
   | IHashMapKey      Name         (v -> next)
   | IRuntimeApply    Int          (Name -> next)                -- artifact?
-  | IIndex                        (Name -> next)
+  | IRuntimeClosure  Name Int Int ((Name, v, v, v) -> next)
   -- TODO
   deriving (Functor)
 {- FOURMOLU_ENABLE -}
