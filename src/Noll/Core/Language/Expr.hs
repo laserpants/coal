@@ -50,16 +50,8 @@ data Focus t = Focus Name (Label t) (Label t)
 instance (HasBound (Focus t)) where
   boundIn (Focus _ ll1 ll2) = boundIn ll1 <> boundIn ll2
 
-data Binding t a = Binding (Label t) a
+data Binding t a = Binding {bindingLabel :: Label t, bindingExpr :: a}
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
-
-{-# INLINE bindingLabel #-}
-bindingLabel :: Binding t a -> Label t
-bindingLabel (Binding label _) = label
-
-{-# INLINE bindingExpr #-}
-bindingExpr :: Binding t a -> a
-bindingExpr (Binding _ e) = e
 
 {-# INLINE overBindingLabel #-}
 overBindingLabel :: (Label s -> Label t) -> Binding s a -> Binding t a
