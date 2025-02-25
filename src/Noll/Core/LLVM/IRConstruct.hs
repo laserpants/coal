@@ -2,7 +2,11 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Core.LLVM.IRConstruct (IRConstruct (..), IRLinkage (..)) where
+module Noll.Core.LLVM.IRConstruct (
+  IRConstruct (..),
+  IRLinkage (..),
+  sortIRConstructs,
+) where
 
 import Data.Function (on)
 import Data.List (sortBy)

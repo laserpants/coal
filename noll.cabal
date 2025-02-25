@@ -60,6 +60,7 @@ library
       Noll.Core.LLVM.IREncodable
       Noll.Core.LLVM.IRInstruction
       Noll.Core.LLVM.IRInstruction.Eval
+      Noll.Core.LLVM.IRInstruction.Interpreter
       Noll.Core.LLVM.IRInstruction.TH
       Noll.Core.LLVM.IRType
       Noll.Core.LLVM.IRValue
