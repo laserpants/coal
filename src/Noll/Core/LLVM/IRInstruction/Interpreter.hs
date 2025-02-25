@@ -1,14 +1,15 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
 
-module Noll.Core.LLVM.IRInstruction.Interpreter where
+module Noll.Core.LLVM.IRInstruction.Interpreter (interpret) where
 
-import Control.Monad.Reader (MonadReader, ReaderT)
+import Control.Monad.Free (iterM)
+import Control.Monad.Reader (MonadReader, ReaderT, runReaderT)
 import Control.Monad.State (MonadState, State, evalState, get, gets, modify, runState)
 import Control.Monad.Writer (MonadWriter, WriterT, execWriterT, tell)
 import Data.Text (Text)
 import Noll.Common.Environment (Environment (..))
-import Noll.Core.LLVM.IRInstruction (IRInstrOp, IRInstrOpF (..))
+import Noll.Core.LLVM.IRInstruction (IRInstr, IRInstrOp, IRInstrOpF (..))
 import Noll.Core.LLVM.IRValue (IRValue (..))
 
 data IRInterpreterArtifact = IRInterpreterArtifact
@@ -21,6 +22,15 @@ data IRInterpreterState = IRInterpreterState
   , irInterpreterStateArtifacts :: [IRInterpreterArtifact]
   }
   deriving (Show, Eq, Ord)
+
+{-# INLINE initialIRInterpreterState #-}
+initialIRInterpreterState :: IRInterpreterState
+initialIRInterpreterState = IRInterpreterState
+  { irInterpreterStateRegisterIndex = 1
+  , irInterpreterStateLabelIndex = 1
+  , irInterpreterStateLabel = mempty
+  , irInterpreterStateArtifacts = []
+  }
 
 data IRInterpreterEnv = IRInterpreterEnv
   { irInterpreterValueEnv :: Environment IRValue
@@ -50,3 +60,13 @@ interpreter =
   \case
     IAdd t v1 v2 next ->
       undefined
+
+{-# INLINE interpret #-}
+interpret :: IRInstr a -> IRInterpreter a
+interpret = iterM interpreter
+
+evalInterpreter :: IRInterpreterEnv -> IRInterpreter a -> [Line]
+evalInterpreter env ipt = evalState (execWriterT (runReaderT (getIRInterpreter ipt) env)) initialIRInterpreterState
+
+runInterpreter :: IRInterpreterEnv -> IRInterpreter a -> ([Line], IRInterpreterState)
+runInterpreter env ipt = runState (execWriterT (runReaderT (getIRInterpreter ipt) env)) initialIRInterpreterState
