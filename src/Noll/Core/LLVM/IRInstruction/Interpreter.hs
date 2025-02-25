@@ -11,11 +11,20 @@ import Noll.Common.Environment (Environment (..))
 import Noll.Core.LLVM.IRInstruction (IRInstrOp, IRInstrOpF (..))
 import Noll.Core.LLVM.IRValue (IRValue (..))
 
+data IRInterpreterArtifact = IRInterpreterArtifact
+  deriving (Show, Eq, Ord)
+
 data IRInterpreterState = IRInterpreterState
+  { irInterpreterStateRegisterIndex :: Int
+  , irInterpreterStateLabelIndex :: Int
+  , irInterpreterStateLabel :: Text
+  , irInterpreterStateArtifacts :: [IRInterpreterArtifact]
+  }
+  deriving (Show, Eq, Ord)
 
 data IRInterpreterEnv = IRInterpreterEnv
-  { irCodeValueEnv :: Environment IRValue
-  , irCodeConstructorEnv :: Environment Int
+  { irInterpreterValueEnv :: Environment IRValue
+  , irInterpreterConstructorEnv :: Environment Int
   }
   deriving (Show, Eq, Ord, Read)
 
