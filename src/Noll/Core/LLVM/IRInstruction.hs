@@ -30,6 +30,7 @@ data IRInstrOpF v t i next
   | IBr1             Name         next
   | ICallGlobal      t Name [v]   (v -> next)
   | IGep             t v v v      (v -> next)
+  | IGepNull         t v          (v -> next)
   | IInttoptr        v t          (v -> next)
   | IPtrtoint        v t          (v -> next)
   | IAlloca          t            (v -> next)
@@ -42,6 +43,7 @@ data IRInstrOpF v t i next
   | ILookup          Name         (v -> next)
   | IBind        [i] (IRInstr v)  (v -> next)
   | IBlock      Name (IRInstr v)  (i -> next)
+  | IDataConstructor t Name       ((Int, t) -> next)
   | IHashMapKey      Name         (v -> next)
   | IRuntimeApply    Int          (Name -> next)                -- artifact?
   | IIndex                        (Name -> next)

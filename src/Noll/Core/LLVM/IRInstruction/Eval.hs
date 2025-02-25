@@ -1,6 +1,6 @@
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE FlexibleContexts #-}
 
 module Noll.Core.LLVM.IRInstruction.Eval (irEvalExpr) where
 
@@ -27,8 +27,7 @@ import Noll.Core.LLVM.IRType (
  )
 import Noll.Core.LLVM.IRValue (IRValue (..), irPrimValue)
 import Noll.Label (Label (..))
-import Noll.Utils (forM, isConstructor)
-import TextShow (showt)
+import Noll.Utils (Name, forM, isConstructor)
 
 import qualified Data.Text as Text
 import qualified Noll.Common.List1 as List1
@@ -84,6 +83,14 @@ irRevealExpr expr = do
 {-# INLINE irEvalArgs #-}
 irEvalArgs :: List1 CoreExpr -> IRInstr [IRValue]
 irEvalArgs = mapM irEvalExpr . fromList1
+
+irMalloc :: IRType -> IRInstr IRValue
+irMalloc t = do
+  irCommentBlock "gc_malloc" $ do
+    r1 <- iGepNull (ptr t) (I32 1)
+    r2 <- iPtrtoint r1 i64
+    r3 <- iCallGlobal i8Ptr "gc_malloc" [r2]
+    iBCast r3 (ptr t)
 
 irEvalOp =
   \case
@@ -165,10 +172,15 @@ irEvalMatch e1 cs = do
       iPhi (irTypeOf (snd b)) (b : bs)
   irConceal v
 
+irEvalVar :: Core.Type -> Name -> IRInstr IRValue
 irEvalVar t var
   | isConstructor var = do
-      mapM_ iComment ["",  "Data constructor: " <> var, "----------------- ^", ""]
-      undefined
+      mapM_ iComment ["", "Data constructor: " <> var, "----------------- ^", ""]
+      (i, t1) <- iDataConstructor (struct [i32]) var
+      v1 <- irMalloc t1
+      v2 <- iGep t1 v1 (I32 0) (I32 0)
+      iStore (I32 (fromIntegral i)) v2
+      iBCast v1 i8Ptr
   | otherwise = do
       v <- iLookup var
       mapM_ iComment ["", "Name: " <> Text.pack (show v), "----- ^", ""]
