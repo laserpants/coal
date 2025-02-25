@@ -1,5 +1,6 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Noll.Core.LLVM.IRInstruction.Interpreter (
   interpret,
@@ -11,8 +12,11 @@ import Control.Monad.Free (iterM)
 import Control.Monad.RWS (MonadReader, MonadState, MonadWriter, RWS, runRWS)
 import Data.Text (Text)
 import Noll.Common.Environment (Environment (..))
+import Noll.Core.LLVM.IREncodable (IREncodable (..), enquote)
 import Noll.Core.LLVM.IRInstruction (IRInstr, IRInstrOp, IRInstrOpF (..))
 import Noll.Core.LLVM.IRValue (IRValue (..))
+
+import qualified Data.Text as Text
 
 data IRInterpreterArtifact = IRInterpreterArtifact
   deriving (Show, Eq, Ord)
@@ -31,7 +35,7 @@ initialIRInterpreterState =
   IRInterpreterState
     { irInterpreterStateRegisterIndex = 1
     , irInterpreterStateLabelIndex = 1
-    , irInterpreterStateLabel = mempty
+    , irInterpreterStateLabel = ""
     , irInterpreterStateArtifacts = []
     }
 
@@ -46,6 +50,16 @@ data IRLine
   | LComment Text
   | LLabel Text
   deriving (Show, Eq, Ord)
+
+instance IREncodable IRLine where
+  irEncode =
+    \case
+      LInstruction tokens ->
+        "  " <> Text.unwords tokens
+      LComment text ->
+        "  ; " <> text
+      LLabel text ->
+        enquote text <> ":"
 
 newtype IRInterpreter a = IRInterpreter {getIRInterpreter :: RWS IRInterpreterEnv [IRLine] IRInterpreterState a}
   deriving
