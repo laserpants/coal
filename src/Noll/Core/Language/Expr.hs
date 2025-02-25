@@ -102,7 +102,7 @@ data ExprF t a
     EIf a a a
   | -- | Operator
     EOp (Op a)
-  | -- | Pattern match statement
+  | -- | Pattern matching expression
     EMat t a (List1 (Clause t a))
   | -- | Record field extension
     EExt (Label t) a a
@@ -146,3 +146,5 @@ instance (Ord t) => HasFree (Expr t) t where
           (freeIn vs <> e) `exceptNames` boundIn vs
         ENil ->
           mempty
+        ELam vs e ->
+          e `exceptNames` boundIn vs
