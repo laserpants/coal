@@ -11,8 +11,6 @@ module Noll.Core.Language.Expr (
   Focus (..),
   Clause (..),
   Binding (..),
-  bindingLabel,
-  bindingExpr,
   overBindingLabel,
   overBindingExpr,
   unzipBindings,

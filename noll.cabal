@@ -58,6 +58,7 @@ library
       Noll.Core.LLVM.IR
       Noll.Core.LLVM.IRInstruction
       Noll.Core.LLVM.IRInstruction.Eval
+      Noll.Core.LLVM.IRInstruction.TH
       Noll.Core.LLVM.IRType
       Noll.Core.LLVM.IRValue
       Noll.Eval
