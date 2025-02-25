@@ -1,5 +1,6 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE FlexibleContexts #-}
 
 module Noll.Core.LLVM.IRInstruction.Eval (irEvalExpr) where
 
@@ -27,6 +28,7 @@ import Noll.Core.LLVM.IRType (
 import Noll.Core.LLVM.IRValue (IRValue (..), irPrimValue)
 import Noll.Label (Label (..))
 import Noll.Utils (forM, isConstructor)
+import TextShow (showt)
 
 import qualified Data.Text as Text
 import qualified Noll.Common.List1 as List1
@@ -165,8 +167,11 @@ irEvalMatch e1 cs = do
 
 irEvalVar t var
   | isConstructor var = do
+      mapM_ iComment ["",  "Data constructor: " <> var, "----------------- ^", ""]
       undefined
   | otherwise = do
+      v <- iLookup var
+      mapM_ iComment ["", "Name: " <> Text.pack (show v), "----- ^", ""]
       undefined
 
 irEvalApp t e1 var es
@@ -188,7 +193,8 @@ irEvalExpr =
       Core.ELit prim ->
         irConceal (irPrimValue prim)
       Core.EVar (Label t var) ->
-        irEvalVar t var
+        irCommentBlock "EVar" $ do
+          irEvalVar t var
       Core.ELet vs e1 ->
         irCommentBlock "ELet" $ do
           bound <- forM vs $ \(Core.Binding (Label _ name) e) -> do

@@ -39,6 +39,7 @@ data IRInstrOpF v t i next
   | IComment         Text         next
   --
   | ILabel           Name         (Name -> next)
+  | ILookup          Name         (v -> next)
   | IBind        [i] (IRInstr v)  (v -> next)
   | IBlock      Name (IRInstr v)  (i -> next)
   | IHashMapKey      Name         (v -> next)
