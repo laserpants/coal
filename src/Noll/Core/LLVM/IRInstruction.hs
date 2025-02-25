@@ -32,7 +32,10 @@ data IRInstrOpF v t i next
   | IGep             t v v v      (v -> next)
   | IInttoptr        v t          (v -> next)
   | IPtrtoint        v t          (v -> next)
+  | IAlloca          t            (v -> next)
+  | IBCast           v t          (v -> next)
   | IPhi             t [i]        (v -> next)
+  | ISwitch          v Name [i]   next
   | IComment         Text         next
   --
   | ILabel           Name         (Name -> next)

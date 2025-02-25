@@ -8,15 +8,28 @@ import Control.Monad.Free (Free (..))
 import Data.Fix (Fix (..))
 import Data.Functor.Foldable (project)
 import Data.Text (Text)
-import Noll.Common.List1 (List1, fromList1)
+import Data.Tuple.Extra (fst3)
+import Noll.Common.List1 (List1, NonEmpty (..), fromList1)
 import Noll.Core.LLVM.IRInstruction (IRInstr, IRInstrOpF (..))
 import Noll.Core.LLVM.IRInstruction.TH
-import Noll.Core.LLVM.IRType (IRType (..), IRTyped (..), i1, i32, i64, i8, i8Ptr, stringLiteralType)
+import Noll.Core.LLVM.IRType (
+  IRType (..),
+  IRTyped (..),
+  i1,
+  i32,
+  i64,
+  i8,
+  i8Ptr,
+  ptr,
+  stringLiteralType,
+  struct,
+ )
 import Noll.Core.LLVM.IRValue (IRValue (..), irPrimValue)
 import Noll.Label (Label (..))
 import Noll.Utils (forM, isConstructor)
 
 import qualified Data.Text as Text
+import qualified Noll.Common.List1 as List1
 import qualified Noll.Core.Language as Core
 
 type CoreExpr = Core.Expr Core.Type
@@ -121,6 +134,47 @@ irApplyClosure v es = do
   name <- iRuntimeApply (length es)
   iCallGlobal i8Ptr name (v : vs)
 
+irEvalMatch :: CoreExpr -> List1 (Core.Clause Core.Type CoreExpr) -> IRInstr IRValue
+irEvalMatch e1 cs = do
+  v1 <- eliminatePtrConversions (irEvalExpr e1)
+  r1 <- iBCast v1 (ptr (struct [i32]))
+  r2 <- iGep (struct [i32]) r1 (I32 0) (I32 0)
+  r3 <- iLoad i32 r2
+  labelEnd <- iLabel "end"
+  -- TODO: Handle case where length cs == 1
+  ds <- forM cs $ \(Core.Clause ((Label _ con) :| lls) e) -> do
+    n <- iLabel con
+    pure (n, lls, e)
+  let ns = fst3 <$> ds
+  iSwitch r3 (List1.head ns) (fromList1 ns `zip` (I32 <$> [0 ..]))
+  b :| bs <- forM ds $ \(ll, lls, e) ->
+    iBlock ll $ do
+      let s = struct (i32 : replicate (length lls) i8Ptr)
+      r4 <- iBCast v1 (ptr s)
+      bound <- forM (zip lls [1 ..]) $ \(Label _ n, i) -> do
+        r5 <- iGep s r4 (I32 0) (I32 i)
+        r6 <- iLoad i8Ptr r5
+        pure (n, r6)
+      r7 <- iBind bound (eliminatePtrConversions (irEvalExpr e))
+      iBr1 labelEnd
+      pure r7
+  (_, v) <-
+    iBlock labelEnd $
+      iPhi (irTypeOf (snd b)) (b : bs)
+  irConceal v
+
+irEvalVar t var
+  | isConstructor var = do
+      undefined
+  | otherwise = do
+      undefined
+
+irEvalApp t e1 var es
+  | isConstructor var = do
+      undefined
+  | otherwise =
+      undefined
+
 irEvalExpr :: CoreExpr -> IRInstr IRValue
 irEvalExpr =
   project
@@ -133,23 +187,17 @@ irEvalExpr =
         error "TODO"
       Core.ELit prim ->
         irConceal (irPrimValue prim)
-      Core.EVar (Label t var)
-        | isConstructor var -> do
-            undefined
-        | otherwise -> do
-            undefined
+      Core.EVar (Label t var) ->
+        irEvalVar t var
       Core.ELet vs e1 ->
         irCommentBlock "ELet" $ do
           bound <- forM vs $ \(Core.Binding (Label _ name) e) -> do
             v <- eliminatePtrConversions (irEvalExpr e)
             pure (name, v)
           iBind (fromList1 bound) (eliminatePtrConversions (irEvalExpr e1))
-      Core.EApp t e1@(Fix (Core.EVar (Label _ var))) es
-        | isConstructor var -> do
-            undefined
-        | otherwise ->
-            undefined
-      Core.EApp t e1 es -> do
+      Core.EApp t e1@(Fix (Core.EVar (Label _ var))) es ->
+        irEvalApp t e1 var es
+      Core.EApp _ e1 es -> do
         v1 <- irEvalExpr e1
         irApplyClosure v1 es
       Core.EIf e1 e2 e3 -> do
@@ -182,8 +230,9 @@ irEvalExpr =
               iCallGlobal i8Ptr name [v2, v1]
             _ ->
               error "TODO"
-      Core.EMat t e1 cs ->
-        undefined
+      Core.EMat _ e1 cs ->
+        irCommentBlock "EMat" $ do
+          irEvalMatch e1 cs
       Core.ENil ->
         irCommentBlock "ENil" $
           iCallGlobal i8Ptr "hashmap_init" []
@@ -209,10 +258,10 @@ eliminatePtrConversions =
   \case
     Free (IInttoptr v1 t1 next) ->
       case next v1 of
-        Free (IPtrtoint v2 t2 next1)
+        Free (IPtrtoint v2 _ next1)
           | v1 == v2 ->
               next1 v1
-        Free instr ->
+        Free{} ->
           iInttoptr v1 t1 >>= eliminatePtrConversions . next
         _ ->
           iInttoptr v1 t1 >>= next
