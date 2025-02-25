@@ -1,12 +1,14 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
 
-module Noll.Core.LLVM.IRInstruction.Interpreter (interpret) where
+module Noll.Core.LLVM.IRInstruction.Interpreter (
+  interpret,
+  evalInterpreter,
+  runInterpreter,
+) where
 
 import Control.Monad.Free (iterM)
-import Control.Monad.Reader (MonadReader, ReaderT, runReaderT)
-import Control.Monad.State (MonadState, State, evalState, get, gets, modify, runState)
-import Control.Monad.Writer (MonadWriter, WriterT, execWriterT, tell)
+import Control.Monad.RWS (MonadReader, MonadState, MonadWriter, RWS, runRWS)
 import Data.Text (Text)
 import Noll.Common.Environment (Environment (..))
 import Noll.Core.LLVM.IRInstruction (IRInstr, IRInstrOp, IRInstrOpF (..))
@@ -25,12 +27,13 @@ data IRInterpreterState = IRInterpreterState
 
 {-# INLINE initialIRInterpreterState #-}
 initialIRInterpreterState :: IRInterpreterState
-initialIRInterpreterState = IRInterpreterState
-  { irInterpreterStateRegisterIndex = 1
-  , irInterpreterStateLabelIndex = 1
-  , irInterpreterStateLabel = mempty
-  , irInterpreterStateArtifacts = []
-  }
+initialIRInterpreterState =
+  IRInterpreterState
+    { irInterpreterStateRegisterIndex = 1
+    , irInterpreterStateLabelIndex = 1
+    , irInterpreterStateLabel = mempty
+    , irInterpreterStateArtifacts = []
+    }
 
 data IRInterpreterEnv = IRInterpreterEnv
   { irInterpreterValueEnv :: Environment IRValue
@@ -44,8 +47,7 @@ data IRLine
   | LLabel Text
   deriving (Show, Eq, Ord)
 
--- TODO: Use RWS
-newtype IRInterpreter a = IRInterpreter {getIRInterpreter :: ReaderT IRInterpreterEnv (WriterT [IRLine] (State IRInterpreterState)) a}
+newtype IRInterpreter a = IRInterpreter {getIRInterpreter :: RWS IRInterpreterEnv [IRLine] IRInterpreterState a}
   deriving
     ( Functor
     , Applicative
@@ -66,7 +68,7 @@ interpret :: IRInstr a -> IRInterpreter a
 interpret = iterM interpreter
 
 evalInterpreter :: IRInterpreterEnv -> IRInterpreter a -> [IRLine]
-evalInterpreter env ipt = evalState (execWriterT (runReaderT (getIRInterpreter ipt) env)) initialIRInterpreterState
+evalInterpreter env ipt = undefined -- evalState (execWriterT (runReaderT (getIRInterpreter ipt) env)) initialIRInterpreterState
 
-runInterpreter :: IRInterpreterEnv -> IRInterpreter a -> ([IRLine], IRInterpreterState)
-runInterpreter env ipt = runState (execWriterT (runReaderT (getIRInterpreter ipt) env)) initialIRInterpreterState
+runInterpreter :: IRInterpreterEnv -> IRInterpreter a -> (a, IRInterpreterState, [IRLine])
+runInterpreter env ipt = runRWS (getIRInterpreter ipt) undefined undefined
