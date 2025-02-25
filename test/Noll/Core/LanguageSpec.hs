@@ -1731,11 +1731,652 @@ blockObjects2 =
               )
               :| []
           )
-          (
-            Core.app
+          ( Core.let_
+              ( Core.Binding
+                  (Label Core.int32 "a")
+                  ( Core.app
+                      Core.int32
+                      (Core.var (Label (Core.int32 ~> Core.int32) "id"))
+                      (Core.lit (Core.PInt32 5) :| [])
+                  )
+                  :| []
+              )
+              (Core.var (Label Core.int32 "a"))
+          )
+      )
+  ]
+
+blockObjects3 :: ObjectList
+blockObjects3 =
+  [ OFunction
+      "main"
+      [Label Core.opaque "_"]
+      ( Core.let_
+          ( Core.Binding
+              (Label (Core.int32 ~> Core.int32) "id")
+              ( Core.lam
+                  (Label Core.int32 "x" :| [])
+                  (Core.var (Label Core.int32 "x"))
+              )
+              :| []
+          )
+          ( Core.app
               Core.int32
               (Core.var (Label (Core.int32 ~> Core.int32) "id"))
               (Core.lit (Core.PInt32 5) :| [])
+          )
+      )
+  ]
+
+blockObjects4 :: ObjectList
+blockObjects4 =
+  [ OFunction
+      "main"
+      [Label Core.opaque "_"]
+      ( Core.let_
+          ( Core.Binding
+              (Label ((opaque ~> opaque) ~> (opaque ~> opaque) ~> opaque ~> opaque) "_compose_")
+              ( Core.lam
+                  ( Label (opaque ~> opaque) "f"
+                      :| [ Label (opaque ~> opaque) "g"
+                         , Label opaque "x"
+                         ]
+                  )
+                  ( Core.app
+                      opaque
+                      (Core.var (Label (opaque ~> opaque) "f"))
+                      ( Core.app
+                          opaque
+                          (Core.var (Label (opaque ~> opaque) "g"))
+                          (Core.var (Label opaque "x") :| [])
+                          :| []
+                      )
+                  )
+              )
+              :| []
+          )
+          ( Core.let_
+              --              ( Core.Binding
+              --                  (Label (list opaque ~> list opaque ~> list opaque) "_list_concat_")
+              --                  ( Core.lam
+              --                      (Label (list opaque) "a" :| [Label (list opaque) "b"])
+              --                      ( Core.match
+              --                          (list opaque)
+              --                          (Core.var (Label (list opaque) "a"))
+              --                          ( Clause
+              --                              (Label (list opaque) "$Nil" :| [])
+              --                              (Core.var (Label (list opaque) "b"))
+              --                              :| [ Clause
+              --                                    ( Label (opaque ~> list opaque ~> list opaque) "$Cons"
+              --                                        <| Label opaque "x"
+              --                                        <| Label (list opaque) "xs"
+              --                                        :| []
+              --                                    )
+              --                                    ( Core.app
+              --                                        (list opaque)
+              --                                        (Core.var (Label (opaque ~> list opaque ~> list opaque) "$Cons"))
+              --                                        ( Core.var (Label opaque "x")
+              --                                            <| Core.app
+              --                                              (list opaque)
+              --                                              (Core.var (Label (list opaque ~> list opaque ~> list opaque) "_list_concat_"))
+              --                                              ( Core.var (Label (list opaque) "xs")
+              --                                                  <| Core.var (Label (list opaque) "b")
+              --                                                  :| []
+              --                                              )
+              --                                            :| []
+              --                                        )
+              --                                    )
+              --                                 ]
+              --                          )
+              --                      )
+              --                  )
+              --                  :| [ Core.Binding
+              --                        (Label (compareDict ~> opaque ~> opaque ~> ordering) "compare")
+              --                        ( Core.lam
+              --                            ( Label compareDict "a_1"
+              --                                <| Label opaque "a_2"
+              --                                <| Label opaque "a_3"
+              --                                :| []
+              --                            )
+              --                            ( Core.match
+              --                                ordering
+              --                                (Core.var (Label compareDict "a_1"))
+              --                                ( Clause
+              --                                    ( Label (compareRow ~> compareDict) "$Record"
+              --                                        <| Label compareRow "r_1"
+              --                                        :| []
+              --                                    )
+              --                                    ( Core.sel
+              --                                        ( Focus
+              --                                            "compare"
+              --                                            (Label (opaque ~> opaque ~> ordering) "f_1")
+              --                                            (Label opaque "q_1")
+              --                                        )
+              --                                        (Core.var (Label compareRow "r_1"))
+              --                                        ( Core.app
+              --                                            ordering
+              --                                            (Core.var (Label (opaque ~> opaque ~> ordering) "f_1"))
+              --                                            ( Core.var (Label opaque "a_2")
+              --                                                <| Core.var (Label opaque "a_3")
+              --                                                :| []
+              --                                            )
+              --                                        )
+              --                                    )
+              --                                    :| []
+              --                                )
+              --                            )
+              --                        )
+              --                     , Core.Binding
+              --                        (Label (fromInt32Dict ~> Core.int32 ~> opaque) "from_int32")
+              --                        ( Core.lam
+              --                            ( Label fromInt32Dict "a_1"
+              --                                <| Label Core.int32 "a_2"
+              --                                :| []
+              --                            )
+              --                            ( Core.match
+              --                                opaque
+              --                                (Core.var (Label fromInt32Dict "a_1"))
+              --                                ( Clause
+              --                                    ( Label (fromInt32Row ~> fromInt32Dict) "$Record"
+              --                                        <| Label fromInt32Row "r_1"
+              --                                        :| []
+              --                                    )
+              --                                    ( Core.sel
+              --                                        ( Focus
+              --                                            "from_int32"
+              --                                            (Label (Core.int32 ~> opaque) "f_1")
+              --                                            (Label opaque "q_1")
+              --                                        )
+              --                                        (Core.var (Label fromInt32Row "r_1"))
+              --                                        ( Core.app
+              --                                            opaque
+              --                                            (Core.var (Label (Core.int32 ~> opaque) "f_1"))
+              --                                            (Core.var (Label Core.int32 "a_2") :| [])
+              --                                        )
+              --                                    )
+              --                                    :| []
+              --                                )
+              --                            )
+              --                        )
+              --                     , Core.Binding
+              --                        (Label (opaque ~> (opaque ~> opaque) ~> opaque) "_forward_application_")
+              --                        ( Core.lam
+              --                            (Label opaque "x" <| Label (opaque ~> opaque) "f" :| [])
+              --                            ( Core.app
+              --                                opaque
+              --                                (Core.var (Label (opaque ~> opaque) "f"))
+              --                                (Core.var (Label opaque "x") :| [])
+              --                            )
+              --                        )
+              --                     , Core.Binding
+              --                        (Label (Core.bool ~> Core.bool) "_not_")
+              --                        ( Core.lam
+              --                            (Label Core.bool "a" :| [])
+              --                            ( Core.if_
+              --                                (Core.var (Label Core.bool "a"))
+              --                                (Core.lit (Core.PBool False))
+              --                                (Core.lit (Core.PBool True))
+              --                            )
+              --                        )
+              --                     ,
+              ( Core.Binding
+                  (Label (Core.int32 ~> Core.int32 ~> ordering) "compare__int32")
+                  ( Core.lam
+                      ( Label Core.int32 "x"
+                          <| Label Core.int32 "y"
+                          :| []
+                      )
+                      ( Core.if_
+                          ( Core.op
+                              ( Core.OLtInt32
+                                  (Core.var (Label Core.int32 "x"))
+                                  (Core.var (Label Core.int32 "y"))
+                              )
+                          )
+                          (Core.var (Label ordering "LessThan"))
+                          ( Core.if_
+                              ( Core.op
+                                  ( Core.OGtInt32
+                                      (Core.var (Label Core.int32 "x"))
+                                      (Core.var (Label Core.int32 "y"))
+                                  )
+                              )
+                              (Core.var (Label ordering "GreaterThan"))
+                              (Core.var (Label ordering "EqualTo"))
+                          )
+                      )
+                  )
+                  :| [ Core.Binding
+                        (Label (Core.int32 ~> Core.int32) "from_int32__int32")
+                        ( Core.lam
+                            (Label Core.int32 "n" :| [])
+                            (Core.var (Label Core.int32 "n"))
+                        )
+                        --                     , Core.Binding
+                        --                        (Label (compareDict ~> opaque ~> opaque ~> Core.bool) "lte")
+                        --                        ( Core.lam
+                        --                            (Label compareDict "d_1" :| [])
+                        --                            ( Core.lam
+                        --                                (Label opaque "x" :| [])
+                        --                                ( Core.lam
+                        --                                    (Label opaque "y" :| [])
+                        --                                    ( Core.match
+                        --                                        Core.bool
+                        --                                        ( Core.app
+                        --                                            ordering
+                        --                                            (Core.var (Label (compareDict ~> opaque ~> opaque ~> ordering) "compare"))
+                        --                                            ( Core.var (Label compareDict "d_1")
+                        --                                                <| Core.var (Label opaque "x")
+                        --                                                <| Core.var (Label opaque "y")
+                        --                                                :| []
+                        --                                            )
+                        --                                        )
+                        --                                        ( Clause
+                        --                                            (Label ordering "LessThan" :| [])
+                        --                                            (Core.lit (Core.PBool True))
+                        --                                            <| Clause
+                        --                                              (Label ordering "EqualTo" :| [])
+                        --                                              (Core.lit (Core.PBool True))
+                        --                                            <| Clause
+                        --                                              (Label ordering "GreaterThan" :| [])
+                        --                                              (Core.lit (Core.PBool False))
+                        --                                            :| []
+                        --                                        )
+                        --                                    )
+                        --                                )
+                        --                            )
+                        --                        )
+                        --                     , Core.Binding
+                        --                        (Label (compareDict ~> opaque ~> opaque ~> Core.bool) "gt")
+                        --                        ( Core.lam
+                        --                            (Label compareDict "d_1" :| [])
+                        --                            ( Core.lam
+                        --                                (Label opaque "x" :| [])
+                        --                                ( Core.app
+                        --                                    (opaque ~> Core.bool)
+                        --                                    (Core.var (Label ((Core.bool ~> Core.bool) ~> (opaque ~> Core.bool) ~> opaque ~> Core.bool) "_compose_"))
+                        --                                    ( Core.var (Label (Core.bool ~> Core.bool) "_not_")
+                        --                                        :| [ Core.app
+                        --                                              (opaque ~> Core.bool)
+                        --                                              (Core.var (Label (compareDict ~> opaque ~> opaque ~> Core.bool) "lte"))
+                        --                                              ( Core.var (Label compareDict "d_1")
+                        --                                                  :| [ Core.var (Label opaque "x")
+                        --                                                     ]
+                        --                                              )
+                        --                                           ]
+                        --                                    )
+                        --                                )
+                        --                            )
+                        --                        )
+                        --                     , Core.Binding
+                        --                        (Label (compareDict ~> maxMinRecord opaque ~> opaque ~> Core.bool) "in_range")
+                        --                        ( Core.lam
+                        --                            (Label compareDict "d_1" :| [])
+                        --                            ( Core.lam
+                        --                                (Label (maxMinRecord opaque) "range" <| Label opaque "n" :| [])
+                        --                                ( Core.match
+                        --                                    Core.bool
+                        --                                    (Core.var (Label (maxMinRecord opaque) "range"))
+                        --                                    ( Clause
+                        --                                        ( Label (maxMinRow opaque ~> maxMinRecord opaque) "$Record"
+                        --                                            <| Label (maxMinRow opaque) "row_1"
+                        --                                            :| []
+                        --                                        )
+                        --                                        ( Core.sel
+                        --                                            ( Focus
+                        --                                                "min"
+                        --                                                (Label opaque "min")
+                        --                                                (Label (Core.RExt "max" opaque opaque) "row_2")
+                        --                                            )
+                        --                                            (Core.var (Label (maxMinRow opaque) "row_1"))
+                        --                                            ( Core.sel
+                        --                                                ( Focus
+                        --                                                    "max"
+                        --                                                    (Label opaque "max")
+                        --                                                    (Label opaque "z")
+                        --                                                )
+                        --                                                (Core.var (Label (Core.RExt "max" opaque opaque) "row_2"))
+                        --                                                ( Core.op
+                        --                                                    ( Core.OAnd
+                        --                                                        ( Core.app
+                        --                                                            Core.bool
+                        --                                                            (Core.var (Label (compareDict ~> opaque ~> opaque ~> Core.bool) "gt"))
+                        --                                                            ( Core.var (Label compareDict "d_1")
+                        --                                                                <| Core.var (Label opaque "n")
+                        --                                                                <| Core.var (Label opaque "min")
+                        --                                                                :| []
+                        --                                                            )
+                        --                                                        )
+                        --                                                        ( Core.op
+                        --                                                            ( Core.OOr
+                        --                                                                ( Core.app
+                        --                                                                    Core.bool
+                        --                                                                    (Core.var (Label (compareDict ~> opaque ~> opaque ~> Core.bool) "gt"))
+                        --                                                                    ( Core.var (Label compareDict "d_1")
+                        --                                                                        <| Core.var (Label opaque "min")
+                        --                                                                        <| Core.var (Label opaque "max")
+                        --                                                                        :| []
+                        --                                                                    )
+                        --                                                                )
+                        --                                                                ( Core.app
+                        --                                                                    Core.bool
+                        --                                                                    (Core.var (Label (compareDict ~> opaque ~> opaque ~> Core.bool) "lte"))
+                        --                                                                    ( Core.var (Label compareDict "d_1")
+                        --                                                                        <| Core.var (Label opaque "n")
+                        --                                                                        <| Core.var (Label opaque "max")
+                        --                                                                        :| []
+                        --                                                                    )
+                        --                                                                )
+                        --                                                            )
+                        --                                                        )
+                        --                                                    )
+                        --                                                )
+                        --                                            )
+                        --                                        )
+                        --                                        :| []
+                        --                                    )
+                        --                                )
+                        --                            )
+                        --                        )
+                        --                     , Core.Binding
+                        --                        (Label (orderedDict ~> list opaque ~> tree opaque) "from_list")
+                        --                        ( Core.lam
+                        --                            (Label orderedDict "d_1" :| [])
+                        --                            ( Core.lam
+                        --                                (Label (list opaque) "list" :| [])
+                        --                                ( Core.let_
+                        --                                    ( Core.Binding
+                        --                                        (Label (list opaque ~> maxMinRecord opaque ~> tree opaque) "fold_")
+                        --                                        ( Core.lam
+                        --                                            (Label (list opaque) "a_0" :| [])
+                        --                                            ( Core.match
+                        --                                                (maxMinRecord opaque ~> tree opaque)
+                        --                                                (Core.var (Label (list opaque) "a_0"))
+                        --                                                ( Clause
+                        --                                                    ( Label (opaque ~> list opaque ~> list opaque) "$Cons"
+                        --                                                        <| Label opaque "p"
+                        --                                                        <| Label (list opaque) "g"
+                        --                                                        :| []
+                        --                                                    )
+                        --                                                    ( Core.lam
+                        --                                                        (Label (maxMinRecord opaque) "range" :| [])
+                        --                                                        ( Core.if_
+                        --                                                            ( Core.app
+                        --                                                                Core.bool
+                        --                                                                (Core.var (Label (opaque ~> (opaque ~> opaque) ~> opaque) "_forward_application_"))
+                        --                                                                ( Core.var (Label opaque "p")
+                        --                                                                    <| Core.app
+                        --                                                                      (opaque ~> Core.bool)
+                        --                                                                      (Core.var (Label (compareDict ~> maxMinRecord opaque ~> opaque ~> Core.bool) "in_range"))
+                        --                                                                      ( Core.var (Label compareDict "d_1")
+                        --                                                                          <| Core.var (Label (maxMinRecord opaque) "range")
+                        --                                                                          :| []
+                        --                                                                      )
+                        --                                                                    :| []
+                        --                                                                )
+                        --                                                            )
+                        --                                                            -- then
+                        --                                                            ( Core.app
+                        --                                                                (tree opaque)
+                        --                                                                (Core.var (Label (opaque ~> tree opaque ~> tree opaque ~> tree opaque) "Node"))
+                        --                                                                ( Core.var (Label opaque "p")
+                        --                                                                    <| Core.app
+                        --                                                                      (tree opaque)
+                        --                                                                      (Core.var (Label (list opaque ~> maxMinRecord opaque ~> tree opaque) "fold_"))
+                        --                                                                      ( Core.var (Label (list opaque) "g")
+                        --                                                                          <| Core.app
+                        --                                                                            (maxMinRecord opaque)
+                        --                                                                            (Core.var (Label (maxMinRow opaque ~> maxMinRecord opaque) "$Record"))
+                        --                                                                            ( Core.ext
+                        --                                                                                (Label opaque "min")
+                        --                                                                                ( Core.match
+                        --                                                                                    opaque
+                        --                                                                                    (Core.var (Label (maxMinRecord opaque) "range"))
+                        --                                                                                    ( Clause
+                        --                                                                                        ( Label (maxMinRow opaque ~> maxMinRecord opaque) "$Record"
+                        --                                                                                            <| Label (maxMinRow opaque) "row_2"
+                        --                                                                                            :| []
+                        --                                                                                        )
+                        --                                                                                        ( Core.sel
+                        --                                                                                            ( Focus
+                        --                                                                                                "min"
+                        --                                                                                                (Label opaque "m_1")
+                        --                                                                                                (Label (Core.RExt "max" opaque opaque) "q_2")
+                        --                                                                                            )
+                        --                                                                                            (Core.var (Label (maxMinRow opaque) "row_2"))
+                        --                                                                                            (Core.var (Label opaque "m_1"))
+                        --                                                                                        )
+                        --                                                                                        :| []
+                        --                                                                                    )
+                        --                                                                                )
+                        --                                                                                ( Core.ext
+                        --                                                                                    (Label opaque "max")
+                        --                                                                                    (Core.var (Label opaque "p"))
+                        --                                                                                    Core.nil
+                        --                                                                                )
+                        --                                                                                :| []
+                        --                                                                            )
+                        --                                                                          :| []
+                        --                                                                      )
+                        --                                                                    <| Core.app
+                        --                                                                      (tree opaque)
+                        --                                                                      (Core.var (Label (list opaque ~> maxMinRecord opaque ~> tree opaque) "fold_"))
+                        --                                                                      ( Core.var (Label (list opaque) "g")
+                        --                                                                          <| Core.app
+                        --                                                                            (maxMinRecord opaque)
+                        --                                                                            (Core.var (Label (maxMinRow opaque ~> maxMinRecord opaque) "$Record"))
+                        --                                                                            ( Core.ext
+                        --                                                                                (Label opaque "min")
+                        --                                                                                (Core.var (Label opaque "p"))
+                        --                                                                                ( Core.ext
+                        --                                                                                    (Label opaque "max")
+                        --                                                                                    ( Core.match
+                        --                                                                                        opaque
+                        --                                                                                        (Core.var (Label (maxMinRecord opaque) "range"))
+                        --                                                                                        ( Clause
+                        --                                                                                            ( Label (maxMinRow opaque ~> maxMinRecord opaque) "$Record"
+                        --                                                                                                <| Label (maxMinRow opaque) "row_2"
+                        --                                                                                                :| []
+                        --                                                                                            )
+                        --                                                                                            ( Core.sel
+                        --                                                                                                ( Focus
+                        --                                                                                                    "max"
+                        --                                                                                                    (Label opaque "m_1")
+                        --                                                                                                    (Label (Core.RExt "min" opaque opaque) "q_2")
+                        --                                                                                                )
+                        --                                                                                                (Core.var (Label (maxMinRow opaque) "row_2"))
+                        --                                                                                                (Core.var (Label opaque "m_1"))
+                        --                                                                                            )
+                        --                                                                                            :| []
+                        --                                                                                        )
+                        --                                                                                    )
+                        --                                                                                    Core.nil
+                        --                                                                                )
+                        --                                                                                :| []
+                        --                                                                            )
+                        --                                                                          :| []
+                        --                                                                      )
+                        --                                                                    :| []
+                        --                                                                )
+                        --                                                            )
+                        --                                                            -- else
+                        --                                                            ( Core.app
+                        --                                                                (tree opaque)
+                        --                                                                (Core.var (Label (list opaque ~> maxMinRecord opaque ~> tree opaque) "fold_"))
+                        --                                                                ( Core.var (Label (list opaque) "g")
+                        --                                                                    <| Core.var (Label (maxMinRecord opaque) "range")
+                        --                                                                    :| []
+                        --                                                                )
+                        --                                                            )
+                        --                                                        )
+                        --                                                    )
+                        --                                                    <| Clause
+                        --                                                      (Label (list opaque) "$Nil" :| [])
+                        --                                                      ( Core.lam
+                        --                                                          (Label (maxMinRecord opaque) "_" :| [])
+                        --                                                          (Core.var (Label (tree opaque) "Leaf"))
+                        --                                                      )
+                        --                                                    :| []
+                        --                                                )
+                        --                                            )
+                        --                                        )
+                        --                                        :| []
+                        --                                    )
+                        --                                    ( Core.app
+                        --                                        (tree opaque)
+                        --                                        (Core.var (Label (list opaque ~> maxMinRecord opaque ~> tree opaque) "fold_"))
+                        --                                        ( Core.var (Label (list opaque) "list")
+                        --                                            <| Core.app
+                        --                                              (maxMinRecord opaque)
+                        --                                              (Core.var (Label (maxMinRow opaque ~> maxMinRecord opaque) "$Record"))
+                        --                                              ( Core.ext
+                        --                                                  (Label opaque "min")
+                        --                                                  ( Core.app
+                        --                                                      opaque
+                        --                                                      (Core.var (Label (orderedDict ~> Core.int32 ~> opaque) "from_int32"))
+                        --                                                      ( Core.var (Label orderedDict "d_1")
+                        --                                                          <| Core.lit (Core.PInt32 0)
+                        --                                                          :| []
+                        --                                                      )
+                        --                                                  )
+                        --                                                  ( Core.ext
+                        --                                                      (Label opaque "max")
+                        --                                                      ( Core.app
+                        --                                                          opaque
+                        --                                                          (Core.var (Label (orderedDict ~> Core.int32 ~> opaque) "from_int32"))
+                        --                                                          ( Core.var (Label orderedDict "d_1")
+                        --                                                              <| Core.lit (Core.PInt32 (-1))
+                        --                                                              :| []
+                        --                                                          )
+                        --                                                      )
+                        --                                                      Core.nil
+                        --                                                  )
+                        --                                                  :| []
+                        --                                              )
+                        --                                            :| []
+                        --                                        )
+                        --                                    )
+                        --                                )
+                        --                            )
+                        --                        )
+                        --                     , Core.Binding
+                        --                        (Label (tree opaque ~> list opaque) "flatten")
+                        --                        ( Core.lam
+                        --                            (Label (tree opaque) "tree" :| [])
+                        --                            ( Core.let_
+                        --                                ( Core.Binding
+                        --                                    (Label (tree opaque ~> list opaque) "fold_")
+                        --                                    ( Core.lam
+                        --                                        (Label (tree opaque) "a_0" :| [])
+                        --                                        ( Core.match
+                        --                                            (list opaque)
+                        --                                            (Core.var (Label (tree opaque) "a_0"))
+                        --                                            ( Clause
+                        --                                                ( Label (opaque ~> tree opaque ~> tree opaque ~> tree opaque) "Node"
+                        --                                                    <| Label opaque "y"
+                        --                                                    <| Label (tree opaque) "lhs"
+                        --                                                    <| Label (tree opaque) "rhs"
+                        --                                                    :| []
+                        --                                                )
+                        --                                                ( Core.app
+                        --                                                    (list opaque)
+                        --                                                    (Core.var (Label (list opaque ~> list opaque ~> list opaque) "_list_concat_"))
+                        --                                                    ( Core.app
+                        --                                                        (list opaque)
+                        --                                                        (Core.var (Label (tree opaque ~> list opaque) "fold_"))
+                        --                                                        (Core.var (Label (tree opaque) "lhs") :| [])
+                        --                                                        <| Core.app
+                        --                                                          (list opaque)
+                        --                                                          (Core.var (Label (opaque ~> list opaque ~> list opaque) "$Cons"))
+                        --                                                          ( Core.var (Label opaque "y")
+                        --                                                              <| Core.app
+                        --                                                                (list opaque)
+                        --                                                                (Core.var (Label (tree opaque ~> list opaque) "fold_"))
+                        --                                                                (Core.var (Label (tree opaque) "rhs") :| [])
+                        --                                                              :| []
+                        --                                                          )
+                        --                                                        :| []
+                        --                                                    )
+                        --                                                )
+                        --                                                <| Clause
+                        --                                                  (Label (tree opaque) "Leaf" :| [])
+                        --                                                  (Core.var (Label (list opaque) "$Nil"))
+                        --                                                :| []
+                        --                                            )
+                        --                                        )
+                        --                                    )
+                        --                                    :| []
+                        --                                )
+                        --                                ( Core.app
+                        --                                    (list opaque)
+                        --                                    (Core.var (Label (tree opaque ~> list opaque) "fold_"))
+                        --                                    (Core.var (Label (tree opaque) "tree") :| [])
+                        --                                )
+                        --                            )
+                        --                        )
+                        --                     , Core.Binding
+                        --                        (Label (orderedDict ~> list opaque ~> list opaque) "qsort")
+                        --                        ( Core.lam
+                        --                            (Label orderedDict "d_1" :| [])
+                        --                            ( Core.app
+                        --                                (list opaque ~> list opaque)
+                        --                                ( Core.var
+                        --                                    ( Label
+                        --                                        ( (tree opaque ~> list opaque)
+                        --                                            ~> (list opaque ~> tree opaque)
+                        --                                            ~> list opaque
+                        --                                            ~> list opaque
+                        --                                        )
+                        --                                        "_compose_"
+                        --                                    )
+                        --                                )
+                        --                                ( Core.var (Label (tree opaque ~> list opaque) "flatten")
+                        --                                    <| Core.app
+                        --                                      (list opaque ~> tree opaque)
+                        --                                      (Core.var (Label (orderedDict ~> list opaque ~> tree opaque) "from_list"))
+                        --                                      (Core.var (Label orderedDict "d_1") :| [])
+                        --                                    :| []
+                        --                                )
+                        --                            )
+                        --                        )
+                        --                     ]
+                        --              )
+                     ]
+              )
+              ( Core.let_
+                  ( Core.Binding
+                      (Label (list Core.int32) "xs")
+                      (Core.var (Label (list Core.int32) "$Nil"))
+                      :| []
+                  )
+                  ( Core.let_
+                      ( Core.Binding
+                          (Label (list Core.int32) "ys")
+                          ( Core.app
+                              (list Core.int32)
+                              (Core.var (Label (orderedInt32Dict ~> list Core.int32 ~> list Core.int32) "qsort"))
+                              ( Core.app
+                                  orderedInt32Dict
+                                  (Core.var (Label (orderedInt32Row ~> orderedInt32Dict) "$Record"))
+                                  ( Core.ext
+                                      (Label (Core.int32 ~> Core.int32 ~> ordering) "compare")
+                                      (Core.var (Label (Core.int32 ~> Core.int32 ~> ordering) "compare__int32"))
+                                      ( Core.ext
+                                          (Label (Core.int32 ~> Core.int32) "from_int32")
+                                          (Core.var (Label (Core.int32 ~> Core.int32) "from_int32__int32"))
+                                          Core.nil
+                                      )
+                                      :| []
+                                  )
+                                  <| Core.var (Label (list Core.int32) "xs")
+                                  :| []
+                              )
+                          )
+                          :| []
+                      )
+                      (Core.var (Label Core.int32 "e"))
+                  )
+              )
           )
       )
   ]

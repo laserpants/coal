@@ -12,6 +12,7 @@ module Noll.Compiler.Core where
 
 import Control.Arrow ((>>>))
 import Control.Monad.RWS (RWS, evalRWS)
+import Control.Monad.Reader (MonadReader, ReaderT, ask, local, runReaderT)
 import Control.Monad.State (MonadState, State, StateT, evalState, evalStateT, gets, modify, runState, runStateT)
 import Control.Monad.Trans (lift)
 import Control.Monad.Writer (MonadWriter, Writer, runWriter, tell)
@@ -25,11 +26,12 @@ import Noll.Core.Language (Binding (..), Clause (..), Expr, ExprF (..), Focus (.
 import Noll.Core.Language.Replace (Sub, relabel)
 import Noll.Core.Language.Typed (isFunction)
 import Noll.Label (Label (..), labelName)
-import Noll.Utils (Dictionary, Name, Over, applyM1, applyM2, foldrM, isConstructor, (<$$$>), (<$$>))
+import Noll.Utils (Dictionary, Name, Over, applyM1, applyM2, foldrM, forM, isConstructor, (<$$$>), (<$$>))
 import TextShow
 
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
+import qualified Data.Text as Text
 import qualified Noll.Common.List1 as List1
 import qualified Noll.Core.Language as Core
 
@@ -64,8 +66,8 @@ type ObjectList = [BlockObject Type (Expr Type)]
 -------------------------------------------------------------------------------
 
 -- TODO: use RWS?
-runLifting :: StateT Int (Writer ObjectList) a -> (a, ObjectList)
-runLifting e = runWriter (evalStateT e 1)
+runLifting :: StateT Int (ReaderT Name (Writer ObjectList)) a -> (a, ObjectList)
+runLifting e = runWriter (runReaderT (evalStateT e 1) "")
 
 functionType :: (Functor f, Foldable f, Typed t, Typed u) => t -> f u -> Type
 functionType a as = foldType (typeOf a) (typeOf <$> as)
@@ -78,14 +80,21 @@ liftLambdas objs = objs1 <> objs2
   go =
     cata $
       \case
+        Core.ELet vs e -> do
+          ws <- forM vs $ \(Binding ll@(Label _ name) e1) -> do
+            f <- local (const name) e1
+            pure (Binding ll f)
+          f <- local mempty e
+          pure (Core.let_ ws f)
         Core.ELam vs e -> do
           n <- supplied id
-          let name = "$anon." <> showt n
-          moveUp name vs =<< e
+          name <- ask
+          f <- local mempty e
+          moveUp (if Text.null name then "$fn." <> showt n else name) vs f
         e ->
-          embed <$> sequence e
+          local mempty (embed <$> sequence e)
 
-moveUp :: (MonadWriter ObjectList m) => Name -> List1 (Label Type) -> Expr Type -> m (Expr Type)
+moveUp :: (MonadWriter ObjectList m, MonadReader Name m) => Name -> List1 (Label Type) -> Expr Type -> m (Expr Type)
 moveUp name vs f = do
   tell [OFunction name (fromList1 vs) f]
   pure (Core.var (Label (functionType f vs) name))
@@ -394,15 +403,6 @@ pure2 f = pure . (f <$>)
 
 pure3 :: (Applicative f1, Functor f2, Functor f3) => (a -> b) -> f2 (f3 a) -> f1 (f2 (f3 b))
 pure3 f = pure . (f <$$>)
-
--- flattenELamC :: ObjectList -> Core ObjectList
--- flattenELamC = pure3 flattenELam
---
--- liftLambdasC :: ObjectList -> Core ObjectList
--- liftLambdasC = pure1 liftLambdas
---
--- simplifyELetC :: ObjectList -> Core ObjectList
--- simplifyELetC = pure3 simplifyELet
 
 pipeline :: ObjectList -> Core ObjectList
 pipeline ol = do

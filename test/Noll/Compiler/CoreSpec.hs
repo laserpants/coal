@@ -325,11 +325,11 @@ test1Result =
                   "f"
               )
           )
-          ( Core.var (Label (Core.TOpq `Core.arrow` Core.int32) "$anon.1")
+          ( Core.var (Label (Core.TOpq `Core.arrow` Core.int32) "$fn.1")
               :| []
           )
       )
-  , OFunction "$anon.1" [Label Core.TOpq "y"] (Core.lit (Core.PInt32 33))
+  , OFunction "$fn.1" [Label Core.TOpq "y"] (Core.lit (Core.PInt32 33))
   ]
 
 test2 :: ObjectList
@@ -432,7 +432,7 @@ test2Result =
               ( Core.call
                   (Label (Core.int32 `Core.arrow` Core.TOpq) "print_int32")
                   [Core.var (Label Core.int32 "m")]
-                  (Core.var (Label (Core.TOpq `Core.arrow` Core.int32) "$anon.1"))
+                  (Core.var (Label (Core.TOpq `Core.arrow` Core.int32) "$fn.1"))
               )
           )
       )
@@ -454,7 +454,7 @@ test2Result =
           )
       )
   , OFunction
-      "$anon.1"
+      "$fn.1"
       [Label Core.TOpq "_"]
       ( Core.var (Label Core.int32 "m")
       )
@@ -474,12 +474,11 @@ fixture41 :: Core.Expr ()
 fixture41 = Core.var (Label () "b")
 
 fixture42 =
-  ( Fix
-      ( ELet
-          (Core.Binding (Label () "fold_.[48]") (Fix (EVar (Label () "$anon.13"))) :| [])
-          (Fix (EApp () (Fix (EVar (Label () "fold_.[48]"))) (Fix (EVar (Label () "list.[49]")) :| [Fix (EApp () (Fix (EVar (Label () "$Record"))) (Fix (EExt (Label () "min") (Fix (EApp () (Fix (EVar (Label () "from_int32.[68]"))) (Fix (EVar (Label () "d_1.[50]")) :| [Fix (ELit (PInt32 0))]))) (Fix (EExt (Label () "max") (Fix (EApp () (Fix (EVar (Label () "from_int32.[68]"))) (Fix (EVar (Label () "d_1.[50]")) :| [Fix (ELit (PInt32 (-1)))]))) (Fix ENil)))) :| []))])))
-      )
-  )
+  Fix
+    ( ELet
+        (Core.Binding (Label () "fold_.[48]") (Fix (EVar (Label () "$anon.13"))) :| [])
+        (Fix (EApp () (Fix (EVar (Label () "fold_.[48]"))) (Fix (EVar (Label () "list.[49]")) :| [Fix (EApp () (Fix (EVar (Label () "$Record"))) (Fix (EExt (Label () "min") (Fix (EApp () (Fix (EVar (Label () "from_int32.[68]"))) (Fix (EVar (Label () "d_1.[50]")) :| [Fix (ELit (PInt32 0))]))) (Fix (EExt (Label () "max") (Fix (EApp () (Fix (EVar (Label () "from_int32.[68]"))) (Fix (EVar (Label () "d_1.[50]")) :| [Fix (ELit (PInt32 (-1)))]))) (Fix ENil)))) :| []))])))
+    )
 
 test3 =
   --  [ OFunction
