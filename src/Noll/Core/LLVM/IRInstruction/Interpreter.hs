@@ -38,20 +38,20 @@ data IRInterpreterEnv = IRInterpreterEnv
   }
   deriving (Show, Eq, Ord, Read)
 
-data Line
+data IRLine
   = LInstruction [Text]
   | LComment Text
   | LLabel Text
   deriving (Show, Eq, Ord)
 
 -- TODO: Use RWS
-newtype IRInterpreter a = IRInterpreter {getIRInterpreter :: ReaderT IRInterpreterEnv (WriterT [Line] (State IRInterpreterState)) a}
+newtype IRInterpreter a = IRInterpreter {getIRInterpreter :: ReaderT IRInterpreterEnv (WriterT [IRLine] (State IRInterpreterState)) a}
   deriving
     ( Functor
     , Applicative
     , Monad
     , MonadState IRInterpreterState
-    , MonadWriter [Line]
+    , MonadWriter [IRLine]
     , MonadReader IRInterpreterEnv
     )
 
@@ -65,8 +65,8 @@ interpreter =
 interpret :: IRInstr a -> IRInterpreter a
 interpret = iterM interpreter
 
-evalInterpreter :: IRInterpreterEnv -> IRInterpreter a -> [Line]
+evalInterpreter :: IRInterpreterEnv -> IRInterpreter a -> [IRLine]
 evalInterpreter env ipt = evalState (execWriterT (runReaderT (getIRInterpreter ipt) env)) initialIRInterpreterState
 
-runInterpreter :: IRInterpreterEnv -> IRInterpreter a -> ([Line], IRInterpreterState)
+runInterpreter :: IRInterpreterEnv -> IRInterpreter a -> ([IRLine], IRInterpreterState)
 runInterpreter env ipt = runState (execWriterT (runReaderT (getIRInterpreter ipt) env)) initialIRInterpreterState
