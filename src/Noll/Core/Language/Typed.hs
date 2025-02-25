@@ -9,7 +9,7 @@ import Noll.Core.Language.Expr (Expr, ExprF (..))
 import Noll.Core.Language.Op (Op (..))
 import Noll.Core.Language.Prim (Prim (..))
 import Noll.Core.Language.Syntax.Type (arity, foldType)
-import Noll.Core.Language.Type (Type (..))
+import Noll.Core.Language.Type (Type (..), normalizeRow)
 import Noll.Label (Label (..))
 
 import qualified Noll.Core.Language.Syntax.Type as Type
@@ -87,7 +87,7 @@ instance (Typed t, Typed a) => Typed (ExprF t a) where
       ENil ->
         Type.RNil
       EExt (Label _ n) t1 t2 ->
-        RExt n (typeOf t1) (typeOf t2) -- TODO: normalize?
+        normalizeRow (RExt n (typeOf t1) (typeOf t2))
       ELam ts t ->
         foldType (typeOf t) (typeOf <$> ts)
       _ ->
