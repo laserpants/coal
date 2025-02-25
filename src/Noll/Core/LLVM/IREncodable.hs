@@ -14,7 +14,6 @@ import Data.Char (isAlphaNum)
 import Data.List (intersperse)
 import Data.Text (Text)
 import Noll.Label (Label (..))
-
 -- import Noll.Core.LLVM.IRConstruct (IRConstruct (..))
 import Noll.Core.LLVM.IRType (IRType (..), IRTyped (..))
 import Noll.Core.LLVM.IRValue (IRValue (..))
