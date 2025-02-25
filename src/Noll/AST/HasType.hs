@@ -17,6 +17,7 @@ import Noll.Module.Constant (Constant (..))
 import Noll.Module.Definition (Definition (..))
 import Noll.Module.Function (Function (..))
 
+-- TODO: move?
 class HasType o k t where
   typeOf :: t -> Type o k
 

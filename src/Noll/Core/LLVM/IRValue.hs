@@ -1,10 +1,11 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Core.LLVM.IRValue (IRValue (..)) where
+module Noll.Core.LLVM.IRValue (IRValue (..), irPrimValue) where
 
 import Data.Int (Int32, Int64)
 import Noll.Core.LLVM.IRType (IRType (..), IRTyped (..))
+import Noll.Core.Language (Prim (..))
 import Noll.Utils (Name)
 
 data IRValue
@@ -37,3 +38,23 @@ instance IRTyped IRValue where
         TDouble
       Null ->
         TPtr TInt8
+
+irPrimValue :: Prim -> IRValue
+irPrimValue =
+  \case
+    PBool b ->
+      I1 b
+    PInt32 n ->
+      I32 n
+    PInt64 n ->
+      I64 n
+    PFloat f ->
+      Float f
+    PDouble d ->
+      Double d
+    PUnit ->
+      I1 True
+    PChar _ ->
+      error "Implementation error"
+    PString _ ->
+      error "Implementation error"

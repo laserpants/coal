@@ -1,7 +1,11 @@
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Core.LLVM.IRInstruction (IRInstrOp, IRInstr) where
+module Noll.Core.LLVM.IRInstruction (
+  IRInstrOpF (..),
+  IRInstrOp,
+  IRInstr,
+) where
 
 import Control.Monad.Free (Free)
 import Noll.Core.LLVM.IRType (IRType)
@@ -21,6 +25,8 @@ data IRInstrOpF v t i next
   | ILoad            t v          (v -> next)
   | IStore           v v          next
   | IRet             t v          next
+  | IInttoptr        v t          (v -> next)
+  | IPtrtoint        v t          (v -> next)
   -- TODO
   deriving (Functor)
 {- FOURMOLU_ENABLE -}
