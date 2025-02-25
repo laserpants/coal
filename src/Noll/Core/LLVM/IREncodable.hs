@@ -13,10 +13,10 @@ module Noll.Core.LLVM.IREncodable (
 import Data.Char (isAlphaNum)
 import Data.List (intersperse)
 import Data.Text (Text)
-import Noll.Label (Label (..))
--- import Noll.Core.LLVM.IRConstruct (IRConstruct (..))
+import Noll.Core.LLVM.IRConstruct (IRConstruct (..))
 import Noll.Core.LLVM.IRType (IRType (..), IRTyped (..))
 import Noll.Core.LLVM.IRValue (IRValue (..))
+import Noll.Label (Label (..))
 import Noll.Utils (Name)
 import TextShow (showt)
 
@@ -100,32 +100,28 @@ instance IREncodable (Label IRType) where
   irEncode (Label t name) =
     irEncode (IRAnnotated (Local t name))
 
--- instance (IREncodable a) => IREncodable (IRConstruct a) where
---  irEncode =
---    \case
---      CDefine name t ln as c ->
---        "define "
---          <> irEncode t
---          <> " "
---          <> "@"
---          <> enquote name
---          <> "("
---          <> Text.intercalate ", " (irEncode <$> as)
---          <> ")"
---          <> " {"
---          <> "\n"
---          <> irEncode c
---          <> "}\n"
---      CDeclare name t ts ->
---        "declare "
---          <> irEncode t
---          <> " "
---          <> "@"
---          <> enquote name
---          <> "("
---          <> Text.intercalate ", " (irEncode <$> ts)
---          <> ")"
---          <> "\n"
+instance (IREncodable a) => IREncodable (IRConstruct a) where
+  irEncode =
+    \case
+      CDefine name t ln as c ->
+        "define "
+          <> irEncode t
+          <> " "
+          <> "@"
+          <> enquote name
+          <> parens (commaSep as)
+          <> " {"
+          <> "\n"
+          <> irEncode c
+          <> "}\n"
+      CDeclare name t ts ->
+        "declare "
+          <> irEncode t
+          <> " "
+          <> "@"
+          <> enquote name
+          <> parens (commaSep ts)
+          <> "\n"
 
 enquote :: Text -> Text
 enquote n
