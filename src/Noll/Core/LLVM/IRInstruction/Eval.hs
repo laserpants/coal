@@ -13,7 +13,7 @@ import Noll.Core.LLVM.IRInstruction (IRInstr, IRInstrOpF (..))
 import Noll.Core.LLVM.IRInstruction.TH
 import Noll.Core.LLVM.IRType (IRType (..), IRTyped (..), i1, i32, i64, i8, i8Ptr)
 import Noll.Core.LLVM.IRValue (IRValue (..), irPrimValue)
-import Noll.Label (Label (..), labelName)
+import Noll.Label (Label (..))
 import Noll.Utils (forM, isConstructor)
 
 import qualified Data.Text as Text
@@ -60,6 +60,11 @@ irReveal v =
       iPtrtoint v i64
     _ ->
       pure v
+
+irRevealExpr :: CoreExpr -> IRInstr IRValue
+irRevealExpr expr = do
+  v <- irEvalExpr expr
+  irReveal v (irTypeOf (Core.typeOf expr))
 
 {-# INLINE irEvalArgs #-}
 irEvalArgs :: List1 CoreExpr -> IRInstr [IRValue]
@@ -136,9 +141,9 @@ irEvalExpr =
       Core.ELet vs e1 ->
         irCommentBlock "ELet" $ do
           bound <- forM vs $ \(Core.Binding (Label _ name) e) -> do
-            v <- optimizePtrConversions (irEvalExpr e)
+            v <- eliminatePtrConversions (irEvalExpr e)
             pure (name, v)
-          iBind (fromList1 bound) (optimizePtrConversions (irEvalExpr e1))
+          iBind (fromList1 bound) (eliminatePtrConversions (irEvalExpr e1))
       Core.EApp t e1@(Fix (Core.EVar (Label _ var))) es
         | isConstructor var -> do
             undefined
@@ -147,9 +152,41 @@ irEvalExpr =
       Core.EApp t e1 es -> do
         v1 <- irEvalExpr e1
         irApplyClosure v1 es
+      Core.EIf e1 e2 e3 -> do
+        irCommentBlock "EIf" $ do
+          labelThen <- iLabel "then"
+          labelElse <- iLabel "else"
+          labelExit <- iLabel "exit"
+          r1 <- irRevealExpr e1
+          iBr r1 [labelThen, labelElse]
+          thenBlock <- iBlock labelThen $ do
+            r <- eliminatePtrConversions (irEvalExpr e2)
+            iBr1 labelExit
+            pure r
+          elseBlock <- iBlock labelElse $ do
+            r <- eliminatePtrConversions (irEvalExpr e3)
+            iBr1 labelExit
+            pure r
+          (_, v) <-
+            iBlock labelExit $
+              iPhi i8Ptr [thenBlock, elseBlock]
+          irConceal v
+      Core.ECall (Label t ll) es e ->
+        irCommentBlock "ECall" $ do
+          rs <- traverse (eliminatePtrConversions . irEvalExpr) es
+          v1 <- iCallGlobal i8Ptr ll rs
+          v2 <- eliminatePtrConversions (irEvalExpr e)
+          case v2 of
+            Local{} -> do
+              name <- iRuntimeApply 1
+              iCallGlobal i8Ptr name [v2, v1]
+            _ ->
+              error "TODO"
+      e ->
+        error "TODO"
 
-optimizePtrConversions :: IRInstr IRValue -> IRInstr IRValue
-optimizePtrConversions =
+eliminatePtrConversions :: IRInstr IRValue -> IRInstr IRValue
+eliminatePtrConversions =
   \case
     Free (IInttoptr v1 t1 next) ->
       case next v1 of
@@ -157,14 +194,14 @@ optimizePtrConversions =
           | v1 == v2 ->
               next1 v1
         Free instr ->
-          iInttoptr v1 t1 >>= optimizePtrConversions . next
+          iInttoptr v1 t1 >>= eliminatePtrConversions . next
         _ ->
           iInttoptr v1 t1 >>= next
     Free (IBind is i next) ->
-      Free (IBind is (optimizePtrConversions i) (optimizePtrConversions <$> next))
+      Free (IBind is (eliminatePtrConversions i) (eliminatePtrConversions <$> next))
     Free (IBlock name i next) ->
-      Free (IBlock name (optimizePtrConversions i) (optimizePtrConversions <$> next))
+      Free (IBlock name (eliminatePtrConversions i) (eliminatePtrConversions <$> next))
     Free instr ->
-      Free (optimizePtrConversions <$> instr)
+      Free (eliminatePtrConversions <$> instr)
     i ->
       i

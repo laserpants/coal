@@ -1,3 +1,5 @@
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
 module Noll.Core.LLVM.IRType (
@@ -13,6 +15,7 @@ module Noll.Core.LLVM.IRType (
   struct,
 ) where
 
+import Noll.Core.Language.Type (Type (..))
 import Noll.Utils (Name)
 
 -- | LLVM IR language types
@@ -48,6 +51,28 @@ class IRTyped t where
 
 instance IRTyped IRType where
   irTypeOf = id
+
+instance IRTyped Type where
+  irTypeOf =
+    \case
+      TCon "unit" [] ->
+        i1
+      TCon "bool" [] ->
+        i1
+      TCon "int32" [] ->
+        i32
+      TCon "int64" [] ->
+        i64
+      TCon "float" [] ->
+        TFloat
+      TCon "double" [] ->
+        TDouble
+      TCon "char" [] ->
+        error "TODO"
+      TCon "string" [] ->
+        error "TODO"
+      _ ->
+        i8Ptr
 
 {-# INLINE i1 #-}
 i1 :: IRType

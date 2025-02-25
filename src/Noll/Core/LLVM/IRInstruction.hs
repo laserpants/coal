@@ -26,11 +26,15 @@ data IRInstrOpF v t i next
   | ILoad            t v          (v -> next)
   | IStore           v v          next
   | IRet             t v          next
+  | IBr              v [Name]     next
+  | IBr1             Name         next
   | ICallGlobal      t Name [v]   (v -> next)
   | IInttoptr        v t          (v -> next)
   | IPtrtoint        v t          (v -> next)
+  | IPhi             t [i]        (v -> next)
   | IComment         Text         next
   --
+  | ILabel           Name         (Name -> next)
   | IBind        [i] (IRInstr v)  (v -> next)
   | IBlock      Name (IRInstr v)  (i -> next)
   | IRuntimeApply    Int          (Name -> next)                -- artifact?
