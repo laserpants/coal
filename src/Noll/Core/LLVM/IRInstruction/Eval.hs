@@ -11,7 +11,7 @@ import Data.Text (Text)
 import Noll.Common.List1 (List1, fromList1)
 import Noll.Core.LLVM.IRInstruction (IRInstr, IRInstrOpF (..))
 import Noll.Core.LLVM.IRInstruction.TH
-import Noll.Core.LLVM.IRType (IRType (..), IRTyped (..), i1, i32, i64, i8, i8Ptr)
+import Noll.Core.LLVM.IRType (IRType (..), IRTyped (..), i1, i32, i64, i8, i8Ptr, stringLiteralType)
 import Noll.Core.LLVM.IRValue (IRValue (..), irPrimValue)
 import Noll.Label (Label (..))
 import Noll.Utils (forM, isConstructor)
@@ -182,6 +182,25 @@ irEvalExpr =
               iCallGlobal i8Ptr name [v2, v1]
             _ ->
               error "TODO"
+      Core.EMat t e1 cs ->
+        undefined
+      Core.ENil ->
+        irCommentBlock "ENil" $
+          iCallGlobal i8Ptr "hashmap_init" []
+      Core.EExt (Label _ field) e1 e2 -> do
+        irCommentBlock "EExt" $ do
+          ky <- iHashMapKey field
+          t2 <- iGep (stringLiteralType field) ky (I32 0) (I32 0)
+          v1 <- eliminatePtrConversions (irEvalExpr e1)
+          v2 <- eliminatePtrConversions (irEvalExpr e2)
+          iCallGlobal i8Ptr "hashmap_insert" [v2, t2, v1]
+      Core.ESel (Core.Focus field (Label t var) (Label _ r)) e1 e2 ->
+        irCommentBlock "ESel" $ do
+          ky <- iHashMapKey field
+          t2 <- iGep (stringLiteralType field) ky (I32 0) (I32 0)
+          v1 <- eliminatePtrConversions (irEvalExpr e1)
+          v2 <- iCallGlobal i8Ptr "hashmap_lookup" [v1, t2]
+          iBind [(var, v2), (r, v1)] (eliminatePtrConversions (irEvalExpr e2))
       e ->
         error "TODO"
 

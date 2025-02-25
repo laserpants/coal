@@ -13,10 +13,14 @@ module Noll.Core.LLVM.IRType (
   i8Ptr,
   fun,
   struct,
+  stringLiteralType,
 ) where
 
+import Data.Text (Text)
 import Noll.Core.Language.Type (Type (..))
 import Noll.Utils (Name)
+
+import qualified Data.Text as Text
 
 -- | LLVM IR language types
 data IRType
@@ -105,3 +109,7 @@ fun = TFun
 {-# INLINE struct #-}
 struct :: [IRType] -> IRType
 struct = TStruct
+
+{-# INLINE stringLiteralType #-}
+stringLiteralType :: Text -> IRType
+stringLiteralType str = TArray (Text.length str + 1) i8
