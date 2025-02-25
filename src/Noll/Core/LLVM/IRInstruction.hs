@@ -8,6 +8,7 @@ module Noll.Core.LLVM.IRInstruction (
 ) where
 
 import Control.Monad.Free (Free)
+import Data.Text (Text)
 import Noll.Core.LLVM.IRType (IRType)
 import Noll.Core.LLVM.IRValue (IRValue)
 import Noll.Utils (Name)
@@ -25,8 +26,15 @@ data IRInstrOpF v t i next
   | ILoad            t v          (v -> next)
   | IStore           v v          next
   | IRet             t v          next
+  | ICallGlobal      t Name [v]   (v -> next)
   | IInttoptr        v t          (v -> next)
   | IPtrtoint        v t          (v -> next)
+  | IComment         Text         next
+  --
+  | IBind        [i] (IRInstr v)  (v -> next)
+  | IBlock      Name (IRInstr v)  (i -> next)
+  | IRuntimeApply    Int          (Name -> next)                -- artifact?
+  | IIndex                        (Name -> next)
   -- TODO
   deriving (Functor)
 {- FOURMOLU_ENABLE -}
