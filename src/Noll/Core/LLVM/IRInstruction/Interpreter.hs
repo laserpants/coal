@@ -8,6 +8,7 @@ module Noll.Core.LLVM.IRInstruction.Interpreter (
   interpret,
   IRInterpreter (..),
   IRInterpreterEnv (..),
+  IRLine (..),
   evalInterpreter,
   runInterpreter,
   inValueEnv,
@@ -19,7 +20,7 @@ import Data.Text (Text, intercalate)
 import Noll.Common.Environment (Environment (..))
 import Noll.Core.LLVM.IREncodable (IRAnnotated (..), IREncodable (..), enquote, irAnnotate)
 import Noll.Core.LLVM.IRInstruction (IRInstr, IRInstrOp, IRInstrOpF (..))
-import Noll.Core.LLVM.IRType (IRType (..), fun, ptr, i8Ptr, irTypeOf, pointee)
+import Noll.Core.LLVM.IRType (IRType (..), fun, i8Ptr, irTypeOf, pointee, ptr)
 import Noll.Core.LLVM.IRValue (IRValue (..))
 import Noll.Utils (Name, Over)
 import TextShow (showt)

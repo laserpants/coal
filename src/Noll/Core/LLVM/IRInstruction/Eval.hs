@@ -392,15 +392,15 @@ irEvalExpr =
           iCallGlobal i8Ptr "hashmap_init" []
       Core.EExt (Label _ field) e1 e2 -> do
         irCommentBlock "EExt" $ do
-          ky <- iHashMapKey field
-          t2 <- iGep (stringLiteralType field) ky (I32 0) (I32 0)
+          k1 <- iHashMapKey field
+          t2 <- iGep (stringLiteralType field) k1 (I32 0) (I32 0)
           v1 <- eliminatePtrConversions (irEvalExpr e1)
           v2 <- eliminatePtrConversions (irEvalExpr e2)
           iCallGlobal i8Ptr "hashmap_insert" [v2, t2, v1]
       Core.ESel (Core.Focus field (Label t var) (Label _ r)) e1 e2 ->
         irCommentBlock "ESel" $ do
-          ky <- iHashMapKey field
-          t2 <- iGep (stringLiteralType field) ky (I32 0) (I32 0)
+          k1 <- iHashMapKey field
+          t2 <- iGep (stringLiteralType field) k1 (I32 0) (I32 0)
           v1 <- eliminatePtrConversions (irEvalExpr e1)
           v2 <- iCallGlobal i8Ptr "hashmap_lookup" [v1, t2]
           iBind [(var, v2), (r, v1)] (eliminatePtrConversions (irEvalExpr e2))

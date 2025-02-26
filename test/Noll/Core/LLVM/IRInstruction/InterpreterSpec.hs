@@ -4,16 +4,20 @@
 module Noll.Core.LLVM.IRInstruction.InterpreterSpec where
 
 import Control.Monad.Reader (local)
+import Control.Monad.Writer (listen)
 import Noll.Common.List1 (NonEmpty (..), (<|))
 import Noll.Compiler.Core (BlockObject (..), ObjectList)
+import Noll.Core.LLVM.IRConstruct (IRConstruct (..))
 import Noll.Core.LLVM.IRInstruction.Eval (irEvalExpr)
 import Noll.Core.LLVM.IRInstruction.Interpreter (
   IRInterpreter (..),
   IRInterpreterEnv (..),
+  IRLine (..),
   inValueEnv,
   interpret,
   runInterpreter,
  )
+import Noll.Core.LLVM.IRInstruction.TH
 import Noll.Core.LLVM.IRType
 import Noll.Core.LLVM.IRValue
 import Noll.Label (Label (..))
@@ -158,7 +162,8 @@ myEnv =
             ( "f.[4]"
             , Global (fun i8Ptr [i8Ptr, i8Ptr]) "f.[4]"
             )
-          , ( "$fn.2"
+          ,
+            ( "$fn.2"
             , Global (fun i8Ptr [i8Ptr, i8Ptr]) "$fn.2"
             )
           ]
@@ -167,28 +172,29 @@ myEnv =
 
 abc1 = runInterpreter myEnv (interpret (irEvalExpr fixture1))
 
-blockInterpreter :: BlockObject Core.Type (Core.Expr Core.Type) -> IRInterpreter IRValue
+-- blockInterpreter :: BlockObject Core.Type (Core.Expr Core.Type) -> IRInterpreter IRValue
+-- blockInterpreter =
+--  \case
+--    OFunction name lls e ->
+--      local (flip (foldr insertLocal) lls) (interpret (irEvalExpr e))
+--    OConstant _ e ->
+--      interpret (irEvalExpr e)
+-- where
+--  insertLocal (Label _ name) =
+--    inValueEnv (Environment.insert name (Local i8Ptr name))
+
+blockInterpreter :: BlockObject Core.Type (Core.Expr Core.Type) -> IRInterpreter (IRConstruct [IRLine])
 blockInterpreter =
   \case
-    OFunction name lls e ->
-      local (flip (foldr insertLocal) lls) (interpret (irEvalExpr e))
-    OConstant _ e ->
-      interpret (irEvalExpr e)
- where
-  insertLocal (Label _ name) =
-    inValueEnv (Environment.insert name (Local i8Ptr name))
-
-blockInterpreter2 :: BlockObject Core.Type (Core.Expr Core.Type) -> IRInterpreter (BlockObject Core.Type IRValue)
-blockInterpreter2 =
-  \case
     OFunction name lls e -> do
-      OFunction name lls <$> local (flip (foldr insertLocal) lls) (interpret (irEvalExpr e))
-    OConstant name e ->
-      OConstant name <$> interpret (irEvalExpr e)
+      (_, w) <- listen (local (flip (foldr insertLocal) lls) (interpret (irEvalExpr e >>= iRet i8Ptr)))
+      pure (CDefine name i8Ptr Nothing [Label i8Ptr n | Label _ n <- lls] w)
+    OConstant name e -> do
+      (_, w) <- listen (interpret (irEvalExpr e))
+      error "TODO"
  where
   insertLocal (Label _ name) =
     inValueEnv (Environment.insert name (Local i8Ptr name))
-
 
 abc2 =
   runInterpreter
@@ -228,7 +234,7 @@ abc3 =
 abc4 =
   runInterpreter
     myEnv
-    ( blockInterpreter2
+    ( blockInterpreter
         ( OFunction
             "f.[4]"
             [Label Core.int32 "one.[3]", Label Core.int32 "x.[2]"]
@@ -273,4 +279,5 @@ abc4 =
                 )
             )
         )
+        --------
     )
