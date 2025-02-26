@@ -122,6 +122,8 @@ instance (IREncodable a) => IREncodable (IRConstruct a) where
           <> enquote name
           <> parens (commaSep ts)
           <> "\n"
+      _ ->
+        error "TODO"
 
 enquote :: Text -> Text
 enquote n

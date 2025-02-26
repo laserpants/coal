@@ -12,6 +12,7 @@ module Noll.Core.LLVM.IRType (
   ptr,
   i8Ptr,
   fun,
+  pointee,
   struct,
   stringLiteralType,
 ) where
@@ -113,3 +114,11 @@ struct = TStruct
 {-# INLINE stringLiteralType #-}
 stringLiteralType :: Text -> IRType
 stringLiteralType str = TArray (Text.length str + 1) i8
+
+pointee :: IRType -> IRType
+pointee =
+  \case
+    TPtr t ->
+      t
+    _ ->
+      error "Implementation error"

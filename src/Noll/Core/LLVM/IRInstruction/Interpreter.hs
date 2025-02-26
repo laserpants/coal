@@ -6,18 +6,20 @@
 
 module Noll.Core.LLVM.IRInstruction.Interpreter (
   interpret,
+  IRInterpreter (..),
   IRInterpreterEnv (..),
   evalInterpreter,
   runInterpreter,
+  inValueEnv,
 ) where
 
 import Control.Monad.Free (iterM)
 import Control.Monad.RWS (MonadReader, MonadState, MonadWriter, RWS, asks, gets, local, modify, runRWS, tell)
 import Data.Text (Text, intercalate)
 import Noll.Common.Environment (Environment (..))
-import Noll.Core.LLVM.IREncodable (IREncodable (..), enquote, irAnnotate)
+import Noll.Core.LLVM.IREncodable (IRAnnotated (..), IREncodable (..), enquote, irAnnotate)
 import Noll.Core.LLVM.IRInstruction (IRInstr, IRInstrOp, IRInstrOpF (..))
-import Noll.Core.LLVM.IRType (IRType (..), ptr)
+import Noll.Core.LLVM.IRType (IRType (..), fun, ptr, i8Ptr, irTypeOf, pointee)
 import Noll.Core.LLVM.IRValue (IRValue (..))
 import Noll.Utils (Name, Over)
 import TextShow (showt)
@@ -27,7 +29,7 @@ import qualified Noll.Common.Environment as Environment
 
 data IRInterpreterArtifact
   = InterpreterArtifactFunctionApply Int
-  | InterpreterArtifactTODO
+  | InterpreterArtifactClosure Int
   deriving (Show, Eq, Ord)
 
 data IRInterpreterState = IRInterpreterState
@@ -56,6 +58,10 @@ overIRInterpreterStateRegisterIndex f IRInterpreterState{..} = IRInterpreterStat
 overIRInterpreterStateLabelIndex :: Over IRInterpreterState Int
 overIRInterpreterStateLabelIndex f IRInterpreterState{..} = IRInterpreterState{irInterpreterStateLabelIndex = f irInterpreterStateLabelIndex, ..}
 
+{-# INLINE overIRInterpreterStateLabel #-}
+overIRInterpreterStateLabel :: Over IRInterpreterState Text
+overIRInterpreterStateLabel f IRInterpreterState{..} = IRInterpreterState{irInterpreterStateLabel = f irInterpreterStateLabel, ..}
+
 {-# INLINE overIRInterpreterStateArtifacts #-}
 overIRInterpreterStateArtifacts :: Over IRInterpreterState [IRInterpreterArtifact]
 overIRInterpreterStateArtifacts f IRInterpreterState{..} = IRInterpreterState{irInterpreterStateArtifacts = f irInterpreterStateArtifacts, ..}
@@ -68,8 +74,13 @@ incrementRegisterIndex = modify (overIRInterpreterStateRegisterIndex succ)
 incrementLabelIndex :: (MonadState IRInterpreterState m) => m ()
 incrementLabelIndex = modify (overIRInterpreterStateLabelIndex succ)
 
+{-# INLINE setLabel #-}
+setLabel :: (MonadState IRInterpreterState m) => Text -> m ()
+setLabel label = modify (overIRInterpreterStateLabel (const label))
+
+{-# INLINE addArtifact #-}
 addArtifact :: (MonadState IRInterpreterState m) => IRInterpreterArtifact -> m ()
-addArtifact art = modify (overIRInterpreterStateArtifacts (art :))
+addArtifact af = modify (overIRInterpreterStateArtifacts (af :))
 
 data IRInterpreterEnv = IRInterpreterEnv
   { irInterpreterValueEnv :: Environment IRValue
@@ -156,6 +167,12 @@ instruction t next tokens = do
 instruction0 :: IRInterpreter a -> [Text] -> IRInterpreter a
 instruction0 next tokens = tell [LInstruction tokens] >> next
 
+offset :: IRType -> IRValue -> IRType
+offset (TStruct ts) (I32 n) = ts !! fromIntegral n
+offset (TNamed _ t) n = offset t n
+offset (TArray _ t) _ = t
+offset _ _ = error "Implementation error"
+
 interpreter :: IRInstrOp (IRInterpreter a) -> IRInterpreter a
 interpreter =
   \case
@@ -203,15 +220,15 @@ interpreter =
     IPhi t vs next ->
       instruction t next ["phi", irEncode t, withCommas (uncurry irEncodePhiBranches <$> vs)]
     IGep t v1 v2 v3 next ->
-      error "IGep"
+      instruction (ptr (offset t v3)) next ["getelementptr", withCommas (irEncode (pointee (irTypeOf v1)) : (irEncode . IRAnnotated <$> [v1, v2, v3]))]
     IGepNull t v1 next ->
-      error "IGepNull"
+      instruction t next ["getelementptr", withCommas [irEncode t, irEncode t <> " null", irEncode (IRAnnotated v1)]]
     ILoad t v1 next ->
-      error "ILoad"
+      instruction t next ["load", withCommas [irEncode t, irEncode (IRAnnotated v1)]]
     IStore v1 v2 next ->
-      error "IStore"
+      instruction0 next ["store", withCommas [irEncode (irAnnotated v1), irEncode (irAnnotated v2)]]
     ISwitch v n cs next ->
-      error "ISwitch"
+      instruction0 next ["switch", withCommas [irAnnotated v, irEncodeLabel n], "[" <> irEncodeSwitchBranches cs <> "]"]
     ILookup var next -> do
       env <- asks irInterpreterValueEnv
       case Environment.lookup var env of
@@ -226,14 +243,27 @@ interpreter =
       d <- nextLabelIndex
       next (showt d)
     ILabel name next -> do
-      error "ILabel"
+      d <- nextLabelIndex
+      next (name <> "." <> showt d)
     IBlock name instr next -> do
-      error "IBlock"
+      setLabel name
+      tell [LLabel name]
+      r <- interpret instr
+      l <- gets irInterpreterStateLabel
+      next (l, r)
     IRuntimeApply arity next -> do
       addArtifact (InterpreterArtifactFunctionApply arity)
       next ("apply" <> showt arity)
     IRuntimeClosure fn applied remain next -> do
-      error "IRuntimeClosure"
+      let name = "closure" <> showt applied
+          signature n = fun i8Ptr (replicate n i8Ptr)
+      addArtifact (InterpreterArtifactClosure applied)
+      next
+        ( name
+        , Global (signature (remain + 1)) (name <> "_finalize")
+        , Global (signature (remain + 1)) (name <> "_extend")
+        , Global (signature (applied + remain)) fn
+        )
     IHashMapKey name next -> do
       error "IHashMapKey"
     IDataConstructor t name next -> do
