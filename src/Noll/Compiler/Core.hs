@@ -293,7 +293,7 @@ addImplicitArgs :: BlockObject Type (Expr Type) -> BlockObject Type (Expr Type)
 addImplicitArgs =
   \case
     f@(OFunction name lls1 expr)
-      | exprIsFun ->
+      | isExprFun ->
           OFunction
             name
             (lls1 <> lls2)
@@ -301,7 +301,7 @@ addImplicitArgs =
       | otherwise ->
           f
      where
-      exprIsFun =
+      isExprFun =
         length ts > 1
       ts =
         Core.unfoldType (typeOf expr)
