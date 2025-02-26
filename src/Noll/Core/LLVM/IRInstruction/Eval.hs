@@ -359,7 +359,7 @@ irEvalExpr =
           labelThen <- iLabel "then"
           labelElse <- iLabel "else"
           labelExit <- iLabel "exit"
-          r1 <- irRevealExpr e1
+          r1 <- eliminatePtrConversions (irRevealExpr e1)
           iBr r1 [labelThen, labelElse]
           thenBlock <- iBlock labelThen $ do
             r <- eliminatePtrConversions (irEvalExpr e2)

@@ -95,64 +95,64 @@ fixture =
         (Core.lit (Core.PInt32 6) :| [])
     )
 
--- main
-fixture1 =
-  Core.let_
-    ( Core.Binding
-        (Label Core.int32 "one.[3]")
-        (Core.lit (Core.PInt32 1))
-        :| []
-    )
-    ( Core.app
-        Core.int32
-        (Core.var (Label (Core.int32 `Core.arrow` Core.int32 `Core.arrow` Core.int32) "f.[4]"))
-        ( Core.var (Label Core.int32 "one.[3]")
-            :| [Core.lit (Core.PInt32 6)]
-        )
-    )
-
-fixture2 = Core.var (Label Core.int32 "m.[1]")
-
-fixture3 =
-  Core.if_
-    ( Core.op
-        ( Core.OEqInt32
-            (Core.var (Label Core.int32 "x.[2]"))
-            (Core.lit (Core.PInt32 0))
-        )
-    )
-    (Core.var (Label Core.int32 "one.[3]"))
-    ( Core.let_
-        ( Core.Binding
-            (Label Core.int32 "m.[1]")
-            ( Core.op
-                ( Core.OMulInt32
-                    (Core.var (Label Core.int32 "x.[2]"))
-                    ( Core.app
-                        Core.int32
-                        (Core.var (Label (Core.int32 `Core.arrow` Core.int32) "f.[4]"))
-                        ( Core.op
-                            ( Core.OSubInt32
-                                (Core.var (Label Core.int32 "x.[2]"))
-                                (Core.lit (Core.PInt32 1))
-                            )
-                            :| []
-                        )
-                    )
-                )
-            )
-            :| []
-        )
-        ( Core.call
-            (Label (Core.int32 `Core.arrow` Core.TOpq) "print_int32")
-            [Core.var (Label Core.int32 "m")]
-            ( Core.app
-                (Core.TOpq `Core.arrow` Core.int32)
-                (Core.var (Label (Core.int32 `Core.arrow` Core.TOpq `Core.arrow` Core.int32) "$fn.2"))
-                (Core.var (Label Core.int32 "m.[1]") :| [])
-            )
-        )
-    )
+---- main
+--fixture1 =
+--  Core.let_
+--    ( Core.Binding
+--        (Label Core.int32 "one.[3]")
+--        (Core.lit (Core.PInt32 1))
+--        :| []
+--    )
+--    ( Core.app
+--        Core.int32
+--        (Core.var (Label (Core.int32 `Core.arrow` Core.int32 `Core.arrow` Core.int32) "f.[4]"))
+--        ( Core.var (Label Core.int32 "one.[3]")
+--            :| [Core.lit (Core.PInt32 6)]
+--        )
+--    )
+--
+--fixture2 = Core.var (Label Core.int32 "m.[1]")
+--
+--fixture3 =
+--  Core.if_
+--    ( Core.op
+--        ( Core.OEqInt32
+--            (Core.var (Label Core.int32 "x.[2]"))
+--            (Core.lit (Core.PInt32 0))
+--        )
+--    )
+--    (Core.var (Label Core.int32 "one.[3]"))
+--    ( Core.let_
+--        ( Core.Binding
+--            (Label Core.int32 "m.[1]")
+--            ( Core.op
+--                ( Core.OMulInt32
+--                    (Core.var (Label Core.int32 "x.[2]"))
+--                    ( Core.app
+--                        Core.int32
+--                        (Core.var (Label (Core.int32 `Core.arrow` Core.int32) "f.[4]"))
+--                        ( Core.op
+--                            ( Core.OSubInt32
+--                                (Core.var (Label Core.int32 "x.[2]"))
+--                                (Core.lit (Core.PInt32 1))
+--                            )
+--                            :| []
+--                        )
+--                    )
+--                )
+--            )
+--            :| []
+--        )
+--        ( Core.call
+--            (Label (Core.int32 `Core.arrow` Core.TOpq) "print_int32")
+--            [Core.var (Label Core.int32 "m")]
+--            ( Core.app
+--                (Core.TOpq `Core.arrow` Core.int32)
+--                (Core.var (Label (Core.int32 `Core.arrow` Core.TOpq `Core.arrow` Core.int32) "$fn.2"))
+--                (Core.var (Label Core.int32 "m.[1]") :| [])
+--            )
+--        )
+--    )
 
 myEnv =
   IRInterpreterEnv
@@ -170,7 +170,7 @@ myEnv =
     , irInterpreterConstructorEnv = mempty
     }
 
-abc1 = runInterpreter myEnv (interpret (irEvalExpr fixture1))
+--abc1 = runInterpreter myEnv (interpret (irEvalExpr fixture1))
 
 -- blockInterpreter :: BlockObject Core.Type (Core.Expr Core.Type) -> IRInterpreter IRValue
 -- blockInterpreter =
@@ -226,7 +226,7 @@ abc3 =
     ( blockInterpreter
         ( OFunction
             "$fn.2"
-            [Label Core.int32 "m.[1]"]
+            [Label Core.int32 "m.[1]", Label Core.TOpq "_.[0]"]
             (Core.var (Label Core.int32 "m.[1]"))
         )
     )
@@ -254,8 +254,10 @@ abc4 =
                                 (Core.var (Label Core.int32 "x.[2]"))
                                 ( Core.app
                                     Core.int32
-                                    (Core.var (Label (Core.int32 `Core.arrow` Core.int32) "f.[4]"))
-                                    ( Core.op
+                                    (Core.var (Label (Core.int32 `Core.arrow` Core.int32 `Core.arrow` Core.int32) "f.[4]"))
+                                    (Core.var (Label Core.int32 "one.[3]")
+                                      <|
+                                      Core.op
                                         ( Core.OSubInt32
                                             (Core.var (Label Core.int32 "x.[2]"))
                                             (Core.lit (Core.PInt32 1))
