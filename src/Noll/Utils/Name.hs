@@ -4,7 +4,7 @@ module Noll.Utils.Name (
   isConstructor,
 ) where
 
-import Data.Char (isAlpha, isUpper, ord)
+import Data.Char (isAlpha, isUpper)
 import Data.Map.Strict (Map)
 import Data.Text (Text)
 import Noll.Utils.Operators ((||.))
