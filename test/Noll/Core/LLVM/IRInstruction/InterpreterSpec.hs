@@ -35,65 +35,63 @@ blockObjects =
   [ OFunction
       "main"
       [Label Core.opaque "_"]
-      fixture
+      ( Core.let_
+          ( Core.Binding
+              (Label Core.int32 "one")
+              (Core.lit (Core.PInt32 1))
+              :| [ Core.Binding
+                    (Label (Core.int32 `Core.arrow` Core.int32) "f")
+                    ( Core.lam
+                        (Label Core.int32 "x" :| [])
+                        ( Core.if_
+                            ( Core.op
+                                ( Core.OEqInt32
+                                    (Core.var (Label Core.int32 "x"))
+                                    (Core.lit (Core.PInt32 0))
+                                )
+                            )
+                            (Core.var (Label Core.int32 "one"))
+                            ( Core.let_
+                                ( Core.Binding
+                                    (Label Core.int32 "m")
+                                    ( Core.op
+                                        ( Core.OMulInt32
+                                            (Core.var (Label Core.int32 "x"))
+                                            ( Core.app
+                                                Core.int32
+                                                (Core.var (Label (Core.int32 `Core.arrow` Core.int32) "f"))
+                                                ( Core.op
+                                                    ( Core.OSubInt32
+                                                        (Core.var (Label Core.int32 "x"))
+                                                        (Core.lit (Core.PInt32 1))
+                                                    )
+                                                    :| []
+                                                )
+                                            )
+                                        )
+                                    )
+                                    :| []
+                                )
+                                ( Core.call
+                                    (Label (Core.int32 `Core.arrow` Core.TOpq) "print_int32")
+                                    [Core.var (Label Core.int32 "m")]
+                                    ( Core.lam
+                                        (Label Core.TOpq "_" :| [])
+                                        (Core.var (Label Core.int32 "m"))
+                                    )
+                                )
+                            )
+                        )
+                    )
+                 ]
+          )
+          ( Core.app
+              Core.int32
+              (Core.var (Label (Core.int32 `Core.arrow` Core.int32) "f"))
+              (Core.lit (Core.PInt32 6) :| [])
+          )
+      )
   ]
-
-fixture =
-  Core.let_
-    ( Core.Binding
-        (Label Core.int32 "one")
-        (Core.lit (Core.PInt32 1))
-        :| [ Core.Binding
-              (Label (Core.int32 `Core.arrow` Core.int32) "f")
-              ( Core.lam
-                  (Label Core.int32 "x" :| [])
-                  ( Core.if_
-                      ( Core.op
-                          ( Core.OEqInt32
-                              (Core.var (Label Core.int32 "x"))
-                              (Core.lit (Core.PInt32 0))
-                          )
-                      )
-                      (Core.var (Label Core.int32 "one"))
-                      ( Core.let_
-                          ( Core.Binding
-                              (Label Core.int32 "m")
-                              ( Core.op
-                                  ( Core.OMulInt32
-                                      (Core.var (Label Core.int32 "x"))
-                                      ( Core.app
-                                          Core.int32
-                                          (Core.var (Label (Core.int32 `Core.arrow` Core.int32) "f"))
-                                          ( Core.op
-                                              ( Core.OSubInt32
-                                                  (Core.var (Label Core.int32 "x"))
-                                                  (Core.lit (Core.PInt32 1))
-                                              )
-                                              :| []
-                                          )
-                                      )
-                                  )
-                              )
-                              :| []
-                          )
-                          ( Core.call
-                              (Label (Core.int32 `Core.arrow` Core.TOpq) "print_int32")
-                              [Core.var (Label Core.int32 "m")]
-                              ( Core.lam
-                                  (Label Core.TOpq "_" :| [])
-                                  (Core.var (Label Core.int32 "m"))
-                              )
-                          )
-                      )
-                  )
-              )
-           ]
-    )
-    ( Core.app
-        Core.int32
-        (Core.var (Label (Core.int32 `Core.arrow` Core.int32) "f"))
-        (Core.lit (Core.PInt32 6) :| [])
-    )
 
 ---- main
 -- fixture1 =
