@@ -267,8 +267,8 @@ interpreter =
         )
     IHashMapKey name next -> do
       error "IHashMapKey"
-    IDataConstructor t name next -> do
-      error "IDataConstructor"
+    IDataConstr t name next -> do
+      error "IDataConstr"
     _ ->
       error "TODO"
 

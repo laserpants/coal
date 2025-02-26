@@ -48,7 +48,7 @@ data IRInstrOpF v t i next
   | ILookup          Name         (v -> next)
   | IBind        [i] (IRInstr v)  (v -> next)
   | IBlock      Name (IRInstr v)  (i -> next)
-  | IDataConstructor t Name       ((Int, t) -> next)
+  | IDataConstr    t Name         ((Int, t) -> next)
   | IHashMapKey      Name         (v -> next)
   | IRuntimeApply    Int          (Name -> next)                -- artifact?
   | IRuntimeClosure  Name Int Int ((Name, v, v, v) -> next)
