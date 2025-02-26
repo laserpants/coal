@@ -121,4 +121,4 @@ pointee =
     TPtr t ->
       t
     _ ->
-      error "Implementation error"
+      error "Not a pointer type"
