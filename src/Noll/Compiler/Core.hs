@@ -94,7 +94,7 @@ liftLambdas objs = objs1 <> objs2
         e ->
           local mempty (embed <$> sequence e)
 
-moveUp :: (MonadWriter ObjectList m, MonadReader Name m) => Name -> List1 (Label Type) -> Expr Type -> m (Expr Type)
+moveUp :: (MonadWriter ObjectList m) => Name -> List1 (Label Type) -> Expr Type -> m (Expr Type)
 moveUp name vs f = do
   tell [OFunction name (fromList1 vs) f]
   pure (Core.var (Label (functionType f vs) name))
