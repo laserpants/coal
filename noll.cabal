@@ -97,6 +97,8 @@ library
       Noll.SystemF.Unification
       Noll.Utils
       Noll.Utils.Embed
+      Noll.Utils.Name
+      Noll.Utils.Operators
   other-modules:
       Paths_noll
   autogen-modules:

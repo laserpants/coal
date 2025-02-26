@@ -6,7 +6,8 @@ module Noll.Utils (
   module Data.Foldable,
   module Data.Set,
   module Data.Map.Strict,
-  Name,
+  module Noll.Utils.Operators,
+  module Noll.Utils.Name,
   Dictionary,
   IndexMap,
   concatMapM,
@@ -20,15 +21,12 @@ module Noll.Utils (
   groupByEq,
   const2,
   traverseM,
-  isConstructor,
   applyM1,
   applyM2,
   applyM3,
   Over,
   (<$$>),
   (<$$$>),
-  (&&.),
-  (||.),
 )
 where
 
@@ -45,10 +43,8 @@ import Data.Set (Set, unions)
 import qualified Data.Set as Set
 import Data.Text (Text)
 import qualified Data.Text as Text
-
-type Name = Text
-
-type Dictionary = Map Name
+import Noll.Utils.Name
+import Noll.Utils.Operators
 
 type IndexMap = Map Int
 
@@ -65,18 +61,6 @@ infixr 8 <$$>
 (<$$$>) = fmap . fmap . fmap
 
 infixr 8 <$$$>
-
-{-# INLINE (&&.) #-}
-(&&.) :: (t -> Bool) -> (t -> Bool) -> t -> Bool
-f &&. g = h where h e = f e && g e
-
-infixr 3 &&.
-
-{-# INLINE (||.) #-}
-(||.) :: (t -> Bool) -> (t -> Bool) -> t -> Bool
-f ||. g = h where h e = f e || g e
-
-infixr 2 ||.
 
 {-# INLINE groupByEq #-}
 groupByEq :: (Eq b) => (a -> b) -> [a] -> [[a]]
@@ -134,18 +118,6 @@ lexOrderRank text
         n - 97
     | otherwise =
         n - 22
-
-{-# INLINE dropWhileNot #-}
-dropWhileNot :: (Char -> Bool) -> Text -> Text
-dropWhileNot = Text.dropWhile . fmap not
-
-isConstructor :: Name -> Bool
-isConstructor name
-  | Text.null name = error "Empty name"
-  | Text.null s = False
-  | otherwise = isUpper (Text.head s)
- where
-  s = dropWhileNot (isAlpha ||. ('_' ==)) name
 
 applyM1 :: (Monad m) => (a -> m b) -> m a -> m b
 applyM1 f a = do

@@ -273,7 +273,7 @@ irEvalVar :: Core.Type -> Name -> IRInstr IRValue
 irEvalVar t var
   | isConstructor var = do
       mapM_ iComment ["", "Data constructor: " <> var, "----------------- ^", ""]
-      (i, t1) <- iDataConstructor (struct [i32]) var
+      (i, t1) <- iDataConstr (struct [i32]) var
       v1 <- irMalloc t1
       v2 <- iGep t1 v1 (I32 0) (I32 0)
       iStore (I32 (fromIntegral i)) v2
@@ -295,7 +295,7 @@ irEvalApp t e1@(Fix (Core.EVar (Label _ var))) es
   | isConstructor var = do
       mapM_ iComment ["", "Apply data constructor: " <> irEncode var, "----------------------- ^", ""]
       vs <- irEvalArgs es
-      (i, t1) <- iDataConstructor (struct (i32 : (i8Ptr <$ vs))) var
+      (i, t1) <- iDataConstr (struct (i32 : (i8Ptr <$ vs))) var
       v1 <- irMalloc t1
       v2 <- iGep t1 v1 (I32 0) (I32 0)
       iStore (I32 (fromIntegral i)) v2
