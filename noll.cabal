@@ -164,6 +164,7 @@ test-suite noll-test
       Noll.CompilerSpec
       Noll.Core.Language.ReplaceSpec
       Noll.Core.LanguageSpec
+      Noll.Core.LLVM.IRInstruction.InterpreterSpec
       Noll.Examples.Test01
       Noll.Examples.Test02
       Noll.Examples.Test03

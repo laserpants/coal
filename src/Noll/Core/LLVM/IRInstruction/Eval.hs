@@ -11,6 +11,7 @@ import Data.Functor.Foldable (project)
 import Data.Text (Text)
 import Data.Tuple.Extra (fst3)
 import Noll.Common.List1 (List1, NonEmpty (..), fromList1)
+import Noll.Core.LLVM.IREncodable (irEncode)
 import Noll.Core.LLVM.IRInstruction (IRInstr, IRInstrOpF (..))
 import Noll.Core.LLVM.IRInstruction.TH
 import Noll.Core.LLVM.IRType (
@@ -26,6 +27,7 @@ import Noll.Core.LLVM.IRType (
   struct,
  )
 import Noll.Core.LLVM.IRValue (IRValue (..), irPrimValue)
+import Noll.Core.Language.Syntax.Type (arity)
 import Noll.Label (Label (..))
 import Noll.Utils (Name, forM, forM_, isConstructor)
 import TextShow (showt)
@@ -267,8 +269,8 @@ irEvalMatch e1 cs = do
       iPhi (irTypeOf (snd b)) (b : bs)
   irConceal v
 
-irEvalVar :: Name -> IRInstr IRValue
-irEvalVar var
+irEvalVar :: Core.Type -> Name -> IRInstr IRValue
+irEvalVar t var
   | isConstructor var = do
       mapM_ iComment ["", "Data constructor: " <> var, "----------------- ^", ""]
       (i, t1) <- iDataConstructor (struct [i32]) var
@@ -278,13 +280,20 @@ irEvalVar var
       iBCast v1 i8Ptr
   | otherwise = do
       v <- iLookup var
-      mapM_ iComment ["", "Name: " <> Text.pack (show v), "----- ^", ""]
-      undefined
+      mapM_ iComment ["", "Name: " <> irEncode v, "----- ^", ""]
+      case v of
+        Global (TFun _ us) _ ->
+          if arity t == 0
+            then -- Global constant
+              iCallGlobal i8Ptr var []
+            else irPackClosure var (length us) []
+        _ ->
+          pure v
 
 irEvalApp :: Core.Type -> CoreExpr -> List1 CoreExpr -> IRInstr IRValue
 irEvalApp t e1@(Fix (Core.EVar (Label _ var))) es
   | isConstructor var = do
-      mapM_ iComment ["", "Apply data constructor: " <> Text.pack (show var), "----------------------- ^", ""]
+      mapM_ iComment ["", "Apply data constructor: " <> irEncode var, "----------------------- ^", ""]
       vs <- irEvalArgs es
       (i, t1) <- iDataConstructor (struct (i32 : (i8Ptr <$ vs))) var
       v1 <- irMalloc t1
@@ -335,7 +344,7 @@ irEvalExpr =
         irConceal (irPrimValue prim)
       Core.EVar (Label t var) ->
         irCommentBlock "EVar" $ do
-          irEvalVar var
+          irEvalVar t var
       Core.ELet vs e1 ->
         irCommentBlock "ELet" $ do
           bound <- forM vs $ \(Core.Binding (Label _ name) e) -> do
@@ -395,8 +404,8 @@ irEvalExpr =
           v1 <- eliminatePtrConversions (irEvalExpr e1)
           v2 <- iCallGlobal i8Ptr "hashmap_lookup" [v1, t2]
           iBind [(var, v2), (r, v1)] (eliminatePtrConversions (irEvalExpr e2))
-      _ ->
-        error "TODO"
+      e ->
+        error (show e)
 
 eliminatePtrConversions :: IRInstr IRValue -> IRInstr IRValue
 eliminatePtrConversions =

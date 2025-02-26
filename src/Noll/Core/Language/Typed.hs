@@ -8,10 +8,11 @@ import Data.Functor.Foldable (project)
 import Noll.Core.Language.Expr (Expr, ExprF (..))
 import Noll.Core.Language.Op (Op (..))
 import Noll.Core.Language.Prim (Prim (..))
-import Noll.Core.Language.Syntax.Type (arity, foldType)
+import Noll.Core.Language.Syntax.Type (arity, foldType, unfoldType)
 import Noll.Core.Language.Type (Type (..), normalizeRow)
 import Noll.Label (Label (..))
 
+import qualified Noll.Common.List1 as List1
 import qualified Noll.Core.Language.Syntax.Type as Type
 
 class Typed t where
@@ -90,8 +91,8 @@ instance (Typed t, Typed a) => Typed (ExprF t a) where
         normalizeRow (RExt n (typeOf t1) (typeOf t2))
       ELam ts t ->
         foldType (typeOf t) (typeOf <$> ts)
-      _ ->
-        error "TODO"
+      ECall _ _ t ->
+        returnTypeOf t
 
 instance (Typed t) => Typed (Expr t) where
   typeOf = typeOf . project
@@ -99,3 +100,7 @@ instance (Typed t) => Typed (Expr t) where
 {-# INLINE isFunction #-}
 isFunction :: (Typed t) => t -> Bool
 isFunction f = arity (typeOf f) > 0
+
+{-# INLINE returnTypeOf #-}
+returnTypeOf :: (Typed t) => t -> Type
+returnTypeOf = List1.last . unfoldType . typeOf
