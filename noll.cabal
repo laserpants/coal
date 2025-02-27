@@ -48,6 +48,7 @@ library
       Noll.Compiler.Transform.Type.AliasInsertion
       Noll.Core.Language
       Noll.Core.Language.Expr
+      Noll.Core.Language.Object
       Noll.Core.Language.Op
       Noll.Core.Language.Prim
       Noll.Core.Language.Replace

@@ -7,7 +7,7 @@
 module Noll.Core.Language.Object (Object (..), ObjectList, objectName) where
 
 import Noll.AST.HasFree (HasFree (..), boundIn, exceptNames)
-import Noll.Core.Language.Expr (Expr (..))
+import Noll.Core.Language.Expr (Expr)
 import Noll.Core.Language.Type (Type (..))
 import Noll.Label (Label (..))
 import Noll.Utils (Name)
