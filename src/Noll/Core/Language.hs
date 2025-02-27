@@ -4,6 +4,7 @@ module Noll.Core.Language (
   module Noll.Core.Language.Typed,
   module Noll.Core.Language.Op,
   module Noll.Core.Language.Expr,
+  module Noll.Core.Language.Object,
   module Noll.Core.Language.Syntax.Expr,
   module Noll.Core.Language.Syntax.Type,
 ) where
@@ -11,6 +12,7 @@ module Noll.Core.Language (
 import Noll.Core.Language.Expr
 import Noll.Core.Language.Op
 import Noll.Core.Language.Prim
+import Noll.Core.Language.Object
 import Noll.Core.Language.Syntax.Expr
 import Noll.Core.Language.Syntax.Type
 import Noll.Core.Language.Type
