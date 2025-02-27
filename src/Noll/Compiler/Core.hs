@@ -12,26 +12,60 @@ module Noll.Compiler.Core where
 
 import Control.Arrow ((>>>))
 import Control.Monad.RWS (RWS, ask, evalRWS, local)
-import Control.Monad.State (MonadState, State, gets, modify, runState, runStateT)
+import Control.Monad.State (MonadState, State, evalState, gets, modify, runState, runStateT)
 import Control.Monad.Trans (lift)
 import Control.Monad.Writer (MonadWriter, runWriter, tell)
 import Data.Fix (Fix (..))
 import Data.Functor.Foldable (cata, embed, project)
 import Data.Set (Set)
 import Noll.AST.HasFree (HasFree (..), exceptNames)
+import Noll.Common.Environment (Environment)
 import Noll.Common.List1 (List1, NonEmpty (..), fromList1)
 import Noll.Common.Supply (supplied)
-import Noll.Core.Language (Binding (..), Clause (..), Expr, ExprF (..), Focus (..), Type, Typed (..), bindingLabel, foldType, overBindingLabel, unzipBindings)
+import Noll.Core.LLVM.IRConstruct (IRConstruct (..))
+import Noll.Core.LLVM.IRInstruction.Interpreter (
+  IRInterpreter (..),
+  IRInterpreterEnv (..),
+  IRLine (..),
+  inValueEnv,
+  runInterpreter,
+ )
+import Noll.Core.LLVM.IRInstruction.Interpreter.Object (objectEnvironment, objectInterpreter)
+import Noll.Core.LLVM.IRValue (IRValue (..))
+import Noll.Core.Language (
+  Binding (..),
+  Clause (..),
+  Expr,
+  ExprF (..),
+  Focus (..),
+  Type,
+  Typed (..),
+  bindingLabel,
+  foldType,
+  overBindingLabel,
+  unzipBindings,
+ )
 import Noll.Core.Language.Object (Object (..), ObjectList, objectName)
 import Noll.Core.Language.Replace (Sub, relabel)
 import Noll.Core.Language.Typed (isFunction)
 import Noll.Label (Label (..), labelName)
-import Noll.Utils (Dictionary, Name, Over, applyM1, applyM2, foldrM, forM, isConstructor, (<$$>))
+import Noll.Utils (
+  Dictionary,
+  Name,
+  Over,
+  applyM1,
+  applyM2,
+  foldrM,
+  forM,
+  isConstructor,
+  (<$$>),
+ )
 import TextShow
 
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import qualified Data.Text as Text
+import qualified Noll.Common.Environment as Environment
 import qualified Noll.Common.List1 as List1
 import qualified Noll.Core.Language as Core
 
@@ -339,12 +373,25 @@ muteObjectTypes =
 
 data PipelineState = PipelineState
   { pipelineStateSupply :: Int
+  , pipelineStateInterpreterEnv :: IRInterpreterEnv
   }
   deriving (Show, Eq, Ord)
 
 {-# INLINE overPipelineStateSupply #-}
 overPipelineStateSupply :: Over PipelineState Int
 overPipelineStateSupply f PipelineState{..} = PipelineState{pipelineStateSupply = f pipelineStateSupply, ..}
+
+{-# INLINE overPipelineStateInterpreterEnv #-}
+overPipelineStateInterpreterEnv :: Over PipelineState IRInterpreterEnv
+overPipelineStateInterpreterEnv f PipelineState{..} = PipelineState{pipelineStateInterpreterEnv = f pipelineStateInterpreterEnv, ..}
+
+{-# INLINE overPipelineStateInterpreterValueEnv #-}
+overPipelineStateInterpreterValueEnv :: Over PipelineState (Environment IRValue)
+overPipelineStateInterpreterValueEnv = overPipelineStateInterpreterEnv . inValueEnv
+
+{-# INLINE extendInterpreterValueEnv #-}
+extendInterpreterValueEnv :: Environment IRValue -> Core ()
+extendInterpreterValueEnv env = modify (overPipelineStateInterpreterValueEnv (<> env))
 
 newtype Core a = Core {pipelineStack :: State PipelineState a}
   deriving
@@ -359,6 +406,12 @@ transSuffixMonad a = do
   (v, n) <- gets (runState a . pipelineStateSupply)
   modify (overPipelineStateSupply (const n))
   pure v
+
+transInterpreter :: IRInterpreter a -> Core a
+transInterpreter p = do
+  env <- gets pipelineStateInterpreterEnv
+  let (a, _, _) = runInterpreter env p
+  pure a
 
 traverse2 :: (Applicative f, Traversable t1, Traversable t2) => (a -> f b) -> t2 (t1 a) -> f (t2 (t1 b))
 traverse2 = traverse . traverse
@@ -375,7 +428,7 @@ pure2 f = pure . (f <$>)
 pure3 :: (Applicative f1, Functor f2, Functor f3) => (a -> b) -> f2 (f3 a) -> f1 (f2 (f3 b))
 pure3 f = pure . (f <$$>)
 
-pipeline :: ObjectList -> Core ObjectList
+pipeline :: ObjectList -> Core [Object Type (Expr Type)]
 pipeline ol = do
   a1 <- suffixNamesC ol
   a2 <- pure3 flattenELam a1
@@ -384,8 +437,17 @@ pipeline ol = do
   a5 <- pure1 closeDefs a4
   pure (addImplicitArgs <$> a5)
 
+compile :: ObjectList -> Core [IRConstruct [IRLine]]
+compile ol = do
+  a1 <- pipeline ol
+  extendInterpreterValueEnv (objectEnvironment a1)
+  transInterpreter (traverse objectInterpreter a1)
+
 runCore :: Core a -> (a, PipelineState)
-runCore p = runState (pipelineStack p) (PipelineState 0)
+runCore p = runState (pipelineStack p) (PipelineState 0 (IRInterpreterEnv mempty mempty))
+
+evalCore :: Core a -> a
+evalCore p = evalState (pipelineStack p) (PipelineState 0 (IRInterpreterEnv mempty mempty))
 
 -- xx1 objs = mapM_ print $ muteObjectTypes <$> liftLambdas (flattenELam <$$> evalState (traverse (traverse transSuffixExpr) objs) 0)
 

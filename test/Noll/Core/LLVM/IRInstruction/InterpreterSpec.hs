@@ -17,6 +17,7 @@ import Noll.Core.LLVM.IRInstruction.Interpreter (
   interpret,
   runInterpreter,
  )
+import Noll.Core.LLVM.IRInstruction.Interpreter.Object (objectEnvironment, objectInterpreter)
 import Noll.Core.LLVM.IRInstruction.TH
 import Noll.Core.LLVM.IRType
 import Noll.Core.LLVM.IRType.Syntax
@@ -175,18 +176,18 @@ blockObjects =
 --    , irInterpreterConstructorEnv = mempty
 --    }
 
-blockInterpreter :: Object Core.Type (Core.Expr Core.Type) -> IRInterpreter (IRConstruct [IRLine])
-blockInterpreter =
-  \case
-    OFunction name lls e -> do
-      (_, w) <- listen (local (flip (foldr insertLocal) lls) (interpret (irEvalExpr e >>= iRet i8Ptr)))
-      pure (CDefine name i8Ptr Nothing [Label i8Ptr n | Label _ n <- lls] w)
-    OConstant name e -> do
-      (_, w) <- listen (interpret (irEvalExpr e))
-      error "TODO"
- where
-  insertLocal (Label _ name) =
-    inValueEnv (Environment.insert name (Local i8Ptr name))
+-- objectInterpreter :: Object Core.Type (Core.Expr Core.Type) -> IRInterpreter (IRConstruct [IRLine])
+-- objectInterpreter =
+--  \case
+--    OFunction name lls e -> do
+--      (_, w) <- listen (local (flip (foldr insertLocal) lls) (interpret (irEvalExpr e >>= iRet i8Ptr)))
+--      pure (CDefine name i8Ptr Nothing [Label i8Ptr n | Label _ n <- lls] w)
+--    OConstant name e -> do
+--      (_, w) <- listen (interpret (irEvalExpr e))
+--      error "TODO"
+-- where
+--  insertLocal (Label _ name) =
+--    inValueEnv (Environment.insert name (Local i8Ptr name))
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
@@ -262,17 +263,11 @@ funF4 =
         )
     )
 
-objectValue :: Object Core.Type (Core.Expr Core.Type) -> (Name, IRValue)
-objectValue o = (name, Global (objectIRType o) name) where name = objectName o
-
-objectListToEnvironment :: Environment IRValue -> ObjectList -> Environment IRValue
-objectListToEnvironment = foldr (uncurry Environment.insert . objectValue)
-
 testEnv :: Environment IRValue
-testEnv = objectListToEnvironment mempty [funMain, funFn2, funF4]
+testEnv = objectEnvironment [funMain, funFn2, funF4]
 
-abc2 = runInterpreter (IRInterpreterEnv testEnv mempty) (blockInterpreter funMain)
+abc2 = runInterpreter (IRInterpreterEnv testEnv mempty) (objectInterpreter funMain)
 
-abc3 = runInterpreter (IRInterpreterEnv testEnv mempty) (blockInterpreter funFn2)
+abc3 = runInterpreter (IRInterpreterEnv testEnv mempty) (objectInterpreter funFn2)
 
-abc4 = runInterpreter (IRInterpreterEnv testEnv mempty) (blockInterpreter funF4)
+abc4 = runInterpreter (IRInterpreterEnv testEnv mempty) (objectInterpreter funF4)

@@ -9,7 +9,7 @@ module Noll.Core.LLVM.IRInstruction.Interpreter (
   IRInterpreter (..),
   IRInterpreterEnv (..),
   IRLine (..),
-  evalInterpreter,
+  --  evalInterpreter,
   runInterpreter,
   inValueEnv,
 ) where
@@ -289,8 +289,8 @@ interpreter =
 interpret :: IRInstr a -> IRInterpreter a
 interpret = iterM interpreter
 
-evalInterpreter :: IRInterpreterEnv -> IRInterpreter a -> [IRLine]
-evalInterpreter env ipt = undefined -- evalState (execWriterT (runReaderT (getIRInterpreter ipt) env)) initialIRInterpreterState
+-- evalInterpreter :: IRInterpreterEnv -> IRInterpreter a -> [IRLine]
+-- evalInterpreter env ipt = undefined -- evalState (execWriterT (runReaderT (getIRInterpreter ipt) env)) initialIRInterpreterState
 
 runInterpreter :: IRInterpreterEnv -> IRInterpreter a -> (a, IRInterpreterState, [IRLine])
 runInterpreter env ipt = runRWS (getIRInterpreter ipt) env initialIRInterpreterState
