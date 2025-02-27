@@ -174,19 +174,6 @@ myEnv =
     , irInterpreterConstructorEnv = mempty
     }
 
--- objectIRType1 = runInterpreter myEnv (interpret (irEvalExpr fixture1))
-
--- blockInterpreter :: BlockObject Core.Type (Core.Expr Core.Type) -> IRInterpreter IRValue
--- blockInterpreter =
---  \case
---    OFunction name lls e ->
---      local (flip (foldr insertLocal) lls) (interpret (irEvalExpr e))
---    OConstant _ e ->
---      interpret (irEvalExpr e)
--- where
---  insertLocal (Label _ name) =
---    inValueEnv (Environment.insert name (Local i8Ptr name))
-
 blockInterpreter :: BlockObject Core.Type (Core.Expr Core.Type) -> IRInterpreter (IRConstruct [IRLine])
 blockInterpreter =
   \case
