@@ -9,7 +9,8 @@ module Noll.Utils (
   module Noll.Utils.Operators,
   module Noll.Utils.Name,
   module Noll.Utils.Data.Text,
-  Dictionary,
+  module Noll.Utils.Data.Functor,
+  module Noll.Utils.Control.Monad,
   IndexMap,
   concatMapM,
   concatForM,
@@ -26,8 +27,6 @@ module Noll.Utils (
   applyM2,
   applyM3,
   Over,
-  (<$$>),
-  (<$$$>),
 )
 where
 
@@ -44,6 +43,8 @@ import Data.Set (Set, unions)
 import qualified Data.Set as Set
 import Data.Text (Text)
 import qualified Data.Text as Text
+import Noll.Utils.Control.Monad
+import Noll.Utils.Data.Functor
 import Noll.Utils.Data.Text
 import Noll.Utils.Name
 import Noll.Utils.Operators
@@ -52,31 +53,9 @@ type IndexMap = Map Int
 
 type Over o n = (n -> n) -> o -> o
 
-{-# INLINE (<$$>) #-}
-(<$$>) :: (Functor f, Functor g) => (a -> b) -> f (g a) -> f (g b)
-(<$$>) = fmap . fmap
-
-infixr 8 <$$>
-
-{-# INLINE (<$$$>) #-}
-(<$$$>) :: (Functor f, Functor g, Functor h) => (a -> b) -> f (g (h a)) -> f (g (h b))
-(<$$$>) = fmap . fmap . fmap
-
-infixr 8 <$$$>
-
 {-# INLINE groupByEq #-}
 groupByEq :: (Eq b) => (a -> b) -> [a] -> [[a]]
 groupByEq = groupBy . on (==)
-
--- | Monadic version of concatMap
-{-# INLINE concatMapM #-}
-concatMapM :: (Monad m, Traversable f) => (a -> m [b]) -> f a -> m [b]
-concatMapM f xs = fmap concat (mapM f xs)
-
--- | concatMapM with the arguments flipped
-{-# INLINE concatForM #-}
-concatForM :: (Monad m, Traversable f) => f a -> (a -> m [b]) -> m [b]
-concatForM = flip concatMapM
 
 {-# INLINE unionMap #-}
 unionMap :: (Ord b) => (a -> Set b) -> Set a -> Set b
@@ -93,10 +72,6 @@ tellRight = tell . fmap Right
 {-# INLINE const2 #-}
 const2 :: a -> b -> c -> a
 const2 a _ _ = a
-
-{-# INLINE traverseM #-}
-traverseM :: (Monad m, Applicative f, Traversable t) => (a -> m (f a)) -> t a -> m (f (t a))
-traverseM = sequenceA <$$$> traverse
 
 getAndModify :: (MonadState s m) => (s -> s) -> m s
 getAndModify f = do
@@ -120,21 +95,3 @@ lexOrderRank text
         n - 97
     | otherwise =
         n - 22
-
-applyM1 :: (Monad m) => (a -> m b) -> m a -> m b
-applyM1 f a = do
-  a1 <- a
-  f a1
-
-applyM2 :: (Monad m) => (a -> b -> m c) -> m a -> m b -> m c
-applyM2 f a b = do
-  a1 <- a
-  b1 <- b
-  f a1 b1
-
-applyM3 :: (Monad m) => (a -> b -> c -> m d) -> m a -> m b -> m c -> m d
-applyM3 f a b c = do
-  a1 <- a
-  b1 <- b
-  c1 <- c
-  f a1 b1 c1

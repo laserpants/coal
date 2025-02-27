@@ -26,7 +26,7 @@ import Noll.Core.Language.Object (Object (..), ObjectList, objectName)
 import Noll.Core.Language.Replace (Sub, relabel)
 import Noll.Core.Language.Typed (isFunction)
 import Noll.Label (Label (..), labelName)
-import Noll.Utils (Dictionary, Name, Over, applyM1, applyM2, foldrM, forM, isConstructor, (<$$$>), (<$$>))
+import Noll.Utils (Dictionary, Name, Over, applyM1, applyM2, foldrM, forM, isConstructor, (<$$>))
 import TextShow
 
 import qualified Data.Map.Strict as Map
