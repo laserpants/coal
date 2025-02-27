@@ -283,8 +283,8 @@ objectListToEnvironment = foldr (uncurry Environment.insert . objectValue)
 testEnv :: Environment IRValue
 testEnv = objectListToEnvironment mempty [funMain, funFn2, funF4]
 
-objectIRType2 = runInterpreter (IRInterpreterEnv testEnv mempty) (blockInterpreter funMain)
+abc2 = runInterpreter (IRInterpreterEnv testEnv mempty) (blockInterpreter funMain)
 
-objectIRType3 = runInterpreter (IRInterpreterEnv testEnv mempty) (blockInterpreter funFn2)
+abc3 = runInterpreter (IRInterpreterEnv testEnv mempty) (blockInterpreter funFn2)
 
-objectIRType4 = runInterpreter (IRInterpreterEnv testEnv mempty) (blockInterpreter funF4)
+abc4 = runInterpreter (IRInterpreterEnv testEnv mempty) (blockInterpreter funF4)
