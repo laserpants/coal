@@ -137,6 +137,12 @@ newtype IRInterpreter a = IRInterpreter {getIRInterpreter :: RWS IRInterpreterEn
     , MonadReader IRInterpreterEnv
     )
 
+evalInterpreter :: IRInterpreterEnv -> IRInterpreter a -> (a, [IRLine])
+evalInterpreter env ri = evalRWS (getIRInterpreter ri) env initialIRInterpreterState
+
+runInterpreter :: IRInterpreterEnv -> IRInterpreter a -> (a, IRInterpreterState, [IRLine])
+runInterpreter env ri = runRWS (getIRInterpreter ri) env initialIRInterpreterState
+
 nextRegister :: IRType -> IRInterpreter IRValue
 nextRegister t = do
   n <- gets irInterpreterStateRegisterIndex
@@ -290,9 +296,3 @@ interpreter =
 {-# INLINE interpret #-}
 interpret :: IRInstr a -> IRInterpreter a
 interpret = iterM interpreter
-
-evalInterpreter :: IRInterpreterEnv -> IRInterpreter a -> (a, [IRLine])
-evalInterpreter env ipt = evalRWS (getIRInterpreter ipt) env initialIRInterpreterState
-
-runInterpreter :: IRInterpreterEnv -> IRInterpreter a -> (a, IRInterpreterState, [IRLine])
-runInterpreter env ipt = runRWS (getIRInterpreter ipt) env initialIRInterpreterState

@@ -13,6 +13,7 @@ module Noll.Utils (
   module Noll.Utils.Data.List,
   module Noll.Utils.Data.Functor,
   module Noll.Utils.Control.Monad,
+  module Noll.Utils.Control.Monad.Writer,
   IndexMap,
   tellLeft,
   tellRight,
@@ -35,6 +36,7 @@ import Data.Maybe (fromMaybe)
 import Data.Set (Set)
 import Data.Text (Text)
 import Noll.Utils.Control.Monad
+import Noll.Utils.Control.Monad.Writer
 import Noll.Utils.Data.Functor
 import Noll.Utils.Data.List
 import Noll.Utils.Data.Set
@@ -47,14 +49,6 @@ import qualified Data.Text as Text
 type IndexMap = Map Int
 
 type Over o n = (n -> n) -> o -> o
-
-{-# INLINE tellLeft #-}
-tellLeft :: (MonadWriter [Either e a] m) => [e] -> m ()
-tellLeft = tell . fmap Left
-
-{-# INLINE tellRight #-}
-tellRight :: (MonadWriter [Either e a] m) => [a] -> m ()
-tellRight = tell . fmap Right
 
 {-# INLINE const2 #-}
 const2 :: a -> b -> c -> a
