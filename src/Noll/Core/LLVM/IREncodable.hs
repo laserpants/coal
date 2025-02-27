@@ -5,7 +5,7 @@
 module Noll.Core.LLVM.IREncodable (
   IREncodable (..),
   IRAnnotated (..),
---  IRLabel (..),
+  --  IRLabel (..),
   irAnnotate,
   enquote,
 ) where
@@ -90,10 +90,10 @@ newtype IRAnnotated v = IRAnnotated v
 instance IREncodable (IRAnnotated IRValue) where
   irEncode (IRAnnotated v) = irEncode (irTypeOf v) <> " " <> irEncode v
 
---newtype IRLabel = IRLabel Name
+-- newtype IRLabel = IRLabel Name
 --  deriving (Show, Eq, Ord, Read)
 --
---instance IREncodable IRLabel where
+-- instance IREncodable IRLabel where
 --  irEncode (IRLabel name) = "label" <> " " <> localName name
 
 instance IREncodable (Label IRType) where
