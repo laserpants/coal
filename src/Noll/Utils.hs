@@ -10,23 +10,16 @@ module Noll.Utils (
   module Noll.Utils.Name,
   module Noll.Utils.Data.Text,
   module Noll.Utils.Data.Set,
+  module Noll.Utils.Data.List,
   module Noll.Utils.Data.Functor,
   module Noll.Utils.Control.Monad,
   IndexMap,
-  concatMapM,
-  concatForM,
-  unionMap,
   tellLeft,
   tellRight,
   fromMaybe,
   lexOrderRank,
   getAndModify,
-  groupByEq,
   const2,
-  traverseM,
-  applyM1,
-  applyM2,
-  applyM3,
   Over,
 )
 where
@@ -36,14 +29,13 @@ import Control.Monad.State (MonadState, get, modify)
 import Control.Monad.Writer (MonadWriter, tell)
 import Data.Char (ord)
 import Data.Foldable (foldrM, traverse_)
-import Data.Function (on)
-import Data.List (groupBy)
 import Data.Map.Strict (Map)
 import Data.Maybe (fromMaybe)
 import Data.Set (Set)
 import Data.Text (Text)
 import Noll.Utils.Control.Monad
 import Noll.Utils.Data.Functor
+import Noll.Utils.Data.List
 import Noll.Utils.Data.Set
 import Noll.Utils.Data.Text
 import Noll.Utils.Name
@@ -54,10 +46,6 @@ import qualified Data.Text as Text
 type IndexMap = Map Int
 
 type Over o n = (n -> n) -> o -> o
-
-{-# INLINE groupByEq #-}
-groupByEq :: (Eq b) => (a -> b) -> [a] -> [[a]]
-groupByEq = groupBy . on (==)
 
 {-# INLINE tellLeft #-}
 tellLeft :: (MonadWriter [Either e a] m) => [e] -> m ()
