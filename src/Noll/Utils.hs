@@ -20,6 +20,7 @@ module Noll.Utils (
   lexOrderRank,
   getAndModify,
   const2,
+  traverse2,
   Over,
 )
 where
@@ -58,6 +59,10 @@ tellRight = tell . fmap Right
 {-# INLINE const2 #-}
 const2 :: a -> b -> c -> a
 const2 a _ _ = a
+
+{-# INLINE traverse2 #-}
+traverse2 :: (Applicative f, Traversable t1, Traversable t2) => (a -> f b) -> t2 (t1 a) -> f (t2 (t1 b))
+traverse2 = traverse . traverse
 
 getAndModify :: (MonadState s m) => (s -> s) -> m s
 getAndModify f = do

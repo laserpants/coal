@@ -27,8 +27,8 @@ import Noll.Core.LLVM.IRInstruction.Interpreter (
   IRInterpreter (..),
   IRInterpreterEnv (..),
   IRLine (..),
+  evalInterpreter,
   inValueEnv,
-  runInterpreter,
  )
 import Noll.Core.LLVM.IRInstruction.Interpreter.Object (objectEnvironment, objectInterpreter)
 import Noll.Core.LLVM.IRValue (IRValue (..))
@@ -58,6 +58,7 @@ import Noll.Utils (
   foldrM,
   forM,
   isConstructor,
+  traverse2,
   (<$$>),
  )
 import TextShow
@@ -410,11 +411,8 @@ transSuffixMonad a = do
 transInterpreter :: IRInterpreter a -> Core a
 transInterpreter p = do
   env <- gets pipelineStateInterpreterEnv
-  let (a, _, _) = runInterpreter env p
+  let (a, _) = evalInterpreter env p
   pure a
-
-traverse2 :: (Applicative f, Traversable t1, Traversable t2) => (a -> f b) -> t2 (t1 a) -> f (t2 (t1 b))
-traverse2 = traverse . traverse
 
 suffixNamesC :: ObjectList -> Core ObjectList
 suffixNamesC = transSuffixMonad . traverse2 transSuffixExpr

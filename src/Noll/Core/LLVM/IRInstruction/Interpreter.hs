@@ -11,6 +11,7 @@ module Noll.Core.LLVM.IRInstruction.Interpreter (
   IRLine (..),
   --  evalInterpreter,
   runInterpreter,
+  evalInterpreter,
   inValueEnv,
 ) where
 
@@ -21,6 +22,7 @@ import Control.Monad.RWS (
   MonadWriter,
   RWS,
   asks,
+  evalRWS,
   gets,
   local,
   modify,
@@ -289,8 +291,8 @@ interpreter =
 interpret :: IRInstr a -> IRInterpreter a
 interpret = iterM interpreter
 
--- evalInterpreter :: IRInterpreterEnv -> IRInterpreter a -> [IRLine]
--- evalInterpreter env ipt = undefined -- evalState (execWriterT (runReaderT (getIRInterpreter ipt) env)) initialIRInterpreterState
+evalInterpreter :: IRInterpreterEnv -> IRInterpreter a -> (a, [IRLine])
+evalInterpreter env ipt = evalRWS (getIRInterpreter ipt) env initialIRInterpreterState
 
 runInterpreter :: IRInterpreterEnv -> IRInterpreter a -> (a, IRInterpreterState, [IRLine])
 runInterpreter env ipt = runRWS (getIRInterpreter ipt) env initialIRInterpreterState
