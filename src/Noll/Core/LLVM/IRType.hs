@@ -15,7 +15,7 @@ module Noll.Core.LLVM.IRType (
   pointee,
   struct,
   stringLiteralType,
-  irOpaqueSignature,
+  opaqueIRSignature,
   objectIRType,
 ) where
 
@@ -126,13 +126,13 @@ pointee =
     _ ->
       error "Not a pointer type"
 
-irOpaqueSignature :: Int -> IRType
-irOpaqueSignature n = fun i8Ptr (replicate n i8Ptr)
+opaqueIRSignature :: Int -> IRType
+opaqueIRSignature n = fun i8Ptr (replicate n i8Ptr)
 
 objectIRType :: Object t e -> IRType
 objectIRType =
   \case
     OFunction _ lls _ ->
-      irOpaqueSignature (length lls)
+      opaqueIRSignature (length lls)
     _ ->
       error "TODO"
