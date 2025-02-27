@@ -3,9 +3,9 @@
 module Noll.Core.LanguageSpec where -- (fixture, fixture2, blockObjects1) where
 
 import Noll.Common.List1 (NonEmpty (..), (<|))
-import Noll.Compiler.Core (BlockObject (..), ObjectList)
 import Noll.Core.Language (list, opaque, (~>))
 import Noll.Core.Language.Expr (Clause (..), Expr, Focus (..))
+import Noll.Core.Language.Object (Object (..), ObjectList)
 import Noll.Label (Label (..))
 
 import qualified Noll.Core.Language as Core

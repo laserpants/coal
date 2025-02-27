@@ -23,6 +23,7 @@ import Noll.AST.HasFree (HasFree (..), boundIn, exceptNames)
 import Noll.Common.List1 (List1, NonEmpty (..), fromList1)
 import Noll.Common.Supply (supplied)
 import Noll.Core.Language (Binding (..), Clause (..), Expr, ExprF (..), Focus (..), Type, Typed (..), bindingLabel, foldType, overBindingLabel, unzipBindings)
+import Noll.Core.Language.Object (Object (..), ObjectList, objectName)
 import Noll.Core.Language.Replace (Sub, relabel)
 import Noll.Core.Language.Typed (isFunction)
 import Noll.Label (Label (..), labelName)
@@ -34,34 +35,6 @@ import qualified Data.Set as Set
 import qualified Data.Text as Text
 import qualified Noll.Common.List1 as List1
 import qualified Noll.Core.Language as Core
-
-data BlockObject t e
-  = OFunction Name [Label t] e
-  | OConstant Name e
-  | OExternal Name t
-  deriving (Show, Eq, Ord, Functor, Foldable, Traversable)
-
-instance (Ord t, HasFree e t) => HasFree (BlockObject t e) t where
-  freeIn =
-    \case
-      OFunction _ lls e ->
-        freeIn e `exceptNames` boundIn lls
-      OConstant _ e ->
-        freeIn e
-      OExternal{} ->
-        mempty
-
-objectName :: BlockObject t e -> Name
-objectName =
-  \case
-    OFunction name _ _ ->
-      name
-    OConstant name _ ->
-      name
-    OExternal name _ ->
-      name
-
-type ObjectList = [BlockObject Type (Expr Type)]
 
 -------------------------------------------------------------------------------
 
@@ -102,13 +75,13 @@ moveUp name vs f = do
 -------------------------------------------------------------------------------
 
 letLiftFromExpression :: Name -> Expr Type -> ObjectList
-letLiftFromExpression name expr = toBlockObject name e : (toBob <$> objs)
+letLiftFromExpression name expr = toObject name e : (toBob <$> objs)
  where
-  toBob (Binding (Label _ name1) e1) = toBlockObject name1 e1
+  toBob (Binding (Label _ name1) e1) = toObject name1 e1
   (e, objs) = runWriter (transLetLifting expr)
 
-toBlockObject :: Name -> Expr Type -> BlockObject Type (Expr Type)
-toBlockObject name =
+toObject :: Name -> Expr Type -> Object Type (Expr Type)
+toObject name =
   project
     >>> \case
       Core.ELam vs e ->
@@ -289,7 +262,7 @@ applyArgs name (a : as) =
 
 -------------------------------------------------------------------------------
 
-addImplicitArgs :: BlockObject Type (Expr Type) -> BlockObject Type (Expr Type)
+addImplicitArgs :: Object Type (Expr Type) -> Object Type (Expr Type)
 addImplicitArgs =
   \case
     f@(OFunction name lls1 expr)
@@ -354,7 +327,7 @@ muteClauseTypes (Clause lls e) = Clause (muteLabelTypes <$> lls) e
 muteLabelTypes :: Label Type -> Label ()
 muteLabelTypes (Label _ name) = Label () name
 
-muteObjectTypes :: BlockObject Type (Expr Type) -> BlockObject () (Expr ())
+muteObjectTypes :: Object Type (Expr Type) -> Object () (Expr ())
 muteObjectTypes =
   \case
     OFunction name lls e ->

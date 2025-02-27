@@ -9,6 +9,7 @@ import Noll.Common.List1 (NonEmpty (..), (<|))
 import Noll.Compiler.Core
 import Noll.Core.Language (ExprF (..), Prim (..), list, opaque, (~>))
 import Noll.Core.Language.Expr (Clause (..), Focus (..))
+import Noll.Core.Language.Object (Object (..), ObjectList, objectName)
 import Noll.Label (Label (..))
 import Test.Hspec (Spec, describe, it)
 

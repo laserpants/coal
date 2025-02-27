@@ -7,7 +7,6 @@ import Control.Monad.Reader (local)
 import Control.Monad.Writer (listen)
 import Noll.Common.Environment (Environment)
 import Noll.Common.List1 (NonEmpty (..), (<|))
-import Noll.Compiler.Core (BlockObject (..), ObjectList, objectName)
 import Noll.Core.LLVM.IRConstruct (IRConstruct (..))
 import Noll.Core.LLVM.IRInstruction.Eval (irEvalExpr)
 import Noll.Core.LLVM.IRInstruction.Interpreter (
@@ -21,6 +20,7 @@ import Noll.Core.LLVM.IRInstruction.Interpreter (
 import Noll.Core.LLVM.IRInstruction.TH
 import Noll.Core.LLVM.IRType
 import Noll.Core.LLVM.IRValue
+import Noll.Core.Language.Object (Object (..), ObjectList, objectName)
 import Noll.Label (Label (..))
 import Noll.Utils (Name)
 import Test.Hspec (Spec, describe, it)
@@ -174,7 +174,7 @@ myEnv =
     , irInterpreterConstructorEnv = mempty
     }
 
-blockInterpreter :: BlockObject Core.Type (Core.Expr Core.Type) -> IRInterpreter (IRConstruct [IRLine])
+blockInterpreter :: Object Core.Type (Core.Expr Core.Type) -> IRInterpreter (IRConstruct [IRLine])
 blockInterpreter =
   \case
     OFunction name lls e -> do
@@ -261,7 +261,7 @@ funF4 =
         )
     )
 
-objectValue :: BlockObject Core.Type (Core.Expr Core.Type) -> (Name, IRValue)
+objectValue :: Object Core.Type (Core.Expr Core.Type) -> (Name, IRValue)
 objectValue o = (name, Global (objectIRType o) name) where name = objectName o
 
 objectListToEnvironment :: Environment IRValue -> ObjectList -> Environment IRValue

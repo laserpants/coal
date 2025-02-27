@@ -20,7 +20,7 @@ module Noll.Core.LLVM.IRType (
 ) where
 
 import Data.Text (Text)
-import Noll.Compiler.Core (BlockObject (..))
+import Noll.Core.Language.Object (Object (..))
 import Noll.Core.Language.Type (Type (..))
 import Noll.Utils (Name)
 
@@ -129,7 +129,7 @@ pointee =
 irOpaqueSignature :: Int -> IRType
 irOpaqueSignature n = fun i8Ptr (replicate n i8Ptr)
 
-objectIRType :: BlockObject t e -> IRType
+objectIRType :: Object t e -> IRType
 objectIRType =
   \case
     OFunction _ lls _ ->
