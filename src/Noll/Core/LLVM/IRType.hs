@@ -15,6 +15,7 @@ module Noll.Core.LLVM.IRType (
   pointee,
   struct,
   stringLiteralType,
+  irOpaqueSignature,
 ) where
 
 import Data.Text (Text)
@@ -122,3 +123,6 @@ pointee =
       t
     _ ->
       error "Not a pointer type"
+
+irOpaqueSignature :: Int -> IRType
+irOpaqueSignature n = fun i8Ptr (replicate n i8Ptr)

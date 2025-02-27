@@ -96,6 +96,7 @@ library
       Noll.SystemF.Substitution
       Noll.SystemF.Unification
       Noll.Utils
+      Noll.Utils.Data.Text
       Noll.Utils.Embed
       Noll.Utils.Name
       Noll.Utils.Operators

@@ -5,8 +5,9 @@ module Noll.Core.LLVM.IRInstruction.InterpreterSpec where
 
 import Control.Monad.Reader (local)
 import Control.Monad.Writer (listen)
+import Noll.Common.Environment (Environment)
 import Noll.Common.List1 (NonEmpty (..), (<|))
-import Noll.Compiler.Core (BlockObject (..), ObjectList)
+import Noll.Compiler.Core (BlockObject (..), ObjectList, objectName)
 import Noll.Core.LLVM.IRConstruct (IRConstruct (..))
 import Noll.Core.LLVM.IRInstruction.Eval (irEvalExpr)
 import Noll.Core.LLVM.IRInstruction.Interpreter (
@@ -21,6 +22,7 @@ import Noll.Core.LLVM.IRInstruction.TH
 import Noll.Core.LLVM.IRType
 import Noll.Core.LLVM.IRValue
 import Noll.Label (Label (..))
+import Noll.Utils (Name)
 import Test.Hspec (Spec, describe, it)
 
 import qualified Noll.Common.Environment as Environment
@@ -164,11 +166,15 @@ myEnv =
             ( "$fn.2"
             , Global (fun i8Ptr [i8Ptr, i8Ptr]) "$fn.2"
             )
+          ,
+            ( "main"
+            , Global (fun i8Ptr [i8Ptr]) "main"
+            )
           ]
     , irInterpreterConstructorEnv = mempty
     }
 
--- abc1 = runInterpreter myEnv (interpret (irEvalExpr fixture1))
+-- objectIRType1 = runInterpreter myEnv (interpret (irEvalExpr fixture1))
 
 -- blockInterpreter :: BlockObject Core.Type (Core.Expr Core.Type) -> IRInterpreter IRValue
 -- blockInterpreter =
@@ -194,89 +200,99 @@ blockInterpreter =
   insertLocal (Label _ name) =
     inValueEnv (Environment.insert name (Local i8Ptr name))
 
-abc2 =
-  runInterpreter
-    myEnv
-    ( blockInterpreter
-        ( OFunction
-            "main"
-            [Label Core.TOpq "_"]
-            ( Core.let_
-                ( Core.Binding
-                    (Label Core.int32 "one.[3]")
-                    (Core.lit (Core.PInt32 1))
-                    :| []
-                )
-                ( Core.app
-                    Core.int32
-                    (Core.var (Label (Core.int32 `Core.arrow` Core.int32 `Core.arrow` Core.int32) "f.[4]"))
-                    ( Core.var (Label Core.int32 "one.[3]")
-                        :| [Core.lit (Core.PInt32 6)]
-                    )
-                )
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+funMain =
+  OFunction
+    "main"
+    [Label Core.TOpq "_"]
+    ( Core.let_
+        ( Core.Binding
+            (Label Core.int32 "one.[3]")
+            (Core.lit (Core.PInt32 1))
+            :| []
+        )
+        ( Core.app
+            Core.int32
+            (Core.var (Label (Core.int32 `Core.arrow` Core.int32 `Core.arrow` Core.int32) "f.[4]"))
+            ( Core.var (Label Core.int32 "one.[3]")
+                :| [Core.lit (Core.PInt32 6)]
             )
         )
     )
 
-abc3 =
-  runInterpreter
-    myEnv
-    ( blockInterpreter
-        ( OFunction
-            "$fn.2"
-            [Label Core.int32 "m.[1]", Label Core.TOpq "_.[0]"]
-            (Core.var (Label Core.int32 "m.[1]"))
-        )
-    )
+funFn2 =
+  OFunction
+    "$fn.2"
+    [Label Core.int32 "m.[1]", Label Core.TOpq "_.[0]"]
+    (Core.var (Label Core.int32 "m.[1]"))
 
-abc4 =
-  runInterpreter
-    myEnv
-    ( blockInterpreter
-        ( OFunction
-            "f.[4]"
-            [Label Core.int32 "one.[3]", Label Core.int32 "x.[2]"]
-            ( Core.if_
+funF4 =
+  OFunction
+    "f.[4]"
+    [Label Core.int32 "one.[3]", Label Core.int32 "x.[2]"]
+    ( Core.if_
+        ( Core.op
+            ( Core.OEqInt32
+                (Core.var (Label Core.int32 "x.[2]"))
+                (Core.lit (Core.PInt32 0))
+            )
+        )
+        (Core.var (Label Core.int32 "one.[3]"))
+        ( Core.let_
+            ( Core.Binding
+                (Label Core.int32 "m.[1]")
                 ( Core.op
-                    ( Core.OEqInt32
+                    ( Core.OMulInt32
                         (Core.var (Label Core.int32 "x.[2]"))
-                        (Core.lit (Core.PInt32 0))
-                    )
-                )
-                (Core.var (Label Core.int32 "one.[3]"))
-                ( Core.let_
-                    ( Core.Binding
-                        (Label Core.int32 "m.[1]")
-                        ( Core.op
-                            ( Core.OMulInt32
-                                (Core.var (Label Core.int32 "x.[2]"))
-                                ( Core.app
-                                    Core.int32
-                                    (Core.var (Label (Core.int32 `Core.arrow` Core.int32 `Core.arrow` Core.int32) "f.[4]"))
-                                    ( Core.var (Label Core.int32 "one.[3]")
-                                        <| Core.op
-                                          ( Core.OSubInt32
-                                              (Core.var (Label Core.int32 "x.[2]"))
-                                              (Core.lit (Core.PInt32 1))
-                                          )
-                                        :| []
-                                    )
-                                )
+                        ( Core.app
+                            Core.int32
+                            (Core.var (Label (Core.int32 `Core.arrow` Core.int32 `Core.arrow` Core.int32) "f.[4]"))
+                            ( Core.var (Label Core.int32 "one.[3]")
+                                <| Core.op
+                                  ( Core.OSubInt32
+                                      (Core.var (Label Core.int32 "x.[2]"))
+                                      (Core.lit (Core.PInt32 1))
+                                  )
+                                :| []
                             )
                         )
-                        :| []
                     )
-                    ( Core.call
-                        (Label (Core.int32 `Core.arrow` Core.TOpq) "print_int32")
-                        [Core.var (Label Core.int32 "m.[1]")]
-                        ( Core.app
-                            (Core.TOpq `Core.arrow` Core.int32)
-                            (Core.var (Label (Core.int32 `Core.arrow` Core.TOpq `Core.arrow` Core.int32) "$fn.2"))
-                            (Core.var (Label Core.int32 "m.[1]") :| [])
-                        )
-                    )
+                )
+                :| []
+            )
+            ( Core.call
+                (Label (Core.int32 `Core.arrow` Core.TOpq) "print_int32")
+                [Core.var (Label Core.int32 "m.[1]")]
+                ( Core.app
+                    (Core.TOpq `Core.arrow` Core.int32)
+                    (Core.var (Label (Core.int32 `Core.arrow` Core.TOpq `Core.arrow` Core.int32) "$fn.2"))
+                    (Core.var (Label Core.int32 "m.[1]") :| [])
                 )
             )
         )
-        --------
     )
+
+objectIRType :: BlockObject Core.Type (Core.Expr Core.Type) -> IRType
+objectIRType =
+  \case
+    OFunction _ lls _ ->
+      irOpaqueSignature (length lls)
+    _ ->
+      error "TODO"
+
+objectValue :: BlockObject Core.Type (Core.Expr Core.Type) -> (Name, IRValue)
+objectValue o = (name, Global (objectIRType o) name) where name = objectName o
+
+objectListToEnvironment :: Environment IRValue -> ObjectList -> Environment IRValue
+objectListToEnvironment = foldr (uncurry Environment.insert . objectValue)
+
+testEnv :: Environment IRValue
+testEnv = objectListToEnvironment mempty [funMain, funFn2, funF4]
+
+objectIRType2 = runInterpreter (IRInterpreterEnv testEnv mempty) (blockInterpreter funMain)
+
+objectIRType3 = runInterpreter (IRInterpreterEnv testEnv mempty) (blockInterpreter funFn2)
+
+objectIRType4 = runInterpreter (IRInterpreterEnv testEnv mempty) (blockInterpreter funF4)

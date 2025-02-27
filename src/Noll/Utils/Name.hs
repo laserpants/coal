@@ -7,6 +7,7 @@ module Noll.Utils.Name (
 import Data.Char (isAlpha, isUpper)
 import Data.Map.Strict (Map)
 import Data.Text (Text)
+import Noll.Utils.Data.Text (dropWhileNot)
 import Noll.Utils.Operators ((||.))
 
 import qualified Data.Text as Text
@@ -14,10 +15,6 @@ import qualified Data.Text as Text
 type Name = Text
 
 type Dictionary = Map Name
-
-{-# INLINE dropWhileNot #-}
-dropWhileNot :: (Char -> Bool) -> Text -> Text
-dropWhileNot = Text.dropWhile . fmap not
 
 isConstructor :: Name -> Bool
 isConstructor name

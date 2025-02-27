@@ -8,6 +8,7 @@ module Noll.Utils (
   module Data.Map.Strict,
   module Noll.Utils.Operators,
   module Noll.Utils.Name,
+  module Noll.Utils.Data.Text,
   Dictionary,
   IndexMap,
   concatMapM,
@@ -33,7 +34,7 @@ where
 import Control.Monad (forM, forM_, mapM)
 import Control.Monad.State (MonadState, get, modify)
 import Control.Monad.Writer (MonadWriter, tell)
-import Data.Char (isAlpha, isUpper, ord)
+import Data.Char (ord)
 import Data.Foldable (foldrM, traverse_)
 import Data.Function (on)
 import Data.List (groupBy)
@@ -43,6 +44,7 @@ import Data.Set (Set, unions)
 import qualified Data.Set as Set
 import Data.Text (Text)
 import qualified Data.Text as Text
+import Noll.Utils.Data.Text
 import Noll.Utils.Name
 import Noll.Utils.Operators
 
