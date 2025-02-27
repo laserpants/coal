@@ -10,9 +10,9 @@ module Noll.Core.Language (
 ) where
 
 import Noll.Core.Language.Expr
+import Noll.Core.Language.Object
 import Noll.Core.Language.Op
 import Noll.Core.Language.Prim
-import Noll.Core.Language.Object
 import Noll.Core.Language.Syntax.Expr
 import Noll.Core.Language.Syntax.Type
 import Noll.Core.Language.Type

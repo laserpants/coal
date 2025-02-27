@@ -14,7 +14,13 @@ module Noll.Core.Language.Syntax.Expr (
 ) where
 
 import Noll.Common.List1 (List1)
-import Noll.Core.Language.Expr (Binding (..), Clause (..), Expr, ExprF (..), Focus (..))
+import Noll.Core.Language.Expr (
+  Binding (..),
+  Clause (..),
+  Expr,
+  ExprF (..),
+  Focus (..),
+ )
 import Noll.Core.Language.Op (Op)
 import Noll.Core.Language.Prim (Prim)
 import Noll.Label (Label (..))
