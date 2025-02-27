@@ -14,9 +14,8 @@ import Noll.Common.List1 (List1, NonEmpty (..), fromList1)
 import Noll.Core.LLVM.IREncodable (irEncode)
 import Noll.Core.LLVM.IRInstruction (IRInstr, IRInstrOpF (..))
 import Noll.Core.LLVM.IRInstruction.TH
-import Noll.Core.LLVM.IRType (
-  IRType (..),
-  IRTyped (..),
+import Noll.Core.LLVM.IRType (IRType (..), IRTyped (..))
+import Noll.Core.LLVM.IRType.Syntax (
   i1,
   i32,
   i64,

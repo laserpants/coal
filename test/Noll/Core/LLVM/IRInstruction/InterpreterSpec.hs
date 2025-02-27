@@ -19,6 +19,7 @@ import Noll.Core.LLVM.IRInstruction.Interpreter (
  )
 import Noll.Core.LLVM.IRInstruction.TH
 import Noll.Core.LLVM.IRType
+import Noll.Core.LLVM.IRType.Syntax
 import Noll.Core.LLVM.IRValue
 import Noll.Core.Language.Object (Object (..), ObjectList, objectName)
 import Noll.Label (Label (..))
@@ -154,7 +155,7 @@ blockObjects =
 --        )
 --    )
 
---myEnv =
+-- myEnv =
 --  IRInterpreterEnv
 --    { irInterpreterValueEnv =
 --        Environment.fromList

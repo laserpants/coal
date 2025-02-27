@@ -5,18 +5,7 @@
 module Noll.Core.LLVM.IRType (
   IRType (..),
   IRTyped (..),
-  i1,
-  i8,
-  i32,
-  i64,
-  ptr,
-  i8Ptr,
-  fun,
   pointee,
-  struct,
-  stringLiteralType,
-  opaqueIRSignature,
-  objectIRType,
 ) where
 
 import Data.Text (Text)
@@ -64,13 +53,13 @@ instance IRTyped Type where
   irTypeOf =
     \case
       TCon "unit" [] ->
-        i1
+        TInt1
       TCon "bool" [] ->
-        i1
+        TInt1
       TCon "int32" [] ->
-        i32
+        TInt32
       TCon "int64" [] ->
-        i64
+        TInt64
       TCon "float" [] ->
         TFloat
       TCon "double" [] ->
@@ -80,43 +69,7 @@ instance IRTyped Type where
       TCon "string" [] ->
         error "TODO"
       _ ->
-        i8Ptr
-
-{-# INLINE i1 #-}
-i1 :: IRType
-i1 = TInt1
-
-{-# INLINE i8 #-}
-i8 :: IRType
-i8 = TInt8
-
-{-# INLINE i32 #-}
-i32 :: IRType
-i32 = TInt32
-
-{-# INLINE i64 #-}
-i64 :: IRType
-i64 = TInt64
-
-{-# INLINE ptr #-}
-ptr :: IRType -> IRType
-ptr = TPtr
-
-{-# INLINE i8Ptr #-}
-i8Ptr :: IRType
-i8Ptr = ptr i8
-
-{-# INLINE fun #-}
-fun :: IRType -> [IRType] -> IRType
-fun = TFun
-
-{-# INLINE struct #-}
-struct :: [IRType] -> IRType
-struct = TStruct
-
-{-# INLINE stringLiteralType #-}
-stringLiteralType :: Text -> IRType
-stringLiteralType str = TArray (Text.length str + 1) i8
+        TPtr TInt8
 
 pointee :: IRType -> IRType
 pointee =
@@ -125,14 +78,3 @@ pointee =
       t
     _ ->
       error "Not a pointer type"
-
-opaqueIRSignature :: Int -> IRType
-opaqueIRSignature n = fun i8Ptr (replicate n i8Ptr)
-
-objectIRType :: Object t e -> IRType
-objectIRType =
-  \case
-    OFunction _ lls _ ->
-      opaqueIRSignature (length lls)
-    _ ->
-      error "TODO"

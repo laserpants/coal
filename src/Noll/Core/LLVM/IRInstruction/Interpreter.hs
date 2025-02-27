@@ -20,7 +20,8 @@ import Data.Text (Text, intercalate)
 import Noll.Common.Environment (Environment (..))
 import Noll.Core.LLVM.IREncodable (IRAnnotated (..), IREncodable (..), enquote, irAnnotate)
 import Noll.Core.LLVM.IRInstruction (IRInstr, IRInstrOp, IRInstrOpF (..))
-import Noll.Core.LLVM.IRType (IRType (..), fun, i8Ptr, irTypeOf, pointee, ptr)
+import Noll.Core.LLVM.IRType (IRType (..), IRTyped (..), pointee)
+import Noll.Core.LLVM.IRType.Syntax (fun, i8Ptr, ptr)
 import Noll.Core.LLVM.IRValue (IRValue (..))
 import Noll.Utils (Name, Over)
 import TextShow (showt)
@@ -208,7 +209,8 @@ interpreter =
       next
     IRet t v next ->
       instruction0 next ["ret", irEncode t, irEncode v]
-    ICall TVoid _ _ _ -> -- v vs next ->
+    ICall TVoid _ _ _ ->
+      -- v vs next ->
       error "TODO"
     ICall t v vs next ->
       instruction t next ["call", irEncode t, irEncode v <> "(" <> withCommas (irAnnotated <$> vs) <> ")"]

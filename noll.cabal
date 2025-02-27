@@ -64,6 +64,7 @@ library
       Noll.Core.LLVM.IRInstruction.Interpreter
       Noll.Core.LLVM.IRInstruction.TH
       Noll.Core.LLVM.IRType
+      Noll.Core.LLVM.IRType.Syntax
       Noll.Core.LLVM.IRValue
       Noll.Eval
       Noll.Label

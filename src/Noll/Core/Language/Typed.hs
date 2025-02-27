@@ -8,8 +8,8 @@ import Data.Functor.Foldable (project)
 import Noll.Core.Language.Expr (Expr, ExprF (..))
 import Noll.Core.Language.Op (Op (..))
 import Noll.Core.Language.Prim (Prim (..))
-import Noll.Core.Language.Type.Syntax (arity, foldType, unfoldType)
 import Noll.Core.Language.Type (Type (..), normalizeRow)
+import Noll.Core.Language.Type.Syntax (arity, foldType, unfoldType)
 import Noll.Label (Label (..))
 
 import qualified Noll.Common.List1 as List1
