@@ -274,14 +274,6 @@ funF4 =
         )
     )
 
-objectIRType :: BlockObject Core.Type (Core.Expr Core.Type) -> IRType
-objectIRType =
-  \case
-    OFunction _ lls _ ->
-      irOpaqueSignature (length lls)
-    _ ->
-      error "TODO"
-
 objectValue :: BlockObject Core.Type (Core.Expr Core.Type) -> (Name, IRValue)
 objectValue o = (name, Global (objectIRType o) name) where name = objectName o
 

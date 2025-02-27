@@ -16,9 +16,11 @@ module Noll.Core.LLVM.IRType (
   struct,
   stringLiteralType,
   irOpaqueSignature,
+  objectIRType,
 ) where
 
 import Data.Text (Text)
+import Noll.Compiler.Core (BlockObject (..))
 import Noll.Core.Language.Type (Type (..))
 import Noll.Utils (Name)
 
@@ -126,3 +128,11 @@ pointee =
 
 irOpaqueSignature :: Int -> IRType
 irOpaqueSignature n = fun i8Ptr (replicate n i8Ptr)
+
+objectIRType :: BlockObject t e -> IRType
+objectIRType =
+  \case
+    OFunction _ lls _ ->
+      irOpaqueSignature (length lls)
+    _ ->
+      error "TODO"
