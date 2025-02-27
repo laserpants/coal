@@ -8,12 +8,8 @@ module Noll.Core.LLVM.IRType (
   pointee,
 ) where
 
-import Data.Text (Text)
-import Noll.Core.Language.Object (Object (..))
 import Noll.Core.Language.Type (Type (..))
 import Noll.Utils (Name)
-
-import qualified Data.Text as Text
 
 -- | LLVM IR language types
 data IRType
