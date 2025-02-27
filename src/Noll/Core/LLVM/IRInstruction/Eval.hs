@@ -397,7 +397,7 @@ irEvalExpr =
           v1 <- eliminatePtrConversions (irEvalExpr e1)
           v2 <- eliminatePtrConversions (irEvalExpr e2)
           iCallGlobal i8Ptr "hashmap_insert" [v2, t2, v1]
-      Core.ESel (Core.Focus field (Label t var) (Label _ r)) e1 e2 ->
+      Core.ESel (Core.Focus field (Label _ var) (Label _ r)) e1 e2 ->
         irCommentBlock "ESel" $ do
           k1 <- iHashMapKey field
           t2 <- iGep (stringLiteralType field) k1 (I32 0) (I32 0)
