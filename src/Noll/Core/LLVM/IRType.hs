@@ -6,6 +6,7 @@ module Noll.Core.LLVM.IRType (
   IRType (..),
   IRTyped (..),
   pointee,
+  pointeeType,
 ) where
 
 import Noll.Core.Language.Type (Type (..))
@@ -67,10 +68,18 @@ instance IRTyped Type where
       _ ->
         TPtr TInt8
 
-pointee :: IRType -> IRType
+pointee :: IRType -> Maybe IRType
 pointee =
   \case
     TPtr t ->
-      t
+      Just t
     _ ->
+      Nothing
+
+pointeeType :: (IRTyped t) => t -> IRType
+pointeeType t =
+  case pointee (irTypeOf t) of
+    Nothing ->
       error "Not a pointer type"
+    Just p ->
+      p

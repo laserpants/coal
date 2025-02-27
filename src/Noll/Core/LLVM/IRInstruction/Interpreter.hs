@@ -15,12 +15,23 @@ module Noll.Core.LLVM.IRInstruction.Interpreter (
 ) where
 
 import Control.Monad.Free (iterM)
-import Control.Monad.RWS (MonadReader, MonadState, MonadWriter, RWS, asks, gets, local, modify, runRWS, tell)
+import Control.Monad.RWS (
+  MonadReader,
+  MonadState,
+  MonadWriter,
+  RWS,
+  asks,
+  gets,
+  local,
+  modify,
+  runRWS,
+  tell,
+ )
 import Data.Text (Text, intercalate)
 import Noll.Common.Environment (Environment (..))
 import Noll.Core.LLVM.IREncodable (IRAnnotated (..), IREncodable (..), enquote, irAnnotate)
 import Noll.Core.LLVM.IRInstruction (IRInstr, IRInstrOp, IRInstrOpF (..))
-import Noll.Core.LLVM.IRType (IRType (..), IRTyped (..), pointee)
+import Noll.Core.LLVM.IRType (IRType (..), pointeeType)
 import Noll.Core.LLVM.IRType.Syntax (fun, i8Ptr, ptr)
 import Noll.Core.LLVM.IRValue (IRValue (..))
 import Noll.Utils (Name, Over)
@@ -223,7 +234,7 @@ interpreter =
     IPhi t vs next ->
       instruction t next ["phi", irEncode t, withCommas (uncurry irEncodePhiBranches <$> vs)]
     IGep t v1 v2 v3 next ->
-      instruction (ptr (offset t v3)) next ["getelementptr", withCommas (irEncode (pointee (irTypeOf v1)) : (irEncode . IRAnnotated <$> [v1, v2, v3]))]
+      instruction (ptr (offset t v3)) next ["getelementptr", withCommas (irEncode (pointeeType v1) : (irEncode . IRAnnotated <$> [v1, v2, v3]))]
     IGepNull t v1 next ->
       instruction t next ["getelementptr", withCommas [irEncode t, irEncode t <> " null", irEncode (IRAnnotated v1)]]
     ILoad t v1 next ->
