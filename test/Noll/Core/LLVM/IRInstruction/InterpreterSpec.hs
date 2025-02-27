@@ -7,7 +7,9 @@ import Control.Monad.Reader (local)
 import Control.Monad.Writer (listen)
 import Noll.Common.Environment (Environment)
 import Noll.Common.List1 (NonEmpty (..), (<|))
+import Noll.Compiler.Core
 import Noll.Core.LLVM.IRConstruct (IRConstruct (..))
+import Noll.Core.LLVM.IREncodable (IREncodable (..))
 import Noll.Core.LLVM.IRInstruction.Eval (irEvalExpr)
 import Noll.Core.LLVM.IRInstruction.Interpreter (
   IRInterpreter (..),
@@ -27,6 +29,7 @@ import Noll.Label (Label (..))
 import Noll.Utils (Name)
 import Test.Hspec (Spec, describe, it)
 
+import qualified Data.Text.IO as Text
 import qualified Noll.Common.Environment as Environment
 import qualified Noll.Core.Language as Core
 
@@ -271,3 +274,5 @@ abc2 = runInterpreter (IRInterpreterEnv testEnv mempty) (objectInterpreter funMa
 abc3 = runInterpreter (IRInterpreterEnv testEnv mempty) (objectInterpreter funFn2)
 
 abc4 = runInterpreter (IRInterpreterEnv testEnv mempty) (objectInterpreter funF4)
+
+abc5 = Text.putStrLn (irEncode (evalCore (compile blockObjects)))

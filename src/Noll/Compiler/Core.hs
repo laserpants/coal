@@ -402,6 +402,12 @@ newtype Core a = Core {pipelineStack :: State PipelineState a}
     , MonadState PipelineState
     )
 
+runCore :: Core a -> (a, PipelineState)
+runCore p = runState (pipelineStack p) (PipelineState 0 (IRInterpreterEnv mempty mempty))
+
+evalCore :: Core a -> a
+evalCore p = evalState (pipelineStack p) (PipelineState 0 (IRInterpreterEnv mempty mempty))
+
 transSuffixMonad :: (MonadState PipelineState m) => State Int a -> m a
 transSuffixMonad a = do
   (v, n) <- gets (runState a . pipelineStateSupply)
@@ -440,12 +446,6 @@ compile ol = do
   a1 <- pipeline ol
   extendInterpreterValueEnv (objectEnvironment a1)
   transInterpreter (traverse objectInterpreter a1)
-
-runCore :: Core a -> (a, PipelineState)
-runCore p = runState (pipelineStack p) (PipelineState 0 (IRInterpreterEnv mempty mempty))
-
-evalCore :: Core a -> a
-evalCore p = evalState (pipelineStack p) (PipelineState 0 (IRInterpreterEnv mempty mempty))
 
 -- xx1 objs = mapM_ print $ muteObjectTypes <$> liftLambdas (flattenELam <$$> evalState (traverse (traverse transSuffixExpr) objs) 0)
 
