@@ -154,25 +154,25 @@ blockObjects =
 --        )
 --    )
 
-myEnv =
-  IRInterpreterEnv
-    { irInterpreterValueEnv =
-        Environment.fromList
-          [
-            ( "f.[4]"
-            , Global (fun i8Ptr [i8Ptr, i8Ptr]) "f.[4]"
-            )
-          ,
-            ( "$fn.2"
-            , Global (fun i8Ptr [i8Ptr, i8Ptr]) "$fn.2"
-            )
-          ,
-            ( "main"
-            , Global (fun i8Ptr [i8Ptr]) "main"
-            )
-          ]
-    , irInterpreterConstructorEnv = mempty
-    }
+--myEnv =
+--  IRInterpreterEnv
+--    { irInterpreterValueEnv =
+--        Environment.fromList
+--          [
+--            ( "f.[4]"
+--            , Global (fun i8Ptr [i8Ptr, i8Ptr]) "f.[4]"
+--            )
+--          ,
+--            ( "$fn.2"
+--            , Global (fun i8Ptr [i8Ptr, i8Ptr]) "$fn.2"
+--            )
+--          ,
+--            ( "main"
+--            , Global (fun i8Ptr [i8Ptr]) "main"
+--            )
+--          ]
+--    , irInterpreterConstructorEnv = mempty
+--    }
 
 blockInterpreter :: Object Core.Type (Core.Expr Core.Type) -> IRInterpreter (IRConstruct [IRLine])
 blockInterpreter =
