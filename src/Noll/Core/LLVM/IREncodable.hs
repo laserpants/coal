@@ -38,9 +38,9 @@ instance IREncodable IRValue where
   irEncode =
     \case
       Local _ name ->
-        "%" <> enquote name
+        localName name
       Global _ name ->
-        "@" <> enquote name
+        globalName name
       I1 False ->
         "0"
       I1 True ->
@@ -74,7 +74,7 @@ instance IREncodable IRType where
       TVoid ->
         "void"
       TNamed n _ ->
-        "%" <> enquote n
+        localName n
       TPtr t ->
         ptr t
       TStruct ts ->
@@ -94,7 +94,7 @@ newtype IRLabel = IRLabel Name
   deriving (Show, Eq, Ord, Read)
 
 instance IREncodable IRLabel where
-  irEncode (IRLabel name) = "label" <> " %" <> enquote name
+  irEncode (IRLabel name) = "label" <> " " <> localName name
 
 instance IREncodable (Label IRType) where
   irEncode (Label t name) =
@@ -104,22 +104,18 @@ instance (IREncodable a) => IREncodable (IRConstruct a) where
   irEncode =
     \case
       CDefine name t ln as c ->
-        "define "
-          <> irEncode t
+        -- TODO
+        "define"
           <> " "
-          <> "@"
-          <> enquote name
+          <> global t name
           <> parens (commaSep as)
-          <> " {"
-          <> "\n"
-          <> irEncode c
-          <> "}\n"
-      CDeclare name t ts ->
-        "declare "
-          <> irEncode t
           <> " "
-          <> "@"
-          <> enquote name
+          <> funBlock c
+          <> "\n"
+      CDeclare name t ts ->
+        "declare"
+          <> " "
+          <> global t name
           <> parens (commaSep ts)
           <> "\n"
       _ ->
@@ -130,8 +126,23 @@ enquote n
   | Text.all isAlphaNum n = n
   | otherwise = "\"" <> n <> "\""
 
+funBlock :: (IREncodable a) => a -> Text
+funBlock b = "{" <> "\n" <> irEncode b <> "}"
+
 commaSep :: (IREncodable a) => [a] -> Text
 commaSep = Text.concat . intersperse ", " . fmap irEncode
+
+{-# INLINE localName #-}
+localName :: Name -> Text
+localName n = "%" <> enquote n
+
+{-# INLINE globalName #-}
+globalName :: Name -> Text
+globalName n = "@" <> enquote n
+
+{-# INLINE global #-}
+global :: IRType -> Name -> Text
+global t name = irEncode t <> " " <> globalName name
 
 {-# INLINE ptr #-}
 ptr :: (IREncodable a) => a -> Text
