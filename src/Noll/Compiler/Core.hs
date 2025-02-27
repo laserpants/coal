@@ -11,7 +11,7 @@
 module Noll.Compiler.Core where
 
 import Control.Arrow ((>>>))
-import Control.Monad.RWS (RWS, evalRWS)
+import Control.Monad.RWS (RWS, evalRWS, runRWS)
 import Control.Monad.Reader (MonadReader, ReaderT, ask, local, runReaderT)
 import Control.Monad.State (MonadState, State, StateT, evalState, evalStateT, gets, modify, runState, runStateT)
 import Control.Monad.Trans (lift)
@@ -38,9 +38,8 @@ import qualified Noll.Core.Language as Core
 
 -------------------------------------------------------------------------------
 
--- TODO: use RWS?
-runLifting :: StateT Int (ReaderT Name (Writer ObjectList)) a -> (a, ObjectList)
-runLifting e = runWriter (runReaderT (evalStateT e 1) "")
+runLifting :: RWS Name ObjectList Int a -> (a, ObjectList)
+runLifting e = evalRWS e "" 1
 
 functionType :: (Functor f, Foldable f, Typed t, Typed u) => t -> f u -> Type
 functionType a as = foldType (typeOf a) (typeOf <$> as)
@@ -212,8 +211,8 @@ simplifyELet e = relabel (Map.fromList sub) e1
 
 -------------------------------------------------------------------------------
 
-runWS0 :: RWS () w Int a -> (a, w)
-runWS0 v = evalRWS v () 0
+evalWS0 :: RWS () w Int a -> (a, w)
+evalWS0 v = evalRWS v () 0
 
 {-# INLINE notConstructor #-}
 notConstructor :: Label t -> Bool
@@ -223,7 +222,7 @@ freeSet :: (Foldable f, HasFree e t) => f Name -> e -> Set (Label t)
 freeSet names obj = Set.filter notConstructor (freeIn obj `exceptNames` names)
 
 closeDefs :: ObjectList -> ObjectList
-closeDefs objs = uncurry app (runWS0 (traverse closed objs))
+closeDefs objs = uncurry app (evalWS0 (traverse closed objs))
  where
   app objs1 args
     | null (snd =<< args) =
