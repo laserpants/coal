@@ -1,7 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Core.Language.Syntax.Type (
+module Noll.Core.Language.Type.Syntax (
   (~>),
   Type (..),
   arrow,

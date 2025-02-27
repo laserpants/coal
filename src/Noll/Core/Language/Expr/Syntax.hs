@@ -1,4 +1,4 @@
-module Noll.Core.Language.Syntax.Expr (
+module Noll.Core.Language.Expr.Syntax (
   var,
   let_,
   lam,

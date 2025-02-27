@@ -48,13 +48,13 @@ library
       Noll.Compiler.Transform.Type.AliasInsertion
       Noll.Core.Language
       Noll.Core.Language.Expr
+      Noll.Core.Language.Expr.Syntax
       Noll.Core.Language.Object
       Noll.Core.Language.Op
       Noll.Core.Language.Prim
       Noll.Core.Language.Replace
-      Noll.Core.Language.Syntax.Expr
-      Noll.Core.Language.Syntax.Type
       Noll.Core.Language.Type
+      Noll.Core.Language.Type.Syntax
       Noll.Core.Language.Typed
       Noll.Core.LLVM.IR
       Noll.Core.LLVM.IRConstruct

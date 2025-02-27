@@ -27,7 +27,7 @@ import Noll.Core.LLVM.IRType (
   struct,
  )
 import Noll.Core.LLVM.IRValue (IRValue (..), irPrimValue)
-import Noll.Core.Language.Syntax.Type (arity)
+import Noll.Core.Language.Type.Syntax (arity)
 import Noll.Label (Label (..))
 import Noll.Utils (Name, forM, forM_, isConstructor)
 import TextShow (showt)
