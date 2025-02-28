@@ -14,6 +14,7 @@ import Noll.Common.List1 (List1, NonEmpty (..), fromList1)
 import Noll.Core.LLVM.IREncodable (irEncode)
 import Noll.Core.LLVM.IRInstruction (IRInstr, IRInstrOpF (..))
 import Noll.Core.LLVM.IRInstruction.Eval.CommentBlock (irCommentBlock)
+import Noll.Core.LLVM.IRInstruction.Eval.Conceal (irConceal, irReveal)
 import Noll.Core.LLVM.IRInstruction.Eval.Malloc (irMalloc)
 import Noll.Core.LLVM.IRInstruction.TH
 import Noll.Core.LLVM.IRType (IRType (..), IRTyped (..))
@@ -38,34 +39,6 @@ import qualified Noll.Common.List1 as List1
 import qualified Noll.Core.Language as Core
 
 type CoreExpr = Core.Expr Core.Type
-
-irConceal :: IRValue -> IRInstr IRValue
-irConceal v =
-  case irTypeOf v of
-    TInt1 ->
-      iInttoptr v i8Ptr
-    TInt8 ->
-      iInttoptr v i8Ptr
-    TInt32 ->
-      iInttoptr v i8Ptr
-    TInt64 ->
-      iInttoptr v i8Ptr
-    _ ->
-      pure v
-
-irReveal :: IRValue -> IRType -> IRInstr IRValue
-irReveal v =
-  \case
-    TInt1 ->
-      iPtrtoint v i1
-    TInt8 ->
-      iPtrtoint v i8
-    TInt32 ->
-      iPtrtoint v i32
-    TInt64 ->
-      iPtrtoint v i64
-    _ ->
-      pure v
 
 irRevealExpr :: CoreExpr -> IRInstr IRValue
 irRevealExpr expr = do
