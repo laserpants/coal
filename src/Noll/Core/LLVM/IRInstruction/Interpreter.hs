@@ -2,13 +2,12 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
 module Noll.Core.LLVM.IRInstruction.Interpreter (
+  module Noll.Core.LLVM.IRInstruction.Interpreter.Environment,
   interpret,
   IRInterpreter (..),
-  IRInterpreterEnv (..),
   IRInterpreterArtifact (..),
   IRInterpreterState (..),
   IRLine (..),
@@ -35,6 +34,11 @@ import Data.Text (Text, intercalate)
 import Noll.Common.Environment (Environment (..))
 import Noll.Core.LLVM.IREncodable (IRAnnotated (..), IREncodable (..), enquote, irAnnotate)
 import Noll.Core.LLVM.IRInstruction (IRInstr, IRInstrOp, IRInstrOpF (..))
+import Noll.Core.LLVM.IRInstruction.Interpreter.Environment (
+  IRInterpreterEnv (..),
+  inValueEnv,
+  insertBoundVars,
+ )
 import Noll.Core.LLVM.IRInstruction.Interpreter.State (
   IRInterpreterArtifact (..),
   IRInterpreterState (..),
@@ -52,20 +56,6 @@ import TextShow (showt)
 
 import qualified Data.Text as Text
 import qualified Noll.Common.Environment as Environment
-
-data IRInterpreterEnv = IRInterpreterEnv
-  { irInterpreterValueEnv :: Environment IRValue
-  , irInterpreterConstructorEnv :: Environment Int
-  }
-  deriving (Show, Eq, Ord, Read)
-
-{-# INLINE inValueEnv #-}
-inValueEnv :: (Environment IRValue -> Environment IRValue) -> IRInterpreterEnv -> IRInterpreterEnv
-inValueEnv f IRInterpreterEnv{..} = IRInterpreterEnv{irInterpreterValueEnv = f irInterpreterValueEnv, ..}
-
-{-# INLINE insertBoundVars #-}
-insertBoundVars :: [(Name, IRValue)] -> IRInterpreterEnv -> IRInterpreterEnv
-insertBoundVars = inValueEnv . Environment.insertMultiple
 
 data IRLine
   = LInstruction [Text]
