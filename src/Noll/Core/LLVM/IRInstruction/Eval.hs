@@ -13,6 +13,8 @@ import Data.Tuple.Extra (fst3)
 import Noll.Common.List1 (List1, NonEmpty (..), fromList1)
 import Noll.Core.LLVM.IREncodable (irEncode)
 import Noll.Core.LLVM.IRInstruction (IRInstr, IRInstrOpF (..))
+import Noll.Core.LLVM.IRInstruction.Eval.CommentBlock (irCommentBlock)
+import Noll.Core.LLVM.IRInstruction.Eval.Malloc (irMalloc)
 import Noll.Core.LLVM.IRInstruction.TH
 import Noll.Core.LLVM.IRType (IRType (..), IRTyped (..))
 import Noll.Core.LLVM.IRType.Syntax (
@@ -36,18 +38,6 @@ import qualified Noll.Common.List1 as List1
 import qualified Noll.Core.Language as Core
 
 type CoreExpr = Core.Expr Core.Type
-
-irCommentBlock :: Text -> IRInstr a -> IRInstr a
-irCommentBlock text block = do
-  s <- iIndex
-  iComment (Text.pack (replicate 75 '='))
-  iComment ("[" <> s <> "] " <> text)
-  iComment ""
-  v <- block
-  iComment ""
-  iComment ("End: [" <> s <> "] " <> text)
-  iComment "---- ^"
-  pure v
 
 irConceal :: IRValue -> IRInstr IRValue
 irConceal v =
@@ -85,14 +75,6 @@ irRevealExpr expr = do
 {-# INLINE irEvalArgs #-}
 irEvalArgs :: List1 CoreExpr -> IRInstr [IRValue]
 irEvalArgs = mapM irEvalExpr . fromList1
-
-irMalloc :: IRType -> IRInstr IRValue
-irMalloc t = do
-  irCommentBlock "gc_malloc" $ do
-    r1 <- iGepNull (ptr t) (I32 1)
-    r2 <- iPtrtoint r1 i64
-    r3 <- iCallGlobal i8Ptr "gc_malloc" [r2]
-    iBCast r3 (ptr t)
 
 irClosureType :: Int -> IRType
 irClosureType n = struct $ [i32] <> replicate (n + 3) i8Ptr
