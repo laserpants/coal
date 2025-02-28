@@ -19,7 +19,6 @@ import Control.Monad.Writer (MonadWriter, runWriter, tell)
 import Data.Fix (Fix (..))
 import Data.Functor.Foldable (cata, embed, project)
 import Data.Set (Set)
-import Debug.Trace
 import Noll.AST.HasFree (HasFree (..), exceptNames)
 import Noll.Common.Environment (Environment)
 import Noll.Common.List1 (List1, NonEmpty (..), fromList1)
