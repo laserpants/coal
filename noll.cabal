@@ -61,7 +61,9 @@ library
       Noll.Core.LLVM.IREncodable
       Noll.Core.LLVM.IRInstruction
       Noll.Core.LLVM.IRInstruction.Eval
+      Noll.Core.LLVM.IRInstruction.Eval.Closure
       Noll.Core.LLVM.IRInstruction.Eval.CommentBlock
+      Noll.Core.LLVM.IRInstruction.Eval.Conceal
       Noll.Core.LLVM.IRInstruction.Eval.Malloc
       Noll.Core.LLVM.IRInstruction.Interpreter
       Noll.Core.LLVM.IRInstruction.Interpreter.Object
