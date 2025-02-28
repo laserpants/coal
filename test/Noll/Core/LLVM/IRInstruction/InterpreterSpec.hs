@@ -1,5 +1,6 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module Noll.Core.LLVM.IRInstruction.InterpreterSpec where
 
@@ -275,4 +276,7 @@ abc3 = runInterpreter (IRInterpreterEnv testEnv mempty) (objectInterpreter funFn
 
 abc4 = runInterpreter (IRInterpreterEnv testEnv mempty) (objectInterpreter funF4)
 
-abc5 = Text.putStrLn (irEncode (evalCore (compile blockObjects)))
+--abc5 = Text.putStrLn (irEncode pipelineStateArtifacts)
+abc5 = (pipelineStateArtifacts, pipelineStateCode)
+  where
+    (_, PipelineState{..}) = runCore (compile blockObjects)

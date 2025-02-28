@@ -11,6 +11,7 @@
 module Noll.Compiler.Core where
 
 import Control.Arrow ((>>>))
+import Control.Monad (void)
 import Control.Monad.RWS (RWS, ask, evalRWS, local)
 import Control.Monad.State (MonadState, State, evalState, gets, modify, runState, runStateT)
 import Control.Monad.Trans (lift)
@@ -18,6 +19,7 @@ import Control.Monad.Writer (MonadWriter, runWriter, tell)
 import Data.Fix (Fix (..))
 import Data.Functor.Foldable (cata, embed, project)
 import Data.Set (Set)
+import Debug.Trace
 import Noll.AST.HasFree (HasFree (..), exceptNames)
 import Noll.Common.Environment (Environment)
 import Noll.Common.List1 (List1, NonEmpty (..), fromList1)
@@ -25,12 +27,17 @@ import Noll.Common.Supply (supplied)
 import Noll.Core.LLVM.IRConstruct (IRConstruct (..))
 import Noll.Core.LLVM.IRInstruction.Interpreter (
   IRInterpreter (..),
+  IRInterpreterArtifact (..),
   IRInterpreterEnv (..),
+  IRInterpreterState (..),
   IRLine (..),
-  evalInterpreter,
   inValueEnv,
+  runInterpreter,
  )
-import Noll.Core.LLVM.IRInstruction.Interpreter.Object (objectEnvironment, objectInterpreter)
+import Noll.Core.LLVM.IRInstruction.Interpreter.Object (
+  objectEnvironment,
+  objectInterpreter,
+ )
 import Noll.Core.LLVM.IRValue (IRValue (..))
 import Noll.Core.Language (
   Binding (..),
@@ -66,7 +73,6 @@ import TextShow
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import qualified Data.Text as Text
-import qualified Noll.Common.Environment as Environment
 import qualified Noll.Common.List1 as List1
 import qualified Noll.Core.Language as Core
 
@@ -375,8 +381,14 @@ muteObjectTypes =
 data PipelineState = PipelineState
   { pipelineStateSupply :: Int
   , pipelineStateInterpreterEnv :: IRInterpreterEnv
+  , pipelineStateArtifacts :: [IRInterpreterArtifact]
+  , pipelineStateCode :: [IRConstruct [IRLine]]
   }
   deriving (Show, Eq, Ord)
+
+{-# INLINE initialPipelineState #-}
+initialPipelineState :: PipelineState
+initialPipelineState = PipelineState 0 (IRInterpreterEnv mempty mempty) [] []
 
 {-# INLINE overPipelineStateSupply #-}
 overPipelineStateSupply :: Over PipelineState Int
@@ -390,9 +402,25 @@ overPipelineStateInterpreterEnv f PipelineState{..} = PipelineState{pipelineStat
 overPipelineStateInterpreterValueEnv :: Over PipelineState (Environment IRValue)
 overPipelineStateInterpreterValueEnv = overPipelineStateInterpreterEnv . inValueEnv
 
+{-# INLINE overPipelineStateArtifacts #-}
+overPipelineStateArtifacts :: Over PipelineState [IRInterpreterArtifact]
+overPipelineStateArtifacts f PipelineState{..} = PipelineState{pipelineStateArtifacts = f pipelineStateArtifacts, ..}
+
+{-# INLINE overPipelineStateCode #-}
+overPipelineStateCode :: Over PipelineState [IRConstruct [IRLine]]
+overPipelineStateCode f PipelineState{..} = PipelineState{pipelineStateCode = f pipelineStateCode, ..}
+
 {-# INLINE extendInterpreterValueEnv #-}
 extendInterpreterValueEnv :: Environment IRValue -> Core ()
 extendInterpreterValueEnv env = modify (overPipelineStateInterpreterValueEnv (<> env))
+
+{-# INLINE pipelineStateInsertArtifacts #-}
+pipelineStateInsertArtifacts :: [IRInterpreterArtifact] -> Core ()
+pipelineStateInsertArtifacts = modify . (overPipelineStateArtifacts . (<>))
+
+{-# INLINE pipelineStateInsertCode #-}
+pipelineStateInsertCode :: [IRConstruct [IRLine]] -> Core ()
+pipelineStateInsertCode = modify . (overPipelineStateCode . (<>))
 
 newtype Core a = Core {pipelineStack :: State PipelineState a}
   deriving
@@ -403,10 +431,10 @@ newtype Core a = Core {pipelineStack :: State PipelineState a}
     )
 
 runCore :: Core a -> (a, PipelineState)
-runCore p = runState (pipelineStack p) (PipelineState 0 (IRInterpreterEnv mempty mempty))
+runCore p = runState (pipelineStack p) initialPipelineState
 
 evalCore :: Core a -> a
-evalCore p = evalState (pipelineStack p) (PipelineState 0 (IRInterpreterEnv mempty mempty))
+evalCore p = evalState (pipelineStack p) initialPipelineState
 
 transSuffixMonad :: (MonadState PipelineState m) => State Int a -> m a
 transSuffixMonad a = do
@@ -417,7 +445,8 @@ transSuffixMonad a = do
 transInterpreter :: IRInterpreter a -> Core a
 transInterpreter p = do
   env <- gets pipelineStateInterpreterEnv
-  let (a, _) = evalInterpreter env p
+  let (a, s, _) = runInterpreter env p
+  pipelineStateInsertArtifacts (irInterpreterStateArtifacts s)
   pure a
 
 suffixNamesC :: ObjectList -> Core ObjectList
@@ -441,11 +470,12 @@ pipeline ol = do
   a5 <- pure1 closeDefs a4
   pure (addImplicitArgs <$> a5)
 
-compile :: ObjectList -> Core [IRConstruct [IRLine]]
+compile :: ObjectList -> Core ()
 compile ol = do
-  a1 <- pipeline ol
-  extendInterpreterValueEnv (objectEnvironment a1)
-  transInterpreter (traverse objectInterpreter a1)
+  objs <- pipeline ol
+  extendInterpreterValueEnv (objectEnvironment objs)
+  code <- transInterpreter (traverse objectInterpreter objs)
+  pipelineStateInsertCode code
 
 -- xx1 objs = mapM_ print $ muteObjectTypes <$> liftLambdas (flattenELam <$$> evalState (traverse (traverse transSuffixExpr) objs) 0)
 

@@ -100,6 +100,7 @@ library
       Noll.SystemF.Unification
       Noll.Utils
       Noll.Utils.Control.Monad
+      Noll.Utils.Control.Monad.Writer
       Noll.Utils.Data.Functor
       Noll.Utils.Data.List
       Noll.Utils.Data.Set

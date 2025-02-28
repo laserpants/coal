@@ -8,8 +8,9 @@ module Noll.Core.LLVM.IRInstruction.Interpreter (
   interpret,
   IRInterpreter (..),
   IRInterpreterEnv (..),
+  IRInterpreterArtifact (..),
+  IRInterpreterState (..),
   IRLine (..),
-  --  evalInterpreter,
   runInterpreter,
   evalInterpreter,
   inValueEnv,
@@ -164,11 +165,11 @@ irAnnotated = irEncode . irAnnotate
 
 {-# INLINE irEncodeName #-}
 irEncodeName :: Text -> Text
-irEncodeName v = "%" <> enquote v
+irEncodeName n = "%" <> enquote n
 
 {-# INLINE irEncodeLabel #-}
 irEncodeLabel :: Text -> Text
-irEncodeLabel v = "label" <> " " <> irEncodeName v
+irEncodeLabel n = "label" <> " " <> irEncodeName n
 
 irEncodePhiBranches :: Name -> IRValue -> Text
 irEncodePhiBranches n v = "[" <> withCommas [irEncode v, irEncodeName n] <> "]"
