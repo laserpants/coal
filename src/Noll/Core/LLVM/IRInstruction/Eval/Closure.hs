@@ -6,16 +6,7 @@ import Noll.Core.LLVM.IRInstruction (IRInstr)
 import Noll.Core.LLVM.IRInstruction.Eval.Malloc (irMalloc)
 import Noll.Core.LLVM.IRInstruction.TH
 import Noll.Core.LLVM.IRType (IRType (..))
-import Noll.Core.LLVM.IRType.Syntax (
-  i1,
-  i32,
-  i64,
-  i8,
-  i8Ptr,
-  ptr,
-  stringLiteralType,
-  struct,
- )
+import Noll.Core.LLVM.IRType.Syntax (i32, i8Ptr, struct)
 import Noll.Core.LLVM.IRValue (IRValue (..))
 import Noll.Utils (Name, forM_)
 import TextShow (showt)
