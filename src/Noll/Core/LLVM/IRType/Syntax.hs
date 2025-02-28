@@ -7,6 +7,7 @@ module Noll.Core.LLVM.IRType.Syntax (
   i64,
   ptr,
   i8Ptr,
+  i8PtrPtr,
   fun,
   struct,
   stringLiteralType,
@@ -43,6 +44,10 @@ ptr = TPtr
 {-# INLINE i8Ptr #-}
 i8Ptr :: IRType
 i8Ptr = ptr i8
+
+{-# INLINE i8PtrPtr #-}
+i8PtrPtr :: IRType
+i8PtrPtr = ptr (ptr i8)
 
 {-# INLINE fun #-}
 fun :: IRType -> [IRType] -> IRType
