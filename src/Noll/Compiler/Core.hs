@@ -18,11 +18,16 @@ import Control.Monad.Writer (MonadWriter, Writer, runWriter, tell)
 import Data.Fix (Fix (..))
 import Data.Functor.Foldable (cata, embed, project)
 import Data.List (partition)
+import qualified Data.Map.Strict as Map
 import Data.Set (Set)
+import qualified Data.Set as Set
+import qualified Data.Text as Text
 import Debug.Trace
 import Noll.AST.HasFree (HasFree (..), exceptNames)
 import Noll.Common.Environment (Environment)
+import qualified Noll.Common.Environment as Environment
 import Noll.Common.List1 (List1, NonEmpty (..), fromList1)
+import qualified Noll.Common.List1 as List1
 import Noll.Common.Supply (supplied)
 import Noll.Core.LLVM.IRConstruct (IRConstruct (..))
 import Noll.Core.LLVM.IRInstruction.Interpreter (
@@ -53,6 +58,7 @@ import Noll.Core.Language (
   overBindingLabel,
   unzipBindings,
  )
+import qualified Noll.Core.Language as Core
 import Noll.Core.Language.Object (Object (..), ObjectList, objectName)
 import Noll.Core.Language.Replace (Sub, relabel)
 import Noll.Core.Language.Typed (isFunction)
@@ -71,13 +77,6 @@ import Noll.Utils (
  )
 import Noll.Utils.Operators ((||.))
 import TextShow
-
-import qualified Data.Map.Strict as Map
-import qualified Data.Set as Set
-import qualified Data.Text as Text
-import qualified Noll.Common.Environment as Environment
-import qualified Noll.Common.List1 as List1
-import qualified Noll.Core.Language as Core
 
 -------------------------------------------------------------------------------
 
@@ -382,6 +381,8 @@ muteTypes =
         Core.sel (Focus name (muteLabelTypes ll1) (muteLabelTypes ll2)) e1 e2
       ECall ll es e ->
         Core.call (muteLabelTypes ll) es e
+      EMem e ->
+        Core.mem e
 
 muteClauseTypes :: Clause Type (Expr ()) -> Clause () (Expr ())
 muteClauseTypes (Clause lls e) = Clause (muteLabelTypes <$> lls) e
