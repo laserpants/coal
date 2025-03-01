@@ -21,7 +21,7 @@ data IRLinkage
   | LPrivate
   deriving (Show, Eq, Ord)
 
--- | IR language construct
+-- | Top-level IR language construct
 data IRConstruct a
   = CDefine Name IRType (Maybe IRLinkage) [Label IRType] a
   | CDeclare Name IRType [IRType]
