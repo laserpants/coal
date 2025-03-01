@@ -24,7 +24,7 @@ data Binding e a t
 instance (Data a, Data t, Typeable e, Data (e a t)) => BoundVars (Binding e a t) where
   boundIn = Set.fromList . universeBi
 
-instance (Ord t, Data a, Data t, FreeVars (e a t) t) => FreeVars (Binding e a t) t where
+instance (Data a, Data t, FreeVars (e a t) t) => FreeVars (Binding e a t) t where
   freeIn =
     \case
       BPattern _ _ e ->
