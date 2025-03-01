@@ -236,7 +236,8 @@ irEvalVar t var
           if arity t == 0
             then -- Global constant
               iCallGlobal i8Ptr var []
-            else irPackClosure var (length us) []
+            else
+              irPackClosure var (length us) []
         _ ->
           pure v
 
