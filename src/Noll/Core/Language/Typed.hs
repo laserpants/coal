@@ -63,6 +63,14 @@ instance Typed (Op a) where
         Type.bool
       OOr{} ->
         Type.bool
+      OAddInt32{} ->
+        Type.int32
+      OAddInt64{} ->
+        Type.int64
+      OSubInt32{} ->
+        Type.int32
+      OSubInt64{} ->
+        Type.int64
       _ ->
         error "TODO"
 

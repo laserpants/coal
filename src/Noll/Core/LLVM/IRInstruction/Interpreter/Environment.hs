@@ -4,11 +4,12 @@ module Noll.Core.LLVM.IRInstruction.Interpreter.Environment (
   IRInterpreterEnv (..),
   insertBoundVars,
   inValueEnv,
+  inConstructorEnv, 
 ) where
 
 import Noll.Common.Environment (Environment (..))
 import Noll.Core.LLVM.IRValue (IRValue (..))
-import Noll.Utils (Name)
+import Noll.Utils (Name, Over)
 
 import qualified Noll.Common.Environment as Environment
 
@@ -19,8 +20,12 @@ data IRInterpreterEnv = IRInterpreterEnv
   deriving (Show, Eq, Ord, Read)
 
 {-# INLINE inValueEnv #-}
-inValueEnv :: (Environment IRValue -> Environment IRValue) -> IRInterpreterEnv -> IRInterpreterEnv
+inValueEnv :: Over IRInterpreterEnv (Environment IRValue)
 inValueEnv f IRInterpreterEnv{..} = IRInterpreterEnv{irInterpreterValueEnv = f irInterpreterValueEnv, ..}
+
+{-# INLINE inConstructorEnv #-}
+inConstructorEnv :: Over IRInterpreterEnv (Environment Int)
+inConstructorEnv f IRInterpreterEnv{..} = IRInterpreterEnv{irInterpreterConstructorEnv = f irInterpreterConstructorEnv, ..}
 
 {-# INLINE insertBoundVars #-}
 insertBoundVars :: [(Name, IRValue)] -> IRInterpreterEnv -> IRInterpreterEnv

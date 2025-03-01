@@ -25,6 +25,7 @@ import Noll.Core.LLVM.IRInstruction.TH
 import Noll.Core.LLVM.IRType
 import Noll.Core.LLVM.IRType.Syntax
 import Noll.Core.LLVM.IRValue
+import Noll.Core.Language (list, opaque, (~>))
 import Noll.Core.Language.Object (Object (..), ObjectList, objectName)
 import Noll.Label (Label (..))
 import Noll.Utils (Name)
@@ -97,6 +98,174 @@ blockObjects =
               Core.int32
               (Core.var (Label (Core.int32 `Core.arrow` Core.int32) "f"))
               (Core.lit (Core.PInt32 6) :| [])
+          )
+      )
+  ]
+
+blockObjects2 :: ObjectList
+blockObjects2 =
+  [ OFunction
+      "main"
+      [Label Core.opaque "_"]
+      ( Core.let_
+          ( Core.Binding
+              (Label ((opaque ~> opaque) ~> (opaque ~> opaque) ~> opaque ~> opaque) "_compose_")
+              ( Core.lam
+                  ( Label (opaque ~> opaque) "f"
+                      :| [ Label (opaque ~> opaque) "g"
+                         , Label opaque "x"
+                         ]
+                  )
+                  ( Core.app
+                      opaque
+                      (Core.var (Label (opaque ~> opaque) "f"))
+                      ( Core.app
+                          opaque
+                          (Core.var (Label (opaque ~> opaque) "g"))
+                          (Core.var (Label opaque "x") :| [])
+                          :| []
+                      )
+                  )
+              )
+              :| []
+          )
+          ( Core.let_
+              ( Core.Binding
+                  (Label (Core.int32 ~> Core.int32) "f")
+                  ( Core.lam
+                      (Label Core.int32 "x" :| [])
+                      ( Core.op
+                          ( Core.OAddInt32
+                              (Core.var (Label Core.int32 "x"))
+                              (Core.lit (Core.PInt32 1))
+                          )
+                      )
+                  )
+                  <| Core.Binding
+                    (Label (Core.int32 ~> Core.int32) "g")
+                    ( Core.lam
+                        (Label Core.int32 "x" :| [])
+                        ( Core.op
+                            ( Core.OAddInt32
+                                (Core.var (Label Core.int32 "x"))
+                                (Core.lit (Core.PInt32 3))
+                            )
+                        )
+                    )
+                  <| Core.Binding
+                    (Label (Core.int32 ~> Core.int32) "h")
+                    ( Core.app
+                        (Core.int32 ~> Core.int32)
+                        (Core.var (Label ((Core.int32 ~> Core.int32) ~> (Core.int32 ~> Core.int32) ~> Core.int32 ~> Core.int32) "_compose_"))
+                        ( Core.var (Label (Core.int32 ~> Core.int32) "f")
+                            <| Core.var (Label (Core.int32 ~> Core.int32) "g")
+                            :| []
+                        )
+                    )
+                  :| []
+              )
+              ( Core.let_
+                  ( Core.Binding
+                      (Label Core.int32 "x")
+                      ( Core.app
+                          Core.int32
+                          (Core.var (Label (Core.int32 ~> Core.int32) "h"))
+                          (Core.lit (Core.PInt32 7) :| [])
+                      )
+                      :| []
+                  )
+                  ( Core.call
+                      (Label (Core.int32 `Core.arrow` Core.TOpq) "print_int32")
+                      [Core.var (Label Core.int32 "x")]
+                      ( Core.lam
+                          (Label Core.TOpq "_" :| [])
+                          (Core.var (Label Core.int32 "x"))
+                      )
+                  )
+              )
+          )
+      )
+  ]
+
+blockObjects3 :: ObjectList
+blockObjects3 =
+  [ OFunction
+      "main"
+      [Label Core.opaque "_"]
+      ( Core.let_
+          ( Core.Binding
+              (Label (list Core.int32) "xs")
+              ( Core.app
+                  (list Core.int32)
+                  (Core.var (Label (Core.int32 ~> list Core.int32 ~> list Core.int32) "$Cons"))
+                  ( Core.lit (Core.PInt32 2)
+                      <| Core.app
+                        (list Core.int32)
+                        (Core.var (Label (Core.int32 ~> list Core.int32 ~> list Core.int32) "$Cons"))
+                        ( Core.lit (Core.PInt32 105)
+                            <| Core.app
+                              (list Core.int32)
+                              (Core.var (Label (Core.int32 ~> list Core.int32 ~> list Core.int32) "$Cons"))
+                              ( Core.lit (Core.PInt32 103)
+                                  <| Core.app
+                                    (list Core.int32)
+                                    (Core.var (Label (Core.int32 ~> list Core.int32 ~> list Core.int32) "$Cons"))
+                                    ( Core.lit (Core.PInt32 104)
+                                        <| Core.app
+                                          (list Core.int32)
+                                          (Core.var (Label (Core.int32 ~> list Core.int32 ~> list Core.int32) "$Cons"))
+                                          ( Core.lit (Core.PInt32 2)
+                                              <| Core.app
+                                                (list Core.int32)
+                                                (Core.var (Label (Core.int32 ~> list Core.int32 ~> list Core.int32) "$Cons"))
+                                                ( Core.lit (Core.PInt32 106)
+                                                    :| [Core.var (Label (list Core.int32) "$Nil")]
+                                                )
+                                              :| []
+                                          )
+                                        :| []
+                                    )
+                                  :| []
+                              )
+                            :| []
+                        )
+                      :| []
+                  )
+              )
+              :| []
+          )
+          ( Core.match
+              Core.int32
+              (Core.var (Label (list Core.int32) "xs"))
+              ( Core.Clause
+                  (Label (Core.int32 ~> list Core.int32 ~> list Core.int32) "$Cons" <| Label Core.int32 "a" <| Label (list Core.int32) "b" :| [])
+                  ( Core.match
+                      Core.int32
+                      (Core.var (Label (list Core.int32) "b"))
+                      ( Core.Clause
+                          (Label (Core.int32 ~> list Core.int32 ~> list Core.int32) "$Cons" <| Label Core.int32 "c" <| Label (list Core.int32) "d" :| [])
+                          ( Core.match
+                              Core.int32
+                              (Core.var (Label (list Core.int32) "d"))
+                              ( Core.Clause
+                                  (Label (Core.int32 ~> list Core.int32 ~> list Core.int32) "$Cons" <| Label Core.int32 "e" <| Label (list Core.int32) "f" :| [])
+                                    ( Core.call
+                                        (Label (Core.int32 `Core.arrow` Core.TOpq) "print_int32")
+                                        [Core.var (Label Core.int32 "e")]
+                                        ( Core.lam
+                                            (Label Core.TOpq "_" :| [])
+                                            (Core.var (Label Core.int32 "e"))
+                                        )
+                                    )
+--                                  (Core.var (Label Core.int32 "e"))
+                                  :| []
+                              )
+                          )
+                          :| []
+                      )
+                  )
+                  :| []
+              )
           )
       )
   ]
@@ -276,7 +445,15 @@ abc3 = runInterpreter (IRInterpreterEnv testEnv mempty) (objectInterpreter funFn
 
 abc4 = runInterpreter (IRInterpreterEnv testEnv mempty) (objectInterpreter funF4)
 
---abc5 = Text.putStrLn (irEncode pipelineStateArtifacts)
+-- abc5 = Text.putStrLn (irEncode pipelineStateArtifacts)
 abc5 = (pipelineStateArtifacts, pipelineStateCode)
-  where
-    (_, PipelineState{..}) = runCore (compile blockObjects)
+ where
+  (_, PipelineState{..}) = runCore (compile blockObjects)
+
+abc6 = (pipelineStateArtifacts, pipelineStateCode)
+ where
+  (_, PipelineState{..}) = runCore (compile blockObjects2)
+
+abc7 = (pipelineStateArtifacts, pipelineStateCode)
+ where
+  (_, PipelineState{..}) = runCore (compile blockObjects3)

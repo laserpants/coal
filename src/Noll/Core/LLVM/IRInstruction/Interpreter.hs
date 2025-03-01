@@ -13,7 +13,6 @@ module Noll.Core.LLVM.IRInstruction.Interpreter (
   IRLine (..),
   runInterpreter,
   evalInterpreter,
-  inValueEnv,
 ) where
 
 import Control.Monad.Free (iterM)
@@ -26,17 +25,16 @@ import Control.Monad.RWS (
   evalRWS,
   gets,
   local,
-  modify,
   runRWS,
   tell,
  )
 import Data.Text (Text, intercalate)
-import Noll.Common.Environment (Environment (..))
 import Noll.Core.LLVM.IREncodable (IRAnnotated (..), IREncodable (..), enquote, irAnnotate)
 import Noll.Core.LLVM.IRInstruction (IRInstr, IRInstrOp, IRInstrOpF (..))
 import Noll.Core.LLVM.IRInstruction.Interpreter.Environment (
   IRInterpreterEnv (..),
   inValueEnv,
+  inConstructorEnv,
   insertBoundVars,
  )
 import Noll.Core.LLVM.IRInstruction.Interpreter.State (
@@ -240,7 +238,14 @@ interpreter =
     IHashMapKey name next -> do
       error "IHashMapKey"
     IDataConstr t name next -> do
-      error "IDataConstr"
+      -- addArtifact undefined
+      -- TODO
+      env <- asks irInterpreterConstructorEnv
+      case Environment.lookup name env of
+        Nothing ->
+          error ("No constructor " <> Text.unpack name)
+        Just n ->
+          next (n, TNamed name t)
     _ ->
       error "TODO"
 
