@@ -192,8 +192,8 @@ irEvalMatch e1 cs = do
       ds <- forM cs $ \(Core.Clause ((Label _ con) :| lls) e) -> do
         n <- iLabel con
         pure (n, lls, e)
-      let ns = fst3 <$> ds
-      iSwitch r3 (List1.head ns) (fromList1 ns `zip` (I32 <$> [0 ..]))
+      let n :| ns = fst3 <$> ds
+      iSwitch r3 n (fromList1 (n :| ns) `zip` (I32 <$> [0 ..]))
       b :| bs <- forM ds $ \(ll, lls, e) ->
         iBlock ll $ do
           r4 <- irEvalClause v1 lls e

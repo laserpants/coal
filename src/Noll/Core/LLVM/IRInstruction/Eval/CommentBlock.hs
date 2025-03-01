@@ -3,10 +3,9 @@
 module Noll.Core.LLVM.IRInstruction.Eval.CommentBlock (irCommentBlock) where
 
 import Data.Text (Text)
-import Noll.Core.LLVM.IRInstruction (IRInstr, IRInstrOpF (..))
-import Noll.Core.LLVM.IRInstruction.TH
-
 import qualified Data.Text as Text
+import Noll.Core.LLVM.IRInstruction (IRInstr)
+import Noll.Core.LLVM.IRInstruction.TH
 
 irCommentBlock :: Text -> IRInstr a -> IRInstr a
 irCommentBlock text block = do

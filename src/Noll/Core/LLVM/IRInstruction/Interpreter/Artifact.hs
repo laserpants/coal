@@ -5,7 +5,6 @@ module Noll.Core.LLVM.IRInstruction.Interpreter.Artifact (artifactInterpreter) w
 
 import Control.Monad.Writer (listen)
 import Noll.Core.LLVM.IRConstruct (IRConstruct (..))
-import Noll.Core.LLVM.IRInstruction (IRInstr, IRInstrOpF (..))
 import Noll.Core.LLVM.IRInstruction.Eval.Closure.Extend (irClosureExtend)
 import Noll.Core.LLVM.IRInstruction.Eval.Closure.Finalize (irClosureFinalize)
 import Noll.Core.LLVM.IRInstruction.Interpreter (
@@ -15,7 +14,6 @@ import Noll.Core.LLVM.IRInstruction.Interpreter (
   interpret,
  )
 import Noll.Core.LLVM.IRType.Syntax (i32, i8Ptr, i8PtrPtr, struct)
-import Noll.Core.LLVM.IRValue (IRValue (..))
 import Noll.Label (Label (..))
 import TextShow (showt)
 
