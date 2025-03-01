@@ -1,5 +1,8 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StrictData #-}
 
 module Noll.Language.Expression (
@@ -9,7 +12,9 @@ module Noll.Language.Expression (
 ) where
 
 import Data.Data (Data, Typeable)
-import Noll.Common.List1 (List1)
+import Data.Generics.Uniplate.Data (universeBi)
+import Noll.AST.HasFree (HasBound (..), HasFree (..), exceptNames)
+import Noll.Common.List1 (List1, NonEmpty ((:|)))
 import Noll.Label (Label (..))
 import Noll.Language.Expression.Binding (Binding (..))
 import Noll.Language.Expression.Choice (Choice (..))
@@ -21,13 +26,29 @@ import Noll.Language.Trait (Trait (..))
 import Noll.Language.Type (Parameter (..), Type)
 import Noll.Utils (Dictionary, Name)
 
+import qualified Data.Set as Set
+
 data Clause a t = EClause a (Pattern a t) (List1 (Choice Expression a t))
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
+
+instance (Ord t, Data a, Data t) => HasFree (Clause a t) t where
+  freeIn =
+    \case
+      EClause _ p cs ->
+        freeIn cs `exceptNames` boundIn p
 
 data CompiledClause a t
   = ECompiledClause (List1 (Label t)) (Expression a t)
   | ECompiledField Name (Label t) (Label t) (Expression a t)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
+
+instance (Ord t, Data a, Data t) => HasFree (CompiledClause a t) t where
+  freeIn =
+    \case
+      ECompiledClause (_ :| lls) e ->
+        freeIn e `exceptNames` boundIn lls
+      ECompiledField{} ->
+        error "TODO"
 
 data Expression a t
   = -- | Type-annotated expression
@@ -73,3 +94,21 @@ data Expression a t
   | -- | TODO
     EDictionaryApplication a t (Expression a t) (List1 (Trait t)) [Expression a t]
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
+
+instance (Ord t, Data a, Data t) => HasFree (Expression a t) t where
+  freeIn =
+    \case
+      EConstructor{} ->
+        mempty
+      ELambda _ ps e ->
+        freeIn e `exceptNames` boundIn ps
+      ELet _ gs e1 ->
+        freeIn gs <> (freeIn e1 `exceptNames` boundIn gs)
+      ERecursiveLet _ p e1 e2 ->
+        (freeIn e1 <> freeIn e2) `exceptNames` boundIn p
+      EMatch _ _ e cs ->
+        freeIn e <> freeIn cs
+      ECompiledMatch _ _ e cs ->
+        freeIn e <> freeIn cs
+      e ->
+        Set.fromList (universeBi e)

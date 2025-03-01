@@ -1,18 +1,14 @@
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StrictData #-}
 
 module Noll.AST.HasFree (HasBound (..), HasFree (..), exceptNames) where
 
-import Data.Data (Data, Typeable)
+import Data.Data (Data)
 import Data.Generics.Uniplate.Data (universeBi)
 import Data.Set (Set, singleton)
-import Noll.Common.List1 (NonEmpty ((:|)))
+import Noll.Common.List1 (NonEmpty)
 import Noll.Label (Label (..), labelName)
-import Noll.Language.Expression (Clause (..), CompiledClause (..), Expression (..))
-import Noll.Language.Expression.Binding (Binding (..))
-import Noll.Language.Expression.Choice (Choice (..), Guard (..))
 import Noll.Language.Pattern (Pattern (..))
 import Noll.Utils (Dictionary, Map, Name)
 
@@ -35,9 +31,6 @@ instance (HasBound b) => HasBound (NonEmpty b) where
 
 instance HasBound (Label t) where
   boundIn (Label _ name) = singleton name
-
-instance (Data a, Data t, Typeable e, Data (e a t)) => HasBound (Binding e a t) where
-  boundIn = Set.fromList . universeBi
 
 instance (Data a, Data t) => HasBound (Pattern a t) where
   boundIn = Set.fromList . universeBi
@@ -62,52 +55,6 @@ instance (Ord t, HasFree f t) => HasFree (Map a f) t where
 
 instance (Ord t, HasFree s t) => HasFree (Set s) t where
   freeIn = Set.unions . Set.map freeIn
-
-instance (Ord t, Data a, Data t) => HasFree (Guard Expression a t) t where
-  freeIn = Set.fromList . universeBi
-
-instance (Ord t, Data a, Data t) => HasFree (Choice Expression a t) t where
-  freeIn = Set.fromList . universeBi
-
-instance (Ord t, Data a, Data t) => HasFree (Clause a t) t where
-  freeIn =
-    \case
-      EClause _ p cs ->
-        freeIn cs `exceptNames` boundIn p
-
-instance (Ord t, Data a, Data t) => HasFree (CompiledClause a t) t where
-  freeIn =
-    \case
-      ECompiledClause (_ :| lls) e ->
-        freeIn e `exceptNames` boundIn lls
-      ECompiledField{} ->
-        error "TODO"
-
-instance (Ord t, Data a, Data t) => HasFree (Binding Expression a t) t where
-  freeIn =
-    \case
-      BPattern _ _ e ->
-        freeIn e
-      BFunction _ _ ps e ->
-        freeIn e `exceptNames` boundIn ps
-
-instance (Ord t, Data a, Data t) => HasFree (Expression a t) t where
-  freeIn =
-    \case
-      EConstructor{} ->
-        mempty
-      ELambda _ ps e ->
-        freeIn e `exceptNames` boundIn ps
-      ELet _ gs e1 ->
-        freeIn gs <> (freeIn e1 `exceptNames` boundIn gs)
-      ERecursiveLet _ p e1 e2 ->
-        (freeIn e1 <> freeIn e2) `exceptNames` boundIn p
-      EMatch _ _ e cs ->
-        freeIn e <> freeIn cs
-      ECompiledMatch _ _ e cs ->
-        freeIn e <> freeIn cs
-      e ->
-        Set.fromList (universeBi e)
 
 {-# INLINE exceptNames #-}
 exceptNames :: (Foldable f) => Set (Label a) -> f Name -> Set (Label a)
