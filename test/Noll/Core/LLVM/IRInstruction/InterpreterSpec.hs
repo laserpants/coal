@@ -249,15 +249,14 @@ blockObjects3 =
                               (Core.var (Label (list Core.int32) "d"))
                               ( Core.Clause
                                   (Label (Core.int32 ~> list Core.int32 ~> list Core.int32) "$Cons" <| Label Core.int32 "e" <| Label (list Core.int32) "f" :| [])
-                                    ( Core.call
-                                        (Label (Core.int32 `Core.arrow` Core.TOpq) "print_int32")
-                                        [Core.var (Label Core.int32 "e")]
-                                        ( Core.lam
-                                            (Label Core.TOpq "_" :| [])
-                                            (Core.var (Label Core.int32 "e"))
-                                        )
-                                    )
---                                  (Core.var (Label Core.int32 "e"))
+                                  ( Core.call
+                                      (Label (Core.int32 `Core.arrow` Core.TOpq) "print_int32")
+                                      [Core.var (Label Core.int32 "e")]
+                                      ( Core.lam
+                                          (Label Core.TOpq "_" :| [])
+                                          (Core.var (Label Core.int32 "e"))
+                                      )
+                                  )
                                   :| []
                               )
                           )

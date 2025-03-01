@@ -4,7 +4,7 @@ module Noll.Core.LLVM.IRInstruction.Interpreter.Environment (
   IRInterpreterEnv (..),
   insertBoundVars,
   inValueEnv,
-  inConstructorEnv, 
+  inConstructorEnv,
 ) where
 
 import Noll.Common.Environment (Environment (..))

@@ -11,6 +11,7 @@ module Noll.Core.Language.Expr.Syntax (
   ext,
   nil,
   call,
+  mem,
 ) where
 
 import Noll.Common.List1 (List1)
@@ -73,3 +74,7 @@ lam = embed2 ELam
 {-# INLINE app #-}
 app :: t -> Expr t -> List1 (Expr t) -> Expr t
 app = embed3 EApp
+
+{-# INLINE mem #-}
+mem :: Expr t -> Expr t
+mem = embed1 EMem

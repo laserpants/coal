@@ -10,15 +10,16 @@
 
 module Noll.Compiler.Core where
 
-import Debug.Trace
 import Control.Arrow ((>>>))
 import Control.Monad.RWS (RWS, ask, evalRWS, local)
 import Control.Monad.State (MonadState, State, evalState, gets, modify, runState, runStateT)
 import Control.Monad.Trans (lift)
-import Control.Monad.Writer (MonadWriter, runWriter, tell)
+import Control.Monad.Writer (MonadWriter, Writer, runWriter, tell)
 import Data.Fix (Fix (..))
 import Data.Functor.Foldable (cata, embed, project)
+import Data.List (partition)
 import Data.Set (Set)
+import Debug.Trace
 import Noll.AST.HasFree (HasFree (..), exceptNames)
 import Noll.Common.Environment (Environment)
 import Noll.Common.List1 (List1, NonEmpty (..), fromList1)
@@ -30,8 +31,8 @@ import Noll.Core.LLVM.IRInstruction.Interpreter (
   IRInterpreterEnv (..),
   IRInterpreterState (..),
   IRLine (..),
-  inValueEnv,
   inConstructorEnv,
+  inValueEnv,
   runInterpreter,
  )
 import Noll.Core.LLVM.IRInstruction.Interpreter.Object (
@@ -68,12 +69,13 @@ import Noll.Utils (
   traverse2,
   (<$$>),
  )
+import Noll.Utils.Operators ((||.))
 import TextShow
 
-import qualified Noll.Common.Environment as Environment
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import qualified Data.Text as Text
+import qualified Noll.Common.Environment as Environment
 import qualified Noll.Common.List1 as List1
 import qualified Noll.Core.Language as Core
 
@@ -114,20 +116,40 @@ moveUp name vs f = do
 
 -------------------------------------------------------------------------------
 
-letLiftFromExpression :: Name -> Expr Type -> ObjectList
-letLiftFromExpression name expr = toObject name e : (toBob <$> objs)
+toObject :: Binding Type (Expr Type) -> Object Type (Expr Type)
+toObject (Binding (Label _ name) e1) = go e1
  where
-  toBob (Binding (Label _ name1) e1) = toObject name1 e1
-  (e, objs) = runWriter (transLetLifting expr)
+  go =
+    project
+      >>> \case
+        Core.ELam vs e ->
+          OFunction name (fromList1 vs) e
+        e ->
+          OConstant name (embed e)
 
-toObject :: Name -> Expr Type -> Object Type (Expr Type)
-toObject name =
+isPrim :: Expr Type -> Bool
+isPrim =
+  cata $
+    \case
+      ELit{} ->
+        True
+      _ ->
+        False
+
+memoize :: (MonadWriter [Binding Type (Expr Type)] m) => Expr Type -> m (Expr Type)
+memoize =
   project
     >>> \case
-      Core.ELam vs e ->
-        OFunction name (fromList1 vs) e
+      Core.ELet vs e -> do
+        let (ps, qs) = partition (not . (isFunction . bindingLabel ||. isPrim . bindingExpr)) (fromList1 vs)
+        tell (Core.mem <$$> ps)
+        case qs of
+          u : us ->
+            pure (Core.let_ (u :| us) e)
+          [] ->
+            pure e
       e ->
-        OConstant name (embed e)
+        pure (embed e)
 
 transLetLifting :: (MonadWriter [Binding Type (Expr Type)] m) => Expr Type -> m (Expr Type)
 transLetLifting =
@@ -470,14 +492,21 @@ pure2 f = pure . (f <$>)
 pure3 :: (Applicative f1, Functor f2, Functor f3) => (a -> b) -> f2 (f3 a) -> f1 (f2 (f3 b))
 pure3 f = pure . (f <$$>)
 
+collectObjs :: (Expr Type -> Writer [Binding Type (Expr Type)] (Expr Type)) -> [Object Type (Expr Type)] -> Core [Object Type (Expr Type)]
+collectObjs f as = pure (xs <> fmap toObject ys)
+ where
+  (xs, ys) = runWriter (traverse2 f as)
+
 pipeline :: ObjectList -> Core [Object Type (Expr Type)]
 pipeline ol = do
   a1 <- suffixNamesC ol
   a2 <- pure3 flattenELam a1
-  a3 <- pure1 liftLambdas a2
-  a4 <- pure3 simplifyELet a3
-  a5 <- pure1 closeDefs a4
-  pure (addImplicitArgs <$> a5)
+  a3 <- collectObjs transLetLifting a2
+  a4 <- collectObjs memoize a3
+  a5 <- pure1 liftLambdas a4
+  a6 <- pure3 simplifyELet a5
+  a7 <- pure1 closeDefs a6
+  pure (addImplicitArgs <$> a7)
 
 compile :: ObjectList -> Core ()
 compile ol = do
@@ -485,7 +514,7 @@ compile ol = do
   traceShow objs $ do
     extendInterpreterValueEnv (objectEnvironment objs)
     -- TODO
-    extendInterpreterConstructorEnv ( Environment.fromList [ ("$Cons", 0) , ("$Nil", 1) ])
+    extendInterpreterConstructorEnv (Environment.fromList [("$Cons", 0), ("$Nil", 1)])
     code <- transInterpreter (traverse objectInterpreter objs)
     pipelineStateInsertCode code
 

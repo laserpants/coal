@@ -167,6 +167,17 @@ irEvalOp =
     _ ->
       error "TODO"
 
+irEvalClause :: IRValue -> [Label Core.Type] -> CoreExpr -> IRInstr IRValue
+irEvalClause v1 lls e = do
+  r1 <- iBCast v1 (ptr s)
+  bound <- forM (zip lls [1 ..]) $ \(Label _ n, i) -> do
+    r2 <- iGep s r1 (I32 0) (I32 i)
+    r3 <- iLoad i8Ptr r2
+    pure (n, r3)
+  iBind bound (eliminatePtrConversions (irEvalExpr e))
+ where
+  s = struct (i32 : replicate (length lls) i8Ptr)
+
 irEvalMatch :: CoreExpr -> List1 (Core.Clause Core.Type CoreExpr) -> IRInstr IRValue
 irEvalMatch e1 cs = do
   v1 <- eliminatePtrConversions (irEvalExpr e1)
@@ -174,27 +185,24 @@ irEvalMatch e1 cs = do
   r2 <- iGep (struct [i32]) r1 (I32 0) (I32 0)
   r3 <- iLoad i32 r2
   labelEnd <- iLabel "end"
-  -- TODO: Handle case where length cs == 1
-  ds <- forM cs $ \(Core.Clause ((Label _ con) :| lls) e) -> do
-    n <- iLabel con
-    pure (n, lls, e)
-  let ns = fst3 <$> ds
-  iSwitch r3 (List1.head ns) (fromList1 ns `zip` (I32 <$> [0 ..]))
-  b :| bs <- forM ds $ \(ll, lls, e) ->
-    iBlock ll $ do
-      let s = struct (i32 : replicate (length lls) i8Ptr)
-      r4 <- iBCast v1 (ptr s)
-      bound <- forM (zip lls [1 ..]) $ \(Label _ n, i) -> do
-        r5 <- iGep s r4 (I32 0) (I32 i)
-        r6 <- iLoad i8Ptr r5
-        pure (n, r6)
-      r7 <- iBind bound (eliminatePtrConversions (irEvalExpr e))
-      iBr1 labelEnd
-      pure r7
-  (_, v) <-
-    iBlock labelEnd $
-      iPhi (irTypeOf (snd b)) (b : bs)
-  irConceal v
+  case cs of
+    Core.Clause ((Label _ _) :| lls) e :| [] ->
+      irEvalClause v1 lls e
+    _ -> do
+      ds <- forM cs $ \(Core.Clause ((Label _ con) :| lls) e) -> do
+        n <- iLabel con
+        pure (n, lls, e)
+      let ns = fst3 <$> ds
+      iSwitch r3 (List1.head ns) (fromList1 ns `zip` (I32 <$> [0 ..]))
+      b :| bs <- forM ds $ \(ll, lls, e) ->
+        iBlock ll $ do
+          r4 <- irEvalClause v1 lls e
+          iBr1 labelEnd
+          pure r4
+      (_, v) <-
+        iBlock labelEnd $
+          iPhi (irTypeOf (snd b)) (b : bs)
+      irConceal v
 
 irEvalVar :: Core.Type -> Name -> IRInstr IRValue
 irEvalVar t var
@@ -300,7 +308,7 @@ irEvalExpr =
             iBlock labelExit $
               iPhi i8Ptr [thenBlock, elseBlock]
           irConceal v
-      Core.ECall (Label t ll) es e ->
+      Core.ECall (Label _ ll) es e ->
         irCommentBlock "ECall" $ do
           rs <- traverse (eliminatePtrConversions . irEvalExpr) es
           v1 <- iCallGlobal i8Ptr ll rs
@@ -331,6 +339,27 @@ irEvalExpr =
           v1 <- eliminatePtrConversions (irEvalExpr e1)
           v2 <- iCallGlobal i8Ptr "hashmap_lookup" [v1, t2]
           iBind [(var, v2), (r, v1)] (eliminatePtrConversions (irEvalExpr e2))
+      Core.EMem e ->
+        irCommentBlock "EMem" $ do
+          p1 <- iLabel "ptr"
+          r1 <- iLoad i8Ptr (Global i8Ptr p1)
+          r2 <- iCmpEq i1 r1 Null
+          labelIsNull <- iLabel "is_null"
+          labelNotNull <- iLabel "not_null"
+          labelEnd <- iLabel "end"
+          iBr r2 [labelIsNull, labelNotNull]
+          isNullBlock <- iBlock labelIsNull $ do
+            r3 <- irEvalExpr e
+            iStore r3 (Global i8Ptr p1)
+            iBr1 labelEnd
+            pure r3
+          notNullBlock <- iBlock labelNotNull $ do
+            iBr1 labelEnd
+            pure r1
+          (_, v) <-
+            iBlock labelEnd $
+              iPhi i8Ptr [isNullBlock, notNullBlock]
+          irConceal v
       e ->
         error (show e)
 

@@ -102,6 +102,8 @@ data ExprF t a
     ESel (Focus t) a a
   | -- | External C function call
     ECall (Label t) [a] a
+  | -- | Memoized top-level constant
+    EMem a
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
 
 -- | Main expression tree grammar
@@ -138,3 +140,5 @@ instance (Ord t) => HasFree (Expr t) t where
           mempty
         ELam vs e ->
           e `exceptNames` boundIn vs
+        EMem e ->
+          e

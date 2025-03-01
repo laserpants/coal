@@ -101,6 +101,8 @@ instance (Typed t, Typed a) => Typed (ExprF t a) where
         foldType (typeOf t) (typeOf <$> ts)
       ECall _ _ t ->
         returnTypeOf t
+      EMem t ->
+        typeOf t
 
 instance (Typed t) => Typed (Expr t) where
   typeOf = typeOf . project

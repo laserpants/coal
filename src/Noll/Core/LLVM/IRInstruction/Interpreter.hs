@@ -33,8 +33,8 @@ import Noll.Core.LLVM.IREncodable (IRAnnotated (..), IREncodable (..), enquote, 
 import Noll.Core.LLVM.IRInstruction (IRInstr, IRInstrOp, IRInstrOpF (..))
 import Noll.Core.LLVM.IRInstruction.Interpreter.Environment (
   IRInterpreterEnv (..),
-  inValueEnv,
   inConstructorEnv,
+  inValueEnv,
   insertBoundVars,
  )
 import Noll.Core.LLVM.IRInstruction.Interpreter.State (
