@@ -7,6 +7,7 @@ module Noll.Utils.Name (
 import Data.Char (isAlpha, isUpper)
 import Data.Map.Strict (Map)
 import Data.Text (Text)
+import Noll.Utils.Data.Char (isUnderscore)
 import Noll.Utils.Data.Text (dropWhileNot)
 import Noll.Utils.Operators ((||.))
 
@@ -22,4 +23,4 @@ isConstructor name
   | Text.null s = False
   | otherwise = isUpper (Text.head s)
  where
-  s = dropWhileNot (isAlpha ||. ('_' ==)) name
+  s = dropWhileNot (isAlpha ||. isUnderscore) name
