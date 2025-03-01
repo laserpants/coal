@@ -8,7 +8,7 @@ import Control.Monad.Reader (local)
 import Control.Monad.Writer (listen)
 import Noll.Common.Environment (Environment)
 import Noll.Common.List1 (NonEmpty (..), (<|))
-import Noll.Compiler.Core
+import Noll.Core.Compiler
 import Noll.Core.LLVM.IRConstruct (IRConstruct (..))
 import Noll.Core.LLVM.IREncodable (IREncodable (..))
 import Noll.Core.LLVM.IRInstruction.Eval (irEvalExpr)

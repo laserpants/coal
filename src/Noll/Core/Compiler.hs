@@ -8,7 +8,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Compiler.Core where
+module Noll.Core.Compiler where
 
 import Control.Arrow ((>>>))
 import Control.Monad.RWS (RWS, ask, evalRWS, local)

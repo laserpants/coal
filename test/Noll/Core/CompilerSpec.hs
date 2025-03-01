@@ -1,12 +1,12 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Compiler.CoreSpec where
+module Noll.Core.CompilerSpec where
 
 import Control.Monad.Identity (runIdentity)
 import Control.Monad.State (evalState)
 import Data.Fix (Fix (..))
 import Noll.Common.List1 (NonEmpty (..), (<|))
-import Noll.Compiler.Core
+import Noll.Core.Compiler
 import Noll.Core.Language (ExprF (..), Prim (..), list, opaque, (~>))
 import Noll.Core.Language.Expr (Clause (..), Focus (..))
 import Noll.Core.Language.Object (Object (..), ObjectList, objectName)
@@ -17,7 +17,7 @@ import qualified Noll.Core.Language as Core
 
 spec :: Spec
 spec =
-  describe "Noll.Compiler.Core" $ do
+  describe "Noll.Core.Compiler" $ do
     describe "transSuffixExpr" $ do
       it "" $ do
         evalState (transSuffixExpr fixture3) 0 == fixture4

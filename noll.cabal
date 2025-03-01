@@ -33,7 +33,6 @@ library
       Noll.Common.List1
       Noll.Common.Supply
       Noll.Compiler
-      Noll.Compiler.Core
       Noll.Compiler.NormalizeObjects
       Noll.Compiler.PatternMatching
       Noll.Compiler.PatternMatching.Compiler
@@ -46,6 +45,7 @@ library
       Noll.Compiler.Transform.Pattern.OrExpansion
       Noll.Compiler.Transform.Tree
       Noll.Compiler.Transform.Type.AliasInsertion
+      Noll.Core.Compiler
       Noll.Core.Language
       Noll.Core.Language.Expr
       Noll.Core.Language.Expr.Syntax
@@ -169,7 +169,6 @@ test-suite noll-test
   other-modules:
       Noll.AST.FreeVarsSpec
       Noll.AST.IndexedSpec
-      Noll.Compiler.CoreSpec
       Noll.Compiler.NormalizeObjectsSpec
       Noll.Compiler.PatternMatchingExamples.Test01
       Noll.Compiler.PatternMatchingExamples.Test02
@@ -183,6 +182,7 @@ test-suite noll-test
       Noll.CompilerExamples.Test01
       Noll.CompilerExamples.Test02
       Noll.CompilerSpec
+      Noll.Core.CompilerSpec
       Noll.Core.Language.ReplaceSpec
       Noll.Core.LanguageSpec
       Noll.Core.LLVM.IRInstruction.InterpreterSpec
