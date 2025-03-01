@@ -144,9 +144,17 @@ irEvalOp =
         iXOr i1 v1 (I1 True)
       irConceal v2
     Core.OLtEInt32 e1 e2 -> do
-      error "TODO"
+      v3 <- irCommentBlock "OLtEInt32" $ do
+        v1 <- irRevealExpr e1
+        v2 <- irRevealExpr e2
+        iCmpSLE i1 v1 v2
+      irConceal v3
     Core.OLtEInt64 e1 e2 -> do
-      error "TODO"
+      v3 <- irCommentBlock "OLtEInt64" $ do
+        v1 <- irRevealExpr e1
+        v2 <- irRevealExpr e2
+        iCmpSLE i1 v1 v2
+      irConceal v3
     Core.OGtInt32 e1 e2 -> do
       v3 <- irCommentBlock "OGtInt32" $ do
         v1 <- irRevealExpr e1
@@ -154,11 +162,23 @@ irEvalOp =
         iCmpSGt i1 v1 v2
       irConceal v3
     Core.OGtInt64 e1 e2 -> do
-      error "TODO"
+      v3 <- irCommentBlock "OGtInt64" $ do
+        v1 <- irRevealExpr e1
+        v2 <- irRevealExpr e2
+        iCmpSGt i1 v1 v2
+      irConceal v3
     Core.OGtEInt32 e1 e2 -> do
-      error "TODO"
+      v3 <- irCommentBlock "OGtEInt32" $ do
+        v1 <- irRevealExpr e1
+        v2 <- irRevealExpr e2
+        iCmpSGE i1 v1 v2
+      irConceal v3
     Core.OGtEInt64 e1 e2 -> do
-      error "TODO"
+      v3 <- irCommentBlock "OGtEInt64" $ do
+        v1 <- irRevealExpr e1
+        v2 <- irRevealExpr e2
+        iCmpSGE i1 v1 v2
+      irConceal v3
     _ ->
       error "TODO"
 

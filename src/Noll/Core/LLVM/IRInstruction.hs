@@ -27,6 +27,8 @@ data IRInstrOpF v t i next
   | ICmpEq           t v v        (v -> next)
   | ICmpSLt          t v v        (v -> next)
   | ICmpSGt          t v v        (v -> next)
+  | ICmpSLE          t v v        (v -> next)
+  | ICmpSGE          t v v        (v -> next)
   | IStore           v v          next
   | IRet             t v          next
   | IBr              v [Name]     next
