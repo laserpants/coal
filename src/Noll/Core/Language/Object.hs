@@ -6,7 +6,7 @@
 
 module Noll.Core.Language.Object (Object (..), ObjectList, objectName) where
 
-import Noll.AST.HasFree (HasFree (..), boundIn, exceptNames)
+import Noll.AST.FreeVars (FreeVars (..), boundIn, exceptNames)
 import Noll.Core.Language.Expr (Expr)
 import Noll.Core.Language.Type (Type (..))
 import Noll.Label (Label (..))
@@ -18,7 +18,7 @@ data Object t e
   | OExternal Name t
   deriving (Show, Eq, Ord, Functor, Foldable, Traversable)
 
-instance (Ord t, HasFree e t) => HasFree (Object t e) t where
+instance (Ord t, FreeVars e t) => FreeVars (Object t e) t where
   freeIn =
     \case
       OFunction _ lls e ->

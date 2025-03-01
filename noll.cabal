@@ -24,7 +24,7 @@ source-repository head
 
 library
   exposed-modules:
-      Noll.AST.HasFree
+      Noll.AST.FreeVars
       Noll.AST.HasKind
       Noll.AST.HasTag
       Noll.AST.HasType
@@ -166,7 +166,7 @@ test-suite noll-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
-      Noll.AST.HasFreeSpec
+      Noll.AST.FreeVarsSpec
       Noll.AST.IndexedSpec
       Noll.Compiler.CoreSpec
       Noll.Compiler.NormalizeObjectsSpec

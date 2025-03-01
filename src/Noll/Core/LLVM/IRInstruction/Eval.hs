@@ -8,7 +8,6 @@ import Control.Arrow ((>>>))
 import Control.Monad.Free (Free (..))
 import Data.Fix (Fix (..))
 import Data.Functor.Foldable (project)
-import Data.Text (Text)
 import Data.Tuple.Extra (fst3)
 import Noll.Common.List1 (List1, NonEmpty (..), fromList1)
 import Noll.Core.LLVM.IREncodable (irEncode)
@@ -23,7 +22,6 @@ import Noll.Core.LLVM.IRType.Syntax (
   i1,
   i32,
   i64,
-  i8,
   i8Ptr,
   ptr,
   stringLiteralType,
@@ -33,10 +31,7 @@ import Noll.Core.LLVM.IRValue (IRValue (..), irPrimValue)
 import Noll.Core.Language.Type.Syntax (arity)
 import Noll.Label (Label (..))
 import Noll.Utils (Name, forM, forM_, isConstructor)
-import TextShow (showt)
 
-import qualified Data.Text as Text
-import qualified Noll.Common.List1 as List1
 import qualified Noll.Core.Language as Core
 
 type CoreExpr = Core.Expr Core.Type

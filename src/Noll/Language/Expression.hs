@@ -13,7 +13,7 @@ module Noll.Language.Expression (
 
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (universeBi)
-import Noll.AST.HasFree (HasBound (..), HasFree (..), exceptNames)
+import Noll.AST.FreeVars (BoundVars (..), FreeVars (..), exceptNames)
 import Noll.Common.List1 (List1, NonEmpty ((:|)))
 import Noll.Label (Label (..))
 import Noll.Language.Expression.Binding (Binding (..))
@@ -31,7 +31,7 @@ import qualified Data.Set as Set
 data Clause a t = EClause a (Pattern a t) (List1 (Choice Expression a t))
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
 
-instance (Ord t, Data a, Data t) => HasFree (Clause a t) t where
+instance (Ord t, Data a, Data t) => FreeVars (Clause a t) t where
   freeIn =
     \case
       EClause _ p cs ->
@@ -42,7 +42,7 @@ data CompiledClause a t
   | ECompiledField Name (Label t) (Label t) (Expression a t)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
 
-instance (Ord t, Data a, Data t) => HasFree (CompiledClause a t) t where
+instance (Ord t, Data a, Data t) => FreeVars (CompiledClause a t) t where
   freeIn =
     \case
       ECompiledClause (_ :| lls) e ->
@@ -95,7 +95,7 @@ data Expression a t
     EDictionaryApplication a t (Expression a t) (List1 (Trait t)) [Expression a t]
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
 
-instance (Ord t, Data a, Data t) => HasFree (Expression a t) t where
+instance (Ord t, Data a, Data t) => FreeVars (Expression a t) t where
   freeIn =
     \case
       EConstructor{} ->

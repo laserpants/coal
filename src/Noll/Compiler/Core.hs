@@ -23,7 +23,7 @@ import Data.Set (Set)
 import qualified Data.Set as Set
 import qualified Data.Text as Text
 import Debug.Trace
-import Noll.AST.HasFree (HasFree (..), exceptNames)
+import Noll.AST.FreeVars (FreeVars (..), exceptNames)
 import Noll.Common.Environment (Environment)
 import qualified Noll.Common.Environment as Environment
 import Noll.Common.List1 (List1, NonEmpty (..), fromList1)
@@ -280,7 +280,7 @@ evalWS0 v = evalRWS v () 0
 notConstructor :: Label t -> Bool
 notConstructor = not . isConstructor . labelName
 
-freeSet :: (Foldable f, HasFree e t) => f Name -> e -> Set (Label t)
+freeSet :: (Foldable f, FreeVars e t) => f Name -> e -> Set (Label t)
 freeSet names obj = Set.filter notConstructor (freeIn obj `exceptNames` names)
 
 closeDefs :: ObjectList -> ObjectList

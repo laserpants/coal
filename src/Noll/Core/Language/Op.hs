@@ -8,7 +8,7 @@
 module Noll.Core.Language.Op (Op (..)) where
 
 import Data.Eq.Deriving (deriveEq1)
-import Noll.AST.HasFree (HasFree (..))
+import Noll.AST.FreeVars (FreeVars (..))
 import Text.Show.Deriving (deriveShow1)
 
 -- | Binary operators
@@ -58,7 +58,7 @@ data Op a
 deriveShow1 ''Op
 deriveEq1 ''Op
 
-instance (Ord t, HasFree a t) => HasFree (Op a) t where
+instance (Ord t, FreeVars a t) => FreeVars (Op a) t where
   freeIn =
     \case
       OEqInt32 e1 e2 ->

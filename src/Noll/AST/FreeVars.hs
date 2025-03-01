@@ -2,7 +2,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.AST.HasFree (HasBound (..), HasFree (..), exceptNames) where
+module Noll.AST.FreeVars (BoundVars (..), FreeVars (..), exceptNames) where
 
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (universeBi)
@@ -14,46 +14,46 @@ import Noll.Utils (Dictionary, Map, Name)
 
 import qualified Data.Set as Set
 
-class HasBound b where
+class BoundVars b where
   boundIn :: b -> Set Name
 
-instance (HasBound b) => HasBound (Dictionary b) where
+instance (BoundVars b) => BoundVars (Dictionary b) where
   boundIn = Set.unions . fmap boundIn
 
-instance (HasBound b) => HasBound (Maybe b) where
+instance (BoundVars b) => BoundVars (Maybe b) where
   boundIn = Set.unions . fmap boundIn
 
-instance (HasBound b) => HasBound [b] where
+instance (BoundVars b) => BoundVars [b] where
   boundIn = Set.unions . fmap boundIn
 
-instance (HasBound b) => HasBound (NonEmpty b) where
+instance (BoundVars b) => BoundVars (NonEmpty b) where
   boundIn = Set.unions . fmap boundIn
 
-instance HasBound (Label t) where
+instance BoundVars (Label t) where
   boundIn (Label _ name) = singleton name
 
-instance (Data a, Data t) => HasBound (Pattern a t) where
+instance (Data a, Data t) => BoundVars (Pattern a t) where
   boundIn = Set.fromList . universeBi
 
-class HasFree f t where
+class FreeVars f t where
   freeIn :: f -> Set (Label t)
 
-instance (HasFree (Label t) t) where
+instance (FreeVars (Label t) t) where
   freeIn = Set.singleton
 
-instance (Ord t, HasFree f t) => HasFree (Maybe f) t where
+instance (Ord t, FreeVars f t) => FreeVars (Maybe f) t where
   freeIn = Set.unions . fmap freeIn
 
-instance (Ord t, HasFree f t) => HasFree [f] t where
+instance (Ord t, FreeVars f t) => FreeVars [f] t where
   freeIn = Set.unions . fmap freeIn
 
-instance (Ord t, HasFree f t) => HasFree (NonEmpty f) t where
+instance (Ord t, FreeVars f t) => FreeVars (NonEmpty f) t where
   freeIn = Set.unions . fmap freeIn
 
-instance (Ord t, HasFree f t) => HasFree (Map a f) t where
+instance (Ord t, FreeVars f t) => FreeVars (Map a f) t where
   freeIn = Set.unions . fmap freeIn
 
-instance (Ord t, HasFree s t) => HasFree (Set s) t where
+instance (Ord t, FreeVars s t) => FreeVars (Set s) t where
   freeIn = Set.unions . Set.map freeIn
 
 {-# INLINE exceptNames #-}

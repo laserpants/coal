@@ -20,7 +20,7 @@ import Data.Eq.Deriving (deriveEq1)
 import Data.Fix (Fix (..))
 import Data.Functor.Foldable (cata)
 import Data.Set (singleton)
-import Noll.AST.HasFree (HasBound (..), HasFree (..), exceptNames)
+import Noll.AST.FreeVars (BoundVars (..), FreeVars (..), exceptNames)
 import Noll.Common.List1 (List1, NonEmpty (..))
 import Noll.Core.Language.Op (Op (..))
 import Noll.Core.Language.Prim (Prim (..))
@@ -38,14 +38,14 @@ data Clause t a = Clause (List1 (Label t)) a
 deriveShow1 ''Clause
 deriveEq1 ''Clause
 
-instance (HasFree a t) => HasFree (Clause t a) t where
+instance (FreeVars a t) => FreeVars (Clause t a) t where
   freeIn (Clause (_ :| lls) e1) = freeIn e1 `exceptNames` boundIn lls
 
 -- | Field selector
 data Focus t = Focus Name (Label t) (Label t)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
 
-instance (HasBound (Focus t)) where
+instance (BoundVars (Focus t)) where
   boundIn (Focus _ ll1 ll2) = boundIn ll1 <> boundIn ll2
 
 data Binding t a = Binding {bindingLabel :: Label t, bindingExpr :: a}
@@ -70,10 +70,10 @@ unzipBindings = List1.unzip . fmap unpackBinding
 deriveShow1 ''Binding
 deriveEq1 ''Binding
 
-instance (HasFree a t) => HasFree (Binding t a) t where
+instance (FreeVars a t) => FreeVars (Binding t a) t where
   freeIn (Binding _ e) = freeIn e
 
-instance HasBound (Binding t a) where
+instance BoundVars (Binding t a) where
   boundIn (Binding ll _) = boundIn ll
 
 -- | Parameterized (non-recursive) expression grammar
@@ -112,7 +112,7 @@ type Expr t = Fix (ExprF t)
 deriveShow1 ''ExprF
 deriveEq1 ''ExprF
 
-instance (Ord t) => HasFree (Expr t) t where
+instance (Ord t) => FreeVars (Expr t) t where
   freeIn =
     cata $
       \case

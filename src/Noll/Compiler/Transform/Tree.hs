@@ -13,7 +13,7 @@ module Noll.Compiler.Transform.Tree (
 
 import Control.Monad.Identity (runIdentity)
 import Data.Data (Data)
-import Noll.AST.HasFree (HasBound (..))
+import Noll.AST.FreeVars (BoundVars (..))
 import Noll.Label (Label (..))
 import Noll.Language (
   Binding (..),
@@ -140,7 +140,7 @@ instance TreeTransform Expression t where
         EListLiteral a t <$> traverse (transform name f) es
 
 {-# INLINE isNotBoundIn #-}
-isNotBoundIn :: (HasBound b) => Name -> b -> Bool
+isNotBoundIn :: (BoundVars b) => Name -> b -> Bool
 isNotBoundIn name obj = name `notElem` boundIn obj
 
 replace :: (Ord t, Data a, Data t) => Name -> (a -> t -> Expression a t) -> Expression a t -> Expression a t

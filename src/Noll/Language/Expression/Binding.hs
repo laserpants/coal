@@ -9,7 +9,7 @@ module Noll.Language.Expression.Binding (Binding (..)) where
 
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (universeBi)
-import Noll.AST.HasFree (HasBound (..), HasFree (..), exceptNames)
+import Noll.AST.FreeVars (BoundVars (..), FreeVars (..), exceptNames)
 import Noll.Common.List1 (List1)
 import Noll.Language.Pattern (Pattern (..))
 import Noll.Utils (Name)
@@ -21,10 +21,10 @@ data Binding e a t
   | BFunction a Name (List1 (Pattern a t)) (e a t)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
 
-instance (Data a, Data t, Typeable e, Data (e a t)) => HasBound (Binding e a t) where
+instance (Data a, Data t, Typeable e, Data (e a t)) => BoundVars (Binding e a t) where
   boundIn = Set.fromList . universeBi
 
-instance (Ord t, Data a, Data t, HasFree (e a t) t) => HasFree (Binding e a t) t where
+instance (Ord t, Data a, Data t, FreeVars (e a t) t) => FreeVars (Binding e a t) t where
   freeIn =
     \case
       BPattern _ _ e ->
