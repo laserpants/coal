@@ -15,7 +15,7 @@ import Noll.Core.LLVM.IRInstruction (IRInstr, IRInstrOpF (..))
 import Noll.Core.LLVM.IRInstruction.Eval.Closure (irPackClosure)
 import Noll.Core.LLVM.IRInstruction.Eval.CommentBlock (irCommentBlock)
 import Noll.Core.LLVM.IRInstruction.Eval.Conceal (irConceal, irReveal)
-import Noll.Core.LLVM.IRInstruction.Eval.Expr.EVar (irEvalVar)
+import Noll.Core.LLVM.IRInstruction.Eval.Var (irEvalVar)
 import Noll.Core.LLVM.IRInstruction.Eval.Malloc (irMalloc)
 import Noll.Core.LLVM.IRInstruction.TH
 import Noll.Core.LLVM.IRType (IRType (..), IRTyped (..))

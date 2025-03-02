@@ -66,8 +66,8 @@ library
       Noll.Core.LLVM.IRInstruction.Eval.Closure.Finalize
       Noll.Core.LLVM.IRInstruction.Eval.CommentBlock
       Noll.Core.LLVM.IRInstruction.Eval.Conceal
-      Noll.Core.LLVM.IRInstruction.Eval.Expr.EVar
       Noll.Core.LLVM.IRInstruction.Eval.Malloc
+      Noll.Core.LLVM.IRInstruction.Eval.Var
       Noll.Core.LLVM.IRInstruction.Interpreter
       Noll.Core.LLVM.IRInstruction.Interpreter.Artifact
       Noll.Core.LLVM.IRInstruction.Interpreter.Environment

@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Core.LLVM.IRInstruction.Eval.Expr.EVar (irEvalVar) where
+module Noll.Core.LLVM.IRInstruction.Eval.Var (irEvalVar) where
 
 import Noll.Core.LLVM.IREncodable (irEncode)
 import Noll.Core.LLVM.IRInstruction (IRInstr)
