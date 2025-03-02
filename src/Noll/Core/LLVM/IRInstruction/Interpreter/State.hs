@@ -13,25 +13,14 @@ module Noll.Core.LLVM.IRInstruction.Interpreter.State (
   initialIRInterpreterState,
 ) where
 
-import Control.Monad.RWS (
-  MonadReader,
-  MonadState,
-  MonadWriter,
-  RWS,
-  asks,
-  evalRWS,
-  gets,
-  local,
-  modify,
-  runRWS,
-  tell,
- )
-import Data.Text (Text, intercalate)
+import Control.Monad.RWS (MonadState, modify)
+import Data.Text (Text)
 import Noll.Utils (Name, Over)
 
 data IRInterpreterArtifact
   = InterpreterArtifactFunctionApply Int
   | InterpreterArtifactClosure Int
+  | InterpreterArtifactHashMapKey Name
   deriving (Show, Eq, Ord)
 
 data IRInterpreterState = IRInterpreterState

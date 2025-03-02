@@ -55,7 +55,7 @@ import Noll.Core.LLVM.IRInstruction.Interpreter.State (
   setLabel,
  )
 import Noll.Core.LLVM.IRType (IRType (..), IRTyped (..), pointeeType)
-import Noll.Core.LLVM.IRType.Syntax (fun, i8Ptr, ptr)
+import Noll.Core.LLVM.IRType.Syntax (fun, i8Ptr, ptr, stringLiteralType)
 import Noll.Core.LLVM.IRValue (IRValue (..))
 import Noll.Utils (Name)
 import TextShow (showt)
@@ -230,7 +230,9 @@ interpreter =
         , Global (signature (applied + remain)) fn
         )
     IHashMapKey name next -> do
-      error "IHashMapKey"
+      let label = "label_" <> name
+      addArtifact (InterpreterArtifactHashMapKey label)
+      next (Global (ptr (stringLiteralType name)) label)
     IDataConstr t name next -> do
       -- addArtifact undefined
       -- TODO
