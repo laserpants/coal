@@ -43,7 +43,7 @@ irRevealExpr expr = do
 
 {-# INLINE irEvalArgs #-}
 irEvalArgs :: List1 CoreExpr -> IRInstr [IRValue]
-irEvalArgs = mapM irEvalExpr . fromList1
+irEvalArgs = mapM (eliminatePtrConversions . irEvalExpr) . fromList1
 
 irApplyClosure :: IRValue -> List1 CoreExpr -> IRInstr IRValue
 irApplyClosure v es = do
