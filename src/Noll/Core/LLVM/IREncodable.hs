@@ -5,8 +5,11 @@
 module Noll.Core.LLVM.IREncodable (
   IREncodable (..),
   IRAnnotated (..),
-  --  IRLabel (..),
-  irAnnotate,
+  IRLabel (..),
+  irEncodeAnnotated,
+  irEncodeLabel,
+  irLocalName,
+  irGlobalName,
   enquote,
 ) where
 
@@ -38,9 +41,9 @@ instance IREncodable IRValue where
   irEncode =
     \case
       Local _ name ->
-        localName name
+        irLocalName name
       Global _ name ->
-        globalName name
+        irGlobalName name
       I1 False ->
         "0"
       I1 True ->
@@ -74,7 +77,7 @@ instance IREncodable IRType where
       TVoid ->
         "void"
       TNamed n _ ->
-        localName n
+        irLocalName n
       TPtr t ->
         ptr t
       TStruct ts ->
@@ -90,11 +93,11 @@ newtype IRAnnotated v = IRAnnotated v
 instance IREncodable (IRAnnotated IRValue) where
   irEncode (IRAnnotated v) = irEncode (irTypeOf v) <> " " <> irEncode v
 
--- newtype IRLabel = IRLabel Name
---  deriving (Show, Eq, Ord, Read)
---
--- instance IREncodable IRLabel where
---  irEncode (IRLabel name) = "label" <> " " <> localName name
+newtype IRLabel = IRLabel Name
+  deriving (Show, Eq, Ord, Read)
+
+instance IREncodable IRLabel where
+  irEncode (IRLabel name) = "label " <> irLocalName name
 
 instance IREncodable (Label IRType) where
   irEncode (Label t name) =
@@ -132,17 +135,17 @@ funBlock b = "{" <> "\n" <> irEncode b <> "}"
 commaSep :: (IREncodable a) => [a] -> Text
 commaSep = Text.concat . intersperse ", " . fmap irEncode
 
-{-# INLINE localName #-}
-localName :: Name -> Text
-localName n = "%" <> enquote n
+{-# INLINE irLocalName #-}
+irLocalName :: Name -> Text
+irLocalName n = "%" <> enquote n
 
-{-# INLINE globalName #-}
-globalName :: Name -> Text
-globalName n = "@" <> enquote n
+{-# INLINE irGlobalName #-}
+irGlobalName :: Name -> Text
+irGlobalName n = "@" <> enquote n
 
 {-# INLINE global #-}
 global :: IRType -> Name -> Text
-global t name = irEncode t <> " " <> globalName name
+global t name = irEncode t <> " " <> irGlobalName name
 
 {-# INLINE ptr #-}
 ptr :: (IREncodable a) => a -> Text
@@ -164,6 +167,10 @@ brackets t = "[" <> irEncode t <> "]"
 padded :: (IREncodable a) => a -> Text
 padded t = " " <> irEncode t <> " "
 
-{-# INLINE irAnnotate #-}
-irAnnotate :: v -> IRAnnotated v
-irAnnotate = IRAnnotated
+{-# INLINE irEncodeAnnotated #-}
+irEncodeAnnotated :: IRValue -> Text
+irEncodeAnnotated = irEncode . IRAnnotated
+
+{-# INLINE irEncodeLabel #-}
+irEncodeLabel :: Text -> Text
+irEncodeLabel = irEncode . IRLabel

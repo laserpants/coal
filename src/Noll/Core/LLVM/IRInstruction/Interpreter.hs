@@ -29,7 +29,15 @@ import Control.Monad.RWS (
   tell,
  )
 import Data.Text (Text, intercalate)
-import Noll.Core.LLVM.IREncodable (IRAnnotated (..), IREncodable (..), enquote, irAnnotate)
+import Noll.Core.LLVM.IREncodable (
+  IRAnnotated (..),
+  IREncodable (..),
+  enquote,
+  irEncodeAnnotated,
+  irEncodeLabel,
+  irGlobalName,
+  irLocalName,
+ )
 import Noll.Core.LLVM.IRInstruction (IRInstr, IRInstrOp, IRInstrOpF (..))
 import Noll.Core.LLVM.IRInstruction.Interpreter.Environment (
   IRInterpreterEnv (..),
@@ -49,7 +57,7 @@ import Noll.Core.LLVM.IRInstruction.Interpreter.State (
 import Noll.Core.LLVM.IRType (IRType (..), IRTyped (..), pointeeType)
 import Noll.Core.LLVM.IRType.Syntax (fun, i8Ptr, ptr)
 import Noll.Core.LLVM.IRValue (IRValue (..))
-import Noll.Utils (Name, Over)
+import Noll.Utils (Name)
 import TextShow (showt)
 
 import qualified Data.Text as Text
@@ -102,26 +110,14 @@ nextLabelIndex = do
 withCommas :: (IREncodable a) => [a] -> Text
 withCommas vs = intercalate ", " (irEncode <$> vs)
 
-{-# INLINE irAnnotated #-}
-irAnnotated :: IRValue -> Text
-irAnnotated = irEncode . irAnnotate
+phiBranches :: Name -> IRValue -> Text
+phiBranches n v = "[" <> withCommas [irEncode v, irLocalName n] <> "]"
 
-{-# INLINE irEncodeName #-}
-irEncodeName :: Text -> Text
-irEncodeName n = "%" <> enquote n
+switchBranch :: Name -> IRValue -> Text
+switchBranch n v = withCommas [irEncodeAnnotated v, irEncodeLabel n]
 
-{-# INLINE irEncodeLabel #-}
-irEncodeLabel :: Text -> Text
-irEncodeLabel n = "label" <> " " <> irEncodeName n
-
-irEncodePhiBranches :: Name -> IRValue -> Text
-irEncodePhiBranches n v = "[" <> withCommas [irEncode v, irEncodeName n] <> "]"
-
-irEncodeSwitchBranch :: Name -> IRValue -> Text
-irEncodeSwitchBranch ll v = withCommas [irAnnotated v, irEncodeLabel ll]
-
-irEncodeSwitchBranches :: [(Name, IRValue)] -> Text
-irEncodeSwitchBranches bs = Text.intercalate " " (uncurry irEncodeSwitchBranch <$> bs)
+switchBranches :: [(Name, IRValue)] -> Text
+switchBranches bs = Text.intercalate " " (uncurry switchBranch <$> bs)
 
 instruction :: IRType -> (IRValue -> IRInterpreter a) -> [Text] -> IRInterpreter a
 instruction t next tokens = do
@@ -136,10 +132,8 @@ offset :: IRType -> IRValue -> IRType
 offset (TStruct ts) (I32 n) = ts !! fromIntegral n
 offset (TNamed _ t) n = offset t n
 offset (TArray _ t) _ = t
--- offset _ _ = error "Implementation error"
-
 offset (TPtr t) n = offset t n
-offset a b = error (show (a, b))
+offset _ _ = error "Implementation error"
 
 interpreter :: IRInstrOp (IRInterpreter a) -> IRInterpreter a
 interpreter =
@@ -151,11 +145,11 @@ interpreter =
     IMul t v1 v2 next ->
       instruction t next ["mul", irEncode t, withCommas [v1, v2]]
     ICmpEq t v1 v2 next ->
-      instruction t next ["icmp", "eq", withCommas [irAnnotated v1, irEncode v2]]
+      instruction t next ["icmp", "eq", withCommas [irEncodeAnnotated v1, irEncode v2]]
     ICmpSLt t v1 v2 next ->
-      instruction t next ["icmp", "slt", withCommas [irAnnotated v1, irEncode v2]]
+      instruction t next ["icmp", "slt", withCommas [irEncodeAnnotated v1, irEncode v2]]
     ICmpSGt t v1 v2 next ->
-      instruction t next ["icmp", "sgt", withCommas [irAnnotated v1, irEncode v2]]
+      instruction t next ["icmp", "sgt", withCommas [irEncodeAnnotated v1, irEncode v2]]
     IXOr t v1 v2 next ->
       instruction t next ["xor", irEncode t, withCommas [v1, v2]]
     IOr t v1 v2 next ->
@@ -163,11 +157,11 @@ interpreter =
     IAnd t v1 v2 next ->
       instruction t next ["and", irEncode t, withCommas [v1, v2]]
     IInttoptr v t next ->
-      instruction t next ["inttoptr", irAnnotated v, "to", irEncode t]
+      instruction t next ["inttoptr", irEncodeAnnotated v, "to", irEncode t]
     IPtrtoint v t next ->
-      instruction t next ["ptrtoint", irAnnotated v, "to", irEncode t]
+      instruction t next ["ptrtoint", irEncodeAnnotated v, "to", irEncode t]
     IBCast v t next ->
-      instruction t next ["bitcast", irAnnotated v, "to", irEncode t]
+      instruction t next ["bitcast", irEncodeAnnotated v, "to", irEncode t]
     IAlloca t next ->
       instruction (ptr t) next ["alloca", irEncode t]
     IComment text next -> do
@@ -179,15 +173,15 @@ interpreter =
       -- v vs next ->
       error "TODO"
     ICall t v vs next ->
-      instruction t next ["call", irEncode t, irEncode v <> "(" <> withCommas (irAnnotated <$> vs) <> ")"]
+      instruction t next ["call", irEncode t, irEncode v <> "(" <> withCommas (irEncodeAnnotated <$> vs) <> ")"]
     ICallGlobal t name vs next ->
-      instruction t next ["call", irEncode t, "@" <> enquote name <> "(" <> withCommas (irAnnotated <$> vs) <> ")"]
+      instruction t next ["call", irEncode t, irGlobalName name <> "(" <> withCommas (irEncodeAnnotated <$> vs) <> ")"]
     IBr v names next ->
-      instruction0 next ["br", withCommas (irAnnotated v : (irEncodeLabel <$> names))]
+      instruction0 next ["br", withCommas (irEncodeAnnotated v : (irEncodeLabel <$> names))]
     IBr1 name next ->
       instruction0 next ["br", irEncodeLabel name]
     IPhi t vs next ->
-      instruction t next ["phi", irEncode t, withCommas (uncurry irEncodePhiBranches <$> vs)]
+      instruction t next ["phi", irEncode t, withCommas (uncurry phiBranches <$> vs)]
     IGep _ v1 v2 v3 next ->
       -- TODO: remove t???
       -- instruction (ptr (offset t v3)) next ["getelementptr", withCommas (irEncode (pointeeType v1) : (irEncode . IRAnnotated <$> [v1, v2, v3]))]
@@ -197,9 +191,9 @@ interpreter =
     ILoad t v1 next ->
       instruction t next ["load", withCommas [irEncode t, irEncode (IRAnnotated v1)]]
     IStore v1 v2 next ->
-      instruction0 next ["store", withCommas [irEncode (irAnnotated v1), irEncode (irAnnotated v2)]]
+      instruction0 next ["store", withCommas [irEncode (irEncodeAnnotated v1), irEncode (irEncodeAnnotated v2)]]
     ISwitch v n cs next ->
-      instruction0 next ["switch", withCommas [irAnnotated v, irEncodeLabel n], "[" <> irEncodeSwitchBranches cs <> "]"]
+      instruction0 next ["switch", withCommas [irEncodeAnnotated v, irEncodeLabel n], "[" <> switchBranches cs <> "]"]
     ILookup var next -> do
       env <- asks irInterpreterValueEnv
       case Environment.lookup var env of
