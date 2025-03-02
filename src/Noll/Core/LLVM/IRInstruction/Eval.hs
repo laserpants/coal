@@ -15,6 +15,7 @@ import Noll.Core.LLVM.IRInstruction (IRInstr, IRInstrOpF (..))
 import Noll.Core.LLVM.IRInstruction.Eval.Closure (irPackClosure)
 import Noll.Core.LLVM.IRInstruction.Eval.CommentBlock (irCommentBlock)
 import Noll.Core.LLVM.IRInstruction.Eval.Conceal (irConceal, irReveal)
+import Noll.Core.LLVM.IRInstruction.Eval.Expr.EVar (irEvalVar)
 import Noll.Core.LLVM.IRInstruction.Eval.Malloc (irMalloc)
 import Noll.Core.LLVM.IRInstruction.TH
 import Noll.Core.LLVM.IRType (IRType (..), IRTyped (..))
@@ -28,9 +29,8 @@ import Noll.Core.LLVM.IRType.Syntax (
   struct,
  )
 import Noll.Core.LLVM.IRValue (IRValue (..), irPrimValue)
-import Noll.Core.Language.Type.Syntax (arity)
 import Noll.Label (Label (..))
-import Noll.Utils (Name, forM, forM_, isConstructor)
+import Noll.Utils (forM, forM_, isConstructor)
 
 import qualified Noll.Core.Language as Core
 
@@ -218,28 +218,6 @@ irEvalMatch e1 cs = do
         iBlock labelEnd $
           iPhi (irTypeOf (snd b)) (b : bs)
       irConceal v
-
-irEvalVar :: Core.Type -> Name -> IRInstr IRValue
-irEvalVar t var
-  | isConstructor var = do
-      mapM_ iComment ["", "Data constructor: " <> var, "----------------- ^", ""]
-      (i, t1) <- iDataConstr (struct [i32]) var
-      v1 <- irMalloc t1
-      v2 <- iGep t1 v1 (I32 0) (I32 0)
-      iStore (I32 (fromIntegral i)) v2
-      iBCast v1 i8Ptr
-  | otherwise = do
-      v <- iLookup var
-      mapM_ iComment ["", "Name: " <> irEncode v, "----- ^", ""]
-      case v of
-        Global (TFun _ us) _ ->
-          if arity t == 0
-            then -- Global constant
-              iCallGlobal i8Ptr var []
-            else
-              irPackClosure var (length us) []
-        _ ->
-          pure v
 
 irEvalApp :: Core.Type -> CoreExpr -> List1 CoreExpr -> IRInstr IRValue
 irEvalApp t e1@(Fix (Core.EVar (Label _ var))) es
