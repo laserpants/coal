@@ -7,7 +7,6 @@ import qualified Noll.AST.IndexedSpec
 -- import qualified Noll.SystemF.TypeSubstitutionSpec
 
 import qualified Noll.AST.FreeVarsSpec
-import qualified Noll.Core.CompilerSpec
 import qualified Noll.Compiler.NormalizeObjectsSpec
 import qualified Noll.Compiler.PatternMatchingExamples.Test01
 import qualified Noll.Compiler.PatternMatchingExamples.Test02
@@ -20,6 +19,7 @@ import qualified Noll.Compiler.Transform.Type.AliasInsertionSpec
 import qualified Noll.CompilerExamples.Test01
 import qualified Noll.CompilerExamples.Test02
 import qualified Noll.CompilerSpec
+import qualified Noll.Core.CompilerSpec
 import qualified Noll.Core.Language.ReplaceSpec
 import qualified Noll.SystemF.Constraint.GenerationSpec
 import qualified Noll.SystemF.UnificationSpec

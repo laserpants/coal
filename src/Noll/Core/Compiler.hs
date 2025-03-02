@@ -515,7 +515,7 @@ compile ol = do
   traceShow objs $ do
     extendInterpreterValueEnv (objectEnvironment objs)
     -- TODO
-    extendInterpreterConstructorEnv (Environment.fromList [("$Cons", 0), ("$Nil", 1)])
+    extendInterpreterConstructorEnv (Environment.fromList [("$Cons", 0), ("$Nil", 1), ("$Record", 0), ("EqualTo", 0), ("GreaterThan", 1), ("LessThan", 2), ("Node", 1), ("Leaf", 0)])
     code <- transInterpreter (traverse objectInterpreter objs)
     pipelineStateInsertCode code
 
