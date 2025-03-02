@@ -61,6 +61,7 @@ struct = TStruct
 stringLiteralType :: Text -> IRType
 stringLiteralType str = TArray (Text.length str + 1) i8
 
+{-# INLINE opaqueIRSignature #-}
 opaqueIRSignature :: Int -> IRType
 opaqueIRSignature n = fun i8Ptr (replicate n i8Ptr)
 
