@@ -353,6 +353,20 @@ labels ts = zipWith Label ts ["$extra." <> showt i | i <- [0 :: Int ..]]
 
 -------------------------------------------------------------------------------
 
+sortMatchClauses :: Expr t -> Expr t
+sortMatchClauses =
+  cata $
+    \case
+      EMat t e1 cs ->
+        Core.match t e1 (List1.sortBy clauseOrder cs)
+      e ->
+        embed e
+ where
+  clauseOrder (Clause (a :| _) _) (Clause (b :| _) _) =
+    compare (labelName a) (labelName b)
+
+-------------------------------------------------------------------------------
+
 muteTypes :: Expr Type -> Expr ()
 muteTypes =
   cata $
@@ -500,7 +514,8 @@ collectObjs f as = pure (xs <> fmap toObject ys)
 
 pipeline :: ObjectList -> Core [Object Type (Expr Type)]
 pipeline ol = do
-  a1 <- suffixNamesC ol
+  a0 <- pure3 sortMatchClauses ol
+  a1 <- suffixNamesC a0
   a2 <- pure3 flattenELam a1
   a3 <- collectObjs transLetLifting a2
   a4 <- collectObjs memoize a3
@@ -512,12 +527,11 @@ pipeline ol = do
 compile :: ObjectList -> Core ()
 compile ol = do
   objs <- pipeline ol
-  traceShow objs $ do
-    extendInterpreterValueEnv (objectEnvironment objs)
-    -- TODO
-    extendInterpreterConstructorEnv (Environment.fromList [("$Cons", 0), ("$Nil", 1), ("$Record", 0), ("EqualTo", 0), ("GreaterThan", 1), ("LessThan", 2), ("Node", 1), ("Leaf", 0)])
-    code <- transInterpreter (traverse objectInterpreter objs)
-    pipelineStateInsertCode code
+  extendInterpreterValueEnv (objectEnvironment objs)
+  -- TODO
+  extendInterpreterConstructorEnv (Environment.fromList [("$Cons", 0), ("$Nil", 1), ("$Record", 0), ("EqualTo", 0), ("GreaterThan", 1), ("LessThan", 2), ("Node", 1), ("Leaf", 0)])
+  code <- transInterpreter (traverse objectInterpreter objs)
+  pipelineStateInsertCode code
 
 -- xx1 objs = mapM_ print $ muteObjectTypes <$> liftLambdas (flattenELam <$$> evalState (traverse (traverse transSuffixExpr) objs) 0)
 

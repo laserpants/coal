@@ -14,6 +14,8 @@ import Data.List.NonEmpty (
   partition,
   reverse,
   singleton,
+  sort,
+  sortBy,
   unzip,
   zip,
   zipWith,

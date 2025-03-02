@@ -345,29 +345,29 @@ blockObjects4 =
                           (list opaque)
                           (Core.var (Label (list opaque) "a"))
                           ( Core.Clause
-                              (Label (list opaque) "$Nil" :| [])
-                              (Core.var (Label (list opaque) "b"))
-                              :| [ Core.Clause
-                                    ( Label (opaque ~> list opaque ~> list opaque) "$Cons"
-                                        <| Label opaque "x"
-                                        <| Label (list opaque) "xs"
-                                        :| []
-                                    )
-                                    ( Core.app
+                              ( Label (opaque ~> list opaque ~> list opaque) "$Cons"
+                                  <| Label opaque "x"
+                                  <| Label (list opaque) "xs"
+                                  :| []
+                              )
+                              ( Core.app
+                                  (list opaque)
+                                  (Core.var (Label (opaque ~> list opaque ~> list opaque) "$Cons"))
+                                  ( Core.var (Label opaque "x")
+                                      <| Core.app
                                         (list opaque)
-                                        (Core.var (Label (opaque ~> list opaque ~> list opaque) "$Cons"))
-                                        ( Core.var (Label opaque "x")
-                                            <| Core.app
-                                              (list opaque)
-                                              (Core.var (Label (list opaque ~> list opaque ~> list opaque) "_list_concat_"))
-                                              ( Core.var (Label (list opaque) "xs")
-                                                  <| Core.var (Label (list opaque) "b")
-                                                  :| []
-                                              )
+                                        (Core.var (Label (list opaque ~> list opaque ~> list opaque) "_list_concat_"))
+                                        ( Core.var (Label (list opaque) "xs")
+                                            <| Core.var (Label (list opaque) "b")
                                             :| []
                                         )
-                                    )
-                                 ]
+                                      :| []
+                                  )
+                              )
+                              <| Core.Clause
+                                (Label (list opaque) "$Nil" :| [])
+                                (Core.var (Label (list opaque) "b"))
+                              :| []
                           )
                       )
                   )
@@ -512,14 +512,14 @@ blockObjects4 =
                                             )
                                         )
                                         ( Core.Clause
-                                            (Label ordering "LessThan" :| [])
+                                            (Label ordering "EqualTo" :| [])
                                             (Core.lit (Core.PBool True))
-                                            <| Core.Clause
-                                              (Label ordering "EqualTo" :| [])
-                                              (Core.lit (Core.PBool True))
                                             <| Core.Clause
                                               (Label ordering "GreaterThan" :| [])
                                               (Core.lit (Core.PBool False))
+                                            <| Core.Clause
+                                              (Label ordering "LessThan" :| [])
+                                              (Core.lit (Core.PBool True))
                                             :| []
                                         )
                                     )
@@ -812,35 +812,35 @@ blockObjects4 =
                                             (list opaque)
                                             (Core.var (Label (tree opaque) "a_0"))
                                             ( Core.Clause
-                                                ( Label (opaque ~> tree opaque ~> tree opaque ~> tree opaque) "Node"
-                                                    <| Label opaque "y"
-                                                    <| Label (tree opaque) "lhs"
-                                                    <| Label (tree opaque) "rhs"
-                                                    :| []
-                                                )
-                                                ( Core.app
-                                                    (list opaque)
-                                                    (Core.var (Label (list opaque ~> list opaque ~> list opaque) "_list_concat_"))
-                                                    ( Core.app
-                                                        (list opaque)
-                                                        (Core.var (Label (tree opaque ~> list opaque) "fold_"))
-                                                        (Core.var (Label (tree opaque) "lhs") :| [])
-                                                        <| Core.app
-                                                          (list opaque)
-                                                          (Core.var (Label (opaque ~> list opaque ~> list opaque) "$Cons"))
-                                                          ( Core.var (Label opaque "y")
-                                                              <| Core.app
-                                                                (list opaque)
-                                                                (Core.var (Label (tree opaque ~> list opaque) "fold_"))
-                                                                (Core.var (Label (tree opaque) "rhs") :| [])
-                                                              :| []
-                                                          )
-                                                        :| []
-                                                    )
-                                                )
+                                                (Label (tree opaque) "Leaf" :| [])
+                                                (Core.var (Label (list opaque) "$Nil"))
                                                 <| Core.Clause
-                                                  (Label (tree opaque) "Leaf" :| [])
-                                                  (Core.var (Label (list opaque) "$Nil"))
+                                                  ( Label (opaque ~> tree opaque ~> tree opaque ~> tree opaque) "Node"
+                                                      <| Label opaque "y"
+                                                      <| Label (tree opaque) "lhs"
+                                                      <| Label (tree opaque) "rhs"
+                                                      :| []
+                                                  )
+                                                  ( Core.app
+                                                      (list opaque)
+                                                      (Core.var (Label (list opaque ~> list opaque ~> list opaque) "_list_concat_"))
+                                                      ( Core.app
+                                                          (list opaque)
+                                                          (Core.var (Label (tree opaque ~> list opaque) "fold_"))
+                                                          (Core.var (Label (tree opaque) "lhs") :| [])
+                                                          <| Core.app
+                                                            (list opaque)
+                                                            (Core.var (Label (opaque ~> list opaque ~> list opaque) "$Cons"))
+                                                            ( Core.var (Label opaque "y")
+                                                                <| Core.app
+                                                                  (list opaque)
+                                                                  (Core.var (Label (tree opaque ~> list opaque) "fold_"))
+                                                                  (Core.var (Label (tree opaque) "rhs") :| [])
+                                                                :| []
+                                                            )
+                                                          :| []
+                                                      )
+                                                  )
                                                 :| []
                                             )
                                         )
