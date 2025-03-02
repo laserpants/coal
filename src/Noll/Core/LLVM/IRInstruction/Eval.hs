@@ -38,7 +38,7 @@ type CoreExpr = Core.Expr Core.Type
 
 irRevealExpr :: CoreExpr -> IRInstr IRValue
 irRevealExpr expr = do
-  v <- irEvalExpr expr
+  v <- eliminatePtrConversions (irEvalExpr expr)
   irReveal v (irTypeOf (Core.typeOf expr))
 
 {-# INLINE irEvalArgs #-}
