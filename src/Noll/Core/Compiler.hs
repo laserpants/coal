@@ -22,7 +22,6 @@ import qualified Data.Map.Strict as Map
 import Data.Set (Set)
 import qualified Data.Set as Set
 import qualified Data.Text as Text
-import Debug.Trace
 import Noll.AST.FreeVars (FreeVars (..), exceptNames)
 import Noll.Common.Environment (Environment)
 import qualified Noll.Common.Environment as Environment
