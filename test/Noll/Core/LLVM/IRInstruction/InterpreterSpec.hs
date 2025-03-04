@@ -6,12 +6,14 @@ module Noll.Core.LLVM.IRInstruction.InterpreterSpec where
 
 import Control.Monad.Reader (local)
 import Control.Monad.Writer (listen)
+import Data.Tuple.Extra (thd3)
 import Noll.Common.Environment (Environment)
 import Noll.Common.List1 (NonEmpty (..), (<|))
 import Noll.Core.Compiler
 import Noll.Core.LLVM.IRConstruct (IRConstruct (..))
 import Noll.Core.LLVM.IREncodable (IREncodable (..))
 import Noll.Core.LLVM.IRInstruction.Eval (irEvalExpr)
+import Noll.Core.LLVM.IRInstruction.Eval.Closure.Extend (irClosureExtend)
 import Noll.Core.LLVM.IRInstruction.Interpreter (
   IRInterpreter (..),
   IRInterpreterEnv (..),
@@ -1160,6 +1162,8 @@ abc2 = runInterpreter (IRInterpreterEnv testEnv mempty) (objectInterpreter funMa
 abc3 = runInterpreter (IRInterpreterEnv testEnv mempty) (objectInterpreter funFn2)
 
 abc4 = runInterpreter (IRInterpreterEnv testEnv mempty) (objectInterpreter funF4)
+
+abcd = Text.putStrLn $ irEncode (thd3 (runInterpreter (IRInterpreterEnv mempty mempty) (interpret (irClosureExtend 2 Null Null (Local i8PtrPtr "as")))))
 
 -- abc5 = Text.putStrLn (irEncode pipelineStateArtifacts)
 abc5 = (pipelineStateArtifacts, pipelineStateCode)

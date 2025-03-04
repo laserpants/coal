@@ -54,7 +54,7 @@ import Noll.Core.LLVM.IRInstruction.Interpreter.State (
   initialIRInterpreterState,
   setLabel,
  )
-import Noll.Core.LLVM.IRType (IRType (..))
+import Noll.Core.LLVM.IRType (IRType (..), IRTyped (..))
 import Noll.Core.LLVM.IRType.Syntax (fun, i8Ptr, ptr, stringLiteralType)
 import Noll.Core.LLVM.IRValue (IRValue (..))
 import Noll.Utils (Name)
@@ -131,7 +131,7 @@ instruction0 next tokens = tell [LInstruction tokens] >> next
 offset :: IRType -> [IRValue] -> IRType
 offset (TPtr t) (I32 0 : ixs) = offset t ixs
 offset (TNamed _ t) ixs = offset t ixs
-offset (TStruct ts) (I32 n : _) = ptr (ts !! fromIntegral n)
+offset (TStruct ts) (I32 n : _) = ts !! fromIntegral n
 offset (TArray _ t) (I32 _ : _) = ptr t
 offset t [] = t
 offset a b = error (show (a, b))
@@ -185,6 +185,7 @@ interpreter =
       instruction t next ["phi", irEncode t, withCommas (uncurry phiBranches <$> vs)]
     IGep t v1 v2 v3 next ->
       instruction (ptr (offset t [v2, v3])) next ["getelementptr", withCommas (irEncode t : (irEncode . IRAnnotated <$> [v1, v2, v3]))]
+    --      instruction (ptr (offset t [v2, v3])) next ["getelementptr", withCommas (irEncode (irTypeOf v1) : (irEncode . IRAnnotated <$> [v1, v2, v3]))]
     IGep1 t v1 v2 next ->
       undefined -- instruction (ptr (offset (irTypeOf v1) [v2, v3])) next ["getelementptr", withCommas (irEncode (pointeeType v1) : (irEncode . IRAnnotated <$> [v1, v2]))]
     IGepNull t v1 next ->
