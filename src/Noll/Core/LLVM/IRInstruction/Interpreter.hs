@@ -188,7 +188,7 @@ interpreter =
       instruction (ptr (offset t [v2, v3])) next ["getelementptr", withCommas (irEncode t : (irEncode . IRAnnotated <$> [v1, v2, v3]))]
     --      instruction (ptr (offset t [v2, v3])) next ["getelementptr", withCommas (irEncode (irTypeOf v1) : (irEncode . IRAnnotated <$> [v1, v2, v3]))]
     IGep1 t v1 v2 next ->
-      undefined -- instruction (ptr (offset (irTypeOf v1) [v2, v3])) next ["getelementptr", withCommas (irEncode (pointeeType v1) : (irEncode . IRAnnotated <$> [v1, v2]))]
+      instruction (ptr (offset (irTypeOf v1) [v2])) next ["getelementptr", withCommas (irEncode t : (irEncode . IRAnnotated <$> [v1, v2]))]
     IGepNull t v1 next ->
       instruction t next ["getelementptr", withCommas [irEncode t, irEncode t <> " null", irEncode (IRAnnotated v1)]]
     ILoad t v1 next ->

@@ -38,7 +38,10 @@ irClosureExtend n argF argN argAs = do
     iComment ("Applied arg #" <> showt m)
     iComment ""
     iLoad i8Ptr rm
-  iComment ""
-  iComment "Extra arg #1"
-  iComment ""
+  forM_ [1 .. n] $ \m -> do
+    rm <- iGep1 i8Ptr argAs (I32 0)
+    iComment ""
+    iComment "Extra arg #1"
+    iComment ""
+    iLoad i8Ptr rm
   pure r2
