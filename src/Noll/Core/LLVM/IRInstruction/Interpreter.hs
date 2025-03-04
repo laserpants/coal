@@ -128,12 +128,13 @@ instruction t next tokens = do
 instruction0 :: IRInterpreter a -> [Text] -> IRInterpreter a
 instruction0 next tokens = tell [LInstruction tokens] >> next
 
-offset :: IRType -> IRValue -> IRType
-offset (TStruct ts) (I32 n) = ts !! fromIntegral n
-offset (TNamed _ t) n = offset t n
-offset (TArray _ t) _ = t
-offset (TPtr t) n = offset t n
-offset _ _ = error "Implementation error"
+offset :: IRType -> [IRValue] -> IRType
+offset (TPtr t) (I32 0 : ixs) = offset t ixs
+offset (TNamed _ t) ixs = offset t ixs
+offset (TStruct ts) (I32 n : _) = ptr (ts !! fromIntegral n)
+offset (TArray _ t) (I32 _ : _) = ptr t
+offset t [] = t
+offset a b = error (show (a, b))
 
 interpreter :: IRInstrOp (IRInterpreter a) -> IRInterpreter a
 interpreter =
@@ -182,10 +183,12 @@ interpreter =
       instruction0 next ["br", irEncodeLabel name]
     IPhi t vs next ->
       instruction t next ["phi", irEncode t, withCommas (uncurry phiBranches <$> vs)]
-    IGep _ v1 v2 v3 next ->
+    IGep t v1 v2 v3 next ->
       -- TODO: remove t???
-      -- instruction (ptr (offset t v3)) next ["getelementptr", withCommas (irEncode (pointeeType v1) : (irEncode . IRAnnotated <$> [v1, v2, v3]))]
-      instruction (ptr (offset (irTypeOf v1) v3)) next ["getelementptr", withCommas (irEncode (pointeeType v1) : (irEncode . IRAnnotated <$> [v1, v2, v3]))]
+      instruction (ptr (offset t [v2, v3])) next ["getelementptr", withCommas (irEncode (pointeeType v1) : (irEncode . IRAnnotated <$> [v1, v2, v3]))]
+    -- instruction (ptr (offset (irTypeOf v1) [v2, v3])) next ["getelementptr", withCommas (irEncode (pointeeType v1) : (irEncode . IRAnnotated <$> [v1, v2, v3]))]
+    IGep1 t v1 v2 next ->
+      undefined -- instruction (ptr (offset (irTypeOf v1) [v2, v3])) next ["getelementptr", withCommas (irEncode (pointeeType v1) : (irEncode . IRAnnotated <$> [v1, v2]))]
     IGepNull t v1 next ->
       instruction t next ["getelementptr", withCommas [irEncode t, irEncode t <> " null", irEncode (IRAnnotated v1)]]
     ILoad t v1 next ->

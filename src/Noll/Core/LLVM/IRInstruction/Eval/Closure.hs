@@ -2,6 +2,7 @@
 
 module Noll.Core.LLVM.IRInstruction.Eval.Closure (irPackClosure) where
 
+import Debug.Trace
 import Noll.Core.LLVM.IRInstruction (IRInstr)
 import Noll.Core.LLVM.IRInstruction.Eval.Malloc (irMalloc)
 import Noll.Core.LLVM.IRInstruction.TH

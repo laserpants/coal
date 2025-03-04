@@ -36,6 +36,7 @@ data IRInstrOpF v t i next
   | ICall            t v [v]      (v -> next)
   | ICallGlobal      t Name [v]   (v -> next)
   | IGep             t v v v      (v -> next)
+  | IGep1            t v v        (v -> next)
   | IGepNull         t v          (v -> next)
   | IInttoptr        v t          (v -> next)
   | IPtrtoint        v t          (v -> next)

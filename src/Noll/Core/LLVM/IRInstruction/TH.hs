@@ -22,6 +22,7 @@ module Noll.Core.LLVM.IRInstruction.TH (
   iCall,
   iCallGlobal,
   iGep,
+  iGep1,
   iGepNull,
   iInttoptr,
   iPtrtoint,

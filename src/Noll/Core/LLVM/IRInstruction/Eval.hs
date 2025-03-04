@@ -9,6 +9,7 @@ import Control.Monad.Free (Free (..))
 import Data.Fix (Fix (..))
 import Data.Functor.Foldable (project)
 import Data.Tuple.Extra (fst3)
+import Debug.Trace
 import Noll.Common.List1 (List1, NonEmpty (..), fromList1)
 import Noll.Core.LLVM.IREncodable (irEncode)
 import Noll.Core.LLVM.IRInstruction (IRInstr, IRInstrOpF (..))
@@ -317,7 +318,7 @@ irEvalExpr =
         irCommentBlock "EMat" $ do
           irEvalMatch e1 cs
       Core.ENil ->
-        irCommentBlock "ENil" $
+        irCommentBlock "ENil" $ do
           iCallGlobal i8Ptr "hashmap_init" []
       Core.EExt (Label _ field) e1 e2 -> do
         irCommentBlock "EExt" $ do

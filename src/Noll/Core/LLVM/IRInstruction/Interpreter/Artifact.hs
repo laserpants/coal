@@ -19,7 +19,7 @@ import TextShow (showt)
 
 foo :: Int -> IRInterpreter (IRConstruct [IRLine])
 foo n = do
-  (_, w) <- listen (interpret (irClosureFinalize n)) -- (interpret (irClosureExtend applied))
+  (_, w) <- listen (interpret (irClosureFinalize n undefined undefined undefined)) -- (interpret (irClosureExtend applied))
   let zz =
         CDefine
           undefined
@@ -34,7 +34,7 @@ foo n = do
 
 foo2 :: Int -> IRInterpreter (IRConstruct [IRLine])
 foo2 n = do
-  (_, w) <- listen (interpret (irClosureExtend n)) -- (interpret (irClosureExtend applied))
+  (_, w) <- listen (interpret (irClosureExtend n undefined undefined undefined)) -- (interpret (irClosureExtend applied))
   let zz =
         CDefine
           undefined
