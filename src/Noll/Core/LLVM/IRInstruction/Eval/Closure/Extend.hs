@@ -2,6 +2,7 @@
 
 module Noll.Core.LLVM.IRInstruction.Eval.Closure.Extend (irClosureExtend) where
 
+import Debug.Trace
 import Noll.Core.LLVM.IRInstruction (IRInstr)
 import Noll.Core.LLVM.IRInstruction.TH
 import Noll.Core.LLVM.IRType (IRType (..))
@@ -12,11 +13,11 @@ import TextShow (showt)
 
 s applied = struct (i32 : replicate (3 + applied) i8Ptr)
 
-xx n = (TNamed ("closure" <> showt n) (s n))
+xx n = TNamed ("closure" <> showt n) (s n)
 
 irClosureExtend :: Int -> IRValue -> IRValue -> IRValue -> IRInstr IRValue
 irClosureExtend n argF argN argAs = do
-  r1 <- iBCast (Local i8Ptr "f") (ptr (TNamed ("closure" <> showt n) (s n)))
+  r1 <- iBCast (Local i8Ptr "f") (ptr (xx n))
   r2 <- iGep (xx n) r1 (I32 0) (I32 0)
   iComment ""
   iComment "Argument count"

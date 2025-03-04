@@ -11,6 +11,7 @@ module Noll.Core.LLVM.IRInstruction.Interpreter (
   IRInterpreterArtifact (..),
   IRInterpreterState (..),
   IRLine (..),
+  offset,
   runInterpreter,
   evalInterpreter,
 ) where
@@ -131,7 +132,7 @@ instruction0 next tokens = tell [LInstruction tokens] >> next
 offset :: IRType -> [IRValue] -> IRType
 offset (TPtr t) (I32 0 : ixs) = offset t ixs
 offset (TNamed _ t) ixs = offset t ixs
-offset (TStruct ts) (I32 n : _) = ts !! fromIntegral n
+offset (TStruct ts) (I32 0 : I32 n : _) = ts !! fromIntegral n
 offset (TArray _ t) (I32 _ : _) = ptr t
 offset t [] = t
 offset a b = error (show (a, b))
