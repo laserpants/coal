@@ -50,7 +50,9 @@ irClosureFinalize n argF argN argAs = do
           r7 <- iBCast r3 (opaqueIRSignature (n + m))
           r8 <- iCall i8Ptr r7 (rs <> qs)
           iRet i8Ptr r8
-          pure r8
+          pure Null
+        -- pure r8
         iBlock_ labelGt $ do
-          pure r6
+          pure Null
+  -- pure r6
   iRet i8Ptr Null
