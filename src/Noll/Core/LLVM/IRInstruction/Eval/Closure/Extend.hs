@@ -17,7 +17,7 @@ xx n = TNamed ("closure" <> showt n) (s n)
 
 irClosureExtend :: Int -> IRValue -> IRValue -> IRValue -> IRInstr IRValue
 irClosureExtend n argF argN argAs = do
-  r1 <- iBCast (Local i8Ptr "f") (ptr (xx n))
+  r1 <- iBCast argF (ptr (xx n))
   r2 <- iGep (xx n) r1 (I32 0) (I32 0)
   iComment ""
   iComment "Argument count"
