@@ -8,7 +8,7 @@ import Noll.Core.LLVM.IRInstruction.TH
 import Noll.Core.LLVM.IRType (IRType (..))
 import Noll.Core.LLVM.IRType.Syntax (i32, i8Ptr, ptr, struct)
 import Noll.Core.LLVM.IRValue (IRValue (..))
-import Noll.Utils (forM_)
+import Noll.Utils (forM, forM_)
 import TextShow (showt)
 
 s applied = struct (i32 : replicate (3 + applied) i8Ptr)
@@ -38,10 +38,25 @@ irClosureExtend n argF argN argAs = do
     iComment ("Applied arg #" <> showt m)
     iComment ""
     iLoad i8Ptr rm
-  forM_ [1 .. n] $ \m -> do
-    rm <- iGep1 i8Ptr argAs (I32 0)
+
+  xs <- forM [1 .. 10 :: Int] $ \m -> do
+    labelEq <- iLabel "eq"
+    labelGt <- iLabel "gt"
+    pure (labelEq, labelGt)
+
+  forM_ [1 .. 10 :: Int] $ \m -> do
+    rm <- iGep1 i8Ptr argAs (I32 (fromIntegral (m - 1)))
     iComment ""
-    iComment "Extra arg #1"
+    iComment ("Extra arg #" <> showt m)
     iComment ""
-    iLoad i8Ptr rm
+    r7 <- iLoad i8Ptr rm
+    r8 <- iCmpSGt i32 argN (I32 1)
+    labelEq <- iLabel "eq"
+    labelGt <- iLabel "gt"
+    iBr r8 [labelEq, labelGt]
+    eqBlock <- iBlock labelEq $ do
+      undefined
+    gtBlock <- iBlock labelGt $ do
+      undefined
+    pure r8
   pure r2
