@@ -6,7 +6,7 @@ import Debug.Trace
 import Noll.Core.LLVM.IRInstruction (IRInstr)
 import Noll.Core.LLVM.IRInstruction.TH
 import Noll.Core.LLVM.IRType (IRType (..))
-import Noll.Core.LLVM.IRType.Syntax (i32, i8Ptr, ptr, struct)
+import Noll.Core.LLVM.IRType.Syntax (i1, i32, i8Ptr, ptr, struct)
 import Noll.Core.LLVM.IRValue (IRValue (..))
 import Noll.Utils (forM, forM_)
 import TextShow (showt)
@@ -50,7 +50,7 @@ irClosureExtend n argF argN argAs = do
     iComment ("Extra arg #" <> showt m)
     iComment ""
     r7 <- iLoad i8Ptr rm
-    r8 <- iCmpSGt i32 argN (I32 1)
+    r8 <- iCmpSGt i1 argN (I32 1)
     labelEq <- iLabel "eq"
     labelGt <- iLabel "gt"
     iBr r8 [labelEq, labelGt]
