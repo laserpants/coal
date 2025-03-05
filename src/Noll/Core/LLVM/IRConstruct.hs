@@ -23,11 +23,16 @@ data IRLinkage
 
 -- | Top-level IR language construct
 data IRConstruct a
-  = CDefine Name IRType (Maybe IRLinkage) [Label IRType] a
-  | CDeclare Name IRType [IRType]
-  | CType Name IRType
-  | CString Name Text
-  | CGlobal Name IRType IRValue
+  = -- | Function definition
+    CDefine Name IRType (Maybe IRLinkage) [Label IRType] a
+  | -- | External symbol
+    CDeclare Name IRType [IRType]
+  | -- | Type definition
+    CType Name IRType
+  | -- | Top-level string constant
+    CString Name Text
+  | -- | Global symbol
+    CGlobal Name IRType IRValue
   deriving (Show, Eq, Ord, Functor, Foldable, Traversable)
 
 irConstructWeight :: IRConstruct a -> Int
