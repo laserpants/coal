@@ -1,4 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
@@ -14,6 +13,7 @@ import Noll.Core.LLVM.IRConstruct (IRConstruct (..))
 import Noll.Core.LLVM.IREncodable (IREncodable (..))
 import Noll.Core.LLVM.IRInstruction.Eval (irEvalExpr)
 import Noll.Core.LLVM.IRInstruction.Eval.Closure.Extend (irClosureExtend)
+import Noll.Core.LLVM.IRInstruction.Eval.Closure.Finalize (irClosureFinalize)
 import Noll.Core.LLVM.IRInstruction.Interpreter (
   IRInterpreter (..),
   IRInterpreterEnv (..),
@@ -1164,6 +1164,8 @@ abc3 = runInterpreter (IRInterpreterEnv testEnv mempty) (objectInterpreter funFn
 abc4 = runInterpreter (IRInterpreterEnv testEnv mempty) (objectInterpreter funF4)
 
 abcd = Text.putStrLn $ irEncode (thd3 (runInterpreter (IRInterpreterEnv mempty mempty) (interpret (irClosureExtend 2 Null (Local i32 "n") (Local i8PtrPtr "as")))))
+
+abce = Text.putStrLn $ irEncode (thd3 (runInterpreter (IRInterpreterEnv mempty mempty) (interpret (irClosureFinalize 2 Null (Local i32 "n") (Local i8PtrPtr "as")))))
 
 -- abc5 = Text.putStrLn (irEncode pipelineStateArtifacts)
 abc5 = (pipelineStateArtifacts, pipelineStateCode)
