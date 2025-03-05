@@ -18,7 +18,10 @@ import qualified Noll.Core.Language as Core
 irEvalVar :: Core.Type -> Name -> IRInstr IRValue
 irEvalVar t var
   | isConstructor var = do
-      mapM_ iComment ["", "Data constructor: " <> var, "----------------- ^", ""]
+      iComment ""
+      iComment ("Data constructor: " <> var)
+      iComment "----------------- ^"
+      iComment ""
       (i, t1) <- iDataConstr (struct [i32]) var
       v1 <- irMalloc t1
       v2 <- iGep t1 v1 (I32 0) (I32 0)
@@ -26,7 +29,10 @@ irEvalVar t var
       iBCast v1 i8Ptr
   | otherwise = do
       v <- iLookup var
-      mapM_ iComment ["", "Name: " <> irEncode v, "----- ^", ""]
+      iComment ""
+      iComment ("Name: " <> irEncode v)
+      iComment "----- ^"
+      iComment ""
       case v of
         Global (TFun _ us) _ ->
           if arity t == 0

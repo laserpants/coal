@@ -5,11 +5,11 @@
 module Noll.Core.LLVM.IRInstruction.Eval.Closure.Finalize (irClosureFinalize) where
 
 import Control.Monad (liftM, void)
-import Control.Monad.State (StateT, MonadState, evalStateT, get, modify)
+import Control.Monad.State (MonadState, StateT, evalStateT, get, modify)
 import Noll.Core.LLVM.IRInstruction (IRInstr)
 import Noll.Core.LLVM.IRInstruction.TH
 import Noll.Core.LLVM.IRType (IRType (..))
-import Noll.Core.LLVM.IRType.Syntax (i1, i32, i8Ptr, ptr, struct, opaqueIRSignature)
+import Noll.Core.LLVM.IRType.Syntax (i1, i32, i8Ptr, opaqueIRSignature, ptr, struct)
 import Noll.Core.LLVM.IRValue (IRValue (..))
 import Noll.Utils (forM, forM_)
 import TextShow (showt)
@@ -32,7 +32,7 @@ irClosureFinalize n argF argN argAs = do
     iComment ("Applied arg #" <> showt m)
     iComment ""
     iLoad i8Ptr rm
-  flip evalStateT [] $ 
+  flip evalStateT [] $
     forM_ [1 .. 3 :: Int] $
       \m -> do
         r4 <- iGep1 i8Ptr argAs (I32 (fromIntegral (m - 1)))
