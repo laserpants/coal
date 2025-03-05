@@ -51,6 +51,7 @@ data IRInstrOpF v t i next
   | ILookup          Name         (v -> next)
   | IBind        [i] (IRInstr v)  (v -> next)
   | IBlock      Name (IRInstr v)  (i -> next)
+  | IBlock1     Name (IRInstr ()) next
   | IDataConstr    t Name         ((Int, t) -> next)
   | IHashMapKey      Name         (v -> next)
   | IRuntimeApply    Int          (Name -> next)                -- artifact?

@@ -219,6 +219,11 @@ interpreter =
       r <- interpret instr
       l <- gets irInterpreterStateLabel
       next (l, r)
+    IBlock1 name instr next -> do
+      setLabel name
+      tell [LLabel name]
+      interpret instr
+      next
     IRuntimeApply arity next -> do
       addArtifact (InterpreterArtifactFunctionApply arity)
       next ("apply" <> showt arity)

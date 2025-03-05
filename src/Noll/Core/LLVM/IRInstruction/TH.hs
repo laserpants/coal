@@ -36,21 +36,19 @@ module Noll.Core.LLVM.IRInstruction.TH (
   iLookup,
   iBind,
   iBlock,
-  iBlock_,
+  iBlock1,
+--  iBlock_,
   iDataConstr,
   iHashMapKey,
   iRuntimeApply,
   iRuntimeClosure,
 ) where
 
-import Control.Monad (void)
 import Control.Monad.Free (MonadFree, liftF)
 import Control.Monad.Free.TH (makeFree)
-import Noll.Core.LLVM.IRInstruction (IRInstr, IRInstrOp, IRInstrOpF (..))
-import Noll.Core.LLVM.IRValue (IRValue (..))
-import Noll.Utils (Name)
+import Noll.Core.LLVM.IRInstruction (IRInstrOpF (..))
 
 makeFree ''IRInstrOpF
 
-iBlock_ :: (MonadFree IRInstrOp m) => Name -> IRInstr IRValue -> m ()
-iBlock_ ll = void . iBlock ll
+--iBlock_ :: (MonadFree IRInstrOp m) => Name -> IRInstr IRValue -> m ()
+--iBlock_ ll = void . iBlock ll

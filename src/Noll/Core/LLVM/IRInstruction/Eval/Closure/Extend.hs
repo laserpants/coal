@@ -54,7 +54,7 @@ irClosureExtend n argF argN argAs = do
         modify (<> [r7])
         qs <- get
         let t = xx (n + m)
-        iBlock_ labelEq $ do
+        iBlock1 labelEq $ do
           r9 <- iGepNull (ptr t) (I32 1)
           r10 <- iPtrtoint r9 i64
           r11 <- iCallGlobal i8Ptr "gc_malloc" [r10]
@@ -73,8 +73,8 @@ irClosureExtend n argF argN argAs = do
             r19 <- iGep t r12 (I32 0) (I32 u)
             iStore r r19
           iRet i8Ptr r11
-          pure Null
-        iBlock_ labelGt $ do
-          pure Null
+--          iRet i8Ptr r11
+--          pure Null
+        iBlock1 labelGt $ pure ()
   -- pure r8
   iRet i8Ptr Null
