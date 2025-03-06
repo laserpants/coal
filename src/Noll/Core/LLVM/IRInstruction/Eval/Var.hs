@@ -36,7 +36,8 @@ irEvalVar t var
       case v of
         Global (TFun _ us) _ ->
           if arity t == 0
-            then -- Global constant
+            then
+              -- Global constant
               iCallGlobal i8Ptr var []
             else
               irPackClosure var (length us) []
