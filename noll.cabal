@@ -54,6 +54,7 @@ library
       Noll.Core.Language.Prim
       Noll.Core.Language.Replace
       Noll.Core.Language.Type
+      Noll.Core.Language.Type.Arrow
       Noll.Core.Language.Type.Syntax
       Noll.Core.Language.Typed
       Noll.Core.LLVM.IR

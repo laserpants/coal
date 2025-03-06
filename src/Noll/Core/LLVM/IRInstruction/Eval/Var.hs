@@ -10,7 +10,7 @@ import Noll.Core.LLVM.IRInstruction.TH
 import Noll.Core.LLVM.IRType (IRType (..))
 import Noll.Core.LLVM.IRType.Syntax (i32, i8Ptr, struct)
 import Noll.Core.LLVM.IRValue (IRValue (..))
-import Noll.Core.Language.Type.Syntax (arity)
+import Noll.Core.Language.Type.Arrow (arity)
 import Noll.Utils (Name, isConstructor)
 
 import qualified Noll.Core.Language as Core
