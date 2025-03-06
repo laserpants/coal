@@ -6,11 +6,13 @@ module Noll.Core.Language (
   module Noll.Core.Language.Expr,
   module Noll.Core.Language.Object,
   module Noll.Core.Language.Expr.Syntax,
+  module Noll.Core.Language.Expr.Replace,
   module Noll.Core.Language.Type.Syntax,
   module Noll.Core.Language.Type.Arrow,
 ) where
 
 import Noll.Core.Language.Expr
+import Noll.Core.Language.Expr.Replace
 import Noll.Core.Language.Expr.Syntax
 import Noll.Core.Language.Object
 import Noll.Core.Language.Op

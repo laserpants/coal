@@ -7,12 +7,12 @@ import Control.Arrow ((>>>))
 import Control.Monad.Identity (runIdentity)
 import Data.Functor.Foldable (embed, para)
 import Noll.Common.List1 (List1)
-import Noll.Core.Language (Binding (..), Clause (..), Expr, ExprF (..), Focus (..), bindingLabel)
+import Noll.Core.Language.Expr (Binding (..), Clause (..), Expr, ExprF (..), Focus (..), bindingLabel)
 import Noll.Label (Label (..), labelName, setLabelName)
 import Noll.Utils (Dictionary, Map, Name, (<$$>))
 
 import qualified Data.Map.Strict as Map
-import qualified Noll.Core.Language as Core
+import qualified Noll.Core.Language.Expr.Syntax as Core
 
 replaceVarM :: (Monad m) => Name -> (Label t -> m (Expr t)) -> Expr t -> m (Expr t)
 replaceVarM name fn =
