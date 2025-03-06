@@ -110,6 +110,7 @@ library
       Noll.SystemF.Unification
       Noll.Utils
       Noll.Utils.Control.Monad
+      Noll.Utils.Control.Monad.State
       Noll.Utils.Control.Monad.Writer
       Noll.Utils.Data.Char
       Noll.Utils.Data.Functor

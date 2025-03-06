@@ -90,7 +90,7 @@ data ExprF t a
     EApp t a (List1 a)
   | -- | If-statement
     EIf a a a
-  | -- | Operator
+  | -- | Operators
     EOp (Op a)
   | -- | Pattern matching expression
     EMat t a (List1 (Clause t a))
