@@ -71,4 +71,4 @@ setLabel label = modify (overIRInterpreterStateLabel (const label))
 
 {-# INLINE addArtifact #-}
 addArtifact :: (MonadState IRInterpreterState m) => IRInterpreterArtifact -> m ()
-addArtifact af = modify (overIRInterpreterStateArtifacts (af :))
+addArtifact art = modify (overIRInterpreterStateArtifacts (art :))
