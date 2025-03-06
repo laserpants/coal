@@ -44,19 +44,17 @@ data IRInstrOpF v t i next
   | IAlloca          t            (v -> next)
   | IBCast           v t          (v -> next)
   | IPhi             t [i]        (v -> next)
+  | ILookup          Name         (v -> next)
+  | IBind        [i] (IRInstr v)  (v -> next)
   | IComment         Text         next
   | ILabel           Name         (Name -> next)
   | IIndex                        (Name -> next)
   | IBlock      Name (IRInstr v)  (i -> next)
   | IBlock1     Name (IRInstr ()) next
-  --
-  | ILookup          Name         (v -> next)
-  | IBind        [i] (IRInstr v)  (v -> next)
   | IDataConstr    t Name         ((Int, t) -> next)
   | IHashMapKey      Name         (v -> next)
-  | IRuntimeApply    Int          (Name -> next)                -- artifact?
-  | IRuntimeClosure  Name Int Int ((Name, v, v, v) -> next)
-  -- TODO
+  | IApply           Int          (Name -> next)
+  | IClosure         Name Int Int ((Name, v, v, v) -> next)
   deriving (Functor)
 {- FOURMOLU_ENABLE -}
 

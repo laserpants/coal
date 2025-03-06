@@ -39,8 +39,8 @@ module Noll.Core.LLVM.IRInstruction.TH (
   iBlock1,
   iDataConstr,
   iHashMapKey,
-  iRuntimeApply,
-  iRuntimeClosure,
+  iApply,
+  iClosure,
 ) where
 
 import Control.Monad.Free (MonadFree, liftF)

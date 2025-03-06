@@ -48,7 +48,7 @@ irEvalArgs = mapM (eliminatePtrConversions . irEvalExpr) . fromList1
 irApplyClosure :: IRValue -> List1 CoreExpr -> IRInstr IRValue
 irApplyClosure v es = do
   vs <- irEvalArgs es
-  name <- iRuntimeApply (length es)
+  name <- iApply (length es)
   iCallGlobal i8Ptr name (v : vs)
 
 irEvalOp :: Core.Op CoreExpr -> IRInstr IRValue
@@ -309,7 +309,7 @@ irEvalExpr =
           v2 <- eliminatePtrConversions (irEvalExpr e)
           case v2 of
             Local{} -> do
-              name <- iRuntimeApply 1
+              name <- iApply 1
               iCallGlobal i8Ptr name [v2, v1]
             _ ->
               error "TODO"

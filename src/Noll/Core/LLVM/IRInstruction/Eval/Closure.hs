@@ -18,7 +18,7 @@ import TextShow (showt)
 
 irPackClosure :: Name -> Int -> [IRValue] -> IRInstr IRValue
 irPackClosure fname a vs = do
-  (name, f1, f2, f3) <- iRuntimeClosure fname (length vs) a
+  (name, f1, f2, f3) <- iClosure fname (length vs) a
   let t = TNamed name (structType (length vs))
   r1 <- irMalloc t
   r2 <- iGep t r1 (I32 0) (I32 0)

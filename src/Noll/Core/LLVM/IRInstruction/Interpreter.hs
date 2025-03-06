@@ -224,10 +224,10 @@ interpreter =
       tell [LLabel name]
       interpret instr
       next
-    IRuntimeApply arity next -> do
+    IApply arity next -> do
       addArtifact (InterpreterArtifactFunctionApply arity)
       next ("apply" <> showt arity)
-    IRuntimeClosure fn applied remain next -> do
+    IClosure fn applied remain next -> do
       let name = "closure" <> showt applied
           signature n = fun i8Ptr (replicate n i8Ptr)
       addArtifact (InterpreterArtifactClosure applied)
