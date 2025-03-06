@@ -2,32 +2,28 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Core.LLVM.IRInstruction.Eval.Closure.Finalize where -- (irClosureFinalize) where
+module Noll.Core.LLVM.IRInstruction.Eval.Closure.Finalize (irClosureFinalize) where
 
 import Control.Monad.State (evalStateT, get, modify)
 import Noll.Core.LLVM.IRInstruction (IRInstr)
-import Noll.Core.LLVM.IRInstruction.Eval.Closure (structType)
+import Noll.Core.LLVM.IRInstruction.Eval.Closure (namedClosureType)
 import Noll.Core.LLVM.IRInstruction.TH
-import Noll.Core.LLVM.IRType (IRType (..))
 import Noll.Core.LLVM.IRType.Syntax (i1, i8Ptr, opaqueIRSignature, ptr)
 import Noll.Core.LLVM.IRValue (IRValue (..))
 import Noll.Utils (forM, forM_)
 import TextShow (showt)
 
-closureType :: Int -> IRType
-closureType n = TNamed ("closure" <> showt n) (structType n)
-
 irClosureFinalize :: Int -> IRValue -> IRValue -> IRValue -> IRInstr ()
 irClosureFinalize n argF argN argAs = do
-  r1 <- iBCast argF (ptr (closureType n))
-  r2 <- iGep (closureType n) r1 (I32 0) (I32 3)
+  r1 <- iBCast argF (ptr (namedClosureType n))
+  r2 <- iGep (namedClosureType n) r1 (I32 0) (I32 3)
   iComment ""
   iComment "Target function"
   iComment ""
   r3 <- iLoad i8Ptr r2
   rs <- forM [1 .. n] $
     \m -> do
-      rm <- iGep (closureType n) r1 (I32 0) (I32 (3 + fromIntegral m))
+      rm <- iGep (namedClosureType n) r1 (I32 0) (I32 (3 + fromIntegral m))
       iComment ""
       iComment ("Applied arg #" <> showt m)
       iComment ""

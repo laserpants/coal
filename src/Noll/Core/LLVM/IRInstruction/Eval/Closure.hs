@@ -1,6 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Core.LLVM.IRInstruction.Eval.Closure (irPackClosure, structType) where
+module Noll.Core.LLVM.IRInstruction.Eval.Closure (
+  irPackClosure,
+  namedClosureType,
+) where
 
 import Data.Text (Text)
 import Noll.Core.LLVM.IRInstruction (IRInstr)
@@ -39,6 +42,9 @@ irPackClosure fname a vs = do
 
 structType :: Int -> IRType
 structType n = struct (i32 : replicate (n + 3) i8Ptr)
+
+namedClosureType :: Int -> IRType
+namedClosureType n = TNamed ("closure" <> showt n) (structType n)
 
 comment :: Name -> Int -> Int -> Text
 comment name args adds =
