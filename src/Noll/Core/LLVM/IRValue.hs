@@ -8,15 +8,24 @@ import Noll.Core.LLVM.IRType (IRType (..), IRTyped (..))
 import Noll.Core.Language (Prim (..))
 import Noll.Utils (Name)
 
+-- | LLVM IR values
 data IRValue
-  = Local IRType Name
-  | Global IRType Name
-  | I1 Bool
-  | I32 Int32
-  | I64 Int64
-  | Float Float
-  | Double Double
-  | Null
+  = -- | Local variable
+    Local IRType Name
+  | -- | Global variable
+    Global IRType Name
+  | -- | Single-bit integer
+    I1 Bool
+  | -- | 32-bit integer
+    I32 Int32
+  | -- | 64-bit integer
+    I64 Int64
+  | -- | Single-precision floating point number
+    Float Float
+  | -- | Double-precision floating point number
+    Double Double
+  | -- | Null value
+    Null
   deriving (Show, Eq, Ord, Read)
 
 instance IRTyped IRValue where

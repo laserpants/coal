@@ -27,7 +27,7 @@ data IRConstruct a
     CDefine Name IRType (Maybe IRLinkage) [Label IRType] a
   | -- | External symbol
     CDeclare Name IRType [IRType]
-  | -- | Type definition
+  | -- | IR type definition
     CType Name IRType
   | -- | Top-level string constant
     CString Name Text

@@ -6,7 +6,7 @@ module Noll.Core.LLVM.IRType (
   IRType (..),
   IRTyped (..),
   pointee,
-  pointeeType,
+  pointeeTypeOf,
 ) where
 
 import Noll.Core.Language.Type (Type (..))
@@ -76,8 +76,8 @@ pointee =
     _ ->
       Nothing
 
-pointeeType :: (IRTyped t) => t -> IRType
-pointeeType t =
+pointeeTypeOf :: (IRTyped t) => t -> IRType
+pointeeTypeOf t =
   case pointee (irTypeOf t) of
     Nothing ->
       error "Not a pointer type"
