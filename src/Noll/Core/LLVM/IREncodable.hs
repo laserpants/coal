@@ -6,8 +6,8 @@ module Noll.Core.LLVM.IREncodable (
   IREncodable (..),
   IRAnnotated (..),
   IRLabel (..),
-  irEncodeAnnotated,
-  irEncodeLabel,
+  annotated,
+  encodeLabel,
   irLocalName,
   irGlobalName,
   enquote,
@@ -107,7 +107,7 @@ instance (IREncodable a) => IREncodable (IRConstruct a) where
   irEncode =
     \case
       CDefine name t ln as c ->
-        -- TODO
+        -- TODO: Handle linkage
         "define"
           <> " "
           <> global t name
@@ -125,15 +125,15 @@ instance (IREncodable a) => IREncodable (IRConstruct a) where
         error "TODO"
 
 enquote :: Text -> Text
-enquote n
-  | Text.all isAlphaNum n = n
-  | otherwise = "\"" <> n <> "\""
+enquote name
+  | Text.all isAlphaNum name = name
+  | otherwise = "\"" <> name <> "\""
 
 funBlock :: (IREncodable a) => a -> Text
-funBlock b = "{" <> "\n" <> irEncode b <> "}"
+funBlock block = "{" <> "\n" <> irEncode block <> "}"
 
 commaSep :: (IREncodable a) => [a] -> Text
-commaSep = Text.concat . intersperse ", " . fmap irEncode
+commaSep = Text.intercalate ", " . fmap irEncode
 
 {-# INLINE irLocalName #-}
 irLocalName :: Name -> Text
@@ -167,10 +167,10 @@ brackets t = "[" <> irEncode t <> "]"
 padded :: (IREncodable a) => a -> Text
 padded t = " " <> irEncode t <> " "
 
-{-# INLINE irEncodeAnnotated #-}
-irEncodeAnnotated :: IRValue -> Text
-irEncodeAnnotated = irEncode . IRAnnotated
+{-# INLINE annotated #-}
+annotated :: IRValue -> Text
+annotated = irEncode . IRAnnotated
 
-{-# INLINE irEncodeLabel #-}
-irEncodeLabel :: Text -> Text
-irEncodeLabel = irEncode . IRLabel
+{-# INLINE encodeLabel #-}
+encodeLabel :: Text -> Text
+encodeLabel = irEncode . IRLabel

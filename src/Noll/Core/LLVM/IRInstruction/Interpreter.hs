@@ -33,9 +33,9 @@ import Data.Text (Text, intercalate)
 import Noll.Core.LLVM.IREncodable (
   IRAnnotated (..),
   IREncodable (..),
+  annotated,
+  encodeLabel,
   enquote,
-  irEncodeAnnotated,
-  irEncodeLabel,
   irGlobalName,
   irLocalName,
  )
@@ -115,7 +115,7 @@ phiBranches :: Name -> IRValue -> Text
 phiBranches n v = "[" <> withCommas [irEncode v, irLocalName n] <> "]"
 
 switchBranch :: Name -> IRValue -> Text
-switchBranch n v = withCommas [irEncodeAnnotated v, irEncodeLabel n]
+switchBranch n v = withCommas [annotated v, encodeLabel n]
 
 switchBranches :: [(Name, IRValue)] -> Text
 switchBranches bs = Text.intercalate " " (uncurry switchBranch <$> bs)
@@ -147,11 +147,11 @@ interpreter =
     IMul t v1 v2 next ->
       instruction t next ["mul", irEncode t, withCommas [v1, v2]]
     ICmpEq t v1 v2 next ->
-      instruction t next ["icmp", "eq", withCommas [irEncodeAnnotated v1, irEncode v2]]
+      instruction t next ["icmp", "eq", withCommas [annotated v1, irEncode v2]]
     ICmpSLt t v1 v2 next ->
-      instruction t next ["icmp", "slt", withCommas [irEncodeAnnotated v1, irEncode v2]]
+      instruction t next ["icmp", "slt", withCommas [annotated v1, irEncode v2]]
     ICmpSGt t v1 v2 next ->
-      instruction t next ["icmp", "sgt", withCommas [irEncodeAnnotated v1, irEncode v2]]
+      instruction t next ["icmp", "sgt", withCommas [annotated v1, irEncode v2]]
     IXOr t v1 v2 next ->
       instruction t next ["xor", irEncode t, withCommas [v1, v2]]
     IOr t v1 v2 next ->
@@ -159,11 +159,11 @@ interpreter =
     IAnd t v1 v2 next ->
       instruction t next ["and", irEncode t, withCommas [v1, v2]]
     IInttoptr v t next ->
-      instruction t next ["inttoptr", irEncodeAnnotated v, "to", irEncode t]
+      instruction t next ["inttoptr", annotated v, "to", irEncode t]
     IPtrtoint v t next ->
-      instruction t next ["ptrtoint", irEncodeAnnotated v, "to", irEncode t]
+      instruction t next ["ptrtoint", annotated v, "to", irEncode t]
     IBCast v t next ->
-      instruction t next ["bitcast", irEncodeAnnotated v, "to", irEncode t]
+      instruction t next ["bitcast", annotated v, "to", irEncode t]
     IAlloca t next ->
       instruction (ptr t) next ["alloca", irEncode t]
     IComment text next -> do
@@ -175,13 +175,13 @@ interpreter =
       -- v vs next ->
       error "TODO"
     ICall t v vs next ->
-      instruction t next ["call", irEncode t, irEncode v <> "(" <> withCommas (irEncodeAnnotated <$> vs) <> ")"]
+      instruction t next ["call", irEncode t, irEncode v <> "(" <> withCommas (annotated <$> vs) <> ")"]
     ICallGlobal t name vs next ->
-      instruction t next ["call", irEncode t, irGlobalName name <> "(" <> withCommas (irEncodeAnnotated <$> vs) <> ")"]
+      instruction t next ["call", irEncode t, irGlobalName name <> "(" <> withCommas (annotated <$> vs) <> ")"]
     IBr v names next ->
-      instruction0 next ["br", withCommas (irEncodeAnnotated v : (irEncodeLabel <$> names))]
+      instruction0 next ["br", withCommas (annotated v : (encodeLabel <$> names))]
     IBr1 name next ->
-      instruction0 next ["br", irEncodeLabel name]
+      instruction0 next ["br", encodeLabel name]
     IPhi t vs next ->
       instruction t next ["phi", irEncode t, withCommas (uncurry phiBranches <$> vs)]
     IGep t v1 v2 v3 next ->
@@ -194,9 +194,9 @@ interpreter =
     ILoad t v1 next ->
       instruction t next ["load", withCommas [irEncode t, irEncode (IRAnnotated v1)]]
     IStore v1 v2 next ->
-      instruction0 next ["store", withCommas [irEncode (irEncodeAnnotated v1), irEncode (irEncodeAnnotated v2)]]
+      instruction0 next ["store", withCommas [irEncode (annotated v1), irEncode (annotated v2)]]
     ISwitch v n cs next ->
-      instruction0 next ["switch", withCommas [irEncodeAnnotated v, irEncodeLabel n], "[" <> switchBranches cs <> "]"]
+      instruction0 next ["switch", withCommas [annotated v, encodeLabel n], "[" <> switchBranches cs <> "]"]
     ILookup var next -> do
       env <- asks irInterpreterValueEnv
       case Environment.lookup var env of
