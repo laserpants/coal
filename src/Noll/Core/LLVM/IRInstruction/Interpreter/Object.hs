@@ -10,7 +10,7 @@ import Control.Monad.Writer (listen)
 import Noll.Common.Environment (Environment)
 import Noll.Core.LLVM.IRConstruct (IRConstruct (..))
 import Noll.Core.LLVM.IREval (irEvalFun)
-import Noll.Core.LLVM.IRInstruction.Eval (irEvalExpr)
+import Noll.Core.LLVM.IREval.Expr (irEvalExpr)
 import Noll.Core.LLVM.IRInstruction.Interpreter (
   IRInterpreter (..),
   IRLine (..),

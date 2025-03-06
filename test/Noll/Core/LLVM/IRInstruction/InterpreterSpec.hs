@@ -11,7 +11,7 @@ import Noll.Common.List1 (NonEmpty (..), (<|))
 import Noll.Core.Compiler
 import Noll.Core.LLVM.IRConstruct (IRConstruct (..))
 import Noll.Core.LLVM.IREncodable (IREncodable (..))
-import Noll.Core.LLVM.IRInstruction.Eval (irEvalExpr)
+import Noll.Core.LLVM.IREval.Expr (irEvalExpr)
 import Noll.Core.LLVM.IRInstruction.Eval.Closure.Extend (irClosureExtend)
 import Noll.Core.LLVM.IRInstruction.Eval.Closure.Finalize (irClosureFinalize)
 import Noll.Core.LLVM.IRInstruction.Interpreter (

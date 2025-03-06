@@ -3,7 +3,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Core.LLVM.IRInstruction.Eval (irEvalExpr) where
+module Noll.Core.LLVM.IREval.Expr (irEvalExpr) where
 
 import Control.Arrow ((>>>))
 import Control.Monad.Free (Free (..))
@@ -26,6 +26,9 @@ import Noll.Label (Label (..))
 import Noll.Utils (forM)
 
 import qualified Noll.Core.Language as Core
+
+instance IREval (Core.Expr Core.Type) where
+  irEval = simplify . irEvalExpr
 
 irEvalExpr :: Core.Expr Core.Type -> IRInstr IRValue
 irEvalExpr =
@@ -131,11 +134,8 @@ irEvalExpr =
       e ->
         error (show e)
 
-instance IREval (Core.Expr Core.Type) where
-  irEval = eliminatePtrConversions . irEvalExpr
-
-eliminatePtrConversions :: IRInstr IRValue -> IRInstr IRValue
-eliminatePtrConversions =
+simplify :: IRInstr IRValue -> IRInstr IRValue
+simplify =
   \case
     Free (IInttoptr v1 t1 next) ->
       case next v1 of
@@ -143,14 +143,14 @@ eliminatePtrConversions =
           | v1 == v2 ->
               next1 v1
         Free{} ->
-          iInttoptr v1 t1 >>= eliminatePtrConversions . next
+          iInttoptr v1 t1 >>= simplify . next
         _ ->
           iInttoptr v1 t1 >>= next
     Free (IBind is i next) ->
-      Free (IBind is (eliminatePtrConversions i) (eliminatePtrConversions <$> next))
+      Free (IBind is (simplify i) (simplify <$> next))
     Free (IBlock name i next) ->
-      Free (IBlock name (eliminatePtrConversions i) (eliminatePtrConversions <$> next))
+      Free (IBlock name (simplify i) (simplify <$> next))
     Free instr ->
-      Free (eliminatePtrConversions <$> instr)
+      Free (simplify <$> instr)
     i ->
       i

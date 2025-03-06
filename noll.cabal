@@ -61,12 +61,12 @@ library
       Noll.Core.LLVM.IRConstruct
       Noll.Core.LLVM.IREncodable
       Noll.Core.LLVM.IREval
+      Noll.Core.LLVM.IREval.Expr
       Noll.Core.LLVM.IREval.Expr.App
       Noll.Core.LLVM.IREval.Expr.Match
       Noll.Core.LLVM.IREval.Expr.Op
       Noll.Core.LLVM.IREval.Expr.Var
       Noll.Core.LLVM.IRInstruction
-      Noll.Core.LLVM.IRInstruction.Eval
       Noll.Core.LLVM.IRInstruction.Eval.Closure
       Noll.Core.LLVM.IRInstruction.Eval.Closure.Extend
       Noll.Core.LLVM.IRInstruction.Eval.Closure.Finalize
