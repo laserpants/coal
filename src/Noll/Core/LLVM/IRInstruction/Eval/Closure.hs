@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Core.LLVM.IRInstruction.Eval.Closure (irPackClosure) where
+module Noll.Core.LLVM.IRInstruction.Eval.Closure (irPackClosure, structType) where
 
 import Data.Text (Text)
 import Noll.Core.LLVM.IRInstruction (IRInstr)

@@ -6,28 +6,28 @@ module Noll.Core.LLVM.IRInstruction.Eval.Closure.Finalize where -- (irClosureFin
 
 import Control.Monad.State (evalStateT, get, modify)
 import Noll.Core.LLVM.IRInstruction (IRInstr)
+import Noll.Core.LLVM.IRInstruction.Eval.Closure (structType)
 import Noll.Core.LLVM.IRInstruction.TH
 import Noll.Core.LLVM.IRType (IRType (..))
-import Noll.Core.LLVM.IRType.Syntax (i1, i32, i8Ptr, opaqueIRSignature, ptr, struct)
+import Noll.Core.LLVM.IRType.Syntax (i1, i8Ptr, opaqueIRSignature, ptr)
 import Noll.Core.LLVM.IRValue (IRValue (..))
 import Noll.Utils (forM, forM_)
 import TextShow (showt)
 
-s applied = struct (i32 : replicate (3 + applied) i8Ptr)
-
-xx n = TNamed ("closure" <> showt n) (s n)
+closureType :: Int -> IRType
+closureType n = TNamed ("closure" <> showt n) (structType n)
 
 irClosureFinalize :: Int -> IRValue -> IRValue -> IRValue -> IRInstr ()
 irClosureFinalize n argF argN argAs = do
-  r1 <- iBCast argF (ptr (xx n))
-  r2 <- iGep (xx n) r1 (I32 0) (I32 3)
+  r1 <- iBCast argF (ptr (closureType n))
+  r2 <- iGep (closureType n) r1 (I32 0) (I32 3)
   iComment ""
   iComment "Target function"
   iComment ""
   r3 <- iLoad i8Ptr r2
   rs <- forM [1 .. n] $
     \m -> do
-      rm <- iGep (xx n) r1 (I32 0) (I32 (3 + fromIntegral m))
+      rm <- iGep (closureType n) r1 (I32 0) (I32 (3 + fromIntegral m))
       iComment ""
       iComment ("Applied arg #" <> showt m)
       iComment ""

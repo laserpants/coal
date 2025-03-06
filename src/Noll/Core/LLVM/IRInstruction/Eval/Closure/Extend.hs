@@ -4,21 +4,21 @@ module Noll.Core.LLVM.IRInstruction.Eval.Closure.Extend (irClosureExtend) where
 
 import Control.Monad.State (evalStateT, get, modify)
 import Noll.Core.LLVM.IRInstruction (IRInstr)
+import Noll.Core.LLVM.IRInstruction.Eval.Closure (structType)
 import Noll.Core.LLVM.IRInstruction.TH
 import Noll.Core.LLVM.IRType (IRType (..))
-import Noll.Core.LLVM.IRType.Syntax (fun, i1, i32, i64, i8Ptr, i8PtrPtr, ptr, struct)
+import Noll.Core.LLVM.IRType.Syntax (fun, i1, i32, i64, i8Ptr, i8PtrPtr, ptr)
 import Noll.Core.LLVM.IRValue (IRValue (..))
 import Noll.Utils (forM, forM_)
 import TextShow (showt)
 
-s applied = struct (i32 : replicate (3 + applied) i8Ptr)
-
-xx n = TNamed ("closure" <> showt n) (s n)
+closureType :: Int -> IRType
+closureType n = TNamed ("closure" <> showt n) (structType n)
 
 irClosureExtend :: Int -> IRValue -> IRValue -> IRValue -> IRInstr ()
 irClosureExtend n argF argN argAs = do
-  r1 <- iBCast argF (ptr (xx n))
-  r2 <- iGep (xx n) r1 (I32 0) (I32 0)
+  r1 <- iBCast argF (ptr (closureType n))
+  r2 <- iGep (closureType n) r1 (I32 0) (I32 0)
   iComment ""
   iComment "Argument count"
   iComment ""
@@ -27,14 +27,14 @@ irClosureExtend n argF argN argAs = do
   iComment "New argument count"
   iComment ""
   r4 <- iSub i32 r3 argN
-  r5 <- iGep (xx n) r1 (I32 0) (I32 3)
+  r5 <- iGep (closureType n) r1 (I32 0) (I32 3)
   iComment ""
   iComment "Target function"
   iComment ""
   r6 <- iLoad i8Ptr r5
   rs <- forM [1 .. n] $
     \m -> do
-      rm <- iGep (xx n) r1 (I32 0) (I32 (3 + fromIntegral m))
+      rm <- iGep (closureType n) r1 (I32 0) (I32 (3 + fromIntegral m))
       iComment ""
       iComment ("Applied arg #" <> showt m)
       iComment ""
@@ -53,7 +53,7 @@ irClosureExtend n argF argN argAs = do
         iBr r8 [labelGt, labelEq]
         modify (<> [r7])
         qs <- get
-        let t = xx (n + m)
+        let t = closureType (n + m)
         iBlock1 labelEq $ do
           r9 <- iGepNull (ptr t) (I32 1)
           r10 <- iPtrtoint r9 i64
