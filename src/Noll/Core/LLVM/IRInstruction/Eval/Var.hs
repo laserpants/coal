@@ -16,30 +16,30 @@ import Noll.Utils (Name, isConstructor)
 import qualified Noll.Core.Language as Core
 
 irEvalVar :: Core.Type -> Name -> IRInstr IRValue
-irEvalVar t var
-  | isConstructor var = do
+irEvalVar t name
+  | isConstructor name = do
       iComment ""
-      iComment ("Data constructor: " <> var)
+      iComment ("Data constructor: " <> name)
       iComment "----------------- ^"
       iComment ""
-      (i, t1) <- iDataConstr (struct [i32]) var
+      (i, t1) <- iDataConstr (struct [i32]) name
       v1 <- irMalloc t1
       v2 <- iGep t1 v1 (I32 0) (I32 0)
       iStore (I32 (fromIntegral i)) v2
       iBCast v1 i8Ptr
   | otherwise = do
-      v <- iLookup var
+      v <- iLookup name
       iComment ""
       iComment ("Name: " <> irEncode v)
       iComment "----- ^"
       iComment ""
       case v of
-        Global (TFun _ us) _ ->
+        Global (TFun _ ts) _ ->
           if arity t == 0
             then
               -- Global constant
-              iCallGlobal i8Ptr var []
+              iCallGlobal i8Ptr name []
             else
-              irPackClosure var (length us) []
+              irPackClosure name (length ts) []
         _ ->
           pure v

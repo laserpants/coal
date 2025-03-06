@@ -8,12 +8,12 @@ import Noll.Core.LLVM.IRInstruction (IRInstr)
 import Noll.Core.LLVM.IRInstruction.TH
 
 irCommentBlock :: Text -> IRInstr a -> IRInstr a
-irCommentBlock text block = do
+irCommentBlock text instrs = do
   s <- iIndex
   iComment (Text.pack (replicate 75 '='))
   iComment ("[" <> s <> "] " <> text)
   iComment ""
-  v <- block
+  v <- instrs
   iComment ""
   iComment ("End: [" <> s <> "] " <> text)
   iComment "---- ^"
