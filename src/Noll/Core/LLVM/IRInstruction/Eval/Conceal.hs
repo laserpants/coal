@@ -1,12 +1,20 @@
 {-# LANGUAGE LambdaCase #-}
 
-module Noll.Core.LLVM.IRInstruction.Eval.Conceal (irConceal, irReveal) where
+module Noll.Core.LLVM.IRInstruction.Eval.Conceal (
+  irConceal,
+  irReveal,
+  irRevealExpr,
+) where
 
+import Noll.Core.LLVM.IREval (IREval (..))
 import Noll.Core.LLVM.IRInstruction (IRInstr)
 import Noll.Core.LLVM.IRInstruction.TH
 import Noll.Core.LLVM.IRType (IRType (..), IRTyped (..))
 import Noll.Core.LLVM.IRType.Syntax (i1, i32, i64, i8, i8Ptr)
 import Noll.Core.LLVM.IRValue (IRValue (..))
+import Noll.Core.Language (Typed)
+
+import qualified Noll.Core.Language as Core
 
 irConceal :: IRValue -> IRInstr IRValue
 irConceal v =
@@ -35,3 +43,8 @@ irReveal v =
       iPtrtoint v i64
     _ ->
       pure v
+
+irRevealExpr :: (IREval e, Typed e) => e -> IRInstr IRValue
+irRevealExpr expr = do
+  v <- irEval expr
+  irReveal v (irTypeOf (Core.typeOf expr))

@@ -60,6 +60,11 @@ library
       Noll.Core.LLVM.IR
       Noll.Core.LLVM.IRConstruct
       Noll.Core.LLVM.IREncodable
+      Noll.Core.LLVM.IREval
+      Noll.Core.LLVM.IREval.Expr.App
+      Noll.Core.LLVM.IREval.Expr.Match
+      Noll.Core.LLVM.IREval.Expr.Op
+      Noll.Core.LLVM.IREval.Expr.Var
       Noll.Core.LLVM.IRInstruction
       Noll.Core.LLVM.IRInstruction.Eval
       Noll.Core.LLVM.IRInstruction.Eval.Closure
@@ -68,7 +73,6 @@ library
       Noll.Core.LLVM.IRInstruction.Eval.Comment
       Noll.Core.LLVM.IRInstruction.Eval.Conceal
       Noll.Core.LLVM.IRInstruction.Eval.Malloc
-      Noll.Core.LLVM.IRInstruction.Eval.Var
       Noll.Core.LLVM.IRInstruction.Interpreter
       Noll.Core.LLVM.IRInstruction.Interpreter.Artifact
       Noll.Core.LLVM.IRInstruction.Interpreter.Environment

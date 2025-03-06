@@ -1,11 +1,12 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Core.LLVM.IRInstruction.Eval.Var (irEvalVar) where
+module Noll.Core.LLVM.IREval.Expr.Var (irEvalVar) where
 
+import Data.Text (Text)
 import Noll.Core.LLVM.IREncodable (irEncode)
 import Noll.Core.LLVM.IRInstruction (IRInstr)
 import Noll.Core.LLVM.IRInstruction.Eval.Closure (irPackClosure)
-import Noll.Core.LLVM.IRInstruction.Eval.Comment (irCommentPad)
+import Noll.Core.LLVM.IRInstruction.Eval.Comment (irComments)
 import Noll.Core.LLVM.IRInstruction.Eval.Malloc (irMalloc)
 import Noll.Core.LLVM.IRInstruction.TH
 import Noll.Core.LLVM.IRType (IRType (..))
@@ -19,7 +20,7 @@ import qualified Noll.Core.Language as Core
 irEvalVar :: Core.Type -> Name -> IRInstr IRValue
 irEvalVar t name
   | isConstructor name = do
-      irCommentPad ["Data constructor: " <> name, "----------------- ^"]
+      irComments (comment1 name)
       (i, t1) <- iDataConstr (struct [i32]) name
       v1 <- irMalloc t1
       v2 <- iGep t1 v1 (I32 0) (I32 0)
@@ -27,7 +28,7 @@ irEvalVar t name
       iBCast v1 i8Ptr
   | otherwise = do
       v <- iLookup name
-      irCommentPad ["Name: " <> irEncode v, "----- ^"]
+      irComments (comment2 (irEncode v))
       case v of
         Global (TFun _ ts) _ ->
           if arity t == 0
@@ -38,3 +39,15 @@ irEvalVar t name
               irPackClosure name (length ts) []
         _ ->
           pure v
+
+comment1 :: Name -> [Text]
+comment1 name =
+  [ "Data constructor: " <> name
+  , "----------------- ^"
+  ]
+
+comment2 :: Name -> [Text]
+comment2 name =
+  [ "Name: " <> name
+  , "----- ^"
+  ]

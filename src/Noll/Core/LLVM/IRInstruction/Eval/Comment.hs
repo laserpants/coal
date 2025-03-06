@@ -3,15 +3,16 @@
 
 module Noll.Core.LLVM.IRInstruction.Eval.Comment (
   irCommentBlock,
-  irCommentPad,
+  irComments,
 ) where
 
 import Control.Monad.Free (MonadFree)
 import Data.Text (Text)
-import qualified Data.Text as Text
 import Noll.Core.LLVM.IRInstruction (IRInstrOp)
 import Noll.Core.LLVM.IRInstruction.TH
 import Noll.Utils (forM_)
+
+import qualified Data.Text as Text
 
 irCommentBlock :: (MonadFree (IRInstrOp) m) => Text -> m a -> m a
 irCommentBlock text instrs = do
@@ -25,8 +26,8 @@ irCommentBlock text instrs = do
   iComment "---- ^"
   pure v
 
-irCommentPad :: (MonadFree (IRInstrOp) m) => [Text] -> m ()
-irCommentPad txts = do
+irComments :: (MonadFree (IRInstrOp) m) => [Text] -> m ()
+irComments txts = do
   iComment ""
   forM_ txts iComment
   iComment ""

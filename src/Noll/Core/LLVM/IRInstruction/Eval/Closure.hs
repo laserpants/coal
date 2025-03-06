@@ -1,13 +1,16 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Noll.Core.LLVM.IRInstruction.Eval.Closure (
+  irApplyClosure,
   irPackClosure,
   namedClosureType,
 ) where
 
 import Data.Text (Text)
+import Noll.Common.List1 (List1, fromList1)
+import Noll.Core.LLVM.IREval
 import Noll.Core.LLVM.IRInstruction (IRInstr)
-import Noll.Core.LLVM.IRInstruction.Eval.Comment (irCommentPad)
+import Noll.Core.LLVM.IRInstruction.Eval.Comment (irComments)
 import Noll.Core.LLVM.IRInstruction.Eval.Malloc (irMalloc)
 import Noll.Core.LLVM.IRInstruction.TH
 import Noll.Core.LLVM.IRType (IRType (..))
@@ -16,14 +19,20 @@ import Noll.Core.LLVM.IRValue (IRValue (..))
 import Noll.Utils (Name, forM_)
 import TextShow (showt)
 
+irApplyClosure :: (IREval e) => IRValue -> List1 e -> IRInstr IRValue
+irApplyClosure v es = do
+  vs <- irEvalArgs es
+  name <- iApply (length es)
+  iCallGlobal i8Ptr name (v : vs)
+
 irPackClosure :: Name -> Int -> [IRValue] -> IRInstr IRValue
-irPackClosure fname a vs = do
-  (name, f1, f2, f3) <- iClosure fname (length vs) a
+irPackClosure fname k vs = do
+  (name, f1, f2, f3) <- iClosure fname (length vs) k
   let t = TNamed name (structType (length vs))
   r1 <- irMalloc t
   r2 <- iGep t r1 (I32 0) (I32 0)
-  irCommentPad [comment fname (length vs) a]
-  r3 <- iInttoptr (I32 (fromIntegral a)) i8Ptr
+  irComments [comment fname (length vs) k]
+  r3 <- iInttoptr (I32 (fromIntegral k)) i8Ptr
   iStore r3 r2
   r4 <- iGep t r1 (I32 0) (I32 1)
   r5 <- iBCast f1 i8Ptr
