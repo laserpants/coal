@@ -48,11 +48,11 @@ library
       Noll.Core.Compiler
       Noll.Core.Language
       Noll.Core.Language.Expr
+      Noll.Core.Language.Expr.Replace
       Noll.Core.Language.Expr.Syntax
       Noll.Core.Language.Object
       Noll.Core.Language.Op
       Noll.Core.Language.Prim
-      Noll.Core.Language.Replace
       Noll.Core.Language.Type
       Noll.Core.Language.Type.Arrow
       Noll.Core.Language.Type.Syntax
@@ -186,7 +186,7 @@ test-suite noll-test
       Noll.CompilerExamples.Test02
       Noll.CompilerSpec
       Noll.Core.CompilerSpec
-      Noll.Core.Language.ReplaceSpec
+      Noll.Core.Language.Expr.ReplaceSpec
       Noll.Core.LanguageSpec
       Noll.Core.LLVM.IRInstruction.InterpreterSpec
       Noll.Examples.Test01

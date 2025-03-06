@@ -1,9 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Core.Language.ReplaceSpec where
+module Noll.Core.Language.Expr.ReplaceSpec where
 
 import Noll.Common.List1 (NonEmpty (..), (<|))
-import Noll.Core.Language.Replace (rewrite)
+import Noll.Core.Language.Expr.Replace (rewrite)
 import Noll.Label (Label (..))
 import Test.Hspec (Spec, describe, it, shouldBe)
 
@@ -14,7 +14,7 @@ ordering = Core.TCon "Ordering" []
 
 spec :: Spec
 spec =
-  describe "Noll.Core.Language.Replace" $ do
+  describe "Noll.Core.Language.Expr.Replace" $ do
     --    it "EVar" $ do
     --      error "TODO" == True
     --    it "ELet" $ do

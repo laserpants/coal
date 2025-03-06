@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 
-module Noll.Core.Language.Replace (rewrite, Sub (..)) where
+module Noll.Core.Language.Expr.Replace (rewrite, Sub (..)) where
 
 import Control.Arrow ((>>>))
 import Control.Monad.Identity (runIdentity)
