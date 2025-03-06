@@ -7,6 +7,7 @@ module Noll.Core.LLVM.IRInstruction.Eval.Closure (
 
 import Data.Text (Text)
 import Noll.Core.LLVM.IRInstruction (IRInstr)
+import Noll.Core.LLVM.IRInstruction.Eval.Comment (irCommentPad)
 import Noll.Core.LLVM.IRInstruction.Eval.Malloc (irMalloc)
 import Noll.Core.LLVM.IRInstruction.TH
 import Noll.Core.LLVM.IRType (IRType (..))
@@ -21,9 +22,7 @@ irPackClosure fname a vs = do
   let t = TNamed name (structType (length vs))
   r1 <- irMalloc t
   r2 <- iGep t r1 (I32 0) (I32 0)
-  iComment ""
-  iComment (comment fname (length vs) a)
-  iComment ""
+  irCommentPad [comment fname (length vs) a]
   r3 <- iInttoptr (I32 (fromIntegral a)) i8Ptr
   iStore r3 r2
   r4 <- iGep t r1 (I32 0) (I32 1)

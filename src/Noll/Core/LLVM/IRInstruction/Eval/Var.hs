@@ -5,6 +5,7 @@ module Noll.Core.LLVM.IRInstruction.Eval.Var (irEvalVar) where
 import Noll.Core.LLVM.IREncodable (irEncode)
 import Noll.Core.LLVM.IRInstruction (IRInstr)
 import Noll.Core.LLVM.IRInstruction.Eval.Closure (irPackClosure)
+import Noll.Core.LLVM.IRInstruction.Eval.Comment (irCommentPad)
 import Noll.Core.LLVM.IRInstruction.Eval.Malloc (irMalloc)
 import Noll.Core.LLVM.IRInstruction.TH
 import Noll.Core.LLVM.IRType (IRType (..))
@@ -18,10 +19,7 @@ import qualified Noll.Core.Language as Core
 irEvalVar :: Core.Type -> Name -> IRInstr IRValue
 irEvalVar t name
   | isConstructor name = do
-      iComment ""
-      iComment ("Data constructor: " <> name)
-      iComment "----------------- ^"
-      iComment ""
+      irCommentPad ["Data constructor: " <> name, "----------------- ^"]
       (i, t1) <- iDataConstr (struct [i32]) name
       v1 <- irMalloc t1
       v2 <- iGep t1 v1 (I32 0) (I32 0)
@@ -29,10 +27,7 @@ irEvalVar t name
       iBCast v1 i8Ptr
   | otherwise = do
       v <- iLookup name
-      iComment ""
-      iComment ("Name: " <> irEncode v)
-      iComment "----- ^"
-      iComment ""
+      irCommentPad ["Name: " <> irEncode v, "----- ^"]
       case v of
         Global (TFun _ ts) _ ->
           if arity t == 0

@@ -3,7 +3,7 @@
 module Noll.Core.LLVM.IRInstruction.Eval.Malloc (irMalloc) where
 
 import Noll.Core.LLVM.IRInstruction (IRInstr)
-import Noll.Core.LLVM.IRInstruction.Eval.CommentBlock (irCommentBlock)
+import Noll.Core.LLVM.IRInstruction.Eval.Comment (irCommentBlock)
 import Noll.Core.LLVM.IRInstruction.TH
 import Noll.Core.LLVM.IRType (IRType (..))
 import Noll.Core.LLVM.IRType.Syntax (i64, i8Ptr, ptr)

@@ -7,6 +7,7 @@ module Noll.Core.LLVM.IRInstruction.Eval.Closure.Finalize (irClosureFinalize) wh
 import Control.Monad.State (evalStateT, get, modify)
 import Noll.Core.LLVM.IRInstruction (IRInstr)
 import Noll.Core.LLVM.IRInstruction.Eval.Closure (namedClosureType)
+import Noll.Core.LLVM.IRInstruction.Eval.Comment (irCommentPad)
 import Noll.Core.LLVM.IRInstruction.TH
 import Noll.Core.LLVM.IRType.Syntax (i1, i8Ptr, opaqueIRSignature, ptr)
 import Noll.Core.LLVM.IRValue (IRValue (..))
@@ -17,24 +18,18 @@ irClosureFinalize :: Int -> IRValue -> IRValue -> IRValue -> IRInstr ()
 irClosureFinalize n argF argN argAs = do
   r1 <- iBCast argF (ptr (namedClosureType n))
   r2 <- iGep (namedClosureType n) r1 (I32 0) (I32 3)
-  iComment ""
-  iComment "Target function"
-  iComment ""
+  irCommentPad ["Target function"]
   r3 <- iLoad i8Ptr r2
   rs <- forM [1 .. n] $
     \m -> do
       rm <- iGep (namedClosureType n) r1 (I32 0) (I32 (3 + fromIntegral m))
-      iComment ""
-      iComment ("Applied arg #" <> showt m)
-      iComment ""
+      irCommentPad ["Applied arg #" <> showt m]
       iLoad i8Ptr rm
   flip evalStateT [] $
     forM_ [1 .. 3] $
       \m -> do
         r4 <- iGep1 i8Ptr argAs (I32 (fromIntegral (m - 1)))
-        iComment ""
-        iComment ("Extra arg #" <> showt m)
-        iComment ""
+        irCommentPad ["Extra arg #" <> showt m]
         r5 <- iLoad i8Ptr r4
         r6 <- iCmpSGt i1 argN (I32 (fromIntegral m))
         labelGt <- iLabel "gt"
