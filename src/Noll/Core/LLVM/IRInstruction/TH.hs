@@ -37,7 +37,6 @@ module Noll.Core.LLVM.IRInstruction.TH (
   iBind,
   iBlock,
   iBlock1,
-  --  iBlock_,
   iDataConstr,
   iHashMapKey,
   iRuntimeApply,
@@ -49,6 +48,3 @@ import Control.Monad.Free.TH (makeFree)
 import Noll.Core.LLVM.IRInstruction (IRInstrOpF (..))
 
 makeFree ''IRInstrOpF
-
--- iBlock_ :: (MonadFree IRInstrOp m) => Name -> IRInstr IRValue -> m ()
--- iBlock_ ll = void . iBlock ll
