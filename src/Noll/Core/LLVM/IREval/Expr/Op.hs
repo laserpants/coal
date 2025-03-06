@@ -4,9 +4,9 @@
 module Noll.Core.LLVM.IREval.Expr.Op (irEvalOp) where
 
 import Noll.Core.LLVM.IREval
+import Noll.Core.LLVM.IREval.Comment (irCommentBlock)
+import Noll.Core.LLVM.IREval.Conceal (irConceal, irRevealExpr)
 import Noll.Core.LLVM.IRInstruction (IRInstr)
-import Noll.Core.LLVM.IRInstruction.Eval.Comment (irCommentBlock)
-import Noll.Core.LLVM.IRInstruction.Eval.Conceal (irConceal, irRevealExpr)
 import Noll.Core.LLVM.IRInstruction.TH
 import Noll.Core.LLVM.IRType (IRTyped (..))
 import Noll.Core.LLVM.IRType.Syntax (

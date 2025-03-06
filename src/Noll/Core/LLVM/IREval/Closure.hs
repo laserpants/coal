@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Core.LLVM.IRInstruction.Eval.Closure (
+module Noll.Core.LLVM.IREval.Closure (
   irApplyClosure,
   irPackClosure,
   namedClosureType,
@@ -9,9 +9,9 @@ module Noll.Core.LLVM.IRInstruction.Eval.Closure (
 import Data.Text (Text)
 import Noll.Common.List1 (List1, fromList1)
 import Noll.Core.LLVM.IREval
+import Noll.Core.LLVM.IREval.Comment (irComments)
+import Noll.Core.LLVM.IREval.Malloc (irMalloc)
 import Noll.Core.LLVM.IRInstruction (IRInstr)
-import Noll.Core.LLVM.IRInstruction.Eval.Comment (irComments)
-import Noll.Core.LLVM.IRInstruction.Eval.Malloc (irMalloc)
 import Noll.Core.LLVM.IRInstruction.TH
 import Noll.Core.LLVM.IRType (IRType (..))
 import Noll.Core.LLVM.IRType.Syntax (i32, i8Ptr, struct)

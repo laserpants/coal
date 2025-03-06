@@ -2,12 +2,12 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Core.LLVM.IRInstruction.Eval.Closure.Finalize (irClosureFinalize) where
+module Noll.Core.LLVM.IREval.Closure.Finalize (irClosureFinalize) where
 
 import Control.Monad.State (evalStateT, get, modify)
+import Noll.Core.LLVM.IREval.Closure (namedClosureType)
+import Noll.Core.LLVM.IREval.Comment (irComments)
 import Noll.Core.LLVM.IRInstruction (IRInstr)
-import Noll.Core.LLVM.IRInstruction.Eval.Closure (namedClosureType)
-import Noll.Core.LLVM.IRInstruction.Eval.Comment (irComments)
 import Noll.Core.LLVM.IRInstruction.TH
 import Noll.Core.LLVM.IRType.Syntax (i1, i8Ptr, opaqueIRSignature, ptr)
 import Noll.Core.LLVM.IRValue (IRValue (..))

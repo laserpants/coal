@@ -5,8 +5,8 @@ module Noll.Core.LLVM.IREval.Expr.Match (irEvalMatch) where
 import Data.Tuple.Extra (fst3)
 import Noll.Common.List1 (List1, NonEmpty (..), fromList1)
 import Noll.Core.LLVM.IREval
+import Noll.Core.LLVM.IREval.Conceal (irConceal)
 import Noll.Core.LLVM.IRInstruction (IRInstr)
-import Noll.Core.LLVM.IRInstruction.Eval.Conceal (irConceal)
 import Noll.Core.LLVM.IRInstruction.TH
 import Noll.Core.LLVM.IRType (IRType (..), IRTyped (..))
 import Noll.Core.LLVM.IRType.Syntax (i32, i8Ptr, ptr, struct)

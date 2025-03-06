@@ -61,18 +61,18 @@ library
       Noll.Core.LLVM.IRConstruct
       Noll.Core.LLVM.IREncodable
       Noll.Core.LLVM.IREval
+      Noll.Core.LLVM.IREval.Closure
+      Noll.Core.LLVM.IREval.Closure.Extend
+      Noll.Core.LLVM.IREval.Closure.Finalize
+      Noll.Core.LLVM.IREval.Comment
+      Noll.Core.LLVM.IREval.Conceal
       Noll.Core.LLVM.IREval.Expr
       Noll.Core.LLVM.IREval.Expr.App
       Noll.Core.LLVM.IREval.Expr.Match
       Noll.Core.LLVM.IREval.Expr.Op
       Noll.Core.LLVM.IREval.Expr.Var
+      Noll.Core.LLVM.IREval.Malloc
       Noll.Core.LLVM.IRInstruction
-      Noll.Core.LLVM.IRInstruction.Eval.Closure
-      Noll.Core.LLVM.IRInstruction.Eval.Closure.Extend
-      Noll.Core.LLVM.IRInstruction.Eval.Closure.Finalize
-      Noll.Core.LLVM.IRInstruction.Eval.Comment
-      Noll.Core.LLVM.IRInstruction.Eval.Conceal
-      Noll.Core.LLVM.IRInstruction.Eval.Malloc
       Noll.Core.LLVM.IRInstruction.Interpreter
       Noll.Core.LLVM.IRInstruction.Interpreter.Artifact
       Noll.Core.LLVM.IRInstruction.Interpreter.Environment

@@ -1,6 +1,6 @@
 {-# LANGUAGE LambdaCase #-}
 
-module Noll.Core.LLVM.IRInstruction.Eval.Conceal (
+module Noll.Core.LLVM.IREval.Conceal (
   irConceal,
   irReveal,
   irRevealExpr,

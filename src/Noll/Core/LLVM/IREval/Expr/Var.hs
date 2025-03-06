@@ -4,10 +4,10 @@ module Noll.Core.LLVM.IREval.Expr.Var (irEvalVar) where
 
 import Data.Text (Text)
 import Noll.Core.LLVM.IREncodable (irEncode)
+import Noll.Core.LLVM.IREval.Closure (irPackClosure)
+import Noll.Core.LLVM.IREval.Comment (irComments)
+import Noll.Core.LLVM.IREval.Malloc (irMalloc)
 import Noll.Core.LLVM.IRInstruction (IRInstr)
-import Noll.Core.LLVM.IRInstruction.Eval.Closure (irPackClosure)
-import Noll.Core.LLVM.IRInstruction.Eval.Comment (irComments)
-import Noll.Core.LLVM.IRInstruction.Eval.Malloc (irMalloc)
 import Noll.Core.LLVM.IRInstruction.TH
 import Noll.Core.LLVM.IRType (IRType (..))
 import Noll.Core.LLVM.IRType.Syntax (i32, i8Ptr, struct)

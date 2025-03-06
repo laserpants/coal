@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Core.LLVM.IRInstruction.Eval.Comment (
+module Noll.Core.LLVM.IREval.Comment (
   irCommentBlock,
   irComments,
 ) where
