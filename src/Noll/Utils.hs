@@ -13,13 +13,11 @@ module Noll.Utils (
   module Noll.Utils.Data.List,
   module Noll.Utils.Data.Functor,
   module Noll.Utils.Control.Monad,
+  module Noll.Utils.Control.Monad.State,
   module Noll.Utils.Control.Monad.Writer,
   IndexMap,
-  tellLeft,
-  tellRight,
   fromMaybe,
   lexOrderRank,
-  getAndModify,
   const2,
   traverse2,
   Over,
@@ -27,8 +25,6 @@ module Noll.Utils (
 where
 
 import Control.Monad (forM, forM_, mapM)
-import Control.Monad.State (MonadState, get, modify)
-import Control.Monad.Writer (MonadWriter, tell)
 import Data.Char (ord)
 import Data.Foldable (foldrM, traverse_)
 import Data.Map.Strict (Map)
@@ -36,6 +32,7 @@ import Data.Maybe (fromMaybe)
 import Data.Set (Set)
 import Data.Text (Text)
 import Noll.Utils.Control.Monad
+import Noll.Utils.Control.Monad.State
 import Noll.Utils.Control.Monad.Writer
 import Noll.Utils.Data.Functor
 import Noll.Utils.Data.List
@@ -58,12 +55,6 @@ const2 a _ _ = a
 traverse2 :: (Applicative f, Traversable t1, Traversable t2) => (a -> f b) -> t2 (t1 a) -> f (t2 (t1 b))
 traverse2 = traverse . traverse
 
-getAndModify :: (MonadState s m) => (s -> s) -> m s
-getAndModify f = do
-  s <- get
-  modify f
-  return s
-
 lexOrderRank :: Text -> Int
 lexOrderRank text
   | Text.null text =
@@ -74,7 +65,7 @@ lexOrderRank text
   f :: Char -> (Int, Int) -> (Int, Int)
   f c (m, n) = (m + 1, n + (36 ^ m) + g (ord c))
   g n
-    | n > 122 || n < 48 =
+    | not ((n >= 97 && n <= 122) || (n >= 48 && n <= 57)) =
         error "Invalid character"
     | n >= 97 =
         n - 97
