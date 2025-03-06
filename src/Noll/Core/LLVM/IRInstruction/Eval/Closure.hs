@@ -12,16 +12,16 @@ import Noll.Utils (Name, forM_)
 import TextShow (showt)
 
 irClosureType :: Int -> IRType
-irClosureType n = struct $ [i32] <> replicate (n + 3) i8Ptr
+irClosureType n = struct (i32 : replicate (n + 3) i8Ptr)
 
 irPackClosure :: Name -> Int -> [IRValue] -> IRInstr IRValue
-irPackClosure fn m vs = do
-  (name, f1, f2, f3) <- iRuntimeClosure fn (length vs) m
+irPackClosure fname m vs = do
+  (name, f1, f2, f3) <- iRuntimeClosure fname (length vs) m
   let t = TNamed name (irClosureType (length vs))
   r1 <- irMalloc t
   r2 <- iGep t r1 (I32 0) (I32 0)
   iComment ""
-  iComment (showt (length vs) <> " argument(s) supplied -- target function '" <> fn <> "' expects " <> showt m <> " additional argument(s)")
+  iComment (showt (length vs) <> " argument(s) supplied -- target function '" <> fname <> "' expects " <> showt m <> " additional argument(s)")
   iComment ""
   r3 <- iInttoptr (I32 (fromIntegral m)) i8Ptr
   iStore r3 r2
@@ -35,6 +35,6 @@ irPackClosure fn m vs = do
   r9 <- iBCast f3 i8Ptr
   iStore r9 r8
   forM_ (zip vs [4 ..]) $ \(v, n) -> do
-    qn <- iGep t r1 (I32 0) (I32 n)
-    iStore v qn
+    rn <- iGep t r1 (I32 0) (I32 n)
+    iStore v rn
   iBCast r1 i8Ptr
