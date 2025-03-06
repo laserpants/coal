@@ -2,7 +2,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Core.LLVM.IRInstruction.Eval (irEvalExpr) where
+module Noll.Core.LLVM.IRInstruction.Eval (irEvalExpr, irEvalFun) where
 
 import Control.Arrow ((>>>))
 import Control.Monad.Free (Free (..))
@@ -356,6 +356,10 @@ irEvalExpr =
           irConceal v
       e ->
         error (show e)
+
+{-# INLINE irEvalFun #-}
+irEvalFun :: CoreExpr -> IRInstr ()
+irEvalFun e = irEvalExpr e >>= iRet i8Ptr
 
 eliminatePtrConversions :: IRInstr IRValue -> IRInstr IRValue
 eliminatePtrConversions =
