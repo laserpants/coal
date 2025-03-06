@@ -18,12 +18,15 @@ module Noll.Core.Language.Expr (
 
 import Data.Eq.Deriving (deriveEq1)
 import Data.Fix (Fix (..))
-import Data.Functor.Foldable (cata)
+import Data.Functor.Foldable (cata, project)
 import Data.Set (singleton)
 import Noll.AST.FreeVars (BoundVars (..), FreeVars (..), exceptNames)
 import Noll.Common.List1 (List1, NonEmpty (..))
 import Noll.Core.Language.Op (Op (..))
 import Noll.Core.Language.Prim (Prim (..))
+import Noll.Core.Language.Type (Type (..), normalizeRow)
+import Noll.Core.Language.Type.Arrow (arity, foldType, returnTypeOf, unfoldType)
+import Noll.Core.Language.Typed (Typed (..))
 import Noll.Label (Label (..))
 import Noll.Utils (Name, Over)
 import Text.Show.Deriving (deriveShow1)
@@ -142,3 +145,36 @@ instance (Ord t) => FreeVars (Expr t) t where
           e `exceptNames` boundIn vs
         EMem e ->
           e
+
+instance (Typed t, Typed a) => Typed (ExprF t a) where
+  typeOf =
+    \case
+      EVar t ->
+        typeOf t
+      ELit t ->
+        typeOf t
+      ELet _ t ->
+        typeOf t
+      EIf _ _ t ->
+        typeOf t
+      EApp t _ _ ->
+        typeOf t
+      EMat t _ _ ->
+        typeOf t
+      ESel _ _ t ->
+        typeOf t
+      EOp op ->
+        typeOf op
+      ENil ->
+        RNil
+      EExt (Label _ n) t1 t2 ->
+        normalizeRow (RExt n (typeOf t1) (typeOf t2))
+      ELam ts t ->
+        foldType (typeOf t) (typeOf <$> ts)
+      ECall _ _ t ->
+        returnTypeOf t
+      EMem t ->
+        typeOf t
+
+instance (Typed t) => Typed (Expr t) where
+  typeOf = typeOf . project

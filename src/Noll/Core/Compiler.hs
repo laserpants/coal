@@ -60,7 +60,7 @@ import Noll.Core.Language (
 import qualified Noll.Core.Language as Core
 import Noll.Core.Language.Object (Object (..), ObjectList, objectName)
 import Noll.Core.Language.Replace (Sub, relabel)
-import Noll.Core.Language.Typed (isFunction)
+import Noll.Core.Language.Type.Arrow (isFunction)
 import Noll.Label (Label (..), labelName)
 import Noll.Utils (
   Dictionary,

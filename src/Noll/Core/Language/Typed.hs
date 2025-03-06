@@ -2,17 +2,13 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Core.Language.Typed (Typed (..), isFunction) where
+module Noll.Core.Language.Typed (Typed (..)) where
 
-import Data.Functor.Foldable (project)
-import Noll.Core.Language.Expr (Expr, ExprF (..))
 import Noll.Core.Language.Op (Op (..))
 import Noll.Core.Language.Prim (Prim (..))
-import Noll.Core.Language.Type (Type (..), normalizeRow)
-import Noll.Core.Language.Type.Arrow (arity, foldType, unfoldType)
+import Noll.Core.Language.Type (Type (..))
 import Noll.Label (Label (..))
 
-import qualified Noll.Common.List1 as List1
 import qualified Noll.Core.Language.Type.Syntax as Type
 
 class Typed t where
@@ -73,44 +69,3 @@ instance Typed (Op a) where
         Type.int64
       _ ->
         error "TODO"
-
-instance (Typed t, Typed a) => Typed (ExprF t a) where
-  typeOf =
-    \case
-      EVar t ->
-        typeOf t
-      ELit t ->
-        typeOf t
-      ELet _ t ->
-        typeOf t
-      EIf _ _ t ->
-        typeOf t
-      EApp t _ _ ->
-        typeOf t
-      EMat t _ _ ->
-        typeOf t
-      ESel _ _ t ->
-        typeOf t
-      EOp op ->
-        typeOf op
-      ENil ->
-        Type.RNil
-      EExt (Label _ n) t1 t2 ->
-        normalizeRow (RExt n (typeOf t1) (typeOf t2))
-      ELam ts t ->
-        foldType (typeOf t) (typeOf <$> ts)
-      ECall _ _ t ->
-        returnTypeOf t
-      EMem t ->
-        typeOf t
-
-instance (Typed t) => Typed (Expr t) where
-  typeOf = typeOf . project
-
-{-# INLINE isFunction #-}
-isFunction :: (Typed t) => t -> Bool
-isFunction f = arity (typeOf f) > 0
-
-{-# INLINE returnTypeOf #-}
-returnTypeOf :: (Typed t) => t -> Type
-returnTypeOf = List1.last . unfoldType . typeOf

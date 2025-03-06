@@ -6,11 +6,14 @@ module Noll.Core.Language.Type.Arrow (
   foldType,
   unfoldType,
   arity,
+  isFunction,
+  returnTypeOf,
 ) where
 
 import Noll.Common.List1 (List1, (<|))
 import Noll.Core.Language.Type (Type (..))
 import Noll.Core.Language.Type.Syntax (arrow)
+import Noll.Core.Language.Typed (Typed (..))
 
 import qualified Noll.Common.List1 as List1
 
@@ -35,3 +38,11 @@ unfoldType =
 {-# INLINE arity #-}
 arity :: Type -> Int
 arity t = List1.length (unfoldType t) - 1
+
+{-# INLINE isFunction #-}
+isFunction :: (Typed t) => t -> Bool
+isFunction f = arity (typeOf f) > 0
+
+{-# INLINE returnTypeOf #-}
+returnTypeOf :: (Typed t) => t -> Type
+returnTypeOf = List1.last . unfoldType . typeOf
