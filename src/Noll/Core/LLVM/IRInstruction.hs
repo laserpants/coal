@@ -31,6 +31,7 @@ data IRInstrOpF v t i next
   | ICmpSGE          t v v        (v -> next)
   | IStore           v v          next
   | IRet             t v          next
+  | ISwitch          v Name [i]   next
   | IBr              v [Name]     next
   | IBr1             Name         next
   | ICall            t v [v]      (v -> next)
@@ -43,15 +44,14 @@ data IRInstrOpF v t i next
   | IAlloca          t            (v -> next)
   | IBCast           v t          (v -> next)
   | IPhi             t [i]        (v -> next)
-  | ISwitch          v Name [i]   next
   | IComment         Text         next
-  --
   | ILabel           Name         (Name -> next)
   | IIndex                        (Name -> next)
-  | ILookup          Name         (v -> next)
-  | IBind        [i] (IRInstr v)  (v -> next)
   | IBlock      Name (IRInstr v)  (i -> next)
   | IBlock1     Name (IRInstr ()) next
+  --
+  | ILookup          Name         (v -> next)
+  | IBind        [i] (IRInstr v)  (v -> next)
   | IDataConstr    t Name         ((Int, t) -> next)
   | IHashMapKey      Name         (v -> next)
   | IRuntimeApply    Int          (Name -> next)                -- artifact?
