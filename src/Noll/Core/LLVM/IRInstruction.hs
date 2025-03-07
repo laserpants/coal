@@ -34,6 +34,7 @@ data IRInstrOpF v t i next
   | ISwitch          v Name [i]   next
   | IBr              v [Name]     next
   | IBr1             Name         next
+  | IComment         Text         next
   | ICall            t v [v]      (v -> next)
   | ICallGlobal      t Name [v]   (v -> next)
   | IGep             t v v v      (v -> next)
@@ -46,7 +47,6 @@ data IRInstrOpF v t i next
   | IPhi             t [i]        (v -> next)
   | ILookup          Name         (v -> next)
   | IBind        [i] (IRInstr v)  (v -> next)
-  | IComment         Text         next
   | ILabel           Name         (Name -> next)
   | IIndex                        (Name -> next)
   | IBlock      Name (IRInstr v)  (i -> next)
