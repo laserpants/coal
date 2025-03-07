@@ -239,13 +239,18 @@ interpreter =
       let label = "label_" <> name
       addArtifact (InterpreterArtifactHashMapKey label)
       next (Global (ptr (stringLiteralType name)) label)
+    IMemoized next -> do
+      d <- nextLabelIndex
+      let name = "ptr." <> showt d
+      addArtifact (InterpreterArtifactMemoizedConstant name)
+      next (Global i8Ptr name)
     IDataConstr t name next -> do
-      -- TODO: addArtifact
+      addArtifact (InterpreterArtifactDataConstructor name t)
       env <- asks irInterpreterConstructorEnv
       case Environment.lookup name env of
         Nothing ->
           error ("No constructor " <> Text.unpack name)
-        Just n ->
+        Just n -> do
           next (n, TNamed name t)
     _ ->
       error "TODO"

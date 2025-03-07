@@ -111,8 +111,8 @@ irEvalExpr =
           iBind [(var, v2), (r, v1)] (irEval e2)
       Core.EMem e ->
         irCommentBlock "EMem" $ do
-          p1 <- iLabel "ptr"
-          r1 <- iLoad i8Ptr (Global i8Ptr p1)
+          p1 <- iMemoized
+          r1 <- iLoad i8Ptr p1
           r2 <- iCmpEq i1 r1 Null
           labelIsNull <- iLabel "is_null"
           labelNotNull <- iLabel "not_null"
@@ -120,7 +120,7 @@ irEvalExpr =
           iBr r2 [labelIsNull, labelNotNull]
           isNullBlock <- iBlock labelIsNull $ do
             r3 <- irEval e
-            iStore r3 (Global i8Ptr p1)
+            iStore r3 p1
             iBr1 labelEnd
             pure r3
           notNullBlock <- iBlock labelNotNull $ do

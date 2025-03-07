@@ -52,6 +52,7 @@ data IRInstrOpF v t i next
   | IBlock1 Name (IRInstr ()) next
   | IDataConstr t Name ((Int, t) -> next)
   | IHashMapKey Name (v -> next)
+  | IMemoized (v -> next)
   | IApply Int (Name -> next)
   | IClosure Name Int Int ((Name, v, v, v) -> next)
   deriving (Functor)

@@ -39,6 +39,7 @@ module Noll.Core.LLVM.IRInstruction.TH (
   iBlock1,
   iDataConstr,
   iHashMapKey,
+  iMemoized,
   iApply,
   iClosure,
 ) where

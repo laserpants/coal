@@ -15,12 +15,15 @@ module Noll.Core.LLVM.IRInstruction.Interpreter.State (
 
 import Control.Monad.RWS (MonadState, modify)
 import Data.Text (Text)
+import Noll.Core.LLVM.IRType (IRType)
 import Noll.Utils (Name, Over)
 
 data IRInterpreterArtifact
   = InterpreterArtifactFunctionApply Int
   | InterpreterArtifactClosure Int
   | InterpreterArtifactHashMapKey Name
+  | InterpreterArtifactDataConstructor Name IRType
+  | InterpreterArtifactMemoizedConstant Name
   deriving (Show, Eq, Ord)
 
 data IRInterpreterState = IRInterpreterState
