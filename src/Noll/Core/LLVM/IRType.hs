@@ -61,7 +61,7 @@ instance IRTyped Type where
       TCon "double" [] ->
         TDouble
       TCon "char" [] ->
-        error "TODO"
+        TInt32
       TCon "string" [] ->
         error "TODO"
       _ ->
