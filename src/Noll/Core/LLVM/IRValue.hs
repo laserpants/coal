@@ -63,7 +63,7 @@ irPrimValue =
       Double d
     PUnit ->
       I1 True
-    PChar _ ->
-      error "Implementation error"
+    PChar c ->
+      I32 c
     PString _ ->
       error "Implementation error"

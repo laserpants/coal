@@ -37,8 +37,6 @@ irEvalExpr =
       Core.EOp op ->
         irCommentBlock "EOp" $ do
           irEvalOp op
-      Core.ELit Core.PChar{} ->
-        error "TODO"
       Core.ELit Core.PString{} ->
         error "TODO"
       Core.ELit prim ->
