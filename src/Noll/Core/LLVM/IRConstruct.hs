@@ -12,9 +12,12 @@ import Noll.Core.LLVM.IRValue (IRValue)
 import Noll.Label (Label (..))
 import Noll.Utils (Name)
 
+-- | https://www.llvm.org/docs/LangRef.html#linkage-types
 data IRLinkage
-  = LInternal
-  | LPrivate
+  = -- | Internal linkage
+    LInternal
+  | -- Private linkage
+    LPrivate
   deriving (Show, Eq, Ord)
 
 -- | Top-level IR language construct
