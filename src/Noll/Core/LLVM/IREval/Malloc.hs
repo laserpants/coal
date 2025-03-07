@@ -15,4 +15,4 @@ irMalloc t = do
     r1 <- iGepNull (ptr t) (I32 1)
     r2 <- iPtrtoint r1 i64
     r3 <- iCallGlobal i8Ptr "gc_malloc" [r2]
-    iBCast r3 (ptr t)
+    iBitcast r3 (ptr t)

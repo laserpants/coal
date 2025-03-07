@@ -27,7 +27,7 @@ module Noll.Core.LLVM.IRInstruction.TH (
   iInttoptr,
   iPtrtoint,
   iAlloca,
-  iBCast,
+  iBitcast,
   iPhi,
   iSwitch,
   iComment,

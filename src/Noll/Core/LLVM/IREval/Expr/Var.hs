@@ -25,7 +25,7 @@ irEvalVar t name
       v1 <- irMalloc t1
       v2 <- iGep t1 v1 (I32 0) (I32 0)
       iStore (I32 (fromIntegral i)) v2
-      iBCast v1 i8Ptr
+      iBitcast v1 i8Ptr
   | otherwise = do
       v <- iLookup name
       irComments (comment2 (irEncode v))

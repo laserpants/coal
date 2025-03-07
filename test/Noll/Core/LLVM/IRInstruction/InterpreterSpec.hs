@@ -11,9 +11,10 @@ import Noll.Common.List1 (NonEmpty (..), (<|))
 import Noll.Core.Compiler
 import Noll.Core.LLVM.IRConstruct (IRConstruct (..))
 import Noll.Core.LLVM.IREncodable (IREncodable (..))
-import Noll.Core.LLVM.IREval.Expr (irEvalExpr)
+import Noll.Core.LLVM.IREval.Closure.Apply (irClosureApply)
 import Noll.Core.LLVM.IREval.Closure.Extend (irClosureExtend)
 import Noll.Core.LLVM.IREval.Closure.Finalize (irClosureFinalize)
+import Noll.Core.LLVM.IREval.Expr (irEvalExpr)
 import Noll.Core.LLVM.IRInstruction.Interpreter (
   IRInterpreter (..),
   IRInterpreterEnv (..),
@@ -22,7 +23,7 @@ import Noll.Core.LLVM.IRInstruction.Interpreter (
   interpret,
   runInterpreter,
  )
-import Noll.Core.LLVM.IRInstruction.Interpreter.Object (objectEnvironment, interpretObject)
+import Noll.Core.LLVM.IRInstruction.Interpreter.Object (interpretObject, objectEnvironment)
 import Noll.Core.LLVM.IRInstruction.TH
 import Noll.Core.LLVM.IRType
 import Noll.Core.LLVM.IRType.Syntax
@@ -1166,6 +1167,8 @@ abc4 = runInterpreter (IRInterpreterEnv testEnv mempty) (interpretObject funF4)
 abcd = Text.putStrLn $ irEncode (thd3 (runInterpreter (IRInterpreterEnv mempty mempty) (interpret (irClosureExtend 2 (Local i8Ptr "f") (Local i32 "n") (Local i8PtrPtr "as")))))
 
 abce = Text.putStrLn $ irEncode (thd3 (runInterpreter (IRInterpreterEnv mempty mempty) (interpret (irClosureFinalize 2 (Local i8Ptr "f") (Local i32 "n") (Local i8PtrPtr "as")))))
+
+abcf = Text.putStrLn $ irEncode (thd3 (runInterpreter (IRInterpreterEnv mempty mempty) (interpret (irClosureApply 3 (Local i8Ptr "f") [Local i8Ptr "a0", Local i8Ptr "a1", Local i8Ptr "a2"]))))
 
 -- abc5 = Text.putStrLn (irEncode pipelineStateArtifacts)
 abc5 = (pipelineStateArtifacts, pipelineStateCode)

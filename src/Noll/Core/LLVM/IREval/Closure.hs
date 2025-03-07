@@ -42,18 +42,18 @@ irPackClosure fname k vs = do
   r3 <- iInttoptr (I32 (fromIntegral k)) i8Ptr
   iStore r3 r2
   r4 <- iGep t r1 (I32 0) (I32 1)
-  r5 <- iBCast f1 i8Ptr
+  r5 <- iBitcast f1 i8Ptr
   iStore r5 r4
   r6 <- iGep t r1 (I32 0) (I32 2)
-  r7 <- iBCast f2 i8Ptr
+  r7 <- iBitcast f2 i8Ptr
   iStore r7 r6
   r8 <- iGep t r1 (I32 0) (I32 3)
-  r9 <- iBCast f3 i8Ptr
+  r9 <- iBitcast f3 i8Ptr
   iStore r9 r8
   forM_ (zip vs [4 ..]) $ \(v, n) -> do
     rn <- iGep t r1 (I32 0) (I32 n)
     iStore v rn
-  iBCast r1 i8Ptr
+  iBitcast r1 i8Ptr
 
 structType :: Int -> IRType
 structType n = struct (i32 : replicate (n + 3) i8Ptr)

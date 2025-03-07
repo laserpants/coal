@@ -162,10 +162,10 @@ interpreter =
       instruction t next ["inttoptr", annotated v, "to", irEncode t]
     IPtrtoint v t next ->
       instruction t next ["ptrtoint", annotated v, "to", irEncode t]
-    IBCast v t next ->
+    IBitcast v t next ->
       instruction t next ["bitcast", annotated v, "to", irEncode t]
-    IAlloca t next ->
-      instruction (ptr t) next ["alloca", irEncode t]
+    IAlloca t v next ->
+      instruction (ptr t) next ["alloca", withCommas [irEncode t, annotated v]]
     IComment text next -> do
       tell [LComment text]
       next

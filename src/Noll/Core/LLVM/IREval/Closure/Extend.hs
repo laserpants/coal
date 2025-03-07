@@ -14,7 +14,7 @@ import TextShow (showt)
 
 irClosureExtend :: Int -> IRValue -> IRValue -> IRValue -> IRInstr ()
 irClosureExtend n argF argN argAs = do
-  r1 <- iBCast argF (ptr (namedClosureType n))
+  r1 <- iBitcast argF (ptr (namedClosureType n))
   r2 <- iGep (namedClosureType n) r1 (I32 0) (I32 0)
   irComments ["Argument count"]
   r3 <- iLoad i32 r2
@@ -45,14 +45,14 @@ irClosureExtend n argF argN argAs = do
           r9 <- iGepNull (ptr t) (I32 1)
           r10 <- iPtrtoint r9 i64
           r11 <- iCallGlobal i8Ptr "gc_malloc" [r10]
-          r12 <- iBCast r11 (ptr t)
+          r12 <- iBitcast r11 (ptr t)
           r13 <- iGep t r12 (I32 0) (I32 0)
           iStore r4 r13
           r14 <- iGep t r12 (I32 0) (I32 1)
-          r15 <- iBCast (Global (fun i8Ptr [i8Ptr, i32, i8PtrPtr]) ("closure" <> showt (n + m) <> "_finalize")) i8Ptr
+          r15 <- iBitcast (Global (fun i8Ptr [i8Ptr, i32, i8PtrPtr]) ("closure" <> showt (n + m) <> "_finalize")) i8Ptr
           iStore r15 r14
           r16 <- iGep t r12 (I32 0) (I32 2)
-          r17 <- iBCast (Global (fun i8Ptr [i8Ptr, i32, i8PtrPtr]) ("closure" <> showt (n + m) <> "_extend")) i8Ptr
+          r17 <- iBitcast (Global (fun i8Ptr [i8Ptr, i32, i8PtrPtr]) ("closure" <> showt (n + m) <> "_extend")) i8Ptr
           iStore r17 r16
           r18 <- iGep t r12 (I32 0) (I32 3)
           iStore r6 r18

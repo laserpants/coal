@@ -33,7 +33,7 @@ irEvalApp t ll@(Label _ var) es
       forM_ (zip vs [1 ..]) $ \(v, n) -> do
         v3 <- iGep t1 v1 (I32 0) (I32 n)
         iStore v v3
-      iBCast v1 i8Ptr
+      iBitcast v1 i8Ptr
   | otherwise =
       irCommentBlock "Function application" $ do
         v <- iLookup var

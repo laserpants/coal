@@ -16,7 +16,7 @@ import TextShow (showt)
 
 irClosureFinalize :: Int -> IRValue -> IRValue -> IRValue -> IRInstr ()
 irClosureFinalize n argF argN argAs = do
-  r1 <- iBCast argF (ptr (namedClosureType n))
+  r1 <- iBitcast argF (ptr (namedClosureType n))
   r2 <- iGep (namedClosureType n) r1 (I32 0) (I32 3)
   irComments ["Target function"]
   r3 <- iLoad i8Ptr r2
@@ -38,7 +38,7 @@ irClosureFinalize n argF argN argAs = do
         modify (<> [r5])
         qs <- get
         iBlock1 labelEq $ do
-          r7 <- iBCast r3 (opaqueIRSignature (n + m))
+          r7 <- iBitcast r3 (opaqueIRSignature (n + m))
           r8 <- iCall i8Ptr r7 (rs <> qs)
           iRet i8Ptr r8
         iBlock1 labelGt $ pure ()

@@ -19,7 +19,7 @@ import qualified Noll.Core.Language as Core
 irEvalClause :: (IREval e) => IRValue -> [Label Core.Type] -> e -> IRInstr IRValue
 irEvalClause v1 lls e = do
   let t = structType (length lls)
-  r1 <- iBCast v1 (ptr t)
+  r1 <- iBitcast v1 (ptr t)
   bound <- forM (zip lls [1 ..]) $
     \(Label _ n, i) -> do
       r2 <- iGep t r1 (I32 0) (I32 i)
@@ -33,7 +33,7 @@ structType n = struct (i32 : replicate n i8Ptr)
 irEvalMatch :: (IREval e) => e -> List1 (Core.Clause Core.Type e) -> IRInstr IRValue
 irEvalMatch e1 cs = do
   v1 <- irEval e1
-  r1 <- iBCast v1 (ptr (struct [i32]))
+  r1 <- iBitcast v1 (ptr (struct [i32]))
   r2 <- iGep (struct [i32]) r1 (I32 0) (I32 0)
   r3 <- iLoad i32 r2
   labelEnd <- iLabel "end"
