@@ -118,7 +118,7 @@ switchBranch :: Name -> IRValue -> Text
 switchBranch n v = withCommas [annotated v, encodeLabel n]
 
 switchBranches :: [(Name, IRValue)] -> Text
-switchBranches bs = Text.intercalate " " (uncurry switchBranch <$> bs)
+switchBranches bs = Text.unwords (uncurry switchBranch <$> bs)
 
 instruction :: IRType -> (IRValue -> IRInterpreter a) -> [Text] -> IRInterpreter a
 instruction t next tokens = do
