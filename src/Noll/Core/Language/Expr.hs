@@ -101,7 +101,7 @@ data ExprF t a
     EExt (Label t) a a
   | -- | Empty record
     ENil
-  | -- | Field selection operator
+  | -- | Field selector
     ESel (Focus t) a a
   | -- | External C function call
     ECall (Label t) [a] a
