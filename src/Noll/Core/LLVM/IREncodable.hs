@@ -108,21 +108,29 @@ instance (IREncodable a) => IREncodable (IRConstruct a) where
     \case
       CDefine name t ln as c ->
         -- TODO: Handle linkage
-        "define"
-          <> " "
-          <> global t name
-          <> parens (commaSep as)
-          <> " "
-          <> funBlock c
-          <> "\n"
+        line $
+          "define"
+            <> space
+            <> global t name
+            <> parens (commaSep as)
+            <> space
+            <> funBlock c
       CDeclare name t ts ->
-        "declare"
-          <> " "
-          <> global t name
-          <> parens (commaSep ts)
-          <> "\n"
+        line $
+          "declare"
+            <> space
+            <> global t name
+            <> parens (commaSep ts)
       _ ->
         error "TODO"
+
+{-# INLINE space #-}
+space :: Text
+space = " "
+
+{-# INLINE line #-}
+line :: Text -> Text
+line txt = txt <> "\n"
 
 enquote :: Text -> Text
 enquote name
@@ -130,7 +138,7 @@ enquote name
   | otherwise = "\"" <> name <> "\""
 
 funBlock :: (IREncodable a) => a -> Text
-funBlock block = "{" <> "\n" <> irEncode block <> "}"
+funBlock block = line "{" <> irEncode block <> "}"
 
 commaSep :: (IREncodable a) => [a] -> Text
 commaSep = Text.intercalate ", " . fmap irEncode
