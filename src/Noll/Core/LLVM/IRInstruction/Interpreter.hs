@@ -126,8 +126,8 @@ instruction t next tokens = do
   tell [LInstruction ([irEncode r, "="] <> tokens)]
   next r
 
-instruction0 :: IRInterpreter a -> [Text] -> IRInterpreter a
-instruction0 next tokens = tell [LInstruction tokens] >> next
+instruction1 :: IRInterpreter a -> [Text] -> IRInterpreter a
+instruction1 next tokens = tell [LInstruction tokens] >> next
 
 offset :: IRType -> [IRValue] -> IRType
 offset (TPtr t) (I32 0 : ixs) = offset t ixs
@@ -135,7 +135,7 @@ offset (TNamed _ t) ixs = offset t ixs
 offset (TStruct ts) (I32 0 : I32 n : _) = ts !! fromIntegral n
 offset (TArray _ t) (I32 _ : _) = ptr t
 offset t [] = t
-offset a b = error (show (a, b))
+offset _ _ = error "Implementation error"
 
 interpreter :: IRInstrOp (IRInterpreter a) -> IRInterpreter a
 interpreter =
@@ -170,7 +170,7 @@ interpreter =
       tell [LComment text]
       next
     IRet t v next ->
-      instruction0 next ["ret", irEncode t, irEncode v]
+      instruction1 next ["ret", irEncode t, irEncode v]
     ICall TVoid v vs next ->
       error "TODO"
     ICall t v vs next ->
@@ -178,14 +178,13 @@ interpreter =
     ICallGlobal t name vs next ->
       instruction t next ["call", irEncode t, irGlobalName name <> "(" <> withCommas (annotated <$> vs) <> ")"]
     IBr v names next ->
-      instruction0 next ["br", withCommas (annotated v : (encodeLabel <$> names))]
+      instruction1 next ["br", withCommas (annotated v : (encodeLabel <$> names))]
     IBr1 name next ->
-      instruction0 next ["br", encodeLabel name]
+      instruction1 next ["br", encodeLabel name]
     IPhi t vs next ->
       instruction t next ["phi", irEncode t, withCommas (uncurry phiBranches <$> vs)]
     IGep t v1 v2 v3 next ->
       instruction (ptr (offset t [v2, v3])) next ["getelementptr", withCommas (irEncode t : (irEncode . IRAnnotated <$> [v1, v2, v3]))]
-    --      instruction (ptr (offset t [v2, v3])) next ["getelementptr", withCommas (irEncode (irTypeOf v1) : (irEncode . IRAnnotated <$> [v1, v2, v3]))]
     IGep1 t v1 v2 next ->
       instruction (ptr t) next ["getelementptr", withCommas (irEncode t : (irEncode . IRAnnotated <$> [v1, v2]))]
     IGepNull t v1 next ->
@@ -193,9 +192,9 @@ interpreter =
     ILoad t v1 next ->
       instruction t next ["load", withCommas [irEncode t, irEncode (IRAnnotated v1)]]
     IStore v1 v2 next ->
-      instruction0 next ["store", withCommas [irEncode (annotated v1), irEncode (annotated v2)]]
+      instruction1 next ["store", withCommas [irEncode (annotated v1), irEncode (annotated v2)]]
     ISwitch v n cs next ->
-      instruction0 next ["switch", withCommas [annotated v, encodeLabel n], "[" <> switchBranches cs <> "]"]
+      instruction1 next ["switch", withCommas [annotated v, encodeLabel n], "[" <> switchBranches cs <> "]"]
     ILookup var next -> do
       env <- asks irInterpreterValueEnv
       case Environment.lookup var env of
@@ -241,8 +240,7 @@ interpreter =
       addArtifact (InterpreterArtifactHashMapKey label)
       next (Global (ptr (stringLiteralType name)) label)
     IDataConstr t name next -> do
-      -- addArtifact undefined
-      -- TODO
+      -- TODO: addArtifact
       env <- asks irInterpreterConstructorEnv
       case Environment.lookup name env of
         Nothing ->

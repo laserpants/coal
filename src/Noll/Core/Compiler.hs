@@ -40,8 +40,8 @@ import Noll.Core.LLVM.IRInstruction.Interpreter (
   runInterpreter,
  )
 import Noll.Core.LLVM.IRInstruction.Interpreter.Object (
-  objectEnvironment,
   interpretObject,
+  objectEnvironment,
  )
 import Noll.Core.LLVM.IRValue (IRValue (..))
 import Noll.Core.Language (

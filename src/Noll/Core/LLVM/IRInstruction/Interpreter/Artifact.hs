@@ -17,8 +17,8 @@ import Noll.Core.LLVM.IRType.Syntax (i32, i8Ptr, i8PtrPtr, struct)
 import Noll.Label (Label (..))
 import TextShow (showt)
 
---foo :: Int -> IRInterpreter (IRConstruct [IRLine])
---foo n = do
+-- foo :: Int -> IRInterpreter (IRConstruct [IRLine])
+-- foo n = do
 --  (_, w) <- listen (interpret (irClosureFinalize n undefined undefined undefined)) -- (interpret (irClosureExtend applied))
 --  let zz =
 --        CDefine
@@ -32,8 +32,8 @@ import TextShow (showt)
 --          w
 --  pure zz
 --
---foo2 :: Int -> IRInterpreter (IRConstruct [IRLine])
---foo2 n = do
+-- foo2 :: Int -> IRInterpreter (IRConstruct [IRLine])
+-- foo2 n = do
 --  (_, w) <- listen (interpret (irClosureExtend n undefined undefined undefined)) -- (interpret (irClosureExtend applied))
 --  let zz =
 --        CDefine
@@ -47,8 +47,8 @@ import TextShow (showt)
 --          w
 --  pure zz
 --
---interpretArtifact :: IRInterpreterArtifact -> IRInterpreter [IRConstruct [IRLine]]
---interpretArtifact =
+-- interpretArtifact :: IRInterpreterArtifact -> IRInterpreter [IRConstruct [IRLine]]
+-- interpretArtifact =
 --  \case
 --    InterpreterArtifactClosure applied -> do
 --      finalize <- foo applied
