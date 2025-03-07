@@ -41,7 +41,7 @@ import Noll.Core.LLVM.IRInstruction.Interpreter (
  )
 import Noll.Core.LLVM.IRInstruction.Interpreter.Object (
   objectEnvironment,
-  objectInterpreter,
+  interpretObject,
  )
 import Noll.Core.LLVM.IRValue (IRValue (..))
 import Noll.Core.Language (
@@ -529,7 +529,7 @@ compile ol = do
   extendInterpreterValueEnv (objectEnvironment objs)
   -- TODO
   extendInterpreterConstructorEnv (Environment.fromList [("$Cons", 0), ("$Nil", 1), ("$Record", 0), ("EqualTo", 0), ("GreaterThan", 1), ("LessThan", 2), ("Node", 1), ("Leaf", 0)])
-  code <- transInterpreter (traverse objectInterpreter objs)
+  code <- transInterpreter (traverse interpretObject objs)
   pipelineStateInsertCode code
 
 -- xx1 objs = mapM_ print $ muteObjectTypes <$> liftLambdas (flattenELam <$$> evalState (traverse (traverse transSuffixExpr) objs) 0)

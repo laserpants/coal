@@ -171,8 +171,7 @@ interpreter =
       next
     IRet t v next ->
       instruction0 next ["ret", irEncode t, irEncode v]
-    ICall TVoid _ _ _ ->
-      -- v vs next ->
+    ICall TVoid v vs next ->
       error "TODO"
     ICall t v vs next ->
       instruction t next ["call", irEncode t, irEncode v <> "(" <> withCommas (annotated <$> vs) <> ")"]

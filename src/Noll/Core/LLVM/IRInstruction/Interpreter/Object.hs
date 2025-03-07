@@ -1,7 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 
 module Noll.Core.LLVM.IRInstruction.Interpreter.Object (
-  objectInterpreter,
+  interpretObject,
   objectEnvironment,
 ) where
 
@@ -28,8 +28,8 @@ import qualified Noll.Core.Language as Core
 
 type CoreObject = Object Core.Type (Core.Expr Core.Type)
 
-objectInterpreter :: CoreObject -> IRInterpreter (IRConstruct [IRLine])
-objectInterpreter =
+interpretObject :: CoreObject -> IRInterpreter (IRConstruct [IRLine])
+interpretObject =
   \case
     OFunction name lls e -> do
       (_, w) <- listen (local (flip (foldr insertLocal) lls) (interpret (irEvalFun e)))

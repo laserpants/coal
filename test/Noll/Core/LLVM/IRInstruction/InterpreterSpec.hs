@@ -22,7 +22,7 @@ import Noll.Core.LLVM.IRInstruction.Interpreter (
   interpret,
   runInterpreter,
  )
-import Noll.Core.LLVM.IRInstruction.Interpreter.Object (objectEnvironment, objectInterpreter)
+import Noll.Core.LLVM.IRInstruction.Interpreter.Object (objectEnvironment, interpretObject)
 import Noll.Core.LLVM.IRInstruction.TH
 import Noll.Core.LLVM.IRType
 import Noll.Core.LLVM.IRType.Syntax
@@ -1067,8 +1067,8 @@ blockObjects4 =
 --    , irInterpreterConstructorEnv = mempty
 --    }
 
--- objectInterpreter :: Object Core.Type (Core.Expr Core.Type) -> IRInterpreter (IRConstruct [IRLine])
--- objectInterpreter =
+-- interpretObject :: Object Core.Type (Core.Expr Core.Type) -> IRInterpreter (IRConstruct [IRLine])
+-- interpretObject =
 --  \case
 --    OFunction name lls e -> do
 --      (_, w) <- listen (local (flip (foldr insertLocal) lls) (interpret (irEvalExpr e >>= iRet i8Ptr)))
@@ -1157,11 +1157,11 @@ funF4 =
 testEnv :: Environment IRValue
 testEnv = objectEnvironment [funMain, funFn2, funF4]
 
-abc2 = runInterpreter (IRInterpreterEnv testEnv mempty) (objectInterpreter funMain)
+abc2 = runInterpreter (IRInterpreterEnv testEnv mempty) (interpretObject funMain)
 
-abc3 = runInterpreter (IRInterpreterEnv testEnv mempty) (objectInterpreter funFn2)
+abc3 = runInterpreter (IRInterpreterEnv testEnv mempty) (interpretObject funFn2)
 
-abc4 = runInterpreter (IRInterpreterEnv testEnv mempty) (objectInterpreter funF4)
+abc4 = runInterpreter (IRInterpreterEnv testEnv mempty) (interpretObject funF4)
 
 abcd = Text.putStrLn $ irEncode (thd3 (runInterpreter (IRInterpreterEnv mempty mempty) (interpret (irClosureExtend 2 (Local i8Ptr "f") (Local i32 "n") (Local i8PtrPtr "as")))))
 
