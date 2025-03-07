@@ -14,7 +14,6 @@ module Noll.Core.LLVM.IREncodable (
 ) where
 
 import Data.Char (isAlphaNum)
-import Data.List (intersperse)
 import Data.Text (Text)
 import Noll.Core.LLVM.IRConstruct (IRConstruct (..))
 import Noll.Core.LLVM.IRType (IRType (..), IRTyped (..))
@@ -85,7 +84,7 @@ instance IREncodable IRType where
       TArray n t ->
         brackets (irEncode n <> " x " <> irEncode t)
       TFun t ts ->
-        irEncode t <> " " <> ptr (parens (commaSep ts))
+        irEncode t <> space <> ptr (parens (commaSep ts))
 
 newtype IRAnnotated v = IRAnnotated v
   deriving (Show, Eq, Ord, Read)
