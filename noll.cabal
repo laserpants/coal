@@ -63,6 +63,7 @@ library
       Noll.Core.LLVM.IREncodable
       Noll.Core.LLVM.IREval
       Noll.Core.LLVM.IREval.Closure
+      Noll.Core.LLVM.IREval.Closure.Apply
       Noll.Core.LLVM.IREval.Closure.Extend
       Noll.Core.LLVM.IREval.Closure.Finalize
       Noll.Core.LLVM.IREval.Comment
