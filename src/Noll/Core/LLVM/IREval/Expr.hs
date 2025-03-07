@@ -48,9 +48,10 @@ irEvalExpr =
           irEvalVar t var
       Core.ELet vs e1 ->
         irCommentBlock "ELet" $ do
-          bound <- forM vs $ \(Core.Binding (Label _ name) e) -> do
-            v <- irEval e
-            pure (name, v)
+          bound <- forM vs $
+            \(Core.Binding (Label _ name) e) -> do
+              v <- irEval e
+              pure (name, v)
           iBind (fromList1 bound) (irEval e1)
       Core.EApp t e1 es ->
         irCommentBlock "EApp" $ do

@@ -2,8 +2,8 @@
 
 module Noll.Core.Language.Prim (Prim (..)) where
 
-import Data.Int (Int32, Int64)
 import Data.ByteString (ByteString)
+import Data.Int (Int32, Int64)
 
 -- | Core language primitives
 data Prim
