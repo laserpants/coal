@@ -25,7 +25,14 @@ irApplyClosure v es = do
   name <- iApply (length es)
   iCallGlobal i8Ptr name (v : vs)
 
-irPackClosure :: Name -> Int -> [IRValue] -> IRInstr IRValue
+irPackClosure ::
+  -- | Target function
+  Name ->
+  -- | Remaining argument count
+  Int ->
+  -- | Applied arguments
+  [IRValue] ->
+  IRInstr IRValue
 irPackClosure fname k vs = do
   (name, f1, f2, f3) <- iClosure fname (length vs) k
   let t = TNamed name (structType (length vs))
