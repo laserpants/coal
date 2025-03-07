@@ -24,8 +24,9 @@ import Noll.AST.FreeVars (BoundVars (..), FreeVars (..), exceptNames)
 import Noll.Common.List1 (List1, NonEmpty (..))
 import Noll.Core.Language.Op (Op (..))
 import Noll.Core.Language.Prim (Prim (..))
-import Noll.Core.Language.Type (Type (..), normalizeRow)
+import Noll.Core.Language.Type (Type (..))
 import Noll.Core.Language.Type.Arrow (foldType, returnTypeOf)
+import Noll.Core.Language.Type.Row (extend)
 import Noll.Core.Language.Typed (Typed (..))
 import Noll.Label (Label (..))
 import Noll.Utils (Name, Over)
@@ -168,7 +169,7 @@ instance (Typed t, Typed a) => Typed (ExprF t a) where
       ENil ->
         RNil
       EExt (Label _ n) t1 t2 ->
-        normalizeRow (RExt n (typeOf t1) (typeOf t2))
+        extend n (typeOf t1) (typeOf t2)
       ELam ts t ->
         foldType (typeOf t) (typeOf <$> ts)
       ECall _ _ t ->
