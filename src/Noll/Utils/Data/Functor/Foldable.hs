@@ -1,4 +1,11 @@
-module Noll.Utils.Embed (embed1, embed2, embed3, embed4, embed5, module Data.Functor.Foldable) where
+module Noll.Utils.Data.Functor.Foldable (
+  embed1,
+  embed2,
+  embed3,
+  embed4,
+  embed5,
+  module Data.Functor.Foldable,
+) where
 
 import Data.Functor.Foldable (Base, Corecursive, embed)
 

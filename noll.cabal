@@ -55,6 +55,7 @@ library
       Noll.Core.Language.Prim
       Noll.Core.Language.Type
       Noll.Core.Language.Type.Arrow
+      Noll.Core.Language.Type.Row
       Noll.Core.Language.Type.Syntax
       Noll.Core.Language.Typed
       Noll.Core.LLVM.IR
@@ -119,10 +120,10 @@ library
       Noll.Utils.Control.Monad.Writer
       Noll.Utils.Data.Char
       Noll.Utils.Data.Functor
+      Noll.Utils.Data.Functor.Foldable
       Noll.Utils.Data.List
       Noll.Utils.Data.Set
       Noll.Utils.Data.Text
-      Noll.Utils.Embed
       Noll.Utils.Name
       Noll.Utils.Operators
   other-modules:

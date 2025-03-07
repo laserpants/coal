@@ -8,6 +8,7 @@ module Noll.Utils (
   module Data.Map.Strict,
   module Noll.Utils.Operators,
   module Noll.Utils.Name,
+  module Noll.Utils.Data.Functor.Foldable,
   module Noll.Utils.Data.Text,
   module Noll.Utils.Data.Set,
   module Noll.Utils.Data.List,
@@ -35,6 +36,7 @@ import Noll.Utils.Control.Monad
 import Noll.Utils.Control.Monad.State
 import Noll.Utils.Control.Monad.Writer
 import Noll.Utils.Data.Functor
+import Noll.Utils.Data.Functor.Foldable
 import Noll.Utils.Data.List
 import Noll.Utils.Data.Set
 import Noll.Utils.Data.Text
