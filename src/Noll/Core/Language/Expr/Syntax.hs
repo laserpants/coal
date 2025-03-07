@@ -25,7 +25,7 @@ import Noll.Core.Language.Expr (
 import Noll.Core.Language.Op (Op)
 import Noll.Core.Language.Prim (Prim)
 import Noll.Label (Label (..))
-import Noll.Utils.Embed
+import Noll.Utils.Embed (embed, embed1, embed2, embed3)
 
 {-# INLINE var #-}
 var :: Label t -> Expr t
