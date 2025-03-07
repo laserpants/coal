@@ -7,7 +7,7 @@ module Noll.Core.LLVM.IREval.Closure (
 ) where
 
 import Data.Text (Text)
-import Noll.Common.List1 (List1, fromList1)
+import Noll.Common.List1 (List1)
 import Noll.Core.LLVM.IREval
 import Noll.Core.LLVM.IREval.Comment (irComments)
 import Noll.Core.LLVM.IREval.Malloc (irMalloc)
