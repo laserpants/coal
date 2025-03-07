@@ -3,7 +3,7 @@
 module Noll.Core.Language.Prim (Prim (..)) where
 
 import Data.Int (Int32, Int64)
-import Data.Text (Text)
+import Data.ByteString (ByteString)
 
 -- | Core language primitives
 data Prim
@@ -22,5 +22,5 @@ data Prim
   | -- | Single characters
     PChar Int32
   | -- | Unicode strings
-    PString Text
+    PString ByteString
   deriving (Show, Eq, Ord, Read)
