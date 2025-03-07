@@ -63,7 +63,7 @@ instance IRTyped Type where
       TCon "char" [] ->
         TInt32
       TCon "string" [] ->
-        error "TODO"
+        TPtr TInt8
       _ ->
         TPtr TInt8
 
