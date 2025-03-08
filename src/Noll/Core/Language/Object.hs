@@ -7,6 +7,8 @@
 module Noll.Core.Language.Object (Object (..), ObjectList, objectName) where
 
 import Noll.AST.FreeVars (FreeVars (..), boundIn, exceptNames)
+import Noll.Core.LLVM.IRType (IRTyped (..))
+import Noll.Core.LLVM.IRType.Syntax (opaqueIRSignature)
 import Noll.Core.Language.Expr (Expr)
 import Noll.Core.Language.Type (Type (..))
 import Noll.Label (Label (..))
@@ -27,6 +29,14 @@ instance (Ord t, FreeVars e t) => FreeVars (Object t e) t where
         freeIn e
       OExternal{} ->
         mempty
+
+instance IRTyped (Object t e) where
+  irTypeOf =
+    \case
+      OFunction _ lls _ ->
+        opaqueIRSignature (length lls)
+      _ ->
+        error "TODO"
 
 objectName :: Object t e -> Name
 objectName =

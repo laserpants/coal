@@ -16,7 +16,8 @@ import Noll.Core.LLVM.IRInstruction.Interpreter (
   inValueEnv,
   interpret,
  )
-import Noll.Core.LLVM.IRType.Syntax (i8Ptr, objectIRType)
+import Noll.Core.LLVM.IRType (IRTyped (..))
+import Noll.Core.LLVM.IRType.Syntax (i8Ptr)
 import Noll.Core.LLVM.IRValue (IRValue (..))
 import Noll.Core.Language.Object (Object (..), ObjectList, objectName)
 import Noll.Label (Label (..))
@@ -43,7 +44,7 @@ interpretObject =
     inValueEnv (Environment.insert name (Local i8Ptr name))
 
 objectValue :: CoreObject -> (Name, IRValue)
-objectValue o = (name, Global (objectIRType o) name) where name = objectName o
+objectValue o = (name, Global (irTypeOf o) name) where name = objectName o
 
 objectEnvironment :: ObjectList -> Environment IRValue
 objectEnvironment = foldr (uncurry Environment.insert . objectValue) mempty

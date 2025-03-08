@@ -1,5 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
-
 module Noll.Core.LLVM.IRType.Syntax (
   i1,
   i8,
@@ -12,12 +10,10 @@ module Noll.Core.LLVM.IRType.Syntax (
   struct,
   stringLiteralType,
   opaqueIRSignature,
-  objectIRType,
 ) where
 
 import Data.Text (Text)
 import Noll.Core.LLVM.IRType (IRType (..))
-import Noll.Core.Language.Object (Object (..))
 
 import qualified Data.Text as Text
 
@@ -64,11 +60,3 @@ stringLiteralType str = TArray (Text.length str + 1) i8
 {-# INLINE opaqueIRSignature #-}
 opaqueIRSignature :: Int -> IRType
 opaqueIRSignature n = fun i8Ptr (replicate n i8Ptr)
-
-objectIRType :: Object t e -> IRType
-objectIRType =
-  \case
-    OFunction _ lls _ ->
-      opaqueIRSignature (length lls)
-    _ ->
-      error "TODO"
