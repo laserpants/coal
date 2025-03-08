@@ -77,8 +77,10 @@ library
       Noll.Core.LLVM.IRInstruction
       Noll.Core.LLVM.IRInstruction.Interpreter
       Noll.Core.LLVM.IRInstruction.Interpreter.Environment
+      Noll.Core.LLVM.IRInstruction.Interpreter.Instruction
       Noll.Core.LLVM.IRInstruction.Interpreter.Object
       Noll.Core.LLVM.IRInstruction.Interpreter.State
+      Noll.Core.LLVM.IRInstruction.Interpreter.Types
       Noll.Core.LLVM.IRInstruction.TH
       Noll.Core.LLVM.IRType
       Noll.Core.LLVM.IRType.Syntax

@@ -1,41 +1,23 @@
 {-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE StrictData #-}
 
 module Noll.Core.LLVM.IRInstruction.Interpreter (
   module Noll.Core.LLVM.IRInstruction.Interpreter.Environment,
+  module Noll.Core.LLVM.IRInstruction.Interpreter.Types,
+  module Noll.Core.LLVM.IRInstruction.Interpreter.State,
   interpret,
-  IRInterpreter (..),
-  IRInterpreterArtifact (..),
-  IRInterpreterState (..),
-  IRLine (..),
   offset,
-  runInterpreter,
-  evalInterpreter,
 ) where
 
 import Control.Monad.Free (iterM)
-import Control.Monad.RWS (
-  MonadReader,
-  MonadState,
-  MonadWriter,
-  RWS,
-  asks,
-  evalRWS,
-  gets,
-  local,
-  runRWS,
-  tell,
- )
+import Control.Monad.RWS (asks, gets, local, tell)
 import Data.Text (Text, intercalate)
 import Noll.Core.LLVM.IREncodable (
   IRAnnotated (..),
   IREncodable (..),
   annotated,
   encodeLabel,
-  enquote,
   irGlobalName,
   irLocalName,
  )
@@ -46,14 +28,22 @@ import Noll.Core.LLVM.IRInstruction.Interpreter.Environment (
   inValueEnv,
   insertBoundVars,
  )
+import Noll.Core.LLVM.IRInstruction.Interpreter.Instruction (
+  instruction,
+  instruction1,
+ )
 import Noll.Core.LLVM.IRInstruction.Interpreter.State (
   IRInterpreterArtifact (..),
   IRInterpreterState (..),
   addArtifact,
-  incrementLabelIndex,
-  incrementRegisterIndex,
-  initialIRInterpreterState,
   setLabel,
+ )
+import Noll.Core.LLVM.IRInstruction.Interpreter.Types (
+  IRInterpreter (..),
+  IRLine (..),
+  evalInterpreter,
+  nextLabelIndex,
+  runInterpreter,
  )
 import Noll.Core.LLVM.IRType (IRType (..))
 import Noll.Core.LLVM.IRType.Syntax (fun, i8Ptr, ptr, stringLiteralType)
@@ -64,78 +54,9 @@ import TextShow (showt)
 import qualified Data.Text as Text
 import qualified Noll.Common.Environment as Environment
 
-data IRLine
-  = LInstruction [Text]
-  | LComment Text
-  | LLabel Text
-  deriving (Show, Eq, Ord)
-
-instance IREncodable IRLine where
-  irEncode =
-    \case
-      LInstruction tokens ->
-        "  " <> Text.unwords tokens
-      LComment text ->
-        "  ; " <> text
-      LLabel text ->
-        enquote text <> ":"
-
-newtype IRInterpreter a = IRInterpreter {getIRInterpreter :: RWS IRInterpreterEnv [IRLine] IRInterpreterState a}
-  deriving
-    ( Functor
-    , Applicative
-    , Monad
-    , MonadState IRInterpreterState
-    , MonadWriter [IRLine]
-    , MonadReader IRInterpreterEnv
-    )
-
-evalInterpreter :: IRInterpreterEnv -> IRInterpreter a -> (a, [IRLine])
-evalInterpreter env ri = evalRWS (getIRInterpreter ri) env initialIRInterpreterState
-
-runInterpreter :: IRInterpreterEnv -> IRInterpreter a -> (a, IRInterpreterState, [IRLine])
-runInterpreter env ri = runRWS (getIRInterpreter ri) env initialIRInterpreterState
-
-nextRegister :: IRType -> IRInterpreter IRValue
-nextRegister t = do
-  n <- gets irInterpreterStateRegisterIndex
-  incrementRegisterIndex
-  pure (Local t (showt n))
-
-nextLabelIndex :: IRInterpreter Int
-nextLabelIndex = do
-  incrementLabelIndex
-  gets irInterpreterStateLabelIndex
-
-{-# INLINE withCommas #-}
-withCommas :: (IREncodable a) => [a] -> Text
-withCommas vs = intercalate ", " (irEncode <$> vs)
-
-phiBranches :: Name -> IRValue -> Text
-phiBranches n v = "[" <> withCommas [irEncode v, irLocalName n] <> "]"
-
-switchBranch :: Name -> IRValue -> Text
-switchBranch n v = withCommas [annotated v, encodeLabel n]
-
-switchBranches :: [(Name, IRValue)] -> Text
-switchBranches bs = Text.unwords (uncurry switchBranch <$> bs)
-
-instruction :: IRType -> (IRValue -> IRInterpreter a) -> [Text] -> IRInterpreter a
-instruction t next tokens = do
-  r <- nextRegister t
-  tell [LInstruction ([irEncode r, "="] <> tokens)]
-  next r
-
-instruction1 :: IRInterpreter a -> [Text] -> IRInterpreter a
-instruction1 next tokens = tell [LInstruction tokens] >> next
-
-offset :: IRType -> [IRValue] -> IRType
-offset (TPtr t) (I32 0 : ixs) = offset t ixs
-offset (TNamed _ t) ixs = offset t ixs
-offset (TStruct ts) (I32 0 : I32 n : _) = ts !! fromIntegral n
-offset (TArray _ t) (I32 _ : _) = ptr t
-offset t [] = t
-offset _ _ = error "Implementation error"
+{-# INLINE interpret #-}
+interpret :: IRInstr a -> IRInterpreter a
+interpret = iterM interpreter
 
 interpreter :: IRInstrOp (IRInterpreter a) -> IRInterpreter a
 interpreter =
@@ -255,6 +176,23 @@ interpreter =
     _ ->
       error "TODO"
 
-{-# INLINE interpret #-}
-interpret :: IRInstr a -> IRInterpreter a
-interpret = iterM interpreter
+{-# INLINE withCommas #-}
+withCommas :: (IREncodable a) => [a] -> Text
+withCommas vs = intercalate ", " (irEncode <$> vs)
+
+phiBranches :: Name -> IRValue -> Text
+phiBranches n v = "[" <> withCommas [irEncode v, irLocalName n] <> "]"
+
+switchBranch :: Name -> IRValue -> Text
+switchBranch n v = withCommas [annotated v, encodeLabel n]
+
+switchBranches :: [(Name, IRValue)] -> Text
+switchBranches bs = Text.unwords (uncurry switchBranch <$> bs)
+
+offset :: IRType -> [IRValue] -> IRType
+offset (TPtr t) (I32 0 : ixs) = offset t ixs
+offset (TNamed _ t) ixs = offset t ixs
+offset (TStruct ts) (I32 0 : I32 n : _) = ts !! fromIntegral n
+offset (TArray _ t) (I32 _ : _) = ptr t
+offset t [] = t
+offset _ _ = error "Implementation error"
