@@ -9,7 +9,7 @@ module Noll.Core.LLVM.IREval.Closure.Finalize (
 
 import Control.Monad.State (evalStateT, get, modify)
 import Noll.Core.LLVM.IRConstruct (IRConstruct (..))
-import Noll.Core.LLVM.IREval.Closure (namedClosureType)
+import Noll.Core.LLVM.IREval.Closure (maxArgs, namedClosureType)
 import Noll.Core.LLVM.IREval.Comment (irComments)
 import Noll.Core.LLVM.IRInstruction (IRInstr)
 import Noll.Core.LLVM.IRInstruction.Interpreter (IRInterpreter (..), IRLine)
@@ -33,7 +33,7 @@ irClosureFinalize n argF argN argAs = do
       irComments ["Applied arg #" <> showt m]
       iLoad i8Ptr rm
   flip evalStateT [] $
-    forM_ [1 .. 3] $
+    forM_ [1 .. maxArgs - n] $
       \m -> do
         r4 <- iGep1 i8Ptr argAs (I32 (fromIntegral (m - 1)))
         irComments ["Extra arg #" <> showt m]

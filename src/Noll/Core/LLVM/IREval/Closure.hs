@@ -4,6 +4,7 @@ module Noll.Core.LLVM.IREval.Closure (
   irApplyClosure,
   irPackClosure,
   namedClosureType,
+  maxArgs,
 ) where
 
 import Data.Text (Text)
@@ -18,6 +19,9 @@ import Noll.Core.LLVM.IRType.Syntax (i32, i8Ptr, struct)
 import Noll.Core.LLVM.IRValue (IRValue (..))
 import Noll.Utils (Name, forM_)
 import TextShow (showt)
+
+maxArgs :: Int
+maxArgs = 32
 
 irApplyClosure :: (IREval e) => IRValue -> List1 e -> IRInstr IRValue
 irApplyClosure v es = do
