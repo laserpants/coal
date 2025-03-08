@@ -2,7 +2,6 @@
 
 module Noll.Core.LLVM.IREval.Closure.Apply (irClosureApply, irApplyN) where
 
-import Control.Monad.Writer (listen)
 import Data.Tuple.Extra (second)
 import Noll.Core.LLVM.IRConstruct (IRConstruct (..))
 import Noll.Core.LLVM.IREval.Comment (irComments)
@@ -17,7 +16,7 @@ import Noll.Core.LLVM.IRType (IRType)
 import Noll.Core.LLVM.IRType.Syntax (fun, i32, i8Ptr, i8PtrPtr, ptr, struct)
 import Noll.Core.LLVM.IRValue (IRValue (..))
 import Noll.Label (Label (..))
-import Noll.Utils (forM, forM_)
+import Noll.Utils (forM, forM_, listenOnly)
 import TextShow (showt)
 
 structType :: IRType
@@ -78,7 +77,7 @@ irClosureApply n argF args = do
 
 irApplyN :: Int -> IRInterpreter (IRConstruct [IRLine])
 irApplyN n = do
-  (_, w) <- listen (interpret (irClosureApply n (Local i8Ptr "f") (Local i8Ptr <$> as)))
+  w <- listenOnly (interpret (irClosureApply n (Local i8Ptr "f") (Local i8Ptr <$> as)))
   pure $ CDefine ("apply" <> showt n) i8Ptr Nothing (Label i8Ptr <$> "f" : as) w
  where
   as = ["a" <> showt m | m <- [0 .. n - 1]]
