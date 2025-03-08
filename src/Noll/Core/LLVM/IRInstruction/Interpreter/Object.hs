@@ -6,7 +6,6 @@ module Noll.Core.LLVM.IRInstruction.Interpreter.Object (
 ) where
 
 import Control.Monad.Reader (local)
-import Control.Monad.Writer (listen)
 import Noll.Common.Environment (Environment)
 import Noll.Core.LLVM.IRConstruct (IRConstruct (..))
 import Noll.Core.LLVM.IREval (irEvalFun)
@@ -21,7 +20,7 @@ import Noll.Core.LLVM.IRType.Syntax (i8Ptr, objectIRType)
 import Noll.Core.LLVM.IRValue (IRValue (..))
 import Noll.Core.Language.Object (Object (..), ObjectList, objectName)
 import Noll.Label (Label (..))
-import Noll.Utils (Name)
+import Noll.Utils (Name, listenOnly)
 
 import qualified Noll.Common.Environment as Environment
 import qualified Noll.Core.Language as Core
@@ -32,10 +31,10 @@ interpretObject :: CoreObject -> IRInterpreter (IRConstruct [IRLine])
 interpretObject =
   \case
     OFunction name lls e -> do
-      (_, w) <- listen (local (flip (foldr insertLocal) lls) (interpret (irEvalFun e)))
+      w <- listenOnly (local (flip (foldr insertLocal) lls) (interpret (irEvalFun e)))
       pure (CDefine name i8Ptr Nothing [Label i8Ptr n | Label _ n <- lls] w)
     OConstant name e -> do
-      (_, w) <- listen (interpret (irEvalExpr e))
+      w <- listenOnly (interpret (irEvalExpr e))
       error "TODO"
     _ ->
       error "TODO"
