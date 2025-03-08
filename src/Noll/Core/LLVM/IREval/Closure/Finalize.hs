@@ -39,16 +39,16 @@ irClosureFinalize n argF argN argAs = do
         irComments ["Extra arg #" <> showt m]
         r5 <- iLoad i8Ptr r4
         r6 <- iCmpSGt i1 argN (I32 (fromIntegral m))
-        labelGt <- iLabel "gt"
-        labelEq <- iLabel "eq"
+        labelGt <- metaLabel "gt"
+        labelEq <- metaLabel "eq"
         iBr r6 [labelGt, labelEq]
         modify (<> [r5])
         qs <- get
-        iBlock1 labelEq $ do
+        metaBlock1 labelEq $ do
           r7 <- iBitcast r3 (opaqueIRSignature (n + m))
           r8 <- iCall i8Ptr r7 (rs <> qs)
           iRet i8Ptr r8
-        iBlock1 labelGt $ pure ()
+        metaBlock1 labelGt $ pure ()
   iRet i8Ptr Null
 
 irFinalizeN :: Int -> IRInterpreter (IRConstruct [IRLine])

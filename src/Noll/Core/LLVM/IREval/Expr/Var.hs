@@ -7,7 +7,7 @@ import Noll.Core.LLVM.IREncodable (irEncode)
 import Noll.Core.LLVM.IREval.Closure (irPackClosure)
 import Noll.Core.LLVM.IREval.Comment (irComments)
 import Noll.Core.LLVM.IREval.Malloc (irMalloc)
-import Noll.Core.LLVM.IRInstruction (IRData (..), IRInstr)
+import Noll.Core.LLVM.IRInstruction (IRConstructor (..), IRInstr)
 import Noll.Core.LLVM.IRInstruction.TH
 import Noll.Core.LLVM.IRType (IRType (..))
 import Noll.Core.LLVM.IRType.Syntax (i32, i8Ptr, struct)
@@ -21,13 +21,13 @@ irEvalVar :: Core.Type -> Name -> IRInstr IRValue
 irEvalVar t name
   | isConstructor name = do
       irComments (comment1 name)
-      IRData i t1 <- iDataConstr (struct [i32]) name
+      IRConstructor i t1 <- metaAdt (struct [i32]) name
       v1 <- irMalloc t1
       v2 <- iGep t1 v1 (I32 0) (I32 0)
       iStore (I32 (fromIntegral i)) v2
       iBitcast v1 i8Ptr
   | otherwise = do
-      v <- iLookup name
+      v <- metaLookup name
       irComments (comment2 (irEncode v))
       case v of
         Global (TFun _ ts) _ ->

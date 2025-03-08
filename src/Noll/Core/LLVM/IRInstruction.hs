@@ -6,7 +6,7 @@ module Noll.Core.LLVM.IRInstruction (
   IRInstrOp,
   IRInstr,
   IRClosure (..),
-  IRData (..),
+  IRConstructor (..),
 ) where
 
 import Control.Monad.Free (Free)
@@ -46,24 +46,23 @@ data IRInstrOpF v t i next
   | IAlloca t v (v -> next)
   | IBitcast v t (v -> next)
   | IPhi t [i] (v -> next)
-  | -- Meta instructions
-    ILookup Name (v -> next)
-  | IBind [i] (IRInstr v) (v -> next)
-  | ILabel Name (Name -> next)
-  | IIndex (Name -> next)
-  | IBlock Name (IRInstr v) (i -> next)
-  | IBlock1 Name (IRInstr ()) next
-  | IDataConstr t Name (IRData t -> next)
-  | IHashMapKey Name (v -> next)
-  | IMemoize (v -> next)
-  | IApply Int (Name -> next)
-  | IClosure Name Int Int (IRClosure v -> next)
+  | MetaLookup Name (v -> next)
+  | MetaBind [i] (IRInstr v) (v -> next)
+  | MetaLabel Name (Name -> next)
+  | MetaIndex (Name -> next)
+  | MetaBlock Name (IRInstr v) (i -> next)
+  | MetaBlock1 Name (IRInstr ()) next
+  | MetaAdt t Name (IRConstructor t -> next)
+  | MetaKey Name (v -> next)
+  | MetaMemoize (v -> next)
+  | MetaApply Int (Name -> next)
+  | MetaClosure Name Int Int (IRClosure v -> next)
   deriving (Functor)
 
 data IRClosure v = IRClosure Name v v v
   deriving (Show, Eq, Ord)
 
-data IRData t = IRData Int t
+data IRConstructor t = IRConstructor Int t
   deriving (Show, Eq, Ord)
 
 type IRInstrOp = IRInstrOpF IRValue IRType (Name, IRValue)

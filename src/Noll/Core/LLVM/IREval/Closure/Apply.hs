@@ -31,9 +31,9 @@ irClosureApply n argF args = do
   r4 <- iGep structType r1 (I32 0) (I32 1)
   irComments ["Finalizer"]
   r5 <- iLoad i8Ptr r4
-  labelDefault <- iLabel "default"
+  labelDefault <- metaLabel "default"
   labels <- forM [1 .. n] $ \m -> do
-    ll <- iLabel ("expects" <> showt m)
+    ll <- metaLabel ("expects" <> showt m)
     pure (ll, m)
   iSwitch r3 labelDefault (second (I32 . fromIntegral) <$> labels)
   forM_ labels $
@@ -41,7 +41,7 @@ irClosureApply n argF args = do
       if m == n
         then do
           irComments ["Number of supplied arguments (" <> showt n <> ") matches function signature"]
-          iBlock1 ll $ do
+          metaBlock1 ll $ do
             r6 <- iBitcast r5 (fun i8Ptr [i8Ptr, i32, i8PtrPtr])
             r7 <- iAlloca i8Ptr (I32 (fromIntegral m))
             forM_ [0 .. m - 1] $
@@ -52,7 +52,7 @@ irClosureApply n argF args = do
             iRet i8Ptr r9
         else do
           irComments ["Function is oversaturated (+" <> showt (n - m) <> ")"]
-          iBlock1 ll $ do
+          metaBlock1 ll $ do
             r6 <- iBitcast r5 (fun i8Ptr [i8Ptr, i32, i8PtrPtr])
             r7 <- iAlloca i8Ptr (I32 (fromIntegral m))
             forM_ [0 .. m - 1] $
@@ -63,7 +63,7 @@ irClosureApply n argF args = do
             r10 <- iCallGlobal i8Ptr ("apply" <> showt (n - m)) ([r9] <> drop m args)
             iRet i8Ptr r10
   irComments ["Function is undersaturated"]
-  iBlock1 labelDefault $ do
+  metaBlock1 labelDefault $ do
     r10 <- iGep structType r1 (I32 0) (I32 2)
     r11 <- iLoad i8Ptr r10
     r12 <- iBitcast r11 (fun i8Ptr [i8Ptr, i32, i8PtrPtr])

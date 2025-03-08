@@ -27,7 +27,7 @@ maxArgs = 32
 irApplyClosure :: (IREval e) => IRValue -> List1 e -> IRInstr IRValue
 irApplyClosure v es = do
   vs <- irEvalArgs es
-  name <- iApply (length es)
+  name <- metaApply (length es)
   iCallGlobal i8Ptr name (v : vs)
 
 irPackClosure ::
@@ -39,7 +39,7 @@ irPackClosure ::
   [IRValue] ->
   IRInstr IRValue
 irPackClosure fname k vs = do
-  IRClosure name f1 f2 f3 <- iClosure fname (length vs) k
+  IRClosure name f1 f2 f3 <- metaClosure fname (length vs) k
   let t = TNamed name (structType (length vs))
   r1 <- irMalloc t
   r2 <- iGep t r1 (I32 0) (I32 0)

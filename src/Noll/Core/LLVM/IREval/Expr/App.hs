@@ -10,7 +10,7 @@ import Noll.Core.LLVM.IREval (IREval (..), irEvalArgs)
 import Noll.Core.LLVM.IREval.Closure (irApplyClosure, irPackClosure)
 import Noll.Core.LLVM.IREval.Comment (irCommentBlock, irComments)
 import Noll.Core.LLVM.IREval.Malloc (irMalloc)
-import Noll.Core.LLVM.IRInstruction (IRData (..), IRInstr)
+import Noll.Core.LLVM.IRInstruction (IRConstructor (..), IRInstr)
 import Noll.Core.LLVM.IRInstruction.TH
 import Noll.Core.LLVM.IRType (IRType (..))
 import Noll.Core.LLVM.IRType.Syntax (i32, i8Ptr, struct)
@@ -26,7 +26,7 @@ irEvalApp t ll@(Label _ var) es
   | isConstructor var = do
       irComments (comment var)
       vs <- irEvalArgs es
-      IRData i t1 <- iDataConstr (struct (i32 : (i8Ptr <$ vs))) var
+      IRConstructor i t1 <- metaAdt (struct (i32 : (i8Ptr <$ vs))) var
       v1 <- irMalloc t1
       v2 <- iGep t1 v1 (I32 0) (I32 0)
       iStore (I32 (fromIntegral i)) v2
@@ -36,7 +36,7 @@ irEvalApp t ll@(Label _ var) es
       iBitcast v1 i8Ptr
   | otherwise =
       irCommentBlock "Function application" $ do
-        v <- iLookup var
+        v <- metaLookup var
         case v of
           Local{} ->
             irApplyClosure v es

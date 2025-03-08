@@ -16,7 +16,7 @@ import qualified Data.Text as Text
 
 irCommentBlock :: (MonadFree (IRInstrOp) m) => Text -> m a -> m a
 irCommentBlock text instrs = do
-  s <- iIndex
+  s <- metaIndex
   iComment (Text.pack (replicate 75 '='))
   iComment ("[" <> s <> "] " <> text)
   iComment ""

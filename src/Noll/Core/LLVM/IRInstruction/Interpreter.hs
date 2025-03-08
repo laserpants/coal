@@ -21,7 +21,7 @@ import Noll.Core.LLVM.IREncodable (
   irGlobalName,
   irLocalName,
  )
-import Noll.Core.LLVM.IRInstruction (IRClosure (..), IRData (..), IRInstr, IRInstrOp, IRInstrOpF (..))
+import Noll.Core.LLVM.IRInstruction (IRClosure (..), IRConstructor (..), IRInstr, IRInstrOp, IRInstrOpF (..))
 import Noll.Core.LLVM.IRInstruction.Interpreter.Environment (
   IRInterpreterEnv (..),
   inConstructorEnv,
@@ -116,37 +116,37 @@ interpreter =
       instruction1 next ["store", withCommas [irEncode (annotated v1), irEncode (annotated v2)]]
     ISwitch v n cs next ->
       instruction1 next ["switch", withCommas [annotated v, encodeLabel n], "[" <> switchBranches cs <> "]"]
-    ILookup var next -> do
+    MetaLookup var next -> do
       env <- asks irInterpreterValueEnv
       case Environment.lookup var env of
         Nothing ->
           error ("Name not in scope: " <> show var)
         Just val ->
           next val
-    IBind bound instr next -> do
+    MetaBind bound instr next -> do
       v <- local (insertBoundVars bound) (interpret instr)
       next v
-    IIndex next -> do
+    MetaIndex next -> do
       d <- nextLabelIndex
       next (showt d)
-    ILabel name next -> do
+    MetaLabel name next -> do
       d <- nextLabelIndex
       next (name <> "." <> showt d)
-    IBlock name instr next -> do
+    MetaBlock name instr next -> do
       setLabel name
       tell [LLabel name]
       r <- interpret instr
       l <- gets irInterpreterStateLabel
       next (l, r)
-    IBlock1 name instr next -> do
+    MetaBlock1 name instr next -> do
       setLabel name
       tell [LLabel name]
       interpret instr
       next
-    IApply arity next -> do
+    MetaApply arity next -> do
       addArtifact (InterpreterArtifactFunctionApply arity)
       next ("apply" <> showt arity)
-    IClosure fn applied remain next -> do
+    MetaClosure fn applied remain next -> do
       let name = "closure" <> showt applied
           signature n = fun i8Ptr (replicate n i8Ptr)
       addArtifact (InterpreterArtifactClosure applied)
@@ -157,23 +157,23 @@ interpreter =
             (Global (signature (remain + 1)) (name <> "_extend"))
             (Global (signature (applied + remain)) fn)
         )
-    IHashMapKey name next -> do
+    MetaKey name next -> do
       let label = "label." <> name
       addArtifact (InterpreterArtifactHashMapKey name)
       next (Global (ptr (stringLiteralType name)) label)
-    IMemoize next -> do
+    MetaMemoize next -> do
       d <- nextLabelIndex
       let name = "ptr." <> showt d
       addArtifact (InterpreterArtifactMemoizedConstant name)
       next (Global i8Ptr name)
-    IDataConstr t name next -> do
+    MetaAdt t name next -> do
       addArtifact (InterpreterArtifactDataConstructor name t)
       env <- asks irInterpreterConstructorEnv
       case Environment.lookup name env of
         Nothing ->
           error ("No constructor " <> Text.unpack name)
         Just n -> do
-          next (IRData n (TNamed name t))
+          next (IRConstructor n (TNamed name t))
     _ ->
       error "TODO"
 

@@ -50,7 +50,7 @@ irEvalExpr =
             \(Core.Binding (Label _ name) e) -> do
               v <- irEval e
               pure (name, v)
-          iBind (fromList1 bound) (irEval e1)
+          metaBind (fromList1 bound) (irEval e1)
       Core.EApp t e1 es ->
         irCommentBlock "EApp" $ do
           case e1 of
@@ -61,21 +61,21 @@ irEvalExpr =
               irApplyClosure v1 es
       Core.EIf e1 e2 e3 -> do
         irCommentBlock "EIf" $ do
-          labelThen <- iLabel "then"
-          labelElse <- iLabel "else"
-          labelExit <- iLabel "exit"
+          labelThen <- metaLabel "then"
+          labelElse <- metaLabel "else"
+          labelExit <- metaLabel "exit"
           r1 <- irRevealExpr e1
           iBr r1 [labelThen, labelElse]
-          thenBlock <- iBlock labelThen $ do
+          thenBlock <- metaBlock labelThen $ do
             r <- irEval e2
             iBr1 labelExit
             pure r
-          elseBlock <- iBlock labelElse $ do
+          elseBlock <- metaBlock labelElse $ do
             r <- irEval e3
             iBr1 labelExit
             pure r
           (_, v) <-
-            iBlock labelExit $
+            metaBlock labelExit $
               iPhi i8Ptr [thenBlock, elseBlock]
           irConceal v
       Core.ECall (Label _ ll) es e ->
@@ -85,7 +85,7 @@ irEvalExpr =
           v2 <- irEval e
           case v2 of
             Local{} -> do
-              name <- iApply 1
+              name <- metaApply 1
               iCallGlobal i8Ptr name [v2, v1]
             _ ->
               error "TODO"
@@ -97,37 +97,37 @@ irEvalExpr =
           iCallGlobal i8Ptr "hashmap_init" []
       Core.EExt (Label _ field) e1 e2 -> do
         irCommentBlock "EExt" $ do
-          k1 <- iHashMapKey field
+          k1 <- metaKey field
           t2 <- iGep (stringLiteralType field) k1 (I32 0) (I32 0)
           v1 <- irEval e1
           v2 <- irEval e2
           iCallGlobal i8Ptr "hashmap_insert" [v2, t2, v1]
       Core.ESel (Core.Focus field (Label _ var) (Label _ r)) e1 e2 ->
         irCommentBlock "ESel" $ do
-          k1 <- iHashMapKey field
+          k1 <- metaKey field
           t2 <- iGep (stringLiteralType field) k1 (I32 0) (I32 0)
           v1 <- irEval e1
           v2 <- iCallGlobal i8Ptr "hashmap_lookup" [v1, t2]
-          iBind [(var, v2), (r, v1)] (irEval e2)
+          metaBind [(var, v2), (r, v1)] (irEval e2)
       Core.EMem e ->
         irCommentBlock "EMem" $ do
-          p1 <- iMemoize
+          p1 <- metaMemoize
           r1 <- iLoad i8Ptr p1
           r2 <- iCmpEq i1 r1 Null
-          labelIsNull <- iLabel "is_null"
-          labelNotNull <- iLabel "not_null"
-          labelEnd <- iLabel "end"
+          labelIsNull <- metaLabel "is_null"
+          labelNotNull <- metaLabel "not_null"
+          labelEnd <- metaLabel "end"
           iBr r2 [labelIsNull, labelNotNull]
-          isNullBlock <- iBlock labelIsNull $ do
+          isNullBlock <- metaBlock labelIsNull $ do
             r3 <- irEval e
             iStore r3 p1
             iBr1 labelEnd
             pure r3
-          notNullBlock <- iBlock labelNotNull $ do
+          notNullBlock <- metaBlock labelNotNull $ do
             iBr1 labelEnd
             pure r1
           (_, v) <-
-            iBlock labelEnd $
+            metaBlock labelEnd $
               iPhi i8Ptr [isNullBlock, notNullBlock]
           irConceal v
       e ->
@@ -145,10 +145,10 @@ simplify =
           iInttoptr v1 t1 >>= simplify . next
         _ ->
           iInttoptr v1 t1 >>= next
-    Free (IBind is i next) ->
-      Free (IBind is (simplify i) (simplify <$> next))
-    Free (IBlock name i next) ->
-      Free (IBlock name (simplify i) (simplify <$> next))
+    Free (MetaBind is i next) ->
+      Free (MetaBind is (simplify i) (simplify <$> next))
+    Free (MetaBlock name i next) ->
+      Free (MetaBlock name (simplify i) (simplify <$> next))
     Free instr ->
       Free (simplify <$> instr)
     i ->

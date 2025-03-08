@@ -43,13 +43,13 @@ irClosureExtend n argF argN argAs = do
         irComments ["Extra arg #" <> showt m]
         r7 <- iLoad i8Ptr rm
         r8 <- iCmpSGt i1 argN (I32 (fromIntegral m))
-        labelGt <- iLabel "gt"
-        labelEq <- iLabel "eq"
+        labelGt <- metaLabel "gt"
+        labelEq <- metaLabel "eq"
         iBr r8 [labelGt, labelEq]
         modify (<> [r7])
         qs <- get
         let t = namedClosureType (n + m)
-        iBlock1 labelEq $ do
+        metaBlock1 labelEq $ do
           r9 <- iGepNull (ptr t) (I32 1)
           r10 <- iPtrtoint r9 i64
           r11 <- iCallGlobal i8Ptr "gc_malloc" [r10]
@@ -68,7 +68,7 @@ irClosureExtend n argF argN argAs = do
             r19 <- iGep t r12 (I32 0) (I32 u)
             iStore r r19
           iRet i8Ptr r11
-        iBlock1 labelGt $ pure ()
+        metaBlock1 labelGt $ pure ()
   iRet i8Ptr Null
 
 irExtendN :: Int -> IRInterpreter (IRConstruct [IRLine])

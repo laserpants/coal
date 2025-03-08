@@ -25,7 +25,7 @@ irEvalClause v1 lls e = do
       r2 <- iGep t r1 (I32 0) (I32 i)
       r3 <- iLoad i8Ptr r2
       pure (n, r3)
-  iBind bound (irEval e)
+  metaBind bound (irEval e)
 
 structType :: Int -> IRType
 structType n = struct (i32 : replicate n i8Ptr)
@@ -36,24 +36,24 @@ irEvalMatch e1 cs = do
   r1 <- iBitcast v1 (ptr (struct [i32]))
   r2 <- iGep (struct [i32]) r1 (I32 0) (I32 0)
   r3 <- iLoad i32 r2
-  labelEnd <- iLabel "end"
+  labelEnd <- metaLabel "end"
   case cs of
     Core.Clause (Label{} :| lls) e :| [] ->
       irEvalClause v1 lls e
     _ -> do
       ds <- forM cs $
         \(Core.Clause ((Label _ con) :| lls) e) -> do
-          n <- iLabel con
+          n <- metaLabel con
           pure (n, lls, e)
       let n :| ns = fst3 <$> ds
       iSwitch r3 n (fromList1 (n :| ns) `zip` (I32 <$> [0 ..]))
       b :| bs <- forM ds $
         \(ll, lls, e) ->
-          iBlock ll $ do
+          metaBlock ll $ do
             r4 <- irEvalClause v1 lls e
             iBr1 labelEnd
             pure r4
       (_, v) <-
-        iBlock labelEnd $
+        metaBlock labelEnd $
           iPhi (irTypeOf (snd b)) (b : bs)
       irConceal v
