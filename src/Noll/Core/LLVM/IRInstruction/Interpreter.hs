@@ -21,7 +21,7 @@ import Noll.Core.LLVM.IREncodable (
   irGlobalName,
   irLocalName,
  )
-import Noll.Core.LLVM.IRInstruction (IRInstr, IRInstrOp, IRInstrOpF (..))
+import Noll.Core.LLVM.IRInstruction (IRClosure (..), IRData (..), IRInstr, IRInstrOp, IRInstrOpF (..))
 import Noll.Core.LLVM.IRInstruction.Interpreter.Environment (
   IRInterpreterEnv (..),
   inConstructorEnv,
@@ -151,10 +151,11 @@ interpreter =
           signature n = fun i8Ptr (replicate n i8Ptr)
       addArtifact (InterpreterArtifactClosure applied)
       next
-        ( name
-        , Global (signature (remain + 1)) (name <> "_finalize")
-        , Global (signature (remain + 1)) (name <> "_extend")
-        , Global (signature (applied + remain)) fn
+        ( IRClosure
+            name
+            (Global (signature (remain + 1)) (name <> "_finalize"))
+            (Global (signature (remain + 1)) (name <> "_extend"))
+            (Global (signature (applied + remain)) fn)
         )
     IHashMapKey name next -> do
       let label = "label." <> name
@@ -172,7 +173,7 @@ interpreter =
         Nothing ->
           error ("No constructor " <> Text.unpack name)
         Just n -> do
-          next (n, TNamed name t)
+          next (IRData n (TNamed name t))
     _ ->
       error "TODO"
 

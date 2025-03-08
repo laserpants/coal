@@ -5,6 +5,8 @@ module Noll.Core.LLVM.IRInstruction (
   IRInstrOpF (..),
   IRInstrOp,
   IRInstr,
+  IRClosure (..),
+  IRData (..),
 ) where
 
 import Control.Monad.Free (Free)
@@ -51,12 +53,18 @@ data IRInstrOpF v t i next
   | IIndex (Name -> next)
   | IBlock Name (IRInstr v) (i -> next)
   | IBlock1 Name (IRInstr ()) next
-  | IDataConstr t Name ((Int, t) -> next)
+  | IDataConstr t Name (IRData t -> next)
   | IHashMapKey Name (v -> next)
   | IMemoize (v -> next)
   | IApply Int (Name -> next)
-  | IClosure Name Int Int ((Name, v, v, v) -> next)
+  | IClosure Name Int Int (IRClosure v -> next)
   deriving (Functor)
+
+data IRClosure v = IRClosure Name v v v
+  deriving (Show, Eq, Ord)
+
+data IRData t = IRData Int t
+  deriving (Show, Eq, Ord)
 
 type IRInstrOp = IRInstrOpF IRValue IRType (Name, IRValue)
 

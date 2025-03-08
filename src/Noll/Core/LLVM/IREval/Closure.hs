@@ -13,7 +13,7 @@ import Noll.Common.List1 (List1)
 import Noll.Core.LLVM.IREval
 import Noll.Core.LLVM.IREval.Comment (irComments)
 import Noll.Core.LLVM.IREval.Malloc (irMalloc)
-import Noll.Core.LLVM.IRInstruction (IRInstr)
+import Noll.Core.LLVM.IRInstruction (IRClosure (..), IRInstr)
 import Noll.Core.LLVM.IRInstruction.TH
 import Noll.Core.LLVM.IRType (IRType (..))
 import Noll.Core.LLVM.IRType.Syntax (i32, i8Ptr, struct)
@@ -39,7 +39,7 @@ irPackClosure ::
   [IRValue] ->
   IRInstr IRValue
 irPackClosure fname k vs = do
-  (name, f1, f2, f3) <- iClosure fname (length vs) k
+  IRClosure name f1 f2 f3 <- iClosure fname (length vs) k
   let t = TNamed name (structType (length vs))
   r1 <- irMalloc t
   r2 <- iGep t r1 (I32 0) (I32 0)
