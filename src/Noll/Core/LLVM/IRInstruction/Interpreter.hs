@@ -157,7 +157,7 @@ interpreter =
         , Global (signature (applied + remain)) fn
         )
     IHashMapKey name next -> do
-      let label = "label_" <> name
+      let label = "label." <> name
       addArtifact (InterpreterArtifactHashMapKey name)
       next (Global (ptr (stringLiteralType name)) label)
     IMemoized next -> do

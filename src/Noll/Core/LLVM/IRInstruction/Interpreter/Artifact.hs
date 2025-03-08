@@ -17,7 +17,7 @@ interpretArtifact =
     InterpreterArtifactClosure arity ->
       pure [CType ("closure" <> showt arity) (structType arity)]
     InterpreterArtifactHashMapKey name ->
-      pure [CString ("label_" <> name) name]
+      pure [CString ("label." <> name) name]
     InterpreterArtifactDataConstructor name t ->
       pure [CType name t]
     InterpreterArtifactMemoizedConstant name ->
