@@ -533,9 +533,9 @@ compile ol = do
   extendInterpreterConstructorEnv (Environment.fromList [("$Cons", 0), ("$Nil", 1), ("$Record", 0), ("EqualTo", 0), ("GreaterThan", 1), ("LessThan", 2), ("Node", 1), ("Leaf", 0)])
   code <- transInterpreter (traverse interpretObject objs)
   pipelineStateInsertCode code
-  xxx <- gets pipelineStateArtifacts
-  yyy <- transInterpreter (traverse interpretArtifact (nub xxx))
-  pipelineStateInsertCode (concat yyy)
+  arts <- gets pipelineStateArtifacts
+  defs <- transInterpreter (traverse interpretArtifact (nub arts))
+  pipelineStateInsertCode (concat defs)
 
 -- xx1 objs = mapM_ print $ muteObjectTypes <$> liftLambdas (flattenELam <$$> evalState (traverse (traverse transSuffixExpr) objs) 0)
 
