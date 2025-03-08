@@ -158,7 +158,7 @@ interpreter =
         )
     IHashMapKey name next -> do
       let label = "label_" <> name
-      addArtifact (InterpreterArtifactHashMapKey label)
+      addArtifact (InterpreterArtifactHashMapKey name)
       next (Global (ptr (stringLiteralType name)) label)
     IMemoized next -> do
       d <- nextLabelIndex

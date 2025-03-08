@@ -76,6 +76,7 @@ library
       Noll.Core.LLVM.IREval.Malloc
       Noll.Core.LLVM.IRInstruction
       Noll.Core.LLVM.IRInstruction.Interpreter
+      Noll.Core.LLVM.IRInstruction.Interpreter.Artifact
       Noll.Core.LLVM.IRInstruction.Interpreter.Environment
       Noll.Core.LLVM.IRInstruction.Interpreter.Instruction
       Noll.Core.LLVM.IRInstruction.Interpreter.IRConstruct

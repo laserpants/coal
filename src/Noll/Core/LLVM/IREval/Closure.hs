@@ -3,6 +3,7 @@
 module Noll.Core.LLVM.IREval.Closure (
   irApplyClosure,
   irPackClosure,
+  structType,
   namedClosureType,
   maxArgs,
 ) where

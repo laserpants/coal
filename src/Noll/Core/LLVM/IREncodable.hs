@@ -17,6 +17,7 @@ import Data.Char (isAlphaNum)
 import Data.Text (Text)
 import Noll.Core.LLVM.IRConstruct (IRConstruct (..))
 import Noll.Core.LLVM.IRType (IRType (..), IRTyped (..))
+import Noll.Core.LLVM.IRType.Syntax (i8, i8Ptr)
 import Noll.Core.LLVM.IRValue (IRValue (..))
 import Noll.Label (Label (..))
 import Noll.Utils (Name)
@@ -120,8 +121,27 @@ instance (IREncodable a) => IREncodable (IRConstruct a) where
             <> space
             <> global t name
             <> parens (commaSep ts)
-      _ ->
-        error "TODO"
+      CType name t ->
+        line $
+          irLocalName name
+            <> " = type "
+            <> irEncode t
+      CString name str ->
+        line $
+          irGlobalName name
+            <> " = constant "
+            <> irEncode (TArray (Text.length str + 1) i8)
+            <> space
+            <> "c\""
+            <> irEncode str
+            <> "\\00\""
+      CGlobal name t v ->
+        line $
+          irGlobalName name
+            <> " = global "
+            <> irEncode t
+            <> space
+            <> irEncode v
 
 {-# INLINE space #-}
 space :: Text

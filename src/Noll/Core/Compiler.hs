@@ -17,11 +17,12 @@ import Control.Monad.Trans (lift)
 import Control.Monad.Writer (MonadWriter, Writer, runWriter, tell)
 import Data.Fix (Fix (..))
 import Data.Functor.Foldable (cata, embed, project)
-import Data.List (partition)
+import Data.List (nub, partition)
 import qualified Data.Map.Strict as Map
 import Data.Set (Set)
 import qualified Data.Set as Set
 import qualified Data.Text as Text
+import Debug.Trace
 import Noll.AST.FreeVars (FreeVars (..), exceptNames)
 import Noll.Common.Environment (Environment)
 import qualified Noll.Common.Environment as Environment
@@ -39,6 +40,7 @@ import Noll.Core.LLVM.IRInstruction.Interpreter (
   inValueEnv,
   runInterpreter,
  )
+import Noll.Core.LLVM.IRInstruction.Interpreter.Artifact (interpretArtifact)
 import Noll.Core.LLVM.IRInstruction.Interpreter.Object (
   interpretObject,
   objectEnvironment,
@@ -531,6 +533,9 @@ compile ol = do
   extendInterpreterConstructorEnv (Environment.fromList [("$Cons", 0), ("$Nil", 1), ("$Record", 0), ("EqualTo", 0), ("GreaterThan", 1), ("LessThan", 2), ("Node", 1), ("Leaf", 0)])
   code <- transInterpreter (traverse interpretObject objs)
   pipelineStateInsertCode code
+  xxx <- gets pipelineStateArtifacts
+  yyy <- transInterpreter (traverse interpretArtifact (nub xxx))
+  pipelineStateInsertCode (concat yyy)
 
 -- xx1 objs = mapM_ print $ muteObjectTypes <$> liftLambdas (flattenELam <$$> evalState (traverse (traverse transSuffixExpr) objs) 0)
 
