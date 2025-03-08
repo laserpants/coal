@@ -44,7 +44,8 @@ data IRInstrOpF v t i next
   | IAlloca t v (v -> next)
   | IBitcast v t (v -> next)
   | IPhi t [i] (v -> next)
-  | ILookup Name (v -> next)
+  | -- Meta instructions
+    ILookup Name (v -> next)
   | IBind [i] (IRInstr v) (v -> next)
   | ILabel Name (Name -> next)
   | IIndex (Name -> next)
@@ -52,7 +53,7 @@ data IRInstrOpF v t i next
   | IBlock1 Name (IRInstr ()) next
   | IDataConstr t Name ((Int, t) -> next)
   | IHashMapKey Name (v -> next)
-  | IMemoized (v -> next)
+  | IMemoize (v -> next)
   | IApply Int (Name -> next)
   | IClosure Name Int Int ((Name, v, v, v) -> next)
   deriving (Functor)

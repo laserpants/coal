@@ -160,7 +160,7 @@ interpreter =
       let label = "label." <> name
       addArtifact (InterpreterArtifactHashMapKey name)
       next (Global (ptr (stringLiteralType name)) label)
-    IMemoized next -> do
+    IMemoize next -> do
       d <- nextLabelIndex
       let name = "ptr." <> showt d
       addArtifact (InterpreterArtifactMemoizedConstant name)
