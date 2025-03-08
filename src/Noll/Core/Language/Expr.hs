@@ -168,8 +168,8 @@ instance (Typed t, Typed a) => Typed (ExprF t a) where
         typeOf op
       ENil ->
         RNil
-      EExt (Label _ n) t1 t2 ->
-        extend n (typeOf t1) (typeOf t2)
+      EExt (Label _ f) t1 t2 ->
+        extend f (typeOf t1) (typeOf t2)
       ELam ts t ->
         foldType (typeOf t) (typeOf <$> ts)
       ECall _ _ t ->
