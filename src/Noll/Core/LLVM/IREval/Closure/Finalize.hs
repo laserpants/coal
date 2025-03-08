@@ -13,7 +13,7 @@ import Noll.Core.LLVM.IREval.Closure (namedClosureType)
 import Noll.Core.LLVM.IREval.Comment (irComments)
 import Noll.Core.LLVM.IRInstruction (IRInstr)
 import Noll.Core.LLVM.IRInstruction.Interpreter (IRInterpreter (..), IRLine)
-import Noll.Core.LLVM.IRInstruction.Interpreter.IRConstruct (irDefine)
+import Noll.Core.LLVM.IRInstruction.Interpreter.IRConstruct (argLabel, irDefine)
 import Noll.Core.LLVM.IRInstruction.TH
 import Noll.Core.LLVM.IRType.Syntax (i1, i32, i8Ptr, i8PtrPtr, opaqueIRSignature, ptr)
 import Noll.Core.LLVM.IRValue (IRValue (..))
@@ -55,5 +55,9 @@ irFinalizeN :: Int -> IRInterpreter (IRConstruct [IRLine])
 irFinalizeN n = do
   irDefine
     ("closure" <> showt n <> "_finalize")
-    (irClosureFinalize n (Local i8Ptr "f") (Local i32 "n") (Local i8PtrPtr "as"))
-    [Label i8Ptr "f", Label i32 "n", Label i8PtrPtr "as"]
+    (irClosureFinalize n arg0 arg1 arg2)
+    (argLabel <$> [arg0, arg1, arg2])
+ where
+  arg0 = Local i8Ptr "f"
+  arg1 = Local i32 "n"
+  arg2 = Local i8PtrPtr "as"

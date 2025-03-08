@@ -9,6 +9,7 @@ import Noll.Core.LLVM.IRInstruction (IRInstr)
 import Noll.Core.LLVM.IRInstruction.Interpreter (
   IRInterpreter (..),
   IRLine,
+  interpret,
  )
 import Noll.Core.LLVM.IRInstruction.Interpreter.IRConstruct (irDefine)
 import Noll.Core.LLVM.IRInstruction.TH
@@ -16,7 +17,7 @@ import Noll.Core.LLVM.IRType (IRType)
 import Noll.Core.LLVM.IRType.Syntax (fun, i32, i8Ptr, i8PtrPtr, ptr, struct)
 import Noll.Core.LLVM.IRValue (IRValue (..))
 import Noll.Label (Label (..))
-import Noll.Utils (forM, forM_)
+import Noll.Utils (forM, forM_, listenOnly)
 import TextShow (showt)
 
 structType :: IRType
