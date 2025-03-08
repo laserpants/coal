@@ -10,16 +10,13 @@ import Noll.Core.LLVM.IRConstruct (IRConstruct (..))
 import Noll.Core.LLVM.IREval.Closure (namedClosureType)
 import Noll.Core.LLVM.IREval.Comment (irComments)
 import Noll.Core.LLVM.IRInstruction (IRInstr)
-import Noll.Core.LLVM.IRInstruction.Interpreter (
-  IRInterpreter (..),
-  IRLine,
-  interpret,
- )
+import Noll.Core.LLVM.IRInstruction.Interpreter (IRInterpreter (..), IRLine)
+import Noll.Core.LLVM.IRInstruction.Interpreter.IRConstruct (irDefine)
 import Noll.Core.LLVM.IRInstruction.TH
 import Noll.Core.LLVM.IRType.Syntax (fun, i1, i32, i64, i8Ptr, i8PtrPtr, opaqueIRSignature, ptr)
 import Noll.Core.LLVM.IRValue (IRValue (..))
 import Noll.Label (Label (..))
-import Noll.Utils (forM, forM_, listenOnly)
+import Noll.Utils (forM, forM_)
 import TextShow (showt)
 
 irClosureExtend :: Int -> IRValue -> IRValue -> IRValue -> IRInstr ()
@@ -74,6 +71,8 @@ irClosureExtend n argF argN argAs = do
   iRet i8Ptr Null
 
 irExtendN :: Int -> IRInterpreter (IRConstruct [IRLine])
-irExtendN n = do
-  w <- listenOnly (interpret (irClosureExtend n (Local i8Ptr "f") (Local i32 "n") (Local i8PtrPtr "as")))
-  pure $ CDefine ("closure" <> showt n <> "_extend") i8Ptr Nothing [Label i8Ptr "f", Label i32 "n", Label i8PtrPtr "as"] w
+irExtendN n =
+  irDefine
+    ("closure" <> showt n <> "_extend")
+    (irClosureExtend n (Local i8Ptr "f") (Local i32 "n") (Local i8PtrPtr "as"))
+    [Label i8Ptr "f", Label i32 "n", Label i8PtrPtr "as"]

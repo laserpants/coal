@@ -9,14 +9,14 @@ import Noll.Core.LLVM.IRInstruction (IRInstr)
 import Noll.Core.LLVM.IRInstruction.Interpreter (
   IRInterpreter (..),
   IRLine,
-  interpret,
  )
+import Noll.Core.LLVM.IRInstruction.Interpreter.IRConstruct (irDefine)
 import Noll.Core.LLVM.IRInstruction.TH
 import Noll.Core.LLVM.IRType (IRType)
 import Noll.Core.LLVM.IRType.Syntax (fun, i32, i8Ptr, i8PtrPtr, ptr, struct)
 import Noll.Core.LLVM.IRValue (IRValue (..))
 import Noll.Label (Label (..))
-import Noll.Utils (forM, forM_, listenOnly)
+import Noll.Utils (forM, forM_)
 import TextShow (showt)
 
 structType :: IRType
@@ -76,8 +76,10 @@ irClosureApply n argF args = do
     iRet i8Ptr r15
 
 irApplyN :: Int -> IRInterpreter (IRConstruct [IRLine])
-irApplyN n = do
-  w <- listenOnly (interpret (irClosureApply n (Local i8Ptr "f") (Local i8Ptr <$> as)))
-  pure $ CDefine ("apply" <> showt n) i8Ptr Nothing (Label i8Ptr <$> "f" : as) w
+irApplyN n =
+  irDefine
+    ("apply" <> showt n)
+    (irClosureApply n (Local i8Ptr "f") (Local i8Ptr <$> as))
+    (Label i8Ptr <$> "f" : as)
  where
   as = ["a" <> showt m | m <- [0 .. n - 1]]
