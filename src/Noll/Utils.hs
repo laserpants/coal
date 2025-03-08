@@ -16,6 +16,7 @@ module Noll.Utils (
   module Noll.Utils.Control.Monad,
   module Noll.Utils.Control.Monad.State,
   module Noll.Utils.Control.Monad.Writer,
+  module Data.Tuple.Extra,
   IndexMap,
   fromMaybe,
   lexOrderRank,
@@ -32,6 +33,7 @@ import Data.Map.Strict (Map)
 import Data.Maybe (fromMaybe)
 import Data.Set (Set)
 import Data.Text (Text)
+import Data.Tuple.Extra (first, second)
 import Noll.Utils.Control.Monad
 import Noll.Utils.Control.Monad.State
 import Noll.Utils.Control.Monad.Writer

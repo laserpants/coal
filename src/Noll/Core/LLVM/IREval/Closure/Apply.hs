@@ -2,7 +2,6 @@
 
 module Noll.Core.LLVM.IREval.Closure.Apply (irClosureApply, irApplyN) where
 
-import Data.Tuple.Extra (second)
 import Noll.Core.LLVM.IRConstruct (IRConstruct (..))
 import Noll.Core.LLVM.IREval.Comment (irComments)
 import Noll.Core.LLVM.IRInstruction (IRInstr)
@@ -17,7 +16,7 @@ import Noll.Core.LLVM.IRType (IRType)
 import Noll.Core.LLVM.IRType.Syntax (fun, i32, i8Ptr, i8PtrPtr, ptr, struct)
 import Noll.Core.LLVM.IRValue (IRValue (..))
 import Noll.Label (Label (..))
-import Noll.Utils (forM, forM_, listenOnly)
+import Noll.Utils (forM, forM_, listenOnly, second)
 import TextShow (showt)
 
 structType :: IRType
