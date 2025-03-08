@@ -11,7 +11,7 @@ import Noll.Core.LLVM.IRInstruction.Interpreter (
   IRLine,
   interpret,
  )
-import Noll.Core.LLVM.IRInstruction.Interpreter.IRConstruct (irDefine)
+import Noll.Core.LLVM.IRInstruction.Interpreter.IRConstruct (argLabel, irDefine)
 import Noll.Core.LLVM.IRInstruction.TH
 import Noll.Core.LLVM.IRType (IRType)
 import Noll.Core.LLVM.IRType.Syntax (fun, i32, i8Ptr, i8PtrPtr, ptr, struct)
@@ -80,7 +80,8 @@ irApplyN :: Int -> IRInterpreter (IRConstruct [IRLine])
 irApplyN n =
   irDefine
     ("apply" <> showt n)
-    (irClosureApply n (Local i8Ptr "f") (Local i8Ptr <$> as))
-    (Label i8Ptr <$> "f" : as)
+    (irClosureApply n arg0 args)
+    (argLabel <$> arg0 : args)
  where
-  as = ["a" <> showt m | m <- [0 .. n - 1]]
+  arg0 = Local i8Ptr "f"
+  args = Local i8Ptr <$> ["a" <> showt m | m <- [0 .. n - 1]]
