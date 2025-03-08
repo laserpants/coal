@@ -2,15 +2,26 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Core.LLVM.IREval.Closure.Finalize (irClosureFinalize) where
+module Noll.Core.LLVM.IREval.Closure.Finalize (
+  irClosureFinalize,
+  irFinalizeN,
+) where
 
 import Control.Monad.State (evalStateT, get, modify)
+import Control.Monad.Writer (listen)
+import Noll.Core.LLVM.IRConstruct (IRConstruct (..))
 import Noll.Core.LLVM.IREval.Closure (namedClosureType)
 import Noll.Core.LLVM.IREval.Comment (irComments)
 import Noll.Core.LLVM.IRInstruction (IRInstr)
+import Noll.Core.LLVM.IRInstruction.Interpreter (
+  IRInterpreter (..),
+  IRLine,
+  interpret,
+ )
 import Noll.Core.LLVM.IRInstruction.TH
-import Noll.Core.LLVM.IRType.Syntax (i1, i8Ptr, opaqueIRSignature, ptr)
+import Noll.Core.LLVM.IRType.Syntax (i1, i32, i8Ptr, i8PtrPtr, opaqueIRSignature, ptr)
 import Noll.Core.LLVM.IRValue (IRValue (..))
+import Noll.Label (Label (..))
 import Noll.Utils (forM, forM_)
 import TextShow (showt)
 
@@ -43,3 +54,8 @@ irClosureFinalize n argF argN argAs = do
           iRet i8Ptr r8
         iBlock1 labelGt $ pure ()
   iRet i8Ptr Null
+
+irFinalizeN :: Int -> IRInterpreter (IRConstruct [IRLine])
+irFinalizeN n = do
+  (_, w) <- listen (interpret (irClosureFinalize n (Local i8Ptr "f") (Local i32 "n") (Local i8PtrPtr "as")))
+  pure $ CDefine ("closure" <> showt n <> "_finalize") i8Ptr Nothing [Label i8Ptr "f", Label i32 "n", Label i8PtrPtr "as"] w

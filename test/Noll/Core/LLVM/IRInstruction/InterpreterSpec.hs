@@ -33,6 +33,7 @@ import Noll.Core.Language.Object (Object (..), ObjectList, objectName)
 import Noll.Label (Label (..))
 import Noll.Utils (Name)
 import Test.Hspec (Spec, describe, it)
+import TextShow (showt)
 
 import qualified Data.Text.IO as Text
 import qualified Noll.Common.Environment as Environment
@@ -1169,6 +1170,15 @@ abcd = Text.putStrLn $ irEncode (thd3 (runInterpreter (IRInterpreterEnv mempty m
 abce = Text.putStrLn $ irEncode (thd3 (runInterpreter (IRInterpreterEnv mempty mempty) (interpret (irClosureFinalize 2 (Local i8Ptr "f") (Local i32 "n") (Local i8PtrPtr "as")))))
 
 abcf = Text.putStrLn $ irEncode (thd3 (runInterpreter (IRInterpreterEnv mempty mempty) (interpret (irClosureApply 3 (Local i8Ptr "f") [Local i8Ptr "a0", Local i8Ptr "a1", Local i8Ptr "a2"]))))
+
+xxd n = CDefine ("apply" <> showt n) i8Ptr Nothing (Label i8Ptr "f" : [Label i8Ptr ("a" <> showt m) | m <- [0 .. n - 1]]) xxc
+  where
+    xxc = thd3 (runInterpreter (IRInterpreterEnv mempty mempty) (interpret (irClosureApply n (Local i8Ptr "f") args)))
+    args = [Local i8Ptr ("a" <> showt m) | m <- [0 .. n - 1]]
+
+abcg1 = Text.putStrLn $ irEncode (xxd 1)
+abcg2 = Text.putStrLn $ irEncode (xxd 2)
+abcg3 = Text.putStrLn $ irEncode (xxd 3)
 
 -- abc5 = Text.putStrLn (irEncode pipelineStateArtifacts)
 abc5 = (pipelineStateArtifacts, pipelineStateCode)

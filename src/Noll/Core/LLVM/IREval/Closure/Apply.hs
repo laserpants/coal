@@ -1,14 +1,22 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Core.LLVM.IREval.Closure.Apply (irClosureApply) where
+module Noll.Core.LLVM.IREval.Closure.Apply (irClosureApply, irApplyN) where
 
+import Control.Monad.Writer (listen)
 import Data.Tuple.Extra (second)
+import Noll.Core.LLVM.IRConstruct (IRConstruct (..))
 import Noll.Core.LLVM.IREval.Comment (irComments)
 import Noll.Core.LLVM.IRInstruction (IRInstr)
+import Noll.Core.LLVM.IRInstruction.Interpreter (
+  IRInterpreter (..),
+  IRLine,
+  interpret,
+ )
 import Noll.Core.LLVM.IRInstruction.TH
 import Noll.Core.LLVM.IRType (IRType)
 import Noll.Core.LLVM.IRType.Syntax (fun, i32, i8Ptr, i8PtrPtr, ptr, struct)
 import Noll.Core.LLVM.IRValue (IRValue (..))
+import Noll.Label (Label (..))
 import Noll.Utils (forM, forM_)
 import TextShow (showt)
 
@@ -44,7 +52,7 @@ irClosureApply n argF args = do
             r9 <- iCall i8Ptr r6 [argF, I32 (fromIntegral m), r7]
             iRet i8Ptr r9
         else do
-          irComments ["Function is oversaturated"]
+          irComments ["Function is oversaturated (+" <> showt (n - m) <> ")"]
           iBlock1 ll $ do
             r6 <- iBitcast r5 (fun i8Ptr [i8Ptr, i32, i8PtrPtr])
             r7 <- iAlloca i8Ptr (I32 (fromIntegral m))
@@ -67,3 +75,10 @@ irClosureApply n argF args = do
         iStore (args !! m) r14
     r15 <- iCall i8Ptr r12 [argF, I32 (fromIntegral n), r13]
     iRet i8Ptr r15
+
+irApplyN :: Int -> IRInterpreter (IRConstruct [IRLine])
+irApplyN n = do
+  (_, w) <- listen (interpret (irClosureApply n (Local i8Ptr "f") (Local i8Ptr <$> as)))
+  pure $ CDefine ("apply" <> showt n) i8Ptr Nothing (Label i8Ptr <$> "f" : as) w
+ where
+  as = ["a" <> showt m | m <- [0 .. n - 1]]
