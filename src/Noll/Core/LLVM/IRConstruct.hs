@@ -7,7 +7,6 @@ module Noll.Core.LLVM.IRConstruct (
 ) where
 
 import Data.ByteString (ByteString)
-import Data.Text (Text)
 import Noll.Core.LLVM.IRType (IRType)
 import Noll.Core.LLVM.IRValue (IRValue)
 import Noll.Label (Label (..))
