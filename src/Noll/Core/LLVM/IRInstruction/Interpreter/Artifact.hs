@@ -3,6 +3,7 @@
 
 module Noll.Core.LLVM.IRInstruction.Interpreter.Artifact (interpretArtifact) where
 
+import Data.Text.Encoding (encodeUtf8)
 import Noll.Core.LLVM.IRConstruct (IRConstruct (..))
 import Noll.Core.LLVM.IREval.Closure (structType)
 import Noll.Core.LLVM.IRInstruction.Interpreter (IRInterpreter (..), IRLine (..))
@@ -17,7 +18,7 @@ interpretArtifact =
     InterpreterArtifactClosure arity ->
       pure [CType ("closure" <> showt arity) (structType arity)]
     InterpreterArtifactHashMapKey name ->
-      pure [CString ("label." <> name) name]
+      pure [CString ("label." <> name) (encodeUtf8 name)]
     InterpreterArtifactDataConstructor name t ->
       pure [CType name t]
     InterpreterArtifactMemoizedConstant name ->

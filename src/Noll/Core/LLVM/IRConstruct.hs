@@ -6,6 +6,7 @@ module Noll.Core.LLVM.IRConstruct (
   IRLinkage (..),
 ) where
 
+import Data.ByteString (ByteString)
 import Data.Text (Text)
 import Noll.Core.LLVM.IRType (IRType)
 import Noll.Core.LLVM.IRValue (IRValue)
@@ -29,7 +30,7 @@ data IRConstruct a
   | -- | Global symbol
     CGlobal Name IRType IRValue
   | -- | Top-level string constant
-    CString Name Text
+    CString Name ByteString
   | -- | Function definition
     CDefine Name IRType (Maybe IRLinkage) [Label IRType] a
   deriving (Show, Eq, Ord, Functor, Foldable, Traversable)

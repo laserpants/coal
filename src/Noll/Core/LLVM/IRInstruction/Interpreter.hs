@@ -174,8 +174,6 @@ interpreter =
           error ("No constructor " <> Text.unpack name)
         Just n -> do
           next (IRConstructor n (TNamed name t))
-    _ ->
-      error "TODO"
 
 {-# INLINE withCommas #-}
 withCommas :: (IREncodable a) => [a] -> Text

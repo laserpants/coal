@@ -13,8 +13,10 @@ module Noll.Core.LLVM.IREncodable (
   enquote,
 ) where
 
+import Data.ByteString (ByteString)
 import Data.Char (isAlphaNum)
 import Data.Text (Text)
+import Data.Text.Encoding (decodeUtf8Lenient)
 import Noll.Core.LLVM.IRConstruct (IRConstruct (..))
 import Noll.Core.LLVM.IRType (IRType (..), IRTyped (..))
 import Noll.Core.LLVM.IRType.Syntax (i8, i8Ptr)
@@ -23,6 +25,7 @@ import Noll.Label (Label (..))
 import Noll.Utils (Name)
 import TextShow (showt)
 
+import qualified Data.ByteString as ByteString
 import qualified Data.Text as Text
 
 class IREncodable a where
@@ -33,6 +36,9 @@ instance (IREncodable a) => IREncodable [a] where
 
 instance IREncodable Text where
   irEncode = id
+
+instance IREncodable ByteString where
+  irEncode = decodeUtf8Lenient
 
 instance IREncodable Int where
   irEncode = showt
@@ -130,11 +136,13 @@ instance (IREncodable a) => IREncodable (IRConstruct a) where
         line $
           irGlobalName name
             <> " = constant "
-            <> irEncode (TArray (Text.length str + 1) i8)
+            <> irEncode (TArray (Text.length txt + 1) i8)
             <> space
             <> "c\""
-            <> irEncode str
+            <> txt
             <> "\\00\""
+       where
+        txt = irEncode str
       CGlobal name t v ->
         line $
           irGlobalName name
