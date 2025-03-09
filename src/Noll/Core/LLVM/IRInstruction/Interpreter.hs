@@ -166,7 +166,7 @@ interpreter =
       let name = "ptr." <> showt d
       addArtifact (InterpreterArtifactMemoizedConstant name)
       next (Global i8Ptr name)
-    MetaAdt t name next -> do
+    MetaConstructor t name next -> do
       addArtifact (InterpreterArtifactDataConstructor name t)
       env <- asks irInterpreterConstructorEnv
       case Environment.lookup name env of

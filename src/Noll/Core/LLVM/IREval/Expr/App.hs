@@ -26,7 +26,7 @@ irEvalApp t ll@(Label _ var) es
   | isConstructor var = do
       irComments (comment var)
       vs <- irEvalArgs es
-      IRConstructor i t1 <- metaAdt (struct (i32 : (i8Ptr <$ vs))) var
+      IRConstructor i t1 <- metaConstructor (struct (i32 : (i8Ptr <$ vs))) var
       v1 <- irMalloc t1
       v2 <- iGep t1 v1 (I32 0) (I32 0)
       iStore (I32 (fromIntegral i)) v2

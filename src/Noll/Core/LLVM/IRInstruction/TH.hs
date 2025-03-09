@@ -37,7 +37,7 @@ module Noll.Core.LLVM.IRInstruction.TH (
   metaBind,
   metaBlock,
   metaBlock1,
-  metaAdt,
+  metaConstructor,
   metaKey,
   metaMemoize,
   metaApply,

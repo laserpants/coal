@@ -52,7 +52,7 @@ data IRInstrOpF v t i next
   | MetaIndex (Name -> next)
   | MetaBlock Name (IRInstr v) (i -> next)
   | MetaBlock1 Name (IRInstr ()) next
-  | MetaAdt t Name (IRConstructor t -> next)
+  | MetaConstructor t Name (IRConstructor t -> next)
   | MetaKey Name (v -> next)
   | MetaMemoize (v -> next)
   | MetaApply Int (Name -> next)

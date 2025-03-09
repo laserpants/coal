@@ -21,7 +21,7 @@ irEvalVar :: Core.Type -> Name -> IRInstr IRValue
 irEvalVar t name
   | isConstructor name = do
       irComments (comment1 name)
-      IRConstructor i t1 <- metaAdt (struct [i32]) name
+      IRConstructor i t1 <- metaConstructor (struct [i32]) name
       v1 <- irMalloc t1
       v2 <- iGep t1 v1 (I32 0) (I32 0)
       iStore (I32 (fromIntegral i)) v2
