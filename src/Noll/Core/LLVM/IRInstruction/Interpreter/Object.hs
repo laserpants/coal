@@ -44,7 +44,7 @@ interpretObject =
     inValueEnv (Environment.insert name (Local i8Ptr name))
 
 objectValue :: CoreObject -> (Name, IRValue)
-objectValue o = (name, Global (irTypeOf o) name) where name = objectName o
+objectValue o = let name = objectName o in (name, Global (irTypeOf o) name)
 
 objectEnvironment :: ObjectList -> Environment IRValue
 objectEnvironment = foldr (uncurry Environment.insert . objectValue) mempty

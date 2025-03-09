@@ -6,8 +6,8 @@ import Noll.Core.LLVM.IRInstruction.TH (iRet)
 import Noll.Core.LLVM.IRType.Syntax (i8Ptr)
 import Noll.Core.LLVM.IRValue (IRValue)
 
-class IREval a where
-  irEval :: a -> IRInstr IRValue
+class IREval e where
+  irEval :: e -> IRInstr IRValue
 
 {-# INLINE irEvalArgs #-}
 irEvalArgs :: (IREval e) => List1 e -> IRInstr [IRValue]
