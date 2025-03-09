@@ -14,7 +14,7 @@ module Noll.Core.LLVM.IREncodable (
 ) where
 
 import Data.ByteString (ByteString)
-import Data.Char (isAlphaNum)
+import Data.Char (isAlphaNum, ord)
 import Data.Text (Text)
 import Data.Text.Encoding (decodeUtf8Lenient)
 import Noll.Core.LLVM.IRConstruct (IRConstruct (..))
@@ -136,13 +136,9 @@ instance (IREncodable a) => IREncodable (IRConstruct a) where
         line $
           irGlobalName name
             <> " = constant "
-            <> irEncode (TArray (Text.length txt + 1) i8)
+            <> irEncode (TArray (ByteString.length str + 1) i8)
             <> space
-            <> "c\""
-            <> txt
-            <> "\\00\""
-       where
-        txt = irEncode str
+            <> Text.concat ["c\"", escapeString (decodeUtf8Lenient str), "\\00\""]
       CGlobal name t v ->
         line $
           irGlobalName name
@@ -150,6 +146,24 @@ instance (IREncodable a) => IREncodable (IRConstruct a) where
             <> irEncode t
             <> space
             <> irEncode v
+
+escapeString :: Text -> Text
+escapeString = Text.concatMap escapeChar
+ where
+  escapeChar :: Char -> Text
+  escapeChar '"' = "\\\"" -- Escape double quotes
+  escapeChar '\\' = "\\\\" -- Escape backslashes
+  escapeChar '\n' = "\\0A" -- LLVM-style newline escape
+  escapeChar '\t' = "\\09" -- LLVM-style tab escape
+  escapeChar c
+    | c < ' ' || c > '~' = Text.pack (escapeUnicode c) -- Escape non-printables
+    | otherwise = Text.singleton c
+
+  escapeUnicode :: Char -> String
+  escapeUnicode c = "\\x" ++ hex (ord c)
+
+  hex :: Int -> String
+  hex n = let h = "0123456789ABCDEF" in [h !! (n `div` 16), h !! (n `mod` 16)]
 
 {-# INLINE space #-}
 space :: Text

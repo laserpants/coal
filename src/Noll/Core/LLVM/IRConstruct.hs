@@ -28,7 +28,7 @@ data IRConstruct a
   | -- | IR type definition
     CType Name IRType
   | -- | Global symbol
-    CGlobal Name IRType IRValue
+    CGlobal Name IRType IRValue -- (Maybe IRLinkage)
   | -- | Top-level string constant
     CString Name ByteString
   | -- | Function definition
