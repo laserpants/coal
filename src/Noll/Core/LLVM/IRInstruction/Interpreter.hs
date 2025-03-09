@@ -143,9 +143,9 @@ interpreter =
       tell [LLabel name]
       interpret instr
       next
-    MetaApply arity next -> do
-      addArtifact (InterpreterArtifactFunctionApply arity)
-      next ("apply" <> showt arity)
+    MetaApply argc next -> do
+      addArtifact (InterpreterArtifactFunctionApply argc)
+      next ("apply" <> showt argc)
     MetaClosure fn applied remain next -> do
       let name = "closure" <> showt applied
           signature n = fun i8Ptr (replicate n i8Ptr)
