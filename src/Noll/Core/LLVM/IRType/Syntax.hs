@@ -54,8 +54,8 @@ struct :: [IRType] -> IRType
 struct = TStruct
 
 {-# INLINE stringLiteralType #-}
-stringLiteralType :: Text -> IRType
-stringLiteralType str = TArray (Text.length str + 1) i8
+stringLiteralType :: Int -> IRType
+stringLiteralType len = TArray len i8
 
 {-# INLINE opaqueIRSignature #-}
 opaqueIRSignature :: Int -> IRType

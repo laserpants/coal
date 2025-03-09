@@ -25,6 +25,7 @@ import Noll.Core.LLVM.IRValue (IRValue (..), irPrimValue)
 import Noll.Label (Label (..))
 import Noll.Utils (forM)
 
+import qualified Data.Text as Text
 import qualified Noll.Core.Language as Core
 
 instance IREval (Core.Expr Core.Type) where
@@ -98,14 +99,14 @@ irEvalExpr =
       Core.EExt (Label _ field) e1 e2 -> do
         irCommentBlock "EExt" $ do
           k1 <- metaKey field
-          t2 <- iGep (stringLiteralType field) k1 (I32 0) (I32 0)
+          t2 <- iGep (stringLiteralType (Text.length field + 1)) k1 (I32 0) (I32 0)
           v1 <- irEval e1
           v2 <- irEval e2
           iCallGlobal i8Ptr "hashmap_insert" [v2, t2, v1]
       Core.ESel (Core.Focus field (Label _ var) (Label _ r)) e1 e2 ->
         irCommentBlock "ESel" $ do
           k1 <- metaKey field
-          t2 <- iGep (stringLiteralType field) k1 (I32 0) (I32 0)
+          t2 <- iGep (stringLiteralType (Text.length field + 1)) k1 (I32 0) (I32 0)
           v1 <- irEval e1
           v2 <- iCallGlobal i8Ptr "hashmap_lookup" [v1, t2]
           metaBind [(var, v2), (r, v1)] (irEval e2)

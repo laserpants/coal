@@ -160,7 +160,7 @@ interpreter =
     MetaKey name next -> do
       let label = "label." <> name
       addArtifact (InterpreterArtifactHashMapKey name)
-      next (Global (ptr (stringLiteralType name)) label)
+      next (Global (ptr (stringLiteralType (Text.length name + 1))) label)
     MetaMemoize next -> do
       d <- nextLabelIndex
       let name = "ptr." <> showt d
