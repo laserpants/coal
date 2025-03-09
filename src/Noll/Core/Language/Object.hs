@@ -8,7 +8,7 @@ module Noll.Core.Language.Object (Object (..), ObjectList, objectName) where
 
 import Noll.AST.FreeVars (FreeVars (..), boundIn, exceptNames)
 import Noll.Core.LLVM.IRType (IRTyped (..))
-import Noll.Core.LLVM.IRType.Syntax (opaqueIRSignature)
+import Noll.Core.LLVM.IRType.Syntax (opaqueFunction)
 import Noll.Core.Language.Expr (Expr)
 import Noll.Core.Language.Type (Type (..))
 import Noll.Label (Label (..))
@@ -34,7 +34,7 @@ instance IRTyped (Object t e) where
   irTypeOf =
     \case
       OFunction _ lls _ ->
-        opaqueIRSignature (length lls)
+        opaqueFunction (length lls)
       _ ->
         error "TODO"
 

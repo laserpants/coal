@@ -15,7 +15,7 @@ import Noll.Core.LLVM.IRInstruction (IRInstr)
 import Noll.Core.LLVM.IRInstruction.Interpreter (IRInterpreter (..), IRLine)
 import Noll.Core.LLVM.IRInstruction.Interpreter.IRConstruct (argLabel, irDefine)
 import Noll.Core.LLVM.IRInstruction.TH
-import Noll.Core.LLVM.IRType.Syntax (i1, i32, i8Ptr, i8PtrPtr, opaqueIRSignature, ptr)
+import Noll.Core.LLVM.IRType.Syntax (i1, i32, i8Ptr, i8PtrPtr, opaqueFunction, ptr)
 import Noll.Core.LLVM.IRValue (IRValue (..))
 import Noll.Utils (forM, forM_)
 import TextShow (showt)
@@ -44,7 +44,7 @@ irClosureFinalize n argF argN argAs = do
         modify (<> [r5])
         qs <- get
         metaBlock1 labelEq $ do
-          r7 <- iBitcast r3 (opaqueIRSignature (n + m))
+          r7 <- iBitcast r3 (opaqueFunction (n + m))
           r8 <- iCall i8Ptr r7 (rs <> qs)
           iRet i8Ptr r8
         metaBlock1 labelGt $ pure ()

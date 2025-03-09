@@ -9,7 +9,7 @@ module Noll.Core.LLVM.IRType.Syntax (
   fun,
   struct,
   stringLiteral,
-  opaqueIRSignature,
+  opaqueFunction,
 ) where
 
 import Noll.Core.LLVM.IRType (IRType (..))
@@ -54,6 +54,6 @@ struct = TStruct
 stringLiteral :: Int -> IRType
 stringLiteral len = TArray len i8
 
-{-# INLINE opaqueIRSignature #-}
-opaqueIRSignature :: Int -> IRType
-opaqueIRSignature n = fun i8Ptr (replicate n i8Ptr)
+{-# INLINE opaqueFunction #-}
+opaqueFunction :: Int -> IRType
+opaqueFunction n = fun i8Ptr (replicate n i8Ptr)
