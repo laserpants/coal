@@ -13,7 +13,7 @@ import Noll.Core.LLVM.IRValue (IRValue)
 import Noll.Label (Label (..))
 import Noll.Utils (Name)
 
--- | https://www.llvm.org/docs/LangRef.html#linkage-types
+-- | <https://www.llvm.org/docs/LangRef.html#linkage-types>
 data IRLinkage
   = -- | Internal linkage
     LInternal
