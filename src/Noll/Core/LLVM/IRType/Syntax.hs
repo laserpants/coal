@@ -12,10 +12,7 @@ module Noll.Core.LLVM.IRType.Syntax (
   opaqueIRSignature,
 ) where
 
-import Data.Text (Text)
 import Noll.Core.LLVM.IRType (IRType (..))
-
-import qualified Data.Text as Text
 
 {-# INLINE i1 #-}
 i1 :: IRType
