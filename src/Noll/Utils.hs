@@ -22,10 +22,12 @@ module Noll.Utils (
   lexOrderRank,
   const2,
   traverse2,
+  optionalOr,
   Over,
 )
 where
 
+import Control.Applicative (Alternative (..))
 import Control.Monad (forM, forM_, mapM)
 import Data.Char (ord)
 import Data.Foldable (foldrM, traverse_)
@@ -58,6 +60,10 @@ const2 a _ _ = a
 {-# INLINE traverse2 #-}
 traverse2 :: (Applicative f, Traversable t1, Traversable t2) => (a -> f b) -> t2 (t1 a) -> f (t2 (t1 b))
 traverse2 = traverse . traverse
+
+{-# INLINE optionalOr #-}
+optionalOr :: (Alternative f) => a -> f a -> f a
+optionalOr def fa = fa <|> pure def
 
 lexOrderRank :: Text -> Int
 lexOrderRank text

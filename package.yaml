@@ -28,7 +28,9 @@ dependencies:
 - containers
 - mtl
 - data-fix
+- parser-combinators
 - free
+- megaparsec
 - extra
 - recursion-schemes
 - uniplate

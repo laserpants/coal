@@ -87,6 +87,10 @@ library
       Noll.Core.LLVM.IRType
       Noll.Core.LLVM.IRType.Syntax
       Noll.Core.LLVM.IRValue
+      Noll.Core.Parser
+      Noll.Core.Parser.Identifier
+      Noll.Core.Parser.Symbol
+      Noll.Core.Parser.Type
       Noll.Eval
       Noll.Label
       Noll.Language
@@ -145,7 +149,9 @@ library
     , deriving-compat
     , extra
     , free
+    , megaparsec
     , mtl
+    , parser-combinators
     , recursion-schemes
     , text
     , text-show
@@ -169,8 +175,10 @@ executable noll-exe
     , deriving-compat
     , extra
     , free
+    , megaparsec
     , mtl
     , noll
+    , parser-combinators
     , recursion-schemes
     , text
     , text-show
@@ -245,8 +253,10 @@ test-suite noll-test
     , extra
     , free
     , hspec
+    , megaparsec
     , mtl
     , noll
+    , parser-combinators
     , recursion-schemes
     , text
     , text-show
