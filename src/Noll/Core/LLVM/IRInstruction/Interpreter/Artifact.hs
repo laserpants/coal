@@ -15,8 +15,8 @@ import TextShow (showt)
 interpretArtifact :: IRInterpreterArtifact -> IRInterpreter [IRConstruct [IRLine]]
 interpretArtifact =
   \case
-    InterpreterArtifactClosure argc ->
-      pure [CType ("closure" <> showt argc) (structType argc)]
+--    InterpreterArtifactClosure argc ->
+--      pure [CType ("closure" <> showt argc) (structType argc)]
     InterpreterArtifactHashMapKey name ->
       pure [CString ("label." <> name) (encodeUtf8 name)]
     InterpreterArtifactDataConstructor name t ->
