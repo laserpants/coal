@@ -6,7 +6,6 @@
 module Noll.Core.LLVM.IREval.Expr (irEvalExpr) where
 
 import Control.Arrow ((>>>))
-import Control.Monad.Free (Free (..))
 import Data.Fix (Fix (..))
 import Data.Functor.Foldable (project)
 import Noll.Common.List1 (fromList1)
@@ -18,7 +17,7 @@ import Noll.Core.LLVM.IREval.Expr.App (irEvalApp)
 import Noll.Core.LLVM.IREval.Expr.Match (irEvalMatch)
 import Noll.Core.LLVM.IREval.Expr.Op (irEvalOp)
 import Noll.Core.LLVM.IREval.Expr.Var (irEvalVar)
-import Noll.Core.LLVM.IRInstruction (IRInstr, IRInstrOpF (..))
+import Noll.Core.LLVM.IRInstruction (IRInstr)
 import Noll.Core.LLVM.IRInstruction.TH
 import Noll.Core.LLVM.IRType.Syntax (i1, i8Ptr, stringLiteral)
 import Noll.Core.LLVM.IRValue (IRValue (..), irPrimValue)
@@ -29,7 +28,7 @@ import qualified Data.Text as Text
 import qualified Noll.Core.Language as Core
 
 instance IREval (Core.Expr Core.Type) where
-  irEval = simplify . irEvalExpr
+  irEval = irEvalExpr
 
 irEvalExpr :: Core.Expr Core.Type -> IRInstr IRValue
 irEvalExpr =
@@ -133,24 +132,3 @@ irEvalExpr =
           irConceal v
       e ->
         error (show e)
-
-simplify :: IRInstr IRValue -> IRInstr IRValue
-simplify =
-  \case
-    Free (IInttoptr v1 t1 next) ->
-      case next v1 of
-        Free (IPtrtoint v2 _ next1)
-          | v1 == v2 ->
-              next1 v1
-        Free{} ->
-          iInttoptr v1 t1 >>= simplify . next
-        _ ->
-          iInttoptr v1 t1 >>= next
-    Free (MetaBind is i next) ->
-      Free (MetaBind is (simplify i) (simplify <$> next))
-    Free (MetaBlock name i next) ->
-      Free (MetaBlock name (simplify i) (simplify <$> next))
-    Free instr ->
-      Free (simplify <$> instr)
-    i ->
-      i
