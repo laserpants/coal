@@ -21,6 +21,6 @@ data Prim
     PDouble Double
   | -- | Single characters
     PChar Int32
-  | -- | Unicode strings
+  | -- | UTF-8 encoded strings
     PString ByteString
   deriving (Show, Eq, Ord, Read)
