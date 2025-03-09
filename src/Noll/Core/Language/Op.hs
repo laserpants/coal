@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
@@ -7,9 +8,13 @@
 
 module Noll.Core.Language.Op (Op (..)) where
 
+import Data.Data (Data, Typeable)
 import Data.Eq.Deriving (deriveEq1)
+import Data.Generics.Uniplate.Data (children)
 import Noll.AST.FreeVars (FreeVars (..))
 import Text.Show.Deriving (deriveShow1)
+
+import qualified Data.Set as Set
 
 -- | Binary operators
 data Op a
@@ -53,65 +58,10 @@ data Op a
     OAnd a a
   | -- | Logical NOT
     ONot a
-  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
+  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
 
 deriveShow1 ''Op
 deriveEq1 ''Op
 
-instance (Ord t, FreeVars a t) => FreeVars (Op a) t where
-  freeIn =
-    \case
-      OEqInt32 e1 e2 ->
-        freeIn e1 <> freeIn e2
-      OEqInt64 e1 e2 ->
-        freeIn e1 <> freeIn e2
-      ONEqInt32 e1 e2 ->
-        freeIn e1 <> freeIn e2
-      ONEqInt64 e1 e2 ->
-        freeIn e1 <> freeIn e2
-      OLtInt32 e1 e2 ->
-        freeIn e1 <> freeIn e2
-      OLtInt64 e1 e2 ->
-        freeIn e1 <> freeIn e2
-      OGtInt32 e1 e2 ->
-        freeIn e1 <> freeIn e2
-      OGtInt64 e1 e2 ->
-        freeIn e1 <> freeIn e2
-      OLtEInt32 e1 e2 ->
-        freeIn e1 <> freeIn e2
-      OLtEInt64 e1 e2 ->
-        freeIn e1 <> freeIn e2
-      OGtEInt32 e1 e2 ->
-        freeIn e1 <> freeIn e2
-      OGtEInt64 e1 e2 ->
-        freeIn e1 <> freeIn e2
-      OAddInt32 e1 e2 ->
-        freeIn e1 <> freeIn e2
-      OAddInt64 e1 e2 ->
-        freeIn e1 <> freeIn e2
-      OSubInt32 e1 e2 ->
-        freeIn e1 <> freeIn e2
-      OSubInt64 e1 e2 ->
-        freeIn e1 <> freeIn e2
-      OMulInt32 e1 e2 ->
-        freeIn e1 <> freeIn e2
-      OMulInt64 e1 e2 ->
-        freeIn e1 <> freeIn e2
-      OMulFloat e1 e2 ->
-        freeIn e1 <> freeIn e2
-      OMulDouble e1 e2 ->
-        freeIn e1 <> freeIn e2
-      ODivInt32 e1 e2 ->
-        freeIn e1 <> freeIn e2
-      ODivInt64 e1 e2 ->
-        freeIn e1 <> freeIn e2
-      ODivFloat e1 e2 ->
-        freeIn e1 <> freeIn e2
-      ODivDouble e1 e2 ->
-        freeIn e1 <> freeIn e2
-      OOr e1 e2 ->
-        freeIn e1 <> freeIn e2
-      OAnd e1 e2 ->
-        freeIn e1 <> freeIn e2
-      ONot e ->
-        freeIn e
+instance (Data a, Ord t, FreeVars a t) => FreeVars (Op a) t where
+  freeIn = freeIn . children

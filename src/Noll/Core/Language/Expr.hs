@@ -16,6 +16,7 @@ module Noll.Core.Language.Expr (
   unzipBindings,
 ) where
 
+import Data.Data (Data)
 import Data.Eq.Deriving (deriveEq1)
 import Data.Fix (Fix (..))
 import Data.Functor.Foldable (cata, project)
@@ -116,7 +117,7 @@ type Expr t = Fix (ExprF t)
 deriveShow1 ''ExprF
 deriveEq1 ''ExprF
 
-instance (Ord t) => FreeVars (Expr t) t where
+instance (Data t, Ord t) => FreeVars (Expr t) t where
   freeIn =
     cata $
       \case

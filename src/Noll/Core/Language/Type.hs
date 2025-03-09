@@ -1,7 +1,9 @@
+{-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE StrictData #-}
 
 module Noll.Core.Language.Type (Type (..)) where
 
+import Data.Data (Data, Typeable)
 import Noll.Utils (Name)
 
 -- | Core language types
@@ -14,4 +16,4 @@ data Type
     RExt Name Type Type
   | -- | Empty row
     RNil
-  deriving (Show, Eq, Ord, Read)
+  deriving (Show, Eq, Ord, Read, Data, Typeable)
