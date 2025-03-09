@@ -17,7 +17,7 @@ import Data.ByteString (ByteString)
 import Data.Char (isAlphaNum, ord)
 import Data.Text (Text)
 import Data.Text.Encoding (decodeUtf8Lenient)
-import Noll.Core.LLVM.IRConstruct (IRConstruct (..))
+import Noll.Core.LLVM.IRConstruct (IRConstruct (..), IRLinkage (..))
 import Noll.Core.LLVM.IRType (IRType (..), IRTyped (..))
 import Noll.Core.LLVM.IRType.Syntax (i8, i8Ptr)
 import Noll.Core.LLVM.IRValue (IRValue (..))
@@ -109,13 +109,29 @@ instance IREncodable (Label IRType) where
   irEncode (Label t name) =
     irEncode (IRAnnotated (Local t name))
 
+instance IREncodable IRLinkage where
+  irEncode =
+    \case
+      LInternal ->
+        "internal"
+      LPrivate ->
+        "private"
+
+instance (IREncodable e) => IREncodable (Maybe e) where
+  irEncode =
+    \case
+      Nothing ->
+        ""
+      Just e ->
+        irEncode e <> " "
+
 instance (IREncodable a) => IREncodable (IRConstruct a) where
   irEncode =
     \case
       CDefine name t ln as c ->
-        -- TODO: Handle linkage
         line $
           "define"
+            <> irEncode ln
             <> space
             <> global t name
             <> parens (commaSep as)
@@ -135,14 +151,17 @@ instance (IREncodable a) => IREncodable (IRConstruct a) where
       CString name str ->
         line $
           irGlobalName name
-            <> " = constant "
+            <> " = private constant "
             <> irEncode (TArray (ByteString.length str + 1) i8)
             <> space
             <> Text.concat ["c\"", escapeString (decodeUtf8Lenient str), "\\00\""]
-      CGlobal name t v ->
+      CGlobal name t ln v ->
         line $
           irGlobalName name
-            <> " = global "
+            <> " = "
+            <> irEncode ln
+            <> "global"
+            <> space
             <> irEncode t
             <> space
             <> irEncode v
@@ -194,7 +213,7 @@ irGlobalName n = "@" <> enquote n
 
 {-# INLINE global #-}
 global :: IRType -> Name -> Text
-global t name = irEncode t <> " " <> irGlobalName name
+global t name = irEncode t <> space <> irGlobalName name
 
 {-# INLINE ptr #-}
 ptr :: (IREncodable a) => a -> Text
