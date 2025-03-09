@@ -67,5 +67,3 @@ instance Typed (Op a) where
         Type.int32
       OSubInt64{} ->
         Type.int64
-      _ ->
-        error "TODO"
