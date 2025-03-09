@@ -67,10 +67,16 @@ interpreter =
       instruction t next ["sub", irEncode t, withCommas [v1, v2]]
     IMul t v1 v2 next ->
       instruction t next ["mul", irEncode t, withCommas [v1, v2]]
+    IDiv{} ->
+      error "TODO"
     ICmpEq t v1 v2 next ->
       instruction t next ["icmp", "eq", withCommas [annotated v1, irEncode v2]]
     ICmpSLt t v1 v2 next ->
       instruction t next ["icmp", "slt", withCommas [annotated v1, irEncode v2]]
+    ICmpSLE{} ->
+      error "TODO"
+    ICmpSGE{} ->
+      error "TODO"
     ICmpSGt t v1 v2 next ->
       instruction t next ["icmp", "sgt", withCommas [annotated v1, irEncode v2]]
     IXOr t v1 v2 next ->
@@ -188,6 +194,7 @@ switchBranch n v = withCommas [annotated v, encodeLabel n]
 switchBranches :: [(Name, IRValue)] -> Text
 switchBranches bs = Text.unwords (uncurry switchBranch <$> bs)
 
+-- TODO: clean up
 offset :: IRType -> [IRValue] -> IRType
 offset (TPtr t) (I32 0 : ixs) = offset t ixs
 offset (TNamed _ t) ixs = offset t ixs
