@@ -17,7 +17,6 @@ import Noll.Core.LLVM.IRInstruction.Interpreter.IRConstruct (argLabel, irDefine)
 import Noll.Core.LLVM.IRInstruction.TH
 import Noll.Core.LLVM.IRType.Syntax (i1, i32, i8Ptr, i8PtrPtr, opaqueIRSignature, ptr)
 import Noll.Core.LLVM.IRValue (IRValue (..))
-import Noll.Label (Label (..))
 import Noll.Utils (forM, forM_)
 import TextShow (showt)
 

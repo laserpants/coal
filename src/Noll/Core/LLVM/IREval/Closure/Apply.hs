@@ -5,18 +5,13 @@ module Noll.Core.LLVM.IREval.Closure.Apply (irClosureApply, irApplyN) where
 import Noll.Core.LLVM.IRConstruct (IRConstruct (..))
 import Noll.Core.LLVM.IREval.Comment (irComments)
 import Noll.Core.LLVM.IRInstruction (IRInstr)
-import Noll.Core.LLVM.IRInstruction.Interpreter (
-  IRInterpreter (..),
-  IRLine,
-  interpret,
- )
+import Noll.Core.LLVM.IRInstruction.Interpreter (IRInterpreter (..), IRLine)
 import Noll.Core.LLVM.IRInstruction.Interpreter.IRConstruct (argLabel, irDefine)
 import Noll.Core.LLVM.IRInstruction.TH
 import Noll.Core.LLVM.IRType (IRType)
 import Noll.Core.LLVM.IRType.Syntax (fun, i32, i8Ptr, i8PtrPtr, ptr, struct)
 import Noll.Core.LLVM.IRValue (IRValue (..))
-import Noll.Label (Label (..))
-import Noll.Utils (forM, forM_, listenOnly, second)
+import Noll.Utils (forM, forM_, second)
 import TextShow (showt)
 
 structType :: IRType
