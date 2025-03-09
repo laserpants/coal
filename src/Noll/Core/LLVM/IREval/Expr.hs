@@ -20,7 +20,7 @@ import Noll.Core.LLVM.IREval.Expr.Op (irEvalOp)
 import Noll.Core.LLVM.IREval.Expr.Var (irEvalVar)
 import Noll.Core.LLVM.IRInstruction (IRInstr, IRInstrOpF (..))
 import Noll.Core.LLVM.IRInstruction.TH
-import Noll.Core.LLVM.IRType.Syntax (i1, i8Ptr, stringLiteralType)
+import Noll.Core.LLVM.IRType.Syntax (i1, i8Ptr, stringLiteral)
 import Noll.Core.LLVM.IRValue (IRValue (..), irPrimValue)
 import Noll.Label (Label (..))
 import Noll.Utils (forM)
@@ -99,14 +99,14 @@ irEvalExpr =
       Core.EExt (Label _ field) e1 e2 -> do
         irCommentBlock "EExt" $ do
           k1 <- metaKey field
-          t2 <- iGep (stringLiteralType (Text.length field + 1)) k1 (I32 0) (I32 0)
+          t2 <- iGep (stringLiteral (Text.length field + 1)) k1 (I32 0) (I32 0)
           v1 <- irEval e1
           v2 <- irEval e2
           iCallGlobal i8Ptr "hashmap_insert" [v2, t2, v1]
       Core.ESel (Core.Focus field (Label _ var) (Label _ r)) e1 e2 ->
         irCommentBlock "ESel" $ do
           k1 <- metaKey field
-          t2 <- iGep (stringLiteralType (Text.length field + 1)) k1 (I32 0) (I32 0)
+          t2 <- iGep (stringLiteral (Text.length field + 1)) k1 (I32 0) (I32 0)
           v1 <- irEval e1
           v2 <- iCallGlobal i8Ptr "hashmap_lookup" [v1, t2]
           metaBind [(var, v2), (r, v1)] (irEval e2)

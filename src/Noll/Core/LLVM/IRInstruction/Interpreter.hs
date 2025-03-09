@@ -46,7 +46,7 @@ import Noll.Core.LLVM.IRInstruction.Interpreter.Types (
   runInterpreter,
  )
 import Noll.Core.LLVM.IRType (IRType (..))
-import Noll.Core.LLVM.IRType.Syntax (fun, i8Ptr, ptr, stringLiteralType)
+import Noll.Core.LLVM.IRType.Syntax (fun, i8Ptr, ptr, stringLiteral)
 import Noll.Core.LLVM.IRValue (IRValue (..))
 import Noll.Utils (Name)
 import TextShow (showt)
@@ -160,7 +160,7 @@ interpreter =
     MetaKey name next -> do
       let label = "label." <> name
       addArtifact (InterpreterArtifactHashMapKey name)
-      next (Global (ptr (stringLiteralType (Text.length name + 1))) label)
+      next (Global (ptr (stringLiteral (Text.length name + 1))) label)
     MetaMemoize next -> do
       d <- nextLabelIndex
       let name = "ptr." <> showt d
