@@ -95,7 +95,7 @@ irEvalExpr =
       Core.ENil ->
         irCommentBlock "ENil" $ do
           iCallGlobal i8Ptr "hashmap_init" []
-      Core.EExt (Label _ field) e1 e2 -> do
+      Core.EExt field e1 e2 -> do
         irCommentBlock "EExt" $ do
           k1 <- metaKey field
           t2 <- iGep (stringLiteral (Text.length field + 1)) k1 (I32 0) (I32 0)

@@ -749,7 +749,7 @@ fixture =
                                                                       (maxMinRecord opaque)
                                                                       (Core.var (Label (maxMinRow opaque ~> maxMinRecord opaque) "$Record"))
                                                                       ( Core.ext
-                                                                          (Label opaque "min")
+                                                                          "min"
                                                                           ( Core.match
                                                                               opaque
                                                                               (Core.var (Label (maxMinRecord opaque) "range"))
@@ -771,7 +771,7 @@ fixture =
                                                                               )
                                                                           )
                                                                           ( Core.ext
-                                                                              (Label opaque "max")
+                                                                              "max"
                                                                               (Core.var (Label opaque "p"))
                                                                               Core.nil
                                                                           )
@@ -787,10 +787,10 @@ fixture =
                                                                       (maxMinRecord opaque)
                                                                       (Core.var (Label (maxMinRow opaque ~> maxMinRecord opaque) "$Record"))
                                                                       ( Core.ext
-                                                                          (Label opaque "min")
+                                                                          "min"
                                                                           (Core.var (Label opaque "p"))
                                                                           ( Core.ext
-                                                                              (Label opaque "max")
+                                                                              "max"
                                                                               ( Core.match
                                                                                   opaque
                                                                                   (Core.var (Label (maxMinRecord opaque) "range"))
@@ -851,7 +851,7 @@ fixture =
                                         (maxMinRecord opaque)
                                         (Core.var (Label (maxMinRow opaque ~> maxMinRecord opaque) "$Record"))
                                         ( Core.ext
-                                            (Label opaque "min")
+                                            "min"
                                             ( Core.app
                                                 opaque
                                                 (Core.var (Label (orderedDict ~> Core.int32 ~> opaque) "from_int32"))
@@ -861,7 +861,7 @@ fixture =
                                                 )
                                             )
                                             ( Core.ext
-                                                (Label opaque "max")
+                                                "max"
                                                 ( Core.app
                                                     opaque
                                                     (Core.var (Label (orderedDict ~> Core.int32 ~> opaque) "from_int32"))
@@ -1014,10 +1014,10 @@ fixture =
                             orderedInt32Dict
                             (Core.var (Label (orderedInt32Row ~> orderedInt32Dict) "$Record"))
                             ( Core.ext
-                                (Label (Core.int32 ~> Core.int32 ~> ordering) "compare")
+                                "compare"
                                 (Core.var (Label (Core.int32 ~> Core.int32 ~> ordering) "compare__int32"))
                                 ( Core.ext
-                                    (Label (Core.int32 ~> Core.int32) "from_int32")
+                                    "from_int32"
                                     (Core.var (Label (Core.int32 ~> Core.int32) "from_int32__int32"))
                                     Core.nil
                                 )
@@ -1401,7 +1401,7 @@ fixture2 =
                                                                   (maxMinRecord opaque)
                                                                   (Core.var (Label (maxMinRow opaque ~> maxMinRecord opaque) "$Record"))
                                                                   ( Core.ext
-                                                                      (Label opaque "min")
+                                                                      "min"
                                                                       ( Core.match
                                                                           opaque
                                                                           (Core.var (Label (maxMinRecord opaque) "range"))
@@ -1423,7 +1423,7 @@ fixture2 =
                                                                           )
                                                                       )
                                                                       ( Core.ext
-                                                                          (Label opaque "max")
+                                                                          "max"
                                                                           (Core.var (Label opaque "p"))
                                                                           Core.nil
                                                                       )
@@ -1439,10 +1439,10 @@ fixture2 =
                                                                   (maxMinRecord opaque)
                                                                   (Core.var (Label (maxMinRow opaque ~> maxMinRecord opaque) "$Record"))
                                                                   ( Core.ext
-                                                                      (Label opaque "min")
+                                                                      "min"
                                                                       (Core.var (Label opaque "p"))
                                                                       ( Core.ext
-                                                                          (Label opaque "max")
+                                                                          "max"
                                                                           ( Core.match
                                                                               opaque
                                                                               (Core.var (Label (maxMinRecord opaque) "range"))
@@ -1503,7 +1503,7 @@ fixture2 =
                                     (maxMinRecord opaque)
                                     (Core.var (Label (maxMinRow opaque ~> maxMinRecord opaque) "$Record"))
                                     ( Core.ext
-                                        (Label opaque "min")
+                                        "min"
                                         ( Core.app
                                             opaque
                                             (Core.var (Label (orderedDict ~> Core.int32 ~> opaque) "from_int32"))
@@ -1513,7 +1513,7 @@ fixture2 =
                                             )
                                         )
                                         ( Core.ext
-                                            (Label opaque "max")
+                                            "max"
                                             ( Core.app
                                                 opaque
                                                 (Core.var (Label (orderedDict ~> Core.int32 ~> opaque) "from_int32"))
@@ -1665,10 +1665,10 @@ fixture2 =
                             orderedInt32Dict
                             (Core.var (Label (orderedInt32Row ~> orderedInt32Dict) "$Record"))
                             ( Core.ext
-                                (Label (Core.int32 ~> Core.int32 ~> ordering) "compare")
+                                "compare"
                                 (Core.var (Label (Core.int32 ~> Core.int32 ~> ordering) "compare__int32"))
                                 ( Core.ext
-                                    (Label (Core.int32 ~> Core.int32) "from_int32")
+                                    "from_int32"
                                     (Core.var (Label (Core.int32 ~> Core.int32) "from_int32__int32"))
                                     Core.nil
                                 )
@@ -2132,7 +2132,7 @@ blockObjects4 =
                                                                             (maxMinRecord opaque)
                                                                             (Core.var (Label (maxMinRow opaque ~> maxMinRecord opaque) "$Record"))
                                                                             ( Core.ext
-                                                                                (Label opaque "min")
+                                                                                "min"
                                                                                 ( Core.match
                                                                                     opaque
                                                                                     (Core.var (Label (maxMinRecord opaque) "range"))
@@ -2154,7 +2154,7 @@ blockObjects4 =
                                                                                     )
                                                                                 )
                                                                                 ( Core.ext
-                                                                                    (Label opaque "max")
+                                                                                    "max"
                                                                                     (Core.var (Label opaque "p"))
                                                                                     Core.nil
                                                                                 )
@@ -2170,10 +2170,10 @@ blockObjects4 =
                                                                             (maxMinRecord opaque)
                                                                             (Core.var (Label (maxMinRow opaque ~> maxMinRecord opaque) "$Record"))
                                                                             ( Core.ext
-                                                                                (Label opaque "min")
+                                                                                "min"
                                                                                 (Core.var (Label opaque "p"))
                                                                                 ( Core.ext
-                                                                                    (Label opaque "max")
+                                                                                    "max"
                                                                                     ( Core.match
                                                                                         opaque
                                                                                         (Core.var (Label (maxMinRecord opaque) "range"))
@@ -2234,7 +2234,7 @@ blockObjects4 =
                                               (maxMinRecord opaque)
                                               (Core.var (Label (maxMinRow opaque ~> maxMinRecord opaque) "$Record"))
                                               ( Core.ext
-                                                  (Label opaque "min")
+                                                  "min"
                                                   ( Core.app
                                                       opaque
                                                       (Core.var (Label (orderedDict ~> Core.int32 ~> opaque) "from_int32"))
@@ -2244,7 +2244,7 @@ blockObjects4 =
                                                       )
                                                   )
                                                   ( Core.ext
-                                                      (Label opaque "max")
+                                                      "max"
                                                       ( Core.app
                                                           opaque
                                                           (Core.var (Label (orderedDict ~> Core.int32 ~> opaque) "from_int32"))
@@ -2361,10 +2361,10 @@ blockObjects4 =
                                   orderedInt32Dict
                                   (Core.var (Label (orderedInt32Row ~> orderedInt32Dict) "$Record"))
                                   ( Core.ext
-                                      (Label (Core.int32 ~> Core.int32 ~> ordering) "compare")
+                                      "compare"
                                       (Core.var (Label (Core.int32 ~> Core.int32 ~> ordering) "compare__int32"))
                                       ( Core.ext
-                                          (Label (Core.int32 ~> Core.int32) "from_int32")
+                                          "from_int32"
                                           (Core.var (Label (Core.int32 ~> Core.int32) "from_int32__int32"))
                                           Core.nil
                                       )

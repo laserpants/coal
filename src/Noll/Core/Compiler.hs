@@ -388,8 +388,8 @@ muteTypes =
         Core.op op
       EMat _ e1 cs ->
         Core.match () e1 (muteClauseTypes <$> cs)
-      EExt ll e1 e2 ->
-        Core.ext (muteLabelTypes ll) e1 e2
+      EExt f e1 e2 ->
+        Core.ext f e1 e2
       ENil ->
         Core.nil
       ESel (Focus name ll1 ll2) e1 e2 ->

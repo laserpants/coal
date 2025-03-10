@@ -25,6 +25,7 @@ import Noll.Core.Language.Expr (
 import Noll.Core.Language.Op (Op)
 import Noll.Core.Language.Prim (Prim)
 import Noll.Label (Label (..))
+import Noll.Utils (Name)
 import Noll.Utils.Data.Functor.Foldable (embed, embed1, embed2, embed3)
 
 {-# INLINE var #-}
@@ -48,7 +49,7 @@ match :: t -> Expr t -> List1 (Clause t (Expr t)) -> Expr t
 match = embed3 EMat
 
 {-# INLINE ext #-}
-ext :: Label t -> Expr t -> Expr t -> Expr t
+ext :: Name -> Expr t -> Expr t -> Expr t
 ext = embed3 EExt
 
 {-# INLINE nil #-}
