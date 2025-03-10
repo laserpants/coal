@@ -1199,16 +1199,16 @@ abc8 = (pipelineStateArtifacts, pipelineStateCode)
  where
   (_, PipelineState{..}) = runCore (compile blockObjects4)
 
-abcx :: IO ()
-abcx = do
-  inp <- Text.readFile "/home/laserpants/tmp5.core"
+abcx :: FilePath -> IO ()
+abcx out = do
+  inp <- Text.readFile "test/Noll/fixtures/prog2.txt"
   c <- case runParser expr "" inp of
     Right e ->
       let (_, PipelineState{..}) = runCore (compile (bob e))
        in pure pipelineStateCode
   let txt = irEncode c
-  Text.writeFile "/home/laserpants/Code/llvm/tmp.txt" txt
-  Text.putStrLn "<<<"
+  Text.writeFile out txt
+  Text.putStrLn "^^^"
   pure ()
     where
       bob e =

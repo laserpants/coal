@@ -11,6 +11,9 @@ op2symbol =
   (symbol "==" >> lexeme "int32" $> OEqInt32)
     <|> (symbol "<" >> lexeme "int32" $> OLtInt32)
     <|> (symbol ">" >> lexeme "int32" $> OGtInt32)
+    <|> (symbol "+" >> lexeme "int32" $> OAddInt32)
+    <|> (symbol "-" >> lexeme "int32" $> OSubInt32)
+    <|> (symbol "*" >> lexeme "int32" $> OMulInt32)
     <|> (symbol "||" $> OOr)
     <|> (symbol "&&" $> OAnd)
 

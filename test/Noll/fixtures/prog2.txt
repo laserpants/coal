@@ -1,0 +1,28 @@
+let
+  m : int32 = 
+    1
+  in
+    let
+      _fact_ : int32/int32 =
+        fn(n : int32) =>
+          if ([== int32](n : int32, 0))
+            then 
+              m : int32
+            else
+              [* int32]
+              ( n : int32
+              , @<int32>
+                  ( _fact_ : int32/int32
+                  , [- int32](n : int32, 1)
+                  )
+              )
+      in
+        let
+          r : int32 = 
+            @<int32>
+              ( _fact_ : int32/int32
+              , 6
+              )
+          in
+            #(print_int32 : int32/*, r : int32)
+             (fn(a : *) => r : int32)

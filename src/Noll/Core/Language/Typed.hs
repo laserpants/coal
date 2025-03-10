@@ -67,3 +67,7 @@ instance Typed (Op a) where
         Type.int32
       OSubInt64{} ->
         Type.int64
+      OMulInt32{} ->
+        Type.int32
+      OMulInt64{} ->
+        Type.int64
