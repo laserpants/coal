@@ -5,10 +5,12 @@ module Noll.Core.Parser.Symbol (
   parens,
   brackets,
   braces,
+  angleBrackets,
   commaSep,
   commaSep1,
   commaSep2,
   commaSepN,
+  semicolonSep1,
   pipe,
   colon,
   slash,
@@ -32,6 +34,9 @@ brackets = symbol "[" `between` symbol "]"
 braces :: Parser a -> Parser a
 braces = symbol "{" `between` symbol "}"
 
+angleBrackets :: Parser a -> Parser a
+angleBrackets = symbol "<" `between` symbol ">"
+
 commaSep :: Parser a -> Parser [a]
 commaSep parser = parser `sepBy` symbol ","
 
@@ -47,6 +52,9 @@ commaSepN n parser = do
   if length as == n
     then pure as
     else fail "Wrong count"
+
+semicolonSep1 :: Parser a -> Parser [a]
+semicolonSep1 parser = parser `sepBy1` symbol ";"
 
 {-# INLINE pipe #-}
 pipe :: Parser Text

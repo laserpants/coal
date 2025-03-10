@@ -19,7 +19,7 @@ import Data.Functor (void, ($>), (<$), (<$>))
 import Data.Text (Text)
 import Data.Void (Void)
 import Noll.Utils (Name)
-import Text.Megaparsec (ParseErrorBundle, Parsec, between, optional, sepBy, sepBy1, try)
+import Text.Megaparsec (ParseErrorBundle, Parsec, between, optional, sepBy, sepBy1, some, try)
 import Text.Megaparsec.Char (space1)
 
 import qualified Data.Text as Text
@@ -34,7 +34,7 @@ spaces =
   Lexer.space
     space1
     (Lexer.skipLineComment "//")
-    (Lexer.skipBlockComment "/*" "*/")
+    (Lexer.skipBlockComment "{-" "-}")
 
 {-# INLINE lexeme #-}
 lexeme :: Parser a -> Parser a
@@ -60,8 +60,6 @@ reserved =
   , "char"
   , "string"
   , "select"
-  , "list"
-  , "record"
   ]
 
 word :: Parser Text -> Parser Text

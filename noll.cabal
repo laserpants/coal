@@ -88,7 +88,10 @@ library
       Noll.Core.LLVM.IRType.Syntax
       Noll.Core.LLVM.IRValue
       Noll.Core.Parser
+      Noll.Core.Parser.Expr
       Noll.Core.Parser.Identifier
+      Noll.Core.Parser.Op
+      Noll.Core.Parser.Prim
       Noll.Core.Parser.Symbol
       Noll.Core.Parser.Type
       Noll.Eval

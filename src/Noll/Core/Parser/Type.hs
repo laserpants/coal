@@ -1,24 +1,21 @@
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Noll.Core.Parser.Type (type_) where
 
-import Control.Monad (replicateM)
 import Control.Monad.Combinators.Expr (Operator (..), makeExprParser)
 import Noll.Core.Language.Type (Type (..))
 import Noll.Core.Language.Type.Row (extend)
-import Noll.Core.Parser (Parser, cons, lexeme, optional, try, word, ($>), (<|>))
+import Noll.Core.Parser (Parser, lexeme, try, ($>), (<|>))
 import Noll.Core.Parser.Identifier (constructor, name)
 import Noll.Core.Parser.Symbol (braces, colon, commaSep, commaSepN, parens, pipe, symbol)
-import Noll.Utils (forM, optionalOr)
+import Noll.Utils (optionalOr)
 
 import qualified Noll.Core.Language.Type.Syntax as Type
-import qualified Text.Megaparsec.Char as Megaparsec
 import qualified Text.Megaparsec.Char.Lexer as Lexer
 
 {-# INLINE opaque #-}
 opaque :: Parser Type
-opaque = symbol "#" $> Type.opaque
+opaque = symbol "*" $> Type.opaque
 
 {-# INLINE bool #-}
 bool :: Parser Type
