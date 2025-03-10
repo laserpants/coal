@@ -47,17 +47,31 @@ instance Typed (Op a) where
         Type.bool
       OLtInt64{} ->
         Type.bool
+      OLtEInt32{} ->
+        Type.bool
+      OLtEInt64{} ->
+        Type.bool
       OGtInt32{} ->
         Type.bool
       OGtInt64{} ->
+        Type.bool
+      OGtEInt32{} ->
+        Type.bool
+      OGtEInt64{} ->
         Type.bool
       OEqInt32{} ->
         Type.bool
       OEqInt64{} ->
         Type.bool
+      ONEqInt32{} ->
+        Type.bool
+      ONEqInt64{} ->
+        Type.bool
       OAnd{} ->
         Type.bool
       OOr{} ->
+        Type.bool
+      ONot{} ->
         Type.bool
       OAddInt32{} ->
         Type.int32
@@ -71,3 +85,15 @@ instance Typed (Op a) where
         Type.int32
       OMulInt64{} ->
         Type.int64
+      OMulFloat{} ->
+        Type.float
+      OMulDouble{} ->
+        Type.double
+      ODivInt32{} ->
+        Type.int32
+      ODivInt64{} ->
+        Type.int64
+      ODivFloat{} ->
+        Type.float
+      ODivDouble{} ->
+        Type.double
