@@ -44,7 +44,7 @@ irReveal v =
     _ ->
       pure v
 
-irRevealExpr :: (IREval e, Typed e) => e -> IRInstr IRValue
+irRevealExpr :: (IREval e, IRTyped e, Typed e) => e -> IRInstr IRValue
 irRevealExpr expr = do
   v <- irEval expr
-  irReveal v (irTypeOf (Core.typeOf expr))
+  irReveal v (irTypeOf expr)

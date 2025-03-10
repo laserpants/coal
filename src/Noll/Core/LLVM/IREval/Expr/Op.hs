@@ -8,13 +8,14 @@ import Noll.Core.LLVM.IREval.Comment (irCommentBlock)
 import Noll.Core.LLVM.IREval.Conceal (irConceal, irRevealExpr)
 import Noll.Core.LLVM.IRInstruction (IRInstr)
 import Noll.Core.LLVM.IRInstruction.TH
+import Noll.Core.LLVM.IRType (IRTyped (..))
 import Noll.Core.LLVM.IRType.Syntax (i1, i32, i64)
 import Noll.Core.LLVM.IRValue (IRValue (..))
 import Noll.Core.Language (Op, Typed)
 
 import qualified Noll.Core.Language as Core
 
-irEvalOp :: (Typed e, IREval e) => Op e -> IRInstr IRValue
+irEvalOp :: (Typed e, IRTyped e, IREval e) => Op e -> IRInstr IRValue
 irEvalOp =
   \case
     Core.OAddInt32 e1 e2 -> do
