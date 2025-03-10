@@ -2,18 +2,9 @@
 
 module Noll.Core.Parser.Prim (prim) where
 
-import Control.Monad.Combinators.Expr (Operator (..), makeExprParser)
-import Noll.Common.List1 (NonEmpty (..))
-import Noll.Core.Language.Expr (Binding (..), Expr (..))
 import Noll.Core.Language.Prim (Prim (..))
-import Noll.Core.Language.Type (Type (..))
-import Noll.Core.Language.Type.Row (extend)
 import Noll.Core.Parser (Parser, lexeme, spaces, try, ($>), (<|>))
-import Noll.Core.Parser.Identifier (constructor, name)
-import Noll.Core.Parser.Symbol (braces, colon, commaSep, commaSepN, equalSign, parens, pipe, semicolonSep1, symbol)
-import Noll.Core.Parser.Type (type_)
-import Noll.Label (Label (..))
-import Noll.Utils (optionalOr)
+import Noll.Core.Parser.Symbol (symbol)
 
 import qualified Text.Megaparsec.Char as Megaparsec
 import qualified Text.Megaparsec.Char.Lexer as Lexer

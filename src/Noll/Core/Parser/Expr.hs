@@ -3,6 +3,7 @@
 
 module Noll.Core.Parser.Expr (expr) where
 
+import Control.Monad (void)
 import Control.Monad.Combinators.Expr (Operator (..), makeExprParser)
 import Noll.Common.List1 (NonEmpty (..))
 import Noll.Core.Language.Expr (Binding (..), Clause (..), Expr (..), Focus (..))
@@ -12,7 +13,7 @@ import Noll.Core.Parser (Parser, lexeme, some, try, ($>), (<|>))
 import Noll.Core.Parser.Identifier (constructor, name)
 import Noll.Core.Parser.Op (op)
 import Noll.Core.Parser.Prim (prim)
-import Noll.Core.Parser.Symbol (angleBrackets, braces, colon, commaSep, commaSep1, commaSepN, equalSign, parens, pipe, semicolonSep1, symbol)
+import Noll.Core.Parser.Symbol (angleBrackets, braces, colon, commaSep, commaSep1, commaSepN, equalSign, pair, parens, pipe, semicolonSep1, symbol)
 import Noll.Core.Parser.Type (type_)
 import Noll.Label (Label (..))
 import Noll.Utils (optionalOr)
@@ -22,7 +23,7 @@ import qualified Noll.Core.Language.Expr.Syntax as Core
 label :: Parser t -> Parser (Label t)
 label p = flip Label <$> (name <|> constructor) <* colon <*> p
 
-binding :: Parser (Expr Type) -> Parser (Binding Type (Expr Type))
+binding :: Parser e -> Parser (Binding Type e)
 binding p = Binding <$> (label type_ <* equalSign) <*> p
 
 let_ :: Parser (Expr Type) -> Parser (Expr Type)
@@ -45,6 +46,10 @@ if_ p =
     <$> (lexeme "if" *> parens p)
     <*> (lexeme "then" *> p)
     <*> (lexeme "else" *> p)
+
+{-# INLINE var #-}
+var :: Parser (Expr Type)
+var = Core.var <$> label type_
 
 lam :: Parser (Expr Type) -> Parser (Expr Type)
 lam p = do
@@ -92,49 +97,42 @@ match p = do
         fail "Empty list"
 
 focus :: Parser (Focus Type)
-focus = do
-  n <- name
-  equalSign
-  ll1 <- label type_
-  pipe
-  ll2 <- label type_
-  pure (Focus n ll1 ll2)
+focus =
+  Focus
+    <$> name
+    <*> (equalSign *> label type_)
+    <*> (pipe *> label type_)
 
 select :: Parser (Expr Type) -> Parser (Expr Type)
-select p = do
-  lexeme "select"
-  f <- braces focus
-  equalSign
-  e1 <- p
-  lexeme "in"
-  e2 <- p
-  pure (Core.sel f e1 e2)
+select p =
+  Core.sel
+    <$> (lexeme "select" *> braces focus)
+    <*> (equalSign *> p)
+    <*> (lexeme "in" *> p)
 
 record :: Parser (Expr Type) -> Parser (Expr Type)
 record p = inner braces
  where
-  inner :: (Parser (Expr Type) -> Parser (Expr Type)) -> Parser (Expr Type)
   inner f =
     nil
-      <|> try (Core.var <$> label type_)
+      <|> try var
       <|> f ext
 
-  ext :: Parser (Expr Type)
   ext =
     Core.ext
       <$> (name <* equalSign)
       <*> (p <* pipe)
       <*> inner id
 
-  nil :: Parser (Expr Type)
-  nil = lexeme "{}" $> Core.nil
+  nil =
+    lexeme "{}" $> Core.nil
 
 call :: Parser (Expr Type) -> Parser (Expr Type)
 call p = do
-  symbol "#"
-  (ll, as) <- parens ((,) <$> label type_ <* symbol "," <*> commaSep1 p)
-  e <- parens p
-  pure (Core.call ll as e)
+  void (symbol "#")
+  uncurry Core.call
+    <$> pair (label type_) (commaSep1 p)
+    <*> parens p
 
 atom :: Parser (Expr Type) -> Parser (Expr Type)
 atom p =
@@ -147,11 +145,8 @@ atom p =
     <|> select p
     <|> (Core.op <$> op p)
     <|> record p
-    <|> (Core.var <$> label type_)
+    <|> var
     <|> call p
 
-operators :: [[Operator Parser (Expr Type)]]
-operators = [[]]
-
 expr :: Parser (Expr Type)
-expr = makeExprParser (try (parens expr) <|> atom expr) operators
+expr = makeExprParser (try (parens expr) <|> atom expr) [[]]

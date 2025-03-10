@@ -11,6 +11,7 @@ module Noll.Core.Parser.Symbol (
   commaSep2,
   commaSepN,
   semicolonSep1,
+  pair,
   pipe,
   colon,
   slash,
@@ -55,6 +56,9 @@ commaSepN n parser = do
 
 semicolonSep1 :: Parser a -> Parser [a]
 semicolonSep1 parser = parser `sepBy1` symbol ";"
+
+pair :: Parser a -> Parser b -> Parser (a, b)
+pair a b = parens ((,) <$> a <* symbol "," <*> b)
 
 {-# INLINE pipe #-}
 pipe :: Parser Text

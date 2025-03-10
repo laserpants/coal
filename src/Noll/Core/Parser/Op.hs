@@ -4,7 +4,7 @@ module Noll.Core.Parser.Op (op) where
 
 import Noll.Core.Language.Op (Op (..))
 import Noll.Core.Parser (Parser, lexeme, ($>), (<|>))
-import Noll.Core.Parser.Symbol (brackets, parens, symbol)
+import Noll.Core.Parser.Symbol (brackets, pair, symbol)
 
 op2symbol :: Parser (a -> a -> Op a)
 op2symbol =
@@ -17,6 +17,4 @@ op2symbol =
 op :: Parser a -> Parser (Op a)
 op p = binop
  where
-  binop = do
-    c <- brackets op2symbol
-    uncurry c <$> parens ((,) <$> p <* symbol "," <*> p)
+  binop = uncurry <$> brackets op2symbol <*> pair p p

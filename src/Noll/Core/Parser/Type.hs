@@ -2,6 +2,7 @@
 
 module Noll.Core.Parser.Type (type_) where
 
+import Control.Monad (void)
 import Control.Monad.Combinators.Expr (Operator (..), makeExprParser)
 import Noll.Core.Language.Type (Type (..))
 import Noll.Core.Language.Type.Row (extend)
@@ -54,7 +55,7 @@ list p = lexeme "list" >> Type.list <$> parens p
 
 tuple :: Parser Type -> Parser Type
 tuple p = do
-  lexeme "tuple"
+  void (lexeme "tuple")
   n <- lexeme Lexer.decimal
   if n >= 2
     then parens (Type.tuple n <$> commaSepN n p)
@@ -63,26 +64,22 @@ tuple p = do
 row :: Parser Type -> Parser Type
 row p = inner braces
  where
-  inner :: (Parser Type -> Parser Type) -> Parser Type
   inner f = nil <|> opaque <|> f ext
 
-  ext :: Parser Type
   ext =
     extend
       <$> (name <* colon)
       <*> (p <* pipe)
       <*> inner id
 
-  nil :: Parser Type
-  nil = lexeme "{}" $> RNil
+  nil =
+    lexeme "{}" $> RNil
 
 record :: Parser Type -> Parser Type
 record p = lexeme "record" >> Type.record <$> parens (row p)
 
 constr :: Parser Type -> Parser Type
-constr p = do
-  name <- constructor
-  TCon name <$> optionalOr [] (parens (commaSep p))
+constr p = TCon <$> constructor <*> optionalOr [] (parens (commaSep p))
 
 atom :: Parser Type -> Parser Type
 atom p =
