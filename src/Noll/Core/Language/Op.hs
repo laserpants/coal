@@ -14,8 +14,6 @@ import Data.Generics.Uniplate.Data (children)
 import Noll.AST.FreeVars (FreeVars (..))
 import Text.Show.Deriving (deriveShow1)
 
-import qualified Data.Set as Set
-
 -- | Binary operators
 data Op a
   = -- | Equality

@@ -1,6 +1,6 @@
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE StrictData #-}
 
 module Noll.Core.LLVM.IRType (
@@ -9,9 +9,9 @@ module Noll.Core.LLVM.IRType (
   pointee,
 ) where
 
+import Noll.Core.Language.Expr (Expr)
 import Noll.Core.Language.Type (Type (..))
 import Noll.Core.Language.Typed (Typed (..))
-import Noll.Core.Language.Expr (Expr)
 import Noll.Utils (Name)
 
 -- | LLVM IR language types

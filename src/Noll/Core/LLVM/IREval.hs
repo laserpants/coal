@@ -24,8 +24,8 @@ irEvalArgs = mapM irEval . fromList1
 irEvalFun :: (IREval e) => e -> IRInstr ()
 irEvalFun e = irEval e >>= iRet i8Ptr
 
---simplify :: IRInstr a -> IRInstr a
---simplify =
+-- simplify :: IRInstr a -> IRInstr a
+-- simplify =
 --  \case
 --    Free (IInttoptr v1 t1 next) ->
 --      case next v1 of
