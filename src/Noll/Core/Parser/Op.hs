@@ -3,8 +3,8 @@
 module Noll.Core.Parser.Op (op) where
 
 import Noll.Core.Language.Op (Op (..))
-import Noll.Core.Parser (Parser, lexeme, ($>), (<|>))
-import Noll.Core.Parser.Symbol (brackets, pair, symbol)
+import Noll.Core.Parser (Parser, lexeme, try, ($>), (<|>))
+import Noll.Core.Parser.Symbol (brackets, pair, parens, symbol)
 
 op2symbol :: Parser (a -> a -> Op a)
 op2symbol =
@@ -17,7 +17,10 @@ op2symbol =
     <|> (symbol "||" $> OOr)
     <|> (symbol "&&" $> OAnd)
 
+op1symbol :: Parser (a -> Op a)
+op1symbol = symbol "!" $> ONot
+
 op :: Parser a -> Parser (Op a)
-op p = binop
- where
-  binop = uncurry <$> brackets op2symbol <*> pair p p
+op p =
+  try (brackets op1symbol <*> parens p)
+    <|> (uncurry <$> brackets op2symbol <*> pair p p)
