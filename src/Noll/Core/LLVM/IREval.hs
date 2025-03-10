@@ -40,6 +40,8 @@ simplify =
       Free (MetaBind is (simplify i) (simplify <$> next))
     Free (MetaBlock name i next) ->
       Free (MetaBlock name (simplify i) (simplify <$> next))
+    Free (MetaBlock1 name i next) ->
+      Free (MetaBlock1 name (simplify i) (simplify next))
     Free instr ->
       Free (simplify <$> instr)
     i ->
