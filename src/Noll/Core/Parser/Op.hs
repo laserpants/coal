@@ -16,8 +16,7 @@ op2symbol =
 
 op :: Parser a -> Parser (Op a)
 op p = binop
-  where
-    binop = do
-      c <- brackets op2symbol
-      uncurry c <$> parens ((,) <$> p <* symbol "," <*> p)
-
+ where
+  binop = do
+    c <- brackets op2symbol
+    uncurry c <$> parens ((,) <$> p <* symbol "," <*> p)

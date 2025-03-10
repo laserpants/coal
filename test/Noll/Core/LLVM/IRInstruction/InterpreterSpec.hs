@@ -8,6 +8,8 @@ import Control.Monad.Writer (listen)
 import Data.Tuple.Extra (thd3)
 import Noll.Common.Environment (Environment)
 import Noll.Common.List1 (NonEmpty (..), (<|))
+import Text.Megaparsec (runParser)
+import Noll.Core.Parser.Expr (expr)
 import Noll.Core.Compiler
 import Noll.Core.LLVM.IRConstruct (IRConstruct (..))
 import Noll.Core.LLVM.IREncodable (IREncodable (..))
@@ -1196,3 +1198,22 @@ abc7 = (pipelineStateArtifacts, pipelineStateCode)
 abc8 = (pipelineStateArtifacts, pipelineStateCode)
  where
   (_, PipelineState{..}) = runCore (compile blockObjects4)
+
+abcx :: IO ()
+abcx = do
+  inp <- Text.readFile "/home/laserpants/tmp5.core"
+  c <- case runParser expr "" inp of
+    Right e ->
+      let (_, PipelineState{..}) = runCore (compile (bob e))
+       in pure pipelineStateCode
+  let txt = irEncode c
+  Text.writeFile "/home/laserpants/Code/llvm/tmp.txt" txt
+  Text.putStrLn "<<<"
+  pure ()
+    where
+      bob e =
+        [ OFunction
+            "main"
+            [Label Core.opaque "_"]
+            e
+        ]

@@ -1,7 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Core.Parser.Expr where
+module Noll.Core.Parser.Expr (expr) where
 
 import Control.Monad.Combinators.Expr (Operator (..), makeExprParser)
 import Noll.Common.List1 (NonEmpty (..))
@@ -110,22 +110,31 @@ select p = do
   e2 <- p
   pure (Core.sel f e1 e2)
 
-row :: Parser (Expr Type) -> Parser (Expr Type)
-row = undefined
---row p = inner braces
--- where
---  inner :: (Parser Type -> Parser Type) -> Parser Type
---  inner f = nil <|> f ext
---
---  ext :: Parser Type
---  ext =
---    Core.ext
---      <$> (name <* equalSign)
---      <*> (p <* pipe)
---      <*> inner id
---
---  nil :: Parser Type
---  nil = lexeme "{}" $> ENil
+record :: Parser (Expr Type) -> Parser (Expr Type)
+record p = inner braces
+ where
+  inner :: (Parser (Expr Type) -> Parser (Expr Type)) -> Parser (Expr Type)
+  inner f =
+    nil
+      <|> try (Core.var <$> label type_)
+      <|> f ext
+
+  ext :: Parser (Expr Type)
+  ext =
+    Core.ext
+      <$> (name <* equalSign)
+      <*> (p <* pipe)
+      <*> inner id
+
+  nil :: Parser (Expr Type)
+  nil = lexeme "{}" $> Core.nil
+
+call :: Parser (Expr Type) -> Parser (Expr Type)
+call p = do
+  symbol "#"
+  (ll, as) <- parens ((,) <$> label type_ <* symbol "," <*> commaSep1 p)
+  e <- parens p
+  pure (Core.call ll as e)
 
 atom :: Parser (Expr Type) -> Parser (Expr Type)
 atom p =
@@ -137,9 +146,9 @@ atom p =
     <|> match p
     <|> select p
     <|> (Core.op <$> op p)
-    <|> row p
---    <|> nil
+    <|> record p
     <|> (Core.var <$> label type_)
+    <|> call p
 
 operators :: [[Operator Parser (Expr Type)]]
 operators = [[]]
