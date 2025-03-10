@@ -478,7 +478,7 @@ fixture42 =
   Fix
     ( ELet
         (Core.Binding (Label () "fold_.[48]") (Fix (EVar (Label () "$anon.13"))) :| [])
-        (Fix (EApp () (Fix (EVar (Label () "fold_.[48]"))) (Fix (EVar (Label () "list.[49]")) :| [Fix (EApp () (Fix (EVar (Label () "$Record"))) (Fix (EExt (Label () "min") (Fix (EApp () (Fix (EVar (Label () "from_int32.[68]"))) (Fix (EVar (Label () "d_1.[50]")) :| [Fix (ELit (PInt32 0))]))) (Fix (EExt (Label () "max") (Fix (EApp () (Fix (EVar (Label () "from_int32.[68]"))) (Fix (EVar (Label () "d_1.[50]")) :| [Fix (ELit (PInt32 (-1)))]))) (Fix ENil)))) :| []))])))
+        (Fix (EApp () (Fix (EVar (Label () "fold_.[48]"))) (Fix (EVar (Label () "list.[49]")) :| [Fix (EApp () (Fix (EVar (Label () "$Record"))) (Fix (EExt "min" (Fix (EApp () (Fix (EVar (Label () "from_int32.[68]"))) (Fix (EVar (Label () "d_1.[50]")) :| [Fix (ELit (PInt32 0))]))) (Fix (EExt "max" (Fix (EApp () (Fix (EVar (Label () "from_int32.[68]"))) (Fix (EVar (Label () "d_1.[50]")) :| [Fix (ELit (PInt32 (-1)))]))) (Fix ENil)))) :| []))])))
     )
 
 test3 =
@@ -773,10 +773,10 @@ test3 =
                                           )
                                       )
                                       ( Core.ext
-                                          (Label Core.TOpq "max")
+                                          "max"
                                           (Core.var (Label Core.TOpq "$p:0:p"))
                                           ( Core.ext
-                                              (Label Core.TOpq "min")
+                                              "min"
                                               ( ( Core.match
                                                     Core.TOpq
                                                     (Core.var (Label (Core.TCon "$Record" [Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)]) "range"))
@@ -831,7 +831,7 @@ test3 =
                                           )
                                       )
                                       ( Core.ext
-                                          (Label Core.TOpq "max")
+                                          "max"
                                           ( Core.match
                                               Core.TOpq
                                               (Core.var (Label (Core.TCon "$Record" [Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)]) "range"))
@@ -857,7 +857,7 @@ test3 =
                                               )
                                           )
                                           ( Core.ext
-                                              (Label Core.TOpq "min")
+                                              "min"
                                               (Core.var (Label Core.TOpq "p"))
                                               Core.nil
                                           )
@@ -1845,7 +1845,7 @@ foo1 =
                                 )
                             )
                             ( Core.ext
-                                (Label Core.TOpq "max")
+                                "max"
                                 ( Core.app
                                     Core.TOpq
                                     (Core.var (Label (Core.TCon "Ordered" [Core.TOpq] `Core.arrow` Core.int32 `Core.arrow` Core.TOpq) "from_int32"))
@@ -1855,7 +1855,7 @@ foo1 =
                                     )
                                 )
                                 ( Core.ext
-                                    (Label Core.TOpq "min")
+                                    "min"
                                     ( Core.app
                                         Core.TOpq
                                         (Core.var (Label (Core.TCon "Ordered" [Core.TOpq] `Core.arrow` Core.int32 `Core.arrow` Core.TOpq) "from_int32"))
@@ -1975,10 +1975,10 @@ foo1 =
                               )
                           )
                           ( Core.ext
-                              (Label Core.TOpq "max")
+                              "max"
                               (Core.var (Label Core.TOpq "$p:0:p"))
                               ( Core.ext
-                                  (Label Core.TOpq "min")
+                                  "min"
                                   ( ( Core.match
                                         Core.TOpq
                                         (Core.var (Label (Core.TCon "$Record" [Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)]) "range"))
@@ -2033,7 +2033,7 @@ foo1 =
                               )
                           )
                           ( Core.ext
-                              (Label Core.TOpq "max")
+                              "max"
                               ( ( Core.match
                                     Core.TOpq
                                     (Core.var (Label (Core.TCon "$Record" [Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)]) "range"))
@@ -2060,7 +2060,7 @@ foo1 =
                                 )
                               )
                               ( Core.ext
-                                  (Label Core.TOpq "min")
+                                  "min"
                                   (Core.var (Label Core.TOpq "$p:0:p"))
                                   Core.nil
                               )
@@ -2474,7 +2474,7 @@ foo1Result =
                                 )
                             )
                             ( Core.ext
-                                (Label Core.TOpq "max")
+                                "max"
                                 ( Core.app
                                     Core.TOpq
                                     (Core.var (Label (Core.TCon "Ordered" [Core.TOpq] `Core.arrow` Core.int32 `Core.arrow` Core.TOpq) "from_int32"))
@@ -2484,7 +2484,7 @@ foo1Result =
                                     )
                                 )
                                 ( Core.ext
-                                    (Label Core.TOpq "min")
+                                    "min"
                                     ( Core.app
                                         Core.TOpq
                                         (Core.var (Label (Core.TCon "Ordered" [Core.TOpq] `Core.arrow` Core.int32 `Core.arrow` Core.TOpq) "from_int32"))
@@ -2628,10 +2628,10 @@ foo1Result =
                               )
                           )
                           ( Core.ext
-                              (Label Core.TOpq "max")
+                              "max"
                               (Core.var (Label Core.TOpq "$p:0:p"))
                               ( Core.ext
-                                  (Label Core.TOpq "min")
+                                  "min"
                                   ( ( Core.match
                                         Core.TOpq
                                         (Core.var (Label (Core.TCon "$Record" [Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)]) "range"))
@@ -2688,7 +2688,7 @@ foo1Result =
                               )
                           )
                           ( Core.ext
-                              (Label Core.TOpq "max")
+                              "max"
                               ( ( Core.match
                                     Core.TOpq
                                     (Core.var (Label (Core.TCon "$Record" [Core.RExt "max" Core.TOpq (Core.RExt "min" Core.TOpq Core.RNil)]) "range"))
@@ -2715,7 +2715,7 @@ foo1Result =
                                 )
                               )
                               ( Core.ext
-                                  (Label Core.TOpq "min")
+                                  "min"
                                   (Core.var (Label Core.TOpq "$p:0:p"))
                                   Core.nil
                               )

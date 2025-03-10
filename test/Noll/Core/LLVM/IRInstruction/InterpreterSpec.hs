@@ -672,7 +672,7 @@ blockObjects4 =
                                                                             (maxMinRecord opaque)
                                                                             (Core.var (Label (maxMinRow opaque ~> maxMinRecord opaque) "$Record"))
                                                                             ( Core.ext
-                                                                                (Label opaque "min")
+                                                                                "min"
                                                                                 ( Core.match
                                                                                     opaque
                                                                                     (Core.var (Label (maxMinRecord opaque) "range"))
@@ -694,7 +694,7 @@ blockObjects4 =
                                                                                     )
                                                                                 )
                                                                                 ( Core.ext
-                                                                                    (Label opaque "max")
+                                                                                    "max"
                                                                                     (Core.var (Label opaque "p"))
                                                                                     Core.nil
                                                                                 )
@@ -710,10 +710,10 @@ blockObjects4 =
                                                                             (maxMinRecord opaque)
                                                                             (Core.var (Label (maxMinRow opaque ~> maxMinRecord opaque) "$Record"))
                                                                             ( Core.ext
-                                                                                (Label opaque "min")
+                                                                                "min"
                                                                                 (Core.var (Label opaque "p"))
                                                                                 ( Core.ext
-                                                                                    (Label opaque "max")
+                                                                                    "max"
                                                                                     ( Core.match
                                                                                         opaque
                                                                                         (Core.var (Label (maxMinRecord opaque) "range"))
@@ -774,7 +774,7 @@ blockObjects4 =
                                               (maxMinRecord opaque)
                                               (Core.var (Label (maxMinRow opaque ~> maxMinRecord opaque) "$Record"))
                                               ( Core.ext
-                                                  (Label opaque "min")
+                                                  "min"
                                                   ( Core.app
                                                       opaque
                                                       (Core.var (Label (orderedDict ~> Core.int32 ~> opaque) "from_int32"))
@@ -784,7 +784,7 @@ blockObjects4 =
                                                       )
                                                   )
                                                   ( Core.ext
-                                                      (Label opaque "max")
+                                                      "max"
                                                       ( Core.app
                                                           opaque
                                                           (Core.var (Label (orderedDict ~> Core.int32 ~> opaque) "from_int32"))
@@ -937,10 +937,10 @@ blockObjects4 =
                                   orderedInt32Dict
                                   (Core.var (Label (orderedInt32Row ~> orderedInt32Dict) "$Record"))
                                   ( Core.ext
-                                      (Label (Core.int32 ~> Core.int32 ~> ordering) "compare")
+                                      "compare"
                                       (Core.var (Label (Core.int32 ~> Core.int32 ~> ordering) "compare__int32"))
                                       ( Core.ext
-                                          (Label (Core.int32 ~> Core.int32) "from_int32")
+                                          "from_int32"
                                           (Core.var (Label (Core.int32 ~> Core.int32) "from_int32__int32"))
                                           Core.nil
                                       )
@@ -1172,9 +1172,9 @@ abce = Text.putStrLn $ irEncode (thd3 (runInterpreter (IRInterpreterEnv mempty m
 abcf = Text.putStrLn $ irEncode (thd3 (runInterpreter (IRInterpreterEnv mempty mempty) (interpret (irClosureApply 3 (Local i8Ptr "f") [Local i8Ptr "a0", Local i8Ptr "a1", Local i8Ptr "a2"]))))
 
 xxd n = CDefine ("apply" <> showt n) i8Ptr Nothing (Label i8Ptr "f" : [Label i8Ptr ("a" <> showt m) | m <- [0 .. n - 1]]) xxc
-  where
-    xxc = thd3 (runInterpreter (IRInterpreterEnv mempty mempty) (interpret (irClosureApply n (Local i8Ptr "f") args)))
-    args = [Local i8Ptr ("a" <> showt m) | m <- [0 .. n - 1]]
+ where
+  xxc = thd3 (runInterpreter (IRInterpreterEnv mempty mempty) (interpret (irClosureApply n (Local i8Ptr "f") args)))
+  args = [Local i8Ptr ("a" <> showt m) | m <- [0 .. n - 1]]
 
 abcg1 = Text.putStrLn $ irEncode (xxd 1)
 abcg2 = Text.putStrLn $ irEncode (xxd 2)

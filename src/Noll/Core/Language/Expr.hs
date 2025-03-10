@@ -100,7 +100,7 @@ data ExprF t a
   | -- | Pattern matching expression
     EMat t a (List1 (Clause t a))
   | -- | Record field extension
-    EExt (Label t) a a
+    EExt Name a a
   | -- | Empty record
     ENil
   | -- | Field selector
@@ -169,7 +169,7 @@ instance (Typed t, Typed a) => Typed (ExprF t a) where
         typeOf op
       ENil ->
         RNil
-      EExt (Label _ f) t1 t2 ->
+      EExt f t1 t2 ->
         extend f (typeOf t1) (typeOf t2)
       ELam ts t ->
         foldType (typeOf t) (typeOf <$> ts)
