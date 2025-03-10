@@ -22,27 +22,27 @@ irEvalArgs = mapM irEval . fromList1
 
 {-# INLINE irEvalFun #-}
 irEvalFun :: (IREval e) => e -> IRInstr ()
-irEvalFun e = simplify (irEval e >>= iRet i8Ptr)
+irEvalFun e = irEval e >>= iRet i8Ptr
 
-simplify :: IRInstr a -> IRInstr a
-simplify =
-  \case
-    Free (IInttoptr v1 t1 next) ->
-      case next v1 of
-        Free (IPtrtoint v2 _ next1)
-          | v1 == v2 ->
-              simplify (next1 v1)
-        Free{} ->
-          iInttoptr v1 t1 >>= simplify . next
-        _ ->
-          iInttoptr v1 t1 >>= next
-    Free (MetaBind is i next) ->
-      Free (MetaBind is (simplify i) (simplify <$> next))
-    Free (MetaBlock name i next) ->
-      Free (MetaBlock name (simplify i) (simplify <$> next))
-    Free (MetaBlock1 name i next) ->
-      Free (MetaBlock1 name (simplify i) (simplify next))
-    Free instr ->
-      Free (simplify <$> instr)
-    i ->
-      i
+--simplify :: IRInstr a -> IRInstr a
+--simplify =
+--  \case
+--    Free (IInttoptr v1 t1 next) ->
+--      case next v1 of
+--        Free (IPtrtoint v2 _ next1)
+--          | v1 == v2 ->
+--              simplify (next1 v1)
+--        Free{} ->
+--          iInttoptr v1 t1 >>= simplify . next
+--        _ ->
+--          iInttoptr v1 t1 >>= next
+--    Free (MetaBind is i next) ->
+--      Free (MetaBind is (simplify i) (simplify <$> next))
+--    Free (MetaBlock name i next) ->
+--      Free (MetaBlock name (simplify i) (simplify <$> next))
+--    Free (MetaBlock1 name i next) ->
+--      Free (MetaBlock1 name (simplify i) (simplify next))
+--    Free instr ->
+--      Free (simplify <$> instr)
+--    i ->
+--      i
