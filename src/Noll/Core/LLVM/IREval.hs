@@ -31,7 +31,7 @@ simplify =
       case next v1 of
         Free (IPtrtoint v2 _ next1)
           | v1 == v2 ->
-              next1 v1
+              simplify (next1 v1)
         Free{} ->
           iInttoptr v1 t1 >>= simplify . next
         _ ->
