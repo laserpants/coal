@@ -1,18 +1,18 @@
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
-{-# LANGUAGE LambdaCase #-}
 
 module Noll.Core.LLVM.IRInterpreter where
 
 import Control.Monad.Free (iterM)
-import Control.Monad.RWS ( MonadReader, MonadState, MonadWriter, RWS, evalRWS, gets, runRWS,)
-import Control.Monad.Reader (local, asks)
+import Control.Monad.RWS (MonadReader, MonadState, MonadWriter, RWS, evalRWS, gets, runRWS)
+import Control.Monad.Reader (asks, local)
 import Control.Monad.State (modify)
 import Control.Monad.Writer (tell)
 import Data.Text (Text)
@@ -20,12 +20,12 @@ import Data.Text.Encoding (encodeUtf8)
 import Noll.AST.FreeVars (FreeVars (..), boundIn, exceptNames)
 import Noll.Common.Environment (Environment (..))
 import Noll.Core.LLVM.IRConstruct (IRConstruct (..), IRLinkage (..))
-import Noll.Core.LLVM.IREncodable ( IRAnnotated (..), IREncodable (..), enquote, annotated, commaSep, encodeLabel, irGlobalName, irLocalName,)
+import Noll.Core.LLVM.IREncodable (IRAnnotated (..), IREncodable (..), annotated, commaSep, encodeLabel, enquote, irGlobalName, irLocalName)
 import Noll.Core.LLVM.IREval (irEvalFun)
 import Noll.Core.LLVM.IREval.Expr (irEvalExpr)
 import Noll.Core.LLVM.IRInstruction
 import Noll.Core.LLVM.IRType (IRType (..), IRTyped (..))
-import Noll.Core.LLVM.IRType.Syntax 
+import Noll.Core.LLVM.IRType.Syntax
 import Noll.Core.LLVM.IRValue (IRValue (..))
 import Noll.Core.Language.Expr (Expr (..))
 import Noll.Core.Language.Object
@@ -34,8 +34,8 @@ import Noll.Label (Label (..))
 import Noll.Utils (Name, Over, listenOnly)
 import TextShow (showt)
 
-import qualified Noll.Common.Environment as Environment
 import qualified Data.Text as Text
+import qualified Noll.Common.Environment as Environment
 import qualified Noll.Core.Language as Core
 
 data IRInterpreterArtifact
@@ -46,16 +46,16 @@ data IRInterpreterArtifact
   | InterpreterArtifactMemoizedConstant Name
   deriving (Show, Eq, Ord)
 
-data IRInterpreterState = IRInterpreterState
+data IRInterpreterState a = IRInterpreterState
   { irInterpreterStateRegisterIndex :: Int
   , irInterpreterStateLabelIndex :: Int
   , irInterpreterStateLabel :: Text
-  , irInterpreterStateArtifacts :: [IRInterpreterArtifact]
+  , irInterpreterStateArtifacts :: [a]
   }
   deriving (Show, Eq, Ord)
 
 {-# INLINE initialIRInterpreterState #-}
-initialIRInterpreterState :: IRInterpreterState
+initialIRInterpreterState :: IRInterpreterState a
 initialIRInterpreterState =
   IRInterpreterState
     { irInterpreterStateRegisterIndex = 1
@@ -65,35 +65,35 @@ initialIRInterpreterState =
     }
 
 {-# INLINE overIRInterpreterStateRegisterIndex #-}
-overIRInterpreterStateRegisterIndex :: Over IRInterpreterState Int
+overIRInterpreterStateRegisterIndex :: Over (IRInterpreterState a) Int
 overIRInterpreterStateRegisterIndex f IRInterpreterState{..} = IRInterpreterState{irInterpreterStateRegisterIndex = f irInterpreterStateRegisterIndex, ..}
 
 {-# INLINE overIRInterpreterStateLabelIndex #-}
-overIRInterpreterStateLabelIndex :: Over IRInterpreterState Int
+overIRInterpreterStateLabelIndex :: Over (IRInterpreterState a) Int
 overIRInterpreterStateLabelIndex f IRInterpreterState{..} = IRInterpreterState{irInterpreterStateLabelIndex = f irInterpreterStateLabelIndex, ..}
 
 {-# INLINE overIRInterpreterStateLabel #-}
-overIRInterpreterStateLabel :: Over IRInterpreterState Text
+overIRInterpreterStateLabel :: Over (IRInterpreterState a) Text
 overIRInterpreterStateLabel f IRInterpreterState{..} = IRInterpreterState{irInterpreterStateLabel = f irInterpreterStateLabel, ..}
 
 {-# INLINE overIRInterpreterStateArtifacts #-}
-overIRInterpreterStateArtifacts :: Over IRInterpreterState [IRInterpreterArtifact]
+overIRInterpreterStateArtifacts :: Over (IRInterpreterState a) [a]
 overIRInterpreterStateArtifacts f IRInterpreterState{..} = IRInterpreterState{irInterpreterStateArtifacts = f irInterpreterStateArtifacts, ..}
 
 {-# INLINE incrementRegisterIndex #-}
-incrementRegisterIndex :: (MonadState IRInterpreterState m) => m ()
+incrementRegisterIndex :: (MonadState (IRInterpreterState a) m) => m ()
 incrementRegisterIndex = modify (overIRInterpreterStateRegisterIndex succ)
 
 {-# INLINE incrementLabelIndex #-}
-incrementLabelIndex :: (MonadState IRInterpreterState m) => m ()
+incrementLabelIndex :: (MonadState (IRInterpreterState a) m) => m ()
 incrementLabelIndex = modify (overIRInterpreterStateLabelIndex succ)
 
 {-# INLINE setLabel #-}
-setLabel :: (MonadState IRInterpreterState m) => Text -> m ()
+setLabel :: (MonadState (IRInterpreterState a) m) => Text -> m ()
 setLabel label = modify (overIRInterpreterStateLabel (const label))
 
 {-# INLINE addArtifact #-}
-addArtifact :: (MonadState IRInterpreterState m) => IRInterpreterArtifact -> m ()
+addArtifact :: (MonadState (IRInterpreterState a) m) => a -> m ()
 addArtifact art = modify (overIRInterpreterStateArtifacts (art :))
 
 type CoreObject = Object Core.Type (Core.Expr Core.Type)
@@ -181,12 +181,12 @@ instance IREncodable IRLine where
       LLabel text ->
         enquote text <> ":"
 
-newtype IRInterpreter a = IRInterpreter {getIRInterpreter :: RWS IRInterpreterEnv [IRLine] IRInterpreterState a}
+newtype IRInterpreter a = IRInterpreter {getIRInterpreter :: RWS IRInterpreterEnv [IRLine] (IRInterpreterState IRInterpreterArtifact) a}
   deriving
     ( Functor
     , Applicative
     , Monad
-    , MonadState IRInterpreterState
+    , MonadState (IRInterpreterState IRInterpreterArtifact)
     , MonadWriter [IRLine]
     , MonadReader IRInterpreterEnv
     )
@@ -194,7 +194,7 @@ newtype IRInterpreter a = IRInterpreter {getIRInterpreter :: RWS IRInterpreterEn
 evalInterpreter :: IRInterpreterEnv -> IRInterpreter a -> (a, [IRLine])
 evalInterpreter env ri = evalRWS (getIRInterpreter ri) env initialIRInterpreterState
 
-runInterpreter :: IRInterpreterEnv -> IRInterpreter a -> (a, IRInterpreterState, [IRLine])
+runInterpreter :: IRInterpreterEnv -> IRInterpreter a -> (a, IRInterpreterState IRInterpreterArtifact, [IRLine])
 runInterpreter env ri = runRWS (getIRInterpreter ri) env initialIRInterpreterState
 
 nextLabelIndex :: IRInterpreter Int
@@ -207,7 +207,6 @@ nextRegister t = do
   n <- gets irInterpreterStateRegisterIndex
   incrementRegisterIndex
   pure (Local t (showt n))
-
 
 {-# INLINE interpret #-}
 interpret :: IRInstr a -> IRInterpreter a

@@ -30,8 +30,9 @@ import Noll.Common.List1 (List1, NonEmpty (..), fromList1)
 import qualified Noll.Common.List1 as List1
 import Noll.Common.Supply (supplied)
 import Noll.Core.LLVM.IRConstruct (IRConstruct (..))
-import Noll.Core.LLVM.IRInterpreter 
---import Noll.Core.LLVM.IRInstruction.Interpreter (
+import Noll.Core.LLVM.IRInterpreter
+
+-- import Noll.Core.LLVM.IRInstruction.Interpreter (
 --  IRInterpreter (..),
 --  IRInterpreterArtifact (..),
 --  IRInterpreterEnv (..),
@@ -41,8 +42,8 @@ import Noll.Core.LLVM.IRInterpreter
 --  inValueEnv,
 --  runInterpreter,
 -- )
---import Noll.Core.LLVM.IRInstruction.Interpreter.Artifact (interpretArtifact)
---import Noll.Core.LLVM.IRInstruction.Interpreter.Object (
+-- import Noll.Core.LLVM.IRInstruction.Interpreter.Artifact (interpretArtifact)
+-- import Noll.Core.LLVM.IRInstruction.Interpreter.Object (
 --  interpretObject,
 --  objectEnvironment,
 -- )
