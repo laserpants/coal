@@ -72,6 +72,8 @@ interpreter =
       error "TODO"
     ICmpEq t v1 v2 next ->
       instruction t next ["icmp", "eq", commaSep [annotated v1, irEncode v2]]
+    ICmpNe t v1 v2 next ->
+      instruction t next ["icmp", "ne", commaSep [annotated v1, irEncode v2]]
     ICmpSLt t v1 v2 next ->
       instruction t next ["icmp", "slt", commaSep [annotated v1, irEncode v2]]
     ICmpSLE{} ->

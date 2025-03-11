@@ -26,6 +26,7 @@ data IRInstrOpF v t i next
   | IOr t v v (v -> next)
   | ILoad t v (v -> next)
   | ICmpEq t v v (v -> next)
+  | ICmpNe t v v (v -> next)
   | ICmpSLt t v v (v -> next)
   | ICmpSGt t v v (v -> next)
   | ICmpSLE t v v (v -> next)

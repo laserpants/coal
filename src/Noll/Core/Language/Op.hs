@@ -20,8 +20,8 @@ data Op a
     OEqInt32 a a
   | OEqInt64 a a
   | -- | Inequality
-    ONEqInt32 a a
-  | ONEqInt64 a a
+    ONeInt32 a a
+  | ONeInt64 a a
   | -- | Less than
     OLtInt32 a a
   | OLtInt64 a a

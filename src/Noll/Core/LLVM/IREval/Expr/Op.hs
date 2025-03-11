@@ -78,6 +78,18 @@ irEvalOp =
         v2 <- irRevealExpr e2
         iCmpEq i1 v1 v2
       irConceal v3
+    Core.ONeInt32 e1 e2 -> do
+      v3 <- irCommentBlock "ONeInt32" $ do
+        v1 <- irRevealExpr e1
+        v2 <- irRevealExpr e2
+        iCmpNe i1 v1 v2
+      irConceal v3
+    Core.ONeInt64 e1 e2 -> do
+      v3 <- irCommentBlock "ONeInt64" $ do
+        v1 <- irRevealExpr e1
+        v2 <- irRevealExpr e2
+        iCmpNe i1 v1 v2
+      irConceal v3
     Core.OAnd e1 e2 -> do
       v3 <- irCommentBlock "OAnd" $ do
         v1 <- irRevealExpr e1

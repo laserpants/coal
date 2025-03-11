@@ -11,6 +11,7 @@ module Noll.Core.LLVM.IRInstruction.TH (
   iOr,
   iLoad,
   iCmpEq,
+  iCmpNe,
   iCmpSLt,
   iCmpSGt,
   iCmpSLE,

@@ -63,9 +63,9 @@ instance Typed (Op a) where
         Type.bool
       OEqInt64{} ->
         Type.bool
-      ONEqInt32{} ->
+      ONeInt32{} ->
         Type.bool
-      ONEqInt64{} ->
+      ONeInt64{} ->
         Type.bool
       OAnd{} ->
         Type.bool
