@@ -17,15 +17,16 @@ import Noll.Core.LLVM.IREval.Closure.Apply (irClosureApply)
 import Noll.Core.LLVM.IREval.Closure.Extend (irClosureExtend)
 import Noll.Core.LLVM.IREval.Closure.Finalize (irClosureFinalize)
 import Noll.Core.LLVM.IREval.Expr (irEvalExpr)
-import Noll.Core.LLVM.IRInstruction.Interpreter (
-  IRInterpreter (..),
-  IRInterpreterEnv (..),
-  IRLine (..),
-  inValueEnv,
-  interpret,
-  runInterpreter,
- )
-import Noll.Core.LLVM.IRInstruction.Interpreter.Object (interpretObject, objectEnvironment)
+--import Noll.Core.LLVM.IRInstruction.Interpreter (
+--  IRInterpreter (..),
+--  IRInterpreterEnv (..),
+--  IRLine (..),
+--  inValueEnv,
+--  interpret,
+--  runInterpreter,
+-- )
+--import Noll.Core.LLVM.IRInstruction.Interpreter.Object (interpretObject, objectEnvironment)
+import Noll.Core.LLVM.IRInterpreter
 import Noll.Core.LLVM.IRInstruction.TH
 import Noll.Core.LLVM.IRType
 import Noll.Core.LLVM.IRType.Syntax

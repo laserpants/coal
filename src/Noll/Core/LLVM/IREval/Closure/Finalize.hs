@@ -12,8 +12,8 @@ import Noll.Core.LLVM.IRConstruct (IRConstruct (..))
 import Noll.Core.LLVM.IREval.Closure (maxArgs, namedClosureType)
 import Noll.Core.LLVM.IREval.Comment (irComments)
 import Noll.Core.LLVM.IRInstruction (IRInstr)
-import Noll.Core.LLVM.IRInstruction.Interpreter (IRInterpreter (..), IRLine)
-import Noll.Core.LLVM.IRInstruction.Interpreter.IRConstruct (argLabel, irDefine)
+--import Noll.Core.LLVM.IRInstruction.Interpreter (IRInterpreter (..), IRLine)
+import Noll.Core.LLVM.IRInterpreter
 import Noll.Core.LLVM.IRInstruction.TH
 import Noll.Core.LLVM.IRType.Syntax (i1, i32, i8Ptr, i8PtrPtr, opaqueFunction, ptr)
 import Noll.Core.LLVM.IRValue (IRValue (..))

@@ -75,15 +75,8 @@ library
       Noll.Core.LLVM.IREval.Expr.Var
       Noll.Core.LLVM.IREval.Malloc
       Noll.Core.LLVM.IRInstruction
-      Noll.Core.LLVM.IRInstruction.Interpreter
-      Noll.Core.LLVM.IRInstruction.Interpreter.Artifact
-      Noll.Core.LLVM.IRInstruction.Interpreter.Environment
-      Noll.Core.LLVM.IRInstruction.Interpreter.Instruction
-      Noll.Core.LLVM.IRInstruction.Interpreter.IRConstruct
-      Noll.Core.LLVM.IRInstruction.Interpreter.Object
-      Noll.Core.LLVM.IRInstruction.Interpreter.State
-      Noll.Core.LLVM.IRInstruction.Interpreter.Types
       Noll.Core.LLVM.IRInstruction.TH
+      Noll.Core.LLVM.IRInterpreter
       Noll.Core.LLVM.IRType
       Noll.Core.LLVM.IRType.Syntax
       Noll.Core.LLVM.IRValue
