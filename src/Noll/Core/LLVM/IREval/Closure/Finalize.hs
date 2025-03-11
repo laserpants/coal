@@ -18,6 +18,7 @@ import Noll.Core.LLVM.IRInterpreter.Monad
 import Noll.Core.LLVM.IRType.Syntax (i1, i32, i8Ptr, i8PtrPtr, opaqueFunction, ptr)
 import Noll.Core.LLVM.IRValue (IRValue (..))
 import Noll.Core.Language.Object (Object (..))
+import Noll.Label (Label (..))
 import Noll.Utils (forM, forM_)
 import TextShow (showt)
 
@@ -53,10 +54,10 @@ irClosureFinalize n argF argN argAs = do
 
 irFinalizeN :: Int -> IRInterpreter (IRConstruct [IRLine])
 irFinalizeN n = do
-  irDefine
+  interpretFunction
     ("closure" <> showt n <> "_finalize")
     (irClosureFinalize n arg0 arg1 arg2)
-    (argLabel <$> [arg0, arg1, arg2])
+    [Label t name | Local t name <- [arg0, arg1, arg2]]
  where
   arg0 = Local i8Ptr "f"
   arg1 = Local i32 "n"

@@ -41,19 +41,16 @@ import qualified Data.Text as Text
 import qualified Noll.Common.Environment as Environment
 import qualified Noll.Core.Language as Core
 
-irDefine :: Name -> IRInstr a -> [Label IRType] -> IRInterpreter (IRConstruct [IRLine])
-irDefine name f args = CDefine name i8Ptr Nothing args <$> listenOnly (interpret f)
-
-argLabel :: IRValue -> Label IRType
-argLabel (Local t name) = Label t name
-argLabel _ = error "Implementation error"
+interpretFunction :: Name -> IRInstr a -> [Label IRType] -> IRInterpreter (IRConstruct [IRLine])
+interpretFunction name f args = CDefine name i8Ptr Nothing args <$> listenOnly (interpret f)
 
 interpretObject :: Object Core.Type (Core.Expr Core.Type) -> IRInterpreter (IRConstruct [IRLine])
 interpretObject =
   \case
     OFunction name lls e -> do
-      w <- listenOnly (local (flip (foldr insertLocal) lls) (interpret (irEvalFun e)))
-      pure (CDefine name i8Ptr Nothing [Label i8Ptr n | Label _ n <- lls] w)
+      local
+        (flip (foldr insertLocal) lls)
+        (interpretFunction name (irEvalFun e) [Label i8Ptr n | Label _ n <- lls])
     OConstant name e -> do
       w <- listenOnly (interpret (irEvalExpr e))
       error "TODO"
