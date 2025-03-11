@@ -1201,7 +1201,7 @@ abc8 = (pipelineStateArtifacts, pipelineStateCode)
 
 abcx :: FilePath -> IO ()
 abcx out = do
-  inp <- Text.readFile "test/Noll/fixtures/prog1.txt"
+  inp <- Text.readFile "test/Noll/fixtures/prog2.txt"
   c <- case runParser expr "" inp of
     Right e ->
       let (_, PipelineState{..}) = runCore (compile (bob e))
