@@ -477,9 +477,7 @@ typeCheckDefinitionsC ds = do
   insertConstraintsC $ do
     (n1, s) <- Map.toList env
     Assumption n2 t <- ams
-    if n1 == n2
-      then [Explicit (InferenceRule 200) (apply sub t) s]
-      else []
+    [Explicit (InferenceRule 200) (apply sub t) s | n1 == n2]
   sub <- solveC2
   pure (fmap (fmap normalizeRowTypes) (apply sub ds), apply sub ams)
 
