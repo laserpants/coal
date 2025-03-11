@@ -129,7 +129,7 @@ instance (IREncodable a) => IREncodable (IRConstruct a) where
   irEncode =
     \case
       CDefine name t ln as c ->
-        line $
+        linebreak $
           "define"
             <> irEncode ln
             <> space
@@ -138,25 +138,25 @@ instance (IREncodable a) => IREncodable (IRConstruct a) where
             <> space
             <> funBlock c
       CDeclare name t ts ->
-        line $
+        linebreak $
           "declare"
             <> space
             <> global t name
             <> parens (commaSep ts)
       CType name t ->
-        line $
+        linebreak $
           irLocalName name
             <> " = type "
             <> irEncode t
       CString name str ->
-        line $
+        linebreak $
           irGlobalName name
             <> " = private constant "
             <> irEncode (TArray (ByteString.length str + 1) i8)
             <> space
             <> Text.concat ["c\"", escapeString (decodeUtf8Lenient str), "\\00\""]
       CGlobal name t ln v ->
-        line $
+        linebreak $
           irGlobalName name
             <> " = "
             <> irEncode ln
@@ -188,9 +188,9 @@ escapeString = Text.concatMap escapeChar
 space :: Text
 space = " "
 
-{-# INLINE line #-}
-line :: Text -> Text
-line txt = txt <> "\n"
+{-# INLINE linebreak #-}
+linebreak :: Text -> Text
+linebreak txt = txt <> "\n"
 
 enquote :: Text -> Text
 enquote name
@@ -198,7 +198,7 @@ enquote name
   | otherwise = "\"" <> name <> "\""
 
 funBlock :: (IREncodable a) => a -> Text
-funBlock block = line "{" <> irEncode block <> "}"
+funBlock block = linebreak "{" <> irEncode block <> "}"
 
 commaSep :: (IREncodable a) => [a] -> Text
 commaSep = Text.intercalate ", " . fmap irEncode
