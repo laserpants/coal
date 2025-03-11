@@ -143,5 +143,3 @@ irEvalOp =
         v2 <- irRevealExpr e2
         iCmpSGE i1 v1 v2
       irConceal v3
-    _ ->
-      error "TODO"

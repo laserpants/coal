@@ -6,6 +6,7 @@ module Noll.Core.LLVM.IREncodable (
   IREncodable (..),
   IRAnnotated (..),
   IRLabel (..),
+  commaSep,
   annotated,
   encodeLabel,
   irLocalName,
@@ -202,6 +203,7 @@ enquote name
 funBlock :: (IREncodable a) => a -> Text
 funBlock block = linebreak "{" <> irEncode block <> "}"
 
+{-# INLINE commaSep #-}
 commaSep :: (IREncodable a) => [a] -> Text
 commaSep = Text.intercalate ", " . fmap irEncode
 
