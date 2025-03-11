@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Core.LLVM.IRInterpreter.Instruction where
+module Noll.Core.LLVM.IRInterpreter.Instruction (instruction, instruction1) where
 
 import Control.Monad.RWS (tell)
 import Data.Text (Text)
