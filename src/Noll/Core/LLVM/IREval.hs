@@ -1,5 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
-
 module Noll.Core.LLVM.IREval (
   IREval (..),
   irEvalArgs,

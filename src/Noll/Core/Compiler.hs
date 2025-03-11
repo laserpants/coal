@@ -31,6 +31,8 @@ import qualified Noll.Common.List1 as List1
 import Noll.Common.Supply (supplied)
 import Noll.Core.LLVM.IRConstruct (IRConstruct (..))
 import Noll.Core.LLVM.IRInterpreter
+import Noll.Core.LLVM.IRInterpreter.Artifact
+import Noll.Core.LLVM.IRInterpreter.Monad
 
 -- import Noll.Core.LLVM.IRInstruction.Interpreter (
 --  IRInterpreter (..),
@@ -47,6 +49,9 @@ import Noll.Core.LLVM.IRInterpreter
 --  interpretObject,
 --  objectEnvironment,
 -- )
+
+import Noll.Core.LLVM.IRInterpreter.Environment
+import Noll.Core.LLVM.IRInterpreter.State
 import Noll.Core.LLVM.IRValue (IRValue (..))
 import Noll.Core.Language (
   Binding (..),

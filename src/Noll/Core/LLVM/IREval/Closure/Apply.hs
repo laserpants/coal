@@ -7,9 +7,11 @@ import Noll.Core.LLVM.IREval.Comment (irComments)
 import Noll.Core.LLVM.IRInstruction (IRInstr)
 import Noll.Core.LLVM.IRInstruction.TH
 import Noll.Core.LLVM.IRInterpreter
+import Noll.Core.LLVM.IRInterpreter.Monad
 import Noll.Core.LLVM.IRType (IRType)
 import Noll.Core.LLVM.IRType.Syntax (fun, i32, i8Ptr, i8PtrPtr, ptr, struct)
 import Noll.Core.LLVM.IRValue (IRValue (..))
+import Noll.Core.Language.Object (Object (..))
 import Noll.Utils (forM, forM_, second)
 import TextShow (showt)
 

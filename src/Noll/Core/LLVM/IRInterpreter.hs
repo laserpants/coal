@@ -1,11 +1,8 @@
-{-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
 module Noll.Core.LLVM.IRInterpreter where
@@ -17,6 +14,7 @@ import Control.Monad.State (modify)
 import Control.Monad.Writer (tell)
 import Data.Text (Text)
 import Data.Text.Encoding (encodeUtf8)
+import Debug.Trace
 import Noll.AST.FreeVars (FreeVars (..), boundIn, exceptNames)
 import Noll.Common.Environment (Environment (..))
 import Noll.Core.LLVM.IRConstruct (IRConstruct (..), IRLinkage (..))
@@ -24,6 +22,11 @@ import Noll.Core.LLVM.IREncodable (IRAnnotated (..), IREncodable (..), annotated
 import Noll.Core.LLVM.IREval (irEvalFun)
 import Noll.Core.LLVM.IREval.Expr (irEvalExpr)
 import Noll.Core.LLVM.IRInstruction
+import Noll.Core.LLVM.IRInterpreter.Artifact
+import Noll.Core.LLVM.IRInterpreter.Environment
+import Noll.Core.LLVM.IRInterpreter.Instruction
+import Noll.Core.LLVM.IRInterpreter.Monad
+import Noll.Core.LLVM.IRInterpreter.State
 import Noll.Core.LLVM.IRType (IRType (..), IRTyped (..))
 import Noll.Core.LLVM.IRType.Syntax
 import Noll.Core.LLVM.IRValue (IRValue (..))
@@ -38,67 +41,14 @@ import qualified Data.Text as Text
 import qualified Noll.Common.Environment as Environment
 import qualified Noll.Core.Language as Core
 
-data IRInterpreterArtifact
-  = InterpreterArtifactFunctionApply Int
-  | InterpreterArtifactClosure Int
-  | InterpreterArtifactHashMapKey Name
-  | InterpreterArtifactDataConstructor Name IRType
-  | InterpreterArtifactMemoizedConstant Name
-  deriving (Show, Eq, Ord)
+irDefine :: Name -> IRInstr a -> [Label IRType] -> IRInterpreter (IRConstruct [IRLine])
+irDefine name f args = CDefine name i8Ptr Nothing args <$> listenOnly (interpret f)
 
-data IRInterpreterState a = IRInterpreterState
-  { irInterpreterStateRegisterIndex :: Int
-  , irInterpreterStateLabelIndex :: Int
-  , irInterpreterStateLabel :: Text
-  , irInterpreterStateArtifacts :: [a]
-  }
-  deriving (Show, Eq, Ord)
+argLabel :: IRValue -> Label IRType
+argLabel (Local t name) = Label t name
+argLabel _ = error "Implementation error"
 
-{-# INLINE initialIRInterpreterState #-}
-initialIRInterpreterState :: IRInterpreterState a
-initialIRInterpreterState =
-  IRInterpreterState
-    { irInterpreterStateRegisterIndex = 1
-    , irInterpreterStateLabelIndex = 1
-    , irInterpreterStateLabel = ""
-    , irInterpreterStateArtifacts = []
-    }
-
-{-# INLINE overIRInterpreterStateRegisterIndex #-}
-overIRInterpreterStateRegisterIndex :: Over (IRInterpreterState a) Int
-overIRInterpreterStateRegisterIndex f IRInterpreterState{..} = IRInterpreterState{irInterpreterStateRegisterIndex = f irInterpreterStateRegisterIndex, ..}
-
-{-# INLINE overIRInterpreterStateLabelIndex #-}
-overIRInterpreterStateLabelIndex :: Over (IRInterpreterState a) Int
-overIRInterpreterStateLabelIndex f IRInterpreterState{..} = IRInterpreterState{irInterpreterStateLabelIndex = f irInterpreterStateLabelIndex, ..}
-
-{-# INLINE overIRInterpreterStateLabel #-}
-overIRInterpreterStateLabel :: Over (IRInterpreterState a) Text
-overIRInterpreterStateLabel f IRInterpreterState{..} = IRInterpreterState{irInterpreterStateLabel = f irInterpreterStateLabel, ..}
-
-{-# INLINE overIRInterpreterStateArtifacts #-}
-overIRInterpreterStateArtifacts :: Over (IRInterpreterState a) [a]
-overIRInterpreterStateArtifacts f IRInterpreterState{..} = IRInterpreterState{irInterpreterStateArtifacts = f irInterpreterStateArtifacts, ..}
-
-{-# INLINE incrementRegisterIndex #-}
-incrementRegisterIndex :: (MonadState (IRInterpreterState a) m) => m ()
-incrementRegisterIndex = modify (overIRInterpreterStateRegisterIndex succ)
-
-{-# INLINE incrementLabelIndex #-}
-incrementLabelIndex :: (MonadState (IRInterpreterState a) m) => m ()
-incrementLabelIndex = modify (overIRInterpreterStateLabelIndex succ)
-
-{-# INLINE setLabel #-}
-setLabel :: (MonadState (IRInterpreterState a) m) => Text -> m ()
-setLabel label = modify (overIRInterpreterStateLabel (const label))
-
-{-# INLINE addArtifact #-}
-addArtifact :: (MonadState (IRInterpreterState a) m) => a -> m ()
-addArtifact art = modify (overIRInterpreterStateArtifacts (art :))
-
-type CoreObject = Object Core.Type (Core.Expr Core.Type)
-
-interpretObject :: CoreObject -> IRInterpreter (IRConstruct [IRLine])
+interpretObject :: Object Core.Type (Core.Expr Core.Type) -> IRInterpreter (IRConstruct [IRLine])
 interpretObject =
   \case
     OFunction name lls e -> do
@@ -113,46 +63,6 @@ interpretObject =
   insertLocal (Label _ name) =
     inValueEnv (Environment.insert name (Local i8Ptr name))
 
-objectValue :: CoreObject -> (Name, IRValue)
-objectValue o = let name = objectName o in (name, Global (irTypeOf o) name)
-
-objectEnvironment :: ObjectList -> Environment IRValue
-objectEnvironment = foldr (uncurry Environment.insert . objectValue) mempty
-
-instruction :: IRType -> (IRValue -> IRInterpreter a) -> [Text] -> IRInterpreter a
-instruction t next tokens = do
-  r <- nextRegister t
-  tell [LInstruction ([irEncode r, "="] <> tokens)]
-  next r
-
-instruction1 :: IRInterpreter a -> [Text] -> IRInterpreter a
-instruction1 next tokens = tell [LInstruction tokens] >> next
-
-irDefine :: Name -> IRInstr a -> [Label IRType] -> IRInterpreter (IRConstruct [IRLine])
-irDefine name f args = CDefine name i8Ptr Nothing args <$> listenOnly (interpret f)
-
-argLabel :: IRValue -> Label IRType
-argLabel (Local t name) = Label t name
-argLabel _ = error "Implementation error"
-
-data IRInterpreterEnv = IRInterpreterEnv
-  { irInterpreterValueEnv :: Environment IRValue
-  , irInterpreterConstructorEnv :: Environment Int
-  }
-  deriving (Show, Eq, Ord, Read)
-
-{-# INLINE inValueEnv #-}
-inValueEnv :: Over IRInterpreterEnv (Environment IRValue)
-inValueEnv f IRInterpreterEnv{..} = IRInterpreterEnv{irInterpreterValueEnv = f irInterpreterValueEnv, ..}
-
-{-# INLINE inConstructorEnv #-}
-inConstructorEnv :: Over IRInterpreterEnv (Environment Int)
-inConstructorEnv f IRInterpreterEnv{..} = IRInterpreterEnv{irInterpreterConstructorEnv = f irInterpreterConstructorEnv, ..}
-
-{-# INLINE insertBoundVars #-}
-insertBoundVars :: [(Name, IRValue)] -> IRInterpreterEnv -> IRInterpreterEnv
-insertBoundVars = inValueEnv . Environment.insertMultiple
-
 interpretArtifact :: IRInterpreterArtifact -> IRInterpreter [IRConstruct [IRLine]]
 interpretArtifact =
   \case
@@ -164,53 +74,6 @@ interpretArtifact =
       pure [CGlobal name i8Ptr (Just LPrivate) Null]
     _ ->
       pure []
-
-data IRLine
-  = LInstruction [Text]
-  | LComment Text
-  | LLabel Text
-  deriving (Show, Eq, Ord)
-
-instance IREncodable IRLine where
-  irEncode =
-    \case
-      LInstruction tokens ->
-        "  " <> Text.unwords tokens
-      LComment text ->
-        "  ; " <> text
-      LLabel text ->
-        enquote text <> ":"
-
-newtype IRInterpreter a = IRInterpreter {getIRInterpreter :: RWS IRInterpreterEnv [IRLine] (IRInterpreterState IRInterpreterArtifact) a}
-  deriving
-    ( Functor
-    , Applicative
-    , Monad
-    , MonadState (IRInterpreterState IRInterpreterArtifact)
-    , MonadWriter [IRLine]
-    , MonadReader IRInterpreterEnv
-    )
-
-evalInterpreter :: IRInterpreterEnv -> IRInterpreter a -> (a, [IRLine])
-evalInterpreter env ri = evalRWS (getIRInterpreter ri) env initialIRInterpreterState
-
-runInterpreter :: IRInterpreterEnv -> IRInterpreter a -> (a, IRInterpreterState IRInterpreterArtifact, [IRLine])
-runInterpreter env ri = runRWS (getIRInterpreter ri) env initialIRInterpreterState
-
-nextLabelIndex :: IRInterpreter Int
-nextLabelIndex = do
-  incrementLabelIndex
-  gets irInterpreterStateLabelIndex
-
-nextRegister :: IRType -> IRInterpreter IRValue
-nextRegister t = do
-  n <- gets irInterpreterStateRegisterIndex
-  incrementRegisterIndex
-  pure (Local t (showt n))
-
-{-# INLINE interpret #-}
-interpret :: IRInstr a -> IRInterpreter a
-interpret = iterM interpreter
 
 interpreter :: IRInstrOp (IRInterpreter a) -> IRInterpreter a
 interpreter =
@@ -344,6 +207,10 @@ switchBranches :: [(Name, IRValue)] -> Text
 switchBranches bs = Text.unwords (uncurry branch <$> bs)
  where
   branch n v = commaSep [annotated v, encodeLabel n]
+
+{-# INLINE interpret #-}
+interpret :: IRInstr a -> IRInterpreter a
+interpret = iterM interpreter
 
 -- TODO: clean up
 offset :: IRType -> [IRValue] -> IRType
