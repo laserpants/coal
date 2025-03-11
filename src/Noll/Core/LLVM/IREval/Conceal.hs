@@ -14,8 +14,6 @@ import Noll.Core.LLVM.IRType.Syntax (i1, i32, i64, i8, i8Ptr)
 import Noll.Core.LLVM.IRValue (IRValue (..))
 import Noll.Core.Language (Typed)
 
-import qualified Noll.Core.Language as Core
-
 irConceal :: IRValue -> IRInstr IRValue
 irConceal v =
   case irTypeOf v of
