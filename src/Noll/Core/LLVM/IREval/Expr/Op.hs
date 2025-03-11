@@ -66,6 +66,18 @@ irEvalOp =
         v2 <- irRevealExpr e2
         iMul TDouble v1 v2
       irConceal v3
+    Core.ODivFloat e1 e2 -> do
+      v3 <- irCommentBlock "ODivFloat" $ do
+        v1 <- irRevealExpr e1
+        v2 <- irRevealExpr e2
+        iDiv TFloat v1 v2
+      irConceal v3
+    Core.ODivDouble e1 e2 -> do
+      v3 <- irCommentBlock "ODivDouble" $ do
+        v1 <- irRevealExpr e1
+        v2 <- irRevealExpr e2
+        iDiv TDouble v1 v2
+      irConceal v3
     Core.ODivInt32 e1 e2 -> do
       v3 <- irCommentBlock "ODivInt32" $ do
         v1 <- irRevealExpr e1
