@@ -5,7 +5,13 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Core.LLVM.IRInterpreter where
+module Noll.Core.LLVM.IRInterpreter (
+  interpret,
+  interpreter,
+  interpretArtifact,
+  interpretObject,
+  interpretFunction,
+) where
 
 import Control.Monad.Free (iterM)
 import Control.Monad.RWS (gets)
@@ -14,7 +20,15 @@ import Control.Monad.Writer (tell)
 import Data.Text (Text)
 import Data.Text.Encoding (encodeUtf8)
 import Noll.Core.LLVM.IRConstruct (IRConstruct (..), IRLinkage (..))
-import Noll.Core.LLVM.IREncodable (IRAnnotated (..), IREncodable (..), annotated, commaSep, encodeLabel, enquote, irGlobalName, irLocalName)
+import Noll.Core.LLVM.IREncodable (
+  IRAnnotated (..),
+  IREncodable (..),
+  annotated,
+  commaSep,
+  encodeLabel,
+  irGlobalName,
+  irLocalName,
+ )
 import Noll.Core.LLVM.IREval (irEvalFun)
 import Noll.Core.LLVM.IREval.Expr (irEvalExpr)
 import Noll.Core.LLVM.IRInstruction
