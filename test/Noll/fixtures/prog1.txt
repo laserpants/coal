@@ -226,11 +226,11 @@ let
                   , { min = @<*>
                               ( from_int32 : record({ from_int32 : int32/* | * })/int32/*
                               , d_1 : record({ compare : */*/Ordering | from_int32 : int32/* | * })
-                              , 0  )
+                              , 0 )
                     | max = @<*>
                               ( from_int32 : record({ from_int32 : int32/* | * })/int32/*
                               , d_1 : record({ compare : */*/Ordering | from_int32 : int32/* | * })
-                              , -1  )
+                              , -1 )
                     | {}
                     }
                   )
