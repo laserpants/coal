@@ -12,7 +12,6 @@ import Noll.Core.LLVM.IRInstruction.TH
 import Noll.Core.LLVM.IRType (IRType (..), IRTyped (..))
 import Noll.Core.LLVM.IRType.Syntax (i1, i32, i64, i8, i8Ptr)
 import Noll.Core.LLVM.IRValue (IRValue (..))
-import Noll.Core.Language (Typed)
 
 irConceal :: IRValue -> IRInstr IRValue
 irConceal v =
@@ -42,7 +41,7 @@ irReveal v =
     _ ->
       pure v
 
-irRevealExpr :: (IREval e, IRTyped e, Typed e) => e -> IRInstr IRValue
+irRevealExpr :: (IREval e, IRTyped e) => e -> IRInstr IRValue
 irRevealExpr expr = do
   v <- irEval expr
   irReveal v (irTypeOf expr)

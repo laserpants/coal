@@ -8,14 +8,14 @@ import Noll.Core.LLVM.IREval.Comment (irCommentBlock)
 import Noll.Core.LLVM.IREval.Conceal (irConceal, irRevealExpr)
 import Noll.Core.LLVM.IRInstruction (IRInstr)
 import Noll.Core.LLVM.IRInstruction.TH
-import Noll.Core.LLVM.IRType (IRTyped (..))
+import Noll.Core.LLVM.IRType (IRType (..), IRTyped (..))
 import Noll.Core.LLVM.IRType.Syntax (i1, i32, i64)
 import Noll.Core.LLVM.IRValue (IRValue (..))
-import Noll.Core.Language (Op, Typed)
+import Noll.Core.Language (Op)
 
 import qualified Noll.Core.Language as Core
 
-irEvalOp :: (Typed e, IRTyped e, IREval e) => Op e -> IRInstr IRValue
+irEvalOp :: (IRTyped e, IREval e) => Op e -> IRInstr IRValue
 irEvalOp =
   \case
     Core.OAddInt32 e1 e2 -> do
@@ -53,6 +53,18 @@ irEvalOp =
         v1 <- irRevealExpr e1
         v2 <- irRevealExpr e2
         iMul i64 v1 v2
+      irConceal v3
+    Core.OMulFloat e1 e2 -> do
+      v3 <- irCommentBlock "OMulFloat" $ do
+        v1 <- irRevealExpr e1
+        v2 <- irRevealExpr e2
+        iMul TFloat v1 v2
+      irConceal v3
+    Core.OMulDouble e1 e2 -> do
+      v3 <- irCommentBlock "OMulDouble" $ do
+        v1 <- irRevealExpr e1
+        v2 <- irRevealExpr e2
+        iMul TDouble v1 v2
       irConceal v3
     Core.ODivInt32 e1 e2 -> do
       v3 <- irCommentBlock "ODivInt32" $ do

@@ -12,11 +12,10 @@ module Noll.Core.LLVM.IRInterpreter.Environment (
 import Noll.Common.Environment (Environment (..))
 import Noll.Core.LLVM.IRType (IRTyped (..))
 import Noll.Core.LLVM.IRValue (IRValue (..))
-import Noll.Core.Language.Object (Object (..), ObjectList, objectName)
-import Noll.Utils (Name, Over, listenOnly)
+import Noll.Core.Language.Object (ObjectList, objectName)
+import Noll.Utils (Name, Over)
 
 import qualified Noll.Common.Environment as Environment
-import qualified Noll.Core.Language as Core
 
 data IRInterpreterEnv = IRInterpreterEnv
   { irInterpreterValueEnv :: Environment IRValue

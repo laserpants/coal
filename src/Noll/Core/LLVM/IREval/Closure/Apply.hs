@@ -11,7 +11,6 @@ import Noll.Core.LLVM.IRInterpreter.Monad
 import Noll.Core.LLVM.IRType (IRType)
 import Noll.Core.LLVM.IRType.Syntax (fun, i32, i8Ptr, i8PtrPtr, ptr, struct)
 import Noll.Core.LLVM.IRValue (IRValue (..))
-import Noll.Core.Language.Object (Object (..))
 import Noll.Label (Label (..))
 import Noll.Utils (forM, forM_, second)
 import TextShow (showt)

@@ -8,15 +8,11 @@
 module Noll.Core.LLVM.IRInterpreter where
 
 import Control.Monad.Free (iterM)
-import Control.Monad.RWS (MonadReader, MonadState, MonadWriter, RWS, evalRWS, gets, runRWS)
+import Control.Monad.RWS (gets)
 import Control.Monad.Reader (asks, local)
-import Control.Monad.State (modify)
 import Control.Monad.Writer (tell)
 import Data.Text (Text)
 import Data.Text.Encoding (encodeUtf8)
-import Debug.Trace
-import Noll.AST.FreeVars (FreeVars (..), boundIn, exceptNames)
-import Noll.Common.Environment (Environment (..))
 import Noll.Core.LLVM.IRConstruct (IRConstruct (..), IRLinkage (..))
 import Noll.Core.LLVM.IREncodable (IRAnnotated (..), IREncodable (..), annotated, commaSep, encodeLabel, enquote, irGlobalName, irLocalName)
 import Noll.Core.LLVM.IREval (irEvalFun)
@@ -27,14 +23,12 @@ import Noll.Core.LLVM.IRInterpreter.Environment
 import Noll.Core.LLVM.IRInterpreter.Instruction
 import Noll.Core.LLVM.IRInterpreter.Monad
 import Noll.Core.LLVM.IRInterpreter.State
-import Noll.Core.LLVM.IRType (IRType (..), IRTyped (..))
+import Noll.Core.LLVM.IRType (IRType (..))
 import Noll.Core.LLVM.IRType.Syntax
 import Noll.Core.LLVM.IRValue (IRValue (..))
-import Noll.Core.Language.Expr (Expr (..))
 import Noll.Core.Language.Object
-import Noll.Core.Language.Type (Type)
 import Noll.Label (Label (..))
-import Noll.Utils (Name, Over, listenOnly)
+import Noll.Utils (Name, listenOnly)
 import TextShow (showt)
 
 import qualified Data.Text as Text

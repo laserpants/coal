@@ -14,11 +14,11 @@ module Noll.Core.LLVM.IRInterpreter.Monad (
 
 import Control.Monad.RWS (MonadReader, MonadState, MonadWriter, RWS, evalRWS, gets, runRWS)
 import Data.Text (Text)
-import Noll.Core.LLVM.IREncodable (IRAnnotated (..), IREncodable (..), annotated, commaSep, encodeLabel, enquote, irGlobalName, irLocalName)
+import Noll.Core.LLVM.IREncodable (IREncodable (..), enquote)
 import Noll.Core.LLVM.IRInterpreter.Artifact
 import Noll.Core.LLVM.IRInterpreter.Environment
 import Noll.Core.LLVM.IRInterpreter.State
-import Noll.Core.LLVM.IRType (IRType (..), IRTyped (..))
+import Noll.Core.LLVM.IRType (IRType (..))
 import Noll.Core.LLVM.IRValue (IRValue (..))
 import TextShow (showt)
 

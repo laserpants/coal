@@ -12,9 +12,9 @@ module Noll.Core.LLVM.IRInterpreter.State (
   setLabel,
 ) where
 
-import Control.Monad.RWS (MonadReader, MonadState, MonadWriter, RWS, evalRWS, gets, modify, runRWS)
+import Control.Monad.RWS (MonadState, modify)
 import Data.Text (Text)
-import Noll.Utils (Name, Over)
+import Noll.Utils (Over)
 
 data IRInterpreterState a = IRInterpreterState
   { irInterpreterStateRegisterIndex :: Int
