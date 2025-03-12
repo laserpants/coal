@@ -427,7 +427,7 @@ collectObjs f as = pure (xs <> fmap toObject ys)
  where
   (xs, ys) = runWriter (traverse2 f as)
 
-pipeline :: ObjectList -> Pipeline [Object Type (Expr Type)]
+pipeline :: ObjectList -> Pipeline ObjectList
 pipeline ol = do
   a0 <- pure3 sortMatchClauses ol
   a1 <- suffixNamesC a0
