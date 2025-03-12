@@ -48,6 +48,7 @@ library
       Noll.Core.Compiler
       Noll.Core.Compiler.Pipeline
       Noll.Core.Compiler.Pipeline.Kernel
+      Noll.Core.Compiler.Utils
       Noll.Core.Language
       Noll.Core.Language.Expr
       Noll.Core.Language.Expr.Replace
