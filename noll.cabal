@@ -47,6 +47,7 @@ library
       Noll.Compiler.Transform.Type.AliasInsertion
       Noll.Core.Compiler
       Noll.Core.Compiler.Ast
+      Noll.Core.Compiler.Pass.ClosureConversion
       Noll.Core.Compiler.Pass.LambdaLifting
       Noll.Core.Compiler.Pass.Suffix
       Noll.Core.Compiler.Pipeline

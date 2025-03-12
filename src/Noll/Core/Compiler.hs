@@ -13,15 +13,9 @@ import Control.Monad.RWS (RWS, ask, evalRWS, local)
 import Control.Monad.State (MonadState, State, evalState, gets, modify, runState, runStateT)
 import Control.Monad.Trans (lift)
 import Control.Monad.Writer (MonadWriter, Writer, runWriter, tell)
-import Data.Fix (Fix (..))
-import Data.Functor ((<&>))
 import Data.Functor.Foldable (cata, embed, project)
 import Data.List (nub, partition)
-import Data.Set (Set)
-import Noll.AST.FreeVars (FreeVars (..), exceptNames)
-import Noll.Common.Environment (Environment)
 import Noll.Common.List1 (List1, NonEmpty (..), fromList1)
-import Noll.Common.Supply (supplied)
 import Noll.Core.Compiler.Ast
 import Noll.Core.Compiler.Pass.ClosureConversion (closeDefs)
 import Noll.Core.Compiler.Pass.LambdaLifting (liftLambdas)
@@ -30,7 +24,6 @@ import Noll.Core.Compiler.Pipeline (Pipeline (..), extendInterpreterConstructorE
 import Noll.Core.Compiler.Pipeline.Kernel (Kernel (..), initialKernel, overKernelArtifacts, overKernelCode, overKernelInterpreterConstructorEnv, overKernelInterpreterValueEnv, overKernelSupply)
 import Noll.Core.LLVM.IRConstruct (IRConstruct (..))
 import Noll.Core.LLVM.IRInterpreter
-import Noll.Core.LLVM.IRInterpreter.Artifact
 import Noll.Core.LLVM.IRInterpreter.Environment
 import Noll.Core.LLVM.IRInterpreter.Monad
 import Noll.Core.LLVM.IRInterpreter.State
@@ -50,29 +43,14 @@ import Noll.Core.Language (
   overBindingLabel,
   unzipBindings,
  )
-import Noll.Core.Language.Expr.Replace (Sub, relabel)
-import Noll.Core.Language.Object (Object (..), ObjectList, objectName)
+import Noll.Core.Language.Object (Object (..), ObjectList)
 import Noll.Core.Language.Type.Arrow (isFunction)
-import Noll.Label (Label (..), labelName)
-import Noll.Utils (
-  Dictionary,
-  Name,
-  Over,
-  applyM1,
-  applyM2,
-  foldrM,
-  forM,
-  isConstructor,
-  traverse2,
-  (<$$>),
- )
+import Noll.Label (Label (..))
+import Noll.Utils (Name, traverse2, (<$$>))
 import Noll.Utils.Control.Applicative (pure1, pure3)
 import Noll.Utils.Operators ((||.))
 import TextShow
 
-import qualified Data.Map.Strict as Map
-import qualified Data.Set as Set
-import qualified Data.Text as Text
 import qualified Noll.Common.Environment as Environment
 import qualified Noll.Common.List1 as List1
 import qualified Noll.Core.Language as Core
