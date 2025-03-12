@@ -22,7 +22,6 @@ import qualified Data.Map.Strict as Map
 import Data.Set (Set)
 import qualified Data.Set as Set
 import qualified Data.Text as Text
-import Debug.Trace
 import Noll.AST.FreeVars (FreeVars (..), exceptNames)
 import Noll.Common.Environment (Environment)
 import qualified Noll.Common.Environment as Environment
@@ -33,23 +32,6 @@ import Noll.Core.LLVM.IRConstruct (IRConstruct (..))
 import Noll.Core.LLVM.IRInterpreter
 import Noll.Core.LLVM.IRInterpreter.Artifact
 import Noll.Core.LLVM.IRInterpreter.Monad
-
--- import Noll.Core.LLVM.IRInstruction.Interpreter (
---  IRInterpreter (..),
---  IRInterpreterArtifact (..),
---  IRInterpreterEnv (..),
---  IRInterpreterState (..),
---  IRLine (..),
---  inConstructorEnv,
---  inValueEnv,
---  runInterpreter,
--- )
--- import Noll.Core.LLVM.IRInstruction.Interpreter.Artifact (interpretArtifact)
--- import Noll.Core.LLVM.IRInstruction.Interpreter.Object (
---  interpretObject,
---  objectEnvironment,
--- )
-
 import Noll.Core.LLVM.IRInterpreter.Environment
 import Noll.Core.LLVM.IRInterpreter.State
 import Noll.Core.LLVM.IRValue (IRValue (..))
