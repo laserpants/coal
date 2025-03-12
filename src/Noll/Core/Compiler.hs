@@ -65,6 +65,7 @@ import Noll.Utils (
   traverse2,
   (<$$>),
  )
+import Noll.Utils.Control.Applicative (pure1, pure3)
 import Noll.Utils.Operators ((||.))
 import TextShow
 
@@ -487,15 +488,6 @@ transInterpreter p = do
 
 suffixNamesC :: ObjectList -> Core ObjectList
 suffixNamesC = transSuffixMonad . traverse2 transSuffixExpr
-
-pure1 :: (Applicative f) => (a -> b) -> a -> f b
-pure1 f = pure . f
-
-pure2 :: (Applicative f1, Functor f2) => (a -> b) -> f2 a -> f1 (f2 b)
-pure2 f = pure . (f <$>)
-
-pure3 :: (Applicative f1, Functor f2, Functor f3) => (a -> b) -> f2 (f3 a) -> f1 (f2 (f3 b))
-pure3 f = pure . (f <$$>)
 
 collectObjs :: (Expr Type -> Writer [Binding Type (Expr Type)] (Expr Type)) -> [Object Type (Expr Type)] -> Core [Object Type (Expr Type)]
 collectObjs f as = pure (xs <> fmap toObject ys)
