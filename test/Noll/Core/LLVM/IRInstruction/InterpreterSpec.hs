@@ -1185,29 +1185,31 @@ abcg1 = Text.putStrLn $ irEncode (xxd 1)
 abcg2 = Text.putStrLn $ irEncode (xxd 2)
 abcg3 = Text.putStrLn $ irEncode (xxd 3)
 
+constrs = [("$Cons", 0), ("$Nil", 1), ("$Record", 0), ("EqualTo", 0), ("GreaterThan", 1), ("LessThan", 2), ("Node", 1), ("Leaf", 0)]
+
 -- abc5 = Text.putStrLn (irEncode pipelineStateArtifacts)
 abc5 = (pipelineStateArtifacts, pipelineStateCode)
  where
-  (_, PipelineState{..}) = runCore (compile blockObjects)
+  (_, PipelineState{..}) = runCore (compile constrs blockObjects)
 
 abc6 = (pipelineStateArtifacts, pipelineStateCode)
  where
-  (_, PipelineState{..}) = runCore (compile blockObjects2)
+  (_, PipelineState{..}) = runCore (compile constrs blockObjects2)
 
 abc7 = (pipelineStateArtifacts, pipelineStateCode)
  where
-  (_, PipelineState{..}) = runCore (compile blockObjects3)
+  (_, PipelineState{..}) = runCore (compile constrs blockObjects3)
 
 abc8 = (pipelineStateArtifacts, pipelineStateCode)
  where
-  (_, PipelineState{..}) = runCore (compile blockObjects4)
+  (_, PipelineState{..}) = runCore (compile constrs blockObjects4)
 
 abcx :: FilePath -> IO ()
 abcx out = do
   inp <- Text.readFile "test/Noll/fixtures/prog2.txt"
   c <- case runParser expr "" inp of
     Right e ->
-      let (_, PipelineState{..}) = runCore (compile (bob e))
+      let (_, PipelineState{..}) = runCore (compile constrs (bob e))
        in pure pipelineStateCode
   let txt = irEncode c
   Text.writeFile out txt

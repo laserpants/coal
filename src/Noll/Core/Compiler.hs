@@ -31,8 +31,8 @@ import Noll.Common.Supply (supplied)
 import Noll.Core.LLVM.IRConstruct (IRConstruct (..))
 import Noll.Core.LLVM.IRInterpreter
 import Noll.Core.LLVM.IRInterpreter.Artifact
-import Noll.Core.LLVM.IRInterpreter.Monad
 import Noll.Core.LLVM.IRInterpreter.Environment
+import Noll.Core.LLVM.IRInterpreter.Monad
 import Noll.Core.LLVM.IRInterpreter.State
 import Noll.Core.LLVM.IRValue (IRValue (..))
 import Noll.Core.Language (
@@ -514,12 +514,11 @@ pipeline ol = do
   a7 <- pure1 closeDefs a6
   pure (addImplicitArgs <$> a7)
 
-compile :: ObjectList -> Core ()
-compile ol = do
+compile :: [(Name, Int)] -> ObjectList -> Core ()
+compile constrs ol = do
   objs <- pipeline ol
   extendInterpreterValueEnv (objectEnvironment objs)
-  -- TODO
-  extendInterpreterConstructorEnv (Environment.fromList [("$Cons", 0), ("$Nil", 1), ("$Record", 0), ("EqualTo", 0), ("GreaterThan", 1), ("LessThan", 2), ("Node", 1), ("Leaf", 0)])
+  extendInterpreterConstructorEnv (Environment.fromList constrs)
   code <- transInterpreter (traverse interpretObject objs)
   pipelineStateInsertCode code
   arts <- gets pipelineStateArtifacts
@@ -527,7 +526,5 @@ compile ol = do
   pipelineStateInsertCode (concat defs)
 
 -- xx1 objs = mapM_ print $ muteObjectTypes <$> liftLambdas (flattenELam <$$> evalState (traverse (traverse transSuffixExpr) objs) 0)
-
-xx2 objs = runCore (pipeline objs)
-
-xx3 objs = muteObjectTypes <$> fst (xx2 objs)
+-- xx2 objs = runCore (pipeline objs)
+-- xx3 objs = muteObjectTypes <$> fst (xx2 objs)
