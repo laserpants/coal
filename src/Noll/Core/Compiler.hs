@@ -392,10 +392,10 @@ pipeline ol = do
   pure (addImplicitArgs <$> a7)
 
 compile :: [(Name, Int)] -> ObjectList -> Pipeline ()
-compile constrs ol = do
+compile ctrs ol = do
   objs <- pipeline ol
   extendInterpreterValueEnv (objectEnvironment objs)
-  extendInterpreterConstructorEnv (Environment.fromList constrs)
+  extendInterpreterConstructorEnv (Environment.fromList ctrs)
   code <- transInterpreter (traverse interpretObject objs)
   pipelineInsertCode code
   arts <- gets kernelArtifacts
