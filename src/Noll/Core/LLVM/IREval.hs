@@ -4,10 +4,9 @@ module Noll.Core.LLVM.IREval (
   irEvalFun,
 ) where
 
-import Control.Monad.Free (Free (..))
 import Noll.Common.List1 (List1, fromList1)
-import Noll.Core.LLVM.IRInstruction (IRInstr, IRInstrOpF (..))
-import Noll.Core.LLVM.IRInstruction.TH (iInttoptr, iRet)
+import Noll.Core.LLVM.IRInstruction (IRInstr)
+import Noll.Core.LLVM.IRInstruction.TH (iRet)
 import Noll.Core.LLVM.IRType.Syntax (i8Ptr)
 import Noll.Core.LLVM.IRValue (IRValue)
 
