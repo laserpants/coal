@@ -24,6 +24,7 @@ import Noll.Common.List1 (List1, NonEmpty (..), fromList1)
 import Noll.Common.Supply (supplied)
 import Noll.Core.Compiler.Ast
 import Noll.Core.Compiler.Pass.LambdaLifting (liftLambdas)
+import Noll.Core.Compiler.Pass.Suffix (transformSuffixExpr)
 import Noll.Core.Compiler.Pipeline (Pipeline (..), extendInterpreterConstructorEnv, extendInterpreterValueEnv, pipelineInsertArtifacts, pipelineInsertCode)
 import Noll.Core.Compiler.Pipeline.Kernel (Kernel (..), initialKernel, overKernelArtifacts, overKernelCode, overKernelInterpreterConstructorEnv, overKernelInterpreterValueEnv, overKernelSupply)
 import Noll.Core.LLVM.IRConstruct (IRConstruct (..))
@@ -118,63 +119,6 @@ transformLetLifting =
             e
       e ->
         embed <$> sequence e
-
--------------------------------------------------------------------------------
-
-transformSuffixExpr :: (MonadState Int m) => Expr t -> m (Expr t)
-transformSuffixExpr =
-  cata $
-    \case
-      Core.ELet vs e -> do
-        let (lls, es) = unzipBindings vs
-        (lls1, a1, a2) <- applyM2 (addSuffix2 lls) (sequence es) e
-        pure (Core.let_ (List1.zipWith Binding lls1 a1) a2)
-      Core.ELam lls e -> do
-        (lls1, a1) <- applyM1 (addSuffix lls) e
-        pure (Core.lam lls1 a1)
-      Core.ESel (Focus name ll2 ll3) e1 e2 -> do
-        a1 <- e1
-        (lls1, a2) <- applyM1 (addSuffix (ll2 :| [ll3])) e2
-        case lls1 of
-          (lls4 :| lls5 : _) ->
-            pure (Core.sel (Focus name lls4 lls5) a1 a2)
-          _ ->
-            error "Implementation error"
-      Core.EMat t e cs ->
-        Core.match t
-          <$> e
-          <*> (traverse transformSuffixClause =<< traverse sequence cs)
-      e ->
-        embed <$> sequence e
-
-transformSuffixClause :: (MonadState Int m) => Clause t (Expr t) -> m (Clause t (Expr t))
-transformSuffixClause =
-  \case
-    Clause lls e -> do
-      (lls1, a) <- addSuffix lls e
-      pure (Clause lls1 a)
-
-addSuffix :: (MonadState Int m, Sub s) => List1 (Label t) -> s -> m (List1 (Label t), s)
-addSuffix lls e = do
-  (lls1, sub) <- mapping lls
-  pure (lls1, relabel sub e)
-
-addSuffix2 :: (MonadState Int m, Sub s1, Sub s2) => List1 (Label t) -> s1 -> s2 -> m (List1 (Label t), s1, s2)
-addSuffix2 lls e1 e2 = do
-  (lls1, sub) <- mapping lls
-  pure (lls1, relabel sub e1, relabel sub e2)
-
-mapping :: (MonadState Int m) => List1 (Label t) -> m (List1 (Label t), Dictionary Name)
-mapping lls = runStateT (traverse go lls) mempty
- where
-  go ll@(Label t name)
-    | isConstructor name =
-        pure ll
-    | otherwise = do
-        n <- lift (supplied id)
-        let name1 = name <> ".[" <> showt n <> "]"
-        modify (Map.insert name name1)
-        pure (Label t name1)
 
 -------------------------------------------------------------------------------
 
