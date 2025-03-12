@@ -422,7 +422,7 @@ transInterpreter p = do
 suffixNamesC :: ObjectList -> Pipeline ObjectList
 suffixNamesC = transSuffixMonad . traverse2 transSuffixExpr
 
-collectObjs :: (Expr Type -> Writer [Binding Type (Expr Type)] (Expr Type)) -> [Object Type (Expr Type)] -> Pipeline [Object Type (Expr Type)]
+collectObjs :: (Expr Type -> Writer [Binding Type (Expr Type)] (Expr Type)) -> ObjectList -> Pipeline ObjectList
 collectObjs f as = pure (xs <> fmap toObject ys)
  where
   (xs, ys) = runWriter (traverse2 f as)
