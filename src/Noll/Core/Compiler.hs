@@ -8,6 +8,7 @@
 module Noll.Core.Compiler where
 
 import Control.Arrow ((>>>))
+import Control.Monad ((>=>))
 import Control.Monad.RWS (RWS, ask, evalRWS, local)
 import Control.Monad.State (MonadState, State, evalState, gets, modify, runState, runStateT)
 import Control.Monad.Trans (lift)
@@ -320,16 +321,16 @@ collectObjs f as = pure (xs <> fmap toObject ys)
 --
 
 pipeline :: ObjectList -> Pipeline ObjectList
-pipeline ol =
-  pure3 sortMatchClauses ol
-    >>= suffixNamesC
-    >>= pure3 flattenELam
-    >>= collectObjs transLetLifting
-    >>= collectObjs memoize
-    >>= pure1 liftLambdas
-    >>= pure3 simplifyELet
-    >>= pure1 closeDefs
-    <&> fmap addImplicitArgs
+pipeline =
+  pure3 sortMatchClauses
+    >=> suffixNamesC
+    >=> pure3 flattenELam
+    >=> collectObjs transLetLifting
+    >=> collectObjs memoize
+    >=> pure1 liftLambdas
+    >=> pure3 simplifyELet
+    >=> pure1 closeDefs
+    >=> pure1 (fmap addImplicitArgs)
 
 compile :: [(Name, Int)] -> ObjectList -> Pipeline ()
 compile ctrs ol = do
