@@ -2,7 +2,6 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
 module Noll.Core.Compiler (compile) where
@@ -13,9 +12,10 @@ import Control.Monad.State (State, gets, modify, runState)
 import Control.Monad.Writer (MonadWriter, Writer, runWriter, tell)
 import Data.Functor.Foldable (cata, embed, project)
 import Data.List (nub, partition)
-import Noll.Common.List1 (List1, NonEmpty (..), fromList1)
+import Noll.Common.List1 (NonEmpty (..), fromList1)
 import Noll.Core.Compiler.Ast
 import Noll.Core.Compiler.Pass.ClosureConversion (closeDefs)
+import Noll.Core.Compiler.Pass.ExtraArgs (addImplicitArgs)
 import Noll.Core.Compiler.Pass.LambdaLifting (liftLambdas)
 import Noll.Core.Compiler.Pass.Suffix (transformSuffixExpr)
 import Noll.Core.Compiler.Pipeline (Pipeline (..), extendInterpreterConstructorEnv, extendInterpreterValueEnv, pipelineInsertArtifacts, pipelineInsertCode)
@@ -25,14 +25,13 @@ import Noll.Core.LLVM.IRInterpreter
 import Noll.Core.LLVM.IRInterpreter.Environment
 import Noll.Core.LLVM.IRInterpreter.Monad
 import Noll.Core.LLVM.IRInterpreter.State
-import Noll.Core.Language (Binding (..), Expr, Type, Typed (..), bindingLabel, isPrim)
+import Noll.Core.Language (Binding (..), Expr, Type, bindingLabel, isPrim)
 import Noll.Core.Language.Object (Object (..), ObjectList)
 import Noll.Core.Language.Type.Arrow (isFunction)
 import Noll.Label (Label (..))
 import Noll.Utils (Name, traverse2, (<$$>))
 import Noll.Utils.Control.Applicative (pure1, pure3)
 import Noll.Utils.Operators ((||.))
-import TextShow (showt)
 
 import qualified Noll.Common.Environment as Environment
 import qualified Noll.Common.List1 as List1
@@ -81,36 +80,6 @@ transformLetLifting =
             e
       e ->
         embed <$> sequence e
-
--------------------------------------------------------------------------------
-
-addImplicitArgs :: Object Type (Expr Type) -> Object Type (Expr Type)
-addImplicitArgs =
-  \case
-    f@(OFunction name lls1 expr)
-      | isExprFun ->
-          OFunction
-            name
-            (lls1 <> lls2)
-            (flattenEApp (Core.app (List1.last ts) expr (exprs lls2)))
-      | otherwise ->
-          f
-     where
-      isExprFun =
-        length ts > 1
-      ts =
-        Core.unfoldType (typeOf expr)
-      lls2 =
-        labels (List1.init ts)
-    o ->
-      o
-
-exprs :: [Label t] -> List1 (Expr t)
-exprs (ll : lls) = Core.var <$> ll :| lls
-exprs _ = error "Implementation error"
-
-labels :: [a] -> [Label a]
-labels ts = zipWith Label ts ["$extra." <> showt i | i <- [0 :: Int ..]]
 
 -------------------------------------------------------------------------------
 
