@@ -3,34 +3,34 @@
 
 module Noll.Core.LLVM.IRInstruction.InterpreterSpec where
 
-import Noll.Core.Compiler.Pipeline (runPipeline)
 import Control.Monad.Reader (local)
 import Control.Monad.Writer (listen)
 import Data.Tuple.Extra (thd3)
 import Noll.Common.Environment (Environment)
 import Noll.Common.List1 (NonEmpty (..), (<|))
-import Noll.Core.LLVM.IRInterpreter.Environment
-import Text.Megaparsec (runParser)
-import Noll.Core.Parser.Expr (expr)
 import Noll.Core.Compiler
+import Noll.Core.Compiler.Pipeline (runPipeline)
+import Noll.Core.Compiler.Pipeline.Kernel (Kernel (..))
 import Noll.Core.LLVM.IRConstruct (IRConstruct (..))
 import Noll.Core.LLVM.IREncodable (IREncodable (..))
 import Noll.Core.LLVM.IREval.Closure.Apply (irClosureApply)
 import Noll.Core.LLVM.IREval.Closure.Extend (irClosureExtend)
 import Noll.Core.LLVM.IREval.Closure.Finalize (irClosureFinalize)
 import Noll.Core.LLVM.IREval.Expr (irEvalExpr)
-import Noll.Core.LLVM.IRInterpreter
 import Noll.Core.LLVM.IRInstruction.TH
-import Noll.Core.LLVM.IRType
+import Noll.Core.LLVM.IRInterpreter
+import Noll.Core.LLVM.IRInterpreter.Environment
 import Noll.Core.LLVM.IRInterpreter.Monad
+import Noll.Core.LLVM.IRType
 import Noll.Core.LLVM.IRType.Syntax
 import Noll.Core.LLVM.IRValue
 import Noll.Core.Language (list, opaque, (~>))
 import Noll.Core.Language.Object (Object (..), ObjectList, objectName)
+import Noll.Core.Parser.Expr (expr)
 import Noll.Label (Label (..))
 import Noll.Utils (Name)
 import Test.Hspec (Spec, describe, it)
-import Noll.Core.Compiler.Pipeline.Kernel (Kernel (..))
+import Text.Megaparsec (runParser)
 import TextShow (showt)
 
 import qualified Data.Text.IO as Text
@@ -1208,10 +1208,10 @@ abcx out = do
   Text.writeFile out txt
   Text.putStrLn "^^^"
   pure ()
-    where
-      bob e =
-        [ OFunction
-            "main"
-            [Label Core.opaque "_"]
-            e
-        ]
+ where
+  bob e =
+    [ OFunction
+        "main"
+        [Label Core.opaque "_"]
+        e
+    ]
