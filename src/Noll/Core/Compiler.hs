@@ -25,8 +25,8 @@ import qualified Noll.Common.Environment as Environment
 import Noll.Common.List1 (List1, NonEmpty (..), fromList1)
 import qualified Noll.Common.List1 as List1
 import Noll.Common.Supply (supplied)
-import Noll.Core.Compiler.Kernel (Kernel (..), initialKernel, overKernelArtifacts, overKernelCode, overKernelInterpreterConstructorEnv, overKernelInterpreterValueEnv, overKernelSupply)
 import Noll.Core.Compiler.Pipeline (Pipeline (..), extendInterpreterConstructorEnv, extendInterpreterValueEnv, pipelineInsertArtifacts, pipelineInsertCode)
+import Noll.Core.Compiler.Pipeline.Kernel (Kernel (..), initialKernel, overKernelArtifacts, overKernelCode, overKernelInterpreterConstructorEnv, overKernelInterpreterValueEnv, overKernelSupply)
 import Noll.Core.LLVM.IRConstruct (IRConstruct (..))
 import Noll.Core.LLVM.IRInterpreter
 import Noll.Core.LLVM.IRInterpreter.Artifact

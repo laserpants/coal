@@ -30,7 +30,7 @@ import Noll.Core.Language.Object (Object (..), ObjectList, objectName)
 import Noll.Label (Label (..))
 import Noll.Utils (Name)
 import Test.Hspec (Spec, describe, it)
-import Noll.Core.Compiler.Kernel (Kernel (..))
+import Noll.Core.Compiler.Pipeline.Kernel (Kernel (..))
 import TextShow (showt)
 
 import qualified Data.Text.IO as Text

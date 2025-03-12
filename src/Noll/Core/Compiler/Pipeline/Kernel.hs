@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Core.Compiler.Kernel (
+module Noll.Core.Compiler.Pipeline.Kernel (
   Kernel (..),
   initialKernel,
   overKernelSupply,

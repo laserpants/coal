@@ -12,7 +12,7 @@ module Noll.Core.Compiler.Pipeline (
 
 import Control.Monad.State (MonadState, State, evalState, modify, runState)
 import Noll.Common.Environment (Environment)
-import Noll.Core.Compiler.Kernel (Kernel (..), initialKernel, overKernelArtifacts, overKernelCode, overKernelInterpreterConstructorEnv, overKernelInterpreterValueEnv, overKernelSupply)
+import Noll.Core.Compiler.Pipeline.Kernel (Kernel (..), initialKernel, overKernelArtifacts, overKernelCode, overKernelInterpreterConstructorEnv, overKernelInterpreterValueEnv, overKernelSupply)
 import Noll.Core.LLVM.IRConstruct (IRConstruct (..))
 import Noll.Core.LLVM.IRInterpreter.Artifact (IRInterpreterArtifact (..))
 import Noll.Core.LLVM.IRInterpreter.Monad (IRLine (..))
