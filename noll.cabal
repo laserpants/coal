@@ -46,6 +46,7 @@ library
       Noll.Compiler.Transform.Tree
       Noll.Compiler.Transform.Type.AliasInsertion
       Noll.Core.Compiler
+      Noll.Core.Compiler.Kernel
       Noll.Core.Compiler.Pipeline
       Noll.Core.Language
       Noll.Core.Language.Expr

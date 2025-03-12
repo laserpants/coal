@@ -3,6 +3,7 @@
 
 module Noll.Core.LLVM.IRInstruction.InterpreterSpec where
 
+import Noll.Core.Compiler.Pipeline (runPipeline)
 import Control.Monad.Reader (local)
 import Control.Monad.Writer (listen)
 import Data.Tuple.Extra (thd3)
@@ -29,7 +30,7 @@ import Noll.Core.Language.Object (Object (..), ObjectList, objectName)
 import Noll.Label (Label (..))
 import Noll.Utils (Name)
 import Test.Hspec (Spec, describe, it)
-import Noll.Core.Compiler.Pipeline (Pipeline (..))
+import Noll.Core.Compiler.Kernel (Kernel (..))
 import TextShow (showt)
 
 import qualified Data.Text.IO as Text
@@ -1179,30 +1180,30 @@ abcg3 = Text.putStrLn $ irEncode (xxd 3)
 
 constrs = [("$Cons", 0), ("$Nil", 1), ("$Record", 0), ("EqualTo", 0), ("GreaterThan", 1), ("LessThan", 2), ("Node", 1), ("Leaf", 0)]
 
--- abc5 = Text.putStrLn (irEncode pipelineStateArtifacts)
-abc5 = (pipelineStateArtifacts, pipelineStateCode)
+-- abc5 = Text.putStrLn (irEncode pipelineArtifacts)
+abc5 = (pipelineArtifacts, pipelineCode)
  where
-  (_, Pipeline{..}) = runCore (compile constrs blockObjects)
+  (_, Kernel{..}) = runPipeline (compile constrs blockObjects)
 
-abc6 = (pipelineStateArtifacts, pipelineStateCode)
+abc6 = (pipelineArtifacts, pipelineCode)
  where
-  (_, Pipeline{..}) = runCore (compile constrs blockObjects2)
+  (_, Kernel{..}) = runPipeline (compile constrs blockObjects2)
 
-abc7 = (pipelineStateArtifacts, pipelineStateCode)
+abc7 = (pipelineArtifacts, pipelineCode)
  where
-  (_, Pipeline{..}) = runCore (compile constrs blockObjects3)
+  (_, Kernel{..}) = runPipeline (compile constrs blockObjects3)
 
-abc8 = (pipelineStateArtifacts, pipelineStateCode)
+abc8 = (pipelineArtifacts, pipelineCode)
  where
-  (_, Pipeline{..}) = runCore (compile constrs blockObjects4)
+  (_, Kernel{..}) = runPipeline (compile constrs blockObjects4)
 
 abcx :: FilePath -> IO ()
 abcx out = do
   inp <- Text.readFile "test/Noll/fixtures/prog2.txt"
   c <- case runParser expr "" inp of
     Right e ->
-      let (_, Pipeline{..}) = runCore (compile constrs (bob e))
-       in pure pipelineStateCode
+      let (_, Kernel{..}) = runPipeline (compile constrs (bob e))
+       in pure pipelineCode
   let txt = irEncode c
   Text.writeFile out txt
   Text.putStrLn "^^^"

@@ -1,11 +1,8 @@
-{-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
 module Noll.Core.Compiler where
@@ -28,7 +25,8 @@ import qualified Noll.Common.Environment as Environment
 import Noll.Common.List1 (List1, NonEmpty (..), fromList1)
 import qualified Noll.Common.List1 as List1
 import Noll.Common.Supply (supplied)
-import Noll.Core.Compiler.Pipeline (Pipeline (..), initialPipeline, overPipelineArtifacts, overPipelineCode, overPipelineInterpreterConstructorEnv, overPipelineInterpreterValueEnv, overPipelineSupply)
+import Noll.Core.Compiler.Kernel (Kernel (..), initialKernel, overKernelArtifacts, overKernelCode, overKernelInterpreterConstructorEnv, overKernelInterpreterValueEnv, overKernelSupply)
+import Noll.Core.Compiler.Pipeline (Pipeline (..), extendInterpreterConstructorEnv, extendInterpreterValueEnv, pipelineInsertArtifacts, pipelineInsertCode)
 import Noll.Core.LLVM.IRConstruct (IRConstruct (..))
 import Noll.Core.LLVM.IRInterpreter
 import Noll.Core.LLVM.IRInterpreter.Artifact
@@ -408,58 +406,28 @@ muteObjectTypes =
 
 -------------------------------------------------------------------------------
 
-newtype Core a = Core {pipelineStack :: State Pipeline a}
-  deriving
-    ( Functor
-    , Applicative
-    , Monad
-    , MonadState Pipeline
-    )
-
-runCore :: Core a -> (a, Pipeline)
-runCore p = runState (pipelineStack p) initialPipeline
-
-evalCore :: Core a -> a
-evalCore p = evalState (pipelineStack p) initialPipeline
-
-{-# INLINE extendInterpreterValueEnv #-}
-extendInterpreterValueEnv :: Environment IRValue -> Core ()
-extendInterpreterValueEnv env = modify (overPipelineInterpreterValueEnv (<> env))
-
-{-# INLINE extendInterpreterConstructorEnv #-}
-extendInterpreterConstructorEnv :: Environment Int -> Core ()
-extendInterpreterConstructorEnv env = modify (overPipelineInterpreterConstructorEnv (<> env))
-
-{-# INLINE pipelineStateInsertArtifacts #-}
-pipelineStateInsertArtifacts :: [IRInterpreterArtifact] -> Core ()
-pipelineStateInsertArtifacts = modify . (overPipelineArtifacts . (<>))
-
-{-# INLINE pipelineStateInsertCode #-}
-pipelineStateInsertCode :: [IRConstruct [IRLine]] -> Core ()
-pipelineStateInsertCode = modify . (overPipelineCode . (<>))
-
-transSuffixMonad :: (MonadState Pipeline m) => State Int a -> m a
+transSuffixMonad :: (MonadState Kernel m) => State Int a -> m a
 transSuffixMonad a = do
-  (v, n) <- gets (runState a . pipelineStateSupply)
-  modify (overPipelineSupply (const n))
+  (v, n) <- gets (runState a . pipelineSupply)
+  modify (overKernelSupply (const n))
   pure v
 
-transInterpreter :: IRInterpreter a -> Core a
+transInterpreter :: IRInterpreter a -> Pipeline a
 transInterpreter p = do
-  env <- gets pipelineStateInterpreterEnv
+  env <- gets pipelineInterpreterEnv
   let (a, s, _) = runInterpreter env p
-  pipelineStateInsertArtifacts (irInterpreterStateArtifacts s)
+  pipelineInsertArtifacts (irInterpreterStateArtifacts s)
   pure a
 
-suffixNamesC :: ObjectList -> Core ObjectList
+suffixNamesC :: ObjectList -> Pipeline ObjectList
 suffixNamesC = transSuffixMonad . traverse2 transSuffixExpr
 
-collectObjs :: (Expr Type -> Writer [Binding Type (Expr Type)] (Expr Type)) -> [Object Type (Expr Type)] -> Core [Object Type (Expr Type)]
+collectObjs :: (Expr Type -> Writer [Binding Type (Expr Type)] (Expr Type)) -> [Object Type (Expr Type)] -> Pipeline [Object Type (Expr Type)]
 collectObjs f as = pure (xs <> fmap toObject ys)
  where
   (xs, ys) = runWriter (traverse2 f as)
 
-pipeline :: ObjectList -> Core [Object Type (Expr Type)]
+pipeline :: ObjectList -> Pipeline [Object Type (Expr Type)]
 pipeline ol = do
   a0 <- pure3 sortMatchClauses ol
   a1 <- suffixNamesC a0
@@ -471,13 +439,13 @@ pipeline ol = do
   a7 <- pure1 closeDefs a6
   pure (addImplicitArgs <$> a7)
 
-compile :: [(Name, Int)] -> ObjectList -> Core ()
+compile :: [(Name, Int)] -> ObjectList -> Pipeline ()
 compile constrs ol = do
   objs <- pipeline ol
   extendInterpreterValueEnv (objectEnvironment objs)
   extendInterpreterConstructorEnv (Environment.fromList constrs)
   code <- transInterpreter (traverse interpretObject objs)
-  pipelineStateInsertCode code
-  arts <- gets pipelineStateArtifacts
+  pipelineInsertCode code
+  arts <- gets pipelineArtifacts
   defs <- transInterpreter (traverse interpretArtifact (nub arts))
-  pipelineStateInsertCode (concat defs)
+  pipelineInsertCode (concat defs)

@@ -1,61 +1,49 @@
-{-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE StrictData #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module Noll.Core.Compiler.Pipeline (
   Pipeline (..),
-  initialPipeline,
-  overPipelineSupply,
-  overPipelineInterpreterEnv,
-  overPipelineInterpreterValueEnv,
-  overPipelineInterpreterConstructorEnv,
-  overPipelineArtifacts,
-  overPipelineCode,
+  runPipeline,
+  evalPipeline,
+  extendInterpreterValueEnv,
+  extendInterpreterConstructorEnv,
+  pipelineInsertArtifacts,
+  pipelineInsertCode,
 ) where
 
+import Control.Monad.State (MonadState, State, evalState, modify, runState)
 import Noll.Common.Environment (Environment)
+import Noll.Core.Compiler.Kernel (Kernel (..), initialKernel, overKernelArtifacts, overKernelCode, overKernelInterpreterConstructorEnv, overKernelInterpreterValueEnv, overKernelSupply)
 import Noll.Core.LLVM.IRConstruct (IRConstruct (..))
-import Noll.Core.LLVM.IRInterpreter.Artifact (IRInterpreterArtifact)
-import Noll.Core.LLVM.IRInterpreter.Environment (
-  IRInterpreterEnv (..),
-  inConstructorEnv,
-  inValueEnv,
- )
+import Noll.Core.LLVM.IRInterpreter.Artifact (IRInterpreterArtifact (..))
 import Noll.Core.LLVM.IRInterpreter.Monad (IRLine (..))
 import Noll.Core.LLVM.IRValue (IRValue (..))
-import Noll.Utils (Over)
 
-data Pipeline = Pipeline
-  { pipelineStateSupply :: Int
-  , pipelineStateInterpreterEnv :: IRInterpreterEnv
-  , pipelineStateArtifacts :: [IRInterpreterArtifact]
-  , pipelineStateCode :: [IRConstruct [IRLine]]
-  }
-  deriving (Show, Eq, Ord)
+newtype Pipeline a = Pipeline {pipelineKernel :: State Kernel a}
+  deriving
+    ( Functor
+    , Applicative
+    , Monad
+    , MonadState Kernel
+    )
 
-{-# INLINE initialPipeline #-}
-initialPipeline :: Pipeline
-initialPipeline = Pipeline 0 (IRInterpreterEnv mempty mempty) [] []
+runPipeline :: Pipeline a -> (a, Kernel)
+runPipeline p = runState (pipelineKernel p) initialKernel
 
-{-# INLINE overPipelineSupply #-}
-overPipelineSupply :: Over Pipeline Int
-overPipelineSupply f Pipeline{..} = Pipeline{pipelineStateSupply = f pipelineStateSupply, ..}
+evalPipeline :: Pipeline a -> a
+evalPipeline p = evalState (pipelineKernel p) initialKernel
 
-{-# INLINE overPipelineInterpreterEnv #-}
-overPipelineInterpreterEnv :: Over Pipeline IRInterpreterEnv
-overPipelineInterpreterEnv f Pipeline{..} = Pipeline{pipelineStateInterpreterEnv = f pipelineStateInterpreterEnv, ..}
+{-# INLINE extendInterpreterValueEnv #-}
+extendInterpreterValueEnv :: Environment IRValue -> Pipeline ()
+extendInterpreterValueEnv env = modify (overKernelInterpreterValueEnv (<> env))
 
-{-# INLINE overPipelineInterpreterValueEnv #-}
-overPipelineInterpreterValueEnv :: Over Pipeline (Environment IRValue)
-overPipelineInterpreterValueEnv = overPipelineInterpreterEnv . inValueEnv
+{-# INLINE extendInterpreterConstructorEnv #-}
+extendInterpreterConstructorEnv :: Environment Int -> Pipeline ()
+extendInterpreterConstructorEnv env = modify (overKernelInterpreterConstructorEnv (<> env))
 
-{-# INLINE overPipelineInterpreterConstructorEnv #-}
-overPipelineInterpreterConstructorEnv :: Over Pipeline (Environment Int)
-overPipelineInterpreterConstructorEnv = overPipelineInterpreterEnv . inConstructorEnv
+{-# INLINE pipelineInsertArtifacts #-}
+pipelineInsertArtifacts :: [IRInterpreterArtifact] -> Pipeline ()
+pipelineInsertArtifacts = modify . (overKernelArtifacts . (<>))
 
-{-# INLINE overPipelineArtifacts #-}
-overPipelineArtifacts :: Over Pipeline [IRInterpreterArtifact]
-overPipelineArtifacts f Pipeline{..} = Pipeline{pipelineStateArtifacts = f pipelineStateArtifacts, ..}
-
-{-# INLINE overPipelineCode #-}
-overPipelineCode :: Over Pipeline [IRConstruct [IRLine]]
-overPipelineCode f Pipeline{..} = Pipeline{pipelineStateCode = f pipelineStateCode, ..}
+{-# INLINE pipelineInsertCode #-}
+pipelineInsertCode :: [IRConstruct [IRLine]] -> Pipeline ()
+pipelineInsertCode = modify . (overKernelCode . (<>))
