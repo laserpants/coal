@@ -15,16 +15,12 @@ import Control.Monad.Writer (MonadWriter, Writer, runWriter, tell)
 import Data.Fix (Fix (..))
 import Data.Functor.Foldable (cata, embed, project)
 import Data.List (nub, partition)
-import qualified Data.Map.Strict as Map
 import Data.Set (Set)
-import qualified Data.Set as Set
-import qualified Data.Text as Text
 import Noll.AST.FreeVars (FreeVars (..), exceptNames)
 import Noll.Common.Environment (Environment)
-import qualified Noll.Common.Environment as Environment
 import Noll.Common.List1 (List1, NonEmpty (..), fromList1)
-import qualified Noll.Common.List1 as List1
 import Noll.Common.Supply (supplied)
+import Noll.Core.Compiler.Ast
 import Noll.Core.Compiler.Pipeline (Pipeline (..), extendInterpreterConstructorEnv, extendInterpreterValueEnv, pipelineInsertArtifacts, pipelineInsertCode)
 import Noll.Core.Compiler.Pipeline.Kernel (Kernel (..), initialKernel, overKernelArtifacts, overKernelCode, overKernelInterpreterConstructorEnv, overKernelInterpreterValueEnv, overKernelSupply)
 import Noll.Core.LLVM.IRConstruct (IRConstruct (..))
@@ -67,6 +63,11 @@ import Noll.Utils.Control.Applicative (pure1, pure3)
 import Noll.Utils.Operators ((||.))
 import TextShow
 
+import qualified Data.Map.Strict as Map
+import qualified Data.Set as Set
+import qualified Data.Text as Text
+import qualified Noll.Common.Environment as Environment
+import qualified Noll.Common.List1 as List1
 import qualified Noll.Core.Language as Core
 
 -------------------------------------------------------------------------------
@@ -216,54 +217,6 @@ mapping lls = runStateT (traverse go lls) mempty
 
 -------------------------------------------------------------------------------
 
-flattenELam :: Expr Type -> Expr Type
-flattenELam =
-  cata $
-    \case
-      Core.ELam vs1 (Fix (Core.ELam vs2 e1)) ->
-        Core.lam (vs1 <> vs2) e1
-      e ->
-        embed e
-
--------------------------------------------------------------------------------
-
-flattenEApp :: Expr t -> Expr t
-flattenEApp =
-  cata $
-    \case
-      Core.EApp t (Fix (Core.EApp _ e1 es1)) es2 ->
-        Core.app t e1 (es1 <> es2)
-      e ->
-        embed e
-
--------------------------------------------------------------------------------
-
-simplifyELet :: Expr t -> Expr t
-simplifyELet e = relabel (Map.fromList sub) e1
- where
-  subst =
-    cata $
-      \case
-        ELet vs f -> do
-          binds <- foldrM go [] =<< traverse sequence vs
-          case binds of
-            a : as ->
-              Core.let_ (a :| as) <$> f
-            [] ->
-              f
-        f ->
-          embed <$> sequence f
-
-  go (Binding ll1 (Fix (Core.EVar ll2))) ls = do
-    tell [(labelName ll1, labelName ll2)]
-    pure ls
-  go l ls =
-    pure (l : ls)
-  (e1, sub) =
-    runWriter (subst e)
-
--------------------------------------------------------------------------------
-
 evalWS0 :: RWS () w Int a -> (a, w)
 evalWS0 v = evalRWS v () 0
 
@@ -341,20 +294,6 @@ exprs _ = error "Implementation error"
 
 labels :: [a] -> [Label a]
 labels ts = zipWith Label ts ["$extra." <> showt i | i <- [0 :: Int ..]]
-
--------------------------------------------------------------------------------
-
-sortMatchClauses :: Expr t -> Expr t
-sortMatchClauses =
-  cata $
-    \case
-      EMat t e1 cs ->
-        Core.match t e1 (List1.sortBy clauseOrder cs)
-      e ->
-        embed e
- where
-  clauseOrder (Clause (a :| _) _) (Clause (b :| _) _) =
-    compare (labelName a) (labelName b)
 
 -------------------------------------------------------------------------------
 

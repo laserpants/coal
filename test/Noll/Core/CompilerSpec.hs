@@ -2,6 +2,7 @@
 
 module Noll.Core.CompilerSpec where
 
+import Noll.Core.Compiler.Ast (simplifyELet)
 import Control.Monad.Identity (runIdentity)
 import Control.Monad.State (evalState)
 import Data.Fix (Fix (..))
