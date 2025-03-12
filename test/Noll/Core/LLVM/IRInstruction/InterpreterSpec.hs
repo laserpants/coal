@@ -1180,20 +1180,20 @@ abcg3 = Text.putStrLn $ irEncode (xxd 3)
 
 constrs = [("$Cons", 0), ("$Nil", 1), ("$Record", 0), ("EqualTo", 0), ("GreaterThan", 1), ("LessThan", 2), ("Node", 1), ("Leaf", 0)]
 
--- abc5 = Text.putStrLn (irEncode pipelineArtifacts)
-abc5 = (pipelineArtifacts, pipelineCode)
+-- abc5 = Text.putStrLn (irEncode kernelArtifacts)
+abc5 = (kernelArtifacts, kernelCode)
  where
   (_, Kernel{..}) = runPipeline (compile constrs blockObjects)
 
-abc6 = (pipelineArtifacts, pipelineCode)
+abc6 = (kernelArtifacts, kernelCode)
  where
   (_, Kernel{..}) = runPipeline (compile constrs blockObjects2)
 
-abc7 = (pipelineArtifacts, pipelineCode)
+abc7 = (kernelArtifacts, kernelCode)
  where
   (_, Kernel{..}) = runPipeline (compile constrs blockObjects3)
 
-abc8 = (pipelineArtifacts, pipelineCode)
+abc8 = (kernelArtifacts, kernelCode)
  where
   (_, Kernel{..}) = runPipeline (compile constrs blockObjects4)
 
@@ -1203,7 +1203,7 @@ abcx out = do
   c <- case runParser expr "" inp of
     Right e ->
       let (_, Kernel{..}) = runPipeline (compile constrs (bob e))
-       in pure pipelineCode
+       in pure kernelCode
   let txt = irEncode c
   Text.writeFile out txt
   Text.putStrLn "^^^"

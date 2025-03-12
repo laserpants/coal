@@ -408,13 +408,13 @@ muteObjectTypes =
 
 transSuffixMonad :: (MonadState Kernel m) => State Int a -> m a
 transSuffixMonad a = do
-  (v, n) <- gets (runState a . pipelineSupply)
+  (v, n) <- gets (runState a . kernelSupply)
   modify (overKernelSupply (const n))
   pure v
 
 transInterpreter :: IRInterpreter a -> Pipeline a
 transInterpreter p = do
-  env <- gets pipelineInterpreterEnv
+  env <- gets kernelInterpreterEnv
   let (a, s, _) = runInterpreter env p
   pipelineInsertArtifacts (irInterpreterStateArtifacts s)
   pure a
@@ -446,6 +446,6 @@ compile constrs ol = do
   extendInterpreterConstructorEnv (Environment.fromList constrs)
   code <- transInterpreter (traverse interpretObject objs)
   pipelineInsertCode code
-  arts <- gets pipelineArtifacts
+  arts <- gets kernelArtifacts
   defs <- transInterpreter (traverse interpretArtifact (nub arts))
   pipelineInsertCode (concat defs)

@@ -25,10 +25,10 @@ import Noll.Core.LLVM.IRValue (IRValue (..))
 import Noll.Utils (Over)
 
 data Kernel = Kernel
-  { pipelineSupply :: Int
-  , pipelineInterpreterEnv :: IRInterpreterEnv
-  , pipelineArtifacts :: [IRInterpreterArtifact]
-  , pipelineCode :: [IRConstruct [IRLine]]
+  { kernelSupply :: Int
+  , kernelInterpreterEnv :: IRInterpreterEnv
+  , kernelArtifacts :: [IRInterpreterArtifact]
+  , kernelCode :: [IRConstruct [IRLine]]
   }
   deriving (Show, Eq, Ord)
 
@@ -38,11 +38,11 @@ initialKernel = Kernel 0 (IRInterpreterEnv mempty mempty) [] []
 
 {-# INLINE overKernelSupply #-}
 overKernelSupply :: Over Kernel Int
-overKernelSupply f Kernel{..} = Kernel{pipelineSupply = f pipelineSupply, ..}
+overKernelSupply f Kernel{..} = Kernel{kernelSupply = f kernelSupply, ..}
 
 {-# INLINE overKernelInterpreterEnv #-}
 overKernelInterpreterEnv :: Over Kernel IRInterpreterEnv
-overKernelInterpreterEnv f Kernel{..} = Kernel{pipelineInterpreterEnv = f pipelineInterpreterEnv, ..}
+overKernelInterpreterEnv f Kernel{..} = Kernel{kernelInterpreterEnv = f kernelInterpreterEnv, ..}
 
 {-# INLINE overKernelInterpreterValueEnv #-}
 overKernelInterpreterValueEnv :: Over Kernel (Environment IRValue)
@@ -54,8 +54,8 @@ overKernelInterpreterConstructorEnv = overKernelInterpreterEnv . inConstructorEn
 
 {-# INLINE overKernelArtifacts #-}
 overKernelArtifacts :: Over Kernel [IRInterpreterArtifact]
-overKernelArtifacts f Kernel{..} = Kernel{pipelineArtifacts = f pipelineArtifacts, ..}
+overKernelArtifacts f Kernel{..} = Kernel{kernelArtifacts = f kernelArtifacts, ..}
 
 {-# INLINE overKernelCode #-}
 overKernelCode :: Over Kernel [IRConstruct [IRLine]]
-overKernelCode f Kernel{..} = Kernel{pipelineCode = f pipelineCode, ..}
+overKernelCode f Kernel{..} = Kernel{kernelCode = f kernelCode, ..}
