@@ -11,8 +11,16 @@ module Noll.Core.Compiler.Pipeline (
 ) where
 
 import Control.Monad.State (MonadState, State, evalState, modify, runState)
+import Data.List (sort)
 import Noll.Common.Environment (Environment)
-import Noll.Core.Compiler.Pipeline.Kernel (Kernel (..), initialKernel, overKernelArtifacts, overKernelCode, overKernelInterpreterConstructorEnv, overKernelInterpreterValueEnv, overKernelSupply)
+import Noll.Core.Compiler.Pipeline.Kernel (
+  Kernel (..),
+  initialKernel,
+  overKernelArtifacts,
+  overKernelCode,
+  overKernelInterpreterConstructorEnv,
+  overKernelInterpreterValueEnv,
+ )
 import Noll.Core.LLVM.IRConstruct (IRConstruct (..))
 import Noll.Core.LLVM.IRInterpreter.Artifact (IRInterpreterArtifact (..))
 import Noll.Core.LLVM.IRInterpreter.Monad (IRLine (..))
@@ -46,4 +54,4 @@ pipelineInsertArtifacts = modify . (overKernelArtifacts . (<>))
 
 {-# INLINE pipelineInsertCode #-}
 pipelineInsertCode :: [IRConstruct [IRLine]] -> Pipeline ()
-pipelineInsertCode = modify . (overKernelCode . (<>))
+pipelineInsertCode code = modify (overKernelCode (sort . (<> code)))

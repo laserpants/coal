@@ -1215,3 +1215,47 @@ abcx out = do
         [Label Core.opaque "_"]
         e
     ]
+
+abcy :: FilePath -> IO ()
+abcy out = do
+  inp <- Text.readFile "test/Noll/fixtures/prog2.txt"
+  c <- case runParser expr "" inp of
+    Right e ->
+      let (_, Kernel{..}) = runPipeline (compile constrs (bob e))
+       in pure kernelCode
+  let txt = irEncode c
+  Text.writeFile out txt
+  Text.putStrLn "^^^"
+  pure ()
+ where
+  bob e =
+    [ OFunction
+        "main"
+        [Label Core.opaque "_"]
+        e
+    ]
+
+abcz :: FilePath -> IO ()
+abcz out = do
+  inp <- Text.readFile "test/Noll/fixtures/prog3.txt"
+  c <- case runParser expr "" inp of
+    Right e ->
+      let (_, Kernel{..}) = runPipeline (compile constrs (bob e))
+       in pure kernelCode
+    Left e ->
+      error (show e)
+  let txt = irEncode c
+  Text.writeFile out txt
+  Text.putStrLn "^^^"
+  pure ()
+ where
+  bob e =
+    [ OConstant
+        "m"
+        (Core.lit (Core.PInt32 1))
+    , OFunction
+        "main"
+        [Label Core.opaque "_"]
+        e
+    ]
+

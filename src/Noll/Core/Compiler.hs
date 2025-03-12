@@ -2,6 +2,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
 module Noll.Core.Compiler (compile) where
@@ -12,6 +13,7 @@ import Control.Monad.State (State, gets, modify, runState)
 import Control.Monad.Writer (Writer, runWriter)
 import Data.Functor.Foldable (embed, project)
 import Data.List (nub)
+import Debug.Trace
 import Noll.Common.List1 (fromList1)
 import Noll.Core.Compiler.Ast (flattenELam, simplifyELet, sortMatchClauses)
 import Noll.Core.Compiler.Pass.ClosureConversion (closeDefs)
@@ -36,7 +38,7 @@ import Noll.Core.LLVM.IRInterpreter.State
 import Noll.Core.Language (Binding (..), Expr, Type)
 import Noll.Core.Language.Object (Object (..), ObjectList)
 import Noll.Label (Label (..))
-import Noll.Utils (Name, traverse2)
+import Noll.Utils (Name, forM_, traverse2)
 import Noll.Utils.Control.Applicative (pure1, pure3)
 
 import qualified Noll.Common.Environment as Environment

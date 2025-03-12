@@ -55,13 +55,12 @@ interpretFunction name f args = CDefine name i8Ptr Nothing args <$> listenOnly (
 interpretObject :: Object Core.Type (Core.Expr Core.Type) -> IRInterpreter (IRConstruct [IRLine])
 interpretObject =
   \case
-    OFunction name lls e -> do
+    OFunction name lls e ->
       local
         (flip (foldr insertLocal) lls)
         (interpretFunction name (irEvalFun e) [Label i8Ptr n | Label _ n <- lls])
-    OConstant name e -> do
-      w <- listenOnly (interpret (irEvalExpr e))
-      error "TODO"
+    OConstant name e ->
+      interpretFunction name (irEvalFun e) []
     _ ->
       error "TODO"
  where
