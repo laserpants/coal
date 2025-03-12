@@ -9,34 +9,37 @@ module Noll.Core.Compiler (compile) where
 import Control.Arrow ((>>>))
 import Control.Monad (void, (>=>))
 import Control.Monad.State (State, gets, modify, runState)
-import Control.Monad.Writer (MonadWriter, Writer, runWriter, tell)
-import Data.Functor.Foldable (cata, embed, project)
-import Data.List (nub, partition)
-import Noll.Common.List1 (NonEmpty (..), fromList1)
-import Noll.Core.Compiler.Ast
+import Control.Monad.Writer (Writer, runWriter)
+import Data.Functor.Foldable (embed, project)
+import Data.List (nub)
+import Noll.Common.List1 (fromList1)
+import Noll.Core.Compiler.Ast (flattenELam, simplifyELet, sortMatchClauses)
 import Noll.Core.Compiler.Pass.ClosureConversion (closeDefs)
 import Noll.Core.Compiler.Pass.ExtraArgs (addImplicitArgs)
 import Noll.Core.Compiler.Pass.LambdaLifting (liftLambdas)
 import Noll.Core.Compiler.Pass.LetLifting (transformLetLifting)
 import Noll.Core.Compiler.Pass.Memoize (memoize)
 import Noll.Core.Compiler.Pass.Suffix (transformSuffixExpr)
-import Noll.Core.Compiler.Pipeline (Pipeline (..), extendInterpreterConstructorEnv, extendInterpreterValueEnv, pipelineInsertArtifacts, pipelineInsertCode)
+import Noll.Core.Compiler.Pipeline (
+  Pipeline (..),
+  extendInterpreterConstructorEnv,
+  extendInterpreterValueEnv,
+  pipelineInsertArtifacts,
+  pipelineInsertCode,
+ )
 import Noll.Core.Compiler.Pipeline.Kernel (Kernel (..), overKernelSupply)
 import Noll.Core.LLVM.IRConstruct (IRConstruct (..))
 import Noll.Core.LLVM.IRInterpreter
 import Noll.Core.LLVM.IRInterpreter.Environment
 import Noll.Core.LLVM.IRInterpreter.Monad
 import Noll.Core.LLVM.IRInterpreter.State
-import Noll.Core.Language (Binding (..), Expr, Type, bindingLabel, isPrim)
+import Noll.Core.Language (Binding (..), Expr, Type)
 import Noll.Core.Language.Object (Object (..), ObjectList)
-import Noll.Core.Language.Type.Arrow (isFunction)
 import Noll.Label (Label (..))
-import Noll.Utils (Name, traverse2, (<$$>))
+import Noll.Utils (Name, traverse2)
 import Noll.Utils.Control.Applicative (pure1, pure3)
-import Noll.Utils.Operators ((||.))
 
 import qualified Noll.Common.Environment as Environment
-import qualified Noll.Common.List1 as List1
 import qualified Noll.Core.Language as Core
 
 -------------------------------------------------------------------------------
