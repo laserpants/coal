@@ -8,6 +8,7 @@ module Noll.Core.Language.Type.Arrow (
   arity,
   isFunction,
   returnTypeOf,
+  functionTypeOf,
 ) where
 
 import Noll.Common.List1 (List1, (<|))
@@ -46,3 +47,7 @@ isFunction f = arity (typeOf f) > 0
 {-# INLINE returnTypeOf #-}
 returnTypeOf :: (Typed t) => t -> Type
 returnTypeOf = List1.last . unfoldType . typeOf
+
+{-# INLINE functionTypeOf #-}
+functionTypeOf :: (Functor f, Foldable f, Typed t, Typed u) => t -> f u -> Type
+functionTypeOf a as = foldType (typeOf a) (typeOf <$> as)

@@ -40,6 +40,7 @@ import Noll.Core.Language (
   Typed (..),
   bindingLabel,
   foldType,
+  functionTypeOf,
   overBindingLabel,
   unzipBindings,
  )
@@ -75,9 +76,6 @@ import qualified Noll.Core.Language as Core
 runLifting :: RWS Name ObjectList Int a -> (a, ObjectList)
 runLifting e = evalRWS e "" 1
 
-functionType :: (Functor f, Foldable f, Typed t, Typed u) => t -> f u -> Type
-functionType a as = foldType (typeOf a) (typeOf <$> as)
-
 liftLambdas :: ObjectList -> ObjectList
 liftLambdas objs = objs1 <> objs2
  where
@@ -103,7 +101,7 @@ liftLambdas objs = objs1 <> objs2
 moveUp :: (MonadWriter ObjectList m) => Name -> List1 (Label Type) -> Expr Type -> m (Expr Type)
 moveUp name vs f = do
   tell [OFunction name (fromList1 vs) f]
-  pure (Core.var (Label (functionType f vs) name))
+  pure (Core.var (Label (functionTypeOf f vs) name))
 
 -------------------------------------------------------------------------------
 
