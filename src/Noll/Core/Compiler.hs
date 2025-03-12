@@ -8,7 +8,7 @@
 module Noll.Core.Compiler where
 
 import Control.Arrow ((>>>))
-import Control.Monad ((>=>))
+import Control.Monad (void, (>=>))
 import Control.Monad.RWS (RWS, ask, evalRWS, local)
 import Control.Monad.State (MonadState, State, evalState, gets, modify, runState, runStateT)
 import Control.Monad.Trans (lift)
@@ -43,9 +43,9 @@ import Noll.Core.Language (
   bindingLabel,
   foldType,
   functionTypeOf,
+  isPrim,
   overBindingLabel,
   unzipBindings,
-  isPrim,
  )
 import Noll.Core.Language.Expr.Replace (Sub, relabel)
 import Noll.Core.Language.Object (Object (..), ObjectList, objectName)
@@ -302,35 +302,58 @@ transInterpreter p = do
   pipelineInsertArtifacts (irInterpreterStateArtifacts s)
   pure a
 
-suffixNamesC :: ObjectList -> Pipeline ObjectList
-suffixNamesC = transSuffixMonad . traverse2 transSuffixExpr
-
-collectObjs :: (Expr Type -> Writer [Binding Type (Expr Type)] (Expr Type)) -> ObjectList -> Pipeline ObjectList
-collectObjs f as = pure (xs <> fmap toObject ys)
- where
-  (xs, ys) = runWriter (traverse2 f as)
-
 --
 
-pipeline :: ObjectList -> Pipeline ObjectList
-pipeline =
-  pure3 sortMatchClauses
-    >=> suffixNamesC
-    >=> pure3 flattenELam
-    >=> collectObjs transLetLifting
-    >=> collectObjs memoize
-    >=> pure1 liftLambdas
-    >=> pure3 simplifyELet
-    >=> pure1 closeDefs
-    >=> pure1 (fmap addImplicitArgs)
+type Pass i o = i -> Pipeline o
 
-compile :: [(Name, Int)] -> ObjectList -> Pipeline ()
-compile ctrs ol = do
-  objs <- pipeline ol
-  extendInterpreterValueEnv (objectEnvironment objs)
-  extendInterpreterConstructorEnv (Environment.fromList ctrs)
+collectObjs :: (Expr Type -> Writer [Binding Type (Expr Type)] (Expr Type)) -> Pass ObjectList ObjectList
+collectObjs f as = pure (ls <> fmap toObject rs)
+ where
+  (ls, rs) = runWriter (traverse2 f as)
+
+coreSortMatchClauses
+  , coreSuffix
+  , coreFlatten
+  , coreLetTranslation
+  , coreMemoize
+  , coreLambdaLifting
+  , coreSimplify
+  , coreCloseDefs
+  , coreExtraArgs ::
+    Pass ObjectList ObjectList
+coreSortMatchClauses = pure3 sortMatchClauses
+coreSuffix = transSuffixMonad . traverse2 transSuffixExpr
+coreFlatten = pure3 flattenELam
+coreLetTranslation = collectObjs transLetLifting
+coreMemoize = collectObjs memoize
+coreLambdaLifting = pure1 liftLambdas
+coreSimplify = pure3 simplifyELet
+coreCloseDefs = pure1 closeDefs
+coreExtraArgs = pure1 (fmap addImplicitArgs)
+
+corePass :: Pass ObjectList ObjectList
+corePass =
+  coreSortMatchClauses
+    >=> coreSuffix
+    >=> coreFlatten
+    >=> coreLetTranslation
+    >=> coreMemoize
+    >=> coreLambdaLifting
+    >=> coreSimplify
+    >=> coreCloseDefs
+    >=> coreExtraArgs
+
+irCodeGenPass :: Pass ObjectList [IRConstruct [IRLine]]
+irCodeGenPass objs = do
   code <- transInterpreter (traverse interpretObject objs)
-  pipelineInsertCode code
   arts <- gets kernelArtifacts
   defs <- transInterpreter (traverse interpretArtifact (nub arts))
-  pipelineInsertCode (concat defs)
+  pipelineInsertCode (concat defs <> code)
+  gets kernelCode
+
+compile :: [(Name, Int)] -> Pass ObjectList ()
+compile ctrs ol = do
+  objs <- corePass ol
+  extendInterpreterValueEnv (objectEnvironment objs)
+  extendInterpreterConstructorEnv (Environment.fromList ctrs)
+  void (irCodeGenPass objs)
