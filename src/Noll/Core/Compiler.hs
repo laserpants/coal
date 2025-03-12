@@ -45,6 +45,7 @@ import Noll.Core.Language (
   functionTypeOf,
   overBindingLabel,
   unzipBindings,
+  isPrim,
  )
 import Noll.Core.Language.Expr.Replace (Sub, relabel)
 import Noll.Core.Language.Object (Object (..), ObjectList, objectName)
@@ -117,15 +118,6 @@ toObject (Binding (Label _ name) e1) = go e1
           OFunction name (fromList1 vs) e
         e ->
           OConstant name (embed e)
-
-isPrim :: Expr Type -> Bool
-isPrim =
-  cata $
-    \case
-      ELit{} ->
-        True
-      _ ->
-        False
 
 memoize :: (MonadWriter [Binding Type (Expr Type)] m) => Expr Type -> m (Expr Type)
 memoize =

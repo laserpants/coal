@@ -14,6 +14,7 @@ module Noll.Core.Language.Expr (
   overBindingLabel,
   overBindingExpr,
   unzipBindings,
+  isPrim,
 ) where
 
 import Data.Data (Data)
@@ -180,3 +181,12 @@ instance (Typed t, Typed a) => Typed (ExprF t a) where
 
 instance (Typed t) => Typed (Expr t) where
   typeOf = typeOf . project
+
+isPrim :: Expr Type -> Bool
+isPrim =
+  cata $
+    \case
+      ELit{} ->
+        True
+      _ ->
+        False
