@@ -13,6 +13,7 @@ import Control.Monad.State (MonadState, State, evalState, gets, modify, runState
 import Control.Monad.Trans (lift)
 import Control.Monad.Writer (MonadWriter, Writer, runWriter, tell)
 import Data.Fix (Fix (..))
+import Data.Functor ((<&>))
 import Data.Functor.Foldable (cata, embed, project)
 import Data.List (nub, partition)
 import Data.Set (Set)
@@ -316,17 +317,19 @@ collectObjs f as = pure (xs <> fmap toObject ys)
  where
   (xs, ys) = runWriter (traverse2 f as)
 
+--
+
 pipeline :: ObjectList -> Pipeline ObjectList
-pipeline ol = do
-  a0 <- pure3 sortMatchClauses ol
-  a1 <- suffixNamesC a0
-  a2 <- pure3 flattenELam a1
-  a3 <- collectObjs transLetLifting a2
-  a4 <- collectObjs memoize a3
-  a5 <- pure1 liftLambdas a4
-  a6 <- pure3 simplifyELet a5
-  a7 <- pure1 closeDefs a6
-  pure (addImplicitArgs <$> a7)
+pipeline ol =
+  pure3 sortMatchClauses ol
+    >>= suffixNamesC
+    >>= pure3 flattenELam
+    >>= collectObjs transLetLifting
+    >>= collectObjs memoize
+    >>= pure1 liftLambdas
+    >>= pure3 simplifyELet
+    >>= pure1 closeDefs
+    <&> fmap addImplicitArgs
 
 compile :: [(Name, Int)] -> ObjectList -> Pipeline ()
 compile ctrs ol = do
