@@ -23,6 +23,7 @@ import Noll.Common.Environment (Environment)
 import Noll.Common.List1 (List1, NonEmpty (..), fromList1)
 import Noll.Common.Supply (supplied)
 import Noll.Core.Compiler.Ast
+import Noll.Core.Compiler.Pass.ClosureConversion (closeDefs)
 import Noll.Core.Compiler.Pass.LambdaLifting (liftLambdas)
 import Noll.Core.Compiler.Pass.Suffix (transformSuffixExpr)
 import Noll.Core.Compiler.Pipeline (Pipeline (..), extendInterpreterConstructorEnv, extendInterpreterValueEnv, pipelineInsertArtifacts, pipelineInsertCode)
@@ -119,56 +120,6 @@ transformLetLifting =
             e
       e ->
         embed <$> sequence e
-
--------------------------------------------------------------------------------
-
-evalWS0 :: RWS () w Int a -> (a, w)
-evalWS0 v = evalRWS v () 0
-
-{-# INLINE notConstructor #-}
-notConstructor :: Label t -> Bool
-notConstructor = not . isConstructor . labelName
-
-freeSet :: (Foldable f, FreeVars e t) => f Name -> e -> Set (Label t)
-freeSet names obj = Set.filter notConstructor (freeIn obj `exceptNames` names)
-
-closeDefs :: ObjectList -> ObjectList
-closeDefs objs = uncurry app (evalWS0 (traverse closed objs))
- where
-  app objs1 args
-    | null (snd =<< args) =
-        objs1
-    | otherwise =
-        closeDefs (foldr (uncurry (fmap . fmap <$$> applyArgs)) objs1 args)
-  names =
-    Set.fromList (objectName <$> objs)
-  closed obj = do
-    let extra = Set.toList (freeSet names obj)
-    case obj of
-      OFunction name lls expr -> do
-        tell [(name, extra)]
-        pure (OFunction name (extra <> lls) expr)
-      OConstant name expr -> do
-        tell [(name, extra)]
-        pure (OFunction name extra expr)
-      OExternal name t ->
-        pure (OExternal name t)
-
-applyArgs :: Name -> [Label Type] -> Expr Type -> Expr Type
-applyArgs _ [] = id
-applyArgs name (a : as) =
-  flattenEApp
-    >>> cata
-      ( \case
-          Core.EVar (Label t n)
-            | name == n -> do
-                let expr = Core.var (Label (Core.foldType t (Core.typeOf <$> (a : as))) n)
-                Core.app t expr (Core.var <$> a :| as)
-            | otherwise ->
-                Core.var (Label t n)
-          e ->
-            embed e
-      )
 
 -------------------------------------------------------------------------------
 

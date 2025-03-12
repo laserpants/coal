@@ -8,6 +8,7 @@ import Data.Fix (Fix (..))
 import Noll.Common.List1 (NonEmpty (..), (<|))
 import Noll.Core.Compiler
 import Noll.Core.Compiler.Ast (simplifyELet)
+import Noll.Core.Compiler.Pass.ClosureConversion (closeDefs)
 import Noll.Core.Compiler.Pass.LambdaLifting (liftLambdas)
 import Noll.Core.Compiler.Pass.Suffix (transformSuffixExpr)
 import Noll.Core.Language (ExprF (..), Prim (..), list, opaque, (~>))
