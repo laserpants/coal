@@ -134,8 +134,8 @@ memoize =
       e ->
         pure (embed e)
 
-transLetLifting :: (MonadWriter [Binding Type (Expr Type)] m) => Expr Type -> m (Expr Type)
-transLetLifting =
+transformLetLifting :: (MonadWriter [Binding Type (Expr Type)] m) => Expr Type -> m (Expr Type)
+transformLetLifting =
   cata $
     \case
       Core.ELet vs e -> do
@@ -152,8 +152,8 @@ transLetLifting =
 
 -------------------------------------------------------------------------------
 
-transSuffixExpr :: (MonadState Int m) => Expr t -> m (Expr t)
-transSuffixExpr =
+transformSuffixExpr :: (MonadState Int m) => Expr t -> m (Expr t)
+transformSuffixExpr =
   cata $
     \case
       Core.ELet vs e -> do
@@ -174,12 +174,12 @@ transSuffixExpr =
       Core.EMat t e cs ->
         Core.match t
           <$> e
-          <*> (traverse transSuffixClause =<< traverse sequence cs)
+          <*> (traverse transformSuffixClause =<< traverse sequence cs)
       e ->
         embed <$> sequence e
 
-transSuffixClause :: (MonadState Int m) => Clause t (Expr t) -> m (Clause t (Expr t))
-transSuffixClause =
+transformSuffixClause :: (MonadState Int m) => Clause t (Expr t) -> m (Clause t (Expr t))
+transformSuffixClause =
   \case
     Clause lls e -> do
       (lls1, a) <- addSuffix lls e
@@ -289,20 +289,18 @@ labels ts = zipWith Label ts ["$extra." <> showt i | i <- [0 :: Int ..]]
 
 -------------------------------------------------------------------------------
 
-transSuffixMonad :: (MonadState Kernel m) => State Int a -> m a
-transSuffixMonad a = do
+transformSuffixMonad :: State Int a -> Pipeline a
+transformSuffixMonad a = do
   (v, n) <- gets (runState a . kernelSupply)
   modify (overKernelSupply (const n))
   pure v
 
-transInterpreter :: IRInterpreter a -> Pipeline a
-transInterpreter p = do
+transformInterpreter :: IRInterpreter a -> Pipeline a
+transformInterpreter p = do
   env <- gets kernelInterpreterEnv
   let (a, s, _) = runInterpreter env p
   pipelineInsertArtifacts (irInterpreterStateArtifacts s)
   pure a
-
---
 
 type Pass i o = i -> Pipeline o
 
@@ -322,9 +320,9 @@ coreSortMatchClauses
   , coreExtraArgs ::
     Pass ObjectList ObjectList
 coreSortMatchClauses = pure3 sortMatchClauses
-coreSuffix = transSuffixMonad . traverse2 transSuffixExpr
+coreSuffix = transformSuffixMonad . traverse2 transformSuffixExpr
 coreFlatten = pure3 flattenELam
-coreLetTranslation = collectObjs transLetLifting
+coreLetTranslation = collectObjs transformLetLifting
 coreMemoize = collectObjs memoize
 coreLambdaLifting = pure1 liftLambdas
 coreSimplify = pure3 simplifyELet
@@ -345,9 +343,9 @@ corePass =
 
 irCodeGenPass :: Pass ObjectList [IRConstruct [IRLine]]
 irCodeGenPass objs = do
-  code <- transInterpreter (traverse interpretObject objs)
+  code <- transformInterpreter (traverse interpretObject objs)
   arts <- gets kernelArtifacts
-  defs <- transInterpreter (traverse interpretArtifact (nub arts))
+  defs <- transformInterpreter (traverse interpretArtifact (nub arts))
   pipelineInsertCode (concat defs <> code)
   gets kernelCode
 

@@ -19,9 +19,9 @@ import qualified Noll.Core.Language as Core
 spec :: Spec
 spec =
   describe "Noll.Core.Compiler" $ do
-    describe "transSuffixExpr" $ do
+    describe "transformSuffixExpr" $ do
       it "" $ do
-        evalState (transSuffixExpr fixture3) 0 == fixture4
+        evalState (transformSuffixExpr fixture3) 0 == fixture4
     describe "liftLambdas" $ do
       it "" $ do
         liftLambdas test1 == test1Result
