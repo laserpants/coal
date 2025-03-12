@@ -4,19 +4,28 @@
 module Noll.Core.Parser.Expr (expr) where
 
 import Control.Monad (void)
-import Control.Monad.Combinators.Expr (Operator (..), makeExprParser)
+import Control.Monad.Combinators.Expr (makeExprParser)
 import Noll.Common.List1 (NonEmpty (..))
-import Noll.Core.Language.Expr (Binding (..), Clause (..), Expr (..), Focus (..))
+import Noll.Core.Language.Expr (Binding (..), Clause (..), Expr, Focus (..))
 import Noll.Core.Language.Type (Type (..))
-import Noll.Core.Language.Type.Row (extend)
 import Noll.Core.Parser (Parser, lexeme, some, try, ($>), (<|>))
 import Noll.Core.Parser.Identifier (constructor, name)
 import Noll.Core.Parser.Op (op)
 import Noll.Core.Parser.Prim (prim)
-import Noll.Core.Parser.Symbol (angleBrackets, braces, colon, commaSep, commaSep1, commaSepN, equalSign, pair, parens, pipe, semicolonSep1, symbol)
+import Noll.Core.Parser.Symbol (
+  angleBrackets,
+  braces,
+  colon,
+  commaSep1,
+  equalSign,
+  pair,
+  parens,
+  pipe,
+  semicolonSep1,
+  symbol,
+ )
 import Noll.Core.Parser.Type (type_)
 import Noll.Label (Label (..))
-import Noll.Utils (optionalOr)
 
 import qualified Noll.Core.Language.Expr.Syntax as Core
 
@@ -28,11 +37,11 @@ binding p = Binding <$> (label type_ <* equalSign) <*> p
 
 let_ :: Parser (Expr Type) -> Parser (Expr Type)
 let_ p = do
-  lexeme "let"
+  void (lexeme "let")
   semicolonSep1 (binding p)
     >>= \case
       b : bs -> do
-        lexeme "in"
+        void (lexeme "in")
         Core.let_ (b :| bs) <$> p
       _ ->
         fail "Empty list"
@@ -53,9 +62,9 @@ var = Core.var <$> label type_
 
 lam :: Parser (Expr Type) -> Parser (Expr Type)
 lam p = do
-  lexeme "fn"
+  void (lexeme "fn")
   args <- parens (commaSep1 (label type_))
-  symbol "=>"
+  void (symbol "=>")
   case args of
     a : as ->
       Core.lam (a :| as) <$> p
@@ -64,7 +73,7 @@ lam p = do
 
 app :: Parser (Expr Type) -> Parser (Expr Type)
 app p = do
-  symbol "@"
+  void (symbol "@")
   t <- angleBrackets type_
   parens (commaSep1 p)
     >>= \case
@@ -75,9 +84,9 @@ app p = do
 
 clause :: Parser (Expr Type) -> Parser (Clause Type (Expr Type))
 clause p = do
-  symbol "|"
+  void (symbol "|")
   lls <- parens (commaSep1 (label type_))
-  symbol "=>"
+  void (symbol "=>")
   case lls of
     l : ls ->
       Clause (l :| ls) <$> p
@@ -86,7 +95,7 @@ clause p = do
 
 match :: Parser (Expr Type) -> Parser (Expr Type)
 match p = do
-  lexeme "match"
+  void (lexeme "match")
   t <- angleBrackets type_
   e <- parens p
   braces (some (clause p))
@@ -123,9 +132,6 @@ record p = inner braces
       <$> (name <* equalSign)
       <*> (p <* pipe)
       <*> inner id
-
-  nil =
-    lexeme "{}" $> Core.nil
 
 call :: Parser (Expr Type) -> Parser (Expr Type)
 call p = do
