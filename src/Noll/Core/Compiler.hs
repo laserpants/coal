@@ -5,13 +5,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Core.Compiler where
+module Noll.Core.Compiler (compile) where
 
 import Control.Arrow ((>>>))
 import Control.Monad (void, (>=>))
-import Control.Monad.RWS (RWS, ask, evalRWS, local)
-import Control.Monad.State (MonadState, State, evalState, gets, modify, runState, runStateT)
-import Control.Monad.Trans (lift)
+import Control.Monad.State (State, gets, modify, runState)
 import Control.Monad.Writer (MonadWriter, Writer, runWriter, tell)
 import Data.Functor.Foldable (cata, embed, project)
 import Data.List (nub, partition)
@@ -21,35 +19,20 @@ import Noll.Core.Compiler.Pass.ClosureConversion (closeDefs)
 import Noll.Core.Compiler.Pass.LambdaLifting (liftLambdas)
 import Noll.Core.Compiler.Pass.Suffix (transformSuffixExpr)
 import Noll.Core.Compiler.Pipeline (Pipeline (..), extendInterpreterConstructorEnv, extendInterpreterValueEnv, pipelineInsertArtifacts, pipelineInsertCode)
-import Noll.Core.Compiler.Pipeline.Kernel (Kernel (..), initialKernel, overKernelArtifacts, overKernelCode, overKernelInterpreterConstructorEnv, overKernelInterpreterValueEnv, overKernelSupply)
+import Noll.Core.Compiler.Pipeline.Kernel (Kernel (..), overKernelSupply)
 import Noll.Core.LLVM.IRConstruct (IRConstruct (..))
 import Noll.Core.LLVM.IRInterpreter
 import Noll.Core.LLVM.IRInterpreter.Environment
 import Noll.Core.LLVM.IRInterpreter.Monad
 import Noll.Core.LLVM.IRInterpreter.State
-import Noll.Core.LLVM.IRValue (IRValue (..))
-import Noll.Core.Language (
-  Binding (..),
-  Clause (..),
-  Expr,
-  ExprF (..),
-  Focus (..),
-  Type,
-  Typed (..),
-  bindingLabel,
-  foldType,
-  functionTypeOf,
-  isPrim,
-  overBindingLabel,
-  unzipBindings,
- )
+import Noll.Core.Language (Binding (..), Expr, Type, Typed (..), bindingLabel, isPrim)
 import Noll.Core.Language.Object (Object (..), ObjectList)
 import Noll.Core.Language.Type.Arrow (isFunction)
 import Noll.Label (Label (..))
 import Noll.Utils (Name, traverse2, (<$$>))
 import Noll.Utils.Control.Applicative (pure1, pure3)
 import Noll.Utils.Operators ((||.))
-import TextShow
+import TextShow (showt)
 
 import qualified Noll.Common.Environment as Environment
 import qualified Noll.Common.List1 as List1
