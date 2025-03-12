@@ -524,7 +524,3 @@ compile constrs ol = do
   arts <- gets pipelineStateArtifacts
   defs <- transInterpreter (traverse interpretArtifact (nub arts))
   pipelineStateInsertCode (concat defs)
-
--- xx1 objs = mapM_ print $ muteObjectTypes <$> liftLambdas (flattenELam <$$> evalState (traverse (traverse transSuffixExpr) objs) 0)
--- xx2 objs = runCore (pipeline objs)
--- xx3 objs = muteObjectTypes <$> fst (xx2 objs)
