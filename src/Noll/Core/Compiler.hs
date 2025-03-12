@@ -38,13 +38,11 @@ import Noll.Core.LLVM.IRInterpreter.State
 import Noll.Core.Language (Binding (..), Expr, Type)
 import Noll.Core.Language.Object (Object (..), ObjectList)
 import Noll.Label (Label (..))
-import Noll.Utils (Name, forM_, traverse2)
+import Noll.Utils (Name, traverse2)
 import Noll.Utils.Control.Applicative (pure1, pure3)
 
 import qualified Noll.Common.Environment as Environment
 import qualified Noll.Core.Language as Core
-
--------------------------------------------------------------------------------
 
 transformSuffixMonad :: State Int a -> Pipeline a
 transformSuffixMonad a = do
