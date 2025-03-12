@@ -50,6 +50,8 @@ library
       Noll.Core.Compiler.Pass.ClosureConversion
       Noll.Core.Compiler.Pass.ExtraArgs
       Noll.Core.Compiler.Pass.LambdaLifting
+      Noll.Core.Compiler.Pass.LetLifting
+      Noll.Core.Compiler.Pass.Memoize
       Noll.Core.Compiler.Pass.Suffix
       Noll.Core.Compiler.Pipeline
       Noll.Core.Compiler.Pipeline.Kernel

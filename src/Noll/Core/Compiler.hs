@@ -17,6 +17,8 @@ import Noll.Core.Compiler.Ast
 import Noll.Core.Compiler.Pass.ClosureConversion (closeDefs)
 import Noll.Core.Compiler.Pass.ExtraArgs (addImplicitArgs)
 import Noll.Core.Compiler.Pass.LambdaLifting (liftLambdas)
+import Noll.Core.Compiler.Pass.LetLifting (transformLetLifting)
+import Noll.Core.Compiler.Pass.Memoize (memoize)
 import Noll.Core.Compiler.Pass.Suffix (transformSuffixExpr)
 import Noll.Core.Compiler.Pipeline (Pipeline (..), extendInterpreterConstructorEnv, extendInterpreterValueEnv, pipelineInsertArtifacts, pipelineInsertCode)
 import Noll.Core.Compiler.Pipeline.Kernel (Kernel (..), overKernelSupply)
@@ -39,50 +41,6 @@ import qualified Noll.Core.Language as Core
 
 -------------------------------------------------------------------------------
 
-toObject :: Binding Type (Expr Type) -> Object Type (Expr Type)
-toObject (Binding (Label _ name) e1) = go e1
- where
-  go =
-    project
-      >>> \case
-        Core.ELam vs e ->
-          OFunction name (fromList1 vs) e
-        e ->
-          OConstant name (embed e)
-
-memoize :: (MonadWriter [Binding Type (Expr Type)] m) => Expr Type -> m (Expr Type)
-memoize =
-  project
-    >>> \case
-      Core.ELet vs e -> do
-        let (ps, qs) = partition (not . (isFunction . bindingLabel ||. isPrim . bindingExpr)) (fromList1 vs)
-        tell (Core.mem <$$> ps)
-        case qs of
-          u : us ->
-            pure (Core.let_ (u :| us) e)
-          [] ->
-            pure e
-      e ->
-        pure (embed e)
-
-transformLetLifting :: (MonadWriter [Binding Type (Expr Type)] m) => Expr Type -> m (Expr Type)
-transformLetLifting =
-  cata $
-    \case
-      Core.ELet vs e -> do
-        as <- traverse sequence vs
-        let (fs, es) = List1.partition (isFunction . bindingLabel) as
-        tell fs
-        case es of
-          w : ws ->
-            Core.let_ (w :| ws) <$> e
-          [] ->
-            e
-      e ->
-        embed <$> sequence e
-
--------------------------------------------------------------------------------
-
 transformSuffixMonad :: State Int a -> Pipeline a
 transformSuffixMonad a = do
   (v, n) <- gets (runState a . kernelSupply)
@@ -97,6 +55,17 @@ transformInterpreter p = do
   pure a
 
 type Pass i o = i -> Pipeline o
+
+toObject :: Binding Type (Expr Type) -> Object Type (Expr Type)
+toObject (Binding (Label _ name) e1) = go e1
+ where
+  go =
+    project
+      >>> \case
+        Core.ELam vs e ->
+          OFunction name (fromList1 vs) e
+        e ->
+          OConstant name (embed e)
 
 collectObjs :: (Expr Type -> Writer [Binding Type (Expr Type)] (Expr Type)) -> Pass ObjectList ObjectList
 collectObjs f as = pure (ls <> fmap toObject rs)
