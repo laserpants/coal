@@ -46,6 +46,7 @@ library
       Noll.Compiler.Transform.Tree
       Noll.Compiler.Transform.Type.AliasInsertion
       Noll.Core.Compiler
+      Noll.Core.Compiler.Pipeline
       Noll.Core.Language
       Noll.Core.Language.Expr
       Noll.Core.Language.Expr.Replace
@@ -124,6 +125,7 @@ library
       Noll.SystemF.Substitution
       Noll.SystemF.Unification
       Noll.Utils
+      Noll.Utils.Control.Applicative
       Noll.Utils.Control.Monad
       Noll.Utils.Control.Monad.State
       Noll.Utils.Control.Monad.Writer

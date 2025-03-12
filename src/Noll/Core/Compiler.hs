@@ -28,6 +28,7 @@ import qualified Noll.Common.Environment as Environment
 import Noll.Common.List1 (List1, NonEmpty (..), fromList1)
 import qualified Noll.Common.List1 as List1
 import Noll.Common.Supply (supplied)
+import Noll.Core.Compiler.Pipeline (Pipeline (..), initialPipeline, overPipelineArtifacts, overPipelineCode, overPipelineInterpreterConstructorEnv, overPipelineInterpreterValueEnv, overPipelineSupply)
 import Noll.Core.LLVM.IRConstruct (IRConstruct (..))
 import Noll.Core.LLVM.IRInterpreter
 import Noll.Core.LLVM.IRInterpreter.Artifact
@@ -407,76 +408,40 @@ muteObjectTypes =
 
 -------------------------------------------------------------------------------
 
-data PipelineState = PipelineState
-  { pipelineStateSupply :: Int
-  , pipelineStateInterpreterEnv :: IRInterpreterEnv
-  , pipelineStateArtifacts :: [IRInterpreterArtifact]
-  , pipelineStateCode :: [IRConstruct [IRLine]]
-  }
-  deriving (Show, Eq, Ord)
-
-{-# INLINE initialPipelineState #-}
-initialPipelineState :: PipelineState
-initialPipelineState = PipelineState 0 (IRInterpreterEnv mempty mempty) [] []
-
-{-# INLINE overPipelineStateSupply #-}
-overPipelineStateSupply :: Over PipelineState Int
-overPipelineStateSupply f PipelineState{..} = PipelineState{pipelineStateSupply = f pipelineStateSupply, ..}
-
-{-# INLINE overPipelineStateInterpreterEnv #-}
-overPipelineStateInterpreterEnv :: Over PipelineState IRInterpreterEnv
-overPipelineStateInterpreterEnv f PipelineState{..} = PipelineState{pipelineStateInterpreterEnv = f pipelineStateInterpreterEnv, ..}
-
-{-# INLINE overPipelineStateInterpreterValueEnv #-}
-overPipelineStateInterpreterValueEnv :: Over PipelineState (Environment IRValue)
-overPipelineStateInterpreterValueEnv = overPipelineStateInterpreterEnv . inValueEnv
-
-{-# INLINE overPipelineStateInterpreterConstructorEnv #-}
-overPipelineStateInterpreterConstructorEnv :: Over PipelineState (Environment Int)
-overPipelineStateInterpreterConstructorEnv = overPipelineStateInterpreterEnv . inConstructorEnv
-
-{-# INLINE overPipelineStateArtifacts #-}
-overPipelineStateArtifacts :: Over PipelineState [IRInterpreterArtifact]
-overPipelineStateArtifacts f PipelineState{..} = PipelineState{pipelineStateArtifacts = f pipelineStateArtifacts, ..}
-
-{-# INLINE overPipelineStateCode #-}
-overPipelineStateCode :: Over PipelineState [IRConstruct [IRLine]]
-overPipelineStateCode f PipelineState{..} = PipelineState{pipelineStateCode = f pipelineStateCode, ..}
-
-{-# INLINE extendInterpreterValueEnv #-}
-extendInterpreterValueEnv :: Environment IRValue -> Core ()
-extendInterpreterValueEnv env = modify (overPipelineStateInterpreterValueEnv (<> env))
-
-{-# INLINE extendInterpreterConstructorEnv #-}
-extendInterpreterConstructorEnv :: Environment Int -> Core ()
-extendInterpreterConstructorEnv env = modify (overPipelineStateInterpreterConstructorEnv (<> env))
-
-{-# INLINE pipelineStateInsertArtifacts #-}
-pipelineStateInsertArtifacts :: [IRInterpreterArtifact] -> Core ()
-pipelineStateInsertArtifacts = modify . (overPipelineStateArtifacts . (<>))
-
-{-# INLINE pipelineStateInsertCode #-}
-pipelineStateInsertCode :: [IRConstruct [IRLine]] -> Core ()
-pipelineStateInsertCode = modify . (overPipelineStateCode . (<>))
-
-newtype Core a = Core {pipelineStack :: State PipelineState a}
+newtype Core a = Core {pipelineStack :: State Pipeline a}
   deriving
     ( Functor
     , Applicative
     , Monad
-    , MonadState PipelineState
+    , MonadState Pipeline
     )
 
-runCore :: Core a -> (a, PipelineState)
-runCore p = runState (pipelineStack p) initialPipelineState
+runCore :: Core a -> (a, Pipeline)
+runCore p = runState (pipelineStack p) initialPipeline
 
 evalCore :: Core a -> a
-evalCore p = evalState (pipelineStack p) initialPipelineState
+evalCore p = evalState (pipelineStack p) initialPipeline
 
-transSuffixMonad :: (MonadState PipelineState m) => State Int a -> m a
+{-# INLINE extendInterpreterValueEnv #-}
+extendInterpreterValueEnv :: Environment IRValue -> Core ()
+extendInterpreterValueEnv env = modify (overPipelineInterpreterValueEnv (<> env))
+
+{-# INLINE extendInterpreterConstructorEnv #-}
+extendInterpreterConstructorEnv :: Environment Int -> Core ()
+extendInterpreterConstructorEnv env = modify (overPipelineInterpreterConstructorEnv (<> env))
+
+{-# INLINE pipelineStateInsertArtifacts #-}
+pipelineStateInsertArtifacts :: [IRInterpreterArtifact] -> Core ()
+pipelineStateInsertArtifacts = modify . (overPipelineArtifacts . (<>))
+
+{-# INLINE pipelineStateInsertCode #-}
+pipelineStateInsertCode :: [IRConstruct [IRLine]] -> Core ()
+pipelineStateInsertCode = modify . (overPipelineCode . (<>))
+
+transSuffixMonad :: (MonadState Pipeline m) => State Int a -> m a
 transSuffixMonad a = do
   (v, n) <- gets (runState a . pipelineStateSupply)
-  modify (overPipelineStateSupply (const n))
+  modify (overPipelineSupply (const n))
   pure v
 
 transInterpreter :: IRInterpreter a -> Core a

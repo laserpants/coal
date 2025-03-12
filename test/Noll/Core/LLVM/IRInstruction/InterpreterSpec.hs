@@ -18,15 +18,6 @@ import Noll.Core.LLVM.IREval.Closure.Apply (irClosureApply)
 import Noll.Core.LLVM.IREval.Closure.Extend (irClosureExtend)
 import Noll.Core.LLVM.IREval.Closure.Finalize (irClosureFinalize)
 import Noll.Core.LLVM.IREval.Expr (irEvalExpr)
---import Noll.Core.LLVM.IRInstruction.Interpreter (
---  IRInterpreter (..),
---  IRInterpreterEnv (..),
---  IRLine (..),
---  inValueEnv,
---  interpret,
---  runInterpreter,
--- )
---import Noll.Core.LLVM.IRInstruction.Interpreter.Object (interpretObject, objectEnvironment)
 import Noll.Core.LLVM.IRInterpreter
 import Noll.Core.LLVM.IRInstruction.TH
 import Noll.Core.LLVM.IRType
@@ -38,6 +29,7 @@ import Noll.Core.Language.Object (Object (..), ObjectList, objectName)
 import Noll.Label (Label (..))
 import Noll.Utils (Name)
 import Test.Hspec (Spec, describe, it)
+import Noll.Core.Compiler.Pipeline (Pipeline (..))
 import TextShow (showt)
 
 import qualified Data.Text.IO as Text
@@ -1190,26 +1182,26 @@ constrs = [("$Cons", 0), ("$Nil", 1), ("$Record", 0), ("EqualTo", 0), ("GreaterT
 -- abc5 = Text.putStrLn (irEncode pipelineStateArtifacts)
 abc5 = (pipelineStateArtifacts, pipelineStateCode)
  where
-  (_, PipelineState{..}) = runCore (compile constrs blockObjects)
+  (_, Pipeline{..}) = runCore (compile constrs blockObjects)
 
 abc6 = (pipelineStateArtifacts, pipelineStateCode)
  where
-  (_, PipelineState{..}) = runCore (compile constrs blockObjects2)
+  (_, Pipeline{..}) = runCore (compile constrs blockObjects2)
 
 abc7 = (pipelineStateArtifacts, pipelineStateCode)
  where
-  (_, PipelineState{..}) = runCore (compile constrs blockObjects3)
+  (_, Pipeline{..}) = runCore (compile constrs blockObjects3)
 
 abc8 = (pipelineStateArtifacts, pipelineStateCode)
  where
-  (_, PipelineState{..}) = runCore (compile constrs blockObjects4)
+  (_, Pipeline{..}) = runCore (compile constrs blockObjects4)
 
 abcx :: FilePath -> IO ()
 abcx out = do
   inp <- Text.readFile "test/Noll/fixtures/prog2.txt"
   c <- case runParser expr "" inp of
     Right e ->
-      let (_, PipelineState{..}) = runCore (compile constrs (bob e))
+      let (_, Pipeline{..}) = runCore (compile constrs (bob e))
        in pure pipelineStateCode
   let txt = irEncode c
   Text.writeFile out txt
