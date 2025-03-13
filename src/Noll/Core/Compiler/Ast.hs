@@ -8,9 +8,9 @@ module Noll.Core.Compiler.Ast (
   sortMatchClauses,
 ) where
 
-import Control.Monad.Writer (MonadWriter, runWriter, tell)
+import Control.Monad.Writer (runWriter, tell)
 import Data.Fix (Fix (..))
-import Data.Functor.Foldable (cata, embed, project)
+import Data.Functor.Foldable (cata, embed)
 import Noll.Common.List1 (NonEmpty (..))
 import Noll.Core.Language (Binding (..), Clause (..), Expr, ExprF (..), Type)
 import Noll.Core.Language.Expr.Replace (relabel)
