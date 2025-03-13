@@ -17,9 +17,9 @@ import Noll.Core.Compiler.Ast (flattenELam, simplifyELet, sortMatchClauses)
 import Noll.Core.Compiler.Pass.ClosureConversion (closeDefs)
 import Noll.Core.Compiler.Pass.ExtraArgs (addImplicitArgs)
 import Noll.Core.Compiler.Pass.LambdaLifting (liftLambdas)
-import Noll.Core.Compiler.Pass.LetLifting (transformLetLifting)
+import Noll.Core.Compiler.Pass.LetLifting (letLifting)
 import Noll.Core.Compiler.Pass.Memoize (memoize)
-import Noll.Core.Compiler.Pass.Suffix (transformSuffixExpr)
+import Noll.Core.Compiler.Pass.Suffix (suffixExpr)
 import Noll.Core.Compiler.Pipeline (
   Pipeline (..),
   extendInterpreterConstructorEnv,
@@ -84,9 +84,9 @@ coreSortMatchClauses
   , coreExtraArgs ::
     Pass ObjectList ObjectList
 coreSortMatchClauses = pure3 sortMatchClauses
-coreSuffix = transformSuffixMonad . traverse2 transformSuffixExpr
+coreSuffix = transformSuffixMonad . traverse2 suffixExpr
 coreFlatten = pure3 flattenELam
-coreLetTranslation = collectObjs transformLetLifting
+coreLetTranslation = collectObjs letLifting
 coreMemoize = collectObjs memoize
 coreLambdaLifting = pure1 liftLambdas
 coreSimplify = pure3 simplifyELet

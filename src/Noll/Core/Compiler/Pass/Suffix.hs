@@ -2,7 +2,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Core.Compiler.Pass.Suffix (transformSuffixExpr) where
+module Noll.Core.Compiler.Pass.Suffix (suffixExpr) where
 
 import Control.Monad.State (MonadState, modify, runStateT)
 import Control.Monad.Trans (lift)
@@ -19,8 +19,8 @@ import qualified Data.Map.Strict as Map
 import qualified Noll.Common.List1 as List1
 import qualified Noll.Core.Language as Core
 
-transformSuffixExpr :: (MonadState Int m) => Expr t -> m (Expr t)
-transformSuffixExpr =
+suffixExpr :: (MonadState Int m) => Expr t -> m (Expr t)
+suffixExpr =
   cata $
     \case
       Core.ELet vs e -> do
@@ -41,12 +41,12 @@ transformSuffixExpr =
       Core.EMat t e cs ->
         Core.match t
           <$> e
-          <*> (traverse transformSuffixClause =<< traverse sequence cs)
+          <*> (traverse suffixClause =<< traverse sequence cs)
       e ->
         embed <$> sequence e
 
-transformSuffixClause :: (MonadState Int m) => Clause t (Expr t) -> m (Clause t (Expr t))
-transformSuffixClause =
+suffixClause :: (MonadState Int m) => Clause t (Expr t) -> m (Clause t (Expr t))
+suffixClause =
   \case
     Clause lls e -> do
       (lls1, a) <- addSuffix lls e

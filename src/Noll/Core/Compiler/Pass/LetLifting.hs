@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase #-}
 
-module Noll.Core.Compiler.Pass.LetLifting (transformLetLifting) where
+module Noll.Core.Compiler.Pass.LetLifting (letLifting) where
 
 import Control.Monad.Writer (MonadWriter, tell)
 import Data.Functor.Foldable (cata, embed)
@@ -12,8 +12,8 @@ import Noll.Core.Language.Type.Arrow (isFunction)
 import qualified Noll.Common.List1 as List1
 import qualified Noll.Core.Language as Core
 
-transformLetLifting :: (MonadWriter [Binding Type (Expr Type)] m) => Expr Type -> m (Expr Type)
-transformLetLifting =
+letLifting :: (MonadWriter [Binding Type (Expr Type)] m) => Expr Type -> m (Expr Type)
+letLifting =
   cata $
     \case
       Core.ELet vs e -> do
