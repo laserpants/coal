@@ -31,7 +31,7 @@ import Noll.Core.LLVM.IREncodable (
   irLocalName,
  )
 import Noll.Core.LLVM.IREval (irEvalFun)
-import Noll.Core.LLVM.IREval.Expr (irEvalExpr)
+import Noll.Core.LLVM.IREval.Expr ()
 import Noll.Core.LLVM.IRInstruction
 import Noll.Core.LLVM.IRInterpreter.Artifact
 import Noll.Core.LLVM.IRInterpreter.Environment
@@ -149,7 +149,7 @@ interpreter =
     IPhi t vs next ->
       instruction t next ["phi", irEncode t, commaSep (uncurry phiBranches <$> vs)]
     IGep t v1 v2 v3 next ->
-      instruction (ptr (offset t [v2, v3])) next ["getelementptr", commaSep (irEncode t : (irEncode . IRAnnotated <$> [v1, v2, v3]))]
+      instruction (ptr (offset t (v2, v3))) next ["getelementptr", commaSep (irEncode t : (irEncode . IRAnnotated <$> [v1, v2, v3]))]
     IGep1 t v1 v2 next ->
       instruction (ptr t) next ["getelementptr", commaSep (irEncode t : (irEncode . IRAnnotated <$> [v1, v2]))]
     IGepNull t v1 next ->
@@ -231,11 +231,8 @@ switchBranches bs = Text.unwords (uncurry branch <$> bs)
 interpret :: IRInstr a -> IRInterpreter a
 interpret = iterM interpreter
 
--- TODO: clean up
-offset :: IRType -> [IRValue] -> IRType
-offset (TPtr t) (I32 0 : ixs) = offset t ixs
-offset (TNamed _ t) ixs = offset t ixs
-offset (TStruct ts) (I32 0 : I32 n : _) = ts !! fromIntegral n
-offset (TArray _ t) (I32 _ : _) = ptr t
-offset t [] = t
+offset :: IRType -> (IRValue, IRValue) -> IRType
+offset (TArray _ t) _ = ptr t
+offset (TNamed _ t) p = offset t p
+offset (TStruct ts) (_, I32 n) = ts !! fromIntegral n
 offset _ _ = error "Implementation error"
