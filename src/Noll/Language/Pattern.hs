@@ -4,11 +4,15 @@
 module Noll.Language.Pattern (Pattern (..)) where
 
 import Data.Data (Data, Typeable)
+import Data.Generics.Uniplate.Data (universeBi)
+import Noll.AST.FreeVars (BoundVars (..))
 import Noll.Common.List1 (List1)
 import Noll.Label (Label (..))
 import Noll.Language.Primitive (Primitive (..))
 import Noll.Language.Type (Parameter (..), Type)
 import Noll.Utils (Dictionary)
+
+import qualified Data.Set as Set
 
 data Pattern a t
   = -- | Type-annotated pattern
@@ -36,3 +40,6 @@ data Pattern a t
   | -- | TODO
     PAtVariable a (Label t)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
+
+instance (Data a, Data t) => BoundVars (Pattern a t) where
+  boundIn = Set.fromList . universeBi

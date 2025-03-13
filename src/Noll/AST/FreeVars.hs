@@ -4,12 +4,9 @@
 
 module Noll.AST.FreeVars (BoundVars (..), FreeVars (..), exceptNames) where
 
-import Data.Data (Data)
-import Data.Generics.Uniplate.Data (universeBi)
 import Data.Set (Set, singleton)
 import Noll.Common.List1 (NonEmpty)
 import Noll.Label (Label (..), labelName)
-import Noll.Language.Pattern (Pattern (..))
 import Noll.Utils (Dictionary, Map, Name)
 
 import qualified Data.Set as Set
@@ -31,9 +28,6 @@ instance (BoundVars b) => BoundVars (NonEmpty b) where
 
 instance BoundVars (Label t) where
   boundIn (Label _ name) = singleton name
-
-instance (Data a, Data t) => BoundVars (Pattern a t) where
-  boundIn = Set.fromList . universeBi
 
 class FreeVars f t where
   freeIn :: f -> Set (Label t)
