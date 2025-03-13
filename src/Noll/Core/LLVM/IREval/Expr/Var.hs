@@ -6,11 +6,12 @@ import Data.Text (Text)
 import Noll.Core.LLVM.IREncodable (irEncode)
 import Noll.Core.LLVM.IREval.Closure (irPackClosure)
 import Noll.Core.LLVM.IREval.Comment (irComments)
+import Noll.Core.LLVM.IREval.Conceal (irConceal)
 import Noll.Core.LLVM.IREval.Malloc (irMalloc)
 import Noll.Core.LLVM.IRInstruction (IRConstructor (..), IRInstr)
 import Noll.Core.LLVM.IRInstruction.TH
-import Noll.Core.LLVM.IRType (IRType (..))
-import Noll.Core.LLVM.IRType.Syntax (i32, i8Ptr, struct)
+import Noll.Core.LLVM.IRType (IRType (..), IRTyped (..))
+import Noll.Core.LLVM.IRType.Syntax (i32, i8Ptr, ptr, struct)
 import Noll.Core.LLVM.IRValue (IRValue (..))
 import Noll.Core.Language.Type.Arrow (arity)
 import Noll.Utils (Name, isConstructor)
@@ -33,10 +34,12 @@ irEvalVar t name
         Global (TFun _ ts) _ ->
           if arity t == 0
             then
-              -- Global constant
               iCallGlobal i8Ptr name []
             else
               irPackClosure name (length ts) []
+        Global t1 name1 -> do
+          v1 <- iLoad (irTypeOf t1) (Global (ptr t1) name1)
+          irConceal v1
         _ ->
           pure v
 

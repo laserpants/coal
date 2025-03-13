@@ -5,6 +5,7 @@ module Noll.Core.Compiler.Pass.ClosureConversion (closeDefs) where
 
 import Control.Arrow ((>>>))
 import Control.Monad.RWS (RWS, evalRWS, tell)
+import Data.Fix (Fix (..))
 import Data.Functor.Foldable (cata, embed)
 import Noll.AST.FreeVars (FreeVars (..), exceptNames)
 import Noll.Common.List1 (NonEmpty (..))
@@ -43,6 +44,8 @@ closeDefs objs = uncurry app (evalWS0 (traverse closed objs))
       OFunction name lls expr -> do
         tell [(name, extra)]
         pure (OFunction name (extra <> lls) expr)
+      OConstant name expr@(Fix Core.ELit{}) | null extra -> do
+        pure (OConstant name expr)
       OConstant name expr -> do
         tell [(name, extra)]
         pure (OFunction name extra expr)

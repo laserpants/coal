@@ -30,12 +30,14 @@ instance (Ord t, FreeVars e t) => FreeVars (Object t e) t where
       OExternal{} ->
         mempty
 
-instance IRTyped (Object t e) where
+instance (IRTyped e) => IRTyped (Object t e) where
   irTypeOf =
     \case
       OFunction _ lls _ ->
         opaqueFunction (length lls)
-      _ ->
+      OConstant _ e ->
+        irTypeOf e
+      OExternal{} ->
         error "TODO"
 
 objectName :: Object t e -> Name

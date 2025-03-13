@@ -17,6 +17,7 @@ import Control.Monad.Free (iterM)
 import Control.Monad.RWS (gets)
 import Control.Monad.Reader (asks, local)
 import Control.Monad.Writer (tell)
+import Data.Fix (Fix (..))
 import Data.Text (Text)
 import Data.Text.Encoding (encodeUtf8)
 import Noll.Core.LLVM.IRConstruct (IRConstruct (..), IRLinkage (..))
@@ -59,6 +60,20 @@ interpretObject =
       local
         (flip (foldr insertLocal) lls)
         (interpretFunction name (irEvalFun e) [Label i8Ptr n | Label _ n <- lls])
+    OConstant name (Fix (Core.ELit (Core.PInt32 n))) ->
+      pure (CGlobal name i32 Nothing (I32 n))
+    OConstant name (Fix (Core.ELit (Core.PInt64 n))) ->
+      pure (CGlobal name i64 Nothing (I64 n))
+    OConstant name (Fix (Core.ELit (Core.PFloat f))) ->
+      pure (CGlobal name TFloat Nothing (Float f))
+    OConstant name (Fix (Core.ELit (Core.PDouble d))) ->
+      pure (CGlobal name TDouble Nothing (Double d))
+    OConstant name (Fix (Core.ELit (Core.PBool b))) ->
+      pure (CGlobal name TInt1 Nothing (I1 b))
+    OConstant name (Fix (Core.ELit Core.PUnit)) ->
+      pure (CGlobal name TInt1 Nothing (I1 True))
+    OConstant name (Fix (Core.ELit (Core.PChar c))) ->
+      pure (CGlobal name TInt32 Nothing (I32 c))
     OConstant name e ->
       interpretFunction name (irEvalFun e) []
     _ ->
