@@ -114,8 +114,8 @@ irCodeGenPass objs = do
   gets kernelCode
 
 compile :: [(Name, Int)] -> Pass ObjectList ()
-compile ctrs ol = do
-  objs <- corePass ol
+compile ctrs input = do
+  objs <- corePass input
   extendInterpreterValueEnv (objectEnvironment objs)
   extendInterpreterConstructorEnv (Environment.fromList ctrs)
   void (irCodeGenPass objs)
