@@ -15,6 +15,13 @@ import Control.Monad.RWS (MonadReader, asks, get)
 import Control.Monad.State (MonadState, StateT, modify, runStateT)
 import Control.Monad.Writer (MonadWriter, tell)
 import Data.List.Extra (groupSortOn)
+import Lang.Utils (
+  Dictionary,
+  Name,
+  concatMapM,
+  forM_,
+  (<$$>),
+ )
 import Noll.Language (
   IndexedType,
   Kind (..),
@@ -32,14 +39,7 @@ import Noll.SystemF.Constraint.Generation.Internal (
   overConstraintsGenStateTypeIndexes,
  )
 import Noll.SystemF.Substitution (Substitution (..))
-import Noll.Utils (
-  Dictionary,
-  Name,
-  concatMapM,
-  forM_,
-  lexOrderRank,
-  (<$$>),
- )
+import Noll.Utils (lexOrderRank)
 
 import qualified Data.Map.Strict as Map
 import qualified Lang.Common.Environment as Environment

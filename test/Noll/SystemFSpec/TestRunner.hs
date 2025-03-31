@@ -10,6 +10,7 @@ import Data.List.NonEmpty ((<|))
 import Debug.Trace
 import Lang.Common.Environment (Environment)
 import Lang.Common.List1 (NonEmpty (..))
+import Lang.Utils (Name, forM_)
 import Noll.Compiler (
   CompilerAssumption (..),
   CompilerEnvironment (..),
@@ -47,7 +48,6 @@ import Noll.SystemF.Constraint.Assumption (Assumption (..))
 import Noll.SystemF.Constraint.Generation (ConstraintsGenError)
 import Noll.SystemF.Constraint.Generation.Internal (InferenceRule (..))
 import Noll.SystemF.Substitution (apply, normalizeTypeIndexes)
-import Noll.Utils (Name, forM_)
 
 import qualified Data.Set as Set
 import qualified Lang.Common.Environment as Environment

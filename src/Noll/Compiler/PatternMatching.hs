@@ -11,15 +11,15 @@ import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformBiM, transformM)
 import Lang.Common.List1 (List1, NonEmpty (..), fromList1)
 import Lang.Common.Supply (suppliedName)
+import Lang.Label (Label (..))
+import Lang.Utils (Dictionary)
 import Noll.Compiler.PatternMatching.Compiler (TypeProxy (..), compileEnvelope)
 import Noll.Compiler.PatternMatching.Envelope (EnvelopeExpression (..), EnvelopePattern (..))
 import Noll.Compiler.PatternMatching.Equation (patternEquation)
 import Noll.Compiler.PatternMatching.Rule (MatchMonad (..), matchPatterns)
 import Noll.Compiler.Transform.Tree (replaceWith)
-import Lang.Label (Label (..))
 import Noll.Language (Binding (..), Choice (..), Clause (..), Expression (..), Pattern (..))
 import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
-import Noll.Utils (Dictionary)
 
 class MatchExpressionContext a where
   compileMatchExprs :: a -> MatchMonad a

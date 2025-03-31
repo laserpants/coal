@@ -19,12 +19,12 @@ import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transform, transformM)
 import Lang.Common.List1 (List1, NonEmpty (..))
 import Lang.Common.Supply (suppliedName)
+import Lang.Label (Label (..), labelName)
+import Lang.Utils (Dictionary, Name, const2)
 import Noll.Compiler.Transform (flattenApplication)
 import Noll.Compiler.Transform.Tree (replace)
-import Lang.Label (Label (..), labelName)
 import Noll.Language (Choice (..), Clause (..), Expression (..), Pattern (..))
 import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
-import Noll.Utils (Dictionary, Name, const2)
 
 newtype FoldExpansion a = FoldExpansion {foldExpansionStack :: ReaderT Name (State Int) a}
   deriving

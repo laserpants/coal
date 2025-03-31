@@ -12,10 +12,10 @@ module Noll.Module (
 ) where
 
 import Data.Data (Data, Typeable)
+import Lang.Utils (Name, Over)
 import Noll.Module.Constant
 import Noll.Module.Definition (Definition (..), Path (..), definitionName)
 import Noll.Module.Function
-import Noll.Utils (Name, Over)
 
 data Module a k t = Module Path [Name] [Definition a k t]
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)

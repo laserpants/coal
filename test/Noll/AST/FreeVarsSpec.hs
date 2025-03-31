@@ -2,23 +2,23 @@
 
 module Noll.AST.FreeVarsSpec where
 
---import Data.List.NonEmpty (NonEmpty (..), (<|))
---import Data.Set (Set)
---import Lang.FreeVars
---import Lang.Label (Label (..))
---import Noll.Language.Expression (Clause (..), Expression (..))
---import Noll.Language.Expression.Binding (Binding (..))
---import Noll.Language.Expression.Choice (Choice (..), Guard (..))
---import Noll.Language.Pattern (Pattern (..))
---import Noll.Language.Primitive (Primitive (..))
---import Noll.Language.Type (Type (..), TypeIndex (..))
---import Noll.Language.Type.Kind (Kind)
---import Test.Hspec (Spec, describe, it)
+-- import Data.List.NonEmpty (NonEmpty (..), (<|))
+-- import Data.Set (Set)
+-- import Lang.FreeVars
+-- import Lang.Label (Label (..))
+-- import Noll.Language.Expression (Clause (..), Expression (..))
+-- import Noll.Language.Expression.Binding (Binding (..))
+-- import Noll.Language.Expression.Choice (Choice (..), Guard (..))
+-- import Noll.Language.Pattern (Pattern (..))
+-- import Noll.Language.Primitive (Primitive (..))
+-- import Noll.Language.Type (Type (..), TypeIndex (..))
+-- import Noll.Language.Type.Kind (Kind)
+-- import Test.Hspec (Spec, describe, it)
 --
---import qualified Data.Set as Set
+-- import qualified Data.Set as Set
 --
---spec :: Spec
---spec =
+-- spec :: Spec
+-- spec =
 --  describe "Lang.FreeVars" $ do
 --    describe "freeIn" $ do
 --      describe "EVariable" $

@@ -6,8 +6,8 @@ import Control.Monad.Identity (runIdentity)
 import Control.Monad.State (evalState)
 import Data.Data (Data)
 import Lang.Common.List1 (NonEmpty (..), (<|))
-import Noll.Compiler
 import Lang.Label (Label (..))
+import Noll.Compiler
 import Noll.Language (
   BinaryOperator (..),
   Choice (..),

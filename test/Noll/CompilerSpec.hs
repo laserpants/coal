@@ -6,8 +6,8 @@ import Control.Monad.Identity (runIdentity)
 import qualified Data.Set as Set
 import qualified Lang.Common.Environment as Environment
 import Lang.Common.List1 (NonEmpty (..), (<|))
-import Noll.Compiler
 import Lang.Label (Label (..))
+import Noll.Compiler
 import Noll.Language (
   BinaryOperator (..),
   Choice (..),

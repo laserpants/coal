@@ -11,8 +11,8 @@ module Noll.SystemF.Constraint.Assumption (
 
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (transformBi)
+import Lang.Utils (Name)
 import Noll.SystemF.Substitution (Substitutable (..), applyT)
-import Noll.Utils (Name)
 
 data Assumption t = Assumption
   { assumptionName :: Name

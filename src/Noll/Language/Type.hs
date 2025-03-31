@@ -25,10 +25,10 @@ import Data.Generics.Uniplate.Data (transform)
 import Data.List.NonEmpty (NonEmpty)
 import Lang.Common.List1 (List1)
 import Lang.Common.Supply (Supply (..))
+import Lang.Utils (Map, Name, Set)
 import Noll.Language.Type.Intrinsic (Intrinsic (..))
 import Noll.Language.Type.Kind (Kind)
 import Noll.Language.Type.Row (Row (..), normalizeRow)
-import Noll.Utils (Map, Name, Set)
 
 import qualified Data.Set as Set
 

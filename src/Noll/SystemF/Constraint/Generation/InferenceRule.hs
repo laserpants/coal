@@ -6,9 +6,9 @@ module Noll.SystemF.Constraint.Generation.InferenceRule (InferenceRule (..)) whe
 
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (transformBi)
+import Lang.Utils (Name)
 import Noll.Language (Kind (..), Type (..), TypeIndex (..))
 import Noll.SystemF.Substitution (Substitutable (..), applyT)
-import Noll.Utils (Name)
 
 data InferenceRule k a
   = InferenceRule Int

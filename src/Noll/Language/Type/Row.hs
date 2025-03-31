@@ -13,7 +13,7 @@ module Noll.Language.Type.Row (
 
 import Data.Data (Data, Typeable)
 import Data.Tuple.Extra (second)
-import Noll.Utils (Dictionary, Name, (<$$>))
+import Lang.Utils (Dictionary, Name, (<$$>))
 
 import qualified Data.Map.Strict as Map
 

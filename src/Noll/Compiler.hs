@@ -34,12 +34,13 @@ import Control.Monad.State (MonadState, StateT, gets, modify, put, runState, run
 import Control.Monad.Writer (execWriter)
 import Data.Data (Data)
 import Data.Either.Extra (partitionEithers)
-import Noll.AST.HasType (foldTypeOf)
-import Noll.AST.Indexed (indexed)
 import Lang.Common.Environment (Environment (..))
 import Lang.Common.List1 (NonEmpty ((:|)))
 import Lang.Common.Supply (Supply (..), supplied)
 import Lang.Label (Label (..))
+import Lang.Utils (Dictionary, Name, Over, forM_, (<$$$>))
+import Noll.AST.HasType (foldTypeOf)
+import Noll.AST.Indexed (indexed)
 import Noll.Language (
   Binding (..),
   Constructor (..),
@@ -74,7 +75,6 @@ import Noll.SystemF (
   runConstraintsGenStack,
   solveConstraints,
  )
-import Noll.Utils (Dictionary, Name, Over, forM_, (<$$$>))
 
 import qualified Data.Map.Strict as Map
 import qualified Lang.Common.Environment as Environment

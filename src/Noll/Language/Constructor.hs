@@ -5,8 +5,8 @@
 module Noll.Language.Constructor (Constructor (..)) where
 
 import Data.Data (Data, Typeable)
+import Lang.Utils (Name)
 import Noll.Language.Type.Scheme (Scheme (..))
-import Noll.Utils (Name)
 
 -- | Data constructor
 data Constructor o k t = Constructor

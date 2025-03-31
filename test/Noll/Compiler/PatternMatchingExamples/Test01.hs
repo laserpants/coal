@@ -3,9 +3,9 @@
 module Noll.Compiler.PatternMatchingExamples.Test01 where
 
 import Data.List.NonEmpty (NonEmpty (..), (<|))
+import Lang.Label (Label (..))
 import Noll.Compiler.PatternMatching
 import Noll.Compiler.PatternMatching.Rule
-import Lang.Label (Label (..))
 import Noll.Language (
   Binding (..),
   Choice (..),

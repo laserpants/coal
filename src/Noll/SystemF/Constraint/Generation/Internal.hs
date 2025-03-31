@@ -35,6 +35,7 @@ import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (transformBi)
 import Lang.Common.Environment (Environment (..))
 import Lang.Common.Supply (Supply (..))
+import Lang.Utils (Dictionary, Name)
 import Noll.Language (Constructor (..), Kind (..), Type (..), TypeIndex (..))
 import Noll.SystemF.Constraint (
   Constraint (..),
@@ -43,7 +44,6 @@ import Noll.SystemF.Constraint (
  )
 import Noll.SystemF.Constraint.Generation.InferenceRule (InferenceRule (..))
 import Noll.SystemF.Substitution (Substitutable (..), applyT)
-import Noll.Utils (Dictionary, Name)
 
 import qualified Data.Set as Set
 

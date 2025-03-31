@@ -5,7 +5,7 @@
 module Noll.Language.Trait (Trait (..), Uses (..)) where
 
 import Data.Data (Data, Typeable)
-import Noll.Utils (Name)
+import Lang.Utils (Name)
 
 -- | Standalone type trait
 data Trait t = Trait Name t

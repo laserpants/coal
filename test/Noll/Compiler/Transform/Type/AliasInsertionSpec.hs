@@ -4,10 +4,10 @@ module Noll.Compiler.Transform.Type.AliasInsertionSpec where
 
 import Control.Monad.Reader (runReader)
 import Lang.Common.List1 (NonEmpty (..), (<|))
+import Lang.Label (Label (..))
 import Noll.Compiler.Transform.Type.AliasInsertion
 import Noll.Examples.Test01 (test01)
 import Noll.Examples.Test02 (test02)
-import Lang.Label (Label (..))
 import Noll.Language (
   BinaryOperator (..),
   Expression (..),

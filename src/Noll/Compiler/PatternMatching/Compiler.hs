@@ -9,12 +9,13 @@ module Noll.Compiler.PatternMatching.Compiler (
 
 import Data.Data (Data, Typeable)
 import Lang.Common.List1 (List1, NonEmpty (..))
+import Lang.Label (Label (..))
+import Lang.Utils (const2)
 import Noll.Compiler.PatternMatching.Envelope (
   EnvelopeClause (..),
   EnvelopeExpression (..),
   fails,
  )
-import Lang.Label (Label (..))
 import Noll.Language (
   BinaryOperator (..),
   CompiledClause (..),
@@ -25,7 +26,6 @@ import Noll.Language (
   Type (..),
   foldType,
  )
-import Noll.Utils (const2)
 
 class TypeProxy t where
   expressionType :: (Data a) => Expression a t -> t

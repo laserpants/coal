@@ -7,6 +7,7 @@ import qualified Noll.AST.IndexedSpec
 -- import qualified Noll.SystemF.TypeSubstitutionSpec
 
 import qualified Lang.FreeVarsSpec
+import qualified Lang.UtilsSpec
 import qualified Noll.Compiler.NormalizeObjectsSpec
 import qualified Noll.Compiler.PatternMatchingExamples.Test01
 import qualified Noll.Compiler.PatternMatchingExamples.Test02
@@ -39,7 +40,6 @@ import qualified Noll.SystemFExamples.Test13
 import qualified Noll.SystemFExamples.Test14
 import qualified Noll.SystemFExamples.Test15
 import qualified Noll.SystemFSpec
-import qualified Noll.UtilsSpec
 import Test.Hspec (hspec)
 
 main :: IO ()
@@ -76,7 +76,7 @@ main =
     Noll.CompilerExamples.Test01.spec
     Noll.CompilerExamples.Test02.spec
     --    Noll.CompilerSpec.spec
-    Noll.UtilsSpec.spec
+    Lang.UtilsSpec.spec
     Noll.Compiler.NormalizeObjectsSpec.spec
     Noll.Core.Language.Expr.ReplaceSpec.spec
     Noll.Core.CompilerSpec.spec

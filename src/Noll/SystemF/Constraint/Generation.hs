@@ -15,10 +15,21 @@ import Control.Monad.Reader (asks)
 import Data.Data (Data)
 import Data.Maybe (maybeToList)
 import Data.Tuple.Extra (second, third3)
-import Noll.AST.HasType (foldTypeOf)
 import Lang.Common.List1 (NonEmpty ((:|)), fromList1)
 import Lang.Common.Supply (supplied)
 import Lang.Label (Label (..))
+import Lang.Utils (
+  Name,
+  concatForM,
+  concatMapM,
+  forM,
+  forM_,
+  fromMaybe,
+  tellLeft,
+  tellRight,
+  (<$$>),
+ )
+import Noll.AST.HasType (foldTypeOf)
 import Noll.Language (
   Binding (..),
   Choice (..),
@@ -58,17 +69,6 @@ import Noll.SystemF.Constraint.Generation.Internal (
   runConstraintsGenStack,
  )
 import Noll.SystemF.Constraint.Generation.TypeAnnotation (instantiateAnnotation)
-import Noll.Utils (
-  Name,
-  concatForM,
-  concatMapM,
-  forM,
-  forM_,
-  fromMaybe,
-  tellLeft,
-  tellRight,
-  (<$$>),
- )
 
 import qualified Data.Map.Strict as Map
 import qualified Lang.Common.Environment as Environment

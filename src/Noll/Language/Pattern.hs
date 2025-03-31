@@ -5,12 +5,12 @@ module Noll.Language.Pattern (Pattern (..)) where
 
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (universeBi)
-import Lang.FreeVars (BoundVars (..))
 import Lang.Common.List1 (List1)
+import Lang.FreeVars (BoundVars (..))
 import Lang.Label (Label (..))
+import Lang.Utils (Dictionary)
 import Noll.Language.Primitive (Primitive (..))
 import Noll.Language.Type (Parameter (..), Type)
-import Noll.Utils (Dictionary)
 
 import qualified Data.Set as Set
 

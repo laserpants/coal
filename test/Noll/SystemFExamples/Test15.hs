@@ -4,8 +4,8 @@ module Noll.SystemFExamples.Test15 where
 
 import Data.Data (Data)
 import Data.List.NonEmpty (NonEmpty (..), (<|))
-import Noll.Compiler
 import Lang.Label (Label (..))
+import Noll.Compiler
 import Noll.Language (
   BinaryOperator (..),
   Binding (..),

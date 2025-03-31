@@ -16,6 +16,7 @@ module Noll.SystemF.Substitution (
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transform, transformBi)
 import Data.List.NonEmpty (NonEmpty)
+import Lang.Utils (IndexMap, Map, Set, fromMaybe)
 import Noll.Language (
   Binding (..),
   Choice (..),
@@ -35,7 +36,6 @@ import Noll.Language (
  )
 import Noll.Module (Constant (..), Definition (..), Function (..))
 import Noll.SystemF.Constraint (Constraint (..), Monomorphic (..))
-import Noll.Utils (IndexMap, Map, Set, fromMaybe)
 
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set

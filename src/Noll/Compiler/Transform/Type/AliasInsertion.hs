@@ -13,6 +13,7 @@ import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformM)
 import Lang.Common.Environment (Environment)
 import Lang.Common.List1 (NonEmpty (..), fromList1)
+import Lang.Utils (Dictionary, Name)
 import Noll.Language (
   Expression (..),
   Parameter (..),
@@ -23,7 +24,6 @@ import Noll.Language (
   Uses (..),
  )
 import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
-import Noll.Utils (Dictionary, Name)
 
 import qualified Lang.Common.Environment as Environment
 

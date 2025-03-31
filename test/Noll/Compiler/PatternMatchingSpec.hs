@@ -5,6 +5,7 @@ module Noll.Compiler.PatternMatchingSpec where
 import Control.Monad.Identity (runIdentity)
 import Lang.Common.Environment (Environment (..))
 import Lang.Common.List1 (NonEmpty (..), (<|))
+import Lang.Label (Label (..))
 import Noll.Compiler.PatternMatching
 import Noll.Compiler.PatternMatching.Envelope
 import Noll.Compiler.PatternMatching.Equation
@@ -13,7 +14,6 @@ import Noll.Compiler.PatternMatchingSpec.TestRunner (compilePatterns)
 import Noll.Eval (Value (..), eval)
 import Noll.Examples.Test07 (test07)
 import Noll.Examples.Test08 (test08)
-import Lang.Label (Label (..))
 import Noll.Language (CompiledClause (..), Expression (..), Pattern (..), Primitive (..), Uses (..))
 import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
 import Test.Hspec (Spec, describe, it)

@@ -12,6 +12,8 @@ module Noll.Compiler.PatternMatching.Rule (
 import Control.Monad.Reader (MonadReader, ReaderT, ask, runReaderT)
 import Control.Monad.State (MonadState, State, evalState)
 import Lang.Common.Supply (supplied, suppliedName)
+import Lang.Label (Label (..))
+import Lang.Utils (Name, foldrM)
 import Noll.Compiler.PatternMatching.Envelope (
   EnvelopeClause (..),
   EnvelopeExpression (..),
@@ -29,8 +31,6 @@ import Noll.Compiler.PatternMatching.Equation (
   patternEquation,
   patternEquationSet,
  )
-import Lang.Label (Label (..))
-import Noll.Utils (Name, foldrM)
 
 newtype MatchMonad a = MatchMonad {matchMonadStack :: ReaderT Name (State Int) a}
   deriving

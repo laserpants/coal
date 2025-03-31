@@ -15,6 +15,7 @@ import Data.Data (Data)
 import Data.List (delete, find)
 import Data.Set (intersection, (\\))
 import Lang.Common.Supply (supply)
+import Lang.Utils (foldrM)
 import Noll.Language (
   IndexedType,
   Kind (..),
@@ -29,7 +30,6 @@ import Noll.Language (
 import Noll.SystemF.Constraint (Constraint (..), Monomorphic (..))
 import Noll.SystemF.Substitution (Substitutable (..), Substitution (..), mapsTo)
 import Noll.SystemF.Unification (UnificationError, Unifier (..), runUnifier, unifyAll)
-import Noll.Utils (foldrM)
 
 import qualified Data.Set as Set
 

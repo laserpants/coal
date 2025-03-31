@@ -15,6 +15,7 @@ import Control.Monad.Identity (runIdentity)
 import Data.Data (Data)
 import Lang.FreeVars (BoundVars (..))
 import Lang.Label (Label (..))
+import Lang.Utils (Name, const2, (<$$>))
 import Noll.Language (
   Binding (..),
   Choice (..),
@@ -23,7 +24,6 @@ import Noll.Language (
   Expression (..),
   Guard (..),
  )
-import Noll.Utils (Name, const2, (<$$>))
 
 class TreeTransform e t where
   transform :: (Monad m, Data a, Data t, Ord t) => Name -> (a -> t -> m (Expression a t)) -> e a t -> m (e a t)

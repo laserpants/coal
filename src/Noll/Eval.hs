@@ -14,10 +14,10 @@ import Data.Maybe (fromMaybe)
 import Lang.Common.Environment (Environment (..))
 import Lang.Common.List1 (fromList1)
 import Lang.Label (Label (..), labelName)
+import Lang.Utils (Name, forM)
 import Noll.Language.Expression (CompiledClause (..), Expression (..))
 import Noll.Language.Expression.Operator.Binary (BinaryOperator (..))
 import Noll.Language.Primitive (Primitive (..))
-import Noll.Utils (Name, forM)
 import TextShow (showt)
 
 import qualified Data.Map.Strict as Map

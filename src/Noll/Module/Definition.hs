@@ -7,13 +7,13 @@
 module Noll.Module.Definition (Definition (..), Path (..), definitionName) where
 
 import Data.Data (Data, Typeable)
+import Lang.Utils (Name)
 import Noll.Language.Constructor (Constructor (..))
 import Noll.Language.Expression (Expression (..))
 import Noll.Language.Trait (Trait (..), Uses (..))
 import Noll.Language.Type (Parameter, Type (..), TypeIndex)
 import Noll.Module.Constant (Constant (..))
 import Noll.Module.Function (Function (..))
-import Noll.Utils (Name)
 
 newtype Path = Path {pathComponents :: [Name]}
   deriving (Show, Eq, Ord, Read, Data, Typeable)

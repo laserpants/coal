@@ -19,6 +19,7 @@ import Data.Data (Data)
 import Data.List.NonEmpty (NonEmpty, (<|))
 import Data.Set (member)
 import Lang.Common.Supply (supplied)
+import Lang.Utils (foldrM, (<$$>))
 import Noll.Language (
   IndexedType,
   Intrinsic (..),
@@ -32,7 +33,6 @@ import Noll.Language (
   updateTail,
  )
 import Noll.SystemF.Substitution (Substitutable (..), Substitution (..), mapsTo)
-import Noll.Utils (foldrM, (<$$>))
 
 import qualified Data.List.NonEmpty as NonEmpty
 

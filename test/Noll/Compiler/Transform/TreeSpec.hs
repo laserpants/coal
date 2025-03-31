@@ -3,8 +3,8 @@
 module Noll.Compiler.Transform.TreeSpec where
 
 import Data.List.NonEmpty (NonEmpty (..), (<|))
-import Noll.Compiler.Transform.Tree
 import Lang.Label (Label (..))
+import Noll.Compiler.Transform.Tree
 import Noll.Language
 import Test.Hspec (Spec, describe, it)
 

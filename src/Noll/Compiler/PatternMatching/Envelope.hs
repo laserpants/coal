@@ -13,10 +13,10 @@ module Noll.Compiler.PatternMatching.Envelope (
 ) where
 
 import Data.Data (Data)
-import Noll.Compiler.Transform.Tree (rename)
 import Lang.Label (Label (..))
+import Lang.Utils (Name)
+import Noll.Compiler.Transform.Tree (rename)
 import Noll.Language (Expression (..), HasType (..))
-import Noll.Utils (Name)
 
 data EnvelopeClause e t = EnvelopeClause (Label t) [Label t] (EnvelopeExpression e t)
   deriving (Show, Eq, Ord, Read)

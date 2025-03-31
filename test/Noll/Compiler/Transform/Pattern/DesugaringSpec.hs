@@ -3,8 +3,8 @@
 module Noll.Compiler.Transform.Pattern.DesugaringSpec where
 
 import Lang.Common.List1 (NonEmpty ((:|)), (<|))
-import Noll.Compiler.Transform.Pattern.Desugaring (desugarPatterns, runPatternDesugaring)
 import Lang.Label (Label (..))
+import Noll.Compiler.Transform.Pattern.Desugaring (desugarPatterns, runPatternDesugaring)
 import Noll.Language (
   BinaryOperator (..),
   Binding (..),
