@@ -6,7 +6,7 @@ module Noll.Compiler.Transform.Pattern.OrExpansionSpec where
 import Control.Monad.Identity (runIdentity)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformBiM)
-import Noll.Common.List1 (NonEmpty (..), fromList1, (<|))
+import Lang.Common.List1 (NonEmpty (..), fromList1, (<|))
 import Noll.Compiler.Transform.Pattern.OrExpansion
 import Noll.Examples.Test06 (test06)
 import Noll.Examples.Test07 (test07)

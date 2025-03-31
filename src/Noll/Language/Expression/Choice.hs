@@ -9,7 +9,7 @@ module Noll.Language.Expression.Choice (Choice (..), Guard (..)) where
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (universeBi)
 import Lang.FreeVars (FreeVars (..))
-import Noll.Common.List1 (List1)
+import Lang.Common.List1 (List1)
 import Noll.Language.Pattern (Pattern)
 
 import qualified Data.Set as Set

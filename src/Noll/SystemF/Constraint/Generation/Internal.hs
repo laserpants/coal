@@ -33,8 +33,8 @@ import Control.Monad.RWS (
  )
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (transformBi)
-import Noll.Common.Environment (Environment (..))
-import Noll.Common.Supply (Supply (..))
+import Lang.Common.Environment (Environment (..))
+import Lang.Common.Supply (Supply (..))
 import Noll.Language (Constructor (..), Kind (..), Type (..), TypeIndex (..))
 import Noll.SystemF.Constraint (
   Constraint (..),

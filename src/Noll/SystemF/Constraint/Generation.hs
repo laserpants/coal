@@ -16,8 +16,8 @@ import Data.Data (Data)
 import Data.Maybe (maybeToList)
 import Data.Tuple.Extra (second, third3)
 import Noll.AST.HasType (foldTypeOf)
-import Noll.Common.List1 (NonEmpty ((:|)), fromList1)
-import Noll.Common.Supply (supplied)
+import Lang.Common.List1 (NonEmpty ((:|)), fromList1)
+import Lang.Common.Supply (supplied)
 import Lang.Label (Label (..))
 import Noll.Language (
   Binding (..),
@@ -71,7 +71,7 @@ import Noll.Utils (
  )
 
 import qualified Data.Map.Strict as Map
-import qualified Noll.Common.Environment as Environment
+import qualified Lang.Common.Environment as Environment
 
 type ConstraintsGen a = ConstraintsGenStack a TypeIndex Kind IndexedType
 

@@ -30,7 +30,7 @@ import Test.Hspec (Spec, describe, hspec, it)
 
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
-import qualified Noll.Common.Environment as Environment
+import qualified Lang.Common.Environment as Environment
 
 spec :: Spec
 spec =

@@ -9,8 +9,8 @@ module Noll.Compiler.PatternMatching (TypeProxy (..), compileEnvelope, compileMa
 
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformBiM, transformM)
-import Noll.Common.List1 (List1, NonEmpty (..), fromList1)
-import Noll.Common.Supply (suppliedName)
+import Lang.Common.List1 (List1, NonEmpty (..), fromList1)
+import Lang.Common.Supply (suppliedName)
 import Noll.Compiler.PatternMatching.Compiler (TypeProxy (..), compileEnvelope)
 import Noll.Compiler.PatternMatching.Envelope (EnvelopeExpression (..), EnvelopePattern (..))
 import Noll.Compiler.PatternMatching.Equation (patternEquation)

@@ -11,7 +11,7 @@ module Noll.Compiler.PatternMatching.Rule (
 
 import Control.Monad.Reader (MonadReader, ReaderT, ask, runReaderT)
 import Control.Monad.State (MonadState, State, evalState)
-import Noll.Common.Supply (supplied, suppliedName)
+import Lang.Common.Supply (supplied, suppliedName)
 import Noll.Compiler.PatternMatching.Envelope (
   EnvelopeClause (..),
   EnvelopeExpression (..),

@@ -8,7 +8,7 @@ module Noll.Compiler.PatternMatching.Compiler (
 ) where
 
 import Data.Data (Data, Typeable)
-import Noll.Common.List1 (List1, NonEmpty (..))
+import Lang.Common.List1 (List1, NonEmpty (..))
 import Noll.Compiler.PatternMatching.Envelope (
   EnvelopeClause (..),
   EnvelopeExpression (..),

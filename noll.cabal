@@ -28,9 +28,6 @@ library
       Noll.AST.HasTag
       Noll.AST.HasType
       Noll.AST.Indexed
-      Noll.Common.Environment
-      Noll.Common.List1
-      Noll.Common.Supply
       Noll.Compiler
       Noll.Compiler.NormalizeObjects
       Noll.Compiler.PatternMatching

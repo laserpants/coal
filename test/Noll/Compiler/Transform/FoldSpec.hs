@@ -2,7 +2,7 @@
 
 module Noll.Compiler.Transform.FoldSpec where
 
-import Noll.Common.List1 (List1 (..), NonEmpty (..), (<|))
+import Lang.Common.List1 (List1 (..), NonEmpty (..), (<|))
 import Noll.Compiler.Transform.Fold
 import Noll.Examples.Test02 (test02)
 import Noll.Examples.Test03 (test03)

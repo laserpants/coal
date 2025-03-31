@@ -42,7 +42,7 @@ import Noll.Utils (
  )
 
 import qualified Data.Map.Strict as Map
-import qualified Noll.Common.Environment as Environment
+import qualified Lang.Common.Environment as Environment
 
 type TypeAnnotationContext = ConstraintsGenContext TypeIndex Kind IndexedType
 

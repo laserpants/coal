@@ -11,8 +11,8 @@ module Noll.Compiler.Transform.Type.AliasInsertion (
 import Control.Monad.Reader (MonadReader, ask)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformM)
-import Noll.Common.Environment (Environment)
-import Noll.Common.List1 (NonEmpty (..), fromList1)
+import Lang.Common.Environment (Environment)
+import Lang.Common.List1 (NonEmpty (..), fromList1)
 import Noll.Language (
   Expression (..),
   Parameter (..),
@@ -25,7 +25,7 @@ import Noll.Language (
 import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
 import Noll.Utils (Dictionary, Name)
 
-import qualified Noll.Common.Environment as Environment
+import qualified Lang.Common.Environment as Environment
 
 type ParameterizedType = Type Parameter ()
 

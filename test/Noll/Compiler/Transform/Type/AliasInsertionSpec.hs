@@ -3,7 +3,7 @@
 module Noll.Compiler.Transform.Type.AliasInsertionSpec where
 
 import Control.Monad.Reader (runReader)
-import Noll.Common.List1 (NonEmpty (..), (<|))
+import Lang.Common.List1 (NonEmpty (..), (<|))
 import Noll.Compiler.Transform.Type.AliasInsertion
 import Noll.Examples.Test01 (test01)
 import Noll.Examples.Test02 (test02)
@@ -22,7 +22,7 @@ import Noll.Language (
 import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
 import Test.Hspec (Spec, describe, it)
 
-import qualified Noll.Common.Environment as Environment
+import qualified Lang.Common.Environment as Environment
 
 spec :: Spec
 spec =

@@ -11,8 +11,8 @@ import Control.Monad.Reader (MonadReader, Reader, ask, local, runReader)
 import Data.Char (isUpper)
 import Data.List (find)
 import Data.Maybe (fromMaybe)
-import Noll.Common.Environment (Environment (..))
-import Noll.Common.List1 (fromList1)
+import Lang.Common.Environment (Environment (..))
+import Lang.Common.List1 (fromList1)
 import Lang.Label (Label (..), labelName)
 import Noll.Language.Expression (CompiledClause (..), Expression (..))
 import Noll.Language.Expression.Operator.Binary (BinaryOperator (..))
@@ -22,7 +22,7 @@ import TextShow (showt)
 
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
-import qualified Noll.Common.Environment as Environment
+import qualified Lang.Common.Environment as Environment
 
 data Value
   = VData Name [Value]

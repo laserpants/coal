@@ -7,7 +7,7 @@ module Noll.Examples.Test04 (
   moduleMain,
 ) where
 
-import Noll.Common.List1 (NonEmpty (..), (<|))
+import Lang.Common.List1 (NonEmpty (..), (<|))
 import Lang.Label (Label (..))
 import Noll.Language (
   BinaryOperator (..),

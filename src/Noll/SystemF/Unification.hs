@@ -18,7 +18,7 @@ import Control.Monad.State (MonadState, State, runState)
 import Data.Data (Data)
 import Data.List.NonEmpty (NonEmpty, (<|))
 import Data.Set (member)
-import Noll.Common.Supply (supplied)
+import Lang.Common.Supply (supplied)
 import Noll.Language (
   IndexedType,
   Intrinsic (..),
