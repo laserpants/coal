@@ -29,7 +29,7 @@ import Lang.Utils (
   tellRight,
   (<$$>),
  )
-import Noll.AST.HasType (foldTypeOf)
+import Noll.Ast.HasType (foldTypeOf)
 import Noll.Language (
   Binding (..),
   Choice (..),

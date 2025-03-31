@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.AST.FreeVarsSpec where
+module Noll.Ast.FreeVarsSpec where
 
 -- import Data.List.NonEmpty (NonEmpty (..), (<|))
 -- import Data.Set (Set)

@@ -39,8 +39,8 @@ import Lang.Common.List1 (NonEmpty ((:|)))
 import Lang.Common.Supply (Supply (..), supplied)
 import Lang.Label (Label (..))
 import Lang.Utils (Dictionary, Name, Over, forM_, (<$$$>))
-import Noll.AST.HasType (foldTypeOf)
-import Noll.AST.Indexed (indexed)
+import Noll.Ast.HasType (foldTypeOf)
+import Noll.Ast.Indexed (indexed)
 import Noll.Language (
   Binding (..),
   Constructor (..),

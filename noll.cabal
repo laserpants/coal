@@ -24,10 +24,10 @@ source-repository head
 
 library
   exposed-modules:
-      Noll.AST.HasKind
-      Noll.AST.HasTag
-      Noll.AST.HasType
-      Noll.AST.Indexed
+      Noll.Ast.HasKind
+      Noll.Ast.HasTag
+      Noll.Ast.HasType
+      Noll.Ast.Indexed
       Noll.Compiler
       Noll.Compiler.NormalizeObjects
       Noll.Compiler.PatternMatching
@@ -127,8 +127,8 @@ test-suite noll-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
-      Noll.AST.FreeVarsSpec
-      Noll.AST.IndexedSpec
+      Noll.Ast.FreeVarsSpec
+      Noll.Ast.IndexedSpec
       Noll.Compiler.NormalizeObjectsSpec
       Noll.Compiler.PatternMatchingExamples.Test01
       Noll.Compiler.PatternMatchingExamples.Test02

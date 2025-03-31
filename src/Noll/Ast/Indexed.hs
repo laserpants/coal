@@ -5,7 +5,7 @@
 {-# LANGUAGE StrictData #-}
 {-# LANGUAGE TypeApplications #-}
 
-module Noll.AST.Indexed (
+module Noll.Ast.Indexed (
   TypeIndexed (..),
   typeIdsIn,
   notBoundIn,
