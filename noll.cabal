@@ -45,63 +45,6 @@ library
       Noll.Compiler.Transform.Pattern.OrExpansion
       Noll.Compiler.Transform.Tree
       Noll.Compiler.Transform.Type.AliasInsertion
-      Noll.Core.Compiler
-      Noll.Core.Compiler.Ast
-      Noll.Core.Compiler.Pass.ClosureConversion
-      Noll.Core.Compiler.Pass.ExtraArgs
-      Noll.Core.Compiler.Pass.LambdaLifting
-      Noll.Core.Compiler.Pass.LetLifting
-      Noll.Core.Compiler.Pass.Memoize
-      Noll.Core.Compiler.Pass.Suffix
-      Noll.Core.Compiler.Pipeline
-      Noll.Core.Compiler.Pipeline.Kernel
-      Noll.Core.Compiler.Utils
-      Noll.Core.Language
-      Noll.Core.Language.Expr
-      Noll.Core.Language.Expr.Replace
-      Noll.Core.Language.Expr.Syntax
-      Noll.Core.Language.Object
-      Noll.Core.Language.Op
-      Noll.Core.Language.Prim
-      Noll.Core.Language.Type
-      Noll.Core.Language.Type.Arrow
-      Noll.Core.Language.Type.Row
-      Noll.Core.Language.Type.Syntax
-      Noll.Core.Language.Typed
-      Noll.Core.LLVM.IR
-      Noll.Core.LLVM.IRConstruct
-      Noll.Core.LLVM.IREncodable
-      Noll.Core.LLVM.IREval
-      Noll.Core.LLVM.IREval.Closure
-      Noll.Core.LLVM.IREval.Closure.Apply
-      Noll.Core.LLVM.IREval.Closure.Extend
-      Noll.Core.LLVM.IREval.Closure.Finalize
-      Noll.Core.LLVM.IREval.Comment
-      Noll.Core.LLVM.IREval.Conceal
-      Noll.Core.LLVM.IREval.Expr
-      Noll.Core.LLVM.IREval.Expr.App
-      Noll.Core.LLVM.IREval.Expr.Match
-      Noll.Core.LLVM.IREval.Expr.Op
-      Noll.Core.LLVM.IREval.Expr.Var
-      Noll.Core.LLVM.IREval.Malloc
-      Noll.Core.LLVM.IRInstruction
-      Noll.Core.LLVM.IRInstruction.TH
-      Noll.Core.LLVM.IRInterpreter
-      Noll.Core.LLVM.IRInterpreter.Artifact
-      Noll.Core.LLVM.IRInterpreter.Environment
-      Noll.Core.LLVM.IRInterpreter.Instruction
-      Noll.Core.LLVM.IRInterpreter.Monad
-      Noll.Core.LLVM.IRInterpreter.State
-      Noll.Core.LLVM.IRType
-      Noll.Core.LLVM.IRType.Syntax
-      Noll.Core.LLVM.IRValue
-      Noll.Core.Parser
-      Noll.Core.Parser.Expr
-      Noll.Core.Parser.Identifier
-      Noll.Core.Parser.Op
-      Noll.Core.Parser.Prim
-      Noll.Core.Parser.Symbol
-      Noll.Core.Parser.Type
       Noll.Eval
       Noll.Label
       Noll.Language
@@ -216,10 +159,6 @@ test-suite noll-test
       Noll.CompilerExamples.Test01
       Noll.CompilerExamples.Test02
       Noll.CompilerSpec
-      Noll.Core.CompilerSpec
-      Noll.Core.Language.Expr.ReplaceSpec
-      Noll.Core.LanguageSpec
-      Noll.Core.LLVM.IRInstruction.InterpreterSpec
       Noll.Examples.Test01
       Noll.Examples.Test02
       Noll.Examples.Test03
