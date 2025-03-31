@@ -6,7 +6,7 @@ import Noll.Common.List1 (List1 (..), NonEmpty (..), (<|))
 import Noll.Compiler.Transform.Fold
 import Noll.Examples.Test02 (test02)
 import Noll.Examples.Test03 (test03)
-import Noll.Label (Label (..))
+import Lang.Label (Label (..))
 import Noll.Language (BinaryOperator (..), Binding (..), Choice (..), Clause (..), Expression (..), Pattern (..), Primitive (..))
 import Test.Hspec (Spec, describe, it)
 

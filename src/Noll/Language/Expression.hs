@@ -13,9 +13,9 @@ module Noll.Language.Expression (
 
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (universeBi)
-import Noll.AST.FreeVars (BoundVars (..), FreeVars (..), exceptNames)
+import Lang.FreeVars (BoundVars (..), FreeVars (..), exceptNames)
 import Noll.Common.List1 (List1, NonEmpty ((:|)))
-import Noll.Label (Label (..))
+import Lang.Label (Label (..))
 import Noll.Language.Expression.Binding (Binding (..))
 import Noll.Language.Expression.Choice (Choice (..))
 import Noll.Language.Expression.Operator.Binary (BinaryOperator)

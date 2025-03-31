@@ -24,7 +24,6 @@ source-repository head
 
 library
   exposed-modules:
-      Noll.AST.FreeVars
       Noll.AST.HasKind
       Noll.AST.HasTag
       Noll.AST.HasType
@@ -46,7 +45,6 @@ library
       Noll.Compiler.Transform.Tree
       Noll.Compiler.Transform.Type.AliasInsertion
       Noll.Eval
-      Noll.Label
       Noll.Language
       Noll.Language.Constructor
       Noll.Language.Expression

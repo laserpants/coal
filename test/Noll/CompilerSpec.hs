@@ -7,7 +7,7 @@ import qualified Data.Set as Set
 import qualified Noll.Common.Environment as Environment
 import Noll.Common.List1 (NonEmpty (..), (<|))
 import Noll.Compiler
-import Noll.Label (Label (..))
+import Lang.Label (Label (..))
 import Noll.Language (
   BinaryOperator (..),
   Choice (..),

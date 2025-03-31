@@ -14,7 +14,7 @@ module Noll.Compiler.PatternMatching.Envelope (
 
 import Data.Data (Data)
 import Noll.Compiler.Transform.Tree (rename)
-import Noll.Label (Label (..))
+import Lang.Label (Label (..))
 import Noll.Language (Expression (..), HasType (..))
 import Noll.Utils (Name)
 

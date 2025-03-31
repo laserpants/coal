@@ -13,8 +13,8 @@ module Noll.Compiler.Transform.Tree (
 
 import Control.Monad.Identity (runIdentity)
 import Data.Data (Data)
-import Noll.AST.FreeVars (BoundVars (..))
-import Noll.Label (Label (..))
+import Lang.FreeVars (BoundVars (..))
+import Lang.Label (Label (..))
 import Noll.Language (
   Binding (..),
   Choice (..),

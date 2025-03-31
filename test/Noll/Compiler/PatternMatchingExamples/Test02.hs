@@ -10,7 +10,7 @@ import Noll.Compiler.PatternMatching.Equation
 import Noll.Compiler.PatternMatching.Rule
 import Noll.Compiler.PatternMatchingSpec.TestRunner (compilePatterns)
 import Noll.Eval (Value (..), eval)
-import Noll.Label (Label (..))
+import Lang.Label (Label (..))
 import Noll.Language (Expression (..), Primitive (..))
 import Test.Hspec (Spec, describe, it)
 

@@ -14,7 +14,7 @@ import Noll.Compiler.PatternMatching.Envelope (
   EnvelopeExpression (..),
   fails,
  )
-import Noll.Label (Label (..))
+import Lang.Label (Label (..))
 import Noll.Language (
   BinaryOperator (..),
   CompiledClause (..),

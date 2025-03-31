@@ -8,7 +8,7 @@ module Noll.Examples.Test03 (
 ) where
 
 import Noll.Common.List1 (NonEmpty (..), (<|))
-import Noll.Label (Label (..))
+import Lang.Label (Label (..))
 import Noll.Language (
   BinaryOperator (..),
   Choice (..),

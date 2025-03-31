@@ -18,7 +18,7 @@ import Data.Tuple.Extra (second, third3)
 import Noll.AST.HasType (foldTypeOf)
 import Noll.Common.List1 (NonEmpty ((:|)), fromList1)
 import Noll.Common.Supply (supplied)
-import Noll.Label (Label (..))
+import Lang.Label (Label (..))
 import Noll.Language (
   Binding (..),
   Choice (..),

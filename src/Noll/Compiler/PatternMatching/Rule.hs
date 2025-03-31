@@ -29,7 +29,7 @@ import Noll.Compiler.PatternMatching.Equation (
   patternEquation,
   patternEquationSet,
  )
-import Noll.Label (Label (..))
+import Lang.Label (Label (..))
 import Noll.Utils (Name, foldrM)
 
 newtype MatchMonad a = MatchMonad {matchMonadStack :: ReaderT Name (State Int) a}

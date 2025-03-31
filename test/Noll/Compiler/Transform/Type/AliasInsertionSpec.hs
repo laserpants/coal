@@ -7,7 +7,7 @@ import Noll.Common.List1 (NonEmpty (..), (<|))
 import Noll.Compiler.Transform.Type.AliasInsertion
 import Noll.Examples.Test01 (test01)
 import Noll.Examples.Test02 (test02)
-import Noll.Label (Label (..))
+import Lang.Label (Label (..))
 import Noll.Language (
   BinaryOperator (..),
   Expression (..),

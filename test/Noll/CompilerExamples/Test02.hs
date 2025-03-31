@@ -7,7 +7,7 @@ import Control.Monad.State (evalState)
 import Data.Data (Data)
 import Noll.Common.List1 (NonEmpty (..), (<|))
 import Noll.Compiler
-import Noll.Label (Label (..))
+import Lang.Label (Label (..))
 import Noll.Language (
   BinaryOperator (..),
   Choice (..),

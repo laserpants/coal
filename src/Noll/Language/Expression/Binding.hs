@@ -9,7 +9,7 @@ module Noll.Language.Expression.Binding (Binding (..)) where
 
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (universeBi)
-import Noll.AST.FreeVars (BoundVars (..), FreeVars (..), exceptNames)
+import Lang.FreeVars (BoundVars (..), FreeVars (..), exceptNames)
 import Noll.Common.List1 (List1)
 import Noll.Language.Pattern (Pattern (..))
 import Noll.Utils (Name)

@@ -5,7 +5,7 @@ module Noll.SystemFSpec where
 
 import Data.List.NonEmpty ((<|))
 import Noll.Common.List1 (NonEmpty (..))
-import Noll.Label (Label (..))
+import Lang.Label (Label (..))
 import Noll.Language (
   BinaryOperator (..),
   Binding (..),

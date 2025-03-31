@@ -39,7 +39,7 @@ import Noll.AST.Indexed (indexed)
 import Noll.Common.Environment (Environment (..))
 import Noll.Common.List1 (NonEmpty ((:|)))
 import Noll.Common.Supply (Supply (..), supplied)
-import Noll.Label (Label (..))
+import Lang.Label (Label (..))
 import Noll.Language (
   Binding (..),
   Constructor (..),
