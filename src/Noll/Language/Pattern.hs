@@ -35,9 +35,9 @@ data Pattern a t
     PTuple a t (List1 (Pattern a t))
   | -- | Pattern matching expression
     POr a t (Pattern a t) (Pattern a t)
-  | -- | Shorthand variable binding of the form { var }, which desugars to { var = var }
+  | -- | Shorthand variable binding of the form { name }, which desugars to { name = name }
     PShorthand a (Label t)
-  | -- | Recursion operator used in fold catamorphisms
+  | -- | Recursion operator pattern used in fold catamorphisms
     PAtVariable a (Label t)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
 
