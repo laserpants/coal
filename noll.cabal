@@ -151,6 +151,7 @@ test-suite noll-test
       Noll.Examples.Test07
       Noll.Examples.Test08
       Noll.Examples.Test09
+      Noll.Set.Test01
       Noll.SystemF.Constraint.GenerationSpec
       Noll.SystemF.UnificationSpec
       Noll.SystemFExamples.Test01
