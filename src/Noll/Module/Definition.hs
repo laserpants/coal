@@ -22,7 +22,7 @@ data Definition a k t
   = -- | Type-annotated definition
     DAnnotation (Uses (Type Parameter ())) (Definition a k t)
   | -- | Type definition
-    DType Name [Type TypeIndex k] [Constructor TypeIndex k (Type TypeIndex k)]
+    DType Name [t] [Constructor Parameter () (Type Parameter ())]
   | -- | Codata type definition
     DCodata a Name -- TODO
   | -- | Function definition
@@ -34,11 +34,11 @@ data Definition a k t
   | -- | Import statement
     DImport Path [Name]
   | -- | Trait
-    DTrait Name [Trait t] (Type TypeIndex k) [TypeIndex (Type TypeIndex k)]
+    DTrait Name [Trait t] (Type Parameter ()) [(Name, Type Parameter ())]
   | -- | Trait instance
     DInstance Name (Type TypeIndex k) [Definition a k t]
   | -- | Type alias
-    DTypeAlias Name [Type TypeIndex k] (Type TypeIndex k)
+    DTypeAlias Name [Type Parameter ()] (Type Parameter ())
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
 
 definitionName :: Definition a k t -> Name
