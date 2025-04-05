@@ -22,7 +22,7 @@ data Definition a k t
   = -- | Type-annotated definition
     DAnnotation (Uses (Type Parameter ())) (Definition a k t)
   | -- | Type definition
-    DType Name [t] [Constructor Parameter () (Type Parameter ())]
+    DType Name [Parameter ()] [Constructor Parameter () (Type Parameter ())]
   | -- | Codata type definition
     DCodata a Name -- TODO
   | -- | Function definition

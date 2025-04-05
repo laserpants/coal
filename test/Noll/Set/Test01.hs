@@ -226,7 +226,7 @@ moduleBinarySearch =
     , -- type Tree
       DType
         "Tree"
-        undefined
+        [Parameter () "a"]
         [ Constructor
             "Node"
             3
