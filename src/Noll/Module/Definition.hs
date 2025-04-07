@@ -30,7 +30,7 @@ data Definition a k t
   | -- | Other (constant) top-level definitions
     DConstant Name (Constant Expression a t)
   | -- | Stand-alone type signature
-    DSignature Name (Uses (Type TypeIndex k))
+    DSignature Name (Uses (Type Parameter ()))
   | -- | Import statement
     DImport Path [Name]
   | -- | Trait
