@@ -29,7 +29,7 @@ moduleUtils =
     [ -- type_alias Predicate
       DTypeAlias
         "Predicate"
-        [TVariable (Parameter () "a")]
+        [Parameter () "a"]
         (TVariable (Parameter () "a") `TArrow` TIntrinsic IBool)
     ]
 
@@ -256,7 +256,7 @@ moduleBinarySearch =
     , -- type_alias Range
       DTypeAlias
         "Range"
-        [TVariable (Parameter () "a")]
+        [Parameter () "a"]
         ( TIntrinsic
             ( IRecord
                 ( TRow
