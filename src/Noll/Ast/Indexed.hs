@@ -25,7 +25,7 @@ import Noll.Language.Expression (Clause (..), CompiledClause (..), Expression (.
 import Noll.Language.Expression.Binding (Binding (..))
 import Noll.Language.Expression.Choice (Choice (..), Guard (..))
 import Noll.Language.Pattern (Pattern (..))
-import Noll.Language.Trait (Trait (..), Uses (..))
+import Noll.Language.Trait (Trait (..), With (..))
 import Noll.Language.Type (Type (..), TypeIndex (..))
 import Noll.Language.Type.Intrinsic (Intrinsic (..))
 import Noll.Language.Type.Kind (Kind (..))
@@ -100,7 +100,7 @@ instance (Ord k, Data a, Data k) => TypeIndexed k (Function Expression a (Type T
 instance (Ord k, Data a, Data k) => TypeIndexed k (Constant Expression a (Type TypeIndex k)) where
   typeIndexesIn = Set.fromList . universeBi
 
-instance (Ord k, Data t, Data k) => TypeIndexed k (Uses t) where
+instance (Ord k, Data t, Data k) => TypeIndexed k (With t) where
   typeIndexesIn = Set.fromList . universeBi
 
 instance (Ord k, Data a, Data k) => TypeIndexed k (Definition a k (Type TypeIndex k)) where

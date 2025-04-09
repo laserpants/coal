@@ -10,7 +10,7 @@ import Data.Data (Data, Typeable)
 import Lang.Utils (Name)
 import Noll.Language.Constructor (Constructor (..))
 import Noll.Language.Expression (Expression (..))
-import Noll.Language.Trait (Trait (..), Uses (..))
+import Noll.Language.Trait (Trait (..), With (..))
 import Noll.Language.Type (Parameter, Type (..), TypeIndex)
 import Noll.Module.Constant (Constant (..))
 import Noll.Module.Function (Function (..))
@@ -20,7 +20,7 @@ newtype Path = Path {pathComponents :: [Name]}
 
 data Definition a k t
   = -- | Type-annotated definition
-    DAnnotation (Uses (Type Parameter ())) (Definition a k t)
+    DAnnotation (With (Type Parameter ())) (Definition a k t)
   | -- | Type definition
     DType Name [Parameter ()] [Constructor Parameter () (Type Parameter ())]
   | -- | Codata type definition
@@ -30,7 +30,7 @@ data Definition a k t
   | -- | Other (constant) top-level definitions
     DConstant Name (Constant Expression a t)
   | -- | Stand-alone type signature
-    DSignature Name (Uses (Type Parameter ()))
+    DSignature Name (With (Type Parameter ()))
   | -- | Import statement
     DImport Path [Name]
   | -- | Trait

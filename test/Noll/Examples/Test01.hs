@@ -20,7 +20,7 @@ import Noll.Language (
   Primitive (..),
   Trait (..),
   Type (..),
-  Uses (..),
+  With (..),
  )
 import Noll.Module (Definition (..), Function (..), Module (..), Path (..))
 
@@ -38,7 +38,7 @@ moduleOrdered =
       -- instance Ordered(int32)
       -- less_than_or_equal_to
       DAnnotation
-        ( Uses
+        ( With
             [Trait "Ordered" (TVariable (Parameter () "a"))]
             ( TApplication
                 ()
@@ -50,7 +50,7 @@ moduleOrdered =
             "less_than_or_equal_to"
             ( Function
                 ()
-                (Uses [] ())
+                (With [] ())
                 (PVariable () (Label () "m") :| [])
                 ( ELambda
                     ()
@@ -88,7 +88,7 @@ moduleOrdered =
         )
     , -- greater_than
       DAnnotation
-        ( Uses
+        ( With
             [Trait "Ordered" (TVariable (Parameter () "a"))]
             ( TApplication
                 ()
@@ -102,7 +102,7 @@ moduleOrdered =
             "greater_than"
             ( Function
                 ()
-                (Uses [] ())
+                (With [] ())
                 ( PAnnotation
                     ()
                     (TVariable (Parameter () "a"))
@@ -141,12 +141,12 @@ moduleBinarySearch =
       -- build_tree
       -- flatten_tree
       DAnnotation
-        (Uses [] (TIntrinsic (IList (TVariable (Parameter () "a")))))
+        (With [] (TIntrinsic (IList (TVariable (Parameter () "a")))))
         ( DFunction
             "flatten_tree"
             ( Function
                 ()
-                (Uses [] ())
+                (With [] ())
                 ( PAnnotation
                     ()
                     ( TApplication

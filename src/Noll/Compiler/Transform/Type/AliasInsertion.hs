@@ -21,7 +21,7 @@ import Noll.Language (
   Row (..),
   Trait (..),
   Type (..),
-  Uses (..),
+  With (..),
  )
 import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
 
@@ -49,7 +49,7 @@ instance (AliasContext c) => AliasContext (NonEmpty c) where
 instance (AliasContext t) => AliasContext (Trait t) where
   insertAliases = traverse insertAliases
 
-instance (AliasContext t) => AliasContext (Uses t) where
+instance (AliasContext t) => AliasContext (With t) where
   insertAliases = traverse insertAliases
 
 instance (AliasContext t) => AliasContext (Row o k t) where

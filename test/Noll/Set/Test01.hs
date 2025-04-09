@@ -68,10 +68,6 @@ moduleOrdered =
           ( "compare"
           , TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TConstructor () "Ordering"
           )
-        ,
-          ( "from_int32"
-          , TIntrinsic IInt32 `TArrow` TVariable (Parameter () "a")
-          )
         ]
     , -- instance Ordered(int32)
       DInstance
@@ -81,7 +77,7 @@ moduleOrdered =
             "compare"
             ( Function
                 ()
-                (Uses [] ())
+                (With [] ())
                 ( PVariable () (Label () "x")
                     <| PVariable () (Label () "y")
                     :| []
@@ -116,18 +112,10 @@ moduleOrdered =
                     )
                 )
             )
-        , DFunction
-            "from_int32"
-            ( Function
-                ()
-                (Uses [] ())
-                (PVariable () (Label () "n") :| [])
-                (EVariable () (Label () "n"))
-            )
         ]
     , -- less_than_or_equal_to
       DAnnotation
-        ( Uses
+        ( With
             [Trait "Ordered" (TVariable (Parameter () "a"))]
             ( TApplication
                 ()
@@ -139,7 +127,7 @@ moduleOrdered =
             "less_than_or_equal_to"
             ( Function
                 ()
-                (Uses [] ())
+                (With [] ())
                 (PVariable () (Label () "m") :| [])
                 ( ELambda
                     ()
@@ -177,7 +165,7 @@ moduleOrdered =
         )
     , -- greater_than
       DAnnotation
-        ( Uses
+        ( With
             [Trait "Ordered" (TVariable (Parameter () "a"))]
             ( TApplication
                 ()
@@ -191,7 +179,7 @@ moduleOrdered =
             "greater_than"
             ( Function
                 ()
-                (Uses [] ())
+                (With [] ())
                 ( PAnnotation
                     ()
                     (TVariable (Parameter () "a"))
@@ -270,15 +258,17 @@ moduleBinarySearch =
         )
     , -- in_range
       DAnnotation
-        ( Uses
-            [Trait "Ordered" (TVariable (Parameter () "a"))]
+        ( With
+            [ Trait "Ordered" (TVariable (Parameter () "a"))
+            , Trait "Numeric" (TVariable (Parameter () "a"))
+            ]
             (TIntrinsic IBool)
         )
         ( DFunction
             "in_range"
             ( Function
                 ()
-                (Uses [] ())
+                (With [] ())
                 ( PAnnotation
                     ()
                     ( TApplication
@@ -326,7 +316,7 @@ moduleBinarySearch =
                                     <| EApplication
                                       ()
                                       ()
-                                      (EVariable () (Label () "from_int32"))
+                                      (EVariable () (Label () "$integer"))
                                       (ELiteral () (LInt32 (-1)) :| [])
                                     :| []
                                 )
@@ -339,15 +329,17 @@ moduleBinarySearch =
         )
     , -- from_list
       DAnnotation
-        ( Uses
-            [Trait "Ordered" (TVariable (Parameter () "a"))]
+        ( With
+            [ Trait "Ordered" (TVariable (Parameter () "a"))
+            , Trait "Numeric" (TVariable (Parameter () "a"))
+            ]
             (TApplication () (TConstructor () "Tree") (TVariable (Parameter () "a") :| []))
         )
         ( DFunction
             "from_list"
             ( Function
                 ()
-                (Uses [] ())
+                (With [] ())
                 (PAnnotation () (TIntrinsic (IList (TVariable (Parameter () "a")))) (PVariable () (Label () "list")) :| [])
                 ( EFold
                     ()
@@ -362,7 +354,7 @@ moduleBinarySearch =
                                 , EApplication
                                     ()
                                     ()
-                                    (EVariable () (Label () "from_int32"))
+                                    (EVariable () (Label () "$integer"))
                                     (ELiteral () (LInt32 0) :| [])
                                 )
                               ,
@@ -370,7 +362,7 @@ moduleBinarySearch =
                                 , EApplication
                                     ()
                                     ()
-                                    (EVariable () (Label () "from_int32"))
+                                    (EVariable () (Label () "$integer"))
                                     (ELiteral () (LInt32 (-1)) :| [])
                                 )
                               ]
@@ -485,12 +477,12 @@ moduleBinarySearch =
         )
     , -- flatten
       DAnnotation
-        (Uses [] (TIntrinsic (IList (TVariable (Parameter () "a")))))
+        (With [] (TIntrinsic (IList (TVariable (Parameter () "a")))))
         ( DFunction
             "flatten"
             ( Function
                 ()
-                (Uses [] ())
+                (With [] ())
                 ( PAnnotation
                     ()
                     (TApplication () (TConstructor () "Tree") (TVariable (Parameter () "a") :| []))
@@ -542,15 +534,17 @@ moduleBinarySearch =
         )
     , -- sort
       DAnnotation
-        ( Uses
-            [Trait "Ordered" (TVariable (Parameter () "a"))]
+        ( With
+            [ Trait "Ordered" (TVariable (Parameter () "a"))
+            , Trait "Numeric" (TVariable (Parameter () "a"))
+            ]
             (TIntrinsic (IList (TVariable (Parameter () "a"))) `TArrow` TIntrinsic (IList (TVariable (Parameter () "a"))))
         )
         ( DConstant
             "qsort"
             ( Constant
                 ()
-                (Uses [] ())
+                (With [] ())
                 ( EApplication
                     ()
                     ()
@@ -575,7 +569,7 @@ moduleMain =
         "main"
         ( Function
             ()
-            (Uses [] ())
+            (With [] ())
             (PLiteral () LUnit :| [])
             ( EApplication
                 ()

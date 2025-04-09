@@ -23,7 +23,7 @@ import Noll.Language (
   Scheme (..),
   Type (..),
   TypeIndex (..),
-  Uses (..),
+  With (..),
  )
 import Noll.Module (Constant (..), Function (..), Module (..))
 import Noll.SystemFSpec.TestRunner
@@ -155,7 +155,7 @@ fixture :: Function Expression () ()
 fixture =
   Function
     ()
-    (Uses [] ())
+    (With [] ())
     (PAnnotation () (TApplication () (TConstructor () "Tree") (TVariable (Parameter () "a") :| [])) (PVariable () (Label () "tree")) :| [])
     ( EFold
         ()
@@ -270,7 +270,7 @@ fixture1 :: Function Expression () (Type TypeIndex Kind)
 fixture1 =
   Function
     ()
-    (Uses [] (list1Type))
+    (With [] (list1Type))
     (PAnnotation () (TApplication () (TConstructor () "Tree") (TVariable (Parameter () "a") :| [])) (PVariable () (Label tree1Type "tree")) :| [])
     ( EFold
         ()

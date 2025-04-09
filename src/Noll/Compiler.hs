@@ -53,7 +53,7 @@ import Noll.Language (
   Type (..),
   TypeIndex (..),
   TypeIndexed (..),
-  Uses (..),
+  With (..),
   normalizeRowTypes,
   typeOf,
  )
@@ -292,7 +292,7 @@ compileConstraintsC2 expr = do
   insertConstraintsC (cs1 <> cs2)
 
 compileFunctionC2 :: (Monad m, Data a) => Function Expression a IndexedType -> CompilerT a m ()
-compileFunctionC2 (Function loc (Uses _ t) ps e) = do
+compileFunctionC2 (Function loc (With _ t) ps e) = do
   insertConstraintsC [Equality (InferTopLevelFunction loc) [t, typeOf e]]
   t1 <- supplied (TVariable . TypeIndex KType)
   compileConstraintsC2 $
@@ -304,7 +304,7 @@ compileFunctionC2 (Function loc (Uses _ t) ps e) = do
   placeholder = "###.function"
 
 compileConstantC2 :: (Monad m, Data a) => Constant Expression a IndexedType -> CompilerT a m ()
-compileConstantC2 (Constant loc (Uses _ t) e) = do
+compileConstantC2 (Constant loc (With _ t) e) = do
   insertConstraintsC [Equality (InferTopLevelConstant loc) [t, typeOf e]]
   compileConstraintsC2 $
     ELet
@@ -371,7 +371,7 @@ compileFunctionC ::
   (Monad m, Data a, Show a, Eq a) =>
   Function Expression a IndexedType ->
   CompilerT a m ()
-compileFunctionC f@(Function loc (Uses _ t) ps e) = do
+compileFunctionC f@(Function loc (With _ t) ps e) = do
   t1 <- supplied (TVariable . TypeIndex KType)
   let t2 = foldTypeOf t1 ps
   compileConstraintsC [Equality (InferenceRule 999) [t, typeOf e]] f $
@@ -396,7 +396,7 @@ compileConstantC ::
   (Monad m, Data a, Show a, Eq a) =>
   Constant Expression a IndexedType ->
   CompilerT a m ()
-compileConstantC g@(Constant loc (Uses _ t) e) = do
+compileConstantC g@(Constant loc (With _ t) e) = do
   sub <- gets compilerSubstitution
   compileConstraintsC [Equality (InferenceRule 999) [t, typeOf e]] g $
     ELet

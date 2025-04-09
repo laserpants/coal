@@ -19,7 +19,7 @@ import Noll.Language (
   Scheme (..),
   Type (..),
   TypeIndex (..),
-  Uses (..),
+  With (..),
  )
 import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
 import Noll.SystemFSpec.TestRunner
@@ -91,7 +91,7 @@ fixture :: Function Expression () ()
 fixture =
   ( Function
       ()
-      (Uses [] ())
+      (With [] ())
       (PVariable () (Label () "x") :| [])
       ( ELambda
           ()
@@ -136,7 +136,7 @@ fixture1 :: Function Expression () (Type TypeIndex Kind)
 fixture1 =
   ( Function
       ()
-      (Uses [] (TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool))
+      (With [] (TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool))
       (PVariable () (Label (TVariable (TypeIndex KType 0)) "x") :| [])
       ( ELambda
           ()

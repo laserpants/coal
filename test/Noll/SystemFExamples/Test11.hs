@@ -22,7 +22,7 @@ import Noll.Language (
   Scheme (..),
   Type (..),
   TypeIndex (..),
-  Uses (..),
+  With (..),
  )
 import Noll.Module (Constant (..), Function (..), Module (..))
 import Noll.SystemFSpec.TestRunner
@@ -80,7 +80,7 @@ fixture :: Function Expression () ()
 fixture =
   Function
     ()
-    (Uses [] ())
+    (With [] ())
     ( PAnnotation
         ()
         ( TAlias
@@ -144,7 +144,7 @@ fixture1 :: Function Expression () (Type TypeIndex Kind)
 fixture1 =
   Function
     ()
-    (Uses [] (TIntrinsic IBool))
+    (With [] (TIntrinsic IBool))
     ( PAnnotation
         ()
         ( TAlias

@@ -24,7 +24,7 @@ import Noll.Language (
   Trait (..),
   Type (..),
   TypeIndex (..),
-  Uses (..),
+  With (..),
  )
 import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
 import Noll.SystemF (
@@ -121,7 +121,7 @@ baz = do
     indexedC $
       Function
         ()
-        (Uses [] ())
+        (With [] ())
         ( PAnnotation
             ()
             (TVariable (Parameter () "a"))

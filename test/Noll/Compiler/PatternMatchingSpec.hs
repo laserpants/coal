@@ -14,7 +14,7 @@ import Noll.Compiler.PatternMatchingSpec.TestRunner (compilePatterns)
 import Noll.Eval (Value (..), eval)
 import Noll.Examples.Test07 (test07)
 import Noll.Examples.Test08 (test08)
-import Noll.Language (CompiledClause (..), Expression (..), Pattern (..), Primitive (..), Uses (..))
+import Noll.Language (CompiledClause (..), Expression (..), Pattern (..), Primitive (..), With (..))
 import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
 import Test.Hspec (Spec, describe, it)
 

@@ -21,7 +21,7 @@ import Noll.Language (
   Scheme (..),
   Type (..),
   TypeIndex (..),
-  Uses (..),
+  With (..),
  )
 import Noll.Module (Constant (..), Function (..), Module (..))
 import Noll.SystemF.Constraint.Assumption (Assumption (..))
@@ -871,7 +871,7 @@ fixture29 :: Function Expression () ()
 fixture29 =
   Function
     ()
-    (Uses [] ())
+    (With [] ())
     ( PAnnotation
         ()
         (TVariable (Parameter () "a"))
@@ -896,7 +896,7 @@ fixture29Typed :: Function Expression () (Type TypeIndex Kind)
 fixture29Typed =
   Function
     ()
-    (Uses [] (TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool))
+    (With [] (TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool))
     ( PAnnotation
         ()
         (TVariable (Parameter () "a"))

@@ -23,7 +23,7 @@ import Noll.Language (
   Scheme (..),
   Type (..),
   TypeIndex (..),
-  Uses (..),
+  With (..),
  )
 import Noll.Module (Constant (..), Function (..), Module (..))
 import Noll.SystemFSpec.TestRunner
@@ -109,7 +109,7 @@ fixture :: Constant Expression () ()
 fixture =
   Constant
     ()
-    (Uses [] ())
+    (With [] ())
     ( EApplication
         ()
         ()
@@ -121,7 +121,7 @@ fixture1 :: Constant Expression () (Type TypeIndex Kind)
 fixture1 =
   Constant
     ()
-    (Uses [] (list0Type `TArrow` list0Type))
+    (With [] (list0Type `TArrow` list0Type))
     ( EApplication
         ()
         (list0Type `TArrow` list0Type)

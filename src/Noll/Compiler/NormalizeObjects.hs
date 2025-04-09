@@ -8,7 +8,7 @@ import Data.Map.Strict (Map)
 import Noll.Ast.HasType (foldTypeOf)
 import Noll.Compiler.Transform
 import Noll.Language.Expression (Expression (..))
-import Noll.Language.Trait (Uses (..))
+import Noll.Language.Trait (With (..))
 import Noll.Language.Type (Type (..))
 import Noll.Module (Module (..))
 import Noll.Module.Constant (Constant (..))
@@ -35,15 +35,15 @@ instance (Monoid a, Data a, Data k, Data (o k), Typeable o) => NormalizeObjectsT
     \case
       DAnnotation u d ->
         DAnnotation u (normalizeObject d)
-      DFunction name (Function a (Uses ts t) ps e) ->
-        DConstant name (Constant a (Uses ts (foldTypeOf t ps)) (flattenLambda (ELambda mempty ps e)))
+      DFunction name (Function a (With ts t) ps e) ->
+        DConstant name (Constant a (With ts (foldTypeOf t ps)) (flattenLambda (ELambda mempty ps e)))
       d ->
         d
 
 -- instance (Monoid a) => NormalizeObjectsTransformContext (TraitInstance Expression a (Type o k)) where
 --  normalizeObject =
 --    \case
---      TFunction (Function a (Uses ts t) ps e) ->
---        TConstant (Constant a (Uses ts (foldType t (typeOf <$> ps))) (flattenLambda (ELambda mempty ps e)))
+--      TFunction (Function a (With ts t) ps e) ->
+--        TConstant (Constant a (With ts (foldType t (typeOf <$> ps))) (flattenLambda (ELambda mempty ps e)))
 --      t ->
 --        t

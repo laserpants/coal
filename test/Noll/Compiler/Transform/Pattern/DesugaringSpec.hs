@@ -18,7 +18,7 @@ import Noll.Language (
   Row (..),
   Type (..),
   TypeIndex (..),
-  Uses (..),
+  With (..),
  )
 import Noll.Module.Function (Function (..))
 import Test.Hspec (Spec, describe, it)
@@ -630,7 +630,7 @@ fixture11 :: Function Expression () (Type TypeIndex Kind)
 fixture11 =
   Function
     ()
-    (Uses [] (TIntrinsic IBool))
+    (With [] (TIntrinsic IBool))
     ( PAnnotation
         ()
         ( TAlias
@@ -747,7 +747,7 @@ fixture12 :: Function Expression () (Type TypeIndex Kind)
 fixture12 =
   Function
     ()
-    (Uses [] (TIntrinsic IBool))
+    (With [] (TIntrinsic IBool))
     ( PVariable
         ()
         ( Label

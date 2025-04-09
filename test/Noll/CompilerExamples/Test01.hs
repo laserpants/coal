@@ -23,7 +23,7 @@ import Noll.Language (
   Trait (..),
   Type (..),
   TypeIndex (..),
-  Uses (..),
+  With (..),
  )
 import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
 import Noll.SystemF (normalizeTypeIndexes)
@@ -106,7 +106,7 @@ fixture =
       "less_than_or_equal_to"
       ( Function
           ()
-          (Uses [] ())
+          (With [] ())
           (PVariable () (Label () "m") :| [])
           ( ELambda
               ()
@@ -145,7 +145,7 @@ fixture =
       "greater_than"
       ( Function
           ()
-          (Uses [] ())
+          (With [] ())
           ( PAnnotation
               ()
               (TVariable (Parameter () "a"))
@@ -183,7 +183,7 @@ fixture1 =
         "less_than_or_equal_to"
         ( Function
             ()
-            (Uses [] (tvariable0 `TArrow` bool))
+            (With [] (tvariable0 `TArrow` bool))
             (PVariable () (Label tvariable0 "m") :| [])
             ( ELambda
                 ()
@@ -223,7 +223,7 @@ fixture1 =
         "greater_than"
         ( Function
             ()
-            (Uses [] (tvariable1 `TArrow` bool))
+            (With [] (tvariable1 `TArrow` bool))
             ( PAnnotation
                 ()
                 (TVariable (Parameter () "a"))

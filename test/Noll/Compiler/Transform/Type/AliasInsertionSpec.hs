@@ -17,7 +17,7 @@ import Noll.Language (
   Row (..),
   Trait (..),
   Type (..),
-  Uses (..),
+  With (..),
  )
 import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
 import Test.Hspec (Spec, describe, it)
@@ -51,7 +51,7 @@ result1 =
 object1 :: Definition () () ()
 object1 =
   DAnnotation
-    ( Uses
+    ( With
         [Trait "Ordered" (TVariable (Parameter () "a"))]
         ( TApplication
             ()
@@ -65,7 +65,7 @@ object1 =
         "greater_than"
         ( Function
             ()
-            (Uses [] ())
+            (With [] ())
             ( PAnnotation
                 ()
                 (TVariable (Parameter () "a"))
@@ -91,7 +91,7 @@ object1 =
 result2 :: Definition () () ()
 result2 =
   DAnnotation
-    ( Uses
+    ( With
         [Trait "Ordered" (TVariable (Parameter () "a"))]
         ( TAlias
             "Predicate"
@@ -103,7 +103,7 @@ result2 =
         "greater_than"
         ( Function
             ()
-            (Uses [] ())
+            (With [] ())
             ( PAnnotation
                 ()
                 (TVariable (Parameter () "a"))
