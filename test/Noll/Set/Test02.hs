@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Set.Test01 where
+module Noll.Set.Test02 where
 
 import Lang.Common.List1 (NonEmpty (..), (<|))
 import Lang.Label (Label (..))
@@ -11,9 +11,9 @@ import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import qualified Noll.Module as Module
 
--- Untyped source tree
-prog1_01 :: [Module () () ()]
-prog1_01 =
+-- Expand type aliases
+prog1_02 :: [Module () () ()]
+prog1_02 =
   [ moduleUtils
   , moduleOrdered
   , moduleBinarySearch
@@ -118,10 +118,10 @@ moduleOrdered =
       DAnnotation
         ( With
             [Trait "Ordered" (TVariable (Parameter () "a"))]
-            ( TApplication
-                ()
-                (TConstructor () "Predicate")
-                (TVariable (Parameter () "a") :| [])
+            ( TAlias
+                "Predicate"
+                [TVariable (Parameter () "a")]
+                (TVariable (Parameter () "a") `TArrow` TIntrinsic IBool)
             )
         )
         ( DFunction
@@ -168,12 +168,10 @@ moduleOrdered =
       DAnnotation
         ( With
             [Trait "Ordered" (TVariable (Parameter () "a"))]
-            ( TApplication
-                ()
-                (TConstructor () "Predicate")
-                ( TVariable (Parameter () "a")
-                    :| []
-                )
+            ( TAlias
+                "Predicate"
+                [TVariable (Parameter () "a")]
+                (TVariable (Parameter () "a") `TArrow` TIntrinsic IBool)
             )
         )
         ( DFunction
@@ -272,10 +270,16 @@ moduleBinarySearch =
                 (With [] ())
                 ( PAnnotation
                     ()
-                    ( TApplication
-                        ()
-                        (TConstructor () "Range")
-                        (TVariable (Parameter () "a") :| [])
+                    ( TAlias
+                        "Range"
+                        [TVariable (Parameter () "a")]
+                        ( TIntrinsic
+                            ( IRecord
+                                (TRow 
+                                  (RExtend "max" (TVariable (Parameter () "a")) 
+                                  (RExtend "min" (TVariable (Parameter () "a")) RNil)))
+                            )
+                        )
                     )
                     (PVariable () (Label () "range"))
                     <| PAnnotation
