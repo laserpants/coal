@@ -23,6 +23,8 @@ import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
 import Test.Hspec (Spec, describe, it)
 
 import qualified Lang.Common.Environment as Environment
+import qualified Noll.Set.Test01
+import qualified Noll.Set.Test02
 
 spec :: Spec
 spec =
@@ -33,6 +35,8 @@ spec =
       runReader (insertAliases object1) testEnvironment == result2
     it "" $
       runReader (insertAliases test01) testEnvironment == test02
+    it "" $
+      runReader (insertAliases Noll.Set.Test01.prog1_01) testEnvironment2 == Noll.Set.Test02.prog1_02
 
 type1 :: Type Parameter ()
 type1 =
@@ -143,6 +147,39 @@ testEnvironment =
         , ( TIntrinsic
               ( IRecord
                   (TRow (RExtend "min" (TVariable (Parameter () "a")) (RExtend "max" (TVariable (Parameter () "a")) RNil)))
+              )
+          )
+        )
+      )
+    ]
+
+testEnvironment2 :: AliasEnvironment
+testEnvironment2 =
+  Environment.fromList
+    [
+      ( "Predicate"
+      ,
+        ( ["a"]
+        , TVariable (Parameter () "a") `TArrow` TIntrinsic IBool
+        )
+      )
+    ,
+      ( "Range"
+      ,
+        ( ["a"]
+        , ( TIntrinsic
+              ( IRecord
+                  ( TRow
+                      ( RExtend
+                          "max"
+                          (TVariable (Parameter () "a"))
+                          ( RExtend
+                              "min"
+                              (TVariable (Parameter () "a"))
+                              RNil
+                          )
+                      )
+                  )
               )
           )
         )
