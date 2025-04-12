@@ -8,7 +8,7 @@
 
 module Noll.Compiler.Transform.Fold (
   CompileFoldsContext (..),
-  runFoldTransform,
+  runFoldExpansion,
   expandFoldExpr,
 ) where
 
@@ -35,8 +35,8 @@ newtype FoldExpansion a = FoldExpansion {foldExpansionStack :: ReaderT Name (Sta
     , MonadState Int
     )
 
-runFoldTransform :: Name -> Int -> FoldExpansion a -> a
-runFoldTransform r s e = evalState (runReaderT (foldExpansionStack e) r) s
+runFoldExpansion :: Name -> Int -> FoldExpansion a -> a
+runFoldExpansion r s e = evalState (runReaderT (foldExpansionStack e) r) s
 
 class FoldContext e where
   expandFolds :: Name -> [Label ()] -> e -> e

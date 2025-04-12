@@ -13,17 +13,21 @@ import Test.Hspec (Spec, describe, it)
 import qualified Data.Map.Strict as Map
 import qualified Noll.Examples.Test02 as Test02
 import qualified Noll.Examples.Test03 as Test03
+import qualified Noll.Set.Test02
+import qualified Noll.Set.Test03
 
 spec :: Spec
 spec =
   describe "Noll.Compiler.Transform.Fold" $ do
     describe "" $ do
       it "" $ do
-        runFoldTransform "fold" 1 (expandFoldExpr exprs1 clauses1) == result1
+        runFoldExpansion "fold" 1 (expandFoldExpr exprs1 clauses1) == result1
       it "" $ do
-        runFoldTransform "fold" 1 (compileFolds Test02.moduleBinarySearch) == Test03.moduleBinarySearch
+        runFoldExpansion "fold" 1 (compileFolds Test02.moduleBinarySearch) == Test03.moduleBinarySearch
       it "" $ do
-        runFoldTransform "fold" 1 (compileFolds test02) == test03
+        runFoldExpansion "fold" 1 (compileFolds test02) == test03
+      it "" $ do
+        runFoldExpansion "fold" 1 (compileFolds Noll.Set.Test02.prog1_02) == Noll.Set.Test03.prog1_03
 
 --
 -- list, { min = 0, max = -1 }
