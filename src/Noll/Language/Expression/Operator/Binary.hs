@@ -71,9 +71,13 @@ binaryOperatorTypeScheme =
       forall0 (TIntrinsic IBool ~> TIntrinsic IBool ~> TIntrinsic IBool)
     OLogicalAnd ->
       forall0 (TIntrinsic IBool ~> TIntrinsic IBool ~> TIntrinsic IBool)
+    OEqualTo ->
+      forall1 (\a -> a ~> a ~> TIntrinsic IBool)
+    ONotEqualTo ->
+      forall1 (\a -> a ~> a ~> TIntrinsic IBool)
     OListConcatenation ->
       forall1 (\a -> TIntrinsic (IList a) ~> TIntrinsic (IList a) ~> TIntrinsic (IList a))
     OAddition ->
       forall1 (\a -> a ~> a ~> a)
-    _ ->
-      error "TODO"
+    o ->
+      error ("TODO: " <> show o)

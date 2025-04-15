@@ -149,7 +149,10 @@ patternConstraints assert ms =
       tellRight [Explicit (InferenceRule 3) (foldTypeOf t [p1, p2]) listConstructorTypeScheme]
       pure (ms1 <> ms2)
     PListLiteral _ t ps -> do
-      tellRight [Equality (InferenceRule 3) (t : (typeOf <$> ps))]
+      tellRight
+        [ Equality (InferenceRule 3) (t : (typeOf <$> ps))
+        , Explicit (InferenceRule 33) t (forall1 (\a -> TIntrinsic (IList a)))
+        ]
       concatForM ps (patternConstraints assert ms)
     PAtVariable _ (Label _ name) -> do
       pure [name]
@@ -165,7 +168,7 @@ extractRow =
     _ ->
       error "TODO"
 
-clauseAssumptions :: (Data a) => Clause a IndexedType -> ConstraintsGen a (IndexedType, [IndexedType], [Assumption IndexedType])
+clauseAssumptions :: (Show a, Data a) => Clause a IndexedType -> ConstraintsGen a (IndexedType, [IndexedType], [Assumption IndexedType])
 clauseAssumptions (EClause loc p cs) = do
   (ts1, ms) <- second concat . unzip <$$> withMonomorphic p $
     forM (fromList1 cs) $
@@ -181,7 +184,7 @@ clauseAssumptions (EClause loc p cs) = do
   names <- patternConstraints (assertEqualityAssumptions loc) ms p
   pure (typeOf p, ts1, filter (assumptionNameIsNotOneOf names) ms)
 
-collectConstraints :: (Data a) => Expression a IndexedType -> ConstraintsGen a [Assumption IndexedType]
+collectConstraints :: (Show a, Data a) => Expression a IndexedType -> ConstraintsGen a [Assumption IndexedType]
 collectConstraints =
   \case
     EAnnotation loc t e -> do
@@ -265,7 +268,10 @@ collectConstraints =
       pure (ms1 <> ms2)
     EListLiteral _ t es -> do
       ms1 <- concatMapM collectConstraints es
-      tellRight [Equality (InferenceRule 555) (t : (typeOf <$> es))]
+      tellRight
+        [ Equality (InferenceRule 555) (t : (typeOf <$> es))
+        , Explicit (InferenceRule 777) t (forall1 (\a -> TIntrinsic (IList a)))
+        ]
       pure ms1
     EMatch loc t e cs -> do
       ms1 <- collectConstraints e

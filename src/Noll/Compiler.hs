@@ -247,7 +247,7 @@ runConstraintsGenC stack = do
       , constraintsGenContextTypeConstructorEnv = compilerTypeConstructorEnv
       }
 
-generateConstraintsC :: (Monad m, Data a) => Expression a IndexedType -> CompilerT a m ([CompilerAssumption], [CompilerConstraint a])
+generateConstraintsC :: (Show a, Monad m, Data a) => Expression a IndexedType -> CompilerT a m ([CompilerAssumption], [CompilerConstraint a])
 generateConstraintsC e = do
   (assumptions, params, result) <- runConstraintsGenC (collectConstraints e)
   let (errors, constraints) = partitionEithers result
@@ -262,7 +262,7 @@ assumptionConstraints Assumption{..} = do
     Nothing ->
       pure $ Left Assumption{..}
     Just s ->
-      pure $ Right (Explicit (InferenceRule 200) assumptionType s)
+      pure $ Right (Explicit (InferenceRule 220) assumptionType s)
 
 solveConstraintsC :: (Monad m, Data a, Show a, Eq a) => [CompilerConstraint a] -> CompilerT a m Substitution
 solveConstraintsC cs = do
@@ -283,7 +283,7 @@ solveC constraints = do
 
 --
 
-compileConstraintsC2 :: (Monad m, Data a) => Expression a IndexedType -> CompilerT a m ()
+compileConstraintsC2 :: (Show a, Monad m, Data a) => Expression a IndexedType -> CompilerT a m ()
 compileConstraintsC2 expr = do
   (ms1, cs1) <- generateConstraintsC expr
   (ms2, cs2) <- partitionEithers <$> traverse assumptionConstraints ms1
@@ -291,7 +291,7 @@ compileConstraintsC2 expr = do
   insertAssumptionsC (apply sub ms2)
   insertConstraintsC (cs1 <> cs2)
 
-compileFunctionC2 :: (Monad m, Data a) => Function Expression a IndexedType -> CompilerT a m ()
+compileFunctionC2 :: (Show a, Monad m, Data a) => Function Expression a IndexedType -> CompilerT a m ()
 compileFunctionC2 (Function loc (With _ t) ps e) = do
   insertConstraintsC [Equality (InferTopLevelFunction loc) [t, typeOf e]]
   t1 <- supplied (TVariable . TypeIndex KType)
@@ -303,7 +303,7 @@ compileFunctionC2 (Function loc (With _ t) ps e) = do
  where
   placeholder = "###.function"
 
-compileConstantC2 :: (Monad m, Data a) => Constant Expression a IndexedType -> CompilerT a m ()
+compileConstantC2 :: (Show a, Monad m, Data a) => Constant Expression a IndexedType -> CompilerT a m ()
 compileConstantC2 (Constant loc (With _ t) e) = do
   insertConstraintsC [Equality (InferTopLevelConstant loc) [t, typeOf e]]
   compileConstraintsC2 $
@@ -324,6 +324,9 @@ compileDefinitionC2 = do
     DAnnotation a d -> do
       -- TODO
       compileDefinitionC2 d
+    _ ->
+      -- TODO ?
+      pure ()
 
 solveC2 :: (Monad m, Data a, Show a, Eq a) => CompilerT a m Substitution
 solveC2 = do
@@ -352,6 +355,7 @@ compileConstraintsC ::
   CompilerT a m ()
 compileConstraintsC cs o e = do
   (ms0, cs0) <- generateConstraintsC e
+
   (ms1, cs1) <- partitionEithers <$> traverse assumptionConstraints ms0
   sub <- gets compilerSubstitution
   insertAssumptionsC (apply sub ms1)
@@ -468,9 +472,16 @@ typeCheckDefinitionC d = do
 --  CompilerT a m ([Definition a Kind IndexedType], [CompilerAssumption])
 typeCheckDefinitionsC ds = do
   forM_ ds $ \d -> do
-    compileDefinitionC2 d
-    sub <- solveC2
-    defineC (definitionName d) (typeOf (apply sub d))
+    case d of
+      -- TODO
+      DImport{} -> pure ()
+      DTrait{} -> pure ()
+      DTypeAlias{} -> pure ()
+      DType{} -> pure ()
+      _ -> do
+        compileDefinitionC2 d
+        sub <- solveC2
+        defineC (definitionName d) (typeOf (apply sub d))
   sub <- gets compilerSubstitution
   ams <- gets compilerAssumptions
   Environment env <- gets compilerNameEnvironment

@@ -116,7 +116,7 @@ typeIndex k name = do
     Just{} ->
       pure index
 
-checkTypeAnnotationParameters :: (MonadWriter [TypeAnnotationError a] m) => [(Name, (a, TypeIndex Kind))] -> Substitution -> m ()
+checkTypeAnnotationParameters :: (Show a, MonadWriter [TypeAnnotationError a] m) => [(Name, (a, TypeIndex Kind))] -> Substitution -> m ()
 checkTypeAnnotationParameters ps (Substitution sub) = do
   params <- groupSortOn fst <$> concatMapM go ps
   case filter (lengthMoreThan 1) params of
