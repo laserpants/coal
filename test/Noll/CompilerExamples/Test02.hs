@@ -42,20 +42,20 @@ import qualified Noll.Set.Test04
 spec :: Spec
 spec =
   describe "Noll.Compiler" $ do
---    it "" $ do
---      testResultExpression (baz fixture) == fixture1
---    it "" $ do
---      testResultExpression (compileOrPatterns Test03.moduleOrdered) == Test04.moduleOrdered
---    it "" $ do
---      testResultExpression (baz3 Test03.moduleBinarySearch) == Test04.moduleBinarySearch
---    it "" $ do
---      testResultExpression (baz3 Noll.Set.Test03.moduleUtils) == Noll.Set.Test04.moduleUtils
---    it "" $ do
---      testResultExpression (baz3 Noll.Set.Test03.moduleOrdered) == Noll.Set.Test04.moduleOrdered
---    it "" $ do
---      testResultExpression (baz3 Noll.Set.Test03.moduleBinarySearch) == Noll.Set.Test04.moduleBinarySearch
---    it "" $ do
---      testResultExpression (baz3 Noll.Set.Test03.moduleMain) == Noll.Set.Test04.moduleMain
+    --    it "" $ do
+    --      testResultExpression (baz fixture) == fixture1
+    --    it "" $ do
+    --      testResultExpression (compileOrPatterns Test03.moduleOrdered) == Test04.moduleOrdered
+    --    it "" $ do
+    --      testResultExpression (baz3 Test03.moduleBinarySearch) == Test04.moduleBinarySearch
+    --    it "" $ do
+    --      testResultExpression (baz3 Noll.Set.Test03.moduleUtils) == Noll.Set.Test04.moduleUtils
+    --    it "" $ do
+    --      testResultExpression (baz3 Noll.Set.Test03.moduleOrdered) == Noll.Set.Test04.moduleOrdered
+    --    it "" $ do
+    --      testResultExpression (baz3 Noll.Set.Test03.moduleBinarySearch) == Noll.Set.Test04.moduleBinarySearch
+    --    it "" $ do
+    --      testResultExpression (baz3 Noll.Set.Test03.moduleMain) == Noll.Set.Test04.moduleMain
     it "" $ do
       testResultExpression (Noll.CompilerExamples.Test02.baz Noll.CompilerExamples.Test02.fixture4) == Noll.CompilerExamples.Test02.fixture41
     it "" $ do
@@ -729,85 +729,85 @@ fixture41 =
 
 -- moduleBinarySearch
 fixture5 =
-  [     ( DFunction
-            "in_range"
-            ( Function
+  [ ( DFunction
+        "in_range"
+        ( Function
+            ()
+            (With [] ())
+            ( PAnnotation
                 ()
-                (With [] ())
-                ( PAnnotation
-                    ()
-                    ( TAlias
-                        "Range"
-                        [TVariable (Parameter () "a")]
-                        ( TIntrinsic
-                            ( IRecord
-                                ( TRow
-                                    ( RExtend
-                                        "max"
-                                        (TVariable (Parameter () "a"))
-                                        (RExtend "min" (TVariable (Parameter () "a")) RNil)
-                                    )
+                ( TAlias
+                    "Range"
+                    [TVariable (Parameter () "a")]
+                    ( TIntrinsic
+                        ( IRecord
+                            ( TRow
+                                ( RExtend
+                                    "max"
+                                    (TVariable (Parameter () "a"))
+                                    (RExtend "min" (TVariable (Parameter () "a")) RNil)
                                 )
                             )
                         )
                     )
-                    (PVariable () (Label () "range"))
-                    <| PAnnotation
-                      ()
-                      (TVariable (Parameter () "a"))
-                      (PVariable () (Label () "n"))
-                    :| []
                 )
+                (PVariable () (Label () "range"))
+                <| PAnnotation
+                  ()
+                  (TVariable (Parameter () "a"))
+                  (PVariable () (Label () "n"))
+                :| []
+            )
+            ( EApplication
+                ()
+                ()
+                (EBinaryOperator () () OLogicalAnd)
                 ( EApplication
                     ()
                     ()
-                    (EBinaryOperator () () OLogicalAnd)
-                    ( EApplication
-                        ()
-                        ()
-                        (EVariable () (Label () "greater_than"))
-                        ( EVariable () (Label () "n")
-                            <| ESelect () (Label () "min") (EVariable () (Label () "range"))
-                            :| []
-                        )
-                        <| ( EApplication
-                              ()
-                              ()
-                              (EBinaryOperator () () OLogicalOr)
-                           )
-                          ( EApplication
-                              ()
-                              ()
-                              (EVariable () (Label () "less_than_or_equal_to"))
-                              ( EVariable () (Label () "n")
-                                  <| ESelect () (Label () "max") (EVariable () (Label () "range"))
-                                  :| []
-                              )
-                              <| EApplication
-                                ()
-                                ()
-                                (EBinaryOperator () () OEqualTo)
-                                ( ESelect () (Label () "max") (EVariable () (Label () "range"))
-                                    <| EApplication
-                                      ()
-                                      ()
-                                      (EVariable () (Label () "from_int32"))
-                                      (ELiteral () (LInt32 (-1)) :| [])
-                                    :| []
-                                )
-                              :| []
-                          )
+                    (EVariable () (Label () "greater_than"))
+                    ( EVariable () (Label () "n")
+                        <| ESelect () (Label () "min") (EVariable () (Label () "range"))
                         :| []
                     )
+                    <| ( EApplication
+                          ()
+                          ()
+                          (EBinaryOperator () () OLogicalOr)
+                       )
+                      ( EApplication
+                          ()
+                          ()
+                          (EVariable () (Label () "less_than_or_equal_to"))
+                          ( EVariable () (Label () "n")
+                              <| ESelect () (Label () "max") (EVariable () (Label () "range"))
+                              :| []
+                          )
+                          <| EApplication
+                            ()
+                            ()
+                            (EBinaryOperator () () OEqualTo)
+                            ( ESelect () (Label () "max") (EVariable () (Label () "range"))
+                                <| EApplication
+                                  ()
+                                  ()
+                                  (EVariable () (Label () "from_int32"))
+                                  (ELiteral () (LInt32 (-1)) :| [])
+                                :| []
+                            )
+                          :| []
+                      )
+                    :| []
                 )
             )
         )
+    )
   , ( DFunction
         "from_list"
         ( Function
             ()
             (With [] ())
-            --            (PAnnotation () (TIntrinsic (IList (TVariable (Parameter () "a")))) (PVariable () (Label () "list")) :| [])
+            --(PAnnotation () (TIntrinsic (IList (TVariable (Parameter () "a")))) (PVariable () (Label () "list")) :| [])
             (PVariable () (Label () "list") :| [])
             ( EFold
                 ()
@@ -939,167 +939,166 @@ fixture5 =
                       )
                     :| []
                 )
-                Nothing
-                -- ( Just
-                --    ( ERecursiveLet
-                --        ()
-                --        (PVariable () (Label () "$fold.1"))
-                --        ( ELambda
-                --            ()
-                --            (PVariable () (Label () "$fold.1.expr") :| [])
-                --            ( EMatch
-                --                ()
-                --                ()
-                --                (EVariable () (Label () "$fold.1.expr"))
-                --                ( EClause
-                --                    ()
-                --                    (PListCons () () (PVariable () (Label () "p")) (PVariable () (Label () "g")))
-                --                    ( CPlain
-                --                        ()
-                --                        []
-                --                        ( ELambda
-                --                            ()
-                --                            (PVariable () (Label () "range") :| [])
-                --                            ( EIf
-                --                                ()
-                --                                ()
-                --                                ( EApplication
-                --                                    ()
-                --                                    ()
-                --                                    (EBinaryOperator () () OReverseApplication)
-                --                                    ( EVariable () (Label () "p")
-                --                                        <| EApplication
-                --                                          ()
-                --                                          ()
-                --                                          (EVariable () (Label () "in_range"))
-                --                                          (EVariable () (Label () "range") :| [])
-                --                                        :| []
-                --                                    )
-                --                                )
-                --                                ( EApplication
-                --                                    ()
-                --                                    ()
-                --                                    (EConstructor () (Label () "Node"))
-                --                                    ( EVariable () (Label () "p")
-                --                                        <| EApplication
-                --                                          ()
-                --                                          ()
-                --                                          (EVariable () (Label () "$fold.1"))
-                --                                          ( EVariable () (Label () "g")
-                --                                              :| [ ERecord
-                --                                                    ()
-                --                                                    ()
-                --                                                    ( Map.fromList
-                --                                                        [
-                --                                                          ( "max"
-                --                                                          , EVariable () (Label () "p")
-                --                                                          )
-                --                                                        ,
-                --                                                          ( "min"
-                --                                                          , ESelect
-                --                                                              ()
-                --                                                              (Label () "min")
-                --                                                              (EVariable () (Label () "range"))
-                --                                                          )
-                --                                                        ]
-                --                                                    )
-                --                                                    Nothing
-                --                                                 ]
-                --                                          )
-                --                                        <| EApplication
-                --                                          ()
-                --                                          ()
-                --                                          (EVariable () (Label () "$fold.1"))
-                --                                          ( EVariable () (Label () "g")
-                --                                              <| ERecord
-                --                                                ()
-                --                                                ()
-                --                                                ( Map.fromList
-                --                                                    [
-                --                                                      ( "max"
-                --                                                      , ESelect
-                --                                                          ()
-                --                                                          (Label () "max")
-                --                                                          (EVariable () (Label () "range"))
-                --                                                      )
-                --                                                    ,
-                --                                                      ( "min"
-                --                                                      , EVariable () (Label () "p")
-                --                                                      )
-                --                                                    ]
-                --                                                )
-                --                                                Nothing
-                --                                              :| []
-                --                                          )
-                --                                        :| []
-                --                                    )
-                --                                )
-                --                                ( EApplication
-                --                                    ()
-                --                                    ()
-                --                                    (EVariable () (Label () "$fold.1"))
-                --                                    ( EVariable () (Label () "g")
-                --                                        <| EVariable () (Label () "range")
-                --                                        :| []
-                --                                    )
-                --                                )
-                --                            )
-                --                        )
-                --                        :| []
-                --                    )
-                --                    <| EClause
-                --                      ()
-                --                      (PListLiteral () () [])
-                --                      ( CPlain
-                --                          ()
-                --                          []
-                --                          ( EApplication
-                --                              ()
-                --                              ()
-                --                              (EVariable () (Label () "always"))
-                --                              ( EConstructor () (Label () "Leaf")
-                --                                  :| []
-                --                              )
-                --                          )
-                --                          :| []
-                --                      )
-                --                    :| []
-                --                )
-                --            )
-                --        )
-                --        ( EApplication
-                --            ()
-                --            ()
-                --            (EVariable () (Label () "$fold.1"))
-                --            ( EVariable () (Label () "list")
-                --                <| ERecord
-                --                  ()
-                --                  ()
-                --                  ( Map.fromList
-                --                      [
-                --                        ( "max"
-                --                        , EApplication
-                --                            ()
-                --                            ()
-                --                            (EVariable () (Label () "from_int32"))
-                --                            (ELiteral () (LInt32 (-1)) :| [])
-                --                        )
-                --                      ,
-                --                        ( "min"
-                --                        , EApplication
-                --                            ()
-                --                            ()
-                --                            (EVariable () (Label () "from_int32"))
-                --                            (ELiteral () (LInt32 0) :| [])
-                --                        )
-                --                      ]
-                --                  )
-                --                  Nothing
-                --                :| []
-                --            )
-                --        )
-                --    )
-                -- )
+                ( Just
+                    ( ERecursiveLet
+                        ()
+                        (PVariable () (Label () "$fold.1"))
+                        ( ELambda
+                            ()
+                            (PVariable () (Label () "$fold.1.expr") :| [])
+                            ( EMatch
+                                ()
+                                ()
+                                (EVariable () (Label () "$fold.1.expr"))
+                                ( EClause
+                                    ()
+                                    (PListCons () () (PVariable () (Label () "p")) (PVariable () (Label () "g")))
+                                    ( CPlain
+                                        ()
+                                        []
+                                        ( ELambda
+                                            ()
+                                            (PVariable () (Label () "range") :| [])
+                                            ( EIf
+                                                ()
+                                                ()
+                                                ( EApplication
+                                                    ()
+                                                    ()
+                                                    (EBinaryOperator () () OReverseApplication)
+                                                    ( EVariable () (Label () "p")
+                                                        <| EApplication
+                                                          ()
+                                                          ()
+                                                          (EVariable () (Label () "in_range"))
+                                                          (EVariable () (Label () "range") :| [])
+                                                        :| []
+                                                    )
+                                                )
+                                                ( EApplication
+                                                    ()
+                                                    ()
+                                                    (EConstructor () (Label () "Node"))
+                                                    ( EVariable () (Label () "p")
+                                                        <| EApplication
+                                                          ()
+                                                          ()
+                                                          (EVariable () (Label () "$fold.1"))
+                                                          ( EVariable () (Label () "g")
+                                                              :| [ ERecord
+                                                                    ()
+                                                                    ()
+                                                                    ( Map.fromList
+                                                                        [
+                                                                          ( "max"
+                                                                          , EVariable () (Label () "p")
+                                                                          )
+                                                                        ,
+                                                                          ( "min"
+                                                                          , ESelect
+                                                                              ()
+                                                                              (Label () "min")
+                                                                              (EVariable () (Label () "range"))
+                                                                          )
+                                                                        ]
+                                                                    )
+                                                                    Nothing
+                                                                 ]
+                                                          )
+                                                        <| EApplication
+                                                          ()
+                                                          ()
+                                                          (EVariable () (Label () "$fold.1"))
+                                                          ( EVariable () (Label () "g")
+                                                              <| ERecord
+                                                                ()
+                                                                ()
+                                                                ( Map.fromList
+                                                                    [
+                                                                      ( "max"
+                                                                      , ESelect
+                                                                          ()
+                                                                          (Label () "max")
+                                                                          (EVariable () (Label () "range"))
+                                                                      )
+                                                                    ,
+                                                                      ( "min"
+                                                                      , EVariable () (Label () "p")
+                                                                      )
+                                                                    ]
+                                                                )
+                                                                Nothing
+                                                              :| []
+                                                          )
+                                                        :| []
+                                                    )
+                                                )
+                                                ( EApplication
+                                                    ()
+                                                    ()
+                                                    (EVariable () (Label () "$fold.1"))
+                                                    ( EVariable () (Label () "g")
+                                                        <| EVariable () (Label () "range")
+                                                        :| []
+                                                    )
+                                                )
+                                            )
+                                        )
+                                        :| []
+                                    )
+                                    <| EClause
+                                      ()
+                                      (PListLiteral () () [])
+                                      ( CPlain
+                                          ()
+                                          []
+                                          ( EApplication
+                                              ()
+                                              ()
+                                              (EVariable () (Label () "always"))
+                                              ( EConstructor () (Label () "Leaf")
+                                                  :| []
+                                              )
+                                          )
+                                          :| []
+                                      )
+                                    :| []
+                                )
+                            )
+                        )
+                        ( EApplication
+                            ()
+                            ()
+                            (EVariable () (Label () "$fold.1"))
+                            ( EVariable () (Label () "list")
+                                <| ERecord
+                                  ()
+                                  ()
+                                  ( Map.fromList
+                                      [
+                                        ( "max"
+                                        , EApplication
+                                            ()
+                                            ()
+                                            (EVariable () (Label () "from_int32"))
+                                            (ELiteral () (LInt32 (-1)) :| [])
+                                        )
+                                      ,
+                                        ( "min"
+                                        , EApplication
+                                            ()
+                                            ()
+                                            (EVariable () (Label () "from_int32"))
+                                            (ELiteral () (LInt32 0) :| [])
+                                        )
+                                      ]
+                                  )
+                                  Nothing
+                                :| []
+                            )
+                        )
+                    )
+                )
             )
         )
     )
@@ -1107,67 +1106,103 @@ fixture5 =
 
 fixture51 :: [Definition () Kind IndexedType]
 fixture51 =
-  [ (   DFunction
-              "in_range"
-              ( Function
+  [ ( DFunction
+        "in_range"
+        ( Function
+            ()
+            (With [] (TIntrinsic IBool))
+            ( PAnnotation
+                ()
+                ( TAlias
+                    "Range"
+                    [TVariable (Parameter () "a")]
+                    ( TIntrinsic
+                        ( IRecord
+                            ( TRow
+                                ( RExtend
+                                    "max"
+                                    (TVariable (Parameter () "a"))
+                                    (RExtend "min" (TVariable (Parameter () "a")) RNil)
+                                )
+                            )
+                        )
+                    )
+                )
+                ( PVariable
+                    ()
+                    ( Label
+                        ( TIntrinsic
+                            ( IRecord
+                                ( TRow
+                                    ( RExtend
+                                        "max"
+                                        (TVariable (TypeIndex KType 0))
+                                        ( RExtend
+                                            "min"
+                                            (TVariable (TypeIndex KType 0))
+                                            RNil
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                        "range"
+                    )
+                )
+                <| PAnnotation
                   ()
-                  (With [] (TIntrinsic IBool))
-                  ( PAnnotation
-                      ()
-                      ( TAlias
-                          "Range"
-                          [TVariable (Parameter () "a")]
-                          ( TIntrinsic
-                              ( IRecord
-                                  ( TRow
-                                      ( RExtend
-                                          "max"
-                                          (TVariable (Parameter () "a"))
-                                          (RExtend "min" (TVariable (Parameter () "a")) RNil)
-                                      )
-                                  )
-                              )
-                          )
-                      )
-                      ( PVariable
+                  (TVariable (Parameter () "a"))
+                  (PVariable () (Label (TVariable (TypeIndex KType 0)) "n"))
+                :| []
+            )
+            ( EApplication
+                ()
+                (TIntrinsic IBool)
+                (EBinaryOperator () (TIntrinsic IBool `TArrow` TIntrinsic IBool `TArrow` TIntrinsic IBool) OLogicalAnd)
+                ( EApplication
+                    ()
+                    (TIntrinsic IBool)
+                    (EVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool) "greater_than"))
+                    ( EVariable () (Label (TVariable (TypeIndex KType 0)) "n")
+                        <| ESelect
                           ()
-                          ( Label
-                              ( TIntrinsic
-                                  ( IRecord
-                                      ( TRow
-                                          ( RExtend
-                                              "max"
-                                              (TVariable (TypeIndex KType 0))
+                          (Label (TVariable (TypeIndex KType 0)) "min")
+                          ( EVariable
+                              ()
+                              ( Label
+                                  ( TIntrinsic
+                                      ( IRecord
+                                          ( TRow
                                               ( RExtend
-                                                  "min"
+                                                  "max"
                                                   (TVariable (TypeIndex KType 0))
-                                                  RNil
+                                                  ( RExtend
+                                                      "min"
+                                                      (TVariable (TypeIndex KType 0))
+                                                      RNil
+                                                  )
                                               )
                                           )
                                       )
                                   )
+                                  "range"
                               )
-                              "range"
                           )
-                      )
-                      <| PAnnotation
-                        ()
-                        (TVariable (Parameter () "a"))
-                        (PVariable () (Label (TVariable (TypeIndex KType 0)) "n"))
-                      :| []
-                  )
-                  ( EApplication
-                      ()
-                      (TIntrinsic IBool)
-                      (EBinaryOperator () (TIntrinsic IBool `TArrow` TIntrinsic IBool `TArrow` TIntrinsic IBool) OLogicalAnd)
+                        :| []
+                    )
+                    <| ( EApplication
+                          ()
+                          (TIntrinsic IBool)
+                          (EBinaryOperator () (TIntrinsic IBool `TArrow` TIntrinsic IBool `TArrow` TIntrinsic IBool) OLogicalOr)
+                       )
                       ( EApplication
                           ()
                           (TIntrinsic IBool)
-                          (EVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool) "greater_than"))
+                          (EVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool) "less_than_or_equal_to"))
                           ( EVariable () (Label (TVariable (TypeIndex KType 0)) "n")
                               <| ESelect
                                 ()
-                                (Label (TVariable (TypeIndex KType 0)) "min")
+                                (Label (TVariable (TypeIndex KType 0)) "max")
                                 ( EVariable
                                     ()
                                     ( Label
@@ -1191,103 +1226,66 @@ fixture51 =
                                 )
                               :| []
                           )
-                          <| ( EApplication
+                          <| EApplication
+                            ()
+                            (TIntrinsic IBool)
+                            ( EBinaryOperator
                                 ()
-                                (TIntrinsic IBool)
-                                (EBinaryOperator () (TIntrinsic IBool `TArrow` TIntrinsic IBool `TArrow` TIntrinsic IBool) OLogicalOr)
-                             )
-                            ( EApplication
+                                (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
+                                OEqualTo
+                            )
+                            ( ESelect
                                 ()
-                                (TIntrinsic IBool)
-                                (EVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool) "less_than_or_equal_to"))
-                                ( EVariable () (Label (TVariable (TypeIndex KType 0)) "n")
-                                    <| ESelect
-                                      ()
-                                      (Label (TVariable (TypeIndex KType 0)) "max")
-                                      ( EVariable
-                                          ()
-                                          ( Label
-                                              ( TIntrinsic
-                                                  ( IRecord
-                                                      ( TRow
-                                                          ( RExtend
-                                                              "max"
-                                                              (TVariable (TypeIndex KType 0))
-                                                              ( RExtend
-                                                                  "min"
-                                                                  (TVariable (TypeIndex KType 0))
-                                                                  RNil
-                                                              )
-                                                          )
-                                                      )
-                                                  )
-                                              )
-                                              "range"
-                                          )
-                                      )
-                                    :| []
+                                (Label (TVariable (TypeIndex KType 0)) "max")
+                                ( EVariable
+                                    ()
+                                    ( Label
+                                        ( TIntrinsic
+                                            ( IRecord
+                                                ( TRow
+                                                    ( RExtend
+                                                        "max"
+                                                        (TVariable (TypeIndex KType 0))
+                                                        ( RExtend
+                                                            "min"
+                                                            (TVariable (TypeIndex KType 0))
+                                                            RNil
+                                                        )
+                                                    )
+                                                )
+                                            )
+                                        )
+                                        "range"
+                                    )
                                 )
                                 <| EApplication
                                   ()
-                                  (TIntrinsic IBool)
-                                  ( EBinaryOperator
-                                      ()
-                                      (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
-                                      OEqualTo
-                                  )
-                                  ( ESelect
-                                      ()
-                                      (Label (TVariable (TypeIndex KType 0)) "max")
-                                      ( EVariable
-                                          ()
-                                          ( Label
-                                              ( TIntrinsic
-                                                  ( IRecord
-                                                      ( TRow
-                                                          ( RExtend
-                                                              "max"
-                                                              (TVariable (TypeIndex KType 0))
-                                                              ( RExtend
-                                                                  "min"
-                                                                  (TVariable (TypeIndex KType 0))
-                                                                  RNil
-                                                              )
-                                                          )
-                                                      )
-                                                  )
-                                              )
-                                              "range"
-                                          )
-                                      )
-                                      <| EApplication
-                                        ()
-                                        (TVariable (TypeIndex KType 0))
-                                        (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0)) "from_int32"))
-                                        (ELiteral () (LInt32 (-1)) :| [])
-                                      :| []
-                                  )
+                                  (TVariable (TypeIndex KType 0))
+                                  (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0)) "from_int32"))
+                                  (ELiteral () (LInt32 (-1)) :| [])
                                 :| []
                             )
                           :| []
                       )
-                  )
-              )
-          )
-        , (
-      DFunction
+                    :| []
+                )
+            )
+        )
+    )
+  , ( DFunction
         "from_list"
         ( Function
             ()
-            (With [] (TApplication KType (TConstructor (KArrow KType KType) "Tree") (TVariable (TypeIndex KType 1) :| [])))
-            (PVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 1)))) "list") :| [])
+            (With [] (TApplication KType (TConstructor (KArrow KType KType) "Tree") (TVariable (TypeIndex KType 2) :| [])))
+            (PVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 2)))) "list") :| [])
             ( EFold
                 ()
                 ( TApplication
                     KType
                     (TConstructor (KArrow KType KType) "Tree")
-                    (TVariable (TypeIndex KType 1) :| [])
+                    (TVariable (TypeIndex KType 2) :| [])
                 )
-                ( EVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 1)))) "list")
+                ( EVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 2)))) "list")
                     <| ERecord
                       ()
                       ( TIntrinsic
@@ -1295,8 +1293,8 @@ fixture51 =
                               ( TRow
                                   ( RExtend
                                       "max"
-                                      (TVariable (TypeIndex KType 1))
-                                      (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
+                                      (TVariable (TypeIndex KType 2))
+                                      (RExtend "min" (TVariable (TypeIndex KType 2)) RNil)
                                   )
                               )
                           )
@@ -1306,16 +1304,16 @@ fixture51 =
                             ( "min"
                             , EApplication
                                 ()
-                                (TVariable (TypeIndex KType 1))
-                                (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32"))
+                                (TVariable (TypeIndex KType 2))
+                                (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 2)) "from_int32"))
                                 (ELiteral () (LInt32 0) :| [])
                             )
                           ,
                             ( "max"
                             , EApplication
                                 ()
-                                (TVariable (TypeIndex KType 1))
-                                (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32"))
+                                (TVariable (TypeIndex KType 2))
+                                (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 2)) "from_int32"))
                                 (ELiteral () (LInt32 (-1)) :| [])
                             )
                           ]
@@ -1327,9 +1325,9 @@ fixture51 =
                     ()
                     ( PListCons
                         ()
-                        (TIntrinsic (IList (TVariable (TypeIndex KType 1))))
-                        (PVariable () (Label (TVariable (TypeIndex KType 1)) "p"))
-                        (PAtVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 1)))) "g"))
+                        (TIntrinsic (IList (TVariable (TypeIndex KType 2))))
+                        (PVariable () (Label (TVariable (TypeIndex KType 2)) "p"))
+                        (PAtVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 2)))) "g"))
                     )
                     ( CPlain
                         ()
@@ -1344,8 +1342,8 @@ fixture51 =
                                             ( TRow
                                                 ( RExtend
                                                     "max"
-                                                    (TVariable (TypeIndex KType 1))
-                                                    (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
+                                                    (TVariable (TypeIndex KType 2))
+                                                    (RExtend "min" (TVariable (TypeIndex KType 2)) RNil)
                                                 )
                                             )
                                         )
@@ -1359,7 +1357,7 @@ fixture51 =
                                 ( TApplication
                                     KType
                                     (TConstructor (KArrow KType KType) "Tree")
-                                    (TVariable (TypeIndex KType 1) :| [])
+                                    (TVariable (TypeIndex KType 2) :| [])
                                 )
                                 ( EApplication
                                     ()
@@ -1367,15 +1365,15 @@ fixture51 =
                                     ( EBinaryOperator
                                         ()
                                         ( TArrow
-                                            (TVariable (TypeIndex KType 1))
-                                            (TArrow (TArrow (TVariable (TypeIndex KType 1)) (TIntrinsic IBool)) (TIntrinsic IBool))
+                                            (TVariable (TypeIndex KType 2))
+                                            (TArrow (TArrow (TVariable (TypeIndex KType 2)) (TIntrinsic IBool)) (TIntrinsic IBool))
                                         )
                                         OReverseApplication
                                     )
-                                    ( EVariable () (Label (TVariable (TypeIndex KType 1)) "p")
+                                    ( EVariable () (Label (TVariable (TypeIndex KType 2)) "p")
                                         <| EApplication
                                           ()
-                                          (TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool)
+                                          (TVariable (TypeIndex KType 2) `TArrow` TIntrinsic IBool)
                                           ( EVariable
                                               ()
                                               ( Label
@@ -1384,13 +1382,13 @@ fixture51 =
                                                             ( TRow
                                                                 ( RExtend
                                                                     "max"
-                                                                    (TVariable (TypeIndex KType 1))
-                                                                    (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
+                                                                    (TVariable (TypeIndex KType 2))
+                                                                    (RExtend "min" (TVariable (TypeIndex KType 2)) RNil)
                                                                 )
                                                             )
                                                         )
                                                     )
-                                                      `TArrow` TVariable (TypeIndex KType 1)
+                                                      `TArrow` TVariable (TypeIndex KType 2)
                                                       `TArrow` TIntrinsic IBool
                                                   )
                                                   "in_range"
@@ -1404,8 +1402,8 @@ fixture51 =
                                                           ( TRow
                                                               ( RExtend
                                                                   "max"
-                                                                  (TVariable (TypeIndex KType 1))
-                                                                  (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
+                                                                  (TVariable (TypeIndex KType 2))
+                                                                  (RExtend "min" (TVariable (TypeIndex KType 2)) RNil)
                                                               )
                                                           )
                                                       )
@@ -1422,38 +1420,38 @@ fixture51 =
                                     ( TApplication
                                         KType
                                         (TConstructor (KArrow KType KType) "Tree")
-                                        (TVariable (TypeIndex KType 1) :| [])
+                                        (TVariable (TypeIndex KType 2) :| [])
                                     )
                                     ( EConstructor
                                         ()
                                         ( Label
-                                            ( (TVariable (TypeIndex KType 1))
+                                            ( (TVariable (TypeIndex KType 2))
                                                 `TArrow` ( TApplication
                                                             KType
                                                             (TConstructor (KArrow KType KType) "Tree")
-                                                            (TVariable (TypeIndex KType 1) :| [])
+                                                            (TVariable (TypeIndex KType 2) :| [])
                                                          )
                                                 `TArrow` ( TApplication
                                                             KType
                                                             (TConstructor (KArrow KType KType) "Tree")
-                                                            (TVariable (TypeIndex KType 1) :| [])
+                                                            (TVariable (TypeIndex KType 2) :| [])
                                                          )
                                                 `TArrow` ( TApplication
                                                             KType
                                                             (TConstructor (KArrow KType KType) "Tree")
-                                                            (TVariable (TypeIndex KType 1) :| [])
+                                                            (TVariable (TypeIndex KType 2) :| [])
                                                          )
                                             )
                                             "Node"
                                         )
                                     )
-                                    ( EVariable () (Label (TVariable (TypeIndex KType 1)) "p")
+                                    ( EVariable () (Label (TVariable (TypeIndex KType 2)) "p")
                                         <| EApplication
                                           ()
                                           ( TApplication
                                               KType
                                               (TConstructor (KArrow KType KType) "Tree")
-                                              (TVariable (TypeIndex KType 1) :| [])
+                                              (TVariable (TypeIndex KType 2) :| [])
                                           )
                                           ( EVariable
                                               ()
@@ -1463,8 +1461,8 @@ fixture51 =
                                                             ( TRow
                                                                 ( RExtend
                                                                     "max"
-                                                                    (TVariable (TypeIndex KType 1))
-                                                                    (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
+                                                                    (TVariable (TypeIndex KType 2))
+                                                                    (RExtend "min" (TVariable (TypeIndex KType 2)) RNil)
                                                                 )
                                                             )
                                                         )
@@ -1472,7 +1470,7 @@ fixture51 =
                                                       `TArrow` ( TApplication
                                                                   KType
                                                                   (TConstructor (KArrow KType KType) "Tree")
-                                                                  (TVariable (TypeIndex KType 1) :| [])
+                                                                  (TVariable (TypeIndex KType 2) :| [])
                                                                )
                                                   )
                                                   "g"
@@ -1485,8 +1483,8 @@ fixture51 =
                                                       ( TRow
                                                           ( RExtend
                                                               "max"
-                                                              (TVariable (TypeIndex KType 1))
-                                                              (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
+                                                              (TVariable (TypeIndex KType 2))
+                                                              (RExtend "min" (TVariable (TypeIndex KType 2)) RNil)
                                                           )
                                                       )
                                                   )
@@ -1496,7 +1494,7 @@ fixture51 =
                                                     ( "min"
                                                     , ESelect
                                                         ()
-                                                        (Label (TVariable (TypeIndex KType 1)) "min")
+                                                        (Label (TVariable (TypeIndex KType 2)) "min")
                                                         ( EVariable
                                                             ()
                                                             ( Label
@@ -1505,8 +1503,8 @@ fixture51 =
                                                                         ( TRow
                                                                             ( RExtend
                                                                                 "max"
-                                                                                (TVariable (TypeIndex KType 1))
-                                                                                (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
+                                                                                (TVariable (TypeIndex KType 2))
+                                                                                (RExtend "min" (TVariable (TypeIndex KType 2)) RNil)
                                                                             )
                                                                         )
                                                                     )
@@ -1517,7 +1515,7 @@ fixture51 =
                                                     )
                                                   ,
                                                     ( "max"
-                                                    , EVariable () (Label (TVariable (TypeIndex KType 1)) "p")
+                                                    , EVariable () (Label (TVariable (TypeIndex KType 2)) "p")
                                                     )
                                                   ]
                                               )
@@ -1529,7 +1527,7 @@ fixture51 =
                                           ( TApplication
                                               KType
                                               (TConstructor (KArrow KType KType) "Tree")
-                                              (TVariable (TypeIndex KType 1) :| [])
+                                              (TVariable (TypeIndex KType 2) :| [])
                                           )
                                           ( EVariable
                                               ()
@@ -1539,8 +1537,8 @@ fixture51 =
                                                             ( TRow
                                                                 ( RExtend
                                                                     "max"
-                                                                    (TVariable (TypeIndex KType 1))
-                                                                    (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
+                                                                    (TVariable (TypeIndex KType 2))
+                                                                    (RExtend "min" (TVariable (TypeIndex KType 2)) RNil)
                                                                 )
                                                             )
                                                         )
@@ -1548,7 +1546,7 @@ fixture51 =
                                                       `TArrow` ( TApplication
                                                                   KType
                                                                   (TConstructor (KArrow KType KType) "Tree")
-                                                                  (TVariable (TypeIndex KType 1) :| [])
+                                                                  (TVariable (TypeIndex KType 2) :| [])
                                                                )
                                                   )
                                                   "g"
@@ -1561,8 +1559,8 @@ fixture51 =
                                                       ( TRow
                                                           ( RExtend
                                                               "max"
-                                                              (TVariable (TypeIndex KType 1))
-                                                              (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
+                                                              (TVariable (TypeIndex KType 2))
+                                                              (RExtend "min" (TVariable (TypeIndex KType 2)) RNil)
                                                           )
                                                       )
                                                   )
@@ -1570,13 +1568,13 @@ fixture51 =
                                               ( Map.fromList
                                                   [
                                                     ( "min"
-                                                    , EVariable () (Label (TVariable (TypeIndex KType 1)) "p")
+                                                    , EVariable () (Label (TVariable (TypeIndex KType 2)) "p")
                                                     )
                                                   ,
                                                     ( "max"
                                                     , ESelect
                                                         ()
-                                                        (Label (TVariable (TypeIndex KType 1)) "max")
+                                                        (Label (TVariable (TypeIndex KType 2)) "max")
                                                         ( EVariable
                                                             ()
                                                             ( Label
@@ -1585,8 +1583,8 @@ fixture51 =
                                                                         ( TRow
                                                                             ( RExtend
                                                                                 "max"
-                                                                                (TVariable (TypeIndex KType 1))
-                                                                                (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
+                                                                                (TVariable (TypeIndex KType 2))
+                                                                                (RExtend "min" (TVariable (TypeIndex KType 2)) RNil)
                                                                             )
                                                                         )
                                                                     )
@@ -1608,7 +1606,7 @@ fixture51 =
                                     ( TApplication
                                         KType
                                         (TConstructor (KArrow KType KType) "Tree")
-                                        (TVariable (TypeIndex KType 1) :| [])
+                                        (TVariable (TypeIndex KType 2) :| [])
                                     )
                                     ( EVariable
                                         ()
@@ -1618,8 +1616,8 @@ fixture51 =
                                                       ( TRow
                                                           ( RExtend
                                                               "max"
-                                                              (TVariable (TypeIndex KType 1))
-                                                              (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
+                                                              (TVariable (TypeIndex KType 2))
+                                                              (RExtend "min" (TVariable (TypeIndex KType 2)) RNil)
                                                           )
                                                       )
                                                   )
@@ -1627,7 +1625,7 @@ fixture51 =
                                                 `TArrow` ( TApplication
                                                             KType
                                                             (TConstructor (KArrow KType KType) "Tree")
-                                                            (TVariable (TypeIndex KType 1) :| [])
+                                                            (TVariable (TypeIndex KType 2) :| [])
                                                          )
                                             )
                                             "g"
@@ -1641,8 +1639,8 @@ fixture51 =
                                                     ( TRow
                                                         ( RExtend
                                                             "max"
-                                                            (TVariable (TypeIndex KType 1))
-                                                            (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
+                                                            (TVariable (TypeIndex KType 2))
+                                                            (RExtend "min" (TVariable (TypeIndex KType 2)) RNil)
                                                         )
                                                     )
                                                 )
@@ -1658,7 +1656,7 @@ fixture51 =
                     )
                     <| EClause
                       ()
-                      (PListLiteral () (TIntrinsic (IList (TVariable (TypeIndex KType 1)))) [])
+                      (PListLiteral () (TIntrinsic (IList (TVariable (TypeIndex KType 2)))) [])
                       ( CPlain
                           ()
                           []
@@ -1669,8 +1667,8 @@ fixture51 =
                                         ( TRow
                                             ( RExtend
                                                 "max"
-                                                (TVariable (TypeIndex KType 1))
-                                                (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
+                                                (TVariable (TypeIndex KType 2))
+                                                (RExtend "min" (TVariable (TypeIndex KType 2)) RNil)
                                             )
                                         )
                                     )
@@ -1678,7 +1676,7 @@ fixture51 =
                                   `TArrow` ( TApplication
                                               KType
                                               (TConstructor (KArrow KType KType) "Tree")
-                                              (TVariable (TypeIndex KType 1) :| [])
+                                              (TVariable (TypeIndex KType 2) :| [])
                                            )
                               )
                               ( EVariable
@@ -1687,22 +1685,22 @@ fixture51 =
                                       ( ( TApplication
                                             KType
                                             (TConstructor (KArrow KType KType) "Tree")
-                                            (TVariable (TypeIndex KType 1) :| [])
+                                            (TVariable (TypeIndex KType 2) :| [])
                                         )
                                           `TArrow` TIntrinsic
                                             ( IRecord
                                                 ( TRow
                                                     ( RExtend
                                                         "max"
-                                                        (TVariable (TypeIndex KType 1))
-                                                        (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
+                                                        (TVariable (TypeIndex KType 2))
+                                                        (RExtend "min" (TVariable (TypeIndex KType 2)) RNil)
                                                     )
                                                 )
                                             )
                                           `TArrow` ( TApplication
                                                       KType
                                                       (TConstructor (KArrow KType KType) "Tree")
-                                                      (TVariable (TypeIndex KType 1) :| [])
+                                                      (TVariable (TypeIndex KType 2) :| [])
                                                    )
                                       )
                                       "always"
@@ -1714,7 +1712,7 @@ fixture51 =
                                       ( TApplication
                                           KType
                                           (TConstructor (KArrow KType KType) "Tree")
-                                          (TVariable (TypeIndex KType 1) :| [])
+                                          (TVariable (TypeIndex KType 2) :| [])
                                       )
                                       "Leaf"
                                   )
@@ -1725,260 +1723,542 @@ fixture51 =
                       )
                     :| []
                 )
-                Nothing
-                -- ( Just
-                --    ( ERecursiveLet
-                --        ()
-                --        (PVariable () (Label undefined "$fold.1"))
-                --        ( ELambda
-                --            ()
-                --            (PVariable () (Label undefined "$fold.1.expr") :| [])
-                --            ( EMatch
-                --                ()
-                --                undefined
-                --                (EVariable () (Label undefined "$fold.1.expr"))
-                --                ( EClause
-                --                    ()
-                --                    (PListCons () undefined (PVariable () (Label undefined "p")) (PVariable () (Label undefined "g")))
-                --                    ( CPlain
-                --                        ()
-                --                        []
-                --                        ( ELambda
-                --                            ()
-                --                            ( PVariable
-                --                                ()
-                --                                ( Label
-                --                                    ( TIntrinsic
-                --                                        ( IRecord
-                --                                            ( TRow
-                --                                                ( RExtend
-                --                                                    "max"
-                --                                                    (TVariable (TypeIndex KType 1))
-                --                                                    (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
-                --                                                )
-                --                                            )
-                --                                        )
-                --                                    )
-                --                                    "range"
-                --                                )
-                --                                :| []
-                --                            )
-                --                            ( EIf
-                --                                ()
-                --                                undefined
-                --                                ( EApplication
-                --                                    ()
-                --                                    undefined
-                --                                    (EBinaryOperator () undefined OReverseApplication)
-                --                                    ( EVariable () (Label undefined "p")
-                --                                        <| EApplication
-                --                                          ()
-                --                                          undefined
-                --                                          (EVariable () (Label undefined "in_range"))
-                --                                          ( EVariable
-                --                                              ()
-                --                                              ( Label
-                --                                                  ( TIntrinsic
-                --                                                      ( IRecord
-                --                                                          ( TRow
-                --                                                              ( RExtend
-                --                                                                  "max"
-                --                                                                  (TVariable (TypeIndex KType 1))
-                --                                                                  (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
-                --                                                              )
-                --                                                          )
-                --                                                      )
-                --                                                  )
-                --                                                  "range"
-                --                                              )
-                --                                              :| []
-                --                                          )
-                --                                        :| []
-                --                                    )
-                --                                )
-                --                                ( EApplication
-                --                                    ()
-                --                                    undefined
-                --                                    (EConstructor () (Label undefined "Node"))
-                --                                    ( EVariable () (Label undefined "p")
-                --                                        <| EApplication
-                --                                          ()
-                --                                          undefined
-                --                                          (EVariable () (Label undefined "$fold.1"))
-                --                                          ( EVariable () (Label undefined "g")
-                --                                              :| [ ERecord
-                --                                                    ()
-                --                                                    undefined
-                --                                                    ( Map.fromList
-                --                                                        [
-                --                                                          ( "max"
-                --                                                          , EVariable () (Label undefined "p")
-                --                                                          )
-                --                                                        ,
-                --                                                          ( "min"
-                --                                                          , ESelect
-                --                                                              ()
-                --                                                              (Label undefined "min")
-                --                                                              ( EVariable
-                --                                                                  ()
-                --                                                                  ( Label
-                --                                                                      ( TIntrinsic
-                --                                                                          ( IRecord
-                --                                                                              ( TRow
-                --                                                                                  ( RExtend
-                --                                                                                      "max"
-                --                                                                                      (TVariable (TypeIndex KType 1))
-                --                                                                                      (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
-                --                                                                                  )
-                --                                                                              )
-                --                                                                          )
-                --                                                                      )
-                --                                                                      "range"
-                --                                                                  )
-                --                                                              )
-                --                                                          )
-                --                                                        ]
-                --                                                    )
-                --                                                    Nothing
-                --                                                 ]
-                --                                          )
-                --                                        <| EApplication
-                --                                          ()
-                --                                          undefined
-                --                                          (EVariable () (Label undefined "$fold.1"))
-                --                                          ( EVariable () (Label undefined "g")
-                --                                              <| ERecord
-                --                                                ()
-                --                                                undefined
-                --                                                ( Map.fromList
-                --                                                    [
-                --                                                      ( "max"
-                --                                                      , ESelect
-                --                                                          ()
-                --                                                          (Label undefined "max")
-                --                                                          ( EVariable
-                --                                                              ()
-                --                                                              ( Label
-                --                                                                  ( TIntrinsic
-                --                                                                      ( IRecord
-                --                                                                          ( TRow
-                --                                                                              ( RExtend
-                --                                                                                  "max"
-                --                                                                                  (TVariable (TypeIndex KType 1))
-                --                                                                                  (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
-                --                                                                              )
-                --                                                                          )
-                --                                                                      )
-                --                                                                  )
-                --                                                                  "range"
-                --                                                              )
-                --                                                          )
-                --                                                      )
-                --                                                    ,
-                --                                                      ( "min"
-                --                                                      , EVariable () (Label undefined "p")
-                --                                                      )
-                --                                                    ]
-                --                                                )
-                --                                                Nothing
-                --                                              :| []
-                --                                          )
-                --                                        :| []
-                --                                    )
-                --                                )
-                --                                ( EApplication
-                --                                    ()
-                --                                    undefined
-                --                                    (EVariable () (Label undefined "$fold.1"))
-                --                                    ( EVariable () (Label undefined "g")
-                --                                        <| EVariable () (Label
-                --                                                                  ( TIntrinsic
-                --                                                                      ( IRecord
-                --                                                                          ( TRow
-                --                                                                              ( RExtend
-                --                                                                                  "max"
-                --                                                                                  (TVariable (TypeIndex KType 1))
-                --                                                                                  (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
-                --                                                                              )
-                --                                                                          )
-                --                                                                      )
-                --                                                                  )
-                --                                        "range")
-                --                                        :| []
-                --                                    )
-                --                                )
-                --                            )
-                --                        )
-                --                        :| []
-                --                    )
-                --                    <| EClause
-                --                      ()
-                --                      (PListLiteral () (TIntrinsic (IList (TVariable (TypeIndex KType 1)))) [])
-                --                      ( CPlain
-                --                          ()
-                --                          []
-                --                          ( EApplication
-                --                              ()
-                --                              undefined
-                --                              (EVariable () (Label undefined "always"))
-                --                              ( EConstructor
-                --                                  ()
-                --                                  ( Label
-                --                                      ( TApplication
-                --                                          KType
-                --                                          (TConstructor (KArrow KType KType) "Tree")
-                --                                          (TVariable (TypeIndex KType 1) :| [])
-                --                                      )
-                --                                      "Leaf"
-                --                                  )
-                --                                  :| []
-                --                              )
-                --                          )
-                --                          :| []
-                --                      )
-                --                    :| []
-                --                )
-                --            )
-                --        )
-                --        ( EApplication
-                --            ()
-                --            undefined
-                --            (EVariable () (Label undefined "$fold.1"))
-                --            ( EVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 1)))) "list")
-                --                <| ERecord
-                --                  ()
-                --                  undefined
-                --                  ( Map.fromList
-                --                      [
-                --                        ( "max"
-                --                        , EApplication
-                --                            ()
-                --                            (TVariable (TypeIndex KType 1))
-                --                            (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32"))
-                --                            (ELiteral () (LInt32 (-1)) :| [])
-                --                        )
-                --                      ,
-                --                        ( "min"
-                --                        , EApplication
-                --                            ()
-                --                            (TVariable (TypeIndex KType 1))
-                --                            (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32"))
-                --                            (ELiteral () (LInt32 0) :| [])
-                --                        )
-                --                      ]
-                --                  )
-                --                  Nothing
-                --                :| []
-                --            )
-                --        )
-                --    )
-                -- )
+                ( Just
+                    ( ERecursiveLet
+                        ()
+                        ( PVariable
+                            ()
+                            ( Label
+                                ( TIntrinsic (IList (TVariable (TypeIndex KType 1)))
+                                    `TArrow` ( TIntrinsic
+                                                ( IRecord
+                                                    ( TRow
+                                                        ( RExtend
+                                                            "max"
+                                                            (TVariable (TypeIndex KType 1))
+                                                            (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
+                                                        )
+                                                    )
+                                                )
+                                             )
+                                    `TArrow` ( TApplication
+                                                KType
+                                                (TConstructor (KArrow KType KType) "Tree")
+                                                (TVariable (TypeIndex KType 1) :| [])
+                                             )
+                                )
+                                "$fold.1"
+                            )
+                        )
+                        ( ELambda
+                            ()
+                            (PVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 1)))) "$fold.1.expr") :| [])
+                            ( EMatch
+                                ()
+                                ( ( TIntrinsic
+                                      ( IRecord
+                                          ( TRow
+                                              ( RExtend
+                                                  "max"
+                                                  (TVariable (TypeIndex KType 1))
+                                                  (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
+                                              )
+                                          )
+                                      )
+                                  )
+                                    `TArrow` ( TApplication
+                                                KType
+                                                (TConstructor (KArrow KType KType) "Tree")
+                                                (TVariable (TypeIndex KType 1) :| [])
+                                             )
+                                )
+                                (EVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 1)))) "$fold.1.expr"))
+                                ( EClause
+                                    ()
+                                    ( PListCons
+                                        ()
+                                        (TIntrinsic (IList (TVariable (TypeIndex KType 1))))
+                                        (PVariable () (Label (TVariable (TypeIndex KType 1)) "p"))
+                                        (PVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 1)))) "g"))
+                                    )
+                                    ( CPlain
+                                        ()
+                                        []
+                                        ( ELambda
+                                            ()
+                                            ( PVariable
+                                                ()
+                                                ( Label
+                                                    ( TIntrinsic
+                                                        ( IRecord
+                                                            ( TRow
+                                                                ( RExtend
+                                                                    "max"
+                                                                    (TVariable (TypeIndex KType 1))
+                                                                    (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
+                                                                )
+                                                            )
+                                                        )
+                                                    )
+                                                    "range"
+                                                )
+                                                :| []
+                                            )
+                                            ( EIf
+                                                ()
+                                                ( TApplication
+                                                    KType
+                                                    (TConstructor (KArrow KType KType) "Tree")
+                                                    (TVariable (TypeIndex KType 1) :| [])
+                                                )
+                                                ( EApplication
+                                                    ()
+                                                    (TIntrinsic IBool)
+                                                    ( EBinaryOperator
+                                                        ()
+                                                        ( TArrow
+                                                            (TVariable (TypeIndex KType 1))
+                                                            (TArrow (TArrow (TVariable (TypeIndex KType 1)) (TIntrinsic IBool)) (TIntrinsic IBool))
+                                                        )
+                                                        OReverseApplication
+                                                    )
+                                                    ( EVariable () (Label (TVariable (TypeIndex KType 1)) "p")
+                                                        <| EApplication
+                                                          ()
+                                                          (TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool)
+                                                          ( EVariable
+                                                              ()
+                                                              ( Label
+                                                                  ( ( TIntrinsic
+                                                                        ( IRecord
+                                                                            ( TRow
+                                                                                ( RExtend
+                                                                                    "max"
+                                                                                    (TVariable (TypeIndex KType 1))
+                                                                                    (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
+                                                                                )
+                                                                            )
+                                                                        )
+                                                                    )
+                                                                      `TArrow` (TVariable (TypeIndex KType 1))
+                                                                      `TArrow` (TIntrinsic IBool)
+                                                                  )
+                                                                  "in_range"
+                                                              )
+                                                          )
+                                                          ( EVariable
+                                                              ()
+                                                              ( Label
+                                                                  ( TIntrinsic
+                                                                      ( IRecord
+                                                                          ( TRow
+                                                                              ( RExtend
+                                                                                  "max"
+                                                                                  (TVariable (TypeIndex KType 1))
+                                                                                  (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
+                                                                              )
+                                                                          )
+                                                                      )
+                                                                  )
+                                                                  "range"
+                                                              )
+                                                              :| []
+                                                          )
+                                                        :| []
+                                                    )
+                                                )
+                                                ( EApplication
+                                                    ()
+                                                    ( TApplication
+                                                        KType
+                                                        (TConstructor (KArrow KType KType) "Tree")
+                                                        (TVariable (TypeIndex KType 1) :| [])
+                                                    )
+                                                    ( EConstructor
+                                                        ()
+                                                        ( Label
+                                                            ( (TVariable (TypeIndex KType 1))
+                                                                `TArrow` ( TApplication
+                                                                            KType
+                                                                            (TConstructor (KArrow KType KType) "Tree")
+                                                                            (TVariable (TypeIndex KType 1) :| [])
+                                                                         )
+                                                                `TArrow` ( TApplication
+                                                                            KType
+                                                                            (TConstructor (KArrow KType KType) "Tree")
+                                                                            (TVariable (TypeIndex KType 1) :| [])
+                                                                         )
+                                                                `TArrow` ( TApplication
+                                                                            KType
+                                                                            (TConstructor (KArrow KType KType) "Tree")
+                                                                            (TVariable (TypeIndex KType 1) :| [])
+                                                                         )
+                                                            )
+                                                            "Node"
+                                                        )
+                                                    )
+                                                    ( EVariable () (Label (TVariable (TypeIndex KType 1)) "p")
+                                                        <| EApplication
+                                                          ()
+                                                          ( TApplication
+                                                              KType
+                                                              (TConstructor (KArrow KType KType) "Tree")
+                                                              (TVariable (TypeIndex KType 1) :| [])
+                                                          )
+                                                          ( EVariable
+                                                              ()
+                                                              ( Label
+                                                                  ( TIntrinsic (IList (TVariable (TypeIndex KType 1)))
+                                                                      `TArrow` ( TIntrinsic
+                                                                                  ( IRecord
+                                                                                      ( TRow
+                                                                                          ( RExtend
+                                                                                              "max"
+                                                                                              (TVariable (TypeIndex KType 1))
+                                                                                              (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
+                                                                                          )
+                                                                                      )
+                                                                                  )
+                                                                               )
+                                                                      `TArrow` ( TApplication
+                                                                                  KType
+                                                                                  (TConstructor (KArrow KType KType) "Tree")
+                                                                                  (TVariable (TypeIndex KType 1) :| [])
+                                                                               )
+                                                                  )
+                                                                  "$fold.1"
+                                                              )
+                                                          )
+                                                          ( EVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 1)))) "g")
+                                                              :| [ ERecord
+                                                                    ()
+                                                                    ( TIntrinsic
+                                                                        ( IRecord
+                                                                            ( TRow
+                                                                                ( RExtend
+                                                                                    "max"
+                                                                                    (TVariable (TypeIndex KType 1))
+                                                                                    (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
+                                                                                )
+                                                                            )
+                                                                        )
+                                                                    )
+                                                                    ( Map.fromList
+                                                                        [
+                                                                          ( "max"
+                                                                          , EVariable () (Label (TVariable (TypeIndex KType 1)) "p")
+                                                                          )
+                                                                        ,
+                                                                          ( "min"
+                                                                          , ESelect
+                                                                              ()
+                                                                              (Label (TVariable (TypeIndex KType 1)) "min")
+                                                                              ( EVariable
+                                                                                  ()
+                                                                                  ( Label
+                                                                                      ( TIntrinsic
+                                                                                          ( IRecord
+                                                                                              ( TRow
+                                                                                                  ( RExtend
+                                                                                                      "max"
+                                                                                                      (TVariable (TypeIndex KType 1))
+                                                                                                      (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
+                                                                                                  )
+                                                                                              )
+                                                                                          )
+                                                                                      )
+                                                                                      "range"
+                                                                                  )
+                                                                              )
+                                                                          )
+                                                                        ]
+                                                                    )
+                                                                    Nothing
+                                                                 ]
+                                                          )
+                                                        <| EApplication
+                                                          ()
+                                                          ( TApplication
+                                                              KType
+                                                              (TConstructor (KArrow KType KType) "Tree")
+                                                              (TVariable (TypeIndex KType 1) :| [])
+                                                          )
+                                                          ( EVariable
+                                                              ()
+                                                              ( Label
+                                                                  ( TIntrinsic (IList (TVariable (TypeIndex KType 1)))
+                                                                      `TArrow` ( TIntrinsic
+                                                                                  ( IRecord
+                                                                                      ( TRow
+                                                                                          ( RExtend
+                                                                                              "max"
+                                                                                              (TVariable (TypeIndex KType 1))
+                                                                                              (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
+                                                                                          )
+                                                                                      )
+                                                                                  )
+                                                                               )
+                                                                      `TArrow` ( TApplication
+                                                                                  KType
+                                                                                  (TConstructor (KArrow KType KType) "Tree")
+                                                                                  (TVariable (TypeIndex KType 1) :| [])
+                                                                               )
+                                                                  )
+                                                                  "$fold.1"
+                                                              )
+                                                          )
+                                                          ( EVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 1)))) "g")
+                                                              <| ERecord
+                                                                ()
+                                                                ( TIntrinsic
+                                                                    ( IRecord
+                                                                        ( TRow
+                                                                            ( RExtend
+                                                                                "max"
+                                                                                (TVariable (TypeIndex KType 1))
+                                                                                (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
+                                                                            )
+                                                                        )
+                                                                    )
+                                                                )
+                                                                ( Map.fromList
+                                                                    [
+                                                                      ( "max"
+                                                                      , ESelect
+                                                                          ()
+                                                                          (Label (TVariable (TypeIndex KType 1)) "max")
+                                                                          ( EVariable
+                                                                              ()
+                                                                              ( Label
+                                                                                  ( TIntrinsic
+                                                                                      ( IRecord
+                                                                                          ( TRow
+                                                                                              ( RExtend
+                                                                                                  "max"
+                                                                                                  (TVariable (TypeIndex KType 1))
+                                                                                                  (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
+                                                                                              )
+                                                                                          )
+                                                                                      )
+                                                                                  )
+                                                                                  "range"
+                                                                              )
+                                                                          )
+                                                                      )
+                                                                    ,
+                                                                      ( "min"
+                                                                      , EVariable () (Label (TVariable (TypeIndex KType 1)) "p")
+                                                                      )
+                                                                    ]
+                                                                )
+                                                                Nothing
+                                                              :| []
+                                                          )
+                                                        :| []
+                                                    )
+                                                )
+                                                ( EApplication
+                                                    ()
+                                                    ( TApplication
+                                                        KType
+                                                        (TConstructor (KArrow KType KType) "Tree")
+                                                        (TVariable (TypeIndex KType 1) :| [])
+                                                    )
+                                                    ( EVariable
+                                                        ()
+                                                        ( Label
+                                                            ( TIntrinsic (IList (TVariable (TypeIndex KType 1)))
+                                                                `TArrow` ( TIntrinsic
+                                                                            ( IRecord
+                                                                                ( TRow
+                                                                                    ( RExtend
+                                                                                        "max"
+                                                                                        (TVariable (TypeIndex KType 1))
+                                                                                        (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
+                                                                                    )
+                                                                                )
+                                                                            )
+                                                                         )
+                                                                `TArrow` ( TApplication
+                                                                            KType
+                                                                            (TConstructor (KArrow KType KType) "Tree")
+                                                                            (TVariable (TypeIndex KType 1) :| [])
+                                                                         )
+                                                            )
+                                                            "$fold.1"
+                                                        )
+                                                    )
+                                                    ( EVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 1)))) "g")
+                                                        <| EVariable
+                                                          ()
+                                                          ( Label
+                                                              ( TIntrinsic
+                                                                  ( IRecord
+                                                                      ( TRow
+                                                                          ( RExtend
+                                                                              "max"
+                                                                              (TVariable (TypeIndex KType 1))
+                                                                              (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
+                                                                          )
+                                                                      )
+                                                                  )
+                                                              )
+                                                              "range"
+                                                          )
+                                                        :| []
+                                                    )
+                                                )
+                                            )
+                                        )
+                                        :| []
+                                    )
+                                    <| EClause
+                                      ()
+                                      (PListLiteral () (TIntrinsic (IList (TVariable (TypeIndex KType 1)))) [])
+                                      ( CPlain
+                                          ()
+                                          []
+                                          ( EApplication
+                                              ()
+                                              ( ( TIntrinsic
+                                                    ( IRecord
+                                                        ( TRow
+                                                            ( RExtend
+                                                                "max"
+                                                                (TVariable (TypeIndex KType 1))
+                                                                (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
+                                                            )
+                                                        )
+                                                    )
+                                                )
+                                                  `TArrow` ( TApplication
+                                                              KType
+                                                              (TConstructor (KArrow KType KType) "Tree")
+                                                              (TVariable (TypeIndex KType 1) :| [])
+                                                           )
+                                              )
+                                              ( EVariable
+                                                  ()
+                                                  ( Label
+                                                      ( ( TApplication
+                                                            KType
+                                                            (TConstructor (KArrow KType KType) "Tree")
+                                                            (TVariable (TypeIndex KType 1) :| [])
+                                                        )
+                                                          `TArrow` TIntrinsic
+                                                            ( IRecord
+                                                                ( TRow
+                                                                    ( RExtend
+                                                                        "max"
+                                                                        (TVariable (TypeIndex KType 1))
+                                                                        (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
+                                                                    )
+                                                                )
+                                                            )
+                                                          `TArrow` ( TApplication
+                                                                      KType
+                                                                      (TConstructor (KArrow KType KType) "Tree")
+                                                                      (TVariable (TypeIndex KType 1) :| [])
+                                                                   )
+                                                      )
+                                                      "always"
+                                                  )
+                                              )
+                                              ( EConstructor
+                                                  ()
+                                                  ( Label
+                                                      ( TApplication
+                                                          KType
+                                                          (TConstructor (KArrow KType KType) "Tree")
+                                                          (TVariable (TypeIndex KType 1) :| [])
+                                                      )
+                                                      "Leaf"
+                                                  )
+                                                  :| []
+                                              )
+                                          )
+                                          :| []
+                                      )
+                                    :| []
+                                )
+                            )
+                        )
+                        ( EApplication
+                            ()
+                            ( TApplication
+                                KType
+                                (TConstructor (KArrow KType KType) "Tree")
+                                (TVariable (TypeIndex KType 2) :| [])
+                            )
+                            ( EVariable
+                                ()
+                                ( Label
+                                    ( TIntrinsic (IList (TVariable (TypeIndex KType 2)))
+                                        `TArrow` ( TIntrinsic
+                                                    ( IRecord
+                                                        ( TRow
+                                                            ( RExtend
+                                                                "max"
+                                                                (TVariable (TypeIndex KType 2))
+                                                                (RExtend "min" (TVariable (TypeIndex KType 2)) RNil)
+                                                            )
+                                                        )
+                                                    )
+                                                 )
+                                        `TArrow` ( TApplication
+                                                    KType
+                                                    (TConstructor (KArrow KType KType) "Tree")
+                                                    (TVariable (TypeIndex KType 2) :| [])
+                                                 )
+                                    )
+                                    "$fold.1"
+                                )
+                            )
+                            ( EVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 2)))) "list")
+                                <| ERecord
+                                  ()
+                                  ( TIntrinsic
+                                      ( IRecord
+                                          ( TRow
+                                              ( RExtend
+                                                  "max"
+                                                  (TVariable (TypeIndex KType 2))
+                                                  (RExtend "min" (TVariable (TypeIndex KType 2)) RNil)
+                                              )
+                                          )
+                                      )
+                                  )
+                                  ( Map.fromList
+                                      [
+                                        ( "max"
+                                        , EApplication
+                                            ()
+                                            (TVariable (TypeIndex KType 2))
+                                            (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 2)) "from_int32"))
+                                            (ELiteral () (LInt32 (-1)) :| [])
+                                        )
+                                      ,
+                                        ( "min"
+                                        , EApplication
+                                            ()
+                                            (TVariable (TypeIndex KType 2))
+                                            (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 2)) "from_int32"))
+                                            (ELiteral () (LInt32 0) :| [])
+                                        )
+                                      ]
+                                  )
+                                  Nothing
+                                :| []
+                            )
+                        )
+                    )
+                )
             )
         )
     )
   ]
 
---fixture6 =
+-- fixture6 =
 --  [ ( DFunction
 --        "from_list"
 --        ( Function
@@ -2218,7 +2498,7 @@ fixture51 =
 --    )
 --  ]
 --
---fixture7 =
+-- fixture7 =
 --  ERecursiveLet
 --    ()
 --    (PVariable () (Label () "$fold.1"))
@@ -2290,7 +2570,7 @@ fixture51 =
 --        )
 --    )
 --
---fixture8 =
+-- fixture8 =
 --  ELambda
 --    ()
 --    (PVariable () (Label () "x") :| [])
