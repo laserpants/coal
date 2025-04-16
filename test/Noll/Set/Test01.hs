@@ -549,8 +549,11 @@ moduleBinarySearch =
                 ( EApplication
                     ()
                     ()
-                    (EBinaryOperator () () OForwardApplication)
-                    (EVariable () (Label () "flatten") <| EVariable () (Label () "from_list") :| [])
+                    (EBinaryOperator () () OReverseComposition)
+                    ( EVariable () (Label () "flatten")
+                        <| EVariable () (Label () "from_list")
+                        :| []
+                    )
                 )
             )
         )

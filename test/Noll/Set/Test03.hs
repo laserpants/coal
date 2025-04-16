@@ -20,7 +20,7 @@ prog1_03 =
   , moduleMain
   ]
 
-moduleUtils :: Module () () ()
+moduleUtils :: Module () k ()
 moduleUtils =
   Module.fromDefinitionList
     (Path ["Utils"])
@@ -34,7 +34,7 @@ moduleUtils =
         (TVariable (Parameter () "a") `TArrow` TIntrinsic IBool)
     ]
 
-moduleOrdered :: Module () () ()
+moduleOrdered :: Module () k ()
 moduleOrdered =
   Module.fromDefinitionList
     (Path ["Ordered"])
@@ -202,7 +202,7 @@ moduleOrdered =
         )
     ]
 
-moduleBinarySearch :: Module () () ()
+moduleBinarySearch :: Module () k ()
 moduleBinarySearch =
   Module.fromDefinitionList
     (Path ["BinarySearch"])
@@ -782,14 +782,17 @@ moduleBinarySearch =
                 ( EApplication
                     ()
                     ()
-                    (EBinaryOperator () () OForwardApplication)
-                    (EVariable () (Label () "flatten") <| EVariable () (Label () "from_list") :| [])
+                    (EBinaryOperator () () OReverseComposition)
+                    ( EVariable () (Label () "flatten")
+                        <| EVariable () (Label () "from_list")
+                        :| []
+                    )
                 )
             )
         )
     ]
 
-moduleMain :: Module () () ()
+moduleMain :: Module () k ()
 moduleMain =
   Module.fromDefinitionList
     (Path ["Main"])
