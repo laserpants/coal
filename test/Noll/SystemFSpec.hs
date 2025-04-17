@@ -3,6 +3,10 @@
 -- module Noll.SystemFSpec (spec) where
 module Noll.SystemFSpec where
 
+import Noll.Compiler.PatternMatching
+import Noll.Compiler.PatternMatching.Envelope
+import Noll.Compiler.PatternMatching.Equation
+import Noll.Compiler.PatternMatching.Rule
 import Control.Monad.Identity
 import Control.Monad.Reader (runReader)
 import Data.List.NonEmpty ((<|))
@@ -47,6 +51,7 @@ import qualified Noll.Set.Test04
 import qualified Noll.Set.Test05
 import qualified Noll.Set.Test06
 import qualified Noll.Set.Test07
+import qualified Noll.Set.Test08
 
 spec :: Spec
 spec =
@@ -1118,32 +1123,6 @@ fixture40 =
     (TIntrinsic IBool)
     (ELiteral () (LInt32 1))
 
-story = do
-  it "" $
-    runReader (insertAliases Noll.Set.Test01.prog1_01) testEnvironment2 == Noll.Set.Test02.prog1_02
-  it "" $
-    runFoldExpansion "fold" 1 (compileFolds Noll.Set.Test02.prog1_02) == Noll.Set.Test03.prog1_03
-  it "" $
-    testResultExpression (Noll.CompilerExamples.Test02.baz3 Noll.Set.Test03.moduleUtils) == Noll.Set.Test04.moduleUtils
-  it "" $
-    testResultExpression (Noll.CompilerExamples.Test02.baz3 Noll.Set.Test03.moduleOrdered) == Noll.Set.Test04.moduleOrdered
-  it "" $
-    testResultExpression (Noll.CompilerExamples.Test02.baz3 Noll.Set.Test03.moduleBinarySearch) == Noll.Set.Test04.moduleBinarySearch
-  it "" $
-    testResultExpression (Noll.CompilerExamples.Test02.baz3 Noll.Set.Test03.moduleMain) == Noll.Set.Test04.moduleMain
-  it "" $
-    normalizeObject Noll.Set.Test04.prog1_04 == Noll.Set.Test05.prog1_05
-  it "" $
-    runPatternDesugaring "v" 0 (desugarPatterns Noll.Set.Test05.moduleBinarySearch) == Noll.Set.Test06.moduleBinarySearch
-  it "" $
-    runIdentity (Noll.Compiler.Transform.Pattern.OrExpansion.compileOrPatterns Noll.Set.Test06.moduleUtils) == Noll.Set.Test07.moduleUtils
-  it "" $
-    runIdentity (Noll.Compiler.Transform.Pattern.OrExpansion.compileOrPatterns Noll.Set.Test06.moduleOrdered) == Noll.Set.Test07.moduleOrdered
-  it "" $
-    runIdentity (Noll.Compiler.Transform.Pattern.OrExpansion.compileOrPatterns Noll.Set.Test06.moduleBinarySearch) == Noll.Set.Test07.moduleBinarySearch
-  it "" $
-    runIdentity (Noll.Compiler.Transform.Pattern.OrExpansion.compileOrPatterns Noll.Set.Test06.moduleMain) == Noll.Set.Test07.moduleMain
-
 testEnvironment2 :: AliasEnvironment
 testEnvironment2 =
   Environment.fromList
@@ -1176,3 +1155,31 @@ testEnvironment2 =
         )
       )
     ]
+
+story = do
+  it "" $
+    runReader (insertAliases Noll.Set.Test01.prog1_01) testEnvironment2 == Noll.Set.Test02.prog1_02
+  it "" $
+    runFoldExpansion "fold" 1 (compileFolds Noll.Set.Test02.prog1_02) == Noll.Set.Test03.prog1_03
+  it "" $
+    testResultExpression (Noll.CompilerExamples.Test02.baz3 Noll.Set.Test03.moduleUtils) == Noll.Set.Test04.moduleUtils
+  it "" $
+    testResultExpression (Noll.CompilerExamples.Test02.baz3 Noll.Set.Test03.moduleOrdered) == Noll.Set.Test04.moduleOrdered
+  it "" $
+    testResultExpression (Noll.CompilerExamples.Test02.baz3 Noll.Set.Test03.moduleBinarySearch) == Noll.Set.Test04.moduleBinarySearch
+  it "" $
+    testResultExpression (Noll.CompilerExamples.Test02.baz3 Noll.Set.Test03.moduleMain) == Noll.Set.Test04.moduleMain
+  it "" $
+    normalizeObject Noll.Set.Test04.prog1_04 == Noll.Set.Test05.prog1_05
+  it "" $
+    runPatternDesugaring "v" 0 (desugarPatterns Noll.Set.Test05.moduleBinarySearch) == Noll.Set.Test06.moduleBinarySearch
+  it "" $
+    runIdentity (Noll.Compiler.Transform.Pattern.OrExpansion.compileOrPatterns Noll.Set.Test06.moduleUtils) == Noll.Set.Test07.moduleUtils
+  it "" $
+    runIdentity (Noll.Compiler.Transform.Pattern.OrExpansion.compileOrPatterns Noll.Set.Test06.moduleOrdered) == Noll.Set.Test07.moduleOrdered
+  it "" $
+    runIdentity (Noll.Compiler.Transform.Pattern.OrExpansion.compileOrPatterns Noll.Set.Test06.moduleBinarySearch) == Noll.Set.Test07.moduleBinarySearch
+  it "" $
+    runIdentity (Noll.Compiler.Transform.Pattern.OrExpansion.compileOrPatterns Noll.Set.Test06.moduleMain) == Noll.Set.Test07.moduleMain
+  it "" $
+    runMatchMonad "match" 0 (compileMatchExprs Noll.Set.Test07.prog1_07) == Noll.Set.Test08.prog1_08

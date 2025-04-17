@@ -98,8 +98,8 @@ translatePattern =
       MConstructor ll (translatePattern <$> ps)
     p@(PLiteral a prim) ->
       MLiteral (patternType p) (ELiteral a prim)
-    PAnnotation{} ->
-      error "TODO"
+    PAnnotation _ _ p ->
+      translatePattern p
     PAny{} ->
       error "TODO"
     PRecord{} ->
