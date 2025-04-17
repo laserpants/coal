@@ -62,6 +62,8 @@ instance (Data a, Data k, Data (o k), Typeable o) => HasType o k (Expression a (
         typeOf t
       ELambda _ ts t ->
         foldTypeOf t ts
+      ELet _ _ t ->
+        typeOf t
       e ->
         head (universeBi e)
 
