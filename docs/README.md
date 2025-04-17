@@ -60,8 +60,8 @@ and then solves these to obtain a substitution that can be applied to the tree.
        x     1               ? ----- x     1
 ```
 
-In addition to simple equality, two additional types of constraints are needed 
-to handle qualified types.
+In addition to simple equality, two extra types of constraints are needed to 
+handle qualified types.
 
 
 #### Passes

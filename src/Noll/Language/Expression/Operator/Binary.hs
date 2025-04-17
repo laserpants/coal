@@ -79,5 +79,13 @@ binaryOperatorTypeScheme =
       forall1 (\a -> TIntrinsic (IList a) ~> TIntrinsic (IList a) ~> TIntrinsic (IList a))
     OAddition ->
       forall1 (\a -> a ~> a ~> a)
+    OLessThan ->
+      forall1 (\a -> a ~> a ~> TIntrinsic IBool)
+    OGreaterThan ->
+      forall1 (\a -> a ~> a ~> TIntrinsic IBool)
+    OLessThanOrEqual ->
+      forall1 (\a -> a ~> a ~> TIntrinsic IBool)
+    OGreaterThanOrEqual ->
+      forall1 (\a -> a ~> a ~> TIntrinsic IBool)
     o ->
       error ("TODO: " <> show o)

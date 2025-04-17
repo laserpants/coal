@@ -83,6 +83,27 @@ baz3 =
     ( CompilerEnvironment
         ( Environment.fromList
             [
+              ( "LessThan"
+              , Constructor
+                  "LessThan"
+                  0
+                  (Forall mempty [] (TConstructor KType "Ordering"))
+              )
+            ,
+              ( "GreaterThan"
+              , Constructor
+                  "GreaterThan"
+                  0
+                  (Forall mempty [] (TConstructor KType "Ordering"))
+              )
+            ,
+              ( "EqualTo"
+              , Constructor
+                  "EqualTo"
+                  0
+                  (Forall mempty [] (TConstructor KType "Ordering"))
+              )
+            ,
               ( "Node"
               , Constructor
                   "Node"
@@ -118,7 +139,69 @@ baz3 =
             ]
         )
     )
-    []
+    [
+      ( "compare"
+      , Forall
+          (Set.fromList [TypeIndex KType 0])
+          []
+          ( TVariable (TypeIndex KType 0)
+              `TArrow` TVariable (TypeIndex KType 0)
+              `TArrow` TConstructor KType "Ordering"
+          )
+      )
+    ,
+      ( "not"
+      , Forall
+          mempty
+          []
+          (TIntrinsic IBool `TArrow` TIntrinsic IBool)
+      )
+    ,
+      ( "from_int32"
+      , Forall
+          (Set.fromList [TypeIndex KType 0])
+          []
+          ( TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0)
+          )
+      )
+    ,
+      ( "in_range"
+      , Forall
+          (Set.fromList [TypeIndex KType 0])
+          []
+          ( TIntrinsic
+              ( IRecord
+                  ( TRow
+                      ( RExtend
+                          "max"
+                          (TVariable (TypeIndex KType 0))
+                          (RExtend "min" (TVariable (TypeIndex KType 0)) RNil)
+                      )
+                  )
+              )
+              `TArrow` TVariable (TypeIndex KType 0)
+              `TArrow` TIntrinsic IBool
+          )
+      )
+    ,
+      ( "always"
+      , Forall
+          (Set.fromList [TypeIndex KType 0, TypeIndex KType 1])
+          []
+          ( TVariable (TypeIndex KType 0)
+              `TArrow` TVariable (TypeIndex KType 1)
+              `TArrow` TVariable (TypeIndex KType 0)
+          )
+      )
+    ,
+      ( "sort"
+      , Forall
+          (Set.fromList [TypeIndex KType 0])
+          []
+          ( TIntrinsic (IList (TVariable (TypeIndex KType 0)))
+                `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 0))))
+      )
+    ]
 
 compileOrPatterns :: (Data a, Show a, Eq a) => Module a Kind t -> TestResult (Module a Kind (Type TypeIndex Kind)) a
 compileOrPatterns =
@@ -226,7 +309,11 @@ baz =
             ]
         )
         ( Environment.fromList
-            []
+            [
+              ( "Tree"
+              , KArrow KType KType
+              )
+            ]
         )
     )
     [
@@ -282,6 +369,14 @@ baz =
               `TArrow` TVariable (TypeIndex KType 1)
               `TArrow` TVariable (TypeIndex KType 0)
           )
+      )
+    ,
+      ( "sort"
+      , Forall
+          (Set.fromList [TypeIndex KType 0])
+          []
+          ( TIntrinsic (IList (TVariable (TypeIndex KType 0)))
+                `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 0))))
       )
       --    ,
       --      ( "baz"
@@ -418,6 +513,14 @@ baz2 =
               `TArrow` TVariable (TypeIndex KType 1)
               `TArrow` TVariable (TypeIndex KType 0)
           )
+      )
+    ,
+      ( "sort"
+      , Forall
+          (Set.fromList [TypeIndex KType 0])
+          []
+          ( TIntrinsic (IList (TVariable (TypeIndex KType 0)))
+                `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 0))))
       )
       --    ,
       --      ( "baz"
@@ -815,7 +918,6 @@ fixture5 =
             ()
             (With [] ())
             (PAnnotation () (TIntrinsic (IList (TVariable (Parameter () "a")))) (PVariable () (Label () "list")) :| [])
-            --            (PVariable () (Label () "list") :| [])
             ( EFold
                 ()
                 ()
@@ -1427,7 +1529,6 @@ fixture51 =
         ( Function
             ()
             (With [] (TApplication KType (TConstructor (KArrow KType KType) "Tree") (TVariable (TypeIndex KType 2) :| [])))
-            -- (PVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 2)))) "list") :| [])
             ( PAnnotation
                 ()
                 (TIntrinsic (IList (TVariable (Parameter () "a"))))
@@ -2808,6 +2909,52 @@ fixture51 =
             )
         )
     )
+  ]
+
+fixture6 =
+  [ DInstance
+      "Ordered"
+      (TIntrinsic IInt32)
+      [ DFunction
+          "compare"
+          ( Function
+              ()
+              (With [] ())
+              ( PVariable () (Label () "x")
+                  <| PVariable () (Label () "y")
+                  :| []
+              )
+              ( EIf
+                  ()
+                  ()
+                  ( EApplication
+                      ()
+                      ()
+                      (EBinaryOperator () () OLessThan)
+                      ( EVariable () (Label () "x")
+                          <| EVariable () (Label () "y")
+                          :| []
+                      )
+                  )
+                  (EConstructor () (Label () "LessThan"))
+                  ( EIf
+                      ()
+                      ()
+                      ( EApplication
+                          ()
+                          ()
+                          (EBinaryOperator () () OGreaterThan)
+                          ( EVariable () (Label () "x")
+                              <| EVariable () (Label () "y")
+                              :| []
+                          )
+                      )
+                      (EConstructor () (Label () "GreaterThan"))
+                      (EConstructor () (Label () "EqualTo"))
+                  )
+              )
+          )
+      ]
   ]
 
 -- fixture6 =

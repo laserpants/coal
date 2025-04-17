@@ -399,7 +399,7 @@ moduleBinarySearch =
                                     ( EApplication
                                         ()
                                         ()
-                                        (EBinaryOperator () () OForwardApplication)
+                                        (EBinaryOperator () () OReverseApplication)
                                         ( EVariable () (Label () "p")
                                             <| EApplication
                                               ()
@@ -506,7 +506,7 @@ moduleBinarySearch =
                                                     ( EApplication
                                                         ()
                                                         ()
-                                                        (EBinaryOperator () () OForwardApplication)
+                                                        (EBinaryOperator () () OReverseApplication)
                                                         ( EVariable () (Label () "p")
                                                             <| EApplication
                                                               ()
@@ -775,7 +775,7 @@ moduleBinarySearch =
             (TIntrinsic (IList (TVariable (Parameter () "a"))) `TArrow` TIntrinsic (IList (TVariable (Parameter () "a"))))
         )
         ( DConstant
-            "qsort"
+            "sort"
             ( Constant
                 ()
                 (With [] ())
@@ -838,7 +838,7 @@ moduleMain =
                     ( EApplication
                         ()
                         ()
-                        (EVariable () (Label () "qsort"))
+                        (EVariable () (Label () "sort"))
                         ( EVariable () (Label () "xs")
                             :| []
                         )
