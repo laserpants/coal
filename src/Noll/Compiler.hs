@@ -325,7 +325,7 @@ compileDefinitionC2 = do
       -- TODO
       compileDefinitionC2 d
     DInstance _ t ds ->
-      forM_ ds compileDefinitionC2 
+      forM_ ds compileDefinitionC2
     _ ->
       -- TODO ?
       pure ()
