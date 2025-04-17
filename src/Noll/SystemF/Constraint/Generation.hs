@@ -269,7 +269,7 @@ collectConstraints =
     EListLiteral _ t es -> do
       ms1 <- concatMapM collectConstraints es
       tellRight
-        [ Equality (InferenceRule 555) (t : (typeOf <$> es))
+        [ Equality (InferenceRule 555) (t : (TIntrinsic . IList . typeOf <$> es))
         , Explicit (InferenceRule 777) t (forall1 (\a -> TIntrinsic (IList a)))
         ]
       pure ms1

@@ -1871,26 +1871,26 @@ moduleMain =
         "main"
         ( Function
             ()
-            (With [] (TVariable (TypeIndex KType 1)))
+            (With [] (TVariable (TypeIndex KType 0)))
             (PLiteral () LUnit :| [])
             ( ELet
                 ()
                 ( BPattern
                     ()
-                    (PVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 0)))) "xs"))
+                    (PVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 1)))) "xs"))
                     ( EAnnotation
                         ()
                         (TIntrinsic (IList (TVariable (Parameter () "a"))))
                         ( EListLiteral
                             ()
-                            (TIntrinsic (IList (TVariable (TypeIndex KType 0))))
-                            [ EApplication () (TVariable (TypeIndex KType 0)) (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0)) "from_int32")) (ELiteral () (LInt32 5) :| [])
-                            , EApplication () (TVariable (TypeIndex KType 0)) (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0)) "from_int32")) (ELiteral () (LInt32 3) :| [])
-                            , EApplication () (TVariable (TypeIndex KType 0)) (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0)) "from_int32")) (ELiteral () (LInt32 7) :| [])
-                            , EApplication () (TVariable (TypeIndex KType 0)) (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0)) "from_int32")) (ELiteral () (LInt32 2) :| [])
-                            , EApplication () (TVariable (TypeIndex KType 0)) (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0)) "from_int32")) (ELiteral () (LInt32 1) :| [])
-                            , EApplication () (TVariable (TypeIndex KType 0)) (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0)) "from_int32")) (ELiteral () (LInt32 6) :| [])
-                            , EApplication () (TVariable (TypeIndex KType 0)) (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0)) "from_int32")) (ELiteral () (LInt32 4) :| [])
+                            (TIntrinsic (IList (TVariable (TypeIndex KType 1))))
+                            [ EApplication () (TVariable (TypeIndex KType 1)) (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32")) (ELiteral () (LInt32 5) :| [])
+                            , EApplication () (TVariable (TypeIndex KType 1)) (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32")) (ELiteral () (LInt32 3) :| [])
+                            , EApplication () (TVariable (TypeIndex KType 1)) (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32")) (ELiteral () (LInt32 7) :| [])
+                            , EApplication () (TVariable (TypeIndex KType 1)) (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32")) (ELiteral () (LInt32 2) :| [])
+                            , EApplication () (TVariable (TypeIndex KType 1)) (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32")) (ELiteral () (LInt32 1) :| [])
+                            , EApplication () (TVariable (TypeIndex KType 1)) (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32")) (ELiteral () (LInt32 6) :| [])
+                            , EApplication () (TVariable (TypeIndex KType 1)) (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32")) (ELiteral () (LInt32 4) :| [])
                             ]
                         )
                     )
@@ -1898,13 +1898,13 @@ moduleMain =
                 )
                 ( EApplication
                     ()
-                    (TVariable (TypeIndex KType 1))
-                    (EVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 0))) `TArrow` TVariable (TypeIndex KType 1)) "trace"))
+                    (TVariable (TypeIndex KType 0))
+                    (EVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 2))) `TArrow` TVariable (TypeIndex KType 0)) "trace"))
                     ( EApplication
                         ()
-                        (TIntrinsic (IList (TVariable (TypeIndex KType 0))))
-                        (EVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 0))) `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 0)))) "sort"))
-                        ( EVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 0)))) "xs")
+                        (TIntrinsic (IList (TVariable (TypeIndex KType 2))))
+                        (EVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 2))) `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 2)))) "sort"))
+                        ( EVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 2)))) "xs")
                             :| []
                         )
                         :| []

@@ -199,7 +199,8 @@ baz3 =
           (Set.fromList [TypeIndex KType 0])
           []
           ( TIntrinsic (IList (TVariable (TypeIndex KType 0)))
-                `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 0))))
+              `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 0)))
+          )
       )
     ]
 
@@ -376,7 +377,8 @@ baz =
           (Set.fromList [TypeIndex KType 0])
           []
           ( TIntrinsic (IList (TVariable (TypeIndex KType 0)))
-                `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 0))))
+              `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 0)))
+          )
       )
       --    ,
       --      ( "baz"
@@ -520,7 +522,8 @@ baz2 =
           (Set.fromList [TypeIndex KType 0])
           []
           ( TIntrinsic (IList (TVariable (TypeIndex KType 0)))
-                `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 0))))
+              `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 0)))
+          )
       )
       --    ,
       --      ( "baz"

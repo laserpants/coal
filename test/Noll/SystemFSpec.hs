@@ -3,12 +3,12 @@
 -- module Noll.SystemFSpec (spec) where
 module Noll.SystemFSpec where
 
-import Noll.Compiler.Transform.Fold
 import Control.Monad.Reader (runReader)
-import Noll.Compiler.Transform.Type.AliasInsertion
 import Data.List.NonEmpty ((<|))
 import Lang.Common.List1 (NonEmpty (..))
 import Lang.Label (Label (..))
+import Noll.Compiler.Transform.Fold
+import Noll.Compiler.Transform.Type.AliasInsertion
 import Noll.Language (
   BinaryOperator (..),
   Binding (..),
@@ -21,8 +21,8 @@ import Noll.Language (
   Parameter (..),
   Pattern (..),
   Primitive (..),
-  Scheme (..),
   Row (..),
+  Scheme (..),
   Type (..),
   TypeIndex (..),
   With (..),
@@ -33,8 +33,8 @@ import Noll.SystemF.Constraint.Generation.Internal (InferenceRule (..))
 import Noll.SystemFSpec.TestRunner
 import Test.Hspec (Spec, describe, it)
 
-import qualified Lang.Common.Environment as Environment
 import qualified Data.Set as Set
+import qualified Lang.Common.Environment as Environment
 import qualified Noll.Set.Test01
 import qualified Noll.Set.Test02
 import qualified Noll.Set.Test03
@@ -1109,14 +1109,11 @@ fixture40 =
     (TIntrinsic IBool)
     (ELiteral () (LInt32 1))
 
-
 story = do
-    it "" $
-      runReader (insertAliases Noll.Set.Test01.prog1_01) testEnvironment2 == Noll.Set.Test02.prog1_02
-    it "" $
-      runFoldExpansion "fold" 1 (compileFolds Noll.Set.Test02.prog1_02) == Noll.Set.Test03.prog1_03
-
-
+  it "" $
+    runReader (insertAliases Noll.Set.Test01.prog1_01) testEnvironment2 == Noll.Set.Test02.prog1_02
+  it "" $
+    runFoldExpansion "fold" 1 (compileFolds Noll.Set.Test02.prog1_02) == Noll.Set.Test03.prog1_03
 
 testEnvironment2 :: AliasEnvironment
 testEnvironment2 =

@@ -29,7 +29,6 @@ module Noll.Compiler where
 --  getSolverRuleViolationsC,
 -- ) where
 
-import Debug.Trace
 import Control.Monad.Reader (MonadReader, ReaderT, ask, runReaderT)
 import Control.Monad.State (MonadState, StateT, gets, modify, put, runState, runStateT)
 import Control.Monad.Writer (execWriter)
