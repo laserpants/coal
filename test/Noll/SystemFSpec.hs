@@ -35,11 +35,11 @@ import Test.Hspec (Spec, describe, it)
 
 import qualified Data.Set as Set
 import qualified Lang.Common.Environment as Environment
+import qualified Noll.CompilerExamples.Test02
 import qualified Noll.Set.Test01
 import qualified Noll.Set.Test02
 import qualified Noll.Set.Test03
 import qualified Noll.Set.Test04
-import qualified Noll.CompilerExamples.Test02
 
 spec :: Spec
 spec =
