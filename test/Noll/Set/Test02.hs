@@ -285,7 +285,22 @@ moduleBinarySearch =
                             )
                         )
                     )
-                    (PVariable () (Label () "range"))
+                    ( PRecord
+                        ()
+                        ()
+                        ( Map.fromList
+                            [
+                              ( "min"
+                              , PVariable () (Label () "min")
+                              )
+                            ,
+                              ( "max"
+                              , PVariable () (Label () "max")
+                              )
+                            ]
+                        )
+                        Nothing
+                    )
                     <| PAnnotation
                       ()
                       (TVariable (Parameter () "a"))
@@ -301,7 +316,7 @@ moduleBinarySearch =
                         ()
                         (EVariable () (Label () "greater_than"))
                         ( EVariable () (Label () "n")
-                            <| ESelect () (Label () "min") (EVariable () (Label () "range"))
+                            <| EVariable () (Label () "min")
                             :| []
                         )
                         <| ( EApplication
@@ -314,14 +329,14 @@ moduleBinarySearch =
                               ()
                               (EVariable () (Label () "less_than_or_equal_to"))
                               ( EVariable () (Label () "n")
-                                  <| ESelect () (Label () "max") (EVariable () (Label () "range"))
+                                  <| EVariable () (Label () "max")
                                   :| []
                               )
                               <| EApplication
                                 ()
                                 ()
                                 (EBinaryOperator () () OEqualTo)
-                                ( ESelect () (Label () "max") (EVariable () (Label () "range"))
+                                ( EVariable () (Label () "max")
                                     <| EApplication
                                       ()
                                       ()

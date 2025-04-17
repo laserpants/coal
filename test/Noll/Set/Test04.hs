@@ -307,26 +307,35 @@ moduleBinarySearch =
                             )
                         )
                     )
-                    ( PVariable
+                    ( PRecord
                         ()
-                        ( Label
-                            ( TIntrinsic
-                                ( IRecord
-                                    ( TRow
+                        ( TIntrinsic
+                            ( IRecord
+                                ( TRow
+                                    ( RExtend
+                                        "max"
+                                        (TVariable (TypeIndex KType 0))
                                         ( RExtend
-                                            "max"
+                                            "min"
                                             (TVariable (TypeIndex KType 0))
-                                            ( RExtend
-                                                "min"
-                                                (TVariable (TypeIndex KType 0))
-                                                RNil
-                                            )
+                                            RNil
                                         )
                                     )
                                 )
                             )
-                            "range"
                         )
+                        ( Map.fromList
+                            [
+                              ( "min"
+                              , PVariable () (Label (TVariable (TypeIndex KType 0)) "min")
+                              )
+                            ,
+                              ( "max"
+                              , PVariable () (Label (TVariable (TypeIndex KType 0)) "max")
+                              )
+                            ]
+                        )
+                        Nothing
                     )
                     <| PAnnotation
                       ()
@@ -343,30 +352,7 @@ moduleBinarySearch =
                         (TIntrinsic IBool)
                         (EVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool) "greater_than"))
                         ( EVariable () (Label (TVariable (TypeIndex KType 0)) "n")
-                            <| ESelect
-                              ()
-                              (Label (TVariable (TypeIndex KType 0)) "min")
-                              ( EVariable
-                                  ()
-                                  ( Label
-                                      ( TIntrinsic
-                                          ( IRecord
-                                              ( TRow
-                                                  ( RExtend
-                                                      "max"
-                                                      (TVariable (TypeIndex KType 0))
-                                                      ( RExtend
-                                                          "min"
-                                                          (TVariable (TypeIndex KType 0))
-                                                          RNil
-                                                      )
-                                                  )
-                                              )
-                                          )
-                                      )
-                                      "range"
-                                  )
-                              )
+                            <| EVariable () (Label (TVariable (TypeIndex KType 0)) "min")
                             :| []
                         )
                         <| ( EApplication
@@ -379,30 +365,7 @@ moduleBinarySearch =
                               (TIntrinsic IBool)
                               (EVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool) "less_than_or_equal_to"))
                               ( EVariable () (Label (TVariable (TypeIndex KType 0)) "n")
-                                  <| ESelect
-                                    ()
-                                    (Label (TVariable (TypeIndex KType 0)) "max")
-                                    ( EVariable
-                                        ()
-                                        ( Label
-                                            ( TIntrinsic
-                                                ( IRecord
-                                                    ( TRow
-                                                        ( RExtend
-                                                            "max"
-                                                            (TVariable (TypeIndex KType 0))
-                                                            ( RExtend
-                                                                "min"
-                                                                (TVariable (TypeIndex KType 0))
-                                                                RNil
-                                                            )
-                                                        )
-                                                    )
-                                                )
-                                            )
-                                            "range"
-                                        )
-                                    )
+                                  <| EVariable () (Label (TVariable (TypeIndex KType 0)) "max")
                                   :| []
                               )
                               <| EApplication
@@ -413,30 +376,7 @@ moduleBinarySearch =
                                     (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
                                     OEqualTo
                                 )
-                                ( ESelect
-                                    ()
-                                    (Label (TVariable (TypeIndex KType 0)) "max")
-                                    ( EVariable
-                                        ()
-                                        ( Label
-                                            ( TIntrinsic
-                                                ( IRecord
-                                                    ( TRow
-                                                        ( RExtend
-                                                            "max"
-                                                            (TVariable (TypeIndex KType 0))
-                                                            ( RExtend
-                                                                "min"
-                                                                (TVariable (TypeIndex KType 0))
-                                                                RNil
-                                                            )
-                                                        )
-                                                    )
-                                                )
-                                            )
-                                            "range"
-                                        )
-                                    )
+                                ( EVariable () (Label (TVariable (TypeIndex KType 0)) "max")
                                     <| EApplication
                                       ()
                                       (TVariable (TypeIndex KType 0))
