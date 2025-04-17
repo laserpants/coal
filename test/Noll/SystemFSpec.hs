@@ -9,6 +9,7 @@ import Lang.Common.List1 (NonEmpty (..))
 import Lang.Label (Label (..))
 import Noll.Compiler.NormalizeObjects (normalizeObject)
 import Noll.Compiler.Transform.Fold
+import Noll.Compiler.Transform.Pattern.Desugaring
 import Noll.Compiler.Transform.Type.AliasInsertion
 import Noll.Language (
   BinaryOperator (..),
@@ -42,6 +43,7 @@ import qualified Noll.Set.Test02
 import qualified Noll.Set.Test03
 import qualified Noll.Set.Test04
 import qualified Noll.Set.Test05
+import qualified Noll.Set.Test06
 
 spec :: Spec
 spec =
@@ -1128,6 +1130,8 @@ story = do
     testResultExpression (Noll.CompilerExamples.Test02.baz3 Noll.Set.Test03.moduleMain) == Noll.Set.Test04.moduleMain
   it "" $
     normalizeObject Noll.Set.Test04.prog1_04 == Noll.Set.Test05.prog1_05
+  it "" $
+    runPatternDesugaring "v" 0 (desugarPatterns Noll.Set.Test05.moduleBinarySearch) == Noll.Set.Test06.moduleBinarySearch
 
 testEnvironment2 :: AliasEnvironment
 testEnvironment2 =
