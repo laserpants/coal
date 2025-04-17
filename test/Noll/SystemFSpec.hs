@@ -7,6 +7,7 @@ import Control.Monad.Reader (runReader)
 import Data.List.NonEmpty ((<|))
 import Lang.Common.List1 (NonEmpty (..))
 import Lang.Label (Label (..))
+import Noll.Compiler.NormalizeObjects (normalizeObject)
 import Noll.Compiler.Transform.Fold
 import Noll.Compiler.Transform.Type.AliasInsertion
 import Noll.Language (
@@ -40,6 +41,7 @@ import qualified Noll.Set.Test01
 import qualified Noll.Set.Test02
 import qualified Noll.Set.Test03
 import qualified Noll.Set.Test04
+import qualified Noll.Set.Test05
 
 spec :: Spec
 spec =
@@ -1124,6 +1126,8 @@ story = do
     testResultExpression (Noll.CompilerExamples.Test02.baz3 Noll.Set.Test03.moduleBinarySearch) == Noll.Set.Test04.moduleBinarySearch
   it "" $
     testResultExpression (Noll.CompilerExamples.Test02.baz3 Noll.Set.Test03.moduleMain) == Noll.Set.Test04.moduleMain
+  it "" $
+    normalizeObject Noll.Set.Test04.prog1_04 == Noll.Set.Test05.prog1_05
 
 testEnvironment2 :: AliasEnvironment
 testEnvironment2 =

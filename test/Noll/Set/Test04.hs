@@ -11,7 +11,7 @@ import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import qualified Noll.Module as Module
 
--- TODO: Add type info
+-- Add type info
 prog1_04 :: [Module () Kind IndexedType]
 prog1_04 =
   [ moduleUtils
