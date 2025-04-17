@@ -463,11 +463,11 @@ moduleBinarySearch =
             "from_list"
             ( Function
                 ()
-                (With [] (TApplication KType (TConstructor (KArrow KType KType) "Tree") (TVariable (TypeIndex KType 1) :| [])))
+                (With [] (TApplication KType (TConstructor (KArrow KType KType) "Tree") (TVariable (TypeIndex KType 2) :| [])))
                 ( PAnnotation
                     ()
                     (TIntrinsic (IList (TVariable (Parameter () "a"))))
-                    (PVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 1)))) "list"))
+                    (PVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 2)))) "list"))
                     :| []
                 )
                 ( EFold
@@ -475,9 +475,9 @@ moduleBinarySearch =
                     ( TApplication
                         KType
                         (TConstructor (KArrow KType KType) "Tree")
-                        (TVariable (TypeIndex KType 1) :| [])
+                        (TVariable (TypeIndex KType 2) :| [])
                     )
-                    ( EVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 1)))) "list")
+                    ( EVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 2)))) "list")
                         <| ERecord
                           ()
                           ( TIntrinsic
@@ -485,8 +485,8 @@ moduleBinarySearch =
                                   ( TRow
                                       ( RExtend
                                           "max"
-                                          (TVariable (TypeIndex KType 1))
-                                          (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
+                                          (TVariable (TypeIndex KType 2))
+                                          (RExtend "min" (TVariable (TypeIndex KType 2)) RNil)
                                       )
                                   )
                               )
@@ -496,16 +496,16 @@ moduleBinarySearch =
                                 ( "min"
                                 , EApplication
                                     ()
-                                    (TVariable (TypeIndex KType 1))
-                                    (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32"))
+                                    (TVariable (TypeIndex KType 2))
+                                    (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 2)) "from_int32"))
                                     (ELiteral () (LInt32 0) :| [])
                                 )
                               ,
                                 ( "max"
                                 , EApplication
                                     ()
-                                    (TVariable (TypeIndex KType 1))
-                                    (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32"))
+                                    (TVariable (TypeIndex KType 2))
+                                    (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 2)) "from_int32"))
                                     (ELiteral () (LInt32 (-1)) :| [])
                                 )
                               ]
@@ -517,9 +517,9 @@ moduleBinarySearch =
                         ()
                         ( PListCons
                             ()
-                            (TIntrinsic (IList (TVariable (TypeIndex KType 1))))
-                            (PVariable () (Label (TVariable (TypeIndex KType 1)) "p"))
-                            (PAtVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 1)))) "g"))
+                            (TIntrinsic (IList (TVariable (TypeIndex KType 2))))
+                            (PVariable () (Label (TVariable (TypeIndex KType 2)) "p"))
+                            (PAtVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 2)))) "g"))
                         )
                         ( CPlain
                             ()
@@ -534,8 +534,8 @@ moduleBinarySearch =
                                                 ( TRow
                                                     ( RExtend
                                                         "max"
-                                                        (TVariable (TypeIndex KType 1))
-                                                        (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
+                                                        (TVariable (TypeIndex KType 2))
+                                                        (RExtend "min" (TVariable (TypeIndex KType 2)) RNil)
                                                     )
                                                 )
                                             )
@@ -549,7 +549,7 @@ moduleBinarySearch =
                                     ( TApplication
                                         KType
                                         (TConstructor (KArrow KType KType) "Tree")
-                                        (TVariable (TypeIndex KType 1) :| [])
+                                        (TVariable (TypeIndex KType 2) :| [])
                                     )
                                     ( EApplication
                                         ()
@@ -557,15 +557,15 @@ moduleBinarySearch =
                                         ( EBinaryOperator
                                             ()
                                             ( TArrow
-                                                (TVariable (TypeIndex KType 1))
-                                                (TArrow (TArrow (TVariable (TypeIndex KType 1)) (TIntrinsic IBool)) (TIntrinsic IBool))
+                                                (TVariable (TypeIndex KType 2))
+                                                (TArrow (TArrow (TVariable (TypeIndex KType 2)) (TIntrinsic IBool)) (TIntrinsic IBool))
                                             )
                                             OReverseApplication
                                         )
-                                        ( EVariable () (Label (TVariable (TypeIndex KType 1)) "p")
+                                        ( EVariable () (Label (TVariable (TypeIndex KType 2)) "p")
                                             <| EApplication
                                               ()
-                                              (TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool)
+                                              (TVariable (TypeIndex KType 2) `TArrow` TIntrinsic IBool)
                                               ( EVariable
                                                   ()
                                                   ( Label
@@ -574,13 +574,13 @@ moduleBinarySearch =
                                                                 ( TRow
                                                                     ( RExtend
                                                                         "max"
-                                                                        (TVariable (TypeIndex KType 1))
-                                                                        (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
+                                                                        (TVariable (TypeIndex KType 2))
+                                                                        (RExtend "min" (TVariable (TypeIndex KType 2)) RNil)
                                                                     )
                                                                 )
                                                             )
                                                         )
-                                                          `TArrow` TVariable (TypeIndex KType 1)
+                                                          `TArrow` TVariable (TypeIndex KType 2)
                                                           `TArrow` TIntrinsic IBool
                                                       )
                                                       "in_range"
@@ -594,8 +594,8 @@ moduleBinarySearch =
                                                               ( TRow
                                                                   ( RExtend
                                                                       "max"
-                                                                      (TVariable (TypeIndex KType 1))
-                                                                      (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
+                                                                      (TVariable (TypeIndex KType 2))
+                                                                      (RExtend "min" (TVariable (TypeIndex KType 2)) RNil)
                                                                   )
                                                               )
                                                           )
@@ -612,38 +612,38 @@ moduleBinarySearch =
                                         ( TApplication
                                             KType
                                             (TConstructor (KArrow KType KType) "Tree")
-                                            (TVariable (TypeIndex KType 1) :| [])
+                                            (TVariable (TypeIndex KType 2) :| [])
                                         )
                                         ( EConstructor
                                             ()
                                             ( Label
-                                                ( (TVariable (TypeIndex KType 1))
+                                                ( (TVariable (TypeIndex KType 2))
                                                     `TArrow` ( TApplication
                                                                 KType
                                                                 (TConstructor (KArrow KType KType) "Tree")
-                                                                (TVariable (TypeIndex KType 1) :| [])
+                                                                (TVariable (TypeIndex KType 2) :| [])
                                                              )
                                                     `TArrow` ( TApplication
                                                                 KType
                                                                 (TConstructor (KArrow KType KType) "Tree")
-                                                                (TVariable (TypeIndex KType 1) :| [])
+                                                                (TVariable (TypeIndex KType 2) :| [])
                                                              )
                                                     `TArrow` ( TApplication
                                                                 KType
                                                                 (TConstructor (KArrow KType KType) "Tree")
-                                                                (TVariable (TypeIndex KType 1) :| [])
+                                                                (TVariable (TypeIndex KType 2) :| [])
                                                              )
                                                 )
                                                 "Node"
                                             )
                                         )
-                                        ( EVariable () (Label (TVariable (TypeIndex KType 1)) "p")
+                                        ( EVariable () (Label (TVariable (TypeIndex KType 2)) "p")
                                             <| EApplication
                                               ()
                                               ( TApplication
                                                   KType
                                                   (TConstructor (KArrow KType KType) "Tree")
-                                                  (TVariable (TypeIndex KType 1) :| [])
+                                                  (TVariable (TypeIndex KType 2) :| [])
                                               )
                                               ( EVariable
                                                   ()
@@ -653,8 +653,8 @@ moduleBinarySearch =
                                                                 ( TRow
                                                                     ( RExtend
                                                                         "max"
-                                                                        (TVariable (TypeIndex KType 1))
-                                                                        (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
+                                                                        (TVariable (TypeIndex KType 2))
+                                                                        (RExtend "min" (TVariable (TypeIndex KType 2)) RNil)
                                                                     )
                                                                 )
                                                             )
@@ -662,7 +662,7 @@ moduleBinarySearch =
                                                           `TArrow` ( TApplication
                                                                       KType
                                                                       (TConstructor (KArrow KType KType) "Tree")
-                                                                      (TVariable (TypeIndex KType 1) :| [])
+                                                                      (TVariable (TypeIndex KType 2) :| [])
                                                                    )
                                                       )
                                                       "g"
@@ -675,8 +675,8 @@ moduleBinarySearch =
                                                           ( TRow
                                                               ( RExtend
                                                                   "max"
-                                                                  (TVariable (TypeIndex KType 1))
-                                                                  (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
+                                                                  (TVariable (TypeIndex KType 2))
+                                                                  (RExtend "min" (TVariable (TypeIndex KType 2)) RNil)
                                                               )
                                                           )
                                                       )
@@ -686,7 +686,7 @@ moduleBinarySearch =
                                                         ( "min"
                                                         , ESelect
                                                             ()
-                                                            (Label (TVariable (TypeIndex KType 1)) "min")
+                                                            (Label (TVariable (TypeIndex KType 2)) "min")
                                                             ( EVariable
                                                                 ()
                                                                 ( Label
@@ -695,8 +695,8 @@ moduleBinarySearch =
                                                                             ( TRow
                                                                                 ( RExtend
                                                                                     "max"
-                                                                                    (TVariable (TypeIndex KType 1))
-                                                                                    (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
+                                                                                    (TVariable (TypeIndex KType 2))
+                                                                                    (RExtend "min" (TVariable (TypeIndex KType 2)) RNil)
                                                                                 )
                                                                             )
                                                                         )
@@ -707,7 +707,7 @@ moduleBinarySearch =
                                                         )
                                                       ,
                                                         ( "max"
-                                                        , EVariable () (Label (TVariable (TypeIndex KType 1)) "p")
+                                                        , EVariable () (Label (TVariable (TypeIndex KType 2)) "p")
                                                         )
                                                       ]
                                                   )
@@ -719,7 +719,7 @@ moduleBinarySearch =
                                               ( TApplication
                                                   KType
                                                   (TConstructor (KArrow KType KType) "Tree")
-                                                  (TVariable (TypeIndex KType 1) :| [])
+                                                  (TVariable (TypeIndex KType 2) :| [])
                                               )
                                               ( EVariable
                                                   ()
@@ -729,8 +729,8 @@ moduleBinarySearch =
                                                                 ( TRow
                                                                     ( RExtend
                                                                         "max"
-                                                                        (TVariable (TypeIndex KType 1))
-                                                                        (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
+                                                                        (TVariable (TypeIndex KType 2))
+                                                                        (RExtend "min" (TVariable (TypeIndex KType 2)) RNil)
                                                                     )
                                                                 )
                                                             )
@@ -738,7 +738,7 @@ moduleBinarySearch =
                                                           `TArrow` ( TApplication
                                                                       KType
                                                                       (TConstructor (KArrow KType KType) "Tree")
-                                                                      (TVariable (TypeIndex KType 1) :| [])
+                                                                      (TVariable (TypeIndex KType 2) :| [])
                                                                    )
                                                       )
                                                       "g"
@@ -751,8 +751,8 @@ moduleBinarySearch =
                                                           ( TRow
                                                               ( RExtend
                                                                   "max"
-                                                                  (TVariable (TypeIndex KType 1))
-                                                                  (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
+                                                                  (TVariable (TypeIndex KType 2))
+                                                                  (RExtend "min" (TVariable (TypeIndex KType 2)) RNil)
                                                               )
                                                           )
                                                       )
@@ -760,13 +760,13 @@ moduleBinarySearch =
                                                   ( Map.fromList
                                                       [
                                                         ( "min"
-                                                        , EVariable () (Label (TVariable (TypeIndex KType 1)) "p")
+                                                        , EVariable () (Label (TVariable (TypeIndex KType 2)) "p")
                                                         )
                                                       ,
                                                         ( "max"
                                                         , ESelect
                                                             ()
-                                                            (Label (TVariable (TypeIndex KType 1)) "max")
+                                                            (Label (TVariable (TypeIndex KType 2)) "max")
                                                             ( EVariable
                                                                 ()
                                                                 ( Label
@@ -775,8 +775,8 @@ moduleBinarySearch =
                                                                             ( TRow
                                                                                 ( RExtend
                                                                                     "max"
-                                                                                    (TVariable (TypeIndex KType 1))
-                                                                                    (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
+                                                                                    (TVariable (TypeIndex KType 2))
+                                                                                    (RExtend "min" (TVariable (TypeIndex KType 2)) RNil)
                                                                                 )
                                                                             )
                                                                         )
@@ -798,7 +798,7 @@ moduleBinarySearch =
                                         ( TApplication
                                             KType
                                             (TConstructor (KArrow KType KType) "Tree")
-                                            (TVariable (TypeIndex KType 1) :| [])
+                                            (TVariable (TypeIndex KType 2) :| [])
                                         )
                                         ( EVariable
                                             ()
@@ -808,8 +808,8 @@ moduleBinarySearch =
                                                           ( TRow
                                                               ( RExtend
                                                                   "max"
-                                                                  (TVariable (TypeIndex KType 1))
-                                                                  (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
+                                                                  (TVariable (TypeIndex KType 2))
+                                                                  (RExtend "min" (TVariable (TypeIndex KType 2)) RNil)
                                                               )
                                                           )
                                                       )
@@ -817,7 +817,7 @@ moduleBinarySearch =
                                                     `TArrow` ( TApplication
                                                                 KType
                                                                 (TConstructor (KArrow KType KType) "Tree")
-                                                                (TVariable (TypeIndex KType 1) :| [])
+                                                                (TVariable (TypeIndex KType 2) :| [])
                                                              )
                                                 )
                                                 "g"
@@ -831,8 +831,8 @@ moduleBinarySearch =
                                                         ( TRow
                                                             ( RExtend
                                                                 "max"
-                                                                (TVariable (TypeIndex KType 1))
-                                                                (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
+                                                                (TVariable (TypeIndex KType 2))
+                                                                (RExtend "min" (TVariable (TypeIndex KType 2)) RNil)
                                                             )
                                                         )
                                                     )
@@ -848,7 +848,7 @@ moduleBinarySearch =
                         )
                         <| EClause
                           ()
-                          (PListLiteral () (TIntrinsic (IList (TVariable (TypeIndex KType 1)))) [])
+                          (PListLiteral () (TIntrinsic (IList (TVariable (TypeIndex KType 2)))) [])
                           ( CPlain
                               ()
                               []
@@ -859,8 +859,8 @@ moduleBinarySearch =
                                             ( TRow
                                                 ( RExtend
                                                     "max"
-                                                    (TVariable (TypeIndex KType 1))
-                                                    (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
+                                                    (TVariable (TypeIndex KType 2))
+                                                    (RExtend "min" (TVariable (TypeIndex KType 2)) RNil)
                                                 )
                                             )
                                         )
@@ -868,7 +868,7 @@ moduleBinarySearch =
                                       `TArrow` ( TApplication
                                                   KType
                                                   (TConstructor (KArrow KType KType) "Tree")
-                                                  (TVariable (TypeIndex KType 1) :| [])
+                                                  (TVariable (TypeIndex KType 2) :| [])
                                                )
                                   )
                                   ( EVariable
@@ -877,22 +877,22 @@ moduleBinarySearch =
                                           ( ( TApplication
                                                 KType
                                                 (TConstructor (KArrow KType KType) "Tree")
-                                                (TVariable (TypeIndex KType 1) :| [])
+                                                (TVariable (TypeIndex KType 2) :| [])
                                             )
                                               `TArrow` TIntrinsic
                                                 ( IRecord
                                                     ( TRow
                                                         ( RExtend
                                                             "max"
-                                                            (TVariable (TypeIndex KType 1))
-                                                            (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
+                                                            (TVariable (TypeIndex KType 2))
+                                                            (RExtend "min" (TVariable (TypeIndex KType 2)) RNil)
                                                         )
                                                     )
                                                 )
                                               `TArrow` ( TApplication
                                                           KType
                                                           (TConstructor (KArrow KType KType) "Tree")
-                                                          (TVariable (TypeIndex KType 1) :| [])
+                                                          (TVariable (TypeIndex KType 2) :| [])
                                                        )
                                           )
                                           "always"
@@ -904,7 +904,7 @@ moduleBinarySearch =
                                           ( TApplication
                                               KType
                                               (TConstructor (KArrow KType KType) "Tree")
-                                              (TVariable (TypeIndex KType 1) :| [])
+                                              (TVariable (TypeIndex KType 2) :| [])
                                           )
                                           "Leaf"
                                       )
@@ -921,14 +921,14 @@ moduleBinarySearch =
                             ( PVariable
                                 ()
                                 ( Label
-                                    ( TIntrinsic (IList (TVariable (TypeIndex KType 0)))
+                                    ( TIntrinsic (IList (TVariable (TypeIndex KType 1)))
                                         `TArrow` ( TIntrinsic
                                                     ( IRecord
                                                         ( TRow
                                                             ( RExtend
                                                                 "max"
-                                                                (TVariable (TypeIndex KType 0))
-                                                                (RExtend "min" (TVariable (TypeIndex KType 0)) RNil)
+                                                                (TVariable (TypeIndex KType 1))
+                                                                (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
                                                             )
                                                         )
                                                     )
@@ -936,7 +936,7 @@ moduleBinarySearch =
                                         `TArrow` ( TApplication
                                                     KType
                                                     (TConstructor (KArrow KType KType) "Tree")
-                                                    (TVariable (TypeIndex KType 0) :| [])
+                                                    (TVariable (TypeIndex KType 1) :| [])
                                                  )
                                     )
                                     "$fold.1"
@@ -944,7 +944,7 @@ moduleBinarySearch =
                             )
                             ( ELambda
                                 ()
-                                (PVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 0)))) "$fold.1.expr") :| [])
+                                (PVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 1)))) "$fold.1.expr") :| [])
                                 ( EMatch
                                     ()
                                     ( ( TIntrinsic
@@ -952,8 +952,8 @@ moduleBinarySearch =
                                               ( TRow
                                                   ( RExtend
                                                       "max"
-                                                      (TVariable (TypeIndex KType 0))
-                                                      (RExtend "min" (TVariable (TypeIndex KType 0)) RNil)
+                                                      (TVariable (TypeIndex KType 1))
+                                                      (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
                                                   )
                                               )
                                           )
@@ -961,17 +961,17 @@ moduleBinarySearch =
                                         `TArrow` ( TApplication
                                                     KType
                                                     (TConstructor (KArrow KType KType) "Tree")
-                                                    (TVariable (TypeIndex KType 0) :| [])
+                                                    (TVariable (TypeIndex KType 1) :| [])
                                                  )
                                     )
-                                    (EVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 0)))) "$fold.1.expr"))
+                                    (EVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 1)))) "$fold.1.expr"))
                                     ( EClause
                                         ()
                                         ( PListCons
                                             ()
-                                            (TIntrinsic (IList (TVariable (TypeIndex KType 0))))
-                                            (PVariable () (Label (TVariable (TypeIndex KType 0)) "p"))
-                                            (PVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 0)))) "g"))
+                                            (TIntrinsic (IList (TVariable (TypeIndex KType 1))))
+                                            (PVariable () (Label (TVariable (TypeIndex KType 1)) "p"))
+                                            (PVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 1)))) "g"))
                                         )
                                         ( CPlain
                                             ()
@@ -986,8 +986,8 @@ moduleBinarySearch =
                                                                 ( TRow
                                                                     ( RExtend
                                                                         "max"
-                                                                        (TVariable (TypeIndex KType 0))
-                                                                        (RExtend "min" (TVariable (TypeIndex KType 0)) RNil)
+                                                                        (TVariable (TypeIndex KType 1))
+                                                                        (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
                                                                     )
                                                                 )
                                                             )
@@ -1001,7 +1001,7 @@ moduleBinarySearch =
                                                     ( TApplication
                                                         KType
                                                         (TConstructor (KArrow KType KType) "Tree")
-                                                        (TVariable (TypeIndex KType 0) :| [])
+                                                        (TVariable (TypeIndex KType 1) :| [])
                                                     )
                                                     ( EApplication
                                                         ()
@@ -1009,15 +1009,15 @@ moduleBinarySearch =
                                                         ( EBinaryOperator
                                                             ()
                                                             ( TArrow
-                                                                (TVariable (TypeIndex KType 0))
-                                                                (TArrow (TArrow (TVariable (TypeIndex KType 0)) (TIntrinsic IBool)) (TIntrinsic IBool))
+                                                                (TVariable (TypeIndex KType 1))
+                                                                (TArrow (TArrow (TVariable (TypeIndex KType 1)) (TIntrinsic IBool)) (TIntrinsic IBool))
                                                             )
                                                             OReverseApplication
                                                         )
-                                                        ( EVariable () (Label (TVariable (TypeIndex KType 0)) "p")
+                                                        ( EVariable () (Label (TVariable (TypeIndex KType 1)) "p")
                                                             <| EApplication
                                                               ()
-                                                              (TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
+                                                              (TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool)
                                                               ( EVariable
                                                                   ()
                                                                   ( Label
@@ -1026,13 +1026,13 @@ moduleBinarySearch =
                                                                                 ( TRow
                                                                                     ( RExtend
                                                                                         "max"
-                                                                                        (TVariable (TypeIndex KType 0))
-                                                                                        (RExtend "min" (TVariable (TypeIndex KType 0)) RNil)
+                                                                                        (TVariable (TypeIndex KType 1))
+                                                                                        (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
                                                                                     )
                                                                                 )
                                                                             )
                                                                         )
-                                                                          `TArrow` (TVariable (TypeIndex KType 0))
+                                                                          `TArrow` (TVariable (TypeIndex KType 1))
                                                                           `TArrow` (TIntrinsic IBool)
                                                                       )
                                                                       "in_range"
@@ -1046,8 +1046,8 @@ moduleBinarySearch =
                                                                               ( TRow
                                                                                   ( RExtend
                                                                                       "max"
-                                                                                      (TVariable (TypeIndex KType 0))
-                                                                                      (RExtend "min" (TVariable (TypeIndex KType 0)) RNil)
+                                                                                      (TVariable (TypeIndex KType 1))
+                                                                                      (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
                                                                                   )
                                                                               )
                                                                           )
@@ -1064,50 +1064,50 @@ moduleBinarySearch =
                                                         ( TApplication
                                                             KType
                                                             (TConstructor (KArrow KType KType) "Tree")
-                                                            (TVariable (TypeIndex KType 0) :| [])
+                                                            (TVariable (TypeIndex KType 1) :| [])
                                                         )
                                                         ( EConstructor
                                                             ()
                                                             ( Label
-                                                                ( (TVariable (TypeIndex KType 0))
+                                                                ( (TVariable (TypeIndex KType 1))
                                                                     `TArrow` ( TApplication
                                                                                 KType
                                                                                 (TConstructor (KArrow KType KType) "Tree")
-                                                                                (TVariable (TypeIndex KType 0) :| [])
+                                                                                (TVariable (TypeIndex KType 1) :| [])
                                                                              )
                                                                     `TArrow` ( TApplication
                                                                                 KType
                                                                                 (TConstructor (KArrow KType KType) "Tree")
-                                                                                (TVariable (TypeIndex KType 0) :| [])
+                                                                                (TVariable (TypeIndex KType 1) :| [])
                                                                              )
                                                                     `TArrow` ( TApplication
                                                                                 KType
                                                                                 (TConstructor (KArrow KType KType) "Tree")
-                                                                                (TVariable (TypeIndex KType 0) :| [])
+                                                                                (TVariable (TypeIndex KType 1) :| [])
                                                                              )
                                                                 )
                                                                 "Node"
                                                             )
                                                         )
-                                                        ( EVariable () (Label (TVariable (TypeIndex KType 0)) "p")
+                                                        ( EVariable () (Label (TVariable (TypeIndex KType 1)) "p")
                                                             <| EApplication
                                                               ()
                                                               ( TApplication
                                                                   KType
                                                                   (TConstructor (KArrow KType KType) "Tree")
-                                                                  (TVariable (TypeIndex KType 0) :| [])
+                                                                  (TVariable (TypeIndex KType 1) :| [])
                                                               )
                                                               ( EVariable
                                                                   ()
                                                                   ( Label
-                                                                      ( TIntrinsic (IList (TVariable (TypeIndex KType 0)))
+                                                                      ( TIntrinsic (IList (TVariable (TypeIndex KType 1)))
                                                                           `TArrow` ( TIntrinsic
                                                                                       ( IRecord
                                                                                           ( TRow
                                                                                               ( RExtend
                                                                                                   "max"
-                                                                                                  (TVariable (TypeIndex KType 0))
-                                                                                                  (RExtend "min" (TVariable (TypeIndex KType 0)) RNil)
+                                                                                                  (TVariable (TypeIndex KType 1))
+                                                                                                  (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
                                                                                               )
                                                                                           )
                                                                                       )
@@ -1115,13 +1115,13 @@ moduleBinarySearch =
                                                                           `TArrow` ( TApplication
                                                                                       KType
                                                                                       (TConstructor (KArrow KType KType) "Tree")
-                                                                                      (TVariable (TypeIndex KType 0) :| [])
+                                                                                      (TVariable (TypeIndex KType 1) :| [])
                                                                                    )
                                                                       )
                                                                       "$fold.1"
                                                                   )
                                                               )
-                                                              ( EVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 0)))) "g")
+                                                              ( EVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 1)))) "g")
                                                                   :| [ ERecord
                                                                         ()
                                                                         ( TIntrinsic
@@ -1129,8 +1129,8 @@ moduleBinarySearch =
                                                                                 ( TRow
                                                                                     ( RExtend
                                                                                         "max"
-                                                                                        (TVariable (TypeIndex KType 0))
-                                                                                        (RExtend "min" (TVariable (TypeIndex KType 0)) RNil)
+                                                                                        (TVariable (TypeIndex KType 1))
+                                                                                        (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
                                                                                     )
                                                                                 )
                                                                             )
@@ -1138,13 +1138,13 @@ moduleBinarySearch =
                                                                         ( Map.fromList
                                                                             [
                                                                               ( "max"
-                                                                              , EVariable () (Label (TVariable (TypeIndex KType 0)) "p")
+                                                                              , EVariable () (Label (TVariable (TypeIndex KType 1)) "p")
                                                                               )
                                                                             ,
                                                                               ( "min"
                                                                               , ESelect
                                                                                   ()
-                                                                                  (Label (TVariable (TypeIndex KType 0)) "min")
+                                                                                  (Label (TVariable (TypeIndex KType 1)) "min")
                                                                                   ( EVariable
                                                                                       ()
                                                                                       ( Label
@@ -1153,8 +1153,8 @@ moduleBinarySearch =
                                                                                                   ( TRow
                                                                                                       ( RExtend
                                                                                                           "max"
-                                                                                                          (TVariable (TypeIndex KType 0))
-                                                                                                          (RExtend "min" (TVariable (TypeIndex KType 0)) RNil)
+                                                                                                          (TVariable (TypeIndex KType 1))
+                                                                                                          (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
                                                                                                       )
                                                                                                   )
                                                                                               )
@@ -1173,19 +1173,19 @@ moduleBinarySearch =
                                                               ( TApplication
                                                                   KType
                                                                   (TConstructor (KArrow KType KType) "Tree")
-                                                                  (TVariable (TypeIndex KType 0) :| [])
+                                                                  (TVariable (TypeIndex KType 1) :| [])
                                                               )
                                                               ( EVariable
                                                                   ()
                                                                   ( Label
-                                                                      ( TIntrinsic (IList (TVariable (TypeIndex KType 0)))
+                                                                      ( TIntrinsic (IList (TVariable (TypeIndex KType 1)))
                                                                           `TArrow` ( TIntrinsic
                                                                                       ( IRecord
                                                                                           ( TRow
                                                                                               ( RExtend
                                                                                                   "max"
-                                                                                                  (TVariable (TypeIndex KType 0))
-                                                                                                  (RExtend "min" (TVariable (TypeIndex KType 0)) RNil)
+                                                                                                  (TVariable (TypeIndex KType 1))
+                                                                                                  (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
                                                                                               )
                                                                                           )
                                                                                       )
@@ -1193,13 +1193,13 @@ moduleBinarySearch =
                                                                           `TArrow` ( TApplication
                                                                                       KType
                                                                                       (TConstructor (KArrow KType KType) "Tree")
-                                                                                      (TVariable (TypeIndex KType 0) :| [])
+                                                                                      (TVariable (TypeIndex KType 1) :| [])
                                                                                    )
                                                                       )
                                                                       "$fold.1"
                                                                   )
                                                               )
-                                                              ( EVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 0)))) "g")
+                                                              ( EVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 1)))) "g")
                                                                   <| ERecord
                                                                     ()
                                                                     ( TIntrinsic
@@ -1207,8 +1207,8 @@ moduleBinarySearch =
                                                                             ( TRow
                                                                                 ( RExtend
                                                                                     "max"
-                                                                                    (TVariable (TypeIndex KType 0))
-                                                                                    (RExtend "min" (TVariable (TypeIndex KType 0)) RNil)
+                                                                                    (TVariable (TypeIndex KType 1))
+                                                                                    (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
                                                                                 )
                                                                             )
                                                                         )
@@ -1218,7 +1218,7 @@ moduleBinarySearch =
                                                                           ( "max"
                                                                           , ESelect
                                                                               ()
-                                                                              (Label (TVariable (TypeIndex KType 0)) "max")
+                                                                              (Label (TVariable (TypeIndex KType 1)) "max")
                                                                               ( EVariable
                                                                                   ()
                                                                                   ( Label
@@ -1227,8 +1227,8 @@ moduleBinarySearch =
                                                                                               ( TRow
                                                                                                   ( RExtend
                                                                                                       "max"
-                                                                                                      (TVariable (TypeIndex KType 0))
-                                                                                                      (RExtend "min" (TVariable (TypeIndex KType 0)) RNil)
+                                                                                                      (TVariable (TypeIndex KType 1))
+                                                                                                      (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
                                                                                                   )
                                                                                               )
                                                                                           )
@@ -1239,7 +1239,7 @@ moduleBinarySearch =
                                                                           )
                                                                         ,
                                                                           ( "min"
-                                                                          , EVariable () (Label (TVariable (TypeIndex KType 0)) "p")
+                                                                          , EVariable () (Label (TVariable (TypeIndex KType 1)) "p")
                                                                           )
                                                                         ]
                                                                     )
@@ -1254,19 +1254,19 @@ moduleBinarySearch =
                                                         ( TApplication
                                                             KType
                                                             (TConstructor (KArrow KType KType) "Tree")
-                                                            (TVariable (TypeIndex KType 0) :| [])
+                                                            (TVariable (TypeIndex KType 1) :| [])
                                                         )
                                                         ( EVariable
                                                             ()
                                                             ( Label
-                                                                ( TIntrinsic (IList (TVariable (TypeIndex KType 0)))
+                                                                ( TIntrinsic (IList (TVariable (TypeIndex KType 1)))
                                                                     `TArrow` ( TIntrinsic
                                                                                 ( IRecord
                                                                                     ( TRow
                                                                                         ( RExtend
                                                                                             "max"
-                                                                                            (TVariable (TypeIndex KType 0))
-                                                                                            (RExtend "min" (TVariable (TypeIndex KType 0)) RNil)
+                                                                                            (TVariable (TypeIndex KType 1))
+                                                                                            (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
                                                                                         )
                                                                                     )
                                                                                 )
@@ -1274,13 +1274,13 @@ moduleBinarySearch =
                                                                     `TArrow` ( TApplication
                                                                                 KType
                                                                                 (TConstructor (KArrow KType KType) "Tree")
-                                                                                (TVariable (TypeIndex KType 0) :| [])
+                                                                                (TVariable (TypeIndex KType 1) :| [])
                                                                              )
                                                                 )
                                                                 "$fold.1"
                                                             )
                                                         )
-                                                        ( EVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 0)))) "g")
+                                                        ( EVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 1)))) "g")
                                                             <| EVariable
                                                               ()
                                                               ( Label
@@ -1289,8 +1289,8 @@ moduleBinarySearch =
                                                                           ( TRow
                                                                               ( RExtend
                                                                                   "max"
-                                                                                  (TVariable (TypeIndex KType 0))
-                                                                                  (RExtend "min" (TVariable (TypeIndex KType 0)) RNil)
+                                                                                  (TVariable (TypeIndex KType 1))
+                                                                                  (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
                                                                               )
                                                                           )
                                                                       )
@@ -1306,7 +1306,7 @@ moduleBinarySearch =
                                         )
                                         <| EClause
                                           ()
-                                          (PListLiteral () (TIntrinsic (IList (TVariable (TypeIndex KType 0)))) [])
+                                          (PListLiteral () (TIntrinsic (IList (TVariable (TypeIndex KType 1)))) [])
                                           ( CPlain
                                               ()
                                               []
@@ -1317,8 +1317,8 @@ moduleBinarySearch =
                                                             ( TRow
                                                                 ( RExtend
                                                                     "max"
-                                                                    (TVariable (TypeIndex KType 0))
-                                                                    (RExtend "min" (TVariable (TypeIndex KType 0)) RNil)
+                                                                    (TVariable (TypeIndex KType 1))
+                                                                    (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
                                                                 )
                                                             )
                                                         )
@@ -1326,7 +1326,7 @@ moduleBinarySearch =
                                                       `TArrow` ( TApplication
                                                                   KType
                                                                   (TConstructor (KArrow KType KType) "Tree")
-                                                                  (TVariable (TypeIndex KType 0) :| [])
+                                                                  (TVariable (TypeIndex KType 1) :| [])
                                                                )
                                                   )
                                                   ( EVariable
@@ -1335,22 +1335,22 @@ moduleBinarySearch =
                                                           ( ( TApplication
                                                                 KType
                                                                 (TConstructor (KArrow KType KType) "Tree")
-                                                                (TVariable (TypeIndex KType 0) :| [])
+                                                                (TVariable (TypeIndex KType 1) :| [])
                                                             )
                                                               `TArrow` TIntrinsic
                                                                 ( IRecord
                                                                     ( TRow
                                                                         ( RExtend
                                                                             "max"
-                                                                            (TVariable (TypeIndex KType 0))
-                                                                            (RExtend "min" (TVariable (TypeIndex KType 0)) RNil)
+                                                                            (TVariable (TypeIndex KType 1))
+                                                                            (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
                                                                         )
                                                                     )
                                                                 )
                                                               `TArrow` ( TApplication
                                                                           KType
                                                                           (TConstructor (KArrow KType KType) "Tree")
-                                                                          (TVariable (TypeIndex KType 0) :| [])
+                                                                          (TVariable (TypeIndex KType 1) :| [])
                                                                        )
                                                           )
                                                           "always"
@@ -1362,7 +1362,7 @@ moduleBinarySearch =
                                                           ( TApplication
                                                               KType
                                                               (TConstructor (KArrow KType KType) "Tree")
-                                                              (TVariable (TypeIndex KType 0) :| [])
+                                                              (TVariable (TypeIndex KType 1) :| [])
                                                           )
                                                           "Leaf"
                                                       )
