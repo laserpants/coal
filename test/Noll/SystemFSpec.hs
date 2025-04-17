@@ -38,6 +38,8 @@ import qualified Lang.Common.Environment as Environment
 import qualified Noll.Set.Test01
 import qualified Noll.Set.Test02
 import qualified Noll.Set.Test03
+import qualified Noll.Set.Test04
+import qualified Noll.CompilerExamples.Test02
 
 spec :: Spec
 spec =
@@ -1114,6 +1116,14 @@ story = do
     runReader (insertAliases Noll.Set.Test01.prog1_01) testEnvironment2 == Noll.Set.Test02.prog1_02
   it "" $
     runFoldExpansion "fold" 1 (compileFolds Noll.Set.Test02.prog1_02) == Noll.Set.Test03.prog1_03
+  it "" $
+    testResultExpression (Noll.CompilerExamples.Test02.baz3 Noll.Set.Test03.moduleUtils) == Noll.Set.Test04.moduleUtils
+  it "" $
+    testResultExpression (Noll.CompilerExamples.Test02.baz3 Noll.Set.Test03.moduleOrdered) == Noll.Set.Test04.moduleOrdered
+  it "" $
+    testResultExpression (Noll.CompilerExamples.Test02.baz3 Noll.Set.Test03.moduleBinarySearch) == Noll.Set.Test04.moduleBinarySearch
+  it "" $
+    testResultExpression (Noll.CompilerExamples.Test02.baz3 Noll.Set.Test03.moduleMain) == Noll.Set.Test04.moduleMain
 
 testEnvironment2 :: AliasEnvironment
 testEnvironment2 =
