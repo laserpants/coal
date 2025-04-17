@@ -3,6 +3,7 @@
 -- module Noll.SystemFSpec (spec) where
 module Noll.SystemFSpec where
 
+import Control.Monad.Identity
 import Control.Monad.Reader (runReader)
 import Data.List.NonEmpty ((<|))
 import Lang.Common.List1 (NonEmpty (..))
@@ -10,6 +11,7 @@ import Lang.Label (Label (..))
 import Noll.Compiler.NormalizeObjects (normalizeObject)
 import Noll.Compiler.Transform.Fold
 import Noll.Compiler.Transform.Pattern.Desugaring
+import Noll.Compiler.Transform.Pattern.OrExpansion
 import Noll.Compiler.Transform.Type.AliasInsertion
 import Noll.Language (
   BinaryOperator (..),
@@ -44,6 +46,7 @@ import qualified Noll.Set.Test03
 import qualified Noll.Set.Test04
 import qualified Noll.Set.Test05
 import qualified Noll.Set.Test06
+import qualified Noll.Set.Test07
 
 spec :: Spec
 spec =
@@ -1132,6 +1135,14 @@ story = do
     normalizeObject Noll.Set.Test04.prog1_04 == Noll.Set.Test05.prog1_05
   it "" $
     runPatternDesugaring "v" 0 (desugarPatterns Noll.Set.Test05.moduleBinarySearch) == Noll.Set.Test06.moduleBinarySearch
+  it "" $
+    runIdentity (Noll.Compiler.Transform.Pattern.OrExpansion.compileOrPatterns Noll.Set.Test06.moduleUtils) == Noll.Set.Test07.moduleUtils
+  it "" $
+    runIdentity (Noll.Compiler.Transform.Pattern.OrExpansion.compileOrPatterns Noll.Set.Test06.moduleOrdered) == Noll.Set.Test07.moduleOrdered
+  it "" $
+    runIdentity (Noll.Compiler.Transform.Pattern.OrExpansion.compileOrPatterns Noll.Set.Test06.moduleBinarySearch) == Noll.Set.Test07.moduleBinarySearch
+  it "" $
+    runIdentity (Noll.Compiler.Transform.Pattern.OrExpansion.compileOrPatterns Noll.Set.Test06.moduleMain) == Noll.Set.Test07.moduleMain
 
 testEnvironment2 :: AliasEnvironment
 testEnvironment2 =
