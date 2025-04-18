@@ -1186,3 +1186,5 @@ story = do
   --    pure True -- TODO : Translate record patterns to select operator
   it "" $
     runMatchMonad "match" 0 (compileMatchExprs Noll.Set.Test08.prog1_08) == Noll.Set.Test09.prog1_09
+  --  it "" $
+  --    pure True -- TODO : Dictionary insertion
