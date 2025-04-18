@@ -3,16 +3,16 @@
 -- module Noll.SystemFSpec (spec) where
 module Noll.SystemFSpec where
 
-import Noll.Compiler.PatternMatching
-import Noll.Compiler.PatternMatching.Envelope
-import Noll.Compiler.PatternMatching.Equation
-import Noll.Compiler.PatternMatching.Rule
 import Control.Monad.Identity
 import Control.Monad.Reader (runReader)
 import Data.List.NonEmpty ((<|))
 import Lang.Common.List1 (NonEmpty (..))
 import Lang.Label (Label (..))
 import Noll.Compiler.NormalizeObjects (normalizeObject)
+import Noll.Compiler.PatternMatching
+import Noll.Compiler.PatternMatching.Envelope
+import Noll.Compiler.PatternMatching.Equation
+import Noll.Compiler.PatternMatching.Rule
 import Noll.Compiler.Transform.Fold
 import Noll.Compiler.Transform.Pattern.Desugaring
 import Noll.Compiler.Transform.Pattern.OrExpansion
@@ -52,6 +52,7 @@ import qualified Noll.Set.Test05
 import qualified Noll.Set.Test06
 import qualified Noll.Set.Test07
 import qualified Noll.Set.Test08
+import qualified Noll.Set.Test09
 
 spec :: Spec
 spec =
@@ -1181,5 +1182,8 @@ story = do
     runIdentity (Noll.Compiler.Transform.Pattern.OrExpansion.compileOrPatterns Noll.Set.Test06.moduleBinarySearch) == Noll.Set.Test07.moduleBinarySearch
   it "" $
     runIdentity (Noll.Compiler.Transform.Pattern.OrExpansion.compileOrPatterns Noll.Set.Test06.moduleMain) == Noll.Set.Test07.moduleMain
+--  it "" $
+--    pure True -- TODO : Translate record patterns to select operator
   it "" $
-    runMatchMonad "match" 0 (compileMatchExprs Noll.Set.Test07.prog1_07) == Noll.Set.Test08.prog1_08
+    runMatchMonad "match" 0 (compileMatchExprs Noll.Set.Test08.prog1_08) == Noll.Set.Test09.prog1_09
+

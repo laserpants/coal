@@ -104,13 +104,17 @@ translatePattern =
       error "TODO"
     PRecord{} ->
       error "TODO"
-    PListCons{} ->
-      error "TODO"
-    PListLiteral{} ->
-      error "TODO"
+    PListCons a t p1 p2 ->
+      translatePattern (PConstructor a (Label t "$Cons") [p1, p2])
+    PListLiteral a t ps ->
+      translatePattern (translateListLiteral a t ps)
     POr{} ->
       error "TODO"
     PShorthand{} ->
       error "TODO"
     PAtVariable{} ->
       error "TODO"
+
+translateListLiteral :: (MatchClasses a t) => a -> t -> [Pattern a t] -> Pattern a t
+translateListLiteral a t [] = PConstructor a (Label t "$Nil") []
+translateListLiteral a t (p : ps) = PConstructor a (Label t "$Cons") [p, translateListLiteral a t ps]

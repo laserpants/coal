@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Set.Test08 where
+module Noll.Set.Test09 where
 
 import Lang.Common.List1 (NonEmpty (..), (<|))
 import Lang.Label (Label (..))
@@ -11,9 +11,9 @@ import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import qualified Noll.Module as Module
 
--- Translate record patterns to select operator
-prog1_08 :: [Module () Kind IndexedType]
-prog1_08 =
+-- Compile match statements
+prog1_09 :: [Module () Kind IndexedType]
+prog1_09 =
   [ moduleUtils
   , moduleOrdered
 --  , moduleBinarySearch
