@@ -1182,8 +1182,7 @@ story = do
     runIdentity (Noll.Compiler.Transform.Pattern.OrExpansion.compileOrPatterns Noll.Set.Test06.moduleBinarySearch) == Noll.Set.Test07.moduleBinarySearch
   it "" $
     runIdentity (Noll.Compiler.Transform.Pattern.OrExpansion.compileOrPatterns Noll.Set.Test06.moduleMain) == Noll.Set.Test07.moduleMain
---  it "" $
---    pure True -- TODO : Translate record patterns to select operator
+  --  it "" $
+  --    pure True -- TODO : Translate record patterns to select operator
   it "" $
     runMatchMonad "match" 0 (compileMatchExprs Noll.Set.Test08.prog1_08) == Noll.Set.Test09.prog1_09
-

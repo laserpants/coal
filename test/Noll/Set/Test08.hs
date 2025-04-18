@@ -16,8 +16,8 @@ prog1_08 :: [Module () Kind IndexedType]
 prog1_08 =
   [ moduleUtils
   , moduleOrdered
---  , moduleBinarySearch
---  , moduleMain
+  , moduleBinarySearch
+  , moduleMain
   ]
 
 moduleUtils :: Module () Kind IndexedType
