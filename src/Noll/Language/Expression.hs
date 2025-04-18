@@ -39,6 +39,7 @@ instance (Ord t, Data a, Data t) => FreeVars (Clause a t) t where
 
 data CompiledClause a t
   = ECompiledClause (List1 (Label t)) (Expression a t)
+  -- TODO: remove ?
   | ECompiledField Name (Label t) (Label t) (Expression a t)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
 
