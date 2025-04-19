@@ -85,7 +85,7 @@ data Expression a t
     EFold a t (List1 (Expression a t)) (List1 (Clause a t)) (Maybe (Expression a t))
   | -- | Record field access selector
     ESelect a (Label t) (Expression a t)
-  | -- | Dictionary lambda function expression
+  | -- | Dictionary lambda function
     EDictionaryLambda a (List1 (Trait t)) (Expression a t)
   | -- | Dictionary application
     EDictionaryApplication a t (Expression a t) (List1 (Trait t)) [Expression a t]
