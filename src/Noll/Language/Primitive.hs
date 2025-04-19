@@ -17,6 +17,8 @@ data Primitive
     LInt32 Int32
   | -- | 64-bit integers
     LInt64 Int64
+  | -- | Arbitrary precision integers
+    LBignum Integer
   | -- | Single-precision floating point numbers
     LFloat Float
   | -- | Double-precision floating point numbers
