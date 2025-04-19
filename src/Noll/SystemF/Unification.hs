@@ -20,19 +20,8 @@ import Data.List.NonEmpty (NonEmpty, (<|))
 import Data.Set (member)
 import Lang.Common.Supply (supplied)
 import Lang.Utils (foldrM, (<$$>))
-import Noll.Language (
-  IndexedType,
-  Intrinsic (..),
-  Kind (..),
-  Row (..),
-  Type (..),
-  TypeIndex (..),
-  extractField,
-  kindOf,
-  typeIdsIn,
-  updateTail,
- )
-import Noll.SystemF.Substitution (Substitutable (..), Substitution (..), mapsTo)
+import Noll.Language
+import Noll.SystemF.Substitution (Substitutable (..), Substitution (..), mapsTo, merge)
 
 import qualified Data.List.NonEmpty as NonEmpty
 
@@ -55,25 +44,37 @@ evalUnifier = fst <$$> runUnifier
 
 data UnificationError
   = CannotUnify
+  | CannotMatch
   | InfiniteType
-  | CannotUnifyKinds
+  | KindMismatch
   deriving (Show, Eq, Ord, Read)
 
 class Unifiable u where
   unify :: u -> u -> Unifier Substitution
+  match :: u -> u -> Unifier Substitution
 
 instance (Substitutable u, Data u, Unifiable u) => Unifiable [u] where
   unify [] [] =
     pure mempty
-  unify (u1 : us1) (u2 : us2) = do
-    sub1 <- unify u1 u2
-    sub2 <- unify (apply sub1 us1) (apply sub1 us2)
+  unify (t1 : ts1) (t2 : ts2) = do
+    sub1 <- unify t1 t2
+    sub2 <- unify (apply sub1 ts1) (apply sub1 ts2)
     pure (sub2 <> sub1)
   unify _ _ =
     error "Implementation error"
 
+  match [] [] =
+    pure mempty
+  match (t1 : ts1) (t2 : ts2) = do
+    sub1 <- match t1 t2
+    sub2 <- match ts1 ts2
+    maybe (throwError CannotMatch) pure (merge sub1 sub2)
+  match _ _ =
+    error "Implementation error"
+
 instance (Substitutable u, Unifiable u, Data u) => Unifiable (NonEmpty u) where
-  unify u1 u2 = unify (NonEmpty.toList u1) (NonEmpty.toList u2)
+  unify t1 t2 = unify (NonEmpty.toList t1) (NonEmpty.toList t2)
+  match t1 t2 = match (NonEmpty.toList t1) (NonEmpty.toList t2)
 
 instance Unifiable (Intrinsic IndexedType) where
   unify (IList t1) (IList t2) =
@@ -91,6 +92,22 @@ instance Unifiable (Intrinsic IndexedType) where
         pure mempty
   unify _ _ =
     throwError CannotUnify
+
+  match (IList t1) (IList t2) =
+    match t1 t2
+  match (IOption t1) (IOption t2) =
+    match t1 t2
+  match (IRecord t1) (IRecord t2) =
+    match t1 t2
+  match (IResult t1) (IResult t2) =
+    match t1 t2
+  match (ITuple ts1) (ITuple ts2) =
+    match ts1 ts2
+  match t1 t2
+    | t1 == t2 =
+        pure mempty
+  match _ _ =
+    throwError CannotMatch
 
 instance Unifiable (Row TypeIndex Kind IndexedType) where
   unify RNil RNil =
@@ -117,6 +134,29 @@ instance Unifiable (Row TypeIndex Kind IndexedType) where
   unify _ _ =
     throwError CannotUnify
 
+  match RNil RNil =
+    pure mempty
+  match (RVariable (TypeIndex _ t)) row2 =
+    pure (t `mapsTo` TRow row2)
+  match row1@(RExtend name _ _) row2@(RExtend _ _ q1) =
+    error "Not implemented"
+    --case extractField name row1 of
+    --  Just (t1, r1) ->
+    --    case extractField name row2 of
+    --      Just (t2, r2) -> do
+    --        sub1 <- match r1 r2
+    --        sub2 <- match t1 t2
+    --        maybe (throwError CannotMatch) pure (merge sub1 sub2)
+    --      Nothing -> do
+    --        r2 <- freshRow
+    --        sub1 <- match q1 (RExtend name t1 r2)
+    --        sub2 <- match r1 (updateRowTail r2 row2)
+    --        maybe (throwError CannotMatch) pure (merge sub1 sub2)
+    --  Nothing ->
+    --    error "Implementation error"
+  match _ _ =
+    throwError CannotMatch
+
 instance Unifiable IndexedType where
   unify (TAlias _ _ t1) t2 =
     unify t1 t2
@@ -140,19 +180,39 @@ instance Unifiable IndexedType where
   unify _ _ =
     throwError CannotUnify
 
+  match (TAlias _ _ t1) t2 =
+    match t1 t2
+  match t1 (TAlias _ _ t2) =
+    match t1 t2
+  match (TVariable (TypeIndex _ t)) t2 =
+    pure (t `mapsTo` t2)
+  match (TArrow t1 u1) (TArrow t2 u2) =
+    match [t1, u1] [t2, u2]
+  match (TApplication _ t1 ts1) (TApplication _ t2 ts2) = do
+    match (t1 : NonEmpty.toList ts1) (t2 : NonEmpty.toList ts2)
+  match (TRow r1) (TRow r2) =
+    match r1 r2
+  match (TConstructor _ c1) (TConstructor _ c2)
+    | c1 == c2 =
+        pure mempty
+  match (TIntrinsic t1) (TIntrinsic t2) =
+    match t1 t2
+  match _ _ =
+    throwError CannotMatch
+
 bindType :: TypeIndex Kind -> IndexedType -> Unifier Substitution
 bindType (TypeIndex k1 ix1) =
   \case
     TVariable (TypeIndex k2 ix2)
       | ix1 == ix2 ->
           if k1 /= k2
-            then throwError CannotUnifyKinds
+            then throwError KindMismatch
             else pure mempty
     t
       | ix1 `member` typeIdsIn t ->
           throwError InfiniteType
       | k1 /= kindOf t ->
-          throwError CannotUnifyKinds
+          throwError KindMismatch
       | otherwise ->
           pure (ix1 `mapsTo` t)
 

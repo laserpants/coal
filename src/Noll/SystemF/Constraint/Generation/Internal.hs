@@ -49,7 +49,7 @@ import qualified Data.Set as Set
 
 data TypeAnnotationError a
   = -- Kind error
-    KindMismatch a
+    KindError a
   | -- | Type constructor is not in scope
     NoTypeConstructor a Name
   | -- | Two or more named parameters refer to the same inferred type variable.

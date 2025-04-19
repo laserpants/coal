@@ -112,7 +112,7 @@ typeIndex k name = do
       pure index
     Just (TypeIndex k1 _)
       | k1 /= k ->
-          throwError KindMismatch
+          throwError KindError
     Just{} ->
       pure index
 

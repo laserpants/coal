@@ -11,10 +11,13 @@ module Noll.SystemF.Substitution (
   fromList,
   normalizeTypeIndexes,
   applyT,
+  merge,
 ) where
 
+import Data.Map.Strict (Map, keysSet, union)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transform, transformBi)
+import Data.Set (Set, intersection)
 import Data.List.NonEmpty (NonEmpty)
 import Lang.Utils (IndexMap, Map, Set, fromMaybe)
 import Noll.Language (
@@ -173,3 +176,11 @@ normalizeTypeIndexes a = apply (fromList sub) a
   sub = do
     (n, TypeIndex k t) <- zip [0 ..] (Set.toList (typeIndexesIn a))
     pure (t, TVariable (TypeIndex k n))
+
+merge :: Substitution -> Substitution -> Maybe Substitution
+merge (Substitution m1) (Substitution m2)
+  | restricted m1 == restricted m2 = Just (Substitution (m1 `union` m2))
+  | otherwise = Nothing
+ where
+  restricted = (`Map.restrictKeys` keys)
+  keys = keysSet m1 `intersection` keysSet m2

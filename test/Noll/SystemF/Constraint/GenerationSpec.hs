@@ -68,7 +68,7 @@ spec =
               )
       describe "Kind mismatch" $ do
         it "f -> f(a)" $
-          testInstantiateAnnotation fixture12 == Left (KindMismatch ())
+          testInstantiateAnnotation fixture12 == Left (KindError ())
 
 -- typeConstraintsInclude :: forall a. (Show a, Eq a) => Expression a Int -> TypeConstraint (TypeRule () a) TypeIndex () (Type TypeIndex ()) -> Bool
 typeConstraintsInclude e r =

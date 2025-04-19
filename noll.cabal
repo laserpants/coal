@@ -34,6 +34,7 @@ library
       Noll.Compiler.PatternMatching.Envelope
       Noll.Compiler.PatternMatching.Equation
       Noll.Compiler.PatternMatching.Rule
+      Noll.Compiler.TraitTransform
       Noll.Compiler.Transform
       Noll.Compiler.Transform.Fold
       Noll.Compiler.Transform.Pattern.Desugaring
