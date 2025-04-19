@@ -13,7 +13,7 @@ module Noll.Language.Type (
   Parameter (..),
   HasActive (..),
   IndexedType,
-  OpaqueType,
+--  OpaqueType,
   foldType,
   activeIdsIn,
   normalizeRowTypes,
@@ -63,7 +63,7 @@ data Parameter k = Parameter
 
 type IndexedType = Type TypeIndex Kind
 
-type OpaqueType = Type TypeIndex ()
+--type OpaqueType = Type TypeIndex ()
 
 instance Supply (TypeIndex k) where
   updateSupply f (TypeIndex k t) = TypeIndex k (f t)

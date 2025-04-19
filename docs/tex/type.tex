@@ -1,0 +1,20 @@
+\documentclass[varwidth]{standalone}
+\usepackage{amsmath}
+\usepackage{xcolor} 
+\begin{document}
+\setlength{\fboxsep}{10pt}
+\colorbox{white}{
+  $\displaystyle
+  \begin{array}{rcll}
+%    \tau & ::= & T_{\mathsf{Constructor}}(\mathsf{name}, [\tau_1, \dots, \tau_n]), n \ge 0 \\
+    \tau & ::= & T_{\mathsf{Application}}(k, \tau_0, [\tau_1, \dots, \tau_n]), n \ge 1 \\
+         & |   & T_{\mathsf{Arrow}}(\tau_1, \tau_2) \\
+         & |   & T_{\mathsf{Constructor}} \\
+         & |   & T_{\mathsf{Intrinsic}} \\
+         & |   & T_{\mathsf{Row}} \\
+         & |   & T_{\mathsf{Variable}} \\
+         & |   & T_{\mathsf{Alias}} \\
+  \end{array}
+  $
+}
+\end{document}

@@ -15,6 +15,8 @@ Noll supports the following language primitives.
 
 ### Type system
 
+![Type system](./type.png "Type system")
+
 ### Expression grammar
 
 #### Labels
