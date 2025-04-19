@@ -6,7 +6,7 @@
 
 module Noll.SystemF.Unification (
   Unifier (..),
-  Unifiable (unify),
+  Unifiable (unify, match),
   UnificationError (..),
   unifyAll,
   runUnifier,
