@@ -3,6 +3,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
 
 module Noll.Compiler where
@@ -34,6 +35,7 @@ import Control.Monad.State (MonadState, StateT, gets, modify, put, runState, run
 import Control.Monad.Writer (execWriter)
 import Data.Data (Data)
 import Data.Either.Extra (partitionEithers)
+import Debug.Trace
 import Lang.Common.Environment (Environment (..))
 import Lang.Common.List1 (NonEmpty ((:|)))
 import Lang.Common.Supply (Supply (..), supplied)
@@ -473,17 +475,7 @@ typeCheckDefinitionC d = do
 --  [Definition a k IndexedType] ->
 --  CompilerT a m ([Definition a Kind IndexedType], [CompilerAssumption])
 typeCheckDefinitionsC ds = do
-  forM_ ds $ \d -> do
-    case d of
-      -- TODO
-      DImport{} -> pure ()
-      DTrait{} -> pure ()
-      DTypeAlias{} -> pure ()
-      DType{} -> pure ()
-      _ -> do
-        compileDefinitionC2 d
-        sub <- solveC2
-        defineC (definitionName d) (typeOf (apply sub d))
+  forM_ ds typeCheckDefinition
   sub <- gets compilerSubstitution
   ams <- gets compilerAssumptions
   Environment env <- gets compilerNameEnvironment
@@ -493,6 +485,26 @@ typeCheckDefinitionsC ds = do
     [Explicit (InferenceRule 200) (apply sub t) s | n1 == n2]
   sub <- solveC2
   pure (fmap (fmap normalizeRowTypes) (apply sub ds), apply sub ams)
+
+typeCheckDefinition d =
+  case d of
+    DImport{} ->
+      pure ()
+    DTrait{} ->
+      pure ()
+    DTypeAlias{} ->
+      pure ()
+    DType{} ->
+      pure ()
+    DSignature{} ->
+      pure ()
+    DInstance name t ds ->
+      forM_ ds typeCheckDefinition
+    _ -> do
+      compileDefinitionC2 d
+      sub <- solveC2
+      traceShowM (definitionName d, typeOf (apply sub d) :: Type TypeIndex Kind)
+      defineC (definitionName d) (typeOf (apply sub d))
 
 defineC :: (Monad m) => Name -> IndexedType -> CompilerT a m ()
 defineC name t = insertNameC name (Forall (typeIndexesIn s) [] s)

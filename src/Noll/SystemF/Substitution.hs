@@ -14,11 +14,11 @@ module Noll.SystemF.Substitution (
   merge,
 ) where
 
-import Data.Map.Strict (Map, keysSet, union)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transform, transformBi)
-import Data.Set (Set, intersection)
 import Data.List.NonEmpty (NonEmpty)
+import Data.Map.Strict (Map, keysSet, union)
+import Data.Set (Set, intersection)
 import Lang.Utils (IndexMap, Map, Set, fromMaybe)
 import Noll.Language (
   Binding (..),

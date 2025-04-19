@@ -4,25 +4,24 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
-{-# LANGUAGE OverloadedStrings #-}
 
 module Noll.Compiler.TraitTransform where
 
-import Noll.SystemF.Substitution
-import Data.Foldable (foldrM)
-import Lang.Label (Label (..))
-import Data.List (nub)
-import Lang.Common.List1 (NonEmpty ((:|)))
-import Noll.Language
 import Control.Monad.Reader
 import Control.Monad.State
-import Lang.Common.Environment (Environment)
 import Control.Monad.Writer
-import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
+import Data.Foldable (foldrM)
+import Data.List (nub)
+import Lang.Common.Environment (Environment)
+import Lang.Common.List1 (NonEmpty ((:|)))
+import Lang.Label (Label (..))
 import Lang.Utils (Name)
+import Noll.Language
+import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
+import Noll.SystemF.Substitution
 
-import qualified Data.Text as Text
 import qualified Data.List.NonEmpty as NonEmpty
+import qualified Data.Text as Text
 import qualified Lang.Common.Environment as Environment
 
 borkZ ::
@@ -86,6 +85,7 @@ transformZ =
       ELambda a ps <$> transformZ e
     EApplication a t e1 es ->
       EApplication a t <$> transformZ e1 <*> traverse transformZ es
+
 --    EDictionaryApplication t e1 ts es e2 -> do
 --      -- tell (NonEmpty.toList ts)
 --      EDictionaryApplication t
@@ -120,11 +120,11 @@ transformZ =
 --    ESelect t name e ->
 --      ESelect t name <$> transformZ e
 --    EListCons t e1 e2 ->
---      EListCons t 
+--      EListCons t
 --        <$> transformZ e1
 --        <*> transformZ e2
 ----    EBlock es ->
-----      EBlock <$> traverse transformZ es 
+----      EBlock <$> traverse transformZ es
 --    expr ->
 --      error (show expr) -- pure expr
 --      -- pure expr
@@ -184,6 +184,7 @@ collectTraits u name = do
  where
   instantiate (TypeIndex k index) acc = do
     undefined
+
 --    var <- (TVariable <$$> TypeIndex) k <$> fresh
 --    pure (index `mapsTo` var <> acc)
 
@@ -193,4 +194,3 @@ tryMatch ::
   Type TypeIndex Kind ->
   m (Either e Substitution)
 tryMatch t u = undefined -- runMatch <$> fresh <*> pure (match t u)
-

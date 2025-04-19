@@ -74,16 +74,16 @@ instance OrPattern (Pattern a t) where
         pure (PListLiteral a t qs1 :| [PListLiteral a t qs | qs <- qss])
       q@(PListCons a t p1 p2) -> do
         pure (List1.singleton q)
-        -- TODO
-        --q1 :| qs1 <- expandOrPatterns p1
-        --q2 :| qs2 <- expandOrPatterns p2
-        --error "TODO"
+      -- TODO
+      -- q1 :| qs1 <- expandOrPatterns p1
+      -- q2 :| qs2 <- expandOrPatterns p2
+      -- error "TODO"
       q@(PRecord a t d p) -> do
         pure (List1.singleton q)
-        -- TODO
-        --d1 :| ds <- expandOrPatterns d
-        --q1 :| qs <- expandOrPatterns p
-        --error "TODO"
+      -- TODO
+      -- d1 :| ds <- expandOrPatterns d
+      -- q1 :| qs <- expandOrPatterns p
+      -- error "TODO"
       p@PAny{} ->
         pure (List1.singleton p)
       p@PVariable{} ->

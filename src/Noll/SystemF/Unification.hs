@@ -147,10 +147,10 @@ instance Unifiable (Row TypeIndex Kind IndexedType) where
             maybe (throwError CannotMatch) pure (merge sub1 sub2)
           Nothing -> do
             error "Not implemented"
-            -- r2 <- freshRow
-            -- sub1 <- match q1 (RExtend name t1 r2)
-            -- sub2 <- match r1 (updateRowTail r2 row2)
-            -- maybe (throwError CannotMatch) pure (merge sub1 sub2)
+      -- r2 <- freshRow
+      -- sub1 <- match q1 (RExtend name t1 r2)
+      -- sub2 <- match r1 (updateRowTail r2 row2)
+      -- maybe (throwError CannotMatch) pure (merge sub1 sub2)
       Nothing ->
         error "Implementation error"
   match _ _ =
