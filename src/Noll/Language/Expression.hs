@@ -16,7 +16,7 @@ import Data.Generics.Uniplate.Data (universeBi)
 import Lang.Common.List1 (List1, NonEmpty ((:|)))
 import Lang.FreeVars (BoundVars (..), FreeVars (..), exceptNames)
 import Lang.Label (Label (..))
-import Lang.Utils (Dictionary, Name)
+import Lang.Utils (Dictionary)
 import Noll.Language.Expression.Binding (Binding (..))
 import Noll.Language.Expression.Choice (Choice (..))
 import Noll.Language.Expression.Operator.Binary (BinaryOperator)
@@ -37,10 +37,7 @@ instance (Ord t, Data a, Data t) => FreeVars (Clause a t) t where
       EClause _ p cs ->
         freeIn cs `exceptNames` boundIn p
 
-data CompiledClause a t
-  = ECompiledClause (List1 (Label t)) (Expression a t)
-  | -- TODO: remove ?
-    ECompiledField Name (Label t) (Label t) (Expression a t)
+data CompiledClause a t = ECompiledClause (List1 (Label t)) (Expression a t)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
 
 instance (Ord t, Data a, Data t) => FreeVars (CompiledClause a t) t where
@@ -48,8 +45,6 @@ instance (Ord t, Data a, Data t) => FreeVars (CompiledClause a t) t where
     \case
       ECompiledClause (_ :| lls) e ->
         freeIn e `exceptNames` boundIn lls
-      ECompiledField{} ->
-        error "TODO"
 
 data Expression a t
   = -- | Type-annotated expression
