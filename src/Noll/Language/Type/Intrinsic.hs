@@ -14,6 +14,7 @@ data Intrinsic t
   | IFloat
   | IInt32
   | IInt64
+  | IBignum
   | IList t
   | INat
   | IOption t
