@@ -98,8 +98,6 @@ evalExpr =
         \case
           ECompiledClause ls e ->
             matchClause (fromList1 (labelName <$> ls)) [v1] e
-          ECompiledField{} ->
-            error "TODO"
       pure $ fromMaybe VFail (find (/= VFail) vs)
     EIf _ _ e1 e2 e3 -> do
       v1 <- evalExpr e1
