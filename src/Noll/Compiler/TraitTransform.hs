@@ -55,6 +55,8 @@ transformZ ::
   m (Expression a (Type TypeIndex Kind))
 transformZ =
   \case
+    ERecursiveLet a p e1 e2 ->
+      transformZ (ELet a (BPattern a p e1 :| []) e2)
     ELet a bs e -> do
       (as, traits) <- runWriterT (traverse transformBindingZ bs)
       let (ds, es) = NonEmpty.unzip as
@@ -72,7 +74,8 @@ transformZ =
         tr : trs -> do
           -- index <- fresh
           tell (filter parameterized traits)
-          pure (EDictionaryApplication a t var (tr :| trs) (NonEmpty.toList es))
+          ds <- traverse transformZ es
+          pure (EDictionaryApplication a t var (tr :| trs) (NonEmpty.toList ds))
     expr@(EVariable a ll@(Label t name)) -> do
       traits <- collectTraits t name
       case traits of

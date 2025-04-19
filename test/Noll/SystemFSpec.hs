@@ -13,6 +13,7 @@ import Noll.Compiler.PatternMatching
 import Noll.Compiler.PatternMatching.Envelope
 import Noll.Compiler.PatternMatching.Equation
 import Noll.Compiler.PatternMatching.Rule
+import Noll.Compiler.TraitTransformSpec
 import Noll.Compiler.Transform.Fold
 import Noll.Compiler.Transform.Pattern.Desugaring
 import Noll.Compiler.Transform.Pattern.OrExpansion
@@ -1186,6 +1187,16 @@ story = do
   --    pure True -- TODO : Translate record patterns to select operator
   it "" $
     runMatchMonad "match" 0 (compileMatchExprs Noll.Set.Test08.prog1_08) == Noll.Set.Test09.prog1_09
+  it "" $
+    result funLte == funLte2
+  it "" $
+    result funGt == funGt2
+  it "" $
+    result funInRange == funInRange2
+  it "" $
+    result funFromList == funFromList2
+  it "" $
+    result funSort == funSort2
 
 --  it "" $
 --    pure True -- TODO : Dictionary insertion
