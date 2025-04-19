@@ -139,21 +139,21 @@ instance Unifiable (Row TypeIndex Kind IndexedType) where
   match (RVariable (TypeIndex _ t)) row2 =
     pure (t `mapsTo` TRow row2)
   match row1@(RExtend name _ _) row2@(RExtend _ _ q1) =
-    error "Not implemented"
-    --case extractField name row1 of
-    --  Just (t1, r1) ->
-    --    case extractField name row2 of
-    --      Just (t2, r2) -> do
-    --        sub1 <- match r1 r2
-    --        sub2 <- match t1 t2
-    --        maybe (throwError CannotMatch) pure (merge sub1 sub2)
-    --      Nothing -> do
-    --        r2 <- freshRow
-    --        sub1 <- match q1 (RExtend name t1 r2)
-    --        sub2 <- match r1 (updateRowTail r2 row2)
-    --        maybe (throwError CannotMatch) pure (merge sub1 sub2)
-    --  Nothing ->
-    --    error "Implementation error"
+    case extractField name row1 of
+      Just (t1, r1) ->
+        case extractField name row2 of
+          Just (t2, r2) -> do
+            sub1 <- match r1 r2
+            sub2 <- match t1 t2
+            maybe (throwError CannotMatch) pure (merge sub1 sub2)
+          Nothing -> do
+            error "Not implemented"
+            -- r2 <- freshRow
+            -- sub1 <- match q1 (RExtend name t1 r2)
+            -- sub2 <- match r1 (updateRowTail r2 row2)
+            -- maybe (throwError CannotMatch) pure (merge sub1 sub2)
+      Nothing ->
+        error "Implementation error"
   match _ _ =
     throwError CannotMatch
 
