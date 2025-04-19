@@ -28,24 +28,6 @@ import Noll.Language.Type (Parameter (..), Type)
 
 import qualified Data.Set as Set
 
-data Clause a t = EClause a (Pattern a t) (List1 (Choice Expression a t))
-  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
-
-instance (Ord t, Data a, Data t) => FreeVars (Clause a t) t where
-  freeIn =
-    \case
-      EClause _ p cs ->
-        freeIn cs `exceptNames` boundIn p
-
-data CompiledClause a t = ECompiledClause (List1 (Label t)) (Expression a t)
-  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
-
-instance (Ord t, Data a, Data t) => FreeVars (CompiledClause a t) t where
-  freeIn =
-    \case
-      ECompiledClause (_ :| lls) e ->
-        freeIn e `exceptNames` boundIn lls
-
 data Expression a t
   = -- | Type-annotated expression
     EAnnotation a (Type Parameter ()) (Expression a t)
@@ -108,3 +90,21 @@ instance (Ord t, Data a, Data t) => FreeVars (Expression a t) t where
         freeIn e <> freeIn cs
       e ->
         Set.fromList (universeBi e)
+
+data Clause a t = EClause a (Pattern a t) (List1 (Choice Expression a t))
+  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
+
+instance (Ord t, Data a, Data t) => FreeVars (Clause a t) t where
+  freeIn =
+    \case
+      EClause _ p cs ->
+        freeIn cs `exceptNames` boundIn p
+
+data CompiledClause a t = ECompiledClause (List1 (Label t)) (Expression a t)
+  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
+
+instance (Ord t, Data a, Data t) => FreeVars (CompiledClause a t) t where
+  freeIn =
+    \case
+      ECompiledClause (_ :| lls) e ->
+        freeIn e `exceptNames` boundIn lls
