@@ -50,8 +50,7 @@ data UnificationError
   deriving (Show, Eq, Ord, Read)
 
 class Unifiable u where
-  unify :: u -> u -> Unifier Substitution
-  match :: u -> u -> Unifier Substitution
+  unify, match :: u -> u -> Unifier Substitution
 
 instance (Substitutable u, Data u, Unifiable u) => Unifiable [u] where
   unify [] [] =
