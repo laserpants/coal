@@ -69,8 +69,6 @@ instance TreeTransform CompiledClause t where
             ECompiledClause lls <$> transform name f e
         | otherwise ->
             pure (ECompiledClause lls e)
-      ECompiledField{} ->
-        error "TODO"
 
 instance TreeTransform Expression t where
   transform name f =
