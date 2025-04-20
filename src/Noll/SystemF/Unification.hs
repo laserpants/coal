@@ -188,7 +188,7 @@ instance Unifiable IndexedType where
   match (TArrow t1 u1) (TArrow t2 u2) =
     match [t1, u1] [t2, u2]
   match (TApplication _ t1 ts1) (TApplication _ t2 ts2) = do
-    match (t1 : NonEmpty.toList ts1) (t2 : NonEmpty.toList ts2)
+    match (t1 <| ts1) (t2 <| ts2)
   match (TRow r1) (TRow r2) =
     match r1 r2
   match (TConstructor _ c1) (TConstructor _ c2)
