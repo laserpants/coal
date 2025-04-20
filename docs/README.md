@@ -2,6 +2,17 @@
 
 ## Synopsis
 
+```
+   --------------------     -------------     -------------     -----------------
+   | Surface language | --> |  Lowpass  | --> |  LLVM IR  | --> |  Object code  |
+   --------------------     -------------     -------------     -----------------
+
+   - Parsing
+   - Type checking/inference
+   - Syntax analysis
+   - Desugaring
+```
+
 ## Language overview
 
 ### Language primitives
@@ -16,6 +27,8 @@ Noll supports the following language primitives.
 ### Type system
 
 ![Type system](./type.png "Type system")
+
+![Intrinsic types](./intrinsics.png "Intrinsic types")
 
 ### Expression grammar
 

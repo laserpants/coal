@@ -22,22 +22,8 @@ import Lang.Utils (
   forM_,
   (<$$>),
  )
-import Noll.Language (
-  IndexedType,
-  Kind (..),
-  Parameter (..),
-  Row (..),
-  Type (..),
-  TypeIndex (..),
-  foldKind,
-  kindOf,
- )
-import Noll.SystemF.Constraint.Generation.Internal (
-  ConstraintsGenContext (..),
-  ConstraintsGenState (..),
-  TypeAnnotationError (..),
-  overConstraintsGenStateTypeIndexes,
- )
+import Noll.Language
+import Noll.SystemF.Constraint.Generation.Internal 
 import Noll.SystemF.Substitution (Substitution (..))
 import Noll.Utils (lexOrderRank)
 

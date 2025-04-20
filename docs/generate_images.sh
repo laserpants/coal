@@ -7,12 +7,12 @@ process_image () {
     DVI_FILE="$TMP_DIR/$1.dvi"
     latex -output-directory="tmp" $TEX_FILE
     dvipng -T tight -D 300 -bg White -o "$2" $DVI_FILE
-    magick "$2" -resize 450x450 "$2"
+    magick "$2" -resize 50% "$2"
 }
 
 mkdir -p tmp
-# process_image "expr_grammar" "./expr_grammar.png"
 process_image "type" "./type.png"
+process_image "intrinsics" "./intrinsics.png"
 
 # pdflatex -output-directory="$TMP_DIR" "tex/overview.tex"
 # magick -density 600 "$TMP_DIR/overview.pdf" -trim -background white -alpha remove -bordercolor White -border 40 "./overview.png"
