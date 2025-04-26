@@ -7,6 +7,7 @@ module Noll.Ast.HasType (HasType (..), foldTypeOf) where
 
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (universeBi)
+import Lang.Label (Label (..))
 import Noll.Language.Expression (Expression (..))
 import Noll.Language.Expression.Choice (Guard (..))
 import Noll.Language.Pattern (Pattern (..))
@@ -55,6 +56,10 @@ instance (Data a, Data k, Data (o k), Typeable o) => HasType o k (Pattern a (Typ
 instance (Data a, Data k, Data (o k), Typeable o) => HasType o k (Guard Expression a (Type o k)) where
   typeOf = head . universeBi
 
+instance (HasType o k t) => HasType o k (Label t) where
+  typeOf (Label t _) =
+    typeOf t
+
 instance (Data a, Data k, Data (o k), Typeable o) => HasType o k (Expression a (Type o k)) where
   typeOf =
     \case
@@ -63,6 +68,10 @@ instance (Data a, Data k, Data (o k), Typeable o) => HasType o k (Expression a (
       ELambda _ ts t ->
         foldTypeOf t ts
       ELet _ _ t ->
+        typeOf t
+      EFocus _ _ _ _ t ->
+        typeOf t
+      ESelect _ t _ ->
         typeOf t
       e ->
         head (universeBi e)
