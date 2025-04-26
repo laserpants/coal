@@ -74,11 +74,7 @@ instance (Data a, Monoid a, Show a) => RecordPattern a (Clause a (Type TypeIndex
   expandRecordPatterns =
     \case
       EClause a p cs -> do
-        -- let zz = p :: Int
         (q, ys :: [(Name, Dictionary (TypedPattern a), Maybe (TypedPattern a))]) <- runWriterT (expandRecordPatterns p)
-        -- traceShowM "****************"
-        -- traceShowM y
-        -- EClause a x <$> expandRecordPatterns cs
         ds <- forM cs $
           \case
             CPlain a gs e -> do
@@ -95,56 +91,17 @@ zork ::
   Expression a (Type TypeIndex Kind) ->
   m (Expression a (Type TypeIndex Kind))
 zork (name, d, mp) e = do
-  --  traceShowM "<<<<<<<<<<<<<"
-  --  traceShowM "<<<<<<<<<<<<<"
-  --  traceShowM "<<<<<<<<<<<<<"
   names <- replicateM (length zz - 1) suppliedName
-  -- traceShowM (zip zz (reverse names))
-  --  traceShowM (zip zz ((name : names)))
-  --  traceShowM "<<<<<<<<<<<<<"
-  --  traceShowM "<<<<<<<<<<<<<"
-  --  traceShowM "<<<<<<<<<<<<<"
-
-  -- [ (("max",PVariable () (Label {labelTag = TVariable (TypeIndex {typeIndexKind = KType, typeIndexId = 0}), labelName = "max"})),"$baz.2")
-  -- , (("min",PVariable () (Label {labelTag = TVariable (TypeIndex {typeIndexKind = KType, typeIndexId = 0}), labelName = "min"})),"$baz.3")
-  -- ]
-
-  --  traceShowM "**************"
-  --  traceShowM tttr
-  --  traceShowM "**************"
-
-  -- aa <- foldrM tork (name, e) zz
   (_, _, aa) <- foldrM tork ("_", RNil, e) (zip zz (name : names))
-
   pure aa
  where
   zz = Map.toList d
 
---  yy =
---    case mp of
---      Nothing ->
---        undefined
---      Just xx ->
---        undefined
-
--- tork :: (Monad m, Monoid a, MonadState Int m, MonadReader Name m) => (Name, (TypedPattern a)) -> (Name, Expression a (Type TypeIndex Kind)) -> m (Name, Expression a (Type TypeIndex Kind))
--- tork :: (Monad m, Monoid a, MonadState Int m, MonadReader Name m) =>
---          (Name, Expression a (Type TypeIndex Kind)) ->
---          (Name, (TypedPattern a)) ->
---          m (Name, Expression a (Type TypeIndex Kind))
+tork :: (Data a, Monad m, Monoid a, MonadState Int m, MonadReader Name m) => 
+        ((Name, TypedPattern a), Name) -> 
+        (Name, Row TypeIndex Kind (Type TypeIndex Kind), Expression a (Type TypeIndex Kind)) -> 
+        m (Name, Row TypeIndex Kind (Type TypeIndex Kind), Expression a (Type TypeIndex Kind))
 tork ((name, p), rrr) (x, tttr, e) = do
-  --  traceShowM ("rrr", rrr)
-  --  traceShowM ("p", p)
-  --  traceShowM ("tp", typeOf p :: Type TypeIndex Kind)
-  --  traceShowM ("e", e)
-  --  traceShowM ("x", x)
-  --  traceShowM ("t", typeOf e :: Type TypeIndex Kind)
-  --  traceShowM ("x", x)
-  --  traceShowM ("t", typeOf e :: Type TypeIndex Kind)
-
-  -- tork :: (Monad m, Monoid a, MonadState Int m, MonadReader Name m) => (Name, (TypedPattern a)) -> (Name, Expression a (Type TypeIndex Kind)) -> m (Name, Expression a (Type TypeIndex Kind))
-  -- tork (name, p) (x, e) = do
-  --  zzz <- suppliedName
   pure $
     ( rrr
     , RExtend name q tttr
@@ -184,8 +141,6 @@ tork ((name, p), rrr) (x, tttr, e) = do
   t = typeOf e :: Type TypeIndex Kind
   q = typeOf p :: Type TypeIndex Kind
 
--- pure (EClause a x cs)
-
 instance (Monoid a, Show a) => RecordPattern a (Pattern a (Type TypeIndex Kind)) where
   expandRecordPatterns =
     \case
@@ -201,7 +156,3 @@ instance (Monoid a, Show a) => RecordPattern a (Pattern a (Type TypeIndex Kind))
         pure (PConstructor mempty (Label t "$Record") [PVariable mempty (Label r name)])
       p -> do
         error "TODO"
-
---        traceShowM "****************"
---        traceShowM p
---        pure p
