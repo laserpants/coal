@@ -5,6 +5,7 @@
 
 module Noll.Language.Type.Row (
   Row (..),
+  RowData (..),
   fromDictionary,
   normalizeRow,
   extractField,

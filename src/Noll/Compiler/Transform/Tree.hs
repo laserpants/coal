@@ -103,6 +103,8 @@ instance TreeTransform Expression t where
           <*> traverse (transform name f) e
       ESelect a ll e ->
         ESelect a ll <$> transform name f e
+      EFocus field ll1 ll2 e1 e2 -> do
+        EFocus field ll1 ll2 <$> transform name f e1 <*> transform name f e2
       EIf a t e1 e2 e3 ->
         EIf a t
           <$> transform name f e1

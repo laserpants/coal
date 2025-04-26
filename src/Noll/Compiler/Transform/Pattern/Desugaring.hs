@@ -32,6 +32,7 @@ import Noll.Module.Function (Function (..))
 
 type NamedPattern c o k = (Name, Pattern c (Type o k))
 
+-- TODO: Use RWS
 type PatternDesugaringStack c o k = WriterT [NamedPattern c o k] (ReaderT Name (State Int))
 
 newtype PatternDesugaring c o k e = PatternDesugaring {patternDesugaringStack :: PatternDesugaringStack c o k e}

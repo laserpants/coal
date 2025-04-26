@@ -23,7 +23,7 @@ import Lang.Utils (
   (<$$>),
  )
 import Noll.Language
-import Noll.SystemF.Constraint.Generation.Internal 
+import Noll.SystemF.Constraint.Generation.Internal
 import Noll.SystemF.Substitution (Substitution (..))
 import Noll.Utils (lexOrderRank)
 

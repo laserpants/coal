@@ -20,17 +20,7 @@ import Noll.Compiler.PatternMatching.Envelope (
   EnvelopeHost (..),
   EnvelopePattern (..),
  )
-import Noll.Compiler.PatternMatching.Equation (
-  HeadConstructorEquation (..),
-  HeadLiteralEquation (..),
-  HeadVariableEquation (..),
-  PatternEquation (..),
-  PatternEquationBody (..),
-  PatternEquationSet (..),
-  groupByHeadConstructor,
-  patternEquation,
-  patternEquationSet,
- )
+import Noll.Compiler.PatternMatching.Equation
 
 newtype MatchMonad a = MatchMonad {matchMonadStack :: ReaderT Name (State Int) a}
   deriving

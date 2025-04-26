@@ -16,7 +16,7 @@ import Data.Generics.Uniplate.Data (universeBi)
 import Lang.Common.List1 (List1, NonEmpty ((:|)))
 import Lang.FreeVars (BoundVars (..), FreeVars (..), exceptNames)
 import Lang.Label (Label (..))
-import Lang.Utils (Dictionary)
+import Lang.Utils (Dictionary, Name)
 import Noll.Language.Expression.Binding (Binding (..))
 import Noll.Language.Expression.Choice (Choice (..))
 import Noll.Language.Expression.Operator.Binary (BinaryOperator)
@@ -67,6 +67,8 @@ data Expression a t
     EFold a t (List1 (Expression a t)) (List1 (Clause a t)) (Maybe (Expression a t))
   | -- | Record field access selector
     ESelect a (Label t) (Expression a t)
+  | -- | Row restriction
+    EFocus Name (Label t) (Label t) (Expression a t) (Expression a t)
   | -- | Dictionary lambda function
     EDictionaryLambda a (List1 (Trait t)) (Expression a t)
   | -- | Dictionary application
