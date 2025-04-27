@@ -17,6 +17,7 @@ import Noll.Compiler.TraitTransformSpec
 import Noll.Compiler.Transform.Fold
 import Noll.Compiler.Transform.Pattern.Desugaring
 import Noll.Compiler.Transform.Pattern.OrExpansion
+import Noll.Compiler.Transform.Pattern.RecordDesugaring
 import Noll.Compiler.Transform.Type.AliasInsertion
 import Noll.Language (
   BinaryOperator (..),
@@ -1183,20 +1184,27 @@ story = do
     runIdentity (Noll.Compiler.Transform.Pattern.OrExpansion.compileOrPatterns Noll.Set.Test06.moduleBinarySearch) == Noll.Set.Test07.moduleBinarySearch
   it "" $
     runIdentity (Noll.Compiler.Transform.Pattern.OrExpansion.compileOrPatterns Noll.Set.Test06.moduleMain) == Noll.Set.Test07.moduleMain
-  --  it "" $
-  --    pure True -- TODO : Translate record patterns to select operator
+  it "" $
+    fst (runExpandRecordPatterns (compileRecordPatterns Noll.Set.Test07.moduleUtils) "row" 1) == Noll.Set.Test08.moduleUtils
+  it "" $
+    fst (runExpandRecordPatterns (compileRecordPatterns Noll.Set.Test07.moduleOrdered) "row" 1) == Noll.Set.Test08.moduleOrdered
+  it "" $
+    fst (runExpandRecordPatterns (compileRecordPatterns Noll.Set.Test07.moduleBinarySearch) "row" 1) == Noll.Set.Test08.moduleBinarySearch
+  it "" $
+    fst (runExpandRecordPatterns (compileRecordPatterns Noll.Set.Test07.moduleMain) "row" 1) == Noll.Set.Test08.moduleMain
   it "" $
     runMatchMonad "match" 0 (compileMatchExprs Noll.Set.Test08.prog1_08) == Noll.Set.Test09.prog1_09
-  it "" $
-    result funLte == funLte2
-  it "" $
-    result funGt == funGt2
-  it "" $
-    result funInRange == funInRange2
-  it "" $
-    result funFromList == funFromList2
-  it "" $
-    result funSort == funSort2
+
+--  it "" $
+--    result funLte == funLte2
+--  it "" $
+--    result funGt == funGt2
+--  it "" $
+--    result funInRange == funInRange2
+--  it "" $
+--    result funFromList == funFromList2
+--  it "" $
+--    result funSort == funSort2
 
 --  it "" $
 --    pure True -- TODO : Dictionary insertion

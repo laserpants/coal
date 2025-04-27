@@ -371,11 +371,46 @@ moduleBinarySearch =
                         )
                         ( EClause
                             ()
-                            ( PVariable
+                            ( PAnnotation
                                 ()
-                                ( Label
+                                ( TAlias
+                                    "Range"
+                                    [TVariable (Parameter () "a")]
                                     ( TIntrinsic
                                         ( IRecord
+                                            ( TRow
+                                                ( RExtend
+                                                    "max"
+                                                    (TVariable (Parameter () "a"))
+                                                    (RExtend "min" (TVariable (Parameter () "a")) RNil)
+                                                )
+                                            )
+                                        )
+                                    )
+                                )
+                                ( PConstructor
+                                    ()
+                                    ( Label
+                                        ( TIntrinsic
+                                            ( IRecord
+                                                ( TRow
+                                                    ( RExtend
+                                                        "max"
+                                                        (TVariable (TypeIndex KType 0))
+                                                        ( RExtend
+                                                            "min"
+                                                            (TVariable (TypeIndex KType 0))
+                                                            RNil
+                                                        )
+                                                    )
+                                                )
+                                            )
+                                        )
+                                        "$Record"
+                                    )
+                                    [ PVariable
+                                        ()
+                                        ( Label
                                             ( TRow
                                                 ( RExtend
                                                     "max"
@@ -387,109 +422,193 @@ moduleBinarySearch =
                                                     )
                                                 )
                                             )
+                                            "$row.1"
                                         )
-                                    )
-                                    "$r.0"
+                                    ]
                                 )
                             )
                             ( CPlain
                                 ()
                                 []
                                 ( EFocus
-                                    "min"
-                                    (Label (TVariable (TypeIndex KType 0)) "min")
-                                    (Label (TIntrinsic (IRecord (TRow (RExtend "max" (TVariable (TypeIndex KType 0)) RNil)))) "_")
+                                    "max"
+                                    (Label (TVariable (TypeIndex KType 0)) "$row.1.field.max")
+                                    (Label (TIntrinsic (IRecord (TRow (RExtend "min" (TVariable (TypeIndex KType 0)) RNil)))) "$row.1.tail")
                                     ( EVariable
                                         ()
                                         ( Label
-                                            ( TIntrinsic
-                                                ( IRecord
-                                                    ( TRow
-                                                        ( RExtend
-                                                            "max"
-                                                            (TVariable (TypeIndex KType 0))
-                                                            ( RExtend
-                                                                "min"
-                                                                (TVariable (TypeIndex KType 0))
-                                                                RNil
-                                                            )
-                                                        )
+                                            ( TRow
+                                                ( RExtend
+                                                    "max"
+                                                    (TVariable (TypeIndex KType 0))
+                                                    ( RExtend
+                                                        "min"
+                                                        (TVariable (TypeIndex KType 0))
+                                                        RNil
                                                     )
                                                 )
                                             )
-                                            "$r.0"
+                                            "$row.1"
                                         )
                                     )
-                                    ( EFocus
-                                        "max"
-                                        (Label (TVariable (TypeIndex KType 0)) "max")
-                                        (Label (TIntrinsic (IRecord (TRow (RExtend "min" (TVariable (TypeIndex KType 0)) RNil)))) "_")
-                                        ( EVariable
+                                    ( EMatch
+                                        ()
+                                        (TIntrinsic IBool)
+                                        (EVariable () (Label (TVariable (TypeIndex KType 0)) "$row.1.field.max"))
+                                        ( EClause
                                             ()
-                                            ( Label
-                                                ( TIntrinsic
-                                                    ( IRecord
-                                                        ( TRow
-                                                            ( RExtend
-                                                                "max"
-                                                                (TVariable (TypeIndex KType 0))
-                                                                ( RExtend
-                                                                    "min"
-                                                                    (TVariable (TypeIndex KType 0))
-                                                                    RNil
+                                            (PVariable () (Label (TVariable (TypeIndex KType 0)) "max"))
+                                            ( CPlain
+                                                ()
+                                                []
+                                                ( EMatch
+                                                    ()
+                                                    (TIntrinsic IBool)
+                                                    (EVariable () (Label (TIntrinsic (IRecord (TRow (RExtend "min" (TVariable (TypeIndex KType 0)) RNil)))) "$row.1.tail"))
+                                                    ( EClause
+                                                        ()
+                                                        ( PConstructor
+                                                            ()
+                                                            ( Label
+                                                                ( TIntrinsic
+                                                                    ( IRecord
+                                                                        ( TRow
+                                                                            ( RExtend
+                                                                                "min"
+                                                                                (TVariable (TypeIndex KType 0))
+                                                                                RNil
+                                                                            )
+                                                                        )
+                                                                    )
+                                                                )
+                                                                "$Record"
+                                                            )
+                                                            [ PVariable
+                                                                ()
+                                                                ( Label
+                                                                    ( TRow
+                                                                        ( RExtend
+                                                                            "min"
+                                                                            (TVariable (TypeIndex KType 0))
+                                                                            RNil
+                                                                        )
+                                                                    )
+                                                                    "$row.2"
+                                                                )
+                                                            ]
+                                                        )
+                                                        ( CPlain
+                                                            ()
+                                                            []
+                                                            ( EFocus
+                                                                "min"
+                                                                (Label (TVariable (TypeIndex KType 0)) "$row.2.field.min")
+                                                                (Label (TIntrinsic (IRecord (TRow RNil))) "$row.2.tail")
+                                                                ( EVariable
+                                                                    ()
+                                                                    ( Label
+                                                                        ( TRow
+                                                                            ( RExtend
+                                                                                "min"
+                                                                                (TVariable (TypeIndex KType 0))
+                                                                                RNil
+                                                                            )
+                                                                        )
+                                                                        "$row.2"
+                                                                    )
+                                                                )
+                                                                ( EMatch
+                                                                    ()
+                                                                    (TIntrinsic IBool)
+                                                                    (EVariable () (Label (TVariable (TypeIndex KType 0)) "$row.2.field.min"))
+                                                                    ( EClause
+                                                                        ()
+                                                                        (PVariable () (Label (TVariable (TypeIndex KType 0)) "min"))
+                                                                        ( CPlain
+                                                                            ()
+                                                                            []
+                                                                            ( EMatch
+                                                                                ()
+                                                                                (TIntrinsic IBool)
+                                                                                (EVariable () (Label (TIntrinsic (IRecord (TRow RNil))) "$row.2.tail"))
+                                                                                ( EClause
+                                                                                    ()
+                                                                                    ( PConstructor
+                                                                                        ()
+                                                                                        (Label (TIntrinsic (IRecord (TRow RNil))) "$Record")
+                                                                                        [ PVariable
+                                                                                            ()
+                                                                                            (Label (TRow RNil) "_")
+                                                                                        ]
+                                                                                    )
+                                                                                    ( CPlain
+                                                                                        ()
+                                                                                        []
+                                                                                        ( EApplication
+                                                                                            ()
+                                                                                            (TIntrinsic IBool)
+                                                                                            (EBinaryOperator () (TIntrinsic IBool `TArrow` TIntrinsic IBool `TArrow` TIntrinsic IBool) OLogicalAnd)
+                                                                                            ( EApplication
+                                                                                                ()
+                                                                                                (TIntrinsic IBool)
+                                                                                                (EVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool) "greater_than"))
+                                                                                                ( EVariable () (Label (TVariable (TypeIndex KType 0)) "n")
+                                                                                                    <| EVariable () (Label (TVariable (TypeIndex KType 0)) "min")
+                                                                                                    :| []
+                                                                                                )
+                                                                                                <| ( EApplication
+                                                                                                      ()
+                                                                                                      (TIntrinsic IBool)
+                                                                                                      (EBinaryOperator () (TIntrinsic IBool `TArrow` TIntrinsic IBool `TArrow` TIntrinsic IBool) OLogicalOr)
+                                                                                                   )
+                                                                                                  ( EApplication
+                                                                                                      ()
+                                                                                                      (TIntrinsic IBool)
+                                                                                                      (EVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool) "less_than_or_equal_to"))
+                                                                                                      ( EVariable () (Label (TVariable (TypeIndex KType 0)) "n")
+                                                                                                          <| EVariable () (Label (TVariable (TypeIndex KType 0)) "max")
+                                                                                                          :| []
+                                                                                                      )
+                                                                                                      <| EApplication
+                                                                                                        ()
+                                                                                                        (TIntrinsic IBool)
+                                                                                                        ( EBinaryOperator
+                                                                                                            ()
+                                                                                                            (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
+                                                                                                            OEqualTo
+                                                                                                        )
+                                                                                                        ( EVariable () (Label (TVariable (TypeIndex KType 0)) "max")
+                                                                                                            <| EApplication
+                                                                                                              ()
+                                                                                                              (TVariable (TypeIndex KType 0))
+                                                                                                              (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0)) "from_int32"))
+                                                                                                              (ELiteral () (LInt32 (-1)) :| [])
+                                                                                                            :| []
+                                                                                                        )
+                                                                                                      :| []
+                                                                                                  )
+                                                                                                :| []
+                                                                                            )
+                                                                                        )
+                                                                                        :| []
+                                                                                    )
+                                                                                    :| []
+                                                                                )
+                                                                            )
+                                                                            :| []
+                                                                        )
+                                                                        :| []
+                                                                    )
                                                                 )
                                                             )
-                                                        )
-                                                    )
-                                                )
-                                                "$r.0"
-                                            )
-                                        )
-                                        ( EApplication
-                                            ()
-                                            (TIntrinsic IBool)
-                                            (EBinaryOperator () (TIntrinsic IBool `TArrow` TIntrinsic IBool `TArrow` TIntrinsic IBool) OLogicalAnd)
-                                            ( EApplication
-                                                ()
-                                                (TIntrinsic IBool)
-                                                (EVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool) "greater_than"))
-                                                ( EVariable () (Label (TVariable (TypeIndex KType 0)) "n")
-                                                    <| EVariable () (Label (TVariable (TypeIndex KType 0)) "min")
-                                                    :| []
-                                                )
-                                                <| ( EApplication
-                                                      ()
-                                                      (TIntrinsic IBool)
-                                                      (EBinaryOperator () (TIntrinsic IBool `TArrow` TIntrinsic IBool `TArrow` TIntrinsic IBool) OLogicalOr)
-                                                   )
-                                                  ( EApplication
-                                                      ()
-                                                      (TIntrinsic IBool)
-                                                      (EVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool) "less_than_or_equal_to"))
-                                                      ( EVariable () (Label (TVariable (TypeIndex KType 0)) "n")
-                                                          <| EVariable () (Label (TVariable (TypeIndex KType 0)) "max")
-                                                          :| []
-                                                      )
-                                                      <| EApplication
-                                                        ()
-                                                        (TIntrinsic IBool)
-                                                        ( EBinaryOperator
-                                                            ()
-                                                            (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
-                                                            OEqualTo
-                                                        )
-                                                        ( EVariable () (Label (TVariable (TypeIndex KType 0)) "max")
-                                                            <| EApplication
-                                                              ()
-                                                              (TVariable (TypeIndex KType 0))
-                                                              (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0)) "from_int32"))
-                                                              (ELiteral () (LInt32 (-1)) :| [])
                                                             :| []
                                                         )
-                                                      :| []
-                                                  )
+                                                        :| []
+                                                    )
+                                                )
                                                 :| []
                                             )
+                                            :| []
                                         )
                                     )
                                 )
@@ -498,6 +617,159 @@ moduleBinarySearch =
                             :| []
                         )
                     )
+                    -- ( EMatch
+                    --     ()
+                    --     (TIntrinsic IBool)
+                    --     ( EVariable
+                    --         ()
+                    --         ( Label
+                    --             ( TIntrinsic
+                    --                 ( IRecord
+                    --                     ( TRow
+                    --                         ( RExtend
+                    --                             "max"
+                    --                             (TVariable (TypeIndex KType 0))
+                    --                             ( RExtend
+                    --                                 "min"
+                    --                                 (TVariable (TypeIndex KType 0))
+                    --                                 RNil
+                    --                             )
+                    --                         )
+                    --                     )
+                    --                 )
+                    --             )
+                    --             "$v.0"
+                    --         )
+                    --     )
+                    --     ( EClause
+                    --         ()
+                    --         ( PVariable
+                    --             ()
+                    --             ( Label
+                    --                 ( TIntrinsic
+                    --                     ( IRecord
+                    --                         ( TRow
+                    --                             ( RExtend
+                    --                                 "max"
+                    --                                 (TVariable (TypeIndex KType 0))
+                    --                                 ( RExtend
+                    --                                     "min"
+                    --                                     (TVariable (TypeIndex KType 0))
+                    --                                     RNil
+                    --                                 )
+                    --                             )
+                    --                         )
+                    --                     )
+                    --                 )
+                    --                 "$r.0"
+                    --             )
+                    --         )
+                    --         ( CPlain
+                    --             ()
+                    --             []
+                    --             ( EFocus
+                    --                 "min"
+                    --                 (Label (TVariable (TypeIndex KType 0)) "min")
+                    --                 (Label (TIntrinsic (IRecord (TRow (RExtend "max" (TVariable (TypeIndex KType 0)) RNil)))) "_")
+                    --                 ( EVariable
+                    --                     ()
+                    --                     ( Label
+                    --                         ( TIntrinsic
+                    --                             ( IRecord
+                    --                                 ( TRow
+                    --                                     ( RExtend
+                    --                                         "max"
+                    --                                         (TVariable (TypeIndex KType 0))
+                    --                                         ( RExtend
+                    --                                             "min"
+                    --                                             (TVariable (TypeIndex KType 0))
+                    --                                             RNil
+                    --                                         )
+                    --                                     )
+                    --                                 )
+                    --                             )
+                    --                         )
+                    --                         "$r.0"
+                    --                     )
+                    --                 )
+                    --                 ( EFocus
+                    --                     "max"
+                    --                     (Label (TVariable (TypeIndex KType 0)) "max")
+                    --                     (Label (TIntrinsic (IRecord (TRow (RExtend "min" (TVariable (TypeIndex KType 0)) RNil)))) "_")
+                    --                     ( EVariable
+                    --                         ()
+                    --                         ( Label
+                    --                             ( TIntrinsic
+                    --                                 ( IRecord
+                    --                                     ( TRow
+                    --                                         ( RExtend
+                    --                                             "max"
+                    --                                             (TVariable (TypeIndex KType 0))
+                    --                                             ( RExtend
+                    --                                                 "min"
+                    --                                                 (TVariable (TypeIndex KType 0))
+                    --                                                 RNil
+                    --                                             )
+                    --                                         )
+                    --                                     )
+                    --                                 )
+                    --                             )
+                    --                             "$r.0"
+                    --                         )
+                    --                     )
+                    --                     ( EApplication
+                    --                         ()
+                    --                         (TIntrinsic IBool)
+                    --                         (EBinaryOperator () (TIntrinsic IBool `TArrow` TIntrinsic IBool `TArrow` TIntrinsic IBool) OLogicalAnd)
+                    --                         ( EApplication
+                    --                             ()
+                    --                             (TIntrinsic IBool)
+                    --                             (EVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool) "greater_than"))
+                    --                             ( EVariable () (Label (TVariable (TypeIndex KType 0)) "n")
+                    --                                 <| EVariable () (Label (TVariable (TypeIndex KType 0)) "min")
+                    --                                 :| []
+                    --                             )
+                    --                             <| ( EApplication
+                    --                                   ()
+                    --                                   (TIntrinsic IBool)
+                    --                                   (EBinaryOperator () (TIntrinsic IBool `TArrow` TIntrinsic IBool `TArrow` TIntrinsic IBool) OLogicalOr)
+                    --                                )
+                    --                               ( EApplication
+                    --                                   ()
+                    --                                   (TIntrinsic IBool)
+                    --                                   (EVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool) "less_than_or_equal_to"))
+                    --                                   ( EVariable () (Label (TVariable (TypeIndex KType 0)) "n")
+                    --                                       <| EVariable () (Label (TVariable (TypeIndex KType 0)) "max")
+                    --                                       :| []
+                    --                                   )
+                    --                                   <| EApplication
+                    --                                     ()
+                    --                                     (TIntrinsic IBool)
+                    --                                     ( EBinaryOperator
+                    --                                         ()
+                    --                                         (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
+                    --                                         OEqualTo
+                    --                                     )
+                    --                                     ( EVariable () (Label (TVariable (TypeIndex KType 0)) "max")
+                    --                                         <| EApplication
+                    --                                           ()
+                    --                                           (TVariable (TypeIndex KType 0))
+                    --                                           (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0)) "from_int32"))
+                    --                                           (ELiteral () (LInt32 (-1)) :| [])
+                    --                                         :| []
+                    --                                     )
+                    --                                   :| []
+                    --                               )
+                    --                             :| []
+                    --                         )
+                    --                     )
+                    --                 )
+                    --             )
+                    --             :| []
+                    --         )
+                    --         :| []
+                    --     )
+                    -- )
                 )
             )
         )
