@@ -5,11 +5,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Language.Expression (
-  Expression (..),
-  Clause (..),
-  CompiledClause (..),
-) where
+module Noll.Language.Expression (Expression (..), Clause (..), CompiledClause (..)) where
 
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (universeBi)
