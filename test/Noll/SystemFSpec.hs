@@ -13,30 +13,14 @@ import Noll.Compiler.PatternMatching
 import Noll.Compiler.PatternMatching.Envelope
 import Noll.Compiler.PatternMatching.Equation
 import Noll.Compiler.PatternMatching.Rule
+import Noll.Compiler.TraitTransform
 import Noll.Compiler.TraitTransformSpec
 import Noll.Compiler.Transform.Fold
 import Noll.Compiler.Transform.Pattern.Desugaring
 import Noll.Compiler.Transform.Pattern.OrExpansion
 import Noll.Compiler.Transform.Pattern.RecordDesugaring
 import Noll.Compiler.Transform.Type.AliasInsertion
-import Noll.Language (
-  BinaryOperator (..),
-  Binding (..),
-  Choice (..),
-  Clause (..),
-  Expression (..),
-  IndexedType,
-  Intrinsic (..),
-  Kind (..),
-  Parameter (..),
-  Pattern (..),
-  Primitive (..),
-  Row (..),
-  Scheme (..),
-  Type (..),
-  TypeIndex (..),
-  With (..),
- )
+import Noll.Language
 import Noll.Module (Constant (..), Function (..), Module (..))
 import Noll.SystemF.Constraint.Assumption (Assumption (..))
 import Noll.SystemF.Constraint.Generation.Internal (InferenceRule (..))
@@ -55,6 +39,7 @@ import qualified Noll.Set.Test06
 import qualified Noll.Set.Test07
 import qualified Noll.Set.Test08
 import qualified Noll.Set.Test09
+import qualified Noll.Set.Test10
 
 spec :: Spec
 spec =
@@ -1204,6 +1189,14 @@ story = do
     result funFromList == funFromList2
   it "" $
     result funSort == funSort2
+  it "" $
+    runTraitTransformZ testEnvZ2 (transformModuleZ Noll.Set.Test09.moduleUtils) (freshIdIn Noll.Set.Test09.moduleUtils) == Noll.Set.Test10.moduleUtils
+  it "" $
+    runTraitTransformZ testEnvZ2 (transformModuleZ Noll.Set.Test09.moduleOrdered) (freshIdIn Noll.Set.Test09.moduleOrdered) == Noll.Set.Test10.moduleOrdered
+  it "" $
+    runTraitTransformZ testEnvZ2 (transformModuleZ Noll.Set.Test09.moduleBinarySearch) (freshIdIn Noll.Set.Test09.moduleBinarySearch) == Noll.Set.Test10.moduleBinarySearch
+  it "" $
+    runTraitTransformZ testEnvZ2 (transformModuleZ Noll.Set.Test09.moduleMain) (freshIdIn Noll.Set.Test09.moduleMain) == Noll.Set.Test10.moduleMain
 
 --  it "" $
 --    pure True -- TODO : Dictionary insertion

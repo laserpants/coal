@@ -18,6 +18,7 @@ import Lang.Common.Supply (Supply (..), supplied)
 import Lang.Label (Label (..))
 import Lang.Utils (Name, (<$$>))
 import Noll.Language
+import Noll.Module
 import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
 import Noll.SystemF.Substitution
 import Noll.SystemF.Unification
@@ -27,10 +28,38 @@ import qualified Data.Text as Text
 import qualified Lang.Common.Environment as Environment
 import qualified Lang.Common.List1 as List1
 
+transformModuleZ ::
+  ( MonadReader (Environment (Scheme TypeIndex Kind (Type TypeIndex Kind))) m
+  , MonadState Int m
+  , MonadWriter [Trait (Type TypeIndex Kind)] m
+  , Show a
+  ) =>
+  Module a Kind (Type TypeIndex Kind) ->
+  m (Module a Kind (Type TypeIndex Kind))
+transformModuleZ = overModuleDefinitionsM (traverse transformDefinitionZ)
+
+transformDefinitionZ ::
+  ( MonadReader (Environment (Scheme TypeIndex Kind (Type TypeIndex Kind))) m
+  , MonadState Int m
+  , MonadWriter [Trait (Type TypeIndex Kind)] m
+  , Show a
+  ) =>
+  Definition a Kind (Type TypeIndex Kind) ->
+  m (Definition a Kind (Type TypeIndex Kind))
+transformDefinitionZ =
+  \case
+    DConstant name c ->
+      DConstant name <$> transformConstantZ c
+    DAnnotation a d ->
+      DAnnotation a <$> transformDefinitionZ d
+    d ->
+      pure d
+
 transformConstantZ ::
   ( MonadReader (Environment (Scheme TypeIndex Kind (Type TypeIndex Kind))) m
   , MonadState Int m
   , MonadWriter [Trait (Type TypeIndex Kind)] m
+  , Show a
   ) =>
   Constant Expression a (Type TypeIndex Kind) ->
   m (Constant Expression a (Type TypeIndex Kind))
@@ -50,6 +79,7 @@ transformZ ::
   ( MonadReader (Environment (Scheme TypeIndex Kind (Type TypeIndex Kind))) m
   , MonadState Int m
   , MonadWriter [Trait (Type TypeIndex Kind)] m
+  , Show a
   ) =>
   Expression a (Type TypeIndex Kind) ->
   m (Expression a (Type TypeIndex Kind))
@@ -75,7 +105,7 @@ transformZ =
           -- index <- fresh
           tell (filter parameterized traits)
           ds <- traverse transformZ es
-          pure (EDictionaryApplication a t var (tr :| trs) (NonEmpty.toList ds))
+          pure (EDictionaryApplication a t var (List1.nub (tr :| trs)) (NonEmpty.toList ds))
     expr@(EVariable a ll@(Label t name)) -> do
       traits <- collectTraits t name
       case traits of
@@ -84,7 +114,7 @@ transformZ =
         tr : trs -> do
           -- index <- fresh
           tell (filter parameterized traits)
-          pure (EDictionaryApplication a t expr (tr :| trs) [])
+          pure (EDictionaryApplication a t expr (List1.nub (tr :| trs)) [])
     EListLiteral a t es ->
       EListLiteral a t <$> traverse transformZ es
     ELambda a ps e ->
@@ -123,20 +153,25 @@ transformZ =
       pure expr
     ESelect a ll e ->
       ESelect a ll <$> transformZ e
+    EFocus name ll1 ll2 e1 e2 ->
+      EFocus name ll1 ll2 <$> transformZ e1 <*> transformZ e2
     EListCons a t e1 e2 ->
       EListCons a t
         <$> transformZ e1
         <*> transformZ e2
     --    EBlock es ->
     --      EBlock <$> traverse transformZ es
+    EAnnotation a t e ->
+      EAnnotation a t <$> transformZ e
     expr ->
-      error "TODO" -- pure expr
+      error (show expr) -- "TODO" -- pure expr
       -- pure expr
 
 transformGuardZ ::
   ( MonadReader (Environment (Scheme TypeIndex Kind (Type TypeIndex Kind))) m
   , MonadState Int m
   , MonadWriter [Trait (Type TypeIndex Kind)] m
+  , Show a
   ) =>
   Guard Expression a (Type TypeIndex Kind) ->
   m (Guard Expression a (Type TypeIndex Kind))
@@ -149,6 +184,7 @@ transformChoiceZ ::
   ( MonadReader (Environment (Scheme TypeIndex Kind (Type TypeIndex Kind))) m
   , MonadState Int m
   , MonadWriter [Trait (Type TypeIndex Kind)] m
+  , Show a
   ) =>
   Choice Expression a (Type TypeIndex Kind) ->
   m (Choice Expression a (Type TypeIndex Kind))
@@ -161,6 +197,7 @@ transformClauseZ ::
   ( MonadReader (Environment (Scheme TypeIndex Kind (Type TypeIndex Kind))) m
   , MonadState Int m
   , MonadWriter [Trait (Type TypeIndex Kind)] m
+  , Show a
   ) =>
   Clause a (Type TypeIndex Kind) ->
   m (Clause a (Type TypeIndex Kind))
@@ -173,6 +210,7 @@ transformCompiledClauseZ ::
   ( MonadReader (Environment (Scheme TypeIndex Kind (Type TypeIndex Kind))) m
   , MonadState Int m
   , MonadWriter [Trait (Type TypeIndex Kind)] m
+  , Show a
   ) =>
   CompiledClause a (Type TypeIndex Kind) ->
   m (CompiledClause a (Type TypeIndex Kind))
@@ -188,6 +226,7 @@ transformBindingZ ::
   ( MonadReader (Environment (Scheme TypeIndex Kind (Type TypeIndex Kind))) m
   , MonadState Int m
   , MonadWriter [Trait (Type TypeIndex Kind)] m
+  , Show a
   ) =>
   Binding Expression a (Type TypeIndex Kind) ->
   m (Binding Expression a (Type TypeIndex Kind), [(Name, Scheme TypeIndex Kind (Type TypeIndex Kind))])

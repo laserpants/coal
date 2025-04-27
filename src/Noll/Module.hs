@@ -5,6 +5,7 @@
 module Noll.Module (
   Module (..),
   overModuleDefinitions,
+  overModuleDefinitionsM,
   fromDefinitionList,
   module Noll.Module.Definition,
   module Noll.Module.Function,
@@ -23,6 +24,10 @@ data Module a k t = Module Path [Name] [Definition a k t]
 {-# INLINE overModuleDefinitions #-}
 overModuleDefinitions :: Over (Module a k t) [Definition a k t]
 overModuleDefinitions fn (Module path names defs) = Module path names (fn defs)
+
+{-# INLINE overModuleDefinitionsM #-}
+overModuleDefinitionsM :: (Monad m) => ([Definition a k t] -> m [Definition a k t]) -> Module a k t -> m (Module a k t)
+overModuleDefinitionsM fn (Module path names defs) = Module path names <$> fn defs
 
 {-# INLINE insertDefinition #-}
 insertDefinition :: Definition a k t -> Module a k t -> Module a k t

@@ -31,6 +31,7 @@ import Noll.Language.Type.Intrinsic (Intrinsic (..))
 import Noll.Language.Type.Kind (Kind (..))
 import Noll.Language.Type.Row (Row (..))
 import Noll.Language.Type.Scheme (Scheme (..))
+import Noll.Module
 import Noll.Module.Constant (Constant (..))
 import Noll.Module.Definition (Definition (..))
 import Noll.Module.Function (Function (..))
@@ -104,6 +105,9 @@ instance (Ord k, Data t, Data k) => TypeIndexed k (With t) where
   typeIndexesIn = Set.fromList . universeBi
 
 instance (Ord k, Data a, Data k) => TypeIndexed k (Definition a k (Type TypeIndex k)) where
+  typeIndexesIn = Set.fromList . universeBi
+
+instance (Ord k, Data a, Data t, Data k) => TypeIndexed k (Module a k t) where
   typeIndexesIn = Set.fromList . universeBi
 
 instance (Ord k, TypeIndexed k t) => TypeIndexed k (Scheme TypeIndex k t) where
