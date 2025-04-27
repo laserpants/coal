@@ -14,6 +14,8 @@ import Control.Monad.State (MonadState)
 import Control.Monad.Writer
 import Data.Data (Data, Typeable)
 import Data.Foldable (foldlM, foldrM)
+import Data.Generics.Uniplate.Data (transformBiM)
+import Data.Semigroup (sconcat)
 import Debug.Trace
 import Lang.Common.List1 (List1, NonEmpty (..))
 import Lang.Common.Supply (suppliedName)
@@ -22,8 +24,33 @@ import Lang.Utils (Dictionary, Map, Name, forM_, traverseM)
 import Noll.Ast.HasType (HasType (..))
 import Noll.Language
 import Noll.Language.Type.Row (RowData (..))
+import Noll.Module (Module (..))
 
 import qualified Data.Map.Strict as Map
+
+compileRecordPatterns ::
+  forall m a k t.
+  (Monad m, Monoid a, Show a, Data a, Data k, Ord k, Data t, MonadState Int m, MonadWriter [(Name, Dictionary (TypedPattern a), Maybe (TypedPattern a))] m, MonadReader Name m) =>
+  Module a k t ->
+  m (Module a k t)
+compileRecordPatterns = transformBiM (expandRecordPatterns :: Expression a (Type TypeIndex Kind) -> m (Expression a (Type TypeIndex Kind)))
+
+compileRecordPatterns2 ::
+  forall m a.
+  (Monad m, Monoid a, Show a, Data a, MonadState Int m, MonadWriter [(Name, Dictionary (TypedPattern a), Maybe (TypedPattern a))] m, MonadReader Name m) =>
+  Expression a (Type TypeIndex Kind) ->
+  m (Expression a (Type TypeIndex Kind))
+compileRecordPatterns2 = transformBiM (expandRecordPatterns :: Expression a (Type TypeIndex Kind) -> m (Expression a (Type TypeIndex Kind)))
+
+-- expandExpression :: (Show a, Data a, Monoid a, MonadState Int m, MonadWriter [(Name, Dictionary (TypedPattern a), Maybe (TypedPattern a))] m, MonadReader Name m) => Expression a (Type TypeIndex Kind) -> m (Expression a (Type TypeIndex Kind))
+-- expandExpression =
+--  \case
+--      EMatch a t e cs ->
+--        EMatch a t e <$> expandRecordPatterns cs
+--      EFold a t es cs e ->
+--        EFold a t es <$> expandRecordPatterns cs <*> pure e
+--      e ->
+--        pure e
 
 type TypedPattern a = Pattern a (Type TypeIndex Kind)
 
@@ -97,10 +124,11 @@ zork (name, d, mp) e = do
  where
   zz = Map.toList d
 
-tork :: (Data a, Monad m, Monoid a, MonadState Int m, MonadReader Name m) => 
-        ((Name, TypedPattern a), Name) -> 
-        (Name, Row TypeIndex Kind (Type TypeIndex Kind), Expression a (Type TypeIndex Kind)) -> 
-        m (Name, Row TypeIndex Kind (Type TypeIndex Kind), Expression a (Type TypeIndex Kind))
+tork ::
+  (Data a, Monad m, Monoid a, MonadState Int m, MonadReader Name m) =>
+  ((Name, TypedPattern a), Name) ->
+  (Name, Row TypeIndex Kind (Type TypeIndex Kind), Expression a (Type TypeIndex Kind)) ->
+  m (Name, Row TypeIndex Kind (Type TypeIndex Kind), Expression a (Type TypeIndex Kind))
 tork ((name, p), rrr) (x, tttr, e) = do
   pure $
     ( rrr
@@ -154,5 +182,11 @@ instance (Monoid a, Show a) => RecordPattern a (Pattern a (Type TypeIndex Kind))
         name <- suppliedName
         tell [(name, d, p)]
         pure (PConstructor mempty (Label t "$Record") [PVariable mempty (Label r name)])
+      p@PAtVariable{} ->
+        pure p
+      PListCons a t p1 p2 ->
+        PListCons a t <$> expandRecordPatterns p1 <*> expandRecordPatterns p2
+      PListLiteral a t ps ->
+        PListLiteral a t <$> traverse expandRecordPatterns ps
       p -> do
-        error "TODO"
+        error (show p) -- "TODO"

@@ -503,7 +503,7 @@ typeCheckDefinition d =
     _ -> do
       compileDefinitionC2 d
       sub <- solveC2
-      --traceShowM (definitionName d, typeOf (apply sub d) :: Type TypeIndex Kind)
+      -- traceShowM (definitionName d, typeOf (apply sub d) :: Type TypeIndex Kind)
       defineC (definitionName d) (typeOf (apply sub d))
 
 defineC :: (Monad m) => Name -> IndexedType -> CompilerT a m ()
