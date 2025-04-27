@@ -1194,17 +1194,16 @@ story = do
     fst (runExpandRecordPatterns (compileRecordPatterns Noll.Set.Test07.moduleMain) "row" 1) == Noll.Set.Test08.moduleMain
   it "" $
     runMatchMonad "match" 0 (compileMatchExprs Noll.Set.Test08.prog1_08) == Noll.Set.Test09.prog1_09
-
---  it "" $
---    result funLte == funLte2
---  it "" $
---    result funGt == funGt2
---  it "" $
---    result funInRange == funInRange2
---  it "" $
---    result funFromList == funFromList2
---  it "" $
---    result funSort == funSort2
+  it "" $
+    result funLte == funLte2
+  it "" $
+    result funGt == funGt2
+  it "" $
+    result funInRange == funInRange2
+  it "" $
+    result funFromList == funFromList2
+  it "" $
+    result funSort == funSort2
 
 --  it "" $
 --    pure True -- TODO : Dictionary insertion
