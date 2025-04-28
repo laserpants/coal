@@ -5,11 +5,11 @@ module Noll.Compiler.NormalizeObjects (NormalizeObjectsTransformContext (..)) wh
 
 import Data.Data (Data, Typeable)
 import Data.Map.Strict (Map)
+import Lang.Common.List1 (List1)
 import Noll.Ast.HasType (foldTypeOf)
 import Noll.Compiler.Transform
 import Noll.Language.Expression (Expression (..))
 import Noll.Language.Trait (With (..))
-import Lang.Common.List1 (List1)
 import Noll.Language.Type (Type (..))
 import Noll.Module (Module (..))
 import Noll.Module.Constant (Constant (..))
