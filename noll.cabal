@@ -28,6 +28,7 @@ library
       Noll.Ast.HasType
       Noll.Ast.Indexed
       Noll.Compiler
+      Noll.Compiler.Lowpass.TranslateType
       Noll.Compiler.NormalizeObjects
       Noll.Compiler.PatternMatching
       Noll.Compiler.PatternMatching.Compiler
