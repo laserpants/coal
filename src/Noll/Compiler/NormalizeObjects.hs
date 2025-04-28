@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 
-module Noll.Compiler.NormalizeObjects where
+module Noll.Compiler.NormalizeObjects (NormalizeObjectsTransformContext (..)) where
 
 import Data.Data (Data, Typeable)
 import Data.Map.Strict (Map)
@@ -9,6 +9,7 @@ import Noll.Ast.HasType (foldTypeOf)
 import Noll.Compiler.Transform
 import Noll.Language.Expression (Expression (..))
 import Noll.Language.Trait (With (..))
+import Lang.Common.List1 (List1)
 import Noll.Language.Type (Type (..))
 import Noll.Module (Module (..))
 import Noll.Module.Constant (Constant (..))
@@ -19,6 +20,9 @@ class NormalizeObjectsTransformContext a where
   normalizeObject :: a -> a
 
 instance (NormalizeObjectsTransformContext a) => NormalizeObjectsTransformContext [a] where
+  normalizeObject = fmap normalizeObject
+
+instance (NormalizeObjectsTransformContext a) => NormalizeObjectsTransformContext (List1 a) where
   normalizeObject = fmap normalizeObject
 
 instance (NormalizeObjectsTransformContext a) => NormalizeObjectsTransformContext (Map k a) where
@@ -41,11 +45,3 @@ instance (Monoid a, Data a, Data k, Data (o k), Typeable o) => NormalizeObjectsT
         DInstance name t (normalizeObject ds)
       d ->
         d
-
--- instance (Monoid a) => NormalizeObjectsTransformContext (TraitInstance Expression a (Type o k)) where
---  normalizeObject =
---    \case
---      TFunction (Function a (With ts t) ps e) ->
---        TConstant (Constant a (With ts (foldType t (typeOf <$> ps))) (flattenLambda (ELambda mempty ps e)))
---      t ->
---        t
