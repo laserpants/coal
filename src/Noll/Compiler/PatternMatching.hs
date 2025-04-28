@@ -37,15 +37,7 @@ instance (MatchExpressionContext a) => MatchExpressionContext (List1 a) where
 instance (MatchExpressionContext a) => MatchExpressionContext (Dictionary a) where
   compileMatchExprs = traverse compileMatchExprs
 
-type MatchClasses a t =
-  ( Show a
-  , Data a
-  , Monoid a
-  , Show t
-  , Data t
-  , TypeProxy t
-  , Ord t
-  )
+type MatchClasses a t = (Show a, Data a, Monoid a, Show t, Data t, TypeProxy t, Ord t)
 
 instance (MatchClasses a t, Data k, Ord k) => MatchExpressionContext (Module a k t) where
   compileMatchExprs = transformBiM (compileMatchExprsE :: Expression a t -> MatchMonad (Expression a t))
