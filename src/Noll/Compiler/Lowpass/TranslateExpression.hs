@@ -3,11 +3,11 @@
 
 module Noll.Compiler.Lowpass.TranslateExpression where
 
-import Noll.Language.Type
 import Lang.Label (Label (..))
+import Noll.Compiler.Lowpass.TranslateType (translateType)
 import Noll.Language.Expression
 import Noll.Language.Primitive
-import Noll.Compiler.Lowpass.TranslateType (translateType)
+import Noll.Language.Type
 
 import qualified Lang.Lowpass.Language as Lowpass
 
@@ -44,7 +44,8 @@ translateExpression =
     --    ERecursiveLet a (Pattern a t) (Expression a t) (Expression a t)
     EVariable _ (Label t name) ->
       Lowpass.var (Label (translateType t) name)
-    --    EConstructor a (Label t)
+    EConstructor _ (Label t name) ->
+      undefined
     ELiteral _ p ->
       Lowpass.lit (translatePrimitive p)
     EIf _ _ e1 e2 e3 ->
@@ -60,10 +61,16 @@ translateExpression =
     --    EListLiteral a t [Expression a t]
     ETuple _ _ es ->
       Lowpass.tupleExpr (translateExpression <$> es)
+    EMatch{} ->
+      error "Implementation error"
+    ECompiledMatch _ t e cs ->
+      Lowpass.match
+        (translateType t)
+        (translateExpression e)
+        undefined
+    EFold _ _ _ _ (Just e) ->
+      translateExpression e
 
---    EMatch a t (Expression a t) (List1 (Clause a t))
---    ECompiledMatch a t (Expression a t) (List1 (CompiledClause a t))
---    EFold a t (List1 (Expression a t)) (List1 (Clause a t)) (Maybe (Expression a t))
 --    ESelect a (Label t) (Expression a t)
 --    EFocus Name (Label t) (Label t) (Expression a t) (Expression a t)
 --    EDictionaryLambda a (List1 (Trait t)) (Expression a t)
