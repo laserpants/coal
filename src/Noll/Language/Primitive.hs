@@ -3,8 +3,8 @@
 
 module Noll.Language.Primitive (Primitive (..)) where
 
-import Data.Data (Data, Typeable)
 import Data.ByteString (ByteString)
+import Data.Data (Data, Typeable)
 import GHC.Int (Int32, Int64)
 
 -- | Language primitives

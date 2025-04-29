@@ -30,8 +30,8 @@ translatePrimitive =
       Lowpass.PDouble double
     LChar chr ->
       Lowpass.PChar chr
-    LString text ->
-      Lowpass.PString undefined -- TOOD text
+    LString str ->
+      Lowpass.PString str
 
 translateExpression :: Expression a (Type o k) -> Lowpass.Expr Lowpass.Type
 translateExpression =
