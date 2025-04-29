@@ -3,8 +3,11 @@
 
 module Noll.Compiler.Lowpass.TranslateExpression where
 
+import Noll.Language.Type
+import Lang.Label (Label (..))
 import Noll.Language.Expression
 import Noll.Language.Primitive
+import Noll.Compiler.Lowpass.TranslateType (translateType)
 
 import qualified Lang.Lowpass.Language as Lowpass
 
@@ -30,7 +33,7 @@ translatePrimitive =
     LString text ->
       Lowpass.PString undefined -- TOOD text
 
-translateExpression :: Expression a t -> Lowpass.Expr Lowpass.Type
+translateExpression :: Expression a (Type o k) -> Lowpass.Expr Lowpass.Type
 translateExpression =
   \case
     EAnnotation _ _ e ->
@@ -39,7 +42,8 @@ translateExpression =
     --    ELambda a (List1 (Pattern a t)) (Expression a t)
     --    ELet a (List1 (Binding Expression a t)) (Expression a t)
     --    ERecursiveLet a (Pattern a t) (Expression a t) (Expression a t)
-    --    EVariable a (Label t)
+    EVariable _ (Label t name) ->
+      Lowpass.var (Label (translateType t) name)
     --    EConstructor a (Label t)
     ELiteral _ p ->
       Lowpass.lit (translatePrimitive p)
