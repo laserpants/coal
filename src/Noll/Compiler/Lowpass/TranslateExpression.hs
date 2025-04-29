@@ -51,7 +51,8 @@ translateExpression =
 --    EUnaryOperator a t UnaryOperator
 --    EBinaryOperator a t BinaryOperator
 --    ERecord a t (Dictionary (Expression a t)) (Maybe (Expression a t))
---    EListCons a t (Expression a t) (Expression a t)
+    EListCons a t e1 e2 ->
+      Lowpass.cons (translateExpression e1) (translateExpression e2)
 --    EListLiteral a t [Expression a t]
     ETuple _ _ es ->
       Lowpass.tupleExpr (translateExpression <$> es)
