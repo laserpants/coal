@@ -73,6 +73,68 @@ testEnvZ2 =
       )
     ]
 
+fixtureY1 =
+  Constant
+    ()
+    ( With
+        []
+        (TIntrinsic IInt32)
+    )
+    ( EApplication
+        ()
+        (TIntrinsic IInt32)
+        (EVariable () (Label (TIntrinsic IInt32 ~> TIntrinsic IInt32) "from_int32"))
+        (ELiteral () (LInt32 11) :| [])
+    )
+
+fixtureY1r =
+  Constant
+    ()
+    ( With
+        []
+        (TIntrinsic IInt32)
+    )
+    ( EDictionaryApplication
+        ()
+        (TIntrinsic IInt32)
+        (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32"))
+        (Trait "Numeric" (TIntrinsic IInt32) :| [])
+        [ELiteral () (LInt32 11)]
+    )
+
+fixtureY2 =
+  Constant
+    ()
+    ( With
+        []
+        (TVariable (TypeIndex KType 0))
+    )
+    ( EApplication
+        ()
+        (TVariable (TypeIndex KType 0))
+        (EVariable () (Label (TIntrinsic IInt32 ~> TVariable (TypeIndex KType 0)) "from_int32"))
+        (ELiteral () (LInt32 11) :| [])
+    )
+
+fixtureY2r =
+  Constant
+    ()
+    ( With
+        [Trait "Numeric" (TVariable (TypeIndex KType 0))]
+        (TVariable (TypeIndex KType 0))
+    )
+    ( EDictionaryLambda
+        ()
+        (Trait "Numeric" (TVariable (TypeIndex KType 0)) :| [])
+        ( EDictionaryApplication
+            ()
+            (TVariable (TypeIndex KType 0))
+            (EVariable () (Label (TIntrinsic IInt32 ~> TVariable (TypeIndex KType 0)) "from_int32"))
+            (Trait "Numeric" (TVariable (TypeIndex KType 0)) :| [])
+            [ELiteral () (LInt32 11)]
+        )
+    )
+
 fixtureX1 =
   Constant
     ()

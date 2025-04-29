@@ -48,14 +48,15 @@ translateExpression =
         (translateExpression e1)
         (translateExpression e2)
         (translateExpression e3)
---    EUnaryOperator a t UnaryOperator
---    EBinaryOperator a t BinaryOperator
---    ERecord a t (Dictionary (Expression a t)) (Maybe (Expression a t))
+    --    EUnaryOperator a t UnaryOperator
+    --    EBinaryOperator a t BinaryOperator
+    --    ERecord a t (Dictionary (Expression a t)) (Maybe (Expression a t))
     EListCons a t e1 e2 ->
       Lowpass.cons (translateExpression e1) (translateExpression e2)
---    EListLiteral a t [Expression a t]
+    --    EListLiteral a t [Expression a t]
     ETuple _ _ es ->
       Lowpass.tupleExpr (translateExpression <$> es)
+
 --    EMatch a t (Expression a t) (List1 (Clause a t))
 --    ECompiledMatch a t (Expression a t) (List1 (CompiledClause a t))
 --    EFold a t (List1 (Expression a t)) (List1 (Clause a t)) (Maybe (Expression a t))

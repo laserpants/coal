@@ -1197,6 +1197,10 @@ story = do
     runTraitTransformZ testEnvZ2 (transformModuleZ Noll.Set.Test09.moduleBinarySearch) (freshIdIn Noll.Set.Test09.moduleBinarySearch) == Noll.Set.Test10.moduleBinarySearch
   it "" $
     runTraitTransformZ testEnvZ2 (transformModuleZ Noll.Set.Test09.moduleMain) (freshIdIn Noll.Set.Test09.moduleMain) == Noll.Set.Test10.moduleMain
+  it "" $
+    result fixtureY1 == fixtureY1r
+  it "" $
+    result fixtureY2 == fixtureY2r
 
 --  it "" $
 --    pure True -- TODO : Dictionary insertion
