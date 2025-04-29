@@ -1,11 +1,11 @@
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Compiler.Lowpass.TranslateType where
+module Noll.Compiler.Lowpass.TranslateType (translateType) where
 
 import Noll.Language.Type
-import Noll.Language.Type.Row
 import Noll.Language.Type.Intrinsic
+import Noll.Language.Type.Row
 
 import qualified Lang.Lowpass.Language as Lowpass
 
