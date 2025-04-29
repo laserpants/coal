@@ -4,7 +4,7 @@
 module Noll.Language.Primitive (Primitive (..)) where
 
 import Data.Data (Data, Typeable)
-import Data.Text (Text)
+import Data.ByteString (ByteString)
 import GHC.Int (Int32, Int64)
 
 -- | Language primitives
@@ -26,5 +26,5 @@ data Primitive
   | -- | Unicode character type
     LChar Int32
   | -- | Strings
-    LString Text
+    LString ByteString
   deriving (Show, Eq, Ord, Read, Data, Typeable)
