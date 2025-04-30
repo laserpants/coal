@@ -3,9 +3,11 @@
 
 module Noll.Compiler.Lowpass.TranslateExpression where
 
-import Lang.Common.List1 (NonEmpty (..))
+import Lang.Common.List1 (List1, NonEmpty (..))
 import Lang.Label (Label (..))
 import Noll.Compiler.Lowpass.TranslateType (translateType)
+import Noll.Language.Expression.Operator.Unary
+import Noll.Language.Expression.Operator.Binary
 import Noll.Language.Expression
 import Noll.Language.Expression.Binding
 import Noll.Language.Pattern
@@ -41,6 +43,10 @@ translateExpression =
   \case
     EAnnotation _ _ e ->
       translateExpression e
+    EApplication _ t (EUnaryOperator _ _ op) es ->
+      undefined
+    EApplication _ t (EBinaryOperator _ _ op) es ->
+      translateBinaryOperator op es
     EApplication _ t e es ->
       Lowpass.app (translateType t) (translateExpression e) (translateExpression <$> es)
     ELambda _ ps e ->
@@ -109,3 +115,7 @@ translateClause =
 
 translateLabel :: Label (Type o k) -> Label Lowpass.Type
 translateLabel (Label t name) = Label (translateType t) name
+
+translateBinaryOperator :: BinaryOperator -> List1 (Expression a (Type o k)) -> Lowpass.Expr Lowpass.Type
+translateBinaryOperator op es =
+  undefined

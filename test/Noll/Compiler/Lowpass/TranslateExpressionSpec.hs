@@ -2,14 +2,15 @@
 
 module Noll.Compiler.Lowpass.TranslateExpressionSpec where
 
-import Noll.Compiler.Lowpass.TranslateExpression
 import Lang.Common.List1 (NonEmpty (..), (<|))
 import Lang.Label (Label (..))
+import Noll.Compiler.Lowpass.TranslateExpression
 import Noll.Language
 import Noll.Module (Constant (..), Definition (..), Function (..), Module (..), Path (..))
 
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
+import qualified Lang.Lowpass.Language as LP
 import qualified Noll.Module as Module
 
 foobaz1 =
@@ -63,3 +64,16 @@ foobaz1 =
           )
       )
   )
+
+foobaz1r =
+  LP.lam
+    (Label LP.TOpq "x" <| Label LP.TOpq "y" :| [])
+    ( LP.if_
+        undefined
+        (LP.var (Label (LP.TCon "Ordering" []) "LessThan"))
+        ( LP.if_
+            undefined
+            (LP.var (Label (LP.TCon "Ordering" []) "GreaterThan"))
+            (LP.var (Label (LP.TCon "Ordering" []) "EqualTo"))
+        )
+    )
