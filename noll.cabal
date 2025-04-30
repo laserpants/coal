@@ -29,7 +29,6 @@ library
       Noll.Ast.Indexed
       Noll.Compiler
       Noll.Compiler.Lowpass.TranslateExpression
-      Noll.Compiler.Lowpass.TranslateExpressionSpec
       Noll.Compiler.Lowpass.TranslateType
       Noll.Compiler.NormalizeObjects
       Noll.Compiler.PatternMatching
@@ -133,6 +132,7 @@ test-suite noll-test
   other-modules:
       Noll.Ast.FreeVarsSpec
       Noll.Ast.IndexedSpec
+      Noll.Compiler.Lowpass.TranslateExpressionSpec
       Noll.Compiler.NormalizeObjectsSpec
       Noll.Compiler.PatternMatchingExamples.Test01
       Noll.Compiler.PatternMatchingExamples.Test02
