@@ -6,6 +6,7 @@ module Noll.Compiler.Lowpass.TranslateExpression where
 import Lang.Label (Label (..))
 import Noll.Compiler.Lowpass.TranslateType (translateType)
 import Noll.Language.Expression
+import Noll.Language.Expression.Binding
 import Noll.Language.Pattern
 import Noll.Language.Primitive
 import Noll.Language.Type
@@ -39,14 +40,14 @@ translateExpression =
   \case
     EAnnotation _ _ e ->
       translateExpression e
-    EApplication a t e es ->
-      undefined
+    EApplication _ t e es ->
+      Lowpass.app (translateType t) (translateExpression e) (translateExpression <$> es)
     ELambda _ ps e ->
       Lowpass.lam (translatePattern <$> ps) (translateExpression e)
-    ELet a vs e ->
-      undefined
-    ERecursiveLet a p e1 e2 ->
-      undefined
+    ELet _ vs e ->
+      Lowpass.let_ (translateBinding <$> vs) (translateExpression e)
+    ERecursiveLet _ p e1 e2 ->
+      Lowpass.let_ undefined undefined
     EVariable _ ll ->
       Lowpass.var (translateLabel ll)
     EConstructor _ (Label t name) ->
@@ -54,10 +55,7 @@ translateExpression =
     ELiteral _ p ->
       Lowpass.lit (translatePrimitive p)
     EIf _ _ e1 e2 e3 ->
-      Lowpass.if_
-        (translateExpression e1)
-        (translateExpression e2)
-        (translateExpression e3)
+      Lowpass.if_ (translateExpression e1) (translateExpression e2) (translateExpression e3)
     EUnaryOperator a t op ->
       undefined
     EBinaryOperator a t op ->
@@ -84,6 +82,12 @@ translateExpression =
       undefined
     EDictionaryApplication a t e ts es ->
       undefined
+
+translateBinding :: Binding Expression a (Type o k) -> Lowpass.Binding Lowpass.Type (Lowpass.Expr Lowpass.Type)
+translateBinding =
+  \case
+    BPattern _ (PVariable _ (Label t name)) e ->
+      Lowpass.Binding (Label (translateType t) name) (translateExpression e)
 
 translatePattern :: Pattern a (Type o k) -> Label Lowpass.Type
 translatePattern =
