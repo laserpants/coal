@@ -3,7 +3,6 @@
 module Noll.Compiler.Lowpass.TranslateExpressionSpec where
 
 import Noll.Compiler.Lowpass.TranslateExpression
-
 import Lang.Common.List1 (NonEmpty (..), (<|))
 import Lang.Label (Label (..))
 import Noll.Language
