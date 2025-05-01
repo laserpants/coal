@@ -18,6 +18,8 @@ import Noll.Language.Primitive
 
 import qualified Lang.Lowpass.Language as Lowpass
 
+type LowpassExpr = Lowpass.Expr Lowpass.Type
+
 translatePrimitive :: Primitive -> Lowpass.Prim
 translatePrimitive =
   \case
@@ -40,7 +42,7 @@ translatePrimitive =
     LString str ->
       Lowpass.PString str
 
-translateExpression :: (Data a) => Expression a IndexedType -> Lowpass.Expr Lowpass.Type
+translateExpression :: (Data a) => Expression a IndexedType -> LowpassExpr
 translateExpression =
   \case
     EAnnotation _ _ e ->
@@ -97,7 +99,7 @@ translateExpression =
     EDictionaryApplication a t e ts es ->
       undefined
 
-translateBinding :: (Data a) => Binding Expression a IndexedType -> Lowpass.Binding Lowpass.Type (Lowpass.Expr Lowpass.Type)
+translateBinding :: (Data a) => Binding Expression a IndexedType -> Lowpass.Binding Lowpass.Type LowpassExpr
 translateBinding =
   \case
     BPattern _ (PVariable _ ll) e ->
@@ -109,19 +111,25 @@ translatePattern =
     PVariable a (Label t name) ->
       Label (translateType t) name
 
-translateClause :: (Data a) => CompiledClause a IndexedType -> Lowpass.Clause Lowpass.Type (Lowpass.Expr Lowpass.Type)
+translateClause :: (Data a) => CompiledClause a IndexedType -> Lowpass.Clause Lowpass.Type LowpassExpr
 translateClause =
   \case
     ECompiledClause lls e ->
       Lowpass.Clause (translateLabel <$> lls) (translateExpression e)
 
+{-# INLINE translateLabel #-}
 translateLabel :: Label IndexedType -> Label Lowpass.Type
 translateLabel (Label t name) = Label (translateType t) name
 
-translateBinaryOperator :: (Data a) => BinaryOperator -> List1 (Expression a IndexedType) -> Lowpass.Expr Lowpass.Type
-translateBinaryOperator OLessThan (e1 :| [e2])
-  | (typeOf e1 :: IndexedType) == TIntrinsic IInt32 =
-      Lowpass.op (Lowpass.OLtInt32 (translateExpression e1) (translateExpression e2))
-translateBinaryOperator OGreaterThan (e1 :| [e2])
-  | (typeOf e1 :: IndexedType) == TIntrinsic IInt32 =
-      Lowpass.op (Lowpass.OGtInt32 (translateExpression e1) (translateExpression e2))
+translateBinaryOperator :: (Data a) => BinaryOperator -> List1 (Expression a IndexedType) -> LowpassExpr
+translateBinaryOperator OLessThan es = binop Lowpass.OLtInt32 es (TIntrinsic IInt32, TIntrinsic IInt32)
+translateBinaryOperator OGreaterThan es = binop Lowpass.OGtInt32 es (TIntrinsic IInt32, TIntrinsic IInt32)
+
+binop :: (Data a) => (LowpassExpr -> LowpassExpr -> Lowpass.Op LowpassExpr) -> List1 (Expression a IndexedType) -> (IndexedType, IndexedType) -> LowpassExpr
+binop op (e1 :| [e2]) (t1, t2)
+  | t1 `hasType` e1 && t2 `hasType` e2 =
+      Lowpass.op (op (translateExpression e1) (translateExpression e2))
+
+{-# INLINE hasType #-}
+hasType :: (Data a) => IndexedType -> Expression a IndexedType -> Bool
+hasType t e = (typeOf e :: IndexedType) == t
