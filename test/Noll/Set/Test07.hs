@@ -5,7 +5,7 @@ module Noll.Set.Test07 where
 import Lang.Common.List1 (NonEmpty (..), (<|))
 import Lang.Label (Label (..))
 import Noll.Language
-import Noll.Module (Constant (..), Definition (..), Function (..), Module (..), Path (..))
+import Noll.Module
 
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
@@ -125,57 +125,56 @@ moduleOrdered =
                 )
             )
         ]
-    , ( DAnnotation
-          ( With
-              [Trait "Ordered" (TVariable (Parameter () "a"))]
-              ( TAlias
-                  "Predicate"
-                  [TVariable (Parameter () "a")]
-                  (TVariable (Parameter () "a") `TArrow` TIntrinsic IBool)
-              )
-          )
-          ( DConstant
-              "less_than_or_equal_to"
-              ( Constant
-                  ()
-                  (With [] (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool))
-                  ( ELambda
-                      ()
-                      ( PVariable () (Label (TVariable (TypeIndex KType 0)) "m")
-                          <| PVariable () (Label (TVariable (TypeIndex KType 0)) "n")
-                          :| []
-                      )
-                      ( EMatch
-                          ()
-                          (TIntrinsic IBool)
-                          ( EApplication
+    , DAnnotation
+        ( With
+            [Trait "Ordered" (TVariable (Parameter () "a"))]
+            ( TAlias
+                "Predicate"
+                [TVariable (Parameter () "a")]
+                (TVariable (Parameter () "a") `TArrow` TIntrinsic IBool)
+            )
+        )
+        ( DConstant
+            "less_than_or_equal_to"
+            ( Constant
+                ()
+                (With [] (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool))
+                ( ELambda
+                    ()
+                    ( PVariable () (Label (TVariable (TypeIndex KType 0)) "m")
+                        <| PVariable () (Label (TVariable (TypeIndex KType 0)) "n")
+                        :| []
+                    )
+                    ( EMatch
+                        ()
+                        (TIntrinsic IBool)
+                        ( EApplication
+                            ()
+                            (TConstructor KType "Ordering")
+                            (EVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TConstructor KType "Ordering") "compare"))
+                            ( EVariable () (Label (TVariable (TypeIndex KType 0)) "m")
+                                <| EVariable () (Label (TVariable (TypeIndex KType 0)) "n")
+                                :| []
+                            )
+                        )
+                        ( EClause
+                            ()
+                            (PConstructor () (Label (TConstructor KType "Ordering") "LessThan") [])
+                            (CPlain () [] (ELiteral () (LBool True)) :| [])
+                            <| EClause
                               ()
-                              (TConstructor KType "Ordering")
-                              (EVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TConstructor KType "Ordering") "compare"))
-                              ( EVariable () (Label (TVariable (TypeIndex KType 0)) "m")
-                                  <| EVariable () (Label (TVariable (TypeIndex KType 0)) "n")
-                                  :| []
-                              )
-                          )
-                          ( EClause
-                              ()
-                              (PConstructor () (Label (TConstructor KType "Ordering") "LessThan") [])
+                              (PConstructor () (Label (TConstructor KType "Ordering") "EqualTo") [])
                               (CPlain () [] (ELiteral () (LBool True)) :| [])
-                              <| EClause
-                                ()
-                                (PConstructor () (Label (TConstructor KType "Ordering") "EqualTo") [])
-                                (CPlain () [] (ELiteral () (LBool True)) :| [])
-                              <| EClause
-                                ()
-                                (PConstructor () (Label (TConstructor KType "Ordering") "GreaterThan") [])
-                                (CPlain () [] (ELiteral () (LBool False)) :| [])
-                              :| []
-                          )
-                      )
-                  )
-              )
-          )
-      )
+                            <| EClause
+                              ()
+                              (PConstructor () (Label (TConstructor KType "Ordering") "GreaterThan") [])
+                              (CPlain () [] (ELiteral () (LBool False)) :| [])
+                            :| []
+                        )
+                    )
+                )
+            )
+        )
     , -- greater_than
       DAnnotation
         ( With
@@ -1608,11 +1607,10 @@ moduleBinarySearch =
                                 ( PVariable
                                     ()
                                     ( Label
-                                        ( ( TApplication
-                                              KType
-                                              (TConstructor (KArrow KType KType) "Tree")
-                                              (TVariable (TypeIndex KType 3) :| [])
-                                          )
+                                        ( TApplication
+                                            KType
+                                            (TConstructor (KArrow KType KType) "Tree")
+                                            (TVariable (TypeIndex KType 3) :| [])
                                             `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 3)))
                                         )
                                         "$fold.2"

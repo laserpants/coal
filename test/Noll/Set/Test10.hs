@@ -1993,7 +1993,7 @@ moduleBinarySearch =
                             )
                             <| EDictionaryApplication
                               ()
-                              ( (TIntrinsic (IList (TVariable (TypeIndex KType 5))))
+                              ( TIntrinsic (IList (TVariable (TypeIndex KType 5)))
                                   `TArrow` TApplication
                                     KType
                                     (TConstructor (KArrow KType KType) "Tree")
