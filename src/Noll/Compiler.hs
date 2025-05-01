@@ -30,7 +30,7 @@ module Noll.Compiler where
 --  getSolverRuleViolationsC,
 -- ) where
 
-import Control.Monad.Reader (MonadReader, ReaderT, ask, runReaderT)
+import Control.Monad.Reader (MonadReader, ReaderT, ask, asks, runReaderT)
 import Control.Monad.State (MonadState, StateT, gets, modify, put, runState, runStateT)
 import Control.Monad.Writer (execWriter)
 import Data.Data (Data)
@@ -43,42 +43,13 @@ import Lang.Label (Label (..))
 import Lang.Utils (Dictionary, Name, Over, forM_, (<$$$>))
 import Noll.Ast.HasType (foldTypeOf)
 import Noll.Ast.Indexed (indexed)
-import Noll.Language (
-  Binding (..),
-  Constructor (..),
-  Expression (..),
-  HasType (..),
-  IndexedType,
-  Kind (..),
-  Pattern (..),
-  Scheme (..),
-  Type (..),
-  TypeIndex (..),
-  TypeIndexed (..),
-  With (..),
-  normalizeRowTypes,
-  typeOf,
- )
+import Noll.Language
 import Noll.Module (Constant (..), Definition (..), Function (..), definitionName)
-import Noll.SystemF (
-  Assumption (..),
-  Constraint (..),
-  ConstraintsGenContext (..),
-  ConstraintsGenError (..),
-  ConstraintsGenOutput,
-  ConstraintsGenStack (..),
-  ConstraintsGenState (..),
-  InferenceRule (..),
-  Substitutable (..),
-  Substitution (..),
-  checkTypeAnnotationParameters,
-  collectConstraints,
-  normalizeTypeIndexes,
-  runConstraintsGenStack,
-  solveConstraints,
- )
+import Noll.SystemF
+import Noll.SystemF.Substitution (mapsTo)
 
 import qualified Data.Map.Strict as Map
+import qualified Data.Text as Text
 import qualified Lang.Common.Environment as Environment
 
 type CompilerAssumption = Assumption IndexedType
@@ -88,6 +59,7 @@ type CompilerConstraint a = Constraint (InferenceRule Kind a) TypeIndex Kind Ind
 data CompilerEnvironment = CompilerEnvironment
   { compilerDataConstructorEnv :: Environment (Constructor TypeIndex Kind IndexedType)
   , compilerTypeConstructorEnv :: Environment Kind
+  , compilerTraitEnvironment :: Environment (TypeIndex Kind, Environment (Scheme TypeIndex Kind IndexedType))
   }
   deriving (Show, Eq, Ord, Read)
 
@@ -498,13 +470,27 @@ typeCheckDefinition d =
       pure ()
     DSignature{} ->
       pure ()
-    DInstance name t ds ->
-      forM_ ds typeCheckDefinition
+    DInstance trait t1 ds -> do
+      traitEnvironment <- asks compilerTraitEnvironment
+      case Environment.lookup trait traitEnvironment of
+        Nothing ->
+          error ("Missing trait: " <> Text.unpack trait)
+        Just (tx, defs) -> do
+          forM_ ds $ \d -> do
+            case Environment.lookup (definitionName d) defs of
+              Nothing ->
+                error ("Missing implementation: " <> Text.unpack (definitionName d))
+              Just s -> do
+                insertConstraintsC [Explicit (InferenceRule 999) (typeOf d) (instantiateTemplate tx t1 s)]
+                compileDefinitionC2 d
     _ -> do
       compileDefinitionC2 d
       sub <- solveC2
       -- traceShowM (definitionName d, typeOf (apply sub d) :: Type TypeIndex Kind)
       defineC (definitionName d) (typeOf (apply sub d))
+
+instantiateTemplate :: TypeIndex Kind -> IndexedType -> Scheme TypeIndex Kind IndexedType -> Scheme TypeIndex Kind IndexedType
+instantiateTemplate (TypeIndex _ n) t1 (Forall vs ts t) = Forall vs ts (apply (n `mapsTo` t1) t)
 
 defineC :: (Monad m) => Name -> IndexedType -> CompilerT a m ()
 defineC name t = insertNameC name (Forall (typeIndexesIn s) [] s)

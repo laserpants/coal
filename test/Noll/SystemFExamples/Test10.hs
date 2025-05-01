@@ -39,7 +39,7 @@ spec =
 runTest :: (Show a, Eq a, Data a) => Function Expression a () -> TestResult (Function Expression a (Type TypeIndex Kind)) a
 runTest =
   runTypedFunctionTest
-    (CompilerEnvironment env1 env2)
+    (CompilerEnvironment env1 env2 env3)
     [
       ( "not"
       , Forall
@@ -66,6 +66,9 @@ runTest =
     Environment.fromList
       [ ("Ordering", KType)
       ]
+  env3 =
+    Environment.fromList
+      []
 
 --
 -- gt(x) = not <<< lte(x)

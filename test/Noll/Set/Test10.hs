@@ -78,11 +78,11 @@ moduleOrdered =
             "compare"
             ( Constant
                 ()
-                (With [] (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TConstructor KType "Ordering"))
+                (With [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TConstructor KType "Ordering"))
                 ( ELambda
                     ()
-                    ( PVariable () (Label (TVariable (TypeIndex KType 0)) "x")
-                        <| PVariable () (Label (TVariable (TypeIndex KType 0)) "y")
+                    ( PVariable () (Label (TIntrinsic IInt32) "x")
+                        <| PVariable () (Label (TIntrinsic IInt32) "y")
                         :| []
                     )
                     ( EIf
@@ -93,14 +93,11 @@ moduleOrdered =
                             (TIntrinsic IBool)
                             ( EBinaryOperator
                                 ()
-                                ( (TVariable (TypeIndex KType 0))
-                                    `TArrow` (TVariable (TypeIndex KType 0))
-                                    `TArrow` TIntrinsic IBool
-                                )
+                                (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IBool)
                                 OLessThan
                             )
-                            ( EVariable () (Label (TVariable (TypeIndex KType 0)) "x")
-                                <| EVariable () (Label (TVariable (TypeIndex KType 0)) "y")
+                            ( EVariable () (Label (TIntrinsic IInt32) "x")
+                                <| EVariable () (Label (TIntrinsic IInt32) "y")
                                 :| []
                             )
                         )
@@ -113,14 +110,11 @@ moduleOrdered =
                                 (TIntrinsic IBool)
                                 ( EBinaryOperator
                                     ()
-                                    ( (TVariable (TypeIndex KType 0))
-                                        `TArrow` (TVariable (TypeIndex KType 0))
-                                        `TArrow` TIntrinsic IBool
-                                    )
+                                    (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IBool)
                                     OGreaterThan
                                 )
-                                ( EVariable () (Label (TVariable (TypeIndex KType 0)) "x")
-                                    <| EVariable () (Label (TVariable (TypeIndex KType 0)) "y")
+                                ( EVariable () (Label (TIntrinsic IInt32) "x")
+                                    <| EVariable () (Label (TIntrinsic IInt32) "y")
                                     :| []
                                 )
                             )
@@ -145,18 +139,18 @@ moduleOrdered =
               ( Constant
                   ()
                   ( With
-                      [Trait "Ordered" (TVariable (TypeIndex KType 1))]
-                      (TVariable (TypeIndex KType 1) `TArrow` TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool)
+                      [Trait "Ordered" (TVariable (TypeIndex KType 0))]
+                      (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
                   )
                   ( EDictionaryLambda
                       ()
-                      ( Trait "Ordered" (TVariable (TypeIndex KType 1))
+                      ( Trait "Ordered" (TVariable (TypeIndex KType 0))
                           :| []
                       )
                       ( ELambda
                           ()
-                          ( PVariable () (Label (TVariable (TypeIndex KType 1)) "m")
-                              <| PVariable () (Label (TVariable (TypeIndex KType 1)) "n")
+                          ( PVariable () (Label (TVariable (TypeIndex KType 0)) "m")
+                              <| PVariable () (Label (TVariable (TypeIndex KType 0)) "n")
                               :| []
                           )
                           ( ECompiledMatch
@@ -165,12 +159,12 @@ moduleOrdered =
                               ( EDictionaryApplication
                                   ()
                                   (TConstructor KType "Ordering")
-                                  (EVariable () (Label (TVariable (TypeIndex KType 1) `TArrow` TVariable (TypeIndex KType 1) `TArrow` TConstructor KType "Ordering") "compare"))
-                                  ( Trait "Ordered" (TVariable (TypeIndex KType 1))
+                                  (EVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TConstructor KType "Ordering") "compare"))
+                                  ( Trait "Ordered" (TVariable (TypeIndex KType 0))
                                       :| []
                                   )
-                                  [ EVariable () (Label (TVariable (TypeIndex KType 1)) "m")
-                                  , EVariable () (Label (TVariable (TypeIndex KType 1)) "n")
+                                  [ EVariable () (Label (TVariable (TypeIndex KType 0)) "m")
+                                  , EVariable () (Label (TVariable (TypeIndex KType 0)) "n")
                                   ]
                               )
                               ( ECompiledClause
@@ -205,28 +199,28 @@ moduleOrdered =
             ( Constant
                 ()
                 ( With
-                    [Trait "Ordered" (TVariable (TypeIndex KType 2))]
-                    (TVariable (TypeIndex KType 2) `TArrow` TVariable (TypeIndex KType 2) `TArrow` TIntrinsic IBool)
+                    [Trait "Ordered" (TVariable (TypeIndex KType 1))]
+                    (TVariable (TypeIndex KType 1) `TArrow` TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool)
                 )
                 ( EDictionaryLambda
                     ()
-                    (Trait "Ordered" (TVariable (TypeIndex KType 2)) :| [])
+                    (Trait "Ordered" (TVariable (TypeIndex KType 1)) :| [])
                     ( ELambda
                         ()
                         ( PAnnotation
                             ()
                             (TVariable (Parameter () "a"))
-                            (PVariable () (Label (TVariable (TypeIndex KType 2)) "n"))
+                            (PVariable () (Label (TVariable (TypeIndex KType 1)) "n"))
                             :| []
                         )
                         ( EApplication
                             ()
-                            (TVariable (TypeIndex KType 2) `TArrow` TIntrinsic IBool)
+                            (TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool)
                             ( EBinaryOperator
                                 ()
                                 ( (TIntrinsic IBool `TArrow` TIntrinsic IBool)
-                                    `TArrow` (TVariable (TypeIndex KType 2) `TArrow` TIntrinsic IBool)
-                                    `TArrow` TVariable (TypeIndex KType 2)
+                                    `TArrow` (TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool)
+                                    `TArrow` TVariable (TypeIndex KType 1)
                                     `TArrow` TIntrinsic IBool
                                 )
                                 OReverseComposition
@@ -234,10 +228,10 @@ moduleOrdered =
                             ( EVariable () (Label (TIntrinsic IBool `TArrow` TIntrinsic IBool) "not")
                                 <| EDictionaryApplication
                                   ()
-                                  (TVariable (TypeIndex KType 2) `TArrow` TIntrinsic IBool)
-                                  (EVariable () (Label (TVariable (TypeIndex KType 2) `TArrow` TVariable (TypeIndex KType 2) `TArrow` TIntrinsic IBool) "less_than_or_equal_to"))
-                                  (Trait "Ordered" (TVariable (TypeIndex KType 2)) :| [])
-                                  [EVariable () (Label (TVariable (TypeIndex KType 2)) "n")]
+                                  (TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool)
+                                  (EVariable () (Label (TVariable (TypeIndex KType 1) `TArrow` TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool) "less_than_or_equal_to"))
+                                  (Trait "Ordered" (TVariable (TypeIndex KType 1)) :| [])
+                                  [EVariable () (Label (TVariable (TypeIndex KType 1)) "n")]
                                 :| []
                             )
                         )

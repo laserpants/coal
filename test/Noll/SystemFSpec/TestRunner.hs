@@ -136,7 +136,7 @@ runTypedExpressionTest env names e =
     pure (TestResult (normalizeTypeIndexes e2) as errs0 errs1)
 
 testRunner :: (CompilerEnvironment -> t) -> t
-testRunner f = f (CompilerEnvironment testDataConstructorEnv testTypeConstructorEnv)
+testRunner f = f (CompilerEnvironment testDataConstructorEnv testTypeConstructorEnv testTraitEnvironment)
 
 testDataConstructorEnv :: Environment (Constructor TypeIndex Kind (Type TypeIndex Kind))
 testDataConstructorEnv =
@@ -220,3 +220,7 @@ testTypeConstructorEnv =
     , ("IntPair", KType)
     , ("Id", KArrow KType KType)
     ]
+
+testTraitEnvironment =
+  Environment.fromList
+    []

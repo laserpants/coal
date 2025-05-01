@@ -70,7 +70,7 @@ spec =
 runTest :: (Show a, Eq a, Data a) => Expression a () -> TestResult (Expression a (Type TypeIndex Kind)) a
 runTest =
   runTypedExpressionTest
-    (CompilerEnvironment env1 env2)
+    (CompilerEnvironment env1 env2 env3)
     [
       ( "from_int32"
       , Forall
@@ -155,6 +155,9 @@ runTest =
         , KArrow KType KType
         )
       ]
+  env3 =
+    Environment.fromList
+      []
 
 --
 -- let

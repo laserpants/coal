@@ -70,6 +70,9 @@ baz =
         ( Environment.fromList
             []
         )
+        ( Environment.fromList
+            []
+        )
     )
     [
       ( "compare"

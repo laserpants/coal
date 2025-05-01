@@ -138,6 +138,27 @@ baz3 =
               )
             ]
         )
+        ( Environment.fromList
+            [
+              ( "Ordered"
+              ,
+                ( TypeIndex KType 0
+                , Environment.fromList
+                    [
+                      ( "compare"
+                      , Forall
+                          (Set.fromList [TypeIndex KType 0])
+                          []
+                          ( TVariable (TypeIndex KType 0)
+                              `TArrow` TVariable (TypeIndex KType 0)
+                              `TArrow` (TConstructor KType "Ordering")
+                          )
+                      )
+                    ]
+                )
+              )
+            ]
+        )
     )
     [
       ( "compare"
@@ -235,6 +256,9 @@ compileOrPatterns =
         ( Environment.fromList
             []
         )
+        ( Environment.fromList
+            []
+        )
     )
     [
       ( "compare"
@@ -315,6 +339,9 @@ baz =
               , KArrow KType KType
               )
             ]
+        )
+        ( Environment.fromList
+            []
         )
     )
     [
@@ -457,6 +484,9 @@ baz2 =
                   )
               )
             ]
+        )
+        ( Environment.fromList
+            []
         )
         ( Environment.fromList
             []
@@ -3431,4 +3461,89 @@ fixture6 =
 --                :| []
 --            )
 --        )
---    )
+-- a    )
+
+bazz :: [Definition () Kind t] -> TestResult [Definition () Kind IndexedType] ()
+bazz =
+  runTypedDefinitionsTest
+    ( CompilerEnvironment
+        ( Environment.fromList
+            [
+              ( "LessThan"
+              , Constructor
+                  "LessThan"
+                  0
+                  (Forall mempty [] (TConstructor KType "Ordering"))
+              )
+            ,
+              ( "GreaterThan"
+              , Constructor
+                  "GreaterThan"
+                  0
+                  (Forall mempty [] (TConstructor KType "Ordering"))
+              )
+            ,
+              ( "EqualTo"
+              , Constructor
+                  "EqualTo"
+                  0
+                  (Forall mempty [] (TConstructor KType "Ordering"))
+              )
+            ,
+              ( "Node"
+              , Constructor
+                  "Node"
+                  3
+                  ( Forall
+                      (Set.fromList [TypeIndex KType 0])
+                      []
+                      ( tvariable0
+                          `TArrow` tree0
+                          `TArrow` tree0
+                          `TArrow` tree0
+                      )
+                  )
+              )
+            ,
+              ( "Leaf"
+              , Constructor
+                  "Leaf"
+                  0
+                  ( Forall
+                      (Set.fromList [TypeIndex KType 0])
+                      []
+                      tree0
+                  )
+              )
+            ]
+        )
+        ( Environment.fromList
+            [
+              ( "Tree"
+              , KArrow KType KType
+              )
+            ]
+        )
+        ( Environment.fromList
+            [
+              ( "Ordered"
+              ,
+                ( TypeIndex KType 0
+                , Environment.fromList
+                    [
+                      ( "compare"
+                      , Forall
+                          (Set.fromList [TypeIndex KType 0])
+                          []
+                          ( TVariable (TypeIndex KType 0)
+                              `TArrow` TVariable (TypeIndex KType 0)
+                              `TArrow` (TConstructor KType "Ordering")
+                          )
+                      )
+                    ]
+                )
+              )
+            ]
+        )
+    )
+    []

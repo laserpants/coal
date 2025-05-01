@@ -85,7 +85,7 @@ spec =
 runTest :: (Show a, Eq a, Data a) => Function Expression a () -> TestResult (Function Expression a (Type TypeIndex Kind)) a
 runTest =
   runTypedFunctionTest
-    (CompilerEnvironment env1 env2)
+    (CompilerEnvironment env1 env2 env3)
     []
  where
   env1 =
@@ -141,6 +141,9 @@ runTest =
         , KArrow KType KType
         )
       ]
+  env3 =
+    Environment.fromList
+      []
 
 --
 --  flatten(tree : Tree(a)) =>

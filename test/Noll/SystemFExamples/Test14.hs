@@ -73,7 +73,7 @@ spec =
 runTest :: (Show a, Eq a, Data a) => Constant Expression a () -> TestResult (Constant Expression a (Type TypeIndex Kind)) a
 runTest =
   runTypedConstantTest
-    (CompilerEnvironment env1 env2)
+    (CompilerEnvironment env1 env2 env3)
     [
       ( "flatten"
       , Forall
@@ -101,6 +101,9 @@ runTest =
         , KArrow KType KType
         )
       ]
+  env3 =
+    Environment.fromList
+      []
 
 --
 --  qsort = flatten << from_list

@@ -1162,6 +1162,8 @@ story = do
   it "" $
     runPatternDesugaring "v" 0 (desugarPatterns Noll.Set.Test05.moduleBinarySearch) == Noll.Set.Test06.moduleBinarySearch
   it "" $
+    runPatternDesugaring "v" 0 (desugarPatterns Noll.Set.Test05.moduleOrdered) == Noll.Set.Test06.moduleOrdered
+  it "" $
     runIdentity (Noll.Compiler.Transform.Pattern.OrExpansion.compileOrPatterns Noll.Set.Test06.moduleUtils) == Noll.Set.Test07.moduleUtils
   it "" $
     runIdentity (Noll.Compiler.Transform.Pattern.OrExpansion.compileOrPatterns Noll.Set.Test06.moduleOrdered) == Noll.Set.Test07.moduleOrdered
@@ -1201,6 +1203,3 @@ story = do
     result fixtureY1 == fixtureY1r
   it "" $
     result fixtureY2 == fixtureY2r
-
---  it "" $
---    pure True -- TODO : Dictionary insertion

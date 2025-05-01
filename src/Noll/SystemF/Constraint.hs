@@ -15,12 +15,7 @@ module Noll.SystemF.Constraint (
 import Data.Data (Data, Typeable)
 import Data.Set (Set, intersection, union)
 import Lang.Utils (Over)
-import Noll.Language (
-  HasActive (..),
-  Scheme (..),
-  TypeIndex (..),
-  TypeIndexed (..),
- )
+import Noll.Language (HasActive (..), Scheme (..), TypeIndex (..), TypeIndexed (..))
 
 -- | Monomorphic type variable set
 newtype Monomorphic m = Monomorphic {monomorphicSet :: Set m}
