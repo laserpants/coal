@@ -3,7 +3,7 @@
 
 module Noll.Compiler.Lowpass.TranslateExpression where
 
-import Data.Data (Data, Typeable)
+import Data.Data (Data)
 import Lang.Common.List1 (List1, NonEmpty (..))
 import Lang.Label (Label (..))
 import Noll.Ast.HasType (HasType (..))
@@ -122,14 +122,18 @@ translateLabel :: Label IndexedType -> Label Lowpass.Type
 translateLabel (Label t name) = Label (translateType t) name
 
 translateBinaryOperator :: (Data a) => BinaryOperator -> List1 (Expression a IndexedType) -> LowpassExpr
-translateBinaryOperator OLessThan es = binop Lowpass.OLtInt32 es (TIntrinsic IInt32, TIntrinsic IInt32)
-translateBinaryOperator OGreaterThan es = binop Lowpass.OGtInt32 es (TIntrinsic IInt32, TIntrinsic IInt32)
+translateBinaryOperator =
+  \case
+    OLessThan ->
+      binop Lowpass.OLtInt32 (TIntrinsic IInt32, TIntrinsic IInt32)
+    OGreaterThan ->
+      binop Lowpass.OGtInt32 (TIntrinsic IInt32, TIntrinsic IInt32)
 
-binop :: (Data a) => (LowpassExpr -> LowpassExpr -> Lowpass.Op LowpassExpr) -> List1 (Expression a IndexedType) -> (IndexedType, IndexedType) -> LowpassExpr
-binop op (e1 :| [e2]) (t1, t2)
-  | t1 `hasType` e1 && t2 `hasType` e2 =
+binop :: (Data a) => (LowpassExpr -> LowpassExpr -> Lowpass.Op LowpassExpr) -> (IndexedType, IndexedType) -> List1 (Expression a IndexedType) -> LowpassExpr
+binop op (t1, t2) (e1 :| [e2])
+  | e1 `hasType` t1 && e2 `hasType` t2 =
       Lowpass.op (op (translateExpression e1) (translateExpression e2))
 
 {-# INLINE hasType #-}
-hasType :: (Data a) => IndexedType -> Expression a IndexedType -> Bool
-hasType t e = (typeOf e :: IndexedType) == t
+hasType :: (Data a) => Expression a IndexedType -> IndexedType -> Bool
+hasType e t = (typeOf e :: IndexedType) == t
