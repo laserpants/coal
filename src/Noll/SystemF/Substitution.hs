@@ -20,23 +20,7 @@ import Data.List.NonEmpty (NonEmpty)
 import Data.Map.Strict (Map, keysSet, union)
 import Data.Set (Set, intersection)
 import Lang.Utils (IndexMap, Map, Set, fromMaybe)
-import Noll.Language (
-  Binding (..),
-  Choice (..),
-  Clause (..),
-  Expression (..),
-  Guard (..),
-  IndexedType,
-  Intrinsic (..),
-  Kind,
-  Pattern (..),
-  Row (..),
-  Scheme (..),
-  Trait (..),
-  Type (..),
-  TypeIndex (..),
-  TypeIndexed (..),
- )
+import Noll.Language
 import Noll.Module (Constant (..), Definition (..), Function (..))
 import Noll.SystemF.Constraint (Constraint (..), Monomorphic (..))
 
