@@ -63,7 +63,7 @@ translateType :: Type o k -> Lowpass.Type
 translateType =
   \case
     TApplication _ t ts ->
-      foldr translateApplication (translateType t) (translateType <$> ts)
+      foldr (translateApplication . translateType) (translateType t) ts
     TArrow t1 t2 ->
       Lowpass.arrow (translateType t1) (translateType t2)
     TConstructor _ name ->
