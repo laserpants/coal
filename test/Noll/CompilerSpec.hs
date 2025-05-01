@@ -3,50 +3,18 @@
 module Noll.CompilerSpec where
 
 import Control.Monad.Identity (runIdentity)
-import qualified Data.Set as Set
-import qualified Lang.Common.Environment as Environment
 import Lang.Common.List1 (NonEmpty (..), (<|))
 import Lang.Label (Label (..))
 import Noll.Compiler
 import Noll.CompilerExamples.Test02 (bazz)
-import Noll.Language (
-  BinaryOperator (..),
-  Choice (..),
-  Clause (..),
-  Constructor (..),
-  Expression (..),
-  IndexedType,
-  Intrinsic (..),
-  Kind (..),
-  Parameter (..),
-  Pattern (..),
-  Primitive (..),
-  Scheme (..),
-  Trait (..),
-  Type (..),
-  TypeIndex (..),
-  With (..),
- )
+import Noll.Language
 import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
-import Noll.SystemF (
-  Assumption (..),
-  Constraint (..),
-  ConstraintsGenContext (..),
-  ConstraintsGenError (..),
-  ConstraintsGenOutput,
-  ConstraintsGenStack (..),
-  ConstraintsGenState (..),
-  InferenceRule (..),
-  Substitutable (..),
-  Substitution (..),
-  checkTypeAnnotationParameters,
-  collectConstraints,
-  normalizeTypeIndexes,
-  runConstraintsGenStack,
-  solveConstraints,
- )
+import Noll.SystemF
 import Noll.SystemFSpec.TestRunner
 import Test.Hspec (Spec, describe, it)
+
+import qualified Data.Set as Set
+import qualified Lang.Common.Environment as Environment
 
 spec :: Spec
 spec =

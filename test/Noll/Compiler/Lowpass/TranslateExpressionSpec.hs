@@ -60,12 +60,22 @@ foobaz1 =
 
 foobaz1r =
   LP.lam
-    (Label LP.TOpq "x" <| Label LP.TOpq "y" :| [])
+    (Label LP.int32 "x" <| Label LP.int32 "y" :| [])
     ( LP.if_
-        undefined
+        ( LP.op
+            ( LP.OLtInt32
+                (LP.var (Label LP.int32 "x"))
+                (LP.var (Label LP.int32 "y"))
+            )
+        )
         (LP.var (Label (LP.TCon "Ordering" []) "LessThan"))
         ( LP.if_
-            undefined
+            ( LP.op
+                ( LP.OGtInt32
+                    (LP.var (Label LP.int32 "x"))
+                    (LP.var (Label LP.int32 "y"))
+                )
+            )
             (LP.var (Label (LP.TCon "Ordering" []) "GreaterThan"))
             (LP.var (Label (LP.TCon "Ordering" []) "EqualTo"))
         )
