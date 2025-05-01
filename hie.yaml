@@ -1,2 +1,22 @@
 cradle:
   stack:
+    - path: "./src"
+      component: "noll:lib"
+
+    - path: "./app"
+      component: "noll:exe:noll-exe"
+
+    - path: "./test"
+      component: "noll:test:noll-test"
+
+    - path: "../lowpass/src"
+      component: "lowpass:lib"
+
+    - path: "../lowpass/app"
+      component: "lowpass:exe:lowpass-exe"
+
+    - path: "../lowpass/test"
+      component: "lowpass:test:lowpass-test"
+
+    - path: "."
+      component: "noll:lib"
