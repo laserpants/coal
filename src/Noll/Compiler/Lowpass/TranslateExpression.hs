@@ -1,18 +1,21 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 module Noll.Compiler.Lowpass.TranslateExpression where
 
+import Data.Data (Data, Typeable)
 import Lang.Common.List1 (List1, NonEmpty (..))
 import Lang.Label (Label (..))
+import Noll.Ast.HasType (HasType (..))
 import Noll.Compiler.Lowpass.TranslateType (translateType)
+import Noll.Language
 import Noll.Language.Expression
 import Noll.Language.Expression.Binding
 import Noll.Language.Expression.Operator.Binary
 import Noll.Language.Expression.Operator.Unary
 import Noll.Language.Pattern
 import Noll.Language.Primitive
-import Noll.Language.Type
 
 import qualified Lang.Lowpass.Language as Lowpass
 
@@ -38,7 +41,7 @@ translatePrimitive =
     LString str ->
       Lowpass.PString str
 
-translateExpression :: Expression a (Type o k) -> Lowpass.Expr Lowpass.Type
+translateExpression :: (Eq k, Eq (o k), Data (o k), Data a, Data k, Typeable o) => Expression a (Type o k) -> Lowpass.Expr Lowpass.Type
 translateExpression =
   \case
     EAnnotation _ _ e ->
@@ -95,7 +98,7 @@ translateExpression =
     EDictionaryApplication a t e ts es ->
       undefined
 
-translateBinding :: Binding Expression a (Type o k) -> Lowpass.Binding Lowpass.Type (Lowpass.Expr Lowpass.Type)
+translateBinding :: (Eq k, Eq (o k), Data a, Data k, Data (o k), Typeable o) => Binding Expression a (Type o k) -> Lowpass.Binding Lowpass.Type (Lowpass.Expr Lowpass.Type)
 translateBinding =
   \case
     BPattern _ (PVariable _ ll) e ->
@@ -107,7 +110,7 @@ translatePattern =
     PVariable a (Label t name) ->
       Label (translateType t) name
 
-translateClause :: CompiledClause a (Type o k) -> Lowpass.Clause Lowpass.Type (Lowpass.Expr Lowpass.Type)
+translateClause :: (Eq k, Eq (o k), Data (o k), Data a, Data k, Typeable o) => CompiledClause a (Type o k) -> Lowpass.Clause Lowpass.Type (Lowpass.Expr Lowpass.Type)
 translateClause =
   \case
     ECompiledClause lls e ->
@@ -116,6 +119,7 @@ translateClause =
 translateLabel :: Label (Type o k) -> Label Lowpass.Type
 translateLabel (Label t name) = Label (translateType t) name
 
-translateBinaryOperator :: BinaryOperator -> List1 (Expression a (Type o k)) -> Lowpass.Expr Lowpass.Type
-translateBinaryOperator op es =
-  undefined
+translateBinaryOperator :: forall a o k. (Eq k, Eq (o k), Data a, Data (o k), Data k, HasType o k (Expression a (Type o k)), Typeable o) => BinaryOperator -> List1 (Expression a (Type o k)) -> Lowpass.Expr Lowpass.Type
+translateBinaryOperator OLessThan (e1 :| [e2])
+  | typeOf e1 == (TIntrinsic IInt32 :: Type o k) =
+      Lowpass.op (Lowpass.OLtInt32 (translateExpression e1) (translateExpression e2))

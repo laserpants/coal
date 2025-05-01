@@ -14,56 +14,49 @@ import qualified Lang.Lowpass.Language as LP
 import qualified Noll.Module as Module
 
 foobaz1 =
-  ( ELambda
-      ()
-      ( PVariable () (Label (TVariable (TypeIndex KType 0)) "x")
-          <| PVariable () (Label (TVariable (TypeIndex KType 0)) "y")
-          :| []
-      )
-      ( EIf
-          ()
-          (TConstructor KType "Ordering")
-          ( EApplication
-              ()
-              (TIntrinsic IBool)
-              ( EBinaryOperator
-                  ()
-                  ( (TVariable (TypeIndex KType 0))
-                      `TArrow` (TVariable (TypeIndex KType 0))
-                      `TArrow` TIntrinsic IBool
-                  )
-                  OLessThan
-              )
-              ( EVariable () (Label (TVariable (TypeIndex KType 0)) "x")
-                  <| EVariable () (Label (TVariable (TypeIndex KType 0)) "y")
-                  :| []
-              )
-          )
-          (EConstructor () (Label (TConstructor KType "Ordering") "LessThan"))
-          ( EIf
-              ()
-              (TConstructor KType "Ordering")
-              ( EApplication
-                  ()
-                  (TIntrinsic IBool)
-                  ( EBinaryOperator
-                      ()
-                      ( (TVariable (TypeIndex KType 0))
-                          `TArrow` (TVariable (TypeIndex KType 0))
-                          `TArrow` TIntrinsic IBool
-                      )
-                      OGreaterThan
-                  )
-                  ( EVariable () (Label (TVariable (TypeIndex KType 0)) "x")
-                      <| EVariable () (Label (TVariable (TypeIndex KType 0)) "y")
-                      :| []
-                  )
-              )
-              (EConstructor () (Label (TConstructor KType "Ordering") "GreaterThan"))
-              (EConstructor () (Label (TConstructor KType "Ordering") "EqualTo"))
-          )
-      )
-  )
+  ELambda
+    ()
+    ( PVariable () (Label (TIntrinsic IInt32) "x")
+        <| PVariable () (Label (TIntrinsic IInt32) "y")
+        :| []
+    )
+    ( EIf
+        ()
+        (TConstructor KType "Ordering")
+        ( EApplication
+            ()
+            (TIntrinsic IBool)
+            ( EBinaryOperator
+                ()
+                (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IBool)
+                OLessThan
+            )
+            ( EVariable () (Label (TIntrinsic IInt32) "x")
+                <| EVariable () (Label (TIntrinsic IInt32) "y")
+                :| []
+            )
+        )
+        (EConstructor () (Label (TConstructor KType "Ordering") "LessThan"))
+        ( EIf
+            ()
+            (TConstructor KType "Ordering")
+            ( EApplication
+                ()
+                (TIntrinsic IBool)
+                ( EBinaryOperator
+                    ()
+                    (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IBool)
+                    OGreaterThan
+                )
+                ( EVariable () (Label (TIntrinsic IInt32) "x")
+                    <| EVariable () (Label (TIntrinsic IInt32) "y")
+                    :| []
+                )
+            )
+            (EConstructor () (Label (TConstructor KType "Ordering") "GreaterThan"))
+            (EConstructor () (Label (TConstructor KType "Ordering") "EqualTo"))
+        )
+    )
 
 foobaz1r =
   LP.lam
