@@ -1597,11 +1597,10 @@ moduleBinarySearch =
                 ()
                 ( With
                     []
-                    ( ( TApplication
+                    ( TApplication
                           KType
                           (TConstructor (KArrow KType KType) "Tree")
                           (TVariable (TypeIndex KType 4) :| [])
-                      )
                         `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 4)))
                     )
                 )
@@ -1681,9 +1680,9 @@ moduleBinarySearch =
                                     (TIntrinsic (IList (TVariable (TypeIndex KType 4))))
                                     ( EBinaryOperator
                                         ()
-                                        ( (TIntrinsic (IList (TVariable (TypeIndex KType 4))))
-                                            `TArrow` (TIntrinsic (IList (TVariable (TypeIndex KType 4))))
-                                            `TArrow` (TIntrinsic (IList (TVariable (TypeIndex KType 4))))
+                                        ( TIntrinsic (IList (TVariable (TypeIndex KType 4)))
+                                            `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 4)))
+                                            `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 4)))
                                         )
                                         OListConcatenation
                                     )
