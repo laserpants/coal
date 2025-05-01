@@ -37,7 +37,7 @@ transUnifier :: Unifier a -> Solver s (Either UnificationError a)
 transUnifier u = do
   (r, q) <- runUnifier <$> get <*> pure u
   put q
-  pure r
+  return r
 
 newtype Solver s t = Solver {solverMonad :: RWS () [s] Int t}
   deriving
