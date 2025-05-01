@@ -56,10 +56,12 @@ type CompilerAssumption = Assumption IndexedType
 
 type CompilerConstraint a = Constraint (InferenceRule Kind a) TypeIndex Kind IndexedType
 
+type TraitImplementationEnv = Environment (Scheme TypeIndex Kind IndexedType)
+
 data CompilerEnvironment = CompilerEnvironment
   { compilerDataConstructorEnv :: Environment (Constructor TypeIndex Kind IndexedType)
   , compilerTypeConstructorEnv :: Environment Kind
-  , compilerTraitEnvironment :: Environment (TypeIndex Kind, Environment (Scheme TypeIndex Kind IndexedType))
+  , compilerTraitEnvironment :: Environment (TypeIndex Kind, TraitImplementationEnv)
   }
   deriving (Show, Eq, Ord, Read)
 
