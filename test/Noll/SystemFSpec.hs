@@ -3,6 +3,7 @@
 -- module Noll.SystemFSpec (spec) where
 module Noll.SystemFSpec where
 
+import Noll.Compiler.DenormalizeObjects (DenormalizeObjectsTransformContext (..))
 import Control.Monad.Identity
 import Control.Monad.Reader (runReader)
 import Data.List.NonEmpty ((<|))
@@ -40,6 +41,7 @@ import qualified Noll.Set.Test07
 import qualified Noll.Set.Test08
 import qualified Noll.Set.Test09
 import qualified Noll.Set.Test10
+import qualified Noll.Set.Test11
 
 spec :: Spec
 spec =
@@ -1203,3 +1205,5 @@ story = do
     result fixtureY1 == fixtureY1r
   it "" $
     result fixtureY2 == fixtureY2r
+  it "" $
+    denormalizeObject Noll.Set.Test10.prog1_10 == Noll.Set.Test11.prog1_11

@@ -11,7 +11,7 @@ import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import qualified Noll.Module as Module
 
--- Normalization
+-- Denormalization
 prog1_11 :: [Module () Kind IndexedType]
 prog1_11 =
   [ moduleUtils

@@ -28,6 +28,7 @@ library
       Noll.Ast.HasType
       Noll.Ast.Indexed
       Noll.Compiler
+      Noll.Compiler.DenormalizeObjects
       Noll.Compiler.Lowpass.TranslateDefinition
       Noll.Compiler.Lowpass.TranslateExpression
       Noll.Compiler.Lowpass.TranslateType
