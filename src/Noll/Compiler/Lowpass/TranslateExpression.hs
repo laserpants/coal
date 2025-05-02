@@ -1,7 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Compiler.Lowpass.TranslateExpression where
+module Noll.Compiler.Lowpass.TranslateExpression (translateExpression, translatePattern) where
 
 import Data.Data (Data)
 import Lang.Common.List1 (List1, NonEmpty (..))
