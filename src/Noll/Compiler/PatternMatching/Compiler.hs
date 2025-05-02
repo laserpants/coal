@@ -11,21 +11,8 @@ import Data.Data (Data, Typeable)
 import Lang.Common.List1 (List1, NonEmpty (..))
 import Lang.Label (Label (..))
 import Lang.Utils (const2)
-import Noll.Compiler.PatternMatching.Envelope (
-  EnvelopeClause (..),
-  EnvelopeExpression (..),
-  fails,
- )
-import Noll.Language (
-  BinaryOperator (..),
-  CompiledClause (..),
-  Expression (..),
-  HasType (..),
-  Intrinsic (..),
-  Pattern (..),
-  Type (..),
-  foldType,
- )
+import Noll.Compiler.PatternMatching.Envelope
+import Noll.Language
 
 class TypeProxy t where
   expressionType :: (Data a) => Expression a t -> t
