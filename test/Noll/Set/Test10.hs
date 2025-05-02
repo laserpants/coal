@@ -1598,9 +1598,9 @@ moduleBinarySearch =
                 ( With
                     []
                     ( TApplication
-                          KType
-                          (TConstructor (KArrow KType KType) "Tree")
-                          (TVariable (TypeIndex KType 4) :| [])
+                        KType
+                        (TConstructor (KArrow KType KType) "Tree")
+                        (TVariable (TypeIndex KType 4) :| [])
                         `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 4)))
                     )
                 )

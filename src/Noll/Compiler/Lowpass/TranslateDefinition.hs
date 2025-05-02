@@ -4,8 +4,8 @@
 module Noll.Compiler.Lowpass.TranslateDefinition where
 
 import Noll.Language
-import Noll.Module.Definition
 import Noll.Module.Constant (Constant (..))
+import Noll.Module.Definition
 import Noll.Module.Function (Function (..))
 
 import qualified Lang.Lowpass.Language as Lowpass
@@ -22,19 +22,20 @@ translateDefinition =
     DType name ps cs ->
       undefined
     DFunction name (Function _ (With _ t) ps e) ->
-      Lowpass.OFunction 
-        undefined 
+      Lowpass.OFunction
+        undefined
         undefined
         undefined
     DConstant name (Constant _ (With _ t) e) ->
       undefined
-    DTrait name ts _ _ -> -- (Type Parameter ()) [(Name, Type Parameter ())]
+    DTrait name ts _ _ ->
+      -- (Type Parameter ()) [(Name, Type Parameter ())]
       undefined
     DInstance name t ds ->
       undefined
 
---isFunction :: IndexedType -> Bool
---isFunction =
+-- isFunction :: IndexedType -> Bool
+-- isFunction =
 --  \case
 --    TArrow{} ->
 --      True
@@ -43,13 +44,12 @@ translateDefinition =
 --    _ ->
 --      False
 
---abc =
+-- abc =
 --  \case
 --    EDictionaryLambda a ts e ->
 --      undefined
 --
---def =
+-- def =
 --  \case
 --    ELambda a ps e ->
 --      undefined
-
