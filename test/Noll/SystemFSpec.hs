@@ -45,6 +45,7 @@ import qualified Noll.Set.Test08
 import qualified Noll.Set.Test09
 import qualified Noll.Set.Test10
 import qualified Noll.Set.Test11
+import qualified Noll.Set.Test12
 
 spec :: Spec
 spec =
@@ -1214,10 +1215,10 @@ story = do
     eliminateDictionaries Noll.Set.Test10.moduleBinarySearch == Noll.Set.Test11.moduleBinarySearch
   it "" $
     eliminateDictionaries Noll.Set.Test10.moduleMain == Noll.Set.Test11.moduleMain
+  it "" $
+    denormalizeObject Noll.Set.Test11.prog1_11 == Noll.Set.Test12.prog1_12
+  it "" $
+    translateDefinition orderedCompareInstance1 == orderedCompareInstance1Result
 
---  it "" $
---    denormalizeObject Noll.Set.Test10.prog1_10 == Noll.Set.Test11.prog1_11
---  it "" $
---    translateDefinition orderedCompareInstance1 == orderedCompareInstance1Result
 --  it "" $
 --    translateDefinition orderedLessThanOrEqualTo == orderedLessThanOrEqualToResult
