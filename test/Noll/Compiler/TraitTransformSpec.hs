@@ -633,7 +633,7 @@ funGt2 =
 -- in_range
 
 funInRange =
-  ( Constant
+  Constant
       ()
       ( With
           []
@@ -792,7 +792,6 @@ funInRange =
               )
           )
       )
-  )
 
 funInRange2 =
   ( Constant
