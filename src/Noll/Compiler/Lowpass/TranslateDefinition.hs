@@ -1,5 +1,4 @@
 {-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE OverloadedStrings #-}
 
 module Noll.Compiler.Lowpass.TranslateDefinition (translateDefinition) where
 
