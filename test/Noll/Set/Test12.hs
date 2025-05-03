@@ -21,7 +21,7 @@ data Ordered.GreaterThan<1, Ordered.Ordering>
 data Ordered.LessThan<2, Ordered.Ordering>
 
 Ordered.compare(a_1 : record({ compare : */*/Ordered.Ordering | * }), a_2 : *, a_3 : *) =
-  match<Ordered.Ordering>(a_1 : record({ compare : */*/Ordered.Ordering | * })) 
+  match<Ordered.Ordering>(a_1 : record({ compare : */*/Ordered.Ordering | * }))
   { | ( $Record : { compare : */*/Ordered.Ordering | * }/record({ compare : */*/Ordered.Ordering | * })
       , r_1 : { compare : */*/Ordered.Ordering | * }
       ) =>

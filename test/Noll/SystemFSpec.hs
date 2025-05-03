@@ -3,13 +3,14 @@
 -- module Noll.SystemFSpec (spec) where
 module Noll.SystemFSpec where
 
-import Noll.Compiler.Lowpass.TranslateExpressionSpec
 import Control.Monad.Identity
 import Control.Monad.Reader (runReader)
 import Data.List.NonEmpty ((<|))
 import Lang.Common.List1 (NonEmpty (..))
 import Lang.Label (Label (..))
 import Noll.Compiler.DenormalizeObjects (DenormalizeObjectsTransformContext (..))
+import Noll.Compiler.Lowpass.TranslateDefinition (translateDefinition)
+import Noll.Compiler.Lowpass.TranslateExpressionSpec
 import Noll.Compiler.NormalizeObjects (normalizeObject)
 import Noll.Compiler.PatternMatching
 import Noll.Compiler.PatternMatching.Envelope
@@ -28,7 +29,6 @@ import Noll.SystemF.Constraint.Assumption (Assumption (..))
 import Noll.SystemF.Constraint.Generation.Internal (InferenceRule (..))
 import Noll.SystemFSpec.TestRunner
 import Test.Hspec (Spec, describe, it)
-import Noll.Compiler.Lowpass.TranslateDefinition (translateDefinition)
 
 import qualified Data.Set as Set
 import qualified Lang.Common.Environment as Environment
