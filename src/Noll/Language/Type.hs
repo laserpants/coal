@@ -1,6 +1,7 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveFoldable #-}
 {-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FunctionalDependencies #-}
@@ -21,7 +22,9 @@ module Noll.Language.Type (
 
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (transform)
+import Data.Hashable (Hashable)
 import Data.List.NonEmpty (NonEmpty)
+import GHC.Generics (Generic)
 import Lang.Common.List1 (List1)
 import Lang.Common.Supply (Supply (..))
 import Lang.Utils (Map, Name, Set)
@@ -39,7 +42,9 @@ data Type o k
   | TRow (Row o k (Type o k))
   | TVariable (o k)
   | TAlias Name [Type o k] (Type o k)
-  deriving (Show, Eq, Ord, Read, Data, Typeable)
+  deriving (Show, Eq, Ord, Read, Data, Typeable, Generic)
+
+instance (Hashable k, Hashable (o k)) => Hashable (Type o k)
 
 infixr 1 `TArrow`
 
@@ -52,13 +57,17 @@ data TypeIndex k = TypeIndex
   { typeIndexKind :: k
   , typeIndexId :: Int
   }
-  deriving (Show, Eq, Ord, Read, Functor, Foldable, Data, Typeable)
+  deriving (Show, Eq, Ord, Read, Functor, Foldable, Data, Typeable, Generic)
+
+instance (Hashable k) => Hashable (TypeIndex k)
 
 data Parameter k = Parameter
   { parameterKind :: k
   , parameterName :: Name
   }
-  deriving (Show, Eq, Ord, Read, Functor, Foldable, Data, Typeable)
+  deriving (Show, Eq, Ord, Read, Functor, Foldable, Data, Typeable, Generic)
+
+instance (Hashable k) => Hashable (Parameter k)
 
 type IndexedType = Type TypeIndex Kind
 

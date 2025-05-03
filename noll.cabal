@@ -92,6 +92,7 @@ library
     , deriving-compat
     , extra
     , free
+    , hashable
     , megaparsec
     , mtl
     , parser-combinators
@@ -118,6 +119,7 @@ executable noll-exe
     , deriving-compat
     , extra
     , free
+    , hashable
     , megaparsec
     , mtl
     , noll
@@ -206,6 +208,7 @@ test-suite noll-test
     , deriving-compat
     , extra
     , free
+    , hashable
     , hspec
     , megaparsec
     , mtl

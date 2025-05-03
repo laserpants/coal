@@ -1,14 +1,9 @@
 module Noll.Utils where
 
-import Control.Applicative (Alternative (..))
-import Control.Monad (forM, forM_, mapM)
 import Data.Char (ord)
-import Data.Foldable (foldrM, traverse_)
-import Data.Map.Strict (Map)
-import Data.Maybe (fromMaybe)
-import Data.Set (Set)
+import Data.Hashable (Hashable, hash)
 import Data.Text (Text)
-import Data.Tuple.Extra (first, second)
+import Numeric (showHex)
 
 import qualified Data.Text as Text
 
@@ -28,3 +23,6 @@ lexOrderRank text
         n - 97
     | otherwise =
         n - 22
+
+hashed :: (Hashable a) => a -> Text
+hashed t = Text.pack (showHex (fromIntegral (hash t) :: Word) "")

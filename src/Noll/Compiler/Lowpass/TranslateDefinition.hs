@@ -3,12 +3,12 @@
 module Noll.Compiler.Lowpass.TranslateDefinition (translateDefinition) where
 
 import Data.Data (Data)
+import Lang.Common.List1 (fromList1)
+import Noll.Compiler.Lowpass.TranslateExpression (translateExpression, translatePattern)
 import Noll.Language
 import Noll.Module.Constant (Constant (..))
 import Noll.Module.Definition
 import Noll.Module.Function (Function (..))
-import Noll.Compiler.Lowpass.TranslateExpression (translateExpression, translatePattern)
-import Lang.Common.List1 (fromList1)
 
 import qualified Lang.Lowpass.Language as Lowpass
 
