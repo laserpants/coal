@@ -714,11 +714,10 @@ fixture22 =
         (PVariable () (Label () "f"))
         ( ELambda
             ()
-            ( ( PAnnotation
+            ( PAnnotation
                   ()
                   (TIntrinsic IBool)
                   (PVariable () (Label () "x"))
-              )
                 :| []
             )
             ( EAnnotation
@@ -1129,7 +1128,7 @@ testEnvironment2 =
       ( "Range"
       ,
         ( ["a"]
-        , ( TIntrinsic
+        , TIntrinsic
               ( IRecord
                   ( TRow
                       ( RExtend
@@ -1143,7 +1142,6 @@ testEnvironment2 =
                       )
                   )
               )
-          )
         )
       )
     ]
