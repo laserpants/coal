@@ -72,8 +72,12 @@ transformConstantZ (Constant a u@(With _ t) e) = do
       pure (Constant a (With (sort (tr : trs)) t) (EDictionaryLambda a (List1.sort (tr :| trs)) expr))
 
 parameterized :: Trait (Type v k) -> Bool
-parameterized (Trait _ TVariable{}) = True
-parameterized _ = False
+parameterized =
+  \case
+    Trait _ _ TVariable{} ->
+      True
+    _ ->
+      False
 
 transformZ ::
   ( MonadReader (Environment (Scheme TypeIndex Kind (Type TypeIndex Kind))) m
