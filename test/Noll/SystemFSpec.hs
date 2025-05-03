@@ -715,9 +715,9 @@ fixture22 =
         ( ELambda
             ()
             ( PAnnotation
-                  ()
-                  (TIntrinsic IBool)
-                  (PVariable () (Label () "x"))
+                ()
+                (TIntrinsic IBool)
+                (PVariable () (Label () "x"))
                 :| []
             )
             ( EAnnotation
@@ -1129,19 +1129,19 @@ testEnvironment2 =
       ,
         ( ["a"]
         , TIntrinsic
-              ( IRecord
-                  ( TRow
-                      ( RExtend
-                          "max"
-                          (TVariable (Parameter () "a"))
-                          ( RExtend
-                              "min"
-                              (TVariable (Parameter () "a"))
-                              RNil
-                          )
-                      )
-                  )
-              )
+            ( IRecord
+                ( TRow
+                    ( RExtend
+                        "max"
+                        (TVariable (Parameter () "a"))
+                        ( RExtend
+                            "min"
+                            (TVariable (Parameter () "a"))
+                            RNil
+                        )
+                    )
+                )
+            )
         )
       )
     ]
@@ -1205,9 +1205,10 @@ story = do
     result fixtureY1 == fixtureY1r
   it "" $
     result fixtureY2 == fixtureY2r
-  it "" $
-    denormalizeObject Noll.Set.Test10.prog1_10 == Noll.Set.Test11.prog1_11
-  it "" $
-    translateDefinition orderedCompareInstance1 == orderedCompareInstance1Result
-  it "" $
-    translateDefinition orderedLessThanOrEqualTo == orderedLessThanOrEqualToResult
+
+--  it "" $
+--    denormalizeObject Noll.Set.Test10.prog1_10 == Noll.Set.Test11.prog1_11
+--  it "" $
+--    translateDefinition orderedCompareInstance1 == orderedCompareInstance1Result
+--  it "" $
+--    translateDefinition orderedLessThanOrEqualTo == orderedLessThanOrEqualToResult

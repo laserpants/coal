@@ -19,7 +19,6 @@ import Lang.Label (Label (..))
 import Lang.Utils (Name, (<$$>))
 import Noll.Language
 import Noll.Module
-import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
 import Noll.SystemF.Substitution
 import Noll.SystemF.Unification
 
@@ -78,6 +77,8 @@ parameterized =
       True
     _ ->
       False
+
+-- TODO: Use uniplate?
 
 transformZ ::
   ( MonadReader (Environment (Scheme TypeIndex Kind (Type TypeIndex Kind))) m

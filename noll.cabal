@@ -29,6 +29,7 @@ library
       Noll.Ast.Indexed
       Noll.Compiler
       Noll.Compiler.DenormalizeObjects
+      Noll.Compiler.DictionaryElimination
       Noll.Compiler.Lowpass.TranslateDefinition
       Noll.Compiler.Lowpass.TranslateExpression
       Noll.Compiler.Lowpass.TranslateType
@@ -136,6 +137,7 @@ test-suite noll-test
   other-modules:
       Noll.Ast.FreeVarsSpec
       Noll.Ast.IndexedSpec
+      Noll.Compiler.DictionaryEliminationSpec
       Noll.Compiler.Lowpass.TranslateExpressionSpec
       Noll.Compiler.NormalizeObjectsSpec
       Noll.Compiler.PatternMatchingExamples.Test01
@@ -173,6 +175,7 @@ test-suite noll-test
       Noll.Set.Test10
       Noll.Set.Test11
       Noll.Set.Test12
+      Noll.Set.Test13
       Noll.SystemF.Constraint.GenerationSpec
       Noll.SystemF.UnificationSpec
       Noll.SystemFExamples.Test01
