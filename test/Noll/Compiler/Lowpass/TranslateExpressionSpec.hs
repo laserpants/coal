@@ -160,29 +160,19 @@ orderedLessThanOrEqualTo =
             [Trait "Ordered" (TVariable (TypeIndex KType 0))]
             (TIntrinsic IBool)
         )
-        ( PVariable () (Label (TVariable (TypeIndex KType 0)) "m")
+        ( PVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Ordered") (TVariable (TypeIndex KType 0) :| [])) "$dict.ffef54c635ab7d00")
+            <| PVariable () (Label (TVariable (TypeIndex KType 0)) "m")
             <| PVariable () (Label (TVariable (TypeIndex KType 0)) "n")
             :| []
         )
         ( ECompiledMatch
             ()
             (TIntrinsic IBool)
-            --                    ( EDictionaryApplication
-            --                        ()
-            --                        (TConstructor KType "Ordering")
-            --                        (EVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TConstructor KType "Ordering") "compare"))
-            --                        ( Trait "Ordered" (TVariable (TypeIndex KType 0))
-            --                            :| []
-            --                        )
-            --                        [ EVariable () (Label (TVariable (TypeIndex KType 0)) "m")
-            --                        , EVariable () (Label (TVariable (TypeIndex KType 0)) "n")
-            --                        ]
-            --                    )
             ( EApplication
                 ()
                 (TConstructor KType "Ordering")
                 (EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Ordered") (TVariable (TypeIndex KType 0) :| []) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TConstructor KType "Ordering") "compare"))
-                ( EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Ordered") (TVariable (TypeIndex KType 0) :| [])) "d_1")
+                ( EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Ordered") (TVariable (TypeIndex KType 0) :| [])) "$dict.ffef54c635ab7d00")
                     <| EVariable () (Label (TVariable (TypeIndex KType 0)) "m")
                     <| EVariable () (Label (TVariable (TypeIndex KType 0)) "n")
                     :| []
@@ -205,7 +195,7 @@ orderedLessThanOrEqualTo =
 orderedLessThanOrEqualToResult =
   LP.OFunction
     "less_than_or_equal_to"
-    [ Label (LP.TCon "Ordered" [LP.TOpq]) "d_1"
+    [ Label (LP.TCon "Ordered" [LP.TOpq]) "$dict.ffef54c635ab7d00"
     , Label LP.TOpq "m"
     , Label LP.TOpq "n"
     ]
@@ -214,21 +204,21 @@ orderedLessThanOrEqualToResult =
         ( LP.app
             (LP.TCon "Ordering" [])
             (LP.var (Label (LP.TCon "Ordered" [LP.TOpq] `LP.arrow` LP.TOpq `LP.arrow` LP.TOpq `LP.arrow` LP.TCon "Ordering" []) "compare"))
-            ( LP.var (Label (LP.TCon "Ordered" [LP.TOpq]) "d_1")
-                <| LP.var (Label LP.TOpq "x")
-                <| LP.var (Label LP.TOpq "y")
+            ( LP.var (Label (LP.TCon "Ordered" [LP.TOpq]) "$dict.ffef54c635ab7d00")
+                <| LP.var (Label LP.TOpq "m")
+                <| LP.var (Label LP.TOpq "n")
                 :| []
             )
         )
         ( LP.Clause
-            (Label (LP.TCon "Ordering" []) "LessThan" :| [])
+            (Label (LP.TCon "Ordering" []) "EqualTo" :| [])
             (LP.lit (LP.PBool True))
-            <| LP.Clause
-              (Label (LP.TCon "Ordering" []) "EqualTo" :| [])
-              (LP.lit (LP.PBool True))
             <| LP.Clause
               (Label (LP.TCon "Ordering" []) "GreaterThan" :| [])
               (LP.lit (LP.PBool False))
+            <| LP.Clause
+              (Label (LP.TCon "Ordering" []) "LessThan" :| [])
+              (LP.lit (LP.PBool True))
             :| []
         )
     )

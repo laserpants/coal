@@ -1219,6 +1219,5 @@ story = do
     denormalizeObject Noll.Set.Test11.prog1_11 == Noll.Set.Test12.prog1_12
   it "" $
     translateDefinition orderedCompareInstance1 == orderedCompareInstance1Result
-
---  it "" $
---    translateDefinition orderedLessThanOrEqualTo == orderedLessThanOrEqualToResult
+  it "" $
+    translateDefinition orderedLessThanOrEqualTo == orderedLessThanOrEqualToResult
