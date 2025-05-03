@@ -637,7 +637,7 @@ funInRange =
       ()
       ( With
           []
-          ( ( TIntrinsic
+          ( TIntrinsic
                 ( IRecord
                     ( TRow
                         ( RExtend
@@ -651,7 +651,6 @@ funInRange =
                         )
                     )
                 )
-            )
               `TArrow` TVariable (TypeIndex KType 0)
               `TArrow` TIntrinsic IBool
           )
@@ -800,7 +799,7 @@ funInRange2 =
           [ Trait "Numeric" (TVariable (TypeIndex KType 0))
           , Trait "Ordered" (TVariable (TypeIndex KType 0))
           ]
-          ( ( TIntrinsic
+          ( TIntrinsic
                 ( IRecord
                     ( TRow
                         ( RExtend
@@ -814,7 +813,6 @@ funInRange2 =
                         )
                     )
                 )
-            )
               `TArrow` TVariable (TypeIndex KType 0)
               `TArrow` TIntrinsic IBool
           )
