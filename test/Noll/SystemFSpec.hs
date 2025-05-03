@@ -9,6 +9,7 @@ import Data.List.NonEmpty ((<|))
 import Lang.Common.List1 (NonEmpty (..))
 import Lang.Label (Label (..))
 import Noll.Compiler.DenormalizeObjects (DenormalizeObjectsTransformContext (..))
+import Noll.Compiler.DictionaryElimination (EliminateDictionariesTransformContext (..))
 import Noll.Compiler.Lowpass.TranslateDefinition (translateDefinition)
 import Noll.Compiler.Lowpass.TranslateExpressionSpec
 import Noll.Compiler.NormalizeObjects (normalizeObject)
@@ -1205,6 +1206,14 @@ story = do
     result fixtureY1 == fixtureY1r
   it "" $
     result fixtureY2 == fixtureY2r
+  it "" $
+    eliminateDictionaries Noll.Set.Test10.moduleUtils == Noll.Set.Test11.moduleUtils
+  it "" $
+    eliminateDictionaries Noll.Set.Test10.moduleOrdered == Noll.Set.Test11.moduleOrdered
+  it "" $
+    eliminateDictionaries Noll.Set.Test10.moduleBinarySearch == Noll.Set.Test11.moduleBinarySearch
+  it "" $
+    eliminateDictionaries Noll.Set.Test10.moduleMain == Noll.Set.Test11.moduleMain
 
 --  it "" $
 --    denormalizeObject Noll.Set.Test10.prog1_10 == Noll.Set.Test11.prog1_11
