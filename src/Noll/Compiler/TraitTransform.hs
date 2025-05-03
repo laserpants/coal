@@ -74,7 +74,7 @@ transformConstantZ (Constant a u@(With _ t) e) = do
 parameterized :: Trait (Type v k) -> Bool
 parameterized =
   \case
-    Trait _ _ TVariable{} ->
+    Trait _ TVariable{} ->
       True
     _ ->
       False
