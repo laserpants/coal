@@ -311,11 +311,10 @@ moduleBinarySearch =
                             <| EVariable () (Label () "min")
                             :| []
                         )
-                        <| ( EApplication
+                        <| EApplication
                               ()
                               ()
                               (EBinaryOperator () () OLogicalOr)
-                           )
                           ( EApplication
                               ()
                               ()
