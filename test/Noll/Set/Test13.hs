@@ -47,8 +47,8 @@ Ordered.less_than_or_equal_to(d_1 : Ordered.Ordered(*), m : *, n : *) =
     ( @<Ordered.Ordering>
       ( Ordered.compare : Ordered.Ordered(*)/*/*/Ordered.Ordering
       , d_1 : Ordered.Ordered(*)
-      , x : *
-      , y : *
+      , m : *
+      , n : *
       ))
   { | (LessThan : Ordered.Ordering) => true
     | (EqualTo : Ordered.Ordering) => true
