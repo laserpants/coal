@@ -110,6 +110,8 @@ translatePattern =
   \case
     PVariable a (Label t name) ->
       Label (translateType t) name
+    PAnnotation _ _ p ->
+      translatePattern p
 
 translateClause :: (Data a) => CompiledClause a IndexedType -> Lowpass.Clause Lowpass.Type LowpassExpr
 translateClause =
@@ -128,6 +130,10 @@ translateBinaryOperator =
       binop Lowpass.OLtInt32 (TIntrinsic IInt32, TIntrinsic IInt32)
     OGreaterThan ->
       binop Lowpass.OGtInt32 (TIntrinsic IInt32, TIntrinsic IInt32)
+    OLogicalAnd ->
+      binop Lowpass.OAnd (TIntrinsic IBool, TIntrinsic IBool)
+    OLogicalOr ->
+      binop Lowpass.OOr (TIntrinsic IBool, TIntrinsic IBool)
 
 binop :: (Data a) => (LowpassExpr -> LowpassExpr -> Lowpass.Op LowpassExpr) -> (IndexedType, IndexedType) -> List1 (Expression a IndexedType) -> LowpassExpr
 binop op (t1, t2) (e1 :| [e2])
