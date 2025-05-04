@@ -50,9 +50,9 @@ Ordered.less_than_or_equal_to(d_1 : Ordered.Ordered(*), m : *, n : *) =
       , m : *
       , n : *
       ))
-  { | (LessThan : Ordered.Ordering) => true
-    | (EqualTo : Ordered.Ordering) => true
+  { | (EqualTo : Ordered.Ordering) => true
     | (GreaterThan : Ordered.Ordering) => false
+    | (LessThan : Ordered.Ordering) => true
   }
 
 Ordered.greater_than(d_1 : Ordered.Ordered(*), n : *) =
