@@ -85,7 +85,7 @@ moduleOrdered =
                             ( EDictionaryApplication
                                 ()
                                 (TConstructor KType "Ordering")
-                                (EVariable () (Label (tvar0 `TArrow` tvar0 `TArrow` TConstructor KType "Ordering") "compare"))
+                                (Label (tvar0 `TArrow` tvar0 `TArrow` TConstructor KType "Ordering") "compare")
                                 (Trait "Ordered" (TVariable (TypeIndex KType 0)) :| [])
                                 [EVariable () (Label tvar0 "m"), EVariable () (Label tvar0 "n")]
                             )
@@ -149,15 +149,12 @@ moduleOrdered =
                                 <| EDictionaryApplication
                                   ()
                                   (TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool)
-                                  ( EVariable
-                                      ()
-                                      ( Label
-                                          ( TVariable (TypeIndex KType 1)
-                                              `TArrow` TVariable (TypeIndex KType 1)
-                                              `TArrow` TIntrinsic IBool
-                                          )
-                                          "less_than_or_equal_to"
+                                  ( Label
+                                      ( TVariable (TypeIndex KType 1)
+                                          `TArrow` TVariable (TypeIndex KType 1)
+                                          `TArrow` TIntrinsic IBool
                                       )
+                                      "less_than_or_equal_to"
                                   )
                                   (Trait "Ordered" (TVariable (TypeIndex KType 0)) :| [])
                                   [EVariable () (Label (TVariable (TypeIndex KType 1)) "n")]

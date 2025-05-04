@@ -97,7 +97,7 @@ fixtureY1r =
     ( EDictionaryApplication
         ()
         (TIntrinsic IInt32)
-        (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32"))
+        (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")
         (Trait "Numeric" (TIntrinsic IInt32) :| [])
         [ELiteral () (LInt32 11)]
     )
@@ -129,7 +129,7 @@ fixtureY2r =
         ( EDictionaryApplication
             ()
             (TVariable (TypeIndex KType 0))
-            (EVariable () (Label (TIntrinsic IInt32 ~> TVariable (TypeIndex KType 0)) "from_int32"))
+            (Label (TIntrinsic IInt32 ~> TVariable (TypeIndex KType 0)) "from_int32")
             (Trait "Numeric" (TVariable (TypeIndex KType 0)) :| [])
             [ELiteral () (LInt32 11)]
         )
@@ -423,7 +423,7 @@ fixtureX2 =
                     ( EDictionaryApplication
                         ()
                         (TIntrinsic IBool)
-                        (EVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool) "greater_than"))
+                        (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool) "greater_than")
                         (Trait "Ordered" (TVariable (TypeIndex KType 0)) :| [])
                         [ EVariable () (Label (TVariable (TypeIndex KType 0)) "n")
                         , EVariable () (Label (TVariable (TypeIndex KType 0)) "min")
@@ -436,7 +436,7 @@ fixtureX2 =
                           ( EDictionaryApplication
                               ()
                               (TIntrinsic IBool)
-                              (EVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool) "less_than_or_equal_to"))
+                              (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool) "less_than_or_equal_to")
                               (Trait "Ordered" (TVariable (TypeIndex KType 0)) :| [])
                               [ EVariable () (Label (TVariable (TypeIndex KType 0)) "n")
                               , EVariable () (Label (TVariable (TypeIndex KType 0)) "max")
@@ -453,7 +453,7 @@ fixtureX2 =
                                     <| EDictionaryApplication
                                       ()
                                       (TVariable (TypeIndex KType 0))
-                                      (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0)) "from_int32"))
+                                      (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0)) "from_int32")
                                       (Trait "Numeric" (TVariable (TypeIndex KType 0)) :| [])
                                       [ELiteral () (LInt32 (-1))]
                                     :| []
@@ -528,7 +528,7 @@ funLte2 =
                 ( EDictionaryApplication
                     ()
                     (TConstructor KType "Ordering")
-                    (EVariable () (Label (TVariable (TypeIndex KType 1) `TArrow` TVariable (TypeIndex KType 1) `TArrow` TConstructor KType "Ordering") "compare"))
+                    (Label (TVariable (TypeIndex KType 1) `TArrow` TVariable (TypeIndex KType 1) `TArrow` TConstructor KType "Ordering") "compare")
                     ( Trait "Ordered" (TVariable (TypeIndex KType 1))
                         :| []
                     )
@@ -621,7 +621,7 @@ funGt2 =
                     <| EDictionaryApplication
                       ()
                       (TVariable (TypeIndex KType 2) `TArrow` TIntrinsic IBool)
-                      (EVariable () (Label (TVariable (TypeIndex KType 2) `TArrow` TVariable (TypeIndex KType 2) `TArrow` TIntrinsic IBool) "less_than_or_equal_to"))
+                      (Label (TVariable (TypeIndex KType 2) `TArrow` TVariable (TypeIndex KType 2) `TArrow` TIntrinsic IBool) "less_than_or_equal_to")
                       (Trait "Ordered" (TVariable (TypeIndex KType 2)) :| [])
                       [EVariable () (Label (TVariable (TypeIndex KType 2)) "n")]
                     :| []
@@ -918,7 +918,7 @@ funInRange2 =
                       ( EDictionaryApplication
                           ()
                           (TIntrinsic IBool)
-                          (EVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool) "greater_than"))
+                          (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool) "greater_than")
                           (Trait "Ordered" (TVariable (TypeIndex KType 0)) :| [])
                           [ EVariable () (Label (TVariable (TypeIndex KType 0)) "n")
                           , EVariable () (Label (TVariable (TypeIndex KType 0)) "min")
@@ -931,7 +931,7 @@ funInRange2 =
                             ( EDictionaryApplication
                                 ()
                                 (TIntrinsic IBool)
-                                (EVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool) "less_than_or_equal_to"))
+                                (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool) "less_than_or_equal_to")
                                 (Trait "Ordered" (TVariable (TypeIndex KType 0)) :| [])
                                 [ EVariable () (Label (TVariable (TypeIndex KType 0)) "n")
                                 , EVariable () (Label (TVariable (TypeIndex KType 0)) "max")
@@ -948,7 +948,7 @@ funInRange2 =
                                       <| EDictionaryApplication
                                         ()
                                         (TVariable (TypeIndex KType 0))
-                                        (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0)) "from_int32"))
+                                        (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0)) "from_int32")
                                         (Trait "Numeric" (TVariable (TypeIndex KType 0)) :| [])
                                         [ELiteral () (LInt32 (-1))]
                                       :| []
@@ -1997,7 +1997,7 @@ funFromList2 =
                               , EDictionaryApplication
                                   ()
                                   (TVariable (TypeIndex KType 2))
-                                  (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 2)) "from_int32"))
+                                  (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 2)) "from_int32")
                                   (Trait "Numeric" (TVariable (TypeIndex KType 2)) :| [])
                                   [ELiteral () (LInt32 0)]
                               )
@@ -2006,7 +2006,7 @@ funFromList2 =
                               , EDictionaryApplication
                                   ()
                                   (TVariable (TypeIndex KType 2))
-                                  (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 2)) "from_int32"))
+                                  (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 2)) "from_int32")
                                   (Trait "Numeric" (TVariable (TypeIndex KType 2)) :| [])
                                   [ELiteral () (LInt32 (-1))]
                               )
@@ -2068,25 +2068,22 @@ funFromList2 =
                                           <| EDictionaryApplication
                                             ()
                                             (TVariable (TypeIndex KType 2) `TArrow` TIntrinsic IBool)
-                                            ( EVariable
-                                                ()
-                                                ( Label
-                                                    ( ( TIntrinsic
-                                                          ( IRecord
-                                                              ( TRow
-                                                                  ( RExtend
-                                                                      "max"
-                                                                      (TVariable (TypeIndex KType 2))
-                                                                      (RExtend "min" (TVariable (TypeIndex KType 2)) RNil)
-                                                                  )
+                                            ( Label
+                                                ( ( TIntrinsic
+                                                      ( IRecord
+                                                          ( TRow
+                                                              ( RExtend
+                                                                  "max"
+                                                                  (TVariable (TypeIndex KType 2))
+                                                                  (RExtend "min" (TVariable (TypeIndex KType 2)) RNil)
                                                               )
                                                           )
                                                       )
-                                                        `TArrow` TVariable (TypeIndex KType 2)
-                                                        `TArrow` TIntrinsic IBool
-                                                    )
-                                                    "in_range"
+                                                  )
+                                                    `TArrow` TVariable (TypeIndex KType 2)
+                                                    `TArrow` TIntrinsic IBool
                                                 )
+                                                "in_range"
                                             )
                                             ( Trait "Numeric" (TVariable (TypeIndex KType 2))
                                                 <| Trait "Ordered" (TVariable (TypeIndex KType 2))
@@ -2525,25 +2522,22 @@ funFromList2 =
                                                           <| EDictionaryApplication
                                                             ()
                                                             (TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool)
-                                                            ( EVariable
-                                                                ()
-                                                                ( Label
-                                                                    ( ( TIntrinsic
-                                                                          ( IRecord
-                                                                              ( TRow
-                                                                                  ( RExtend
-                                                                                      "max"
-                                                                                      (TVariable (TypeIndex KType 1))
-                                                                                      (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
-                                                                                  )
+                                                            ( Label
+                                                                ( ( TIntrinsic
+                                                                      ( IRecord
+                                                                          ( TRow
+                                                                              ( RExtend
+                                                                                  "max"
+                                                                                  (TVariable (TypeIndex KType 1))
+                                                                                  (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
                                                                               )
                                                                           )
                                                                       )
-                                                                        `TArrow` (TVariable (TypeIndex KType 1))
-                                                                        `TArrow` (TIntrinsic IBool)
-                                                                    )
-                                                                    "in_range"
+                                                                  )
+                                                                    `TArrow` (TVariable (TypeIndex KType 1))
+                                                                    `TArrow` (TIntrinsic IBool)
                                                                 )
+                                                                "in_range"
                                                             )
                                                             ( Trait "Numeric" (TVariable (TypeIndex KType 1))
                                                                 <| Trait "Ordered" (TVariable (TypeIndex KType 1))
@@ -2930,7 +2924,7 @@ funFromList2 =
                                           , EDictionaryApplication
                                               ()
                                               (TVariable (TypeIndex KType 2))
-                                              (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 2)) "from_int32"))
+                                              (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 2)) "from_int32")
                                               (Trait "Numeric" (TVariable (TypeIndex KType 2)) :| [])
                                               [ELiteral () (LInt32 (-1))]
                                           )
@@ -2939,7 +2933,7 @@ funFromList2 =
                                           , EDictionaryApplication
                                               ()
                                               (TVariable (TypeIndex KType 2))
-                                              (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 2)) "from_int32"))
+                                              (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 2)) "from_int32")
                                               (Trait "Numeric" (TVariable (TypeIndex KType 2)) :| [])
                                               [ELiteral () (LInt32 0)]
                                           )
@@ -3087,7 +3081,7 @@ funSort2 =
                                     (TVariable (TypeIndex KType 5) :| [])
                                  )
                     )
-                    (EVariable () (Label ((TIntrinsic (IList (TVariable (TypeIndex KType 5)))) `TArrow` (TApplication KType (TConstructor (KArrow KType KType) "Tree") (TVariable (TypeIndex KType 5) :| []))) "from_list"))
+                    (Label ((TIntrinsic (IList (TVariable (TypeIndex KType 5)))) `TArrow` (TApplication KType (TConstructor (KArrow KType KType) "Tree") (TVariable (TypeIndex KType 5) :| []))) "from_list")
                     ( Trait "Numeric" (TVariable (TypeIndex KType 5))
                         <| Trait "Ordered" (TVariable (TypeIndex KType 5))
                         :| []
@@ -3583,7 +3577,7 @@ funInRangeA2 =
                                                 ( EDictionaryApplication
                                                     ()
                                                     (TIntrinsic IBool)
-                                                    (EVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool) "greater_than"))
+                                                    (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool) "greater_than")
                                                     (Trait "Ordered" (TVariable (TypeIndex KType 0)) :| [])
                                                     [ EVariable () (Label (TVariable (TypeIndex KType 0)) "n")
                                                     , EVariable () (Label (TVariable (TypeIndex KType 0)) "$row.2.field.min")
@@ -3596,7 +3590,7 @@ funInRangeA2 =
                                                       ( EDictionaryApplication
                                                           ()
                                                           (TIntrinsic IBool)
-                                                          (EVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool) "less_than_or_equal_to"))
+                                                          (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool) "less_than_or_equal_to")
                                                           (Trait "Ordered" (TVariable (TypeIndex KType 0)) :| [])
                                                           [ EVariable () (Label (TVariable (TypeIndex KType 0)) "n")
                                                           , EVariable () (Label (TVariable (TypeIndex KType 0)) "$row.1.field.max")
@@ -3613,7 +3607,7 @@ funInRangeA2 =
                                                                 <| EDictionaryApplication
                                                                   ()
                                                                   (TVariable (TypeIndex KType 0))
-                                                                  (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0)) "from_int32"))
+                                                                  (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0)) "from_int32")
                                                                   (Trait "Numeric" (TVariable (TypeIndex KType 0)) :| [])
                                                                   [ELiteral () (LInt32 (-1))]
                                                                 :| []
@@ -5340,7 +5334,7 @@ funFromListA2 =
                               , EDictionaryApplication
                                   ()
                                   (TVariable (TypeIndex KType 2))
-                                  (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 2)) "from_int32"))
+                                  (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 2)) "from_int32")
                                   (Trait "Numeric" (TVariable (TypeIndex KType 0)) :| [])
                                   [ELiteral () (LInt32 0)]
                               )
@@ -5349,7 +5343,7 @@ funFromListA2 =
                               , EDictionaryApplication
                                   ()
                                   (TVariable (TypeIndex KType 2))
-                                  (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 2)) "from_int32"))
+                                  (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 2)) "from_int32")
                                   (Trait "Numeric" (TVariable (TypeIndex KType 0)) :| [])
                                   [ELiteral () (LInt32 (-1))]
                               )
@@ -5411,25 +5405,22 @@ funFromListA2 =
                                           <| EDictionaryApplication
                                             ()
                                             (TVariable (TypeIndex KType 2) `TArrow` TIntrinsic IBool)
-                                            ( EVariable
-                                                ()
-                                                ( Label
-                                                    ( ( TIntrinsic
-                                                          ( IRecord
-                                                              ( TRow
-                                                                  ( RExtend
-                                                                      "max"
-                                                                      (TVariable (TypeIndex KType 2))
-                                                                      (RExtend "min" (TVariable (TypeIndex KType 2)) RNil)
-                                                                  )
+                                            ( Label
+                                                ( ( TIntrinsic
+                                                      ( IRecord
+                                                          ( TRow
+                                                              ( RExtend
+                                                                  "max"
+                                                                  (TVariable (TypeIndex KType 2))
+                                                                  (RExtend "min" (TVariable (TypeIndex KType 2)) RNil)
                                                               )
                                                           )
                                                       )
-                                                        `TArrow` TVariable (TypeIndex KType 2)
-                                                        `TArrow` TIntrinsic IBool
-                                                    )
-                                                    "in_range"
+                                                  )
+                                                    `TArrow` TVariable (TypeIndex KType 2)
+                                                    `TArrow` TIntrinsic IBool
                                                 )
+                                                "in_range"
                                             )
                                             ( Trait "Numeric" (TVariable (TypeIndex KType 2))
                                                 <| Trait "Ordered" (TVariable (TypeIndex KType 2))
@@ -5868,25 +5859,22 @@ funFromListA2 =
                                                           <| EDictionaryApplication
                                                             ()
                                                             (TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool)
-                                                            ( EVariable
-                                                                ()
-                                                                ( Label
-                                                                    ( ( TIntrinsic
-                                                                          ( IRecord
-                                                                              ( TRow
-                                                                                  ( RExtend
-                                                                                      "max"
-                                                                                      (TVariable (TypeIndex KType 1))
-                                                                                      (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
-                                                                                  )
+                                                            ( Label
+                                                                ( ( TIntrinsic
+                                                                      ( IRecord
+                                                                          ( TRow
+                                                                              ( RExtend
+                                                                                  "max"
+                                                                                  (TVariable (TypeIndex KType 1))
+                                                                                  (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
                                                                               )
                                                                           )
                                                                       )
-                                                                        `TArrow` (TVariable (TypeIndex KType 1))
-                                                                        `TArrow` (TIntrinsic IBool)
-                                                                    )
-                                                                    "in_range"
+                                                                  )
+                                                                    `TArrow` (TVariable (TypeIndex KType 1))
+                                                                    `TArrow` (TIntrinsic IBool)
                                                                 )
+                                                                "in_range"
                                                             )
                                                             ( Trait "Numeric" (TVariable (TypeIndex KType 2))
                                                                 <| Trait "Ordered" (TVariable (TypeIndex KType 2))
@@ -6273,7 +6261,7 @@ funFromListA2 =
                                           , EDictionaryApplication
                                               ()
                                               (TVariable (TypeIndex KType 2))
-                                              (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 2)) "from_int32"))
+                                              (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 2)) "from_int32")
                                               (Trait "Numeric" (TVariable (TypeIndex KType 0)) :| [])
                                               [ELiteral () (LInt32 (-1))]
                                           )
@@ -6282,7 +6270,7 @@ funFromListA2 =
                                           , EDictionaryApplication
                                               ()
                                               (TVariable (TypeIndex KType 2))
-                                              (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 2)) "from_int32"))
+                                              (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 2)) "from_int32")
                                               (Trait "Numeric" (TVariable (TypeIndex KType 0)) :| [])
                                               [ELiteral () (LInt32 0)]
                                           )
@@ -6378,43 +6366,43 @@ fromMain2 =
                                     EDictionaryApplication
                                       ()
                                       (TVariable (TypeIndex KType 1))
-                                      (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32"))
+                                      (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32")
                                       (Trait "Numeric" (TVariable (TypeIndex KType 1)) :| [])
                                       [ELiteral () (LInt32 5)]
                                   , EDictionaryApplication
                                       ()
                                       (TVariable (TypeIndex KType 1))
-                                      (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32"))
+                                      (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32")
                                       (Trait "Numeric" (TVariable (TypeIndex KType 1)) :| [])
                                       [ELiteral () (LInt32 3)]
                                   , EDictionaryApplication
                                       ()
                                       (TVariable (TypeIndex KType 1))
-                                      (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32"))
+                                      (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32")
                                       (Trait "Numeric" (TVariable (TypeIndex KType 1)) :| [])
                                       [ELiteral () (LInt32 7)]
                                   , EDictionaryApplication
                                       ()
                                       (TVariable (TypeIndex KType 1))
-                                      (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32"))
+                                      (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32")
                                       (Trait "Numeric" (TVariable (TypeIndex KType 1)) :| [])
                                       [ELiteral () (LInt32 2)]
                                   , EDictionaryApplication
                                       ()
                                       (TVariable (TypeIndex KType 1))
-                                      (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32"))
+                                      (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32")
                                       (Trait "Numeric" (TVariable (TypeIndex KType 1)) :| [])
                                       [ELiteral () (LInt32 1)]
                                   , EDictionaryApplication
                                       ()
                                       (TVariable (TypeIndex KType 1))
-                                      (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32"))
+                                      (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32")
                                       (Trait "Numeric" (TVariable (TypeIndex KType 1)) :| [])
                                       [ELiteral () (LInt32 6)]
                                   , EDictionaryApplication
                                       ()
                                       (TVariable (TypeIndex KType 1))
-                                      (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32"))
+                                      (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32")
                                       (Trait "Numeric" (TVariable (TypeIndex KType 1)) :| [])
                                       [ELiteral () (LInt32 4)]
                                   ]

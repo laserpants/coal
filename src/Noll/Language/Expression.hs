@@ -68,7 +68,7 @@ data Expression a t
   | -- | Dictionary lambda function
     EDictionaryLambda a (List1 (Trait t)) (Expression a t)
   | -- | Dictionary application
-    EDictionaryApplication a t (Expression a t) (List1 (Trait t)) [Expression a t]
+    EDictionaryApplication a t (Label t) (List1 (Trait t)) [Expression a t]
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
 
 instance (Ord t, Data a, Data t) => FreeVars (Expression a t) t where

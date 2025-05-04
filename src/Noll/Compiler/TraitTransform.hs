@@ -101,7 +101,7 @@ transformZ =
       -- tell (filter (not . parameterized) traits)
       --      tell (filter parameterized traits)
       ELet a (fst <$> as) <$> local (Environment.insertMultiple xs) (transformZ e)
-    expr@(EApplication a t var@(EVariable _ (Label t1 name)) es) -> do
+    expr@(EApplication a t var@(EVariable _ ll@(Label t1 name)) es) -> do
       traits <- collectTraits t1 name
       case traits of
         [] ->
@@ -110,7 +110,7 @@ transformZ =
           -- index <- fresh
           tell (filter parameterized traits)
           ds <- traverse transformZ es
-          pure (EDictionaryApplication a t var (List1.nub (tr :| trs)) (NonEmpty.toList ds))
+          pure (EDictionaryApplication a t ll (List1.nub (tr :| trs)) (NonEmpty.toList ds))
     expr@(EVariable a ll@(Label t name)) -> do
       traits <- collectTraits t name
       case traits of
@@ -119,19 +119,15 @@ transformZ =
         tr : trs -> do
           -- index <- fresh
           tell (filter parameterized traits)
-          pure (EDictionaryApplication a t expr (List1.nub (tr :| trs)) [])
+          pure (EDictionaryApplication a t ll (List1.nub (tr :| trs)) [])
     EListLiteral a t es ->
       EListLiteral a t <$> traverse transformZ es
     ELambda a ps e ->
       ELambda a ps <$> transformZ e
     EApplication a t e1 es ->
       EApplication a t <$> transformZ e1 <*> traverse transformZ es
-    EDictionaryApplication a t e1 ts es -> do
-      -- tell (NonEmpty.toList ts)
-      EDictionaryApplication a t
-        <$> transformZ e1
-        <*> pure ts
-        <*> traverse transformZ es
+    EDictionaryApplication a t ll ts es ->
+      EDictionaryApplication a t ll ts <$> traverse transformZ es
     ECompiledMatch a t e cs ->
       ECompiledMatch a t
         <$> transformZ e

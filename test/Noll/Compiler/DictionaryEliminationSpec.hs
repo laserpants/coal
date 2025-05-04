@@ -30,7 +30,7 @@ fixtureFoo1 =
             ( EDictionaryApplication
                 ()
                 (TConstructor KType "Ordering")
-                (EVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TConstructor KType "Ordering") "compare"))
+                (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TConstructor KType "Ordering") "compare")
                 ( Trait "Ordered" (TVariable (TypeIndex KType 0))
                     :| []
                 )

@@ -57,10 +57,8 @@ eliminateDictionariesExpr =
   \case
     EDictionaryLambda a ts e ->
       flattenLambda (ELambda a (pvars ts) e)
-    EDictionaryApplication a t e1 ts es ->
-      EApplication a t (setType t1 e1) (evars ts `List1.appendList` es)
-     where
-      t1 = foldType (typeOf e1) (dictionaryType <$> ts)
+    EDictionaryApplication a t (Label t1 name) ts es ->
+      EApplication a t (EVariable mempty (Label (foldType t1 (dictionaryType <$> ts)) name)) (evars ts `List1.appendList` es)
     e ->
       e
 
