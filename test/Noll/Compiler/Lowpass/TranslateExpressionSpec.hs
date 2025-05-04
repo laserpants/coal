@@ -473,3 +473,95 @@ binarySearchInRange =
             )
         )
     )
+
+orderedInstanceOrdered =
+  DInstance
+    "Ordered"
+    (TIntrinsic IInt32)
+    [ DFunction
+        "compare"
+        ( Function
+            ()
+            (With [] (TConstructor KType "Ordering"))
+            (PVariable () (Label (TIntrinsic IInt32) "x") <| PVariable () (Label (TIntrinsic IInt32) "y") :| [])
+            ( EIf
+                ()
+                (TConstructor KType "Ordering")
+                ( EApplication
+                    ()
+                    (TIntrinsic IBool)
+                    ( EBinaryOperator
+                        ()
+                        (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IBool)
+                        OLessThan
+                    )
+                    ( EVariable () (Label (TIntrinsic IInt32) "x")
+                        <| EVariable () (Label (TIntrinsic IInt32) "y")
+                        :| []
+                    )
+                )
+                (EConstructor () (Label (TConstructor KType "Ordering") "LessThan"))
+                ( EIf
+                    ()
+                    (TConstructor KType "Ordering")
+                    ( EApplication
+                        ()
+                        (TIntrinsic IBool)
+                        ( EBinaryOperator
+                            ()
+                            (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IBool)
+                            OGreaterThan
+                        )
+                        ( EVariable () (Label (TIntrinsic IInt32) "x")
+                            <| EVariable () (Label (TIntrinsic IInt32) "y")
+                            :| []
+                        )
+                    )
+                    (EConstructor () (Label (TConstructor KType "Ordering") "GreaterThan"))
+                    (EConstructor () (Label (TConstructor KType "Ordering") "EqualTo"))
+                )
+            )
+        )
+    ]
+
+orderedGreaterThan =
+  DFunction
+    "greater_than"
+    ( Function
+        ()
+        ( With
+            [Trait "Ordered" (TVariable (TypeIndex KType 1))]
+            (TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool)
+        )
+        ( PVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Ordered") (TVariable (TypeIndex KType 1) :| [])) "$dict.ffef54c635ab7d01")
+            <| PAnnotation
+              ()
+              (TVariable (Parameter () "a"))
+              (PVariable () (Label (TVariable (TypeIndex KType 1)) "n"))
+            :| []
+        )
+        ( EApplication
+            ()
+            (TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool)
+            ( EBinaryOperator
+                ()
+                ( (TIntrinsic IBool `TArrow` TIntrinsic IBool)
+                    `TArrow` (TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool)
+                    `TArrow` TVariable (TypeIndex KType 1)
+                    `TArrow` TIntrinsic IBool
+                )
+                OReverseComposition
+            )
+            ( EVariable () (Label (TIntrinsic IBool `TArrow` TIntrinsic IBool) "not")
+                <| EApplication
+                  ()
+                  (TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool)
+                  (EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Ordered") (TVariable (TypeIndex KType 1) :| []) `TArrow` TVariable (TypeIndex KType 1) `TArrow` TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool) "less_than_or_equal_to"))
+                  ( EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Ordered") (TVariable (TypeIndex KType 1) :| [])) "$dict.ffef54c635ab7d01")
+                      <| EVariable () (Label (TVariable (TypeIndex KType 1)) "n")
+                      :| []
+                  )
+                :| []
+            )
+        )
+    )

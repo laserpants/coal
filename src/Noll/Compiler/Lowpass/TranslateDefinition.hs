@@ -14,7 +14,7 @@ import qualified Lang.Lowpass.Language as Lowpass
 
 type LowpassObject = Lowpass.Object Lowpass.Type (Lowpass.Expr Lowpass.Type)
 
-translateDefinition :: (Data a) => Definition a Kind IndexedType -> LowpassObject
+translateDefinition :: (Data a) => Definition a Kind IndexedType -> [LowpassObject]
 translateDefinition =
   \case
     DAnnotation u d ->
@@ -24,9 +24,9 @@ translateDefinition =
     DType name ps cs ->
       undefined
     DFunction name (Function _ (With _ t) ps e) ->
-      Lowpass.OFunction name (translatePattern <$> fromList1 ps) (translateExpression e)
+      [Lowpass.OFunction name (translatePattern <$> fromList1 ps) (translateExpression e)]
     DConstant name (Constant _ With{} e) ->
-      Lowpass.OConstant name (translateExpression e)
+      [Lowpass.OConstant name (translateExpression e)]
     DTrait name ts _ _ ->
       -- (Type Parameter ()) [(Name, Type Parameter ())]
       undefined
