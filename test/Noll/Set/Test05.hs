@@ -293,21 +293,20 @@ moduleBinarySearch =
                 ()
                 ( With
                     []
-                    ( ( TIntrinsic
-                          ( IRecord
-                              ( TRow
-                                  ( RExtend
-                                      "max"
-                                      (TVariable (TypeIndex KType 0))
-                                      ( RExtend
-                                          "min"
-                                          (TVariable (TypeIndex KType 0))
-                                          RNil
-                                      )
-                                  )
-                              )
-                          )
-                      )
+                    ( TIntrinsic
+                        ( IRecord
+                            ( TRow
+                                ( RExtend
+                                    "max"
+                                    (TVariable (TypeIndex KType 0))
+                                    ( RExtend
+                                        "min"
+                                        (TVariable (TypeIndex KType 0))
+                                        RNil
+                                    )
+                                )
+                            )
+                        )
                         `TArrow` TVariable (TypeIndex KType 0)
                         `TArrow` TIntrinsic IBool
                     )
@@ -379,11 +378,10 @@ moduleBinarySearch =
                                 <| EVariable () (Label (TVariable (TypeIndex KType 0)) "min")
                                 :| []
                             )
-                            <| ( EApplication
-                                  ()
-                                  (TIntrinsic IBool)
-                                  (EBinaryOperator () (TIntrinsic IBool `TArrow` TIntrinsic IBool `TArrow` TIntrinsic IBool) OLogicalOr)
-                               )
+                            <| EApplication
+                              ()
+                              (TIntrinsic IBool)
+                              (EBinaryOperator () (TIntrinsic IBool `TArrow` TIntrinsic IBool `TArrow` TIntrinsic IBool) OLogicalOr)
                               ( EApplication
                                   ()
                                   (TIntrinsic IBool)
@@ -395,11 +393,7 @@ moduleBinarySearch =
                                   <| EApplication
                                     ()
                                     (TIntrinsic IBool)
-                                    ( EBinaryOperator
-                                        ()
-                                        (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
-                                        OEqualTo
-                                    )
+                                    (EVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool) "less_than_or_equal_to"))
                                     ( EVariable () (Label (TVariable (TypeIndex KType 0)) "max")
                                         <| EApplication
                                           ()

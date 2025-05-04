@@ -522,11 +522,10 @@ moduleBinarySearch =
                                                                 [ EVariable () (Label (TVariable (TypeIndex KType 0)) "n")
                                                                 , EVariable () (Label (TVariable (TypeIndex KType 0)) "$row.2.field.min")
                                                                 ]
-                                                                <| ( EApplication
-                                                                      ()
-                                                                      (TIntrinsic IBool)
-                                                                      (EBinaryOperator () (TIntrinsic IBool `TArrow` TIntrinsic IBool `TArrow` TIntrinsic IBool) OLogicalOr)
-                                                                   )
+                                                                <| EApplication
+                                                                  ()
+                                                                  (TIntrinsic IBool)
+                                                                  (EBinaryOperator () (TIntrinsic IBool `TArrow` TIntrinsic IBool `TArrow` TIntrinsic IBool) OLogicalOr)
                                                                   ( EDictionaryApplication
                                                                       ()
                                                                       (TIntrinsic IBool)
@@ -535,23 +534,19 @@ moduleBinarySearch =
                                                                       [ EVariable () (Label (TVariable (TypeIndex KType 0)) "n")
                                                                       , EVariable () (Label (TVariable (TypeIndex KType 0)) "$row.1.field.max")
                                                                       ]
-                                                                      <| EApplication
+                                                                      <| EDictionaryApplication
                                                                         ()
                                                                         (TIntrinsic IBool)
-                                                                        ( EBinaryOperator
+                                                                        (EVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool) "less_than_or_equal_to"))
+                                                                        (Trait "Ordered" (TVariable (TypeIndex KType 0)) :| [])
+                                                                        [ EVariable () (Label (TVariable (TypeIndex KType 0)) "$row.1.field.max")
+                                                                        , EDictionaryApplication
                                                                             ()
-                                                                            (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
-                                                                            OEqualTo
-                                                                        )
-                                                                        ( EVariable () (Label (TVariable (TypeIndex KType 0)) "$row.1.field.max")
-                                                                            <| EDictionaryApplication
-                                                                              ()
-                                                                              (TVariable (TypeIndex KType 0))
-                                                                              (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0)) "from_int32"))
-                                                                              (Trait "Numeric" (TVariable (TypeIndex KType 0)) :| [])
-                                                                              [ELiteral () (LInt32 (-1))]
-                                                                            :| []
-                                                                        )
+                                                                            (TVariable (TypeIndex KType 0))
+                                                                            (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0)) "from_int32"))
+                                                                            (Trait "Numeric" (TVariable (TypeIndex KType 0)) :| [])
+                                                                            [ELiteral () (LInt32 (-1))]
+                                                                        ]
                                                                       :| []
                                                                   )
                                                                 :| []

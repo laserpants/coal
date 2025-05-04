@@ -445,11 +445,7 @@ moduleBinarySearch =
                                               <| EApplication
                                                 ()
                                                 (TIntrinsic IBool)
-                                                ( EBinaryOperator
-                                                    ()
-                                                    (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
-                                                    OEqualTo
-                                                )
+                                                (EVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool) "less_than_or_equal_to"))
                                                 ( EVariable () (Label (TVariable (TypeIndex KType 0)) "max")
                                                     <| EApplication
                                                       ()
@@ -591,17 +587,16 @@ moduleBinarySearch =
                                                   ( EVariable
                                                       ()
                                                       ( Label
-                                                          ( ( TIntrinsic
-                                                                ( IRecord
-                                                                    ( TRow
-                                                                        ( RExtend
-                                                                            "max"
-                                                                            (TVariable (TypeIndex KType 2))
-                                                                            (RExtend "min" (TVariable (TypeIndex KType 2)) RNil)
-                                                                        )
-                                                                    )
-                                                                )
-                                                            )
+                                                          ( TIntrinsic
+                                                              ( IRecord
+                                                                  ( TRow
+                                                                      ( RExtend
+                                                                          "max"
+                                                                          (TVariable (TypeIndex KType 2))
+                                                                          (RExtend "min" (TVariable (TypeIndex KType 2)) RNil)
+                                                                      )
+                                                                  )
+                                                              )
                                                               `TArrow` TVariable (TypeIndex KType 2)
                                                               `TArrow` TIntrinsic IBool
                                                           )

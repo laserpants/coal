@@ -498,11 +498,10 @@ moduleBinarySearch =
                                                                 <| EVariable () (Label (TVariable (TypeIndex KType 0)) "$row.2.field.min")
                                                                 :| []
                                                             )
-                                                            <| ( EApplication
-                                                                  ()
-                                                                  (TIntrinsic IBool)
-                                                                  (EBinaryOperator () (TIntrinsic IBool `TArrow` TIntrinsic IBool `TArrow` TIntrinsic IBool) OLogicalOr)
-                                                               )
+                                                            <| EApplication
+                                                              ()
+                                                              (TIntrinsic IBool)
+                                                              (EBinaryOperator () (TIntrinsic IBool `TArrow` TIntrinsic IBool `TArrow` TIntrinsic IBool) OLogicalOr)
                                                               ( EApplication
                                                                   ()
                                                                   (TIntrinsic IBool)
@@ -514,11 +513,7 @@ moduleBinarySearch =
                                                                   <| EApplication
                                                                     ()
                                                                     (TIntrinsic IBool)
-                                                                    ( EBinaryOperator
-                                                                        ()
-                                                                        (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
-                                                                        OEqualTo
-                                                                    )
+                                                                    (EVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool) "less_than_or_equal_to"))
                                                                     ( EVariable () (Label (TVariable (TypeIndex KType 0)) "$row.1.field.max")
                                                                         <| EApplication
                                                                           ()

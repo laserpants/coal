@@ -528,12 +528,9 @@ moduleBinarySearch =
                                                                   <| EApplication
                                                                     ()
                                                                     (TIntrinsic IBool)
-                                                                    ( EBinaryOperator
-                                                                        ()
-                                                                        (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
-                                                                        OEqualTo
-                                                                    )
-                                                                    ( EVariable () (Label (TVariable (TypeIndex KType 0)) "$row.1.field.max")
+                                                                    (EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Ordered") (TVariable (TypeIndex KType 0) :| []) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool) "less_than_or_equal_to"))
+                                                                    ( EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Ordered") (TVariable (TypeIndex KType 0) :| [])) "$dict.ffef54c635ab7d00")
+                                                                        <| EVariable () (Label (TVariable (TypeIndex KType 0)) "$row.1.field.max")
                                                                         <| EApplication
                                                                           ()
                                                                           (TVariable (TypeIndex KType 0))

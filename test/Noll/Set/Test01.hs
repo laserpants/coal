@@ -224,9 +224,9 @@ moduleBinarySearch =
                 (Set.fromList [Parameter () "a"])
                 []
                 ( TVariable (Parameter () "a")
-                    `TArrow` (TApplication () (TConstructor () "Tree") (TVariable (Parameter () "a") :| []))
-                    `TArrow` (TApplication () (TConstructor () "Tree") (TVariable (Parameter () "a") :| []))
-                    `TArrow` (TApplication () (TConstructor () "Tree") (TVariable (Parameter () "a") :| []))
+                    `TArrow` TApplication () (TConstructor () "Tree") (TVariable (Parameter () "a") :| [])
+                    `TArrow` TApplication () (TConstructor () "Tree") (TVariable (Parameter () "a") :| [])
+                    `TArrow` TApplication () (TConstructor () "Tree") (TVariable (Parameter () "a") :| [])
                 )
             )
         , Constructor
@@ -312,9 +312,9 @@ moduleBinarySearch =
                             :| []
                         )
                         <| EApplication
-                              ()
-                              ()
-                              (EBinaryOperator () () OLogicalOr)
+                          ()
+                          ()
+                          (EBinaryOperator () () OLogicalOr)
                           ( EApplication
                               ()
                               ()
@@ -326,7 +326,7 @@ moduleBinarySearch =
                               <| EApplication
                                 ()
                                 ()
-                                (EBinaryOperator () () OEqualTo)
+                                (EVariable () (Label () "less_than_or_equal_to"))
                                 ( EVariable () (Label () "max")
                                     <| EApplication
                                       ()

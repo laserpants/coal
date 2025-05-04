@@ -319,11 +319,10 @@ moduleBinarySearch =
                             <| EVariable () (Label () "min")
                             :| []
                         )
-                        <| ( EApplication
-                              ()
-                              ()
-                              (EBinaryOperator () () OLogicalOr)
-                           )
+                        <| EApplication
+                          ()
+                          ()
+                          (EBinaryOperator () () OLogicalOr)
                           ( EApplication
                               ()
                               ()
@@ -335,7 +334,7 @@ moduleBinarySearch =
                               <| EApplication
                                 ()
                                 ()
-                                (EBinaryOperator () () OEqualTo)
+                                (EVariable () (Label () "less_than_or_equal_to"))
                                 ( EVariable () (Label () "max")
                                     <| EApplication
                                       ()
