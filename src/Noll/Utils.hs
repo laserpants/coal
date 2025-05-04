@@ -1,4 +1,4 @@
-module Noll.Utils where
+module Noll.Utils (lexOrderRank, hashed) where
 
 import Data.Char (ord)
 import Data.Hashable (Hashable, hash)
