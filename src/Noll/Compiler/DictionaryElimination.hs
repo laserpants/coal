@@ -71,9 +71,11 @@ setType t =
       -- TODO
       e
 
+{-# INLINE pvars #-}
 pvars :: (Functor f, Monoid a) => f (Trait (Type TypeIndex Kind)) -> f (Pattern a (Type TypeIndex Kind))
 pvars = fmap (translateTrait PVariable)
 
+{-# INLINE evars #-}
 evars :: (Functor f, Monoid a) => f (Trait (Type TypeIndex Kind)) -> f (Expression a (Type TypeIndex Kind))
 evars = fmap (translateTrait EVariable)
 
