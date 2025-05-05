@@ -97,6 +97,7 @@ library
     , megaparsec
     , mtl
     , parser-combinators
+    , raw-strings-qq
     , recursion-schemes
     , text
     , text-show
@@ -125,6 +126,7 @@ executable noll-exe
     , mtl
     , noll
     , parser-combinators
+    , raw-strings-qq
     , recursion-schemes
     , text
     , text-show
@@ -217,6 +219,7 @@ test-suite noll-test
     , mtl
     , noll
     , parser-combinators
+    , raw-strings-qq
     , recursion-schemes
     , text
     , text-show

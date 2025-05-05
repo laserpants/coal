@@ -35,6 +35,7 @@ dependencies:
 - recursion-schemes
 - uniplate
 - deriving-compat
+- raw-strings-qq
 
 ghc-options:
 - -Wall

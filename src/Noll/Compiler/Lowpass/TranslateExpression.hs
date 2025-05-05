@@ -50,7 +50,7 @@ translateExpression =
     EApplication _ t (EUnaryOperator _ _ op) es ->
       undefined
     EApplication _ t (EBinaryOperator _ _ op) es ->
-      translateBinaryOperator op es
+      translateBinaryOperator t op es
     EApplication _ t e es ->
       Lowpass.app (translateType t) (translateExpression e) (translateExpression <$> es)
     ELambda _ ps e ->
@@ -123,9 +123,11 @@ translateClause =
 translateLabel :: Label IndexedType -> Label Lowpass.Type
 translateLabel (Label t name) = Label (translateType t) name
 
-translateBinaryOperator :: (Data a) => BinaryOperator -> List1 (Expression a IndexedType) -> LowpassExpr
-translateBinaryOperator =
+translateBinaryOperator :: (Data a) => IndexedType -> BinaryOperator -> List1 (Expression a IndexedType) -> LowpassExpr
+translateBinaryOperator t =
   \case
+    OReverseComposition ->
+      reverseCompositionOperator t
     OLessThan ->
       binop Lowpass.OLtInt32 (TIntrinsic IInt32, TIntrinsic IInt32)
     OGreaterThan ->
@@ -134,6 +136,16 @@ translateBinaryOperator =
       binop Lowpass.OAnd (TIntrinsic IBool, TIntrinsic IBool)
     OLogicalOr ->
       binop Lowpass.OOr (TIntrinsic IBool, TIntrinsic IBool)
+
+reverseCompositionOperator :: (Data a) => IndexedType -> List1 (Expression a IndexedType) -> LowpassExpr
+reverseCompositionOperator t es =
+  Lowpass.app
+    t1
+    (Lowpass.var (Label (Lowpass.foldType t1 (Lowpass.typeOf <$> exprs)) "Prelude.operator__reverse_composition"))
+    exprs
+ where
+  t1 = translateType t
+  exprs = translateExpression <$> es
 
 binop :: (Data a) => (LowpassExpr -> LowpassExpr -> Lowpass.Op LowpassExpr) -> (IndexedType, IndexedType) -> List1 (Expression a IndexedType) -> LowpassExpr
 binop op (t1, t2) (e1 :| [e2])
