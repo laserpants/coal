@@ -3,6 +3,7 @@
 
 module Noll.Compiler.Lowpass.TranslateExpression (translateExpression, translatePattern) where
 
+import Data.Maybe (fromMaybe)
 import Data.Data (Data)
 import Lang.Common.List1 (List1, NonEmpty (..))
 import Lang.Label (Label (..))
@@ -12,11 +13,13 @@ import Noll.Language
 import Noll.Language.Expression
 import Noll.Language.Expression.Binding
 import Noll.Language.Expression.Operator.Binary
+import Lang.Utils (Dictionary)
 import Noll.Language.Expression.Operator.Unary
 import Noll.Language.Pattern
 import Noll.Language.Primitive
 
 import qualified Lang.Lowpass.Language as Lowpass
+import qualified Data.Map.Strict as Map
 
 type LowpassExpr = Lowpass.Expr Lowpass.Type
 
@@ -73,8 +76,8 @@ translateExpression =
       undefined
     EBinaryOperator a t op ->
       undefined
-    ERecord a t d me ->
-      undefined
+    ERecord _ t d me ->
+      translateRecord t d me
     EListCons a t e1 e2 ->
       Lowpass.cons (translateExpression e1) (translateExpression e2)
     EListLiteral a t (e : es) ->
@@ -87,8 +90,13 @@ translateExpression =
       Lowpass.match (translateType t) (translateExpression e) (translateClause <$> cs)
     EFold _ _ _ _ (Just e) ->
       translateExpression e
-    ESelect _ ll e ->
-      error "TODO"
+    ESelect _ ll@(Label t name) e ->
+      Lowpass.sel
+        (Lowpass.Focus name v (Label Lowpass.opaque "_"))
+        (translateExpression e)
+        (Lowpass.var v)
+       where
+        v = translateLabel ll
     EFocus name0 ll1 ll2 e1 e2 ->
       Lowpass.sel
         (Lowpass.Focus name0 (translateLabel ll1) (translateLabel ll2))
@@ -98,6 +106,18 @@ translateExpression =
       undefined
     EDictionaryApplication a t e ts es ->
       undefined
+
+translateRecord :: (Data a) => IndexedType -> Dictionary (Expression a IndexedType) -> Maybe (Expression a IndexedType) -> LowpassExpr
+translateRecord t d me =
+  Lowpass.app
+    (translateType t)
+    (Lowpass.var (Label (Lowpass.arrow t1 (Lowpass.TCon "record" [t1])) "$Record"))
+    (e1 :| [])
+  where
+    exprs = translateExpression <$> d
+    expr0 = translateExpression <$> me
+    e1 = foldr (uncurry Lowpass.ext) (fromMaybe Lowpass.nil expr0) (Map.toList exprs)
+    t1 = Lowpass.typeOf e1
 
 translateBinding :: (Data a) => Binding Expression a IndexedType -> Lowpass.Binding Lowpass.Type LowpassExpr
 translateBinding =
@@ -128,6 +148,8 @@ translateBinaryOperator t =
   \case
     OReverseComposition ->
       reverseCompositionOperator t
+    OReverseApplication ->
+      reverseApplicationOperator t
     OLessThan ->
       binop Lowpass.OLtInt32 (TIntrinsic IInt32, TIntrinsic IInt32)
     OGreaterThan ->
@@ -146,6 +168,17 @@ reverseCompositionOperator t es =
  where
   t1 = translateType t
   exprs = translateExpression <$> es
+
+reverseApplicationOperator :: (Data a) => IndexedType -> List1 (Expression a IndexedType) -> LowpassExpr
+reverseApplicationOperator t es =
+  Lowpass.app
+    t1
+    (Lowpass.var (Label (Lowpass.foldType t1 (Lowpass.typeOf <$> exprs)) "Prelude.operator__reverse_application"))
+    exprs
+ where
+  t1 = translateType t
+  exprs = translateExpression <$> es
+
 
 binop :: (Data a) => (LowpassExpr -> LowpassExpr -> Lowpass.Op LowpassExpr) -> (IndexedType, IndexedType) -> List1 (Expression a IndexedType) -> LowpassExpr
 binop op (t1, t2) (e1 :| [e2])
