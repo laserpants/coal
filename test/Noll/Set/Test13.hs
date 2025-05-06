@@ -94,14 +94,16 @@ fixture1 =
               |]
           , OFunction
               "Ordered.greater_than"
-              [Label (TCon "Ordered.Ordered" [opaque]) "$dict.ffef54c635ab7d00", Label opaque "n"]
+              [ Label (TCon "Ordered.Ordered" [opaque]) "$dict.ffef54c635ab7d01"
+              , Label opaque "n"
+              ]
               [r| 
                   @<*/bool> 
                     ( Prelude.operator__reverse_composition : (bool/bool)/(*/bool)/*/bool 
                     , Prelude.not : bool/bool 
                     , @<*/bool> 
                         ( Ordered.less_than_or_equal_to : Ordered.Ordered(*)/*/*/bool 
-                        , $dict.ffef54c635ab7d00 : Ordered.Ordered(*) 
+                        , $dict.ffef54c635ab7d01 : Ordered.Ordered(*) 
                         , n : *) 
                     ) 
               |]
@@ -141,7 +143,7 @@ fixture1 =
                                                    , d_1 : record({ compare : */*/Ordering.Ordering | * })
                                                    , n : *
                                                    , min : * )
-                                          , [||\]
+                                          , [|| ]
                                             ( @<bool>( Ordering.gt : record({ compare : */*/Ordering.Ordering | * })/*/*/bool
                                                      , d_1 : record({ compare : */*/Ordering.Ordering | * })
                                                      , min : *
@@ -154,14 +156,44 @@ fixture1 =
                                           )
                     }
               |]
-          ]
-      }
-  ]
-
---                , OFunction
---                    "BinarySearch.from_list"
---                    []
---                    ""
+                , OFunction
+                    "BinarySearch.from_list"
+                    [ Label (TCon "Numeric" [TOpq]) "$dict.be194a5d16952b74"
+                    , Label (TCon "Ordered" [TOpq]) "$dict.ffef54c635ab7d02"
+                    , Label (TCon "list" [TOpq]) "list"
+                    ]
+                    [r|
+                      let
+                        $fold.1 : list(*)/record({ max : * | min : * | {} })/Tree(*) =
+                          fn($fold.1.expr : list(*)) =>
+                            match<Tree(*)>($fold.1.expr : list(*)) {
+                              | ( $Cons : */list(*)/list(*)
+                                , $match.10.p : *
+                                , $match.11.g : list(*)
+                                ) =>
+                                  fn(range : record({ max : * | min : * | {} })) =>
+                                    if 
+                                      ( @<bool>
+                                          (
+                                          )
+                                      )
+                                      then
+                                      else
+                              | ( $Nil : list(*)) =>
+                                  fn(_ : record({ max : * | min : * | {} })) =>
+                                    ?
+                            }
+                        in
+                          @<>
+                            ( $fold.1
+                            , list
+                            , @<record({ max : * | min : * | {} })>
+                                ( $Record : ?
+                                , ?
+                                , ?
+                                )
+                            )
+                    |]
 --                , OFunction
 --                    "BinarySearch.flatten"
 --                    []
@@ -170,6 +202,9 @@ fixture1 =
 --                    "BinarySearch.sort"
 --                    []
 --                    ""
+          ]
+      }
+  ]
 
 --  , Module
 --      { moduleName = "Main"
