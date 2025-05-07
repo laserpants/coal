@@ -15,6 +15,7 @@ import Control.Monad.Reader (asks)
 import Data.Data (Data)
 import Data.Maybe (maybeToList)
 import Data.Tuple.Extra (second, third3)
+import Debug.Trace
 import Lang.Common.List1 (NonEmpty ((:|)), fromList1)
 import Lang.Common.Supply (supplied)
 import Lang.Label (Label (..))
@@ -300,8 +301,14 @@ collectConstraints =
       -- Pattern types
       tellRight [Equality (InferenceRule 401) (typeOf e : ts1)]
       -- Expression types
-      tellRight [Equality (InferenceRule 402) (foldTypeOf t es : concat ts2)]
+      tellRight [Equality (InferenceRule 99402) (foldTypeOf t es : concat ts2)]
       ms4 <- concatMapM collectConstraints e1
+      case e1 of
+        Just (ERecursiveLet _ (PVariable _ (Label t1 _)) _ _) ->
+          tellRight [Equality (InferenceRule 999) [foldTypeOf t (e :| es), t1]]
+        _ ->
+          pure ()
+
       pure (ms1 <> ms2 <> ms3 <> ms4)
     ERecord _ t d e -> do
       ms1 <- concatMapM collectConstraints e

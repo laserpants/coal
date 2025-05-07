@@ -3,23 +3,23 @@
 
 module Noll.Compiler.Lowpass.TranslateExpression (translateExpression, translatePattern) where
 
-import Data.Maybe (fromMaybe)
 import Data.Data (Data)
+import Data.Maybe (fromMaybe)
 import Lang.Common.List1 (List1, NonEmpty (..))
 import Lang.Label (Label (..))
+import Lang.Utils (Dictionary)
 import Noll.Ast.HasType (HasType (..))
 import Noll.Compiler.Lowpass.TranslateType (translateType)
 import Noll.Language
 import Noll.Language.Expression
 import Noll.Language.Expression.Binding
 import Noll.Language.Expression.Operator.Binary
-import Lang.Utils (Dictionary)
 import Noll.Language.Expression.Operator.Unary
 import Noll.Language.Pattern
 import Noll.Language.Primitive
 
-import qualified Lang.Lowpass.Language as Lowpass
 import qualified Data.Map.Strict as Map
+import qualified Lang.Lowpass.Language as Lowpass
 
 type LowpassExpr = Lowpass.Expr Lowpass.Type
 
@@ -95,8 +95,8 @@ translateExpression =
         (Lowpass.Focus name v (Label Lowpass.opaque "_"))
         (translateExpression e)
         (Lowpass.var v)
-       where
-        v = translateLabel ll
+     where
+      v = translateLabel ll
     EFocus name0 ll1 ll2 e1 e2 ->
       Lowpass.sel
         (Lowpass.Focus name0 (translateLabel ll1) (translateLabel ll2))
@@ -113,11 +113,11 @@ translateRecord t d me =
     (translateType t)
     (Lowpass.var (Label (Lowpass.arrow t1 (Lowpass.TCon "record" [t1])) "$Record"))
     (e1 :| [])
-  where
-    exprs = translateExpression <$> d
-    expr0 = translateExpression <$> me
-    e1 = foldr (uncurry Lowpass.ext) (fromMaybe Lowpass.nil expr0) (Map.toList exprs)
-    t1 = Lowpass.typeOf e1
+ where
+  exprs = translateExpression <$> d
+  expr0 = translateExpression <$> me
+  e1 = foldr (uncurry Lowpass.ext) (fromMaybe Lowpass.nil expr0) (Map.toList exprs)
+  t1 = Lowpass.typeOf e1
 
 translateBinding :: (Data a) => Binding Expression a IndexedType -> Lowpass.Binding Lowpass.Type LowpassExpr
 translateBinding =
@@ -178,7 +178,6 @@ reverseApplicationOperator t es =
  where
   t1 = translateType t
   exprs = translateExpression <$> es
-
 
 binop :: (Data a) => (LowpassExpr -> LowpassExpr -> Lowpass.Op LowpassExpr) -> (IndexedType, IndexedType) -> List1 (Expression a IndexedType) -> LowpassExpr
 binop op (t1, t2) (e1 :| [e2])
