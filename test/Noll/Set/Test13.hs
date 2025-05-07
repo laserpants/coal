@@ -174,23 +174,43 @@ fixture1 =
                                   fn(range : record({ max : * | min : * | {} })) =>
                                     if 
                                       ( @<bool>
-                                          (
+                                          ( Prelude.operator__reverse_application : ?
+                                          , $match.10.p : *
+                                          , @<*/bool>
+                                              ( in_range : Ordering(*)/record({ max : * | min : * | {} })/*/bool
+                                              , $dict.ffef54c635ab7d02 : Ordered(*)
+                                              , range : record({ max : * | min : * | {} })
+                                              )
                                           )
                                       )
                                       then
+                                        @<Tree(*)>
+                                          ( Node : */Tree(*)/Tree(*)/Tree(*)
+                                          )
                                       else
+                                        @<Tree(*)>
+                                          ( $fold.1 : list(*)/record({ max : * | min : * | {} })/Tree(*)
+                                          , $match.11.g : list(*)
+                                          , @<record({ max : * | min : * | {} }>
+                                              ( $Record : ?
+                                              , { max = 1
+                                                | min = 2
+                                                | {}
+                                                }
+                                              )
+                                          )
                               | ( $Nil : list(*)) =>
                                   fn(_ : record({ max : * | min : * | {} })) =>
-                                    ?
+                                    5
                             }
                         in
                           @<>
                             ( $fold.1
                             , list
                             , @<record({ max : * | min : * | {} })>
-                                ( $Record : ?
-                                , ?
-                                , ?
+                                ( $Record : */*
+                                , 1
+                                , 2
                                 )
                             )
                     |]

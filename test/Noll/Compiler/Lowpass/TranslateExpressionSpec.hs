@@ -1663,3 +1663,69 @@ binarySearchFromList =
                     )
                 )
             )
+
+
+binarySearchFromListResult = unsafeParseExpr <$$> binarySearchFromListResult1
+
+binarySearchFromListResult1 =
+        [ LP.OFunction
+            "from_list"
+            [ Label (LP.TCon "Numeric" [LP.TOpq]) "$dict.be194a5d16952b77"
+            , Label (LP.TCon "Ordered" [LP.TOpq]) "$dict.ffef54c635ab7d01"
+            , Label LP.TOpq "n"
+            ]
+            [r| 
+                 let
+                   $fold.1 : list(*)/record({ max : * | min : * | {} })/Tree(*) =
+                     fn($fold.1.expr : list(*)) =>
+                       match<record({ max : * | min : * | {} })/Tree(*)>($fold.1.expr : list(*)) {
+                         | ( $Cons : */list(*)/list(*)
+                           , $match.10.p : *
+                           , $match.11.g : list(*)
+                           ) =>
+                             fn(range : record({ max : * | min : * | {} })) =>
+                               if 
+                                 ( @<bool>
+                                     ( Prelude.operator__reverse_application : */(*/bool)/bool
+                                     , $match.10.p : *
+                                     , @<*/bool>
+                                         ( in_range : Ordered(*)/record({ max : * | min : * | {} })/*/bool
+                                         , $dict.be194a5d16952b77 : Numeric(*)
+                                         , $dict.ffef54c635ab7d01 : Ordered(*)
+                                         , range : record({ max : * | min : * | {} })
+                                         )
+                                     )
+                                 )
+                                 then
+                                   @<Tree(*)>
+                                     ( Node : */Tree(*)/Tree(*)/Tree(*)
+                                     , 1
+                                     )
+                                 else
+                                   @<Tree(*)>
+                                     ( $fold.1 : list(*)/record({ max : * | min : * | {} })/Tree(*)
+                                     , $match.11.g : list(*)
+                                     , @<record({ max : * | min : * | {} })>
+                                         ( $Record : *
+                                         , { max = 1
+                                           | min = 2
+                                           | {}
+                                           }
+                                         )
+                                     )
+                         | ( $Nil : list(*)) =>
+                             fn(_ : record({ max : * | min : * | {} })) =>
+                               5
+                       }
+                   in
+                     @<*>
+                       ( $fold.1 : list(*)/record({ max : * | min : * | {} })/Tree(*)
+                       , 1
+                       , @<record({ max : * | min : * | {} })>
+                           ( $Record : */*
+                           , 1
+                           , 2
+                           )
+                       )
+                |]
+        ]
