@@ -156,13 +156,13 @@ fixture1 =
                                           )
                     }
               |]
-                , OFunction
-                    "BinarySearch.from_list"
-                    [ Label (TCon "Numeric" [TOpq]) "$dict.be194a5d16952b74"
-                    , Label (TCon "Ordered" [TOpq]) "$dict.ffef54c635ab7d02"
-                    , Label (TCon "list" [TOpq]) "list"
-                    ]
-                    [r|
+          , OFunction
+              "BinarySearch.from_list"
+              [ Label (TCon "Numeric" [TOpq]) "$dict.be194a5d16952b74"
+              , Label (TCon "Ordered" [TOpq]) "$dict.ffef54c635ab7d02"
+              , Label (TCon "list" [TOpq]) "list"
+              ]
+              [r|
                       let
                         $fold.1 : list(*)/record({ max : * | min : * | {} })/Tree(*) =
                           fn($fold.1.expr : list(*)) =>
@@ -214,6 +214,10 @@ fixture1 =
                                 )
                             )
                     |]
+          ]
+      }
+  ]
+
 --                , OFunction
 --                    "BinarySearch.flatten"
 --                    []
@@ -222,9 +226,6 @@ fixture1 =
 --                    "BinarySearch.sort"
 --                    []
 --                    ""
-          ]
-      }
-  ]
 
 --  , Module
 --      { moduleName = "Main"
