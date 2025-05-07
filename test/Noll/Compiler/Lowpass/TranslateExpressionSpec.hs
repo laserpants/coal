@@ -1670,9 +1670,9 @@ binarySearchFromListResult = unsafeParseExpr <$$> binarySearchFromListResult1
 binarySearchFromListResult1 =
         [ LP.OFunction
             "from_list"
-            [ Label (LP.TCon "Numeric" [LP.TOpq]) "$dict.be194a5d16952b77"
-            , Label (LP.TCon "Ordered" [LP.TOpq]) "$dict.ffef54c635ab7d01"
-            , Label LP.TOpq "n"
+            [ Label (LP.TCon "Numeric" [LP.TOpq]) "$dict.be194a5d16952b74"
+            , Label (LP.TCon "Ordered" [LP.TOpq]) "$dict.ffef54c635ab7d02"
+            , Label (LP.TCon "list" [LP.TOpq]) "list"
             ]
             [r| 
                  let
@@ -1689,7 +1689,7 @@ binarySearchFromListResult1 =
                                      ( Prelude.operator__reverse_application : */(*/bool)/bool
                                      , $match.10.p : *
                                      , @<*/bool>
-                                         ( in_range : Ordered(*)/record({ max : * | min : * | {} })/*/bool
+                                         ( in_range : Numeric(*)/Ordered(*)/record({ max : * | min : * | {} })/*/bool
                                          , $dict.be194a5d16952b77 : Numeric(*)
                                          , $dict.ffef54c635ab7d01 : Ordered(*)
                                          , range : record({ max : * | min : * | {} })
@@ -1699,6 +1699,26 @@ binarySearchFromListResult1 =
                                  then
                                    @<Tree(*)>
                                      ( Node : */Tree(*)/Tree(*)/Tree(*)
+                                     , $match.10.p : *
+                                     , @<Tree(*)>
+                                         ( $fold.1 : list(*)/record({ max : * | min : * | {} })/Tree(*)
+                                         , $match.11.g : list(*)
+                                         , @<record({ max : * | min : * | {} })>
+                                             ( $Record : { max : * | min : * | {} }/record({ max : * | min : * | {} })
+                                             , { max = $match.10.p : *
+                                               | min =
+                                                   match<*>(range : record({ max : * | min : * | {} })) {
+                                                     | ($Record : { max : * | min : * | {} }/record({ max : * | min : * | {} }), row_2 : { max : * | min : * | {} }) =>
+                                                         select
+                                                           { min = m_1 : * | q_2 : { max : * | {} } } =
+                                                             row_2 : { max : * | min : * | {} }
+                                                           in
+                                                             m_1 : *
+                                                   }
+                                               | {}
+                                               }
+                                             )
+                                         )
                                      , 1
                                      )
                                  else
