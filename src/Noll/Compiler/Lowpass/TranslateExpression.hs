@@ -5,7 +5,7 @@ module Noll.Compiler.Lowpass.TranslateExpression (translateExpression, translate
 
 import Data.Data (Data)
 import Data.Maybe (fromMaybe)
-import Lang.Common.List1 (List1, NonEmpty (..))
+import Lang.Common.List1 (List1, NonEmpty (..), (<|))
 import Lang.Label (Label (..))
 import Lang.Utils (Dictionary)
 import Noll.Ast.HasType (HasType (..))
@@ -90,13 +90,25 @@ translateExpression =
       Lowpass.match (translateType t) (translateExpression e) (translateClause <$> cs)
     EFold _ _ _ _ (Just e) ->
       translateExpression e
-    ESelect _ ll@(Label t name) e ->
-      Lowpass.sel
-        (Lowpass.Focus name v (Label Lowpass.opaque "_"))
+    ESelect _ ll@(Label t field) e ->
+      Lowpass.match
+        (translateType t)
         (translateExpression e)
-        (Lowpass.var v)
+        ( Lowpass.Clause
+            (Label (Lowpass.arrow t1 (Lowpass.TCon "record" [r])) "$Record" <| Label t1 "$row" :| [])
+            -- ( translateExpression
+            --    ( EFocus field ll undefined undefined (EVariable undefined ll) )
+            -- )
+            ( Lowpass.sel
+                (Lowpass.Focus field (translateLabel ll) (Label (Lowpass.dropField field r) "_"))
+                (Lowpass.var (Label r "$row"))
+                (Lowpass.var (translateLabel ll))
+            )
+            :| []
+        )
      where
-      v = translateLabel ll
+      Lowpass.TCon _ [r] = Lowpass.typeOf (translateExpression e)
+      t1 = Lowpass.typeOf r
     EFocus name0 ll1 ll2 e1 e2 ->
       Lowpass.sel
         (Lowpass.Focus name0 (translateLabel ll1) (translateLabel ll2))
@@ -163,21 +175,21 @@ reverseCompositionOperator :: (Data a) => IndexedType -> List1 (Expression a Ind
 reverseCompositionOperator t es =
   Lowpass.app
     t1
-    (Lowpass.var (Label (Lowpass.foldType t1 (Lowpass.typeOf <$> exprs)) "Prelude.operator__reverse_composition"))
-    exprs
+    (Lowpass.var (Label (Lowpass.foldType t1 (Lowpass.typeOf <$> args)) "Prelude.operator__reverse_composition"))
+    args
  where
   t1 = translateType t
-  exprs = translateExpression <$> es
+  args = translateExpression <$> es
 
 reverseApplicationOperator :: (Data a) => IndexedType -> List1 (Expression a IndexedType) -> LowpassExpr
 reverseApplicationOperator t es =
   Lowpass.app
     t1
-    (Lowpass.var (Label (Lowpass.foldType t1 (Lowpass.typeOf <$> exprs)) "Prelude.operator__reverse_application"))
-    exprs
+    (Lowpass.var (Label (Lowpass.foldType t1 (Lowpass.typeOf <$> args)) "Prelude.operator__reverse_application"))
+    args
  where
   t1 = translateType t
-  exprs = translateExpression <$> es
+  args = translateExpression <$> es
 
 binop :: (Data a) => (LowpassExpr -> LowpassExpr -> Lowpass.Op LowpassExpr) -> (IndexedType, IndexedType) -> List1 (Expression a IndexedType) -> LowpassExpr
 binop op (t1, t2) (e1 :| [e2])

@@ -1707,43 +1707,71 @@ binarySearchFromListResult1 =
                                              , { max = $match.10.p : *
                                                | min =
                                                    match<*>(range : record({ max : * | min : * | {} })) {
-                                                     | ($Record : { max : * | min : * | {} }/record({ max : * | min : * | {} }), row_2 : { max : * | min : * | {} }) =>
+                                                     | ( $Record : { max : * | min : * | {} }/record({ max : * | min : * | {} })
+                                                       , $row : { max : * | min : * | {} }
+                                                       ) =>
                                                          select
-                                                           { min = m_1 : * | q_2 : { max : * | {} } } =
-                                                             row_2 : { max : * | min : * | {} }
+                                                           { min = min : * | _ : { max : * | {} } } =
+                                                             $row : { max : * | min : * | {} }
                                                            in
-                                                             m_1 : *
+                                                             min : *
                                                    }
                                                | {}
                                                }
                                              )
                                          )
-                                     , 1
+                                     , @<Tree(*)>
+                                       ( $fold.1 : list(*)/record({ max : * | min : * | {} })/Tree(*)
+                                       , $match.11.g : list(*)
+                                       , @<record({ max : * | min : * | {} })>
+                                           ( $Record : { max : * | min : * | {} }/record({ max : * | min : * | {} })
+                                           , { max = 
+                                                 match<*>(range : record({ max : * | min : * | {} })) {
+                                                   | ( $Record : { max : * | min : * | {} }/record({ max : * | min : * | {} })
+                                                     , $row : { max : * | min : * | {} }
+                                                     ) =>
+                                                       select
+                                                         { max = max : * | _ : { min : * | {} } } =
+                                                           $row : { max : * | min : * | {} }
+                                                         in
+                                                           max : *
+                                                 }
+                                             | min = $match.10.p : *
+                                             | {}
+                                             }
+                                           )
+                                       )
                                      )
                                  else
                                    @<Tree(*)>
                                      ( $fold.1 : list(*)/record({ max : * | min : * | {} })/Tree(*)
                                      , $match.11.g : list(*)
-                                     , @<record({ max : * | min : * | {} })>
-                                         ( $Record : *
-                                         , { max = 1
-                                           | min = 2
-                                           | {}
-                                           }
-                                         )
+                                     , range : record({ max : * | min : * | {} })
                                      )
-                         | ( $Nil : list(*)) =>
-                             fn(_ : record({ max : * | min : * | {} })) =>
-                               5
+                         | ($Nil : list(*)) =>
+                             @<record({ max : * | min : * | {} })/Tree(*)>
+                               ( always : Tree(*)/record({ max : * | min : * | {} })/Tree(*)
+                               , Leaf : Tree(*)
+                               )
                        }
                    in
-                     @<*>
+                     @<Tree(*)>
                        ( $fold.1 : list(*)/record({ max : * | min : * | {} })/Tree(*)
-                       , 1
+                       , list : list(*)
                        , @<record({ max : * | min : * | {} })>
-                           ( $Record : */*
-                           , 1
-                           , 2
+                           ( $Record : { max : * | min : * | {} }/record({ max : * | min : * | {} })
+                           , { max =
+                                 @<*>
+                                   ( from_int32 : Numeric(*)/int32/*
+                                   , $dict.be194a5d16952b74 : Numeric(*)
+                                   , -1 )
+                             | min =
+                                 @<*>
+                                   ( from_int32 : Numeric(*)/int32/*
+                                   , $dict.be194a5d16952b74 : Numeric(*)
+                                   , 0 )
+                             | {}
+                             }
                            )
                        )
                 |]

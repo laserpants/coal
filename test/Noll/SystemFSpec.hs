@@ -1221,3 +1221,5 @@ story = do
     translateDefinition orderedCompareInstance1 == [orderedCompareInstance1Result]
   it "" $
     translateDefinition orderedLessThanOrEqualTo == [orderedLessThanOrEqualToResult]
+  it "" $
+    translateDefinition binarySearchFromList == binarySearchFromListResult
