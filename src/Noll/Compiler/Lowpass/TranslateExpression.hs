@@ -80,6 +80,8 @@ translateExpression =
       translateRecord t d me
     EListCons a t e1 e2 ->
       Lowpass.cons (translateExpression e1) (translateExpression e2)
+    EListLiteral _ t [] ->
+      Lowpass.var (Label (translateType t) "$Nil")
     EListLiteral a t (e : es) ->
       translateExpression (foldr (EListCons a t) e es)
     ETuple _ _ es ->
@@ -162,6 +164,8 @@ translateBinaryOperator t =
       reverseCompositionOperator t
     OReverseApplication ->
       reverseApplicationOperator t
+    OListConcatenation ->
+      listConcatenationOperator t
     OLessThan ->
       binop Lowpass.OLtInt32 (TIntrinsic IInt32, TIntrinsic IInt32)
     OGreaterThan ->
@@ -170,6 +174,15 @@ translateBinaryOperator t =
       binop Lowpass.OAnd (TIntrinsic IBool, TIntrinsic IBool)
     OLogicalOr ->
       binop Lowpass.OOr (TIntrinsic IBool, TIntrinsic IBool)
+
+listConcatenationOperator t es =
+  Lowpass.app
+    t1
+    (Lowpass.var (Label (t1 `Lowpass.arrow` t1 `Lowpass.arrow` t1) "Prelude.operator__list_concatenation"))
+    args
+ where
+  t1 = translateType t
+  args = translateExpression <$> es
 
 reverseCompositionOperator :: (Data a) => IndexedType -> List1 (Expression a IndexedType) -> LowpassExpr
 reverseCompositionOperator t es =

@@ -1223,3 +1223,6 @@ story = do
     translateDefinition orderedLessThanOrEqualTo == [orderedLessThanOrEqualToResult]
   it "" $
     translateDefinition binarySearchFromList == binarySearchFromListResult
+  it "" $
+    translateDefinition binarySearchFlatten == binarySearchFlattenResult
+
