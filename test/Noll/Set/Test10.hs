@@ -2084,15 +2084,18 @@ moduleMain =
                         ()
                         (TVariable (TypeIndex KType 0))
                         (EVariable () (Label (TIntrinsic (IList (TIntrinsic IInt32)) `TArrow` TVariable (TypeIndex KType 0)) "trace"))
-                        ( EApplication
-                            ()
-                            (TIntrinsic (IList (TIntrinsic IInt32)))
-                            (EVariable () (Label (TIntrinsic (IList (TIntrinsic IInt32)) `TArrow` TIntrinsic (IList (TIntrinsic IInt32))) "sort"))
-                            ( EVariable () (Label (TIntrinsic (IList (TIntrinsic IInt32))) "xs")
-                                :| []
-                            )
+                            ( EDictionaryApplication
+                                ()
+                                (TIntrinsic (IList (TIntrinsic IInt32)))
+                                (Label (TIntrinsic (IList (TIntrinsic IInt32)) `TArrow` TIntrinsic (IList (TIntrinsic IInt32))) "sort") 
+                                ( Trait "Numeric" (TIntrinsic IInt32)
+                                    <| Trait "Ordered" (TIntrinsic IInt32)
+                                    :| []
+                                )
+                                [ EVariable () (Label (TIntrinsic (IList (TIntrinsic IInt32))) "xs") 
+                                ]
                             :| []
-                        )
+                            )
                     )
                 )
             )
