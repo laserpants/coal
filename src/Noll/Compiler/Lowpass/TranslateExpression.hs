@@ -146,6 +146,8 @@ translatePattern =
       Label (translateType t) name
     PAnnotation _ _ p ->
       translatePattern p
+    PLiteral _ p ->
+      Label (translateType (typeOf p)) "_"
 
 translateClause :: (Data a) => CompiledClause a IndexedType -> Lowpass.Clause Lowpass.Type LowpassExpr
 translateClause =
