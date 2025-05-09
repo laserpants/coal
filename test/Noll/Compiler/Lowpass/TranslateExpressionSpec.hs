@@ -2242,116 +2242,116 @@ binarySearchSortResult1 =
       |]
   ]
 
-mainMain = 
-      DFunction
-        "main"
-        ( Function
+mainMain =
+  DFunction
+    "main"
+    ( Function
+        ()
+        ( With
+            [Trait "Numeric" (TVariable (TypeIndex KType 2))]
+            (TVariable (TypeIndex KType 0))
+        )
+        ( PVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 2) :| [])) "$dict.be194a5d16952b74")
+            <| PLiteral () LUnit
+            :| []
+        )
+        ( ELet
             ()
-            ( With
-                [Trait "Numeric" (TVariable (TypeIndex KType 2))]
-                (TVariable (TypeIndex KType 0))
-            )
-            ( PVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 2) :| [])) "$dict.be194a5d16952b74")
-                <| PLiteral () LUnit
-                :| []
-            )
-            ( ELet
+            ( BPattern
                 ()
-                ( BPattern
+                (PVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 1)))) "xs"))
+                ( ELambda
                     ()
-                    (PVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 1)))) "xs"))
-                    ( ELambda
+                    (PVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 1) :| [])) "$dict.be194a5d16952b77") :| [])
+                    ( EAnnotation
                         ()
-                        (PVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 1) :| [])) "$dict.be194a5d16952b77") :| [])
-                        ( EAnnotation
+                        (TIntrinsic (IList (TVariable (Parameter () "a"))))
+                        ( EListLiteral
                             ()
-                            (TIntrinsic (IList (TVariable (Parameter () "a"))))
-                            ( EListLiteral
+                            (TIntrinsic (IList (TVariable (TypeIndex KType 1))))
+                            [ -- EApplication () (TVariable (TypeIndex KType 1)) (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32")) (ELiteral () (LInt32 5) :| [])
+                              EApplication
                                 ()
-                                (TIntrinsic (IList (TVariable (TypeIndex KType 1))))
-                                [ -- EApplication () (TVariable (TypeIndex KType 1)) (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32")) (ELiteral () (LInt32 5) :| [])
-                                  EApplication
-                                    ()
-                                    (TVariable (TypeIndex KType 1))
-                                    (EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 1) :| []) `TArrow` TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32"))
-                                    ( EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 1) :| [])) "$dict.be194a5d16952b77")
-                                        <| ELiteral () (LInt32 5)
-                                        :| []
-                                    )
-                                , EApplication
-                                    ()
-                                    (TVariable (TypeIndex KType 1))
-                                    (EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 1) :| []) `TArrow` TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32"))
-                                    ( EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 1) :| [])) "$dict.be194a5d16952b77")
-                                        <| ELiteral () (LInt32 3)
-                                        :| []
-                                    )
-                                , EApplication
-                                    ()
-                                    (TVariable (TypeIndex KType 1))
-                                    (EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 1) :| []) `TArrow` TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32"))
-                                    ( EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 1) :| [])) "$dict.be194a5d16952b77")
-                                        <| ELiteral () (LInt32 7)
-                                        :| []
-                                    )
-                                , EApplication
-                                    ()
-                                    (TVariable (TypeIndex KType 1))
-                                    (EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 1) :| []) `TArrow` TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32"))
-                                    ( EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 1) :| [])) "$dict.be194a5d16952b77")
-                                        <| ELiteral () (LInt32 2)
-                                        :| []
-                                    )
-                                , EApplication
-                                    ()
-                                    (TVariable (TypeIndex KType 1))
-                                    (EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 1) :| []) `TArrow` TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32"))
-                                    ( EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 1) :| [])) "$dict.be194a5d16952b77")
-                                        <| ELiteral () (LInt32 1)
-                                        :| []
-                                    )
-                                , EApplication
-                                    ()
-                                    (TVariable (TypeIndex KType 1))
-                                    (EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 1) :| []) `TArrow` TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32"))
-                                    ( EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 1) :| [])) "$dict.be194a5d16952b77")
-                                        <| ELiteral () (LInt32 6)
-                                        :| []
-                                    )
-                                , EApplication
-                                    ()
-                                    (TVariable (TypeIndex KType 1))
-                                    (EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 1) :| []) `TArrow` TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32"))
-                                    ( EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 1) :| [])) "$dict.be194a5d16952b77")
-                                        <| ELiteral () (LInt32 4)
-                                        :| []
-                                    )
-                                ]
-                            )
+                                (TVariable (TypeIndex KType 1))
+                                (EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 1) :| []) `TArrow` TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32"))
+                                ( EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 1) :| [])) "$dict.be194a5d16952b77")
+                                    <| ELiteral () (LInt32 5)
+                                    :| []
+                                )
+                            , EApplication
+                                ()
+                                (TVariable (TypeIndex KType 1))
+                                (EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 1) :| []) `TArrow` TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32"))
+                                ( EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 1) :| [])) "$dict.be194a5d16952b77")
+                                    <| ELiteral () (LInt32 3)
+                                    :| []
+                                )
+                            , EApplication
+                                ()
+                                (TVariable (TypeIndex KType 1))
+                                (EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 1) :| []) `TArrow` TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32"))
+                                ( EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 1) :| [])) "$dict.be194a5d16952b77")
+                                    <| ELiteral () (LInt32 7)
+                                    :| []
+                                )
+                            , EApplication
+                                ()
+                                (TVariable (TypeIndex KType 1))
+                                (EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 1) :| []) `TArrow` TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32"))
+                                ( EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 1) :| [])) "$dict.be194a5d16952b77")
+                                    <| ELiteral () (LInt32 2)
+                                    :| []
+                                )
+                            , EApplication
+                                ()
+                                (TVariable (TypeIndex KType 1))
+                                (EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 1) :| []) `TArrow` TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32"))
+                                ( EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 1) :| [])) "$dict.be194a5d16952b77")
+                                    <| ELiteral () (LInt32 1)
+                                    :| []
+                                )
+                            , EApplication
+                                ()
+                                (TVariable (TypeIndex KType 1))
+                                (EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 1) :| []) `TArrow` TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32"))
+                                ( EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 1) :| [])) "$dict.be194a5d16952b77")
+                                    <| ELiteral () (LInt32 6)
+                                    :| []
+                                )
+                            , EApplication
+                                ()
+                                (TVariable (TypeIndex KType 1))
+                                (EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 1) :| []) `TArrow` TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32"))
+                                ( EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 1) :| [])) "$dict.be194a5d16952b77")
+                                    <| ELiteral () (LInt32 4)
+                                    :| []
+                                )
+                            ]
                         )
                     )
-                    :| []
                 )
+                :| []
+            )
+            ( EApplication
+                ()
+                (TVariable (TypeIndex KType 0))
+                (EVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 2))) `TArrow` TVariable (TypeIndex KType 0)) "trace"))
                 ( EApplication
                     ()
-                    (TVariable (TypeIndex KType 0))
-                    (EVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 2))) `TArrow` TVariable (TypeIndex KType 0)) "trace"))
+                    (TIntrinsic (IList (TVariable (TypeIndex KType 2))))
+                    (EVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 2))) `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 2)))) "sort"))
                     ( EApplication
                         ()
                         (TIntrinsic (IList (TVariable (TypeIndex KType 2))))
-                        (EVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 2))) `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 2)))) "sort"))
-                        ( EApplication
-                            ()
-                            (TIntrinsic (IList (TVariable (TypeIndex KType 2))))
-                            (EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 2) :| []) `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 2)))) "xs"))
-                            (EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 2) :| [])) "$dict.be194a5d16952b74") :| [])
-                            :| []
-                        )
+                        (EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 2) :| []) `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 2)))) "xs"))
+                        (EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 2) :| [])) "$dict.be194a5d16952b74") :| [])
                         :| []
                     )
+                    :| []
                 )
             )
         )
+    )
 
 mainMainResult = unsafeParseExpr <$$> mainMainResult1
 
@@ -2365,5 +2365,3 @@ mainMainResult1 =
           foo
       |]
   ]
-
-

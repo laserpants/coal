@@ -2016,96 +2016,82 @@ moduleMain =
         ( Constant
             ()
             ( With
-                [Trait "Numeric" (TVariable (TypeIndex KType 2))]
+                []
                 (TIntrinsic IUnit `TArrow` TVariable (TypeIndex KType 0))
             )
-            ( EDictionaryLambda
+            ( ELambda
                 ()
-                (Trait "Numeric" (TVariable (TypeIndex KType 2)) :| [])
-                ( ELambda
+                (PLiteral () LUnit :| [])
+                ( ELet
                     ()
-                    (PLiteral () LUnit :| [])
-                    ( ELet
+                    ( BPattern
                         ()
-                        ( BPattern
+                        (PVariable () (Label (TIntrinsic (IList (TIntrinsic IInt32))) "xs"))
+                        ( EAnnotation
                             ()
-                            (PVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 1)))) "xs"))
-                            ( EDictionaryLambda
+                            (TIntrinsic (IList (TIntrinsic IInt32)))
+                            ( EListLiteral
                                 ()
-                                (Trait "Numeric" (TVariable (TypeIndex KType 1)) :| [])
-                                ( EAnnotation
+                                (TIntrinsic (IList (TIntrinsic IInt32)))
+                                [ EDictionaryApplication
                                     ()
-                                    (TIntrinsic (IList (TVariable (Parameter () "a"))))
-                                    ( EListLiteral
-                                        ()
-                                        (TIntrinsic (IList (TVariable (TypeIndex KType 1))))
-                                        [ -- EApplication () (TVariable (TypeIndex KType 1)) (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32")) (ELiteral () (LInt32 5) :| [])
-                                          EDictionaryApplication
-                                            ()
-                                            (TVariable (TypeIndex KType 1))
-                                            (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32")
-                                            (Trait "Numeric" (TVariable (TypeIndex KType 1)) :| [])
-                                            [ELiteral () (LInt32 5)]
-                                        , EDictionaryApplication
-                                            ()
-                                            (TVariable (TypeIndex KType 1))
-                                            (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32")
-                                            (Trait "Numeric" (TVariable (TypeIndex KType 1)) :| [])
-                                            [ELiteral () (LInt32 3)]
-                                        , EDictionaryApplication
-                                            ()
-                                            (TVariable (TypeIndex KType 1))
-                                            (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32")
-                                            (Trait "Numeric" (TVariable (TypeIndex KType 1)) :| [])
-                                            [ELiteral () (LInt32 7)]
-                                        , EDictionaryApplication
-                                            ()
-                                            (TVariable (TypeIndex KType 1))
-                                            (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32")
-                                            (Trait "Numeric" (TVariable (TypeIndex KType 1)) :| [])
-                                            [ELiteral () (LInt32 2)]
-                                        , EDictionaryApplication
-                                            ()
-                                            (TVariable (TypeIndex KType 1))
-                                            (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32")
-                                            (Trait "Numeric" (TVariable (TypeIndex KType 1)) :| [])
-                                            [ELiteral () (LInt32 1)]
-                                        , EDictionaryApplication
-                                            ()
-                                            (TVariable (TypeIndex KType 1))
-                                            (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32")
-                                            (Trait "Numeric" (TVariable (TypeIndex KType 1)) :| [])
-                                            [ELiteral () (LInt32 6)]
-                                        , EDictionaryApplication
-                                            ()
-                                            (TVariable (TypeIndex KType 1))
-                                            (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32")
-                                            (Trait "Numeric" (TVariable (TypeIndex KType 1)) :| [])
-                                            [ELiteral () (LInt32 4)]
-                                        ]
-                                    )
-                                )
+                                    (TIntrinsic IInt32)
+                                    (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")
+                                    (Trait "Numeric" (TIntrinsic IInt32) :| [])
+                                    [ELiteral () (LInt32 5)]
+                                , EDictionaryApplication
+                                    ()
+                                    (TIntrinsic IInt32)
+                                    (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")
+                                    (Trait "Numeric" (TIntrinsic IInt32) :| [])
+                                    [ELiteral () (LInt32 3)]
+                                , EDictionaryApplication
+                                    ()
+                                    (TIntrinsic IInt32)
+                                    (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")
+                                    (Trait "Numeric" (TIntrinsic IInt32) :| [])
+                                    [ELiteral () (LInt32 7)]
+                                , EDictionaryApplication
+                                    ()
+                                    (TIntrinsic IInt32)
+                                    (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")
+                                    (Trait "Numeric" (TIntrinsic IInt32) :| [])
+                                    [ELiteral () (LInt32 2)]
+                                , EDictionaryApplication
+                                    ()
+                                    (TIntrinsic IInt32)
+                                    (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")
+                                    (Trait "Numeric" (TIntrinsic IInt32) :| [])
+                                    [ELiteral () (LInt32 1)]
+                                , EDictionaryApplication
+                                    ()
+                                    (TIntrinsic IInt32)
+                                    (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")
+                                    (Trait "Numeric" (TIntrinsic IInt32) :| [])
+                                    [ELiteral () (LInt32 6)]
+                                , EDictionaryApplication
+                                    ()
+                                    (TIntrinsic IInt32)
+                                    (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")
+                                    (Trait "Numeric" (TIntrinsic IInt32) :| [])
+                                    [ELiteral () (LInt32 4)]
+                                ]
                             )
-                            :| []
                         )
+                        :| []
+                    )
+                    ( EApplication
+                        ()
+                        (TVariable (TypeIndex KType 0))
+                        (EVariable () (Label (TIntrinsic (IList (TIntrinsic IInt32)) `TArrow` TVariable (TypeIndex KType 0)) "trace"))
                         ( EApplication
                             ()
-                            (TVariable (TypeIndex KType 0))
-                            (EVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 2))) `TArrow` TVariable (TypeIndex KType 0)) "trace"))
-                            ( EApplication
-                                ()
-                                (TIntrinsic (IList (TVariable (TypeIndex KType 2))))
-                                (EVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 2))) `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 2)))) "sort"))
-                                ( EDictionaryApplication
-                                    ()
-                                    (TIntrinsic (IList (TVariable (TypeIndex KType 2))))
-                                    (Label (TIntrinsic (IList (TVariable (TypeIndex KType 2)))) "xs")
-                                    (Trait "Numeric" (TVariable (TypeIndex KType 2)) :| [])
-                                    []
-                                    :| []
-                                )
+                            (TIntrinsic (IList (TIntrinsic IInt32)))
+                            (EVariable () (Label (TIntrinsic (IList (TIntrinsic IInt32)) `TArrow` TIntrinsic (IList (TIntrinsic IInt32))) "sort"))
+                            ( EVariable () (Label (TIntrinsic (IList (TIntrinsic IInt32))) "xs")
                                 :| []
                             )
+                            :| []
                         )
                     )
                 )

@@ -604,7 +604,7 @@ moduleMain =
                     (PVariable () (Label () "xs"))
                     ( EAnnotation
                         ()
-                        (TIntrinsic (IList (TVariable (Parameter () "a"))))
+                        (TIntrinsic (IList (TIntrinsic IInt32)))
                         ( EListLiteral
                             ()
                             ()

@@ -1227,4 +1227,3 @@ story = do
     translateDefinition binarySearchFlatten == binarySearchFlattenResult
   it "" $
     translateDefinition binarySearchSort == binarySearchSortResult
-
