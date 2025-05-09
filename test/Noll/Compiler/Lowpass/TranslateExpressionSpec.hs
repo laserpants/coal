@@ -2139,3 +2139,105 @@ binarySearchFlattenResult1 =
                 )
       |]
   ]
+
+binarySearchSort =
+  DFunction
+    "sort"
+    ( Function
+        ()
+        ( With
+            [ Trait "Numeric" (TVariable (TypeIndex KType 3))
+            , Trait "Ordered" (TVariable (TypeIndex KType 3))
+            ]
+            ( TIntrinsic (IList (TVariable (TypeIndex KType 3)))
+                `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 3)))
+            )
+        )
+        ( PVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 3) :| [])) "$dict.be194a5d16952b75")
+            <| PVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Ordered") (TVariable (TypeIndex KType 3) :| [])) "$dict.ffef54c635ab7d03")
+            :| []
+        )
+        ( EApplication
+            ()
+            ( TIntrinsic (IList (TVariable (TypeIndex KType 3)))
+                `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 3)))
+            )
+            ( EBinaryOperator
+                ()
+                ( ( TApplication
+                      KType
+                      (TConstructor (KArrow KType KType) "Tree")
+                      (TVariable (TypeIndex KType 3) :| [])
+                      `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 3)))
+                  )
+                    `TArrow` ( TIntrinsic (IList (TVariable (TypeIndex KType 3)))
+                                `TArrow` TApplication
+                                  KType
+                                  (TConstructor (KArrow KType KType) "Tree")
+                                  (TVariable (TypeIndex KType 3) :| [])
+                             )
+                    `TArrow` ( TIntrinsic (IList (TVariable (TypeIndex KType 3)))
+                                `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 3)))
+                             )
+                )
+                OReverseComposition
+            )
+            ( EVariable
+                ()
+                ( Label
+                    ( TApplication
+                        KType
+                        (TConstructor (KArrow KType KType) "Tree")
+                        (TVariable (TypeIndex KType 3) :| [])
+                        `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 3)))
+                    )
+                    "flatten"
+                )
+                <| EApplication
+                  ()
+                  ( TIntrinsic (IList (TVariable (TypeIndex KType 3)))
+                      `TArrow` TApplication
+                        KType
+                        (TConstructor (KArrow KType KType) "Tree")
+                        (TVariable (TypeIndex KType 3) :| [])
+                  )
+                  ( EVariable
+                      ()
+                      ( Label
+                          ( TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 3) :| [])
+                              `TArrow` TApplication KTrait (TConstructor (KArrow KType KTrait) "Ordered") (TVariable (TypeIndex KType 3) :| [])
+                              `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 3)))
+                              `TArrow` TApplication KType (TConstructor (KArrow KType KType) "Tree") (TVariable (TypeIndex KType 3) :| [])
+                          )
+                          "from_list"
+                      )
+                  )
+                  ( EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 3) :| [])) "$dict.be194a5d16952b75")
+                      <| EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Ordered") (TVariable (TypeIndex KType 3) :| [])) "$dict.ffef54c635ab7d03")
+                      :| []
+                  )
+                :| []
+            )
+        )
+    )
+
+binarySearchSortResult = unsafeParseExpr <$$> binarySearchSortResult1
+
+binarySearchSortResult1 =
+  [ LP.OFunction
+      "sort"
+      [ Label (LP.TCon "Numeric" [LP.TOpq]) "$dict.be194a5d16952b75"
+      , Label (LP.TCon "Ordered" [LP.TOpq]) "$dict.ffef54c635ab7d03"
+      ]
+      [r|
+          @<list(*)/list(*)>
+            ( Prelude.operator__reverse_composition : (Tree(*)/list(*))/(list(*)/Tree(*))/list(*)/list(*)
+            , flatten : Tree(*)/list(*)
+            , @<list(*)/Tree(*)>
+                ( from_list : Numeric(*)/Ordered(*)/list(*)/Tree(*)
+                , $dict.be194a5d16952b75 : Numeric(*)
+                , $dict.ffef54c635ab7d03 : Ordered(*)
+                )
+            )
+      |]
+  ]

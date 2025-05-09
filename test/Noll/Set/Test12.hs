@@ -1777,9 +1777,9 @@ moduleBinarySearch =
                                                           ()
                                                           ( Label
                                                               ( TApplication
-                                                                    KType
-                                                                    (TConstructor (KArrow KType KType) "Tree")
-                                                                    (TVariable (TypeIndex KType 2) :| [])
+                                                                  KType
+                                                                  (TConstructor (KArrow KType KType) "Tree")
+                                                                  (TVariable (TypeIndex KType 2) :| [])
                                                                   `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 2)))
                                                               )
                                                               "$fold.2"
@@ -1808,9 +1808,9 @@ moduleBinarySearch =
                                                                 ()
                                                                 ( Label
                                                                     ( TApplication
-                                                                          KType
-                                                                          (TConstructor (KArrow KType KType) "Tree")
-                                                                          (TVariable (TypeIndex KType 2) :| [])
+                                                                        KType
+                                                                        (TConstructor (KArrow KType KType) "Tree")
+                                                                        (TVariable (TypeIndex KType 2) :| [])
                                                                         `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 2)))
                                                                     )
                                                                     "$fold.2"
