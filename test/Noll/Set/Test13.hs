@@ -26,6 +26,39 @@ unsafeParseExpr t =
 moduleOrdered1 :: Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
 moduleOrdered1 = unsafeParseExpr <$> moduleOrdered
 
+-- Module
+--  { moduleName = "Ordered"
+--  , moduleImports =
+--      []
+--  , moduleObjects =
+--      [ OFunction
+--          "Ordered.compare"
+--          [ Label (TCon "Ordered.Ordered" [opaque]) "a_1"
+--          , Label opaque "a_2"
+--          , Label opaque "a_3"
+--          ]
+--          [r|
+--          |]
+--      , OFunction
+--          "Ordered.$instance.??.compare"
+--          [Label int32 "x", Label int32 "y"]
+--          [r|
+--          |]
+--      , OFunction
+--          "Ordered.less_than_or_equal_to"
+--          [Label (TCon "Ordered.Ordered" [opaque]) "$dict.ffef54c635ab7d00", Label opaque "m", Label opaque "n"]
+--          [r|
+--          |]
+--      , OFunction
+--          "Ordered.greater_than"
+--          [ Label (TCon "Ordered.Ordered" [opaque]) "$dict.ffef54c635ab7d01"
+--          , Label opaque "n"
+--          ]
+--          [r|
+--          |]
+--      ]
+--  }
+
 moduleOrdered :: Module Lowpass.Type Name Text
 moduleOrdered =
   Module
@@ -404,38 +437,6 @@ fixture1 =
           []
       }
   , moduleOrdered
-  , -- Module
-    --  { moduleName = "Ordered"
-    --  , moduleImports =
-    --      []
-    --  , moduleObjects =
-    --      [ OFunction
-    --          "Ordered.compare"
-    --          [ Label (TCon "Ordered.Ordered" [opaque]) "a_1"
-    --          , Label opaque "a_2"
-    --          , Label opaque "a_3"
-    --          ]
-    --          [r|
-    --          |]
-    --      , OFunction
-    --          "Ordered.$instance.??.compare"
-    --          [Label int32 "x", Label int32 "y"]
-    --          [r|
-    --          |]
-    --      , OFunction
-    --          "Ordered.less_than_or_equal_to"
-    --          [Label (TCon "Ordered.Ordered" [opaque]) "$dict.ffef54c635ab7d00", Label opaque "m", Label opaque "n"]
-    --          [r|
-    --          |]
-    --      , OFunction
-    --          "Ordered.greater_than"
-    --          [ Label (TCon "Ordered.Ordered" [opaque]) "$dict.ffef54c635ab7d01"
-    --          , Label opaque "n"
-    --          ]
-    --          [r|
-    --          |]
-    --      ]
-    --  }
-    moduleBinarySearch
+  , moduleBinarySearch
   , moduleMain
   ]
