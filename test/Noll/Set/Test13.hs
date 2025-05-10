@@ -23,6 +23,54 @@ unsafeParseExpr t =
     Right r ->
       r
 
+moduleOrdered :: Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
+moduleOrdered = unsafeParseExpr <$> moduleOrdered1
+
+moduleOrdered1 :: Module Lowpass.Type Name Text
+moduleOrdered1 =
+  Module
+    { moduleName = "Ordered"
+    , moduleImports =
+        []
+    , moduleObjects =
+        [ OFunction
+            "less_than_or_equal_to"
+            [ Label (TCon "Ordered" [opaque]) "$dict.ffef54c635ab7d00"
+            , Label opaque "m"
+            , Label opaque "n"
+            ]
+            [r| 
+                  match<bool>
+                    ( @<Ordering>
+                      ( compare : Ordered(*)/*/*/Ordering
+                      , $dict.ffef54c635ab7d00 : Ordered(*)
+                      , m : *
+                      , n : *
+                      )
+                    ) { 
+                      | (EqualTo : Ordering) => true
+                      | (GreaterThan : Ordering) => false
+                      | (LessThan : Ordering) => true
+                  }
+              |]
+        , OFunction
+            "greater_than"
+            [ Label (TCon "Ordered" [opaque]) "$dict.ffef54c635ab7d01"
+            , Label opaque "n"
+            ]
+            [r| 
+                  @<*/bool>
+                    ( Prelude.operator__reverse_composition : (bool/bool)/(*/bool)/*/bool
+                    , not : bool/bool
+                    , @<*/bool>
+                        ( less_than_or_equal_to : Ordered(*)/*/*/bool
+                        , $dict.ffef54c635ab7d01 : Ordered(*)
+                        , n : *)
+                    )
+              |]
+        ]
+    }
+
 prog1_13 :: [Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)]
 prog1_13 = unsafeParseExpr <$$> fixture1
 
@@ -42,74 +90,40 @@ fixture1 =
       , moduleObjects =
           []
       }
-  , Module
-      { moduleName = "Ordered"
-      , moduleImports =
-          []
-      , moduleObjects =
-          [ OFunction
-              "Ordered.compare"
-              [ Label (TCon "Ordered.Ordered" [opaque]) "a_1"
-              , Label opaque "a_2"
-              , Label opaque "a_3"
-              ]
-              [r| 
-                  match<Ordered.Ordering>(a_1 : Ordered.Ordered(*)) 
-                    { | ( $Record : { compare : */*/Ordered.Ordering | * }/Ordered.Ordered(*) 
-                        , r_1 : { compare : */*/Ordered.Ordering | * } 
-                        ) => 
-                          select 
-                            { compare = f_1 : */*/Ordered.Ordering | q_1 : * } = 
-                              r_1 : { compare : */*/Ordered.Ordering | * } 
-                            in 
-                              @<Ordered.Ordering>(f_1 : */*/Ordered.Ordering, a_2 : *, a_3 : *) 
-                    } 
-              |]
-          , OFunction
-              "Ordered.$instance.??.compare"
-              [Label int32 "x", Label int32 "y"]
-              [r| 
-                  if ([< int32](x : int32, y : int32)) 
-                    then Ordered.LessThan : Ordered.Ordering 
-                    else 
-                      if ([> int32](x : int32, y : int32)) 
-                        then Ordered.GreaterThan : Ordered.Ordering 
-                        else Ordered.EqualTo : Ordered.Ordering 
-              |]
-          , OFunction
-              "Ordered.less_than_or_equal_to"
-              [Label (TCon "Ordered.Ordered" [opaque]) "$dict.ffef54c635ab7d00", Label opaque "m", Label opaque "n"]
-              [r| 
-                  match<bool> 
-                    ( @<Ordered.Ordering> 
-                      ( Ordered.compare : Ordered.Ordered(*)/*/*/Ordered.Ordering 
-                      , $dict.ffef54c635ab7d00 : Ordered.Ordered(*) 
-                      , m : * 
-                      , n : * 
-                      )) 
-                    { | (EqualTo : Ordered.Ordering) => true 
-                      | (GreaterThan : Ordered.Ordering) => false 
-                      | (LessThan : Ordered.Ordering) => true 
-                    } 
-              |]
-          , OFunction
-              "Ordered.greater_than"
-              [ Label (TCon "Ordered.Ordered" [opaque]) "$dict.ffef54c635ab7d01"
-              , Label opaque "n"
-              ]
-              [r| 
-                  @<*/bool> 
-                    ( Prelude.operator__reverse_composition : (bool/bool)/(*/bool)/*/bool 
-                    , Prelude.not : bool/bool 
-                    , @<*/bool> 
-                        ( Ordered.less_than_or_equal_to : Ordered.Ordered(*)/*/*/bool 
-                        , $dict.ffef54c635ab7d01 : Ordered.Ordered(*) 
-                        , n : *) 
-                    ) 
-              |]
-          ]
-      }
-  , Module
+  , moduleOrdered1
+  , -- Module
+    --  { moduleName = "Ordered"
+    --  , moduleImports =
+    --      []
+    --  , moduleObjects =
+    --      [ OFunction
+    --          "Ordered.compare"
+    --          [ Label (TCon "Ordered.Ordered" [opaque]) "a_1"
+    --          , Label opaque "a_2"
+    --          , Label opaque "a_3"
+    --          ]
+    --          [r|
+    --          |]
+    --      , OFunction
+    --          "Ordered.$instance.??.compare"
+    --          [Label int32 "x", Label int32 "y"]
+    --          [r|
+    --          |]
+    --      , OFunction
+    --          "Ordered.less_than_or_equal_to"
+    --          [Label (TCon "Ordered.Ordered" [opaque]) "$dict.ffef54c635ab7d00", Label opaque "m", Label opaque "n"]
+    --          [r|
+    --          |]
+    --      , OFunction
+    --          "Ordered.greater_than"
+    --          [ Label (TCon "Ordered.Ordered" [opaque]) "$dict.ffef54c635ab7d01"
+    --          , Label opaque "n"
+    --          ]
+    --          [r|
+    --          |]
+    --      ]
+    --  }
+    Module
       { moduleName = "BinarySearch"
       , moduleImports =
           []
@@ -122,39 +136,6 @@ fixture1 =
               , Label TOpq "n"
               ]
               [r|
-                  match<bool>($v.0 : record({ max : * | min : * | * })) 
-                    { | ( $Record : { max : * | min : * | * }/record({ max : * | min : * | * })
-                        , $match.8.$row.1 : { max : * | min : * | * }
-                        ) =>
-                          select
-                            { max = $row.1.field.max : * | $row.1.tail : record({ min : * | * }) } =
-                              $match.8.$row.1 : { max : * | min : * | * }   
-                            in
-                              match<bool>($row.1.tail : record({ min : * | * })) 
-                                { | ( $Record : { min : * | * }/record({ min : * | * })
-                                    , $match.5.$row.2 : { min : * | * }
-                                    ) =>
-                                      select
-                                        { min = $row.2.field.min : * | $row.2.tail : record(*) } =
-                                          $match.5.$row.2 : { min : * | * }   
-                                        in
-                                          [&&]
-                                          ( @<bool>( Ordering.gt : record({ compare : */*/Ordering.Ordering | * })/*/*/bool
-                                                   , d_1 : record({ compare : */*/Ordering.Ordering | * })
-                                                   , n : *
-                                                   , min : * )
-                                          , [|| ]
-                                            ( @<bool>( Ordering.gt : record({ compare : */*/Ordering.Ordering | * })/*/*/bool
-                                                     , d_1 : record({ compare : */*/Ordering.Ordering | * })
-                                                     , min : *
-                                                     , max : * )
-                                            , @<bool>( Ordering.lte : record({ compare : */*/Ordering.Ordering | * })/*/*/bool
-                                                     , d_1 : record({ compare : */*/Ordering.Ordering | * })
-                                                     , n : *
-                                                     , max : * )
-                                            )
-                                          )
-                    }
               |]
           , OFunction
               "BinarySearch.from_list"
@@ -163,65 +144,17 @@ fixture1 =
               , Label (TCon "list" [TOpq]) "list"
               ]
               [r|
-                      let
-                        $fold.1 : list(*)/record({ max : * | min : * | {} })/Tree(*) =
-                          fn($fold.1.expr : list(*)) =>
-                            match<Tree(*)>($fold.1.expr : list(*)) {
-                              | ( $Cons : */list(*)/list(*)
-                                , $match.10.p : *
-                                , $match.11.g : list(*)
-                                ) =>
-                                  fn(range : record({ max : * | min : * | {} })) =>
-                                    if 
-                                      ( @<bool>
-                                          ( Prelude.operator__reverse_application : ?
-                                          , $match.10.p : *
-                                          , @<*/bool>
-                                              ( in_range : Ordering(*)/record({ max : * | min : * | {} })/*/bool
-                                              , $dict.ffef54c635ab7d02 : Ordered(*)
-                                              , range : record({ max : * | min : * | {} })
-                                              )
-                                          )
-                                      )
-                                      then
-                                        @<Tree(*)>
-                                          ( Node : */Tree(*)/Tree(*)/Tree(*)
-                                          )
-                                      else
-                                        @<Tree(*)>
-                                          ( $fold.1 : list(*)/record({ max : * | min : * | {} })/Tree(*)
-                                          , $match.11.g : list(*)
-                                          , @<record({ max : * | min : * | {} }>
-                                              ( $Record : ?
-                                              , { max = 1
-                                                | min = 2
-                                                | {}
-                                                }
-                                              )
-                                          )
-                              | ( $Nil : list(*)) =>
-                                  fn(_ : record({ max : * | min : * | {} })) =>
-                                    5
-                            }
-                        in
-                          @<>
-                            ( $fold.1
-                            , list
-                            , @<record({ max : * | min : * | {} })>
-                                ( $Record : */*
-                                , 1
-                                , 2
-                                )
-                            )
-                    |]
-                , OFunction
-                    "BinarySearch.flatten"
-                    []
-                    ""
-                , OFunction
-                    "BinarySearch.sort"
-                    []
-                    ""
+              |]
+          , OFunction
+              "BinarySearch.flatten"
+              []
+              [r|
+              |]
+          , OFunction
+              "BinarySearch.sort"
+              []
+              [r|
+              |]
           ]
       }
   , Module
@@ -232,57 +165,8 @@ fixture1 =
           [ OFunction
               "Main.main"
               []
-              ""
+              [r|
+              |]
           ]
       }
   ]
-
--- Lowpass
-
--------------------
-
--- Utils
-
--------------------
-
--- Ordered
-
-{-
-
-data Ordered.EqualTo<0, Ordered.Ordering>
-
-data Ordered.GreaterThan<1, Ordered.Ordering>
-
-data Ordered.LessThan<2, Ordered.Ordering>
-
-Ordered.compare(a_1 : record({ compare : */*/Ordered.Ordering | * }), a_2 : *, a_3 : *) =
-  match<Ordered.Ordering>(a_1 : record({ compare : */*/Ordered.Ordering | * }))
-  { | ( $Record : { compare : */*/Ordered.Ordering | * }/record({ compare : */*/Ordered.Ordering | * })
-      , r_1 : { compare : */*/Ordered.Ordering | * }
-      ) =>
-        select
-          { compare = f_1 : */*/Ordered.Ordering | q_1 : * } =
-            r_1 : { compare : */*/Ordered.Ordering | * }
-          in
-            @<Ordered.Ordering>(f_1 : */*/Ordered.Ordering, a_2 : *, a_3 : *)
-  }
-
-// instance Ordered.Ordered(int32)
-
-Ordered.Ordered_compare_instance_1(x : int32, y : int32) =
-  if ([< int32](x : int32, y : int32))
-    then Ordered.LessThan : Ordered.Ordering
-    else
-      if ([> int32](x : int32, y : int32))
-        then Ordered.GreaterThan : Ordered.Ordering
-        else Ordered.EqualTo : Ordered.Ordering
-
--}
-
--------------------
-
--- BinarySearch
-
--------------------
-
--- Main

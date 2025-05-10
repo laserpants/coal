@@ -32,6 +32,7 @@ library
       Noll.Compiler.DictionaryElimination
       Noll.Compiler.Lowpass.TranslateDefinition
       Noll.Compiler.Lowpass.TranslateExpression
+      Noll.Compiler.Lowpass.TranslateModule
       Noll.Compiler.Lowpass.TranslateType
       Noll.Compiler.NormalizeObjects
       Noll.Compiler.PatternMatching
