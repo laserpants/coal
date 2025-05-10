@@ -83,7 +83,7 @@ translateExpression =
     EListLiteral _ t [] ->
       Lowpass.var (Label (translateType t) "$Nil")
     EListLiteral a t (e : es) ->
-      translateExpression (foldr (EListCons a t) e es)
+      translateExpression (foldr (EListCons a t) (EListLiteral a t []) (e : es))
     ETuple _ _ es ->
       Lowpass.tupleExpr (translateExpression <$> es)
     EMatch{} ->
@@ -98,9 +98,6 @@ translateExpression =
         (translateExpression e)
         ( Lowpass.Clause
             (Label (Lowpass.arrow t1 (Lowpass.TCon "record" [r])) "$Record" <| Label t1 "$row" :| [])
-            -- ( translateExpression
-            --    ( EFocus field ll undefined undefined (EVariable undefined ll) )
-            -- )
             ( Lowpass.sel
                 (Lowpass.Focus field (translateLabel ll) (Label (Lowpass.dropField field r) "_"))
                 (Lowpass.var (Label r "$row"))

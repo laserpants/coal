@@ -76,7 +76,7 @@ testEnvZ2 =
       , Forall
           (Set.fromList [TypeIndex KType 0] :: Set (TypeIndex Kind))
           [Trait "Numeric" (TVariable (TypeIndex KType 0)), Trait "Ordered" (TVariable (TypeIndex KType 0))]
-          ( TIntrinsic (IList (TVariable (TypeIndex KType 0))) `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 0))))
+          (TIntrinsic (IList (TVariable (TypeIndex KType 0))) `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 0))))
       )
     ]
 
