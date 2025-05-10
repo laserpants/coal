@@ -214,30 +214,28 @@ fixture1 =
                                 )
                             )
                     |]
+                , OFunction
+                    "BinarySearch.flatten"
+                    []
+                    ""
+                , OFunction
+                    "BinarySearch.sort"
+                    []
+                    ""
+          ]
+      }
+  , Module
+      { moduleName = "Main"
+      , moduleImports =
+          []
+      , moduleObjects =
+          [ OFunction
+              "Main.main"
+              []
+              ""
           ]
       }
   ]
-
---                , OFunction
---                    "BinarySearch.flatten"
---                    []
---                    ""
---                , OFunction
---                    "BinarySearch.sort"
---                    []
---                    ""
-
---  , Module
---      { moduleName = "Main"
---      , moduleImports =
---          []
---      , moduleObjects =
---          [ OFunction
---              "Main.main"
---              []
---              ""
---          ]
---      }
 
 -- Lowpass
 
