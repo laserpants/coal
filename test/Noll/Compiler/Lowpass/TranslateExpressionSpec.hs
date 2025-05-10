@@ -1763,12 +1763,12 @@ binarySearchFromListResult1 =
                            , { max =
                                  @<*>
                                    ( from_int32 : Numeric(*)/int32/*
-                                   , $dict.be194a5d16952b77 : Numeric(*)
+                                   , $dict.be194a5d16952b74 : Numeric(*)
                                    , -1 )
                              | min =
                                  @<*>
                                    ( from_int32 : Numeric(*)/int32/*
-                                   , $dict.be194a5d16952b77 : Numeric(*)
+                                   , $dict.be194a5d16952b74 : Numeric(*)
                                    , 0 )
                              | {}
                              }

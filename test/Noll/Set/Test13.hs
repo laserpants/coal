@@ -67,6 +67,38 @@ moduleOrdered =
         []
     , moduleObjects =
         [ OFunction
+            "compare"
+            [ Label (TCon "Ordered" [opaque]) "$a"
+            ]
+            [r| 
+                  match<Ordering>($a : Ordered(*)) {
+                    | ( $Record : { compare : */*/Ordering | * }/Ordered(*)
+                      , $r : { compare : */*/Ordering | * }
+                      ) =>
+                        select
+                          { compare = $f : */*/Ordering | _ : * } =
+                            $r : { compare : */*/Ordering | * }
+                          in
+                            $f : */*/Ordering
+                  }
+              |]
+        , OFunction
+            "compare__$instance.f377c7c1cf28bc72"
+            [ Label Lowpass.int32 "x"
+            , Label Lowpass.int32 "y"
+            ]
+            [r| 
+                  if ([< int32](x : int32, y : int32))
+                    then
+                      LessThan : Ordering
+                    else
+                      if ([> int32](x : int32, y : int32))
+                        then
+                          GreaterThan : Ordering
+                        else
+                          EqualTo : Ordering
+              |]
+        , OFunction
             "less_than_or_equal_to"
             [ Label (TCon "Ordered" [opaque]) "$dict.ffef54c635ab7d00"
             , Label opaque "m"
@@ -122,51 +154,51 @@ moduleBinarySearch =
             , Label TOpq "n"
             ]
             [r| 
-              match<bool>($v.0 : record({ max : * | min : * | {} })) 
-                { | ( $Record : { max : * | min : * | {} }/record({ max : * | min : * | {} })
-                    , $match.8.$row.1 : { max : * | min : * | {} }
-                    ) =>
-                      select
-                        { max = $row.1.field.max : * | $row.1.tail : record({ min : * | {} }) } =
-                          $match.8.$row.1 : { max : * | min : * | {} }   
-                        in
-                          match<bool>($row.1.tail : record({ min : * | {} })) 
-                            { | ( $Record : { min : * | {} }/record({ min : * | {} })
-                                , $match.5.$row.2 : { min : * | {} }
-                                ) =>
-                                  select
-                                    { min = $row.2.field.min : * | $row.2.tail : record({}) } =
-                                      $match.5.$row.2 : { min : * | {} }   
-                                    in
-                                      match<bool>($row.2.tail : record({})) 
-                                        { | ( $Record : {}/record({})
-                                            , $match.2._ : {}
-                                            ) =>
-                                              [&&]
-                                              ( @<bool>( greater_than : Ordered(*)/*/*/bool
-                                                       , $dict.ffef54c635ab7d00 : Ordered(*)
-                                                       , n : *
-                                                       , $row.2.field.min : * )
-                                              , [|| ]
-                                                ( @<bool>( less_than_or_equal_to : Ordered(*)/*/*/bool
-                                                         , $dict.ffef54c635ab7d00 : Ordered(*)
-                                                         , n : *
-                                                         , $row.1.field.max : * )
-                                                , @<bool>
-                                                    ( less_than_or_equal_to : Ordered(*)/*/*/bool
-                                                    , $dict.ffef54c635ab7d00 : Ordered(*)
-                                                    , $row.1.field.max : * 
-                                                    , @<*>
-                                                        ( from_int32 : Numeric(*)/int32/*
-                                                        , $dict.be194a5d16952b76 : Numeric(*)
-                                                        , -1
+                  match<bool>($v.0 : record({ max : * | min : * | {} })) 
+                    { | ( $Record : { max : * | min : * | {} }/record({ max : * | min : * | {} })
+                        , $match.8.$row.1 : { max : * | min : * | {} }
+                        ) =>
+                          select
+                            { max = $row.1.field.max : * | $row.1.tail : record({ min : * | {} }) } =
+                              $match.8.$row.1 : { max : * | min : * | {} }   
+                            in
+                              match<bool>($row.1.tail : record({ min : * | {} })) 
+                                { | ( $Record : { min : * | {} }/record({ min : * | {} })
+                                    , $match.5.$row.2 : { min : * | {} }
+                                    ) =>
+                                      select
+                                        { min = $row.2.field.min : * | $row.2.tail : record({}) } =
+                                          $match.5.$row.2 : { min : * | {} }   
+                                        in
+                                          match<bool>($row.2.tail : record({})) 
+                                            { | ( $Record : {}/record({})
+                                                , $match.2._ : {}
+                                                ) =>
+                                                  [&&]
+                                                  ( @<bool>( greater_than : Ordered(*)/*/*/bool
+                                                           , $dict.ffef54c635ab7d00 : Ordered(*)
+                                                           , n : *
+                                                           , $row.2.field.min : * )
+                                                  , [|| ]
+                                                    ( @<bool>( less_than_or_equal_to : Ordered(*)/*/*/bool
+                                                             , $dict.ffef54c635ab7d00 : Ordered(*)
+                                                             , n : *
+                                                             , $row.1.field.max : * )
+                                                    , @<bool>
+                                                        ( less_than_or_equal_to : Ordered(*)/*/*/bool
+                                                        , $dict.ffef54c635ab7d00 : Ordered(*)
+                                                        , $row.1.field.max : * 
+                                                        , @<*>
+                                                            ( from_int32 : Numeric(*)/int32/*
+                                                            , $dict.be194a5d16952b76 : Numeric(*)
+                                                            , -1
+                                                            )
                                                         )
                                                     )
-                                                )
-                                              )
-                                        }
-                            }
-                }
+                                                  )
+                                            }
+                                }
+                    }
           |]
         , OFunction
             "from_list"

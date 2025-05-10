@@ -15,6 +15,7 @@ module Noll.Language.Type (
   HasActive (..),
   IndexedType,
   foldType,
+  unfoldType,
   activeIdsIn,
   normalizeRowTypes,
   (~>),
@@ -25,7 +26,7 @@ import Data.Generics.Uniplate.Data (transform)
 import Data.Hashable (Hashable)
 import Data.List.NonEmpty (NonEmpty)
 import GHC.Generics (Generic)
-import Lang.Common.List1 (List1)
+import Lang.Common.List1 (List1, (<|))
 import Lang.Common.Supply (Supply (..))
 import Lang.Utils (Map, Name, Set)
 import Noll.Language.Type.Intrinsic (Intrinsic (..))
@@ -33,6 +34,7 @@ import Noll.Language.Type.Kind (Kind)
 import Noll.Language.Type.Row (Row (..), normalizeRow)
 
 import qualified Data.Set as Set
+import qualified Lang.Common.List1 as List1
 
 data Type o k
   = TApplication k (Type o k) (List1 (Type o k))
@@ -94,6 +96,14 @@ activeIdsIn = Set.map typeIndexId . activeIn
 {-# INLINE foldType #-}
 foldType :: (Foldable f) => Type o k -> f (Type o k) -> Type o k
 foldType = foldr TArrow
+
+unfoldType :: Type o k -> List1 (Type o k)
+unfoldType =
+  \case
+    TArrow t1 t2 ->
+      t1 <| unfoldType t2
+    t ->
+      List1.singleton t
 
 normalizeRowTypes :: (Typeable o, Data k, Data (o k)) => Type o k -> Type o k
 normalizeRowTypes = transform $
