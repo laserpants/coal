@@ -243,6 +243,56 @@ moduleBinarySearch =
                            )
                        )
           |]
+        , OFunction
+          "flatten"
+          [ Label (TCon "Tree" [opaque]) "tree"
+          ]
+          [r| 
+                  let
+                    $fold.2 : Tree(*)/list(*) =
+                      fn($fold.2.expr : Tree(*)) =>
+                        match<list(*)>($fold.2.expr : Tree(*)) {
+                          | (Leaf : Tree(*)) =>
+                              $Nil : list(*)
+                          | ( Node : */Tree(*)/Tree(*)/Tree(*)
+                            , $match.13.y : *
+                            , $match.14.lhs : Tree(*)
+                            , $match.15.rhs : Tree(*)
+                            ) =>
+                              @<list(*)>
+                                ( Prelude.operator__list_concatenation : list(*)/list(*)/list(*)
+                                , @<list(*)>
+                                    ( $fold.2 : Tree(*)/list(*)
+                                    , $match.14.lhs : Tree(*))
+                                , @<list(*)>
+                                    ( $Cons : */list(*)/list(*)
+                                    , $match.13.y : *
+                                    , @<list(*)>
+                                        ( $fold.2 : Tree(*)/list(*)
+                                        , $match.15.rhs : Tree(*))))
+                        }
+                    in
+                      @<list(*)>
+                        ( $fold.2 : Tree(*)/list(*)
+                        , tree : Tree(*)
+                        )
+          |]
+        , OFunction
+            "sort"
+            [ Label (TCon "Numeric" [TOpq]) "$dict.be194a5d16952b75"
+            , Label (TCon "Ordered" [TOpq]) "$dict.ffef54c635ab7d03"
+            ]
+            [r|
+                @<list(*)/list(*)>
+                  ( Prelude.operator__reverse_composition : (Tree(*)/list(*))/(list(*)/Tree(*))/list(*)/list(*)
+                  , flatten : Tree(*)/list(*)
+                  , @<list(*)/Tree(*)>
+                      ( from_list : Numeric(*)/Ordered(*)/list(*)/Tree(*)
+                      , $dict.be194a5d16952b75 : Numeric(*)
+                      , $dict.ffef54c635ab7d03 : Ordered(*)
+                      )
+                  )
+            |]
       ]
     }
 
