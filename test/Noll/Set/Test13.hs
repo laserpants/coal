@@ -82,13 +82,13 @@ moduleBinarySearch =
         []
     , moduleObjects =
         [ OFunction
-          "in_range"
-          [ Label (TCon "Numeric" [TOpq]) "$dict.be194a5d16952b76"
-          , Label (TCon "Ordered" [TOpq]) "$dict.ffef54c635ab7d00"
-          , Label (TCon "record" [RExt "max" TOpq (RExt "min" TOpq RNil)]) "$v.0"
-          , Label TOpq "n"
-          ]
-          [r| 
+            "in_range"
+            [ Label (TCon "Numeric" [TOpq]) "$dict.be194a5d16952b76"
+            , Label (TCon "Ordered" [TOpq]) "$dict.ffef54c635ab7d00"
+            , Label (TCon "record" [RExt "max" TOpq (RExt "min" TOpq RNil)]) "$v.0"
+            , Label TOpq "n"
+            ]
+            [r| 
               match<bool>($v.0 : record({ max : * | min : * | {} })) 
                 { | ( $Record : { max : * | min : * | {} }/record({ max : * | min : * | {} })
                     , $match.8.$row.1 : { max : * | min : * | {} }
@@ -136,12 +136,12 @@ moduleBinarySearch =
                 }
           |]
         , OFunction
-          "from_list"
-          [ Label (TCon "Numeric" [TOpq]) "$dict.be194a5d16952b77"
-          , Label (TCon "Ordered" [TOpq]) "$dict.ffef54c635ab7d01"
-          , Label (TCon "list" [TOpq]) "list"
-          ]
-          [r| 
+            "from_list"
+            [ Label (TCon "Numeric" [TOpq]) "$dict.be194a5d16952b77"
+            , Label (TCon "Ordered" [TOpq]) "$dict.ffef54c635ab7d01"
+            , Label (TCon "list" [TOpq]) "list"
+            ]
+            [r| 
                  let
                    $fold.1 : list(*)/record({ max : * | min : * | {} })/Tree(*) =
                      fn($fold.1.expr : list(*)) =>
@@ -244,10 +244,10 @@ moduleBinarySearch =
                        )
           |]
         , OFunction
-          "flatten"
-          [ Label (TCon "Tree" [opaque]) "tree"
-          ]
-          [r| 
+            "flatten"
+            [ Label (TCon "Tree" [opaque]) "tree"
+            ]
+            [r| 
                   let
                     $fold.2 : Tree(*)/list(*) =
                       fn($fold.2.expr : Tree(*)) =>
@@ -293,7 +293,95 @@ moduleBinarySearch =
                       )
                   )
             |]
-      ]
+        ]
+    }
+
+moduleMain1 :: Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
+moduleMain1 = unsafeParseExpr <$> moduleMain
+
+moduleMain :: Module Lowpass.Type Name Text
+moduleMain =
+  Module
+    { moduleName = "Main"
+    , moduleImports =
+        []
+    , moduleObjects =
+        [ OFunction
+            "main"
+            [Label (TCon "unit" []) "_"]
+            [r|
+              let
+                xs : list(int32) =
+                  @<list(int32)>
+                    ( $Cons : int32/list(int32)/list(int32)
+                    , @<int32>
+                        ( from_int32 : Numeric(int32)/int32/int32
+                        , $dict.2967b53e939a3c94 : Numeric(int32)
+                        , 5
+                        )
+                      , @<list(int32)>
+                          ( $Cons : int32/list(int32)/list(int32)
+                          , @<int32>
+                              ( from_int32 : Numeric(int32)/int32/int32
+                              , $dict.2967b53e939a3c94 : Numeric(int32)
+                              , 3
+                              )
+                            , @<list(int32)>
+                                ( $Cons : int32/list(int32)/list(int32)
+                                , @<int32>
+                                    ( from_int32 : Numeric(int32)/int32/int32
+                                    , $dict.2967b53e939a3c94 : Numeric(int32)
+                                    , 7
+                                    )
+                                  , @<list(int32)>
+                                      ( $Cons : int32/list(int32)/list(int32)
+                                      , @<int32>
+                                          ( from_int32 : Numeric(int32)/int32/int32
+                                          , $dict.2967b53e939a3c94 : Numeric(int32)
+                                          , 2
+                                          )
+                                        , @<list(int32)>
+                                            ( $Cons : int32/list(int32)/list(int32)
+                                            , @<int32>
+                                                ( from_int32 : Numeric(int32)/int32/int32
+                                                , $dict.2967b53e939a3c94 : Numeric(int32)
+                                                , 1
+                                                )
+                                              , @<list(int32)>
+                                                  ( $Cons : int32/list(int32)/list(int32)
+                                                  , @<int32>
+                                                      ( from_int32 : Numeric(int32)/int32/int32
+                                                      , $dict.2967b53e939a3c94 : Numeric(int32)
+                                                      , 6
+                                                      )
+                                                    , @<list(int32)>
+                                                        ( $Cons : int32/list(int32)/list(int32)
+                                                        , @<int32>
+                                                            ( from_int32 : Numeric(int32)/int32/int32
+                                                            , $dict.2967b53e939a3c94 : Numeric(int32)
+                                                            , 4
+                                                            )
+                                                          , 
+                                                          $Nil : list(int32) 
+                                                        )
+                                                  )
+                                            )
+                                      )
+                                )
+                          )
+                    )
+                in
+                  @<*>
+                    ( trace : list(int32)/*
+                    , @<list(int32)>
+                        ( sort : Numeric(int32)/Ordered(int32)/list(int32)/list(int32)
+                        , $dict.2967b53e939a3c94 : Numeric(int32)
+                        , $dict.b7c5e7e84eeaf782 : Ordered(int32)
+                        , xs : list(int32)
+                        )
+                    )
+            |]
+        ]
     }
 
 prog1_13 :: [Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)]
@@ -349,50 +437,5 @@ fixture1 =
     --      ]
     --  }
     moduleBinarySearch
-    --Module
-    --  { moduleName = "BinarySearch"
-    --  , moduleImports =
-    --      []
-    --  , moduleObjects =
-    --      [ OFunction
-    --          "BinarySearch.in_range"
-    --          [ Label (TCon "Numeric" [TOpq]) "$dict.be194a5d16952b76"
-    --          , Label (TCon "Ordered" [TOpq]) "$dict.ffef54c635ab7d00"
-    --          , Label (TCon "record" [RExt "max" TOpq (RExt "min" TOpq RNil)]) "$v.0"
-    --          , Label TOpq "n"
-    --          ]
-    --          [r|
-    --          |]
-    --      , OFunction
-    --          "BinarySearch.from_list"
-    --          [ Label (TCon "Numeric" [TOpq]) "$dict.be194a5d16952b74"
-    --          , Label (TCon "Ordered" [TOpq]) "$dict.ffef54c635ab7d02"
-    --          , Label (TCon "list" [TOpq]) "list"
-    --          ]
-    --          [r|
-    --          |]
-    --      , OFunction
-    --          "BinarySearch.flatten"
-    --          []
-    --          [r|
-    --          |]
-    --      , OFunction
-    --          "BinarySearch.sort"
-    --          []
-    --          [r|
-    --          |]
-    --      ]
-    --  }
-  , Module
-      { moduleName = "Main"
-      , moduleImports =
-          []
-      , moduleObjects =
-          [ OFunction
-              "Main.main"
-              []
-              [r|
-              |]
-          ]
-      }
+  , moduleMain
   ]
