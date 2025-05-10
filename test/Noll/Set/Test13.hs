@@ -23,11 +23,11 @@ unsafeParseExpr t =
     Right r ->
       r
 
-moduleOrdered :: Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
-moduleOrdered = unsafeParseExpr <$> moduleOrdered1
+moduleOrdered1 :: Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
+moduleOrdered1 = unsafeParseExpr <$> moduleOrdered
 
-moduleOrdered1 :: Module Lowpass.Type Name Text
-moduleOrdered1 =
+moduleOrdered :: Module Lowpass.Type Name Text
+moduleOrdered =
   Module
     { moduleName = "Ordered"
     , moduleImports =
@@ -71,6 +71,181 @@ moduleOrdered1 =
         ]
     }
 
+moduleBinarySearch1 :: Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
+moduleBinarySearch1 = unsafeParseExpr <$> moduleBinarySearch
+
+moduleBinarySearch :: Module Lowpass.Type Name Text
+moduleBinarySearch =
+  Module
+    { moduleName = "BinarySearch"
+    , moduleImports =
+        []
+    , moduleObjects =
+        [ OFunction
+          "in_range"
+          [ Label (TCon "Numeric" [TOpq]) "$dict.be194a5d16952b76"
+          , Label (TCon "Ordered" [TOpq]) "$dict.ffef54c635ab7d00"
+          , Label (TCon "record" [RExt "max" TOpq (RExt "min" TOpq RNil)]) "$v.0"
+          , Label TOpq "n"
+          ]
+          [r| 
+              match<bool>($v.0 : record({ max : * | min : * | {} })) 
+                { | ( $Record : { max : * | min : * | {} }/record({ max : * | min : * | {} })
+                    , $match.8.$row.1 : { max : * | min : * | {} }
+                    ) =>
+                      select
+                        { max = $row.1.field.max : * | $row.1.tail : record({ min : * | {} }) } =
+                          $match.8.$row.1 : { max : * | min : * | {} }   
+                        in
+                          match<bool>($row.1.tail : record({ min : * | {} })) 
+                            { | ( $Record : { min : * | {} }/record({ min : * | {} })
+                                , $match.5.$row.2 : { min : * | {} }
+                                ) =>
+                                  select
+                                    { min = $row.2.field.min : * | $row.2.tail : record({}) } =
+                                      $match.5.$row.2 : { min : * | {} }   
+                                    in
+                                      match<bool>($row.2.tail : record({})) 
+                                        { | ( $Record : {}/record({})
+                                            , $match.2._ : {}
+                                            ) =>
+                                              [&&]
+                                              ( @<bool>( greater_than : Ordered(*)/*/*/bool
+                                                       , $dict.ffef54c635ab7d00 : Ordered(*)
+                                                       , n : *
+                                                       , $row.2.field.min : * )
+                                              , [|| ]
+                                                ( @<bool>( less_than_or_equal_to : Ordered(*)/*/*/bool
+                                                         , $dict.ffef54c635ab7d00 : Ordered(*)
+                                                         , n : *
+                                                         , $row.1.field.max : * )
+                                                , @<bool>
+                                                    ( less_than_or_equal_to : Ordered(*)/*/*/bool
+                                                    , $dict.ffef54c635ab7d00 : Ordered(*)
+                                                    , $row.1.field.max : * 
+                                                    , @<*>
+                                                        ( from_int32 : Numeric(*)/int32/*
+                                                        , $dict.be194a5d16952b76 : Numeric(*)
+                                                        , -1
+                                                        )
+                                                    )
+                                                )
+                                              )
+                                        }
+                            }
+                }
+          |]
+        , OFunction
+          "from_list"
+          [ Label (TCon "Numeric" [TOpq]) "$dict.be194a5d16952b77"
+          , Label (TCon "Ordered" [TOpq]) "$dict.ffef54c635ab7d01"
+          , Label (TCon "list" [TOpq]) "list"
+          ]
+          [r| 
+                 let
+                   $fold.1 : list(*)/record({ max : * | min : * | {} })/Tree(*) =
+                     fn($fold.1.expr : list(*)) =>
+                       match<record({ max : * | min : * | {} })/Tree(*)>($fold.1.expr : list(*)) {
+                         | ( $Cons : */list(*)/list(*)
+                           , $match.10.p : *
+                           , $match.11.g : list(*)
+                           ) =>
+                             fn(range : record({ max : * | min : * | {} })) =>
+                               if 
+                                 ( @<bool>
+                                     ( Prelude.operator__reverse_application : */(*/bool)/bool
+                                     , $match.10.p : *
+                                     , @<*/bool>
+                                         ( in_range : Numeric(*)/Ordered(*)/record({ max : * | min : * | {} })/*/bool
+                                         , $dict.be194a5d16952b77 : Numeric(*)
+                                         , $dict.ffef54c635ab7d01 : Ordered(*)
+                                         , range : record({ max : * | min : * | {} })
+                                         )
+                                     )
+                                 )
+                                 then
+                                   @<Tree(*)>
+                                     ( Node : */Tree(*)/Tree(*)/Tree(*)
+                                     , $match.10.p : *
+                                     , @<Tree(*)>
+                                         ( $fold.1 : list(*)/record({ max : * | min : * | {} })/Tree(*)
+                                         , $match.11.g : list(*)
+                                         , @<record({ max : * | min : * | {} })>
+                                             ( $Record : { max : * | min : * | {} }/record({ max : * | min : * | {} })
+                                             , { max = $match.10.p : *
+                                               | min =
+                                                   match<*>(range : record({ max : * | min : * | {} })) {
+                                                     | ( $Record : { max : * | min : * | {} }/record({ max : * | min : * | {} })
+                                                       , $row : { max : * | min : * | {} }
+                                                       ) =>
+                                                         select
+                                                           { min = min : * | _ : { max : * | {} } } =
+                                                             $row : { max : * | min : * | {} }
+                                                           in
+                                                             min : *
+                                                   }
+                                               | {}
+                                               }
+                                             )
+                                         )
+                                     , @<Tree(*)>
+                                       ( $fold.1 : list(*)/record({ max : * | min : * | {} })/Tree(*)
+                                       , $match.11.g : list(*)
+                                       , @<record({ max : * | min : * | {} })>
+                                           ( $Record : { max : * | min : * | {} }/record({ max : * | min : * | {} })
+                                           , { max = 
+                                                 match<*>(range : record({ max : * | min : * | {} })) {
+                                                   | ( $Record : { max : * | min : * | {} }/record({ max : * | min : * | {} })
+                                                     , $row : { max : * | min : * | {} }
+                                                     ) =>
+                                                       select
+                                                         { max = max : * | _ : { min : * | {} } } =
+                                                           $row : { max : * | min : * | {} }
+                                                         in
+                                                           max : *
+                                                 }
+                                             | min = $match.10.p : *
+                                             | {}
+                                             }
+                                           )
+                                       )
+                                     )
+                                 else
+                                   @<Tree(*)>
+                                     ( $fold.1 : list(*)/record({ max : * | min : * | {} })/Tree(*)
+                                     , $match.11.g : list(*)
+                                     , range : record({ max : * | min : * | {} })
+                                     )
+                         | ($Nil : list(*)) =>
+                             @<record({ max : * | min : * | {} })/Tree(*)>
+                               ( always : Tree(*)/record({ max : * | min : * | {} })/Tree(*)
+                               , Leaf : Tree(*)
+                               )
+                       }
+                   in
+                     @<Tree(*)>
+                       ( $fold.1 : list(*)/record({ max : * | min : * | {} })/Tree(*)
+                       , list : list(*)
+                       , @<record({ max : * | min : * | {} })>
+                           ( $Record : { max : * | min : * | {} }/record({ max : * | min : * | {} })
+                           , { max =
+                                 @<*>
+                                   ( from_int32 : Numeric(*)/int32/*
+                                   , $dict.be194a5d16952b77 : Numeric(*)
+                                   , -1 )
+                             | min =
+                                 @<*>
+                                   ( from_int32 : Numeric(*)/int32/*
+                                   , $dict.be194a5d16952b77 : Numeric(*)
+                                   , 0 )
+                             | {}
+                             }
+                           )
+                       )
+          |]
+      ]
+    }
+
 prog1_13 :: [Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)]
 prog1_13 = unsafeParseExpr <$$> fixture1
 
@@ -90,7 +265,7 @@ fixture1 =
       , moduleObjects =
           []
       }
-  , moduleOrdered1
+  , moduleOrdered
   , -- Module
     --  { moduleName = "Ordered"
     --  , moduleImports =
@@ -123,40 +298,41 @@ fixture1 =
     --          |]
     --      ]
     --  }
-    Module
-      { moduleName = "BinarySearch"
-      , moduleImports =
-          []
-      , moduleObjects =
-          [ OFunction
-              "BinarySearch.in_range"
-              [ Label (TCon "Numeric" [TOpq]) "$dict.be194a5d16952b76"
-              , Label (TCon "Ordered" [TOpq]) "$dict.ffef54c635ab7d00"
-              , Label (TCon "record" [RExt "max" TOpq (RExt "min" TOpq RNil)]) "$v.0"
-              , Label TOpq "n"
-              ]
-              [r|
-              |]
-          , OFunction
-              "BinarySearch.from_list"
-              [ Label (TCon "Numeric" [TOpq]) "$dict.be194a5d16952b74"
-              , Label (TCon "Ordered" [TOpq]) "$dict.ffef54c635ab7d02"
-              , Label (TCon "list" [TOpq]) "list"
-              ]
-              [r|
-              |]
-          , OFunction
-              "BinarySearch.flatten"
-              []
-              [r|
-              |]
-          , OFunction
-              "BinarySearch.sort"
-              []
-              [r|
-              |]
-          ]
-      }
+    moduleBinarySearch
+    --Module
+    --  { moduleName = "BinarySearch"
+    --  , moduleImports =
+    --      []
+    --  , moduleObjects =
+    --      [ OFunction
+    --          "BinarySearch.in_range"
+    --          [ Label (TCon "Numeric" [TOpq]) "$dict.be194a5d16952b76"
+    --          , Label (TCon "Ordered" [TOpq]) "$dict.ffef54c635ab7d00"
+    --          , Label (TCon "record" [RExt "max" TOpq (RExt "min" TOpq RNil)]) "$v.0"
+    --          , Label TOpq "n"
+    --          ]
+    --          [r|
+    --          |]
+    --      , OFunction
+    --          "BinarySearch.from_list"
+    --          [ Label (TCon "Numeric" [TOpq]) "$dict.be194a5d16952b74"
+    --          , Label (TCon "Ordered" [TOpq]) "$dict.ffef54c635ab7d02"
+    --          , Label (TCon "list" [TOpq]) "list"
+    --          ]
+    --          [r|
+    --          |]
+    --      , OFunction
+    --          "BinarySearch.flatten"
+    --          []
+    --          [r|
+    --          |]
+    --      , OFunction
+    --          "BinarySearch.sort"
+    --          []
+    --          [r|
+    --          |]
+    --      ]
+    --  }
   , Module
       { moduleName = "Main"
       , moduleImports =
