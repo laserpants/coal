@@ -41,7 +41,7 @@ moduleOrdered =
             [ Label (TCon "Ordered" [opaque]) "$a"
             ]
             [r| 
-                  match<Ordering>($a : Ordered(*)) {
+                  match<*/*/Ordering>($a : Ordered(*)) {
                     | ( $Record : { compare : */*/Ordering | * }/Ordered(*)
                       , $r : { compare : */*/Ordering | * }
                       ) =>

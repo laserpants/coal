@@ -54,7 +54,7 @@ traitAccessor trait fn t =
     fn
     [dict]
     ( Lowpass.match
-        (Lowpass.returnTypeOf t)
+        t
         (Lowpass.var dict)
         ( Lowpass.Clause
             (Label (Lowpass.functionTypeOf dict [row]) "$Record" <| row :| [])
