@@ -946,7 +946,7 @@ moduleBinarySearch =
                               []
                               ( EApplication
                                   ()
-                                  ( ( TIntrinsic
+                                  ( TIntrinsic
                                         ( IRecord
                                             ( TRow
                                                 ( RExtend
@@ -956,7 +956,6 @@ moduleBinarySearch =
                                                 )
                                             )
                                         )
-                                    )
                                       `TArrow` ( TApplication
                                                   KType
                                                   (TConstructor (KArrow KType KType) "Tree")
