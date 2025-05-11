@@ -828,11 +828,10 @@ moduleBinarySearch =
                                                                   )
                                                               )
                                                           )
-                                                          `TArrow` ( TApplication
+                                                          `TArrow` TApplication
                                                                       KType
                                                                       (TConstructor (KArrow KType KType) "Tree")
                                                                       (TVariable (TypeIndex KType 1) :| [])
-                                                                   )
                                                       )
                                                       "g"
                                                   )
