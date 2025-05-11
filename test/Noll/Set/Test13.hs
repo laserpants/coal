@@ -100,7 +100,8 @@ moduleOrdered =
                     , @<*/bool>
                         ( less_than_or_equal_to : Ordered(*)/*/*/bool
                         , $dict.ffef54c635ab7d01 : Ordered(*)
-                        , n : *)
+                        , n : *
+                        )
                     )
               |]
         ]
