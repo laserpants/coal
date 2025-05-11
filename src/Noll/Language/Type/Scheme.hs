@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE StrictData #-}
 
@@ -12,7 +13,9 @@ module Noll.Language.Type.Scheme (
 ) where
 
 import Data.Data (Data, Typeable)
+import Data.Hashable (Hashable)
 import Data.Set (Set)
+import GHC.Generics (Generic)
 import Noll.Language.Trait (Trait (..))
 import Noll.Language.Type (Type (..), TypeIndex (..))
 import Noll.Language.Type.Kind (Kind (..))
@@ -20,7 +23,9 @@ import Noll.Language.Type.Kind (Kind (..))
 import qualified Data.Set as Set
 
 data Scheme o k t = Forall (Set (o k)) [Trait t] t
-  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
+  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable, Generic)
+
+instance (Hashable k, Hashable (o k), Hashable t) => Hashable (Scheme o k t)
 
 {-# INLINE index #-}
 index :: Int -> TypeIndex Kind
