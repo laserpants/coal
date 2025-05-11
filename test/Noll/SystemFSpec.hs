@@ -4,6 +4,7 @@
 module Noll.SystemFSpec where
 
 import Control.Monad.Identity
+import Noll.Compiler.Lowpass.TranslateModule (translateModule)
 import Control.Monad.Reader (runReader)
 import Data.List.NonEmpty ((<|))
 import Lang.Common.List1 (NonEmpty (..))
@@ -46,6 +47,7 @@ import qualified Noll.Set.Test09
 import qualified Noll.Set.Test10
 import qualified Noll.Set.Test11
 import qualified Noll.Set.Test12
+import qualified Noll.Set.Test13
 
 spec :: Spec
 spec =
@@ -1229,3 +1231,5 @@ story = do
     translateDefinition binarySearchSort == binarySearchSortResult
   it "" $
     translateDefinition mainMain == mainMainResult
+  it "" $
+    (translateModule <$> Noll.Set.Test12.prog1_12) == Noll.Set.Test13.prog1_13
