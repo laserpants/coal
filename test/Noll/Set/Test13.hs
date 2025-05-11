@@ -119,7 +119,6 @@ moduleBinarySearch =
     , moduleObjects =
         [ OData "Leaf" 0 (TCon "Tree" [Lowpass.opaque])
         , OData "Node" 1 (Lowpass.opaque `Lowpass.arrow` TCon "Tree" [Lowpass.opaque] `Lowpass.arrow` TCon "Tree" [Lowpass.opaque] `Lowpass.arrow` TCon "Tree" [Lowpass.opaque])
-
         , OFunction
             "in_range"
             [ Label (TCon "Numeric" [TOpq]) "$dict.be194a5d16952b76"
