@@ -110,9 +110,27 @@ translateExpression =
       t1 = Lowpass.typeOf r
     EFocus name0 ll1 ll2 e1 e2 ->
       Lowpass.sel
-        (Lowpass.Focus name0 (translateLabel ll1) (translateLabel ll2))
+        (Lowpass.Focus name0 (translateLabel ll1) (Label r "$rest"))
         (translateExpression e1)
-        (translateExpression e2)
+        (Lowpass.let_
+          ( Lowpass.Binding
+              (translateLabel ll2)
+              ( Lowpass.app
+                  t
+                  (Lowpass.var (Label (r `Lowpass.arrow` t) "$Record"))
+                  (Lowpass.var (Label r "$rest") :| [])
+              )
+              :| []
+          )
+          (translateExpression e2)
+        )
+     where
+       t@(Lowpass.TCon _ [r]) = Lowpass.typeOf (translateLabel ll2)
+
+      --Lowpass.sel
+      --  (Lowpass.Focus name0 (translateLabel ll1) (translateLabel ll2))
+      --  (translateExpression e1)
+      --  (translateExpression e2)
     EDictionaryLambda a ts e ->
       undefined
     EDictionaryApplication a t e ts es ->
