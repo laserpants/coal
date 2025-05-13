@@ -120,6 +120,22 @@ moduleBinarySearch =
         [ OData "Leaf" 0 (TCon "Tree" [Lowpass.opaque])
         , OData "Node" 1 (Lowpass.opaque `Lowpass.arrow` TCon "Tree" [Lowpass.opaque] `Lowpass.arrow` TCon "Tree" [Lowpass.opaque] `Lowpass.arrow` TCon "Tree" [Lowpass.opaque])
         , OFunction
+            "from_int32"
+            [ Label (TCon "Numeric" [opaque]) "$a"
+            ]
+            [r| 
+                  match<int32/*>($a : Numeric(*)) {
+                    | ( $Record : { from_int32 : int32/* | * }/Numeric(*)
+                      , $r : { from_int32 : int32/* | * }
+                      ) =>
+                        select
+                          { from_int32 = $f : int32/* | _ : * } =
+                            $r : { from_int32 : int32/* | * }
+                          in
+                            $f : int32/*
+                  }
+              |]
+        , OFunction
             "in_range"
             [ Label (TCon "Numeric" [TOpq]) "$dict.be194a5d16952b76"
             , Label (TCon "Ordered" [TOpq]) "$dict.ffef54c635ab7d00"
@@ -132,44 +148,58 @@ moduleBinarySearch =
                         , $match.8.$row.1 : { max : * | min : * | {} }
                         ) =>
                           select
-                            { max = $row.1.field.max : * | $row.1.tail : record({ min : * | {} }) } =
+                            { max = $row.1.field.max : * | $rest : { min : * | {} } } =
                               $match.8.$row.1 : { max : * | min : * | {} }   
                             in
-                              match<bool>($row.1.tail : record({ min : * | {} })) 
-                                { | ( $Record : { min : * | {} }/record({ min : * | {} })
-                                    , $match.5.$row.2 : { min : * | {} }
-                                    ) =>
-                                      select
-                                        { min = $row.2.field.min : * | $row.2.tail : record({}) } =
-                                          $match.5.$row.2 : { min : * | {} }   
-                                        in
-                                          match<bool>($row.2.tail : record({})) 
-                                            { | ( $Record : {}/record({})
-                                                , $match.2._ : {}
-                                                ) =>
-                                                  [&&]
-                                                  ( @<bool>( greater_than : Ordered(*)/*/*/bool
-                                                           , $dict.ffef54c635ab7d00 : Ordered(*)
-                                                           , n : *
-                                                           , $row.2.field.min : * )
-                                                  , [|| ]
-                                                    ( @<bool>( less_than_or_equal_to : Ordered(*)/*/*/bool
-                                                             , $dict.ffef54c635ab7d00 : Ordered(*)
-                                                             , n : *
-                                                             , $row.1.field.max : * )
-                                                    , @<bool>
-                                                        ( less_than_or_equal_to : Ordered(*)/*/*/bool
-                                                        , $dict.ffef54c635ab7d00 : Ordered(*)
-                                                        , $row.1.field.max : * 
-                                                        , @<*>
-                                                            ( from_int32 : Numeric(*)/int32/*
-                                                            , $dict.be194a5d16952b76 : Numeric(*)
-                                                            , -1
+                              let 
+                                $row.1.tail : record({ min : * | {} }) =
+                                  @<record({ min : * | {} })>
+                                    ( $Record : { min : * | {} }/record({ min : * | {} })
+                                    , $rest : { min : * | {} }
+                                    )
+                               in
+                                match<bool>($row.1.tail : record({ min : * | {} })) 
+                                  { | ( $Record : { min : * | {} }/record({ min : * | {} })
+                                      , $match.5.$row.2 : { min : * | {} }
+                                      ) =>
+                                        select
+                                          { min = $row.2.field.min : * | $rest : {} } =
+                                            $match.5.$row.2 : { min : * | {} }   
+                                          in
+                                            let
+                                              $row.2.tail : record({}) =
+                                                @<record({})>
+                                                  ( $Record : {}/record({})
+                                                  , $rest : {}
+                                                  )
+                                              in
+                                              match<bool>($row.2.tail : record({})) 
+                                                { | ( $Record : {}/record({})
+                                                    , $match.2._ : {}
+                                                    ) =>
+                                                      [&&]
+                                                      ( @<bool>( greater_than : Ordered(*)/*/*/bool
+                                                               , $dict.ffef54c635ab7d00 : Ordered(*)
+                                                               , n : *
+                                                               , $row.2.field.min : * )
+                                                      , [|| ]
+                                                        ( @<bool>( less_than_or_equal_to : Ordered(*)/*/*/bool
+                                                                 , $dict.ffef54c635ab7d00 : Ordered(*)
+                                                                 , n : *
+                                                                 , $row.1.field.max : * )
+                                                        , @<bool>
+                                                            ( less_than_or_equal_to : Ordered(*)/*/*/bool
+                                                            , $dict.ffef54c635ab7d00 : Ordered(*)
+                                                            , $row.1.field.max : * 
+                                                            , @<*>
+                                                                ( from_int32 : Numeric(*)/int32/*
+                                                                , $dict.be194a5d16952b76 : Numeric(*)
+                                                                , -1
+                                                                )
                                                             )
                                                         )
-                                                    )
-                                                  )
-                                            }
+                                                      )
+                                                }
                                 }
                     }
           |]
@@ -428,14 +458,14 @@ prog1_13 = unsafeParseExpr <$$> fixture1
 fixture1 :: [Module Lowpass.Type Name Text]
 fixture1 =
   [ Module
---      { moduleName = "Prelude"
---      , moduleImports =
---          []
---      , moduleObjects =
---          []
---      }
---  , Module
-      { moduleName = "Utils"
+      { --      { moduleName = "Prelude"
+        --      , moduleImports =
+        --          []
+        --      , moduleObjects =
+        --          []
+        --      }
+        --  , Module
+        moduleName = "Utils"
       , moduleImports =
           []
       , moduleObjects =

@@ -262,6 +262,16 @@ moduleBinarySearch =
                 )
             )
         ]
+    , -- trait Numeric
+      DTrait
+        "Numeric"
+        []
+        (TVariable (Parameter () "a"))
+        [
+          ( "from_int32"
+          , TIntrinsic IInt32 `TArrow` TVariable (Parameter () "a")
+          )
+        ]
     , -- type_alias Range
       DTypeAlias
         "Range"

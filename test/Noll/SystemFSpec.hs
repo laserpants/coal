@@ -4,7 +4,6 @@
 module Noll.SystemFSpec where
 
 import Control.Monad.Identity
-import Noll.Compiler.Lowpass.TranslateModule (translateModule)
 import Control.Monad.Reader (runReader)
 import Data.List.NonEmpty ((<|))
 import Lang.Common.List1 (NonEmpty (..))
@@ -13,6 +12,7 @@ import Noll.Compiler.DenormalizeObjects (DenormalizeObjectsTransformContext (..)
 import Noll.Compiler.DictionaryElimination (EliminateDictionariesTransformContext (..))
 import Noll.Compiler.Lowpass.TranslateDefinition (translateDefinition)
 import Noll.Compiler.Lowpass.TranslateExpressionSpec
+import Noll.Compiler.Lowpass.TranslateModule (translateModule)
 import Noll.Compiler.NormalizeObjects (normalizeObject)
 import Noll.Compiler.PatternMatching
 import Noll.Compiler.PatternMatching.Envelope

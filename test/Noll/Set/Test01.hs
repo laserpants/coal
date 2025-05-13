@@ -14,11 +14,116 @@ import qualified Noll.Module as Module
 -- Untyped source tree
 prog1_01 :: [Module () () ()]
 prog1_01 =
-  [ moduleUtils
+  [ --  modulePrelude
+    --  ,
+    moduleUtils
   , moduleOrdered
   , moduleBinarySearch
   , moduleMain
   ]
+
+modulePrelude :: Module () () ()
+modulePrelude =
+  Module.fromDefinitionList
+    (Path ["Prelude"])
+    -- Exports
+    ["operator__not", "operator__reverse_composition"]
+    -- Definitions
+    [ -- operator__not
+      DFunction
+        "operator__not"
+        ( Function
+            ()
+            (With [] ())
+            (PVariable () (Label () "a") :| [])
+            ( EIf
+                ()
+                ()
+                (EVariable () (Label () "a"))
+                (ELiteral () (LBool False))
+                (ELiteral () (LBool True))
+            )
+        )
+    , -- operator__reverse_composition
+      DFunction
+        "operator__reverse_composition"
+        ( Function
+            ()
+            (With [] ())
+            ( PVariable () (Label () "f")
+                <| PVariable () (Label () "g")
+                <| PVariable () (Label () "x")
+                :| []
+            )
+            ( EApplication
+                ()
+                ()
+                (EVariable () (Label () "f"))
+                ( EApplication
+                    ()
+                    ()
+                    (EVariable () (Label () "g"))
+                    (EVariable () (Label () "x") :| [])
+                    :| []
+                )
+            )
+        )
+    , -- operator__reverse_application
+      DFunction
+        "operator__reverse_application"
+        ( Function
+            ()
+            (With [] ())
+            ( PVariable () (Label () "x")
+                <| PVariable () (Label () "f")
+                :| []
+            )
+            ( EApplication
+                ()
+                ()
+                (EVariable () (Label () "f"))
+                (EVariable () (Label () "x") :| [])
+            )
+        )
+    , -- always
+      DFunction
+        "always"
+        ( Function
+            ()
+            (With [] ())
+            ( PVariable () (Label () "x")
+                <| PVariable () (Label () "_")
+                :| []
+            )
+            (EVariable () (Label () "x"))
+        )
+    , -- operator__list_concatenation
+      DFunction
+        "operator__list_concatenation"
+        ( Function
+            ()
+            (With [] ())
+            ( PVariable () (Label () "xs")
+                <| PVariable () (Label () "ys")
+                :| []
+            )
+            ( EMatch
+                ()
+                ()
+                (EVariable () (Label () "xs"))
+                ( EClause
+                    ()
+                    (PListLiteral () () [])
+                    undefined
+                    <| EClause
+                      ()
+                      (PListCons () () (PVariable () undefined) (PVariable () undefined))
+                      undefined
+                    :| []
+                )
+            )
+        )
+    ]
 
 moduleUtils :: Module () () ()
 moduleUtils =
@@ -241,6 +346,16 @@ moduleBinarySearch =
                     (TVariable (Parameter () "a") :| [])
                 )
             )
+        ]
+    , -- trait Numeric
+      DTrait
+        "Numeric"
+        []
+        (TVariable (Parameter () "a"))
+        [
+          ( "from_int32"
+          , TIntrinsic IInt32 `TArrow` TVariable (Parameter () "a")
+          )
         ]
     , -- type_alias Range
       DTypeAlias

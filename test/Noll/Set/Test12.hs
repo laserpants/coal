@@ -259,6 +259,16 @@ moduleBinarySearch =
                 )
             )
         ]
+    , -- trait Numeric
+      DTrait
+        "Numeric"
+        []
+        (TVariable (Parameter () "a"))
+        [
+          ( "from_int32"
+          , TIntrinsic IInt32 `TArrow` TVariable (Parameter () "a")
+          )
+        ]
     , -- type_alias Range
       DTypeAlias
         "Range"
@@ -829,9 +839,9 @@ moduleBinarySearch =
                                                               )
                                                           )
                                                           `TArrow` TApplication
-                                                                      KType
-                                                                      (TConstructor (KArrow KType KType) "Tree")
-                                                                      (TVariable (TypeIndex KType 1) :| [])
+                                                            KType
+                                                            (TConstructor (KArrow KType KType) "Tree")
+                                                            (TVariable (TypeIndex KType 1) :| [])
                                                       )
                                                       "g"
                                                   )
@@ -946,15 +956,15 @@ moduleBinarySearch =
                               ( EApplication
                                   ()
                                   ( TIntrinsic
-                                        ( IRecord
-                                            ( TRow
-                                                ( RExtend
-                                                    "max"
-                                                    (TVariable (TypeIndex KType 1))
-                                                    (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
-                                                )
-                                            )
-                                        )
+                                      ( IRecord
+                                          ( TRow
+                                              ( RExtend
+                                                  "max"
+                                                  (TVariable (TypeIndex KType 1))
+                                                  (RExtend "min" (TVariable (TypeIndex KType 1)) RNil)
+                                              )
+                                          )
+                                      )
                                       `TArrow` ( TApplication
                                                   KType
                                                   (TConstructor (KArrow KType KType) "Tree")
