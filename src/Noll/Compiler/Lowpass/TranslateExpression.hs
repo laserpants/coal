@@ -195,7 +195,7 @@ translateBinaryOperator t =
 listConcatenationOperator t es =
   Lowpass.app
     t1
-    (Lowpass.var (Label (t1 `Lowpass.arrow` t1 `Lowpass.arrow` t1) "Prelude.operator__list_concatenation"))
+    (Lowpass.var (Label (t1 `Lowpass.arrow` t1 `Lowpass.arrow` t1) "Core$.operator__list_concatenation"))
     args
  where
   t1 = translateType t
@@ -205,7 +205,7 @@ reverseCompositionOperator :: (Data a) => IndexedType -> List1 (Expression a Ind
 reverseCompositionOperator t es =
   Lowpass.app
     t1
-    (Lowpass.var (Label (Lowpass.foldType t1 (Lowpass.typeOf <$> args)) "Prelude.operator__reverse_composition"))
+    (Lowpass.var (Label (Lowpass.foldType t1 (Lowpass.typeOf <$> args)) "Core$.operator__reverse_composition"))
     args
  where
   t1 = translateType t
@@ -215,7 +215,7 @@ reverseApplicationOperator :: (Data a) => IndexedType -> List1 (Expression a Ind
 reverseApplicationOperator t es =
   Lowpass.app
     t1
-    (Lowpass.var (Label (Lowpass.foldType t1 (Lowpass.typeOf <$> args)) "Prelude.operator__reverse_application"))
+    (Lowpass.var (Label (Lowpass.foldType t1 (Lowpass.typeOf <$> args)) "Core$.operator__reverse_application"))
     args
  where
   t1 = translateType t

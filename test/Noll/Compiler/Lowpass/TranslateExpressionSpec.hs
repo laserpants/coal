@@ -649,7 +649,7 @@ orderedGreaterThanResult1 =
       ]
       [r| 
           @<*/bool>
-            ( Prelude.operator__reverse_composition : (bool/bool)/(*/bool)/*/bool
+            ( Core$.operator__reverse_composition : (bool/bool)/(*/bool)/*/bool
             , not : bool/bool
             , @<*/bool>
                 ( less_than_or_equal_to : Ordered(*)/*/*/bool
@@ -1685,7 +1685,7 @@ binarySearchFromListResult1 =
                              fn(range : record({ max : * | min : * | {} })) =>
                                if 
                                  ( @<bool>
-                                     ( Prelude.operator__reverse_application : */(*/bool)/bool
+                                     ( Core$.operator__reverse_application : */(*/bool)/bool
                                      , $match.10.p : *
                                      , @<*/bool>
                                          ( in_range : Numeric(*)/Ordered(*)/record({ max : * | min : * | {} })/*/bool
@@ -2121,7 +2121,7 @@ binarySearchFlattenResult1 =
                     , $match.15.rhs : Tree(*)
                     ) =>
                       @<list(*)>
-                        ( Prelude.operator__list_concatenation : list(*)/list(*)/list(*)
+                        ( Core$.operator__list_concatenation : list(*)/list(*)/list(*)
                         , @<list(*)>
                             ( $fold.2 : Tree(*)/list(*)
                             , $match.14.lhs : Tree(*))
@@ -2231,7 +2231,7 @@ binarySearchSortResult1 =
       ]
       [r|
           @<list(*)/list(*)>
-            ( Prelude.operator__reverse_composition : (Tree(*)/list(*))/(list(*)/Tree(*))/list(*)/list(*)
+            ( Core$.operator__reverse_composition : (Tree(*)/list(*))/(list(*)/Tree(*))/list(*)/list(*)
             , flatten : Tree(*)/list(*)
             , @<list(*)/Tree(*)>
                 ( from_list : Numeric(*)/Ordered(*)/list(*)/Tree(*)
