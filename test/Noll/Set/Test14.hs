@@ -14,6 +14,8 @@ import Text.RawString.QQ
 
 import qualified Data.Text as Text
 import qualified Lang.Lowpass.Language as Lowpass
+import qualified Lang.Lowpass.Compiler as Lowpass
+import qualified Lang.Lowpass.Compiler.Utils as Lowpass
 
 unsafeParseExpr :: Text -> Lowpass.Expr Lowpass.Type
 unsafeParseExpr t =
@@ -490,3 +492,13 @@ fixture1 =
   , moduleBinarySearch
   , moduleMain
   ]
+
+fixture2 :: [Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)]
+fixture2 =
+  [ moduleOrdered1
+  , moduleBinarySearch1
+  , moduleMain1
+  ]
+
+fooz :: IO ()
+fooz = Lowpass.testModules =<< Lowpass.compileModules fixture2
