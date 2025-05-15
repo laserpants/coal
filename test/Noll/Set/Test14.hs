@@ -193,6 +193,8 @@ moduleBinarySearch =
         , "Ordered.less_than_or_equal_to"
         , "Core$.always"
         , "Core$.operator__reverse_application"
+        , "Core$.operator__reverse_composition"
+        , "Core$.operator__list_concatenation"
         ]
     , moduleObjects =
         [ OData "BinarySearch.Leaf" 0 (TCon "BinarySearch.Tree" [Lowpass.opaque])
