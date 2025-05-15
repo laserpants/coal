@@ -459,9 +459,41 @@ moduleMain =
     , moduleImports =
         [ "BinarySearch.sort"
         , "BinarySearch.from_int32"
+        , "Ordered.LessThan"
+        , "Ordered.GreaterThan"
+        , "Ordered.EqualTo"
         ]
     , moduleObjects =
-        [ OFunction
+        [ OConstant
+            "Main.d"
+            [r|
+                  @<BinarySearch.Numeric(int32)>
+                    ( $Record : { from_int32 : int32/int32 | * }/BinarySearch.Numeric(int32)
+                    , { from_int32 = fn(x : int32) => x : int32
+                      | {}
+                      }
+                    )
+            |]
+        , OConstant
+            "Main.d2"
+            [r|
+                  @<Ordered.Ordered(int32)>
+                    ( $Record : { compare : int32/int32/Ordered.Ordering | * }/Ordered.Ordered(int32)
+                    , { compare = fn(x : int32, y : int32) =>
+                          if ([< int32](x : int32, y : int32))
+                            then
+                              Ordered.LessThan : Ordered.Ordering
+                            else
+                              if ([> int32](x : int32, y : int32))
+                                then
+                                  Ordered.GreaterThan : Ordered.Ordering
+                                else
+                                  Ordered.EqualTo : Ordered.Ordering
+                      | {}
+                      }
+                    )
+            |]
+        , OFunction
             "Main.main"
             [Label (TCon "unit" []) "_"]
             [r|
@@ -471,49 +503,49 @@ moduleMain =
                         ( $Cons : int32/list(int32)/list(int32)
                         , @<int32>
                             ( BinarySearch.from_int32 : BinarySearch.Numeric(int32)/int32/int32
-                            , $dict.2967b53e939a3c94 : BinarySearch.Numeric(int32)
+                            , Main.d : BinarySearch.Numeric(int32)
                             , 5
                             )
                           , @<list(int32)>
                               ( $Cons : int32/list(int32)/list(int32)
                               , @<int32>
                                   ( BinarySearch.from_int32 : BinarySearch.Numeric(int32)/int32/int32
-                                  , $dict.2967b53e939a3c94 : BinarySearch.Numeric(int32)
+                                  , Main.d : BinarySearch.Numeric(int32)
                                   , 3
                                   )
                                 , @<list(int32)>
                                     ( $Cons : int32/list(int32)/list(int32)
                                     , @<int32>
                                         ( BinarySearch.from_int32 : BinarySearch.Numeric(int32)/int32/int32
-                                        , $dict.2967b53e939a3c94 : BinarySearch.Numeric(int32)
+                                        , Main.d : BinarySearch.Numeric(int32)
                                         , 7
                                         )
                                       , @<list(int32)>
                                           ( $Cons : int32/list(int32)/list(int32)
                                           , @<int32>
                                               ( BinarySearch.from_int32 : BinarySearch.Numeric(int32)/int32/int32
-                                              , $dict.2967b53e939a3c94 : BinarySearch.Numeric(int32)
+                                              , Main.d : BinarySearch.Numeric(int32)
                                               , 2
                                               )
                                             , @<list(int32)>
                                                 ( $Cons : int32/list(int32)/list(int32)
                                                 , @<int32>
                                                     ( BinarySearch.from_int32 : BinarySearch.Numeric(int32)/int32/int32
-                                                    , $dict.2967b53e939a3c94 : BinarySearch.Numeric(int32)
+                                                    , Main.d : BinarySearch.Numeric(int32)
                                                     , 1
                                                     )
                                                   , @<list(int32)>
                                                       ( $Cons : int32/list(int32)/list(int32)
                                                       , @<int32>
                                                           ( BinarySearch.from_int32 : BinarySearch.Numeric(int32)/int32/int32
-                                                          , $dict.2967b53e939a3c94 : BinarySearch.Numeric(int32)
+                                                          , Main.d : BinarySearch.Numeric(int32)
                                                           , 6
                                                           )
                                                         , @<list(int32)>
                                                             ( $Cons : int32/list(int32)/list(int32)
                                                             , @<int32>
                                                                 ( BinarySearch.from_int32 : BinarySearch.Numeric(int32)/int32/int32
-                                                                , $dict.2967b53e939a3c94 : BinarySearch.Numeric(int32)
+                                                                , Main.d : BinarySearch.Numeric(int32)
                                                                 , 4
                                                                 )
                                                               , 
