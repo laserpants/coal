@@ -13,9 +13,9 @@ import Text.Megaparsec.Error (errorBundlePretty)
 import Text.RawString.QQ
 
 import qualified Data.Text as Text
-import qualified Lang.Lowpass.Language as Lowpass
 import qualified Lang.Lowpass.Compiler as Lowpass
 import qualified Lang.Lowpass.Compiler.Utils as Lowpass
+import qualified Lang.Lowpass.Language as Lowpass
 
 unsafeParseExpr :: Text -> Lowpass.Expr Lowpass.Type
 unsafeParseExpr t =
@@ -33,7 +33,9 @@ moduleOrdered =
   Module
     { moduleName = "Ordered"
     , moduleImports =
-        []
+        [ "Core$.operator__reverse_composition"
+        , "Core$.not"
+        ]
     , moduleObjects =
         [ OData "Ordered.EqualTo" 0 (TCon "Ordered.Ordering" [])
         , OData "Ordered.GreaterThan" 1 (TCon "Ordered.Ordering" [])
@@ -117,7 +119,11 @@ moduleBinarySearch =
   Module
     { moduleName = "BinarySearch"
     , moduleImports =
-        []
+        [ "Ordered.greater_than"
+        , "Ordered.less_than_or_equal_to"
+        , "Core$.always"
+        , "Core$.operator__reverse_application"
+        ]
     , moduleObjects =
         [ OData "BinarySearch.Leaf" 0 (TCon "BinarySearch.Tree" [Lowpass.opaque])
         , OData "BinarySearch.Node" 1 (Lowpass.opaque `Lowpass.arrow` TCon "BinarySearch.Tree" [Lowpass.opaque] `Lowpass.arrow` TCon "Tree" [Lowpass.opaque] `Lowpass.arrow` TCon "BinarySearch.Tree" [Lowpass.opaque])
@@ -379,7 +385,9 @@ moduleMain =
   Module
     { moduleName = "Main"
     , moduleImports =
-        []
+        [ "BinarySearch.sort"
+        , "BinarySearch.from_int32"
+        ]
     , moduleObjects =
         [ OFunction
             "main"
