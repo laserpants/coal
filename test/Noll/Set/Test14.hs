@@ -25,6 +25,76 @@ unsafeParseExpr t =
     Right r ->
       r
 
+moduleCore1 :: Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
+moduleCore1 = unsafeParseExpr <$> moduleCore
+
+moduleCore :: Module Lowpass.Type Name Text
+moduleCore =
+  Module
+    { moduleName = "Core$"
+    , moduleImports =
+        []
+    , moduleObjects =
+        [ OFunction
+            "Core$.operator__not"
+            [ Label bool "a"
+            ]
+            [r| 
+                  if (a : bool) then false else true
+              |]
+        , OFunction
+            "Core$.operator__reverse_composition"
+            [ Label (opaque `arrow` opaque) "f"
+            , Label (opaque `arrow` opaque) "g"
+            , Label opaque "x"
+            ]
+            [r| 
+                  @<*>(f : */*, @<*>(g : */*, x : *))
+              |]
+        , OFunction
+            "Core$.operator__reverse_application"
+            [ Label opaque "x"
+            , Label (opaque `arrow` opaque) "f"
+            ]
+            [r| 
+                  @<*>(f : */*, x : *)
+              |]
+        , OFunction
+            "Core$.always"
+            [ Label opaque "a"
+            , Label opaque "_"
+            ]
+            [r|   
+                  a : *
+              |]
+        , OFunction
+            "Core$.operator__list_concatenation"
+            [ Label (TCon "list" [opaque]) "xs"
+            , Label (TCon "list" [opaque]) "ys"
+            ]
+            [r| 
+                  match<list(*)>(xs : list(*)) {
+                    | ( $Cons : */list(*)/list(*)
+                      , z : *
+                      , zs : list(*)
+                      ) =>
+                        @<list(*)>
+                          ( $Cons : */list(*)/list(*)
+                          , z : *
+                          , @<list(*)>
+                              ( Core$.operator__list_concatenation : list(*)/list(*)/list(*)
+                              , zs : list(*)
+                              , ys : list(*)
+                              )
+                          )
+                    | ( $Nil : list(*)
+                      ) =>
+                        ys : list(*)
+                  }
+              |]
+        ]
+    }
+
 moduleOrdered1 :: Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
 moduleOrdered1 = unsafeParseExpr <$> moduleOrdered
 
@@ -34,7 +104,7 @@ moduleOrdered =
     { moduleName = "Ordered"
     , moduleImports =
         [ "Core$.operator__reverse_composition"
-        , "Core$.not"
+        , "Core$.operator__not"
         ]
     , moduleObjects =
         [ OData "Ordered.EqualTo" 0 (TCon "Ordered.Ordering" [])
@@ -100,7 +170,7 @@ moduleOrdered =
             [r| 
                   @<*/bool>
                     ( Core$.operator__reverse_composition : (bool/bool)/(*/bool)/*/bool
-                    , Core$.not : bool/bool
+                    , Core$.operator__not : bool/bool
                     , @<*/bool>
                         ( Ordered.less_than_or_equal_to : Ordered.Ordered(*)/*/*/bool
                         , $dict.ffef54c635ab7d01 : Ordered.Ordered(*)
@@ -390,7 +460,7 @@ moduleMain =
         ]
     , moduleObjects =
         [ OFunction
-            "main"
+            "Main.main"
             [Label (TCon "unit" []) "_"]
             [r|
                   let
@@ -503,7 +573,8 @@ fixture1 =
 
 fixture2 :: [Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)]
 fixture2 =
-  [ moduleOrdered1
+  [ moduleCore1
+  , moduleOrdered1
   , moduleBinarySearch1
   , moduleMain1
   ]
