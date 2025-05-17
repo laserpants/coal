@@ -2026,6 +2026,21 @@ moduleMain =
       DImport
         (Path ["BinarySearch"])
         ["Node", "Leaf", "sort", "in_range", "from_int32"]
+    , DInstance
+        "Numeric"
+        (TIntrinsic IInt32)
+        [ DConstant
+            "from_int32"
+            ( Constant
+                ()
+                (With [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32))
+                ( ELambda
+                    ()
+                    (PVariable () (Label (TIntrinsic IInt32) "x") :| [])
+                    (EVariable () (Label (TIntrinsic IInt32) "x"))
+                )
+            )
+        ]
     , -- main
       DConstant
         "main"

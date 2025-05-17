@@ -1907,6 +1907,21 @@ moduleMain =
       DImport
         (Path ["BinarySearch"])
         ["Node", "Leaf", "sort", "in_range", "from_int32"]
+    , DInstance
+        "Numeric"
+        (TIntrinsic IInt32)
+        [ DConstant
+            "from_int32"
+            ( Constant
+                ()
+                (With [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32))
+                ( ELambda
+                    ()
+                    (PVariable () (Label (TIntrinsic IInt32) "x") :| [])
+                    (EVariable () (Label (TIntrinsic IInt32) "x"))
+                )
+            )
+        ]
     , -- main
       DConstant
         "main"
@@ -1915,43 +1930,58 @@ moduleMain =
             (With [] (TIntrinsic IUnit `TArrow` TVariable (TypeIndex KType 0)))
             ( ELambda
                 ()
-                (PLiteral () LUnit :| [])
-                ( ELet
+                (PVariable () (Label (TIntrinsic IUnit) "$v.0") :| [])
+                ( EMatch
                     ()
-                    ( BPattern
+                    (TVariable (TypeIndex KType 0))
+                    (EVariable () (Label (TIntrinsic IUnit) "$v.0"))
+                    ( EClause
                         ()
-                        (PVariable () (Label (TIntrinsic (IList (TIntrinsic IInt32))) "xs"))
-                        ( EAnnotation
+                        (PLiteral () LUnit)
+                        ( CPlain
                             ()
-                            (TIntrinsic (IList (TIntrinsic IInt32)))
-                            ( EListLiteral
+                            []
+                            ( ELet
                                 ()
-                                (TIntrinsic (IList (TIntrinsic IInt32)))
-                                [ EApplication () (TIntrinsic IInt32) (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")) (ELiteral () (LInt32 5) :| [])
-                                , EApplication () (TIntrinsic IInt32) (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")) (ELiteral () (LInt32 3) :| [])
-                                , EApplication () (TIntrinsic IInt32) (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")) (ELiteral () (LInt32 7) :| [])
-                                , EApplication () (TIntrinsic IInt32) (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")) (ELiteral () (LInt32 2) :| [])
-                                , EApplication () (TIntrinsic IInt32) (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")) (ELiteral () (LInt32 1) :| [])
-                                , EApplication () (TIntrinsic IInt32) (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")) (ELiteral () (LInt32 6) :| [])
-                                , EApplication () (TIntrinsic IInt32) (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")) (ELiteral () (LInt32 4) :| [])
-                                ]
-                            )
-                        )
-                        :| []
-                    )
-                    ( EApplication
-                        ()
-                        (TVariable (TypeIndex KType 0))
-                        (EVariable () (Label (TIntrinsic (IList (TIntrinsic IInt32)) `TArrow` TVariable (TypeIndex KType 0)) "trace"))
-                        ( EApplication
-                            ()
-                            (TIntrinsic (IList (TIntrinsic IInt32)))
-                            (EVariable () (Label (TIntrinsic (IList (TIntrinsic IInt32)) `TArrow` TIntrinsic (IList (TIntrinsic IInt32))) "sort"))
-                            ( EVariable () (Label (TIntrinsic (IList (TIntrinsic IInt32))) "xs")
-                                :| []
+                                ( BPattern
+                                    ()
+                                    (PVariable () (Label (TIntrinsic (IList (TIntrinsic IInt32))) "xs"))
+                                    ( EAnnotation
+                                        ()
+                                        (TIntrinsic (IList (TIntrinsic IInt32)))
+                                        ( EListLiteral
+                                            ()
+                                            (TIntrinsic (IList (TIntrinsic IInt32)))
+                                            [ EApplication () (TIntrinsic IInt32) (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")) (ELiteral () (LInt32 5) :| [])
+                                            , EApplication () (TIntrinsic IInt32) (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")) (ELiteral () (LInt32 3) :| [])
+                                            , EApplication () (TIntrinsic IInt32) (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")) (ELiteral () (LInt32 7) :| [])
+                                            , EApplication () (TIntrinsic IInt32) (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")) (ELiteral () (LInt32 2) :| [])
+                                            , EApplication () (TIntrinsic IInt32) (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")) (ELiteral () (LInt32 1) :| [])
+                                            , EApplication () (TIntrinsic IInt32) (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")) (ELiteral () (LInt32 6) :| [])
+                                            , EApplication () (TIntrinsic IInt32) (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")) (ELiteral () (LInt32 4) :| [])
+                                            ]
+                                        )
+                                    )
+                                    :| []
+                                )
+                                ( EApplication
+                                    ()
+                                    (TVariable (TypeIndex KType 0))
+                                    (EVariable () (Label (TIntrinsic (IList (TIntrinsic IInt32)) `TArrow` TVariable (TypeIndex KType 0)) "trace"))
+                                    ( EApplication
+                                        ()
+                                        (TIntrinsic (IList (TIntrinsic IInt32)))
+                                        (EVariable () (Label (TIntrinsic (IList (TIntrinsic IInt32)) `TArrow` TIntrinsic (IList (TIntrinsic IInt32))) "sort"))
+                                        ( EVariable () (Label (TIntrinsic (IList (TIntrinsic IInt32))) "xs")
+                                            :| []
+                                        )
+                                        :| []
+                                    )
+                                )
                             )
                             :| []
                         )
+                        :| []
                     )
                 )
             )

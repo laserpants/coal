@@ -829,6 +829,18 @@ moduleMain =
       DImport
         (Path ["BinarySearch"])
         ["Node", "Leaf", "sort", "in_range", "from_int32"]
+    , DInstance
+        "Numeric"
+        (TIntrinsic IInt32)
+        [ DFunction
+            "from_int32"
+            ( Function
+                ()
+                (With [] ())
+                (PVariable () (Label () "x") :| [])
+                (EVariable () (Label () "x"))
+            )
+        ]
     , -- main
       DFunction
         "main"

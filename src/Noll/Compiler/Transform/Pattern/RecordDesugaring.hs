@@ -130,7 +130,7 @@ tork ::
   (Name, Row TypeIndex Kind (Type TypeIndex Kind), Expression a (Type TypeIndex Kind)) ->
   m (Name, Row TypeIndex Kind (Type TypeIndex Kind), Expression a (Type TypeIndex Kind))
 tork ((name, p), rrr) (x, tttr, e) = do
-  pure $
+  pure
     ( rrr
     , RExtend name q tttr
     , EFocus
@@ -188,5 +188,7 @@ instance (Monoid a, Show a) => RecordPattern a (Pattern a (Type TypeIndex Kind))
         PListCons a t <$> expandRecordPatterns p1 <*> expandRecordPatterns p2
       PListLiteral a t ps ->
         PListLiteral a t <$> traverse expandRecordPatterns ps
-      p -> do
-        error (show p) -- "TODO"
+      p ->
+        pure p
+--      p -> do
+--        error (show p) -- "TODO"

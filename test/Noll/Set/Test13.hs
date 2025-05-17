@@ -391,7 +391,15 @@ moduleMain =
         , "BinarySearch.sort"
         ]
     , moduleObjects =
-        [ OFunction
+        [ 
+          OFunction
+            "Main.from_int32__$instance.f377c7c1cf28bc72"
+            [ Label Lowpass.int32 "x"
+            ]
+            [r| 
+                  x : int32
+              |]
+        , OFunction
             "Main.main"
             [Label (TCon "unit" []) "_"]
             [r|
