@@ -73,6 +73,8 @@ instance TreeTransform CompiledClause t where
 instance TreeTransform Expression t where
   transform name f =
     \case
+      EAnnotation _ _ e ->
+        transform name f e
       EVariable a ll@(Label t name1)
         | name == name1 ->
             f a t
