@@ -234,7 +234,9 @@ moduleBinarySearch =
     ["Tree", "from_list", "flatten"]
     -- Definitions
     [ -- import Ordered(Ordering, Ordered, less_than_or_equal_to, greater_than)
-      DImport (Path ["Ordered"]) ["Ordering", "Ordered", "less_than_or_equal_to", "greater_than"]
+      DImport
+        (Path ["Ordered"])
+        ["LessThan", "EqualTo", "GreaterThan", "compare", "less_than_or_equal_to", "greater_than"]
     , -- type Tree
       DType
         "Tree"
@@ -1849,7 +1851,9 @@ moduleMain =
     []
     -- Definitions
     [ -- import BinarySearch
-      DImport (Path ["BinarySearch"]) ["sort"]
+      DImport
+        (Path ["BinarySearch"])
+        ["Node", "Leaf", "sort", "in_range", "from_int32"]
     , -- main
       DConstant
         "main"

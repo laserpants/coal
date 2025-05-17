@@ -10,7 +10,7 @@ import Lang.Common.List1 (NonEmpty (..))
 import Lang.Label (Label (..))
 import Noll.Compiler.DenormalizeObjects (DenormalizeObjectsTransformContext (..))
 import Noll.Compiler.DictionaryElimination (EliminateDictionariesTransformContext (..))
-import Noll.Compiler.Lowpass.Environment (TranslateEnvironment (..), initialTranslateEnvironment, withModuleName)
+import Noll.Compiler.Lowpass.Environment (TranslateEnvironment (..), initialTranslateEnvironment, insertQualifiedNames, withModuleName)
 import Noll.Compiler.Lowpass.TranslateDefinition (translateDefinition)
 import Noll.Compiler.Lowpass.TranslateExpressionSpec
 import Noll.Compiler.Lowpass.TranslateModule (translateModule)
@@ -1231,7 +1231,7 @@ story = do
   it "" $
     runReader (withModuleName "BinarySearch" (translateDefinition binarySearchSort)) testNameEnvironment == binarySearchSortResult
   it "" $
-    runReader (withModuleName "Main" (translateDefinition mainMain)) testNameEnvironment == mainMainResult
+    runReader (insertQualifiedNames (Environment.fromList [("sort", "BinarySearch.sort"), ("from_int32", "BinarySearch.from_int32")]) (withModuleName "Main" (translateDefinition mainMain))) testNameEnvironment == mainMainResult
   it "" $
     runReader (traverse translateModule Noll.Set.Test12.prog1_12) testNameEnvironment == Noll.Set.Test13.prog1_13
 
@@ -1243,32 +1243,12 @@ testNameEnvironment =
           , "Core$.always"
           )
         ,
-          ( "$Cons"
-          , "$Cons"
-          )
-        ,
-          ( "$Nil"
-          , "$Nil"
-          )
-        ,
-          ( "$Record"
-          , "$Record"
-          )
-        ,
           ( "trace"
           , "trace"
           )
         ,
           ( "not"
           , "Core$.operator__not"
-          )
-        ,
-          ( "$dict.2967b53e939a3c94"
-          , "$dict.2967b53e939a3c94"
-          )
-        ,
-          ( "$dict.b7c5e7e84eeaf782"
-          , "$dict.b7c5e7e84eeaf782"
           )
         ]
     )
