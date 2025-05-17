@@ -1172,6 +1172,8 @@ story = do
   it "" $
     runPatternDesugaring "v" 0 (desugarPatterns Noll.Set.Test05.moduleOrdered) == Noll.Set.Test06.moduleOrdered
   it "" $
+    runPatternDesugaring "v" 0 (desugarPatterns Noll.Set.Test05.moduleMain) == Noll.Set.Test06.moduleMain
+  it "" $
     runIdentity (Noll.Compiler.Transform.Pattern.OrExpansion.compileOrPatterns Noll.Set.Test06.moduleUtils) == Noll.Set.Test07.moduleUtils
   it "" $
     runIdentity (Noll.Compiler.Transform.Pattern.OrExpansion.compileOrPatterns Noll.Set.Test06.moduleOrdered) == Noll.Set.Test07.moduleOrdered
