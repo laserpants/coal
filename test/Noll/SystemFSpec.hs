@@ -8,6 +8,7 @@ import Control.Monad.Reader (runReader)
 import Data.List.NonEmpty ((<|))
 import Lang.Common.List1 (NonEmpty (..))
 import Lang.Label (Label (..))
+import Lang.Utils (Name)
 import Noll.Compiler.DenormalizeObjects (DenormalizeObjectsTransformContext (..))
 import Noll.Compiler.DictionaryElimination (EliminateDictionariesTransformContext (..))
 import Noll.Compiler.Lowpass.Environment (TranslateEnvironment (..), initialTranslateEnvironment, insertQualifiedNames, withModuleName)
@@ -141,11 +142,11 @@ spec =
       it "" $ do
         typedExpressionErrors2Includes (InferAnnotation () (TIntrinsic IInt32) (TIntrinsic IBool)) fixture40
 
--- typedExpression_ :: Function Expression () () -> Function Expression () (Type TypeIndex Kind)
-typedExpression_ names e = testRunner runTypedExpressionTest names e
+typedExpression_ :: [(Name, Scheme TypeIndex Kind IndexedType)] -> Expression () (Type TypeIndex Kind) -> TestResult (Expression () (Type TypeIndex Kind)) ()
+typedExpression_ = testRunner runTypedExpressionTest
 
--- typedFunction_ :: Function Expression () () -> Function Expression () (Type TypeIndex Kind)
-typedFunction_ names f = testRunner runTypedFunctionTest names f
+typedFunction_ :: [(Name, Scheme TypeIndex Kind IndexedType)] -> Function Expression () (Type TypeIndex Kind) -> TestResult (Function Expression () (Type TypeIndex Kind)) ()
+typedFunction_ = testRunner runTypedFunctionTest
 
 typedFunction :: Function Expression () () -> Function Expression () (Type TypeIndex Kind)
 typedFunction f = testResultExpression (testRunner runTypedFunctionTest mempty f)
