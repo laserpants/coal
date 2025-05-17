@@ -107,23 +107,23 @@ moduleOrdered =
         , "Core$.operator__not"
         ]
     , moduleObjects =
-        [ OData "Ordered.EqualTo" 0 (TCon "Ordered.Ordering" [])
-        , OData "Ordered.GreaterThan" 1 (TCon "Ordered.Ordering" [])
-        , OData "Ordered.LessThan" 2 (TCon "Ordered.Ordering" [])
+        [ OData "Ordered.EqualTo" 0 (TCon "Ordering" [])
+        , OData "Ordered.GreaterThan" 1 (TCon "Ordering" [])
+        , OData "Ordered.LessThan" 2 (TCon "Ordering" [])
         , OFunction
             "Ordered.compare"
             [ Label (TCon "Ordered.Ordered" [opaque]) "$a"
             ]
             [r| 
-                  match<*/*/Ordered.Ordering>($a : Ordered.Ordered(*)) {
-                    | ( $Record : { compare : */*/Ordered.Ordering | * }/Ordered.Ordered(*)
-                      , $r : { compare : */*/Ordered.Ordering | * }
+                  match<*/*/Ordering>($a : Ordered.Ordered(*)) {
+                    | ( $Record : { compare : */*/Ordering | * }/Ordered.Ordered(*)
+                      , $r : { compare : */*/Ordering | * }
                       ) =>
                         select
-                          { compare = $f : */*/Ordered.Ordering | _ : * } =
-                            $r : { compare : */*/Ordered.Ordering | * }
+                          { compare = $f : */*/Ordering | _ : * } =
+                            $r : { compare : */*/Ordering | * }
                           in
-                            $f : */*/Ordered.Ordering
+                            $f : */*/Ordering
                   }
               |]
         , OFunction
@@ -134,13 +134,13 @@ moduleOrdered =
             [r| 
                   if ([< int32](x : int32, y : int32))
                     then
-                      Ordered.LessThan : Ordered.Ordering
+                      Ordered.LessThan : Ordering
                     else
                       if ([> int32](x : int32, y : int32))
                         then
-                          Ordered.GreaterThan : Ordered.Ordering
+                          Ordered.GreaterThan : Ordering
                         else
-                          Ordered.EqualTo : Ordered.Ordering
+                          Ordered.EqualTo : Ordering
               |]
         , OFunction
             "Ordered.less_than_or_equal_to"
@@ -150,16 +150,16 @@ moduleOrdered =
             ]
             [r| 
                   match<bool>
-                    ( @<Ordered.Ordering>
-                      ( Ordered.compare : Ordered.Ordered(*)/*/*/Ordered.Ordering
+                    ( @<Ordering>
+                      ( Ordered.compare : Ordered.Ordered(*)/*/*/Ordering
                       , $dict.ffef54c635ab7d00 : Ordered.Ordered(*)
                       , m : *
                       , n : *
                       )
                     ) { 
-                      | (Ordered.EqualTo : Ordered.Ordering) => true
-                      | (Ordered.GreaterThan : Ordered.Ordering) => false
-                      | (Ordered.LessThan : Ordered.Ordering) => true
+                      | (Ordered.EqualTo : Ordering) => true
+                      | (Ordered.GreaterThan : Ordering) => false
+                      | (Ordered.LessThan : Ordering) => true
                   }
               |]
         , OFunction
@@ -478,17 +478,17 @@ moduleMain =
             "Main.d2"
             [r|
                   @<Ordered.Ordered(int32)>
-                    ( $Record : { compare : int32/int32/Ordered.Ordering | * }/Ordered.Ordered(int32)
+                    ( $Record : { compare : int32/int32/Ordering | * }/Ordered.Ordered(int32)
                     , { compare = fn(x : int32, y : int32) =>
                           if ([< int32](x : int32, y : int32))
                             then
-                              Ordered.LessThan : Ordered.Ordering
+                              Ordered.LessThan : Ordering
                             else
                               if ([> int32](x : int32, y : int32))
                                 then
-                                  Ordered.GreaterThan : Ordered.Ordering
+                                  Ordered.GreaterThan : Ordering
                                 else
-                                  Ordered.EqualTo : Ordered.Ordering
+                                  Ordered.EqualTo : Ordering
                       | {}
                       }
                     )
