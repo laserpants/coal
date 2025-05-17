@@ -197,8 +197,8 @@ moduleBinarySearch =
         , "Core$.operator__list_concatenation"
         ]
     , moduleObjects =
-        [ OData "BinarySearch.Leaf" 0 (TCon "BinarySearch.Tree" [Lowpass.opaque])
-        , OData "BinarySearch.Node" 1 (Lowpass.opaque `Lowpass.arrow` TCon "BinarySearch.Tree" [Lowpass.opaque] `Lowpass.arrow` TCon "Tree" [Lowpass.opaque] `Lowpass.arrow` TCon "BinarySearch.Tree" [Lowpass.opaque])
+        [ OData "BinarySearch.Leaf" 0 (TCon "Tree" [Lowpass.opaque])
+        , OData "BinarySearch.Node" 1 (Lowpass.opaque `Lowpass.arrow` TCon "Tree" [Lowpass.opaque] `Lowpass.arrow` TCon "Tree" [Lowpass.opaque] `Lowpass.arrow` TCon "Tree" [Lowpass.opaque])
         , OFunction
             "BinarySearch.from_int32"
             [ Label (TCon "BinarySearch.Numeric" [opaque]) "$a"
@@ -295,9 +295,9 @@ moduleBinarySearch =
             ]
             [r| 
                   let
-                    $fold.1 : list(*)/record({ max : * | min : * | {} })/BinarySearch.Tree(*) =
+                    $fold.1 : list(*)/record({ max : * | min : * | {} })/Tree(*) =
                       fn($fold.1.expr : list(*)) =>
-                        match<record({ max : * | min : * | {} })/BinarySearch.Tree(*)>($fold.1.expr : list(*)) {
+                        match<record({ max : * | min : * | {} })/Tree(*)>($fold.1.expr : list(*)) {
                           | ( $Cons : */list(*)/list(*)
                             , $match.10.p : *
                             , $match.11.g : list(*)
@@ -316,11 +316,11 @@ moduleBinarySearch =
                                       )
                                   )
                                   then
-                                    @<BinarySearch.Tree(*)>
-                                      ( BinarySearch.Node : */BinarySearch.Tree(*)/BinarySearch.Tree(*)/BinarySearch.Tree(*)
+                                    @<Tree(*)>
+                                      ( BinarySearch.Node : */Tree(*)/Tree(*)/Tree(*)
                                       , $match.10.p : *
-                                      , @<BinarySearch.Tree(*)>
-                                          ( $fold.1 : list(*)/record({ max : * | min : * | {} })/BinarySearch.Tree(*)
+                                      , @<Tree(*)>
+                                          ( $fold.1 : list(*)/record({ max : * | min : * | {} })/Tree(*)
                                           , $match.11.g : list(*)
                                           , @<record({ max : * | min : * | {} })>
                                               ( $Record : { max : * | min : * | {} }/record({ max : * | min : * | {} })
@@ -340,8 +340,8 @@ moduleBinarySearch =
                                                 }
                                               )
                                           )
-                                      , @<BinarySearch.Tree(*)>
-                                        ( $fold.1 : list(*)/record({ max : * | min : * | {} })/BinarySearch.Tree(*)
+                                      , @<Tree(*)>
+                                        ( $fold.1 : list(*)/record({ max : * | min : * | {} })/Tree(*)
                                         , $match.11.g : list(*)
                                         , @<record({ max : * | min : * | {} })>
                                             ( $Record : { max : * | min : * | {} }/record({ max : * | min : * | {} })
@@ -363,20 +363,20 @@ moduleBinarySearch =
                                         )
                                       )
                                   else
-                                    @<BinarySearch.Tree(*)>
-                                      ( $fold.1 : list(*)/record({ max : * | min : * | {} })/BinarySearch.Tree(*)
+                                    @<Tree(*)>
+                                      ( $fold.1 : list(*)/record({ max : * | min : * | {} })/Tree(*)
                                       , $match.11.g : list(*)
                                       , range : record({ max : * | min : * | {} })
                                       )
                           | ($Nil : list(*)) =>
-                              @<record({ max : * | min : * | {} })/BinarySearch.Tree(*)>
-                                ( Core$.always : BinarySearch.Tree(*)/record({ max : * | min : * | {} })/BinarySearch.Tree(*)
-                                , BinarySearch.Leaf : BinarySearch.Tree(*)
+                              @<record({ max : * | min : * | {} })/Tree(*)>
+                                ( Core$.always : Tree(*)/record({ max : * | min : * | {} })/Tree(*)
+                                , BinarySearch.Leaf : Tree(*)
                                 )
                         }
                     in
-                      @<BinarySearch.Tree(*)>
-                        ( $fold.1 : list(*)/record({ max : * | min : * | {} })/BinarySearch.Tree(*)
+                      @<Tree(*)>
+                        ( $fold.1 : list(*)/record({ max : * | min : * | {} })/Tree(*)
                         , list : list(*)
                         , @<record({ max : * | min : * | {} })>
                             ( $Record : { max : * | min : * | {} }/record({ max : * | min : * | {} })
@@ -397,37 +397,37 @@ moduleBinarySearch =
           |]
         , OFunction
             "BinarySearch.flatten"
-            [ Label (TCon "BinarySearch.Tree" [opaque]) "tree"
+            [ Label (TCon "Tree" [opaque]) "tree"
             ]
             [r| 
                   let
-                    $fold.2 : BinarySearch.Tree(*)/list(*) =
-                      fn($fold.2.expr : BinarySearch.Tree(*)) =>
-                        match<list(*)>($fold.2.expr : BinarySearch.Tree(*)) {
-                          | ( BinarySearch.Leaf : BinarySearch.Tree(*)
+                    $fold.2 : Tree(*)/list(*) =
+                      fn($fold.2.expr : Tree(*)) =>
+                        match<list(*)>($fold.2.expr : Tree(*)) {
+                          | ( BinarySearch.Leaf : Tree(*)
                             ) =>
                               $Nil : list(*)
-                          | ( BinarySearch.Node : */BinarySearch.Tree(*)/BinarySearch.Tree(*)/BinarySearch.Tree(*)
+                          | ( BinarySearch.Node : */Tree(*)/Tree(*)/Tree(*)
                             , $match.13.y : *
-                            , $match.14.lhs : BinarySearch.Tree(*)
-                            , $match.15.rhs : BinarySearch.Tree(*)
+                            , $match.14.lhs : Tree(*)
+                            , $match.15.rhs : Tree(*)
                             ) =>
                               @<list(*)>
                                 ( Core$.operator__list_concatenation : list(*)/list(*)/list(*)
                                 , @<list(*)>
-                                    ( $fold.2 : BinarySearch.Tree(*)/list(*)
-                                    , $match.14.lhs : BinarySearch.Tree(*))
+                                    ( $fold.2 : Tree(*)/list(*)
+                                    , $match.14.lhs : Tree(*))
                                 , @<list(*)>
                                     ( $Cons : */list(*)/list(*)
                                     , $match.13.y : *
                                     , @<list(*)>
-                                        ( $fold.2 : BinarySearch.Tree(*)/list(*)
-                                        , $match.15.rhs : BinarySearch.Tree(*))))
+                                        ( $fold.2 : Tree(*)/list(*)
+                                        , $match.15.rhs : Tree(*))))
                         }
                     in
                       @<list(*)>
-                        ( $fold.2 : BinarySearch.Tree(*)/list(*)
-                        , tree : BinarySearch.Tree(*)
+                        ( $fold.2 : Tree(*)/list(*)
+                        , tree : Tree(*)
                         )
           |]
         , OFunction
@@ -437,10 +437,10 @@ moduleBinarySearch =
             ]
             [r|
                   @<list(*)/list(*)>
-                    ( Core$.operator__reverse_composition : (BinarySearch.Tree(*)/list(*))/(list(*)/BinarySearch.Tree(*))/list(*)/list(*)
-                    , BinarySearch.flatten : BinarySearch.Tree(*)/list(*)
-                    , @<list(*)/BinarySearch.Tree(*)>
-                        ( BinarySearch.from_list : BinarySearch.Numeric(*)/Ordered(*)/list(*)/BinarySearch.Tree(*)
+                    ( Core$.operator__reverse_composition : (Tree(*)/list(*))/(list(*)/Tree(*))/list(*)/list(*)
+                    , BinarySearch.flatten : Tree(*)/list(*)
+                    , @<list(*)/Tree(*)>
+                        ( BinarySearch.from_list : BinarySearch.Numeric(*)/Ordered(*)/list(*)/Tree(*)
                         , $dict.be194a5d16952b75 : BinarySearch.Numeric(*)
                         , $dict.ffef54c635ab7d03 : Ordered(*)
                         )

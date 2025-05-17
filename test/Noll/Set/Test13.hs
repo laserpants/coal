@@ -31,7 +31,8 @@ moduleOrdered =
   Module
     { moduleName = "Ordered"
     , moduleImports =
-        []
+        [ "Utils.Predicate"
+        ]
     , moduleObjects =
         [ OData "Ordered.EqualTo" 0 (TCon "Ordering" [])
         , OData "Ordered.GreaterThan" 1 (TCon "Ordering" [])
@@ -115,7 +116,13 @@ moduleBinarySearch =
   Module
     { moduleName = "BinarySearch"
     , moduleImports =
-        []
+        [ "Ordered.EqualTo"
+        , "Ordered.GreaterThan"
+        , "Ordered.LessThan"
+        , "Ordered.compare"
+        , "Ordered.greater_than"
+        , "Ordered.less_than_or_equal_to"
+        ]
     , moduleObjects =
         [ OData "BinarySearch.Leaf" 0 (TCon "Tree" [Lowpass.opaque])
         , OData "BinarySearch.Node" 1 (Lowpass.opaque `Lowpass.arrow` TCon "Tree" [Lowpass.opaque] `Lowpass.arrow` TCon "Tree" [Lowpass.opaque] `Lowpass.arrow` TCon "Tree" [Lowpass.opaque])
@@ -377,7 +384,12 @@ moduleMain =
   Module
     { moduleName = "Main"
     , moduleImports =
-        []
+        [ "BinarySearch.Leaf"
+        , "BinarySearch.Node"
+        , "BinarySearch.from_int32"
+        , "BinarySearch.in_range"
+        , "BinarySearch.sort"
+        ]
     , moduleObjects =
         [ OFunction
             "Main.main"

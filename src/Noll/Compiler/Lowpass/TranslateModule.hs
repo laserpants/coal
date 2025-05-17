@@ -22,11 +22,13 @@ translateModule :: (MonadReader TranslateEnvironment m, Data a) => Module a Kind
 translateModule =
   \case
     Module (Path p) _ defs ->
-      insertQualifiedNames (collectImports defs) $
+      insertQualifiedNames env $
         withModuleName name $
-          Lowpass.Module name [] . concat <$> traverse translateDefinition defs
+          Lowpass.Module 
+            name (Environment.elems env) . concat <$> traverse translateDefinition defs
      where
       name = Text.intercalate "." p
+      env = collectImports defs
 
 collectImports :: [Definition a k t] -> Environment Name
 collectImports defs = Environment.fromList (concatMap imports defs)
