@@ -137,7 +137,7 @@ orderedCompareInstance1 =
 
 orderedCompareInstance1Result =
   LP.OFunction
-    "compare"
+    "Ordered.compare"
     [Label LP.int32 "x", Label LP.int32 "y"]
     ( LP.if_
         ( LP.op
@@ -146,7 +146,7 @@ orderedCompareInstance1Result =
                 (LP.var (Label LP.int32 "y"))
             )
         )
-        (LP.var (Label (LP.TCon "Ordering" []) "LessThan"))
+        (LP.var (Label (LP.TCon "Ordering" []) "Ordered.LessThan"))
         ( LP.if_
             ( LP.op
                 ( LP.OGtInt32
@@ -154,8 +154,8 @@ orderedCompareInstance1Result =
                     (LP.var (Label LP.int32 "y"))
                 )
             )
-            (LP.var (Label (LP.TCon "Ordering" []) "GreaterThan"))
-            (LP.var (Label (LP.TCon "Ordering" []) "EqualTo"))
+            (LP.var (Label (LP.TCon "Ordering" []) "Ordered.GreaterThan"))
+            (LP.var (Label (LP.TCon "Ordering" []) "Ordered.EqualTo"))
         )
     )
 
@@ -202,7 +202,7 @@ orderedLessThanOrEqualTo =
 
 orderedLessThanOrEqualToResult =
   LP.OFunction
-    "less_than_or_equal_to"
+    "Ordered.less_than_or_equal_to"
     [ Label (LP.TCon "Ordered" [LP.TOpq]) "$dict.ffef54c635ab7d00"
     , Label LP.TOpq "m"
     , Label LP.TOpq "n"
@@ -211,7 +211,7 @@ orderedLessThanOrEqualToResult =
         LP.bool
         ( LP.app
             (LP.TCon "Ordering" [])
-            (LP.var (Label (LP.TCon "Ordered" [LP.TOpq] `LP.arrow` LP.TOpq `LP.arrow` LP.TOpq `LP.arrow` LP.TCon "Ordering" []) "compare"))
+            (LP.var (Label (LP.TCon "Ordered" [LP.TOpq] `LP.arrow` LP.TOpq `LP.arrow` LP.TOpq `LP.arrow` LP.TCon "Ordering" []) "Ordered.compare"))
             ( LP.var (Label (LP.TCon "Ordered" [LP.TOpq]) "$dict.ffef54c635ab7d00")
                 <| LP.var (Label LP.TOpq "m")
                 <| LP.var (Label LP.TOpq "n")
@@ -219,13 +219,13 @@ orderedLessThanOrEqualToResult =
             )
         )
         ( LP.Clause
-            (Label (LP.TCon "Ordering" []) "EqualTo" :| [])
+            (Label (LP.TCon "Ordering" []) "Ordered.EqualTo" :| [])
             (LP.lit (LP.PBool True))
             <| LP.Clause
-              (Label (LP.TCon "Ordering" []) "GreaterThan" :| [])
+              (Label (LP.TCon "Ordering" []) "Ordered.GreaterThan" :| [])
               (LP.lit (LP.PBool False))
             <| LP.Clause
-              (Label (LP.TCon "Ordering" []) "LessThan" :| [])
+              (Label (LP.TCon "Ordering" []) "Ordered.LessThan" :| [])
               (LP.lit (LP.PBool True))
             :| []
         )
@@ -584,7 +584,7 @@ binarySearchInRangeResult = unsafeParseExpr <$$> binarySearchInRangeResult1
 
 binarySearchInRangeResult1 =
   [ LP.OFunction
-      "in_range"
+      "BinarySearch.in_range"
       [ Label (LP.TCon "Numeric" [LP.TOpq]) "$dict.be194a5d16952b76"
       , Label (LP.TCon "Ordered" [LP.TOpq]) "$dict.ffef54c635ab7d00"
       , Label (LP.TCon "record" [LP.RExt "max" LP.TOpq (LP.RExt "min" LP.TOpq LP.RNil)]) "$v.0"
@@ -670,7 +670,7 @@ binarySearchFromList =
             ]
             (TApplication KType (TConstructor (KArrow KType KType) "Tree") (TVariable (TypeIndex KType 2) :| []))
         )
-        ( PVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 2) :| [])) "$dict.be194a5d16952b74")
+        ( PVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 2) :| [])) "$dict.be194a5d16952b77")
             <| PVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Ordered") (TVariable (TypeIndex KType 2) :| [])) "$dict.ffef54c635ab7d02")
             <| PAnnotation
               ()
@@ -706,7 +706,7 @@ binarySearchFromList =
                             ()
                             (TVariable (TypeIndex KType 2))
                             (EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 2) :| []) `TArrow` TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 2)) "from_int32"))
-                            ( EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 2) :| [])) "$dict.be194a5d16952b74")
+                            ( EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 2) :| [])) "$dict.be194a5d16952b77")
                                 <| ELiteral () (LInt32 0)
                                 :| []
                             )
@@ -717,7 +717,7 @@ binarySearchFromList =
                             ()
                             (TVariable (TypeIndex KType 2))
                             (EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 2) :| []) `TArrow` TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 2)) "from_int32"))
-                            ( EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 2) :| [])) "$dict.be194a5d16952b74")
+                            ( EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 2) :| [])) "$dict.be194a5d16952b77")
                                 <| ELiteral () (LInt32 (-1))
                                 :| []
                             )
@@ -801,7 +801,7 @@ binarySearchFromList =
                                               "in_range"
                                           )
                                       )
-                                      ( EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 2) :| [])) "$dict.be194a5d16952b74")
+                                      ( EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 2) :| [])) "$dict.be194a5d16952b77")
                                           <| EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Ordered") (TVariable (TypeIndex KType 2) :| [])) "$dict.ffef54c635ab7d02")
                                           <| EVariable
                                             ()
@@ -1253,7 +1253,7 @@ binarySearchFromList =
                                                           )
                                                       )
                                                       ( EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 1) :| [])) "$dict.be194a5d16952b77")
-                                                          <| EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Ordered") (TVariable (TypeIndex KType 1) :| [])) "$dict.ffef54c635ab7d01")
+                                                          <| EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Ordered") (TVariable (TypeIndex KType 1) :| [])) "$dict.ffef54c635ab7d02")
                                                           <| EVariable
                                                             ()
                                                             ( Label
@@ -1637,7 +1637,7 @@ binarySearchFromList =
                                         ()
                                         (TVariable (TypeIndex KType 2))
                                         (EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 2) :| []) `TArrow` TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 2)) "from_int32"))
-                                        ( EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 2) :| [])) "$dict.be194a5d16952b74")
+                                        ( EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 2) :| [])) "$dict.be194a5d16952b77")
                                             <| ELiteral () (LInt32 (-1))
                                             :| []
                                         )
@@ -1648,7 +1648,7 @@ binarySearchFromList =
                                         ()
                                         (TVariable (TypeIndex KType 2))
                                         (EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 2) :| []) `TArrow` TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 2)) "from_int32"))
-                                        ( EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 2) :| [])) "$dict.be194a5d16952b74")
+                                        ( EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TVariable (TypeIndex KType 2) :| [])) "$dict.be194a5d16952b77")
                                             <| ELiteral () (LInt32 0)
                                             :| []
                                         )
@@ -1668,8 +1668,8 @@ binarySearchFromListResult = unsafeParseExpr <$$> binarySearchFromListResult1
 
 binarySearchFromListResult1 =
   [ LP.OFunction
-      "from_list"
-      [ Label (LP.TCon "Numeric" [LP.TOpq]) "$dict.be194a5d16952b74"
+      "BinarySearch.from_list"
+      [ Label (LP.TCon "Numeric" [LP.TOpq]) "$dict.be194a5d16952b77"
       , Label (LP.TCon "Ordered" [LP.TOpq]) "$dict.ffef54c635ab7d02"
       , Label (LP.TCon "list" [LP.TOpq]) "list"
       ]
@@ -1688,16 +1688,16 @@ binarySearchFromListResult1 =
                                      ( Core$.operator__reverse_application : */(*/bool)/bool
                                      , $match.10.p : *
                                      , @<*/bool>
-                                         ( in_range : Numeric(*)/Ordered(*)/record({ max : * | min : * | {} })/*/bool
+                                         ( BinarySearch.in_range : Numeric(*)/Ordered(*)/record({ max : * | min : * | {} })/*/bool
                                          , $dict.be194a5d16952b77 : Numeric(*)
-                                         , $dict.ffef54c635ab7d01 : Ordered(*)
+                                         , $dict.ffef54c635ab7d02 : Ordered(*)
                                          , range : record({ max : * | min : * | {} })
                                          )
                                      )
                                  )
                                  then
                                    @<Tree(*)>
-                                     ( Node : */Tree(*)/Tree(*)/Tree(*)
+                                     ( BinarySearch.Node : */Tree(*)/Tree(*)/Tree(*)
                                      , $match.10.p : *
                                      , @<Tree(*)>
                                          ( $fold.1 : list(*)/record({ max : * | min : * | {} })/Tree(*)
@@ -1750,8 +1750,8 @@ binarySearchFromListResult1 =
                                      )
                          | ($Nil : list(*)) =>
                              @<record({ max : * | min : * | {} })/Tree(*)>
-                               ( always : Tree(*)/record({ max : * | min : * | {} })/Tree(*)
-                               , Leaf : Tree(*)
+                               ( Core$.always : Tree(*)/record({ max : * | min : * | {} })/Tree(*)
+                               , BinarySearch.Leaf : Tree(*)
                                )
                        }
                    in
@@ -1762,13 +1762,13 @@ binarySearchFromListResult1 =
                            ( $Record : { max : * | min : * | {} }/record({ max : * | min : * | {} })
                            , { max =
                                  @<*>
-                                   ( from_int32 : Numeric(*)/int32/*
-                                   , $dict.be194a5d16952b74 : Numeric(*)
+                                   ( BinarySearch.from_int32 : Numeric(*)/int32/*
+                                   , $dict.be194a5d16952b77 : Numeric(*)
                                    , -1 )
                              | min =
                                  @<*>
-                                   ( from_int32 : Numeric(*)/int32/*
-                                   , $dict.be194a5d16952b74 : Numeric(*)
+                                   ( BinarySearch.from_int32 : Numeric(*)/int32/*
+                                   , $dict.be194a5d16952b77 : Numeric(*)
                                    , 0 )
                              | {}
                              }
@@ -2105,7 +2105,7 @@ binarySearchFlattenResult = unsafeParseExpr <$$> binarySearchFlattenResult1
 
 binarySearchFlattenResult1 =
   [ LP.OFunction
-      "flatten"
+      "BinarySearch.flatten"
       [ Label (LP.TCon "Tree" [LP.TOpq]) "tree"
       ]
       [r|
@@ -2113,9 +2113,10 @@ binarySearchFlattenResult1 =
             $fold.2 : Tree(*)/list(*) =
               fn($fold.2.expr : Tree(*)) =>
                 match<list(*)>($fold.2.expr : Tree(*)) {
-                  | (Leaf : Tree(*)) =>
+                  | ( BinarySearch.Leaf : Tree(*)
+                    ) =>
                       $Nil : list(*)
-                  | ( Node : */Tree(*)/Tree(*)/Tree(*)
+                  | ( BinarySearch.Node : */Tree(*)/Tree(*)/Tree(*)
                     , $match.13.y : *
                     , $match.14.lhs : Tree(*)
                     , $match.15.rhs : Tree(*)
@@ -2225,16 +2226,16 @@ binarySearchSortResult = unsafeParseExpr <$$> binarySearchSortResult1
 
 binarySearchSortResult1 =
   [ LP.OFunction
-      "sort"
+      "BinarySearch.sort"
       [ Label (LP.TCon "Numeric" [LP.TOpq]) "$dict.be194a5d16952b75"
       , Label (LP.TCon "Ordered" [LP.TOpq]) "$dict.ffef54c635ab7d03"
       ]
       [r|
           @<list(*)/list(*)>
             ( Core$.operator__reverse_composition : (Tree(*)/list(*))/(list(*)/Tree(*))/list(*)/list(*)
-            , flatten : Tree(*)/list(*)
+            , BinarySearch.flatten : Tree(*)/list(*)
             , @<list(*)/Tree(*)>
-                ( from_list : Numeric(*)/Ordered(*)/list(*)/Tree(*)
+                ( BinarySearch.from_list : Numeric(*)/Ordered(*)/list(*)/Tree(*)
                 , $dict.be194a5d16952b75 : Numeric(*)
                 , $dict.ffef54c635ab7d03 : Ordered(*)
                 )
@@ -2349,7 +2350,7 @@ mainMainResult = unsafeParseExpr <$$> mainMainResult1
 
 mainMainResult1 =
   [ LP.OFunction
-      "main"
+      "Main.main"
       [Label (LP.TCon "unit" []) "_"]
       [r|
         let
@@ -2357,7 +2358,7 @@ mainMainResult1 =
             @<list(int32)>
               ( $Cons : int32/list(int32)/list(int32)
               , @<int32>
-                  ( from_int32 : Numeric(int32)/int32/int32
+                  ( BinarySearch.from_int32 : Numeric(int32)/int32/int32
                   , $dict.2967b53e939a3c94 : Numeric(int32)
                   , 5
                   )
@@ -2367,7 +2368,7 @@ mainMainResult1 =
             @<*>
               ( trace : list(int32)/*
               , @<list(int32)>
-                  ( sort : Numeric(int32)/Ordered(int32)/list(int32)/list(int32)
+                  ( BinarySearch.sort : Numeric(int32)/Ordered(int32)/list(int32)/list(int32)
                   , $dict.2967b53e939a3c94 : Numeric(int32)
                   , $dict.b7c5e7e84eeaf782 : Ordered(int32)
                   , xs : list(int32)

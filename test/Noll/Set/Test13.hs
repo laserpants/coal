@@ -33,11 +33,11 @@ moduleOrdered =
     , moduleImports =
         []
     , moduleObjects =
-        [ OData "EqualTo" 0 (TCon "Ordering" [])
-        , OData "GreaterThan" 1 (TCon "Ordering" [])
-        , OData "LessThan" 2 (TCon "Ordering" [])
+        [ OData "Ordered.EqualTo" 0 (TCon "Ordering" [])
+        , OData "Ordered.GreaterThan" 1 (TCon "Ordering" [])
+        , OData "Ordered.LessThan" 2 (TCon "Ordering" [])
         , OFunction
-            "compare"
+            "Ordered.compare"
             [ Label (TCon "Ordered" [opaque]) "$a"
             ]
             [r| 
@@ -53,23 +53,23 @@ moduleOrdered =
                   }
               |]
         , OFunction
-            "compare__$instance.f377c7c1cf28bc72"
+            "Ordered.compare__$instance.f377c7c1cf28bc72"
             [ Label Lowpass.int32 "x"
             , Label Lowpass.int32 "y"
             ]
             [r| 
                   if ([< int32](x : int32, y : int32))
                     then
-                      LessThan : Ordering
+                      Ordered.LessThan : Ordering
                     else
                       if ([> int32](x : int32, y : int32))
                         then
-                          GreaterThan : Ordering
+                          Ordered.GreaterThan : Ordering
                         else
-                          EqualTo : Ordering
+                          Ordered.EqualTo : Ordering
               |]
         , OFunction
-            "less_than_or_equal_to"
+            "Ordered.less_than_or_equal_to"
             [ Label (TCon "Ordered" [opaque]) "$dict.ffef54c635ab7d00"
             , Label opaque "m"
             , Label opaque "n"
@@ -77,28 +77,28 @@ moduleOrdered =
             [r| 
                   match<bool>
                     ( @<Ordering>
-                      ( compare : Ordered(*)/*/*/Ordering
+                      ( Ordered.compare : Ordered(*)/*/*/Ordering
                       , $dict.ffef54c635ab7d00 : Ordered(*)
                       , m : *
                       , n : *
                       )
                     ) { 
-                      | (EqualTo : Ordering) => true
-                      | (GreaterThan : Ordering) => false
-                      | (LessThan : Ordering) => true
+                      | (Ordered.EqualTo : Ordering) => true
+                      | (Ordered.GreaterThan : Ordering) => false
+                      | (Ordered.LessThan : Ordering) => true
                   }
               |]
         , OFunction
-            "greater_than"
+            "Ordered.greater_than"
             [ Label (TCon "Ordered" [opaque]) "$dict.ffef54c635ab7d01"
             , Label opaque "n"
             ]
             [r| 
                   @<*/bool>
                     ( Core$.operator__reverse_composition : (bool/bool)/(*/bool)/*/bool
-                    , not : bool/bool
+                    , Core$.operator__not : bool/bool
                     , @<*/bool>
-                        ( less_than_or_equal_to : Ordered(*)/*/*/bool
+                        ( Ordered.less_than_or_equal_to : Ordered(*)/*/*/bool
                         , $dict.ffef54c635ab7d01 : Ordered(*)
                         , n : *
                         )
@@ -117,10 +117,10 @@ moduleBinarySearch =
     , moduleImports =
         []
     , moduleObjects =
-        [ OData "Leaf" 0 (TCon "Tree" [Lowpass.opaque])
-        , OData "Node" 1 (Lowpass.opaque `Lowpass.arrow` TCon "Tree" [Lowpass.opaque] `Lowpass.arrow` TCon "Tree" [Lowpass.opaque] `Lowpass.arrow` TCon "Tree" [Lowpass.opaque])
+        [ OData "BinarySearch.Leaf" 0 (TCon "Tree" [Lowpass.opaque])
+        , OData "BinarySearch.Node" 1 (Lowpass.opaque `Lowpass.arrow` TCon "Tree" [Lowpass.opaque] `Lowpass.arrow` TCon "Tree" [Lowpass.opaque] `Lowpass.arrow` TCon "Tree" [Lowpass.opaque])
         , OFunction
-            "from_int32"
+            "BinarySearch.from_int32"
             [ Label (TCon "Numeric" [opaque]) "$a"
             ]
             [r| 
@@ -136,7 +136,7 @@ moduleBinarySearch =
                   }
               |]
         , OFunction
-            "in_range"
+            "BinarySearch.in_range"
             [ Label (TCon "Numeric" [TOpq]) "$dict.be194a5d16952b76"
             , Label (TCon "Ordered" [TOpq]) "$dict.ffef54c635ab7d00"
             , Label (TCon "record" [RExt "max" TOpq (RExt "min" TOpq RNil)]) "$v.0"
@@ -178,21 +178,25 @@ moduleBinarySearch =
                                                     , $match.2._ : {}
                                                     ) =>
                                                       [&&]
-                                                      ( @<bool>( greater_than : Ordered(*)/*/*/bool
-                                                               , $dict.ffef54c635ab7d00 : Ordered(*)
-                                                               , n : *
-                                                               , $row.2.field.min : * )
+                                                      ( @<bool>
+                                                          ( Ordered.greater_than : Ordered(*)/*/*/bool
+                                                          , $dict.ffef54c635ab7d00 : Ordered(*)
+                                                          , n : *
+                                                          , $row.2.field.min : * 
+                                                          )
                                                       , [|| ]
-                                                        ( @<bool>( less_than_or_equal_to : Ordered(*)/*/*/bool
-                                                                 , $dict.ffef54c635ab7d00 : Ordered(*)
-                                                                 , n : *
-                                                                 , $row.1.field.max : * )
+                                                        ( @<bool>
+                                                            ( Ordered.less_than_or_equal_to : Ordered(*)/*/*/bool
+                                                            , $dict.ffef54c635ab7d00 : Ordered(*)
+                                                            , n : *
+                                                            , $row.1.field.max : * 
+                                                            )
                                                         , @<bool>
-                                                            ( less_than_or_equal_to : Ordered(*)/*/*/bool
+                                                            ( Ordered.less_than_or_equal_to : Ordered(*)/*/*/bool
                                                             , $dict.ffef54c635ab7d00 : Ordered(*)
                                                             , $row.1.field.max : * 
                                                             , @<*>
-                                                                ( from_int32 : Numeric(*)/int32/*
+                                                                ( BinarySearch.from_int32 : Numeric(*)/int32/*
                                                                 , $dict.be194a5d16952b76 : Numeric(*)
                                                                 , -1
                                                                 )
@@ -204,7 +208,7 @@ moduleBinarySearch =
                     }
           |]
         , OFunction
-            "from_list"
+            "BinarySearch.from_list"
             [ Label (TCon "Numeric" [TOpq]) "$dict.be194a5d16952b77"
             , Label (TCon "Ordered" [TOpq]) "$dict.ffef54c635ab7d01"
             , Label (TCon "list" [TOpq]) "list"
@@ -224,7 +228,7 @@ moduleBinarySearch =
                                       ( Core$.operator__reverse_application : */(*/bool)/bool
                                       , $match.10.p : *
                                       , @<*/bool>
-                                          ( in_range : Numeric(*)/Ordered(*)/record({ max : * | min : * | {} })/*/bool
+                                          ( BinarySearch.in_range : Numeric(*)/Ordered(*)/record({ max : * | min : * | {} })/*/bool
                                           , $dict.be194a5d16952b77 : Numeric(*)
                                           , $dict.ffef54c635ab7d01 : Ordered(*)
                                           , range : record({ max : * | min : * | {} })
@@ -233,7 +237,7 @@ moduleBinarySearch =
                                   )
                                   then
                                     @<Tree(*)>
-                                      ( Node : */Tree(*)/Tree(*)/Tree(*)
+                                      ( BinarySearch.Node : */Tree(*)/Tree(*)/Tree(*)
                                       , $match.10.p : *
                                       , @<Tree(*)>
                                           ( $fold.1 : list(*)/record({ max : * | min : * | {} })/Tree(*)
@@ -286,8 +290,8 @@ moduleBinarySearch =
                                       )
                           | ($Nil : list(*)) =>
                               @<record({ max : * | min : * | {} })/Tree(*)>
-                                ( always : Tree(*)/record({ max : * | min : * | {} })/Tree(*)
-                                , Leaf : Tree(*)
+                                ( Core$.always : Tree(*)/record({ max : * | min : * | {} })/Tree(*)
+                                , BinarySearch.Leaf : Tree(*)
                                 )
                         }
                     in
@@ -298,12 +302,12 @@ moduleBinarySearch =
                             ( $Record : { max : * | min : * | {} }/record({ max : * | min : * | {} })
                             , { max =
                                   @<*>
-                                    ( from_int32 : Numeric(*)/int32/*
+                                    ( BinarySearch.from_int32 : Numeric(*)/int32/*
                                     , $dict.be194a5d16952b77 : Numeric(*)
                                     , -1 )
                               | min =
                                   @<*>
-                                    ( from_int32 : Numeric(*)/int32/*
+                                    ( BinarySearch.from_int32 : Numeric(*)/int32/*
                                     , $dict.be194a5d16952b77 : Numeric(*)
                                     , 0 )
                               | {}
@@ -312,7 +316,7 @@ moduleBinarySearch =
                         )
           |]
         , OFunction
-            "flatten"
+            "BinarySearch.flatten"
             [ Label (TCon "Tree" [opaque]) "tree"
             ]
             [r| 
@@ -320,9 +324,10 @@ moduleBinarySearch =
                     $fold.2 : Tree(*)/list(*) =
                       fn($fold.2.expr : Tree(*)) =>
                         match<list(*)>($fold.2.expr : Tree(*)) {
-                          | (Leaf : Tree(*)) =>
+                          | ( BinarySearch.Leaf : Tree(*)
+                            ) =>
                               $Nil : list(*)
-                          | ( Node : */Tree(*)/Tree(*)/Tree(*)
+                          | ( BinarySearch.Node : */Tree(*)/Tree(*)/Tree(*)
                             , $match.13.y : *
                             , $match.14.lhs : Tree(*)
                             , $match.15.rhs : Tree(*)
@@ -346,16 +351,16 @@ moduleBinarySearch =
                         )
           |]
         , OFunction
-            "sort"
+            "BinarySearch.sort"
             [ Label (TCon "Numeric" [TOpq]) "$dict.be194a5d16952b75"
             , Label (TCon "Ordered" [TOpq]) "$dict.ffef54c635ab7d03"
             ]
             [r|
                   @<list(*)/list(*)>
                     ( Core$.operator__reverse_composition : (Tree(*)/list(*))/(list(*)/Tree(*))/list(*)/list(*)
-                    , flatten : Tree(*)/list(*)
+                    , BinarySearch.flatten : Tree(*)/list(*)
                     , @<list(*)/Tree(*)>
-                        ( from_list : Numeric(*)/Ordered(*)/list(*)/Tree(*)
+                        ( BinarySearch.from_list : Numeric(*)/Ordered(*)/list(*)/Tree(*)
                         , $dict.be194a5d16952b75 : Numeric(*)
                         , $dict.ffef54c635ab7d03 : Ordered(*)
                         )
@@ -375,7 +380,7 @@ moduleMain =
         []
     , moduleObjects =
         [ OFunction
-            "main"
+            "Main.main"
             [Label (TCon "unit" []) "_"]
             [r|
                   let
@@ -383,49 +388,49 @@ moduleMain =
                       @<list(int32)>
                         ( $Cons : int32/list(int32)/list(int32)
                         , @<int32>
-                            ( from_int32 : Numeric(int32)/int32/int32
+                            ( BinarySearch.from_int32 : Numeric(int32)/int32/int32
                             , $dict.2967b53e939a3c94 : Numeric(int32)
                             , 5
                             )
                           , @<list(int32)>
                               ( $Cons : int32/list(int32)/list(int32)
                               , @<int32>
-                                  ( from_int32 : Numeric(int32)/int32/int32
+                                  ( BinarySearch.from_int32 : Numeric(int32)/int32/int32
                                   , $dict.2967b53e939a3c94 : Numeric(int32)
                                   , 3
                                   )
                                 , @<list(int32)>
                                     ( $Cons : int32/list(int32)/list(int32)
                                     , @<int32>
-                                        ( from_int32 : Numeric(int32)/int32/int32
+                                        ( BinarySearch.from_int32 : Numeric(int32)/int32/int32
                                         , $dict.2967b53e939a3c94 : Numeric(int32)
                                         , 7
                                         )
                                       , @<list(int32)>
                                           ( $Cons : int32/list(int32)/list(int32)
                                           , @<int32>
-                                              ( from_int32 : Numeric(int32)/int32/int32
+                                              ( BinarySearch.from_int32 : Numeric(int32)/int32/int32
                                               , $dict.2967b53e939a3c94 : Numeric(int32)
                                               , 2
                                               )
                                             , @<list(int32)>
                                                 ( $Cons : int32/list(int32)/list(int32)
                                                 , @<int32>
-                                                    ( from_int32 : Numeric(int32)/int32/int32
+                                                    ( BinarySearch.from_int32 : Numeric(int32)/int32/int32
                                                     , $dict.2967b53e939a3c94 : Numeric(int32)
                                                     , 1
                                                     )
                                                   , @<list(int32)>
                                                       ( $Cons : int32/list(int32)/list(int32)
                                                       , @<int32>
-                                                          ( from_int32 : Numeric(int32)/int32/int32
+                                                          ( BinarySearch.from_int32 : Numeric(int32)/int32/int32
                                                           , $dict.2967b53e939a3c94 : Numeric(int32)
                                                           , 6
                                                           )
                                                         , @<list(int32)>
                                                             ( $Cons : int32/list(int32)/list(int32)
                                                             , @<int32>
-                                                                ( from_int32 : Numeric(int32)/int32/int32
+                                                                ( BinarySearch.from_int32 : Numeric(int32)/int32/int32
                                                                 , $dict.2967b53e939a3c94 : Numeric(int32)
                                                                 , 4
                                                                 )
@@ -442,7 +447,7 @@ moduleMain =
                       @<*>
                         ( trace : list(int32)/*
                         , @<list(int32)>
-                            ( sort : Numeric(int32)/Ordered(int32)/list(int32)/list(int32)
+                            ( BinarySearch.sort : Numeric(int32)/Ordered(int32)/list(int32)/list(int32)
                             , $dict.2967b53e939a3c94 : Numeric(int32)
                             , $dict.b7c5e7e84eeaf782 : Ordered(int32)
                             , xs : list(int32)

@@ -1,14 +1,18 @@
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Noll.Compiler.Lowpass.TranslateExpression (translateExpression, translatePattern) where
 
+import Control.Monad.Reader (MonadReader, asks, local)
 import Data.Data (Data)
 import Data.Maybe (fromMaybe)
-import Lang.Common.List1 (List1, NonEmpty (..), (<|))
+import Debug.Trace (traceShow)
+import Lang.Common.List1 (List1, NonEmpty (..), fromList1, (<|))
 import Lang.Label (Label (..))
-import Lang.Utils (Dictionary)
+import Lang.Utils (Dictionary, Name, Set)
 import Noll.Ast.HasType (HasType (..))
+import Noll.Compiler.Lowpass.Environment (TranslateEnvironment (..), qualifyName, withLocalName, withLocalNames)
 import Noll.Compiler.Lowpass.TranslateType (translateType)
 import Noll.Language
 import Noll.Language.Expression
@@ -19,6 +23,8 @@ import Noll.Language.Pattern
 import Noll.Language.Primitive
 
 import qualified Data.Map.Strict as Map
+import qualified Data.Set as Set
+import qualified Data.Text as Text
 import qualified Lang.Lowpass.Language as Lowpass
 
 type LowpassExpr = Lowpass.Expr Lowpass.Type
@@ -45,7 +51,7 @@ translatePrimitive =
     LString str ->
       Lowpass.PString str
 
-translateExpression :: (Data a) => Expression a IndexedType -> LowpassExpr
+translateExpression :: (MonadReader TranslateEnvironment m, Data a) => Expression a IndexedType -> m LowpassExpr
 translateExpression =
   \case
     EAnnotation _ _ e ->
@@ -54,127 +60,173 @@ translateExpression =
       undefined
     EApplication _ t (EBinaryOperator _ _ op) es ->
       translateBinaryOperator t op es
-    EApplication _ t e es ->
-      Lowpass.app (translateType t) (translateExpression e) (translateExpression <$> es)
-    ELambda _ ps e ->
-      Lowpass.lam (translatePattern <$> ps) (translateExpression e)
-    ELet _ vs e ->
-      Lowpass.let_ (translateBinding <$> vs) (translateExpression e)
-    ERecursiveLet _ (PVariable _ ll) e1 e2 ->
-      Lowpass.let_
-        (Lowpass.Binding (translateLabel ll) (translateExpression e1) :| [])
-        (translateExpression e2)
-    EVariable _ ll ->
-      Lowpass.var (translateLabel ll)
-    EConstructor _ ll ->
-      Lowpass.var (translateLabel ll)
+    EApplication _ t e es -> do
+      xx <- translateExpression e
+      xs1 <- traverse translateExpression es
+      pure (Lowpass.app (translateType t) xx xs1)
+    --      Lowpass.app (translateType t) (translateExpression e) (translateExpression <$> es)
+    ELambda _ ps e -> do
+      qqs1 <- traverse translatePattern ps
+      -- (Set.insert (labelName <$> qqs1))
+      --      let sss1 = Set.fromList (labelName <$> fromList1 qqs1)
+      --      xx1 <- local (Set.union sss1) (translateExpression e)
+      xx1 <- withLocalNames (labelName <$> fromList1 qqs1) (translateExpression e)
+
+      pure (Lowpass.lam qqs1 xx1)
+    --      Lowpass.lam (translatePattern <$> ps) (translateExpression e)
+    ELet _ vs e -> do
+      vvs1 <- traverse translateBinding vs
+      -- let sss1 = Set.fromList (fromList1 (labelName . Lowpass.bindingLabel <$> vvs1))
+      -- xx1 <- local (Set.union sss1) (translateExpression e)
+
+      xx1 <- withLocalNames (labelName . Lowpass.bindingLabel <$> vvs1) (translateExpression e)
+      pure (Lowpass.let_ vvs1 xx1)
+    --      Lowpass.let_ (translateBinding <$> vs) (translateExpression e)
+    ERecursiveLet _ (PVariable _ ll) e1 e2 -> do
+      xx1 <- withLocalName (labelName ll) (translateExpression e1)
+      -- xx2 <- local (Set.insert (labelName ll)) (translateExpression e2)
+
+      xx2 <- withLocalName (labelName ll) (translateExpression e2)
+      pure (Lowpass.let_ (Lowpass.Binding (translateLabel ll) xx1 :| []) xx2)
+    --      Lowpass.let_
+    --        (Lowpass.Binding (translateLabel ll) (translateExpression e1) :| [])
+    --        (translateExpression e2)
+    EVariable _ (Label t name) -> do
+      qq <- qualifyName name
+      pure (Lowpass.var (Label (translateType t) qq))
+    EConstructor _ (Label t name) -> do
+      qq <- qualifyName name
+      pure (Lowpass.var (Label (translateType t) qq))
     ELiteral _ p ->
-      Lowpass.lit (translatePrimitive p)
-    EIf _ _ e1 e2 e3 ->
-      Lowpass.if_ (translateExpression e1) (translateExpression e2) (translateExpression e3)
+      pure (Lowpass.lit (translatePrimitive p))
+    EIf _ _ e1 e2 e3 -> do
+      xx1 <- translateExpression e1
+      xx2 <- translateExpression e2
+      xx3 <- translateExpression e3
+      pure (Lowpass.if_ xx1 xx2 xx3)
+    -- Lowpass.if_ (translateExpression e1) (translateExpression e2) (translateExpression e3)
     EUnaryOperator a t op ->
       undefined
     EBinaryOperator a t op ->
       undefined
     ERecord _ t d me ->
       translateRecord t d me
-    EListCons a t e1 e2 ->
-      Lowpass.cons (translateExpression e1) (translateExpression e2)
+    EListCons a t e1 e2 -> do
+      xx1 <- translateExpression e1
+      xx2 <- translateExpression e2
+      pure (Lowpass.cons xx1 xx2)
+    --      Lowpass.cons (translateExpression e1) (translateExpression e2)
     EListLiteral _ t [] ->
-      Lowpass.var (Label (translateType t) "$Nil")
+      pure (Lowpass.var (Label (translateType t) "$Nil"))
     EListLiteral a t (e : es) ->
       translateExpression (foldr (EListCons a t) (EListLiteral a t []) (e : es))
     ETuple _ _ es ->
-      Lowpass.tupleExpr (translateExpression <$> es)
+      Lowpass.tupleExpr <$> traverse translateExpression es
     EMatch{} ->
       error "Implementation error"
     ECompiledMatch _ t e cs ->
-      Lowpass.match (translateType t) (translateExpression e) (translateClause <$> cs)
+      Lowpass.match (translateType t) <$> translateExpression e <*> traverse translateClause cs
     EFold _ _ _ _ (Just e) ->
       translateExpression e
-    ESelect _ ll@(Label t field) e ->
-      Lowpass.match
-        (translateType t)
-        (translateExpression e)
-        ( Lowpass.Clause
-            (Label (Lowpass.arrow t1 (Lowpass.TCon "record" [r])) "$Record" <| Label t1 "$row" :| [])
-            ( Lowpass.sel
-                (Lowpass.Focus field (translateLabel ll) (Label (Lowpass.dropField field r) "_"))
-                (Lowpass.var (Label r "$row"))
-                (Lowpass.var (translateLabel ll))
-            )
-            :| []
-        )
-     where
-      Lowpass.TCon _ [r] = Lowpass.typeOf (translateExpression e)
-      t1 = Lowpass.typeOf r
-    EFocus name0 ll1 ll2 e1 e2 ->
-      Lowpass.sel
-        (Lowpass.Focus name0 (translateLabel ll1) (Label r "$rest"))
-        (translateExpression e1)
-        ( Lowpass.let_
-            ( Lowpass.Binding
-                (translateLabel ll2)
-                ( Lowpass.app
-                    t
-                    (Lowpass.var (Label (r `Lowpass.arrow` t) "$Record"))
-                    (Lowpass.var (Label r "$rest") :| [])
-                )
-                :| []
-            )
-            (translateExpression e2)
-        )
+    ESelect _ ll@(Label t field) e -> do
+      xx1 <- translateExpression e
+      let
+        Lowpass.TCon _ [r] = Lowpass.typeOf xx1
+        t1 = Lowpass.typeOf r
+      pure $
+        Lowpass.match
+          (translateType t)
+          xx1
+          ( Lowpass.Clause
+              (Label (Lowpass.arrow t1 (Lowpass.TCon "record" [r])) "$Record" <| Label t1 "$row" :| [])
+              ( Lowpass.sel
+                  (Lowpass.Focus field (translateLabel ll) (Label (Lowpass.dropField field r) "_"))
+                  (Lowpass.var (Label r "$row"))
+                  (Lowpass.var (translateLabel ll))
+              )
+              :| []
+          )
+    EFocus name0 ll1 ll2 e1 e2 -> do
+      xx1 <- translateExpression e1
+      --      let sss1 = Set.fromList [labelName ll1, labelName ll2]
+      --      xx2 <- local (Set.union sss1) (translateExpression e2)
+      xx2 <- withLocalNames [labelName ll1, labelName ll2] (translateExpression e2)
+      pure $
+        Lowpass.sel
+          (Lowpass.Focus name0 (translateLabel ll1) (Label r "$rest"))
+          xx1
+          ( Lowpass.let_
+              ( Lowpass.Binding
+                  (translateLabel ll2)
+                  ( Lowpass.app
+                      t
+                      (Lowpass.var (Label (r `Lowpass.arrow` t) "$Record"))
+                      (Lowpass.var (Label r "$rest") :| [])
+                  )
+                  :| []
+              )
+              xx2
+          )
      where
       t@(Lowpass.TCon _ [r]) = Lowpass.typeOf (translateLabel ll2)
 
-    -- Lowpass.sel
-    --  (Lowpass.Focus name0 (translateLabel ll1) (translateLabel ll2))
-    --  (translateExpression e1)
-    --  (translateExpression e2)
+    --    -- Lowpass.sel
+    --    --  (Lowpass.Focus name0 (translateLabel ll1) (translateLabel ll2))
+    --    --  (translateExpression e1)
+    --    --  (translateExpression e2)
     EDictionaryLambda a ts e ->
       undefined
     EDictionaryApplication a t e ts es ->
       undefined
 
-translateRecord :: (Data a) => IndexedType -> Dictionary (Expression a IndexedType) -> Maybe (Expression a IndexedType) -> LowpassExpr
-translateRecord t d me =
-  Lowpass.app
-    (translateType t)
-    (Lowpass.var (Label (Lowpass.arrow t1 (Lowpass.TCon "record" [t1])) "$Record"))
-    (e1 :| [])
- where
-  exprs = translateExpression <$> d
-  expr0 = translateExpression <$> me
-  e1 = foldr (uncurry Lowpass.ext) (fromMaybe Lowpass.nil expr0) (Map.toList exprs)
-  t1 = Lowpass.typeOf e1
+translateRecord :: (MonadReader TranslateEnvironment m, Data a) => IndexedType -> Dictionary (Expression a IndexedType) -> Maybe (Expression a IndexedType) -> m LowpassExpr
+translateRecord t d me = do
+  exprs <- traverse translateExpression d
+  expr0 <- traverse translateExpression me
+  let
+    e1 = foldr (uncurry Lowpass.ext) (fromMaybe Lowpass.nil expr0) (Map.toList exprs)
+    t1 = Lowpass.typeOf e1
+  pure $
+    Lowpass.app
+      (translateType t)
+      (Lowpass.var (Label (Lowpass.arrow t1 (Lowpass.TCon "record" [t1])) "$Record"))
+      (e1 :| [])
 
-translateBinding :: (Data a) => Binding Expression a IndexedType -> Lowpass.Binding Lowpass.Type LowpassExpr
+translateBinding :: (MonadReader TranslateEnvironment m, Data a) => Binding Expression a IndexedType -> m (Lowpass.Binding Lowpass.Type LowpassExpr)
 translateBinding =
   \case
-    BPattern _ (PVariable _ ll) e ->
-      Lowpass.Binding (translateLabel ll) (translateExpression e)
+    BPattern _ (PVariable _ ll) e -> do
+      xx1 <- withLocalNames [name | name <- [labelName ll], Text.isPrefixOf "$fold" name] (translateExpression e)
+      pure (Lowpass.Binding (translateLabel ll) xx1)
 
-translatePattern :: Pattern a IndexedType -> Label Lowpass.Type
+translatePattern :: (MonadReader TranslateEnvironment m, Data a) => Pattern a IndexedType -> m (Label Lowpass.Type)
 translatePattern =
   \case
     PVariable a (Label t name) ->
-      Label (translateType t) name
+      pure (Label (translateType t) name)
     PAnnotation _ _ p ->
       translatePattern p
     PLiteral _ p ->
-      Label (translateType (typeOf p)) "_"
+      pure (Label (translateType (typeOf p)) "_")
 
-translateClause :: (Data a) => CompiledClause a IndexedType -> Lowpass.Clause Lowpass.Type LowpassExpr
+translateClause :: (MonadReader TranslateEnvironment m, Data a) => CompiledClause a IndexedType -> m (Lowpass.Clause Lowpass.Type LowpassExpr)
 translateClause =
   \case
-    ECompiledClause lls e ->
-      Lowpass.Clause (translateLabel <$> lls) (translateExpression e)
+    ECompiledClause (ll :| lls) e -> do
+      xx1 <- withLocalNames (labelName <$> lls) (translateExpression e)
+      qq <- qualifyLabel ll
+      pure (Lowpass.Clause (translateLabel <$> (qq :| lls)) xx1)
+
+qualifyLabel :: (MonadReader TranslateEnvironment m) => Label IndexedType -> m (Label IndexedType)
+qualifyLabel (Label t name) = do
+  qq <- qualifyName name
+  pure (Label t qq)
 
 {-# INLINE translateLabel #-}
 translateLabel :: Label IndexedType -> Label Lowpass.Type
 translateLabel (Label t name) = Label (translateType t) name
 
-translateBinaryOperator :: (Data a) => IndexedType -> BinaryOperator -> List1 (Expression a IndexedType) -> LowpassExpr
+translateBinaryOperator :: (MonadReader TranslateEnvironment m, Data a) => IndexedType -> BinaryOperator -> List1 (Expression a IndexedType) -> m LowpassExpr
 translateBinaryOperator t =
   \case
     OReverseComposition ->
@@ -192,39 +244,41 @@ translateBinaryOperator t =
     OLogicalOr ->
       binop Lowpass.OOr (TIntrinsic IBool, TIntrinsic IBool)
 
-listConcatenationOperator t es =
-  Lowpass.app
-    t1
-    (Lowpass.var (Label (t1 `Lowpass.arrow` t1 `Lowpass.arrow` t1) "Core$.operator__list_concatenation"))
-    args
- where
-  t1 = translateType t
-  args = translateExpression <$> es
+listConcatenationOperator t es = do
+  args <- traverse translateExpression es
+  let t1 = translateType t
+  pure $
+    Lowpass.app
+      t1
+      (Lowpass.var (Label (t1 `Lowpass.arrow` t1 `Lowpass.arrow` t1) "Core$.operator__list_concatenation"))
+      args
 
-reverseCompositionOperator :: (Data a) => IndexedType -> List1 (Expression a IndexedType) -> LowpassExpr
-reverseCompositionOperator t es =
-  Lowpass.app
-    t1
-    (Lowpass.var (Label (Lowpass.foldType t1 (Lowpass.typeOf <$> args)) "Core$.operator__reverse_composition"))
-    args
- where
-  t1 = translateType t
-  args = translateExpression <$> es
+reverseCompositionOperator :: (MonadReader TranslateEnvironment m, Data a) => IndexedType -> List1 (Expression a IndexedType) -> m LowpassExpr
+reverseCompositionOperator t es = do
+  args <- traverse translateExpression es
+  let t1 = translateType t
+  pure $
+    Lowpass.app
+      t1
+      (Lowpass.var (Label (Lowpass.foldType t1 (Lowpass.typeOf <$> args)) "Core$.operator__reverse_composition"))
+      args
 
-reverseApplicationOperator :: (Data a) => IndexedType -> List1 (Expression a IndexedType) -> LowpassExpr
-reverseApplicationOperator t es =
-  Lowpass.app
-    t1
-    (Lowpass.var (Label (Lowpass.foldType t1 (Lowpass.typeOf <$> args)) "Core$.operator__reverse_application"))
-    args
- where
-  t1 = translateType t
-  args = translateExpression <$> es
+reverseApplicationOperator :: (MonadReader TranslateEnvironment m, Data a) => IndexedType -> List1 (Expression a IndexedType) -> m LowpassExpr
+reverseApplicationOperator t es = do
+  args <- traverse translateExpression es
+  let t1 = translateType t
+  pure $
+    Lowpass.app
+      t1
+      (Lowpass.var (Label (Lowpass.foldType t1 (Lowpass.typeOf <$> args)) "Core$.operator__reverse_application"))
+      args
 
-binop :: (Data a) => (LowpassExpr -> LowpassExpr -> Lowpass.Op LowpassExpr) -> (IndexedType, IndexedType) -> List1 (Expression a IndexedType) -> LowpassExpr
+binop :: (MonadReader TranslateEnvironment m, Data a) => (LowpassExpr -> LowpassExpr -> Lowpass.Op LowpassExpr) -> (IndexedType, IndexedType) -> List1 (Expression a IndexedType) -> m LowpassExpr
 binop op (t1, t2) (e1 :| [e2])
-  | e1 `hasType` t1 && e2 `hasType` t2 =
-      Lowpass.op (op (translateExpression e1) (translateExpression e2))
+  | e1 `hasType` t1 && e2 `hasType` t2 = do
+      xx1 <- translateExpression e1
+      xx2 <- translateExpression e2
+      pure (Lowpass.op (op xx1 xx2))
 
 {-# INLINE hasType #-}
 hasType :: (Data a) => Expression a IndexedType -> IndexedType -> Bool

@@ -10,6 +10,7 @@ import Lang.Common.List1 (NonEmpty (..))
 import Lang.Label (Label (..))
 import Noll.Compiler.DenormalizeObjects (DenormalizeObjectsTransformContext (..))
 import Noll.Compiler.DictionaryElimination (EliminateDictionariesTransformContext (..))
+import Noll.Compiler.Lowpass.Environment (TranslateEnvironment (..), initialTranslateEnvironment, withModuleName)
 import Noll.Compiler.Lowpass.TranslateDefinition (translateDefinition)
 import Noll.Compiler.Lowpass.TranslateExpressionSpec
 import Noll.Compiler.Lowpass.TranslateModule (translateModule)
@@ -1220,16 +1221,106 @@ story = do
   it "" $
     denormalizeObject Noll.Set.Test11.prog1_11 == Noll.Set.Test12.prog1_12
   it "" $
-    translateDefinition orderedCompareInstance1 == [orderedCompareInstance1Result]
+    runReader (withModuleName "Ordered" (translateDefinition orderedCompareInstance1)) testNameEnvironment == [orderedCompareInstance1Result]
   it "" $
-    translateDefinition orderedLessThanOrEqualTo == [orderedLessThanOrEqualToResult]
+    runReader (withModuleName "Ordered" (translateDefinition orderedLessThanOrEqualTo)) testNameEnvironment == [orderedLessThanOrEqualToResult]
   it "" $
-    translateDefinition binarySearchFromList == binarySearchFromListResult
+    runReader (withModuleName "BinarySearch" (translateDefinition binarySearchFromList)) testNameEnvironment == binarySearchFromListResult
   it "" $
-    translateDefinition binarySearchFlatten == binarySearchFlattenResult
+    runReader (withModuleName "BinarySearch" (translateDefinition binarySearchFlatten)) testNameEnvironment == binarySearchFlattenResult
   it "" $
-    translateDefinition binarySearchSort == binarySearchSortResult
+    runReader (withModuleName "BinarySearch" (translateDefinition binarySearchSort)) testNameEnvironment == binarySearchSortResult
   it "" $
-    translateDefinition mainMain == mainMainResult
+    runReader (withModuleName "Main" (translateDefinition mainMain)) testNameEnvironment == mainMainResult
   it "" $
-    (translateModule <$> Noll.Set.Test12.prog1_12) == Noll.Set.Test13.prog1_13
+    runReader (traverse translateModule Noll.Set.Test12.prog1_12) testNameEnvironment == Noll.Set.Test13.prog1_13
+
+testNameEnvironment =
+  initialTranslateEnvironment
+    ( Environment.fromList
+        [
+          ( "LessThan"
+          , "Ordered.LessThan"
+          )
+        ,
+          ( "EqualTo"
+          , "Ordered.EqualTo"
+          )
+        ,
+          ( "GreaterThan"
+          , "Ordered.GreaterThan"
+          )
+        ,
+          ( "compare"
+          , "Ordered.compare"
+          )
+        ,
+          ( "Node"
+          , "BinarySearch.Node"
+          )
+        ,
+          ( "Leaf"
+          , "BinarySearch.Leaf"
+          )
+        ,
+          ( "in_range"
+          , "BinarySearch.in_range"
+          )
+        ,
+          ( "always"
+          , "Core$.always"
+          )
+        ,
+          ( "from_int32"
+          , "BinarySearch.from_int32"
+          )
+        ,
+          ( "$Cons"
+          , "$Cons"
+          )
+        ,
+          ( "$Nil"
+          , "$Nil"
+          )
+        ,
+          ( "$Record"
+          , "$Record"
+          )
+        ,
+          ( "flatten"
+          , "BinarySearch.flatten"
+          )
+        ,
+          ( "from_list"
+          , "BinarySearch.from_list"
+          )
+        ,
+          ( "sort"
+          , "BinarySearch.sort"
+          )
+        ,
+          ( "trace"
+          , "trace"
+          )
+        ,
+          ( "not"
+          , "Core$.operator__not"
+          )
+        ,
+          ( "$dict.2967b53e939a3c94"
+          , "$dict.2967b53e939a3c94"
+          )
+        ,
+          ( "$dict.b7c5e7e84eeaf782"
+          , "$dict.b7c5e7e84eeaf782"
+          )
+        ,
+          ( "less_than_or_equal_to"
+          , "Ordered.less_than_or_equal_to"
+          )
+        ,
+          ( "greater_than"
+          , "Ordered.greater_than"
+          )
+        ]
+    )

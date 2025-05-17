@@ -30,6 +30,7 @@ library
       Noll.Compiler
       Noll.Compiler.DenormalizeObjects
       Noll.Compiler.DictionaryElimination
+      Noll.Compiler.Lowpass.Environment
       Noll.Compiler.Lowpass.TranslateDefinition
       Noll.Compiler.Lowpass.TranslateExpression
       Noll.Compiler.Lowpass.TranslateModule
