@@ -201,11 +201,11 @@ moduleBinarySearch =
         , OData "BinarySearch.Node" 1 (Lowpass.opaque `Lowpass.arrow` TCon "Tree" [Lowpass.opaque] `Lowpass.arrow` TCon "Tree" [Lowpass.opaque] `Lowpass.arrow` TCon "Tree" [Lowpass.opaque])
         , OFunction
             "BinarySearch.from_int32"
-            [ Label (TCon "BinarySearch.Numeric" [opaque]) "$a"
+            [ Label (TCon "Numeric" [opaque]) "$a"
             ]
             [r| 
-                  match<int32/*>($a : BinarySearch.Numeric(*)) {
-                    | ( $Record : { from_int32 : int32/* | * }/BinarySearch.Numeric(*)
+                  match<int32/*>($a : Numeric(*)) {
+                    | ( $Record : { from_int32 : int32/* | * }/Numeric(*)
                       , $r : { from_int32 : int32/* | * }
                       ) =>
                         select
@@ -217,7 +217,7 @@ moduleBinarySearch =
               |]
         , OFunction
             "BinarySearch.in_range"
-            [ Label (TCon "BinarySearch.Numeric" [TOpq]) "$dict.be194a5d16952b76"
+            [ Label (TCon "Numeric" [TOpq]) "$dict.be194a5d16952b76"
             , Label (TCon "Ordered" [TOpq]) "$dict.ffef54c635ab7d00"
             , Label (TCon "record" [RExt "max" TOpq (RExt "min" TOpq RNil)]) "$v.0"
             , Label TOpq "n"
@@ -289,7 +289,7 @@ moduleBinarySearch =
           |]
         , OFunction
             "BinarySearch.from_list"
-            [ Label (TCon "BinarySearch.Numeric" [TOpq]) "$dict.be194a5d16952b77"
+            [ Label (TCon "Numeric" [TOpq]) "$dict.be194a5d16952b77"
             , Label (TCon "Ordered" [TOpq]) "$dict.ffef54c635ab7d01"
             , Label (TCon "list" [TOpq]) "list"
             ]
@@ -432,7 +432,7 @@ moduleBinarySearch =
           |]
         , OFunction
             "BinarySearch.sort"
-            [ Label (TCon "BinarySearch.Numeric" [TOpq]) "$dict.be194a5d16952b75"
+            [ Label (TCon "Numeric" [TOpq]) "$dict.be194a5d16952b75"
             , Label (TCon "Ordered" [TOpq]) "$dict.ffef54c635ab7d03"
             ]
             [r|
@@ -440,8 +440,8 @@ moduleBinarySearch =
                     ( Core$.operator__reverse_composition : (Tree(*)/list(*))/(list(*)/Tree(*))/list(*)/list(*)
                     , BinarySearch.flatten : Tree(*)/list(*)
                     , @<list(*)/Tree(*)>
-                        ( BinarySearch.from_list : BinarySearch.Numeric(*)/Ordered(*)/list(*)/Tree(*)
-                        , $dict.be194a5d16952b75 : BinarySearch.Numeric(*)
+                        ( BinarySearch.from_list : Numeric(*)/Ordered(*)/list(*)/Tree(*)
+                        , $dict.be194a5d16952b75 : Numeric(*)
                         , $dict.ffef54c635ab7d03 : Ordered(*)
                         )
                     )
@@ -467,8 +467,8 @@ moduleMain =
         [ OConstant
             "Main.d"
             [r|
-                  @<BinarySearch.Numeric(int32)>
-                    ( $Record : { from_int32 : int32/int32 | * }/BinarySearch.Numeric(int32)
+                  @<Numeric(int32)>
+                    ( $Record : { from_int32 : int32/int32 | * }/Numeric(int32)
                     , { from_int32 = fn(x : int32) => x : int32
                       | {}
                       }
@@ -502,50 +502,50 @@ moduleMain =
                       @<list(int32)>
                         ( $Cons : int32/list(int32)/list(int32)
                         , @<int32>
-                            ( BinarySearch.from_int32 : BinarySearch.Numeric(int32)/int32/int32
-                            , Main.d : BinarySearch.Numeric(int32)
+                            ( BinarySearch.from_int32 : Numeric(int32)/int32/int32
+                            , Main.d : Numeric(int32)
                             , 5
                             )
                           , @<list(int32)>
                               ( $Cons : int32/list(int32)/list(int32)
                               , @<int32>
-                                  ( BinarySearch.from_int32 : BinarySearch.Numeric(int32)/int32/int32
-                                  , Main.d : BinarySearch.Numeric(int32)
+                                  ( BinarySearch.from_int32 : Numeric(int32)/int32/int32
+                                  , Main.d : Numeric(int32)
                                   , 3
                                   )
                                 , @<list(int32)>
                                     ( $Cons : int32/list(int32)/list(int32)
                                     , @<int32>
-                                        ( BinarySearch.from_int32 : BinarySearch.Numeric(int32)/int32/int32
-                                        , Main.d : BinarySearch.Numeric(int32)
+                                        ( BinarySearch.from_int32 : Numeric(int32)/int32/int32
+                                        , Main.d : Numeric(int32)
                                         , 7
                                         )
                                       , @<list(int32)>
                                           ( $Cons : int32/list(int32)/list(int32)
                                           , @<int32>
-                                              ( BinarySearch.from_int32 : BinarySearch.Numeric(int32)/int32/int32
-                                              , Main.d : BinarySearch.Numeric(int32)
+                                              ( BinarySearch.from_int32 : Numeric(int32)/int32/int32
+                                              , Main.d : Numeric(int32)
                                               , 2
                                               )
                                             , @<list(int32)>
                                                 ( $Cons : int32/list(int32)/list(int32)
                                                 , @<int32>
-                                                    ( BinarySearch.from_int32 : BinarySearch.Numeric(int32)/int32/int32
-                                                    , Main.d : BinarySearch.Numeric(int32)
+                                                    ( BinarySearch.from_int32 : Numeric(int32)/int32/int32
+                                                    , Main.d : Numeric(int32)
                                                     , 1
                                                     )
                                                   , @<list(int32)>
                                                       ( $Cons : int32/list(int32)/list(int32)
                                                       , @<int32>
-                                                          ( BinarySearch.from_int32 : BinarySearch.Numeric(int32)/int32/int32
-                                                          , Main.d : BinarySearch.Numeric(int32)
+                                                          ( BinarySearch.from_int32 : Numeric(int32)/int32/int32
+                                                          , Main.d : Numeric(int32)
                                                           , 6
                                                           )
                                                         , @<list(int32)>
                                                             ( $Cons : int32/list(int32)/list(int32)
                                                             , @<int32>
-                                                                ( BinarySearch.from_int32 : BinarySearch.Numeric(int32)/int32/int32
-                                                                , Main.d : BinarySearch.Numeric(int32)
+                                                                ( BinarySearch.from_int32 : Numeric(int32)/int32/int32
+                                                                , Main.d : Numeric(int32)
                                                                 , 4
                                                                 )
                                                               , 
@@ -561,8 +561,8 @@ moduleMain =
                       let
                         ys : list(int32) =
                           @<list(int32)>
-                            ( BinarySearch.sort : BinarySearch.Numeric(int32)/Ordered(int32)/list(int32)/list(int32)
-                            , Main.d : BinarySearch.Numeric(int32)
+                            ( BinarySearch.sort : Numeric(int32)/Ordered(int32)/list(int32)/list(int32)
+                            , Main.d : Numeric(int32)
                             , Main.d2 : Ordered(int32)
                             , xs : list(int32)
                             )
