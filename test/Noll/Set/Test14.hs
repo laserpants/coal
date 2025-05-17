@@ -92,6 +92,13 @@ moduleCore =
                         ys : list(*)
                   }
               |]
+        , OFunction
+            "Core$.$trace_int32"
+            [ Label int32 "n"
+            ]
+            [r|
+                  #(print_int32 : int32/*, n : int32) (fn(a : *) => a)
+              |]
         ]
     }
 
