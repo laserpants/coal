@@ -2052,62 +2052,59 @@ moduleMain =
             )
             ( ELambda
                 ()
-                (PLiteral () LUnit :| [])
+                -- (PLiteral () LUnit :| [])
+                (PVariable () (Label (TIntrinsic IUnit) "$v.0") :| [])
                 ( ELet
                     ()
                     ( BPattern
                         ()
                         (PVariable () (Label (TIntrinsic (IList (TIntrinsic IInt32))) "xs"))
-                        ( EAnnotation
+                        ( EListLiteral
                             ()
                             (TIntrinsic (IList (TIntrinsic IInt32)))
-                            ( EListLiteral
+                            [ EDictionaryApplication
                                 ()
-                                (TIntrinsic (IList (TIntrinsic IInt32)))
-                                [ EDictionaryApplication
-                                    ()
-                                    (TIntrinsic IInt32)
-                                    (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")
-                                    (Trait "Numeric" (TIntrinsic IInt32) :| [])
-                                    [ELiteral () (LInt32 5)]
-                                , EDictionaryApplication
-                                    ()
-                                    (TIntrinsic IInt32)
-                                    (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")
-                                    (Trait "Numeric" (TIntrinsic IInt32) :| [])
-                                    [ELiteral () (LInt32 3)]
-                                , EDictionaryApplication
-                                    ()
-                                    (TIntrinsic IInt32)
-                                    (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")
-                                    (Trait "Numeric" (TIntrinsic IInt32) :| [])
-                                    [ELiteral () (LInt32 7)]
-                                , EDictionaryApplication
-                                    ()
-                                    (TIntrinsic IInt32)
-                                    (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")
-                                    (Trait "Numeric" (TIntrinsic IInt32) :| [])
-                                    [ELiteral () (LInt32 2)]
-                                , EDictionaryApplication
-                                    ()
-                                    (TIntrinsic IInt32)
-                                    (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")
-                                    (Trait "Numeric" (TIntrinsic IInt32) :| [])
-                                    [ELiteral () (LInt32 1)]
-                                , EDictionaryApplication
-                                    ()
-                                    (TIntrinsic IInt32)
-                                    (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")
-                                    (Trait "Numeric" (TIntrinsic IInt32) :| [])
-                                    [ELiteral () (LInt32 6)]
-                                , EDictionaryApplication
-                                    ()
-                                    (TIntrinsic IInt32)
-                                    (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")
-                                    (Trait "Numeric" (TIntrinsic IInt32) :| [])
-                                    [ELiteral () (LInt32 4)]
-                                ]
-                            )
+                                (TIntrinsic IInt32)
+                                (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")
+                                (Trait "Numeric" (TIntrinsic IInt32) :| [])
+                                [ELiteral () (LInt32 5)]
+                            , EDictionaryApplication
+                                ()
+                                (TIntrinsic IInt32)
+                                (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")
+                                (Trait "Numeric" (TIntrinsic IInt32) :| [])
+                                [ELiteral () (LInt32 3)]
+                            , EDictionaryApplication
+                                ()
+                                (TIntrinsic IInt32)
+                                (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")
+                                (Trait "Numeric" (TIntrinsic IInt32) :| [])
+                                [ELiteral () (LInt32 7)]
+                            , EDictionaryApplication
+                                ()
+                                (TIntrinsic IInt32)
+                                (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")
+                                (Trait "Numeric" (TIntrinsic IInt32) :| [])
+                                [ELiteral () (LInt32 2)]
+                            , EDictionaryApplication
+                                ()
+                                (TIntrinsic IInt32)
+                                (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")
+                                (Trait "Numeric" (TIntrinsic IInt32) :| [])
+                                [ELiteral () (LInt32 1)]
+                            , EDictionaryApplication
+                                ()
+                                (TIntrinsic IInt32)
+                                (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")
+                                (Trait "Numeric" (TIntrinsic IInt32) :| [])
+                                [ELiteral () (LInt32 6)]
+                            , EDictionaryApplication
+                                ()
+                                (TIntrinsic IInt32)
+                                (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")
+                                (Trait "Numeric" (TIntrinsic IInt32) :| [])
+                                [ELiteral () (LInt32 4)]
+                            ]
                         )
                         :| []
                     )

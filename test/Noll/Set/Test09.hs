@@ -1990,27 +1990,24 @@ moduleMain =
             (With [] (TIntrinsic IUnit `TArrow` TVariable (TypeIndex KType 0)))
             ( ELambda
                 ()
-                (PLiteral () LUnit :| [])
+                -- (PLiteral () LUnit :| [])
+                (PVariable () (Label (TIntrinsic IUnit) "$v.0") :| [])
                 ( ELet
                     ()
                     ( BPattern
                         ()
                         (PVariable () (Label (TIntrinsic (IList (TIntrinsic IInt32))) "xs"))
-                        ( EAnnotation
+                        ( EListLiteral
                             ()
                             (TIntrinsic (IList (TIntrinsic IInt32)))
-                            ( EListLiteral
-                                ()
-                                (TIntrinsic (IList (TIntrinsic IInt32)))
-                                [ EApplication () (TIntrinsic IInt32) (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")) (ELiteral () (LInt32 5) :| [])
-                                , EApplication () (TIntrinsic IInt32) (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")) (ELiteral () (LInt32 3) :| [])
-                                , EApplication () (TIntrinsic IInt32) (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")) (ELiteral () (LInt32 7) :| [])
-                                , EApplication () (TIntrinsic IInt32) (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")) (ELiteral () (LInt32 2) :| [])
-                                , EApplication () (TIntrinsic IInt32) (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")) (ELiteral () (LInt32 1) :| [])
-                                , EApplication () (TIntrinsic IInt32) (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")) (ELiteral () (LInt32 6) :| [])
-                                , EApplication () (TIntrinsic IInt32) (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")) (ELiteral () (LInt32 4) :| [])
-                                ]
-                            )
+                            [ EApplication () (TIntrinsic IInt32) (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")) (ELiteral () (LInt32 5) :| [])
+                            , EApplication () (TIntrinsic IInt32) (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")) (ELiteral () (LInt32 3) :| [])
+                            , EApplication () (TIntrinsic IInt32) (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")) (ELiteral () (LInt32 7) :| [])
+                            , EApplication () (TIntrinsic IInt32) (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")) (ELiteral () (LInt32 2) :| [])
+                            , EApplication () (TIntrinsic IInt32) (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")) (ELiteral () (LInt32 1) :| [])
+                            , EApplication () (TIntrinsic IInt32) (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")) (ELiteral () (LInt32 6) :| [])
+                            , EApplication () (TIntrinsic IInt32) (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")) (ELiteral () (LInt32 4) :| [])
+                            ]
                         )
                         :| []
                     )

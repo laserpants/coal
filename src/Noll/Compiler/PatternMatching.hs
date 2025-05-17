@@ -19,7 +19,7 @@ import Noll.Compiler.PatternMatching.Envelope (EnvelopeExpression (..), Envelope
 import Noll.Compiler.PatternMatching.Equation (patternEquation)
 import Noll.Compiler.PatternMatching.Rule (MatchMonad (..), matchPatterns)
 import Noll.Compiler.Transform.Tree (replaceWith)
-import Noll.Language (Binding (..), Choice (..), Clause (..), Expression (..), Pattern (..))
+import Noll.Language (Binding (..), Choice (..), Clause (..), Expression (..), Pattern (..), Primitive (..))
 import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
 
 class MatchExpressionContext a where
@@ -89,12 +89,14 @@ translatePattern =
       MVariable ll
     PConstructor _ ll ps ->
       MConstructor ll (translatePattern <$> ps)
+    p@(PLiteral _ LUnit) ->
+      MVariable (Label (patternType p) "_")
     p@(PLiteral a prim) ->
       MLiteral (patternType p) (ELiteral a prim)
     PAnnotation _ _ p ->
       translatePattern p
-    PAny{} ->
-      error "TODO"
+    PAny _ t ->
+      MVariable (Label t "_")
     PRecord{} ->
       error "TODO"
     PListCons a t p1 p2 ->

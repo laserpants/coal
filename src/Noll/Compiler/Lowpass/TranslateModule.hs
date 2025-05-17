@@ -23,8 +23,11 @@ translateModule =
     Module (Path p) _ defs ->
       insertQualifiedNames env $
         withModuleName name $
-          Lowpass.Module 
-            name (Environment.elems env) . concat <$> traverse translateDefinition defs
+          Lowpass.Module
+            name
+            (Environment.elems env)
+            . concat
+            <$> traverse translateDefinition defs
      where
       name = Text.intercalate "." p
       env = collectImports defs

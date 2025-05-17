@@ -97,7 +97,7 @@ moduleCore =
             [ Label int32 "n"
             ]
             [r|
-                  #(print_int32 : int32/*, n : int32) (fn(a : *) => a)
+                  #(print_int32 : int32/*, n : int32) (fn(a : *) => a : *)
               |]
         ]
     }
@@ -509,7 +509,7 @@ moduleMain =
               |]
         , OFunction
             "Main.main"
-            [Label (TCon "unit" []) "_"]
+            [Label (TCon "unit" []) "$v.0"]
             [r|
                   let
                     xs : list(int32) =

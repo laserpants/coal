@@ -190,5 +190,6 @@ instance (Monoid a, Show a) => RecordPattern a (Pattern a (Type TypeIndex Kind))
         PListLiteral a t <$> traverse expandRecordPatterns ps
       p ->
         pure p
+
 --      p -> do
 --        error (show p) -- "TODO"
