@@ -7,12 +7,11 @@ module Noll.Compiler.Lowpass.TranslateModule (translateModule) where
 import Control.Monad.Reader (MonadReader)
 import Data.Data (Data)
 import Lang.Common.Environment
-import Lang.Utils (Name, Set)
+import Lang.Utils (Name)
 import Noll.Compiler.Lowpass.Environment (TranslateEnvironment, insertQualifiedNames, withModuleName)
 import Noll.Compiler.Lowpass.TranslateDefinition (translateDefinition)
 import Noll.Language
 import Noll.Module
-import Noll.Module.Definition
 
 import qualified Data.Text as Text
 import qualified Lang.Common.Environment as Environment
@@ -31,7 +30,7 @@ translateModule =
       env = collectImports defs
 
 collectImports :: [Definition a k t] -> Environment Name
-collectImports defs = Environment.fromList (concatMap imports defs)
+collectImports = Environment.fromList . concatMap imports
 
 imports :: Definition a k t -> [(Name, Name)]
 imports =
