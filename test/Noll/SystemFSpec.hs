@@ -1239,40 +1239,8 @@ testNameEnvironment =
   initialTranslateEnvironment
     ( Environment.fromList
         [
-          ( "LessThan"
-          , "Ordered.LessThan"
-          )
-        ,
-          ( "EqualTo"
-          , "Ordered.EqualTo"
-          )
-        ,
-          ( "GreaterThan"
-          , "Ordered.GreaterThan"
-          )
-        ,
-          ( "compare"
-          , "Ordered.compare"
-          )
-        ,
-          ( "Node"
-          , "BinarySearch.Node"
-          )
-        ,
-          ( "Leaf"
-          , "BinarySearch.Leaf"
-          )
-        ,
-          ( "in_range"
-          , "BinarySearch.in_range"
-          )
-        ,
           ( "always"
           , "Core$.always"
-          )
-        ,
-          ( "from_int32"
-          , "BinarySearch.from_int32"
           )
         ,
           ( "$Cons"
@@ -1285,18 +1253,6 @@ testNameEnvironment =
         ,
           ( "$Record"
           , "$Record"
-          )
-        ,
-          ( "flatten"
-          , "BinarySearch.flatten"
-          )
-        ,
-          ( "from_list"
-          , "BinarySearch.from_list"
-          )
-        ,
-          ( "sort"
-          , "BinarySearch.sort"
           )
         ,
           ( "trace"
@@ -1313,14 +1269,6 @@ testNameEnvironment =
         ,
           ( "$dict.b7c5e7e84eeaf782"
           , "$dict.b7c5e7e84eeaf782"
-          )
-        ,
-          ( "less_than_or_equal_to"
-          , "Ordered.less_than_or_equal_to"
-          )
-        ,
-          ( "greater_than"
-          , "Ordered.greater_than"
           )
         ]
     )

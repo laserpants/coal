@@ -9,6 +9,7 @@ module Noll.Compiler.Lowpass.Environment (
   withLocalName,
   withLocalNames,
   withModuleName,
+  insertQualifiedNames,
 ) where
 
 import Control.Monad.Reader (MonadReader, ask, local)
@@ -50,7 +51,7 @@ qualifyName name = do
       Just qname ->
         pure qname
       Nothing ->
-        error ("Name not in scope: " <> Text.unpack name)
+        pure (translateEnvironmentModule <> "." <> name)
 
 withLocalName :: (MonadReader TranslateEnvironment m) => Name -> m a -> m a
 withLocalName = local . overTranslateEnvironmentLocalNames . Set.insert
@@ -60,3 +61,6 @@ withLocalNames = flip (foldr withLocalName)
 
 withModuleName :: (MonadReader TranslateEnvironment m) => Name -> m a -> m a
 withModuleName = local . overTranslateEnvironmentModule . const
+
+insertQualifiedNames :: (MonadReader TranslateEnvironment m) => Environment Name -> m a -> m a
+insertQualifiedNames names = local (overTranslateEnvironmentQualifiedNames (names <>))
