@@ -223,69 +223,69 @@ moduleBinarySearch =
             , Label TOpq "n"
             ]
             [r| 
-                  match<bool>($v.0 : record({ max : * | min : * | {} })) 
-                    { | ( $Record : { max : * | min : * | {} }/record({ max : * | min : * | {} })
-                        , $match.8.$row.1 : { max : * | min : * | {} }
-                        ) =>
-                          select
-                            { max = $row.1.field.max : * | $rest : { min : * | {} } } =
-                              $match.8.$row.1 : { max : * | min : * | {} }   
-                            in
-                              let 
-                                $row.1.tail : record({ min : * | {} }) =
-                                  @<record({ min : * | {} })>
-                                    ( $Record : { min : * | {} }/record({ min : * | {} })
-                                    , $rest : { min : * | {} }
-                                    )
-                               in
-                                match<bool>($row.1.tail : record({ min : * | {} })) 
-                                  { | ( $Record : { min : * | {} }/record({ min : * | {} })
-                                      , $match.5.$row.2 : { min : * | {} }
-                                      ) =>
-                                        select
-                                          { min = $row.2.field.min : * | $rest : {} } =
-                                            $match.5.$row.2 : { min : * | {} }   
-                                          in
-                                            let
-                                              $row.2.tail : record({}) =
-                                                @<record({})>
-                                                  ( $Record : {}/record({})
-                                                  , $rest : {}
-                                                  )
-                                              in
-                                              match<bool>($row.2.tail : record({})) 
-                                                { | ( $Record : {}/record({})
-                                                    , $match.2._ : {}
-                                                    ) =>
-                                                      [&&]
+                  match<bool>($v.0 : record({ max : * | min : * | {} })) { 
+                    | ( $Record : { max : * | min : * | {} }/record({ max : * | min : * | {} })
+                      , $match.8.$row.1 : { max : * | min : * | {} }
+                      ) =>
+                        select
+                          { max = $row.1.field.max : * | $rest : { min : * | {} } } =
+                            $match.8.$row.1 : { max : * | min : * | {} }   
+                          in
+                            let 
+                              $row.1.tail : record({ min : * | {} }) =
+                                @<record({ min : * | {} })>
+                                  ( $Record : { min : * | {} }/record({ min : * | {} })
+                                  , $rest : { min : * | {} }
+                                  )
+                             in
+                              match<bool>($row.1.tail : record({ min : * | {} })) 
+                                { | ( $Record : { min : * | {} }/record({ min : * | {} })
+                                    , $match.5.$row.2 : { min : * | {} }
+                                    ) =>
+                                      select
+                                        { min = $row.2.field.min : * | $rest : {} } =
+                                          $match.5.$row.2 : { min : * | {} }   
+                                        in
+                                          let
+                                            $row.2.tail : record({}) =
+                                              @<record({})>
+                                                ( $Record : {}/record({})
+                                                , $rest : {}
+                                                )
+                                            in
+                                            match<bool>($row.2.tail : record({})) 
+                                              { | ( $Record : {}/record({})
+                                                  , $match.2._ : {}
+                                                  ) =>
+                                                    [&&]
+                                                    ( @<bool>
+                                                        ( Ordered.greater_than : Ordered(*)/*/*/bool
+                                                        , $dict.ffef54c635ab7d00 : Ordered(*)
+                                                        , n : *
+                                                        , $row.2.field.min : * 
+                                                        )
+                                                    , [|| ]
                                                       ( @<bool>
-                                                          ( Ordered.greater_than : Ordered(*)/*/*/bool
+                                                          ( Ordered.less_than_or_equal_to : Ordered(*)/*/*/bool
                                                           , $dict.ffef54c635ab7d00 : Ordered(*)
                                                           , n : *
-                                                          , $row.2.field.min : * 
+                                                          , $row.1.field.max : * 
                                                           )
-                                                      , [|| ]
-                                                        ( @<bool>
-                                                            ( Ordered.less_than_or_equal_to : Ordered(*)/*/*/bool
-                                                            , $dict.ffef54c635ab7d00 : Ordered(*)
-                                                            , n : *
-                                                            , $row.1.field.max : * 
-                                                            )
-                                                        , @<bool>
-                                                            ( Ordered.less_than_or_equal_to : Ordered(*)/*/*/bool
-                                                            , $dict.ffef54c635ab7d00 : Ordered(*)
-                                                            , $row.1.field.max : * 
-                                                            , @<*>
-                                                                ( BinarySearch.from_int32 : Numeric(*)/int32/*
-                                                                , $dict.be194a5d16952b76 : Numeric(*)
-                                                                , -1
-                                                                )
-                                                            )
-                                                        )
+                                                      , @<bool>
+                                                          ( Ordered.less_than_or_equal_to : Ordered(*)/*/*/bool
+                                                          , $dict.ffef54c635ab7d00 : Ordered(*)
+                                                          , $row.1.field.max : * 
+                                                          , @<*>
+                                                              ( BinarySearch.from_int32 : Numeric(*)/int32/*
+                                                              , $dict.be194a5d16952b76 : Numeric(*)
+                                                              , -1
+                                                              )
+                                                          )
                                                       )
-                                                }
-                                }
-                    }
+                                                    )
+                                              }
+                              }
+                  }
           |]
         , OFunction
             "BinarySearch.from_list"
