@@ -3557,7 +3557,7 @@ bazz =
                           []
                           ( TVariable (TypeIndex KType 0)
                               `TArrow` TVariable (TypeIndex KType 0)
-                              `TArrow` (TConstructor KType "Ordering")
+                              `TArrow` TConstructor KType "Ordering"
                           )
                       )
                     ]
