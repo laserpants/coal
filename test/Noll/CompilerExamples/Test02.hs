@@ -140,6 +140,22 @@ baz3 =
         )
         ( Environment.fromList
             [
+              ( "Numeric"
+              ,
+                ( TypeIndex KType 0
+                , Environment.fromList
+                    [
+                      ( "from_int32"
+                      , Forall
+                          (Set.fromList [TypeIndex KType 0])
+                          []
+                          ( TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0)
+                          )
+                      )
+                    ]
+                )
+              )
+            ,
               ( "Ordered"
               ,
                 ( TypeIndex KType 0
