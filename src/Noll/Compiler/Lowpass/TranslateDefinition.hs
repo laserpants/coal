@@ -33,17 +33,14 @@ translateDefinition =
     DType _ _ cs -> do
       let abc = zip [0 ..] (sortOn constructorName cs)
       traverse translateConstructor abc
-    -- pure (translateConstructor <$> zip [0 ..] (sortOn constructorName cs))
     DFunction name (Function _ (With _ t) ps e) -> do
       qs <- traverse translatePattern (fromList1 ps)
       f <- withLocalNames (labelName <$> qs) (translateExpression e)
       moduleName <- asks translateEnvironmentModule
       pure [Lowpass.OFunction (moduleName <> "." <> name) qs f]
-    --      [Lowpass.OFunction name (translatePattern <$> fromList1 ps) (translateExpression e)]
     DConstant name (Constant _ With{} e) -> do
       c <- translateExpression e
       pure [Lowpass.OConstant name c]
-    --      [Lowpass.OConstant name (translateExpression e)]
     DTrait name _ _ ins -> do
       moduleName <- asks translateEnvironmentModule
       forM ins $
