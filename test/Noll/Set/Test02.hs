@@ -604,6 +604,9 @@ moduleMain =
       DImport
         (Path ["BinarySearch"])
         ["Node", "Leaf", "sort", "in_range", "from_int32"]
+    , DImport
+        (Path ["Ordered"])
+        ["Ordered__$instance.b7c5e7e84eeaf782"]
     , DInstance
         "Numeric"
         (TIntrinsic IInt32)

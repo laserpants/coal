@@ -396,6 +396,7 @@ moduleMain =
     , moduleImports =
         [ "BinarySearch.Leaf"
         , "BinarySearch.Node"
+        , "Ordered.Ordered__$instance.b7c5e7e84eeaf782"
         , "BinarySearch.from_int32"
         , "BinarySearch.in_range"
         , "BinarySearch.sort"
@@ -428,49 +429,49 @@ moduleMain =
                         ( $Cons : int32/list(int32)/list(int32)
                         , @<int32>
                             ( BinarySearch.from_int32 : Numeric(int32)/int32/int32
-                            , $dict.2967b53e939a3c94 : Numeric(int32)
+                            , Main.Numeric__$instance.2967b53e939a3c94 : Numeric(int32)
                             , 5
                             )
                           , @<list(int32)>
                               ( $Cons : int32/list(int32)/list(int32)
                               , @<int32>
                                   ( BinarySearch.from_int32 : Numeric(int32)/int32/int32
-                                  , $dict.2967b53e939a3c94 : Numeric(int32)
+                                  , Main.Numeric__$instance.2967b53e939a3c94 : Numeric(int32)
                                   , 3
                                   )
                                 , @<list(int32)>
                                     ( $Cons : int32/list(int32)/list(int32)
                                     , @<int32>
                                         ( BinarySearch.from_int32 : Numeric(int32)/int32/int32
-                                        , $dict.2967b53e939a3c94 : Numeric(int32)
+                                        , Main.Numeric__$instance.2967b53e939a3c94 : Numeric(int32)
                                         , 7
                                         )
                                       , @<list(int32)>
                                           ( $Cons : int32/list(int32)/list(int32)
                                           , @<int32>
                                               ( BinarySearch.from_int32 : Numeric(int32)/int32/int32
-                                              , $dict.2967b53e939a3c94 : Numeric(int32)
+                                              , Main.Numeric__$instance.2967b53e939a3c94 : Numeric(int32)
                                               , 2
                                               )
                                             , @<list(int32)>
                                                 ( $Cons : int32/list(int32)/list(int32)
                                                 , @<int32>
                                                     ( BinarySearch.from_int32 : Numeric(int32)/int32/int32
-                                                    , $dict.2967b53e939a3c94 : Numeric(int32)
+                                                    , Main.Numeric__$instance.2967b53e939a3c94 : Numeric(int32)
                                                     , 1
                                                     )
                                                   , @<list(int32)>
                                                       ( $Cons : int32/list(int32)/list(int32)
                                                       , @<int32>
                                                           ( BinarySearch.from_int32 : Numeric(int32)/int32/int32
-                                                          , $dict.2967b53e939a3c94 : Numeric(int32)
+                                                          , Main.Numeric__$instance.2967b53e939a3c94 : Numeric(int32)
                                                           , 6
                                                           )
                                                         , @<list(int32)>
                                                             ( $Cons : int32/list(int32)/list(int32)
                                                             , @<int32>
                                                                 ( BinarySearch.from_int32 : Numeric(int32)/int32/int32
-                                                                , $dict.2967b53e939a3c94 : Numeric(int32)
+                                                                , Main.Numeric__$instance.2967b53e939a3c94 : Numeric(int32)
                                                                 , 4
                                                                 )
                                                               , 
@@ -488,8 +489,8 @@ moduleMain =
                         , match<int32>
                             ( @<list(int32)>
                                 ( BinarySearch.sort : Numeric(int32)/Ordered(int32)/list(int32)/list(int32)
-                                , $dict.2967b53e939a3c94 : Numeric(int32)
-                                , $dict.b7c5e7e84eeaf782 : Ordered(int32)
+                                , Main.Numeric__$instance.2967b53e939a3c94 : Numeric(int32)
+                                , Ordered.Ordered__$instance.b7c5e7e84eeaf782 : Ordered(int32)
                                 , xs : list(int32)
                                 )
                             ) {

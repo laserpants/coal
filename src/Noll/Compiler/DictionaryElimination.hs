@@ -16,6 +16,7 @@ import Noll.Module.Constant (Constant (..))
 import Noll.Module.Definition (Definition (..))
 import Noll.Module.Function (Function (..))
 import Noll.Utils (hashed)
+import Noll.Compiler.TraitTransform (parameterized)
 
 import qualified Lang.Common.List1 as List1
 
@@ -80,8 +81,11 @@ evars :: (Functor f, Monoid a) => f (Trait (Type TypeIndex Kind)) -> f (Expressi
 evars = fmap (translateTrait EVariable)
 
 translateTrait :: (Monoid a) => (a -> Label (Type TypeIndex Kind) -> t) -> Trait (Type TypeIndex Kind) -> t
-translateTrait ctor trait =
-  ctor mempty (Label (dictionaryType trait) ("$dict." <> hashed trait))
+translateTrait ctor trait@(Trait tname _) = ctor mempty (Label (dictionaryType trait) (name <> hashed trait))
+  where
+    name 
+      | parameterized trait = "$dict." 
+      | otherwise = tname <> "__$instance." 
 
 dictionaryType :: Trait (Type TypeIndex Kind) -> Type TypeIndex Kind
 dictionaryType (Trait name t) =
