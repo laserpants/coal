@@ -82,7 +82,7 @@ instanceDictionary name t xyz = do
       (dictExpr d (foldr hello Lowpass.nil xyz))
  where
   postfix = "__$instance." <> hashed t
-  d = (Lowpass.TCon name [translateType t])
+  d = Lowpass.TCon name [translateType t]
 
 -- hello :: [Name] -> LowpassObject
 hello (n, obj) = Lowpass.ext n v
