@@ -70,6 +70,7 @@ transformConstantZ (Constant a u@(With _ t) e) = do
     tr : trs -> do
       pure (Constant a (With (sort (tr : trs)) t) (EDictionaryLambda a (List1.sort (tr :| trs)) expr))
 
+-- TODO
 parameterized :: Trait (Type v k) -> Bool
 parameterized =
   \case
