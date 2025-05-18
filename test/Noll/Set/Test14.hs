@@ -461,277 +461,141 @@ moduleMain1 = unsafeParseExpr <$> moduleMain
 
 moduleMain :: Module Lowpass.Type Name Text
 moduleMain =
-  Module
-    { moduleName = "Main"
-    , moduleImports =
-        [ "BinarySearch.sort"
-        , "BinarySearch.from_int32"
-        , "Ordered.LessThan"
-        , "Ordered.GreaterThan"
-        , "Ordered.EqualTo"
-        ]
-    , moduleObjects =
-        [ OConstant
-            "Main.d"
-            [r|
-                  @<Numeric(int32)>
-                    ( $Record : { from_int32 : int32/int32 | * }/Numeric(int32)
-                    , { from_int32 = fn(x : int32) => x : int32
-                      | {}
-                      }
-                    )
-            |]
-        , OConstant
-            "Main.d2"
-            [r|
-                  @<Ordered(int32)>
-                    ( $Record : { compare : int32/int32/Ordering | * }/Ordered(int32)
-                    , { compare = fn(x : int32, y : int32) =>
-                          if ([< int32](x : int32, y : int32))
-                            then
-                              Ordered.LessThan : Ordering
-                            else
-                              if ([> int32](x : int32, y : int32))
-                                then
-                                  Ordered.GreaterThan : Ordering
-                                else
-                                  Ordered.EqualTo : Ordering
-                      | {}
-                      }
-                    )
-            |]
-        , OFunction
-            "Main.from_int32__$instance.f377c7c1cf28bc72"
-            [ Label Lowpass.int32 "x"
-            ]
-            [r| 
-                  x : int32
-              |]
-        , OFunction
-            "Main.main"
-            [Label (TCon "unit" []) "$v.0"]
-            [r|
-                  let
-                    xs : list(int32) =
-                      @<list(int32)>
-                        ( $Cons : int32/list(int32)/list(int32)
-                        , @<int32>
-                            ( BinarySearch.from_int32 : Numeric(int32)/int32/int32
-                            , Main.d : Numeric(int32)
-                            , 5
-                            )
-                          , @<list(int32)>
-                              ( $Cons : int32/list(int32)/list(int32)
-                              , @<int32>
-                                  ( BinarySearch.from_int32 : Numeric(int32)/int32/int32
-                                  , Main.d : Numeric(int32)
-                                  , 3
-                                  )
-                                , @<list(int32)>
-                                    ( $Cons : int32/list(int32)/list(int32)
-                                    , @<int32>
-                                        ( BinarySearch.from_int32 : Numeric(int32)/int32/int32
-                                        , Main.d : Numeric(int32)
-                                        , 7
-                                        )
-                                      , @<list(int32)>
-                                          ( $Cons : int32/list(int32)/list(int32)
-                                          , @<int32>
-                                              ( BinarySearch.from_int32 : Numeric(int32)/int32/int32
-                                              , Main.d : Numeric(int32)
-                                              , 2
-                                              )
-                                            , @<list(int32)>
-                                                ( $Cons : int32/list(int32)/list(int32)
-                                                , @<int32>
-                                                    ( BinarySearch.from_int32 : Numeric(int32)/int32/int32
-                                                    , Main.d : Numeric(int32)
-                                                    , 1
-                                                    )
-                                                  , @<list(int32)>
-                                                      ( $Cons : int32/list(int32)/list(int32)
-                                                      , @<int32>
-                                                          ( BinarySearch.from_int32 : Numeric(int32)/int32/int32
-                                                          , Main.d : Numeric(int32)
-                                                          , 6
-                                                          )
-                                                        , @<list(int32)>
-                                                            ( $Cons : int32/list(int32)/list(int32)
-                                                            , @<int32>
-                                                                ( BinarySearch.from_int32 : Numeric(int32)/int32/int32
-                                                                , Main.d : Numeric(int32)
-                                                                , 4
-                                                                )
-                                                              , 
-                                                              $Nil : list(int32) 
-                                                            )
-                                                      )
-                                                )
-                                          )
-                                    )
-                              )
-                        )
-                    in
-                      let
-                        ys : list(int32) =
-                          @<list(int32)>
-                            ( BinarySearch.sort : Numeric(int32)/Ordered(int32)/list(int32)/list(int32)
-                            , Main.d : Numeric(int32)
-                            , Main.d2 : Ordered(int32)
-                            , xs : list(int32)
-                            )
-                        in
-                          match<int32>(ys : list(int32)) {
-                            | ( $Cons : int32/list(int32)/list(int32)
-                              , x : int32
-                              , _ : list(int32)
-                              ) =>
-                                #(print_int32 : int32/*, x : int32) (fn(a : *) => 0)
-                            | ( $Nil : list(int32)
-                              ) =>
-                                #(print_int32 : int32/*, 7) (fn(a : *) => 0)
-                          }
-            |]
-        ]
-    }
-
--- moduleMain :: Module Lowpass.Type Name Text
--- moduleMain =
---  Module
---    { moduleName = "Main"
---    , moduleImports =
---        [ "BinarySearch.sort"
---        , "BinarySearch.from_int32"
---        , "Ordered.LessThan"
---        , "Ordered.GreaterThan"
---        , "Ordered.EqualTo"
---        , "Core$.$trace_int32"
---        ]
---    , moduleObjects =
---        [ OConstant
---            "Main.d"
---            [r|
---                  @<Numeric(int32)>
---                    ( $Record : { from_int32 : int32/int32 | * }/Numeric(int32)
---                    , { from_int32 = fn(x : int32) => x : int32
---                      | {}
---                      }
---                    )
---            |]
---        , OConstant
---            "Main.d2"
---            [r|
---                  @<Ordered(int32)>
---                    ( $Record : { compare : int32/int32/Ordering | * }/Ordered(int32)
---                    , { compare = fn(x : int32, y : int32) =>
---                          if ([< int32](x : int32, y : int32))
---                            then
---                              Ordered.LessThan : Ordering
---                            else
---                              if ([> int32](x : int32, y : int32))
---                                then
---                                  Ordered.GreaterThan : Ordering
---                                else
---                                  Ordered.EqualTo : Ordering
---                      | {}
---                      }
---                    )
---            |]
---        , OFunction
---            "Main.from_int32__$instance.f377c7c1cf28bc72"
---            [ Label Lowpass.int32 "x"
---            ]
---            [r|
---                  x : int32
---              |]
---        , OFunction
---            "Main.main"
---            [Label (TCon "unit" []) "$v.0"]
---            [r|
---                  let
---                    xs : list(int32) =
---                      @<list(int32)>
---                        ( $Cons : int32/list(int32)/list(int32)
---                        , @<int32>
---                            ( BinarySearch.from_int32 : Numeric(int32)/int32/int32
---                            , $dict.2967b53e939a3c94 : Numeric(int32)
---                            , 5
---                            )
---                          , @<list(int32)>
---                              ( $Cons : int32/list(int32)/list(int32)
---                              , @<int32>
---                                  ( BinarySearch.from_int32 : Numeric(int32)/int32/int32
---                                  , $dict.2967b53e939a3c94 : Numeric(int32)
---                                  , 3
---                                  )
---                                , @<list(int32)>
---                                    ( $Cons : int32/list(int32)/list(int32)
---                                    , @<int32>
---                                        ( BinarySearch.from_int32 : Numeric(int32)/int32/int32
---                                        , $dict.2967b53e939a3c94 : Numeric(int32)
---                                        , 7
---                                        )
---                                      , @<list(int32)>
---                                          ( $Cons : int32/list(int32)/list(int32)
---                                          , @<int32>
---                                              ( BinarySearch.from_int32 : Numeric(int32)/int32/int32
---                                              , $dict.2967b53e939a3c94 : Numeric(int32)
---                                              , 2
---                                              )
---                                            , @<list(int32)>
---                                                ( $Cons : int32/list(int32)/list(int32)
---                                                , @<int32>
---                                                    ( BinarySearch.from_int32 : Numeric(int32)/int32/int32
---                                                    , $dict.2967b53e939a3c94 : Numeric(int32)
---                                                    , 1
---                                                    )
---                                                  , @<list(int32)>
---                                                      ( $Cons : int32/list(int32)/list(int32)
---                                                      , @<int32>
---                                                          ( BinarySearch.from_int32 : Numeric(int32)/int32/int32
---                                                          , $dict.2967b53e939a3c94 : Numeric(int32)
---                                                          , 6
---                                                          )
---                                                        , @<list(int32)>
---                                                            ( $Cons : int32/list(int32)/list(int32)
---                                                            , @<int32>
---                                                                ( BinarySearch.from_int32 : Numeric(int32)/int32/int32
---                                                                , $dict.2967b53e939a3c94 : Numeric(int32)
---                                                                , 4
---                                                                )
---                                                              ,
---                                                              $Nil : list(int32)
---                                                            )
---                                                      )
---                                                )
---                                          )
---                                    )
---                              )
---                        )
---                    in
---                      @<*>
---                        ( Core$.$trace_int32 : int32/*
---                        , match<int32>
---                            ( @<list(int32)>
---                                ( BinarySearch.sort : Numeric(int32)/Ordered(int32)/list(int32)/list(int32)
---                                , $dict.2967b53e939a3c94 : Numeric(int32)
---                                , $dict.b7c5e7e84eeaf782 : Ordered(int32)
---                                , xs : list(int32)
---                                )
---                            ) {
---                            | ( $Cons : int32/list(int32)/list(int32)
---                              , $match.17.y : int32
---                              , $match.18._ : list(int32)
---                              ) =>
---                                $match.17.y : int32
---                            | ( $Nil : list(int32)
---                              ) =>
---                                12345
---                          }
---                        )
---            |]
---        ]
---    }
+ Module
+   { moduleName = "Main"
+   , moduleImports =
+       [ "BinarySearch.sort"
+       , "BinarySearch.from_int32"
+       , "Ordered.LessThan"
+       , "Ordered.GreaterThan"
+       , "Ordered.EqualTo"
+       , "Core$.$trace_int32"
+       ]
+   , moduleObjects =
+       [ OConstant
+           "Main.d"
+           [r|
+                 @<Numeric(int32)>
+                   ( $Record : { from_int32 : int32/int32 | * }/Numeric(int32)
+                   , { from_int32 = fn(x : int32) => x : int32
+                     | {}
+                     }
+                   )
+           |]
+       , OConstant
+           "Main.d2"
+           [r|
+                 @<Ordered(int32)>
+                   ( $Record : { compare : int32/int32/Ordering | * }/Ordered(int32)
+                   , { compare = fn(x : int32, y : int32) =>
+                         if ([< int32](x : int32, y : int32))
+                           then
+                             Ordered.LessThan : Ordering
+                           else
+                             if ([> int32](x : int32, y : int32))
+                               then
+                                 Ordered.GreaterThan : Ordering
+                               else
+                                 Ordered.EqualTo : Ordering
+                     | {}
+                     }
+                   )
+           |]
+       , OFunction
+           "Main.from_int32__$instance.f377c7c1cf28bc72"
+           [ Label Lowpass.int32 "x"
+           ]
+           [r|
+                 x : int32
+             |]
+       , OFunction
+           "Main.main"
+           [Label (TCon "unit" []) "$v.0"]
+           [r|
+                 let
+                   xs : list(int32) =
+                     @<list(int32)>
+                       ( $Cons : int32/list(int32)/list(int32)
+                       , @<int32>
+                           ( BinarySearch.from_int32 : Numeric(int32)/int32/int32
+                           , Main.d : Numeric(int32)
+                           , 5
+                           )
+                         , @<list(int32)>
+                             ( $Cons : int32/list(int32)/list(int32)
+                             , @<int32>
+                                 ( BinarySearch.from_int32 : Numeric(int32)/int32/int32
+                                 , Main.d : Numeric(int32)
+                                 , 3
+                                 )
+                               , @<list(int32)>
+                                   ( $Cons : int32/list(int32)/list(int32)
+                                   , @<int32>
+                                       ( BinarySearch.from_int32 : Numeric(int32)/int32/int32
+                                       , Main.d : Numeric(int32)
+                                       , 7
+                                       )
+                                     , @<list(int32)>
+                                         ( $Cons : int32/list(int32)/list(int32)
+                                         , @<int32>
+                                             ( BinarySearch.from_int32 : Numeric(int32)/int32/int32
+                                             , Main.d : Numeric(int32)
+                                             , 2
+                                             )
+                                           , @<list(int32)>
+                                               ( $Cons : int32/list(int32)/list(int32)
+                                               , @<int32>
+                                                   ( BinarySearch.from_int32 : Numeric(int32)/int32/int32
+                                                   , Main.d : Numeric(int32)
+                                                   , 1
+                                                   )
+                                                 , @<list(int32)>
+                                                     ( $Cons : int32/list(int32)/list(int32)
+                                                     , @<int32>
+                                                         ( BinarySearch.from_int32 : Numeric(int32)/int32/int32
+                                                         , Main.d : Numeric(int32)
+                                                         , 6
+                                                         )
+                                                       , @<list(int32)>
+                                                           ( $Cons : int32/list(int32)/list(int32)
+                                                           , @<int32>
+                                                               ( BinarySearch.from_int32 : Numeric(int32)/int32/int32
+                                                               , Main.d : Numeric(int32)
+                                                               , 4
+                                                               )
+                                                             ,
+                                                             $Nil : list(int32)
+                                                           )
+                                                     )
+                                               )
+                                         )
+                                   )
+                             )
+                       )
+                   in
+                     @<*>
+                       ( Core$.$trace_int32 : int32/*
+                       , match<int32>
+                           ( @<list(int32)>
+                               ( BinarySearch.sort : Numeric(int32)/Ordered(int32)/list(int32)/list(int32)
+                               , Main.d : Numeric(int32)
+                               , Main.d2 : Ordered(int32)
+                               , xs : list(int32)
+                               )
+                           ) {
+                           | ( $Cons : int32/list(int32)/list(int32)
+                             , $match.17.y : int32
+                             , $match.18._ : list(int32)
+                             ) =>
+                               $match.17.y : int32
+                           | ( $Nil : list(int32)
+                             ) =>
+                               12345
+                         }
+                       )
+           |]
+       ]
+   }
 
 prog1_14 :: [Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)]
 prog1_14 = unsafeParseExpr <$$> fixture1
