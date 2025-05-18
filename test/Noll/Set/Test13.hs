@@ -69,6 +69,16 @@ moduleOrdered =
                         else
                           Ordered.EqualTo : Ordering
               |]
+        , OConstant
+            "Ordered__$instance.f377c7c1cf28bc72"
+            [r| 
+                  @<Ordered(int32)>
+                    ( $Record : { compare : int32/int32/Ordering | {} }/Ordered(int32)
+                    , { compare = Ordered.compare__$instance.f377c7c1cf28bc72 : int32/int32/Ordering
+                      | {}
+                      }
+                    )
+              |]
         , OFunction
             "Ordered.less_than_or_equal_to"
             [ Label (TCon "Ordered" [opaque]) "$dict.ffef54c635ab7d00"
@@ -397,6 +407,16 @@ moduleMain =
             ]
             [r| 
                   x : int32
+              |]
+        , OConstant
+            "Numeric__$instance.f377c7c1cf28bc72"
+            [r| 
+                  @<Numeric(int32)>
+                    ( $Record : { from_int32 : int32/int32 | {} }/Numeric(int32)
+                    , { from_int32 = Main.from_int32__$instance.f377c7c1cf28bc72 : int32/int32 
+                      | {}
+                      }
+                    )
               |]
         , OFunction
             "Main.main"
