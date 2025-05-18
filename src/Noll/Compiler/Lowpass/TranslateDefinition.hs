@@ -53,11 +53,30 @@ translateDefinition =
             translateDefinition (DFunction (name <> postfix) f)
           DConstant name c ->
             translateDefinition (DConstant (name <> postfix) c)
-      pure (concat bs)
+      xx <- instanceDictionary
+      pure (concat bs <> [xx])
      where
       postfix = "__$instance." <> hashed t
     _ ->
       pure []
+
+instanceDictionary :: (MonadReader TranslateEnvironment m) => m LowpassObject
+instanceDictionary =
+  pure $
+    Lowpass.OConstant
+      undefined
+      (
+        Lowpass.recordExpr
+          (
+              Lowpass.ext
+                undefined
+                undefined
+                undefined
+          )
+      )
+
+xxx :: [Name] -> LowpassObject
+xxx = undefined
 
 traitAccessor :: (MonadReader TranslateEnvironment m) => Name -> Name -> Lowpass.Type -> m LowpassObject
 traitAccessor trait fn t = do

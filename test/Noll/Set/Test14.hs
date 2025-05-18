@@ -134,7 +134,7 @@ moduleOrdered =
                   }
               |]
         , OFunction
-            "compare__$instance.f377c7c1cf28bc72"
+            "Ordered.compare__$instance.f377c7c1cf28bc72"
             [ Label Lowpass.int32 "x"
             , Label Lowpass.int32 "y"
             ]
@@ -461,57 +461,49 @@ moduleMain1 = unsafeParseExpr <$> moduleMain
 
 moduleMain :: Module Lowpass.Type Name Text
 moduleMain =
- Module
-   { moduleName = "Main"
-   , moduleImports =
-       [ "BinarySearch.sort"
-       , "BinarySearch.from_int32"
-       , "Ordered.LessThan"
-       , "Ordered.GreaterThan"
-       , "Ordered.EqualTo"
-       , "Core$.$trace_int32"
-       ]
-   , moduleObjects =
-       [ OConstant
-           "Main.d"
-           [r|
-                 @<Numeric(int32)>
-                   ( $Record : { from_int32 : int32/int32 | * }/Numeric(int32)
-                   , { from_int32 = fn(x : int32) => x : int32
-                     | {}
-                     }
-                   )
-           |]
-       , OConstant
-           "Main.d2"
-           [r|
-                 @<Ordered(int32)>
-                   ( $Record : { compare : int32/int32/Ordering | * }/Ordered(int32)
-                   , { compare = fn(x : int32, y : int32) =>
-                         if ([< int32](x : int32, y : int32))
-                           then
-                             Ordered.LessThan : Ordering
-                           else
-                             if ([> int32](x : int32, y : int32))
-                               then
-                                 Ordered.GreaterThan : Ordering
-                               else
-                                 Ordered.EqualTo : Ordering
-                     | {}
-                     }
-                   )
-           |]
-       , OFunction
-           "Main.from_int32__$instance.f377c7c1cf28bc72"
-           [ Label Lowpass.int32 "x"
-           ]
-           [r|
+  Module
+    { moduleName = "Main"
+    , moduleImports =
+        [ "BinarySearch.sort"
+        , "BinarySearch.from_int32"
+        , "Ordered.LessThan"
+        , "Ordered.GreaterThan"
+        , "Ordered.EqualTo"
+        , "Ordered.compare__$instance.f377c7c1cf28bc72"
+        , "Core$.$trace_int32"
+        ]
+    , moduleObjects =
+        [ OFunction
+            "Main.from_int32__$instance.f377c7c1cf28bc72"
+            [ Label Lowpass.int32 "x"
+            ]
+            [r|
                  x : int32
              |]
-       , OFunction
-           "Main.main"
-           [Label (TCon "unit" []) "$v.0"]
-           [r|
+        , OConstant
+            "Main.d"
+            [r|
+                 @<Numeric(int32)>
+                   ( $Record : { from_int32 : int32/int32 | * }/Numeric(int32)
+                   , { from_int32 = Main.from_int32__$instance.f377c7c1cf28bc72 : int32/int32
+                     | {}
+                     }
+                   )
+           |]
+        , OConstant
+            "Main.d2"
+            [r|
+                 @<Ordered(int32)>
+                   ( $Record : { compare : int32/int32/Ordering | * }/Ordered(int32)
+                   , { compare = Ordered.compare__$instance.f377c7c1cf28bc72 : int32/int32/Ordering
+                     | {}
+                     }
+                   )
+           |]
+        , OFunction
+            "Main.main"
+            [Label (TCon "unit" []) "$v.0"]
+            [r|
                  let
                    xs : list(int32) =
                      @<list(int32)>
@@ -594,8 +586,8 @@ moduleMain =
                          }
                        )
            |]
-       ]
-   }
+        ]
+    }
 
 prog1_14 :: [Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)]
 prog1_14 = unsafeParseExpr <$$> fixture1
