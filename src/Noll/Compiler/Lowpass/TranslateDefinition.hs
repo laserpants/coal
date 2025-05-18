@@ -4,11 +4,11 @@
 
 module Noll.Compiler.Lowpass.TranslateDefinition (translateDefinition) where
 
-import Debug.Trace (traceShow)
 import Control.Monad (forM)
 import Control.Monad.Reader (MonadReader, asks)
 import Data.Data (Data)
 import Data.List.Extra (sortOn)
+import Debug.Trace (traceShow)
 import Lang.Common.List1 (NonEmpty ((:|)), fromList1, (<|))
 import Lang.Label (Label (..))
 import Lang.Utils (Name, Set)
@@ -57,16 +57,16 @@ translateDefinition =
             xx1 <- translateDefinition (DConstant (name <> postfix) c)
             pure (name, xx1)
       xx <- instanceDictionary name t bs
---      pure (concat bs <> [xx])
---      let zzz = (concat (snd <$> bs))
---      traceShow (Lowpass.typeOf <$> zzz) $
-      pure (concat (snd <$> bs) <> [xx])
+      --      pure (concat bs <> [xx])
+      --      let zzz = (concat (snd <$> bs))
+      --      traceShow (Lowpass.typeOf <$> zzz) $
+      pure (concatMap snd bs <> [xx])
      where
       postfix = "__$instance." <> hashed t
     _ ->
       pure []
 
---dictExpr :: Expr Lang.Type -> Expr Lang.Type
+-- dictExpr :: Expr Lang.Type -> Expr Lang.Type
 dictExpr t r =
   Lowpass.app
     t
@@ -74,24 +74,25 @@ dictExpr t r =
     (r :| [])
 
 instanceDictionary :: (MonadReader TranslateEnvironment m) => Name -> IndexedType -> [(Name, [LowpassObject])] -> m LowpassObject
-instanceDictionary name t xyz =
+instanceDictionary name t xyz = do
+  moduleName <- asks translateEnvironmentModule
   pure $
     Lowpass.OConstant
-      (name <> postfix)
+      (moduleName <> "." <> name <> postfix)
       (dictExpr d (foldr hello Lowpass.nil xyz))
-  where
-    postfix = "__$instance." <> hashed t
-    d = (Lowpass.TCon name [translateType t])
+ where
+  postfix = "__$instance." <> hashed t
+  d = (Lowpass.TCon name [translateType t])
 
---hello :: [Name] -> LowpassObject
-hello (n, obj) = Lowpass.ext n v 
-  where
-    v = 
-      case obj of
-        [z] ->
-          Lowpass.var (Label (Lowpass.typeOf z) (Lowpass.objectName z))
-        _ ->
-          error "Implementation error"
+-- hello :: [Name] -> LowpassObject
+hello (n, obj) = Lowpass.ext n v
+ where
+  v =
+    case obj of
+      [z] ->
+        Lowpass.var (Label (Lowpass.typeOf z) (Lowpass.objectName z))
+      _ ->
+        error "Implementation error"
 
 traitAccessor :: (MonadReader TranslateEnvironment m) => Name -> Name -> Lowpass.Type -> m LowpassObject
 traitAccessor trait fn t = do

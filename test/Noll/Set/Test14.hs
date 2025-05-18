@@ -149,6 +149,16 @@ moduleOrdered =
                         else
                           Ordered.EqualTo : Ordering
               |]
+        , OConstant
+            "Ordered.Ordered__$instance.f377c7c1cf28bc72"
+            [r| 
+                  @<Ordered(int32)>
+                    ( $Record : { compare : int32/int32/Ordering | {} }/Ordered(int32)
+                    , { compare = Ordered.compare__$instance.f377c7c1cf28bc72 : int32/int32/Ordering
+                      | {}
+                      }
+                    )
+              |]
         , OFunction
             "Ordered.less_than_or_equal_to"
             [ Label (TCon "Ordered" [opaque]) "$dict.ffef54c635ab7d00"
@@ -469,7 +479,7 @@ moduleMain =
         , "Ordered.LessThan"
         , "Ordered.GreaterThan"
         , "Ordered.EqualTo"
-        , "Ordered.compare__$instance.f377c7c1cf28bc72"
+        , "Ordered.Ordered__$instance.f377c7c1cf28bc72"
         , "Core$.$trace_int32"
         ]
     , moduleObjects =
@@ -481,25 +491,15 @@ moduleMain =
                  x : int32
              |]
         , OConstant
-            "Main.d"
-            [r|
-                 @<Numeric(int32)>
-                   ( $Record : { from_int32 : int32/int32 | {} }/Numeric(int32)
-                   , { from_int32 = Main.from_int32__$instance.f377c7c1cf28bc72 : int32/int32
-                     | {}
-                     }
-                   )
-           |]
-        , OConstant
-            "Main.d2"
-            [r|
-                 @<Ordered(int32)>
-                   ( $Record : { compare : int32/int32/Ordering | {} }/Ordered(int32)
-                   , { compare = Ordered.compare__$instance.f377c7c1cf28bc72 : int32/int32/Ordering
-                     | {}
-                     }
-                   )
-           |]
+            "Main.Numeric__$instance.f377c7c1cf28bc72"
+            [r| 
+                  @<Numeric(int32)>
+                    ( $Record : { from_int32 : int32/int32 | {} }/Numeric(int32)
+                    , { from_int32 = Main.from_int32__$instance.f377c7c1cf28bc72 : int32/int32 
+                      | {}
+                      }
+                    )
+              |]
         , OFunction
             "Main.main"
             [Label (TCon "unit" []) "$v.0"]
@@ -510,49 +510,49 @@ moduleMain =
                        ( $Cons : int32/list(int32)/list(int32)
                        , @<int32>
                            ( BinarySearch.from_int32 : Numeric(int32)/int32/int32
-                           , Main.d : Numeric(int32)
+                           , Main.Numeric__$instance.f377c7c1cf28bc72 : Numeric(int32)
                            , 5
                            )
                          , @<list(int32)>
                              ( $Cons : int32/list(int32)/list(int32)
                              , @<int32>
                                  ( BinarySearch.from_int32 : Numeric(int32)/int32/int32
-                                 , Main.d : Numeric(int32)
+                                 , Main.Numeric__$instance.f377c7c1cf28bc72 : Numeric(int32)
                                  , 3
                                  )
                                , @<list(int32)>
                                    ( $Cons : int32/list(int32)/list(int32)
                                    , @<int32>
                                        ( BinarySearch.from_int32 : Numeric(int32)/int32/int32
-                                       , Main.d : Numeric(int32)
+                                       , Main.Numeric__$instance.f377c7c1cf28bc72 : Numeric(int32)
                                        , 7
                                        )
                                      , @<list(int32)>
                                          ( $Cons : int32/list(int32)/list(int32)
                                          , @<int32>
                                              ( BinarySearch.from_int32 : Numeric(int32)/int32/int32
-                                             , Main.d : Numeric(int32)
+                                             , Main.Numeric__$instance.f377c7c1cf28bc72 : Numeric(int32)
                                              , 2
                                              )
                                            , @<list(int32)>
                                                ( $Cons : int32/list(int32)/list(int32)
                                                , @<int32>
                                                    ( BinarySearch.from_int32 : Numeric(int32)/int32/int32
-                                                   , Main.d : Numeric(int32)
+                                                   , Main.Numeric__$instance.f377c7c1cf28bc72 : Numeric(int32)
                                                    , 1
                                                    )
                                                  , @<list(int32)>
                                                      ( $Cons : int32/list(int32)/list(int32)
                                                      , @<int32>
                                                          ( BinarySearch.from_int32 : Numeric(int32)/int32/int32
-                                                         , Main.d : Numeric(int32)
+                                                         , Main.Numeric__$instance.f377c7c1cf28bc72 : Numeric(int32)
                                                          , 6
                                                          )
                                                        , @<list(int32)>
                                                            ( $Cons : int32/list(int32)/list(int32)
                                                            , @<int32>
                                                                ( BinarySearch.from_int32 : Numeric(int32)/int32/int32
-                                                               , Main.d : Numeric(int32)
+                                                               , Main.Numeric__$instance.f377c7c1cf28bc72 : Numeric(int32)
                                                                , 4
                                                                )
                                                              ,
@@ -570,8 +570,8 @@ moduleMain =
                        , match<int32>
                            ( @<list(int32)>
                                ( BinarySearch.sort : Numeric(int32)/Ordered(int32)/list(int32)/list(int32)
-                               , Main.d : Numeric(int32)
-                               , Main.d2 : Ordered(int32)
+                               , Main.Numeric__$instance.f377c7c1cf28bc72 : Numeric(int32)
+                               , Ordered.Ordered__$instance.f377c7c1cf28bc72 : Ordered(int32)
                                , xs : list(int32)
                                )
                            ) {

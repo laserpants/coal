@@ -70,7 +70,7 @@ moduleOrdered =
                           Ordered.EqualTo : Ordering
               |]
         , OConstant
-            "Ordered__$instance.f377c7c1cf28bc72"
+            "Ordered.Ordered__$instance.f377c7c1cf28bc72"
             [r| 
                   @<Ordered(int32)>
                     ( $Record : { compare : int32/int32/Ordering | {} }/Ordered(int32)
@@ -409,7 +409,7 @@ moduleMain =
                   x : int32
               |]
         , OConstant
-            "Numeric__$instance.f377c7c1cf28bc72"
+            "Main.Numeric__$instance.f377c7c1cf28bc72"
             [r| 
                   @<Numeric(int32)>
                     ( $Record : { from_int32 : int32/int32 | {} }/Numeric(int32)
