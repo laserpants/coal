@@ -30,9 +30,8 @@ translateDefinition =
   \case
     DAnnotation _ d ->
       translateDefinition d
-    DType _ _ cs -> do
-      let abc = zip [0 ..] (sortOn constructorName cs)
-      traverse translateConstructor abc
+    DType _ _ ctors ->
+      traverse translateConstructor (zip [0 ..] (sortOn constructorName ctors))
     DFunction name (Function _ (With _ t) ps e) -> do
       qs <- traverse translatePattern (fromList1 ps)
       f <- withLocalNames (labelName <$> qs) (translateExpression e)
