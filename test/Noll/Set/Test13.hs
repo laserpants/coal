@@ -54,7 +54,7 @@ moduleOrdered =
                   }
               |]
         , OFunction
-            "Ordered.compare__$instance.f377c7c1cf28bc72"
+            "Ordered.compare__$instance.b7c5e7e84eeaf782"
             [ Label Lowpass.int32 "x"
             , Label Lowpass.int32 "y"
             ]
@@ -70,11 +70,11 @@ moduleOrdered =
                           Ordered.EqualTo : Ordering
               |]
         , OConstant
-            "Ordered.Ordered__$instance.f377c7c1cf28bc72"
+            "Ordered.Ordered__$instance.b7c5e7e84eeaf782"
             [r| 
                   @<Ordered(int32)>
                     ( $Record : { compare : int32/int32/Ordering | {} }/Ordered(int32)
-                    , { compare = Ordered.compare__$instance.f377c7c1cf28bc72 : int32/int32/Ordering
+                    , { compare = Ordered.compare__$instance.b7c5e7e84eeaf782 : int32/int32/Ordering
                       | {}
                       }
                     )
@@ -403,18 +403,18 @@ moduleMain =
         ]
     , moduleObjects =
         [ OFunction
-            "Main.from_int32__$instance.f377c7c1cf28bc72"
+            "Main.from_int32__$instance.2967b53e939a3c94"
             [ Label Lowpass.int32 "x"
             ]
             [r| 
                   x : int32
               |]
         , OConstant
-            "Main.Numeric__$instance.f377c7c1cf28bc72"
+            "Main.Numeric__$instance.2967b53e939a3c94"
             [r| 
                   @<Numeric(int32)>
                     ( $Record : { from_int32 : int32/int32 | {} }/Numeric(int32)
-                    , { from_int32 = Main.from_int32__$instance.f377c7c1cf28bc72 : int32/int32 
+                    , { from_int32 = Main.from_int32__$instance.2967b53e939a3c94 : int32/int32 
                       | {}
                       }
                     )

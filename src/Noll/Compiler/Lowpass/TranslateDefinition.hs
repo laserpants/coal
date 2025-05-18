@@ -56,13 +56,10 @@ translateDefinition =
           DConstant name c -> do
             xx1 <- translateDefinition (DConstant (name <> postfix) c)
             pure (name, xx1)
-      xx <- instanceDictionary name t bs
-      --      pure (concat bs <> [xx])
-      --      let zzz = (concat (snd <$> bs))
-      --      traceShow (Lowpass.typeOf <$> zzz) $
+      xx <- instanceDictionary postfix name t bs
       pure (concatMap snd bs <> [xx])
      where
-      postfix = "__$instance." <> hashed t
+      postfix = "__$instance." <> hashed (Trait name t)
     _ ->
       pure []
 
@@ -73,15 +70,14 @@ dictExpr t r =
     (Lowpass.var (Label (Lowpass.typeOf r `Lowpass.arrow` t) "$Record"))
     (r :| [])
 
-instanceDictionary :: (MonadReader TranslateEnvironment m) => Name -> IndexedType -> [(Name, [LowpassObject])] -> m LowpassObject
-instanceDictionary name t xyz = do
+instanceDictionary :: (MonadReader TranslateEnvironment m) => Name -> Name -> IndexedType -> [(Name, [LowpassObject])] -> m LowpassObject
+instanceDictionary postfix name t xyz = do
   moduleName <- asks translateEnvironmentModule
   pure $
     Lowpass.OConstant
       (moduleName <> "." <> name <> postfix)
       (dictExpr d (foldr hello Lowpass.nil xyz))
  where
-  postfix = "__$instance." <> hashed t
   d = Lowpass.TCon name [translateType t]
 
 -- hello :: [Name] -> LowpassObject
