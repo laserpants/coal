@@ -2114,12 +2114,34 @@ moduleMain =
                                 ( EApplication
                                     ()
                                     (TVariable (TypeIndex KType 0))
-                                    (EVariable () (Label (TIntrinsic (IList (TIntrinsic IInt32)) `TArrow` TVariable (TypeIndex KType 0)) "trace"))
-                                    ( EApplication
+                                    (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0)) "trace"))
+                                    ( EMatch
                                         ()
-                                        (TIntrinsic (IList (TIntrinsic IInt32)))
-                                        (EVariable () (Label (TIntrinsic (IList (TIntrinsic IInt32)) `TArrow` TIntrinsic (IList (TIntrinsic IInt32))) "sort"))
-                                        ( EVariable () (Label (TIntrinsic (IList (TIntrinsic IInt32))) "xs")
+                                        (TIntrinsic IInt32)
+                                        ( EApplication
+                                            ()
+                                            (TIntrinsic (IList (TIntrinsic IInt32)))
+                                            (EVariable () (Label (TIntrinsic (IList (TIntrinsic IInt32)) `TArrow` TIntrinsic (IList (TIntrinsic IInt32))) "sort"))
+                                            (EVariable () (Label (TIntrinsic (IList (TIntrinsic IInt32))) "xs") :| [])
+                                        )
+                                        ( EClause
+                                            ()
+                                            (PListLiteral () (TIntrinsic (IList (TIntrinsic IInt32))) [])
+                                            ( CPlain
+                                                ()
+                                                []
+                                                (ELiteral () (LInt32 12345))
+                                                :| []
+                                            )
+                                            <| EClause
+                                              ()
+                                              (PListCons () (TIntrinsic (IList (TIntrinsic IInt32))) (PVariable () (Label (TIntrinsic IInt32) "y")) (PAny () (TIntrinsic (IList (TIntrinsic IInt32)))))
+                                              ( CPlain
+                                                  ()
+                                                  []
+                                                  (EVariable () (Label (TIntrinsic IInt32) "y"))
+                                                  :| []
+                                              )
                                             :| []
                                         )
                                         :| []

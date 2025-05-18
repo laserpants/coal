@@ -2076,14 +2076,26 @@ moduleMain =
                 ( EApplication
                     ()
                     (TVariable (TypeIndex KType 0))
-                    (EVariable () (Label (TIntrinsic (IList (TIntrinsic IInt32)) `TArrow` TVariable (TypeIndex KType 0)) "trace"))
-                    ( EApplication
+                    (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0)) "trace"))
+                    ( ECompiledMatch
                         ()
-                        (TIntrinsic (IList (TIntrinsic IInt32)))
-                        (EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TIntrinsic IInt32 :| []) `TArrow` TApplication KTrait (TConstructor (KArrow KType KTrait) "Ordered") (TIntrinsic IInt32 :| []) `TArrow` TIntrinsic (IList (TIntrinsic IInt32)) `TArrow` TIntrinsic (IList (TIntrinsic IInt32))) "sort"))
-                        ( EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TIntrinsic IInt32 :| [])) "$dict.2967b53e939a3c94")
-                            <| EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Ordered") (TIntrinsic IInt32 :| [])) "$dict.b7c5e7e84eeaf782")
-                            <| EVariable () (Label (TIntrinsic (IList (TIntrinsic IInt32))) "xs")
+                        (TIntrinsic IInt32)
+                        ( EApplication
+                            ()
+                            (TIntrinsic (IList (TIntrinsic IInt32)))
+                            (EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TIntrinsic IInt32 :| []) `TArrow` TApplication KTrait (TConstructor (KArrow KType KTrait) "Ordered") (TIntrinsic IInt32 :| []) `TArrow` TIntrinsic (IList (TIntrinsic IInt32)) `TArrow` TIntrinsic (IList (TIntrinsic IInt32))) "sort"))
+                            ( EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TIntrinsic IInt32 :| [])) "$dict.2967b53e939a3c94")
+                                <| EVariable () (Label (TApplication KTrait (TConstructor (KArrow KType KTrait) "Ordered") (TIntrinsic IInt32 :| [])) "$dict.b7c5e7e84eeaf782")
+                                <| EVariable () (Label (TIntrinsic (IList (TIntrinsic IInt32))) "xs")
+                                :| []
+                            )
+                        )
+                        ( ECompiledClause
+                            (Label (TIntrinsic IInt32 `TArrow` TIntrinsic (IList (TIntrinsic IInt32)) `TArrow` TIntrinsic (IList (TIntrinsic IInt32))) "$Cons" <| Label (TIntrinsic IInt32) "$match.17.y" :| [Label (TIntrinsic (IList (TIntrinsic IInt32))) "$match.18._"])
+                            (EVariable () (Label (TIntrinsic IInt32) "$match.17.y"))
+                            <| ECompiledClause
+                              (Label (TIntrinsic (IList (TIntrinsic IInt32))) "$Nil" :| [])
+                              (ELiteral () (LInt32 12345))
                             :| []
                         )
                         :| []

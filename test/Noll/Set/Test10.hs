@@ -2111,17 +2111,28 @@ moduleMain =
                     ( EApplication
                         ()
                         (TVariable (TypeIndex KType 0))
-                        (EVariable () (Label (TIntrinsic (IList (TIntrinsic IInt32)) `TArrow` TVariable (TypeIndex KType 0)) "trace"))
-                        ( EDictionaryApplication
+                        (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0)) "trace"))
+                        ( ECompiledMatch
                             ()
-                            (TIntrinsic (IList (TIntrinsic IInt32)))
-                            (Label (TIntrinsic (IList (TIntrinsic IInt32)) `TArrow` TIntrinsic (IList (TIntrinsic IInt32))) "sort")
-                            ( Trait "Numeric" (TIntrinsic IInt32)
-                                <| Trait "Ordered" (TIntrinsic IInt32)
+                            (TIntrinsic IInt32)
+                            ( EDictionaryApplication
+                                ()
+                                (TIntrinsic (IList (TIntrinsic IInt32)))
+                                (Label (TIntrinsic (IList (TIntrinsic IInt32)) `TArrow` TIntrinsic (IList (TIntrinsic IInt32))) "sort")
+                                ( Trait "Numeric" (TIntrinsic IInt32)
+                                    <| Trait "Ordered" (TIntrinsic IInt32)
+                                    :| []
+                                )
+                                [EVariable () (Label (TIntrinsic (IList (TIntrinsic IInt32))) "xs")]
+                            )
+                            ( ECompiledClause
+                                (Label (TIntrinsic IInt32 `TArrow` TIntrinsic (IList (TIntrinsic IInt32)) `TArrow` TIntrinsic (IList (TIntrinsic IInt32))) "$Cons" <| Label (TIntrinsic IInt32) "$match.17.y" :| [Label (TIntrinsic (IList (TIntrinsic IInt32))) "$match.18._"])
+                                (EVariable () (Label (TIntrinsic IInt32) "$match.17.y"))
+                                <| ECompiledClause
+                                  (Label (TIntrinsic (IList (TIntrinsic IInt32))) "$Nil" :| [])
+                                  (ELiteral () (LInt32 12345))
                                 :| []
                             )
-                            [ EVariable () (Label (TIntrinsic (IList (TIntrinsic IInt32))) "xs")
-                            ]
                             :| []
                         )
                     )

@@ -464,13 +464,24 @@ moduleMain =
                         )
                     in
                       @<*>
-                        ( trace : list(int32)/*
-                        , @<list(int32)>
-                            ( BinarySearch.sort : Numeric(int32)/Ordered(int32)/list(int32)/list(int32)
-                            , $dict.2967b53e939a3c94 : Numeric(int32)
-                            , $dict.b7c5e7e84eeaf782 : Ordered(int32)
-                            , xs : list(int32)
-                            )
+                        ( trace : int32/*
+                        , match<int32>
+                            ( @<list(int32)>
+                                ( BinarySearch.sort : Numeric(int32)/Ordered(int32)/list(int32)/list(int32)
+                                , $dict.2967b53e939a3c94 : Numeric(int32)
+                                , $dict.b7c5e7e84eeaf782 : Ordered(int32)
+                                , xs : list(int32)
+                                )
+                            ) {
+                            | ( $Cons : int32/list(int32)/list(int32)
+                              , $match.17.y : int32
+                              , $match.18._ : list(int32)
+                              ) =>
+                                $match.17.y : int32
+                            | ( $Nil : list(int32)
+                              ) =>
+                                12345
+                          }
                         )
             |]
         ]

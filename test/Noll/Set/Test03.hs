@@ -875,11 +875,33 @@ moduleMain =
                     ()
                     ()
                     (EVariable () (Label () "trace"))
-                    ( EApplication
+                    ( EMatch
                         ()
                         ()
-                        (EVariable () (Label () "sort"))
-                        ( EVariable () (Label () "xs")
+                        ( EApplication
+                            ()
+                            ()
+                            (EVariable () (Label () "sort"))
+                            (EVariable () (Label () "xs") :| [])
+                        )
+                        ( EClause
+                            ()
+                            (PListLiteral () () [])
+                            ( CPlain
+                                ()
+                                []
+                                (ELiteral () (LInt32 12345))
+                                :| []
+                            )
+                            <| EClause
+                              ()
+                              (PListCons () () (PVariable () (Label () "y")) (PAny () ()))
+                              ( CPlain
+                                  ()
+                                  []
+                                  (EVariable () (Label () "y"))
+                                  :| []
+                              )
                             :| []
                         )
                         :| []
