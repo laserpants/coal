@@ -749,7 +749,7 @@ moduleMain =
                 ( EApplication
                     ()
                     ()
-                    (EVariable () (Label () "trace"))
+                    (EVariable () (Label () "@@@_trace_int32"))
                     ( EMatch
                         ()
                         ()

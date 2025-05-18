@@ -1907,7 +1907,7 @@ moduleMain =
                     ( EApplication
                         ()
                         (TVariable (TypeIndex KType 0))
-                        (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0)) "trace"))
+                        (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0)) "@@@_trace_int32"))
                         ( EMatch
                             ()
                             (TIntrinsic IInt32)

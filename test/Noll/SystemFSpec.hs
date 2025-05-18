@@ -1250,6 +1250,10 @@ testNameEnvironment =
           , "trace"
           )
         ,
+          ( "@@@_trace_int32"
+          , "Core$.$trace_int32"
+          )
+        ,
           ( "not"
           , "Core$.operator__not"
           )
