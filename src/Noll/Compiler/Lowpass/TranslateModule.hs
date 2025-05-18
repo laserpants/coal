@@ -25,7 +25,7 @@ translateModule =
         withModuleName name $
           Lowpass.Module
             name
-            (Environment.elems env)
+            (Environment.elems env <> coreImports)
             . concat
             <$> traverse translateDefinition defs
      where
@@ -34,6 +34,16 @@ translateModule =
 
 collectImports :: [Definition a k t] -> Environment Name
 collectImports = Environment.fromList . concatMap imports
+
+coreImports :: [Name]
+coreImports =
+  [ "Core$.operator__not"
+  , "Core$.operator__reverse_composition"
+  , "Core$.operator__reverse_application"
+  , "Core$.always"
+  , "Core$.operator__list_concatenation"
+  , "Core$.$trace_int32"
+  ]
 
 imports :: Definition a k t -> [(Name, Name)]
 imports =

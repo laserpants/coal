@@ -13,6 +13,8 @@ import Text.Megaparsec.Error (errorBundlePretty)
 import Text.RawString.QQ
 
 import qualified Data.Text as Text
+import qualified Lang.Lowpass.Compiler as Lowpass
+import qualified Lang.Lowpass.Compiler.Utils as Lowpass
 import qualified Lang.Lowpass.Language as Lowpass
 
 unsafeParseExpr :: Text -> Lowpass.Expr Lowpass.Type
@@ -23,6 +25,83 @@ unsafeParseExpr t =
     Right r ->
       r
 
+moduleCore1 :: Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
+moduleCore1 = unsafeParseExpr <$> moduleCore
+
+moduleCore :: Module Lowpass.Type Name Text
+moduleCore =
+  Module
+    { moduleName = "Core$"
+    , moduleImports =
+        []
+    , moduleObjects =
+        [ OFunction
+            "Core$.operator__not"
+            [ Label bool "a"
+            ]
+            [r| 
+                  if (a : bool) then false else true
+              |]
+        , OFunction
+            "Core$.operator__reverse_composition"
+            [ Label (opaque `arrow` opaque) "f"
+            , Label (opaque `arrow` opaque) "g"
+            , Label opaque "x"
+            ]
+            [r| 
+                  @<*>(f : */*, @<*>(g : */*, x : *))
+              |]
+        , OFunction
+            "Core$.operator__reverse_application"
+            [ Label opaque "x"
+            , Label (opaque `arrow` opaque) "f"
+            ]
+            [r| 
+                  @<*>(f : */*, x : *)
+              |]
+        , OFunction
+            "Core$.always"
+            [ Label opaque "a"
+            , Label opaque "_"
+            ]
+            [r|   
+                  a : *
+              |]
+        , OFunction
+            "Core$.operator__list_concatenation"
+            [ Label (TCon "list" [opaque]) "xs"
+            , Label (TCon "list" [opaque]) "ys"
+            ]
+            [r| 
+                  match<list(*)>(xs : list(*)) {
+                    | ( $Cons : */list(*)/list(*)
+                      , z : *
+                      , zs : list(*)
+                      ) =>
+                        @<list(*)>
+                          ( $Cons : */list(*)/list(*)
+                          , z : *
+                          , @<list(*)>
+                              ( Core$.operator__list_concatenation : list(*)/list(*)/list(*)
+                              , zs : list(*)
+                              , ys : list(*)
+                              )
+                          )
+                    | ( $Nil : list(*)
+                      ) =>
+                        ys : list(*)
+                  }
+              |]
+        , OFunction
+            "Core$.$trace_int32"
+            [ Label int32 "n"
+            ]
+            [r|
+                  #(print_int32 : int32/*, n : int32) (fn(a : *) => a : *)
+              |]
+        ]
+    }
+
 moduleOrdered1 :: Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
 moduleOrdered1 = unsafeParseExpr <$> moduleOrdered
 
@@ -32,6 +111,12 @@ moduleOrdered =
     { moduleName = "Ordered"
     , moduleImports =
         [ "Utils.Predicate"
+        , "Core$.operator__not"
+        , "Core$.operator__reverse_composition"
+        , "Core$.operator__reverse_application"
+        , "Core$.always"
+        , "Core$.operator__list_concatenation"
+        , "Core$.$trace_int32"
         ]
     , moduleObjects =
         [ OData "Ordered.EqualTo" 0 (TCon "Ordering" [])
@@ -132,6 +217,12 @@ moduleBinarySearch =
         , "Ordered.compare"
         , "Ordered.greater_than"
         , "Ordered.less_than_or_equal_to"
+        , "Core$.operator__not"
+        , "Core$.operator__reverse_composition"
+        , "Core$.operator__reverse_application"
+        , "Core$.always"
+        , "Core$.operator__list_concatenation"
+        , "Core$.$trace_int32"
         ]
     , moduleObjects =
         [ OData "BinarySearch.Leaf" 0 (TCon "Tree" [Lowpass.opaque])
@@ -400,6 +491,12 @@ moduleMain =
         , "BinarySearch.from_int32"
         , "BinarySearch.in_range"
         , "BinarySearch.sort"
+        , "Core$.operator__not"
+        , "Core$.operator__reverse_composition"
+        , "Core$.operator__reverse_application"
+        , "Core$.always"
+        , "Core$.operator__list_concatenation"
+        , "Core$.$trace_int32"
         ]
     , moduleObjects =
         [ OFunction
@@ -485,7 +582,7 @@ moduleMain =
                         )
                     in
                       @<*>
-                        ( trace : int32/*
+                        ( Core$.$trace_int32 : int32/*
                         , match<int32>
                             ( @<list(int32)>
                                 ( BinarySearch.sort : Numeric(int32)/Ordered(int32)/list(int32)/list(int32)
@@ -523,7 +620,13 @@ fixture1 =
         --  , Module
         moduleName = "Utils"
       , moduleImports =
-          []
+          [ "Core$.operator__not"
+          , "Core$.operator__reverse_composition"
+          , "Core$.operator__reverse_application"
+          , "Core$.always"
+          , "Core$.operator__list_concatenation"
+          , "Core$.$trace_int32"
+          ]
       , moduleObjects =
           []
       }
@@ -531,3 +634,14 @@ fixture1 =
   , moduleBinarySearch
   , moduleMain
   ]
+
+fixture2 :: [Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)]
+fixture2 =
+  [ moduleCore1
+  , moduleOrdered1
+  , moduleBinarySearch1
+  , moduleMain1
+  ]
+
+zooz :: IO ()
+zooz = Lowpass.testModules =<< Lowpass.compileModules fixture2

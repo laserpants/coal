@@ -9,6 +9,7 @@ import Data.Generics.Uniplate.Data (transform)
 import Data.Map.Strict (Map)
 import Lang.Common.List1 (List1, NonEmpty (..))
 import Lang.Label (Label (..))
+import Noll.Compiler.TraitTransform (parameterized)
 import Noll.Compiler.Transform (flattenLambda)
 import Noll.Language
 import Noll.Module (Module (..))
@@ -16,7 +17,6 @@ import Noll.Module.Constant (Constant (..))
 import Noll.Module.Definition (Definition (..))
 import Noll.Module.Function (Function (..))
 import Noll.Utils (hashed)
-import Noll.Compiler.TraitTransform (parameterized)
 
 import qualified Lang.Common.List1 as List1
 
@@ -82,10 +82,10 @@ evars = fmap (translateTrait EVariable)
 
 translateTrait :: (Monoid a) => (a -> Label (Type TypeIndex Kind) -> t) -> Trait (Type TypeIndex Kind) -> t
 translateTrait ctor trait@(Trait tname _) = ctor mempty (Label (dictionaryType trait) (name <> hashed trait))
-  where
-    name 
-      | parameterized trait = "$dict." 
-      | otherwise = tname <> "__$instance." 
+ where
+  name
+    | parameterized trait = "$dict."
+    | otherwise = tname <> "__$instance."
 
 dictionaryType :: Trait (Type TypeIndex Kind) -> Type TypeIndex Kind
 dictionaryType (Trait name t) =
