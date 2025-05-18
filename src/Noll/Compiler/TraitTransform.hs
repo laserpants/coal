@@ -97,10 +97,6 @@ transformZ =
       (as, traits) <- runWriterT (traverse transformBindingZ bs)
       let (ds, es) = NonEmpty.unzip as
       let xs = concat (NonEmpty.toList (snd <$> as)) -- :: [Scheme TypeIndex (Kind Int) (Type TypeIndex (Kind Int))]
-      -- (as, traits) <- NonEmpty.unzip <$> traverse transformBindingZ bs
-      -- (as, traits) <- NonEmpty.unzip <$> traverse transformBindingZ bs
-      -- tell (filter (not . parameterized) traits)
-      --      tell (filter parameterized traits)
       ELet a (fst <$> as) <$> local (Environment.insertMultiple xs) (transformZ e)
     expr@(EApplication a t var@(EVariable _ ll@(Label t1 name)) es) -> do
       traits <- collectTraits t1 name
@@ -108,7 +104,6 @@ transformZ =
         [] ->
           EApplication a t var <$> traverse transformZ es
         tr : trs -> do
-          -- index <- fresh
           tell (filter parameterized traits)
           ds <- traverse transformZ es
           pure (EDictionaryApplication a t ll (List1.nub (tr :| trs)) (NonEmpty.toList ds))
@@ -118,7 +113,6 @@ transformZ =
         [] ->
           pure (EVariable a ll)
         tr : trs -> do
-          -- index <- fresh
           tell (filter parameterized traits)
           pure (EDictionaryApplication a t ll (List1.nub (tr :| trs)) [])
     EListLiteral a t es ->
