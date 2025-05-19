@@ -18,6 +18,8 @@ import Noll.Module.Function (Function (..))
 
 class NormalizeObjectsTransformContext a where
   normalizeObject :: a -> a
+  -- TODO
+  -- move denormalizeObject here
 
 instance (NormalizeObjectsTransformContext a) => NormalizeObjectsTransformContext [a] where
   normalizeObject = fmap normalizeObject
