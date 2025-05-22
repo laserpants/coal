@@ -874,7 +874,7 @@ fixture27 =
 -- match x { | Yes => y }
 fixture28 :: Expression () ()
 fixture28 =
-  ( EMatch
+  EMatch
       ()
       ()
       (EVariable () (Label () "x"))
@@ -884,7 +884,6 @@ fixture28 =
           (CPlain () [] (EVariable () (Label () "y")) :| [])
           :| []
       )
-  )
 
 fixture29 :: Function Expression () ()
 fixture29 =
