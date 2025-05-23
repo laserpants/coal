@@ -29,6 +29,7 @@ library
       Noll.Ast.Indexed
       Noll.Compiler
       Noll.Compiler.DenormalizeObjects
+      Noll.Compiler.Dictionaries
       Noll.Compiler.DictionaryElimination
       Noll.Compiler.Lowpass.Environment
       Noll.Compiler.Lowpass.TranslateDefinition
