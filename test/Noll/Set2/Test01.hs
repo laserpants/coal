@@ -53,12 +53,28 @@ moduleFoo =
       DInstance
         "Show"
         undefined
-        undefined
+        [ DFunction
+            "show"
+            ( Function
+                ()
+                (With [] ())
+                undefined
+                undefined
+            )
+        ]
     , -- instance Show(list(a)) with Show(a) 
       DInstance
         "Show"
         undefined
-        undefined
+        [ DFunction
+            "show"
+            ( Function
+                ()
+                (With [] ())
+                undefined
+                undefined
+            )
+        ]
     , DConstant
         "foo"
         (
