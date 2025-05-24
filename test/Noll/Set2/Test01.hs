@@ -90,16 +90,16 @@ moduleFoo =
                                     ()
                                     OStringConcatenation
                                 )
-                                ( EApplication 
-                                    () 
-                                    () 
+                                ( EApplication
+                                    ()
+                                    ()
                                     (EVariable () (Label () "show"))
                                     (EVariable () (Label () "x") :| [])
-                                    <| EApplication 
-                                        () 
-                                        () 
-                                        (EVariable () (Label () "show")) 
-                                        (EVariable () (Label () "y") :| [])
+                                    <| EApplication
+                                      ()
+                                      ()
+                                      (EVariable () (Label () "show"))
+                                      (EVariable () (Label () "y") :| [])
                                     :| []
                                 )
                             )
