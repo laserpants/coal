@@ -151,24 +151,61 @@ moduleFoo =
     , DConstant
         "foo"
         ( Constant
-            undefined
-            undefined
+            ()
+            (With [] ())
             ( ELet
-                undefined
-                undefined
-                undefined
+                ()
+                ( BPattern
+                    ()
+                    (PVariable () (Label () "p"))
+                    ( ETuple
+                        ()
+                        ()
+                        ( ELiteral () (LInt32 1)
+                            <| ELiteral () (LString "hello")
+                            :| []
+                        )
+                    )
+                    :| []
+                )
+                ( EApplication
+                    ()
+                    ()
+                    (EVariable () (Label () "show"))
+                    (EVariable () (Label () "p") :| [])
+                )
             )
         )
     , DFunction
         "baz"
         ( Function
-            undefined
-            undefined
-            undefined
+            ()
+            (With [] ())
+            ( PVariable () (Label () "x")
+                <| PVariable () (Label () "y")
+                :| []
+            )
             ( ELet
-                undefined
-                undefined
-                undefined
+                ()
+                ( BPattern
+                    ()
+                    (PVariable () (Label () "p"))
+                    ( ETuple
+                        ()
+                        ()
+                        ( EVariable () (Label () "x")
+                            <| EVariable () (Label () "y")
+                            :| []
+                        )
+                    )
+                    :| []
+                )
+                ( EApplication
+                    ()
+                    ()
+                    (EVariable () (Label () "show"))
+                    (EVariable () (Label () "p") :| [])
+                )
             )
         )
     ]
