@@ -22,8 +22,8 @@ prog1_01 =
   , moduleMain
   ]
 
---modulePrelude :: Module () () ()
---modulePrelude =
+-- modulePrelude :: Module () () ()
+-- modulePrelude =
 --  Module.fromDefinitionList
 --    (Path ["Prelude"])
 --    -- Exports

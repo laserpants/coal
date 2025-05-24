@@ -3,10 +3,10 @@
 module Noll.Set2.Test01 where
 
 import Lang.Common.List1 (NonEmpty (..), (<|))
-import Noll.Language.Type.Intrinsic
 import Lang.Label (Label (..))
 import Noll.Language
-import Noll.Module 
+import Noll.Language.Type.Intrinsic
+import Noll.Module
 
 import qualified Data.Set as Set
 import qualified Noll.Module as Module
@@ -25,8 +25,8 @@ moduleFoo =
     -- Definitions
     [ DType
         "Pair"
-        [ Parameter () "a", Parameter () "b" ]
-        [ Constructor "Pair" 2 (Forall mempty [] (TIntrinsic (ITuple []))) ]
+        [Parameter () "a", Parameter () "b"]
+        [Constructor "Pair" 2 (Forall mempty [] (TIntrinsic (ITuple [])))]
     , DTrait
         "Show"
         []
@@ -37,7 +37,7 @@ moduleFoo =
           )
         ]
     , -- instance Show(int32)
-      DInstance
+      DInstance2
         "Show"
         (TIntrinsic IInt32)
         [ DFunction
@@ -45,44 +45,115 @@ moduleFoo =
             ( Function
                 ()
                 (With [] ())
-                (PVariable () (Label () "_") :| [])
+                (PVariable () (Label () "n") :| [])
                 (ELiteral () (LString "TODO"))
             )
         ]
     , -- instance Show(Pair(a, b)) with Show(a), Show(b)
-      DInstance
+      DInstance2
         "Show"
-        undefined
+        ( TApplication
+            ()
+            (TConstructor () "Pair")
+            ( TVariable (Parameter () "a")
+                <| TVariable (Parameter () "b")
+                :| []
+            )
+        )
         [ DFunction
             "show"
             ( Function
                 ()
                 (With [] ())
-                undefined
-                undefined
+                (PVariable () (Label () "p") :| [])
+                ( EMatch
+                    ()
+                    ()
+                    (EVariable () (Label () "p"))
+                    ( EClause
+                        ()
+                        ( PConstructor
+                            ()
+                            (Label () "Pair")
+                            [ PVariable () (Label () "x")
+                            , PVariable () (Label () "y")
+                            ]
+                        )
+                        ( CPlain
+                            ()
+                            []
+                            ( EApplication
+                                ()
+                                ()
+                                ( EBinaryOperator
+                                    ()
+                                    ()
+                                    OStringConcatenation
+                                )
+                                ( EApplication 
+                                    () 
+                                    () 
+                                    (EVariable () (Label () "show"))
+                                    (EVariable () (Label () "x") :| [])
+                                    <| EApplication 
+                                        () 
+                                        () 
+                                        (EVariable () (Label () "show")) 
+                                        (EVariable () (Label () "y") :| [])
+                                    :| []
+                                )
+                            )
+                            :| []
+                        )
+                        :| []
+                    )
+                )
             )
         ]
-    , -- instance Show(list(a)) with Show(a) 
-      DInstance
+    , -- instance Show(list(a)) with Show(a)
+      DInstance2
         "Show"
-        undefined
+        (TIntrinsic (IList (TVariable (Parameter () "a"))))
         [ DFunction
             "show"
             ( Function
                 ()
                 (With [] ())
-                undefined
-                undefined
+                (PVariable () (Label () "lst") :| [])
+                ( EMatch
+                    ()
+                    ()
+                    (EVariable () (Label () "lst"))
+                    ( EClause
+                        ()
+                        ( PListCons
+                            ()
+                            ()
+                            (PVariable () (Label () "x"))
+                            (PAny () ())
+                        )
+                        ( CPlain
+                            ()
+                            []
+                            ( EApplication
+                                ()
+                                ()
+                                (EVariable () (Label () "show"))
+                                (EVariable () (Label () "x") :| [])
+                            )
+                            :| []
+                        )
+                        :| []
+                    )
+                )
             )
         ]
     , DConstant
         "foo"
-        (
-          Constant
+        ( Constant
             undefined
             undefined
-            (
-              ELet
+            ( ELet
                 undefined
                 undefined
                 undefined
@@ -90,17 +161,14 @@ moduleFoo =
         )
     , DFunction
         "baz"
-        (
-          Function
+        ( Function
             undefined
             undefined
             undefined
-            (
-              ELet
+            ( ELet
                 undefined
                 undefined
                 undefined
             )
         )
     ]
-

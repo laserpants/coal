@@ -875,15 +875,15 @@ fixture27 =
 fixture28 :: Expression () ()
 fixture28 =
   EMatch
-      ()
-      ()
-      (EVariable () (Label () "x"))
-      ( EClause
-          ()
-          (PConstructor () (Label () "Yes") [])
-          (CPlain () [] (EVariable () (Label () "y")) :| [])
-          :| []
-      )
+    ()
+    ()
+    (EVariable () (Label () "x"))
+    ( EClause
+        ()
+        (PConstructor () (Label () "Yes") [])
+        (CPlain () [] (EVariable () (Label () "y")) :| [])
+        :| []
+    )
 
 fixture29 :: Function Expression () ()
 fixture29 =

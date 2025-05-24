@@ -37,6 +37,8 @@ data Definition a k t
     DTrait Name [Trait t] (Type Parameter ()) [(Name, Type Parameter ())]
   | -- | Trait instance
     DInstance Name (Type TypeIndex k) [Definition a k t]
+  | -- | Trait instance
+    DInstance2 Name (Type Parameter k) [Definition a k t]
   | -- | Type alias
     DTypeAlias Name [Parameter ()] (Type Parameter ())
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
