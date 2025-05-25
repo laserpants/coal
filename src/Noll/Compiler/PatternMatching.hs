@@ -21,6 +21,7 @@ import Noll.Compiler.PatternMatching.Rule (MatchMonad (..), matchPatterns)
 import Noll.Compiler.Transform.Tree (replaceWith)
 import Noll.Language (Binding (..), Choice (..), Clause (..), Expression (..), Pattern (..), Primitive (..))
 import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
+import TextShow
 
 class MatchExpressionContext a where
   compileMatchExprs :: a -> MatchMonad a
@@ -103,6 +104,8 @@ translatePattern =
       translatePattern (PConstructor a (Label t "$Cons") [p1, p2])
     PListLiteral a t ps ->
       translatePattern (translateListLiteral a t ps)
+    PTuple a t (p :| ps) ->
+      translatePattern (PConstructor a (Label t ("$Tuple" <> showt (length ps + 1))) (p : ps))
     POr{} ->
       error "TODO"
     PShorthand{} ->
