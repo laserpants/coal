@@ -50,6 +50,8 @@ import qualified Noll.Set.Test10
 import qualified Noll.Set.Test11
 import qualified Noll.Set.Test12
 import qualified Noll.Set.Test13
+import qualified Noll.Set2.Test05
+import qualified Noll.Set2.Test09
 
 spec :: Spec
 spec =
@@ -1190,6 +1192,8 @@ story = do
     fst (runExpandRecordPatterns (compileRecordPatterns Noll.Set.Test07.moduleMain) "row" 1) == Noll.Set.Test08.moduleMain
   it "" $
     runMatchMonad "match" 0 (compileMatchExprs Noll.Set.Test08.prog1_08) == Noll.Set.Test09.prog1_09
+  it "" $
+    runMatchMonad "match" 0 (compileMatchExprs Noll.Set2.Test05.prog2_05) == Noll.Set2.Test09.prog2_09
   it "" $
     result funLte == funLte2
   it "" $
