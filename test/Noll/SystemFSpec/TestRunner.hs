@@ -224,3 +224,37 @@ testTypeConstructorEnv =
 testTraitEnvironment =
   Environment.fromList
     []
+
+gork123 =
+  123
+
+newtype DictShow d a = DictShow {show_ :: d -> a -> String}
+
+unpackShow :: DictShow d a -> d -> a -> String
+unpackShow (DictShow show_) = show_
+
+instanceShowString :: DictShow () String
+instanceShowString = DictShow{show_ = \_ s -> s}
+
+instanceShowInt :: DictShow () Int
+instanceShowInt = DictShow{show_ = \_ n -> show n}
+
+instanceShowTuple = DictShow{show_ = \(d1, d2) (a, b) -> unpackShow d1 () a <> "," <> unpackShow d2 () b}
+
+instanceShowTuple1 = DictShow{show_ = \(d1, d2) (a, b) -> unpackShow d1 () a <> "," <> unpackShow d2 () b}
+
+instanceShowList = DictShow{show_ = \d1 (x : _) -> "[" <> unpackShow d1 () x <> "]"}
+
+exampleFoo =
+  let p = (1, "hello") :: (Int, String)
+   in unpackShow instanceShowTuple (instanceShowInt, instanceShowString) p
+
+exampleBaz d1 d2 x y = unpackShow instanceShowTuple (d1, d2) (x, y)
+
+exampleBar :: DictShow () a -> DictShow () b -> [(a, b)] -> String
+exampleBar d1 d2 =
+  unpackShow
+    instanceShowList
+    (DictShow{show_ = \() -> unpackShow instanceShowTuple (d1, d2)})
+
+example1 = exampleBar instanceShowInt instanceShowString [(1, "foo")]

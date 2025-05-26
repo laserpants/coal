@@ -23,7 +23,7 @@ moduleFoo =
     -- Exports
     []
     -- Definitions
-    [ 
+    []
 
 --    DType
 --        "Pair"
@@ -210,4 +210,3 @@ moduleFoo =
 --                )
 --            )
 --        )
-    ]

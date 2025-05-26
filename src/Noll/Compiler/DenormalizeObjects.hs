@@ -44,6 +44,8 @@ instance (Monoid a, Data a, Data k, Data (o k), Typeable o) => DenormalizeObject
         denormalizeConstant name c
       DInstance name t ds ->
         DInstance name t (denormalizeObject ds)
+      DInstance2 name t ds ->
+        DInstance2 name t (denormalizeObject ds)
       d ->
         d
 

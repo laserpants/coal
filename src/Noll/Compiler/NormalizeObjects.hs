@@ -18,8 +18,9 @@ import Noll.Module.Function (Function (..))
 
 class NormalizeObjectsTransformContext a where
   normalizeObject :: a -> a
-  -- TODO
-  -- move denormalizeObject here
+
+-- TODO
+-- move denormalizeObject here
 
 instance (NormalizeObjectsTransformContext a) => NormalizeObjectsTransformContext [a] where
   normalizeObject = fmap normalizeObject
@@ -45,5 +46,7 @@ instance (Monoid a, Data a, Data k, Data (o k), Typeable o) => NormalizeObjectsT
         DConstant name (Constant a (With ts (foldTypeOf t ps)) (flattenLambda (ELambda mempty ps e)))
       DInstance name t ds ->
         DInstance name t (normalizeObject ds)
+      DInstance2 name t ds ->
+        DInstance2 name t (normalizeObject ds)
       d ->
         d

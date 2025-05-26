@@ -10,6 +10,7 @@ import Lang.FreeVars (BoundVars (..))
 import Lang.Label (Label (..))
 import Lang.Utils (Dictionary)
 import Noll.Language.Primitive (Primitive (..))
+import Noll.Language.Trait (Trait (..))
 import Noll.Language.Type (Parameter (..), Type)
 
 import qualified Data.Set as Set
@@ -39,6 +40,8 @@ data Pattern a t
     PShorthand a (Label t)
   | -- | Recursion operator pattern used in fold catamorphisms
     PAtVariable a (Label t)
+  | -- | Dictionary
+    PDictionary a t (Trait t)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
 
 instance (Data a, Data t) => BoundVars (Pattern a t) where

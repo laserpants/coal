@@ -84,36 +84,36 @@ moduleFoo =
                         (TIntrinsic IString)
                         (EVariable () (Label pairType "p"))
                         ( ECompiledClause
-                            (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 1) `TArrow` pairType) "$Tuple2"
-                              <| Label (TVariable (TypeIndex KType 0)) "$match.1.x"
-                              <| Label (TVariable (TypeIndex KType 1)) "$match.2.y"
-                              :| []
+                            ( Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 1) `TArrow` pairType) "$Tuple2"
+                                <| Label (TVariable (TypeIndex KType 0)) "$match.1.x"
+                                <| Label (TVariable (TypeIndex KType 1)) "$match.2.y"
+                                :| []
                             )
+                            ( EApplication
+                                ()
+                                (TIntrinsic IString)
+                                ( EBinaryOperator
+                                    ()
+                                    (TIntrinsic IString `TArrow` TIntrinsic IString `TArrow` TIntrinsic IString)
+                                    OStringConcatenation
+                                )
                                 ( EApplication
                                     ()
                                     (TIntrinsic IString)
-                                    ( EBinaryOperator
-                                        ()
-                                        (TIntrinsic IString `TArrow` TIntrinsic IString `TArrow` TIntrinsic IString)
-                                        OStringConcatenation
-                                    )
-                                    ( EApplication
-                                        ()
-                                        (TIntrinsic IString)
-                                        (EVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IString) "show"))
-                                        (EVariable () (Label (TVariable (TypeIndex KType 0)) "$match.1.x") :| [])
-                                        <| EApplication
-                                          ()
-                                          (TIntrinsic IString)
-                                          (EVariable () (Label (TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IString) "show"))
-                                          (EVariable () (Label (TVariable (TypeIndex KType 1)) "$match.2.y") :| [])
-                                        :| []
-                                    )
+                                    (EVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IString) "show"))
+                                    (EVariable () (Label (TVariable (TypeIndex KType 0)) "$match.1.x") :| [])
+                                    <| EApplication
+                                      ()
+                                      (TIntrinsic IString)
+                                      (EVariable () (Label (TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IString) "show"))
+                                      (EVariable () (Label (TVariable (TypeIndex KType 1)) "$match.2.y") :| [])
+                                    :| []
                                 )
+                            )
                             :| []
                         )
                     )
-                    )
+                )
             )
         ]
     , -- instance Show(list(a)) with Show(a)
@@ -133,17 +133,17 @@ moduleFoo =
                         (TIntrinsic IString)
                         (EVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 0)))) "lst"))
                         ( ECompiledClause
-                            (Label (TVariable (TypeIndex KType 0) `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 0))) `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 0)))) "$Cons"
-                              <| Label (TVariable (TypeIndex KType 0)) "$match.4.x"
-                              <| Label (TIntrinsic (IList (TVariable (TypeIndex KType 0)))) "$match.5._"
-                              :| []
+                            ( Label (TVariable (TypeIndex KType 0) `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 0))) `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 0)))) "$Cons"
+                                <| Label (TVariable (TypeIndex KType 0)) "$match.4.x"
+                                <| Label (TIntrinsic (IList (TVariable (TypeIndex KType 0)))) "$match.5._"
+                                :| []
                             )
-                                ( EApplication
-                                    ()
-                                    (TIntrinsic IString)
-                                    (EVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IString) "show"))
-                                    (EVariable () (Label (TVariable (TypeIndex KType 0)) "$match.4.x") :| [])
-                                )
+                            ( EApplication
+                                ()
+                                (TIntrinsic IString)
+                                (EVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IString) "show"))
+                                (EVariable () (Label (TVariable (TypeIndex KType 0)) "$match.4.x") :| [])
+                            )
                             :| []
                         )
                     )

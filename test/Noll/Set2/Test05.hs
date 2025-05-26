@@ -122,7 +122,7 @@ moduleFoo =
                             :| []
                         )
                     )
-                    )
+                )
             )
         ]
     , -- instance Show(list(a)) with Show(a)
