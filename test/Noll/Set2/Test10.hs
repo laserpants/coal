@@ -11,7 +11,7 @@ import Noll.Module
 import qualified Data.Map.Strict as Map
 import qualified Noll.Module as Module
 
--- Dictionary insertion?
+-- Dictionary insertion
 prog2_10 :: [Module () Kind IndexedType]
 prog2_10 =
   [ moduleFoo
@@ -229,42 +229,54 @@ moduleFoo =
         "baz"
         ( Constant
             ()
-            (With [] (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IString))
+            ( With
+                [ Trait "Show" (TVariable (TypeIndex KType 0))
+                , Trait "Show" (TVariable (TypeIndex KType 1))
+                ]
+                (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IString)
+            )
             ( ELambda
                 ()
-                ( PVariable () (Label (TVariable (TypeIndex KType 0)) "x")
-                    <| PVariable () (Label (TVariable (TypeIndex KType 1)) "y")
+                ( PDictionary () (showType (TVariable (TypeIndex KType 0))) (Trait "Show" (TVariable (TypeIndex KType 0)))
+                    <| PDictionary () (showType (TVariable (TypeIndex KType 1))) (Trait "Show" (TVariable (TypeIndex KType 1)))
                     :| []
                 )
-                ( ELet
+                ( ELambda
                     ()
-                    ( BPattern
-                        ()
-                        (PVariable () (Label pairType "p"))
-                        ( ETuple
-                            ()
-                            pairType
-                            ( EVariable () (Label (TVariable (TypeIndex KType 0)) "x")
-                                <| EVariable () (Label (TVariable (TypeIndex KType 1)) "y")
-                                :| []
-                            )
-                        )
+                    ( PVariable () (Label (TVariable (TypeIndex KType 0)) "x")
+                        <| PVariable () (Label (TVariable (TypeIndex KType 1)) "y")
                         :| []
                     )
-                    ( EApplication
+                    ( ELet
                         ()
-                        (TIntrinsic IString)
+                        ( BPattern
+                            ()
+                            (PVariable () (Label pairType "p"))
+                            ( ETuple
+                                ()
+                                pairType
+                                ( EVariable () (Label (TVariable (TypeIndex KType 0)) "x")
+                                    <| EVariable () (Label (TVariable (TypeIndex KType 1)) "y")
+                                    :| []
+                                )
+                            )
+                            :| []
+                        )
                         ( EApplication
                             ()
-                            (pairType `TArrow` TIntrinsic IString)
-                            (EVariable () (Label (showType pairType `TArrow` showType (TVariable (TypeIndex KType 0)) `TArrow` showType (TVariable (TypeIndex KType 1)) `TArrow` pairType `TArrow` TIntrinsic IString) "show"))
-                            ( EDictionary () (showType pairType) (Trait "Show" pairType)
-                                <| EDictionary () (showType (TVariable (TypeIndex KType 0))) (Trait "Show" (TVariable (TypeIndex KType 0)))
-                                <| EDictionary () (showType (TVariable (TypeIndex KType 1))) (Trait "Show" (TVariable (TypeIndex KType 1)))
-                                :| []
+                            (TIntrinsic IString)
+                            ( EApplication
+                                ()
+                                (pairType `TArrow` TIntrinsic IString)
+                                (EVariable () (Label (showType pairType `TArrow` showType (TVariable (TypeIndex KType 0)) `TArrow` showType (TVariable (TypeIndex KType 1)) `TArrow` pairType `TArrow` TIntrinsic IString) "show"))
+                                ( EDictionary () (showType pairType) (Trait "Show" pairType)
+                                    <| EDictionary () (showType (TVariable (TypeIndex KType 0))) (Trait "Show" (TVariable (TypeIndex KType 0)))
+                                    <| EDictionary () (showType (TVariable (TypeIndex KType 1))) (Trait "Show" (TVariable (TypeIndex KType 1)))
+                                    :| []
+                                )
                             )
+                            (EVariable () (Label pairType "p") :| [])
                         )
-                        (EVariable () (Label pairType "p") :| [])
                     )
                 )
             )
@@ -273,42 +285,54 @@ moduleFoo =
         "bar"
         ( Constant
             ()
-            (With [] (TIntrinsic (IList pairType) `TArrow` TIntrinsic IString))
+            ( With
+                [ Trait "Show" (TVariable (TypeIndex KType 0))
+                , Trait "Show" (TVariable (TypeIndex KType 1))
+                ]
+                (TIntrinsic (IList pairType) `TArrow` TIntrinsic IString)
+            )
             ( ELambda
                 ()
-                (PVariable () (Label (TIntrinsic (IList pairType)) "xs") :| [])
-                ( EApplication
+                ( PDictionary () (showType (TVariable (TypeIndex KType 0))) (Trait "Show" (TVariable (TypeIndex KType 0)))
+                    <| PDictionary () (showType (TVariable (TypeIndex KType 1))) (Trait "Show" (TVariable (TypeIndex KType 1)))
+                    :| []
+                )
+                ( ELambda
                     ()
-                    (TIntrinsic IString)
+                    (PVariable () (Label (TIntrinsic (IList pairType)) "xs") :| [])
                     ( EApplication
                         ()
-                        (TIntrinsic (IList pairType) `TArrow` TIntrinsic IString)
-                        (EVariable () (Label (showType (TIntrinsic (IList pairType)) `TArrow` TIntrinsic (IList pairType) `TArrow` TIntrinsic IString) "show"))
-                        ( EDictionary () (showType (TIntrinsic (IList pairType))) (Trait "Show" (TIntrinsic (IList pairType)))
-                            <| ERecord
-                              ()
-                              ( TIntrinsic (IRecord (TRow (RExtend "show" (pairType `TArrow` TIntrinsic IString) RNil)))
-                              )
-                              ( Map.fromList
-                                  [
-                                    ( "show"
-                                    , EApplication
-                                        ()
-                                        (pairType `TArrow` TIntrinsic IString)
-                                        (EVariable () (Label (showType pairType `TArrow` showType (TVariable (TypeIndex KType 0)) `TArrow` showType (TVariable (TypeIndex KType 1)) `TArrow` pairType `TArrow` TIntrinsic IString) "show"))
-                                        ( EDictionary () (showType pairType) (Trait "Show" pairType)
-                                            <| EDictionary () (showType (TVariable (TypeIndex KType 0))) (Trait "Show" (TVariable (TypeIndex KType 0)))
-                                            <| EDictionary () (showType (TVariable (TypeIndex KType 1))) (Trait "Show" (TVariable (TypeIndex KType 1)))
-                                            :| []
+                        (TIntrinsic IString)
+                        ( EApplication
+                            ()
+                            (TIntrinsic (IList pairType) `TArrow` TIntrinsic IString)
+                            (EVariable () (Label (showType (TIntrinsic (IList pairType)) `TArrow` TIntrinsic (IList pairType) `TArrow` TIntrinsic IString) "show"))
+                            ( EDictionary () (showType (TIntrinsic (IList pairType))) (Trait "Show" (TIntrinsic (IList pairType)))
+                                <| ERecord
+                                  ()
+                                  ( TIntrinsic (IRecord (TRow (RExtend "show" (pairType `TArrow` TIntrinsic IString) RNil)))
+                                  )
+                                  ( Map.fromList
+                                      [
+                                        ( "show"
+                                        , EApplication
+                                            ()
+                                            (pairType `TArrow` TIntrinsic IString)
+                                            (EVariable () (Label (showType pairType `TArrow` showType (TVariable (TypeIndex KType 0)) `TArrow` showType (TVariable (TypeIndex KType 1)) `TArrow` pairType `TArrow` TIntrinsic IString) "show"))
+                                            ( EDictionary () (showType pairType) (Trait "Show" pairType)
+                                                <| EDictionary () (showType (TVariable (TypeIndex KType 0))) (Trait "Show" (TVariable (TypeIndex KType 0)))
+                                                <| EDictionary () (showType (TVariable (TypeIndex KType 1))) (Trait "Show" (TVariable (TypeIndex KType 1)))
+                                                :| []
+                                            )
                                         )
-                                    )
-                                  ]
-                              )
-                              Nothing
-                            :| []
+                                      ]
+                                  )
+                                  Nothing
+                                :| []
+                            )
                         )
+                        (EVariable () (Label (TIntrinsic (IList pairType)) "xs") :| [])
                     )
-                    (EVariable () (Label (TIntrinsic (IList pairType)) "xs") :| [])
                 )
             )
         )

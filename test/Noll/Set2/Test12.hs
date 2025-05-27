@@ -213,8 +213,15 @@ moduleFoo =
         "baz"
         ( Function
             ()
-            (With [] (TIntrinsic IString))
-            ( PVariable () (Label (TVariable (TypeIndex KType 0)) "x")
+            ( With
+                [ Trait "Show" (TVariable (TypeIndex KType 0))
+                , Trait "Show" (TVariable (TypeIndex KType 1))
+                ]
+                (TIntrinsic IString)
+            )
+            ( PDictionary () (showType (TVariable (TypeIndex KType 0))) (Trait "Show" (TVariable (TypeIndex KType 0)))
+                <| PDictionary () (showType (TVariable (TypeIndex KType 1))) (Trait "Show" (TVariable (TypeIndex KType 1)))
+                <| PVariable () (Label (TVariable (TypeIndex KType 0)) "x")
                 <| PVariable () (Label (TVariable (TypeIndex KType 1)) "y")
                 :| []
             )
@@ -254,8 +261,17 @@ moduleFoo =
         "bar"
         ( Function
             ()
-            (With [] (TIntrinsic IString))
-            (PVariable () (Label (TIntrinsic (IList pairType)) "xs") :| [])
+            ( With
+                [ Trait "Show" (TVariable (TypeIndex KType 0))
+                , Trait "Show" (TVariable (TypeIndex KType 1))
+                ]
+                (TIntrinsic IString)
+            )
+            ( PDictionary () (showType (TVariable (TypeIndex KType 0))) (Trait "Show" (TVariable (TypeIndex KType 0)))
+                <| PDictionary () (showType (TVariable (TypeIndex KType 1))) (Trait "Show" (TVariable (TypeIndex KType 1)))
+                <| PVariable () (Label (TIntrinsic (IList pairType)) "xs")
+                :| []
+            )
             ( EApplication
                 ()
                 (TIntrinsic IString)
