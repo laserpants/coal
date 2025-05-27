@@ -52,6 +52,8 @@ instance (Monoid a, Data a, Data k, Data (o k), Typeable o) => DenormalizeObject
 denormalizeConstant :: (Data a, Data k, Data (o k), Typeable o) => Name -> Constant Expression a (Type o k) -> Definition a k (Type o k)
 denormalizeConstant name =
   \case
+    Constant a with (ELambda a1 ps (ELambda _ qs e)) ->
+      denormalizeConstant name (Constant a with (ELambda a1 (ps <> qs) e))
     Constant a (With ts t) (ELambda _ ps e) ->
       DFunction name (Function a (With ts (typeOf e)) ps e)
     c@Constant{} ->
