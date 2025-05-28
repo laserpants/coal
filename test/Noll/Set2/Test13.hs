@@ -308,12 +308,12 @@ moduleFoo =
                         , Foo.show__$instance.string : string/string
                         )
               |]
---        , OFunction
---            "Foo.baz"
---            [
---            ]
---            undefined
-        , OFunction
+        , --        , OFunction
+          --            "Foo.baz"
+          --            [
+          --            ]
+          --            undefined
+          OFunction
             "Foo.bar"
             [ Label (TCon "Show" [TOpq]) "$dict1"
             , Label (TCon "Show" [TOpq]) "$dict2"
