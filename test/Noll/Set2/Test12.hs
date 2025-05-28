@@ -282,8 +282,7 @@ moduleFoo =
                     ( EDictionary () (showType (TIntrinsic (IList pairType))) (Trait "Show" (TIntrinsic (IList pairType)))
                         <| ERecord
                           ()
-                          ( TIntrinsic (IRecord (TRow (RExtend "show" (pairType `TArrow` TIntrinsic IString) RNil)))
-                          )
+                          ( TIntrinsic (IRecord (TRow (RExtend "show" (pairType `TArrow` TIntrinsic IString) RNil))))
                           ( Map.fromList
                               [
                                 ( "show"

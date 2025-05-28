@@ -611,14 +611,7 @@ prog1_13 = unsafeParseExpr <$$> fixture1
 fixture1 :: [Module Lowpass.Type Name Text]
 fixture1 =
   [ Module
-      { --      { moduleName = "Core$"
-        --      , moduleImports =
-        --          []
-        --      , moduleObjects =
-        --          []
-        --      }
-        --  , Module
-        moduleName = "Utils"
+      { moduleName = "Utils"
       , moduleImports =
           [ "Core$.operator__not"
           , "Core$.operator__reverse_composition"
