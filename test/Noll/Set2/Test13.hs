@@ -93,14 +93,14 @@ moduleCore =
                   }
               |]
         , OFunction
-            "Core$.$trace_int32"
+            "Core$.trace_int32"
             [ Label int32 "n"
             ]
             [r|
                   #(print_int32 : int32/*, n : int32) (fn(a : *) => a : *)
               |]
         , OFunction
-            "Core$.$trace_string"
+            "Core$.trace_string"
             [ Label string "s"
             ]
             [r|
@@ -356,8 +356,8 @@ moduleMain =
         , "Core$.operator__reverse_application"
         , "Core$.always"
         , "Core$.operator__list_concatenation"
-        , "Core$.$trace_int32"
-        , "Core$.$trace_string"
+        , "Core$.trace_int32"
+        , "Core$.trace_string"
         , "Core$.operator__string_concatenation"
         , "Foo.Show__$instance.string"
         , "Foo.Show__$instance.pair"
@@ -392,7 +392,7 @@ moduleMain =
                       //        )
                       //      in
                       //        @<*>
-                      //          ( Core$.$trace_string : string/*
+                      //          ( Core$.trace_string : string/*
                       //          , s : string
                       //          )
 
@@ -436,7 +436,7 @@ moduleMain =
                               )
                             in
                               @<*>
-                                ( Core$.$trace_string : string/*
+                                ( Core$.trace_string : string/*
                                 , s : string
                                 )
 
@@ -461,7 +461,7 @@ moduleMain =
                   //          )
                   //  in
                   //    @<*>
-                  //      ( Core$.$trace_string : string/*
+                  //      ( Core$.trace_string : string/*
                   //      , q : string
                   //      )
             |]

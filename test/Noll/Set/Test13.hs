@@ -93,7 +93,7 @@ moduleCore =
                   }
               |]
         , OFunction
-            "Core$.$trace_int32"
+            "Core$.trace_int32"
             [ Label int32 "n"
             ]
             [r|
@@ -116,7 +116,7 @@ moduleOrdered =
         , "Core$.operator__reverse_application"
         , "Core$.always"
         , "Core$.operator__list_concatenation"
-        , "Core$.$trace_int32"
+        , "Core$.trace_int32"
         ]
     , moduleObjects =
         [ OData "Ordered.EqualTo" 0 (TCon "Ordering" [])
@@ -222,7 +222,7 @@ moduleBinarySearch =
         , "Core$.operator__reverse_application"
         , "Core$.always"
         , "Core$.operator__list_concatenation"
-        , "Core$.$trace_int32"
+        , "Core$.trace_int32"
         ]
     , moduleObjects =
         [ OData "BinarySearch.Leaf" 0 (TCon "Tree" [Lowpass.opaque])
@@ -496,7 +496,7 @@ moduleMain =
         , "Core$.operator__reverse_application"
         , "Core$.always"
         , "Core$.operator__list_concatenation"
-        , "Core$.$trace_int32"
+        , "Core$.trace_int32"
         ]
     , moduleObjects =
         [ OFunction
@@ -582,7 +582,7 @@ moduleMain =
                         )
                     in
                       @<*>
-                        ( Core$.$trace_int32 : int32/*
+                        ( Core$.trace_int32 : int32/*
                         , match<int32>
                             ( @<list(int32)>
                                 ( BinarySearch.sort : Numeric(int32)/Ordered(int32)/list(int32)/list(int32)
@@ -618,7 +618,7 @@ fixture1 =
           , "Core$.operator__reverse_application"
           , "Core$.always"
           , "Core$.operator__list_concatenation"
-          , "Core$.$trace_int32"
+          , "Core$.trace_int32"
           ]
       , moduleObjects =
           []

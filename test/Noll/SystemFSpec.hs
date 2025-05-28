@@ -1258,7 +1258,7 @@ testNameEnvironment =
           )
         ,
           ( "@@@_trace_int32"
-          , "Core$.$trace_int32"
+          , "Core$.trace_int32"
           )
         ,
           ( "not"

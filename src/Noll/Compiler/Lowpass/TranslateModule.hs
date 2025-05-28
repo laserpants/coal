@@ -42,7 +42,7 @@ coreImports =
   , "Core$.operator__reverse_application"
   , "Core$.always"
   , "Core$.operator__list_concatenation"
-  , "Core$.$trace_int32"
+  , "Core$.trace_int32"
   ]
 
 imports :: Definition a k t -> [(Name, Name)]
