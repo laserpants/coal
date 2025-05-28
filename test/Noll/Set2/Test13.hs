@@ -114,6 +114,13 @@ moduleCore =
             [r|
                   #(string_concat : string/string/string, s : string, t : string) (fn(r : string) => r : string)
               |]
+        , OFunction
+            "Core$.int32_to_string"
+            [ Label int32 "n"
+            ]
+            [r| 
+                  #(int32_to_string : int32/string, n : int32) (fn(r : string) => r : string)
+              |]
         ]
     }
 
@@ -126,6 +133,7 @@ moduleFoo =
     { moduleName = "Foo"
     , moduleImports =
         [ "Core$.operator__string_concatenation"
+        , "Core$.int32_to_string"
         ]
     , moduleObjects =
         [ OFunction
@@ -144,36 +152,22 @@ moduleFoo =
                             $f : *
                   }
               |]
-        , OFunction
-            "Foo.show__$instance.string"
-            [ Label Lowpass.string "s"
-            ]
-            [r| 
-                  s : string
-              |]
         , OConstant
             "Foo.Show__$instance.string"
             [r| 
                   @<Show(string)>
                     ( $Record : { show : string/string | {} }/Show(string)
-                    , { show = Foo.show__$instance.string : string/string
+                    , { show = fn(s : string) => s : string
                       | {}
                       }
                     )
-              |]
-        , OFunction
-            "Foo.show__$instance.int32"
-            [ Label Lowpass.int32 "n"
-            ]
-            [r| 
-                  #(int32_to_string : int32/string, n : int32) (fn(r : string) => r : string)
               |]
         , OConstant
             "Foo.Show__$instance.int32"
             [r| 
                   @<Show(int32)>
                     ( $Record : { show : int32/string | {} }/Show(int32)
-                    , { show = Foo.show__$instance.int32 : int32/string
+                    , { show = Core$.int32_to_string : int32/string
                       | {}
                       }
                     )
