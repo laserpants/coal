@@ -25,10 +25,36 @@ moduleMain =
     []
     -- Definitions
     [ -- instance Traceable(string)
+      DInstance2
+        "Traceable"
+        (TIntrinsic IString)
+        [
+        ]
       -- instance Traceable(int32)
+    , DInstance2
+        "Traceable"
+        (TIntrinsic IInt32)
+        [
+        ]
       -- instance Traceable((a, b))
+    , DInstance2
+        "Traceable"
+        (TIntrinsic (ITuple [TVariable (Parameter () "a"), TVariable (Parameter () "b")]))
+        [
+        ]
       -- instance Traceable(list(a))
+    , DInstance2
+        "Traceable"
+        (TIntrinsic (IList (TVariable (Parameter () "a"))))
+        [
+        ]
       -- pair1
+    , DConstant
+        "pair1"
+        undefined
       -- list1
+    , DConstant
+        "list1"
+        undefined
     ]
 
