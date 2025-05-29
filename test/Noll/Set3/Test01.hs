@@ -14,16 +14,21 @@ import qualified Noll.Module as Module
 -- Untyped source tree
 prog3_01 :: [Module () () ()]
 prog3_01 =
-  [ moduleExample
-  , moduleMain
+  [ moduleMain
   ]
-
-moduleExample :: Module () () ()
-moduleExample =
-  undefined
 
 moduleMain :: Module () () ()
 moduleMain =
-  undefined
-
+  Module.fromDefinitionList
+    (Path ["Main"])
+    -- Exports
+    []
+    -- Definitions
+    [ -- instance Traceable(string)
+      -- instance Traceable(int32)
+      -- instance Traceable((a, b))
+      -- instance Traceable(list(a))
+      -- pair1
+      -- list1
+    ]
 
