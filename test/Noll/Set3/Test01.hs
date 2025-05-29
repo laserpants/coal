@@ -106,8 +106,7 @@ moduleMain =
             (With [] ())
             ( ELet
                 ()
-                (
-                  BPattern
+                ( BPattern
                     ()
                     (PVariable () (Label () "p"))
                     ( ETuple
@@ -118,7 +117,7 @@ moduleMain =
                             :| []
                         )
                     )
-                  :| []
+                    :| []
                 )
                 ( EApplication
                     ()

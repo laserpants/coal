@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
 
-module Noll.Set3.Test04 where
+module Noll.Set3.Test05 where
 
 import Lang.Common.List1 (NonEmpty (..), (<|))
 import Lang.Label (Label (..))
@@ -11,9 +11,9 @@ import Noll.Module
 
 import qualified Noll.Module as Module
 
--- Add type info
-prog3_04 :: [Module () Kind IndexedType]
-prog3_04 =
+-- Normalize top-level definitions
+prog3_05 :: [Module () Kind IndexedType]
+prog3_05 =
   [ moduleMain
   ]
 
@@ -35,30 +35,36 @@ moduleMain =
       DInstance2
         "Traceable"
         (TIntrinsic IString)
-        [ DFunction
+        [ DConstant
             "trace"
-            ( Function
+            ( Constant
                 ()
-                (With [] (TIntrinsic IString))
-                (PVariable () (Label (TIntrinsic IString) "s") :| [])
-                (EVariable () (Label (TIntrinsic IString) "s"))
+                (With [] (TIntrinsic IString `TArrow` TIntrinsic IString))
+                ( ELambda
+                    ()
+                    (PVariable () (Label (TIntrinsic IString) "s") :| [])
+                    (EVariable () (Label (TIntrinsic IString) "s"))
+                )
             )
         ]
     , -- instance Traceable(int32)
       DInstance2
         "Traceable"
         (TIntrinsic IInt32)
-        [ DFunction
+        [ DConstant
             "trace"
-            ( Function
+            ( Constant
                 ()
-                (With [] (TIntrinsic IString))
-                (PVariable () (Label (TIntrinsic IInt32) "n") :| [])
-                ( EApplication
+                (With [] (TIntrinsic IInt32 `TArrow` TIntrinsic IString))
+                ( ELambda
                     ()
-                    (TIntrinsic IString)
-                    (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IString) "int32_to_string"))
-                    (EVariable () (Label (TIntrinsic IInt32) "n") :| [])
+                    (PVariable () (Label (TIntrinsic IInt32) "n") :| [])
+                    ( EApplication
+                        ()
+                        (TIntrinsic IString)
+                        (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IString) "int32_to_string"))
+                        (EVariable () (Label (TIntrinsic IInt32) "n") :| [])
+                    )
                 )
             )
         ]
@@ -66,17 +72,20 @@ moduleMain =
       DInstance2
         "Traceable"
         (TIntrinsic (ITuple [TVariable (Parameter KType "a"), TVariable (Parameter KType "b")]))
-        [ DFunction
+        [ DConstant
             "trace"
-            ( Function
+            ( Constant
                 ()
-                (With [] (TIntrinsic IString))
-                (PVariable () (Label (TIntrinsic (ITuple [TVariable (TypeIndex KType 0), TVariable (TypeIndex KType 1)])) "p") :| [])
-                ( EApplication
+                (With [] (TIntrinsic (ITuple [TVariable (TypeIndex KType 0), TVariable (TypeIndex KType 1)]) `TArrow` TIntrinsic IString))
+                ( ELambda
                     ()
-                    (TIntrinsic IString)
-                    (EVariable () (Label (TIntrinsic (ITuple [TVariable (TypeIndex KType 0), TVariable (TypeIndex KType 1)]) `TArrow` TIntrinsic IString) "pair_to_string"))
-                    (EVariable () (Label (TIntrinsic (ITuple [TVariable (TypeIndex KType 0), TVariable (TypeIndex KType 1)])) "p") :| [])
+                    (PVariable () (Label (TIntrinsic (ITuple [TVariable (TypeIndex KType 0), TVariable (TypeIndex KType 1)])) "p") :| [])
+                    ( EApplication
+                        ()
+                        (TIntrinsic IString)
+                        (EVariable () (Label (TIntrinsic (ITuple [TVariable (TypeIndex KType 0), TVariable (TypeIndex KType 1)]) `TArrow` TIntrinsic IString) "pair_to_string"))
+                        (EVariable () (Label (TIntrinsic (ITuple [TVariable (TypeIndex KType 0), TVariable (TypeIndex KType 1)])) "p") :| [])
+                    )
                 )
             )
         ]
@@ -84,17 +93,20 @@ moduleMain =
       DInstance2
         "Traceable"
         (TIntrinsic (IList (TVariable (Parameter KType "a"))))
-        [ DFunction
+        [ DConstant
             "trace"
-            ( Function
+            ( Constant
                 ()
-                (With [] (TIntrinsic IString))
-                (PVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 0)))) "lst") :| [])
-                ( EApplication
+                (With [] (TIntrinsic (IList (TVariable (TypeIndex KType 0))) `TArrow` TIntrinsic IString))
+                ( ELambda
                     ()
-                    (TIntrinsic IString)
-                    (EVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 0))) `TArrow` TIntrinsic IString) "list_to_string"))
-                    (EVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 0)))) "lst") :| [])
+                    (PVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 0)))) "lst") :| [])
+                    ( EApplication
+                        ()
+                        (TIntrinsic IString)
+                        (EVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 0))) `TArrow` TIntrinsic IString) "list_to_string"))
+                        (EVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 0)))) "lst") :| [])
+                    )
                 )
             )
         ]
