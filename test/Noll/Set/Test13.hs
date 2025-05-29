@@ -99,6 +99,136 @@ moduleCore =
             [r|
                   #(print_int32 : int32/*, n : int32) (fn(a : *) => a : *)
               |]
+        , OFunction
+            "Core$.trace_string"
+            [ Label string "s"
+            ]
+            [r|
+                  #(print_string : string/*, s : string) (fn(a : *) => a : *)
+              |]
+        , OFunction
+            "Core$.operator__string_concatenation"
+            [ Label string "s"
+            , Label string "t"
+            ]
+            [r|
+                  #(string_concat : string/string/string, s : string, t : string) (fn(r : string) => r : string)
+              |]
+        , OFunction
+            "Core$.int32_to_string"
+            [ Label int32 "n"
+            ]
+            [r| 
+                  #(int32_to_string : int32/string, n : int32) (fn(r : string) => r : string)
+              |]
+        , OFunction
+            "Core$.pair_to_string"
+            [ Label (TCon "Traceable" [TOpq]) "$dict1"
+            , Label (TCon "Traceable" [TOpq]) "$dict2"
+            , Label (TCon "$Tuple2" [TOpq, TOpq]) "p"
+            ]
+            [r| 
+                  match<string>
+                    ( p : $Tuple2(*,*) ) { 
+                      | ( $Tuple2 : */*/$Tuple2(*,*)
+                        , a : *
+                        , b : *
+                        ) =>
+                          @<string>
+                            ( Core$.operator__string_concatenation : string/string/string
+                            , @<string>
+                                ( Core$.operator__string_concatenation : string/string/string
+                                , "("
+                                , @<string>
+                                    ( Core$.operator__string_concatenation : string/string/string
+                                    , @<string>
+                                        ( Core$.operator__string_concatenation : string/string/string
+                                        , @<string>
+                                            ( Core$.show : Show(*)/*/string
+                                            , $dict1 : Show(*)
+                                            , a : *
+                                            )
+                                        , ","
+                                        )
+                                    , @<string>
+                                        ( Core$.show : Show(*)/*/string
+                                        , $dict2 : Show(*)
+                                        , b : *
+                                        )
+                                    )
+                                )
+                            , ")"
+                            )
+                    }
+              |]
+        , OFunction
+            "Core$.list_to_string"
+            [ Label (TCon "Traceable" [TOpq]) "$dict1"
+            , Label (TCon "list" [TOpq]) "ls"
+            ]
+            [r| 
+                  let
+                    f : bool/list(*)/string =
+                      fn(first : bool, l : list(*)) =>
+                        match<string>
+                          ( l : list(*)
+                          ) {
+                            | ( $Cons : */list(*)/list(*)
+                              , x : *
+                              , xs : list(*)
+                              ) =>
+                                @<string>
+                                  ( Core$.operator__string_concatenation : string/string/string
+                                  , if (first : bool) then "" else ","
+                                  , @<string>
+                                      ( Core$.operator__string_concatenation : string/string/string
+                                      , @<string>
+                                          ( Core$.show : Show(*)/*/string
+                                          , $dict1 : Show(*)
+                                          , x : *
+                                          )
+                                      , @<string>
+                                          ( f : list(*)/string
+                                          , false
+                                          , xs : list(*)
+                                          )
+                                      )
+                                  )
+                            | ( $Nil : list(*)
+                              ) =>
+                                ""
+                          }
+                    in
+                      @<string>
+                        ( Core$.operator__string_concatenation : string/string/string
+                        , @<string>
+                            ( Core$.operator__string_concatenation : string/string/string
+                            , "["
+                            , @<string>
+                                ( f : list(*)/string
+                                , true
+                                , ls : list(*)
+                                )
+                            )
+                        , "]"
+                        )
+              |]
+        , OFunction
+            "Core$.trace"
+            [ Label (TCon "Traceable" [opaque]) "$a"
+            ]
+            [r| 
+                  match<*>($a : Traceable(*)) {
+                    | ( $Record : { trace : * | * }/Traceable(*)
+                      , $r : { trace : * | * }
+                      ) =>
+                        select
+                          { trace = $f : * | _ : * } =
+                            $r : { trace : * | * }
+                          in
+                            $f : *
+                  }
+              |]
         ]
     }
 
@@ -117,6 +247,12 @@ moduleOrdered =
         , "Core$.always"
         , "Core$.operator__list_concatenation"
         , "Core$.trace_int32"
+        , "Core$.trace_string"
+        , "Core$.operator__string_concatenation"
+        , "Core$.int32_to_string"
+        , "Core$.pair_to_string"
+        , "Core$.list_to_string"
+        , "Core$.trace"
         ]
     , moduleObjects =
         [ OData "Ordered.EqualTo" 0 (TCon "Ordering" [])
@@ -223,6 +359,12 @@ moduleBinarySearch =
         , "Core$.always"
         , "Core$.operator__list_concatenation"
         , "Core$.trace_int32"
+        , "Core$.trace_string"
+        , "Core$.operator__string_concatenation"
+        , "Core$.int32_to_string"
+        , "Core$.pair_to_string"
+        , "Core$.list_to_string"
+        , "Core$.trace"
         ]
     , moduleObjects =
         [ OData "BinarySearch.Leaf" 0 (TCon "Tree" [Lowpass.opaque])
@@ -497,6 +639,12 @@ moduleMain =
         , "Core$.always"
         , "Core$.operator__list_concatenation"
         , "Core$.trace_int32"
+        , "Core$.trace_string"
+        , "Core$.operator__string_concatenation"
+        , "Core$.int32_to_string"
+        , "Core$.pair_to_string"
+        , "Core$.list_to_string"
+        , "Core$.trace"
         ]
     , moduleObjects =
         [ OFunction
@@ -619,6 +767,12 @@ fixture1 =
           , "Core$.always"
           , "Core$.operator__list_concatenation"
           , "Core$.trace_int32"
+          , "Core$.trace_string"
+          , "Core$.operator__string_concatenation"
+          , "Core$.int32_to_string"
+          , "Core$.pair_to_string"
+          , "Core$.list_to_string"
+          , "Core$.trace"
           ]
       , moduleObjects =
           []

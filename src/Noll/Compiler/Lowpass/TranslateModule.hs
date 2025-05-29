@@ -43,6 +43,12 @@ coreImports =
   , "Core$.always"
   , "Core$.operator__list_concatenation"
   , "Core$.trace_int32"
+  , "Core$.trace_string"
+  , "Core$.operator__string_concatenation"
+  , "Core$.int32_to_string"
+  , "Core$.pair_to_string"
+  , "Core$.list_to_string"
+  , "Core$.trace"
   ]
 
 imports :: Definition a k t -> [(Name, Name)]

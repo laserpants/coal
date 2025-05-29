@@ -20,10 +20,10 @@ prog2_12 =
 pairType :: IndexedType
 pairType = TIntrinsic (ITuple [TVariable (TypeIndex KType 0), TVariable (TypeIndex KType 1)])
 
-showType t =
+traceableType t =
   TApplication
     KTrait
-    (TConstructor (KType `KArrow` KTrait) "Show")
+    (TConstructor (KType `KArrow` KTrait) "Traceable")
     (t :| [])
 
 moduleFoo :: Module () Kind IndexedType
@@ -34,20 +34,20 @@ moduleFoo =
     []
     -- Definitions
     [ DTrait
-        "Show"
+        "Traceable"
         []
         (TVariable (Parameter () "a"))
         [
-          ( "show"
+          ( "trace"
           , TVariable (Parameter () "a") `TArrow` TIntrinsic IString
           )
         ]
     , -- instance Show(string)
       DInstance2
-        "Show"
+        "Traceable"
         (TIntrinsic IString)
         [ DFunction
-            "show"
+            "trace"
             ( Function
                 ()
                 (With [] (TIntrinsic IString))
@@ -57,10 +57,10 @@ moduleFoo =
         ]
     , -- instance Show(int32)
       DInstance2
-        "Show"
+        "Traceable"
         (TIntrinsic IInt32)
         [ DFunction
-            "show"
+            "trace"
             ( Function
                 ()
                 (With [] (TIntrinsic IString))
@@ -70,20 +70,20 @@ moduleFoo =
         ]
     , -- instance Show((a, b)) with Show(a), Show(b)
       DInstance2
-        "Show"
+        "Traceable"
         (TIntrinsic (ITuple [TVariable (Parameter KType "a"), TVariable (Parameter KType "b")]))
         [ DFunction
-            "show"
+            "trace"
             ( Function
                 ()
                 ( With
-                    [ Trait "Show" (TVariable (TypeIndex KType 0))
-                    , Trait "Show" (TVariable (TypeIndex KType 1))
+                    [ Trait "Traceable" (TVariable (TypeIndex KType 0))
+                    , Trait "Traceable" (TVariable (TypeIndex KType 1))
                     ]
                     (TIntrinsic IString)
                 )
-                ( PDictionary () (showType (TVariable (TypeIndex KType 0))) (Trait "Show" (TVariable (TypeIndex KType 0)))
-                    <| PDictionary () (showType (TVariable (TypeIndex KType 1))) (Trait "Show" (TVariable (TypeIndex KType 1)))
+                ( PDictionary () (traceableType (TVariable (TypeIndex KType 0))) (Trait "Traceable" (TVariable (TypeIndex KType 0)))
+                    <| PDictionary () (traceableType (TVariable (TypeIndex KType 1))) (Trait "Traceable" (TVariable (TypeIndex KType 1)))
                     <| PVariable () (Label pairType "p")
                     :| []
                 )
@@ -111,8 +111,8 @@ moduleFoo =
                                 ( EApplication
                                     ()
                                     (TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IString)
-                                    (EVariable () (Label (showType (TVariable (TypeIndex KType 0)) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IString) "show"))
-                                    (EDictionary () (showType (TVariable (TypeIndex KType 0))) (Trait "Show" (TVariable (TypeIndex KType 0))) :| [])
+                                    (EVariable () (Label (traceableType (TVariable (TypeIndex KType 0)) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IString) "trace"))
+                                    (EDictionary () (traceableType (TVariable (TypeIndex KType 0))) (Trait "Traceable" (TVariable (TypeIndex KType 0))) :| [])
                                 )
                                 (EVariable () (Label (TVariable (TypeIndex KType 0)) "$match.1.x") :| [])
                                 <| EApplication
@@ -121,8 +121,8 @@ moduleFoo =
                                   ( EApplication
                                       ()
                                       (TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IString)
-                                      (EVariable () (Label (showType (TVariable (TypeIndex KType 1)) `TArrow` TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IString) "show"))
-                                      (EDictionary () (showType (TVariable (TypeIndex KType 1))) (Trait "Show" (TVariable (TypeIndex KType 1))) :| [])
+                                      (EVariable () (Label (traceableType (TVariable (TypeIndex KType 1)) `TArrow` TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IString) "trace"))
+                                      (EDictionary () (traceableType (TVariable (TypeIndex KType 1))) (Trait "Traceable" (TVariable (TypeIndex KType 1))) :| [])
                                   )
                                   (EVariable () (Label (TVariable (TypeIndex KType 1)) "$match.2.y") :| [])
                                 :| []
@@ -135,14 +135,14 @@ moduleFoo =
         ]
     , -- instance Show(list(a)) with Show(a)
       DInstance2
-        "Show"
+        "Traceable"
         (TIntrinsic (IList (TVariable (Parameter KType "a"))))
         [ DFunction
-            "show"
+            "trace"
             ( Function
                 ()
-                (With [Trait "Show" (TVariable (TypeIndex KType 0))] (TIntrinsic IString))
-                ( PDictionary () (showType (TVariable (TypeIndex KType 0))) (Trait "Show" (TVariable (TypeIndex KType 0)))
+                (With [Trait "Traceable" (TVariable (TypeIndex KType 0))] (TIntrinsic IString))
+                ( PDictionary () (traceableType (TVariable (TypeIndex KType 0))) (Trait "Traceable" (TVariable (TypeIndex KType 0)))
                     <| PVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 0)))) "lst")
                     :| []
                 )
@@ -162,8 +162,8 @@ moduleFoo =
                             ( EApplication
                                 ()
                                 (TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IString)
-                                (EVariable () (Label (showType (TVariable (TypeIndex KType 0)) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IString) "show"))
-                                (EDictionary () (showType (TVariable (TypeIndex KType 0))) (Trait "Show" (TVariable (TypeIndex KType 0))) :| [])
+                                (EVariable () (Label (traceableType (TVariable (TypeIndex KType 0)) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IString) "trace"))
+                                (EDictionary () (traceableType (TVariable (TypeIndex KType 0))) (Trait "Traceable" (TVariable (TypeIndex KType 0))) :| [])
                             )
                             (EVariable () (Label (TVariable (TypeIndex KType 0)) "$match.4.x") :| [])
                         )
@@ -198,10 +198,10 @@ moduleFoo =
                     ( EApplication
                         ()
                         (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]) `TArrow` TIntrinsic IString)
-                        (EVariable () (Label (showType (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])) `TArrow` showType (TIntrinsic IInt32) `TArrow` showType (TIntrinsic IString) `TArrow` TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]) `TArrow` TIntrinsic IString) "show"))
-                        ( EDictionary () (showType (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))) (Trait "Show" (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])))
-                            <| EDictionary () (showType (TIntrinsic IInt32)) (Trait "Show" (TIntrinsic IInt32))
-                            <| EDictionary () (showType (TIntrinsic IString)) (Trait "Show" (TIntrinsic IString))
+                        (EVariable () (Label (traceableType (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])) `TArrow` traceableType (TIntrinsic IInt32) `TArrow` traceableType (TIntrinsic IString) `TArrow` TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]) `TArrow` TIntrinsic IString) "trace"))
+                        ( EDictionary () (traceableType (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))) (Trait "Traceable" (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])))
+                            <| EDictionary () (traceableType (TIntrinsic IInt32)) (Trait "Traceable" (TIntrinsic IInt32))
+                            <| EDictionary () (traceableType (TIntrinsic IString)) (Trait "Traceable" (TIntrinsic IString))
                             :| []
                         )
                     )
@@ -214,13 +214,13 @@ moduleFoo =
         ( Function
             ()
             ( With
-                [ Trait "Show" (TVariable (TypeIndex KType 0))
-                , Trait "Show" (TVariable (TypeIndex KType 1))
+                [ Trait "Traceable" (TVariable (TypeIndex KType 0))
+                , Trait "Traceable" (TVariable (TypeIndex KType 1))
                 ]
                 (TIntrinsic IString)
             )
-            ( PDictionary () (showType (TVariable (TypeIndex KType 0))) (Trait "Show" (TVariable (TypeIndex KType 0)))
-                <| PDictionary () (showType (TVariable (TypeIndex KType 1))) (Trait "Show" (TVariable (TypeIndex KType 1)))
+            ( PDictionary () (traceableType (TVariable (TypeIndex KType 0))) (Trait "Traceable" (TVariable (TypeIndex KType 0)))
+                <| PDictionary () (traceableType (TVariable (TypeIndex KType 1))) (Trait "Traceable" (TVariable (TypeIndex KType 1)))
                 <| PVariable () (Label (TVariable (TypeIndex KType 0)) "x")
                 <| PVariable () (Label (TVariable (TypeIndex KType 1)) "y")
                 :| []
@@ -246,10 +246,10 @@ moduleFoo =
                     ( EApplication
                         ()
                         (pairType `TArrow` TIntrinsic IString)
-                        (EVariable () (Label (showType pairType `TArrow` showType (TVariable (TypeIndex KType 0)) `TArrow` showType (TVariable (TypeIndex KType 1)) `TArrow` pairType `TArrow` TIntrinsic IString) "show"))
-                        ( EDictionary () (showType pairType) (Trait "Show" pairType)
-                            <| EDictionary () (showType (TVariable (TypeIndex KType 0))) (Trait "Show" (TVariable (TypeIndex KType 0)))
-                            <| EDictionary () (showType (TVariable (TypeIndex KType 1))) (Trait "Show" (TVariable (TypeIndex KType 1)))
+                        (EVariable () (Label (traceableType pairType `TArrow` traceableType (TVariable (TypeIndex KType 0)) `TArrow` traceableType (TVariable (TypeIndex KType 1)) `TArrow` pairType `TArrow` TIntrinsic IString) "trace"))
+                        ( EDictionary () (traceableType pairType) (Trait "Traceable" pairType)
+                            <| EDictionary () (traceableType (TVariable (TypeIndex KType 0))) (Trait "Traceable" (TVariable (TypeIndex KType 0)))
+                            <| EDictionary () (traceableType (TVariable (TypeIndex KType 1))) (Trait "Traceable" (TVariable (TypeIndex KType 1)))
                             :| []
                         )
                     )
@@ -262,13 +262,13 @@ moduleFoo =
         ( Function
             ()
             ( With
-                [ Trait "Show" (TVariable (TypeIndex KType 0))
-                , Trait "Show" (TVariable (TypeIndex KType 1))
+                [ Trait "Traceable" (TVariable (TypeIndex KType 0))
+                , Trait "Traceable" (TVariable (TypeIndex KType 1))
                 ]
                 (TIntrinsic IString)
             )
-            ( PDictionary () (showType (TVariable (TypeIndex KType 0))) (Trait "Show" (TVariable (TypeIndex KType 0)))
-                <| PDictionary () (showType (TVariable (TypeIndex KType 1))) (Trait "Show" (TVariable (TypeIndex KType 1)))
+            ( PDictionary () (traceableType (TVariable (TypeIndex KType 0))) (Trait "Traceable" (TVariable (TypeIndex KType 0)))
+                <| PDictionary () (traceableType (TVariable (TypeIndex KType 1))) (Trait "Traceable" (TVariable (TypeIndex KType 1)))
                 <| PVariable () (Label (TIntrinsic (IList pairType)) "xs")
                 :| []
             )
@@ -278,21 +278,21 @@ moduleFoo =
                 ( EApplication
                     ()
                     (TIntrinsic (IList pairType) `TArrow` TIntrinsic IString)
-                    (EVariable () (Label (showType (TIntrinsic (IList pairType)) `TArrow` TIntrinsic (IList pairType) `TArrow` TIntrinsic IString) "show"))
-                    ( EDictionary () (showType (TIntrinsic (IList pairType))) (Trait "Show" (TIntrinsic (IList pairType)))
+                    (EVariable () (Label (traceableType (TIntrinsic (IList pairType)) `TArrow` TIntrinsic (IList pairType) `TArrow` TIntrinsic IString) "trace"))
+                    ( EDictionary () (traceableType (TIntrinsic (IList pairType))) (Trait "Traceable" (TIntrinsic (IList pairType)))
                         <| ERecord
                           ()
-                          (TIntrinsic (IRecord (TRow (RExtend "show" (pairType `TArrow` TIntrinsic IString) RNil))))
+                          (TIntrinsic (IRecord (TRow (RExtend "trace" (pairType `TArrow` TIntrinsic IString) RNil))))
                           ( Map.fromList
                               [
-                                ( "show"
+                                ( "trace"
                                 , EApplication
                                     ()
                                     (pairType `TArrow` TIntrinsic IString)
-                                    (EVariable () (Label (showType pairType `TArrow` showType (TVariable (TypeIndex KType 0)) `TArrow` showType (TVariable (TypeIndex KType 1)) `TArrow` pairType `TArrow` TIntrinsic IString) "show"))
-                                    ( EDictionary () (showType pairType) (Trait "Show" pairType)
-                                        <| EDictionary () (showType (TVariable (TypeIndex KType 0))) (Trait "Show" (TVariable (TypeIndex KType 0)))
-                                        <| EDictionary () (showType (TVariable (TypeIndex KType 1))) (Trait "Show" (TVariable (TypeIndex KType 1)))
+                                    (EVariable () (Label (traceableType pairType `TArrow` traceableType (TVariable (TypeIndex KType 0)) `TArrow` traceableType (TVariable (TypeIndex KType 1)) `TArrow` pairType `TArrow` TIntrinsic IString) "trace"))
+                                    ( EDictionary () (traceableType pairType) (Trait "Traceable" pairType)
+                                        <| EDictionary () (traceableType (TVariable (TypeIndex KType 0))) (Trait "Traceable" (TVariable (TypeIndex KType 0)))
+                                        <| EDictionary () (traceableType (TVariable (TypeIndex KType 1))) (Trait "Traceable" (TVariable (TypeIndex KType 1)))
                                         :| []
                                     )
                                 )

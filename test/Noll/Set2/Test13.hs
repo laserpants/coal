@@ -121,62 +121,11 @@ moduleCore =
             [r| 
                   #(int32_to_string : int32/string, n : int32) (fn(r : string) => r : string)
               |]
-        ]
-    }
-
-moduleFoo1 :: Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
-moduleFoo1 = unsafeParseExpr <$> moduleFoo
-
-moduleFoo :: Module Lowpass.Type Name Text
-moduleFoo =
-  Module
-    { moduleName = "Foo"
-    , moduleImports =
-        [ "Core$.operator__string_concatenation"
-        , "Core$.int32_to_string"
-        ]
-    , moduleObjects =
-        [ OFunction
-            "Foo.show"
-            [ Label (TCon "Show" [opaque]) "$a"
-            ]
-            [r| 
-                  match<*>($a : Show(*)) {
-                    | ( $Record : { show : * | * }/Show(*)
-                      , $r : { show : * | * }
-                      ) =>
-                        select
-                          { show = $f : * | _ : * } =
-                            $r : { show : * | * }
-                          in
-                            $f : *
-                  }
-              |]
-        , OConstant
-            "Foo.Show__$instance.string"
-            [r| 
-                  @<Show(string)>
-                    ( $Record : { show : string/string | {} }/Show(string)
-                    , { show = fn(s : string) => s : string
-                      | {}
-                      }
-                    )
-              |]
-        , OConstant
-            "Foo.Show__$instance.int32"
-            [r| 
-                  @<Show(int32)>
-                    ( $Record : { show : int32/string | {} }/Show(int32)
-                    , { show = Core$.int32_to_string : int32/string
-                      | {}
-                      }
-                    )
-              |]
         , OFunction
-            "Foo.show__$instance.pair"
-            [ Label (TCon "Show" [TOpq]) "$dict1"
-            , Label (TCon "Show" [TOpq]) "$dict2"
-            , Label Lowpass.opaque "p"
+            "Core$.pair_to_string"
+            [ Label (TCon "Traceable" [TOpq]) "$dict1"
+            , Label (TCon "Traceable" [TOpq]) "$dict2"
+            , Label (TCon "$Tuple2" [TOpq, TOpq]) "p"
             ]
             [r| 
                   match<string>
@@ -195,15 +144,15 @@ moduleFoo =
                                     , @<string>
                                         ( Core$.operator__string_concatenation : string/string/string
                                         , @<string>
-                                            ( Foo.show : Show(*)/*/string
-                                            , $dict1 : Show(*)
+                                            ( Core$.trace : Traceable(*)/*/string
+                                            , $dict1 : Traceable(*)
                                             , a : *
                                             )
                                         , ","
                                         )
                                     , @<string>
-                                        ( Foo.show : Show(*)/*/string
-                                        , $dict2 : Show(*)
+                                        ( Core$.trace : Traceable(*)/*/string
+                                        , $dict2 : Traceable(*)
                                         , b : *
                                         )
                                     )
@@ -212,19 +161,9 @@ moduleFoo =
                             )
                     }
               |]
-        , OConstant
-            "Foo.Show__$instance.pair"
-            [r| 
-                  @<Show($Tuple2(*,*))>
-                    ( $Record : { show : Show(*)/Show(*)/$Tuple2(*,*)/string | {} }/Show($Tuple2(*,*))
-                    , { show = Foo.show__$instance.pair : Show(*)/Show(*)/$Tuple2(*,*)/string
-                      | {}
-                      }
-                    )
-              |]
         , OFunction
-            "Foo.show__$instance.list"
-            [ Label (TCon "Show" [TOpq]) "$dict1"
+            "Core$.list_to_string"
+            [ Label (TCon "Traceable" [TOpq]) "$dict1"
             , Label (TCon "list" [TOpq]) "ls"
             ]
             [r| 
@@ -244,8 +183,8 @@ moduleFoo =
                                   , @<string>
                                       ( Core$.operator__string_concatenation : string/string/string
                                       , @<string>
-                                          ( Foo.show : Show(*)/*/string
-                                          , $dict1 : Show(*)
+                                          ( Core$.trace : Traceable(*)/*/string
+                                          , $dict1 : Traceable(*)
                                           , x : *
                                           )
                                       , @<string>
@@ -274,12 +213,75 @@ moduleFoo =
                         , "]"
                         )
               |]
-        , OConstant
-            "Foo.Show__$instance.list"
+        , OFunction
+            "Core$.trace"
+            [ Label (TCon "Traceable" [opaque]) "$a"
+            ]
             [r| 
-                  @<Show(list(*))>
-                    ( $Record : { show : Show(*)/list(*)/string | {} }/Show(list(*))
-                    , { show = Foo.show__$instance.list : Show(*)/list(*)/string
+                  match<*>($a : Traceable(*)) {
+                    | ( $Record : { trace : * | * }/Traceable(*)
+                      , $r : { trace : * | * }
+                      ) =>
+                        select
+                          { trace = $f : * | _ : * } =
+                            $r : { trace : * | * }
+                          in
+                            $f : *
+                  }
+              |]
+        ]
+    }
+
+moduleFoo1 :: Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
+moduleFoo1 = unsafeParseExpr <$> moduleFoo
+
+moduleFoo :: Module Lowpass.Type Name Text
+moduleFoo =
+  Module
+    { moduleName = "Foo"
+    , moduleImports =
+        [ "Core$.operator__string_concatenation"
+        , "Core$.int32_to_string"
+        , "Core$.pair_to_string"
+        , "Core$.list_to_string"
+        ]
+    , moduleObjects =
+        [ OConstant
+            "Foo.Traceable__$instance.string"
+            [r| 
+                  @<Traceable(string)>
+                    ( $Record : { trace : string/string | {} }/Traceable(string)
+                    , { trace = fn(s : string) => s : string
+                      | {}
+                      }
+                    )
+              |]
+        , OConstant
+            "Foo.Traceable__$instance.int32"
+            [r| 
+                  @<Traceable(int32)>
+                    ( $Record : { trace : int32/string | {} }/Traceable(int32)
+                    , { trace = Core$.int32_to_string : int32/string
+                      | {}
+                      }
+                    )
+              |]
+        , OConstant
+            "Foo.Traceable__$instance.pair"
+            [r| 
+                  @<Traceable($Tuple2(*,*))>
+                    ( $Record : { trace : Traceable(*)/Traceable(*)/$Tuple2(*,*)/string | {} }/Traceable($Tuple2(*,*))
+                    , { trace = Core$.pair_to_string : Traceable(*)/Traceable(*)/$Tuple2(*,*)/string
+                      | {}
+                      }
+                    )
+              |]
+        , OConstant
+            "Foo.Traceable__$instance.list"
+            [r| 
+                  @<Traceable(list(*))>
+                    ( $Record : { trace : Traceable(*)/list(*)/string | {} }/Traceable(list(*))
+                    , { trace = Core$.list_to_string : Traceable(*)/list(*)/string
                       | {}
                       }
                     )
@@ -296,10 +298,10 @@ moduleFoo =
                         )
                     in
                       @<string>
-                        ( Foo.show__$instance.pair : Show(*)/Show(*)/$Tuple2(*,*)/string
+                        ( Core$.trace__$instance.pair : Traceable(*)/Traceable(*)/$Tuple2(*,*)/string
                         , p : $Tuple2(int32, string)
-                        , Foo.show__$instance.int32 : int32/string
-                        , Foo.show__$instance.string : string/string
+                        , Core$.trace__$instance.int32 : int32/string
+                        , Core$.trace__$instance.string : string/string
                         )
               |]
         , --        , OFunction
@@ -309,23 +311,23 @@ moduleFoo =
           --            undefined
           OFunction
             "Foo.bar"
-            [ Label (TCon "Show" [TOpq]) "$dict1"
-            , Label (TCon "Show" [TOpq]) "$dict2"
+            [ Label (TCon "Traceable" [TOpq]) "$dict1"
+            , Label (TCon "Traceable" [TOpq]) "$dict2"
             , Label (TCon "list" [opaque]) "xs"
             ]
             [r| 
                   @<string>
                     ( @<list(*)/string>
-                        ( show : Show(list(*))
-                        , Foo.Show__$instance.list : Show(*)/list(*)/string
-                        , @<Show(*)> 
-                            ( $Record : { show : * | * }/Show(*)
-                            , { show = 
-                                  @<Show(*)>
-                                    ( Foo.show : Show($Tuple2(*,*))/Show(*)/Show(*)/Show(*)
-                                    , Foo.Show__$instance.list : Show($Tuple2(*,*))
-                                    , $dict1 : Show(*)
-                                    , $dict2 : Show(*)
+                        ( trace : Traceable(list(*))
+                        , Foo.Traceable__$instance.list : Traceable(*)/list(*)/string
+                        , @<Traceable(*)> 
+                            ( $Record : { trace : * | * }/Traceable(*)
+                            , { trace = 
+                                  @<Traceable(*)>
+                                    ( Core$.trace : Traceable($Tuple2(*,*))/Traceable(*)/Traceable(*)/Traceable(*)
+                                    , Core$.Traceable__$instance.list : Traceable($Tuple2(*,*))
+                                    , $dict1 : Traceable(*)
+                                    , $dict2 : Traceable(*)
                                     )
                               | {}
                               }
@@ -353,12 +355,12 @@ moduleMain =
         , "Core$.trace_int32"
         , "Core$.trace_string"
         , "Core$.operator__string_concatenation"
-        , "Foo.Show__$instance.string"
-        , "Foo.Show__$instance.pair"
-        , "Foo.Show__$instance.int32"
-        , "Foo.Show__$instance.list"
+        , "Foo.Traceable__$instance.string"
+        , "Foo.Traceable__$instance.pair"
+        , "Foo.Traceable__$instance.int32"
+        , "Foo.Traceable__$instance.list"
         , "Foo.foo"
-        , "Foo.show"
+        , "Core$.trace"
         ]
     , moduleObjects =
         [ OFunction
@@ -379,9 +381,9 @@ moduleMain =
                       //  in
                       //    let s : string =
                       //      @<string>
-                      //        ( Foo.show : Show(list(int32))/Show(int32)/list(int32)/string
-                      //        , Foo.Show__$instance.list : Show(list(int32))
-                      //        , Foo.Show__$instance.int32 : Show(int32)
+                      //        ( Core$.trace : Traceable(list(int32))/Traceable(int32)/list(int32)/string
+                      //        , Foo.Traceable__$instance.list : Traceable(list(int32))
+                      //        , Foo.Traceable__$instance.int32 : Traceable(int32)
                       //        , xs : list(int32)
                       //        )
                       //      in
@@ -412,16 +414,16 @@ moduleMain =
                         in
                           let s : string =
                             @<string>
-                              ( Foo.show : Show(list($Tuple2(int32, string)))/Show($Tuple2(int32, string))/list($Tuple2(int32, string))/string
-                              , Foo.Show__$instance.list : Show(list($Tuple2(int32, string)))
-                              , @<Show($Tuple2(int32, string))> 
-                                  ( $Record : { show : * | * }/Show(*)
-                                  , { show = 
+                              ( Core$.trace : Traceable(list($Tuple2(int32, string)))/Traceable($Tuple2(int32, string))/list($Tuple2(int32, string))/string
+                              , Foo.Traceable__$instance.list : Traceable(list($Tuple2(int32, string)))
+                              , @<Traceable($Tuple2(int32, string))> 
+                                  ( $Record : { trace : * | * }/Traceable(*)
+                                  , { trace = 
                                         @<$Tuple2(int32, string)/string>
-                                          ( Foo.show : Show($Tuple2(int32, string))/Show(int32)/Show(string)/$Tuple2(int32, string)/string
-                                          , Foo.Show__$instance.pair : Show($Tuple2(int32, string))
-                                          , Foo.Show__$instance.int32 : Show(int32)
-                                          , Foo.Show__$instance.string : Show(string)
+                                          ( Core$.trace : Traceable($Tuple2(int32, string))/Traceable(int32)/Traceable(string)/$Tuple2(int32, string)/string
+                                          , Foo.Traceable__$instance.pair : Traceable($Tuple2(int32, string))
+                                          , Foo.Traceable__$instance.int32 : Traceable(int32)
+                                          , Foo.Traceable__$instance.string : Traceable(string)
                                           )
                                     | {}
                                     }
@@ -446,10 +448,10 @@ moduleMain =
                   //      in
                   //        @<string>
                   //          ( @<$Tuple2(int32, string)/string>
-                  //              ( Foo.show : Show($Tuple2(int32, string))/Show(int32)/Show(string)/$Tuple2(int32, string)/string
-                  //              , Foo.Show__$instance.pair : Show($Tuple2(int32, string))
-                  //              , Foo.Show__$instance.int32 : Show(int32)
-                  //              , Foo.Show__$instance.string : Show(string)
+                  //              ( Core$.trace : Traceable($Tuple2(int32, string))/Traceable(int32)/Traceable(string)/$Tuple2(int32, string)/string
+                  //              , Foo.Traceable__$instance.pair : Traceable($Tuple2(int32, string))
+                  //              , Foo.Traceable__$instance.int32 : Traceable(int32)
+                  //              , Foo.Traceable__$instance.string : Traceable(string)
                   //              )
                   //          , p : $Tuple2(int32, string)
                   //          )
