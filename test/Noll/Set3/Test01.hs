@@ -28,33 +28,60 @@ moduleMain =
       DInstance2
         "Traceable"
         (TIntrinsic IString)
-        [
+        [ DFunction
+            "trace"
+            ( Function
+                ()
+                undefined
+                undefined
+                undefined
+            )
         ]
-      -- instance Traceable(int32)
-    , DInstance2
+    , -- instance Traceable(int32)
+      DInstance2
         "Traceable"
         (TIntrinsic IInt32)
-        [
+        [ DFunction
+            "trace"
+            ( Function
+                ()
+                undefined
+                undefined
+                undefined
+            )
         ]
-      -- instance Traceable((a, b))
-    , DInstance2
+    , -- instance Traceable((a, b))
+      DInstance2
         "Traceable"
         (TIntrinsic (ITuple [TVariable (Parameter () "a"), TVariable (Parameter () "b")]))
-        [
+        [ DFunction
+            "trace"
+            ( Function
+                ()
+                undefined
+                undefined
+                undefined
+            )
         ]
-      -- instance Traceable(list(a))
-    , DInstance2
+    , -- instance Traceable(list(a))
+      DInstance2
         "Traceable"
         (TIntrinsic (IList (TVariable (Parameter () "a"))))
-        [
+        [ DFunction
+            "trace"
+            ( Function
+                ()
+                undefined
+                undefined
+                undefined
+            )
         ]
-      -- pair1
-    , DConstant
+    , -- pair1
+      DConstant
         "pair1"
         undefined
-      -- list1
-    , DConstant
+    , -- list1
+      DConstant
         "list1"
         undefined
     ]
-
