@@ -56,6 +56,8 @@ import qualified Noll.Set2.Test10
 import qualified Noll.Set2.Test12
 import qualified Noll.Set3.Test04
 import qualified Noll.Set3.Test05
+import qualified Noll.Set3.Test10
+import qualified Noll.Set3.Test12
 
 spec :: Spec
 spec =
@@ -1234,6 +1236,8 @@ story = do
     denormalizeObject Noll.Set.Test11.prog1_11 == Noll.Set.Test12.prog1_12
   it "" $
     denormalizeObject Noll.Set2.Test10.prog2_10 == Noll.Set2.Test12.prog2_12
+  it "" $
+    denormalizeObject Noll.Set3.Test10.prog3_10 == Noll.Set3.Test12.prog3_12
   it "" $
     runReader (withModuleName "Ordered" (translateDefinition orderedCompareInstance1)) testNameEnvironment == [orderedCompareInstance1Result]
   it "" $

@@ -108,10 +108,10 @@ moduleMain =
                 ()
                 ( BPattern
                     ()
-                    (PVariable () (Label (TIntrinsic (ITuple [TVariable (TypeIndex KType 0), TVariable (TypeIndex KType 1)])) "p"))
+                    (PVariable () (Label (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])) "p"))
                     ( ETuple
                         ()
-                        (TIntrinsic (ITuple [TVariable (TypeIndex KType 0), TVariable (TypeIndex KType 1)]))
+                        (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))
                         ( ELiteral () (LInt32 1)
                             <| ELiteral () (LString "hello")
                             :| []
@@ -122,8 +122,8 @@ moduleMain =
                 ( EApplication
                     ()
                     (TIntrinsic IString)
-                    (EVariable () (Label (TIntrinsic (ITuple [TVariable (TypeIndex KType 0), TVariable (TypeIndex KType 1)]) `TArrow` TIntrinsic IString) "trace"))
-                    ( EVariable () (Label (TIntrinsic (ITuple [TVariable (TypeIndex KType 0), TVariable (TypeIndex KType 1)])) "p")
+                    (EVariable () (Label (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]) `TArrow` TIntrinsic IString) "trace"))
+                    ( EVariable () (Label (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])) "p")
                         :| []
                     )
                 )
