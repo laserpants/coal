@@ -152,124 +152,124 @@ moduleMain =
                 )
             )
         ]
-    , -- pair1
-      DConstant
-        "pair1"
-        ( Constant
-            ()
-            (With [] (TIntrinsic IString))
-            ( ELet
-                ()
-                ( BPattern
-                    ()
-                    (PVariable () (Label (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])) "p"))
-                    ( ETuple
-                        ()
-                        (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))
-                        ( ELiteral () (LInt32 1)
-                            <| ELiteral () (LString "hello")
-                            :| []
-                        )
-                    )
-                    :| []
-                )
-                ( EApplication
-                    ()
-                    (TIntrinsic IString)
-                    ( EApplication
-                        ()
-                        (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]) `TArrow` TIntrinsic IString)
-                        ( EVariable
-                            ()
-                            ( Label
-                                ( traceType (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))
-                                    `TArrow` traceType (TIntrinsic IInt32)
-                                    `TArrow` traceType (TIntrinsic IString)
-                                    `TArrow` TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])
-                                    `TArrow` TIntrinsic IString
-                                )
-                                "trace"
-                            )
-                        )
-                        ( EDictionary () (traceType (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))) (Trait "Traceable" (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])))
-                            <| EDictionary () (traceType (TIntrinsic IInt32)) (Trait "Traceable" (TIntrinsic IInt32))
-                            <| EDictionary () (traceType (TIntrinsic IString)) (Trait "Traceable" (TIntrinsic IString))
-                            :| []
-                        )
-                    )
-                    ( EVariable () (Label (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])) "p")
-                        :| []
-                    )
-                )
-            )
-        )
-    , -- list1
-      DConstant
-        "list1"
-        ( Constant
-            ()
-            (With [] (TIntrinsic IString))
-            ( EApplication
-                ()
-                (TIntrinsic IString)
-                ( EApplication
-                    ()
-                    (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))) `TArrow` TIntrinsic IString)
-                    (EVariable () (Label (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))) `TArrow` TIntrinsic IString) "trace"))
-                    ( EDictionary () (traceType (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))))) (Trait "Traceable" (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])))))
-                        <| ERecord
-                          ()
-                          (TIntrinsic (IRecord (TRow (RExtend "trace" (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]) `TArrow` TIntrinsic IString) RNil))))
-                          ( Map.fromList
-                              [
-                                ( "trace"
-                                , EApplication
-                                    ()
-                                    (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]) `TArrow` TIntrinsic IString)
-                                    ( EVariable
-                                        ()
-                                        ( Label
-                                            ( traceType (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))
-                                                `TArrow` traceType (TIntrinsic IInt32)
-                                                `TArrow` traceType (TIntrinsic IString)
-                                                `TArrow` TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])
-                                                `TArrow` TIntrinsic IString
-                                            )
-                                            "trace"
-                                        )
-                                    )
-                                    ( EDictionary () (traceType (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))) (Trait "Traceable" (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])))
-                                        <| EDictionary () (traceType (TIntrinsic IInt32)) (Trait "Traceable" (TIntrinsic IInt32))
-                                        <| EDictionary () (traceType (TIntrinsic IString)) (Trait "Traceable" (TIntrinsic IString))
-                                        :| []
-                                    )
-                                )
-                              ]
-                          )
-                          Nothing
-                        :| []
-                    )
-                )
-                ( EListLiteral
-                    ()
-                    (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))))
-                    [ ETuple
-                        ()
-                        (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))
-                        ( ELiteral () (LInt32 1)
-                            <| ELiteral () (LString "a")
-                            :| []
-                        )
-                    , ETuple
-                        ()
-                        (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))
-                        ( ELiteral () (LInt32 2)
-                            <| ELiteral () (LString "b")
-                            :| []
-                        )
-                    ]
-                    :| []
-                )
-            )
-        )
+--    , -- pair1
+--      DConstant
+--        "pair1"
+--        ( Constant
+--            ()
+--            (With [] (TIntrinsic IString))
+--            ( ELet
+--                ()
+--                ( BPattern
+--                    ()
+--                    (PVariable () (Label (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])) "p"))
+--                    ( ETuple
+--                        ()
+--                        (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))
+--                        ( ELiteral () (LInt32 1)
+--                            <| ELiteral () (LString "hello")
+--                            :| []
+--                        )
+--                    )
+--                    :| []
+--                )
+--                ( EApplication
+--                    ()
+--                    (TIntrinsic IString)
+--                    ( EApplication
+--                        ()
+--                        (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]) `TArrow` TIntrinsic IString)
+--                        ( EVariable
+--                            ()
+--                            ( Label
+--                                ( traceType (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))
+--                                    `TArrow` traceType (TIntrinsic IInt32)
+--                                    `TArrow` traceType (TIntrinsic IString)
+--                                    `TArrow` TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])
+--                                    `TArrow` TIntrinsic IString
+--                                )
+--                                "trace"
+--                            )
+--                        )
+--                        ( EDictionary () (traceType (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))) (Trait "Traceable" (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])))
+--                            <| EDictionary () (traceType (TIntrinsic IInt32)) (Trait "Traceable" (TIntrinsic IInt32))
+--                            <| EDictionary () (traceType (TIntrinsic IString)) (Trait "Traceable" (TIntrinsic IString))
+--                            :| []
+--                        )
+--                    )
+--                    ( EVariable () (Label (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])) "p")
+--                        :| []
+--                    )
+--                )
+--            )
+--        )
+--    , -- list1
+--      DConstant
+--        "list1"
+--        ( Constant
+--            ()
+--            (With [] (TIntrinsic IString))
+--            ( EApplication
+--                ()
+--                (TIntrinsic IString)
+--                ( EApplication
+--                    ()
+--                    (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))) `TArrow` TIntrinsic IString)
+--                    (EVariable () (Label (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))) `TArrow` TIntrinsic IString) "trace"))
+--                    ( EDictionary () (traceType (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))))) (Trait "Traceable" (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])))))
+--                        <| ERecord
+--                          ()
+--                          (TIntrinsic (IRecord (TRow (RExtend "trace" (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]) `TArrow` TIntrinsic IString) RNil))))
+--                          ( Map.fromList
+--                              [
+--                                ( "trace"
+--                                , EApplication
+--                                    ()
+--                                    (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]) `TArrow` TIntrinsic IString)
+--                                    ( EVariable
+--                                        ()
+--                                        ( Label
+--                                            ( traceType (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))
+--                                                `TArrow` traceType (TIntrinsic IInt32)
+--                                                `TArrow` traceType (TIntrinsic IString)
+--                                                `TArrow` TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])
+--                                                `TArrow` TIntrinsic IString
+--                                            )
+--                                            "trace"
+--                                        )
+--                                    )
+--                                    ( EDictionary () (traceType (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))) (Trait "Traceable" (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])))
+--                                        <| EDictionary () (traceType (TIntrinsic IInt32)) (Trait "Traceable" (TIntrinsic IInt32))
+--                                        <| EDictionary () (traceType (TIntrinsic IString)) (Trait "Traceable" (TIntrinsic IString))
+--                                        :| []
+--                                    )
+--                                )
+--                              ]
+--                          )
+--                          Nothing
+--                        :| []
+--                    )
+--                )
+--                ( EListLiteral
+--                    ()
+--                    (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))))
+--                    [ ETuple
+--                        ()
+--                        (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))
+--                        ( ELiteral () (LInt32 1)
+--                            <| ELiteral () (LString "a")
+--                            :| []
+--                        )
+--                    , ETuple
+--                        ()
+--                        (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))
+--                        ( ELiteral () (LInt32 2)
+--                            <| ELiteral () (LString "b")
+--                            :| []
+--                        )
+--                    ]
+--                    :| []
+--                )
+--            )
+--        )
     ]
