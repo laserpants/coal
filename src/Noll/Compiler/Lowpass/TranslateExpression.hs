@@ -21,6 +21,7 @@ import Noll.Language.Expression.Operator.Binary
 import Noll.Language.Expression.Operator.Unary
 import Noll.Language.Pattern
 import Noll.Language.Primitive
+import Noll.Utils (hashed)
 
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
@@ -178,6 +179,8 @@ translateExpression =
       undefined
     EDictionaryApplication a t e ts es ->
       undefined
+    EDictionary _ t trait@(Trait name _) ->
+      pure (Lowpass.var (Label (translateType t) ("$d." <> name <> "__$instance." <> hashed trait)))
 
 translateRecord :: (MonadReader TranslateEnvironment m, Data a) => IndexedType -> Dictionary (Expression a IndexedType) -> Maybe (Expression a IndexedType) -> m LowpassExpr
 translateRecord t d me = do
@@ -208,6 +211,9 @@ translatePattern =
       translatePattern p
     PLiteral _ p ->
       pure (Label (translateType (typeOf p)) "_")
+    PDictionary _ t trait@(Trait name _) ->
+      -- TODO: DRY?
+      pure (Label (translateType t) ("$d." <> name <> "__$instance." <> hashed trait))
 
 translateClause :: (MonadReader TranslateEnvironment m, Data a) => CompiledClause a IndexedType -> m (Lowpass.Clause Lowpass.Type LowpassExpr)
 translateClause =

@@ -244,6 +244,7 @@ moduleMain =
         , "Core$.list_to_string"
         , "Core$.pair_to_string"
         , "Core$.trace"
+        , "Core$.trace_string"
         , "Core$.operator__not"
         , "Core$.operator__reverse_composition"
         , "Core$.operator__reverse_application"
@@ -277,32 +278,32 @@ moduleMain =
               |]
         , OFunction
             "Main.trace__$instance.a2de7bde6bbaafb6"
-            [ Label (TCon "Traceable" [opaque]) "$dict1"
-            , Label (TCon "Traceable" [opaque]) "$dict2"
+            [ Label (TCon "Traceable" [opaque]) "$d.Traceable__$instance.46804159d1c1d0e2"
+            , Label (TCon "Traceable" [opaque]) "$d.Traceable__$instance.46804159d1c1d0e3"
             , Label (TCon "tuple2" [opaque, opaque]) "p"
             ]
             [r| 
                   @<string>
                     ( @<tuple2(*,*)/string>
                         ( Core$.pair_to_string : Traceable(*)/Traceable(*)/tuple2(*,*)/string
-                        , $dict1 : Traceable(*)
-                        , $dict2 : Traceable(*)
+                        , $d.Traceable__$instance.46804159d1c1d0e2 : Traceable(*)
+                        , $d.Traceable__$instance.46804159d1c1d0e3 : Traceable(*)
                         )
                     , p : tuple2(*,*)
                     )
               |]
         , OFunction
             "Main.trace__$instance.fcea41ba44fb0cf4"
-            [ Label (TCon "Traceable" [opaque]) "$dict1"
-            , Label (TCon "list" [opaque]) "l"
+            [ Label (TCon "Traceable" [opaque]) "$d.Traceable__$instance.46804159d1c1d0e2"
+            , Label (TCon "list" [opaque]) "lst"
             ]
             [r| 
                   @<string>
                     ( @<list(*)/string>
                         ( Core$.list_to_string : Traceable(*)/list(*)/string
-                        , $dict1 : Traceable(*)
+                        , $d.Traceable__$instance.46804159d1c1d0e2 : Traceable(*)
                         )
-                    , l : list(*)
+                    , lst : list(*)
                     )
               |]
         , -- pair1
@@ -321,18 +322,18 @@ moduleMain =
                          ( @<tuple2(int32, string)/string>
                              ( Core$.trace : Traceable(tuple2(int32, string))/tuple2(int32, string)/string
                              , @<Traceable(tuple2(int32, string))>
-                                 ( $Record : { trace : tuple2(int32, string)/string | {} }/Traceable(tuple2(int32, string))
+                                 ( $Record : { trace : tuple2(int32, string)/string | {} }/record({ trace : tuple2(int32, string)/string | {} })
                                  , { trace = 
                                        @<tuple2(int32, string)/string>
                                          ( Main.trace__$instance.a2de7bde6bbaafb6 : Traceable(int32)/Traceable(string)/tuple2(int32, string)/string
                                          , @<Traceable(int32)>
-                                             ( $Record : { trace : int32/string | {} }/Traceable(int32)
+                                             ( $Record : { trace : int32/string | {} }/record({ trace : int32/string | {} })
                                              , { trace = Main.trace__$instance.c847f12006235dc0 : int32/string
                                                | {}
                                                }
                                              )
                                          , @<Traceable(string)>
-                                             ( $Record : { trace : string/string | {} }/Traceable(string)
+                                             ( $Record : { trace : string/string | {} }/record({ trace : string/string | {} })
                                              , { trace = Main.trace__$instance.c81d5162b7d14248 : string/string
                                                | {}
                                                }
@@ -353,28 +354,28 @@ moduleMain =
                     ( @<list(tuple2(int32, string))/string>
                         ( Core$.trace : Traceable(list(tuple2(int32, string)))/list(tuple2(int32, string))/string
                         , @<Traceable(list(tuple2(int32, string)))>
-                            ( $Record : { trace : list(tuple2(int32, string))/string | {} }/Traceable(list(tuple2(int32, string)))
+                            ( $Record : { trace : list(tuple2(int32, string))/string | {} }/record({ trace : list(tuple2(int32, string))/string | {} })
                             , { trace =
                                   @<list(tuple2(int32, string))/string>
                                     ( Core$.trace : Traceable(tuple2(int32, string))/list(tuple2(int32, string))/string
                                     , @<Traceable(tuple2(int32, string))>
-                                        ( $Record : { trace : tuple2(int32, string)/string | {} }/Traceable(tuple2(int32, string))
+                                        ( $Record : { trace : tuple2(int32, string)/string | {} }/record({ trace : tuple2(int32, string)/string | {} })
                                         , { trace = 
                                               @<tuple2(int32, string)/string>
                                                 ( Main.trace__$instance.fcea41ba44fb0cf4 : Traceable(tuple2(int32, string))/tuple2(int32, string)/string
                                                 , @<Traceable(tuple2(int32, string))>
-                                                    ( $Record : { trace : tuple2(int32, string)/string | {} }/Traceable(tuple2(int32, string))
+                                                    ( $Record : { trace : tuple2(int32, string)/string | {} }/record({ trace : tuple2(int32, string)/string | {} })
                                                     , { trace = 
                                                           @<tuple2(int32, string)/string>
                                                             ( Main.trace__$instance.a2de7bde6bbaafb6 : Traceable(int32)/Traceable(string)/tuple2(int32, string)/string
                                                             , @<Traceable(int32)>
-                                                                ( $Record : { trace : int32/string | {} }/Traceable(int32)
+                                                                ( $Record : { trace : int32/string | {} }/record({ trace : int32/string | {} })
                                                                 , { trace = Main.trace__$instance.c847f12006235dc0 : int32/string
                                                                   | {}
                                                                   }
                                                                 )
                                                             , @<Traceable(string)>
-                                                                ( $Record : { trace : string/string | {} }/Traceable(string)
+                                                                ( $Record : { trace : string/string | {} }/record({ trace : string/string | {} })
                                                                 , { trace = Main.trace__$instance.c81d5162b7d14248 : string/string
                                                                   | {}
                                                                   }
@@ -418,7 +419,7 @@ moduleMain =
                     @<*>
                       ( Core$.trace_string : string/*
                       , Main.list1 : string
-//                      , Main.pair1 : string
+ //                      , Main.pair1 : string
                       )
               |]
         ]

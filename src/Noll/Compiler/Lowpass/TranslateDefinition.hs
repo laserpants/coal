@@ -40,7 +40,9 @@ translateDefinition =
       pure [Lowpass.OFunction (moduleName <> "." <> name) qs f]
     DConstant name (Constant _ With{} e) -> do
       c <- translateExpression e
-      pure [Lowpass.OConstant name c]
+      --pure [Lowpass.OConstant name c]
+      moduleName <- asks translateEnvironmentModule
+      pure [Lowpass.OConstant (moduleName <> "." <> name) c]
     DTrait name _ _ ins -> do
       moduleName <- asks translateEnvironmentModule
       forM ins $
@@ -70,8 +72,9 @@ translateDefinition =
           DConstant name c -> do
             xx1 <- translateDefinition (DConstant (name <> postfix) c)
             pure (name, xx1)
-      xx <- instanceDictionary2 postfix name t bs
-      pure (concatMap snd bs <> [xx])
+      pure (concatMap snd bs)
+--      xx <- instanceDictionary2 postfix name t bs
+--      pure (concatMap snd bs <> [xx])
      where
       postfix = "__$instance." <> hashed (Trait name t)
     _ ->

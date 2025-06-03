@@ -58,6 +58,8 @@ import qualified Noll.Set3.Test04
 import qualified Noll.Set3.Test05
 import qualified Noll.Set3.Test10
 import qualified Noll.Set3.Test12
+import qualified Noll.Set3.Test12x
+import qualified Noll.Set3.Test13x
 
 spec :: Spec
 spec =
@@ -1252,6 +1254,8 @@ story = do
     runReader (insertQualifiedNames (Environment.fromList [("sort", "BinarySearch.sort"), ("from_int32", "BinarySearch.from_int32")]) (withModuleName "Main" (translateDefinition mainMain))) testNameEnvironment == mainMainResult
   it "" $
     runReader (traverse translateModule Noll.Set.Test12.prog1_12) testNameEnvironment == Noll.Set.Test13.prog1_13
+  it "" $
+    runReader (traverse translateModule Noll.Set3.Test12x.prog3_12x) testNameEnvironment == Noll.Set3.Test13x.prog3_13x
 
 testNameEnvironment =
   initialTranslateEnvironment

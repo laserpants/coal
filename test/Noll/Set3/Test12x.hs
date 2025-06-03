@@ -35,6 +35,7 @@ moduleMain =
         , "pair_to_string"
         , "list_to_string"
         , "trace"
+        , "trace_string"
         ]
     , -- instance Traceable(string)
       DInstance2
@@ -209,7 +210,7 @@ moduleMain =
                                                   `TArrow` TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])
                                                   `TArrow` TIntrinsic IString
                                               )
-                                              "trace__$instance.pair"
+                                              "trace__$instance.a2de7bde6bbaafb6"
                                           )
                                       )
                                       ( ERecord
@@ -218,7 +219,7 @@ moduleMain =
                                           ( Map.fromList
                                               [
                                                 ( "trace"
-                                                , EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IString) "trace__$instance.int32")
+                                                , EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IString) "trace__$instance.c847f12006235dc0")
                                                 )
                                               ]
                                           )
@@ -229,7 +230,7 @@ moduleMain =
                                             ( Map.fromList
                                                 [
                                                   ( "trace"
-                                                  , EVariable () (Label (TIntrinsic IString `TArrow` TIntrinsic IString) "trace__$instance.string")
+                                                  , EVariable () (Label (TIntrinsic IString `TArrow` TIntrinsic IString) "trace__$instance.c81d5162b7d14248")
                                                   )
                                                 ]
                                             )
@@ -261,7 +262,7 @@ moduleMain =
                 ( EApplication
                     ()
                     (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))) `TArrow` TIntrinsic IString)
-                    (EVariable () (Label (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))) `TArrow` TIntrinsic IString) "trace"))
+                    (EVariable () (Label (traceableTrait (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])))) `TArrow` TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))) `TArrow` TIntrinsic IString) "trace"))
                     ( ERecord
                         ()
                         (traceableTrait (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])))))
@@ -271,14 +272,24 @@ moduleMain =
                               , EApplication
                                   ()
                                   (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))) `TArrow` TIntrinsic IString)
+                                  (EVariable () (Label (traceableTrait (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])) `TArrow` TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))) `TArrow` TIntrinsic IString) "trace"))
+                                  ( ERecord
+                                      ()
+                                      (traceableTrait (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])))
+                        ( Map.fromList
+                            [
+                              ( "trace"
+                              , EApplication
+                                  ()
+                                  (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]) `TArrow` TIntrinsic IString)
                                   ( EVariable
                                       ()
                                       ( Label
                                           ( traceableTrait (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))
-                                              `TArrow` TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])))
+                                              `TArrow` TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])
                                               `TArrow` TIntrinsic IString
                                           )
-                                          "trace__$instance.list"
+                                          "trace__$instance.fcea41ba44fb0cf4"
                                       )
                                   )
                                   ( ERecord
@@ -298,7 +309,7 @@ moduleMain =
                                                             `TArrow` TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])
                                                             `TArrow` TIntrinsic IString
                                                         )
-                                                        "trace__$instance.pair"
+                                                        "trace__$instance.a2de7bde6bbaafb6"
                                                     )
                                                 )
                                                 ( ERecord
@@ -307,7 +318,7 @@ moduleMain =
                                                     ( Map.fromList
                                                         [
                                                           ( "trace"
-                                                          , EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IString) "trace__$instance.int32")
+                                                          , EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IString) "trace__$instance.c847f12006235dc0")
                                                           )
                                                         ]
                                                     )
@@ -318,7 +329,7 @@ moduleMain =
                                                       ( Map.fromList
                                                           [
                                                             ( "trace"
-                                                            , EVariable () (Label (TIntrinsic IString `TArrow` TIntrinsic IString) "trace__$instance.string")
+                                                            , EVariable () (Label (TIntrinsic IString `TArrow` TIntrinsic IString) "trace__$instance.c81d5162b7d14248")
                                                             )
                                                           ]
                                                       )
@@ -328,6 +339,12 @@ moduleMain =
                                             )
                                           ]
                                       )
+                                      Nothing
+                                      :| []
+                                  )
+                                  )
+                                  ]
+                                  )
                                       Nothing
                                       :| []
                                   )
@@ -357,6 +374,23 @@ moduleMain =
                         )
                     ]
                     :| []
+                )
+            )
+        )
+    , -- main
+      DFunction
+        "main"
+        ( Function
+            ()
+            (With [] (TVariable (TypeIndex KType 0)))
+            ( PVariable () (Label (TIntrinsic IUnit) "$v.0") :| [])
+            ( EApplication
+                ()
+                (TVariable (TypeIndex KType 0))
+                (EVariable () (Label (TIntrinsic IString `TArrow` TVariable (TypeIndex KType 0)) "trace_string"))
+                (
+                  EVariable () (Label (TIntrinsic IString) "list1")
+                  :| []
                 )
             )
         )
