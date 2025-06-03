@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Set3.Test05x where
+module Noll.Set3.Test10x where
 
 import Lang.Common.List1 (NonEmpty (..), (<|))
 import Lang.Label (Label (..))
@@ -11,8 +11,8 @@ import Noll.Module
 import qualified Data.Map.Strict as Map
 import qualified Noll.Module as Module
 
-prog3_05x :: [Module () Kind IndexedType]
-prog3_05x =
+prog3_10x :: [Module () Kind IndexedType]
+prog3_10x =
   [ moduleMain
   ]
 
