@@ -246,3 +246,138 @@ fixturee8 =
 
 fixturee9 :: Expression () (Type TypeIndex Kind)
 fixturee9 = fst $ runTraitTransformY (transformScope fixturee7)
+
+fixturee10 =
+  EApplication
+    ()
+    (TIntrinsic IString)
+    (EVariable () (Label (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))) `TArrow` TIntrinsic IString) "trace"))
+    ( EListLiteral
+        ()
+        (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))))
+        [ ETuple
+            ()
+            (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))
+            ( ELiteral () (LInt32 1)
+                <| ELiteral () (LString "a")
+                :| []
+            )
+        , ETuple
+            ()
+            (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))
+            ( ELiteral () (LInt32 2)
+                <| ELiteral () (LString "b")
+                :| []
+            )
+        ]
+        :| []
+    )
+
+fixturee11 :: Expression () (Type TypeIndex Kind)
+fixturee11 =
+  EApplication
+    ()
+    (TIntrinsic IString)
+    ( EApplication
+        ()
+        (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))) `TArrow` TIntrinsic IString)
+        (EVariable () (Label (traceableTrait (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])))) `TArrow` TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))) `TArrow` TIntrinsic IString) "trace"))
+        ( ERecord
+            ()
+            (traceableTrait (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])))))
+            ( Map.fromList
+                [
+                  ( "trace"
+                  , EApplication
+                      ()
+                      (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))) `TArrow` TIntrinsic IString)
+                      ( EVariable
+                          ()
+                          ( Label
+                              ( traceableTrait (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))
+                                  `TArrow` TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])))
+                                  `TArrow` TIntrinsic IString
+                              )
+                              "trace__$instance.8582bc20351fc496"
+                          )
+                      )
+                      ( ERecord
+                          ()
+                          (traceableTrait (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])))
+                          ( Map.fromList
+                              [
+                                ( "trace"
+                                , EApplication
+                                    ()
+                                    (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]) `TArrow` TIntrinsic IString)
+                                    ( EVariable
+                                        ()
+                                        ( Label
+                                            ( traceableTrait (TIntrinsic IInt32)
+                                                `TArrow` traceableTrait (TIntrinsic IString)
+                                                `TArrow` TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])
+                                                `TArrow` TIntrinsic IString
+                                            )
+                                            "trace__$instance.895a62bb6130678a"
+                                        )
+                                    )
+                                    ( ERecord
+                                        ()
+                                        (traceableTrait (TIntrinsic IInt32))
+                                        ( Map.fromList
+                                            [
+                                              ( "trace"
+                                              , EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IString) "trace__$instance.c847f12006235dc0")
+                                              )
+                                            ]
+                                        )
+                                        Nothing
+                                        <| ERecord
+                                          ()
+                                          (traceableTrait (TIntrinsic IString))
+                                          ( Map.fromList
+                                              [
+                                                ( "trace"
+                                                , EVariable () (Label (TIntrinsic IString `TArrow` TIntrinsic IString) "trace__$instance.c81d5162b7d14248")
+                                                )
+                                              ]
+                                          )
+                                          Nothing
+                                        :| []
+                                    )
+                                )
+                              ]
+                          )
+                          Nothing
+                          :| []
+                      )
+                  )
+                ]
+            )
+            Nothing
+            :| []
+        )
+    )
+    ( EListLiteral
+        ()
+        (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))))
+        [ ETuple
+            ()
+            (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))
+            ( ELiteral () (LInt32 1)
+                <| ELiteral () (LString "a")
+                :| []
+            )
+        , ETuple
+            ()
+            (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))
+            ( ELiteral () (LInt32 2)
+                <| ELiteral () (LString "b")
+                :| []
+            )
+        ]
+        :| []
+    )
+
+fixturee12 :: Expression () (Type TypeIndex Kind)
+fixturee12 = fst $ runTraitTransformY (transformScope fixturee10)
