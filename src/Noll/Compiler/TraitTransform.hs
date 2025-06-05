@@ -68,7 +68,12 @@ transformConstantZ (Constant a u@(With _ t) e) = do
     [] ->
       pure (Constant a u expr)
     tr : trs -> do
-      pure (Constant a (With (sort (tr : trs)) t) (EDictionaryLambda a (List1.sort (tr :| trs)) expr))
+      pure
+        ( Constant
+            a
+            (With (sort (tr : trs)) t)
+            (EDictionaryLambda a (List1.sort (tr :| trs)) expr)
+        )
 
 -- TODO
 parameterized :: Trait (Type v k) -> Bool

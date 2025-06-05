@@ -19,6 +19,7 @@ import Data.Generics.Uniplate.Data (transform, transformBi)
 import Data.List.NonEmpty (NonEmpty)
 import Data.Map.Strict (Map, keysSet, union)
 import Data.Set (Set, intersection)
+import Lang.Common.Environment (Environment (..))
 import Lang.Utils (IndexMap, Map, Set, fromMaybe)
 import Noll.Language
 import Noll.Module (Constant (..), Definition (..), Function (..))
@@ -112,7 +113,7 @@ instance (Data a) => Substitutable (Function Expression a IndexedType) where
 instance (Data a) => Substitutable (Constant Expression a IndexedType) where
   apply = transformBi . applyT
 
-instance (Data a, Data k, Ord k) => Substitutable (Definition a k IndexedType) where
+instance (Data a, Data k) => Substitutable (Definition a k IndexedType) where
   apply = transformBi . applyT
 
 instance (Data a) => Substitutable (Binding Expression a IndexedType) where
@@ -137,6 +138,12 @@ instance Semigroup Substitution where
 
 instance Monoid Substitution where
   mempty = Substitution mempty
+
+instance (Substitutable s) => Substitutable (Environment s) where
+  apply sub =
+    \case
+      Environment e ->
+        Environment (apply sub e)
 
 {-# INLINE substitutionIndex #-}
 substitutionIndex :: TypeIndex Kind -> Substitution -> Maybe IndexedType

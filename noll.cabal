@@ -142,6 +142,7 @@ test-suite noll-test
   other-modules:
       Noll.Ast.FreeVarsSpec
       Noll.Ast.IndexedSpec
+      Noll.Compiler.DictionariesSpec
       Noll.Compiler.DictionaryEliminationSpec
       Noll.Compiler.Lowpass.TranslateExpressionSpec
       Noll.Compiler.NormalizeObjectsSpec

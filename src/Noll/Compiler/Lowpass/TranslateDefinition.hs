@@ -8,6 +8,7 @@ import Control.Monad (forM)
 import Control.Monad.Reader (MonadReader, asks)
 import Data.Data (Data)
 import Data.List.Extra (sortOn)
+import Debug.Trace
 import Debug.Trace (traceShow)
 import Lang.Common.List1 (NonEmpty ((:|)), fromList1, (<|))
 import Lang.Label (Label (..))
@@ -40,7 +41,7 @@ translateDefinition =
       pure [Lowpass.OFunction (moduleName <> "." <> name) qs f]
     DConstant name (Constant _ With{} e) -> do
       c <- translateExpression e
-      --pure [Lowpass.OConstant name c]
+      -- pure [Lowpass.OConstant name c]
       moduleName <- asks translateEnvironmentModule
       pure [Lowpass.OConstant (moduleName <> "." <> name) c]
     DTrait name _ _ ins -> do
@@ -73,9 +74,10 @@ translateDefinition =
             xx1 <- translateDefinition (DConstant (name <> postfix) c)
             pure (name, xx1)
       pure (concatMap snd bs)
---      xx <- instanceDictionary2 postfix name t bs
---      pure (concatMap snd bs <> [xx])
      where
+      --      xx <- instanceDictionary2 postfix name t bs
+      --      pure (concatMap snd bs <> [xx])
+
       postfix = "__$instance." <> hashed (Trait name t)
     _ ->
       pure []

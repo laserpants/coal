@@ -10,6 +10,7 @@ import Lang.Common.List1 (NonEmpty (..))
 import Lang.Label (Label (..))
 import Lang.Utils (Name)
 import Noll.Compiler.DenormalizeObjects (DenormalizeObjectsTransformContext (..))
+import Noll.Compiler.DictionariesSpec
 import Noll.Compiler.DictionaryElimination (EliminateDictionariesTransformContext (..))
 import Noll.Compiler.Lowpass.Environment (TranslateEnvironment (..), initialTranslateEnvironment, insertQualifiedNames, withModuleName)
 import Noll.Compiler.Lowpass.TranslateDefinition (translateDefinition)
@@ -1256,6 +1257,12 @@ story = do
     runReader (traverse translateModule Noll.Set.Test12.prog1_12) testNameEnvironment == Noll.Set.Test13.prog1_13
   it "" $
     runReader (traverse translateModule Noll.Set3.Test12x.prog3_12x) testNameEnvironment == Noll.Set3.Test13x.prog3_13x
+  it "" $
+    fixturee3 == fixturee2
+  it "" $
+    fixturee6 == fixturee5
+  it "" $
+    fixturee9 == fixturee8
 
 testNameEnvironment =
   initialTranslateEnvironment
