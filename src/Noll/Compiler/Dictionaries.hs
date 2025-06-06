@@ -87,7 +87,7 @@ tryMatch t u = do
   pure (evalUnifier var (match t u))
 
 -- TODO: rename
---mapAlterAll :: (Monad m, Ord k) => (k -> m (Maybe Substitution)) -> Map k (Environment (Scheme TypeIndex Kind IndexedType)) -> m [(k, Map Name (Scheme TypeIndex Kind IndexedType))]
+-- mapAlterAll :: (Monad m, Ord k) => (k -> m (Maybe Substitution)) -> Map k (Environment (Scheme TypeIndex Kind IndexedType)) -> m [(k, Map Name (Scheme TypeIndex Kind IndexedType))]
 mapAlterAll f m = do
   let abc = [fn k v | (k, v) <- Map.toList m]
   def <- sequence abc
@@ -128,6 +128,7 @@ findFirstMatch (Trait _ t1) = do
  where
   --   test :: (Monad m) => Type TypeIndex Kind -> m (Maybe Substitution) -- (Environment (Scheme TypeIndex Kind IndexedType))
   test t = tryMatch t t1
+
 --    case x of
 --      Left{} ->
 --        pure Nothing
@@ -515,15 +516,14 @@ transformConstantY ::
   Constant Expression a (Type TypeIndex Kind) ->
   m (Constant Expression a (Type TypeIndex Kind))
 transformConstantY (Constant a u@(With _ t) e) = do
-  --e1 <- transformScope e
+  -- e1 <- transformScope e
   (expr, traits) <- runWriterT (descendM transformY e)
   case nub traits of
     [] ->
       pure (Constant a (With [] t) expr)
     tr : trs ->
       pure
-        (
-          Constant
+        ( Constant
             a
             (With (tr : trs) t)
             (ELambda mempty (toPattern <$> (tr :| trs)) expr)

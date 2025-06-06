@@ -2,8 +2,6 @@
 
 module Noll.Compiler.DictionariesSpec where
 
-import Noll.Language
-import Noll.Module
 import Control.Monad.Reader
 import Control.Monad.State
 import Control.Monad.Writer
@@ -12,6 +10,7 @@ import Lang.Common.List1 (NonEmpty (..), (<|))
 import Lang.Label (Label (..))
 import Noll.Compiler.Dictionaries
 import Noll.Language
+import Noll.Module
 import Test.Hspec (Spec, describe, it)
 
 import qualified Data.Map.Strict as Map
@@ -385,547 +384,546 @@ fixturee12 :: Expression () (Type TypeIndex Kind)
 fixturee12 = fst $ runTraitTransformY (transformScope fixturee10)
 
 fixturee13 =
-            Constant
-                ()
-                (With [] (TIntrinsic (ITuple [TVariable (TypeIndex KType 0), TVariable (TypeIndex KType 1)]) `TArrow` TIntrinsic IString))
-                ( ELambda
-                    ()
-                    (PVariable () (Label (TIntrinsic (ITuple [TVariable (TypeIndex KType 0), TVariable (TypeIndex KType 1)])) "p") :| [])
-                    ( EApplication
-                        ()
-                        (TIntrinsic IString)
-                        (EVariable () (Label (TIntrinsic (ITuple [TVariable (TypeIndex KType 0), TVariable (TypeIndex KType 1)]) `TArrow` TIntrinsic IString) "pair_to_string"))
-                        (EVariable () (Label (TIntrinsic (ITuple [TVariable (TypeIndex KType 0), TVariable (TypeIndex KType 1)])) "p") :| [])
-                    )
-                )
+  Constant
+    ()
+    (With [] (TIntrinsic (ITuple [TVariable (TypeIndex KType 0), TVariable (TypeIndex KType 1)]) `TArrow` TIntrinsic IString))
+    ( ELambda
+        ()
+        (PVariable () (Label (TIntrinsic (ITuple [TVariable (TypeIndex KType 0), TVariable (TypeIndex KType 1)])) "p") :| [])
+        ( EApplication
+            ()
+            (TIntrinsic IString)
+            (EVariable () (Label (TIntrinsic (ITuple [TVariable (TypeIndex KType 0), TVariable (TypeIndex KType 1)]) `TArrow` TIntrinsic IString) "pair_to_string"))
+            (EVariable () (Label (TIntrinsic (ITuple [TVariable (TypeIndex KType 0), TVariable (TypeIndex KType 1)])) "p") :| [])
+        )
+    )
 
 fixturee14 =
-            Constant
+  Constant
+    ()
+    ( With
+        [ Trait "Traceable" (TVariable (TypeIndex KType 0))
+        , Trait "Traceable" (TVariable (TypeIndex KType 1))
+        ]
+        (TIntrinsic (ITuple [TVariable (TypeIndex KType 0), TVariable (TypeIndex KType 1)]) `TArrow` TIntrinsic IString)
+    )
+    ( ELambda
+        ()
+        ( PDictionary () (traceableTrait (TVariable (TypeIndex KType 0))) (Trait "Traceable" (TVariable (TypeIndex KType 0)))
+            <| PDictionary () (traceableTrait (TVariable (TypeIndex KType 1))) (Trait "Traceable" (TVariable (TypeIndex KType 1)))
+            :| []
+        )
+        ( ELambda
+            ()
+            (PVariable () (Label (TIntrinsic (ITuple [TVariable (TypeIndex KType 0), TVariable (TypeIndex KType 1)])) "p") :| [])
+            ( EApplication
                 ()
-                ( With
-                    [ Trait "Traceable" (TVariable (TypeIndex KType 0))
-                    , Trait "Traceable" (TVariable (TypeIndex KType 1))
-                    ]
-                    (TIntrinsic (ITuple [TVariable (TypeIndex KType 0), TVariable (TypeIndex KType 1)]) `TArrow` TIntrinsic IString)
-                )
-                ( ELambda
+                (TIntrinsic IString)
+                ( EApplication
                     ()
-                    ( PDictionary () (traceableTrait (TVariable (TypeIndex KType 0))) (Trait "Traceable" (TVariable (TypeIndex KType 0)))
-                        <| PDictionary () (traceableTrait (TVariable (TypeIndex KType 1))) (Trait "Traceable" (TVariable (TypeIndex KType 1)))
-                        :| []
-                    )
-                    ( ELambda
+                    (TIntrinsic (ITuple [TVariable (TypeIndex KType 0), TVariable (TypeIndex KType 1)]) `TArrow` TIntrinsic IString)
+                    ( EVariable
                         ()
-                        (PVariable () (Label (TIntrinsic (ITuple [TVariable (TypeIndex KType 0), TVariable (TypeIndex KType 1)])) "p") :| [])
-                        ( EApplication
-                            ()
-                            (TIntrinsic IString)
-                            ( EApplication
-                                ()
-                                (TIntrinsic (ITuple [TVariable (TypeIndex KType 0), TVariable (TypeIndex KType 1)]) `TArrow` TIntrinsic IString)
-                                ( EVariable
-                                    ()
-                                    ( Label
-                                        ( traceableTrait (TVariable (TypeIndex KType 0))
-                                            `TArrow` traceableTrait (TVariable (TypeIndex KType 1))
-                                            `TArrow` TIntrinsic (ITuple [TVariable (TypeIndex KType 0), TVariable (TypeIndex KType 1)])
-                                            `TArrow` TIntrinsic IString
-                                        )
-                                        "pair_to_string"
-                                    )
-                                )
-                                ( EDictionary () (traceableTrait (TVariable (TypeIndex KType 0))) (Trait "Traceable" (TVariable (TypeIndex KType 0)))
-                                    <| EDictionary () (traceableTrait (TVariable (TypeIndex KType 1))) (Trait "Traceable" (TVariable (TypeIndex KType 1)))
-                                    :| []
-                                )
+                        ( Label
+                            ( traceableTrait (TVariable (TypeIndex KType 0))
+                                `TArrow` traceableTrait (TVariable (TypeIndex KType 1))
+                                `TArrow` TIntrinsic (ITuple [TVariable (TypeIndex KType 0), TVariable (TypeIndex KType 1)])
+                                `TArrow` TIntrinsic IString
                             )
-                            ( EVariable () (Label (TIntrinsic (ITuple [TVariable (TypeIndex KType 0), TVariable (TypeIndex KType 1)])) "p")
-                                :| []
-                            )
+                            "pair_to_string"
                         )
                     )
+                    ( EDictionary () (traceableTrait (TVariable (TypeIndex KType 0))) (Trait "Traceable" (TVariable (TypeIndex KType 0)))
+                        <| EDictionary () (traceableTrait (TVariable (TypeIndex KType 1))) (Trait "Traceable" (TVariable (TypeIndex KType 1)))
+                        :| []
+                    )
                 )
+                ( EVariable () (Label (TIntrinsic (ITuple [TVariable (TypeIndex KType 0), TVariable (TypeIndex KType 1)])) "p")
+                    :| []
+                )
+            )
+        )
+    )
 
 fixturee15 :: Constant Expression () (Type TypeIndex Kind)
 fixturee15 = runTraitTransformY (transformConstantY fixturee13)
 
 fixturee16 =
-            Constant
-                ()
-                (With [] (TIntrinsic (IList (TVariable (TypeIndex KType 0))) `TArrow` TIntrinsic IString))
-                ( ELambda
-                    ()
-                    (PVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 0)))) "lst") :| [])
-                    ( EApplication
-                        ()
-                        (TIntrinsic IString)
-                        (EVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 0))) `TArrow` TIntrinsic IString) "list_to_string"))
-                        (EVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 0)))) "lst") :| [])
-                    )
-                )
+  Constant
+    ()
+    (With [] (TIntrinsic (IList (TVariable (TypeIndex KType 0))) `TArrow` TIntrinsic IString))
+    ( ELambda
+        ()
+        (PVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 0)))) "lst") :| [])
+        ( EApplication
+            ()
+            (TIntrinsic IString)
+            (EVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 0))) `TArrow` TIntrinsic IString) "list_to_string"))
+            (EVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 0)))) "lst") :| [])
+        )
+    )
 
 fixturee17 =
-            Constant
+  Constant
+    ()
+    ( With
+        [ Trait "Traceable" (TVariable (TypeIndex KType 0))
+        ]
+        (TIntrinsic (IList (TVariable (TypeIndex KType 0))) `TArrow` TIntrinsic IString)
+    )
+    ( ELambda
+        ()
+        ( PDictionary () (traceableTrait (TVariable (TypeIndex KType 0))) (Trait "Traceable" (TVariable (TypeIndex KType 0)))
+            :| []
+        )
+        ( ELambda
+            ()
+            (PVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 0)))) "lst") :| [])
+            ( EApplication
                 ()
-                ( With
-                    [ Trait "Traceable" (TVariable (TypeIndex KType 0))
-                    ]
-                    (TIntrinsic (IList (TVariable (TypeIndex KType 0))) `TArrow` TIntrinsic IString)
-                )
-                ( ELambda
+                (TIntrinsic IString)
+                ( EApplication
                     ()
-                    ( PDictionary () (traceableTrait (TVariable (TypeIndex KType 0))) (Trait "Traceable" (TVariable (TypeIndex KType 0)))
-                        :| []
-                    )
-                    ( ELambda
+                    (TIntrinsic (IList (TVariable (TypeIndex KType 0))) `TArrow` TIntrinsic IString)
+                    ( EVariable
                         ()
-                        (PVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 0)))) "lst") :| [])
-                        ( EApplication
-                            ()
-                            (TIntrinsic IString)
-                            ( EApplication
-                                ()
-                                (TIntrinsic (IList (TVariable (TypeIndex KType 0))) `TArrow` TIntrinsic IString)
-                                ( EVariable
-                                    ()
-                                    ( Label
-                                        ( traceableTrait (TVariable (TypeIndex KType 0))
-                                            `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 0)))
-                                            `TArrow` TIntrinsic IString
-                                        )
-                                        "list_to_string"
-                                    )
-                                )
-                                ( EDictionary () (traceableTrait (TVariable (TypeIndex KType 0))) (Trait "Traceable" (TVariable (TypeIndex KType 0)))
-                                    :| []
-                                )
+                        ( Label
+                            ( traceableTrait (TVariable (TypeIndex KType 0))
+                                `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 0)))
+                                `TArrow` TIntrinsic IString
                             )
-                            (EVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 0)))) "lst") :| [])
+                            "list_to_string"
                         )
                     )
+                    ( EDictionary () (traceableTrait (TVariable (TypeIndex KType 0))) (Trait "Traceable" (TVariable (TypeIndex KType 0)))
+                        :| []
+                    )
                 )
+                (EVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 0)))) "lst") :| [])
+            )
+        )
+    )
 
 fixturee18 :: Constant Expression () (Type TypeIndex Kind)
 fixturee18 = runTraitTransformY (transformConstantY fixturee16)
 
 fixturee19 :: Constant Expression () (Type TypeIndex Kind)
 fixturee19 =
-        Constant
+  Constant
+    ()
+    (With [] (TIntrinsic IString))
+    ( ELet
+        ()
+        ( BPattern
             ()
-            (With [] (TIntrinsic IString))
-            ( ELet
+            (PVariable () (Label (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])) "p"))
+            ( ETuple
                 ()
-                ( BPattern
-                    ()
-                    (PVariable () (Label (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])) "p"))
-                    ( ETuple
-                        ()
-                        (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))
-                        ( ELiteral () (LInt32 1)
-                            <| ELiteral () (LString "hello")
-                            :| []
-                        )
-                    )
+                (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))
+                ( ELiteral () (LInt32 1)
+                    <| ELiteral () (LString "hello")
                     :| []
                 )
-                ( EApplication
-                    ()
-                    (TIntrinsic IString)
-                    (EVariable () (Label (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]) `TArrow` TIntrinsic IString) "trace"))
-                    ( EVariable () (Label (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])) "p")
-                        :| []
-                    )
-                )
             )
+            :| []
+        )
+        ( EApplication
+            ()
+            (TIntrinsic IString)
+            (EVariable () (Label (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]) `TArrow` TIntrinsic IString) "trace"))
+            ( EVariable () (Label (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])) "p")
+                :| []
+            )
+        )
+    )
 
 fixturee20 :: Constant Expression () (Type TypeIndex Kind)
-fixturee20 = 
-    Constant
+fixturee20 =
+  Constant
+    ()
+    (With [] (TIntrinsic IString))
+    ( ELet
+        ()
+        ( BPattern
             ()
-            (With [] (TIntrinsic IString))
-            ( ELet
+            (PVariable () (Label (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])) "p"))
+            ( ETuple
                 ()
-                ( BPattern
-                    ()
-                    (PVariable () (Label (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])) "p"))
-                    ( ETuple
-                        ()
-                        (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))
-                        ( ELiteral () (LInt32 1)
-                            <| ELiteral () (LString "hello")
-                            :| []
-                        )
-                    )
+                (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))
+                ( ELiteral () (LInt32 1)
+                    <| ELiteral () (LString "hello")
                     :| []
                 )
-                ( EApplication
+            )
+            :| []
+        )
+        ( EApplication
+            ()
+            (TIntrinsic IString)
+            ( EApplication
+                ()
+                (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]) `TArrow` TIntrinsic IString)
+                ( EVariable
                     ()
-                    (TIntrinsic IString)
-                    ( EApplication
-                        ()
-                        (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]) `TArrow` TIntrinsic IString)
-                        ( EVariable
-                            ()
-                            ( Label
-                                ( traceableTrait (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))
-                                    `TArrow` TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])
-                                    `TArrow` TIntrinsic IString
-                                )
-                                "trace"
-                            )
+                    ( Label
+                        ( traceableTrait (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))
+                            `TArrow` TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])
+                            `TArrow` TIntrinsic IString
                         )
-                        ( ERecord
-                            ()
-                            (traceableTrait (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])))
-                            ( Map.fromList
-                                [
-                                  ( "trace"
-                                  , EApplication
-                                      ()
-                                      (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]) `TArrow` TIntrinsic IString)
-                                      ( EVariable
-                                          ()
-                                          ( Label
-                                              ( traceableTrait (TIntrinsic IInt32)
-                                                  `TArrow` traceableTrait (TIntrinsic IString)
-                                                  `TArrow` TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])
-                                                  `TArrow` TIntrinsic IString
-                                              )
-                                              "trace__$instance.895a62bb6130678a"
-                                          )
-                                      )
-                                      ( ERecord
-                                          ()
-                                          (traceableTrait (TIntrinsic IInt32))
-                                          ( Map.fromList
-                                              [
-                                                ( "trace"
-                                                , EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IString) "trace__$instance.c847f12006235dc0")
-                                                )
-                                              ]
-                                          )
-                                          Nothing
-                                          <| ERecord
-                                            ()
-                                            (traceableTrait (TIntrinsic IString))
-                                            ( Map.fromList
-                                                [
-                                                  ( "trace"
-                                                  , EVariable () (Label (TIntrinsic IString `TArrow` TIntrinsic IString) "trace__$instance.c81d5162b7d14248")
-                                                  )
-                                                ]
-                                            )
-                                            Nothing
-                                          :| []
-                                      )
-                                  )
-                                ]
-                            )
-                            Nothing
-                            :| []
-                        )
-                    )
-                    ( EVariable () (Label (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])) "p")
-                        :| []
+                        "trace"
                     )
                 )
+                ( ERecord
+                    ()
+                    (traceableTrait (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])))
+                    ( Map.fromList
+                        [
+                          ( "trace"
+                          , EApplication
+                              ()
+                              (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]) `TArrow` TIntrinsic IString)
+                              ( EVariable
+                                  ()
+                                  ( Label
+                                      ( traceableTrait (TIntrinsic IInt32)
+                                          `TArrow` traceableTrait (TIntrinsic IString)
+                                          `TArrow` TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])
+                                          `TArrow` TIntrinsic IString
+                                      )
+                                      "trace__$instance.895a62bb6130678a"
+                                  )
+                              )
+                              ( ERecord
+                                  ()
+                                  (traceableTrait (TIntrinsic IInt32))
+                                  ( Map.fromList
+                                      [
+                                        ( "trace"
+                                        , EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IString) "trace__$instance.c847f12006235dc0")
+                                        )
+                                      ]
+                                  )
+                                  Nothing
+                                  <| ERecord
+                                    ()
+                                    (traceableTrait (TIntrinsic IString))
+                                    ( Map.fromList
+                                        [
+                                          ( "trace"
+                                          , EVariable () (Label (TIntrinsic IString `TArrow` TIntrinsic IString) "trace__$instance.c81d5162b7d14248")
+                                          )
+                                        ]
+                                    )
+                                    Nothing
+                                  :| []
+                              )
+                          )
+                        ]
+                    )
+                    Nothing
+                    :| []
+                )
             )
+            ( EVariable () (Label (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])) "p")
+                :| []
+            )
+        )
+    )
 
 fixturee21 :: Constant Expression () (Type TypeIndex Kind)
 fixturee21 = runTraitTransformY (transformConstantY fixturee19)
 
-fixturee22 = 
-    Constant
+fixturee22 =
+  Constant
+    ()
+    (With [] (TIntrinsic IString))
+    ( EApplication
+        ()
+        (TIntrinsic IString)
+        (EVariable () (Label (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))) `TArrow` TIntrinsic IString) "trace"))
+        ( EListLiteral
             ()
-            (With [] (TIntrinsic IString))
-            ( EApplication
+            (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))))
+            [ ETuple
                 ()
-                (TIntrinsic IString)
-                (EVariable () (Label (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))) `TArrow` TIntrinsic IString) "trace"))
-                ( EListLiteral
-                    ()
-                    (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))))
-                    [ ETuple
-                        ()
-                        (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))
-                        ( ELiteral () (LInt32 1)
-                            <| ELiteral () (LString "a")
-                            :| []
-                        )
-                    , ETuple
-                        ()
-                        (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))
-                        ( ELiteral () (LInt32 2)
-                            <| ELiteral () (LString "b")
-                            :| []
-                        )
-                    ]
+                (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))
+                ( ELiteral () (LInt32 1)
+                    <| ELiteral () (LString "a")
                     :| []
                 )
-            )
+            , ETuple
+                ()
+                (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))
+                ( ELiteral () (LInt32 2)
+                    <| ELiteral () (LString "b")
+                    :| []
+                )
+            ]
+            :| []
+        )
+    )
 
 fixturee23 :: Constant Expression () (Type TypeIndex Kind)
 fixturee23 =
-        Constant
+  Constant
+    ()
+    (With [] (TIntrinsic IString))
+    ( EApplication
+        ()
+        (TIntrinsic IString)
+        ( EApplication
             ()
-            (With [] (TIntrinsic IString))
-            ( EApplication
+            (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))) `TArrow` TIntrinsic IString)
+            (EVariable () (Label (traceableTrait (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])))) `TArrow` TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))) `TArrow` TIntrinsic IString) "trace"))
+            ( ERecord
                 ()
-                (TIntrinsic IString)
-                ( EApplication
-                    ()
-                    (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))) `TArrow` TIntrinsic IString)
-                    (EVariable () (Label (traceableTrait (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])))) `TArrow` TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))) `TArrow` TIntrinsic IString) "trace"))
-                    ( ERecord
-                        ()
-                        (traceableTrait (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])))))
-                        ( Map.fromList
-                            [
-                              ( "trace"
-                              , --EApplication
-                                --  ()
-                                --  (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))) `TArrow` TIntrinsic IString)
-                                --  (EVariable () (Label (traceableTrait (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])) `TArrow` TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))) `TArrow` TIntrinsic IString) "trace"))
-                                --  ( ERecord
-                                --      ()
-                                --      (traceableTrait (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])))
-                                --      ( Map.fromList
-                                --          [
-                                --            ( "trace"
-                                --            , 
-                                            EApplication
-                                                ()
-                                                (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))) `TArrow` TIntrinsic IString)
-                                                ( EVariable
-                                                    ()
-                                                    ( Label
-                                                        ( traceableTrait (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))
-                                                            `TArrow` TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])))
-                                                            `TArrow` TIntrinsic IString
-                                                        )
-                                                        "trace__$instance.8582bc20351fc496"
-                                                    )
-                                                )
-                                                ( ERecord
-                                                    ()
-                                                    (traceableTrait (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])))
-                                                    ( Map.fromList
-                                                        [
-                                                          ( "trace"
-                                                          , EApplication
-                                                              ()
-                                                              (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]) `TArrow` TIntrinsic IString)
-                                                              ( EVariable
-                                                                  ()
-                                                                  ( Label
-                                                                      ( traceableTrait (TIntrinsic IInt32)
-                                                                          `TArrow` traceableTrait (TIntrinsic IString)
-                                                                          `TArrow` TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])
-                                                                          `TArrow` TIntrinsic IString
-                                                                      )
-                                                                      "trace__$instance.895a62bb6130678a"
-                                                                  )
-                                                              )
-                                                              ( ERecord
-                                                                  ()
-                                                                  (traceableTrait (TIntrinsic IInt32))
-                                                                  ( Map.fromList
-                                                                      [
-                                                                        ( "trace"
-                                                                        , EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IString) "trace__$instance.c847f12006235dc0")
-                                                                        )
-                                                                      ]
-                                                                  )
-                                                                  Nothing
-                                                                  <| ERecord
-                                                                    ()
-                                                                    (traceableTrait (TIntrinsic IString))
-                                                                    ( Map.fromList
-                                                                        [
-                                                                          ( "trace"
-                                                                          , EVariable () (Label (TIntrinsic IString `TArrow` TIntrinsic IString) "trace__$instance.c81d5162b7d14248")
-                                                                          )
-                                                                        ]
-                                                                    )
-                                                                    Nothing
-                                                                  :| []
-                                                              )
-                                                          )
-                                                        ]
-                                                    )
-                                                    Nothing
-                                                    :| []
-                                                )
---                                            )
---                                          ]
---                                      )
---                                      Nothing
---                                      :| []
---                                  )
+                (traceableTrait (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])))))
+                ( Map.fromList
+                    [
+                      ( "trace"
+                      , -- EApplication
+                        --  ()
+                        --  (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))) `TArrow` TIntrinsic IString)
+                        --  (EVariable () (Label (traceableTrait (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])) `TArrow` TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))) `TArrow` TIntrinsic IString) "trace"))
+                        --  ( ERecord
+                        --      ()
+                        --      (traceableTrait (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])))
+                        --      ( Map.fromList
+                        --          [
+                        --            ( "trace"
+                        --            ,
+                        EApplication
+                          ()
+                          (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))) `TArrow` TIntrinsic IString)
+                          ( EVariable
+                              ()
+                              ( Label
+                                  ( traceableTrait (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))
+                                      `TArrow` TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])))
+                                      `TArrow` TIntrinsic IString
+                                  )
+                                  "trace__$instance.8582bc20351fc496"
                               )
-                            ]
-                        )
-                        Nothing
-                        :| []
-                    )
-                )
-                ( EListLiteral
-                    ()
-                    (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))))
-                    [ ETuple
-                        ()
-                        (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))
-                        ( ELiteral () (LInt32 1)
-                            <| ELiteral () (LString "a")
-                            :| []
-                        )
-                    , ETuple
-                        ()
-                        (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))
-                        ( ELiteral () (LInt32 2)
-                            <| ELiteral () (LString "b")
-                            :| []
-                        )
+                          )
+                          ( ERecord
+                              ()
+                              (traceableTrait (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])))
+                              ( Map.fromList
+                                  [
+                                    ( "trace"
+                                    , EApplication
+                                        ()
+                                        (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]) `TArrow` TIntrinsic IString)
+                                        ( EVariable
+                                            ()
+                                            ( Label
+                                                ( traceableTrait (TIntrinsic IInt32)
+                                                    `TArrow` traceableTrait (TIntrinsic IString)
+                                                    `TArrow` TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])
+                                                    `TArrow` TIntrinsic IString
+                                                )
+                                                "trace__$instance.895a62bb6130678a"
+                                            )
+                                        )
+                                        ( ERecord
+                                            ()
+                                            (traceableTrait (TIntrinsic IInt32))
+                                            ( Map.fromList
+                                                [
+                                                  ( "trace"
+                                                  , EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IString) "trace__$instance.c847f12006235dc0")
+                                                  )
+                                                ]
+                                            )
+                                            Nothing
+                                            <| ERecord
+                                              ()
+                                              (traceableTrait (TIntrinsic IString))
+                                              ( Map.fromList
+                                                  [
+                                                    ( "trace"
+                                                    , EVariable () (Label (TIntrinsic IString `TArrow` TIntrinsic IString) "trace__$instance.c81d5162b7d14248")
+                                                    )
+                                                  ]
+                                              )
+                                              Nothing
+                                            :| []
+                                        )
+                                    )
+                                  ]
+                              )
+                              Nothing
+                              :| []
+                          )
+                          --                                            )
+                          --                                          ]
+                          --                                      )
+                          --                                      Nothing
+                          --                                      :| []
+                          --                                  )
+                      )
                     ]
+                )
+                Nothing
+                :| []
+            )
+        )
+        ( EListLiteral
+            ()
+            (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))))
+            [ ETuple
+                ()
+                (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))
+                ( ELiteral () (LInt32 1)
+                    <| ELiteral () (LString "a")
                     :| []
                 )
-            )
+            , ETuple
+                ()
+                (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))
+                ( ELiteral () (LInt32 2)
+                    <| ELiteral () (LString "b")
+                    :| []
+                )
+            ]
+            :| []
+        )
+    )
 
 fixturee24 :: Constant Expression () (Type TypeIndex Kind)
 fixturee24 = runTraitTransformY (transformConstantY fixturee22)
 
-fixturee25 = 
-    EApplication
-                ()
-                (TIntrinsic IString)
-                (EVariable () (Label (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))) `TArrow` TIntrinsic IString) "trace"))
-                ( EListLiteral
-                    ()
-                    (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))))
-                    [ ETuple
-                        ()
-                        (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))
-                        ( ELiteral () (LInt32 1)
-                            <| ELiteral () (LString "a")
-                            :| []
-                        )
-                    , ETuple
-                        ()
-                        (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))
-                        ( ELiteral () (LInt32 2)
-                            <| ELiteral () (LString "b")
-                            :| []
-                        )
-                    ]
-                    :| []
-                )
+fixturee25 =
+  EApplication
+    ()
+    (TIntrinsic IString)
+    (EVariable () (Label (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))) `TArrow` TIntrinsic IString) "trace"))
+    ( EListLiteral
+        ()
+        (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))))
+        [ ETuple
+            ()
+            (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))
+            ( ELiteral () (LInt32 1)
+                <| ELiteral () (LString "a")
+                :| []
+            )
+        , ETuple
+            ()
+            (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))
+            ( ELiteral () (LInt32 2)
+                <| ELiteral () (LString "b")
+                :| []
+            )
+        ]
+        :| []
+    )
 
 fixturee26 :: Expression () (Type TypeIndex Kind)
 fixturee26 =
   EApplication
-                ()
-                (TIntrinsic IString)
-                ( EApplication
-                    ()
-                    (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))) `TArrow` TIntrinsic IString)
-                    (EVariable () (Label (traceableTrait (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])))) `TArrow` TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))) `TArrow` TIntrinsic IString) "trace"))
-                    ( ERecord
-                        ()
-                        (traceableTrait (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])))))
-                        ( Map.fromList
-                            [
-                              ( "trace"
-                              , EApplication
-                                                ()
-                                                (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))) `TArrow` TIntrinsic IString)
-                                                ( EVariable
-                                                    ()
-                                                    ( Label
-                                                        ( traceableTrait (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))
-                                                            `TArrow` TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])))
-                                                            `TArrow` TIntrinsic IString
-                                                        )
-                                                        "trace__$instance.8582bc20351fc496"
-                                                    )
-                                                )
-                                                ( ERecord
-                                                    ()
-                                                    (traceableTrait (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])))
-                                                    ( Map.fromList
-                                                        [
-                                                          ( "trace"
-                                                          , EApplication
-                                                              ()
-                                                              (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]) `TArrow` TIntrinsic IString)
-                                                              ( EVariable
-                                                                  ()
-                                                                  ( Label
-                                                                      ( traceableTrait (TIntrinsic IInt32)
-                                                                          `TArrow` traceableTrait (TIntrinsic IString)
-                                                                          `TArrow` TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])
-                                                                          `TArrow` TIntrinsic IString
-                                                                      )
-                                                                      "trace__$instance.895a62bb6130678a"
-                                                                  )
-                                                              )
-                                                              ( ERecord
-                                                                  ()
-                                                                  (traceableTrait (TIntrinsic IInt32))
-                                                                  ( Map.fromList
-                                                                      [
-                                                                        ( "trace"
-                                                                        , EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IString) "trace__$instance.c847f12006235dc0")
-                                                                        )
-                                                                      ]
-                                                                  )
-                                                                  Nothing
-                                                                  <| ERecord
-                                                                    ()
-                                                                    (traceableTrait (TIntrinsic IString))
-                                                                    ( Map.fromList
-                                                                        [
-                                                                          ( "trace"
-                                                                          , EVariable () (Label (TIntrinsic IString `TArrow` TIntrinsic IString) "trace__$instance.c81d5162b7d14248")
-                                                                          )
-                                                                        ]
-                                                                    )
-                                                                    Nothing
-                                                                  :| []
-                                                              )
-                                                          )
-                                                        ]
-                                                    )
-                                                    Nothing
-                                                    :| []
-                                                )
+    ()
+    (TIntrinsic IString)
+    ( EApplication
+        ()
+        (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))) `TArrow` TIntrinsic IString)
+        (EVariable () (Label (traceableTrait (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])))) `TArrow` TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))) `TArrow` TIntrinsic IString) "trace"))
+        ( ERecord
+            ()
+            (traceableTrait (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])))))
+            ( Map.fromList
+                [
+                  ( "trace"
+                  , EApplication
+                      ()
+                      (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))) `TArrow` TIntrinsic IString)
+                      ( EVariable
+                          ()
+                          ( Label
+                              ( traceableTrait (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))
+                                  `TArrow` TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])))
+                                  `TArrow` TIntrinsic IString
                               )
-                            ]
-                        )
-                        Nothing
-                        :| []
-                    )
-                )
-                ( EListLiteral
-                    ()
-                    (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))))
-                    [ ETuple
-                        ()
-                        (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))
-                        ( ELiteral () (LInt32 1)
-                            <| ELiteral () (LString "a")
-                            :| []
-                        )
-                    , ETuple
-                        ()
-                        (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))
-                        ( ELiteral () (LInt32 2)
-                            <| ELiteral () (LString "b")
-                            :| []
-                        )
-                    ]
-                    :| []
-                )
+                              "trace__$instance.8582bc20351fc496"
+                          )
+                      )
+                      ( ERecord
+                          ()
+                          (traceableTrait (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])))
+                          ( Map.fromList
+                              [
+                                ( "trace"
+                                , EApplication
+                                    ()
+                                    (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]) `TArrow` TIntrinsic IString)
+                                    ( EVariable
+                                        ()
+                                        ( Label
+                                            ( traceableTrait (TIntrinsic IInt32)
+                                                `TArrow` traceableTrait (TIntrinsic IString)
+                                                `TArrow` TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])
+                                                `TArrow` TIntrinsic IString
+                                            )
+                                            "trace__$instance.895a62bb6130678a"
+                                        )
+                                    )
+                                    ( ERecord
+                                        ()
+                                        (traceableTrait (TIntrinsic IInt32))
+                                        ( Map.fromList
+                                            [
+                                              ( "trace"
+                                              , EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IString) "trace__$instance.c847f12006235dc0")
+                                              )
+                                            ]
+                                        )
+                                        Nothing
+                                        <| ERecord
+                                          ()
+                                          (traceableTrait (TIntrinsic IString))
+                                          ( Map.fromList
+                                              [
+                                                ( "trace"
+                                                , EVariable () (Label (TIntrinsic IString `TArrow` TIntrinsic IString) "trace__$instance.c81d5162b7d14248")
+                                                )
+                                              ]
+                                          )
+                                          Nothing
+                                        :| []
+                                    )
+                                )
+                              ]
+                          )
+                          Nothing
+                          :| []
+                      )
+                  )
+                ]
+            )
+            Nothing
+            :| []
+        )
+    )
+    ( EListLiteral
+        ()
+        (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))))
+        [ ETuple
+            ()
+            (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))
+            ( ELiteral () (LInt32 1)
+                <| ELiteral () (LString "a")
+                :| []
+            )
+        , ETuple
+            ()
+            (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))
+            ( ELiteral () (LInt32 2)
+                <| ELiteral () (LString "b")
+                :| []
+            )
+        ]
+        :| []
+    )
 
 fixturee27 :: Expression () (Type TypeIndex Kind)
 fixturee27 = fst $ runTraitTransformY (transformScope fixturee25)
-

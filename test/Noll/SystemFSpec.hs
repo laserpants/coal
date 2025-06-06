@@ -58,8 +58,8 @@ import qualified Noll.Set2.Test12
 import qualified Noll.Set3.Test04
 import qualified Noll.Set3.Test05
 import qualified Noll.Set3.Test10
-import qualified Noll.Set3.Test12
 import qualified Noll.Set3.Test10x
+import qualified Noll.Set3.Test12
 import qualified Noll.Set3.Test12x
 import qualified Noll.Set3.Test13x
 
@@ -1243,7 +1243,7 @@ story = do
   it "" $
     denormalizeObject Noll.Set3.Test10.prog3_10 == Noll.Set3.Test12.prog3_12
   it "" $
-    denormalizeObject Noll.Set3.Test10x.prog3_10x == Noll.Set3.Test12x.prog3_12x 
+    denormalizeObject Noll.Set3.Test10x.prog3_10x == Noll.Set3.Test12x.prog3_12x
   it "" $
     runReader (withModuleName "Ordered" (translateDefinition orderedCompareInstance1)) testNameEnvironment == [orderedCompareInstance1Result]
   it "" $
