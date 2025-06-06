@@ -87,7 +87,7 @@ tryMatch t u = do
   pure (evalUnifier var (match t u))
 
 -- TODO: rename
-mapAlterAll :: (Monad m, Ord k) => (k -> m (Maybe Substitution)) -> Map k (Environment (Scheme TypeIndex Kind IndexedType)) -> m [(k, Map Name (Scheme TypeIndex Kind IndexedType))]
+--mapAlterAll :: (Monad m, Ord k) => (k -> m (Maybe Substitution)) -> Map k (Environment (Scheme TypeIndex Kind IndexedType)) -> m [(k, Map Name (Scheme TypeIndex Kind IndexedType))]
 mapAlterAll f m = do
   let abc = [fn k v | (k, v) <- Map.toList m]
   def <- sequence abc
@@ -96,9 +96,9 @@ mapAlterAll f m = do
   fn k (Environment env) = do
     s <- f k
     case s of
-      Nothing ->
+      Left{} ->
         pure []
-      Just sub -> do
+      Right sub -> do
         pure [(k, Map.map (applySpecial sub) env)]
 
 applySpecial :: Substitution -> Scheme TypeIndex Kind IndexedType -> Scheme TypeIndex Kind IndexedType
@@ -127,13 +127,12 @@ findFirstMatch (Trait _ t1) = do
       pure (Just (k, v))
  where
   --   test :: (Monad m) => Type TypeIndex Kind -> m (Maybe Substitution) -- (Environment (Scheme TypeIndex Kind IndexedType))
-  test t = do
-    x <- tryMatch t t1
-    case x of
-      Left{} ->
-        pure Nothing
-      Right sub ->
-        pure (Just sub)
+  test t = tryMatch t t1
+--    case x of
+--      Left{} ->
+--        pure Nothing
+--      Right sub ->
+--        pure (Just sub)
 
 lookupTraitInstance ::
   ( Monoid a
