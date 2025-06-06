@@ -24,7 +24,7 @@ data Definition a k t
   | -- | Type definition
     DType Name [Parameter ()] [Constructor Parameter () (Type Parameter ())]
   | -- | Codata type definition
-    DCodata a Name -- TODO
+    DCodata Name [Parameter ()] [(Name, Type Parameter ())]
   | -- | Function definition
     DFunction Name (Function Expression a t)
   | -- | Other (constant) top-level definitions
