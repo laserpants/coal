@@ -30,6 +30,7 @@ moduleMain =
         , "pair_to_string"
         , "list_to_string"
         , "trace"
+        , "trace_string"
         ]
     , -- instance Traceable(string)
       DInstance2
