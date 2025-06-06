@@ -1268,6 +1268,16 @@ story = do
     fixturee9 == fixturee8
   it "" $
     fixturee12 == fixturee11
+  it "" $
+    fixturee15 == fixturee14
+  it "" $
+    fixturee18 == fixturee17
+  it "" $
+    fixturee21 == fixturee20
+  it "" $
+    fixturee24 == fixturee23
+  it "" $
+    fixturee27 == fixturee26
 
 testNameEnvironment =
   initialTranslateEnvironment

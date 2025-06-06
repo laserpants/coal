@@ -354,33 +354,24 @@ moduleMain =
                     ( @<list(tuple2(int32, string))/string>
                         ( Core$.trace : Traceable(list(tuple2(int32, string)))/list(tuple2(int32, string))/string
                         , @<Traceable(list(tuple2(int32, string)))>
-                            ( $Record : { trace : list(tuple2(int32, string))/string | {} }/record({ trace : list(tuple2(int32, string))/string | {} })
+                            ( $Record : { trace : tuple2(int32, string)/string | {} }/record({ trace : tuple2(int32, string)/string | {} })
                             , { trace =
-                                  @<list(tuple2(int32, string))/string>
-                                    ( Core$.trace : Traceable(tuple2(int32, string))/list(tuple2(int32, string))/string
+                                  @<tuple2(int32, string)/string>
+                                    ( Main.trace__$instance.fcea41ba44fb0cf4 : Traceable(tuple2(int32, string))/tuple2(int32, string)/string
                                     , @<Traceable(tuple2(int32, string))>
                                         ( $Record : { trace : tuple2(int32, string)/string | {} }/record({ trace : tuple2(int32, string)/string | {} })
                                         , { trace = 
                                               @<tuple2(int32, string)/string>
-                                                ( Main.trace__$instance.fcea41ba44fb0cf4 : Traceable(tuple2(int32, string))/tuple2(int32, string)/string
-                                                , @<Traceable(tuple2(int32, string))>
-                                                    ( $Record : { trace : tuple2(int32, string)/string | {} }/record({ trace : tuple2(int32, string)/string | {} })
-                                                    , { trace = 
-                                                          @<tuple2(int32, string)/string>
-                                                            ( Main.trace__$instance.a2de7bde6bbaafb6 : Traceable(int32)/Traceable(string)/tuple2(int32, string)/string
-                                                            , @<Traceable(int32)>
-                                                                ( $Record : { trace : int32/string | {} }/record({ trace : int32/string | {} })
-                                                                , { trace = Main.trace__$instance.c847f12006235dc0 : int32/string
-                                                                  | {}
-                                                                  }
-                                                                )
-                                                            , @<Traceable(string)>
-                                                                ( $Record : { trace : string/string | {} }/record({ trace : string/string | {} })
-                                                                , { trace = Main.trace__$instance.c81d5162b7d14248 : string/string
-                                                                  | {}
-                                                                  }
-                                                                )
-                                                            )
+                                                ( Main.trace__$instance.a2de7bde6bbaafb6 : Traceable(int32)/Traceable(string)/tuple2(int32, string)/string
+                                                , @<Traceable(int32)>
+                                                    ( $Record : { trace : int32/string | {} }/record({ trace : int32/string | {} })
+                                                    , { trace = Main.trace__$instance.c847f12006235dc0 : int32/string
+                                                      | {}
+                                                      }
+                                                    )
+                                                , @<Traceable(string)>
+                                                    ( $Record : { trace : string/string | {} }/record({ trace : string/string | {} })
+                                                    , { trace = Main.trace__$instance.c81d5162b7d14248 : string/string
                                                       | {}
                                                       }
                                                     )

@@ -287,17 +287,18 @@ moduleMain =
                         ( Map.fromList
                             [
                               ( "trace"
-                              , EApplication
-                                  ()
-                                  (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))) `TArrow` TIntrinsic IString)
-                                  (EVariable () (Label (traceableTrait (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])) `TArrow` TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))) `TArrow` TIntrinsic IString) "trace"))
-                                  ( ERecord
-                                      ()
-                                      (traceableTrait (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])))
-                                      ( Map.fromList
-                                          [
-                                            ( "trace"
-                                            , EApplication
+                              , --EApplication
+                                --  ()
+                                --  (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))) `TArrow` TIntrinsic IString)
+                                --  (EVariable () (Label (traceableTrait (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])) `TArrow` TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))) `TArrow` TIntrinsic IString) "trace"))
+                                --  ( ERecord
+                                --      ()
+                                --      (traceableTrait (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])))
+                                --      ( Map.fromList
+                                --          [
+                                --            ( "trace"
+                                --            , 
+                                              EApplication
                                                 ()
                                                 (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]) `TArrow` TIntrinsic IString)
                                                 ( EVariable
@@ -360,12 +361,12 @@ moduleMain =
                                                     Nothing
                                                     :| []
                                                 )
-                                            )
-                                          ]
-                                      )
-                                      Nothing
-                                      :| []
-                                  )
+--                                            )
+--                                          ]
+--                                      )
+--                                      Nothing
+--                                      :| []
+--                                  )
                               )
                             ]
                         )

@@ -484,6 +484,54 @@ xx =
       )
     ]
 
+-- Type class?
+transformDefinitionY ::
+  ( MonadReader DictionaryEnvironment m
+  , MonadState Int m
+  , MonadWriter [Trait (Type TypeIndex Kind)] m
+  , Monoid a
+  , Show a
+  , Data a
+  ) =>
+  Definition a Kind (Type TypeIndex Kind) ->
+  m (Definition a Kind (Type TypeIndex Kind))
+transformDefinitionY =
+  \case
+    DConstant name c ->
+      DConstant name <$> transformConstantY c
+    DAnnotation a d ->
+      DAnnotation a <$> transformDefinitionY d
+    d ->
+      pure d
+
+transformConstantY ::
+  ( MonadReader DictionaryEnvironment m
+  , MonadState Int m
+  , MonadWriter [Trait (Type TypeIndex Kind)] m
+  , Monoid a
+  , Show a
+  , Data a
+  ) =>
+  Constant Expression a (Type TypeIndex Kind) ->
+  m (Constant Expression a (Type TypeIndex Kind))
+transformConstantY (Constant a u@(With _ t) e) = do
+  --e1 <- transformScope e
+  (expr, traits) <- runWriterT (descendM transformY e)
+  case nub traits of
+    [] ->
+      pure (Constant a (With [] t) expr)
+    tr : trs ->
+      pure
+        (
+          Constant
+            a
+            (With (tr : trs) t)
+            (ELambda mempty (toPattern <$> (tr :| trs)) expr)
+        )
+ where
+  toPattern tr@(Trait _ t) =
+    PDictionary mempty (traitType tr) tr
+
 -- listPair =
 --  TApplication
 --    KType
