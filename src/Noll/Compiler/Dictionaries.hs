@@ -117,7 +117,8 @@ findFirstMatch ::
   ) =>
   Trait (Type TypeIndex Kind) ->
   m (Maybe (Type TypeIndex Kind, Map Name (Scheme TypeIndex Kind IndexedType)))
-findFirstMatch (Trait _ t1) = do
+findFirstMatch (Trait nnn t1) = do
+  traceShowM nnn
   env <- asks dictionaryEnvironmentInstances
   abc <- mapAlterAll test env
   case abc of
