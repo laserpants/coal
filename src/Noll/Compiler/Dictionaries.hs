@@ -20,7 +20,7 @@ import Lang.Common.Environment (Environment (..))
 import Lang.Common.List1 (List1, NonEmpty ((:|)), (<|))
 import Lang.Common.Supply (Supply (..), supplied)
 import Lang.Label (Label (..))
-import Lang.Utils (Name)
+import Lang.Utils (Dictionary, Name)
 import Noll.Language
 import Noll.Language.Expression (Expression (..))
 import Noll.Language.Trait
@@ -40,7 +40,7 @@ import Lang.Common.List1 (NonEmpty (..), fromList1)
 
 data DictionaryEnvironment = DictionaryEnvironment
   { dictionaryEnvironmentNames :: Environment (Scheme TypeIndex Kind (Type TypeIndex Kind))
-  , dictionaryEnvironmentInstances :: Map IndexedType (Environment (Scheme TypeIndex Kind IndexedType))
+  , dictionaryEnvironmentInstances :: Map IndexedType (Dictionary (Scheme TypeIndex Kind IndexedType))
   }
   deriving (Show, Eq, Ord)
 
@@ -93,7 +93,7 @@ mapAlterAll f m = do
   def <- sequence abc
   pure (concat def)
  where
-  fn k (Environment env) = do
+  fn k env = do
     s <- f k
     case s of
       Left{} ->
@@ -440,12 +440,12 @@ yy =
 --      )
 --    ]
 
-xx :: Map IndexedType (Environment (Scheme TypeIndex Kind IndexedType))
+xx :: Map IndexedType (Dictionary (Scheme TypeIndex Kind IndexedType))
 xx =
   Map.fromList
     [
       ( TIntrinsic IString
-      , Environment.fromList
+      , Map.fromList
           [
             ( "trace"
             , Forall mempty [] (TIntrinsic IString `TArrow` TIntrinsic IString)
@@ -454,7 +454,7 @@ xx =
       )
     ,
       ( TIntrinsic IInt32
-      , Environment.fromList
+      , Map.fromList
           [
             ( "trace"
             , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IString)
@@ -463,7 +463,7 @@ xx =
       )
     ,
       ( TIntrinsic (ITuple [TVariable (TypeIndex KType 0), TVariable (TypeIndex KType 1)])
-      , Environment.fromList
+      , Map.fromList
           [
             ( "trace"
             , Forall
@@ -477,7 +477,7 @@ xx =
       )
     ,
       ( TIntrinsic (IList (TVariable (TypeIndex KType 0)))
-      , Environment.fromList
+      , Map.fromList
           [
             ( "trace"
             , Forall
