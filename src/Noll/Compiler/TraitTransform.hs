@@ -5,6 +5,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
+-- TODO: remove
 module Noll.Compiler.TraitTransform where
 
 import Control.Monad.Reader
@@ -63,17 +64,18 @@ transformConstantZ ::
   Constant Expression a (Type TypeIndex Kind) ->
   m (Constant Expression a (Type TypeIndex Kind))
 transformConstantZ (Constant a u@(With _ t) e) = do
-  (expr, traits) <- runWriterT (transformZ e)
-  case nub traits of
-    [] ->
-      pure (Constant a u expr)
-    tr : trs -> do
-      pure
-        ( Constant
-            a
-            (With (sort (tr : trs)) t)
-            (EDictionaryLambda a (List1.sort (tr :| trs)) expr)
-        )
+  undefined
+--  (expr, traits) <- runWriterT (transformZ e)
+--  case nub traits of
+--    [] ->
+--      pure (Constant a u expr)
+--    tr : trs -> do
+--      pure
+--        ( Constant
+--            a
+--            (With (sort (tr : trs)) t)
+--            (EDictionaryLambda a (List1.sort (tr :| trs)) expr)
+--        )
 
 -- TODO
 parameterized :: Trait (Type v k) -> Bool
@@ -95,78 +97,79 @@ transformZ ::
   Expression a (Type TypeIndex Kind) ->
   m (Expression a (Type TypeIndex Kind))
 transformZ =
-  \case
-    ERecursiveLet a p e1 e2 ->
-      transformZ (ELet a (BPattern a p e1 :| []) e2)
-    ELet a bs e -> do
-      (as, traits) <- runWriterT (traverse transformBindingZ bs)
-      let (ds, es) = NonEmpty.unzip as
-      let xs = concat (NonEmpty.toList (snd <$> as)) -- :: [Scheme TypeIndex (Kind Int) (Type TypeIndex (Kind Int))]
-      ELet a (fst <$> as) <$> local (Environment.insertMultiple xs) (transformZ e)
-    expr@(EApplication a t var@(EVariable _ ll@(Label t1 name)) es) -> do
-      traits <- collectTraits t1 name
-      case traits of
-        [] ->
-          EApplication a t var <$> traverse transformZ es
-        tr : trs -> do
-          tell (filter parameterized traits)
-          ds <- traverse transformZ es
-          pure (EDictionaryApplication a t ll (List1.nub (tr :| trs)) (NonEmpty.toList ds))
-    expr@(EVariable a ll@(Label t name)) -> do
-      traits <- collectTraits t name
-      case traits of
-        [] ->
-          pure (EVariable a ll)
-        tr : trs -> do
-          tell (filter parameterized traits)
-          pure (EDictionaryApplication a t ll (List1.nub (tr :| trs)) [])
-    EListLiteral a t es ->
-      EListLiteral a t <$> traverse transformZ es
-    ELambda a ps e ->
-      ELambda a ps <$> transformZ e
-    EApplication a t e1 es ->
-      EApplication a t <$> transformZ e1 <*> traverse transformZ es
-    EDictionaryApplication a t ll ts es ->
-      EDictionaryApplication a t ll ts <$> traverse transformZ es
-    ECompiledMatch a t e cs ->
-      ECompiledMatch a t
-        <$> transformZ e
-        <*> traverse transformCompiledClauseZ cs
-    EFold a t e1 cs me ->
-      EFold a t
-        <$> traverse transformZ e1
-        <*> traverse transformClauseZ cs
-        <*> traverse transformZ me
-    ERecord a t d me ->
-      ERecord a t
-        <$> traverse transformZ d
-        <*> traverse transformZ me
-    EIf a t e1 e2 e3 ->
-      EIf a t
-        <$> transformZ e1
-        <*> transformZ e2
-        <*> transformZ e3
-    EConstructor a ll ->
-      pure (EConstructor a ll)
-    expr@ELiteral{} ->
-      pure expr
-    expr@EBinaryOperator{} ->
-      pure expr
-    ESelect a ll e ->
-      ESelect a ll <$> transformZ e
-    EFocus name ll1 ll2 e1 e2 ->
-      EFocus name ll1 ll2 <$> transformZ e1 <*> transformZ e2
-    EListCons a t e1 e2 ->
-      EListCons a t
-        <$> transformZ e1
-        <*> transformZ e2
-    --    EBlock es ->
-    --      EBlock <$> traverse transformZ es
-    EAnnotation a t e ->
-      EAnnotation a t <$> transformZ e
-    expr ->
-      error (show expr) -- "TODO" -- pure expr
-      -- pure expr
+  undefined
+--  \case
+--    ERecursiveLet a p e1 e2 ->
+--      transformZ (ELet a (BPattern a p e1 :| []) e2)
+--    ELet a bs e -> do
+--      (as, traits) <- runWriterT (traverse transformBindingZ bs)
+--      let (ds, es) = NonEmpty.unzip as
+--      let xs = concat (NonEmpty.toList (snd <$> as)) -- :: [Scheme TypeIndex (Kind Int) (Type TypeIndex (Kind Int))]
+--      ELet a (fst <$> as) <$> local (Environment.insertMultiple xs) (transformZ e)
+--    expr@(EApplication a t var@(EVariable _ ll@(Label t1 name)) es) -> do
+--      traits <- collectTraits t1 name
+--      case traits of
+--        [] ->
+--          EApplication a t var <$> traverse transformZ es
+--        tr : trs -> do
+--          tell (filter parameterized traits)
+--          ds <- traverse transformZ es
+--          pure (EDictionaryApplication a t ll (List1.nub (tr :| trs)) (NonEmpty.toList ds))
+--    expr@(EVariable a ll@(Label t name)) -> do
+--      traits <- collectTraits t name
+--      case traits of
+--        [] ->
+--          pure (EVariable a ll)
+--        tr : trs -> do
+--          tell (filter parameterized traits)
+--          pure (EDictionaryApplication a t ll (List1.nub (tr :| trs)) [])
+--    EListLiteral a t es ->
+--      EListLiteral a t <$> traverse transformZ es
+--    ELambda a ps e ->
+--      ELambda a ps <$> transformZ e
+--    EApplication a t e1 es ->
+--      EApplication a t <$> transformZ e1 <*> traverse transformZ es
+----    EDictionaryApplication a t ll ts es ->
+----      EDictionaryApplication a t ll ts <$> traverse transformZ es
+--    ECompiledMatch a t e cs ->
+--      ECompiledMatch a t
+--        <$> transformZ e
+--        <*> traverse transformCompiledClauseZ cs
+--    EFold a t e1 cs me ->
+--      EFold a t
+--        <$> traverse transformZ e1
+--        <*> traverse transformClauseZ cs
+--        <*> traverse transformZ me
+--    ERecord a t d me ->
+--      ERecord a t
+--        <$> traverse transformZ d
+--        <*> traverse transformZ me
+--    EIf a t e1 e2 e3 ->
+--      EIf a t
+--        <$> transformZ e1
+--        <*> transformZ e2
+--        <*> transformZ e3
+--    EConstructor a ll ->
+--      pure (EConstructor a ll)
+--    expr@ELiteral{} ->
+--      pure expr
+--    expr@EBinaryOperator{} ->
+--      pure expr
+--    ESelect a ll e ->
+--      ESelect a ll <$> transformZ e
+--    EFocus name ll1 ll2 e1 e2 ->
+--      EFocus name ll1 ll2 <$> transformZ e1 <*> transformZ e2
+--    EListCons a t e1 e2 ->
+--      EListCons a t
+--        <$> transformZ e1
+--        <*> transformZ e2
+--    --    EBlock es ->
+--    --      EBlock <$> traverse transformZ es
+--    EAnnotation a t e ->
+--      EAnnotation a t <$> transformZ e
+--    expr ->
+--      error (show expr) -- "TODO" -- pure expr
+--      -- pure expr
 
 transformGuardZ ::
   ( MonadReader (Environment (Scheme TypeIndex Kind (Type TypeIndex Kind))) m
@@ -232,27 +235,28 @@ transformBindingZ ::
   Binding Expression a (Type TypeIndex Kind) ->
   m (Binding Expression a (Type TypeIndex Kind), [(Name, Scheme TypeIndex Kind (Type TypeIndex Kind))])
 transformBindingZ =
-  \case
-    BPattern a var@(PVariable a1 (Label t name)) e
-      | Text.isPrefixOf "$fold" name -> do
-          body <- transformZ e
-          pure (BPattern a var body, [])
-    BPattern a var@(PVariable a1 (Label t name)) e -> do
-      (body, traits) <- runWriterT (transformZ e)
-      case nub traits of
-        [] ->
-          pure (BPattern a var body, [])
-        tr : trs -> do
-          -- tell traits
-          pure (BPattern a var (EDictionaryLambda a (List1.sort (tr :| trs)) body), [(name, Forall (typeIndexesIn t) traits t)])
-    -- (body, traits) <- runWriterT (transform e)
-    -- case traits of
-    --  [] ->
-    --    pure (BPattern var body, [])
-    --  tr : trs ->
-    --    pure (BPattern var (EDictionaryLambda (tr :| trs) body), [(name, tr : trs)])
-    BPattern a p e ->
-      error "TODO"
+  undefined
+--  \case
+--    BPattern a var@(PVariable a1 (Label t name)) e
+--      | Text.isPrefixOf "$fold" name -> do
+--          body <- transformZ e
+--          pure (BPattern a var body, [])
+--    BPattern a var@(PVariable a1 (Label t name)) e -> do
+--      (body, traits) <- runWriterT (transformZ e)
+--      case nub traits of
+--        [] ->
+--          pure (BPattern a var body, [])
+--        tr : trs -> do
+--          -- tell traits
+--          pure (BPattern a var (EDictionaryLambda a (List1.sort (tr :| trs)) body), [(name, Forall (typeIndexesIn t) traits t)])
+--    -- (body, traits) <- runWriterT (transform e)
+--    -- case traits of
+--    --  [] ->
+--    --    pure (BPattern var body, [])
+--    --  tr : trs ->
+--    --    pure (BPattern var (EDictionaryLambda (tr :| trs) body), [(name, tr : trs)])
+--    BPattern a p e ->
+--      error "TODO"
 
 collectTraits ::
   ( MonadReader (Environment (Scheme TypeIndex Kind (Type TypeIndex Kind))) m

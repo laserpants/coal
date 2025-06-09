@@ -50,122 +50,123 @@ tvar1 = TVariable (TypeIndex KType 1)
 
 moduleOrdered :: Module () Kind IndexedType
 moduleOrdered =
-  Module.fromDefinitionList
-    (Path ["Ordered"])
-    []
-    [ DAnnotation
-        ( With
-            [Trait "Ordered" (TVariable (Parameter () "a"))]
-            ( TAlias
-                "Predicate"
-                [TVariable (Parameter () "a")]
-                (TVariable (Parameter () "a") `TArrow` TIntrinsic IBool)
-            )
-        )
-        ( DConstant
-            "less_than_or_equal_to"
-            ( Constant
-                ()
-                ( With
-                    []
-                    (tvar0 `TArrow` tvar0 `TArrow` TIntrinsic IBool)
-                )
-                ( EDictionaryLambda
-                    ()
-                    (Trait "Ordered" (TVariable (TypeIndex KType 0)) :| [])
-                    ( ELambda
-                        ()
-                        ( PVariable () (Label tvar0 "m")
-                            <| PVariable () (Label tvar0 "n")
-                            :| []
-                        )
-                        ( ECompiledMatch
-                            ()
-                            (TIntrinsic IBool)
-                            ( EDictionaryApplication
-                                ()
-                                (TConstructor KType "Ordering")
-                                (Label (tvar0 `TArrow` tvar0 `TArrow` TConstructor KType "Ordering") "compare")
-                                (Trait "Ordered" (TVariable (TypeIndex KType 0)) :| [])
-                                [EVariable () (Label tvar0 "m"), EVariable () (Label tvar0 "n")]
-                            )
-                            ( ECompiledClause
-                                (Label (TConstructor KType "Ordering") "EqualTo" :| [])
-                                (ELiteral () (LBool True))
-                                <| ECompiledClause
-                                  (Label (TConstructor KType "Ordering") "GreaterThan" :| [])
-                                  (ELiteral () (LBool False))
-                                <| ECompiledClause
-                                  (Label (TConstructor KType "Ordering") "LessThan" :| [])
-                                  (ELiteral () (LBool True))
-                                :| []
-                            )
-                        )
-                    )
-                )
-            )
-        )
-    , DAnnotation
-        ( With
-            [Trait "Ordered" (TVariable (Parameter () "a"))]
-            ( TAlias
-                "Predicate"
-                [TVariable (Parameter () "a")]
-                (TVariable (Parameter () "a") `TArrow` TIntrinsic IBool)
-            )
-        )
-        ( DConstant
-            "greater_than"
-            ( Constant
-                ()
-                ( With
-                    []
-                    (tvar1 `TArrow` tvar1 `TArrow` TIntrinsic IBool)
-                )
-                ( EDictionaryLambda
-                    ()
-                    (Trait "Ordered" (TVariable (TypeIndex KType 0)) :| [])
-                    ( ELambda
-                        ()
-                        ( PAnnotation
-                            ()
-                            (TVariable (Parameter () "a"))
-                            (PVariable () (Label (TVariable (TypeIndex KType 1)) "n"))
-                            :| []
-                        )
-                        ( EApplication
-                            ()
-                            (TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool)
-                            ( EBinaryOperator
-                                ()
-                                ( (TIntrinsic IBool `TArrow` TIntrinsic IBool)
-                                    `TArrow` (TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool)
-                                    `TArrow` TVariable (TypeIndex KType 1)
-                                    `TArrow` TIntrinsic IBool
-                                )
-                                OReverseComposition
-                            )
-                            ( EVariable () (Label (TIntrinsic IBool `TArrow` TIntrinsic IBool) "not")
-                                <| EDictionaryApplication
-                                  ()
-                                  (TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool)
-                                  ( Label
-                                      ( TVariable (TypeIndex KType 1)
-                                          `TArrow` TVariable (TypeIndex KType 1)
-                                          `TArrow` TIntrinsic IBool
-                                      )
-                                      "less_than_or_equal_to"
-                                  )
-                                  (Trait "Ordered" (TVariable (TypeIndex KType 0)) :| [])
-                                  [EVariable () (Label (TVariable (TypeIndex KType 1)) "n")]
-                                :| []
-                            )
-                        )
-                    )
-                )
-            )
-        )
-    ]
+  undefined
+--  Module.fromDefinitionList
+--    (Path ["Ordered"])
+--    []
+--    [ DAnnotation
+--        ( With
+--            [Trait "Ordered" (TVariable (Parameter () "a"))]
+--            ( TAlias
+--                "Predicate"
+--                [TVariable (Parameter () "a")]
+--                (TVariable (Parameter () "a") `TArrow` TIntrinsic IBool)
+--            )
+--        )
+--        ( DConstant
+--            "less_than_or_equal_to"
+--            ( Constant
+--                ()
+--                ( With
+--                    []
+--                    (tvar0 `TArrow` tvar0 `TArrow` TIntrinsic IBool)
+--                )
+--                ( EDictionaryLambda
+--                    ()
+--                    (Trait "Ordered" (TVariable (TypeIndex KType 0)) :| [])
+--                    ( ELambda
+--                        ()
+--                        ( PVariable () (Label tvar0 "m")
+--                            <| PVariable () (Label tvar0 "n")
+--                            :| []
+--                        )
+--                        ( ECompiledMatch
+--                            ()
+--                            (TIntrinsic IBool)
+--                            ( EDictionaryApplication
+--                                ()
+--                                (TConstructor KType "Ordering")
+--                                (Label (tvar0 `TArrow` tvar0 `TArrow` TConstructor KType "Ordering") "compare")
+--                                (Trait "Ordered" (TVariable (TypeIndex KType 0)) :| [])
+--                                [EVariable () (Label tvar0 "m"), EVariable () (Label tvar0 "n")]
+--                            )
+--                            ( ECompiledClause
+--                                (Label (TConstructor KType "Ordering") "EqualTo" :| [])
+--                                (ELiteral () (LBool True))
+--                                <| ECompiledClause
+--                                  (Label (TConstructor KType "Ordering") "GreaterThan" :| [])
+--                                  (ELiteral () (LBool False))
+--                                <| ECompiledClause
+--                                  (Label (TConstructor KType "Ordering") "LessThan" :| [])
+--                                  (ELiteral () (LBool True))
+--                                :| []
+--                            )
+--                        )
+--                    )
+--                )
+--            )
+--        )
+--    , DAnnotation
+--        ( With
+--            [Trait "Ordered" (TVariable (Parameter () "a"))]
+--            ( TAlias
+--                "Predicate"
+--                [TVariable (Parameter () "a")]
+--                (TVariable (Parameter () "a") `TArrow` TIntrinsic IBool)
+--            )
+--        )
+--        ( DConstant
+--            "greater_than"
+--            ( Constant
+--                ()
+--                ( With
+--                    []
+--                    (tvar1 `TArrow` tvar1 `TArrow` TIntrinsic IBool)
+--                )
+--                ( EDictionaryLambda
+--                    ()
+--                    (Trait "Ordered" (TVariable (TypeIndex KType 0)) :| [])
+--                    ( ELambda
+--                        ()
+--                        ( PAnnotation
+--                            ()
+--                            (TVariable (Parameter () "a"))
+--                            (PVariable () (Label (TVariable (TypeIndex KType 1)) "n"))
+--                            :| []
+--                        )
+--                        ( EApplication
+--                            ()
+--                            (TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool)
+--                            ( EBinaryOperator
+--                                ()
+--                                ( (TIntrinsic IBool `TArrow` TIntrinsic IBool)
+--                                    `TArrow` (TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool)
+--                                    `TArrow` TVariable (TypeIndex KType 1)
+--                                    `TArrow` TIntrinsic IBool
+--                                )
+--                                OReverseComposition
+--                            )
+--                            ( EVariable () (Label (TIntrinsic IBool `TArrow` TIntrinsic IBool) "not")
+--                                <| EDictionaryApplication
+--                                  ()
+--                                  (TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool)
+--                                  ( Label
+--                                      ( TVariable (TypeIndex KType 1)
+--                                          `TArrow` TVariable (TypeIndex KType 1)
+--                                          `TArrow` TIntrinsic IBool
+--                                      )
+--                                      "less_than_or_equal_to"
+--                                  )
+--                                  (Trait "Ordered" (TVariable (TypeIndex KType 0)) :| [])
+--                                  [EVariable () (Label (TVariable (TypeIndex KType 1)) "n")]
+--                                :| []
+--                            )
+--                        )
+--                    )
+--                )
+--            )
+--        )
+--    ]
 
 moduleBinarySearch :: Module () Kind IndexedType
 moduleBinarySearch =

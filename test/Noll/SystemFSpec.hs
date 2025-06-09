@@ -1206,28 +1206,28 @@ story = do
     runMatchMonad "match" 0 (compileMatchExprs Noll.Set.Test08.prog1_08) == Noll.Set.Test09.prog1_09
   it "" $
     runMatchMonad "match" 0 (compileMatchExprs Noll.Set2.Test05.prog2_05) == Noll.Set2.Test09.prog2_09
-  it "" $
-    result funLte == funLte2
-  it "" $
-    result funGt == funGt2
-  it "" $
-    result funInRange == funInRange2
-  it "" $
-    result funFromList == funFromList2
-  it "" $
-    result funSort == funSort2
-  it "" $
-    runTraitTransformZ testEnvZ2 (transformModuleZ Noll.Set.Test09.moduleUtils) (freshIdIn Noll.Set.Test09.moduleUtils) == Noll.Set.Test10.moduleUtils
-  it "" $
-    runTraitTransformZ testEnvZ2 (transformModuleZ Noll.Set.Test09.moduleOrdered) (freshIdIn Noll.Set.Test09.moduleOrdered) == Noll.Set.Test10.moduleOrdered
-  it "" $
-    runTraitTransformZ testEnvZ2 (transformModuleZ Noll.Set.Test09.moduleBinarySearch) (freshIdIn Noll.Set.Test09.moduleBinarySearch) == Noll.Set.Test10.moduleBinarySearch
-  it "" $
-    runTraitTransformZ testEnvZ2 (transformModuleZ Noll.Set.Test09.moduleMain) (freshIdIn Noll.Set.Test09.moduleMain) == Noll.Set.Test10.moduleMain
-  it "" $
-    result fixtureY1 == fixtureY1r
-  it "" $
-    result fixtureY2 == fixtureY2r
+--  it "" $
+--    result funLte == funLte2
+--  it "" $
+--    result funGt == funGt2
+--  it "" $
+--    result funInRange == funInRange2
+--  it "" $
+--    result funFromList == funFromList2
+--  it "" $
+--    result funSort == funSort2
+--  it "" $
+--    runTraitTransformZ testEnvZ2 (transformModuleZ Noll.Set.Test09.moduleUtils) (freshIdIn Noll.Set.Test09.moduleUtils) == Noll.Set.Test10.moduleUtils
+--  it "" $
+--    runTraitTransformZ testEnvZ2 (transformModuleZ Noll.Set.Test09.moduleOrdered) (freshIdIn Noll.Set.Test09.moduleOrdered) == Noll.Set.Test10.moduleOrdered
+--  it "" $
+--    runTraitTransformZ testEnvZ2 (transformModuleZ Noll.Set.Test09.moduleBinarySearch) (freshIdIn Noll.Set.Test09.moduleBinarySearch) == Noll.Set.Test10.moduleBinarySearch
+--  it "" $
+--    runTraitTransformZ testEnvZ2 (transformModuleZ Noll.Set.Test09.moduleMain) (freshIdIn Noll.Set.Test09.moduleMain) == Noll.Set.Test10.moduleMain
+--  it "" $
+--    result fixtureY1 == fixtureY1r
+--  it "" $
+--    result fixtureY2 == fixtureY2r
   it "" $
     eliminateDictionaries Noll.Set.Test10.moduleUtils == Noll.Set.Test11.moduleUtils
   it "" $

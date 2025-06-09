@@ -2,6 +2,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
+-- TODO: remove
 module Noll.Compiler.DictionaryElimination (EliminateDictionariesTransformContext (..)) where
 
 import Data.Data (Data, Typeable)
@@ -55,13 +56,14 @@ instance (Monoid a, Data a) => EliminateDictionariesTransformContext (Expression
 
 eliminateDictionariesExpr :: (Monoid a, Data a) => Expression a (Type TypeIndex Kind) -> Expression a (Type TypeIndex Kind)
 eliminateDictionariesExpr =
-  \case
-    EDictionaryLambda a ts e ->
-      flattenLambda (ELambda a (pvars ts) e)
-    EDictionaryApplication a t (Label t1 name) ts es ->
-      EApplication a t (EVariable mempty (Label (foldType t1 (dictionaryType <$> ts)) name)) (evars ts `List1.appendList` es)
-    e ->
-      e
+  undefined
+--  \case
+--    EDictionaryLambda a ts e ->
+--      flattenLambda (ELambda a (pvars ts) e)
+--    EDictionaryApplication a t (Label t1 name) ts es ->
+--      EApplication a t (EVariable mempty (Label (foldType t1 (dictionaryType <$> ts)) name)) (evars ts `List1.appendList` es)
+--    e ->
+--      e
 
 setType :: Type TypeIndex Kind -> Expression a (Type TypeIndex Kind) -> Expression a (Type TypeIndex Kind)
 setType t =

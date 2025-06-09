@@ -13,44 +13,45 @@ import qualified Data.Set as Set
 import qualified Noll.Module as Module
 
 fixtureFoo1 =
-  EDictionaryLambda
-    ()
-    ( Trait "Ordered" (TVariable (TypeIndex KType 0))
-        :| []
-    )
-    ( ELambda
-        ()
-        ( PVariable () (Label (TVariable (TypeIndex KType 0)) "m")
-            <| PVariable () (Label (TVariable (TypeIndex KType 0)) "n")
-            :| []
-        )
-        ( ECompiledMatch
-            ()
-            (TIntrinsic IBool)
-            ( EDictionaryApplication
-                ()
-                (TConstructor KType "Ordering")
-                (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TConstructor KType "Ordering") "compare")
-                ( Trait "Ordered" (TVariable (TypeIndex KType 0))
-                    :| []
-                )
-                [ EVariable () (Label (TVariable (TypeIndex KType 0)) "m")
-                , EVariable () (Label (TVariable (TypeIndex KType 0)) "n")
-                ]
-            )
-            ( ECompiledClause
-                (Label (TConstructor KType "Ordering") "EqualTo" :| [])
-                (ELiteral () (LBool True))
-                <| ECompiledClause
-                  (Label (TConstructor KType "Ordering") "GreaterThan" :| [])
-                  (ELiteral () (LBool False))
-                <| ECompiledClause
-                  (Label (TConstructor KType "Ordering") "LessThan" :| [])
-                  (ELiteral () (LBool True))
-                :| []
-            )
-        )
-    )
+  undefined
+--  EDictionaryLambda
+--    ()
+--    ( Trait "Ordered" (TVariable (TypeIndex KType 0))
+--        :| []
+--    )
+--    ( ELambda
+--        ()
+--        ( PVariable () (Label (TVariable (TypeIndex KType 0)) "m")
+--            <| PVariable () (Label (TVariable (TypeIndex KType 0)) "n")
+--            :| []
+--        )
+--        ( ECompiledMatch
+--            ()
+--            (TIntrinsic IBool)
+--            ( EDictionaryApplication
+--                ()
+--                (TConstructor KType "Ordering")
+--                (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TConstructor KType "Ordering") "compare")
+--                ( Trait "Ordered" (TVariable (TypeIndex KType 0))
+--                    :| []
+--                )
+--                [ EVariable () (Label (TVariable (TypeIndex KType 0)) "m")
+--                , EVariable () (Label (TVariable (TypeIndex KType 0)) "n")
+--                ]
+--            )
+--            ( ECompiledClause
+--                (Label (TConstructor KType "Ordering") "EqualTo" :| [])
+--                (ELiteral () (LBool True))
+--                <| ECompiledClause
+--                  (Label (TConstructor KType "Ordering") "GreaterThan" :| [])
+--                  (ELiteral () (LBool False))
+--                <| ECompiledClause
+--                  (Label (TConstructor KType "Ordering") "LessThan" :| [])
+--                  (ELiteral () (LBool True))
+--                :| []
+--            )
+--        )
+--    )
 
 fixtureFoo2 =
   ELambda
