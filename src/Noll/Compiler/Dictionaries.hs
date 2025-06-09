@@ -310,12 +310,16 @@ transformCompiledClauseY ::
   ( MonadReader DictionaryEnvironment m
   , MonadState Int m
   , MonadWriter [Trait (Type TypeIndex Kind)] m
+  , Data a
+  , Monoid a
   , Show a
   ) =>
   CompiledClause a (Type TypeIndex Kind) ->
   m (CompiledClause a (Type TypeIndex Kind))
 transformCompiledClauseY =
-  undefined
+  \case
+    ECompiledClause lls e ->
+      ECompiledClause lls <$> transformY e
 
 --
 

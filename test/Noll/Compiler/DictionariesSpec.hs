@@ -927,3 +927,78 @@ fixturee26 =
 
 fixturee27 :: Expression () (Type TypeIndex Kind)
 fixturee27 = fst $ runTraitTransformY (transformScope fixturee25)
+
+fixturee28 =
+            Constant
+                ()
+                (With [] (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool))
+                ( ELambda
+                    ()
+                    ( PVariable () (Label (TVariable (TypeIndex KType 0)) "m")
+                        <| PVariable () (Label (TVariable (TypeIndex KType 0)) "n")
+                        :| []
+                    )
+                    ( ECompiledMatch
+                        ()
+                        (TIntrinsic IBool)
+                        ( EApplication
+                            ()
+                            (TConstructor KType "Ordering")
+                            (EVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TConstructor KType "Ordering") "compare"))
+                            ( EVariable () (Label (TVariable (TypeIndex KType 0)) "m")
+                                <| EVariable () (Label (TVariable (TypeIndex KType 0)) "n")
+                                :| []
+                            )
+                        )
+                        ( ECompiledClause
+                            (Label (TConstructor KType "Ordering") "EqualTo" :| [])
+                            (ELiteral () (LBool True))
+                            <| ECompiledClause
+                              (Label (TConstructor KType "Ordering") "GreaterThan" :| [])
+                              (ELiteral () (LBool False))
+                            <| ECompiledClause
+                              (Label (TConstructor KType "Ordering") "LessThan" :| [])
+                              (ELiteral () (LBool True))
+                            :| []
+                        )
+                    )
+                )
+
+fixturee29 =
+            Constant
+                ()
+                (With [] (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool))
+                ( ELambda
+                    ()
+                    ( PVariable () (Label (TVariable (TypeIndex KType 0)) "m")
+                        <| PVariable () (Label (TVariable (TypeIndex KType 0)) "n")
+                        :| []
+                    )
+                    ( ECompiledMatch
+                        ()
+                        (TIntrinsic IBool)
+                        ( EApplication
+                            ()
+                            (TConstructor KType "Ordering")
+                            (EVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TConstructor KType "Ordering") "compare"))
+                            ( EVariable () (Label (TVariable (TypeIndex KType 0)) "m")
+                                <| EVariable () (Label (TVariable (TypeIndex KType 0)) "n")
+                                :| []
+                            )
+                        )
+                        ( ECompiledClause
+                            (Label (TConstructor KType "Ordering") "EqualTo" :| [])
+                            (ELiteral () (LBool True))
+                            <| ECompiledClause
+                              (Label (TConstructor KType "Ordering") "GreaterThan" :| [])
+                              (ELiteral () (LBool False))
+                            <| ECompiledClause
+                              (Label (TConstructor KType "Ordering") "LessThan" :| [])
+                              (ELiteral () (LBool True))
+                            :| []
+                        )
+                    )
+                )
+
+fixturee30 :: Constant Expression () (Type TypeIndex Kind)
+fixturee30 = runTraitTransformY (transformConstantY fixturee28)

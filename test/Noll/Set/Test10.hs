@@ -37,42 +37,42 @@ moduleUtils =
 moduleOrdered :: Module () Kind IndexedType
 moduleOrdered =
   undefined
---  Module.fromDefinitionList
---    (Path ["Ordered"])
---    -- Exports
---    ["Ordering", "Ordered", "less_than_or_equal_to", "greater_than"]
---    -- Definitions
---    [ -- import Utils(Predicate)
---      DImport
---        (Path ["Utils"])
---        ["Predicate"]
---    , -- type Ordering
---      DType
---        "Ordering"
---        []
---        [ Constructor
---            "LessThan"
---            0
---            (Forall mempty [] (TConstructor () "Ordering"))
---        , Constructor
---            "EqualTo"
---            0
---            (Forall mempty [] (TConstructor () "Ordering"))
---        , Constructor
---            "GreaterThan"
---            0
---            (Forall mempty [] (TConstructor () "Ordering"))
---        ]
---    , -- trait Ordered
---      DTrait
---        "Ordered"
---        []
---        (TVariable (Parameter () "a"))
---        [
---          ( "compare"
---          , TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TConstructor () "Ordering"
---          )
---        ]
+  Module.fromDefinitionList
+    (Path ["Ordered"])
+    -- Exports
+    ["Ordering", "Ordered", "less_than_or_equal_to", "greater_than"]
+    -- Definitions
+    [ -- import Utils(Predicate)
+      DImport
+        (Path ["Utils"])
+        ["Predicate"]
+    , -- type Ordering
+      DType
+        "Ordering"
+        []
+        [ Constructor
+            "LessThan"
+            0
+            (Forall mempty [] (TConstructor () "Ordering"))
+        , Constructor
+            "EqualTo"
+            0
+            (Forall mempty [] (TConstructor () "Ordering"))
+        , Constructor
+            "GreaterThan"
+            0
+            (Forall mempty [] (TConstructor () "Ordering"))
+        ]
+    , -- trait Ordered
+      DTrait
+        "Ordered"
+        []
+        (TVariable (Parameter () "a"))
+        [
+          ( "compare"
+          , TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TConstructor () "Ordering"
+          )
+        ]
 --    , -- instance Ordered(int32)
 --      DInstance
 --        "Ordered"
@@ -241,7 +241,7 @@ moduleOrdered =
 --                )
 --            )
 --        )
---    ]
+    ]
 
 moduleBinarySearch :: Module () Kind IndexedType
 moduleBinarySearch =
