@@ -318,6 +318,7 @@ collectConstraints =
           t1 = TIntrinsic (IRecord (TRow (fromDictionary d1 (fromMaybe RNil e1))))
       tellRight [Equality (InferenceRule 301) [t, t1]]
       pure (ms1 <> ms2)
+
 --    EDictionaryLambda{} ->
 --      error "TODO"
 --    EDictionaryApplication{} ->

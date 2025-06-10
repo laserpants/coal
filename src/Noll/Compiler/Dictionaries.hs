@@ -120,15 +120,15 @@ findFirstMatch ::
 findFirstMatch (Trait nnn t1) = do
   env <- asks dictionaryEnvironmentInstances
   case Environment.lookup nnn env of
-    Nothing -> 
+    Nothing ->
       pure Nothing
     Just env1 -> do
-        abc <- mapAlterAll test env1
-        case abc of
-          [] ->
-            pure Nothing
-          [(k, v)] ->
-            pure (Just (k, v))
+      abc <- mapAlterAll test env1
+      case abc of
+        [] ->
+          pure Nothing
+        [(k, v)] ->
+          pure (Just (k, v))
  where
   --   test :: (Monad m) => Type TypeIndex Kind -> m (Maybe Substitution) -- (Environment (Scheme TypeIndex Kind IndexedType))
   test t = tryMatch t t1
@@ -247,8 +247,9 @@ znorkY ll@(Label t name) =
       pure (EVariable mempty ll)
     tr : trs ->
       EApplication mempty t (EVariable mempty (Label t1 name)) <$> traverse bork (tr :| trs)
---      EApplication mempty t (EVariable mempty (Label t name)) <$> traverse bork (tr :| trs)
      where
+      --      EApplication mempty t (EVariable mempty (Label t name)) <$> traverse bork (tr :| trs)
+
       t1 = foldType t (traitType <$> (tr : trs))
 
 transformY ::
@@ -374,7 +375,8 @@ yy =
           ]
           (TIntrinsic (IList (TVariable (TypeIndex KType 0))) `TArrow` TIntrinsic IString)
       )
-    , ( "from_int32"
+    ,
+      ( "from_int32"
       , Forall
           (Set.fromList [TypeIndex KType 0] :: Set (TypeIndex Kind))
           [Trait "Numeric" (TVariable (TypeIndex KType 0))]
@@ -511,7 +513,36 @@ yy =
 xx :: Environment (Map IndexedType (Dictionary (Scheme TypeIndex Kind IndexedType)))
 xx =
   Environment.fromList
-    [ ( "Traceable"
+    [
+      ( "Numeric"
+      , Map.fromList
+          [
+            ( TIntrinsic IInt32
+            , Map.fromList
+                [
+                  ( "from_int32"
+                  , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
+                  )
+                ]
+            )
+          ]
+      )
+    ,
+      ( "Ordered"
+      , Map.fromList
+          [
+            ( TIntrinsic IInt32
+            , Map.fromList
+                [
+                  ( "compare"
+                  , Forall (Set.fromList [TypeIndex KType 0]) [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TConstructor KType "Ordering")
+                  )
+                ]
+            )
+          ]
+      )
+    ,
+      ( "Traceable"
       , Map.fromList
           [
             ( TIntrinsic IString

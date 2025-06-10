@@ -3,7 +3,6 @@
 -- module Noll.SystemFSpec (spec) where
 module Noll.SystemFSpec where
 
-import Noll.Compiler.Dictionaries
 import Control.Monad.Identity
 import Control.Monad.Reader (runReader)
 import Data.List.NonEmpty ((<|))
@@ -11,6 +10,7 @@ import Lang.Common.List1 (NonEmpty (..))
 import Lang.Label (Label (..))
 import Lang.Utils (Name)
 import Noll.Compiler.DenormalizeObjects (DenormalizeObjectsTransformContext (..))
+import Noll.Compiler.Dictionaries
 import Noll.Compiler.DictionariesSpec
 import Noll.Compiler.DictionaryElimination (EliminateDictionariesTransformContext (..))
 import Noll.Compiler.Lowpass.Environment (TranslateEnvironment (..), initialTranslateEnvironment, insertQualifiedNames, withModuleName)

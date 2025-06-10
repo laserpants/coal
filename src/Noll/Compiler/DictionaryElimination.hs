@@ -57,6 +57,7 @@ instance (Monoid a, Data a) => EliminateDictionariesTransformContext (Expression
 eliminateDictionariesExpr :: (Monoid a, Data a) => Expression a (Type TypeIndex Kind) -> Expression a (Type TypeIndex Kind)
 eliminateDictionariesExpr =
   undefined
+
 --  \case
 --    EDictionaryLambda a ts e ->
 --      flattenLambda (ELambda a (pvars ts) e)

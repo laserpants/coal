@@ -65,11 +65,12 @@ data Expression a t
     ESelect a (Label t) (Expression a t)
   | -- | Row restriction
     EFocus Name (Label t) (Label t) (Expression a t) (Expression a t)
---  | -- | Dictionary lambda function
---    EDictionaryLambda a (List1 (Trait t)) (Expression a t)
---  | -- | Dictionary application
---    EDictionaryApplication a t (Label t) (List1 (Trait t)) [Expression a t]
-  | -- | Dictionary
+  | --  | -- | Dictionary lambda function
+    --    EDictionaryLambda a (List1 (Trait t)) (Expression a t)
+    --  | -- | Dictionary application
+    --    EDictionaryApplication a t (Label t) (List1 (Trait t)) [Expression a t]
+
+    -- | Dictionary
     EDictionary a t (Trait t)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
 

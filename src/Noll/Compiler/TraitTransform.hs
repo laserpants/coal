@@ -65,6 +65,7 @@ transformConstantZ ::
   m (Constant Expression a (Type TypeIndex Kind))
 transformConstantZ (Constant a u@(With _ t) e) = do
   undefined
+
 --  (expr, traits) <- runWriterT (transformZ e)
 --  case nub traits of
 --    [] ->
@@ -98,6 +99,7 @@ transformZ ::
   m (Expression a (Type TypeIndex Kind))
 transformZ =
   undefined
+
 --  \case
 --    ERecursiveLet a p e1 e2 ->
 --      transformZ (ELet a (BPattern a p e1 :| []) e2)
@@ -236,6 +238,7 @@ transformBindingZ ::
   m (Binding Expression a (Type TypeIndex Kind), [(Name, Scheme TypeIndex Kind (Type TypeIndex Kind))])
 transformBindingZ =
   undefined
+
 --  \case
 --    BPattern a var@(PVariable a1 (Label t name)) e
 --      | Text.isPrefixOf "$fold" name -> do
