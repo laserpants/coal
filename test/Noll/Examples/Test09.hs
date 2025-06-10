@@ -51,6 +51,7 @@ tvar1 = TVariable (TypeIndex KType 1)
 moduleOrdered :: Module () Kind IndexedType
 moduleOrdered =
   undefined
+
 --  Module.fromDefinitionList
 --    (Path ["Ordered"])
 --    []

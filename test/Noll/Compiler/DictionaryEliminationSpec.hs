@@ -14,6 +14,7 @@ import qualified Noll.Module as Module
 
 fixtureFoo1 =
   undefined
+
 --  EDictionaryLambda
 --    ()
 --    ( Trait "Ordered" (TVariable (TypeIndex KType 0))

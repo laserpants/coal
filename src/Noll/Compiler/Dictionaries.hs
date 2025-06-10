@@ -40,7 +40,7 @@ import Lang.Common.List1 (NonEmpty (..), fromList1)
 
 data DictionaryEnvironment = DictionaryEnvironment
   { dictionaryEnvironmentNames :: Environment (Scheme TypeIndex Kind (Type TypeIndex Kind))
-  , dictionaryEnvironmentInstances :: Map IndexedType (Dictionary (Scheme TypeIndex Kind IndexedType))
+  , dictionaryEnvironmentInstances :: Environment (Map IndexedType (Dictionary (Scheme TypeIndex Kind IndexedType)))
   }
   deriving (Show, Eq, Ord)
 
@@ -118,14 +118,17 @@ findFirstMatch ::
   Trait (Type TypeIndex Kind) ->
   m (Maybe (Type TypeIndex Kind, Map Name (Scheme TypeIndex Kind IndexedType)))
 findFirstMatch (Trait nnn t1) = do
-  traceShowM nnn
   env <- asks dictionaryEnvironmentInstances
-  abc <- mapAlterAll test env
-  case abc of
-    [] ->
+  case Environment.lookup nnn env of
+    Nothing -> 
       pure Nothing
-    [(k, v)] ->
-      pure (Just (k, v))
+    Just env1 -> do
+        abc <- mapAlterAll test env1
+        case abc of
+          [] ->
+            pure Nothing
+          [(k, v)] ->
+            pure (Just (k, v))
  where
   --   test :: (Monad m) => Type TypeIndex Kind -> m (Maybe Substitution) -- (Environment (Scheme TypeIndex Kind IndexedType))
   test t = tryMatch t t1
@@ -244,6 +247,7 @@ znorkY ll@(Label t name) =
       pure (EVariable mempty ll)
     tr : trs ->
       EApplication mempty t (EVariable mempty (Label t1 name)) <$> traverse bork (tr :| trs)
+--      EApplication mempty t (EVariable mempty (Label t name)) <$> traverse bork (tr :| trs)
      where
       t1 = foldType t (traitType <$> (tr : trs))
 
@@ -302,7 +306,8 @@ transformBindingY =
   \case
     BPattern a var@(PVariable a1 (Label t name)) e
       | Text.isPrefixOf "$fold" name -> do
-          error "TODO"
+          body <- transformY e
+          pure (BPattern a var body, [])
     BPattern _ var@(PVariable _ (Label t name)) e -> do
       (e1, traits) <- transformScope e
       pure (BPattern mempty var e1, [(name, Forall (typeIndexesIn t) traits t)])
@@ -321,6 +326,18 @@ transformCompiledClauseY =
   \case
     ECompiledClause lls e ->
       ECompiledClause lls <$> transformY e
+
+transformModuleY ::
+  ( MonadReader DictionaryEnvironment m
+  , MonadState Int m
+  , MonadWriter [Trait (Type TypeIndex Kind)] m
+  , Data a
+  , Monoid a
+  , Show a
+  ) =>
+  Module a Kind (Type TypeIndex Kind) ->
+  m (Module a Kind (Type TypeIndex Kind))
+transformModuleY = overModuleDefinitionsM (traverse transformDefinitionY)
 
 --
 
@@ -356,6 +373,57 @@ yy =
           [ Trait "Traceable" (TVariable (TypeIndex KType 0))
           ]
           (TIntrinsic (IList (TVariable (TypeIndex KType 0))) `TArrow` TIntrinsic IString)
+      )
+    , ( "from_int32"
+      , Forall
+          (Set.fromList [TypeIndex KType 0] :: Set (TypeIndex Kind))
+          [Trait "Numeric" (TVariable (TypeIndex KType 0))]
+          (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0))
+      )
+    ,
+      ( "greater_than"
+      , Forall
+          (Set.fromList [TypeIndex KType 0] :: Set (TypeIndex Kind))
+          [Trait "Ordered" (TVariable (TypeIndex KType 0))]
+          (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
+      )
+    ,
+      ( "less_than_or_equal_to"
+      , Forall
+          (Set.fromList [TypeIndex KType 0] :: Set (TypeIndex Kind))
+          [Trait "Ordered" (TVariable (TypeIndex KType 0))]
+          (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
+      )
+    ,
+      ( "compare"
+      , Forall
+          (Set.fromList [TypeIndex KType 0] :: Set (TypeIndex Kind))
+          [Trait "Ordered" (TVariable (TypeIndex KType 0))]
+          (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TConstructor KType "Ordering")
+      )
+    ,
+      ( "from_list"
+      , Forall
+          (Set.fromList [TypeIndex KType 0] :: Set (TypeIndex Kind))
+          [Trait "Numeric" (TVariable (TypeIndex KType 0)), Trait "Ordered" (TVariable (TypeIndex KType 0))]
+          (TIntrinsic (IList (TVariable (TypeIndex KType 0))) `TArrow` (TApplication KType (TConstructor (KArrow KType KType) "Tree") (TVariable (TypeIndex KType 0) :| [])))
+      )
+    ,
+      ( "in_range"
+      , Forall
+          (Set.fromList [TypeIndex KType 0] :: Set (TypeIndex Kind))
+          [Trait "Numeric" (TVariable (TypeIndex KType 0)), Trait "Ordered" (TVariable (TypeIndex KType 0))]
+          ( TIntrinsic (IRecord (TRow (RExtend "max" (TVariable (TypeIndex KType 0)) (RExtend "min" (TVariable (TypeIndex KType 0)) RNil))))
+              `TArrow` TVariable (TypeIndex KType 0)
+              `TArrow` TIntrinsic IBool
+          )
+      )
+    ,
+      ( "sort"
+      , Forall
+          (Set.fromList [TypeIndex KType 0] :: Set (TypeIndex Kind))
+          [Trait "Numeric" (TVariable (TypeIndex KType 0)), Trait "Ordered" (TVariable (TypeIndex KType 0))]
+          (TIntrinsic (IList (TVariable (TypeIndex KType 0))) `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 0))))
       )
     ]
 
@@ -440,51 +508,55 @@ yy =
 --      )
 --    ]
 
-xx :: Map IndexedType (Dictionary (Scheme TypeIndex Kind IndexedType))
+xx :: Environment (Map IndexedType (Dictionary (Scheme TypeIndex Kind IndexedType)))
 xx =
-  Map.fromList
-    [
-      ( TIntrinsic IString
+  Environment.fromList
+    [ ( "Traceable"
       , Map.fromList
           [
-            ( "trace"
-            , Forall mempty [] (TIntrinsic IString `TArrow` TIntrinsic IString)
-            )
-          ]
-      )
-    ,
-      ( TIntrinsic IInt32
-      , Map.fromList
-          [
-            ( "trace"
-            , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IString)
-            )
-          ]
-      )
-    ,
-      ( TIntrinsic (ITuple [TVariable (TypeIndex KType 0), TVariable (TypeIndex KType 1)])
-      , Map.fromList
-          [
-            ( "trace"
-            , Forall
-                (Set.fromList [TypeIndex KType 0, TypeIndex KType 1])
-                [ Trait "Traceable" (TVariable (TypeIndex KType 0))
-                , Trait "Traceable" (TVariable (TypeIndex KType 1))
+            ( TIntrinsic IString
+            , Map.fromList
+                [
+                  ( "trace"
+                  , Forall mempty [] (TIntrinsic IString `TArrow` TIntrinsic IString)
+                  )
                 ]
-                (TIntrinsic (ITuple [TVariable (TypeIndex KType 0), TVariable (TypeIndex KType 1)]) `TArrow` TIntrinsic IString)
             )
-          ]
-      )
-    ,
-      ( TIntrinsic (IList (TVariable (TypeIndex KType 0)))
-      , Map.fromList
-          [
-            ( "trace"
-            , Forall
-                (Set.fromList [TypeIndex KType 0])
-                [ Trait "Traceable" (TVariable (TypeIndex KType 0))
+          ,
+            ( TIntrinsic IInt32
+            , Map.fromList
+                [
+                  ( "trace"
+                  , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IString)
+                  )
                 ]
-                (TIntrinsic (IList (TVariable (TypeIndex KType 0))) `TArrow` TIntrinsic IString)
+            )
+          ,
+            ( TIntrinsic (ITuple [TVariable (TypeIndex KType 0), TVariable (TypeIndex KType 1)])
+            , Map.fromList
+                [
+                  ( "trace"
+                  , Forall
+                      (Set.fromList [TypeIndex KType 0, TypeIndex KType 1])
+                      [ Trait "Traceable" (TVariable (TypeIndex KType 0))
+                      , Trait "Traceable" (TVariable (TypeIndex KType 1))
+                      ]
+                      (TIntrinsic (ITuple [TVariable (TypeIndex KType 0), TVariable (TypeIndex KType 1)]) `TArrow` TIntrinsic IString)
+                  )
+                ]
+            )
+          ,
+            ( TIntrinsic (IList (TVariable (TypeIndex KType 0)))
+            , Map.fromList
+                [
+                  ( "trace"
+                  , Forall
+                      (Set.fromList [TypeIndex KType 0])
+                      [ Trait "Traceable" (TVariable (TypeIndex KType 0))
+                      ]
+                      (TIntrinsic (IList (TVariable (TypeIndex KType 0))) `TArrow` TIntrinsic IString)
+                  )
+                ]
             )
           ]
       )

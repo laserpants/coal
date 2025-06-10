@@ -929,76 +929,183 @@ fixturee27 :: Expression () (Type TypeIndex Kind)
 fixturee27 = fst $ runTraitTransformY (transformScope fixturee25)
 
 fixturee28 =
-            Constant
+  Constant
+    ()
+    (With [] (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool))
+    ( ELambda
+        ()
+        ( PVariable () (Label (TVariable (TypeIndex KType 0)) "m")
+            <| PVariable () (Label (TVariable (TypeIndex KType 0)) "n")
+            :| []
+        )
+        ( ECompiledMatch
+            ()
+            (TIntrinsic IBool)
+            ( EApplication
                 ()
-                (With [] (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool))
-                ( ELambda
-                    ()
-                    ( PVariable () (Label (TVariable (TypeIndex KType 0)) "m")
-                        <| PVariable () (Label (TVariable (TypeIndex KType 0)) "n")
-                        :| []
-                    )
-                    ( ECompiledMatch
-                        ()
-                        (TIntrinsic IBool)
-                        ( EApplication
-                            ()
-                            (TConstructor KType "Ordering")
-                            (EVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TConstructor KType "Ordering") "compare"))
-                            ( EVariable () (Label (TVariable (TypeIndex KType 0)) "m")
-                                <| EVariable () (Label (TVariable (TypeIndex KType 0)) "n")
-                                :| []
-                            )
-                        )
-                        ( ECompiledClause
-                            (Label (TConstructor KType "Ordering") "EqualTo" :| [])
-                            (ELiteral () (LBool True))
-                            <| ECompiledClause
-                              (Label (TConstructor KType "Ordering") "GreaterThan" :| [])
-                              (ELiteral () (LBool False))
-                            <| ECompiledClause
-                              (Label (TConstructor KType "Ordering") "LessThan" :| [])
-                              (ELiteral () (LBool True))
-                            :| []
-                        )
-                    )
+                (TConstructor KType "Ordering")
+                (EVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TConstructor KType "Ordering") "compare"))
+                ( EVariable () (Label (TVariable (TypeIndex KType 0)) "m")
+                    <| EVariable () (Label (TVariable (TypeIndex KType 0)) "n")
+                    :| []
                 )
+            )
+            ( ECompiledClause
+                (Label (TConstructor KType "Ordering") "EqualTo" :| [])
+                (ELiteral () (LBool True))
+                <| ECompiledClause
+                  (Label (TConstructor KType "Ordering") "GreaterThan" :| [])
+                  (ELiteral () (LBool False))
+                <| ECompiledClause
+                  (Label (TConstructor KType "Ordering") "LessThan" :| [])
+                  (ELiteral () (LBool True))
+                :| []
+            )
+        )
+    )
 
 fixturee29 =
-            Constant
+  Constant
+    ()
+    ( With
+        [ Trait "Ordered" (TVariable (TypeIndex KType 0))
+        ]
+        (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
+    )
+    ( ELambda
+        ()
+        ( PDictionary () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Ordered") (TVariable (TypeIndex KType 0) :| [])) (Trait "Ordered" (TVariable (TypeIndex KType 0)))
+            :| []
+        )
+        ( ELambda
+            ()
+            ( PVariable () (Label (TVariable (TypeIndex KType 0)) "m")
+                <| PVariable () (Label (TVariable (TypeIndex KType 0)) "n")
+                :| []
+            )
+            ( ECompiledMatch
                 ()
-                (With [] (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool))
-                ( ELambda
+                (TIntrinsic IBool)
+                ( EApplication
                     ()
-                    ( PVariable () (Label (TVariable (TypeIndex KType 0)) "m")
-                        <| PVariable () (Label (TVariable (TypeIndex KType 0)) "n")
-                        :| []
-                    )
-                    ( ECompiledMatch
+                    (TConstructor KType "Ordering")
+                    ( EApplication
                         ()
-                        (TIntrinsic IBool)
-                        ( EApplication
-                            ()
-                            (TConstructor KType "Ordering")
-                            (EVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TConstructor KType "Ordering") "compare"))
-                            ( EVariable () (Label (TVariable (TypeIndex KType 0)) "m")
-                                <| EVariable () (Label (TVariable (TypeIndex KType 0)) "n")
-                                :| []
-                            )
-                        )
-                        ( ECompiledClause
-                            (Label (TConstructor KType "Ordering") "EqualTo" :| [])
-                            (ELiteral () (LBool True))
-                            <| ECompiledClause
-                              (Label (TConstructor KType "Ordering") "GreaterThan" :| [])
-                              (ELiteral () (LBool False))
-                            <| ECompiledClause
-                              (Label (TConstructor KType "Ordering") "LessThan" :| [])
-                              (ELiteral () (LBool True))
+                        (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TConstructor KType "Ordering")
+                        (EVariable () (Label (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Ordered") (TVariable (TypeIndex KType 0) :| []) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TConstructor KType "Ordering") "compare"))
+                        ( EDictionary () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Ordered") (TVariable (TypeIndex KType 0) :| [])) (Trait "Ordered" (TVariable (TypeIndex KType 0)))
                             :| []
                         )
                     )
+                    ( EVariable () (Label (TVariable (TypeIndex KType 0)) "m")
+                        <| EVariable () (Label (TVariable (TypeIndex KType 0)) "n")
+                        :| []
+                    )
                 )
+                ( ECompiledClause
+                    (Label (TConstructor KType "Ordering") "EqualTo" :| [])
+                    (ELiteral () (LBool True))
+                    <| ECompiledClause
+                      (Label (TConstructor KType "Ordering") "GreaterThan" :| [])
+                      (ELiteral () (LBool False))
+                    <| ECompiledClause
+                      (Label (TConstructor KType "Ordering") "LessThan" :| [])
+                      (ELiteral () (LBool True))
+                    :| []
+                )
+            )
+        )
+    )
 
 fixturee30 :: Constant Expression () (Type TypeIndex Kind)
 fixturee30 = runTraitTransformY (transformConstantY fixturee28)
+
+fixturee31 =
+  Constant
+    ()
+    (With [] (TVariable (TypeIndex KType 1) `TArrow` TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool))
+    ( ELambda
+        ()
+        ( PAnnotation
+            ()
+            (TVariable (Parameter () "a"))
+            (PVariable () (Label (TVariable (TypeIndex KType 1)) "n"))
+            :| []
+        )
+        ( EApplication
+            ()
+            (TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool)
+            ( EBinaryOperator
+                ()
+                ( (TIntrinsic IBool `TArrow` TIntrinsic IBool)
+                    `TArrow` (TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool)
+                    `TArrow` TVariable (TypeIndex KType 1)
+                    `TArrow` TIntrinsic IBool
+                )
+                OReverseComposition
+            )
+            ( EVariable () (Label (TIntrinsic IBool `TArrow` TIntrinsic IBool) "not")
+                <| EApplication
+                  ()
+                  (TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool)
+                  (EVariable () (Label (TVariable (TypeIndex KType 1) `TArrow` TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool) "less_than_or_equal_to"))
+                  (EVariable () (Label (TVariable (TypeIndex KType 1)) "n") :| [])
+                :| []
+            )
+        )
+    )
+
+fixturee32 =
+  Constant
+    ()
+    ( With
+        [ Trait "Ordered" (TVariable (TypeIndex KType 1))
+        ]
+        (TVariable (TypeIndex KType 1) `TArrow` TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool)
+    )
+    ( ELambda
+        ()
+        ( PDictionary () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Ordered") (TVariable (TypeIndex KType 1) :| [])) (Trait "Ordered" (TVariable (TypeIndex KType 1)))
+            :| []
+        )
+        ( ELambda
+            ()
+            ( PAnnotation
+                ()
+                (TVariable (Parameter () "a"))
+                (PVariable () (Label (TVariable (TypeIndex KType 1)) "n"))
+                :| []
+            )
+            ( EApplication
+                ()
+                (TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool)
+                ( EBinaryOperator
+                    ()
+                    ( (TIntrinsic IBool `TArrow` TIntrinsic IBool)
+                        `TArrow` (TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool)
+                        `TArrow` TVariable (TypeIndex KType 1)
+                        `TArrow` TIntrinsic IBool
+                    )
+                    OReverseComposition
+                )
+                ( EVariable () (Label (TIntrinsic IBool `TArrow` TIntrinsic IBool) "not")
+                    <| EApplication
+                      ()
+                      (TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool)
+                      ( EApplication
+                          ()
+                          (TVariable (TypeIndex KType 1) `TArrow` TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool)
+                          (EVariable () (Label ((TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Ordered") (TVariable (TypeIndex KType 1) :| [])) `TArrow` TVariable (TypeIndex KType 1) `TArrow` TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool) "less_than_or_equal_to"))
+                          ( EDictionary () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Ordered") (TVariable (TypeIndex KType 1) :| [])) (Trait "Ordered" (TVariable (TypeIndex KType 1)))
+                              :| []
+                          )
+                      )
+                      (EVariable () (Label (TVariable (TypeIndex KType 1)) "n") :| [])
+                    :| []
+                )
+            )
+        )
+    )
+
+fixturee33 :: Constant Expression () (Type TypeIndex Kind)
+fixturee33 = runTraitTransformY (transformConstantY fixturee31)
