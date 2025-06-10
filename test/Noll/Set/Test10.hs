@@ -1723,557 +1723,616 @@ moduleBinarySearch =
                 )
             )
         )
---    , -- flatten
---      DAnnotation
---        (With [] (TIntrinsic (IList (TVariable (Parameter () "a")))))
---        ( DConstant
---            "flatten"
---            ( Constant
---                ()
---                ( With
---                    []
---                    ( TApplication
---                        KType
---                        (TConstructor (KArrow KType KType) "Tree")
---                        (TVariable (TypeIndex KType 2) :| [])
---                        `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 2)))
---                    )
---                )
---                ( ELambda
---                    ()
---                    ( PAnnotation
---                        ()
---                        (TApplication () (TConstructor () "Tree") (TVariable (Parameter () "a") :| []))
---                        ( PVariable
---                            ()
---                            ( Label
---                                ( TApplication
---                                    KType
---                                    (TConstructor (KArrow KType KType) "Tree")
---                                    (TVariable (TypeIndex KType 2) :| [])
---                                )
---                                "tree"
---                            )
---                        )
---                        :| []
---                    )
---                    ( EFold
---                        ()
---                        (TIntrinsic (IList (TVariable (TypeIndex KType 2))))
---                        ( EVariable
---                            ()
---                            ( Label
---                                ( TApplication
---                                    KType
---                                    (TConstructor (KArrow KType KType) "Tree")
---                                    (TVariable (TypeIndex KType 2) :| [])
---                                )
---                                "tree"
---                            )
---                            :| []
---                        )
---                        ( EClause
---                            ()
---                            ( PConstructor
---                                ()
---                                ( Label
---                                    ( TApplication
---                                        KType
---                                        (TConstructor (KArrow KType KType) "Tree")
---                                        (TVariable (TypeIndex KType 2) :| [])
---                                    )
---                                    "Node"
---                                )
---                                [ PVariable () (Label (TVariable (TypeIndex KType 2)) "y")
---                                , PAtVariable
---                                    ()
---                                    ( Label
---                                        ( TApplication
---                                            KType
---                                            (TConstructor (KArrow KType KType) "Tree")
---                                            (TVariable (TypeIndex KType 2) :| [])
---                                        )
---                                        "lhs"
---                                    )
---                                , PAtVariable
---                                    ()
---                                    ( Label
---                                        ( TApplication
---                                            KType
---                                            (TConstructor (KArrow KType KType) "Tree")
---                                            (TVariable (TypeIndex KType 2) :| [])
---                                        )
---                                        "rhs"
---                                    )
---                                ]
---                            )
---                            ( CPlain
---                                ()
---                                []
---                                ( EApplication
---                                    ()
---                                    (TIntrinsic (IList (TVariable (TypeIndex KType 2))))
---                                    ( EBinaryOperator
---                                        ()
---                                        ( TIntrinsic (IList (TVariable (TypeIndex KType 2)))
---                                            `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 2)))
---                                            `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 2)))
---                                        )
---                                        OListConcatenation
---                                    )
---                                    ( EVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 2)))) "lhs")
---                                        <| EListCons
---                                          ()
---                                          (TIntrinsic (IList (TVariable (TypeIndex KType 2))))
---                                          (EVariable () (Label (TVariable (TypeIndex KType 2)) "y"))
---                                          (EVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 2)))) "rhs"))
---                                        :| []
---                                    )
---                                )
---                                :| []
---                            )
---                            <| EClause
---                              ()
---                              ( PConstructor
---                                  ()
---                                  ( Label
---                                      ( TApplication
---                                          KType
---                                          (TConstructor (KArrow KType KType) "Tree")
---                                          (TVariable (TypeIndex KType 2) :| [])
---                                      )
---                                      "Leaf"
---                                  )
---                                  []
---                              )
---                              ( CPlain
---                                  ()
---                                  []
---                                  (EListLiteral () (TIntrinsic (IList (TVariable (TypeIndex KType 2)))) [])
---                                  :| []
---                              )
---                            :| []
---                        )
---                        ( Just
---                            ( ELet
---                                ()
---                                ( BPattern
---                                    ()
---                                    ( PVariable
---                                        ()
---                                        ( Label
---                                            ( ( TApplication
---                                                  KType
---                                                  (TConstructor (KArrow KType KType) "Tree")
---                                                  (TVariable (TypeIndex KType 2) :| [])
---                                              )
---                                                `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 2)))
---                                            )
---                                            "$fold.2"
---                                        )
---                                    )
---                                    ( ELambda
---                                        ()
---                                        ( PVariable
---                                            ()
---                                            ( Label
---                                                ( TApplication
---                                                    KType
---                                                    (TConstructor (KArrow KType KType) "Tree")
---                                                    (TVariable (TypeIndex KType 2) :| [])
---                                                )
---                                                "$fold.2.expr"
---                                            )
---                                            :| []
---                                        )
---                                        ( ECompiledMatch
---                                            ()
---                                            (TIntrinsic (IList (TVariable (TypeIndex KType 2))))
---                                            ( EVariable
---                                                ()
---                                                ( Label
---                                                    ( TApplication
---                                                        KType
---                                                        (TConstructor (KArrow KType KType) "Tree")
---                                                        (TVariable (TypeIndex KType 2) :| [])
---                                                    )
---                                                    "$fold.2.expr"
---                                                )
---                                            )
---                                            ( ECompiledClause
---                                                ( Label
---                                                    ( TApplication
---                                                        KType
---                                                        (TConstructor (KArrow KType KType) "Tree")
---                                                        (TVariable (TypeIndex KType 2) :| [])
---                                                    )
---                                                    "Leaf"
---                                                    :| []
---                                                )
---                                                (EListLiteral () (TIntrinsic (IList (TVariable (TypeIndex KType 2)))) [])
---                                                <| ECompiledClause
---                                                  ( Label
---                                                      ( TVariable (TypeIndex KType 2)
---                                                          `TArrow` TApplication
---                                                            KType
---                                                            (TConstructor (KArrow KType KType) "Tree")
---                                                            (TVariable (TypeIndex KType 2) :| [])
---                                                          `TArrow` TApplication
---                                                            KType
---                                                            (TConstructor (KArrow KType KType) "Tree")
---                                                            (TVariable (TypeIndex KType 2) :| [])
---                                                          `TArrow` TApplication
---                                                            KType
---                                                            (TConstructor (KArrow KType KType) "Tree")
---                                                            (TVariable (TypeIndex KType 2) :| [])
---                                                      )
---                                                      "Node"
---                                                      <| Label (TVariable (TypeIndex KType 2)) "$match.13.y"
---                                                      <| Label
---                                                        ( TApplication
---                                                            KType
---                                                            (TConstructor (KArrow KType KType) "Tree")
---                                                            (TVariable (TypeIndex KType 2) :| [])
---                                                        )
---                                                        "$match.14.lhs"
---                                                      <| Label
---                                                        ( TApplication
---                                                            KType
---                                                            (TConstructor (KArrow KType KType) "Tree")
---                                                            (TVariable (TypeIndex KType 2) :| [])
---                                                        )
---                                                        "$match.15.rhs"
---                                                      :| []
---                                                  )
---                                                  ( EApplication
---                                                      ()
---                                                      (TIntrinsic (IList (TVariable (TypeIndex KType 2))))
---                                                      ( EBinaryOperator
---                                                          ()
---                                                          ( TIntrinsic (IList (TVariable (TypeIndex KType 2)))
---                                                              `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 2)))
---                                                              `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 2)))
---                                                          )
---                                                          OListConcatenation
---                                                      )
---                                                      ( EApplication
---                                                          ()
---                                                          (TIntrinsic (IList (TVariable (TypeIndex KType 2))))
---                                                          ( EVariable
---                                                              ()
---                                                              ( Label
---                                                                  ( ( TApplication
---                                                                        KType
---                                                                        (TConstructor (KArrow KType KType) "Tree")
---                                                                        (TVariable (TypeIndex KType 2) :| [])
---                                                                    )
---                                                                      `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 2)))
---                                                                  )
---                                                                  "$fold.2"
---                                                              )
---                                                          )
---                                                          ( EVariable
---                                                              ()
---                                                              ( Label
---                                                                  ( TApplication
---                                                                      KType
---                                                                      (TConstructor (KArrow KType KType) "Tree")
---                                                                      (TVariable (TypeIndex KType 2) :| [])
---                                                                  )
---                                                                  "$match.14.lhs"
---                                                              )
---                                                              :| []
---                                                          )
---                                                          <| EListCons
---                                                            ()
---                                                            (TIntrinsic (IList (TVariable (TypeIndex KType 2))))
---                                                            (EVariable () (Label (TVariable (TypeIndex KType 2)) "$match.13.y"))
---                                                            ( EApplication
---                                                                ()
---                                                                (TIntrinsic (IList (TVariable (TypeIndex KType 2))))
---                                                                ( EVariable
---                                                                    ()
---                                                                    ( Label
---                                                                        ( ( TApplication
---                                                                              KType
---                                                                              (TConstructor (KArrow KType KType) "Tree")
---                                                                              (TVariable (TypeIndex KType 2) :| [])
---                                                                          )
---                                                                            `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 2)))
---                                                                        )
---                                                                        "$fold.2"
---                                                                    )
---                                                                )
---                                                                ( EVariable
---                                                                    ()
---                                                                    ( Label
---                                                                        ( TApplication
---                                                                            KType
---                                                                            (TConstructor (KArrow KType KType) "Tree")
---                                                                            (TVariable (TypeIndex KType 2) :| [])
---                                                                        )
---                                                                        "$match.15.rhs"
---                                                                    )
---                                                                    :| []
---                                                                )
---                                                            )
---                                                          :| []
---                                                      )
---                                                  )
---                                                :| []
---                                            )
---                                        )
---                                    )
---                                    :| []
---                                )
---                                ( EApplication
---                                    ()
---                                    (TIntrinsic (IList (TVariable (TypeIndex KType 2))))
---                                    ( EVariable
---                                        ()
---                                        ( Label
---                                            ( ( TApplication
---                                                  KType
---                                                  (TConstructor (KArrow KType KType) "Tree")
---                                                  (TVariable (TypeIndex KType 2) :| [])
---                                              )
---                                                `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 2)))
---                                            )
---                                            "$fold.2"
---                                        )
---                                    )
---                                    ( EVariable
---                                        ()
---                                        ( Label
---                                            ( TApplication
---                                                KType
---                                                (TConstructor (KArrow KType KType) "Tree")
---                                                (TVariable (TypeIndex KType 2) :| [])
---                                            )
---                                            "tree"
---                                        )
---                                        :| []
---                                    )
---                                )
---                            )
---                        )
---                    )
---                )
---            )
---        )
---    , -- sort
---      DAnnotation
---        ( With
---            [ Trait "Ordered" (TVariable (Parameter () "a"))
---            , Trait "Numeric" (TVariable (Parameter () "a"))
---            ]
---            (TIntrinsic (IList (TVariable (Parameter () "a"))) `TArrow` TIntrinsic (IList (TVariable (Parameter () "a"))))
---        )
---        ( DConstant
---            "sort"
---            ( Constant
---                ()
---                ( With
---                    [ Trait "Numeric" (TVariable (TypeIndex KType 3))
---                    , Trait "Ordered" (TVariable (TypeIndex KType 3))
---                    ]
---                    ( TIntrinsic (IList (TVariable (TypeIndex KType 3)))
---                        `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 3)))
---                    )
---                )
---                ( EDictionaryLambda
---                    ()
---                    ( Trait "Numeric" (TVariable (TypeIndex KType 3))
---                        <| Trait "Ordered" (TVariable (TypeIndex KType 3))
---                        :| []
---                    )
---                    ( EApplication
---                        ()
---                        ( TIntrinsic (IList (TVariable (TypeIndex KType 3)))
---                            `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 3)))
---                        )
---                        ( EBinaryOperator
---                            ()
---                            ( ( ( TApplication
---                                    KType
---                                    (TConstructor (KArrow KType KType) "Tree")
---                                    (TVariable (TypeIndex KType 3) :| [])
---                                )
---                                  `TArrow` (TIntrinsic (IList (TVariable (TypeIndex KType 3))))
---                              )
---                                `TArrow` ( (TIntrinsic (IList (TVariable (TypeIndex KType 3))))
---                                            `TArrow` ( TApplication
---                                                        KType
---                                                        (TConstructor (KArrow KType KType) "Tree")
---                                                        (TVariable (TypeIndex KType 3) :| [])
---                                                     )
---                                         )
---                                `TArrow` ( (TIntrinsic (IList (TVariable (TypeIndex KType 3))))
---                                            `TArrow` (TIntrinsic (IList (TVariable (TypeIndex KType 3))))
---                                         )
---                            )
---                            OReverseComposition
---                        )
---                        ( EVariable
---                            ()
---                            ( Label
---                                ( TApplication
---                                    KType
---                                    (TConstructor (KArrow KType KType) "Tree")
---                                    (TVariable (TypeIndex KType 3) :| [])
---                                    `TArrow` (TIntrinsic (IList (TVariable (TypeIndex KType 3))))
---                                )
---                                "flatten"
---                            )
---                            <| EDictionaryApplication
---                              ()
---                              ( TIntrinsic (IList (TVariable (TypeIndex KType 3)))
---                                  `TArrow` TApplication
---                                    KType
---                                    (TConstructor (KArrow KType KType) "Tree")
---                                    (TVariable (TypeIndex KType 3) :| [])
---                              )
---                              (Label ((TIntrinsic (IList (TVariable (TypeIndex KType 3)))) `TArrow` (TApplication KType (TConstructor (KArrow KType KType) "Tree") (TVariable (TypeIndex KType 3) :| []))) "from_list")
---                              ( Trait "Numeric" (TVariable (TypeIndex KType 3))
---                                  <| Trait "Ordered" (TVariable (TypeIndex KType 3))
---                                  :| []
---                              )
---                              []
---                            :| []
---                        )
---                    )
---                )
---            )
---        )
+    , -- flatten
+      DAnnotation
+        (With [] (TIntrinsic (IList (TVariable (Parameter () "a")))))
+        ( DConstant
+            "flatten"
+            ( Constant
+                ()
+                ( With
+                    []
+                    ( TApplication
+                        KType
+                        (TConstructor (KArrow KType KType) "Tree")
+                        (TVariable (TypeIndex KType 2) :| [])
+                        `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 2)))
+                    )
+                )
+                ( ELambda
+                    ()
+                    ( PAnnotation
+                        ()
+                        (TApplication () (TConstructor () "Tree") (TVariable (Parameter () "a") :| []))
+                        ( PVariable
+                            ()
+                            ( Label
+                                ( TApplication
+                                    KType
+                                    (TConstructor (KArrow KType KType) "Tree")
+                                    (TVariable (TypeIndex KType 2) :| [])
+                                )
+                                "tree"
+                            )
+                        )
+                        :| []
+                    )
+                    ( EFold
+                        ()
+                        (TIntrinsic (IList (TVariable (TypeIndex KType 2))))
+                        ( EVariable
+                            ()
+                            ( Label
+                                ( TApplication
+                                    KType
+                                    (TConstructor (KArrow KType KType) "Tree")
+                                    (TVariable (TypeIndex KType 2) :| [])
+                                )
+                                "tree"
+                            )
+                            :| []
+                        )
+                        ( EClause
+                            ()
+                            ( PConstructor
+                                ()
+                                ( Label
+                                    ( TApplication
+                                        KType
+                                        (TConstructor (KArrow KType KType) "Tree")
+                                        (TVariable (TypeIndex KType 2) :| [])
+                                    )
+                                    "Node"
+                                )
+                                [ PVariable () (Label (TVariable (TypeIndex KType 2)) "y")
+                                , PAtVariable
+                                    ()
+                                    ( Label
+                                        ( TApplication
+                                            KType
+                                            (TConstructor (KArrow KType KType) "Tree")
+                                            (TVariable (TypeIndex KType 2) :| [])
+                                        )
+                                        "lhs"
+                                    )
+                                , PAtVariable
+                                    ()
+                                    ( Label
+                                        ( TApplication
+                                            KType
+                                            (TConstructor (KArrow KType KType) "Tree")
+                                            (TVariable (TypeIndex KType 2) :| [])
+                                        )
+                                        "rhs"
+                                    )
+                                ]
+                            )
+                            ( CPlain
+                                ()
+                                []
+                                ( EApplication
+                                    ()
+                                    (TIntrinsic (IList (TVariable (TypeIndex KType 2))))
+                                    ( EBinaryOperator
+                                        ()
+                                        ( TIntrinsic (IList (TVariable (TypeIndex KType 2)))
+                                            `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 2)))
+                                            `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 2)))
+                                        )
+                                        OListConcatenation
+                                    )
+                                    ( EVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 2)))) "lhs")
+                                        <| EListCons
+                                          ()
+                                          (TIntrinsic (IList (TVariable (TypeIndex KType 2))))
+                                          (EVariable () (Label (TVariable (TypeIndex KType 2)) "y"))
+                                          (EVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 2)))) "rhs"))
+                                        :| []
+                                    )
+                                )
+                                :| []
+                            )
+                            <| EClause
+                              ()
+                              ( PConstructor
+                                  ()
+                                  ( Label
+                                      ( TApplication
+                                          KType
+                                          (TConstructor (KArrow KType KType) "Tree")
+                                          (TVariable (TypeIndex KType 2) :| [])
+                                      )
+                                      "Leaf"
+                                  )
+                                  []
+                              )
+                              ( CPlain
+                                  ()
+                                  []
+                                  (EListLiteral () (TIntrinsic (IList (TVariable (TypeIndex KType 2)))) [])
+                                  :| []
+                              )
+                            :| []
+                        )
+                        ( Just
+                            ( ELet
+                                ()
+                                ( BPattern
+                                    ()
+                                    ( PVariable
+                                        ()
+                                        ( Label
+                                            ( ( TApplication
+                                                  KType
+                                                  (TConstructor (KArrow KType KType) "Tree")
+                                                  (TVariable (TypeIndex KType 2) :| [])
+                                              )
+                                                `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 2)))
+                                            )
+                                            "$fold.2"
+                                        )
+                                    )
+                                    ( ELambda
+                                        ()
+                                        ( PVariable
+                                            ()
+                                            ( Label
+                                                ( TApplication
+                                                    KType
+                                                    (TConstructor (KArrow KType KType) "Tree")
+                                                    (TVariable (TypeIndex KType 2) :| [])
+                                                )
+                                                "$fold.2.expr"
+                                            )
+                                            :| []
+                                        )
+                                        ( ECompiledMatch
+                                            ()
+                                            (TIntrinsic (IList (TVariable (TypeIndex KType 2))))
+                                            ( EVariable
+                                                ()
+                                                ( Label
+                                                    ( TApplication
+                                                        KType
+                                                        (TConstructor (KArrow KType KType) "Tree")
+                                                        (TVariable (TypeIndex KType 2) :| [])
+                                                    )
+                                                    "$fold.2.expr"
+                                                )
+                                            )
+                                            ( ECompiledClause
+                                                ( Label
+                                                    ( TApplication
+                                                        KType
+                                                        (TConstructor (KArrow KType KType) "Tree")
+                                                        (TVariable (TypeIndex KType 2) :| [])
+                                                    )
+                                                    "Leaf"
+                                                    :| []
+                                                )
+                                                (EListLiteral () (TIntrinsic (IList (TVariable (TypeIndex KType 2)))) [])
+                                                <| ECompiledClause
+                                                  ( Label
+                                                      ( TVariable (TypeIndex KType 2)
+                                                          `TArrow` TApplication
+                                                            KType
+                                                            (TConstructor (KArrow KType KType) "Tree")
+                                                            (TVariable (TypeIndex KType 2) :| [])
+                                                          `TArrow` TApplication
+                                                            KType
+                                                            (TConstructor (KArrow KType KType) "Tree")
+                                                            (TVariable (TypeIndex KType 2) :| [])
+                                                          `TArrow` TApplication
+                                                            KType
+                                                            (TConstructor (KArrow KType KType) "Tree")
+                                                            (TVariable (TypeIndex KType 2) :| [])
+                                                      )
+                                                      "Node"
+                                                      <| Label (TVariable (TypeIndex KType 2)) "$match.13.y"
+                                                      <| Label
+                                                        ( TApplication
+                                                            KType
+                                                            (TConstructor (KArrow KType KType) "Tree")
+                                                            (TVariable (TypeIndex KType 2) :| [])
+                                                        )
+                                                        "$match.14.lhs"
+                                                      <| Label
+                                                        ( TApplication
+                                                            KType
+                                                            (TConstructor (KArrow KType KType) "Tree")
+                                                            (TVariable (TypeIndex KType 2) :| [])
+                                                        )
+                                                        "$match.15.rhs"
+                                                      :| []
+                                                  )
+                                                  ( EApplication
+                                                      ()
+                                                      (TIntrinsic (IList (TVariable (TypeIndex KType 2))))
+                                                      ( EBinaryOperator
+                                                          ()
+                                                          ( TIntrinsic (IList (TVariable (TypeIndex KType 2)))
+                                                              `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 2)))
+                                                              `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 2)))
+                                                          )
+                                                          OListConcatenation
+                                                      )
+                                                      ( EApplication
+                                                          ()
+                                                          (TIntrinsic (IList (TVariable (TypeIndex KType 2))))
+                                                          ( EVariable
+                                                              ()
+                                                              ( Label
+                                                                  ( ( TApplication
+                                                                        KType
+                                                                        (TConstructor (KArrow KType KType) "Tree")
+                                                                        (TVariable (TypeIndex KType 2) :| [])
+                                                                    )
+                                                                      `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 2)))
+                                                                  )
+                                                                  "$fold.2"
+                                                              )
+                                                          )
+                                                          ( EVariable
+                                                              ()
+                                                              ( Label
+                                                                  ( TApplication
+                                                                      KType
+                                                                      (TConstructor (KArrow KType KType) "Tree")
+                                                                      (TVariable (TypeIndex KType 2) :| [])
+                                                                  )
+                                                                  "$match.14.lhs"
+                                                              )
+                                                              :| []
+                                                          )
+                                                          <| EListCons
+                                                            ()
+                                                            (TIntrinsic (IList (TVariable (TypeIndex KType 2))))
+                                                            (EVariable () (Label (TVariable (TypeIndex KType 2)) "$match.13.y"))
+                                                            ( EApplication
+                                                                ()
+                                                                (TIntrinsic (IList (TVariable (TypeIndex KType 2))))
+                                                                ( EVariable
+                                                                    ()
+                                                                    ( Label
+                                                                        ( ( TApplication
+                                                                              KType
+                                                                              (TConstructor (KArrow KType KType) "Tree")
+                                                                              (TVariable (TypeIndex KType 2) :| [])
+                                                                          )
+                                                                            `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 2)))
+                                                                        )
+                                                                        "$fold.2"
+                                                                    )
+                                                                )
+                                                                ( EVariable
+                                                                    ()
+                                                                    ( Label
+                                                                        ( TApplication
+                                                                            KType
+                                                                            (TConstructor (KArrow KType KType) "Tree")
+                                                                            (TVariable (TypeIndex KType 2) :| [])
+                                                                        )
+                                                                        "$match.15.rhs"
+                                                                    )
+                                                                    :| []
+                                                                )
+                                                            )
+                                                          :| []
+                                                      )
+                                                  )
+                                                :| []
+                                            )
+                                        )
+                                    )
+                                    :| []
+                                )
+                                ( EApplication
+                                    ()
+                                    (TIntrinsic (IList (TVariable (TypeIndex KType 2))))
+                                    ( EVariable
+                                        ()
+                                        ( Label
+                                            ( ( TApplication
+                                                  KType
+                                                  (TConstructor (KArrow KType KType) "Tree")
+                                                  (TVariable (TypeIndex KType 2) :| [])
+                                              )
+                                                `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 2)))
+                                            )
+                                            "$fold.2"
+                                        )
+                                    )
+                                    ( EVariable
+                                        ()
+                                        ( Label
+                                            ( TApplication
+                                                KType
+                                                (TConstructor (KArrow KType KType) "Tree")
+                                                (TVariable (TypeIndex KType 2) :| [])
+                                            )
+                                            "tree"
+                                        )
+                                        :| []
+                                    )
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    , -- sort
+      DAnnotation
+        ( With
+            [ Trait "Ordered" (TVariable (Parameter () "a"))
+            , Trait "Numeric" (TVariable (Parameter () "a"))
+            ]
+            (TIntrinsic (IList (TVariable (Parameter () "a"))) `TArrow` TIntrinsic (IList (TVariable (Parameter () "a"))))
+        )
+        ( DConstant
+            "sort"
+            ( Constant
+                ()
+                ( With
+                    [ Trait "Numeric" (TVariable (TypeIndex KType 3))
+                    , Trait "Ordered" (TVariable (TypeIndex KType 3))
+                    ]
+                    ( TIntrinsic (IList (TVariable (TypeIndex KType 3)))
+                        `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 3)))
+                    )
+                )
+                ( ELambda
+                    ()
+                        ( PDictionary () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TVariable (TypeIndex KType 3) :| [])) (Trait "Numeric" (TVariable (TypeIndex KType 3)))
+                    <|  PDictionary () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Ordered") (TVariable (TypeIndex KType 3) :| [])) (Trait "Ordered" (TVariable (TypeIndex KType 3)))
+                        :| []
+                    )
+                    ( EApplication
+                        ()
+                        ( TIntrinsic (IList (TVariable (TypeIndex KType 3)))
+                            `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 3)))
+                        )
+                        ( EBinaryOperator
+                            ()
+                            ( ( ( TApplication
+                                    KType
+                                    (TConstructor (KArrow KType KType) "Tree")
+                                    (TVariable (TypeIndex KType 3) :| [])
+                                )
+                                  `TArrow` (TIntrinsic (IList (TVariable (TypeIndex KType 3))))
+                              )
+                                `TArrow` ( (TIntrinsic (IList (TVariable (TypeIndex KType 3))))
+                                            `TArrow` ( TApplication
+                                                        KType
+                                                        (TConstructor (KArrow KType KType) "Tree")
+                                                        (TVariable (TypeIndex KType 3) :| [])
+                                                     )
+                                         )
+                                `TArrow` ( (TIntrinsic (IList (TVariable (TypeIndex KType 3))))
+                                            `TArrow` (TIntrinsic (IList (TVariable (TypeIndex KType 3))))
+                                         )
+                            )
+                            OReverseComposition
+                        )
+                        ( EVariable
+                            ()
+                            ( Label
+                                ( TApplication
+                                    KType
+                                    (TConstructor (KArrow KType KType) "Tree")
+                                    (TVariable (TypeIndex KType 3) :| [])
+                                    `TArrow` (TIntrinsic (IList (TVariable (TypeIndex KType 3))))
+                                )
+                                "flatten"
+                            )
+                            <| EApplication
+                                ()
+                                  ( (TIntrinsic (IList (TVariable (TypeIndex KType 3))))
+                                      `TArrow` ( TApplication
+                                                  KType
+                                                  (TConstructor (KArrow KType KType) "Tree")
+                                                  (TVariable (TypeIndex KType 3) :| [])
+                                               )
+                                  )
+                              (EVariable
+                              ()
+                              ( Label
+                                  ( TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TVariable (TypeIndex KType 3) :| [])
+                                      `TArrow` TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Ordered") (TVariable (TypeIndex KType 3) :| [])
+                                       `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 3)))
+                                      `TArrow` TApplication
+                                                  KType
+                                                  (TConstructor (KArrow KType KType) "Tree")
+                                                  (TVariable (TypeIndex KType 3) :| [])
+                                  )
+                                  "from_list"
+                              )
+                              )
+                                            ( EDictionary () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TVariable (TypeIndex KType 3) :| [])) (Trait "Numeric" (TVariable (TypeIndex KType 3)))
+                                                <| EDictionary () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Ordered") (TVariable (TypeIndex KType 3) :| [])) (Trait "Ordered" (TVariable (TypeIndex KType 3)))
+                                                :| []
+                                            )
+                            -- EApplication
+                              -- ()
+                              -- ( TIntrinsic (IList (TVariable (TypeIndex KType 3)))
+                              --     `TArrow` TApplication
+                              --       KType
+                              --       (TConstructor (KArrow KType KType) "Tree")
+                              --       (TVariable (TypeIndex KType 3) :| [])
+                              -- )
+                              -- undefined
+                              --(Label ((TIntrinsic (IList (TVariable (TypeIndex KType 3)))) `TArrow` (TApplication KType (TConstructor (KArrow KType KType) "Tree") (TVariable (TypeIndex KType 3) :| []))) "from_list")
+                              --( Trait "Numeric" (TVariable (TypeIndex KType 3))
+                              --    <| Trait "Ordered" (TVariable (TypeIndex KType 3))
+                              --    :| []
+                              --)
+                              -- []
+                            :| []
+                        )
+                    )
+                )
+            )
+        )
     ]
 
 moduleMain :: Module () Kind IndexedType
 moduleMain =
-  undefined
-
---  Module.fromDefinitionList
---    (Path ["Main"])
---    -- Exports
---    []
---    -- Definitions
---    [ -- import BinarySearch
---      DImport
---        (Path ["BinarySearch"])
---        ["Node", "Leaf", "sort", "in_range", "from_int32"]
---    , DImport
---        (Path ["Ordered"])
---        ["Ordered__$instance.b7c5e7e84eeaf782"]
---    , DInstance
---        "Numeric"
---        (TIntrinsic IInt32)
---        [ DConstant
---            "from_int32"
---            ( Constant
---                ()
---                (With [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32))
---                ( ELambda
---                    ()
---                    (PVariable () (Label (TIntrinsic IInt32) "x") :| [])
---                    (EVariable () (Label (TIntrinsic IInt32) "x"))
---                )
---            )
---        ]
---    , -- main
---      DConstant
---        "main"
---        ( Constant
---            ()
---            ( With
---                []
---                (TIntrinsic IUnit `TArrow` TVariable (TypeIndex KType 0))
---            )
---            ( ELambda
---                ()
---                -- (PLiteral () LUnit :| [])
---                (PVariable () (Label (TIntrinsic IUnit) "$v.0") :| [])
---                ( ELet
---                    ()
---                    ( BPattern
---                        ()
---                        (PVariable () (Label (TIntrinsic (IList (TIntrinsic IInt32))) "xs"))
---                        ( EListLiteral
---                            ()
---                            (TIntrinsic (IList (TIntrinsic IInt32)))
---                            [ EDictionaryApplication
---                                ()
---                                (TIntrinsic IInt32)
---                                (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")
---                                (Trait "Numeric" (TIntrinsic IInt32) :| [])
---                                [ELiteral () (LInt32 5)]
---                            , EDictionaryApplication
---                                ()
---                                (TIntrinsic IInt32)
---                                (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")
---                                (Trait "Numeric" (TIntrinsic IInt32) :| [])
---                                [ELiteral () (LInt32 3)]
---                            , EDictionaryApplication
---                                ()
---                                (TIntrinsic IInt32)
---                                (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")
---                                (Trait "Numeric" (TIntrinsic IInt32) :| [])
---                                [ELiteral () (LInt32 7)]
---                            , EDictionaryApplication
---                                ()
---                                (TIntrinsic IInt32)
---                                (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")
---                                (Trait "Numeric" (TIntrinsic IInt32) :| [])
---                                [ELiteral () (LInt32 2)]
---                            , EDictionaryApplication
---                                ()
---                                (TIntrinsic IInt32)
---                                (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")
---                                (Trait "Numeric" (TIntrinsic IInt32) :| [])
---                                [ELiteral () (LInt32 1)]
---                            , EDictionaryApplication
---                                ()
---                                (TIntrinsic IInt32)
---                                (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")
---                                (Trait "Numeric" (TIntrinsic IInt32) :| [])
---                                [ELiteral () (LInt32 6)]
---                            , EDictionaryApplication
---                                ()
---                                (TIntrinsic IInt32)
---                                (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32")
---                                (Trait "Numeric" (TIntrinsic IInt32) :| [])
---                                [ELiteral () (LInt32 4)]
---                            ]
---                        )
---                        :| []
---                    )
---                    ( EApplication
---                        ()
---                        (TVariable (TypeIndex KType 0))
---                        (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0)) "@@@_trace_int32"))
---                        ( ECompiledMatch
---                            ()
---                            (TIntrinsic IInt32)
---                            ( EDictionaryApplication
---                                ()
---                                (TIntrinsic (IList (TIntrinsic IInt32)))
---                                (Label (TIntrinsic (IList (TIntrinsic IInt32)) `TArrow` TIntrinsic (IList (TIntrinsic IInt32))) "sort")
---                                ( Trait "Numeric" (TIntrinsic IInt32)
---                                    <| Trait "Ordered" (TIntrinsic IInt32)
---                                    :| []
---                                )
---                                [EVariable () (Label (TIntrinsic (IList (TIntrinsic IInt32))) "xs")]
---                            )
---                            ( ECompiledClause
---                                (Label (TIntrinsic IInt32 `TArrow` TIntrinsic (IList (TIntrinsic IInt32)) `TArrow` TIntrinsic (IList (TIntrinsic IInt32))) "$Cons" <| Label (TIntrinsic IInt32) "$match.17.y" :| [Label (TIntrinsic (IList (TIntrinsic IInt32))) "$match.18._"])
---                                (EVariable () (Label (TIntrinsic IInt32) "$match.17.y"))
---                                <| ECompiledClause
---                                  (Label (TIntrinsic (IList (TIntrinsic IInt32))) "$Nil" :| [])
---                                  (ELiteral () (LInt32 12345))
---                                :| []
---                            )
---                            :| []
---                        )
---                    )
---                )
---            )
---        )
---    ]
+  Module.fromDefinitionList
+    (Path ["Main"])
+    -- Exports
+    []
+    -- Definitions
+    [ -- import BinarySearch
+      DImport
+        (Path ["BinarySearch"])
+        ["Node", "Leaf", "sort", "in_range", "from_int32"]
+    , DImport
+        (Path ["Ordered"])
+        ["Ordered__$instance.b7c5e7e84eeaf782"]
+    , DInstance
+        "Numeric"
+        (TIntrinsic IInt32)
+        [ DConstant
+            "from_int32"
+            ( Constant
+                ()
+                (With [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32))
+                ( ELambda
+                    ()
+                    (PVariable () (Label (TIntrinsic IInt32) "x") :| [])
+                    (EVariable () (Label (TIntrinsic IInt32) "x"))
+                )
+            )
+        ]
+    , -- main
+      DConstant
+        "main"
+        ( Constant
+            ()
+            ( With
+                []
+                (TIntrinsic IUnit `TArrow` TVariable (TypeIndex KType 0))
+            )
+            ( ELambda
+                ()
+                -- (PLiteral () LUnit :| [])
+                (PVariable () (Label (TIntrinsic IUnit) "$v.0") :| [])
+                ( ELet
+                    ()
+                    ( BPattern
+                        ()
+                        (PVariable () (Label (TIntrinsic (IList (TIntrinsic IInt32))) "xs"))
+                        ( EListLiteral
+                            ()
+                            (TIntrinsic (IList (TIntrinsic IInt32)))
+                            [ EApplication
+                                ()
+                                (TIntrinsic IInt32)
+                                (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32"))
+                                            ( EDictionary () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TIntrinsic IInt32 :| [])) (Trait "Numeric" (TIntrinsic IInt32))
+                                                <| ELiteral () (LInt32 5)
+                                                :| []
+                                            )
+                                -- (Trait "Numeric" (TIntrinsic IInt32) :| [])
+                                -- [ELiteral () (LInt32 5)]
+                            , EApplication
+                                ()
+                                (TIntrinsic IInt32)
+                                (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32"))
+                                            ( EDictionary () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TIntrinsic IInt32 :| [])) (Trait "Numeric" (TIntrinsic IInt32))
+                                                <| ELiteral () (LInt32 3)
+                                                :| []
+                                            )
+                                --(Trait "Numeric" (TIntrinsic IInt32) :| [])
+                                --[ELiteral () (LInt32 3)]
+                            , EApplication
+                                ()
+                                (TIntrinsic IInt32)
+                                (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32"))
+                                            ( EDictionary () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TIntrinsic IInt32 :| [])) (Trait "Numeric" (TIntrinsic IInt32))
+                                                <| ELiteral () (LInt32 7)
+                                                :| []
+                                            )
+                                --(Trait "Numeric" (TIntrinsic IInt32) :| [])
+                                --[ELiteral () (LInt32 7)]
+                            , EApplication
+                                ()
+                                (TIntrinsic IInt32)
+                                (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32"))
+                                            ( EDictionary () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TIntrinsic IInt32 :| [])) (Trait "Numeric" (TIntrinsic IInt32))
+                                                <| ELiteral () (LInt32 2)
+                                                :| []
+                                            )
+                                --(Trait "Numeric" (TIntrinsic IInt32) :| [])
+                                --[ELiteral () (LInt32 2)]
+                            , EApplication
+                                ()
+                                (TIntrinsic IInt32)
+                                (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32"))
+                                            ( EDictionary () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TIntrinsic IInt32 :| [])) (Trait "Numeric" (TIntrinsic IInt32))
+                                                <| ELiteral () (LInt32 1)
+                                                :| []
+                                            )
+                                --(Trait "Numeric" (TIntrinsic IInt32) :| [])
+                                --[ELiteral () (LInt32 1)]
+                            , EApplication
+                                ()
+                                (TIntrinsic IInt32)
+                                (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32"))
+                                            ( EDictionary () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TIntrinsic IInt32 :| [])) (Trait "Numeric" (TIntrinsic IInt32))
+                                                <| ELiteral () (LInt32 6)
+                                                :| []
+                                            )
+                                --(Trait "Numeric" (TIntrinsic IInt32) :| [])
+                                --[ELiteral () (LInt32 6)]
+                            , EApplication
+                                ()
+                                (TIntrinsic IInt32)
+                                (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32"))
+                                            ( EDictionary () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TIntrinsic IInt32 :| [])) (Trait "Numeric" (TIntrinsic IInt32))
+                                                <| ELiteral () (LInt32 4)
+                                                :| []
+                                            )
+                                --(Trait "Numeric" (TIntrinsic IInt32) :| [])
+                                --[ELiteral () (LInt32 4)]
+                            ]
+                        )
+                        :| []
+                    )
+                    ( EApplication
+                        ()
+                        (TVariable (TypeIndex KType 0))
+                        (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0)) "@@@_trace_int32"))
+                        ( ECompiledMatch
+                            ()
+                            (TIntrinsic IInt32)
+                            ( EApplication
+                                ()
+                                (TIntrinsic (IList (TIntrinsic IInt32)))
+                                (EVariable () (Label (TIntrinsic (IList (TIntrinsic IInt32)) `TArrow` TIntrinsic (IList (TIntrinsic IInt32))) "sort"))
+                                            ( EDictionary () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TIntrinsic IInt32 :| [])) (Trait "Numeric" (TIntrinsic IInt32))
+                                                <| EDictionary () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Ordered") (TIntrinsic IInt32 :| [])) (Trait "Ordered" (TIntrinsic IInt32))
+                                                <| EVariable () (Label (TIntrinsic (IList (TIntrinsic IInt32))) "xs")
+                                                :| []
+                                            )
+                                --( Trait "Numeric" (TIntrinsic IInt32)
+                                --    <| Trait "Ordered" (TIntrinsic IInt32)
+                                --    :| []
+                                --)
+                                --[EVariable () (Label (TIntrinsic (IList (TIntrinsic IInt32))) "xs")]
+                            )
+                            ( ECompiledClause
+                                (Label (TIntrinsic IInt32 `TArrow` TIntrinsic (IList (TIntrinsic IInt32)) `TArrow` TIntrinsic (IList (TIntrinsic IInt32))) "$Cons" <| Label (TIntrinsic IInt32) "$match.17.y" :| [Label (TIntrinsic (IList (TIntrinsic IInt32))) "$match.18._"])
+                                (EVariable () (Label (TIntrinsic IInt32) "$match.17.y"))
+                                <| ECompiledClause
+                                  (Label (TIntrinsic (IList (TIntrinsic IInt32))) "$Nil" :| [])
+                                  (ELiteral () (LInt32 12345))
+                                :| []
+                            )
+                            :| []
+                        )
+                    )
+                )
+            )
+        )
+    ]
