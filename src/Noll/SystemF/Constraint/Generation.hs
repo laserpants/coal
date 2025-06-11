@@ -264,7 +264,6 @@ collectConstraints =
           tellRight [Equality (InferenceRule 999) [foldTypeOf t (e :| es), t1]]
         _ ->
           pure ()
-
       pure (ms1 <> ms2 <> ms3 <> ms4)
     ERecord _ t d e -> do
       ms1 <- concatMapM collectConstraints e
@@ -274,11 +273,6 @@ collectConstraints =
           t1 = TIntrinsic (IRecord (TRow (fromDictionary d1 (fromMaybe RNil e1))))
       tellRight [Equality (InferenceRule 301) [t, t1]]
       pure (ms1 <> ms2)
-
---    EDictionaryLambda{} ->
---      error "TODO"
---    EDictionaryApplication{} ->
---      error "TODO"
 
 listConstructorTypeScheme :: Scheme TypeIndex Kind IndexedType
 listConstructorTypeScheme = forall1 (\a -> a ~> TIntrinsic (IList a) ~> TIntrinsic (IList a))
