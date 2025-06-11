@@ -262,19 +262,19 @@ solveConstraintsC cs = do
 
 --
 
-compileConstraintsC2 :: (Show a, Monad m, Data a) => Expression a IndexedType -> CompilerT a m ()
-compileConstraintsC2 expr = do
+compileConstraintsC :: (Show a, Monad m, Data a) => Expression a IndexedType -> CompilerT a m ()
+compileConstraintsC expr = do
   (ms1, cs1) <- generateConstraintsC expr
   (ms2, cs2) <- partitionEithers <$> traverse assumptionConstraints ms1
   sub <- gets compilerSubstitution
   insertAssumptionsC (apply sub ms2)
   insertConstraintsC (cs1 <> cs2)
 
-compileFunctionC2 :: (Show a, Monad m, Data a) => Function Expression a IndexedType -> CompilerT a m ()
-compileFunctionC2 (Function loc (With _ t) ps e) = do
+compileFunctionC :: (Show a, Monad m, Data a) => Function Expression a IndexedType -> CompilerT a m ()
+compileFunctionC (Function loc (With _ t) ps e) = do
   insertConstraintsC [Equality (InferTopLevelFunction loc) [t, typeOf e]]
   t1 <- supplied (TVariable . TypeIndex KType)
-  compileConstraintsC2 $
+  compileConstraintsC $
     ELet
       loc
       (BFunction loc placeholder ps e :| [])
@@ -282,10 +282,10 @@ compileFunctionC2 (Function loc (With _ t) ps e) = do
  where
   placeholder = "###.function"
 
-compileConstantC2 :: (Show a, Monad m, Data a) => Constant Expression a IndexedType -> CompilerT a m ()
-compileConstantC2 (Constant loc (With _ t) e) = do
+compileConstantC :: (Show a, Monad m, Data a) => Constant Expression a IndexedType -> CompilerT a m ()
+compileConstantC (Constant loc (With _ t) e) = do
   insertConstraintsC [Equality (InferTopLevelConstant loc) [t, typeOf e]]
-  compileConstraintsC2 $
+  compileConstraintsC $
     ELet
       loc
       (BPattern loc (PVariable loc (Label t placeholder)) e :| [])
@@ -293,24 +293,24 @@ compileConstantC2 (Constant loc (With _ t) e) = do
  where
   placeholder = "###.constant"
 
-compileDefinitionC2 :: (Monad m, Data a, Show a, Eq a) => Definition a k IndexedType -> CompilerT a m ()
-compileDefinitionC2 = do
+compileDefinitionC :: (Monad m, Data a, Show a, Eq a) => Definition a k IndexedType -> CompilerT a m ()
+compileDefinitionC = do
   \case
     DFunction _ f ->
-      compileFunctionC2 f
+      compileFunctionC f
     DConstant _ c ->
-      compileConstantC2 c
+      compileConstantC c
     DAnnotation a d -> do
       -- TODO
-      compileDefinitionC2 d
+      compileDefinitionC d
     DInstance _ t ds ->
-      forM_ ds compileDefinitionC2
+      forM_ ds compileDefinitionC
     _ ->
       -- TODO ?
       pure ()
 
-solveC2 :: (Monad m, Data a, Show a, Eq a) => CompilerT a m Substitution
-solveC2 = do
+solveC :: (Monad m, Data a, Show a, Eq a) => CompilerT a m Substitution
+solveC = do
   constraints <- gets compilerConstraints
   sub1 <- gets compilerSubstitution
   sub2 <- solveConstraintsC constraints
@@ -468,7 +468,7 @@ typeCheckDefinitionsC ds = do
     (n1, s) <- Map.toList env
     Assumption n2 t <- ams
     [Explicit (InferenceRule 200) (apply sub t) s | n1 == n2]
-  sub <- solveC2
+  sub <- solveC
   pure (fmap (fmap normalizeRowTypes) (apply sub ds), apply sub ams)
 
 typeCheckDefinition d =
@@ -495,10 +495,10 @@ typeCheckDefinition d =
                 error ("Missing implementation: " <> Text.unpack (definitionName d))
               Just s -> do
                 insertConstraintsC [Explicit (InferenceRule 999) (typeOf d) (instantiateTemplate tx t1 s)]
-                compileDefinitionC2 d
+                compileDefinitionC d
     _ -> do
-      compileDefinitionC2 d
-      sub <- solveC2
+      compileDefinitionC d
+      sub <- solveC
       -- traceShowM (definitionName d, typeOf (apply sub d) :: Type TypeIndex Kind)
       defineC (definitionName d) (typeOf (apply sub d))
 
