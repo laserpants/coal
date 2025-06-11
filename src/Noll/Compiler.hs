@@ -129,6 +129,7 @@ initialCompilerState =
     , compilerSupply = 0
     }
 
+-- RWS?
 newtype CompilerT a m c = Compiler {compilerStack :: ReaderT CompilerEnvironment (StateT (CompilerState a) m) c}
   deriving
     ( Functor
