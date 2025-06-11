@@ -93,10 +93,6 @@ overCompilerSolverRuleViolations fn CompilerState{..} = CompilerState{compilerSo
 overCompilerNameEnvironment :: Over (CompilerState a) (Environment (Scheme TypeIndex Kind IndexedType))
 overCompilerNameEnvironment fn CompilerState{..} = CompilerState{compilerNameEnvironment = fn compilerNameEnvironment, ..}
 
--- {-# INLINE overCompilerDefinitions #-}
--- overCompilerDefinitions :: Over (CompilerState a) (Environment IndexedType)
--- overCompilerDefinitions fn CompilerState{..} = CompilerState{compilerDefinitions = fn compilerDefinitions, ..}
-
 {-# INLINE overCompilerSupply #-}
 overCompilerSupply :: Over (CompilerState a) Int
 overCompilerSupply fn CompilerState{..} = CompilerState{compilerSupply = fn compilerSupply, ..}
