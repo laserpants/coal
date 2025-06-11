@@ -30,6 +30,7 @@ module Noll.Compiler where
 --  getSolverRuleViolationsC,
 -- ) where
 
+import Control.Monad.RWS (RWST, runRWST)
 import Control.Monad.Reader (MonadReader, ReaderT, ask, asks, runReaderT)
 import Control.Monad.State (MonadState, StateT, gets, modify, put, runState, runStateT)
 import Control.Monad.Writer (execWriter)
@@ -124,8 +125,7 @@ initialCompilerState =
     , compilerSupply = 0
     }
 
--- RWS?
-newtype CompilerT a m c = Compiler {compilerStack :: ReaderT CompilerEnvironment (StateT (CompilerState a) m) c}
+newtype CompilerT a m c = Compiler {compilerStack :: RWST CompilerEnvironment () (CompilerState a) m c}
   deriving
     ( Functor
     , Applicative
@@ -196,7 +196,9 @@ insertAssumptionsC as = modify (overCompilerAssumptions (<> as))
 
 {-# INLINE runCompilerT #-}
 runCompilerT :: (Monad m) => CompilerEnvironment -> CompilerT a m c -> m (c, CompilerState a)
-runCompilerT env com = runStateT (runReaderT (compilerStack com) env) initialCompilerState
+runCompilerT env com = do
+  (c, s, _) <- runRWST (compilerStack com) env initialCompilerState
+  pure (c, s)
 
 {-# INLINE evalCompilerT #-}
 evalCompilerT :: (Monad m) => CompilerEnvironment -> CompilerT a m c -> m c
