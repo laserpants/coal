@@ -19,56 +19,12 @@ import Debug.Trace
 import Lang.Common.List1 (NonEmpty ((:|)), fromList1)
 import Lang.Common.Supply (supplied)
 import Lang.Label (Label (..))
-import Lang.Utils (
-  Name,
-  concatForM,
-  concatMapM,
-  forM,
-  forM_,
-  fromMaybe,
-  tellLeft,
-  tellRight,
-  (<$$>),
- )
-import Noll.Language (
-  Binding (..),
-  Choice (..),
-  Clause (..),
-  Constructor (..),
-  Expression (..),
-  Guard (..),
-  IndexedType,
-  Intrinsic (..),
-  Kind (..),
-  Pattern (..),
-  Row (..),
-  Scheme (..),
-  Type (..),
-  TypeIndex (..),
-  TypeIndexed (..),
-  binaryOperatorTypeScheme,
-  foldType,
-  forall1,
-  fromDictionary,
-  typeOf,
-  (~>),
- )
+import Lang.Utils
+import Noll.Language
 import Noll.Language.HasType (foldTypeOf)
 import Noll.SystemF.Constraint (Constraint (..))
-import Noll.SystemF.Constraint.Assumption (
-  Assumption (..),
-  assumptionNameIs,
-  assumptionNameIsNotOneOf,
- )
-import Noll.SystemF.Constraint.Generation.Internal (
-  ConstraintsGenContext (..),
-  ConstraintsGenError (..),
-  ConstraintsGenStack (..),
-  InferenceRule (..),
-  localMonoset,
-  monosetInsertMultiple,
-  runConstraintsGenStack,
- )
+import Noll.SystemF.Constraint.Assumption
+import Noll.SystemF.Constraint.Generation.Internal
 import Noll.SystemF.Constraint.Generation.TypeAnnotation (instantiateAnnotation)
 
 import qualified Data.Map.Strict as Map
