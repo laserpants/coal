@@ -23,8 +23,6 @@ source-repository head
 
 library
   exposed-modules:
-      Noll.Ast.HasKind
-      Noll.Ast.HasType
       Noll.Ast.Indexed
       Noll.Compiler
       Noll.Compiler.DenormalizeObjects
@@ -56,6 +54,8 @@ library
       Noll.Language.Expression.Binding
       Noll.Language.Expression.Choice
       Noll.Language.Expression.Operator
+      Noll.Language.HasKind
+      Noll.Language.HasType
       Noll.Language.Pattern
       Noll.Language.Primitive
       Noll.Language.Trait

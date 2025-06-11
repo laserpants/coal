@@ -3,7 +3,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Ast.HasType (HasType (..), foldTypeOf) where
+module Noll.Language.HasType (HasType (..), foldTypeOf) where
 
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (universeBi)
@@ -18,7 +18,6 @@ import Noll.Module.Constant (Constant (..))
 import Noll.Module.Definition (Definition (..))
 import Noll.Module.Function (Function (..))
 
--- TODO: move?
 class HasType o k t where
   typeOf :: t -> Type o k
 

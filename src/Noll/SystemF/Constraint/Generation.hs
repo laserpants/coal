@@ -30,7 +30,6 @@ import Lang.Utils (
   tellRight,
   (<$$>),
  )
-import Noll.Ast.HasType (foldTypeOf)
 import Noll.Language (
   Binding (..),
   Choice (..),
@@ -54,6 +53,7 @@ import Noll.Language (
   typeOf,
   (~>),
  )
+import Noll.Language.HasType (foldTypeOf)
 import Noll.SystemF.Constraint (Constraint (..))
 import Noll.SystemF.Constraint.Assumption (
   Assumption (..),

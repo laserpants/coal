@@ -41,9 +41,9 @@ import Lang.Common.List1 (NonEmpty ((:|)))
 import Lang.Common.Supply (Supply (..), supplied)
 import Lang.Label (Label (..))
 import Lang.Utils (Dictionary, Name, Over, forM_, (<$$$>))
-import Noll.Ast.HasType (foldTypeOf)
 import Noll.Ast.Indexed (indexed)
 import Noll.Language
+import Noll.Language.HasType (foldTypeOf)
 import Noll.Module (Constant (..), Definition (..), Function (..), definitionName)
 import Noll.SystemF
 import Noll.SystemF.Substitution (mapsTo)

@@ -11,13 +11,13 @@ import Debug.Trace (traceShow)
 import Lang.Common.List1 (List1, NonEmpty (..), fromList1, (<|))
 import Lang.Label (Label (..))
 import Lang.Utils (Dictionary, Name, Set)
-import Noll.Ast.HasType (HasType (..))
 import Noll.Compiler.Lowpass.Environment (TranslateEnvironment (..), qualifyName, withLocalName, withLocalNames)
 import Noll.Compiler.Lowpass.TranslateType (translateType)
 import Noll.Language
 import Noll.Language.Expression
 import Noll.Language.Expression.Binding
 import Noll.Language.Expression.Operator
+import Noll.Language.HasType (HasType (..))
 import Noll.Language.Pattern
 import Noll.Language.Primitive
 import Noll.Utils (hashed)

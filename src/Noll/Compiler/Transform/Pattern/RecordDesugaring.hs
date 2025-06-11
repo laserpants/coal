@@ -21,8 +21,8 @@ import Lang.Common.List1 (List1, NonEmpty (..))
 import Lang.Common.Supply (suppliedName)
 import Lang.Label (Label (..))
 import Lang.Utils (Dictionary, Map, Name, forM_, traverseM)
-import Noll.Ast.HasType (HasType (..))
 import Noll.Language
+import Noll.Language.HasType (HasType (..))
 import Noll.Language.Type.Row (RowData (..))
 import Noll.Module (Module (..))
 

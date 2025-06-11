@@ -3,7 +3,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Ast.HasKind (HasKind (..)) where
+module Noll.Language.HasKind (HasKind (..)) where
 
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (universeBi)
