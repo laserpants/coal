@@ -48,7 +48,6 @@ assertImplicitAssumptions loc t ms = do
   set <- asks constraintsGenContextMonomorphicSet
   tellRight $ do
     Assumption{..} <- ms
-    -- TODO
     pure (Implicit (InferLetImplicit loc assumptionName assumptionType t) assumptionType t set)
 
 withMonomorphic :: (TypeIndexed Kind t) => t -> ConstraintsGen a c -> ConstraintsGen a c
@@ -91,7 +90,7 @@ patternConstraints assert ms =
       pure [name]
     PRecord _ t d p -> do
       let d1 = pure . typeOf <$> d
-          p1 = extractRow . typeOf <$> p
+          p1 = getRow . typeOf <$> p
           t1 = TIntrinsic (IRecord (TRow (fromDictionary d1 (fromMaybe RNil p1))))
       forM_ (Map.toList d) $ \(name, e) ->
         assert (typeOf e) (filter (assumptionNameIs name) ms)
@@ -116,14 +115,13 @@ patternConstraints assert ms =
     PLiteral{} ->
       pure []
 
--- TODO: move
-extractRow :: Type TypeIndex Kind -> Row TypeIndex Kind (Type TypeIndex Kind)
-extractRow =
+getRow :: Type TypeIndex Kind -> Row TypeIndex Kind (Type TypeIndex Kind)
+getRow =
   \case
     TIntrinsic (IRecord (TRow r)) ->
       r
     _ ->
-      error "TODO"
+      error "Implementation error"
 
 clauseAssumptions :: (Show a, Data a) => Clause a IndexedType -> ConstraintsGen a (IndexedType, [IndexedType], [Assumption IndexedType])
 clauseAssumptions (EClause loc p cs) = do
@@ -269,7 +267,7 @@ collectConstraints =
       ms1 <- concatMapM collectConstraints e
       ms2 <- concatMapM collectConstraints d
       let d1 = pure . typeOf <$> d
-          e1 = extractRow . typeOf <$> e
+          e1 = getRow . typeOf <$> e
           t1 = TIntrinsic (IRecord (TRow (fromDictionary d1 (fromMaybe RNil e1))))
       tellRight [Equality (InferenceRule 301) [t, t1]]
       pure (ms1 <> ms2)
