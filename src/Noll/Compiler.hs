@@ -35,7 +35,6 @@ import Control.Monad.State (MonadState, StateT, gets, modify, put, runState, run
 import Control.Monad.Writer (execWriter)
 import Data.Data (Data)
 import Data.Either.Extra (partitionEithers)
-import Debug.Trace
 import Lang.Common.Environment (Environment (..))
 import Lang.Common.List1 (NonEmpty ((:|)))
 import Lang.Common.Supply (Supply (..), supplied)
