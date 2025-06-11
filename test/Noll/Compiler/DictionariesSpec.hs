@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Noll.Compiler.DictionariesSpec where
@@ -22,7 +23,8 @@ spec = do
 fixtured1 =
   undefined
 
-runTraitTransformY v = fst $ runWriter (evalStateT (runReaderT v testEnv) 200)
+runTraitTransformY :: (Monoid b) => ReaderT DictionaryEnvironment (StateT Int (Writer b)) a -> a
+runTraitTransformY v = fst $ runWriter (evalStateT (runReaderT v testEnv) 200) -- (freshIdIn v))
 
 testEnv = DictionaryEnvironment yy xx
 
@@ -1055,6 +1057,7 @@ fixturee31 =
         )
     )
 
+fixturee32 :: Constant Expression () (Type TypeIndex Kind)
 fixturee32 =
   Constant
     ()
