@@ -251,15 +251,6 @@ solveConstraintsC cs = do
   compilerReportConstraintsGenErrors (IllFormedTypeAnnotation <$> errors)
   pure sub
 
--- solveC :: (Monad m, Data a, Show a, Eq a) => [CompilerConstraint a] -> CompilerT a m ()
--- solveC constraints = do
---  undefined
---  sub1 <- gets compilerSubstitution
---  sub2 <- solveConstraintsC constraints
---  updateSubstitutionC (sub2 <> sub1)
-
---
-
 compileConstraintsC :: (Show a, Monad m, Data a) => Expression a IndexedType -> CompilerT a m ()
 compileConstraintsC expr = do
   (ms1, cs1) <- generateConstraintsC expr
