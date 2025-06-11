@@ -1,4 +1,4 @@
-import qualified Noll.Ast.IndexedSpec
+import qualified Noll.Language.Type.IndexedSpec
 
 -- import qualified Noll.SystemF.ConstraintSolverSpec
 -- import qualified Noll.SystemF.KindConstraint.CollectSpec
@@ -45,7 +45,7 @@ import Test.Hspec (hspec)
 main :: IO ()
 main =
   hspec $ do
-    Noll.Ast.IndexedSpec.spec
+    Noll.Language.Type.IndexedSpec.spec
     Noll.SystemF.Constraint.GenerationSpec.spec
     Noll.Compiler.Transform.Pattern.DesugaringSpec.spec
     Noll.SystemFSpec.spec
