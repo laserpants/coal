@@ -240,7 +240,7 @@ assumptionConstraints Assumption{..} = do
     Nothing ->
       pure $ Left Assumption{..}
     Just s ->
-      pure $ Right (Explicit (InferenceRule 220) assumptionType s)
+      pure $ Right (Explicit InferenceRulePlaceholder assumptionType s)
 
 solveConstraintsC :: (Monad m, Data a, Show a, Eq a) => [CompilerConstraint a] -> CompilerT a m Substitution
 solveConstraintsC cs = do
@@ -467,7 +467,7 @@ typeCheckDefinitionsC ds = do
   insertConstraintsC $ do
     (n1, s) <- Map.toList env
     Assumption n2 t <- ams
-    [Explicit (InferenceRule 200) (apply sub t) s | n1 == n2]
+    [Explicit InferenceRulePlaceholder (apply sub t) s | n1 == n2]
   sub <- solveC
   pure (fmap (fmap normalizeRowTypes) (apply sub ds), apply sub ams)
 
@@ -494,7 +494,7 @@ typeCheckDefinition d =
               Nothing ->
                 error ("Missing implementation: " <> Text.unpack (definitionName d))
               Just s -> do
-                insertConstraintsC [Explicit (InferenceRule 999) (typeOf d) (instantiateTemplate tx t1 s)]
+                insertConstraintsC [Explicit InferenceRulePlaceholder (typeOf d) (instantiateTemplate tx t1 s)]
                 compileDefinitionC d
     _ -> do
       compileDefinitionC d

@@ -11,7 +11,7 @@ import Noll.Language (Kind (..), Type (..), TypeIndex (..))
 import Noll.SystemF.Substitution (Substitutable (..), applyT)
 
 data InferenceRule k a
-  = InferenceRule Int
+  = InferenceRulePlaceholder
   | -- | Type annotation
     InferAnnotation a (Type TypeIndex k) (Type TypeIndex k)
   | -- | Function application

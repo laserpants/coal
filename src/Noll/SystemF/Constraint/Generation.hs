@@ -40,8 +40,7 @@ assertEqualityAssumptions :: a -> IndexedType -> [Assumption IndexedType] -> Con
 assertEqualityAssumptions _ t ms =
   tellRight $ do
     Assumption{..} <- ms
-    -- TODO
-    pure (Equality (InferenceRule 1) [assumptionType, t])
+    pure (Equality InferenceRulePlaceholder [assumptionType, t])
 
 assertImplicitAssumptions :: a -> IndexedType -> [Assumption IndexedType] -> ConstraintsGen a ()
 assertImplicitAssumptions loc t ms = do
@@ -78,10 +77,10 @@ patternConstraints assert ms =
           | constructorArity /= length ps ->
               tellLeft [DataConstructorArityMismatch loc name constructorArity (length ps)]
         Just Constructor{..} ->
-          tellRight [Explicit (InferenceRule 3) (foldTypeOf t ps) constructorScheme]
+          tellRight [Explicit InferenceRulePlaceholder (foldTypeOf t ps) constructorScheme]
       concatForM ps (patternConstraints assert ms)
     POr _ t p1 p2 -> do
-      tellRight [Equality (InferenceRule 11) [t, typeOf p1, typeOf p2]]
+      tellRight [Equality InferenceRulePlaceholder [t, typeOf p1, typeOf p2]]
       ps1 <- patternConstraints assert ms p1
       ps2 <- patternConstraints assert ms p2
       pure (ps1 <> ps2)
@@ -94,7 +93,7 @@ patternConstraints assert ms =
           t1 = TIntrinsic (IRecord (TRow (fromDictionary d1 (fromMaybe RNil p1))))
       forM_ (Map.toList d) $ \(name, e) ->
         assert (typeOf e) (filter (assumptionNameIs name) ms)
-      tellRight [Equality (InferenceRule 300) [t, t1]]
+      tellRight [Equality InferenceRulePlaceholder [t, t1]]
       ps1 <- concatForM (Map.elems d <> maybeToList p) (patternConstraints assert ms)
       pure (ps1 <> Map.keys d)
     PAny{} ->
@@ -102,12 +101,12 @@ patternConstraints assert ms =
     PListCons _ t p1 p2 -> do
       ms1 <- patternConstraints assert ms p1
       ms2 <- patternConstraints assert ms p2
-      tellRight [Explicit (InferenceRule 3) (foldTypeOf t [p1, p2]) listConstructorTypeScheme]
+      tellRight [Explicit InferenceRulePlaceholder (foldTypeOf t [p1, p2]) listConstructorTypeScheme]
       pure (ms1 <> ms2)
     PListLiteral _ t ps -> do
       tellRight
-        [ Equality (InferenceRule 3) (t : (typeOf <$> ps))
-        , Explicit (InferenceRule 33) t (forall1 (\a -> TIntrinsic (IList a)))
+        [ Equality InferenceRulePlaceholder (t : (typeOf <$> ps))
+        , Explicit InferenceRulePlaceholder t (forall1 (\a -> TIntrinsic (IList a)))
         ]
       concatForM ps (patternConstraints assert ms)
     PAtVariable _ (Label _ name) -> do
@@ -156,7 +155,7 @@ collectConstraints =
         Nothing ->
           tellLeft [NoDataConstructor loc name]
         Just Constructor{..} ->
-          tellRight [Explicit (InferenceRule 4) t constructorScheme]
+          tellRight [Explicit InferenceRulePlaceholder t constructorScheme]
       pure []
     EVariable _ (Label t name) ->
       pure [Assumption name t]
@@ -219,13 +218,13 @@ collectConstraints =
       ms1 <- collectConstraints e1
       ms2 <- collectConstraints e2
       let t1 = typeOf e1 `TArrow` typeOf e2 `TArrow` t
-      tellRight [Explicit (InferenceRule 402) t1 listConstructorTypeScheme]
+      tellRight [Explicit InferenceRulePlaceholder t1 listConstructorTypeScheme]
       pure (ms1 <> ms2)
     EListLiteral _ t es -> do
       ms1 <- concatMapM collectConstraints es
       tellRight
-        [ Equality (InferenceRule 555) (t : (TIntrinsic . IList . typeOf <$> es))
-        , Explicit (InferenceRule 777) t (forall1 (\a -> TIntrinsic (IList a)))
+        [ Equality InferenceRulePlaceholder (t : (TIntrinsic . IList . typeOf <$> es))
+        , Explicit InferenceRulePlaceholder t (forall1 (\a -> TIntrinsic (IList a)))
         ]
       pure ms1
     EMatch loc t e cs -> do
@@ -246,20 +245,20 @@ collectConstraints =
     ESelect _ (Label t name) e -> do
       rvar <- supplied (RVariable . TypeIndex KRow)
       let t1 = TIntrinsic (IRecord (TRow (RExtend name t rvar)))
-      tellRight [Equality (InferenceRule 302) [t1, typeOf e]]
+      tellRight [Equality InferenceRulePlaceholder [t1, typeOf e]]
       collectConstraints e
     EFold _ t (e :| es) cs e1 -> do
       ms1 <- collectConstraints e
       ms2 <- concatMapM collectConstraints es
       (ts1, ts2, ms3) <- (third3 concat . unzip3 <$$> traverse clauseAssumptions) (fromList1 cs)
       -- Pattern types
-      tellRight [Equality (InferenceRule 401) (typeOf e : ts1)]
+      tellRight [Equality InferenceRulePlaceholder (typeOf e : ts1)]
       -- Expression types
-      tellRight [Equality (InferenceRule 99402) (foldTypeOf t es : concat ts2)]
+      tellRight [Equality InferenceRulePlaceholder (foldTypeOf t es : concat ts2)]
       ms4 <- concatMapM collectConstraints e1
       case e1 of
         Just (ERecursiveLet _ (PVariable _ (Label t1 _)) _ _) ->
-          tellRight [Equality (InferenceRule 999) [foldTypeOf t (e :| es), t1]]
+          tellRight [Equality InferenceRulePlaceholder [foldTypeOf t (e :| es), t1]]
         _ ->
           pure ()
       pure (ms1 <> ms2 <> ms3 <> ms4)
@@ -269,7 +268,7 @@ collectConstraints =
       let d1 = pure . typeOf <$> d
           e1 = getRow . typeOf <$> e
           t1 = TIntrinsic (IRecord (TRow (fromDictionary d1 (fromMaybe RNil e1))))
-      tellRight [Equality (InferenceRule 301) [t, t1]]
+      tellRight [Equality InferenceRulePlaceholder [t, t1]]
       pure (ms1 <> ms2)
 
 listConstructorTypeScheme :: Scheme TypeIndex Kind IndexedType

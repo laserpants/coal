@@ -54,10 +54,9 @@ data TypeAnnotationError a
     NoTypeConstructor a Name
   | -- | Two or more named parameters refer to the same inferred type variable.
     -- E.g., the annotation reads something like (a -> b) -> c -> b, but the
-    -- function is fn(f, x) => f(x), which forces 'a' and 'c' to be the same
-    -- type. The type signature claims that the function is polymorphic with
-    -- respect to any choice of variables a, b, and c, and is therefore
-    -- incorrect.
+    -- function is fn(f, x) => f(x), which would force 'a' and 'c' to be the
+    -- same type. The type signature claims that the function is polymorphic
+    -- with respect to any choice of variables a, b, and c. This is incorrect.
     NonDistinctParametereters [[(Name, a)]]
   | -- | Type parameter resolves to a concrete type; e.g.,
     -- fn(x : a, y : int32) => x + y
@@ -125,10 +124,6 @@ runConstraintsGenStack supply ctx a = runRWS (constraintsGenMonad a) ctx (Constr
 {-# INLINE updateConstraintsGenSupply #-}
 updateConstraintsGenSupply :: Int -> ConstraintsGenStack c o k t ()
 updateConstraintsGenSupply supply = modify (overConstraintsGenStateSupply (const supply))
-
--- {-# INLINE getConstraintsGenSupply #-}
--- getConstraintsGenSupply :: ConstraintsGenStack c o k t Int
--- getConstraintsGenSupply = gets constraintsGenStateSupply
 
 {-# INLINE monosetInsert #-}
 monosetInsert :: (Ord k) => TypeIndex k -> Monomorphic (TypeIndex k) -> Monomorphic (TypeIndex k)
