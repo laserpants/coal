@@ -24,7 +24,6 @@ source-repository head
 library
   exposed-modules:
       Noll.Ast.HasKind
-      Noll.Ast.HasTag
       Noll.Ast.HasType
       Noll.Ast.Indexed
       Noll.Compiler
