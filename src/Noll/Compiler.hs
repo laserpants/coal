@@ -497,7 +497,6 @@ typeCheckDefinition d =
     _ -> do
       compileDefinitionC d
       sub <- solveC
-      -- traceShowM (definitionName d, typeOf (apply sub d) :: Type TypeIndex Kind)
       defineC (definitionName d) (typeOf (apply sub d))
 
 instantiateTemplate :: TypeIndex Kind -> IndexedType -> Scheme TypeIndex Kind IndexedType -> Scheme TypeIndex Kind IndexedType
