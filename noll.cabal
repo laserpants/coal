@@ -56,8 +56,7 @@ library
       Noll.Language.Expression
       Noll.Language.Expression.Binding
       Noll.Language.Expression.Choice
-      Noll.Language.Expression.Operator.Binary
-      Noll.Language.Expression.Operator.Unary
+      Noll.Language.Expression.Operator
       Noll.Language.Pattern
       Noll.Language.Primitive
       Noll.Language.Trait

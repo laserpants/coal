@@ -2,13 +2,27 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Language.Expression.Operator.Binary (BinaryOperator (..), binaryOperatorTypeScheme) where
+module Noll.Language.Expression.Operator 
+  ( BinaryOperator (..)
+  , UnaryOperator (..)
+  , binaryOperatorTypeScheme
+  ) where
 
 import Data.Data (Data, Typeable)
 import Noll.Language.Type (IndexedType, Type (..), TypeIndex, (~>))
 import Noll.Language.Type.Intrinsic (Intrinsic (..))
 import Noll.Language.Type.Kind (Kind)
 import Noll.Language.Type.Scheme (Scheme (..), forall0, forall1, forall2, forall3)
+
+import Data.Data (Data, Typeable)
+
+-- | Unary operators
+data UnaryOperator
+  = -- | Logical NOT (!)
+    OLogicalNot
+  | -- | Negation (-)
+    ONegate
+  deriving (Show, Eq, Ord, Read, Data, Typeable)
 
 -- | Binary operators
 data BinaryOperator

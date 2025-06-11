@@ -16,7 +16,7 @@ import Lang.Common.List1 (fromList1)
 import Lang.Label (Label (..), labelName)
 import Lang.Utils (Name, forM)
 import Noll.Language.Expression (CompiledClause (..), Expression (..))
-import Noll.Language.Expression.Operator.Binary (BinaryOperator (..))
+import Noll.Language.Expression.Operator (BinaryOperator (..))
 import Noll.Language.Primitive (Primitive (..))
 import TextShow (showt)
 

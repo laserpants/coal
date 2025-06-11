@@ -17,8 +17,7 @@ import Noll.Compiler.Lowpass.TranslateType (translateType)
 import Noll.Language
 import Noll.Language.Expression
 import Noll.Language.Expression.Binding
-import Noll.Language.Expression.Operator.Binary
-import Noll.Language.Expression.Operator.Unary
+import Noll.Language.Expression.Operator
 import Noll.Language.Pattern
 import Noll.Language.Primitive
 import Noll.Utils (hashed)
