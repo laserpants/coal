@@ -153,7 +153,7 @@ spec =
       it "" $ do
         typedExpressionShouldMatch fixture39 fixture38
       it "" $ do
-        typedExpressionErrors2Includes (InferAnnotation () (TIntrinsic IInt32) (TIntrinsic IBool)) fixture40
+        typedExpressionErrors2Includes (RuleAnnotation () (TIntrinsic IInt32) (TIntrinsic IBool)) fixture40
 
 typedExpression_ :: [(Name, Scheme TypeIndex Kind IndexedType)] -> Expression () (Type TypeIndex Kind) -> TestResult (Expression () (Type TypeIndex Kind)) ()
 typedExpression_ = testRunner runTypedExpressionTest

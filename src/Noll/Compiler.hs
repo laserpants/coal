@@ -30,7 +30,6 @@ module Noll.Compiler where
 --  getSolverRuleViolationsC,
 -- ) where
 
-import Debug.Trace
 import Control.Monad.Reader (MonadReader, ReaderT, ask, asks, runReaderT)
 import Control.Monad.State (MonadState, StateT, gets, modify, put, runState, runStateT)
 import Control.Monad.Writer (execWriter)
@@ -253,8 +252,8 @@ solveConstraintsC cs = do
   compilerReportConstraintsGenErrors (IllFormedTypeAnnotation <$> errors)
   pure sub
 
---solveC :: (Monad m, Data a, Show a, Eq a) => [CompilerConstraint a] -> CompilerT a m ()
---solveC constraints = do
+-- solveC :: (Monad m, Data a, Show a, Eq a) => [CompilerConstraint a] -> CompilerT a m ()
+-- solveC constraints = do
 --  undefined
 --  sub1 <- gets compilerSubstitution
 --  sub2 <- solveConstraintsC constraints
@@ -272,7 +271,7 @@ compileConstraintsC expr = do
 
 compileFunctionC :: (Show a, Monad m, Data a) => Function Expression a IndexedType -> CompilerT a m ()
 compileFunctionC (Function loc (With _ t) ps e) = do
-  insertConstraintsC [Equality (InferTopLevelFunction loc) [t, typeOf e]]
+  insertConstraintsC [Equality (RuleTopLevelFunction loc) [t, typeOf e]]
   t1 <- supplied (TVariable . TypeIndex KType)
   compileConstraintsC $
     ELet
@@ -284,7 +283,7 @@ compileFunctionC (Function loc (With _ t) ps e) = do
 
 compileConstantC :: (Show a, Monad m, Data a) => Constant Expression a IndexedType -> CompilerT a m ()
 compileConstantC (Constant loc (With _ t) e) = do
-  insertConstraintsC [Equality (InferTopLevelConstant loc) [t, typeOf e]]
+  insertConstraintsC [Equality (RuleTopLevelConstant loc) [t, typeOf e]]
   compileConstraintsC $
     ELet
       loc
@@ -321,7 +320,7 @@ solveC = do
 
 --
 
---compileConstraintsC ::
+-- compileConstraintsC ::
 --  ( Functor f
 --  , Monad m
 --  , Substitutable (f IndexedType)
@@ -334,7 +333,7 @@ solveC = do
 --  f IndexedType ->
 --  Expression a IndexedType ->
 --  CompilerT a m ()
---compileConstraintsC cs o e = do
+-- compileConstraintsC cs o e = do
 --  undefined
 ----  (ms0, cs0) <- generateConstraintsC e
 ----
@@ -343,22 +342,22 @@ solveC = do
 ----  insertAssumptionsC (apply sub ms1)
 ----  solveC (cs <> cs0 <> cs1)
 
---typeCheckExpressionC ::
+-- typeCheckExpressionC ::
 --  (Monad m, Data a, Show a, Eq a) =>
 --  Expression a IndexedType ->
 --  CompilerT a m (Expression a IndexedType, [CompilerAssumption])
---typeCheckExpressionC e = do
+-- typeCheckExpressionC e = do
 --  undefined
 --  compileConstraintsC [] e e
 --  ams <- gets compilerAssumptions
 --  sub <- gets compilerSubstitution
 --  pure (normalizeRowTypes <$> apply sub e, apply sub ams)
 
---compileFunctionC ::
+-- compileFunctionC ::
 --  (Monad m, Data a, Show a, Eq a) =>
 --  Function Expression a IndexedType ->
 --  CompilerT a m ()
---compileFunctionC f@(Function loc (With _ t) ps e) = do
+-- compileFunctionC f@(Function loc (With _ t) ps e) = do
 --  undefined
 --  t1 <- supplied (TVariable . TypeIndex KType)
 --  let t2 = foldTypeOf t1 ps
@@ -370,22 +369,22 @@ solveC = do
 -- where
 --  placeholder = "###.function"
 
---typeCheckFunctionC ::
+-- typeCheckFunctionC ::
 --  (Monad m, Data a, Show a, Eq a) =>
 --  Function Expression a IndexedType ->
 --  CompilerT a m (Function Expression a IndexedType, [CompilerAssumption])
---typeCheckFunctionC f = do
+-- typeCheckFunctionC f = do
 --  undefined
 --  compileFunctionC f
 --  ams <- gets compilerAssumptions
 --  sub <- gets compilerSubstitution
 --  pure (normalizeRowTypes <$> apply sub f, ams)
 
---compileConstantC ::
+-- compileConstantC ::
 --  (Monad m, Data a, Show a, Eq a) =>
 --  Constant Expression a IndexedType ->
 --  CompilerT a m ()
---compileConstantC g@(Constant loc (With _ t) e) = do
+-- compileConstantC g@(Constant loc (With _ t) e) = do
 --  undefined
 --  sub <- gets compilerSubstitution
 --  compileConstraintsC [Equality (InferenceRule 999) [t, typeOf e]] g $
@@ -396,22 +395,22 @@ solveC = do
 -- where
 --  placeholder = "###.constant"
 
---typeCheckConstantC ::
+-- typeCheckConstantC ::
 --  (Monad m, Data a, Show a, Eq a) =>
 --  Constant Expression a IndexedType ->
 --  CompilerT a m (Constant Expression a IndexedType, [CompilerAssumption])
---typeCheckConstantC c = do
+-- typeCheckConstantC c = do
 --  undefined
 --  compileConstantC c
 --  ams <- gets compilerAssumptions
 --  sub <- gets compilerSubstitution
 --  pure (normalizeRowTypes <$> apply sub c, ams)
 --
---typeCheckModuleC = do
+-- typeCheckModuleC = do
 --  undefined
 --
---compileDefinitionC :: (Monad m, Data a, Show a, Eq a) => Definition a k IndexedType -> CompilerT a m ()
---compileDefinitionC = do
+-- compileDefinitionC :: (Monad m, Data a, Show a, Eq a) => Definition a k IndexedType -> CompilerT a m ()
+-- compileDefinitionC = do
 --  undefined
 --  \case
 --    DFunction _ f ->
@@ -429,7 +428,7 @@ insertDefinitionC =
 
       t = normalizeTypeIndexes (typeOf d)
 
---typeCheckDefinitionC ::
+-- typeCheckDefinitionC ::
 --  ( Monad m
 --  , Show a
 --  , Data a
@@ -441,7 +440,7 @@ insertDefinitionC =
 --  ) =>
 --  Definition a k IndexedType ->
 --  CompilerT a m (Definition a k IndexedType, [CompilerAssumption])
---typeCheckDefinitionC d = do
+-- typeCheckDefinitionC d = do
 --  undefined
 --  compileDefinitionC d
 --  ams <- gets compilerAssumptions

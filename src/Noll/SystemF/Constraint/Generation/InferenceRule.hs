@@ -13,29 +13,29 @@ import Noll.SystemF.Substitution (Substitutable (..), applyT)
 data InferenceRule k a
   = InferenceRulePlaceholder
   | -- | Type annotation
-    InferAnnotation a (Type TypeIndex k) (Type TypeIndex k)
+    RuleAnnotation a (Type TypeIndex k) (Type TypeIndex k)
   | -- | Function application
-    InferApplication a (Type TypeIndex k) [Type TypeIndex k]
+    RuleApplication a (Type TypeIndex k) [Type TypeIndex k]
   | -- | Type of if-condition is bool
-    InferIfCondition a (Type TypeIndex k)
+    RuleIfCondition a (Type TypeIndex k)
   | -- | If-expression 'then' and 'else' branches must have the same type
-    InferIfBranches a (Type TypeIndex k) (Type TypeIndex k)
+    RuleIfBranches a (Type TypeIndex k) (Type TypeIndex k)
   | -- Type of binding expression matches binding pattern
-    InferLetBindingPattern a (Type TypeIndex k) (Type TypeIndex k)
+    RuleLetBindingPattern a (Type TypeIndex k) (Type TypeIndex k)
   | -- TODO
-    InferLetImplicit a Name (Type TypeIndex k) (Type TypeIndex k)
+    RuleLetImplicit a Name (Type TypeIndex k) (Type TypeIndex k)
   | -- | Pattern guards are of type bool
-    InferMatchClauseGuard a
+    RuleMatchClauseGuard a
   | -- | Match clauses all have the same type as expression
-    InferMatchClauseExpressions a
+    RuleMatchClauseExpressions a
   | -- | Match clause patterns have identical types
-    InferMatchClausePatterns a
+    RuleMatchClausePatterns a
   | -- | TODO
-    InferBinaryOperator a
+    RuleBinaryOperator a
   | -- | TODO
-    InferTopLevelFunction a
+    RuleTopLevelFunction a
   | -- | TODO
-    InferTopLevelConstant a
+    RuleTopLevelConstant a
   deriving (Show, Eq, Ord, Read, Data, Typeable)
 
 instance (Data a) => Substitutable (InferenceRule Kind a) where

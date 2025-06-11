@@ -47,7 +47,7 @@ assertImplicitAssumptions loc t ms = do
   set <- asks constraintsGenContextMonomorphicSet
   tellRight $ do
     Assumption{..} <- ms
-    pure (Implicit (InferLetImplicit loc assumptionName assumptionType t) assumptionType t set)
+    pure (Implicit (RuleLetImplicit loc assumptionName assumptionType t) assumptionType t set)
 
 withMonomorphic :: (TypeIndexed Kind t) => t -> ConstraintsGen a c -> ConstraintsGen a c
 withMonomorphic = localMonoset . monosetInsertMultiple . typeIndexesIn
@@ -63,7 +63,7 @@ patternConstraints assert ms =
         Left err ->
           tellLeft [IllFormedTypeAnnotation err]
         Right t1 ->
-          tellRight [Equality (InferAnnotation loc (typeOf p) t1) [typeOf p, t1]]
+          tellRight [Equality (RuleAnnotation loc (typeOf p) t1) [typeOf p, t1]]
       patternConstraints assert ms p
     PVariable _ (Label t name) -> do
       assert t (filter (assumptionNameIs name) ms)
@@ -129,7 +129,7 @@ clauseAssumptions (EClause loc p cs) = do
       \case
         CPlain _ gs e -> do
           ms1 <- concatForM gs $ \(CGuard g) -> do
-            tellRight [Equality (InferMatchClauseGuard loc) [typeOf g, TIntrinsic IBool]]
+            tellRight [Equality (RuleMatchClauseGuard loc) [typeOf g, TIntrinsic IBool]]
             collectConstraints g
           ms2 <- collectConstraints e
           pure (typeOf e, ms1 <> ms2)
@@ -147,7 +147,7 @@ collectConstraints =
         Left err ->
           tellLeft [IllFormedTypeAnnotation err]
         Right t1 ->
-          tellRight [Equality (InferAnnotation loc (typeOf e) t1) [typeOf e, t1]]
+          tellRight [Equality (RuleAnnotation loc (typeOf e) t1) [typeOf e, t1]]
       collectConstraints e
     EConstructor loc (Label t name) -> do
       r <- lookupDataConstructor name
@@ -167,7 +167,7 @@ collectConstraints =
       ms1 <- collectConstraints e2
       let t1 = typeOf p
           t2 = typeOf e1
-      tellRight [Equality (InferLetBindingPattern loc t1 t2) [t1, t2]]
+      tellRight [Equality (RuleLetBindingPattern loc t1 t2) [t1, t2]]
       ms2 <- collectConstraints e1
       names <- patternConstraints (assertImplicitAssumptions loc) ms1 p
       pure (filter (assumptionNameIsNotOneOf names) (ms1 <> ms2))
@@ -178,7 +178,7 @@ collectConstraints =
           BPattern _ p e -> do
             let t1 = typeOf p
                 t2 = typeOf e
-            tellRight [Equality (InferLetBindingPattern loc t1 t2) [t1, t2]]
+            tellRight [Equality (RuleLetBindingPattern loc t1 t2) [t1, t2]]
             collectConstraints e
           BFunction _ _ ps e -> do
             ms <- withMonomorphic ps (collectConstraints e)
@@ -201,8 +201,8 @@ collectConstraints =
       let t1 = typeOf e1
           t2 = typeOf e2
           t3 = typeOf e3
-      tellRight [Equality (InferIfCondition loc t1) [t1, TIntrinsic IBool]]
-      tellRight [Equality (InferIfBranches loc t2 t3) [t, t2, t3]]
+      tellRight [Equality (RuleIfCondition loc t1) [t1, TIntrinsic IBool]]
+      tellRight [Equality (RuleIfBranches loc t2 t3) [t, t2, t3]]
       pure (ms1 <> ms2 <> ms3)
     EApplication loc t e1 es -> do
       ms1 <- collectConstraints e1
@@ -210,7 +210,7 @@ collectConstraints =
       let t1 = typeOf e1
           t2 = foldType t ts
           ts = typeOf <$> es
-      tellRight [Equality (InferApplication loc t1 (fromList1 ts)) [t1, t2]]
+      tellRight [Equality (RuleApplication loc t1 (fromList1 ts)) [t1, t2]]
       pure (ms1 <> ms2)
     ELiteral{} ->
       pure []
@@ -231,16 +231,16 @@ collectConstraints =
       ms1 <- collectConstraints e
       (ts1, ts2, ms2) <- (third3 concat . unzip3 <$$> traverse clauseAssumptions) (fromList1 cs)
       -- Pattern types
-      tellRight [Equality (InferMatchClausePatterns loc) (typeOf e : ts1)]
+      tellRight [Equality (RuleMatchClausePatterns loc) (typeOf e : ts1)]
       -- Expression types
-      tellRight [Equality (InferMatchClauseExpressions loc) (t : concat ts2)]
+      tellRight [Equality (RuleMatchClauseExpressions loc) (t : concat ts2)]
       pure (ms1 <> ms2)
     ECompiledMatch{} ->
       error "TODO"
     EUnaryOperator{} ->
       error "TODO"
     EBinaryOperator loc t op -> do
-      tellRight [Explicit (InferBinaryOperator loc) t (binaryOperatorTypeScheme op)]
+      tellRight [Explicit (RuleBinaryOperator loc) t (binaryOperatorTypeScheme op)]
       pure []
     ESelect _ (Label t name) e -> do
       rvar <- supplied (RVariable . TypeIndex KRow)
