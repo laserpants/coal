@@ -114,8 +114,9 @@ baz = do
                 :| []
             )
         )
-  (xx, yy) <- typeCheckFunctionC e
-  pure (normalizeTypeIndexes xx, yy)
+  undefined
+--  (xx, yy) <- typeCheckFunctionC e
+--  pure (normalizeTypeIndexes xx, yy)
 
 bark :: Definition () k ()
 bark =

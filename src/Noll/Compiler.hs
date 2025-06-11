@@ -30,6 +30,7 @@ module Noll.Compiler where
 --  getSolverRuleViolationsC,
 -- ) where
 
+import Debug.Trace
 import Control.Monad.Reader (MonadReader, ReaderT, ask, asks, runReaderT)
 import Control.Monad.State (MonadState, StateT, gets, modify, put, runState, runStateT)
 import Control.Monad.Writer (execWriter)
@@ -252,11 +253,12 @@ solveConstraintsC cs = do
   compilerReportConstraintsGenErrors (IllFormedTypeAnnotation <$> errors)
   pure sub
 
-solveC :: (Monad m, Data a, Show a, Eq a) => [CompilerConstraint a] -> CompilerT a m ()
-solveC constraints = do
-  sub1 <- gets compilerSubstitution
-  sub2 <- solveConstraintsC constraints
-  updateSubstitutionC (sub2 <> sub1)
+--solveC :: (Monad m, Data a, Show a, Eq a) => [CompilerConstraint a] -> CompilerT a m ()
+--solveC constraints = do
+--  undefined
+--  sub1 <- gets compilerSubstitution
+--  sub2 <- solveConstraintsC constraints
+--  updateSubstitutionC (sub2 <> sub1)
 
 --
 
@@ -319,96 +321,103 @@ solveC2 = do
 
 --
 
-compileConstraintsC ::
-  ( Functor f
-  , Monad m
-  , Substitutable (f IndexedType)
-  , TypeIndexed Kind (f IndexedType)
-  , Show a
-  , Data a
-  , Eq a
-  ) =>
-  [CompilerConstraint a] ->
-  f IndexedType ->
-  Expression a IndexedType ->
-  CompilerT a m ()
-compileConstraintsC cs o e = do
-  (ms0, cs0) <- generateConstraintsC e
+--compileConstraintsC ::
+--  ( Functor f
+--  , Monad m
+--  , Substitutable (f IndexedType)
+--  , TypeIndexed Kind (f IndexedType)
+--  , Show a
+--  , Data a
+--  , Eq a
+--  ) =>
+--  [CompilerConstraint a] ->
+--  f IndexedType ->
+--  Expression a IndexedType ->
+--  CompilerT a m ()
+--compileConstraintsC cs o e = do
+--  undefined
+----  (ms0, cs0) <- generateConstraintsC e
+----
+----  (ms1, cs1) <- partitionEithers <$> traverse assumptionConstraints ms0
+----  sub <- gets compilerSubstitution
+----  insertAssumptionsC (apply sub ms1)
+----  solveC (cs <> cs0 <> cs1)
 
-  (ms1, cs1) <- partitionEithers <$> traverse assumptionConstraints ms0
-  sub <- gets compilerSubstitution
-  insertAssumptionsC (apply sub ms1)
-  solveC (cs <> cs0 <> cs1)
+--typeCheckExpressionC ::
+--  (Monad m, Data a, Show a, Eq a) =>
+--  Expression a IndexedType ->
+--  CompilerT a m (Expression a IndexedType, [CompilerAssumption])
+--typeCheckExpressionC e = do
+--  undefined
+--  compileConstraintsC [] e e
+--  ams <- gets compilerAssumptions
+--  sub <- gets compilerSubstitution
+--  pure (normalizeRowTypes <$> apply sub e, apply sub ams)
 
-typeCheckExpressionC ::
-  (Monad m, Data a, Show a, Eq a) =>
-  Expression a IndexedType ->
-  CompilerT a m (Expression a IndexedType, [CompilerAssumption])
-typeCheckExpressionC e = do
-  compileConstraintsC [] e e
-  ams <- gets compilerAssumptions
-  sub <- gets compilerSubstitution
-  pure (normalizeRowTypes <$> apply sub e, apply sub ams)
+--compileFunctionC ::
+--  (Monad m, Data a, Show a, Eq a) =>
+--  Function Expression a IndexedType ->
+--  CompilerT a m ()
+--compileFunctionC f@(Function loc (With _ t) ps e) = do
+--  undefined
+--  t1 <- supplied (TVariable . TypeIndex KType)
+--  let t2 = foldTypeOf t1 ps
+--  compileConstraintsC [Equality (InferenceRule 999) [t, typeOf e]] f $
+--    ELet
+--      loc
+--      (BFunction loc placeholder ps e :| [])
+--      (EVariable loc (Label t2 placeholder))
+-- where
+--  placeholder = "###.function"
 
-compileFunctionC ::
-  (Monad m, Data a, Show a, Eq a) =>
-  Function Expression a IndexedType ->
-  CompilerT a m ()
-compileFunctionC f@(Function loc (With _ t) ps e) = do
-  t1 <- supplied (TVariable . TypeIndex KType)
-  let t2 = foldTypeOf t1 ps
-  compileConstraintsC [Equality (InferenceRule 999) [t, typeOf e]] f $
-    ELet
-      loc
-      (BFunction loc placeholder ps e :| [])
-      (EVariable loc (Label t2 placeholder))
- where
-  placeholder = "###.function"
+--typeCheckFunctionC ::
+--  (Monad m, Data a, Show a, Eq a) =>
+--  Function Expression a IndexedType ->
+--  CompilerT a m (Function Expression a IndexedType, [CompilerAssumption])
+--typeCheckFunctionC f = do
+--  undefined
+--  compileFunctionC f
+--  ams <- gets compilerAssumptions
+--  sub <- gets compilerSubstitution
+--  pure (normalizeRowTypes <$> apply sub f, ams)
 
-typeCheckFunctionC ::
-  (Monad m, Data a, Show a, Eq a) =>
-  Function Expression a IndexedType ->
-  CompilerT a m (Function Expression a IndexedType, [CompilerAssumption])
-typeCheckFunctionC f = do
-  compileFunctionC f
-  ams <- gets compilerAssumptions
-  sub <- gets compilerSubstitution
-  pure (normalizeRowTypes <$> apply sub f, ams)
+--compileConstantC ::
+--  (Monad m, Data a, Show a, Eq a) =>
+--  Constant Expression a IndexedType ->
+--  CompilerT a m ()
+--compileConstantC g@(Constant loc (With _ t) e) = do
+--  undefined
+--  sub <- gets compilerSubstitution
+--  compileConstraintsC [Equality (InferenceRule 999) [t, typeOf e]] g $
+--    ELet
+--      loc
+--      (BPattern loc (PVariable loc (Label t placeholder)) e :| [])
+--      (EVariable loc (Label t placeholder))
+-- where
+--  placeholder = "###.constant"
 
-compileConstantC ::
-  (Monad m, Data a, Show a, Eq a) =>
-  Constant Expression a IndexedType ->
-  CompilerT a m ()
-compileConstantC g@(Constant loc (With _ t) e) = do
-  sub <- gets compilerSubstitution
-  compileConstraintsC [Equality (InferenceRule 999) [t, typeOf e]] g $
-    ELet
-      loc
-      (BPattern loc (PVariable loc (Label t placeholder)) e :| [])
-      (EVariable loc (Label t placeholder))
- where
-  placeholder = "###.constant"
-
-typeCheckConstantC ::
-  (Monad m, Data a, Show a, Eq a) =>
-  Constant Expression a IndexedType ->
-  CompilerT a m (Constant Expression a IndexedType, [CompilerAssumption])
-typeCheckConstantC c = do
-  compileConstantC c
-  ams <- gets compilerAssumptions
-  sub <- gets compilerSubstitution
-  pure (normalizeRowTypes <$> apply sub c, ams)
-
-typeCheckModuleC = do
-  undefined
-
-compileDefinitionC :: (Monad m, Data a, Show a, Eq a) => Definition a k IndexedType -> CompilerT a m ()
-compileDefinitionC = do
-  \case
-    DFunction _ f ->
-      compileFunctionC f
-    DConstant _ c ->
-      compileConstantC c
+--typeCheckConstantC ::
+--  (Monad m, Data a, Show a, Eq a) =>
+--  Constant Expression a IndexedType ->
+--  CompilerT a m (Constant Expression a IndexedType, [CompilerAssumption])
+--typeCheckConstantC c = do
+--  undefined
+--  compileConstantC c
+--  ams <- gets compilerAssumptions
+--  sub <- gets compilerSubstitution
+--  pure (normalizeRowTypes <$> apply sub c, ams)
+--
+--typeCheckModuleC = do
+--  undefined
+--
+--compileDefinitionC :: (Monad m, Data a, Show a, Eq a) => Definition a k IndexedType -> CompilerT a m ()
+--compileDefinitionC = do
+--  undefined
+--  \case
+--    DFunction _ f ->
+--      compileFunctionC f
+--    DConstant _ c ->
+--      compileConstantC c
 
 insertDefinitionC :: (Monad m, HasType TypeIndex Kind (Definition a k (Type TypeIndex Kind))) => Definition a k IndexedType -> CompilerT a m ()
 insertDefinitionC =
@@ -420,25 +429,26 @@ insertDefinitionC =
 
       t = normalizeTypeIndexes (typeOf d)
 
-typeCheckDefinitionC ::
-  ( Monad m
-  , Show a
-  , Data a
-  , Data k
-  , Ord k
-  , Eq a
-  , HasType TypeIndex Kind (Definition a k (Type TypeIndex Kind))
-  , TypeIndexed Kind (Definition a k IndexedType)
-  ) =>
-  Definition a k IndexedType ->
-  CompilerT a m (Definition a k IndexedType, [CompilerAssumption])
-typeCheckDefinitionC d = do
-  compileDefinitionC d
-  ams <- gets compilerAssumptions
-  sub <- gets compilerSubstitution
-  let def = normalizeRowTypes <$> apply sub d
-  insertDefinitionC def
-  pure (def, ams)
+--typeCheckDefinitionC ::
+--  ( Monad m
+--  , Show a
+--  , Data a
+--  , Data k
+--  , Ord k
+--  , Eq a
+--  , HasType TypeIndex Kind (Definition a k (Type TypeIndex Kind))
+--  , TypeIndexed Kind (Definition a k IndexedType)
+--  ) =>
+--  Definition a k IndexedType ->
+--  CompilerT a m (Definition a k IndexedType, [CompilerAssumption])
+--typeCheckDefinitionC d = do
+--  undefined
+--  compileDefinitionC d
+--  ams <- gets compilerAssumptions
+--  sub <- gets compilerSubstitution
+--  let def = normalizeRowTypes <$> apply sub d
+--  insertDefinitionC def
+--  pure (def, ams)
 
 -- typeCheckDefinitionsC ::
 --  ( Monad m
