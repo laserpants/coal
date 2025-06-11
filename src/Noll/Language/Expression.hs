@@ -62,6 +62,10 @@ data Expression a t
     EFold a t (List1 (Expression a t)) (List1 (Clause a t)) (Maybe (Expression a t))
   | -- | Record field access selector
     ESelect a (Label t) (Expression a t)
+  | -- | TODO
+    EUnfold a t
+  | -- | TODO
+    ECodataSelect a (Label t) (Expression a t)
   | -- | Row restriction
     EFocus Name (Label t) (Label t) (Expression a t) (Expression a t)
   | -- | Dictionary
