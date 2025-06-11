@@ -1284,13 +1284,13 @@ story = do
   it "" $
     fixturee33 == fixturee32
   it "" $
-    runTraitTransformY (transformModuleY Noll.Set.Test09.moduleUtils) == Noll.Set.Test10.moduleUtils
+    runTraitTransformY2 (freshIdIn Noll.Set.Test09.moduleUtils) (transformModuleY Noll.Set.Test09.moduleUtils) == Noll.Set.Test10.moduleUtils
   it "" $
-    runTraitTransformY (transformModuleY Noll.Set.Test09.moduleOrdered) == Noll.Set.Test10.moduleOrdered
+    runTraitTransformY2 (freshIdIn Noll.Set.Test09.moduleOrdered) (transformModuleY Noll.Set.Test09.moduleOrdered) == Noll.Set.Test10.moduleOrdered
   it "" $
-    runTraitTransformY (transformModuleY Noll.Set.Test09.moduleBinarySearch) == Noll.Set.Test10.moduleBinarySearch
+    runTraitTransformY2 (freshIdIn Noll.Set.Test09.moduleBinarySearch) (transformModuleY Noll.Set.Test09.moduleBinarySearch) == Noll.Set.Test10.moduleBinarySearch
   it "" $
-    runTraitTransformY (transformModuleY Noll.Set.Test09.moduleMain) == Noll.Set.Test10.moduleMain
+    runTraitTransformY2 (freshIdIn Noll.Set.Test09.moduleMain) (transformModuleY Noll.Set.Test09.moduleMain) == Noll.Set.Test10.moduleMain
 
 testNameEnvironment =
   initialTranslateEnvironment

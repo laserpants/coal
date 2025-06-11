@@ -23,12 +23,15 @@ spec = do
 fixtured1 =
   undefined
 
-runTraitTransformY :: (Monoid b) => ReaderT DictionaryEnvironment (StateT Int (Writer b)) a -> a
-runTraitTransformY v = fst $ runWriter (evalStateT (runReaderT v testEnv) 200) -- (freshIdIn v))
+--runTraitTransformY :: (Monoid b) => ReaderT DictionaryEnvironment (StateT Int (Writer b)) a -> a
+--runTraitTransformY v = fst $ runWriter (evalStateT (runReaderT v testEnv) 200) -- (freshIdIn v))
+
+runTraitTransformY2 :: (Monoid b) => Int -> ReaderT DictionaryEnvironment (StateT Int (Writer b)) a -> a
+runTraitTransformY2 n v = fst $ runWriter (evalStateT (runReaderT v testEnv) n)
 
 testEnv = DictionaryEnvironment yy xx
 
-fixtured2 = runTraitTransformY (collectTraitsY (TIntrinsic IInt32) "trace")
+fixtured2 = runTraitTransformY2 0 (collectTraitsY (TIntrinsic IInt32) "trace")
 
 fixturee1 =
   ELambda
@@ -85,7 +88,7 @@ fixturee2 =
         )
     )
 
-fixturee3 = fst $ runTraitTransformY (transformScope fixturee1)
+fixturee3 = fst $ runTraitTransformY2 (freshIdIn fixturee1) (transformScope fixturee1)
 
 fixturee4 =
   ELambda
@@ -131,8 +134,9 @@ fixturee5 =
         )
     )
 
-fixturee6 = fst $ runTraitTransformY (transformScope fixturee4)
+fixturee6 = fst $ runTraitTransformY2 (freshIdIn fixturee4) (transformScope fixturee4)
 
+fixturee7 :: Expression () (Type TypeIndex Kind)
 fixturee7 =
   ELet
     ()
@@ -248,8 +252,9 @@ fixturee8 =
     )
 
 fixturee9 :: Expression () (Type TypeIndex Kind)
-fixturee9 = fst $ runTraitTransformY (transformScope fixturee7)
+fixturee9 = fst $ runTraitTransformY2 (freshIdIn fixturee7) (transformScope fixturee7)
 
+fixturee10 :: Expression () (Type TypeIndex Kind)
 fixturee10 =
   EApplication
     ()
@@ -383,7 +388,7 @@ fixturee11 =
     )
 
 fixturee12 :: Expression () (Type TypeIndex Kind)
-fixturee12 = fst $ runTraitTransformY (transformScope fixturee10)
+fixturee12 = fst $ runTraitTransformY2 (freshIdIn fixturee10) (transformScope fixturee10)
 
 fixturee13 =
   Constant
@@ -448,7 +453,7 @@ fixturee14 =
     )
 
 fixturee15 :: Constant Expression () (Type TypeIndex Kind)
-fixturee15 = runTraitTransformY (transformConstantY fixturee13)
+fixturee15 = runTraitTransformY2 (freshIdIn fixturee13) (transformConstantY fixturee13)
 
 fixturee16 =
   Constant
@@ -507,7 +512,7 @@ fixturee17 =
     )
 
 fixturee18 :: Constant Expression () (Type TypeIndex Kind)
-fixturee18 = runTraitTransformY (transformConstantY fixturee16)
+fixturee18 = runTraitTransformY2 (freshIdIn fixturee16) (transformConstantY fixturee16)
 
 fixturee19 :: Constant Expression () (Type TypeIndex Kind)
 fixturee19 =
@@ -633,8 +638,9 @@ fixturee20 =
     )
 
 fixturee21 :: Constant Expression () (Type TypeIndex Kind)
-fixturee21 = runTraitTransformY (transformConstantY fixturee19)
+fixturee21 = runTraitTransformY2 (freshIdIn fixturee19) (transformConstantY fixturee19)
 
+fixturee22 :: Constant Expression () (Type TypeIndex Kind)
 fixturee22 =
   Constant
     ()
@@ -793,8 +799,9 @@ fixturee23 =
     )
 
 fixturee24 :: Constant Expression () (Type TypeIndex Kind)
-fixturee24 = runTraitTransformY (transformConstantY fixturee22)
+fixturee24 = runTraitTransformY2 (freshIdIn fixturee22) (transformConstantY fixturee22)
 
+fixturee25 :: Expression () (Type TypeIndex Kind)
 fixturee25 =
   EApplication
     ()
@@ -928,7 +935,7 @@ fixturee26 =
     )
 
 fixturee27 :: Expression () (Type TypeIndex Kind)
-fixturee27 = fst $ runTraitTransformY (transformScope fixturee25)
+fixturee27 = fst $ runTraitTransformY2 (freshIdIn fixturee25) (transformScope fixturee25)
 
 fixturee28 =
   Constant
@@ -1020,7 +1027,7 @@ fixturee29 =
     )
 
 fixturee30 :: Constant Expression () (Type TypeIndex Kind)
-fixturee30 = runTraitTransformY (transformConstantY fixturee28)
+fixturee30 = runTraitTransformY2 (freshIdIn fixturee28) (transformConstantY fixturee28)
 
 fixturee31 =
   Constant
@@ -1111,4 +1118,4 @@ fixturee32 =
     )
 
 fixturee33 :: Constant Expression () (Type TypeIndex Kind)
-fixturee33 = runTraitTransformY (transformConstantY fixturee31)
+fixturee33 = runTraitTransformY2 (freshIdIn fixturee31) (transformConstantY fixturee31)
