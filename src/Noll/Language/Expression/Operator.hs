@@ -2,11 +2,11 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Language.Expression.Operator 
-  ( BinaryOperator (..)
-  , UnaryOperator (..)
-  , binaryOperatorTypeScheme
-  ) where
+module Noll.Language.Expression.Operator (
+  BinaryOperator (..),
+  UnaryOperator (..),
+  binaryOperatorTypeScheme,
+) where
 
 import Data.Data (Data, Typeable)
 import Noll.Language.Type (IndexedType, Type (..), TypeIndex, (~>))
