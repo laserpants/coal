@@ -502,6 +502,6 @@ defineC name t = insertNameC name (Forall (typeIndexesIn s) [] s)
 
 indexedC :: (Monad m, Traversable t) => t e -> CompilerT a m (t IndexedType)
 indexedC t = do
-  (r, q) <- runState (indexed t) <$> gets compilerSupply
+  (r, q) <- gets (runState (indexed t) . compilerSupply)
   updateSupplyC q
   return r
