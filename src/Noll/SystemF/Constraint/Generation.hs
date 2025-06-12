@@ -224,7 +224,7 @@ collectConstraints =
       ms1 <- concatMapM collectConstraints es
       tellRight
         [ Equality InferenceRulePlaceholder (t : (TIntrinsic . IList . typeOf <$> es))
-        , Explicit InferenceRulePlaceholder t (forall1 (\a -> TIntrinsic (IList a)))
+        , Explicit InferenceRulePlaceholder t (forall1 (TIntrinsic . IList))
         ]
       pure ms1
     EMatch loc t e cs -> do
