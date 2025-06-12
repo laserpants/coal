@@ -46,6 +46,7 @@ library
       Noll.Compiler.Transform.Pattern.RecordDesugaring
       Noll.Compiler.Transform.Tree
       Noll.Compiler.Transform.Type.AliasInsertion
+      Noll.Compiler2
       Noll.Eval
       Noll.Language
       Noll.Language.Constructor
