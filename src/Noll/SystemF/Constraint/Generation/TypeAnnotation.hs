@@ -68,7 +68,7 @@ instantiate =
       c <- lookupTypeConstructor name
       case c of
         Nothing ->
-          throwError (`NoTypeConstructor` name)
+          throwError (`EAnnotationConstructor` name)
         Just k ->
           pure (TConstructor k name)
     TIntrinsic t ->
@@ -98,7 +98,7 @@ typeIndex k name = do
       pure index
     Just (TypeIndex k1 _)
       | k1 /= k ->
-          throwError KindError
+          throwError EAnnotationKindMismatch
     Just{} ->
       pure index
 
@@ -109,7 +109,7 @@ checkTypeAnnotationParameters ps (Substitution sub) = do
     [] ->
       pure ()
     qs ->
-      tell [NonDistinctParametereters (snd <$$> qs)]
+      tell [EAnnotationNonDistinctParameters (snd <$$> qs)]
  where
   lengthMoreThan n = length >>> (> n)
   go (name, (loc, TypeIndex _ index)) =
@@ -117,7 +117,7 @@ checkTypeAnnotationParameters ps (Substitution sub) = do
       Just (TVariable (TypeIndex _ n)) ->
         pure [(n, (name, loc))]
       Just t -> do
-        tell [ResolvesToMonomorphicType name t]
+        tell [EAnnotationMonomorphicType name t]
         pure []
       Nothing ->
         pure [(index, (name, loc))]
