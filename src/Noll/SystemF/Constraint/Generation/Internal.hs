@@ -20,17 +20,7 @@ module Noll.SystemF.Constraint.Generation.Internal (
   updateConstraintsGenSupply,
 ) where
 
-import Control.Monad.RWS (
-  MonadRWS,
-  MonadReader,
-  MonadState,
-  MonadWriter,
-  RWS,
-  evalRWS,
-  local,
-  modify,
-  runRWS,
- )
+import Control.Monad.RWS
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (transformBi)
 import Lang.Common.Environment (Environment (..))
@@ -64,9 +54,9 @@ data TypeAnnotationError a
   deriving (Show, Eq, Ord, Read)
 
 data ConstraintsGenError a
-  = NoDataConstructor a Name
-  | DataConstructorArityMismatch a Name Int Int
-  | IllFormedTypeAnnotation (TypeAnnotationError a)
+  = ENoDataConstructor a Name
+  | EDataConstructorArityMismatch a Name Int Int
+  | EIllFormedTypeAnnotation (TypeAnnotationError a)
   deriving (Show, Eq, Ord, Read)
 
 data ConstraintsGenContext o k t = ConstraintsGenContext

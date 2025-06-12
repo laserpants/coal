@@ -61,7 +61,7 @@ patternConstraints assert ms =
       r <- instantiateAnnotation loc t
       case r of
         Left err ->
-          tellLeft [IllFormedTypeAnnotation err]
+          tellLeft [EIllFormedTypeAnnotation err]
         Right t1 ->
           tellRight [Equality (RuleAnnotation loc (typeOf p) t1) [typeOf p, t1]]
       patternConstraints assert ms p
@@ -72,10 +72,10 @@ patternConstraints assert ms =
       r <- lookupDataConstructor name
       case r of
         Nothing ->
-          tellLeft [NoDataConstructor loc name]
+          tellLeft [ENoDataConstructor loc name]
         Just Constructor{..}
           | constructorArity /= length ps ->
-              tellLeft [DataConstructorArityMismatch loc name constructorArity (length ps)]
+              tellLeft [EDataConstructorArityMismatch loc name constructorArity (length ps)]
         Just Constructor{..} ->
           tellRight [Explicit InferenceRulePlaceholder (foldTypeOf t ps) constructorScheme]
       concatForM ps (patternConstraints assert ms)
@@ -145,7 +145,7 @@ collectConstraints =
       r <- instantiateAnnotation loc t
       case r of
         Left err ->
-          tellLeft [IllFormedTypeAnnotation err]
+          tellLeft [EIllFormedTypeAnnotation err]
         Right t1 ->
           tellRight [Equality (RuleAnnotation loc (typeOf e) t1) [typeOf e, t1]]
       collectConstraints e
@@ -153,7 +153,7 @@ collectConstraints =
       r <- lookupDataConstructor name
       case r of
         Nothing ->
-          tellLeft [NoDataConstructor loc name]
+          tellLeft [ENoDataConstructor loc name]
         Just Constructor{..} ->
           tellRight [Explicit InferenceRulePlaceholder t constructorScheme]
       pure []

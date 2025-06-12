@@ -246,7 +246,7 @@ solveConstraintsC cs = do
   updateSupplyC m
   let errors = execWriter (checkTypeAnnotationParameters (Map.toList dict) sub)
   compilerReportSolverRuleViolations (apply sub rs)
-  compilerReportConstraintsGenErrors (IllFormedTypeAnnotation <$> errors)
+  compilerReportConstraintsGenErrors (EIllFormedTypeAnnotation <$> errors)
   pure sub
 
 compileConstraintsC :: (Show a, Monad m, Data a) => Expression a IndexedType -> CompilerT a m ()
