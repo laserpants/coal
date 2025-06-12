@@ -43,10 +43,10 @@ evalUnifier :: Int -> Unifier a -> Either UnificationError a
 evalUnifier = fst <$$> runUnifier
 
 data UnificationError
-  = CannotUnify
-  | CannotMatch
-  | InfiniteType
-  | KindMismatch
+  = ECannotUnify
+  | ECannotMatch
+  | EInfiniteType
+  | EKindMismatch
   deriving (Show, Eq, Ord, Read)
 
 class Unifiable u where
@@ -67,7 +67,7 @@ instance (Substitutable u, Data u, Unifiable u) => Unifiable [u] where
   match (t1 : ts1) (t2 : ts2) = do
     sub1 <- match t1 t2
     sub2 <- match ts1 ts2
-    maybe (throwError CannotMatch) pure (merge sub1 sub2)
+    maybe (throwError ECannotMatch) pure (merge sub1 sub2)
   match _ _ =
     error "Implementation error"
 
@@ -90,7 +90,7 @@ instance Unifiable (Intrinsic IndexedType) where
     | t1 == t2 =
         pure mempty
   unify _ _ =
-    throwError CannotUnify
+    throwError ECannotUnify
 
   match (IList t1) (IList t2) =
     match t1 t2
@@ -106,7 +106,7 @@ instance Unifiable (Intrinsic IndexedType) where
     | t1 == t2 =
         pure mempty
   match _ _ =
-    throwError CannotMatch
+    throwError ECannotMatch
 
 instance Unifiable (Row TypeIndex Kind IndexedType) where
   unify RNil RNil =
@@ -131,7 +131,7 @@ instance Unifiable (Row TypeIndex Kind IndexedType) where
       Nothing ->
         error "Implementation error"
   unify _ _ =
-    throwError CannotUnify
+    throwError ECannotUnify
 
   match RNil RNil =
     pure mempty
@@ -144,17 +144,17 @@ instance Unifiable (Row TypeIndex Kind IndexedType) where
           Just (t2, r2) -> do
             sub1 <- match r1 r2
             sub2 <- match t1 t2
-            maybe (throwError CannotMatch) pure (merge sub1 sub2)
+            maybe (throwError ECannotMatch) pure (merge sub1 sub2)
           Nothing -> do
             error "Not implemented"
       -- r2 <- freshRow
       -- sub1 <- match q1 (RExtend name t1 r2)
       -- sub2 <- match r1 (updateRowTail r2 row2)
-      -- maybe (throwError CannotMatch) pure (merge sub1 sub2)
+      -- maybe (throwError ECannotMatch) pure (merge sub1 sub2)
       Nothing ->
         error "Implementation error"
   match _ _ =
-    throwError CannotMatch
+    throwError ECannotMatch
 
 instance Unifiable IndexedType where
   unify (TAlias _ _ t1) t2 =
@@ -177,7 +177,7 @@ instance Unifiable IndexedType where
   unify (TIntrinsic t1) (TIntrinsic t2) =
     unify t1 t2
   unify _ _ =
-    throwError CannotUnify
+    throwError ECannotUnify
 
   match (TAlias _ _ t1) t2 =
     match t1 t2
@@ -197,7 +197,7 @@ instance Unifiable IndexedType where
   match (TIntrinsic t1) (TIntrinsic t2) =
     match t1 t2
   match _ _ =
-    throwError CannotMatch
+    throwError ECannotMatch
 
 bindType :: TypeIndex Kind -> IndexedType -> Unifier Substitution
 bindType (TypeIndex k1 ix1) =
@@ -205,13 +205,13 @@ bindType (TypeIndex k1 ix1) =
     TVariable (TypeIndex k2 ix2)
       | ix1 == ix2 ->
           if k1 /= k2
-            then throwError KindMismatch
+            then throwError EKindMismatch
             else pure mempty
     t
       | ix1 `member` typeIdsIn t ->
-          throwError InfiniteType
+          throwError EInfiniteType
       | k1 /= kindOf t ->
-          throwError KindMismatch
+          throwError EKindMismatch
       | otherwise ->
           pure (ix1 `mapsTo` t)
 

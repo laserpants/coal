@@ -58,12 +58,12 @@ spec =
         testUnifyTypes
           (TIntrinsic IInt32 :: Type TypeIndex Kind)
           (TIntrinsic IBool)
-          == Left CannotUnify
+          == Left ECannotUnify
     describe "unifyAll" $ do
       it "'0 ~ int32 ~ bool" $ do
         testUnifyAllTypes
           [TVariable (TypeIndex KType 0), TIntrinsic IInt32, TIntrinsic IBool :: Type TypeIndex Kind]
-          == Left CannotUnify
+          == Left ECannotUnify
       it "'0 ~ bool ~ bool" $ do
         testUnifyAllTypes
           [TVariable (TypeIndex KType 0), TIntrinsic IBool, TIntrinsic IBool :: Type TypeIndex Kind]
@@ -83,7 +83,7 @@ spec =
         testUnifyRows
           fixture6
           fixture5
-          == Left CannotUnify
+          == Left ECannotUnify
       it "{one : '0 | two : '1 | {}} ~ {two : '1 | one : '0 | {}}" $ do
         testUnifyRows
           fixture7
