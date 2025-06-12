@@ -28,7 +28,7 @@ data InferenceRule k a
     RuleMatchClauseGuard a
   | -- | Match clauses all have the same type as expression
     RuleMatchClauseExpressions a
-  | -- | Match clause patterns have identical types
+  | -- | Match clause patterns have compatible types
     RuleMatchClausePatterns a
   | -- | TODO
     RuleBinaryOperator a
