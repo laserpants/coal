@@ -106,7 +106,7 @@ patternConstraints assert ms =
     PListLiteral _ t ps -> do
       tellRight
         [ Equality InferenceRulePlaceholder (t : (typeOf <$> ps))
-        , Explicit InferenceRulePlaceholder t (forall1 (\a -> TIntrinsic (IList a)))
+        , Explicit InferenceRulePlaceholder t (forall1 (TIntrinsic . IList))
         ]
       concatForM ps (patternConstraints assert ms)
     PAtVariable _ (Label _ name) -> do

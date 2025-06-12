@@ -94,6 +94,14 @@ runTypedModuleTest env names (Module p ns ds) = TestResult (Module p ns a) b c d
  where
   TestResult a b c d = runTypedDefinitionsTest env names ds
 
+typeCheckExpressionC e = do
+  compileConstraintsC e 
+  ams <- gets compilerAssumptions
+  --sub <- gets compilerSubstitution
+  sub <- solveC
+  traceShow sub $
+    pure (normalizeRowTypes <$> apply sub e, apply sub ams)
+
 runTypedExpressionTest ::
   (Show a, Eq a, Data a) =>
   CompilerEnvironment ->
@@ -101,14 +109,13 @@ runTypedExpressionTest ::
   Expression a t ->
   TestResult (Expression a (Type TypeIndex Kind)) a
 runTypedExpressionTest env names e =
-  undefined
---  runIdentity $ evalCompilerT env $ do
---    insertNamesC names
---    e1 <- indexedC e
---    (e2, as) <- typeCheckExpressionC e1
---    errs0 <- getConstraintsGenErrorsC
---    errs1 <- getSolverRuleViolationsC
---    pure (TestResult (normalizeTypeIndexes e2) as errs0 errs1)
+  runIdentity $ evalCompilerT env $ do
+    insertNamesC names
+    e1 <- indexedC e
+    (e2, as) <- typeCheckExpressionC e1
+    errs0 <- getConstraintsGenErrorsC
+    errs1 <- getSolverRuleViolationsC
+    pure (TestResult (normalizeTypeIndexes e2) as errs0 errs1)
 
 testRunner :: (CompilerEnvironment -> t) -> t
 testRunner f = f (CompilerEnvironment testDataConstructorEnv testTypeConstructorEnv testTraitEnvironment)

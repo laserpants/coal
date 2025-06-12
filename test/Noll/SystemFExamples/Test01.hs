@@ -31,48 +31,7 @@ spec =
   describe "let lte = fn(x) => fn(y) => match(compare(x, y)) { LessThan or EqualTo => true | GreaterThan => false } in lte" $
     it "" $ do
       testResultExpression (runTest fixture)
-        == ( ELet
-              ()
-              ( BPattern
-                  ()
-                  (PVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool) "lte"))
-                  ( ELambda
-                      ()
-                      (PVariable () (Label (TVariable (TypeIndex KType 0)) "x") :| [])
-                      ( ELambda
-                          ()
-                          (PVariable () (Label (TVariable (TypeIndex KType 0)) "y") :| [])
-                          ( EMatch
-                              ()
-                              (TIntrinsic IBool)
-                              ( EApplication
-                                  ()
-                                  (TConstructor KType "Ordering")
-                                  (EVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TConstructor KType "Ordering") "compare"))
-                                  (EVariable () (Label (TVariable (TypeIndex KType 0)) "x") <| EVariable () (Label (TVariable (TypeIndex KType 0)) "y") :| [])
-                              )
-                              ( EClause
-                                  ()
-                                  ( POr
-                                      ()
-                                      (TConstructor KType "Ordering")
-                                      (PConstructor () (Label (TConstructor KType "Ordering") "LessThan") [])
-                                      (PConstructor () (Label (TConstructor KType "Ordering") "EqualTo") [])
-                                  )
-                                  (CPlain () [] (ELiteral () (LBool True)) :| [])
-                                  <| EClause
-                                    ()
-                                    (PConstructor () (Label (TConstructor KType "Ordering") "GreaterThan") [])
-                                    (CPlain () [] (ELiteral () (LBool False)) :| [])
-                                    :| []
-                              )
-                          )
-                      )
-                  )
-                  :| []
-              )
-              (EVariable () (Label (TVariable (TypeIndex KType 1) `TArrow` TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool) "lte"))
-           )
+        == fixtureR
 
 runTest :: (Show a, Eq a, Data a) => Expression a () -> TestResult (Expression a (Type TypeIndex Kind)) a
 runTest =
@@ -177,3 +136,47 @@ fixture =
       )
       (EVariable () (Label () "lte"))
   )
+
+fixtureR = ( ELet
+              ()
+              ( BPattern
+                  ()
+                  (PVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool) "lte"))
+                  ( ELambda
+                      ()
+                      (PVariable () (Label (TVariable (TypeIndex KType 0)) "x") :| [])
+                      ( ELambda
+                          ()
+                          (PVariable () (Label (TVariable (TypeIndex KType 0)) "y") :| [])
+                          ( EMatch
+                              ()
+                              (TIntrinsic IBool)
+                              ( EApplication
+                                  ()
+                                  (TConstructor KType "Ordering")
+                                  (EVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TConstructor KType "Ordering") "compare"))
+                                  (EVariable () (Label (TVariable (TypeIndex KType 0)) "x") <| EVariable () (Label (TVariable (TypeIndex KType 0)) "y") :| [])
+                              )
+                              ( EClause
+                                  ()
+                                  ( POr
+                                      ()
+                                      (TConstructor KType "Ordering")
+                                      (PConstructor () (Label (TConstructor KType "Ordering") "LessThan") [])
+                                      (PConstructor () (Label (TConstructor KType "Ordering") "EqualTo") [])
+                                  )
+                                  (CPlain () [] (ELiteral () (LBool True)) :| [])
+                                  <| EClause
+                                    ()
+                                    (PConstructor () (Label (TConstructor KType "Ordering") "GreaterThan") [])
+                                    (CPlain () [] (ELiteral () (LBool False)) :| [])
+                                    :| []
+                              )
+                          )
+                      )
+                  )
+                  :| []
+              )
+              (EVariable () (Label (TVariable (TypeIndex KType 1) `TArrow` TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool) "lte"))
+           )
+
