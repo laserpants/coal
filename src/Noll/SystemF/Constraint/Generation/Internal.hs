@@ -54,9 +54,9 @@ data TypeAnnotationError a
     NoTypeConstructor a Name
   | -- | Two or more named parameters refer to the same inferred type variable.
     -- E.g., the annotation reads something like (a -> b) -> c -> b, but the
-    -- function is fn(f, x) => f(x), which would force 'a' and 'c' to be the
+    -- function is fn(f, x) => f(x), which would require 'a' and 'c' to be the
     -- same type. The type signature claims that the function is polymorphic
-    -- with respect to any choice of variables a, b, and c. This is incorrect.
+    -- with respect to any choice of variables a, b, and c.
     NonDistinctParametereters [[(Name, a)]]
   | -- | Type parameter resolves to a concrete type; e.g.,
     -- fn(x : a, y : int32) => x + y
