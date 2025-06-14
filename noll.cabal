@@ -69,6 +69,7 @@ library
       Noll.Module.Constant
       Noll.Module.Definition
       Noll.Module.Function
+      Noll.Parser
       Noll.SystemF
       Noll.SystemF.Constraint
       Noll.SystemF.Constraint.Assumption
@@ -197,6 +198,8 @@ test-suite noll-test
       Noll.Set3.Test12x
       Noll.Set3.Test13
       Noll.Set3.Test13x
+      Noll.Set4.Test02
+      Noll.Set4.Test03
       Noll.SystemF.Constraint.GenerationSpec
       Noll.SystemF.UnificationSpec
       Noll.SystemFExamples.Test01

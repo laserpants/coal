@@ -63,7 +63,7 @@ data Expression a t
   | -- | Record field access selector
     ESelect a (Label t) (Expression a t)
   | -- | TODO
-    EUnfold a t
+    EUnfold a t (Label t) Name (List1 (Pattern a t)) (Dictionary (Expression a t)) (Maybe (Expression a t))
   | -- | TODO
     ECodataSelect a (Label t) (Expression a t)
   | -- | Row restriction
