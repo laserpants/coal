@@ -134,6 +134,14 @@ instance TreeTransform Expression t where
           <*> traverse (transform name f) cs
       EFold{} ->
         error "EFold"
+      EUnfold a t ll name ps d me ->
+        EUnfold a t ll name ps
+          <$> traverse (transform name f) d
+          <*> traverse (transform name f) me
+      ECodataSelect a ll e me ->
+        ECodataSelect a ll
+          <$> transform name f e
+          <*> traverse (transform name f) me
       expr@EUnaryOperator{} ->
         pure expr
       expr@EBinaryOperator{} ->

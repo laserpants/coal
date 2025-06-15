@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Set4.Test03 where
+module Noll.Set4.Test04 where
 
 import Lang.Common.List1 (NonEmpty (..), (<|))
 import Lang.Label (Label (..))
@@ -11,13 +11,13 @@ import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import qualified Noll.Module as Module
 
-prog4_03 :: [Module () () ()]
-prog4_03 =
+prog4_04 :: [Module () Kind IndexedType]
+prog4_04 =
   [ moduleMain
   ]
 
--- Expand folds
-moduleMain :: Module () () ()
+-- Add types
+moduleMain :: Module () Kind IndexedType
 moduleMain =
   Module.fromDefinitionList
     (Path ["Main"])
@@ -39,37 +39,37 @@ moduleMain =
         "nats"
         ( Constant
             ()
-            (With [] ())
+            (With [] undefined)
             ( EApplication
                 ()
-                ()
+                undefined
                 ( EUnfold
                     ()
-                    ()
-                    (Label () "Stream")
+                    undefined
+                    (Label undefined "Stream")
                     "f"
                     ( PAnnotation
                         ()
                         (TIntrinsic IInt32)
-                        (PVariable () (Label () "n"))
+                        (PVariable () (Label undefined "n"))
                         :| []
                     )
                     ( Map.fromList
                         [
                           ( "Head"
-                          , EVariable () (Label () "n")
+                          , EVariable () (Label undefined "n")
                           )
                         ,
                           ( "Tail"
                           , EApplication
                               ()
-                              ()
-                              (EVariable () (Label () "f"))
+                              undefined
+                              (EVariable () (Label undefined "f"))
                               ( EApplication
                                   ()
-                                  ()
-                                  (EBinaryOperator () () OAddition)
-                                  ( EVariable () (Label () "n")
+                                  undefined
+                                  (EBinaryOperator () undefined OAddition)
+                                  ( EVariable () (Label undefined "n")
                                       <| ELiteral () (LInt32 1)
                                       :| []
                                   )
@@ -81,35 +81,35 @@ moduleMain =
                     ( Just
                         ( ERecursiveLet
                             ()
-                            (PVariable () (Label () "$unfold.1"))
+                            (PVariable () (Label undefined "$unfold.1"))
                             ( ELambda
                                 ()
-                                (PVariable () (Label () "n") :| [])
+                                (PVariable () (Label undefined "n") :| [])
                                 ( ERecord
                                     ()
-                                    ()
+                                    undefined
                                     ( Map.fromList
                                         [
                                           ( "Head"
                                           , ELambda
                                               ()
-                                              (PAny () () :| [])
-                                              (EVariable () (Label () "n"))
+                                              (PAny () undefined :| [])
+                                              (EVariable () (Label undefined "n"))
                                           )
                                         ,
                                           ( "Tail"
                                           , ELambda
                                               ()
-                                              (PAny () () :| [])
+                                              (PAny () undefined :| [])
                                               ( EApplication
                                                   ()
-                                                  ()
-                                                  (EVariable () (Label () "$unfold.1"))
+                                                      undefined
+                                                  (EVariable () (Label undefined "$unfold.1"))
                                                   ( EApplication
                                                       ()
-                                                      ()
-                                                      (EBinaryOperator () () OAddition)
-                                                      ( EVariable () (Label () "n")
+                                                      undefined
+                                                      (EBinaryOperator () undefined OAddition)
+                                                      ( EVariable () (Label undefined "n")
                                                           <| ELiteral () (LInt32 1)
                                                           :| []
                                                       )
@@ -122,7 +122,7 @@ moduleMain =
                                     Nothing
                                 )
                             )
-                            (EVariable () (Label () "$unfold.1"))
+                            (EVariable () (Label undefined "$unfold.1"))
                         )
                     )
                 )
@@ -133,17 +133,17 @@ moduleMain =
         "nth"
         ( Function
             ()
-            (With [] ())
-            (PVariable () (Label () "n") :| [])
+            (With [] undefined)
+            (PVariable () (Label undefined "n") :| [])
             ( EFold
                 ()
-                ()
-                (EVariable () (Label () "n") :| [])
+                undefined
+                (EVariable () (Label undefined "n") :| [])
                 ( EClause
                     ()
                     ( PConstructor
                         ()
-                        (Label () "Zero")
+                        (Label undefined "Zero")
                         []
                     )
                     ( CPlain
@@ -151,17 +151,17 @@ moduleMain =
                         []
                         ( ELambda
                             ()
-                            (PVariable () (Label () "stream") :| [])
+                            (PVariable () (Label undefined "stream") :| [])
                             ( ECodataSelect
                                 ()
-                                (Label () "Head")
-                                (EVariable () (Label () "stream"))
+                                (Label undefined "Head")
+                                (EVariable () (Label undefined "stream"))
                                 ( Just
                                     ( EApplication
                                         ()
-                                        ()
-                                        (EVariable () (Label () "$$force_Head"))
-                                        (EVariable () (Label () "stream") :| [])
+                                        undefined
+                                        (EVariable () (Label undefined "$$force_Head"))
+                                        (EVariable () (Label undefined "stream") :| [])
                                     )
                                 )
                             )
@@ -172,8 +172,8 @@ moduleMain =
                       ()
                       ( PConstructor
                           ()
-                          (Label () "Succ")
-                          [ PAtVariable () (Label () "f")
+                          (Label undefined "Succ")
+                          [ PAtVariable () (Label undefined "f")
                           ]
                       )
                       ( CPlain
@@ -181,21 +181,21 @@ moduleMain =
                           []
                           ( ELambda
                               ()
-                              (PVariable () (Label () "stream") :| [])
+                              (PVariable () (Label undefined "stream") :| [])
                               ( EApplication
                                   ()
-                                  ()
-                                  (EVariable () (Label () "f"))
+                                  undefined
+                                  (EVariable () (Label undefined "f"))
                                   ( ECodataSelect
                                       ()
-                                      (Label () "Tail")
-                                      (EVariable () (Label () "stream"))
+                                      (Label undefined "Tail")
+                                      (EVariable () (Label undefined "stream"))
                                       ( Just
                                           ( EApplication
                                               ()
-                                              ()
-                                              (EVariable () (Label () "$$force_Tail"))
-                                              (EVariable () (Label () "stream") :| [])
+                                             undefined
+                                              (EVariable () (Label undefined "$$force_Tail"))
+                                              (EVariable () (Label undefined "stream") :| [])
                                           )
                                       )
                                       :| []
@@ -209,17 +209,17 @@ moduleMain =
                 ( Just
                     ( ERecursiveLet
                         ()
-                        (PVariable () (Label{labelTag = (), labelName = "$fold.1"}))
+                        (PVariable () (Label{labelTag = undefined, labelName = "$fold.1"}))
                         ( ELambda
                             ()
-                            (PVariable () (Label{labelTag = (), labelName = "$fold.1.expr"}) :| [])
+                            (PVariable () (Label{labelTag = undefined, labelName = "$fold.1.expr"}) :| [])
                             ( EMatch
                                 ()
-                                ()
-                                (EVariable () (Label{labelTag = (), labelName = "$fold.1.expr"}))
+                                undefined
+                                (EVariable () (Label{labelTag = undefined, labelName = "$fold.1.expr"}))
                                 ( EClause
                                     ()
-                                    (PConstructor () (Label{labelTag = (), labelName = "Zero"}) [])
+                                    (PConstructor () (Label{labelTag = undefined, labelName = "Zero"}) [])
                                     ( CPlain
                                         ()
                                         []
@@ -227,19 +227,19 @@ moduleMain =
                                             ()
                                             ( PVariable
                                                 ()
-                                                (Label{labelTag = (), labelName = "stream"})
+                                                (Label{labelTag = undefined, labelName = "stream"})
                                                 :| []
                                             )
                                             ( ECodataSelect
                                                 ()
-                                                (Label{labelTag = (), labelName = "Head"})
-                                                (EVariable () (Label{labelTag = (), labelName = "stream"}))
+                                                (Label{labelTag = undefined, labelName = "Head"})
+                                                (EVariable () (Label{labelTag = undefined, labelName = "stream"}))
                                                 ( Just
                                                     ( EApplication
                                                         ()
-                                                        ()
-                                                        (EVariable () (Label{labelTag = (), labelName = "$$force_Head"}))
-                                                        (EVariable () (Label{labelTag = (), labelName = "stream"}) :| [])
+                                                        undefined
+                                                        (EVariable () (Label{labelTag = undefined, labelName = "$$force_Head"}))
+                                                        (EVariable () (Label{labelTag = undefined, labelName = "stream"}) :| [])
                                                     )
                                                 )
                                             )
@@ -250,10 +250,10 @@ moduleMain =
                                           ()
                                           ( PConstructor
                                               ()
-                                              (Label{labelTag = (), labelName = "Succ"})
+                                              (Label{labelTag = undefined, labelName = "Succ"})
                                               [ PVariable
                                                   ()
-                                                  (Label{labelTag = (), labelName = "f"})
+                                                  (Label{labelTag = undefined, labelName = "f"})
                                               ]
                                           )
                                           ( CPlain
@@ -261,22 +261,22 @@ moduleMain =
                                               []
                                               ( ELambda
                                                   ()
-                                                  (PVariable () (Label{labelTag = (), labelName = "stream"}) :| [])
+                                                  (PVariable () (Label{labelTag = undefined, labelName = "stream"}) :| [])
                                                   ( EApplication
                                                       ()
-                                                      ()
-                                                      (EVariable () (Label{labelTag = (), labelName = "$fold.1"}))
-                                                      ( EVariable () (Label{labelTag = (), labelName = "f"})
+                                                      undefined
+                                                      (EVariable () (Label{labelTag = undefined, labelName = "$fold.1"}))
+                                                      ( EVariable () (Label{labelTag = undefined, labelName = "f"})
                                                           :| [ ECodataSelect
                                                                 ()
-                                                                (Label{labelTag = (), labelName = "Tail"})
-                                                                (EVariable () (Label{labelTag = (), labelName = "stream"}))
+                                                                (Label{labelTag = undefined, labelName = "Tail"})
+                                                                (EVariable () (Label{labelTag = undefined, labelName = "stream"}))
                                                                 ( Just
                                                                     ( EApplication
                                                                         ()
-                                                                        ()
-                                                                        (EVariable () (Label{labelTag = (), labelName = "$$force_Tail"}))
-                                                                        (EVariable () (Label{labelTag = (), labelName = "stream"}) :| [])
+                                                                        undefined
+                                                                        (EVariable () (Label{labelTag = undefined, labelName = "$$force_Tail"}))
+                                                                        (EVariable () (Label{labelTag = undefined, labelName = "stream"}) :| [])
                                                                     )
                                                                 )
                                                              ]
@@ -291,9 +291,9 @@ moduleMain =
                         )
                         ( EApplication
                             ()
-                            ()
-                            (EVariable () (Label{labelTag = (), labelName = "$fold.1"}))
-                            (EVariable () (Label{labelTag = (), labelName = "n"}) :| [])
+                            undefined
+                            (EVariable () (Label{labelTag = undefined, labelName = "$fold.1"}))
+                            (EVariable () (Label{labelTag = undefined, labelName = "n"}) :| [])
                         )
                     )
                 )
@@ -303,19 +303,19 @@ moduleMain =
         "main"
         ( Function
             ()
-            (With [] ())
+            (With [] (TVariable (TypeIndex KType 0)))
             (PLiteral () LUnit :| [])
             ( ELet
                 ()
                 ( BPattern
                     ()
-                    (PVariable () (Label () "v"))
+                    (PVariable () (Label (TIntrinsic IInt32) "v"))
                     ( EApplication
                         ()
-                        ()
-                        (EVariable () (Label () "nth"))
-                        ( EApplication () () (EVariable () (Label () "from_int32")) (ELiteral () (LInt32 5) :| [])
-                            <| EVariable () (Label () "nats")
+                        (TIntrinsic IInt32)
+                        (EVariable () (Label (TIntrinsic INat `TArrow` TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TIntrinsic IInt32 :| []) `TArrow` TIntrinsic IInt32) "nth"))
+                        ( EApplication () undefined (EVariable () (Label undefined "from_int32")) (ELiteral () (LInt32 5) :| [])
+                            <| EVariable () (Label (TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TIntrinsic IInt32 :| [])) "nats")
                             :| []
                         )
                     )
@@ -323,9 +323,9 @@ moduleMain =
                 )
                 ( EApplication
                     ()
-                    ()
-                    (EVariable () (Label () "trace_int32"))
-                    ( EVariable () (Label () "v")
+                    (TVariable (TypeIndex KType 0))
+                    (EVariable () (Label (TIntrinsic IString `TArrow` TVariable (TypeIndex KType 0)) "trace_int32"))
+                    ( EVariable () (Label (TIntrinsic IInt32) "v")
                         :| []
                     )
                 )

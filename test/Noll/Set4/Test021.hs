@@ -122,7 +122,7 @@ moduleMain =
                                     Nothing
                                 )
                             )
-                            undefined
+                            (EVariable () (Label () "$unfold.1"))
                         )
                     )
                 )
@@ -224,7 +224,7 @@ moduleMain =
                         ()
                         ()
                         (EVariable () (Label () "nth"))
-                        ( ELiteral () (LInt32 5)
+                        ( EApplication () () (EVariable () (Label () "from_int32")) (ELiteral () (LInt32 5) :| [])
                             <| EVariable () (Label () "nats")
                             :| []
                         )
@@ -234,7 +234,7 @@ moduleMain =
                 ( EApplication
                     ()
                     ()
-                    (EVariable () (Label () "trace_string"))
+                    (EVariable () (Label () "trace_int32"))
                     ( EVariable () (Label () "v")
                         :| []
                     )

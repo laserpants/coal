@@ -39,42 +39,47 @@ moduleMain =
         ( Constant
             ()
             (With [] ())
-            ( EUnfold
+            ( EApplication
                 ()
                 ()
-                (Label () "Stream")
-                "f"
-                ( PAnnotation
+                ( EUnfold
                     ()
-                    (TIntrinsic IInt32)
-                    (PVariable () (Label () "n"))
-                    :| []
-                )
-                ( Map.fromList
-                    [
-                      ( "Head"
-                      , EVariable () (Label () "n")
-                      )
-                    ,
-                      ( "Tail"
-                      , EApplication
-                          ()
-                          ()
-                          (EVariable () (Label () "f"))
-                          ( EApplication
+                    ()
+                    (Label () "Stream")
+                    "f"
+                    ( PAnnotation
+                        ()
+                        (TIntrinsic IInt32)
+                        (PVariable () (Label () "n"))
+                        :| []
+                    )
+                    ( Map.fromList
+                        [
+                          ( "Head"
+                          , EVariable () (Label () "n")
+                          )
+                        ,
+                          ( "Tail"
+                          , EApplication
                               ()
                               ()
-                              (EBinaryOperator () () OAddition)
-                              ( EVariable () (Label () "n")
-                                  <| ELiteral () (LInt32 1)
+                              (EVariable () (Label () "f"))
+                              ( EApplication
+                                  ()
+                                  ()
+                                  (EBinaryOperator () () OAddition)
+                                  ( EVariable () (Label () "n")
+                                      <| ELiteral () (LInt32 1)
+                                      :| []
+                                  )
                                   :| []
                               )
-                              :| []
                           )
-                      )
-                    ]
+                        ]
+                    )
+                    Nothing
                 )
-                Nothing
+                (ELiteral () (LInt32 0) :| [])
             )
         )
     , DFunction
@@ -158,7 +163,7 @@ moduleMain =
                         ()
                         ()
                         (EVariable () (Label () "nth"))
-                        ( ELiteral () (LInt32 5)
+                        ( EApplication () () (EVariable () (Label () "from_int32")) (ELiteral () (LInt32 5) :| [])
                             <| EVariable () (Label () "nats")
                             :| []
                         )
@@ -168,7 +173,7 @@ moduleMain =
                 ( EApplication
                     ()
                     ()
-                    (EVariable () (Label () "trace_string"))
+                    (EVariable () (Label () "trace_int32"))
                     ( EVariable () (Label () "v")
                         :| []
                     )
