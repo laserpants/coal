@@ -11,8 +11,8 @@ import Debug.Trace
 import Lang.Common.Environment (Environment)
 import Lang.Common.List1 (NonEmpty (..))
 import Lang.Utils (Name, forM_)
-import Noll.Compiler 
-import Noll.Language 
+import Noll.Compiler
+import Noll.Language
 import Noll.Module (Constant (..), Function (..), Module (..))
 import Noll.SystemF.Constraint.Assumption (Assumption (..))
 import Noll.SystemF.Constraint.Generation (ConstraintsGenError)
@@ -38,6 +38,7 @@ runTypedConstantTest ::
   TestResult (Constant Expression a (Type TypeIndex Kind)) a
 runTypedConstantTest env names g =
   undefined
+
 --  runIdentity $ evalCompilerT env $ do
 --    insertNamesC names
 --    g1 <- indexedC g
@@ -54,6 +55,7 @@ runTypedFunctionTest ::
   TestResult (Function Expression a (Type TypeIndex Kind)) a
 runTypedFunctionTest env names f =
   undefined
+
 --  runIdentity $ evalCompilerT env $ do
 --    insertNamesC names
 --    f1 <- indexedC f
@@ -95,9 +97,9 @@ runTypedModuleTest env names (Module p ns ds) = TestResult (Module p ns a) b c d
   TestResult a b c d = runTypedDefinitionsTest env names ds
 
 typeCheckExpressionC e = do
-  compileConstraintsC e 
+  compileConstraintsC e
   ams <- gets compilerAssumptions
-  --sub <- gets compilerSubstitution
+  -- sub <- gets compilerSubstitution
   sub <- solveC
   traceShow sub $
     pure (normalizeRowTypes <$> apply sub e, apply sub ams)

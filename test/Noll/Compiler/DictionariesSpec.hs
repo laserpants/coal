@@ -23,8 +23,8 @@ spec = do
 fixtured1 =
   undefined
 
---runTraitTransformY :: (Monoid b) => ReaderT DictionaryEnvironment (StateT Int (Writer b)) a -> a
---runTraitTransformY v = fst $ runWriter (evalStateT (runReaderT v testEnv) 200) -- (freshIdIn v))
+-- runTraitTransformY :: (Monoid b) => ReaderT DictionaryEnvironment (StateT Int (Writer b)) a -> a
+-- runTraitTransformY v = fst $ runWriter (evalStateT (runReaderT v testEnv) 200) -- (freshIdIn v))
 
 runTraitTransformY2 :: (Monoid b) => Int -> ReaderT DictionaryEnvironment (StateT Int (Writer b)) a -> a
 runTraitTransformY2 n v = fst $ runWriter (evalStateT (runReaderT v testEnv) n)

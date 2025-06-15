@@ -115,6 +115,7 @@ baz = do
             )
         )
   undefined
+
 --  (xx, yy) <- typeCheckFunctionC e
 --  pure (normalizeTypeIndexes xx, yy)
 

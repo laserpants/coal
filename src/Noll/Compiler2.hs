@@ -107,6 +107,7 @@ moduleMainB =
                                 ()
                                 (Label () "Head")
                                 (EVariable () (Label () "stream"))
+                                Nothing
                             )
                         )
                         :| []
@@ -133,6 +134,7 @@ moduleMainB =
                                       ()
                                       (Label () "Tail")
                                       (EVariable () (Label () "stream"))
+                                      Nothing
                                       :| []
                                   )
                               )
@@ -152,30 +154,26 @@ moduleMainB =
             (PLiteral () LUnit :| [])
             ( ELet
                 ()
-                (
-                  BPattern
+                ( BPattern
                     ()
                     (PVariable () (Label () "v"))
-                    (
-                      EApplication
+                    ( EApplication
                         ()
                         ()
                         (EVariable () (Label () "nth"))
-                        (
-                          ELiteral () (LInt32 5)
+                        ( ELiteral () (LInt32 5)
                             <| EVariable () (Label () "nats")
                             :| []
                         )
                     )
                     :| []
                 )
-                (
-                  EApplication
+                ( EApplication
                     ()
                     ()
                     (EVariable () (Label () "trace_string"))
-                    (EVariable () (Label () "v")
-                      :| []
+                    ( EVariable () (Label () "v")
+                        :| []
                     )
                 )
             )

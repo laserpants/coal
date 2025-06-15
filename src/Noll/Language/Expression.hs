@@ -60,12 +60,12 @@ data Expression a t
     ECompiledMatch a t (Expression a t) (List1 (CompiledClause a t))
   | -- | Fold expression
     EFold a t (List1 (Expression a t)) (List1 (Clause a t)) (Maybe (Expression a t))
-  | -- | Record field access selector
+  | -- | Record field selector
     ESelect a (Label t) (Expression a t)
-  | -- | TODO
+  | -- | Codata unfold
     EUnfold a t (Label t) Name (List1 (Pattern a t)) (Dictionary (Expression a t)) (Maybe (Expression a t))
-  | -- | TODO
-    ECodataSelect a (Label t) (Expression a t)
+  | -- | Codata field selector
+    ECodataSelect a (Label t) (Expression a t) (Maybe (Expression a t))
   | -- | Row restriction
     EFocus Name (Label t) (Label t) (Expression a t) (Expression a t)
   | -- | Dictionary

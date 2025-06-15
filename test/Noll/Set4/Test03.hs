@@ -40,42 +40,93 @@ moduleMain =
         ( Constant
             ()
             (With [] ())
-            ( EUnfold
+            ( EApplication
                 ()
                 ()
-                (Label () "Stream")
-                "f"
-                ( PAnnotation
+                ( EUnfold
                     ()
-                    (TIntrinsic IInt32)
-                    (PVariable () (Label () "n"))
-                    :| []
-                )
-                ( Map.fromList
-                    [
-                      ( "Head"
-                      , EVariable () (Label () "n")
-                      )
-                    ,
-                      ( "Tail"
-                      , EApplication
-                          ()
-                          ()
-                          (EVariable () (Label () "f"))
-                          ( EApplication
+                    ()
+                    (Label () "Stream")
+                    "f"
+                    ( PAnnotation
+                        ()
+                        (TIntrinsic IInt32)
+                        (PVariable () (Label () "n"))
+                        :| []
+                    )
+                    ( Map.fromList
+                        [
+                          ( "Head"
+                          , EVariable () (Label () "n")
+                          )
+                        ,
+                          ( "Tail"
+                          , EApplication
                               ()
                               ()
-                              (EBinaryOperator () () OAddition)
-                              ( EVariable () (Label () "n")
-                                  <| ELiteral () (LInt32 1)
+                              (EVariable () (Label () "f"))
+                              ( EApplication
+                                  ()
+                                  ()
+                                  (EBinaryOperator () () OAddition)
+                                  ( EVariable () (Label () "n")
+                                      <| ELiteral () (LInt32 1)
+                                      :| []
+                                  )
                                   :| []
                               )
-                              :| []
                           )
-                      )
-                    ]
+                        ]
+                    )
+                    ( Just
+                        ( ERecursiveLet
+                            ()
+                            (PVariable () (Label () "$unfold.1"))
+                            ( ELambda
+                                ()
+                                (PVariable () (Label () "n") :| [])
+                                ( ERecord
+                                    ()
+                                    ()
+                                    ( Map.fromList
+                                        [
+                                          ( "Head"
+                                          , ELambda
+                                              ()
+                                              (PAny () () :| [])
+                                              (EVariable () (Label () "n"))
+                                          )
+                                        ,
+                                          ( "Tail"
+                                          , ELambda
+                                              ()
+                                              (PAny () () :| [])
+                                              ( EApplication
+                                                  ()
+                                                  ()
+                                                  (EVariable () (Label () "$unfold.1"))
+                                                  ( EApplication
+                                                      ()
+                                                      ()
+                                                      (EBinaryOperator () () OAddition)
+                                                      ( EVariable () (Label () "n")
+                                                          <| ELiteral () (LInt32 1)
+                                                          :| []
+                                                      )
+                                                      :| []
+                                                  )
+                                              )
+                                          )
+                                        ]
+                                    )
+                                    Nothing
+                                )
+                            )
+                            undefined
+                        )
+                    )
                 )
-                Nothing
+                (ELiteral () (LInt32 0) :| [])
             )
         )
     , DFunction
@@ -105,6 +156,14 @@ moduleMain =
                                 ()
                                 (Label () "Head")
                                 (EVariable () (Label () "stream"))
+                                ( Just
+                                    ( EApplication
+                                        ()
+                                        ()
+                                        (EVariable () (Label () "$$force_Head"))
+                                        (EVariable () (Label () "stream") :| [])
+                                    )
+                                )
                             )
                         )
                         :| []
@@ -131,6 +190,14 @@ moduleMain =
                                       ()
                                       (Label () "Tail")
                                       (EVariable () (Label () "stream"))
+                                      ( Just
+                                          ( EApplication
+                                              ()
+                                              ()
+                                              (EVariable () (Label () "$$force_Tail"))
+                                              (EVariable () (Label () "stream") :| [])
+                                          )
+                                      )
                                       :| []
                                   )
                               )
@@ -150,33 +217,28 @@ moduleMain =
             (PLiteral () LUnit :| [])
             ( ELet
                 ()
-                (
-                  BPattern
+                ( BPattern
                     ()
                     (PVariable () (Label () "v"))
-                    (
-                      EApplication
+                    ( EApplication
                         ()
                         ()
                         (EVariable () (Label () "nth"))
-                        (
-                          ELiteral () (LInt32 5)
+                        ( ELiteral () (LInt32 5)
                             <| EVariable () (Label () "nats")
                             :| []
                         )
                     )
                     :| []
                 )
-                (
-                  EApplication
+                ( EApplication
                     ()
                     ()
                     (EVariable () (Label () "trace_string"))
-                    (EVariable () (Label () "v")
-                      :| []
+                    ( EVariable () (Label () "v")
+                        :| []
                     )
                 )
             )
         )
     ]
-

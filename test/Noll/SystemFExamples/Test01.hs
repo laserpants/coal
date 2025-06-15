@@ -137,46 +137,46 @@ fixture =
       (EVariable () (Label () "lte"))
   )
 
-fixtureR = ( ELet
+fixtureR =
+  ( ELet
+      ()
+      ( BPattern
+          ()
+          (PVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool) "lte"))
+          ( ELambda
               ()
-              ( BPattern
+              (PVariable () (Label (TVariable (TypeIndex KType 0)) "x") :| [])
+              ( ELambda
                   ()
-                  (PVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool) "lte"))
-                  ( ELambda
+                  (PVariable () (Label (TVariable (TypeIndex KType 0)) "y") :| [])
+                  ( EMatch
                       ()
-                      (PVariable () (Label (TVariable (TypeIndex KType 0)) "x") :| [])
-                      ( ELambda
+                      (TIntrinsic IBool)
+                      ( EApplication
                           ()
-                          (PVariable () (Label (TVariable (TypeIndex KType 0)) "y") :| [])
-                          ( EMatch
+                          (TConstructor KType "Ordering")
+                          (EVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TConstructor KType "Ordering") "compare"))
+                          (EVariable () (Label (TVariable (TypeIndex KType 0)) "x") <| EVariable () (Label (TVariable (TypeIndex KType 0)) "y") :| [])
+                      )
+                      ( EClause
+                          ()
+                          ( POr
                               ()
-                              (TIntrinsic IBool)
-                              ( EApplication
-                                  ()
-                                  (TConstructor KType "Ordering")
-                                  (EVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TConstructor KType "Ordering") "compare"))
-                                  (EVariable () (Label (TVariable (TypeIndex KType 0)) "x") <| EVariable () (Label (TVariable (TypeIndex KType 0)) "y") :| [])
-                              )
-                              ( EClause
-                                  ()
-                                  ( POr
-                                      ()
-                                      (TConstructor KType "Ordering")
-                                      (PConstructor () (Label (TConstructor KType "Ordering") "LessThan") [])
-                                      (PConstructor () (Label (TConstructor KType "Ordering") "EqualTo") [])
-                                  )
-                                  (CPlain () [] (ELiteral () (LBool True)) :| [])
-                                  <| EClause
-                                    ()
-                                    (PConstructor () (Label (TConstructor KType "Ordering") "GreaterThan") [])
-                                    (CPlain () [] (ELiteral () (LBool False)) :| [])
-                                    :| []
-                              )
+                              (TConstructor KType "Ordering")
+                              (PConstructor () (Label (TConstructor KType "Ordering") "LessThan") [])
+                              (PConstructor () (Label (TConstructor KType "Ordering") "EqualTo") [])
                           )
+                          (CPlain () [] (ELiteral () (LBool True)) :| [])
+                          <| EClause
+                            ()
+                            (PConstructor () (Label (TConstructor KType "Ordering") "GreaterThan") [])
+                            (CPlain () [] (ELiteral () (LBool False)) :| [])
+                            :| []
                       )
                   )
-                  :| []
               )
-              (EVariable () (Label (TVariable (TypeIndex KType 1) `TArrow` TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool) "lte"))
-           )
-
+          )
+          :| []
+      )
+      (EVariable () (Label (TVariable (TypeIndex KType 1) `TArrow` TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool) "lte"))
+  )
