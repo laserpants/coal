@@ -468,6 +468,8 @@ typeCheckDefinition d =
       pure ()
     DType{} ->
       pure ()
+    DCodata{} ->
+      pure ()
     DSignature{} ->
       pure ()
     DInstance trait t1 ds -> do

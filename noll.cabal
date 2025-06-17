@@ -219,6 +219,7 @@ test-suite noll-test
       Noll.SystemFExamples.Test13
       Noll.SystemFExamples.Test14
       Noll.SystemFExamples.Test15
+      Noll.SystemFExamples.Test16
       Noll.SystemFFixtures.Expression
       Noll.SystemFSpec
       Noll.SystemFSpec.TestRunner

@@ -129,6 +129,18 @@ baz3 =
                       tree0
                   )
               )
+            , ( "Succ"
+              , Constructor
+                  "Succ"
+                  1
+                  (Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic INat))
+              )
+            , ( "Zero"
+              , Constructor
+                  "Zero"
+                  0
+                  (Forall mempty [] (TIntrinsic INat))
+              )
             ]
         )
         ( Environment.fromList
@@ -257,6 +269,24 @@ baz3 =
           ( TVariable (TypeIndex KType 0)
               `TArrow` TVariable (TypeIndex KType 0)
               `TArrow` TIntrinsic IBool
+          )
+      )
+    ,
+      ( "trace_int32"
+      , Forall
+          (Set.fromList [TypeIndex KType 0])
+          []
+          ( TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0)
+          )
+      )
+    ,
+      ( "nth"
+      , Forall
+          (Set.fromList [TypeIndex KType 0])
+          []
+          ( TIntrinsic INat 
+                `TArrow` TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| []) 
+                `TArrow` TVariable (TypeIndex KType 0) 
           )
       )
     ]

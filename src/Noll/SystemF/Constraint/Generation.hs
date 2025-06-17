@@ -169,7 +169,7 @@ collectConstraints =
           t2 = typeOf e1
       tellRight [Equality (RuleLetBindingPattern loc t1 t2) [t1, t2]]
       ms2 <- collectConstraints e1
-      names <- patternConstraints (assertImplicitAssumptions loc) ms1 p
+      names <- patternConstraints (assertEqualityAssumptions loc) (ms1 <> ms2) p
       pure (filter (assumptionNameIsNotOneOf names) (ms1 <> ms2))
     ELet loc gs e1 -> do
       ms1 <- collectConstraints e1
@@ -270,6 +270,9 @@ collectConstraints =
           t1 = TIntrinsic (IRecord (TRow (fromDictionary d1 (fromMaybe RNil e1))))
       tellRight [Equality InferenceRulePlaceholder [t, t1]]
       pure (ms1 <> ms2)
+    ECodataSelect{} ->
+      -- TODO
+      pure []
 
 listConstructorTypeScheme :: Scheme TypeIndex Kind IndexedType
 listConstructorTypeScheme = forall1 (\a -> a ~> TIntrinsic (IList a) ~> TIntrinsic (IList a))

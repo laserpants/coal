@@ -52,5 +52,7 @@ definitionName =
       name
     DAnnotation _ d ->
       definitionName d
+    DCodata name _ _ ->
+      name
     _ ->
       error "Not implemented"

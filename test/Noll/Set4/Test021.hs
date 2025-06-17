@@ -90,14 +90,14 @@ moduleMain =
                                     ()
                                     ( Map.fromList
                                         [
-                                          ( "Head"
+                                          ( "$$Head"
                                           , ELambda
                                               ()
                                               (PAny () () :| [])
                                               (EVariable () (Label () "n"))
                                           )
                                         ,
-                                          ( "Tail"
+                                          ( "$$Tail"
                                           , ELambda
                                               ()
                                               (PAny () () :| [])
