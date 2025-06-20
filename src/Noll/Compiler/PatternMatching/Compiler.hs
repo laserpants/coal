@@ -48,8 +48,7 @@ instance (Data k, Data (o k), Typeable o) => TypeProxy (Type o k) where
   boolean =
     TIntrinsic IBool
   folded t1 lls =
-    let untag (Label t _) = t
-     in foldType t1 (untag <$> lls)
+    foldType t1 (labelTag <$> lls)
 
 compileEnvelope :: (TypeProxy t, Ord t, Data a, Monoid a) => EnvelopeExpression (Expression a) t -> Expression a t
 compileEnvelope =
