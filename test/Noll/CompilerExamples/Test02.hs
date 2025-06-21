@@ -129,13 +129,15 @@ baz3 =
                       tree0
                   )
               )
-            , ( "Succ"
+            ,
+              ( "Succ"
               , Constructor
                   "Succ"
                   1
                   (Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic INat))
               )
-            , ( "Zero"
+            ,
+              ( "Zero"
               , Constructor
                   "Zero"
                   0
@@ -284,10 +286,17 @@ baz3 =
       , Forall
           (Set.fromList [TypeIndex KType 0])
           []
-          ( TIntrinsic INat 
-                `TArrow` TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| []) 
-                `TArrow` TVariable (TypeIndex KType 0) 
+          ( TIntrinsic INat
+              `TArrow` TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| [])
+              `TArrow` TVariable (TypeIndex KType 0)
           )
+      )
+    ,
+      ( "nats"
+      , Forall
+          mempty
+          []
+          (TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TIntrinsic IInt32 :| []))
       )
     ]
 

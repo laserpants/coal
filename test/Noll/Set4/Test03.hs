@@ -22,7 +22,7 @@ moduleMain =
   Module.fromDefinitionList
     (Path ["Main"])
     []
-    [ DImport (Path ["Core$"]) ["trace_int32"]
+    [ DImport (Path ["Core$"]) ["trace_string"]
     , DCodata
         "Stream"
         [Parameter () "a"]
@@ -35,57 +35,72 @@ moduleMain =
           , TApplication () (TConstructor () "Stream") (TVariable (Parameter () "a") :| [])
           )
         ]
-    , DConstant
+    , --    , DType
+      --        "$$Stream"
+      --        [Parameter () "a"]
+      --        [ Constructor
+      --            "$$Stream"
+      --            1
+      --            ( Forall
+      --                (Set.fromList [Parameter () "a"])
+      --                []
+      --                ( TRow ( RExtend "$$Head" (TArrow (TIntrinsic IUnit) (TVariable (Parameter () "a"))) ( RExtend "$$Tail" (TArrow (TIntrinsic IUnit) (TApplication () (TConstructor () "Stream") (TVariable (Parameter () "a") :| []))) RNil))
+      --                    `TArrow` (TApplication () (TConstructor () "$$Stream") (TVariable (Parameter () "a") :| []))
+      --                )
+      --            )
+      --        ]
+      --      ,
+      DConstant
         "nats"
         ( Constant
             ()
             (With [] ())
---            ( EApplication
---                ()
---                ()
---                ( EUnfold
---                    ()
---                    ()
---                    (Label () "Stream")
---                    "f"
---                    ( PAnnotation
---                        ()
---                        (TIntrinsic IInt32)
---                        (PVariable () (Label () "n"))
---                        :| []
---                    )
---                    ( Map.fromList
---                        [
---                          ( "Head"
---                          , EVariable () (Label () "n")
---                          )
---                        ,
---                          ( "Tail"
---                          , EApplication
---                              ()
---                              ()
---                              (EVariable () (Label () "f"))
---                              ( EApplication
---                                  ()
---                                  ()
---                                  (EBinaryOperator () () OAddition)
---                                  ( EVariable () (Label () "n")
---                                      <| ELiteral () (LInt32 1)
---                                      :| []
---                                  )
---                                  :| []
---                              )
---                          )
---                        ]
---                    )
---                    ( Just
+            ( EApplication
+                ()
+                ()
+                ( EUnfold
+                    ()
+                    ()
+                    (Label () "Stream")
+                    "f"
+                    ( PAnnotation
+                        ()
+                        (TIntrinsic IInt32)
+                        (PVariable () (Label () "n"))
+                        :| []
+                    )
+                    ( Map.fromList
+                        [
+                          ( "Head"
+                          , EVariable () (Label () "n")
+                          )
+                        ,
+                          ( "Tail"
+                          , EApplication
+                              ()
+                              ()
+                              (EVariable () (Label () "f"))
+                              ( EApplication
+                                  ()
+                                  ()
+                                  (EBinaryOperator () () OAddition)
+                                  ( EVariable () (Label () "n")
+                                      <| ELiteral () (LInt32 1)
+                                      :| []
+                                  )
+                                  :| []
+                              )
+                          )
+                        ]
+                    )
+                    ( Just
                         ( ERecursiveLet
                             ()
                             (PVariable () (Label () "$unfold.1"))
                             ( ELambda
                                 ()
                                 (PVariable () (Label () "n") :| [])
-                                ( ERecord
+                                ( ECodataFields
                                     ()
                                     ()
                                     ( Map.fromList
@@ -119,216 +134,214 @@ moduleMain =
                                           )
                                         ]
                                     )
-                                    Nothing
                                 )
                             )
                             (EVariable () (Label () "$unfold.1"))
                         )
---                    )
---                )
---                (ELiteral () (LInt32 0) :| [])
---            )
---        )
---    , DFunction
---        "nth"
---        ( Function
---            ()
---            (With [] ())
---            (PVariable () (Label () "n") :| [])
---            ( EFold
---                ()
---                ()
---                (EVariable () (Label () "n") :| [])
---                ( EClause
---                    ()
---                    ( PConstructor
---                        ()
---                        (Label () "Zero")
---                        []
---                    )
---                    ( CPlain
---                        ()
---                        []
---                        ( ELambda
---                            ()
---                            (PVariable () (Label () "stream") :| [])
---                            ( ECodataSelect
---                                ()
---                                (Label () "Head")
---                                (EVariable () (Label () "stream"))
---                                ( Just
---                                    ( EApplication
---                                        ()
---                                        ()
---                                        (EVariable () (Label () "$$force_Head"))
---                                        (EVariable () (Label () "stream") :| [])
---                                    )
---                                )
---                            )
---                        )
---                        :| []
---                    )
---                    <| EClause
---                      ()
---                      ( PConstructor
---                          ()
---                          (Label () "Succ")
---                          [ PAtVariable () (Label () "f")
---                          ]
---                      )
---                      ( CPlain
---                          ()
---                          []
---                          ( ELambda
---                              ()
---                              (PVariable () (Label () "stream") :| [])
---                              ( EApplication
---                                  ()
---                                  ()
---                                  (EVariable () (Label () "f"))
---                                  ( ECodataSelect
---                                      ()
---                                      (Label () "Tail")
---                                      (EVariable () (Label () "stream"))
---                                      ( Just
---                                          ( EApplication
---                                              ()
---                                              ()
---                                              (EVariable () (Label () "$$force_Tail"))
---                                              (EVariable () (Label () "stream") :| [])
---                                          )
---                                      )
---                                      :| []
---                                  )
---                              )
---                          )
---                          :| []
---                      )
---                    :| []
---                )
---                ( Just
---                    ( ERecursiveLet
---                        ()
---                        (PVariable () (Label{labelTag = (), labelName = "$fold.1"}))
---                        ( ELambda
---                            ()
---                            (PVariable () (Label{labelTag = (), labelName = "$fold.1.expr"}) :| [])
---                            ( EMatch
---                                ()
---                                ()
---                                (EVariable () (Label{labelTag = (), labelName = "$fold.1.expr"}))
---                                ( EClause
---                                    ()
---                                    (PConstructor () (Label{labelTag = (), labelName = "Zero"}) [])
---                                    ( CPlain
---                                        ()
---                                        []
---                                        ( ELambda
---                                            ()
---                                            ( PVariable
---                                                ()
---                                                (Label{labelTag = (), labelName = "stream"})
---                                                :| []
---                                            )
---                                            ( ECodataSelect
---                                                ()
---                                                (Label{labelTag = (), labelName = "Head"})
---                                                (EVariable () (Label{labelTag = (), labelName = "stream"}))
---                                                ( Just
---                                                    ( EApplication
---                                                        ()
---                                                        ()
---                                                        (EVariable () (Label{labelTag = (), labelName = "$$force_Head"}))
---                                                        (EVariable () (Label{labelTag = (), labelName = "stream"}) :| [])
---                                                    )
---                                                )
---                                            )
---                                        )
---                                        :| []
---                                    )
---                                    :| [ EClause
---                                          ()
---                                          ( PConstructor
---                                              ()
---                                              (Label{labelTag = (), labelName = "Succ"})
---                                              [ PVariable
---                                                  ()
---                                                  (Label{labelTag = (), labelName = "f"})
---                                              ]
---                                          )
---                                          ( CPlain
---                                              ()
---                                              []
---                                              ( ELambda
---                                                  ()
---                                                  (PVariable () (Label{labelTag = (), labelName = "stream"}) :| [])
---                                                  ( EApplication
---                                                      ()
---                                                      ()
---                                                      (EVariable () (Label{labelTag = (), labelName = "$fold.1"}))
---                                                      ( EVariable () (Label{labelTag = (), labelName = "f"})
---                                                          :| [ ECodataSelect
---                                                                ()
---                                                                (Label{labelTag = (), labelName = "Tail"})
---                                                                (EVariable () (Label{labelTag = (), labelName = "stream"}))
---                                                                ( Just
---                                                                    ( EApplication
---                                                                        ()
---                                                                        ()
---                                                                        (EVariable () (Label{labelTag = (), labelName = "$$force_Tail"}))
---                                                                        (EVariable () (Label{labelTag = (), labelName = "stream"}) :| [])
---                                                                    )
---                                                                )
---                                                             ]
---                                                      )
---                                                  )
---                                              )
---                                              :| []
---                                          )
---                                       ]
---                                )
---                            )
---                        )
---                        ( EApplication
---                            ()
---                            ()
---                            (EVariable () (Label{labelTag = (), labelName = "$fold.1"}))
---                            (EVariable () (Label{labelTag = (), labelName = "n"}) :| [])
---                        )
---                    )
---                )
---            )
+                    )
+                )
+                (ELiteral () (LInt32 0) :| [])
+            )
         )
---    , DFunction
---        "main"
---        ( Function
---            ()
---            (With [] ())
---            (PLiteral () LUnit :| [])
---            ( ELet
---                ()
---                ( BPattern
---                    ()
---                    (PVariable () (Label () "v"))
---                    ( EApplication
---                        ()
---                        ()
---                        (EVariable () (Label () "nth"))
---                        ( EApplication () () (EVariable () (Label () "from_int32")) (ELiteral () (LInt32 5) :| [])
---                            <| EVariable () (Label () "nats")
---                            :| []
---                        )
---                    )
---                    :| []
---                )
---                ( EApplication
---                    ()
---                    ()
---                    (EVariable () (Label () "trace_int32"))
---                    ( EVariable () (Label () "v")
---                        :| []
---                    )
---                )
---            )
---        )
+        -- ,
+        --         DFunction
+        --         "nth"
+        --         ( Function
+        --             ()
+        --             (With [] ())
+        --             (PVariable () (Label () "n") :| [])
+        --             ( EFold
+        --                 ()
+        --                 ()
+        --                 (EVariable () (Label () "n") :| [])
+        --                 ( EClause
+        --                     ()
+        --                     ( PConstructor
+        --                         ()
+        --                         (Label () "Zero")
+        --                         []
+        --                     )
+        --                     ( CPlain
+        --                         ()
+        --                         []
+        --                         ( ELambda
+        --                             ()
+        --                             (PVariable () (Label () "stream") :| [])
+        --                             ( ECodataSelect
+        --                                 ()
+        --                                 (Label () "Head")
+        --                                 (EVariable () (Label () "stream"))
+        --                                 ( Just
+        --                                     ( EApplication
+        --                                         ()
+        --                                         ()
+        --                                         (EVariable () (Label () "$$force_Head"))
+        --                                         (EVariable () (Label () "stream") :| [])
+        --                                     )
+        --                                 )
+        --                             )
+        --                         )
+        --                         :| []
+        --                     )
+        --                     <| EClause
+        --                       ()
+        --                       ( PConstructor
+        --                           ()
+        --                           (Label () "Succ")
+        --                           [ PAtVariable () (Label () "f")
+        --                           ]
+        --                       )
+        --                       ( CPlain
+        --                           ()
+        --                           []
+        --                           ( ELambda
+        --                               ()
+        --                               (PVariable () (Label () "stream") :| [])
+        --                               ( EApplication
+        --                                   ()
+        --                                   ()
+        --                                   (EVariable () (Label () "f"))
+        --                                   ( ECodataSelect
+        --                                       ()
+        --                                       (Label () "Tail")
+        --                                       (EVariable () (Label () "stream"))
+        --                                       ( Just
+        --                                           ( EApplication
+        --                                               ()
+        --                                               ()
+        --                                               (EVariable () (Label () "$$force_Tail"))
+        --                                               (EVariable () (Label () "stream") :| [])
+        --                                           )
+        --                                       )
+        --                                       :| []
+        --                                   )
+        --                               )
+        --                           )
+        --                           :| []
+        --                       )
+        --                     :| []
+        --                 )
+        --                 ( Just
+        --                     ( ERecursiveLet
+        --                         ()
+        --                         (PVariable () (Label{labelTag = (), labelName = "$fold.1"}))
+        --                         ( ELambda
+        --                             ()
+        --                             (PVariable () (Label{labelTag = (), labelName = "$fold.1.expr"}) :| [])
+        --                             ( EMatch
+        --                                 ()
+        --                                 ()
+        --                                 (EVariable () (Label{labelTag = (), labelName = "$fold.1.expr"}))
+        --                                 ( EClause
+        --                     ()
+        --                     ( PConstructor
+        --                         ()
+        --                         (Label () "Zero")
+        --                         []
+        --                     )
+        --                     ( CPlain
+        --                         ()
+        --                         []
+        --                         ( ELambda
+        --                             ()
+        --                             (PVariable () (Label () "stream") :| [])
+        --                             ( ECodataSelect
+        --                                 ()
+        --                                 (Label () "Head")
+        --                                 (EVariable () (Label () "stream"))
+        --                                 ( Just
+        --                                     ( EApplication
+        --                                         ()
+        --                                         ()
+        --                                         (EVariable () (Label () "$$force_Head"))
+        --                                         (EVariable () (Label () "stream") :| [])
+        --                                     )
+        --                                 )
+        --                             )
+        --                         )
+        --                         :| []
+        --                     )
+        --                     <| EClause
+        --                       ()
+        --                       ( PConstructor
+        --                           ()
+        --                           (Label () "Succ")
+        --                           [ PVariable () (Label () "f")
+        --                           ]
+        --                       )
+        --                       ( CPlain
+        --                           ()
+        --                           []
+        --                           ( ELambda
+        --                               ()
+        --                               (PVariable () (Label () "stream") :| [])
+        --                               ( EApplication
+        --                                   ()
+        --                                   ()
+        --                                   (EVariable () (Label () "$fold.1"))
+        --                                   ( EVariable () (Label () "f")
+        --                                      <| ECodataSelect
+        --                                       ()
+        --                                       (Label () "Tail")
+        --                                       (EVariable () (Label () "stream"))
+        --                                       ( Just
+        --                                           ( EApplication
+        --                                               ()
+        --                                               ()
+        --                                               (EVariable () (Label () "$$force_Tail"))
+        --                                               (EVariable () (Label () "stream") :| [])
+        --                                           )
+        --                                       )
+        --                                       :| []
+        --                                   )
+        --                               )
+        --                           )
+        --                           :| []
+        --                       )
+        --                     :| []
+        --                 )
+        --                             )
+        --                         )
+        --                         ( EApplication
+        --                             ()
+        --                             ()
+        --                             (EVariable () (Label{labelTag = (), labelName = "$fold.1"}))
+        --                             (EVariable () (Label{labelTag = (), labelName = "n"}) :| [])
+        --                         )
+        --                     )
+        --                 )
+        --             )
+        --         )
+        -- , DFunction
+        --   "main"
+        --   ( Function
+        --       ()
+        --       (With [] ())
+        --       (PLiteral () LUnit :| [])
+        --       ( ELet
+        --           ()
+        --           ( BPattern
+        --               ()
+        --               (PVariable () (Label () "v"))
+        --               ( EApplication
+        --                   ()
+        --                   ()
+        --                   (EVariable () (Label () "nth"))
+        --                   ( EApplication () () (EVariable () (Label () "from_int32")) (ELiteral () (LInt32 5) :| [])
+        --                       <| EVariable () (Label () "nats")
+        --                       :| []
+        --                   )
+        --               )
+        --               :| []
+        --           )
+        --           ( EApplication
+        --               ()
+        --               ()
+        --               (EVariable () (Label () "trace_int32"))
+        --               ( EVariable () (Label () "v")
+        --                   :| []
+        --               )
+        --           )
+        --       )
+        --   )
     ]

@@ -97,48 +97,45 @@ fixture :: Expression () ()
 fixture =
   ( ERecursiveLet
       ()
-      ( PVariable () (Label () "unfold"))
-        ( ELambda
-            ()
-            (PVariable () (Label () "n") :| [])
-            ( ERecord
-                ()
-                ()
-                (
-                  Map.fromList
-                    [
-                      ( "abc"
-                      , EVariable () (Label () "unfold")
-                      )
-                    ]
-                )
-                Nothing
-            )
-        )
+      (PVariable () (Label () "unfold"))
+      ( ELambda
+          ()
+          (PVariable () (Label () "n") :| [])
+          ( ERecord
+              ()
+              ()
+              ( Map.fromList
+                  [
+                    ( "abc"
+                    , EVariable () (Label () "unfold")
+                    )
+                  ]
+              )
+              Nothing
+          )
+      )
       (EVariable () (Label () "unfold"))
   )
 
 fixtureR =
   ( ERecursiveLet
       undefined
-      ( PVariable () (Label undefined "unfold"))
-        ( ELambda
-            ()
-            (PVariable () (Label undefined "n") :| [])
-            ( ERecord
-                ()
-                undefined
-                (
-                  Map.fromList
-                    [
-                      ( "abc"
-                      , ELiteral () (LInt32 1)
-                      )
-                    ]
-                )
-                Nothing
-            )
-        )
+      (PVariable () (Label undefined "unfold"))
+      ( ELambda
+          ()
+          (PVariable () (Label undefined "n") :| [])
+          ( ERecord
+              ()
+              undefined
+              ( Map.fromList
+                  [
+                    ( "abc"
+                    , ELiteral () (LInt32 1)
+                    )
+                  ]
+              )
+              Nothing
+          )
+      )
       (EVariable () (Label undefined "unfold"))
   )
-

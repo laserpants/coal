@@ -264,8 +264,13 @@ transformY ::
   m (Expression a (Type TypeIndex Kind))
 transformY =
   \case
-    ERecursiveLet a p e1 e2 ->
-      transformY (ELet a (BPattern a p e1 :| []) e2)
+    ERecursiveLet a p e1 e2 -> do
+      xx23 <- transformY (ELet a (BPattern a p e1 :| []) e2)
+      case xx23 of
+        ELet a2 (BPattern _ p2 e8 :| []) e9 ->
+          pure (ERecursiveLet a2 p2 e8 e9)
+        _ ->
+          error "Implementation error"
     ELet a bs e -> do
       (as, traits) <- runWriterT (traverse transformBindingY bs)
       let (ds, es) = List1.unzip as
@@ -522,6 +527,15 @@ xx =
                 [
                   ( "from_int32"
                   , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
+                  )
+                ]
+            )
+          ,
+            ( TIntrinsic INat
+            , Map.fromList
+                [
+                  ( "from_int32"
+                  , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic INat)
                   )
                 ]
             )

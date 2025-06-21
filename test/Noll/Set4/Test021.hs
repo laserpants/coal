@@ -35,7 +35,21 @@ moduleMain =
           , TApplication () (TConstructor () "Stream") (TVariable (Parameter () "a") :| [])
           )
         ]
-    , DConstant
+    , --    , DType
+      --        "$$Stream"
+      --        [Parameter () "a"]
+      --        [ Constructor
+      --            "$$Stream"
+      --            1
+      --            ( Forall
+      --                (Set.fromList [Parameter () "a"])
+      --                []
+      --                ( TRow ( RExtend "$$Head" (TArrow (TIntrinsic IUnit) (TVariable (Parameter () "a"))) ( RExtend "$$Tail" (TArrow (TIntrinsic IUnit) (TApplication () (TConstructor () "Stream") (TVariable (Parameter () "a") :| []))) RNil))
+      --                    `TArrow` (TApplication () (TConstructor () "$$Stream") (TVariable (Parameter () "a") :| []))
+      --                )
+      --            )
+      --        ]
+      DConstant
         "nats"
         ( Constant
             ()
@@ -85,7 +99,7 @@ moduleMain =
                             ( ELambda
                                 ()
                                 (PVariable () (Label () "n") :| [])
-                                ( ERecord
+                                ( ECodataFields
                                     ()
                                     ()
                                     ( Map.fromList
@@ -119,7 +133,6 @@ moduleMain =
                                           )
                                         ]
                                     )
-                                    Nothing
                                 )
                             )
                             (EVariable () (Label () "$unfold.1"))

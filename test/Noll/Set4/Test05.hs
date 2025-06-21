@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Set4.Test04 where
+module Noll.Set4.Test05 where
 
 import Lang.Common.List1 (NonEmpty (..), (<|))
 import Lang.Label (Label (..))
@@ -11,12 +11,11 @@ import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import qualified Noll.Module as Module
 
-prog4_04 :: [Module () Kind IndexedType]
-prog4_04 =
+prog4_05 :: [Module () Kind IndexedType]
+prog4_05 =
   [ moduleMain
   ]
 
--- Add types
 moduleMain :: Module () Kind IndexedType
 moduleMain =
   Module.fromDefinitionList
@@ -142,202 +141,208 @@ moduleMain =
                 (ELiteral () (LInt32 0) :| [])
             )
         )
-    , DFunction
+    , DConstant
         "nth"
-        ( Function
+        ( Constant
             ()
-            (With [] (TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| []) `TArrow` TVariable (TypeIndex KType 0)))
-            (PVariable () (Label (TIntrinsic INat) "n") :| [])
-            ( EFold
+            (With [] (TIntrinsic INat `TArrow` TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| []) `TArrow` TVariable (TypeIndex KType 0)))
+            ( ELambda
                 ()
-                (TVariable (TypeIndex KType 0))
-                (EVariable () (Label (TIntrinsic INat) "n") :| [])
-                ( EClause
+                (PVariable () (Label (TIntrinsic INat) "n") :| [])
+                ( EFold
                     ()
-                    ( PConstructor
+                    (TVariable (TypeIndex KType 0))
+                    (EVariable () (Label (TIntrinsic INat) "n") :| [])
+                    ( EClause
                         ()
-                        (Label (TIntrinsic INat) "Zero")
-                        []
-                    )
-                    ( CPlain
-                        ()
-                        []
-                        ( ELambda
+                        ( PConstructor
                             ()
-                            (PVariable () (Label (TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| [])) "stream") :| [])
-                            ( ECodataSelect
+                            (Label (TIntrinsic INat) "Zero")
+                            []
+                        )
+                        ( CPlain
+                            ()
+                            []
+                            ( ELambda
                                 ()
-                                (Label (TVariable (TypeIndex KType 0)) "Head")
-                                (EVariable () (Label (TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| [])) "stream"))
-                                ( Just
-                                    ( EApplication
-                                        ()
-                                        (TVariable (TypeIndex KType 0))
-                                        (EVariable () (Label (TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| []) `TArrow` TVariable (TypeIndex KType 0)) "$$force_Head"))
-                                        (EVariable () (Label (TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| [])) "stream") :| [])
+                                (PVariable () (Label (TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| [])) "stream") :| [])
+                                ( ECodataSelect
+                                    ()
+                                    (Label (TVariable (TypeIndex KType 0)) "Head")
+                                    (EVariable () (Label (TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| [])) "stream"))
+                                    ( Just
+                                        ( EApplication
+                                            ()
+                                            (TVariable (TypeIndex KType 0))
+                                            (EVariable () (Label (TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| []) `TArrow` TVariable (TypeIndex KType 0)) "$$force_Head"))
+                                            (EVariable () (Label (TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| [])) "stream") :| [])
+                                        )
                                     )
                                 )
                             )
+                            :| []
                         )
-                        :| []
-                    )
-                    <| EClause
-                      ()
-                      ( PConstructor
+                        <| EClause
                           ()
-                          (Label (TIntrinsic INat) "Succ")
-                          [ PAtVariable () (Label (TIntrinsic INat) "f")
-                          ]
-                      )
-                      ( CPlain
-                          ()
-                          []
-                          ( ELambda
+                          ( PConstructor
                               ()
-                              (PVariable () (Label (TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| [])) "stream") :| [])
-                              ( EApplication
-                                  ()
-                                  (TVariable (TypeIndex KType 0))
-                                  (EVariable () (Label (TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| []) `TArrow` TVariable (TypeIndex KType 0)) "f"))
-                                  ( ECodataSelect
-                                      ()
-                                      (Label (TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| [])) "Tail")
-                                      (EVariable () (Label (TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| [])) "stream"))
-                                      ( Just
-                                          ( EApplication
-                                              ()
-                                              (TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| []))
-                                              (EVariable () (Label (TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| []) `TArrow` TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| [])) "$$force_Tail"))
-                                              (EVariable () (Label (TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| [])) "stream") :| [])
-                                          )
-                                      )
-                                      :| []
-                                  )
-                              )
+                              (Label (TIntrinsic INat) "Succ")
+                              [ PAtVariable () (Label (TIntrinsic INat) "f")
+                              ]
                           )
-                          :| []
-                      )
-                    :| []
-                )
-                ( Just
-                    ( ERecursiveLet
-                        ()
-                        (PVariable () (Label{labelTag = TIntrinsic INat `TArrow` TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| []) `TArrow` TVariable (TypeIndex KType 0), labelName = "$fold.1"}))
-                        ( ELambda
-                            ()
-                            (PVariable () (Label{labelTag = TIntrinsic INat, labelName = "$fold.1.expr"}) :| [])
-                            ( EMatch
-                                ()
-                                (TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| []) `TArrow` TVariable (TypeIndex KType 0))
-                                (EVariable () (Label{labelTag = TIntrinsic INat, labelName = "$fold.1.expr"}))
-                                ( EClause
-                                    ()
-                                    ( PConstructor
-                                        ()
-                                        (Label (TIntrinsic INat) "Zero")
-                                        []
-                                    )
-                                    ( CPlain
-                                        ()
-                                        []
-                                        ( ELambda
-                                            ()
-                                            (PVariable () (Label (TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| [])) "stream") :| [])
-                                            ( ECodataSelect
-                                                ()
-                                                (Label (TVariable (TypeIndex KType 0)) "Head")
-                                                (EVariable () (Label (TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| [])) "stream"))
-                                                ( Just
-                                                    ( EApplication
-                                                        ()
-                                                        (TVariable (TypeIndex KType 0))
-                                                        (EVariable () (Label (TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| []) `TArrow` TVariable (TypeIndex KType 0)) "$$force_Head"))
-                                                        (EVariable () (Label (TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| [])) "stream") :| [])
-                                                    )
-                                                )
-                                            )
-                                        )
-                                        :| []
-                                    )
-                                    <| EClause
+                          ( CPlain
+                              ()
+                              []
+                              ( ELambda
+                                  ()
+                                  (PVariable () (Label (TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| [])) "stream") :| [])
+                                  ( EApplication
                                       ()
-                                      ( PConstructor
+                                      (TVariable (TypeIndex KType 0))
+                                      (EVariable () (Label (TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| []) `TArrow` TVariable (TypeIndex KType 0)) "f"))
+                                      ( ECodataSelect
                                           ()
-                                          (Label (TIntrinsic INat) "Succ")
-                                          [ PVariable () (Label (TIntrinsic INat) "f")
-                                          ]
-                                      )
-                                      ( CPlain
-                                          ()
-                                          []
-                                          ( ELambda
-                                              ()
-                                              (PVariable () (Label (TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| [])) "stream") :| [])
+                                          (Label (TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| [])) "Tail")
+                                          (EVariable () (Label (TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| [])) "stream"))
+                                          ( Just
                                               ( EApplication
                                                   ()
-                                                  (TVariable (TypeIndex KType 0))
-                                                  (EVariable () (Label (TIntrinsic INat `TArrow` TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| []) `TArrow` TVariable (TypeIndex KType 0)) "$fold.1"))
-                                                  ( EVariable () (Label (TIntrinsic INat) "f")
-                                                      <| ECodataSelect
-                                                        ()
-                                                        (Label (TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| [])) "Tail")
-                                                        (EVariable () (Label (TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| [])) "stream"))
-                                                        ( Just
-                                                            ( EApplication
-                                                                ()
-                                                                (TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| []))
-                                                                (EVariable () (Label (TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| []) `TArrow` TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| [])) "$$force_Tail"))
-                                                                (EVariable () (Label (TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| [])) "stream") :| [])
-                                                            )
-                                                        )
-                                                      :| []
-                                                  )
+                                                  (TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| []))
+                                                  (EVariable () (Label (TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| []) `TArrow` TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| [])) "$$force_Tail"))
+                                                  (EVariable () (Label (TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| [])) "stream") :| [])
                                               )
                                           )
                                           :| []
                                       )
-                                    :| []
+                                  )
+                              )
+                              :| []
+                          )
+                        :| []
+                    )
+                    ( Just
+                        ( ERecursiveLet
+                            ()
+                            (PVariable () (Label{labelTag = TIntrinsic INat `TArrow` TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| []) `TArrow` TVariable (TypeIndex KType 0), labelName = "$fold.1"}))
+                            ( ELambda
+                                ()
+                                (PVariable () (Label{labelTag = TIntrinsic INat, labelName = "$fold.1.expr"}) :| [])
+                                ( EMatch
+                                    ()
+                                    (TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| []) `TArrow` TVariable (TypeIndex KType 0))
+                                    (EVariable () (Label{labelTag = TIntrinsic INat, labelName = "$fold.1.expr"}))
+                                    ( EClause
+                                        ()
+                                        ( PConstructor
+                                            ()
+                                            (Label (TIntrinsic INat) "Zero")
+                                            []
+                                        )
+                                        ( CPlain
+                                            ()
+                                            []
+                                            ( ELambda
+                                                ()
+                                                (PVariable () (Label (TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| [])) "stream") :| [])
+                                                ( ECodataSelect
+                                                    ()
+                                                    (Label (TVariable (TypeIndex KType 0)) "Head")
+                                                    (EVariable () (Label (TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| [])) "stream"))
+                                                    ( Just
+                                                        ( EApplication
+                                                            ()
+                                                            (TVariable (TypeIndex KType 0))
+                                                            (EVariable () (Label (TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| []) `TArrow` TVariable (TypeIndex KType 0)) "$$force_Head"))
+                                                            (EVariable () (Label (TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| [])) "stream") :| [])
+                                                        )
+                                                    )
+                                                )
+                                            )
+                                            :| []
+                                        )
+                                        <| EClause
+                                          ()
+                                          ( PConstructor
+                                              ()
+                                              (Label (TIntrinsic INat) "Succ")
+                                              [ PVariable () (Label (TIntrinsic INat) "f")
+                                              ]
+                                          )
+                                          ( CPlain
+                                              ()
+                                              []
+                                              ( ELambda
+                                                  ()
+                                                  (PVariable () (Label (TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| [])) "stream") :| [])
+                                                  ( EApplication
+                                                      ()
+                                                      (TVariable (TypeIndex KType 0))
+                                                      (EVariable () (Label (TIntrinsic INat `TArrow` TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| []) `TArrow` TVariable (TypeIndex KType 0)) "$fold.1"))
+                                                      ( EVariable () (Label (TIntrinsic INat) "f")
+                                                          <| ECodataSelect
+                                                            ()
+                                                            (Label (TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| [])) "Tail")
+                                                            (EVariable () (Label (TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| [])) "stream"))
+                                                            ( Just
+                                                                ( EApplication
+                                                                    ()
+                                                                    (TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| []))
+                                                                    (EVariable () (Label (TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| []) `TArrow` TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| [])) "$$force_Tail"))
+                                                                    (EVariable () (Label (TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| [])) "stream") :| [])
+                                                                )
+                                                            )
+                                                          :| []
+                                                      )
+                                                  )
+                                              )
+                                              :| []
+                                          )
+                                        :| []
+                                    )
                                 )
                             )
-                        )
-                        ( EApplication
-                            ()
-                            (TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| []) `TArrow` TVariable (TypeIndex KType 0))
-                            (EVariable () (Label{labelTag = TIntrinsic INat `TArrow` TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| []) `TArrow` TVariable (TypeIndex KType 0), labelName = "$fold.1"}))
-                            (EVariable () (Label{labelTag = TIntrinsic INat, labelName = "n"}) :| [])
+                            ( EApplication
+                                ()
+                                (TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| []) `TArrow` TVariable (TypeIndex KType 0))
+                                (EVariable () (Label{labelTag = TIntrinsic INat `TArrow` TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TVariable (TypeIndex KType 0) :| []) `TArrow` TVariable (TypeIndex KType 0), labelName = "$fold.1"}))
+                                (EVariable () (Label{labelTag = TIntrinsic INat, labelName = "n"}) :| [])
+                            )
                         )
                     )
                 )
             )
         )
-    , DFunction
+    , DConstant
         "main"
-        ( Function
+        ( Constant
             ()
-            (With [] (TVariable (TypeIndex KType 0)))
-            (PLiteral () LUnit :| [])
-            ( ELet
+            (With [] (TIntrinsic IUnit `TArrow` TVariable (TypeIndex KType 0)))
+            ( ELambda
                 ()
-                ( BPattern
+                (PLiteral () LUnit :| [])
+                ( ELet
                     ()
-                    (PVariable () (Label (TIntrinsic IInt32) "v"))
+                    ( BPattern
+                        ()
+                        (PVariable () (Label (TIntrinsic IInt32) "v"))
+                        ( EApplication
+                            ()
+                            (TIntrinsic IInt32)
+                            (EVariable () (Label (TIntrinsic INat `TArrow` TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TIntrinsic IInt32 :| []) `TArrow` TIntrinsic IInt32) "nth"))
+                            ( EApplication () (TIntrinsic INat) (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic INat) "from_int32")) (ELiteral () (LInt32 5) :| [])
+                                <| EVariable () (Label (TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TIntrinsic IInt32 :| [])) "nats")
+                                :| []
+                            )
+                        )
+                        :| []
+                    )
                     ( EApplication
                         ()
-                        (TIntrinsic IInt32)
-                        (EVariable () (Label (TIntrinsic INat `TArrow` TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TIntrinsic IInt32 :| []) `TArrow` TIntrinsic IInt32) "nth"))
-                        ( EApplication () (TIntrinsic INat) (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic INat) "from_int32")) (ELiteral () (LInt32 5) :| [])
-                            <| EVariable () (Label (TApplication KType (TConstructor (KType `KArrow` KType) "Stream") (TIntrinsic IInt32 :| [])) "nats")
+                        (TVariable (TypeIndex KType 0))
+                        (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0)) "trace_int32"))
+                        ( EVariable () (Label (TIntrinsic IInt32) "v")
                             :| []
                         )
-                    )
-                    :| []
-                )
-                ( EApplication
-                    ()
-                    (TVariable (TypeIndex KType 0))
-                    (EVariable () (Label (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0)) "trace_int32"))
-                    ( EVariable () (Label (TIntrinsic IInt32) "v")
-                        :| []
                     )
                 )
             )

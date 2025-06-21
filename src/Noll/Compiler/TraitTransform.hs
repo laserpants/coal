@@ -28,32 +28,32 @@ import qualified Data.Text as Text
 import qualified Lang.Common.Environment as Environment
 import qualified Lang.Common.List1 as List1
 
-transformModuleZ ::
-  ( MonadReader (Environment (Scheme TypeIndex Kind (Type TypeIndex Kind))) m
-  , MonadState Int m
-  , MonadWriter [Trait (Type TypeIndex Kind)] m
-  , Show a
-  ) =>
-  Module a Kind (Type TypeIndex Kind) ->
-  m (Module a Kind (Type TypeIndex Kind))
-transformModuleZ = overModuleDefinitionsM (traverse transformDefinitionZ)
+-- transformModuleZ ::
+--  ( MonadReader (Environment (Scheme TypeIndex Kind (Type TypeIndex Kind))) m
+--  , MonadState Int m
+--  , MonadWriter [Trait (Type TypeIndex Kind)] m
+--  , Show a
+--  ) =>
+--  Module a Kind (Type TypeIndex Kind) ->
+--  m (Module a Kind (Type TypeIndex Kind))
+-- transformModuleZ = overModuleDefinitionsM (traverse transformDefinitionZ)
 
-transformDefinitionZ ::
-  ( MonadReader (Environment (Scheme TypeIndex Kind (Type TypeIndex Kind))) m
-  , MonadState Int m
-  , MonadWriter [Trait (Type TypeIndex Kind)] m
-  , Show a
-  ) =>
-  Definition a Kind (Type TypeIndex Kind) ->
-  m (Definition a Kind (Type TypeIndex Kind))
-transformDefinitionZ =
-  \case
-    DConstant name c ->
-      DConstant name <$> transformConstantZ c
-    DAnnotation a d ->
-      DAnnotation a <$> transformDefinitionZ d
-    d ->
-      pure d
+-- transformDefinitionZ ::
+--  ( MonadReader (Environment (Scheme TypeIndex Kind (Type TypeIndex Kind))) m
+--  , MonadState Int m
+--  , MonadWriter [Trait (Type TypeIndex Kind)] m
+--  , Show a
+--  ) =>
+--  Definition a Kind (Type TypeIndex Kind) ->
+--  m (Definition a Kind (Type TypeIndex Kind))
+-- transformDefinitionZ =
+--  \case
+--    DConstant name c ->
+--      DConstant name <$> transformConstantZ c
+--    DAnnotation a d ->
+--      DAnnotation a <$> transformDefinitionZ d
+--    d ->
+--      pure d
 
 transformConstantZ ::
   ( MonadReader (Environment (Scheme TypeIndex Kind (Type TypeIndex Kind))) m
@@ -182,9 +182,11 @@ transformGuardZ ::
   Guard Expression a (Type TypeIndex Kind) ->
   m (Guard Expression a (Type TypeIndex Kind))
 transformGuardZ =
-  \case
-    CGuard e ->
-      CGuard <$> transformZ e
+  undefined
+
+--  \case
+--    CGuard e ->
+--      CGuard <$> transformZ e
 
 transformChoiceZ ::
   ( MonadReader (Environment (Scheme TypeIndex Kind (Type TypeIndex Kind))) m
@@ -195,9 +197,11 @@ transformChoiceZ ::
   Choice Expression a (Type TypeIndex Kind) ->
   m (Choice Expression a (Type TypeIndex Kind))
 transformChoiceZ =
-  \case
-    CPlain a gs e ->
-      CPlain a <$> traverse transformGuardZ gs <*> transformZ e
+  undefined
+
+--  \case
+--    CPlain a gs e ->
+--      CPlain a <$> traverse transformGuardZ gs <*> transformZ e
 
 transformClauseZ ::
   ( MonadReader (Environment (Scheme TypeIndex Kind (Type TypeIndex Kind))) m
@@ -208,9 +212,11 @@ transformClauseZ ::
   Clause a (Type TypeIndex Kind) ->
   m (Clause a (Type TypeIndex Kind))
 transformClauseZ =
-  \case
-    EClause a ps cs ->
-      EClause a ps <$> traverse transformChoiceZ cs
+  undefined
+
+--  \case
+--    EClause a ps cs ->
+--      EClause a ps <$> traverse transformChoiceZ cs
 
 transformCompiledClauseZ ::
   ( MonadReader (Environment (Scheme TypeIndex Kind (Type TypeIndex Kind))) m
@@ -221,9 +227,11 @@ transformCompiledClauseZ ::
   CompiledClause a (Type TypeIndex Kind) ->
   m (CompiledClause a (Type TypeIndex Kind))
 transformCompiledClauseZ =
-  \case
-    ECompiledClause lls e ->
-      ECompiledClause lls <$> transformZ e
+  undefined
+
+--  \case
+--    ECompiledClause lls e ->
+--      ECompiledClause lls <$> transformZ e
 
 --    RField name ll1 ll2 e ->
 --      RField name ll1 ll2 <$> transformZ e
@@ -261,39 +269,39 @@ transformBindingZ =
 --    BPattern a p e ->
 --      error "TODO"
 
-collectTraits ::
-  ( MonadReader (Environment (Scheme TypeIndex Kind (Type TypeIndex Kind))) m
-  , MonadState Int m
-  , MonadWriter [Trait (Type TypeIndex Kind)] m
-  ) =>
-  Type TypeIndex Kind ->
-  Name ->
-  m [Trait (Type TypeIndex Kind)]
-collectTraits u name = do
-  env <- ask
-  case Environment.lookup name env of
-    Nothing ->
-      pure []
-    Just (Forall vs ts t) -> do
-      sub1 <- foldrM instantiate mempty vs
-      r <- tryMatch (apply sub1 t) u
-      case r of
-        Left x ->
-          error (show (name, apply sub1 t, u)) -- "TODO" -- (show x) -- "???"
-        Right sub2 ->
-          pure (apply sub2 (apply sub1 ts))
- where
-  instantiate (TypeIndex k index) acc = do
-    var <- supplied (TVariable . TypeIndex KType)
-    --    var <- (TVariable <$$> TypeIndex) k <$> fresh
-    pure (index `mapsTo` var <> acc)
+-- collectTraits ::
+--  ( MonadReader (Environment (Scheme TypeIndex Kind (Type TypeIndex Kind))) m
+--  , MonadState Int m
+--  , MonadWriter [Trait (Type TypeIndex Kind)] m
+--  ) =>
+--  Type TypeIndex Kind ->
+--  Name ->
+--  m [Trait (Type TypeIndex Kind)]
+-- collectTraits u name = do
+--  env <- ask
+--  case Environment.lookup name env of
+--    Nothing ->
+--      pure []
+--    Just (Forall vs ts t) -> do
+--      sub1 <- foldrM instantiate mempty vs
+--      r <- tryMatch (apply sub1 t) u
+--      case r of
+--        Left x ->
+--          error (show (name, apply sub1 t, u)) -- "TODO" -- (show x) -- "???"
+--        Right sub2 ->
+--          pure (apply sub2 (apply sub1 ts))
+-- where
+--  instantiate (TypeIndex k index) acc = do
+--    var <- supplied (TVariable . TypeIndex KType)
+--    --    var <- (TVariable <$$> TypeIndex) k <$> fresh
+--    pure (index `mapsTo` var <> acc)
 
-tryMatch ::
-  (MonadState Int m) =>
-  Type TypeIndex Kind ->
-  Type TypeIndex Kind ->
-  m (Either UnificationError Substitution)
-tryMatch t u = do
-  var <- supplied id
-  -- let zz = match t u
-  pure (evalUnifier var (match t u))
+-- tryMatch ::
+--  (MonadState Int m) =>
+--  Type TypeIndex Kind ->
+--  Type TypeIndex Kind ->
+--  m (Either UnificationError Substitution)
+-- tryMatch t u = do
+--  var <- supplied id
+--  -- let zz = match t u
+--  pure (evalUnifier var (match t u))

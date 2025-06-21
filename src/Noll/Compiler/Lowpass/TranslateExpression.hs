@@ -126,8 +126,6 @@ translateExpression =
       error "Implementation error"
     ECompiledMatch _ t e cs ->
       Lowpass.match (translateType t) <$> translateExpression e <*> traverse translateClause cs
-    EFold _ _ _ _ (Just e) ->
-      translateExpression e
     ESelect _ ll@(Label t field) e -> do
       xx1 <- translateExpression e
       let
@@ -146,6 +144,18 @@ translateExpression =
               )
               :| []
           )
+    ECodataSelect a ll@(Label t field) e me -> do
+      -- TODO: DRY
+      xx1 <- translateExpression e
+      let
+        Lowpass.TCon _ [r] = Lowpass.typeOf xx1
+        t1 = Lowpass.typeOf r
+      pure
+        ( Lowpass.sel
+            (Lowpass.Focus field (translateLabel ll) (Label (Lowpass.dropField field r) "_"))
+            (Lowpass.var (Label r "$row"))
+            (Lowpass.var (translateLabel ll))
+        )
     EFocus name0 ll1 ll2 e1 e2 -> do
       xx1 <- translateExpression e1
       --      let sss1 = Set.fromList [labelName ll1, labelName ll2]
@@ -180,6 +190,21 @@ translateExpression =
     --      undefined
     EDictionary _ t trait@(Trait name _) ->
       pure (Lowpass.var (Label (translateType t) ("$d." <> name <> "__$instance." <> hashed trait)))
+    EFold _ _ _ _ (Just e) ->
+      translateExpression e
+    EUnfold _ _ _ _ _ _ (Just e) ->
+      translateExpression e
+    ECodataFields _ _ fields -> do
+      exprs <- traverse translateExpression fields
+      let e1 = foldr (uncurry Lowpass.ext) Lowpass.nil (Map.toList exprs)
+      pure e1
+      --    t1 = Lowpass.typeOf e1
+      --    t = TIntrinsic IVoid -- TODO
+      --pure $
+      --  Lowpass.app
+      --    (translateType t)
+      --    (Lowpass.var (Label (Lowpass.arrow t1 (Lowpass.TCon "record" [t1])) "$Record"))
+      --    (e1 :| [])
 
 translateRecord :: (MonadReader TranslateEnvironment m, Data a) => IndexedType -> Dictionary (Expression a IndexedType) -> Maybe (Expression a IndexedType) -> m LowpassExpr
 translateRecord t d me = do
@@ -204,6 +229,8 @@ translateBinding =
 translatePattern :: (MonadReader TranslateEnvironment m, Data a) => Pattern a IndexedType -> m (Label Lowpass.Type)
 translatePattern =
   \case
+    PAny a t ->
+      translatePattern (PVariable a (Label t "_"))
     PVariable a (Label t name) ->
       pure (Label (translateType t) name)
     PAnnotation _ _ p ->
@@ -248,6 +275,62 @@ translateBinaryOperator t =
       binop Lowpass.OAnd (TIntrinsic IBool, TIntrinsic IBool)
     OLogicalOr ->
       binop Lowpass.OOr (TIntrinsic IBool, TIntrinsic IBool)
+    OAddition
+      | TIntrinsic IInt32 == t ->
+          binop Lowpass.OAddInt32 (TIntrinsic IInt32, TIntrinsic IInt32)
+    OAddition
+      | TIntrinsic IInt64 == t ->
+          binop Lowpass.OAddInt64 (TIntrinsic IInt64, TIntrinsic IInt64)
+    OAddition
+      | TIntrinsic IFloat == t ->
+          binop Lowpass.OAddFloat (TIntrinsic IFloat, TIntrinsic IFloat)
+    OAddition
+      | TIntrinsic IDouble == t ->
+          binop Lowpass.OAddDouble (TIntrinsic IDouble, TIntrinsic IDouble)
+    OAddition ->
+      error "TODO"
+    OSubtraction
+      | TIntrinsic IInt32 == t ->
+          binop Lowpass.OSubInt32 (TIntrinsic IInt32, TIntrinsic IInt32)
+    OSubtraction
+      | TIntrinsic IInt64 == t ->
+          binop Lowpass.OSubInt64 (TIntrinsic IInt64, TIntrinsic IInt64)
+    OSubtraction
+      | TIntrinsic IFloat == t ->
+          binop Lowpass.OSubFloat (TIntrinsic IFloat, TIntrinsic IFloat)
+    OSubtraction
+      | TIntrinsic IDouble == t ->
+          binop Lowpass.OSubDouble (TIntrinsic IDouble, TIntrinsic IDouble)
+    OSubtraction ->
+      error "TODO"
+    OMultiplication
+      | TIntrinsic IInt32 == t ->
+          binop Lowpass.OMulInt32 (TIntrinsic IInt32, TIntrinsic IInt32)
+    OMultiplication
+      | TIntrinsic IInt64 == t ->
+          binop Lowpass.OMulInt64 (TIntrinsic IInt64, TIntrinsic IInt64)
+    OMultiplication
+      | TIntrinsic IFloat == t ->
+          binop Lowpass.OMulFloat (TIntrinsic IFloat, TIntrinsic IFloat)
+    OMultiplication
+      | TIntrinsic IDouble == t ->
+          binop Lowpass.OMulDouble (TIntrinsic IDouble, TIntrinsic IDouble)
+    OMultiplication ->
+      error "TODO"
+    ODivision
+      | TIntrinsic IInt32 == t ->
+          binop Lowpass.ODivInt32 (TIntrinsic IInt32, TIntrinsic IInt32)
+    ODivision
+      | TIntrinsic IInt64 == t ->
+          binop Lowpass.ODivInt64 (TIntrinsic IInt64, TIntrinsic IInt64)
+    ODivision
+      | TIntrinsic IFloat == t ->
+          binop Lowpass.ODivFloat (TIntrinsic IFloat, TIntrinsic IFloat)
+    ODivision
+      | TIntrinsic IDouble == t ->
+          binop Lowpass.ODivDouble (TIntrinsic IDouble, TIntrinsic IDouble)
+    ODivision ->
+      error "TODO"
 
 listConcatenationOperator t es = do
   args <- traverse translateExpression es
