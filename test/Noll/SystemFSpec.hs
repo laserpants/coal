@@ -63,6 +63,9 @@ import qualified Noll.Set3.Test10x
 import qualified Noll.Set3.Test12
 import qualified Noll.Set3.Test12x
 import qualified Noll.Set3.Test13x
+import qualified Noll.Set5.Test01
+import qualified Noll.Set5.Test03
+
 
 spec :: Spec
 spec =
@@ -1169,6 +1172,8 @@ story = do
     runReader (insertAliases Noll.Set.Test01.prog1_01) testEnvironment2 == Noll.Set.Test02.prog1_02
   it "" $
     runFoldExpansion "fold" 1 (compileFolds Noll.Set.Test02.prog1_02) == Noll.Set.Test03.prog1_03
+  it "" $
+    runFoldExpansion "fold" 1 (compileFolds Noll.Set5.Test01.prog1_01) == Noll.Set5.Test03.prog1_03
   it "" $
     testResultExpression (Noll.CompilerExamples.Test02.baz3 Noll.Set.Test03.moduleUtils) == Noll.Set.Test04.moduleUtils
   it "" $
