@@ -326,8 +326,8 @@ moduleMain =
                          , () 
                          )
               |]
-        , OConstant 
-            "Main.nats" 
+        , OConstant
+            "Main.nats"
             [r| 
                  @<Stream(int32)>
                    ( let
@@ -352,8 +352,8 @@ moduleMain =
                    , 0
                    )
               |]
-        , OFunction 
-            "Main.nth" 
+        , OFunction
+            "Main.nth"
             [Label (TCon "$Nat" []) "n"]
             [r| 
                  let
@@ -386,8 +386,8 @@ moduleMain =
                        , n : $Nat
                        )
               |]
-        , OFunction 
-            "Main.main" 
+        , OFunction
+            "Main.main"
             [Label (TCon "unit" []) "$v.0"]
             [r| 
                  let
