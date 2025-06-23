@@ -209,6 +209,7 @@ test-suite noll-test
       Noll.Set4.Test14
       Noll.Set5.Test01
       Noll.Set5.Test03
+      Noll.Set5.Test04
       Noll.SystemF.Constraint.GenerationSpec
       Noll.SystemF.UnificationSpec
       Noll.SystemFExamples.Test01
@@ -227,6 +228,7 @@ test-suite noll-test
       Noll.SystemFExamples.Test14
       Noll.SystemFExamples.Test15
       Noll.SystemFExamples.Test16
+      Noll.SystemFExamples.Test17
       Noll.SystemFFixtures.Expression
       Noll.SystemFSpec
       Noll.SystemFSpec.TestRunner

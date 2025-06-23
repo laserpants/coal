@@ -101,8 +101,7 @@ typeCheckExpressionC e = do
   ams <- gets compilerAssumptions
   -- sub <- gets compilerSubstitution
   sub <- solveC
-  traceShow sub $
-    pure (normalizeRowTypes <$> apply sub e, apply sub ams)
+  pure (normalizeRowTypes <$> apply sub e, apply sub ams)
 
 runTypedExpressionTest ::
   (Show a, Eq a, Data a) =>

@@ -91,6 +91,8 @@ binaryOperatorTypeScheme =
       forall1 (\a -> a ~> a ~> TIntrinsic IBool)
     OListConcatenation ->
       forall1 (\a -> TIntrinsic (IList a) ~> TIntrinsic (IList a) ~> TIntrinsic (IList a))
+    OStringConcatenation ->
+      Forall mempty [] (TIntrinsic IString ~> TIntrinsic IString ~> TIntrinsic IString)
     OAddition ->
       forall1 (\a -> a ~> a ~> a)
     OLessThan ->
