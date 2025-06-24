@@ -67,6 +67,8 @@ import qualified Noll.Set5.Test01
 import qualified Noll.Set5.Test03
 import qualified Noll.Set5.Test04
 import qualified Noll.Set5.Test05
+import qualified Noll.Set5.Test09
+import qualified Noll.Set5.Test10
 
 spec :: Spec
 spec =
@@ -1217,6 +1219,9 @@ story = do
     runMatchMonad "match" 0 (compileMatchExprs Noll.Set.Test08.prog1_08) == Noll.Set.Test09.prog1_09
   it "" $
     runMatchMonad "match" 0 (compileMatchExprs Noll.Set2.Test05.prog2_05) == Noll.Set2.Test09.prog2_09
+  it "" $
+    runMatchMonad "match" 0 (compileMatchExprs Noll.Set5.Test05.moduleMain) == Noll.Set5.Test09.moduleMain
+
   --  it "" $
   --    result funLte == funLte2
   --  it "" $
@@ -1305,6 +1310,8 @@ story = do
     runTraitTransformY2 (freshIdIn Noll.Set.Test09.moduleBinarySearch) (transformModuleY Noll.Set.Test09.moduleBinarySearch) == Noll.Set.Test10.moduleBinarySearch
   it "" $
     runTraitTransformY2 (freshIdIn Noll.Set.Test09.moduleMain) (transformModuleY Noll.Set.Test09.moduleMain) == Noll.Set.Test10.moduleMain
+  it "" $
+    runTraitTransformY2 (freshIdIn Noll.Set5.Test09.moduleMain) (transformModuleY Noll.Set5.Test09.moduleMain) == Noll.Set5.Test10.moduleMain
 
 testNameEnvironment =
   initialTranslateEnvironment
