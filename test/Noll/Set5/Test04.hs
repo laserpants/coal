@@ -69,12 +69,11 @@ moduleMain =
                             (EVariable () (Label (TIntrinsic INat) "n") :| [])
                             ( EClause
                                 ()
-                                ( PConstructor
-                                    ()
-                                    (Label (TIntrinsic INat) "Succ")
-                                    [ PAtVariable () (Label (TIntrinsic INat) "f")
-                                    ]
-                                )
+                                  ( PConstructor
+                                      ()
+                                      (Label (TIntrinsic INat) "Zero")
+                                      []
+                                  )
                                 ( CPlain
                                     ()
                                     []
@@ -88,11 +87,12 @@ moduleMain =
                                 )
                                 <| EClause
                                   ()
-                                  ( PConstructor
-                                      ()
-                                      (Label (TIntrinsic INat) "Zero")
-                                      []
-                                  )
+                                    ( PConstructor
+                                        ()
+                                        (Label (TIntrinsic INat) "Succ")
+                                        [ PAtVariable () (Label (TIntrinsic INat) "f")
+                                        ]
+                                    )
                                   ( CPlain
                                       ()
                                       []
@@ -136,17 +136,11 @@ moduleMain =
                                             (EVariable () (Label (TIntrinsic INat) "$fold.1.expr"))
                                             ( EClause
                                                 ()
-                                                ( PConstructor
-                                                    ()
-                                                    (Label (TIntrinsic INat) "Succ")
-                                                    [ PVariable
-                                                        ()
-                                                        ( Label
-                                                            (TIntrinsic INat)
-                                                            "f"
-                                                        )
-                                                    ]
-                                                )
+                                                  ( PConstructor
+                                                      ()
+                                                      (Label (TIntrinsic INat) "Zero")
+                                                      []
+                                                  )
                                                 ( CPlain
                                                     ()
                                                     []
@@ -160,11 +154,17 @@ moduleMain =
                                                 )
                                                 <| EClause
                                                   ()
-                                                  ( PConstructor
-                                                      ()
-                                                      (Label (TIntrinsic INat) "Zero")
-                                                      []
-                                                  )
+                                                ( PConstructor
+                                                    ()
+                                                    (Label (TIntrinsic INat) "Succ")
+                                                    [ PVariable
+                                                        ()
+                                                        ( Label
+                                                            (TIntrinsic INat)
+                                                            "f"
+                                                        )
+                                                    ]
+                                                )
                                                   ( CPlain
                                                       ()
                                                       []
@@ -177,12 +177,13 @@ moduleMain =
                                                               ( EVariable
                                                                   ()
                                                                   ( Label
-                                                                      ( TIntrinsic IString `TArrow` TIntrinsic IString
+                                                                      ( TIntrinsic INat `TArrow` TIntrinsic IString `TArrow` TIntrinsic IString
                                                                       )
-                                                                      "f"
+                                                                      "$fold.1"
                                                                   )
                                                               )
-                                                              ( EApplication
+                                                              ( EVariable () (Label (TIntrinsic INat) "f")
+                                                                 <| EApplication
                                                                   ()
                                                                   (TIntrinsic IString)
                                                                   ( EBinaryOperator
@@ -204,12 +205,13 @@ moduleMain =
                                             )
                                         )
                                     )
-                                    ( EApplication
-                                        ()
-                                        (TIntrinsic IString `TArrow` TIntrinsic IString)
-                                        (EVariable () (Label (TIntrinsic INat `TArrow` TIntrinsic IString `TArrow` TIntrinsic IString) "$fold.1"))
-                                        (EVariable () (Label (TIntrinsic INat) "n") :| [])
-                                    )
+                                     ( EApplication
+                                         ()
+                                         (TIntrinsic IString `TArrow` TIntrinsic IString)
+                                         (EVariable () (Label (TIntrinsic INat `TArrow` TIntrinsic IString `TArrow` TIntrinsic IString) "$fold.1"))
+                                         (EVariable () (Label (TIntrinsic INat) "n") :| [])
+                                     )
+
                                 )
                             )
                         )
@@ -218,22 +220,27 @@ moduleMain =
                 )
                 ( EApplication
                     ()
-                    (TIntrinsic IString)
-                    ( EVariable
+                    (TVariable (TypeIndex KType 0))
+                    (EVariable () (Label (TIntrinsic IString `TArrow` TVariable (TypeIndex KType 0)) "trace_string"))
+                    ( EApplication
                         ()
-                        ( Label
-                            ( TIntrinsic IInt32
-                                `TArrow` TIntrinsic IString
-                                `TArrow` TIntrinsic IString
+                        (TIntrinsic IString)
+                        (EVariable () (Label (TIntrinsic INat `TArrow` TIntrinsic IString `TArrow` TIntrinsic IString) "f"))
+                        ( 
+                          EApplication
+                            ()
+                            (TIntrinsic INat)
+                            (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic INat) "from_int32"))
+                            (ELiteral () (LInt32 5)
+                              :| []
                             )
-                            "f"
+                              <| ELiteral () (LString "")
+                              :| []
                         )
-                    )
-                    ( ELiteral () (LInt32 5)
-                        <| ELiteral () (LString "")
                         :| []
                     )
                 )
+
             )
         )
     ]

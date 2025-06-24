@@ -51,63 +51,63 @@ moduleMain =
                     ( ELambda
                         ()
                         (PVariable () (Label () "n") :| [])
-                         ( EFold
-                             ()
-                             ()
-                             (EVariable () (Label () "n") :| [])
-                             ( EClause
-                                 ()
-                                 ( PConstructor
-                                     ()
-                                     (Label () "Succ")
-                                     [ PAtVariable () (Label () "f")
-                                     ]
-                                 )
-                                 ( CPlain
-                                     ()
-                                     []
-                                     ( ELambda
-                                         ()
-                                         (PVariable () (Label () "s") :| [])
-                                         ( EVariable () (Label () "s")
-                                         )
-                                     )
-                                     :| []
-                                 )
-                                 <| EClause
-                                   ()
-                                   ( PConstructor
-                                       ()
-                                       (Label () "Zero")
-                                       []
-                                   )
-                                   ( CPlain
-                                       ()
-                                       []
-                                       ( ELambda
-                                           ()
-                                           (PVariable () (Label () "s") :| [])
-                                           ( EApplication
-                                               ()
-                                               ()
-                                               (EVariable () (Label () "f"))
-                                               ( EApplication
-                                                   ()
-                                                   ()
-                                                   (EBinaryOperator () () OStringConcatenation)
-                                                   ( ELiteral () (LString "a")
-                                                       <| EVariable () (Label () "s")
-                                                       :| []
-                                                   )
-                                                   :| []
-                                               )
-                                           )
-                                       )
-                                       :| []
-                                   )
-                                 :| []
-                             )
-                             ( Just
+                        ( EFold
+                            ()
+                            ()
+                            (EVariable () (Label () "n") :| [])
+                            ( EClause
+                                ()
+                                ( PConstructor
+                                    ()
+                                    (Label () "Zero")
+                                    []
+                                )
+                                ( CPlain
+                                    ()
+                                    []
+                                    ( ELambda
+                                        ()
+                                        (PVariable () (Label () "s") :| [])
+                                        ( EVariable () (Label () "s")
+                                        )
+                                    )
+                                    :| []
+                                )
+                                <| EClause
+                                  ()
+                                  ( PConstructor
+                                      ()
+                                      (Label () "Succ")
+                                      [ PAtVariable () (Label () "f")
+                                      ]
+                                  )
+                                  ( CPlain
+                                      ()
+                                      []
+                                      ( ELambda
+                                          ()
+                                          (PVariable () (Label () "s") :| [])
+                                          ( EApplication
+                                              ()
+                                              ()
+                                              (EVariable () (Label () "f"))
+                                              ( EApplication
+                                                  ()
+                                                  ()
+                                                  (EBinaryOperator () () OStringConcatenation)
+                                                  ( ELiteral () (LString "a")
+                                                      <| EVariable () (Label () "s")
+                                                      :| []
+                                                  )
+                                                  :| []
+                                              )
+                                          )
+                                      )
+                                      :| []
+                                  )
+                                :| []
+                            )
+                           ( Just
                                  ( ERecursiveLet
                                      ()
                                      (PVariable () (Label () "$fold.1"))
@@ -122,9 +122,8 @@ moduleMain =
                                                  ()
                                                  ( PConstructor
                                                      ()
-                                                     (Label () "Succ")
-                                                     [ PVariable () (Label () "f")
-                                                     ]
+                                                     (Label () "Zero")
+                                                     []
                                                  )
                                                  ( CPlain
                                                      ()
@@ -141,8 +140,9 @@ moduleMain =
                                                    ()
                                                    ( PConstructor
                                                        ()
-                                                       (Label () "Zero")
-                                                       []
+                                                       (Label () "Succ")
+                                                       [ PVariable () (Label () "f")
+                                                       ]
                                                    )
                                                    ( CPlain
                                                        ()
@@ -153,8 +153,9 @@ moduleMain =
                                                            ( EApplication
                                                                ()
                                                                ()
-                                                               (EVariable () (Label () "f"))
-                                                               ( EApplication
+                                                               (EVariable () (Label () "$fold.1"))
+                                                               ( EVariable () (Label () "f")
+                                                                  <| EApplication
                                                                    ()
                                                                    ()
                                                                    (EBinaryOperator () () OStringConcatenation)
@@ -180,19 +181,189 @@ moduleMain =
                                      )
                                  )
                              )
-                         )
+                        )
                     )
                     :| []
                 )
                 ( EApplication
                     ()
                     ()
-                    (EVariable () (Label () "f"))
-                    ( ELiteral () (LInt32 5)
-                        <| ELiteral () (LString "")
+                    (EVariable () (Label () "trace_string"))
+                    ( EApplication
+                        ()
+                        ()
+                        (EVariable () (Label () "f"))
+                        ( 
+                          EApplication
+                            ()
+                            ()
+                            (EVariable () (Label () "from_int32"))
+                            (ELiteral () (LInt32 5)
+                              :| []
+                            )
+                              <| ELiteral () (LString "")
+                              :| []
+                        )
                         :| []
                     )
                 )
             )
         )
+
+--        ( Function
+--            ()
+--            (With [] ())
+--            (PLiteral () LUnit :| [])
+--            ( ELet
+--                ()
+--                ( BPattern
+--                    ()
+--                    (PVariable () (Label () "f"))
+--                    ( ELambda
+--                        ()
+--                        (PVariable () (Label () "n") :| [])
+--                         ( EFold
+--                             ()
+--                             ()
+--                             (EVariable () (Label () "n") :| [])
+--                             ( EClause
+--                                 ()
+--                                 ( PConstructor
+--                                     ()
+--                                     (Label () "Succ")
+--                                     [ PAtVariable () (Label () "f")
+--                                     ]
+--                                 )
+--                                 ( CPlain
+--                                     ()
+--                                     []
+--                                     ( ELambda
+--                                         ()
+--                                         (PVariable () (Label () "s") :| [])
+--                                         ( EVariable () (Label () "s")
+--                                         )
+--                                     )
+--                                     :| []
+--                                 )
+--                                 <| EClause
+--                                   ()
+--                                   ( PConstructor
+--                                       ()
+--                                       (Label () "Zero")
+--                                       []
+--                                   )
+--                                   ( CPlain
+--                                       ()
+--                                       []
+--                                       ( ELambda
+--                                           ()
+--                                           (PVariable () (Label () "s") :| [])
+--                                           ( EApplication
+--                                               ()
+--                                               ()
+--                                               (EVariable () (Label () "f"))
+--                                               ( EApplication
+--                                                   ()
+--                                                   ()
+--                                                   (EBinaryOperator () () OStringConcatenation)
+--                                                   ( ELiteral () (LString "a")
+--                                                       <| EVariable () (Label () "s")
+--                                                       :| []
+--                                                   )
+--                                                   :| []
+--                                               )
+--                                           )
+--                                       )
+--                                       :| []
+--                                   )
+--                                 :| []
+--                             )
+--                             ( Just
+--                                 ( ERecursiveLet
+--                                     ()
+--                                     (PVariable () (Label () "$fold.1"))
+--                                     ( ELambda
+--                                         ()
+--                                         (PVariable () (Label () "$fold.1.expr") :| [])
+--                                         ( EMatch
+--                                             ()
+--                                             ()
+--                                             (EVariable () (Label () "$fold.1.expr"))
+--                                             ( EClause
+--                                                 ()
+--                                                 ( PConstructor
+--                                                     ()
+--                                                     (Label () "Succ")
+--                                                     [ PVariable () (Label () "f")
+--                                                     ]
+--                                                 )
+--                                                 ( CPlain
+--                                                     ()
+--                                                     []
+--                                                     ( ELambda
+--                                                         ()
+--                                                         (PVariable () (Label () "s") :| [])
+--                                                         ( EVariable () (Label () "s")
+--                                                         )
+--                                                     )
+--                                                     :| []
+--                                                 )
+--                                                 <| EClause
+--                                                   ()
+--                                                   ( PConstructor
+--                                                       ()
+--                                                       (Label () "Zero")
+--                                                       []
+--                                                   )
+--                                                   ( CPlain
+--                                                       ()
+--                                                       []
+--                                                       ( ELambda
+--                                                           ()
+--                                                           (PVariable () (Label () "s") :| [])
+--                                                           ( EApplication
+--                                                               ()
+--                                                               ()
+--                                                               (EVariable () (Label () "f"))
+--                                                               ( EApplication
+--                                                                   ()
+--                                                                   ()
+--                                                                   (EBinaryOperator () () OStringConcatenation)
+--                                                                   ( ELiteral () (LString "a")
+--                                                                       <| EVariable () (Label () "s")
+--                                                                       :| []
+--                                                                   )
+--                                                                   :| []
+--                                                               )
+--                                                           )
+--                                                       )
+--                                                       :| []
+--                                                   )
+--                                                 :| []
+--                                             )
+--                                         )
+--                                     )
+--                                     ( EApplication
+--                                         ()
+--                                         ()
+--                                         (EVariable () (Label () "$fold.1"))
+--                                         (EVariable () (Label () "n") :| [])
+--                                     )
+--                                 )
+--                             )
+--                         )
+--                    )
+--                    :| []
+--                )
+--                ( EApplication
+--                    ()
+--                    ()
+--                    (EVariable () (Label () "f"))
+--                    ( ELiteral () (LInt32 5)
+--                        <| ELiteral () (LString "")
+--                        :| []
+--                    )
+--                )
+--            )
+--        )
     ]

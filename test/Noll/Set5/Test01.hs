@@ -59,9 +59,8 @@ moduleMain =
                                 ()
                                 ( PConstructor
                                     ()
-                                    (Label () "Succ")
-                                    [ PAtVariable () (Label () "f")
-                                    ]
+                                    (Label () "Zero")
+                                    []
                                 )
                                 ( CPlain
                                     ()
@@ -78,8 +77,9 @@ moduleMain =
                                   ()
                                   ( PConstructor
                                       ()
-                                      (Label () "Zero")
-                                      []
+                                      (Label () "Succ")
+                                      [ PAtVariable () (Label () "f")
+                                      ]
                                   )
                                   ( CPlain
                                       ()
@@ -115,9 +115,22 @@ moduleMain =
                 ( EApplication
                     ()
                     ()
-                    (EVariable () (Label () "f"))
-                    ( ELiteral () (LInt32 5)
-                        <| ELiteral () (LString "")
+                    (EVariable () (Label () "trace_string"))
+                    ( EApplication
+                        ()
+                        ()
+                        (EVariable () (Label () "f"))
+                        ( 
+                          EApplication
+                            ()
+                            ()
+                            (EVariable () (Label () "from_int32"))
+                            (ELiteral () (LInt32 5)
+                              :| []
+                            )
+                              <| ELiteral () (LString "")
+                              :| []
+                        )
                         :| []
                     )
                 )
