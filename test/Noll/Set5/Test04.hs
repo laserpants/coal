@@ -2,13 +2,13 @@
 
 module Noll.Set5.Test04 where
 
-import Noll.SystemF.Constraint
-import Noll.SystemF.Substitution (Substitutable (..), Substitution (..), mapsTo)
-import Noll.SystemF.Constraint.Solver
 import Lang.Common.List1 (NonEmpty (..), (<|))
 import Lang.Label (Label (..))
 import Noll.Language
 import Noll.Module (Constant (..), Definition (..), Function (..), Module (..), Path (..))
+import Noll.SystemF.Constraint
+import Noll.SystemF.Constraint.Solver
+import Noll.SystemF.Substitution (Substitutable (..), Substitution (..), mapsTo)
 
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
@@ -69,11 +69,11 @@ moduleMain =
                             (EVariable () (Label (TIntrinsic INat) "n") :| [])
                             ( EClause
                                 ()
-                                  ( PConstructor
-                                      ()
-                                      (Label (TIntrinsic INat) "Zero")
-                                      []
-                                  )
+                                ( PConstructor
+                                    ()
+                                    (Label (TIntrinsic INat) "Zero")
+                                    []
+                                )
                                 ( CPlain
                                     ()
                                     []
@@ -87,12 +87,12 @@ moduleMain =
                                 )
                                 <| EClause
                                   ()
-                                    ( PConstructor
-                                        ()
-                                        (Label (TIntrinsic INat) "Succ")
-                                        [ PAtVariable () (Label (TIntrinsic INat) "f")
-                                        ]
-                                    )
+                                  ( PConstructor
+                                      ()
+                                      (Label (TIntrinsic INat) "Succ")
+                                      [ PAtVariable () (Label (TIntrinsic INat) "f")
+                                      ]
+                                  )
                                   ( CPlain
                                       ()
                                       []
@@ -136,11 +136,11 @@ moduleMain =
                                             (EVariable () (Label (TIntrinsic INat) "$fold.1.expr"))
                                             ( EClause
                                                 ()
-                                                  ( PConstructor
-                                                      ()
-                                                      (Label (TIntrinsic INat) "Zero")
-                                                      []
-                                                  )
+                                                ( PConstructor
+                                                    ()
+                                                    (Label (TIntrinsic INat) "Zero")
+                                                    []
+                                                )
                                                 ( CPlain
                                                     ()
                                                     []
@@ -154,17 +154,17 @@ moduleMain =
                                                 )
                                                 <| EClause
                                                   ()
-                                                ( PConstructor
-                                                    ()
-                                                    (Label (TIntrinsic INat) "Succ")
-                                                    [ PVariable
-                                                        ()
-                                                        ( Label
-                                                            (TIntrinsic INat)
-                                                            "f"
-                                                        )
-                                                    ]
-                                                )
+                                                  ( PConstructor
+                                                      ()
+                                                      (Label (TIntrinsic INat) "Succ")
+                                                      [ PVariable
+                                                          ()
+                                                          ( Label
+                                                              (TIntrinsic INat)
+                                                              "f"
+                                                          )
+                                                      ]
+                                                  )
                                                   ( CPlain
                                                       ()
                                                       []
@@ -183,18 +183,18 @@ moduleMain =
                                                                   )
                                                               )
                                                               ( EVariable () (Label (TIntrinsic INat) "f")
-                                                                 <| EApplication
-                                                                  ()
-                                                                  (TIntrinsic IString)
-                                                                  ( EBinaryOperator
-                                                                      ()
-                                                                      (TIntrinsic IString `TArrow` TIntrinsic IString `TArrow` TIntrinsic IString)
-                                                                      OStringConcatenation
-                                                                  )
-                                                                  ( ELiteral () (LString "a")
-                                                                      <| EVariable () (Label (TIntrinsic IString) "s")
-                                                                      :| []
-                                                                  )
+                                                                  <| EApplication
+                                                                    ()
+                                                                    (TIntrinsic IString)
+                                                                    ( EBinaryOperator
+                                                                        ()
+                                                                        (TIntrinsic IString `TArrow` TIntrinsic IString `TArrow` TIntrinsic IString)
+                                                                        OStringConcatenation
+                                                                    )
+                                                                    ( ELiteral () (LString "a")
+                                                                        <| EVariable () (Label (TIntrinsic IString) "s")
+                                                                        :| []
+                                                                    )
                                                                   :| []
                                                               )
                                                           )
@@ -205,13 +205,12 @@ moduleMain =
                                             )
                                         )
                                     )
-                                     ( EApplication
-                                         ()
-                                         (TIntrinsic IString `TArrow` TIntrinsic IString)
-                                         (EVariable () (Label (TIntrinsic INat `TArrow` TIntrinsic IString `TArrow` TIntrinsic IString) "$fold.1"))
-                                         (EVariable () (Label (TIntrinsic INat) "n") :| [])
-                                     )
-
+                                    ( EApplication
+                                        ()
+                                        (TIntrinsic IString `TArrow` TIntrinsic IString)
+                                        (EVariable () (Label (TIntrinsic INat `TArrow` TIntrinsic IString `TArrow` TIntrinsic IString) "$fold.1"))
+                                        (EVariable () (Label (TIntrinsic INat) "n") :| [])
+                                    )
                                 )
                             )
                         )
@@ -226,34 +225,19 @@ moduleMain =
                         ()
                         (TIntrinsic IString)
                         (EVariable () (Label (TIntrinsic INat `TArrow` TIntrinsic IString `TArrow` TIntrinsic IString) "f"))
-                        ( 
-                          EApplication
+                        ( EApplication
                             ()
                             (TIntrinsic INat)
                             (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic INat) "from_int32"))
-                            (ELiteral () (LInt32 5)
-                              :| []
+                            ( ELiteral () (LInt32 5)
+                                :| []
                             )
-                              <| ELiteral () (LString "")
-                              :| []
+                            <| ELiteral () (LString "")
+                            :| []
                         )
                         :| []
                     )
                 )
-
             )
         )
-    ]
-
-banan :: (Substitution, Int, [()])
-banan =
-  solveConstraints 200
-    []
-
-banan22 :: (Substitution, Int, [()])
-banan22 =
-  solveConstraints 200
-    [ Equality () [TVariable (TypeIndex KType 3), TArrow (TIntrinsic IInt32) (TVariable (TypeIndex KType 2))]
-    , Equality () [TVariable (TypeIndex KType 0), TVariable (TypeIndex KType 1)]
-    , Implicit () (TVariable (TypeIndex KType 3)) (TVariable (TypeIndex KType 0)) (Monomorphic (Set.fromList [TypeIndex KType 1]))
     ]

@@ -86,36 +86,35 @@ fixture :: Expression () ()
 fixture =
   ELet
     ()
-      (BPattern
+    ( BPattern
         ()
         ( PVariable
             ()
             ( Label
-                ()          -- 0
+                () -- 0
                 "f"
             )
         )
-        (
-          ELambda
+        ( ELambda
             ()
-            (PLiteral () (LInt32 5) 
-                <| PVariable () (Label () "x") 
-                :| [])
-            (
-              ELiteral () (LInt32 1)
+            ( PLiteral () (LInt32 5)
+                <| PVariable () (Label () "x")
+                  :| []
+            )
+            ( ELiteral () (LInt32 1)
             )
         )
         :| []
     )
-                ( EApplication
-                    ()
-                    ()
-                    (EVariable () (Label () "f"))
-                    ( ELiteral () (LInt32 5)
-                        <| ELiteral () (LString "")
-                        :| []
-                    )
-                )
+    ( EApplication
+        ()
+        ()
+        (EVariable () (Label () "f"))
+        ( ELiteral () (LInt32 5)
+            <| ELiteral () (LString "")
+              :| []
+        )
+    )
 
 fixtureR =
   ELet
@@ -142,5 +141,5 @@ fixtureR =
                 "f"
             )
         )
-        ( ELiteral () (LInt32 5) :| [])
+        (ELiteral () (LInt32 5) :| [])
     )

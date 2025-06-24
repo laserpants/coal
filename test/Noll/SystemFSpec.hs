@@ -67,7 +67,6 @@ import qualified Noll.Set5.Test01
 import qualified Noll.Set5.Test03
 import qualified Noll.Set5.Test04
 
-
 spec :: Spec
 spec =
   describe "Noll.SystemF" $ do

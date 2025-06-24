@@ -120,16 +120,15 @@ moduleMain =
                         ()
                         ()
                         (EVariable () (Label () "f"))
-                        ( 
-                          EApplication
+                        ( EApplication
                             ()
                             ()
                             (EVariable () (Label () "from_int32"))
-                            (ELiteral () (LInt32 5)
-                              :| []
+                            ( ELiteral () (LInt32 5)
+                                :| []
                             )
-                              <| ELiteral () (LString "")
-                              :| []
+                            <| ELiteral () (LString "")
+                            :| []
                         )
                         :| []
                     )
