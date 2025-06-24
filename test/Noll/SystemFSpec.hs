@@ -66,6 +66,7 @@ import qualified Noll.Set3.Test13x
 import qualified Noll.Set5.Test01
 import qualified Noll.Set5.Test03
 import qualified Noll.Set5.Test04
+import qualified Noll.Set5.Test05
 
 spec :: Spec
 spec =
@@ -1188,6 +1189,8 @@ story = do
     normalizeObject Noll.Set.Test04.prog1_04 == Noll.Set.Test05.prog1_05
   it "" $
     normalizeObject Noll.Set3.Test04.prog3_04 == Noll.Set3.Test05.prog3_05
+  it "" $
+    normalizeObject Noll.Set5.Test04.prog1_04 == Noll.Set5.Test05.prog1_05
   it "" $
     runPatternDesugaring "v" 0 (desugarPatterns Noll.Set.Test05.moduleBinarySearch) == Noll.Set.Test06.moduleBinarySearch
   it "" $
