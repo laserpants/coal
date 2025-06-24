@@ -28,7 +28,7 @@ prog1_01 =
 --             fn(s) => f("a" +++ s)
 --       }
 --   in
---     f(5, "")
+--     trace_string(f(from_int32(5), ""))
 --
 moduleMain :: Module () () ()
 moduleMain =

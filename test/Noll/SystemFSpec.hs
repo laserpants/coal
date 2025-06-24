@@ -65,6 +65,7 @@ import qualified Noll.Set3.Test12x
 import qualified Noll.Set3.Test13x
 import qualified Noll.Set5.Test01
 import qualified Noll.Set5.Test03
+import qualified Noll.Set5.Test04
 
 
 spec :: Spec
@@ -1182,6 +1183,8 @@ story = do
     testResultExpression (Noll.CompilerExamples.Test02.baz3 Noll.Set.Test03.moduleBinarySearch) == Noll.Set.Test04.moduleBinarySearch
   it "" $
     testResultExpression (Noll.CompilerExamples.Test02.baz3 Noll.Set.Test03.moduleMain) == Noll.Set.Test04.moduleMain
+  it "" $
+    testResultExpression (Noll.CompilerExamples.Test02.baz3 Noll.Set5.Test03.moduleMain) == Noll.Set5.Test04.moduleMain
   it "" $
     normalizeObject Noll.Set.Test04.prog1_04 == Noll.Set.Test05.prog1_05
   it "" $
