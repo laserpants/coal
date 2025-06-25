@@ -34,174 +34,173 @@ moduleMain =
             ( ELambda
                 ()
                 (PLiteral () LUnit :| [])
-            ( ELet
-                ()
-                ( BPattern
+                ( ELet
                     ()
-                    ( PVariable
+                    ( BPattern
                         ()
-                        ( Label
-                            ( TIntrinsic INat
-                                `TArrow` TIntrinsic IString
-                                `TArrow` TIntrinsic IString
-                            )
-                            "f"
-                        )
-                    )
-                    ( ELambda
-                        ()
-                        (PVariable () (Label (TIntrinsic INat) "n") :| [])
-                        ( EFold
+                        ( PVariable
                             ()
-                            (TIntrinsic IString `TArrow` TIntrinsic IString)
-                            (EVariable () (Label (TIntrinsic INat) "n") :| [])
-                            ( EClause
+                            ( Label
+                                ( TIntrinsic INat
+                                    `TArrow` TIntrinsic IString
+                                    `TArrow` TIntrinsic IString
+                                )
+                                "f"
+                            )
+                        )
+                        ( ELambda
+                            ()
+                            (PVariable () (Label (TIntrinsic INat) "n") :| [])
+                            ( EFold
                                 ()
-                                ( PConstructor
+                                (TIntrinsic IString `TArrow` TIntrinsic IString)
+                                (EVariable () (Label (TIntrinsic INat) "n") :| [])
+                                ( EClause
                                     ()
-                                    (Label (TIntrinsic INat) "Zero")
-                                    []
-                                )
-                                ( CPlain
-                                    ()
-                                    []
-                                    ( ELambda
+                                    ( PConstructor
                                         ()
-                                        (PVariable () (Label (TIntrinsic IString) "s") :| [])
-                                        ( EVariable () (Label (TIntrinsic IString) "s")
-                                        )
+                                        (Label (TIntrinsic INat) "Zero")
+                                        []
                                     )
-                                    :| []
-                                )
-                                <| EClause
-                                  ()
-                                  ( PConstructor
+                                    ( CPlain
+                                        ()
+                                        []
+                                        ( ELambda
+                                            ()
+                                            (PVariable () (Label (TIntrinsic IString) "s") :| [])
+                                            ( EVariable () (Label (TIntrinsic IString) "s")
+                                            )
+                                        )
+                                        :| []
+                                    )
+                                    <| EClause
                                       ()
-                                      (Label (TIntrinsic INat) "Succ")
-                                      [ PAtVariable () (Label (TIntrinsic INat) "f")
-                                      ]
-                                  )
-                                  ( CPlain
-                                      ()
-                                      []
-                                      ( ELambda
+                                      ( PConstructor
                                           ()
-                                          (PVariable () (Label (TIntrinsic IString) "s") :| [])
-                                          ( EApplication
+                                          (Label (TIntrinsic INat) "Succ")
+                                          [ PAtVariable () (Label (TIntrinsic INat) "f")
+                                          ]
+                                      )
+                                      ( CPlain
+                                          ()
+                                          []
+                                          ( ELambda
                                               ()
-                                              (TIntrinsic IString)
-                                              (EVariable () (Label (TIntrinsic IString `TArrow` TIntrinsic IString) "f"))
+                                              (PVariable () (Label (TIntrinsic IString) "s") :| [])
                                               ( EApplication
                                                   ()
                                                   (TIntrinsic IString)
-                                                  ( EBinaryOperator
+                                                  (EVariable () (Label (TIntrinsic IString `TArrow` TIntrinsic IString) "f"))
+                                                  ( EApplication
                                                       ()
-                                                      (TIntrinsic IString `TArrow` TIntrinsic IString `TArrow` TIntrinsic IString)
-                                                      OStringConcatenation
-                                                  )
-                                                  ( ELiteral () (LString "a")
-                                                      <| EVariable () (Label (TIntrinsic IString) "s")
+                                                      (TIntrinsic IString)
+                                                      ( EBinaryOperator
+                                                          ()
+                                                          (TIntrinsic IString `TArrow` TIntrinsic IString `TArrow` TIntrinsic IString)
+                                                          OStringConcatenation
+                                                      )
+                                                      ( ELiteral () (LString "a")
+                                                          <| EVariable () (Label (TIntrinsic IString) "s")
+                                                          :| []
+                                                      )
                                                       :| []
                                                   )
-                                                  :| []
                                               )
                                           )
+                                          :| []
                                       )
-                                      :| []
-                                  )
-                                :| []
-                            )
-                            ( Just
-                                ( ERecursiveLet
-                                    ()
-                                    (PVariable () (Label (TIntrinsic INat `TArrow` TIntrinsic IString `TArrow` TIntrinsic IString) "$fold.1"))
-                                    ( ELambda
+                                    :| []
+                                )
+                                ( Just
+                                    ( ERecursiveLet
                                         ()
-                                        (PVariable () (Label (TIntrinsic INat) "$fold.1.expr") :| [])
-                                        ( ECompiledMatch
+                                        (PVariable () (Label (TIntrinsic INat `TArrow` TIntrinsic IString `TArrow` TIntrinsic IString) "$fold.1"))
+                                        ( ELambda
                                             ()
-                                            (TIntrinsic IString `TArrow` TIntrinsic IString)
-                                            (EVariable () (Label (TIntrinsic INat) "$fold.1.expr"))
-                                            ( ECompiledClause
-                                                    (Label (TIntrinsic INat `TArrow` TIntrinsic INat) "Succ" <| Label (TIntrinsic INat) "$match.1.f" :| []) 
+                                            (PVariable () (Label (TIntrinsic INat) "$fold.1.expr") :| [])
+                                            ( ECompiledMatch
+                                                ()
+                                                (TIntrinsic IString `TArrow` TIntrinsic IString)
+                                                (EVariable () (Label (TIntrinsic INat) "$fold.1.expr"))
+                                                ( ECompiledClause
+                                                    (Label (TIntrinsic INat `TArrow` TIntrinsic INat) "Succ" <| Label (TIntrinsic INat) "$match.1.f" :| [])
                                                     ( ELambda
-                                                           ()
-                                                           (PVariable () (Label (TIntrinsic IString) "s") :| [])
-                                                           ( EApplication
-                                                               ()
-                                                               (TIntrinsic IString)
-                                                               ( EVariable
-                                                                   ()
-                                                                   ( Label
-                                                                       ( TIntrinsic INat `TArrow` TIntrinsic IString `TArrow` TIntrinsic IString
-                                                                       )
-                                                                       "$fold.1"
-                                                                   )
-                                                               )
-                                                               ( EVariable () (Label (TIntrinsic INat) "$match.1.f")
-                                                                   <| EApplication
-                                                                     ()
-                                                                     (TIntrinsic IString)
-                                                                     ( EBinaryOperator
-                                                                         ()
-                                                                         (TIntrinsic IString `TArrow` TIntrinsic IString `TArrow` TIntrinsic IString)
-                                                                         OStringConcatenation
-                                                                     )
-                                                                     ( ELiteral () (LString "a")
-                                                                         <| EVariable () (Label (TIntrinsic IString) "s")
-                                                                         :| []
-                                                                     )
-                                                                   :| []
-                                                               )
-                                                           )
-                                                       )
-                                                       <|
-                                            ECompiledClause
-                                               ( Label (TIntrinsic INat) "Zero" :| [])
-                                                     ( ELambda
-                                                         ()
-                                                         (PVariable () (Label (TIntrinsic IString) "s") :| [])
-                                                         ( EVariable () (Label (TIntrinsic IString) "s")
-                                                         )
-                                                     )
-                                                :| []
+                                                        ()
+                                                        (PVariable () (Label (TIntrinsic IString) "s") :| [])
+                                                        ( EApplication
+                                                            ()
+                                                            (TIntrinsic IString)
+                                                            ( EVariable
+                                                                ()
+                                                                ( Label
+                                                                    ( TIntrinsic INat `TArrow` TIntrinsic IString `TArrow` TIntrinsic IString
+                                                                    )
+                                                                    "$fold.1"
+                                                                )
+                                                            )
+                                                            ( EVariable () (Label (TIntrinsic INat) "$match.1.f")
+                                                                <| EApplication
+                                                                  ()
+                                                                  (TIntrinsic IString)
+                                                                  ( EBinaryOperator
+                                                                      ()
+                                                                      (TIntrinsic IString `TArrow` TIntrinsic IString `TArrow` TIntrinsic IString)
+                                                                      OStringConcatenation
+                                                                  )
+                                                                  ( ELiteral () (LString "a")
+                                                                      <| EVariable () (Label (TIntrinsic IString) "s")
+                                                                      :| []
+                                                                  )
+                                                                :| []
+                                                            )
+                                                        )
+                                                    )
+                                                    <| ECompiledClause
+                                                      (Label (TIntrinsic INat) "Zero" :| [])
+                                                      ( ELambda
+                                                          ()
+                                                          (PVariable () (Label (TIntrinsic IString) "s") :| [])
+                                                          ( EVariable () (Label (TIntrinsic IString) "s")
+                                                          )
+                                                      )
+                                                    :| []
+                                                )
                                             )
                                         )
-                                    )
-                                    ( EApplication
-                                        ()
-                                        (TIntrinsic IString `TArrow` TIntrinsic IString)
-                                        (EVariable () (Label (TIntrinsic INat `TArrow` TIntrinsic IString `TArrow` TIntrinsic IString) "$fold.1"))
-                                        (EVariable () (Label (TIntrinsic INat) "n") :| [])
+                                        ( EApplication
+                                            ()
+                                            (TIntrinsic IString `TArrow` TIntrinsic IString)
+                                            (EVariable () (Label (TIntrinsic INat `TArrow` TIntrinsic IString `TArrow` TIntrinsic IString) "$fold.1"))
+                                            (EVariable () (Label (TIntrinsic INat) "n") :| [])
+                                        )
                                     )
                                 )
                             )
                         )
-                    )
-                    :| []
-                )
-                ( EApplication
-                    ()
-                    (TVariable (TypeIndex KType 0))
-                    (EVariable () (Label (TIntrinsic IString `TArrow` TVariable (TypeIndex KType 0)) "trace_string"))
-                    ( EApplication
-                        ()
-                        (TIntrinsic IString)
-                        (EVariable () (Label (TIntrinsic INat `TArrow` TIntrinsic IString `TArrow` TIntrinsic IString) "f"))
-                        ( EApplication
-                            ()
-                            (TIntrinsic INat)
-                            (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic INat) "from_int32"))
-                            ( ELiteral () (LInt32 5)
-                                :| []
-                            )
-                            <| ELiteral () (LString "")
-                            :| []
-                        )
                         :| []
                     )
+                    ( EApplication
+                        ()
+                        (TVariable (TypeIndex KType 0))
+                        (EVariable () (Label (TIntrinsic IString `TArrow` TVariable (TypeIndex KType 0)) "trace_string"))
+                        ( EApplication
+                            ()
+                            (TIntrinsic IString)
+                            (EVariable () (Label (TIntrinsic INat `TArrow` TIntrinsic IString `TArrow` TIntrinsic IString) "f"))
+                            ( EApplication
+                                ()
+                                (TIntrinsic INat)
+                                (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic INat) "from_int32"))
+                                ( ELiteral () (LInt32 5)
+                                    :| []
+                                )
+                                <| ELiteral () (LString "")
+                                :| []
+                            )
+                            :| []
+                        )
+                    )
                 )
-            )
             )
         )
     ]

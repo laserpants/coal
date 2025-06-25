@@ -214,6 +214,7 @@ test-suite noll-test
       Noll.Set5.Test09
       Noll.Set5.Test10
       Noll.Set5.Test12
+      Noll.Set5.Test14
       Noll.SystemF.Constraint.GenerationSpec
       Noll.SystemF.UnificationSpec
       Noll.SystemFExamples.Test01
