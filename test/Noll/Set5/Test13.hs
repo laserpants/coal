@@ -28,8 +28,7 @@ moduleMain =
     -- Definitions
     [ DImport (Path ["Core$"]) ["trace_string"]
     , DImport (Path ["Core$"]) ["operator__string_concatenation"]
-    , 
-      DFunction
+    , DFunction
         "main"
         ( Function
             ()
@@ -42,7 +41,7 @@ moduleMain =
                     ( PVariable
                         ()
                         ( Label
-                            ( TConstructor KType "$Nat" 
+                            ( TConstructor KType "$Nat"
                                 `TArrow` TIntrinsic IString
                                 `TArrow` TIntrinsic IString
                             )
@@ -128,31 +127,28 @@ moduleMain =
                                                 ( ERecursiveLet
                                                     ()
                                                     (PVariable () (Label (TConstructor KType "$Nat") "$match.1.f"))
-                                                    (
-                                                      EIf
+                                                    ( EIf
                                                         ()
                                                         (TIntrinsic IInt32)
-                                                        (EApplication
-                                                          ()
-                                                          (TIntrinsic IBool)
-                                                          (EBinaryOperator () (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IBool) OEqualTo)
-                                                                (EVariable () (Label (TIntrinsic IInt32) "$succ.1")
-                                                                    <| ELiteral () (LInt32 0)
-                                                                    :| []
-                                                                )
+                                                        ( EApplication
+                                                            ()
+                                                            (TIntrinsic IBool)
+                                                            (EBinaryOperator () (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IBool) OEqualTo)
+                                                            ( EVariable () (Label (TIntrinsic IInt32) "$succ.1")
+                                                                <| ELiteral () (LInt32 0)
+                                                                :| []
+                                                            )
                                                         )
                                                         (EVariable () (Label (TConstructor KType "$Nat") "$Zero"))
-                                                        (
-                                                          EApplication
+                                                        ( EApplication
                                                             ()
                                                             (TConstructor KType "$Nat")
                                                             (EVariable () (Label (TIntrinsic IInt32 `TArrow` TConstructor KType "$Nat") "$Succ"))
-                                                            (
-                                                              EApplication
+                                                            ( EApplication
                                                                 ()
                                                                 (TIntrinsic IInt32)
                                                                 (EBinaryOperator () (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) OSubtraction)
-                                                                (EVariable () (Label (TIntrinsic IInt32) "$succ.1")
+                                                                ( EVariable () (Label (TIntrinsic IInt32) "$succ.1")
                                                                     <| ELiteral () (LInt32 1)
                                                                     :| []
                                                                 )
@@ -160,37 +156,37 @@ moduleMain =
                                                             )
                                                         )
                                                     )
-                                                ( ELambda
-                                                    ()
-                                                    (PVariable () (Label (TIntrinsic IString) "s") :| [])
-                                                    ( EApplication
+                                                    ( ELambda
                                                         ()
-                                                        (TIntrinsic IString)
-                                                        ( EVariable
+                                                        (PVariable () (Label (TIntrinsic IString) "s") :| [])
+                                                        ( EApplication
                                                             ()
-                                                            ( Label
-                                                                ( TConstructor KType "$Nat" `TArrow` TIntrinsic IString `TArrow` TIntrinsic IString
+                                                            (TIntrinsic IString)
+                                                            ( EVariable
+                                                                ()
+                                                                ( Label
+                                                                    ( TConstructor KType "$Nat" `TArrow` TIntrinsic IString `TArrow` TIntrinsic IString
+                                                                    )
+                                                                    "$fold.1"
                                                                 )
-                                                                "$fold.1"
+                                                            )
+                                                            ( EVariable () (Label (TConstructor KType "$Nat") "$match.1.f")
+                                                                <| EApplication
+                                                                  ()
+                                                                  (TIntrinsic IString)
+                                                                  ( EBinaryOperator
+                                                                      ()
+                                                                      (TIntrinsic IString `TArrow` TIntrinsic IString `TArrow` TIntrinsic IString)
+                                                                      OStringConcatenation
+                                                                  )
+                                                                  ( ELiteral () (LString "a")
+                                                                      <| EVariable () (Label (TIntrinsic IString) "s")
+                                                                      :| []
+                                                                  )
+                                                                :| []
                                                             )
                                                         )
-                                                        ( EVariable () (Label (TConstructor KType "$Nat") "$match.1.f")
-                                                            <| EApplication
-                                                              ()
-                                                              (TIntrinsic IString)
-                                                              ( EBinaryOperator
-                                                                  ()
-                                                                  (TIntrinsic IString `TArrow` TIntrinsic IString `TArrow` TIntrinsic IString)
-                                                                  OStringConcatenation
-                                                              )
-                                                              ( ELiteral () (LString "a")
-                                                                  <| EVariable () (Label (TIntrinsic IString) "s")
-                                                                  :| []
-                                                              )
-                                                            :| []
-                                                        )
                                                     )
-                                                )
                                                 )
                                                 <| ECompiledClause
                                                   (Label (TConstructor KType "$Nat") "$Zero" :| [])

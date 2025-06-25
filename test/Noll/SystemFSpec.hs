@@ -1286,7 +1286,7 @@ story = do
   it "" $
     runReader (traverse translateModule Noll.Set3.Test12x.prog3_12x) testNameEnvironment == Noll.Set3.Test13x.prog3_13x
   it "" $
-    runReader (traverse translateModule Noll.Set5.Test13.prog1_13) testNameEnvironment == Noll.Set5.Test14.prog4_14 
+    runReader (traverse translateModule Noll.Set5.Test13.prog1_13) testNameEnvironment == Noll.Set5.Test14.prog4_14
   it "" $
     fixturee3 == fixturee2
   it "" $

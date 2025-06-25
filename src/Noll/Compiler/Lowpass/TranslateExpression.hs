@@ -198,13 +198,14 @@ translateExpression =
       exprs <- traverse translateExpression fields
       let e1 = foldr (uncurry Lowpass.ext) Lowpass.nil (Map.toList exprs)
       pure e1
-      --    t1 = Lowpass.typeOf e1
-      --    t = TIntrinsic IVoid -- TODO
-      --pure $
-      --  Lowpass.app
-      --    (translateType t)
-      --    (Lowpass.var (Label (Lowpass.arrow t1 (Lowpass.TCon "record" [t1])) "$Record"))
-      --    (e1 :| [])
+
+--    t1 = Lowpass.typeOf e1
+--    t = TIntrinsic IVoid -- TODO
+-- pure $
+--  Lowpass.app
+--    (translateType t)
+--    (Lowpass.var (Label (Lowpass.arrow t1 (Lowpass.TCon "record" [t1])) "$Record"))
+--    (e1 :| [])
 
 translateRecord :: (MonadReader TranslateEnvironment m, Data a) => IndexedType -> Dictionary (Expression a IndexedType) -> Maybe (Expression a IndexedType) -> m LowpassExpr
 translateRecord t d me = do
