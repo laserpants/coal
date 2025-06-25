@@ -331,6 +331,17 @@ translateBinaryOperator t =
           binop Lowpass.ODivDouble (TIntrinsic IDouble, TIntrinsic IDouble)
     ODivision ->
       error "TODO"
+    OStringConcatenation ->
+      stringConcatenationOperator
+
+stringConcatenationOperator es = do
+  args <- traverse translateExpression es
+  let t1 = translateType (TIntrinsic IString)
+  pure $
+    Lowpass.app
+      t1
+      (Lowpass.var (Label (t1 `Lowpass.arrow` t1 `Lowpass.arrow` t1) "Core$.operator__string_concatenation"))
+      args
 
 listConcatenationOperator t es = do
   args <- traverse translateExpression es
