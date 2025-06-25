@@ -333,6 +333,14 @@ translateBinaryOperator t =
       error "TODO"
     OStringConcatenation ->
       stringConcatenationOperator
+    OEqualTo ->
+      binop Lowpass.OEqInt32 (TIntrinsic IInt32, TIntrinsic IInt32)
+    OEqualTo ->
+      binop Lowpass.OEqInt64 (TIntrinsic IInt64, TIntrinsic IInt64)
+    OEqualTo ->
+      binop Lowpass.OEqFloat (TIntrinsic IFloat, TIntrinsic IFloat)
+    OEqualTo ->
+      binop Lowpass.OEqDouble (TIntrinsic IDouble, TIntrinsic IDouble)
 
 stringConcatenationOperator es = do
   args <- traverse translateExpression es
