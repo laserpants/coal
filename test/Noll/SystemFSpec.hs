@@ -70,6 +70,8 @@ import qualified Noll.Set5.Test05
 import qualified Noll.Set5.Test09
 import qualified Noll.Set5.Test10
 import qualified Noll.Set5.Test12
+import qualified Noll.Set5.Test13
+import qualified Noll.Set5.Test14
 
 spec :: Spec
 spec =
@@ -1283,6 +1285,8 @@ story = do
     runReader (traverse translateModule Noll.Set.Test12.prog1_12) testNameEnvironment == Noll.Set.Test13.prog1_13
   it "" $
     runReader (traverse translateModule Noll.Set3.Test12x.prog3_12x) testNameEnvironment == Noll.Set3.Test13x.prog3_13x
+  it "" $
+    runReader (traverse translateModule Noll.Set5.Test13.prog1_13) testNameEnvironment == Noll.Set5.Test14.prog4_14 
   it "" $
     fixturee3 == fixturee2
   it "" $

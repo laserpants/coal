@@ -229,8 +229,6 @@ moduleCore =
                             $f : *
                   }
               |]
-        , OData "Core$.$Succ" 0 (Lowpass.int32 `Lowpass.arrow` TCon "$Nat" [])
-        , OData "Core$.$Zero" 1 (TCon "$Nat" [])
         ]
     }
 
@@ -242,47 +240,58 @@ moduleMain =
   Module
     { moduleName = "Main"
     , moduleImports =
-        [ "Core$.$Zero"
-        , "Core$.$Succ"
+        [ "Core$.operator__string_concatenation"
+        , "Core$.trace_string"
+        , "Core$.operator__not"
+        , "Core$.operator__reverse_composition"
+        , "Core$.operator__reverse_application"
+        , "Core$.always"
+        , "Core$.operator__list_concatenation"
+        , "Core$.trace_int32"
         , "Core$.trace_string"
         , "Core$.operator__string_concatenation"
+        , "Core$.int32_to_string"
+        , "Core$.pair_to_string"
+        , "Core$.list_to_string"
+        , "Core$.trace"
         ]
     , moduleObjects =
         [ 
-          OFunction
-            "Main.from_int32"
-            [ Label (TCon "Numeric" [opaque]) "$a"
-            ]
-            [r| 
-                  match<int32/*>($a : Numeric(*)) {
-                    | ( $Record : { from_int32 : int32/* | * }/Numeric(*)
-                      , $r : { from_int32 : int32/* | * }
-                      ) =>
-                        select
-                          { from_int32 = $f : int32/* | _ : * } =
-                            $r : { from_int32 : int32/* | * }
-                          in
-                            $f : int32/*
-                  }
-              |]
-        , OFunction
-            "Main.from_int32__$instance.a952655fec712ed8"
-            -- TODO
-            [ Label int32 "n"
-            ]
-            [r| 
-                  if ([== int32](n : int32, 0))
-                    then
-                      Core$.$Zero : $Nat 
-                    else
-                      @<$Nat>
-                        ( Core$.$Succ : int32/$Nat
-                        , [- int32](n : int32, 1)
-                        )
-              |]
-        , OFunction
+--          OFunction
+--            "Main.from_int32"
+--            [ Label (TCon "Numeric" [opaque]) "$a"
+--            ]
+--            [r| 
+--                  match<int32/*>($a : Numeric(*)) {
+--                    | ( $Record : { from_int32 : int32/* | * }/Numeric(*)
+--                      , $r : { from_int32 : int32/* | * }
+--                      ) =>
+--                        select
+--                          { from_int32 = $f : int32/* | _ : * } =
+--                            $r : { from_int32 : int32/* | * }
+--                          in
+--                            $f : int32/*
+--                  }
+--              |]
+--        , OFunction
+--            "Main.from_int32__$instance.a952655fec712ed8"
+--            -- TODO
+--            [ Label int32 "n"
+--            ]
+--            [r| 
+--                  if ([== int32](n : int32, 0))
+--                    then
+--                      $Zero : $Nat 
+--                    else
+--                      @<$Nat>
+--                        ( $Succ : int32/$Nat
+--                        , [- int32](n : int32, 1)
+--                        )
+--              |]
+--        , 
+        OFunction
             "Main.main"
-            [Label (TCon "unit" []) "$v.0"]
+            [Label (TCon "unit" []) "_"]
             [r| 
                  let
                    f : $Nat/string/string =
@@ -298,10 +307,10 @@ moduleMain =
                                      $match.1.f : $Nat =
                                        if ([== int32]($succ.1 : int32, 0))
                                          then
-                                           Core$.$Zero : $Nat 
+                                           $Zero : $Nat 
                                          else
                                            @<$Nat>
-                                             ( Core$.$Succ : int32/$Nat
+                                             ( $Succ : int32/$Nat
                                              , [- int32]($succ.1 : int32, 1)
                                              )
                                          in
@@ -331,12 +340,14 @@ moduleMain =
                        , @<string>
                            ( f : $Nat/string/string
                            , @<$Nat>
-                               ( Main.from_int32 : Numeric($Nat)/int32/$Nat
-                               , @<record({ from_int32 : int32/$Nat | {} })>
-                                   ( $Record : { from_int32 : int32/$Nat | {} }/record({ from_int32 : int32/$Nat | {} })
-                                   , { from_int32 = Main.from_int32__$instance.a952655fec712ed8 : int32/$Nat
-                                     | {}
-                                     }
+                               ( @<int32/$Nat>
+                                   ( Main.from_int32 : Numeric($Nat)/int32/$Nat
+                                   , @<Numeric($Nat)>
+                                       ( $Record : { from_int32 : int32/$Nat | {} }/record({ from_int32 : int32/$Nat | {} })
+                                       , { from_int32 = Main.from_int32__$instance.a952655fec712ed8 : int32/$Nat
+                                         | {}
+                                         }
+                                       )
                                    )
                                , 5
                                )
