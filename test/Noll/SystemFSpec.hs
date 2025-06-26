@@ -25,6 +25,7 @@ import Noll.Compiler.PatternMatching.Rule
 import Noll.Compiler.TraitTransform
 import Noll.Compiler.TraitTransformSpec
 import Noll.Compiler.Transform.Fold
+import Noll.Compiler.Transform.Unfold
 import Noll.Compiler.Transform.Pattern.Desugaring
 import Noll.Compiler.Transform.Pattern.OrExpansion
 import Noll.Compiler.Transform.Pattern.RecordDesugaring
@@ -72,6 +73,8 @@ import qualified Noll.Set5.Test10
 import qualified Noll.Set5.Test12
 import qualified Noll.Set5.Test13
 import qualified Noll.Set5.Test14
+import qualified Noll.Set4.Test02
+import qualified Noll.Set4.Test021
 
 spec :: Spec
 spec =
@@ -1319,6 +1322,8 @@ story = do
     runTraitTransformY2 (freshIdIn Noll.Set.Test09.moduleMain) (transformModuleY Noll.Set.Test09.moduleMain) == Noll.Set.Test10.moduleMain
   it "" $
     runTraitTransformY2 (freshIdIn Noll.Set5.Test09.moduleMain) (transformModuleY Noll.Set5.Test09.moduleMain) == Noll.Set5.Test10.moduleMain
+  it "" $
+    runUnfoldExpansion "unfold" 1 (compileUnfolds Noll.Set4.Test02.moduleMain) == Noll.Set4.Test021.moduleMain 
 
 testNameEnvironment =
   initialTranslateEnvironment
