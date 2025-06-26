@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
 
-module Noll.Set5.Test14 where
+module Noll.Set6.Test14 where
 
 import Data.Text (Text)
 import Lang.Label (Label (..))
@@ -229,6 +229,21 @@ moduleCore =
                             $f : *
                   }
               |]
+        , OFunction
+            "Core$.unpack_nat"
+            [ Label (TCon "$Nat" []) "nat"
+            ]
+            [r| 
+                  match<int32>(nat: $Nat) {
+                    | ( $Succ : int32/$Nat
+                      , succ : int32
+                      ) =>
+                        [+ int32](succ : int32, 1)
+                    | ( $Zero : $Nat
+                      ) =>
+                        0
+                  }
+              |]
         ]
     }
 
@@ -254,6 +269,7 @@ moduleMain =
         , "Core$.pair_to_string"
         , "Core$.list_to_string"
         , "Core$.trace"
+        , "Core$.unpack_nat"
         ]
     , moduleObjects =
         [ OFunction
@@ -338,16 +354,35 @@ moduleMain =
                        , @<string>
                            ( f : $Nat/string/string
                            , @<$Nat>
-                               ( @<int32/$Nat>
-                                   ( Main.from_int32 : Numeric($Nat)/int32/$Nat
-                                   , @<Numeric($Nat)>
-                                       ( $Record : { from_int32 : int32/$Nat | {} }/record({ from_int32 : int32/$Nat | {} })
-                                       , { from_int32 = Main.from_int32__$instance.a952655fec712ed8 : int32/$Nat
-                                         | {}
-                                         }
+                               ( $Succ : int32/$Nat
+                               , @<int32>
+                                   ( Core$.unpack_nat : $Nat/int32
+                                   , @<$Nat>
+                                       ( $Succ : int32/$Nat
+                                       , @<int32>
+                                           ( Core$.unpack_nat : $Nat/int32
+                                           , @<$Nat>
+                                               ( $Succ : int32/$Nat
+                                               , @<int32>
+                                                   ( Core$.unpack_nat : $Nat/int32
+                                                   , @<$Nat>
+                                                       ( $Succ : int32/$Nat
+                                                       , @<int32>
+                                                           ( Core$.unpack_nat : $Nat/int32
+                                                           , @<$Nat>
+                                                               ( $Succ : int32/$Nat
+                                                               , @<int32>
+                                                                   ( Core$.unpack_nat : $Nat/int32
+                                                                   , $Zero : $Nat
+                                                                   )
+                                                               )
+                                                           )
+                                                       )
+                                                   )
+                                               )
+                                           )
                                        )
                                    )
-                               , 5
                                )
                            , "b"
                            )
@@ -370,5 +405,5 @@ fixture3 =
   , moduleMain1
   ]
 
-poobx :: IO ()
-poobx = Lowpass.testModules =<< Lowpass.compileModules fixture3
+loobx :: IO ()
+loobx = Lowpass.testModules =<< Lowpass.compileModules fixture3

@@ -25,11 +25,11 @@ import Noll.Compiler.PatternMatching.Rule
 import Noll.Compiler.TraitTransform
 import Noll.Compiler.TraitTransformSpec
 import Noll.Compiler.Transform.Fold
-import Noll.Compiler.Transform.Unfold
 import Noll.Compiler.Transform.Pattern.Desugaring
 import Noll.Compiler.Transform.Pattern.OrExpansion
 import Noll.Compiler.Transform.Pattern.RecordDesugaring
 import Noll.Compiler.Transform.Type.AliasInsertion
+import Noll.Compiler.Transform.Unfold
 import Noll.Language
 import Noll.Module (Constant (..), Function (..), Module (..))
 import Noll.SystemF.Constraint.Assumption (Assumption (..))
@@ -64,6 +64,8 @@ import qualified Noll.Set3.Test10x
 import qualified Noll.Set3.Test12
 import qualified Noll.Set3.Test12x
 import qualified Noll.Set3.Test13x
+import qualified Noll.Set4.Test02
+import qualified Noll.Set4.Test021
 import qualified Noll.Set5.Test01
 import qualified Noll.Set5.Test03
 import qualified Noll.Set5.Test04
@@ -73,8 +75,6 @@ import qualified Noll.Set5.Test10
 import qualified Noll.Set5.Test12
 import qualified Noll.Set5.Test13
 import qualified Noll.Set5.Test14
-import qualified Noll.Set4.Test02
-import qualified Noll.Set4.Test021
 
 spec :: Spec
 spec =
@@ -1323,7 +1323,7 @@ story = do
   it "" $
     runTraitTransformY2 (freshIdIn Noll.Set5.Test09.moduleMain) (transformModuleY Noll.Set5.Test09.moduleMain) == Noll.Set5.Test10.moduleMain
   it "" $
-    runUnfoldExpansion "unfold" 1 (compileUnfolds Noll.Set4.Test02.moduleMain) == Noll.Set4.Test021.moduleMain 
+    runUnfoldExpansion "unfold" 1 (compileUnfolds Noll.Set4.Test02.moduleMain) == Noll.Set4.Test021.moduleMain
 
 testNameEnvironment =
   initialTranslateEnvironment

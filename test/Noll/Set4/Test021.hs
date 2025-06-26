@@ -98,12 +98,12 @@ moduleMain =
                             (PVariable () (Label () "$unfold.1"))
                             ( ELambda
                                 ()
-                                  ( PAnnotation
-                                      ()
-                                      (TIntrinsic IInt32)
-                                      (PVariable () (Label () "n"))
-                                   :| []
-                                  )
+                                ( PAnnotation
+                                    ()
+                                    (TIntrinsic IInt32)
+                                    (PVariable () (Label () "n"))
+                                    :| []
+                                )
                                 ( ECodataFields
                                     ()
                                     ()
