@@ -8,19 +8,17 @@
 
 module Noll.Compiler.Transform.Nats where
 
-import Data.Generics.Uniplate.Data (rewriteM, transform, transformBi)
 import Control.Monad ((<=<))
 import Control.Monad.Reader (MonadReader, ReaderT, runReaderT)
 import Control.Monad.State (MonadState, State, evalState)
 import Control.Monad.Writer (execWriter, tell)
 import Data.Data (Data)
-import Data.Generics.Uniplate.Data (transform, transformM)
-import Lang.Common.List1 (List1, NonEmpty (..))
+import Data.Generics.Uniplate.Data (rewriteM, transform, transformBi, transformM)
+import Lang.Common.List1 (List1, NonEmpty (..), (<|))
 import Lang.Common.Supply (suppliedName)
 import Lang.Label (Label (..), labelName)
 import Lang.Utils (Dictionary, Name, const2)
 import Noll.Compiler.Transform (flattenApplication)
-import Lang.Common.List1 (List1, NonEmpty (..), (<|))
 import Noll.Compiler.Transform.Tree (replace)
 import Noll.Language
 import Noll.Language (Choice (..), Clause (..), Expression (..), Pattern (..))
@@ -51,7 +49,7 @@ instance (CompileNatsContext a) => CompileNatsContext (Dictionary a) where
   compileNats = traverse compileNats
 
 convertConstructor :: IndexedType -> NatExpansion IndexedType
-convertConstructor = 
+convertConstructor =
   \case
     TIntrinsic INat ->
       pure $ TConstructor KType "$Nat"
@@ -96,47 +94,41 @@ instance (Monoid a, Data a) => CompileNatsContext (Expression a IndexedType) whe
 instance (Monoid a, Data a) => CompileNatsContext (CompiledClause a IndexedType) where
   compileNats =
     \case
-      ECompiledClause (Label _ "Succ" :| [ Label _ s ]) e -> do
+      ECompiledClause (Label _ "Succ" :| [Label _ s]) e -> do
         name <- suppliedName
         pure $
-          ECompiledClause (Label (TConstructor KType "$Nat" `TArrow` TConstructor KType "$Nat") "$Succ" :| [ Label (TIntrinsic IInt32) name ]) $
+          ECompiledClause (Label (TConstructor KType "$Nat" `TArrow` TConstructor KType "$Nat") "$Succ" :| [Label (TIntrinsic IInt32) name]) $
             ERecursiveLet
               mempty
               (PVariable mempty (Label (TConstructor KType "$Nat") s))
-              (
-                EIf
+              ( EIf
                   mempty
                   (TIntrinsic IInt32)
-                  (
-                        EApplication
+                  ( EApplication
+                      mempty
+                      (TIntrinsic IBool)
+                      ( EBinaryOperator
                           mempty
-                          (TIntrinsic IBool)
-                          (
-                              EBinaryOperator
-                                mempty
-                                (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IBool)
-                                OEqualTo
-                          )
-                          ( EVariable mempty (Label (TIntrinsic IInt32) name)
-                              <| ELiteral mempty (LInt32 0)
-                              :| []
-                          )
+                          (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IBool)
+                          OEqualTo
+                      )
+                      ( EVariable mempty (Label (TIntrinsic IInt32) name)
+                          <| ELiteral mempty (LInt32 0)
+                          :| []
+                      )
                   )
                   (EConstructor mempty (Label (TConstructor KType "$Nat") "$Zero"))
-                  (
-                    EApplication
+                  ( EApplication
                       mempty
                       (TConstructor KType "$Nat")
                       (EConstructor mempty (Label (TIntrinsic IInt32 `TArrow` TConstructor KType "$Nat") "$Succ"))
-                      (
-                        EApplication
+                      ( EApplication
                           mempty
                           (TIntrinsic IInt32)
-                          (
-                              EBinaryOperator
-                                mempty
-                                (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
-                                OSubtraction
+                          ( EBinaryOperator
+                              mempty
+                              (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
+                              OSubtraction
                           )
                           ( EVariable mempty (Label (TIntrinsic IInt32) name)
                               <| ELiteral mempty (LInt32 1)

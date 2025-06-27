@@ -184,11 +184,11 @@ translateExpression =
     --    --  (Lowpass.Focus name0 (translateLabel ll1) (translateLabel ll2))
     --    --  (translateExpression e1)
     --    --  (translateExpression e2)
-    --    EDictionaryLambda a ts e ->
+    --    EPlaceholderLambda a ts e ->
     --      undefined
-    --    EDictionaryApplication a t e ts es ->
+    --    EPlaceholderApplication a t e ts es ->
     --      undefined
-    EDictionary _ t trait@(Trait name _) ->
+    EPlaceholder _ t trait@(Trait name _) ->
       pure (Lowpass.var (Label (translateType t) ("$d." <> name <> "__$instance." <> hashed trait)))
     EFold _ _ _ _ (Just e) ->
       translateExpression e

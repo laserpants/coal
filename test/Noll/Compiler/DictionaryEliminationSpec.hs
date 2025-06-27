@@ -15,7 +15,7 @@ import qualified Noll.Module as Module
 fixtureFoo1 =
   undefined
 
---  EDictionaryLambda
+--  EPlaceholderLambda
 --    ()
 --    ( Trait "Ordered" (TVariable (TypeIndex KType 0))
 --        :| []
@@ -29,7 +29,7 @@ fixtureFoo1 =
 --        ( ECompiledMatch
 --            ()
 --            (TIntrinsic IBool)
---            ( EDictionaryApplication
+--            ( EPlaceholderApplication
 --                ()
 --                (TConstructor KType "Ordering")
 --                (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TConstructor KType "Ordering") "compare")

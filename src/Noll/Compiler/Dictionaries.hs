@@ -202,7 +202,7 @@ bork tr@(Trait _ t) = do
   case xx of
     Nothing -> do
       tell [tr]
-      pure (EDictionary mempty (traitType tr) tr)
+      pure (EPlaceholder mempty (traitType tr) tr)
     Just r ->
       -- TODO
       pure zz

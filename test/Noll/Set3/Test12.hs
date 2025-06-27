@@ -104,8 +104,8 @@ moduleMain =
                                 "pair_to_string"
                             )
                         )
-                        ( EDictionary () (traceableTrait (TVariable (TypeIndex KType 0))) (Trait "Traceable" (TVariable (TypeIndex KType 0)))
-                            <| EDictionary () (traceableTrait (TVariable (TypeIndex KType 1))) (Trait "Traceable" (TVariable (TypeIndex KType 1)))
+                        ( EPlaceholder () (traceableTrait (TVariable (TypeIndex KType 0))) (Trait "Traceable" (TVariable (TypeIndex KType 0)))
+                            <| EPlaceholder () (traceableTrait (TVariable (TypeIndex KType 1))) (Trait "Traceable" (TVariable (TypeIndex KType 1)))
                             :| []
                         )
                     )
@@ -146,7 +146,7 @@ moduleMain =
                                 "list_to_string"
                             )
                         )
-                        (EDictionary () (traceableTrait (TVariable (TypeIndex KType 0))) (Trait "Traceable" (TVariable (TypeIndex KType 0))) :| [])
+                        (EPlaceholder () (traceableTrait (TVariable (TypeIndex KType 0))) (Trait "Traceable" (TVariable (TypeIndex KType 0))) :| [])
                     )
                     (EVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 0)))) "lst") :| [])
                 )
@@ -191,9 +191,9 @@ moduleMain =
                                 "trace"
                             )
                         )
-                        ( EDictionary () (traceableTrait (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))) (Trait "Traceable" (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])))
-                            <| EDictionary () (traceableTrait (TIntrinsic IInt32)) (Trait "Traceable" (TIntrinsic IInt32))
-                            <| EDictionary () (traceableTrait (TIntrinsic IString)) (Trait "Traceable" (TIntrinsic IString))
+                        ( EPlaceholder () (traceableTrait (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))) (Trait "Traceable" (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])))
+                            <| EPlaceholder () (traceableTrait (TIntrinsic IInt32)) (Trait "Traceable" (TIntrinsic IInt32))
+                            <| EPlaceholder () (traceableTrait (TIntrinsic IString)) (Trait "Traceable" (TIntrinsic IString))
                             :| []
                         )
                     )
@@ -216,7 +216,7 @@ moduleMain =
                     ()
                     (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))) `TArrow` TIntrinsic IString)
                     (EVariable () (Label (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))) `TArrow` TIntrinsic IString) "trace"))
-                    ( EDictionary () (traceableTrait (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))))) (Trait "Traceable" (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])))))
+                    ( EPlaceholder () (traceableTrait (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))))) (Trait "Traceable" (TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])))))
                         <| ERecord
                           ()
                           (TIntrinsic (IRecord (TRow (RExtend "trace" (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]) `TArrow` TIntrinsic IString) RNil))))
@@ -238,9 +238,9 @@ moduleMain =
                                             "trace"
                                         )
                                     )
-                                    ( EDictionary () (traceableTrait (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))) (Trait "Traceable" (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])))
-                                        <| EDictionary () (traceableTrait (TIntrinsic IInt32)) (Trait "Traceable" (TIntrinsic IInt32))
-                                        <| EDictionary () (traceableTrait (TIntrinsic IString)) (Trait "Traceable" (TIntrinsic IString))
+                                    ( EPlaceholder () (traceableTrait (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString]))) (Trait "Traceable" (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])))
+                                        <| EPlaceholder () (traceableTrait (TIntrinsic IInt32)) (Trait "Traceable" (TIntrinsic IInt32))
+                                        <| EPlaceholder () (traceableTrait (TIntrinsic IString)) (Trait "Traceable" (TIntrinsic IString))
                                         :| []
                                     )
                                 )

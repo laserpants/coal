@@ -72,7 +72,7 @@ moduleOrdered =
 --                    []
 --                    (tvar0 `TArrow` tvar0 `TArrow` TIntrinsic IBool)
 --                )
---                ( EDictionaryLambda
+--                ( EPlaceholderLambda
 --                    ()
 --                    (Trait "Ordered" (TVariable (TypeIndex KType 0)) :| [])
 --                    ( ELambda
@@ -84,7 +84,7 @@ moduleOrdered =
 --                        ( ECompiledMatch
 --                            ()
 --                            (TIntrinsic IBool)
---                            ( EDictionaryApplication
+--                            ( EPlaceholderApplication
 --                                ()
 --                                (TConstructor KType "Ordering")
 --                                (Label (tvar0 `TArrow` tvar0 `TArrow` TConstructor KType "Ordering") "compare")
@@ -124,7 +124,7 @@ moduleOrdered =
 --                    []
 --                    (tvar1 `TArrow` tvar1 `TArrow` TIntrinsic IBool)
 --                )
---                ( EDictionaryLambda
+--                ( EPlaceholderLambda
 --                    ()
 --                    (Trait "Ordered" (TVariable (TypeIndex KType 0)) :| [])
 --                    ( ELambda
@@ -148,7 +148,7 @@ moduleOrdered =
 --                                OReverseComposition
 --                            )
 --                            ( EVariable () (Label (TIntrinsic IBool `TArrow` TIntrinsic IBool) "not")
---                                <| EDictionaryApplication
+--                                <| EPlaceholderApplication
 --                                  ()
 --                                  (TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool)
 --                                  ( Label

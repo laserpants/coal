@@ -25,6 +25,7 @@ import Noll.Compiler.PatternMatching.Rule
 import Noll.Compiler.TraitTransform
 import Noll.Compiler.TraitTransformSpec
 import Noll.Compiler.Transform.Fold
+import Noll.Compiler.Transform.Nats
 import Noll.Compiler.Transform.Pattern.Desugaring
 import Noll.Compiler.Transform.Pattern.OrExpansion
 import Noll.Compiler.Transform.Pattern.RecordDesugaring
@@ -36,7 +37,6 @@ import Noll.SystemF.Constraint.Assumption (Assumption (..))
 import Noll.SystemF.Constraint.Generation.Internal (InferenceRule (..))
 import Noll.SystemFSpec.TestRunner
 import Test.Hspec (Spec, describe, it)
-import Noll.Compiler.Transform.Nats
 
 import qualified Data.Set as Set
 import qualified Lang.Common.Environment as Environment
@@ -1328,7 +1328,7 @@ story = do
   it "" $
     runUnfoldExpansion "unfold" 1 (compileUnfolds Noll.Set4.Test02.moduleMain) == Noll.Set4.Test021.moduleMain
   it "" $
-    runNatExpansion "succ" 1 (compileNats Noll.Set6.Test12.moduleMain ) == Noll.Set6.Test13.moduleMain 
+    runNatExpansion "succ" 1 (compileNats Noll.Set6.Test12.moduleMain) == Noll.Set6.Test13.moduleMain
 
 testNameEnvironment =
   initialTranslateEnvironment

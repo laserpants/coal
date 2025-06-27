@@ -59,9 +59,9 @@ eliminateDictionariesExpr =
   undefined
 
 --  \case
---    EDictionaryLambda a ts e ->
+--    EPlaceholderLambda a ts e ->
 --      flattenLambda (ELambda a (pvars ts) e)
---    EDictionaryApplication a t (Label t1 name) ts es ->
+--    EPlaceholderApplication a t (Label t1 name) ts es ->
 --      EApplication a t (EVariable mempty (Label (foldType t1 (dictionaryType <$> ts)) name)) (evars ts `List1.appendList` es)
 --    e ->
 --      e

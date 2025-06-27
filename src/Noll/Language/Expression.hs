@@ -71,7 +71,7 @@ data Expression a t
   | -- | Row restriction
     EFocus Name (Label t) (Label t) (Expression a t) (Expression a t)
   | -- | Dictionary (trait placeholder)
-    EDictionary a t (Trait t)
+    EPlaceholder a t (Trait t)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
 
 instance (Ord t, Data a, Data t) => FreeVars (Expression a t) t where

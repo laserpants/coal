@@ -75,7 +75,7 @@ transformConstantZ (Constant a u@(With _ t) e) = do
 --        ( Constant
 --            a
 --            (With (sort (tr : trs)) t)
---            (EDictionaryLambda a (List1.sort (tr :| trs)) expr)
+--            (EPlaceholderLambda a (List1.sort (tr :| trs)) expr)
 --        )
 
 -- TODO
@@ -116,7 +116,7 @@ transformZ =
 --        tr : trs -> do
 --          tell (filter parameterized traits)
 --          ds <- traverse transformZ es
---          pure (EDictionaryApplication a t ll (List1.nub (tr :| trs)) (NonEmpty.toList ds))
+--          pure (EPlaceholderApplication a t ll (List1.nub (tr :| trs)) (NonEmpty.toList ds))
 --    expr@(EVariable a ll@(Label t name)) -> do
 --      traits <- collectTraits t name
 --      case traits of
@@ -124,15 +124,15 @@ transformZ =
 --          pure (EVariable a ll)
 --        tr : trs -> do
 --          tell (filter parameterized traits)
---          pure (EDictionaryApplication a t ll (List1.nub (tr :| trs)) [])
+--          pure (EPlaceholderApplication a t ll (List1.nub (tr :| trs)) [])
 --    EListLiteral a t es ->
 --      EListLiteral a t <$> traverse transformZ es
 --    ELambda a ps e ->
 --      ELambda a ps <$> transformZ e
 --    EApplication a t e1 es ->
 --      EApplication a t <$> transformZ e1 <*> traverse transformZ es
-----    EDictionaryApplication a t ll ts es ->
-----      EDictionaryApplication a t ll ts <$> traverse transformZ es
+----    EPlaceholderApplication a t ll ts es ->
+----      EPlaceholderApplication a t ll ts <$> traverse transformZ es
 --    ECompiledMatch a t e cs ->
 --      ECompiledMatch a t
 --        <$> transformZ e
@@ -259,13 +259,13 @@ transformBindingZ =
 --          pure (BPattern a var body, [])
 --        tr : trs -> do
 --          -- tell traits
---          pure (BPattern a var (EDictionaryLambda a (List1.sort (tr :| trs)) body), [(name, Forall (typeIndexesIn t) traits t)])
+--          pure (BPattern a var (EPlaceholderLambda a (List1.sort (tr :| trs)) body), [(name, Forall (typeIndexesIn t) traits t)])
 --    -- (body, traits) <- runWriterT (transform e)
 --    -- case traits of
 --    --  [] ->
 --    --    pure (BPattern var body, [])
 --    --  tr : trs ->
---    --    pure (BPattern var (EDictionaryLambda (tr :| trs) body), [(name, tr : trs)])
+--    --    pure (BPattern var (EPlaceholderLambda (tr :| trs) body), [(name, tr : trs)])
 --    BPattern a p e ->
 --      error "TODO"
 

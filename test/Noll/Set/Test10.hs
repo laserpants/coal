@@ -165,7 +165,7 @@ moduleOrdered =
                                     ()
                                     (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TConstructor KType "Ordering")
                                     (EVariable () (Label (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Ordered") (TVariable (TypeIndex KType 0) :| []) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TConstructor KType "Ordering") "compare"))
-                                    ( EDictionary () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Ordered") (TVariable (TypeIndex KType 0) :| [])) (Trait "Ordered" (TVariable (TypeIndex KType 0)))
+                                    ( EPlaceholder () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Ordered") (TVariable (TypeIndex KType 0) :| [])) (Trait "Ordered" (TVariable (TypeIndex KType 0)))
                                         :| []
                                     )
                                 )
@@ -241,7 +241,7 @@ moduleOrdered =
                                       ()
                                       (TVariable (TypeIndex KType 1) `TArrow` TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool)
                                       (EVariable () (Label (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Ordered") (TVariable (TypeIndex KType 1) :| []) `TArrow` TVariable (TypeIndex KType 1) `TArrow` TVariable (TypeIndex KType 1) `TArrow` TIntrinsic IBool) "less_than_or_equal_to"))
-                                      ( EDictionary () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Ordered") (TVariable (TypeIndex KType 1) :| [])) (Trait "Ordered" (TVariable (TypeIndex KType 1)))
+                                      ( EPlaceholder () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Ordered") (TVariable (TypeIndex KType 1) :| [])) (Trait "Ordered" (TVariable (TypeIndex KType 1)))
                                           :| []
                                       )
                                   )
@@ -548,7 +548,7 @@ moduleBinarySearch =
                                                                     ()
                                                                     (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
                                                                     (EVariable () (Label (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Ordered") (TVariable (TypeIndex KType 0) :| []) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool) "greater_than"))
-                                                                    (EDictionary () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Ordered") (TVariable (TypeIndex KType 0) :| [])) (Trait "Ordered" (TVariable (TypeIndex KType 0))) :| [])
+                                                                    (EPlaceholder () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Ordered") (TVariable (TypeIndex KType 0) :| [])) (Trait "Ordered" (TVariable (TypeIndex KType 0))) :| [])
                                                                 )
                                                                 ( EVariable () (Label (TVariable (TypeIndex KType 0)) "n")
                                                                     <| EVariable () (Label (TVariable (TypeIndex KType 0)) "$row.2.field.min")
@@ -565,7 +565,7 @@ moduleBinarySearch =
                                                                           ()
                                                                           (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
                                                                           (EVariable () (Label (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Ordered") (TVariable (TypeIndex KType 0) :| []) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool) "less_than_or_equal_to"))
-                                                                          (EDictionary () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Ordered") (TVariable (TypeIndex KType 0) :| [])) (Trait "Ordered" (TVariable (TypeIndex KType 0))) :| [])
+                                                                          (EPlaceholder () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Ordered") (TVariable (TypeIndex KType 0) :| [])) (Trait "Ordered" (TVariable (TypeIndex KType 0))) :| [])
                                                                       )
                                                                       ( EVariable () (Label (TVariable (TypeIndex KType 0)) "n")
                                                                           <| EVariable () (Label (TVariable (TypeIndex KType 0)) "$row.1.field.max")
@@ -578,7 +578,7 @@ moduleBinarySearch =
                                                                             ()
                                                                             (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
                                                                             (EVariable () (Label (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Ordered") (TVariable (TypeIndex KType 0) :| []) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool) "less_than_or_equal_to"))
-                                                                            (EDictionary () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Ordered") (TVariable (TypeIndex KType 0) :| [])) (Trait "Ordered" (TVariable (TypeIndex KType 0))) :| [])
+                                                                            (EPlaceholder () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Ordered") (TVariable (TypeIndex KType 0) :| [])) (Trait "Ordered" (TVariable (TypeIndex KType 0))) :| [])
                                                                         )
                                                                         ( EVariable () (Label (TVariable (TypeIndex KType 0)) "$row.1.field.max")
                                                                             <| EApplication
@@ -588,7 +588,7 @@ moduleBinarySearch =
                                                                                   ()
                                                                                   (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0))
                                                                                   (EVariable () (Label (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TVariable (TypeIndex KType 0) :| []) `TArrow` TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0)) "from_int32"))
-                                                                                  (EDictionary () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TVariable (TypeIndex KType 0) :| [])) (Trait "Numeric" (TVariable (TypeIndex KType 0))) :| [])
+                                                                                  (EPlaceholder () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TVariable (TypeIndex KType 0) :| [])) (Trait "Numeric" (TVariable (TypeIndex KType 0))) :| [])
                                                                               )
                                                                               ( ELiteral () (LInt32 (-1))
                                                                                   :| []
@@ -679,7 +679,7 @@ moduleBinarySearch =
                                                 (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1))
                                                 ( EVariable () (Label (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TVariable (TypeIndex KType 1) :| []) `TArrow` TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32")
                                                 )
-                                                ( EDictionary () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TVariable (TypeIndex KType 1) :| [])) (Trait "Numeric" (TVariable (TypeIndex KType 1)))
+                                                ( EPlaceholder () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TVariable (TypeIndex KType 1) :| [])) (Trait "Numeric" (TVariable (TypeIndex KType 1)))
                                                     :| []
                                                 )
                                             )
@@ -698,7 +698,7 @@ moduleBinarySearch =
                                                 ()
                                                 (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1))
                                                 (EVariable () (Label (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TVariable (TypeIndex KType 1) :| []) `TArrow` TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32"))
-                                                ( EDictionary () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TVariable (TypeIndex KType 1) :| [])) (Trait "Numeric" (TVariable (TypeIndex KType 1)))
+                                                ( EPlaceholder () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TVariable (TypeIndex KType 1) :| [])) (Trait "Numeric" (TVariable (TypeIndex KType 1)))
                                                     :| []
                                                 )
                                             )
@@ -784,8 +784,8 @@ moduleBinarySearch =
                                                                   "in_range"
                                                               )
                                                           )
-                                                          ( EDictionary () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TVariable (TypeIndex KType 1) :| [])) (Trait "Numeric" (TVariable (TypeIndex KType 1)))
-                                                              <| EDictionary () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Ordered") (TVariable (TypeIndex KType 1) :| [])) (Trait "Ordered" (TVariable (TypeIndex KType 1)))
+                                                          ( EPlaceholder () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TVariable (TypeIndex KType 1) :| [])) (Trait "Numeric" (TVariable (TypeIndex KType 1)))
+                                                              <| EPlaceholder () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Ordered") (TVariable (TypeIndex KType 1) :| [])) (Trait "Ordered" (TVariable (TypeIndex KType 1)))
                                                               :| []
                                                           )
                                                       )
@@ -1264,8 +1264,8 @@ moduleBinarySearch =
                                                                               "in_range"
                                                                           )
                                                                       )
-                                                                      ( EDictionary () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TVariable (TypeIndex KType 1) :| [])) (Trait "Numeric" (TVariable (TypeIndex KType 1)))
-                                                                          <| EDictionary () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Ordered") (TVariable (TypeIndex KType 1) :| [])) (Trait "Ordered" (TVariable (TypeIndex KType 1)))
+                                                                      ( EPlaceholder () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TVariable (TypeIndex KType 1) :| [])) (Trait "Numeric" (TVariable (TypeIndex KType 1)))
+                                                                          <| EPlaceholder () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Ordered") (TVariable (TypeIndex KType 1) :| [])) (Trait "Ordered" (TVariable (TypeIndex KType 1)))
                                                                           :| []
                                                                       )
                                                                   )
@@ -1674,7 +1674,7 @@ moduleBinarySearch =
                                                             ()
                                                             (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1))
                                                             (EVariable () (Label (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TVariable (TypeIndex KType 1) :| []) `TArrow` TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32"))
-                                                            ( EDictionary () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TVariable (TypeIndex KType 1) :| [])) (Trait "Numeric" (TVariable (TypeIndex KType 1)))
+                                                            ( EPlaceholder () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TVariable (TypeIndex KType 1) :| [])) (Trait "Numeric" (TVariable (TypeIndex KType 1)))
                                                                 :| []
                                                             )
                                                         )
@@ -1693,7 +1693,7 @@ moduleBinarySearch =
                                                             ()
                                                             (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1))
                                                             (EVariable () (Label (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TVariable (TypeIndex KType 1) :| []) `TArrow` TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 1)) "from_int32"))
-                                                            ( EDictionary () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TVariable (TypeIndex KType 1) :| [])) (Trait "Numeric" (TVariable (TypeIndex KType 1)))
+                                                            ( EPlaceholder () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TVariable (TypeIndex KType 1) :| [])) (Trait "Numeric" (TVariable (TypeIndex KType 1)))
                                                                 :| []
                                                             )
                                                         )
@@ -2137,8 +2137,8 @@ moduleBinarySearch =
                                       "from_list"
                                   )
                               )
-                              ( EDictionary () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TVariable (TypeIndex KType 3) :| [])) (Trait "Numeric" (TVariable (TypeIndex KType 3)))
-                                  <| EDictionary () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Ordered") (TVariable (TypeIndex KType 3) :| [])) (Trait "Ordered" (TVariable (TypeIndex KType 3)))
+                              ( EPlaceholder () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TVariable (TypeIndex KType 3) :| [])) (Trait "Numeric" (TVariable (TypeIndex KType 3)))
+                                  <| EPlaceholder () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Ordered") (TVariable (TypeIndex KType 3) :| [])) (Trait "Ordered" (TVariable (TypeIndex KType 3)))
                                   :| []
                               )
                             -- EApplication
@@ -2456,7 +2456,7 @@ moduleMain =
         --                                ()
         --                                (TIntrinsic IInt32)
         --                                (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32"))
-        --                                            ( EDictionary () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TIntrinsic IInt32 :| [])) (Trait "Numeric" (TIntrinsic IInt32))
+        --                                            ( EPlaceholder () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TIntrinsic IInt32 :| [])) (Trait "Numeric" (TIntrinsic IInt32))
         --                                                <| ELiteral () (LInt32 5)
         --                                                :| []
         --                                            )
@@ -2466,7 +2466,7 @@ moduleMain =
         --                                ()
         --                                (TIntrinsic IInt32)
         --                                (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32"))
-        --                                            ( EDictionary () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TIntrinsic IInt32 :| [])) (Trait "Numeric" (TIntrinsic IInt32))
+        --                                            ( EPlaceholder () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TIntrinsic IInt32 :| [])) (Trait "Numeric" (TIntrinsic IInt32))
         --                                                <| ELiteral () (LInt32 3)
         --                                                :| []
         --                                            )
@@ -2476,7 +2476,7 @@ moduleMain =
         --                                ()
         --                                (TIntrinsic IInt32)
         --                                (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32"))
-        --                                            ( EDictionary () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TIntrinsic IInt32 :| [])) (Trait "Numeric" (TIntrinsic IInt32))
+        --                                            ( EPlaceholder () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TIntrinsic IInt32 :| [])) (Trait "Numeric" (TIntrinsic IInt32))
         --                                                <| ELiteral () (LInt32 7)
         --                                                :| []
         --                                            )
@@ -2486,7 +2486,7 @@ moduleMain =
         --                                ()
         --                                (TIntrinsic IInt32)
         --                                (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32"))
-        --                                            ( EDictionary () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TIntrinsic IInt32 :| [])) (Trait "Numeric" (TIntrinsic IInt32))
+        --                                            ( EPlaceholder () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TIntrinsic IInt32 :| [])) (Trait "Numeric" (TIntrinsic IInt32))
         --                                                <| ELiteral () (LInt32 2)
         --                                                :| []
         --                                            )
@@ -2496,7 +2496,7 @@ moduleMain =
         --                                ()
         --                                (TIntrinsic IInt32)
         --                                (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32"))
-        --                                            ( EDictionary () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TIntrinsic IInt32 :| [])) (Trait "Numeric" (TIntrinsic IInt32))
+        --                                            ( EPlaceholder () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TIntrinsic IInt32 :| [])) (Trait "Numeric" (TIntrinsic IInt32))
         --                                                <| ELiteral () (LInt32 1)
         --                                                :| []
         --                                            )
@@ -2506,7 +2506,7 @@ moduleMain =
         --                                ()
         --                                (TIntrinsic IInt32)
         --                                (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32"))
-        --                                            ( EDictionary () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TIntrinsic IInt32 :| [])) (Trait "Numeric" (TIntrinsic IInt32))
+        --                                            ( EPlaceholder () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TIntrinsic IInt32 :| [])) (Trait "Numeric" (TIntrinsic IInt32))
         --                                                <| ELiteral () (LInt32 6)
         --                                                :| []
         --                                            )
@@ -2516,7 +2516,7 @@ moduleMain =
         --                                ()
         --                                (TIntrinsic IInt32)
         --                                (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32"))
-        --                                            ( EDictionary () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TIntrinsic IInt32 :| [])) (Trait "Numeric" (TIntrinsic IInt32))
+        --                                            ( EPlaceholder () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TIntrinsic IInt32 :| [])) (Trait "Numeric" (TIntrinsic IInt32))
         --                                                <| ELiteral () (LInt32 4)
         --                                                :| []
         --                                            )
@@ -2537,8 +2537,8 @@ moduleMain =
         --                                ()
         --                                (TIntrinsic (IList (TIntrinsic IInt32)))
         --                                (EVariable () (Label (TIntrinsic (IList (TIntrinsic IInt32)) `TArrow` TIntrinsic (IList (TIntrinsic IInt32))) "sort"))
-        --                                            ( EDictionary () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TIntrinsic IInt32 :| [])) (Trait "Numeric" (TIntrinsic IInt32))
-        --                                                <| EDictionary () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Ordered") (TIntrinsic IInt32 :| [])) (Trait "Ordered" (TIntrinsic IInt32))
+        --                                            ( EPlaceholder () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TIntrinsic IInt32 :| [])) (Trait "Numeric" (TIntrinsic IInt32))
+        --                                                <| EPlaceholder () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Ordered") (TIntrinsic IInt32 :| [])) (Trait "Ordered" (TIntrinsic IInt32))
         --                                                <| EVariable () (Label (TIntrinsic (IList (TIntrinsic IInt32))) "xs")
         --                                                :| []
         --                                            )
