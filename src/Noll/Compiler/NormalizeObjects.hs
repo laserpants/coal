@@ -15,27 +15,34 @@ import Noll.Module (Module (..))
 import Noll.Module.Constant (Constant (..))
 import Noll.Module.Definition (Definition (..))
 import Noll.Module.Function (Function (..))
+import Lang.Utils (Name)
+import Noll.Language.HasType (HasType (..), foldTypeOf)
 
 class NormalizeObjectsTransformContext a where
   normalizeObject :: a -> a
-
--- TODO
--- move denormalizeObject here
+  denormalizeObject :: a -> a
 
 instance (NormalizeObjectsTransformContext a) => NormalizeObjectsTransformContext [a] where
   normalizeObject = fmap normalizeObject
+  denormalizeObject = fmap denormalizeObject
 
 instance (NormalizeObjectsTransformContext a) => NormalizeObjectsTransformContext (List1 a) where
   normalizeObject = fmap normalizeObject
+  denormalizeObject = fmap denormalizeObject
 
 instance (NormalizeObjectsTransformContext a) => NormalizeObjectsTransformContext (Map k a) where
   normalizeObject = fmap normalizeObject
+  denormalizeObject = fmap denormalizeObject
 
 instance (Monoid a, Data a, Data k, Data (o k), Typeable o) => NormalizeObjectsTransformContext (Module a k (Type o k)) where
   normalizeObject =
     \case
       Module p ns d ->
         Module p ns (normalizeObject d)
+  denormalizeObject =
+    \case
+      Module p ns d ->
+        Module p ns (denormalizeObject d)
 
 instance (Monoid a, Data a, Data k, Data (o k), Typeable o) => NormalizeObjectsTransformContext (Definition a k (Type o k)) where
   normalizeObject =
@@ -50,3 +57,25 @@ instance (Monoid a, Data a, Data k, Data (o k), Typeable o) => NormalizeObjectsT
         DInstance2 name t (normalizeObject ds)
       d ->
         d
+  denormalizeObject =
+    \case
+      DAnnotation u d ->
+        DAnnotation u (denormalizeObject d)
+      DConstant name c ->
+        denormalizeConstant name c
+      DInstance name t ds ->
+        DInstance name t (denormalizeObject ds)
+      DInstance2 name t ds ->
+        DInstance2 name t (denormalizeObject ds)
+      d ->
+        d
+
+denormalizeConstant :: (Data a, Data k, Data (o k), Typeable o) => Name -> Constant Expression a (Type o k) -> Definition a k (Type o k)
+denormalizeConstant name =
+  \case
+    Constant a with (ELambda a1 ps (ELambda _ qs e)) ->
+      denormalizeConstant name (Constant a with (ELambda a1 (ps <> qs) e))
+    Constant a (With ts t) (ELambda _ ps e) ->
+      DFunction name (Function a (With ts (typeOf e)) ps e)
+    c@Constant{} ->
+      DConstant name c

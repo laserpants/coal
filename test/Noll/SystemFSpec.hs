@@ -9,7 +9,7 @@ import Data.List.NonEmpty ((<|))
 import Lang.Common.List1 (NonEmpty (..))
 import Lang.Label (Label (..))
 import Lang.Utils (Name)
-import Noll.Compiler.DenormalizeObjects (DenormalizeObjectsTransformContext (..))
+import Noll.Compiler.NormalizeObjects (NormalizeObjectsTransformContext (..))
 import Noll.Compiler.Dictionaries
 import Noll.Compiler.DictionariesSpec
 import Noll.Compiler.DictionaryElimination (EliminateDictionariesTransformContext (..))
