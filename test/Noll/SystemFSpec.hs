@@ -22,8 +22,6 @@ import Noll.Compiler.PatternMatching
 import Noll.Compiler.PatternMatching.Envelope
 import Noll.Compiler.PatternMatching.Equation
 import Noll.Compiler.PatternMatching.Rule
-import Noll.Compiler.TraitTransform
-import Noll.Compiler.TraitTransformSpec
 import Noll.Compiler.Transform.Fold
 import Noll.Compiler.Transform.Nats
 import Noll.Compiler.Transform.Pattern.Desugaring
