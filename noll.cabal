@@ -41,6 +41,7 @@ library
       Noll.Compiler.TraitTransform
       Noll.Compiler.Transform
       Noll.Compiler.Transform.Fold
+      Noll.Compiler.Transform.Nats
       Noll.Compiler.Transform.Pattern.Desugaring
       Noll.Compiler.Transform.Pattern.OrExpansion
       Noll.Compiler.Transform.Pattern.RecordDesugaring

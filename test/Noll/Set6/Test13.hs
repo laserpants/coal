@@ -59,7 +59,7 @@ moduleMain =
                                 ()
                                 ( PConstructor
                                     ()
-                                    (Label (TConstructor KType "$Nat") "$Zero")
+                                    (Label (TConstructor KType "$Nat") "Zero")
                                     []
                                 )
                                 ( CPlain
@@ -77,7 +77,7 @@ moduleMain =
                                   ()
                                   ( PConstructor
                                       ()
-                                      (Label (TConstructor KType "$Nat") "$Succ")
+                                      (Label (TConstructor KType "$Nat") "Succ")
                                       [ PAtVariable () (Label (TConstructor KType "$Nat") "f")
                                       ]
                                   )
@@ -139,11 +139,11 @@ moduleMain =
                                                                 :| []
                                                             )
                                                         )
-                                                        (EVariable () (Label (TConstructor KType "$Nat") "$Zero"))
+                                                        (EConstructor () (Label (TConstructor KType "$Nat") "$Zero"))
                                                         ( EApplication
                                                             ()
                                                             (TConstructor KType "$Nat")
-                                                            (EVariable () (Label (TIntrinsic IInt32 `TArrow` TConstructor KType "$Nat") "$Succ"))
+                                                            (EConstructor () (Label (TIntrinsic IInt32 `TArrow` TConstructor KType "$Nat") "$Succ"))
                                                             ( EApplication
                                                                 ()
                                                                 (TIntrinsic IInt32)
@@ -251,6 +251,7 @@ moduleMain =
                                                     ( EApplication
                                                         ()
                                                         (TIntrinsic IInt32)
+                                                        (EVariable () (Label (TConstructor KType "$Nat" `TArrow` TIntrinsic IInt32) "Core$.unpack_nat"))
                                                         ( EApplication
                                                             ()
                                                             (TConstructor KType "$Nat")
@@ -259,11 +260,11 @@ moduleMain =
                                                                 ()
                                                                 (TIntrinsic IInt32)
                                                                 (EVariable () (Label (TConstructor KType "$Nat" `TArrow` TIntrinsic IInt32) "Core$.unpack_nat"))
-                                                                (EVariable () (Label (TConstructor KType "$Nat") "$Zero") :| [])
+                                                                (EConstructor () (Label (TConstructor KType "$Nat") "$Zero") :| [])
                                                                 :| []
                                                             )
+                                                            :| []
                                                         )
-                                                        (EVariable () (Label (TConstructor KType "$Nat") "$Zero") :| [])
                                                         :| []
                                                     )
                                                     :| []

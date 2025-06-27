@@ -36,6 +36,7 @@ import Noll.SystemF.Constraint.Assumption (Assumption (..))
 import Noll.SystemF.Constraint.Generation.Internal (InferenceRule (..))
 import Noll.SystemFSpec.TestRunner
 import Test.Hspec (Spec, describe, it)
+import Noll.Compiler.Transform.Nats
 
 import qualified Data.Set as Set
 import qualified Lang.Common.Environment as Environment
@@ -75,6 +76,8 @@ import qualified Noll.Set5.Test10
 import qualified Noll.Set5.Test12
 import qualified Noll.Set5.Test13
 import qualified Noll.Set5.Test14
+import qualified Noll.Set6.Test12
+import qualified Noll.Set6.Test13
 
 spec :: Spec
 spec =
@@ -1324,6 +1327,8 @@ story = do
     runTraitTransformY2 (freshIdIn Noll.Set5.Test09.moduleMain) (transformModuleY Noll.Set5.Test09.moduleMain) == Noll.Set5.Test10.moduleMain
   it "" $
     runUnfoldExpansion "unfold" 1 (compileUnfolds Noll.Set4.Test02.moduleMain) == Noll.Set4.Test021.moduleMain
+  it "" $
+    runNatExpansion "succ" 1 (compileNats Noll.Set6.Test12.moduleMain ) == Noll.Set6.Test13.moduleMain 
 
 testNameEnvironment =
   initialTranslateEnvironment

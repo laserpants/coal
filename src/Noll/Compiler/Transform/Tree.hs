@@ -114,8 +114,11 @@ instance TreeTransform Expression t where
           <*> transform name f e3
       expr@ELiteral{} ->
         pure expr
-      expr@EConstructor{} ->
-        pure expr
+      EConstructor a ll@(Label t name1)
+        | name == name1 ->
+            f a t
+        | otherwise ->
+            pure (EConstructor a ll)
       EApplication a t e1 es ->
         EApplication a t
           <$> transform name f e1

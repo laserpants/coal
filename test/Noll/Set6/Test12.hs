@@ -39,7 +39,9 @@ moduleMain =
     -- Exports
     []
     -- Definitions
-    [ DFunction
+    [ DImport (Path ["Core$"]) ["trace_string"]
+    , DImport (Path ["Core$"]) ["operator__string_concatenation"]
+    , DFunction
         "main"
         ( Function
             ()

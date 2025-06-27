@@ -256,38 +256,38 @@ moduleMain =
         , "Core$.trace"
         ]
     , moduleObjects =
+--        [ OFunction
+--            "Main.from_int32"
+--            [ Label (TCon "Numeric" [opaque]) "$a"
+--            ]
+--            [r|
+--                            match<int32/*>($a : Numeric(*)) {
+--                              | ( $Record : { from_int32 : int32/* | * }/Numeric(*)
+--                                , $r : { from_int32 : int32/* | * }
+--                                ) =>
+--                                  select
+--                                    { from_int32 = $f : int32/* | _ : * } =
+--                                      $r : { from_int32 : int32/* | * }
+--                                    in
+--                                      $f : int32/*
+--                            }
+--                        |]
+--        , OFunction
+--            "Main.from_int32__$instance.a952655fec712ed8"
+--            -- TODO
+--            [ Label int32 "n"
+--            ]
+--            [r|
+--                            if ([== int32](n : int32, 0))
+--                              then
+--                                $Zero : $Nat
+--                              else
+--                                @<$Nat>
+--                                  ( $Succ : int32/$Nat
+--                                  , [- int32](n : int32, 1)
+--                                  )
+--                        |]
         [ OFunction
-            "Main.from_int32"
-            [ Label (TCon "Numeric" [opaque]) "$a"
-            ]
-            [r|
-                            match<int32/*>($a : Numeric(*)) {
-                              | ( $Record : { from_int32 : int32/* | * }/Numeric(*)
-                                , $r : { from_int32 : int32/* | * }
-                                ) =>
-                                  select
-                                    { from_int32 = $f : int32/* | _ : * } =
-                                      $r : { from_int32 : int32/* | * }
-                                    in
-                                      $f : int32/*
-                            }
-                        |]
-        , OFunction
-            "Main.from_int32__$instance.a952655fec712ed8"
-            -- TODO
-            [ Label int32 "n"
-            ]
-            [r|
-                            if ([== int32](n : int32, 0))
-                              then
-                                $Zero : $Nat
-                              else
-                                @<$Nat>
-                                  ( $Succ : int32/$Nat
-                                  , [- int32](n : int32, 1)
-                                  )
-                        |]
-        , OFunction
             "Main.main"
             [Label (TCon "unit" []) "_"]
             [r| 
