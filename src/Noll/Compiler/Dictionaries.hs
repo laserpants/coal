@@ -228,7 +228,7 @@ transformScope e = do
       pure (ELambda mempty (toPattern <$> (tr :| trs)) expr, traits)
  where
   toPattern tr@(Trait _ t) =
-    PDictionary mempty (traitType tr) tr
+    PPlaceholder mempty (traitType tr) tr
 
 znorkY ::
   ( MonadReader DictionaryEnvironment m
@@ -652,4 +652,4 @@ transformConstantY (Constant a u@(With _ t) e) = do
         )
  where
   toPattern tr@(Trait _ t) =
-    PDictionary mempty (traitType tr) tr
+    PPlaceholder mempty (traitType tr) tr

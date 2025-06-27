@@ -82,8 +82,8 @@ moduleMain =
                     ]
                     (TIntrinsic IString)
                 )
-                ( PDictionary () (traceableTrait (TVariable (TypeIndex KType 0))) (Trait "Traceable" (TVariable (TypeIndex KType 0)))
-                    <| PDictionary () (traceableTrait (TVariable (TypeIndex KType 1))) (Trait "Traceable" (TVariable (TypeIndex KType 1)))
+                ( PPlaceholder () (traceableTrait (TVariable (TypeIndex KType 0))) (Trait "Traceable" (TVariable (TypeIndex KType 0)))
+                    <| PPlaceholder () (traceableTrait (TVariable (TypeIndex KType 1))) (Trait "Traceable" (TVariable (TypeIndex KType 1)))
                     <| PVariable () (Label (TIntrinsic (ITuple [TVariable (TypeIndex KType 0), TVariable (TypeIndex KType 1)])) "p")
                     :| []
                 )
@@ -126,7 +126,7 @@ moduleMain =
                     ]
                     (TIntrinsic IString)
                 )
-                ( PDictionary () (traceableTrait (TVariable (TypeIndex KType 0))) (Trait "Traceable" (TVariable (TypeIndex KType 0)))
+                ( PPlaceholder () (traceableTrait (TVariable (TypeIndex KType 0))) (Trait "Traceable" (TVariable (TypeIndex KType 0)))
                     <| PVariable () (Label (TIntrinsic (IList (TVariable (TypeIndex KType 0)))) "lst")
                     :| []
                 )

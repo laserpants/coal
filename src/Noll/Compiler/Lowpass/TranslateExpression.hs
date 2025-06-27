@@ -238,7 +238,7 @@ translatePattern =
       translatePattern p
     PLiteral _ p ->
       pure (Label (translateType (typeOf p)) "_")
-    PDictionary _ t trait@(Trait name _) ->
+    PPlaceholder _ t trait@(Trait name _) ->
       -- TODO: DRY?
       pure (Label (translateType t) ("$d." <> name <> "__$instance." <> hashed trait))
 

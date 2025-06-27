@@ -6,17 +6,16 @@ module Noll.Compiler.NormalizeObjects (NormalizeObjectsTransformContext (..)) wh
 import Data.Data (Data, Typeable)
 import Data.Map.Strict (Map)
 import Lang.Common.List1 (List1)
+import Lang.Utils (Name)
 import Noll.Compiler.Transform
 import Noll.Language.Expression (Expression (..))
-import Noll.Language.HasType (foldTypeOf)
+import Noll.Language.HasType (HasType (..), foldTypeOf)
 import Noll.Language.Trait (With (..))
 import Noll.Language.Type (Type (..))
 import Noll.Module (Module (..))
 import Noll.Module.Constant (Constant (..))
 import Noll.Module.Definition (Definition (..))
 import Noll.Module.Function (Function (..))
-import Lang.Utils (Name)
-import Noll.Language.HasType (HasType (..), foldTypeOf)
 
 class NormalizeObjectsTransformContext a where
   normalizeObject :: a -> a

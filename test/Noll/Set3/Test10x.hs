@@ -90,8 +90,8 @@ moduleMain =
                 )
                 ( ELambda
                     ()
-                    ( PDictionary () (traceableTrait (TVariable (TypeIndex KType 0))) (Trait "Traceable" (TVariable (TypeIndex KType 0)))
-                        <| PDictionary () (traceableTrait (TVariable (TypeIndex KType 1))) (Trait "Traceable" (TVariable (TypeIndex KType 1)))
+                    ( PPlaceholder () (traceableTrait (TVariable (TypeIndex KType 0))) (Trait "Traceable" (TVariable (TypeIndex KType 0)))
+                        <| PPlaceholder () (traceableTrait (TVariable (TypeIndex KType 1))) (Trait "Traceable" (TVariable (TypeIndex KType 1)))
                         :| []
                     )
                     ( ELambda
@@ -142,7 +142,7 @@ moduleMain =
                 )
                 ( ELambda
                     ()
-                    ( PDictionary () (traceableTrait (TVariable (TypeIndex KType 0))) (Trait "Traceable" (TVariable (TypeIndex KType 0)))
+                    ( PPlaceholder () (traceableTrait (TVariable (TypeIndex KType 0))) (Trait "Traceable" (TVariable (TypeIndex KType 0)))
                         :| []
                     )
                     ( ELambda

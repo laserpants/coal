@@ -146,7 +146,7 @@ moduleOrdered =
                 )
                 ( ELambda
                     ()
-                    ( PDictionary () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Ordered") (TVariable (TypeIndex KType 0) :| [])) (Trait "Ordered" (TVariable (TypeIndex KType 0)))
+                    ( PPlaceholder () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Ordered") (TVariable (TypeIndex KType 0) :| [])) (Trait "Ordered" (TVariable (TypeIndex KType 0)))
                         :| []
                     )
                     ( ELambda
@@ -210,7 +210,7 @@ moduleOrdered =
                 )
                 ( ELambda
                     ()
-                    ( PDictionary () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Ordered") (TVariable (TypeIndex KType 1) :| [])) (Trait "Ordered" (TVariable (TypeIndex KType 1)))
+                    ( PPlaceholder () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Ordered") (TVariable (TypeIndex KType 1) :| [])) (Trait "Ordered" (TVariable (TypeIndex KType 1)))
                         :| []
                     )
                     ( ELambda
@@ -356,8 +356,8 @@ moduleBinarySearch =
                 )
                 ( ELambda
                     ()
-                    ( PDictionary () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Ordered") (TVariable (TypeIndex KType 0) :| [])) (Trait "Ordered" (TVariable (TypeIndex KType 0)))
-                        <| PDictionary () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TVariable (TypeIndex KType 0) :| [])) (Trait "Numeric" (TVariable (TypeIndex KType 0)))
+                    ( PPlaceholder () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Ordered") (TVariable (TypeIndex KType 0) :| [])) (Trait "Ordered" (TVariable (TypeIndex KType 0)))
+                        <| PPlaceholder () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TVariable (TypeIndex KType 0) :| [])) (Trait "Numeric" (TVariable (TypeIndex KType 0)))
                         :| []
                     )
                     ( ELambda
@@ -635,8 +635,8 @@ moduleBinarySearch =
                 )
                 ( ELambda
                     ()
-                    ( PDictionary () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TVariable (TypeIndex KType 1) :| [])) (Trait "Numeric" (TVariable (TypeIndex KType 1)))
-                        <| PDictionary () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Ordered") (TVariable (TypeIndex KType 1) :| [])) (Trait "Ordered" (TVariable (TypeIndex KType 1)))
+                    ( PPlaceholder () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TVariable (TypeIndex KType 1) :| [])) (Trait "Numeric" (TVariable (TypeIndex KType 1)))
+                        <| PPlaceholder () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Ordered") (TVariable (TypeIndex KType 1) :| [])) (Trait "Ordered" (TVariable (TypeIndex KType 1)))
                         :| []
                     )
                     ( ELambda
@@ -2072,8 +2072,8 @@ moduleBinarySearch =
                 )
                 ( ELambda
                     ()
-                    ( PDictionary () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TVariable (TypeIndex KType 3) :| [])) (Trait "Numeric" (TVariable (TypeIndex KType 3)))
-                        <| PDictionary () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Ordered") (TVariable (TypeIndex KType 3) :| [])) (Trait "Ordered" (TVariable (TypeIndex KType 3)))
+                    ( PPlaceholder () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Numeric") (TVariable (TypeIndex KType 3) :| [])) (Trait "Numeric" (TVariable (TypeIndex KType 3)))
+                        <| PPlaceholder () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Ordered") (TVariable (TypeIndex KType 3) :| [])) (Trait "Ordered" (TVariable (TypeIndex KType 3)))
                         :| []
                     )
                     ( EApplication

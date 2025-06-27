@@ -53,8 +53,8 @@ traceableTrait t =
 fixturee2 =
   ELambda
     ()
-    ( PDictionary () (traceableTrait (TVariable (TypeIndex KType 0))) (Trait "Traceable" (TVariable (TypeIndex KType 0)))
-        <| PDictionary () (traceableTrait (TVariable (TypeIndex KType 1))) (Trait "Traceable" (TVariable (TypeIndex KType 1)))
+    ( PPlaceholder () (traceableTrait (TVariable (TypeIndex KType 0))) (Trait "Traceable" (TVariable (TypeIndex KType 0)))
+        <| PPlaceholder () (traceableTrait (TVariable (TypeIndex KType 1))) (Trait "Traceable" (TVariable (TypeIndex KType 1)))
         :| []
     )
     ( ELambda
@@ -104,7 +104,7 @@ fixturee4 =
 fixturee5 =
   ELambda
     ()
-    ( PDictionary () (traceableTrait (TVariable (TypeIndex KType 0))) (Trait "Traceable" (TVariable (TypeIndex KType 0)))
+    ( PPlaceholder () (traceableTrait (TVariable (TypeIndex KType 0))) (Trait "Traceable" (TVariable (TypeIndex KType 0)))
         :| []
     )
     ( ELambda
@@ -416,8 +416,8 @@ fixturee14 =
     )
     ( ELambda
         ()
-        ( PDictionary () (traceableTrait (TVariable (TypeIndex KType 0))) (Trait "Traceable" (TVariable (TypeIndex KType 0)))
-            <| PDictionary () (traceableTrait (TVariable (TypeIndex KType 1))) (Trait "Traceable" (TVariable (TypeIndex KType 1)))
+        ( PPlaceholder () (traceableTrait (TVariable (TypeIndex KType 0))) (Trait "Traceable" (TVariable (TypeIndex KType 0)))
+            <| PPlaceholder () (traceableTrait (TVariable (TypeIndex KType 1))) (Trait "Traceable" (TVariable (TypeIndex KType 1)))
             :| []
         )
         ( ELambda
@@ -480,7 +480,7 @@ fixturee17 =
     )
     ( ELambda
         ()
-        ( PDictionary () (traceableTrait (TVariable (TypeIndex KType 0))) (Trait "Traceable" (TVariable (TypeIndex KType 0)))
+        ( PPlaceholder () (traceableTrait (TVariable (TypeIndex KType 0))) (Trait "Traceable" (TVariable (TypeIndex KType 0)))
             :| []
         )
         ( ELambda
@@ -983,7 +983,7 @@ fixturee29 =
     )
     ( ELambda
         ()
-        ( PDictionary () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Ordered") (TVariable (TypeIndex KType 0) :| [])) (Trait "Ordered" (TVariable (TypeIndex KType 0)))
+        ( PPlaceholder () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Ordered") (TVariable (TypeIndex KType 0) :| [])) (Trait "Ordered" (TVariable (TypeIndex KType 0)))
             :| []
         )
         ( ELambda
@@ -1075,7 +1075,7 @@ fixturee32 =
     )
     ( ELambda
         ()
-        ( PDictionary () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Ordered") (TVariable (TypeIndex KType 1) :| [])) (Trait "Ordered" (TVariable (TypeIndex KType 1)))
+        ( PPlaceholder () (TApplication KTrait (TConstructor (KType `KArrow` KTrait) "Ordered") (TVariable (TypeIndex KType 1) :| [])) (Trait "Ordered" (TVariable (TypeIndex KType 1)))
             :| []
         )
         ( ELambda

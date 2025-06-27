@@ -41,7 +41,7 @@ data Pattern a t
   | -- | Recursion operator pattern used in fold catamorphisms
     PAtVariable a (Label t)
   | -- | Dictionary
-    PDictionary a t (Trait t)
+    PPlaceholder a t (Trait t)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
 
 instance (Data a, Data t) => BoundVars (Pattern a t) where
