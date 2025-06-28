@@ -1,11 +1,50 @@
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE StrictData #-}
 
 module Noll.Compiler2 where
 
+import Control.Monad.RWS (RWST, runRWST)
+import Control.Monad.Reader (MonadReader, ReaderT, ask, asks, runReaderT)
+import Control.Monad.State (MonadState, StateT, gets, modify, put, runState, runStateT)
+import Control.Monad.Writer (execWriter)
+import Lang.Common.Supply (Supply (..), supplied)
+import Lang.Utils (Dictionary, Name, Over, forM_, (<$$$>))
+
 data Compiler2Environment = Compiler2Environment
+  deriving (Show, Eq, Ord, Read)
 
-data Compiler2State a = Compiler2State
+data Compiler2State = Compiler2State
+  { compiler2Supply :: Int
+  }
+  deriving (Show, Eq, Ord, Read)
 
+{-# INLINE overCompiler2Supply #-}
+overCompiler2Supply :: Over Compiler2State Int
+overCompiler2Supply fn Compiler2State{..} = Compiler2State{compiler2Supply = fn compiler2Supply, ..}
+
+initialCompiler2State :: Compiler2State
+initialCompiler2State =
+  Compiler2State
+    { compiler2Supply = 0
+    }
+
+newtype Compiler2T m c = Compiler2 {compiler2Stack :: RWST Compiler2Environment () Compiler2State m c}
+  deriving
+    ( Functor
+    , Applicative
+    , Monad
+    , MonadReader Compiler2Environment
+    , MonadState Compiler2State
+    )
+
+instance Supply Compiler2State where
+  updateSupply = overCompiler2Supply
+  getSupply = compiler2Supply
 
 -- import Control.Monad.Reader (runReader)
 -- import Lang.Common.List1 (NonEmpty (..), (<|))
@@ -15,7 +54,7 @@ data Compiler2State a = Compiler2State
 -- import Noll.Language
 -- import Noll.Module (Constant (..), Definition (..), Function (..), Module (..), Path (..))
 -- import Noll.Set3.Test13x (moduleCore1)
--- 
+--
 -- import qualified Data.Map.Strict as Map
 -- import qualified Data.Set as Set
 -- import qualified Lang.Common.Environment as Environment
@@ -23,12 +62,12 @@ data Compiler2State a = Compiler2State
 -- import qualified Lang.Lowpass.Compiler.Utils as Lowpass
 -- import qualified Lang.Lowpass.Language as Lowpass
 -- import qualified Noll.Module as Module
--- 
+--
 -- progx_05 :: [Module () () ()]
 -- progx_05 =
 --   [ moduleMainB
 --   ]
--- 
+--
 -- moduleMainB :: Module () () ()
 -- moduleMainB =
 --   Module.fromDefinitionList
@@ -184,17 +223,17 @@ data Compiler2State a = Compiler2State
 --             )
 --         )
 --     ]
--- 
+--
 -- ---
 -- ---
 -- ---
 -- ---
--- 
+--
 -- progx_04 :: [Module () Kind IndexedType]
 -- progx_04 =
 --   [ moduleMain
 --   ]
--- 
+--
 -- moduleMain :: Module () Kind IndexedType
 -- moduleMain =
 --   Module.fromDefinitionList
@@ -217,7 +256,7 @@ data Compiler2State a = Compiler2State
 --             )
 --         )
 --     ]
--- 
+--
 -- moduleMain2 :: Module () Kind IndexedType
 -- moduleMain2 =
 --   Module.fromDefinitionList
@@ -243,15 +282,15 @@ data Compiler2State a = Compiler2State
 --             )
 --         )
 --     ]
--- 
+--
 -- banan1 =
 --   Lowpass.compileModules (runReader (traverse translateModule Noll.Compiler2.progx_04) testNameEnvironment)
--- 
+--
 -- banan2 :: IO ()
 -- banan2 = Lowpass.testModules =<< Lowpass.compileModules (moduleCore1 : xs)
 --  where
 --   xs = runReader (traverse translateModule Noll.Compiler2.progx_04) testNameEnvironment
--- 
+--
 -- testNameEnvironment =
 --   initialTranslateEnvironment
 --     ( Environment.fromList

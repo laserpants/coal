@@ -12,5 +12,32 @@ import qualified Data.Set as Set
 import qualified Noll.Module as Module
 
 prog7_01 :: [Module () () ()]
-prog7_01 = 
-  undefined
+prog7_01 =
+  [ moduleMain
+  ]
+
+moduleMain :: Module () () ()
+moduleMain =
+  Module.fromDefinitionList
+    (Path ["Main"])
+    -- Exports
+    []
+    -- Definitions
+    [
+      DFunction
+        "main"
+        ( Function
+            ()
+            (With [] ())
+            (PLiteral () LUnit :| [])
+            (
+              EApplication
+                ()
+                ()
+                (EVariable () (Label () "trace_string"))
+                (ELiteral () (LString "Hello 🤖")
+                  :| []
+                )
+            )
+        )
+    ]
