@@ -96,6 +96,7 @@ library
     , extra
     , free
     , hashable
+    , lowpass
     , megaparsec
     , mtl
     , parser-combinators
@@ -124,6 +125,7 @@ executable noll-exe
     , extra
     , free
     , hashable
+    , lowpass
     , megaparsec
     , mtl
     , noll
@@ -256,6 +258,7 @@ test-suite noll-test
     , free
     , hashable
     , hspec
+    , lowpass
     , megaparsec
     , mtl
     , noll
