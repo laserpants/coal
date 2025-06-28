@@ -95,6 +95,8 @@ instance (AliasContext t, Data a, Data t) => AliasContext (Definition a k t) whe
         DAnnotation <$> insertAliases u <*> insertAliases o
       DFunction name f ->
         DFunction name <$> insertAliases f
+      DConstant name c ->
+        DConstant name <$> insertAliases c
       -- TODO
       o ->
         pure o
