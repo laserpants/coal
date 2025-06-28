@@ -4,7 +4,7 @@ module Noll.Compiler.Transform.Pattern.DesugarSpec where
 
 import Lang.Common.List1 (NonEmpty ((:|)), (<|))
 import Lang.Label (Label (..))
-import Noll.Compiler.Transform.Pattern.Desugar (desugarPatterns, runPatternDesugar)
+import Noll.Compiler.Transform.Pattern.Desugar (desugarPatterns, evalPatternDesugar)
 import Noll.Language (
   BinaryOperator (..),
   Binding (..),
@@ -31,21 +31,21 @@ spec :: Spec
 spec =
   describe "" $ do
     it "" $
-      runPatternDesugar "v" 0 (desugarPatterns fixture1) == fixture2
+      evalPatternDesugar "v" 0 (desugarPatterns fixture1) == fixture2
     it "" $
-      runPatternDesugar "v" 0 (desugarPatterns fixture3) == fixture4
+      evalPatternDesugar "v" 0 (desugarPatterns fixture3) == fixture4
     it "" $
-      runPatternDesugar "v" 0 (desugarPatterns fixture5) == fixture6
+      evalPatternDesugar "v" 0 (desugarPatterns fixture5) == fixture6
     it "" $
-      runPatternDesugar "v" 0 (desugarPatterns fixture7) == fixture8
+      evalPatternDesugar "v" 0 (desugarPatterns fixture7) == fixture8
     it "" $
-      runPatternDesugar "v" 0 (desugarPatterns fixture9) == fixture10
+      evalPatternDesugar "v" 0 (desugarPatterns fixture9) == fixture10
     it "" $
-      runPatternDesugar "v" 0 (desugarPatterns fixture11) == fixture12
+      evalPatternDesugar "v" 0 (desugarPatterns fixture11) == fixture12
     it "" $
-      runPatternDesugar "v" 0 (desugarPatterns Noll.Examples.Test05.moduleOrdered) == Noll.Examples.Test06.moduleOrdered
+      evalPatternDesugar "v" 0 (desugarPatterns Noll.Examples.Test05.moduleOrdered) == Noll.Examples.Test06.moduleOrdered
     it "" $
-      runPatternDesugar "v" 0 (desugarPatterns Noll.Examples.Test05.moduleBinarySearch) == Noll.Examples.Test06.moduleBinarySearch
+      evalPatternDesugar "v" 0 (desugarPatterns Noll.Examples.Test05.moduleBinarySearch) == Noll.Examples.Test06.moduleBinarySearch
 
 -- let
 --  Some(p) = x     Option(int32)

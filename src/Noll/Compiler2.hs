@@ -9,6 +9,7 @@
 module Noll.Compiler2 where
 
 import Noll.Compiler.Transform.Fold
+import Noll.Compiler.NormalizeObjects (NormalizeObjectsTransformContext (..))
 import Noll.Compiler.Transform.Unfold
 import Control.Monad ((>=>))
 import Control.Monad.RWS (RWST, runRWST)
@@ -23,6 +24,7 @@ import Noll.Language
 import Noll.Module (Constant (..), Definition (..), Function (..), Module (..), Path (..))
 import Noll.SystemF
 import Noll.SystemF.Substitution (mapsTo)
+import Noll.Compiler.Transform.Pattern.Desugar
 
 data Compiler2Environment o k t = Compiler2Environment
   { compiler2DataConstructorEnv :: Environment (Constructor o k t)
@@ -105,6 +107,25 @@ unfoldExpansionTrans f e = do
 compileFoldsC :: (Monad m) => (CompileUnfoldsContext a) => a -> Compiler2T m a
 compileFoldsC = unfoldExpansionTrans compileUnfolds
 
+runTypeInferenceC :: Module () () () -> Compiler2T m (Module () Kind IndexedType)
+runTypeInferenceC = undefined
+
+normalizeObjectC :: (Monad m, NormalizeObjectsTransformContext a) => a -> Compiler2T m a
+normalizeObjectC = pure . normalizeObject
+
+denormalizeObjectC :: (Monad m, NormalizeObjectsTransformContext a) => a -> Compiler2T m a
+denormalizeObjectC = pure . denormalizeObject
+
+patternDesugarTrans :: (Monad m) => (a -> PatternDesugar c TypeIndex Kind a) -> a -> Compiler2T m a
+patternDesugarTrans f e = do
+  n <- gets compiler2Supply
+  let (a, n') = runPatternDesugar "v" n (f e)
+  insertSupplyC n'
+  pure a
+
+desugarPatternsC :: (Monad m, Sugared c TypeIndex Kind a) => a -> Compiler2T m a
+desugarPatternsC = patternDesugarTrans desugarPatterns
+
 --
 
 compileModule :: (Monad m) => Module () () () -> Compiler2T m a
@@ -116,16 +137,23 @@ compileModule =
     -- Expand folds
     >=> compileFoldsC
     -- Type inference
-    >=> undefined
+    >=> runTypeInferenceC
     -- Normalize top-level expressions
+    >=> normalizeObjectC
     -- Translate patterns in expression arguments to match expressions
+    >=> desugarPatternsC
     -- Compile or-patterns
-    -- Translate record patterns to select operators
-    -- Compile match statements
-    -- Placeholder insertion
-    -- Denormalize top-level expressions
-    -- Final lowering
     >=> undefined
+--    -- Translate record patterns to select operators
+--    >=> undefined
+--    -- Compile match statements
+--    >=> undefined
+--    -- Placeholder insertion
+--    >=> undefined
+--    -- Denormalize top-level expressions
+--    >=> denormalizeObjectC
+--    -- Final lowering
+--    >=> undefined
 
 -----------------------
 -----------------------

@@ -1199,11 +1199,11 @@ story = do
   it "" $
     normalizeObject Noll.Set5.Test04.prog1_04 == Noll.Set5.Test05.prog1_05
   it "" $
-    runPatternDesugar "v" 0 (desugarPatterns Noll.Set.Test05.moduleBinarySearch) == Noll.Set.Test06.moduleBinarySearch
+    evalPatternDesugar "v" 0 (desugarPatterns Noll.Set.Test05.moduleBinarySearch) == Noll.Set.Test06.moduleBinarySearch
   it "" $
-    runPatternDesugar "v" 0 (desugarPatterns Noll.Set.Test05.moduleOrdered) == Noll.Set.Test06.moduleOrdered
+    evalPatternDesugar "v" 0 (desugarPatterns Noll.Set.Test05.moduleOrdered) == Noll.Set.Test06.moduleOrdered
   it "" $
-    runPatternDesugar "v" 0 (desugarPatterns Noll.Set.Test05.moduleMain) == Noll.Set.Test06.moduleMain
+    evalPatternDesugar "v" 0 (desugarPatterns Noll.Set.Test05.moduleMain) == Noll.Set.Test06.moduleMain
   it "" $
     runIdentity (Noll.Compiler.Transform.Pattern.OrExpansion.compileOrPatterns Noll.Set.Test06.moduleUtils) == Noll.Set.Test07.moduleUtils
   it "" $

@@ -7,13 +7,13 @@
 
 module Noll.Compiler.Transform.Pattern.Desugar (
   Sugared (..),
+  PatternDesugar (..),
   runPatternDesugar,
+  evalPatternDesugar,
 ) where
 
-import Control.Monad.RWS (RWS, evalRWS)
-import Control.Monad.Reader (MonadReader, ReaderT, runReaderT)
-import Control.Monad.State (MonadState, State, evalState)
-import Control.Monad.Writer (MonadWriter, WriterT, runWriterT, tell)
+import Control.Monad.RWS (RWS, evalRWS, runRWS, MonadReader, MonadState, MonadWriter, tell)
+import Control.Monad.Writer (runWriterT)
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (transformM)
 import Lang.Common.List1 (NonEmpty ((:|)))
@@ -45,9 +45,15 @@ newtype PatternDesugar c o k e = PatternDesugar {patternDesugarStack :: PatternD
     , MonadWriter [NamedPattern c o k]
     )
 
+{-# INLINE evalPatternDesugar #-}
+evalPatternDesugar :: Name -> Int -> PatternDesugar c o k e -> e
+evalPatternDesugar r s e = fst (runPatternDesugar r s e)
+
 {-# INLINE runPatternDesugar #-}
-runPatternDesugar :: Name -> Int -> PatternDesugar c o k e -> e
-runPatternDesugar r s e = fst (evalRWS (patternDesugarStack e) r s)
+runPatternDesugar :: Name -> Int -> PatternDesugar c o k e -> (e, Int)
+runPatternDesugar r s e = (a, s')
+  where
+    (a, s', _) = runRWS (patternDesugarStack e) r s
 
 class Sugared c o k e | e -> c, e -> o k where
   desugarPatterns ::
