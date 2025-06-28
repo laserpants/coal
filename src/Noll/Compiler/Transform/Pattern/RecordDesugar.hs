@@ -164,20 +164,13 @@ instance (Monoid a, Show a) => RecordPattern a (Pattern a (Type TypeIndex Kind))
         PAnnotation a t <$> expandRecordPatterns p
       PConstructor a ll ps ->
         PConstructor a ll <$> traverse expandRecordPatterns ps
-      p@PVariable{} ->
-        pure p
       PRecord _ t@(TIntrinsic (IRecord r)) d p -> do
         name <- suppliedName
         tell [(name, d, p)]
         pure (PConstructor mempty (Label t "$Record") [PVariable mempty (Label r name)])
-      p@PAtVariable{} ->
-        pure p
       PListCons a t p1 p2 ->
         PListCons a t <$> expandRecordPatterns p1 <*> expandRecordPatterns p2
       PListLiteral a t ps ->
         PListLiteral a t <$> traverse expandRecordPatterns ps
       p ->
         pure p
-
---      p -> do
---        error (show p) -- "TODO"
