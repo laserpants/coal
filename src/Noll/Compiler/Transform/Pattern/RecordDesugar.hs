@@ -30,14 +30,14 @@ import qualified Data.Map.Strict as Map
 
 compileRecordPatterns ::
   forall m a k t.
-  (Monad m, Monoid a, Show a, Data a, Data k, Ord k, Data t, MonadState Int m, MonadWriter [(Name, Dictionary (TypedPattern a), Maybe (TypedPattern a))] m, MonadReader Name m) =>
+  (Monoid a, Show a, Data a, Data k, Data t, MonadState Int m, MonadWriter [(Name, Dictionary (TypedPattern a), Maybe (TypedPattern a))] m, MonadReader Name m) =>
   Module a k t ->
   m (Module a k t)
 compileRecordPatterns = transformBiM (expandRecordPatterns :: Expression a (Type TypeIndex Kind) -> m (Expression a (Type TypeIndex Kind)))
 
 compileRecordPatterns2 ::
   forall m a.
-  (Monad m, Monoid a, Show a, Data a, MonadState Int m, MonadWriter [(Name, Dictionary (TypedPattern a), Maybe (TypedPattern a))] m, MonadReader Name m) =>
+  (Monoid a, Show a, Data a, MonadState Int m, MonadWriter [(Name, Dictionary (TypedPattern a), Maybe (TypedPattern a))] m, MonadReader Name m) =>
   Expression a (Type TypeIndex Kind) ->
   m (Expression a (Type TypeIndex Kind))
 compileRecordPatterns2 = transformBiM (expandRecordPatterns :: Expression a (Type TypeIndex Kind) -> m (Expression a (Type TypeIndex Kind)))
