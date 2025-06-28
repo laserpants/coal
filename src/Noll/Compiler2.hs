@@ -2,6 +2,11 @@
 
 module Noll.Compiler2 where
 
+data Compiler2Environment = Compiler2Environment
+
+data Compiler2State a = Compiler2State
+
+
 -- import Control.Monad.Reader (runReader)
 -- import Lang.Common.List1 (NonEmpty (..), (<|))
 -- import Lang.Label (Label (..))
