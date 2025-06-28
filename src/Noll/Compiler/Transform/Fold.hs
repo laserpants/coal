@@ -12,6 +12,7 @@ module Noll.Compiler.Transform.Fold (
   expandFoldExpr,
 ) where
 
+import Control.Monad.RWS (RWS, evalRWS)
 import Control.Monad.Reader (MonadReader, ReaderT, runReaderT)
 import Control.Monad.State (MonadState, State, evalState)
 import Control.Monad.Writer (execWriter, tell)
@@ -26,7 +27,7 @@ import Noll.Compiler.Transform.Tree (replace)
 import Noll.Language (Choice (..), Clause (..), Expression (..), Pattern (..))
 import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
 
-newtype FoldExpansion a = FoldExpansion {foldExpansionStack :: ReaderT Name (State Int) a}
+newtype FoldExpansion a = FoldExpansion {foldExpansionStack :: RWS Name () Int a}
   deriving
     ( Functor
     , Applicative
@@ -36,7 +37,7 @@ newtype FoldExpansion a = FoldExpansion {foldExpansionStack :: ReaderT Name (Sta
     )
 
 runFoldExpansion :: Name -> Int -> FoldExpansion a -> a
-runFoldExpansion r s e = evalState (runReaderT (foldExpansionStack e) r) s
+runFoldExpansion r s e = fst (evalRWS (foldExpansionStack e) r s)
 
 class FoldContext e where
   expandFolds :: Name -> [Label ()] -> e -> e

@@ -12,6 +12,7 @@ module Noll.Compiler.Transform.Unfold (
   expandUnfoldExpr,
 ) where
 
+import Control.Monad.RWS (RWS, evalRWS)
 import Control.Monad.Reader (MonadReader, ReaderT, runReaderT)
 import Control.Monad.State (MonadState, State, evalState)
 import Control.Monad.Writer (execWriter, tell)
@@ -28,7 +29,7 @@ import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
 
 import qualified Data.Map.Strict as Map
 
-newtype UnfoldExpansion a = UnfoldExpansion {unfoldExpansionStack :: ReaderT Name (State Int) a}
+newtype UnfoldExpansion a = UnfoldExpansion {unfoldExpansionStack :: RWS Name () Int a}
   deriving
     ( Functor
     , Applicative
@@ -38,7 +39,7 @@ newtype UnfoldExpansion a = UnfoldExpansion {unfoldExpansionStack :: ReaderT Nam
     )
 
 runUnfoldExpansion :: Name -> Int -> UnfoldExpansion a -> a
-runUnfoldExpansion r s e = evalState (runReaderT (unfoldExpansionStack e) r) s
+runUnfoldExpansion r s e = fst (evalRWS (unfoldExpansionStack e) r s)
 
 renameRecursiveCall :: (Monoid a, Data a) => Name -> Name -> Expression a () -> Expression a ()
 renameRecursiveCall old new = replace old (const2 $ EVariable mempty (Label mempty new))

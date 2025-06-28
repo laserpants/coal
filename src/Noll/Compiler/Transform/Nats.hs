@@ -9,6 +9,7 @@
 module Noll.Compiler.Transform.Nats where
 
 import Control.Monad ((<=<))
+import Control.Monad.RWS (RWS, evalRWS)
 import Control.Monad.Reader (MonadReader, ReaderT, runReaderT)
 import Control.Monad.State (MonadState, State, evalState)
 import Control.Monad.Writer (execWriter, tell)
@@ -21,10 +22,9 @@ import Lang.Utils (Dictionary, Name, const2)
 import Noll.Compiler.Transform (flattenApplication)
 import Noll.Compiler.Transform.Tree (replace)
 import Noll.Language
-import Noll.Language (Choice (..), Clause (..), Expression (..), Pattern (..))
 import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
 
-newtype NatExpansion a = NatExpansion {natExpansionStack :: ReaderT Name (State Int) a}
+newtype NatExpansion a = NatExpansion {natExpansionStack :: RWS Name () Int a}
   deriving
     ( Functor
     , Applicative
@@ -34,7 +34,7 @@ newtype NatExpansion a = NatExpansion {natExpansionStack :: ReaderT Name (State 
     )
 
 runNatExpansion :: Name -> Int -> NatExpansion a -> a
-runNatExpansion r s e = evalState (runReaderT (natExpansionStack e) r) s
+runNatExpansion r s e = fst (evalRWS (natExpansionStack e) r s)
 
 class CompileNatsContext a where
   compileNats :: a -> NatExpansion a
