@@ -84,6 +84,8 @@ constructorRule (u@(Label t _) : us) eqs ex = do
   processGroup qs@(HeadConstructorEquation con ps _ : _) = do
     vs <- mapM suppliedLabel ps
     EnvelopeClause con vs <$> matchPatterns (vs <> us) (shift <$> qs) ex
+  processGroup _ =
+    error "Implementation error"
   shift (HeadConstructorEquation _ ps (PatternEquationBody qs e)) =
     patternEquation (ps <> qs) e
 
