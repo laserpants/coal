@@ -42,6 +42,16 @@ newtype Compiler2T m c = Compiler2 {compiler2Stack :: RWST Compiler2Environment 
     , MonadState Compiler2State
     )
 
+{-# INLINE runCompiler2T #-}
+runCompiler2T :: (Monad m) => Compiler2Environment -> Compiler2T m c -> m (c, Compiler2State)
+runCompiler2T env com = do
+  (c, s, _) <- runRWST (compiler2Stack com) env initialCompiler2State
+  pure (c, s)
+
+{-# INLINE evalCompiler2T #-}
+evalCompiler2T :: (Monad m) => Compiler2Environment -> Compiler2T m c -> m c
+evalCompiler2T = fst <$$$> runCompiler2T
+
 instance Supply Compiler2State where
   updateSupply = overCompiler2Supply
   getSupply = compiler2Supply
