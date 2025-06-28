@@ -1,11 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Compiler.Transform.Type.AliasInsertionSpec where
+module Noll.Compiler.Transform.Type.AliasExpansionSpec where
 
 import Control.Monad.Reader (runReader)
 import Lang.Common.List1 (NonEmpty (..), (<|))
 import Lang.Label (Label (..))
-import Noll.Compiler.Transform.Type.AliasInsertion
+import Noll.Compiler.Transform.Type.AliasExpansion
 import Noll.Examples.Test01 (test01)
 import Noll.Examples.Test02 (test02)
 import Noll.Language (
@@ -30,13 +30,13 @@ spec :: Spec
 spec =
   describe "Lime.Compiler.ExpandAliases" $ do
     it "" $
-      runReader (insertAliases type1) testEnvironment == result1
+      runReader (expandAliases type1) testEnvironment == result1
     it "" $
-      runReader (insertAliases object1) testEnvironment == result2
+      runReader (expandAliases object1) testEnvironment == result2
     it "" $
-      runReader (insertAliases test01) testEnvironment == test02
+      runReader (expandAliases test01) testEnvironment == test02
     it "" $
-      runReader (insertAliases Noll.Set.Test01.prog1_01) testEnvironment2 == Noll.Set.Test02.prog1_02
+      runReader (expandAliases Noll.Set.Test01.prog1_01) testEnvironment2 == Noll.Set.Test02.prog1_02
 
 type1 :: Type Parameter ()
 type1 =

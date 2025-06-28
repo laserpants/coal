@@ -25,7 +25,7 @@ import Noll.Compiler.Transform.Nats
 import Noll.Compiler.Transform.Pattern.Desugar
 import Noll.Compiler.Transform.Pattern.OrExpansion
 import Noll.Compiler.Transform.Pattern.RecordDesugar
-import Noll.Compiler.Transform.Type.AliasInsertion
+import Noll.Compiler.Transform.Type.AliasExpansion
 import Noll.Compiler.Transform.Unfold
 import Noll.Language
 import Noll.Module (Constant (..), Function (..), Module (..))
@@ -1177,7 +1177,7 @@ testEnvironment2 =
 
 story = do
   it "" $
-    runReader (insertAliases Noll.Set.Test01.prog1_01) testEnvironment2 == Noll.Set.Test02.prog1_02
+    runReader (expandAliases Noll.Set.Test01.prog1_01) testEnvironment2 == Noll.Set.Test02.prog1_02
   it "" $
     runFoldExpansion "fold" 1 (compileFolds Noll.Set.Test02.prog1_02) == Noll.Set.Test03.prog1_03
   it "" $

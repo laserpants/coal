@@ -9,16 +9,16 @@
 module Noll.Compiler2 where
 
 import Control.Monad.RWS (RWST, runRWST)
-import Control.Monad.Reader (MonadReader, ReaderT, ask, asks, runReaderT)
+import Control.Monad.Reader (MonadReader, Reader, ReaderT, ask, asks, runReader, runReaderT)
 import Control.Monad.State (MonadState, StateT, gets, modify, put, runState, runStateT)
 import Control.Monad.Writer (execWriter)
-import Lang.Common.Supply (Supply (..), supplied)
 import Lang.Common.Environment (Environment (..))
-import Noll.Language
+import Lang.Common.Supply (Supply (..), supplied)
 import Lang.Utils (Dictionary, Name, Over, forM_, (<$$$>))
+import Noll.Compiler.Transform.Type.AliasExpansion
+import Noll.Language
 import Noll.SystemF
 import Noll.SystemF.Substitution (mapsTo)
-import Noll.Compiler.Transform.Type.AliasInsertion
 
 data Compiler2Environment o k t = Compiler2Environment
   { compiler2DataConstructorEnv :: Environment (Constructor o k t)
@@ -45,7 +45,9 @@ initialCompiler2State =
     , compilerSubstitution = mempty
     }
 
-newtype Compiler2T m c = Compiler2 {compiler2Stack :: RWST (Compiler2Environment TypeIndex Kind IndexedType) () Compiler2State m c}
+type Compiler2Stack m c = RWST (Compiler2Environment TypeIndex Kind IndexedType) () Compiler2State m c
+
+newtype Compiler2T m c = Compiler2 {compiler2Stack :: Compiler2Stack m c}
   deriving
     ( Functor
     , Applicative
@@ -67,6 +69,14 @@ evalCompiler2T = fst <$$$> runCompiler2T
 instance Supply Compiler2State where
   updateSupply = overCompiler2Supply
   getSupply = compiler2Supply
+
+--
+
+aliasExpansionTrans :: (Monad m) => (a -> Reader AliasEnvironment a) -> a -> Compiler2T m a
+aliasExpansionTrans f e = asks (runReader (f e) . compiler2AliasEnv)
+
+expandAliasesC :: (MonadReader AliasEnvironment m, AliasContext a) => a -> Compiler2T m a
+expandAliasesC = aliasExpansionTrans expandAliases
 
 -----------------------
 -----------------------

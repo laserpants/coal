@@ -16,7 +16,7 @@ import qualified Noll.Compiler.Transform.FoldSpec
 import qualified Noll.Compiler.Transform.Pattern.DesugarSpec
 import qualified Noll.Compiler.Transform.Pattern.OrExpansionSpec
 import qualified Noll.Compiler.Transform.TreeSpec
-import qualified Noll.Compiler.Transform.Type.AliasInsertionSpec
+import qualified Noll.Compiler.Transform.Type.AliasExpansionSpec
 import qualified Noll.CompilerExamples.Test01
 import qualified Noll.CompilerExamples.Test02
 import qualified Noll.CompilerSpec
@@ -71,7 +71,7 @@ main =
     Noll.Compiler.PatternMatchingExamples.Test01.spec
     Noll.Compiler.PatternMatchingExamples.Test02.spec
     Noll.Compiler.Transform.Pattern.OrExpansionSpec.spec
-    Noll.Compiler.Transform.Type.AliasInsertionSpec.spec
+    Noll.Compiler.Transform.Type.AliasExpansionSpec.spec
     Noll.Compiler.Transform.FoldSpec.spec
     Noll.CompilerExamples.Test01.spec
     Noll.CompilerExamples.Test02.spec

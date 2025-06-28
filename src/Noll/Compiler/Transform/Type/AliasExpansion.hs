@@ -3,7 +3,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Compiler.Transform.Type.AliasInsertion (
+module Noll.Compiler.Transform.Type.AliasExpansion (
   AliasEnvironment,
   AliasContext (..),
 ) where
@@ -24,101 +24,101 @@ type ParameterizedType = Type Parameter ()
 type AliasEnvironment = Environment ([Name], ParameterizedType)
 
 class AliasContext c where
-  insertAliases :: (MonadReader AliasEnvironment m) => c -> m c
+  expandAliases :: (MonadReader AliasEnvironment m) => c -> m c
 
 instance AliasContext () where
-  insertAliases _ = pure ()
+  expandAliases _ = pure ()
 
 instance (AliasContext c) => AliasContext [c] where
-  insertAliases = traverse insertAliases
+  expandAliases = traverse expandAliases
 
 instance (AliasContext c) => AliasContext (Dictionary c) where
-  insertAliases = traverse insertAliases
+  expandAliases = traverse expandAliases
 
 instance (AliasContext c) => AliasContext (NonEmpty c) where
-  insertAliases = traverse insertAliases
+  expandAliases = traverse expandAliases
 
 instance (AliasContext t) => AliasContext (Trait t) where
-  insertAliases = traverse insertAliases
+  expandAliases = traverse expandAliases
 
 instance (AliasContext t) => AliasContext (With t) where
-  insertAliases = traverse insertAliases
+  expandAliases = traverse expandAliases
 
 instance (AliasContext t) => AliasContext (Row o k t) where
-  insertAliases = traverse insertAliases
+  expandAliases = traverse expandAliases
 
 instance (AliasContext t, Data a, Data t) => AliasContext (Pattern a t) where
-  insertAliases =
+  expandAliases =
     transformM $
       \case
         PAnnotation a t p ->
-          PAnnotation a <$> insertAliases t <*> insertAliases p
+          PAnnotation a <$> expandAliases t <*> expandAliases p
         p ->
           pure p
 
 instance (AliasContext t, Data t, Data a) => AliasContext (Expression a t) where
-  insertAliases =
+  expandAliases =
     transformM $
       \case
         EAnnotation a t e ->
-          EAnnotation a <$> insertAliases t <*> insertAliases e
+          EAnnotation a <$> expandAliases t <*> expandAliases e
         e ->
           pure e
 
 instance (AliasContext t, Data e, Data t) => AliasContext (Module e a t) where
-  insertAliases =
+  expandAliases =
     \case
       Module p ns o ->
-        Module p ns <$> insertAliases o
+        Module p ns <$> expandAliases o
 
 instance (AliasContext (e a t), AliasContext t, Data a, Data t) => AliasContext (Function e a t) where
-  insertAliases =
+  expandAliases =
     \case
       Function a u ps e ->
         Function a
-          <$> insertAliases u
-          <*> insertAliases ps
-          <*> insertAliases e
+          <$> expandAliases u
+          <*> expandAliases ps
+          <*> expandAliases e
 
 instance (AliasContext (e a t), AliasContext t) => AliasContext (Constant e a t) where
-  insertAliases =
+  expandAliases =
     \case
       Constant a u e ->
         Constant a
-          <$> insertAliases u
-          <*> insertAliases e
+          <$> expandAliases u
+          <*> expandAliases e
 
 instance (AliasContext t, Data a, Data t) => AliasContext (Definition a k t) where
-  insertAliases =
+  expandAliases =
     \case
       DAnnotation u o ->
-        DAnnotation <$> insertAliases u <*> insertAliases o
+        DAnnotation <$> expandAliases u <*> expandAliases o
       DFunction name f ->
-        DFunction name <$> insertAliases f
+        DFunction name <$> expandAliases f
       DConstant name c ->
-        DConstant name <$> insertAliases c
+        DConstant name <$> expandAliases c
       DInstance name t ds ->
-        DInstance name t <$> traverse insertAliases ds
+        DInstance name t <$> traverse expandAliases ds
       o ->
         pure o
 
 instance AliasContext ParameterizedType where
-  insertAliases =
+  expandAliases =
     \case
       t@(TApplication _ (TVariable (Parameter _ name)) ts) -> do
         lookupAlias t (fromList1 ts) name
       t@(TApplication _ (TConstructor _ name) ts) -> do
         lookupAlias t (fromList1 ts) name
       TApplication k t ts ->
-        TApplication k <$> insertAliases t <*> insertAliases ts
+        TApplication k <$> expandAliases t <*> expandAliases ts
       TArrow t1 t2 ->
-        TArrow <$> insertAliases t1 <*> insertAliases t2
+        TArrow <$> expandAliases t1 <*> expandAliases t2
       TAlias name ts t ->
-        TAlias name <$> insertAliases ts <*> insertAliases t
+        TAlias name <$> expandAliases ts <*> expandAliases t
       TIntrinsic t ->
-        TIntrinsic <$> traverse insertAliases t
+        TIntrinsic <$> traverse expandAliases t
       TRow row ->
-        TRow <$> traverse insertAliases row
+        TRow <$> traverse expandAliases row
       t@(TVariable (Parameter _ name)) ->
         lookupAlias t [] name
       t@(TConstructor _ name) ->
