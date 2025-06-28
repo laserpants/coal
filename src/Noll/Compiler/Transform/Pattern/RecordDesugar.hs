@@ -57,7 +57,6 @@ type TypedPattern a = Pattern a (Type TypeIndex Kind)
 class RecordPattern a p where
   expandRecordPatterns :: (MonadState Int m, MonadWriter [(Name, Dictionary (TypedPattern a), Maybe (TypedPattern a))] m, MonadReader Name m) => p -> m p
 
--- runExpandRecordPatterns :: (MonadState Int m, MonadWriter [(Name, Dictionary (TypedPattern a), Maybe (TypedPattern a))] m, MonadReader Name m) => m a -> a
 runExpandRecordPatterns :: RWS Name w Int a -> Name -> Int -> (a, w)
 runExpandRecordPatterns = evalRWS
 
@@ -113,7 +112,7 @@ instance (Data a, Monoid a, Show a) => RecordPattern a (Clause a (Type TypeIndex
         pure (EClause a q ds)
 
 zork ::
-  (Data a, Show a, Monoid a, MonadState Int m, MonadWriter [(Name, Dictionary (TypedPattern a), Maybe (TypedPattern a))] m, MonadReader Name m) =>
+  (Data a, Monoid a, MonadState Int m, MonadReader Name m) =>
   (Name, Dictionary (TypedPattern a), Maybe (TypedPattern a)) ->
   Expression a (Type TypeIndex Kind) ->
   m (Expression a (Type TypeIndex Kind))
@@ -125,7 +124,7 @@ zork (name, d, mp) e = do
   zz = Map.toList d
 
 tork ::
-  (Data a, Monad m, Monoid a, MonadState Int m, MonadReader Name m) =>
+  (Data a, Monad m, Monoid a) =>
   ((Name, TypedPattern a), Name) ->
   (Name, Row TypeIndex Kind (Type TypeIndex Kind), Expression a (Type TypeIndex Kind)) ->
   m (Name, Row TypeIndex Kind (Type TypeIndex Kind), Expression a (Type TypeIndex Kind))
