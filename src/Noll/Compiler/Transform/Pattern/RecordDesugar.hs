@@ -85,14 +85,6 @@ instance (Data a, Monoid a, Show a) => RecordPattern a (Guard Expression a (Type
       CGuard e ->
         CGuard <$> expandRecordPatterns e
 
--- instance (Monoid a, Show a) => RecordPattern a (Choice Expression a (Type TypeIndex Kind)) where
---  expandRecordPatterns =
---    \case
---      CPlain a gs e ->
---        CPlain a <$> expandRecordPatterns gs <*> expandRecordPatterns e
---      CLambda a ps gs e ->
---        CLambda a <$> expandRecordPatterns ps <*> expandRecordPatterns gs <*> expandRecordPatterns e
-
 instance (Data a, Monoid a, Show a) => RecordPattern a (Clause a (Type TypeIndex Kind)) where
   expandRecordPatterns =
     \case
@@ -104,8 +96,8 @@ instance (Data a, Monoid a, Show a) => RecordPattern a (Clause a (Type TypeIndex
               hs <- expandRecordPatterns gs
               f <- foldrM zork e ys
               pure (CPlain a hs f)
-            CLambda a ps gs e ->
-              undefined
+            CLambda{} ->
+              error "Not implemented"
         pure (EClause a q ds)
 
 zork ::
