@@ -116,6 +116,8 @@ translatePattern =
       error "TODO"
     PAtVariable{} ->
       error "TODO"
+    PPlaceholder{} ->
+      error "TODO"
 
 translateListLiteral :: (MatchClasses a t) => a -> t -> [Pattern a t] -> Pattern a t
 translateListLiteral a t [] = PConstructor a (Label t "$Nil") []
