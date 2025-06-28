@@ -290,17 +290,17 @@ moduleOrdered =
                         else
                           Ordered.EqualTo : Ordering
               |]
-        , OConstant
-            "Ordered.Ordered__$instance.b7c5e7e84eeaf782"
-            [r| 
-                  @<Ordered(int32)>
-                    ( $Record : { compare : int32/int32/Ordering | {} }/Ordered(int32)
-                    , { compare = Ordered.compare__$instance.b7c5e7e84eeaf782 : int32/int32/Ordering
-                      | {}
-                      }
-                    )
-              |]
-        , OFunction
+        , --        , OConstant
+          --            "Ordered.Ordered__$instance.b7c5e7e84eeaf782"
+          --            [r|
+          --                  @<Ordered(int32)>
+          --                    ( $Record : { compare : int32/int32/Ordering | {} }/Ordered(int32)
+          --                    , { compare = Ordered.compare__$instance.b7c5e7e84eeaf782 : int32/int32/Ordering
+          --                      | {}
+          --                      }
+          --                    )
+          --              |]
+          OFunction
             "Ordered.less_than_or_equal_to"
             [ Label (TCon "Ordered" [opaque]) "$dict.ffef54c635ab7d00"
             , Label opaque "m"
@@ -654,17 +654,17 @@ moduleMain =
             [r| 
                   x : int32
               |]
-        , OConstant
-            "Main.Numeric__$instance.2967b53e939a3c94"
-            [r| 
-                  @<Numeric(int32)>
-                    ( $Record : { from_int32 : int32/int32 | {} }/Numeric(int32)
-                    , { from_int32 = Main.from_int32__$instance.2967b53e939a3c94 : int32/int32 
-                      | {}
-                      }
-                    )
-              |]
-        , OFunction
+        , --        , OConstant
+          --            "Main.Numeric__$instance.2967b53e939a3c94"
+          --            [r|
+          --                  @<Numeric(int32)>
+          --                    ( $Record : { from_int32 : int32/int32 | {} }/Numeric(int32)
+          --                    , { from_int32 = Main.from_int32__$instance.2967b53e939a3c94 : int32/int32
+          --                      | {}
+          --                      }
+          --                    )
+          --              |]
+          OFunction
             "Main.main"
             [Label (TCon "unit" []) "$v.0"]
             [r|

@@ -36,6 +36,7 @@ import Control.Monad.State (MonadState, StateT, gets, modify, put, runState, run
 import Control.Monad.Writer (execWriter)
 import Data.Data (Data)
 import Data.Either.Extra (partitionEithers)
+import Data.Generics.Uniplate.Data (descendBiM, universeBi)
 import Lang.Common.Environment (Environment (..))
 import Lang.Common.List1 (NonEmpty ((:|)))
 import Lang.Common.Supply (Supply (..), supplied)
@@ -483,12 +484,39 @@ typeCheckDefinition d =
               Nothing ->
                 error ("Missing implementation: " <> Text.unpack (definitionName d))
               Just s -> do
-                insertConstraintsC [Explicit InferenceRulePlaceholder (typeOf d) (instantiateTemplate tx t1 s)]
+                xxx <- yyy t1
+                insertConstraintsC [Explicit InferenceRulePlaceholder (typeOf d) (instantiateTemplate tx xxx s)]
                 compileDefinitionC d
     _ -> do
       compileDefinitionC d
       sub <- solveC
       defineC (definitionName d) (typeOf (apply sub d))
+
+yyy :: (Monad m) => Type Parameter Kind -> CompilerT a m IndexedType
+yyy = do
+  \case
+    TVariable{} -> do
+      supplied (TVariable . TypeIndex KType)
+    TApplication k t ts ->
+      TApplication k <$> yyy t <*> traverse yyy ts
+    TArrow t1 t2 ->
+      TArrow <$> yyy t1 <*> yyy t2
+    TIntrinsic t ->
+      TIntrinsic <$> traverse yyy t
+    TRow r ->
+      TRow <$> yyyR r
+    TAlias name ts t ->
+      TAlias name <$> traverse yyy ts <*> yyy t
+
+yyyR :: (Monad m) => Row Parameter Kind (Type Parameter Kind) -> CompilerT a m (Row TypeIndex Kind IndexedType)
+yyyR =
+  \case
+    RVariable{} ->
+      supplied (RVariable . TypeIndex KType)
+    RExtend name t r ->
+      RExtend name <$> yyy t <*> yyyR r
+    RNil ->
+      pure RNil
 
 instantiateTemplate :: TypeIndex Kind -> IndexedType -> Scheme TypeIndex Kind IndexedType -> Scheme TypeIndex Kind IndexedType
 instantiateTemplate (TypeIndex _ n) t1 (Forall vs ts t) = Forall vs ts (apply (n `mapsTo` t1) t)

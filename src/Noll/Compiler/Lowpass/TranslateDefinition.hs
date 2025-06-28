@@ -49,21 +49,21 @@ translateDefinition =
       forM ins $
         \(n, t) ->
           traitAccessor name n (translateType t)
+    --    DInstance name t ds -> do
+    --      moduleName <- asks translateEnvironmentModule
+    --      bs <- forM ds $ do
+    --        \case
+    --          DFunction name f -> do
+    --            xx1 <- translateDefinition (DFunction (name <> postfix) f)
+    --            pure (name, xx1)
+    --          DConstant name c -> do
+    --            xx1 <- translateDefinition (DConstant (name <> postfix) c)
+    --            pure (name, xx1)
+    --      xx <- instanceDictionary2 postfix name t bs
+    --      pure (concatMap snd bs <> [xx])
+    --     where
+    --      postfix = "__$instance." <> hashed (Trait name t)
     DInstance name t ds -> do
-      moduleName <- asks translateEnvironmentModule
-      bs <- forM ds $ do
-        \case
-          DFunction name f -> do
-            xx1 <- translateDefinition (DFunction (name <> postfix) f)
-            pure (name, xx1)
-          DConstant name c -> do
-            xx1 <- translateDefinition (DConstant (name <> postfix) c)
-            pure (name, xx1)
-      xx <- instanceDictionary postfix name t bs
-      pure (concatMap snd bs <> [xx])
-     where
-      postfix = "__$instance." <> hashed (Trait name t)
-    DInstance2 name t ds -> do
       moduleName <- asks translateEnvironmentModule
       bs <- forM ds $ do
         \case

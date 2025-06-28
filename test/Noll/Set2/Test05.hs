@@ -36,7 +36,7 @@ moduleFoo =
           )
         ]
     , -- instance Show(string)
-      DInstance2
+      DInstance
         "Show"
         (TIntrinsic IString)
         [ DConstant
@@ -52,7 +52,7 @@ moduleFoo =
             )
         ]
     , -- instance Show(int32)
-      DInstance2
+      DInstance
         "Show"
         (TIntrinsic IInt32)
         [ DConstant
@@ -68,7 +68,7 @@ moduleFoo =
             )
         ]
     , -- instance Show((a, b)) with Show(a), Show(b)
-      DInstance2
+      DInstance
         "Show"
         (TIntrinsic (ITuple [TVariable (Parameter KType "a"), TVariable (Parameter KType "b")]))
         [ DConstant
@@ -126,7 +126,7 @@ moduleFoo =
             )
         ]
     , -- instance Show(list(a)) with Show(a)
-      DInstance2
+      DInstance
         "Show"
         (TIntrinsic (IList (TVariable (Parameter KType "a"))))
         [ DConstant
