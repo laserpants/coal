@@ -21,13 +21,13 @@ spec =
   describe "Noll.Compiler.Transform.Fold" $ do
     describe "" $ do
       it "" $ do
-        runFoldExpansion "fold" 1 (expandFoldExpr exprs1 clauses1) == result1
+        evalFoldExpansion "fold" 1 (expandFoldExpr exprs1 clauses1) == result1
       it "" $ do
-        runFoldExpansion "fold" 1 (compileFolds Test02.moduleBinarySearch) == Test03.moduleBinarySearch
+        evalFoldExpansion "fold" 1 (compileFolds Test02.moduleBinarySearch) == Test03.moduleBinarySearch
       it "" $ do
-        runFoldExpansion "fold" 1 (compileFolds test02) == test03
+        evalFoldExpansion "fold" 1 (compileFolds test02) == test03
       it "" $ do
-        runFoldExpansion "fold" 1 (compileFolds Noll.Set.Test02.prog1_02) == Noll.Set.Test03.prog1_03
+        evalFoldExpansion "fold" 1 (compileFolds Noll.Set.Test02.prog1_02) == Noll.Set.Test03.prog1_03
 
 --
 -- list, { min = 0, max = -1 }

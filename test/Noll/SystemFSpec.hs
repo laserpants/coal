@@ -1179,9 +1179,9 @@ story = do
   it "" $
     runReader (expandAliases Noll.Set.Test01.prog1_01) testEnvironment2 == Noll.Set.Test02.prog1_02
   it "" $
-    runFoldExpansion "fold" 1 (compileFolds Noll.Set.Test02.prog1_02) == Noll.Set.Test03.prog1_03
+    evalFoldExpansion "fold" 1 (compileFolds Noll.Set.Test02.prog1_02) == Noll.Set.Test03.prog1_03
   it "" $
-    runFoldExpansion "fold" 1 (compileFolds Noll.Set5.Test01.prog1_01) == Noll.Set5.Test03.prog1_03
+    evalFoldExpansion "fold" 1 (compileFolds Noll.Set5.Test01.prog1_01) == Noll.Set5.Test03.prog1_03
   it "" $
     testResultExpression (Noll.CompilerExamples.Test02.baz3 Noll.Set.Test03.moduleUtils) == Noll.Set.Test04.moduleUtils
   it "" $
@@ -1322,7 +1322,7 @@ story = do
   it "" $
     runTraitTransformY2 (freshIdIn Noll.Set5.Test09.moduleMain) (transformModuleY Noll.Set5.Test09.moduleMain) == Noll.Set5.Test10.moduleMain
   it "" $
-    runUnfoldExpansion "unfold" 1 (compileUnfolds Noll.Set4.Test02.moduleMain) == Noll.Set4.Test021.moduleMain
+    evalUnfoldExpansion "unfold" 1 (compileUnfolds Noll.Set4.Test02.moduleMain) == Noll.Set4.Test021.moduleMain
   it "" $
     runNatExpansion "succ" 1 (compileNats Noll.Set6.Test12.moduleMain) == Noll.Set6.Test13.moduleMain
 

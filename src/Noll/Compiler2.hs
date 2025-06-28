@@ -8,6 +8,9 @@
 
 module Noll.Compiler2 where
 
+import Noll.Compiler.Transform.Fold
+import Noll.Compiler.Transform.Unfold
+import Control.Monad ((>=>))
 import Control.Monad.RWS (RWST, runRWST)
 import Control.Monad.Reader (MonadReader, Reader, ReaderT, ask, asks, runReader, runReaderT)
 import Control.Monad.State (MonadState, StateT, gets, modify, put, runState, runStateT)
@@ -17,6 +20,7 @@ import Lang.Common.Supply (Supply (..), supplied)
 import Lang.Utils (Dictionary, Name, Over, forM_, (<$$$>))
 import Noll.Compiler.Transform.Type.AliasExpansion
 import Noll.Language
+import Noll.Module (Constant (..), Definition (..), Function (..), Module (..), Path (..))
 import Noll.SystemF
 import Noll.SystemF.Substitution (mapsTo)
 
@@ -66,6 +70,9 @@ runCompiler2T env com = do
 evalCompiler2T :: (Monad m) => Compiler2Environment TypeIndex Kind IndexedType -> Compiler2T m c -> m c
 evalCompiler2T = fst <$$$> runCompiler2T
 
+insertSupplyC :: (Monad m) => Int -> Compiler2T m ()
+insertSupplyC = modify . overCompiler2Supply . const
+
 instance Supply Compiler2State where
   updateSupply = overCompiler2Supply
   getSupply = compiler2Supply
@@ -75,8 +82,50 @@ instance Supply Compiler2State where
 aliasExpansionTrans :: (Monad m) => (a -> Reader AliasEnvironment a) -> a -> Compiler2T m a
 aliasExpansionTrans f e = asks (runReader (f e) . compiler2AliasEnv)
 
-expandAliasesC :: (MonadReader AliasEnvironment m, AliasContext a) => a -> Compiler2T m a
+expandAliasesC :: (Monad m, AliasContext a) => a -> Compiler2T m a
 expandAliasesC = aliasExpansionTrans expandAliases
+
+foldExpansionTrans :: (Monad m) => (a -> FoldExpansion a) -> a -> Compiler2T m a
+foldExpansionTrans f e = do
+  n <- gets compiler2Supply
+  let (a, n') = runFoldExpansion "fold" n (f e)
+  insertSupplyC n'
+  pure a
+
+compileUnfoldsC :: (Monad m, CompileFoldsContext a) => a -> Compiler2T m a
+compileUnfoldsC = foldExpansionTrans compileFolds
+
+unfoldExpansionTrans :: (Monad m) => (a -> UnfoldExpansion a) -> a -> Compiler2T m a
+unfoldExpansionTrans f e = do
+  n <- gets compiler2Supply
+  let (a, n') = runUnfoldExpansion "unfold" n (f e)
+  insertSupplyC n'
+  pure a
+
+compileFoldsC :: (Monad m) => (CompileUnfoldsContext a) => a -> Compiler2T m a
+compileFoldsC = unfoldExpansionTrans compileUnfolds
+
+--
+
+compileModule :: (Monad m) => Module () () () -> Compiler2T m a
+compileModule =
+  -- Expand type aliases
+  expandAliasesC
+    -- Expand unfolds (codata)
+    >=> compileUnfoldsC
+    -- Expand folds
+    >=> compileFoldsC
+    -- Type inference
+    >=> undefined
+    -- Normalize top-level expressions
+    -- Translate patterns in expression arguments to match expressions
+    -- Compile or-patterns
+    -- Translate record patterns to select operators
+    -- Compile match statements
+    -- Placeholder insertion
+    -- Denormalize top-level expressions
+    -- Final lowering
+    >=> undefined
 
 -----------------------
 -----------------------

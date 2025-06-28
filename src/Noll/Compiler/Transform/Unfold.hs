@@ -7,12 +7,14 @@
 {-# LANGUAGE StrictData #-}
 
 module Noll.Compiler.Transform.Unfold (
-  compileUnfolds,
+  CompileUnfoldsContext (..),
+  UnfoldExpansion (..),
   runUnfoldExpansion,
+  evalUnfoldExpansion,
   expandUnfoldExpr,
 ) where
 
-import Control.Monad.RWS (RWS, evalRWS)
+import Control.Monad.RWS (RWS, evalRWS, runRWS)
 import Control.Monad.Reader (MonadReader, ReaderT, runReaderT)
 import Control.Monad.State (MonadState, State, evalState)
 import Control.Monad.Writer (execWriter, tell)
@@ -38,13 +40,18 @@ newtype UnfoldExpansion a = UnfoldExpansion {unfoldExpansionStack :: RWS Name ()
     , MonadState Int
     )
 
-runUnfoldExpansion :: Name -> Int -> UnfoldExpansion a -> a
-runUnfoldExpansion r s e = fst (evalRWS (unfoldExpansionStack e) r s)
+evalUnfoldExpansion :: Name -> Int -> UnfoldExpansion a -> a
+evalUnfoldExpansion name s =  fst . runUnfoldExpansion name s
+
+runUnfoldExpansion :: Name -> Int -> UnfoldExpansion a -> (a, Int)
+runUnfoldExpansion r s e = (a, s')
+  where
+    (a, s', _) = runRWS (unfoldExpansionStack e) r s
 
 renameRecursiveCall :: (Monoid a, Data a) => Name -> Name -> Expression a () -> Expression a ()
 renameRecursiveCall old new = replace old (const2 $ EVariable mempty (Label mempty new))
 
-toLambda :: (Monoid a, Data a) => Expression a () -> Expression a ()
+toLambda :: (Monoid a) => Expression a () -> Expression a ()
 toLambda = ELambda mempty (PAny mempty () :| [])
 
 expandUnfoldExpr :: forall m a d. (Monoid a, Data a, MonadState Int m, MonadReader Name m) => Name -> List1 (Pattern a ()) -> Dictionary (Expression a ()) -> m (Expression a ())

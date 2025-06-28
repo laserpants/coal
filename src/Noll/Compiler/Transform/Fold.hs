@@ -8,11 +8,13 @@
 
 module Noll.Compiler.Transform.Fold (
   CompileFoldsContext (..),
+  FoldExpansion (..),
   runFoldExpansion,
+  evalFoldExpansion,
   expandFoldExpr,
 ) where
 
-import Control.Monad.RWS (RWS, evalRWS)
+import Control.Monad.RWS (RWS, evalRWS, runRWS)
 import Control.Monad.Reader (MonadReader, ReaderT, runReaderT)
 import Control.Monad.State (MonadState, State, evalState)
 import Control.Monad.Writer (execWriter, tell)
@@ -36,8 +38,13 @@ newtype FoldExpansion a = FoldExpansion {foldExpansionStack :: RWS Name () Int a
     , MonadState Int
     )
 
-runFoldExpansion :: Name -> Int -> FoldExpansion a -> a
-runFoldExpansion r s e = fst (evalRWS (foldExpansionStack e) r s)
+evalFoldExpansion :: Name -> Int -> FoldExpansion a -> a
+evalFoldExpansion name s =  fst . runFoldExpansion name s
+
+runFoldExpansion :: Name -> Int -> FoldExpansion a -> (a, Int)
+runFoldExpansion r s e = (a, s')
+  where
+    (a, s', _) = runRWS (foldExpansionStack e) r s
 
 class FoldContext e where
   expandFolds :: Name -> [Label ()] -> e -> e
