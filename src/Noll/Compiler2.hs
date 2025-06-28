@@ -13,13 +13,24 @@ import Control.Monad.Reader (MonadReader, ReaderT, ask, asks, runReaderT)
 import Control.Monad.State (MonadState, StateT, gets, modify, put, runState, runStateT)
 import Control.Monad.Writer (execWriter)
 import Lang.Common.Supply (Supply (..), supplied)
+import Lang.Common.Environment (Environment (..))
+import Noll.Language
 import Lang.Utils (Dictionary, Name, Over, forM_, (<$$$>))
+import Noll.SystemF
+import Noll.SystemF.Substitution (mapsTo)
+import Noll.Compiler.Transform.Type.AliasInsertion
 
-data Compiler2Environment = Compiler2Environment
+data Compiler2Environment o k t = Compiler2Environment
+  { compiler2DataConstructorEnv :: Environment (Constructor o k t)
+  , compiler2TypeConstructorEnv :: Environment Kind
+  , compiler2TraitEnv :: Environment (o k, Environment (Scheme o k t))
+  , compiler2AliasEnv :: AliasEnvironment
+  }
   deriving (Show, Eq, Ord, Read)
 
 data Compiler2State = Compiler2State
   { compiler2Supply :: Int
+  , compilerSubstitution :: Substitution
   }
   deriving (Show, Eq, Ord, Read)
 
@@ -31,30 +42,35 @@ initialCompiler2State :: Compiler2State
 initialCompiler2State =
   Compiler2State
     { compiler2Supply = 0
+    , compilerSubstitution = mempty
     }
 
-newtype Compiler2T m c = Compiler2 {compiler2Stack :: RWST Compiler2Environment () Compiler2State m c}
+newtype Compiler2T m c = Compiler2 {compiler2Stack :: RWST (Compiler2Environment TypeIndex Kind IndexedType) () Compiler2State m c}
   deriving
     ( Functor
     , Applicative
     , Monad
-    , MonadReader Compiler2Environment
+    , MonadReader (Compiler2Environment TypeIndex Kind IndexedType)
     , MonadState Compiler2State
     )
 
 {-# INLINE runCompiler2T #-}
-runCompiler2T :: (Monad m) => Compiler2Environment -> Compiler2T m c -> m (c, Compiler2State)
+runCompiler2T :: (Monad m) => Compiler2Environment TypeIndex Kind IndexedType -> Compiler2T m c -> m (c, Compiler2State)
 runCompiler2T env com = do
   (c, s, _) <- runRWST (compiler2Stack com) env initialCompiler2State
   pure (c, s)
 
 {-# INLINE evalCompiler2T #-}
-evalCompiler2T :: (Monad m) => Compiler2Environment -> Compiler2T m c -> m c
+evalCompiler2T :: (Monad m) => Compiler2Environment TypeIndex Kind IndexedType -> Compiler2T m c -> m c
 evalCompiler2T = fst <$$$> runCompiler2T
 
 instance Supply Compiler2State where
   updateSupply = overCompiler2Supply
   getSupply = compiler2Supply
+
+-----------------------
+-----------------------
+-----------------------
 
 -- import Control.Monad.Reader (runReader)
 -- import Lang.Common.List1 (NonEmpty (..), (<|))
