@@ -22,9 +22,9 @@ import Noll.Compiler.PatternMatching.Equation
 import Noll.Compiler.PatternMatching.Rule
 import Noll.Compiler.Transform.Fold
 import Noll.Compiler.Transform.Nats
-import Noll.Compiler.Transform.Pattern.Desugaring
+import Noll.Compiler.Transform.Pattern.Desugar
 import Noll.Compiler.Transform.Pattern.OrExpansion
-import Noll.Compiler.Transform.Pattern.RecordDesugaring
+import Noll.Compiler.Transform.Pattern.RecordDesugar
 import Noll.Compiler.Transform.Type.AliasInsertion
 import Noll.Compiler.Transform.Unfold
 import Noll.Language
@@ -1199,11 +1199,11 @@ story = do
   it "" $
     normalizeObject Noll.Set5.Test04.prog1_04 == Noll.Set5.Test05.prog1_05
   it "" $
-    runPatternDesugaring "v" 0 (desugarPatterns Noll.Set.Test05.moduleBinarySearch) == Noll.Set.Test06.moduleBinarySearch
+    runPatternDesugar "v" 0 (desugarPatterns Noll.Set.Test05.moduleBinarySearch) == Noll.Set.Test06.moduleBinarySearch
   it "" $
-    runPatternDesugaring "v" 0 (desugarPatterns Noll.Set.Test05.moduleOrdered) == Noll.Set.Test06.moduleOrdered
+    runPatternDesugar "v" 0 (desugarPatterns Noll.Set.Test05.moduleOrdered) == Noll.Set.Test06.moduleOrdered
   it "" $
-    runPatternDesugaring "v" 0 (desugarPatterns Noll.Set.Test05.moduleMain) == Noll.Set.Test06.moduleMain
+    runPatternDesugar "v" 0 (desugarPatterns Noll.Set.Test05.moduleMain) == Noll.Set.Test06.moduleMain
   it "" $
     runIdentity (Noll.Compiler.Transform.Pattern.OrExpansion.compileOrPatterns Noll.Set.Test06.moduleUtils) == Noll.Set.Test07.moduleUtils
   it "" $

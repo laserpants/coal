@@ -5,11 +5,12 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Compiler.Transform.Pattern.Desugaring (
+module Noll.Compiler.Transform.Pattern.Desugar (
   Sugared (..),
-  runPatternDesugaring,
+  runPatternDesugar,
 ) where
 
+import Control.Monad.RWS (RWS, evalRWS)
 import Control.Monad.Reader (MonadReader, ReaderT, runReaderT)
 import Control.Monad.State (MonadState, State, evalState)
 import Control.Monad.Writer (MonadWriter, WriterT, runWriterT, tell)
@@ -32,10 +33,9 @@ import Noll.Module.Function (Function (..))
 
 type NamedPattern c o k = (Name, Pattern c (Type o k))
 
--- TODO: Use RWS
-type PatternDesugaringStack c o k = WriterT [NamedPattern c o k] (ReaderT Name (State Int))
+type PatternDesugarStack c o k = RWS Name [NamedPattern c o k] Int
 
-newtype PatternDesugaring c o k e = PatternDesugaring {patternDesugaringStack :: PatternDesugaringStack c o k e}
+newtype PatternDesugar c o k e = PatternDesugar {patternDesugarStack :: PatternDesugarStack c o k e}
   deriving
     ( Functor
     , Applicative
@@ -45,9 +45,9 @@ newtype PatternDesugaring c o k e = PatternDesugaring {patternDesugaringStack ::
     , MonadWriter [NamedPattern c o k]
     )
 
-{-# INLINE runPatternDesugaring #-}
-runPatternDesugaring :: Name -> Int -> PatternDesugaring c o k e -> e
-runPatternDesugaring r s e = fst (evalState (runReaderT (runWriterT (patternDesugaringStack e)) r) s)
+{-# INLINE runPatternDesugar #-}
+runPatternDesugar :: Name -> Int -> PatternDesugar c o k e -> e
+runPatternDesugar r s e = fst (evalRWS (patternDesugarStack e) r s)
 
 class Sugared c o k e | e -> c, e -> o k where
   desugarPatterns ::

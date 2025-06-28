@@ -1,11 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Compiler.Transform.Pattern.RecordDesugaringSpec where
+module Noll.Compiler.Transform.Pattern.RecordDesugarSpec where
 
 import Lang.Common.List1 (NonEmpty (..), (<|))
 import Lang.Label (Label (..))
 import Lang.Utils (Dictionary, Name)
-import Noll.Compiler.Transform.Pattern.RecordDesugaring
+import Noll.Compiler.Transform.Pattern.RecordDesugar
 import Noll.Language
 import Noll.Module
 import Test.Hspec (Spec, describe, it)

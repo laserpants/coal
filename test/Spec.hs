@@ -13,7 +13,7 @@ import qualified Noll.Compiler.PatternMatchingExamples.Test01
 import qualified Noll.Compiler.PatternMatchingExamples.Test02
 import qualified Noll.Compiler.PatternMatchingSpec
 import qualified Noll.Compiler.Transform.FoldSpec
-import qualified Noll.Compiler.Transform.Pattern.DesugaringSpec
+import qualified Noll.Compiler.Transform.Pattern.DesugarSpec
 import qualified Noll.Compiler.Transform.Pattern.OrExpansionSpec
 import qualified Noll.Compiler.Transform.TreeSpec
 import qualified Noll.Compiler.Transform.Type.AliasInsertionSpec
@@ -47,7 +47,7 @@ main =
   hspec $ do
     Noll.Language.Type.IndexedSpec.spec
     Noll.SystemF.Constraint.GenerationSpec.spec
-    Noll.Compiler.Transform.Pattern.DesugaringSpec.spec
+    Noll.Compiler.Transform.Pattern.DesugarSpec.spec
     Noll.SystemFSpec.spec
     Noll.SystemF.UnificationSpec.spec
     Noll.SystemFExamples.Test01.spec

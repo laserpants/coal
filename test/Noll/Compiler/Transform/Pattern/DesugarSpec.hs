@@ -1,10 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Compiler.Transform.Pattern.DesugaringSpec where
+module Noll.Compiler.Transform.Pattern.DesugarSpec where
 
 import Lang.Common.List1 (NonEmpty ((:|)), (<|))
 import Lang.Label (Label (..))
-import Noll.Compiler.Transform.Pattern.Desugaring (desugarPatterns, runPatternDesugaring)
+import Noll.Compiler.Transform.Pattern.Desugar (desugarPatterns, runPatternDesugar)
 import Noll.Language (
   BinaryOperator (..),
   Binding (..),
@@ -31,21 +31,21 @@ spec :: Spec
 spec =
   describe "" $ do
     it "" $
-      runPatternDesugaring "v" 0 (desugarPatterns fixture1) == fixture2
+      runPatternDesugar "v" 0 (desugarPatterns fixture1) == fixture2
     it "" $
-      runPatternDesugaring "v" 0 (desugarPatterns fixture3) == fixture4
+      runPatternDesugar "v" 0 (desugarPatterns fixture3) == fixture4
     it "" $
-      runPatternDesugaring "v" 0 (desugarPatterns fixture5) == fixture6
+      runPatternDesugar "v" 0 (desugarPatterns fixture5) == fixture6
     it "" $
-      runPatternDesugaring "v" 0 (desugarPatterns fixture7) == fixture8
+      runPatternDesugar "v" 0 (desugarPatterns fixture7) == fixture8
     it "" $
-      runPatternDesugaring "v" 0 (desugarPatterns fixture9) == fixture10
+      runPatternDesugar "v" 0 (desugarPatterns fixture9) == fixture10
     it "" $
-      runPatternDesugaring "v" 0 (desugarPatterns fixture11) == fixture12
+      runPatternDesugar "v" 0 (desugarPatterns fixture11) == fixture12
     it "" $
-      runPatternDesugaring "v" 0 (desugarPatterns Noll.Examples.Test05.moduleOrdered) == Noll.Examples.Test06.moduleOrdered
+      runPatternDesugar "v" 0 (desugarPatterns Noll.Examples.Test05.moduleOrdered) == Noll.Examples.Test06.moduleOrdered
     it "" $
-      runPatternDesugaring "v" 0 (desugarPatterns Noll.Examples.Test05.moduleBinarySearch) == Noll.Examples.Test06.moduleBinarySearch
+      runPatternDesugar "v" 0 (desugarPatterns Noll.Examples.Test05.moduleBinarySearch) == Noll.Examples.Test06.moduleBinarySearch
 
 -- let
 --  Some(p) = x     Option(int32)

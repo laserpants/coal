@@ -39,9 +39,9 @@ library
       Noll.Compiler.Transform
       Noll.Compiler.Transform.Fold
       Noll.Compiler.Transform.Nats
-      Noll.Compiler.Transform.Pattern.Desugaring
+      Noll.Compiler.Transform.Pattern.Desugar
       Noll.Compiler.Transform.Pattern.OrExpansion
-      Noll.Compiler.Transform.Pattern.RecordDesugaring
+      Noll.Compiler.Transform.Pattern.RecordDesugar
       Noll.Compiler.Transform.Tree
       Noll.Compiler.Transform.Type.AliasInsertion
       Noll.Compiler.Transform.Unfold
@@ -149,9 +149,9 @@ test-suite noll-test
       Noll.Compiler.PatternMatchingSpec
       Noll.Compiler.PatternMatchingSpec.TestRunner
       Noll.Compiler.Transform.FoldSpec
-      Noll.Compiler.Transform.Pattern.DesugaringSpec
+      Noll.Compiler.Transform.Pattern.DesugarSpec
       Noll.Compiler.Transform.Pattern.OrExpansionSpec
-      Noll.Compiler.Transform.Pattern.RecordDesugaringSpec
+      Noll.Compiler.Transform.Pattern.RecordDesugarSpec
       Noll.Compiler.Transform.TreeSpec
       Noll.Compiler.Transform.Type.AliasInsertionSpec
       Noll.CompilerExamples.Test01

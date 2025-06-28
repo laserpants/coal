@@ -6,7 +6,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Compiler.Transform.Pattern.RecordDesugaring where
+module Noll.Compiler.Transform.Pattern.RecordDesugar where
 
 import Control.Monad.RWS
 import Control.Monad.Reader (MonadReader)
