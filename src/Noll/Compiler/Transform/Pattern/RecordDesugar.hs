@@ -17,7 +17,7 @@ import Data.Generics.Uniplate.Data (transformBiM)
 import Lang.Common.List1 (List1, NonEmpty (..))
 import Lang.Common.Supply (suppliedName)
 import Lang.Label (Label (..))
-import Lang.Utils (Dictionary, Map, Name, forM_, traverseM)
+import Lang.Utils (Dictionary, Map, Name, traverseM)
 import Noll.Language
 import Noll.Language.HasType (HasType (..))
 import Noll.Language.Type.Row (RowData (..))
