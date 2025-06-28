@@ -43,8 +43,8 @@ runUnfoldExpansion r s e = evalState (runReaderT (unfoldExpansionStack e) r) s
 renameRecursiveCall :: (Monoid a, Data a) => Name -> Name -> Expression a () -> Expression a ()
 renameRecursiveCall old new = replace old (const2 $ EVariable mempty (Label mempty new))
 
-makeThunk :: (Monoid a, Data a) => Expression a () -> Expression a ()
-makeThunk = ELambda mempty (PAny mempty () :| [])
+toLambda :: (Monoid a, Data a) => Expression a () -> Expression a ()
+toLambda = ELambda mempty (PAny mempty () :| [])
 
 expandUnfoldExpr :: forall m a d. (Monoid a, Data a, MonadState Int m, MonadReader Name m) => Name -> List1 (Pattern a ()) -> Dictionary (Expression a ()) -> m (Expression a ())
 expandUnfoldExpr var ps d = do
@@ -60,7 +60,7 @@ expandUnfoldExpr var ps d = do
             ( ECodataFields
                 mempty
                 ()
-                (Map.mapKeys ("$$" <>) (Map.map (makeThunk . renameRecursiveCall var name) d))
+                (Map.mapKeys ("$$" <>) (Map.map (toLambda . renameRecursiveCall var name) d))
             )
         )
         (EVariable mempty (Label mempty name))
