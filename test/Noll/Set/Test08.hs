@@ -820,7 +820,7 @@ moduleBinarySearch =
                                                   ( EVariable
                                                       ()
                                                       ( Label
-                                                          ( ( TIntrinsic
+                                                          ( TIntrinsic
                                                                 ( IRecord
                                                                     ( TRow
                                                                         ( RExtend
@@ -830,12 +830,10 @@ moduleBinarySearch =
                                                                         )
                                                                     )
                                                                 )
-                                                            )
-                                                              `TArrow` ( TApplication
+                                                              `TArrow` TApplication
                                                                           KType
                                                                           (TConstructor (KArrow KType KType) "Tree")
                                                                           (TVariable (TypeIndex KType 1) :| [])
-                                                                       )
                                                           )
                                                           "g"
                                                       )

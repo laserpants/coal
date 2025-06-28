@@ -9,14 +9,11 @@
 module Noll.Compiler.Transform.Pattern.RecordDesugar where
 
 import Control.Monad.RWS
-import Control.Monad.Reader (MonadReader)
 import Control.Monad.State (MonadState)
 import Control.Monad.Writer
-import Data.Data (Data, Typeable)
-import Data.Foldable (foldlM, foldrM)
+import Data.Data (Data)
+import Data.Foldable (foldrM)
 import Data.Generics.Uniplate.Data (transformBiM)
-import Data.Semigroup (sconcat)
-import Debug.Trace
 import Lang.Common.List1 (List1, NonEmpty (..))
 import Lang.Common.Supply (suppliedName)
 import Lang.Label (Label (..))
