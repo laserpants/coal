@@ -95,7 +95,7 @@ spec =
 -- }
 fixture :: Expression () ()
 fixture =
-  runMatchMonad
+  evalMatchMonad
     "match"
     0
     ( compilePatterns

@@ -39,12 +39,12 @@ newtype FoldExpansion a = FoldExpansion {foldExpansionStack :: RWS Name () Int a
     )
 
 evalFoldExpansion :: Name -> Int -> FoldExpansion a -> a
-evalFoldExpansion name s =  fst . runFoldExpansion name s
+evalFoldExpansion name s = fst . runFoldExpansion name s
 
 runFoldExpansion :: Name -> Int -> FoldExpansion a -> (a, Int)
 runFoldExpansion r s e = (a, s')
-  where
-    (a, s', _) = runRWS (foldExpansionStack e) r s
+ where
+  (a, s', _) = runRWS (foldExpansionStack e) r s
 
 class FoldContext e where
   expandFolds :: Name -> [Label ()] -> e -> e

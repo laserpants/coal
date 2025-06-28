@@ -41,12 +41,12 @@ newtype UnfoldExpansion a = UnfoldExpansion {unfoldExpansionStack :: RWS Name ()
     )
 
 evalUnfoldExpansion :: Name -> Int -> UnfoldExpansion a -> a
-evalUnfoldExpansion name s =  fst . runUnfoldExpansion name s
+evalUnfoldExpansion name s = fst . runUnfoldExpansion name s
 
 runUnfoldExpansion :: Name -> Int -> UnfoldExpansion a -> (a, Int)
 runUnfoldExpansion r s e = (a, s')
-  where
-    (a, s', _) = runRWS (unfoldExpansionStack e) r s
+ where
+  (a, s', _) = runRWS (unfoldExpansionStack e) r s
 
 renameRecursiveCall :: (Monoid a, Data a) => Name -> Name -> Expression a () -> Expression a ()
 renameRecursiveCall old new = replace old (const2 $ EVariable mempty (Label mempty new))

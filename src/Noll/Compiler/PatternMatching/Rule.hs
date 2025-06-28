@@ -6,11 +6,12 @@
 module Noll.Compiler.PatternMatching.Rule (
   MatchMonad (..),
   matchPatterns,
+  evalMatchMonad,
   runMatchMonad,
 ) where
 
 import Control.Monad.Reader (MonadReader, ReaderT, ask, runReaderT)
-import Control.Monad.State (MonadState, State, evalState)
+import Control.Monad.State (MonadState, State, evalState, runState)
 import Lang.Common.Supply (supplied, suppliedName)
 import Lang.Label (Label (..))
 import Lang.Utils (Name, foldrM)
@@ -31,8 +32,11 @@ newtype MatchMonad a = MatchMonad {matchMonadStack :: ReaderT Name (State Int) a
     , MonadReader Name
     )
 
-runMatchMonad :: Name -> Int -> MatchMonad a -> a
-runMatchMonad name n e = evalState (runReaderT (matchMonadStack e) name) n
+evalMatchMonad :: Name -> Int -> MatchMonad a -> a
+evalMatchMonad name n e = evalState (runReaderT (matchMonadStack e) name) n
+
+runMatchMonad :: Name -> Int -> MatchMonad a -> (a, Int)
+runMatchMonad name n e = runState (runReaderT (matchMonadStack e) name) n
 
 type MatchRule p e t = [Label t] -> [p e t] -> EnvelopeExpression e t -> MatchMonad (EnvelopeExpression e t)
 

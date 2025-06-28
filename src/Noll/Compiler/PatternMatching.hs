@@ -6,7 +6,11 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Compiler.PatternMatching (TypeProxy (..), compileEnvelope, compileMatchExprs) where
+module Noll.Compiler.PatternMatching (
+  MatchExpressionContext (..),
+  TypeProxy (..),
+  compileEnvelope,
+) where
 
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformBiM, transformM)
@@ -40,10 +44,10 @@ instance (MatchExpressionContext a) => MatchExpressionContext (Dictionary a) whe
 
 type MatchClasses a t = (Show a, Data a, Monoid a, Show t, Data t, TypeProxy t, Ord t)
 
-instance (MatchClasses a t, Data k, Ord k) => MatchExpressionContext (Module a k t) where
+instance (MatchClasses a t, Data k) => MatchExpressionContext (Module a k t) where
   compileMatchExprs = transformBiM (compileMatchExprsE :: Expression a t -> MatchMonad (Expression a t))
 
-instance (MatchClasses a t, Data k, Ord k) => MatchExpressionContext (Definition a k t) where
+instance (MatchClasses a t, Data k) => MatchExpressionContext (Definition a k t) where
   compileMatchExprs = transformBiM (compileMatchExprsE :: Expression a t -> MatchMonad (Expression a t))
 
 instance (MatchClasses a t) => MatchExpressionContext (Function Expression a t) where

@@ -21,7 +21,7 @@ spec :: Spec
 spec =
   describe "" $
     it "" $ do
-      runMatchMonad "???" 0 (compileMatchExprs fixture) == fixture1
+      evalMatchMonad "???" 0 (compileMatchExprs fixture) == fixture1
 
 --
 -- let

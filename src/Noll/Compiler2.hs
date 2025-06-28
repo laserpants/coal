@@ -1,6 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ScopedTypeVariables #-}
@@ -8,9 +7,6 @@
 
 module Noll.Compiler2 where
 
-import Noll.Compiler.Transform.Fold
-import Noll.Compiler.NormalizeObjects (NormalizeObjectsTransformContext (..))
-import Noll.Compiler.Transform.Unfold
 import Control.Monad ((>=>))
 import Control.Monad.RWS (RWST, runRWST)
 import Control.Monad.Reader (MonadReader, Reader, ReaderT, ask, asks, runReader, runReaderT)
@@ -19,12 +15,18 @@ import Control.Monad.Writer (execWriter)
 import Lang.Common.Environment (Environment (..))
 import Lang.Common.Supply (Supply (..), supplied)
 import Lang.Utils (Dictionary, Name, Over, forM_, (<$$$>))
+import Noll.Compiler.NormalizeObjects (NormalizeObjectsTransformContext (..))
+import Noll.Compiler.PatternMatching
+import Noll.Compiler.PatternMatching.Rule (MatchMonad (..), matchPatterns, runMatchMonad)
+import Noll.Compiler.Transform.Fold
+import Noll.Compiler.Transform.Pattern.Desugar
+import Noll.Compiler.Transform.Pattern.OrExpansion
 import Noll.Compiler.Transform.Type.AliasExpansion
+import Noll.Compiler.Transform.Unfold
 import Noll.Language
 import Noll.Module (Constant (..), Definition (..), Function (..), Module (..), Path (..))
 import Noll.SystemF
 import Noll.SystemF.Substitution (mapsTo)
-import Noll.Compiler.Transform.Pattern.Desugar
 
 data Compiler2Environment o k t = Compiler2Environment
   { compiler2DataConstructorEnv :: Environment (Constructor o k t)
@@ -81,6 +83,13 @@ instance Supply Compiler2State where
 
 --
 
+withSupplyC :: (Monad m) => (Int -> (a, Int)) -> Compiler2T m a
+withSupplyC f = do
+  n <- gets compiler2Supply
+  let (r, n') = f n
+  insertSupplyC n'
+  pure r
+
 aliasExpansionTrans :: (Monad m) => (a -> Reader AliasEnvironment a) -> a -> Compiler2T m a
 aliasExpansionTrans f e = asks (runReader (f e) . compiler2AliasEnv)
 
@@ -88,21 +97,13 @@ expandAliasesC :: (Monad m, AliasContext a) => a -> Compiler2T m a
 expandAliasesC = aliasExpansionTrans expandAliases
 
 foldExpansionTrans :: (Monad m) => (a -> FoldExpansion a) -> a -> Compiler2T m a
-foldExpansionTrans f e = do
-  n <- gets compiler2Supply
-  let (a, n') = runFoldExpansion "fold" n (f e)
-  insertSupplyC n'
-  pure a
+foldExpansionTrans f e = withSupplyC (\n -> runFoldExpansion "fold" n (f e))
 
 compileUnfoldsC :: (Monad m, CompileFoldsContext a) => a -> Compiler2T m a
 compileUnfoldsC = foldExpansionTrans compileFolds
 
 unfoldExpansionTrans :: (Monad m) => (a -> UnfoldExpansion a) -> a -> Compiler2T m a
-unfoldExpansionTrans f e = do
-  n <- gets compiler2Supply
-  let (a, n') = runUnfoldExpansion "unfold" n (f e)
-  insertSupplyC n'
-  pure a
+unfoldExpansionTrans f e = withSupplyC (\n -> runUnfoldExpansion "unfold" n (f e))
 
 compileFoldsC :: (Monad m) => (CompileUnfoldsContext a) => a -> Compiler2T m a
 compileFoldsC = unfoldExpansionTrans compileUnfolds
@@ -117,18 +118,20 @@ denormalizeObjectC :: (Monad m, NormalizeObjectsTransformContext a) => a -> Comp
 denormalizeObjectC = pure . denormalizeObject
 
 patternDesugarTrans :: (Monad m) => (a -> PatternDesugar c TypeIndex Kind a) -> a -> Compiler2T m a
-patternDesugarTrans f e = do
-  n <- gets compiler2Supply
-  let (a, n') = runPatternDesugar "v" n (f e)
-  insertSupplyC n'
-  pure a
+patternDesugarTrans f e = withSupplyC (\n -> runPatternDesugar "v" n (f e))
 
 desugarPatternsC :: (Monad m, Sugared c TypeIndex Kind a) => a -> Compiler2T m a
 desugarPatternsC = patternDesugarTrans desugarPatterns
 
+matchMonadTrans :: (Monad m) => (a -> MatchMonad a) -> a -> Compiler2T m a
+matchMonadTrans f e = withSupplyC (\n -> runMatchMonad "match" n (f e))
+
+compileMatchExprsC :: (Monad m, MatchExpressionContext a) => a -> Compiler2T m a
+compileMatchExprsC = matchMonadTrans compileMatchExprs
+
 --
 
-compileModule :: (Monad m) => Module () () () -> Compiler2T m a
+compileModule :: (Monad m) => Module () () () -> Compiler2T m (Module () Kind IndexedType)
 compileModule =
   -- Expand type aliases
   expandAliasesC
@@ -143,15 +146,16 @@ compileModule =
     -- Translate patterns in expression arguments to match expressions
     >=> desugarPatternsC
     -- Compile or-patterns
-    >=> undefined
---    -- Translate record patterns to select operators
---    >=> undefined
---    -- Compile match statements
---    >=> undefined
---    -- Placeholder insertion
---    >=> undefined
---    -- Denormalize top-level expressions
---    >=> denormalizeObjectC
+    >=> compileOrPatterns
+    --    -- Translate record patterns to select operators
+    --    >=> TODO
+    -- Compile match statements
+    >=> compileMatchExprsC
+    --    -- Placeholder insertion
+    --    >=> TODO
+    -- Denormalize top-level expressions
+    >=> denormalizeObjectC
+
 --    -- Final lowering
 --    >=> undefined
 

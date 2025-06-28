@@ -12,7 +12,7 @@ module Noll.Compiler.Transform.Pattern.Desugar (
   evalPatternDesugar,
 ) where
 
-import Control.Monad.RWS (RWS, evalRWS, runRWS, MonadReader, MonadState, MonadWriter, tell)
+import Control.Monad.RWS (MonadReader, MonadState, MonadWriter, RWS, evalRWS, runRWS, tell)
 import Control.Monad.Writer (runWriterT)
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (transformM)
@@ -52,8 +52,8 @@ evalPatternDesugar r s e = fst (runPatternDesugar r s e)
 {-# INLINE runPatternDesugar #-}
 runPatternDesugar :: Name -> Int -> PatternDesugar c o k e -> (e, Int)
 runPatternDesugar r s e = (a, s')
-  where
-    (a, s', _) = runRWS (patternDesugarStack e) r s
+ where
+  (a, s', _) = runRWS (patternDesugarStack e) r s
 
 class Sugared c o k e | e -> c, e -> o k where
   desugarPatterns ::

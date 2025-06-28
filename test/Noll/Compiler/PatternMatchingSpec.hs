@@ -29,14 +29,14 @@ spec = do
     testCompilePatterns
   describe "" $ do
     it "" $ do
-      runMatchMonad
+      evalMatchMonad
         "match"
         0
         (compileMatchExprs test07)
         == test08
 
 bork =
-  runMatchMonad
+  evalMatchMonad
     "match"
     0
     ( compilePatterns
@@ -99,7 +99,7 @@ testCompilePatterns :: Spec
 testCompilePatterns =
   describe "" $
     it "" $
-      runMatchMonad
+      evalMatchMonad
         "match"
         0
         ( compilePatterns
@@ -225,7 +225,7 @@ testCompileEnvelopeExpression :: Spec
 testCompileEnvelopeExpression =
   describe "compileEnvelope" $ do
     it "" $
-      runMatchMonad
+      evalMatchMonad
         "match"
         0
         ( compileEnvelope
@@ -242,7 +242,7 @@ testCompileEnvelopeExpression =
         )
         == (ELiteral () (LInt32 1) :: (Expression ()) ())
     it "" $
-      runMatchMonad
+      evalMatchMonad
         "match"
         0
         ( compileEnvelope
@@ -259,7 +259,7 @@ testCompileEnvelopeExpression =
         )
         == EVariable () (Label () "u1")
     it "" $
-      runMatchMonad
+      evalMatchMonad
         "match"
         0
         ( compileEnvelope
@@ -276,7 +276,7 @@ testCompileEnvelopeExpression =
         )
         == EVariable () (Label () "u2")
     it "" $
-      runMatchMonad
+      evalMatchMonad
         "match"
         0
         ( compileEnvelope
@@ -311,7 +311,7 @@ testCompileEnvelopeExpression =
                 ]
             )
         )
-        ( runMatchMonad
+        ( evalMatchMonad
             "match"
             0
             ( compileEnvelope
@@ -347,7 +347,7 @@ testCompileEnvelopeExpression =
                 ]
             )
         )
-        ( runMatchMonad
+        ( evalMatchMonad
             "match"
             0
             ( compileEnvelope
@@ -383,7 +383,7 @@ testCompileEnvelopeExpression =
                 ]
             )
         )
-        ( runMatchMonad
+        ( evalMatchMonad
             "match"
             0
             ( compileEnvelope
@@ -419,7 +419,7 @@ testCompileEnvelopeExpression =
                 ]
             )
         )
-        ( runMatchMonad
+        ( evalMatchMonad
             "match"
             0
             ( compileEnvelope
@@ -461,7 +461,7 @@ testCompileEnvelopeExpression =
                 ]
             )
         )
-        ( runMatchMonad
+        ( evalMatchMonad
             "match"
             0
             ( compileEnvelope
@@ -509,7 +509,7 @@ testCompileEnvelopeExpression =
                 ]
             )
         )
-        ( runMatchMonad
+        ( evalMatchMonad
             "match"
             0
             ( compileEnvelope
@@ -557,7 +557,7 @@ testCompileEnvelopeExpression =
                 ]
             )
         )
-        ( runMatchMonad
+        ( evalMatchMonad
             "match"
             0
             ( compileEnvelope

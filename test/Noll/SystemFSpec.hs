@@ -1221,11 +1221,11 @@ story = do
   it "" $
     fst (runExpandRecordPatterns (compileRecordPatterns Noll.Set.Test07.moduleMain) "row" 1) == Noll.Set.Test08.moduleMain
   it "" $
-    runMatchMonad "match" 0 (compileMatchExprs Noll.Set.Test08.prog1_08) == Noll.Set.Test09.prog1_09
+    evalMatchMonad "match" 0 (compileMatchExprs Noll.Set.Test08.prog1_08) == Noll.Set.Test09.prog1_09
   it "" $
-    runMatchMonad "match" 0 (compileMatchExprs Noll.Set2.Test05.prog2_05) == Noll.Set2.Test09.prog2_09
+    evalMatchMonad "match" 0 (compileMatchExprs Noll.Set2.Test05.prog2_05) == Noll.Set2.Test09.prog2_09
   it "" $
-    runMatchMonad "match" 0 (compileMatchExprs Noll.Set5.Test05.moduleMain) == Noll.Set5.Test09.moduleMain
+    evalMatchMonad "match" 0 (compileMatchExprs Noll.Set5.Test05.moduleMain) == Noll.Set5.Test09.moduleMain
 
   --  it "" $
   --    result funLte == funLte2
