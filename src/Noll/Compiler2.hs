@@ -28,6 +28,8 @@ import Noll.Module (Constant (..), Definition (..), Function (..), Module (..), 
 import Noll.SystemF
 import Noll.SystemF.Substitution (mapsTo)
 
+import qualified Lang.Common.Environment as Environment
+
 data Compiler2Environment o k t = Compiler2Environment
   { compiler2DataConstructorEnv :: Environment (Constructor o k t)
   , compiler2TypeConstructorEnv :: Environment Kind
@@ -38,9 +40,14 @@ data Compiler2Environment o k t = Compiler2Environment
 
 data Compiler2State = Compiler2State
   { compiler2Supply :: Int
+  , compiler2NameStore :: Environment (Scheme TypeIndex Kind IndexedType)
   , compilerSubstitution :: Substitution
   }
   deriving (Show, Eq, Ord, Read)
+
+{-# INLINE overCompiler2NameStore #-}
+overCompiler2NameStore :: Over Compiler2State (Environment (Scheme TypeIndex Kind IndexedType))
+overCompiler2NameStore fn Compiler2State{..} = Compiler2State{compiler2NameStore = fn compiler2NameStore, ..}
 
 {-# INLINE overCompiler2Supply #-}
 overCompiler2Supply :: Over Compiler2State Int
@@ -50,6 +57,7 @@ initialCompiler2State :: Compiler2State
 initialCompiler2State =
   Compiler2State
     { compiler2Supply = 0
+    , compiler2NameStore = mempty
     , compilerSubstitution = mempty
     }
 
@@ -74,8 +82,13 @@ runCompiler2T env com = do
 evalCompiler2T :: (Monad m) => Compiler2Environment TypeIndex Kind IndexedType -> Compiler2T m c -> m c
 evalCompiler2T = fst <$$$> runCompiler2T
 
+{-# INLINE insertSupplyC #-}
 insertSupplyC :: (Monad m) => Int -> Compiler2T m ()
 insertSupplyC = modify . overCompiler2Supply . const
+
+{-# INLINE insertNamesC #-}
+insertNamesC :: (Monad m) => [(Name, Scheme TypeIndex Kind IndexedType)] -> Compiler2T m ()
+insertNamesC names = modify (overCompiler2NameStore (Environment.insertMultiple names))
 
 instance Supply Compiler2State where
   updateSupply = overCompiler2Supply
