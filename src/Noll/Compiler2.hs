@@ -1,19 +1,13 @@
 {-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
 
 module Noll.Compiler2 where
 
 import Control.Monad ((>=>))
-import Control.Monad.Reader (MonadReader, Reader, ReaderT, ask, asks, runReader, runReaderT)
-import Control.Monad.State (MonadState, StateT, gets, modify, put, runState, runStateT)
-import Control.Monad.Writer (execWriter)
-import Lang.Common.Environment (Environment (..))
-import Lang.Common.Supply (Supply (..), supplied)
-import Lang.Utils (Dictionary, Name, Over, forM_, (<$$$>))
+import Control.Monad.Reader (Reader, asks, runReader)
+import Control.Monad.State (gets, runState)
 import Noll.Compiler.NormalizeObjects (NormalizeObjectsTransformContext (..))
 import Noll.Compiler.PatternMatching
 import Noll.Compiler.PatternMatching.Rule (MatchMonad (..), matchPatterns, runMatchMonad)
@@ -25,7 +19,7 @@ import Noll.Compiler.Transform.Unfold
 import Noll.Compiler2.Internal
 import Noll.Compiler2.TypeInference
 import Noll.Language
-import Noll.Module (Constant (..), Definition (..), Function (..), Module (..), Path (..))
+import Noll.Module (Module (..))
 
 withSupplyC :: (Monad m) => (Int -> (c, Int)) -> Compiler2T a m c
 withSupplyC f = do
