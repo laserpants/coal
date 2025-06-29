@@ -1,6 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
@@ -8,11 +7,11 @@
 module Noll.Compiler2.Internal where
 
 import Control.Monad.RWS (RWST, runRWST)
-import Control.Monad.Reader (MonadReader, Reader, ReaderT, ask, asks, runReader, runReaderT)
-import Control.Monad.State (MonadState, StateT, gets, modify, put, runState, runStateT)
+import Control.Monad.Reader (MonadReader)
+import Control.Monad.State (MonadState)
 import Lang.Common.Environment (Environment (..))
-import Lang.Common.Supply (Supply (..), supplied)
-import Lang.Utils (Dictionary, Name, Over, forM_, (<$$$>))
+import Lang.Common.Supply (Supply (..))
+import Lang.Utils (Over, (<$$$>))
 import Noll.Compiler.Transform.Type.AliasExpansion
 import Noll.Language
 import Noll.SystemF
