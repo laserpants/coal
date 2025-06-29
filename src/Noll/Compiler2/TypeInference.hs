@@ -31,5 +31,10 @@ typeDefinitionC =
       pure ()
     DSignature{} ->
       pure ()
-    _ ->
-      error ""
+    DInstance trait t1 ds -> do
+      error "TODO"
+    d -> do
+      error "TODO"
+      --compileDefinitionC d
+      --sub <- solveC
+      --defineC (definitionName d) (typeOf (apply sub d))
