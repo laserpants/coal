@@ -23,6 +23,7 @@ import Noll.Compiler.Transform.Pattern.Desugar
 import Noll.Compiler.Transform.Pattern.OrExpansion
 import Noll.Compiler.Transform.Type.AliasExpansion
 import Noll.Compiler.Transform.Unfold
+import Noll.Compiler2.Internal
 import Noll.Compiler2.TypeInference
 import Noll.Language
 import Noll.Module (Constant (..), Definition (..), Function (..), Module (..), Path (..))
@@ -31,58 +32,6 @@ import Noll.SystemF.Substitution (mapsTo)
 
 import qualified Lang.Common.Environment as Environment
 
-data Compiler2Environment o k t = Compiler2Environment
-  { compiler2DataConstructorEnv :: Environment (Constructor o k t)
-  , compiler2TypeConstructorEnv :: Environment Kind
-  , compiler2TraitEnv :: Environment (o k, Environment (Scheme o k t))
-  , compiler2AliasEnv :: AliasEnvironment
-  }
-  deriving (Show, Eq, Ord, Read)
-
-data Compiler2State = Compiler2State
-  { compiler2Supply :: Int
-  , compiler2NameStore :: Environment (Scheme TypeIndex Kind IndexedType)
-  , compilerSubstitution :: Substitution
-  }
-  deriving (Show, Eq, Ord, Read)
-
-{-# INLINE overCompiler2NameStore #-}
-overCompiler2NameStore :: Over Compiler2State (Environment (Scheme TypeIndex Kind IndexedType))
-overCompiler2NameStore fn Compiler2State{..} = Compiler2State{compiler2NameStore = fn compiler2NameStore, ..}
-
-{-# INLINE overCompiler2Supply #-}
-overCompiler2Supply :: Over Compiler2State Int
-overCompiler2Supply fn Compiler2State{..} = Compiler2State{compiler2Supply = fn compiler2Supply, ..}
-
-initialCompiler2State :: Compiler2State
-initialCompiler2State =
-  Compiler2State
-    { compiler2Supply = 0
-    , compiler2NameStore = mempty
-    , compilerSubstitution = mempty
-    }
-
-type Compiler2Stack m c = RWST (Compiler2Environment TypeIndex Kind IndexedType) () Compiler2State m c
-
-newtype Compiler2T m c = Compiler2 {compiler2Stack :: Compiler2Stack m c}
-  deriving
-    ( Functor
-    , Applicative
-    , Monad
-    , MonadReader (Compiler2Environment TypeIndex Kind IndexedType)
-    , MonadState Compiler2State
-    )
-
-{-# INLINE runCompiler2T #-}
-runCompiler2T :: (Monad m) => Compiler2Environment TypeIndex Kind IndexedType -> Compiler2T m c -> m (c, Compiler2State)
-runCompiler2T env com = do
-  (c, s, _) <- runRWST (compiler2Stack com) env initialCompiler2State
-  pure (c, s)
-
-{-# INLINE evalCompiler2T #-}
-evalCompiler2T :: (Monad m) => Compiler2Environment TypeIndex Kind IndexedType -> Compiler2T m c -> m c
-evalCompiler2T = fst <$$$> runCompiler2T
-
 {-# INLINE insertSupplyC #-}
 insertSupplyC :: (Monad m) => Int -> Compiler2T m ()
 insertSupplyC = modify . overCompiler2Supply . const
@@ -90,10 +39,6 @@ insertSupplyC = modify . overCompiler2Supply . const
 {-# INLINE insertNamesC #-}
 insertNamesC :: (Monad m) => [(Name, Scheme TypeIndex Kind IndexedType)] -> Compiler2T m ()
 insertNamesC names = modify (overCompiler2NameStore (Environment.insertMultiple names))
-
-instance Supply Compiler2State where
-  updateSupply = overCompiler2Supply
-  getSupply = compiler2Supply
 
 --
 
