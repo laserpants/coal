@@ -110,9 +110,8 @@ compileModule =
     --    >=> TODO
     -- Denormalize top-level expressions
     >=> denormalizeObjectC
-
---    -- Final lowering
---    >=> undefined
+    -- Final lowering
+    >=> undefined
 
 -----------------------
 -----------------------

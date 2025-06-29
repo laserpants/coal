@@ -31,7 +31,7 @@ type CompilerConstraint a = Constraint (InferenceRule Kind a) TypeIndex Kind Ind
 data Compiler2State = Compiler2State
   { compiler2Supply :: Int
   , compiler2NameStore :: Environment (Scheme TypeIndex Kind IndexedType)
-  , compilerSubstitution :: Substitution
+  , compiler2Substitution :: Substitution
 --  , compiler2Substitution :: Substitution
 --  , compiler2Constraints :: [CompilerConstraint a]
 --  , compiler2ConstraintsGenErrors :: [ConstraintsGenError a]
@@ -55,7 +55,7 @@ initialCompiler2State =
   Compiler2State
     { compiler2Supply = 0
     , compiler2NameStore = mempty
-    , compilerSubstitution = mempty
+    , compiler2Substitution = mempty
     }
 
 type Compiler2Stack m c = RWST (Compiler2Environment TypeIndex Kind IndexedType) () Compiler2State m c
@@ -86,3 +86,6 @@ insertSupplyC = modify . overCompiler2Supply . const
 {-# INLINE insertNamesC #-}
 insertNamesC :: (Monad m) => [(Name, Scheme TypeIndex Kind IndexedType)] -> Compiler2T m ()
 insertNamesC names = modify (overCompiler2NameStore (Environment.insertMultiple names))
+
+--insertConstraintsC :: (Monad m) => [CompilerConstraint a] -> Compiler2T m ()
+insertConstraintsC = undefined
