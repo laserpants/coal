@@ -4,17 +4,20 @@
 
 module Noll.Compiler2.TypeInference where
 
+import Noll.Module.Definition (definitionName)
 import Data.Data (Data)
 import Lang.Common.List1 (NonEmpty (..))
-import Lang.Common.Supply (Supply (..), supplied)
+import Lang.Common.Supply (supplied)
 import Control.Monad.State (gets)
 import Lang.Label (Label (..))
 import Noll.Compiler2.Internal
+import Lang.Utils (Name, forM_)
 import Noll.Language
 import Noll.Module (Constant (..), Definition (..), Function (..))
 import Noll.SystemF
+import Lang.Common.Environment (Environment (..))
 
-type CompilerAssumption = Assumption IndexedType
+import qualified Data.Map.Strict as Map
 
 solveConstraintsC =
   undefined
@@ -66,28 +69,44 @@ solveC = do
   gets compiler2Substitution
 
 typeDefinitionsC :: (Monad m) => [Definition a k IndexedType] -> Compiler2T b m ([Definition a Kind IndexedType], [CompilerAssumption])
-typeDefinitionsC = undefined
+typeDefinitionsC ds = do
+  forM_ ds typeDefinitionC
+  undefined
+--  sub <- gets compiler2Substitution
+--  ams <- gets compiler2Assumptions
+--  Environment env <- gets compiler2NameStore
+--  insertConstraintsC $ do
+--    (n1, s) <- Map.toList env
+--    Assumption n2 t <- ams
+--    [Explicit InferenceRulePlaceholder (apply sub t) s | n1 == n2]
+--  sub <- solveC
+--  pure (fmap (fmap normalizeRowTypes) (apply sub ds), apply sub ams)
 
-typeDefinitionC :: (Monad m, Data a, Show a, Eq a) => Definition a k IndexedType -> Compiler2T a m ()
+--typeDefinitionC :: (Monad m, Data a, Data k, Show a, Eq a) => Definition a k IndexedType -> Compiler2T b m ()
+typeDefinitionC :: (Monad m) => Definition a k IndexedType -> Compiler2T b m ()
 typeDefinitionC =
-  \case
-    DImport{} ->
-      pure ()
-    DTrait{} ->
-      pure ()
-    DTypeAlias{} ->
-      pure ()
-    DType{} ->
-      pure ()
-    DCodata{} ->
-      pure ()
-    DSignature{} ->
-      pure ()
-    DInstance trait t1 ds -> do
-      error "TODO"
-    d -> do
-      compileDefinitionC d
-      sub <- solveC
-      error "TODO"
+  undefined
+--  \case
+--    DImport{} ->
+--      pure ()
+--    DTrait{} ->
+--      pure ()
+--    DTypeAlias{} ->
+--      pure ()
+--    DType{} ->
+--      pure ()
+--    DCodata{} ->
+--      pure ()
+--    DSignature{} ->
+--      pure ()
+--    DInstance trait t1 ds -> do
+--      error "TODO"
+--    d -> do
+--      compileDefinitionC d
+--      sub <- solveC
+--      undefined -- defineC (definitionName d) (typeOf (apply sub d) :: Type TypeIndex Kind)
 
-  -- defineC (definitionName d) (typeOf (apply sub d))
+defineC :: (Monad m) => Name -> IndexedType -> Compiler2T a m ()
+defineC name t = insertNameC name (Forall (typeIndexesIn s) [] s)
+ where
+  s = normalizeTypeIndexes t
