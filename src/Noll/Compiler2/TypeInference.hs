@@ -13,11 +13,23 @@ type CompilerAssumption = Assumption IndexedType
 
 type CompilerConstraint a = Constraint (InferenceRule Kind a) TypeIndex Kind IndexedType
 
-typeDefinitionsC :: [Definition a k IndexedType] -> Compiler2T m ([Definition a Kind IndexedType], [CompilerAssumption])
+typeDefinitionsC :: (Monad m) => [Definition a k IndexedType] -> Compiler2T m ([Definition a Kind IndexedType], [CompilerAssumption])
 typeDefinitionsC = undefined
 
-typeDefinitionC :: Definition a k IndexedType -> Compiler2T m (Definition a Kind IndexedType)
+typeDefinitionC :: (Monad m) => Definition a k IndexedType -> Compiler2T m ()
 typeDefinitionC =
   \case
+    DImport{} ->
+      pure ()
+    DTrait{} ->
+      pure ()
+    DTypeAlias{} ->
+      pure ()
+    DType{} ->
+      pure ()
+    DCodata{} ->
+      pure ()
+    DSignature{} ->
+      pure ()
     _ ->
-      undefined
+      error ""
