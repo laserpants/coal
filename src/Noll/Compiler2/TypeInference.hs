@@ -50,6 +50,10 @@ compileDefinitionC = do
   \case
     DFunction _ f ->
       compileFunctionC f
+    DConstant _ c ->
+      compileConstantC c
+    _ ->
+      error "TODO"
 
 solveC :: (Monad m, Data a, Show a, Eq a) => Compiler2T a m Substitution
 solveC = do
