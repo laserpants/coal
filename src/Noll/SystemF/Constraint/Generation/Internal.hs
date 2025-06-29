@@ -21,19 +21,12 @@ module Noll.SystemF.Constraint.Generation.Internal (
 ) where
 
 import Control.Monad.RWS
-import Data.Data (Data, Typeable)
-import Data.Generics.Uniplate.Data (transformBi)
 import Lang.Common.Environment (Environment (..))
 import Lang.Common.Supply (Supply (..))
 import Lang.Utils (Dictionary, Name)
 import Noll.Language (Constructor (..), Kind (..), Type (..), TypeIndex (..))
-import Noll.SystemF.Constraint (
-  Constraint (..),
-  Monomorphic (..),
-  overMonomorphicSet,
- )
+import Noll.SystemF.Constraint (Constraint (..), Monomorphic (..), overMonomorphicSet)
 import Noll.SystemF.Constraint.Generation.InferenceRule (InferenceRule (..))
-import Noll.SystemF.Substitution (Substitutable (..), applyT)
 
 import qualified Data.Set as Set
 

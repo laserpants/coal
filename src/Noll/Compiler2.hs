@@ -23,6 +23,7 @@ import Noll.Compiler.Transform.Pattern.Desugar
 import Noll.Compiler.Transform.Pattern.OrExpansion
 import Noll.Compiler.Transform.Type.AliasExpansion
 import Noll.Compiler.Transform.Unfold
+import Noll.Compiler2.TypeInference
 import Noll.Language
 import Noll.Module (Constant (..), Definition (..), Function (..), Module (..), Path (..))
 import Noll.SystemF
@@ -122,14 +123,15 @@ compileFoldsC :: (Monad m) => (CompileUnfoldsContext a) => a -> Compiler2T m a
 compileFoldsC = unfoldExpansionTrans compileUnfolds
 
 indexedC :: (Monad m, Traversable t) => t e -> Compiler2T m (t IndexedType)
-indexedC = undefined
+indexedC t = withSupplyC (runState (indexed t))
 
 runTypeInferenceC :: (Monad m) => Module () () () -> Compiler2T m (Module () Kind IndexedType)
 runTypeInferenceC m = do
-    defs <- traverse indexedC ds
-    undefined
-  where
-    Module p ns ds = m
+  defs <- traverse indexedC ds
+  (tdefs, as) <- typeDefinitionsC defs
+  undefined
+ where
+  Module p ns ds = m
 
 normalizeObjectC :: (Monad m, NormalizeObjectsTransformContext a) => a -> Compiler2T m a
 normalizeObjectC = pure . normalizeObject
