@@ -119,7 +119,7 @@ findFirstMatch (Trait nnn t1) = do
       case abc of
         [] ->
           pure Nothing
-        [(k, v)] ->
+        (k, v) : _ ->
           pure (Just (k, v))
  where
   --   test :: (Monad m) => Type TypeIndex Kind -> m (Maybe Substitution) -- (Environment (Scheme TypeIndex Kind IndexedType))
