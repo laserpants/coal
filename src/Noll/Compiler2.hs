@@ -8,7 +8,6 @@
 module Noll.Compiler2 where
 
 import Control.Monad ((>=>))
-import Control.Monad.RWS (RWST, runRWST)
 import Control.Monad.Reader (MonadReader, Reader, ReaderT, ask, asks, runReader, runReaderT)
 import Control.Monad.State (MonadState, StateT, gets, modify, put, runState, runStateT)
 import Control.Monad.Writer (execWriter)
@@ -27,38 +26,36 @@ import Noll.Compiler2.Internal
 import Noll.Compiler2.TypeInference
 import Noll.Language
 import Noll.Module (Constant (..), Definition (..), Function (..), Module (..), Path (..))
-import Noll.SystemF
-import Noll.SystemF.Substitution (mapsTo)
 
-withSupplyC :: (Monad m) => (Int -> (a, Int)) -> Compiler2T b m a
+withSupplyC :: (Monad m) => (Int -> (c, Int)) -> Compiler2T a m c
 withSupplyC f = do
   n <- gets compiler2Supply
   let (r, n') = f n
   insertSupplyC n'
   pure r
 
-aliasExpansionTrans :: (Monad m) => (a -> Reader AliasEnvironment a) -> a -> Compiler2T b m a
+aliasExpansionTrans :: (Monad m) => (c -> Reader AliasEnvironment c) -> c -> Compiler2T a m c
 aliasExpansionTrans f e = asks (runReader (f e) . compiler2AliasEnv)
 
-expandAliasesC :: (Monad m, AliasContext a) => a -> Compiler2T b m a
+expandAliasesC :: (Monad m, AliasContext c) => c -> Compiler2T a m c
 expandAliasesC = aliasExpansionTrans expandAliases
 
-foldExpansionTrans :: (Monad m) => (a -> FoldExpansion a) -> a -> Compiler2T b m a
+foldExpansionTrans :: (Monad m) => (c -> FoldExpansion c) -> c -> Compiler2T a m c
 foldExpansionTrans f e = withSupplyC (\n -> runFoldExpansion "fold" n (f e))
 
-compileUnfoldsC :: (Monad m, CompileFoldsContext a) => a -> Compiler2T b m a
+compileUnfoldsC :: (Monad m, CompileFoldsContext c) => c -> Compiler2T a m c
 compileUnfoldsC = foldExpansionTrans compileFolds
 
-unfoldExpansionTrans :: (Monad m) => (a -> UnfoldExpansion a) -> a -> Compiler2T b m a
+unfoldExpansionTrans :: (Monad m) => (c -> UnfoldExpansion c) -> c -> Compiler2T a m c
 unfoldExpansionTrans f e = withSupplyC (\n -> runUnfoldExpansion "unfold" n (f e))
 
-compileFoldsC :: (Monad m) => (CompileUnfoldsContext a) => a -> Compiler2T b m a
+compileFoldsC :: (Monad m) => (CompileUnfoldsContext c) => c -> Compiler2T a m c
 compileFoldsC = unfoldExpansionTrans compileUnfolds
 
-indexedC :: (Monad m, Traversable t) => t e -> Compiler2T b m (t IndexedType)
+indexedC :: (Monad m, Traversable t) => t e -> Compiler2T a m (t IndexedType)
 indexedC t = withSupplyC (runState (indexed t))
 
-runTypeInferenceC :: (Monad m) => Module () () () -> Compiler2T b m (Module () Kind IndexedType)
+runTypeInferenceC :: (Monad m) => Module () () () -> Compiler2T a m (Module () Kind IndexedType)
 runTypeInferenceC m = do
   defs <- traverse indexedC ds
   (tdefs, as) <- typeDefinitionsC defs
@@ -66,22 +63,22 @@ runTypeInferenceC m = do
  where
   Module p ns ds = m
 
-normalizeObjectC :: (Monad m, NormalizeObjectsTransformContext a) => a -> Compiler2T b m a
+normalizeObjectC :: (Monad m, NormalizeObjectsTransformContext c) => c -> Compiler2T a m c
 normalizeObjectC = pure . normalizeObject
 
-denormalizeObjectC :: (Monad m, NormalizeObjectsTransformContext a) => a -> Compiler2T b m a
+denormalizeObjectC :: (Monad m, NormalizeObjectsTransformContext c) => c -> Compiler2T a m c
 denormalizeObjectC = pure . denormalizeObject
 
-patternDesugarTrans :: (Monad m) => (a -> PatternDesugar c TypeIndex Kind a) -> a -> Compiler2T b m a
+patternDesugarTrans :: (Monad m) => (c -> PatternDesugar s TypeIndex Kind c) -> c -> Compiler2T a m c
 patternDesugarTrans f e = withSupplyC (\n -> runPatternDesugar "v" n (f e))
 
-desugarPatternsC :: (Monad m, Sugared c TypeIndex Kind a) => a -> Compiler2T b m a
+desugarPatternsC :: (Monad m, Sugared s TypeIndex Kind c) => c -> Compiler2T a m c
 desugarPatternsC = patternDesugarTrans desugarPatterns
 
-matchMonadTrans :: (Monad m) => (a -> MatchMonad a) -> a -> Compiler2T b m a
+matchMonadTrans :: (Monad m) => (c -> MatchMonad c) -> c -> Compiler2T a m c
 matchMonadTrans f e = withSupplyC (\n -> runMatchMonad "match" n (f e))
 
-compileMatchExprsC :: (Monad m, MatchExpressionContext a) => a -> Compiler2T b m a
+compileMatchExprsC :: (Monad m, MatchExpressionContext c) => c -> Compiler2T a m c
 compileMatchExprsC = matchMonadTrans compileMatchExprs
 
 --
