@@ -35,7 +35,7 @@ data Compiler2State a = Compiler2State
   , compiler2NameStore :: Environment (Scheme TypeIndex Kind IndexedType)
   , compiler2Substitution :: Substitution
   , compiler2Constraints :: [CompilerConstraint a]
-  --  , compiler2ConstraintsGenErrors :: [ConstraintsGenError a]
+  , compiler2ConstraintsGenErrors :: [ConstraintsGenError a]
   , compiler2Assumptions :: [CompilerAssumption]
   }
   deriving (Show, Eq, Ord, Read)
@@ -67,6 +67,7 @@ initialCompiler2State =
     , compiler2NameStore = mempty
     , compiler2Substitution = mempty
     , compiler2Constraints = []
+    , compiler2ConstraintsGenErrors = []
     , compiler2Assumptions = []
     }
 
