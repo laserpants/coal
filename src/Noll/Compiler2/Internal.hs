@@ -8,13 +8,15 @@ module Noll.Compiler2.Internal where
 
 import Control.Monad.RWS (RWST, runRWST)
 import Control.Monad.Reader (MonadReader)
-import Control.Monad.State (MonadState)
+import Control.Monad.State (MonadState, modify)
 import Lang.Common.Environment (Environment (..))
 import Lang.Common.Supply (Supply (..))
-import Lang.Utils (Over, (<$$$>))
+import Lang.Utils (Name, Over, (<$$$>))
 import Noll.Compiler.Transform.Type.AliasExpansion
 import Noll.Language
 import Noll.SystemF
+
+import qualified Lang.Common.Environment as Environment
 
 data Compiler2Environment o k t = Compiler2Environment
   { compiler2DataConstructorEnv :: Environment (Constructor o k t)
@@ -71,3 +73,11 @@ runCompiler2T env com = do
 {-# INLINE evalCompiler2T #-}
 evalCompiler2T :: (Monad m) => Compiler2Environment TypeIndex Kind IndexedType -> Compiler2T m c -> m c
 evalCompiler2T = fst <$$$> runCompiler2T
+
+{-# INLINE insertSupplyC #-}
+insertSupplyC :: (Monad m) => Int -> Compiler2T m ()
+insertSupplyC = modify . overCompiler2Supply . const
+
+{-# INLINE insertNamesC #-}
+insertNamesC :: (Monad m) => [(Name, Scheme TypeIndex Kind IndexedType)] -> Compiler2T m ()
+insertNamesC names = modify (overCompiler2NameStore (Environment.insertMultiple names))

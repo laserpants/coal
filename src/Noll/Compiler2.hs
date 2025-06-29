@@ -30,18 +30,6 @@ import Noll.Module (Constant (..), Definition (..), Function (..), Module (..), 
 import Noll.SystemF
 import Noll.SystemF.Substitution (mapsTo)
 
-import qualified Lang.Common.Environment as Environment
-
-{-# INLINE insertSupplyC #-}
-insertSupplyC :: (Monad m) => Int -> Compiler2T m ()
-insertSupplyC = modify . overCompiler2Supply . const
-
-{-# INLINE insertNamesC #-}
-insertNamesC :: (Monad m) => [(Name, Scheme TypeIndex Kind IndexedType)] -> Compiler2T m ()
-insertNamesC names = modify (overCompiler2NameStore (Environment.insertMultiple names))
-
---
-
 withSupplyC :: (Monad m) => (Int -> (a, Int)) -> Compiler2T m a
 withSupplyC f = do
   n <- gets compiler2Supply
