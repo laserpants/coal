@@ -49,6 +49,10 @@ overCompiler2NameStore fn Compiler2State{..} = Compiler2State{compiler2NameStore
 overCompiler2Supply :: Over (Compiler2State a) Int
 overCompiler2Supply fn Compiler2State{..} = Compiler2State{compiler2Supply = fn compiler2Supply, ..}
 
+{-# INLINE overCompiler2Substitution #-}
+overCompiler2Substitution :: Over (Compiler2State a) Substitution
+overCompiler2Substitution fn Compiler2State{..} = Compiler2State{compiler2Substitution = fn compiler2Substitution, ..}
+
 {-# INLINE overCompiler2Constraints #-}
 overCompiler2Constraints :: Over (Compiler2State a) [CompilerConstraint a]
 overCompiler2Constraints fn Compiler2State{..} = Compiler2State{compiler2Constraints = fn compiler2Constraints, ..}
@@ -91,5 +95,18 @@ insertSupplyC = modify . overCompiler2Supply . const
 insertNamesC :: (Monad m) => [(Name, Scheme TypeIndex Kind IndexedType)] -> Compiler2T a m ()
 insertNamesC names = modify (overCompiler2NameStore (Environment.insertMultiple names))
 
+{-# INLINE insertConstraintsC #-}
 insertConstraintsC :: (Monad m) => [CompilerConstraint a] -> Compiler2T a m ()
 insertConstraintsC cs = modify (overCompiler2Constraints (<> cs))
+
+{-# INLINE clearConstraintsC #-}
+clearConstraintsC :: (Monad m) => Compiler2T a m ()
+clearConstraintsC = undefined
+
+{-# INLINE updateSupplyC #-}
+updateSupplyC :: (Monad m) => Int -> Compiler2T a m ()
+updateSupplyC supply = modify (overCompiler2Supply (const supply))
+
+{-# INLINE updateSubstitutionC #-}
+updateSubstitutionC :: (Monad m) => Substitution -> Compiler2T a m ()
+updateSubstitutionC sub = modify (overCompiler2Substitution (const sub))

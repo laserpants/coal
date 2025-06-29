@@ -7,6 +7,7 @@ module Noll.Compiler2.TypeInference where
 import Data.Data (Data)
 import Lang.Common.List1 (NonEmpty (..))
 import Lang.Common.Supply (Supply (..), supplied)
+import Control.Monad.State (gets)
 import Lang.Label (Label (..))
 import Noll.Compiler2.Internal
 import Noll.Language
@@ -15,10 +16,13 @@ import Noll.SystemF
 
 type CompilerAssumption = Assumption IndexedType
 
+solveConstraintsC =
+  undefined
+
 compileConstraintsC =
   undefined
 
-compileFunctionC :: (Show a, Monad m, Data a) => Function Expression a IndexedType -> Compiler2T a m ()
+compileFunctionC :: (Monad m, Data a) => Function Expression a IndexedType -> Compiler2T a m ()
 compileFunctionC (Function loc (With _ t) ps e) = do
   insertConstraintsC [Equality (RuleTopLevelFunction loc) [t, typeOf e]]
   t1 <- supplied (TVariable . TypeIndex KType)
@@ -30,7 +34,7 @@ compileFunctionC (Function loc (With _ t) ps e) = do
  where
   placeholder = "###.function"
 
-compileConstantC :: (Show a, Monad m, Data a) => Constant Expression a IndexedType -> Compiler2T a m ()
+compileConstantC :: (Monad m, Data a) => Constant Expression a IndexedType -> Compiler2T a m ()
 compileConstantC (Constant loc (With _ t) e) = do
   insertConstraintsC [Equality (RuleTopLevelConstant loc) [t, typeOf e]]
   compileConstraintsC $
@@ -41,16 +45,26 @@ compileConstantC (Constant loc (With _ t) e) = do
  where
   placeholder = "###.constant"
 
-compileDefinitionC :: (Monad m, Data a, Show a, Eq a) => Definition a k IndexedType -> Compiler2T a m ()
+compileDefinitionC :: (Monad m, Data a) => Definition a k IndexedType -> Compiler2T a m ()
 compileDefinitionC = do
   \case
     DFunction _ f ->
       compileFunctionC f
 
+solveC :: (Monad m, Data a, Show a, Eq a) => Compiler2T a m Substitution
+solveC = do
+  constraints <- gets compiler2Constraints
+  sub1 <- gets compiler2Substitution
+  sub2 <- solveConstraintsC constraints
+  clearConstraintsC
+  -- TODO: Clear typeAnnotationParameters?
+  updateSubstitutionC (sub2 <> sub1)
+  gets compiler2Substitution
+
 typeDefinitionsC :: (Monad m) => [Definition a k IndexedType] -> Compiler2T b m ([Definition a Kind IndexedType], [CompilerAssumption])
 typeDefinitionsC = undefined
 
-typeDefinitionC :: (Monad m) => Definition a k IndexedType -> Compiler2T b m ()
+typeDefinitionC :: (Monad m, Data a, Show a, Eq a) => Definition a k IndexedType -> Compiler2T a m ()
 typeDefinitionC =
   \case
     DImport{} ->
@@ -68,8 +82,8 @@ typeDefinitionC =
     DInstance trait t1 ds -> do
       error "TODO"
     d -> do
+      compileDefinitionC d
+      sub <- solveC
       error "TODO"
 
--- compileDefinitionC d
--- sub <- solveC
--- defineC (definitionName d) (typeOf (apply sub d))
+  -- defineC (definitionName d) (typeOf (apply sub d))
