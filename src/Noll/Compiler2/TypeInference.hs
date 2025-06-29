@@ -11,8 +11,6 @@ import Noll.SystemF
 
 type CompilerAssumption = Assumption IndexedType
 
-type CompilerConstraint a = Constraint (InferenceRule Kind a) TypeIndex Kind IndexedType
-
 typeDefinitionsC :: (Monad m) => [Definition a k IndexedType] -> Compiler2T m ([Definition a Kind IndexedType], [CompilerAssumption])
 typeDefinitionsC = undefined
 

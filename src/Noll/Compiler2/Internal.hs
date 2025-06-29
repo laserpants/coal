@@ -26,10 +26,15 @@ data Compiler2Environment o k t = Compiler2Environment
   }
   deriving (Show, Eq, Ord, Read)
 
+type CompilerConstraint a = Constraint (InferenceRule Kind a) TypeIndex Kind IndexedType
+
 data Compiler2State = Compiler2State
   { compiler2Supply :: Int
   , compiler2NameStore :: Environment (Scheme TypeIndex Kind IndexedType)
   , compilerSubstitution :: Substitution
+--  , compiler2Substitution :: Substitution
+--  , compiler2Constraints :: [CompilerConstraint a]
+--  , compiler2ConstraintsGenErrors :: [ConstraintsGenError a]
   }
   deriving (Show, Eq, Ord, Read)
 
