@@ -99,9 +99,6 @@ applySpecial sub (Forall vs ts t) = Forall (typeIndexesIn t1 <> typeIndexesIn ts
   ts1 = apply sub ts
   t1 = apply sub t
 
--- nork :: Substitution -> TypeIndex Kind -> Maybe (TypeIndex Kind)
--- nork = undefined
-
 findFirstMatch ::
   ( MonadReader DictionaryEnvironment m
   , MonadState Int m
