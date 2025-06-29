@@ -23,20 +23,18 @@ moduleMain =
     -- Exports
     []
     -- Definitions
-    [
-      DFunction
+    [ DFunction
         "main"
         ( Function
             ()
             (With [] ())
             (PLiteral () LUnit :| [])
-            (
-              EApplication
+            ( EApplication
                 ()
                 ()
                 (EVariable () (Label () "trace_string"))
-                (ELiteral () (LString "Hello 🤖")
-                  :| []
+                ( ELiteral () (LString "Hello 🤖")
+                    :| []
                 )
             )
         )
