@@ -121,8 +121,15 @@ unfoldExpansionTrans f e = withSupplyC (\n -> runUnfoldExpansion "unfold" n (f e
 compileFoldsC :: (Monad m) => (CompileUnfoldsContext a) => a -> Compiler2T m a
 compileFoldsC = unfoldExpansionTrans compileUnfolds
 
-runTypeInferenceC :: Module () () () -> Compiler2T m (Module () Kind IndexedType)
-runTypeInferenceC = undefined
+indexedC :: (Monad m, Traversable t) => t e -> Compiler2T m (t IndexedType)
+indexedC = undefined
+
+runTypeInferenceC :: (Monad m) => Module () () () -> Compiler2T m (Module () Kind IndexedType)
+runTypeInferenceC m = do
+    defs <- traverse indexedC ds
+    undefined
+  where
+    Module p ns ds = m
 
 normalizeObjectC :: (Monad m, NormalizeObjectsTransformContext a) => a -> Compiler2T m a
 normalizeObjectC = pure . normalizeObject
