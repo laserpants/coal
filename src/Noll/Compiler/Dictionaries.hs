@@ -1,14 +1,19 @@
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE StrictData #-}
 
 module Noll.Compiler.Dictionaries where
 
+import Control.Monad.RWS (RWS, evalRWS, runRWS)
 import Control.Monad (forM)
 import Control.Monad.Reader (MonadReader, ask, asks, local)
 import Control.Monad.State (MonadState)
-import Control.Monad.Writer (MonadWriter, runWriterT, tell)
+import Control.Monad.Writer (MonadWriter, runWriterT, tell, listen)
 import Data.Data (Data)
 import Data.Foldable (foldrM)
 import Data.Generics.Uniplate.Data (descendM)
@@ -39,14 +44,22 @@ data DictionaryEnvironment = DictionaryEnvironment
 overDictionaryEnvironmentNames :: (Environment (Scheme TypeIndex Kind (Type TypeIndex Kind)) -> Environment (Scheme TypeIndex Kind (Type TypeIndex Kind))) -> DictionaryEnvironment -> DictionaryEnvironment
 overDictionaryEnvironmentNames f DictionaryEnvironment{..} = DictionaryEnvironment{dictionaryEnvironmentNames = f dictionaryEnvironmentNames, ..}
 
-collectTraitsY ::
-  ( MonadReader DictionaryEnvironment m
-  , MonadState Int m
-  , MonadWriter [Trait (Type TypeIndex Kind)] m
-  ) =>
-  Type TypeIndex Kind ->
-  Name ->
-  m [Trait (Type TypeIndex Kind)]
+newtype DictionaryStack a = DictionaryStack { dictionaryStack :: RWS DictionaryEnvironment [Trait (Type TypeIndex Kind)] Int a }
+  deriving
+    ( Functor
+    , Applicative
+    , Monad
+    , MonadReader DictionaryEnvironment
+    , MonadState Int
+    , MonadWriter [Trait (Type TypeIndex Kind)]
+    )
+
+runDictionaryStack :: DictionaryEnvironment -> Int -> DictionaryStack a -> (a, Int)
+runDictionaryStack r s d = (a, n)
+  where
+    (a, n, _) = runRWS (dictionaryStack d) r s 
+
+collectTraitsY :: Type TypeIndex Kind -> Name -> DictionaryStack [Trait (Type TypeIndex Kind)]
 collectTraitsY u name = do
   env <- asks dictionaryEnvironmentNames
   case Environment.lookup name env of
@@ -69,11 +82,7 @@ collectTraitsY u name = do
     var <- supplied (TVariable . TypeIndex KType)
     pure (index `mapsTo` var <> acc)
 
-tryMatch ::
-  (MonadState Int m) =>
-  Type TypeIndex Kind ->
-  Type TypeIndex Kind ->
-  m (Either UnificationError Substitution)
+tryMatch :: Type TypeIndex Kind -> Type TypeIndex Kind -> DictionaryStack (Either UnificationError Substitution)
 tryMatch t u = do
   var <- supplied id
   pure (evalUnifier var (match t u))
@@ -99,13 +108,7 @@ applySpecial sub (Forall _ ts t) = Forall (typeIndexesIn t1 <> typeIndexesIn ts1
   ts1 = apply sub ts
   t1 = apply sub t
 
-findFirstMatch ::
-  ( MonadReader DictionaryEnvironment m
-  , MonadState Int m
-  , MonadWriter [Trait (Type TypeIndex Kind)] m
-  ) =>
-  Trait (Type TypeIndex Kind) ->
-  m (Maybe (Type TypeIndex Kind, Map Name (Scheme TypeIndex Kind IndexedType)))
+findFirstMatch :: Trait (Type TypeIndex Kind) -> DictionaryStack (Maybe (Type TypeIndex Kind, Map Name (Scheme TypeIndex Kind IndexedType)))
 findFirstMatch (Trait nnn t1) = do
   env <- asks dictionaryEnvironmentInstances
   case Environment.lookup nnn env of
@@ -128,17 +131,7 @@ findFirstMatch (Trait nnn t1) = do
 --      Right sub ->
 --        pure (Just sub)
 
-lookupTraitInstance ::
-  ( Monoid a
-  , Data a
-  , Show a
-  , MonadReader DictionaryEnvironment m
-  , MonadState Int m
-  , MonadWriter [Trait (Type TypeIndex Kind)] m
-  ) =>
-  Trait (Type TypeIndex Kind) ->
-  --  m (Maybe (Environment (Scheme TypeIndex Kind IndexedType)))
-  m (Maybe (Map Name (Expression a (Type TypeIndex Kind))))
+lookupTraitInstance :: (Monoid a) => Trait (Type TypeIndex Kind) -> DictionaryStack (Maybe (Map Name (Expression a (Type TypeIndex Kind))))
 lookupTraitInstance tr@(Trait tn t1) = do
   xx <- findFirstMatch tr
   case xx of
@@ -156,18 +149,7 @@ lookupTraitInstance tr@(Trait tn t1) = do
 --    Map.fromList
 --      []
 
-gork ::
-  ( Monoid a
-  , Data a
-  , Show a
-  , MonadReader DictionaryEnvironment m
-  , MonadState Int m
-  , MonadWriter [Trait (Type TypeIndex Kind)] m
-  ) =>
-  Trait (Type TypeIndex Kind) ->
-  Name ->
-  Scheme TypeIndex Kind (Type TypeIndex Kind) ->
-  m (Name, Expression a (Type TypeIndex Kind))
+gork :: (Monoid a) => Trait (Type TypeIndex Kind) -> Name -> Scheme TypeIndex Kind (Type TypeIndex Kind) -> DictionaryStack (Name, Expression a (Type TypeIndex Kind))
 gork xx name (Forall _ ts t) = do
   abc <- znorkY xyz ts
   pure (name, abc)
@@ -176,16 +158,7 @@ gork xx name (Forall _ ts t) = do
 
   xyz = Label t (name <> "__$instance." <> hashed xx)
 
-bork ::
-  ( Monoid a
-  , Data a
-  , Show a
-  , MonadReader DictionaryEnvironment m
-  , MonadState Int m
-  , MonadWriter [Trait (Type TypeIndex Kind)] m
-  ) =>
-  Trait (Type TypeIndex Kind) ->
-  m (Expression a (Type TypeIndex Kind))
+bork :: (Monoid a) => Trait (Type TypeIndex Kind) -> DictionaryStack (Expression a (Type TypeIndex Kind))
 bork tr@(Trait _ t) = do
   xx <- lookupTraitInstance tr
   case xx of
@@ -198,18 +171,9 @@ bork tr@(Trait _ t) = do
      where
       zz = ERecord mempty (traitType tr) r Nothing
 
-transformScope ::
-  ( MonadReader DictionaryEnvironment m
-  , MonadState Int m
-  , MonadWriter [Trait (Type TypeIndex Kind)] m
-  , Monoid a
-  , Show a
-  , Data a
-  ) =>
-  Expression a (Type TypeIndex Kind) ->
-  m (Expression a (Type TypeIndex Kind), [Trait (Type TypeIndex Kind)])
+transformScope :: (Monoid a, Data a) => Expression a (Type TypeIndex Kind) -> DictionaryStack (Expression a (Type TypeIndex Kind), [Trait (Type TypeIndex Kind)])
 transformScope e = do
-  (expr, traits) <- runWriterT (transformY e)
+  (expr, traits) <- listen (transformY e)
   case nub traits of
     [] ->
       pure (expr, traits)
@@ -219,17 +183,7 @@ transformScope e = do
   toPattern tr@(Trait _ t) =
     PPlaceholder mempty (traitType tr) tr
 
-znorkY ::
-  ( MonadReader DictionaryEnvironment m
-  , MonadState Int m
-  , MonadWriter [Trait (Type TypeIndex Kind)] m
-  , Monoid a
-  , Show a
-  , Data a
-  ) =>
-  Label (Type TypeIndex Kind) ->
-  [Trait (Type TypeIndex Kind)] ->
-  m (Expression a (Type TypeIndex Kind))
+znorkY :: (Monoid a) => Label (Type TypeIndex Kind) -> [Trait (Type TypeIndex Kind)] -> DictionaryStack (Expression a (Type TypeIndex Kind))
 znorkY ll@(Label t name) =
   \case
     [] ->
@@ -241,16 +195,7 @@ znorkY ll@(Label t name) =
 
       t1 = foldType t (traitType <$> (tr : trs))
 
-transformY ::
-  ( MonadReader DictionaryEnvironment m
-  , MonadState Int m
-  , MonadWriter [Trait (Type TypeIndex Kind)] m
-  , Monoid a
-  , Show a
-  , Data a
-  ) =>
-  Expression a (Type TypeIndex Kind) ->
-  m (Expression a (Type TypeIndex Kind))
+transformY :: (Monoid a, Data a) => Expression a (Type TypeIndex Kind) -> DictionaryStack (Expression a (Type TypeIndex Kind))
 transformY =
   \case
     ERecursiveLet a p e1 e2 -> do
@@ -261,7 +206,7 @@ transformY =
         _ ->
           error "Implementation error"
     ELet a bs e -> do
-      (as, traits) <- runWriterT (traverse transformBindingY bs)
+      (as, traits) <- listen (traverse transformBindingY bs)
       let (ds, es) = List1.unzip as
       let xs = concat (fromList1 (snd <$> as)) -- :: [Scheme TypeIndex (Kind Int) (Type TypeIndex (Kind Int))]
       ELet a (fst <$> as) <$> local (overDictionaryEnvironmentNames (Environment.insertMultiple xs)) (transformY e)
@@ -287,16 +232,7 @@ transformY =
 traitType :: Trait (Type TypeIndex Kind) -> Type TypeIndex Kind
 traitType (Trait name t) = TApplication KTrait (TConstructor (KType `KArrow` KTrait) name) (t :| [])
 
-transformBindingY ::
-  ( MonadReader DictionaryEnvironment m
-  , MonadState Int m
-  , MonadWriter [Trait (Type TypeIndex Kind)] m
-  , Show a
-  , Monoid a
-  , Data a
-  ) =>
-  Binding Expression a (Type TypeIndex Kind) ->
-  m (Binding Expression a (Type TypeIndex Kind), [(Name, Scheme TypeIndex Kind (Type TypeIndex Kind))])
+transformBindingY :: (Monoid a, Data a) => Binding Expression a (Type TypeIndex Kind) -> DictionaryStack (Binding Expression a (Type TypeIndex Kind), [(Name, Scheme TypeIndex Kind (Type TypeIndex Kind))])
 transformBindingY =
   \case
     BPattern a var@(PVariable a1 (Label t name)) e
@@ -307,31 +243,13 @@ transformBindingY =
       (e1, traits) <- transformScope e
       pure (BPattern mempty var e1, [(name, Forall (typeIndexesIn t) traits t)])
 
-transformCompiledClauseY ::
-  ( MonadReader DictionaryEnvironment m
-  , MonadState Int m
-  , MonadWriter [Trait (Type TypeIndex Kind)] m
-  , Data a
-  , Monoid a
-  , Show a
-  ) =>
-  CompiledClause a (Type TypeIndex Kind) ->
-  m (CompiledClause a (Type TypeIndex Kind))
+transformCompiledClauseY :: (Monoid a, Data a) => CompiledClause a (Type TypeIndex Kind) -> DictionaryStack (CompiledClause a (Type TypeIndex Kind))
 transformCompiledClauseY =
   \case
     ECompiledClause lls e ->
       ECompiledClause lls <$> transformY e
 
-transformModuleY ::
-  ( MonadReader DictionaryEnvironment m
-  , MonadState Int m
-  , MonadWriter [Trait (Type TypeIndex Kind)] m
-  , Data a
-  , Monoid a
-  , Show a
-  ) =>
-  Module a Kind (Type TypeIndex Kind) ->
-  m (Module a Kind (Type TypeIndex Kind))
+transformModuleY :: (Monoid a, Data a) => Module a Kind (Type TypeIndex Kind) -> DictionaryStack (Module a Kind (Type TypeIndex Kind))
 transformModuleY = overModuleDefinitionsM (traverse transformDefinitionY)
 
 --
@@ -343,16 +261,7 @@ traceType t =
     (t :| [])
 
 -- Type class?
-transformDefinitionY ::
-  ( MonadReader DictionaryEnvironment m
-  , MonadState Int m
-  , MonadWriter [Trait (Type TypeIndex Kind)] m
-  , Monoid a
-  , Show a
-  , Data a
-  ) =>
-  Definition a Kind (Type TypeIndex Kind) ->
-  m (Definition a Kind (Type TypeIndex Kind))
+transformDefinitionY :: (Monoid a, Data a) => Definition a Kind (Type TypeIndex Kind) -> DictionaryStack (Definition a Kind (Type TypeIndex Kind))
 transformDefinitionY =
   \case
     DConstant name c ->
@@ -362,19 +271,9 @@ transformDefinitionY =
     d ->
       pure d
 
-transformConstantY ::
-  ( MonadReader DictionaryEnvironment m
-  , MonadState Int m
-  , MonadWriter [Trait (Type TypeIndex Kind)] m
-  , Monoid a
-  , Show a
-  , Data a
-  ) =>
-  Constant Expression a (Type TypeIndex Kind) ->
-  m (Constant Expression a (Type TypeIndex Kind))
+transformConstantY :: (Monoid a, Data a) => Constant Expression a (Type TypeIndex Kind) -> DictionaryStack (Constant Expression a (Type TypeIndex Kind))
 transformConstantY (Constant a u@(With _ t) e) = do
-  -- e1 <- transformScope e
-  (expr, traits) <- runWriterT (descendM transformY e)
+  (expr, traits) <- listen (descendM transformY e)
   case nub traits of
     [] ->
       pure (Constant a (With [] t) expr)
