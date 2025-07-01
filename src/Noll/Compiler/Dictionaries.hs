@@ -94,7 +94,7 @@ mapAlterAll f m = do
         pure [(k, Map.map (applySpecial sub) env)]
 
 applySpecial :: Substitution -> Scheme TypeIndex Kind IndexedType -> Scheme TypeIndex Kind IndexedType
-applySpecial sub (Forall vs ts t) = Forall (typeIndexesIn t1 <> typeIndexesIn ts1) ts1 t1
+applySpecial sub (Forall _ ts t) = Forall (typeIndexesIn t1 <> typeIndexesIn ts1) ts1 t1
  where
   ts1 = apply sub ts
   t1 = apply sub t
