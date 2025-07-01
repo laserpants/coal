@@ -55,9 +55,9 @@ newtype DictionaryStack a = DictionaryStack { dictionaryStack :: RWS DictionaryE
     )
 
 runDictionaryStack :: DictionaryEnvironment -> Int -> DictionaryStack a -> (a, Int)
-runDictionaryStack r s d = (a, n)
+runDictionaryStack e s d = (a, n)
   where
-    (a, n, _) = runRWS (dictionaryStack d) r s 
+    (a, n, _) = runRWS (dictionaryStack d) e s 
 
 collectTraitsY :: Type TypeIndex Kind -> Name -> DictionaryStack [Trait (Type TypeIndex Kind)]
 collectTraitsY u name = do
@@ -71,14 +71,12 @@ collectTraitsY u name = do
       sub1 <- foldrM instantiate mempty vs
       r <- tryMatch (apply sub1 t) u
       case r of
-        Left x ->
-          pure []
-        -- TODO
-        -- error (show u)
+        Left{} ->
+          error "TODO"
         Right sub2 ->
           pure (apply sub2 (apply sub1 ts))
  where
-  instantiate (TypeIndex k index) acc = do
+  instantiate (TypeIndex _ index) acc = do
     var <- supplied (TVariable . TypeIndex KType)
     pure (index `mapsTo` var <> acc)
 
@@ -88,7 +86,7 @@ tryMatch t u = do
   pure (evalUnifier var (match t u))
 
 -- TODO: rename
--- mapAlterAll :: (Monad m, Ord k) => (k -> m (Maybe Substitution)) -> Map k (Environment (Scheme TypeIndex Kind IndexedType)) -> m [(k, Map Name (Scheme TypeIndex Kind IndexedType))]
+mapAlterAll :: (Monad m) => (a -> m (Either e Substitution)) -> Map a (Dictionary (Scheme TypeIndex Kind IndexedType)) -> m [(a, Map Name (Scheme TypeIndex Kind IndexedType))]
 mapAlterAll f m = do
   let abc = [fn k v | (k, v) <- Map.toList m]
   def <- sequence abc
@@ -109,27 +107,18 @@ applySpecial sub (Forall _ ts t) = Forall (typeIndexesIn t1 <> typeIndexesIn ts1
   t1 = apply sub t
 
 findFirstMatch :: Trait (Type TypeIndex Kind) -> DictionaryStack (Maybe (Type TypeIndex Kind, Map Name (Scheme TypeIndex Kind IndexedType)))
-findFirstMatch (Trait nnn t1) = do
+findFirstMatch (Trait name t1) = do
   env <- asks dictionaryEnvironmentInstances
-  case Environment.lookup nnn env of
+  case Environment.lookup name env of
     Nothing ->
       pure Nothing
     Just env1 -> do
-      abc <- mapAlterAll test env1
+      abc <- mapAlterAll (`tryMatch` t1) env1
       case abc of
         [] ->
           pure Nothing
         (k, v) : _ ->
           pure (Just (k, v))
- where
-  --   test :: (Monad m) => Type TypeIndex Kind -> m (Maybe Substitution) -- (Environment (Scheme TypeIndex Kind IndexedType))
-  test t = tryMatch t t1
-
---    case x of
---      Left{} ->
---        pure Nothing
---      Right sub ->
---        pure (Just sub)
 
 lookupTraitInstance :: (Monoid a) => Trait (Type TypeIndex Kind) -> DictionaryStack (Maybe (Map Name (Expression a (Type TypeIndex Kind))))
 lookupTraitInstance tr@(Trait tn t1) = do
@@ -142,12 +131,6 @@ lookupTraitInstance tr@(Trait tn t1) = do
       z01 <- forM a01 (\(z, b) -> gork (Trait tn a) z b)
       let zz1 = Map.fromList z01
       pure (Just zz1)
-
--- pure (Just zz1) -- (Just (Map.mapWithKey (gork (Trait tn a)) b))
--- where
---  zoop =
---    Map.fromList
---      []
 
 gork :: (Monoid a) => Trait (Type TypeIndex Kind) -> Name -> Scheme TypeIndex Kind (Type TypeIndex Kind) -> DictionaryStack (Name, Expression a (Type TypeIndex Kind))
 gork xx name (Forall _ ts t) = do
@@ -272,7 +255,7 @@ transformDefinitionY =
       pure d
 
 transformConstantY :: (Monoid a, Data a) => Constant Expression a (Type TypeIndex Kind) -> DictionaryStack (Constant Expression a (Type TypeIndex Kind))
-transformConstantY (Constant a u@(With _ t) e) = do
+transformConstantY (Constant a (With _ t) e) = do
   (expr, traits) <- listen (descendM transformY e)
   case nub traits of
     [] ->
@@ -285,5 +268,5 @@ transformConstantY (Constant a u@(With _ t) e) = do
             (ELambda mempty (toPattern <$> (tr :| trs)) expr)
         )
  where
-  toPattern tr@(Trait _ t) =
+  toPattern tr =
     PPlaceholder mempty (traitType tr) tr
