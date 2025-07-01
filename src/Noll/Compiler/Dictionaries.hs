@@ -113,32 +113,30 @@ findFirstMatch (Trait name t1) = do
     Nothing ->
       pure Nothing
     Just env1 -> do
-      abc <- mapAlterAll (`tryMatch` t1) env1
-      case abc of
+      kvs <- mapAlterAll (`tryMatch` t1) env1
+      case kvs of
         [] ->
           pure Nothing
         (k, v) : _ ->
           pure (Just (k, v))
 
+bozz :: (Monad m) => Dictionary (Scheme TypeIndex Kind IndexedType) -> ((Name, Scheme TypeIndex Kind IndexedType) -> m (Name, Expression a (Type TypeIndex Kind))) -> m (Maybe (Dictionary (Expression a (Type TypeIndex Kind))))
+bozz b f = fmap (Just . Map.fromList) (traverse f (Map.toList b))
+
 lookupTraitInstance :: (Monoid a) => Trait (Type TypeIndex Kind) -> DictionaryStack (Maybe (Map Name (Expression a (Type TypeIndex Kind))))
-lookupTraitInstance tr@(Trait tn t1) = do
-  xx <- findFirstMatch tr
-  case xx of
+lookupTraitInstance tr@(Trait tn _) = do
+  found <- findFirstMatch tr
+  case found of
     Nothing ->
       pure Nothing
-    Just (a, b) -> do
-      let a01 = Map.toList b
-      z01 <- forM a01 (uncurry (gork (Trait tn a)))
-      let zz1 = Map.fromList z01
-      pure (Just zz1)
+    Just (a, b) ->
+      bozz b (uncurry (gork (Trait tn a)))
 
 gork :: (Monoid a) => Trait (Type TypeIndex Kind) -> Name -> Scheme TypeIndex Kind (Type TypeIndex Kind) -> DictionaryStack (Name, Expression a (Type TypeIndex Kind))
 gork xx name (Forall _ ts t) = do
   abc <- znorkY xyz ts
   pure (name, abc)
  where
-  --  EVariable mempty
-
   xyz = Label t (name <> "__$instance." <> hashed xx)
 
 bork :: (Monoid a) => Trait (Type TypeIndex Kind) -> DictionaryStack (Expression a (Type TypeIndex Kind))
@@ -236,12 +234,6 @@ transformCompiledClauseY =
 
 transformModuleY :: (Monoid a, Data a) => Module a Kind (Type TypeIndex Kind) -> DictionaryStack (Module a Kind (Type TypeIndex Kind))
 transformModuleY = overModuleDefinitionsM (traverse transformDefinitionY)
-
---traceType t =
---  TApplication
---    KTrait
---    (TConstructor (KType `KArrow` KTrait) "Traceable")
---    (t :| [])
 
 -- Type class?
 transformDefinitionY :: (Monoid a, Data a) => Definition a Kind (Type TypeIndex Kind) -> DictionaryStack (Definition a Kind (Type TypeIndex Kind))
