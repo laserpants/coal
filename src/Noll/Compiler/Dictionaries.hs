@@ -9,11 +9,11 @@
 
 module Noll.Compiler.Dictionaries where
 
-import Control.Monad.RWS (RWS, evalRWS, runRWS)
+import Control.Monad.RWS (RWS, runRWS)
 import Control.Monad (forM)
-import Control.Monad.Reader (MonadReader, ask, asks, local)
+import Control.Monad.Reader (MonadReader, asks, local)
 import Control.Monad.State (MonadState)
-import Control.Monad.Writer (MonadWriter, runWriterT, tell, listen)
+import Control.Monad.Writer (MonadWriter, tell, listen)
 import Data.Data (Data)
 import Data.Foldable (foldrM)
 import Data.Generics.Uniplate.Data (descendM)
@@ -128,7 +128,7 @@ lookupTraitInstance tr@(Trait tn t1) = do
       pure Nothing
     Just (a, b) -> do
       let a01 = Map.toList b
-      z01 <- forM a01 (\(z, b) -> gork (Trait tn a) z b)
+      z01 <- forM a01 (uncurry (gork (Trait tn a)))
       let zz1 = Map.fromList z01
       pure (Just zz1)
 
@@ -225,6 +225,8 @@ transformBindingY =
     BPattern _ var@(PVariable _ (Label t name)) e -> do
       (e1, traits) <- transformScope e
       pure (BPattern mempty var e1, [(name, Forall (typeIndexesIn t) traits t)])
+    _ ->
+      error "TODO"
 
 transformCompiledClauseY :: (Monoid a, Data a) => CompiledClause a (Type TypeIndex Kind) -> DictionaryStack (CompiledClause a (Type TypeIndex Kind))
 transformCompiledClauseY =
@@ -235,13 +237,11 @@ transformCompiledClauseY =
 transformModuleY :: (Monoid a, Data a) => Module a Kind (Type TypeIndex Kind) -> DictionaryStack (Module a Kind (Type TypeIndex Kind))
 transformModuleY = overModuleDefinitionsM (traverse transformDefinitionY)
 
---
-
-traceType t =
-  TApplication
-    KTrait
-    (TConstructor (KType `KArrow` KTrait) "Traceable")
-    (t :| [])
+--traceType t =
+--  TApplication
+--    KTrait
+--    (TConstructor (KType `KArrow` KTrait) "Traceable")
+--    (t :| [])
 
 -- Type class?
 transformDefinitionY :: (Monoid a, Data a) => Definition a Kind (Type TypeIndex Kind) -> DictionaryStack (Definition a Kind (Type TypeIndex Kind))
@@ -268,5 +268,4 @@ transformConstantY (Constant a (With _ t) e) = do
             (ELambda mempty (toPattern <$> (tr :| trs)) expr)
         )
  where
-  toPattern tr =
-    PPlaceholder mempty (traitType tr) tr
+  toPattern tr = PPlaceholder mempty (traitType tr) tr
