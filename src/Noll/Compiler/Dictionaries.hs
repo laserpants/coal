@@ -88,8 +88,7 @@ tryMatch t u = do
 -- TODO: rename
 mapAlterAll :: (Monad m) => (a -> m (Either e Substitution)) -> Map a (Dictionary (Scheme TypeIndex Kind IndexedType)) -> m [(a, Map Name (Scheme TypeIndex Kind IndexedType))]
 mapAlterAll f m = do
-  let abc = [fn k v | (k, v) <- Map.toList m]
-  def <- sequence abc
+  def <- sequence [fn k v | (k, v) <- Map.toList m]
   pure (concat def)
  where
   fn k env = do
