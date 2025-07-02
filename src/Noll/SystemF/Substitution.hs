@@ -20,7 +20,7 @@ import Data.List.NonEmpty (NonEmpty)
 import Data.Map.Strict (Map, keysSet, union)
 import Data.Set (Set, intersection)
 import Lang.Common.Environment (Environment (..))
-import Lang.Utils (IndexMap, Map, Set, fromMaybe)
+import Lang.Utils (IndexMap, fromMaybe)
 import Noll.Language
 import Noll.Module (Constant (..), Definition (..), Function (..))
 import Noll.SystemF.Constraint (Constraint (..), Monomorphic (..))

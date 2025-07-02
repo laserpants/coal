@@ -1312,15 +1312,15 @@ story = do
   it "" $
     fixturee33 == fixturee32
   it "" $
-    runTraitTransformY2 (freshIdIn Noll.Set.Test09.moduleUtils) (transformModuleY Noll.Set.Test09.moduleUtils) == Noll.Set.Test10.moduleUtils
+    runTraitTransformY2 (freshIdIn Noll.Set.Test09.moduleUtils) (expandTraits Noll.Set.Test09.moduleUtils) == Noll.Set.Test10.moduleUtils
   it "" $
-    runTraitTransformY2 (freshIdIn Noll.Set.Test09.moduleOrdered) (transformModuleY Noll.Set.Test09.moduleOrdered) == Noll.Set.Test10.moduleOrdered
+    runTraitTransformY2 (freshIdIn Noll.Set.Test09.moduleOrdered) (expandTraits Noll.Set.Test09.moduleOrdered) == Noll.Set.Test10.moduleOrdered
   it "" $
-    runTraitTransformY2 (freshIdIn Noll.Set.Test09.moduleBinarySearch) (transformModuleY Noll.Set.Test09.moduleBinarySearch) == Noll.Set.Test10.moduleBinarySearch
+    runTraitTransformY2 (freshIdIn Noll.Set.Test09.moduleBinarySearch) (expandTraits Noll.Set.Test09.moduleBinarySearch) == Noll.Set.Test10.moduleBinarySearch
   it "" $
-    runTraitTransformY2 (freshIdIn Noll.Set.Test09.moduleMain) (transformModuleY Noll.Set.Test09.moduleMain) == Noll.Set.Test10.moduleMain
+    runTraitTransformY2 (freshIdIn Noll.Set.Test09.moduleMain) (expandTraits Noll.Set.Test09.moduleMain) == Noll.Set.Test10.moduleMain
   it "" $
-    runTraitTransformY2 (freshIdIn Noll.Set5.Test09.moduleMain) (transformModuleY Noll.Set5.Test09.moduleMain) == Noll.Set5.Test10.moduleMain
+    runTraitTransformY2 (freshIdIn Noll.Set5.Test09.moduleMain) (expandTraits Noll.Set5.Test09.moduleMain) == Noll.Set5.Test10.moduleMain
   it "" $
     evalUnfoldExpansion "unfold" 1 (compileUnfolds Noll.Set4.Test02.moduleMain) == Noll.Set4.Test021.moduleMain
   it "" $

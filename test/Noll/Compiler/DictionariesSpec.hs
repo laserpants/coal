@@ -291,7 +291,7 @@ yy =
 --      )
 --    ]
 
-fixtured2 = runTraitTransformY2 0 (collectTraitsY (TIntrinsic IInt32) "trace")
+fixtured2 = runTraitTransformY2 0 (collectTraits (TIntrinsic IInt32) "trace")
 
 fixturee1 =
   ELambda
@@ -713,7 +713,7 @@ fixturee14 =
     )
 
 fixturee15 :: Constant Expression () (Type TypeIndex Kind)
-fixturee15 = runTraitTransformY2 (freshIdIn fixturee13) (transformConstantY fixturee13)
+fixturee15 = runTraitTransformY2 (freshIdIn fixturee13) (expandTraits fixturee13)
 
 fixturee16 =
   Constant
@@ -772,7 +772,7 @@ fixturee17 =
     )
 
 fixturee18 :: Constant Expression () (Type TypeIndex Kind)
-fixturee18 = runTraitTransformY2 (freshIdIn fixturee16) (transformConstantY fixturee16)
+fixturee18 = runTraitTransformY2 (freshIdIn fixturee16) (expandTraits fixturee16)
 
 fixturee19 :: Constant Expression () (Type TypeIndex Kind)
 fixturee19 =
@@ -898,7 +898,7 @@ fixturee20 =
     )
 
 fixturee21 :: Constant Expression () (Type TypeIndex Kind)
-fixturee21 = runTraitTransformY2 (freshIdIn fixturee19) (transformConstantY fixturee19)
+fixturee21 = runTraitTransformY2 (freshIdIn fixturee19) (expandTraits fixturee19)
 
 fixturee22 :: Constant Expression () (Type TypeIndex Kind)
 fixturee22 =
@@ -1059,7 +1059,7 @@ fixturee23 =
     )
 
 fixturee24 :: Constant Expression () (Type TypeIndex Kind)
-fixturee24 = runTraitTransformY2 (freshIdIn fixturee22) (transformConstantY fixturee22)
+fixturee24 = runTraitTransformY2 (freshIdIn fixturee22) (expandTraits fixturee22)
 
 fixturee25 :: Expression () (Type TypeIndex Kind)
 fixturee25 =
@@ -1287,7 +1287,7 @@ fixturee29 =
     )
 
 fixturee30 :: Constant Expression () (Type TypeIndex Kind)
-fixturee30 = runTraitTransformY2 (freshIdIn fixturee28) (transformConstantY fixturee28)
+fixturee30 = runTraitTransformY2 (freshIdIn fixturee28) (expandTraits fixturee28)
 
 fixturee31 =
   Constant
@@ -1378,4 +1378,4 @@ fixturee32 =
     )
 
 fixturee33 :: Constant Expression () (Type TypeIndex Kind)
-fixturee33 = runTraitTransformY2 (freshIdIn fixturee31) (transformConstantY fixturee31)
+fixturee33 = runTraitTransformY2 (freshIdIn fixturee31) (expandTraits fixturee31)

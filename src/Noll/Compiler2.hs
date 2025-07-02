@@ -49,13 +49,14 @@ compileFoldsC = unfoldExpansionTrans compileUnfolds
 indexedC :: (Monad m, Traversable t) => t e -> Compiler2T a m (t IndexedType)
 indexedC t = withSupplyC (runState (indexed t))
 
---runTypeInferenceC :: (Monad m) => Module () () () -> Compiler2T a m (Module () Kind IndexedType)
+-- runTypeInferenceC :: (Monad m) => Module () () () -> Compiler2T a m (Module () Kind IndexedType)
 runTypeInferenceC m = do
   defs <- traverse indexedC ds
   (tdefs, as) <- typeDefinitionsC defs
   undefined
---  undefined
  where
+  --  undefined
+
   Module p ns ds = m
 
 normalizeObjectC :: (Monad m, NormalizeObjectsTransformContext c) => c -> Compiler2T a m c
@@ -85,24 +86,24 @@ compileModule =
     -- Expand unfolds (codata)
     >=> compileUnfoldsC
     -- Expand folds
---    >=> compileFoldsC
---    -- Type inference
---    >=> runTypeInferenceC
---    -- Normalize top-level expressions
---    >=> normalizeObjectC
---    -- Translate patterns in expression arguments to match expressions
---    >=> desugarPatternsC
---    -- Compile or-patterns
---    >=> compileOrPatterns
---    --    -- Translate record patterns to select operators
---    --    >=> TODO
---    -- Compile match statements
---    >=> compileMatchExprsC
---    --    -- Placeholder insertion
---    --    >=> TODO
---    -- Denormalize top-level expressions
---    >=> denormalizeObjectC
---    -- Final lowering
+    --    >=> compileFoldsC
+    --    -- Type inference
+    --    >=> runTypeInferenceC
+    --    -- Normalize top-level expressions
+    --    >=> normalizeObjectC
+    --    -- Translate patterns in expression arguments to match expressions
+    --    >=> desugarPatternsC
+    --    -- Compile or-patterns
+    --    >=> compileOrPatterns
+    --    --    -- Translate record patterns to select operators
+    --    --    >=> TODO
+    --    -- Compile match statements
+    --    >=> compileMatchExprsC
+    --    --    -- Placeholder insertion
+    --    --    >=> TODO
+    --    -- Denormalize top-level expressions
+    --    >=> denormalizeObjectC
+    --    -- Final lowering
     >=> undefined
 
 -----------------------

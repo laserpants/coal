@@ -7,13 +7,16 @@ module Noll.Language.HasType (HasType (..), foldTypeOf) where
 
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (universeBi)
+import Lang.Common.List1 (NonEmpty ((:|)))
 import Lang.Label (Label (..))
 import Noll.Language.Expression (Expression (..))
 import Noll.Language.Expression.Choice (Guard (..))
 import Noll.Language.Pattern (Pattern (..))
 import Noll.Language.Primitive (Primitive (..))
+import Noll.Language.Trait (Trait (..))
 import Noll.Language.Type (Type (..), foldType)
 import Noll.Language.Type.Intrinsic (Intrinsic (..))
+import Noll.Language.Type.Kind (Kind (..))
 import Noll.Module.Constant (Constant (..))
 import Noll.Module.Definition (Definition (..))
 import Noll.Module.Function (Function (..))
@@ -43,6 +46,8 @@ instance HasType o k Primitive where
         TIntrinsic IChar
       LString{} ->
         TIntrinsic IString
+      LBignum{} ->
+        TIntrinsic IBignum
 
 instance (Data a, Data k, Data (o k), Typeable o) => HasType o k (Pattern a (Type o k)) where
   typeOf =
@@ -86,6 +91,10 @@ instance (Data a, Data k, Ord k, Data (o k), Typeable o) => HasType o k (Definit
         typeOf e
       d ->
         head (universeBi d)
+
+instance HasType o Kind (Trait (Type o Kind)) where
+  typeOf (Trait name t) =
+    TApplication KTrait (TConstructor (KType `KArrow` KTrait) name) (t :| [])
 
 {-# INLINE foldTypeOf #-}
 foldTypeOf :: (HasType o k t, HasType o k s, Functor f, Foldable f) => s -> f t -> Type o k
