@@ -6,7 +6,11 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Compiler.Transform.Nats where
+module Noll.Compiler.Transform.Nats (
+  compileNats,
+  runNatExpansion,
+)
+where
 
 import Control.Monad ((<=<))
 import Control.Monad.RWS (RWS, evalRWS)
