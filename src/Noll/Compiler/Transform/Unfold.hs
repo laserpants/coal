@@ -53,7 +53,7 @@ renameRecursiveCall old new = replace old (const2 $ EVariable mempty (Label memp
 toLambda :: (Monoid a) => Expression a () -> Expression a ()
 toLambda = ELambda mempty (PAny mempty () :| [])
 
-expandUnfoldExpr :: forall m a d. (Monoid a, Data a, MonadState Int m, MonadReader Name m) => Name -> List1 (Pattern a ()) -> Dictionary (Expression a ()) -> m (Expression a ())
+expandUnfoldExpr :: forall m a. (Monoid a, Data a, MonadState Int m, MonadReader Name m) => Name -> List1 (Pattern a ()) -> Dictionary (Expression a ()) -> m (Expression a ())
 expandUnfoldExpr var ps d = do
   name <- suppliedName
   pure $
@@ -72,7 +72,7 @@ expandUnfoldExpr var ps d = do
         )
         (EVariable mempty (Label mempty name))
 
-expandCodataSelect :: forall m a. (Monoid a, Data a, MonadState Int m, MonadReader Name m) => Name -> Expression a () -> m (Expression a ())
+expandCodataSelect :: forall m a. (Monoid a, MonadState Int m) => Name -> Expression a () -> m (Expression a ())
 expandCodataSelect field e =
   pure $
     EApplication
