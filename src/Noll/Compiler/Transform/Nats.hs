@@ -10,17 +10,14 @@ module Noll.Compiler.Transform.Nats where
 
 import Control.Monad ((<=<))
 import Control.Monad.RWS (RWS, evalRWS)
-import Control.Monad.Reader (MonadReader, ReaderT, runReaderT)
-import Control.Monad.State (MonadState, State, evalState)
-import Control.Monad.Writer (execWriter, tell)
+import Control.Monad.Reader (MonadReader)
+import Control.Monad.State (MonadState)
 import Data.Data (Data)
-import Data.Generics.Uniplate.Data (rewriteM, transform, transformBi, transformM)
-import Lang.Common.List1 (List1, NonEmpty (..), (<|))
+import Data.Generics.Uniplate.Data (transformM)
+import Lang.Common.List1 (NonEmpty (..), (<|))
 import Lang.Common.Supply (suppliedName)
-import Lang.Label (Label (..), labelName)
-import Lang.Utils (Dictionary, Name, const2)
-import Noll.Compiler.Transform (flattenApplication)
-import Noll.Compiler.Transform.Tree (replace)
+import Lang.Label (Label (..))
+import Lang.Utils (Dictionary, Name)
 import Noll.Language
 import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
 
@@ -71,7 +68,7 @@ instance (Monoid a, Data a) => CompileNatsContext (Expression a IndexedType) whe
    where
     go =
       \case
-        EApplication a1 (TIntrinsic INat) (EConstructor a (Label t "Succ")) es ->
+        EApplication a1 (TIntrinsic INat) (EConstructor _ (Label _ "Succ")) es ->
           pure $
             EApplication
               a1
@@ -84,14 +81,14 @@ instance (Monoid a, Data a) => CompileNatsContext (Expression a IndexedType) whe
                   es
                   :| []
               )
-        EConstructor a (Label t "Zero") ->
+        EConstructor a (Label _ "Zero") ->
           pure (EConstructor a (Label (TConstructor KType "$Nat") "$Zero"))
         ECompiledMatch a t e cs ->
           ECompiledMatch a t e <$> traverse compileNats cs
         e ->
           pure e
 
-instance (Monoid a, Data a) => CompileNatsContext (CompiledClause a IndexedType) where
+instance (Monoid a) => CompileNatsContext (CompiledClause a IndexedType) where
   compileNats =
     \case
       ECompiledClause (Label _ "Succ" :| [Label _ s]) e -> do
