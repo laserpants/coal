@@ -8,6 +8,7 @@ module Noll.Compiler2 where
 import Control.Monad ((>=>))
 import Control.Monad.Reader (Reader, asks, runReader)
 import Control.Monad.State (gets, runState)
+import Data.Data (Data)
 import Noll.Compiler.NormalizeObjects (NormalizeObjectsTransformContext (..))
 import Noll.Compiler.PatternMatching
 import Noll.Compiler.PatternMatching.Rule (MatchMonad (..), matchPatterns, runMatchMonad)
@@ -31,25 +32,25 @@ withSupplyC f = do
 aliasExpansionTrans :: (Monad m) => (c -> Reader AliasEnvironment c) -> c -> Compiler2T a m c
 aliasExpansionTrans f e = asks (runReader (f e) . compiler2AliasEnv)
 
-expandAliasesC :: (Monad m, AliasContext c) => c -> Compiler2T a m c
+expandAliasesC :: (Monad m, Data a) => Module a () () -> Compiler2T a m (Module a () ())
 expandAliasesC = aliasExpansionTrans expandAliases
 
 foldExpansionTrans :: (Monad m) => (c -> FoldExpansion c) -> c -> Compiler2T a m c
 foldExpansionTrans f e = withSupplyC (\n -> runFoldExpansion "fold" n (f e))
 
-compileUnfoldsC :: (Monad m, CompileFoldsContext c) => c -> Compiler2T a m c
+compileUnfoldsC :: (Monad m, Data a, Monoid a) => Module a () () -> Compiler2T a m (Module a () ())
 compileUnfoldsC = foldExpansionTrans compileFolds
 
 unfoldExpansionTrans :: (Monad m) => (c -> UnfoldExpansion c) -> c -> Compiler2T a m c
 unfoldExpansionTrans f e = withSupplyC (\n -> runUnfoldExpansion "unfold" n (f e))
 
-compileFoldsC :: (Monad m) => (CompileUnfoldsContext c) => c -> Compiler2T a m c
+compileFoldsC :: (Monad m, Data a, Monoid a) => Module a () () -> Compiler2T a m (Module a () ())
 compileFoldsC = unfoldExpansionTrans compileUnfolds
 
 indexedC :: (Monad m, Traversable t) => t e -> Compiler2T a m (t IndexedType)
 indexedC t = withSupplyC (runState (indexed t))
 
--- runTypeInferenceC :: (Monad m) => Module () () () -> Compiler2T a m (Module () Kind IndexedType)
+runTypeInferenceC :: (Monad m, Data a, Show a, Eq a) => Module a () () -> Compiler2T a m (Module a Kind IndexedType)
 runTypeInferenceC m = do
   defs <- traverse indexedC ds
   (tdefs, as) <- typeDefinitionsC defs
@@ -79,31 +80,31 @@ compileMatchExprsC = matchMonadTrans compileMatchExprs
 
 --
 
-compileModule :: (Monad m) => Module () () () -> Compiler2T a m (Module () Kind IndexedType)
+compileModule :: (Monad m, Monoid a, Data a, Show a, Eq a) => Module a () () -> Compiler2T a m (Module a Kind IndexedType)
 compileModule =
   -- Expand type aliases
   expandAliasesC
     -- Expand unfolds (codata)
     >=> compileUnfoldsC
     -- Expand folds
-    --    >=> compileFoldsC
-    --    -- Type inference
-    --    >=> runTypeInferenceC
-    --    -- Normalize top-level expressions
-    --    >=> normalizeObjectC
-    --    -- Translate patterns in expression arguments to match expressions
-    --    >=> desugarPatternsC
-    --    -- Compile or-patterns
-    --    >=> compileOrPatterns
-    --    --    -- Translate record patterns to select operators
-    --    --    >=> TODO
-    --    -- Compile match statements
-    --    >=> compileMatchExprsC
-    --    --    -- Placeholder insertion
-    --    --    >=> TODO
-    --    -- Denormalize top-level expressions
-    --    >=> denormalizeObjectC
-    --    -- Final lowering
+    >=> compileFoldsC
+    -- Type inference
+    >=> runTypeInferenceC
+    -- Normalize top-level expressions
+    >=> normalizeObjectC
+    -- Translate patterns in expression arguments to match expressions
+    >=> desugarPatternsC
+    -- Compile or-patterns
+    >=> compileOrPatterns
+    --    -- Translate record patterns to select operators
+    --    >=> TODO
+    -- Compile match statements
+    >=> compileMatchExprsC
+    --    -- Placeholder insertion
+    --    >=> TODO
+    -- Denormalize top-level expressions
+    >=> denormalizeObjectC
+    -- Final lowering
     >=> undefined
 
 -----------------------
