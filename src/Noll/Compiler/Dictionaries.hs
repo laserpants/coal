@@ -7,7 +7,13 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Compiler.Dictionaries where
+module Noll.Compiler.Dictionaries 
+  ( TraitContext (..)
+  , DictionaryEnvironment (..)
+  , runDictionaryStack
+  , transformScope
+  , collectTraits
+  ) where
 
 import Control.Monad (forM)
 import Control.Monad.RWS (RWS, runRWS)
