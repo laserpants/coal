@@ -20,7 +20,8 @@ import Noll.Compiler.Transform.Unfold
 import Noll.Compiler2.Internal
 import Noll.Compiler2.TypeInference
 import Noll.Language
-import Noll.Module (Module (..))
+import Noll.Module (Module (..), Definition (..))
+import Noll.SystemF.Substitution (normalizeTypeIndexes)
 
 withSupplyC :: (Monad m) => (Int -> (c, Int)) -> Compiler2T a m c
 withSupplyC f = do
@@ -50,14 +51,14 @@ compileFoldsC = unfoldExpansionTrans compileUnfolds
 indexedC :: (Monad m, Traversable t) => t e -> Compiler2T a m (t IndexedType)
 indexedC t = withSupplyC (runState (indexed t))
 
-runTypeInferenceC :: (Monad m, Data a, Show a, Eq a) => Module a () () -> Compiler2T a m (Module a Kind IndexedType)
+runTypeInferenceC :: forall m a. (Monad m, Data a, Show a, Eq a) => Module a () () -> Compiler2T a m (Module a Kind IndexedType)
 runTypeInferenceC m = do
   defs <- traverse indexedC ds
   (tdefs, as) <- typeDefinitionsC defs
+  let zz = tdefs :: [Definition a () IndexedType]
   undefined
+  --let zz = normalizeTypeIndexes tdefs
  where
-  --  undefined
-
   Module p ns ds = m
 
 normalizeObjectC :: (Monad m, NormalizeObjectsTransformContext c) => c -> Compiler2T a m c
