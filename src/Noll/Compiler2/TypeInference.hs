@@ -82,7 +82,7 @@ typeDefinitionsC ds = do
   pure (fmap (fmap normalizeRowTypes) (apply sub1 ds), apply sub1 ams)
 
 -- typeDefinitionC :: (Monad m, Data a, Data k, Show a, Eq a) => Definition a k IndexedType -> Compiler2T b m ()
-typeDefinitionC :: (Monad m, Data a, Show a, Eq a, Data k) => Definition a k IndexedType -> Compiler2T a m ()
+typeDefinitionC :: (Monad m, Data a, Show a, Eq a) => Definition a k IndexedType -> Compiler2T a m ()
 typeDefinitionC =
   \case
     DImport{} ->
