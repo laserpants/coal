@@ -14,9 +14,9 @@ module Noll.Compiler.Transform.Fold (
   expandFoldExpr,
 ) where
 
-import Control.Monad.RWS (RWS, evalRWS, runRWS)
-import Control.Monad.Reader (MonadReader, ReaderT, runReaderT)
-import Control.Monad.State (MonadState, State, evalState)
+import Control.Monad.RWS (RWS, runRWS)
+import Control.Monad.Reader (MonadReader)
+import Control.Monad.State (MonadState)
 import Control.Monad.Writer (execWriter, tell)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transform, transformM)

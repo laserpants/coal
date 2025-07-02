@@ -14,19 +14,18 @@ module Noll.Compiler.Transform.Unfold (
   expandUnfoldExpr,
 ) where
 
-import Control.Monad.RWS (RWS, evalRWS, runRWS)
-import Control.Monad.Reader (MonadReader, ReaderT, runReaderT)
-import Control.Monad.State (MonadState, State, evalState)
-import Control.Monad.Writer (execWriter, tell)
+import Control.Monad.RWS (RWS, runRWS)
+import Control.Monad.Reader (MonadReader)
+import Control.Monad.State (MonadState)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transform, transformM)
 import Lang.Common.List1 (List1, NonEmpty (..))
 import Lang.Common.Supply (suppliedName)
-import Lang.Label (Label (..), labelName)
+import Lang.Label (Label (..))
 import Lang.Utils (Dictionary, Name, const2)
 import Noll.Compiler.Transform (flattenApplication)
 import Noll.Compiler.Transform.Tree (replace)
-import Noll.Language (Choice (..), Clause (..), Expression (..), Pattern (..))
+import Noll.Language (Expression (..), Pattern (..))
 import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
 
 import qualified Data.Map.Strict as Map
