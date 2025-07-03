@@ -51,10 +51,10 @@ compileFoldsC = unfoldExpansionTrans compileUnfolds
 indexedC :: (Monad m, Traversable t) => t e -> Compiler2T a m (t IndexedType)
 indexedC t = withSupplyC (runState (indexed t))
 
-runTypeInferenceC :: forall m k a. (Monad m, Data a, Show a, Eq a) => Module a Kind () -> Compiler2T a m (Module a Kind IndexedType)
+runTypeInferenceC :: (Monad m, Data a) => Module a Kind () -> Compiler2T a m (Module a Kind IndexedType)
 runTypeInferenceC m = do
   defs <- traverse indexedC ds
-  (tdefs, as) <- typeDefinitionsC defs
+  (tdefs, _) <- typeDefinitionsC defs
   pure (Module p ns (normalizeTypeIndexes tdefs))
  where
   Module p ns ds = m
@@ -79,8 +79,8 @@ compileMatchExprsC = matchMonadTrans compileMatchExprs
 
 --
 
-compileModule :: (Monad m, Monoid a, Data a, Show a, Eq a) => Module a Kind () -> Compiler2T a m (Module a Kind IndexedType)
-compileModule =
+passOne :: (Monad m, Monoid a, Data a) => Module a Kind () -> Compiler2T a m (Module a Kind IndexedType)
+passOne =
   -- Expand type aliases
   expandAliasesC
     -- Expand unfolds (codata)
@@ -89,6 +89,10 @@ compileModule =
     >=> compileFoldsC
     -- Type inference
     >=> runTypeInferenceC
+
+compileModule :: (Monad m, Monoid a, Data a, Show a) => Module a Kind () -> Compiler2T a m (Module a Kind IndexedType)
+compileModule =
+    passOne
     -- Normalize top-level expressions
     >=> normalizeObjectC
     -- Translate patterns in expression arguments to match expressions

@@ -68,7 +68,7 @@ solveC = do
   updateSubstitutionC (sub2 <> sub1)
   gets compiler2Substitution
 
-typeDefinitionsC :: (Monad m, Data a, Show a, Eq a) => [Definition a Kind IndexedType] -> Compiler2T a m ([Definition a Kind IndexedType], [CompilerAssumption])
+typeDefinitionsC :: (Monad m, Data a) => [Definition a Kind IndexedType] -> Compiler2T a m ([Definition a Kind IndexedType], [CompilerAssumption])
 typeDefinitionsC ds = do
   forM_ ds typeDefinitionC
   sub <- gets compiler2Substitution
@@ -101,7 +101,7 @@ typeDefinitionC =
     d -> do
       compileDefinitionC d
       sub <- solveC
-      undefined -- defineC (definitionName d) (typeOf (apply sub d))
+      defineC (definitionName d) (typeOf (apply sub d))
 
 defineC :: (Monad m) => Name -> IndexedType -> Compiler2T a m ()
 defineC name t = insertNameC name (Forall (typeIndexesIn s) [] s)
