@@ -79,8 +79,8 @@ compileMatchExprsC = matchMonadTrans compileMatchExprs
 
 --
 
-passOne :: (Monad m, Monoid a, Data a, Eq a, Show a) => Module a Kind () -> Compiler2T a m (Module a Kind IndexedType)
-passOne =
+typePass :: (Monad m, Monoid a, Data a, Eq a, Show a) => Module a Kind () -> Compiler2T a m (Module a Kind IndexedType)
+typePass =
   -- Expand type aliases
   expandAliasesC
     -- Expand unfolds (codata)
@@ -92,7 +92,7 @@ passOne =
 
 compileModule :: (Monad m, Monoid a, Data a, Eq a, Show a) => Module a Kind () -> Compiler2T a m (Module a Kind IndexedType)
 compileModule =
-  passOne
+  typePass
     -- Normalize top-level expressions
     >=> normalizeObjectC
     -- Translate patterns in expression arguments to match expressions
