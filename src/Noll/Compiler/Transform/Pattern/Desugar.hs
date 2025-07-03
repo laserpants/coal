@@ -12,7 +12,7 @@ module Noll.Compiler.Transform.Pattern.Desugar (
   evalPatternDesugar,
 ) where
 
-import Control.Monad.RWS (MonadReader, MonadState, MonadWriter, RWS, evalRWS, runRWS, tell)
+import Control.Monad.RWS (MonadReader, MonadState, MonadWriter, RWS, runRWS, tell)
 import Control.Monad.Writer (runWriterT)
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (transformM)

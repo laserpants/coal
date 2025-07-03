@@ -2,6 +2,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
+-- TODO
 module Noll.Compiler.Lowpass.TranslateDefinition (translateDefinition) where
 
 import Control.Monad (forM)

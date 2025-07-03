@@ -10,9 +10,9 @@ module Noll.Compiler.PatternMatching.Rule (
   runMatchMonad,
 ) where
 
-import Control.Monad.Reader (MonadReader, ReaderT, ask, runReaderT)
+import Control.Monad.Reader (MonadReader, ReaderT, runReaderT)
 import Control.Monad.State (MonadState, State, evalState, runState)
-import Lang.Common.Supply (supplied, suppliedName)
+import Lang.Common.Supply (suppliedName)
 import Lang.Label (Label (..))
 import Lang.Utils (Name, foldrM)
 import Noll.Compiler.PatternMatching.Envelope (
