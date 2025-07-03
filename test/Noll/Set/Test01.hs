@@ -860,6 +860,387 @@ moduleBinarySearch =
         )
     ]
 
+moduleBinarySearch2 :: Module () o ()
+moduleBinarySearch2 =
+  Module.fromDefinitionList
+    (Path ["BinarySearch"])
+    -- Exports
+    ["Tree", "from_list", "flatten"]
+    -- Definitions
+    [ -- import Ordered(Ordering, Ordered, less_than_or_equal_to, greater_than)
+      DImport
+        (Path ["Ordered"])
+        ["LessThan", "EqualTo", "GreaterThan", "compare", "less_than_or_equal_to", "greater_than"]
+    , -- type Tree
+      DType
+        "Tree"
+        [Parameter () "a"]
+        [ Constructor
+            "Node"
+            3
+            ( Forall
+                (Set.fromList [Parameter () "a"])
+                []
+                ( TVariable (Parameter () "a")
+                    `TArrow` TApplication () (TConstructor () "Tree") (TVariable (Parameter () "a") :| [])
+                    `TArrow` TApplication () (TConstructor () "Tree") (TVariable (Parameter () "a") :| [])
+                    `TArrow` TApplication () (TConstructor () "Tree") (TVariable (Parameter () "a") :| [])
+                )
+            )
+        , Constructor
+            "Leaf"
+            0
+            ( Forall
+                (Set.fromList [Parameter () "a"])
+                []
+                ( TApplication
+                    ()
+                    (TConstructor () "Tree")
+                    (TVariable (Parameter () "a") :| [])
+                )
+            )
+        ]
+    , -- trait Numeric
+      DTrait
+        "Numeric"
+        []
+        (TVariable (Parameter () "a"))
+        [
+          ( "from_int32"
+          , TIntrinsic IInt32 `TArrow` TVariable (Parameter () "a")
+          )
+        ]
+    , -- type_alias Range
+      DTypeAlias
+        "Range"
+        [Parameter () "a"]
+        ( TIntrinsic
+            ( IRecord
+                ( TRow
+                    ( RExtend
+                        "min"
+                        (TVariable (Parameter () "a"))
+                        (RExtend "max" (TVariable (Parameter () "a")) RNil)
+                    )
+                )
+            )
+        )
+    , -- in_range
+      DAnnotation
+        ( With
+            [ Trait "Ordered" (TVariable (Parameter () "a"))
+            , Trait "Numeric" (TVariable (Parameter () "a"))
+            ]
+            (TIntrinsic IBool)
+        )
+        ( DFunction
+            "in_range"
+            ( Function
+                ()
+                (With [] ())
+                ( PAnnotation
+                    ()
+                    ( TApplication
+                        ()
+                        (TConstructor () "Range")
+                        (TVariable (Parameter () "a") :| [])
+                    )
+                    ( PRecord
+                        ()
+                        ()
+                        ( Map.fromList
+                            [
+                              ( "min"
+                              , PVariable () (Label () "min")
+                              )
+                            ,
+                              ( "max"
+                              , PVariable () (Label () "max")
+                              )
+                            ]
+                        )
+                        Nothing
+                    )
+                    <| PAnnotation
+                      ()
+                      (TVariable (Parameter () "a"))
+                      (PVariable () (Label () "n"))
+                    :| []
+                )
+                ( EApplication
+                    ()
+                    ()
+                    (EBinaryOperator () () OLogicalAnd)
+                    ( EApplication
+                        ()
+                        ()
+                        (EVariable () (Label () "greater_than"))
+                        ( EVariable () (Label () "n")
+                            <| EVariable () (Label () "min")
+                            :| []
+                        )
+                        <| EApplication
+                          ()
+                          ()
+                          (EBinaryOperator () () OLogicalOr)
+                          ( EApplication
+                              ()
+                              ()
+                              (EVariable () (Label () "less_than_or_equal_to"))
+                              ( EVariable () (Label () "n")
+                                  <| EVariable () (Label () "max")
+                                  :| []
+                              )
+                              <| EApplication
+                                ()
+                                ()
+                                (EVariable () (Label () "less_than_or_equal_to"))
+                                ( EVariable () (Label () "max")
+                                    <| EApplication
+                                      ()
+                                      ()
+                                      (EVariable () (Label () "from_int32"))
+                                      (ELiteral () (LInt32 (-1)) :| [])
+                                    :| []
+                                )
+                              :| []
+                          )
+                        :| []
+                    )
+                )
+            )
+        )
+    , -- from_list
+      DAnnotation
+        ( With
+            [ Trait "Ordered" (TVariable (Parameter () "a"))
+            , Trait "Numeric" (TVariable (Parameter () "a"))
+            ]
+            (TApplication () (TConstructor () "Tree") (TVariable (Parameter () "a") :| []))
+        )
+        ( DFunction
+            "from_list"
+            ( Function
+                ()
+                (With [] ())
+                (PAnnotation () (TIntrinsic (IList (TVariable (Parameter () "a")))) (PVariable () (Label () "list")) :| [])
+                ( EFold
+                    ()
+                    ()
+                    ( EVariable () (Label () "list")
+                        <| ERecord
+                          ()
+                          ()
+                          ( Map.fromList
+                              [
+                                ( "min"
+                                , EApplication
+                                    ()
+                                    ()
+                                    (EVariable () (Label () "from_int32"))
+                                    (ELiteral () (LInt32 0) :| [])
+                                )
+                              ,
+                                ( "max"
+                                , EApplication
+                                    ()
+                                    ()
+                                    (EVariable () (Label () "from_int32"))
+                                    (ELiteral () (LInt32 (-1)) :| [])
+                                )
+                              ]
+                          )
+                          Nothing
+                        :| []
+                    )
+                    ( EClause
+                        ()
+                        ( PListCons
+                            ()
+                            ()
+                            (PVariable () (Label () "p"))
+                            (PAtVariable () (Label () "g"))
+                        )
+                        ( CPlain
+                            ()
+                            []
+                            ( ELambda
+                                ()
+                                (PVariable () (Label () "range") :| [])
+                                ( EIf
+                                    ()
+                                    ()
+                                    ( EApplication
+                                        ()
+                                        ()
+                                        (EBinaryOperator () () OReverseApplication)
+                                        ( EVariable () (Label () "p")
+                                            <| EApplication
+                                              ()
+                                              ()
+                                              (EVariable () (Label () "in_range"))
+                                              (EVariable () (Label () "range") :| [])
+                                            :| []
+                                        )
+                                    )
+                                    ( EApplication
+                                        ()
+                                        ()
+                                        (EConstructor () (Label () "Node"))
+                                        ( EVariable () (Label () "p")
+                                            <| EApplication
+                                              ()
+                                              ()
+                                              (EVariable () (Label () "g"))
+                                              ( ERecord
+                                                  ()
+                                                  ()
+                                                  ( Map.fromList
+                                                      [
+                                                        ( "min"
+                                                        , ESelect () (Label () "min") (EVariable () (Label () "range"))
+                                                        )
+                                                      ,
+                                                        ( "max"
+                                                        , EVariable () (Label () "p")
+                                                        )
+                                                      ]
+                                                  )
+                                                  Nothing
+                                                  :| []
+                                              )
+                                            <| EApplication
+                                              ()
+                                              ()
+                                              (EVariable () (Label () "g"))
+                                              ( ERecord
+                                                  ()
+                                                  ()
+                                                  ( Map.fromList
+                                                      [
+                                                        ( "min"
+                                                        , EVariable () (Label () "p")
+                                                        )
+                                                      ,
+                                                        ( "max"
+                                                        , ESelect () (Label () "max") (EVariable () (Label () "range"))
+                                                        )
+                                                      ]
+                                                  )
+                                                  Nothing
+                                                  :| []
+                                              )
+                                            :| []
+                                        )
+                                    )
+                                    (EApplication () () (EVariable () (Label () "g")) (EVariable () (Label () "range") :| []))
+                                )
+                            )
+                            :| []
+                        )
+                        <| EClause
+                          ()
+                          (PListLiteral () () [])
+                          ( CPlain
+                              ()
+                              []
+                              ( EApplication
+                                  ()
+                                  ()
+                                  (EVariable () (Label () "always"))
+                                  (EConstructor () (Label () "Leaf") :| [])
+                              )
+                              :| []
+                          )
+                        :| []
+                    )
+                    Nothing
+                )
+            )
+        )
+    , -- flatten
+      DAnnotation
+        (With [] (TIntrinsic (IList (TVariable (Parameter () "a")))))
+        ( DFunction
+            "flatten"
+            ( Function
+                ()
+                (With [] ())
+                ( PAnnotation
+                    ()
+                    (TApplication () (TConstructor () "Tree") (TVariable (Parameter () "a") :| []))
+                    (PVariable () (Label () "tree"))
+                    :| []
+                )
+                ( EFold
+                    ()
+                    ()
+                    (EVariable () (Label () "tree") :| [])
+                    ( EClause
+                        ()
+                        ( PConstructor
+                            ()
+                            (Label () "Node")
+                            [ PVariable () (Label () "y")
+                            , PAtVariable () (Label () "lhs")
+                            , PAtVariable () (Label () "rhs")
+                            ]
+                        )
+                        ( CPlain
+                            ()
+                            []
+                            ( EApplication
+                                ()
+                                ()
+                                (EBinaryOperator () () OListConcatenation)
+                                ( EVariable () (Label () "lhs")
+                                    <| EListCons () () (EVariable () (Label () "y")) (EVariable () (Label () "rhs"))
+                                    :| []
+                                )
+                            )
+                            :| []
+                        )
+                        <| EClause
+                          ()
+                          (PConstructor () (Label () "Leaf") [])
+                          ( CPlain
+                              ()
+                              []
+                              (EListLiteral () () [])
+                              :| []
+                          )
+                        :| []
+                    )
+                    Nothing
+                )
+            )
+        )
+    , -- sort
+      DAnnotation
+        ( With
+            [ Trait "Ordered" (TVariable (Parameter () "a"))
+            , Trait "Numeric" (TVariable (Parameter () "a"))
+            ]
+            (TIntrinsic (IList (TVariable (Parameter () "a"))) `TArrow` TIntrinsic (IList (TVariable (Parameter () "a"))))
+        )
+        ( DConstant
+            "sort"
+            ( Constant
+                ()
+                (With [] ())
+                ( EApplication
+                    ()
+                    ()
+                    (EBinaryOperator () () OReverseComposition)
+                    ( EVariable () (Label () "flatten")
+                        <| EVariable () (Label () "from_list")
+                        :| []
+                    )
+                )
+            )
+        )
+    ]
+
 moduleMain :: Module () () ()
 moduleMain =
   Module.fromDefinitionList

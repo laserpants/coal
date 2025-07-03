@@ -30,7 +30,7 @@ compiler2TestEnvironment =
     , compiler2TypeConstructorEnv = env2
     , compiler2TraitEnvironment = env3
     , compiler2TraitEnv = env4
-    , compiler2AliasEnv = mempty
+    , compiler2AliasEnv = env5
     }
 
 env1 =
@@ -106,6 +106,44 @@ env2 =
       )
     ]
 
+env3 =
+  Environment.fromList
+    [
+      ( "Numeric"
+      ,
+        ( TypeIndex KType 0
+        , Environment.fromList
+            [
+              ( "from_int32"
+              , Forall
+                  (Set.fromList [TypeIndex KType 0])
+                  []
+                  ( TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0)
+                  )
+              )
+            ]
+        )
+      )
+    ,
+      ( "Ordered"
+      ,
+        ( TypeIndex KType 0
+        , Environment.fromList
+            [
+              ( "compare"
+              , Forall
+                  (Set.fromList [TypeIndex KType 0])
+                  []
+                  ( TVariable (TypeIndex KType 0)
+                      `TArrow` TVariable (TypeIndex KType 0)
+                      `TArrow` TConstructor KType "Ordering"
+                  )
+              )
+            ]
+        )
+      )
+    ]
+
 env4 =
   Environment.fromList
     [
@@ -144,40 +182,33 @@ env4 =
       )
     ]
 
-env3 =
+env5 =
   Environment.fromList
     [
-      ( "Numeric"
+      ( "Predicate"
       ,
-        ( TypeIndex KType 0
-        , Environment.fromList
-            [
-              ( "from_int32"
-              , Forall
-                  (Set.fromList [TypeIndex KType 0])
-                  []
-                  ( TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0)
-                  )
-              )
-            ]
+        ( ["a"]
+        , TVariable (Parameter () "a") `TArrow` TIntrinsic IBool
         )
       )
     ,
-      ( "Ordered"
+      ( "Range"
       ,
-        ( TypeIndex KType 0
-        , Environment.fromList
-            [
-              ( "compare"
-              , Forall
-                  (Set.fromList [TypeIndex KType 0])
-                  []
-                  ( TVariable (TypeIndex KType 0)
-                      `TArrow` TVariable (TypeIndex KType 0)
-                      `TArrow` TConstructor KType "Ordering"
-                  )
-              )
-            ]
+        ( ["a"]
+        , TIntrinsic
+            ( IRecord
+                ( TRow
+                    ( RExtend
+                        "max"
+                        (TVariable (Parameter () "a"))
+                        ( RExtend
+                            "min"
+                            (TVariable (Parameter () "a"))
+                            RNil
+                        )
+                    )
+                )
+            )
         )
       )
     ]

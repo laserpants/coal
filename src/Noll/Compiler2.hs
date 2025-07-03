@@ -20,7 +20,7 @@ import Noll.Compiler.Transform.Unfold
 import Noll.Compiler2.Internal
 import Noll.Compiler2.TypeInference
 import Noll.Language
-import Noll.Module (Definition (..), Module (..))
+import Noll.Module (Module (..))
 import Noll.SystemF.Substitution (normalizeTypeIndexes)
 
 withSupplyC :: (Monad m) => (Int -> (c, Int)) -> Compiler2T a m c

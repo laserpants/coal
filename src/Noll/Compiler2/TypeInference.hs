@@ -109,6 +109,8 @@ compileDefinitionC = do
       compileFunctionC f
     DConstant _ c ->
       compileConstantC c
+    DAnnotation _ d ->
+      compileDefinitionC d
     _ ->
       error "TODO"
 
