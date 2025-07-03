@@ -4,10 +4,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Compiler2.TypeInference (
-  typeDefinitionsC,
-)
-where
+module Noll.Compiler2.TypeInference (typeDefinitionsC) where
 
 import Control.Monad.Reader (ask, asks)
 import Control.Monad.State (gets)
