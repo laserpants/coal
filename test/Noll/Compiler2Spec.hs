@@ -228,3 +228,5 @@ tvariable1 = TVariable (TypeIndex KType 1)
 
 bool :: IndexedType
 bool = TIntrinsic IBool
+
+-- fst (runIdentity (runCompiler2T compiler2TestEnvironment (compileModule Noll.Set7.Test01.moduleMain)))

@@ -5,6 +5,7 @@
 
 module Noll.Compiler2 where
 
+import Noll.Compiler.Lowpass.TranslateModule (translateModule)
 import Control.Monad ((>=>))
 import Control.Monad.Reader (Reader, asks, runReader)
 import Control.Monad.State (gets, runState)
@@ -22,6 +23,10 @@ import Noll.Compiler2.TypeInference
 import Noll.Language
 import Noll.Module (Module (..))
 import Noll.SystemF.Substitution (normalizeTypeIndexes)
+import Lang.Utils (Name)
+
+import qualified Lang.Lowpass.Language as Lowpass
+import qualified Noll.Compiler.Lowpass.Environment as Lowpass
 
 withSupplyC :: (Monad m) => (Int -> (c, Int)) -> Compiler2T a m c
 withSupplyC f = do
@@ -77,6 +82,12 @@ matchMonadTrans f e = withSupplyC (\n -> runMatchMonad "match" n (f e))
 compileMatchExprsC :: (Monad m, MatchExpressionContext c) => c -> Compiler2T a m c
 compileMatchExprsC = matchMonadTrans compileMatchExprs
 
+lowpassMonadTrans :: (Monad m) => (c -> Reader Lowpass.TranslateEnvironment d) -> c -> Compiler2T a m d
+lowpassMonadTrans f e = pure (runReader (f e) (Lowpass.initialTranslateEnvironment mempty))
+
+finalLoweringC :: (Monad m, Data a) => Module a Kind IndexedType -> Compiler2T a m (Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type))
+finalLoweringC = lowpassMonadTrans translateModule
+
 --
 
 typePass :: (Monad m, Monoid a, Data a, Eq a, Show a) => Module a Kind () -> Compiler2T a m (Module a Kind IndexedType)
@@ -107,12 +118,12 @@ mainPass =
     -- Denormalize top-level expressions
     >=> denormalizeObjectC
 
-compileModule :: (Monad m, Monoid a, Data a, Eq a, Show a) => Module a Kind () -> Compiler2T a m (Module a Kind IndexedType)
+compileModule :: (Monad m, Monoid a, Data a, Eq a, Show a) => Module a Kind () -> Compiler2T a m (Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type))
 compileModule =
   typePass
     >=> mainPass
     -- Final lowering
-    >=> undefined
+    >=> finalLoweringC
 
 -----------------------
 -----------------------
