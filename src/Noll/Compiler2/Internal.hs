@@ -13,6 +13,7 @@ module Noll.Compiler2.Internal (
   runCompiler2T,
   evalCompiler2T,
   insertNameC,
+  insertNamesC,
   insertConstraintsC,
   insertAssumptionsC,
   updateSubstitutionC,
