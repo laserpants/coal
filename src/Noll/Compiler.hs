@@ -506,6 +506,8 @@ yyy = do
       TRow <$> yyyR r
     TAlias name ts t ->
       TAlias name <$> traverse yyy ts <*> yyy t
+    _ ->
+      error "TODO"
 
 yyyR :: (Monad m) => Row Parameter Kind (Type Parameter Kind) -> CompilerT a m (Row TypeIndex Kind IndexedType)
 yyyR =

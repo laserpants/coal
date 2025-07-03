@@ -309,6 +309,176 @@ moduleOrdered =
         )
     ]
 
+moduleOrdered1 :: Module () k ()
+moduleOrdered1 =
+  Module.fromDefinitionList
+    (Path ["Ordered"])
+    -- Exports
+    ["Ordering", "Ordered", "less_than_or_equal_to", "greater_than"]
+    -- Definitions
+    [ -- import Utils(Predicate)
+      DImport (Path ["Utils"]) ["Predicate"]
+    , -- type Ordering
+      DType
+        "Ordering"
+        []
+        [ Constructor
+            "LessThan"
+            0
+            (Forall mempty [] (TConstructor () "Ordering"))
+        , Constructor
+            "EqualTo"
+            0
+            (Forall mempty [] (TConstructor () "Ordering"))
+        , Constructor
+            "GreaterThan"
+            0
+            (Forall mempty [] (TConstructor () "Ordering"))
+        ]
+    , -- trait Ordered
+      DTrait
+        "Ordered"
+        []
+        (TVariable (Parameter () "a"))
+        [
+          ( "compare"
+          , TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TConstructor () "Ordering"
+          )
+        ]
+    , -- instance Ordered(int32)
+      DInstance
+        "Ordered"
+        (TIntrinsic IInt32)
+        [ DFunction
+            "compare"
+            ( Function
+                ()
+                (With [] ())
+                ( PVariable () (Label () "x")
+                    <| PVariable () (Label () "y")
+                    :| []
+                )
+                ( EIf
+                    ()
+                    ()
+                    ( EApplication
+                        ()
+                        ()
+                        (EBinaryOperator () () OLessThan)
+                        ( EVariable () (Label () "x")
+                            <| EVariable () (Label () "y")
+                            :| []
+                        )
+                    )
+                    (EConstructor () (Label () "LessThan"))
+                    ( EIf
+                        ()
+                        ()
+                        ( EApplication
+                            ()
+                            ()
+                            (EBinaryOperator () () OGreaterThan)
+                            ( EVariable () (Label () "x")
+                                <| EVariable () (Label () "y")
+                                :| []
+                            )
+                        )
+                        (EConstructor () (Label () "GreaterThan"))
+                        (EConstructor () (Label () "EqualTo"))
+                    )
+                )
+            )
+        ]
+    , -- less_than_or_equal_to
+      DAnnotation
+        ( With
+            [Trait "Ordered" (TVariable (Parameter () "a"))]
+            ( TApplication
+                ()
+                (TConstructor () "Predicate")
+                (TVariable (Parameter () "a") :| [])
+            )
+        )
+        ( DFunction
+            "less_than_or_equal_to"
+            ( Function
+                ()
+                (With [] ())
+                (PVariable () (Label () "m") :| [])
+                ( ELambda
+                    ()
+                    (PVariable () (Label () "n") :| [])
+                    ( EMatch
+                        ()
+                        ()
+                        ( EApplication
+                            ()
+                            ()
+                            (EVariable () (Label () "compare"))
+                            ( EVariable () (Label () "m")
+                                <| EVariable () (Label () "n")
+                                :| []
+                            )
+                        )
+                        ( EClause
+                            ()
+                            ( POr
+                                ()
+                                ()
+                                (PConstructor () (Label () "LessThan") [])
+                                (PConstructor () (Label () "EqualTo") [])
+                            )
+                            (CPlain () [] (ELiteral () (LBool True)) :| [])
+                            <| EClause
+                              ()
+                              (PConstructor () (Label () "GreaterThan") [])
+                              (CPlain () [] (ELiteral () (LBool False)) :| [])
+                            :| []
+                        )
+                    )
+                )
+            )
+        )
+    , -- greater_than
+      DAnnotation
+        ( With
+            [Trait "Ordered" (TVariable (Parameter () "a"))]
+            ( TApplication
+                ()
+                (TConstructor () "Predicate")
+                ( TVariable (Parameter () "a")
+                    :| []
+                )
+            )
+        )
+        ( DFunction
+            "greater_than"
+            ( Function
+                ()
+                (With [] ())
+                ( PAnnotation
+                    ()
+                    (TVariable (Parameter () "a"))
+                    (PVariable () (Label () "n"))
+                    :| []
+                )
+                ( EApplication
+                    ()
+                    ()
+                    (EBinaryOperator () () OReverseComposition)
+                    ( EVariable () (Label () "not")
+                        <| EApplication
+                          ()
+                          ()
+                          (EVariable () (Label () "less_than_or_equal_to"))
+                          (EVariable () (Label () "n") :| [])
+                        :| []
+                    )
+                )
+            )
+        )
+    ]
+
 moduleBinarySearch :: Module () () ()
 moduleBinarySearch =
   Module.fromDefinitionList
