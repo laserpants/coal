@@ -4,7 +4,27 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Compiler2.Internal where
+module Noll.Compiler2.Internal (
+  Compiler2T (..),
+  Compiler2Environment (..),
+  Compiler2State (..),
+  CompilerConstraint,
+  CompilerAssumption,
+  runCompiler2T,
+  evalCompiler2T,
+  insertNameC,
+  insertConstraintsC,
+  insertAssumptionsC,
+  updateSubstitutionC,
+  clearConstraintsC,
+  updateSupply,
+  updateSupplyC,
+  insertSupplyC,
+  compiler2ReportConstraintsGenErrors,
+  compiler2ReportSolverRuleViolations,
+  compiler2SetTypeAnnotationParams,
+)
+where
 
 import Control.Monad.RWS (RWST, runRWST)
 import Control.Monad.Reader (MonadReader)

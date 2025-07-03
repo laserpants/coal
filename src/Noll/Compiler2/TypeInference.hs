@@ -4,7 +4,10 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Compiler2.TypeInference where
+module Noll.Compiler2.TypeInference (
+  typeDefinitionsC,
+)
+where
 
 import Control.Monad.Reader (ask, asks)
 import Control.Monad.State (gets)
@@ -21,8 +24,6 @@ import Noll.Language
 import Noll.Module (Constant (..), Definition (..), Function (..))
 import Noll.Module.Definition (definitionName)
 import Noll.SystemF
-import Noll.SystemF.Constraint.Assumption
-import Noll.SystemF.Constraint.Generation
 
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
