@@ -9,16 +9,13 @@ import Control.Monad (forM)
 import Control.Monad.Reader (MonadReader, asks)
 import Data.Data (Data)
 import Data.List.Extra (sortOn)
-import Debug.Trace
-import Debug.Trace (traceShow)
 import Lang.Common.List1 (NonEmpty ((:|)), fromList1, (<|))
 import Lang.Label (Label (..))
-import Lang.Utils (Name, Set)
+import Lang.Utils (Name)
 import Noll.Compiler.Lowpass.Environment (TranslateEnvironment (..), withLocalNames)
 import Noll.Compiler.Lowpass.TranslateExpression (translateExpression, translatePattern)
 import Noll.Compiler.Lowpass.TranslateType (translateType)
 import Noll.Language
-import Noll.Language.Trait (With (..))
 import Noll.Module.Constant (Constant (..))
 import Noll.Module.Definition
 import Noll.Module.Function (Function (..))
