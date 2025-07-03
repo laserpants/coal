@@ -13,7 +13,7 @@ import Lang.Common.List1 (NonEmpty (..))
 import Lang.Utils (Name, forM_)
 import Noll.Compiler
 import Noll.Language
-import Noll.Module (Constant (..), Function (..), Module (..))
+import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
 import Noll.SystemF.Constraint.Assumption (Assumption (..))
 import Noll.SystemF.Constraint.Generation (ConstraintsGenError)
 import Noll.SystemF.Constraint.Generation.Internal (InferenceRule (..))
@@ -66,17 +66,12 @@ runTypedFunctionTest env names f =
 --    errs1 <- getSolverRuleViolationsC
 --    pure (TestResult (normalizeTypeIndexes f2) as errs0 errs1)
 
--- runTypedDefinitionsTest ::
---  ( Show a
---  , Eq a
---  , Show k
---  , HasType TypeIndex Kind (Definition a k (Type TypeIndex Kind))
---  , TypeIndexed Kind (Definition a k IndexedType)
---  ) =>
---  CompilerEnvironment ->
---  [(Name, Scheme TypeIndex Kind IndexedType)] ->
---  [Definition a k t] ->
---  TestResult [Definition a Kind IndexedType] a
+runTypedDefinitionsTest ::
+  (Show a, Eq a, Data a) =>
+  CompilerEnvironment ->
+  [(Name, Scheme TypeIndex Kind IndexedType)] ->
+  [Definition a Kind t] ->
+  TestResult [Definition a Kind IndexedType] a
 runTypedDefinitionsTest env names ds =
   runIdentity $ evalCompilerT env $ do
     insertNamesC names
@@ -86,12 +81,12 @@ runTypedDefinitionsTest env names ds =
     errs1 <- getSolverRuleViolationsC
     pure (TestResult (normalizeTypeIndexes ds2) as errs0 errs1)
 
--- runTypedModuleTest ::
---  (Show a, Eq a) =>
---  CompilerEnvironment ->
---  [(Name, Scheme TypeIndex Kind IndexedType)] ->
---  Module a k t ->
---  TestResult (Module a Kind (Type TypeIndex Kind)) a
+runTypedModuleTest ::
+  (Show a, Data a, Eq a) =>
+  CompilerEnvironment ->
+  [(Name, Scheme TypeIndex Kind IndexedType)] ->
+  Module a Kind t ->
+  TestResult (Module a Kind (Type TypeIndex Kind)) a
 runTypedModuleTest env names (Module p ns ds) = TestResult (Module p ns a) b c d
  where
   TestResult a b c d = runTypedDefinitionsTest env names ds

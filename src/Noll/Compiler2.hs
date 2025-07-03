@@ -33,31 +33,29 @@ withSupplyC f = do
 aliasExpansionTrans :: (Monad m) => (c -> Reader AliasEnvironment c) -> c -> Compiler2T a m c
 aliasExpansionTrans f e = asks (runReader (f e) . compiler2AliasEnv)
 
-expandAliasesC :: (Monad m, Data a) => Module a () () -> Compiler2T a m (Module a () ())
+expandAliasesC :: (Monad m, Data a) => Module a Kind () -> Compiler2T a m (Module a Kind ())
 expandAliasesC = aliasExpansionTrans expandAliases
 
 foldExpansionTrans :: (Monad m) => (c -> FoldExpansion c) -> c -> Compiler2T a m c
 foldExpansionTrans f e = withSupplyC (\n -> runFoldExpansion "fold" n (f e))
 
-compileUnfoldsC :: (Monad m, Data a, Monoid a) => Module a () () -> Compiler2T a m (Module a () ())
+compileUnfoldsC :: (Monad m, Data a, Monoid a) => Module a Kind () -> Compiler2T a m (Module a Kind ())
 compileUnfoldsC = foldExpansionTrans compileFolds
 
 unfoldExpansionTrans :: (Monad m) => (c -> UnfoldExpansion c) -> c -> Compiler2T a m c
 unfoldExpansionTrans f e = withSupplyC (\n -> runUnfoldExpansion "unfold" n (f e))
 
-compileFoldsC :: (Monad m, Data a, Monoid a) => Module a () () -> Compiler2T a m (Module a () ())
+compileFoldsC :: (Monad m, Data a, Monoid a) => Module a Kind () -> Compiler2T a m (Module a Kind ())
 compileFoldsC = unfoldExpansionTrans compileUnfolds
 
 indexedC :: (Monad m, Traversable t) => t e -> Compiler2T a m (t IndexedType)
 indexedC t = withSupplyC (runState (indexed t))
 
-runTypeInferenceC :: forall m a. (Monad m, Data a, Show a, Eq a) => Module a () () -> Compiler2T a m (Module a Kind IndexedType)
+runTypeInferenceC :: forall m k a. (Monad m, Data a, Show a, Eq a) => Module a Kind () -> Compiler2T a m (Module a Kind IndexedType)
 runTypeInferenceC m = do
   defs <- traverse indexedC ds
   (tdefs, as) <- typeDefinitionsC defs
-  let zz = tdefs :: [Definition a () IndexedType]
-  undefined
-  --let zz = normalizeTypeIndexes tdefs
+  pure (Module p ns (normalizeTypeIndexes tdefs))
  where
   Module p ns ds = m
 
@@ -81,7 +79,7 @@ compileMatchExprsC = matchMonadTrans compileMatchExprs
 
 --
 
-compileModule :: (Monad m, Monoid a, Data a, Show a, Eq a) => Module a () () -> Compiler2T a m (Module a Kind IndexedType)
+compileModule :: (Monad m, Monoid a, Data a, Show a, Eq a) => Module a Kind () -> Compiler2T a m (Module a Kind IndexedType)
 compileModule =
   -- Expand type aliases
   expandAliasesC

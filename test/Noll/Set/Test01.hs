@@ -785,3 +785,99 @@ moduleMain =
             )
         )
     ]
+
+moduleMain2 :: Module () o ()
+moduleMain2 =
+  Module.fromDefinitionList
+    (Path ["Main"])
+    -- Exports
+    []
+    -- Definitions
+    [ -- import BinarySearch
+      DImport
+        (Path ["BinarySearch"])
+        ["Node", "Leaf", "sort", "in_range", "from_int32"]
+    , DImport
+        (Path ["Ordered"])
+        ["Ordered__$instance.b7c5e7e84eeaf782"]
+    , DInstance
+        "Numeric"
+        (TIntrinsic IInt32)
+        [ DFunction
+            "from_int32"
+            ( Function
+                ()
+                (With [] ())
+                (PVariable () (Label () "x") :| [])
+                (EVariable () (Label () "x"))
+            )
+        ]
+    , -- main
+      DFunction
+        "main"
+        ( Function
+            ()
+            (With [] ())
+            (PLiteral () LUnit :| [])
+            ( ELet
+                ()
+                ( BPattern
+                    ()
+                    (PVariable () (Label () "xs"))
+                    ( EAnnotation
+                        ()
+                        (TIntrinsic (IList (TIntrinsic IInt32)))
+                        ( EListLiteral
+                            ()
+                            ()
+                            [ EApplication () () (EVariable () (Label () "from_int32")) (ELiteral () (LInt32 5) :| [])
+                            , EApplication () () (EVariable () (Label () "from_int32")) (ELiteral () (LInt32 3) :| [])
+                            , EApplication () () (EVariable () (Label () "from_int32")) (ELiteral () (LInt32 7) :| [])
+                            , EApplication () () (EVariable () (Label () "from_int32")) (ELiteral () (LInt32 2) :| [])
+                            , EApplication () () (EVariable () (Label () "from_int32")) (ELiteral () (LInt32 1) :| [])
+                            , EApplication () () (EVariable () (Label () "from_int32")) (ELiteral () (LInt32 6) :| [])
+                            , EApplication () () (EVariable () (Label () "from_int32")) (ELiteral () (LInt32 4) :| [])
+                            ]
+                        )
+                    )
+                    :| []
+                )
+                ( EApplication
+                    ()
+                    ()
+                    (EVariable () (Label () "@@@_trace_int32"))
+                    ( EMatch
+                        ()
+                        ()
+                        ( EApplication
+                            ()
+                            ()
+                            (EVariable () (Label () "sort"))
+                            (EVariable () (Label () "xs") :| [])
+                        )
+                        ( EClause
+                            ()
+                            (PListLiteral () () [])
+                            ( CPlain
+                                ()
+                                []
+                                (ELiteral () (LInt32 12345))
+                                :| []
+                            )
+                            <| EClause
+                              ()
+                              (PListCons () () (PVariable () (Label () "y")) (PAny () ()))
+                              ( CPlain
+                                  ()
+                                  []
+                                  (EVariable () (Label () "y"))
+                                  :| []
+                              )
+                            :| []
+                        )
+                        :| []
+                    )
+                )
+            )
+        )
+    ]

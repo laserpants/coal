@@ -438,15 +438,14 @@ insertDefinitionC =
 --  insertDefinitionC def
 --  pure (def, ams)
 
--- typeCheckDefinitionsC ::
---  ( Monad m
---  , Show a
---  , Show k
---  , Eq a
-----  , HasType TypeIndex Kind (Definition a k IndexedType)
---  ) =>
---  [Definition a k IndexedType] ->
---  CompilerT a m ([Definition a Kind IndexedType], [CompilerAssumption])
+typeCheckDefinitionsC ::
+  ( Monad m
+  , Show a
+  , Data a
+  , Eq a
+  ) =>
+  [Definition a Kind IndexedType] ->
+  CompilerT a m ([Definition a Kind IndexedType], [CompilerAssumption])
 typeCheckDefinitionsC ds = do
   forM_ ds typeCheckDefinition
   sub <- gets compilerSubstitution
