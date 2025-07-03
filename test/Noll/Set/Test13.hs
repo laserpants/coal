@@ -253,6 +253,7 @@ moduleOrdered =
         , "Core$.pair_to_string"
         , "Core$.list_to_string"
         , "Core$.trace"
+        , "Core$.unpack_nat"
         ]
     , moduleObjects =
         [ OData "Ordered.EqualTo" 0 (TCon "Ordering" [])
@@ -365,6 +366,7 @@ moduleBinarySearch =
         , "Core$.pair_to_string"
         , "Core$.list_to_string"
         , "Core$.trace"
+        , "Core$.unpack_nat"
         ]
     , moduleObjects =
         [ OData "BinarySearch.Leaf" 0 (TCon "Tree" [Lowpass.opaque])
@@ -645,6 +647,7 @@ moduleMain =
         , "Core$.pair_to_string"
         , "Core$.list_to_string"
         , "Core$.trace"
+        , "Core$.unpack_nat"
         ]
     , moduleObjects =
         [ OFunction
@@ -773,6 +776,7 @@ fixture1 =
           , "Core$.pair_to_string"
           , "Core$.list_to_string"
           , "Core$.trace"
+          , "Core$.unpack_nat"
           ]
       , moduleObjects =
           []

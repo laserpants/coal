@@ -90,11 +90,10 @@ typePass =
     -- Type inference
     >=> runTypeInferenceC
 
-compileModule :: (Monad m, Monoid a, Data a, Eq a, Show a) => Module a Kind () -> Compiler2T a m (Module a Kind IndexedType)
-compileModule =
-  typePass
+mainPass :: (Monad m, Monoid a, Data a, Show a) => Module a Kind IndexedType -> Compiler2T a m (Module a Kind IndexedType)
+mainPass = 
     -- Normalize top-level expressions
-    >=> normalizeObjectC
+    normalizeObjectC
     -- Translate patterns in expression arguments to match expressions
     >=> desugarPatternsC
     -- Compile or-patterns
@@ -107,6 +106,11 @@ compileModule =
     --    >=> TODO
     -- Denormalize top-level expressions
     >=> denormalizeObjectC
+
+compileModule :: (Monad m, Monoid a, Data a, Eq a, Show a) => Module a Kind () -> Compiler2T a m (Module a Kind IndexedType)
+compileModule =
+  typePass
+    >=> mainPass
     -- Final lowering
     >=> undefined
 
