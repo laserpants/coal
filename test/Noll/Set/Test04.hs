@@ -123,54 +123,54 @@ moduleOrdered =
             )
         ]
     , DAnnotation
-          ( With
-              [Trait "Ordered" (TVariable (Parameter () "a"))]
-              ( TAlias
-                  "Predicate"
-                  [TVariable (Parameter () "a")]
-                  (TVariable (Parameter () "a") `TArrow` TIntrinsic IBool)
-              )
-          )
-          ( DFunction
-              "less_than_or_equal_to"
-              ( Function
-                  ()
-                  (With [] (TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool))
-                  (PVariable () (Label (TVariable (TypeIndex KType 0)) "m") :| [])
-                  ( ELambda
-                      ()
-                      (PVariable () (Label (TVariable (TypeIndex KType 0)) "n") :| [])
-                      ( EMatch
-                          ()
-                          (TIntrinsic IBool)
-                          ( EApplication
-                              ()
-                              (TConstructor KType "Ordering")
-                              (EVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TConstructor KType "Ordering") "compare"))
-                              ( EVariable () (Label (TVariable (TypeIndex KType 0)) "m")
-                                  <| EVariable () (Label (TVariable (TypeIndex KType 0)) "n")
-                                  :| []
-                              )
-                          )
-                          ( EClause
-                              ()
-                              ( POr
-                                  ()
-                                  (TConstructor KType "Ordering")
-                                  (PConstructor () (Label (TConstructor KType "Ordering") "LessThan") [])
-                                  (PConstructor () (Label (TConstructor KType "Ordering") "EqualTo") [])
-                              )
-                              (CPlain () [] (ELiteral () (LBool True)) :| [])
-                              <| EClause
+        ( With
+            [Trait "Ordered" (TVariable (Parameter () "a"))]
+            ( TAlias
+                "Predicate"
+                [TVariable (Parameter () "a")]
+                (TVariable (Parameter () "a") `TArrow` TIntrinsic IBool)
+            )
+        )
+        ( DFunction
+            "less_than_or_equal_to"
+            ( Function
+                ()
+                (With [] (TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool))
+                (PVariable () (Label (TVariable (TypeIndex KType 0)) "m") :| [])
+                ( ELambda
+                    ()
+                    (PVariable () (Label (TVariable (TypeIndex KType 0)) "n") :| [])
+                    ( EMatch
+                        ()
+                        (TIntrinsic IBool)
+                        ( EApplication
+                            ()
+                            (TConstructor KType "Ordering")
+                            (EVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TConstructor KType "Ordering") "compare"))
+                            ( EVariable () (Label (TVariable (TypeIndex KType 0)) "m")
+                                <| EVariable () (Label (TVariable (TypeIndex KType 0)) "n")
+                                :| []
+                            )
+                        )
+                        ( EClause
+                            ()
+                            ( POr
                                 ()
-                                (PConstructor () (Label (TConstructor KType "Ordering") "GreaterThan") [])
-                                (CPlain () [] (ELiteral () (LBool False)) :| [])
-                              :| []
-                          )
-                      )
-                  )
-              )
-          )
+                                (TConstructor KType "Ordering")
+                                (PConstructor () (Label (TConstructor KType "Ordering") "LessThan") [])
+                                (PConstructor () (Label (TConstructor KType "Ordering") "EqualTo") [])
+                            )
+                            (CPlain () [] (ELiteral () (LBool True)) :| [])
+                            <| EClause
+                              ()
+                              (PConstructor () (Label (TConstructor KType "Ordering") "GreaterThan") [])
+                              (CPlain () [] (ELiteral () (LBool False)) :| [])
+                            :| []
+                        )
+                    )
+                )
+            )
+        )
     , -- greater_than
       DAnnotation
         ( With

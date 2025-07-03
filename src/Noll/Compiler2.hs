@@ -11,7 +11,7 @@ import Control.Monad.State (gets, runState)
 import Data.Data (Data)
 import Noll.Compiler.NormalizeObjects (NormalizeObjectsTransformContext (..))
 import Noll.Compiler.PatternMatching
-import Noll.Compiler.PatternMatching.Rule (MatchMonad (..), matchPatterns, runMatchMonad)
+import Noll.Compiler.PatternMatching.Rule (MatchMonad (..), runMatchMonad)
 import Noll.Compiler.Transform.Fold
 import Noll.Compiler.Transform.Pattern.Desugar
 import Noll.Compiler.Transform.Pattern.OrExpansion
@@ -20,7 +20,7 @@ import Noll.Compiler.Transform.Unfold
 import Noll.Compiler2.Internal
 import Noll.Compiler2.TypeInference
 import Noll.Language
-import Noll.Module (Module (..), Definition (..))
+import Noll.Module (Definition (..), Module (..))
 import Noll.SystemF.Substitution (normalizeTypeIndexes)
 
 withSupplyC :: (Monad m) => (Int -> (c, Int)) -> Compiler2T a m c
@@ -51,7 +51,7 @@ compileFoldsC = unfoldExpansionTrans compileUnfolds
 indexedC :: (Monad m, Traversable t) => t e -> Compiler2T a m (t IndexedType)
 indexedC t = withSupplyC (runState (indexed t))
 
-runTypeInferenceC :: (Monad m, Data a) => Module a Kind () -> Compiler2T a m (Module a Kind IndexedType)
+runTypeInferenceC :: (Monad m, Data a, Eq a, Show a) => Module a Kind () -> Compiler2T a m (Module a Kind IndexedType)
 runTypeInferenceC m = do
   defs <- traverse indexedC ds
   (tdefs, _) <- typeDefinitionsC defs
@@ -79,7 +79,7 @@ compileMatchExprsC = matchMonadTrans compileMatchExprs
 
 --
 
-passOne :: (Monad m, Monoid a, Data a) => Module a Kind () -> Compiler2T a m (Module a Kind IndexedType)
+passOne :: (Monad m, Monoid a, Data a, Eq a, Show a) => Module a Kind () -> Compiler2T a m (Module a Kind IndexedType)
 passOne =
   -- Expand type aliases
   expandAliasesC
@@ -90,9 +90,9 @@ passOne =
     -- Type inference
     >=> runTypeInferenceC
 
-compileModule :: (Monad m, Monoid a, Data a, Show a) => Module a Kind () -> Compiler2T a m (Module a Kind IndexedType)
+compileModule :: (Monad m, Monoid a, Data a, Eq a, Show a) => Module a Kind () -> Compiler2T a m (Module a Kind IndexedType)
 compileModule =
-    passOne
+  passOne
     -- Normalize top-level expressions
     >=> normalizeObjectC
     -- Translate patterns in expression arguments to match expressions

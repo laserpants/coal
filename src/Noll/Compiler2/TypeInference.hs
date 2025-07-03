@@ -1,34 +1,87 @@
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
 module Noll.Compiler2.TypeInference where
 
+import Control.Monad.Reader (ask, asks)
 import Control.Monad.State (gets)
-import Control.Monad.Reader (asks)
+import Control.Monad.Writer (execWriter)
 import Data.Data (Data)
+import Data.Either.Extra (partitionEithers)
 import Lang.Common.Environment (Environment (..))
 import Lang.Common.List1 (NonEmpty (..))
 import Lang.Common.Supply (supplied)
 import Lang.Label (Label (..))
-import Lang.Utils (Name, forM_)
+import Lang.Utils (Dictionary, Name, forM_)
 import Noll.Compiler2.Internal
 import Noll.Language
 import Noll.Module (Constant (..), Definition (..), Function (..))
 import Noll.Module.Definition (definitionName)
 import Noll.SystemF
+import Noll.SystemF.Constraint.Assumption
+import Noll.SystemF.Constraint.Generation
 
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
 import qualified Lang.Common.Environment as Environment
 
-solveConstraintsC =
-  undefined
+type ConstraintsGenResult c o k t r = (r, Dictionary (c, o k), [ConstraintsGenOutput c o k t])
 
-compileConstraintsC =
-  undefined
+runConstraintsGenC :: (Monad m) => ConstraintsGenStack c TypeIndex Kind IndexedType r -> Compiler2T a m (ConstraintsGenResult c TypeIndex Kind IndexedType r)
+runConstraintsGenC stack = do
+  env <- ask
+  sup <- gets compiler2Supply
+  let (result, ConstraintsGenState{..}, output) = runConstraintsGenStack sup (context env) stack
+  updateSupplyC constraintsGenStateSupply
+  pure (result, constraintsGenStateTypeIndexes, output)
+ where
+  context Compiler2Environment{..} =
+    ConstraintsGenContext
+      { constraintsGenContextMonomorphicSet = mempty
+      , constraintsGenContextDataConstructorEnv = compiler2DataConstructorEnv
+      , constraintsGenContextTypeConstructorEnv = compiler2TypeConstructorEnv
+      }
 
-compileFunctionC :: (Monad m, Data a) => Function Expression a IndexedType -> Compiler2T a m ()
+generateConstraintsC :: (Monad m, Data a, Show a) => Expression a IndexedType -> Compiler2T a m ([CompilerAssumption], [CompilerConstraint a])
+generateConstraintsC e = do
+  (assumptions, params, result) <- runConstraintsGenC (collectConstraints e)
+  let (errors, constraints) = partitionEithers result
+  compiler2ReportConstraintsGenErrors errors
+  compiler2SetTypeAnnotationParams params
+  pure (assumptions, constraints)
+
+assumptionConstraints :: (Monad m) => CompilerAssumption -> Compiler2T a m (Either CompilerAssumption (CompilerConstraint a))
+assumptionConstraints Assumption{..} = do
+  names <- gets compiler2NameStore
+  case Environment.lookup assumptionName names of
+    Nothing ->
+      pure $ Left Assumption{..}
+    Just s ->
+      pure $ Right (Explicit InferenceRulePlaceholder assumptionType s)
+
+solveConstraintsC :: (Monad m, Data a, Eq a, Show a) => [CompilerConstraint a] -> Compiler2T a m Substitution
+solveConstraintsC cs = do
+  dict <- gets compiler2TypeAnnotationParams
+  n <- gets compiler2Supply
+  let (sub, m, rs) = solveConstraints n cs
+  updateSupplyC m
+  let errors = execWriter (checkTypeAnnotationParameters (Map.toList dict) sub)
+  compiler2ReportSolverRuleViolations (apply sub rs)
+  compiler2ReportConstraintsGenErrors (EIllFormedTypeAnnotation <$> errors)
+  pure sub
+
+compileConstraintsC :: (Monad m, Data a, Show a) => Expression a IndexedType -> Compiler2T a m ()
+compileConstraintsC expr = do
+  (ms1, cs1) <- generateConstraintsC expr
+  (ms2, cs2) <- partitionEithers <$> traverse assumptionConstraints ms1
+  sub <- gets compiler2Substitution
+  insertAssumptionsC (apply sub ms2)
+  insertConstraintsC (cs1 <> cs2)
+
+compileFunctionC :: (Monad m, Data a, Show a) => Function Expression a IndexedType -> Compiler2T a m ()
 compileFunctionC (Function loc (With _ t) ps e) = do
   insertConstraintsC [Equality (RuleTopLevelFunction loc) [t, typeOf e]]
   t1 <- supplied (TVariable . TypeIndex KType)
@@ -40,7 +93,7 @@ compileFunctionC (Function loc (With _ t) ps e) = do
  where
   placeholder = "###.function"
 
-compileConstantC :: (Monad m, Data a) => Constant Expression a IndexedType -> Compiler2T a m ()
+compileConstantC :: (Monad m, Data a, Show a) => Constant Expression a IndexedType -> Compiler2T a m ()
 compileConstantC (Constant loc (With _ t) e) = do
   insertConstraintsC [Equality (RuleTopLevelConstant loc) [t, typeOf e]]
   compileConstraintsC $
@@ -51,7 +104,7 @@ compileConstantC (Constant loc (With _ t) e) = do
  where
   placeholder = "###.constant"
 
-compileDefinitionC :: (Monad m, Data a) => Definition a k IndexedType -> Compiler2T a m ()
+compileDefinitionC :: (Monad m, Data a, Show a) => Definition a k IndexedType -> Compiler2T a m ()
 compileDefinitionC = do
   \case
     DFunction _ f ->
@@ -61,7 +114,7 @@ compileDefinitionC = do
     _ ->
       error "TODO"
 
-solveC :: (Monad m) => Compiler2T a m Substitution
+solveC :: (Monad m, Data a, Eq a, Show a) => Compiler2T a m Substitution
 solveC = do
   constraints <- gets compiler2Constraints
   sub1 <- gets compiler2Substitution
@@ -71,7 +124,7 @@ solveC = do
   updateSubstitutionC (sub2 <> sub1)
   gets compiler2Substitution
 
-typeDefinitionsC :: (Monad m, Data a) => [Definition a Kind IndexedType] -> Compiler2T a m ([Definition a Kind IndexedType], [CompilerAssumption])
+typeDefinitionsC :: (Monad m, Data a, Show a, Eq a) => [Definition a Kind IndexedType] -> Compiler2T a m ([Definition a Kind IndexedType], [CompilerAssumption])
 typeDefinitionsC ds = do
   forM_ ds typeDefinitionC
   sub <- gets compiler2Substitution
@@ -84,7 +137,7 @@ typeDefinitionsC ds = do
   sub1 <- solveC
   pure (fmap (fmap normalizeRowTypes) (apply sub1 ds), apply sub1 ams)
 
-typeDefinitionC :: (Monad m, Data a) => Definition a Kind IndexedType -> Compiler2T a m ()
+typeDefinitionC :: (Monad m, Data a, Show a, Eq a) => Definition a Kind IndexedType -> Compiler2T a m ()
 typeDefinitionC =
   \case
     DImport{} ->

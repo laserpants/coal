@@ -27,6 +27,9 @@ import Noll.Compiler.Transform.Pattern.OrExpansion
 import Noll.Compiler.Transform.Pattern.RecordDesugar
 import Noll.Compiler.Transform.Type.AliasExpansion
 import Noll.Compiler.Transform.Unfold
+import Noll.Compiler2
+import Noll.Compiler2.Internal
+import Noll.Compiler2Spec (compiler2TestEnvironment)
 import Noll.Language
 import Noll.Module (Constant (..), Function (..), Module (..))
 import Noll.SystemF.Constraint.Assumption (Assumption (..))
@@ -1226,6 +1229,8 @@ story = do
     evalMatchMonad "match" 0 (compileMatchExprs Noll.Set2.Test05.prog2_05) == Noll.Set2.Test09.prog2_09
   it "" $
     evalMatchMonad "match" 0 (compileMatchExprs Noll.Set5.Test05.moduleMain) == Noll.Set5.Test09.moduleMain
+  it "" $
+    fst (runIdentity (runCompiler2T compiler2TestEnvironment (passOne Noll.Set.Test01.moduleMain2))) == Noll.Set.Test04.moduleMain
 
   --  it "" $
   --    result funLte == funLte2
