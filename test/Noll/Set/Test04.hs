@@ -122,7 +122,7 @@ moduleOrdered =
                 )
             )
         ]
-    , ( DAnnotation
+    , DAnnotation
           ( With
               [Trait "Ordered" (TVariable (Parameter () "a"))]
               ( TAlias
@@ -171,7 +171,6 @@ moduleOrdered =
                   )
               )
           )
-      )
     , -- greater_than
       DAnnotation
         ( With

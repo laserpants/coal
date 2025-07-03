@@ -110,6 +110,7 @@ insertConstraintsC cs = modify (overCompiler2Constraints (<> cs))
 
 {-# INLINE clearConstraintsC #-}
 clearConstraintsC :: (Monad m) => Compiler2T a m ()
+-- TODO
 clearConstraintsC = undefined
 
 {-# INLINE updateSupplyC #-}
