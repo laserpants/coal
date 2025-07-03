@@ -11,12 +11,12 @@ import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import qualified Noll.Module as Module
 
-prog7_01 :: [Module () () ()]
+prog7_01 :: [Module () o ()]
 prog7_01 =
   [ moduleMain
   ]
 
-moduleMain :: Module () () ()
+moduleMain :: Module () o ()
 moduleMain =
   Module.fromDefinitionList
     (Path ["Main"])
