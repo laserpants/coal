@@ -270,13 +270,7 @@ collectConstraints =
           t1 = TIntrinsic (IRecord (TRow (fromDictionary d1 (fromMaybe RNil e1))))
       tellRight [Equality InferenceRulePlaceholder [t, t1]]
       pure (ms1 <> ms2)
-    EUnfold{} ->
-      -- TODO
-      pure []
     ECodataSelect{} ->
-      -- TODO
-      pure []
-    ECodataFields{} ->
       -- TODO
       pure []
 
