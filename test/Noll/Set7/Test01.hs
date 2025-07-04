@@ -9,6 +9,8 @@ import Noll.Module (Constant (..), Definition (..), Function (..), Module (..), 
 
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
+import qualified Data.Text as Text
+import qualified Data.Text.Encoding as TE
 import qualified Noll.Module as Module
 
 prog7_01 :: [Module () o ()]
@@ -34,7 +36,7 @@ moduleMain =
                 ()
                 ()
                 (EVariable () (Label () "trace_string"))
-                ( ELiteral () (LString "Hello 🤖")
+                ( ELiteral () (LString (TE.encodeUtf8 (Text.pack "Hello 🤖, world!")))
                     :| []
                 )
             )
