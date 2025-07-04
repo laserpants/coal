@@ -248,12 +248,6 @@ abc2 = fst (runIdentity (runCompiler2T compiler2TestEnvironment (compileModule N
 abc3 :: IO ()
 abc3 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc2]
 
---abc9 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
---abc9 =
---  fst (runIdentity (runCompiler2T compiler2TestEnvironment (compileModule Noll.Set7.Test01.moduleMain)))
---
---abca =
---  Lowpass.testModules [abc9]
 
 
 moduleCore1 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
