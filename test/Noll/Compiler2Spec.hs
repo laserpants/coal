@@ -2,11 +2,13 @@
 
 module Noll.Compiler2Spec where
 
+import Control.Monad ((>=>))
 import Control.Monad.Identity (runIdentity)
 import Lang.Common.List1 (NonEmpty (..), (<|))
 import Lang.Label (Label (..))
 import Noll.Compiler2
 import Noll.Compiler2.Internal
+import Lang.Utils (Name)
 
 -- import Noll.Compiler2Examples.Test02 (bazz)
 import Noll.Language
@@ -17,6 +19,10 @@ import Test.Hspec (Spec, describe, it)
 
 import qualified Data.Set as Set
 import qualified Lang.Common.Environment as Environment
+import qualified Lang.Lowpass.Compiler as Lowpass
+import qualified Lang.Lowpass.Compiler.Utils as Lowpass
+import qualified Lang.Lowpass.Language as Lowpass
+import qualified Noll.Set7.Test01
 
 spec :: Spec
 spec =
@@ -229,4 +235,19 @@ tvariable1 = TVariable (TypeIndex KType 1)
 bool :: IndexedType
 bool = TIntrinsic IBool
 
--- fst (runIdentity (runCompiler2T compiler2TestEnvironment (compileModule Noll.Set7.Test01.moduleMain)))
+--abc1 :: Module () Kind IndexedType
+--abc1 = fst (runIdentity (runCompiler2T compiler2TestEnvironment ((typePass >=> mainPass) Noll.Set7.Test01.moduleMain)))
+
+abc2 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
+abc2 = fst (runIdentity (runCompiler2T compiler2TestEnvironment (compileModule Noll.Set7.Test01.moduleMain)))
+
+abc3 :: IO ()
+abc3 = Lowpass.testModules =<< Lowpass.compileModules [abc2]
+
+--abc9 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
+--abc9 =
+--  fst (runIdentity (runCompiler2T compiler2TestEnvironment (compileModule Noll.Set7.Test01.moduleMain)))
+--
+--abca =
+--  Lowpass.testModules [abc9]
+
