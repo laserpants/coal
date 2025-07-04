@@ -23,7 +23,8 @@ moduleMain =
     -- Exports
     []
     -- Definitions
-    [ DFunction
+    [ DImport (Path ["Core$"]) ["trace_string"]
+    , DFunction
         "main"
         ( Function
             ()

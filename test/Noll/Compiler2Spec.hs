@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE QuasiQuotes #-}
 
 module Noll.Compiler2Spec where
 
@@ -9,9 +10,12 @@ import Lang.Label (Label (..))
 import Noll.Compiler2
 import Noll.Compiler2.Internal
 import Lang.Utils (Name)
+import Text.RawString.QQ
+import Lang.Lowpass.Language (Module (..), Object (..), opaque)
+import Data.Text (Text)
 
 -- import Noll.Compiler2Examples.Test02 (bazz)
-import Noll.Language
+import Noll.Language (Constructor (..), Scheme (..), Row (..), Parameter (..), IndexedType (..), Intrinsic (..), Type (..), Kind (..), TypeIndex (..))
 import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
 import Noll.SystemF
 import Noll.SystemFSpec.TestRunner
@@ -242,7 +246,7 @@ abc2 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
 abc2 = fst (runIdentity (runCompiler2T compiler2TestEnvironment (compileModule Noll.Set7.Test01.moduleMain)))
 
 abc3 :: IO ()
-abc3 = Lowpass.testModules =<< Lowpass.compileModules [abc2]
+abc3 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc2]
 
 --abc9 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
 --abc9 =
@@ -250,4 +254,227 @@ abc3 = Lowpass.testModules =<< Lowpass.compileModules [abc2]
 --
 --abca =
 --  Lowpass.testModules [abc9]
+
+
+moduleCore1 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
+moduleCore1 = Lowpass.unsafeParseExpr <$> moduleCore
+
+moduleCore :: Lowpass.Module Lowpass.Type Name Text
+moduleCore =
+  Lowpass.Module
+    { moduleName = "Core$"
+    , moduleImports =
+        []
+    , moduleObjects =
+        [ OFunction
+            "Core$.operator__not"
+            [ Label Lowpass.bool "a"
+            ]
+            [r| 
+                  if (a : bool) then false else true
+              |]
+        , OFunction
+            "Core$.operator__reverse_composition"
+            [ Label (Lowpass.opaque `Lowpass.arrow` Lowpass.opaque) "f"
+            , Label (Lowpass.opaque `Lowpass.arrow` Lowpass.opaque) "g"
+            , Label Lowpass.opaque "x"
+            ]
+            [r| 
+                  @<*>(f : */*, @<*>(g : */*, x : *))
+              |]
+        , OFunction
+            "Core$.operator__reverse_application"
+            [ Label Lowpass.opaque "x"
+            , Label (Lowpass.opaque `Lowpass.arrow` Lowpass.opaque) "f"
+            ]
+            [r| 
+                  @<*>(f : */*, x : *)
+              |]
+        , OFunction
+            "Core$.always"
+            [ Label Lowpass.opaque "a"
+            , Label Lowpass.opaque "_"
+            ]
+            [r|   
+                  a : *
+              |]
+        , OFunction
+            "Core$.operator__list_concatenation"
+            [ Label (Lowpass.TCon "list" [Lowpass.opaque]) "xs"
+            , Label (Lowpass.TCon "list" [Lowpass.opaque]) "ys"
+            ]
+            [r| 
+                  match<list(*)>(xs : list(*)) {
+                    | ( $Cons : */list(*)/list(*)
+                      , z : *
+                      , zs : list(*)
+                      ) =>
+                        @<list(*)>
+                          ( $Cons : */list(*)/list(*)
+                          , z : *
+                          , @<list(*)>
+                              ( Core$.operator__list_concatenation : list(*)/list(*)/list(*)
+                              , zs : list(*)
+                              , ys : list(*)
+                              )
+                          )
+                    | ( $Nil : list(*)
+                      ) =>
+                        ys : list(*)
+                  }
+              |]
+        , OFunction
+            "Core$.trace_int32"
+            [ Label Lowpass.int32 "n"
+            ]
+            [r|
+                  #(print_int32 : int32/*, n : int32) (fn(a : *) => a : *)
+              |]
+        , OFunction
+            "Core$.trace_string"
+            [ Label Lowpass.string "s"
+            ]
+            [r|
+                  #(print_string : string/*, s : string) (fn(a : *) => a : *)
+              |]
+        , OFunction
+            "Core$.operator__string_concatenation"
+            [ Label Lowpass.string "s"
+            , Label Lowpass.string "t"
+            ]
+            [r|
+                  #(string_concat : string/string/string, s : string, t : string) (fn(r : string) => r : string)
+              |]
+        , OFunction
+            "Core$.int32_to_string"
+            [ Label Lowpass.int32 "n"
+            ]
+            [r| 
+                  #(int32_to_string : int32/string, n : int32) (fn(r : string) => r : string)
+              |]
+        , OFunction
+            "Core$.pair_to_string"
+            [ Label (Lowpass.TCon "Traceable" [Lowpass.TOpq]) "$dict1"
+            , Label (Lowpass.TCon "Traceable" [Lowpass.TOpq]) "$dict2"
+            , Label (Lowpass.TCon "$Tuple2" [Lowpass.TOpq, Lowpass.TOpq]) "p"
+            ]
+            [r| 
+                  match<string>
+                    ( p : $Tuple2(*,*) ) { 
+                      | ( $Tuple2 : */*/$Tuple2(*,*)
+                        , a : *
+                        , b : *
+                        ) =>
+                          @<string>
+                            ( Core$.operator__string_concatenation : string/string/string
+                            , @<string>
+                                ( Core$.operator__string_concatenation : string/string/string
+                                , "("
+                                , @<string>
+                                    ( Core$.operator__string_concatenation : string/string/string
+                                    , @<string>
+                                        ( Core$.operator__string_concatenation : string/string/string
+                                        , @<string>
+                                            ( Core$.trace : Traceable(*)/*/string
+                                            , $dict1 : Traceable(*)
+                                            , a : *
+                                            )
+                                        , ","
+                                        )
+                                    , @<string>
+                                        ( Core$.trace : Traceable(*)/*/string
+                                        , $dict2 : Traceable(*)
+                                        , b : *
+                                        )
+                                    )
+                                )
+                            , ")"
+                            )
+                    }
+              |]
+        , OFunction
+            "Core$.list_to_string"
+            [ Label (Lowpass.TCon "Traceable" [Lowpass.TOpq]) "$dict1"
+            , Label (Lowpass.TCon "list" [Lowpass.TOpq]) "ls"
+            ]
+            [r| 
+                  let
+                    f : bool/list(*)/string =
+                      fn(first : bool, l : list(*)) =>
+                        match<string>
+                          ( l : list(*)
+                          ) {
+                            | ( $Cons : */list(*)/list(*)
+                              , x : *
+                              , xs : list(*)
+                              ) =>
+                                @<string>
+                                  ( Core$.operator__string_concatenation : string/string/string
+                                  , if (first : bool) then "" else ","
+                                  , @<string>
+                                      ( Core$.operator__string_concatenation : string/string/string
+                                      , @<string>
+                                          ( Core$.trace : Traceable(*)/*/string
+                                          , $dict1 : Traceable(*)
+                                          , x : *
+                                          )
+                                      , @<string>
+                                          ( f : list(*)/string
+                                          , false
+                                          , xs : list(*)
+                                          )
+                                      )
+                                  )
+                            | ( $Nil : list(*)
+                              ) =>
+                                ""
+                          }
+                    in
+                      @<string>
+                        ( Core$.operator__string_concatenation : string/string/string
+                        , @<string>
+                            ( Core$.operator__string_concatenation : string/string/string
+                            , "["
+                            , @<string>
+                                ( f : list(*)/string
+                                , true
+                                , ls : list(*)
+                                )
+                            )
+                        , "]"
+                        )
+              |]
+        , OFunction
+            "Core$.trace"
+            [ Label (Lowpass.TCon "Traceable" [opaque]) "$a"
+            ]
+            [r| 
+                  match<*>($a : Traceable(*)) {
+                    | ( $Record : { trace : * | * }/Traceable(*)
+                      , $r : { trace : * | * }
+                      ) =>
+                        select
+                          { trace = $f : * | _ : * } =
+                            $r : { trace : * | * }
+                          in
+                            $f : *
+                  }
+              |]
+        , OFunction
+            "Core$.unpack_nat"
+            [ Label (Lowpass.TCon "$Nat" []) "nat"
+            ]
+            [r| 
+                  match<int32>(nat: $Nat) {
+                    | ( $Succ : int32/$Nat
+                      , succ : int32
+                      ) =>
+                        [+ int32](succ : int32, 1)
+                    | ( $Zero : $Nat
+                      ) =>
+                        0
+                  }
+              |]
+        ]
+    }
 
