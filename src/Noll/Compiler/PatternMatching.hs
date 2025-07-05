@@ -110,6 +110,8 @@ translatePattern =
       translatePattern (translateListLiteral a t ps)
     PTuple a t (p :| ps) ->
       translatePattern (PConstructor a (Label t ("$Tuple" <> showt (length ps + 1))) (p : ps))
+    PAs{} ->
+      error "TODO"
     POr{} ->
       error "TODO"
     PShorthand{} ->

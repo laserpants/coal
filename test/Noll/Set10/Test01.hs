@@ -71,11 +71,15 @@ moduleUtilities =
                     )
                     <| EClause
                       ()
-                      ( PConstructor
+                      ( PAs
                           ()
-                          (Label () "Succ")
-                          [ PAtVariable () (Label () "f")
-                          ]
+                          (Label () "m")
+                          ( PConstructor
+                              ()
+                              (Label () "Succ")
+                              [ PAtVariable () (Label () "f")
+                              ]
+                          )
                       )
                       ( CPlain
                           ()

@@ -111,6 +111,10 @@ patternConstraints assert ms =
       concatForM ps (patternConstraints assert ms)
     PAtVariable _ (Label _ name) -> do
       pure [name]
+    PAs _ (Label t name) p -> do
+      ps <- patternConstraints assert ms p
+      tellRight [Equality InferenceRulePlaceholder [t, typeOf p]]
+      pure (name : ps)
     PLiteral{} ->
       pure []
 

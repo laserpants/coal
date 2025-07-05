@@ -36,6 +36,8 @@ data Pattern a t
     PTuple a t (List1 (Pattern a t))
   | -- | Pattern matching expression
     POr a t (Pattern a t) (Pattern a t)
+  | -- | As-pattern
+    PAs a (Label t) (Pattern a t)
   | -- | Shorthand variable binding of the form { name }, which desugars to { name = name }
     PShorthand a (Label t)
   | -- | Recursion operator pattern used in fold catamorphisms
