@@ -255,6 +255,7 @@ moduleMain =
         , "Core$.list_to_string"
         , "Core$.trace"
         , "Core$.unpack_nat"
+        , "Core$.pack_nat"
         ]
     , moduleObjects =
         --        [ OFunction

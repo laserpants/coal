@@ -50,6 +50,7 @@ coreImports =
   , "Core$.list_to_string"
   , "Core$.trace"
   , "Core$.unpack_nat"
+  , "Core$.pack_nat"
   ]
 
 imports :: Definition a k t -> [(Name, Name)]

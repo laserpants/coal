@@ -484,5 +484,19 @@ moduleCore =
                         0
                   }
               |]
+        , OFunction
+            "Core$.pack_nat"
+            [ Label (Lowpass.int32) "n"
+            ]
+            [r| 
+                  if ([== int32](n : int32, 0))
+                    then
+                      $Zero : $Nat
+                    else
+                      @<$Nat>
+                        ( $Succ : int32/$Nat
+                        , [- int32](n : int32, 1)
+                        )
+              |]
         ]
     }

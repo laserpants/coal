@@ -21,7 +21,8 @@ moduleUtilities =
     -- Exports
     [ "increment" ]
     -- Definitions
-    [ DFunction
+    [ DImport (Path ["Core$"]) ["unpack_nat"]
+    , DFunction
         "increment"
         ( Function
             ()
@@ -35,6 +36,28 @@ moduleUtilities =
                     <| ELiteral () (LInt32 1)
                     :| []
                 )
+            )
+        )
+    , DFunction
+        "factorial"
+        ( Function
+            ()
+            (With [] ())
+            (PVariable () (Label () "n") :| [])
+            (
+              EFold
+                ()
+                ()
+                (
+                  EApplication
+                    ()
+                    undefined
+                    (EVariable () (Label () "unpack_nat"))
+                    undefined
+                    :| []
+                )
+                undefined
+                Nothing
             )
         )
     ]
