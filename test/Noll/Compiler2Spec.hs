@@ -26,10 +26,11 @@ import qualified Lang.Common.Environment as Environment
 import qualified Lang.Lowpass.Compiler as Lowpass
 import qualified Lang.Lowpass.Compiler.Utils as Lowpass
 import qualified Lang.Lowpass.Language as Lowpass
+import qualified Noll.Set10.Test01
+import qualified Noll.Set11.Test01
 import qualified Noll.Set7.Test01
 import qualified Noll.Set8.Test01
 import qualified Noll.Set9.Test01
-import qualified Noll.Set10.Test01
 
 spec :: Spec
 spec =
@@ -281,6 +282,13 @@ abc10 = fst (runIdentity (runCompiler2T compiler2TestEnvironment (compileModule 
 abc11 :: IO ()
 abc11 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc9, abc10]
 
+--
+
+abc12 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
+abc12 = fst (runIdentity (runCompiler2T compiler2TestEnvironment (compileModule Noll.Set11.Test01.moduleMain)))
+
+abc13 :: IO ()
+abc13 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc12]
 
 moduleCore1 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
 moduleCore1 = Lowpass.unsafeParseExpr <$> moduleCore

@@ -47,15 +47,15 @@ moduleUtilities =
             ( EFold
                 ()
                 ()
-                 ( EApplication
-                     ()
-                     ()
-                     (EConstructor () (Label () "Succ"))
-                     ( EConstructor () (Label () "Zero")
-                         :| []
-                     )
-                     :| []
-                 )
+                ( EApplication
+                    ()
+                    ()
+                    (EConstructor () (Label () "Succ"))
+                    ( EConstructor () (Label () "Zero")
+                        :| []
+                    )
+                    :| []
+                )
                 ( EClause
                     ()
                     ( PConstructor
@@ -81,8 +81,8 @@ moduleUtilities =
                           ()
                           []
                           (ELiteral () (LInt32 8))
-                          --(EVariable () (Label () "f"))
-                          --(
+                          -- (EVariable () (Label () "f"))
+                          -- (
                           --  EApplication
                           --    ()
                           --    ()
@@ -92,7 +92,7 @@ moduleUtilities =
                           --        <| EVariable () (Label () "f")
                           --        :| []
                           --    )
-                          --)
+                          -- )
                           :| []
                       )
                     :| []
@@ -121,19 +121,18 @@ moduleMain =
                 ()
                 ()
                 (EVariable () (Label () "trace_int32"))
-                --( EApplication
+                -- ( EApplication
                 --    ()
                 --    ()
                 --    (EVariable () (Label () "increment"))
-                    (
-                      EApplication
-                        ()
-                        ()
-                        (EVariable () (Label () "factorial"))
-                        (ELiteral () (LInt32 1)
-                          :| []
-                        )
---                    :| [])
+                ( EApplication
+                    ()
+                    ()
+                    (EVariable () (Label () "factorial"))
+                    ( ELiteral () (LInt32 1)
+                        :| []
+                    )
+                    --                    :| [])
                     :| []
                 )
             )
