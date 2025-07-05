@@ -869,7 +869,7 @@ fixture26 =
                       (TVariable (Parameter () "c"))
                       (PVariable () (Label () "x"))
                    )
-                  :| []
+                :| []
             )
             ( EApplication
                 ()
@@ -889,7 +889,7 @@ fixture27 =
     ()
     ( PVariable () (Label () "g")
         <| PVariable () (Label () "x")
-          :| []
+        :| []
     )
     ( EApplication
         ()
@@ -933,7 +933,7 @@ fixture29 =
               ()
               (EVariable () (Label () "less_than_or_equal_to"))
               (EVariable () (Label () "n") :| [])
-              :| []
+            :| []
         )
     )
 
@@ -962,7 +962,7 @@ fixture29Typed =
               (TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
               (EVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool) "less_than_or_equal_to"))
               (EVariable () (Label (TVariable (TypeIndex KType 0)) "n") :| [])
-              :| []
+            :| []
         )
     )
 

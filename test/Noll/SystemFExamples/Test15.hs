@@ -89,9 +89,10 @@ fixture =
                 ()
                 (EConstructor () (Label () "More"))
                 ( ELiteral () (LInt32 2)
-                    <| EConstructor () (Label () "Nope") :| []
+                    <| EConstructor () (Label () "Nope")
+                    :| []
                 )
-                :| []
+              :| []
           )
           :| []
       )
@@ -122,12 +123,12 @@ fixture =
                     (EBinaryOperator () () OAddition)
                     ( ELiteral () (LInt32 0)
                         <| (EVariable () (Label () "ms"))
-                          :| []
+                        :| []
                     )
                 )
                 :| []
             )
-            :| []
+          :| []
       )
       Nothing
   )
@@ -157,9 +158,10 @@ fixture1 =
                 (TConstructor KType "Ints")
                 (EConstructor () (Label (TIntrinsic IInt32 `TArrow` TConstructor KType "Ints" `TArrow` TConstructor KType "Ints") "More"))
                 ( ELiteral () (LInt32 2)
-                    <| EConstructor () (Label (TConstructor KType "Ints") "Nope") :| []
+                    <| EConstructor () (Label (TConstructor KType "Ints") "Nope")
+                    :| []
                 )
-                :| []
+              :| []
           )
           :| []
       )
@@ -190,12 +192,12 @@ fixture1 =
                     (EBinaryOperator () (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) OAddition)
                     ( ELiteral () (LInt32 0)
                         <| (EVariable () (Label (TIntrinsic IInt32) "ms"))
-                          :| []
+                        :| []
                     )
                 )
                 :| []
             )
-            :| []
+          :| []
       )
       Nothing
   )

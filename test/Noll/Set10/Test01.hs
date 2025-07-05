@@ -9,8 +9,8 @@ import Noll.Module (Definition (..), Function (..), Module (..), Path (..))
 
 import qualified Noll.Module as Module
 
---prog7_01 :: [Module () o ()]
---prog7_01 =
+-- prog7_01 :: [Module () o ()]
+-- prog7_01 =
 --  [ moduleMain
 --  ]
 
@@ -19,9 +19,9 @@ moduleUtilities =
   Module.fromDefinitionList
     (Path ["Utilities"])
     -- Exports
-    [ "increment" ]
+    ["increment"]
     -- Definitions
-    [ DImport (Path ["Core$"]) ["unpack_nat"]
+    [ DImport (Path ["Core$"]) ["pack_nat"]
     , DFunction
         "increment"
         ( Function
@@ -44,19 +44,47 @@ moduleUtilities =
             ()
             (With [] ())
             (PVariable () (Label () "n") :| [])
-            (
-              EFold
+            ( EFold
                 ()
                 ()
-                (
-                  EApplication
+                ( EApplication
                     ()
-                    undefined
-                    (EVariable () (Label () "unpack_nat"))
-                    undefined
+                    ()
+                    (EVariable () (Label () "pack_nat"))
+                    ( EVariable () (Label () "n")
+                        :| []
+                    )
                     :| []
                 )
-                undefined
+                ( EClause
+                    ()
+                    ( PConstructor
+                        ()
+                        (Label () "Zero")
+                        []
+                    )
+                    ( CPlain
+                        ()
+                        []
+                        undefined
+                        :| []
+                    )
+                    <| EClause
+                      ()
+                      ( PConstructor
+                          ()
+                          (Label () "Succ")
+                          [ PAtVariable () (Label () "n")
+                          ]
+                      )
+                      ( CPlain
+                          ()
+                          []
+                          undefined
+                          :| []
+                      )
+                    :| []
+                )
                 Nothing
             )
         )

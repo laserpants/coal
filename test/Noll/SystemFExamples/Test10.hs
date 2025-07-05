@@ -89,7 +89,7 @@ fixture =
               ()
               (EVariable () (Label () "lte"))
               (EVariable () (Label () "x") :| [])
-              :| []
+            :| []
         )
     )
 
@@ -109,6 +109,6 @@ fixture1 =
               (TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
               (EVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool) "lte"))
               (EVariable () (Label (TVariable (TypeIndex KType 0)) "x") :| [])
-              :| []
+            :| []
         )
     )

@@ -5,11 +5,12 @@
 
 module Noll.Compiler2 where
 
-import Noll.Compiler.Lowpass.TranslateModule (translateModule)
 import Control.Monad ((>=>))
 import Control.Monad.Reader (Reader, asks, runReader)
 import Control.Monad.State (gets, runState)
 import Data.Data (Data)
+import Lang.Utils (Name)
+import Noll.Compiler.Lowpass.TranslateModule (translateModule)
 import Noll.Compiler.NormalizeObjects (NormalizeObjectsTransformContext (..))
 import Noll.Compiler.PatternMatching
 import Noll.Compiler.PatternMatching.Rule (MatchMonad (..), runMatchMonad)
@@ -23,7 +24,6 @@ import Noll.Compiler2.TypeInference
 import Noll.Language
 import Noll.Module (Module (..))
 import Noll.SystemF.Substitution (normalizeTypeIndexes)
-import Lang.Utils (Name)
 
 import qualified Lang.Lowpass.Language as Lowpass
 import qualified Noll.Compiler.Lowpass.Environment as Lowpass
@@ -102,9 +102,9 @@ typePass =
     >=> runTypeInferenceC
 
 mainPass :: (Monad m, Monoid a, Data a, Show a) => Module a Kind IndexedType -> Compiler2T a m (Module a Kind IndexedType)
-mainPass = 
-    -- Normalize top-level expressions
-    normalizeObjectC
+mainPass =
+  -- Normalize top-level expressions
+  normalizeObjectC
     -- Translate patterns in expression arguments to match expressions
     >=> desugarPatternsC
     -- Compile or-patterns

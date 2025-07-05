@@ -138,6 +138,7 @@ fixture1 =
             OReverseComposition
         )
         ( EVariable () (Label (tree0Type `TArrow` list0Type) "flatten")
-            <| EVariable () (Label (list0Type `TArrow` tree0Type) "from_list") :| []
+            <| EVariable () (Label (list0Type `TArrow` tree0Type) "from_list")
+            :| []
         )
     )

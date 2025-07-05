@@ -176,7 +176,7 @@ fixture =
                             (EBinaryOperator () () OListConcatenation)
                             ( EVariable () (Label () "lhs")
                                 <| EListCons () () (EVariable () (Label () "y")) (EVariable () (Label () "rhs"))
-                                  :| []
+                                :| []
                             )
                         )
                         :| []
@@ -190,7 +190,7 @@ fixture =
                           (EListLiteral () () [])
                           :| []
                       )
-                      :| []
+                    :| []
                 )
                 ( Just
                     ( ERecursiveLet
@@ -239,7 +239,7 @@ fixture =
                                                       (EVariable () (Label () "$fold:1"))
                                                       (EVariable () (Label () "rhs") :| [])
                                                   )
-                                                  :| []
+                                                :| []
                                             )
                                         )
                                         :| []
@@ -248,7 +248,7 @@ fixture =
                                       ()
                                       (PConstructor () (Label () "Leaf") [])
                                       (CPlain () [] (EListLiteral () () []) :| [])
-                                      :| []
+                                    :| []
                                 )
                             )
                         )
@@ -299,7 +299,7 @@ fixture1 =
                             (EBinaryOperator () (list0Type `TArrow` list0Type `TArrow` list0Type) OListConcatenation)
                             ( EVariable () (Label list0Type "lhs")
                                 <| EListCons () list0Type (EVariable () (Label tvariable0 "y")) (EVariable () (Label list0Type "rhs"))
-                                  :| []
+                                :| []
                             )
                         )
                         :| []
@@ -313,7 +313,7 @@ fixture1 =
                           (EListLiteral () list0Type [])
                           :| []
                       )
-                      :| []
+                    :| []
                 )
                 ( Just
                     ( ERecursiveLet
@@ -363,7 +363,7 @@ fixture1 =
                                                       (EVariable () (Label (treeType 1 `TArrow` listType 1) "$fold:1"))
                                                       (EVariable () (Label (treeType 1) "rhs") :| [])
                                                   )
-                                                  :| []
+                                                :| []
                                             )
                                         )
                                         :| []
@@ -372,7 +372,7 @@ fixture1 =
                                       ()
                                       (PConstructor () (Label (treeType 1) "Leaf") [])
                                       (CPlain () [] (EListLiteral () (listType 1) []) :| [])
-                                      :| []
+                                    :| []
                                 )
                             )
                         )

@@ -9,8 +9,8 @@ import Noll.Module (Definition (..), Function (..), Module (..), Path (..))
 
 import qualified Noll.Module as Module
 
---prog7_01 :: [Module () o ()]
---prog7_01 =
+-- prog7_01 :: [Module () o ()]
+-- prog7_01 =
 --  [ moduleMain
 --  ]
 
@@ -19,7 +19,7 @@ moduleUtilities =
   Module.fromDefinitionList
     (Path ["Utilities"])
     -- Exports
-    [ "increment" ]
+    ["increment"]
     -- Definitions
     [ DFunction
         "increment"
