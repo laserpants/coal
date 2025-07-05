@@ -33,46 +33,46 @@ moduleMain =
                 ()
                 (EVariable () (Label () "trace_int32"))
                 ( EMatch
-                      ()
-                      ()
-                      ( EApplication
-                          ()
-                          ()
-                          (EConstructor () (Label () "Succ"))
-                          ( EConstructor () (Label () "Zero")
-                              :| []
-                          )
-                      )
-                      ( EClause
+                    ()
+                    ()
+                    ( EApplication
+                        ()
+                        ()
+                        (EConstructor () (Label () "Succ"))
+                        ( EConstructor () (Label () "Zero")
+                            :| []
+                        )
+                    )
+                    ( EClause
+                        ()
+                        ( PConstructor
+                            ()
+                            (Label () "Zero")
+                            []
+                        )
+                        ( CPlain
+                            ()
+                            []
+                            (ELiteral () (LInt32 1))
+                            :| []
+                        )
+                        <| EClause
                           ()
                           ( PConstructor
                               ()
-                              (Label () "Zero")
-                              []
+                              (Label () "Succ")
+                              [ PVariable () (Label () "n")
+                              ]
                           )
                           ( CPlain
                               ()
                               []
-                              (ELiteral () (LInt32 1))
+                              (ELiteral () (LInt32 8))
                               :| []
                           )
-                          <| EClause
-                            ()
-                            ( PConstructor
-                                ()
-                                (Label () "Succ")
-                                [ PVariable () (Label () "n")
-                                ]
-                            )
-                            ( CPlain
-                                ()
-                                []
-                                (ELiteral () (LInt32 8))
-                                :| []
-                            )
-                          :| []
-                      )
-                      :| []
+                        :| []
+                    )
+                    :| []
                 )
             )
         )

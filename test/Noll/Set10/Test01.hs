@@ -21,7 +21,7 @@ moduleUtilities =
     -- Exports
     ["increment"]
     -- Definitions
-    [ DImport (Path ["Core$"]) ["pack_nat"]
+    [ DImport (Path ["Core$"]) ["pack_nat", "trace_int32"]
     , DFunction
         "increment"
         ( Function
@@ -50,8 +50,8 @@ moduleUtilities =
                 ( EApplication
                     ()
                     ()
-                    (EConstructor () (Label () "Succ"))
-                    ( EConstructor () (Label () "Zero")
+                    (EVariable () (Label () "pack_nat"))
+                    ( EVariable () (Label () "n")
                         :| []
                     )
                     :| []
@@ -80,19 +80,29 @@ moduleUtilities =
                       ( CPlain
                           ()
                           []
-                          (ELiteral () (LInt32 8))
-                          -- (EVariable () (Label () "f"))
-                          -- (
-                          --  EApplication
-                          --    ()
-                          --    ()
-                          --    ( EBinaryOperator () () OMultiplication)
-                          --    (
-                          --      EVariable () (Label () "n")
-                          --        <| EVariable () (Label () "f")
-                          --        :| []
-                          --    )
-                          -- )
+                          ( ELet
+                              ()
+                              ( BPattern
+                                  ()
+                                  (PVariable () (Label () "aa"))
+                                  ( EApplication
+                                      ()
+                                      ()
+                                      (EVariable () (Label () "trace_int32"))
+                                      (EVariable () (Label () "n") :| [])
+                                  )
+                                  :| []
+                              )
+                              ( EApplication
+                                  ()
+                                  ()
+                                  (EBinaryOperator () () OMultiplication)
+                                  ( EVariable () (Label () "n")
+                                      <| EVariable () (Label () "f")
+                                      :| []
+                                  )
+                              )
+                          )
                           :| []
                       )
                     :| []
@@ -121,18 +131,19 @@ moduleMain =
                 ()
                 ()
                 (EVariable () (Label () "trace_int32"))
-                -- ( EApplication
-                --    ()
-                --    ()
-                --    (EVariable () (Label () "increment"))
                 ( EApplication
                     ()
                     ()
-                    (EVariable () (Label () "factorial"))
-                    ( ELiteral () (LInt32 1)
+                    (EVariable () (Label () "increment"))
+                    ( EApplication
+                        ()
+                        ()
+                        (EVariable () (Label () "factorial"))
+                        ( ELiteral () (LInt32 4)
+                            :| []
+                        )
                         :| []
                     )
-                    --                    :| [])
                     :| []
                 )
             )

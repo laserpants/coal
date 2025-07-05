@@ -41,9 +41,9 @@ evalNatExpansion :: Name -> Int -> NatExpansion a -> a
 evalNatExpansion r s = fst . runNatExpansion r s
 
 runNatExpansion :: Name -> Int -> NatExpansion a -> (a, Int)
-runNatExpansion r s e = (a, n)
+runNatExpansion r s e = (a, s')
  where
-  (a, n, _) = runRWS (natExpansionStack e) r s
+  (a, s', _) = runRWS (natExpansionStack e) r s
 
 class CompileNatsContext a where
   compileNats :: a -> NatExpansion a
