@@ -39,6 +39,7 @@ library
       Noll.Compiler.Transform
       Noll.Compiler.Transform.Fold
       Noll.Compiler.Transform.Nats
+      Noll.Compiler.Transform.Pattern.AsDesugar
       Noll.Compiler.Transform.Pattern.Desugar
       Noll.Compiler.Transform.Pattern.OrExpansion
       Noll.Compiler.Transform.Pattern.RecordDesugar
