@@ -7,24 +7,21 @@ import Lang.Label (Label (..))
 import Noll.Language
 import Noll.Module (Definition (..), Function (..), Module (..), Path (..))
 
-import qualified Data.Text as Text
-import qualified Data.Text.Encoding as Text
 import qualified Noll.Module as Module
 
-prog7_01 :: [Module () o ()]
-prog7_01 =
-  [ moduleMain
-  ]
+--prog7_01 :: [Module () o ()]
+--prog7_01 =
+--  [ moduleMain
+--  ]
 
-moduleMain :: Module () o ()
-moduleMain =
+moduleUtilities :: Module () o ()
+moduleUtilities =
   Module.fromDefinitionList
-    (Path ["Main"])
+    (Path ["Utilities"])
     -- Exports
-    []
+    [ "increment" ]
     -- Definitions
-    [ DImport (Path ["Core$"]) ["trace_int32"]
-    , DFunction
+    [ DFunction
         "increment"
         ( Function
             ()
@@ -40,6 +37,17 @@ moduleMain =
                 )
             )
         )
+    ]
+
+moduleMain :: Module () o ()
+moduleMain =
+  Module.fromDefinitionList
+    (Path ["Main"])
+    -- Exports
+    []
+    -- Definitions
+    [ DImport (Path ["Core$"]) ["trace_int32"]
+    , DImport (Path ["Utilities"]) ["increment"]
     , DFunction
         "main"
         ( Function
