@@ -85,8 +85,8 @@ compileMatchExprsC = matchMonadTrans compileMatchExprs
 lowpassMonadTrans :: (Monad m) => (c -> Reader Lowpass.TranslateEnvironment d) -> c -> Compiler2T a m d
 lowpassMonadTrans f e = pure (runReader (f e) (Lowpass.initialTranslateEnvironment mempty))
 
-finalLoweringC :: (Monad m, Data a) => Module a Kind IndexedType -> Compiler2T a m (Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type))
-finalLoweringC = lowpassMonadTrans translateModule
+lowpassTranslationC :: (Monad m, Data a) => Module a Kind IndexedType -> Compiler2T a m (Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type))
+lowpassTranslationC = lowpassMonadTrans translateModule
 
 --
 
@@ -123,7 +123,7 @@ compileModule =
   typePass
     >=> mainPass
     -- Final lowering
-    >=> finalLoweringC
+    >=> lowpassTranslationC
 
 -----------------------
 -----------------------
