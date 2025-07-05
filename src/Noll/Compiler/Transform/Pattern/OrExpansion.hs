@@ -84,6 +84,9 @@ instance OrPattern (Pattern a t) where
       -- d1 :| ds <- expandOrPatterns d
       -- q1 :| qs <- expandOrPatterns p
       -- error "TODO"
+      PAs a ll p -> do
+        q1 :| qs <- expandOrPatterns p
+        pure (PAs a ll q1 :| [PAs a ll q | q <- qs])
       p@PAny{} ->
         pure (List1.singleton p)
       p@PVariable{} ->
