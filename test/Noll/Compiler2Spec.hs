@@ -5,17 +5,17 @@ module Noll.Compiler2Spec where
 
 import Control.Monad ((>=>))
 import Control.Monad.Identity (runIdentity)
+import Data.Text (Text)
 import Lang.Common.List1 (NonEmpty (..), (<|))
 import Lang.Label (Label (..))
+import Lang.Lowpass.Language (Module (..), Object (..), opaque)
+import Lang.Utils (Name)
 import Noll.Compiler2
 import Noll.Compiler2.Internal
-import Lang.Utils (Name)
 import Text.RawString.QQ
-import Lang.Lowpass.Language (Module (..), Object (..), opaque)
-import Data.Text (Text)
 
 -- import Noll.Compiler2Examples.Test02 (bazz)
-import Noll.Language (Constructor (..), Scheme (..), Row (..), Parameter (..), IndexedType (..), Intrinsic (..), Type (..), Kind (..), TypeIndex (..))
+import Noll.Language (Constructor (..), IndexedType (..), Intrinsic (..), Kind (..), Parameter (..), Row (..), Scheme (..), Type (..), TypeIndex (..))
 import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
 import Noll.SystemF
 import Noll.SystemFSpec.TestRunner
@@ -27,6 +27,7 @@ import qualified Lang.Lowpass.Compiler as Lowpass
 import qualified Lang.Lowpass.Compiler.Utils as Lowpass
 import qualified Lang.Lowpass.Language as Lowpass
 import qualified Noll.Set7.Test01
+import qualified Noll.Set8.Test01
 
 spec :: Spec
 spec =
@@ -239,8 +240,8 @@ tvariable1 = TVariable (TypeIndex KType 1)
 bool :: IndexedType
 bool = TIntrinsic IBool
 
---abc1 :: Module () Kind IndexedType
---abc1 = fst (runIdentity (runCompiler2T compiler2TestEnvironment ((typePass >=> mainPass) Noll.Set7.Test01.moduleMain)))
+-- abc1 :: Module () Kind IndexedType
+-- abc1 = fst (runIdentity (runCompiler2T compiler2TestEnvironment ((typePass >=> mainPass) Noll.Set7.Test01.moduleMain)))
 
 abc2 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
 abc2 = fst (runIdentity (runCompiler2T compiler2TestEnvironment (compileModule Noll.Set7.Test01.moduleMain)))
@@ -248,7 +249,11 @@ abc2 = fst (runIdentity (runCompiler2T compiler2TestEnvironment (compileModule N
 abc3 :: IO ()
 abc3 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc2]
 
+abc4 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
+abc4 = fst (runIdentity (runCompiler2T compiler2TestEnvironment (compileModule Noll.Set8.Test01.moduleMain)))
 
+abc5 :: IO ()
+abc5 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc4]
 
 moduleCore1 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
 moduleCore1 = Lowpass.unsafeParseExpr <$> moduleCore
@@ -471,4 +476,3 @@ moduleCore =
               |]
         ]
     }
-

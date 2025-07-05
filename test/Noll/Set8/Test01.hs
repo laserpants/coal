@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Set7.Test01 where
+module Noll.Set8.Test01 where
 
 import Lang.Common.List1 (NonEmpty (..), (<|))
 import Lang.Label (Label (..))
@@ -23,7 +23,23 @@ moduleMain =
     -- Exports
     []
     -- Definitions
-    [ DImport (Path ["Core$"]) ["trace_string"]
+    [ DImport (Path ["Core$"]) ["trace_int32"]
+    , DFunction
+        "increment"
+        ( Function
+            ()
+            (With [] ())
+            (PVariable () (Label () "a") :| [])
+            ( EApplication
+                ()
+                ()
+                (EBinaryOperator () () OAddition)
+                ( EVariable () (Label () "a")
+                    <| ELiteral () (LInt32 1)
+                    :| []
+                )
+            )
+        )
     , DFunction
         "main"
         ( Function
@@ -33,8 +49,12 @@ moduleMain =
             ( EApplication
                 ()
                 ()
-                (EVariable () (Label () "trace_string"))
-                ( ELiteral () (LString (Text.encodeUtf8 (Text.pack "Hello 🤖, world!")))
+                (EVariable () (Label () "trace_int32"))
+                ( EApplication
+                    ()
+                    ()
+                    (EVariable () (Label () "increment"))
+                    (ELiteral () (LInt32 1) :| [])
                     :| []
                 )
             )
