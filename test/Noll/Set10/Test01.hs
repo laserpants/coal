@@ -50,8 +50,8 @@ moduleUtilities =
                 ( EApplication
                     ()
                     ()
-                    (EVariable () (Label () "pack_nat"))
-                    ( EVariable () (Label () "n")
+                    (EConstructor () (Label () "Succ"))
+                    ( EConstructor () (Label () "Zero")
                         :| []
                     )
                     :| []
@@ -66,7 +66,7 @@ moduleUtilities =
                     ( CPlain
                         ()
                         []
-                        undefined
+                        (ELiteral () (LInt32 1))
                         :| []
                     )
                     <| EClause
@@ -74,13 +74,24 @@ moduleUtilities =
                       ( PConstructor
                           ()
                           (Label () "Succ")
-                          [ PAtVariable () (Label () "n")
+                          [ PAtVariable () (Label () "f")
                           ]
                       )
                       ( CPlain
                           ()
                           []
-                          undefined
+                          (EVariable () (Label () "f"))
+                          --(
+                          --  EApplication
+                          --    ()
+                          --    ()
+                          --    ( EBinaryOperator () () OMultiplication)
+                          --    (
+                          --      EVariable () (Label () "n")
+                          --        <| EVariable () (Label () "f")
+                          --        :| []
+                          --    )
+                          --)
                           :| []
                       )
                     :| []
@@ -98,7 +109,7 @@ moduleMain =
     []
     -- Definitions
     [ DImport (Path ["Core$"]) ["trace_int32"]
-    , DImport (Path ["Utilities"]) ["increment"]
+    , DImport (Path ["Utilities"]) ["factorial", "increment"]
     , DFunction
         "main"
         ( Function
@@ -109,11 +120,19 @@ moduleMain =
                 ()
                 ()
                 (EVariable () (Label () "trace_int32"))
-                ( EApplication
-                    ()
-                    ()
-                    (EVariable () (Label () "increment"))
-                    (ELiteral () (LInt32 1) :| [])
+                --( EApplication
+                --    ()
+                --    ()
+                --    (EVariable () (Label () "increment"))
+                    (
+                      EApplication
+                        ()
+                        ()
+                        (EVariable () (Label () "factorial"))
+                        (ELiteral () (LInt32 1)
+                          :| []
+                        )
+--                    :| [])
                     :| []
                 )
             )

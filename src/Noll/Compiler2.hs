@@ -15,6 +15,7 @@ import Noll.Compiler.NormalizeObjects (NormalizeObjectsTransformContext (..))
 import Noll.Compiler.PatternMatching
 import Noll.Compiler.PatternMatching.Rule (MatchMonad (..), runMatchMonad)
 import Noll.Compiler.Transform.Fold
+import Noll.Compiler.Transform.Nats
 import Noll.Compiler.Transform.Pattern.Desugar
 import Noll.Compiler.Transform.Pattern.OrExpansion
 import Noll.Compiler.Transform.Type.AliasExpansion
@@ -82,6 +83,12 @@ matchMonadTrans f e = withSupplyC (\n -> runMatchMonad "match" n (f e))
 compileMatchExprsC :: (Monad m, MatchExpressionContext c) => c -> Compiler2T a m c
 compileMatchExprsC = matchMonadTrans compileMatchExprs
 
+natExpansionTrans :: (Monad m) => (c -> NatExpansion c) -> c -> Compiler2T a m c
+natExpansionTrans f e = withSupplyC (\n -> runNatExpansion "succ" n (f e))
+
+compileNatsC :: (Monad m, Monoid a, Data a) => Module a Kind IndexedType -> Compiler2T a m (Module a Kind IndexedType)
+compileNatsC = natExpansionTrans compileNats
+
 lowpassMonadTrans :: (Monad m) => (c -> Reader Lowpass.TranslateEnvironment d) -> c -> Compiler2T a m d
 lowpassMonadTrans f e = pure (runReader (f e) (Lowpass.initialTranslateEnvironment mempty))
 
@@ -117,6 +124,8 @@ mainPass =
     --    >=> TODO
     -- Denormalize top-level expressions
     >=> denormalizeObjectC
+    -- Compile nats
+    >=> compileNatsC
 
 compileModule :: (Monad m, Monoid a, Data a, Eq a, Show a) => Module a Kind () -> Compiler2T a m (Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type))
 compileModule =

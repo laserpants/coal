@@ -95,6 +95,10 @@ binaryOperatorTypeScheme =
       Forall mempty [] (TIntrinsic IString ~> TIntrinsic IString ~> TIntrinsic IString)
     OAddition ->
       forall1 (\a -> a ~> a ~> a)
+    OSubtraction ->
+      forall1 (\a -> a ~> a ~> a)
+    OMultiplication ->
+      forall1 (\a -> a ~> a ~> a)
     OLessThan ->
       forall1 (\a -> a ~> a ~> TIntrinsic IBool)
     OGreaterThan ->

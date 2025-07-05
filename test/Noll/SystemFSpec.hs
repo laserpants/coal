@@ -1329,7 +1329,7 @@ story = do
   it "" $
     evalUnfoldExpansion "unfold" 1 (compileUnfolds Noll.Set4.Test02.moduleMain) == Noll.Set4.Test021.moduleMain
   it "" $
-    runNatExpansion "succ" 1 (compileNats Noll.Set6.Test12.moduleMain) == Noll.Set6.Test13.moduleMain
+    evalNatExpansion "succ" 1 (compileNats Noll.Set6.Test12.moduleMain) == Noll.Set6.Test13.moduleMain
 
 testNameEnvironment =
   initialTranslateEnvironment
