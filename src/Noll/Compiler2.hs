@@ -118,6 +118,8 @@ mainPass =
     >=> compileOrPatterns
     --    -- Translate record patterns to select operators
     --    >=> TODO
+    --    -- Desugar as-patterns
+    --    >=> TODO
     -- Compile match statements
     >=> compileMatchExprsC
     --    -- Placeholder insertion
