@@ -124,7 +124,7 @@ mainPass =
     --    >=> TODO
     -- Denormalize top-level expressions
     >=> denormalizeObjectC
-    -- Compile nats
+    -- Expand nats
     >=> compileNatsC
 
 compileModule :: (Monad m, Monoid a, Data a, Eq a, Show a) => Module a Kind () -> Compiler2T a m (Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type))

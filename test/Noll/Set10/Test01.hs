@@ -47,15 +47,15 @@ moduleUtilities =
             ( EFold
                 ()
                 ()
-                ( EApplication
-                    ()
-                    ()
-                    (EConstructor () (Label () "Succ"))
-                    ( EConstructor () (Label () "Zero")
-                        :| []
-                    )
-                    :| []
-                )
+                 ( EApplication
+                     ()
+                     ()
+                     (EConstructor () (Label () "Succ"))
+                     ( EConstructor () (Label () "Zero")
+                         :| []
+                     )
+                     :| []
+                 )
                 ( EClause
                     ()
                     ( PConstructor
@@ -80,7 +80,8 @@ moduleUtilities =
                       ( CPlain
                           ()
                           []
-                          (EVariable () (Label () "f"))
+                          (ELiteral () (LInt32 8))
+                          --(EVariable () (Label () "f"))
                           --(
                           --  EApplication
                           --    ()
