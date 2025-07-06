@@ -51,6 +51,8 @@ coreImports =
   , "Core$.trace"
   , "Core$.unpack_nat"
   , "Core$.pack_nat"
+--  , "Core$.$Succ"
+--  , "Core$.$Zero"
   ]
 
 imports :: Definition a k t -> [(Name, Name)]
