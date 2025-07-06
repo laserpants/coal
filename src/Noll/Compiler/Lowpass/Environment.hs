@@ -45,7 +45,7 @@ overTranslateEnvironmentQualifiedNames fn TranslateEnvironment{..} =
 qualifyName :: (MonadReader TranslateEnvironment m) => Name -> m Name
 qualifyName name = do
   TranslateEnvironment{..} <- ask
-  if Text.head name == '$' || Text.isPrefixOf "Core$" name || Set.member name translateEnvironmentLocalNames
+  if name == "_" || Text.head name == '$' || Text.isPrefixOf "Core$" name || Set.member name translateEnvironmentLocalNames
     then pure name
     else case Environment.lookup name translateEnvironmentQualifiedNames of
       Just qname ->
