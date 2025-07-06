@@ -28,6 +28,7 @@ import qualified Lang.Lowpass.Compiler.Utils as Lowpass
 import qualified Lang.Lowpass.Language as Lowpass
 import qualified Noll.Set10.Test01
 import qualified Noll.Set11.Test01
+import qualified Noll.Set12.Test01
 import qualified Noll.Set7.Test01
 import qualified Noll.Set8.Test01
 import qualified Noll.Set9.Test01
@@ -110,6 +111,22 @@ env1 =
           0
           (Forall mempty [] (TIntrinsic INat))
       )
+
+--    ,
+--      ( "$Succ"
+--      , Constructor
+--          "$Succ"
+--          1
+--          (Forall mempty [] (TIntrinsic IInt32 `TArrow` TConstructor KType "$Nat"))
+--      )
+--    ,
+--      ( "$Zero"
+--      , Constructor
+--          "$Zero"
+--          0
+--          (Forall mempty [] (TConstructor KType "$Nat"))
+--      )
+
     ]
 
 env2 =
@@ -118,6 +135,9 @@ env2 =
       ( "Tree"
       , KArrow KType KType
       )
+--    , ( "$Nat"
+--      , KType 
+--      )
     ]
 
 env3 =
@@ -290,6 +310,18 @@ abc12 = fst (runIdentity (runCompiler2T compiler2TestEnvironment (compileModule 
 abc13 :: IO ()
 abc13 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc12]
 
+--
+
+abc14 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
+abc14 = fst (runIdentity (runCompiler2T compiler2TestEnvironment (compileModule_ Noll.Set12.Test01.moduleUtilities)))
+
+abc15 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
+abc15 = fst (runIdentity (runCompiler2T compiler2TestEnvironment (compileModule_ Noll.Set12.Test01.moduleMain)))
+
+abc16 :: IO ()
+abc16 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc14, abc15]
+
+
 moduleCore1 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
 moduleCore1 = Lowpass.unsafeParseExpr <$> moduleCore
 
@@ -300,7 +332,17 @@ moduleCore =
     , moduleImports =
         []
     , moduleObjects =
-        [ OFunction
+        [ 
+--        OData
+--            "$Succ"
+--            0
+--            (Lowpass.int32 `Lowpass.arrow` Lowpass.TCon "$Nat" [])
+--        , OData
+--            "$Zero"
+--            1
+--            (Lowpass.TCon "$Nat" [])
+--        , 
+        OFunction
             "Core$.operator__not"
             [ Label Lowpass.bool "a"
             ]
@@ -511,7 +553,7 @@ moduleCore =
               |]
         , OFunction
             "Core$.pack_nat"
-            [ Label (Lowpass.int32) "n"
+            [ Label Lowpass.int32 "n"
             ]
             [r| 
                   if ([== int32](n : int32, 0))
