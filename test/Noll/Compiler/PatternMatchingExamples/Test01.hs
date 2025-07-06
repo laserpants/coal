@@ -117,3 +117,49 @@ fixture1 =
         :| []
     )
     (EVariable () (Label () "lte"))
+
+fixture3 :: Expression () ()
+fixture3 =
+                EMatch
+                    ()
+                    ()
+                    ( EApplication
+                        ()
+                        ()
+                        (EVariable () (Label () "Succ"))
+                        (EVariable () (Label () "Zero") :| [])
+                    )
+                    ( EClause
+                        ()
+                        (PConstructor () (Label () "Zero") [])
+                        (CPlain () [] (ELiteral () (LInt32 0)) :| [])
+                        <| EClause
+                          ()
+                          (PConstructor () (Label () "Succ") [ PVariable () (Label () "zz")])
+                          (CPlain () [] (ELiteral () (LInt32 1)) :| [])
+                        :| []
+                    )
+
+
+fixture4 :: Expression () ()
+fixture4 =
+                EMatch
+                    ()
+                    ()
+                    ( EApplication
+                        ()
+                        ()
+                        (EVariable () (Label () "Succ"))
+                        (EVariable () (Label () "Zero") :| [])
+                    )
+                    ( EClause
+                        ()
+                        (PConstructor () (Label () "Zero") [])
+                        (CPlain () [] (ELiteral () (LInt32 0)) :| [])
+                        <| EClause
+                          ()
+                          (PVariable () (Label () "m"))
+                          (CPlain () [] (ELiteral () (LInt32 1)) :| [])
+                        :| []
+                    )
+
