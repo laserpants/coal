@@ -5,9 +5,10 @@
 
 module Noll.Compiler2 where
 
+import Debug.Trace
 import Control.Monad ((>=>))
 import Control.Monad.Reader (Reader, asks, runReader)
-import Control.Monad.State (gets, runState)
+import Control.Monad.State (get, gets, runState)
 import Data.Data (Data)
 import Lang.Utils (Name)
 import Noll.Compiler.Lowpass.TranslateModule (translateModule)
@@ -16,6 +17,7 @@ import Noll.Compiler.PatternMatching
 import Noll.Compiler.PatternMatching.Rule (MatchMonad (..), runMatchMonad)
 import Noll.Compiler.Transform.Fold
 import Noll.Compiler.Transform.Nats
+import Noll.Compiler.Transform.Pattern.AsDesugar
 import Noll.Compiler.Transform.Pattern.Desugar
 import Noll.Compiler.Transform.Pattern.OrExpansion
 import Noll.Compiler.Transform.Type.AliasExpansion
@@ -112,14 +114,14 @@ mainPass :: (Monad m, Monoid a, Data a, Show a) => Module a Kind IndexedType -> 
 mainPass =
   -- Normalize top-level expressions
   normalizeObjectC
-    -- Translate patterns in expression arguments to match expressions
+    -- Translate patterns in expression bindings to match expressions
     >=> desugarPatternsC
     -- Compile or-patterns
     >=> compileOrPatterns
     --    -- Translate record patterns to select operators
     --    >=> TODO
-    --    -- Compile as-patterns
-    --    >=> TODO
+    -- Compile as-patterns
+    >=> pure . desugarAsPatterns
     -- Compile match statements
     >=> compileMatchExprsC
     --    -- Placeholder insertion
@@ -135,6 +137,13 @@ compileModule =
     >=> mainPass
     -- Final lowering
     >=> lowpassTranslationC
+
+compileModule_ :: (Monad m, Monoid a, Data a, Eq a, Show a) => Module a Kind () -> Compiler2T a m (Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type))
+compileModule_ m = do
+  r <- compileModule m
+  s <- get
+  traceShow s
+    $ pure r
 
 -----------------------
 -----------------------
