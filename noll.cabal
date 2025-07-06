@@ -154,6 +154,7 @@ test-suite noll-test
       Noll.Compiler.PatternMatchingSpec
       Noll.Compiler.PatternMatchingSpec.TestRunner
       Noll.Compiler.Transform.FoldSpec
+      Noll.Compiler.Transform.Pattern.AsDesugarSpec
       Noll.Compiler.Transform.Pattern.DesugarSpec
       Noll.Compiler.Transform.Pattern.OrExpansionSpec
       Noll.Compiler.Transform.Pattern.RecordDesugarSpec

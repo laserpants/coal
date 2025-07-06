@@ -399,7 +399,7 @@ fixture2Typed =
 -- match x { | Yes => true }
 fixture7 :: Expression () ()
 fixture7 =
-  ( EMatch
+  EMatch
       ()
       ()
       (EVariable () (Label () "x"))
@@ -409,7 +409,6 @@ fixture7 =
           (CPlain () [] (ELiteral () (LBool True)) :| [])
           :| []
       )
-  )
 
 fixture7Typed :: Expression () (Type TypeIndex Kind)
 fixture7Typed =
