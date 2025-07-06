@@ -9,10 +9,11 @@ import Noll.Module (Definition (..), Function (..), Module (..), Path (..))
 
 import qualified Noll.Module as Module
 
--- prog7_01 :: [Module () o ()]
--- prog7_01 =
---  [ moduleMain
---  ]
+prog10_01 :: [Module () o ()]
+prog10_01 =
+  [ moduleUtilities
+  , moduleMain
+  ]
 
 moduleUtilities :: Module () o ()
 moduleUtilities =
@@ -21,7 +22,7 @@ moduleUtilities =
     -- Exports
     ["increment"]
     -- Definitions
-    [ DImport (Path ["Core$"]) ["pack_nat", "trace_int32"]
+    [ DImport (Path ["Core$"]) ["pack_nat", "unpack_nat", "trace_int32"]
     , DFunction
         "increment"
         ( Function
@@ -47,6 +48,15 @@ moduleUtilities =
             ( EFold
                 ()
                 ()
+                --( EApplication
+                --    ()
+                --    ()
+                --    (EConstructor () (Label () "Succ"))
+                --    ( EConstructor () (Label () "Zero")
+                --        :| []
+                --    )
+                --    :| []
+                --)
                 ( EApplication
                     ()
                     ()
@@ -70,7 +80,8 @@ moduleUtilities =
                         :| []
                     )
                     <| EClause
-                      ()
+                        ()
+--                        ( PVariable () (Label () "m"))
                       ( PAs
                           ()
                           (Label () "m")
@@ -78,6 +89,7 @@ moduleUtilities =
                               ()
                               (Label () "Succ")
                               [ PAtVariable () (Label () "f")
+--                              [ PVariable () (Label () "zz")
                               ]
                           )
                       )
@@ -97,11 +109,18 @@ moduleUtilities =
                                   )
                                   :| []
                               )
+                              --(ELiteral () (LInt32 401))
                               ( EApplication
                                   ()
                                   ()
                                   (EBinaryOperator () () OMultiplication)
-                                  ( EVariable () (Label () "n")
+                                  ( EApplication
+                                      ()
+                                      ()
+                                      (EVariable () (Label () "unpack_nat"))
+                                      ( EVariable () (Label () "m")
+                                          :| []
+                                      )
                                       <| EVariable () (Label () "f")
                                       :| []
                                   )
@@ -143,7 +162,7 @@ moduleMain =
                         ()
                         ()
                         (EVariable () (Label () "factorial"))
-                        ( ELiteral () (LInt32 4)
+                        ( ELiteral () (LInt32 5)
                             :| []
                         )
                         :| []
