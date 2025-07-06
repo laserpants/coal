@@ -53,7 +53,7 @@ expression1 =
                           ()
                           (PConstructor () (Label () "GreaterThan") [])
                           (CPlain () [] (ELiteral () (LBool False)) :| [])
-                        :| []
+                          :| []
                     )
                 )
             )
@@ -97,7 +97,7 @@ expression2 =
                           ()
                           (PConstructor () (Label (TConstructor KType "Ordering") "GreaterThan") [])
                           (CPlain () [] (ELiteral () (LBool False)) :| [])
-                        :| []
+                          :| []
                     )
                 )
             )

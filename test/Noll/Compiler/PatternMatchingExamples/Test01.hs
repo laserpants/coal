@@ -69,7 +69,7 @@ fixture =
                           ()
                           (PConstructor () (Label () "GreaterThan") [])
                           (CPlain () [] (ELiteral () (LBool False)) :| [])
-                        :| []
+                          :| []
                     )
                 )
             )
@@ -109,7 +109,7 @@ fixture1 =
                         <| ECompiledClause
                           (Label () "LessThan" :| [])
                           (ELiteral () (LBool True))
-                        :| []
+                          :| []
                     )
                 )
             )
