@@ -168,7 +168,7 @@ moduleUtilities =
                                                   ()
                                                   ()
                                                   (EBinaryOperator () () OMultiplication)
-                                                  ( EVariable () (Label () "n")
+                                                  ( EVariable () (Label () "m")
                                                       <| EApplication
                                                         ()
                                                         ()
