@@ -22,6 +22,7 @@ import Noll.Compiler.PatternMatching.Equation
 import Noll.Compiler.PatternMatching.Rule
 import Noll.Compiler.Transform.Fold
 import Noll.Compiler.Transform.Nats
+import Noll.Compiler.Transform.Pattern.AsDesugar
 import Noll.Compiler.Transform.Pattern.Desugar
 import Noll.Compiler.Transform.Pattern.OrExpansion
 import Noll.Compiler.Transform.Pattern.RecordDesugar
@@ -53,6 +54,9 @@ import qualified Noll.Set.Test10
 import qualified Noll.Set.Test11
 import qualified Noll.Set.Test12
 import qualified Noll.Set.Test13
+import qualified Noll.Set10.Test01
+import qualified Noll.Set10.Test03
+import qualified Noll.Set10.Test04
 import qualified Noll.Set2.Test05
 import qualified Noll.Set2.Test09
 import qualified Noll.Set2.Test10
@@ -1185,6 +1189,8 @@ story = do
   it "" $
     evalFoldExpansion "fold" 1 (compileFolds Noll.Set5.Test01.prog1_01) == Noll.Set5.Test03.prog1_03
   it "" $
+    evalFoldExpansion "fold" 1 (compileFolds Noll.Set10.Test01.prog10_01) == Noll.Set10.Test03.prog10_01
+  it "" $
     testResultExpression (Noll.CompilerExamples.Test02.baz3 Noll.Set.Test03.moduleUtils) == Noll.Set.Test04.moduleUtils
   it "" $
     testResultExpression (Noll.CompilerExamples.Test02.baz3 Noll.Set.Test03.moduleOrdered) == Noll.Set.Test04.moduleOrdered
@@ -1230,6 +1236,8 @@ story = do
     evalMatchMonad "match" 0 (compileMatchExprs Noll.Set5.Test05.moduleMain) == Noll.Set5.Test09.moduleMain
   it "" $
     fst (runIdentity (runCompiler2T compiler2TestEnvironment (typePass Noll.Set.Test01.moduleMain2))) == Noll.Set.Test04.moduleMain
+  it "" $
+    desugarAsPatterns Noll.Set10.Test03.prog10_01 == Noll.Set10.Test04.prog10_01
 
   --  it "" $
   --    result funLte == funLte2
