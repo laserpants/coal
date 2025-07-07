@@ -272,8 +272,7 @@ moduleUtilities =
         , "Core$.unpack_nat"
         ]
     , moduleObjects =
-        [         
-        ]
+        []
     }
 
 moduleMain1 :: Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
@@ -301,8 +300,7 @@ moduleMain =
         , "Core$.unpack_nat"
         ]
     , moduleObjects =
-        [         
-        ]
+        []
     }
 
 prog4_14 :: [Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)]

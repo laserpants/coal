@@ -70,8 +70,8 @@ moduleUtilities =
                         :| []
                     )
                     <| EClause
-                        ()
-                        ( PVariable () (Label () "m"))
+                      ()
+                      (PVariable () (Label () "m"))
                       ( CPlain
                           ()
                           []

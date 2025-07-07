@@ -22,7 +22,7 @@ moduleUtilities =
     -- Exports
     ["increment"]
     -- Definitions
-    [ DImport (Path ["Core$"]) ["pack_nat", "trace_int32"]
+    [ DImport (Path ["Core$"]) ["pack_nat", "unpack_nat", "trace_int32"]
     , DFunction
         "increment"
         ( Function
@@ -102,7 +102,13 @@ moduleUtilities =
                                   ()
                                   ()
                                   (EBinaryOperator () () OMultiplication)
-                                  ( EVariable () (Label () "n")
+                                  ( EApplication
+                                      ()
+                                      ()
+                                      (EVariable () (Label () "unpack_nat"))
+                                      ( EVariable () (Label () "m")
+                                          :| []
+                                      )
                                       <| EVariable () (Label () "f")
                                       :| []
                                   )
@@ -174,7 +180,13 @@ moduleUtilities =
                                                               ()
                                                               ()
                                                               (EBinaryOperator () () OMultiplication)
-                                                              ( EVariable () (Label () "m")
+                                                              ( EApplication
+                                                                  ()
+                                                                  ()
+                                                                  (EVariable () (Label () "unpack_nat"))
+                                                                  ( EVariable () (Label () "m")
+                                                                      :| []
+                                                                  )
                                                                   <| EApplication
                                                                     ()
                                                                     ()
@@ -244,7 +256,7 @@ moduleMain =
                         ()
                         ()
                         (EVariable () (Label () "factorial"))
-                        ( ELiteral () (LInt32 4)
+                        ( ELiteral () (LInt32 5)
                             :| []
                         )
                         :| []
