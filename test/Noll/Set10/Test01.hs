@@ -48,15 +48,6 @@ moduleUtilities =
             ( EFold
                 ()
                 ()
-                -- ( EApplication
-                --    ()
-                --    ()
-                --    (EConstructor () (Label () "Succ"))
-                --    ( EConstructor () (Label () "Zero")
-                --        :| []
-                --    )
-                --    :| []
-                -- )
                 ( EApplication
                     ()
                     ()
@@ -81,7 +72,6 @@ moduleUtilities =
                     )
                     <| EClause
                       ()
-                      --                        ( PVariable () (Label () "m"))
                       ( PAs
                           ()
                           (Label () "m")
@@ -89,7 +79,6 @@ moduleUtilities =
                               ()
                               (Label () "Succ")
                               [ PAtVariable () (Label () "f")
-                              --                              [ PVariable () (Label () "zz")
                               ]
                           )
                       )
@@ -109,7 +98,6 @@ moduleUtilities =
                                   )
                                   :| []
                               )
-                              -- (ELiteral () (LInt32 401))
                               ( EApplication
                                   ()
                                   ()
