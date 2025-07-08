@@ -71,7 +71,7 @@ moduleUtilities =
                         :| []
                     )
                     <| EClause
-                      ()
+                        ()
                       ( PAs
                           ()
                           (Label () "m")
@@ -94,10 +94,18 @@ moduleUtilities =
                                       ()
                                       ()
                                       (EVariable () (Label () "trace_int32"))
-                                      (EVariable () (Label () "n") :| [])
+                                      ( EApplication
+                                      ()
+                                      ()
+                                      (EVariable () (Label () "unpack_nat"))
+                                      ( EVariable () (Label () "m")
+                                          :| []
+                                      )
+                                      :| [])
                                   )
                                   :| []
                               )
+                              --(ELiteral () (LInt32 401))
                               ( EApplication
                                   ()
                                   ()
