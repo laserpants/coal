@@ -48,15 +48,6 @@ moduleUtilities =
             ( EFold
                 ()
                 ()
-                --( EApplication
-                --    ()
-                --    ()
-                --    (EConstructor () (Label () "Succ"))
-                --    ( EConstructor () (Label () "Zero")
-                --        :| []
-                --    )
-                --    :| []
-                --)
                 ( EApplication
                     ()
                     ()
@@ -81,7 +72,6 @@ moduleUtilities =
                     )
                     <| EClause
                         ()
---                        ( PVariable () (Label () "m"))
                       ( PAs
                           ()
                           (Label () "m")
@@ -89,7 +79,6 @@ moduleUtilities =
                               ()
                               (Label () "Succ")
                               [ PAtVariable () (Label () "f")
---                              [ PVariable () (Label () "zz")
                               ]
                           )
                       )
@@ -105,7 +94,14 @@ moduleUtilities =
                                       ()
                                       ()
                                       (EVariable () (Label () "trace_int32"))
-                                      (EVariable () (Label () "n") :| [])
+                                      ( EApplication
+                                      ()
+                                      ()
+                                      (EVariable () (Label () "unpack_nat"))
+                                      ( EVariable () (Label () "m")
+                                          :| []
+                                      )
+                                      :| [])
                                   )
                                   :| []
                               )
