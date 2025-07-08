@@ -5,11 +5,11 @@
 
 module Noll.Compiler2 where
 
-import Debug.Trace
 import Control.Monad ((>=>))
 import Control.Monad.Reader (Reader, asks, runReader)
 import Control.Monad.State (get, gets, runState)
 import Data.Data (Data)
+import Debug.Trace
 import Lang.Utils (Name)
 import Noll.Compiler.Lowpass.TranslateModule (translateModule)
 import Noll.Compiler.NormalizeObjects (NormalizeObjectsTransformContext (..))
@@ -142,8 +142,8 @@ compileModule_ :: (Monad m, Monoid a, Data a, Eq a, Show a) => Module a Kind () 
 compileModule_ m = do
   r <- compileModule m
   s <- get
-  traceShow s
-    $ pure r
+  traceShow s $
+    pure r
 
 -----------------------
 -----------------------

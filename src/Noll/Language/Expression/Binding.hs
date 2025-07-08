@@ -21,8 +21,13 @@ data Binding e a t
   | BFunction a Name (List1 (Pattern a t)) (e a t)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
 
-instance (Data a, Data t, Typeable e, Data (e a t)) => BoundVars (Binding e a t) where
-  boundIn = Set.fromList . universeBi
+instance (Data a, Data t) => BoundVars (Binding e a t) where
+  boundIn =
+    \case
+      BPattern _ p _ ->
+        Set.fromList (universeBi p)
+      BFunction{} ->
+        error "TODO"
 
 instance (Data a, Data t, FreeVars (e a t) t) => FreeVars (Binding e a t) t where
   freeIn =
