@@ -111,22 +111,20 @@ env1 =
           0
           (Forall mempty [] (TIntrinsic INat))
       )
-
---    ,
---      ( "$Succ"
---      , Constructor
---          "$Succ"
---          1
---          (Forall mempty [] (TIntrinsic IInt32 `TArrow` TConstructor KType "$Nat"))
---      )
---    ,
---      ( "$Zero"
---      , Constructor
---          "$Zero"
---          0
---          (Forall mempty [] (TConstructor KType "$Nat"))
---      )
-
+      --    ,
+      --      ( "$Succ"
+      --      , Constructor
+      --          "$Succ"
+      --          1
+      --          (Forall mempty [] (TIntrinsic IInt32 `TArrow` TConstructor KType "$Nat"))
+      --      )
+      --    ,
+      --      ( "$Zero"
+      --      , Constructor
+      --          "$Zero"
+      --          0
+      --          (Forall mempty [] (TConstructor KType "$Nat"))
+      --      )
     ]
 
 env2 =
@@ -135,9 +133,9 @@ env2 =
       ( "Tree"
       , KArrow KType KType
       )
---    , ( "$Nat"
---      , KType 
---      )
+      --    , ( "$Nat"
+      --      , KType
+      --      )
     ]
 
 env3 =
@@ -321,7 +319,6 @@ abc15 = fst (runIdentity (runCompiler2T compiler2TestEnvironment (compileModule_
 abc16 :: IO ()
 abc16 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc14, abc15]
 
-
 moduleCore1 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
 moduleCore1 = Lowpass.unsafeParseExpr <$> moduleCore
 
@@ -332,17 +329,16 @@ moduleCore =
     , moduleImports =
         []
     , moduleObjects =
-        [ 
---        OData
---            "$Succ"
---            0
---            (Lowpass.int32 `Lowpass.arrow` Lowpass.TCon "$Nat" [])
---        , OData
---            "$Zero"
---            1
---            (Lowpass.TCon "$Nat" [])
---        , 
-        OFunction
+        [ --        OData
+          --            "$Succ"
+          --            0
+          --            (Lowpass.int32 `Lowpass.arrow` Lowpass.TCon "$Nat" [])
+          --        , OData
+          --            "$Zero"
+          --            1
+          --            (Lowpass.TCon "$Nat" [])
+          --        ,
+          OFunction
             "Core$.operator__not"
             [ Label Lowpass.bool "a"
             ]
