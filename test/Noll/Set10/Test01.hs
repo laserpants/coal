@@ -158,7 +158,7 @@ moduleMain =
                         ()
                         ()
                         (EVariable () (Label () "factorial"))
-                        ( ELiteral () (LInt32 5)
+                        ( ELiteral () (LInt32 12)
                             :| []
                         )
                         :| []
