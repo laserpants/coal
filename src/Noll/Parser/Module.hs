@@ -35,6 +35,6 @@ moduleParser = do
   void (lexeme "module")
   path <- identifier upperChar `sepBy` symbol "."
   exps <- option ["*"] (parens (commaSep name))
-  b <- braces (many definitionParser)
+  b <- many definitionParser
   eof
   pure (Module (Path path) exps b)

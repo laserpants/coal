@@ -76,6 +76,7 @@ library
       Noll.Parser.Identifier
       Noll.Parser.Module
       Noll.Parser.Pattern
+      Noll.Parser.Primitive
       Noll.Parser.Symbol
       Noll.SystemF
       Noll.SystemF.Constraint
