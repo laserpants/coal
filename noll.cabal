@@ -72,6 +72,11 @@ library
       Noll.Module.Definition
       Noll.Module.Function
       Noll.Parser
+      Noll.Parser.Expression
+      Noll.Parser.Identifier
+      Noll.Parser.Module
+      Noll.Parser.Pattern
+      Noll.Parser.Symbol
       Noll.SystemF
       Noll.SystemF.Constraint
       Noll.SystemF.Constraint.Assumption
