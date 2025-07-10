@@ -114,9 +114,12 @@ patternConstraints assert ms =
     PAs _ (Label t name) p -> do
       ps <- patternConstraints assert ms p
       tellRight [Equality InferenceRulePlaceholder [t, typeOf p]]
+      assert t (filter (assumptionNameIs name) ms)
       pure (name : ps)
     PLiteral{} ->
       pure []
+    _ ->
+      error "TODO"
 
 getRow :: Type TypeIndex Kind -> Row TypeIndex Kind (Type TypeIndex Kind)
 getRow =
