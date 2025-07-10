@@ -2,8 +2,8 @@
 
 module Noll.Parser.Identifier where
 
-import Noll.Parser
 import Data.Text (Text)
+import Noll.Parser
 import Text.Megaparsec
 import Text.Megaparsec.Char (alphaNumChar, char, lowerChar)
 

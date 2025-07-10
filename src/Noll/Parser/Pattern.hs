@@ -4,8 +4,8 @@ module Noll.Parser.Pattern where
 
 import Noll.Language
 import Noll.Parser
-import Text.Megaparsec
 import Noll.Parser.Identifier
+import Text.Megaparsec
 
 patternParser :: Parser (Pattern () ())
 patternParser = undefined

@@ -4,26 +4,26 @@ module Noll.Parser.Expression where
 
 import Control.Monad.Combinators.Expr
 import Data.Functor (($>))
-import Noll.Language
-import Noll.Parser
-import Noll.Parser.Symbol
 import Lang.Common.List1 (NonEmpty (..))
 import Lang.Label (Label (..))
-import Text.Megaparsec ((<|>), try)
+import Noll.Language
+import Noll.Parser
 import Noll.Parser.Identifier
+import Noll.Parser.Symbol
+import Text.Megaparsec (try, (<|>))
 
 expressionParser :: Parser (Expression () ())
 expressionParser = makeExprParser go operator
-  where
-    go =
-      try functionCall
---      <|> letExpression
+ where
+  go =
+    try functionCall
+      --      <|> letExpression
       <|> literalExpression
---      <|> variableExpression     
+      --      <|> variableExpression
       <|> parens expressionParser
 
 functionCall :: Parser (Expression () ())
-functionCall = do 
+functionCall = do
   fn <- try (parens expressionParser) <|> EVariable () . Label () <$> name
   arg : args <- parens (commaSep1 expressionParser)
   pure (EApplication () () fn (arg :| args))
@@ -41,7 +41,7 @@ literalExpression :: Parser (Expression () ())
 literalExpression = undefined
 
 unaryOperator :: UnaryOperator -> Expression () () -> Expression () ()
-unaryOperator op e1 = 
+unaryOperator op e1 =
   EApplication
     ()
     ()
@@ -49,7 +49,7 @@ unaryOperator op e1 =
     (e1 :| [])
 
 binaryOperator :: BinaryOperator -> Expression () () -> Expression () () -> Expression () ()
-binaryOperator op e1 e2 = 
+binaryOperator op e1 e2 =
   EApplication
     ()
     ()
@@ -58,7 +58,7 @@ binaryOperator op e1 e2 =
 
 fixity8 = []
 
-fixity7 = 
+fixity7 =
   [ InfixL (binaryOperator OMultiplication <$ symbol "*")
   ]
 
@@ -77,4 +77,3 @@ operator =
   , fixity3
   , fixity2
   ]
-

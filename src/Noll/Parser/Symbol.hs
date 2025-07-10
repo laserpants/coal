@@ -18,8 +18,8 @@ module Noll.Parser.Symbol (
   equalSign,
 ) where
 
-import Noll.Parser 
 import Data.Text (Text)
+import Noll.Parser
 import Text.Megaparsec
 
 import qualified Text.Megaparsec.Char.Lexer as Lexer

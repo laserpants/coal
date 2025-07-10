@@ -5,13 +5,13 @@
 
 module Noll.Compiler2 where
 
-import Noll.Compiler.Dictionaries
 import Control.Monad ((>=>))
 import Control.Monad.Reader (Reader, asks, runReader)
 import Control.Monad.State (get, gets, runState)
 import Data.Data (Data)
 import Debug.Trace
 import Lang.Utils (Name)
+import Noll.Compiler.Dictionaries
 import Noll.Compiler.Lowpass.TranslateModule (translateModule)
 import Noll.Compiler.NormalizeObjects (NormalizeObjectsTransformContext (..))
 import Noll.Compiler.PatternMatching

@@ -2,22 +2,22 @@
 
 module Noll.Parser.Module where
 
-import Lang.Common.List1 (NonEmpty (..))
 import Control.Monad (void)
-import Noll.Parser
-import Noll.Parser.Identifier
-import Noll.Module 
+import Lang.Common.List1 (NonEmpty (..))
 import Noll.Language
-import Noll.Parser.Pattern
-import Noll.Parser.Expression
-import Text.Megaparsec
-import Noll.Parser.Symbol
+import Noll.Module
 import Noll.Module.Definition (Path (..))
+import Noll.Parser
+import Noll.Parser.Expression
+import Noll.Parser.Identifier
+import Noll.Parser.Pattern
+import Noll.Parser.Symbol
+import Text.Megaparsec
 import Text.Megaparsec.Char (upperChar)
 
 definitionParser :: Parser (Definition () o ())
 definitionParser =
---  functionParser
+  --  functionParser
   lexeme "foo" >> pure (DImport (Path []) [])
 
 functionParser :: Parser (Definition () o ())
