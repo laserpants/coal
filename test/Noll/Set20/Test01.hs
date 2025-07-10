@@ -110,6 +110,32 @@ moduleMain =
     -- Definitions
     [ DImport (Path ["Core$"]) ["trace_int32"]
     , DImport (Path ["Utilities"]) ["factorial"]
+    , DTrait
+        "Numeric"
+        []
+        (TVariable (Parameter () "a"))
+        [
+          ( "from_int32"
+          , TIntrinsic IInt32 `TArrow` TVariable (Parameter () "a")
+          )
+        ]
+    , DInstance
+        "Numeric"
+        (TIntrinsic INat)
+        [ DFunction
+            "from_int32"
+            ( Function
+                ()
+                (With [] ())
+                (PVariable () (Label () "n") :| [])
+                ( EApplication
+                    ()
+                    ()
+                    (EVariable () (Label () "Core$.pack_nat"))
+                    (EVariable () (Label () "n") :| [])
+                )
+            )
+        ]
     , DFunction
         "main"
         ( Function
@@ -120,10 +146,6 @@ moduleMain =
                 ()
                 ()
                 (EVariable () (Label () "trace_int32"))
-                ( EApplication
-                    ()
-                    ()
-                    (EVariable () (Label () "increment"))
                     ( EApplication
                         ()
                         ()
@@ -137,8 +159,6 @@ moduleMain =
                         )
                         :| []
                     )
-                    :| []
-                )
             )
         )
     ]

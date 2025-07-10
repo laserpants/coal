@@ -10,6 +10,7 @@
 module Noll.Compiler.Dictionaries (
   TraitContext (..),
   DictionaryEnvironment (..),
+  DictionaryStack (..),
   runDictionaryStack,
   transformScope,
   collectTraits,
@@ -45,7 +46,7 @@ data DictionaryEnvironment = DictionaryEnvironment
   { dictionaryEnvironmentNames :: Environment (Scheme TypeIndex Kind (Type TypeIndex Kind))
   , dictionaryEnvironmentInstances :: Environment (Map IndexedType (Dictionary (Scheme TypeIndex Kind IndexedType)))
   }
-  deriving (Show, Eq, Ord)
+  deriving (Show, Eq, Ord, Read)
 
 overDictionaryEnvironmentNames ::
   ( Environment (Scheme TypeIndex Kind (Type TypeIndex Kind)) ->

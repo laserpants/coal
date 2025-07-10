@@ -5,6 +5,7 @@
 
 module Noll.Compiler2 where
 
+import Noll.Compiler.Dictionaries
 import Control.Monad ((>=>))
 import Control.Monad.Reader (Reader, asks, runReader)
 import Control.Monad.State (get, gets, runState)
@@ -91,6 +92,14 @@ natExpansionTrans f e = withSupplyC (\n -> runNatExpansion "succ" n (f e))
 compileNatsC :: (Monad m, Monoid a, Data a) => Module a Kind IndexedType -> Compiler2T a m (Module a Kind IndexedType)
 compileNatsC = natExpansionTrans compileNats
 
+placeholderTrans :: (Monad m, TraitContext c) => (c -> DictionaryStack c) -> c -> Compiler2T a m c
+placeholderTrans f e = do
+  env <- asks compiler2DictionaryEnvironment
+  withSupplyC (\n -> runDictionaryStack env n (expandTraits e))
+
+placeholderInsertionC :: (Monad m, Monoid a, Data a) => Module a Kind IndexedType -> Compiler2T a m (Module a Kind IndexedType)
+placeholderInsertionC = placeholderTrans expandTraits
+
 lowpassMonadTrans :: (Monad m) => (c -> Reader Lowpass.TranslateEnvironment d) -> c -> Compiler2T a m d
 lowpassMonadTrans f e = pure (runReader (f e) (Lowpass.initialTranslateEnvironment mempty))
 
@@ -124,8 +133,8 @@ mainPass =
     >=> pure . desugarAsPatterns
     -- Compile match statements
     >=> compileMatchExprsC
-    --    -- Placeholder insertion
-    --    >=> TODO
+    -- Placeholder insertion
+    >=> placeholderInsertionC
     -- Denormalize top-level expressions
     >=> denormalizeObjectC
     -- Expand nats

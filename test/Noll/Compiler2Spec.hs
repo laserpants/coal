@@ -3,6 +3,8 @@
 
 module Noll.Compiler2Spec where
 
+import Noll.Compiler.Dictionaries
+import Lang.Common.Environment (Environment)
 import Control.Monad ((>=>))
 import Control.Monad.Identity (runIdentity)
 import Data.Text (Text)
@@ -10,18 +12,23 @@ import Lang.Common.List1 (NonEmpty (..), (<|))
 import Lang.Label (Label (..))
 import Lang.Lowpass.Language (Module (..), Object (..), opaque)
 import Lang.Utils (Name)
+import Noll.Language.Trait
 import Noll.Compiler2
 import Noll.Compiler2.Internal
 import Text.RawString.QQ
+import Data.Set (Set)
 
+import Data.Map.Strict (Map)
 -- import Noll.Compiler2Examples.Test02 (bazz)
 import Noll.Language (Constructor (..), IndexedType (..), Intrinsic (..), Kind (..), Parameter (..), Row (..), Scheme (..), Type (..), TypeIndex (..))
 import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
 import Noll.SystemF
 import Noll.SystemFSpec.TestRunner
 import Test.Hspec (Spec, describe, it)
+import Lang.Utils (Dictionary)
 
 import qualified Data.Set as Set
+import qualified Data.Map.Strict as Map
 import qualified Lang.Common.Environment as Environment
 import qualified Lang.Lowpass.Compiler as Lowpass
 import qualified Lang.Lowpass.Compiler.Utils as Lowpass
@@ -32,6 +39,7 @@ import qualified Noll.Set12.Test01
 import qualified Noll.Set7.Test01
 import qualified Noll.Set8.Test01
 import qualified Noll.Set9.Test01
+import qualified Noll.Set20.Test01
 
 spec :: Spec
 spec =
@@ -43,9 +51,10 @@ compiler2TestEnvironment =
   Compiler2Environment
     { compiler2DataConstructorEnv = env1
     , compiler2TypeConstructorEnv = env2
-    , compiler2TraitEnvironment = env3
-    , compiler2TraitEnv = env4
+    , compiler2TraitEnvironment = env3 -- ?
+    , compiler2TraitEnv = env4  -- ?
     , compiler2AliasEnv = env5
+    , compiler2DictionaryEnvironment = env6
     }
 
 env1 =
@@ -245,6 +254,182 @@ env5 =
       )
     ]
 
+env6 = DictionaryEnvironment yy xx
+
+xx :: Environment (Map IndexedType (Dictionary (Scheme TypeIndex Kind IndexedType)))
+xx =
+  Environment.fromList
+    [
+      ( "Numeric"
+      , Map.fromList
+          [
+            ( TIntrinsic IInt32
+            , Map.fromList
+                [
+                  ( "from_int32"
+                  , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
+                  )
+                ]
+            )
+          ,
+            ( TIntrinsic INat
+            , Map.fromList
+                [
+                  ( "from_int32"
+                  , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic INat)
+                  )
+                ]
+            )
+          ]
+      )
+    ,
+      ( "Ordered"
+      , Map.fromList
+          [
+            ( TIntrinsic IInt32
+            , Map.fromList
+                [
+                  ( "compare"
+                  , Forall (Set.fromList [TypeIndex KType 0]) [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TConstructor KType "Ordering")
+                  )
+                ]
+            )
+          ]
+      )
+    ,
+      ( "Traceable"
+      , Map.fromList
+          [
+            ( TIntrinsic IString
+            , Map.fromList
+                [
+                  ( "trace"
+                  , Forall mempty [] (TIntrinsic IString `TArrow` TIntrinsic IString)
+                  )
+                ]
+            )
+          ,
+            ( TIntrinsic IInt32
+            , Map.fromList
+                [
+                  ( "trace"
+                  , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IString)
+                  )
+                ]
+            )
+          ,
+            ( TIntrinsic (ITuple [TVariable (TypeIndex KType 0), TVariable (TypeIndex KType 1)])
+            , Map.fromList
+                [
+                  ( "trace"
+                  , Forall
+                      (Set.fromList [TypeIndex KType 0, TypeIndex KType 1])
+                      [ Trait "Traceable" (TVariable (TypeIndex KType 0))
+                      , Trait "Traceable" (TVariable (TypeIndex KType 1))
+                      ]
+                      (TIntrinsic (ITuple [TVariable (TypeIndex KType 0), TVariable (TypeIndex KType 1)]) `TArrow` TIntrinsic IString)
+                  )
+                ]
+            )
+          ,
+            ( TIntrinsic (IList (TVariable (TypeIndex KType 0)))
+            , Map.fromList
+                [
+                  ( "trace"
+                  , Forall
+                      (Set.fromList [TypeIndex KType 0])
+                      [ Trait "Traceable" (TVariable (TypeIndex KType 0))
+                      ]
+                      (TIntrinsic (IList (TVariable (TypeIndex KType 0))) `TArrow` TIntrinsic IString)
+                  )
+                ]
+            )
+          ]
+      )
+    ]
+
+yy :: Environment (Scheme TypeIndex Kind (Type TypeIndex Kind))
+yy =
+  Environment.fromList
+    [
+      ( "trace"
+      , Forall
+          (Set.fromList [TypeIndex KType 0] :: Set (TypeIndex Kind))
+          [Trait "Traceable" (TVariable (TypeIndex KType 0))]
+          (TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IString)
+      )
+    ,
+      ( "pair_to_string"
+      , Forall
+          (Set.fromList [TypeIndex KType 0, TypeIndex KType 1] :: Set (TypeIndex Kind))
+          [ Trait "Traceable" (TVariable (TypeIndex KType 0))
+          , Trait "Traceable" (TVariable (TypeIndex KType 1))
+          ]
+          (TIntrinsic (ITuple [TVariable (TypeIndex KType 0), TVariable (TypeIndex KType 1)]) `TArrow` TIntrinsic IString)
+      )
+    ,
+      ( "list_to_string"
+      , Forall
+          (Set.fromList [TypeIndex KType 0] :: Set (TypeIndex Kind))
+          [ Trait "Traceable" (TVariable (TypeIndex KType 0))
+          ]
+          (TIntrinsic (IList (TVariable (TypeIndex KType 0))) `TArrow` TIntrinsic IString)
+      )
+    ,
+      ( "from_int32"
+      , Forall
+          (Set.fromList [TypeIndex KType 0] :: Set (TypeIndex Kind))
+          [Trait "Numeric" (TVariable (TypeIndex KType 0))]
+          (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0))
+      )
+    ,
+      ( "greater_than"
+      , Forall
+          (Set.fromList [TypeIndex KType 0] :: Set (TypeIndex Kind))
+          [Trait "Ordered" (TVariable (TypeIndex KType 0))]
+          (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
+      )
+    ,
+      ( "less_than_or_equal_to"
+      , Forall
+          (Set.fromList [TypeIndex KType 0] :: Set (TypeIndex Kind))
+          [Trait "Ordered" (TVariable (TypeIndex KType 0))]
+          (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
+      )
+    ,
+      ( "compare"
+      , Forall
+          (Set.fromList [TypeIndex KType 0] :: Set (TypeIndex Kind))
+          [Trait "Ordered" (TVariable (TypeIndex KType 0))]
+          (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TConstructor KType "Ordering")
+      )
+    ,
+      ( "from_list"
+      , Forall
+          (Set.fromList [TypeIndex KType 0] :: Set (TypeIndex Kind))
+          [Trait "Numeric" (TVariable (TypeIndex KType 0)), Trait "Ordered" (TVariable (TypeIndex KType 0))]
+          (TIntrinsic (IList (TVariable (TypeIndex KType 0))) `TArrow` (TApplication KType (TConstructor (KArrow KType KType) "Tree") (TVariable (TypeIndex KType 0) :| [])))
+      )
+    ,
+      ( "in_range"
+      , Forall
+          (Set.fromList [TypeIndex KType 0] :: Set (TypeIndex Kind))
+          [Trait "Numeric" (TVariable (TypeIndex KType 0)), Trait "Ordered" (TVariable (TypeIndex KType 0))]
+          ( TIntrinsic (IRecord (TRow (RExtend "max" (TVariable (TypeIndex KType 0)) (RExtend "min" (TVariable (TypeIndex KType 0)) RNil))))
+              `TArrow` TVariable (TypeIndex KType 0)
+              `TArrow` TIntrinsic IBool
+          )
+      )
+    ,
+      ( "sort"
+      , Forall
+          (Set.fromList [TypeIndex KType 0] :: Set (TypeIndex Kind))
+          [Trait "Numeric" (TVariable (TypeIndex KType 0)), Trait "Ordered" (TVariable (TypeIndex KType 0))]
+          (TIntrinsic (IList (TVariable (TypeIndex KType 0))) `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 0))))
+      )
+    ]
+
+
 tree0 :: IndexedType
 tree0 =
   TApplication
@@ -318,6 +503,18 @@ abc15 = fst (runIdentity (runCompiler2T compiler2TestEnvironment (compileModule_
 
 abc16 :: IO ()
 abc16 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc14, abc15]
+
+--
+
+abc17 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
+abc17 = fst (runIdentity (runCompiler2T compiler2TestEnvironment (compileModule Noll.Set20.Test01.moduleUtilities)))
+
+abc18 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
+abc18 = fst (runIdentity (runCompiler2T compiler2TestEnvironment (compileModule Noll.Set20.Test01.moduleMain)))
+
+abc19 :: IO ()
+abc19 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc17, abc18]
+
 
 moduleCore1 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
 moduleCore1 = Lowpass.unsafeParseExpr <$> moduleCore

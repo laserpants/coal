@@ -27,6 +27,7 @@ module Noll.Compiler2.Internal (
 )
 where
 
+import Noll.Compiler.Dictionaries (DictionaryEnvironment (..))
 import Control.Monad.RWS (RWST, runRWST)
 import Control.Monad.Reader (MonadReader)
 import Control.Monad.State (MonadState, modify)
@@ -44,8 +45,9 @@ type TraitImplementationEnv = Environment (Scheme TypeIndex Kind IndexedType)
 data Compiler2Environment o k t = Compiler2Environment
   { compiler2DataConstructorEnv :: Environment (Constructor o k t)
   , compiler2TypeConstructorEnv :: Environment Kind
-  , compiler2TraitEnvironment :: Environment (TypeIndex Kind, TraitImplementationEnv)
-  , compiler2TraitEnv :: Environment (o k, Environment (Scheme o k t))
+  , compiler2TraitEnvironment :: Environment (TypeIndex Kind, TraitImplementationEnv) -- ??
+  , compiler2TraitEnv :: Environment (o k, Environment (Scheme o k t))   -- ??
+  , compiler2DictionaryEnvironment :: DictionaryEnvironment 
   , compiler2AliasEnv :: AliasEnvironment
   }
   deriving (Show, Eq, Ord, Read)
