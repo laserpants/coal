@@ -136,6 +136,18 @@ moduleMain =
                 )
             )
         ]
+    , DInstance
+        "Numeric"
+        (TIntrinsic IInt32)
+        [ DFunction
+            "from_int32"
+            ( Function
+                ()
+                (With [] ())
+                (PVariable () (Label () "n") :| [])
+                (EVariable () (Label () "n"))
+            )
+        ]
     , DFunction
         "main"
         ( Function

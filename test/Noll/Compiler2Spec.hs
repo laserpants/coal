@@ -510,7 +510,16 @@ abc17 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
 abc17 = fst (runIdentity (runCompiler2T compiler2TestEnvironment (compileModule Noll.Set20.Test01.moduleUtilities)))
 
 abc18 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
-abc18 = fst (runIdentity (runCompiler2T compiler2TestEnvironment (compileModule Noll.Set20.Test01.moduleMain)))
+abc18 = fst (runIdentity (runCompiler2T compiler2TestEnvironment prog))
+  where
+    prog = do
+      insertNamesC
+        [
+          ( "factorial"
+          , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
+          )
+        ]
+      compileModule Noll.Set20.Test01.moduleMain
 
 abc19 :: IO ()
 abc19 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc17, abc18]

@@ -31,8 +31,7 @@ reserved :: [Name]
 reserved =
   [ "let"
   , "in"
-  , --  , "fn"
-    "fun"
+  , "fn"
   , "fold"
   , "unfold"
   , "main"
