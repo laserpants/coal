@@ -5,7 +5,7 @@ module Noll.Parser.Identifier where
 import Data.Text (Text)
 import Noll.Parser
 import Text.Megaparsec
-import Text.Megaparsec.Char (alphaNumChar, char, lowerChar)
+import Text.Megaparsec.Char (alphaNumChar, char, lowerChar, upperChar)
 
 import qualified Data.Text as Text
 
@@ -20,6 +20,10 @@ validChar = alphaNumChar <|> underscore
 {-# INLINE name #-}
 name :: Parser Text
 name = identifier (lowerChar <|> underscore)
+
+{-# INLINE constructor #-}
+constructor :: Parser Text
+constructor = identifier upperChar
 
 withInitial :: Parser [Char] -> Parser Char -> Parser Text
 withInitial chrs chr = Text.pack <$> cons chr chrs

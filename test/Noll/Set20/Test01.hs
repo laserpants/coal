@@ -23,6 +23,27 @@ moduleUtilities =
     ["factorial"]
     -- Definitions
     [ DImport (Path ["Core$"]) ["pack_nat", "unpack_nat", "trace_int32"]
+    , DTrait
+        "Numeric"
+        []
+        (TVariable (Parameter () "a"))
+        [
+          ( "from_int32"
+          , TIntrinsic IInt32 `TArrow` TVariable (Parameter () "a")
+          )
+        ]
+    , DInstance
+        "Numeric"
+        (TIntrinsic IInt32)
+        [ DFunction
+            "from_int32"
+            ( Function
+                ()
+                (With [] ())
+                (PVariable () (Label () "n") :| [])
+                (EVariable () (Label () "n"))
+            )
+        ]
     , DAnnotation
         (With [] (TIntrinsic IInt32))
         ( DFunction
@@ -58,7 +79,16 @@ moduleUtilities =
                         ( CPlain
                             ()
                             []
-                            (ELiteral () (LInt32 1))
+                            ( EAnnotation
+                                ()
+                                (TIntrinsic IInt32)
+                                ( EApplication
+                                    ()
+                                    ()
+                                    (EVariable () (Label () "from_int32"))
+                                    (ELiteral () (LInt32 1) :| [])
+                                )
+                            )
                             :| []
                         )
                         <| EClause
@@ -158,19 +188,19 @@ moduleMain =
                 ()
                 ()
                 (EVariable () (Label () "trace_int32"))
+                ( EApplication
+                    ()
+                    ()
+                    (EVariable () (Label () "factorial"))
                     ( EApplication
                         ()
                         ()
-                        (EVariable () (Label () "factorial"))
-                        ( EApplication
-                            ()
-                            ()
-                            (EVariable () (Label () "from_int32"))
-                            (ELiteral () (LInt32 12) :| [])
-                            :| []
-                        )
+                        (EVariable () (Label () "from_int32"))
+                        (ELiteral () (LInt32 4) :| [])
                         :| []
                     )
+                    :| []
+                )
             )
         )
     ]

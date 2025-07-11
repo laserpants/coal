@@ -18,7 +18,7 @@ import Text.Megaparsec.Char (upperChar)
 definitionParser :: Parser (Definition () o ())
 definitionParser =
   --  functionParser
-  lexeme "foo" >> pure (DImport (Path []) [])
+  void (lexeme "foo") >> pure (DImport (Path []) [])
 
 functionParser :: Parser (Definition () o ())
 functionParser = do

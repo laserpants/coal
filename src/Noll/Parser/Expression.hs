@@ -2,6 +2,7 @@
 
 module Noll.Parser.Expression where
 
+import Control.Monad (void)
 import Control.Monad.Combinators.Expr
 import Data.Functor (($>))
 import Lang.Common.List1 (NonEmpty (..))
@@ -9,17 +10,20 @@ import Lang.Label (Label (..))
 import Noll.Language
 import Noll.Parser
 import Noll.Parser.Identifier
+import Noll.Parser.Pattern (patternParser)
 import Noll.Parser.Symbol
-import Text.Megaparsec (try, (<|>))
+import Text.Megaparsec (some, try, (<|>))
+
+import qualified Text.Megaparsec.Char.Lexer as Lexer
 
 expressionParser :: Parser (Expression () ())
 expressionParser = makeExprParser go operator
  where
   go =
     try functionCall
-      --      <|> letExpression
-      <|> literalExpression
-      --      <|> variableExpression
+      <|> intExpression
+      <|> foldExpression
+      <|> variableExpression
       <|> parens expressionParser
 
 functionCall :: Parser (Expression () ())
@@ -31,11 +35,41 @@ functionCall = do
 letExpression :: Parser (Expression () ())
 letExpression = undefined
 
+choice :: Parser (Choice Expression () ())
+choice = do
+  e <- expressionParser
+  -- TODO
+  pure (CPlain () [] e)
+
+clause :: Parser (Clause () ())
+clause = do
+  void (symbol "|")
+  p <- patternParser
+  void (symbol "=>")
+  c : cs <- some choice
+  pure (EClause () p (c :| cs))
+
 foldExpression :: Parser (Expression () ())
-foldExpression = undefined
+foldExpression = do
+  void $ lexeme "fold"
+  expr : exprs <- parens (commaSep1 expressionParser)
+  c : cs <- braces (some clause)
+  pure (EFold () () (expr :| exprs) (c :| cs) Nothing)
 
 variableExpression :: Parser (Expression () ())
-variableExpression = undefined
+variableExpression = do
+  var <- name
+  pure (EVariable () (Label () var))
+
+intExpression :: Parser (Expression () ())
+intExpression = do
+  n <- Lexer.signed spaces (lexeme Lexer.decimal)
+  pure $
+    EApplication
+      ()
+      ()
+      (EVariable () (Label () "from_int32"))
+      (ELiteral () (LInt32 n) :| [])
 
 literalExpression :: Parser (Expression () ())
 literalExpression = undefined

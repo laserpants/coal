@@ -3,32 +3,34 @@
 
 module Noll.Compiler2Spec where
 
-import Noll.Compiler.Dictionaries
-import Lang.Common.Environment (Environment)
 import Control.Monad ((>=>))
 import Control.Monad.Identity (runIdentity)
+import Data.Set (Set)
 import Data.Text (Text)
+import Lang.Common.Environment (Environment)
 import Lang.Common.List1 (NonEmpty (..), (<|))
 import Lang.Label (Label (..))
 import Lang.Lowpass.Language (Module (..), Object (..), opaque)
 import Lang.Utils (Name)
-import Noll.Language.Trait
+import Noll.Compiler.Dictionaries
 import Noll.Compiler2
 import Noll.Compiler2.Internal
+import Noll.Language.Trait
 import Text.RawString.QQ
-import Data.Set (Set)
 
 import Data.Map.Strict (Map)
+
 -- import Noll.Compiler2Examples.Test02 (bazz)
+
+import Lang.Utils (Dictionary)
 import Noll.Language (Constructor (..), IndexedType (..), Intrinsic (..), Kind (..), Parameter (..), Row (..), Scheme (..), Type (..), TypeIndex (..))
 import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
 import Noll.SystemF
 import Noll.SystemFSpec.TestRunner
 import Test.Hspec (Spec, describe, it)
-import Lang.Utils (Dictionary)
 
-import qualified Data.Set as Set
 import qualified Data.Map.Strict as Map
+import qualified Data.Set as Set
 import qualified Lang.Common.Environment as Environment
 import qualified Lang.Lowpass.Compiler as Lowpass
 import qualified Lang.Lowpass.Compiler.Utils as Lowpass
@@ -36,10 +38,10 @@ import qualified Lang.Lowpass.Language as Lowpass
 import qualified Noll.Set10.Test01
 import qualified Noll.Set11.Test01
 import qualified Noll.Set12.Test01
+import qualified Noll.Set20.Test01
 import qualified Noll.Set7.Test01
 import qualified Noll.Set8.Test01
 import qualified Noll.Set9.Test01
-import qualified Noll.Set20.Test01
 
 spec :: Spec
 spec =
@@ -52,7 +54,7 @@ compiler2TestEnvironment =
     { compiler2DataConstructorEnv = env1
     , compiler2TypeConstructorEnv = env2
     , compiler2TraitEnvironment = env3 -- ?
-    , compiler2TraitEnv = env4  -- ?
+    , compiler2TraitEnv = env4 -- ?
     , compiler2AliasEnv = env5
     , compiler2DictionaryEnvironment = env6
     }
@@ -429,7 +431,6 @@ yy =
       )
     ]
 
-
 tree0 :: IndexedType
 tree0 =
   TApplication
@@ -511,19 +512,18 @@ abc17 = fst (runIdentity (runCompiler2T compiler2TestEnvironment (compileModule 
 
 abc18 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
 abc18 = fst (runIdentity (runCompiler2T compiler2TestEnvironment prog))
-  where
-    prog = do
-      insertNamesC
-        [
-          ( "factorial"
-          , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
-          )
-        ]
-      compileModule Noll.Set20.Test01.moduleMain
+ where
+  prog = do
+    insertNamesC
+      [
+        ( "factorial"
+        , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
+        )
+      ]
+    compileModule Noll.Set20.Test01.moduleMain
 
 abc19 :: IO ()
 abc19 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc17, abc18]
-
 
 moduleCore1 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
 moduleCore1 = Lowpass.unsafeParseExpr <$> moduleCore
