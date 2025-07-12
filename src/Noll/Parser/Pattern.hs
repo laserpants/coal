@@ -9,6 +9,7 @@ import Noll.Language
 import Noll.Parser
 import Noll.Parser.Identifier
 import Noll.Parser.Symbol
+import Noll.Parser.Type
 import Text.Megaparsec (option, optional, (<|>))
 import Text.Megaparsec.Char (char)
 
@@ -36,7 +37,16 @@ patternParser = makeExprParser go operator
           p1
 
 operator :: [[Operator Parser (Pattern () ())]]
-operator = []
+operator = 
+  [ -- TODO
+    [ Postfix typeAnnotation ]
+  ]
+
+typeAnnotation :: Parser (Pattern () () -> Pattern () ())
+typeAnnotation = do
+  void (symbol ":")
+  ty <- typeParser
+  pure (PAnnotation () ty)
 
 variablePattern :: Parser (Pattern () ())
 variablePattern = do

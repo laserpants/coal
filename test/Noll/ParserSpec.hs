@@ -5,8 +5,10 @@ module Noll.ParserSpec where
 import Lang.Common.List1 (NonEmpty (..), (<|))
 import Lang.Label (Label (..))
 import Noll.Language
+import Noll.Module
 import Noll.Parser
 import Noll.Parser.Expression
+import Noll.Parser.Module
 import Test.Hspec (Spec, describe, it)
 import Text.Megaparsec (runParser)
 
@@ -81,4 +83,281 @@ spec =
                   :| []
               )
               Nothing
+          )
+    it "" $ do
+      runParser functionParser "" "factorial(n) = fold(pack_nat(n)) { | Zero => 1 | Succ(@f) as m => unpack_nat(m) * f };"
+        == Right
+          ( DFunction
+              "factorial"
+              ( Function
+                  ()
+                  (With [] ())
+                  (PVariable () (Label () "n") :| [])
+                  ( EFold
+                      ()
+                      ()
+                      ( EApplication
+                          ()
+                          ()
+                          (EVariable () (Label () "pack_nat"))
+                          ( EVariable () (Label () "n")
+                              :| []
+                          )
+                          :| []
+                      )
+                      ( EClause
+                          ()
+                          ( PConstructor
+                              ()
+                              (Label () "Zero")
+                              []
+                          )
+                          ( CPlain
+                              ()
+                              []
+                              ( EApplication
+                                  ()
+                                  ()
+                                  (EVariable () (Label () "from_int32"))
+                                  (ELiteral () (LInt32 1) :| [])
+                              )
+                              :| []
+                          )
+                          <| EClause
+                            ()
+                            ( PAs
+                                ()
+                                (Label () "m")
+                                ( PConstructor
+                                    ()
+                                    (Label () "Succ")
+                                    [ PAtVariable () (Label () "f")
+                                    ]
+                                )
+                            )
+                            ( CPlain
+                                ()
+                                []
+                                ( EApplication
+                                    ()
+                                    ()
+                                    (EBinaryOperator () () OMultiplication)
+                                    ( EApplication
+                                        ()
+                                        ()
+                                        (EVariable () (Label () "unpack_nat"))
+                                        ( EVariable () (Label () "m")
+                                            :| []
+                                        )
+                                        <| EVariable () (Label () "f")
+                                        :| []
+                                    )
+                                )
+                                :| []
+                            )
+                          :| []
+                      )
+                      Nothing
+                  )
+              ) ::
+              Definition () () ()
+          )
+    it "" $ do
+      runParser functionParser "" "factorial(n : int32) = fold(pack_nat(n)) { | Zero => 1 | Succ(@f) as m => unpack_nat(m) * f };"
+        == Right
+          ( DFunction
+              "factorial"
+              ( Function
+                  ()
+                  (With [] ())
+                  ( PAnnotation
+                      ()
+                      (TIntrinsic IInt32)
+                      (PVariable () (Label () "n"))
+                      :| []
+                  )
+                  ( EFold
+                      ()
+                      ()
+                      ( EApplication
+                          ()
+                          ()
+                          (EVariable () (Label () "pack_nat"))
+                          ( EVariable () (Label () "n")
+                              :| []
+                          )
+                          :| []
+                      )
+                      ( EClause
+                          ()
+                          ( PConstructor
+                              ()
+                              (Label () "Zero")
+                              []
+                          )
+                          ( CPlain
+                              ()
+                              []
+                              ( EApplication
+                                  ()
+                                  ()
+                                  (EVariable () (Label () "from_int32"))
+                                  (ELiteral () (LInt32 1) :| [])
+                              )
+                              :| []
+                          )
+                          <| EClause
+                            ()
+                            ( PAs
+                                ()
+                                (Label () "m")
+                                ( PConstructor
+                                    ()
+                                    (Label () "Succ")
+                                    [ PAtVariable () (Label () "f")
+                                    ]
+                                )
+                            )
+                            ( CPlain
+                                ()
+                                []
+                                ( EApplication
+                                    ()
+                                    ()
+                                    (EBinaryOperator () () OMultiplication)
+                                    ( EApplication
+                                        ()
+                                        ()
+                                        (EVariable () (Label () "unpack_nat"))
+                                        ( EVariable () (Label () "m")
+                                            :| []
+                                        )
+                                        <| EVariable () (Label () "f")
+                                        :| []
+                                    )
+                                )
+                                :| []
+                            )
+                          :| []
+                      )
+                      Nothing
+                  )
+              ) ::
+              Definition () () ()
+          )
+    it "" $ do
+      runParser functionParser "" "factorial(n : int32) : int32 = fold(pack_nat(n)) { | Zero => 1 | Succ(@f) as m => unpack_nat(m) * f };"
+        == Right
+          ( DAnnotation
+              (With [] (TIntrinsic IInt32))
+              ( DFunction
+                  "factorial"
+                  ( Function
+                      ()
+                      (With [] ())
+                      ( PAnnotation
+                          ()
+                          (TIntrinsic IInt32)
+                          (PVariable () (Label () "n"))
+                          :| []
+                      )
+                      ( EFold
+                          ()
+                          ()
+                          ( EApplication
+                              ()
+                              ()
+                              (EVariable () (Label () "pack_nat"))
+                              ( EVariable () (Label () "n")
+                                  :| []
+                              )
+                              :| []
+                          )
+                          ( EClause
+                              ()
+                              ( PConstructor
+                                  ()
+                                  (Label () "Zero")
+                                  []
+                              )
+                              ( CPlain
+                                  ()
+                                  []
+                                  ( EApplication
+                                      ()
+                                      ()
+                                      (EVariable () (Label () "from_int32"))
+                                      (ELiteral () (LInt32 1) :| [])
+                                  )
+                                  :| []
+                              )
+                              <| EClause
+                                ()
+                                ( PAs
+                                    ()
+                                    (Label () "m")
+                                    ( PConstructor
+                                        ()
+                                        (Label () "Succ")
+                                        [ PAtVariable () (Label () "f")
+                                        ]
+                                    )
+                                )
+                                ( CPlain
+                                    ()
+                                    []
+                                    ( EApplication
+                                        ()
+                                        ()
+                                        (EBinaryOperator () () OMultiplication)
+                                        ( EApplication
+                                            ()
+                                            ()
+                                            (EVariable () (Label () "unpack_nat"))
+                                            ( EVariable () (Label () "m")
+                                                :| []
+                                            )
+                                            <| EVariable () (Label () "f")
+                                            :| []
+                                        )
+                                    )
+                                    :| []
+                                )
+                              :| []
+                          )
+                          Nothing
+                      )
+                  )
+              ) ::
+              Definition () () ()
+          )
+    it "" $ do
+      runParser functionParser "" "main() = trace_int32(factorial(12));"
+        == Right
+          ( DFunction
+              "main"
+              ( Function
+                  ()
+                  (With [] ())
+                  (PLiteral () LUnit :| [])
+                  ( EApplication
+                      ()
+                      ()
+                      (EVariable () (Label () "trace_int32"))
+                      ( EApplication
+                          ()
+                          ()
+                          (EVariable () (Label () "factorial"))
+                          ( EApplication
+                              ()
+                              ()
+                              (EVariable () (Label () "from_int32"))
+                              (ELiteral () (LInt32 12) :| [])
+                              :| []
+                          )
+                          :| []
+                      )
+                  )
+              ) ::
+              Definition () () ()
           )

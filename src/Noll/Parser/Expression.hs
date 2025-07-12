@@ -10,6 +10,7 @@ import Lang.Label (Label (..))
 import Noll.Language
 import Noll.Parser
 import Noll.Parser.Identifier
+import Noll.Parser.Type
 import Noll.Parser.Pattern (patternParser)
 import Noll.Parser.Symbol
 import Text.Megaparsec (some, try, (<|>))
@@ -92,6 +93,7 @@ binaryOperator op e1 e2 =
 
 fixity8 = []
 
+fixity7 :: [Operator Parser (Expression () ())]
 fixity7 =
   [ InfixL (binaryOperator OMultiplication <$ symbol "*")
   ]
@@ -110,4 +112,11 @@ operator =
   , fixity4
   , fixity3
   , fixity2
+  , [ Postfix typeAnnotation ]
   ]
+
+typeAnnotation :: Parser (Expression () () -> Expression () ())
+typeAnnotation = do
+  void (symbol ":")
+  ty <- typeParser
+  pure (EAnnotation () ty)

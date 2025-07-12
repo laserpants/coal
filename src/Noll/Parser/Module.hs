@@ -8,9 +8,10 @@ import Noll.Language
 import Noll.Module
 import Noll.Module.Definition (Path (..))
 import Noll.Parser
-import Noll.Parser.Expression
+import Noll.Parser.Expression (expressionParser)
 import Noll.Parser.Identifier
-import Noll.Parser.Pattern
+import Noll.Parser.Pattern (patternParser)
+import Noll.Parser.Type
 import Noll.Parser.Symbol
 import Text.Megaparsec
 import Text.Megaparsec.Char (upperChar)
@@ -22,13 +23,24 @@ definitionParser =
 
 functionParser :: Parser (Definition () o ())
 functionParser = do
-  void (lexeme "fun")
   fn <- name
-  arg : args <- parens (commaSep1 patternParser)
+  args <- parens (commaSep patternParser)
+  ann <- optional (void (symbol ":") *> typeParser)
   void (symbol "=")
   expr <- expressionParser
   void (symbol ";")
-  pure (DFunction fn (Function () (With [] ()) (arg :| args) expr))
+  let args' =
+        case args of
+          [] ->
+            PLiteral () LUnit :| []
+          a : as ->
+            a :| as
+  let f = DFunction fn (Function () (With [] ()) args' expr)
+  case ann of
+    Nothing ->
+      pure f
+    Just t ->
+      pure (DAnnotation (With [] t) f)
 
 moduleParser :: Parser (Module () o ())
 moduleParser = do

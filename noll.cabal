@@ -78,6 +78,7 @@ library
       Noll.Parser.Pattern
       Noll.Parser.Primitive
       Noll.Parser.Symbol
+      Noll.Parser.Type
       Noll.SystemF
       Noll.SystemF.Constraint
       Noll.SystemF.Constraint.Assumption

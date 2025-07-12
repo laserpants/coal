@@ -34,7 +34,6 @@ reserved =
   , "fn"
   , "fold"
   , "unfold"
-  , "main"
   , "as"
   , "if"
   , "then"
