@@ -17,6 +17,7 @@ import Noll.Compiler2
 import Noll.Compiler2.Internal
 import Noll.Language.Trait
 import Text.RawString.QQ
+import Lang.Utils (forM)
 
 import Data.Map.Strict (Map)
 
@@ -524,6 +525,22 @@ abc18 = fst (runIdentity (runCompiler2T compiler2TestEnvironment prog))
 
 abc19 :: IO ()
 abc19 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc17, abc18]
+
+abc20 :: [Noll.Module.Module () Kind ()] -> IO ()
+abc20 mods = do
+  undefined
+    where
+      r = runIdentity (runCompiler2T compiler2TestEnvironment steps)
+      steps = do
+        -- TODO: Topological sort
+        ms2 <- forM mods $
+          \m -> do
+            m1 <- typePass m
+            let zz = m1 :: Noll.Module.Module () Kind IndexedType
+            undefined
+        ms3 <- traverse mainPass ms2
+        ms4 <- traverse lowpassTranslationC ms3
+        pure ms4
 
 moduleCore1 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
 moduleCore1 = Lowpass.unsafeParseExpr <$> moduleCore
