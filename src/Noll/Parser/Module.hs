@@ -6,20 +6,27 @@ import Control.Monad (void)
 import Lang.Common.List1 (NonEmpty (..))
 import Noll.Language
 import Noll.Module
-import Noll.Module.Definition (Path (..))
 import Noll.Parser
 import Noll.Parser.Expression (expressionParser)
 import Noll.Parser.Identifier
 import Noll.Parser.Pattern (patternParser)
-import Noll.Parser.Type
 import Noll.Parser.Symbol
+import Noll.Parser.Type
 import Text.Megaparsec
 import Text.Megaparsec.Char (upperChar)
 
 definitionParser :: Parser (Definition () o ())
 definitionParser =
-  --  functionParser
-  void (lexeme "foo") >> pure (DImport (Path []) [])
+  importParser
+    <|> functionParser
+
+importParser :: Parser (Definition () o ())
+importParser = do
+  void (lexeme "import")
+  path <- identifier upperChar `sepBy1` symbol "."
+  names <- option ["*"] (parens (commaSep name))
+  void (symbol ";")
+  pure (DImport (Path path) names)
 
 functionParser :: Parser (Definition () o ())
 functionParser = do
@@ -45,8 +52,8 @@ functionParser = do
 moduleParser :: Parser (Module () o ())
 moduleParser = do
   void (lexeme "module")
-  path <- identifier upperChar `sepBy` symbol "."
+  path <- identifier upperChar `sepBy1` symbol "."
   exps <- option ["*"] (parens (commaSep name))
-  b <- many definitionParser
+  b <- braces (many definitionParser)
   eof
   pure (Module (Path path) exps b)

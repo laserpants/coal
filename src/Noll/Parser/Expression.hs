@@ -10,9 +10,9 @@ import Lang.Label (Label (..))
 import Noll.Language
 import Noll.Parser
 import Noll.Parser.Identifier
-import Noll.Parser.Type
 import Noll.Parser.Pattern (patternParser)
 import Noll.Parser.Symbol
+import Noll.Parser.Type
 import Text.Megaparsec (some, try, (<|>))
 
 import qualified Text.Megaparsec.Char.Lexer as Lexer
@@ -112,7 +112,7 @@ operator =
   , fixity4
   , fixity3
   , fixity2
-  , [ Postfix typeAnnotation ]
+  , [Postfix typeAnnotation]
   ]
 
 typeAnnotation :: Parser (Expression () () -> Expression () ())

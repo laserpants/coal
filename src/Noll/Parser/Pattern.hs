@@ -37,9 +37,9 @@ patternParser = makeExprParser go operator
           p1
 
 operator :: [[Operator Parser (Pattern () ())]]
-operator = 
+operator =
   [ -- TODO
-    [ Postfix typeAnnotation ]
+    [Postfix typeAnnotation]
   ]
 
 typeAnnotation :: Parser (Pattern () () -> Pattern () ())

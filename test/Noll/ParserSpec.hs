@@ -361,3 +361,128 @@ spec =
               ) ::
               Definition () () ()
           )
+    it "" $ do
+      runParser moduleParser "" "module Main { import Utilities(factorial); main() = trace_int32(factorial(12)); }"
+        == Right
+          ( Module
+              (Path ["Main"])
+              ["*"]
+              [ DImport (Path ["Utilities"]) ["factorial"]
+              , DFunction
+                  "main"
+                  ( Function
+                      ()
+                      (With [] ())
+                      (PLiteral () LUnit :| [])
+                      ( EApplication
+                          ()
+                          ()
+                          (EVariable () (Label () "trace_int32"))
+                          ( EApplication
+                              ()
+                              ()
+                              (EVariable () (Label () "factorial"))
+                              ( EApplication
+                                  ()
+                                  ()
+                                  (EVariable () (Label () "from_int32"))
+                                  (ELiteral () (LInt32 12) :| [])
+                                  :| []
+                              )
+                              :| []
+                          )
+                      )
+                  )
+              ] ::
+              Module () () ()
+          )
+    it "" $ do
+      runParser moduleParser "" "module Utilities(factorial) { factorial(n : int32) : int32 = fold(pack_nat(n)) { | Zero => 1 | Succ(@f) as m => unpack_nat(m) * f }; }"
+        == Right
+          ( Module
+              (Path ["Utilities"])
+              ["factorial"]
+              [ DAnnotation
+                  (With [] (TIntrinsic IInt32))
+                  ( DFunction
+                      "factorial"
+                      ( Function
+                          ()
+                          (With [] ())
+                          ( PAnnotation
+                              ()
+                              (TIntrinsic IInt32)
+                              (PVariable () (Label () "n"))
+                              :| []
+                          )
+                          ( EFold
+                              ()
+                              ()
+                              ( EApplication
+                                  ()
+                                  ()
+                                  (EVariable () (Label () "pack_nat"))
+                                  ( EVariable () (Label () "n")
+                                      :| []
+                                  )
+                                  :| []
+                              )
+                              ( EClause
+                                  ()
+                                  ( PConstructor
+                                      ()
+                                      (Label () "Zero")
+                                      []
+                                  )
+                                  ( CPlain
+                                      ()
+                                      []
+                                      ( EApplication
+                                          ()
+                                          ()
+                                          (EVariable () (Label () "from_int32"))
+                                          (ELiteral () (LInt32 1) :| [])
+                                      )
+                                      :| []
+                                  )
+                                  <| EClause
+                                    ()
+                                    ( PAs
+                                        ()
+                                        (Label () "m")
+                                        ( PConstructor
+                                            ()
+                                            (Label () "Succ")
+                                            [ PAtVariable () (Label () "f")
+                                            ]
+                                        )
+                                    )
+                                    ( CPlain
+                                        ()
+                                        []
+                                        ( EApplication
+                                            ()
+                                            ()
+                                            (EBinaryOperator () () OMultiplication)
+                                            ( EApplication
+                                                ()
+                                                ()
+                                                (EVariable () (Label () "unpack_nat"))
+                                                ( EVariable () (Label () "m")
+                                                    :| []
+                                                )
+                                                <| EVariable () (Label () "f")
+                                                :| []
+                                            )
+                                        )
+                                        :| []
+                                    )
+                                  :| []
+                              )
+                              Nothing
+                          )
+                      )
+                  ) ::
+                  Definition () () ()
+              ]
+          )
