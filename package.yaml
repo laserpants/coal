@@ -24,7 +24,6 @@ dependencies:
 - text
 - text-show
 - bytestring
-- hashable
 - containers
 - mtl
 - data-fix

@@ -14,7 +14,6 @@ module Noll.Language.Type.Row (
 ) where
 
 import Data.Data (Data, Typeable)
-import Data.Hashable (Hashable)
 import Data.Tuple.Extra (second)
 import GHC.Generics (Generic)
 import Lang.Utils (Dictionary, Name, (<$$>))
@@ -26,8 +25,6 @@ data Row o k t
   | RVariable (o k)
   | RNil
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable, Generic)
-
-instance (Hashable t, Hashable (o k)) => Hashable (Row o k t)
 
 data RowData o k t = RowData (Dictionary [t]) (Row o k t)
   deriving (Show, Eq, Ord, Read)

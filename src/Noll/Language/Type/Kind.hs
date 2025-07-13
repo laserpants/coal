@@ -7,7 +7,6 @@
 module Noll.Language.Type.Kind (Kind (..), foldKind) where
 
 import Data.Data (Data, Typeable)
-import Data.Hashable (Hashable)
 import GHC.Generics (Generic)
 
 data Kind
@@ -16,8 +15,6 @@ data Kind
   | KArrow Kind Kind
   | KTrait
   deriving (Show, Eq, Ord, Read, Data, Typeable, Generic)
-
-instance Hashable Kind
 
 infixr 1 `KArrow`
 

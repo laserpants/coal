@@ -23,7 +23,6 @@ module Noll.Language.Type (
 
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (transform)
-import Data.Hashable (Hashable)
 import Data.List.NonEmpty (NonEmpty)
 import GHC.Generics (Generic)
 import Lang.Common.List1 (List1, (<|))
@@ -46,8 +45,6 @@ data Type o k
   | TAlias Name [Type o k] (Type o k)
   deriving (Show, Eq, Ord, Read, Data, Typeable, Generic)
 
-instance (Hashable k, Hashable (o k)) => Hashable (Type o k)
-
 infixr 1 `TArrow`
 
 (~>) :: Type o k -> Type o k -> Type o k
@@ -61,15 +58,11 @@ data TypeIndex k = TypeIndex
   }
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Data, Typeable, Generic)
 
-instance (Hashable k) => Hashable (TypeIndex k)
-
 data Parameter k = Parameter
   { parameterKind :: k
   , parameterName :: Name
   }
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Data, Typeable, Generic)
-
-instance (Hashable k) => Hashable (Parameter k)
 
 type IndexedType = Type TypeIndex Kind
 

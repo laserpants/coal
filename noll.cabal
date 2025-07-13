@@ -105,7 +105,6 @@ library
     , deriving-compat
     , extra
     , free
-    , hashable
     , lowpass
     , megaparsec
     , mtl
@@ -134,7 +133,6 @@ executable noll-exe
     , deriving-compat
     , extra
     , free
-    , hashable
     , lowpass
     , megaparsec
     , mtl
@@ -280,7 +278,6 @@ test-suite noll-test
     , deriving-compat
     , extra
     , free
-    , hashable
     , hspec
     , lowpass
     , megaparsec

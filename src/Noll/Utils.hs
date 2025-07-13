@@ -2,16 +2,14 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Utils where -- (lexOrderRank, hashed) where
+module Noll.Utils (Serializable (..), lexOrderRank) where
 
 import Data.Char (ord)
-import Data.Hashable (Hashable, hash)
 import Data.Text (Text)
 import Lang.Common.List1 (List1, fromList1)
 import Noll.Language.Trait
 import Noll.Language.Type
 import Noll.Language.Type.Intrinsic
-import Numeric (showHex)
 import TextShow
 
 import qualified Data.Text as Text
@@ -34,9 +32,6 @@ lexOrderRank text
         error "Invalid character"
     | n >= ord 'a' = n - ord 'a'
     | otherwise = n - 22
-
-hashed :: (Hashable a) => a -> Text
-hashed t = Text.pack (showHex (fromIntegral (hash t) :: Word) "")
 
 class Serializable s where
   serialize :: s -> Text
@@ -63,7 +58,7 @@ instance (Serializable s) => Serializable [s] where
       [t] -> serialize t
       (t : ts) -> serialize t <> "," <> serialize ts
 
-instance (Show s, Serializable s) => Serializable (Intrinsic s) where
+instance (Serializable s) => Serializable (Intrinsic s) where
   serialize =
     \case
       IBool ->
@@ -91,7 +86,7 @@ instance (Show s, Serializable s) => Serializable (Intrinsic s) where
       _ ->
         error "Not implemented"
 
-instance (Show k, Show (s k), Serializable (s k)) => Serializable (Type s k) where
+instance (Serializable (s k)) => Serializable (Type s k) where
   serialize =
     \case
       TApplication _ t1 ts ->

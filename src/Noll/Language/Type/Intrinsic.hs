@@ -6,7 +6,6 @@
 module Noll.Language.Type.Intrinsic (Intrinsic (..)) where
 
 import Data.Data (Data, Typeable)
-import Data.Hashable (Hashable)
 import GHC.Generics (Generic)
 
 -- | Built-in types
@@ -28,5 +27,3 @@ data Intrinsic t
   | IUnit
   | IVoid
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable, Generic)
-
-instance (Hashable t) => Hashable (Intrinsic t)

@@ -6,15 +6,12 @@
 module Noll.Language.Trait (Trait (..), With (..)) where
 
 import Data.Data (Data, Typeable)
-import Data.Hashable (Hashable)
 import GHC.Generics (Generic)
 import Lang.Utils (Name)
 
 -- | Standalone type trait
 data Trait t = Trait Name t
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable, Generic)
-
-instance (Hashable t) => Hashable (Trait t)
 
 data With t = With [Trait t] t
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
