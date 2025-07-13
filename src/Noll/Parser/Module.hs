@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Parser.Module where
+module Noll.Parser.Module (moduleParser, functionParser) where
 
 import Control.Monad (void)
 import Lang.Common.List1 (NonEmpty (..))

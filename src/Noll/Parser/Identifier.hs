@@ -1,6 +1,11 @@
-{-# LANGUAGE OverloadedStrings #-}
-
-module Noll.Parser.Identifier where
+module Noll.Parser.Identifier (
+  underscore,
+  validChar,
+  name,
+  constructor,
+  withInitial,
+  identifier,
+) where
 
 import Data.Text (Text)
 import Noll.Parser

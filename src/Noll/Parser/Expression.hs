@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Parser.Expression where
+module Noll.Parser.Expression (expressionParser) where
 
 import Control.Monad (void)
 import Control.Monad.Combinators.Expr
