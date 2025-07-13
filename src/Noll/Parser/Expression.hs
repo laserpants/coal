@@ -108,6 +108,7 @@ operator =
   [ fixity8
   , fixity7
   , fixity6
+  , fixity5
   , fixity4
   , fixity3
   , fixity2
