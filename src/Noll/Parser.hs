@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Noll.Parser (
-  Parser (..),
+  Parser,
   ParserError,
   cons,
   spaces,

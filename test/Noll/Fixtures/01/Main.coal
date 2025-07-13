@@ -1,0 +1,7 @@
+module Main {
+
+import Utilities(factorial);
+
+main() = trace_int32(factorial(12));
+
+}
