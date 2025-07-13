@@ -198,7 +198,7 @@ moduleMain =
                                     ( Map.fromList
                                         [
                                           ( "from_int32"
-                                          , EVariable () (Label{labelTag = TArrow (TIntrinsic IInt32) (TIntrinsic INat), labelName = "from_int32__$instance.a952655fec712ed8"})
+                                          , EVariable () (Label{labelTag = TArrow (TIntrinsic IInt32) (TIntrinsic INat), labelName = "from_int32__$instance_Numeric(Intrinsic(Nat))"})
                                           )
                                         ]
                                     )

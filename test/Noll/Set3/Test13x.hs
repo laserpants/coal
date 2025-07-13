@@ -262,14 +262,14 @@ moduleMain =
         ]
     , moduleObjects =
         [ OFunction
-            "Main.trace__$instance.c81d5162b7d14248"
+            "Main.trace__$instance_Traceable(Intrinsic(String))"
             [ Label string "s"
             ]
             [r| 
                   s : string
               |]
         , OFunction
-            "Main.trace__$instance.c847f12006235dc0"
+            "Main.trace__$instance_Traceable(Intrinsic(Int32))"
             [ Label int32 "n"
             ]
             [r| 
@@ -279,31 +279,31 @@ moduleMain =
                     )
               |]
         , OFunction
-            "Main.trace__$instance.a2de7bde6bbaafb6"
-            [ Label (TCon "Traceable" [opaque]) "$d.Traceable__$instance.46804159d1c1d0e2"
-            , Label (TCon "Traceable" [opaque]) "$d.Traceable__$instance.46804159d1c1d0e3"
+            "Main.trace__$instance_Traceable(Intrinsic(Tuple(Variable(Parameter(a)),Variable(Parameter(b)))))"
+            [ Label (TCon "Traceable" [opaque]) "$d.Traceable__$instance_Traceable(Variable(TypeIndex(0)))"
+            , Label (TCon "Traceable" [opaque]) "$d.Traceable__$instance_Traceable(Variable(TypeIndex(1)))"
             , Label (TCon "tuple2" [opaque, opaque]) "p"
             ]
             [r| 
                   @<string>
                     ( @<tuple2(*,*)/string>
                         ( Core$.pair_to_string : Traceable(*)/Traceable(*)/tuple2(*,*)/string
-                        , $d.Traceable__$instance.46804159d1c1d0e2 : Traceable(*)
-                        , $d.Traceable__$instance.46804159d1c1d0e3 : Traceable(*)
+                        , `$d.Traceable__$instance_Traceable(Variable(TypeIndex(0)))` : Traceable(*)
+                        , `$d.Traceable__$instance_Traceable(Variable(TypeIndex(1)))` : Traceable(*)
                         )
                     , p : tuple2(*,*)
                     )
               |]
         , OFunction
-            "Main.trace__$instance.fcea41ba44fb0cf4"
-            [ Label (TCon "Traceable" [opaque]) "$d.Traceable__$instance.46804159d1c1d0e2"
+            "Main.trace__$instance_Traceable(Intrinsic(List(Variable(Parameter(a)))))"
+            [ Label (TCon "Traceable" [opaque]) "$d.Traceable__$instance_Traceable(Variable(TypeIndex(0)))"
             , Label (TCon "list" [opaque]) "lst"
             ]
             [r| 
                   @<string>
                     ( @<list(*)/string>
                         ( Core$.list_to_string : Traceable(*)/list(*)/string
-                        , $d.Traceable__$instance.46804159d1c1d0e2 : Traceable(*)
+                        , `$d.Traceable__$instance_Traceable(Variable(TypeIndex(0)))` : Traceable(*)
                         )
                     , lst : list(*)
                     )

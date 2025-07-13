@@ -472,7 +472,7 @@ fixturee8 =
                                       `TArrow` TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])
                                       `TArrow` TIntrinsic IString
                                   )
-                                  "trace__$instance.895a62bb6130678a"
+                                  "trace__$instance_Traceable(Intrinsic(Tuple(Variable(TypeIndex(0)),Variable(TypeIndex(1)))))"
                               )
                           )
                           ( ERecord
@@ -481,7 +481,7 @@ fixturee8 =
                               ( Map.fromList
                                   [
                                     ( "trace"
-                                    , EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IString) "trace__$instance.c847f12006235dc0")
+                                    , EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IString) "trace__$instance_Traceable(Intrinsic(Int32))")
                                     )
                                   ]
                               )
@@ -492,7 +492,7 @@ fixturee8 =
                                 ( Map.fromList
                                     [
                                       ( "trace"
-                                      , EVariable () (Label (TIntrinsic IString `TArrow` TIntrinsic IString) "trace__$instance.c81d5162b7d14248")
+                                      , EVariable () (Label (TIntrinsic IString `TArrow` TIntrinsic IString) "trace__$instance_Traceable(Intrinsic(String))")
                                       )
                                     ]
                                 )
@@ -566,7 +566,7 @@ fixturee11 =
                                   `TArrow` TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])))
                                   `TArrow` TIntrinsic IString
                               )
-                              "trace__$instance.8582bc20351fc496"
+                              "trace__$instance_Traceable(Intrinsic(List(Variable(TypeIndex(0)))))"
                           )
                       )
                       ( ERecord
@@ -586,7 +586,7 @@ fixturee11 =
                                                 `TArrow` TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])
                                                 `TArrow` TIntrinsic IString
                                             )
-                                            "trace__$instance.895a62bb6130678a"
+                                            "trace__$instance_Traceable(Intrinsic(Tuple(Variable(TypeIndex(0)),Variable(TypeIndex(1)))))"
                                         )
                                     )
                                     ( ERecord
@@ -595,7 +595,7 @@ fixturee11 =
                                         ( Map.fromList
                                             [
                                               ( "trace"
-                                              , EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IString) "trace__$instance.c847f12006235dc0")
+                                              , EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IString) "trace__$instance_Traceable(Intrinsic(Int32))")
                                               )
                                             ]
                                         )
@@ -606,7 +606,7 @@ fixturee11 =
                                           ( Map.fromList
                                               [
                                                 ( "trace"
-                                                , EVariable () (Label (TIntrinsic IString `TArrow` TIntrinsic IString) "trace__$instance.c81d5162b7d14248")
+                                                , EVariable () (Label (TIntrinsic IString `TArrow` TIntrinsic IString) "trace__$instance_Traceable(Intrinsic(String))")
                                                 )
                                               ]
                                           )
@@ -857,7 +857,7 @@ fixturee20 =
                                           `TArrow` TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])
                                           `TArrow` TIntrinsic IString
                                       )
-                                      "trace__$instance.895a62bb6130678a"
+                                      "trace__$instance_Traceable(Intrinsic(Tuple(Variable(TypeIndex(0)),Variable(TypeIndex(1)))))"
                                   )
                               )
                               ( ERecord
@@ -866,7 +866,7 @@ fixturee20 =
                                   ( Map.fromList
                                       [
                                         ( "trace"
-                                        , EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IString) "trace__$instance.c847f12006235dc0")
+                                        , EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IString) "trace__$instance_Traceable(Intrinsic(Int32))")
                                         )
                                       ]
                                   )
@@ -877,7 +877,7 @@ fixturee20 =
                                     ( Map.fromList
                                         [
                                           ( "trace"
-                                          , EVariable () (Label (TIntrinsic IString `TArrow` TIntrinsic IString) "trace__$instance.c81d5162b7d14248")
+                                          , EVariable () (Label (TIntrinsic IString `TArrow` TIntrinsic IString) "trace__$instance_Traceable(Intrinsic(String))")
                                           )
                                         ]
                                     )
@@ -970,7 +970,7 @@ fixturee23 =
                                       `TArrow` TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])))
                                       `TArrow` TIntrinsic IString
                                   )
-                                  "trace__$instance.8582bc20351fc496"
+                                  "trace__$instance_Traceable(Intrinsic(List(Variable(TypeIndex(0)))))"
                               )
                           )
                           ( ERecord
@@ -990,7 +990,7 @@ fixturee23 =
                                                     `TArrow` TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])
                                                     `TArrow` TIntrinsic IString
                                                 )
-                                                "trace__$instance.895a62bb6130678a"
+                                                "trace__$instance_Traceable(Intrinsic(Tuple(Variable(TypeIndex(0)),Variable(TypeIndex(1)))))"
                                             )
                                         )
                                         ( ERecord
@@ -999,7 +999,7 @@ fixturee23 =
                                             ( Map.fromList
                                                 [
                                                   ( "trace"
-                                                  , EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IString) "trace__$instance.c847f12006235dc0")
+                                                  , EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IString) "trace__$instance_Traceable(Intrinsic(Int32))")
                                                   )
                                                 ]
                                             )
@@ -1010,7 +1010,7 @@ fixturee23 =
                                               ( Map.fromList
                                                   [
                                                     ( "trace"
-                                                    , EVariable () (Label (TIntrinsic IString `TArrow` TIntrinsic IString) "trace__$instance.c81d5162b7d14248")
+                                                    , EVariable () (Label (TIntrinsic IString `TArrow` TIntrinsic IString) "trace__$instance_Traceable(Intrinsic(String))")
                                                     )
                                                   ]
                                               )
@@ -1113,7 +1113,7 @@ fixturee26 =
                                   `TArrow` TIntrinsic (IList (TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])))
                                   `TArrow` TIntrinsic IString
                               )
-                              "trace__$instance.8582bc20351fc496"
+                              "trace__$instance_Traceable(Intrinsic(List(Variable(TypeIndex(0)))))"
                           )
                       )
                       ( ERecord
@@ -1133,7 +1133,7 @@ fixturee26 =
                                                 `TArrow` TIntrinsic (ITuple [TIntrinsic IInt32, TIntrinsic IString])
                                                 `TArrow` TIntrinsic IString
                                             )
-                                            "trace__$instance.895a62bb6130678a"
+                                            "trace__$instance_Traceable(Intrinsic(Tuple(Variable(TypeIndex(0)),Variable(TypeIndex(1)))))"
                                         )
                                     )
                                     ( ERecord
@@ -1142,7 +1142,7 @@ fixturee26 =
                                         ( Map.fromList
                                             [
                                               ( "trace"
-                                              , EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IString) "trace__$instance.c847f12006235dc0")
+                                              , EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IString) "trace__$instance_Traceable(Intrinsic(Int32))")
                                               )
                                             ]
                                         )
@@ -1153,7 +1153,7 @@ fixturee26 =
                                           ( Map.fromList
                                               [
                                                 ( "trace"
-                                                , EVariable () (Label (TIntrinsic IString `TArrow` TIntrinsic IString) "trace__$instance.c81d5162b7d14248")
+                                                , EVariable () (Label (TIntrinsic IString `TArrow` TIntrinsic IString) "trace__$instance_Traceable(Intrinsic(String))")
                                                 )
                                               ]
                                           )

@@ -63,7 +63,7 @@ instance (Serializable s) => Serializable [s] where
       [t] -> serialize t
       (t : ts) -> serialize t <> "," <> serialize ts
 
-instance Serializable (Intrinsic s) where
+instance (Show s, Serializable s) => Serializable (Intrinsic s) where
   serialize =
     \case
       IBool ->
@@ -80,12 +80,18 @@ instance Serializable (Intrinsic s) where
         "Int64"
       IBignum ->
         "Bignum"
+      IString ->
+        "String"
       INat ->
         "Nat"
+      ITuple ts ->
+        "Tuple" <> "(" <> serialize ts <> ")"
+      IList t ->
+        "List" <> "(" <> serialize t <> ")"
       _ ->
         error "Not implemented"
 
-instance (Serializable (s k)) => Serializable (Type s k) where
+instance (Show k, Show (s k), Serializable (s k)) => Serializable (Type s k) where
   serialize =
     \case
       TApplication _ t1 ts ->

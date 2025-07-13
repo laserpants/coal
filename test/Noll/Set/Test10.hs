@@ -2227,7 +2227,7 @@ moduleMain =
                                         ( Map.fromList
                                             [
                                               ( "from_int32"
-                                              , EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32__$instance.2967b53e939a3c94")
+                                              , EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32__$instance_Numeric(Intrinsic(Int32))")
                                               )
                                             ]
                                         )
@@ -2250,7 +2250,7 @@ moduleMain =
                                         ( Map.fromList
                                             [
                                               ( "from_int32"
-                                              , EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32__$instance.2967b53e939a3c94")
+                                              , EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32__$instance_Numeric(Intrinsic(Int32))")
                                               )
                                             ]
                                         )
@@ -2273,7 +2273,7 @@ moduleMain =
                                         ( Map.fromList
                                             [
                                               ( "from_int32"
-                                              , EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32__$instance.2967b53e939a3c94")
+                                              , EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32__$instance_Numeric(Intrinsic(Int32))")
                                               )
                                             ]
                                         )
@@ -2296,7 +2296,7 @@ moduleMain =
                                         ( Map.fromList
                                             [
                                               ( "from_int32"
-                                              , EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32__$instance.2967b53e939a3c94")
+                                              , EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32__$instance_Numeric(Intrinsic(Int32))")
                                               )
                                             ]
                                         )
@@ -2319,7 +2319,7 @@ moduleMain =
                                         ( Map.fromList
                                             [
                                               ( "from_int32"
-                                              , EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32__$instance.2967b53e939a3c94")
+                                              , EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32__$instance_Numeric(Intrinsic(Int32))")
                                               )
                                             ]
                                         )
@@ -2342,7 +2342,7 @@ moduleMain =
                                         ( Map.fromList
                                             [
                                               ( "from_int32"
-                                              , EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32__$instance.2967b53e939a3c94")
+                                              , EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32__$instance_Numeric(Intrinsic(Int32))")
                                               )
                                             ]
                                         )
@@ -2365,7 +2365,7 @@ moduleMain =
                                         ( Map.fromList
                                             [
                                               ( "from_int32"
-                                              , EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32__$instance.2967b53e939a3c94")
+                                              , EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32__$instance_Numeric(Intrinsic(Int32))")
                                               )
                                             ]
                                         )
@@ -2398,7 +2398,7 @@ moduleMain =
                                         ( Map.fromList
                                             [
                                               ( "from_int32"
-                                              , EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32__$instance.2967b53e939a3c94")
+                                              , EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "from_int32__$instance_Numeric(Intrinsic(Int32))")
                                               )
                                             ]
                                         )
@@ -2409,7 +2409,7 @@ moduleMain =
                                           ( Map.fromList
                                               [
                                                 ( "compare"
-                                                , EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TConstructor KType "Ordering") "compare__$instance.b7c5e7e84eeaf782")
+                                                , EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TConstructor KType "Ordering") "compare__$instance_Ordered(Intrinsic(Int32))")
                                                 )
                                               ]
                                           )

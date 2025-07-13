@@ -277,7 +277,7 @@ moduleOrdered =
                   }
               |]
         , OFunction
-            "Ordered.compare__$instance.b7c5e7e84eeaf782"
+            "Ordered.compare__$instance_Ordered(Intrinsic(Int32))"
             [ Label Lowpass.int32 "x"
             , Label Lowpass.int32 "y"
             ]
@@ -654,7 +654,7 @@ moduleMain =
         ]
     , moduleObjects =
         [ OFunction
-            "Main.from_int32__$instance.2967b53e939a3c94"
+            "Main.from_int32__$instance_Numeric(Intrinsic(Int32))"
             [ Label Lowpass.int32 "x"
             ]
             [r| 
