@@ -16,10 +16,10 @@ import Noll.Compiler.Lowpass.Environment (TranslateEnvironment (..), withLocalNa
 import Noll.Compiler.Lowpass.TranslateExpression (translateExpression, translatePattern)
 import Noll.Compiler.Lowpass.TranslateType (translateType)
 import Noll.Language
+import Noll.Language.Serializable (serialize)
 import Noll.Module.Constant (Constant (..))
 import Noll.Module.Definition
 import Noll.Module.Function (Function (..))
-import Noll.Utils (serialize)
 
 import qualified Lang.Lowpass.Language as Lowpass
 

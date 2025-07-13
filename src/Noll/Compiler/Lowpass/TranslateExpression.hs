@@ -20,7 +20,7 @@ import Noll.Language.Expression.Operator
 import Noll.Language.HasType (HasType (..))
 import Noll.Language.Pattern
 import Noll.Language.Primitive
-import Noll.Utils (serialize)
+import Noll.Language.Serializable (serialize)
 
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set

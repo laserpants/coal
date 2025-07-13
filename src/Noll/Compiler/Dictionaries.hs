@@ -32,10 +32,10 @@ import Lang.Common.Supply (supplied)
 import Lang.Label (Label (..))
 import Lang.Utils (Dictionary, Name)
 import Noll.Language
+import Noll.Language.Serializable (serialize)
 import Noll.Module
 import Noll.SystemF.Substitution
 import Noll.SystemF.Unification
-import Noll.Utils (serialize)
 
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
