@@ -1,6 +1,13 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Parser where
+module Noll.Parser (
+  Parser (..),
+  ParserError,
+  cons,
+  spaces,
+  word,
+  lexeme,
+) where
 
 import Control.Monad (when)
 import Data.Text (Text)
