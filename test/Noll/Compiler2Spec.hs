@@ -3,23 +3,22 @@
 
 module Noll.Compiler2Spec where
 
-import Debug.Trace
 import Control.Monad ((>=>))
-import Control.Monad.State (get)
 import Control.Monad.Identity (runIdentity)
+import Control.Monad.State (get)
 import Data.Set (Set)
 import Data.Text (Text)
+import Debug.Trace
 import Lang.Common.Environment (Environment)
 import Lang.Common.List1 (NonEmpty (..), (<|))
 import Lang.Label (Label (..))
 import Lang.Lowpass.Language (Module (..), Object (..), opaque)
-import Lang.Utils (Name)
+import Lang.Utils (Name, forM)
 import Noll.Compiler.Dictionaries
 import Noll.Compiler2
 import Noll.Compiler2.Internal
 import Noll.Language.Trait
 import Text.RawString.QQ
-import Lang.Utils (forM)
 
 import Data.Map.Strict (Map)
 
@@ -530,24 +529,23 @@ abc19 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc17, abc1
 
 abc20 :: [Noll.Module.Module () Kind ()] -> IO ()
 abc20 mods = do
-      traceShowM r
-      ms5 <- Lowpass.compileModules (moduleCore1 : fst r)
-      Lowpass.testModules ms5
-      pure ()
-    where
-      r = runIdentity (runCompiler2T compiler2TestEnvironment steps)
-      steps = do
-        -- TODO: Topological sort
-        ms2 <- forM mods $
-          \m -> do
-            s <- get
-            traceShowM s
-            m1 <- typePass m
-            let zz = m1 :: Noll.Module.Module () Kind IndexedType
-            pure m1
-        ms3 <- traverse mainPass ms2
-        ms4 <- traverse lowpassTranslationC ms3
-        pure ms4
+  traceShowM r
+  ms5 <- Lowpass.compileModules (moduleCore1 : fst r)
+  Lowpass.testModules ms5
+  pure ()
+ where
+  r = runIdentity (runCompiler2T compiler2TestEnvironment steps)
+  steps = do
+    -- TODO: Topological sort
+    ms2 <- forM mods $
+      \m -> do
+        s <- get
+        traceShowM s
+        typePass m
+    --            let zz = m1 :: Noll.Module.Module () Kind IndexedType
+    ms3 <- traverse mainPass ms2
+    ms4 <- traverse lowpassTranslationC ms3
+    pure ms4
 
 abc21 :: IO ()
 abc21 = abc20 Noll.Set20.Test01.prog10_01
@@ -793,6 +791,39 @@ moduleCore =
                         ( $Succ : int32/$Nat
                         , [- int32](n : int32, 1)
                         )
+              |]
+        , OFunction
+            "Core$.from_int32"
+            [ Label (Lowpass.TCon "Numeric" [opaque]) "$a"
+            ]
+            [r| 
+                  match<int32/*>($a : Numeric(*)) {
+                    | ( $Record : { from_int32 : int32/* | * }/Numeric(*)
+                      , $r : { from_int32 : int32/* | * }
+                      ) =>
+                        select
+                          { from_int32 = $f : int32/* | _ : * } =
+                            $r : { from_int32 : int32/* | * }
+                          in
+                            $f : int32/*
+                  }
+              |]
+        , OFunction
+            "Core$.from_int32__$instance.2967b53e939a3c94"
+            [ Label Lowpass.int32 "n"
+            ]
+            [r| 
+                  n : int32
+              |]
+        , OFunction
+            "Core$.from_int32_b"
+            [ Label Lowpass.int32 "n"
+            ]
+            [r| 
+                  @<$Nat>
+                    ( Core$.pack_nat : int32/$Nat
+                    , n : int32
+                    )
               |]
         ]
     }

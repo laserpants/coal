@@ -22,28 +22,7 @@ moduleUtilities =
     -- Exports
     ["factorial"]
     -- Definitions
-    [ DImport (Path ["Core$"]) ["pack_nat", "unpack_nat", "trace_int32"]
-    , DTrait
-        "Numeric"
-        []
-        (TVariable (Parameter () "a"))
-        [
-          ( "from_int32"
-          , TIntrinsic IInt32 `TArrow` TVariable (Parameter () "a")
-          )
-        ]
-    , DInstance
-        "Numeric"
-        (TIntrinsic IInt32)
-        [ DFunction
-            "from_int32"
-            ( Function
-                ()
-                (With [] ())
-                (PVariable () (Label () "n") :| [])
-                (EVariable () (Label () "n"))
-            )
-        ]
+    [ DImport (Path ["Core$"]) ["pack_nat", "unpack_nat", "trace_int32", "from_int32", "from_int32__$instance.2967b53e939a3c94", "from_int32__$instance.2967b53e939a3c94"]
     , DAnnotation
         (With [] (TIntrinsic IInt32))
         ( DFunction
@@ -138,46 +117,8 @@ moduleMain =
     -- Exports
     []
     -- Definitions
-    [ DImport (Path ["Core$"]) ["trace_int32"]
+    [ DImport (Path ["Core$"]) ["trace_int32", "from_int32", "from_int32__$instance.2967b53e939a3c94"]
     , DImport (Path ["Utilities"]) ["factorial"]
-    , DTrait
-        "Numeric"
-        []
-        (TVariable (Parameter () "a"))
-        [
-          ( "from_int32"
-          , TIntrinsic IInt32 `TArrow` TVariable (Parameter () "a")
-          )
-        ]
-    , DInstance
-        "Numeric"
-        (TIntrinsic INat)
-        [ DFunction
-            "from_int32"
-            ( Function
-                ()
-                (With [] ())
-                (PVariable () (Label () "n") :| [])
-                ( EApplication
-                    ()
-                    ()
-                    (EVariable () (Label () "Core$.pack_nat"))
-                    (EVariable () (Label () "n") :| [])
-                )
-            )
-        ]
-    , DInstance
-        "Numeric"
-        (TIntrinsic IInt32)
-        [ DFunction
-            "from_int32"
-            ( Function
-                ()
-                (With [] ())
-                (PVariable () (Label () "n") :| [])
-                (EVariable () (Label () "n"))
-            )
-        ]
     , DFunction
         "main"
         ( Function

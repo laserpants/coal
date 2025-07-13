@@ -4,10 +4,10 @@ module Noll.Parser.Type where
 
 import Control.Monad (void)
 import Control.Monad.Combinators.Expr
+import Data.Functor (($>))
 import Lang.Label (Label (..))
 import Noll.Language
 import Noll.Parser
-import Data.Functor (($>))
 import Noll.Parser.Identifier
 import Noll.Parser.Symbol
 import Text.Megaparsec (option, optional, (<|>))
@@ -18,4 +18,4 @@ intrinsicParser = lexeme "int32" $> IInt32
 
 -- TODO
 typeParser :: Parser (Type Parameter ())
-typeParser = TIntrinsic <$> intrinsicParser 
+typeParser = TIntrinsic <$> intrinsicParser
