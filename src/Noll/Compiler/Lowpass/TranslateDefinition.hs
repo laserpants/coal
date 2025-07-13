@@ -19,7 +19,7 @@ import Noll.Language
 import Noll.Module.Constant (Constant (..))
 import Noll.Module.Definition
 import Noll.Module.Function (Function (..))
-import Noll.Utils (hashed)
+import Noll.Utils (serialize)
 
 import qualified Lang.Lowpass.Language as Lowpass
 
@@ -76,7 +76,7 @@ translateDefinition =
       --      xx <- instanceDictionary2 postfix name t bs
       --      pure (concatMap snd bs <> [xx])
 
-      postfix = "__$instance." <> hashed (Trait name t)
+      postfix = "__$instance." <> serialize (Trait name t)
     _ ->
       pure []
 
