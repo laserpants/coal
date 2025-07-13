@@ -138,7 +138,7 @@ lookupTraitInstance tr@(Trait name _) = do
       mapEntriesM b (uncurry (go (Trait name a)))
  where
   go trait n (Forall _ ts t) = do
-    expr <- applyTraits (Label t (n <> "__$instance." <> serialize trait)) ts
+    expr <- applyTraits (Label t (n <> "__$instance_" <> serialize trait)) ts
     pure (n, expr)
 
 applyTraits :: (Monoid a) => Label (Type TypeIndex Kind) -> [Trait (Type TypeIndex Kind)] -> DictionaryStack (Expression a (Type TypeIndex Kind))

@@ -22,7 +22,7 @@ moduleUtilities =
     -- Exports
     ["factorial"]
     -- Definitions
-    [ DImport (Path ["Core$"]) ["pack_nat", "unpack_nat", "trace_int32", "from_int32", "from_int32__$instance.Numeric(Intrinsic(Nat))", "from_int32__$instance.Numeric(Intrinsic(Int32))"]
+    [ DImport (Path ["Core$"]) ["pack_nat", "unpack_nat", "trace_int32", "from_int32", "from_int32__$instance_Numeric(Intrinsic(Nat))", "from_int32__$instance_Numeric(Intrinsic(Int32))"]
     , DAnnotation
         (With [] (TIntrinsic IInt32))
         ( DFunction
@@ -117,7 +117,7 @@ moduleMain =
     -- Exports
     []
     -- Definitions
-    [ DImport (Path ["Core$"]) ["trace_int32", "from_int32", "from_int32__$instance.Numeric(Intrinsic(Int32))"]
+    [ DImport (Path ["Core$"]) ["trace_int32", "from_int32", "from_int32__$instance_Numeric(Intrinsic(Int32))"]
     , DImport (Path ["Utilities"]) ["factorial"]
     , DFunction
         "main"

@@ -800,14 +800,14 @@ moduleCore =
                   }
               |]
         , OFunction
-            "Core$.from_int32__$instance.Numeric(Intrinsic(Int32))"
+            "Core$.from_int32__$instance_Numeric(Intrinsic(Int32))"
             [ Label Lowpass.int32 "n"
             ]
             [r| 
                   n : int32
               |]
         , OFunction
-            "Core$.from_int32__$instance.Numeric(Intrinsic(Nat))"
+            "Core$.from_int32__$instance_Numeric(Intrinsic(Nat))"
             [ Label Lowpass.int32 "n"
             ]
             [r| 

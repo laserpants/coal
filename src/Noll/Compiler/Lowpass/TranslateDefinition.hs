@@ -76,7 +76,7 @@ translateDefinition =
       --      xx <- instanceDictionary2 postfix name t bs
       --      pure (concatMap snd bs <> [xx])
 
-      postfix = "__$instance." <> serialize (Trait name t)
+      postfix = "__$instance_" <> serialize (Trait name t)
     _ ->
       pure []
 

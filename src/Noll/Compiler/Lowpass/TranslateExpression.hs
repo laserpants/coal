@@ -189,7 +189,7 @@ translateExpression =
     --    EPlaceholderApplication a t e ts es ->
     --      undefined
     EPlaceholder _ t trait@(Trait name _) ->
-      pure (Lowpass.var (Label (translateType t) ("$d." <> name <> "__$instance." <> serialize trait)))
+      pure (Lowpass.var (Label (translateType t) ("$d." <> name <> "__$instance_" <> serialize trait)))
     EFold _ _ _ _ (Just e) ->
       translateExpression e
     EUnfold _ _ _ _ _ _ (Just e) ->
@@ -240,7 +240,7 @@ translatePattern =
       pure (Label (translateType (typeOf p)) "_")
     PPlaceholder _ t trait@(Trait name _) ->
       -- TODO: DRY?
-      pure (Label (translateType t) ("$d." <> name <> "__$instance." <> serialize trait))
+      pure (Label (translateType t) ("$d." <> name <> "__$instance_" <> serialize trait))
 
 translateClause :: (MonadReader TranslateEnvironment m, Data a) => CompiledClause a IndexedType -> m (Lowpass.Clause Lowpass.Type LowpassExpr)
 translateClause =
