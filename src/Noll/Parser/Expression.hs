@@ -4,7 +4,6 @@ module Noll.Parser.Expression where
 
 import Control.Monad (void)
 import Control.Monad.Combinators.Expr
-import Data.Functor (($>))
 import Lang.Common.List1 (NonEmpty (..))
 import Lang.Label (Label (..))
 import Noll.Language
@@ -91,6 +90,7 @@ binaryOperator op e1 e2 =
     (EBinaryOperator () () op)
     (e1 :| [e2])
 
+fixity8 :: [Operator Parser (Expression () ())]
 fixity8 = []
 
 fixity7 :: [Operator Parser (Expression () ())]
@@ -98,6 +98,7 @@ fixity7 =
   [ InfixL (binaryOperator OMultiplication <$ symbol "*")
   ]
 
+fixity6, fixity5, fixity4, fixity3, fixity2 :: [Operator Parser (Expression () ())]
 fixity6 = []
 fixity5 = []
 fixity4 = []
