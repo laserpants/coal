@@ -60,6 +60,7 @@ library
       Noll.Language.HasType
       Noll.Language.Pattern
       Noll.Language.Primitive
+      Noll.Language.Serializable
       Noll.Language.Trait
       Noll.Language.Type
       Noll.Language.Type.Indexed
