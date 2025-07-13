@@ -3,7 +3,9 @@
 
 module Noll.Compiler2Spec where
 
+import Debug.Trace
 import Control.Monad ((>=>))
+import Control.Monad.State (get)
 import Control.Monad.Identity (runIdentity)
 import Data.Set (Set)
 import Data.Text (Text)
@@ -528,19 +530,27 @@ abc19 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc17, abc1
 
 abc20 :: [Noll.Module.Module () Kind ()] -> IO ()
 abc20 mods = do
-  undefined
+      traceShowM r
+      ms5 <- Lowpass.compileModules (moduleCore1 : fst r)
+      Lowpass.testModules ms5
+      pure ()
     where
       r = runIdentity (runCompiler2T compiler2TestEnvironment steps)
       steps = do
         -- TODO: Topological sort
         ms2 <- forM mods $
           \m -> do
+            s <- get
+            traceShowM s
             m1 <- typePass m
             let zz = m1 :: Noll.Module.Module () Kind IndexedType
-            undefined
+            pure m1
         ms3 <- traverse mainPass ms2
         ms4 <- traverse lowpassTranslationC ms3
         pure ms4
+
+abc21 :: IO ()
+abc21 = abc20 Noll.Set20.Test01.prog10_01
 
 moduleCore1 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
 moduleCore1 = Lowpass.unsafeParseExpr <$> moduleCore
