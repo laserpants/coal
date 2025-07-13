@@ -57,9 +57,7 @@ foldExpression = do
   pure (EFold () () (expr :| exprs) (c :| cs) Nothing)
 
 variableExpression :: Parser (Expression () ())
-variableExpression = do
-  var <- name
-  pure (EVariable () (Label () var))
+variableExpression = EVariable () . Label () <$> name
 
 intExpression :: Parser (Expression () ())
 intExpression = do
