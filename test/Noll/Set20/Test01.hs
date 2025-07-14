@@ -58,16 +58,16 @@ moduleUtilities =
                         ( CPlain
                             ()
                             []
-                            ( EAnnotation
+                            --                            ( EAnnotation
+                            --                                ()
+                            --                                (TIntrinsic IInt32)
+                            ( EApplication
                                 ()
-                                (TIntrinsic IInt32)
-                                ( EApplication
-                                    ()
-                                    ()
-                                    (EVariable () (Label () "from_int32"))
-                                    (ELiteral () (LInt32 1) :| [])
-                                )
+                                ()
+                                (EVariable () (Label () "from_int32"))
+                                (ELiteral () (LInt32 1) :| [])
                             )
+                            --                            )
                             :| []
                         )
                         <| EClause
@@ -115,7 +115,7 @@ moduleMain =
   Module.fromDefinitionList
     (Path ["Main"])
     -- Exports
-    []
+    ["*"]
     -- Definitions
     [ DImport (Path ["Core$"]) ["trace_int32", "from_int32", "from_int32__$instance_Numeric(Intrinsic(Int32))"]
     , DImport (Path ["Utilities"]) ["factorial"]

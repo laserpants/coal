@@ -13,11 +13,13 @@ import Lang.Common.Environment (Environment)
 import Lang.Common.List1 (NonEmpty (..), (<|))
 import Lang.Label (Label (..))
 import Lang.Lowpass.Language (Module (..), Object (..), opaque)
-import Lang.Utils (Name, forM)
+import Lang.Utils (Name, forM, forM_)
 import Noll.Compiler.Dictionaries
 import Noll.Compiler2
 import Noll.Compiler2.Internal
 import Noll.Language.Trait
+import Noll.Parser.Module
+import Text.Megaparsec (runParser)
 import Text.RawString.QQ
 
 import Data.Map.Strict (Map)
@@ -44,6 +46,8 @@ import qualified Noll.Set20.Test01
 import qualified Noll.Set7.Test01
 import qualified Noll.Set8.Test01
 import qualified Noll.Set9.Test01
+
+import qualified Data.Text as Text
 
 spec :: Spec
 spec =
@@ -521,6 +525,10 @@ abc18 = fst (runIdentity (runCompiler2T compiler2TestEnvironment prog))
         ( "factorial"
         , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
         )
+      ,
+        ( "unpack_nat"
+        , Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic IInt32)
+        )
       ]
     compileModule Noll.Set20.Test01.moduleMain
 
@@ -537,6 +545,17 @@ abc20 mods = do
   r = runIdentity (runCompiler2T compiler2TestEnvironment steps)
   steps = do
     -- TODO: Topological sort
+    --
+    insertNamesC
+      [
+        ( "factorial"
+        , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
+        )
+      ,
+        ( "unpack_nat"
+        , Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic IInt32)
+        )
+      ]
     ms2 <- forM mods $
       \m -> do
         s <- get
@@ -549,6 +568,49 @@ abc20 mods = do
 
 abc21 :: IO ()
 abc21 = abc20 Noll.Set20.Test01.prog10_01
+
+--
+
+abc22 :: [String] -> IO ()
+abc22 files = do
+  ms <- traverse readFile files
+  let x = fmap parsing ms
+  traceShowM (x :: [Noll.Module.Module () () ()])
+  traceShowM (Noll.Set20.Test01.prog10_01 :: [Noll.Module.Module () () ()])
+  traceShowM (x == (Noll.Set20.Test01.prog10_01 :: [Noll.Module.Module () () ()]))
+  let r = runIdentity (runCompiler2T compiler2TestEnvironment (steps x))
+  ms5 <- Lowpass.compileModules (moduleCore1 : fst r)
+  Lowpass.testModules ms5
+ where
+  steps mods = do
+    traceShow mods $ do
+      -- TODO: Topological sort
+      --
+      insertNamesC
+        [
+          ( "factorial"
+          , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
+          )
+        ,
+          ( "unpack_nat"
+          , Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic IInt32)
+          )
+        ]
+      ms2 <- traverse typePass mods
+      ms3 <- traverse mainPass ms2
+      traverse lowpassTranslationC ms3
+  parsing m =
+    case runParser moduleParser "" (Text.pack m) of
+      Left e ->
+        error (show e)
+      Right q ->
+        q
+
+abc23 =
+  abc22
+    [ "./test/Noll/Fixtures/01/Utilities.coal"
+    , "./test/Noll/Fixtures/01/Main.coal"
+    ]
 
 moduleCore1 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
 moduleCore1 = Lowpass.unsafeParseExpr <$> moduleCore
