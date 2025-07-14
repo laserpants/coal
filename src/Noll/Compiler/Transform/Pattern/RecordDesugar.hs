@@ -18,6 +18,7 @@ import Control.Monad.RWS
 import Data.Data (Data)
 import Data.Foldable (foldrM)
 import Data.Generics.Uniplate.Data (transformBiM)
+import Data.Tuple.Extra (thd3)
 import Lang.Common.List1 (List1, NonEmpty (..))
 import Lang.Common.Supply (suppliedName)
 import Lang.Label (Label (..))
@@ -73,62 +74,54 @@ instance (Data a, Monoid a, Show a) => RecordPattern a (Guard Expression a (Type
 instance (Data a, Monoid a, Show a) => RecordPattern a (Clause a (Type TypeIndex Kind)) where
   expandRecordPatterns =
     \case
-      EClause a p cs -> do
-        (q, ys) <- listen (expandRecordPatterns p)
-        ds <- forM cs $
-          \case
-            CPlain a1 gs e -> do
-              hs <- expandRecordPatterns gs
-              f <- foldrM go e ys
-              pure (CPlain a1 hs f)
-            CLambda{} ->
-              error "Not implemented"
-        pure (EClause a q ds)
+      EClause a pat clauses -> do
+        (pat', fields) <- listen (expandRecordPatterns pat)
+        clauses' <- forM clauses $ \case
+          CPlain a1 guards expr -> do
+            guards' <- expandRecordPatterns guards
+            expr' <- foldrM (insertMatch a1) expr fields
+            pure (CPlain a1 guards' expr')
+          CLambda{} ->
+            error "Not implemented"
+        pure (EClause a pat' clauses')
    where
-    go (name, d, _) e = do
-      let fields = Map.toList d
+    insertMatch a (name, dict, _) expr = do
+      let fields = Map.toList dict
       names <- replicateM (length fields - 1) suppliedName
-      (_, _, e1) <- foldrM go1 ("_", RNil, e) (zip fields (name : names))
-      pure e1
-    go1 ((name, p), pfix) (var, row, e) = do
-      let t = typeOf e
-          q = typeOf p
-          ll = Label q (pfix <> ".field." <> name)
-      pure
-        ( pfix
-        , RExtend name q row
-        , EFocus
-            name
-            ll
-            (Label (TIntrinsic (IRecord (TRow row))) (pfix <> ".tail"))
-            (EVariable mempty (Label (TRow (RExtend name q row)) pfix))
-            ( EMatch
-                mempty
-                t
-                (EVariable mempty ll)
-                ( EClause
-                    mempty
-                    p
-                    ( CPlain
-                        mempty
-                        []
-                        ( EMatch
-                            mempty
-                            t
-                            (EVariable mempty (Label (TIntrinsic (IRecord (TRow row))) (pfix <> ".tail")))
-                            ( EClause
-                                mempty
-                                (PConstructor mempty (Label (TIntrinsic (IRecord (TRow row))) "$Record") [PVariable mempty (Label (TRow row) var)])
-                                (CPlain mempty [] e :| [])
-                                :| []
-                            )
-                        )
-                        :| []
-                    )
-                    :| []
-                )
-            )
-        )
+      thd3 <$> foldrM (go a) ("_", RNil, expr) (zip fields (name : names))
+
+    go _ ((fieldName, pat), prefix) (var, row, expr) = do
+      let t1 = typeOf expr
+          t2 = typeOf pat
+          ll1 = Label t2 (prefix <> ".field." <> fieldName)
+          ll2 = Label (TIntrinsic (IRecord (TRow row))) (prefix <> ".tail")
+          var1 = EVariable mempty (Label (TRow (RExtend fieldName t2 row)) prefix)
+          var2 = EVariable mempty ll2
+
+          innerClause =
+            EClause
+              mempty
+              ( PConstructor
+                  mempty
+                  (Label (TIntrinsic (IRecord (TRow row))) "$Record")
+                  [PVariable mempty (Label (TRow row) var)]
+              )
+              (CPlain mempty [] expr :| [])
+
+          matchTail =
+            EMatch mempty t1 var2 (innerClause :| [])
+
+          matchField =
+            EMatch
+              mempty
+              t1
+              (EVariable mempty ll1)
+              (EClause mempty pat (CPlain mempty [] matchTail :| []) :| [])
+
+          focusExpr =
+            EFocus fieldName ll1 ll2 var1 matchField
+
+      pure (prefix, RExtend fieldName t2 row, focusExpr)
 
 instance (Monoid a, Show a) => RecordPattern a (Pattern a (Type TypeIndex Kind)) where
   expandRecordPatterns =
