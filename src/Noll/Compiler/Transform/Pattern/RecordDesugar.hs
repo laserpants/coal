@@ -9,8 +9,8 @@
 -- TODO
 module Noll.Compiler.Transform.Pattern.RecordDesugar where
 
+import Debug.Trace
 import Control.Monad.RWS
-import Control.Monad.State (MonadState)
 import Control.Monad.Writer
 import Data.Data (Data)
 import Data.Foldable (foldrM)
@@ -18,10 +18,8 @@ import Data.Generics.Uniplate.Data (transformBiM)
 import Lang.Common.List1 (List1, NonEmpty (..))
 import Lang.Common.Supply (suppliedName)
 import Lang.Label (Label (..))
-import Lang.Utils (Dictionary, Map, Name, traverseM)
+import Lang.Utils (Dictionary, Map, Name)
 import Noll.Language
-import Noll.Language.HasType (HasType (..))
-import Noll.Language.Type.Row (RowData (..))
 import Noll.Module (Module (..))
 
 import qualified Data.Map.Strict as Map
@@ -39,16 +37,6 @@ compileRecordPatterns2 ::
   Expression a (Type TypeIndex Kind) ->
   m (Expression a (Type TypeIndex Kind))
 compileRecordPatterns2 = transformBiM (expandRecordPatterns :: Expression a (Type TypeIndex Kind) -> m (Expression a (Type TypeIndex Kind)))
-
--- expandExpression :: (Show a, Data a, Monoid a, MonadState Int m, MonadWriter [(Name, Dictionary (TypedPattern a), Maybe (TypedPattern a))] m, MonadReader Name m) => Expression a (Type TypeIndex Kind) -> m (Expression a (Type TypeIndex Kind))
--- expandExpression =
---  \case
---      EMatch a t e cs ->
---        EMatch a t e <$> expandRecordPatterns cs
---      EFold a t es cs e ->
---        EFold a t es <$> expandRecordPatterns cs <*> pure e
---      e ->
---        pure e
 
 type TypedPattern a = Pattern a (Type TypeIndex Kind)
 
@@ -93,46 +81,42 @@ instance (Data a, Monoid a, Show a) => RecordPattern a (Clause a (Type TypeIndex
         (q, ys) <- runWriterT (expandRecordPatterns p)
         ds <- forM cs $
           \case
-            CPlain a gs e -> do
+            CPlain a1 gs e -> do
               hs <- expandRecordPatterns gs
               f <- foldrM zork e ys
-              pure (CPlain a hs f)
+              pure (CPlain a1 hs f)
             CLambda{} ->
               error "Not implemented"
         pure (EClause a q ds)
-
-zork ::
-  (Data a, Monoid a, MonadState Int m, MonadReader Name m) =>
-  (Name, Dictionary (TypedPattern a), Maybe (TypedPattern a)) ->
-  Expression a (Type TypeIndex Kind) ->
-  m (Expression a (Type TypeIndex Kind))
-zork (name, d, mp) e = do
-  names <- replicateM (length zz - 1) suppliedName
-  (_, _, aa) <- foldrM messy ("_", RNil, e) (zip zz (name : names))
-  pure aa
- where
-  zz = Map.toList d
+    where
+      -- TODO
+      zork (name, d, _) e = do
+        names <- replicateM (length zz - 1) suppliedName
+        (_, _, aa) <- foldrM messy ("_", RNil, e) (zip zz (name : names))
+        pure aa
+       where
+        zz = Map.toList d
 
 messy ::
   (Data a, Monad m, Monoid a) =>
   ((Name, TypedPattern a), Name) ->
   (Name, Row TypeIndex Kind (Type TypeIndex Kind), Expression a (Type TypeIndex Kind)) ->
   m (Name, Row TypeIndex Kind (Type TypeIndex Kind), Expression a (Type TypeIndex Kind))
-messy ((name, p), rrr) (x, tttr, e) = do
+messy ((name, p), pfix) (var, row, e) = do
   let t = typeOf e 
       q = typeOf p 
   pure
-    ( rrr
-    , RExtend name q tttr
+    ( pfix
+    , RExtend name q row
     , EFocus
         name
-        (Label q (rrr <> ".field." <> name))
-        (Label (TIntrinsic (IRecord (TRow tttr))) (rrr <> ".tail"))
-        (EVariable mempty (Label (TRow (RExtend name q tttr)) rrr))
+        (Label q (pfix <> ".field." <> name))
+        (Label (TIntrinsic (IRecord (TRow row))) (pfix <> ".tail"))
+        (EVariable mempty (Label (TRow (RExtend name q row)) pfix))
         ( EMatch
             mempty
             t
-            (EVariable mempty (Label q (rrr <> ".field." <> name)))
+            (EVariable mempty (Label q (pfix <> ".field." <> name)))
             ( EClause
                 mempty
                 p
@@ -142,10 +126,10 @@ messy ((name, p), rrr) (x, tttr, e) = do
                     ( EMatch
                         mempty
                         t
-                        (EVariable mempty (Label (TIntrinsic (IRecord (TRow tttr))) (rrr <> ".tail")))
+                        (EVariable mempty (Label (TIntrinsic (IRecord (TRow row))) (pfix <> ".tail")))
                         ( EClause
                             mempty
-                            (PConstructor mempty (Label (TIntrinsic (IRecord (TRow tttr))) "$Record") [PVariable mempty (Label (TRow tttr) x)])
+                            (PConstructor mempty (Label (TIntrinsic (IRecord (TRow row))) "$Record") [PVariable mempty (Label (TRow row) var)])
                             (CPlain mempty [] e :| [])
                             :| []
                         )

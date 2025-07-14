@@ -7,6 +7,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
 
+-- TODO
 module Noll.Compiler.Dictionaries (
   TraitContext (..),
   DictionaryEnvironment (..),
