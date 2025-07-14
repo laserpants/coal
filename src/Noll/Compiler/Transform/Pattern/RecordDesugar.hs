@@ -10,7 +10,6 @@
 module Noll.Compiler.Transform.Pattern.RecordDesugar where
 
 import Control.Monad.RWS
-import Control.Monad.Writer
 import Data.Data (Data)
 import Data.Foldable (foldrM)
 import Data.Generics.Uniplate.Data (transformBiM)
@@ -24,24 +23,20 @@ import Noll.Module (Module (..))
 
 import qualified Data.Map.Strict as Map
 
-compileRecordPatterns ::
-  forall m a k t.
-  (Monoid a, Show a, Data a, Data k, Data t, MonadState Int m, MonadWriter [(Name, Dictionary (TypedPattern a), Maybe (TypedPattern a))] m, MonadReader Name m) =>
-  Module a k t ->
-  m (Module a k t)
-compileRecordPatterns = transformBiM (expandRecordPatterns :: Expression a (Type TypeIndex Kind) -> m (Expression a (Type TypeIndex Kind)))
+compileRecordPatterns :: forall a k t. (Monoid a, Show a, Data a, Data t, Data k) => Module a k t -> RWS Name [(Name, Dictionary (TypedPattern a), Maybe (TypedPattern a))] Int (Module a k t)
+compileRecordPatterns = transformBiM (expandRecordPatterns :: Expression a (Type TypeIndex Kind) -> RWS Name [(Name, Dictionary (TypedPattern a), Maybe (TypedPattern a))] Int (Expression a (Type TypeIndex Kind)))
 
-compileRecordPatterns2 ::
-  forall m a.
-  (Monoid a, Show a, Data a, MonadState Int m, MonadWriter [(Name, Dictionary (TypedPattern a), Maybe (TypedPattern a))] m, MonadReader Name m) =>
-  Expression a (Type TypeIndex Kind) ->
-  m (Expression a (Type TypeIndex Kind))
-compileRecordPatterns2 = transformBiM (expandRecordPatterns :: Expression a (Type TypeIndex Kind) -> m (Expression a (Type TypeIndex Kind)))
+--compileRecordPatterns2 ::
+--  forall m a.
+--  (Monoid a, Show a, Data a, MonadState Int m, MonadWriter [(Name, Dictionary (TypedPattern a), Maybe (TypedPattern a))] m, MonadReader Name m) =>
+--  Expression a (Type TypeIndex Kind) ->
+--  m (Expression a (Type TypeIndex Kind))
+--compileRecordPatterns2 = transformBiM (expandRecordPatterns :: (Data a, Monoid a) => Expression a (Type TypeIndex Kind) -> RWS Name [(Name, Dictionary (TypedPattern a), Maybe (TypedPattern a))] Int (Expression a (Type TypeIndex Kind)))
 
 type TypedPattern a = Pattern a (Type TypeIndex Kind)
 
 class RecordPattern a p where
-  expandRecordPatterns :: (MonadState Int m, MonadWriter [(Name, Dictionary (TypedPattern a), Maybe (TypedPattern a))] m, MonadReader Name m) => p -> m p
+  expandRecordPatterns :: p -> RWS Name [(Name, Dictionary (TypedPattern a), Maybe (TypedPattern a))] Int p
 
 runExpandRecordPatterns :: RWS Name w Int a -> Name -> Int -> (a, w)
 runExpandRecordPatterns = evalRWS
