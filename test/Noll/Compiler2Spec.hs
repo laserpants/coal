@@ -575,9 +575,6 @@ abc22 :: [String] -> IO ()
 abc22 files = do
   ms <- traverse readFile files
   let x = fmap parsing ms
-  traceShowM (x :: [Noll.Module.Module () () ()])
-  traceShowM (Noll.Set20.Test01.prog10_01 :: [Noll.Module.Module () () ()])
-  traceShowM (x == (Noll.Set20.Test01.prog10_01 :: [Noll.Module.Module () () ()]))
   let r = runIdentity (runCompiler2T compiler2TestEnvironment (steps x))
   ms5 <- Lowpass.compileModules (moduleCore1 : fst r)
   Lowpass.testModules ms5
