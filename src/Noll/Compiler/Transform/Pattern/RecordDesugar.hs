@@ -9,12 +9,12 @@
 -- TODO
 module Noll.Compiler.Transform.Pattern.RecordDesugar where
 
-import Debug.Trace
 import Control.Monad.RWS
 import Control.Monad.Writer
 import Data.Data (Data)
 import Data.Foldable (foldrM)
 import Data.Generics.Uniplate.Data (transformBiM)
+import Debug.Trace
 import Lang.Common.List1 (List1, NonEmpty (..))
 import Lang.Common.Supply (suppliedName)
 import Lang.Label (Label (..))
@@ -83,63 +83,56 @@ instance (Data a, Monoid a, Show a) => RecordPattern a (Clause a (Type TypeIndex
           \case
             CPlain a1 gs e -> do
               hs <- expandRecordPatterns gs
-              f <- foldrM zork e ys
+              f <- foldrM go e ys
               pure (CPlain a1 hs f)
             CLambda{} ->
               error "Not implemented"
         pure (EClause a q ds)
-    where
-      -- TODO
-      zork (name, d, _) e = do
-        names <- replicateM (length zz - 1) suppliedName
-        (_, _, aa) <- foldrM messy ("_", RNil, e) (zip zz (name : names))
-        pure aa
-       where
-        zz = Map.toList d
-
-messy ::
-  (Data a, Monad m, Monoid a) =>
-  ((Name, TypedPattern a), Name) ->
-  (Name, Row TypeIndex Kind (Type TypeIndex Kind), Expression a (Type TypeIndex Kind)) ->
-  m (Name, Row TypeIndex Kind (Type TypeIndex Kind), Expression a (Type TypeIndex Kind))
-messy ((name, p), pfix) (var, row, e) = do
-  let t = typeOf e 
-      q = typeOf p 
-  pure
-    ( pfix
-    , RExtend name q row
-    , EFocus
-        name
-        (Label q (pfix <> ".field." <> name))
-        (Label (TIntrinsic (IRecord (TRow row))) (pfix <> ".tail"))
-        (EVariable mempty (Label (TRow (RExtend name q row)) pfix))
-        ( EMatch
-            mempty
-            t
-            (EVariable mempty (Label q (pfix <> ".field." <> name)))
-            ( EClause
+   where
+    go (name, d, _) e = do
+      let fields = Map.toList d
+      names <- replicateM (length fields - 1) suppliedName
+      (_, _, e1) <- foldrM go1 ("_", RNil, e) (zip fields (name : names))
+      pure e1
+    go1 ((name, p), pfix) (var, row, e) = do
+      let t = typeOf e
+          q = typeOf p
+          ll = Label q (pfix <> ".field." <> name)
+      pure
+        ( pfix
+        , RExtend name q row
+        , EFocus
+            name
+            ll
+            (Label (TIntrinsic (IRecord (TRow row))) (pfix <> ".tail"))
+            (EVariable mempty (Label (TRow (RExtend name q row)) pfix))
+            ( EMatch
                 mempty
-                p
-                ( CPlain
+                t
+                (EVariable mempty ll)
+                ( EClause
                     mempty
-                    []
-                    ( EMatch
+                    p
+                    ( CPlain
                         mempty
-                        t
-                        (EVariable mempty (Label (TIntrinsic (IRecord (TRow row))) (pfix <> ".tail")))
-                        ( EClause
+                        []
+                        ( EMatch
                             mempty
-                            (PConstructor mempty (Label (TIntrinsic (IRecord (TRow row))) "$Record") [PVariable mempty (Label (TRow row) var)])
-                            (CPlain mempty [] e :| [])
-                            :| []
+                            t
+                            (EVariable mempty (Label (TIntrinsic (IRecord (TRow row))) (pfix <> ".tail")))
+                            ( EClause
+                                mempty
+                                (PConstructor mempty (Label (TIntrinsic (IRecord (TRow row))) "$Record") [PVariable mempty (Label (TRow row) var)])
+                                (CPlain mempty [] e :| [])
+                                :| []
+                            )
                         )
+                        :| []
                     )
                     :| []
                 )
-                :| []
             )
         )
-    )
 
 instance (Monoid a, Show a) => RecordPattern a (Pattern a (Type TypeIndex Kind)) where
   expandRecordPatterns =

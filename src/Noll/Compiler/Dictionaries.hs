@@ -7,7 +7,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
 
--- TODO
 module Noll.Compiler.Dictionaries (
   TraitContext (..),
   DictionaryEnvironment (..),
@@ -29,6 +28,7 @@ import Data.List (nub)
 import Data.Map.Strict (Map)
 import Data.Maybe (catMaybes)
 import Lang.Common.Environment (Environment (..))
+import Lang.Common.List1 (NonEmpty (..), fromList1)
 import Lang.Common.Supply (supplied)
 import Lang.Label (Label (..))
 import Lang.Utils (Dictionary, Name)
@@ -41,7 +41,6 @@ import Noll.SystemF.Unification
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
 import qualified Lang.Common.Environment as Environment
-import Lang.Common.List1 (NonEmpty (..), fromList1)
 
 data DictionaryEnvironment = DictionaryEnvironment
   { dictionaryEnvironmentNames :: Environment (Scheme TypeIndex Kind (Type TypeIndex Kind))
