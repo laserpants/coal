@@ -585,10 +585,6 @@ abc22 files = do
       --
       insertNamesC
         [
-          ( "factorial"
-          , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
-          )
-        ,
           ( "unpack_nat"
           , Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic IInt32)
           )
