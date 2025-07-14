@@ -97,3 +97,5 @@ instance OrPattern (Pattern a t) where
         pure (List1.singleton p)
       p@PShorthand{} ->
         pure (List1.singleton p)
+      _ ->
+        error "TODO"

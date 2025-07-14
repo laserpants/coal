@@ -108,17 +108,19 @@ zork ::
   m (Expression a (Type TypeIndex Kind))
 zork (name, d, mp) e = do
   names <- replicateM (length zz - 1) suppliedName
-  (_, _, aa) <- foldrM tork ("_", RNil, e) (zip zz (name : names))
+  (_, _, aa) <- foldrM messy ("_", RNil, e) (zip zz (name : names))
   pure aa
  where
   zz = Map.toList d
 
-tork ::
+messy ::
   (Data a, Monad m, Monoid a) =>
   ((Name, TypedPattern a), Name) ->
   (Name, Row TypeIndex Kind (Type TypeIndex Kind), Expression a (Type TypeIndex Kind)) ->
   m (Name, Row TypeIndex Kind (Type TypeIndex Kind), Expression a (Type TypeIndex Kind))
-tork ((name, p), rrr) (x, tttr, e) = do
+messy ((name, p), rrr) (x, tttr, e) = do
+  let t = typeOf e 
+      q = typeOf p 
   pure
     ( rrr
     , RExtend name q tttr
@@ -154,9 +156,6 @@ tork ((name, p), rrr) (x, tttr, e) = do
             )
         )
     )
- where
-  t = typeOf e :: Type TypeIndex Kind
-  q = typeOf p :: Type TypeIndex Kind
 
 instance (Monoid a, Show a) => RecordPattern a (Pattern a (Type TypeIndex Kind)) where
   expandRecordPatterns =
