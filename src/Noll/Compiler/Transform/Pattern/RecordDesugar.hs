@@ -78,7 +78,7 @@ instance (Data a, Monoid a, Show a) => RecordPattern a (Clause a (Type TypeIndex
   expandRecordPatterns =
     \case
       EClause a p cs -> do
-        (q, ys) <- runWriterT (expandRecordPatterns p)
+        (q, ys) <- listen (expandRecordPatterns p)
         ds <- forM cs $
           \case
             CPlain a1 gs e -> do
