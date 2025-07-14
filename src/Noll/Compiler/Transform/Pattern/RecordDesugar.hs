@@ -5,15 +5,19 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
+{-# LANGUAGE TypeApplications #-}
 
--- TODO
-module Noll.Compiler.Transform.Pattern.RecordDesugar where
+module Noll.Compiler.Transform.Pattern.RecordDesugar (
+  RecordPattern (..),
+  TypedPattern,
+  compileRecordPatterns,
+  runExpandRecordPatterns,
+) where
 
 import Control.Monad.RWS
 import Data.Data (Data)
 import Data.Foldable (foldrM)
 import Data.Generics.Uniplate.Data (transformBiM)
-import Debug.Trace
 import Lang.Common.List1 (List1, NonEmpty (..))
 import Lang.Common.Supply (suppliedName)
 import Lang.Label (Label (..))
@@ -23,17 +27,14 @@ import Noll.Module (Module (..))
 
 import qualified Data.Map.Strict as Map
 
-compileRecordPatterns :: forall a k t. (Monoid a, Show a, Data a, Data t, Data k) => Module a k t -> RWS Name [(Name, Dictionary (TypedPattern a), Maybe (TypedPattern a))] Int (Module a k t)
-compileRecordPatterns = transformBiM (expandRecordPatterns :: Expression a (Type TypeIndex Kind) -> RWS Name [(Name, Dictionary (TypedPattern a), Maybe (TypedPattern a))] Int (Expression a (Type TypeIndex Kind)))
-
---compileRecordPatterns2 ::
---  forall m a.
---  (Monoid a, Show a, Data a, MonadState Int m, MonadWriter [(Name, Dictionary (TypedPattern a), Maybe (TypedPattern a))] m, MonadReader Name m) =>
---  Expression a (Type TypeIndex Kind) ->
---  m (Expression a (Type TypeIndex Kind))
---compileRecordPatterns2 = transformBiM (expandRecordPatterns :: (Data a, Monoid a) => Expression a (Type TypeIndex Kind) -> RWS Name [(Name, Dictionary (TypedPattern a), Maybe (TypedPattern a))] Int (Expression a (Type TypeIndex Kind)))
-
 type TypedPattern a = Pattern a (Type TypeIndex Kind)
+
+compileRecordPatterns ::
+  forall a k t.
+  (Monoid a, Show a, Data a, Data t, Data k) =>
+  Module a k t ->
+  RWS Name [(Name, Dictionary (TypedPattern a), Maybe (TypedPattern a))] Int (Module a k t)
+compileRecordPatterns = transformBiM (expandRecordPatterns @a @(Expression a (Type TypeIndex Kind)))
 
 class RecordPattern a p where
   expandRecordPatterns :: p -> RWS Name [(Name, Dictionary (TypedPattern a), Maybe (TypedPattern a))] Int p
