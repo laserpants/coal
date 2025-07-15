@@ -9,7 +9,7 @@ import Lang.Common.List1 (List1, fromList1)
 import Noll.Language.Trait
 import Noll.Language.Type
 import Noll.Language.Type.Intrinsic
-import TextShow
+import TextShow (showt)
 
 class Serializable s where
   serialize :: s -> Text
