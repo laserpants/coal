@@ -14,14 +14,12 @@ module Noll.SystemF.Constraint.Generation (
 import Control.Monad.Reader (asks)
 import Data.Data (Data)
 import Data.Maybe (maybeToList)
-import Data.Tuple.Extra (second, third3)
-import Debug.Trace
+import Data.Tuple.Extra (third3)
 import Lang.Common.List1 (NonEmpty ((:|)), fromList1)
 import Lang.Common.Supply (supplied)
 import Lang.Label (Label (..))
 import Lang.Utils
 import Noll.Language
-import Noll.Language.HasType (foldTypeOf)
 import Noll.SystemF.Constraint (Constraint (..))
 import Noll.SystemF.Constraint.Assumption
 import Noll.SystemF.Constraint.Generation.Internal
@@ -280,6 +278,8 @@ collectConstraints =
     ECodataSelect{} ->
       -- TODO
       pure []
+    e ->
+      error "Not implemented"
 
 listConstructorTypeScheme :: Scheme TypeIndex Kind IndexedType
 listConstructorTypeScheme = forall1 (\a -> a ~> TIntrinsic (IList a) ~> TIntrinsic (IList a))
