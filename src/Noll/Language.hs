@@ -12,6 +12,7 @@ module Noll.Language (
   module Noll.Language.Pattern,
   module Noll.Language.Primitive,
   module Noll.Language.Expression,
+  module Noll.Language.Serializable,
   module Noll.Language.Expression.Choice,
   module Noll.Language.Expression.Binding,
   module Noll.Language.Expression.Operator,
@@ -26,6 +27,7 @@ import Noll.Language.HasKind
 import Noll.Language.HasType
 import Noll.Language.Pattern
 import Noll.Language.Primitive
+import Noll.Language.Serializable
 import Noll.Language.Trait
 import Noll.Language.Type
 import Noll.Language.Type.Indexed
