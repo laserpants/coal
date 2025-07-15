@@ -22,7 +22,7 @@ patternParser = makeExprParser go operator
         <|> atVariablePattern
         <|> variablePattern
     rest <- optional $ do
-      _ <- lexeme "as"
+      void (lexeme "as")
       p2 <- patternParser
       case p2 of
         PVariable _ (Label _ n) ->
