@@ -278,7 +278,7 @@ collectConstraints =
     ECodataSelect{} ->
       -- TODO
       pure []
-    e ->
+    _ ->
       error "Not implemented"
 
 listConstructorTypeScheme :: Scheme TypeIndex Kind IndexedType
