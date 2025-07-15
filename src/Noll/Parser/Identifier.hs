@@ -5,9 +5,12 @@ module Noll.Parser.Identifier (
   constructor,
   withInitial,
   identifier,
+  backtickString,
 ) where
 
+import Control.Monad (void)
 import Data.Text (Text)
+import Lang.Utils (Name)
 import Noll.Parser
 import Text.Megaparsec
 import Text.Megaparsec.Char (alphaNumChar, char, lowerChar, upperChar)
@@ -35,3 +38,11 @@ withInitial chrs chr = Text.pack <$> cons chr chrs
 
 identifier :: Parser Char -> Parser Text
 identifier initial = word $ many validChar `withInitial` initial
+
+backtickString :: Parser Name
+backtickString =
+  lexeme $ do
+    void (char '`')
+    s <- takeWhileP (Just "Non-backtick character") (/= '`')
+    void (char '`')
+    pure s

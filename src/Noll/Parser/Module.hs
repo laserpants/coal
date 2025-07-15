@@ -4,7 +4,6 @@ module Noll.Parser.Module (moduleParser, functionParser) where
 
 import Control.Monad (void)
 import Lang.Common.List1 (NonEmpty (..))
-import Lang.Utils (Name)
 import Noll.Language
 import Noll.Module
 import Noll.Parser
@@ -14,7 +13,7 @@ import Noll.Parser.Pattern (patternParser)
 import Noll.Parser.Symbol
 import Noll.Parser.Type
 import Text.Megaparsec
-import Text.Megaparsec.Char (char, upperChar)
+import Text.Megaparsec.Char (upperChar)
 
 definitionParser :: Parser (Definition () o ())
 definitionParser =
@@ -28,14 +27,6 @@ importParser = do
   names <- option ["*"] (parens (commaSep (backtickString <|> name)))
   void (symbol ";")
   pure (DImport (Path path) names)
-
-backtickString :: Parser Name
-backtickString =
-  lexeme $ do
-    void (char '`')
-    s <- takeWhileP (Just "Non-backtick character") (/= '`')
-    void (char '`')
-    pure s
 
 functionParser :: Parser (Definition () o ())
 functionParser = do
