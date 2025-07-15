@@ -30,6 +30,7 @@ importParser = do
 
 functionParser :: Parser (Definition () o ())
 functionParser = do
+  void (lexeme "fn")
   fn <- name
   args <- parens (commaSep patternParser)
   ann <- optional (void (symbol ":") *> typeParser)

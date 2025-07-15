@@ -1,8 +1,8 @@
 module Main {
 
-import Core$(trace_int32, from_int32, `from_int32__$instance_Numeric(Intrinsic(Int32))`);
-import Utilities(factorial);
+  import Core$(trace_int32, from_int32, `from_int32__$instance_Numeric(Intrinsic(Int32))`);
+  import Utilities(factorial);
 
-main() = trace_int32(factorial(4));
+  fn main() = trace_int32(factorial(4));
 
 }
