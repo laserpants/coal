@@ -236,15 +236,14 @@ instance (Monoid a, Data a) => TraitContext (Constant Expression a (Type TypeInd
     \case
       Constant a (With _ t) e -> do
         (expr, traits) <- listen (descendM expandTraits e)
-        case nub traits of
-          [] ->
-            pure (Constant a (With [] t) expr)
-          tr : trs ->
-            pure
-              ( Constant
-                  a
-                  (With (tr : trs) t)
-                  (ELambda mempty (toPattern <$> (tr :| trs)) expr)
-              )
+        pure $
+          case nub traits of
+            [] ->
+              Constant a (With [] t) expr
+            tr : trs ->
+              Constant
+                a
+                (With (tr : trs) t)
+                (ELambda mempty (toPattern <$> (tr :| trs)) expr)
        where
         toPattern tr = PPlaceholder mempty (typeOf tr) tr
