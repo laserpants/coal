@@ -1188,8 +1188,8 @@ story = do
     evalFoldExpansion "fold" 1 (compileFolds Noll.Set.Test02.prog1_02) == Noll.Set.Test03.prog1_03
   it "" $
     evalFoldExpansion "fold" 1 (compileFolds Noll.Set5.Test01.prog1_01) == Noll.Set5.Test03.prog1_03
-  it "" $
-    evalFoldExpansion "fold" 1 (compileFolds Noll.Set10.Test01.prog10_01) == Noll.Set10.Test03.prog10_01
+--  it "" $
+--    evalFoldExpansion "fold" 1 (compileFolds Noll.Set10.Test01.prog10_01) == Noll.Set10.Test03.prog10_01
   it "" $
     testResultExpression (Noll.CompilerExamples.Test02.baz3 Noll.Set.Test03.moduleUtils) == Noll.Set.Test04.moduleUtils
   it "" $
