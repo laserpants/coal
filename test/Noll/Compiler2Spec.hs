@@ -39,10 +39,12 @@ import qualified Lang.Common.Environment as Environment
 import qualified Lang.Lowpass.Compiler as Lowpass
 import qualified Lang.Lowpass.Compiler.Utils as Lowpass
 import qualified Lang.Lowpass.Language as Lowpass
+import qualified Noll.Set.Test01
 import qualified Noll.Set10.Test01
 import qualified Noll.Set11.Test01
 import qualified Noll.Set12.Test01
 import qualified Noll.Set20.Test01
+import qualified Noll.Set21.Test01
 import qualified Noll.Set7.Test01
 import qualified Noll.Set8.Test01
 import qualified Noll.Set9.Test01
@@ -298,7 +300,7 @@ xx =
             , Map.fromList
                 [
                   ( "compare"
-                  , Forall (Set.fromList [TypeIndex KType 0]) [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TConstructor KType "Ordering")
+                  , Forall (Set.fromList mempty) [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TConstructor KType "Ordering")
                   )
                 ]
             )
@@ -604,6 +606,47 @@ abc23 =
     [ "./test/Noll/Fixtures/01/Utilities.coal"
     , "./test/Noll/Fixtures/01/Main.coal"
     ]
+
+--
+
+abc24 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
+abc24 = fst (runIdentity (runCompiler2T compiler2TestEnvironment prog))
+ where
+  prog = do
+    insertNamesC
+      [
+        ( "flatten"
+        , Forall (Set.fromList [TypeIndex KType 0]) [] (tree0 `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 0))))
+        )
+      , ( "from_list"
+        , Forall (Set.fromList [TypeIndex KType 0]) [] (TIntrinsic (IList (TVariable (TypeIndex KType 0))) `TArrow` tree0)
+        )
+      , ( "compare"
+        , Forall (Set.fromList [TypeIndex KType 0]) [] (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TConstructor KType "Ordering")
+        )
+      ]
+    compileModule Noll.Set21.Test01.moduleMain
+
+abc25 :: IO ()
+abc25 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc24]
+
+
+-- abc25 =
+--  abc22
+--    [ "./test/Noll/Fixtures/02/Utilities.coal"
+--    , "./test/Noll/Fixtures/02/Main.coal"
+--    ]
+
+--
+
+-- abc24 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
+-- abc24 = fst (runIdentity (runCompiler2T compiler2TestEnvironment (compileModule Noll.Set.Test01.moduleUtils2)))
+
+-- abc15 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
+-- abc15 = fst (runIdentity (runCompiler2T compiler2TestEnvironment (compileModule_ Noll.Set12.Test01.moduleMain)))
+--
+-- abc16 :: IO ()
+-- abc16 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc14, abc15]
 
 moduleCore1 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
 moduleCore1 = Lowpass.unsafeParseExpr <$> moduleCore

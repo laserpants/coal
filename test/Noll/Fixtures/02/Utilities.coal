@@ -1,0 +1,13 @@
+module Utilities(factorial) {
+
+  import Core$(pack_nat, unpack_nat, trace_int32, from_int32, `from_int32__$instance_Numeric(Intrinsic(Nat))`, `from_int32__$instance_Numeric(Intrinsic(Int32))`);
+
+  fn factorial(n : int32) : int32 =
+    fold(pack_nat(n)) {
+      | Zero =>
+          1
+      | Succ(@f) as m =>
+          unpack_nat(m) * f
+    };
+
+}

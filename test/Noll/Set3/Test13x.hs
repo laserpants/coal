@@ -280,30 +280,30 @@ moduleMain =
               |]
         , OFunction
             "Main.trace__$instance_Traceable(Intrinsic(Tuple(Variable(Parameter(a)),Variable(Parameter(b)))))"
-            [ Label (TCon "Traceable" [opaque]) "$d.Traceable__$instance_Traceable(Variable(TypeIndex(0)))"
-            , Label (TCon "Traceable" [opaque]) "$d.Traceable__$instance_Traceable(Variable(TypeIndex(1)))"
+            [ Label (TCon "Traceable" [opaque]) "$d_Traceable__$instance_Traceable(Variable(TypeIndex(0)))"
+            , Label (TCon "Traceable" [opaque]) "$d_Traceable__$instance_Traceable(Variable(TypeIndex(1)))"
             , Label (TCon "tuple2" [opaque, opaque]) "p"
             ]
             [r| 
                   @<string>
                     ( @<tuple2(*,*)/string>
                         ( Core$.pair_to_string : Traceable(*)/Traceable(*)/tuple2(*,*)/string
-                        , `$d.Traceable__$instance_Traceable(Variable(TypeIndex(0)))` : Traceable(*)
-                        , `$d.Traceable__$instance_Traceable(Variable(TypeIndex(1)))` : Traceable(*)
+                        , `$d_Traceable__$instance_Traceable(Variable(TypeIndex(0)))` : Traceable(*)
+                        , `$d_Traceable__$instance_Traceable(Variable(TypeIndex(1)))` : Traceable(*)
                         )
                     , p : tuple2(*,*)
                     )
               |]
         , OFunction
             "Main.trace__$instance_Traceable(Intrinsic(List(Variable(Parameter(a)))))"
-            [ Label (TCon "Traceable" [opaque]) "$d.Traceable__$instance_Traceable(Variable(TypeIndex(0)))"
+            [ Label (TCon "Traceable" [opaque]) "$d_Traceable__$instance_Traceable(Variable(TypeIndex(0)))"
             , Label (TCon "list" [opaque]) "lst"
             ]
             [r| 
                   @<string>
                     ( @<list(*)/string>
                         ( Core$.list_to_string : Traceable(*)/list(*)/string
-                        , `$d.Traceable__$instance_Traceable(Variable(TypeIndex(0)))` : Traceable(*)
+                        , `$d_Traceable__$instance_Traceable(Variable(TypeIndex(0)))` : Traceable(*)
                         )
                     , lst : list(*)
                     )
