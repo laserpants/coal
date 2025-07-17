@@ -45,6 +45,7 @@ import qualified Noll.Set11.Test01
 import qualified Noll.Set12.Test01
 import qualified Noll.Set20.Test01
 import qualified Noll.Set21.Test01
+import qualified Noll.Set22.Test01
 import qualified Noll.Set7.Test01
 import qualified Noll.Set8.Test01
 import qualified Noll.Set9.Test01
@@ -618,10 +619,12 @@ abc24 = fst (runIdentity (runCompiler2T compiler2TestEnvironment prog))
         ( "flatten"
         , Forall (Set.fromList [TypeIndex KType 0]) [] (tree0 `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 0))))
         )
-      , ( "from_list"
+      ,
+        ( "from_list"
         , Forall (Set.fromList [TypeIndex KType 0]) [] (TIntrinsic (IList (TVariable (TypeIndex KType 0))) `TArrow` tree0)
         )
-      , ( "compare"
+      ,
+        ( "compare"
         , Forall (Set.fromList [TypeIndex KType 0]) [] (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TConstructor KType "Ordering")
         )
       ]
@@ -630,6 +633,28 @@ abc24 = fst (runIdentity (runCompiler2T compiler2TestEnvironment prog))
 abc25 :: IO ()
 abc25 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc24]
 
+abc26 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
+abc26 = fst (runIdentity (runCompiler2T compiler2TestEnvironment prog))
+ where
+  prog = do
+    insertNamesC
+      [
+        ( "flatten"
+        , Forall (Set.fromList [TypeIndex KType 0]) [] (tree0 `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 0))))
+        )
+      ,
+        ( "from_list"
+        , Forall (Set.fromList [TypeIndex KType 0]) [] (TIntrinsic (IList (TVariable (TypeIndex KType 0))) `TArrow` tree0)
+        )
+      ,
+        ( "compare"
+        , Forall (Set.fromList [TypeIndex KType 0]) [] (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TConstructor KType "Ordering")
+        )
+      ]
+    compileModule Noll.Set22.Test01.moduleMain
+
+abc27 :: IO ()
+abc27 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc26]
 
 -- abc25 =
 --  abc22
@@ -728,6 +753,13 @@ moduleCore =
             ]
             [r|
                   #(print_string : string/*, s : string) (fn(a : *) => a : *)
+              |]
+        , OFunction
+            "Core$.trace_bool"
+            [ Label Lowpass.string "b"
+            ]
+            [r|
+                  #(print_bool : bool/*, b : bool) (fn(a : *) => a : *)
               |]
         , OFunction
             "Core$.operator__string_concatenation"

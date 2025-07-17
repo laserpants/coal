@@ -210,6 +210,7 @@ test-suite noll-test
       Noll.Set20.Test01
       Noll.Set20.Test04
       Noll.Set21.Test01
+      Noll.Set22.Test01
       Noll.Set3.Test01
       Noll.Set3.Test04
       Noll.Set3.Test05

@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Set21.Test01 where
+module Noll.Set22.Test01 where
 
 import Lang.Common.List1 (NonEmpty (..), (<|))
 import Lang.Label (Label (..))
@@ -24,7 +24,8 @@ moduleMain =
     -- Exports
     []
     -- Definitions
-    [ DType
+    [ DImport (Path ["Core$"]) ["trace_int32", "trace_bool", "operator__not", "always"]
+    , DType
         "Ordering"
         []
         [ Constructor
@@ -40,117 +41,6 @@ moduleMain =
             0
             (Forall mempty [] (TConstructor () "Ordering"))
         ]
-    , DTrait
-        "Ordered"
-        []
-        (TVariable (Parameter () "a"))
-        [
-          ( "compare"
-          , TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TConstructor () "Ordering"
-          )
-        ]
-    , DInstance
-        "Ordered"
-        (TIntrinsic IInt32)
-        [ DFunction
-            "compare"
-            ( Function
-                ()
-                (With [] ())
-                ( PVariable () (Label () "x")
-                    <| PVariable () (Label () "y")
-                    :| []
-                )
-                ( EIf
-                    ()
-                    ()
-                    ( EApplication
-                        ()
-                        ()
-                        (EBinaryOperator () () OLessThan)
-                        ( EVariable () (Label () "x")
-                            <| EVariable () (Label () "y")
-                            :| []
-                        )
-                    )
-                    (EConstructor () (Label () "LessThan"))
-                    ( EIf
-                        ()
-                        ()
-                        ( EApplication
-                            ()
-                            ()
-                            (EBinaryOperator () () OGreaterThan)
-                            ( EVariable () (Label () "x")
-                                <| EVariable () (Label () "y")
-                                :| []
-                            )
-                        )
-                        (EConstructor () (Label () "GreaterThan"))
-                        (EConstructor () (Label () "EqualTo"))
-                    )
-                )
-            )
-        ]
-    , DFunction
-        "lessThanOrEqualTo"
-        ( Function
-            ()
-            (With [] ())
-            (PVariable () (Label () "m") :| [])
-            ( ELambda
-                ()
-                (PVariable () (Label () "n") :| [])
-                ( EMatch
-                    ()
-                    ()
-                    ( EApplication
-                        ()
-                        ()
-                        (EVariable () (Label () "compare"))
-                        ( EVariable () (Label () "m")
-                            <| EVariable () (Label () "n")
-                            :| []
-                        )
-                    )
-                    ( EClause
-                        ()
-                        ( POr
-                            ()
-                            ()
-                            (PConstructor () (Label () "LessThan") [])
-                            (PConstructor () (Label () "EqualTo") [])
-                        )
-                        (CPlain () [] (ELiteral () (LBool True)) :| [])
-                        <| EClause
-                          ()
-                          (PConstructor () (Label () "GreaterThan") [])
-                          (CPlain () [] (ELiteral () (LBool False)) :| [])
-                        :| []
-                    )
-                )
-            )
-        )
-    , DFunction
-        "greaterThan"
-        ( Function
-            ()
-            (With [] ())
-            (PVariable () (Label () "n") :| [])
-            ( EApplication
-                ()
-                ()
-                (EBinaryOperator () () OReverseComposition)
-                ( EVariable () (Label () "not")
-                    <| EApplication
-                      ()
-                      ()
-                      (EVariable () (Label () "lessThanOrEqualTo"))
-                      (EVariable () (Label () "n") :| [])
-                    :| []
-                )
-            )
-        )
     , DType
         "Tree"
         [Parameter () "a"]
@@ -180,7 +70,111 @@ moduleMain =
             )
         ]
     , DFunction
-        "inRange"
+        "f_compare"
+        ( Function
+            ()
+            (With [] ())
+            ( PAnnotation
+                ()
+                (TIntrinsic IInt32)
+                (PVariable () (Label () "x"))
+                <| PAnnotation
+                  ()
+                  (TIntrinsic IInt32)
+                  (PVariable () (Label () "y"))
+                :| []
+            )
+            ( EIf
+                ()
+                ()
+                ( EApplication
+                    ()
+                    ()
+                    (EBinaryOperator () () OLessThan)
+                    ( EVariable () (Label () "x")
+                        <| EVariable () (Label () "y")
+                        :| []
+                    )
+                )
+                (EConstructor () (Label () "LessThan"))
+                ( EIf
+                    ()
+                    ()
+                    ( EApplication
+                        ()
+                        ()
+                        (EBinaryOperator () () OGreaterThan)
+                        ( EVariable () (Label () "x")
+                            <| EVariable () (Label () "y")
+                            :| []
+                        )
+                    )
+                    (EConstructor () (Label () "GreaterThan"))
+                    (EConstructor () (Label () "EqualTo"))
+                )
+            )
+        )
+    , DFunction
+        "f_less_than_or_equal_to"
+        ( Function
+            ()
+            (With [] ())
+            (PVariable () (Label () "m") :| [])
+            ( ELambda
+                ()
+                (PVariable () (Label () "n") :| [])
+                ( EMatch
+                    ()
+                    ()
+                    ( EApplication
+                        ()
+                        ()
+                        (EVariable () (Label () "f_compare"))
+                        ( EVariable () (Label () "m")
+                            <| EVariable () (Label () "n")
+                            :| []
+                        )
+                    )
+                    ( EClause
+                        ()
+                        ( POr
+                            ()
+                            ()
+                            (PConstructor () (Label () "LessThan") [])
+                            (PConstructor () (Label () "EqualTo") [])
+                        )
+                        (CPlain () [] (ELiteral () (LBool True)) :| [])
+                        <| EClause
+                          ()
+                          (PConstructor () (Label () "GreaterThan") [])
+                          (CPlain () [] (ELiteral () (LBool False)) :| [])
+                        :| []
+                    )
+                )
+            )
+        )
+    , DFunction
+        "f_greater_than"
+        ( Function
+            ()
+            (With [] ())
+            (PVariable () (Label () "n") :| [])
+            ( EApplication
+                ()
+                ()
+                (EBinaryOperator () () OReverseComposition)
+                ( EVariable () (Label () "operator__not")
+                    <| EApplication
+                      ()
+                      ()
+                      (EVariable () (Label () "f_less_than_or_equal_to"))
+                      (EVariable () (Label () "n") :| [])
+                    :| []
+                )
+            )
+        )
+    , DFunction
+        "f_in_range"
         ( Function
             ()
             (With [] ())
@@ -195,7 +189,7 @@ moduleMain =
                 ( EApplication
                     ()
                     ()
-                    (EVariable () (Label () "greaterThan"))
+                    (EVariable () (Label () "f_greater_than"))
                     ( EVariable () (Label () "n")
                         <| ESelect () (Label () "min") (EVariable () (Label () "range"))
                         :| []
@@ -207,7 +201,7 @@ moduleMain =
                       ( EApplication
                           ()
                           ()
-                          (EVariable () (Label () "lessThanOrEqualTo"))
+                          (EVariable () (Label () "f_less_than_or_equal_to"))
                           ( EVariable () (Label () "n")
                               <| ESelect () (Label () "max") (EVariable () (Label () "range"))
                               :| []
@@ -215,13 +209,9 @@ moduleMain =
                           <| EApplication
                             ()
                             ()
-                            (EVariable () (Label () "lessThanOrEqualTo"))
+                            (EVariable () (Label () "f_less_than_or_equal_to"))
                             ( ESelect () (Label () "max") (EVariable () (Label () "range"))
-                                <| EApplication
-                                  ()
-                                  ()
-                                  (EVariable () (Label () "from_int32"))
-                                  (ELiteral () (LInt32 (-1)) :| [])
+                                <| ELiteral () (LInt32 (-1))
                                 :| []
                             )
                           :| []
@@ -231,7 +221,7 @@ moduleMain =
             )
         )
     , DFunction
-        "fromList"
+        "f_from_list"
         ( Function
             ()
             (With [] ())
@@ -246,19 +236,11 @@ moduleMain =
                       ( Map.fromList
                           [
                             ( "min"
-                            , EApplication
-                                ()
-                                ()
-                                (EVariable () (Label () "from_int32"))
-                                (ELiteral () (LInt32 0) :| [])
+                            , ELiteral () (LInt32 0) 
                             )
                           ,
                             ( "max"
-                            , EApplication
-                                ()
-                                ()
-                                (EVariable () (Label () "from_int32"))
-                                (ELiteral () (LInt32 (-1)) :| [])
+                            , ELiteral () (LInt32 (-1))
                             )
                           ]
                       )
@@ -290,7 +272,7 @@ moduleMain =
                                         <| EApplication
                                           ()
                                           ()
-                                          (EVariable () (Label () "in_range"))
+                                          (EVariable () (Label () "f_in_range"))
                                           (EVariable () (Label () "range") :| [])
                                         :| []
                                     )
@@ -368,9 +350,10 @@ moduleMain =
                 )
                 Nothing
             )
+
         )
     , DFunction
-        "flatten"
+        "f_flatten"
         ( Function
             ()
             (With [] ())
@@ -418,7 +401,7 @@ moduleMain =
             )
         )
     , DConstant
-        "sort"
+        "f_sort"
         ( Constant
             ()
             (With [] ())
@@ -426,8 +409,8 @@ moduleMain =
                 ()
                 ()
                 (EBinaryOperator () () OReverseComposition)
-                ( EVariable () (Label () "flatten")
-                    <| EVariable () (Label () "from_list")
+                ( EVariable () (Label () "f_flatten")
+                    <| EVariable () (Label () "f_from_list")
                     :| []
                 )
             )
@@ -438,65 +421,61 @@ moduleMain =
             ()
             (With [] ())
             (PLiteral () LUnit :| [])
-            ( ELet
-                ()
-                ( BPattern
-                    ()
-                    (PVariable () (Label () "xs"))
-                    ( EAnnotation
-                        ()
-                        (TIntrinsic (IList (TIntrinsic IInt32)))
-                        ( EListLiteral
-                            ()
-                            ()
-                            [ EApplication () () (EVariable () (Label () "from_int32")) (ELiteral () (LInt32 5) :| [])
-                            , EApplication () () (EVariable () (Label () "from_int32")) (ELiteral () (LInt32 3) :| [])
-                            , EApplication () () (EVariable () (Label () "from_int32")) (ELiteral () (LInt32 7) :| [])
-                            , EApplication () () (EVariable () (Label () "from_int32")) (ELiteral () (LInt32 2) :| [])
-                            , EApplication () () (EVariable () (Label () "from_int32")) (ELiteral () (LInt32 1) :| [])
-                            , EApplication () () (EVariable () (Label () "from_int32")) (ELiteral () (LInt32 6) :| [])
-                            , EApplication () () (EVariable () (Label () "from_int32")) (ELiteral () (LInt32 4) :| [])
-                            ]
-                        )
-                    )
-                    :| []
-                )
-                ( EApplication
-                    ()
-                    ()
-                    (EVariable () (Label () "trace_int32"))
-                    ( EMatch
-                        ()
-                        ()
-                        ( EApplication
-                            ()
-                            ()
-                            (EVariable () (Label () "sort"))
-                            (EVariable () (Label () "xs") :| [])
-                        )
-                        ( EClause
-                            ()
-                            (PListLiteral () () [])
-                            ( CPlain
-                                ()
-                                []
-                                (ELiteral () (LInt32 12345))
-                                :| []
-                            )
-                            <| EClause
-                              ()
-                              (PListCons () () (PVariable () (Label () "y")) (PAny () ()))
-                              ( CPlain
-                                  ()
-                                  []
-                                  (EVariable () (Label () "y"))
-                                  :| []
-                              )
-                            :| []
-                        )
-                        :| []
-                    )
-                )
-            )
+             ( ELet
+                 ()
+                 ( BPattern
+                     ()
+                     (PVariable () (Label () "xs"))
+                     ( EListLiteral
+                         ()
+                         ()
+                         [ ELiteral () (LInt32 5)
+                         , ELiteral () (LInt32 3)
+                         , ELiteral () (LInt32 7)
+                         , ELiteral () (LInt32 2)
+                         , ELiteral () (LInt32 1)
+                         , ELiteral () (LInt32 6)
+                         , ELiteral () (LInt32 4)
+                         ]
+                     )
+                     :| []
+                 )
+                 ( EApplication
+                     ()
+                     ()
+                     (EVariable () (Label () "trace_int32"))
+                     ( EMatch
+                         ()
+                         ()
+                         ( EApplication
+                             ()
+                             ()
+                             (EVariable () (Label () "f_sort"))
+                             (EVariable () (Label () "xs") :| [])
+                         )
+                         ( EClause
+                             ()
+                             (PListLiteral () () [])
+                             ( CPlain
+                                 ()
+                                 []
+                                 (ELiteral () (LInt32 12345))
+                                 :| []
+                             )
+                             <| EClause
+                               ()
+                               (PListCons () () (PVariable () (Label () "y")) (PAny () ()))
+                               ( CPlain
+                                   ()
+                                   []
+                                   (EVariable () (Label () "y"))
+                                   :| []
+                               )
+                             :| []
+                         )
+                         :| []
+                     )
+                 )
+             )
         )
     ]
