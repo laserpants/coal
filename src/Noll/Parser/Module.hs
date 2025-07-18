@@ -19,6 +19,7 @@ definitionParser :: Parser (Definition () o ())
 definitionParser =
   importParser
     <|> functionParser
+    <|> constantParser
 
 importParser :: Parser (Definition () o ())
 importParser = do
@@ -49,6 +50,20 @@ functionParser = do
       pure f
     Just t ->
       pure (DAnnotation (With [] t) f)
+
+constantParser :: Parser (Definition () o ())
+constantParser = do
+  c <- name
+  ann <- optional (void (symbol ":") *> typeParser)
+  void (symbol "=")
+  expr <- expressionParser
+  void (symbol ";")
+  let e = DConstant c (Constant () (With [] ()) expr)
+  case ann of
+    Nothing ->
+      pure e
+    Just t ->
+      pure (DAnnotation (With [] t) e)
 
 moduleParser :: Parser (Module () o ())
 moduleParser = do
