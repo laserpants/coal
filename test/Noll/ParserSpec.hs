@@ -85,7 +85,7 @@ spec =
               Nothing
           )
     it "" $ do
-      runParser functionParser "" "factorial(n) = fold(pack_nat(n)) { | Zero => 1 | Succ(@f) as m => unpack_nat(m) * f };"
+      runParser functionParser "" "fn factorial(n) = fold(pack_nat(n)) { | Zero => 1 | Succ(@f) as m => unpack_nat(m) * f };"
         == Right
           ( DFunction
               "factorial"
@@ -163,7 +163,7 @@ spec =
               Definition () () ()
           )
     it "" $ do
-      runParser functionParser "" "factorial(n : int32) = fold(pack_nat(n)) { | Zero => 1 | Succ(@f) as m => unpack_nat(m) * f };"
+      runParser functionParser "" "fn factorial(n : int32) = fold(pack_nat(n)) { | Zero => 1 | Succ(@f) as m => unpack_nat(m) * f };"
         == Right
           ( DFunction
               "factorial"
@@ -246,7 +246,7 @@ spec =
               Definition () () ()
           )
     it "" $ do
-      runParser functionParser "" "factorial(n : int32) : int32 = fold(pack_nat(n)) { | Zero => 1 | Succ(@f) as m => unpack_nat(m) * f };"
+      runParser functionParser "" "fn factorial(n : int32) : int32 = fold(pack_nat(n)) { | Zero => 1 | Succ(@f) as m => unpack_nat(m) * f };"
         == Right
           ( DAnnotation
               (With [] (TIntrinsic IInt32))
@@ -332,7 +332,7 @@ spec =
               Definition () () ()
           )
     it "" $ do
-      runParser functionParser "" "main() = trace_int32(factorial(12));"
+      runParser functionParser "" "fn main() = trace_int32(factorial(12));"
         == Right
           ( DFunction
               "main"
@@ -362,7 +362,7 @@ spec =
               Definition () () ()
           )
     it "" $ do
-      runParser moduleParser "" "module Main { import Utilities(factorial); main() = trace_int32(factorial(12)); }"
+      runParser moduleParser "" "module Main { import Utilities(factorial); fn main() = trace_int32(factorial(12)); }"
         == Right
           ( Module
               (Path ["Main"])
@@ -397,7 +397,7 @@ spec =
               Module () () ()
           )
     it "" $ do
-      runParser moduleParser "" "module Utilities(factorial) { factorial(n : int32) : int32 = fold(pack_nat(n)) { | Zero => 1 | Succ(@f) as m => unpack_nat(m) * f }; }"
+      runParser moduleParser "" "module Utilities(factorial) { fn factorial(n : int32) : int32 = fold(pack_nat(n)) { | Zero => 1 | Succ(@f) as m => unpack_nat(m) * f }; }"
         == Right
           ( Module
               (Path ["Utilities"])
