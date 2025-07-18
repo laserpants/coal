@@ -11,9 +11,11 @@ import Noll.Parser.Identifier
 import Noll.Parser.Pattern (patternParser)
 import Noll.Parser.Symbol
 import Noll.Parser.Type
+import Lang.Utils (Name)
 import Text.Megaparsec (some, try, (<|>))
 
 import qualified Text.Megaparsec.Char.Lexer as Lexer
+import qualified Data.Map.Strict as Map
 
 expressionParser :: Parser (Expression () ())
 expressionParser = makeExprParser go operator
@@ -24,7 +26,9 @@ expressionParser = makeExprParser go operator
       <|> literalExpression
       <|> foldExpression
       <|> matchExpression
+      <|> recordExpression
       <|> ifExpression
+      <|> lambdaExpression
       <|> letExpression
       <|> variableExpression
       <|> parens expressionParser
@@ -59,10 +63,8 @@ choice = CPlain () [] <$> expressionParser
 
 clause :: Parser (Clause () ())
 clause = do
-  symbol_ "|"
-  p <- patternParser
-  symbol_ "=>"
-  c : cs <- some choice
+  p <- symbol_ "|" *> patternParser
+  c : cs <- symbol_ "=>" *> some choice
   pure (EClause () p (c :| cs))
 
 foldExpression :: Parser (Expression () ())
@@ -113,6 +115,25 @@ ifExpression = do
   e3 <- expressionParser
   pure (EIf () () e1 e2 e3)
 
+lambdaExpression :: Parser (Expression () ())
+lambdaExpression = do
+  args <- lexeme_ "fn" *> parens (commaSep1 patternParser)
+  e <- symbol_ "=>" *> expressionParser
+  case args of
+    a : as ->
+      pure (ELambda () (a :| as) e)
+    _ ->
+      error "Implementation error"
+
+recordExpression :: Parser (Expression () ())
+recordExpression = do
+  kvs <- braces (some field)
+  -- TODO
+  pure (ERecord () () (Map.fromList kvs) Nothing)
+ where
+  field :: Parser (Name, Expression () ())
+  field = (,) <$> name <*> (symbol_ "=" *> expressionParser)
+
 intExpression :: Parser (Expression () ())
 intExpression = do
   n <- Lexer.signed spaces (lexeme Lexer.decimal)
@@ -151,6 +172,8 @@ fixity9 :: [Operator Parser (Expression () ())]
 fixity9 =
   [ -- TODO
     InfixR (binaryOperator OReverseComposition <$ symbol "<<")
+    -- TODO
+  , InfixR (binaryOperator OReverseApplication <$ symbol "|.")
   ]
 
 fixity8 :: [Operator Parser (Expression () ())]
