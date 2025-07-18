@@ -46,10 +46,8 @@ letBinding = patternBinding <|> functionBinding
 
 letExpression :: Parser (Expression () ())
 letExpression = do
-  lexeme_ "let"
-  bs <- semicolonSep1 letBinding
-  lexeme_ "in"
-  e <- expressionParser
+  bs <- lexeme_ "let" *> semicolonSep1 letBinding
+  e <- lexeme_ "in" *> expressionParser
   case bs of
     b : bs1 ->
       pure (ELet () (b :| bs1) e)
