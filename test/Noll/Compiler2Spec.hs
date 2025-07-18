@@ -46,6 +46,7 @@ import qualified Noll.Set12.Test01
 import qualified Noll.Set20.Test01
 import qualified Noll.Set21.Test01
 import qualified Noll.Set22.Test01
+import qualified Noll.Set23.Test01
 import qualified Noll.Set7.Test01
 import qualified Noll.Set8.Test01
 import qualified Noll.Set9.Test01
@@ -425,7 +426,8 @@ yy =
       ( "in_range"
       , Forall
           (Set.fromList [TypeIndex KType 0] :: Set (TypeIndex Kind))
-          [Trait "Numeric" (TVariable (TypeIndex KType 0)), Trait "Ordered" (TVariable (TypeIndex KType 0))]
+          -- [Trait "Numeric" (TVariable (TypeIndex KType 0)), Trait "Ordered" (TVariable (TypeIndex KType 0))]
+          [Trait "Ordered" (TVariable (TypeIndex KType 0))]
           ( TIntrinsic (IRecord (TRow (RExtend "max" (TVariable (TypeIndex KType 0)) (RExtend "min" (TVariable (TypeIndex KType 0)) RNil))))
               `TArrow` TVariable (TypeIndex KType 0)
               `TArrow` TIntrinsic IBool
@@ -655,6 +657,46 @@ abc26 = fst (runIdentity (runCompiler2T compiler2TestEnvironment prog))
 
 abc27 :: IO ()
 abc27 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc26]
+
+abc28 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
+abc28 = fst (runIdentity (runCompiler2T compiler2TestEnvironment prog))
+ where
+  prog = do
+    insertNamesC
+      [
+        ( "flatten"
+        , Forall (Set.fromList [TypeIndex KType 0]) [] (tree0 `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 0))))
+        )
+      ,
+        ( "from_list"
+        , Forall (Set.fromList [TypeIndex KType 0]) [] (TIntrinsic (IList (TVariable (TypeIndex KType 0))) `TArrow` tree0)
+        )
+      ,
+        ( "compare"
+        , Forall (Set.fromList [TypeIndex KType 0]) [] (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TConstructor KType "Ordering")
+        )
+      ,
+        ( "greater_than"
+        , Forall (Set.fromList [TypeIndex KType 0]) [] (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
+        )
+      ,
+        ( "less_than_or_equal_to"
+        , Forall (Set.fromList [TypeIndex KType 0]) [] (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
+        )
+      ,
+        ( "operator__not"
+        , Forall mempty [] (TIntrinsic IBool `TArrow` TIntrinsic IBool)
+        )
+      ,
+        ( "in_range"
+        , Forall (Set.fromList [TypeIndex KType 0]) [] (TIntrinsic (IRecord (TRow (RExtend "max" (TVariable (TypeIndex KType 0)) (RExtend "min" (TVariable (TypeIndex KType 0)) RNil)))) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
+        )
+      ]
+    compileModule Noll.Set23.Test01.moduleMain
+
+abc29 :: IO ()
+abc29 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc28]
+
 
 -- abc25 =
 --  abc22

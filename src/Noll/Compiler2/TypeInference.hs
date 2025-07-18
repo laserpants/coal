@@ -177,7 +177,7 @@ instantiateTemplate (TypeIndex _ n) t1 (Forall vs ts t) = Forall vs ts (apply (n
 instantiateVars :: (Monad m) => Type Parameter Kind -> Compiler2T a m IndexedType
 instantiateVars = do
   \case
-    TVariable{} -> do
+    TVariable{} ->
       supplied (TVariable . TypeIndex KType)
     TApplication k t ts ->
       TApplication k <$> instantiateVars t <*> traverse instantiateVars ts
