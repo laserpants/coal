@@ -697,7 +697,6 @@ abc28 = fst (runIdentity (runCompiler2T compiler2TestEnvironment prog))
 abc29 :: IO ()
 abc29 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc28]
 
-
 -- abc25 =
 --  abc22
 --    [ "./test/Noll/Fixtures/02/Utilities.coal"

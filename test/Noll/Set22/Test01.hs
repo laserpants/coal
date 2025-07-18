@@ -236,7 +236,7 @@ moduleMain =
                       ( Map.fromList
                           [
                             ( "min"
-                            , ELiteral () (LInt32 0) 
+                            , ELiteral () (LInt32 0)
                             )
                           ,
                             ( "max"
@@ -350,7 +350,6 @@ moduleMain =
                 )
                 Nothing
             )
-
         )
     , DFunction
         "f_flatten"
@@ -421,61 +420,61 @@ moduleMain =
             ()
             (With [] ())
             (PLiteral () LUnit :| [])
-             ( ELet
-                 ()
-                 ( BPattern
-                     ()
-                     (PVariable () (Label () "xs"))
-                     ( EListLiteral
-                         ()
-                         ()
-                         [ ELiteral () (LInt32 5)
-                         , ELiteral () (LInt32 3)
-                         , ELiteral () (LInt32 7)
-                         , ELiteral () (LInt32 2)
-                         , ELiteral () (LInt32 1)
-                         , ELiteral () (LInt32 6)
-                         , ELiteral () (LInt32 4)
-                         ]
-                     )
-                     :| []
-                 )
-                 ( EApplication
-                     ()
-                     ()
-                     (EVariable () (Label () "trace_int32"))
-                     ( EMatch
-                         ()
-                         ()
-                         ( EApplication
-                             ()
-                             ()
-                             (EVariable () (Label () "f_sort"))
-                             (EVariable () (Label () "xs") :| [])
-                         )
-                         ( EClause
-                             ()
-                             (PListLiteral () () [])
-                             ( CPlain
-                                 ()
-                                 []
-                                 (ELiteral () (LInt32 12345))
-                                 :| []
-                             )
-                             <| EClause
-                               ()
-                               (PListCons () () (PVariable () (Label () "y")) (PAny () ()))
-                               ( CPlain
-                                   ()
-                                   []
-                                   (EVariable () (Label () "y"))
-                                   :| []
-                               )
-                             :| []
-                         )
-                         :| []
-                     )
-                 )
-             )
+            ( ELet
+                ()
+                ( BPattern
+                    ()
+                    (PVariable () (Label () "xs"))
+                    ( EListLiteral
+                        ()
+                        ()
+                        [ ELiteral () (LInt32 5)
+                        , ELiteral () (LInt32 3)
+                        , ELiteral () (LInt32 7)
+                        , ELiteral () (LInt32 2)
+                        , ELiteral () (LInt32 1)
+                        , ELiteral () (LInt32 6)
+                        , ELiteral () (LInt32 4)
+                        ]
+                    )
+                    :| []
+                )
+                ( EApplication
+                    ()
+                    ()
+                    (EVariable () (Label () "trace_int32"))
+                    ( EMatch
+                        ()
+                        ()
+                        ( EApplication
+                            ()
+                            ()
+                            (EVariable () (Label () "f_sort"))
+                            (EVariable () (Label () "xs") :| [])
+                        )
+                        ( EClause
+                            ()
+                            (PListLiteral () () [])
+                            ( CPlain
+                                ()
+                                []
+                                (ELiteral () (LInt32 12345))
+                                :| []
+                            )
+                            <| EClause
+                              ()
+                              (PListCons () () (PVariable () (Label () "y")) (PAny () ()))
+                              ( CPlain
+                                  ()
+                                  []
+                                  (EVariable () (Label () "y"))
+                                  :| []
+                              )
+                            :| []
+                        )
+                        :| []
+                    )
+                )
+            )
         )
     ]
