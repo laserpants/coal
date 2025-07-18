@@ -46,7 +46,7 @@ reserved =
   , "then"
   , "else"
   , "match"
-  , "uses"
+--  , "uses"
   , "or"
   , "type"
   , "cotype"
