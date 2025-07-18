@@ -419,7 +419,8 @@ yy =
       ( "from_list"
       , Forall
           (Set.fromList [TypeIndex KType 0] :: Set (TypeIndex Kind))
-          [Trait "Numeric" (TVariable (TypeIndex KType 0)), Trait "Ordered" (TVariable (TypeIndex KType 0))]
+--           [Trait "Numeric" (TVariable (TypeIndex KType 0)), Trait "Ordered" (TVariable (TypeIndex KType 0))]
+          [Trait "Ordered" (TVariable (TypeIndex KType 0)), Trait "Numeric" (TVariable (TypeIndex KType 0))]
           (TIntrinsic (IList (TVariable (TypeIndex KType 0))) `TArrow` (TApplication KType (TConstructor (KArrow KType KType) "Tree") (TVariable (TypeIndex KType 0) :| [])))
       )
     ,
