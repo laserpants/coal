@@ -167,6 +167,5 @@ operator =
 
 typeAnnotation :: Parser (Expression () () -> Expression () ())
 typeAnnotation = do
-  void (symbol ":")
-  ty <- typeParser
-  pure (EAnnotation () ty)
+  symbol_ ":"
+  EAnnotation () <$> typeParser
