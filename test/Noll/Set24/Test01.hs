@@ -451,17 +451,21 @@ moduleMain =
                 ( BPattern
                     ()
                     (PVariable () (Label () "xs"))
+                    ( EAnnotation
+                        ()
+                        (TIntrinsic (IList (TIntrinsic IInt32)))
                     ( EListLiteral
                         ()
                         ()
-                        [ ELiteral () (LInt32 5)
-                        , ELiteral () (LInt32 3)
-                        , ELiteral () (LInt32 7)
-                        , ELiteral () (LInt32 2)
-                        , ELiteral () (LInt32 1)
-                        , ELiteral () (LInt32 6)
-                        , ELiteral () (LInt32 4)
+                        [ EApplication () () (EVariable () (Label () "from_int32")) (ELiteral () (LInt32 5) :| []) -- ELiteral () (LInt32 5)
+                        , EApplication () () (EVariable () (Label () "from_int32")) (ELiteral () (LInt32 3) :| []) -- Literal () (LInt32 3)
+                        , EApplication () () (EVariable () (Label () "from_int32")) (ELiteral () (LInt32 7) :| []) -- Literal () (LInt32 7)
+                        , EApplication () () (EVariable () (Label () "from_int32")) (ELiteral () (LInt32 2) :| []) -- Literal () (LInt32 2)
+                        , EApplication () () (EVariable () (Label () "from_int32")) (ELiteral () (LInt32 1) :| []) -- Literal () (LInt32 1)
+                        , EApplication () () (EVariable () (Label () "from_int32")) (ELiteral () (LInt32 6) :| []) -- Literal () (LInt32 6)
+                        , EApplication () () (EVariable () (Label () "from_int32")) (ELiteral () (LInt32 4) :| []) -- Literal () (LInt32 4)
                         ]
+                    )
                     )
                     :| []
                 )
