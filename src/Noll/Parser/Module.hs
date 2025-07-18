@@ -2,7 +2,6 @@
 
 module Noll.Parser.Module (moduleParser, functionParser) where
 
-import Control.Monad (void)
 import Lang.Common.List1 (NonEmpty (..))
 import Noll.Language
 import Noll.Module
@@ -23,21 +22,21 @@ definitionParser =
 
 importParser :: Parser (Definition () o ())
 importParser = do
-  void (lexeme "import")
+  lexeme_ "import"
   path <- (lexeme "Core$" <|> identifier upperChar) `sepBy1` symbol "."
   names <- option ["*"] (parens (commaSep (backtickString <|> name)))
-  void (symbol ";")
+  symbol_ ";"
   pure (DImport (Path path) names)
 
 functionParser :: Parser (Definition () o ())
 functionParser = do
-  void (lexeme "fn")
+  lexeme_ "fn"
   fn <- name
   args <- parens (commaSep patternParser)
-  ann <- optional (void (symbol ":") *> typeParser)
-  void (symbol "=")
+  ann <- optional (symbol_ ":" *> typeParser)
+  symbol_ "="
   expr <- expressionParser
-  void (symbol ";")
+  symbol_ ";"
   let args' =
         case args of
           [] ->
@@ -54,10 +53,10 @@ functionParser = do
 constantParser :: Parser (Definition () o ())
 constantParser = do
   c <- name
-  ann <- optional (void (symbol ":") *> typeParser)
-  void (symbol "=")
+  ann <- optional (symbol_ ":" *> typeParser)
+  symbol_ "="
   expr <- expressionParser
-  void (symbol ";")
+  symbol_ ";"
   let e = DConstant c (Constant () (With [] ()) expr)
   case ann of
     Nothing ->
@@ -67,7 +66,7 @@ constantParser = do
 
 moduleParser :: Parser (Module () o ())
 moduleParser = do
-  void (lexeme "module")
+  lexeme_ "module"
   path <- identifier upperChar `sepBy1` symbol "."
   exps <- option ["*"] (parens (commaSep name))
   b <- braces (many definitionParser)

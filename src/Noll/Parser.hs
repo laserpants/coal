@@ -7,9 +7,10 @@ module Noll.Parser (
   spaces,
   word,
   lexeme,
+  lexeme_,
 ) where
 
-import Control.Monad (when)
+import Control.Monad (when, void)
 import Data.Text (Text)
 import Data.Void (Void)
 import Lang.Utils (Name)
@@ -33,6 +34,10 @@ spaces =
 {-# INLINE lexeme #-}
 lexeme :: Parser a -> Parser a
 lexeme = Lexer.lexeme spaces
+
+{-# INLINE lexeme_ #-}
+lexeme_ :: Parser a -> Parser ()
+lexeme_ = void . lexeme
 
 reserved :: [Name]
 reserved =

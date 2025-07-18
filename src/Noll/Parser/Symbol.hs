@@ -2,6 +2,7 @@
 
 module Noll.Parser.Symbol (
   symbol,
+  symbol_,
   parens,
   brackets,
   braces,
@@ -18,6 +19,7 @@ module Noll.Parser.Symbol (
   equalSign,
 ) where
 
+import Control.Monad (void)
 import Data.Text (Text)
 import Noll.Parser
 import Text.Megaparsec
@@ -27,6 +29,10 @@ import qualified Text.Megaparsec.Char.Lexer as Lexer
 {-# INLINE symbol #-}
 symbol :: Text -> Parser Text
 symbol = Lexer.symbol spaces
+
+{-# INLINE symbol_ #-}
+symbol_ :: Text -> Parser ()
+symbol_ = void . symbol
 
 parens :: Parser a -> Parser a
 parens = symbol "(" `between` symbol ")"
