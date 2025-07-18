@@ -1,5 +1,70 @@
 module Main {
 
+  type Ordering
+    = LessThan
+    | EqualTo
+    | GreaterThan
+
+  trait Ordered(a) {
+    compare : a -> a -> Ordering;
+  }
+
+  instance Ordered(int32) {
+    fn compare(x, y) =
+      if (x < y)
+        then LessThan
+        else if (x > y)
+          then GreaterThan
+          else EqualTo;
+  }
+
+  type Tree(a)
+    = Node(a, Tree(a), Tree(a))
+    | Leaf
+
+  fn less_than_or_equal_to(m) =
+    fn(n) =>
+      match(compare(m, n)) {
+        | LessThan or EqualTo =>
+            true
+        | GreaterThan =>
+            false
+      };
+
+  fn greater_than(n) =
+    not << less_than_or_equal_to(n);
+
+  fn in_range(range, n) =
+    greater_than(n, range.min) 
+      && (less_than_or_equal_to(n, range.max) || less_than_or_equal_to(range.max, -1));
+
+  fn from_list(list) =
+    fold(list, { min = 0, max = -1 }) {
+      | (p :: @g) =>
+          fn(range) =>
+            if (p |. in_range(range))
+              then 
+                Node
+                  ( p
+                  , g({ min = range.min, max = p })
+                  , g({ min = p, max = range.max })
+                  )
+              else
+                g(range)
+      | [] =>
+          always(Leaf)
+    };
+
+  fn flatten(tree) = 
+    fold(tree) {
+      Node(y, @lhs, @rhs) =>
+        lhs ++ (y :: rhs)
+      Leaf =>
+        []
+    };
+
+  sort = flatten << from_list;
+
   fn main() = 
     let
       xs =
