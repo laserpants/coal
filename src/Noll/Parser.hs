@@ -10,7 +10,7 @@ module Noll.Parser (
   lexeme_,
 ) where
 
-import Control.Monad (when, void)
+import Control.Monad (void, when)
 import Data.Text (Text)
 import Data.Void (Void)
 import Lang.Utils (Name)
@@ -51,8 +51,8 @@ reserved =
   , "then"
   , "else"
   , "match"
---  , "uses"
-  , "or"
+  , --  , "uses"
+    "or"
   , "type"
   , "cotype"
   , "alias"

@@ -16,7 +16,7 @@ import Data.Data (Data, Typeable)
 import Data.Set (Set)
 import GHC.Generics (Generic)
 import Noll.Language.Trait (Trait (..))
-import Noll.Language.Type (Type (..), TypeIndex (..), IndexedType)
+import Noll.Language.Type (IndexedType, Type (..), TypeIndex (..))
 import Noll.Language.Type.Kind (Kind (..))
 
 import qualified Data.Set as Set

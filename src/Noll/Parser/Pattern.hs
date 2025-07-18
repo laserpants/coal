@@ -43,6 +43,7 @@ patternParser = makeExprParser go operator
 operator :: [[Operator Parser (Pattern () ())]]
 operator =
   [ -- TODO
+
     [ InfixR (PListCons () () <$ symbol "::")
     ]
   , [Postfix typeAnnotation]
@@ -63,7 +64,7 @@ literalPattern :: Parser (Pattern () ())
 literalPattern = listLiteralPattern
 
 listLiteralPattern :: Parser (Pattern () ())
-listLiteralPattern = do 
+listLiteralPattern = do
   ps <- brackets (commaSep patternParser)
   pure (PListLiteral () () ps)
 

@@ -193,254 +193,253 @@ moduleMain =
                 ()
                 ()
                 (EBinaryOperator () () OLogicalAnd)
-                (EApplication
-                     ()
-                     ()
-                     (EVariable () (Label () "greater_than"))
-                     ( EVariable () (Label () "n")
-                         <| ESelect () (Label () "min") (EVariable () (Label () "range"))
-                         :| []
-                     )
+                ( EApplication
+                    ()
+                    ()
+                    (EVariable () (Label () "greater_than"))
+                    ( EVariable () (Label () "n")
+                        <| ESelect () (Label () "min") (EVariable () (Label () "range"))
+                        :| []
+                    )
                     <| EApplication
-                             ()
-                             ()
-                             (EBinaryOperator () () OLogicalOr)
-                             (
-                                                      EApplication
-                                                     ()
-                                                     ()
-                                                     (EVariable () (Label () "less_than_or_equal_to"))
-                                                     ( EVariable () (Label () "n")
-                                                         <| ESelect () (Label () "max") (EVariable () (Label () "range"))
-                                                         :| []
-                                                     )
+                      ()
+                      ()
+                      (EBinaryOperator () () OLogicalOr)
+                      ( EApplication
+                          ()
+                          ()
+                          (EVariable () (Label () "less_than_or_equal_to"))
+                          ( EVariable () (Label () "n")
+                              <| ESelect () (Label () "max") (EVariable () (Label () "range"))
+                              :| []
+                          )
+                          <| EApplication
+                            ()
+                            ()
+                            (EVariable () (Label () "less_than_or_equal_to"))
+                            ( ESelect () (Label () "max") (EVariable () (Label () "range"))
                                 <| EApplication
-                                                                       ()
-                                                                       ()
-                                                                       (EVariable () (Label () "less_than_or_equal_to"))
-                                                                       ( ESelect () (Label () "max") (EVariable () (Label () "range"))
-                                                                           <| EApplication
-                                                                                   ()
-                                                                                   ()
-                                                                                   (EVariable () (Label () "from_int32"))
-                                                                                   (ELiteral () (LInt32 (-1))
-                                                                                       :| []
-                                                                                   )
-                                                                           :| []
-                                                                       )
+                                  ()
+                                  ()
+                                  (EVariable () (Label () "from_int32"))
+                                  ( ELiteral () (LInt32 (-1))
+                                      :| []
+                                  )
                                 :| []
-                             )
+                            )
+                          :| []
+                      )
                     :| []
                 )
             )
         )
-    ,     DFunction
-              "from_list"
-              ( Function
-                  ()
-                  (With [] ())
-                  (PVariable () (Label () "list") :| [])
-                  ( EFold
+    , DFunction
+        "from_list"
+        ( Function
+            ()
+            (With [] ())
+            (PVariable () (Label () "list") :| [])
+            ( EFold
+                ()
+                ()
+                ( EVariable () (Label () "list")
+                    <| ERecord
                       ()
                       ()
-                      ( EVariable () (Label () "list")
-                          <| ERecord
-                            ()
-                            ()
-                            ( Map.fromList
-                                [
-                                  ( "min"
-                                  ,  EApplication
-                                                                                   ()
-                                                                                   ()
-                                                                                   (EVariable () (Label () "from_int32"))
-                                                                                   (ELiteral () (LInt32 0)
-                                                                                       :| []
-                                                                                   )
-                                  )
-                                ,
-                                  ( "max"
-                                  , EApplication
-                                                                                   ()
-                                                                                   ()
-                                                                                   (EVariable () (Label () "from_int32"))
-                                                                                   (ELiteral () (LInt32 (-1))
-                                                                                       :| []
-                                                                                   )
-                                  )
-                                ]
-                            )
-                            Nothing
-                          :| []
-                      )
-                      ( EClause
-                          ()
-                          ( PListCons
-                              ()
-                              ()
-                              (PVariable () (Label () "p"))
-                              (PAtVariable () (Label () "g"))
-                          )
-                          ( CPlain
-                              ()
-                              []
-                              ( ELambda
-                                  ()
-                                  (PVariable () (Label () "range") :| [])
-                                  ( EIf
-                                      ()
-                                      ()
-                                      ( EApplication
-                                          ()
-                                          ()
-                                          (EBinaryOperator () () OReverseApplication)
-                                          ( EVariable () (Label () "p")
-                                              <| EApplication
-                                                ()
-                                                ()
-                                                (EVariable () (Label () "in_range"))
-                                                (EVariable () (Label () "range") :| [])
-                                              :| []
-                                          )
-                                      )
-                                      ( EApplication
-                                          ()
-                                          ()
-                                          (EConstructor () (Label () "Node"))
-                                          ( EVariable () (Label () "p")
-                                              <| EApplication
-                                                ()
-                                                ()
-                                                (EVariable () (Label () "g"))
-                                                ( ERecord
-                                                    ()
-                                                    ()
-                                                    ( Map.fromList
-                                                        [
-                                                          ( "min"
-                                                          , ESelect () (Label () "min") (EVariable () (Label () "range"))
-                                                          )
-                                                        ,
-                                                          ( "max"
-                                                          , EVariable () (Label () "p")
-                                                          )
-                                                        ]
-                                                    )
-                                                    Nothing
-                                                    :| []
-                                                )
-                                              <| EApplication
-                                                ()
-                                                ()
-                                                (EVariable () (Label () "g"))
-                                                ( ERecord
-                                                    ()
-                                                    ()
-                                                    ( Map.fromList
-                                                        [
-                                                          ( "min"
-                                                          , EVariable () (Label () "p")
-                                                          )
-                                                        ,
-                                                          ( "max"
-                                                          , ESelect () (Label () "max") (EVariable () (Label () "range"))
-                                                          )
-                                                        ]
-                                                    )
-                                                    Nothing
-                                                    :| []
-                                                )
-                                              :| []
-                                          )
-                                      )
-                                      (EApplication () () (EVariable () (Label () "g")) (EVariable () (Label () "range") :| []))
-                                  )
-                              )
-                              :| []
-                          )
-                          <| EClause
-                            ()
-                            (PListLiteral () () [])
-                            ( CPlain
+                      ( Map.fromList
+                          [
+                            ( "min"
+                            , EApplication
                                 ()
-                                []
+                                ()
+                                (EVariable () (Label () "from_int32"))
+                                ( ELiteral () (LInt32 0)
+                                    :| []
+                                )
+                            )
+                          ,
+                            ( "max"
+                            , EApplication
+                                ()
+                                ()
+                                (EVariable () (Label () "from_int32"))
+                                ( ELiteral () (LInt32 (-1))
+                                    :| []
+                                )
+                            )
+                          ]
+                      )
+                      Nothing
+                    :| []
+                )
+                ( EClause
+                    ()
+                    ( PListCons
+                        ()
+                        ()
+                        (PVariable () (Label () "p"))
+                        (PAtVariable () (Label () "g"))
+                    )
+                    ( CPlain
+                        ()
+                        []
+                        ( ELambda
+                            ()
+                            (PVariable () (Label () "range") :| [])
+                            ( EIf
+                                ()
+                                ()
                                 ( EApplication
                                     ()
                                     ()
-                                    (EVariable () (Label () "always"))
-                                    (EConstructor () (Label () "Leaf") :| [])
+                                    (EBinaryOperator () () OReverseApplication)
+                                    ( EVariable () (Label () "p")
+                                        <| EApplication
+                                          ()
+                                          ()
+                                          (EVariable () (Label () "in_range"))
+                                          (EVariable () (Label () "range") :| [])
+                                        :| []
+                                    )
                                 )
-                                :| []
+                                ( EApplication
+                                    ()
+                                    ()
+                                    (EConstructor () (Label () "Node"))
+                                    ( EVariable () (Label () "p")
+                                        <| EApplication
+                                          ()
+                                          ()
+                                          (EVariable () (Label () "g"))
+                                          ( ERecord
+                                              ()
+                                              ()
+                                              ( Map.fromList
+                                                  [
+                                                    ( "min"
+                                                    , ESelect () (Label () "min") (EVariable () (Label () "range"))
+                                                    )
+                                                  ,
+                                                    ( "max"
+                                                    , EVariable () (Label () "p")
+                                                    )
+                                                  ]
+                                              )
+                                              Nothing
+                                              :| []
+                                          )
+                                        <| EApplication
+                                          ()
+                                          ()
+                                          (EVariable () (Label () "g"))
+                                          ( ERecord
+                                              ()
+                                              ()
+                                              ( Map.fromList
+                                                  [
+                                                    ( "min"
+                                                    , EVariable () (Label () "p")
+                                                    )
+                                                  ,
+                                                    ( "max"
+                                                    , ESelect () (Label () "max") (EVariable () (Label () "range"))
+                                                    )
+                                                  ]
+                                              )
+                                              Nothing
+                                              :| []
+                                          )
+                                        :| []
+                                    )
+                                )
+                                (EApplication () () (EVariable () (Label () "g")) (EVariable () (Label () "range") :| []))
                             )
-                          :| []
-                      )
-                      Nothing
-                  )
-              )
-          , DFunction
-              "flatten"
-              ( Function
-                  ()
-                  (With [] ())
-                  (PVariable () (Label () "tree") :| [])
-                  ( EFold
+                        )
+                        :| []
+                    )
+                    <| EClause
                       ()
-                      ()
-                      (EVariable () (Label () "tree") :| [])
-                      ( EClause
+                      (PListLiteral () () [])
+                      ( CPlain
                           ()
-                          ( PConstructor
+                          []
+                          ( EApplication
                               ()
-                              (Label () "Node")
-                              [ PVariable () (Label () "y")
-                              , PAtVariable () (Label () "lhs")
-                              , PAtVariable () (Label () "rhs")
-                              ]
-                          )
-                          ( CPlain
                               ()
-                              []
-                              ( EApplication
-                                  ()
-                                  ()
-                                  (EBinaryOperator () () OListConcatenation)
-                                  ( EVariable () (Label () "lhs")
-                                      <| EListCons () () (EVariable () (Label () "y")) (EVariable () (Label () "rhs"))
-                                      :| []
-                                  )
-                              )
-                              :| []
+                              (EVariable () (Label () "always"))
+                              (EConstructor () (Label () "Leaf") :| [])
                           )
-                          <| EClause
+                          :| []
+                      )
+                    :| []
+                )
+                Nothing
+            )
+        )
+    , DFunction
+        "flatten"
+        ( Function
+            ()
+            (With [] ())
+            (PVariable () (Label () "tree") :| [])
+            ( EFold
+                ()
+                ()
+                (EVariable () (Label () "tree") :| [])
+                ( EClause
+                    ()
+                    ( PConstructor
+                        ()
+                        (Label () "Node")
+                        [ PVariable () (Label () "y")
+                        , PAtVariable () (Label () "lhs")
+                        , PAtVariable () (Label () "rhs")
+                        ]
+                    )
+                    ( CPlain
+                        ()
+                        []
+                        ( EApplication
                             ()
-                            (PConstructor () (Label () "Leaf") [])
-                            ( CPlain
-                                ()
-                                []
-                                (EListLiteral () () [])
+                            ()
+                            (EBinaryOperator () () OListConcatenation)
+                            ( EVariable () (Label () "lhs")
+                                <| EListCons () () (EVariable () (Label () "y")) (EVariable () (Label () "rhs"))
                                 :| []
                             )
+                        )
+                        :| []
+                    )
+                    <| EClause
+                      ()
+                      (PConstructor () (Label () "Leaf") [])
+                      ( CPlain
+                          ()
+                          []
+                          (EListLiteral () () [])
                           :| []
                       )
-                      Nothing
-                  )
-              )
-          , DConstant
-              "sort"
-              ( Constant
-                  ()
-                  (With [] ())
-                  ( EApplication
-                      ()
-                      ()
-                      (EBinaryOperator () () OReverseComposition)
-                      ( EVariable () (Label () "flatten")
-                          <| EVariable () (Label () "from_list")
-                          :| []
-                      )
-                  )
-              )
-     , DFunction
+                    :| []
+                )
+                Nothing
+            )
+        )
+    , DConstant
+        "sort"
+        ( Constant
+            ()
+            (With [] ())
+            ( EApplication
+                ()
+                ()
+                (EBinaryOperator () () OReverseComposition)
+                ( EVariable () (Label () "flatten")
+                    <| EVariable () (Label () "from_list")
+                    :| []
+                )
+            )
+        )
+    , DFunction
         "main"
         ( Function
             ()
@@ -454,22 +453,22 @@ moduleMain =
                     ( EAnnotation
                         ()
                         (TIntrinsic (IList (TIntrinsic IInt32)))
-                    ( EListLiteral
-                        ()
-                        ()
-                        [ EApplication () () (EVariable () (Label () "from_int32")) (ELiteral () (LInt32 5) :| []) -- ELiteral () (LInt32 5)
-                        , EApplication () () (EVariable () (Label () "from_int32")) (ELiteral () (LInt32 3) :| []) -- Literal () (LInt32 3)
-                        , EApplication () () (EVariable () (Label () "from_int32")) (ELiteral () (LInt32 7) :| []) -- Literal () (LInt32 7)
-                        , EApplication () () (EVariable () (Label () "from_int32")) (ELiteral () (LInt32 2) :| []) -- Literal () (LInt32 2)
-                        , EApplication () () (EVariable () (Label () "from_int32")) (ELiteral () (LInt32 1) :| []) -- Literal () (LInt32 1)
-                        , EApplication () () (EVariable () (Label () "from_int32")) (ELiteral () (LInt32 6) :| []) -- Literal () (LInt32 6)
-                        , EApplication () () (EVariable () (Label () "from_int32")) (ELiteral () (LInt32 4) :| []) -- Literal () (LInt32 4)
-                        ]
-                    )
+                        ( EListLiteral
+                            ()
+                            ()
+                            [ EApplication () () (EVariable () (Label () "from_int32")) (ELiteral () (LInt32 5) :| []) -- ELiteral () (LInt32 5)
+                            , EApplication () () (EVariable () (Label () "from_int32")) (ELiteral () (LInt32 3) :| []) -- Literal () (LInt32 3)
+                            , EApplication () () (EVariable () (Label () "from_int32")) (ELiteral () (LInt32 7) :| []) -- Literal () (LInt32 7)
+                            , EApplication () () (EVariable () (Label () "from_int32")) (ELiteral () (LInt32 2) :| []) -- Literal () (LInt32 2)
+                            , EApplication () () (EVariable () (Label () "from_int32")) (ELiteral () (LInt32 1) :| []) -- Literal () (LInt32 1)
+                            , EApplication () () (EVariable () (Label () "from_int32")) (ELiteral () (LInt32 6) :| []) -- Literal () (LInt32 6)
+                            , EApplication () () (EVariable () (Label () "from_int32")) (ELiteral () (LInt32 4) :| []) -- Literal () (LInt32 4)
+                            ]
+                        )
                     )
                     :| []
                 )
-                 ( EApplication
+                ( EApplication
                     ()
                     ()
                     (EVariable () (Label () "trace_int32"))
@@ -504,7 +503,7 @@ moduleMain =
                         )
                         :| []
                     )
-                 )
+                )
             )
         )
     ]

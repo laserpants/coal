@@ -81,7 +81,7 @@ variableExpression = EVariable () . Label () <$> name
 choiceParser = do
   -- TODO
   e <- expressionParser
-  pure (CPlain () [] e) 
+  pure (CPlain () [] e)
 
 matchClause = do
   void $ symbol "|"
@@ -112,7 +112,7 @@ intExpression = do
       (ELiteral () (LInt32 n) :| [])
 
 listLiteral :: Parser (Expression () ())
-listLiteral = do 
+listLiteral = do
   es <- brackets (commaSep expressionParser)
   pure (EListLiteral () () es)
 
@@ -145,7 +145,10 @@ fixity7 =
 
 fixity6, fixity5, fixity4, fixity3, fixity2 :: [Operator Parser (Expression () ())]
 fixity6 = []
-fixity5 = []
+fixity5 =
+  [ InfixR (binaryOperator OListConcatenation <$ symbol "++")
+  , InfixR (EListCons () () <$ symbol "::")
+  ]
 fixity4 = []
 fixity3 = []
 fixity2 = []

@@ -193,43 +193,42 @@ moduleMain =
                 ()
                 ()
                 (EBinaryOperator () () OLogicalAnd)
-                (EApplication
-                     ()
-                     ()
-                     (EVariable () (Label () "greater_than"))
-                     ( EVariable () (Label () "n")
-                         <| ESelect () (Label () "min") (EVariable () (Label () "range"))
-                         :| []
-                     )
+                ( EApplication
+                    ()
+                    ()
+                    (EVariable () (Label () "greater_than"))
+                    ( EVariable () (Label () "n")
+                        <| ESelect () (Label () "min") (EVariable () (Label () "range"))
+                        :| []
+                    )
                     <| EApplication
-                             ()
-                             ()
-                             (EBinaryOperator () () OLogicalOr)
-                             (
-                                                      EApplication
-                                                     ()
-                                                     ()
-                                                     (EVariable () (Label () "less_than_or_equal_to"))
-                                                     ( EVariable () (Label () "n")
-                                                         <| ESelect () (Label () "max") (EVariable () (Label () "range"))
-                                                         :| []
-                                                     )
+                      ()
+                      ()
+                      (EBinaryOperator () () OLogicalOr)
+                      ( EApplication
+                          ()
+                          ()
+                          (EVariable () (Label () "less_than_or_equal_to"))
+                          ( EVariable () (Label () "n")
+                              <| ESelect () (Label () "max") (EVariable () (Label () "range"))
+                              :| []
+                          )
+                          <| EApplication
+                            ()
+                            ()
+                            (EVariable () (Label () "less_than_or_equal_to"))
+                            ( ESelect () (Label () "max") (EVariable () (Label () "range"))
                                 <| EApplication
-                                                                       ()
-                                                                       ()
-                                                                       (EVariable () (Label () "less_than_or_equal_to"))
-                                                                       ( ESelect () (Label () "max") (EVariable () (Label () "range"))
-                                                                           <| EApplication
-                                                                                   ()
-                                                                                   ()
-                                                                                   (EVariable () (Label () "from_int32"))
-                                                                                   (ELiteral () (LInt32 (-1))
-                                                                                       :| []
-                                                                                   )
-                                                                           :| []
-                                                                       )
+                                  ()
+                                  ()
+                                  (EVariable () (Label () "from_int32"))
+                                  ( ELiteral () (LInt32 (-1))
+                                      :| []
+                                  )
                                 :| []
-                             )
+                            )
+                          :| []
+                      )
                     :| []
                 )
             )
