@@ -121,52 +121,7 @@ moduleMain =
                 )
             )
         ]
-    , --    , DFunction
-      --        "f_compare"
-      --        ( Function
-      --            ()
-      --            (With [] ())
-      --            ( PAnnotation
-      --                ()
-      --                (TIntrinsic IInt32)
-      --                (PVariable () (Label () "x"))
-      --                <| PAnnotation
-      --                  ()
-      --                  (TIntrinsic IInt32)
-      --                  (PVariable () (Label () "y"))
-      --                :| []
-      --            )
-      --            ( EIf
-      --                ()
-      --                ()
-      --                ( EApplication
-      --                    ()
-      --                    ()
-      --                    (EBinaryOperator () () OLessThan)
-      --                    ( EVariable () (Label () "x")
-      --                        <| EVariable () (Label () "y")
-      --                        :| []
-      --                    )
-      --                )
-      --                (EConstructor () (Label () "LessThan"))
-      --                ( EIf
-      --                    ()
-      --                    ()
-      --                    ( EApplication
-      --                        ()
-      --                        ()
-      --                        (EBinaryOperator () () OGreaterThan)
-      --                        ( EVariable () (Label () "x")
-      --                            <| EVariable () (Label () "y")
-      --                            :| []
-      --                        )
-      --                    )
-      --                    (EConstructor () (Label () "GreaterThan"))
-      --                    (EConstructor () (Label () "EqualTo"))
-      --                )
-      --            )
-      --        )
-      DFunction
+    , DFunction
         "less_than_or_equal_to"
         ( Function
             ()
