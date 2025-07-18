@@ -486,3 +486,128 @@ spec =
                   Definition () () ()
               ]
           )
+    it "" $ do
+      runParser functionParser "" "fn main() = let xs = [5, 3, 7, 2, 1, 6, 4] : list(int32) in trace_int32(match(sort(xs)) { | [] => 12345 | (y :: _) => y });"
+        == Right
+          ( DFunction
+              "main"
+              ( Function
+                  ()
+                  (With [] ())
+                  (PLiteral () LUnit :| [])
+                  (
+                    ELet
+                      ()
+                      (
+                        BPattern
+                          ()
+                          (PVariable () (Label () "xs"))
+                          (
+                            EAnnotation
+                              ()
+                              (
+                                TApplication
+                                  ()
+                                  (TConstructor () "list")
+                                  (TIntrinsic IInt32 :| [])
+                              )
+                              (
+                                EListLiteral () ()
+                                  [ EApplication 
+                                          ()
+                                          ()
+                                          (EVariable () (Label () "from_int32"))
+                                          (ELiteral () (LInt32 5) :| [])
+                                  , EApplication 
+                                          ()
+                                          ()
+                                          (EVariable () (Label () "from_int32"))
+                                          (ELiteral () (LInt32 3) :| [])
+                                  , EApplication 
+                                          ()
+                                          ()
+                                          (EVariable () (Label () "from_int32"))
+                                          (ELiteral () (LInt32 7) :| [])
+                                  , EApplication 
+                                          ()
+                                          ()
+                                          (EVariable () (Label () "from_int32"))
+                                          (ELiteral () (LInt32 2) :| [])
+                                  , EApplication 
+                                          ()
+                                          ()
+                                          (EVariable () (Label () "from_int32"))
+                                          (ELiteral () (LInt32 1) :| [])
+                                  , EApplication 
+                                          ()
+                                          ()
+                                          (EVariable () (Label () "from_int32"))
+                                          (ELiteral () (LInt32 6) :| [])
+                                  , EApplication 
+                                          ()
+                                          ()
+                                          (EVariable () (Label () "from_int32"))
+                                          (ELiteral () (LInt32 4) :| [])
+                                  ]
+                              )
+                          )
+                        :| []
+                      )
+                      (
+                        EApplication
+                          ()
+                          ()
+                          (EVariable () (Label () "trace_int32"))
+                          (
+                            EMatch
+                              ()
+                              ()
+                              (
+                                EApplication
+                                  ()
+                                  ()
+                                  (EVariable () (Label () "sort"))
+                                  (EVariable () (Label () "xs") :| [])
+                              )
+                              (
+                                EClause
+                                  ()
+                                  (
+                                    PListLiteral () () []
+                                  )
+                                  (
+                                    CPlain
+                                      ()
+                                      []
+                                      (
+                                        EApplication 
+                                          ()
+                                          ()
+                                          (EVariable () (Label () "from_int32"))
+                                          (ELiteral () (LInt32 12345) :| [])
+                                      )
+                                      :| []
+                                  )
+                                  <| EClause
+                                        ()
+                                        (
+                                          PListCons () () 
+                                            (PVariable () (Label () "y"))
+                                            (PAny () ())
+                                        )
+                                                  (
+                                                    CPlain
+                                                      ()
+                                                      []
+                                                      (EVariable () (Label () "y"))
+                                                      :| []
+                                                  )
+                                  :| []
+                              )
+                            :| []
+                          )
+                      )
+                  )
+              ) ::
+              Definition () () ()
+          )
