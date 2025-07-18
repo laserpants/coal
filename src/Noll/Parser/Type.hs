@@ -16,8 +16,7 @@ import Text.Megaparsec.Char (char)
 intrinsicParser :: Parser (Intrinsic (Type Parameter ()))
 intrinsicParser = lexeme "int32" $> IInt32
 
-typeConstructor = 
-  lexeme "list" $> TConstructor () "list"
+typeConstructor = TConstructor () <$> lexeme "list"
 
 typeApplication = do 
   t0 <- typeConstructor
