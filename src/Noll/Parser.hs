@@ -57,6 +57,7 @@ reserved =
   , "import"
   , "true"
   , "false"
+  , "not"
   , "unit"
   , "bool"
   , "int32"
