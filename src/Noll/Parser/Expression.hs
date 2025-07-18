@@ -2,7 +2,6 @@
 
 module Noll.Parser.Expression where -- (expressionParser) where
 
-import Control.Monad (void)
 import Control.Monad.Combinators.Expr
 import Lang.Common.List1 (NonEmpty (..))
 import Lang.Label (Label (..))
@@ -25,6 +24,7 @@ expressionParser = makeExprParser go operator
       <|> literalExpression
       <|> foldExpression
       <|> matchExpression
+      <|> ifExpression
       <|> letExpression
       <|> variableExpression
       <|> parens expressionParser
@@ -46,31 +46,30 @@ letBinding = patternBinding <|> functionBinding
 
 letExpression :: Parser (Expression () ())
 letExpression = do
-  void $ lexeme "let"
+  lexeme_ "let"
   bs <- semicolonSep1 letBinding
-  void $ lexeme "in"
+  lexeme_ "in"
   e <- expressionParser
   case bs of
     b : bs1 ->
       pure (ELet () (b :| bs1) e)
+    _ ->
+      error "Implementation error"
 
 choice :: Parser (Choice Expression () ())
-choice = do
-  e <- expressionParser
-  -- TODO
-  pure (CPlain () [] e)
+choice = CPlain () [] <$> expressionParser
 
 clause :: Parser (Clause () ())
 clause = do
-  void (symbol "|")
+  symbol_ "|"
   p <- patternParser
-  void (symbol "=>")
+  symbol_ "=>"
   c : cs <- some choice
   pure (EClause () p (c :| cs))
 
 foldExpression :: Parser (Expression () ())
 foldExpression = do
-  void $ lexeme "fold"
+  lexeme_ "fold"
   expr : exprs <- parens (commaSep1 expressionParser)
   c : cs <- braces (some clause)
   pure (EFold () () (expr :| exprs) (c :| cs) Nothing)
@@ -83,23 +82,38 @@ choiceParser = do
   e <- expressionParser
   pure (CPlain () [] e)
 
+matchClause :: Parser (Clause () ())
 matchClause = do
-  void $ symbol "|"
+  symbol_ "|"
   p <- patternParser
-  void $ symbol "=>"
+  symbol_ "=>"
   cs <- some choiceParser
   case cs of
     c : cs1 ->
       pure (EClause () p (c :| cs1))
+    _ ->
+      error "Implementation error"
 
 matchExpression :: Parser (Expression () ())
 matchExpression = do
-  void $ lexeme "match"
+  lexeme_ "match"
   e <- parens expressionParser
   cs <- braces (some matchClause)
   case cs of
     c : cs1 ->
       pure (EMatch () () e (c :| cs1))
+    _ ->
+      error "Implementation error"
+
+ifExpression :: Parser (Expression () ())
+ifExpression = do
+  lexeme_ "if"
+  e1 <- expressionParser
+  lexeme_ "then"
+  e2 <- expressionParser
+  lexeme_ "else"
+  e3 <- expressionParser
+  pure (EIf () () e1 e2 e3)
 
 intExpression :: Parser (Expression () ())
 intExpression = do
@@ -136,7 +150,7 @@ binaryOperator op e1 e2 =
     (e1 :| [e2])
 
 fixity9 :: [Operator Parser (Expression () ())]
-fixity9 = 
+fixity9 =
   [ -- TODO
     InfixR (binaryOperator OReverseComposition <$ symbol "<<")
   ]
