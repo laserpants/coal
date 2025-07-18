@@ -9,14 +9,13 @@
 module Noll.Compiler.Transform.Nats (
   NatExpansion (..),
   CompileNatsContext (..),
-  compileNats,
   evalNatExpansion,
   runNatExpansion,
 )
 where
 
 import Control.Monad ((<=<))
-import Control.Monad.RWS (RWS, evalRWS, runRWS)
+import Control.Monad.RWS (RWS, runRWS)
 import Control.Monad.Reader (MonadReader)
 import Control.Monad.State (MonadState)
 import Data.Data (Data)
