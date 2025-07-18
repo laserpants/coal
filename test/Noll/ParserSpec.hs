@@ -601,3 +601,76 @@ spec =
               ) ::
               Definition () () ()
           )
+    it "" $ do
+      runParser functionParser "" "fn flatten(tree) = fold(tree) { | Node(y, @lhs, @rhs) => lhs ++ (y :: rhs) | Leaf => [] };"
+        == Right
+          ( DFunction
+              "flatten"
+              ( Function
+                  ()
+                  (With [] ())
+                  (PVariable () (Label () "tree") :| [])
+                  ( EFold
+                      ()
+                      ()
+                      (EVariable () (Label () "tree") :| [])
+                      ( EClause
+                          ()
+                          ( PConstructor
+                              ()
+                              (Label () "Node")
+                              [ PVariable () (Label () "y")
+                              , PAtVariable () (Label () "lhs")
+                              , PAtVariable () (Label () "rhs")
+                              ]
+                          )
+                          ( CPlain
+                              ()
+                              []
+                              ( EApplication
+                                  ()
+                                  ()
+                                  (EBinaryOperator () () OListConcatenation)
+                                  ( EVariable () (Label () "lhs")
+                                      <| EListCons () () (EVariable () (Label () "y")) (EVariable () (Label () "rhs"))
+                                      :| []
+                                  )
+                              )
+                              :| []
+                          )
+                          <| EClause
+                            ()
+                            (PConstructor () (Label () "Leaf") [])
+                            ( CPlain
+                                ()
+                                []
+                                (EListLiteral () () [])
+                                :| []
+                            )
+                          :| []
+                      )
+                      Nothing
+                  )
+              ) ::
+              Definition () () ()
+          )
+    it "" $ do
+      runParser constantParser "" "sort = flatten << from_list;"
+        == Right
+          ( DConstant
+              "sort"
+              ( Constant
+                  ()
+                  (With [] ())
+                  ( EApplication
+                      ()
+                      ()
+                      (EBinaryOperator () () OReverseComposition)
+                      ( EVariable () (Label () "flatten")
+                          <| EVariable () (Label () "from_list")
+                          :| []
+                      )
+                  )
+              ) ::
+              Definition () () ()
+          )

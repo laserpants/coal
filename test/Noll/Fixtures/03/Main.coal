@@ -57,10 +57,10 @@ module Main {
 
   fn flatten(tree) = 
     fold(tree) {
-      Node(y, @lhs, @rhs) =>
-        lhs ++ (y :: rhs)
-      Leaf =>
-        []
+      | Node(y, @lhs, @rhs) =>
+          lhs ++ (y :: rhs)
+      | Leaf =>
+          []
     };
 
   sort = flatten << from_list;

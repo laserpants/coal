@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Parser.Module (moduleParser, functionParser) where
+module Noll.Parser.Module (moduleParser, functionParser, constantParser) where
 
 import Lang.Common.List1 (NonEmpty (..))
 import Noll.Language

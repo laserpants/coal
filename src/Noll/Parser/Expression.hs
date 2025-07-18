@@ -135,6 +135,12 @@ binaryOperator op e1 e2 =
     (EBinaryOperator () () op)
     (e1 :| [e2])
 
+fixity9 :: [Operator Parser (Expression () ())]
+fixity9 = 
+  [ -- TODO
+    InfixR (binaryOperator OReverseComposition <$ symbol "<<")
+  ]
+
 fixity8 :: [Operator Parser (Expression () ())]
 fixity8 = []
 
@@ -155,7 +161,8 @@ fixity2 = []
 
 operator :: [[Operator Parser (Expression () ())]]
 operator =
-  [ fixity8
+  [ fixity9
+  , fixity8
   , fixity7
   , fixity6
   , fixity5
