@@ -238,83 +238,46 @@ moduleMain =
                 ()
                 ()
                 (EBinaryOperator () () OLogicalAnd)
-                ( EApplication
-                    ()
-                    ()
-                    (EVariable () (Label () "greater_than"))
-                    ( EVariable () (Label () "n")
-                        <| ESelect () (Label () "min") (EVariable () (Label () "range"))
-                        :| []
-                    )
+                (EApplication
+                     ()
+                     ()
+                     (EVariable () (Label () "greater_than"))
+                     ( EVariable () (Label () "n")
+                         <| ESelect () (Label () "min") (EVariable () (Label () "range"))
+                         :| []
+                     )
                     <| EApplication
-                      ()
-                      ()
-                      (EBinaryOperator () () OLogicalOr)
-                      ( EApplication
-                          ()
-                          ()
-                          (EVariable () (Label () "less_than_or_equal_to"))
-                          ( EVariable () (Label () "n")
-                              <| ESelect () (Label () "max") (EVariable () (Label () "range"))
-                              :| []
-                          )
-                          :| []
-                      )
-                    <| EApplication
-                          ()
-                          ()
-                          (EVariable () (Label () "less_than_or_equal_to"))
-                          ( ESelect () (Label () "max") (EVariable () (Label () "range"))
-                              <| undefined
-                              :| []
-                          )
+                             ()
+                             ()
+                             (EBinaryOperator () () OLogicalOr)
+                             (
+                                                      EApplication
+                                                     ()
+                                                     ()
+                                                     (EVariable () (Label () "less_than_or_equal_to"))
+                                                     ( EVariable () (Label () "n")
+                                                         <| ESelect () (Label () "max") (EVariable () (Label () "range"))
+                                                         :| []
+                                                     )
+                                <| EApplication
+                                                                       ()
+                                                                       ()
+                                                                       (EVariable () (Label () "less_than_or_equal_to"))
+                                                                       ( ESelect () (Label () "max") (EVariable () (Label () "range"))
+                                                                           <| EApplication
+                                                                                   ()
+                                                                                   ()
+                                                                                   (EVariable () (Label () "from_int32"))
+                                                                                   (ELiteral () (LInt32 (-1))
+                                                                                       :| []
+                                                                                   )
+                                                                           :| []
+                                                                       )
+                                :| []
+                             )
                     :| []
                 )
             )
-            -- ( EApplication
-            --     ()
-            --     ()
-            --     (EBinaryOperator () () OLogicalAnd)
-            --     ( EApplication
-            --         ()
-            --         ()
-            --         (EVariable () (Label () "greater_than"))
-            --         ( EVariable () (Label () "n")
-            --             <| ESelect () (Label () "min") (EVariable () (Label () "range"))
-            --             :| []
-            --         )
-            --         <| EApplication
-            --           ()
-            --           ()
-            --           (EBinaryOperator () () OLogicalOr)
-            --           ( EApplication
-            --               ()
-            --               ()
-            --               (EVariable () (Label () "less_than_or_equal_to"))
-            --               ( EVariable () (Label () "n")
-            --                   <| ESelect () (Label () "max") (EVariable () (Label () "range"))
-            --                   :| []
-            --               )
-            --               <| EApplication
-            --                 ()
-            --                 ()
-            --                 (EVariable () (Label () "less_than_or_equal_to"))
-            --                 ( ESelect () (Label () "max") (EVariable () (Label () "range"))
-            --                     <| ELiteral () (LInt32 (-1))
-            --                     -- <| EApplication
-            --                     --     ()
-            --                     --     ()
-            --                     --     (EVariable () (Label () "from_int32"))
-            --                     --     (ELiteral () (LInt32 (-1))
-            --                     --         :| []
-            --                     --     )
-            --                     :| []
-            --                 )
-            --               :| []
-            --           )
-            --         :| []
-            --     )
-            -- )
         )
     , --    , DFunction
       --        "f_from_list"
@@ -539,17 +502,6 @@ moduleMain =
                     ()
                     ()
                     (EVariable () (Label () "trace_bool"))
-                    -- (
-                    --   EApplication
-                    --     ()
-                    --     ()
-                    --     (EVariable () (Label () "greater_than"))
-                    --     ( ELiteral () (LInt32 9)
-                    --        <| ELiteral () (LInt32 7)
-                    --        :| []
-                    --     )
-                    --     :| []
-                    -- )
                     ( EApplication
                         ()
                         ()
@@ -569,7 +521,7 @@ moduleMain =
                                 ]
                             )
                             Nothing
-                            <| ELiteral () (LInt32 12)
+                            <| ELiteral () (LInt32 5)
                             :| []
                         )
                         :| []

@@ -427,7 +427,8 @@ yy =
       , Forall
           (Set.fromList [TypeIndex KType 0] :: Set (TypeIndex Kind))
           -- [Trait "Numeric" (TVariable (TypeIndex KType 0)), Trait "Ordered" (TVariable (TypeIndex KType 0))]
-          [Trait "Ordered" (TVariable (TypeIndex KType 0))]
+          [Trait "Ordered" (TVariable (TypeIndex KType 0)), Trait "Numeric" (TVariable (TypeIndex KType 0))]
+          --[Trait "Ordered" (TVariable (TypeIndex KType 0))]
           ( TIntrinsic (IRecord (TRow (RExtend "max" (TVariable (TypeIndex KType 0)) (RExtend "min" (TVariable (TypeIndex KType 0)) RNil))))
               `TArrow` TVariable (TypeIndex KType 0)
               `TArrow` TIntrinsic IBool
@@ -691,8 +692,12 @@ abc28 = fst (runIdentity (runCompiler2T compiler2TestEnvironment prog))
         ( "in_range"
         , Forall (Set.fromList [TypeIndex KType 0]) [] (TIntrinsic (IRecord (TRow (RExtend "max" (TVariable (TypeIndex KType 0)) (RExtend "min" (TVariable (TypeIndex KType 0)) RNil)))) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
         )
+      ,
+        ( "from_int32"
+        , Forall (Set.fromList [TypeIndex KType 0]) [] (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0))
+        )
       ]
-    compileModule Noll.Set23.Test01.moduleMain
+    compileModule_ Noll.Set23.Test01.moduleMain
 
 abc29 :: IO ()
 abc29 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc28]
