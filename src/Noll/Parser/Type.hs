@@ -3,7 +3,6 @@
 module Noll.Parser.Type where
 
 import Lang.Common.List1 (NonEmpty (..))
-import Control.Monad (void)
 import Control.Monad.Combinators.Expr
 import Data.Functor (($>))
 import Lang.Label (Label (..))

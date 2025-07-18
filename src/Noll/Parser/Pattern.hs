@@ -26,7 +26,7 @@ patternParser = makeExprParser go operator
         <|> variablePattern
         <|> parens patternParser
     rest <- optional $ do
-      void (lexeme "as")
+      lexeme_ "as"
       p2 <- patternParser
       case p2 of
         PVariable _ (Label _ n) ->
@@ -50,7 +50,7 @@ operator =
 
 typeAnnotation :: Parser (Pattern () () -> Pattern () ())
 typeAnnotation = do
-  void (symbol ":")
+  symbol_ ":"
   PAnnotation () <$> typeParser
 
 anyPattern :: Parser (Pattern () ())
