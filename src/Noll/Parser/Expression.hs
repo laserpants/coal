@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Parser.Expression (expressionParser) where
+module Noll.Parser.Expression where -- (expressionParser) where
 
 import Control.Monad (void)
 import Control.Monad.Combinators.Expr
@@ -22,7 +22,9 @@ expressionParser = makeExprParser go operator
   go =
     try functionCall
       <|> intExpression
+      <|> literalExpression
       <|> foldExpression
+      <|> letExpression
       <|> variableExpression
       <|> parens expressionParser
 
@@ -32,8 +34,24 @@ functionCall = do
   arg : args <- parens (commaSep1 expressionParser)
   pure (EApplication () () fn (arg :| args))
 
+patternBinding :: Parser (Binding Expression () ())
+patternBinding = BPattern () <$> (patternParser <* symbol "=") <*> expressionParser
+
+functionBinding :: Parser (Binding Expression () ())
+functionBinding = undefined
+
+letBinding :: Parser (Binding Expression () ())
+letBinding = patternBinding <|> functionBinding
+
 letExpression :: Parser (Expression () ())
-letExpression = undefined
+letExpression = do
+  void $ lexeme "let"
+  bs <- semicolonSep1 letBinding
+  void $ lexeme "in"
+  e <- expressionParser
+  case bs of
+    b : bs1 ->
+      pure (ELet () (b :| bs1) e)
 
 choice :: Parser (Choice Expression () ())
 choice = do
@@ -69,8 +87,13 @@ intExpression = do
       (EVariable () (Label () "from_int32"))
       (ELiteral () (LInt32 n) :| [])
 
+listLiteral :: Parser (Expression () ())
+listLiteral = do 
+  es <- brackets (commaSep expressionParser)
+  pure (EListLiteral () () es)
+
 literalExpression :: Parser (Expression () ())
-literalExpression = undefined
+literalExpression = listLiteral
 
 unaryOperator :: UnaryOperator -> Expression () () -> Expression () ()
 unaryOperator op e1 =
