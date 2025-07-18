@@ -24,6 +24,7 @@ expressionParser = makeExprParser go operator
       <|> intExpression
       <|> literalExpression
       <|> foldExpression
+      <|> matchExpression
       <|> letExpression
       <|> variableExpression
       <|> parens expressionParser
@@ -76,6 +77,29 @@ foldExpression = do
 
 variableExpression :: Parser (Expression () ())
 variableExpression = EVariable () . Label () <$> name
+
+choiceParser = do
+  -- TODO
+  e <- expressionParser
+  pure (CPlain () [] e) 
+
+matchClause = do
+  void $ symbol "|"
+  p <- patternParser
+  void $ symbol "=>"
+  cs <- some choiceParser
+  case cs of
+    c : cs1 ->
+      pure (EClause () p (c :| cs1))
+
+matchExpression :: Parser (Expression () ())
+matchExpression = do
+  void $ lexeme "match"
+  e <- parens expressionParser
+  cs <- braces (some matchClause)
+  case cs of
+    c : cs1 ->
+      pure (EMatch () () e (c :| cs1))
 
 intExpression :: Parser (Expression () ())
 intExpression = do

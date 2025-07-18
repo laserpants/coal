@@ -4,6 +4,7 @@ module Noll.Parser.Pattern (patternParser) where
 
 import Control.Monad (void)
 import Control.Monad.Combinators.Expr
+import Data.Functor (($>))
 import Lang.Label (Label (..))
 import Noll.Language
 import Noll.Parser
@@ -20,7 +21,10 @@ patternParser = makeExprParser go operator
     p1 <-
       constructorPattern
         <|> atVariablePattern
+        <|> literalPattern
+        <|> anyPattern
         <|> variablePattern
+        <|> parens patternParser
     rest <- optional $ do
       void (lexeme "as")
       p2 <- patternParser
@@ -39,20 +43,29 @@ patternParser = makeExprParser go operator
 operator :: [[Operator Parser (Pattern () ())]]
 operator =
   [ -- TODO
-    [Postfix typeAnnotation]
+    [ InfixR (PListCons () () <$ symbol "::")
+    ]
+  , [Postfix typeAnnotation]
   ]
 
 typeAnnotation :: Parser (Pattern () () -> Pattern () ())
 typeAnnotation = do
   void (symbol ":")
-  ty <- typeParser
-  pure (PAnnotation () ty)
+  PAnnotation () <$> typeParser
+
+anyPattern :: Parser (Pattern () ())
+anyPattern = symbol "_" $> PAny () ()
 
 variablePattern :: Parser (Pattern () ())
 variablePattern = PVariable () . Label () <$> name
 
 literalPattern :: Parser (Pattern () ())
-literalPattern = undefined
+literalPattern = listLiteralPattern
+
+listLiteralPattern :: Parser (Pattern () ())
+listLiteralPattern = do 
+  ps <- brackets (commaSep patternParser)
+  pure (PListLiteral () () ps)
 
 atVariablePattern :: Parser (Pattern () ())
 atVariablePattern = do
