@@ -45,7 +45,7 @@ parseExpression = makeExprParser go operator
 
 parseFunctionApplication :: Parser (Expression () ())
 parseFunctionApplication = do
-  fn <- try (parens parseExpression) <|> parseDataConstructor <|> EVariable () . Label () <$> name
+  fn <- try (parens parseExpression) <|> parseDataConstructor <|> parseVariableExpression
   as <- parens (commaSep parseExpression)
   pure $
     EApplication () () fn $
