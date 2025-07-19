@@ -234,10 +234,5 @@ operator =
   , fixity4
   , fixity3
   , fixity2
-  , [Postfix typeAnnotation]
+  , [Postfix (symbol_ ":" *> (EAnnotation () <$> typeParser))]
   ]
-
-typeAnnotation :: Parser (Expression () () -> Expression () ())
-typeAnnotation = do
-  symbol_ ":"
-  EAnnotation () <$> typeParser
