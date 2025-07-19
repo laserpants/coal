@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Parser.Pattern (patternParser) where
+module Noll.Parser.Pattern (parsePattern) where
 
 import Control.Monad (void)
 import Control.Monad.Combinators.Expr
@@ -14,8 +14,8 @@ import Noll.Parser.Type (parseType)
 import Text.Megaparsec (option, optional, (<|>))
 import Text.Megaparsec.Char (char)
 
-patternParser :: Parser (Pattern () ())
-patternParser = makeExprParser go operator
+parsePattern :: Parser (Pattern () ())
+parsePattern = makeExprParser go operator
  where
   go = do
     p1 <-
@@ -24,10 +24,10 @@ patternParser = makeExprParser go operator
         <|> parseLiteralPattern
         <|> parseAnyPattern
         <|> parseVariablePattern
-        <|> parens patternParser
+        <|> parens parsePattern
     rest <- optional $ do
       lexeme_ "as"
-      p2 <- patternParser
+      p2 <- parsePattern
       case p2 of
         PVariable _ (Label _ n) ->
           pure (Label () n)
@@ -50,13 +50,8 @@ operator =
 
     [ InfixL (POr () () <$ lexeme "or")
     ]
-  , [Postfix typeAnnotation]
+  , [Postfix (symbol_ ":" *> (PAnnotation () <$> parseType))]
   ]
-
-typeAnnotation :: Parser (Pattern () () -> Pattern () ())
-typeAnnotation = do
-  symbol_ ":"
-  PAnnotation () <$> parseType
 
 parseAnyPattern :: Parser (Pattern () ())
 parseAnyPattern = symbol "_" $> PAny () ()
@@ -69,7 +64,7 @@ parseLiteralPattern = parseListLiteralPattern
 
 parseListLiteralPattern :: Parser (Pattern () ())
 parseListLiteralPattern = do
-  ps <- brackets (commaSep patternParser)
+  ps <- brackets (commaSep parsePattern)
   pure (PListLiteral () () ps)
 
 parseAtVariablePattern :: Parser (Pattern () ())
@@ -80,5 +75,5 @@ parseAtVariablePattern = do
 parseConstructorPattern :: Parser (Pattern () ())
 parseConstructorPattern = do
   c <- constructor
-  ps <- option [] (parens (commaSep1 patternParser))
+  ps <- option [] (parens (commaSep1 parsePattern))
   pure (PConstructor () (Label () c) ps)

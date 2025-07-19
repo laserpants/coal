@@ -10,7 +10,7 @@ import Lang.Utils (Name)
 import Noll.Language
 import Noll.Parser
 import Noll.Parser.Identifier
-import Noll.Parser.Pattern (patternParser)
+import Noll.Parser.Pattern (parsePattern)
 import Noll.Parser.Symbol
 import Noll.Parser.Type (parseType)
 import Text.Megaparsec (optional, some, try, (<|>))
@@ -59,7 +59,7 @@ parseDataConstructor :: Parser (Expression () ())
 parseDataConstructor = EConstructor () . Label () <$> constructor
 
 patternBinding :: Parser (Binding Expression () ())
-patternBinding = BPattern () <$> (patternParser <* symbol "=") <*> parseExpression
+patternBinding = BPattern () <$> (parsePattern <* symbol "=") <*> parseExpression
 
 parseBinding :: Parser (Binding Expression () ())
 parseBinding = patternBinding -- <|> functionBinding
@@ -79,7 +79,7 @@ parseChoice = CPlain () [] <$> parseExpression
 
 parseClause :: Parser (Clause () ())
 parseClause = do
-  p <- symbol_ "|" *> patternParser
+  p <- symbol_ "|" *> parsePattern
   c : cs <- symbol_ "=>" *> some parseChoice
   pure (EClause () p (c :| cs))
 
@@ -93,17 +93,12 @@ parseFoldExpression = do
 parseVariableExpression :: Parser (Expression () ())
 parseVariableExpression = EVariable () . Label () <$> name
 
-parseChoiceParser = do
-  -- TODO
-  e <- parseExpression
-  pure (CPlain () [] e)
-
 parseMatchClause :: Parser (Clause () ())
 parseMatchClause = do
   symbol_ "|"
-  p <- patternParser
+  p <- parsePattern
   symbol_ "=>"
-  cs <- some parseChoiceParser
+  cs <- some parseChoice
   case cs of
     c : cs1 ->
       pure (EClause () p (c :| cs1))
@@ -130,7 +125,7 @@ parseIfExpression =
 
 parseLambdaExpression :: Parser (Expression () ())
 parseLambdaExpression = do
-  args <- lexeme_ "fn" *> parens (commaSep1 patternParser)
+  args <- lexeme_ "fn" *> parens (commaSep1 parsePattern)
   e <- symbol_ "=>" *> parseExpression
   case args of
     a : as ->

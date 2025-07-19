@@ -17,7 +17,7 @@ import Noll.Module
 import Noll.Parser
 import Noll.Parser.Expression (parseExpression)
 import Noll.Parser.Identifier
-import Noll.Parser.Pattern (patternParser)
+import Noll.Parser.Pattern (parsePattern)
 import Noll.Parser.Symbol
 import Noll.Parser.Type
 import Text.Megaparsec
@@ -90,7 +90,7 @@ parseFunctionDefinition :: Parser (Definition () o ())
 parseFunctionDefinition = do
   lexeme_ "fn"
   fn <- name
-  args <- parens (commaSep patternParser)
+  args <- parens (commaSep parsePattern)
   ann <- optional (symbol_ ":" *> parseType)
   symbol_ "="
   expr <- parseExpression
