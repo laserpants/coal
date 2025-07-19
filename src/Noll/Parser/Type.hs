@@ -36,27 +36,29 @@ parseIntrinsicType =
       <|> lexeme "void"
     $> IVoid
 
-parseTypeConstructor :: Parser (Type Parameter ())
-parseTypeConstructor = TConstructor () <$> constructor
-
-typeApplication = do
-  t0 <- parseTypeConstructor
-  xx <- option [] (parens (commaSep1 parseType))
-  case xx of
-    t : ts ->
-      pure (TApplication () t0 (t :| ts))
-    [] ->
-      pure t0
-
+{-# INLINE parseTypeParameter #-}
 parseTypeParameter :: Parser (Parameter ())
 parseTypeParameter = Parameter () <$> name
 
--- TODO
+{-# INLINE parseTypeConstructor #-}
+parseTypeConstructor :: Parser (Type Parameter ())
+parseTypeConstructor = TConstructor () <$> constructor
+
+parseTypeApplication :: Parser (Type Parameter ())
+parseTypeApplication = do
+  t0 <- parseTypeConstructor
+  ts <- option [] (parens (commaSep1 parseType))
+  case ts of
+    t : ts1 ->
+      pure (TApplication () t0 (t :| ts1))
+    [] ->
+      pure t0
+
 parseType :: Parser (Type Parameter ())
 parseType = makeExprParser go operator
  where
   go = do
-    try typeApplication
+    try parseTypeApplication
       <|> (lexeme_ "list" *> (TIntrinsic . IList <$> parens parseType))
       <|> (TIntrinsic <$> parseIntrinsicType)
       <|> (TVariable <$> parseTypeParameter)
