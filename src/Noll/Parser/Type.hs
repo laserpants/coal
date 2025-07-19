@@ -13,23 +13,34 @@ import Text.Megaparsec (option, try, (<|>))
 
 parseIntrinsicType :: Parser (Intrinsic (Type Parameter ()))
 parseIntrinsicType =
-  lexeme "int32" $> IInt32
-    <|> lexeme "int64" $> IInt64
-    <|> lexeme "bool" $> IBool
-    <|> lexeme "char" $> IChar
-    <|> lexeme "double" $> IDouble
-    <|> lexeme "float" $> IFloat
-    <|> lexeme "bignum" $> IBignum
-    <|> lexeme "nat" $> INat
-    <|> lexeme "string" $> IString
-    <|> lexeme "unit" $> IUnit
-    <|> lexeme "void" $> IVoid
+  lexeme "int32"
+    $> IInt32
+      <|> lexeme "int64"
+    $> IInt64
+      <|> lexeme "bool"
+    $> IBool
+      <|> lexeme "char"
+    $> IChar
+      <|> lexeme "double"
+    $> IDouble
+      <|> lexeme "float"
+    $> IFloat
+      <|> lexeme "bignum"
+    $> IBignum
+      <|> lexeme "nat"
+    $> INat
+      <|> lexeme "string"
+    $> IString
+      <|> lexeme "unit"
+    $> IUnit
+      <|> lexeme "void"
+    $> IVoid
 
-typeConstructor :: Parser (Type Parameter ())
-typeConstructor = TConstructor () <$> constructor
+parseTypeConstructor :: Parser (Type Parameter ())
+parseTypeConstructor = TConstructor () <$> constructor
 
 typeApplication = do
-  t0 <- typeConstructor
+  t0 <- parseTypeConstructor
   xx <- option [] (parens (commaSep1 parseType))
   case xx of
     t : ts ->

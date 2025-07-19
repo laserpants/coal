@@ -163,8 +163,10 @@ parseListLiteral = EListLiteral () () <$> brackets (commaSep parseExpression)
 parseLiteralExpression :: Parser (Expression () ())
 parseLiteralExpression =
   parseListLiteral
-    <|> lexeme_ "true" $> ELiteral () (LBool True)
-    <|> lexeme_ "false" $> ELiteral () (LBool False)
+    <|> lexeme_ "true"
+    $> ELiteral () (LBool True)
+      <|> lexeme_ "false"
+    $> ELiteral () (LBool False)
 
 unaryOperator :: UnaryOperator -> Expression () () -> Expression () ()
 unaryOperator op e1 =
@@ -205,8 +207,7 @@ fixity5 =
   , InfixR (EListCons () () <$ symbol "::")
   ]
 fixity4 =
-  [ 
-  ]
+  []
 fixity3 =
   [ InfixR (binaryOperator OLogicalAnd <$ symbol "&&")
   ]

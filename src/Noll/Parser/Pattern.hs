@@ -19,21 +19,21 @@ patternParser = makeExprParser go operator
  where
   go = do
     p1 <-
-      constructorPattern
-        <|> atVariablePattern
-        <|> literalPattern
-        <|> anyPattern
-        <|> variablePattern
+      parseConstructorPattern
+        <|> parseAtVariablePattern
+        <|> parseLiteralPattern
+        <|> parseAnyPattern
+        <|> parseVariablePattern
         <|> parens patternParser
     rest <- optional $ do
       lexeme_ "as"
       p2 <- patternParser
       case p2 of
         PVariable _ (Label _ n) ->
-          return (Label () n)
+          pure (Label () n)
         _ ->
           fail "Expected variable on right-hand side of 'as'"
-    return $
+    pure $
       case rest of
         Just n ->
           PAs () n p1
@@ -58,27 +58,27 @@ typeAnnotation = do
   symbol_ ":"
   PAnnotation () <$> parseType
 
-anyPattern :: Parser (Pattern () ())
-anyPattern = symbol "_" $> PAny () ()
+parseAnyPattern :: Parser (Pattern () ())
+parseAnyPattern = symbol "_" $> PAny () ()
 
-variablePattern :: Parser (Pattern () ())
-variablePattern = PVariable () . Label () <$> name
+parseVariablePattern :: Parser (Pattern () ())
+parseVariablePattern = PVariable () . Label () <$> name
 
-literalPattern :: Parser (Pattern () ())
-literalPattern = listLiteralPattern
+parseLiteralPattern :: Parser (Pattern () ())
+parseLiteralPattern = parseListLiteralPattern
 
-listLiteralPattern :: Parser (Pattern () ())
-listLiteralPattern = do
+parseListLiteralPattern :: Parser (Pattern () ())
+parseListLiteralPattern = do
   ps <- brackets (commaSep patternParser)
   pure (PListLiteral () () ps)
 
-atVariablePattern :: Parser (Pattern () ())
-atVariablePattern = do
+parseAtVariablePattern :: Parser (Pattern () ())
+parseAtVariablePattern = do
   void (char '@')
   PAtVariable () . Label () <$> name
 
-constructorPattern :: Parser (Pattern () ())
-constructorPattern = do
+parseConstructorPattern :: Parser (Pattern () ())
+parseConstructorPattern = do
   c <- constructor
   ps <- option [] (parens (commaSep1 patternParser))
   pure (PConstructor () (Label () c) ps)
