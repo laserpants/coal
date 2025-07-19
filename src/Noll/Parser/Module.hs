@@ -25,8 +25,7 @@ definitionParser =
     <|> constantParser
     <|> typeDefinitionParser
     <|> traitParser
-
---    <|> instanceParser
+    <|> instanceParser
 
 traitParser :: Parser (Definition () o ())
 traitParser = do
