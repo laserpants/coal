@@ -140,9 +140,9 @@ parseLambdaExpression = do
 
 parseRecordExpression :: Parser (Expression () ())
 parseRecordExpression = do
-  kvs <- braces (commaSep1 field)
+  fields <- braces (commaSep1 field)
   -- TODO
-  pure (ERecord () () (Map.fromList kvs) Nothing)
+  pure (ERecord () () (Map.fromList fields) Nothing)
  where
   field :: Parser (Name, Expression () ())
   field = (,) <$> name <*> (symbol_ "=" *> parseExpression)
@@ -157,14 +157,12 @@ parseInt = do
       (EVariable () (Label () "from_int32"))
       (ELiteral () (LInt32 n) :| [])
 
-listLiteral :: Parser (Expression () ())
-listLiteral = do
-  es <- brackets (commaSep parseExpression)
-  pure (EListLiteral () () es)
+parseListLiteral :: Parser (Expression () ())
+parseListLiteral = EListLiteral () () <$> brackets (commaSep parseExpression)
 
 parseLiteralExpression :: Parser (Expression () ())
 parseLiteralExpression =
-  listLiteral
+  parseListLiteral
     <|> lexeme_ "true" $> ELiteral () (LBool True)
     <|> lexeme_ "false" $> ELiteral () (LBool False)
 
