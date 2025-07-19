@@ -44,16 +44,10 @@ parseExpression = makeExprParser go operator
           e1
 
 parseFunctionApplication :: Parser (Expression () ())
-parseFunctionApplication = do
-  fn <- try (parens parseExpression) <|> parseDataConstructor <|> parseVariableExpression
-  as <- parens (commaSep parseExpression)
-  pure $
-    EApplication () () fn $
-      case as of
-        arg : args ->
-          arg :| args
-        [] ->
-          ELiteral () LUnit :| []
+parseFunctionApplication =
+  EApplication () ()
+    <$> (try (parens parseExpression) <|> parseDataConstructor <|> parseVariableExpression)
+    <*> parens (nonEmptyOr (ELiteral () LUnit :| []) (commaSep parseExpression))
 
 parseDataConstructor :: Parser (Expression () ())
 parseDataConstructor = EConstructor () . Label () <$> constructor

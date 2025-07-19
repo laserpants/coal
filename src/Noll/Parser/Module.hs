@@ -89,18 +89,12 @@ parseFunctionDefinition :: Parser (Definition () o ())
 parseFunctionDefinition = do
   lexeme_ "fn"
   fn <- name
-  args <- parens (commaSep parsePattern)
+  args <- parens (nonEmptyOr (PLiteral () LUnit :| []) (commaSep parsePattern))
   ann <- optional (symbol_ ":" *> parseType)
   symbol_ "="
   expr <- parseExpression
   symbol_ ";"
-  let args' =
-        case args of
-          [] ->
-            PLiteral () LUnit :| []
-          a : as ->
-            a :| as
-  let f = DFunction fn (Function () (With [] ()) args' expr)
+  let f = DFunction fn (Function () (With [] ()) args expr)
   case ann of
     Nothing ->
       pure f

@@ -9,6 +9,7 @@ module Noll.Parser (
   lexeme,
   lexeme_,
   nonEmpty,
+  nonEmptyOr,
 ) where
 
 import Control.Monad (void, when)
@@ -97,3 +98,13 @@ nonEmpty p = do
       pure (q :| qs)
     [] ->
       fail "Empty list"
+
+nonEmptyOr :: List1 a -> Parser [a] -> Parser (List1 a)
+nonEmptyOr ls p = do
+  ps <- p
+  pure $
+    case ps of
+      q : qs ->
+        q :| qs
+      [] ->
+        ls
