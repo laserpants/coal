@@ -36,7 +36,6 @@ data Definition a k t
   | -- | Trait
     DTrait Name [Trait t] (Type Parameter ()) [(Name, Type Parameter ())]
   | -- | Trait instance
---    DInstance Name (Type Parameter k) [Definition a k t]
     DInstance Name (Type Parameter ()) [Definition a k t]
   | -- | Trait instance
     DTypeAlias Name [Parameter ()] (Type Parameter ())
