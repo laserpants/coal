@@ -41,6 +41,7 @@ typeApplication = do
     [] ->
       pure t0
 
+typeParameter :: Parser (Parameter ())
 typeParameter = Parameter () <$> name
 
 -- TODO
