@@ -31,45 +31,57 @@ typeDefinitionParser = do
   n <- constructor
   ps <- option [] (parens (commaSep1 (Parameter () <$> name)))
   symbol_ "="
-  cs <- ctor n `sepBy1` symbol_ "|"
+  cs <- ctor ps (qq n ps) `sepBy1` symbol_ "|"
   pure (DType n ps cs)
-
-toScheme :: Name -> [Type Parameter ()] -> Scheme Parameter () (Type Parameter ())
-toScheme n ps = Forall (Set.fromList (params =<< ps)) [] (foldr TArrow q ps)
-  where
-    q =
-      case ps of
+ where
+    qq n =
+      \case
         [] ->
           TConstructor () n
         a : as ->
           TApplication
             ()
             (TConstructor () n)
-            (a :| as)
+            (TVariable <$> (a :| as))
 
-params :: Type Parameter () -> [Parameter ()]
-params =
-  \case
-    TVariable p ->
-      [p]
-    TApplication _ t ts ->
-      params t <> concat (params <$> ts)
-    TArrow t1 t2 ->
-      params t1 <> params t2
-    TConstructor{} ->
-      []
-    TIntrinsic t ->
-      error "TODO"
-    TRow r ->
-      error "TODO"
-    TAlias _ _ t ->
-      params t
 
-ctor :: Name -> Parser (Constructor Parameter () (Type Parameter ()))
-ctor x = do
+--toScheme :: Name -> [Type Parameter ()] -> Scheme Parameter () (Type Parameter ())
+--toScheme qs q ps = Forall (Set.fromList (params =<< ps)) [] (foldr TArrow q ps)
+toScheme qs q ps = Forall (Set.fromList qs) [] (foldr TArrow q ps)
+--  where
+--    q =
+--      case ps of
+--        [] ->
+--          TConstructor () n
+--        a : as ->
+--          TApplication
+--            ()
+--            (TConstructor () n)
+--            (a :| as)
+
+--params :: Type Parameter () -> [Parameter ()]
+--params =
+--  \case
+--    TVariable p ->
+--      [p]
+--    TApplication _ t ts ->
+--      params t <> concat (params <$> ts)
+--    TArrow t1 t2 ->
+--      params t1 <> params t2
+--    TConstructor{} ->
+--      []
+--    TIntrinsic t ->
+--      error "TODO"
+--    TRow r ->
+--      error "TODO"
+--    TAlias _ _ t ->
+--      params t
+
+--ctor :: Name -> Parser (Constructor Parameter () (Type Parameter ()))
+ctor qs s = do
   n <- constructor
-  as <- option [] (parens (commaSep1 typeParser))
-  pure (Constructor n (length as) (toScheme x as))
+  ps <- option [] (parens (commaSep1 typeParser))
+  pure (Constructor n (length ps) (toScheme qs s ps))
 
 importParser :: Parser (Definition () o ())
 importParser = do

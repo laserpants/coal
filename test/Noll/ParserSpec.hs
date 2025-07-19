@@ -13,6 +13,7 @@ import Test.Hspec (Spec, describe, it)
 import Text.Megaparsec (runParser)
 
 import qualified Data.Map.Strict as Map
+import qualified Data.Set as Set
 
 spec :: Spec
 spec =
@@ -972,3 +973,36 @@ spec =
         ] 
         :: Definition () () ()
           )
+    it "" $ do
+      runParser typeDefinitionParser "" "type Tree(a) = Node(a, Tree(a), Tree(a)) | Leaf"
+        == Right
+            ( DType
+        "Tree"
+        [Parameter () "a"]
+        [ Constructor
+            "Node"
+            3
+            ( Forall
+                (Set.fromList [Parameter () "a"])
+                []
+                ( TVariable (Parameter () "a")
+                    `TArrow` TApplication () (TConstructor () "Tree") (TVariable (Parameter () "a") :| [])
+                    `TArrow` TApplication () (TConstructor () "Tree") (TVariable (Parameter () "a") :| [])
+                    `TArrow` TApplication () (TConstructor () "Tree") (TVariable (Parameter () "a") :| [])
+                )
+            )
+        , Constructor
+            "Leaf"
+            0
+            ( Forall
+                (Set.fromList [Parameter () "a"])
+                []
+                ( TApplication
+                    ()
+                    (TConstructor () "Tree")
+                    (TVariable (Parameter () "a") :| [])
+                )
+            )
+        ]
+        :: Definition () () ()
+            )

@@ -19,7 +19,9 @@ intrinsicParser =
     <|> lexeme "int64" $> IInt64
 
 typeConstructor :: Parser (Type Parameter ())
-typeConstructor = TConstructor () <$> lexeme "list"
+typeConstructor = TConstructor () <$> go 
+  where
+    go = lexeme "list" <|> constructor
 
 typeApplication = do
   t0 <- typeConstructor
