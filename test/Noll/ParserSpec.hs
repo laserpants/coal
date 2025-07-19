@@ -163,7 +163,7 @@ spec =
                       Nothing
                   )
               ) ::
-              Definition () () ()
+              Definition () Kind ()
           )
     it "" $ do
       runParser functionParser "" "fn factorial(n : int32) = fold(pack_nat(n)) { | Zero => 1 | Succ(@f) as m => unpack_nat(m) * f };"
@@ -246,7 +246,7 @@ spec =
                       Nothing
                   )
               ) ::
-              Definition () () ()
+              Definition () Kind ()
           )
     it "" $ do
       runParser functionParser "" "fn factorial(n : int32) : int32 = fold(pack_nat(n)) { | Zero => 1 | Succ(@f) as m => unpack_nat(m) * f };"
@@ -332,7 +332,7 @@ spec =
                       )
                   )
               ) ::
-              Definition () () ()
+              Definition () Kind ()
           )
     it "" $ do
       runParser functionParser "" "fn main() = trace_int32(factorial(12));"
@@ -362,7 +362,7 @@ spec =
                       )
                   )
               ) ::
-              Definition () () ()
+              Definition () Kind ()
           )
     it "" $ do
       runParser moduleParser "" "module Main { import Utilities(factorial); fn main() = trace_int32(factorial(12)); }"
@@ -397,7 +397,7 @@ spec =
                       )
                   )
               ] ::
-              Module () () ()
+              Module () Kind ()
           )
     it "" $ do
       runParser moduleParser "" "module Utilities(factorial) { fn factorial(n : int32) : int32 = fold(pack_nat(n)) { | Zero => 1 | Succ(@f) as m => unpack_nat(m) * f }; }"
@@ -486,7 +486,7 @@ spec =
                           )
                       )
                   ) ::
-                  Definition () () ()
+                  Definition () Kind ()
               ]
           )
     it "" $ do
@@ -602,7 +602,7 @@ spec =
                       )
                   )
               ) ::
-              Definition () () ()
+              Definition () Kind ()
           )
     it "" $ do
       runParser functionParser "" "fn flatten(tree) = fold(tree) { | Node(y, @lhs, @rhs) => lhs ++ (y :: rhs) | Leaf => [] };"
@@ -655,7 +655,7 @@ spec =
                       Nothing
                   )
               ) ::
-              Definition () () ()
+              Definition () Kind ()
           )
     it "" $ do
       runParser constantParser "" "sort = flatten << from_list;"
@@ -675,7 +675,7 @@ spec =
                       )
                   )
               ) ::
-              Definition () () ()
+              Definition () Kind ()
           )
     it "" $ do
       runParser functionParser "" "fn from_list(list) = fold(list, { min = 0, max = -1 }) { | (p :: @g) => fn(range) => if (p |. in_range(range)) then Node ( p , g({ min = range.min, max = p }) , g({ min = p, max = range.max })) else g(range) | [] => always(Leaf) };"
@@ -823,7 +823,7 @@ spec =
                                 Nothing
                             )
               ) ::
-              Definition () () ()
+              Definition () Kind ()
                         )
     it "" $ do
       runParser functionParser "" "fn in_range(range, n) = greater_than(n, range.min) && (less_than_or_equal_to(n, range.max) || less_than_or_equal_to(range.max, -1));"
@@ -881,7 +881,7 @@ spec =
                 )
             )
               ) ::
-              Definition () () ()
+              Definition () Kind ()
                         )
 
     it "" $ do
@@ -907,7 +907,7 @@ spec =
                                     )
                                 )
               ) ::
-              Definition () () ()
+              Definition () Kind ()
                         )
     it "" $ do
       runParser functionParser "" "fn less_than_or_equal_to(m) = fn(n) => match(compare(m, n)) { | LessThan or EqualTo => true | GreaterThan => false };"
@@ -950,7 +950,7 @@ spec =
                         )
                             )
                     )
-                  ) :: Definition () () ()
+                  ) :: Definition () Kind ()
                             )
     it "" $ do
       runParser typeDefinitionParser "" "type Ordering = LessThan | EqualTo | GreaterThan"
@@ -971,7 +971,7 @@ spec =
             0
             (Forall mempty [] (TConstructor () "Ordering"))
         ] 
-        :: Definition () () ()
+        :: Definition () Kind ()
           )
     it "" $ do
       runParser typeDefinitionParser "" "type Tree(a) = Node(a, Tree(a), Tree(a)) | Leaf"
@@ -1004,7 +1004,7 @@ spec =
                 )
             )
         ]
-        :: Definition () () ()
+        :: Definition () Kind ()
             )
     it "" $ do
       runParser traitParser "" "trait Ordered(a) { compare : a -> a -> Ordering }"
@@ -1018,5 +1018,5 @@ spec =
                   , TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TConstructor () "Ordering"
                   )
                 ]
-        :: Definition () () ()
+        :: Definition () Kind ()
             )

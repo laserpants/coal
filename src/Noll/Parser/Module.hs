@@ -18,7 +18,7 @@ import Lang.Utils (Name)
 
 import qualified Data.Set as Set
 
-definitionParser :: Parser (Definition () o ())
+definitionParser :: Parser (Definition () Kind ())
 definitionParser =
   importParser
     <|> functionParser
@@ -31,11 +31,10 @@ traitParser :: Parser (Definition () o ())
 traitParser = do
   lexeme_ "trait"
   n <- constructor
-  t <- parens typeParser
+  t <- parens (TVariable <$> typeParameter)
   xx <- braces (semicolonSep1 sig)
   -- TODO
   pure (DTrait n [] t xx)
- where
 
 sig :: Parser (Name, Type Parameter ())
 sig = do
@@ -47,7 +46,14 @@ sig = do
 instanceParser :: Parser (Definition () o ())
 instanceParser = do
   lexeme_ "instance"
-  undefined
+  n <- constructor
+  t <- parens undefined -- typeParser
+  xx <- braces (semicolonSep1 zz)
+  -- TODO
+  pure (DInstance n t xx)
+
+zz :: Parser (Definition () o ())
+zz = undefined
 
 typeDefinitionParser :: Parser (Definition () o ())
 typeDefinitionParser = do
@@ -67,7 +73,6 @@ typeDefinitionParser = do
             ()
             (TConstructor () n)
             (TVariable <$> (a :| as))
-
 
 --toScheme :: Name -> [Type Parameter ()] -> Scheme Parameter () (Type Parameter ())
 --toScheme qs q ps = Forall (Set.fromList (params =<< ps)) [] (foldr TArrow q ps)
@@ -151,7 +156,7 @@ constantParser = do
     Just t ->
       pure (DAnnotation (With [] t) e)
 
-moduleParser :: Parser (Module () o ())
+moduleParser :: Parser (Module () Kind ())
 moduleParser = do
   lexeme_ "module"
   path <- identifier upperChar `sepBy1` symbol "."
