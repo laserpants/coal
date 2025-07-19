@@ -291,8 +291,8 @@ compileDefinitionC = do
     DAnnotation a d -> do
       -- TODO
       compileDefinitionC d
---    DInstance _ t ds ->
---      forM_ ds compileDefinitionC
+    --    DInstance _ t ds ->
+    --      forM_ ds compileDefinitionC
     DInstance _ t ds ->
       forM_ ds compileDefinitionC
     _ ->
@@ -474,20 +474,20 @@ typeCheckDefinition d =
       pure ()
     DSignature{} ->
       pure ()
---    DInstance trait t1 ds -> do
---      traitEnvironment <- asks compilerTraitEnvironment
---      case Environment.lookup trait traitEnvironment of
---        Nothing ->
---          error ("Missing trait: " <> Text.unpack trait)
---        Just (tx, defs) -> do
---          forM_ ds $ \d -> do
---            case Environment.lookup (definitionName d) defs of
---              Nothing ->
---                error ("Missing implementation: " <> Text.unpack (definitionName d))
---              Just s -> do
---                xxx <- yyy t1
---                insertConstraintsC [Explicit InferenceRulePlaceholder (typeOf d) (instantiateTemplate tx xxx s)]
---                compileDefinitionC d
+    --    DInstance trait t1 ds -> do
+    --      traitEnvironment <- asks compilerTraitEnvironment
+    --      case Environment.lookup trait traitEnvironment of
+    --        Nothing ->
+    --          error ("Missing trait: " <> Text.unpack trait)
+    --        Just (tx, defs) -> do
+    --          forM_ ds $ \d -> do
+    --            case Environment.lookup (definitionName d) defs of
+    --              Nothing ->
+    --                error ("Missing implementation: " <> Text.unpack (definitionName d))
+    --              Just s -> do
+    --                xxx <- yyy t1
+    --                insertConstraintsC [Explicit InferenceRulePlaceholder (typeOf d) (instantiateTemplate tx xxx s)]
+    --                compileDefinitionC d
     _ -> do
       compileDefinitionC d
       sub <- solveC

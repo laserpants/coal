@@ -61,11 +61,8 @@ dataConstructor = EConstructor () . Label () <$> constructor
 patternBinding :: Parser (Binding Expression () ())
 patternBinding = BPattern () <$> (patternParser <* symbol "=") <*> expressionParser
 
-functionBinding :: Parser (Binding Expression () ())
-functionBinding = undefined
-
 letBinding :: Parser (Binding Expression () ())
-letBinding = patternBinding <|> functionBinding
+letBinding = patternBinding -- <|> functionBinding
 
 letExpression :: Parser (Expression () ())
 letExpression = do

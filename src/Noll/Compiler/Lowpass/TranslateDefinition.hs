@@ -16,7 +16,7 @@ import Noll.Compiler.Lowpass.Environment (TranslateEnvironment (..), withLocalNa
 import Noll.Compiler.Lowpass.TranslateExpression (translateExpression, translatePattern)
 import Noll.Compiler.Lowpass.TranslateType (translateType)
 import Noll.Language
-import Noll.Language.Serializable (Serializable(..))
+import Noll.Language.Serializable (Serializable (..))
 import Noll.Module.Constant (Constant (..))
 import Noll.Module.Definition
 import Noll.Module.Function (Function (..))
@@ -61,22 +61,22 @@ translateDefinition =
     --      pure (concatMap snd bs <> [xx])
     --     where
     --      postfix = "__$instance." <> hashed (Trait name t)
---    DInstance name t ds -> do
---      moduleName <- asks translateEnvironmentModule
---      bs <- forM ds $ do
---        \case
---          DFunction name f -> do
---            xx1 <- translateDefinition (DFunction (name <> postfix) f)
---            pure (name, xx1)
---          DConstant name c -> do
---            xx1 <- translateDefinition (DConstant (name <> postfix) c)
---            pure (name, xx1)
---      pure (concatMap snd bs)
---     where
---      --      xx <- instanceDictionary2 postfix name t bs
---      --      pure (concatMap snd bs <> [xx])
---
---      postfix = "__$instance_" <> serialize (Trait name t)
+    --    DInstance name t ds -> do
+    --      moduleName <- asks translateEnvironmentModule
+    --      bs <- forM ds $ do
+    --        \case
+    --          DFunction name f -> do
+    --            xx1 <- translateDefinition (DFunction (name <> postfix) f)
+    --            pure (name, xx1)
+    --          DConstant name c -> do
+    --            xx1 <- translateDefinition (DConstant (name <> postfix) c)
+    --            pure (name, xx1)
+    --      pure (concatMap snd bs)
+    --     where
+    --      --      xx <- instanceDictionary2 postfix name t bs
+    --      --      pure (concatMap snd bs <> [xx])
+    --
+    --      postfix = "__$instance_" <> serialize (Trait name t)
     DInstance name t ds -> do
       moduleName <- asks translateEnvironmentModule
       bs <- forM ds $ do
