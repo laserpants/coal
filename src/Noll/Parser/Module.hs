@@ -38,7 +38,7 @@ parseTraitDefinition :: Parser (Definition () o ())
 parseTraitDefinition = do
   lexeme_ "trait"
   n <- constructor
-  t <- parens (TVariable <$> typeParameter)
+  t <- parens (TVariable <$> parseTypeParameter)
   xx <- braces (semicolonSep1 sig)
   -- TODO
   pure (DTrait n [] t xx)
@@ -47,14 +47,14 @@ sig :: Parser (Name, Type Parameter ())
 sig = do
   n <- name
   symbol_ ":"
-  t <- typeParser
+  t <- parseType
   pure (n, t)
 
 parseInstanceDefinition :: Parser (Definition () o ())
 parseInstanceDefinition = do
   lexeme_ "instance"
   n <- constructor
-  t <- parens typeParser
+  t <- parens parseType
   xx <- braces (semicolonSep1 parseDefinition)
   -- TODO
   pure (DInstance n t xx)
@@ -71,7 +71,7 @@ parseTypeDefinition = do
 ctor :: Name -> [Parameter ()] -> Parser (Constructor Parameter () (Type Parameter ()))
 ctor c qs = do
   n <- constructor
-  ps <- option [] (parens (commaSep1 typeParser))
+  ps <- option [] (parens (commaSep1 parseType))
   pure (Constructor n (length ps) (toScheme ps))
  where
     toScheme ps = Forall (Set.fromList qs) [] (foldr TArrow qq ps)
@@ -98,7 +98,7 @@ parseFunctionDefinition = do
   lexeme_ "fn"
   fn <- name
   args <- parens (commaSep patternParser)
-  ann <- optional (symbol_ ":" *> typeParser)
+  ann <- optional (symbol_ ":" *> parseType)
   symbol_ "="
   expr <- parseExpression
   symbol_ ";"
@@ -118,7 +118,7 @@ parseFunctionDefinition = do
 parseConstantDefinition :: Parser (Definition () o ())
 parseConstantDefinition = do
   c <- name
-  ann <- optional (symbol_ ":" *> typeParser)
+  ann <- optional (symbol_ ":" *> parseType)
   symbol_ "="
   expr <- parseExpression
   symbol_ ";"

@@ -12,7 +12,7 @@ import Noll.Parser
 import Noll.Parser.Identifier
 import Noll.Parser.Pattern (patternParser)
 import Noll.Parser.Symbol
-import Noll.Parser.Type (typeParser)
+import Noll.Parser.Type (parseType)
 import Text.Megaparsec (optional, some, try, (<|>))
 
 import qualified Data.Map.Strict as Map
@@ -231,5 +231,5 @@ operator =
   , fixity4
   , fixity3
   , fixity2
-  , [Postfix (symbol_ ":" *> (EAnnotation () <$> typeParser))]
+  , [Postfix (symbol_ ":" *> (EAnnotation () <$> parseType))]
   ]

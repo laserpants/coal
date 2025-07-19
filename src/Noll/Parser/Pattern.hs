@@ -10,7 +10,7 @@ import Noll.Language
 import Noll.Parser
 import Noll.Parser.Identifier
 import Noll.Parser.Symbol
-import Noll.Parser.Type (typeParser)
+import Noll.Parser.Type (parseType)
 import Text.Megaparsec (option, optional, (<|>))
 import Text.Megaparsec.Char (char)
 
@@ -55,7 +55,7 @@ operator =
 typeAnnotation :: Parser (Pattern () () -> Pattern () ())
 typeAnnotation = do
   symbol_ ":"
-  PAnnotation () <$> typeParser
+  PAnnotation () <$> parseType
 
 anyPattern :: Parser (Pattern () ())
 anyPattern = symbol "_" $> PAny () ()

@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Parser.Type (typeParser, typeParameter) where
+module Noll.Parser.Type (parseType, parseTypeParameter) where
 
 import Control.Monad.Combinators.Expr
 import Data.Functor (($>))
@@ -30,25 +30,25 @@ typeConstructor = TConstructor () <$> constructor
 
 typeApplication = do
   t0 <- typeConstructor
-  xx <- option [] (parens (commaSep1 typeParser))
+  xx <- option [] (parens (commaSep1 parseType))
   case xx of
     t : ts ->
       pure (TApplication () t0 (t :| ts))
     [] ->
       pure t0
 
-typeParameter :: Parser (Parameter ())
-typeParameter = Parameter () <$> name
+parseTypeParameter :: Parser (Parameter ())
+parseTypeParameter = Parameter () <$> name
 
 -- TODO
-typeParser :: Parser (Type Parameter ())
-typeParser = makeExprParser go operator
+parseType :: Parser (Type Parameter ())
+parseType = makeExprParser go operator
  where
   go = do
     try typeApplication
-      <|> (lexeme_ "list" *> (TIntrinsic . IList <$> parens typeParser))
+      <|> (lexeme_ "list" *> (TIntrinsic . IList <$> parens parseType))
       <|> (TIntrinsic <$> parseIntrinsicType)
-      <|> (TVariable <$> typeParameter)
+      <|> (TVariable <$> parseTypeParameter)
 
 operator :: [[Operator Parser (Type Parameter ())]]
 operator = [[InfixR (TArrow <$ symbol "->")]]
