@@ -78,10 +78,10 @@ word :: Parser Text -> Parser Text
 word p =
   lexeme $
     try $ do
-      txt <- p
-      when (txt `elem` reserved) $
-        fail ("Reserved keyword " <> Text.unpack txt)
-      pure txt
+      w <- p
+      when (w `elem` reserved) $
+        fail ("Reserved keyword " <> Text.unpack w)
+      pure w
 
 {-# INLINE cons #-}
 cons :: Parser a -> Parser [a] -> Parser [a]
