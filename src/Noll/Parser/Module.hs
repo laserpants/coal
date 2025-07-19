@@ -58,11 +58,11 @@ parseTypeDefinition = do
   c <- constructor
   ps <- option [] (parens (commaSep1 (Parameter () <$> name)))
   symbol_ "="
-  cs <- ctor c ps `sepBy1` symbol_ "|"
+  cs <- parseConstructor c ps `sepBy1` symbol_ "|"
   pure (DType c ps cs)
 
-ctor :: Name -> [Parameter ()] -> Parser (Constructor Parameter () (Type Parameter ()))
-ctor c qs = do
+parseConstructor :: Name -> [Parameter ()] -> Parser (Constructor Parameter () (Type Parameter ()))
+parseConstructor c qs = do
   n <- constructor
   ps <- option [] (parens (commaSep1 parseType))
   pure (Constructor n (length ps) (toScheme ps))
