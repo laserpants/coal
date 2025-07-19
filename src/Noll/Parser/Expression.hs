@@ -61,12 +61,12 @@ parseDataConstructor = EConstructor () . Label () <$> constructor
 patternBinding :: Parser (Binding Expression () ())
 patternBinding = BPattern () <$> (patternParser <* symbol "=") <*> parseExpression
 
-letBinding :: Parser (Binding Expression () ())
-letBinding = patternBinding -- <|> functionBinding
+parseBinding :: Parser (Binding Expression () ())
+parseBinding = patternBinding -- <|> functionBinding
 
 parseLetExpression :: Parser (Expression () ())
 parseLetExpression = do
-  bs <- lexeme_ "let" *> semicolonSep1 letBinding
+  bs <- lexeme_ "let" *> semicolonSep1 parseBinding
   e <- lexeme_ "in" *> parseExpression
   case bs of
     b : bs1 ->
@@ -74,26 +74,26 @@ parseLetExpression = do
     _ ->
       error "Implementation error"
 
-choice :: Parser (Choice Expression () ())
-choice = CPlain () [] <$> parseExpression
+parseChoice :: Parser (Choice Expression () ())
+parseChoice = CPlain () [] <$> parseExpression
 
-clause :: Parser (Clause () ())
-clause = do
+parseClause :: Parser (Clause () ())
+parseClause = do
   p <- symbol_ "|" *> patternParser
-  c : cs <- symbol_ "=>" *> some choice
+  c : cs <- symbol_ "=>" *> some parseChoice
   pure (EClause () p (c :| cs))
 
 parseFoldExpression :: Parser (Expression () ())
 parseFoldExpression = do
   lexeme_ "fold"
   expr : exprs <- parens (commaSep1 parseExpression)
-  c : cs <- braces (some clause)
+  c : cs <- braces (some parseClause)
   pure (EFold () () (expr :| exprs) (c :| cs) Nothing)
 
 parseVariableExpression :: Parser (Expression () ())
 parseVariableExpression = EVariable () . Label () <$> name
 
-choiceParser = do
+parseChoiceParser = do
   -- TODO
   e <- parseExpression
   pure (CPlain () [] e)
@@ -103,7 +103,7 @@ parseMatchClause = do
   symbol_ "|"
   p <- patternParser
   symbol_ "=>"
-  cs <- some choiceParser
+  cs <- some parseChoiceParser
   case cs of
     c : cs1 ->
       pure (EClause () p (c :| cs1))
@@ -205,7 +205,7 @@ fixity5 =
   , InfixR (EListCons () () <$ symbol "::")
   ]
 fixity4 =
-  [ InfixR (EListCons () () <$ symbol "::")
+  [ 
   ]
 fixity3 =
   [ InfixR (binaryOperator OLogicalAnd <$ symbol "&&")

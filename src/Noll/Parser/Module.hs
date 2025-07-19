@@ -39,25 +39,18 @@ parseTraitDefinition = do
   lexeme_ "trait"
   n <- constructor
   t <- parens (TVariable <$> parseTypeParameter)
-  xx <- braces (semicolonSep1 sig)
+  ds <- braces (semicolonSep1 ((,) <$> name <*> (symbol_ ":" *> parseType)))
   -- TODO
-  pure (DTrait n [] t xx)
-
-sig :: Parser (Name, Type Parameter ())
-sig = do
-  n <- name
-  symbol_ ":"
-  t <- parseType
-  pure (n, t)
+  pure (DTrait n [] t ds)
 
 parseInstanceDefinition :: Parser (Definition () o ())
 parseInstanceDefinition = do
   lexeme_ "instance"
   n <- constructor
   t <- parens parseType
-  xx <- braces (semicolonSep1 parseDefinition)
+  ds <- braces (semicolonSep1 parseDefinition)
   -- TODO
-  pure (DInstance n t xx)
+  pure (DInstance n t ds)
 
 parseTypeDefinition :: Parser (Definition () o ())
 parseTypeDefinition = do
