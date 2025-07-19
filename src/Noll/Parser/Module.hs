@@ -56,18 +56,16 @@ parseTypeDefinition = do
   lexeme_ "type"
   n <- constructor
   ps <- option [] (parens (commaSep1 (Parameter () <$> name)))
-  symbol_ "="
-  cs <- parseConstructor n ps `sepBy1` symbol_ "|"
+  cs <- symbol_ "=" *> parseConstructor n ps `sepBy1` symbol_ "|"
   pure (DType n ps cs)
 
 parseConstructor :: Name -> [Parameter ()] -> Parser (Constructor Parameter () (Type Parameter ()))
 parseConstructor c qs = do
   n <- constructor
   ps <- option [] (parens (commaSep1 parseType))
-  let s = Forall (Set.fromList qs) [] (foldr TArrow go ps)
-  pure (Constructor n (length ps) s)
+  pure (Constructor n (length ps) (Forall (Set.fromList qs) [] (foldr TArrow t0 ps)))
  where
-  go =
+  t0 =
     case qs of
       [] ->
         TConstructor () c
@@ -78,40 +76,40 @@ parseConstructor c qs = do
           (TVariable <$> (a :| as))
 
 parseImport :: Parser (Definition () o ())
-parseImport = do
-  lexeme_ "import"
-  path <- (lexeme "Core$" <|> identifier upperChar) `sepBy1` symbol "."
-  names <- option ["*"] (parens (commaSep (backtickString <|> name)))
-  symbol_ ";"
-  pure (DImport (Path path) names)
+parseImport =
+  endingWithSemicolon $ do
+    lexeme_ "import"
+    path <- (lexeme "Core$" <|> identifier upperChar) `sepBy1` symbol "."
+    names <- option ["*"] (parens (commaSep (backtickString <|> name)))
+    pure (DImport (Path path) names)
 
 parseFunctionDefinition :: Parser (Definition () o ())
-parseFunctionDefinition = do
-  fn <- lexeme_ "fn" *> name
-  args <- parens (nonEmptyOr (PLiteral () LUnit :| []) (commaSep parsePattern))
-  ann <- optional (symbol_ ":" *> parseType)
-  expr <- symbol_ "=" *> parseExpression
-  symbol_ ";"
-  let f = DFunction fn (Function () (With [] ()) args expr)
-  case ann of
-    Nothing ->
-      pure f
-    Just t ->
-      pure (DAnnotation (With [] t) f)
+parseFunctionDefinition =
+  endingWithSemicolon $ do
+    fn <- lexeme_ "fn" *> name
+    args <- parens (nonEmptyOr (PLiteral () LUnit :| []) (commaSep parsePattern))
+    ann <- optional (symbol_ ":" *> parseType)
+    expr <- symbol_ "=" *> parseExpression
+    let f = DFunction fn (Function () (With [] ()) args expr)
+    case ann of
+      Nothing ->
+        pure f
+      Just t ->
+        pure (DAnnotation (With [] t) f)
 
 parseConstantDefinition :: Parser (Definition () o ())
-parseConstantDefinition = do
-  c <- name
-  ann <- optional (symbol_ ":" *> parseType)
-  symbol_ "="
-  expr <- parseExpression
-  symbol_ ";"
-  let e = DConstant c (Constant () (With [] ()) expr)
-  case ann of
-    Nothing ->
-      pure e
-    Just t ->
-      pure (DAnnotation (With [] t) e)
+parseConstantDefinition =
+  endingWithSemicolon $ do
+    c <- name
+    ann <- optional (symbol_ ":" *> parseType)
+    symbol_ "="
+    expr <- parseExpression
+    let e = DConstant c (Constant () (With [] ()) expr)
+    case ann of
+      Nothing ->
+        pure e
+      Just t ->
+        pure (DAnnotation (With [] t) e)
 
 parseModule :: Parser (Module () o ())
 parseModule = do
