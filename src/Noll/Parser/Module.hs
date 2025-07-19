@@ -55,29 +55,28 @@ instanceParser = do
 typeDefinitionParser :: Parser (Definition () o ())
 typeDefinitionParser = do
   lexeme_ "type"
-  n <- constructor
+  c <- constructor
   ps <- option [] (parens (commaSep1 (Parameter () <$> name)))
   symbol_ "="
-  cs <- ctor ps (qq n ps) `sepBy1` symbol_ "|"
-  pure (DType n ps cs)
- where
-  qq n =
-    \case
-      [] ->
-        TConstructor () n
-      a : as ->
-        TApplication
-          ()
-          (TConstructor () n)
-          (TVariable <$> (a :| as))
+  cs <- ctor c ps `sepBy1` symbol_ "|"
+  pure (DType c ps cs)
 
-ctor :: [Parameter ()] -> Type Parameter () -> Parser (Constructor Parameter () (Type Parameter ()))
-ctor qs s = do
+ctor :: Name -> [Parameter ()] -> Parser (Constructor Parameter () (Type Parameter ()))
+ctor c qs = do
   n <- constructor
   ps <- option [] (parens (commaSep1 typeParser))
   pure (Constructor n (length ps) (toScheme ps))
  where
-    toScheme ps = Forall (Set.fromList qs) [] (foldr TArrow s ps)
+    toScheme ps = Forall (Set.fromList qs) [] (foldr TArrow qq ps)
+    qq =
+      case qs of
+        [] ->
+          TConstructor () c
+        a : as ->
+          TApplication
+            ()
+            (TConstructor () c)
+            (TVariable <$> (a :| as))
 
 importParser :: Parser (Definition () o ())
 importParser = do
