@@ -1,5 +1,7 @@
 module Main {
 
+  import Core(trace_int32, trace_bool, not, always, from_int32, `from_int32__$instance_Numeric(Intrinsic(Int32))`);
+
   type Ordering
     = LessThan
     | EqualTo

@@ -28,9 +28,10 @@ intrinsicParser =
     <|> lexeme "void" $> IVoid
 
 typeConstructor :: Parser (Type Parameter ())
-typeConstructor = TConstructor () <$> go
- where
-  go = lexeme "list" <|> constructor
+typeConstructor = TConstructor () <$> constructor
+
+-- where
+--  go = lexeme "list" <|> constructor
 
 typeApplication = do
   t0 <- typeConstructor
@@ -50,6 +51,7 @@ typeParser = makeExprParser go operator
  where
   go = do
     try typeApplication
+      <|> (lexeme_ "list" *> (TIntrinsic . IList <$> parens typeParser))
       <|> (TIntrinsic <$> intrinsicParser)
       <|> (TVariable <$> typeParameter)
 

@@ -2037,7 +2037,8 @@ moduleMain =
     , DImport
         (Path ["Ordered"])
         ["Ordered__$instance.b7c5e7e84eeaf782"]
-    , DInstance "Numeric"
+    , DInstance
+        "Numeric"
         (TIntrinsic IInt32)
         [ DConstant
             "from_int32"
