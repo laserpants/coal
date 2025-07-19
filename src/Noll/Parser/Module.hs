@@ -71,15 +71,13 @@ typeDefinitionParser = do
           (TConstructor () n)
           (TVariable <$> (a :| as))
 
--- toScheme :: Name -> [Type Parameter ()] -> Scheme Parameter () (Type Parameter ())
--- toScheme qs q ps = Forall (Set.fromList (params =<< ps)) [] (foldr TArrow q ps)
-toScheme qs q ps = Forall (Set.fromList qs) [] (foldr TArrow q ps)
-
--- ctor :: Name -> Parser (Constructor Parameter () (Type Parameter ()))
+ctor :: [Parameter ()] -> Type Parameter () -> Parser (Constructor Parameter () (Type Parameter ()))
 ctor qs s = do
   n <- constructor
   ps <- option [] (parens (commaSep1 typeParser))
-  pure (Constructor n (length ps) (toScheme qs s ps))
+  pure (Constructor n (length ps) (toScheme ps))
+ where
+    toScheme ps = Forall (Set.fromList qs) [] (foldr TArrow s ps)
 
 importParser :: Parser (Definition () o ())
 importParser = do
