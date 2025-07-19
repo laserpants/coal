@@ -883,7 +883,6 @@ spec =
               ) ::
               Definition () Kind ()
                         )
-
     it "" $ do
       runParser functionParser "" "fn greater_than(n) = not << less_than_or_equal_to(n);"
         == Right
