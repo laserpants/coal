@@ -5,13 +5,11 @@ module Noll.Parser.Type where
 import Control.Monad.Combinators.Expr
 import Data.Functor (($>))
 import Lang.Common.List1 (NonEmpty (..))
-import Lang.Label (Label (..))
 import Noll.Language
 import Noll.Parser
 import Noll.Parser.Identifier
 import Noll.Parser.Symbol
-import Text.Megaparsec (option, optional, try, (<|>))
-import Text.Megaparsec.Char (char)
+import Text.Megaparsec (option, try, (<|>))
 
 intrinsicParser :: Parser (Intrinsic (Type Parameter ()))
 intrinsicParser =
