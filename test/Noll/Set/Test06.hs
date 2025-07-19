@@ -71,7 +71,7 @@ moduleOrdered =
           )
         ]
     , -- instance Ordered(int32)
-      DInstance
+      DInstance2
         "Ordered"
         (TIntrinsic IInt32)
         [ DConstant
@@ -1913,7 +1913,7 @@ moduleMain =
     , DImport
         (Path ["Ordered"])
         ["Ordered__$instance.b7c5e7e84eeaf782"]
-    , DInstance
+    , DInstance2
         "Numeric"
         (TIntrinsic IInt32)
         [ DConstant

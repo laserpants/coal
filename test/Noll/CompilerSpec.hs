@@ -121,7 +121,7 @@ baz = do
 
 bark :: Definition () k ()
 bark =
-  DInstance
+  DInstance2
     "Ordered"
     (TIntrinsic IInt32)
     [ DFunction
@@ -167,7 +167,7 @@ bark =
 
 bark2 :: Definition () k IndexedType
 bark2 =
-  DInstance
+  DInstance2
     "Ordered"
     (TIntrinsic IInt32)
     [ DFunction

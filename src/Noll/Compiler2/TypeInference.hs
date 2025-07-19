@@ -152,20 +152,20 @@ typeDefinitionC =
       pure ()
     DSignature{} ->
       pure ()
-    DInstance trait t1 ds -> do
-      env <- asks compiler2TraitEnvironment
-      case Environment.lookup trait env of
-        Nothing ->
-          error ("Missing trait: " <> Text.unpack trait)
-        Just (tx, defs) -> do
-          forM_ ds $ \d -> do
-            case Environment.lookup (definitionName d) defs of
-              Nothing ->
-                error ("Missing implementation: " <> Text.unpack (definitionName d))
-              Just s -> do
-                ti <- instantiateVars t1
-                insertConstraintsC [Explicit InferenceRulePlaceholder (typeOf d) (instantiateTemplate tx ti s)]
-                compileDefinitionC d
+--    DInstance trait t1 ds -> do
+--      env <- asks compiler2TraitEnvironment
+--      case Environment.lookup trait env of
+--        Nothing ->
+--          error ("Missing trait: " <> Text.unpack trait)
+--        Just (tx, defs) -> do
+--          forM_ ds $ \d -> do
+--            case Environment.lookup (definitionName d) defs of
+--              Nothing ->
+--                error ("Missing implementation: " <> Text.unpack (definitionName d))
+--              Just s -> do
+--                ti <- instantiateVars t1
+--                insertConstraintsC [Explicit InferenceRulePlaceholder (typeOf d) (instantiateTemplate tx ti s)]
+--                compileDefinitionC d
     DInstance2 trait t1 ds -> do
       env <- asks compiler2TraitEnvironment
       case Environment.lookup trait env of

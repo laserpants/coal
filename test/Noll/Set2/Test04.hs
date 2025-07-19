@@ -36,7 +36,7 @@ moduleFoo =
           )
         ]
     , -- instance Show(string)
-      DInstance
+      DInstance2
         "Show"
         (TIntrinsic IString)
         [ DFunction
@@ -49,7 +49,7 @@ moduleFoo =
             )
         ]
     , -- instance Show(int32)
-      DInstance
+      DInstance2
         "Show"
         (TIntrinsic IInt32)
         [ DFunction
@@ -62,9 +62,9 @@ moduleFoo =
             )
         ]
     , -- instance Show((a, b)) with Show(a), Show(b)
-      DInstance
+      DInstance2
         "Show"
-        (TIntrinsic (ITuple [TVariable (Parameter KType "a"), TVariable (Parameter KType "b")]))
+        (TIntrinsic (ITuple [TVariable (Parameter () "a"), TVariable (Parameter () "b")]))
         [ DFunction
             "show"
             ( Function
@@ -117,9 +117,9 @@ moduleFoo =
             )
         ]
     , -- instance Show(list(a)) with Show(a)
-      DInstance
+      DInstance2
         "Show"
-        (TIntrinsic (IList (TVariable (Parameter KType "a"))))
+        (TIntrinsic (IList (TVariable (Parameter () "a"))))
         [ DFunction
             "show"
             ( Function

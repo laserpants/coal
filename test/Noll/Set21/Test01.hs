@@ -49,7 +49,7 @@ moduleMain =
           , TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TConstructor () "Ordering"
           )
         ]
-    , DInstance
+    , DInstance2
         "Ordered"
         (TIntrinsic IInt32)
         [ DFunction

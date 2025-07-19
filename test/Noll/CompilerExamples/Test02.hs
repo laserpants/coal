@@ -3020,7 +3020,7 @@ fixture51 =
   ]
 
 fixture6 =
-  [ DInstance
+  [ DInstance2
       "Ordered"
       (TIntrinsic IInt32)
       [ DFunction

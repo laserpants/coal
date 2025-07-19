@@ -43,7 +43,7 @@ moduleFoo =
           )
         ]
     , -- instance Traceable(string)
-      DInstance
+      DInstance2
         "Traceable"
         (TIntrinsic IString)
         [ DConstant
@@ -59,7 +59,7 @@ moduleFoo =
             )
         ]
     , -- instance Traceable(int32)
-      DInstance
+      DInstance2
         "Traceable"
         (TIntrinsic IInt32)
         [ DConstant
@@ -75,9 +75,9 @@ moduleFoo =
             )
         ]
     , -- instance Traceable((a, b)) with Traceable(a), Traceable(b)
-      DInstance
+      DInstance2
         "Traceable"
-        (TIntrinsic (ITuple [TVariable (Parameter KType "a"), TVariable (Parameter KType "b")]))
+        (TIntrinsic (ITuple [TVariable (Parameter () "a"), TVariable (Parameter () "b")]))
         [ DConstant
             "trace"
             ( Constant
@@ -146,9 +146,9 @@ moduleFoo =
             )
         ]
     , -- instance Traceable(list(a)) with Traceable(a)
-      DInstance
+      DInstance2
         "Traceable"
-        (TIntrinsic (IList (TVariable (Parameter KType "a"))))
+        (TIntrinsic (IList (TVariable (Parameter () "a"))))
         [ DConstant
             "trace"
             ( Constant
