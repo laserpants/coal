@@ -1,6 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE LambdaCase #-}
 
-module Noll.Parser.Module (moduleParser, functionParser, constantParser) where
+module Noll.Parser.Module where -- (moduleParser, functionParser, constantParser) where
 
 import Lang.Common.List1 (NonEmpty (..))
 import Noll.Language
@@ -13,6 +14,9 @@ import Noll.Parser.Symbol
 import Noll.Parser.Type
 import Text.Megaparsec
 import Text.Megaparsec.Char (upperChar)
+import Lang.Utils (Name)
+
+import qualified Data.Set as Set
 
 definitionParser :: Parser (Definition () o ())
 definitionParser =
@@ -25,7 +29,47 @@ typeDefinitionParser :: Parser (Definition () o ())
 typeDefinitionParser = do
   lexeme_ "type"
   n <- constructor
-  undefined
+  ps <- option [] (parens (commaSep1 (Parameter () <$> name)))
+  symbol_ "="
+  cs <- ctor n `sepBy1` symbol_ "|"
+  pure (DType n ps cs)
+
+toScheme :: Name -> [Type Parameter ()] -> Scheme Parameter () (Type Parameter ())
+toScheme n ps = Forall (Set.fromList (params =<< ps)) [] (foldr TArrow q ps)
+  where
+    q =
+      case ps of
+        [] ->
+          TConstructor () n
+        a : as ->
+          TApplication
+            ()
+            (TConstructor () n)
+            (a :| as)
+
+params :: Type Parameter () -> [Parameter ()]
+params =
+  \case
+    TVariable p ->
+      [p]
+    TApplication _ t ts ->
+      params t <> concat (params <$> ts)
+    TArrow t1 t2 ->
+      params t1 <> params t2
+    TConstructor{} ->
+      []
+    TIntrinsic t ->
+      error "TODO"
+    TRow r ->
+      error "TODO"
+    TAlias _ _ t ->
+      params t
+
+ctor :: Name -> Parser (Constructor Parameter () (Type Parameter ()))
+ctor x = do
+  n <- constructor
+  as <- option [] (parens (commaSep1 typeParser))
+  pure (Constructor n (length as) (toScheme x as))
 
 importParser :: Parser (Definition () o ())
 importParser = do

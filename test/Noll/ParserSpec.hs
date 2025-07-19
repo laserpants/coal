@@ -949,7 +949,26 @@ spec =
                         )
                             )
                     )
-                  ) ::
-                  Definition () () ()
+                  ) :: Definition () () ()
                             )
-
+    it "" $ do
+      runParser typeDefinitionParser "" "type Ordering = LessThan | EqualTo | GreaterThan"
+        == Right
+          ( DType
+        "Ordering"
+        []
+        [ Constructor
+            "LessThan"
+            0
+            (Forall mempty [] (TConstructor () "Ordering"))
+        , Constructor
+            "EqualTo"
+            0
+            (Forall mempty [] (TConstructor () "Ordering"))
+        , Constructor
+            "GreaterThan"
+            0
+            (Forall mempty [] (TConstructor () "Ordering"))
+        ] 
+        :: Definition () () ()
+          )

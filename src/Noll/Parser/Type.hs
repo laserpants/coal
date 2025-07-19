@@ -14,8 +14,11 @@ import Text.Megaparsec (option, optional, try, (<|>))
 import Text.Megaparsec.Char (char)
 
 intrinsicParser :: Parser (Intrinsic (Type Parameter ()))
-intrinsicParser = lexeme "int32" $> IInt32
+intrinsicParser = 
+  lexeme "int32" $> IInt32
+    <|> lexeme "int64" $> IInt64
 
+typeConstructor :: Parser (Type Parameter ())
 typeConstructor = TConstructor () <$> lexeme "list"
 
 typeApplication = do
@@ -23,8 +26,11 @@ typeApplication = do
   t : ts <- parens (commaSep1 typeParser)
   pure (TApplication () t0 (t :| ts))
 
+typeParameter = Parameter () <$> name
+
 -- TODO
 typeParser :: Parser (Type Parameter ())
 typeParser =
   try typeApplication
     <|> (TIntrinsic <$> intrinsicParser)
+    <|> (TVariable <$> typeParameter)
