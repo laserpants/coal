@@ -171,7 +171,7 @@ testDataConstructorEnv =
                     (TConstructor (KArrow KType (KArrow KType KType)) "Pair")
                     ( TVariable (TypeIndex KType 0)
                         <| TVariable (TypeIndex KType 1)
-                          :| []
+                        :| []
                     )
               )
           )

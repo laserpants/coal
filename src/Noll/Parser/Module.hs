@@ -1,9 +1,10 @@
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Noll.Parser.Module where -- (moduleParser, functionParser, constantParser) where
 
 import Lang.Common.List1 (NonEmpty (..))
+import Lang.Utils (Name)
 import Noll.Language
 import Noll.Module
 import Noll.Parser
@@ -14,7 +15,6 @@ import Noll.Parser.Symbol
 import Noll.Parser.Type
 import Text.Megaparsec
 import Text.Megaparsec.Char (upperChar)
-import Lang.Utils (Name)
 
 import qualified Data.Set as Set
 
@@ -25,6 +25,7 @@ definitionParser =
     <|> constantParser
     <|> typeDefinitionParser
     <|> traitParser
+
 --    <|> instanceParser
 
 traitParser :: Parser (Definition () o ())
@@ -61,19 +62,20 @@ typeDefinitionParser = do
   cs <- ctor ps (qq n ps) `sepBy1` symbol_ "|"
   pure (DType n ps cs)
  where
-    qq n =
-      \case
-        [] ->
-          TConstructor () n
-        a : as ->
-          TApplication
-            ()
-            (TConstructor () n)
-            (TVariable <$> (a :| as))
+  qq n =
+    \case
+      [] ->
+        TConstructor () n
+      a : as ->
+        TApplication
+          ()
+          (TConstructor () n)
+          (TVariable <$> (a :| as))
 
---toScheme :: Name -> [Type Parameter ()] -> Scheme Parameter () (Type Parameter ())
---toScheme qs q ps = Forall (Set.fromList (params =<< ps)) [] (foldr TArrow q ps)
+-- toScheme :: Name -> [Type Parameter ()] -> Scheme Parameter () (Type Parameter ())
+-- toScheme qs q ps = Forall (Set.fromList (params =<< ps)) [] (foldr TArrow q ps)
 toScheme qs q ps = Forall (Set.fromList qs) [] (foldr TArrow q ps)
+
 --  where
 --    q =
 --      case ps of
@@ -85,8 +87,8 @@ toScheme qs q ps = Forall (Set.fromList qs) [] (foldr TArrow q ps)
 --            (TConstructor () n)
 --            (a :| as)
 
---params :: Type Parameter () -> [Parameter ()]
---params =
+-- params :: Type Parameter () -> [Parameter ()]
+-- params =
 --  \case
 --    TVariable p ->
 --      [p]
@@ -103,7 +105,7 @@ toScheme qs q ps = Forall (Set.fromList qs) [] (foldr TArrow q ps)
 --    TAlias _ _ t ->
 --      params t
 
---ctor :: Name -> Parser (Constructor Parameter () (Type Parameter ()))
+-- ctor :: Name -> Parser (Constructor Parameter () (Type Parameter ()))
 ctor qs s = do
   n <- constructor
   ps <- option [] (parens (commaSep1 typeParser))

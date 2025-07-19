@@ -14,14 +14,14 @@ import Text.Megaparsec (option, optional, try, (<|>))
 import Text.Megaparsec.Char (char)
 
 intrinsicParser :: Parser (Intrinsic (Type Parameter ()))
-intrinsicParser = 
+intrinsicParser =
   lexeme "int32" $> IInt32
     <|> lexeme "int64" $> IInt64
 
 typeConstructor :: Parser (Type Parameter ())
-typeConstructor = TConstructor () <$> go 
-  where
-    go = lexeme "list" <|> constructor
+typeConstructor = TConstructor () <$> go
+ where
+  go = lexeme "list" <|> constructor
 
 typeApplication = do
   t0 <- typeConstructor
@@ -37,11 +37,11 @@ typeParameter = Parameter () <$> name
 -- TODO
 typeParser :: Parser (Type Parameter ())
 typeParser = makeExprParser go operator
-  where
-    go = do
-      try typeApplication
-        <|> (TIntrinsic <$> intrinsicParser)
-        <|> (TVariable <$> typeParameter)
+ where
+  go = do
+    try typeApplication
+      <|> (TIntrinsic <$> intrinsicParser)
+      <|> (TVariable <$> typeParameter)
 
 operator :: [[Operator Parser (Type Parameter ())]]
 operator = [[InfixR (TArrow <$ symbol "->")]]

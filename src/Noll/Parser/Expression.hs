@@ -6,36 +6,36 @@ import Control.Monad.Combinators.Expr
 import Data.Functor (($>))
 import Lang.Common.List1 (NonEmpty (..))
 import Lang.Label (Label (..))
+import Lang.Utils (Name)
 import Noll.Language
 import Noll.Parser
 import Noll.Parser.Identifier
 import Noll.Parser.Pattern (patternParser)
 import Noll.Parser.Symbol
 import Noll.Parser.Type (typeParser)
-import Lang.Utils (Name)
-import Text.Megaparsec (some, try, (<|>), optional)
+import Text.Megaparsec (optional, some, try, (<|>))
 
-import qualified Text.Megaparsec.Char.Lexer as Lexer
 import qualified Data.Map.Strict as Map
+import qualified Text.Megaparsec.Char.Lexer as Lexer
 
 expressionParser :: Parser (Expression () ())
 expressionParser = makeExprParser go operator
  where
   go = do
-    e1 <- 
-          try functionCall
-            <|> dataConstructor
-            <|> intExpression
-            <|> literalExpression
-            <|> foldExpression
-            <|> matchExpression
-            <|> recordExpression
-            <|> ifExpression
-            <|> lambdaExpression
-            <|> letExpression
-            <|> variableExpression
-            <|> parens expressionParser
-    rest <- optional (symbol_ "."  *> name)
+    e1 <-
+      try functionCall
+        <|> dataConstructor
+        <|> intExpression
+        <|> literalExpression
+        <|> foldExpression
+        <|> matchExpression
+        <|> recordExpression
+        <|> ifExpression
+        <|> lambdaExpression
+        <|> letExpression
+        <|> variableExpression
+        <|> parens expressionParser
+    rest <- optional (symbol_ "." *> name)
     return $
       case rest of
         Just ll ->
@@ -47,12 +47,13 @@ functionCall :: Parser (Expression () ())
 functionCall = do
   fn <- try (parens expressionParser) <|> dataConstructor <|> EVariable () . Label () <$> name
   as <- parens (commaSep expressionParser)
-  pure $ EApplication () () fn $
-    case as of
-      arg : args ->
-        (arg :| args)
-      [] ->
-        ELiteral () LUnit :| []
+  pure $
+    EApplication () () fn $
+      case as of
+        arg : args ->
+          (arg :| args)
+        [] ->
+          ELiteral () LUnit :| []
 
 dataConstructor :: Parser (Expression () ())
 dataConstructor = EConstructor () . Label () <$> constructor
@@ -168,9 +169,10 @@ listLiteral = do
   pure (EListLiteral () () es)
 
 literalExpression :: Parser (Expression () ())
-literalExpression = listLiteral
-  <|> lexeme_ "true" $> ELiteral () (LBool True)
-  <|> lexeme_ "false" $> ELiteral () (LBool False)
+literalExpression =
+  listLiteral
+    <|> lexeme_ "true" $> ELiteral () (LBool True)
+    <|> lexeme_ "false" $> ELiteral () (LBool False)
 
 unaryOperator :: UnaryOperator -> Expression () () -> Expression () ()
 unaryOperator op e1 =
@@ -192,8 +194,8 @@ fixity9 :: [Operator Parser (Expression () ())]
 fixity9 =
   [ -- TODO
     InfixR (binaryOperator OReverseComposition <$ symbol "<<")
-    -- TODO
-  , InfixR (binaryOperator OReverseApplication <$ symbol "|.")
+  , -- TODO
+    InfixR (binaryOperator OReverseApplication <$ symbol "|.")
   ]
 
 fixity8 :: [Operator Parser (Expression () ())]
@@ -210,17 +212,13 @@ fixity5 =
   [ InfixR (binaryOperator OListConcatenation <$ symbol "++")
   , InfixR (EListCons () () <$ symbol "::")
   ]
-
-fixity4 = 
-  [
-    InfixR (EListCons () () <$ symbol "::")
+fixity4 =
+  [ InfixR (EListCons () () <$ symbol "::")
   ]
-
-fixity3 = 
+fixity3 =
   [ InfixR (binaryOperator OLogicalAnd <$ symbol "&&")
   ]
-
-fixity2 = 
+fixity2 =
   [ InfixN (binaryOperator OLessThan <$ symbol "<")
   , InfixN (binaryOperator OGreaterThan <$ symbol ">")
   , InfixR (binaryOperator OLogicalOr <$ symbol "||")

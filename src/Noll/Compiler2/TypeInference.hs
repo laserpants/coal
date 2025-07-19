@@ -189,7 +189,7 @@ instantiateTemplate :: TypeIndex Kind -> IndexedType -> Scheme TypeIndex Kind In
 instantiateTemplate (TypeIndex _ n) t1 (Forall vs ts t) = Forall vs ts (apply (n `mapsTo` t1) t)
 
 instantiateVars2 :: (Monad m) => Type Parameter () -> Compiler2T a m IndexedType
-instantiateVars2 = 
+instantiateVars2 =
   \case
     TVariable{} ->
       supplied (TVariable . TypeIndex KType)
@@ -208,7 +208,7 @@ instantiateVars2 =
       error "TODO"
 
 instantiateRowVars2 :: (Monad m) => Row Parameter () (Type Parameter ()) -> Compiler2T a m (Row TypeIndex Kind IndexedType)
-instantiateRowVars2 = 
+instantiateRowVars2 =
   \case
     RVariable{} ->
       supplied (RVariable . TypeIndex KType)

@@ -127,7 +127,7 @@ fixture =
                             ()
                             (PConstructor () (Label () "GreaterThan") [])
                             (CPlain () [] (ELiteral () (LBool False)) :| [])
-                            :| []
+                          :| []
                       )
                   )
               )
@@ -171,7 +171,7 @@ fixtureR =
                             ()
                             (PConstructor () (Label (TConstructor KType "Ordering") "GreaterThan") [])
                             (CPlain () [] (ELiteral () (LBool False)) :| [])
-                            :| []
+                          :| []
                       )
                   )
               )
