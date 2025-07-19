@@ -98,8 +98,8 @@ choiceParser = do
   e <- parseExpression
   pure (CPlain () [] e)
 
-matchClause :: Parser (Clause () ())
-matchClause = do
+parseMatchClause :: Parser (Clause () ())
+parseMatchClause = do
   symbol_ "|"
   p <- patternParser
   symbol_ "=>"
@@ -114,7 +114,7 @@ parseMatchExpression :: Parser (Expression () ())
 parseMatchExpression = do
   lexeme_ "match"
   e <- parens parseExpression
-  cs <- braces (some matchClause)
+  cs <- braces (some parseMatchClause)
   case cs of
     c : cs1 ->
       pure (EMatch () () e (c :| cs1))
@@ -122,14 +122,11 @@ parseMatchExpression = do
       error "Implementation error"
 
 parseIfExpression :: Parser (Expression () ())
-parseIfExpression = do
-  lexeme_ "if"
-  e1 <- parseExpression
-  lexeme_ "then"
-  e2 <- parseExpression
-  lexeme_ "else"
-  e3 <- parseExpression
-  pure (EIf () () e1 e2 e3)
+parseIfExpression =
+  EIf () ()
+    <$> (lexeme_ "if" *> parseExpression)
+    <*> (lexeme_ "then" *> parseExpression)
+    <*> (lexeme_ "else" *> parseExpression)
 
 parseLambdaExpression :: Parser (Expression () ())
 parseLambdaExpression = do

@@ -2,13 +2,13 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Noll.Parser.Module (
-  parseModule, 
-  parseFunctionDefinition, 
-  parseInstanceDefinition, 
-  parseTraitDefinition, 
-  parseTypeDefinition, 
-  parseConstantDefinition
- ) where
+  parseModule,
+  parseFunctionDefinition,
+  parseInstanceDefinition,
+  parseTraitDefinition,
+  parseTypeDefinition,
+  parseConstantDefinition,
+) where
 
 import Lang.Common.List1 (NonEmpty (..))
 import Lang.Utils (Name)
@@ -74,16 +74,16 @@ ctor c qs = do
   ps <- option [] (parens (commaSep1 parseType))
   pure (Constructor n (length ps) (toScheme ps))
  where
-    toScheme ps = Forall (Set.fromList qs) [] (foldr TArrow qq ps)
-    qq =
-      case qs of
-        [] ->
-          TConstructor () c
-        a : as ->
-          TApplication
-            ()
-            (TConstructor () c)
-            (TVariable <$> (a :| as))
+  toScheme ps = Forall (Set.fromList qs) [] (foldr TArrow qq ps)
+  qq =
+    case qs of
+      [] ->
+        TConstructor () c
+      a : as ->
+        TApplication
+          ()
+          (TConstructor () c)
+          (TVariable <$> (a :| as))
 
 parseImport :: Parser (Definition () o ())
 parseImport = do
