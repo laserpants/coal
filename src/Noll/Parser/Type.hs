@@ -25,14 +25,23 @@ typeConstructor = TConstructor () <$> go
 
 typeApplication = do
   t0 <- typeConstructor
-  t : ts <- parens (commaSep1 typeParser)
-  pure (TApplication () t0 (t :| ts))
+  xx <- option [] (parens (commaSep1 typeParser))
+  case xx of
+    t : ts ->
+      pure (TApplication () t0 (t :| ts))
+    [] ->
+      pure t0
 
 typeParameter = Parameter () <$> name
 
 -- TODO
 typeParser :: Parser (Type Parameter ())
-typeParser =
-  try typeApplication
-    <|> (TIntrinsic <$> intrinsicParser)
-    <|> (TVariable <$> typeParameter)
+typeParser = makeExprParser go operator
+  where
+    go = do
+      try typeApplication
+        <|> (TIntrinsic <$> intrinsicParser)
+        <|> (TVariable <$> typeParameter)
+
+operator :: [[Operator Parser (Type Parameter ())]]
+operator = [[InfixR (TArrow <$ symbol "->")]]

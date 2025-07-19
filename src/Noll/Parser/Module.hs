@@ -24,6 +24,30 @@ definitionParser =
     <|> functionParser
     <|> constantParser
     <|> typeDefinitionParser
+    <|> traitParser
+--    <|> instanceParser
+
+traitParser :: Parser (Definition () o ())
+traitParser = do
+  lexeme_ "trait"
+  n <- constructor
+  t <- parens typeParser
+  xx <- braces (semicolonSep1 sig)
+  -- TODO
+  pure (DTrait n [] t xx)
+ where
+
+sig :: Parser (Name, Type Parameter ())
+sig = do
+  n <- name
+  symbol_ ":"
+  t <- typeParser
+  pure (n, t)
+
+instanceParser :: Parser (Definition () o ())
+instanceParser = do
+  lexeme_ "instance"
+  undefined
 
 typeDefinitionParser :: Parser (Definition () o ())
 typeDefinitionParser = do

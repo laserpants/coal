@@ -10,7 +10,7 @@ import Noll.Language
 import Noll.Parser
 import Noll.Parser.Identifier
 import Noll.Parser.Symbol
-import Noll.Parser.Type
+import Noll.Parser.Type (typeParser)
 import Text.Megaparsec (option, optional, (<|>))
 import Text.Megaparsec.Char (char)
 

@@ -11,7 +11,7 @@ import Noll.Parser
 import Noll.Parser.Identifier
 import Noll.Parser.Pattern (patternParser)
 import Noll.Parser.Symbol
-import Noll.Parser.Type
+import Noll.Parser.Type (typeParser)
 import Lang.Utils (Name)
 import Text.Megaparsec (some, try, (<|>), optional)
 

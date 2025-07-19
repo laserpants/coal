@@ -1006,3 +1006,17 @@ spec =
         ]
         :: Definition () () ()
             )
+    it "" $ do
+      runParser traitParser "" "trait Ordered(a) { compare : a -> a -> Ordering }"
+        == Right
+            ( DTrait
+                "Ordered"
+                []
+                (TVariable (Parameter () "a"))
+                [
+                  ( "compare"
+                  , TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TConstructor () "Ordering"
+                  )
+                ]
+        :: Definition () () ()
+            )
