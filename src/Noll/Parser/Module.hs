@@ -51,7 +51,7 @@ instanceParser = do
   t <- parens typeParser
   xx <- braces (semicolonSep1 definitionParser)
   -- TODO
-  pure (DInstance2 n t xx)
+  pure (DInstance n t xx)
 
 typeDefinitionParser :: Parser (Definition () o ())
 typeDefinitionParser = do

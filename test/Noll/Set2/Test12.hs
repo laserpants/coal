@@ -43,7 +43,7 @@ moduleFoo =
           )
         ]
     , -- instance Show(string)
-      DInstance2
+      DInstance
         "Traceable"
         (TIntrinsic IString)
         [ DFunction
@@ -56,7 +56,7 @@ moduleFoo =
             )
         ]
     , -- instance Show(int32)
-      DInstance2
+      DInstance
         "Traceable"
         (TIntrinsic IInt32)
         [ DFunction
@@ -69,7 +69,7 @@ moduleFoo =
             )
         ]
     , -- instance Show((a, b)) with Show(a), Show(b)
-      DInstance2
+      DInstance
         "Traceable"
         (TIntrinsic (ITuple [TVariable (Parameter () "a"), TVariable (Parameter () "b")]))
         [ DFunction
@@ -134,7 +134,7 @@ moduleFoo =
             )
         ]
     , -- instance Show(list(a)) with Show(a)
-      DInstance2
+      DInstance
         "Traceable"
         (TIntrinsic (IList (TVariable (Parameter () "a"))))
         [ DFunction

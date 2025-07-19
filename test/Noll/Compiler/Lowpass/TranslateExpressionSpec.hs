@@ -480,7 +480,7 @@ binarySearchInRange =
     )
 
 orderedInstanceOrdered =
-  DInstance2
+  DInstance
     "Ordered"
     (TIntrinsic IInt32)
     [ DFunction

@@ -77,7 +77,7 @@ translateDefinition =
 --      --      pure (concatMap snd bs <> [xx])
 --
 --      postfix = "__$instance_" <> serialize (Trait name t)
-    DInstance2 name t ds -> do
+    DInstance name t ds -> do
       moduleName <- asks translateEnvironmentModule
       bs <- forM ds $ do
         \case

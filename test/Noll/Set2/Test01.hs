@@ -39,7 +39,7 @@ moduleFoo =
 --          )
 --        ]
 --    , -- instance Show(int32)
---      DInstance2
+--      DInstance
 --        "Show"
 --        (TIntrinsic IInt32)
 --        [ DFunction
@@ -52,7 +52,7 @@ moduleFoo =
 --            )
 --        ]
 --    , -- instance Show(Pair(a, b)) with Show(a), Show(b)
---      DInstance2
+--      DInstance
 --        "Show"
 --        ( TApplication
 --            ()
@@ -113,7 +113,7 @@ moduleFoo =
 --            )
 --        ]
 --    , -- instance Show(list(a)) with Show(a)
---      DInstance2
+--      DInstance
 --        "Show"
 --        (TIntrinsic (IList (TVariable (Parameter () "a"))))
 --        [ DFunction

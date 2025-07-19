@@ -176,7 +176,7 @@ moduleOrdered =
           )
         ]
     , -- instance Ordered(int32)
-      DInstance2
+      DInstance
         "Ordered"
         (TIntrinsic IInt32)
         [ DFunction
@@ -346,7 +346,7 @@ moduleOrdered1 =
           )
         ]
     , -- instance Ordered(int32)
-      DInstance2
+      DInstance
         "Ordered"
         (TIntrinsic IInt32)
         [ DFunction
@@ -1255,7 +1255,7 @@ moduleMain =
     , DImport
         (Path ["Ordered"])
         ["Ordered__$instance.b7c5e7e84eeaf782"]
-    , DInstance2
+    , DInstance
         "Numeric"
         (TIntrinsic IInt32)
         [ DFunction
@@ -1351,7 +1351,7 @@ moduleMain2 =
     , DImport
         (Path ["Ordered"])
         ["Ordered__$instance.b7c5e7e84eeaf782"]
-    , DInstance2
+    , DInstance
         "Numeric"
         (TIntrinsic IInt32)
         [ DFunction

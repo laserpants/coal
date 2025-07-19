@@ -293,7 +293,7 @@ compileDefinitionC = do
       compileDefinitionC d
 --    DInstance _ t ds ->
 --      forM_ ds compileDefinitionC
-    DInstance2 _ t ds ->
+    DInstance _ t ds ->
       forM_ ds compileDefinitionC
     _ ->
       -- TODO ?

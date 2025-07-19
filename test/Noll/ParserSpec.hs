@@ -1023,7 +1023,7 @@ spec =
     it "" $ do
       runParser instanceParser "" "instance Ordered(int32) { fn compare(x, y) = if (x < y) then LessThan else if (x > y) then GreaterThan else EqualTo; }"
         == Right
-          ( DInstance2
+          ( DInstance
               "Ordered"
               (TIntrinsic IInt32)
               [ DFunction

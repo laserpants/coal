@@ -166,7 +166,7 @@ typeDefinitionC =
 --                ti <- instantiateVars t1
 --                insertConstraintsC [Explicit InferenceRulePlaceholder (typeOf d) (instantiateTemplate tx ti s)]
 --                compileDefinitionC d
-    DInstance2 trait t1 ds -> do
+    DInstance trait t1 ds -> do
       env <- asks compiler2TraitEnvironment
       case Environment.lookup trait env of
         Nothing ->
