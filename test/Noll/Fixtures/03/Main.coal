@@ -6,7 +6,7 @@ module Main {
     | GreaterThan
 
   trait Ordered(a) {
-    compare : a -> a -> Ordering;
+    compare : a -> a -> Ordering
   }
 
   instance Ordered(int32) {
