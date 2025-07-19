@@ -17,6 +17,15 @@ intrinsicParser :: Parser (Intrinsic (Type Parameter ()))
 intrinsicParser =
   lexeme "int32" $> IInt32
     <|> lexeme "int64" $> IInt64
+    <|> lexeme "bool" $> IBool
+    <|> lexeme "char" $> IChar
+    <|> lexeme "double" $> IDouble
+    <|> lexeme "float" $> IFloat
+    <|> lexeme "bignum" $> IBignum
+    <|> lexeme "nat" $> INat
+    <|> lexeme "string" $> IString
+    <|> lexeme "unit" $> IUnit
+    <|> lexeme "void" $> IVoid
 
 typeConstructor :: Parser (Type Parameter ())
 typeConstructor = TConstructor () <$> go
