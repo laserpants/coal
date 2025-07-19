@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Parser.Type where
+module Noll.Parser.Type (typeParser, typeParameter) where
 
 import Control.Monad.Combinators.Expr
 import Data.Functor (($>))
@@ -11,8 +11,8 @@ import Noll.Parser.Identifier
 import Noll.Parser.Symbol
 import Text.Megaparsec (option, try, (<|>))
 
-intrinsicParser :: Parser (Intrinsic (Type Parameter ()))
-intrinsicParser =
+parseIntrinsicType :: Parser (Intrinsic (Type Parameter ()))
+parseIntrinsicType =
   lexeme "int32" $> IInt32
     <|> lexeme "int64" $> IInt64
     <|> lexeme "bool" $> IBool
@@ -47,7 +47,7 @@ typeParser = makeExprParser go operator
   go = do
     try typeApplication
       <|> (lexeme_ "list" *> (TIntrinsic . IList <$> parens typeParser))
-      <|> (TIntrinsic <$> intrinsicParser)
+      <|> (TIntrinsic <$> parseIntrinsicType)
       <|> (TVariable <$> typeParameter)
 
 operator :: [[Operator Parser (Type Parameter ())]]

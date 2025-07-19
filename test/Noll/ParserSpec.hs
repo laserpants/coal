@@ -20,7 +20,7 @@ spec :: Spec
 spec =
   describe "Noll.Compiler" $ do
     it "" $ do
-      runParser expressionParser "" "fold(pack_nat(n)) { | Zero => 1 | Succ(@f) as m => unpack_nat(m) * f }"
+      runParser parseExpression "" "fold(pack_nat(n)) { | Zero => 1 | Succ(@f) as m => unpack_nat(m) * f }"
         == Right
           ( EFold
               ()
@@ -89,7 +89,7 @@ spec =
               Nothing
           )
     it "" $ do
-      runParser functionParser "" "fn factorial(n) = fold(pack_nat(n)) { | Zero => 1 | Succ(@f) as m => unpack_nat(m) * f };"
+      runParser parseFunctionDefinition "" "fn factorial(n) = fold(pack_nat(n)) { | Zero => 1 | Succ(@f) as m => unpack_nat(m) * f };"
         == Right
           ( DFunction
               "factorial"
@@ -167,7 +167,7 @@ spec =
               Definition () Kind ()
           )
     it "" $ do
-      runParser functionParser "" "fn factorial(n : int32) = fold(pack_nat(n)) { | Zero => 1 | Succ(@f) as m => unpack_nat(m) * f };"
+      runParser parseFunctionDefinition "" "fn factorial(n : int32) = fold(pack_nat(n)) { | Zero => 1 | Succ(@f) as m => unpack_nat(m) * f };"
         == Right
           ( DFunction
               "factorial"
@@ -250,7 +250,7 @@ spec =
               Definition () Kind ()
           )
     it "" $ do
-      runParser functionParser "" "fn factorial(n : int32) : int32 = fold(pack_nat(n)) { | Zero => 1 | Succ(@f) as m => unpack_nat(m) * f };"
+      runParser parseFunctionDefinition "" "fn factorial(n : int32) : int32 = fold(pack_nat(n)) { | Zero => 1 | Succ(@f) as m => unpack_nat(m) * f };"
         == Right
           ( DAnnotation
               (With [] (TIntrinsic IInt32))
@@ -336,7 +336,7 @@ spec =
               Definition () Kind ()
           )
     it "" $ do
-      runParser functionParser "" "fn main() = trace_int32(factorial(12));"
+      runParser parseFunctionDefinition "" "fn main() = trace_int32(factorial(12));"
         == Right
           ( DFunction
               "main"
@@ -366,7 +366,7 @@ spec =
               Definition () Kind ()
           )
     it "" $ do
-      runParser moduleParser "" "module Main { import Utilities(factorial); fn main() = trace_int32(factorial(12)); }"
+      runParser parseModule "" "module Main { import Utilities(factorial); fn main() = trace_int32(factorial(12)); }"
         == Right
           ( Module
               (Path ["Main"])
@@ -401,7 +401,7 @@ spec =
               Module () Kind ()
           )
     it "" $ do
-      runParser moduleParser "" "module Utilities(factorial) { fn factorial(n : int32) : int32 = fold(pack_nat(n)) { | Zero => 1 | Succ(@f) as m => unpack_nat(m) * f }; }"
+      runParser parseModule "" "module Utilities(factorial) { fn factorial(n : int32) : int32 = fold(pack_nat(n)) { | Zero => 1 | Succ(@f) as m => unpack_nat(m) * f }; }"
         == Right
           ( Module
               (Path ["Utilities"])
@@ -491,7 +491,7 @@ spec =
               ]
           )
     it "" $ do
-      runParser functionParser "" "fn main() = let xs = [5, 3, 7, 2, 1, 6, 4] : list(int32) in trace_int32(match(sort(xs)) { | [] => 12345 | (y :: _) => y });"
+      runParser parseFunctionDefinition "" "fn main() = let xs = [5, 3, 7, 2, 1, 6, 4] : list(int32) in trace_int32(match(sort(xs)) { | [] => 12345 | (y :: _) => y });"
         == Right
           ( DFunction
               "main"
@@ -602,7 +602,7 @@ spec =
               Definition () Kind ()
           )
     it "" $ do
-      runParser functionParser "" "fn flatten(tree) = fold(tree) { | Node(y, @lhs, @rhs) => lhs ++ (y :: rhs) | Leaf => [] };"
+      runParser parseFunctionDefinition "" "fn flatten(tree) = fold(tree) { | Node(y, @lhs, @rhs) => lhs ++ (y :: rhs) | Leaf => [] };"
         == Right
           ( DFunction
               "flatten"
@@ -655,7 +655,7 @@ spec =
               Definition () Kind ()
           )
     it "" $ do
-      runParser constantParser "" "sort = flatten << from_list;"
+      runParser parseConstantDefinition "" "sort = flatten << from_list;"
         == Right
           ( DConstant
               "sort"
@@ -675,7 +675,7 @@ spec =
               Definition () Kind ()
           )
     it "" $ do
-      runParser functionParser "" "fn from_list(list) = fold(list, { min = 0, max = -1 }) { | (p :: @g) => fn(range) => if (p |. in_range(range)) then Node ( p , g({ min = range.min, max = p }) , g({ min = p, max = range.max })) else g(range) | [] => always(Leaf) };"
+      runParser parseFunctionDefinition "" "fn from_list(list) = fold(list, { min = 0, max = -1 }) { | (p :: @g) => fn(range) => if (p |. in_range(range)) then Node ( p , g({ min = range.min, max = p }) , g({ min = p, max = range.max })) else g(range) | [] => always(Leaf) };"
         == Right
           ( DFunction
               "from_list"
@@ -823,7 +823,7 @@ spec =
               Definition () Kind ()
           )
     it "" $ do
-      runParser functionParser "" "fn in_range(range, n) = greater_than(n, range.min) && (less_than_or_equal_to(n, range.max) || less_than_or_equal_to(range.max, -1));"
+      runParser parseFunctionDefinition "" "fn in_range(range, n) = greater_than(n, range.min) && (less_than_or_equal_to(n, range.max) || less_than_or_equal_to(range.max, -1));"
         == Right
           ( DFunction
               "in_range"
@@ -881,7 +881,7 @@ spec =
               Definition () Kind ()
           )
     it "" $ do
-      runParser functionParser "" "fn greater_than(n) = not << less_than_or_equal_to(n);"
+      runParser parseFunctionDefinition "" "fn greater_than(n) = not << less_than_or_equal_to(n);"
         == Right
           ( DFunction
               "greater_than"
@@ -906,7 +906,7 @@ spec =
               Definition () Kind ()
           )
     it "" $ do
-      runParser functionParser "" "fn less_than_or_equal_to(m) = fn(n) => match(compare(m, n)) { | LessThan or EqualTo => true | GreaterThan => false };"
+      runParser parseFunctionDefinition "" "fn less_than_or_equal_to(m) = fn(n) => match(compare(m, n)) { | LessThan or EqualTo => true | GreaterThan => false };"
         == Right
           ( DFunction
               "less_than_or_equal_to"
@@ -950,7 +950,7 @@ spec =
               Definition () Kind ()
           )
     it "" $ do
-      runParser typeDefinitionParser "" "type Ordering = LessThan | EqualTo | GreaterThan"
+      runParser parseTypeDefinition "" "type Ordering = LessThan | EqualTo | GreaterThan"
         == Right
           ( DType
               "Ordering"
@@ -971,7 +971,7 @@ spec =
               Definition () Kind ()
           )
     it "" $ do
-      runParser typeDefinitionParser "" "type Tree(a) = Node(a, Tree(a), Tree(a)) | Leaf"
+      runParser parseTypeDefinition "" "type Tree(a) = Node(a, Tree(a), Tree(a)) | Leaf"
         == Right
           ( DType
               "Tree"
@@ -1004,7 +1004,7 @@ spec =
               Definition () Kind ()
           )
     it "" $ do
-      runParser traitParser "" "trait Ordered(a) { compare : a -> a -> Ordering }"
+      runParser parseTraitDefinition "" "trait Ordered(a) { compare : a -> a -> Ordering }"
         == Right
           ( DTrait
               "Ordered"
@@ -1018,7 +1018,7 @@ spec =
               Definition () Kind ()
           )
     it "" $ do
-      runParser instanceParser "" "instance Ordered(int32) { fn compare(x, y) = if (x < y) then LessThan else if (x > y) then GreaterThan else EqualTo; }"
+      runParser parseInstanceDefinition "" "instance Ordered(int32) { fn compare(x, y) = if (x < y) then LessThan else if (x > y) then GreaterThan else EqualTo; }"
         == Right
           ( DInstance
               "Ordered"
@@ -1066,7 +1066,7 @@ spec =
               Definition () Kind ()
           )
     it "" $ do
-      runParser moduleParser "" "module Main { import Core$(trace_int32, trace_bool, not, always, from_int32, `from_int32__$instance_Numeric(Intrinsic(Int32))`); type Ordering = LessThan | EqualTo | GreaterThan trait Ordered(a) { compare : a -> a -> Ordering } instance Ordered(int32) { fn compare(x, y) = if (x < y) then LessThan else if (x > y) then GreaterThan else EqualTo; } type Tree(a) = Node(a, Tree(a), Tree(a)) | Leaf fn less_than_or_equal_to(m) = fn(n) => match(compare(m, n)) { | LessThan or EqualTo => true | GreaterThan => false }; fn greater_than(n) = not << less_than_or_equal_to(n); fn in_range(range, n) = greater_than(n, range.min) && (less_than_or_equal_to(n, range.max) || less_than_or_equal_to(range.max, -1)); fn from_list(list) = fold(list, { min = 0, max = -1 }) { | (p :: @g) => fn(range) => if (p |. in_range(range)) then Node ( p , g({ min = range.min, max = p }) , g({ min = p, max = range.max })) else g(range) | [] => always(Leaf) }; fn flatten(tree) = fold(tree) { | Node(y, @lhs, @rhs) => lhs ++ (y :: rhs) | Leaf => [] }; sort = flatten << from_list; fn main() = let xs = [5, 3, 7, 2, 1, 6, 4] : list(int32) in trace_int32(match(sort(xs)) { | [] => 12345 | (y :: _) => y }); }"
+      runParser parseModule "" "module Main { import Core$(trace_int32, trace_bool, not, always, from_int32, `from_int32__$instance_Numeric(Intrinsic(Int32))`); type Ordering = LessThan | EqualTo | GreaterThan trait Ordered(a) { compare : a -> a -> Ordering } instance Ordered(int32) { fn compare(x, y) = if (x < y) then LessThan else if (x > y) then GreaterThan else EqualTo; } type Tree(a) = Node(a, Tree(a), Tree(a)) | Leaf fn less_than_or_equal_to(m) = fn(n) => match(compare(m, n)) { | LessThan or EqualTo => true | GreaterThan => false }; fn greater_than(n) = not << less_than_or_equal_to(n); fn in_range(range, n) = greater_than(n, range.min) && (less_than_or_equal_to(n, range.max) || less_than_or_equal_to(range.max, -1)); fn from_list(list) = fold(list, { min = 0, max = -1 }) { | (p :: @g) => fn(range) => if (p |. in_range(range)) then Node ( p , g({ min = range.min, max = p }) , g({ min = p, max = range.max })) else g(range) | [] => always(Leaf) }; fn flatten(tree) = fold(tree) { | Node(y, @lhs, @rhs) => lhs ++ (y :: rhs) | Leaf => [] }; sort = flatten << from_list; fn main() = let xs = [5, 3, 7, 2, 1, 6, 4] : list(int32) in trace_int32(match(sort(xs)) { | [] => 12345 | (y :: _) => y }); }"
         == Right moduleTest
 
 -- ( Module.fromDefinitionList

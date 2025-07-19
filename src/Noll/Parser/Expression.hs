@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Parser.Expression where -- (expressionParser) where
+module Noll.Parser.Expression (parseExpression) where
 
 import Control.Monad.Combinators.Expr
 import Data.Functor (($>))
@@ -18,35 +18,35 @@ import Text.Megaparsec (optional, some, try, (<|>))
 import qualified Data.Map.Strict as Map
 import qualified Text.Megaparsec.Char.Lexer as Lexer
 
-expressionParser :: Parser (Expression () ())
-expressionParser = makeExprParser go operator
+parseExpression :: Parser (Expression () ())
+parseExpression = makeExprParser go operator
  where
   go = do
     e1 <-
-      try functionCall
-        <|> dataConstructor
-        <|> intExpression
-        <|> literalExpression
-        <|> foldExpression
-        <|> matchExpression
-        <|> recordExpression
-        <|> ifExpression
-        <|> lambdaExpression
-        <|> letExpression
-        <|> variableExpression
-        <|> parens expressionParser
+      try parseFunctionApplication
+        <|> parseDataConstructor
+        <|> parseInt
+        <|> parseLiteralExpression
+        <|> parseFoldExpression
+        <|> parseMatchExpression
+        <|> parseRecordExpression
+        <|> parseIfExpression
+        <|> parseLambdaExpression
+        <|> parseLetExpression
+        <|> parseVariableExpression
+        <|> parens parseExpression
     rest <- optional (symbol_ "." *> name)
-    return $
+    pure $
       case rest of
         Just ll ->
           ESelect () (Label () ll) e1
         Nothing ->
           e1
 
-functionCall :: Parser (Expression () ())
-functionCall = do
-  fn <- try (parens expressionParser) <|> dataConstructor <|> EVariable () . Label () <$> name
-  as <- parens (commaSep expressionParser)
+parseFunctionApplication :: Parser (Expression () ())
+parseFunctionApplication = do
+  fn <- try (parens parseExpression) <|> parseDataConstructor <|> EVariable () . Label () <$> name
+  as <- parens (commaSep parseExpression)
   pure $
     EApplication () () fn $
       case as of
@@ -55,19 +55,19 @@ functionCall = do
         [] ->
           ELiteral () LUnit :| []
 
-dataConstructor :: Parser (Expression () ())
-dataConstructor = EConstructor () . Label () <$> constructor
+parseDataConstructor :: Parser (Expression () ())
+parseDataConstructor = EConstructor () . Label () <$> constructor
 
 patternBinding :: Parser (Binding Expression () ())
-patternBinding = BPattern () <$> (patternParser <* symbol "=") <*> expressionParser
+patternBinding = BPattern () <$> (patternParser <* symbol "=") <*> parseExpression
 
 letBinding :: Parser (Binding Expression () ())
 letBinding = patternBinding -- <|> functionBinding
 
-letExpression :: Parser (Expression () ())
-letExpression = do
+parseLetExpression :: Parser (Expression () ())
+parseLetExpression = do
   bs <- lexeme_ "let" *> semicolonSep1 letBinding
-  e <- lexeme_ "in" *> expressionParser
+  e <- lexeme_ "in" *> parseExpression
   case bs of
     b : bs1 ->
       pure (ELet () (b :| bs1) e)
@@ -75,7 +75,7 @@ letExpression = do
       error "Implementation error"
 
 choice :: Parser (Choice Expression () ())
-choice = CPlain () [] <$> expressionParser
+choice = CPlain () [] <$> parseExpression
 
 clause :: Parser (Clause () ())
 clause = do
@@ -83,19 +83,19 @@ clause = do
   c : cs <- symbol_ "=>" *> some choice
   pure (EClause () p (c :| cs))
 
-foldExpression :: Parser (Expression () ())
-foldExpression = do
+parseFoldExpression :: Parser (Expression () ())
+parseFoldExpression = do
   lexeme_ "fold"
-  expr : exprs <- parens (commaSep1 expressionParser)
+  expr : exprs <- parens (commaSep1 parseExpression)
   c : cs <- braces (some clause)
   pure (EFold () () (expr :| exprs) (c :| cs) Nothing)
 
-variableExpression :: Parser (Expression () ())
-variableExpression = EVariable () . Label () <$> name
+parseVariableExpression :: Parser (Expression () ())
+parseVariableExpression = EVariable () . Label () <$> name
 
 choiceParser = do
   -- TODO
-  e <- expressionParser
+  e <- parseExpression
   pure (CPlain () [] e)
 
 matchClause :: Parser (Clause () ())
@@ -110,10 +110,10 @@ matchClause = do
     _ ->
       error "Implementation error"
 
-matchExpression :: Parser (Expression () ())
-matchExpression = do
+parseMatchExpression :: Parser (Expression () ())
+parseMatchExpression = do
   lexeme_ "match"
-  e <- parens expressionParser
+  e <- parens parseExpression
   cs <- braces (some matchClause)
   case cs of
     c : cs1 ->
@@ -121,37 +121,37 @@ matchExpression = do
     _ ->
       error "Implementation error"
 
-ifExpression :: Parser (Expression () ())
-ifExpression = do
+parseIfExpression :: Parser (Expression () ())
+parseIfExpression = do
   lexeme_ "if"
-  e1 <- expressionParser
+  e1 <- parseExpression
   lexeme_ "then"
-  e2 <- expressionParser
+  e2 <- parseExpression
   lexeme_ "else"
-  e3 <- expressionParser
+  e3 <- parseExpression
   pure (EIf () () e1 e2 e3)
 
-lambdaExpression :: Parser (Expression () ())
-lambdaExpression = do
+parseLambdaExpression :: Parser (Expression () ())
+parseLambdaExpression = do
   args <- lexeme_ "fn" *> parens (commaSep1 patternParser)
-  e <- symbol_ "=>" *> expressionParser
+  e <- symbol_ "=>" *> parseExpression
   case args of
     a : as ->
       pure (ELambda () (a :| as) e)
     _ ->
       error "Implementation error"
 
-recordExpression :: Parser (Expression () ())
-recordExpression = do
+parseRecordExpression :: Parser (Expression () ())
+parseRecordExpression = do
   kvs <- braces (commaSep1 field)
   -- TODO
   pure (ERecord () () (Map.fromList kvs) Nothing)
  where
   field :: Parser (Name, Expression () ())
-  field = (,) <$> name <*> (symbol_ "=" *> expressionParser)
+  field = (,) <$> name <*> (symbol_ "=" *> parseExpression)
 
-intExpression :: Parser (Expression () ())
-intExpression = do
+parseInt :: Parser (Expression () ())
+parseInt = do
   n <- Lexer.signed spaces (lexeme Lexer.decimal)
   pure $
     EApplication
@@ -162,11 +162,11 @@ intExpression = do
 
 listLiteral :: Parser (Expression () ())
 listLiteral = do
-  es <- brackets (commaSep expressionParser)
+  es <- brackets (commaSep parseExpression)
   pure (EListLiteral () () es)
 
-literalExpression :: Parser (Expression () ())
-literalExpression =
+parseLiteralExpression :: Parser (Expression () ())
+parseLiteralExpression =
   listLiteral
     <|> lexeme_ "true" $> ELiteral () (LBool True)
     <|> lexeme_ "false" $> ELiteral () (LBool False)

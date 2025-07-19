@@ -1,14 +1,21 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Parser.Module where -- (moduleParser, functionParser, constantParser) where
+module Noll.Parser.Module (
+  parseModule, 
+  parseFunctionDefinition, 
+  parseInstanceDefinition, 
+  parseTraitDefinition, 
+  parseTypeDefinition, 
+  parseConstantDefinition
+ ) where
 
 import Lang.Common.List1 (NonEmpty (..))
 import Lang.Utils (Name)
 import Noll.Language
 import Noll.Module
 import Noll.Parser
-import Noll.Parser.Expression (expressionParser)
+import Noll.Parser.Expression (parseExpression)
 import Noll.Parser.Identifier
 import Noll.Parser.Pattern (patternParser)
 import Noll.Parser.Symbol
@@ -18,17 +25,17 @@ import Text.Megaparsec.Char (upperChar)
 
 import qualified Data.Set as Set
 
-definitionParser :: Parser (Definition () o ())
-definitionParser =
-  importParser
-    <|> functionParser
-    <|> constantParser
-    <|> typeDefinitionParser
-    <|> traitParser
-    <|> instanceParser
+parseDefinition :: Parser (Definition () o ())
+parseDefinition =
+  parseImport
+    <|> parseFunctionDefinition
+    <|> parseConstantDefinition
+    <|> parseTypeDefinition
+    <|> parseTraitDefinition
+    <|> parseInstanceDefinition
 
-traitParser :: Parser (Definition () o ())
-traitParser = do
+parseTraitDefinition :: Parser (Definition () o ())
+parseTraitDefinition = do
   lexeme_ "trait"
   n <- constructor
   t <- parens (TVariable <$> typeParameter)
@@ -43,17 +50,17 @@ sig = do
   t <- typeParser
   pure (n, t)
 
-instanceParser :: Parser (Definition () o ())
-instanceParser = do
+parseInstanceDefinition :: Parser (Definition () o ())
+parseInstanceDefinition = do
   lexeme_ "instance"
   n <- constructor
   t <- parens typeParser
-  xx <- braces (semicolonSep1 definitionParser)
+  xx <- braces (semicolonSep1 parseDefinition)
   -- TODO
   pure (DInstance n t xx)
 
-typeDefinitionParser :: Parser (Definition () o ())
-typeDefinitionParser = do
+parseTypeDefinition :: Parser (Definition () o ())
+parseTypeDefinition = do
   lexeme_ "type"
   c <- constructor
   ps <- option [] (parens (commaSep1 (Parameter () <$> name)))
@@ -78,22 +85,22 @@ ctor c qs = do
             (TConstructor () c)
             (TVariable <$> (a :| as))
 
-importParser :: Parser (Definition () o ())
-importParser = do
+parseImport :: Parser (Definition () o ())
+parseImport = do
   lexeme_ "import"
   path <- (lexeme "Core$" <|> identifier upperChar) `sepBy1` symbol "."
   names <- option ["*"] (parens (commaSep (backtickString <|> name)))
   symbol_ ";"
   pure (DImport (Path path) names)
 
-functionParser :: Parser (Definition () o ())
-functionParser = do
+parseFunctionDefinition :: Parser (Definition () o ())
+parseFunctionDefinition = do
   lexeme_ "fn"
   fn <- name
   args <- parens (commaSep patternParser)
   ann <- optional (symbol_ ":" *> typeParser)
   symbol_ "="
-  expr <- expressionParser
+  expr <- parseExpression
   symbol_ ";"
   let args' =
         case args of
@@ -108,12 +115,12 @@ functionParser = do
     Just t ->
       pure (DAnnotation (With [] t) f)
 
-constantParser :: Parser (Definition () o ())
-constantParser = do
+parseConstantDefinition :: Parser (Definition () o ())
+parseConstantDefinition = do
   c <- name
   ann <- optional (symbol_ ":" *> typeParser)
   symbol_ "="
-  expr <- expressionParser
+  expr <- parseExpression
   symbol_ ";"
   let e = DConstant c (Constant () (With [] ()) expr)
   case ann of
@@ -122,11 +129,11 @@ constantParser = do
     Just t ->
       pure (DAnnotation (With [] t) e)
 
-moduleParser :: Parser (Module () o ())
-moduleParser = do
+parseModule :: Parser (Module () o ())
+parseModule = do
   lexeme_ "module"
   path <- identifier upperChar `sepBy1` symbol "."
   exps <- option ["*"] (parens (commaSep name))
-  b <- braces (many definitionParser)
+  b <- braces (many parseDefinition)
   eof
   pure (Module (Path path) exps b)

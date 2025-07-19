@@ -601,7 +601,7 @@ abc22 files = do
       ms3 <- traverse mainPass ms2
       traverse lowpassTranslationC ms3
   parsing m =
-    case runParser moduleParser "" (Text.pack m) of
+    case runParser parseModule "" (Text.pack m) of
       Left e ->
         error (show e)
       Right q ->
