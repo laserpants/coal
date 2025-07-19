@@ -18,27 +18,29 @@ import Noll.Module.Function (Function (..))
 newtype Path = Path {pathComponents :: [Name]}
   deriving (Show, Eq, Ord, Read, Data, Typeable)
 
+type ParameterizedType = Type Parameter ()
+
 data Definition a k t
   = -- | Type-annotated definition
-    DAnnotation (With (Type Parameter ())) (Definition a k t)
+    DAnnotation (With ParameterizedType) (Definition a k t)
   | -- | Type definition
-    DType Name [Parameter ()] [Constructor Parameter () (Type Parameter ())]
+    DType Name [Parameter ()] [Constructor Parameter () ParameterizedType]
   | -- | Codata type definition
-    DCodata Name [Parameter ()] [(Name, Type Parameter ())]
+    DCodata Name [Parameter ()] [(Name, ParameterizedType)]
   | -- | Function definition
     DFunction Name (Function Expression a t)
   | -- | Other (constant) top-level definitions
     DConstant Name (Constant Expression a t)
   | -- | Stand-alone type signature
-    DSignature Name (With (Type Parameter ()))
+    DSignature Name (With ParameterizedType)
   | -- | Import statement
     DImport Path [Name]
   | -- | Trait
-    DTrait Name [Trait t] (Type Parameter ()) [(Name, Type Parameter ())]
+    DTrait Name [Trait t] ParameterizedType [(Name, ParameterizedType)]
   | -- | Trait instance
-    DInstance Name (Type Parameter ()) [Definition a k t]
+    DInstance Name ParameterizedType [Definition a k t]
   | -- | Trait instance
-    DTypeAlias Name [Parameter ()] (Type Parameter ())
+    DTypeAlias Name [Parameter ()] ParameterizedType
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
 
 definitionName :: Definition a k t -> Name
