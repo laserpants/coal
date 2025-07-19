@@ -63,9 +63,7 @@ parseLiteralPattern :: Parser (Pattern () ())
 parseLiteralPattern = parseListLiteralPattern
 
 parseListLiteralPattern :: Parser (Pattern () ())
-parseListLiteralPattern = do
-  ps <- brackets (commaSep parsePattern)
-  pure (PListLiteral () () ps)
+parseListLiteralPattern = PListLiteral () () <$> brackets (commaSep parsePattern)
 
 parseAtVariablePattern :: Parser (Pattern () ())
 parseAtVariablePattern = do
@@ -73,7 +71,7 @@ parseAtVariablePattern = do
   PAtVariable () . Label () <$> name
 
 parseConstructorPattern :: Parser (Pattern () ())
-parseConstructorPattern = do
-  c <- constructor
-  ps <- option [] (parens (commaSep1 parsePattern))
-  pure (PConstructor () (Label () c) ps)
+parseConstructorPattern =
+  PConstructor () . Label ()
+    <$> constructor
+    <*> option [] (parens (commaSep1 parsePattern))

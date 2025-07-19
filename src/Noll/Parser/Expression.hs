@@ -65,28 +65,24 @@ parseBinding :: Parser (Binding Expression () ())
 parseBinding = patternBinding -- <|> functionBinding
 
 parseLetExpression :: Parser (Expression () ())
-parseLetExpression = do
-  bs <- lexeme_ "let" *> semicolonSep1 parseBinding
-  e <- lexeme_ "in" *> parseExpression
-  case bs of
-    b : bs1 ->
-      pure (ELet () (b :| bs1) e)
-    _ ->
-      error "Implementation error"
+parseLetExpression =
+  ELet ()
+    <$> (lexeme_ "let" *> nonEmpty (semicolonSep1 parseBinding))
+    <*> (lexeme_ "in" *> parseExpression)
 
 parseChoice :: Parser (Choice Expression () ())
 parseChoice = CPlain () [] <$> parseExpression
 
 parseClause :: Parser (Clause () ())
-parseClause = do
-  p <- symbol_ "|" *> parsePattern
-  c : cs <- symbol_ "=>" *> some parseChoice
-  pure (EClause () p (c :| cs))
+parseClause =
+  EClause ()
+    <$> (symbol_ "|" *> parsePattern)
+    <*> (symbol_ "=>" *> nonEmpty (some parseChoice))
 
 parseFoldExpression :: Parser (Expression () ())
 parseFoldExpression = do
   lexeme_ "fold"
-  EFold () () 
+  EFold () ()
     <$> parens (nonEmpty (commaSep1 parseExpression))
     <*> braces (nonEmpty (some parseClause))
     <*> pure Nothing
@@ -96,7 +92,7 @@ parseVariableExpression = EVariable () . Label () <$> name
 
 parseMatchClause :: Parser (Clause () ())
 parseMatchClause =
-  EClause () 
+  EClause ()
     <$> (symbol_ "|" *> parsePattern)
     <*> (symbol_ "=>" *> nonEmpty (some parseChoice))
 
