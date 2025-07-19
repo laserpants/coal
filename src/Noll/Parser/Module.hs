@@ -18,7 +18,7 @@ import Lang.Utils (Name)
 
 import qualified Data.Set as Set
 
-definitionParser :: Parser (Definition () Kind ())
+definitionParser :: Parser (Definition () o ())
 definitionParser =
   importParser
     <|> functionParser
@@ -47,13 +47,10 @@ instanceParser :: Parser (Definition () o ())
 instanceParser = do
   lexeme_ "instance"
   n <- constructor
-  t <- parens undefined -- typeParser
-  xx <- braces (semicolonSep1 zz)
+  t <- parens typeParser
+  xx <- braces (semicolonSep1 definitionParser)
   -- TODO
-  pure (DInstance n t xx)
-
-zz :: Parser (Definition () o ())
-zz = undefined
+  pure (DInstance2 n t xx)
 
 typeDefinitionParser :: Parser (Definition () o ())
 typeDefinitionParser = do
@@ -156,7 +153,7 @@ constantParser = do
     Just t ->
       pure (DAnnotation (With [] t) e)
 
-moduleParser :: Parser (Module () Kind ())
+moduleParser :: Parser (Module () o ())
 moduleParser = do
   lexeme_ "module"
   path <- identifier upperChar `sepBy1` symbol "."
@@ -164,24 +161,3 @@ moduleParser = do
   b <- braces (many definitionParser)
   eof
   pure (Module (Path path) exps b)
-
---addKinds :: Type Parameter k -> Type Parameter Kind
---addKinds = 
---  \case
---    TApplication _ t ts ->
---      undefined
---    TArrow t1 t2 ->
---      TArrow (addKinds t1) (addKinds t2)
---    TConstructor _ name ->
---      undefined
---    TIntrinsic t ->
---      undefined
---    TRow r ->
---      TRow (addRowKinds r)
---    TVariable _ ->
---      undefined
---    TAlias name ts t ->
---      TAlias name (addKinds <$> ts (addKinds t)
---
---addRowKinds =
---  undefined

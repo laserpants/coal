@@ -99,6 +99,8 @@ instance (AliasContext t, Data a, Data t) => AliasContext (Definition a k t) whe
         DConstant name <$> expandAliases c
       DInstance name t ds ->
         DInstance name t <$> traverse expandAliases ds
+      DInstance2 name t ds ->
+        DInstance2 name t <$> traverse expandAliases ds
       o ->
         pure o
 

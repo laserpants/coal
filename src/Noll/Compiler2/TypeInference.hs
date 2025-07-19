@@ -166,6 +166,20 @@ typeDefinitionC =
                 ti <- instantiateVars t1
                 insertConstraintsC [Explicit InferenceRulePlaceholder (typeOf d) (instantiateTemplate tx ti s)]
                 compileDefinitionC d
+    DInstance2 trait t1 ds -> do
+      env <- asks compiler2TraitEnvironment
+      case Environment.lookup trait env of
+        Nothing ->
+          error ("Missing trait: " <> Text.unpack trait)
+        Just (tx, defs) -> do
+          forM_ ds $ \d -> do
+            case Environment.lookup (definitionName d) defs of
+              Nothing ->
+                error ("Missing implementation: " <> Text.unpack (definitionName d))
+              Just s -> do
+                ti <- instantiateVars2 t1
+                insertConstraintsC [Explicit InferenceRulePlaceholder (typeOf d) (instantiateTemplate tx ti s)]
+                compileDefinitionC d
     d -> do
       compileDefinitionC d
       sub <- solveC
@@ -173,6 +187,35 @@ typeDefinitionC =
 
 instantiateTemplate :: TypeIndex Kind -> IndexedType -> Scheme TypeIndex Kind IndexedType -> Scheme TypeIndex Kind IndexedType
 instantiateTemplate (TypeIndex _ n) t1 (Forall vs ts t) = Forall vs ts (apply (n `mapsTo` t1) t)
+
+instantiateVars2 :: (Monad m) => Type Parameter () -> Compiler2T a m IndexedType
+instantiateVars2 = 
+  \case
+    TVariable{} ->
+      supplied (TVariable . TypeIndex KType)
+    TApplication k t ts ->
+      -- TODO: ??
+      TApplication KType <$> instantiateVars2 t <*> traverse instantiateVars2 ts
+    TArrow t1 t2 ->
+      TArrow <$> instantiateVars2 t1 <*> instantiateVars2 t2
+    TIntrinsic t ->
+      TIntrinsic <$> traverse instantiateVars2 t
+    TRow r ->
+      TRow <$> instantiateRowVars2 r
+    TAlias name ts t ->
+      TAlias name <$> traverse instantiateVars2 ts <*> instantiateVars2 t
+    _ ->
+      error "TODO"
+
+instantiateRowVars2 :: (Monad m) => Row Parameter () (Type Parameter ()) -> Compiler2T a m (Row TypeIndex Kind IndexedType)
+instantiateRowVars2 = 
+  \case
+    RVariable{} ->
+      supplied (RVariable . TypeIndex KType)
+    RExtend name t r ->
+      RExtend name <$> instantiateVars2 t <*> instantiateRowVars2 r
+    RNil ->
+      pure RNil
 
 instantiateVars :: (Monad m) => Type Parameter Kind -> Compiler2T a m IndexedType
 instantiateVars = do

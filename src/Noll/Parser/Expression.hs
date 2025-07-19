@@ -210,14 +210,20 @@ fixity5 =
   [ InfixR (binaryOperator OListConcatenation <$ symbol "++")
   , InfixR (EListCons () () <$ symbol "::")
   ]
-fixity4 = []
+
+fixity4 = 
+  [
+    InfixR (EListCons () () <$ symbol "::")
+  ]
 
 fixity3 = 
   [ InfixR (binaryOperator OLogicalAnd <$ symbol "&&")
   ]
 
 fixity2 = 
-  [ InfixR (binaryOperator OLogicalOr <$ symbol "||")
+  [ InfixN (binaryOperator OLessThan <$ symbol "<")
+  , InfixN (binaryOperator OGreaterThan <$ symbol ">")
+  , InfixR (binaryOperator OLogicalOr <$ symbol "||")
   ]
 
 operator :: [[Operator Parser (Expression () ())]]

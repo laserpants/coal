@@ -1019,3 +1019,51 @@ spec =
                 ]
         :: Definition () Kind ()
             )
+    it "" $ do
+      runParser instanceParser "" "instance Ordered(int32) { fn compare(x, y) = if (x < y) then LessThan else if (x > y) then GreaterThan else EqualTo; }"
+        == Right
+            ( DInstance2
+        "Ordered"
+        (TIntrinsic IInt32)
+        [ DFunction
+            "compare"
+            ( Function
+                ()
+                (With [] ())
+                ( PVariable () (Label () "x")
+                    <| PVariable () (Label () "y")
+                    :| []
+                )
+                ( EIf
+                    ()
+                    ()
+                    ( EApplication
+                        ()
+                        ()
+                        (EBinaryOperator () () OLessThan)
+                        ( EVariable () (Label () "x")
+                            <| EVariable () (Label () "y")
+                            :| []
+                        )
+                    )
+                    (EConstructor () (Label () "LessThan"))
+                    ( EIf
+                        ()
+                        ()
+                        ( EApplication
+                            ()
+                            ()
+                            (EBinaryOperator () () OGreaterThan)
+                            ( EVariable () (Label () "x")
+                                <| EVariable () (Label () "y")
+                                :| []
+                            )
+                        )
+                        (EConstructor () (Label () "GreaterThan"))
+                        (EConstructor () (Label () "EqualTo"))
+                    )
+                )
+            )
+        ]
+            :: Definition () Kind ()
+            )
