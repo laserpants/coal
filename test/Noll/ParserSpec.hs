@@ -1018,7 +1018,7 @@ spec =
               Definition () Kind ()
           )
     it "" $ do
-      runParser parseInstanceDefinition "" "instance Ordered(int32) { fn compare(x, y) = if (x < y) then LessThan else if (x > y) then GreaterThan else EqualTo; }"
+      runParser parseTraitInstance "" "instance Ordered(int32) { fn compare(x, y) = if (x < y) then LessThan else if (x > y) then GreaterThan else EqualTo; }"
         == Right
           ( DInstance
               "Ordered"

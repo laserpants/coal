@@ -4,7 +4,7 @@
 module Noll.Parser.Module (
   parseModule,
   parseFunctionDefinition,
-  parseInstanceDefinition,
+  parseTraitInstance,
   parseTraitDefinition,
   parseTypeDefinition,
   parseConstantDefinition,
@@ -32,7 +32,7 @@ parseDefinition =
     <|> parseConstantDefinition
     <|> parseTypeDefinition
     <|> parseTraitDefinition
-    <|> parseInstanceDefinition
+    <|> parseTraitInstance
 
 parseTraitDefinition :: Parser (Definition () o ())
 parseTraitDefinition = do
@@ -43,8 +43,8 @@ parseTraitDefinition = do
   -- TODO
   pure (DTrait n [] t ds)
 
-parseInstanceDefinition :: Parser (Definition () o ())
-parseInstanceDefinition = do
+parseTraitInstance :: Parser (Definition () o ())
+parseTraitInstance = do
   lexeme_ "instance"
   n <- constructor
   t <- parens parseType
