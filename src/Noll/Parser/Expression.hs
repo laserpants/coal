@@ -108,13 +108,9 @@ parseMatchClause = do
 parseMatchExpression :: Parser (Expression () ())
 parseMatchExpression = do
   lexeme_ "match"
-  e <- parens parseExpression
-  cs <- braces (some parseMatchClause)
-  case cs of
-    c : cs1 ->
-      pure (EMatch () () e (c :| cs1))
-    _ ->
-      error "Implementation error"
+  EMatch () ()
+    <$> parens parseExpression
+    <*> braces (nonEmpty (some parseMatchClause))
 
 parseIfExpression :: Parser (Expression () ())
 parseIfExpression =
@@ -124,14 +120,10 @@ parseIfExpression =
     <*> (lexeme_ "else" *> parseExpression)
 
 parseLambdaExpression :: Parser (Expression () ())
-parseLambdaExpression = do
-  args <- lexeme_ "fn" *> parens (commaSep1 parsePattern)
-  e <- symbol_ "=>" *> parseExpression
-  case args of
-    a : as ->
-      pure (ELambda () (a :| as) e)
-    _ ->
-      error "Implementation error"
+parseLambdaExpression =
+  ELambda ()
+    <$> (lexeme_ "fn" *> parens (nonEmpty (commaSep1 parsePattern)))
+    <*> (symbol_ "=>" *> parseExpression)
 
 parseRecordExpression :: Parser (Expression () ())
 parseRecordExpression = do
@@ -158,10 +150,8 @@ parseListLiteral = EListLiteral () () <$> brackets (commaSep parseExpression)
 parseLiteralExpression :: Parser (Expression () ())
 parseLiteralExpression =
   parseListLiteral
-    <|> lexeme_ "true"
-    $> ELiteral () (LBool True)
-      <|> lexeme_ "false"
-    $> ELiteral () (LBool False)
+    <|> (lexeme_ "true" $> ELiteral () (LBool True))
+    <|> (lexeme_ "false" $> ELiteral () (LBool False))
 
 unaryOperator :: UnaryOperator -> Expression () () -> Expression () ()
 unaryOperator op e1 =

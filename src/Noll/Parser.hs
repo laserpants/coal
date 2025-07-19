@@ -8,11 +8,13 @@ module Noll.Parser (
   word,
   lexeme,
   lexeme_,
+  nonEmpty,
 ) where
 
 import Control.Monad (void, when)
 import Data.Text (Text)
 import Data.Void (Void)
+import Lang.Common.List1 (List1, NonEmpty (..))
 import Lang.Utils (Name)
 import Text.Megaparsec
 import Text.Megaparsec.Char (space1)
@@ -86,3 +88,12 @@ word p =
 {-# INLINE cons #-}
 cons :: Parser a -> Parser [a] -> Parser [a]
 cons p ps = (:) <$> p <*> ps
+
+nonEmpty :: Parser [a] -> Parser (List1 a)
+nonEmpty p = do
+  ps <- p
+  case ps of
+    q : qs ->
+      pure (q :| qs)
+    [] ->
+      fail "Empty list"
