@@ -87,12 +87,10 @@ parseImport = do
 
 parseFunctionDefinition :: Parser (Definition () o ())
 parseFunctionDefinition = do
-  lexeme_ "fn"
-  fn <- name
+  fn <- lexeme_ "fn" *> name
   args <- parens (nonEmptyOr (PLiteral () LUnit :| []) (commaSep parsePattern))
   ann <- optional (symbol_ ":" *> parseType)
-  symbol_ "="
-  expr <- parseExpression
+  expr <- symbol_ "=" *> parseExpression
   symbol_ ";"
   let f = DFunction fn (Function () (With [] ()) args expr)
   case ann of
