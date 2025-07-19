@@ -54,11 +54,11 @@ parseTraitInstance = do
 parseTypeDefinition :: Parser (Definition () o ())
 parseTypeDefinition = do
   lexeme_ "type"
-  c <- constructor
+  n <- constructor
   ps <- option [] (parens (commaSep1 (Parameter () <$> name)))
   symbol_ "="
-  cs <- parseConstructor c ps `sepBy1` symbol_ "|"
-  pure (DType c ps cs)
+  cs <- parseConstructor n ps `sepBy1` symbol_ "|"
+  pure (DType n ps cs)
 
 parseConstructor :: Name -> [Parameter ()] -> Parser (Constructor Parameter () (Type Parameter ()))
 parseConstructor c qs = do
