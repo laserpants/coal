@@ -43,7 +43,6 @@ patternParser = makeExprParser go operator
 operator :: [[Operator Parser (Pattern () ())]]
 operator =
   [ -- TODO
-
     [ InfixR (PListCons () () <$ symbol "::")
     ]
   , -- TODO

@@ -28,9 +28,6 @@ intrinsicParser =
 typeConstructor :: Parser (Type Parameter ())
 typeConstructor = TConstructor () <$> constructor
 
--- where
---  go = lexeme "list" <|> constructor
-
 typeApplication = do
   t0 <- typeConstructor
   xx <- option [] (parens (commaSep1 typeParser))

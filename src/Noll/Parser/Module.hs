@@ -75,35 +75,6 @@ typeDefinitionParser = do
 -- toScheme qs q ps = Forall (Set.fromList (params =<< ps)) [] (foldr TArrow q ps)
 toScheme qs q ps = Forall (Set.fromList qs) [] (foldr TArrow q ps)
 
---  where
---    q =
---      case ps of
---        [] ->
---          TConstructor () n
---        a : as ->
---          TApplication
---            ()
---            (TConstructor () n)
---            (a :| as)
-
--- params :: Type Parameter () -> [Parameter ()]
--- params =
---  \case
---    TVariable p ->
---      [p]
---    TApplication _ t ts ->
---      params t <> concat (params <$> ts)
---    TArrow t1 t2 ->
---      params t1 <> params t2
---    TConstructor{} ->
---      []
---    TIntrinsic t ->
---      error "TODO"
---    TRow r ->
---      error "TODO"
---    TAlias _ _ t ->
---      params t
-
 -- ctor :: Name -> Parser (Constructor Parameter () (Type Parameter ()))
 ctor qs s = do
   n <- constructor
