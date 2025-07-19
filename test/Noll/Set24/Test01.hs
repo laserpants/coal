@@ -24,7 +24,7 @@ moduleMain =
     -- Exports
     []
     -- Definitions
-    [ DImport (Path ["Core$"]) ["trace_int32", "trace_bool", "operator__not", "always", "from_int32", "from_int32__$instance_Numeric(Intrinsic(Int32))"]
+    [ DImport (Path ["Core$"]) ["trace_int32", "trace_bool", "not", "always", "from_int32", "from_int32__$instance_Numeric(Intrinsic(Int32))"]
     , DType
         "Ordering"
         []
@@ -170,7 +170,7 @@ moduleMain =
                 ()
                 ()
                 (EBinaryOperator () () OReverseComposition)
-                ( EVariable () (Label () "operator__not")
+                ( EVariable () (Label () "not")
                     <| EApplication
                       ()
                       ()

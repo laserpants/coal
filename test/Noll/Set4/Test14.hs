@@ -43,6 +43,13 @@ moduleCore =
                   if (a : bool) then false else true
               |]
         , OFunction
+            "Core$.not"
+            [ Label bool "a"
+            ]
+            [r| 
+                  if (a : bool) then false else true
+              |]
+        , OFunction
             "Core$.operator__reverse_composition"
             [ Label (opaque `arrow` opaque) "f"
             , Label (opaque `arrow` opaque) "g"

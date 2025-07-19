@@ -38,6 +38,7 @@ collectImports = Environment.fromList . concatMap imports
 coreImports :: [Name]
 coreImports =
   [ "Core$.operator__not"
+  , "Core$.not"
   , "Core$.operator__reverse_composition"
   , "Core$.operator__reverse_application"
   , "Core$.always"

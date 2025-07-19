@@ -734,6 +734,10 @@ abc30 = fst (runIdentity (runCompiler2T compiler2TestEnvironment prog))
         , Forall mempty [] (TIntrinsic IBool `TArrow` TIntrinsic IBool)
         )
       ,
+        ( "not"
+        , Forall mempty [] (TIntrinsic IBool `TArrow` TIntrinsic IBool)
+        )
+      ,
         ( "in_range"
         , Forall (Set.fromList [TypeIndex KType 0]) [] (TIntrinsic (IRecord (TRow (RExtend "max" (TVariable (TypeIndex KType 0)) (RExtend "min" (TVariable (TypeIndex KType 0)) RNil)))) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
         )
@@ -776,6 +780,13 @@ moduleCore =
     , moduleObjects =
         [ OFunction
             "Core$.operator__not"
+            [ Label Lowpass.bool "a"
+            ]
+            [r| 
+                  if (a : bool) then false else true
+              |]
+        , OFunction
+            "Core$.not"
             [ Label Lowpass.bool "a"
             ]
             [r| 
