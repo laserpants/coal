@@ -65,10 +65,10 @@ parseConstructor :: Name -> [Parameter ()] -> Parser (Constructor Parameter () (
 parseConstructor c qs = do
   n <- constructor
   ps <- option [] (parens (commaSep1 parseType))
-  let s = Forall (Set.fromList qs) [] (foldr TArrow qq ps)
+  let s = Forall (Set.fromList qs) [] (foldr TArrow go ps)
   pure (Constructor n (length ps) s)
  where
-  qq =
+  go =
     case qs of
       [] ->
         TConstructor () c
