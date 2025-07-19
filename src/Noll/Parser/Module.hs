@@ -164,3 +164,24 @@ moduleParser = do
   b <- braces (many definitionParser)
   eof
   pure (Module (Path path) exps b)
+
+--addKinds :: Type Parameter k -> Type Parameter Kind
+--addKinds = 
+--  \case
+--    TApplication _ t ts ->
+--      undefined
+--    TArrow t1 t2 ->
+--      TArrow (addKinds t1) (addKinds t2)
+--    TConstructor _ name ->
+--      undefined
+--    TIntrinsic t ->
+--      undefined
+--    TRow r ->
+--      TRow (addRowKinds r)
+--    TVariable _ ->
+--      undefined
+--    TAlias name ts t ->
+--      TAlias name (addKinds <$> ts (addKinds t)
+--
+--addRowKinds =
+--  undefined
