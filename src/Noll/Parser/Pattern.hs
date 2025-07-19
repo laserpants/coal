@@ -46,6 +46,9 @@ operator =
 
     [ InfixR (PListCons () () <$ symbol "::")
     ]
+    -- TODO
+  , [ InfixL (POr () () <$ lexeme "or")
+    ]
   , [Postfix typeAnnotation]
   ]
 

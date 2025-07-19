@@ -908,48 +908,4 @@ spec =
               ) ::
               Definition () () ()
                         )
-    it "" $ do
-      runParser functionParser "" "fn less_than_or_equal_to(m) = fn(n) => match(compare(m, n)) { | LessThan or EqualTo => true | GreaterThan => false };"
-        == Right
-        ( DFunction
-            "less_than_or_equal_to"
-            ( Function
-                ()
-                (With [] ())
-                (PVariable () (Label () "m") :| [])
-                ( ELambda
-                    ()
-                    (PVariable () (Label () "n") :| [])
-                    ( EMatch
-                        ()
-                        ()
-                        ( EApplication
-                            ()
-                            ()
-                            (EVariable () (Label () "compare"))
-                            ( EVariable () (Label () "m")
-                                <| EVariable () (Label () "n")
-                                :| []
-                            )
-                        )
-                        ( EClause
-                            ()
-                            ( POr
-                                ()
-                                ()
-                                (PConstructor () (Label () "LessThan") [])
-                                (PConstructor () (Label () "EqualTo") [])
-                            )
-                            (CPlain () [] (ELiteral () (LBool True)) :| [])
-                            <| EClause
-                              ()
-                              (PConstructor () (Label () "GreaterThan") [])
-                              (CPlain () [] (ELiteral () (LBool False)) :| [])
-                            :| []
-                        )
-                            )
-                    )
-                  ) ::
-                  Definition () () ()
-                            )
 

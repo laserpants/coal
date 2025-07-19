@@ -19,6 +19,13 @@ definitionParser =
   importParser
     <|> functionParser
     <|> constantParser
+    <|> typeDefinitionParser
+
+typeDefinitionParser :: Parser (Definition () o ())
+typeDefinitionParser = do
+  lexeme_ "type"
+  n <- constructor
+  undefined
 
 importParser :: Parser (Definition () o ())
 importParser = do
