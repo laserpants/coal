@@ -13,18 +13,17 @@ import Text.Megaparsec (option, try, (<|>))
 
 parseIntrinsicType :: Parser (Intrinsic (Type Parameter ()))
 parseIntrinsicType =
-  lexeme "int32"
-    $> IInt32
-      <|> (lexeme "int64" $> IInt64)
-      <|> (lexeme "bool" $> IBool)
-      <|> (lexeme "char" $> IChar)
-      <|> (lexeme "double" $> IDouble)
-      <|> (lexeme "float" $> IFloat)
-      <|> (lexeme "bignum" $> IBignum)
-      <|> (lexeme "nat" $> INat)
-      <|> (lexeme "string" $> IString)
-      <|> (lexeme "unit" $> IUnit)
-      <|> (lexeme "void" $> IVoid)
+  (lexeme "int32" $> IInt32)
+    <|> (lexeme "int64" $> IInt64)
+    <|> (lexeme "bool" $> IBool)
+    <|> (lexeme "char" $> IChar)
+    <|> (lexeme "double" $> IDouble)
+    <|> (lexeme "float" $> IFloat)
+    <|> (lexeme "bignum" $> IBignum)
+    <|> (lexeme "nat" $> INat)
+    <|> (lexeme "string" $> IString)
+    <|> (lexeme "unit" $> IUnit)
+    <|> (lexeme "void" $> IVoid)
 
 {-# INLINE parseTypeParameter #-}
 parseTypeParameter :: Parser (Parameter ())
