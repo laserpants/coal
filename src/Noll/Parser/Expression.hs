@@ -86,24 +86,19 @@ parseClause = do
 parseFoldExpression :: Parser (Expression () ())
 parseFoldExpression = do
   lexeme_ "fold"
-  expr : exprs <- parens (commaSep1 parseExpression)
-  c : cs <- braces (some parseClause)
-  pure (EFold () () (expr :| exprs) (c :| cs) Nothing)
+  EFold () () 
+    <$> parens (nonEmpty (commaSep1 parseExpression))
+    <*> braces (nonEmpty (some parseClause))
+    <*> pure Nothing
 
 parseVariableExpression :: Parser (Expression () ())
 parseVariableExpression = EVariable () . Label () <$> name
 
 parseMatchClause :: Parser (Clause () ())
-parseMatchClause = do
-  symbol_ "|"
-  p <- parsePattern
-  symbol_ "=>"
-  cs <- some parseChoice
-  case cs of
-    c : cs1 ->
-      pure (EClause () p (c :| cs1))
-    _ ->
-      error "Implementation error"
+parseMatchClause =
+  EClause () 
+    <$> (symbol_ "|" *> parsePattern)
+    <*> (symbol_ "=>" *> nonEmpty (some parseChoice))
 
 parseMatchExpression :: Parser (Expression () ())
 parseMatchExpression = do
