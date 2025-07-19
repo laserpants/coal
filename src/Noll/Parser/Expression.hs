@@ -51,7 +51,7 @@ functionCall = do
     EApplication () () fn $
       case as of
         arg : args ->
-          (arg :| args)
+          arg :| args
         [] ->
           ELiteral () LUnit :| []
 
