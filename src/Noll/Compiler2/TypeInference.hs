@@ -160,7 +160,7 @@ typeDefinitionC =
       case Environment.lookup trait env of
         Nothing ->
           error ("Missing trait: " <> Text.unpack trait)
-        Just (tx, defs) -> do
+        Just (tx, defs) ->
           forM_ ds $
             \d -> do
               case Environment.lookup (definitionName d) defs of
