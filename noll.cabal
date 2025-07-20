@@ -48,6 +48,7 @@ library
       Noll.Compiler.Transform.Type.AliasExpansion
       Noll.Compiler.Transform.Unfold
       Noll.Compiler2
+      Noll.Compiler2.Environment
       Noll.Compiler2.Internal
       Noll.Compiler2.TypeInference
       Noll.Eval

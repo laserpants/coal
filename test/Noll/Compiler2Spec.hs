@@ -64,7 +64,7 @@ compiler2TestEnvironment =
   Compiler2Environment
     { compiler2DataConstructorEnv = env1
     , compiler2TypeConstructorEnv = env2
-    , compiler2TraitEnvironment = env3 -- ?
+    , compiler2TraitEnvironment = env3
     , compiler2AliasEnv = env5
     , compiler2DictionaryEnvironment = env6
     }
@@ -269,7 +269,7 @@ env5 =
       )
     ]
 
-env6 = DictionaryEnvironment yy xx
+env6 = DictionaryEnvironment yy mempty -- xx
 
 xx :: Environment (Map IndexedType (Dictionary (Scheme TypeIndex Kind IndexedType)))
 xx =
