@@ -137,8 +137,8 @@ instance TreeTransform Expression t where
           <*> traverse (transform name f) cs
       EFold{} ->
         error "EFold"
-      EUnfold a t ll name ps d me ->
-        EUnfold a t ll name ps
+      EUnfold a t ll u ps d me ->
+        EUnfold a t ll u ps
           <$> traverse (transform name f) d
           <*> traverse (transform name f) me
       ECodataSelect a ll e me ->
