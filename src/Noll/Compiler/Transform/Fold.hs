@@ -3,7 +3,6 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
 
 module Noll.Compiler.Transform.Fold (
@@ -101,7 +100,7 @@ atLabels = execWriter . transformM go
       p ->
         pure p
 
-expandFoldExpr :: forall m a. (Monoid a, Data a, MonadState Int m, MonadReader Name m) => List1 (Expression a ()) -> List1 (Clause a ()) -> m (Expression a ())
+expandFoldExpr :: (Monoid a, Data a, MonadState Int m, MonadReader Name m) => List1 (Expression a ()) -> List1 (Clause a ()) -> m (Expression a ())
 expandFoldExpr args clauses = do
   name <- suppliedName
   let var = name <> ".expr"
