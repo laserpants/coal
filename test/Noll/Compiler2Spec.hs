@@ -715,9 +715,136 @@ abc30 = fst (runIdentity (runCompiler2T compiler2TestEnvironment prog))
         ( "operator__not"
         , Forall mempty [] (TIntrinsic IBool `TArrow` TIntrinsic IBool)
         )
-      , ( "not"
+      , 
+        ( "not"
         , Forall mempty [] (TIntrinsic IBool `TArrow` TIntrinsic IBool)
         )
+--      , ( "operator__reverse_composition"
+--        , Forall 
+--            (Set.fromList [TypeIndex KType 0]) 
+--            [] 
+--            ( undefined
+--                `TArrow` undefined
+--                `TArrow` undefined
+--            )
+--        )
+--      , ( "operator__reverse_application"
+--        , Forall 
+--            (Set.fromList [TypeIndex KType 0]) 
+--            [] 
+--            ( undefined
+--                `TArrow` undefined
+--                `TArrow` undefined
+--            )
+--        )
+--      , ( "always"
+--        , Forall 
+--            (Set.fromList [TypeIndex KType 0]) 
+--            [] 
+--            ( undefined
+--                `TArrow` undefined
+--                `TArrow` undefined
+--            )
+--        )
+--      , ( "operator__list_concatenation"
+--        , Forall 
+--            (Set.fromList [TypeIndex KType 0]) 
+--            [] 
+--            ( undefined
+--                `TArrow` undefined
+--                `TArrow` undefined
+--            )
+--        )
+--      , ( "trace_int32"
+--        , Forall 
+--            (Set.fromList [TypeIndex KType 0]) 
+--            [] 
+--            ( undefined
+--                `TArrow` undefined
+--                `TArrow` undefined
+--            )
+--        )
+--      , ( "trace_string"
+--        , Forall 
+--            (Set.fromList [TypeIndex KType 0]) 
+--            [] 
+--            ( undefined
+--                `TArrow` undefined
+--                `TArrow` undefined
+--            )
+--        )
+--      , ( "trace_bool"
+--        , Forall 
+--            (Set.fromList [TypeIndex KType 0]) 
+--            [] 
+--            ( undefined
+--                `TArrow` undefined
+--                `TArrow` undefined
+--            )
+--        )
+--      , ( "operator__string_concatenation"
+--        , Forall 
+--            (Set.fromList [TypeIndex KType 0]) 
+--            [] 
+--            ( undefined
+--                `TArrow` undefined
+--                `TArrow` undefined
+--            )
+--        )
+--      , ( "int32_to_string"
+--        , Forall 
+--            (Set.fromList [TypeIndex KType 0]) 
+--            [] 
+--            ( undefined
+--                `TArrow` undefined
+--                `TArrow` undefined
+--            )
+--        )
+--      , ( "pair_to_string"
+--        , Forall 
+--            (Set.fromList [TypeIndex KType 0]) 
+--            [] 
+--            ( undefined
+--                `TArrow` undefined
+--                `TArrow` undefined
+--            )
+--        )
+--      , ( "list_to_string"
+--        , Forall 
+--            (Set.fromList [TypeIndex KType 0]) 
+--            [] 
+--            ( undefined
+--                `TArrow` undefined
+--                `TArrow` undefined
+--            )
+--        )
+--      , ( "trace"
+--        , Forall 
+--            (Set.fromList [TypeIndex KType 0]) 
+--            [] 
+--            ( undefined
+--                `TArrow` undefined
+--                `TArrow` undefined
+--            )
+--        )
+--      , ( "unpack_nat"
+--        , Forall 
+--            (Set.fromList [TypeIndex KType 0]) 
+--            [] 
+--            ( undefined
+--                `TArrow` undefined
+--                `TArrow` undefined
+--            )
+--        )
+--      , ( "pack_nat"
+--        , Forall 
+--            (Set.fromList [TypeIndex KType 0]) 
+--            [] 
+--            ( undefined
+--                `TArrow` undefined
+--                `TArrow` undefined
+--            )
+--        )
       ,
         ( "from_int32"
         , Forall (Set.fromList [TypeIndex KType 0]) [] (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0))
