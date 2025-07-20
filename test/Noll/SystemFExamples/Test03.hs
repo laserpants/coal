@@ -86,7 +86,7 @@ spec =
                               Nothing
                           )
                           <| PAnnotation () (TVariable (Parameter () "a")) (PVariable () (Label (TVariable (TypeIndex KType 0)) "n"))
-                          :| []
+                            :| []
                       )
                       ( EApplication
                           ()
@@ -152,9 +152,9 @@ spec =
                                           )
                                       )
                                       (EVariable () (Label (TVariable (TypeIndex KType 0)) "n") <| EVariable () (Label (TVariable (TypeIndex KType 0)) "max") :| [])
-                                    :| []
+                                      :| []
                                 )
-                              :| []
+                                :| []
                           )
                       )
                   )
@@ -257,7 +257,7 @@ fixture =
                       Nothing
                   )
                   <| PAnnotation () (TVariable (Parameter () "a")) (PVariable () (Label () "n"))
-                  :| []
+                    :| []
               )
               ( EApplication
                   ()
@@ -282,9 +282,9 @@ fixture =
                               ()
                               (EVariable () (Label () "lte"))
                               (EVariable () (Label () "n") <| EVariable () (Label () "max") :| [])
-                            :| []
+                              :| []
                         )
-                      :| []
+                        :| []
                   )
               )
           )

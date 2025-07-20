@@ -112,7 +112,7 @@ fixture =
             Nothing
         )
         <| PAnnotation () (TVariable (Parameter () "a")) (PVariable () (Label () "n"))
-        :| []
+          :| []
     )
     ( EApplication
         ()
@@ -137,9 +137,9 @@ fixture =
                     ()
                     (EVariable () (Label () "lte"))
                     (EVariable () (Label () "n") <| EVariable () (Label () "max") :| [])
-                  :| []
+                    :| []
               )
-            :| []
+              :| []
         )
     )
 
@@ -180,7 +180,7 @@ fixture1 =
             Nothing
         )
         <| PAnnotation () (TVariable (Parameter () "a")) (PVariable () (Label (TVariable (TypeIndex KType 0)) "n"))
-        :| []
+          :| []
     )
     ( EApplication
         ()
@@ -246,8 +246,8 @@ fixture1 =
                         )
                     )
                     (EVariable () (Label (TVariable (TypeIndex KType 0)) "n") <| EVariable () (Label (TVariable (TypeIndex KType 0)) "max") :| [])
-                  :| []
+                    :| []
               )
-            :| []
+              :| []
         )
     )

@@ -223,7 +223,7 @@ fixture =
                                                 ]
                                             )
                                             Nothing
-                                          :| []
+                                            :| []
                                       )
                                     <| EApplication
                                       ()
@@ -239,9 +239,9 @@ fixture =
                                                 ]
                                             )
                                             Nothing
-                                          :| []
+                                            :| []
                                       )
-                                    :| []
+                                      :| []
                                 )
                             )
                             ( EApplication
@@ -263,7 +263,7 @@ fixture =
                       (ELambda () (PAny () () :| []) (EConstructor () (Label () "Leaf")))
                       :| []
                   )
-                :| []
+                  :| []
             )
         )
     )
@@ -295,7 +295,7 @@ fixture =
                   ]
               )
               Nothing
-            :| []
+              :| []
         )
     )
 
@@ -387,7 +387,7 @@ fixture1 =
                                                 ]
                                             )
                                             Nothing
-                                          :| []
+                                            :| []
                                       )
                                     <| EApplication
                                       ()
@@ -403,9 +403,9 @@ fixture1 =
                                                 ]
                                             )
                                             Nothing
-                                          :| []
+                                            :| []
                                       )
-                                    :| []
+                                      :| []
                                 )
                             )
                             ( EApplication
@@ -427,7 +427,7 @@ fixture1 =
                       (ELambda () (PAny () maxMin0Type :| []) (EConstructor () (Label tree0Type "Leaf")))
                       :| []
                   )
-                :| []
+                  :| []
             )
         )
     )
@@ -459,6 +459,6 @@ fixture1 =
                   ]
               )
               Nothing
-            :| []
+              :| []
         )
     )

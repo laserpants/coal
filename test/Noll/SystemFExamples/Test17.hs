@@ -99,7 +99,7 @@ fixture =
             ()
             ( PLiteral () (LInt32 5)
                 <| PVariable () (Label () "x")
-                :| []
+                  :| []
             )
             ( ELiteral () (LInt32 1)
             )
@@ -112,7 +112,7 @@ fixture =
         (EVariable () (Label () "f"))
         ( ELiteral () (LInt32 5)
             <| ELiteral () (LString "")
-            :| []
+              :| []
         )
     )
 
