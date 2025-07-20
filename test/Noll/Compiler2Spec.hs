@@ -719,34 +719,38 @@ abc30 = fst (runIdentity (runCompiler2T compiler2TestEnvironment prog))
         ( "not"
         , Forall mempty [] (TIntrinsic IBool `TArrow` TIntrinsic IBool)
         )
-      , --      , ( "operator__reverse_composition"
-        --        , Forall
-        --            (Set.fromList [TypeIndex KType 0])
-        --            []
-        --            ( undefined
-        --                `TArrow` undefined
-        --                `TArrow` undefined
-        --            )
-        --        )
-        --      , ( "operator__reverse_application"
-        --        , Forall
-        --            (Set.fromList [TypeIndex KType 0])
-        --            []
-        --            ( undefined
-        --                `TArrow` undefined
-        --                `TArrow` undefined
-        --            )
-        --        )
-        --      , ( "always"
-        --        , Forall
-        --            (Set.fromList [TypeIndex KType 0])
-        --            []
-        --            ( undefined
-        --                `TArrow` undefined
-        --                `TArrow` undefined
-        --            )
-        --        )
-
+      ,
+        ( "operator__reverse_composition"
+        , Forall
+            (Set.fromList [TypeIndex KType 0, TypeIndex KType 1, TypeIndex KType 2])
+            []
+            ( (TVariable (TypeIndex KType 1) `TArrow` TVariable (TypeIndex KType 2))
+                `TArrow` (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 1))
+                `TArrow` TVariable (TypeIndex KType 0)
+                `TArrow` TVariable (TypeIndex KType 2)
+            )
+        )
+      ,
+        ( "operator__reverse_application"
+        , Forall
+            (Set.fromList [TypeIndex KType 0, TypeIndex KType 1])
+            []
+            ( TVariable (TypeIndex KType 0)
+                `TArrow` (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 1))
+                `TArrow` TVariable (TypeIndex KType 1)
+            )
+        )
+      ,
+        ( "always"
+        , Forall
+            (Set.fromList [TypeIndex KType 0, TypeIndex KType 1])
+            []
+            ( TVariable (TypeIndex KType 0)
+                `TArrow` TVariable (TypeIndex KType 1)
+                `TArrow` TVariable (TypeIndex KType 0)
+            )
+        )
+      ,
         ( "operator__list_concatenation"
         , Forall
             (Set.fromList [TypeIndex KType 0])
@@ -756,34 +760,31 @@ abc30 = fst (runIdentity (runCompiler2T compiler2TestEnvironment prog))
                 `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 0)))
             )
         )
-      , --      , ( "trace_int32"
-        --        , Forall
-        --            (Set.fromList [TypeIndex KType 0])
-        --            []
-        --            ( undefined
-        --                `TArrow` undefined
-        --                `TArrow` undefined
-        --            )
-        --        )
-        --      , ( "trace_string"
-        --        , Forall
-        --            (Set.fromList [TypeIndex KType 0])
-        --            []
-        --            ( undefined
-        --                `TArrow` undefined
-        --                `TArrow` undefined
-        --            )
-        --        )
-        --      , ( "trace_bool"
-        --        , Forall
-        --            (Set.fromList [TypeIndex KType 0])
-        --            []
-        --            ( undefined
-        --                `TArrow` undefined
-        --                `TArrow` undefined
-        --            )
-        --        )
-
+      ,
+        ( "trace_int32"
+        , Forall
+            (Set.fromList [TypeIndex KType 0])
+            []
+            ( TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0)
+            )
+        )
+      ,
+        ( "trace_string"
+        , Forall
+            (Set.fromList [TypeIndex KType 0])
+            []
+            ( TIntrinsic IString `TArrow` TVariable (TypeIndex KType 0)
+            )
+        )
+      ,
+        ( "trace_bool"
+        , Forall
+            (Set.fromList [TypeIndex KType 0])
+            []
+            ( TIntrinsic IBool `TArrow` TVariable (TypeIndex KType 0)
+            )
+        )
+      ,
         ( "operator__string_concatenation"
         , Forall
             mempty
@@ -798,7 +799,7 @@ abc30 = fst (runIdentity (runCompiler2T compiler2TestEnvironment prog))
             ( TIntrinsic IInt32 `TArrow` TIntrinsic IString
             )
         )
-      , --      , ( "pair_to_string"
+      , --       ( "pair_to_string"
         --        , Forall
         --            (Set.fromList [TypeIndex KType 0])
         --            []
