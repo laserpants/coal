@@ -47,7 +47,7 @@ parseFunctionApplication :: Parser (Expression () ())
 parseFunctionApplication =
   EApplication () ()
     <$> (try (parens parseExpression) <|> parseDataConstructor <|> parseVariableExpression)
-    <*> parens (nonEmptyOr (ELiteral () LUnit :| []) (commaSep parseExpression))
+    <*> parens (nonEmptyOr (pure $ ELiteral () LUnit :| []) (commaSep parseExpression))
 
 parseDataConstructor :: Parser (Expression () ())
 parseDataConstructor = EConstructor () . Label () <$> constructor

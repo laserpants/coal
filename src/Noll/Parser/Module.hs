@@ -87,7 +87,7 @@ parseFunctionDefinition :: Parser (Definition () o ())
 parseFunctionDefinition =
   endingWithSemicolon $ do
     fn <- lexeme_ "fn" *> name
-    args <- parens (nonEmptyOr (PLiteral () LUnit :| []) (commaSep parsePattern))
+    args <- parens (nonEmptyOr (pure $ PLiteral () LUnit :| []) (commaSep parsePattern))
     withAnnotation $ do
       expr <- symbol_ "=" *> parseExpression
       pure (DFunction fn (Function () (With [] ()) args expr))

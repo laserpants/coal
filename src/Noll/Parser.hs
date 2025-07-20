@@ -91,20 +91,13 @@ cons :: Parser a -> Parser [a] -> Parser [a]
 cons p ps = (:) <$> p <*> ps
 
 nonEmpty :: Parser [a] -> Parser (List1 a)
-nonEmpty p = do
+nonEmpty = nonEmptyOr (fail "Empty list")
+
+nonEmptyOr :: Parser (List1 a) -> Parser [a] -> Parser (List1 a)
+nonEmptyOr ls p = do
   ps <- p
   case ps of
     q : qs ->
       pure (q :| qs)
     [] ->
-      fail "Empty list"
-
-nonEmptyOr :: List1 a -> Parser [a] -> Parser (List1 a)
-nonEmptyOr ls p = do
-  ps <- p
-  pure $
-    case ps of
-      q : qs ->
-        q :| qs
-      [] ->
-        ls
+      ls
