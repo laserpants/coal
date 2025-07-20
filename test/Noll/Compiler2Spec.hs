@@ -363,7 +363,7 @@ xx =
       )
     ]
 
-yy :: Environment (Scheme TypeIndex Kind (Type TypeIndex Kind))
+yy :: Environment (Scheme TypeIndex Kind IndexedType)
 yy =
   Environment.fromList
     [
