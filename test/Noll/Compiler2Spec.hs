@@ -65,7 +65,6 @@ compiler2TestEnvironment =
     { compiler2DataConstructorEnv = env1
     , compiler2TypeConstructorEnv = env2
     , compiler2TraitEnvironment = env3 -- ?
-    , compiler2TraitEnv = env4 -- ?
     , compiler2AliasEnv = env5
     , compiler2DictionaryEnvironment = env6
     }

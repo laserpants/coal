@@ -46,7 +46,7 @@ data Compiler2Environment o k t = Compiler2Environment
   { compiler2DataConstructorEnv :: Environment (Constructor o k t)
   , compiler2TypeConstructorEnv :: Environment Kind
   , compiler2TraitEnvironment :: Environment (TypeIndex Kind, TraitImplementationEnv) -- ??
-  , compiler2TraitEnv :: Environment (o k, Environment (Scheme o k t)) -- ??
+  --  , compiler2TraitEnv :: Environment (o k, Environment (Scheme o k t)) -- ??
   , compiler2DictionaryEnvironment :: DictionaryEnvironment
   , compiler2AliasEnv :: AliasEnvironment
   }
