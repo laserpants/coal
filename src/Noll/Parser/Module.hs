@@ -88,28 +88,27 @@ parseFunctionDefinition =
   endingWithSemicolon $ do
     fn <- lexeme_ "fn" *> name
     args <- parens (nonEmptyOr (PLiteral () LUnit :| []) (commaSep parsePattern))
-    ann <- optional (symbol_ ":" *> parseType)
-    expr <- symbol_ "=" *> parseExpression
-    let f = DFunction fn (Function () (With [] ()) args expr)
-    case ann of
-      Nothing ->
-        pure f
-      Just t ->
-        pure (DAnnotation (With [] t) f)
+    withAnnotation $ do
+      expr <- symbol_ "=" *> parseExpression
+      pure (DFunction fn (Function () (With [] ()) args expr))
 
 parseConstantDefinition :: Parser (Definition () o ())
 parseConstantDefinition =
   endingWithSemicolon $ do
     c <- name
-    ann <- optional (symbol_ ":" *> parseType)
-    symbol_ "="
-    expr <- parseExpression
-    let e = DConstant c (Constant () (With [] ()) expr)
-    case ann of
-      Nothing ->
-        pure e
-      Just t ->
-        pure (DAnnotation (With [] t) e)
+    withAnnotation $ do
+      expr <- symbol_ "=" *> parseExpression
+      pure (DConstant c (Constant () (With [] ()) expr))
+
+withAnnotation :: Parser (Definition () o ()) -> Parser (Definition () o ())
+withAnnotation p = do
+  ann <- optional (symbol_ ":" *> parseType)
+  d <- p
+  case ann of
+    Nothing ->
+      pure d
+    Just t ->
+      pure (DAnnotation (With [] t) d)
 
 parseModule :: Parser (Module () o ())
 parseModule = do
