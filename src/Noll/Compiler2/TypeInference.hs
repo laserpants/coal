@@ -55,11 +55,12 @@ generateConstraintsC e = do
 assumptionConstraints :: (Monad m) => CompilerAssumption -> Compiler2T a m (Either CompilerAssumption (CompilerConstraint a))
 assumptionConstraints Assumption{..} = do
   names <- gets compiler2NameStore
-  case Environment.lookup assumptionName names of
-    Nothing ->
-      pure $ Left Assumption{..}
-    Just s ->
-      pure $ Right (Explicit InferenceRulePlaceholder assumptionType s)
+  pure $
+    case Environment.lookup assumptionName names of
+      Nothing ->
+        Left Assumption{..}
+      Just s ->
+        Right (Explicit InferenceRulePlaceholder assumptionType s)
 
 solveConstraintsC :: (Monad m, Data a, Eq a, Show a) => [CompilerConstraint a] -> Compiler2T a m Substitution
 solveConstraintsC cs = do
