@@ -5,7 +5,12 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Language.Type.Kind (Kind (..), foldKind, applyKind) where
+module Noll.Language.Type.Kind (
+  Kind (..),
+  foldKind,
+  unfoldKind,
+  applyKind,
+) where
 
 import Data.Data (Data, Typeable)
 import Data.List (isPrefixOf)
