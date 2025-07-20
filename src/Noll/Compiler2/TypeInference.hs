@@ -104,7 +104,7 @@ compileConstantC (Constant loc (With _ t) e) = do
   placeholder = "###.constant"
 
 compileDefinitionC :: (Monad m, Data a, Show a) => Definition a k IndexedType -> Compiler2T a m ()
-compileDefinitionC = do
+compileDefinitionC =
   \case
     DFunction _ f ->
       compileFunctionC f
