@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
@@ -7,13 +8,13 @@
 module Noll.Compiler2.TypeInference (typeDefinitionsC) where
 
 import Control.Monad.Reader (ReaderT, ask, asks, lift, runReaderT)
-import Control.Monad.State (gets)
+import Control.Monad.State (MonadState, gets)
 import Control.Monad.Writer (WriterT, execWriter, execWriterT, tell)
 import Data.Data (Data)
 import Data.Either.Extra (partitionEithers)
 import Lang.Common.Environment (Environment (..))
 import Lang.Common.List1 (NonEmpty (..), fromList1)
-import Lang.Common.Supply (supplied)
+import Lang.Common.Supply (Supply (..), supplied)
 import Lang.Label (Label (..))
 import Lang.Utils (Dictionary, Name, forM_, traverse_)
 import Noll.Compiler2.Internal
@@ -230,59 +231,62 @@ instantiateRowVars =
     RNil ->
       pure RNil
 
-params :: (Monad m) => Type Parameter () -> WriterT [(Name, TypeIndex Kind)] (Compiler2T a m) ()
-params =
-  \case
-    TVariable p ->
-      indexParam p
-    TApplication _ t ts -> do
-      params t
-      traverse_ params ts
-    TArrow t1 t2 -> do
-      params t1
-      params t2
-    TIntrinsic t ->
-      intrinsicParams t
-    TRow r ->
-      rowParams r
-    TAlias _ _ t ->
-      params t
-    TConstructor{} -> do
-      pure ()
-
-intrinsicParams :: (Monad m) => Intrinsic (Type Parameter ()) -> WriterT [(Name, TypeIndex Kind)] (Compiler2T a m) ()
-intrinsicParams =
-  \case
-    IList t ->
-      params t
-    IOption t ->
-      params t
-    IRecord t ->
-      params t
-    IResult t ->
-      params t
-    ITuple ts ->
-      traverse_ params ts
-    _ ->
-      pure ()
-
-rowParams :: (Monad m) => Row Parameter () (Type Parameter ()) -> WriterT [(Name, TypeIndex Kind)] (Compiler2T a m) ()
-rowParams =
-  \case
-    RVariable p ->
-      indexParam p
-    RExtend _ t r -> do
-      params t
-      rowParams r
-    RNil ->
-      pure ()
-
-indexParam :: (Monad m) => Parameter () -> WriterT [(Name, TypeIndex Kind)] (Compiler2T a m) ()
-indexParam p = do
-  ti <- supplied (TypeIndex KType)
-  tell [(parameterName p, ti)]
-
 defineC :: (Monad m) => Name -> IndexedType -> Compiler2T a m ()
 defineC name t = insertNameC name (Forall (typeIndexesIn s) [] s)
  where
   s = normalizeTypeIndexes t
+
+class Params p where
+  params :: (MonadState s m, Supply s) => p -> WriterT [(Name, TypeIndex Kind)] m ()
+
+instance Params (Type Parameter ()) where
+  params =
+    \case
+      TVariable p ->
+        params p
+      TApplication _ t ts -> do
+        params t
+        traverse_ params ts
+      TArrow t1 t2 -> do
+        params t1
+        params t2
+      TIntrinsic t ->
+        params t
+      TRow r ->
+        params r
+      TAlias _ _ t ->
+        params t
+      TConstructor{} -> do
+        pure ()
+
+instance Params (Intrinsic (Type Parameter ())) where
+  params =
+    \case
+      IList t ->
+        params t
+      IOption t ->
+        params t
+      IRecord t ->
+        params t
+      IResult t ->
+        params t
+      ITuple ts ->
+        traverse_ params ts
+      _ ->
+        pure ()
+
+instance Params (Row Parameter () (Type Parameter ())) where
+  params =
+    \case
+      RVariable p ->
+        params p
+      RExtend _ t r -> do
+        params t
+        params r
+      RNil ->
+        pure ()
+
+instance Params (Parameter ()) where
+  params p = do
+    ti <- supplied (TypeIndex KType)
+    tell [(parameterName p, ti)]
