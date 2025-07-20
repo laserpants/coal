@@ -3,7 +3,6 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
 
 module Noll.Compiler.Transform.Unfold (
@@ -51,7 +50,7 @@ runUnfoldExpansion r s e = (a, s')
 renameRecursiveCall :: (Monoid a, Data a) => Name -> Name -> Expression a () -> Expression a ()
 renameRecursiveCall old new = replace old (const2 $ varE new)
 
-expandUnfoldExpr :: forall m a. (Monoid a, Data a, MonadState Int m, MonadReader Name m) => Name -> List1 (Pattern a ()) -> Dictionary (Expression a ()) -> m (Expression a ())
+expandUnfoldExpr :: (Monoid a, Data a, MonadState Int m, MonadReader Name m) => Name -> List1 (Pattern a ()) -> Dictionary (Expression a ()) -> m (Expression a ())
 expandUnfoldExpr var ps d = do
   name <- suppliedName
   pure $
@@ -68,7 +67,7 @@ expandUnfoldExpr var ps d = do
         )
         (varE name)
 
-expandCodataSelect :: forall m a. (Monoid a, MonadState Int m) => Name -> Expression a () -> m (Expression a ())
+expandCodataSelect :: (Monoid a, MonadState Int m) => Name -> Expression a () -> m (Expression a ())
 expandCodataSelect field e =
   pure $ applicationE (varE ("$$force_" <> field)) (e :| [])
 
