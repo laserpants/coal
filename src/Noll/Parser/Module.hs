@@ -115,6 +115,5 @@ parseModule = do
   lexeme_ "module"
   path <- identifier upperChar `sepBy1` symbol "."
   exps <- option ["*"] (parens (commaSep name))
-  b <- braces (some parseDefinition)
-  eof
-  pure (Module (Path path) exps b)
+  ds <- braces (some parseDefinition) <* eof
+  pure (Module (Path path) exps ds)
