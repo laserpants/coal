@@ -16,6 +16,7 @@ import Lang.Common.Environment (Environment (..))
 import Lang.Common.List1 (NonEmpty (..))
 import Lang.Common.Supply (supplied)
 import Lang.Label (Label (..))
+import Lang.Common.List1 (List1, fromList1, (<|))
 import Lang.Utils (Dictionary, Name, forM, forM_, traverse_)
 import Noll.Compiler2.Internal
 import Noll.Language
@@ -195,8 +196,11 @@ instantiateTypeVars =
     TApplication _ t ts -> do
       u <- instantiateTypeVars t
       us <- traverse instantiateTypeVars ts
-      -- TODO: infer kind?
-      pure (TApplication KType u us)
+      case applyKind (kindOf <$> fromList1 us) (kindOf u) of
+        Nothing ->
+          error "Kind mismatch"
+        Just k ->
+          pure (TApplication k u us)
     TArrow t1 t2 ->
       TArrow <$> instantiateTypeVars t1 <*> instantiateTypeVars t2
     TIntrinsic t ->
