@@ -24,6 +24,7 @@ import Lang.Common.List1 (List1, NonEmpty (..))
 import Lang.Common.Supply (suppliedName)
 import Lang.Label (Label (..), labelName)
 import Lang.Utils (Dictionary, Name, const2)
+import Noll.Compiler.Expression
 import Noll.Compiler.Transform (flattenApplication)
 import Noll.Compiler.Transform.Tree (replace)
 import Noll.Language (Choice (..), Clause (..), Expression (..), Pattern (..))
@@ -79,11 +80,7 @@ updateName :: (Monoid a, Data a) => Name -> Label () -> Expression a () -> Expre
 updateName name label =
   replace (labelName label) $
     const2 $
-      EApplication
-        mempty
-        ()
-        (EVariable mempty (Label () name))
-        (EVariable mempty label :| [])
+      applicationE (varE name) (EVariable mempty label :| [])
 
 eliminateAtPatterns :: Pattern a () -> Pattern a ()
 eliminateAtPatterns =
@@ -110,25 +107,16 @@ expandFoldExpr args clauses = do
   let var = name <> ".expr"
   pure $
     transform flattenApplication $
-      ERecursiveLet
-        mempty
-        (PVariable mempty (Label () name))
-        ( ELambda
-            mempty
-            (PVariable mempty (Label () var) :| [])
-            ( EMatch
-                mempty
-                ()
-                (EVariable mempty (Label () var))
+      letE
+        name
+        ( lambda1E
+            var
+            ( matchE
+                (varE var)
                 (expandFolds name [] <$> clauses)
             )
         )
-        ( EApplication
-            mempty
-            ()
-            (EVariable mempty (Label () name))
-            args
-        )
+        (applicationE (varE name) args)
 
 class CompileFoldsContext a where
   compileFolds :: a -> FoldExpansion a

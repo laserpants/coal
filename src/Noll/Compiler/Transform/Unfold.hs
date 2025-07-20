@@ -23,6 +23,7 @@ import Lang.Common.List1 (List1, NonEmpty (..))
 import Lang.Common.Supply (suppliedName)
 import Lang.Label (Label (..))
 import Lang.Utils (Dictionary, Name, const2)
+import Noll.Compiler.Expression
 import Noll.Compiler.Transform (flattenApplication)
 import Noll.Compiler.Transform.Tree (replace)
 import Noll.Language (Expression (..), Pattern (..))
@@ -48,38 +49,28 @@ runUnfoldExpansion r s e = (a, s')
   (a, s', _) = runRWS (unfoldExpansionStack e) r s
 
 renameRecursiveCall :: (Monoid a, Data a) => Name -> Name -> Expression a () -> Expression a ()
-renameRecursiveCall old new = replace old (const2 $ EVariable mempty (Label mempty new))
-
-toLambda :: (Monoid a) => Expression a () -> Expression a ()
-toLambda = ELambda mempty (PAny mempty () :| [])
+renameRecursiveCall old new = replace old (const2 $ varE new)
 
 expandUnfoldExpr :: forall m a. (Monoid a, Data a, MonadState Int m, MonadReader Name m) => Name -> List1 (Pattern a ()) -> Dictionary (Expression a ()) -> m (Expression a ())
 expandUnfoldExpr var ps d = do
   name <- suppliedName
   pure $
     transform flattenApplication $
-      ERecursiveLet
-        mempty
-        (PVariable mempty (Label () name))
-        ( ELambda
-            mempty
+      letE
+        name
+        ( lambdaE
             ps
             ( ECodataFields
                 mempty
                 ()
-                (Map.mapKeys ("$$" <>) (Map.map (toLambda . renameRecursiveCall var name) d))
+                (Map.mapKeys ("$$" <>) (Map.map (lambdaAnyE . renameRecursiveCall var name) d))
             )
         )
-        (EVariable mempty (Label mempty name))
+        (varE name)
 
 expandCodataSelect :: forall m a. (Monoid a, MonadState Int m) => Name -> Expression a () -> m (Expression a ())
 expandCodataSelect field e =
-  pure $
-    EApplication
-      mempty
-      ()
-      (EVariable mempty (Label () ("$$force_" <> field)))
-      (e :| [])
+  pure $ applicationE (varE ("$$force_" <> field)) (e :| [])
 
 class CompileUnfoldsContext a where
   compileUnfolds :: a -> UnfoldExpansion a
