@@ -11,13 +11,11 @@ import Control.Monad.State (gets)
 import Control.Monad.Writer (WriterT, execWriter, execWriterT, tell)
 import Data.Data (Data)
 import Data.Either.Extra (partitionEithers)
-import Debug.Trace
 import Lang.Common.Environment (Environment (..))
-import Lang.Common.List1 (NonEmpty (..))
+import Lang.Common.List1 (NonEmpty (..), fromList1)
 import Lang.Common.Supply (supplied)
 import Lang.Label (Label (..))
-import Lang.Common.List1 (List1, fromList1, (<|))
-import Lang.Utils (Dictionary, Name, forM, forM_, traverse_)
+import Lang.Utils (Dictionary, Name, forM_, traverse_)
 import Noll.Compiler2.Internal
 import Noll.Language
 import Noll.Module (Constant (..), Definition (..), Function (..))
