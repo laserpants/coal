@@ -262,7 +262,7 @@ instance Params (Type Parameter ()) where
         params r
       TAlias _ _ t ->
         params t
-      TConstructor{} -> do
+      TConstructor{} ->
         pure ()
 
 instance Params (Intrinsic (Type Parameter ())) where
