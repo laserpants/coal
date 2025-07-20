@@ -200,43 +200,43 @@ env3 =
       )
     ]
 
-env4 =
-  Environment.fromList
-    [
-      ( "Numeric"
-      ,
-        ( TypeIndex KType 0
-        , Environment.fromList
-            [
-              ( "from_int32"
-              , Forall
-                  (Set.fromList [TypeIndex KType 0])
-                  []
-                  ( TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0)
-                  )
-              )
-            ]
-        )
-      )
-    ,
-      ( "Ordered"
-      ,
-        ( TypeIndex KType 0
-        , Environment.fromList
-            [
-              ( "compare"
-              , Forall
-                  (Set.fromList [TypeIndex KType 0])
-                  []
-                  ( TVariable (TypeIndex KType 0)
-                      `TArrow` TVariable (TypeIndex KType 0)
-                      `TArrow` TConstructor KType "Ordering"
-                  )
-              )
-            ]
-        )
-      )
-    ]
+--env4 =
+--  Environment.fromList
+--    [
+--      ( "Numeric"
+--      ,
+--        ( TypeIndex KType 0
+--        , Environment.fromList
+--            [
+--              ( "from_int32"
+--              , Forall
+--                  (Set.fromList [TypeIndex KType 0])
+--                  []
+--                  ( TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0)
+--                  )
+--              )
+--            ]
+--        )
+--      )
+--    ,
+--      ( "Ordered"
+--      ,
+--        ( TypeIndex KType 0
+--        , Environment.fromList
+--            [
+--              ( "compare"
+--              , Forall
+--                  (Set.fromList [TypeIndex KType 0])
+--                  []
+--                  ( TVariable (TypeIndex KType 0)
+--                      `TArrow` TVariable (TypeIndex KType 0)
+--                      `TArrow` TConstructor KType "Ordering"
+--                  )
+--              )
+--            ]
+--        )
+--      )
+--    ]
 
 env5 =
   Environment.fromList
