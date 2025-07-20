@@ -269,7 +269,7 @@ env5 =
       )
     ]
 
-env6 = DictionaryEnvironment yy mempty -- xx
+env6 = DictionaryEnvironment yy xx
 
 xx :: Environment (Map IndexedType (Dictionary (Scheme TypeIndex Kind IndexedType)))
 xx =
@@ -712,7 +712,10 @@ abc30 = fst (runIdentity (runCompiler2T compiler2TestEnvironment prog))
   prog = do
     insertNamesC
       [
-        ( "not"
+        ( "operator__not"
+        , Forall mempty [] (TIntrinsic IBool `TArrow` TIntrinsic IBool)
+        )
+      , ( "not"
         , Forall mempty [] (TIntrinsic IBool `TArrow` TIntrinsic IBool)
         )
       ,
