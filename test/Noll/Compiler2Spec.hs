@@ -13,7 +13,7 @@ import Lang.Common.Environment (Environment)
 import Lang.Common.List1 (NonEmpty (..), (<|))
 import Lang.Label (Label (..))
 import Lang.Lowpass.Language (Module (..), Object (..), opaque)
-import Lang.Utils (Name, forM, forM_)
+import Lang.Utils (Dictionary, Name, forM, forM_)
 import Noll.Compiler.Dictionaries
 import Noll.Compiler2
 import Noll.Compiler2.Internal
@@ -26,7 +26,6 @@ import Data.Map.Strict (Map)
 
 -- import Noll.Compiler2Examples.Test02 (bazz)
 
-import Lang.Utils (Dictionary)
 import Noll.Language (Constructor (..), IndexedType (..), Intrinsic (..), Kind (..), Parameter (..), Row (..), Scheme (..), Type (..), TypeIndex (..))
 import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
 import Noll.SystemF
