@@ -114,9 +114,12 @@ findFirstMatch (Trait name t1) = do
   go f m = fmap catMaybes . forM (Map.toList m) $
     \(k, env) -> do
       result <- f k
-      case result of
-        Left{} -> pure Nothing
-        Right sub -> pure $ Just (k, Map.map (applySpecial sub) env)
+      pure $
+        case result of
+          Left{} ->
+            Nothing
+          Right sub ->
+            Just (k, Map.map (applySpecial sub) env)
 
 applySpecial :: Substitution -> Scheme TypeIndex Kind IndexedType -> Scheme TypeIndex Kind IndexedType
 applySpecial sub (Forall _ ts t) = Forall (typeIndexesIn t' <> typeIndexesIn ts') ts' t'
