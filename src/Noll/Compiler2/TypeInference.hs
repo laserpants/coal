@@ -13,7 +13,7 @@ import Control.Monad.Writer (WriterT, execWriter, execWriterT, tell)
 import Data.Data (Data)
 import Data.Either.Extra (partitionEithers)
 import Lang.Common.Environment (Environment (..))
-import Lang.Common.List1 (NonEmpty (..), fromList1)
+import Lang.Common.List1 (List1, NonEmpty (..), fromList1)
 import Lang.Common.Supply (Supply (..), supplied)
 import Lang.Label (Label (..))
 import Lang.Utils (Dictionary, Name, forM_, traverse_)
@@ -239,6 +239,12 @@ defineC name t = insertNameC name (Forall (typeIndexesIn s) [] s)
 class Params p where
   params :: (MonadState s m, Supply s) => p -> WriterT [(Name, TypeIndex Kind)] m ()
 
+instance (Params a) => Params [a] where
+  params = traverse_ params
+
+instance (Params a) => Params (List1 a) where
+  params = traverse_ params
+
 instance Params (Type Parameter ()) where
   params =
     \case
@@ -246,7 +252,7 @@ instance Params (Type Parameter ()) where
         params p
       TApplication _ t ts -> do
         params t
-        traverse_ params ts
+        params ts
       TArrow t1 t2 -> do
         params t1
         params t2
@@ -271,7 +277,7 @@ instance Params (Intrinsic (Type Parameter ())) where
       IResult t ->
         params t
       ITuple ts ->
-        traverse_ params ts
+        params ts
       _ ->
         pure ()
 
