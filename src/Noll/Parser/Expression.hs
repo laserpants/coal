@@ -36,12 +36,7 @@ parseExpression = makeExprParser go operator
         <|> parseVariableExpression
         <|> parens parseExpression
     rest <- optional (symbol_ "." *> name)
-    pure $
-      case rest of
-        Just ll ->
-          ESelect () (Label () ll) e1
-        Nothing ->
-          e1
+    pure (maybe e1 (\ll -> ESelect () (Label () ll) e1) rest)
 
 parseFunctionApplication :: Parser (Expression () ())
 parseFunctionApplication =

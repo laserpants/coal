@@ -33,12 +33,7 @@ parsePattern = makeExprParser go operator
           pure (Label () n)
         _ ->
           fail "Expected variable on right-hand side of 'as'"
-    pure $
-      case rest of
-        Just n ->
-          PAs () n p1
-        Nothing ->
-          p1
+    pure (maybe p1 (\n -> PAs () n p1) rest)
 
 operator :: [[Operator Parser (Pattern () ())]]
 operator =
