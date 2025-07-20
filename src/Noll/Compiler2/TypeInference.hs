@@ -6,16 +6,17 @@
 
 module Noll.Compiler2.TypeInference (typeDefinitionsC) where
 
-import Control.Monad.Reader (ask, asks)
+import Control.Monad.Reader (ReaderT, ask, asks, lift, runReaderT)
 import Control.Monad.State (gets)
-import Control.Monad.Writer (execWriter)
+import Control.Monad.Writer (WriterT, execWriter, execWriterT, tell)
 import Data.Data (Data)
 import Data.Either.Extra (partitionEithers)
+import Debug.Trace
 import Lang.Common.Environment (Environment (..))
 import Lang.Common.List1 (NonEmpty (..))
 import Lang.Common.Supply (supplied)
 import Lang.Label (Label (..))
-import Lang.Utils (Dictionary, Name, forM_)
+import Lang.Utils (Dictionary, Name, forM, forM_, traverse_)
 import Noll.Compiler2.Internal
 import Noll.Language
 import Noll.Module (Constant (..), Definition (..), Function (..))
@@ -142,8 +143,6 @@ typeDefinitionC =
   \case
     DImport{} ->
       pure ()
-    DTrait{} ->
-      pure ()
     DTypeAlias{} ->
       pure ()
     DType{} ->
@@ -152,20 +151,24 @@ typeDefinitionC =
       pure ()
     DSignature{} ->
       pure ()
+    DTrait _ _ _ ds ->
+      forM_ ds $
+        \(n, s) -> defineC n =<< instantiateVars s
     DInstance trait t1 ds -> do
       env <- asks compiler2TraitEnvironment
       case Environment.lookup trait env of
         Nothing ->
           error ("Missing trait: " <> Text.unpack trait)
         Just (tx, defs) -> do
-          forM_ ds $ \d -> do
-            case Environment.lookup (definitionName d) defs of
-              Nothing ->
-                error ("Missing implementation: " <> Text.unpack (definitionName d))
-              Just s -> do
-                ti <- instantiateVars2 t1
-                insertConstraintsC [Explicit InferenceRulePlaceholder (typeOf d) (instantiateTemplate tx ti s)]
-                compileDefinitionC d
+          forM_ ds $
+            \d -> do
+              case Environment.lookup (definitionName d) defs of
+                Nothing ->
+                  error ("Missing implementation: " <> Text.unpack (definitionName d))
+                Just s -> do
+                  ti <- instantiateVars t1
+                  insertConstraintsC [Explicit InferenceRulePlaceholder (typeOf d) (instantiateTemplate tx ti s)]
+                  compileDefinitionC d
     d -> do
       compileDefinitionC d
       sub <- solveC
@@ -174,62 +177,108 @@ typeDefinitionC =
 instantiateTemplate :: TypeIndex Kind -> IndexedType -> Scheme TypeIndex Kind IndexedType -> Scheme TypeIndex Kind IndexedType
 instantiateTemplate (TypeIndex _ n) t1 (Forall vs ts t) = Forall vs ts (apply (n `mapsTo` t1) t)
 
-instantiateVars2 :: (Monad m) => Type Parameter () -> Compiler2T a m IndexedType
-instantiateVars2 =
-  \case
-    TVariable{} ->
-      supplied (TVariable . TypeIndex KType)
-    TApplication k t ts ->
-      -- TODO: ??
-      TApplication KType <$> instantiateVars2 t <*> traverse instantiateVars2 ts
-    TArrow t1 t2 ->
-      TArrow <$> instantiateVars2 t1 <*> instantiateVars2 t2
-    TIntrinsic t ->
-      TIntrinsic <$> traverse instantiateVars2 t
-    TRow r ->
-      TRow <$> instantiateRowVars2 r
-    TAlias name ts t ->
-      TAlias name <$> traverse instantiateVars2 ts <*> instantiateVars2 t
-    _ ->
-      error "TODO"
+instantiateVars :: (Monad m) => Type Parameter () -> Compiler2T a m IndexedType
+instantiateVars t = do
+  ts <- execWriterT (params t)
+  runReaderT (instantiateTypeVars t) (Environment.fromList ts)
 
-instantiateRowVars2 :: (Monad m) => Row Parameter () (Type Parameter ()) -> Compiler2T a m (Row TypeIndex Kind IndexedType)
-instantiateRowVars2 =
+instantiateTypeVars :: (Monad m) => Type Parameter () -> ReaderT (Environment (TypeIndex Kind)) (Compiler2T a m) IndexedType
+instantiateTypeVars =
   \case
-    RVariable{} ->
-      supplied (RVariable . TypeIndex KType)
-    RExtend name t r ->
-      RExtend name <$> instantiateVars2 t <*> instantiateRowVars2 r
-    RNil ->
-      pure RNil
-
-instantiateVars :: (Monad m) => Type Parameter Kind -> Compiler2T a m IndexedType
-instantiateVars = do
-  \case
-    TVariable{} ->
-      supplied (TVariable . TypeIndex KType)
-    TApplication k t ts ->
-      TApplication k <$> instantiateVars t <*> traverse instantiateVars ts
+    TVariable (Parameter _ n) -> do
+      env <- ask
+      case Environment.lookup n env of
+        Just v ->
+          pure (TVariable v)
+        Nothing ->
+          error "Implementation error"
+    TApplication _ t ts -> do
+      u <- instantiateTypeVars t
+      us <- traverse instantiateTypeVars ts
+      -- TODO: infer kind?
+      pure (TApplication KType u us)
     TArrow t1 t2 ->
-      TArrow <$> instantiateVars t1 <*> instantiateVars t2
+      TArrow <$> instantiateTypeVars t1 <*> instantiateTypeVars t2
     TIntrinsic t ->
-      TIntrinsic <$> traverse instantiateVars t
+      TIntrinsic <$> traverse instantiateTypeVars t
     TRow r ->
       TRow <$> instantiateRowVars r
     TAlias name ts t ->
-      TAlias name <$> traverse instantiateVars ts <*> instantiateVars t
-    _ ->
-      error "TODO"
+      TAlias name <$> traverse instantiateTypeVars ts <*> instantiateTypeVars t
+    TConstructor _ name -> do
+      env <- lift (asks compiler2TypeConstructorEnv)
+      case Environment.lookup name env of
+        Just k ->
+          pure (TConstructor k name)
+        Nothing ->
+          error ("No type constructor '" <> Text.unpack name <> "'")
 
-instantiateRowVars :: (Monad m) => Row Parameter Kind (Type Parameter Kind) -> Compiler2T a m (Row TypeIndex Kind IndexedType)
+instantiateRowVars :: (Monad m) => Row Parameter () (Type Parameter ()) -> ReaderT (Environment (TypeIndex Kind)) (Compiler2T a m) (Row TypeIndex Kind IndexedType)
 instantiateRowVars =
   \case
-    RVariable{} ->
-      supplied (RVariable . TypeIndex KType)
+    RVariable (Parameter _ n) -> do
+      env <- ask
+      case Environment.lookup n env of
+        Just v ->
+          pure (RVariable v)
+        Nothing ->
+          error "Implementation error"
     RExtend name t r ->
-      RExtend name <$> instantiateVars t <*> instantiateRowVars r
+      RExtend name <$> instantiateTypeVars t <*> instantiateRowVars r
     RNil ->
       pure RNil
+
+params :: (Monad m) => Type Parameter () -> WriterT [(Name, TypeIndex Kind)] (Compiler2T a m) ()
+params =
+  \case
+    TVariable p ->
+      indexParam p
+    TApplication _ t ts -> do
+      params t
+      traverse_ params ts
+    TArrow t1 t2 -> do
+      params t1
+      params t2
+    TIntrinsic t ->
+      intrinsicParams t
+    TRow r ->
+      rowParams r
+    TAlias _ _ t ->
+      params t
+    TConstructor{} -> do
+      pure ()
+
+intrinsicParams :: (Monad m) => Intrinsic (Type Parameter ()) -> WriterT [(Name, TypeIndex Kind)] (Compiler2T a m) ()
+intrinsicParams =
+  \case
+    IList t ->
+      params t
+    IOption t ->
+      params t
+    IRecord t ->
+      params t
+    IResult t ->
+      params t
+    ITuple ts ->
+      traverse_ params ts
+    _ ->
+      pure ()
+
+rowParams :: (Monad m) => Row Parameter () (Type Parameter ()) -> WriterT [(Name, TypeIndex Kind)] (Compiler2T a m) ()
+rowParams =
+  \case
+    RVariable p ->
+      indexParam p
+    RExtend _ t r -> do
+      params t
+      rowParams r
+    RNil ->
+      pure ()
+
+indexParam :: (Monad m) => Parameter () -> WriterT [(Name, TypeIndex Kind)] (Compiler2T a m) ()
+indexParam p = do
+  ti <- supplied (TypeIndex KType)
+  tell [(parameterName p, ti)]
 
 defineC :: (Monad m) => Name -> IndexedType -> Compiler2T a m ()
 defineC name t = insertNameC name (Forall (typeIndexesIn s) [] s)

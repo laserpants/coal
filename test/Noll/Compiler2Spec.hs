@@ -155,6 +155,9 @@ env2 =
       ( "Tree"
       , KArrow KType KType
       )
+    , ( "Ordering"
+      , KType 
+      )
       --    , ( "$Nat"
       --      , KType
       --      )
@@ -710,10 +713,6 @@ abc30 = fst (runIdentity (runCompiler2T compiler2TestEnvironment prog))
   prog = do
     insertNamesC
       [
-        ( "compare"
-        , Forall (Set.fromList [TypeIndex KType 0]) [] (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TConstructor KType "Ordering")
-        )
-      ,
         ( "not"
         , Forall mempty [] (TIntrinsic IBool `TArrow` TIntrinsic IBool)
         )
