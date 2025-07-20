@@ -151,6 +151,8 @@ instance TreeTransform Expression t where
         pure expr
       EListLiteral a t es ->
         EListLiteral a t <$> traverse (transform name f) es
+      _ ->
+        error "TODO"
 
 {-# INLINE isNotBoundIn #-}
 isNotBoundIn :: (BoundVars b) => Name -> b -> Bool

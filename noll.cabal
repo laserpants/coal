@@ -25,6 +25,7 @@ library
   exposed-modules:
       Noll.Compiler
       Noll.Compiler.Dictionaries
+      Noll.Compiler.Expression
       Noll.Compiler.Lowpass.Environment
       Noll.Compiler.Lowpass.TranslateDefinition
       Noll.Compiler.Lowpass.TranslateExpression
