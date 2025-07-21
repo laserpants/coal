@@ -6,19 +6,27 @@ import Noll.Language
 import Noll.Module.Definition
 import Lang.Common.Environment (Environment (..))
 import Noll.Compiler.Transform.Type.AliasExpansion
+import Lang.Utils (Name)
 
 import qualified Lang.Common.Environment as Environment
 
-buildDataConstructorEnv :: Environment Kind -> [Definition a k t] -> Environment (Constructor o k t)
-buildDataConstructorEnv =
+buildDataConstructorEnv :: Environment Kind -> [Definition a k t] -> Environment (Constructor o Kind IndexedType)
+buildDataConstructorEnv env =
   undefined
    where
     go =
       \case
         DType name ps cs ->
-          undefined
+          let zz = xxx <$> cs
+           in undefined
         _ ->
           []
+
+xxx :: Constructor Parameter () (Type Parameter ()) -> (Name, Constructor o Kind IndexedType)
+xxx (Constructor n a s) = (n, Constructor n a (zabc s))
+
+zabc :: Scheme Parameter () (Type Parameter ()) -> Scheme o Kind IndexedType
+zabc = undefined
 
 buildTypeConstructorEnv :: [Definition a k t] -> Environment Kind
 buildTypeConstructorEnv = Environment.fromList . concatMap go
@@ -41,6 +49,7 @@ buildTraitEnvironment =
         _ ->
           []
 
+-- TODO
 buildAliasEnv :: a -> AliasEnvironment
 buildAliasEnv =
   undefined
