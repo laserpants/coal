@@ -44,14 +44,15 @@ buildTypeConstructorEnv = Environment.fromList . concatMap go
       _ ->
         []
 
-buildTraitEnvironment :: a -> Environment (TypeIndex Kind, Environment (Scheme TypeIndex Kind IndexedType))
-buildTraitEnvironment =
-  undefined
+buildTraitEnvironment :: Environment Kind -> [Definition a k t] -> Environment (TypeIndex Kind, Environment (Scheme TypeIndex Kind IndexedType))
+buildTraitEnvironment env = Environment.fromList . concatMap go
  where
   go =
     \case
-      DTrait name ts t ds ->
-        undefined
+      DTrait name _ t ds ->
+          undefined
+         where
+          t1 = evalState (instantiateVars env t) (0 :: Int)
       _ ->
         []
 

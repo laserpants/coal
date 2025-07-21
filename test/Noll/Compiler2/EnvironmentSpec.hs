@@ -5,10 +5,10 @@ module Noll.Compiler2.EnvironmentSpec where
 import Lang.Common.Environment (Environment)
 import Lang.Common.List1 (NonEmpty (..), (<|))
 import Lang.Label (Label (..))
+import Noll.Compiler2.Environment
 import Noll.Language
 import Noll.Module (Constant (..), Definition (..), Function (..), Module (..), Path (..))
 import Test.Hspec (Spec, describe, it)
-import Noll.Compiler2.Environment
 
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
@@ -18,7 +18,7 @@ spec :: Spec
 spec =
   describe "Noll.Compiler" $ do
     it "" $ do
-       buildConstructorEnvs defs == (tenv1, tenv2)
+      buildConstructorEnvs defs == (tenv1, tenv2)
 
 defs :: [Definition () o ()]
 defs =
@@ -574,5 +574,28 @@ tenv2 =
               []
               tree0
           )
+      )
+    ]
+
+tenv3 :: Environment (TypeIndex Kind, Environment (Scheme TypeIndex Kind IndexedType))
+tenv3 =
+  Environment.fromList
+    [
+      ( "Ordered"
+      ,
+        ( TypeIndex KType 0
+        , Environment.fromList
+            [
+              ( "compare"
+              , Forall
+                  (Set.fromList [TypeIndex KType 0])
+                  []
+                  ( TVariable (TypeIndex KType 0)
+                      `TArrow` TVariable (TypeIndex KType 0)
+                      `TArrow` TConstructor KType "Ordering"
+                  )
+              )
+            ]
+        )
       )
     ]
