@@ -37,10 +37,16 @@ parseTraitDefinition :: Parser (Definition () o ())
 parseTraitDefinition = do
   lexeme_ "trait"
   n <- constructor
-  t <- parens (TVariable <$> parseTypeParameter)
+  t <- parens parseParameter
   ds <- braces (semicolonSep1 ((,) <$> name <*> (symbol_ ":" *> parseType)))
   -- TODO
   pure (DTrait n [] t ds)
+
+parseParameter :: Parser (Parameter Kind)
+parseParameter = do
+  n <- name
+  k <- option KType (symbol_ ":" *> parseKind)
+  pure (Parameter k n)
 
 parseTraitInstance :: Parser (Definition () o ())
 parseTraitInstance = do

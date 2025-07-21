@@ -5,6 +5,7 @@ module Noll.Compiler2.Environment where
 
 import Control.Monad.State (evalState)
 import Lang.Common.Environment (Environment (..))
+import Lang.Utils (Name, (<$$>))
 import Noll.Compiler.Transform.Type.AliasExpansion
 import Noll.Compiler2.Params
 import Noll.Language
@@ -12,9 +13,10 @@ import Noll.Module.Definition
 
 import qualified Lang.Common.Environment as Environment
 
-buildConstructorEnvs :: [Definition a k t] -> (Environment Kind, Environment (Constructor TypeIndex Kind IndexedType))
-buildConstructorEnvs defs = (e1, e2)
+buildEnvironments :: [Definition a k t] -> (Environment Kind, Environment (Constructor TypeIndex Kind IndexedType), Environment (TypeIndex Kind, Environment (Scheme TypeIndex Kind IndexedType)))
+buildEnvironments defs = (e1, e2, e3)
  where
+  e3 = buildTraitEnvironment e1 defs
   e2 = buildDataConstructorEnv e1 defs
   e1 = buildTypeConstructorEnv defs
 
@@ -32,7 +34,7 @@ buildDataConstructorEnv env = Environment.fromList . concatMap go
   translateScheme (Forall _ _ t) =
     Forall (typeIndexesIn t1) [] t1
    where
-    t1 = evalState (instantiateVars env t) (0 :: Int)
+    t1 = evalState (instantiateVars [] env t) (0 :: Int)
 
 buildTypeConstructorEnv :: [Definition a k t] -> Environment Kind
 buildTypeConstructorEnv = Environment.fromList . concatMap go
@@ -49,10 +51,12 @@ buildTraitEnvironment env = Environment.fromList . concatMap go
  where
   go =
     \case
-      DTrait name _ t ds ->
-          undefined
-         where
-          t1 = evalState (instantiateVars env t) (0 :: Int)
+      DTrait name _ (Parameter k n) ds ->
+        [(name, (TypeIndex k 0, Environment.fromList (f <$$> ds)))]
+       where
+        f t =
+          let t1 = evalState (instantiateVars [(n, TypeIndex k 0)] env t) (1 :: Int)
+           in Forall (typeIndexesIn t1) [] t1
       _ ->
         []
 

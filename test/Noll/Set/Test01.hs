@@ -169,7 +169,7 @@ moduleOrdered =
       DTrait
         "Ordered"
         []
-        (TVariable (Parameter () "a"))
+        (Parameter KType "a")
         [
           ( "compare"
           , TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TConstructor () "Ordering"
@@ -339,7 +339,7 @@ moduleOrdered1 =
       DTrait
         "Ordered"
         []
-        (TVariable (Parameter () "a"))
+        (Parameter KType "a")
         [
           ( "compare"
           , TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TConstructor () "Ordering"
@@ -523,7 +523,7 @@ moduleBinarySearch =
       DTrait
         "Numeric"
         []
-        (TVariable (Parameter () "a"))
+        (Parameter KType "a")
         [
           ( "from_int32"
           , TIntrinsic IInt32 `TArrow` TVariable (Parameter () "a")
@@ -904,7 +904,7 @@ moduleBinarySearch2 =
       DTrait
         "Numeric"
         []
-        (TVariable (Parameter () "a"))
+        (Parameter KType "a")
         [
           ( "from_int32"
           , TIntrinsic IInt32 `TArrow` TVariable (Parameter () "a")

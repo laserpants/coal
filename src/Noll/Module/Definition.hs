@@ -12,6 +12,7 @@ import Noll.Language.Constructor (Constructor (..))
 import Noll.Language.Expression (Expression (..))
 import Noll.Language.Trait (Trait (..), With (..))
 import Noll.Language.Type (Parameter, Type (..))
+import Noll.Language.Type.Kind (Kind (..))
 import Noll.Module.Constant (Constant (..))
 import Noll.Module.Function (Function (..))
 
@@ -36,7 +37,7 @@ data Definition a k t
   | -- | Import statement
     DImport Path [Name]
   | -- | Trait
-    DTrait Name [Trait t] ParameterizedType [(Name, ParameterizedType)]
+    DTrait Name [Trait t] (Parameter Kind) [(Name, ParameterizedType)]
   | -- | Trait instance
     DInstance Name ParameterizedType [Definition a k t]
   | -- | Trait instance

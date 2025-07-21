@@ -1009,7 +1009,7 @@ spec =
           ( DTrait
               "Ordered"
               []
-              (TVariable (Parameter () "a"))
+              (Parameter KType "a")
               [
                 ( "compare"
                 , TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TConstructor () "Ordering"
@@ -1581,7 +1581,7 @@ moduleTest =
       , DTrait
           "Ordered"
           []
-          (TVariable (Parameter () "a"))
+          (Parameter KType "a")
           [
             ( "compare"
             , TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TConstructor () "Ordering"

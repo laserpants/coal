@@ -182,7 +182,7 @@ instantiateTemplateC (TypeIndex _ n) t1 (Forall vs ts t) = Forall vs ts (apply (
 instantiateVarsC :: (Monad m) => Type Parameter () -> Compiler2T a m IndexedType
 instantiateVarsC t = do
   env <- asks compiler2TypeConstructorEnv
-  instantiateVars env t
+  instantiateVars [] env t
 
 defineC :: (Monad m) => Name -> IndexedType -> Compiler2T a m ()
 defineC name t = insertNameC name (Forall (typeIndexesIn s) [] s)

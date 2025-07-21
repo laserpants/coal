@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Parser.Type (parseType, parseTypeParameter) where
+module Noll.Parser.Type (parseType, parseTypeParameter, parseKind) where
 
 import Control.Monad.Combinators.Expr
 import Data.Functor (($>))
@@ -44,7 +44,7 @@ parseTypeApplication = do
       pure t0
 
 parseType :: Parser (Type Parameter ())
-parseType = makeExprParser go operator
+parseType = makeExprParser go typeOperator
  where
   go = do
     try parseTypeApplication
@@ -52,5 +52,11 @@ parseType = makeExprParser go operator
       <|> (TIntrinsic <$> parseIntrinsicType)
       <|> (TVariable <$> parseTypeParameter)
 
-operator :: [[Operator Parser (Type Parameter ())]]
-operator = [[InfixR (TArrow <$ symbol "->")]]
+typeOperator :: [[Operator Parser (Type Parameter ())]]
+typeOperator = [[InfixR (TArrow <$ symbol "->")]]
+
+parseKind :: Parser Kind
+parseKind = makeExprParser (symbol "*" $> KType) kindOperator
+
+kindOperator :: [[Operator Parser Kind]]
+kindOperator = [[InfixR (KArrow <$ symbol "->")]]

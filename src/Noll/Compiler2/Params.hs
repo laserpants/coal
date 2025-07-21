@@ -16,10 +16,10 @@ import Noll.Language
 import qualified Data.Text as Text
 import qualified Lang.Common.Environment as Environment
 
-instantiateVars :: (MonadState s m, Supply s) => Environment Kind -> Type Parameter () -> m IndexedType
-instantiateVars env t = do
+instantiateVars :: (MonadState s m, Supply s) => [(Name, TypeIndex Kind)] -> Environment Kind -> Type Parameter () -> m IndexedType
+instantiateVars ts0 env t = do
   ts <- execWriterT (params t)
-  runReaderT (instantiateTypeVars t) (Environment.fromList ts, env)
+  runReaderT (instantiateTypeVars t) (Environment.fromList (ts0 <> ts), env)
 
 instantiateTypeVars :: (MonadState s m, Supply s) => Type Parameter () -> ReaderT (Environment (TypeIndex Kind), Environment Kind) m IndexedType
 instantiateTypeVars =

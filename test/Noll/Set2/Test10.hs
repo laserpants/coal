@@ -36,7 +36,7 @@ moduleFoo =
     [ DTrait
         "Traceable"
         []
-        (TVariable (Parameter () "a"))
+        (Parameter KType "a")
         [
           ( "trace"
           , TVariable (Parameter () "a") `TArrow` TIntrinsic IString

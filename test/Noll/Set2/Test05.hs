@@ -29,7 +29,7 @@ moduleFoo =
     [ DTrait
         "Show"
         []
-        (TVariable (Parameter () "a"))
+        (Parameter KType "a")
         [
           ( "show"
           , TVariable (Parameter () "a") `TArrow` TIntrinsic IString

@@ -18,7 +18,47 @@ spec :: Spec
 spec =
   describe "Noll.Compiler" $ do
     it "" $ do
-      buildConstructorEnvs defs == (tenv1, tenv2)
+      buildEnvironments defs == (tenv1, tenv2, tenv3)
+    it "" $ do
+      buildEnvironments defs2 == (mempty, mempty, tenv5)
+
+defs2 :: [Definition () o ()]
+defs2 =
+  [ DTrait
+      "Functor"
+      []
+      (Parameter (KArrow KType KType) "f")
+      [
+        ( "map"
+        , (TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "b"))
+            `TArrow` TApplication () (TVariable (Parameter () "f")) (TVariable (Parameter () "a") :| [])
+            `TArrow` TApplication () (TVariable (Parameter () "f")) (TVariable (Parameter () "b") :| [])
+        )
+      ]
+  ]
+
+tenv5 :: Environment (TypeIndex Kind, Environment (Scheme TypeIndex Kind IndexedType))
+tenv5 =
+  Environment.fromList
+    [
+      ( "Functor"
+      ,
+        ( TypeIndex (KArrow KType KType) 0
+        , Environment.fromList
+            [
+              ( "map"
+              , Forall
+                  (Set.fromList [TypeIndex (KArrow KType KType) 0, TypeIndex KType 1, TypeIndex KType 2])
+                  []
+                  ( (TVariable (TypeIndex KType 1) `TArrow` TVariable (TypeIndex KType 2))
+                      `TArrow` TApplication KType (TVariable (TypeIndex (KArrow KType KType) 0)) (TVariable (TypeIndex KType 1) :| [])
+                      `TArrow` TApplication KType (TVariable (TypeIndex (KArrow KType KType) 0)) (TVariable (TypeIndex KType 2) :| [])
+                  )
+              )
+            ]
+        )
+      )
+    ]
 
 defs :: [Definition () o ()]
 defs =
@@ -42,7 +82,7 @@ defs =
   , DTrait
       "Ordered"
       []
-      (TVariable (Parameter () "a"))
+      (Parameter KType "a")
       [
         ( "compare"
         , TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TConstructor () "Ordering"
