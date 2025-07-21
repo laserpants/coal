@@ -50,6 +50,7 @@ library
       Noll.Compiler2
       Noll.Compiler2.Environment
       Noll.Compiler2.Internal
+      Noll.Compiler2.Params
       Noll.Compiler2.TypeInference
       Noll.Eval
       Noll.Language
@@ -167,6 +168,7 @@ test-suite noll-test
       Noll.Compiler.Transform.Pattern.RecordDesugarSpec
       Noll.Compiler.Transform.TreeSpec
       Noll.Compiler.Transform.Type.AliasExpansionSpec
+      Noll.Compiler2.EnvironmentSpec
       Noll.Compiler2Spec
       Noll.CompilerExamples.Test01
       Noll.CompilerExamples.Test02
