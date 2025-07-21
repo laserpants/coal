@@ -5,7 +5,7 @@ module Noll.Compiler2.Environment where
 
 import Control.Monad.State (evalState)
 import Lang.Common.Environment (Environment (..))
-import Lang.Utils (Name, (<$$>))
+import Lang.Utils ((<$$>))
 import Noll.Compiler.Transform.Type.AliasExpansion
 import Noll.Compiler2.Params
 import Noll.Language
