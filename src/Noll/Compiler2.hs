@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
 module Noll.Compiler2 where
@@ -19,8 +19,6 @@ import Noll.Compiler.PatternMatching
 import Noll.Compiler.PatternMatching.Rule (MatchMonad (..), runMatchMonad)
 import Noll.Compiler.Transform.Fold
 import Noll.Compiler.Transform.Nats
-import Noll.Module.Definition
-import Noll.Module.Constant
 import Noll.Compiler.Transform.Pattern.AsDesugar
 import Noll.Compiler.Transform.Pattern.Desugar
 import Noll.Compiler.Transform.Pattern.OrExpansion
@@ -30,6 +28,8 @@ import Noll.Compiler2.Internal
 import Noll.Compiler2.TypeInference
 import Noll.Language
 import Noll.Module (Module (..))
+import Noll.Module.Constant
+import Noll.Module.Definition
 import Noll.SystemF.Substitution (normalizeTypeIndexes)
 
 import qualified Lang.Lowpass.Language as Lowpass
@@ -169,6 +169,7 @@ compileModule_ m = do
   r <- compileModule m
   s <- get
   pure r
+
 --  traceShow s $
 --    pure r
 

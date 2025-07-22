@@ -34,7 +34,7 @@ spec =
               ()
               ( BPattern () (PVariable () (Label () "a")) (EVariable () (Label () "a"))
                   <| BPattern () (PVariable () (Label () "b")) (EVariable () (Label () "b"))
-                    :| []
+                  :| []
               )
               (EVariable () (Label () "a"))
           )
@@ -42,7 +42,7 @@ spec =
                 ()
                 ( BPattern () (PVariable () (Label () "a")) (EVariable () (Label () "x"))
                     <| BPattern () (PVariable () (Label () "b")) (EVariable () (Label () "b"))
-                      :| []
+                    :| []
                 )
                 (EVariable () (Label () "a"))
              )
@@ -54,7 +54,7 @@ spec =
               ()
               ( BPattern () (PVariable () (Label () "a")) (EVariable () (Label () "z"))
                   <| BPattern () (PVariable () (Label () "b")) (EVariable () (Label () "z"))
-                    :| []
+                  :| []
               )
               (EVariable () (Label () "a"))
           )
@@ -62,7 +62,7 @@ spec =
                 ()
                 ( BPattern () (PVariable () (Label () "a")) (EVariable () (Label () "z"))
                     <| BPattern () (PVariable () (Label () "b")) (EVariable () (Label () "z"))
-                      :| []
+                    :| []
                 )
                 (EVariable () (Label () "a"))
              )
@@ -74,7 +74,7 @@ spec =
               ()
               ( BPattern () (PVariable () (Label () "c")) (EVariable () (Label () "z"))
                   <| BPattern () (PVariable () (Label () "d")) (EVariable () (Label () "z"))
-                    :| []
+                  :| []
               )
               (EVariable () (Label () "a"))
           )
@@ -82,7 +82,7 @@ spec =
                 ()
                 ( BPattern () (PVariable () (Label () "c")) (EVariable () (Label () "z"))
                     <| BPattern () (PVariable () (Label () "d")) (EVariable () (Label () "z"))
-                      :| []
+                    :| []
                 )
                 (EVariable () (Label () "x"))
              )

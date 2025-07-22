@@ -47,9 +47,9 @@ data Compiler2Environment o k t = Compiler2Environment
   , compiler2TypeConstructorEnv :: Environment Kind
   , compiler2TraitEnvironment :: Environment (TypeIndex Kind, TraitImplementationEnv)
   , compiler2DictionaryEnvironment :: DictionaryEnvironment
-  -- TODO:  Environment (Map IndexedType (Dictionary (Scheme TypeIndex Kind IndexedType)))
-  --  (instance Environment)
-  , compiler2AliasEnv :: AliasEnvironment
+  , -- TODO:  Environment (Map IndexedType (Dictionary (Scheme TypeIndex Kind IndexedType)))
+    --  (instance Environment)
+    compiler2AliasEnv :: AliasEnvironment
   }
   deriving (Show, Eq, Ord, Read)
 

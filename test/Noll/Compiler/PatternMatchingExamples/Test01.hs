@@ -69,7 +69,7 @@ fixture =
                           ()
                           (PConstructor () (Label () "GreaterThan") [])
                           (CPlain () [] (ELiteral () (LBool False)) :| [])
-                          :| []
+                        :| []
                     )
                 )
             )
@@ -109,7 +109,7 @@ fixture1 =
                         <| ECompiledClause
                           (Label () "LessThan" :| [])
                           (ELiteral () (LBool True))
-                          :| []
+                        :| []
                     )
                 )
             )
@@ -137,7 +137,7 @@ fixture3 =
           ()
           (PConstructor () (Label () "Succ") [PVariable () (Label () "zz")])
           (CPlain () [] (ELiteral () (LInt32 1)) :| [])
-          :| []
+        :| []
     )
 
 fixture4 :: Expression () ()
@@ -159,5 +159,5 @@ fixture4 =
           ()
           (PVariable () (Label () "m"))
           (CPlain () [] (ELiteral () (LInt32 1)) :| [])
-          :| []
+        :| []
     )

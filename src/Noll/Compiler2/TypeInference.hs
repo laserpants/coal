@@ -8,7 +8,7 @@
 module Noll.Compiler2.TypeInference (typeDefinitionsC) where
 
 import Control.Monad.Reader (ask, asks)
-import Control.Monad.State (gets, evalState)
+import Control.Monad.State (evalState, gets)
 import Control.Monad.Writer (execWriter)
 import Data.Data (Data)
 import Data.Either.Extra (partitionEithers)

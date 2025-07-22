@@ -129,8 +129,8 @@ xx =
       )
     ]
 
---yy :: Environment (Scheme TypeIndex Kind (Type TypeIndex Kind))
---yy =
+-- yy :: Environment (Scheme TypeIndex Kind (Type TypeIndex Kind))
+-- yy =
 --  Environment.fromList
 --    [
 --      ( "trace"
