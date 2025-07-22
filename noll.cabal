@@ -52,7 +52,6 @@ library
       Noll.Compiler2.Internal
       Noll.Compiler2.Params
       Noll.Compiler2.TypeInference
-      Noll.Eval
       Noll.Language
       Noll.Language.Constructor
       Noll.Language.Expression
