@@ -43,7 +43,11 @@ buildTypeConstructorEnv = Environment.fromList . concatMap go
   go =
     \case
       DType name ps _ ->
-        [(name, foldr KArrow KType (replicate (length ps) KType))]
+        [
+          ( name
+          , foldr KArrow KType (replicate (length ps) KType)
+          )
+        ]
       _ ->
         []
 
@@ -53,7 +57,11 @@ buildTraitEnvironment env = Environment.fromList . concatMap go
   go =
     \case
       DTrait name _ (Parameter k n) ds ->
-        [(name, (TypeIndex k 0, Environment.fromList (f <$$> ds)))]
+        [
+          ( name
+          , (TypeIndex k 0, Environment.fromList (f <$$> ds))
+          )
+        ]
        where
         f t =
           let t1 = evalState (instantiateVars [(n, TypeIndex k 0)] env t) (1 :: Int)
