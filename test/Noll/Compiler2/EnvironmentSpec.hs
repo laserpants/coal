@@ -21,9 +21,9 @@ spec :: Spec
 spec =
   describe "Noll.Compiler" $ do
     it "" $ do
-      buildEnvironments defs == (tenv1, tenv2, tenv3, mempty)
+      buildEnvironments defs == (tenv1, tenv2, tenv3, mempty, tenv9)
     it "" $ do
-      buildEnvironments defs2 == (mempty, mempty, tenv5, mempty)
+      buildEnvironments defs2 == (mempty, mempty, tenv5, mempty, tenv9)
     it "" $ do
       buildAliasEnv defs3 == tenv6
 
@@ -775,3 +775,136 @@ tenv7 =
       )
     ]
 
+defs5 :: [Definition () o ()]
+defs5 =
+  [ DInstance
+        "Numeric"
+        (TIntrinsic IInt32)
+        [ DFunction
+            "from_int32"
+            ( Function
+                ()
+                (With [] ())
+                ( PVariable () (Label () "n")
+                    :| []
+                )
+                (
+                  EVariable () (Label () "n")
+                )
+             )
+        ]
+  , DInstance
+        "Ordered"
+        (TIntrinsic IInt32)
+        [ DFunction
+            "compare"
+            ( Function
+                ()
+                (With [] ())
+                ( PVariable () (Label () "x")
+                    <| PVariable () (Label () "y")
+                    :| []
+                )
+                ( EIf
+                    ()
+                    ()
+                    ( EApplication
+                        ()
+                        ()
+                        (EBinaryOperator () () OLessThan)
+                        ( EVariable () (Label () "x")
+                            <| EVariable () (Label () "y")
+                            :| []
+                        )
+                    )
+                    (EConstructor () (Label () "LessThan"))
+                    ( EIf
+                        ()
+                        ()
+                        ( EApplication
+                            ()
+                            ()
+                            (EBinaryOperator () () OGreaterThan)
+                            ( EVariable () (Label () "x")
+                                <| EVariable () (Label () "y")
+                                :| []
+                            )
+                        )
+                        (EConstructor () (Label () "GreaterThan"))
+                        (EConstructor () (Label () "EqualTo"))
+                    )
+                )
+            )
+        ]
+  ]
+
+tenv8 :: Environment (TypeIndex Kind, Environment (Scheme TypeIndex Kind IndexedType))
+tenv8 =
+  Environment.fromList
+    [
+      ( "Ordered"
+      ,
+        ( TypeIndex KType 0
+        , Environment.fromList
+            [
+              ( "compare"
+              , Forall
+                  (Set.fromList [TypeIndex KType 0])
+                  []
+                  ( TVariable (TypeIndex KType 0)
+                      `TArrow` TVariable (TypeIndex KType 0)
+                      `TArrow` TConstructor KType "Ordering"
+                  )
+              )
+            ]
+        )
+      )
+    , ( "Numeric"
+      ,
+        ( TypeIndex KType 0
+        , Environment.fromList
+            [
+              ( "from_int32"
+              , Forall
+                  (Set.fromList [TypeIndex KType 0])
+                  []
+                  ( TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0)
+                  )
+              )
+            ]
+        )
+      )
+    ]
+
+tenv9 :: Environment (Map IndexedType (Dictionary (Scheme TypeIndex Kind IndexedType)))
+tenv9 = 
+  Environment.fromList
+    [
+      ( "Numeric"
+      , Map.fromList
+          [
+            ( TIntrinsic IInt32
+            , Map.fromList
+                [
+                  ( "from_int32"
+                  , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
+                  )
+                ]
+            )
+          ]
+      )
+    ,
+      ( "Ordered"
+      , Map.fromList
+          [
+            ( TIntrinsic IInt32
+            , Map.fromList
+                [
+                  ( "compare"
+                  , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TConstructor KType "Ordering")
+                  )
+                ]
+            )
+          ]
+      )
+      ]

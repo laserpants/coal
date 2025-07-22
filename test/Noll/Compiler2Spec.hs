@@ -21,7 +21,6 @@ import Noll.Language.Trait
 import Noll.Parser.Module
 import Text.Megaparsec (runParser)
 import Text.RawString.QQ
-
 import Data.Map.Strict (Map)
 
 -- import Noll.Compiler2Examples.Test02 (bazz)

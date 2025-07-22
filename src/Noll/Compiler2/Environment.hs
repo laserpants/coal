@@ -1,21 +1,27 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase #-}
 
-module Noll.Compiler2.Environment (buildEnvironments, buildAliasEnv) where
+module Noll.Compiler2.Environment (buildEnvironments, buildAliasEnv, buildInstanceEnvironment) where
 
-import Control.Monad.State (evalState)
+import Control.Monad.State (evalState, execState, modify)
+import Data.Map.Strict (Map)
 import Lang.Common.Environment (Environment (..))
-import Lang.Utils ((<$$>))
+import Lang.Utils (Dictionary, traverse_, (<$$>))
 import Noll.Compiler.Transform.Type.AliasExpansion
 import Noll.Compiler2.Parameterized
 import Noll.Language
 import Noll.Module.Definition
+import Noll.SystemF.Substitution (Substitution, apply, mapsTo)
 
+import qualified Data.Map.Strict as Map
+import qualified Data.Set as Set
+import qualified Data.Text as Text
 import qualified Lang.Common.Environment as Environment
 
-buildEnvironments :: [Definition a k t] -> (Environment Kind, Environment (Constructor TypeIndex Kind IndexedType), Environment (TypeIndex Kind, Environment (Scheme TypeIndex Kind IndexedType)), AliasEnvironment)
-buildEnvironments defs = (e1, e2, e3, e4)
+buildEnvironments :: [Definition a k t] -> (Environment Kind, Environment (Constructor TypeIndex Kind IndexedType), Environment (TypeIndex Kind, Environment (Scheme TypeIndex Kind IndexedType)), AliasEnvironment, Environment (Map IndexedType (Dictionary (Scheme TypeIndex Kind IndexedType))))
+buildEnvironments defs = (e1, e2, e3, e4, e5)
  where
+  e5 = buildInstanceEnvironment e1 e3 defs
   e4 = buildAliasEnv defs
   e3 = buildTraitEnvironment e1 defs
   e2 = buildDataConstructorEnv e1 defs
@@ -85,3 +91,33 @@ buildAliasEnv = Environment.fromList . concatMap go
         ]
       _ ->
         []
+
+buildInstanceEnvironment ::
+  Environment Kind ->
+  Environment (TypeIndex Kind, Environment (Scheme TypeIndex Kind IndexedType)) ->
+  [Definition a k t] ->
+  Environment (Map IndexedType (Dictionary (Scheme TypeIndex Kind IndexedType)))
+buildInstanceEnvironment env1 env2 ds = execState (traverse_ go ds) mempty
+ where
+  go =
+    \case
+      DInstance name t _ ->
+        case Environment.lookup name env2 of
+          Just (TypeIndex _ ix, env3) -> do
+            modify (Environment.insertWith Map.union name mp)
+           where
+            fs = Environment.toList env3
+            t1 = evalState (instantiateVars [] env1 t) (freshId fs)
+            mp = Map.singleton t1 (Map.fromList (instantiate (ix `mapsTo` t1) <$$> fs))
+            freshId = freshIdIn . Set.unions . fmap (vars . snd)
+            vars (Forall vs _ _) = vs
+          Nothing ->
+            error ("Trait '" <> Text.unpack name <> "' not in scope.")
+      _ ->
+        pure ()
+
+-- TODO: DRY (see applySpecial)
+instantiate :: Substitution -> Scheme o Kind IndexedType -> Scheme TypeIndex Kind IndexedType
+instantiate sub (Forall _ ts t) = Forall (typeIndexesIn s) (apply sub ts) s
+ where
+  s = apply sub t

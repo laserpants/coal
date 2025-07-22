@@ -20,6 +20,10 @@ module Main {
           else EqualTo;
   }
 
+  trait Numeric(n) {
+    from_int32 : int32 -> n
+  }
+
   instance Numeric(int32) {
     fn from_int32(n) = n;
   }
