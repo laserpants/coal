@@ -16,7 +16,7 @@ module Noll.Compiler.Dictionaries (
   collectTraits,
 ) where
 
-import Control.Monad (forM)
+import Control.Monad (when, forM)
 import Control.Monad.RWS (RWS, runRWS)
 import Control.Monad.Reader (MonadReader, asks, local)
 import Control.Monad.State (MonadState)
@@ -42,28 +42,28 @@ import qualified Data.Text as Text
 import qualified Lang.Common.Environment as Environment
 
 data DictionaryEnvironment = DictionaryEnvironment
-  { dictionaryEnvironmentNames :: Environment (Scheme TypeIndex Kind (Type TypeIndex Kind))
+  { dictionaryEnvironmentNames :: Environment (Scheme TypeIndex Kind IndexedType)
   , dictionaryEnvironmentInstances :: Environment (Map IndexedType (Dictionary (Scheme TypeIndex Kind IndexedType)))
   }
   deriving (Show, Eq, Ord, Read)
 
 overDictionaryEnvironmentNames ::
-  ( Environment (Scheme TypeIndex Kind (Type TypeIndex Kind)) ->
-    Environment (Scheme TypeIndex Kind (Type TypeIndex Kind))
+  ( Environment (Scheme TypeIndex Kind IndexedType) ->
+    Environment (Scheme TypeIndex Kind IndexedType)
   ) ->
   DictionaryEnvironment ->
   DictionaryEnvironment
 overDictionaryEnvironmentNames f DictionaryEnvironment{..} =
   DictionaryEnvironment{dictionaryEnvironmentNames = f dictionaryEnvironmentNames, ..}
 
-newtype DictionaryStack a = DictionaryStack {dictionaryStack :: RWS DictionaryEnvironment [Trait (Type TypeIndex Kind)] Int a}
+newtype DictionaryStack a = DictionaryStack {dictionaryStack :: RWS DictionaryEnvironment [Trait IndexedType] Int a}
   deriving
     ( Functor
     , Applicative
     , Monad
     , MonadReader DictionaryEnvironment
     , MonadState Int
-    , MonadWriter [Trait (Type TypeIndex Kind)]
+    , MonadWriter [Trait IndexedType]
     )
 
 runDictionaryStack :: DictionaryEnvironment -> Int -> DictionaryStack a -> (a, Int)
@@ -71,7 +71,7 @@ runDictionaryStack e s d = (a, n)
  where
   (a, n, _) = runRWS (dictionaryStack d) e s
 
-collectTraits :: Type TypeIndex Kind -> Name -> DictionaryStack [Trait (Type TypeIndex Kind)]
+collectTraits :: IndexedType -> Name -> DictionaryStack [Trait IndexedType]
 collectTraits u name = do
   env <- asks dictionaryEnvironmentNames
   case Environment.lookup name env of
@@ -92,12 +92,12 @@ collectTraits u name = do
     var <- supplied (TVariable . TypeIndex KType)
     pure (index `mapsTo` var <> acc)
 
-tryMatch :: Type TypeIndex Kind -> Type TypeIndex Kind -> DictionaryStack (Either UnificationError Substitution)
+tryMatch :: IndexedType -> IndexedType -> DictionaryStack (Either UnificationError Substitution)
 tryMatch t u = do
   var <- supplied id
   pure (evalUnifier var (match t u))
 
-findFirstMatch :: Trait (Type TypeIndex Kind) -> DictionaryStack (Maybe (Type TypeIndex Kind, Map Name (Scheme TypeIndex Kind IndexedType)))
+findFirstMatch :: Trait IndexedType -> DictionaryStack (Maybe (IndexedType, Map Name (Scheme TypeIndex Kind IndexedType)))
 findFirstMatch (Trait name t1) = do
   env <- asks dictionaryEnvironmentInstances
   case Environment.lookup name env of
@@ -127,10 +127,10 @@ applySpecial sub (Forall _ ts t) = Forall (typeIndexesIn t' <> typeIndexesIn ts'
   t' = apply sub t
   ts' = apply sub ts
 
-mapEntriesM :: (Monad m) => Dictionary (Scheme TypeIndex Kind IndexedType) -> ((Name, Scheme TypeIndex Kind IndexedType) -> m (Name, Expression a (Type TypeIndex Kind))) -> m (Maybe (Dictionary (Expression a (Type TypeIndex Kind))))
+mapEntriesM :: (Monad m) => Dictionary (Scheme TypeIndex Kind IndexedType) -> ((Name, Scheme TypeIndex Kind IndexedType) -> m (Name, Expression a IndexedType)) -> m (Maybe (Dictionary (Expression a IndexedType)))
 mapEntriesM b f = Just . Map.fromList <$> traverse f (Map.toList b)
 
-lookupTraitInstance :: (Monoid a) => Trait (Type TypeIndex Kind) -> DictionaryStack (Maybe (Map Name (Expression a (Type TypeIndex Kind))))
+lookupTraitInstance :: (Monoid a) => Trait IndexedType -> DictionaryStack (Maybe (Map Name (Expression a IndexedType)))
 lookupTraitInstance tr@(Trait name _) = do
   found <- findFirstMatch tr
   case found of
@@ -143,7 +143,7 @@ lookupTraitInstance tr@(Trait name _) = do
     expr <- applyTraits (Label t (n <> "__$instance_" <> serialize trait)) ts
     pure (n, expr)
 
-applyTraits :: (Monoid a) => Label (Type TypeIndex Kind) -> [Trait (Type TypeIndex Kind)] -> DictionaryStack (Expression a (Type TypeIndex Kind))
+applyTraits :: (Monoid a) => Label IndexedType -> [Trait IndexedType] -> DictionaryStack (Expression a IndexedType)
 applyTraits ll@(Label t name) =
   \case
     [] ->
@@ -164,7 +164,7 @@ applyTraits ll@(Label t name) =
 class TraitContext d where
   expandTraits :: d -> DictionaryStack d
 
-instance (Monoid a, Data a) => TraitContext (Expression a (Type TypeIndex Kind)) where
+instance (Monoid a, Data a) => TraitContext (Expression a IndexedType) where
   expandTraits =
     \case
       ERecursiveLet a p e1 e2 -> do
@@ -201,7 +201,7 @@ instance (Monoid a, Data a) => TraitContext (Expression a (Type TypeIndex Kind))
         _ ->
           error "Not implemented"
 
-transformScope :: (Monoid a, Data a) => Expression a (Type TypeIndex Kind) -> DictionaryStack (Expression a (Type TypeIndex Kind), [Trait (Type TypeIndex Kind)])
+transformScope :: (Monoid a, Data a) => Expression a IndexedType -> DictionaryStack (Expression a IndexedType, [Trait IndexedType])
 transformScope e = do
   (expr, traits) <- listen (expandTraits e)
   case nub traits of
@@ -213,17 +213,17 @@ transformScope e = do
   toPattern tr =
     PPlaceholder mempty (typeOf tr) tr
 
-instance (Monoid a, Data a) => TraitContext (CompiledClause a (Type TypeIndex Kind)) where
+instance (Monoid a, Data a) => TraitContext (CompiledClause a IndexedType) where
   expandTraits =
     \case
       ECompiledClause lls e ->
         ECompiledClause lls <$> expandTraits e
 
-instance (Monoid a, Data a) => TraitContext (Module a Kind (Type TypeIndex Kind)) where
+instance (Monoid a, Data a) => TraitContext (Module a Kind IndexedType) where
   expandTraits =
     overModuleDefinitionsM (traverse expandTraits)
 
-instance (Monoid a, Data a) => TraitContext (Definition a Kind (Type TypeIndex Kind)) where
+instance (Monoid a, Data a) => TraitContext (Definition a Kind IndexedType) where
   expandTraits =
     \case
       DConstant name c ->
@@ -233,7 +233,7 @@ instance (Monoid a, Data a) => TraitContext (Definition a Kind (Type TypeIndex K
       d ->
         pure d
 
-instance (Monoid a, Data a) => TraitContext (Constant Expression a (Type TypeIndex Kind)) where
+instance (Monoid a, Data a) => TraitContext (Constant Expression a IndexedType) where
   expandTraits =
     \case
       Constant a (With _ t) e -> do

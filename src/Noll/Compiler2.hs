@@ -1,6 +1,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
 module Noll.Compiler2 where
@@ -10,7 +11,7 @@ import Control.Monad.Reader (Reader, asks, runReader)
 import Control.Monad.State (get, gets, runState)
 import Data.Data (Data)
 import Debug.Trace
-import Lang.Utils (Name)
+import Lang.Utils (Name, forM)
 import Noll.Compiler.Dictionaries
 import Noll.Compiler.Lowpass.TranslateModule (translateModule)
 import Noll.Compiler.NormalizeObjects (NormalizeObjectsTransformContext (..))
@@ -18,6 +19,8 @@ import Noll.Compiler.PatternMatching
 import Noll.Compiler.PatternMatching.Rule (MatchMonad (..), runMatchMonad)
 import Noll.Compiler.Transform.Fold
 import Noll.Compiler.Transform.Nats
+import Noll.Module.Definition
+import Noll.Module.Constant
 import Noll.Compiler.Transform.Pattern.AsDesugar
 import Noll.Compiler.Transform.Pattern.Desugar
 import Noll.Compiler.Transform.Pattern.OrExpansion
@@ -94,11 +97,25 @@ compileNatsC = natExpansionTrans compileNats
 
 placeholderTrans :: (Monad m) => (c -> DictionaryStack c) -> c -> Compiler2T a m c
 placeholderTrans f e = do
-  env <- asks compiler2DictionaryEnvironment
-  withSupplyC (\n -> runDictionaryStack env n (f e))
+  DictionaryEnvironment _ env2 <- asks compiler2DictionaryEnvironment
+  names <- gets compiler2NameStore
+  withSupplyC (\n -> runDictionaryStack (DictionaryEnvironment names env2) n (f e))
 
-placeholderInsertionC :: (Monad m, Monoid a, Data a) => Module a Kind IndexedType -> Compiler2T a m (Module a Kind IndexedType)
-placeholderInsertionC = placeholderTrans expandTraits
+placeholderInsertionC :: (Monad m, Monoid a, Data a, Show a) => Module a Kind IndexedType -> Compiler2T a m (Module a Kind IndexedType)
+placeholderInsertionC (Module p ns ds) = do
+  es <- forM ds $
+    \case
+      d@(DConstant name c) -> do
+        d1 <- placeholderTrans expandTraits d
+        case d1 of
+          DConstant _ (Constant _ (With ts t) e) -> do
+            insertNameC name (Forall (typeIndexesIn t) ts t)
+          _ ->
+            error "Implementation error"
+        pure d1
+      d ->
+        placeholderTrans expandTraits d
+  pure (Module p ns es)
 
 lowpassMonadTrans :: (Monad m) => (c -> Reader Lowpass.TranslateEnvironment d) -> c -> Compiler2T a m d
 lowpassMonadTrans f e = pure (runReader (f e) (Lowpass.initialTranslateEnvironment mempty))
@@ -151,8 +168,9 @@ compileModule_ :: (Monad m, Monoid a, Data a, Eq a, Show a) => Module a Kind () 
 compileModule_ m = do
   r <- compileModule m
   s <- get
-  traceShow s $
-    pure r
+  pure r
+--  traceShow s $
+--    pure r
 
 -----------------------
 -----------------------

@@ -8,7 +8,7 @@
 module Noll.Compiler2.TypeInference (typeDefinitionsC) where
 
 import Control.Monad.Reader (ask, asks)
-import Control.Monad.State (gets)
+import Control.Monad.State (gets, evalState)
 import Control.Monad.Writer (execWriter)
 import Data.Data (Data)
 import Data.Either.Extra (partitionEithers)
@@ -153,9 +153,12 @@ typeDefinitionC =
       pure ()
     DSignature{} ->
       pure ()
-    DTrait _ _ _ ds ->
+    DTrait name _ (Parameter k q) ds ->
       forM_ ds $
-        \(n, s) -> defineC n =<< instantiateVarsC s
+        \(n, s) -> do
+          env <- asks compiler2TypeConstructorEnv
+          let s1 = evalState (instantiateVars [(q, TypeIndex k 0)] env s) (1 :: Int)
+          insertNameC n (Forall (typeIndexesIn s1) [Trait name (TVariable (TypeIndex k 0))] s1)
     DInstance trait t1 ds -> do
       env <- asks compiler2TraitEnvironment
       case Environment.lookup trait env of
