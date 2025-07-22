@@ -5,14 +5,16 @@ module Noll.Compiler2.Environment (buildEnvironments, buildAliasEnv) where
 
 import Control.Monad.State (evalState)
 import Lang.Common.Environment (Environment (..))
-import Lang.Utils (Dictionary, (<$$>))
+import Lang.Utils (Name, Dictionary, (<$$>))
 import Noll.Compiler.Transform.Type.AliasExpansion
 import Noll.Compiler2.Parameterized
 import Noll.Language
 import Noll.Module.Definition
 import Data.Map.Strict (Map)
 
+import qualified Data.Map.Strict as Map
 import qualified Lang.Common.Environment as Environment
+import qualified Data.Text as Text
 
 buildEnvironments :: [Definition a k t] -> (Environment Kind, Environment (Constructor TypeIndex Kind IndexedType), Environment (TypeIndex Kind, Environment (Scheme TypeIndex Kind IndexedType)), AliasEnvironment)
 buildEnvironments defs = (e1, e2, e3, e4)
@@ -70,15 +72,51 @@ buildTraitEnvironment env = Environment.fromList . concatMap go
       _ ->
         []
 
-buildInstanceEnvironment :: [Definition a k t] -> Environment (Map IndexedType (Dictionary (Scheme TypeIndex Kind IndexedType)))
-buildInstanceEnvironment = Environment.fromList . concatMap go
+unions :: [(Name, Map IndexedType (Dictionary (Scheme TypeIndex Kind IndexedType)))]
+       -> Environment (Map IndexedType (Dictionary (Scheme TypeIndex Kind IndexedType)))
+unions = foldr xx mempty
+
+xx :: (Name, Map IndexedType (Dictionary (Scheme TypeIndex Kind IndexedType))) 
+    -> Environment (Map IndexedType (Dictionary (Scheme TypeIndex Kind IndexedType)))
+    -> Environment (Map IndexedType (Dictionary (Scheme TypeIndex Kind IndexedType)))
+xx = undefined
+
+buildInstanceEnvironment :: 
+  Environment (TypeIndex Kind, Environment (Scheme TypeIndex Kind IndexedType)) ->
+  [Definition a k t] -> 
+  Environment (Map IndexedType (Dictionary (Scheme TypeIndex Kind IndexedType)))
+buildInstanceEnvironment env ds = unions (xnork <$> fazbox) -- Environment.fromList . concatMap go
  where
+  fazbox = concatMap go ds
   go =
     \case
-      DInstance{} ->
-        undefined
+      DInstance name t ds ->
+        case Environment.lookup name env of
+          Nothing -> 
+            error ("Trait '" <> Text.unpack name <> "' not in scope")
+          Just (t1, env1) ->
+            [ ( name, [ ( t1, gork <$> ds ) ] ) ]
       _ ->
         []
+
+xnork :: (Name, [(TypeIndex Kind, [(Name, Scheme TypeIndex Kind IndexedType)])])
+      -> (Name, Map IndexedType (Dictionary (Scheme TypeIndex Kind IndexedType)))
+xnork = undefined
+
+gork :: Definition a k t -> (Name, Scheme TypeIndex Kind IndexedType)
+gork = undefined
+
+--box :: 
+--  TypeIndex Kind -> 
+--  Environment (Scheme TypeIndex Kind IndexedType) -> 
+--  [Definition a k t] -> 
+--  Map IndexedType (Dictionary (Scheme TypeIndex Kind IndexedType))
+--box t1 env1 ds = undefined
+--  where
+--    faz = fox <$> ds
+--
+--fox :: Definition a k t -> (Name, Scheme TypeIndex Kind IndexedType)
+--fox = undefined
 
 buildAliasEnv :: [Definition a k t] -> AliasEnvironment
 buildAliasEnv = Environment.fromList . concatMap go
