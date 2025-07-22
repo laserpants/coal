@@ -17,7 +17,7 @@ import qualified Lang.Common.Environment as Environment
 
 instantiateVars :: (MonadState s m, Supply s) => [(Name, TypeIndex Kind)] -> Environment Kind -> Type Parameter () -> m IndexedType
 instantiateVars ts0 env t = do
-  ts <- execWriterT (params t)
+  ts <- execWriterT (instantiateTypeIndexes t)
   runReaderT (instantiateTypeVars t) (Environment.fromList (ts0 <> ts), env)
 
 instantiateTypeVars :: (MonadState s m, Supply s) => Type Parameter () -> ReaderT (Environment (TypeIndex Kind), Environment Kind) m IndexedType
@@ -70,62 +70,62 @@ instantiateRowVars =
       pure RNil
 
 class Parameterized p where
-  params :: (MonadState s m, Supply s) => p -> WriterT [(Name, TypeIndex Kind)] m ()
+  instantiateTypeIndexes :: (MonadState s m, Supply s) => p -> WriterT [(Name, TypeIndex Kind)] m ()
 
 instance (Parameterized a) => Parameterized [a] where
-  params = traverse_ params
+  instantiateTypeIndexes = traverse_ instantiateTypeIndexes
 
 instance (Parameterized a) => Parameterized (List1 a) where
-  params = traverse_ params
+  instantiateTypeIndexes = traverse_ instantiateTypeIndexes
 
 instance Parameterized (Type Parameter ()) where
-  params =
+  instantiateTypeIndexes =
     \case
       TVariable p ->
-        params p
+        instantiateTypeIndexes p
       TApplication _ t ts -> do
-        params t
-        params ts
+        instantiateTypeIndexes t
+        instantiateTypeIndexes ts
       TArrow t1 t2 -> do
-        params t1
-        params t2
+        instantiateTypeIndexes t1
+        instantiateTypeIndexes t2
       TIntrinsic t ->
-        params t
+        instantiateTypeIndexes t
       TRow r ->
-        params r
+        instantiateTypeIndexes r
       TAlias _ _ t ->
-        params t
+        instantiateTypeIndexes t
       TConstructor{} ->
         pure ()
 
 instance Parameterized (Intrinsic (Type Parameter ())) where
-  params =
+  instantiateTypeIndexes =
     \case
       IList t ->
-        params t
+        instantiateTypeIndexes t
       IOption t ->
-        params t
+        instantiateTypeIndexes t
       IRecord t ->
-        params t
+        instantiateTypeIndexes t
       IResult t ->
-        params t
+        instantiateTypeIndexes t
       ITuple ts ->
-        params ts
+        instantiateTypeIndexes ts
       _ ->
         pure ()
 
 instance Parameterized (Row Parameter () (Type Parameter ())) where
-  params =
+  instantiateTypeIndexes =
     \case
       RVariable p ->
-        params p
+        instantiateTypeIndexes p
       RExtend _ t r -> do
-        params t
-        params r
+        instantiateTypeIndexes t
+        instantiateTypeIndexes r
       RNil ->
         pure ()
 
 instance Parameterized (Parameter ()) where
-  params p = do
+  instantiateTypeIndexes p = do
     ti <- supplied (TypeIndex KType)
     tell [(parameterName p, ti)]
