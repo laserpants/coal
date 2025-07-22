@@ -13,9 +13,10 @@ import Noll.Module.Definition
 
 import qualified Lang.Common.Environment as Environment
 
-buildEnvironments :: [Definition a k t] -> (Environment Kind, Environment (Constructor TypeIndex Kind IndexedType), Environment (TypeIndex Kind, Environment (Scheme TypeIndex Kind IndexedType)))
-buildEnvironments defs = (e1, e2, e3)
+buildEnvironments :: [Definition a k t] -> (Environment Kind, Environment (Constructor TypeIndex Kind IndexedType), Environment (TypeIndex Kind, Environment (Scheme TypeIndex Kind IndexedType)), AliasEnvironment)
+buildEnvironments defs = (e1, e2, e3, e4)
  where
+  e4 = buildAliasEnv defs
   e3 = buildTraitEnvironment e1 defs
   e2 = buildDataConstructorEnv e1 defs
   e1 = buildTypeConstructorEnv defs
@@ -60,7 +61,19 @@ buildTraitEnvironment env = Environment.fromList . concatMap go
       _ ->
         []
 
--- TODO
-buildAliasEnv :: a -> AliasEnvironment
-buildAliasEnv =
-  undefined
+buildAliasEnv :: [Definition a k t] -> AliasEnvironment
+buildAliasEnv = Environment.fromList . concatMap go
+ where
+  go =
+    \case
+      DTypeAlias name ps t ->
+        [
+          ( name
+          ,
+            ( parameterName <$> ps
+            , t
+            )
+          )
+        ]
+      _ ->
+        []

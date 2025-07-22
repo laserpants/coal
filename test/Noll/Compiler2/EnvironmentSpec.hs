@@ -5,6 +5,7 @@ module Noll.Compiler2.EnvironmentSpec where
 import Lang.Common.Environment (Environment)
 import Lang.Common.List1 (NonEmpty (..), (<|))
 import Lang.Label (Label (..))
+import Noll.Compiler.Transform.Type.AliasExpansion
 import Noll.Compiler2.Environment
 import Noll.Language
 import Noll.Module (Constant (..), Definition (..), Function (..), Module (..), Path (..))
@@ -18,9 +19,11 @@ spec :: Spec
 spec =
   describe "Noll.Compiler" $ do
     it "" $ do
-      buildEnvironments defs == (tenv1, tenv2, tenv3)
+      buildEnvironments defs == (tenv1, tenv2, tenv3, mempty)
     it "" $ do
-      buildEnvironments defs2 == (mempty, mempty, tenv5)
+      buildEnvironments defs2 == (mempty, mempty, tenv5, mempty)
+    it "" $ do
+      buildAliasEnv defs3 == tenv6
 
 defs2 :: [Definition () o ()]
 defs2 =
@@ -636,6 +639,56 @@ tenv3 =
                   )
               )
             ]
+        )
+      )
+    ]
+
+defs3 :: [Definition () o ()]
+defs3 =
+  [ DTypeAlias
+      "Predicate"
+      [Parameter () "a"]
+      (TVariable (Parameter () "a") `TArrow` TIntrinsic IBool)
+  , DTypeAlias
+      "Range"
+      [Parameter () "a"]
+      ( TIntrinsic
+          ( IRecord
+              ( TRow
+                  ( RExtend
+                      "min"
+                      (TVariable (Parameter () "a"))
+                      (RExtend "max" (TVariable (Parameter () "a")) RNil)
+                  )
+              )
+          )
+      )
+  ]
+
+tenv6 :: AliasEnvironment
+tenv6 =
+  Environment.fromList
+    [
+      ( "Predicate"
+      ,
+        ( ["a"]
+        , TVariable (Parameter () "a") `TArrow` TIntrinsic IBool
+        )
+      )
+    ,
+      ( "Range"
+      ,
+        ( ["a"]
+        , TIntrinsic
+            ( IRecord
+                ( TRow
+                    ( RExtend
+                        "min"
+                        (TVariable (Parameter () "a"))
+                        (RExtend "max" (TVariable (Parameter () "a")) RNil)
+                    )
+                )
+            )
         )
       )
     ]
