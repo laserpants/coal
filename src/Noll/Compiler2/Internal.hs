@@ -34,6 +34,7 @@ import Lang.Common.Environment (Environment (..))
 import Lang.Common.Supply (Supply (..))
 import Lang.Utils (Dictionary, Name, Over, (<$$$>))
 import Noll.Compiler.Dictionaries (DictionaryEnvironment (..))
+import Data.Map.Strict (Map)
 import Noll.Compiler.Transform.Type.AliasExpansion
 import Noll.Language
 import Noll.SystemF
@@ -46,10 +47,8 @@ data Compiler2Environment o k t = Compiler2Environment
   { compiler2DataConstructorEnv :: Environment (Constructor o k t)
   , compiler2TypeConstructorEnv :: Environment Kind
   , compiler2TraitEnvironment :: Environment (TypeIndex Kind, TraitImplementationEnv)
-  , compiler2DictionaryEnvironment :: DictionaryEnvironment
-  , -- TODO:  Environment (Map IndexedType (Dictionary (Scheme TypeIndex Kind IndexedType)))
-    --  (instance Environment)
-    compiler2AliasEnv :: AliasEnvironment
+  , compiler2InstanceEnvironment :: Environment (Map IndexedType (Dictionary (Scheme TypeIndex Kind IndexedType)))
+  , compiler2AliasEnv :: AliasEnvironment
   }
   deriving (Show, Eq, Ord, Read)
 

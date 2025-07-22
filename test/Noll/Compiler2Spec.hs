@@ -65,7 +65,7 @@ compiler2TestEnvironment =
     , compiler2TypeConstructorEnv = env2
     , compiler2TraitEnvironment = env3
     , compiler2AliasEnv = env5
-    , compiler2DictionaryEnvironment = env6
+    , compiler2InstanceEnvironment = env6
     }
 
 env1 =
@@ -269,11 +269,8 @@ env5 =
       )
     ]
 
--- env6 = DictionaryEnvironment yy xx
-env6 = DictionaryEnvironment mempty xx
-
-xx :: Environment (Map IndexedType (Dictionary (Scheme TypeIndex Kind IndexedType)))
-xx =
+env6 :: Environment (Map IndexedType (Dictionary (Scheme TypeIndex Kind IndexedType)))
+env6 =
   Environment.fromList
     [
       ( "Numeric"

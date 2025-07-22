@@ -97,9 +97,9 @@ compileNatsC = natExpansionTrans compileNats
 
 placeholderTrans :: (Monad m) => (c -> DictionaryStack c) -> c -> Compiler2T a m c
 placeholderTrans f e = do
-  DictionaryEnvironment _ env2 <- asks compiler2DictionaryEnvironment
-  names <- gets compiler2NameStore
-  withSupplyC (\n -> runDictionaryStack (DictionaryEnvironment names env2) n (f e))
+  env1 <- gets compiler2NameStore
+  env2 <- asks compiler2InstanceEnvironment
+  withSupplyC (\n -> runDictionaryStack (DictionaryEnvironment env1 env2) n (f e))
 
 placeholderInsertionC :: (Monad m, Monoid a, Data a, Show a) => Module a Kind IndexedType -> Compiler2T a m (Module a Kind IndexedType)
 placeholderInsertionC (Module p ns ds) = do
