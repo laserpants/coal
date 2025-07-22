@@ -1,8 +1,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 
--- TODO: rename
-module Noll.Compiler2.Params where
+module Noll.Compiler2.Parameterized where
 
 import Control.Monad.Reader (ReaderT, asks, runReaderT)
 import Control.Monad.State (MonadState)
@@ -70,16 +69,16 @@ instantiateRowVars =
     RNil ->
       pure RNil
 
-class Params p where
+class Parameterized p where
   params :: (MonadState s m, Supply s) => p -> WriterT [(Name, TypeIndex Kind)] m ()
 
-instance (Params a) => Params [a] where
+instance (Parameterized a) => Parameterized [a] where
   params = traverse_ params
 
-instance (Params a) => Params (List1 a) where
+instance (Parameterized a) => Parameterized (List1 a) where
   params = traverse_ params
 
-instance Params (Type Parameter ()) where
+instance Parameterized (Type Parameter ()) where
   params =
     \case
       TVariable p ->
@@ -99,7 +98,7 @@ instance Params (Type Parameter ()) where
       TConstructor{} ->
         pure ()
 
-instance Params (Intrinsic (Type Parameter ())) where
+instance Parameterized (Intrinsic (Type Parameter ())) where
   params =
     \case
       IList t ->
@@ -115,7 +114,7 @@ instance Params (Intrinsic (Type Parameter ())) where
       _ ->
         pure ()
 
-instance Params (Row Parameter () (Type Parameter ())) where
+instance Parameterized (Row Parameter () (Type Parameter ())) where
   params =
     \case
       RVariable p ->
@@ -126,7 +125,7 @@ instance Params (Row Parameter () (Type Parameter ())) where
       RNil ->
         pure ()
 
-instance Params (Parameter ()) where
+instance Parameterized (Parameter ()) where
   params p = do
     ti <- supplied (TypeIndex KType)
     tell [(parameterName p, ti)]

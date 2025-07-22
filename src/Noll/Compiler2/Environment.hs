@@ -7,7 +7,7 @@ import Control.Monad.State (evalState)
 import Lang.Common.Environment (Environment (..))
 import Lang.Utils ((<$$>))
 import Noll.Compiler.Transform.Type.AliasExpansion
-import Noll.Compiler2.Params
+import Noll.Compiler2.Parameterized
 import Noll.Language
 import Noll.Module.Definition
 

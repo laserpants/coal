@@ -50,7 +50,7 @@ library
       Noll.Compiler2
       Noll.Compiler2.Environment
       Noll.Compiler2.Internal
-      Noll.Compiler2.Params
+      Noll.Compiler2.Parameterized
       Noll.Compiler2.TypeInference
       Noll.Language
       Noll.Language.Constructor

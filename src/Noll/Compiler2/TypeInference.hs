@@ -18,7 +18,7 @@ import Lang.Common.Supply (supplied)
 import Lang.Label (Label (..))
 import Lang.Utils (Dictionary, Name, forM_)
 import Noll.Compiler2.Internal
-import Noll.Compiler2.Params
+import Noll.Compiler2.Parameterized
 import Noll.Language
 import Noll.Module (Constant (..), Definition (..), Function (..))
 import Noll.Module.Definition (definitionName)
