@@ -293,7 +293,7 @@ env6 =
             , Map.fromList
                 [
                   ( "compare"
-                  , Forall (Set.fromList mempty) [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TConstructor KType "Ordering")
+                  , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TConstructor KType "Ordering")
                   )
                 ]
             )

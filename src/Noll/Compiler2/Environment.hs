@@ -104,11 +104,11 @@ buildInstanceEnvironment env1 env2 ds = execState (traverse_ go ds) mempty
       DInstance name t _ ->
         case Environment.lookup name env2 of
           Just (TypeIndex _ ix, env3) -> do
-            modify (Environment.insertWith Map.union name mp)
+            modify (Environment.insertWith Map.union name (Map.singleton t1 mp))
            where
             fs = Environment.toList env3
             t1 = evalState (instantiateVars [] env1 t) (freshId fs)
-            mp = Map.singleton t1 (Map.fromList (instantiate (ix `mapsTo` t1) <$$> fs))
+            mp = Map.fromList (instantiate (ix `mapsTo` t1) <$$> fs)
             freshId = freshIdIn . Set.unions . fmap (vars . snd)
             vars (Forall vs _ _) = vs
           Nothing ->
