@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase #-}
 
-module Noll.Compiler2.Environment where
+module Noll.Compiler2.Environment (buildEnvironments, buildAliasEnv) where
 
 import Control.Monad.State (evalState)
 import Lang.Common.Environment (Environment (..))
