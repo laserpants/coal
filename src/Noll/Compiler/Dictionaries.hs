@@ -16,7 +16,7 @@ module Noll.Compiler.Dictionaries (
   collectTraits,
 ) where
 
-import Control.Monad (forM, when)
+import Control.Monad (forM)
 import Control.Monad.RWS (RWS, runRWS)
 import Control.Monad.Reader (MonadReader, asks, local)
 import Control.Monad.State (MonadState)
