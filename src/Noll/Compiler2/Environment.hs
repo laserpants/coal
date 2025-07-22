@@ -5,11 +5,12 @@ module Noll.Compiler2.Environment (buildEnvironments, buildAliasEnv) where
 
 import Control.Monad.State (evalState)
 import Lang.Common.Environment (Environment (..))
-import Lang.Utils ((<$$>))
+import Lang.Utils (Dictionary, (<$$>))
 import Noll.Compiler.Transform.Type.AliasExpansion
 import Noll.Compiler2.Parameterized
 import Noll.Language
 import Noll.Module.Definition
+import Data.Map.Strict (Map)
 
 import qualified Lang.Common.Environment as Environment
 
@@ -66,6 +67,16 @@ buildTraitEnvironment env = Environment.fromList . concatMap go
         f t =
           let t1 = evalState (instantiateVars [(n, TypeIndex k 0)] env t) (1 :: Int)
            in Forall (typeIndexesIn t1) [] t1
+      _ ->
+        []
+
+buildInstanceEnvironment :: [Definition a k t] -> Environment (Map IndexedType (Dictionary (Scheme TypeIndex Kind IndexedType)))
+buildInstanceEnvironment = Environment.fromList . concatMap go
+ where
+  go =
+    \case
+      DInstance{} ->
+        undefined
       _ ->
         []
 

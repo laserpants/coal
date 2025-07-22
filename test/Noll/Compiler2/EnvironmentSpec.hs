@@ -4,6 +4,8 @@ module Noll.Compiler2.EnvironmentSpec where
 
 import Lang.Common.Environment (Environment)
 import Lang.Common.List1 (NonEmpty (..), (<|))
+import Lang.Utils (Dictionary)
+import Data.Map.Strict (Map)
 import Lang.Label (Label (..))
 import Noll.Compiler.Transform.Type.AliasExpansion
 import Noll.Compiler2.Environment
@@ -692,3 +694,84 @@ tenv6 =
         )
       )
     ]
+
+defs4 :: [Definition () o ()]
+defs4 =
+  [ DInstance
+        "Ordered"
+        (TIntrinsic IInt32)
+        [ DFunction
+            "compare"
+            ( Function
+                ()
+                (With [] ())
+                ( PVariable () (Label () "x")
+                    <| PVariable () (Label () "y")
+                    :| []
+                )
+                ( EIf
+                    ()
+                    ()
+                    ( EApplication
+                        ()
+                        ()
+                        (EBinaryOperator () () OLessThan)
+                        ( EVariable () (Label () "x")
+                            <| EVariable () (Label () "y")
+                            :| []
+                        )
+                    )
+                    (EConstructor () (Label () "LessThan"))
+                    ( EIf
+                        ()
+                        ()
+                        ( EApplication
+                            ()
+                            ()
+                            (EBinaryOperator () () OGreaterThan)
+                            ( EVariable () (Label () "x")
+                                <| EVariable () (Label () "y")
+                                :| []
+                            )
+                        )
+                        (EConstructor () (Label () "GreaterThan"))
+                        (EConstructor () (Label () "EqualTo"))
+                    )
+                )
+            )
+        ]
+      ]
+
+tenv7 :: Environment (Map IndexedType (Dictionary (Scheme TypeIndex Kind IndexedType)))
+tenv7 =
+  Environment.fromList
+    [
+      ( "Numeric"
+      , Map.fromList
+          [
+            ( TIntrinsic IInt32
+            , Map.fromList
+                [
+                  ( "from_int32"
+                  , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
+                  )
+                ]
+            )
+          ]
+      )
+    ,
+      ( "Ordered"
+      , Map.fromList
+          [
+            ( TIntrinsic IInt32
+            , Map.fromList
+                [
+                  ( "compare"
+                  , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TConstructor KType "Ordering")
+                  )
+                ]
+            )
+          ]
+      )
+    ]
+

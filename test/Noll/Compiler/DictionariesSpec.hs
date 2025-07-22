@@ -77,56 +77,56 @@ xx =
             )
           ]
       )
-    ,
-      ( "Traceable"
-      , Map.fromList
-          [
-            ( TIntrinsic IString
-            , Map.fromList
-                [
-                  ( "trace"
-                  , Forall mempty [] (TIntrinsic IString `TArrow` TIntrinsic IString)
-                  )
-                ]
-            )
-          ,
-            ( TIntrinsic IInt32
-            , Map.fromList
-                [
-                  ( "trace"
-                  , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IString)
-                  )
-                ]
-            )
-          ,
-            ( TIntrinsic (ITuple [TVariable (TypeIndex KType 0), TVariable (TypeIndex KType 1)])
-            , Map.fromList
-                [
-                  ( "trace"
-                  , Forall
-                      (Set.fromList [TypeIndex KType 0, TypeIndex KType 1])
-                      [ Trait "Traceable" (TVariable (TypeIndex KType 0))
-                      , Trait "Traceable" (TVariable (TypeIndex KType 1))
-                      ]
-                      (TIntrinsic (ITuple [TVariable (TypeIndex KType 0), TVariable (TypeIndex KType 1)]) `TArrow` TIntrinsic IString)
-                  )
-                ]
-            )
-          ,
-            ( TIntrinsic (IList (TVariable (TypeIndex KType 0)))
-            , Map.fromList
-                [
-                  ( "trace"
-                  , Forall
-                      (Set.fromList [TypeIndex KType 0])
-                      [ Trait "Traceable" (TVariable (TypeIndex KType 0))
-                      ]
-                      (TIntrinsic (IList (TVariable (TypeIndex KType 0))) `TArrow` TIntrinsic IString)
-                  )
-                ]
-            )
-          ]
-      )
+--    ,
+--      ( "Traceable"
+--      , Map.fromList
+--          [
+--            ( TIntrinsic IString
+--            , Map.fromList
+--                [
+--                  ( "trace"
+--                  , Forall mempty [] (TIntrinsic IString `TArrow` TIntrinsic IString)
+--                  )
+--                ]
+--            )
+--          ,
+--            ( TIntrinsic IInt32
+--            , Map.fromList
+--                [
+--                  ( "trace"
+--                  , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IString)
+--                  )
+--                ]
+--            )
+--          ,
+--            ( TIntrinsic (ITuple [TVariable (TypeIndex KType 0), TVariable (TypeIndex KType 1)])
+--            , Map.fromList
+--                [
+--                  ( "trace"
+--                  , Forall
+--                      (Set.fromList [TypeIndex KType 0, TypeIndex KType 1])
+--                      [ Trait "Traceable" (TVariable (TypeIndex KType 0))
+--                      , Trait "Traceable" (TVariable (TypeIndex KType 1))
+--                      ]
+--                      (TIntrinsic (ITuple [TVariable (TypeIndex KType 0), TVariable (TypeIndex KType 1)]) `TArrow` TIntrinsic IString)
+--                  )
+--                ]
+--            )
+--          ,
+--            ( TIntrinsic (IList (TVariable (TypeIndex KType 0)))
+--            , Map.fromList
+--                [
+--                  ( "trace"
+--                  , Forall
+--                      (Set.fromList [TypeIndex KType 0])
+--                      [ Trait "Traceable" (TVariable (TypeIndex KType 0))
+--                      ]
+--                      (TIntrinsic (IList (TVariable (TypeIndex KType 0))) `TArrow` TIntrinsic IString)
+--                  )
+--                ]
+--            )
+--          ]
+--      )
     ]
 
 -- yy :: Environment (Scheme TypeIndex Kind (Type TypeIndex Kind))
