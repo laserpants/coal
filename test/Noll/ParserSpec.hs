@@ -1018,6 +1018,20 @@ spec =
               Definition () Kind ()
           )
     it "" $ do
+      runParser parseTraitDefinition "" "trait Ordered(a : *) { compare : a -> a -> Ordering }"
+        == Right
+          ( DTrait
+              "Ordered"
+              []
+              (Parameter KType "a")
+              [
+                ( "compare"
+                , TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TConstructor () "Ordering"
+                )
+              ] ::
+              Definition () Kind ()
+          )
+    it "" $ do
       runParser parseTraitInstance "" "instance Ordered(int32) { fn compare(x, y) = if (x < y) then LessThan else if (x > y) then GreaterThan else EqualTo; }"
         == Right
           ( DInstance
