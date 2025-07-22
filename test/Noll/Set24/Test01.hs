@@ -22,7 +22,7 @@ moduleMain =
   Module.fromDefinitionList
     (Path ["Main"])
     -- Exports
-    []
+    ["*"]
     -- Definitions
     [ DImport (Path ["Core$"]) ["trace_int32", "trace_bool", "not", "always", "from_int32", "from_int32__$instance_Numeric(Intrinsic(Int32))"]
     , DType
@@ -487,7 +487,12 @@ moduleMain =
                             ( CPlain
                                 ()
                                 []
-                                (ELiteral () (LInt32 12445))
+                                ( EApplication
+                                    ()
+                                    ()
+                                    (EVariable () (Label () "from_int32"))
+                                    (ELiteral () (LInt32 12445) :| [])
+                                )
                                 :| []
                             )
                             <| EClause

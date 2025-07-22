@@ -850,6 +850,171 @@ abc30 = fst (runIdentity (runCompiler2T compiler2TestEnvironment prog))
 abc31 :: IO ()
 abc31 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc30]
 
+abc32 :: [String] -> IO ()
+abc32 files = do
+  ms <- traverse readFile files
+  let x = fmap parsing ms
+  let r = runIdentity (runCompiler2T compiler2TestEnvironment (steps x))
+  ms5 <- Lowpass.compileModules (moduleCore1 : fst r)
+  Lowpass.testModules ms5
+ where
+  steps mods = do
+    traceShow mods $ do
+      -- TODO: Topological sort
+      --
+      forM mods $
+        \mod -> do
+          -- ms2 <- traverse typePass mods
+          insertNamesC
+            [
+              ( "trace"
+              , Forall
+                  (Set.fromList [TypeIndex KType 0] :: Set (TypeIndex Kind))
+                  [Trait "Traceable" (TVariable (TypeIndex KType 0))]
+                  (TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IString)
+              )
+            ,
+              ( "pair_to_string"
+              , Forall
+                  (Set.fromList [TypeIndex KType 0, TypeIndex KType 1] :: Set (TypeIndex Kind))
+                  [ Trait "Traceable" (TVariable (TypeIndex KType 0))
+                  , Trait "Traceable" (TVariable (TypeIndex KType 1))
+                  ]
+                  (TIntrinsic (ITuple [TVariable (TypeIndex KType 0), TVariable (TypeIndex KType 1)]) `TArrow` TIntrinsic IString)
+              )
+            ,
+              ( "list_to_string"
+              , Forall
+                  (Set.fromList [TypeIndex KType 0] :: Set (TypeIndex Kind))
+                  [ Trait "Traceable" (TVariable (TypeIndex KType 0))
+                  ]
+                  (TIntrinsic (IList (TVariable (TypeIndex KType 0))) `TArrow` TIntrinsic IString)
+              )
+            ,
+              ( "operator__not"
+              , Forall mempty [] (TIntrinsic IBool `TArrow` TIntrinsic IBool)
+              )
+            ,
+              ( "not"
+              , Forall mempty [] (TIntrinsic IBool `TArrow` TIntrinsic IBool)
+              )
+            ,
+              ( "operator__reverse_composition"
+              , Forall
+                  (Set.fromList [TypeIndex KType 0, TypeIndex KType 1, TypeIndex KType 2])
+                  []
+                  ( (TVariable (TypeIndex KType 1) `TArrow` TVariable (TypeIndex KType 2))
+                      `TArrow` (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 1))
+                      `TArrow` TVariable (TypeIndex KType 0)
+                      `TArrow` TVariable (TypeIndex KType 2)
+                  )
+              )
+            ,
+              ( "operator__reverse_application"
+              , Forall
+                  (Set.fromList [TypeIndex KType 0, TypeIndex KType 1])
+                  []
+                  ( TVariable (TypeIndex KType 0)
+                      `TArrow` (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 1))
+                      `TArrow` TVariable (TypeIndex KType 1)
+                  )
+              )
+            ,
+              ( "always"
+              , Forall
+                  (Set.fromList [TypeIndex KType 0, TypeIndex KType 1])
+                  []
+                  ( TVariable (TypeIndex KType 0)
+                      `TArrow` TVariable (TypeIndex KType 1)
+                      `TArrow` TVariable (TypeIndex KType 0)
+                  )
+              )
+            ,
+              ( "operator__list_concatenation"
+              , Forall
+                  (Set.fromList [TypeIndex KType 0])
+                  []
+                  ( TIntrinsic (IList (TVariable (TypeIndex KType 0)))
+                      `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 0)))
+                      `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 0)))
+                  )
+              )
+            ,
+              ( "trace_int32"
+              , Forall
+                  (Set.fromList [TypeIndex KType 0])
+                  []
+                  ( TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0)
+                  )
+              )
+            ,
+              ( "trace_string"
+              , Forall
+                  (Set.fromList [TypeIndex KType 0])
+                  []
+                  ( TIntrinsic IString `TArrow` TVariable (TypeIndex KType 0)
+                  )
+              )
+            ,
+              ( "trace_bool"
+              , Forall
+                  (Set.fromList [TypeIndex KType 0])
+                  []
+                  ( TIntrinsic IBool `TArrow` TVariable (TypeIndex KType 0)
+                  )
+              )
+            ,
+              ( "operator__string_concatenation"
+              , Forall
+                  mempty
+                  []
+                  (TIntrinsic IString `TArrow` TIntrinsic IString `TArrow` TIntrinsic IString)
+              )
+            ,
+              ( "int32_to_string"
+              , Forall
+                  mempty
+                  []
+                  ( TIntrinsic IInt32 `TArrow` TIntrinsic IString
+                  )
+              )
+            ,
+              ( "unpack_nat"
+              , Forall
+                  mempty
+                  []
+                  ( TIntrinsic INat `TArrow` TIntrinsic IInt32
+                  )
+              )
+            ,
+              ( "pack_nat"
+              , Forall
+                  mempty
+                  []
+                  ( TIntrinsic IInt32 `TArrow` TIntrinsic INat
+                  )
+              )
+            ,
+              ( "from_int32"
+              , Forall
+                  (Set.fromList [TypeIndex KType 0] :: Set (TypeIndex Kind))
+                  [Trait "Numeric" (TVariable (TypeIndex KType 0))]
+                  (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0))
+              )
+            ]
+          compileModule_ mod
+  parsing m =
+    case runParser parseModule "" (Text.pack m) of
+      Left e ->
+        error (show e)
+      Right q ->
+        q
+
+abc33 =
+  abc32
+    [ "./test/Noll/Fixtures/03/Main.coal"
+    ]
+
 -- abc25 =
 --  abc22
 --    [ "./test/Noll/Fixtures/02/Utilities.coal"
