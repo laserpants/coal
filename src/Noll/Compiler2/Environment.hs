@@ -2,6 +2,10 @@
 {-# LANGUAGE LambdaCase #-}
 
 module Noll.Compiler2.Environment (
+  DataConstructorEnv,
+  TypeConstructorEnv,
+  TraitEnvironment,
+  InstanceEnvironment,
   Compiler2Environment (..),
   emptyCompiler2Environment,
   buildEnvironment,
@@ -24,16 +28,21 @@ import qualified Data.Set as Set
 import qualified Data.Text as Text
 import qualified Lang.Common.Environment as Environment
 
-data Compiler2Environment o k t = Compiler2Environment
-  { compiler2DataConstructorEnv :: Environment (Constructor o k t)
-  , compiler2TypeConstructorEnv :: Environment Kind
-  , compiler2TraitEnvironment :: Environment (TypeIndex Kind, Environment (Scheme TypeIndex Kind IndexedType))
-  , compiler2InstanceEnvironment :: Environment (Map IndexedType (Dictionary (Scheme TypeIndex Kind IndexedType)))
+type DataConstructorEnv = Environment (Constructor TypeIndex Kind IndexedType)
+type TypeConstructorEnv = Environment Kind
+type TraitEnvironment = Environment (TypeIndex Kind, Environment (Scheme TypeIndex Kind IndexedType))
+type InstanceEnvironment = Environment (Map IndexedType (Dictionary (Scheme TypeIndex Kind IndexedType)))
+
+data Compiler2Environment = Compiler2Environment
+  { compiler2DataConstructorEnv :: DataConstructorEnv
+  , compiler2TypeConstructorEnv :: TypeConstructorEnv
+  , compiler2TraitEnvironment :: TraitEnvironment
+  , compiler2InstanceEnvironment :: InstanceEnvironment
   , compiler2AliasEnv :: AliasEnvironment
   }
   deriving (Show, Eq, Ord, Read)
 
-emptyCompiler2Environment :: Compiler2Environment o k t
+emptyCompiler2Environment :: Compiler2Environment
 emptyCompiler2Environment =
   Compiler2Environment
     { compiler2DataConstructorEnv = mempty
@@ -43,7 +52,7 @@ emptyCompiler2Environment =
     , compiler2AliasEnv = mempty
     }
 
-buildEnvironment :: [Definition a k t] -> Compiler2Environment TypeIndex Kind IndexedType
+buildEnvironment :: [Definition a k t] -> Compiler2Environment
 buildEnvironment defs =
   Compiler2Environment
     { compiler2DataConstructorEnv = dataConstructorEnv
@@ -59,7 +68,7 @@ buildEnvironment defs =
   dataConstructorEnv = buildDataConstructorEnv typeConstructorEnv defs
   typeConstructorEnv = buildTypeConstructorEnv defs
 
-buildDataConstructorEnv :: Environment Kind -> [Definition a k t] -> Environment (Constructor TypeIndex Kind IndexedType)
+buildDataConstructorEnv :: TypeConstructorEnv -> [Definition a k t] -> DataConstructorEnv
 buildDataConstructorEnv env = Environment.fromList . concatMap go
  where
   go =
@@ -75,7 +84,7 @@ buildDataConstructorEnv env = Environment.fromList . concatMap go
    where
     t1 = evalState (instantiateVars [] env t) (0 :: Int)
 
-buildTypeConstructorEnv :: [Definition a k t] -> Environment Kind
+buildTypeConstructorEnv :: [Definition a k t] -> TypeConstructorEnv
 buildTypeConstructorEnv = Environment.fromList . concatMap go
  where
   go =
@@ -89,7 +98,7 @@ buildTypeConstructorEnv = Environment.fromList . concatMap go
       _ ->
         []
 
-buildTraitEnvironment :: Environment Kind -> [Definition a k t] -> Environment (TypeIndex Kind, Environment (Scheme TypeIndex Kind IndexedType))
+buildTraitEnvironment :: TypeConstructorEnv -> [Definition a k t] -> TraitEnvironment
 buildTraitEnvironment env = Environment.fromList . concatMap go
  where
   go =
@@ -124,11 +133,7 @@ buildAliasEnv = Environment.fromList . concatMap go
       _ ->
         []
 
-buildInstanceEnvironment ::
-  Environment Kind ->
-  Environment (TypeIndex Kind, Environment (Scheme TypeIndex Kind IndexedType)) ->
-  [Definition a k t] ->
-  Environment (Map IndexedType (Dictionary (Scheme TypeIndex Kind IndexedType)))
+buildInstanceEnvironment :: TypeConstructorEnv -> TraitEnvironment -> [Definition a k t] -> InstanceEnvironment
 buildInstanceEnvironment env1 env2 ds = execState (traverse_ go ds) mempty
  where
   go =

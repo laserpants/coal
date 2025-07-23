@@ -38,25 +38,25 @@ import Noll.SystemF
 
 import qualified Lang.Common.Environment as Environment
 
-type Compiler2Stack a m c = RWST (Compiler2Environment TypeIndex Kind IndexedType) () (Compiler2State a) m c
+type Compiler2Stack a m c = RWST Compiler2Environment () (Compiler2State a) m c
 
 newtype Compiler2T a m c = Compiler2 {compiler2Stack :: Compiler2Stack a m c}
   deriving
     ( Functor
     , Applicative
     , Monad
-    , MonadReader (Compiler2Environment TypeIndex Kind IndexedType)
+    , MonadReader Compiler2Environment
     , MonadState (Compiler2State a)
     )
 
 {-# INLINE runCompiler2T #-}
-runCompiler2T :: (Monad m) => Compiler2Environment TypeIndex Kind IndexedType -> Compiler2T a m c -> m (c, Compiler2State a)
+runCompiler2T :: (Monad m) => Compiler2Environment -> Compiler2T a m c -> m (c, Compiler2State a)
 runCompiler2T env com = do
   (c, s, _) <- runRWST (compiler2Stack com) env initialCompiler2State
   pure (c, s)
 
 {-# INLINE evalCompiler2T #-}
-evalCompiler2T :: (Monad m) => Compiler2Environment TypeIndex Kind IndexedType -> Compiler2T a m c -> m c
+evalCompiler2T :: (Monad m) => Compiler2Environment -> Compiler2T a m c -> m c
 evalCompiler2T = fst <$$$> runCompiler2T
 
 {-# INLINE compiler2ReportConstraintsGenErrors #-}

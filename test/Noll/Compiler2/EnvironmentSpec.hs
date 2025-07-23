@@ -32,14 +32,14 @@ spec =
            )
     it "" $ do
       buildEnvironment defs2
-        == ( Compiler2Environment -- Compiler2Environment mempty mempty tenv5 mempty mempty
+        == ( Compiler2Environment
               { compiler2DataConstructorEnv = mempty
               , compiler2TypeConstructorEnv = mempty
               , compiler2TraitEnvironment = tenv5
               , compiler2InstanceEnvironment = mempty
               , compiler2AliasEnv = mempty
               } ::
-              Compiler2Environment TypeIndex Kind IndexedType
+              Compiler2Environment
            )
 
     it "" $ do
