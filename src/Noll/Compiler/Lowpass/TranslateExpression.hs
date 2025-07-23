@@ -102,7 +102,7 @@ translateExpression =
     ESelect _ ll@(Label t field) e -> do
       d1 <- translateExpression e
       let
-        Lowpass.TCon _ [r] = Lowpass.typeOf d1
+        r = extractRow d1
         t1 = Lowpass.typeOf r
       pure $
         Lowpass.match
@@ -118,18 +118,15 @@ translateExpression =
               :| []
           )
     ECodataSelect a ll@(Label t field) e me -> do
-      -- TODO: DRY
       d1 <- translateExpression e
-      let
-        Lowpass.TCon _ [r] = Lowpass.typeOf d1
-        t1 = Lowpass.typeOf r
+      let r = extractRow d1
       pure
         ( Lowpass.sel
             (Lowpass.Focus field (translateLabel ll) (Label (Lowpass.dropField field r) "_"))
             (Lowpass.var (Label r "$row"))
             (Lowpass.var (translateLabel ll))
         )
-    EFocus name0 ll1 ll2 e1 e2 -> do
+    EFocus name0 ll1 ll2@(Label t1 _) e1 e2 -> do
       d1 <- translateExpression e1
       d2 <- withLocalNames [labelName ll1, labelName ll2] (translateExpression e2)
       pure $
@@ -149,7 +146,8 @@ translateExpression =
               d2
           )
      where
-      t@(Lowpass.TCon _ [r]) = Lowpass.typeOf (translateLabel ll2)
+      t = translateType t1
+      r = extractRow (translateLabel ll2)
     EPlaceholder _ t trait@(Trait name _) ->
       pure (Lowpass.var (Label (translateType t) (dictVariable name trait)))
     EFold _ _ _ _ (Just e) ->
@@ -161,6 +159,14 @@ translateExpression =
       pure (foldr (uncurry Lowpass.ext) Lowpass.nil (Map.toList exprs))
     _ ->
       error "TODO"
+
+extractRow :: (Lowpass.Typed a) => a -> Lowpass.Type
+extractRow e =
+  case Lowpass.typeOf e of
+    Lowpass.TCon _ [r] ->
+      r
+    _ ->
+      error "Implementation error"
 
 translateRecord :: (MonadReader TranslateEnvironment m, Data a) => IndexedType -> Dictionary (Expression a IndexedType) -> Maybe (Expression a IndexedType) -> m LowpassExpr
 translateRecord t d me = do
