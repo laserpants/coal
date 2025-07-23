@@ -24,7 +24,7 @@ import qualified Lang.Lowpass.Language as Lowpass
 
 type LowpassObject = Lowpass.Object Lowpass.Type (Lowpass.Expr Lowpass.Type)
 
-translateDefinition :: (MonadReader TranslateEnvironment m, Data a) => Definition a Kind IndexedType -> m [LowpassObject]
+translateDefinition :: (Show a, MonadReader TranslateEnvironment m, Data a) => Definition a Kind IndexedType -> m [LowpassObject]
 translateDefinition =
   \case
     DAnnotation _ d ->

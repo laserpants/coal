@@ -2,10 +2,10 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Compiler.Lowpass.TranslateExpression 
-  (translateExpression, 
-  translatePattern
- ) where
+module Noll.Compiler.Lowpass.TranslateExpression (
+  translateExpression,
+  translatePattern,
+) where
 
 import Control.Monad.Reader (MonadReader)
 import Data.Data (Data)
@@ -45,15 +45,15 @@ translatePrimitive =
     LString str ->
       Lowpass.PString str
 
-translateExpression :: (MonadReader TranslateEnvironment m, Data a) => Expression a IndexedType -> m LowpassExpr
+translateExpression :: (Show a, MonadReader TranslateEnvironment m, Data a) => Expression a IndexedType -> m LowpassExpr
 translateExpression =
   \case
     EAnnotation _ _ e ->
       translateExpression e
-    EApplication _ t (EUnaryOperator _ _ op) es ->
+    EApplication _ t (EUnaryOperator _ ot op) es ->
       error "TODO"
-    EApplication _ t (EBinaryOperator _ _ op) es ->
-      translateBinaryOperator t op es
+    EApplication _ t (EBinaryOperator _ ot op) es ->
+      translateBinaryOperator t ot op es
     EApplication _ t e es -> do
       xx <- translateExpression e
       xs1 <- traverse translateExpression es
@@ -93,14 +93,14 @@ translateExpression =
     ELiteral _ p ->
       pure (Lowpass.lit (translatePrimitive p))
     EIf _ _ e1 e2 e3 ->
-      Lowpass.if_ 
+      Lowpass.if_
         <$> translateExpression e1
         <*> translateExpression e2
         <*> translateExpression e3
     ERecord _ t d me ->
       translateRecord t d me
     EListCons _ _ e1 e2 ->
-      Lowpass.cons 
+      Lowpass.cons
         <$> translateExpression e1
         <*> translateExpression e2
     EListLiteral _ t [] ->
@@ -188,7 +188,7 @@ translateExpression =
     _ ->
       error "TODO"
 
-translateRecord :: (MonadReader TranslateEnvironment m, Data a) => IndexedType -> Dictionary (Expression a IndexedType) -> Maybe (Expression a IndexedType) -> m LowpassExpr
+translateRecord :: (Show a, MonadReader TranslateEnvironment m, Data a) => IndexedType -> Dictionary (Expression a IndexedType) -> Maybe (Expression a IndexedType) -> m LowpassExpr
 translateRecord t d me = do
   exprs <- traverse translateExpression d
   expr0 <- traverse translateExpression me
@@ -201,7 +201,7 @@ translateRecord t d me = do
       (Lowpass.var (Label (Lowpass.arrow t1 (Lowpass.TCon "record" [t1])) "$Record"))
       (e1 :| [])
 
-translateBinding :: (MonadReader TranslateEnvironment m, Data a) => Binding Expression a IndexedType -> m (Lowpass.Binding Lowpass.Type LowpassExpr)
+translateBinding :: (Show a, MonadReader TranslateEnvironment m, Data a) => Binding Expression a IndexedType -> m (Lowpass.Binding Lowpass.Type LowpassExpr)
 translateBinding =
   \case
     BPattern _ (PVariable _ ll) e -> do
@@ -227,7 +227,7 @@ translatePattern =
     _ ->
       error "TODO"
 
-translateClause :: (MonadReader TranslateEnvironment m, Data a) => CompiledClause a IndexedType -> m (Lowpass.Clause Lowpass.Type LowpassExpr)
+translateClause :: (Show a, MonadReader TranslateEnvironment m, Data a) => CompiledClause a IndexedType -> m (Lowpass.Clause Lowpass.Type LowpassExpr)
 translateClause =
   \case
     ECompiledClause (ll :| lls) e -> do
@@ -244,8 +244,8 @@ qualifyLabel (Label t name) = do
 translateLabel :: Label IndexedType -> Label Lowpass.Type
 translateLabel (Label t name) = Label (translateType t) name
 
-translateBinaryOperator :: (MonadReader TranslateEnvironment m, Data a) => IndexedType -> BinaryOperator -> List1 (Expression a IndexedType) -> m LowpassExpr
-translateBinaryOperator t =
+translateBinaryOperator :: (Show a, MonadReader TranslateEnvironment m, Data a) => IndexedType -> IndexedType -> BinaryOperator -> List1 (Expression a IndexedType) -> m LowpassExpr
+translateBinaryOperator t ot =
   \case
     OReverseComposition ->
       reverseCompositionOperator t
@@ -319,24 +319,28 @@ translateBinaryOperator t =
       error "TODO"
     OStringConcatenation ->
       stringConcatenationOperator
-
---    OEqualTo ->
---      binop Lowpass.OEqInt32 (TIntrinsic IInt32, TIntrinsic IInt32)
-
-    OEqualTo 
-      | TIntrinsic IInt32 == t ->
-          binop Lowpass.OEqInt32 (TIntrinsic IInt32, TIntrinsic IInt32)
-    OEqualTo
-      | TIntrinsic IInt64 == t ->
-          binop Lowpass.OEqInt64 (TIntrinsic IInt64, TIntrinsic IInt64)
-    OEqualTo
-      | TIntrinsic IFloat == t ->
-          binop Lowpass.OEqFloat (TIntrinsic IFloat, TIntrinsic IFloat)
-    OEqualTo
-      | TIntrinsic IDouble == t ->
-          binop Lowpass.OEqDouble (TIntrinsic IDouble, TIntrinsic IDouble)
+    OEqualTo ->
+      equalityOperator ot
     _ ->
       error "Not implemented"
+
+equalityOperator :: (Show a, MonadReader TranslateEnvironment m, Data a) => IndexedType -> List1 (Expression a IndexedType) -> m LowpassExpr
+equalityOperator ot (e1 :| [e2]) = do
+  xx1 <- translateExpression e1
+  xx2 <- translateExpression e2
+  case ot of
+    (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IBool) ->
+      pure (Lowpass.op (Lowpass.OEqInt32 xx1 xx2))
+    (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64 `TArrow` TIntrinsic IBool) ->
+      pure (Lowpass.op (Lowpass.OEqInt64 xx1 xx2))
+    (TIntrinsic IFloat `TArrow` TIntrinsic IFloat `TArrow` TIntrinsic IBool) ->
+      pure (Lowpass.op (Lowpass.OEqFloat xx1 xx2))
+    (TIntrinsic IDouble `TArrow` TIntrinsic IDouble `TArrow` TIntrinsic IBool) ->
+      pure (Lowpass.op (Lowpass.OEqDouble xx1 xx2))
+    _ ->
+      error "Not implemented"
+equalityOperator _ _ = do
+  error "Not implemented"
 
 stringConcatenationOperator es = do
   args <- traverse translateExpression es
@@ -356,7 +360,7 @@ listConcatenationOperator t es = do
       (Lowpass.var (Label (t1 `Lowpass.arrow` t1 `Lowpass.arrow` t1) "Core$.operator__list_concatenation"))
       args
 
-reverseCompositionOperator :: (MonadReader TranslateEnvironment m, Data a) => IndexedType -> List1 (Expression a IndexedType) -> m LowpassExpr
+reverseCompositionOperator :: (Show a, MonadReader TranslateEnvironment m, Data a) => IndexedType -> List1 (Expression a IndexedType) -> m LowpassExpr
 reverseCompositionOperator t es = do
   args <- traverse translateExpression es
   let t1 = translateType t
@@ -366,7 +370,7 @@ reverseCompositionOperator t es = do
       (Lowpass.var (Label (Lowpass.foldType t1 (Lowpass.typeOf <$> args)) "Core$.operator__reverse_composition"))
       args
 
-reverseApplicationOperator :: (MonadReader TranslateEnvironment m, Data a) => IndexedType -> List1 (Expression a IndexedType) -> m LowpassExpr
+reverseApplicationOperator :: (Show a, MonadReader TranslateEnvironment m, Data a) => IndexedType -> List1 (Expression a IndexedType) -> m LowpassExpr
 reverseApplicationOperator t es = do
   args <- traverse translateExpression es
   let t1 = translateType t
@@ -376,12 +380,14 @@ reverseApplicationOperator t es = do
       (Lowpass.var (Label (Lowpass.foldType t1 (Lowpass.typeOf <$> args)) "Core$.operator__reverse_application"))
       args
 
-binop :: (MonadReader TranslateEnvironment m, Data a) => (LowpassExpr -> LowpassExpr -> Lowpass.Op LowpassExpr) -> (IndexedType, IndexedType) -> List1 (Expression a IndexedType) -> m LowpassExpr
+binop :: (Show a, MonadReader TranslateEnvironment m, Data a) => (LowpassExpr -> LowpassExpr -> Lowpass.Op LowpassExpr) -> (IndexedType, IndexedType) -> List1 (Expression a IndexedType) -> m LowpassExpr
 binop op (t1, t2) (e1 :| [e2])
   | e1 `hasType` t1 && e2 `hasType` t2 = do
       xx1 <- translateExpression e1
       xx2 <- translateExpression e2
       pure (Lowpass.op (op xx1 xx2))
+binop _ _ _ = do
+  error "Implementation error"
 
 {-# INLINE hasType #-}
 hasType :: (Data a) => Expression a IndexedType -> IndexedType -> Bool

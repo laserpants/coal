@@ -1182,107 +1182,107 @@ testEnvironment2 =
     ]
 
 story = do
---  it "" $
---    runReader (expandAliases Noll.Set.Test01.prog1_01) testEnvironment2 == Noll.Set.Test02.prog1_02
---  it "" $
---    evalFoldExpansion "fold" 1 (compileFolds Noll.Set.Test02.prog1_02) == Noll.Set.Test03.prog1_03
---  it "" $
---    evalFoldExpansion "fold" 1 (compileFolds Noll.Set5.Test01.prog1_01) == Noll.Set5.Test03.prog1_03
---  --  it "" $
---  --    evalFoldExpansion "fold" 1 (compileFolds Noll.Set10.Test01.prog10_01) == Noll.Set10.Test03.prog10_01
---  it "" $
---    testResultExpression (Noll.CompilerExamples.Test02.baz3 Noll.Set.Test03.moduleUtils) == Noll.Set.Test04.moduleUtils
---  it "" $
---    testResultExpression (Noll.CompilerExamples.Test02.baz3 Noll.Set.Test03.moduleOrdered) == Noll.Set.Test04.moduleOrdered
---  it "" $
---    testResultExpression (Noll.CompilerExamples.Test02.baz3 Noll.Set.Test03.moduleBinarySearch) == Noll.Set.Test04.moduleBinarySearch
---  it "" $
---    testResultExpression (Noll.CompilerExamples.Test02.baz3 Noll.Set.Test03.moduleMain) == Noll.Set.Test04.moduleMain
---  it "" $
---    testResultExpression (Noll.CompilerExamples.Test02.baz3 Noll.Set5.Test03.moduleMain) == Noll.Set5.Test04.moduleMain
---  it "" $
---    normalizeObject Noll.Set.Test04.prog1_04 == Noll.Set.Test05.prog1_05
---  it "" $
---    normalizeObject Noll.Set3.Test04.prog3_04 == Noll.Set3.Test05.prog3_05
---  it "" $
---    normalizeObject Noll.Set5.Test04.prog1_04 == Noll.Set5.Test05.prog1_05
---  it "" $
---    evalPatternDesugar "v" 0 (desugarPatterns Noll.Set.Test05.moduleBinarySearch) == Noll.Set.Test06.moduleBinarySearch
---  it "" $
---    evalPatternDesugar "v" 0 (desugarPatterns Noll.Set.Test05.moduleOrdered) == Noll.Set.Test06.moduleOrdered
---  it "" $
---    evalPatternDesugar "v" 0 (desugarPatterns Noll.Set.Test05.moduleMain) == Noll.Set.Test06.moduleMain
---  it "" $
---    runIdentity (Noll.Compiler.Transform.Pattern.OrExpansion.compileOrPatterns Noll.Set.Test06.moduleUtils) == Noll.Set.Test07.moduleUtils
---  it "" $
---    runIdentity (Noll.Compiler.Transform.Pattern.OrExpansion.compileOrPatterns Noll.Set.Test06.moduleOrdered) == Noll.Set.Test07.moduleOrdered
---  it "" $
---    runIdentity (Noll.Compiler.Transform.Pattern.OrExpansion.compileOrPatterns Noll.Set.Test06.moduleBinarySearch) == Noll.Set.Test07.moduleBinarySearch
---  it "" $
---    runIdentity (Noll.Compiler.Transform.Pattern.OrExpansion.compileOrPatterns Noll.Set.Test06.moduleMain) == Noll.Set.Test07.moduleMain
---  it "" $
---    fst (runExpandRecordPatterns (compileRecordPatterns Noll.Set.Test07.moduleUtils) "row" 1) == Noll.Set.Test08.moduleUtils
---  it "" $
---    fst (runExpandRecordPatterns (compileRecordPatterns Noll.Set.Test07.moduleOrdered) "row" 1) == Noll.Set.Test08.moduleOrdered
---  it "" $
---    fst (runExpandRecordPatterns (compileRecordPatterns Noll.Set.Test07.moduleBinarySearch) "row" 1) == Noll.Set.Test08.moduleBinarySearch
---  it "" $
---    fst (runExpandRecordPatterns (compileRecordPatterns Noll.Set.Test07.moduleMain) "row" 1) == Noll.Set.Test08.moduleMain
---  it "" $
---    evalMatchMonad "match" 0 (compileMatchExprs Noll.Set.Test08.prog1_08) == Noll.Set.Test09.prog1_09
---  it "" $
---    evalMatchMonad "match" 0 (compileMatchExprs Noll.Set2.Test05.prog2_05) == Noll.Set2.Test09.prog2_09
---  it "" $
---    evalMatchMonad "match" 0 (compileMatchExprs Noll.Set5.Test05.moduleMain) == Noll.Set5.Test09.moduleMain
---  it "" $
---    fst (runIdentity (runCompiler2T compiler2TestEnvironment (typePass Noll.Set.Test01.moduleMain2))) == Noll.Set.Test04.moduleMain
---  it "" $
---    desugarAsPatterns Noll.Set10.Test03.prog10_01 == Noll.Set10.Test04.prog10_01
---
---  --  it "" $
---  --    result funLte == funLte2
---  --  it "" $
---  --    result funGt == funGt2
---  --  it "" $
---  --    result funInRange == funInRange2
---  --  it "" $
---  --    result funFromList == funFromList2
---  --  it "" $
---  --    result funSort == funSort2
---  --  it "" $
---  --    runTraitTransformZ testEnvZ2 (transformModuleZ Noll.Set.Test09.moduleUtils) (freshIdIn Noll.Set.Test09.moduleUtils) == Noll.Set.Test10.moduleUtils
---  --  it "" $
---  --    runTraitTransformZ testEnvZ2 (transformModuleZ Noll.Set.Test09.moduleOrdered) (freshIdIn Noll.Set.Test09.moduleOrdered) == Noll.Set.Test10.moduleOrdered
---  --  it "" $
---  --    runTraitTransformZ testEnvZ2 (transformModuleZ Noll.Set.Test09.moduleBinarySearch) (freshIdIn Noll.Set.Test09.moduleBinarySearch) == Noll.Set.Test10.moduleBinarySearch
---  --  it "" $
---  --    runTraitTransformZ testEnvZ2 (transformModuleZ Noll.Set.Test09.moduleMain) (freshIdIn Noll.Set.Test09.moduleMain) == Noll.Set.Test10.moduleMain
---  --  it "" $
---  --    result fixtureY1 == fixtureY1r
---  --  it "" $
---  --    result fixtureY2 == fixtureY2r
---  it "" $
---    -- TODO
---    True -- eliminateDictionaries Noll.Set.Test10.moduleUtils == Noll.Set.Test11.moduleUtils
---  it "" $
---    -- TODO
---    True -- eliminateDictionaries Noll.Set.Test10.moduleOrdered == Noll.Set.Test11.moduleOrdered
---  it "" $
---    -- TODO
---    True -- eliminateDictionaries Noll.Set.Test10.moduleBinarySearch == Noll.Set.Test11.moduleBinarySearch
---  it "" $
---    -- TODO
---    True -- eliminateDictionaries Noll.Set.Test10.moduleMain == Noll.Set.Test11.moduleMain
---  it "" $
---    denormalizeObject Noll.Set.Test11.prog1_11 == Noll.Set.Test12.prog1_12
---  it "" $
---    denormalizeObject Noll.Set2.Test10.prog2_10 == Noll.Set2.Test12.prog2_12
---  it "" $
---    denormalizeObject Noll.Set3.Test10.prog3_10 == Noll.Set3.Test12.prog3_12
---  it "" $
---    denormalizeObject Noll.Set3.Test10x.prog3_10x == Noll.Set3.Test12x.prog3_12x
---  it "" $
---    denormalizeObject Noll.Set5.Test10.prog1_10 == Noll.Set5.Test12.prog1_12
+  --  it "" $
+  --    runReader (expandAliases Noll.Set.Test01.prog1_01) testEnvironment2 == Noll.Set.Test02.prog1_02
+  --  it "" $
+  --    evalFoldExpansion "fold" 1 (compileFolds Noll.Set.Test02.prog1_02) == Noll.Set.Test03.prog1_03
+  --  it "" $
+  --    evalFoldExpansion "fold" 1 (compileFolds Noll.Set5.Test01.prog1_01) == Noll.Set5.Test03.prog1_03
+  --  --  it "" $
+  --  --    evalFoldExpansion "fold" 1 (compileFolds Noll.Set10.Test01.prog10_01) == Noll.Set10.Test03.prog10_01
+  --  it "" $
+  --    testResultExpression (Noll.CompilerExamples.Test02.baz3 Noll.Set.Test03.moduleUtils) == Noll.Set.Test04.moduleUtils
+  --  it "" $
+  --    testResultExpression (Noll.CompilerExamples.Test02.baz3 Noll.Set.Test03.moduleOrdered) == Noll.Set.Test04.moduleOrdered
+  --  it "" $
+  --    testResultExpression (Noll.CompilerExamples.Test02.baz3 Noll.Set.Test03.moduleBinarySearch) == Noll.Set.Test04.moduleBinarySearch
+  --  it "" $
+  --    testResultExpression (Noll.CompilerExamples.Test02.baz3 Noll.Set.Test03.moduleMain) == Noll.Set.Test04.moduleMain
+  --  it "" $
+  --    testResultExpression (Noll.CompilerExamples.Test02.baz3 Noll.Set5.Test03.moduleMain) == Noll.Set5.Test04.moduleMain
+  --  it "" $
+  --    normalizeObject Noll.Set.Test04.prog1_04 == Noll.Set.Test05.prog1_05
+  --  it "" $
+  --    normalizeObject Noll.Set3.Test04.prog3_04 == Noll.Set3.Test05.prog3_05
+  --  it "" $
+  --    normalizeObject Noll.Set5.Test04.prog1_04 == Noll.Set5.Test05.prog1_05
+  --  it "" $
+  --    evalPatternDesugar "v" 0 (desugarPatterns Noll.Set.Test05.moduleBinarySearch) == Noll.Set.Test06.moduleBinarySearch
+  --  it "" $
+  --    evalPatternDesugar "v" 0 (desugarPatterns Noll.Set.Test05.moduleOrdered) == Noll.Set.Test06.moduleOrdered
+  --  it "" $
+  --    evalPatternDesugar "v" 0 (desugarPatterns Noll.Set.Test05.moduleMain) == Noll.Set.Test06.moduleMain
+  --  it "" $
+  --    runIdentity (Noll.Compiler.Transform.Pattern.OrExpansion.compileOrPatterns Noll.Set.Test06.moduleUtils) == Noll.Set.Test07.moduleUtils
+  --  it "" $
+  --    runIdentity (Noll.Compiler.Transform.Pattern.OrExpansion.compileOrPatterns Noll.Set.Test06.moduleOrdered) == Noll.Set.Test07.moduleOrdered
+  --  it "" $
+  --    runIdentity (Noll.Compiler.Transform.Pattern.OrExpansion.compileOrPatterns Noll.Set.Test06.moduleBinarySearch) == Noll.Set.Test07.moduleBinarySearch
+  --  it "" $
+  --    runIdentity (Noll.Compiler.Transform.Pattern.OrExpansion.compileOrPatterns Noll.Set.Test06.moduleMain) == Noll.Set.Test07.moduleMain
+  --  it "" $
+  --    fst (runExpandRecordPatterns (compileRecordPatterns Noll.Set.Test07.moduleUtils) "row" 1) == Noll.Set.Test08.moduleUtils
+  --  it "" $
+  --    fst (runExpandRecordPatterns (compileRecordPatterns Noll.Set.Test07.moduleOrdered) "row" 1) == Noll.Set.Test08.moduleOrdered
+  --  it "" $
+  --    fst (runExpandRecordPatterns (compileRecordPatterns Noll.Set.Test07.moduleBinarySearch) "row" 1) == Noll.Set.Test08.moduleBinarySearch
+  --  it "" $
+  --    fst (runExpandRecordPatterns (compileRecordPatterns Noll.Set.Test07.moduleMain) "row" 1) == Noll.Set.Test08.moduleMain
+  --  it "" $
+  --    evalMatchMonad "match" 0 (compileMatchExprs Noll.Set.Test08.prog1_08) == Noll.Set.Test09.prog1_09
+  --  it "" $
+  --    evalMatchMonad "match" 0 (compileMatchExprs Noll.Set2.Test05.prog2_05) == Noll.Set2.Test09.prog2_09
+  --  it "" $
+  --    evalMatchMonad "match" 0 (compileMatchExprs Noll.Set5.Test05.moduleMain) == Noll.Set5.Test09.moduleMain
+  --  it "" $
+  --    fst (runIdentity (runCompiler2T compiler2TestEnvironment (typePass Noll.Set.Test01.moduleMain2))) == Noll.Set.Test04.moduleMain
+  --  it "" $
+  --    desugarAsPatterns Noll.Set10.Test03.prog10_01 == Noll.Set10.Test04.prog10_01
+  --
+  --  --  it "" $
+  --  --    result funLte == funLte2
+  --  --  it "" $
+  --  --    result funGt == funGt2
+  --  --  it "" $
+  --  --    result funInRange == funInRange2
+  --  --  it "" $
+  --  --    result funFromList == funFromList2
+  --  --  it "" $
+  --  --    result funSort == funSort2
+  --  --  it "" $
+  --  --    runTraitTransformZ testEnvZ2 (transformModuleZ Noll.Set.Test09.moduleUtils) (freshIdIn Noll.Set.Test09.moduleUtils) == Noll.Set.Test10.moduleUtils
+  --  --  it "" $
+  --  --    runTraitTransformZ testEnvZ2 (transformModuleZ Noll.Set.Test09.moduleOrdered) (freshIdIn Noll.Set.Test09.moduleOrdered) == Noll.Set.Test10.moduleOrdered
+  --  --  it "" $
+  --  --    runTraitTransformZ testEnvZ2 (transformModuleZ Noll.Set.Test09.moduleBinarySearch) (freshIdIn Noll.Set.Test09.moduleBinarySearch) == Noll.Set.Test10.moduleBinarySearch
+  --  --  it "" $
+  --  --    runTraitTransformZ testEnvZ2 (transformModuleZ Noll.Set.Test09.moduleMain) (freshIdIn Noll.Set.Test09.moduleMain) == Noll.Set.Test10.moduleMain
+  --  --  it "" $
+  --  --    result fixtureY1 == fixtureY1r
+  --  --  it "" $
+  --  --    result fixtureY2 == fixtureY2r
+  --  it "" $
+  --    -- TODO
+  --    True -- eliminateDictionaries Noll.Set.Test10.moduleUtils == Noll.Set.Test11.moduleUtils
+  --  it "" $
+  --    -- TODO
+  --    True -- eliminateDictionaries Noll.Set.Test10.moduleOrdered == Noll.Set.Test11.moduleOrdered
+  --  it "" $
+  --    -- TODO
+  --    True -- eliminateDictionaries Noll.Set.Test10.moduleBinarySearch == Noll.Set.Test11.moduleBinarySearch
+  --  it "" $
+  --    -- TODO
+  --    True -- eliminateDictionaries Noll.Set.Test10.moduleMain == Noll.Set.Test11.moduleMain
+  --  it "" $
+  --    denormalizeObject Noll.Set.Test11.prog1_11 == Noll.Set.Test12.prog1_12
+  --  it "" $
+  --    denormalizeObject Noll.Set2.Test10.prog2_10 == Noll.Set2.Test12.prog2_12
+  --  it "" $
+  --    denormalizeObject Noll.Set3.Test10.prog3_10 == Noll.Set3.Test12.prog3_12
+  --  it "" $
+  --    denormalizeObject Noll.Set3.Test10x.prog3_10x == Noll.Set3.Test12x.prog3_12x
+  --  it "" $
+  --    denormalizeObject Noll.Set5.Test10.prog1_10 == Noll.Set5.Test12.prog1_12
   it "" $
     runReader (withModuleName "Ordered" (translateDefinition orderedCompareInstance1)) testNameEnvironment == [orderedCompareInstance1Result]
   it "" $
@@ -1293,6 +1293,7 @@ story = do
     runReader (withModuleName "BinarySearch" (translateDefinition binarySearchFlatten)) testNameEnvironment == binarySearchFlattenResult
   it "" $
     runReader (withModuleName "BinarySearch" (translateDefinition binarySearchSort)) testNameEnvironment == binarySearchSortResult
+
 --  it "" $
 --    runReader (insertQualifiedNames (Environment.fromList [("sort", "BinarySearch.sort"), ("from_int32", "BinarySearch.from_int32")]) (withModuleName "Main" (translateDefinition mainMain))) testNameEnvironment == mainMainResult
 --  it "" $

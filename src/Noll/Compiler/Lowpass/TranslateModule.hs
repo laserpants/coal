@@ -17,7 +17,7 @@ import qualified Data.Text as Text
 import qualified Lang.Common.Environment as Environment
 import qualified Lang.Lowpass.Language as Lowpass
 
-translateModule :: (MonadReader TranslateEnvironment m, Data a) => Module a Kind IndexedType -> m (Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type))
+translateModule :: (Show a, MonadReader TranslateEnvironment m, Data a) => Module a Kind IndexedType -> m (Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type))
 translateModule =
   \case
     Module (Path p) _ defs ->

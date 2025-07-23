@@ -414,14 +414,142 @@ abc20 mods = do
     --
     insertNamesC
       [
-        ( "factorial"
-        , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
+        ( "trace"
+        , Forall
+            (Set.fromList [TypeIndex KType 0] :: Set (TypeIndex Kind))
+            [Trait "Traceable" (TVariable (TypeIndex KType 0))]
+            (TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IString)
+        )
+      ,
+        ( "pair_to_string"
+        , Forall
+            (Set.fromList [TypeIndex KType 0, TypeIndex KType 1] :: Set (TypeIndex Kind))
+            [ Trait "Traceable" (TVariable (TypeIndex KType 0))
+            , Trait "Traceable" (TVariable (TypeIndex KType 1))
+            ]
+            (TIntrinsic (ITuple [TVariable (TypeIndex KType 0), TVariable (TypeIndex KType 1)]) `TArrow` TIntrinsic IString)
+        )
+      ,
+        ( "list_to_string"
+        , Forall
+            (Set.fromList [TypeIndex KType 0] :: Set (TypeIndex Kind))
+            [ Trait "Traceable" (TVariable (TypeIndex KType 0))
+            ]
+            (TIntrinsic (IList (TVariable (TypeIndex KType 0))) `TArrow` TIntrinsic IString)
+        )
+      ,
+        ( "operator__not"
+        , Forall mempty [] (TIntrinsic IBool `TArrow` TIntrinsic IBool)
+        )
+      ,
+        ( "not"
+        , Forall mempty [] (TIntrinsic IBool `TArrow` TIntrinsic IBool)
+        )
+      ,
+        ( "operator__reverse_composition"
+        , Forall
+            (Set.fromList [TypeIndex KType 0, TypeIndex KType 1, TypeIndex KType 2])
+            []
+            ( (TVariable (TypeIndex KType 1) `TArrow` TVariable (TypeIndex KType 2))
+                `TArrow` (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 1))
+                `TArrow` TVariable (TypeIndex KType 0)
+                `TArrow` TVariable (TypeIndex KType 2)
+            )
+        )
+      ,
+        ( "operator__reverse_application"
+        , Forall
+            (Set.fromList [TypeIndex KType 0, TypeIndex KType 1])
+            []
+            ( TVariable (TypeIndex KType 0)
+                `TArrow` (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 1))
+                `TArrow` TVariable (TypeIndex KType 1)
+            )
+        )
+      ,
+        ( "always"
+        , Forall
+            (Set.fromList [TypeIndex KType 0, TypeIndex KType 1])
+            []
+            ( TVariable (TypeIndex KType 0)
+                `TArrow` TVariable (TypeIndex KType 1)
+                `TArrow` TVariable (TypeIndex KType 0)
+            )
+        )
+      ,
+        ( "operator__list_concatenation"
+        , Forall
+            (Set.fromList [TypeIndex KType 0])
+            []
+            ( TIntrinsic (IList (TVariable (TypeIndex KType 0)))
+                `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 0)))
+                `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 0)))
+            )
+        )
+      ,
+        ( "trace_int32"
+        , Forall
+            (Set.fromList [TypeIndex KType 0])
+            []
+            ( TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0)
+            )
+        )
+      ,
+        ( "trace_string"
+        , Forall
+            (Set.fromList [TypeIndex KType 0])
+            []
+            ( TIntrinsic IString `TArrow` TVariable (TypeIndex KType 0)
+            )
+        )
+      ,
+        ( "trace_bool"
+        , Forall
+            (Set.fromList [TypeIndex KType 0])
+            []
+            ( TIntrinsic IBool `TArrow` TVariable (TypeIndex KType 0)
+            )
+        )
+      ,
+        ( "operator__string_concatenation"
+        , Forall
+            mempty
+            []
+            (TIntrinsic IString `TArrow` TIntrinsic IString `TArrow` TIntrinsic IString)
+        )
+      ,
+        ( "int32_to_string"
+        , Forall
+            mempty
+            []
+            ( TIntrinsic IInt32 `TArrow` TIntrinsic IString
+            )
         )
       ,
         ( "unpack_nat"
-        , Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic IInt32)
+        , Forall
+            mempty
+            []
+            ( TIntrinsic INat `TArrow` TIntrinsic IInt32
+            )
+        )
+      ,
+        ( "pack_nat"
+        , Forall
+            mempty
+            []
+            ( TIntrinsic IInt32 `TArrow` TIntrinsic INat
+            )
+        )
+      ,
+        ( "from_int32"
+        , Forall
+            (Set.fromList [TypeIndex KType 0] :: Set (TypeIndex Kind))
+            [Trait "Numeric" (TVariable (TypeIndex KType 0))]
+            (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0))
         )
       ]
+
     ms2 <- forM mods $
       \m -> do
         s <- get

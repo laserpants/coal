@@ -120,7 +120,7 @@ placeholderInsertionC (Module p ns ds) = do
 lowpassMonadTrans :: (Monad m) => (c -> Reader Lowpass.TranslateEnvironment d) -> c -> Compiler2T a m d
 lowpassMonadTrans f e = pure (runReader (f e) (Lowpass.initialTranslateEnvironment mempty))
 
-lowpassTranslationC :: (Monad m, Data a) => Module a Kind IndexedType -> Compiler2T a m (Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type))
+lowpassTranslationC :: (Show a, Monad m, Data a) => Module a Kind IndexedType -> Compiler2T a m (Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type))
 lowpassTranslationC = lowpassMonadTrans translateModule
 
 --
