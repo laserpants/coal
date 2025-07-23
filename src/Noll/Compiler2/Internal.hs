@@ -35,7 +35,6 @@ import Data.Map.Strict (Map)
 import Lang.Common.Environment (Environment (..))
 import Lang.Common.Supply (Supply (..))
 import Lang.Utils (Dictionary, Name, Over, (<$$$>))
-import Noll.Compiler.Dictionaries (DictionaryEnvironment (..))
 import Noll.Compiler.Transform.Type.AliasExpansion
 import Noll.Language
 import Noll.SystemF
