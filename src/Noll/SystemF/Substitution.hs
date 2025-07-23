@@ -178,8 +178,7 @@ merge (Substitution m1) (Substitution m2)
   keys = keysSet m1 `intersection` keysSet m2
 
 substituteInScheme :: Substitution -> Scheme o Kind IndexedType -> Scheme TypeIndex Kind IndexedType
-substituteInScheme sub (Forall _ ts t) = Forall vs rs r
+substituteInScheme sub (Forall _ ts t) = Forall (typeIndexesIn r <> typeIndexesIn rs) rs r
  where
   r = apply sub t
   rs = apply sub ts
-  vs = typeIndexesIn r <> typeIndexesIn rs
