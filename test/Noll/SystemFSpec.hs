@@ -29,7 +29,7 @@ import Noll.Compiler.Transform.Pattern.RecordDesugar
 import Noll.Compiler.Transform.Type.AliasExpansion
 import Noll.Compiler.Transform.Unfold
 import Noll.Compiler2
-import Noll.Compiler2.Internal
+import Noll.Compiler2.Stack
 import Noll.Compiler2Spec (compiler2TestEnvironment)
 import Noll.Language
 import Noll.Module (Constant (..), Function (..), Module (..))

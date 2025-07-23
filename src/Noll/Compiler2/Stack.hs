@@ -4,8 +4,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
 
--- rename: Stack
-module Noll.Compiler2.Internal (
+module Noll.Compiler2.Stack (
   Compiler2T (..),
   Compiler2Environment (..),
   Compiler2State (..),
@@ -28,13 +27,13 @@ module Noll.Compiler2.Internal (
 )
 where
 
-import Noll.Compiler2.Environment (Compiler2Environment (..))
 import Control.Monad.RWS (RWST, runRWST)
 import Control.Monad.Reader (MonadReader)
 import Control.Monad.State (MonadState, modify)
 import Lang.Common.Environment (Environment (..))
 import Lang.Common.Supply (Supply (..))
 import Lang.Utils (Dictionary, Name, Over, (<$$$>))
+import Noll.Compiler2.Environment (Compiler2Environment (..))
 import Noll.Language
 import Noll.SystemF
 

@@ -2,11 +2,11 @@
 {-# LANGUAGE LambdaCase #-}
 
 module Noll.Compiler2.Environment (
-  Compiler2Environment (..), 
-  buildEnvironments, 
-  buildAliasEnv, 
-  buildInstanceEnvironment
-  ) where
+  Compiler2Environment (..),
+  buildEnvironments,
+  buildAliasEnv,
+  buildInstanceEnvironment,
+) where
 
 import Control.Monad.State (evalState, execState, modify)
 import Data.Map.Strict (Map)

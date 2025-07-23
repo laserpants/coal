@@ -19,7 +19,7 @@ import Lang.Utils (Dictionary, Name, forM, forM_)
 import Noll.Compiler.Dictionaries
 import Noll.Compiler2
 import Noll.Compiler2.Environment
-import Noll.Compiler2.Internal
+import Noll.Compiler2.Stack
 import Noll.Language.Trait
 import Noll.Parser.Module
 import Text.Megaparsec (runParser)

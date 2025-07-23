@@ -24,7 +24,7 @@ import Noll.Compiler.Transform.Pattern.Desugar
 import Noll.Compiler.Transform.Pattern.OrExpansion
 import Noll.Compiler.Transform.Type.AliasExpansion
 import Noll.Compiler.Transform.Unfold
-import Noll.Compiler2.Internal
+import Noll.Compiler2.Stack
 import Noll.Compiler2.TypeInference
 import Noll.Language
 import Noll.Module (Module (..))
