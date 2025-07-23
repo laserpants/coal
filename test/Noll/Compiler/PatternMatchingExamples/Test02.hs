@@ -2,23 +2,23 @@
 
 module Noll.Compiler.PatternMatchingExamples.Test02 where
 
---import Lang.Common.Environment (Environment (..))
---import Lang.Common.List1 (NonEmpty (..), (<|))
---import Lang.Label (Label (..))
---import Noll.Compiler.PatternMatching
---import Noll.Compiler.PatternMatching.Envelope
---import Noll.Compiler.PatternMatching.Equation
---import Noll.Compiler.PatternMatching.Rule
---import Noll.Compiler.PatternMatchingSpec.TestRunner (compilePatterns)
---import Noll.Eval (Value (..), eval)
---import Noll.Language (Expression (..), Primitive (..))
---import Test.Hspec (Spec, describe, it)
+-- import Lang.Common.Environment (Environment (..))
+-- import Lang.Common.List1 (NonEmpty (..), (<|))
+-- import Lang.Label (Label (..))
+-- import Noll.Compiler.PatternMatching
+-- import Noll.Compiler.PatternMatching.Envelope
+-- import Noll.Compiler.PatternMatching.Equation
+-- import Noll.Compiler.PatternMatching.Rule
+-- import Noll.Compiler.PatternMatchingSpec.TestRunner (compilePatterns)
+-- import Noll.Eval (Value (..), eval)
+-- import Noll.Language (Expression (..), Primitive (..))
+-- import Test.Hspec (Spec, describe, it)
 --
---import qualified Data.Map.Strict as Map
---import qualified Lang.Common.Environment as Environment
+-- import qualified Data.Map.Strict as Map
+-- import qualified Lang.Common.Environment as Environment
 --
---spec :: Spec
---spec =
+-- spec :: Spec
+-- spec =
 --  describe "" $ do
 --    it "" $ do
 --      evalWithEnv
@@ -93,8 +93,8 @@ module Noll.Compiler.PatternMatchingExamples.Test02 where
 ----   | (Cons(x, xs), Cons(y, ys)) =>
 ----       C(u1, x, xs, y, ys)
 ---- }
---fixture :: Expression () ()
---fixture =
+-- fixture :: Expression () ()
+-- fixture =
 --  evalMatchMonad
 --    "match"
 --    0
@@ -140,5 +140,5 @@ module Noll.Compiler.PatternMatchingExamples.Test02 where
 --        MFail
 --    )
 --
---evalWithEnv :: Expression () () -> Environment Value -> Value
---evalWithEnv = flip eval
+-- evalWithEnv :: Expression () () -> Environment Value -> Value
+-- evalWithEnv = flip eval

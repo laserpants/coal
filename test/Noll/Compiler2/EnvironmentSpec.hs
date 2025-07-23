@@ -2,11 +2,11 @@
 
 module Noll.Compiler2.EnvironmentSpec where
 
+import Data.Map.Strict (Map)
 import Lang.Common.Environment (Environment)
 import Lang.Common.List1 (NonEmpty (..), (<|))
-import Lang.Utils (Dictionary)
-import Data.Map.Strict (Map)
 import Lang.Label (Label (..))
+import Lang.Utils (Dictionary)
 import Noll.Compiler.Transform.Type.AliasExpansion
 import Noll.Compiler2.Environment
 import Noll.Language
@@ -23,7 +23,7 @@ spec =
     it "" $ do
       buildEnvironments defs == (tenv1, tenv2, tenv3, mempty, tenv9)
     it "" $ do
-      buildEnvironments defs2 == (mempty, mempty, tenv5, mempty, tenv9)
+      buildEnvironments defs2 == (mempty, mempty, tenv5, mempty, mempty)
     it "" $ do
       buildAliasEnv defs3 == tenv6
 
@@ -92,6 +92,30 @@ defs =
         ( "compare"
         , TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TConstructor () "Ordering"
         )
+      ]
+  , DTrait
+      "Numeric"
+      []
+      (Parameter KType "a")
+      [
+        ( "from_int32"
+        , TIntrinsic IInt32 `TArrow` TVariable (Parameter () "a")
+        )
+      ]
+  , DInstance
+      "Numeric"
+      (TIntrinsic IInt32)
+      [ DFunction
+          "from_int32"
+          ( Function
+              ()
+              (With [] ())
+              ( PVariable () (Label () "n")
+                  :| []
+              )
+              ( EVariable () (Label () "n")
+              )
+          )
       ]
   , DInstance
       "Ordered"
@@ -626,6 +650,21 @@ tenv3 :: Environment (TypeIndex Kind, Environment (Scheme TypeIndex Kind Indexed
 tenv3 =
   Environment.fromList
     [
+      ( "Numeric"
+      ,
+        ( TypeIndex KType 0
+        , Environment.fromList
+            [
+              ( "from_int32"
+              , Forall
+                  (Set.fromList [TypeIndex KType 0])
+                  []
+                  (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0))
+              )
+            ]
+        )
+      )
+    ,
       ( "Ordered"
       ,
         ( TypeIndex KType 0
@@ -698,49 +737,49 @@ tenv6 =
 defs4 :: [Definition () o ()]
 defs4 =
   [ DInstance
-        "Ordered"
-        (TIntrinsic IInt32)
-        [ DFunction
-            "compare"
-            ( Function
-                ()
-                (With [] ())
-                ( PVariable () (Label () "x")
-                    <| PVariable () (Label () "y")
-                    :| []
-                )
-                ( EIf
-                    ()
-                    ()
-                    ( EApplication
-                        ()
-                        ()
-                        (EBinaryOperator () () OLessThan)
-                        ( EVariable () (Label () "x")
-                            <| EVariable () (Label () "y")
-                            :| []
-                        )
-                    )
-                    (EConstructor () (Label () "LessThan"))
-                    ( EIf
-                        ()
-                        ()
-                        ( EApplication
-                            ()
-                            ()
-                            (EBinaryOperator () () OGreaterThan)
-                            ( EVariable () (Label () "x")
-                                <| EVariable () (Label () "y")
-                                :| []
-                            )
-                        )
-                        (EConstructor () (Label () "GreaterThan"))
-                        (EConstructor () (Label () "EqualTo"))
-                    )
-                )
-            )
-        ]
+      "Ordered"
+      (TIntrinsic IInt32)
+      [ DFunction
+          "compare"
+          ( Function
+              ()
+              (With [] ())
+              ( PVariable () (Label () "x")
+                  <| PVariable () (Label () "y")
+                  :| []
+              )
+              ( EIf
+                  ()
+                  ()
+                  ( EApplication
+                      ()
+                      ()
+                      (EBinaryOperator () () OLessThan)
+                      ( EVariable () (Label () "x")
+                          <| EVariable () (Label () "y")
+                          :| []
+                      )
+                  )
+                  (EConstructor () (Label () "LessThan"))
+                  ( EIf
+                      ()
+                      ()
+                      ( EApplication
+                          ()
+                          ()
+                          (EBinaryOperator () () OGreaterThan)
+                          ( EVariable () (Label () "x")
+                              <| EVariable () (Label () "y")
+                              :| []
+                          )
+                      )
+                      (EConstructor () (Label () "GreaterThan"))
+                      (EConstructor () (Label () "EqualTo"))
+                  )
+              )
+          )
       ]
+  ]
 
 tenv7 :: Environment (Map IndexedType (Dictionary (Scheme TypeIndex Kind IndexedType)))
 tenv7 =
@@ -778,64 +817,63 @@ tenv7 =
 defs5 :: [Definition () o ()]
 defs5 =
   [ DInstance
-        "Numeric"
-        (TIntrinsic IInt32)
-        [ DFunction
-            "from_int32"
-            ( Function
-                ()
-                (With [] ())
-                ( PVariable () (Label () "n")
-                    :| []
-                )
-                (
-                  EVariable () (Label () "n")
-                )
-             )
-        ]
+      "Numeric"
+      (TIntrinsic IInt32)
+      [ DFunction
+          "from_int32"
+          ( Function
+              ()
+              (With [] ())
+              ( PVariable () (Label () "n")
+                  :| []
+              )
+              ( EVariable () (Label () "n")
+              )
+          )
+      ]
   , DInstance
-        "Ordered"
-        (TIntrinsic IInt32)
-        [ DFunction
-            "compare"
-            ( Function
-                ()
-                (With [] ())
-                ( PVariable () (Label () "x")
-                    <| PVariable () (Label () "y")
-                    :| []
-                )
-                ( EIf
-                    ()
-                    ()
-                    ( EApplication
-                        ()
-                        ()
-                        (EBinaryOperator () () OLessThan)
-                        ( EVariable () (Label () "x")
-                            <| EVariable () (Label () "y")
-                            :| []
-                        )
-                    )
-                    (EConstructor () (Label () "LessThan"))
-                    ( EIf
-                        ()
-                        ()
-                        ( EApplication
-                            ()
-                            ()
-                            (EBinaryOperator () () OGreaterThan)
-                            ( EVariable () (Label () "x")
-                                <| EVariable () (Label () "y")
-                                :| []
-                            )
-                        )
-                        (EConstructor () (Label () "GreaterThan"))
-                        (EConstructor () (Label () "EqualTo"))
-                    )
-                )
-            )
-        ]
+      "Ordered"
+      (TIntrinsic IInt32)
+      [ DFunction
+          "compare"
+          ( Function
+              ()
+              (With [] ())
+              ( PVariable () (Label () "x")
+                  <| PVariable () (Label () "y")
+                  :| []
+              )
+              ( EIf
+                  ()
+                  ()
+                  ( EApplication
+                      ()
+                      ()
+                      (EBinaryOperator () () OLessThan)
+                      ( EVariable () (Label () "x")
+                          <| EVariable () (Label () "y")
+                          :| []
+                      )
+                  )
+                  (EConstructor () (Label () "LessThan"))
+                  ( EIf
+                      ()
+                      ()
+                      ( EApplication
+                          ()
+                          ()
+                          (EBinaryOperator () () OGreaterThan)
+                          ( EVariable () (Label () "x")
+                              <| EVariable () (Label () "y")
+                              :| []
+                          )
+                      )
+                      (EConstructor () (Label () "GreaterThan"))
+                      (EConstructor () (Label () "EqualTo"))
+                  )
+              )
+          )
+      ]
   ]
 
 tenv8 :: Environment (TypeIndex Kind, Environment (Scheme TypeIndex Kind IndexedType))
@@ -859,7 +897,8 @@ tenv8 =
             ]
         )
       )
-    , ( "Numeric"
+    ,
+      ( "Numeric"
       ,
         ( TypeIndex KType 0
         , Environment.fromList
@@ -877,7 +916,7 @@ tenv8 =
     ]
 
 tenv9 :: Environment (Map IndexedType (Dictionary (Scheme TypeIndex Kind IndexedType)))
-tenv9 = 
+tenv9 =
   Environment.fromList
     [
       ( "Numeric"
@@ -907,4 +946,4 @@ tenv9 =
             )
           ]
       )
-      ]
+    ]

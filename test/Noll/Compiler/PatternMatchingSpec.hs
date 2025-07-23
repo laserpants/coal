@@ -2,27 +2,27 @@
 
 module Noll.Compiler.PatternMatchingSpec where
 
---import Control.Monad.Identity (runIdentity)
---import Lang.Common.Environment (Environment (..))
---import Lang.Common.List1 (NonEmpty (..), (<|))
---import Lang.Label (Label (..))
---import Noll.Compiler.PatternMatching
---import Noll.Compiler.PatternMatching.Envelope
---import Noll.Compiler.PatternMatching.Equation
---import Noll.Compiler.PatternMatching.Rule
---import Noll.Compiler.PatternMatchingSpec.TestRunner (compilePatterns)
---import Noll.Eval (Value (..), eval)
---import Noll.Examples.Test07 (test07)
---import Noll.Examples.Test08 (test08)
---import Noll.Language (CompiledClause (..), Expression (..), Pattern (..), Primitive (..), With (..))
---import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
---import Test.Hspec (Spec, describe, it)
+-- import Control.Monad.Identity (runIdentity)
+-- import Lang.Common.Environment (Environment (..))
+-- import Lang.Common.List1 (NonEmpty (..), (<|))
+-- import Lang.Label (Label (..))
+-- import Noll.Compiler.PatternMatching
+-- import Noll.Compiler.PatternMatching.Envelope
+-- import Noll.Compiler.PatternMatching.Equation
+-- import Noll.Compiler.PatternMatching.Rule
+-- import Noll.Compiler.PatternMatchingSpec.TestRunner (compilePatterns)
+-- import Noll.Eval (Value (..), eval)
+-- import Noll.Examples.Test07 (test07)
+-- import Noll.Examples.Test08 (test08)
+-- import Noll.Language (CompiledClause (..), Expression (..), Pattern (..), Primitive (..), With (..))
+-- import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
+-- import Test.Hspec (Spec, describe, it)
 --
---import qualified Data.Map.Strict as Map
---import qualified Lang.Common.Environment as Environment
+-- import qualified Data.Map.Strict as Map
+-- import qualified Lang.Common.Environment as Environment
 --
---spec :: Spec
---spec = do
+-- spec :: Spec
+-- spec = do
 --  describe "" $ do
 --    testGroupByConstructor
 --    testCompileEnvelopeExpression
@@ -35,7 +35,7 @@ module Noll.Compiler.PatternMatchingSpec where
 --        (compileMatchExprs test07)
 --        == test08
 --
---bork =
+-- bork =
 --  evalMatchMonad
 --    "match"
 --    0
@@ -95,8 +95,8 @@ module Noll.Compiler.PatternMatchingSpec where
 --        MFail
 --    )
 --
---testCompilePatterns :: Spec
---testCompilePatterns =
+-- testCompilePatterns :: Spec
+-- testCompilePatterns =
 --  describe "" $
 --    it "" $
 --      evalMatchMonad
@@ -221,8 +221,8 @@ module Noll.Compiler.PatternMatchingSpec where
 --                 ]
 --          )
 --
---testCompileEnvelopeExpression :: Spec
---testCompileEnvelopeExpression =
+-- testCompileEnvelopeExpression :: Spec
+-- testCompileEnvelopeExpression =
 --  describe "compileEnvelope" $ do
 --    it "" $
 --      evalMatchMonad
@@ -587,8 +587,8 @@ module Noll.Compiler.PatternMatchingSpec where
 --        )
 --        == VPrim (LInt32 3)
 --
---testGroupByConstructor :: Spec
---testGroupByConstructor = do
+-- testGroupByConstructor :: Spec
+-- testGroupByConstructor = do
 --  describe "groupByConstructor" $ do
 --    it "" $
 --      groupByHeadConstructor

@@ -6,6 +6,7 @@ module Noll.Compiler2Spec where
 import Control.Monad ((>=>))
 import Control.Monad.Identity (runIdentity)
 import Control.Monad.State (get)
+import Data.Map.Strict (Map)
 import Data.Set (Set)
 import Data.Text (Text)
 import Debug.Trace
@@ -21,7 +22,6 @@ import Noll.Language.Trait
 import Noll.Parser.Module
 import Text.Megaparsec (runParser)
 import Text.RawString.QQ
-import Data.Map.Strict (Map)
 
 -- import Noll.Compiler2Examples.Test02 (bazz)
 

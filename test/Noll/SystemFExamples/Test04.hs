@@ -119,7 +119,7 @@ spec =
                                   ]
                               )
                               Nothing
-                            :| []
+                              :| []
                         )
                       <| EApplication
                         ()
@@ -135,9 +135,9 @@ spec =
                                   ]
                               )
                               Nothing
-                            :| []
+                              :| []
                         )
-                      :| []
+                        :| []
                   )
               )
               ( EApplication
@@ -308,7 +308,7 @@ fixture =
                             ]
                         )
                         Nothing
-                      :| []
+                        :| []
                   )
                 <| EApplication
                   ()
@@ -324,9 +324,9 @@ fixture =
                             ]
                         )
                         Nothing
-                      :| []
+                        :| []
                   )
-                :| []
+                  :| []
             )
         )
         ( EApplication
