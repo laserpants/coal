@@ -11,7 +11,7 @@ import Data.Data (Data)
 import Data.List.Extra (sortOn)
 import Lang.Common.List1 (NonEmpty ((:|)), fromList1, (<|))
 import Lang.Label (Label (..))
-import Lang.Utils (Name)
+import Lang.Utils (Name, (<$$>))
 import Noll.Compiler.Lowpass.Environment (TranslateEnvironment (..), withLocalNames)
 import Noll.Compiler.Lowpass.TranslateExpression (translateExpression, translatePattern)
 import Noll.Compiler.Lowpass.TranslateType (translateType)
@@ -44,16 +44,15 @@ translateDefinition =
       forM ins $
         \(n, t) ->
           traitAccessor name n (translateType t)
-    DInstance name t ds -> do
-      bs <- forM ds $
+    DInstance name t ds ->
+      concat <$$> forM ds $
         \case
-          DFunction name f -> do
-            translateDefinition (DFunction (name <> postfix) f)
-          DConstant name c -> do
-            translateDefinition (DConstant (name <> postfix) c)
+          DFunction n f -> do
+            translateDefinition (DFunction (n <> postfix) f)
+          DConstant n c -> do
+            translateDefinition (DConstant (n <> postfix) c)
           _ ->
             error "TODO"
-      pure (concat bs)
      where
       postfix = "__$instance_" <> serialize (Trait name t)
     _ ->
