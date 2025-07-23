@@ -1,6 +1,6 @@
 module Main {
 
-  import Core$(trace_int32, trace_bool, not, always, from_int32);
+  import Core$(trace_int32, not, always);
 
   type Ordering
     = LessThan
