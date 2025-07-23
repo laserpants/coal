@@ -104,11 +104,11 @@ buildInstanceEnvironment env1 env2 ds = execState (traverse_ go ds) mempty
       DInstance name t _ ->
         case Environment.lookup name env2 of
           Just (TypeIndex _ ix, env3) -> do
-            modify (Environment.insertWith Map.union name (Map.singleton t1 m1))
+            modify (Environment.insertWith Map.union name val)
            where
+            val = Map.singleton t1 (Map.fromList (substituteInScheme (ix `mapsTo` t1) <$$> fs))
             fs = Environment.toList env3
             t1 = evalState (instantiateVars [] env1 t) (freshId fs)
-            m1 = Map.fromList (substituteInScheme (ix `mapsTo` t1) <$$> fs)
             freshId = freshIdIn . indexSet . fmap snd
           Nothing ->
             error ("Trait '" <> Text.unpack name <> "' not in scope.")
