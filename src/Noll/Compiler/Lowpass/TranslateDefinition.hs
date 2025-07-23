@@ -11,7 +11,7 @@ import Data.Data (Data)
 import Data.List.Extra (sortOn)
 import Lang.Common.List1 (NonEmpty ((:|)), fromList1, (<|))
 import Lang.Label (Label (..))
-import Lang.Utils (Name, (<$$>))
+import Lang.Utils (Name)
 import Noll.Compiler.Lowpass.Environment (TranslateEnvironment (..), withLocalNames)
 import Noll.Compiler.Lowpass.TranslateExpression (translateExpression, translatePattern)
 import Noll.Compiler.Lowpass.TranslateType (translateType)
@@ -40,19 +40,20 @@ translateDefinition =
       c <- translateExpression e
       moduleName <- asks translateEnvironmentModule
       pure [Lowpass.OConstant (moduleName <> "." <> name) c]
-    DTrait name _ _ ins -> do
+    DTrait name _ _ ins ->
       forM ins $
         \(n, t) ->
           traitAccessor name n (translateType t)
-    DInstance name t ds ->
-      concat <$$> forM ds $
+    DInstance name t ds -> do
+      bs <- forM ds $
         \case
-          DFunction _ f -> do
+          DFunction name f -> do
             translateDefinition (DFunction (name <> postfix) f)
-          DConstant _ c -> do
+          DConstant name c -> do
             translateDefinition (DConstant (name <> postfix) c)
           _ ->
             error "TODO"
+      pure (concat bs)
      where
       postfix = "__$instance_" <> serialize (Trait name t)
     _ ->
