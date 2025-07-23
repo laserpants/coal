@@ -16,7 +16,6 @@ import Noll.Compiler.Lowpass.Environment (TranslateEnvironment (..), withLocalNa
 import Noll.Compiler.Lowpass.TranslateExpression (translateExpression, translatePattern)
 import Noll.Compiler.Lowpass.TranslateType (translateType)
 import Noll.Language
-import Noll.Language.Serializable (Serializable (..))
 import Noll.Module.Constant (Constant (..))
 import Noll.Module.Definition
 import Noll.Module.Function (Function (..))

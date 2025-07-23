@@ -2,28 +2,22 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Compiler.Lowpass.TranslateExpression (translateExpression, translatePattern) where
+module Noll.Compiler.Lowpass.TranslateExpression 
+  (translateExpression, 
+  translatePattern
+ ) where
 
-import Control.Monad.Reader (MonadReader, asks, local)
+import Control.Monad.Reader (MonadReader)
 import Data.Data (Data)
 import Data.Maybe (fromMaybe)
-import Debug.Trace (traceShow)
 import Lang.Common.List1 (List1, NonEmpty (..), fromList1, (<|))
 import Lang.Label (Label (..))
-import Lang.Utils (Dictionary, Name, Set)
+import Lang.Utils (Dictionary)
 import Noll.Compiler.Lowpass.Environment (TranslateEnvironment (..), qualifyName, withLocalName, withLocalNames)
 import Noll.Compiler.Lowpass.TranslateType (translateType)
 import Noll.Language
-import Noll.Language.Expression
-import Noll.Language.Expression.Binding
-import Noll.Language.Expression.Operator
-import Noll.Language.HasType (HasType (..))
-import Noll.Language.Pattern
-import Noll.Language.Primitive
-import Noll.Language.Serializable (serialize)
 
 import qualified Data.Map.Strict as Map
-import qualified Data.Set as Set
 import qualified Data.Text as Text
 import qualified Lang.Lowpass.Language as Lowpass
 
@@ -57,14 +51,13 @@ translateExpression =
     EAnnotation _ _ e ->
       translateExpression e
     EApplication _ t (EUnaryOperator _ _ op) es ->
-      undefined
+      error "TODO"
     EApplication _ t (EBinaryOperator _ _ op) es ->
       translateBinaryOperator t op es
     EApplication _ t e es -> do
       xx <- translateExpression e
       xs1 <- traverse translateExpression es
       pure (Lowpass.app (translateType t) xx xs1)
-    --      Lowpass.app (translateType t) (translateExpression e) (translateExpression <$> es)
     ELambda _ ps e -> do
       qqs1 <- traverse translatePattern ps
       -- (Set.insert (labelName <$> qqs1))
@@ -99,23 +92,17 @@ translateExpression =
       pure (Lowpass.var (Label (translateType t) qq))
     ELiteral _ p ->
       pure (Lowpass.lit (translatePrimitive p))
-    EIf _ _ e1 e2 e3 -> do
-      xx1 <- translateExpression e1
-      xx2 <- translateExpression e2
-      xx3 <- translateExpression e3
-      pure (Lowpass.if_ xx1 xx2 xx3)
-    -- Lowpass.if_ (translateExpression e1) (translateExpression e2) (translateExpression e3)
-    EUnaryOperator a t op ->
-      undefined
-    EBinaryOperator a t op ->
-      undefined
+    EIf _ _ e1 e2 e3 ->
+      Lowpass.if_ 
+        <$> translateExpression e1
+        <*> translateExpression e2
+        <*> translateExpression e3
     ERecord _ t d me ->
       translateRecord t d me
-    EListCons a t e1 e2 -> do
-      xx1 <- translateExpression e1
-      xx2 <- translateExpression e2
-      pure (Lowpass.cons xx1 xx2)
-    --      Lowpass.cons (translateExpression e1) (translateExpression e2)
+    EListCons _ _ e1 e2 ->
+      Lowpass.cons 
+        <$> translateExpression e1
+        <*> translateExpression e2
     EListLiteral _ t [] ->
       pure (Lowpass.var (Label (translateType t) "$Nil"))
     EListLiteral a t (e : es) ->
