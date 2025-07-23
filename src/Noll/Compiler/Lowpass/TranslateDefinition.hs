@@ -11,7 +11,7 @@ import Data.Data (Data)
 import Data.List.Extra (sortOn)
 import Lang.Common.List1 (NonEmpty ((:|)), fromList1, (<|))
 import Lang.Label (Label (..))
-import Lang.Utils (Name)
+import Lang.Utils (Name, (<$$>))
 import Noll.Compiler.Lowpass.Environment (TranslateEnvironment (..), withLocalNames)
 import Noll.Compiler.Lowpass.TranslateExpression (translateExpression, translatePattern)
 import Noll.Compiler.Lowpass.TranslateType (translateType)
@@ -38,55 +38,21 @@ translateDefinition =
       pure [Lowpass.OFunction (moduleName <> "." <> name) qs f]
     DConstant name (Constant _ With{} e) -> do
       c <- translateExpression e
-      -- pure [Lowpass.OConstant name c]
       moduleName <- asks translateEnvironmentModule
       pure [Lowpass.OConstant (moduleName <> "." <> name) c]
     DTrait name _ _ ins -> do
-      moduleName <- asks translateEnvironmentModule
       forM ins $
         \(n, t) ->
           traitAccessor name n (translateType t)
-    --    DInstance name t ds -> do
-    --      moduleName <- asks translateEnvironmentModule
-    --      bs <- forM ds $ do
-    --        \case
-    --          DFunction name f -> do
-    --            xx1 <- translateDefinition (DFunction (name <> postfix) f)
-    --            pure (name, xx1)
-    --          DConstant name c -> do
-    --            xx1 <- translateDefinition (DConstant (name <> postfix) c)
-    --            pure (name, xx1)
-    --      xx <- instanceDictionary2 postfix name t bs
-    --      pure (concatMap snd bs <> [xx])
-    --     where
-    --      postfix = "__$instance." <> hashed (Trait name t)
-    --    DInstance name t ds -> do
-    --      moduleName <- asks translateEnvironmentModule
-    --      bs <- forM ds $ do
-    --        \case
-    --          DFunction name f -> do
-    --            xx1 <- translateDefinition (DFunction (name <> postfix) f)
-    --            pure (name, xx1)
-    --          DConstant name c -> do
-    --            xx1 <- translateDefinition (DConstant (name <> postfix) c)
-    --            pure (name, xx1)
-    --      pure (concatMap snd bs)
-    --     where
-    --      --      xx <- instanceDictionary2 postfix name t bs
-    --      --      pure (concatMap snd bs <> [xx])
-    --
-    --      postfix = "__$instance_" <> serialize (Trait name t)
-    DInstance name t ds -> do
-      moduleName <- asks translateEnvironmentModule
-      bs <- forM ds $ do
+    DInstance name t ds ->
+      concat <$$> forM ds $
         \case
-          DFunction name f -> do
-            xx1 <- translateDefinition (DFunction (name <> postfix) f)
-            pure (name, xx1)
-          DConstant name c -> do
-            xx1 <- translateDefinition (DConstant (name <> postfix) c)
-            pure (name, xx1)
-      pure (concatMap snd bs)
+          DFunction _ f -> do
+            translateDefinition (DFunction (name <> postfix) f)
+          DConstant _ c -> do
+            translateDefinition (DConstant (name <> postfix) c)
+          _ ->
+            error "TODO"
      where
       postfix = "__$instance_" <> serialize (Trait name t)
     _ ->

@@ -12,7 +12,7 @@ import Data.Data (Data)
 import Data.Maybe (fromMaybe)
 import Lang.Common.List1 (List1, NonEmpty (..), fromList1, (<|))
 import Lang.Label (Label (..))
-import Lang.Utils (Dictionary)
+import Lang.Utils (Dictionary, Name)
 import Noll.Compiler.Lowpass.Environment (TranslateEnvironment (..), qualifyName, withLocalName, withLocalNames)
 import Noll.Compiler.Lowpass.TranslateType (translateType)
 import Noll.Language
@@ -45,7 +45,7 @@ translatePrimitive =
     LString str ->
       Lowpass.PString str
 
-translateExpression :: (Show a, MonadReader TranslateEnvironment m, Data a) => Expression a IndexedType -> m LowpassExpr
+translateExpression :: (MonadReader TranslateEnvironment m, Data a) => Expression a IndexedType -> m LowpassExpr
 translateExpression =
   \case
     EAnnotation _ _ e ->
@@ -54,36 +54,22 @@ translateExpression =
       error "TODO"
     EApplication _ t (EBinaryOperator _ ot op) es ->
       translateBinaryOperator t ot op es
-    EApplication _ t e es -> do
-      xx <- translateExpression e
-      xs1 <- traverse translateExpression es
-      pure (Lowpass.app (translateType t) xx xs1)
+    EApplication _ t e es ->
+      Lowpass.app (translateType t)
+        <$> translateExpression e
+        <*> traverse translateExpression es
     ELambda _ ps e -> do
-      qqs1 <- traverse translatePattern ps
-      -- (Set.insert (labelName <$> qqs1))
-      --      let sss1 = Set.fromList (labelName <$> fromList1 qqs1)
-      --      xx1 <- local (Set.union sss1) (translateExpression e)
-      xx1 <- withLocalNames (labelName <$> fromList1 qqs1) (translateExpression e)
-
-      pure (Lowpass.lam qqs1 xx1)
-    --      Lowpass.lam (translatePattern <$> ps) (translateExpression e)
+      qs <- traverse translatePattern ps
+      e1 <- withLocalNames (labelName <$> fromList1 qs) (translateExpression e)
+      pure (Lowpass.lam qs e1)
     ELet _ vs e -> do
-      vvs1 <- traverse translateBinding vs
-      -- let sss1 = Set.fromList (fromList1 (labelName . Lowpass.bindingLabel <$> vvs1))
-      -- xx1 <- local (Set.union sss1) (translateExpression e)
-
-      xx1 <- withLocalNames (labelName . Lowpass.bindingLabel <$> vvs1) (translateExpression e)
-      pure (Lowpass.let_ vvs1 xx1)
-    --      Lowpass.let_ (translateBinding <$> vs) (translateExpression e)
+      ws <- traverse translateBinding vs
+      d1 <- withLocalNames (labelName . Lowpass.bindingLabel <$> ws) (translateExpression e)
+      pure (Lowpass.let_ ws d1)
     ERecursiveLet _ (PVariable _ ll) e1 e2 -> do
-      xx1 <- withLocalName (labelName ll) (translateExpression e1)
-      -- xx2 <- local (Set.insert (labelName ll)) (translateExpression e2)
-
-      xx2 <- withLocalName (labelName ll) (translateExpression e2)
-      pure (Lowpass.let_ (Lowpass.Binding (translateLabel ll) xx1 :| []) xx2)
-    --      Lowpass.let_
-    --        (Lowpass.Binding (translateLabel ll) (translateExpression e1) :| [])
-    --        (translateExpression e2)
+      d1 <- withLocalName (labelName ll) (translateExpression e1)
+      d2 <- withLocalName (labelName ll) (translateExpression e2)
+      pure (Lowpass.let_ (Lowpass.Binding (translateLabel ll) d1 :| []) d2)
     EVariable _ (Label t name) -> do
       qq <- qualifyName name
       pure (Lowpass.var (Label (translateType t) qq))
@@ -114,14 +100,14 @@ translateExpression =
     ECompiledMatch _ t e cs ->
       Lowpass.match (translateType t) <$> translateExpression e <*> traverse translateClause cs
     ESelect _ ll@(Label t field) e -> do
-      xx1 <- translateExpression e
+      d1 <- translateExpression e
       let
-        Lowpass.TCon _ [r] = Lowpass.typeOf xx1
+        Lowpass.TCon _ [r] = Lowpass.typeOf d1
         t1 = Lowpass.typeOf r
       pure $
         Lowpass.match
           (translateType t)
-          xx1
+          d1
           ( Lowpass.Clause
               (Label (Lowpass.arrow t1 (Lowpass.TCon "record" [r])) "$Record" <| Label t1 "$row" :| [])
               ( Lowpass.sel
@@ -133,9 +119,9 @@ translateExpression =
           )
     ECodataSelect a ll@(Label t field) e me -> do
       -- TODO: DRY
-      xx1 <- translateExpression e
+      d1 <- translateExpression e
       let
-        Lowpass.TCon _ [r] = Lowpass.typeOf xx1
+        Lowpass.TCon _ [r] = Lowpass.typeOf d1
         t1 = Lowpass.typeOf r
       pure
         ( Lowpass.sel
@@ -144,14 +130,12 @@ translateExpression =
             (Lowpass.var (translateLabel ll))
         )
     EFocus name0 ll1 ll2 e1 e2 -> do
-      xx1 <- translateExpression e1
-      --      let sss1 = Set.fromList [labelName ll1, labelName ll2]
-      --      xx2 <- local (Set.union sss1) (translateExpression e2)
-      xx2 <- withLocalNames [labelName ll1, labelName ll2] (translateExpression e2)
+      d1 <- translateExpression e1
+      d2 <- withLocalNames [labelName ll1, labelName ll2] (translateExpression e2)
       pure $
         Lowpass.sel
           (Lowpass.Focus name0 (translateLabel ll1) (Label r "$rest"))
-          xx1
+          d1
           ( Lowpass.let_
               ( Lowpass.Binding
                   (translateLabel ll2)
@@ -162,33 +146,23 @@ translateExpression =
                   )
                   :| []
               )
-              xx2
+              d2
           )
      where
       t@(Lowpass.TCon _ [r]) = Lowpass.typeOf (translateLabel ll2)
-
-    --    -- Lowpass.sel
-    --    --  (Lowpass.Focus name0 (translateLabel ll1) (translateLabel ll2))
-    --    --  (translateExpression e1)
-    --    --  (translateExpression e2)
-    --    EPlaceholderLambda a ts e ->
-    --      undefined
-    --    EPlaceholderApplication a t e ts es ->
-    --      undefined
     EPlaceholder _ t trait@(Trait name _) ->
-      pure (Lowpass.var (Label (translateType t) ("$d_" <> name <> "__$instance_" <> serialize trait)))
+      pure (Lowpass.var (Label (translateType t) (dictVariable name trait)))
     EFold _ _ _ _ (Just e) ->
       translateExpression e
     EUnfold _ _ _ _ _ _ (Just e) ->
       translateExpression e
     ECodataFields _ _ fields -> do
       exprs <- traverse translateExpression fields
-      let e1 = foldr (uncurry Lowpass.ext) Lowpass.nil (Map.toList exprs)
-      pure e1
+      pure (foldr (uncurry Lowpass.ext) Lowpass.nil (Map.toList exprs))
     _ ->
       error "TODO"
 
-translateRecord :: (Show a, MonadReader TranslateEnvironment m, Data a) => IndexedType -> Dictionary (Expression a IndexedType) -> Maybe (Expression a IndexedType) -> m LowpassExpr
+translateRecord :: (MonadReader TranslateEnvironment m, Data a) => IndexedType -> Dictionary (Expression a IndexedType) -> Maybe (Expression a IndexedType) -> m LowpassExpr
 translateRecord t d me = do
   exprs <- traverse translateExpression d
   expr0 <- traverse translateExpression me
@@ -201,13 +175,13 @@ translateRecord t d me = do
       (Lowpass.var (Label (Lowpass.arrow t1 (Lowpass.TCon "record" [t1])) "$Record"))
       (e1 :| [])
 
-translateBinding :: (Show a, MonadReader TranslateEnvironment m, Data a) => Binding Expression a IndexedType -> m (Lowpass.Binding Lowpass.Type LowpassExpr)
+translateBinding :: (MonadReader TranslateEnvironment m, Data a) => Binding Expression a IndexedType -> m (Lowpass.Binding Lowpass.Type LowpassExpr)
 translateBinding =
   \case
     BPattern _ (PVariable _ ll) e -> do
-      xx1 <- withLocalNames [name | name <- [labelName ll], Text.isPrefixOf "$fold" name] (translateExpression e)
-      pure (Lowpass.Binding (translateLabel ll) xx1)
-    BFunction{} ->
+      e1 <- withLocalNames [name | name <- [labelName ll], Text.isPrefixOf "$fold" name] (translateExpression e)
+      pure (Lowpass.Binding (translateLabel ll) e1)
+    _ ->
       error "Not implemented"
 
 translatePattern :: (MonadReader TranslateEnvironment m, Data a) => Pattern a IndexedType -> m (Label Lowpass.Type)
@@ -215,36 +189,43 @@ translatePattern =
   \case
     PAny a t ->
       translatePattern (PVariable a (Label t "_"))
-    PVariable a (Label t name) ->
+    PVariable _ (Label t name) ->
       pure (Label (translateType t) name)
     PAnnotation _ _ p ->
       translatePattern p
     PLiteral _ p ->
       pure (Label (translateType (typeOf p)) "_")
     PPlaceholder _ t trait@(Trait name _) ->
-      -- TODO: DRY?
-      pure (Label (translateType t) ("$d_" <> name <> "__$instance_" <> serialize trait))
+      pure (Label (translateType t) (dictVariable name trait))
     _ ->
       error "TODO"
 
-translateClause :: (Show a, MonadReader TranslateEnvironment m, Data a) => CompiledClause a IndexedType -> m (Lowpass.Clause Lowpass.Type LowpassExpr)
+dictVariable :: (Serializable t) => Name -> Trait t -> Name
+dictVariable name trait = "$d_" <> name <> "__$instance_" <> serialize trait
+
+translateClause :: (MonadReader TranslateEnvironment m, Data a) => CompiledClause a IndexedType -> m (Lowpass.Clause Lowpass.Type LowpassExpr)
 translateClause =
   \case
     ECompiledClause (ll :| lls) e -> do
-      xx1 <- withLocalNames (labelName <$> lls) (translateExpression e)
-      qq <- qualifyLabel ll
-      pure (Lowpass.Clause (translateLabel <$> (qq :| lls)) xx1)
+      e1 <- withLocalNames (labelName <$> lls) (translateExpression e)
+      ll0 <- qualifyLabel ll
+      pure (Lowpass.Clause (translateLabel <$> (ll0 :| lls)) e1)
 
+{-# INLINE qualifyLabel #-}
 qualifyLabel :: (MonadReader TranslateEnvironment m) => Label IndexedType -> m (Label IndexedType)
-qualifyLabel (Label t name) = do
-  qq <- qualifyName name
-  pure (Label t qq)
+qualifyLabel (Label t name) = Label t <$> qualifyName name
 
 {-# INLINE translateLabel #-}
 translateLabel :: Label IndexedType -> Label Lowpass.Type
 translateLabel (Label t name) = Label (translateType t) name
 
-translateBinaryOperator :: (Show a, MonadReader TranslateEnvironment m, Data a) => IndexedType -> IndexedType -> BinaryOperator -> List1 (Expression a IndexedType) -> m LowpassExpr
+translateBinaryOperator ::
+  (MonadReader TranslateEnvironment m, Data a) =>
+  IndexedType ->
+  IndexedType ->
+  BinaryOperator ->
+  List1 (Expression a IndexedType) ->
+  m LowpassExpr
 translateBinaryOperator t ot =
   \case
     OReverseComposition ->
@@ -324,24 +305,24 @@ translateBinaryOperator t ot =
     _ ->
       error "Not implemented"
 
-equalityOperator :: (Show a, MonadReader TranslateEnvironment m, Data a) => IndexedType -> List1 (Expression a IndexedType) -> m LowpassExpr
+equalityOperator :: (MonadReader TranslateEnvironment m, Data a) => IndexedType -> List1 (Expression a IndexedType) -> m LowpassExpr
 equalityOperator ot (e1 :| [e2]) = do
-  xx1 <- translateExpression e1
-  xx2 <- translateExpression e2
+  o1 <- translateExpression e1
+  o2 <- translateExpression e2
   case ot of
     (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IBool) ->
-      pure (Lowpass.op (Lowpass.OEqInt32 xx1 xx2))
+      pure (Lowpass.op (Lowpass.OEqInt32 o1 o2))
     (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64 `TArrow` TIntrinsic IBool) ->
-      pure (Lowpass.op (Lowpass.OEqInt64 xx1 xx2))
+      pure (Lowpass.op (Lowpass.OEqInt64 o1 o2))
     (TIntrinsic IFloat `TArrow` TIntrinsic IFloat `TArrow` TIntrinsic IBool) ->
-      pure (Lowpass.op (Lowpass.OEqFloat xx1 xx2))
+      pure (Lowpass.op (Lowpass.OEqFloat o1 o2))
     (TIntrinsic IDouble `TArrow` TIntrinsic IDouble `TArrow` TIntrinsic IBool) ->
-      pure (Lowpass.op (Lowpass.OEqDouble xx1 xx2))
+      pure (Lowpass.op (Lowpass.OEqDouble o1 o2))
     _ ->
       error "Not implemented"
-equalityOperator _ _ = do
-  error "Not implemented"
+equalityOperator _ _ = error "Not implemented"
 
+stringConcatenationOperator :: (MonadReader TranslateEnvironment m, Data a) => List1 (Expression a IndexedType) -> m LowpassExpr
 stringConcatenationOperator es = do
   args <- traverse translateExpression es
   let t1 = translateType (TIntrinsic IString)
@@ -351,6 +332,7 @@ stringConcatenationOperator es = do
       (Lowpass.var (Label (t1 `Lowpass.arrow` t1 `Lowpass.arrow` t1) "Core$.operator__string_concatenation"))
       args
 
+listConcatenationOperator :: (MonadReader TranslateEnvironment m, Data a) => IndexedType -> List1 (Expression a IndexedType) -> m LowpassExpr
 listConcatenationOperator t es = do
   args <- traverse translateExpression es
   let t1 = translateType t
@@ -360,7 +342,7 @@ listConcatenationOperator t es = do
       (Lowpass.var (Label (t1 `Lowpass.arrow` t1 `Lowpass.arrow` t1) "Core$.operator__list_concatenation"))
       args
 
-reverseCompositionOperator :: (Show a, MonadReader TranslateEnvironment m, Data a) => IndexedType -> List1 (Expression a IndexedType) -> m LowpassExpr
+reverseCompositionOperator :: (MonadReader TranslateEnvironment m, Data a) => IndexedType -> List1 (Expression a IndexedType) -> m LowpassExpr
 reverseCompositionOperator t es = do
   args <- traverse translateExpression es
   let t1 = translateType t
@@ -370,7 +352,7 @@ reverseCompositionOperator t es = do
       (Lowpass.var (Label (Lowpass.foldType t1 (Lowpass.typeOf <$> args)) "Core$.operator__reverse_composition"))
       args
 
-reverseApplicationOperator :: (Show a, MonadReader TranslateEnvironment m, Data a) => IndexedType -> List1 (Expression a IndexedType) -> m LowpassExpr
+reverseApplicationOperator :: (MonadReader TranslateEnvironment m, Data a) => IndexedType -> List1 (Expression a IndexedType) -> m LowpassExpr
 reverseApplicationOperator t es = do
   args <- traverse translateExpression es
   let t1 = translateType t
@@ -380,14 +362,13 @@ reverseApplicationOperator t es = do
       (Lowpass.var (Label (Lowpass.foldType t1 (Lowpass.typeOf <$> args)) "Core$.operator__reverse_application"))
       args
 
-binop :: (Show a, MonadReader TranslateEnvironment m, Data a) => (LowpassExpr -> LowpassExpr -> Lowpass.Op LowpassExpr) -> (IndexedType, IndexedType) -> List1 (Expression a IndexedType) -> m LowpassExpr
+binop :: (MonadReader TranslateEnvironment m, Data a) => (LowpassExpr -> LowpassExpr -> Lowpass.Op LowpassExpr) -> (IndexedType, IndexedType) -> List1 (Expression a IndexedType) -> m LowpassExpr
 binop op (t1, t2) (e1 :| [e2])
   | e1 `hasType` t1 && e2 `hasType` t2 = do
-      xx1 <- translateExpression e1
-      xx2 <- translateExpression e2
-      pure (Lowpass.op (op xx1 xx2))
-binop _ _ _ = do
-  error "Implementation error"
+      o1 <- translateExpression e1
+      o2 <- translateExpression e2
+      pure (Lowpass.op (op o1 o2))
+binop _ _ _ = error "Implementation error"
 
 {-# INLINE hasType #-}
 hasType :: (Data a) => Expression a IndexedType -> IndexedType -> Bool
