@@ -18,7 +18,14 @@ import qualified Data.Set as Set
 import qualified Data.Text as Text
 import qualified Lang.Common.Environment as Environment
 
-buildEnvironments :: [Definition a k t] -> (Environment Kind, Environment (Constructor TypeIndex Kind IndexedType), Environment (TypeIndex Kind, Environment (Scheme TypeIndex Kind IndexedType)), AliasEnvironment, Environment (Map IndexedType (Dictionary (Scheme TypeIndex Kind IndexedType))))
+buildEnvironments ::
+  [Definition a k t] ->
+  ( Environment Kind
+  , Environment (Constructor TypeIndex Kind IndexedType)
+  , Environment (TypeIndex Kind, Environment (Scheme TypeIndex Kind IndexedType))
+  , AliasEnvironment
+  , Environment (Map IndexedType (Dictionary (Scheme TypeIndex Kind IndexedType)))
+  )
 buildEnvironments defs = (e1, e2, e3, e4, e5)
  where
   e5 = buildInstanceEnvironment e1 e3 defs
