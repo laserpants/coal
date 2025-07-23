@@ -188,14 +188,6 @@ translateExpression =
     _ ->
       error "TODO"
 
---    t1 = Lowpass.typeOf e1
---    t = TIntrinsic IVoid -- TODO
--- pure $
---  Lowpass.app
---    (translateType t)
---    (Lowpass.var (Label (Lowpass.arrow t1 (Lowpass.TCon "record" [t1])) "$Record"))
---    (e1 :| [])
-
 translateRecord :: (MonadReader TranslateEnvironment m, Data a) => IndexedType -> Dictionary (Expression a IndexedType) -> Maybe (Expression a IndexedType) -> m LowpassExpr
 translateRecord t d me = do
   exprs <- traverse translateExpression d
@@ -215,6 +207,8 @@ translateBinding =
     BPattern _ (PVariable _ ll) e -> do
       xx1 <- withLocalNames [name | name <- [labelName ll], Text.isPrefixOf "$fold" name] (translateExpression e)
       pure (Lowpass.Binding (translateLabel ll) xx1)
+    BFunction{} ->
+      error "Not implemented"
 
 translatePattern :: (MonadReader TranslateEnvironment m, Data a) => Pattern a IndexedType -> m (Label Lowpass.Type)
 translatePattern =
@@ -325,14 +319,24 @@ translateBinaryOperator t =
       error "TODO"
     OStringConcatenation ->
       stringConcatenationOperator
-    OEqualTo ->
-      binop Lowpass.OEqInt32 (TIntrinsic IInt32, TIntrinsic IInt32)
-    OEqualTo ->
-      binop Lowpass.OEqInt64 (TIntrinsic IInt64, TIntrinsic IInt64)
-    OEqualTo ->
-      binop Lowpass.OEqFloat (TIntrinsic IFloat, TIntrinsic IFloat)
-    OEqualTo ->
-      binop Lowpass.OEqDouble (TIntrinsic IDouble, TIntrinsic IDouble)
+
+--    OEqualTo ->
+--      binop Lowpass.OEqInt32 (TIntrinsic IInt32, TIntrinsic IInt32)
+
+    OEqualTo 
+      | TIntrinsic IInt32 == t ->
+          binop Lowpass.OEqInt32 (TIntrinsic IInt32, TIntrinsic IInt32)
+    OEqualTo
+      | TIntrinsic IInt64 == t ->
+          binop Lowpass.OEqInt64 (TIntrinsic IInt64, TIntrinsic IInt64)
+    OEqualTo
+      | TIntrinsic IFloat == t ->
+          binop Lowpass.OEqFloat (TIntrinsic IFloat, TIntrinsic IFloat)
+    OEqualTo
+      | TIntrinsic IDouble == t ->
+          binop Lowpass.OEqDouble (TIntrinsic IDouble, TIntrinsic IDouble)
+    _ ->
+      error "Not implemented"
 
 stringConcatenationOperator es = do
   args <- traverse translateExpression es
