@@ -2,7 +2,6 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
--- TODO
 module Noll.Compiler.Lowpass.TranslateDefinition (translateDefinition) where
 
 import Control.Monad (forM)
@@ -16,9 +15,7 @@ import Noll.Compiler.Lowpass.Environment (TranslateEnvironment (..), withLocalNa
 import Noll.Compiler.Lowpass.TranslateExpression (translateExpression, translatePattern)
 import Noll.Compiler.Lowpass.TranslateType (translateType)
 import Noll.Language
-import Noll.Module.Constant (Constant (..))
-import Noll.Module.Definition
-import Noll.Module.Function (Function (..))
+import Noll.Module
 
 import qualified Lang.Lowpass.Language as Lowpass
 
@@ -31,7 +28,7 @@ translateDefinition =
       translateDefinition d
     DType _ _ ctors ->
       traverse translateConstructor (zip [0 ..] (sortOn constructorName ctors))
-    DFunction name (Function _ (With _ t) ps e) -> do
+    DFunction name (Function _ _ ps e) -> do
       qs <- traverse translatePattern (fromList1 ps)
       f <- withLocalNames (labelName <$> qs) (translateExpression e)
       moduleName <- asks translateEnvironmentModule
@@ -57,43 +54,6 @@ translateDefinition =
       postfix = "__$instance_" <> serialize (Trait name t)
     _ ->
       pure []
-
--- dictExpr :: Expr Lang.Type -> Expr Lang.Type
-dictExpr t r =
-  Lowpass.app
-    t
-    (Lowpass.var (Label (Lowpass.typeOf r `Lowpass.arrow` t) "$Record"))
-    (r :| [])
-
-instanceDictionary :: (MonadReader TranslateEnvironment m) => Name -> Name -> IndexedType -> [(Name, [LowpassObject])] -> m LowpassObject
-instanceDictionary postfix name t xyz = do
-  moduleName <- asks translateEnvironmentModule
-  pure $
-    Lowpass.OConstant
-      (moduleName <> "." <> name <> postfix)
-      (dictExpr d (foldr hello Lowpass.nil xyz))
- where
-  d = Lowpass.TCon name [translateType t]
-
-instanceDictionary2 :: (MonadReader TranslateEnvironment m) => Name -> Name -> Type Parameter Kind -> [(Name, [LowpassObject])] -> m LowpassObject
-instanceDictionary2 postfix name t xyz = do
-  moduleName <- asks translateEnvironmentModule
-  pure $
-    Lowpass.OConstant
-      (moduleName <> "." <> name <> postfix)
-      (dictExpr d (foldr hello Lowpass.nil xyz))
- where
-  d = Lowpass.TCon name [translateType t]
-
--- hello :: [Name] -> LowpassObject
-hello (n, obj) = Lowpass.ext n v
- where
-  v =
-    case obj of
-      [z] ->
-        Lowpass.var (Label (Lowpass.typeOf z) (Lowpass.objectName z))
-      _ ->
-        error "Implementation error"
 
 traitAccessor :: (MonadReader TranslateEnvironment m) => Name -> Name -> Lowpass.Type -> m LowpassObject
 traitAccessor trait fn t = do
