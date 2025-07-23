@@ -51,6 +51,7 @@ library
       Noll.Compiler2.Environment
       Noll.Compiler2.Parameterized
       Noll.Compiler2.Stack
+      Noll.Compiler2.State
       Noll.Compiler2.TypeInference
       Noll.Language
       Noll.Language.Constructor

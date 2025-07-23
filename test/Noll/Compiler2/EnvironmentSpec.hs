@@ -8,7 +8,7 @@ import Lang.Common.List1 (NonEmpty (..), (<|))
 import Lang.Label (Label (..))
 import Lang.Utils (Dictionary)
 import Noll.Compiler.Transform.Type.AliasExpansion
-import Noll.Compiler2.Environment 
+import Noll.Compiler2.Environment
 import Noll.Language
 import Noll.Module (Constant (..), Definition (..), Function (..), Module (..), Path (..))
 import Test.Hspec (Spec, describe, it)
