@@ -1,14 +1,18 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase #-}
 
-module Noll.Compiler2.Environment (buildEnvironments, buildAliasEnv, buildInstanceEnvironment) where
+module Noll.Compiler2.Environment (
+  Compiler2Environment (..), 
+  buildEnvironments, 
+  buildAliasEnv, 
+  buildInstanceEnvironment
+  ) where
 
 import Control.Monad.State (evalState, execState, modify)
 import Data.Map.Strict (Map)
 import Lang.Common.Environment (Environment (..))
 import Lang.Utils (Dictionary, Set, traverse_, (<$$>))
 import Noll.Compiler.Transform.Type.AliasExpansion
-import Noll.Compiler2.Internal (Compiler2Environment (..))
 import Noll.Compiler2.Parameterized
 import Noll.Language
 import Noll.Module.Definition
@@ -18,6 +22,15 @@ import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import qualified Data.Text as Text
 import qualified Lang.Common.Environment as Environment
+
+data Compiler2Environment o k t = Compiler2Environment
+  { compiler2DataConstructorEnv :: Environment (Constructor o k t)
+  , compiler2TypeConstructorEnv :: Environment Kind
+  , compiler2TraitEnvironment :: Environment (TypeIndex Kind, Environment (Scheme TypeIndex Kind IndexedType))
+  , compiler2InstanceEnvironment :: Environment (Map IndexedType (Dictionary (Scheme TypeIndex Kind IndexedType)))
+  , compiler2AliasEnv :: AliasEnvironment
+  }
+  deriving (Show, Eq, Ord, Read)
 
 buildEnvironments :: [Definition a k t] -> Compiler2Environment TypeIndex Kind IndexedType
 buildEnvironments defs =

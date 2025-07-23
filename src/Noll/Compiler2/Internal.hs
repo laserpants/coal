@@ -28,28 +28,17 @@ module Noll.Compiler2.Internal (
 )
 where
 
+import Noll.Compiler2.Environment (Compiler2Environment (..))
 import Control.Monad.RWS (RWST, runRWST)
 import Control.Monad.Reader (MonadReader)
 import Control.Monad.State (MonadState, modify)
-import Data.Map.Strict (Map)
 import Lang.Common.Environment (Environment (..))
 import Lang.Common.Supply (Supply (..))
 import Lang.Utils (Dictionary, Name, Over, (<$$$>))
-import Noll.Compiler.Transform.Type.AliasExpansion
 import Noll.Language
 import Noll.SystemF
 
 import qualified Lang.Common.Environment as Environment
-
--- TODO: move to  Environment?
-data Compiler2Environment o k t = Compiler2Environment
-  { compiler2DataConstructorEnv :: Environment (Constructor o k t)
-  , compiler2TypeConstructorEnv :: Environment Kind
-  , compiler2TraitEnvironment :: Environment (TypeIndex Kind, Environment (Scheme TypeIndex Kind IndexedType))
-  , compiler2InstanceEnvironment :: Environment (Map IndexedType (Dictionary (Scheme TypeIndex Kind IndexedType)))
-  , compiler2AliasEnv :: AliasEnvironment
-  }
-  deriving (Show, Eq, Ord, Read)
 
 type CompilerConstraint a = Constraint (InferenceRule Kind a) TypeIndex Kind IndexedType
 
