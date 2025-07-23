@@ -5,6 +5,7 @@ module Noll.Compiler2Spec where
 
 import Control.Monad ((>=>))
 import Control.Monad.Identity (runIdentity)
+import Control.Monad.Reader (local)
 import Control.Monad.State (get)
 import Data.Map.Strict (Map)
 import Data.Set (Set)
@@ -13,10 +14,11 @@ import Debug.Trace
 import Lang.Common.Environment (Environment)
 import Lang.Common.List1 (NonEmpty (..), (<|))
 import Lang.Label (Label (..))
-import Lang.Lowpass.Language (Module (..), Object (..), opaque)
+import Lang.Lowpass.Language (Object (..), moduleImports, moduleName, moduleObjects, opaque)
 import Lang.Utils (Dictionary, Name, forM, forM_)
 import Noll.Compiler.Dictionaries
 import Noll.Compiler2
+import Noll.Compiler2.Environment
 import Noll.Compiler2.Internal
 import Noll.Language.Trait
 import Noll.Parser.Module
@@ -710,16 +712,24 @@ abc32 :: [String] -> IO ()
 abc32 files = do
   ms <- traverse readFile files
   let x = fmap parsing ms
-  let r = runIdentity (runCompiler2T compiler2TestEnvironment (steps x))
+  let r = runIdentity (runCompiler2T (Compiler2Environment mempty mempty mempty mempty mempty) (steps x))
   ms5 <- Lowpass.compileModules (moduleCore1 : fst r)
   Lowpass.testModules ms5
  where
+  --  env = buildEnvironment
+  --      Compiler2Environment
+  --        { compiler2DataConstructorEnv = env1
+  --        , compiler2TypeConstructorEnv = env2
+  --        , compiler2TraitEnvironment = env3
+  --        , compiler2AliasEnv = env5
+  --        , compiler2InstanceEnvironment = env6
+  --        }
   steps mods = do
     traceShow mods $ do
       -- TODO: Topological sort
       --
       forM mods $
-        \mod -> do
+        \mod@(Module _ _ dfs) -> do
           -- ms2 <- traverse typePass mods
           insertNamesC
             [
@@ -858,7 +868,7 @@ abc32 files = do
                   (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0))
               )
             ]
-          compileModule_ mod
+          local (\_ -> buildEnvironments dfs) (compileModule_ mod)
   parsing m =
     case runParser parseModule "" (Text.pack m) of
       Left e ->

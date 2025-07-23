@@ -8,6 +8,7 @@ import Data.Map.Strict (Map)
 import Lang.Common.Environment (Environment (..))
 import Lang.Utils (Dictionary, Set, traverse_, (<$$>))
 import Noll.Compiler.Transform.Type.AliasExpansion
+import Noll.Compiler2.Internal (Compiler2Environment (..))
 import Noll.Compiler2.Parameterized
 import Noll.Language
 import Noll.Module.Definition
@@ -18,21 +19,21 @@ import qualified Data.Set as Set
 import qualified Data.Text as Text
 import qualified Lang.Common.Environment as Environment
 
-buildEnvironments ::
-  [Definition a k t] ->
-  ( Environment Kind
-  , Environment (Constructor TypeIndex Kind IndexedType)
-  , Environment (TypeIndex Kind, Environment (Scheme TypeIndex Kind IndexedType))
-  , AliasEnvironment
-  , Environment (Map IndexedType (Dictionary (Scheme TypeIndex Kind IndexedType)))
-  )
-buildEnvironments defs = (e1, e2, e3, e4, e5)
+buildEnvironments :: [Definition a k t] -> Compiler2Environment TypeIndex Kind IndexedType
+buildEnvironments defs =
+  Compiler2Environment
+    { compiler2DataConstructorEnv = dataConstructorEnv
+    , compiler2TypeConstructorEnv = typeConstructorEnv
+    , compiler2TraitEnvironment = traitEnvironment
+    , compiler2InstanceEnvironment = instanceEnvironment
+    , compiler2AliasEnv = aliasEnv
+    }
  where
-  e5 = buildInstanceEnvironment e1 e3 defs
-  e4 = buildAliasEnv defs
-  e3 = buildTraitEnvironment e1 defs
-  e2 = buildDataConstructorEnv e1 defs
-  e1 = buildTypeConstructorEnv defs
+  instanceEnvironment = buildInstanceEnvironment typeConstructorEnv traitEnvironment defs
+  aliasEnv = buildAliasEnv defs
+  traitEnvironment = buildTraitEnvironment typeConstructorEnv defs
+  dataConstructorEnv = buildDataConstructorEnv typeConstructorEnv defs
+  typeConstructorEnv = buildTypeConstructorEnv defs
 
 buildDataConstructorEnv :: Environment Kind -> [Definition a k t] -> Environment (Constructor TypeIndex Kind IndexedType)
 buildDataConstructorEnv env = Environment.fromList . concatMap go

@@ -9,6 +9,7 @@ import Lang.Label (Label (..))
 import Lang.Utils (Dictionary)
 import Noll.Compiler.Transform.Type.AliasExpansion
 import Noll.Compiler2.Environment
+import Noll.Compiler2.Internal (Compiler2Environment (..))
 import Noll.Language
 import Noll.Module (Constant (..), Definition (..), Function (..), Module (..), Path (..))
 import Test.Hspec (Spec, describe, it)
@@ -21,9 +22,27 @@ spec :: Spec
 spec =
   describe "Noll.Compiler" $ do
     it "" $ do
-      buildEnvironments defs == (tenv1, tenv2, tenv3, mempty, tenv9)
+      buildEnvironments defs
+        == ( Compiler2Environment
+              { compiler2DataConstructorEnv = tenv2
+              , compiler2TypeConstructorEnv = tenv1
+              , compiler2TraitEnvironment = tenv3
+              , compiler2InstanceEnvironment = tenv9
+              , compiler2AliasEnv = mempty
+              }
+           )
     it "" $ do
-      buildEnvironments defs2 == (mempty, mempty, tenv5, mempty, mempty)
+      buildEnvironments defs2
+        == ( Compiler2Environment -- Compiler2Environment mempty mempty tenv5 mempty mempty
+              { compiler2DataConstructorEnv = mempty
+              , compiler2TypeConstructorEnv = mempty
+              , compiler2TraitEnvironment = tenv5
+              , compiler2InstanceEnvironment = mempty
+              , compiler2AliasEnv = mempty
+              } ::
+              Compiler2Environment TypeIndex Kind IndexedType
+           )
+
     it "" $ do
       buildAliasEnv defs3 == tenv6
 
@@ -587,7 +606,7 @@ tenv1 =
       )
     ]
 
-tree0 :: IndexedType
+-- tree0 :: IndexedType
 tree0 =
   TApplication
     KType
