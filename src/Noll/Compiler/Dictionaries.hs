@@ -119,13 +119,7 @@ findFirstMatch (Trait name t1) = do
           Left{} ->
             Nothing
           Right sub ->
-            Just (k, Map.map (applySpecial sub) env)
-
-applySpecial :: Substitution -> Scheme TypeIndex Kind IndexedType -> Scheme TypeIndex Kind IndexedType
-applySpecial sub (Forall _ ts t) = Forall (typeIndexesIn t' <> typeIndexesIn ts') ts' t'
- where
-  t' = apply sub t
-  ts' = apply sub ts
+            Just (k, Map.map (substituteInScheme sub) env)
 
 mapEntriesM :: (Monad m) => Dictionary (Scheme TypeIndex Kind IndexedType) -> ((Name, Scheme TypeIndex Kind IndexedType) -> m (Name, Expression a IndexedType)) -> m (Maybe (Dictionary (Expression a IndexedType)))
 mapEntriesM b f = Just . Map.fromList <$> traverse f (Map.toList b)

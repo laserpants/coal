@@ -6,12 +6,12 @@ module Noll.Compiler2.Environment (buildEnvironments, buildAliasEnv, buildInstan
 import Control.Monad.State (evalState, execState, modify)
 import Data.Map.Strict (Map)
 import Lang.Common.Environment (Environment (..))
-import Lang.Utils (Dictionary, traverse_, (<$$>))
+import Lang.Utils (Dictionary, Set, traverse_, (<$$>))
 import Noll.Compiler.Transform.Type.AliasExpansion
 import Noll.Compiler2.Parameterized
 import Noll.Language
 import Noll.Module.Definition
-import Noll.SystemF.Substitution (Substitution, apply, mapsTo)
+import Noll.SystemF.Substitution (mapsTo, substituteInScheme)
 
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
@@ -104,20 +104,16 @@ buildInstanceEnvironment env1 env2 ds = execState (traverse_ go ds) mempty
       DInstance name t _ ->
         case Environment.lookup name env2 of
           Just (TypeIndex _ ix, env3) -> do
-            modify (Environment.insertWith Map.union name (Map.singleton t1 mp))
+            modify (Environment.insertWith Map.union name (Map.singleton t1 m1))
            where
             fs = Environment.toList env3
             t1 = evalState (instantiateVars [] env1 t) (freshId fs)
-            mp = Map.fromList (instantiate (ix `mapsTo` t1) <$$> fs)
-            freshId = freshIdIn . Set.unions . fmap (vars . snd)
-            vars (Forall vs _ _) = vs
+            m1 = Map.fromList (substituteInScheme (ix `mapsTo` t1) <$$> fs)
+            freshId = freshIdIn . indexSet . fmap snd
           Nothing ->
             error ("Trait '" <> Text.unpack name <> "' not in scope.")
       _ ->
         pure ()
 
--- TODO: DRY (see applySpecial)
-instantiate :: Substitution -> Scheme o Kind IndexedType -> Scheme TypeIndex Kind IndexedType
-instantiate sub (Forall _ ts t) = Forall (typeIndexesIn s) (apply sub ts) s
- where
-  s = apply sub t
+indexSet :: [Scheme TypeIndex Kind t] -> Set (TypeIndex Kind)
+indexSet = Set.unions . fmap vars where vars (Forall vs _ _) = vs
