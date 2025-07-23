@@ -21,7 +21,7 @@ spec :: Spec
 spec =
   describe "Noll.Compiler" $ do
     it "" $ do
-      buildEnvironments defs
+      buildEnvironment defs
         == ( Compiler2Environment
               { compiler2DataConstructorEnv = tenv2
               , compiler2TypeConstructorEnv = tenv1
@@ -31,7 +31,7 @@ spec =
               }
            )
     it "" $ do
-      buildEnvironments defs2
+      buildEnvironment defs2
         == ( Compiler2Environment -- Compiler2Environment mempty mempty tenv5 mempty mempty
               { compiler2DataConstructorEnv = mempty
               , compiler2TypeConstructorEnv = mempty

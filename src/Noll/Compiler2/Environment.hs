@@ -3,7 +3,7 @@
 
 module Noll.Compiler2.Environment (
   Compiler2Environment (..),
-  buildEnvironments,
+  buildEnvironment,
   buildAliasEnv,
   buildInstanceEnvironment,
 ) where
@@ -32,8 +32,8 @@ data Compiler2Environment o k t = Compiler2Environment
   }
   deriving (Show, Eq, Ord, Read)
 
-buildEnvironments :: [Definition a k t] -> Compiler2Environment TypeIndex Kind IndexedType
-buildEnvironments defs =
+buildEnvironment :: [Definition a k t] -> Compiler2Environment TypeIndex Kind IndexedType
+buildEnvironment defs =
   Compiler2Environment
     { compiler2DataConstructorEnv = dataConstructorEnv
     , compiler2TypeConstructorEnv = typeConstructorEnv

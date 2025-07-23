@@ -868,7 +868,7 @@ abc32 files = do
                   (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0))
               )
             ]
-          local (\_ -> buildEnvironments dfs) (compileModule_ mod)
+          local (\_ -> buildEnvironment dfs) (compileModule_ mod)
   parsing m =
     case runParser parseModule "" (Text.pack m) of
       Left e ->
