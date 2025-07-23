@@ -712,7 +712,7 @@ abc32 :: [String] -> IO ()
 abc32 files = do
   ms <- traverse readFile files
   let x = fmap parsing ms
-  let r = runIdentity (runCompiler2T (Compiler2Environment mempty mempty mempty mempty mempty) (steps x))
+  let r = runIdentity (runCompiler2T emptyCompiler2Environment (steps x))
   ms5 <- Lowpass.compileModules (moduleCore1 : fst r)
   Lowpass.testModules ms5
  where

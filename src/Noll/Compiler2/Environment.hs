@@ -3,6 +3,7 @@
 
 module Noll.Compiler2.Environment (
   Compiler2Environment (..),
+  emptyCompiler2Environment,
   buildEnvironment,
   buildAliasEnv,
   buildInstanceEnvironment,
@@ -31,6 +32,16 @@ data Compiler2Environment o k t = Compiler2Environment
   , compiler2AliasEnv :: AliasEnvironment
   }
   deriving (Show, Eq, Ord, Read)
+
+emptyCompiler2Environment :: Compiler2Environment o k t
+emptyCompiler2Environment =
+  Compiler2Environment
+    { compiler2DataConstructorEnv = mempty
+    , compiler2TypeConstructorEnv = mempty
+    , compiler2TraitEnvironment = mempty
+    , compiler2InstanceEnvironment = mempty
+    , compiler2AliasEnv = mempty
+    }
 
 buildEnvironment :: [Definition a k t] -> Compiler2Environment TypeIndex Kind IndexedType
 buildEnvironment defs =
