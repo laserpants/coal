@@ -17,7 +17,7 @@ import Control.Monad.State (evalState, execState, modify)
 import Data.Map.Strict (Map)
 import Lang.Common.Environment (Environment (..))
 import Lang.Utils (Dictionary, Set, traverse_, (<$$>))
-import Noll.Compiler.Parameterized
+import Noll.Compiler.Transform.Type.Parameterized
 import Noll.Compiler.Transform.Type.AliasExpansion
 import Noll.Language
 import Noll.Module.Definition

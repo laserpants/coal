@@ -17,7 +17,7 @@ import Lang.Common.List1 (NonEmpty (..))
 import Lang.Common.Supply (supplied)
 import Lang.Label (Label (..))
 import Lang.Utils (Dictionary, Name, forM_)
-import Noll.Compiler.Parameterized
+import Noll.Compiler.Transform.Type.Parameterized
 import Noll.Compiler.Stack
 import Noll.Language
 import Noll.Module (Constant (..), Definition (..), Function (..))

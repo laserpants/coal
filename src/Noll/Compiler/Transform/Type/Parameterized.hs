@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 
-module Noll.Compiler.Parameterized where
+module Noll.Compiler.Transform.Type.Parameterized where
 
 import Control.Monad.Reader (ReaderT, asks, runReaderT)
 import Control.Monad.State (MonadState)
