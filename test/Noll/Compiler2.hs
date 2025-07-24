@@ -45,7 +45,7 @@ import Lang.Utils (Dictionary, Name, Over, forM_, (<$$$>))
 import Noll.Language
 import Noll.Language.HasType (foldTypeOf)
 import Noll.Language.Type.Indexed (indexed)
-import Noll.Module (Constant (..), Definition (..), Function (..), definitionName)
+import Noll.Language.Module (Constant (..), Definition (..), Function (..), definitionName)
 import Noll.TypeSystem
 import Noll.TypeSystem.Substitution (mapsTo)
 

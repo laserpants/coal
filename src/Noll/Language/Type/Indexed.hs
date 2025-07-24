@@ -31,7 +31,7 @@ import Noll.Language.Type.Intrinsic (Intrinsic (..))
 import Noll.Language.Type.Kind (Kind (..))
 import Noll.Language.Type.Row (Row (..))
 import Noll.Language.Type.Scheme (Scheme (..))
-import Noll.Module
+import Noll.Language.Module
 
 import qualified Data.Set as Set
 

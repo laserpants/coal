@@ -20,8 +20,8 @@ import Lang.Utils (Dictionary, Name, forM_)
 import Noll.Compiler.Transform.Type.Parameterized
 import Noll.Compiler.Stack
 import Noll.Language
-import Noll.Module (Constant (..), Definition (..), Function (..))
-import Noll.Module.Definition (definitionName)
+import Noll.Language.Module (Constant (..), Definition (..), Function (..))
+import Noll.Language.Module.Definition (definitionName)
 import Noll.TypeSystem
 
 import qualified Data.Map.Strict as Map

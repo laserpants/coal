@@ -20,7 +20,7 @@ import Lang.Utils (Dictionary, Set, traverse_, (<$$>))
 import Noll.Compiler.Transform.Type.Parameterized
 import Noll.Compiler.Transform.Type.AliasExpansion
 import Noll.Language
-import Noll.Module.Definition
+import Noll.Language.Module.Definition
 import Noll.TypeSystem.Substitution (mapsTo, substituteInScheme)
 
 import qualified Data.Map.Strict as Map

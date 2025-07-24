@@ -7,9 +7,9 @@ import Lang.Common.List1 (NonEmpty (..), (<|))
 import Lang.Label (Label (..))
 import Noll.Language
 import Noll.Language.Type.Intrinsic
-import Noll.Module
+import Noll.Language.Module
 
-import qualified Noll.Module as Module
+import qualified Noll.Language.Module as Module
 
 -- Untyped source tree
 prog3_01 :: [Module () () ()]

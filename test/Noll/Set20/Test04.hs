@@ -5,9 +5,9 @@ module Noll.Set20.Test04 where
 import Lang.Common.List1 (NonEmpty (..), (<|))
 import Lang.Label (Label (..))
 import Noll.Language
-import Noll.Module (Definition (..), Function (..), Module (..), Path (..))
+import Noll.Language.Module (Definition (..), Function (..), Module (..), Path (..))
 
-import qualified Noll.Module as Module
+import qualified Noll.Language.Module as Module
 
 prog10_04 :: [Module () Kind IndexedType]
 prog10_04 =

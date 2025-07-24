@@ -15,7 +15,7 @@ import Lang.Common.Environment (Environment)
 import Lang.Common.List1 (NonEmpty (..), fromList1)
 import Lang.Utils (Dictionary, Name)
 import Noll.Language
-import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
+import Noll.Language.Module (Constant (..), Definition (..), Function (..), Module (..))
 
 import qualified Lang.Common.Environment as Environment
 

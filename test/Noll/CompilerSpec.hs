@@ -28,7 +28,7 @@ import Text.RawString.QQ
 -- import Noll.CompilerExamples.Test02 (bazz)
 
 import Noll.Language (Constructor (..), IndexedType (..), Intrinsic (..), Kind (..), Parameter (..), Row (..), Scheme (..), Type (..), TypeIndex (..))
-import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
+import Noll.Language.Module (Constant (..), Definition (..), Function (..), Module (..))
 import Noll.TypeSystem
 import Noll.TypeSystemSpec.TestRunner
 import Test.Hspec (Spec, describe, it)
@@ -401,7 +401,7 @@ abc18 = fst (runIdentity (runCompilerT compilerTestEnvironment prog))
 abc19 :: IO ()
 abc19 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc17, abc18]
 
-abc20 :: [Noll.Module.Module () Kind ()] -> IO ()
+abc20 :: [Noll.Language.Module.Module () Kind ()] -> IO ()
 abc20 mods = do
   traceShowM r
   ms5 <- Lowpass.compileModules (moduleCore1 : fst r)
@@ -555,7 +555,7 @@ abc20 mods = do
         s <- get
         --        traceShowM s
         typePass m
-    --            let zz = m1 :: Noll.Module.Module () Kind IndexedType
+    --            let zz = m1 :: Noll.Language.Module.Module () Kind IndexedType
     ms3 <- traverse mainPass ms2
     ms4 <- traverse lowpassTranslationC ms3
     pure ms4

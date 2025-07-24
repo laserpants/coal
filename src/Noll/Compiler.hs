@@ -26,9 +26,9 @@ import Noll.Compiler.Transform.Type.AliasExpansion
 import Noll.Compiler.Transform.Unfold
 import Noll.Compiler.TypeInference
 import Noll.Language
-import Noll.Module (Module (..))
-import Noll.Module.Constant
-import Noll.Module.Definition
+import Noll.Language.Module (Module (..))
+import Noll.Language.Module.Constant
+import Noll.Language.Module.Definition
 import Noll.TypeSystem.Substitution (normalizeTypeIndexes)
 
 import qualified Lang.Lowpass.Language as Lowpass

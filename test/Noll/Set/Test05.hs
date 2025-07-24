@@ -5,11 +5,11 @@ module Noll.Set.Test05 where
 import Lang.Common.List1 (NonEmpty (..), (<|))
 import Lang.Label (Label (..))
 import Noll.Language
-import Noll.Module (Constant (..), Definition (..), Function (..), Module (..), Path (..))
+import Noll.Language.Module (Constant (..), Definition (..), Function (..), Module (..), Path (..))
 
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
-import qualified Noll.Module as Module
+import qualified Noll.Language.Module as Module
 
 -- Normalize top-level definitions
 prog1_05 :: [Module () Kind IndexedType]

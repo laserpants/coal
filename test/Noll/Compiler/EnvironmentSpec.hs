@@ -10,7 +10,7 @@ import Lang.Utils (Dictionary)
 import Noll.Compiler.Transform.Type.AliasExpansion
 import Noll.Compiler.Environment
 import Noll.Language
-import Noll.Module (Constant (..), Definition (..), Function (..), Module (..), Path (..))
+import Noll.Language.Module (Constant (..), Definition (..), Function (..), Module (..), Path (..))
 import Test.Hspec (Spec, describe, it)
 
 import qualified Data.Map.Strict as Map

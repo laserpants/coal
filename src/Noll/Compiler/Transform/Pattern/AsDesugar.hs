@@ -11,10 +11,10 @@ import Data.Generics.Uniplate.Data (descend, transformM)
 import Lang.Common.List1 (NonEmpty (..))
 import Lang.Label (Label (..))
 import Noll.Language (Choice (..), Clause (..), Expression (..), Pattern (..))
-import Noll.Module (Module (..))
-import Noll.Module.Constant (Constant (..))
-import Noll.Module.Definition (Definition (..))
-import Noll.Module.Function (Function (..))
+import Noll.Language.Module (Module (..))
+import Noll.Language.Module.Constant (Constant (..))
+import Noll.Language.Module.Definition (Definition (..))
+import Noll.Language.Module.Function (Function (..))
 
 class AsDesugarContext e where
   desugarAsPatterns :: e -> e

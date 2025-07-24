@@ -25,7 +25,7 @@ import Noll.Language (
   TypeIndex (..),
   With (..),
  )
-import Noll.Module (Constant (..), Function (..), Module (..))
+import Noll.Language.Module (Constant (..), Function (..), Module (..))
 import Noll.TypeSystemSpec.TestRunner
 import Test.Hspec (Spec, describe, hspec, it)
 

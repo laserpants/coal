@@ -2,7 +2,7 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Module.Function (Function (..)) where
+module Noll.Language.Module.Function (Function (..)) where
 
 import Data.Data (Data, Typeable)
 import Lang.Common.List1 (List1)

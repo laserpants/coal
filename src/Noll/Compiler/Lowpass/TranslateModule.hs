@@ -11,7 +11,7 @@ import Lang.Utils (Name)
 import Noll.Compiler.Lowpass.Environment (TranslateEnvironment, insertQualifiedNames, withModuleName)
 import Noll.Compiler.Lowpass.TranslateDefinition (translateDefinition)
 import Noll.Language
-import Noll.Module
+import Noll.Language.Module
 
 import qualified Data.Text as Text
 import qualified Lang.Common.Environment as Environment

@@ -33,7 +33,7 @@ import Lang.Common.Supply (supplied)
 import Lang.Label (Label (..))
 import Lang.Utils (Dictionary, Name)
 import Noll.Language
-import Noll.Module
+import Noll.Language.Module
 import Noll.TypeSystem.Substitution
 import Noll.TypeSystem.Unification
 

@@ -5,14 +5,14 @@ module Noll.Set6.Test13 where
 import Lang.Common.List1 (NonEmpty (..), (<|))
 import Lang.Label (Label (..))
 import Noll.Language
-import Noll.Module (Constant (..), Definition (..), Function (..), Module (..), Path (..))
+import Noll.Language.Module (Constant (..), Definition (..), Function (..), Module (..), Path (..))
 import Noll.TypeSystem.Constraint
 import Noll.TypeSystem.Constraint.Solver
 import Noll.TypeSystem.Substitution (Substitutable (..), Substitution (..), mapsTo)
 
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
-import qualified Noll.Module as Module
+import qualified Noll.Language.Module as Module
 
 prog1_13 :: [Module () Kind IndexedType]
 prog1_13 =

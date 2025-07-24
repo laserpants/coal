@@ -2,7 +2,7 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Module.Constant (Constant (..)) where
+module Noll.Language.Module.Constant (Constant (..)) where
 
 import Data.Data (Data, Typeable)
 

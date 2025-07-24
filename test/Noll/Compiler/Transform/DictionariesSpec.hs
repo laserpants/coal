@@ -16,7 +16,7 @@ import Lang.Label (Label (..))
 import Lang.Utils (Dictionary, Name)
 import Noll.Compiler.Transform.Dictionaries
 import Noll.Language
-import Noll.Module
+import Noll.Language.Module
 import Test.Hspec (Spec, describe, it)
 
 import qualified Data.Map.Strict as Map

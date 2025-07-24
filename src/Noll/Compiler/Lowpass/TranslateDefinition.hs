@@ -15,7 +15,7 @@ import Noll.Compiler.Lowpass.Environment (TranslateEnvironment (..), withLocalNa
 import Noll.Compiler.Lowpass.TranslateExpression (translateExpression, translatePattern)
 import Noll.Compiler.Lowpass.TranslateType (translateType)
 import Noll.Language
-import Noll.Module
+import Noll.Language.Module
 
 import qualified Lang.Lowpass.Language as Lowpass
 

@@ -5,11 +5,11 @@ module Noll.Set8.Test01 where
 import Lang.Common.List1 (NonEmpty (..), (<|))
 import Lang.Label (Label (..))
 import Noll.Language
-import Noll.Module (Definition (..), Function (..), Module (..), Path (..))
+import Noll.Language.Module (Definition (..), Function (..), Module (..), Path (..))
 
 import qualified Data.Text as Text
 import qualified Data.Text.Encoding as Text
-import qualified Noll.Module as Module
+import qualified Noll.Language.Module as Module
 
 prog7_01 :: [Module () o ()]
 prog7_01 =

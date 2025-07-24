@@ -24,7 +24,7 @@ import Noll.Compiler.PatternMatching.Equation (patternEquation)
 import Noll.Compiler.PatternMatching.Rule (MatchMonad (..), matchPatterns)
 import Noll.Compiler.Transform.Tree (replaceWith)
 import Noll.Language (Binding (..), Choice (..), Clause (..), Expression (..), Pattern (..), Primitive (..))
-import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
+import Noll.Language.Module (Constant (..), Definition (..), Function (..), Module (..))
 import TextShow
 
 class MatchExpressionContext a where

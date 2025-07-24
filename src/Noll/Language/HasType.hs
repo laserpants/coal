@@ -17,9 +17,9 @@ import Noll.Language.Trait (Trait (..))
 import Noll.Language.Type (Type (..), foldType)
 import Noll.Language.Type.Intrinsic (Intrinsic (..))
 import Noll.Language.Type.Kind (Kind (..))
-import Noll.Module.Constant (Constant (..))
-import Noll.Module.Definition (Definition (..))
-import Noll.Module.Function (Function (..))
+import Noll.Language.Module.Constant (Constant (..))
+import Noll.Language.Module.Definition (Definition (..))
+import Noll.Language.Module.Function (Function (..))
 
 class HasType o k t where
   typeOf :: t -> Type o k

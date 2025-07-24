@@ -5,11 +5,11 @@ module Noll.Set.Test12 where
 import Lang.Common.List1 (NonEmpty (..), (<|))
 import Lang.Label (Label (..))
 import Noll.Language
-import Noll.Module
+import Noll.Language.Module
 
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
-import qualified Noll.Module as Module
+import qualified Noll.Language.Module as Module
 
 -- Denormalization
 prog1_12 :: [Module () Kind IndexedType]

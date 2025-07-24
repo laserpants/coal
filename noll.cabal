@@ -60,6 +60,10 @@ library
       Noll.Language.Expression.Operator
       Noll.Language.HasKind
       Noll.Language.HasType
+      Noll.Language.Module
+      Noll.Language.Module.Constant
+      Noll.Language.Module.Definition
+      Noll.Language.Module.Function
       Noll.Language.Pattern
       Noll.Language.Primitive
       Noll.Language.Serializable
@@ -70,10 +74,6 @@ library
       Noll.Language.Type.Kind
       Noll.Language.Type.Row
       Noll.Language.Type.Scheme
-      Noll.Module
-      Noll.Module.Constant
-      Noll.Module.Definition
-      Noll.Module.Function
       Noll.Parser
       Noll.Parser.Expression
       Noll.Parser.Identifier

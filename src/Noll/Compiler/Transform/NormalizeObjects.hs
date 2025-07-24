@@ -12,10 +12,10 @@ import Noll.Language.Expression (Expression (..))
 import Noll.Language.HasType (HasType (..), foldTypeOf)
 import Noll.Language.Trait (With (..))
 import Noll.Language.Type (Type (..))
-import Noll.Module (Module (..))
-import Noll.Module.Constant (Constant (..))
-import Noll.Module.Definition (Definition (..))
-import Noll.Module.Function (Function (..))
+import Noll.Language.Module (Module (..))
+import Noll.Language.Module.Constant (Constant (..))
+import Noll.Language.Module.Definition (Definition (..))
+import Noll.Language.Module.Function (Function (..))
 
 class NormalizeObjectsTransformContext a where
   normalizeObject :: a -> a

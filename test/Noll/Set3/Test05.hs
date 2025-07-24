@@ -6,9 +6,9 @@ import Lang.Common.List1 (NonEmpty (..), (<|))
 import Lang.Label (Label (..))
 import Noll.Language
 import Noll.Language.Type.Intrinsic
-import Noll.Module
+import Noll.Language.Module
 
-import qualified Noll.Module as Module
+import qualified Noll.Language.Module as Module
 
 -- Normalize top-level definitions
 prog3_05 :: [Module () Kind IndexedType]

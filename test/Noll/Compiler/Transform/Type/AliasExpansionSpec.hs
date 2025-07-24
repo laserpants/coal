@@ -19,7 +19,7 @@ import Noll.Language (
   Type (..),
   With (..),
  )
-import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
+import Noll.Language.Module (Constant (..), Definition (..), Function (..), Module (..))
 import Test.Hspec (Spec, describe, it)
 
 import qualified Lang.Common.Environment as Environment

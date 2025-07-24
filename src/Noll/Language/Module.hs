@@ -2,21 +2,21 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Module (
+module Noll.Language.Module (
   Module (..),
   overModuleDefinitions,
   overModuleDefinitionsM,
   fromDefinitionList,
-  module Noll.Module.Definition,
-  module Noll.Module.Function,
-  module Noll.Module.Constant,
+  module Noll.Language.Module.Definition,
+  module Noll.Language.Module.Function,
+  module Noll.Language.Module.Constant,
 ) where
 
 import Data.Data (Data, Typeable)
 import Lang.Utils (Name, Over)
-import Noll.Module.Constant
-import Noll.Module.Definition (Definition (..), Path (..), definitionName)
-import Noll.Module.Function
+import Noll.Language.Module.Constant
+import Noll.Language.Module.Definition (Definition (..), Path (..), definitionName)
+import Noll.Language.Module.Function
 
 data Module a k t = Module Path [Name] [Definition a k t]
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)

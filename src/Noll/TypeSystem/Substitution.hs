@@ -23,7 +23,7 @@ import Data.Set (Set, intersection)
 import Lang.Common.Environment (Environment (..))
 import Lang.Utils (IndexMap, fromMaybe)
 import Noll.Language
-import Noll.Module (Constant (..), Definition (..), Function (..))
+import Noll.Language.Module (Constant (..), Definition (..), Function (..))
 import Noll.TypeSystem.Constraint (Constraint (..), Monomorphic (..))
 
 import qualified Data.Map.Strict as Map

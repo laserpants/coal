@@ -10,7 +10,7 @@ import Lang.Lowpass.Parser.Expr (expr)
 import Lang.Utils (Name, (<$$>))
 import Noll.Compiler.Lowpass.TranslateExpression
 import Noll.Language
-import Noll.Module (Constant (..), Definition (..), Function (..), Module (..), Path (..))
+import Noll.Language.Module (Constant (..), Definition (..), Function (..), Module (..), Path (..))
 import Text.Megaparsec (eof, runParser)
 import Text.Megaparsec.Error (errorBundlePretty)
 import Text.RawString.QQ
@@ -19,7 +19,7 @@ import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import qualified Data.Text as Text
 import qualified Lang.Lowpass.Language as LP
-import qualified Noll.Module as Module
+import qualified Noll.Language.Module as Module
 
 foobaz1 =
   ELambda

@@ -27,7 +27,7 @@ import Noll.Compiler.Transform.Expression
 import Noll.Compiler.Transform (flattenApplication)
 import Noll.Compiler.Transform.Tree (replace)
 import Noll.Language (Choice (..), Clause (..), Expression (..), Pattern (..))
-import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
+import Noll.Language.Module (Constant (..), Definition (..), Function (..), Module (..))
 
 newtype FoldExpansion a = FoldExpansion {foldExpansionStack :: RWS Name () Int a}
   deriving

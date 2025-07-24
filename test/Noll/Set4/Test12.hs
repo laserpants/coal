@@ -5,11 +5,11 @@ module Noll.Set4.Test12 where
 import Lang.Common.List1 (NonEmpty (..), (<|))
 import Lang.Label (Label (..))
 import Noll.Language
-import Noll.Module (Constant (..), Definition (..), Function (..), Module (..), Path (..))
+import Noll.Language.Module (Constant (..), Definition (..), Function (..), Module (..), Path (..))
 
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
-import qualified Noll.Module as Module
+import qualified Noll.Language.Module as Module
 
 prog4_12 :: [Module () Kind IndexedType]
 prog4_12 =

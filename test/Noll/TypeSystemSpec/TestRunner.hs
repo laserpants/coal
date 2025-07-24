@@ -13,7 +13,7 @@ import Lang.Common.List1 (NonEmpty (..))
 import Lang.Utils (Name, forM_)
 import Noll.Compiler2
 import Noll.Language
-import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
+import Noll.Language.Module (Constant (..), Definition (..), Function (..), Module (..))
 import Noll.TypeSystem.Constraint.Assumption (Assumption (..))
 import Noll.TypeSystem.Constraint.Generation (ConstraintsGenError)
 import Noll.TypeSystem.Constraint.Generation.Internal (InferenceRule (..))

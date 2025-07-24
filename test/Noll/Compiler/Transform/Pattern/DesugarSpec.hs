@@ -20,7 +20,7 @@ import Noll.Language (
   TypeIndex (..),
   With (..),
  )
-import Noll.Module.Function (Function (..))
+import Noll.Language.Module.Function (Function (..))
 import Test.Hspec (Spec, describe, it)
 
 import qualified Data.Map.Strict as Map

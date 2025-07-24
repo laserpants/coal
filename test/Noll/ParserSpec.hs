@@ -5,7 +5,7 @@ module Noll.ParserSpec where
 import Lang.Common.List1 (NonEmpty (..), (<|))
 import Lang.Label (Label (..))
 import Noll.Language
-import Noll.Module
+import Noll.Language.Module
 import Noll.Parser
 import Noll.Parser.Expression
 import Noll.Parser.Module
@@ -14,7 +14,7 @@ import Text.Megaparsec (runParser)
 
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
-import qualified Noll.Module as Module
+import qualified Noll.Language.Module as Module
 
 spec :: Spec
 spec =

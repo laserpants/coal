@@ -32,7 +32,7 @@ import Noll.Compiler
 import Noll.Compiler.Stack
 import Noll.CompilerSpec (compilerTestEnvironment)
 import Noll.Language
-import Noll.Module (Constant (..), Function (..), Module (..))
+import Noll.Language.Module (Constant (..), Function (..), Module (..))
 import Noll.TypeSystem.Constraint.Assumption (Assumption (..))
 import Noll.TypeSystem.Constraint.Generation.Internal (InferenceRule (..))
 import Noll.TypeSystemSpec.TestRunner

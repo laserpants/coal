@@ -12,7 +12,7 @@ module Noll.Parser.Module (
 import Lang.Common.List1 (NonEmpty (..))
 import Lang.Utils (Name)
 import Noll.Language
-import Noll.Module
+import Noll.Language.Module
 import Noll.Parser
 import Noll.Parser.Expression (parseExpression)
 import Noll.Parser.Identifier

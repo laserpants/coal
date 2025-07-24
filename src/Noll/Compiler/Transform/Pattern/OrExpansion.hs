@@ -17,7 +17,7 @@ import Lang.Common.List1 (List1, NonEmpty (..))
 import Lang.Label (Label (..))
 import Lang.Utils (Map, traverseM)
 import Noll.Language (Clause (..), Expression (..), Pattern (..))
-import Noll.Module (Module (..))
+import Noll.Language.Module (Module (..))
 
 import qualified Lang.Common.List1 as List1
 

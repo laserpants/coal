@@ -26,9 +26,9 @@ import Noll.Language (
   TypeIndex (..),
   With (..),
  )
-import Noll.Module (Constant (..), Definition (..), Module (..), Path (..))
+import Noll.Language.Module (Constant (..), Definition (..), Module (..), Path (..))
 
-import qualified Noll.Module as Module
+import qualified Noll.Language.Module as Module
 
 tree0 :: Type TypeIndex Kind
 tree0 = TApplication KType (TConstructor (KArrow KType KType) "Tree") (TVariable (TypeIndex KType 0) :| [])

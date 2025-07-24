@@ -25,7 +25,7 @@ import Lang.Common.Supply (suppliedName)
 import Lang.Label (Label (..))
 import Lang.Utils (Dictionary, Name)
 import Noll.Language
-import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
+import Noll.Language.Module (Constant (..), Definition (..), Function (..), Module (..))
 
 newtype NatExpansion a = NatExpansion {natExpansionStack :: RWS Name () Int a}
   deriving

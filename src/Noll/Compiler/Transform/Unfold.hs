@@ -26,7 +26,7 @@ import Noll.Compiler.Transform.Expression
 import Noll.Compiler.Transform (flattenApplication)
 import Noll.Compiler.Transform.Tree (replace)
 import Noll.Language (Expression (..), Pattern (..))
-import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
+import Noll.Language.Module (Constant (..), Definition (..), Function (..), Module (..))
 
 import qualified Data.Map.Strict as Map
 

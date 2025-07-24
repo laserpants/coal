@@ -6,10 +6,10 @@ import Lang.Common.List1 (NonEmpty (..), (<|))
 import Lang.Label (Label (..))
 import Noll.Language
 import Noll.Language.Type.Intrinsic
-import Noll.Module
+import Noll.Language.Module
 
 import qualified Data.Map.Strict as Map
-import qualified Noll.Module as Module
+import qualified Noll.Language.Module as Module
 
 -- Denormalization
 prog2_12 :: [Module () Kind IndexedType]

@@ -25,9 +25,9 @@ import Noll.Language (
   TypeIndex (..),
   With (..),
  )
-import Noll.Module (Definition (..), Function (..), Module (..), Path (..))
+import Noll.Language.Module (Definition (..), Function (..), Module (..), Path (..))
 
-import qualified Noll.Module as Module
+import qualified Noll.Language.Module as Module
 
 moduleOrdered :: Module () Kind IndexedType
 moduleOrdered =

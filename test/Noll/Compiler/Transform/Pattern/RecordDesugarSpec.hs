@@ -7,7 +7,7 @@ import Lang.Label (Label (..))
 import Lang.Utils (Dictionary, Name)
 import Noll.Compiler.Transform.Pattern.RecordDesugar
 import Noll.Language
-import Noll.Module
+import Noll.Language.Module
 import Test.Hspec (Spec, describe, it)
 
 import qualified Data.Map.Strict as Map

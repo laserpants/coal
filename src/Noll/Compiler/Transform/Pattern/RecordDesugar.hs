@@ -24,7 +24,7 @@ import Lang.Common.Supply (suppliedName)
 import Lang.Label (Label (..))
 import Lang.Utils (Dictionary, Map, Name)
 import Noll.Language
-import Noll.Module (Module (..))
+import Noll.Language.Module (Module (..))
 
 import qualified Data.Map.Strict as Map
 

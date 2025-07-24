@@ -22,9 +22,9 @@ import Noll.Language (
   Type (..),
   With (..),
  )
-import Noll.Module (Definition (..), Function (..), Module (..), Path (..))
+import Noll.Language.Module (Definition (..), Function (..), Module (..), Path (..))
 
-import qualified Noll.Module as Module
+import qualified Noll.Language.Module as Module
 
 moduleOrdered :: Module () k ()
 moduleOrdered =
