@@ -1,14 +1,14 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
 
-module Noll.Compiler.Lowpass.TranslateExpressionSpec where
+module Noll.Compiler.Kernel.TranslateExpressionSpec where
 
 import Data.Text (Text)
 import Lang.Common.List1 (NonEmpty (..), (<|))
 import Lang.Label (Label (..))
 import Lang.Lowpass.Parser.Expr (expr)
 import Lang.Utils (Name, (<$$>))
-import Noll.Compiler.Lowpass.TranslateExpression
+import Noll.Compiler.Kernel.TranslateExpression
 import Noll.Language
 import Noll.Language.Module (Constant (..), Definition (..), Function (..), Module (..), Path (..))
 import Text.Megaparsec (eof, runParser)

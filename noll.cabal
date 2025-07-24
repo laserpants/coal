@@ -25,11 +25,11 @@ library
   exposed-modules:
       Noll.Compiler
       Noll.Compiler.Environment
-      Noll.Compiler.Lowpass.Environment
-      Noll.Compiler.Lowpass.TranslateDefinition
-      Noll.Compiler.Lowpass.TranslateExpression
-      Noll.Compiler.Lowpass.TranslateModule
-      Noll.Compiler.Lowpass.TranslateType
+      Noll.Compiler.Kernel.Environment
+      Noll.Compiler.Kernel.TranslateDefinition
+      Noll.Compiler.Kernel.TranslateExpression
+      Noll.Compiler.Kernel.TranslateModule
+      Noll.Compiler.Kernel.TranslateType
       Noll.Compiler.PatternMatching
       Noll.Compiler.PatternMatching.Compiler
       Noll.Compiler.PatternMatching.Envelope
@@ -154,7 +154,7 @@ test-suite noll-test
       Noll.Ast.FreeVarsSpec
       Noll.Compiler.DictionaryEliminationSpec
       Noll.Compiler.EnvironmentSpec
-      Noll.Compiler.Lowpass.TranslateExpressionSpec
+      Noll.Compiler.Kernel.TranslateExpressionSpec
       Noll.Compiler.PatternMatchingExamples.Test01
       Noll.Compiler.PatternMatchingExamples.Test02
       Noll.Compiler.PatternMatchingSpec

@@ -1,7 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Compiler.Lowpass.TranslateType (translateType) where
+module Noll.Compiler.Kernel.TranslateType (translateType) where
 
 import Noll.Language.Type
 import Noll.Language.Type.Intrinsic

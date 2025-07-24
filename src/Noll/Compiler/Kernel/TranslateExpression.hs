@@ -2,7 +2,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Compiler.Lowpass.TranslateExpression (
+module Noll.Compiler.Kernel.TranslateExpression (
   translateExpression,
   translatePattern,
 ) where
@@ -13,8 +13,8 @@ import Data.Maybe (fromMaybe)
 import Lang.Common.List1 (List1, NonEmpty (..), fromList1, (<|))
 import Lang.Label (Label (..))
 import Lang.Utils (Dictionary, Name)
-import Noll.Compiler.Lowpass.Environment (TranslateEnvironment (..), qualifyName, withLocalName, withLocalNames)
-import Noll.Compiler.Lowpass.TranslateType (translateType)
+import Noll.Compiler.Kernel.Environment (TranslateEnvironment (..), qualifyName, withLocalName, withLocalNames)
+import Noll.Compiler.Kernel.TranslateType (translateType)
 import Noll.Language
 
 import qualified Data.Map.Strict as Map

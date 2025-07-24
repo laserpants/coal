@@ -2,7 +2,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Compiler.Lowpass.TranslateDefinition (translateDefinition) where
+module Noll.Compiler.Kernel.TranslateDefinition (translateDefinition) where
 
 import Control.Monad (forM)
 import Control.Monad.Reader (MonadReader, asks)
@@ -11,9 +11,9 @@ import Data.List.Extra (sortOn)
 import Lang.Common.List1 (NonEmpty ((:|)), fromList1, (<|))
 import Lang.Label (Label (..))
 import Lang.Utils (Name, (<$$>))
-import Noll.Compiler.Lowpass.Environment (TranslateEnvironment (..), withLocalNames)
-import Noll.Compiler.Lowpass.TranslateExpression (translateExpression, translatePattern)
-import Noll.Compiler.Lowpass.TranslateType (translateType)
+import Noll.Compiler.Kernel.Environment (TranslateEnvironment (..), withLocalNames)
+import Noll.Compiler.Kernel.TranslateExpression (translateExpression, translatePattern)
+import Noll.Compiler.Kernel.TranslateType (translateType)
 import Noll.Language
 import Noll.Language.Module
 

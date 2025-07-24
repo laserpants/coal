@@ -2,7 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module Noll.Compiler.Lowpass.Environment (
+module Noll.Compiler.Kernel.Environment (
   TranslateEnvironment (..),
   initialTranslateEnvironment,
   qualifyName,

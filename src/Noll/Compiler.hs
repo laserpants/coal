@@ -12,7 +12,7 @@ import Control.Monad.State (get, gets, runState)
 import Data.Data (Data)
 import Lang.Utils (Name, forM)
 import Noll.Compiler.Transform.Dictionaries
-import Noll.Compiler.Lowpass.TranslateModule (translateModule)
+import Noll.Compiler.Kernel.TranslateModule (translateModule)
 import Noll.Compiler.Transform.NormalizeObjects (NormalizeObjectsTransformContext (..))
 import Noll.Compiler.PatternMatching
 import Noll.Compiler.PatternMatching.Rule (MatchMonad (..), runMatchMonad)
@@ -32,7 +32,7 @@ import Noll.Language.Module.Definition
 import Noll.TypeSystem.Substitution (normalizeTypeIndexes)
 
 import qualified Lang.Lowpass.Language as Lowpass
-import qualified Noll.Compiler.Lowpass.Environment as Lowpass
+import qualified Noll.Compiler.Kernel.Environment as Lowpass
 
 withSupplyC :: (Monad m) => (Int -> (c, Int)) -> CompilerT a m c
 withSupplyC f = do

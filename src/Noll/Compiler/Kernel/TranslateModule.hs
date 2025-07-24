@@ -2,14 +2,14 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Compiler.Lowpass.TranslateModule (translateModule) where
+module Noll.Compiler.Kernel.TranslateModule (translateModule) where
 
 import Control.Monad.Reader (MonadReader)
 import Data.Data (Data)
 import Lang.Common.Environment
 import Lang.Utils (Name)
-import Noll.Compiler.Lowpass.Environment (TranslateEnvironment, insertQualifiedNames, withModuleName)
-import Noll.Compiler.Lowpass.TranslateDefinition (translateDefinition)
+import Noll.Compiler.Kernel.Environment (TranslateEnvironment, insertQualifiedNames, withModuleName)
+import Noll.Compiler.Kernel.TranslateDefinition (translateDefinition)
 import Noll.Language
 import Noll.Language.Module
 
