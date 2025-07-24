@@ -23,7 +23,6 @@ source-repository head
 
 library
   exposed-modules:
-      Noll.Compiler
       Noll.Compiler.Dictionaries
       Noll.Compiler.Expression
       Noll.Compiler.Lowpass.Environment
@@ -153,6 +152,7 @@ test-suite noll-test
   main-is: Spec.hs
   other-modules:
       Noll.Ast.FreeVarsSpec
+      Noll.Compiler
       Noll.Compiler.DictionariesSpec
       Noll.Compiler.DictionaryEliminationSpec
       Noll.Compiler.Lowpass.TranslateExpressionSpec
