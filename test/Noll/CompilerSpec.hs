@@ -60,13 +60,13 @@ spec =
     it "" $ do
       1 == 2
 
-compiler2TestEnvironment =
+compilerTestEnvironment =
   CompilerEnvironment
-    { compiler2DataConstructorEnv = env1
-    , compiler2TypeConstructorEnv = env2
-    , compiler2TraitEnvironment = env3
-    , compiler2AliasEnv = env5
-    , compiler2InstanceEnvironment = env6
+    { compilerDataConstructorEnv = env1
+    , compilerTypeConstructorEnv = env2
+    , compilerTraitEnvironment = env3
+    , compilerAliasEnv = env5
+    , compilerInstanceEnvironment = env6
     }
 
 env1 =
@@ -320,10 +320,10 @@ bool :: IndexedType
 bool = TIntrinsic IBool
 
 -- abc1 :: Module () Kind IndexedType
--- abc1 = fst (runIdentity (runCompilerT compiler2TestEnvironment ((typePass >=> mainPass) Noll.Set7.Test01.moduleMain)))
+-- abc1 = fst (runIdentity (runCompilerT compilerTestEnvironment ((typePass >=> mainPass) Noll.Set7.Test01.moduleMain)))
 
 abc2 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
-abc2 = fst (runIdentity (runCompilerT compiler2TestEnvironment (compileModule Noll.Set7.Test01.moduleMain)))
+abc2 = fst (runIdentity (runCompilerT compilerTestEnvironment (compileModule Noll.Set7.Test01.moduleMain)))
 
 abc3 :: IO ()
 abc3 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc2]
@@ -331,7 +331,7 @@ abc3 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc2]
 --
 
 abc4 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
-abc4 = fst (runIdentity (runCompilerT compiler2TestEnvironment (compileModule Noll.Set8.Test01.moduleMain)))
+abc4 = fst (runIdentity (runCompilerT compilerTestEnvironment (compileModule Noll.Set8.Test01.moduleMain)))
 
 abc5 :: IO ()
 abc5 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc4]
@@ -339,10 +339,10 @@ abc5 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc4]
 --
 
 abc6 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
-abc6 = fst (runIdentity (runCompilerT compiler2TestEnvironment (compileModule Noll.Set9.Test01.moduleUtilities)))
+abc6 = fst (runIdentity (runCompilerT compilerTestEnvironment (compileModule Noll.Set9.Test01.moduleUtilities)))
 
 abc7 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
-abc7 = fst (runIdentity (runCompilerT compiler2TestEnvironment (compileModule Noll.Set9.Test01.moduleMain)))
+abc7 = fst (runIdentity (runCompilerT compilerTestEnvironment (compileModule Noll.Set9.Test01.moduleMain)))
 
 abc8 :: IO ()
 abc8 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc6, abc7]
@@ -350,10 +350,10 @@ abc8 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc6, abc7]
 --
 
 abc9 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
-abc9 = fst (runIdentity (runCompilerT compiler2TestEnvironment (compileModule Noll.Set10.Test01.moduleUtilities)))
+abc9 = fst (runIdentity (runCompilerT compilerTestEnvironment (compileModule Noll.Set10.Test01.moduleUtilities)))
 
 abc10 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
-abc10 = fst (runIdentity (runCompilerT compiler2TestEnvironment (compileModule Noll.Set10.Test01.moduleMain)))
+abc10 = fst (runIdentity (runCompilerT compilerTestEnvironment (compileModule Noll.Set10.Test01.moduleMain)))
 
 abc11 :: IO ()
 abc11 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc9, abc10]
@@ -361,7 +361,7 @@ abc11 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc9, abc10
 --
 
 abc12 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
-abc12 = fst (runIdentity (runCompilerT compiler2TestEnvironment (compileModule Noll.Set11.Test01.moduleMain)))
+abc12 = fst (runIdentity (runCompilerT compilerTestEnvironment (compileModule Noll.Set11.Test01.moduleMain)))
 
 abc13 :: IO ()
 abc13 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc12]
@@ -369,10 +369,10 @@ abc13 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc12]
 --
 
 abc14 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
-abc14 = fst (runIdentity (runCompilerT compiler2TestEnvironment (compileModule_ Noll.Set12.Test01.moduleUtilities)))
+abc14 = fst (runIdentity (runCompilerT compilerTestEnvironment (compileModule_ Noll.Set12.Test01.moduleUtilities)))
 
 abc15 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
-abc15 = fst (runIdentity (runCompilerT compiler2TestEnvironment (compileModule_ Noll.Set12.Test01.moduleMain)))
+abc15 = fst (runIdentity (runCompilerT compilerTestEnvironment (compileModule_ Noll.Set12.Test01.moduleMain)))
 
 abc16 :: IO ()
 abc16 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc14, abc15]
@@ -380,10 +380,10 @@ abc16 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc14, abc1
 --
 
 abc17 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
-abc17 = fst (runIdentity (runCompilerT compiler2TestEnvironment (compileModule Noll.Set20.Test01.moduleUtilities)))
+abc17 = fst (runIdentity (runCompilerT compilerTestEnvironment (compileModule Noll.Set20.Test01.moduleUtilities)))
 
 abc18 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
-abc18 = fst (runIdentity (runCompilerT compiler2TestEnvironment prog))
+abc18 = fst (runIdentity (runCompilerT compilerTestEnvironment prog))
  where
   prog = do
     insertNamesC
@@ -408,7 +408,7 @@ abc20 mods = do
   Lowpass.testModules ms5
   pure ()
  where
-  r = runIdentity (runCompilerT compiler2TestEnvironment steps)
+  r = runIdentity (runCompilerT compilerTestEnvironment steps)
   steps = do
     -- TODO: Topological sort
     --
@@ -569,7 +569,7 @@ abc22 :: [String] -> IO ()
 abc22 files = do
   ms <- traverse readFile files
   let x = fmap parsing ms
-  let r = runIdentity (runCompilerT compiler2TestEnvironment (steps x))
+  let r = runIdentity (runCompilerT compilerTestEnvironment (steps x))
   ms5 <- Lowpass.compileModules (moduleCore1 : fst r)
   Lowpass.testModules ms5
  where
@@ -602,7 +602,7 @@ abc23 =
 --
 
 abc24 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
-abc24 = fst (runIdentity (runCompilerT compiler2TestEnvironment prog))
+abc24 = fst (runIdentity (runCompilerT compilerTestEnvironment prog))
  where
   prog = do
     insertNamesC
@@ -625,7 +625,7 @@ abc25 :: IO ()
 abc25 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc24]
 
 abc26 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
-abc26 = fst (runIdentity (runCompilerT compiler2TestEnvironment prog))
+abc26 = fst (runIdentity (runCompilerT compilerTestEnvironment prog))
  where
   prog = do
     insertNamesC
@@ -648,7 +648,7 @@ abc27 :: IO ()
 abc27 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc26]
 
 abc28 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
-abc28 = fst (runIdentity (runCompilerT compiler2TestEnvironment prog))
+abc28 = fst (runIdentity (runCompilerT compilerTestEnvironment prog))
  where
   prog = do
     insertNamesC
@@ -691,7 +691,7 @@ abc29 :: IO ()
 abc29 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc28]
 
 abc30 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
-abc30 = fst (runIdentity (runCompilerT compiler2TestEnvironment prog))
+abc30 = fst (runIdentity (runCompilerT compilerTestEnvironment prog))
  where
   prog = do
     insertNamesC
@@ -846,11 +846,11 @@ abc32 files = do
  where
   --  env = buildEnvironment
   --      CompilerEnvironment
-  --        { compiler2DataConstructorEnv = env1
-  --        , compiler2TypeConstructorEnv = env2
-  --        , compiler2TraitEnvironment = env3
-  --        , compiler2AliasEnv = env5
-  --        , compiler2InstanceEnvironment = env6
+  --        { compilerDataConstructorEnv = env1
+  --        , compilerTypeConstructorEnv = env2
+  --        , compilerTraitEnvironment = env3
+  --        , compilerAliasEnv = env5
+  --        , compilerInstanceEnvironment = env6
   --        }
   steps mods = do
     traceShow mods $ do
@@ -1018,10 +1018,10 @@ abc33 =
 --
 
 -- abc24 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
--- abc24 = fst (runIdentity (runCompilerT compiler2TestEnvironment (compileModule Noll.Set.Test01.moduleUtils2)))
+-- abc24 = fst (runIdentity (runCompilerT compilerTestEnvironment (compileModule Noll.Set.Test01.moduleUtils2)))
 
 -- abc15 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
--- abc15 = fst (runIdentity (runCompilerT compiler2TestEnvironment (compileModule_ Noll.Set12.Test01.moduleMain)))
+-- abc15 = fst (runIdentity (runCompilerT compilerTestEnvironment (compileModule_ Noll.Set12.Test01.moduleMain)))
 --
 -- abc16 :: IO ()
 -- abc16 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc14, abc15]

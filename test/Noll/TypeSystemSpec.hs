@@ -30,7 +30,7 @@ import Noll.Compiler.Transform.Type.AliasExpansion
 import Noll.Compiler.Transform.Unfold
 import Noll.Compiler
 import Noll.Compiler.Stack
-import Noll.CompilerSpec (compiler2TestEnvironment)
+import Noll.CompilerSpec (compilerTestEnvironment)
 import Noll.Language
 import Noll.Module (Constant (..), Function (..), Module (..))
 import Noll.TypeSystem.Constraint.Assumption (Assumption (..))
@@ -1235,7 +1235,7 @@ story = do
   --  it "" $
   --    evalMatchMonad "match" 0 (compileMatchExprs Noll.Set5.Test05.moduleMain) == Noll.Set5.Test09.moduleMain
   --  it "" $
-  --    fst (runIdentity (runCompilerT compiler2TestEnvironment (typePass Noll.Set.Test01.moduleMain2))) == Noll.Set.Test04.moduleMain
+  --    fst (runIdentity (runCompilerT compilerTestEnvironment (typePass Noll.Set.Test01.moduleMain2))) == Noll.Set.Test04.moduleMain
   --  it "" $
   --    desugarAsPatterns Noll.Set10.Test03.prog10_01 == Noll.Set10.Test04.prog10_01
   --

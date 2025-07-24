@@ -20,9 +20,9 @@ module Noll.Compiler.Stack (
   updateSupply,
   updateSupplyC,
   insertSupplyC,
-  compiler2ReportConstraintsGenErrors,
-  compiler2ReportSolverRuleViolations,
-  compiler2SetTypeAnnotationParams,
+  compilerReportConstraintsGenErrors,
+  compilerReportSolverRuleViolations,
+  compilerSetTypeAnnotationParams,
 )
 where
 
@@ -40,7 +40,7 @@ import qualified Lang.Common.Environment as Environment
 
 type CompilerStack a m c = RWST CompilerEnvironment () (CompilerState a) m c
 
-newtype CompilerT a m c = Compiler {compiler2Stack :: CompilerStack a m c}
+newtype CompilerT a m c = Compiler {compilerStack :: CompilerStack a m c}
   deriving
     ( Functor
     , Applicative
@@ -52,24 +52,24 @@ newtype CompilerT a m c = Compiler {compiler2Stack :: CompilerStack a m c}
 {-# INLINE runCompilerT #-}
 runCompilerT :: (Monad m) => CompilerEnvironment -> CompilerT a m c -> m (c, CompilerState a)
 runCompilerT env com = do
-  (c, s, _) <- runRWST (compiler2Stack com) env initialCompilerState
+  (c, s, _) <- runRWST (compilerStack com) env initialCompilerState
   pure (c, s)
 
 {-# INLINE evalCompilerT #-}
 evalCompilerT :: (Monad m) => CompilerEnvironment -> CompilerT a m c -> m c
 evalCompilerT = fst <$$$> runCompilerT
 
-{-# INLINE compiler2ReportConstraintsGenErrors #-}
-compiler2ReportConstraintsGenErrors :: (Monad m) => [ConstraintsGenError a] -> CompilerT a m ()
-compiler2ReportConstraintsGenErrors errors = modify (overCompilerStateConstraintsGenErrors (<> errors))
+{-# INLINE compilerReportConstraintsGenErrors #-}
+compilerReportConstraintsGenErrors :: (Monad m) => [ConstraintsGenError a] -> CompilerT a m ()
+compilerReportConstraintsGenErrors errors = modify (overCompilerStateConstraintsGenErrors (<> errors))
 
-{-# INLINE compiler2SetTypeAnnotationParams #-}
-compiler2SetTypeAnnotationParams :: (Monad m) => Dictionary (a, TypeIndex Kind) -> CompilerT a m ()
-compiler2SetTypeAnnotationParams params = modify (overCompilerTypeAnnotationParams (const params))
+{-# INLINE compilerSetTypeAnnotationParams #-}
+compilerSetTypeAnnotationParams :: (Monad m) => Dictionary (a, TypeIndex Kind) -> CompilerT a m ()
+compilerSetTypeAnnotationParams params = modify (overCompilerTypeAnnotationParams (const params))
 
-{-# INLINE compiler2ReportSolverRuleViolations #-}
-compiler2ReportSolverRuleViolations :: (Monad m) => [InferenceRule Kind a] -> CompilerT a m ()
-compiler2ReportSolverRuleViolations errors = modify (overCompilerSolverRuleViolations (<> errors))
+{-# INLINE compilerReportSolverRuleViolations #-}
+compilerReportSolverRuleViolations :: (Monad m) => [InferenceRule Kind a] -> CompilerT a m ()
+compilerReportSolverRuleViolations errors = modify (overCompilerSolverRuleViolations (<> errors))
 
 {-# INLINE insertSupplyC #-}
 insertSupplyC :: (Monad m) => Int -> CompilerT a m ()

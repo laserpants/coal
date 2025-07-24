@@ -34,32 +34,32 @@ type TraitEnvironment = Environment (TypeIndex Kind, Environment (Scheme TypeInd
 type InstanceEnvironment = Environment (Map IndexedType (Dictionary (Scheme TypeIndex Kind IndexedType)))
 
 data CompilerEnvironment = CompilerEnvironment
-  { compiler2DataConstructorEnv :: DataConstructorEnv
-  , compiler2TypeConstructorEnv :: TypeConstructorEnv
-  , compiler2TraitEnvironment :: TraitEnvironment
-  , compiler2InstanceEnvironment :: InstanceEnvironment
-  , compiler2AliasEnv :: AliasEnvironment
+  { compilerDataConstructorEnv :: DataConstructorEnv
+  , compilerTypeConstructorEnv :: TypeConstructorEnv
+  , compilerTraitEnvironment :: TraitEnvironment
+  , compilerInstanceEnvironment :: InstanceEnvironment
+  , compilerAliasEnv :: AliasEnvironment
   }
   deriving (Show, Eq, Ord, Read)
 
 emptyCompilerEnvironment :: CompilerEnvironment
 emptyCompilerEnvironment =
   CompilerEnvironment
-    { compiler2DataConstructorEnv = mempty
-    , compiler2TypeConstructorEnv = mempty
-    , compiler2TraitEnvironment = mempty
-    , compiler2InstanceEnvironment = mempty
-    , compiler2AliasEnv = mempty
+    { compilerDataConstructorEnv = mempty
+    , compilerTypeConstructorEnv = mempty
+    , compilerTraitEnvironment = mempty
+    , compilerInstanceEnvironment = mempty
+    , compilerAliasEnv = mempty
     }
 
 buildEnvironment :: [Definition a k t] -> CompilerEnvironment
 buildEnvironment defs =
   CompilerEnvironment
-    { compiler2DataConstructorEnv = dataConstructorEnv
-    , compiler2TypeConstructorEnv = typeConstructorEnv
-    , compiler2TraitEnvironment = traitEnvironment
-    , compiler2InstanceEnvironment = instanceEnvironment
-    , compiler2AliasEnv = aliasEnv
+    { compilerDataConstructorEnv = dataConstructorEnv
+    , compilerTypeConstructorEnv = typeConstructorEnv
+    , compilerTraitEnvironment = traitEnvironment
+    , compilerInstanceEnvironment = instanceEnvironment
+    , compilerAliasEnv = aliasEnv
     }
  where
   instanceEnvironment = buildInstanceEnvironment typeConstructorEnv traitEnvironment defs

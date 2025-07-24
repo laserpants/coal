@@ -33,7 +33,7 @@ type ConstraintsGenResult c o k t r = (r, Dictionary (c, o k), [ConstraintsGenOu
 runConstraintsGenC :: (Monad m) => ConstraintsGenStack c TypeIndex Kind IndexedType r -> CompilerT a m (ConstraintsGenResult c TypeIndex Kind IndexedType r)
 runConstraintsGenC stack = do
   env <- ask
-  sup <- gets compiler2Supply
+  sup <- gets compilerSupply
   let (result, ConstraintsGenState{..}, output) = runConstraintsGenStack sup (context env) stack
   updateSupplyC constraintsGenStateSupply
   pure (result, constraintsGenStateTypeIndexes, output)
@@ -41,21 +41,21 @@ runConstraintsGenC stack = do
   context CompilerEnvironment{..} =
     ConstraintsGenContext
       { constraintsGenContextMonomorphicSet = mempty
-      , constraintsGenContextDataConstructorEnv = compiler2DataConstructorEnv
-      , constraintsGenContextTypeConstructorEnv = compiler2TypeConstructorEnv
+      , constraintsGenContextDataConstructorEnv = compilerDataConstructorEnv
+      , constraintsGenContextTypeConstructorEnv = compilerTypeConstructorEnv
       }
 
 generateConstraintsC :: (Monad m, Data a, Show a) => Expression a IndexedType -> CompilerT a m ([CompilerAssumption], [CompilerConstraint a])
 generateConstraintsC e = do
   (assumptions, params, result) <- runConstraintsGenC (collectConstraints e)
   let (errors, constraints) = partitionEithers result
-  compiler2ReportConstraintsGenErrors errors
-  compiler2SetTypeAnnotationParams params
+  compilerReportConstraintsGenErrors errors
+  compilerSetTypeAnnotationParams params
   pure (assumptions, constraints)
 
 assumptionConstraints :: (Monad m) => CompilerAssumption -> CompilerT a m (Either CompilerAssumption (CompilerConstraint a))
 assumptionConstraints Assumption{..} = do
-  names <- gets compiler2NameStore
+  names <- gets compilerNameStore
   pure $
     case Environment.lookup assumptionName names of
       Nothing ->
@@ -65,20 +65,20 @@ assumptionConstraints Assumption{..} = do
 
 solveConstraintsC :: (Monad m, Data a, Eq a, Show a) => [CompilerConstraint a] -> CompilerT a m Substitution
 solveConstraintsC cs = do
-  dict <- gets compiler2TypeAnnotationParams
-  n <- gets compiler2Supply
+  dict <- gets compilerTypeAnnotationParams
+  n <- gets compilerSupply
   let (sub, m, rs) = solveConstraints n cs
   updateSupplyC m
   let errors = execWriter (checkTypeAnnotationParameters (Map.toList dict) sub)
-  compiler2ReportSolverRuleViolations (apply sub rs)
-  compiler2ReportConstraintsGenErrors (EIllFormedTypeAnnotation <$> errors)
+  compilerReportSolverRuleViolations (apply sub rs)
+  compilerReportConstraintsGenErrors (EIllFormedTypeAnnotation <$> errors)
   pure sub
 
 compileConstraintsC :: (Monad m, Data a, Show a) => Expression a IndexedType -> CompilerT a m ()
 compileConstraintsC expr = do
   (ms1, cs1) <- generateConstraintsC expr
   (ms2, cs2) <- partitionEithers <$> traverse assumptionConstraints ms1
-  sub <- gets compiler2Substitution
+  sub <- gets compilerSubstitution
   insertAssumptionsC (apply sub ms2)
   insertConstraintsC (cs1 <> cs2)
 
@@ -119,20 +119,20 @@ compileDefinitionC =
 
 solveC :: (Monad m, Data a, Eq a, Show a) => CompilerT a m Substitution
 solveC = do
-  constraints <- gets compiler2Constraints
-  sub1 <- gets compiler2Substitution
+  constraints <- gets compilerConstraints
+  sub1 <- gets compilerSubstitution
   sub2 <- solveConstraintsC constraints
   clearConstraintsC
   -- TODO: Clear typeAnnotationParameters?
   updateSubstitutionC (sub2 <> sub1)
-  gets compiler2Substitution
+  gets compilerSubstitution
 
 typeDefinitionsC :: (Monad m, Data a, Show a, Eq a) => [Definition a Kind IndexedType] -> CompilerT a m ([Definition a Kind IndexedType], [CompilerAssumption])
 typeDefinitionsC ds = do
   forM_ ds typeDefinitionC
-  sub <- gets compiler2Substitution
-  ams <- gets compiler2Assumptions
-  Environment env <- gets compiler2NameStore
+  sub <- gets compilerSubstitution
+  ams <- gets compilerAssumptions
+  Environment env <- gets compilerNameStore
   insertConstraintsC $ do
     (n1, s) <- Map.toList env
     Assumption n2 t <- ams
@@ -156,11 +156,11 @@ typeDefinitionC =
     DTrait name _ (Parameter k q) ds ->
       forM_ ds $
         \(n, s) -> do
-          env <- asks compiler2TypeConstructorEnv
+          env <- asks compilerTypeConstructorEnv
           let s1 = evalState (instantiateVars [(q, TypeIndex k 0)] env s) (1 :: Int)
           insertNameC n (Forall (typeIndexesIn s1) [Trait name (TVariable (TypeIndex k 0))] s1)
     DInstance trait t1 ds -> do
-      env <- asks compiler2TraitEnvironment
+      env <- asks compilerTraitEnvironment
       case Environment.lookup trait env of
         Nothing ->
           error ("Missing trait: " <> Text.unpack trait)
@@ -184,7 +184,7 @@ instantiateTemplateC (TypeIndex _ n) t1 (Forall vs ts t) = Forall vs ts (apply (
 
 instantiateVarsC :: (Monad m) => Type Parameter () -> CompilerT a m IndexedType
 instantiateVarsC t = do
-  env <- asks compiler2TypeConstructorEnv
+  env <- asks compilerTypeConstructorEnv
   instantiateVars [] env t
 
 defineC :: (Monad m) => Name -> IndexedType -> CompilerT a m ()

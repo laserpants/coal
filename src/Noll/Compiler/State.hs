@@ -27,62 +27,62 @@ type CompilerConstraint a = Constraint (InferenceRule Kind a) TypeIndex Kind Ind
 type CompilerAssumption = Assumption IndexedType
 
 data CompilerState a = CompilerState
-  { compiler2Supply :: Int
-  , compiler2NameStore :: Environment (Scheme TypeIndex Kind IndexedType)
-  , compiler2Substitution :: Substitution
-  , compiler2Constraints :: [CompilerConstraint a]
-  , compiler2ConstraintsGenErrors :: [ConstraintsGenError a]
-  , compiler2SolverRuleViolations :: [InferenceRule Kind a]
-  , compiler2Assumptions :: [CompilerAssumption]
-  , compiler2TypeAnnotationParams :: Dictionary (a, TypeIndex Kind)
+  { compilerSupply :: Int
+  , compilerNameStore :: Environment (Scheme TypeIndex Kind IndexedType)
+  , compilerSubstitution :: Substitution
+  , compilerConstraints :: [CompilerConstraint a]
+  , compilerConstraintsGenErrors :: [ConstraintsGenError a]
+  , compilerSolverRuleViolations :: [InferenceRule Kind a]
+  , compilerAssumptions :: [CompilerAssumption]
+  , compilerTypeAnnotationParams :: Dictionary (a, TypeIndex Kind)
   }
   deriving (Show, Eq, Ord, Read)
 
 instance Supply (CompilerState a) where
   updateSupply = overCompilerSupply
-  getSupply = compiler2Supply
+  getSupply = compilerSupply
 
 {-# INLINE overCompilerNameStore #-}
 overCompilerNameStore :: Over (CompilerState a) (Environment (Scheme TypeIndex Kind IndexedType))
-overCompilerNameStore fn CompilerState{..} = CompilerState{compiler2NameStore = fn compiler2NameStore, ..}
+overCompilerNameStore fn CompilerState{..} = CompilerState{compilerNameStore = fn compilerNameStore, ..}
 
 {-# INLINE overCompilerSupply #-}
 overCompilerSupply :: Over (CompilerState a) Int
-overCompilerSupply fn CompilerState{..} = CompilerState{compiler2Supply = fn compiler2Supply, ..}
+overCompilerSupply fn CompilerState{..} = CompilerState{compilerSupply = fn compilerSupply, ..}
 
 {-# INLINE overCompilerSubstitution #-}
 overCompilerSubstitution :: Over (CompilerState a) Substitution
-overCompilerSubstitution fn CompilerState{..} = CompilerState{compiler2Substitution = fn compiler2Substitution, ..}
+overCompilerSubstitution fn CompilerState{..} = CompilerState{compilerSubstitution = fn compilerSubstitution, ..}
 
 {-# INLINE overCompilerConstraints #-}
 overCompilerConstraints :: Over (CompilerState a) [CompilerConstraint a]
-overCompilerConstraints fn CompilerState{..} = CompilerState{compiler2Constraints = fn compiler2Constraints, ..}
+overCompilerConstraints fn CompilerState{..} = CompilerState{compilerConstraints = fn compilerConstraints, ..}
 
 {-# INLINE overCompilerAssumptions #-}
 overCompilerAssumptions :: Over (CompilerState a) [CompilerAssumption]
-overCompilerAssumptions fn CompilerState{..} = CompilerState{compiler2Assumptions = fn compiler2Assumptions, ..}
+overCompilerAssumptions fn CompilerState{..} = CompilerState{compilerAssumptions = fn compilerAssumptions, ..}
 
 {-# INLINE overCompilerStateConstraintsGenErrors #-}
 overCompilerStateConstraintsGenErrors :: Over (CompilerState a) [ConstraintsGenError a]
-overCompilerStateConstraintsGenErrors fn CompilerState{..} = CompilerState{compiler2ConstraintsGenErrors = fn compiler2ConstraintsGenErrors, ..}
+overCompilerStateConstraintsGenErrors fn CompilerState{..} = CompilerState{compilerConstraintsGenErrors = fn compilerConstraintsGenErrors, ..}
 
 {-# INLINE overCompilerTypeAnnotationParams #-}
 overCompilerTypeAnnotationParams :: Over (CompilerState a) (Dictionary (a, TypeIndex Kind))
-overCompilerTypeAnnotationParams fn CompilerState{..} = CompilerState{compiler2TypeAnnotationParams = fn compiler2TypeAnnotationParams, ..}
+overCompilerTypeAnnotationParams fn CompilerState{..} = CompilerState{compilerTypeAnnotationParams = fn compilerTypeAnnotationParams, ..}
 
 {-# INLINE overCompilerSolverRuleViolations #-}
 overCompilerSolverRuleViolations :: Over (CompilerState a) [InferenceRule Kind a]
-overCompilerSolverRuleViolations fn CompilerState{..} = CompilerState{compiler2SolverRuleViolations = fn compiler2SolverRuleViolations, ..}
+overCompilerSolverRuleViolations fn CompilerState{..} = CompilerState{compilerSolverRuleViolations = fn compilerSolverRuleViolations, ..}
 
 initialCompilerState :: CompilerState a
 initialCompilerState =
   CompilerState
-    { compiler2Supply = 0
-    , compiler2NameStore = mempty
-    , compiler2Substitution = mempty
-    , compiler2Constraints = []
-    , compiler2ConstraintsGenErrors = []
-    , compiler2SolverRuleViolations = []
-    , compiler2Assumptions = []
-    , compiler2TypeAnnotationParams = mempty
+    { compilerSupply = 0
+    , compilerNameStore = mempty
+    , compilerSubstitution = mempty
+    , compilerConstraints = []
+    , compilerConstraintsGenErrors = []
+    , compilerSolverRuleViolations = []
+    , compilerAssumptions = []
+    , compilerTypeAnnotationParams = mempty
     }

@@ -36,13 +36,13 @@ import qualified Noll.Compiler.Lowpass.Environment as Lowpass
 
 withSupplyC :: (Monad m) => (Int -> (c, Int)) -> CompilerT a m c
 withSupplyC f = do
-  n <- gets compiler2Supply
+  n <- gets compilerSupply
   let (r, n') = f n
   insertSupplyC n'
   pure r
 
 aliasExpansionTrans :: (Monad m) => (c -> Reader AliasEnvironment c) -> c -> CompilerT a m c
-aliasExpansionTrans f e = asks (runReader (f e) . compiler2AliasEnv)
+aliasExpansionTrans f e = asks (runReader (f e) . compilerAliasEnv)
 
 expandAliasesC :: (Monad m, Data a) => Module a Kind () -> CompilerT a m (Module a Kind ())
 expandAliasesC = aliasExpansionTrans expandAliases
@@ -96,8 +96,8 @@ compileNatsC = natExpansionTrans compileNats
 
 placeholderTrans :: (Monad m) => (c -> DictionaryStack c) -> c -> CompilerT a m c
 placeholderTrans f e = do
-  env1 <- gets compiler2NameStore
-  env2 <- asks compiler2InstanceEnvironment
+  env1 <- gets compilerNameStore
+  env2 <- asks compilerInstanceEnvironment
   withSupplyC (\n -> runDictionaryStack (DictionaryEnvironment env1 env2) n (f e))
 
 placeholderInsertionC :: (Monad m, Monoid a, Data a, Show a) => Module a Kind IndexedType -> CompilerT a m (Module a Kind IndexedType)
