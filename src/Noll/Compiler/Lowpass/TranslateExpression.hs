@@ -117,7 +117,7 @@ translateExpression =
               )
               :| []
           )
-    ECodataSelect a ll@(Label t field) e me -> do
+    ECodataSelect _ ll@(Label t field) e me -> do
       d1 <- translateExpression e
       let r = extractRow d1
       pure
