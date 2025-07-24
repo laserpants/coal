@@ -17,8 +17,8 @@ import qualified Lang.Common.Environment as Environment
 
 instantiateVars :: (MonadState s m, Supply s) => [(Name, TypeIndex Kind)] -> Environment Kind -> Type Parameter () -> m IndexedType
 instantiateVars ts0 env t = do
-  ts <- execWriterT (instantiateTypeIndexes t)
-  runReaderT (instantiateTypeVars t) (Environment.fromList (ts0 <> ts), env)
+  ts1 <- execWriterT (instantiateTypeIndexes t)
+  runReaderT (instantiateTypeVars t) (Environment.fromList (ts0 <> ts1), env)
 
 instantiateTypeVars :: (MonadState s m, Supply s) => Type Parameter () -> ReaderT (Environment (TypeIndex Kind), Environment Kind) m IndexedType
 instantiateTypeVars =
