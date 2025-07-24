@@ -37,9 +37,9 @@ library
       Noll.Compiler.PatternMatching.Rule
       Noll.Compiler.Stack
       Noll.Compiler.State
-      Noll.Compiler.Transform
       Noll.Compiler.Transform.Dictionaries
       Noll.Compiler.Transform.Expression
+      Noll.Compiler.Transform.Flattening
       Noll.Compiler.Transform.Fold
       Noll.Compiler.Transform.Nats
       Noll.Compiler.Transform.NormalizeObjects

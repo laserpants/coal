@@ -1,6 +1,6 @@
 {-# LANGUAGE LambdaCase #-}
 
-module Noll.Compiler.Transform (
+module Noll.Compiler.Transform.Flattening (
   flattenApplication,
   flattenLambda,
 ) where
