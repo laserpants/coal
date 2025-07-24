@@ -153,8 +153,8 @@ test-suite noll-test
   other-modules:
       Noll.Ast.FreeVarsSpec
       Noll.Compiler
-      Noll.Compiler.DictionaryEliminationSpec
       Noll.Compiler2.DictionariesSpec
+      Noll.Compiler2.DictionaryEliminationSpec
       Noll.Compiler2.EnvironmentSpec
       Noll.Compiler2.Lowpass.TranslateExpressionSpec
       Noll.Compiler2.NormalizeObjectsSpec

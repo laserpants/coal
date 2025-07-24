@@ -1,7 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Compiler.DictionaryEliminationSpec where
+module Noll.Compiler2.DictionaryEliminationSpec where
 
 import Lang.Common.List1 (NonEmpty (..), (<|))
 import Lang.Label (Label (..))
