@@ -8,7 +8,7 @@ import Control.Monad.Reader (MonadReader)
 import Data.Data (Data)
 import Lang.Common.Environment
 import Lang.Utils (Name)
-import Noll.Compiler.Kernel.Environment (TranslateEnvironment, insertQualifiedNames, withModuleName)
+import Noll.Compiler.Kernel.Environment (KernelEnvironment, insertQualifiedNames, withModuleName)
 import Noll.Compiler.Kernel.TranslateDefinition (translateDefinition)
 import Noll.Language
 import Noll.Language.Module
@@ -17,7 +17,7 @@ import qualified Data.Text as Text
 import qualified Lang.Common.Environment as Environment
 import qualified Lang.Lowpass.Language as Lowpass
 
-translateModule :: (Show a, MonadReader TranslateEnvironment m, Data a) => Module a Kind IndexedType -> m (Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type))
+translateModule :: (Show a, MonadReader KernelEnvironment m, Data a) => Module a Kind IndexedType -> m (Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type))
 translateModule =
   \case
     Module (Path p) _ defs ->

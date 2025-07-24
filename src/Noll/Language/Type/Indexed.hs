@@ -24,6 +24,7 @@ import Lang.Label (Label (..))
 import Noll.Language.Expression (Clause (..), CompiledClause (..), Expression (..))
 import Noll.Language.Expression.Binding (Binding (..))
 import Noll.Language.Expression.Choice (Choice (..), Guard (..))
+import Noll.Language.Module
 import Noll.Language.Pattern (Pattern (..))
 import Noll.Language.Trait (Trait (..), With (..))
 import Noll.Language.Type (Type (..), TypeIndex (..))
@@ -31,7 +32,6 @@ import Noll.Language.Type.Intrinsic (Intrinsic (..))
 import Noll.Language.Type.Kind (Kind (..))
 import Noll.Language.Type.Row (Row (..))
 import Noll.Language.Type.Scheme (Scheme (..))
-import Noll.Language.Module
 
 import qualified Data.Set as Set
 

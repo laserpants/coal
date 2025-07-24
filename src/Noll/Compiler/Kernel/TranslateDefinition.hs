@@ -11,7 +11,7 @@ import Data.List.Extra (sortOn)
 import Lang.Common.List1 (NonEmpty ((:|)), fromList1, (<|))
 import Lang.Label (Label (..))
 import Lang.Utils (Name, (<$$>))
-import Noll.Compiler.Kernel.Environment (TranslateEnvironment (..), withLocalNames)
+import Noll.Compiler.Kernel.Environment (KernelEnvironment (..), withLocalNames)
 import Noll.Compiler.Kernel.TranslateExpression (translateExpression, translatePattern)
 import Noll.Compiler.Kernel.TranslateType (translateType)
 import Noll.Language
@@ -21,7 +21,7 @@ import qualified Lang.Lowpass.Language as Lowpass
 
 type LowpassObject = Lowpass.Object Lowpass.Type (Lowpass.Expr Lowpass.Type)
 
-translateDefinition :: (Show a, MonadReader TranslateEnvironment m, Data a) => Definition a Kind IndexedType -> m [LowpassObject]
+translateDefinition :: (Show a, MonadReader KernelEnvironment m, Data a) => Definition a Kind IndexedType -> m [LowpassObject]
 translateDefinition =
   \case
     DAnnotation _ d ->
@@ -31,11 +31,11 @@ translateDefinition =
     DFunction name (Function _ _ ps e) -> do
       qs <- traverse translatePattern (fromList1 ps)
       f <- withLocalNames (labelName <$> qs) (translateExpression e)
-      moduleName <- asks translateEnvironmentModule
+      moduleName <- asks kernelEnvironmentModule
       pure [Lowpass.OFunction (moduleName <> "." <> name) qs f]
     DConstant name (Constant _ With{} e) -> do
       c <- translateExpression e
-      moduleName <- asks translateEnvironmentModule
+      moduleName <- asks kernelEnvironmentModule
       pure [Lowpass.OConstant (moduleName <> "." <> name) c]
     DTrait name _ _ ins ->
       forM ins $
@@ -55,9 +55,9 @@ translateDefinition =
     _ ->
       pure []
 
-traitAccessor :: (MonadReader TranslateEnvironment m) => Name -> Name -> Lowpass.Type -> m LowpassObject
+traitAccessor :: (MonadReader KernelEnvironment m) => Name -> Name -> Lowpass.Type -> m LowpassObject
 traitAccessor trait fn t = do
-  moduleName <- asks translateEnvironmentModule
+  moduleName <- asks kernelEnvironmentModule
   pure $
     Lowpass.OFunction
       (moduleName <> "." <> fn)
@@ -80,7 +80,7 @@ traitAccessor trait fn t = do
   row = Label (Lowpass.RExt fn t Lowpass.opaque) "$r"
   dict = Label (Lowpass.TCon trait [Lowpass.opaque]) "$a"
 
-translateConstructor :: (MonadReader TranslateEnvironment m) => (Int, Constructor Parameter () (Type Parameter ())) -> m LowpassObject
+translateConstructor :: (MonadReader KernelEnvironment m) => (Int, Constructor Parameter () (Type Parameter ())) -> m LowpassObject
 translateConstructor (index, Constructor name _ (Forall _ _ t)) = do
-  moduleName <- asks translateEnvironmentModule
+  moduleName <- asks kernelEnvironmentModule
   pure (Lowpass.OData (moduleName <> "." <> name) index (translateType t))

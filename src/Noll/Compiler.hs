@@ -11,14 +11,14 @@ import Control.Monad.Reader (Reader, asks, runReader)
 import Control.Monad.State (get, gets, runState)
 import Data.Data (Data)
 import Lang.Utils (Name, forM)
-import Noll.Compiler.Transform.Dictionaries
 import Noll.Compiler.Kernel.TranslateModule (translateModule)
-import Noll.Compiler.Transform.NormalizeObjects (NormalizeObjectsTransformContext (..))
 import Noll.Compiler.PatternMatching
 import Noll.Compiler.PatternMatching.Rule (MatchMonad (..), runMatchMonad)
 import Noll.Compiler.Stack
+import Noll.Compiler.Transform.Dictionaries
 import Noll.Compiler.Transform.Fold
 import Noll.Compiler.Transform.Nats
+import Noll.Compiler.Transform.NormalizeObjects (NormalizeObjectsTransformContext (..))
 import Noll.Compiler.Transform.Pattern.AsDesugar
 import Noll.Compiler.Transform.Pattern.Desugar
 import Noll.Compiler.Transform.Pattern.OrExpansion
@@ -116,8 +116,8 @@ placeholderInsertionC (Module p ns ds) = do
         placeholderTrans expandTraits d
   pure (Module p ns es)
 
-lowpassMonadTrans :: (Monad m) => (c -> Reader Lowpass.TranslateEnvironment d) -> c -> CompilerT a m d
-lowpassMonadTrans f e = pure (runReader (f e) (Lowpass.initialTranslateEnvironment mempty))
+lowpassMonadTrans :: (Monad m) => (c -> Reader Lowpass.KernelEnvironment d) -> c -> CompilerT a m d
+lowpassMonadTrans f e = pure (runReader (f e) (Lowpass.initialKernelEnvironment mempty))
 
 lowpassTranslationC :: (Show a, Monad m, Data a) => Module a Kind IndexedType -> CompilerT a m (Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type))
 lowpassTranslationC = lowpassMonadTrans translateModule

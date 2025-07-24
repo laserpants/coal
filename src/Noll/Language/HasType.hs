@@ -11,15 +11,15 @@ import Lang.Common.List1 (NonEmpty ((:|)))
 import Lang.Label (Label (..))
 import Noll.Language.Expression (Expression (..))
 import Noll.Language.Expression.Choice (Guard (..))
+import Noll.Language.Module.Constant (Constant (..))
+import Noll.Language.Module.Definition (Definition (..))
+import Noll.Language.Module.Function (Function (..))
 import Noll.Language.Pattern (Pattern (..))
 import Noll.Language.Primitive (Primitive (..))
 import Noll.Language.Trait (Trait (..))
 import Noll.Language.Type (Type (..), foldType)
 import Noll.Language.Type.Intrinsic (Intrinsic (..))
 import Noll.Language.Type.Kind (Kind (..))
-import Noll.Language.Module.Constant (Constant (..))
-import Noll.Language.Module.Definition (Definition (..))
-import Noll.Language.Module.Function (Function (..))
 
 class HasType o k t where
   typeOf :: t -> Type o k

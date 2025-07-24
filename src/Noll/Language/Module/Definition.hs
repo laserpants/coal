@@ -10,11 +10,11 @@ import Data.Data (Data, Typeable)
 import Lang.Utils (Name)
 import Noll.Language.Constructor (Constructor (..))
 import Noll.Language.Expression (Expression (..))
+import Noll.Language.Module.Constant (Constant (..))
+import Noll.Language.Module.Function (Function (..))
 import Noll.Language.Trait (Trait (..), With (..))
 import Noll.Language.Type (Parameter, Type (..))
 import Noll.Language.Type.Kind (Kind (..))
-import Noll.Language.Module.Constant (Constant (..))
-import Noll.Language.Module.Function (Function (..))
 
 newtype Path = Path {pathComponents :: [Name]}
   deriving (Show, Eq, Ord, Read, Data, Typeable)

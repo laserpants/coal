@@ -3,8 +3,8 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module Noll.Compiler.Kernel.Environment (
-  TranslateEnvironment (..),
-  initialTranslateEnvironment,
+  KernelEnvironment (..),
+  initialKernelEnvironment,
   qualifyName,
   withLocalName,
   withLocalNames,
@@ -20,47 +20,47 @@ import qualified Data.Set as Set
 import qualified Data.Text as Text
 import qualified Lang.Common.Environment as Environment
 
-data TranslateEnvironment = TranslateEnvironment
-  { translateEnvironmentModule :: Name
-  , translateEnvironmentLocalNames :: Set Name
-  , translateEnvironmentQualifiedNames :: Environment Name
+data KernelEnvironment = KernelEnvironment
+  { kernelEnvironmentModule :: Name
+  , kernelEnvironmentLocalNames :: Set Name
+  , kernelEnvironmentQualifiedNames :: Environment Name
   }
   deriving (Show, Eq, Ord)
 
-initialTranslateEnvironment :: Environment Name -> TranslateEnvironment
-initialTranslateEnvironment = TranslateEnvironment mempty mempty
+initialKernelEnvironment :: Environment Name -> KernelEnvironment
+initialKernelEnvironment = KernelEnvironment mempty mempty
 
-overTranslateEnvironmentModule :: Over TranslateEnvironment Name
-overTranslateEnvironmentModule fn TranslateEnvironment{..} =
-  TranslateEnvironment{translateEnvironmentModule = fn translateEnvironmentModule, ..}
+overKernelEnvironmentModule :: Over KernelEnvironment Name
+overKernelEnvironmentModule fn KernelEnvironment{..} =
+  KernelEnvironment{kernelEnvironmentModule = fn kernelEnvironmentModule, ..}
 
-overTranslateEnvironmentLocalNames :: Over TranslateEnvironment (Set Name)
-overTranslateEnvironmentLocalNames fn TranslateEnvironment{..} =
-  TranslateEnvironment{translateEnvironmentLocalNames = fn translateEnvironmentLocalNames, ..}
+overKernelEnvironmentLocalNames :: Over KernelEnvironment (Set Name)
+overKernelEnvironmentLocalNames fn KernelEnvironment{..} =
+  KernelEnvironment{kernelEnvironmentLocalNames = fn kernelEnvironmentLocalNames, ..}
 
-overTranslateEnvironmentQualifiedNames :: Over TranslateEnvironment (Environment Name)
-overTranslateEnvironmentQualifiedNames fn TranslateEnvironment{..} =
-  TranslateEnvironment{translateEnvironmentQualifiedNames = fn translateEnvironmentQualifiedNames, ..}
+overKernelEnvironmentQualifiedNames :: Over KernelEnvironment (Environment Name)
+overKernelEnvironmentQualifiedNames fn KernelEnvironment{..} =
+  KernelEnvironment{kernelEnvironmentQualifiedNames = fn kernelEnvironmentQualifiedNames, ..}
 
-qualifyName :: (MonadReader TranslateEnvironment m) => Name -> m Name
+qualifyName :: (MonadReader KernelEnvironment m) => Name -> m Name
 qualifyName name = do
-  TranslateEnvironment{..} <- ask
-  if name == "_" || Text.head name == '$' || Text.isPrefixOf "Core$" name || Set.member name translateEnvironmentLocalNames
+  KernelEnvironment{..} <- ask
+  if name == "_" || Text.head name == '$' || Text.isPrefixOf "Core$" name || Set.member name kernelEnvironmentLocalNames
     then pure name
-    else case Environment.lookup name translateEnvironmentQualifiedNames of
+    else case Environment.lookup name kernelEnvironmentQualifiedNames of
       Just qname ->
         pure qname
       Nothing ->
-        pure (translateEnvironmentModule <> "." <> name)
+        pure (kernelEnvironmentModule <> "." <> name)
 
-withLocalName :: (MonadReader TranslateEnvironment m) => Name -> m a -> m a
-withLocalName = local . overTranslateEnvironmentLocalNames . Set.insert
+withLocalName :: (MonadReader KernelEnvironment m) => Name -> m a -> m a
+withLocalName = local . overKernelEnvironmentLocalNames . Set.insert
 
-withLocalNames :: (Foldable f, MonadReader TranslateEnvironment m) => f Name -> m a -> m a
+withLocalNames :: (Foldable f, MonadReader KernelEnvironment m) => f Name -> m a -> m a
 withLocalNames = flip (foldr withLocalName)
 
-withModuleName :: (MonadReader TranslateEnvironment m) => Name -> m a -> m a
-withModuleName = local . overTranslateEnvironmentModule . const
+withModuleName :: (MonadReader KernelEnvironment m) => Name -> m a -> m a
+withModuleName = local . overKernelEnvironmentModule . const
 
-insertQualifiedNames :: (MonadReader TranslateEnvironment m) => Environment Name -> m a -> m a
-insertQualifiedNames names = local (overTranslateEnvironmentQualifiedNames (names <>))
+insertQualifiedNames :: (MonadReader KernelEnvironment m) => Environment Name -> m a -> m a
+insertQualifiedNames names = local (overKernelEnvironmentQualifiedNames (names <>))

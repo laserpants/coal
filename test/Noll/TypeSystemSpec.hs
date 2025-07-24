@@ -11,7 +11,7 @@ import Lang.Label (Label (..))
 import Lang.Utils (Name)
 import Noll.Compiler.Transform.Dictionaries
 import Noll.Compiler.Transform.DictionariesSpec
-import Noll.Compiler.Kernel.Environment (TranslateEnvironment (..), initialTranslateEnvironment, insertQualifiedNames, withModuleName)
+import Noll.Compiler.Kernel.Environment (KernelEnvironment (..), initialKernelEnvironment, insertQualifiedNames, withModuleName)
 import Noll.Compiler.Kernel.TranslateDefinition (translateDefinition)
 import Noll.Compiler.Kernel.TranslateExpressionSpec
 import Noll.Compiler.Kernel.TranslateModule (translateModule)
@@ -1340,7 +1340,7 @@ story = do
 --    evalNatExpansion "succ" 1 (compileNats Noll.Set6.Test12.moduleMain) == Noll.Set6.Test13.moduleMain
 
 testNameEnvironment =
-  initialTranslateEnvironment
+  initialKernelEnvironment
     ( Environment.fromList
         [
           ( "always"
