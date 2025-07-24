@@ -7,7 +7,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
 
-module Noll.Compiler.Dictionaries (
+module Noll.Compiler.Transform.Dictionaries (
   TraitContext (..),
   DictionaryEnvironment (..),
   DictionaryStack (..),

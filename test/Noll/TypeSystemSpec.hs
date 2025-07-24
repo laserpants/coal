@@ -9,8 +9,8 @@ import Data.List.NonEmpty ((<|))
 import Lang.Common.List1 (NonEmpty (..))
 import Lang.Label (Label (..))
 import Lang.Utils (Name)
-import Noll.Compiler.Dictionaries
-import Noll.Compiler.DictionariesSpec
+import Noll.Compiler.Transform.Dictionaries
+import Noll.Compiler.Transform.DictionariesSpec
 import Noll.Compiler.Lowpass.Environment (TranslateEnvironment (..), initialTranslateEnvironment, insertQualifiedNames, withModuleName)
 import Noll.Compiler.Lowpass.TranslateDefinition (translateDefinition)
 import Noll.Compiler.Lowpass.TranslateExpressionSpec

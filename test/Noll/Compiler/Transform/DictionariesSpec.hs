@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Compiler.DictionariesSpec where
+module Noll.Compiler.Transform.DictionariesSpec where
 
 import Control.Monad.Reader
 import Control.Monad.State
@@ -14,7 +14,7 @@ import Lang.Common.Environment (Environment (..))
 import Lang.Common.List1 (NonEmpty (..), (<|))
 import Lang.Label (Label (..))
 import Lang.Utils (Dictionary, Name)
-import Noll.Compiler.Dictionaries
+import Noll.Compiler.Transform.Dictionaries
 import Noll.Language
 import Noll.Module
 import Test.Hspec (Spec, describe, it)

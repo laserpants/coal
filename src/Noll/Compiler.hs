@@ -11,7 +11,7 @@ import Control.Monad.Reader (Reader, asks, runReader)
 import Control.Monad.State (get, gets, runState)
 import Data.Data (Data)
 import Lang.Utils (Name, forM)
-import Noll.Compiler.Dictionaries
+import Noll.Compiler.Transform.Dictionaries
 import Noll.Compiler.Lowpass.TranslateModule (translateModule)
 import Noll.Compiler.NormalizeObjects (NormalizeObjectsTransformContext (..))
 import Noll.Compiler.PatternMatching

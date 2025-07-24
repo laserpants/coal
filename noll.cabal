@@ -24,7 +24,6 @@ source-repository head
 library
   exposed-modules:
       Noll.Compiler
-      Noll.Compiler.Dictionaries
       Noll.Compiler.Environment
       Noll.Compiler.Expression
       Noll.Compiler.Lowpass.Environment
@@ -42,6 +41,7 @@ library
       Noll.Compiler.Stack
       Noll.Compiler.State
       Noll.Compiler.Transform
+      Noll.Compiler.Transform.Dictionaries
       Noll.Compiler.Transform.Fold
       Noll.Compiler.Transform.Nats
       Noll.Compiler.Transform.Pattern.AsDesugar
@@ -152,7 +152,6 @@ test-suite noll-test
   main-is: Spec.hs
   other-modules:
       Noll.Ast.FreeVarsSpec
-      Noll.Compiler.DictionariesSpec
       Noll.Compiler.DictionaryEliminationSpec
       Noll.Compiler.EnvironmentSpec
       Noll.Compiler.Lowpass.TranslateExpressionSpec
@@ -161,6 +160,7 @@ test-suite noll-test
       Noll.Compiler.PatternMatchingExamples.Test02
       Noll.Compiler.PatternMatchingSpec
       Noll.Compiler.PatternMatchingSpec.TestRunner
+      Noll.Compiler.Transform.DictionariesSpec
       Noll.Compiler.Transform.FoldSpec
       Noll.Compiler.Transform.Pattern.AsDesugarSpec
       Noll.Compiler.Transform.Pattern.DesugarSpec
