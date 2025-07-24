@@ -25,13 +25,11 @@ library
   exposed-modules:
       Noll.Compiler
       Noll.Compiler.Environment
-      Noll.Compiler.Expression
       Noll.Compiler.Lowpass.Environment
       Noll.Compiler.Lowpass.TranslateDefinition
       Noll.Compiler.Lowpass.TranslateExpression
       Noll.Compiler.Lowpass.TranslateModule
       Noll.Compiler.Lowpass.TranslateType
-      Noll.Compiler.NormalizeObjects
       Noll.Compiler.Parameterized
       Noll.Compiler.PatternMatching
       Noll.Compiler.PatternMatching.Compiler
@@ -42,8 +40,10 @@ library
       Noll.Compiler.State
       Noll.Compiler.Transform
       Noll.Compiler.Transform.Dictionaries
+      Noll.Compiler.Transform.Expression
       Noll.Compiler.Transform.Fold
       Noll.Compiler.Transform.Nats
+      Noll.Compiler.Transform.NormalizeObjects
       Noll.Compiler.Transform.Pattern.AsDesugar
       Noll.Compiler.Transform.Pattern.Desugar
       Noll.Compiler.Transform.Pattern.OrExpansion
@@ -155,13 +155,13 @@ test-suite noll-test
       Noll.Compiler.DictionaryEliminationSpec
       Noll.Compiler.EnvironmentSpec
       Noll.Compiler.Lowpass.TranslateExpressionSpec
-      Noll.Compiler.NormalizeObjectsSpec
       Noll.Compiler.PatternMatchingExamples.Test01
       Noll.Compiler.PatternMatchingExamples.Test02
       Noll.Compiler.PatternMatchingSpec
       Noll.Compiler.PatternMatchingSpec.TestRunner
       Noll.Compiler.Transform.DictionariesSpec
       Noll.Compiler.Transform.FoldSpec
+      Noll.Compiler.Transform.NormalizeObjectsSpec
       Noll.Compiler.Transform.Pattern.AsDesugarSpec
       Noll.Compiler.Transform.Pattern.DesugarSpec
       Noll.Compiler.Transform.Pattern.OrExpansionSpec

@@ -13,7 +13,7 @@ import Data.Data (Data)
 import Lang.Utils (Name, forM)
 import Noll.Compiler.Transform.Dictionaries
 import Noll.Compiler.Lowpass.TranslateModule (translateModule)
-import Noll.Compiler.NormalizeObjects (NormalizeObjectsTransformContext (..))
+import Noll.Compiler.Transform.NormalizeObjects (NormalizeObjectsTransformContext (..))
 import Noll.Compiler.PatternMatching
 import Noll.Compiler.PatternMatching.Rule (MatchMonad (..), runMatchMonad)
 import Noll.Compiler.Stack

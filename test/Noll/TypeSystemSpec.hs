@@ -15,7 +15,7 @@ import Noll.Compiler.Lowpass.Environment (TranslateEnvironment (..), initialTran
 import Noll.Compiler.Lowpass.TranslateDefinition (translateDefinition)
 import Noll.Compiler.Lowpass.TranslateExpressionSpec
 import Noll.Compiler.Lowpass.TranslateModule (translateModule)
-import Noll.Compiler.NormalizeObjects (NormalizeObjectsTransformContext (..), normalizeObject)
+import Noll.Compiler.Transform.NormalizeObjects (NormalizeObjectsTransformContext (..), normalizeObject)
 import Noll.Compiler.PatternMatching
 import Noll.Compiler.PatternMatching.Envelope
 import Noll.Compiler.PatternMatching.Equation

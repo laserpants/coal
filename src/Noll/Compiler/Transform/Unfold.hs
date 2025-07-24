@@ -22,7 +22,7 @@ import Lang.Common.List1 (List1, NonEmpty (..))
 import Lang.Common.Supply (suppliedName)
 import Lang.Label (Label (..))
 import Lang.Utils (Dictionary, Name, const2)
-import Noll.Compiler.Expression
+import Noll.Compiler.Transform.Expression
 import Noll.Compiler.Transform (flattenApplication)
 import Noll.Compiler.Transform.Tree (replace)
 import Noll.Language (Expression (..), Pattern (..))

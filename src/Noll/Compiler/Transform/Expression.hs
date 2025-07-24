@@ -1,4 +1,4 @@
-module Noll.Compiler.Expression (
+module Noll.Compiler.Transform.Expression (
   matchE,
   varE,
   letE,

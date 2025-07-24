@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 
-module Noll.Compiler.NormalizeObjects (NormalizeObjectsTransformContext (..)) where
+module Noll.Compiler.Transform.NormalizeObjects (NormalizeObjectsTransformContext (..)) where
 
 import Data.Data (Data, Typeable)
 import Data.Map.Strict (Map)

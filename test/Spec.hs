@@ -8,7 +8,7 @@ import qualified Noll.Language.Type.IndexedSpec
 
 import qualified Lang.FreeVarsSpec
 import qualified Lang.UtilsSpec
-import qualified Noll.Compiler.NormalizeObjectsSpec
+import qualified Noll.Compiler.Transform.NormalizeObjectsSpec
 import qualified Noll.Compiler.PatternMatchingExamples.Test01
 import qualified Noll.Compiler.PatternMatchingExamples.Test02
 import qualified Noll.Compiler.PatternMatchingSpec
@@ -77,7 +77,7 @@ main =
     Noll.CompilerExamples.Test02.spec
     --    Noll.CompilerSpec.spec
     Lang.UtilsSpec.spec
-    Noll.Compiler.NormalizeObjectsSpec.spec
+    Noll.Compiler.Transform.NormalizeObjectsSpec.spec
     Noll.Core.Language.Expr.ReplaceSpec.spec
     Noll.Core.CompilerSpec.spec
 

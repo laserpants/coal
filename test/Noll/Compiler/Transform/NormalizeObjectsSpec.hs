@@ -1,8 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Noll.Compiler.NormalizeObjectsSpec where
+module Noll.Compiler.Transform.NormalizeObjectsSpec where
 
-import Noll.Compiler.NormalizeObjects (normalizeObject)
+import Noll.Compiler.Transform.NormalizeObjects (normalizeObject)
 import Test.Hspec (Spec, describe, it)
 
 import qualified Noll.Examples.Test04 as Test04
