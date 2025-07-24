@@ -11,7 +11,7 @@ import Debug.Trace
 import Lang.Common.Environment (Environment)
 import Lang.Common.List1 (NonEmpty (..))
 import Lang.Utils (Name, forM_)
-import Noll.Compiler
+import Noll.Compiler2
 import Noll.Language
 import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
 import Noll.TypeSystem.Constraint.Assumption (Assumption (..))

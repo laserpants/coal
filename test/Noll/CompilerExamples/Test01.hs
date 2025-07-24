@@ -6,7 +6,7 @@ import Control.Monad.Identity (runIdentity)
 import Control.Monad.State (evalState)
 import Lang.Common.List1 (NonEmpty (..), (<|))
 import Lang.Label (Label (..))
-import Noll.Compiler
+import Noll.Compiler2
 import Noll.Language (
   BinaryOperator (..),
   Choice (..),

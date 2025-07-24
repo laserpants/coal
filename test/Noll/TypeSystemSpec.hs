@@ -9,28 +9,28 @@ import Data.List.NonEmpty ((<|))
 import Lang.Common.List1 (NonEmpty (..))
 import Lang.Label (Label (..))
 import Lang.Utils (Name)
-import Noll.Compiler2.Dictionaries
-import Noll.Compiler2.DictionariesSpec
-import Noll.Compiler2.Lowpass.Environment (TranslateEnvironment (..), initialTranslateEnvironment, insertQualifiedNames, withModuleName)
-import Noll.Compiler2.Lowpass.TranslateDefinition (translateDefinition)
-import Noll.Compiler2.Lowpass.TranslateExpressionSpec
-import Noll.Compiler2.Lowpass.TranslateModule (translateModule)
-import Noll.Compiler2.NormalizeObjects (NormalizeObjectsTransformContext (..), normalizeObject)
-import Noll.Compiler2.PatternMatching
-import Noll.Compiler2.PatternMatching.Envelope
-import Noll.Compiler2.PatternMatching.Equation
-import Noll.Compiler2.PatternMatching.Rule
-import Noll.Compiler2.Transform.Fold
-import Noll.Compiler2.Transform.Nats
-import Noll.Compiler2.Transform.Pattern.AsDesugar
-import Noll.Compiler2.Transform.Pattern.Desugar
-import Noll.Compiler2.Transform.Pattern.OrExpansion
-import Noll.Compiler2.Transform.Pattern.RecordDesugar
-import Noll.Compiler2.Transform.Type.AliasExpansion
-import Noll.Compiler2.Transform.Unfold
-import Noll.Compiler2
-import Noll.Compiler2.Stack
-import Noll.Compiler2Spec (compiler2TestEnvironment)
+import Noll.Compiler.Dictionaries
+import Noll.Compiler.DictionariesSpec
+import Noll.Compiler.Lowpass.Environment (TranslateEnvironment (..), initialTranslateEnvironment, insertQualifiedNames, withModuleName)
+import Noll.Compiler.Lowpass.TranslateDefinition (translateDefinition)
+import Noll.Compiler.Lowpass.TranslateExpressionSpec
+import Noll.Compiler.Lowpass.TranslateModule (translateModule)
+import Noll.Compiler.NormalizeObjects (NormalizeObjectsTransformContext (..), normalizeObject)
+import Noll.Compiler.PatternMatching
+import Noll.Compiler.PatternMatching.Envelope
+import Noll.Compiler.PatternMatching.Equation
+import Noll.Compiler.PatternMatching.Rule
+import Noll.Compiler.Transform.Fold
+import Noll.Compiler.Transform.Nats
+import Noll.Compiler.Transform.Pattern.AsDesugar
+import Noll.Compiler.Transform.Pattern.Desugar
+import Noll.Compiler.Transform.Pattern.OrExpansion
+import Noll.Compiler.Transform.Pattern.RecordDesugar
+import Noll.Compiler.Transform.Type.AliasExpansion
+import Noll.Compiler.Transform.Unfold
+import Noll.Compiler
+import Noll.Compiler.Stack
+import Noll.CompilerSpec (compiler2TestEnvironment)
 import Noll.Language
 import Noll.Module (Constant (..), Function (..), Module (..))
 import Noll.TypeSystem.Constraint.Assumption (Assumption (..))
@@ -1213,13 +1213,13 @@ story = do
   --  it "" $
   --    evalPatternDesugar "v" 0 (desugarPatterns Noll.Set.Test05.moduleMain) == Noll.Set.Test06.moduleMain
   --  it "" $
-  --    runIdentity (Noll.Compiler2.Transform.Pattern.OrExpansion.compileOrPatterns Noll.Set.Test06.moduleUtils) == Noll.Set.Test07.moduleUtils
+  --    runIdentity (Noll.Compiler.Transform.Pattern.OrExpansion.compileOrPatterns Noll.Set.Test06.moduleUtils) == Noll.Set.Test07.moduleUtils
   --  it "" $
-  --    runIdentity (Noll.Compiler2.Transform.Pattern.OrExpansion.compileOrPatterns Noll.Set.Test06.moduleOrdered) == Noll.Set.Test07.moduleOrdered
+  --    runIdentity (Noll.Compiler.Transform.Pattern.OrExpansion.compileOrPatterns Noll.Set.Test06.moduleOrdered) == Noll.Set.Test07.moduleOrdered
   --  it "" $
-  --    runIdentity (Noll.Compiler2.Transform.Pattern.OrExpansion.compileOrPatterns Noll.Set.Test06.moduleBinarySearch) == Noll.Set.Test07.moduleBinarySearch
+  --    runIdentity (Noll.Compiler.Transform.Pattern.OrExpansion.compileOrPatterns Noll.Set.Test06.moduleBinarySearch) == Noll.Set.Test07.moduleBinarySearch
   --  it "" $
-  --    runIdentity (Noll.Compiler2.Transform.Pattern.OrExpansion.compileOrPatterns Noll.Set.Test06.moduleMain) == Noll.Set.Test07.moduleMain
+  --    runIdentity (Noll.Compiler.Transform.Pattern.OrExpansion.compileOrPatterns Noll.Set.Test06.moduleMain) == Noll.Set.Test07.moduleMain
   --  it "" $
   --    fst (runExpandRecordPatterns (compileRecordPatterns Noll.Set.Test07.moduleUtils) "row" 1) == Noll.Set.Test08.moduleUtils
   --  it "" $
@@ -1235,7 +1235,7 @@ story = do
   --  it "" $
   --    evalMatchMonad "match" 0 (compileMatchExprs Noll.Set5.Test05.moduleMain) == Noll.Set5.Test09.moduleMain
   --  it "" $
-  --    fst (runIdentity (runCompiler2T compiler2TestEnvironment (typePass Noll.Set.Test01.moduleMain2))) == Noll.Set.Test04.moduleMain
+  --    fst (runIdentity (runCompilerT compiler2TestEnvironment (typePass Noll.Set.Test01.moduleMain2))) == Noll.Set.Test04.moduleMain
   --  it "" $
   --    desugarAsPatterns Noll.Set10.Test03.prog10_01 == Noll.Set10.Test04.prog10_01
   --

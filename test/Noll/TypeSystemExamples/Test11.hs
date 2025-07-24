@@ -5,7 +5,7 @@ module Noll.TypeSystemExamples.Test11 where
 import Data.Data (Data)
 import Data.List.NonEmpty (NonEmpty (..), (<|))
 import Lang.Label (Label (..))
-import Noll.Compiler
+import Noll.Compiler2
 import Noll.Language (
   BinaryOperator (..),
   Binding (..),

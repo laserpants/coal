@@ -23,35 +23,35 @@ source-repository head
 
 library
   exposed-modules:
-      Noll.Compiler2
-      Noll.Compiler2.Dictionaries
-      Noll.Compiler2.Environment
-      Noll.Compiler2.Expression
-      Noll.Compiler2.Lowpass.Environment
-      Noll.Compiler2.Lowpass.TranslateDefinition
-      Noll.Compiler2.Lowpass.TranslateExpression
-      Noll.Compiler2.Lowpass.TranslateModule
-      Noll.Compiler2.Lowpass.TranslateType
-      Noll.Compiler2.NormalizeObjects
-      Noll.Compiler2.Parameterized
-      Noll.Compiler2.PatternMatching
-      Noll.Compiler2.PatternMatching.Compiler
-      Noll.Compiler2.PatternMatching.Envelope
-      Noll.Compiler2.PatternMatching.Equation
-      Noll.Compiler2.PatternMatching.Rule
-      Noll.Compiler2.Stack
-      Noll.Compiler2.State
-      Noll.Compiler2.Transform
-      Noll.Compiler2.Transform.Fold
-      Noll.Compiler2.Transform.Nats
-      Noll.Compiler2.Transform.Pattern.AsDesugar
-      Noll.Compiler2.Transform.Pattern.Desugar
-      Noll.Compiler2.Transform.Pattern.OrExpansion
-      Noll.Compiler2.Transform.Pattern.RecordDesugar
-      Noll.Compiler2.Transform.Tree
-      Noll.Compiler2.Transform.Type.AliasExpansion
-      Noll.Compiler2.Transform.Unfold
-      Noll.Compiler2.TypeInference
+      Noll.Compiler
+      Noll.Compiler.Dictionaries
+      Noll.Compiler.Environment
+      Noll.Compiler.Expression
+      Noll.Compiler.Lowpass.Environment
+      Noll.Compiler.Lowpass.TranslateDefinition
+      Noll.Compiler.Lowpass.TranslateExpression
+      Noll.Compiler.Lowpass.TranslateModule
+      Noll.Compiler.Lowpass.TranslateType
+      Noll.Compiler.NormalizeObjects
+      Noll.Compiler.Parameterized
+      Noll.Compiler.PatternMatching
+      Noll.Compiler.PatternMatching.Compiler
+      Noll.Compiler.PatternMatching.Envelope
+      Noll.Compiler.PatternMatching.Equation
+      Noll.Compiler.PatternMatching.Rule
+      Noll.Compiler.Stack
+      Noll.Compiler.State
+      Noll.Compiler.Transform
+      Noll.Compiler.Transform.Fold
+      Noll.Compiler.Transform.Nats
+      Noll.Compiler.Transform.Pattern.AsDesugar
+      Noll.Compiler.Transform.Pattern.Desugar
+      Noll.Compiler.Transform.Pattern.OrExpansion
+      Noll.Compiler.Transform.Pattern.RecordDesugar
+      Noll.Compiler.Transform.Tree
+      Noll.Compiler.Transform.Type.AliasExpansion
+      Noll.Compiler.Transform.Unfold
+      Noll.Compiler.TypeInference
       Noll.Language
       Noll.Language.Constructor
       Noll.Language.Expression
@@ -152,26 +152,26 @@ test-suite noll-test
   main-is: Spec.hs
   other-modules:
       Noll.Ast.FreeVarsSpec
-      Noll.Compiler
-      Noll.Compiler2.DictionariesSpec
-      Noll.Compiler2.DictionaryEliminationSpec
-      Noll.Compiler2.EnvironmentSpec
-      Noll.Compiler2.Lowpass.TranslateExpressionSpec
-      Noll.Compiler2.NormalizeObjectsSpec
-      Noll.Compiler2.PatternMatchingExamples.Test01
-      Noll.Compiler2.PatternMatchingExamples.Test02
-      Noll.Compiler2.PatternMatchingSpec
-      Noll.Compiler2.PatternMatchingSpec.TestRunner
-      Noll.Compiler2.Transform.FoldSpec
-      Noll.Compiler2.Transform.Pattern.AsDesugarSpec
-      Noll.Compiler2.Transform.Pattern.DesugarSpec
-      Noll.Compiler2.Transform.Pattern.OrExpansionSpec
-      Noll.Compiler2.Transform.Pattern.RecordDesugarSpec
-      Noll.Compiler2.Transform.TreeSpec
-      Noll.Compiler2.Transform.Type.AliasExpansionSpec
-      Noll.Compiler2Spec
+      Noll.Compiler.DictionariesSpec
+      Noll.Compiler.DictionaryEliminationSpec
+      Noll.Compiler.EnvironmentSpec
+      Noll.Compiler.Lowpass.TranslateExpressionSpec
+      Noll.Compiler.NormalizeObjectsSpec
+      Noll.Compiler.PatternMatchingExamples.Test01
+      Noll.Compiler.PatternMatchingExamples.Test02
+      Noll.Compiler.PatternMatchingSpec
+      Noll.Compiler.PatternMatchingSpec.TestRunner
+      Noll.Compiler.Transform.FoldSpec
+      Noll.Compiler.Transform.Pattern.AsDesugarSpec
+      Noll.Compiler.Transform.Pattern.DesugarSpec
+      Noll.Compiler.Transform.Pattern.OrExpansionSpec
+      Noll.Compiler.Transform.Pattern.RecordDesugarSpec
+      Noll.Compiler.Transform.TreeSpec
+      Noll.Compiler.Transform.Type.AliasExpansionSpec
+      Noll.Compiler2
       Noll.CompilerExamples.Test01
       Noll.CompilerExamples.Test02
+      Noll.CompilerSpec
       Noll.Examples.Test01
       Noll.Examples.Test02
       Noll.Examples.Test03
