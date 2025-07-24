@@ -16,7 +16,7 @@ import Lang.Common.List1 (NonEmpty (..), (<|))
 import Lang.Label (Label (..))
 import Lang.Lowpass.Language (Object (..), moduleImports, moduleName, moduleObjects, opaque)
 import Lang.Utils (Dictionary, Name, forM, forM_)
-import Noll.Compiler.Dictionaries
+import Noll.Compiler2.Dictionaries
 import Noll.Compiler2
 import Noll.Compiler2.Environment
 import Noll.Compiler2.Stack

@@ -8,15 +8,15 @@ import qualified Noll.Language.Type.IndexedSpec
 
 import qualified Lang.FreeVarsSpec
 import qualified Lang.UtilsSpec
-import qualified Noll.Compiler.NormalizeObjectsSpec
-import qualified Noll.Compiler.PatternMatchingExamples.Test01
-import qualified Noll.Compiler.PatternMatchingExamples.Test02
-import qualified Noll.Compiler.PatternMatchingSpec
-import qualified Noll.Compiler.Transform.FoldSpec
-import qualified Noll.Compiler.Transform.Pattern.DesugarSpec
-import qualified Noll.Compiler.Transform.Pattern.OrExpansionSpec
-import qualified Noll.Compiler.Transform.TreeSpec
-import qualified Noll.Compiler.Transform.Type.AliasExpansionSpec
+import qualified Noll.Compiler2.NormalizeObjectsSpec
+import qualified Noll.Compiler2.PatternMatchingExamples.Test01
+import qualified Noll.Compiler2.PatternMatchingExamples.Test02
+import qualified Noll.Compiler2.PatternMatchingSpec
+import qualified Noll.Compiler2.Transform.FoldSpec
+import qualified Noll.Compiler2.Transform.Pattern.DesugarSpec
+import qualified Noll.Compiler2.Transform.Pattern.OrExpansionSpec
+import qualified Noll.Compiler2.Transform.TreeSpec
+import qualified Noll.Compiler2.Transform.Type.AliasExpansionSpec
 import qualified Noll.CompilerExamples.Test01
 import qualified Noll.CompilerExamples.Test02
 import qualified Noll.CompilerSpec
@@ -47,7 +47,7 @@ main =
   hspec $ do
     Noll.Language.Type.IndexedSpec.spec
     Noll.SystemF.Constraint.GenerationSpec.spec
-    Noll.Compiler.Transform.Pattern.DesugarSpec.spec
+    Noll.Compiler2.Transform.Pattern.DesugarSpec.spec
     Noll.SystemFSpec.spec
     Noll.SystemF.UnificationSpec.spec
     Noll.SystemFExamples.Test01.spec
@@ -65,19 +65,19 @@ main =
     Noll.SystemFExamples.Test13.spec
     Noll.SystemFExamples.Test14.spec
     Noll.SystemFExamples.Test15.spec
-    Noll.Compiler.PatternMatchingSpec.spec
+    Noll.Compiler2.PatternMatchingSpec.spec
     Lang.FreeVarsSpec.spec
-    Noll.Compiler.Transform.TreeSpec.spec
-    Noll.Compiler.PatternMatchingExamples.Test01.spec
-    Noll.Compiler.PatternMatchingExamples.Test02.spec
-    Noll.Compiler.Transform.Pattern.OrExpansionSpec.spec
-    Noll.Compiler.Transform.Type.AliasExpansionSpec.spec
-    Noll.Compiler.Transform.FoldSpec.spec
+    Noll.Compiler2.Transform.TreeSpec.spec
+    Noll.Compiler2.PatternMatchingExamples.Test01.spec
+    Noll.Compiler2.PatternMatchingExamples.Test02.spec
+    Noll.Compiler2.Transform.Pattern.OrExpansionSpec.spec
+    Noll.Compiler2.Transform.Type.AliasExpansionSpec.spec
+    Noll.Compiler2.Transform.FoldSpec.spec
     Noll.CompilerExamples.Test01.spec
     Noll.CompilerExamples.Test02.spec
     --    Noll.CompilerSpec.spec
     Lang.UtilsSpec.spec
-    Noll.Compiler.NormalizeObjectsSpec.spec
+    Noll.Compiler2.NormalizeObjectsSpec.spec
     Noll.Core.Language.Expr.ReplaceSpec.spec
     Noll.Core.CompilerSpec.spec
 

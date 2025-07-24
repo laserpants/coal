@@ -10,21 +10,20 @@ import Control.Monad ((>=>))
 import Control.Monad.Reader (Reader, asks, runReader)
 import Control.Monad.State (get, gets, runState)
 import Data.Data (Data)
-import Debug.Trace
 import Lang.Utils (Name, forM)
-import Noll.Compiler.Dictionaries
-import Noll.Compiler.Lowpass.TranslateModule (translateModule)
-import Noll.Compiler.NormalizeObjects (NormalizeObjectsTransformContext (..))
-import Noll.Compiler.PatternMatching
-import Noll.Compiler.PatternMatching.Rule (MatchMonad (..), runMatchMonad)
-import Noll.Compiler.Transform.Fold
-import Noll.Compiler.Transform.Nats
-import Noll.Compiler.Transform.Pattern.AsDesugar
-import Noll.Compiler.Transform.Pattern.Desugar
-import Noll.Compiler.Transform.Pattern.OrExpansion
-import Noll.Compiler.Transform.Type.AliasExpansion
-import Noll.Compiler.Transform.Unfold
+import Noll.Compiler2.Dictionaries
+import Noll.Compiler2.Lowpass.TranslateModule (translateModule)
+import Noll.Compiler2.NormalizeObjects (NormalizeObjectsTransformContext (..))
+import Noll.Compiler2.PatternMatching
+import Noll.Compiler2.PatternMatching.Rule (MatchMonad (..), runMatchMonad)
 import Noll.Compiler2.Stack
+import Noll.Compiler2.Transform.Fold
+import Noll.Compiler2.Transform.Nats
+import Noll.Compiler2.Transform.Pattern.AsDesugar
+import Noll.Compiler2.Transform.Pattern.Desugar
+import Noll.Compiler2.Transform.Pattern.OrExpansion
+import Noll.Compiler2.Transform.Type.AliasExpansion
+import Noll.Compiler2.Transform.Unfold
 import Noll.Compiler2.TypeInference
 import Noll.Language
 import Noll.Module (Module (..))
@@ -33,7 +32,7 @@ import Noll.Module.Definition
 import Noll.SystemF.Substitution (normalizeTypeIndexes)
 
 import qualified Lang.Lowpass.Language as Lowpass
-import qualified Noll.Compiler.Lowpass.Environment as Lowpass
+import qualified Noll.Compiler2.Lowpass.Environment as Lowpass
 
 withSupplyC :: (Monad m) => (Int -> (c, Int)) -> Compiler2T a m c
 withSupplyC f = do

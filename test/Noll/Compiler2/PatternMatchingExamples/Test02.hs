@@ -1,0 +1,144 @@
+{-# LANGUAGE OverloadedStrings #-}
+
+module Noll.Compiler2.PatternMatchingExamples.Test02 where
+
+-- import Lang.Common.Environment (Environment (..))
+-- import Lang.Common.List1 (NonEmpty (..), (<|))
+-- import Lang.Label (Label (..))
+-- import Noll.Compiler2.PatternMatching
+-- import Noll.Compiler2.PatternMatching.Envelope
+-- import Noll.Compiler2.PatternMatching.Equation
+-- import Noll.Compiler2.PatternMatching.Rule
+-- import Noll.Compiler2.PatternMatchingSpec.TestRunner (compilePatterns)
+-- import Noll.Eval (Value (..), eval)
+-- import Noll.Language (Expression (..), Primitive (..))
+-- import Test.Hspec (Spec, describe, it)
+--
+-- import qualified Data.Map.Strict as Map
+-- import qualified Lang.Common.Environment as Environment
+--
+-- spec :: Spec
+-- spec =
+--  describe "" $ do
+--    it "" $ do
+--      evalWithEnv
+--        fixture
+--        ( Environment.fromList
+--            [
+--              ( "u1"
+--              , VPrim (LInt32 1)
+--              )
+--            ,
+--              ( "u2"
+--              , VData "Nil" []
+--              )
+--            ,
+--              ( "u3"
+--              , VData "Nil" []
+--              )
+--            ]
+--        )
+--        == VData "A" [VPrim (LInt32 1), VData "Nil" []]
+--    it "" $ do
+--      evalWithEnv
+--        fixture
+--        ( Environment.fromList
+--            [
+--              ( "u1"
+--              , VPrim (LInt32 1)
+--              )
+--            ,
+--              ( "u2"
+--              , VData "Cons" [VPrim (LInt32 1), VData "Nil" []]
+--              )
+--            ,
+--              ( "u3"
+--              , VData "Nil" []
+--              )
+--            ]
+--        )
+--        == VData "B" [VPrim (LInt32 1), VData "Cons" [VPrim (LInt32 1), VData "Nil" []]]
+--    it "" $ do
+--      evalWithEnv
+--        fixture
+--        ( Environment.fromList
+--            [
+--              ( "u1"
+--              , VPrim (LInt32 1)
+--              )
+--            ,
+--              ( "u2"
+--              , VData "Cons" [VPrim (LInt32 2), VData "Nil" []]
+--              )
+--            ,
+--              ( "u3"
+--              , VData "Cons" [VPrim (LInt32 3), VData "Nil" []]
+--              )
+--            ]
+--        )
+--        == VData
+--          "C"
+--          [ VPrim (LInt32 1)
+--          , VPrim (LInt32 2)
+--          , VData "Nil" []
+--          , VPrim (LInt32 3)
+--          , VData "Nil" []
+--          ]
+--
+---- match (u2, u3) {
+----   | (Nil, ys) =>
+----       A(u1, ys)
+----   | (xs, Nil) =>
+----       B(u1, xs)
+----   | (Cons(x, xs), Cons(y, ys)) =>
+----       C(u1, x, xs, y, ys)
+---- }
+-- fixture :: Expression () ()
+-- fixture =
+--  evalMatchMonad
+--    "match"
+--    0
+--    ( compilePatterns
+--        [Label () "u2", Label () "u3"]
+--        [ patternEquation
+--            [ MConstructor (Label () "Nil") []
+--            , MVariable (Label () "ys")
+--            ]
+--            (MExpression (EApplication () () (EConstructor () (Label () "A")) (EVariable () (Label () "u1") <| EVariable () (Label () "ys") :| [])))
+--        , patternEquation
+--            [ MVariable (Label () "xs")
+--            , MConstructor (Label () "Nil") []
+--            ]
+--            (MExpression (EApplication () () (EConstructor () (Label () "B")) (EVariable () (Label () "u1") <| EVariable () (Label () "xs") :| [])))
+--        , patternEquation
+--            [ MConstructor
+--                (Label () "Cons")
+--                [ MVariable (Label () "x")
+--                , MVariable (Label () "xs")
+--                ]
+--            , MConstructor
+--                (Label () "Cons")
+--                [ MVariable (Label () "y")
+--                , MVariable (Label () "ys")
+--                ]
+--            ]
+--            ( MExpression
+--                ( EApplication
+--                    ()
+--                    ()
+--                    (EConstructor () (Label () "C"))
+--                    ( EVariable () (Label () "u1")
+--                        <| EVariable () (Label () "x")
+--                        <| EVariable () (Label () "xs")
+--                        <| EVariable () (Label () "y")
+--                        <| EVariable () (Label () "ys")
+--                        :| []
+--                    )
+--                )
+--            )
+--        ]
+--        MFail
+--    )
+--
+-- evalWithEnv :: Expression () () -> Environment Value -> Value
+-- evalWithEnv = flip eval
