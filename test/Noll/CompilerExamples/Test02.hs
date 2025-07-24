@@ -28,7 +28,7 @@ import Noll.Language (
   With (..),
  )
 import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
-import Noll.SystemFSpec.TestRunner
+import Noll.TypeSystemSpec.TestRunner
 import Test.Hspec (Spec, describe, it)
 
 import qualified Data.Map.Strict as Map

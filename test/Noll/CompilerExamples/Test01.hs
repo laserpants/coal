@@ -26,8 +26,8 @@ import Noll.Language (
   With (..),
  )
 import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
-import Noll.SystemF (normalizeTypeIndexes)
-import Noll.SystemFSpec.TestRunner
+import Noll.TypeSystem (normalizeTypeIndexes)
+import Noll.TypeSystemSpec.TestRunner
 import Test.Hspec (Spec, describe, it)
 
 import qualified Data.Set as Set

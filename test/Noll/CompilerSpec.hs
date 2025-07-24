@@ -9,8 +9,8 @@ import Noll.Compiler
 import Noll.CompilerExamples.Test02 (bazz)
 import Noll.Language
 import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
-import Noll.SystemF
-import Noll.SystemFSpec.TestRunner
+import Noll.TypeSystem
+import Noll.TypeSystemSpec.TestRunner
 import Test.Hspec (Spec, describe, it)
 
 import qualified Data.Set as Set

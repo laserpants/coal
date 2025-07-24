@@ -29,8 +29,8 @@ import Text.RawString.QQ
 
 import Noll.Language (Constructor (..), IndexedType (..), Intrinsic (..), Kind (..), Parameter (..), Row (..), Scheme (..), Type (..), TypeIndex (..))
 import Noll.Module (Constant (..), Definition (..), Function (..), Module (..))
-import Noll.SystemF
-import Noll.SystemFSpec.TestRunner
+import Noll.TypeSystem
+import Noll.TypeSystemSpec.TestRunner
 import Test.Hspec (Spec, describe, it)
 
 import qualified Data.Map.Strict as Map

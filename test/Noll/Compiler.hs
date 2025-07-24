@@ -46,8 +46,8 @@ import Noll.Language
 import Noll.Language.HasType (foldTypeOf)
 import Noll.Language.Type.Indexed (indexed)
 import Noll.Module (Constant (..), Definition (..), Function (..), definitionName)
-import Noll.SystemF
-import Noll.SystemF.Substitution (mapsTo)
+import Noll.TypeSystem
+import Noll.TypeSystem.Substitution (mapsTo)
 
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text

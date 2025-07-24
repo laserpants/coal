@@ -22,7 +22,7 @@ import Noll.Compiler2.Stack
 import Noll.Language
 import Noll.Module (Constant (..), Definition (..), Function (..))
 import Noll.Module.Definition (definitionName)
-import Noll.SystemF
+import Noll.TypeSystem
 
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text

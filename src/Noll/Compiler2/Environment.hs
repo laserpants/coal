@@ -21,7 +21,7 @@ import Noll.Compiler2.Parameterized
 import Noll.Compiler2.Transform.Type.AliasExpansion
 import Noll.Language
 import Noll.Module.Definition
-import Noll.SystemF.Substitution (mapsTo, substituteInScheme)
+import Noll.TypeSystem.Substitution (mapsTo, substituteInScheme)
 
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set

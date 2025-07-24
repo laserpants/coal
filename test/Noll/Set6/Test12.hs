@@ -6,9 +6,9 @@ import Lang.Common.List1 (NonEmpty (..), (<|))
 import Lang.Label (Label (..))
 import Noll.Language
 import Noll.Module (Constant (..), Definition (..), Function (..), Module (..), Path (..))
-import Noll.SystemF.Constraint
-import Noll.SystemF.Constraint.Solver
-import Noll.SystemF.Substitution (Substitutable (..), Substitution (..), mapsTo)
+import Noll.TypeSystem.Constraint
+import Noll.TypeSystem.Constraint.Solver
+import Noll.TypeSystem.Substitution (Substitutable (..), Substitution (..), mapsTo)
 
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set

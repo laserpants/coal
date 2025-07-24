@@ -1,10 +1,10 @@
 import qualified Noll.Language.Type.IndexedSpec
 
--- import qualified Noll.SystemF.ConstraintSolverSpec
--- import qualified Noll.SystemF.KindConstraint.CollectSpec
--- import qualified Noll.SystemF.KindSubstitutionSpec
--- import qualified Noll.SystemF.TypeConstraint.CollectSpec
--- import qualified Noll.SystemF.TypeSubstitutionSpec
+-- import qualified Noll.TypeSystem.ConstraintSolverSpec
+-- import qualified Noll.TypeSystem.KindConstraint.CollectSpec
+-- import qualified Noll.TypeSystem.KindSubstitutionSpec
+-- import qualified Noll.TypeSystem.TypeConstraint.CollectSpec
+-- import qualified Noll.TypeSystem.TypeSubstitutionSpec
 
 import qualified Lang.FreeVarsSpec
 import qualified Lang.UtilsSpec
@@ -22,49 +22,49 @@ import qualified Noll.CompilerExamples.Test02
 import qualified Noll.CompilerSpec
 import qualified Noll.Core.CompilerSpec
 import qualified Noll.Core.Language.Expr.ReplaceSpec
-import qualified Noll.SystemF.Constraint.GenerationSpec
-import qualified Noll.SystemF.UnificationSpec
-import qualified Noll.SystemFExamples.Test01
-import qualified Noll.SystemFExamples.Test02
-import qualified Noll.SystemFExamples.Test03
-import qualified Noll.SystemFExamples.Test04
-import qualified Noll.SystemFExamples.Test05
-import qualified Noll.SystemFExamples.Test06
-import qualified Noll.SystemFExamples.Test07
-import qualified Noll.SystemFExamples.Test08
-import qualified Noll.SystemFExamples.Test09
-import qualified Noll.SystemFExamples.Test10
-import qualified Noll.SystemFExamples.Test11
-import qualified Noll.SystemFExamples.Test12
-import qualified Noll.SystemFExamples.Test13
-import qualified Noll.SystemFExamples.Test14
-import qualified Noll.SystemFExamples.Test15
-import qualified Noll.SystemFSpec
+import qualified Noll.TypeSystem.Constraint.GenerationSpec
+import qualified Noll.TypeSystem.UnificationSpec
+import qualified Noll.TypeSystemExamples.Test01
+import qualified Noll.TypeSystemExamples.Test02
+import qualified Noll.TypeSystemExamples.Test03
+import qualified Noll.TypeSystemExamples.Test04
+import qualified Noll.TypeSystemExamples.Test05
+import qualified Noll.TypeSystemExamples.Test06
+import qualified Noll.TypeSystemExamples.Test07
+import qualified Noll.TypeSystemExamples.Test08
+import qualified Noll.TypeSystemExamples.Test09
+import qualified Noll.TypeSystemExamples.Test10
+import qualified Noll.TypeSystemExamples.Test11
+import qualified Noll.TypeSystemExamples.Test12
+import qualified Noll.TypeSystemExamples.Test13
+import qualified Noll.TypeSystemExamples.Test14
+import qualified Noll.TypeSystemExamples.Test15
+import qualified Noll.TypeSystemSpec
 import Test.Hspec (hspec)
 
 main :: IO ()
 main =
   hspec $ do
     Noll.Language.Type.IndexedSpec.spec
-    Noll.SystemF.Constraint.GenerationSpec.spec
+    Noll.TypeSystem.Constraint.GenerationSpec.spec
     Noll.Compiler2.Transform.Pattern.DesugarSpec.spec
-    Noll.SystemFSpec.spec
-    Noll.SystemF.UnificationSpec.spec
-    Noll.SystemFExamples.Test01.spec
-    Noll.SystemFExamples.Test02.spec
-    Noll.SystemFExamples.Test03.spec
-    Noll.SystemFExamples.Test04.spec
-    Noll.SystemFExamples.Test05.spec
-    Noll.SystemFExamples.Test06.spec
-    Noll.SystemFExamples.Test07.spec
-    Noll.SystemFExamples.Test08.spec
-    Noll.SystemFExamples.Test09.spec
-    Noll.SystemFExamples.Test10.spec
-    Noll.SystemFExamples.Test11.spec
-    Noll.SystemFExamples.Test12.spec
-    Noll.SystemFExamples.Test13.spec
-    Noll.SystemFExamples.Test14.spec
-    Noll.SystemFExamples.Test15.spec
+    Noll.TypeSystemSpec.spec
+    Noll.TypeSystem.UnificationSpec.spec
+    Noll.TypeSystemExamples.Test01.spec
+    Noll.TypeSystemExamples.Test02.spec
+    Noll.TypeSystemExamples.Test03.spec
+    Noll.TypeSystemExamples.Test04.spec
+    Noll.TypeSystemExamples.Test05.spec
+    Noll.TypeSystemExamples.Test06.spec
+    Noll.TypeSystemExamples.Test07.spec
+    Noll.TypeSystemExamples.Test08.spec
+    Noll.TypeSystemExamples.Test09.spec
+    Noll.TypeSystemExamples.Test10.spec
+    Noll.TypeSystemExamples.Test11.spec
+    Noll.TypeSystemExamples.Test12.spec
+    Noll.TypeSystemExamples.Test13.spec
+    Noll.TypeSystemExamples.Test14.spec
+    Noll.TypeSystemExamples.Test15.spec
     Noll.Compiler2.PatternMatchingSpec.spec
     Lang.FreeVarsSpec.spec
     Noll.Compiler2.Transform.TreeSpec.spec
@@ -81,9 +81,9 @@ main =
     Noll.Core.Language.Expr.ReplaceSpec.spec
     Noll.Core.CompilerSpec.spec
 
---    Noll.SystemF.TypeConstraint.CollectSpec.spec
---    Noll.SystemF.TypeSubstitutionSpec.spec
---    Noll.SystemF.KindSubstitutionSpec.spec
---    Noll.SystemF.ConstraintSolverSpec.spec
---    Noll.SystemF.KindConstraint.CollectSpec.spec
---    Noll.SystemFSpec.spec
+--    Noll.TypeSystem.TypeConstraint.CollectSpec.spec
+--    Noll.TypeSystem.TypeSubstitutionSpec.spec
+--    Noll.TypeSystem.KindSubstitutionSpec.spec
+--    Noll.TypeSystem.ConstraintSolverSpec.spec
+--    Noll.TypeSystem.KindConstraint.CollectSpec.spec
+--    Noll.TypeSystemSpec.spec

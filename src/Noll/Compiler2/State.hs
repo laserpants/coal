@@ -20,7 +20,7 @@ import Lang.Common.Environment (Environment (..))
 import Lang.Common.Supply (Supply (..))
 import Lang.Utils (Dictionary, Over)
 import Noll.Language
-import Noll.SystemF
+import Noll.TypeSystem
 
 type CompilerConstraint a = Constraint (InferenceRule Kind a) TypeIndex Kind IndexedType
 

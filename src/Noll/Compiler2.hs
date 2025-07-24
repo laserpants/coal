@@ -29,7 +29,7 @@ import Noll.Language
 import Noll.Module (Module (..))
 import Noll.Module.Constant
 import Noll.Module.Definition
-import Noll.SystemF.Substitution (normalizeTypeIndexes)
+import Noll.TypeSystem.Substitution (normalizeTypeIndexes)
 
 import qualified Lang.Lowpass.Language as Lowpass
 import qualified Noll.Compiler2.Lowpass.Environment as Lowpass

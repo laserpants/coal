@@ -81,16 +81,16 @@ library
       Noll.Parser.Pattern
       Noll.Parser.Symbol
       Noll.Parser.Type
-      Noll.SystemF
-      Noll.SystemF.Constraint
-      Noll.SystemF.Constraint.Assumption
-      Noll.SystemF.Constraint.Generation
-      Noll.SystemF.Constraint.Generation.InferenceRule
-      Noll.SystemF.Constraint.Generation.Internal
-      Noll.SystemF.Constraint.Generation.TypeAnnotation
-      Noll.SystemF.Constraint.Solver
-      Noll.SystemF.Substitution
-      Noll.SystemF.Unification
+      Noll.TypeSystem
+      Noll.TypeSystem.Constraint
+      Noll.TypeSystem.Constraint.Assumption
+      Noll.TypeSystem.Constraint.Generation
+      Noll.TypeSystem.Constraint.Generation.InferenceRule
+      Noll.TypeSystem.Constraint.Generation.Internal
+      Noll.TypeSystem.Constraint.Generation.TypeAnnotation
+      Noll.TypeSystem.Constraint.Solver
+      Noll.TypeSystem.Substitution
+      Noll.TypeSystem.Unification
       Noll.Utils
   other-modules:
       Paths_noll
@@ -249,28 +249,28 @@ test-suite noll-test
       Noll.Set7.Test01
       Noll.Set8.Test01
       Noll.Set9.Test01
-      Noll.SystemF.Constraint.GenerationSpec
-      Noll.SystemF.UnificationSpec
-      Noll.SystemFExamples.Test01
-      Noll.SystemFExamples.Test02
-      Noll.SystemFExamples.Test03
-      Noll.SystemFExamples.Test04
-      Noll.SystemFExamples.Test05
-      Noll.SystemFExamples.Test06
-      Noll.SystemFExamples.Test07
-      Noll.SystemFExamples.Test08
-      Noll.SystemFExamples.Test09
-      Noll.SystemFExamples.Test10
-      Noll.SystemFExamples.Test11
-      Noll.SystemFExamples.Test12
-      Noll.SystemFExamples.Test13
-      Noll.SystemFExamples.Test14
-      Noll.SystemFExamples.Test15
-      Noll.SystemFExamples.Test16
-      Noll.SystemFExamples.Test17
-      Noll.SystemFFixtures.Expression
-      Noll.SystemFSpec
-      Noll.SystemFSpec.TestRunner
+      Noll.TypeSystem.Constraint.GenerationSpec
+      Noll.TypeSystem.UnificationSpec
+      Noll.TypeSystemExamples.Test01
+      Noll.TypeSystemExamples.Test02
+      Noll.TypeSystemExamples.Test03
+      Noll.TypeSystemExamples.Test04
+      Noll.TypeSystemExamples.Test05
+      Noll.TypeSystemExamples.Test06
+      Noll.TypeSystemExamples.Test07
+      Noll.TypeSystemExamples.Test08
+      Noll.TypeSystemExamples.Test09
+      Noll.TypeSystemExamples.Test10
+      Noll.TypeSystemExamples.Test11
+      Noll.TypeSystemExamples.Test12
+      Noll.TypeSystemExamples.Test13
+      Noll.TypeSystemExamples.Test14
+      Noll.TypeSystemExamples.Test15
+      Noll.TypeSystemExamples.Test16
+      Noll.TypeSystemExamples.Test17
+      Noll.TypeSystemFixtures.Expression
+      Noll.TypeSystemSpec
+      Noll.TypeSystemSpec.TestRunner
       Noll.UtilsSpec
       Paths_noll
   autogen-modules:

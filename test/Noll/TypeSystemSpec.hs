@@ -1,0 +1,1362 @@
+{-# LANGUAGE OverloadedStrings #-}
+
+-- module Noll.TypeSystemSpec (spec) where
+module Noll.TypeSystemSpec where
+
+import Control.Monad.Identity
+import Control.Monad.Reader (runReader)
+import Data.List.NonEmpty ((<|))
+import Lang.Common.List1 (NonEmpty (..))
+import Lang.Label (Label (..))
+import Lang.Utils (Name)
+import Noll.Compiler2.Dictionaries
+import Noll.Compiler2.DictionariesSpec
+import Noll.Compiler2.Lowpass.Environment (TranslateEnvironment (..), initialTranslateEnvironment, insertQualifiedNames, withModuleName)
+import Noll.Compiler2.Lowpass.TranslateDefinition (translateDefinition)
+import Noll.Compiler2.Lowpass.TranslateExpressionSpec
+import Noll.Compiler2.Lowpass.TranslateModule (translateModule)
+import Noll.Compiler2.NormalizeObjects (NormalizeObjectsTransformContext (..), normalizeObject)
+import Noll.Compiler2.PatternMatching
+import Noll.Compiler2.PatternMatching.Envelope
+import Noll.Compiler2.PatternMatching.Equation
+import Noll.Compiler2.PatternMatching.Rule
+import Noll.Compiler2.Transform.Fold
+import Noll.Compiler2.Transform.Nats
+import Noll.Compiler2.Transform.Pattern.AsDesugar
+import Noll.Compiler2.Transform.Pattern.Desugar
+import Noll.Compiler2.Transform.Pattern.OrExpansion
+import Noll.Compiler2.Transform.Pattern.RecordDesugar
+import Noll.Compiler2.Transform.Type.AliasExpansion
+import Noll.Compiler2.Transform.Unfold
+import Noll.Compiler2
+import Noll.Compiler2.Stack
+import Noll.Compiler2Spec (compiler2TestEnvironment)
+import Noll.Language
+import Noll.Module (Constant (..), Function (..), Module (..))
+import Noll.TypeSystem.Constraint.Assumption (Assumption (..))
+import Noll.TypeSystem.Constraint.Generation.Internal (InferenceRule (..))
+import Noll.TypeSystemSpec.TestRunner
+import Test.Hspec (Spec, describe, it)
+
+import qualified Data.Set as Set
+import qualified Lang.Common.Environment as Environment
+import qualified Noll.CompilerExamples.Test02
+import qualified Noll.Set.Test01
+import qualified Noll.Set.Test02
+import qualified Noll.Set.Test03
+import qualified Noll.Set.Test04
+import qualified Noll.Set.Test05
+import qualified Noll.Set.Test06
+import qualified Noll.Set.Test07
+import qualified Noll.Set.Test08
+import qualified Noll.Set.Test09
+import qualified Noll.Set.Test10
+import qualified Noll.Set.Test11
+import qualified Noll.Set.Test12
+import qualified Noll.Set.Test13
+import qualified Noll.Set10.Test01
+import qualified Noll.Set10.Test03
+import qualified Noll.Set10.Test04
+import qualified Noll.Set2.Test05
+import qualified Noll.Set2.Test09
+import qualified Noll.Set2.Test10
+import qualified Noll.Set2.Test12
+import qualified Noll.Set3.Test04
+import qualified Noll.Set3.Test05
+import qualified Noll.Set3.Test10
+import qualified Noll.Set3.Test10x
+import qualified Noll.Set3.Test12
+import qualified Noll.Set3.Test12x
+import qualified Noll.Set3.Test13x
+import qualified Noll.Set4.Test02
+import qualified Noll.Set4.Test021
+import qualified Noll.Set5.Test01
+import qualified Noll.Set5.Test03
+import qualified Noll.Set5.Test04
+import qualified Noll.Set5.Test05
+import qualified Noll.Set5.Test09
+import qualified Noll.Set5.Test10
+import qualified Noll.Set5.Test12
+import qualified Noll.Set5.Test13
+import qualified Noll.Set5.Test14
+import qualified Noll.Set6.Test12
+import qualified Noll.Set6.Test13
+
+spec :: Spec
+spec =
+  describe "Noll.TypeSystem" $ do
+    describe "match x { | Yes => true }" $ do
+      it "" $ do
+        typedExpressionShouldMatch fixture7Typed fixture7
+      it "" $
+        hasNoErrors fixture7
+      it "" $
+        assumptions fixture7 == [Assumption "x" (TConstructor KType "Answer")]
+    describe "fn(m) => let y = m in let x = y(true) in x" $ do
+      it "" $
+        typedExpressionShouldMatch fixture1Typed fixture1
+      it "" $
+        hasNoErrors fixture1
+      it "" $
+        hasNoAssumptions fixture1
+    describe "match x { | Yes => y }" $ do
+      it "" $
+        assumptions fixture28 == [Assumption "x" (TConstructor KType "Answer"), Assumption "y" (TVariable (TypeIndex KType 3))]
+      it "" $
+        hasNoErrors fixture1
+      it "let f = fn(x) => x in (f(f))(f(1))" $ do
+        typedExpressionShouldMatch fixture2Typed fixture2
+      it "" $
+        hasNoErrors fixture2
+      it "match(p) { | MkPair(fst, snd) => true }" $ do
+        typedExpressionShouldMatch fixture12Typed fixture12
+      it "" $
+        hasNoErrors fixture12
+      it "match(p : Pair(int32, bool)) { | MkPair(fst, snd) => true }" $ do
+        typedExpressionShouldMatch fixture13Typed fixture13
+      it "" $
+        hasNoErrors fixture13
+      it "match(p : Pair(a, b)) { | MkPair(fst, snd) => true }" $ do
+        typedExpressionShouldMatch fixture14Typed fixture14
+      it "" $
+        hasNoErrors fixture14
+      it "match(p : Pair(a, a)) { | MkPair(fst, snd) => true }" $ do
+        typedExpressionShouldMatch fixture15Typed fixture15
+      it "" $
+        hasNoErrors fixture15
+      it "" $ do
+        typedExpressionShouldMatch fixture17Typed fixture17
+      it "" $
+        hasNoErrors fixture17
+      it "" $
+        numberOfErrors fixture22 == 1
+      it "" $
+        numberOfErrors fixture23 == 1
+      it "" $
+        numberOfErrors fixture25 == 1
+      it "" $
+        numberOfErrors fixture26 == 1
+      it "" $
+        assumptions fixture27 == []
+    describe "" $ do
+      it "" $ do
+        typedFunctionShouldMatch
+          [
+            ( "not"
+            , Forall
+                mempty
+                []
+                (TIntrinsic IBool `TArrow` TIntrinsic IBool)
+            )
+          ,
+            ( "less_than_or_equal_to"
+            , Forall
+                (Set.fromList [TypeIndex KType 0])
+                []
+                ( TVariable (TypeIndex KType 0)
+                    `TArrow` TVariable (TypeIndex KType 0)
+                    `TArrow` TIntrinsic IBool
+                )
+            )
+          ]
+          fixture29Typed
+          fixture29
+      it "" $ do
+        typedExpressionShouldMatch fixture30Typed fixture30
+      it "" $ do
+        typedExpressionShouldMatch fixture31Typed fixture31
+    describe "" $ do
+      it "" $ do
+        typedExpressionShouldMatch fixture37 fixture36
+      it "" $ do
+        typedExpressionShouldMatch fixture39 fixture38
+      it "" $ do
+        typedExpressionErrors2Includes (RuleAnnotation () (TIntrinsic IInt32) (TIntrinsic IBool)) fixture40
+
+typedExpression_ :: [(Name, Scheme TypeIndex Kind IndexedType)] -> Expression () (Type TypeIndex Kind) -> TestResult (Expression () (Type TypeIndex Kind)) ()
+typedExpression_ = testRunner runTypedExpressionTest
+
+typedFunction_ :: [(Name, Scheme TypeIndex Kind IndexedType)] -> Function Expression () (Type TypeIndex Kind) -> TestResult (Function Expression () (Type TypeIndex Kind)) ()
+typedFunction_ = testRunner runTypedFunctionTest
+
+typedFunction :: Function Expression () () -> Function Expression () (Type TypeIndex Kind)
+typedFunction f = testResultExpression (testRunner runTypedFunctionTest mempty f)
+
+-- typedFunctionShouldMatch :: Function Expression () (Type TypeIndex Kind) -> Function Expression () () -> Bool
+typedFunctionShouldMatch names f0 f = testResultExpression (testRunner runTypedFunctionTest names f) == f0
+
+typedExpressionErrors2Includes e f = e `elem` testResultErrors2 (testRunner runTypedExpressionTest mempty f)
+
+typedExpression :: Expression () () -> Expression () (Type TypeIndex Kind)
+typedExpression e = testResultExpression (testRunner runTypedExpressionTest mempty e)
+
+typedExpressionShouldMatch :: Expression () (Type TypeIndex Kind) -> Expression () () -> Bool
+typedExpressionShouldMatch e0 e = testResultExpression (testRunner runTypedExpressionTest mempty e) == e0
+
+assumptions :: Expression () () -> [Assumption IndexedType]
+assumptions e = testResultAssumptions (testRunner runTypedExpressionTest mempty e)
+
+hasNoAssumptions :: Expression () () -> Bool
+hasNoAssumptions e = null (testResultAssumptions (testRunner runTypedExpressionTest mempty e))
+
+hasNoErrors :: Expression () () -> Bool
+hasNoErrors e = null errs1 && null errs2
+ where
+  errs1 = testResultErrors1 result
+  errs2 = testResultErrors2 result
+  result = testRunner runTypedExpressionTest mempty e
+
+numberOfErrors :: Expression () () -> Int
+numberOfErrors e = length errs1 + length errs2
+ where
+  errs1 = testResultErrors1 result
+  errs2 = testResultErrors2 result
+  result = testRunner runTypedExpressionTest mempty e
+
+-- fn(m) => let y = m in let x = y(true) in x
+fixture1 :: Expression () ()
+fixture1 =
+  ELambda
+    ()
+    (PVariable () (Label () "m") :| [])
+    ( ELet
+        ()
+        ( BPattern
+            ()
+            (PVariable () (Label () "y"))
+            (EVariable () (Label () "m"))
+            :| []
+        )
+        ( ELet
+            ()
+            ( BPattern
+                ()
+                (PVariable () (Label () "x"))
+                ( EApplication
+                    ()
+                    ()
+                    (EVariable () (Label () "y"))
+                    (ELiteral () (LBool True) :| [])
+                )
+                :| []
+            )
+            ( EVariable () (Label () "x")
+            )
+        )
+    )
+
+fixture1Typed :: Expression () (Type TypeIndex Kind)
+fixture1Typed =
+  ELambda
+    ()
+    (PVariable () (Label (TIntrinsic IBool `TArrow` TVariable (TypeIndex KType 0)) "m") :| [])
+    ( ELet
+        ()
+        ( BPattern
+            ()
+            (PVariable () (Label (TIntrinsic IBool `TArrow` TVariable (TypeIndex KType 0)) "y"))
+            (EVariable () (Label (TIntrinsic IBool `TArrow` TVariable (TypeIndex KType 0)) "m"))
+            :| []
+        )
+        ( ELet
+            ()
+            ( BPattern
+                ()
+                (PVariable () (Label (TVariable (TypeIndex KType 0)) "x"))
+                ( EApplication
+                    ()
+                    (TVariable (TypeIndex KType 0))
+                    (EVariable () (Label (TIntrinsic IBool `TArrow` TVariable (TypeIndex KType 0)) "y"))
+                    (ELiteral () (LBool True) :| [])
+                )
+                :| []
+            )
+            ( EVariable () (Label (TVariable (TypeIndex KType 0)) "x")
+            )
+        )
+    )
+
+-- let f = fn(x) => x in (f(f))(f(1))
+fixture2 :: Expression () ()
+fixture2 =
+  ELet
+    ()
+    ( BPattern
+        ()
+        (PVariable () (Label () "f"))
+        ( ELambda
+            ()
+            (PVariable () (Label () "x") :| [])
+            (EVariable () (Label () "x"))
+        )
+        :| []
+    )
+    ( EApplication
+        ()
+        ()
+        ( EApplication
+            ()
+            ()
+            (EVariable () (Label () "f"))
+            (EVariable () (Label () "f") :| [])
+        )
+        ( EApplication
+            ()
+            ()
+            (EVariable () (Label () "f"))
+            (ELiteral () (LInt32 1) :| [])
+            :| []
+        )
+    )
+
+fixture2Typed :: Expression () (Type TypeIndex Kind)
+fixture2Typed =
+  ( ELet
+      ()
+      ( BPattern
+          ()
+          (PVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0)) "f"))
+          ( ELambda
+              ()
+              (PVariable () (Label (TVariable (TypeIndex KType 0)) "x") :| [])
+              (EVariable () (Label (TVariable (TypeIndex KType 0)) "x"))
+          )
+          :| []
+      )
+      ( EApplication
+          ()
+          (TIntrinsic IInt32)
+          ( EApplication
+              ()
+              (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
+              (EVariable () (Label ((TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "f"))
+              (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "f") :| [])
+          )
+          ( EApplication
+              ()
+              (TIntrinsic IInt32)
+              (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "f"))
+              (ELiteral () (LInt32 1) :| [])
+              :| []
+          )
+      )
+  )
+
+-- -- TODO
+-- -- let x = 1 in x(x)
+-- fixture3 :: Expression () ()
+-- fixture3 =
+--   ELet
+--     ()
+--     ( BPattern
+--         ()
+--         (PVariable () (Label () "x"))
+--         (ELiteral () (LInt32 1))
+--         :| []
+--     )
+--     ( EApplication
+--         ()
+--         ()
+--         (EVariable () (Label () "x"))
+--         (EVariable () (Label () "x") :| [])
+--     )
+--
+-- -- TODO
+-- -- if 1 then 2 else 3
+-- fixture4 :: Expression String ()
+-- fixture4 =
+--   EIf
+--     "if"
+--     ()
+--     (ELiteral "b" (LInt32 1))
+--     (ELiteral "c" (LInt32 2))
+--     (ELiteral "d" (LInt32 3))
+
+-- -- TODO
+-- -- if true then 2 else false
+-- fixture5 :: Expression String ()
+-- fixture5 =
+--   EIf
+--     "if"
+--     ()
+--     (ELiteral "b" (LBool True))
+--     (ELiteral "c" (LInt32 2))
+--     (ELiteral "d" (LBool False))
+
+-- -- TODO
+-- -- if 1 then 2 else (if true then false else 2)
+-- fixture6 :: Expression String ()
+-- fixture6 =
+--   EIf
+--     "EIf-1"
+--     ()
+--     (ELiteral "ELiteral-1" (LInt32 1))
+--     (ELiteral "ELiteral-2" (LInt32 2))
+--     ( EIf
+--         "EIf-2"
+--         ()
+--         (ELiteral "ELiteral-3" (LBool True))
+--         (ELiteral "ELiteral-4" (LBool False))
+--         (ELiteral "ELiteral-5" (LInt32 2))
+--     )
+
+-- match x { | Yes => true }
+fixture7 :: Expression () ()
+fixture7 =
+  EMatch
+    ()
+    ()
+    (EVariable () (Label () "x"))
+    ( EClause
+        ()
+        (PConstructor () (Label () "Yes") [])
+        (CPlain () [] (ELiteral () (LBool True)) :| [])
+        :| []
+    )
+
+fixture7Typed :: Expression () (Type TypeIndex Kind)
+fixture7Typed =
+  EMatch
+    ()
+    (TIntrinsic IBool)
+    (EVariable () (Label (TConstructor KType "Answer") "x"))
+    ( EClause
+        ()
+        (PConstructor () (Label (TConstructor KType "Answer") "Yes") [])
+        (CPlain () [] (ELiteral () (LBool True)) :| [])
+        :| []
+    )
+
+-- match(p) { | MkPair(fst, snd) => true }
+fixture12 :: Expression () ()
+fixture12 =
+  EMatch
+    ()
+    ()
+    (EVariable () (Label () "p"))
+    ( EClause
+        ()
+        (PConstructor () (Label () "MkPair") [PVariable () (Label () "fst"), PVariable () (Label () "snd")])
+        (CPlain () [] (ELiteral () (LBool True)) :| [])
+        :| []
+    )
+
+fixture12Typed :: Expression () (Type TypeIndex Kind)
+fixture12Typed =
+  EMatch
+    ()
+    (TIntrinsic IBool)
+    ( EVariable
+        ()
+        ( Label
+            ( TApplication
+                KType
+                (TConstructor (KArrow KType (KArrow KType KType)) "Pair")
+                (TVariable (TypeIndex KType 1) :| [TVariable (TypeIndex KType 0)])
+            )
+            "p"
+        )
+    )
+    ( EClause
+        ()
+        ( PConstructor
+            ()
+            ( Label
+                ( TApplication
+                    KType
+                    (TConstructor (KArrow KType (KArrow KType KType)) "Pair")
+                    (TVariable (TypeIndex KType 1) <| TVariable (TypeIndex KType 0) :| [])
+                )
+                "MkPair"
+            )
+            [ PVariable () (Label (TVariable (TypeIndex KType 1)) "fst")
+            , PVariable () (Label (TVariable (TypeIndex KType 0)) "snd")
+            ]
+        )
+        (CPlain () [] (ELiteral () (LBool True)) :| [])
+        :| []
+    )
+
+-- match(p : Pair(int32, bool)) { | MkPair(fst, snd) => true }
+fixture13 :: Expression () ()
+fixture13 =
+  EMatch
+    ()
+    ()
+    ( EAnnotation
+        ()
+        (TApplication () (TConstructor () "Pair") (TIntrinsic IInt32 <| TIntrinsic IBool :| []))
+        (EVariable () (Label () "p"))
+    )
+    ( EClause
+        ()
+        (PConstructor () (Label () "MkPair") [PVariable () (Label () "fst"), PVariable () (Label () "snd")])
+        (CPlain () [] (ELiteral () (LBool True)) :| [])
+        :| []
+    )
+
+fixture13Typed :: Expression () (Type TypeIndex Kind)
+fixture13Typed =
+  EMatch
+    ()
+    (TIntrinsic IBool)
+    ( EAnnotation
+        ()
+        (TApplication () (TConstructor () "Pair") (TIntrinsic IInt32 <| TIntrinsic IBool :| []))
+        (EVariable () (Label (TApplication KType (TConstructor (KArrow KType (KArrow KType KType)) "Pair") (TIntrinsic IInt32 :| [TIntrinsic IBool])) "p"))
+    )
+    ( EClause
+        ()
+        ( PConstructor
+            ()
+            ( Label
+                (TApplication KType (TConstructor (KArrow KType (KArrow KType KType)) "Pair") (TIntrinsic IInt32 <| TIntrinsic IBool :| []))
+                "MkPair"
+            )
+            [PVariable () (Label (TIntrinsic IInt32) "fst"), PVariable () (Label (TIntrinsic IBool) "snd")]
+        )
+        (CPlain () [] (ELiteral () (LBool True)) :| [])
+        :| []
+    )
+
+-- match(p : Pair(a, b)) { | MkPair(fst, snd) => true }
+fixture14 :: Expression () ()
+fixture14 =
+  EMatch
+    ()
+    ()
+    ( EAnnotation
+        ()
+        (TApplication () (TConstructor () "Pair") (TVariable (Parameter () "a") <| TVariable (Parameter () "b") :| []))
+        (EVariable () (Label () "p"))
+    )
+    ( EClause
+        ()
+        (PConstructor () (Label () "MkPair") [PVariable () (Label () "fst"), PVariable () (Label () "snd")])
+        (CPlain () [] (ELiteral () (LBool True)) :| [])
+        :| []
+    )
+
+fixture14Typed :: Expression () (Type TypeIndex Kind)
+fixture14Typed =
+  EMatch
+    ()
+    (TIntrinsic IBool)
+    ( EAnnotation
+        ()
+        (TApplication () (TConstructor () "Pair") (TVariable (Parameter () "a") <| TVariable (Parameter () "b") :| []))
+        (EVariable () (Label (TApplication KType (TConstructor (KArrow KType (KArrow KType KType)) "Pair") (TVariable (TypeIndex KType 1) :| [TVariable (TypeIndex KType 0)])) "p"))
+    )
+    ( EClause
+        ()
+        ( PConstructor
+            ()
+            ( Label
+                (TApplication KType (TConstructor (KArrow KType (KArrow KType KType)) "Pair") (TVariable (TypeIndex KType 1) <| TVariable (TypeIndex KType 0) :| []))
+                "MkPair"
+            )
+            [PVariable () (Label (TVariable (TypeIndex KType 1)) "fst"), PVariable () (Label (TVariable (TypeIndex KType 0)) "snd")]
+        )
+        (CPlain () [] (ELiteral () (LBool True)) :| [])
+        :| []
+    )
+
+-- match(p : Pair(a, a)) { | MkPair(fst, snd) => true }
+fixture15 :: Expression () ()
+fixture15 =
+  EMatch
+    ()
+    ()
+    ( EAnnotation
+        ()
+        (TApplication () (TConstructor () "Pair") (TVariable (Parameter () "a") <| TVariable (Parameter () "a") :| []))
+        (EVariable () (Label () "p"))
+    )
+    ( EClause
+        ()
+        (PConstructor () (Label () "MkPair") [PVariable () (Label () "fst"), PVariable () (Label () "snd")])
+        (CPlain () [] (ELiteral () (LBool True)) :| [])
+        :| []
+    )
+
+fixture15Typed :: Expression () (Type TypeIndex Kind)
+fixture15Typed =
+  EMatch
+    ()
+    (TIntrinsic IBool)
+    ( EAnnotation
+        ()
+        (TApplication () (TConstructor () "Pair") (TVariable (Parameter () "a") <| TVariable (Parameter () "a") :| []))
+        (EVariable () (Label (TApplication KType (TConstructor (KArrow KType (KArrow KType KType)) "Pair") (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 0)])) "p"))
+    )
+    ( EClause
+        ()
+        ( PConstructor
+            ()
+            ( Label
+                (TApplication KType (TConstructor (KArrow KType (KArrow KType KType)) "Pair") (TVariable (TypeIndex KType 0) <| TVariable (TypeIndex KType 0) :| []))
+                "MkPair"
+            )
+            [PVariable () (Label (TVariable (TypeIndex KType 0)) "fst"), PVariable () (Label (TVariable (TypeIndex KType 0)) "snd")]
+        )
+        (CPlain () [] (ELiteral () (LBool True)) :| [])
+        :| []
+    )
+
+-- -- TODO
+-- fixture16 :: Expression () ()
+-- fixture16 =
+--   ( EMatch
+--       ()
+--       ()
+--       (EVariable () (Label () "x"))
+--       ( EClause
+--           ()
+--           (PConstructor () (Label () "Yes") [])
+--           (CPlain () [] (ELiteral () (LBool True)) :| [])
+--           <| EClause
+--             ()
+--             (PConstructor () (Label () "Foo") [])
+--             (CPlain () [] (ELiteral () (LBool False)) :| [])
+--             :| []
+--       )
+--   )
+
+-- let f = fn(g, x) => g(x) in f
+fixture17 :: Expression () ()
+fixture17 =
+  ELet
+    ()
+    ( BPattern
+        ()
+        (PVariable () (Label () "f"))
+        ( ELambda
+            ()
+            (PVariable () (Label () "g") :| [PVariable () (Label () "x")])
+            ( EApplication
+                ()
+                ()
+                (EVariable () (Label () "g"))
+                (EVariable () (Label () "x") :| [])
+            )
+        )
+        :| []
+    )
+    (EVariable () (Label () "f"))
+
+fixture17Typed :: Expression () (Type TypeIndex Kind)
+fixture17Typed =
+  ELet
+    ()
+    ( BPattern
+        ()
+        (PVariable () (Label ((TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 1)) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 1)) "f"))
+        ( ELambda
+            ()
+            ( PVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 1)) "g")
+                :| [PVariable () (Label (TVariable (TypeIndex KType 0)) "x")]
+            )
+            ( EApplication
+                ()
+                (TVariable (TypeIndex KType 1))
+                (EVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 1)) "g"))
+                (EVariable () (Label (TVariable (TypeIndex KType 0)) "x") :| [])
+            )
+        )
+        :| []
+    )
+    (EVariable () (Label ((TVariable (TypeIndex KType 3) `TArrow` TVariable (TypeIndex KType 2)) `TArrow` TVariable (TypeIndex KType 3) `TArrow` TVariable (TypeIndex KType 2)) "f"))
+
+-- -- let f = fn(x : int32) => 1 in f
+-- fixture18 :: Expression () ()
+-- fixture18 =
+--   ELet
+--     ()
+--     ( BPattern
+--         ()
+--         (PVariable () (Label () "f"))
+--         ( ELambda
+--             ()
+--             ( ( PAnnotation
+--                   ()
+--                   (TIntrinsic IInt32)
+--                   (PVariable () (Label () "x"))
+--               )
+--                 :| []
+--             )
+--             (ELiteral () (LInt32 1))
+--         )
+--         :| []
+--     )
+--     (EVariable () (Label () "f"))
+
+-- -- let f = fn(x : bool) => 1 in f
+-- fixture19 :: Expression () ()
+-- fixture19 =
+--   ELet
+--     ()
+--     ( BPattern
+--         ()
+--         (PVariable () (Label () "f"))
+--         ( ELambda
+--             ()
+--             ( ( PAnnotation
+--                   ()
+--                   (TIntrinsic IBool)
+--                   (PVariable () (Label () "x"))
+--               )
+--                 :| []
+--             )
+--             (ELiteral () (LInt32 1))
+--         )
+--         :| []
+--     )
+--     (EVariable () (Label () "f"))
+
+-- -- let f = fn(x : bool) => x : bool in f
+-- fixture21 :: Expression () ()
+-- fixture21 =
+--   ELet
+--     ()
+--     ( BPattern
+--         ()
+--         (PVariable () (Label () "f"))
+--         ( ELambda
+--             ()
+--             ( ( PAnnotation
+--                   ()
+--                   (TIntrinsic IBool)
+--                   (PVariable () (Label () "x"))
+--               )
+--                 :| []
+--             )
+--             ( EAnnotation
+--                 ()
+--                 (TIntrinsic IBool)
+--                 (EVariable () (Label () "x"))
+--             )
+--         )
+--         :| []
+--     )
+--     (EVariable () (Label () "f"))
+
+-- let f = fn(x : bool) => x : int32 in f
+fixture22 :: Expression () ()
+fixture22 =
+  ELet
+    ()
+    ( BPattern
+        ()
+        (PVariable () (Label () "f"))
+        ( ELambda
+            ()
+            ( PAnnotation
+                ()
+                (TIntrinsic IBool)
+                (PVariable () (Label () "x"))
+                :| []
+            )
+            ( EAnnotation
+                ()
+                (TIntrinsic IInt32)
+                (EVariable () (Label () "x"))
+            )
+        )
+        :| []
+    )
+    (EVariable () (Label () "f"))
+
+-- let f = fn(x : a) => x : int32 in f
+fixture23 :: Expression () ()
+fixture23 =
+  ELet
+    ()
+    ( BPattern
+        ()
+        (PVariable () (Label () "f"))
+        ( ELambda
+            ()
+            ( ( PAnnotation
+                  ()
+                  (TVariable (Parameter () "a"))
+                  (PVariable () (Label () "x"))
+              )
+                :| []
+            )
+            ( EAnnotation
+                ()
+                (TIntrinsic IInt32)
+                (EVariable () (Label () "x"))
+            )
+        )
+        :| []
+    )
+    (EVariable () (Label () "f"))
+
+-- -- let f = fn(x : bool) => x : a in f
+-- fixture24 :: Expression () ()
+-- fixture24 =
+--   ELet
+--     ()
+--     ( BPattern
+--         ()
+--         (PVariable () (Label () "f"))
+--         ( ELambda
+--             ()
+--             ( ( PAnnotation
+--                   ()
+--                   (TIntrinsic IBool)
+--                   (PVariable () (Label () "x"))
+--               )
+--                 :| []
+--             )
+--             ( EAnnotation
+--                 ()
+--                 (TVariable (Parameter () "a"))
+--                 (EVariable () (Label () "x"))
+--             )
+--         )
+--         :| []
+--     )
+--     (EVariable () (Label () "f"))
+
+-- let f = fn(x : b) => x : a in f
+fixture25 :: Expression () ()
+fixture25 =
+  ELet
+    ()
+    ( BPattern
+        ()
+        (PVariable () (Label () "f"))
+        ( ELambda
+            ()
+            ( ( PAnnotation
+                  ()
+                  (TVariable (Parameter () "b"))
+                  (PVariable () (Label () "x"))
+              )
+                :| []
+            )
+            ( EAnnotation
+                ()
+                (TVariable (Parameter () "a"))
+                (EVariable () (Label () "x"))
+            )
+        )
+        :| []
+    )
+    (EVariable () (Label () "f"))
+
+-- let
+--   f =
+--     fn(g : a -> b, x : c) =>
+--       g(x)
+--   in
+--     f
+fixture26 :: Expression () ()
+fixture26 =
+  ELet
+    ()
+    ( BPattern
+        ()
+        (PVariable () (Label () "f"))
+        ( ELambda
+            ()
+            ( ( PAnnotation
+                  ()
+                  (TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "b"))
+                  (PVariable () (Label () "g"))
+              )
+                <| ( PAnnotation
+                      ()
+                      (TVariable (Parameter () "c"))
+                      (PVariable () (Label () "x"))
+                   )
+                  :| []
+            )
+            ( EApplication
+                ()
+                ()
+                (EVariable () (Label () "g"))
+                (EVariable () (Label () "x") :| [])
+            )
+        )
+        :| []
+    )
+    (EVariable () (Label () "f"))
+
+-- fn(g, x) => g(x)
+fixture27 :: Expression () ()
+fixture27 =
+  ELambda
+    ()
+    ( PVariable () (Label () "g")
+        <| PVariable () (Label () "x")
+          :| []
+    )
+    ( EApplication
+        ()
+        ()
+        (EVariable () (Label () "g"))
+        (EVariable () (Label () "x") :| [])
+    )
+
+-- match x { | Yes => y }
+fixture28 :: Expression () ()
+fixture28 =
+  EMatch
+    ()
+    ()
+    (EVariable () (Label () "x"))
+    ( EClause
+        ()
+        (PConstructor () (Label () "Yes") [])
+        (CPlain () [] (EVariable () (Label () "y")) :| [])
+        :| []
+    )
+
+fixture29 :: Function Expression () ()
+fixture29 =
+  Function
+    ()
+    (With [] ())
+    ( PAnnotation
+        ()
+        (TVariable (Parameter () "a"))
+        (PVariable () (Label () "n"))
+        :| []
+    )
+    ( EApplication
+        ()
+        ()
+        (EBinaryOperator () () OReverseComposition)
+        ( EVariable () (Label () "not")
+            <| EApplication
+              ()
+              ()
+              (EVariable () (Label () "less_than_or_equal_to"))
+              (EVariable () (Label () "n") :| [])
+              :| []
+        )
+    )
+
+fixture29Typed :: Function Expression () (Type TypeIndex Kind)
+fixture29Typed =
+  Function
+    ()
+    (With [] (TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool))
+    ( PAnnotation
+        ()
+        (TVariable (Parameter () "a"))
+        (PVariable () (Label (TVariable (TypeIndex KType 0)) "n"))
+        :| []
+    )
+    ( EApplication
+        ()
+        (TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
+        ( EBinaryOperator
+            ()
+            (TArrow (TIntrinsic IBool `TArrow` TIntrinsic IBool) (TArrow (TArrow (TVariable (TypeIndex KType 0)) (TIntrinsic IBool)) (TArrow (TVariable (TypeIndex KType 0)) (TIntrinsic IBool))))
+            OReverseComposition
+        )
+        ( EVariable () (Label (TIntrinsic IBool `TArrow` TIntrinsic IBool) "not")
+            <| EApplication
+              ()
+              (TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
+              (EVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool) "less_than_or_equal_to"))
+              (EVariable () (Label (TVariable (TypeIndex KType 0)) "n") :| [])
+              :| []
+        )
+    )
+
+--
+-- let
+--   f =
+--     fn(x) =>
+--       x
+--   in
+--     f(1)
+--
+fixture30 :: Expression () ()
+fixture30 =
+  ELet
+    ()
+    ( BPattern
+        ()
+        (PVariable () (Label () "f"))
+        ( ELambda
+            ()
+            (PVariable () (Label () "x") :| [])
+            (EVariable () (Label () "x"))
+        )
+        :| []
+    )
+    ( EApplication
+        ()
+        ()
+        (EVariable () (Label () "f"))
+        (ELiteral () (LInt32 1) :| [])
+    )
+
+fixture30Typed :: Expression () IndexedType
+fixture30Typed =
+  ELet
+    ()
+    ( BPattern
+        ()
+        (PVariable () (Label (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0)) "f"))
+        ( ELambda
+            ()
+            (PVariable () (Label (TVariable (TypeIndex KType 0)) "x") :| [])
+            (EVariable () (Label (TVariable (TypeIndex KType 0)) "x"))
+        )
+        :| []
+    )
+    ( EApplication
+        ()
+        (TIntrinsic IInt32)
+        (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "f"))
+        (ELiteral () (LInt32 1) :| [])
+    )
+
+-- let
+--   f(x) = x
+--   in
+--     f(1)
+--
+fixture31 :: Expression () ()
+fixture31 =
+  ELet
+    ()
+    ( BFunction
+        ()
+        "f"
+        (PVariable () (Label () "x") :| [])
+        (EVariable () (Label () "x"))
+        :| []
+    )
+    ( EApplication
+        ()
+        ()
+        (EVariable () (Label () "f"))
+        (ELiteral () (LInt32 1) :| [])
+    )
+
+fixture31Typed :: Expression () IndexedType
+fixture31Typed =
+  ELet
+    ()
+    ( BFunction
+        ()
+        "f"
+        (PVariable () (Label (TVariable (TypeIndex KType 0)) "x") :| [])
+        (EVariable () (Label (TVariable (TypeIndex KType 0)) "x"))
+        :| []
+    )
+    ( EApplication
+        ()
+        (TIntrinsic IInt32)
+        (EVariable () (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) "f"))
+        (ELiteral () (LInt32 1) :| [])
+    )
+
+-- baz =
+--  Noll.TypeSystemSpec.typedExpression_
+--    []
+--    --      ( "not"
+--    --      , Forall
+--    --          mempty
+--    --          []
+--    --          (TIntrinsic IBool `TArrow` TIntrinsic IBool)
+--    --      )
+--    --    ,
+--    --      ( "less_than_or_equal_to"
+--    --      , Forall
+--    --          (Set.fromList [TypeIndex KType 0])
+--    --          []
+--    --          ( TVariable (TypeIndex KType 0)
+--    --              `TArrow` TVariable (TypeIndex KType 0)
+--    --              `TArrow` TIntrinsic IBool
+--    --          )
+--    --      )
+--
+--    Noll.TypeSystemSpec.fixture30
+
+-- fn(m) => let y = m in let x = y(true) in x
+fixture10 :: Expression () ()
+fixture10 =
+  ELambda
+    ()
+    (PVariable () (Label () "m") :| [])
+    ( ELet
+        ()
+        ( BPattern
+            ()
+            (PVariable () (Label () "y"))
+            (EVariable () (Label () "m"))
+            :| []
+        )
+        ( ELet
+            ()
+            ( BPattern
+                ()
+                (PVariable () (Label () "x"))
+                ( EApplication
+                    ()
+                    ()
+                    (EVariable () (Label () "y"))
+                    (ELiteral () (LBool True) :| [])
+                )
+                :| []
+            )
+            ( EVariable () (Label () "x")
+            )
+        )
+    )
+
+fixture36 :: Expression () ()
+fixture36 =
+  EAnnotation
+    ()
+    (TIntrinsic IBool)
+    (EVariable () (Label () "a"))
+
+fixture37 :: Expression () IndexedType
+fixture37 =
+  EAnnotation
+    ()
+    (TIntrinsic IBool)
+    (EVariable () (Label (TIntrinsic IBool) "a"))
+
+fixture38 :: Expression () ()
+fixture38 =
+  EAnnotation
+    ()
+    (TIntrinsic IBool)
+    (ELiteral () (LBool True))
+
+fixture39 :: Expression () IndexedType
+fixture39 =
+  EAnnotation
+    ()
+    (TIntrinsic IBool)
+    (ELiteral () (LBool True))
+
+fixture40 :: Expression () ()
+fixture40 =
+  EAnnotation
+    ()
+    (TIntrinsic IBool)
+    (ELiteral () (LInt32 1))
+
+testEnvironment2 :: AliasEnvironment
+testEnvironment2 =
+  Environment.fromList
+    [
+      ( "Predicate"
+      ,
+        ( ["a"]
+        , TVariable (Parameter () "a") `TArrow` TIntrinsic IBool
+        )
+      )
+    ,
+      ( "Range"
+      ,
+        ( ["a"]
+        , TIntrinsic
+            ( IRecord
+                ( TRow
+                    ( RExtend
+                        "max"
+                        (TVariable (Parameter () "a"))
+                        ( RExtend
+                            "min"
+                            (TVariable (Parameter () "a"))
+                            RNil
+                        )
+                    )
+                )
+            )
+        )
+      )
+    ]
+
+story = do
+  --  it "" $
+  --    runReader (expandAliases Noll.Set.Test01.prog1_01) testEnvironment2 == Noll.Set.Test02.prog1_02
+  --  it "" $
+  --    evalFoldExpansion "fold" 1 (compileFolds Noll.Set.Test02.prog1_02) == Noll.Set.Test03.prog1_03
+  --  it "" $
+  --    evalFoldExpansion "fold" 1 (compileFolds Noll.Set5.Test01.prog1_01) == Noll.Set5.Test03.prog1_03
+  --  --  it "" $
+  --  --    evalFoldExpansion "fold" 1 (compileFolds Noll.Set10.Test01.prog10_01) == Noll.Set10.Test03.prog10_01
+  --  it "" $
+  --    testResultExpression (Noll.CompilerExamples.Test02.baz3 Noll.Set.Test03.moduleUtils) == Noll.Set.Test04.moduleUtils
+  --  it "" $
+  --    testResultExpression (Noll.CompilerExamples.Test02.baz3 Noll.Set.Test03.moduleOrdered) == Noll.Set.Test04.moduleOrdered
+  --  it "" $
+  --    testResultExpression (Noll.CompilerExamples.Test02.baz3 Noll.Set.Test03.moduleBinarySearch) == Noll.Set.Test04.moduleBinarySearch
+  --  it "" $
+  --    testResultExpression (Noll.CompilerExamples.Test02.baz3 Noll.Set.Test03.moduleMain) == Noll.Set.Test04.moduleMain
+  --  it "" $
+  --    testResultExpression (Noll.CompilerExamples.Test02.baz3 Noll.Set5.Test03.moduleMain) == Noll.Set5.Test04.moduleMain
+  --  it "" $
+  --    normalizeObject Noll.Set.Test04.prog1_04 == Noll.Set.Test05.prog1_05
+  --  it "" $
+  --    normalizeObject Noll.Set3.Test04.prog3_04 == Noll.Set3.Test05.prog3_05
+  --  it "" $
+  --    normalizeObject Noll.Set5.Test04.prog1_04 == Noll.Set5.Test05.prog1_05
+  --  it "" $
+  --    evalPatternDesugar "v" 0 (desugarPatterns Noll.Set.Test05.moduleBinarySearch) == Noll.Set.Test06.moduleBinarySearch
+  --  it "" $
+  --    evalPatternDesugar "v" 0 (desugarPatterns Noll.Set.Test05.moduleOrdered) == Noll.Set.Test06.moduleOrdered
+  --  it "" $
+  --    evalPatternDesugar "v" 0 (desugarPatterns Noll.Set.Test05.moduleMain) == Noll.Set.Test06.moduleMain
+  --  it "" $
+  --    runIdentity (Noll.Compiler2.Transform.Pattern.OrExpansion.compileOrPatterns Noll.Set.Test06.moduleUtils) == Noll.Set.Test07.moduleUtils
+  --  it "" $
+  --    runIdentity (Noll.Compiler2.Transform.Pattern.OrExpansion.compileOrPatterns Noll.Set.Test06.moduleOrdered) == Noll.Set.Test07.moduleOrdered
+  --  it "" $
+  --    runIdentity (Noll.Compiler2.Transform.Pattern.OrExpansion.compileOrPatterns Noll.Set.Test06.moduleBinarySearch) == Noll.Set.Test07.moduleBinarySearch
+  --  it "" $
+  --    runIdentity (Noll.Compiler2.Transform.Pattern.OrExpansion.compileOrPatterns Noll.Set.Test06.moduleMain) == Noll.Set.Test07.moduleMain
+  --  it "" $
+  --    fst (runExpandRecordPatterns (compileRecordPatterns Noll.Set.Test07.moduleUtils) "row" 1) == Noll.Set.Test08.moduleUtils
+  --  it "" $
+  --    fst (runExpandRecordPatterns (compileRecordPatterns Noll.Set.Test07.moduleOrdered) "row" 1) == Noll.Set.Test08.moduleOrdered
+  --  it "" $
+  --    fst (runExpandRecordPatterns (compileRecordPatterns Noll.Set.Test07.moduleBinarySearch) "row" 1) == Noll.Set.Test08.moduleBinarySearch
+  --  it "" $
+  --    fst (runExpandRecordPatterns (compileRecordPatterns Noll.Set.Test07.moduleMain) "row" 1) == Noll.Set.Test08.moduleMain
+  --  it "" $
+  --    evalMatchMonad "match" 0 (compileMatchExprs Noll.Set.Test08.prog1_08) == Noll.Set.Test09.prog1_09
+  --  it "" $
+  --    evalMatchMonad "match" 0 (compileMatchExprs Noll.Set2.Test05.prog2_05) == Noll.Set2.Test09.prog2_09
+  --  it "" $
+  --    evalMatchMonad "match" 0 (compileMatchExprs Noll.Set5.Test05.moduleMain) == Noll.Set5.Test09.moduleMain
+  --  it "" $
+  --    fst (runIdentity (runCompiler2T compiler2TestEnvironment (typePass Noll.Set.Test01.moduleMain2))) == Noll.Set.Test04.moduleMain
+  --  it "" $
+  --    desugarAsPatterns Noll.Set10.Test03.prog10_01 == Noll.Set10.Test04.prog10_01
+  --
+  --  --  it "" $
+  --  --    result funLte == funLte2
+  --  --  it "" $
+  --  --    result funGt == funGt2
+  --  --  it "" $
+  --  --    result funInRange == funInRange2
+  --  --  it "" $
+  --  --    result funFromList == funFromList2
+  --  --  it "" $
+  --  --    result funSort == funSort2
+  --  --  it "" $
+  --  --    runTraitTransformZ testEnvZ2 (transformModuleZ Noll.Set.Test09.moduleUtils) (freshIdIn Noll.Set.Test09.moduleUtils) == Noll.Set.Test10.moduleUtils
+  --  --  it "" $
+  --  --    runTraitTransformZ testEnvZ2 (transformModuleZ Noll.Set.Test09.moduleOrdered) (freshIdIn Noll.Set.Test09.moduleOrdered) == Noll.Set.Test10.moduleOrdered
+  --  --  it "" $
+  --  --    runTraitTransformZ testEnvZ2 (transformModuleZ Noll.Set.Test09.moduleBinarySearch) (freshIdIn Noll.Set.Test09.moduleBinarySearch) == Noll.Set.Test10.moduleBinarySearch
+  --  --  it "" $
+  --  --    runTraitTransformZ testEnvZ2 (transformModuleZ Noll.Set.Test09.moduleMain) (freshIdIn Noll.Set.Test09.moduleMain) == Noll.Set.Test10.moduleMain
+  --  --  it "" $
+  --  --    result fixtureY1 == fixtureY1r
+  --  --  it "" $
+  --  --    result fixtureY2 == fixtureY2r
+  --  it "" $
+  --    -- TODO
+  --    True -- eliminateDictionaries Noll.Set.Test10.moduleUtils == Noll.Set.Test11.moduleUtils
+  --  it "" $
+  --    -- TODO
+  --    True -- eliminateDictionaries Noll.Set.Test10.moduleOrdered == Noll.Set.Test11.moduleOrdered
+  --  it "" $
+  --    -- TODO
+  --    True -- eliminateDictionaries Noll.Set.Test10.moduleBinarySearch == Noll.Set.Test11.moduleBinarySearch
+  --  it "" $
+  --    -- TODO
+  --    True -- eliminateDictionaries Noll.Set.Test10.moduleMain == Noll.Set.Test11.moduleMain
+  --  it "" $
+  --    denormalizeObject Noll.Set.Test11.prog1_11 == Noll.Set.Test12.prog1_12
+  --  it "" $
+  --    denormalizeObject Noll.Set2.Test10.prog2_10 == Noll.Set2.Test12.prog2_12
+  --  it "" $
+  --    denormalizeObject Noll.Set3.Test10.prog3_10 == Noll.Set3.Test12.prog3_12
+  --  it "" $
+  --    denormalizeObject Noll.Set3.Test10x.prog3_10x == Noll.Set3.Test12x.prog3_12x
+  --  it "" $
+  --    denormalizeObject Noll.Set5.Test10.prog1_10 == Noll.Set5.Test12.prog1_12
+  it "" $
+    runReader (withModuleName "Ordered" (translateDefinition orderedCompareInstance1)) testNameEnvironment == [orderedCompareInstance1Result]
+  it "" $
+    runReader (withModuleName "Ordered" (translateDefinition orderedLessThanOrEqualTo)) testNameEnvironment == [orderedLessThanOrEqualToResult]
+  it "" $
+    runReader (withModuleName "BinarySearch" (translateDefinition binarySearchFromList)) testNameEnvironment == binarySearchFromListResult
+  it "" $
+    runReader (withModuleName "BinarySearch" (translateDefinition binarySearchFlatten)) testNameEnvironment == binarySearchFlattenResult
+  it "" $
+    runReader (withModuleName "BinarySearch" (translateDefinition binarySearchSort)) testNameEnvironment == binarySearchSortResult
+
+--  it "" $
+--    runReader (insertQualifiedNames (Environment.fromList [("sort", "BinarySearch.sort"), ("from_int32", "BinarySearch.from_int32")]) (withModuleName "Main" (translateDefinition mainMain))) testNameEnvironment == mainMainResult
+--  it "" $
+--    runReader (traverse translateModule Noll.Set.Test12.prog1_12) testNameEnvironment == Noll.Set.Test13.prog1_13
+--  it "" $
+--    runReader (traverse translateModule Noll.Set3.Test12x.prog3_12x) testNameEnvironment == Noll.Set3.Test13x.prog3_13x
+--  it "" $
+--    runReader (traverse translateModule Noll.Set5.Test13.prog1_13) testNameEnvironment == Noll.Set5.Test14.prog4_14
+--  it "" $
+--    fixturee3 == fixturee2
+--  it "" $
+--    fixturee6 == fixturee5
+--  it "" $
+--    fixturee9 == fixturee8
+--  it "" $
+--    fixturee12 == fixturee11
+--  it "" $
+--    fixturee15 == fixturee14
+--  it "" $
+--    fixturee18 == fixturee17
+--  it "" $
+--    fixturee21 == fixturee20
+--  it "" $
+--    fixturee24 == fixturee23
+--  it "" $
+--    fixturee27 == fixturee26
+--  it "" $
+--    fixturee30 == fixturee29
+--  it "" $
+--    fixturee33 == fixturee32
+--  it "" $
+--    runTraitTransformY2 (freshIdIn Noll.Set.Test09.moduleUtils) (expandTraits Noll.Set.Test09.moduleUtils) == Noll.Set.Test10.moduleUtils
+--  it "" $
+--    runTraitTransformY2 (freshIdIn Noll.Set.Test09.moduleOrdered) (expandTraits Noll.Set.Test09.moduleOrdered) == Noll.Set.Test10.moduleOrdered
+--  it "" $
+--    runTraitTransformY2 (freshIdIn Noll.Set.Test09.moduleBinarySearch) (expandTraits Noll.Set.Test09.moduleBinarySearch) == Noll.Set.Test10.moduleBinarySearch
+--  it "" $
+--    runTraitTransformY2 (freshIdIn Noll.Set.Test09.moduleMain) (expandTraits Noll.Set.Test09.moduleMain) == Noll.Set.Test10.moduleMain
+--  it "" $
+--    runTraitTransformY2 (freshIdIn Noll.Set5.Test09.moduleMain) (expandTraits Noll.Set5.Test09.moduleMain) == Noll.Set5.Test10.moduleMain
+--  it "" $
+--    evalUnfoldExpansion "unfold" 1 (compileUnfolds Noll.Set4.Test02.moduleMain) == Noll.Set4.Test021.moduleMain
+--  it "" $
+--    evalNatExpansion "succ" 1 (compileNats Noll.Set6.Test12.moduleMain) == Noll.Set6.Test13.moduleMain
+
+testNameEnvironment =
+  initialTranslateEnvironment
+    ( Environment.fromList
+        [
+          ( "always"
+          , "Core$.always"
+          )
+        ,
+          ( "trace"
+          , "trace"
+          )
+        ,
+          ( "@@@_trace_int32"
+          , "Core$.trace_int32"
+          )
+        ,
+          ( "not"
+          , "Core$.operator__not"
+          )
+        ]
+    )

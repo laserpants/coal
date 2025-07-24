@@ -34,7 +34,7 @@ import Lang.Utils (Dictionary, Name, (<$$$>))
 import Noll.Compiler2.Environment (Compiler2Environment (..))
 import Noll.Compiler2.State
 import Noll.Language
-import Noll.SystemF
+import Noll.TypeSystem
 
 import qualified Lang.Common.Environment as Environment
 
