@@ -172,7 +172,6 @@ test-suite noll-test
       Noll.Compiler2Spec
       Noll.CompilerExamples.Test01
       Noll.CompilerExamples.Test02
-      Noll.CompilerSpec
       Noll.Examples.Test01
       Noll.Examples.Test02
       Noll.Examples.Test03
