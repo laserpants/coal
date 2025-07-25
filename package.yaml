@@ -1,7 +1,7 @@
 name:                coal
 version:             0.1.0.0
-github:              "githubuser/coal"
-license:             BSD-3-Clause
+github:              "laserpants/coal"
+license:             MIT
 author:              "Author name here"
 maintainer:          "example@example.com"
 copyright:           "2025 Author name here"
