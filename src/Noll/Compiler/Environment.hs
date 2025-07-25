@@ -16,7 +16,7 @@ module Noll.Compiler.Environment (
 import Control.Monad.State (evalState, execState, modify)
 import Data.Map.Strict (Map)
 import Lang.Common.Environment (Environment (..))
-import Lang.Utils (Dictionary, Set, traverse_, (<$$>))
+import Lang.Utils (Dictionary, Name, Set, traverse_, (<$$>))
 import Noll.Compiler.Transform.Type.AliasExpansion
 import Noll.Compiler.Transform.Type.Parameterized
 import Noll.Language
@@ -68,15 +68,19 @@ buildEnvironment defs =
   dataConstructorEnvironment = buildDataConstructorEnvironment typeConstructorEnvironment defs
   typeConstructorEnvironment = buildTypeConstructorEnvironment defs
 
+makeEnv :: (Definition a k t -> [(Name, e)]) -> [Definition a k t] -> Environment e
+makeEnv f = Environment.fromList . concatMap f
+
 buildDataConstructorEnvironment :: TypeConstructorEnvironment -> [Definition a k t] -> DataConstructorEnvironment
-buildDataConstructorEnvironment env = Environment.fromList . concatMap go
+buildDataConstructorEnvironment env =
+  makeEnv
+    ( \case
+        DType _ _ cs ->
+          translateConstructor <$> cs
+        _ ->
+          []
+    )
  where
-  go =
-    \case
-      DType _ _ cs ->
-        translateConstructor <$> cs
-      _ ->
-        []
   translateConstructor (Constructor n a s) =
     (n, Constructor n a (translateScheme s))
   translateScheme (Forall _ _ t) =
@@ -85,53 +89,52 @@ buildDataConstructorEnvironment env = Environment.fromList . concatMap go
     t1 = evalState (instantiateVars [] env t) (0 :: Int)
 
 buildTypeConstructorEnvironment :: [Definition a k t] -> TypeConstructorEnvironment
-buildTypeConstructorEnvironment = Environment.fromList . concatMap go
- where
-  go =
-    \case
-      DType name ps _ ->
-        [
-          ( name
-          , foldr KArrow KType (replicate (length ps) KType)
-          )
-        ]
-      _ ->
-        []
+buildTypeConstructorEnvironment =
+  makeEnv
+    ( \case
+        DType name ps _ ->
+          [
+            ( name
+            , foldr KArrow KType (replicate (length ps) KType)
+            )
+          ]
+        _ -> []
+    )
 
 buildTraitEnvironment :: TypeConstructorEnvironment -> [Definition a k t] -> TraitEnvironment
-buildTraitEnvironment env = Environment.fromList . concatMap go
- where
-  go =
-    \case
-      DTrait name _ (Parameter k n) ds ->
-        [
-          ( name
-          , (TypeIndex k 0, Environment.fromList (f <$$> ds))
-          )
-        ]
-       where
-        f t =
-          let t1 = evalState (instantiateVars [(n, TypeIndex k 0)] env t) (1 :: Int)
-           in Forall (typeIndexesIn t1) [] t1
-      _ ->
-        []
+buildTraitEnvironment env =
+  makeEnv
+    ( \case
+        DTrait name _ (Parameter k n) ds ->
+          [
+            ( name
+            , (TypeIndex k 0, Environment.fromList (f <$$> ds))
+            )
+          ]
+         where
+          f t =
+            let t1 = evalState (instantiateVars [(n, TypeIndex k 0)] env t) (1 :: Int)
+             in Forall (typeIndexesIn t1) [] t1
+        _ ->
+          []
+    )
 
 buildAliasEnvironment :: [Definition a k t] -> AliasEnvironment
-buildAliasEnvironment = Environment.fromList . concatMap go
- where
-  go =
-    \case
-      DTypeAlias name ps t ->
-        [
-          ( name
-          ,
-            ( parameterName <$> ps
-            , t
+buildAliasEnvironment =
+  makeEnv
+    ( \case
+        DTypeAlias name ps t ->
+          [
+            ( name
+            ,
+              ( parameterName <$> ps
+              , t
+              )
             )
-          )
-        ]
-      _ ->
-        []
+          ]
+        _ ->
+          []
+    )
 
 buildInstanceEnvironment :: TypeConstructorEnvironment -> TraitEnvironment -> [Definition a k t] -> InstanceEnvironment
 buildInstanceEnvironment env1 env2 ds = execState (traverse_ go ds) mempty
