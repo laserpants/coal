@@ -15,7 +15,7 @@ import Data.Data (Data)
 import Data.List (delete, find)
 import Data.Set (intersection, (\\))
 import Lang.Common.Supply (supply)
-import Lang.Utils (foldrM)
+import Extra (foldrM)
 import Noll.Language (
   IndexedType,
   IndexedScheme,

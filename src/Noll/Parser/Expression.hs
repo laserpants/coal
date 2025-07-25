@@ -5,8 +5,8 @@ module Noll.Parser.Expression (parseExpression) where
 import Control.Monad.Combinators.Expr
 import Data.Functor (($>))
 import Lang.Common.List1 (NonEmpty (..))
-import Lang.Label (Label (..))
-import Lang.Utils (Name)
+import Lang.Common.Label (Label (..))
+import Extra (Name)
 import Noll.Language
 import Noll.Parser
 import Noll.Parser.Identifier

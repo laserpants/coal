@@ -12,8 +12,8 @@ import Data.Set (Set)
 import qualified Data.Set as Set
 import Lang.Common.Environment (Environment (..))
 import Lang.Common.List1 (NonEmpty (..), (<|))
-import Lang.Label (Label (..))
-import Lang.Utils (Dictionary, Name)
+import Lang.Common.Label (Label (..))
+import Extra (Dictionary, Name)
 import Noll.Compiler.Transform.Dictionaries
 import Noll.Language
 import Noll.Language.Module

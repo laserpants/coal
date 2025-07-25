@@ -16,8 +16,8 @@ module Noll.Compiler.PatternMatching.Equation (
 import Data.Function (on)
 import Data.List (sortBy)
 import Data.Maybe (mapMaybe)
-import Lang.Label (Label (..))
-import Lang.Utils (Name, groupByEq)
+import Lang.Common.Label (Label (..))
+import Extra (Name, groupByEq)
 import Noll.Compiler.PatternMatching.Envelope (EnvelopeExpression (..), EnvelopePattern (..))
 
 data PatternEquationBody e t = PatternEquationBody [EnvelopePattern e t] (EnvelopeExpression e t)

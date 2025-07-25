@@ -10,7 +10,7 @@ module Noll.Parser.Identifier (
 
 import Control.Monad (void)
 import Data.Text (Text)
-import Lang.Utils (Name)
+import Extra (Name)
 import Noll.Parser
 import Text.Megaparsec
 import Text.Megaparsec.Char (alphaNumChar, char, lowerChar, upperChar)

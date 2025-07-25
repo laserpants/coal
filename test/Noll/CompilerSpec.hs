@@ -13,9 +13,9 @@ import Data.Text (Text)
 import Debug.Trace
 import Lang.Common.Environment (Environment)
 import Lang.Common.List1 (NonEmpty (..), (<|))
-import Lang.Label (Label (..))
+import Lang.Common.Label (Label (..))
 import Lang.Lowpass.Language (Object (..), moduleImports, moduleName, moduleObjects, opaque)
-import Lang.Utils (Dictionary, Name, forM, forM_)
+import Extra (Dictionary, Name, forM, forM_)
 import Noll.Compiler.Transform.Dictionaries
 import Noll.Compiler
 import Noll.Compiler.Environment

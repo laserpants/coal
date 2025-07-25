@@ -7,7 +7,7 @@ import Control.Monad.Identity (runIdentity)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformBiM)
 import Lang.Common.List1 (NonEmpty (..), fromList1, (<|))
-import Lang.Label (Label (..))
+import Lang.Common.Label (Label (..))
 import Noll.Compiler.Transform.Pattern.OrExpansion
 import Noll.Examples.Test06 (test06)
 import Noll.Examples.Test07 (test07)

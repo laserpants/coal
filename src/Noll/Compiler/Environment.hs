@@ -17,7 +17,7 @@ module Noll.Compiler.Environment (
 import Control.Monad.State (evalState, execState, modify)
 import Data.Map.Strict (Map)
 import Lang.Common.Environment (Environment (..))
-import Lang.Utils (Dictionary, Name, Set, traverse_, (<$$>))
+import Extra (Dictionary, Name, Set, traverse_, (<$$>))
 import Noll.Compiler.Transform.Type.AliasExpansion
 import Noll.Compiler.Transform.Type.Parameterized
 import Noll.Language

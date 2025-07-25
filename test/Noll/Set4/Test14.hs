@@ -4,10 +4,10 @@
 module Noll.Set4.Test14 where
 
 import Data.Text (Text)
-import Lang.Label (Label (..))
+import Lang.Common.Label (Label (..))
 import Lang.Lowpass.Language
 import Lang.Lowpass.Parser.Expr (expr)
-import Lang.Utils (Name, (<$$>))
+import Extra (Name, (<$$>))
 import Text.Megaparsec (eof, runParser)
 import Text.Megaparsec.Error (errorBundlePretty)
 import Text.RawString.QQ

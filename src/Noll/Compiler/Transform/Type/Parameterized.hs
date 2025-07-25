@@ -9,7 +9,7 @@ import Control.Monad.Writer (WriterT, execWriterT, tell)
 import Lang.Common.Environment (Environment (..))
 import Lang.Common.List1 (List1, fromList1)
 import Lang.Common.Supply (Supply (..), supplied)
-import Lang.Utils (Name, traverse_)
+import Extra (Name, traverse_)
 import Noll.Language
 
 import qualified Data.Text as Text

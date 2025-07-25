@@ -7,7 +7,7 @@ module Noll.Compiler.Kernel.TranslateModule (translateModule) where
 import Control.Monad.Reader (MonadReader)
 import Data.Data (Data)
 import Lang.Common.Environment
-import Lang.Utils (Name)
+import Extra (Name)
 import Noll.Compiler.Kernel.Environment (KernelEnvironment, insertQualifiedNames, withModuleName)
 import Noll.Compiler.Kernel.TranslateDefinition (translateDefinition)
 import Noll.Language

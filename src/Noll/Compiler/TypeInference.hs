@@ -15,8 +15,8 @@ import Data.Either.Extra (partitionEithers)
 import Lang.Common.Environment (Environment (..))
 import Lang.Common.List1 (NonEmpty (..))
 import Lang.Common.Supply (supplied)
-import Lang.Label (Label (..))
-import Lang.Utils (Dictionary, Name, forM_)
+import Lang.Common.Label (Label (..))
+import Extra (Dictionary, Name, forM_)
 import Noll.Compiler.Stack
 import Noll.Compiler.Transform.Type.Parameterized
 import Noll.Language

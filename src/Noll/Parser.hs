@@ -16,7 +16,7 @@ import Control.Monad (void, when)
 import Data.Text (Text)
 import Data.Void (Void)
 import Lang.Common.List1 (List1, NonEmpty (..))
-import Lang.Utils (Name)
+import Extra (Name)
 import Text.Megaparsec
 import Text.Megaparsec.Char (space1)
 

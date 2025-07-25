@@ -17,8 +17,8 @@ import Data.Maybe (maybeToList)
 import Data.Tuple.Extra (third3)
 import Lang.Common.List1 (NonEmpty ((:|)), fromList1)
 import Lang.Common.Supply (supplied)
-import Lang.Label (Label (..))
-import Lang.Utils
+import Lang.Common.Label (Label (..))
+import Extra
 import Noll.Language
 import Noll.TypeSystem.Constraint (Constraint (..))
 import Noll.TypeSystem.Constraint.Assumption

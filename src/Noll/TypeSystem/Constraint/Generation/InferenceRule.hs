@@ -6,7 +6,7 @@ module Noll.TypeSystem.Constraint.Generation.InferenceRule (InferenceRule (..)) 
 
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (transformBi)
-import Lang.Utils (Name)
+import Extra (Name)
 import Noll.Language (Kind (..), Type (..), TypeIndex (..))
 import Noll.TypeSystem.Substitution (Substitutable (..), applyT)
 

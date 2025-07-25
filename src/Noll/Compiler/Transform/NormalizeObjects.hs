@@ -6,7 +6,7 @@ module Noll.Compiler.Transform.NormalizeObjects (NormalizeObjectsTransformContex
 import Data.Data (Data, Typeable)
 import Data.Map.Strict (Map)
 import Lang.Common.List1 (List1)
-import Lang.Utils (Name)
+import Extra (Name)
 import Noll.Compiler.Transform.Flattening
 import Noll.Language.Expression (Expression (..))
 import Noll.Language.HasType (HasType (..), foldTypeOf)

@@ -15,7 +15,7 @@ import Control.Monad.RWS (MonadReader, asks, get)
 import Control.Monad.State (MonadState, StateT, modify, runStateT)
 import Control.Monad.Writer (MonadWriter, tell)
 import Data.List.Extra (groupSortOn)
-import Lang.Utils (
+import Extra (
   Dictionary,
   Name,
   concatMapM,

@@ -3,7 +3,7 @@
 module Noll.Set7.Test01 where
 
 import Lang.Common.List1 (NonEmpty (..), (<|))
-import Lang.Label (Label (..))
+import Lang.Common.Label (Label (..))
 import Noll.Language
 import Noll.Language.Module (Definition (..), Function (..), Module (..), Path (..))
 

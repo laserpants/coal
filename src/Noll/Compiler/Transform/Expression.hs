@@ -9,8 +9,8 @@ module Noll.Compiler.Transform.Expression (
 ) where
 
 import Lang.Common.List1 (List1, NonEmpty (..))
-import Lang.Label (Label (..))
-import Lang.Utils (Name)
+import Lang.Common.Label (Label (..))
+import Extra (Name)
 import Noll.Language
 
 {-# INLINE matchE #-}

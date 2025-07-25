@@ -3,8 +3,8 @@
 module Noll.Compiler.Transform.Pattern.RecordDesugarSpec where
 
 import Lang.Common.List1 (NonEmpty (..), (<|))
-import Lang.Label (Label (..))
-import Lang.Utils (Dictionary, Name)
+import Lang.Common.Label (Label (..))
+import Extra (Dictionary, Name)
 import Noll.Compiler.Transform.Pattern.RecordDesugar
 import Noll.Language
 import Noll.Language.Module

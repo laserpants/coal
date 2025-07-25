@@ -10,7 +10,7 @@ import Control.Monad ((>=>))
 import Control.Monad.Reader (Reader, asks, runReader)
 import Control.Monad.State (get, gets, runState)
 import Data.Data (Data)
-import Lang.Utils (Name, forM)
+import Extra (Name, forM)
 import Noll.Compiler.Kernel.TranslateModule (translateModule)
 import Noll.Compiler.PatternMatching
 import Noll.Compiler.PatternMatching.Rule (MatchMonad (..), runMatchMonad)

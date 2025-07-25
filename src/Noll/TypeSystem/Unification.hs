@@ -19,7 +19,7 @@ import Data.Data (Data)
 import Data.List.NonEmpty (NonEmpty, (<|))
 import Data.Set (member)
 import Lang.Common.Supply (supplied)
-import Lang.Utils (foldrM, (<$$>))
+import Extra (foldrM, (<$$>))
 import Noll.Language
 import Noll.TypeSystem.Substitution (Substitutable (..), Substitution (..), mapsTo, merge)
 

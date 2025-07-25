@@ -5,7 +5,7 @@ module Noll.Compiler.PatternMatchingSpec where
 -- import Control.Monad.Identity (runIdentity)
 -- import Lang.Common.Environment (Environment (..))
 -- import Lang.Common.List1 (NonEmpty (..), (<|))
--- import Lang.Label (Label (..))
+-- import Lang.Common.Label (Label (..))
 -- import Noll.Compiler.PatternMatching
 -- import Noll.Compiler.PatternMatching.Envelope
 -- import Noll.Compiler.PatternMatching.Equation

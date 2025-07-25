@@ -3,7 +3,7 @@
 module Noll.Compiler.Transform.Pattern.DesugarSpec where
 
 import Lang.Common.List1 (NonEmpty ((:|)), (<|))
-import Lang.Label (Label (..))
+import Lang.Common.Label (Label (..))
 import Noll.Compiler.Transform.Pattern.Desugar (desugarPatterns, evalPatternDesugar)
 import Noll.Language (
   BinaryOperator (..),

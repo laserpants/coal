@@ -5,8 +5,8 @@ module Noll.Compiler.EnvironmentSpec where
 import Data.Map.Strict (Map)
 import Lang.Common.Environment (Environment)
 import Lang.Common.List1 (NonEmpty (..), (<|))
-import Lang.Label (Label (..))
-import Lang.Utils (Dictionary)
+import Lang.Common.Label (Label (..))
+import Extra (Dictionary)
 import Noll.Compiler.Transform.Type.AliasExpansion
 import Noll.Compiler.Environment
 import Noll.Language

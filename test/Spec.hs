@@ -6,8 +6,8 @@ import qualified Noll.Language.Type.IndexedSpec
 -- import qualified Noll.TypeSystem.TypeConstraint.CollectSpec
 -- import qualified Noll.TypeSystem.TypeSubstitutionSpec
 
-import qualified Lang.FreeVarsSpec
-import qualified Lang.UtilsSpec
+import qualified Lang.Common.FreeVarsSpec
+import qualified ExtraSpec
 import qualified Noll.Compiler.Transform.NormalizeObjectsSpec
 import qualified Noll.Compiler.PatternMatchingExamples.Test01
 import qualified Noll.Compiler.PatternMatchingExamples.Test02
@@ -66,7 +66,7 @@ main =
     Noll.TypeSystemExamples.Test14.spec
     Noll.TypeSystemExamples.Test15.spec
     Noll.Compiler.PatternMatchingSpec.spec
-    Lang.FreeVarsSpec.spec
+    Lang.Common.FreeVarsSpec.spec
     Noll.Compiler.Transform.TreeSpec.spec
     Noll.Compiler.PatternMatchingExamples.Test01.spec
     Noll.Compiler.PatternMatchingExamples.Test02.spec
@@ -76,7 +76,7 @@ main =
     Noll.CompilerExamples.Test01.spec
     Noll.CompilerExamples.Test02.spec
     --    Noll.CompilerSpec.spec
-    Lang.UtilsSpec.spec
+    ExtraSpec.spec
     Noll.Compiler.Transform.NormalizeObjectsSpec.spec
     Noll.Core.Language.Expr.ReplaceSpec.spec
     Noll.Core.CompilerSpec.spec

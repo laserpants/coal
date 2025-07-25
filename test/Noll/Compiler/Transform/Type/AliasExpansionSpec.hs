@@ -4,7 +4,7 @@ module Noll.Compiler.Transform.Type.AliasExpansionSpec where
 
 import Control.Monad.Reader (runReader)
 import Lang.Common.List1 (NonEmpty (..), (<|))
-import Lang.Label (Label (..))
+import Lang.Common.Label (Label (..))
 import Noll.Compiler.Transform.Type.AliasExpansion
 import Noll.Examples.Test01 (test01)
 import Noll.Examples.Test02 (test02)

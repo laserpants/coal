@@ -3,7 +3,7 @@
 module Noll.Compiler.Transform.TreeSpec where
 
 import Data.List.NonEmpty (NonEmpty (..), (<|))
-import Lang.Label (Label (..))
+import Lang.Common.Label (Label (..))
 import Noll.Compiler.Transform.Tree
 import Noll.Language
 import Test.Hspec (Spec, describe, it)

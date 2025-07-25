@@ -5,7 +5,7 @@ module Noll.Parser.Pattern (parsePattern) where
 import Control.Monad (void)
 import Control.Monad.Combinators.Expr
 import Data.Functor (($>))
-import Lang.Label (Label (..))
+import Lang.Common.Label (Label (..))
 import Noll.Language
 import Noll.Parser
 import Noll.Parser.Identifier

@@ -3,7 +3,7 @@
 module Noll.Compiler.Transform.Pattern.AsDesugarSpec where
 
 import Lang.Common.List1 (NonEmpty (..), (<|))
-import Lang.Label (Label (..))
+import Lang.Common.Label (Label (..))
 import Noll.Compiler.Transform.Fold
 import Noll.Language
 

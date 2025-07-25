@@ -7,8 +7,8 @@ import Control.Monad.Identity
 import Control.Monad.Reader (runReader)
 import Data.List.NonEmpty ((<|))
 import Lang.Common.List1 (NonEmpty (..))
-import Lang.Label (Label (..))
-import Lang.Utils (Name)
+import Lang.Common.Label (Label (..))
+import Extra (Name)
 import Noll.Compiler.Transform.Dictionaries
 import Noll.Compiler.Transform.DictionariesSpec
 import Noll.Compiler.Kernel.Environment (KernelEnvironment (..), initialKernelEnvironment, insertQualifiedNames, withModuleName)

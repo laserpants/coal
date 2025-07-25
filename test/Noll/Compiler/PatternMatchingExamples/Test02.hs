@@ -4,7 +4,7 @@ module Noll.Compiler.PatternMatchingExamples.Test02 where
 
 -- import Lang.Common.Environment (Environment (..))
 -- import Lang.Common.List1 (NonEmpty (..), (<|))
--- import Lang.Label (Label (..))
+-- import Lang.Common.Label (Label (..))
 -- import Noll.Compiler.PatternMatching
 -- import Noll.Compiler.PatternMatching.Envelope
 -- import Noll.Compiler.PatternMatching.Equation

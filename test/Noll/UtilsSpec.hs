@@ -7,7 +7,7 @@ import Test.Hspec (Spec, describe, it)
 
 spec :: Spec
 spec =
-  describe "Lang.Utils" $ do
+  describe "Extra" $ do
     describe "lexOrderRank" $ do
       it "a" $
         lexOrderRank "a" == 0

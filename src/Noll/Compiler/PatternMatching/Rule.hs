@@ -13,8 +13,8 @@ module Noll.Compiler.PatternMatching.Rule (
 import Control.Monad.Reader (MonadReader, ReaderT, runReaderT)
 import Control.Monad.State (MonadState, State, evalState, runState)
 import Lang.Common.Supply (suppliedName)
-import Lang.Label (Label (..))
-import Lang.Utils (Name, foldrM)
+import Lang.Common.Label (Label (..))
+import Extra (Name, foldrM)
 import Noll.Compiler.PatternMatching.Envelope (
   EnvelopeClause (..),
   EnvelopeExpression (..),

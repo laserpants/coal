@@ -10,7 +10,7 @@ module Noll.Parser.Module (
 ) where
 
 import Lang.Common.List1 (NonEmpty (..))
-import Lang.Utils (Name)
+import Extra (Name)
 import Noll.Language
 import Noll.Language.Module
 import Noll.Parser

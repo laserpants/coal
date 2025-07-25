@@ -23,7 +23,7 @@ module Noll.TypeSystem.Constraint.Generation.Internal (
 import Control.Monad.RWS
 import Lang.Common.Environment (Environment (..))
 import Lang.Common.Supply (Supply (..))
-import Lang.Utils (Dictionary, Name)
+import Extra (Dictionary, Name)
 import Noll.Language (Constructor (..), Kind (..), Type (..), TypeIndex (..))
 import Noll.TypeSystem.Constraint (Constraint (..), Monomorphic (..), overMonomorphicSet)
 import Noll.TypeSystem.Constraint.Generation.InferenceRule (InferenceRule (..))

@@ -14,7 +14,7 @@ module Noll.TypeSystem.Constraint (
 
 import Data.Data (Data, Typeable)
 import Data.Set (Set, intersection, union)
-import Lang.Utils (Over)
+import Extra (Over)
 import Noll.Language (HasActive (..), Scheme (..), TypeIndex (..), TypeIndexed (..))
 
 -- | Monomorphic type variable set

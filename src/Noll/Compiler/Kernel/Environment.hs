@@ -14,7 +14,7 @@ module Noll.Compiler.Kernel.Environment (
 
 import Control.Monad.Reader (MonadReader, ask, local)
 import Lang.Common.Environment (Environment)
-import Lang.Utils (Name, Over, Set)
+import Extra (Name, Over, Set)
 
 import qualified Data.Set as Set
 import qualified Data.Text as Text

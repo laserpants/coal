@@ -9,8 +9,8 @@ module Noll.Compiler.PatternMatching.Compiler (
 
 import Data.Data (Data, Typeable)
 import Lang.Common.List1 (List1, NonEmpty (..))
-import Lang.Label (Label (..))
-import Lang.Utils (const2)
+import Lang.Common.Label (Label (..))
+import Extra (const2)
 import Noll.Compiler.PatternMatching.Envelope
 import Noll.Language
 

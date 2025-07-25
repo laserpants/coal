@@ -7,7 +7,7 @@
 module Noll.Language.Module.Definition (Definition (..), Path (..), definitionName) where
 
 import Data.Data (Data, Typeable)
-import Lang.Utils (Name)
+import Extra (Name)
 import Noll.Language.Constructor (Constructor (..))
 import Noll.Language.Expression (Expression (..))
 import Noll.Language.Module.Constant (Constant (..))

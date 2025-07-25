@@ -31,8 +31,8 @@ import Data.Text (isPrefixOf)
 import Lang.Common.Environment (Environment (..))
 import Lang.Common.List1 (NonEmpty (..), fromList1)
 import Lang.Common.Supply (supplied)
-import Lang.Label (Label (..))
-import Lang.Utils (Dictionary, Name)
+import Lang.Common.Label (Label (..))
+import Extra (Dictionary, Name)
 import Noll.Language
 import Noll.Language.Module
 import Noll.TypeSystem.Substitution

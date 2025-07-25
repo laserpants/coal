@@ -22,8 +22,8 @@ import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformM)
 import Lang.Common.List1 (NonEmpty (..), (<|))
 import Lang.Common.Supply (suppliedName)
-import Lang.Label (Label (..))
-import Lang.Utils (Dictionary, Name)
+import Lang.Common.Label (Label (..))
+import Extra (Dictionary, Name)
 import Noll.Language
 import Noll.Language.Module (Constant (..), Definition (..), Function (..), Module (..))
 

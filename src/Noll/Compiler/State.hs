@@ -18,7 +18,7 @@ module Noll.Compiler.State (
 
 import Lang.Common.Environment (Environment (..))
 import Lang.Common.Supply (Supply (..))
-import Lang.Utils (Dictionary, Over)
+import Extra (Dictionary, Over)
 import Noll.Language
 import Noll.TypeSystem
 

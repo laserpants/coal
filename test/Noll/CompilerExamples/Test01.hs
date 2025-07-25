@@ -5,7 +5,7 @@ module Noll.CompilerExamples.Test01 where
 import Control.Monad.Identity (runIdentity)
 import Control.Monad.State (evalState)
 import Lang.Common.List1 (NonEmpty (..), (<|))
-import Lang.Label (Label (..))
+import Lang.Common.Label (Label (..))
 import Noll.Compiler2
 import Noll.Language (
   BinaryOperator (..),

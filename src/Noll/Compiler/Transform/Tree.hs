@@ -13,9 +13,9 @@ module Noll.Compiler.Transform.Tree (
 
 import Control.Monad.Identity (runIdentity)
 import Data.Data (Data)
-import Lang.FreeVars (BoundVars (..))
-import Lang.Label (Label (..))
-import Lang.Utils (Name, const2, (<$$>))
+import Lang.Common.FreeVars (BoundVars (..))
+import Lang.Common.Label (Label (..))
+import Extra (Name, const2, (<$$>))
 import Noll.Language (
   Binding (..),
   Choice (..),

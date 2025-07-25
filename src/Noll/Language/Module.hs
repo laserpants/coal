@@ -13,7 +13,7 @@ module Noll.Language.Module (
 ) where
 
 import Data.Data (Data, Typeable)
-import Lang.Utils (Name, Over)
+import Extra (Name, Over)
 import Noll.Language.Module.Constant
 import Noll.Language.Module.Definition (Definition (..), Path (..), definitionName)
 import Noll.Language.Module.Function
