@@ -12,11 +12,11 @@ module Coal.Compiler.PatternMatching.Envelope (
   fails,
 ) where
 
-import Data.Data (Data)
-import Extra (Name)
 import Coal.Common.Label (Label (..))
 import Coal.Compiler.Transform.Tree (rename)
 import Coal.Language (Expression (..), HasType (..))
+import Data.Data (Data)
+import Extra (Name)
 
 data EnvelopeClause e t = EnvelopeClause (Label t) [Label t] (EnvelopeExpression e t)
   deriving (Show, Eq, Ord, Read)

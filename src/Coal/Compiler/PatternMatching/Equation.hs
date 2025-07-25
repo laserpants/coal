@@ -13,12 +13,12 @@ module Coal.Compiler.PatternMatching.Equation (
   patternEquationSet,
 ) where
 
+import Coal.Common.Label (Label (..))
+import Coal.Compiler.PatternMatching.Envelope (EnvelopeExpression (..), EnvelopePattern (..))
 import Data.Function (on)
 import Data.List (sortBy)
 import Data.Maybe (mapMaybe)
 import Extra (Name, groupByEq)
-import Coal.Common.Label (Label (..))
-import Coal.Compiler.PatternMatching.Envelope (EnvelopeExpression (..), EnvelopePattern (..))
 
 data PatternEquationBody e t = PatternEquationBody [EnvelopePattern e t] (EnvelopeExpression e t)
   deriving (Show, Eq, Ord, Read)

@@ -7,19 +7,19 @@ module Coal.Compiler.Kernel.TranslateExpression (
   translatePattern,
 ) where
 
-import Control.Monad.Reader (MonadReader)
-import Data.Data (Data)
-import Data.Maybe (fromMaybe)
-import Extra (Dictionary, Name)
 import Coal.Common.Label (Label (..))
 import Coal.Common.List1 (List1, NonEmpty (..), fromList1, (<|))
 import Coal.Compiler.Kernel.Environment (KernelEnvironment (..), qualifyName, withLocalName, withLocalNames)
 import Coal.Compiler.Kernel.TranslateType (translateType)
 import Coal.Language
+import Control.Monad.Reader (MonadReader)
+import Data.Data (Data)
+import Data.Maybe (fromMaybe)
+import Extra (Dictionary, Name)
 
+import qualified Coal.Kernel.Language as Kernel
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
-import qualified Coal.Kernel.Language as Kernel
 
 type KernelExpr = Kernel.Expr Kernel.Type
 

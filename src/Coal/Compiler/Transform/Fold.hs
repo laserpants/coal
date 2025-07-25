@@ -13,13 +13,6 @@ module Coal.Compiler.Transform.Fold (
   expandFoldExpr,
 ) where
 
-import Control.Monad.RWS (RWS, runRWS)
-import Control.Monad.Reader (MonadReader)
-import Control.Monad.State (MonadState)
-import Control.Monad.Writer (execWriter, tell)
-import Data.Data (Data)
-import Data.Generics.Uniplate.Data (transform, transformM)
-import Extra (Dictionary, Name, const2)
 import Coal.Common.Label (Label (..), labelName)
 import Coal.Common.List1 (List1, NonEmpty (..))
 import Coal.Common.Supply (suppliedName)
@@ -28,6 +21,13 @@ import Coal.Compiler.Transform.Flattening (flattenApplication)
 import Coal.Compiler.Transform.Tree (replace)
 import Coal.Language (Choice (..), Clause (..), Expression (..), Pattern (..))
 import Coal.Language.Module (Constant (..), Definition (..), Function (..), Module (..))
+import Control.Monad.RWS (RWS, runRWS)
+import Control.Monad.Reader (MonadReader)
+import Control.Monad.State (MonadState)
+import Control.Monad.Writer (execWriter, tell)
+import Data.Data (Data)
+import Data.Generics.Uniplate.Data (transform, transformM)
+import Extra (Dictionary, Name, const2)
 
 newtype FoldExpansion a = FoldExpansion {foldExpansionStack :: RWS Name () Int a}
   deriving

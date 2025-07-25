@@ -3,17 +3,17 @@
 
 module Coal.Compiler.Transform.Type.Parameterized where
 
-import Control.Monad.Reader (ReaderT, asks, runReaderT)
-import Control.Monad.State (MonadState)
-import Control.Monad.Writer (WriterT, execWriterT, tell)
-import Extra (Name, traverse_)
 import Coal.Common.Environment (Environment (..))
 import Coal.Common.List1 (List1, fromList1)
 import Coal.Common.Supply (Supply (..), supplied)
 import Coal.Language
+import Control.Monad.Reader (ReaderT, asks, runReaderT)
+import Control.Monad.State (MonadState)
+import Control.Monad.Writer (WriterT, execWriterT, tell)
+import Extra (Name, traverse_)
 
-import qualified Data.Text as Text
 import qualified Coal.Common.Environment as Environment
+import qualified Data.Text as Text
 
 instantiateVars :: (MonadState s m, Supply s) => [(Name, TypeIndex Kind)] -> Environment Kind -> Type Parameter () -> m IndexedType
 instantiateVars ts0 env t = do

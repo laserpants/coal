@@ -3,15 +3,15 @@
 
 module Coal.Kernel.Compiler.Pass.Memoize (memoize) where
 
+import Coal.Common.FreeVars (freeSet)
+import Coal.Common.Label (Label (..))
+import Coal.Common.List1 (NonEmpty (..), fromList1)
+import Coal.Kernel.Language (Binding (..), Expr, Type, bindingLabel, isFunction, isPrim)
 import Control.Arrow ((>>>))
 import Control.Monad.Writer (MonadWriter, tell)
 import Data.Functor.Foldable (embed, project)
 import Data.List (partition)
 import Extra (Set, (<$$>))
-import Coal.Common.FreeVars (freeSet)
-import Coal.Common.Label (Label (..))
-import Coal.Common.List1 (NonEmpty (..), fromList1)
-import Coal.Kernel.Language (Binding (..), Expr, Type, bindingLabel, isFunction, isPrim)
 
 import qualified Coal.Kernel.Language as Core
 

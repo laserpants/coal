@@ -16,6 +16,14 @@ module Coal.Compiler.Transform.Dictionaries (
   collectTraits,
 ) where
 
+import Coal.Common.Environment (Environment (..))
+import Coal.Common.Label (Label (..))
+import Coal.Common.List1 (NonEmpty (..), fromList1)
+import Coal.Common.Supply (supplied)
+import Coal.Language
+import Coal.Language.Module
+import Coal.TypeSystem.Substitution
+import Coal.TypeSystem.Unification
 import Control.Monad (forM)
 import Control.Monad.RWS (RWS, runRWS)
 import Control.Monad.Reader (MonadReader, asks, local)
@@ -29,17 +37,9 @@ import Data.Map.Strict (Map)
 import Data.Maybe (catMaybes)
 import Data.Text (isPrefixOf)
 import Extra (Dictionary, Name)
-import Coal.Common.Environment (Environment (..))
-import Coal.Common.Label (Label (..))
-import Coal.Common.List1 (NonEmpty (..), fromList1)
-import Coal.Common.Supply (supplied)
-import Coal.Language
-import Coal.Language.Module
-import Coal.TypeSystem.Substitution
-import Coal.TypeSystem.Unification
 
-import qualified Data.Map.Strict as Map
 import qualified Coal.Common.Environment as Environment
+import qualified Data.Map.Strict as Map
 
 data DictionaryEnvironment = DictionaryEnvironment
   { dictionaryEnvironmentNames :: Environment IndexedScheme

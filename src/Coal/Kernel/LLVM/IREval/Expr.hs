@@ -6,10 +6,6 @@
 
 module Coal.Kernel.LLVM.IREval.Expr (IREval (..)) where
 
-import Control.Arrow ((>>>))
-import Data.Fix (Fix (..))
-import Data.Functor.Foldable (project)
-import Extra (forM)
 import Coal.Common.Label (Label (..))
 import Coal.Common.List1 (fromList1)
 import Coal.Kernel.LLVM.IREval
@@ -26,9 +22,13 @@ import Coal.Kernel.LLVM.IRType (IRTyped (..))
 import Coal.Kernel.LLVM.IRType.Syntax (i1, i8Ptr, stringLiteral)
 import Coal.Kernel.LLVM.IRValue (IRValue (..), irPrimValue)
 import Coal.Kernel.Language.Type.Arrow (returnTypeOf)
+import Control.Arrow ((>>>))
+import Data.Fix (Fix (..))
+import Data.Functor.Foldable (project)
+import Extra (forM)
 
-import qualified Data.Text as Text
 import qualified Coal.Kernel.Language as Core
+import qualified Data.Text as Text
 
 instance IREval (Core.Expr Core.Type) where
   irEval =

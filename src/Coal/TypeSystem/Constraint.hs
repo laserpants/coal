@@ -12,10 +12,10 @@ module Coal.TypeSystem.Constraint (
   overMonomorphicSet,
 ) where
 
+import Coal.Language (HasActive (..), Scheme (..), TypeIndex (..), TypeIndexed (..))
 import Data.Data (Data, Typeable)
 import Data.Set (Set, intersection, union)
 import Extra (Over)
-import Coal.Language (HasActive (..), Scheme (..), TypeIndex (..), TypeIndexed (..))
 
 -- | Monomorphic type variable set
 newtype Monomorphic m = Monomorphic {monomorphicSet :: Set m}

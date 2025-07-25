@@ -9,6 +9,10 @@ module Coal.TypeSystem.Constraint.Generation.TypeAnnotation (
   runTypeAnnotation,
 ) where
 
+import Coal.Language
+import Coal.TypeSystem.Constraint.Generation.Internal
+import Coal.TypeSystem.Substitution (Substitution (..))
+import Coal.Utils (lexOrderRank)
 import Control.Arrow ((>>>))
 import Control.Monad.Except (ExceptT, runExceptT, throwError, withExceptT)
 import Control.Monad.RWS (MonadReader, asks, get)
@@ -22,13 +26,9 @@ import Extra (
   forM_,
   (<$$>),
  )
-import Coal.Language
-import Coal.TypeSystem.Constraint.Generation.Internal
-import Coal.TypeSystem.Substitution (Substitution (..))
-import Coal.Utils (lexOrderRank)
 
-import qualified Data.Map.Strict as Map
 import qualified Coal.Common.Environment as Environment
+import qualified Data.Map.Strict as Map
 
 type TypeAnnotationContext = ConstraintsGenContext TypeIndex Kind IndexedType
 

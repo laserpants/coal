@@ -2,8 +2,8 @@
 
 module Coal.Kernel.Language.Type.Row (normalizeRow, extend, dropField) where
 
-import Extra (Map, Name)
 import Coal.Kernel.Language.Type (Type (..))
+import Extra (Map, Name)
 
 import qualified Data.Map.Strict as Map
 

@@ -2,11 +2,11 @@
 
 module Coal.Kernel.Parser.Prim (prim) where
 
-import Control.Monad (void)
-import Data.Char (ord)
 import Coal.Kernel.Language.Prim (Prim (..))
 import Coal.Kernel.Parser (Parser, lexeme, spaces, try, ($>), (<|>))
 import Coal.Kernel.Parser.Symbol (symbol)
+import Control.Monad (void)
+import Data.Char (ord)
 import Text.Megaparsec (manyTill)
 
 import qualified Data.Text as Text

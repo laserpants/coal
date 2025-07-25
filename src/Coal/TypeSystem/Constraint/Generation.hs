@@ -11,11 +11,6 @@ module Coal.TypeSystem.Constraint.Generation (
   runConstraintsGenStack,
 ) where
 
-import Control.Monad.Reader (asks)
-import Data.Data (Data)
-import Data.Maybe (maybeToList)
-import Data.Tuple.Extra (third3)
-import Extra
 import Coal.Common.Label (Label (..))
 import Coal.Common.List1 (NonEmpty ((:|)), fromList1)
 import Coal.Common.Supply (supplied)
@@ -24,9 +19,14 @@ import Coal.TypeSystem.Constraint (Constraint (..))
 import Coal.TypeSystem.Constraint.Assumption
 import Coal.TypeSystem.Constraint.Generation.Internal
 import Coal.TypeSystem.Constraint.Generation.TypeAnnotation (instantiateAnnotation)
+import Control.Monad.Reader (asks)
+import Data.Data (Data)
+import Data.Maybe (maybeToList)
+import Data.Tuple.Extra (third3)
+import Extra
 
-import qualified Data.Map.Strict as Map
 import qualified Coal.Common.Environment as Environment
+import qualified Data.Map.Strict as Map
 
 type ConstraintsGen a = ConstraintsGenStack a TypeIndex Kind IndexedType
 

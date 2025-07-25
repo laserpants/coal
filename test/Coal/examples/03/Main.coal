@@ -1,0 +1,89 @@
+module Main {
+
+  import Core$(trace_int32, not, always);
+
+  type Ordering
+    = LessThan
+    | EqualTo
+    | GreaterThan
+
+  trait Ordered(a) {
+    compare : a -> a -> Ordering
+  }
+
+  instance Ordered(int32) {
+    fn compare(x, y) =
+      if (x < y)
+        then LessThan
+        else if (x > y)
+          then GreaterThan
+          else EqualTo;
+  }
+
+  trait Numeric(n) {
+    from_int32 : int32 -> n
+  }
+
+  instance Numeric(int32) {
+    fn from_int32(n) = n;
+  }
+
+  type Tree(a)
+    = Node(a, Tree(a), Tree(a))
+    | Leaf
+
+  fn less_than_or_equal_to(m) =
+    fn(n) =>
+      match(compare(m, n)) {
+        | LessThan or EqualTo =>
+            true
+        | GreaterThan =>
+            false
+      };
+
+  fn greater_than(n) =
+    not << less_than_or_equal_to(n);
+
+  fn in_range(range, n) =
+    greater_than(n, range.min) 
+      && (less_than_or_equal_to(n, range.max) || less_than_or_equal_to(range.max, -1));
+
+  fn from_list(list) =
+    fold(list, { min = 0, max = -1 }) {
+      | (p :: @g) =>
+          fn(range) =>
+            if (p |. in_range(range))
+              then 
+                Node
+                  ( p
+                  , g({ min = range.min, max = p })
+                  , g({ min = p, max = range.max })
+                  )
+              else
+                g(range)
+      | [] =>
+          always(Leaf)
+    };
+
+  fn flatten(tree) = 
+    fold(tree) {
+      | Node(y, @lhs, @rhs) =>
+          lhs ++ (y :: rhs)
+      | Leaf =>
+          []
+    };
+
+  sort = flatten << from_list;
+
+  fn main() = 
+    let
+      xs =
+        [5, 3, 7, 2, 1, 6, 4] : list(int32)
+      in
+        trace_int32(match(sort(xs)) {
+          | [] =>
+              12345
+          | (y :: _) =>
+              y
+        }); 
+}

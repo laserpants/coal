@@ -3,15 +3,15 @@
 
 module Coal.Language.Pattern (Pattern (..)) where
 
-import Data.Data (Data, Typeable)
-import Data.Generics.Uniplate.Data (universeBi)
-import Extra (Dictionary)
 import Coal.Common.FreeVars (BoundVars (..))
 import Coal.Common.Label (Label (..))
 import Coal.Common.List1 (List1)
 import Coal.Language.Primitive (Primitive (..))
 import Coal.Language.Trait (Trait (..))
 import Coal.Language.Type (Parameter (..), Type)
+import Data.Data (Data, Typeable)
+import Data.Generics.Uniplate.Data (universeBi)
+import Extra (Dictionary)
 
 import qualified Data.Set as Set
 

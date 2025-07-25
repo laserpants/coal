@@ -15,16 +15,16 @@ module Coal.TypeSystem.Substitution (
   substituteInScheme,
 ) where
 
+import Coal.Common.Environment (Environment (..))
+import Coal.Language
+import Coal.Language.Module (Constant (..), Definition (..), Function (..))
+import Coal.TypeSystem.Constraint (Constraint (..), Monomorphic (..))
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transform, transformBi)
 import Data.List.NonEmpty (NonEmpty)
 import Data.Map.Strict (Map, keysSet, union)
 import Data.Set (Set, intersection)
 import Extra (IndexMap, fromMaybe)
-import Coal.Common.Environment (Environment (..))
-import Coal.Language
-import Coal.Language.Module (Constant (..), Definition (..), Function (..))
-import Coal.TypeSystem.Constraint (Constraint (..), Monomorphic (..))
 
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set

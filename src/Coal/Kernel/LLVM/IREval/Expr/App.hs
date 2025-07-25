@@ -3,9 +3,6 @@
 
 module Coal.Kernel.LLVM.IREval.Expr.App (irEvalApp) where
 
-import Control.Monad (unless)
-import Data.Text (Text)
-import Extra (Name, forM, forSM_, isConstructor)
 import Coal.Common.Label (Label (..))
 import Coal.Common.List1 (List1, NonEmpty (..), fromList1)
 import Coal.Kernel.LLVM.IREncodable (irEncode)
@@ -20,6 +17,9 @@ import Coal.Kernel.LLVM.IRType (IRType (..), IRTyped (..))
 import Coal.Kernel.LLVM.IRType.Syntax (i32, i8Ptr, struct)
 import Coal.Kernel.LLVM.IRValue (IRValue (..))
 import Coal.Kernel.Language (Expr)
+import Control.Monad (unless)
+import Data.Text (Text)
+import Extra (Name, forM, forSM_, isConstructor)
 
 import qualified Coal.Kernel.Language as Core
 

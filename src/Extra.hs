@@ -26,6 +26,7 @@ module Extra (
 )
 where
 
+import Coal.Common.Name
 import Control.Applicative (Alternative (..))
 import Control.Monad (forM, forM_, mapM, void)
 import Data.Foldable (foldrM, traverse_)
@@ -43,7 +44,6 @@ import Extra.Data.Set
 import Extra.Data.Text
 import Extra.Data.Traversable
 import Extra.Operators
-import Coal.Common.Name
 
 type IndexMap = Map Int
 

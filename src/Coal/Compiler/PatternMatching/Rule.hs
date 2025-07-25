@@ -10,9 +10,6 @@ module Coal.Compiler.PatternMatching.Rule (
   runMatchMonad,
 ) where
 
-import Control.Monad.Reader (MonadReader, ReaderT, runReaderT)
-import Control.Monad.State (MonadState, State, evalState, runState)
-import Extra (Name, foldrM)
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (suppliedName)
 import Coal.Compiler.PatternMatching.Envelope (
@@ -22,6 +19,9 @@ import Coal.Compiler.PatternMatching.Envelope (
   EnvelopePattern (..),
  )
 import Coal.Compiler.PatternMatching.Equation
+import Control.Monad.Reader (MonadReader, ReaderT, runReaderT)
+import Control.Monad.State (MonadState, State, evalState, runState)
+import Extra (Name, foldrM)
 
 newtype MatchMonad a = MatchMonad {matchMonadStack :: ReaderT Name (State Int) a}
   deriving

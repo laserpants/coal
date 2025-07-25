@@ -9,10 +9,10 @@
 
 module Coal.Kernel.Language.Op (Op (..)) where
 
+import Coal.Common.FreeVars (FreeVars (..))
 import Data.Data (Data, Typeable)
 import Data.Eq.Deriving (deriveEq1)
 import Data.Generics.Uniplate.Data (childrenBi)
-import Coal.Common.FreeVars (FreeVars (..))
 import Text.Show.Deriving (deriveShow1)
 
 -- | Binary operators

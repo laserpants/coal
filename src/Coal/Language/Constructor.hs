@@ -5,10 +5,10 @@
 
 module Coal.Language.Constructor (Constructor (..)) where
 
+import Coal.Language.Type.Scheme (Scheme (..))
 import Data.Data (Data, Typeable)
 import Extra (Name)
 import GHC.Generics (Generic)
-import Coal.Language.Type.Scheme (Scheme (..))
 
 -- | Data constructor
 data Constructor o k t = Constructor

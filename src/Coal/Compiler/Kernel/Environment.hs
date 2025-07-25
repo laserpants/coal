@@ -12,13 +12,13 @@ module Coal.Compiler.Kernel.Environment (
   insertQualifiedNames,
 ) where
 
+import Coal.Common.Environment (Environment)
 import Control.Monad.Reader (MonadReader, ask, local)
 import Extra (Name, Over, Set)
-import Coal.Common.Environment (Environment)
 
+import qualified Coal.Common.Environment as Environment
 import qualified Data.Set as Set
 import qualified Data.Text as Text
-import qualified Coal.Common.Environment as Environment
 
 data KernelEnvironment = KernelEnvironment
   { kernelEnvironmentModule :: Name

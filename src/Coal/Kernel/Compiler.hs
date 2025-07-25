@@ -8,19 +8,19 @@
 
 module Coal.Kernel.Compiler (compile, compileModules) where
 
-import Control.Monad (void, (>=>))
-import Control.Monad.State (gets)
-import Data.List (nub)
-import Extra (Name, forM, isConstructor, (<$$>), (||.))
 import Coal.Common.Environment (Environment (..))
 import Coal.Kernel.Compiler.Pass
 import Coal.Kernel.Compiler.Pipeline
 import Coal.Kernel.Compiler.Pipeline.Kernel (Kernel (..))
 import Coal.Kernel.LLVM
 import Coal.Kernel.Language
+import Control.Monad (void, (>=>))
+import Control.Monad.State (gets)
+import Data.List (nub)
+import Extra (Name, forM, isConstructor, (<$$>), (||.))
 
-import qualified Data.Text as Text
 import qualified Coal.Common.Environment as Environment
+import qualified Data.Text as Text
 
 corePass :: Pass ObjectList ObjectList
 corePass =

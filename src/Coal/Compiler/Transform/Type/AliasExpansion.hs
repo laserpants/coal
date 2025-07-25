@@ -8,14 +8,14 @@ module Coal.Compiler.Transform.Type.AliasExpansion (
   AliasContext (..),
 ) where
 
-import Control.Monad.Reader (MonadReader, ask)
-import Data.Data (Data)
-import Data.Generics.Uniplate.Data (transformM)
-import Extra (Dictionary, Name)
 import Coal.Common.Environment (Environment)
 import Coal.Common.List1 (NonEmpty (..), fromList1)
 import Coal.Language
 import Coal.Language.Module (Constant (..), Definition (..), Function (..), Module (..))
+import Control.Monad.Reader (MonadReader, ask)
+import Data.Data (Data)
+import Data.Generics.Uniplate.Data (transformM)
+import Extra (Dictionary, Name)
 
 import qualified Coal.Common.Environment as Environment
 

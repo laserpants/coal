@@ -11,9 +11,6 @@ module Coal.Language.Expression (
   CompiledClause (..),
 ) where
 
-import Data.Data (Data, Typeable)
-import Data.Generics.Uniplate.Data (universeBi)
-import Extra (Dictionary, Name)
 import Coal.Common.FreeVars (BoundVars (..), FreeVars (..), exceptNames)
 import Coal.Common.Label (Label (..))
 import Coal.Common.List1 (List1, NonEmpty ((:|)))
@@ -24,6 +21,9 @@ import Coal.Language.Pattern (Pattern (..))
 import Coal.Language.Primitive (Primitive (..))
 import Coal.Language.Trait (Trait (..))
 import Coal.Language.Type (Parameter (..), Type)
+import Data.Data (Data, Typeable)
+import Data.Generics.Uniplate.Data (universeBi)
+import Extra (Dictionary, Name)
 
 import qualified Data.Set as Set
 

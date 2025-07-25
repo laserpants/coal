@@ -4,11 +4,11 @@
 
 module Coal.TypeSystem.Constraint.Generation.InferenceRule (InferenceRule (..)) where
 
+import Coal.Language (Kind (..), Type (..), TypeIndex (..))
+import Coal.TypeSystem.Substitution (Substitutable (..), applyT)
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (transformBi)
 import Extra (Name)
-import Coal.Language (Kind (..), Type (..), TypeIndex (..))
-import Coal.TypeSystem.Substitution (Substitutable (..), applyT)
 
 data InferenceRule k a
   = InferenceRulePlaceholder

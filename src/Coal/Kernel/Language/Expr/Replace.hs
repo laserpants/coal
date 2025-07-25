@@ -3,16 +3,16 @@
 
 module Coal.Kernel.Language.Expr.Replace (rewrite, Sub (..)) where
 
+import Coal.Common.Label (Label (..), labelName, setLabelName)
+import Coal.Common.List1 (List1)
+import Coal.Kernel.Language.Expr (Binding (..), Clause (..), Expr, ExprF (..), Focus (..), bindingLabel)
 import Control.Arrow ((>>>))
 import Control.Monad.Identity (runIdentity)
 import Data.Functor.Foldable (embed, para)
 import Extra (Dictionary, Map, Name, (<$$>))
-import Coal.Common.Label (Label (..), labelName, setLabelName)
-import Coal.Common.List1 (List1)
-import Coal.Kernel.Language.Expr (Binding (..), Clause (..), Expr, ExprF (..), Focus (..), bindingLabel)
 
-import qualified Data.Map.Strict as Map
 import qualified Coal.Kernel.Language.Expr.Syntax as Core
+import qualified Data.Map.Strict as Map
 
 replaceVarM :: (Monad m) => Name -> (Label t -> m (Expr t)) -> Expr t -> m (Expr t)
 replaceVarM name fn =

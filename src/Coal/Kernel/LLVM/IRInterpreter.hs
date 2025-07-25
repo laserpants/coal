@@ -15,13 +15,6 @@ module Coal.Kernel.LLVM.IRInterpreter (
   closureSupport,
 ) where
 
-import Control.Monad (unless, void)
-import Control.Monad.Free (iterM)
-import Control.Monad.RWS (asks, gets, local, tell)
-import Data.Fix (Fix (..))
-import Data.Text (Text, isPrefixOf)
-import Data.Text.Encoding (encodeUtf8)
-import Extra (Name, forM, listenOnly)
 import Coal.Common.Label (Label (..))
 import Coal.Kernel.LLVM.IRConstruct (IRConstruct (..), IRLinkage (..))
 import Coal.Kernel.LLVM.IREncodable
@@ -40,12 +33,19 @@ import Coal.Kernel.LLVM.IRType (IRType (..), IRTyped (..))
 import Coal.Kernel.LLVM.IRType.Syntax
 import Coal.Kernel.LLVM.IRValue (IRValue (..))
 import Coal.Kernel.Language.Object
+import Control.Monad (unless, void)
+import Control.Monad.Free (iterM)
+import Control.Monad.RWS (asks, gets, local, tell)
+import Data.Fix (Fix (..))
+import Data.Text (Text, isPrefixOf)
+import Data.Text.Encoding (encodeUtf8)
+import Extra (Name, forM, listenOnly)
 import TextShow (showt)
 
-import qualified Data.ByteString as ByteString
-import qualified Data.Text as Text
 import qualified Coal.Common.Environment as Environment
 import qualified Coal.Kernel.Language as Core
+import qualified Data.ByteString as ByteString
+import qualified Data.Text as Text
 
 closureSupport :: [IRConstruct [IRLine]]
 closureSupport =

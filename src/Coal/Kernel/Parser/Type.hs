@@ -2,14 +2,14 @@
 
 module Coal.Kernel.Parser.Type (type_) where
 
-import Control.Monad (void)
-import Control.Monad.Combinators.Expr (Operator (..), makeExprParser)
-import Extra (optionalOr)
 import Coal.Kernel.Language.Type (Type (..))
 import Coal.Kernel.Language.Type.Row (extend)
 import Coal.Kernel.Parser (Parser, lexeme, try, ($>), (<|>))
 import Coal.Kernel.Parser.Identifier (constructor, name)
 import Coal.Kernel.Parser.Symbol (braces, colon, commaSep, commaSepN, parens, pipe, symbol)
+import Control.Monad (void)
+import Control.Monad.Combinators.Expr (Operator (..), makeExprParser)
+import Extra (optionalOr)
 
 import qualified Coal.Kernel.Language.Type.Syntax as Type
 import qualified Text.Megaparsec.Char.Lexer as Lexer

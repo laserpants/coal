@@ -12,11 +12,11 @@ module Coal.Language.Module (
   module Coal.Language.Module.Constant,
 ) where
 
-import Data.Data (Data, Typeable)
-import Extra (Name, Over)
 import Coal.Language.Module.Constant
 import Coal.Language.Module.Definition (Definition (..), Path (..), definitionName)
 import Coal.Language.Module.Function
+import Data.Data (Data, Typeable)
+import Extra (Name, Over)
 
 data Module a k t = Module Path [Name] [Definition a k t]
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)

@@ -21,19 +21,19 @@ module Coal.Language.Type (
   (~>),
 ) where
 
-import Data.Data (Data, Typeable)
-import Data.Generics.Uniplate.Data (transform)
-import Data.List.NonEmpty (NonEmpty)
-import Extra (Map, Name, Set)
-import GHC.Generics (Generic)
 import Coal.Common.List1 (List1, (<|))
 import Coal.Common.Supply (Supply (..))
 import Coal.Language.Type.Intrinsic (Intrinsic (..))
 import Coal.Language.Type.Kind (Kind)
 import Coal.Language.Type.Row (Row (..), normalizeRow)
+import Data.Data (Data, Typeable)
+import Data.Generics.Uniplate.Data (transform)
+import Data.List.NonEmpty (NonEmpty)
+import Extra (Map, Name, Set)
+import GHC.Generics (Generic)
 
-import qualified Data.Set as Set
 import qualified Coal.Common.List1 as List1
+import qualified Data.Set as Set
 
 data Type o k
   = TApplication k (Type o k) (List1 (Type o k))

@@ -9,10 +9,10 @@ module Coal.Kernel.LLVM.IRType (
   pointee,
 ) where
 
-import Extra (Name)
 import Coal.Kernel.Language.Expr (Expr)
 import Coal.Kernel.Language.Type (Type (..))
 import Coal.Kernel.Language.Typed (Typed (..))
+import Extra (Name)
 
 -- | LLVM IR language types
 data IRType

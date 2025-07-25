@@ -14,20 +14,20 @@ module Coal.Compiler.Environment (
   buildInstanceEnvironment,
 ) where
 
-import Control.Monad.State (evalState, execState, modify)
-import Data.Map.Strict (Map)
-import Extra (Dictionary, Name, Set, traverse_, (<$$>))
 import Coal.Common.Environment (Environment (..))
 import Coal.Compiler.Transform.Type.AliasExpansion
 import Coal.Compiler.Transform.Type.Parameterized
 import Coal.Language
 import Coal.Language.Module.Definition
 import Coal.TypeSystem.Substitution (mapsTo, substituteInScheme)
+import Control.Monad.State (evalState, execState, modify)
+import Data.Map.Strict (Map)
+import Extra (Dictionary, Name, Set, traverse_, (<$$>))
 
+import qualified Coal.Common.Environment as Environment
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import qualified Data.Text as Text
-import qualified Coal.Common.Environment as Environment
 
 type DataConstructorEnvironment = Environment (Constructor TypeIndex Kind IndexedType)
 type TypeConstructorEnvironment = Environment Kind

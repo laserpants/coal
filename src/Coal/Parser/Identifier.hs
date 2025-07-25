@@ -8,10 +8,10 @@ module Coal.Parser.Identifier (
   backtickString,
 ) where
 
+import Coal.Parser
 import Control.Monad (void)
 import Data.Text (Text)
 import Extra (Name)
-import Coal.Parser
 import Text.Megaparsec
 import Text.Megaparsec.Char (alphaNumChar, char, lowerChar, upperChar)
 

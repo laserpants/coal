@@ -8,10 +8,10 @@ module Coal.Compiler.Transform.Expression (
   lambdaAnyE,
 ) where
 
-import Extra (Name)
 import Coal.Common.Label (Label (..))
 import Coal.Common.List1 (List1, NonEmpty (..))
 import Coal.Language
+import Extra (Name)
 
 {-# INLINE matchE #-}
 matchE :: (Monoid a) => Expression a () -> List1 (Clause a ()) -> Expression a ()

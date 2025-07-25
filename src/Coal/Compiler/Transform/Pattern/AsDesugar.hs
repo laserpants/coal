@@ -5,9 +5,6 @@
 
 module Coal.Compiler.Transform.Pattern.AsDesugar where
 
-import Control.Monad.Writer
-import Data.Data (Data)
-import Data.Generics.Uniplate.Data (descend, transformM)
 import Coal.Common.Label (Label (..))
 import Coal.Common.List1 (NonEmpty (..))
 import Coal.Language (Choice (..), Clause (..), Expression (..), Pattern (..))
@@ -15,6 +12,9 @@ import Coal.Language.Module (Module (..))
 import Coal.Language.Module.Constant (Constant (..))
 import Coal.Language.Module.Definition (Definition (..))
 import Coal.Language.Module.Function (Function (..))
+import Control.Monad.Writer
+import Data.Data (Data)
+import Data.Generics.Uniplate.Data (descend, transformM)
 
 class AsDesugarContext e where
   desugarAsPatterns :: e -> e

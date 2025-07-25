@@ -6,9 +6,6 @@ module Coal.Kernel.LLVM.IREval.Closure (
   closureStructType,
 ) where
 
-import Control.Monad (unless)
-import Data.Text (Text)
-import Extra (Name, forM, forSM_)
 import Coal.Common.List1 (List1, fromList1)
 import Coal.Kernel.LLVM.IREval
 import Coal.Kernel.LLVM.IREval.Comment (irComment)
@@ -19,6 +16,9 @@ import Coal.Kernel.LLVM.IRInstruction.TH
 import Coal.Kernel.LLVM.IRType (IRType (..), IRTyped (..))
 import Coal.Kernel.LLVM.IRType.Syntax (i32, i8Ptr, struct)
 import Coal.Kernel.LLVM.IRValue (IRValue (..))
+import Control.Monad (unless)
+import Data.Text (Text)
+import Extra (Name, forM, forSM_)
 import TextShow (showt)
 
 storeElement :: IRValue -> IRValue -> Int -> IRInstr ()

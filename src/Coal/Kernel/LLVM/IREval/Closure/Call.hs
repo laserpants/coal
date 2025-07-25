@@ -2,7 +2,6 @@
 
 module Coal.Kernel.LLVM.IREval.Closure.Call (irCalls, irCallTable, irCallN) where
 
-import Extra (forM)
 import Coal.Common.Label (Label (..))
 import Coal.Kernel.LLVM.IRConstruct (IRConstruct (..))
 import Coal.Kernel.LLVM.IRInstruction (IRInstr)
@@ -12,6 +11,7 @@ import Coal.Kernel.LLVM.IRInterpreter.Monad (IRInterpreter, IRLine)
 import Coal.Kernel.LLVM.IRType (IRType (..))
 import Coal.Kernel.LLVM.IRType.Syntax
 import Coal.Kernel.LLVM.IRValue (IRValue (..))
+import Extra (forM)
 import TextShow (showt)
 
 maxArgs :: Int

@@ -12,9 +12,6 @@ module Coal.Compiler.PatternMatching (
   compileEnvelope,
 ) where
 
-import Data.Data (Data)
-import Data.Generics.Uniplate.Data (transformBiM, transformM)
-import Extra (Dictionary)
 import Coal.Common.Label (Label (..))
 import Coal.Common.List1 (List1, NonEmpty (..), fromList1)
 import Coal.Common.Supply (suppliedName)
@@ -25,6 +22,9 @@ import Coal.Compiler.PatternMatching.Rule (MatchMonad (..), matchPatterns)
 import Coal.Compiler.Transform.Tree (replaceWith)
 import Coal.Language (Binding (..), Choice (..), Clause (..), Expression (..), Pattern (..), Primitive (..))
 import Coal.Language.Module (Constant (..), Definition (..), Function (..), Module (..))
+import Data.Data (Data)
+import Data.Generics.Uniplate.Data (transformBiM, transformM)
+import Extra (Dictionary)
 import TextShow
 
 class MatchExpressionContext a where

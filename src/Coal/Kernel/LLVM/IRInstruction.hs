@@ -11,12 +11,12 @@ module Coal.Kernel.LLVM.IRInstruction (
   FCmpCond (..),
 ) where
 
+import Coal.Kernel.LLVM.IRType (IRType)
+import Coal.Kernel.LLVM.IRValue (IRValue)
 import Control.Monad.Free (Free)
 import Data.ByteString (ByteString)
 import Data.Text (Text)
 import Extra (Name)
-import Coal.Kernel.LLVM.IRType (IRType)
-import Coal.Kernel.LLVM.IRValue (IRValue)
 
 -- | icmp instruction condition codes
 data ICmpCond

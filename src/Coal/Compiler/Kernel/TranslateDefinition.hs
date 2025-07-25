@@ -4,11 +4,6 @@
 
 module Coal.Compiler.Kernel.TranslateDefinition (translateDefinition) where
 
-import Control.Monad (forM)
-import Control.Monad.Reader (MonadReader, asks)
-import Data.Data (Data)
-import Data.List.Extra (sortOn)
-import Extra (Name, (<$$>))
 import Coal.Common.Label (Label (..))
 import Coal.Common.List1 (NonEmpty ((:|)), fromList1, (<|))
 import Coal.Compiler.Kernel.Environment (KernelEnvironment (..), withLocalNames)
@@ -16,6 +11,11 @@ import Coal.Compiler.Kernel.TranslateExpression (translateExpression, translateP
 import Coal.Compiler.Kernel.TranslateType (translateType)
 import Coal.Language
 import Coal.Language.Module
+import Control.Monad (forM)
+import Control.Monad.Reader (MonadReader, asks)
+import Data.Data (Data)
+import Data.List.Extra (sortOn)
+import Extra (Name, (<$$>))
 
 import qualified Coal.Kernel.Language as Kernel
 

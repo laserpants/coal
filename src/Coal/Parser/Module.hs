@@ -9,7 +9,6 @@ module Coal.Parser.Module (
   parseConstantDefinition,
 ) where
 
-import Extra (Name)
 import Coal.Common.List1 (NonEmpty (..))
 import Coal.Language
 import Coal.Language.Module
@@ -19,6 +18,7 @@ import Coal.Parser.Identifier
 import Coal.Parser.Pattern (parsePattern)
 import Coal.Parser.Symbol
 import Coal.Parser.Type
+import Extra (Name)
 import Text.Megaparsec
 import Text.Megaparsec.Char (upperChar)
 

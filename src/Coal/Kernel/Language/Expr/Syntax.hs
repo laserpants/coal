@@ -14,8 +14,6 @@ module Coal.Kernel.Language.Expr.Syntax (
   mem,
 ) where
 
-import Extra (Name)
-import Extra.Data.Functor.Foldable (embed, embed1, embed2, embed3)
 import Coal.Common.Label (Label (..))
 import Coal.Common.List1 (List1)
 import Coal.Kernel.Language.Expr (
@@ -27,6 +25,8 @@ import Coal.Kernel.Language.Expr (
  )
 import Coal.Kernel.Language.Op (Op)
 import Coal.Kernel.Language.Prim (Prim)
+import Extra (Name)
+import Extra.Data.Functor.Foldable (embed, embed1, embed2, embed3)
 
 {-# INLINE var #-}
 var :: Label t -> Expr t

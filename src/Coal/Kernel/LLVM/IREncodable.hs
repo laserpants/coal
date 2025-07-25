@@ -14,6 +14,11 @@ module Coal.Kernel.LLVM.IREncodable (
   enquote,
 ) where
 
+import Coal.Common.Label (Label (..))
+import Coal.Kernel.LLVM.IRConstruct (IRConstruct (..), IRLinkage (..))
+import Coal.Kernel.LLVM.IRType (IRType (..), IRTyped (..))
+import Coal.Kernel.LLVM.IRType.Syntax (i8)
+import Coal.Kernel.LLVM.IRValue (IRValue (..))
 import Data.ByteString (ByteString)
 import Data.Char (isAlphaNum)
 import Data.Text (Text)
@@ -21,11 +26,6 @@ import Data.Text.Encoding (decodeUtf8Lenient)
 import Data.Word (Word8)
 import Extra (Name, (||.))
 import Extra.Data.Char (isUnderscore)
-import Coal.Common.Label (Label (..))
-import Coal.Kernel.LLVM.IRConstruct (IRConstruct (..), IRLinkage (..))
-import Coal.Kernel.LLVM.IRType (IRType (..), IRTyped (..))
-import Coal.Kernel.LLVM.IRType.Syntax (i8)
-import Coal.Kernel.LLVM.IRValue (IRValue (..))
 import TextShow (showt)
 
 import qualified Data.ByteString as ByteString

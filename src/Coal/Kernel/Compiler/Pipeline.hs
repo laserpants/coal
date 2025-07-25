@@ -15,14 +15,14 @@ module Coal.Kernel.Compiler.Pipeline (
   pipelineResetSupply,
 ) where
 
-import Control.Monad.IO.Class (MonadIO)
-import Control.Monad.State (MonadState, StateT, evalStateT, modify, runStateT)
-import Data.List (sort)
-import Extra (Name)
 import Coal.Common.Environment (Environment)
 import Coal.Kernel.Compiler.Pipeline.Kernel
 import Coal.Kernel.LLVM
 import Coal.Kernel.Language (Type)
+import Control.Monad.IO.Class (MonadIO)
+import Control.Monad.State (MonadState, StateT, evalStateT, modify, runStateT)
+import Data.List (sort)
+import Extra (Name)
 
 import qualified Coal.Common.Environment as Environment
 

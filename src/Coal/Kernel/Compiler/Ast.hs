@@ -9,20 +9,20 @@ module Coal.Kernel.Compiler.Ast (
   sortMatchClauses,
 ) where
 
-import Control.Monad.Writer (runWriter, tell)
-import Data.Fix (Fix (..))
-import Data.Function (on)
-import Data.Functor.Foldable (cata, embed)
-import Extra (foldrM)
 import Coal.Common.Label (Label (..))
 import Coal.Common.List1 (NonEmpty (..), fromList1)
 import Coal.Kernel.Language (Binding (..), Clause (..), Expr, ExprF (..), Type)
 import Coal.Kernel.Language.Expr.Replace (relabel)
 import Coal.Kernel.Language.Object (Object (..))
+import Control.Monad.Writer (runWriter, tell)
+import Data.Fix (Fix (..))
+import Data.Function (on)
+import Data.Functor.Foldable (cata, embed)
+import Extra (foldrM)
 
-import qualified Data.Map.Strict as Map
 import qualified Coal.Common.List1 as List1
 import qualified Coal.Kernel.Language as Core
+import qualified Data.Map.Strict as Map
 
 flattenObject :: Object Type (Expr Type) -> Object Type (Expr Type)
 flattenObject =

@@ -2,13 +2,13 @@
 
 module Coal.Parser.Type (parseType, parseTypeParameter, parseKind) where
 
-import Control.Monad.Combinators.Expr
-import Data.Functor (($>))
 import Coal.Common.List1 (NonEmpty (..))
 import Coal.Language
 import Coal.Parser
 import Coal.Parser.Identifier
 import Coal.Parser.Symbol
+import Control.Monad.Combinators.Expr
+import Data.Functor (($>))
 import Text.Megaparsec (option, try, (<|>))
 
 parseIntrinsicType :: Parser (Intrinsic (Type Parameter ()))

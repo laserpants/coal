@@ -7,12 +7,6 @@
 
 module Coal.Compiler.TypeInference (typeDefinitionsC) where
 
-import Control.Monad.Reader (ask, asks)
-import Control.Monad.State (evalState, gets)
-import Control.Monad.Writer (execWriter)
-import Data.Data (Data)
-import Data.Either.Extra (partitionEithers)
-import Extra (Dictionary, Name, forM_)
 import Coal.Common.Environment (Environment (..))
 import Coal.Common.Label (Label (..))
 import Coal.Common.List1 (NonEmpty (..))
@@ -23,10 +17,16 @@ import Coal.Language
 import Coal.Language.Module (Constant (..), Definition (..), Function (..))
 import Coal.Language.Module.Definition (definitionName)
 import Coal.TypeSystem
+import Control.Monad.Reader (ask, asks)
+import Control.Monad.State (evalState, gets)
+import Control.Monad.Writer (execWriter)
+import Data.Data (Data)
+import Data.Either.Extra (partitionEithers)
+import Extra (Dictionary, Name, forM_)
 
+import qualified Coal.Common.Environment as Environment
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
-import qualified Coal.Common.Environment as Environment
 
 type ConstraintsGenResult c o k t r = (r, Dictionary (c, o k), [ConstraintsGenOutput c o k t])
 

@@ -2,8 +2,6 @@
 
 module Coal.Kernel.LLVM.IREval.Expr.Match (irEvalMatch) where
 
-import Data.Tuple.Extra (fst3)
-import Extra (forM, forSM, (<$$>))
 import Coal.Common.Label (Label (..))
 import Coal.Common.List1 (List1, NonEmpty (..), fromList1)
 import Coal.Kernel.LLVM.IREval
@@ -13,6 +11,8 @@ import Coal.Kernel.LLVM.IRInstruction.TH
 import Coal.Kernel.LLVM.IRType (IRType (..), IRTyped (..))
 import Coal.Kernel.LLVM.IRType.Syntax (i32, i8Ptr, ptr, struct)
 import Coal.Kernel.LLVM.IRValue (IRValue (..))
+import Data.Tuple.Extra (fst3)
+import Extra (forM, forSM, (<$$>))
 
 import qualified Coal.Kernel.Language as Core
 

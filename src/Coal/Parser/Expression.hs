@@ -2,9 +2,6 @@
 
 module Coal.Parser.Expression (parseExpression) where
 
-import Control.Monad.Combinators.Expr
-import Data.Functor (($>))
-import Extra (Name)
 import Coal.Common.Label (Label (..))
 import Coal.Common.List1 (NonEmpty (..))
 import Coal.Language
@@ -13,6 +10,9 @@ import Coal.Parser.Identifier
 import Coal.Parser.Pattern (parsePattern)
 import Coal.Parser.Symbol
 import Coal.Parser.Type (parseType)
+import Control.Monad.Combinators.Expr
+import Data.Functor (($>))
+import Extra (Name)
 import Text.Megaparsec (optional, some, try, (<|>))
 
 import qualified Data.Map.Strict as Map

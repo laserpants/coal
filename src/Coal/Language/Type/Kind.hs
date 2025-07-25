@@ -12,10 +12,10 @@ module Coal.Language.Type.Kind (
   applyKind,
 ) where
 
+import Coal.Common.List1 (List1, fromList1, (<|))
 import Data.Data (Data, Typeable)
 import Data.List (isPrefixOf)
 import GHC.Generics (Generic)
-import Coal.Common.List1 (List1, fromList1, (<|))
 
 import qualified Coal.Common.List1 as List1
 

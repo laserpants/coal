@@ -4,18 +4,18 @@
 
 module Coal.Kernel.Compiler.Pass.LambdaLifting (liftLambdaNodes) where
 
-import Control.Monad.RWS (MonadWriter, RWS, ask, evalRWS, local, tell)
-import Data.Functor.Foldable (cata, embed)
-import Extra (Name, forM, traverse2)
 import Coal.Common.Label (Label (..))
 import Coal.Common.List1 (List1, fromList1)
 import Coal.Common.Supply (supplied)
 import Coal.Kernel.Language (Binding (..), Expr, Type, functionTypeOf)
 import Coal.Kernel.Language.Object (Object (..), ObjectList)
+import Control.Monad.RWS (MonadWriter, RWS, ask, evalRWS, local, tell)
+import Data.Functor.Foldable (cata, embed)
+import Extra (Name, forM, traverse2)
 import TextShow (showt)
 
-import qualified Data.Text as Text
 import qualified Coal.Kernel.Language as Core
+import qualified Data.Text as Text
 
 runLifting :: RWS Name ObjectList Int a -> (a, ObjectList)
 runLifting e = evalRWS e "" 1

@@ -6,11 +6,6 @@
 
 module Coal.Compiler where
 
-import Control.Monad ((>=>))
-import Control.Monad.Reader (Reader, asks, runReader)
-import Control.Monad.State (get, gets, runState)
-import Data.Data (Data)
-import Extra (Name, forM)
 import Coal.Compiler.Kernel.TranslateModule (translateModule)
 import Coal.Compiler.PatternMatching
 import Coal.Compiler.PatternMatching.Rule (MatchMonad (..), runMatchMonad)
@@ -30,6 +25,11 @@ import Coal.Language.Module (Module (..))
 import Coal.Language.Module.Constant
 import Coal.Language.Module.Definition
 import Coal.TypeSystem.Substitution (normalizeTypeIndexes)
+import Control.Monad ((>=>))
+import Control.Monad.Reader (Reader, asks, runReader)
+import Control.Monad.State (get, gets, runState)
+import Data.Data (Data)
+import Extra (Name, forM)
 
 import qualified Coal.Compiler.Kernel.Environment as Kernel
 import qualified Coal.Kernel.Language as Kernel
@@ -160,9 +160,3 @@ compileModule =
     >=> mainPass
     -- Final lowering
     >=> kernelTranslationC
-
-compileModule_ :: (Monad m, Monoid a, Data a, Eq a, Show a) => Module a Kind () -> CompilerT a m (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))
-compileModule_ m = do
-  r <- compileModule m
-  s <- get
-  pure r

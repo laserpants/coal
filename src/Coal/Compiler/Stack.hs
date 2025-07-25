@@ -27,15 +27,16 @@ module Coal.Compiler.Stack (
 )
 where
 
-import Control.Monad.RWS (RWST, runRWST)
-import Control.Monad.Reader (MonadReader)
-import Control.Monad.State (MonadState, modify)
-import Extra (Dictionary, Name, (<$$$>))
 import Coal.Common.Supply (Supply (..))
 import Coal.Compiler.Environment (CompilerEnvironment (..))
 import Coal.Compiler.State
 import Coal.Language
 import Coal.TypeSystem
+import Control.Monad.IO.Class (MonadIO)
+import Control.Monad.RWS (RWST, runRWST)
+import Control.Monad.Reader (MonadReader)
+import Control.Monad.State (MonadState, modify)
+import Extra (Dictionary, Name, (<$$$>))
 
 import qualified Coal.Common.Environment as Environment
 
@@ -48,6 +49,7 @@ newtype CompilerT a m c = Compiler {compilerStack :: CompilerStack a m c}
     , Monad
     , MonadReader CompilerEnvironment
     , MonadState (CompilerState a)
+    , MonadIO
     )
 
 {-# INLINE runCompilerT #-}

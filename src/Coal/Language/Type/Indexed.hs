@@ -13,12 +13,6 @@ module Coal.Language.Type.Indexed (
   indexed,
 ) where
 
-import Control.Monad.State (State)
-import Data.Data (Data)
-import Data.Generics.Uniplate.Data (universeBi)
-import Data.List.NonEmpty (NonEmpty)
-import Data.Map.Strict (Map)
-import Data.Set (Set, singleton)
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (supply)
 import Coal.Language.Expression (Clause (..), CompiledClause (..), Expression (..))
@@ -32,6 +26,12 @@ import Coal.Language.Type.Intrinsic (Intrinsic (..))
 import Coal.Language.Type.Kind (Kind (..))
 import Coal.Language.Type.Row (Row (..))
 import Coal.Language.Type.Scheme (Scheme (..))
+import Control.Monad.State (State)
+import Data.Data (Data)
+import Data.Generics.Uniplate.Data (universeBi)
+import Data.List.NonEmpty (NonEmpty)
+import Data.Map.Strict (Map)
+import Data.Set (Set, singleton)
 
 import qualified Data.Set as Set
 

@@ -14,9 +14,6 @@ module Coal.Kernel.Language.Object (
   objectConstructorInfo,
 ) where
 
-import Control.Arrow ((>>>))
-import Data.Functor.Foldable (embed, project)
-import Extra (Name)
 import Coal.Common.FreeVars (FreeVars (..), boundIn, exceptNames)
 import Coal.Common.Label (Label (..))
 import Coal.Common.List1 (fromList1)
@@ -26,6 +23,9 @@ import Coal.Kernel.Language.Expr (Binding (..), Expr, ExprF (..))
 import Coal.Kernel.Language.Type (Type (..))
 import Coal.Kernel.Language.Type.Arrow (functionTypeOf)
 import Coal.Kernel.Language.Typed (Typed (..))
+import Control.Arrow ((>>>))
+import Data.Functor.Foldable (embed, project)
+import Extra (Name)
 
 data Object t e
   = OFunction Name [Label t] e

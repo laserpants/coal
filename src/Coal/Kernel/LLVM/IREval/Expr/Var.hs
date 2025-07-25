@@ -2,8 +2,6 @@
 
 module Coal.Kernel.LLVM.IREval.Expr.Var (irEvalVar) where
 
-import Data.Text (Text)
-import Extra (Name, isConstructor)
 import Coal.Kernel.LLVM.IREncodable (irEncode)
 import Coal.Kernel.LLVM.IREval.Closure (irPackClosure)
 import Coal.Kernel.LLVM.IREval.Comment (irComment)
@@ -15,6 +13,8 @@ import Coal.Kernel.LLVM.IRType (IRType (..))
 import Coal.Kernel.LLVM.IRType.Syntax (i32, i8Ptr, struct)
 import Coal.Kernel.LLVM.IRValue (IRValue (..))
 import Coal.Kernel.Language.Type.Arrow (arity)
+import Data.Text (Text)
+import Extra (Name, isConstructor)
 
 import qualified Coal.Kernel.Language as Core
 

@@ -7,12 +7,12 @@
 
 module Coal.Language.Expression.Binding (Binding (..)) where
 
-import Data.Data (Data, Typeable)
-import Data.Generics.Uniplate.Data (universeBi)
-import Extra (Name)
 import Coal.Common.FreeVars (BoundVars (..), FreeVars (..), exceptNames)
 import Coal.Common.List1 (List1)
 import Coal.Language.Pattern (Pattern (..))
+import Data.Data (Data, Typeable)
+import Data.Generics.Uniplate.Data (universeBi)
+import Extra (Name)
 
 import qualified Data.Set as Set
 

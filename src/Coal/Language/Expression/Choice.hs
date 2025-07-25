@@ -6,11 +6,11 @@
 
 module Coal.Language.Expression.Choice (Choice (..), Guard (..)) where
 
-import Data.Data (Data, Typeable)
-import Data.Generics.Uniplate.Data (universeBi)
 import Coal.Common.FreeVars (FreeVars (..))
 import Coal.Common.List1 (List1)
 import Coal.Language.Pattern (Pattern)
+import Data.Data (Data, Typeable)
+import Data.Generics.Uniplate.Data (universeBi)
 
 import qualified Data.Set as Set
 

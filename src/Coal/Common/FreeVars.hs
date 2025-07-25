@@ -4,10 +4,10 @@
 
 module Coal.Common.FreeVars (BoundVars (..), FreeVars (..), exceptNames, freeSet) where
 
-import Data.Set (Set, singleton)
-import Extra (Dictionary, Map, Name, isConstructor)
 import Coal.Common.Label (Label (..), labelName)
 import Coal.Common.List1 (NonEmpty)
+import Data.Set (Set, singleton)
+import Extra (Dictionary, Map, Name, isConstructor)
 
 import qualified Data.Set as Set
 

@@ -9,10 +9,10 @@ module Coal.TypeSystem.Constraint.Assumption (
   assumptionNameIsNotOneOf,
 ) where
 
+import Coal.TypeSystem.Substitution (Substitutable (..), applyT)
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (transformBi)
 import Extra (Name)
-import Coal.TypeSystem.Substitution (Substitutable (..), applyT)
 
 data Assumption t = Assumption
   { assumptionName :: Name

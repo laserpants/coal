@@ -4,11 +4,11 @@
 
 module Coal.Language.Serializable (Serializable (..)) where
 
-import Data.Text (Text)
 import Coal.Common.List1 (List1, fromList1)
 import Coal.Language.Trait
 import Coal.Language.Type
 import Coal.Language.Type.Intrinsic
+import Data.Text (Text)
 import TextShow (showt)
 
 class Serializable s where

@@ -48,13 +48,13 @@ module Coal.Kernel.LLVM.IRInstruction.TH (
   memoize,
 ) where
 
-import Control.Monad.Free (MonadFree, liftF)
-import Control.Monad.Free.TH (makeFree)
-import Data.Text (Text)
 import Coal.Common.Name (Name)
 import Coal.Kernel.LLVM.IRInstruction (FCmpCond, ICmpCond, IRInstrOp, InstrOpF (..))
 import Coal.Kernel.LLVM.IRType (IRType)
 import Coal.Kernel.LLVM.IRValue (IRValue)
+import Control.Monad.Free (MonadFree, liftF)
+import Control.Monad.Free.TH (makeFree)
+import Data.Text (Text)
 import Prelude hiding (and, or)
 
 makeFree ''InstrOpF

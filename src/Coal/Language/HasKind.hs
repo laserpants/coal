@@ -5,10 +5,10 @@
 
 module Coal.Language.HasKind (HasKind (..)) where
 
-import Data.Data (Data, Typeable)
-import Data.Generics.Uniplate.Data (universeBi)
 import Coal.Language.Type (Type (..), TypeIndex (..))
 import Coal.Language.Type.Kind (Kind (..))
+import Data.Data (Data, Typeable)
+import Data.Generics.Uniplate.Data (universeBi)
 
 class HasKind k where
   kindOf :: k -> Kind

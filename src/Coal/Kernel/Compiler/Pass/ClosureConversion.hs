@@ -3,6 +3,12 @@
 
 module Coal.Kernel.Compiler.Pass.ClosureConversion (closeObjects) where
 
+import Coal.Common.FreeVars (freeSet)
+import Coal.Common.Label (Label (..))
+import Coal.Common.List1 (NonEmpty (..))
+import Coal.Kernel.Compiler.Ast (flattenAppNodes)
+import Coal.Kernel.Language (Expr, Type)
+import Coal.Kernel.Language.Object (Object (..), ObjectList, objectName)
 import Control.Arrow ((>>>))
 import Control.Monad.RWS (RWS, evalRWS, tell)
 import Data.Fix (Fix (..))
@@ -10,15 +16,9 @@ import Data.Function (on)
 import Data.Functor.Foldable (cata, embed)
 import Data.List (nubBy)
 import Extra (Name, (<$$>))
-import Coal.Common.FreeVars (freeSet)
-import Coal.Common.Label (Label (..))
-import Coal.Common.List1 (NonEmpty (..))
-import Coal.Kernel.Compiler.Ast (flattenAppNodes)
-import Coal.Kernel.Language (Expr, Type)
-import Coal.Kernel.Language.Object (Object (..), ObjectList, objectName)
 
-import qualified Data.Set as Set
 import qualified Coal.Kernel.Language as Core
+import qualified Data.Set as Set
 
 evalWS0 :: RWS () w Int a -> (a, w)
 evalWS0 v = evalRWS v () 0

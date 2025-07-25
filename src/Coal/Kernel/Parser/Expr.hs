@@ -3,9 +3,6 @@
 
 module Coal.Kernel.Parser.Expr (expr, label) where
 
-import Control.Monad (void)
-import Control.Monad.Combinators.Expr (makeExprParser)
-import Extra (Name)
 import Coal.Common.Label (Label (..))
 import Coal.Common.List1 (NonEmpty (..))
 import Coal.Kernel.Language.Expr (Binding (..), Clause (..), Expr, Focus (..))
@@ -16,6 +13,9 @@ import Coal.Kernel.Parser.Op (op)
 import Coal.Kernel.Parser.Prim (prim)
 import Coal.Kernel.Parser.Symbol
 import Coal.Kernel.Parser.Type (type_)
+import Control.Monad (void)
+import Control.Monad.Combinators.Expr (makeExprParser)
+import Extra (Name)
 import Text.Megaparsec (takeWhileP)
 import Text.Megaparsec.Char (char)
 

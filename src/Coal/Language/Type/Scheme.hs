@@ -13,12 +13,12 @@ module Coal.Language.Type.Scheme (
   IndexedScheme,
 ) where
 
-import Data.Data (Data, Typeable)
-import Data.Set (Set)
-import GHC.Generics (Generic)
 import Coal.Language.Trait (Trait (..))
 import Coal.Language.Type (IndexedType, Type (..), TypeIndex (..))
 import Coal.Language.Type.Kind (Kind (..))
+import Data.Data (Data, Typeable)
+import Data.Set (Set)
+import GHC.Generics (Generic)
 
 import qualified Data.Set as Set
 

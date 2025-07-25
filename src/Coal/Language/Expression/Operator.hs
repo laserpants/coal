@@ -8,11 +8,11 @@ module Coal.Language.Expression.Operator (
   binaryOperatorTypeScheme,
 ) where
 
-import Data.Data (Data, Typeable)
 import Coal.Language.Type (IndexedType, Type (..), TypeIndex, (~>))
 import Coal.Language.Type.Intrinsic (Intrinsic (..))
 import Coal.Language.Type.Kind (Kind)
 import Coal.Language.Type.Scheme (IndexedScheme, Scheme (..), forall0, forall1, forall2, forall3)
+import Data.Data (Data, Typeable)
 
 -- | Unary operators
 data UnaryOperator

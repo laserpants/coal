@@ -13,14 +13,14 @@ module Coal.Kernel.LLVM.IRInterpreter.Monad (
   refreshInterpreterState,
 ) where
 
-import Control.Monad.RWS (MonadReader, MonadState, MonadWriter, RWS, evalRWS, gets, modify, runRWS)
-import Data.Text (Text)
 import Coal.Kernel.LLVM.IREncodable (IREncodable (..), enquote)
 import Coal.Kernel.LLVM.IRInterpreter.Artifact
 import Coal.Kernel.LLVM.IRInterpreter.Environment
 import Coal.Kernel.LLVM.IRInterpreter.State
 import Coal.Kernel.LLVM.IRType (IRType (..))
 import Coal.Kernel.LLVM.IRValue (IRValue (..))
+import Control.Monad.RWS (MonadReader, MonadState, MonadWriter, RWS, evalRWS, gets, modify, runRWS)
+import Data.Text (Text)
 import TextShow (showt)
 
 import qualified Data.Text as Text

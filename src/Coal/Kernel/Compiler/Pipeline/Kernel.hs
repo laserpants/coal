@@ -16,10 +16,10 @@ module Coal.Kernel.Compiler.Pipeline.Kernel (
   overKernelConstructors,
 ) where
 
-import Extra (Over)
 import Coal.Common.Environment (Environment)
 import Coal.Kernel.LLVM
 import Coal.Kernel.Language.Type (Type)
+import Extra (Over)
 
 data Kernel = Kernel
   { kernelSupply :: Int

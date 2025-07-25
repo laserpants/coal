@@ -10,14 +10,14 @@ module Coal.Compiler.Transform.Pattern.OrExpansion (
   expandExpression,
 ) where
 
-import Data.Data (Data)
-import Data.Generics.Uniplate.Data (transformBiM)
-import Data.Semigroup (sconcat)
-import Extra (Map, traverseM)
 import Coal.Common.Label (Label (..))
 import Coal.Common.List1 (List1, NonEmpty (..))
 import Coal.Language (Clause (..), Expression (..), Pattern (..))
 import Coal.Language.Module (Module (..))
+import Data.Data (Data)
+import Data.Generics.Uniplate.Data (transformBiM)
+import Data.Semigroup (sconcat)
+import Extra (Map, traverseM)
 
 import qualified Coal.Common.List1 as List1
 

@@ -7,12 +7,12 @@ module Coal.Compiler.PatternMatching.Compiler (
   compileEnvelope,
 ) where
 
-import Data.Data (Data, Typeable)
-import Extra (const2)
 import Coal.Common.Label (Label (..))
 import Coal.Common.List1 (List1, NonEmpty (..))
 import Coal.Compiler.PatternMatching.Envelope
 import Coal.Language
+import Data.Data (Data, Typeable)
+import Extra (const2)
 
 class TypeProxy t where
   expressionType :: (Data a) => Expression a t -> t

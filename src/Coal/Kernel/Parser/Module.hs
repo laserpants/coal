@@ -2,9 +2,6 @@
 
 module Coal.Kernel.Parser.Module (module_) where
 
-import Control.Applicative ((<|>))
-import Control.Monad (void)
-import Extra (Name)
 import Coal.Kernel.Language.Expr (Expr)
 import Coal.Kernel.Language.Module (Module (Module))
 import Coal.Kernel.Language.Object (Object (..))
@@ -14,6 +11,9 @@ import Coal.Kernel.Parser.Expr (expr, label)
 import Coal.Kernel.Parser.Identifier (identifier)
 import Coal.Kernel.Parser.Symbol (angleBrackets, braces, commaSep1, parens, symbol)
 import Coal.Kernel.Parser.Type (type_)
+import Control.Applicative ((<|>))
+import Control.Monad (void)
+import Extra (Name)
 import Text.Megaparsec (try)
 import Text.Megaparsec.Char (upperChar)
 

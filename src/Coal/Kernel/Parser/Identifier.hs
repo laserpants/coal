@@ -1,8 +1,8 @@
 module Coal.Kernel.Parser.Identifier (name, constructor, identifier) where
 
+import Coal.Kernel.Parser (Parser, cons, option, word)
 import Control.Applicative ((<|>))
 import Data.Text (Text)
-import Coal.Kernel.Parser (Parser, cons, option, word)
 import Text.Megaparsec (many)
 import Text.Megaparsec.Char (alphaNumChar, char, lowerChar, upperChar)
 

@@ -4,20 +4,20 @@
 
 module Coal.Kernel.Compiler.Pass.Suffix (suffixExpr) where
 
-import Control.Monad.State (MonadState, modify, runStateT)
-import Control.Monad.Trans (lift)
-import Data.Functor.Foldable (cata, embed)
-import Extra (Dictionary, Name, applyM1, applyM2, isConstructor)
 import Coal.Common.Label (Label (..))
 import Coal.Common.List1 (List1, NonEmpty (..))
 import Coal.Common.Supply (supplied)
 import Coal.Kernel.Language (Binding (..), Clause (..), Expr, Focus (..), unzipBindings)
 import Coal.Kernel.Language.Expr.Replace (Sub, relabel)
+import Control.Monad.State (MonadState, modify, runStateT)
+import Control.Monad.Trans (lift)
+import Data.Functor.Foldable (cata, embed)
+import Extra (Dictionary, Name, applyM1, applyM2, isConstructor)
 import TextShow (showt)
 
-import qualified Data.Map.Strict as Map
 import qualified Coal.Common.List1 as List1
 import qualified Coal.Kernel.Language as Core
+import qualified Data.Map.Strict as Map
 
 suffixExpr :: (MonadState Int m) => Expr t -> m (Expr t)
 suffixExpr =

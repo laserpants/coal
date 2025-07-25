@@ -13,15 +13,15 @@ module Coal.TypeSystem.Unification (
   evalUnifier,
 ) where
 
+import Coal.Common.Supply (supplied)
+import Coal.Language
+import Coal.TypeSystem.Substitution (Substitutable (..), Substitution (..), mapsTo, merge)
 import Control.Monad.Except (ExceptT, MonadError, runExceptT, throwError)
 import Control.Monad.State (MonadState, State, runState)
 import Data.Data (Data)
 import Data.List.NonEmpty (NonEmpty, (<|))
 import Data.Set (member)
 import Extra (foldrM, (<$$>))
-import Coal.Common.Supply (supplied)
-import Coal.Language
-import Coal.TypeSystem.Substitution (Substitutable (..), Substitution (..), mapsTo, merge)
 
 import qualified Data.List.NonEmpty as NonEmpty
 

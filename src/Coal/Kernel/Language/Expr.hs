@@ -17,12 +17,6 @@ module Coal.Kernel.Language.Expr (
   isPrim,
 ) where
 
-import Data.Data (Data)
-import Data.Eq.Deriving (deriveEq1)
-import Data.Fix (Fix (..))
-import Data.Functor.Foldable (cata, project)
-import Data.Set (singleton)
-import Extra (Name, Over)
 import Coal.Common.FreeVars (BoundVars (..), FreeVars (..), exceptNames)
 import Coal.Common.Label (Label (..))
 import Coal.Common.List1 (List1, NonEmpty (..))
@@ -32,10 +26,16 @@ import Coal.Kernel.Language.Type (Type (..))
 import Coal.Kernel.Language.Type.Arrow (foldType, returnTypeOf)
 import Coal.Kernel.Language.Type.Row (extend)
 import Coal.Kernel.Language.Typed (Typed (..))
+import Data.Data (Data)
+import Data.Eq.Deriving (deriveEq1)
+import Data.Fix (Fix (..))
+import Data.Functor.Foldable (cata, project)
+import Data.Set (singleton)
+import Extra (Name, Over)
 import Text.Show.Deriving (deriveShow1)
 
-import qualified Data.Set as Set
 import qualified Coal.Common.List1 as List1
+import qualified Data.Set as Set
 
 -- | Pattern matching clause
 data Clause t a = Clause (List1 (Label t)) a

@@ -2,15 +2,15 @@
 
 module Coal.Parser.Pattern (parsePattern) where
 
-import Control.Monad (void)
-import Control.Monad.Combinators.Expr
-import Data.Functor (($>))
 import Coal.Common.Label (Label (..))
 import Coal.Language
 import Coal.Parser
 import Coal.Parser.Identifier
 import Coal.Parser.Symbol
 import Coal.Parser.Type (parseType)
+import Control.Monad (void)
+import Control.Monad.Combinators.Expr
+import Data.Functor (($>))
 import Text.Megaparsec (option, optional, (<|>))
 import Text.Megaparsec.Char (char)
 

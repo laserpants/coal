@@ -20,9 +20,9 @@ module Coal.Parser.Symbol (
   equalSign,
 ) where
 
+import Coal.Parser
 import Control.Monad (void)
 import Data.Text (Text)
-import Coal.Parser
 import Text.Megaparsec
 
 import qualified Text.Megaparsec.Char.Lexer as Lexer

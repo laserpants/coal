@@ -10,11 +10,6 @@ module Coal.TypeSystem.Constraint.Solver (
   solveConstraints,
 ) where
 
-import Control.Monad.RWS (MonadState, MonadWriter, RWS, get, put, runRWS, tell)
-import Data.Data (Data)
-import Data.List (delete, find)
-import Data.Set (intersection, (\\))
-import Extra (foldrM)
 import Coal.Common.Supply (supply)
 import Coal.Language (
   IndexedScheme,
@@ -31,6 +26,11 @@ import Coal.Language (
 import Coal.TypeSystem.Constraint (Constraint (..), Monomorphic (..))
 import Coal.TypeSystem.Substitution (Substitutable (..), Substitution (..), mapsTo)
 import Coal.TypeSystem.Unification (UnificationError, Unifier (..), runUnifier, unifyAll)
+import Control.Monad.RWS (MonadState, MonadWriter, RWS, get, put, runRWS, tell)
+import Data.Data (Data)
+import Data.List (delete, find)
+import Data.Set (intersection, (\\))
+import Extra (foldrM)
 
 import qualified Data.Set as Set
 

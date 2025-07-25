@@ -14,10 +14,6 @@ module Coal.Kernel.Compiler.Pass (
   astSimplify1,
 ) where
 
-import Control.Monad.State (State, gets, modify, runState)
-import Control.Monad.Writer (Writer, runWriter)
-import Extra (traverse2)
-import Extra.Control.Applicative (pure1, pure3)
 import Coal.Kernel.Compiler.Ast (flattenLambdaNodes, flattenObject, simplifyLetNodes, sortMatchClauses)
 import Coal.Kernel.Compiler.Pass.ClosureConversion (closeObjects)
 import Coal.Kernel.Compiler.Pass.ExtraArgs (addImplicitArgs)
@@ -29,6 +25,10 @@ import Coal.Kernel.Compiler.Pipeline
 import Coal.Kernel.Compiler.Pipeline.Kernel (Kernel (..), overKernelSupply)
 import Coal.Kernel.LLVM (IRInterpreter, irInterpreterStateArtifacts, runInterpreter)
 import Coal.Kernel.Language
+import Control.Monad.State (State, gets, modify, runState)
+import Control.Monad.Writer (Writer, runWriter)
+import Extra (traverse2)
+import Extra.Control.Applicative (pure1, pure3)
 
 transformSuffixMonad :: State Int a -> Pipeline a
 transformSuffixMonad a = do

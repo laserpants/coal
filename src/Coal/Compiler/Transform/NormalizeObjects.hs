@@ -3,9 +3,6 @@
 
 module Coal.Compiler.Transform.NormalizeObjects (NormalizeObjectsTransformContext (..)) where
 
-import Data.Data (Data, Typeable)
-import Data.Map.Strict (Map)
-import Extra (Name)
 import Coal.Common.List1 (List1)
 import Coal.Compiler.Transform.Flattening
 import Coal.Language.Expression (Expression (..))
@@ -16,6 +13,9 @@ import Coal.Language.Module.Definition (Definition (..))
 import Coal.Language.Module.Function (Function (..))
 import Coal.Language.Trait (With (..))
 import Coal.Language.Type (Type (..))
+import Data.Data (Data, Typeable)
+import Data.Map.Strict (Map)
+import Extra (Name)
 
 class NormalizeObjectsTransformContext a where
   normalizeObject :: a -> a

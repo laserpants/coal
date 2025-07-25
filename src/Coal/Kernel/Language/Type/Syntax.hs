@@ -18,8 +18,8 @@ module Coal.Kernel.Language.Type.Syntax (
   record,
 ) where
 
-import Extra (Name)
 import Coal.Kernel.Language.Type (Type (..))
+import Extra (Name)
 import TextShow (showt)
 
 {-# INLINE tcon0 #-}

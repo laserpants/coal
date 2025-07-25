@@ -12,11 +12,11 @@ module Coal.Parser (
   nonEmptyOr,
 ) where
 
+import Coal.Common.List1 (List1, NonEmpty (..))
 import Control.Monad (void, when)
 import Data.Text (Text)
 import Data.Void (Void)
 import Extra (Name)
-import Coal.Common.List1 (List1, NonEmpty (..))
 import Text.Megaparsec
 import Text.Megaparsec.Char (space1)
 
