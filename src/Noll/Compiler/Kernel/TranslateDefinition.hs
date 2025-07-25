@@ -8,8 +8,8 @@ import Control.Monad (forM)
 import Control.Monad.Reader (MonadReader, asks)
 import Data.Data (Data)
 import Data.List.Extra (sortOn)
-import Lang.Common.List1 (NonEmpty ((:|)), fromList1, (<|))
-import Lang.Common.Label (Label (..))
+import Noll.Common.List1 (NonEmpty ((:|)), fromList1, (<|))
+import Noll.Common.Label (Label (..))
 import Extra (Name, (<$$>))
 import Noll.Compiler.Kernel.Environment (KernelEnvironment (..), withLocalNames)
 import Noll.Compiler.Kernel.TranslateExpression (translateExpression, translatePattern)
@@ -17,7 +17,7 @@ import Noll.Compiler.Kernel.TranslateType (translateType)
 import Noll.Language
 import Noll.Language.Module
 
-import qualified Lang.Kernel.Language as Kernel
+import qualified Noll.Kernel.Language as Kernel
 
 type KernelObject = Kernel.Object Kernel.Type (Kernel.Expr Kernel.Type)
 

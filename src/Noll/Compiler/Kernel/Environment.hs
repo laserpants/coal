@@ -13,12 +13,12 @@ module Noll.Compiler.Kernel.Environment (
 ) where
 
 import Control.Monad.Reader (MonadReader, ask, local)
-import Lang.Common.Environment (Environment)
+import Noll.Common.Environment (Environment)
 import Extra (Name, Over, Set)
 
 import qualified Data.Set as Set
 import qualified Data.Text as Text
-import qualified Lang.Common.Environment as Environment
+import qualified Noll.Common.Environment as Environment
 
 data KernelEnvironment = KernelEnvironment
   { kernelEnvironmentModule :: Name

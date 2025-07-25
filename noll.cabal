@@ -187,10 +187,10 @@ library
     , deriving-compat
     , extra
     , free
-    , lowpass
     , megaparsec
     , mtl
     , parser-combinators
+    , process
     , raw-strings-qq
     , recursion-schemes
     , text
@@ -215,11 +215,11 @@ executable noll-exe
     , deriving-compat
     , extra
     , free
-    , lowpass
     , megaparsec
     , mtl
     , noll
     , parser-combinators
+    , process
     , raw-strings-qq
     , recursion-schemes
     , text
@@ -261,6 +261,7 @@ test-suite noll-test
       Noll.Examples.Test07
       Noll.Examples.Test08
       Noll.Examples.Test09
+      Noll.Kernel.Compiler.Utils
       Noll.Language.Type.IndexedSpec
       Noll.ParserSpec
       Noll.Set.Test01
@@ -366,11 +367,11 @@ test-suite noll-test
     , extra
     , free
     , hspec
-    , lowpass
     , megaparsec
     , mtl
     , noll
     , parser-combinators
+    , process
     , raw-strings-qq
     , recursion-schemes
     , text

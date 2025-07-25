@@ -15,7 +15,7 @@ module Noll.Parser (
 import Control.Monad (void, when)
 import Data.Text (Text)
 import Data.Void (Void)
-import Lang.Common.List1 (List1, NonEmpty (..))
+import Noll.Common.List1 (List1, NonEmpty (..))
 import Extra (Name)
 import Text.Megaparsec
 import Text.Megaparsec.Char (space1)

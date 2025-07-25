@@ -4,7 +4,7 @@ module Noll.Parser.Type (parseType, parseTypeParameter, parseKind) where
 
 import Control.Monad.Combinators.Expr
 import Data.Functor (($>))
-import Lang.Common.List1 (NonEmpty (..))
+import Noll.Common.List1 (NonEmpty (..))
 import Noll.Language
 import Noll.Parser
 import Noll.Parser.Identifier

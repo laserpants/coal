@@ -16,9 +16,9 @@ module Noll.Kernel.Language.Object (
 
 import Control.Arrow ((>>>))
 import Data.Functor.Foldable (embed, project)
-import Lang.Common.List1 (fromList1)
-import Lang.Common.FreeVars (FreeVars (..), boundIn, exceptNames)
-import Lang.Common.Label (Label (..))
+import Noll.Common.List1 (fromList1)
+import Noll.Common.FreeVars (FreeVars (..), boundIn, exceptNames)
+import Noll.Common.Label (Label (..))
 import Noll.Kernel.LLVM.IRType (IRType, IRTyped (..))
 import Noll.Kernel.LLVM.IRType.Syntax (opaqueFunction)
 import Noll.Kernel.Language.Expr (Binding (..), Expr, ExprF (..))

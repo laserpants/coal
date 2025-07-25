@@ -1,4 +1,4 @@
-module Lang.Common.List1 (
+module Noll.Common.List1 (
   module Data.List.NonEmpty,
   List1,
   fromList1,

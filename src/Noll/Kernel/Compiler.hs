@@ -11,7 +11,7 @@ module Noll.Kernel.Compiler (compile, compileModules) where
 import Control.Monad (void, (>=>))
 import Control.Monad.State (gets)
 import Data.List (nub)
-import Lang.Common.Environment (Environment (..))
+import Noll.Common.Environment (Environment (..))
 import Noll.Kernel.Compiler.Pass
 import Noll.Kernel.Compiler.Pipeline
 import Noll.Kernel.Compiler.Pipeline.Kernel (Kernel (..))
@@ -20,7 +20,7 @@ import Noll.Kernel.Language
 import Extra (Name, forM, isConstructor, (<$$>), (||.))
 
 import qualified Data.Text as Text
-import qualified Lang.Common.Environment as Environment
+import qualified Noll.Common.Environment as Environment
 
 corePass :: Pass ObjectList ObjectList
 corePass =

@@ -15,9 +15,9 @@ import Control.Monad.Reader (asks)
 import Data.Data (Data)
 import Data.Maybe (maybeToList)
 import Data.Tuple.Extra (third3)
-import Lang.Common.List1 (NonEmpty ((:|)), fromList1)
-import Lang.Common.Supply (supplied)
-import Lang.Common.Label (Label (..))
+import Noll.Common.List1 (NonEmpty ((:|)), fromList1)
+import Noll.Common.Supply (supplied)
+import Noll.Common.Label (Label (..))
 import Extra
 import Noll.Language
 import Noll.TypeSystem.Constraint (Constraint (..))
@@ -26,7 +26,7 @@ import Noll.TypeSystem.Constraint.Generation.Internal
 import Noll.TypeSystem.Constraint.Generation.TypeAnnotation (instantiateAnnotation)
 
 import qualified Data.Map.Strict as Map
-import qualified Lang.Common.Environment as Environment
+import qualified Noll.Common.Environment as Environment
 
 type ConstraintsGen a = ConstraintsGenStack a TypeIndex Kind IndexedType
 

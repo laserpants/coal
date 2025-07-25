@@ -4,7 +4,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
-module Lang.Common.Supply (
+module Noll.Common.Supply (
   Supply (..),
   supply,
   supplied,

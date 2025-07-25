@@ -6,14 +6,14 @@ module Noll.Compiler.Transform.Type.Parameterized where
 import Control.Monad.Reader (ReaderT, asks, runReaderT)
 import Control.Monad.State (MonadState)
 import Control.Monad.Writer (WriterT, execWriterT, tell)
-import Lang.Common.Environment (Environment (..))
-import Lang.Common.List1 (List1, fromList1)
-import Lang.Common.Supply (Supply (..), supplied)
+import Noll.Common.Environment (Environment (..))
+import Noll.Common.List1 (List1, fromList1)
+import Noll.Common.Supply (Supply (..), supplied)
 import Extra (Name, traverse_)
 import Noll.Language
 
 import qualified Data.Text as Text
-import qualified Lang.Common.Environment as Environment
+import qualified Noll.Common.Environment as Environment
 
 instantiateVars :: (MonadState s m, Supply s) => [(Name, TypeIndex Kind)] -> Environment Kind -> Type Parameter () -> m IndexedType
 instantiateVars ts0 env t = do

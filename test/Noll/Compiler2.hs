@@ -37,10 +37,10 @@ import Control.Monad.Writer (execWriter)
 import Data.Data (Data)
 import Data.Either.Extra (partitionEithers)
 import Data.Generics.Uniplate.Data (descendBiM, universeBi)
-import Lang.Common.Environment (Environment (..))
-import Lang.Common.List1 (NonEmpty ((:|)))
-import Lang.Common.Supply (Supply (..), supplied)
-import Lang.Common.Label (Label (..))
+import Noll.Common.Environment (Environment (..))
+import Noll.Common.List1 (NonEmpty ((:|)))
+import Noll.Common.Supply (Supply (..), supplied)
+import Noll.Common.Label (Label (..))
 import Extra (Dictionary, Name, Over, forM_, (<$$$>))
 import Noll.Language
 import Noll.Language.HasType (foldTypeOf)
@@ -51,7 +51,7 @@ import Noll.TypeSystem.Substitution (mapsTo)
 
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
-import qualified Lang.Common.Environment as Environment
+import qualified Noll.Common.Environment as Environment
 
 type CompilerAssumption = Assumption IndexedType
 

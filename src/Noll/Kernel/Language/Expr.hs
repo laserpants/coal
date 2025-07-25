@@ -22,9 +22,9 @@ import Data.Eq.Deriving (deriveEq1)
 import Data.Fix (Fix (..))
 import Data.Functor.Foldable (cata, project)
 import Data.Set (singleton)
-import Lang.Common.List1 (List1, NonEmpty (..))
-import Lang.Common.FreeVars (BoundVars (..), FreeVars (..), exceptNames)
-import Lang.Common.Label (Label (..))
+import Noll.Common.List1 (List1, NonEmpty (..))
+import Noll.Common.FreeVars (BoundVars (..), FreeVars (..), exceptNames)
+import Noll.Common.Label (Label (..))
 import Noll.Kernel.Language.Op (Op (..))
 import Noll.Kernel.Language.Prim (Prim (..))
 import Noll.Kernel.Language.Type (Type (..))
@@ -35,7 +35,7 @@ import Extra (Name, Over)
 import Text.Show.Deriving (deriveShow1)
 
 import qualified Data.Set as Set
-import qualified Lang.Common.List1 as List1
+import qualified Noll.Common.List1 as List1
 
 -- | Pattern matching clause
 data Clause t a = Clause (List1 (Label t)) a

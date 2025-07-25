@@ -7,7 +7,7 @@ module Noll.Kernel.LLVM.IRConstruct (
 ) where
 
 import Data.ByteString (ByteString)
-import Lang.Common.Label (Label (..))
+import Noll.Common.Label (Label (..))
 import Noll.Kernel.LLVM.IRType (IRType)
 import Noll.Kernel.LLVM.IRValue (IRValue)
 import Extra (Name)

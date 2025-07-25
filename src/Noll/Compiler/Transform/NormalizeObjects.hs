@@ -5,7 +5,7 @@ module Noll.Compiler.Transform.NormalizeObjects (NormalizeObjectsTransformContex
 
 import Data.Data (Data, Typeable)
 import Data.Map.Strict (Map)
-import Lang.Common.List1 (List1)
+import Noll.Common.List1 (List1)
 import Extra (Name)
 import Noll.Compiler.Transform.Flattening
 import Noll.Language.Expression (Expression (..))

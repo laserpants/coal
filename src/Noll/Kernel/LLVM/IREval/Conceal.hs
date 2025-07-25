@@ -4,7 +4,7 @@
 module Noll.Kernel.LLVM.IREval.Conceal (irConceal, irConcealArgs, irReveal) where
 
 import Control.Monad (unless)
-import Lang.Common.List1 (List1, fromList1)
+import Noll.Common.List1 (List1, fromList1)
 import Noll.Kernel.LLVM.IREval (IREval (..))
 import Noll.Kernel.LLVM.IREval.Comment (irComment)
 import Noll.Kernel.LLVM.IREval.Malloc (irMalloc)

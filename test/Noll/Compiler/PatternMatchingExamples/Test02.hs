@@ -2,9 +2,9 @@
 
 module Noll.Compiler.PatternMatchingExamples.Test02 where
 
--- import Lang.Common.Environment (Environment (..))
--- import Lang.Common.List1 (NonEmpty (..), (<|))
--- import Lang.Common.Label (Label (..))
+-- import Noll.Common.Environment (Environment (..))
+-- import Noll.Common.List1 (NonEmpty (..), (<|))
+-- import Noll.Common.Label (Label (..))
 -- import Noll.Compiler.PatternMatching
 -- import Noll.Compiler.PatternMatching.Envelope
 -- import Noll.Compiler.PatternMatching.Equation
@@ -15,7 +15,7 @@ module Noll.Compiler.PatternMatchingExamples.Test02 where
 -- import Test.Hspec (Spec, describe, it)
 --
 -- import qualified Data.Map.Strict as Map
--- import qualified Lang.Common.Environment as Environment
+-- import qualified Noll.Common.Environment as Environment
 --
 -- spec :: Spec
 -- spec =

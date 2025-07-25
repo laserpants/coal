@@ -4,7 +4,7 @@
 
 module Noll.Kernel.Language.Typed (Typed (..)) where
 
-import Lang.Common.Label (Label (..))
+import Noll.Common.Label (Label (..))
 import Noll.Kernel.Language.Op (Op (..))
 import Noll.Kernel.Language.Prim (Prim (..))
 import Noll.Kernel.Language.Type (Type (..))

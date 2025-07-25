@@ -14,8 +14,8 @@ module Noll.Kernel.Language.Expr.Syntax (
   mem,
 ) where
 
-import Lang.Common.List1 (List1)
-import Lang.Common.Label (Label (..))
+import Noll.Common.List1 (List1)
+import Noll.Common.Label (Label (..))
 import Noll.Kernel.Language.Expr (
   Binding (..),
   Clause (..),

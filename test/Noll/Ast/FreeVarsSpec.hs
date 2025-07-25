@@ -4,8 +4,8 @@ module Noll.Ast.FreeVarsSpec where
 
 -- import Data.List.NonEmpty (NonEmpty (..), (<|))
 -- import Data.Set (Set)
--- import Lang.Common.FreeVars
--- import Lang.Common.Label (Label (..))
+-- import Noll.Common.FreeVars
+-- import Noll.Common.Label (Label (..))
 -- import Noll.Language.Expression (Clause (..), Expression (..))
 -- import Noll.Language.Expression.Binding (Binding (..))
 -- import Noll.Language.Expression.Choice (Choice (..), Guard (..))
@@ -19,7 +19,7 @@ module Noll.Ast.FreeVarsSpec where
 --
 -- spec :: Spec
 -- spec =
---  describe "Lang.Common.FreeVars" $ do
+--  describe "Noll.Common.FreeVars" $ do
 --    describe "freeIn" $ do
 --      describe "EVariable" $
 --        it "a" $

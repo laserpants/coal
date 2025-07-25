@@ -3,7 +3,7 @@
 module Noll.TypeSystemFixtures.Expression where
 
 import Data.List.NonEmpty (NonEmpty (..), (<|))
-import Lang.Common.Label (Label (..))
+import Noll.Common.Label (Label (..))
 import Noll.Language
 
 --

@@ -4,8 +4,8 @@ module Noll.CompilerExamples.Test01 where
 
 import Control.Monad.Identity (runIdentity)
 import Control.Monad.State (evalState)
-import Lang.Common.List1 (NonEmpty (..), (<|))
-import Lang.Common.Label (Label (..))
+import Noll.Common.List1 (NonEmpty (..), (<|))
+import Noll.Common.Label (Label (..))
 import Noll.Compiler2
 import Noll.Language (
   BinaryOperator (..),
@@ -31,7 +31,7 @@ import Noll.TypeSystemSpec.TestRunner
 import Test.Hspec (Spec, describe, it)
 
 import qualified Data.Set as Set
-import qualified Lang.Common.Environment as Environment
+import qualified Noll.Common.Environment as Environment
 
 spec :: Spec
 spec =

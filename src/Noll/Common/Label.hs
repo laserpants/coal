@@ -2,7 +2,7 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE StrictData #-}
 
-module Lang.Common.Label (Label (..), setLabelName) where
+module Noll.Common.Label (Label (..), setLabelName) where
 
 import Data.Data (Data, Typeable)
 import Extra (Name)

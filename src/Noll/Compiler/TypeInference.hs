@@ -12,10 +12,10 @@ import Control.Monad.State (evalState, gets)
 import Control.Monad.Writer (execWriter)
 import Data.Data (Data)
 import Data.Either.Extra (partitionEithers)
-import Lang.Common.Environment (Environment (..))
-import Lang.Common.List1 (NonEmpty (..))
-import Lang.Common.Supply (supplied)
-import Lang.Common.Label (Label (..))
+import Noll.Common.Environment (Environment (..))
+import Noll.Common.List1 (NonEmpty (..))
+import Noll.Common.Supply (supplied)
+import Noll.Common.Label (Label (..))
 import Extra (Dictionary, Name, forM_)
 import Noll.Compiler.Stack
 import Noll.Compiler.Transform.Type.Parameterized
@@ -26,7 +26,7 @@ import Noll.TypeSystem
 
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
-import qualified Lang.Common.Environment as Environment
+import qualified Noll.Common.Environment as Environment
 
 type ConstraintsGenResult c o k t r = (r, Dictionary (c, o k), [ConstraintsGenOutput c o k t])
 

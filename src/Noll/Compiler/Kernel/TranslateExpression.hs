@@ -10,8 +10,8 @@ module Noll.Compiler.Kernel.TranslateExpression (
 import Control.Monad.Reader (MonadReader)
 import Data.Data (Data)
 import Data.Maybe (fromMaybe)
-import Lang.Common.List1 (List1, NonEmpty (..), fromList1, (<|))
-import Lang.Common.Label (Label (..))
+import Noll.Common.List1 (List1, NonEmpty (..), fromList1, (<|))
+import Noll.Common.Label (Label (..))
 import Extra (Dictionary, Name)
 import Noll.Compiler.Kernel.Environment (KernelEnvironment (..), qualifyName, withLocalName, withLocalNames)
 import Noll.Compiler.Kernel.TranslateType (translateType)
@@ -19,7 +19,7 @@ import Noll.Language
 
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
-import qualified Lang.Kernel.Language as Kernel
+import qualified Noll.Kernel.Language as Kernel
 
 type KernelExpr = Kernel.Expr Kernel.Type
 

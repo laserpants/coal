@@ -4,18 +4,18 @@
 module Noll.Set3.Test13x where
 
 import Data.Text (Text)
-import Lang.Common.Label (Label (..))
-import Lang.Kernel.Language
-import Lang.Kernel.Parser.Expr (expr)
+import Noll.Common.Label (Label (..))
+import Noll.Kernel.Language
+import Noll.Kernel.Parser.Expr (expr)
 import Extra (Name, (<$$>))
 import Text.Megaparsec (eof, runParser)
 import Text.Megaparsec.Error (errorBundlePretty)
 import Text.RawString.QQ
 
 import qualified Data.Text as Text
-import qualified Lang.Kernel.Compiler as Kernel
-import qualified Lang.Kernel.Compiler.Utils as Kernel
-import qualified Lang.Kernel.Language as Kernel
+import qualified Noll.Kernel.Compiler as Kernel
+import qualified Noll.Kernel.Compiler.Utils as Kernel
+import qualified Noll.Kernel.Language as Kernel
 
 unsafeParseExpr :: Text -> Kernel.Expr Kernel.Type
 unsafeParseExpr t =

@@ -6,8 +6,8 @@ module Noll.Kernel.Language.Expr.Replace (rewrite, Sub (..)) where
 import Control.Arrow ((>>>))
 import Control.Monad.Identity (runIdentity)
 import Data.Functor.Foldable (embed, para)
-import Lang.Common.List1 (List1)
-import Lang.Common.Label (Label (..), labelName, setLabelName)
+import Noll.Common.List1 (List1)
+import Noll.Common.Label (Label (..), labelName, setLabelName)
 import Noll.Kernel.Language.Expr (Binding (..), Clause (..), Expr, ExprF (..), Focus (..), bindingLabel)
 import Extra (Dictionary, Map, Name, (<$$>))
 

@@ -3,14 +3,14 @@
 
 module Noll.Kernel.Compiler.Pass.ExtraArgs (addImplicitArgs) where
 
-import Lang.Common.List1 (List1, NonEmpty (..))
-import Lang.Common.Label (Label (..))
+import Noll.Common.List1 (List1, NonEmpty (..))
+import Noll.Common.Label (Label (..))
 import Noll.Kernel.Compiler.Ast (flattenAppNodes)
 import Noll.Kernel.Language (Expr, Type, Typed (..))
 import Noll.Kernel.Language.Object (Object (..))
 import TextShow (showt)
 
-import qualified Lang.Common.List1 as List1
+import qualified Noll.Common.List1 as List1
 import qualified Noll.Kernel.Language as Core
 
 addImplicitArgs :: Object Type (Expr Type) -> Object Type (Expr Type)

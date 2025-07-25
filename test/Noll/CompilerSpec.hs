@@ -11,10 +11,10 @@ import Data.Map.Strict (Map)
 import Data.Set (Set)
 import Data.Text (Text)
 import Debug.Trace
-import Lang.Common.Environment (Environment)
-import Lang.Common.List1 (NonEmpty (..), (<|))
-import Lang.Common.Label (Label (..))
-import Lang.Kernel.Language (Object (..), moduleImports, moduleName, moduleObjects, opaque)
+import Noll.Common.Environment (Environment)
+import Noll.Common.List1 (NonEmpty (..), (<|))
+import Noll.Common.Label (Label (..))
+import Noll.Kernel.Language (Object (..), moduleImports, moduleName, moduleObjects, opaque)
 import Extra (Dictionary, Name, forM, forM_)
 import Noll.Compiler.Transform.Dictionaries
 import Noll.Compiler
@@ -35,10 +35,10 @@ import Test.Hspec (Spec, describe, it)
 
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
-import qualified Lang.Common.Environment as Environment
-import qualified Lang.Kernel.Compiler as Kernel
-import qualified Lang.Kernel.Compiler.Utils as Kernel
-import qualified Lang.Kernel.Language as Kernel
+import qualified Noll.Common.Environment as Environment
+import qualified Noll.Kernel.Compiler as Kernel
+import qualified Noll.Kernel.Compiler.Utils as Kernel
+import qualified Noll.Kernel.Language as Kernel
 import qualified Noll.Set.Test01
 import qualified Noll.Set10.Test01
 import qualified Noll.Set11.Test01
@@ -557,7 +557,7 @@ abc20 mods = do
         typePass m
     --            let zz = m1 :: Noll.Language.Module.Module () Kind IndexedType
     ms3 <- traverse mainPass ms2
-    ms4 <- traverse lowpassTranslationC ms3
+    ms4 <- traverse kernelTranslationC ms3
     pure ms4
 
 abc21 :: IO ()
@@ -585,7 +585,7 @@ abc22 files = do
         ]
       ms2 <- traverse typePass mods
       ms3 <- traverse mainPass ms2
-      traverse lowpassTranslationC ms3
+      traverse kernelTranslationC ms3
   parsing m =
     case runParser parseModule "" (Text.pack m) of
       Left e ->

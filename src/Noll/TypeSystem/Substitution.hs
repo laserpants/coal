@@ -20,7 +20,7 @@ import Data.Generics.Uniplate.Data (transform, transformBi)
 import Data.List.NonEmpty (NonEmpty)
 import Data.Map.Strict (Map, keysSet, union)
 import Data.Set (Set, intersection)
-import Lang.Common.Environment (Environment (..))
+import Noll.Common.Environment (Environment (..))
 import Extra (IndexMap, fromMaybe)
 import Noll.Language
 import Noll.Language.Module (Constant (..), Definition (..), Function (..))

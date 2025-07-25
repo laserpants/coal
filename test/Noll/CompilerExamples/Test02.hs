@@ -5,8 +5,8 @@ module Noll.CompilerExamples.Test02 where
 import Control.Monad.Identity (runIdentity)
 import Control.Monad.State (evalState)
 import Data.Data (Data)
-import Lang.Common.List1 (NonEmpty (..), (<|))
-import Lang.Common.Label (Label (..))
+import Noll.Common.List1 (NonEmpty (..), (<|))
+import Noll.Common.Label (Label (..))
 import Noll.Compiler2
 import Noll.Language (
   BinaryOperator (..),
@@ -33,7 +33,7 @@ import Test.Hspec (Spec, describe, it)
 
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
-import qualified Lang.Common.Environment as Environment
+import qualified Noll.Common.Environment as Environment
 import qualified Noll.Examples.Test03 as Test03
 import qualified Noll.Examples.Test04 as Test04
 import qualified Noll.Set.Test03

@@ -6,7 +6,7 @@ module Noll.Compiler.Kernel.TranslateModule (translateModule) where
 
 import Control.Monad.Reader (MonadReader)
 import Data.Data (Data)
-import Lang.Common.Environment
+import Noll.Common.Environment
 import Extra (Name)
 import Noll.Compiler.Kernel.Environment (KernelEnvironment, insertQualifiedNames, withModuleName)
 import Noll.Compiler.Kernel.TranslateDefinition (translateDefinition)
@@ -14,8 +14,8 @@ import Noll.Language
 import Noll.Language.Module
 
 import qualified Data.Text as Text
-import qualified Lang.Common.Environment as Environment
-import qualified Lang.Kernel.Language as Kernel
+import qualified Noll.Common.Environment as Environment
+import qualified Noll.Kernel.Language as Kernel
 
 translateModule :: (Show a, MonadReader KernelEnvironment m, Data a) => Module a Kind IndexedType -> m (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))
 translateModule =

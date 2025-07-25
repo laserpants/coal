@@ -28,7 +28,7 @@ import Noll.TypeSystem.Substitution (Substitution (..))
 import Noll.Utils (lexOrderRank)
 
 import qualified Data.Map.Strict as Map
-import qualified Lang.Common.Environment as Environment
+import qualified Noll.Common.Environment as Environment
 
 type TypeAnnotationContext = ConstraintsGenContext TypeIndex Kind IndexedType
 

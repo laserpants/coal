@@ -2,7 +2,7 @@
 
 module Noll.Kernel.LLVM.IREval.Closure.Extend (irExtend) where
 
-import Lang.Common.Label (Label (..))
+import Noll.Common.Label (Label (..))
 import Noll.Kernel.LLVM.IRConstruct (IRConstruct (..))
 import Noll.Kernel.LLVM.IREval.Closure (closureStructType)
 import Noll.Kernel.LLVM.IREval.Comment (irComment)

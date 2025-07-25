@@ -12,7 +12,7 @@ module Noll.Kernel.Language.Op (Op (..)) where
 import Data.Data (Data, Typeable)
 import Data.Eq.Deriving (deriveEq1)
 import Data.Generics.Uniplate.Data (childrenBi)
-import Lang.Common.FreeVars (FreeVars (..))
+import Noll.Common.FreeVars (FreeVars (..))
 import Text.Show.Deriving (deriveShow1)
 
 -- | Binary operators

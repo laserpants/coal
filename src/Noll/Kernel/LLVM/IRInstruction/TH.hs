@@ -54,7 +54,7 @@ import Data.Text (Text)
 import Noll.Kernel.LLVM.IRInstruction (FCmpCond, ICmpCond, IRInstrOp, InstrOpF (..))
 import Noll.Kernel.LLVM.IRType (IRType)
 import Noll.Kernel.LLVM.IRValue (IRValue)
-import Lang.Common.Name (Name)
+import Noll.Common.Name (Name)
 import Prelude hiding (and, or)
 
 makeFree ''InstrOpF

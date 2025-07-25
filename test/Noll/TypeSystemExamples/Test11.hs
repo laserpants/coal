@@ -4,7 +4,7 @@ module Noll.TypeSystemExamples.Test11 where
 
 import Data.Data (Data)
 import Data.List.NonEmpty (NonEmpty (..), (<|))
-import Lang.Common.Label (Label (..))
+import Noll.Common.Label (Label (..))
 import Noll.Compiler2
 import Noll.Language (
   BinaryOperator (..),
@@ -30,7 +30,7 @@ import Test.Hspec (Spec, describe, hspec, it)
 
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
-import qualified Lang.Common.Environment as Environment
+import qualified Noll.Common.Environment as Environment
 
 spec :: Spec
 spec =

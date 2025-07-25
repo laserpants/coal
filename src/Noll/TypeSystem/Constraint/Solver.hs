@@ -14,7 +14,7 @@ import Control.Monad.RWS (MonadState, MonadWriter, RWS, get, put, runRWS, tell)
 import Data.Data (Data)
 import Data.List (delete, find)
 import Data.Set (intersection, (\\))
-import Lang.Common.Supply (supply)
+import Noll.Common.Supply (supply)
 import Extra (foldrM)
 import Noll.Language (
   IndexedType,

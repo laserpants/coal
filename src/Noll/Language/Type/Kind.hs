@@ -15,9 +15,9 @@ module Noll.Language.Type.Kind (
 import Data.Data (Data, Typeable)
 import Data.List (isPrefixOf)
 import GHC.Generics (Generic)
-import Lang.Common.List1 (List1, fromList1, (<|))
+import Noll.Common.List1 (List1, fromList1, (<|))
 
-import qualified Lang.Common.List1 as List1
+import qualified Noll.Common.List1 as List1
 
 data Kind
   = KType

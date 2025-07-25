@@ -7,16 +7,16 @@ module Noll.Kernel.Compiler.Pass.Suffix (suffixExpr) where
 import Control.Monad.State (MonadState, modify, runStateT)
 import Control.Monad.Trans (lift)
 import Data.Functor.Foldable (cata, embed)
-import Lang.Common.List1 (List1, NonEmpty (..))
-import Lang.Common.Supply (supplied)
-import Lang.Common.Label (Label (..))
+import Noll.Common.List1 (List1, NonEmpty (..))
+import Noll.Common.Supply (supplied)
+import Noll.Common.Label (Label (..))
 import Noll.Kernel.Language (Binding (..), Clause (..), Expr, Focus (..), unzipBindings)
 import Noll.Kernel.Language.Expr.Replace (Sub, relabel)
 import Extra (Dictionary, Name, applyM1, applyM2, isConstructor)
 import TextShow (showt)
 
 import qualified Data.Map.Strict as Map
-import qualified Lang.Common.List1 as List1
+import qualified Noll.Common.List1 as List1
 import qualified Noll.Kernel.Language as Core
 
 suffixExpr :: (MonadState Int m) => Expr t -> m (Expr t)

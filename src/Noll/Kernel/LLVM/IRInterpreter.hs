@@ -21,7 +21,7 @@ import Control.Monad.RWS (asks, gets, local, tell)
 import Data.Fix (Fix (..))
 import Data.Text (Text, isPrefixOf)
 import Data.Text.Encoding (encodeUtf8)
-import Lang.Common.Label (Label (..))
+import Noll.Common.Label (Label (..))
 import Noll.Kernel.LLVM.IRConstruct (IRConstruct (..), IRLinkage (..))
 import Noll.Kernel.LLVM.IREncodable
 import Noll.Kernel.LLVM.IREval.Closure (closureStructType)
@@ -44,7 +44,7 @@ import TextShow (showt)
 
 import qualified Data.ByteString as ByteString
 import qualified Data.Text as Text
-import qualified Lang.Common.Environment as Environment
+import qualified Noll.Common.Environment as Environment
 import qualified Noll.Kernel.Language as Core
 
 closureSupport :: [IRConstruct [IRLine]]

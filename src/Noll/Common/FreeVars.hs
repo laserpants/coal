@@ -2,11 +2,11 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StrictData #-}
 
-module Lang.Common.FreeVars (BoundVars (..), FreeVars (..), exceptNames, freeSet) where
+module Noll.Common.FreeVars (BoundVars (..), FreeVars (..), exceptNames, freeSet) where
 
 import Data.Set (Set, singleton)
-import Lang.Common.List1 (NonEmpty)
-import Lang.Common.Label (Label (..), labelName)
+import Noll.Common.List1 (NonEmpty)
+import Noll.Common.Label (Label (..), labelName)
 import Extra (Dictionary, Map, Name, isConstructor)
 
 import qualified Data.Set as Set

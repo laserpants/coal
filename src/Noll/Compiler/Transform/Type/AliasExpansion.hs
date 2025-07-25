@@ -11,13 +11,13 @@ module Noll.Compiler.Transform.Type.AliasExpansion (
 import Control.Monad.Reader (MonadReader, ask)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformM)
-import Lang.Common.Environment (Environment)
-import Lang.Common.List1 (NonEmpty (..), fromList1)
+import Noll.Common.Environment (Environment)
+import Noll.Common.List1 (NonEmpty (..), fromList1)
 import Extra (Dictionary, Name)
 import Noll.Language
 import Noll.Language.Module (Constant (..), Definition (..), Function (..), Module (..))
 
-import qualified Lang.Common.Environment as Environment
+import qualified Noll.Common.Environment as Environment
 
 type ParameterizedType = Type Parameter ()
 

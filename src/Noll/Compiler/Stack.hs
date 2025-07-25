@@ -30,14 +30,14 @@ where
 import Control.Monad.RWS (RWST, runRWST)
 import Control.Monad.Reader (MonadReader)
 import Control.Monad.State (MonadState, modify)
-import Lang.Common.Supply (Supply (..))
+import Noll.Common.Supply (Supply (..))
 import Extra (Dictionary, Name, (<$$$>))
 import Noll.Compiler.Environment (CompilerEnvironment (..))
 import Noll.Compiler.State
 import Noll.Language
 import Noll.TypeSystem
 
-import qualified Lang.Common.Environment as Environment
+import qualified Noll.Common.Environment as Environment
 
 type CompilerStack a m c = RWST CompilerEnvironment () (CompilerState a) m c
 

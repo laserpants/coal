@@ -5,7 +5,7 @@
 module Noll.Language.Serializable (Serializable (..)) where
 
 import Data.Text (Text)
-import Lang.Common.List1 (List1, fromList1)
+import Noll.Common.List1 (List1, fromList1)
 import Noll.Language.Trait
 import Noll.Language.Type
 import Noll.Language.Type.Intrinsic

@@ -5,8 +5,8 @@ module Noll.Kernel.Parser.Expr (expr, label) where
 
 import Control.Monad (void)
 import Control.Monad.Combinators.Expr (makeExprParser)
-import Lang.Common.List1 (NonEmpty (..))
-import Lang.Common.Label (Label (..))
+import Noll.Common.List1 (NonEmpty (..))
+import Noll.Common.Label (Label (..))
 import Noll.Kernel.Language.Expr (Binding (..), Clause (..), Expr, Focus (..))
 import Noll.Kernel.Language.Type (Type (..))
 import Noll.Kernel.Parser (Parser, lexeme, some, try, ($>), (<|>))

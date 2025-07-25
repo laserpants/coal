@@ -2,8 +2,8 @@
 
 module Noll.Kernel.Language.Expr.Composite (tupleExpr, cons, recordExpr) where
 
-import Lang.Common.List1 (List1, NonEmpty (..), fromList1)
-import Lang.Common.Label (Label (..))
+import Noll.Common.List1 (List1, NonEmpty (..), fromList1)
+import Noll.Common.Label (Label (..))
 import Noll.Kernel.Language.Expr (Expr)
 import Noll.Kernel.Language.Expr.Syntax
 import Noll.Kernel.Language.Type.Arrow (foldType)

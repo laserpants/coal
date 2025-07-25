@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Lang.Common.Name (
+module Noll.Common.Name (
   Name,
   Dictionary,
   isConstructor,

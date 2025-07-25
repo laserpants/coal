@@ -5,9 +5,9 @@ module Noll.Language.Pattern (Pattern (..)) where
 
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (universeBi)
-import Lang.Common.List1 (List1)
-import Lang.Common.FreeVars (BoundVars (..))
-import Lang.Common.Label (Label (..))
+import Noll.Common.List1 (List1)
+import Noll.Common.FreeVars (BoundVars (..))
+import Noll.Common.Label (Label (..))
 import Extra (Dictionary)
 import Noll.Language.Primitive (Primitive (..))
 import Noll.Language.Trait (Trait (..))

@@ -2,7 +2,7 @@
 
 module Noll.Kernel.LLVM.IREval.Closure.Call (irCalls, irCallTable, irCallN) where
 
-import Lang.Common.Label (Label (..))
+import Noll.Common.Label (Label (..))
 import Noll.Kernel.LLVM.IRConstruct (IRConstruct (..))
 import Noll.Kernel.LLVM.IRInstruction (IRInstr)
 import Noll.Kernel.LLVM.IRInstruction.TH

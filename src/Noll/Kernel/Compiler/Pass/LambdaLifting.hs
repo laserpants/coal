@@ -6,9 +6,9 @@ module Noll.Kernel.Compiler.Pass.LambdaLifting (liftLambdaNodes) where
 
 import Control.Monad.RWS (MonadWriter, RWS, ask, evalRWS, local, tell)
 import Data.Functor.Foldable (cata, embed)
-import Lang.Common.List1 (List1, fromList1)
-import Lang.Common.Supply (supplied)
-import Lang.Common.Label (Label (..))
+import Noll.Common.List1 (List1, fromList1)
+import Noll.Common.Supply (supplied)
+import Noll.Common.Label (Label (..))
 import Noll.Kernel.Language (Binding (..), Expr, Type, functionTypeOf)
 import Noll.Kernel.Language.Object (Object (..), ObjectList)
 import Extra (Name, forM, traverse2)

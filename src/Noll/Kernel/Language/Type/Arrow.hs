@@ -11,12 +11,12 @@ module Noll.Kernel.Language.Type.Arrow (
   functionTypeOf,
 ) where
 
-import Lang.Common.List1 (List1, (<|))
+import Noll.Common.List1 (List1, (<|))
 import Noll.Kernel.Language.Type (Type (..))
 import Noll.Kernel.Language.Type.Syntax (arrow)
 import Noll.Kernel.Language.Typed (Typed (..))
 
-import qualified Lang.Common.List1 as List1
+import qualified Noll.Common.List1 as List1
 
 {-# INLINE (~>) #-}
 (~>) :: Type -> Type -> Type

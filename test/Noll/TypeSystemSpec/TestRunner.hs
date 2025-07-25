@@ -8,8 +8,8 @@ import Control.Monad.State (get, gets)
 import Data.Data (Data)
 import Data.List.NonEmpty ((<|))
 import Debug.Trace
-import Lang.Common.Environment (Environment)
-import Lang.Common.List1 (NonEmpty (..))
+import Noll.Common.Environment (Environment)
+import Noll.Common.List1 (NonEmpty (..))
 import Extra (Name, forM_)
 import Noll.Compiler2
 import Noll.Language
@@ -20,7 +20,7 @@ import Noll.TypeSystem.Constraint.Generation.Internal (InferenceRule (..))
 import Noll.TypeSystem.Substitution (apply, normalizeTypeIndexes)
 
 import qualified Data.Set as Set
-import qualified Lang.Common.Environment as Environment
+import qualified Noll.Common.Environment as Environment
 
 data TestResult r a = TestResult
   { testResultExpression :: r

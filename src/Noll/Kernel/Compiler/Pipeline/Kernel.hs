@@ -16,7 +16,7 @@ module Noll.Kernel.Compiler.Pipeline.Kernel (
   overKernelConstructors,
 ) where
 
-import Lang.Common.Environment (Environment)
+import Noll.Common.Environment (Environment)
 import Noll.Kernel.LLVM
 import Noll.Kernel.Language.Type (Type)
 import Extra (Over)

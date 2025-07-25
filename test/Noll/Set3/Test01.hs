@@ -3,8 +3,8 @@
 
 module Noll.Set3.Test01 where
 
-import Lang.Common.List1 (NonEmpty (..), (<|))
-import Lang.Common.Label (Label (..))
+import Noll.Common.List1 (NonEmpty (..), (<|))
+import Noll.Common.Label (Label (..))
 import Noll.Language
 import Noll.Language.Type.Intrinsic
 import Noll.Language.Module

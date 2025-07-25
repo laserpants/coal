@@ -3,7 +3,7 @@
 module Noll.Compiler.PatternMatchingExamples.Test01 where
 
 import Data.List.NonEmpty (NonEmpty (..), (<|))
-import Lang.Common.Label (Label (..))
+import Noll.Common.Label (Label (..))
 import Noll.Compiler.PatternMatching
 import Noll.Compiler.PatternMatching.Rule
 import Noll.Language (

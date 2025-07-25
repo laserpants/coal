@@ -16,7 +16,7 @@ module Noll.Compiler.Environment (
 
 import Control.Monad.State (evalState, execState, modify)
 import Data.Map.Strict (Map)
-import Lang.Common.Environment (Environment (..))
+import Noll.Common.Environment (Environment (..))
 import Extra (Dictionary, Name, Set, traverse_, (<$$>))
 import Noll.Compiler.Transform.Type.AliasExpansion
 import Noll.Compiler.Transform.Type.Parameterized
@@ -27,7 +27,7 @@ import Noll.TypeSystem.Substitution (mapsTo, substituteInScheme)
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import qualified Data.Text as Text
-import qualified Lang.Common.Environment as Environment
+import qualified Noll.Common.Environment as Environment
 
 type DataConstructorEnvironment = Environment (Constructor TypeIndex Kind IndexedType)
 type TypeConstructorEnvironment = Environment Kind

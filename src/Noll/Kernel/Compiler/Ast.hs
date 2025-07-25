@@ -13,15 +13,15 @@ import Control.Monad.Writer (runWriter, tell)
 import Data.Fix (Fix (..))
 import Data.Function (on)
 import Data.Functor.Foldable (cata, embed)
-import Lang.Common.List1 (NonEmpty (..), fromList1)
-import Lang.Common.Label (Label (..))
+import Noll.Common.List1 (NonEmpty (..), fromList1)
+import Noll.Common.Label (Label (..))
 import Noll.Kernel.Language (Binding (..), Clause (..), Expr, ExprF (..), Type)
 import Noll.Kernel.Language.Expr.Replace (relabel)
 import Noll.Kernel.Language.Object (Object (..))
 import Extra (foldrM)
 
 import qualified Data.Map.Strict as Map
-import qualified Lang.Common.List1 as List1
+import qualified Noll.Common.List1 as List1
 import qualified Noll.Kernel.Language as Core
 
 flattenObject :: Object Type (Expr Type) -> Object Type (Expr Type)

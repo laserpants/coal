@@ -7,7 +7,7 @@ import Noll.Language.Type
 import Noll.Language.Type.Intrinsic
 import Noll.Language.Type.Row
 
-import qualified Lang.Kernel.Language as Kernel
+import qualified Noll.Kernel.Language as Kernel
 
 translateIntrinsicType :: Intrinsic (Type o k) -> Kernel.Type
 translateIntrinsicType =

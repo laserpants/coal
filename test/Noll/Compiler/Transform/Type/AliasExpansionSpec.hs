@@ -3,8 +3,8 @@
 module Noll.Compiler.Transform.Type.AliasExpansionSpec where
 
 import Control.Monad.Reader (runReader)
-import Lang.Common.List1 (NonEmpty (..), (<|))
-import Lang.Common.Label (Label (..))
+import Noll.Common.List1 (NonEmpty (..), (<|))
+import Noll.Common.Label (Label (..))
 import Noll.Compiler.Transform.Type.AliasExpansion
 import Noll.Examples.Test01 (test01)
 import Noll.Examples.Test02 (test02)
@@ -22,7 +22,7 @@ import Noll.Language (
 import Noll.Language.Module (Constant (..), Definition (..), Function (..), Module (..))
 import Test.Hspec (Spec, describe, it)
 
-import qualified Lang.Common.Environment as Environment
+import qualified Noll.Common.Environment as Environment
 import qualified Noll.Set.Test01
 import qualified Noll.Set.Test02
 

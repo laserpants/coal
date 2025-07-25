@@ -5,11 +5,11 @@ module Noll.Kernel.Compiler.Pass.LetLifting (liftLetNodes) where
 
 import Control.Monad.Writer (MonadWriter, tell)
 import Data.Functor.Foldable (cata, embed)
-import Lang.Common.List1 (NonEmpty (..))
+import Noll.Common.List1 (NonEmpty (..))
 import Noll.Kernel.Language (Binding (..), Expr, Type, bindingLabel)
 import Noll.Kernel.Language.Type.Arrow (isFunction)
 
-import qualified Lang.Common.List1 as List1
+import qualified Noll.Common.List1 as List1
 import qualified Noll.Kernel.Language as Core
 
 liftLetNodes :: (MonadWriter [Binding Type (Expr Type)] m) => Expr Type -> m (Expr Type)

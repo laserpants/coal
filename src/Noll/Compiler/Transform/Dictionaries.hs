@@ -28,10 +28,10 @@ import Data.List (nub)
 import Data.Map.Strict (Map)
 import Data.Maybe (catMaybes)
 import Data.Text (isPrefixOf)
-import Lang.Common.Environment (Environment (..))
-import Lang.Common.List1 (NonEmpty (..), fromList1)
-import Lang.Common.Supply (supplied)
-import Lang.Common.Label (Label (..))
+import Noll.Common.Environment (Environment (..))
+import Noll.Common.List1 (NonEmpty (..), fromList1)
+import Noll.Common.Supply (supplied)
+import Noll.Common.Label (Label (..))
 import Extra (Dictionary, Name)
 import Noll.Language
 import Noll.Language.Module
@@ -39,7 +39,7 @@ import Noll.TypeSystem.Substitution
 import Noll.TypeSystem.Unification
 
 import qualified Data.Map.Strict as Map
-import qualified Lang.Common.Environment as Environment
+import qualified Noll.Common.Environment as Environment
 
 data DictionaryEnvironment = DictionaryEnvironment
   { dictionaryEnvironmentNames :: Environment IndexedScheme

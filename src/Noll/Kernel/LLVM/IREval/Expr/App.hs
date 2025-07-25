@@ -5,8 +5,8 @@ module Noll.Kernel.LLVM.IREval.Expr.App (irEvalApp) where
 
 import Control.Monad (unless)
 import Data.Text (Text)
-import Lang.Common.List1 (List1, NonEmpty (..), fromList1)
-import Lang.Common.Label (Label (..))
+import Noll.Common.List1 (List1, NonEmpty (..), fromList1)
+import Noll.Common.Label (Label (..))
 import Noll.Kernel.LLVM.IREncodable (irEncode)
 import Noll.Kernel.LLVM.IREval (IREval (..))
 import Noll.Kernel.LLVM.IREval.Closure (irApplyClosure, irPackClosure)

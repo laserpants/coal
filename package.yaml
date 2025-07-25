@@ -35,7 +35,7 @@ dependencies:
 - uniplate
 - deriving-compat
 - raw-strings-qq
-- lowpass
+- process
 
 ghc-options:
 - -Wall

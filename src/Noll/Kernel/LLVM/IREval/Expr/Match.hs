@@ -3,8 +3,8 @@
 module Noll.Kernel.LLVM.IREval.Expr.Match (irEvalMatch) where
 
 import Data.Tuple.Extra (fst3)
-import Lang.Common.List1 (List1, NonEmpty (..), fromList1)
-import Lang.Common.Label (Label (..))
+import Noll.Common.List1 (List1, NonEmpty (..), fromList1)
+import Noll.Common.Label (Label (..))
 import Noll.Kernel.LLVM.IREval
 import Noll.Kernel.LLVM.IREval.Conceal (irReveal)
 import Noll.Kernel.LLVM.IRInstruction (IRInstr)

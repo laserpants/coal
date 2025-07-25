@@ -25,15 +25,15 @@ import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (transform)
 import Data.List.NonEmpty (NonEmpty)
 import GHC.Generics (Generic)
-import Lang.Common.List1 (List1, (<|))
-import Lang.Common.Supply (Supply (..))
+import Noll.Common.List1 (List1, (<|))
+import Noll.Common.Supply (Supply (..))
 import Extra (Map, Name, Set)
 import Noll.Language.Type.Intrinsic (Intrinsic (..))
 import Noll.Language.Type.Kind (Kind)
 import Noll.Language.Type.Row (Row (..), normalizeRow)
 
 import qualified Data.Set as Set
-import qualified Lang.Common.List1 as List1
+import qualified Noll.Common.List1 as List1
 
 data Type o k
   = TApplication k (Type o k) (List1 (Type o k))

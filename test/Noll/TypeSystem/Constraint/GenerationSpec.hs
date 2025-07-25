@@ -8,7 +8,7 @@ import Data.Data (Data)
 import Data.List (sortOn)
 import Data.List.NonEmpty (NonEmpty (..))
 import Debug.Trace
-import Lang.Common.Label (Label (..))
+import Noll.Common.Label (Label (..))
 import Noll.Language (
   Binding (..),
   Expression (..),

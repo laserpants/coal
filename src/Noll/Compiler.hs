@@ -31,7 +31,7 @@ import Noll.Language.Module.Constant
 import Noll.Language.Module.Definition
 import Noll.TypeSystem.Substitution (normalizeTypeIndexes)
 
-import qualified Lang.Kernel.Language as Kernel
+import qualified Noll.Kernel.Language as Kernel
 import qualified Noll.Compiler.Kernel.Environment as Kernel
 
 withSupplyC :: (Monad m) => (Int -> (c, Int)) -> CompilerT a m c
@@ -116,11 +116,11 @@ placeholderInsertionC (Module p ns ds) = do
         placeholderTrans expandTraits d
   pure (Module p ns es)
 
-lowpassMonadTrans :: (Monad m) => (c -> Reader Kernel.KernelEnvironment d) -> c -> CompilerT a m d
-lowpassMonadTrans f e = pure (runReader (f e) (Kernel.initialKernelEnvironment mempty))
+kernelMonadTrans :: (Monad m) => (c -> Reader Kernel.KernelEnvironment d) -> c -> CompilerT a m d
+kernelMonadTrans f e = pure (runReader (f e) (Kernel.initialKernelEnvironment mempty))
 
-lowpassTranslationC :: (Show a, Monad m, Data a) => Module a Kind IndexedType -> CompilerT a m (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))
-lowpassTranslationC = lowpassMonadTrans translateModule
+kernelTranslationC :: (Show a, Monad m, Data a) => Module a Kind IndexedType -> CompilerT a m (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))
+kernelTranslationC = kernelMonadTrans translateModule
 
 --
 
@@ -161,7 +161,7 @@ compileModule =
   typePass
     >=> mainPass
     -- Final lowering
-    >=> lowpassTranslationC
+    >=> kernelTranslationC
 
 compileModule_ :: (Monad m, Monoid a, Data a, Eq a, Show a) => Module a Kind () -> CompilerT a m (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))
 compileModule_ m = do

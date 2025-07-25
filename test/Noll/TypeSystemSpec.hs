@@ -6,8 +6,8 @@ module Noll.TypeSystemSpec where
 import Control.Monad.Identity
 import Control.Monad.Reader (runReader)
 import Data.List.NonEmpty ((<|))
-import Lang.Common.List1 (NonEmpty (..))
-import Lang.Common.Label (Label (..))
+import Noll.Common.List1 (NonEmpty (..))
+import Noll.Common.Label (Label (..))
 import Extra (Name)
 import Noll.Compiler.Transform.Dictionaries
 import Noll.Compiler.Transform.DictionariesSpec
@@ -39,7 +39,7 @@ import Noll.TypeSystemSpec.TestRunner
 import Test.Hspec (Spec, describe, it)
 
 import qualified Data.Set as Set
-import qualified Lang.Common.Environment as Environment
+import qualified Noll.Common.Environment as Environment
 import qualified Noll.CompilerExamples.Test02
 import qualified Noll.Set.Test01
 import qualified Noll.Set.Test02

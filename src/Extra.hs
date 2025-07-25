@@ -7,7 +7,7 @@ module Extra (
   module Data.Set,
   module Data.Map.Strict,
   module Extra.Operators,
-  module Lang.Common.Name,
+  module Noll.Common.Name,
   module Extra.Data.Functor.Foldable,
   module Extra.Data.Text,
   module Extra.Data.Set,
@@ -43,7 +43,7 @@ import Extra.Data.Functor.Foldable
 import Extra.Data.List
 import Extra.Data.Set
 import Extra.Data.Text
-import Lang.Common.Name
+import Noll.Common.Name
 import Extra.Operators
 
 type IndexMap = Map Int

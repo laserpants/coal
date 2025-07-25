@@ -2,8 +2,8 @@
 
 module Noll.Set5.Test03 where
 
-import Lang.Common.List1 (NonEmpty (..), (<|))
-import Lang.Common.Label (Label (..))
+import Noll.Common.List1 (NonEmpty (..), (<|))
+import Noll.Common.Label (Label (..))
 import Noll.Language
 import Noll.Language.Module (Constant (..), Definition (..), Function (..), Module (..), Path (..))
 

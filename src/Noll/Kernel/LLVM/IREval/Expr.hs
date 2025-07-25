@@ -9,8 +9,8 @@ module Noll.Kernel.LLVM.IREval.Expr (IREval (..)) where
 import Control.Arrow ((>>>))
 import Data.Fix (Fix (..))
 import Data.Functor.Foldable (project)
-import Lang.Common.List1 (fromList1)
-import Lang.Common.Label (Label (..))
+import Noll.Common.List1 (fromList1)
+import Noll.Common.Label (Label (..))
 import Noll.Kernel.LLVM.IREval
 import Noll.Kernel.LLVM.IREval.Closure (irApplyClosure)
 import Noll.Kernel.LLVM.IREval.Comment (irCommentBlock)

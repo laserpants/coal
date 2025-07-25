@@ -5,7 +5,7 @@
 module Noll.Language.Module.Function (Function (..)) where
 
 import Data.Data (Data, Typeable)
-import Lang.Common.List1 (List1)
+import Noll.Common.List1 (List1)
 import Noll.Language.Pattern (Pattern)
 import Noll.Language.Trait (With (..))
 

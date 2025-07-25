@@ -1,6 +1,6 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
-module Lang.Common.Environment (
+module Noll.Common.Environment (
   Environment (..),
   new,
   insert,
