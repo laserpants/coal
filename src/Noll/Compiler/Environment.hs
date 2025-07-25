@@ -2,14 +2,14 @@
 {-# LANGUAGE LambdaCase #-}
 
 module Noll.Compiler.Environment (
-  DataConstructorEnv,
-  TypeConstructorEnv,
+  DataConstructorEnvironment,
+  TypeConstructorEnvironment,
   TraitEnvironment,
   InstanceEnvironment,
   CompilerEnvironment (..),
   emptyCompilerEnvironment,
   buildEnvironment,
-  buildAliasEnv,
+  buildAliasEnvironment,
   buildInstanceEnvironment,
 ) where
 
@@ -28,48 +28,48 @@ import qualified Data.Set as Set
 import qualified Data.Text as Text
 import qualified Lang.Common.Environment as Environment
 
-type DataConstructorEnv = Environment (Constructor TypeIndex Kind IndexedType)
-type TypeConstructorEnv = Environment Kind
+type DataConstructorEnvironment = Environment (Constructor TypeIndex Kind IndexedType)
+type TypeConstructorEnvironment = Environment Kind
 type TraitEnvironment = Environment (TypeIndex Kind, Environment (Scheme TypeIndex Kind IndexedType))
 type InstanceEnvironment = Environment (Map IndexedType (Dictionary (Scheme TypeIndex Kind IndexedType)))
 
 data CompilerEnvironment = CompilerEnvironment
-  { compilerDataConstructorEnv :: DataConstructorEnv
-  , compilerTypeConstructorEnv :: TypeConstructorEnv
+  { compilerDataConstructorEnvironment :: DataConstructorEnvironment
+  , compilerTypeConstructorEnvironment :: TypeConstructorEnvironment
   , compilerTraitEnvironment :: TraitEnvironment
   , compilerInstanceEnvironment :: InstanceEnvironment
-  , compilerAliasEnv :: AliasEnvironment
+  , compilerAliasEnvironment :: AliasEnvironment
   }
   deriving (Show, Eq, Ord, Read)
 
 emptyCompilerEnvironment :: CompilerEnvironment
 emptyCompilerEnvironment =
   CompilerEnvironment
-    { compilerDataConstructorEnv = mempty
-    , compilerTypeConstructorEnv = mempty
+    { compilerDataConstructorEnvironment = mempty
+    , compilerTypeConstructorEnvironment = mempty
     , compilerTraitEnvironment = mempty
     , compilerInstanceEnvironment = mempty
-    , compilerAliasEnv = mempty
+    , compilerAliasEnvironment = mempty
     }
 
 buildEnvironment :: [Definition a k t] -> CompilerEnvironment
 buildEnvironment defs =
   CompilerEnvironment
-    { compilerDataConstructorEnv = dataConstructorEnv
-    , compilerTypeConstructorEnv = typeConstructorEnv
+    { compilerDataConstructorEnvironment = dataConstructorEnvironment
+    , compilerTypeConstructorEnvironment = typeConstructorEnvironment
     , compilerTraitEnvironment = traitEnvironment
     , compilerInstanceEnvironment = instanceEnvironment
-    , compilerAliasEnv = aliasEnv
+    , compilerAliasEnvironment = aliasEnvironment
     }
  where
-  instanceEnvironment = buildInstanceEnvironment typeConstructorEnv traitEnvironment defs
-  aliasEnv = buildAliasEnv defs
-  traitEnvironment = buildTraitEnvironment typeConstructorEnv defs
-  dataConstructorEnv = buildDataConstructorEnv typeConstructorEnv defs
-  typeConstructorEnv = buildTypeConstructorEnv defs
+  instanceEnvironment = buildInstanceEnvironment typeConstructorEnvironment traitEnvironment defs
+  aliasEnvironment = buildAliasEnvironment defs
+  traitEnvironment = buildTraitEnvironment typeConstructorEnvironment defs
+  dataConstructorEnvironment = buildDataConstructorEnvironment typeConstructorEnvironment defs
+  typeConstructorEnvironment = buildTypeConstructorEnvironment defs
 
-buildDataConstructorEnv :: TypeConstructorEnv -> [Definition a k t] -> DataConstructorEnv
-buildDataConstructorEnv env = Environment.fromList . concatMap go
+buildDataConstructorEnvironment :: TypeConstructorEnvironment -> [Definition a k t] -> DataConstructorEnvironment
+buildDataConstructorEnvironment env = Environment.fromList . concatMap go
  where
   go =
     \case
@@ -84,8 +84,8 @@ buildDataConstructorEnv env = Environment.fromList . concatMap go
    where
     t1 = evalState (instantiateVars [] env t) (0 :: Int)
 
-buildTypeConstructorEnv :: [Definition a k t] -> TypeConstructorEnv
-buildTypeConstructorEnv = Environment.fromList . concatMap go
+buildTypeConstructorEnvironment :: [Definition a k t] -> TypeConstructorEnvironment
+buildTypeConstructorEnvironment = Environment.fromList . concatMap go
  where
   go =
     \case
@@ -98,7 +98,7 @@ buildTypeConstructorEnv = Environment.fromList . concatMap go
       _ ->
         []
 
-buildTraitEnvironment :: TypeConstructorEnv -> [Definition a k t] -> TraitEnvironment
+buildTraitEnvironment :: TypeConstructorEnvironment -> [Definition a k t] -> TraitEnvironment
 buildTraitEnvironment env = Environment.fromList . concatMap go
  where
   go =
@@ -116,8 +116,8 @@ buildTraitEnvironment env = Environment.fromList . concatMap go
       _ ->
         []
 
-buildAliasEnv :: [Definition a k t] -> AliasEnvironment
-buildAliasEnv = Environment.fromList . concatMap go
+buildAliasEnvironment :: [Definition a k t] -> AliasEnvironment
+buildAliasEnvironment = Environment.fromList . concatMap go
  where
   go =
     \case
@@ -133,7 +133,7 @@ buildAliasEnv = Environment.fromList . concatMap go
       _ ->
         []
 
-buildInstanceEnvironment :: TypeConstructorEnv -> TraitEnvironment -> [Definition a k t] -> InstanceEnvironment
+buildInstanceEnvironment :: TypeConstructorEnvironment -> TraitEnvironment -> [Definition a k t] -> InstanceEnvironment
 buildInstanceEnvironment env1 env2 ds = execState (traverse_ go ds) mempty
  where
   go =

@@ -41,8 +41,8 @@ runConstraintsGenC stack = do
   context CompilerEnvironment{..} =
     ConstraintsGenContext
       { constraintsGenContextMonomorphicSet = mempty
-      , constraintsGenContextDataConstructorEnv = compilerDataConstructorEnv
-      , constraintsGenContextTypeConstructorEnv = compilerTypeConstructorEnv
+      , constraintsGenContextDataConstructorEnv = compilerDataConstructorEnvironment
+      , constraintsGenContextTypeConstructorEnv = compilerTypeConstructorEnvironment
       }
 
 generateConstraintsC :: (Monad m, Data a, Show a) => Expression a IndexedType -> CompilerT a m ([CompilerAssumption], [CompilerConstraint a])
@@ -156,7 +156,7 @@ typeDefinitionC =
     DTrait name _ (Parameter k q) ds ->
       forM_ ds $
         \(n, s) -> do
-          env <- asks compilerTypeConstructorEnv
+          env <- asks compilerTypeConstructorEnvironment
           let s1 = evalState (instantiateVars [(q, TypeIndex k 0)] env s) (1 :: Int)
           insertNameC n (Forall (typeIndexesIn s1) [Trait name (TVariable (TypeIndex k 0))] s1)
     DInstance trait t1 ds -> do
@@ -184,7 +184,7 @@ instantiateTemplateC (TypeIndex _ n) t1 (Forall vs ts t) = Forall vs ts (apply (
 
 instantiateVarsC :: (Monad m) => Type Parameter () -> CompilerT a m IndexedType
 instantiateVarsC t = do
-  env <- asks compilerTypeConstructorEnv
+  env <- asks compilerTypeConstructorEnvironment
   instantiateVars [] env t
 
 defineC :: (Monad m) => Name -> IndexedType -> CompilerT a m ()

@@ -42,7 +42,7 @@ withSupplyC f = do
   pure r
 
 aliasExpansionTrans :: (Monad m) => (c -> Reader AliasEnvironment c) -> c -> CompilerT a m c
-aliasExpansionTrans f e = asks (runReader (f e) . compilerAliasEnv)
+aliasExpansionTrans f e = asks (runReader (f e) . compilerAliasEnvironment)
 
 expandAliasesC :: (Monad m, Data a) => Module a Kind () -> CompilerT a m (Module a Kind ())
 expandAliasesC = aliasExpansionTrans expandAliases

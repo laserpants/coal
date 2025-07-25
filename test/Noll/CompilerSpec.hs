@@ -62,10 +62,10 @@ spec =
 
 compilerTestEnvironment =
   CompilerEnvironment
-    { compilerDataConstructorEnv = env1
-    , compilerTypeConstructorEnv = env2
+    { compilerDataConstructorEnvironment = env1
+    , compilerTypeConstructorEnvironment = env2
     , compilerTraitEnvironment = env3
-    , compilerAliasEnv = env5
+    , compilerAliasEnvironment = env5
     , compilerInstanceEnvironment = env6
     }
 
@@ -846,10 +846,10 @@ abc32 files = do
  where
   --  env = buildEnvironment
   --      CompilerEnvironment
-  --        { compilerDataConstructorEnv = env1
-  --        , compilerTypeConstructorEnv = env2
+  --        { compilerDataConstructorEnvironment = env1
+  --        , compilerTypeConstructorEnvironment = env2
   --        , compilerTraitEnvironment = env3
-  --        , compilerAliasEnv = env5
+  --        , compilerAliasEnvironment = env5
   --        , compilerInstanceEnvironment = env6
   --        }
   steps mods = do

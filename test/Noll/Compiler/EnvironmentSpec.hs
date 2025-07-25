@@ -23,27 +23,27 @@ spec =
     it "" $ do
       buildEnvironment defs
         == ( CompilerEnvironment
-              { compilerDataConstructorEnv = tenv2
-              , compilerTypeConstructorEnv = tenv1
+              { compilerDataConstructorEnvironment = tenv2
+              , compilerTypeConstructorEnvironment = tenv1
               , compilerTraitEnvironment = tenv3
               , compilerInstanceEnvironment = tenv9
-              , compilerAliasEnv = mempty
+              , compilerAliasEnvironment = mempty
               }
            )
     it "" $ do
       buildEnvironment defs2
         == ( CompilerEnvironment
-              { compilerDataConstructorEnv = mempty
-              , compilerTypeConstructorEnv = mempty
+              { compilerDataConstructorEnvironment = mempty
+              , compilerTypeConstructorEnvironment = mempty
               , compilerTraitEnvironment = tenv5
               , compilerInstanceEnvironment = mempty
-              , compilerAliasEnv = mempty
+              , compilerAliasEnvironment = mempty
               } ::
               CompilerEnvironment
            )
 
     it "" $ do
-      buildAliasEnv defs3 == tenv6
+      buildAliasEnvironment defs3 == tenv6
 
 defs2 :: [Definition () o ()]
 defs2 =

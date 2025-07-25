@@ -114,10 +114,10 @@ runTypedExpressionTest env names e =
     pure (TestResult (normalizeTypeIndexes e2) as errs0 errs1)
 
 testRunner :: (CompilerEnvironment -> t) -> t
-testRunner f = f (CompilerEnvironment testDataConstructorEnv testTypeConstructorEnv testTraitEnvironment)
+testRunner f = f (CompilerEnvironment testDataConstructorEnvironment testTypeConstructorEnvironment testTraitEnvironment)
 
-testDataConstructorEnv :: Environment (Constructor TypeIndex Kind (Type TypeIndex Kind))
-testDataConstructorEnv =
+testDataConstructorEnvironment :: Environment (Constructor TypeIndex Kind (Type TypeIndex Kind))
+testDataConstructorEnvironment =
   Environment.fromList
     [
       ( "Yes"
@@ -189,8 +189,8 @@ testDataConstructorEnv =
       )
     ]
 
-testTypeConstructorEnv :: Environment Kind
-testTypeConstructorEnv =
+testTypeConstructorEnvironment :: Environment Kind
+testTypeConstructorEnvironment =
   Environment.fromList
     [ ("Answer", KType)
     , ("Pair1", KArrow KType KType) -- Homogeneous pair type

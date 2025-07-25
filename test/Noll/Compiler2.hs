@@ -60,8 +60,8 @@ type CompilerConstraint a = Constraint (InferenceRule Kind a) TypeIndex Kind Ind
 type TraitImplementationEnv = Environment (Scheme TypeIndex Kind IndexedType)
 
 data CompilerEnvironment = CompilerEnvironment
-  { compilerDataConstructorEnv :: Environment (Constructor TypeIndex Kind IndexedType)
-  , compilerTypeConstructorEnv :: Environment Kind
+  { compilerDataConstructorEnvironment :: Environment (Constructor TypeIndex Kind IndexedType)
+  , compilerTypeConstructorEnvironment :: Environment Kind
   , compilerTraitEnvironment :: Environment (TypeIndex Kind, TraitImplementationEnv)
   }
   deriving (Show, Eq, Ord, Read)
@@ -218,8 +218,8 @@ runConstraintsGenC stack = do
   context CompilerEnvironment{..} =
     ConstraintsGenContext
       { constraintsGenContextMonomorphicSet = mempty
-      , constraintsGenContextDataConstructorEnv = compilerDataConstructorEnv
-      , constraintsGenContextTypeConstructorEnv = compilerTypeConstructorEnv
+      , constraintsGenContextDataConstructorEnv = compilerDataConstructorEnvironment
+      , constraintsGenContextTypeConstructorEnv = compilerTypeConstructorEnvironment
       }
 
 generateConstraintsC :: (Show a, Monad m, Data a) => Expression a IndexedType -> CompilerT a m ([CompilerAssumption], [CompilerConstraint a])
