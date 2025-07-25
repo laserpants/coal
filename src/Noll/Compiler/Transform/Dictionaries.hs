@@ -27,6 +27,7 @@ import Data.Generics.Uniplate.Data (descendM)
 import Data.List (nub)
 import Data.Map.Strict (Map)
 import Data.Maybe (catMaybes)
+import Data.Text (isPrefixOf)
 import Lang.Common.Environment (Environment (..))
 import Lang.Common.List1 (NonEmpty (..), fromList1)
 import Lang.Common.Supply (supplied)
@@ -38,7 +39,6 @@ import Noll.TypeSystem.Substitution
 import Noll.TypeSystem.Unification
 
 import qualified Data.Map.Strict as Map
-import qualified Data.Text as Text
 import qualified Lang.Common.Environment as Environment
 
 data DictionaryEnvironment = DictionaryEnvironment
@@ -186,7 +186,7 @@ instance (Monoid a, Data a) => TraitContext (Expression a IndexedType) where
     transformBinding =
       \case
         BPattern a var@(PVariable _ (Label _ name)) e
-          | Text.isPrefixOf "$fold" name -> do
+          | "$fold" `isPrefixOf` name -> do
               body <- expandTraits e
               pure (BPattern a var body, [])
         BPattern _ var@(PVariable _ (Label t name)) e -> do
