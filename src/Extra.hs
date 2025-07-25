@@ -7,7 +7,7 @@ module Extra (
   module Data.Set,
   module Data.Map.Strict,
   module Extra.Operators,
-  module Noll.Common.Name,
+  module Coal.Common.Name,
   module Extra.Data.Functor.Foldable,
   module Extra.Data.Text,
   module Extra.Data.Set,
@@ -43,7 +43,7 @@ import Extra.Data.Set
 import Extra.Data.Text
 import Extra.Data.Traversable
 import Extra.Operators
-import Noll.Common.Name
+import Coal.Common.Name
 
 type IndexMap = Map Int
 

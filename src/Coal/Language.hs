@@ -1,0 +1,37 @@
+module Coal.Language (
+  module Coal.Language.Constructor,
+  module Coal.Language.Type.Indexed,
+  module Coal.Language.HasKind,
+  module Coal.Language.HasType,
+  module Coal.Language.Type,
+  module Coal.Language.Type.Intrinsic,
+  module Coal.Language.Type.Kind,
+  module Coal.Language.Type.Scheme,
+  module Coal.Language.Type.Row,
+  module Coal.Language.Trait,
+  module Coal.Language.Pattern,
+  module Coal.Language.Primitive,
+  module Coal.Language.Expression,
+  module Coal.Language.Serializable,
+  module Coal.Language.Expression.Choice,
+  module Coal.Language.Expression.Binding,
+  module Coal.Language.Expression.Operator,
+) where
+
+import Coal.Language.Constructor
+import Coal.Language.Expression
+import Coal.Language.Expression.Binding
+import Coal.Language.Expression.Choice
+import Coal.Language.Expression.Operator
+import Coal.Language.HasKind
+import Coal.Language.HasType
+import Coal.Language.Pattern
+import Coal.Language.Primitive
+import Coal.Language.Serializable
+import Coal.Language.Trait
+import Coal.Language.Type
+import Coal.Language.Type.Indexed
+import Coal.Language.Type.Intrinsic
+import Coal.Language.Type.Kind
+import Coal.Language.Type.Row
+import Coal.Language.Type.Scheme

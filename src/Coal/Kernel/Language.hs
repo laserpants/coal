@@ -1,0 +1,29 @@
+module Coal.Kernel.Language (
+  module Coal.Kernel.Language.Prim,
+  module Coal.Kernel.Language.Type,
+  module Coal.Kernel.Language.Typed,
+  module Coal.Kernel.Language.Module,
+  module Coal.Kernel.Language.Op,
+  module Coal.Kernel.Language.Expr,
+  module Coal.Kernel.Language.Expr.Composite,
+  module Coal.Kernel.Language.Object,
+  module Coal.Kernel.Language.Expr.Syntax,
+  module Coal.Kernel.Language.Expr.Replace,
+  module Coal.Kernel.Language.Type.Syntax,
+  module Coal.Kernel.Language.Type.Row,
+  module Coal.Kernel.Language.Type.Arrow,
+) where
+
+import Coal.Kernel.Language.Expr
+import Coal.Kernel.Language.Expr.Composite
+import Coal.Kernel.Language.Expr.Replace
+import Coal.Kernel.Language.Expr.Syntax
+import Coal.Kernel.Language.Module
+import Coal.Kernel.Language.Object
+import Coal.Kernel.Language.Op
+import Coal.Kernel.Language.Prim
+import Coal.Kernel.Language.Type
+import Coal.Kernel.Language.Type.Arrow
+import Coal.Kernel.Language.Type.Row
+import Coal.Kernel.Language.Type.Syntax
+import Coal.Kernel.Language.Typed
