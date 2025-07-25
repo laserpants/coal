@@ -122,8 +122,6 @@ kernelMonadTrans f e = pure (runReader (f e) (Kernel.initialKernelEnvironment me
 kernelTranslationC :: (Show a, Monad m, Data a) => Module a Kind IndexedType -> CompilerT a m (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))
 kernelTranslationC = kernelMonadTrans translateModule
 
---
-
 typePass :: (Monad m, Monoid a, Data a, Eq a, Show a) => Module a Kind () -> CompilerT a m (Module a Kind IndexedType)
 typePass =
   -- Expand type aliases
@@ -168,6 +166,3 @@ compileModule_ m = do
   r <- compileModule m
   s <- get
   pure r
-
---  traceShow s $
---    pure r
