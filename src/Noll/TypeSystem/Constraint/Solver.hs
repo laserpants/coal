@@ -18,6 +18,7 @@ import Lang.Common.Supply (supply)
 import Lang.Utils (foldrM)
 import Noll.Language (
   IndexedType,
+  IndexedScheme,
   Kind (..),
   Scheme (..),
   Type (..),
@@ -99,7 +100,7 @@ solve constraints =
 generalize :: (TypeIndexed k t) => Monomorphic (TypeIndex k) -> t -> Scheme TypeIndex k t
 generalize (Monomorphic m) t = Forall (notBoundIn m (typeIndexesIn t)) [] t
 
-instantiate :: Scheme TypeIndex Kind IndexedType -> Solver s IndexedType
+instantiate :: IndexedScheme -> Solver s IndexedType
 instantiate (Forall qs _ t) = do
   sub <- foldrM go mempty qs
   pure (apply sub t)

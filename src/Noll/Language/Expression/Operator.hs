@@ -12,7 +12,7 @@ import Data.Data (Data, Typeable)
 import Noll.Language.Type (IndexedType, Type (..), TypeIndex, (~>))
 import Noll.Language.Type.Intrinsic (Intrinsic (..))
 import Noll.Language.Type.Kind (Kind)
-import Noll.Language.Type.Scheme (Scheme (..), forall0, forall1, forall2, forall3)
+import Noll.Language.Type.Scheme (Scheme (..), IndexedScheme, forall0, forall1, forall2, forall3)
 
 -- | Unary operators
 data UnaryOperator
@@ -68,7 +68,7 @@ data BinaryOperator
     OListConcatenation
   deriving (Show, Eq, Ord, Read, Data, Typeable)
 
-binaryOperatorTypeScheme :: BinaryOperator -> Scheme TypeIndex Kind IndexedType
+binaryOperatorTypeScheme :: BinaryOperator -> IndexedScheme
 binaryOperatorTypeScheme =
   \case
     OReverseApplication ->

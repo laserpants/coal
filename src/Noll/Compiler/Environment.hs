@@ -31,8 +31,8 @@ import qualified Lang.Common.Environment as Environment
 
 type DataConstructorEnvironment = Environment (Constructor TypeIndex Kind IndexedType)
 type TypeConstructorEnvironment = Environment Kind
-type TraitEnvironment = Environment (TypeIndex Kind, Environment (Scheme TypeIndex Kind IndexedType))
-type InstanceEnvironment = Environment (Map IndexedType (Dictionary (Scheme TypeIndex Kind IndexedType)))
+type TraitEnvironment = Environment (TypeIndex Kind, Environment IndexedScheme)
+type InstanceEnvironment = Environment (Map IndexedType (Dictionary IndexedScheme))
 
 data CompilerEnvironment = CompilerEnvironment
   { compilerDataConstructorEnvironment :: DataConstructorEnvironment
@@ -156,5 +156,5 @@ buildInstanceEnvironment env1 env2 ds = execState (traverse_ go ds) mempty
       _ ->
         pure ()
 
-indexSet :: [Scheme TypeIndex Kind t] -> Set (TypeIndex Kind)
+indexSet :: [IndexedScheme] -> Set (TypeIndex Kind)
 indexSet = Set.unions . fmap vars where vars (Forall vs _ _) = vs

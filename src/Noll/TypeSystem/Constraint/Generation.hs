@@ -281,5 +281,5 @@ collectConstraints =
     _ ->
       error "Not implemented"
 
-listConstructorTypeScheme :: Scheme TypeIndex Kind IndexedType
+listConstructorTypeScheme :: IndexedScheme
 listConstructorTypeScheme = forall1 (\a -> a ~> TIntrinsic (IList a) ~> TIntrinsic (IList a))

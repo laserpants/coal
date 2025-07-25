@@ -28,7 +28,7 @@ type CompilerAssumption = Assumption IndexedType
 
 data CompilerState a = CompilerState
   { compilerSupply :: Int
-  , compilerNameStore :: Environment (Scheme TypeIndex Kind IndexedType)
+  , compilerNameStore :: Environment IndexedScheme
   , compilerSubstitution :: Substitution
   , compilerConstraints :: [CompilerConstraint a]
   , compilerConstraintsGenErrors :: [ConstraintsGenError a]
@@ -43,7 +43,7 @@ instance Supply (CompilerState a) where
   getSupply = compilerSupply
 
 {-# INLINE overCompilerNameStore #-}
-overCompilerNameStore :: Over (CompilerState a) (Environment (Scheme TypeIndex Kind IndexedType))
+overCompilerNameStore :: Over (CompilerState a) (Environment IndexedScheme)
 overCompilerNameStore fn CompilerState{..} = CompilerState{compilerNameStore = fn compilerNameStore, ..}
 
 {-# INLINE overCompilerSupply #-}

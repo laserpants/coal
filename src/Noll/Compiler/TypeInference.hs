@@ -179,7 +179,7 @@ typeDefinitionC =
       sub <- solveC
       defineC (definitionName d) (typeOf (apply sub d))
 
-instantiateTemplateC :: TypeIndex Kind -> IndexedType -> Scheme TypeIndex Kind IndexedType -> Scheme TypeIndex Kind IndexedType
+instantiateTemplateC :: TypeIndex Kind -> IndexedType -> IndexedScheme -> IndexedScheme
 instantiateTemplateC (TypeIndex _ n) t1 (Forall vs ts t) = Forall vs ts (apply (n `mapsTo` t1) t)
 
 instantiateVarsC :: (Monad m) => Type Parameter () -> CompilerT a m IndexedType

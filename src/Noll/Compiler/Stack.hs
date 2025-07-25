@@ -76,11 +76,11 @@ insertSupplyC :: (Monad m) => Int -> CompilerT a m ()
 insertSupplyC = modify . overCompilerSupply . const
 
 {-# INLINE insertNameC #-}
-insertNameC :: (Monad m) => Name -> Scheme TypeIndex Kind IndexedType -> CompilerT a m ()
+insertNameC :: (Monad m) => Name -> IndexedScheme -> CompilerT a m ()
 insertNameC name scheme = modify (overCompilerNameStore (Environment.insert name scheme))
 
 {-# INLINE insertNamesC #-}
-insertNamesC :: (Monad m) => [(Name, Scheme TypeIndex Kind IndexedType)] -> CompilerT a m ()
+insertNamesC :: (Monad m) => [(Name, IndexedScheme)] -> CompilerT a m ()
 insertNamesC names = modify (overCompilerNameStore (Environment.insertMultiple names))
 
 {-# INLINE insertConstraintsC #-}

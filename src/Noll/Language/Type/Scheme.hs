@@ -10,6 +10,7 @@ module Noll.Language.Type.Scheme (
   forall2,
   forall3,
   forall4,
+  IndexedScheme,
 ) where
 
 import Data.Data (Data, Typeable)
@@ -32,22 +33,24 @@ index = TypeIndex KType
 forall0 :: t -> Scheme TypeIndex Kind t
 forall0 = Forall mempty []
 
-forall1 :: (IndexedType -> t) -> Scheme TypeIndex Kind t
+type IndexedScheme = Scheme TypeIndex Kind IndexedType
+
+forall1 :: (IndexedType -> IndexedType) -> IndexedScheme
 forall1 f = Forall (Set.singleton a0) [] (f (TVariable a0))
  where
   a0 = index 0
 
-forall2 :: (IndexedType -> IndexedType -> t) -> Scheme TypeIndex Kind t
+forall2 :: (IndexedType -> IndexedType -> IndexedType) -> IndexedScheme
 forall2 f = Forall (Set.fromList [a0, a1]) [] (f (TVariable a0) (TVariable a1))
  where
   (a0, a1) = (index 0, index 1)
 
-forall3 :: (IndexedType -> IndexedType -> IndexedType -> t) -> Scheme TypeIndex Kind t
+forall3 :: (IndexedType -> IndexedType -> IndexedType -> IndexedType) -> IndexedScheme
 forall3 f = Forall (Set.fromList [a0, a1, a2]) [] (f (TVariable a0) (TVariable a1) (TVariable a2))
  where
   (a0, a1, a2) = (index 0, index 1, index 2)
 
-forall4 :: (IndexedType -> IndexedType -> IndexedType -> IndexedType -> t) -> Scheme TypeIndex Kind t
+forall4 :: (IndexedType -> IndexedType -> IndexedType -> IndexedType -> IndexedType) -> IndexedScheme
 forall4 f = Forall (Set.fromList [a0, a1, a2, a3]) [] (f (TVariable a0) (TVariable a1) (TVariable a2) (TVariable a3))
  where
   (a0, a1, a2, a3) = (index 0, index 1, index 2, index 3)

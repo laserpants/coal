@@ -42,14 +42,14 @@ import qualified Data.Text as Text
 import qualified Lang.Common.Environment as Environment
 
 data DictionaryEnvironment = DictionaryEnvironment
-  { dictionaryEnvironmentNames :: Environment (Scheme TypeIndex Kind IndexedType)
-  , dictionaryEnvironmentInstances :: Environment (Map IndexedType (Dictionary (Scheme TypeIndex Kind IndexedType)))
+  { dictionaryEnvironmentNames :: Environment IndexedScheme
+  , dictionaryEnvironmentInstances :: Environment (Map IndexedType (Dictionary IndexedScheme))
   }
   deriving (Show, Eq, Ord, Read)
 
 overDictionaryEnvironmentNames ::
-  ( Environment (Scheme TypeIndex Kind IndexedType) ->
-    Environment (Scheme TypeIndex Kind IndexedType)
+  ( Environment IndexedScheme ->
+    Environment IndexedScheme
   ) ->
   DictionaryEnvironment ->
   DictionaryEnvironment
@@ -97,7 +97,7 @@ tryMatch t u = do
   var <- supplied id
   pure (evalUnifier var (match t u))
 
-findFirstMatch :: Trait IndexedType -> DictionaryStack (Maybe (IndexedType, Map Name (Scheme TypeIndex Kind IndexedType)))
+findFirstMatch :: Trait IndexedType -> DictionaryStack (Maybe (IndexedType, Map Name IndexedScheme))
 findFirstMatch (Trait name t1) = do
   env <- asks dictionaryEnvironmentInstances
   case Environment.lookup name env of
@@ -121,7 +121,7 @@ findFirstMatch (Trait name t1) = do
           Right sub ->
             Just (k, Map.map (substituteInScheme sub) env)
 
-mapEntriesM :: (Monad m) => Dictionary (Scheme TypeIndex Kind IndexedType) -> ((Name, Scheme TypeIndex Kind IndexedType) -> m (Name, Expression a IndexedType)) -> m (Maybe (Dictionary (Expression a IndexedType)))
+mapEntriesM :: (Monad m) => Dictionary IndexedScheme -> ((Name, IndexedScheme) -> m (Name, Expression a IndexedType)) -> m (Maybe (Dictionary (Expression a IndexedType)))
 mapEntriesM b f = Just . Map.fromList <$> traverse f (Map.toList b)
 
 lookupTraitInstance :: (Monoid a) => Trait IndexedType -> DictionaryStack (Maybe (Map Name (Expression a IndexedType)))

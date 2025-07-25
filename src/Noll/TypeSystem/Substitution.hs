@@ -51,7 +51,7 @@ instance Substitutable (Monomorphic (TypeIndex Kind)) where
       Monomorphic m ->
         Monomorphic (typeIndexesIn (Set.map (apply sub . TVariable) m))
 
-instance Substitutable (Scheme TypeIndex Kind IndexedType) where
+instance Substitutable IndexedScheme where
   apply sub =
     \case
       Forall qs ps t ->
@@ -177,7 +177,7 @@ merge (Substitution m1) (Substitution m2)
   restricted = (`Map.restrictKeys` keys)
   keys = keysSet m1 `intersection` keysSet m2
 
-substituteInScheme :: Substitution -> Scheme o Kind IndexedType -> Scheme TypeIndex Kind IndexedType
+substituteInScheme :: Substitution -> Scheme o Kind IndexedType -> IndexedScheme
 substituteInScheme sub (Forall _ ts t) = Forall (typeIndexesIn r <> typeIndexesIn rs) rs r
  where
   r = apply sub t
