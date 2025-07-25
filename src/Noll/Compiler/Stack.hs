@@ -17,6 +17,7 @@ module Noll.Compiler.Stack (
   insertAssumptionsC,
   updateSubstitutionC,
   clearConstraintsC,
+  clearTypeAnnotationParamsC,
   updateSupply,
   updateSupplyC,
   insertSupplyC,
@@ -90,6 +91,10 @@ insertConstraintsC cs = modify (overCompilerConstraints (<> cs))
 {-# INLINE clearConstraintsC #-}
 clearConstraintsC :: (Monad m) => CompilerT a m ()
 clearConstraintsC = modify (overCompilerConstraints (const mempty))
+
+{-# INLINE clearTypeAnnotationParamsC #-}
+clearTypeAnnotationParamsC :: (Monad m) => CompilerT a m ()
+clearTypeAnnotationParamsC = modify (overCompilerTypeAnnotationParams (const mempty))
 
 {-# INLINE insertAssumptionsC #-}
 insertAssumptionsC :: (Monad m) => [CompilerAssumption] -> CompilerT a m ()
