@@ -1,4 +1,4 @@
-cabal-version: 2.2
+cabal-version: 1.12
 
 -- This file has been generated from package.yaml by hpack version 0.37.0.
 --
@@ -7,20 +7,19 @@ cabal-version: 2.2
 name:           coal
 version:        0.1.0.0
 description:    Please see the README on GitHub at <https://github.com/githubuser/coal#readme>
-homepage:       https://github.com/githubuser/coal#readme
-bug-reports:    https://github.com/githubuser/coal/issues
+homepage:       https://github.com/laserpants/coal#readme
+bug-reports:    https://github.com/laserpants/coal/issues
 author:         Author name here
 maintainer:     example@example.com
 copyright:      2025 Author name here
-license:        BSD-3-Clause
+license:        MIT
 build-type:     Simple
 extra-source-files:
     README.md
-    CHANGELOG.md
 
 source-repository head
   type: git
-  location: https://github.com/githubuser/coal
+  location: https://github.com/laserpants/coal
 
 library
   exposed-modules:
@@ -176,8 +175,6 @@ library
       Extra.Operators
   other-modules:
       Paths_coal
-  autogen-modules:
-      Paths_coal
   hs-source-dirs:
       src
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
@@ -203,8 +200,6 @@ library
 executable coal-exe
   main-is: Main.hs
   other-modules:
-      Paths_coal
-  autogen-modules:
       Paths_coal
   hs-source-dirs:
       app
@@ -233,8 +228,6 @@ test-suite coal-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
-      Paths_coal
-  autogen-modules:
       Paths_coal
   hs-source-dirs:
       test
