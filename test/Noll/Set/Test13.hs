@@ -5,19 +5,19 @@ module Noll.Set.Test13 where
 
 import Data.Text (Text)
 import Lang.Common.Label (Label (..))
-import Lang.Lowpass.Language
-import Lang.Lowpass.Parser.Expr (expr)
+import Lang.Kernel.Language
+import Lang.Kernel.Parser.Expr (expr)
 import Extra (Name, (<$$>))
 import Text.Megaparsec (eof, runParser)
 import Text.Megaparsec.Error (errorBundlePretty)
 import Text.RawString.QQ
 
 import qualified Data.Text as Text
-import qualified Lang.Lowpass.Compiler as Lowpass
-import qualified Lang.Lowpass.Compiler.Utils as Lowpass
-import qualified Lang.Lowpass.Language as Lowpass
+import qualified Lang.Kernel.Compiler as Kernel
+import qualified Lang.Kernel.Compiler.Utils as Kernel
+import qualified Lang.Kernel.Language as Kernel
 
-unsafeParseExpr :: Text -> Lowpass.Expr Lowpass.Type
+unsafeParseExpr :: Text -> Kernel.Expr Kernel.Type
 unsafeParseExpr t =
   case runParser expr "" (Text.stripStart t) of
     Left e ->
@@ -25,10 +25,10 @@ unsafeParseExpr t =
     Right r ->
       r
 
-moduleCore1 :: Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
+moduleCore1 :: Module Kernel.Type Name (Kernel.Expr Kernel.Type)
 moduleCore1 = unsafeParseExpr <$> moduleCore
 
-moduleCore :: Module Lowpass.Type Name Text
+moduleCore :: Module Kernel.Type Name Text
 moduleCore =
   Module
     { moduleName = "Core$"
@@ -232,10 +232,10 @@ moduleCore =
         ]
     }
 
-moduleOrdered1 :: Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
+moduleOrdered1 :: Module Kernel.Type Name (Kernel.Expr Kernel.Type)
 moduleOrdered1 = unsafeParseExpr <$> moduleOrdered
 
-moduleOrdered :: Module Lowpass.Type Name Text
+moduleOrdered :: Module Kernel.Type Name Text
 moduleOrdered =
   Module
     { moduleName = "Ordered"
@@ -278,8 +278,8 @@ moduleOrdered =
               |]
         , OFunction
             "Ordered.compare__$instance_Ordered(Intrinsic(Int32))"
-            [ Label Lowpass.int32 "x"
-            , Label Lowpass.int32 "y"
+            [ Label Kernel.int32 "x"
+            , Label Kernel.int32 "y"
             ]
             [r| 
                   if ([< int32](x : int32, y : int32))
@@ -341,10 +341,10 @@ moduleOrdered =
         ]
     }
 
-moduleBinarySearch1 :: Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
+moduleBinarySearch1 :: Module Kernel.Type Name (Kernel.Expr Kernel.Type)
 moduleBinarySearch1 = unsafeParseExpr <$> moduleBinarySearch
 
-moduleBinarySearch :: Module Lowpass.Type Name Text
+moduleBinarySearch :: Module Kernel.Type Name Text
 moduleBinarySearch =
   Module
     { moduleName = "BinarySearch"
@@ -371,8 +371,8 @@ moduleBinarySearch =
         , "Core$.pack_nat"
         ]
     , moduleObjects =
-        [ OData "BinarySearch.Leaf" 0 (TCon "Tree" [Lowpass.opaque])
-        , OData "BinarySearch.Node" 1 (Lowpass.opaque `Lowpass.arrow` TCon "Tree" [Lowpass.opaque] `Lowpass.arrow` TCon "Tree" [Lowpass.opaque] `Lowpass.arrow` TCon "Tree" [Lowpass.opaque])
+        [ OData "BinarySearch.Leaf" 0 (TCon "Tree" [Kernel.opaque])
+        , OData "BinarySearch.Node" 1 (Kernel.opaque `Kernel.arrow` TCon "Tree" [Kernel.opaque] `Kernel.arrow` TCon "Tree" [Kernel.opaque] `Kernel.arrow` TCon "Tree" [Kernel.opaque])
         , OFunction
             "BinarySearch.from_int32"
             [ Label (TCon "Numeric" [opaque]) "$a"
@@ -623,10 +623,10 @@ moduleBinarySearch =
         ]
     }
 
-moduleMain1 :: Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
+moduleMain1 :: Module Kernel.Type Name (Kernel.Expr Kernel.Type)
 moduleMain1 = unsafeParseExpr <$> moduleMain
 
-moduleMain :: Module Lowpass.Type Name Text
+moduleMain :: Module Kernel.Type Name Text
 moduleMain =
   Module
     { moduleName = "Main"
@@ -655,7 +655,7 @@ moduleMain =
     , moduleObjects =
         [ OFunction
             "Main.from_int32__$instance_Numeric(Intrinsic(Int32))"
-            [ Label Lowpass.int32 "x"
+            [ Label Kernel.int32 "x"
             ]
             [r| 
                   x : int32
@@ -759,10 +759,10 @@ moduleMain =
         ]
     }
 
-prog1_13 :: [Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)]
+prog1_13 :: [Module Kernel.Type Name (Kernel.Expr Kernel.Type)]
 prog1_13 = unsafeParseExpr <$$> fixture1
 
-fixture1 :: [Module Lowpass.Type Name Text]
+fixture1 :: [Module Kernel.Type Name Text]
 fixture1 =
   [ Module
       { moduleName = "Utils"
@@ -790,7 +790,7 @@ fixture1 =
   , moduleMain
   ]
 
-fixture2 :: [Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)]
+fixture2 :: [Module Kernel.Type Name (Kernel.Expr Kernel.Type)]
 fixture2 =
   [ moduleCore1
   , moduleOrdered1
@@ -799,4 +799,4 @@ fixture2 =
   ]
 
 zooz :: IO ()
-zooz = Lowpass.testModules =<< Lowpass.compileModules fixture2
+zooz = Kernel.testModules =<< Kernel.compileModules fixture2

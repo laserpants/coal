@@ -5,19 +5,19 @@ module Noll.Set4.Test14 where
 
 import Data.Text (Text)
 import Lang.Common.Label (Label (..))
-import Lang.Lowpass.Language
-import Lang.Lowpass.Parser.Expr (expr)
+import Lang.Kernel.Language
+import Lang.Kernel.Parser.Expr (expr)
 import Extra (Name, (<$$>))
 import Text.Megaparsec (eof, runParser)
 import Text.Megaparsec.Error (errorBundlePretty)
 import Text.RawString.QQ
 
 import qualified Data.Text as Text
-import qualified Lang.Lowpass.Compiler as Lowpass
-import qualified Lang.Lowpass.Compiler.Utils as Lowpass
-import qualified Lang.Lowpass.Language as Lowpass
+import qualified Lang.Kernel.Compiler as Kernel
+import qualified Lang.Kernel.Compiler.Utils as Kernel
+import qualified Lang.Kernel.Language as Kernel
 
-unsafeParseExpr :: Text -> Lowpass.Expr Lowpass.Type
+unsafeParseExpr :: Text -> Kernel.Expr Kernel.Type
 unsafeParseExpr t =
   case runParser expr "" (Text.stripStart t) of
     Left e ->
@@ -25,10 +25,10 @@ unsafeParseExpr t =
     Right r ->
       r
 
-moduleCore1 :: Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
+moduleCore1 :: Module Kernel.Type Name (Kernel.Expr Kernel.Type)
 moduleCore1 = unsafeParseExpr <$> moduleCore
 
-moduleCore :: Module Lowpass.Type Name Text
+moduleCore :: Module Kernel.Type Name Text
 moduleCore =
   Module
     { moduleName = "Core$"
@@ -239,10 +239,10 @@ moduleCore =
         ]
     }
 
-moduleMain1 :: Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
+moduleMain1 :: Module Kernel.Type Name (Kernel.Expr Kernel.Type)
 moduleMain1 = unsafeParseExpr <$> moduleMain
 
-moduleMain :: Module Lowpass.Type Name Text
+moduleMain :: Module Kernel.Type Name Text
 moduleMain =
   Module
     { moduleName = "Main"
@@ -422,19 +422,19 @@ moduleMain =
         ]
     }
 
-prog4_14 :: [Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)]
+prog4_14 :: [Module Kernel.Type Name (Kernel.Expr Kernel.Type)]
 prog4_14 = unsafeParseExpr <$$> fixture1
 
-fixture1 :: [Module Lowpass.Type Name Text]
+fixture1 :: [Module Kernel.Type Name Text]
 fixture1 =
   [ moduleMain
   ]
 
-fixture3 :: [Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)]
+fixture3 :: [Module Kernel.Type Name (Kernel.Expr Kernel.Type)]
 fixture3 =
   [ moduleCore1
   , moduleMain1
   ]
 
 woobx :: IO ()
-woobx = Lowpass.testModules =<< Lowpass.compileModules fixture3
+woobx = Kernel.testModules =<< Kernel.compileModules fixture3

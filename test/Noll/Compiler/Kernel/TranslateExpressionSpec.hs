@@ -6,7 +6,7 @@ module Noll.Compiler.Kernel.TranslateExpressionSpec where
 import Data.Text (Text)
 import Lang.Common.List1 (NonEmpty (..), (<|))
 import Lang.Common.Label (Label (..))
-import Lang.Lowpass.Parser.Expr (expr)
+import Lang.Kernel.Parser.Expr (expr)
 import Extra (Name, (<$$>))
 import Noll.Compiler.Kernel.TranslateExpression
 import Noll.Language
@@ -18,7 +18,7 @@ import Text.RawString.QQ
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import qualified Data.Text as Text
-import qualified Lang.Lowpass.Language as LP
+import qualified Lang.Kernel.Language as LP
 import qualified Noll.Language.Module as Module
 
 foobaz1 =

@@ -15,15 +15,15 @@ import Noll.Language.Module
 
 import qualified Data.Text as Text
 import qualified Lang.Common.Environment as Environment
-import qualified Lang.Lowpass.Language as Lowpass
+import qualified Lang.Kernel.Language as Kernel
 
-translateModule :: (Show a, MonadReader KernelEnvironment m, Data a) => Module a Kind IndexedType -> m (Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type))
+translateModule :: (Show a, MonadReader KernelEnvironment m, Data a) => Module a Kind IndexedType -> m (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))
 translateModule =
   \case
     Module (Path p) _ defs ->
       insertQualifiedNames env $
         withModuleName name $
-          Lowpass.Module
+          Kernel.Module
             name
             (Environment.elems env <> coreImports)
             . concat

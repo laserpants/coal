@@ -1,0 +1,15 @@
+module Extra.Control.Applicative (pure1, pure2, pure3) where
+
+import Extra.Data.Functor ((<$$>))
+
+{-# INLINE pure1 #-}
+pure1 :: (Applicative f) => (a -> b) -> a -> f b
+pure1 f = pure . f
+
+{-# INLINE pure2 #-}
+pure2 :: (Applicative f1, Functor f2) => (a -> b) -> f2 a -> f1 (f2 b)
+pure2 f = pure . (f <$>)
+
+{-# INLINE pure3 #-}
+pure3 :: (Applicative f1, Functor f2, Functor f3) => (a -> b) -> f2 (f3 a) -> f1 (f2 (f3 b))
+pure3 f = pure . (f <$$>)

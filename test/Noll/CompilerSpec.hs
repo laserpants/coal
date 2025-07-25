@@ -14,7 +14,7 @@ import Debug.Trace
 import Lang.Common.Environment (Environment)
 import Lang.Common.List1 (NonEmpty (..), (<|))
 import Lang.Common.Label (Label (..))
-import Lang.Lowpass.Language (Object (..), moduleImports, moduleName, moduleObjects, opaque)
+import Lang.Kernel.Language (Object (..), moduleImports, moduleName, moduleObjects, opaque)
 import Extra (Dictionary, Name, forM, forM_)
 import Noll.Compiler.Transform.Dictionaries
 import Noll.Compiler
@@ -36,9 +36,9 @@ import Test.Hspec (Spec, describe, it)
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import qualified Lang.Common.Environment as Environment
-import qualified Lang.Lowpass.Compiler as Lowpass
-import qualified Lang.Lowpass.Compiler.Utils as Lowpass
-import qualified Lang.Lowpass.Language as Lowpass
+import qualified Lang.Kernel.Compiler as Kernel
+import qualified Lang.Kernel.Compiler.Utils as Kernel
+import qualified Lang.Kernel.Language as Kernel
 import qualified Noll.Set.Test01
 import qualified Noll.Set10.Test01
 import qualified Noll.Set11.Test01
@@ -322,67 +322,67 @@ bool = TIntrinsic IBool
 -- abc1 :: Module () Kind IndexedType
 -- abc1 = fst (runIdentity (runCompilerT compilerTestEnvironment ((typePass >=> mainPass) Noll.Set7.Test01.moduleMain)))
 
-abc2 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
+abc2 :: Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type)
 abc2 = fst (runIdentity (runCompilerT compilerTestEnvironment (compileModule Noll.Set7.Test01.moduleMain)))
 
 abc3 :: IO ()
-abc3 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc2]
+abc3 = Kernel.testModules =<< Kernel.compileModules [moduleCore1, abc2]
 
 --
 
-abc4 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
+abc4 :: Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type)
 abc4 = fst (runIdentity (runCompilerT compilerTestEnvironment (compileModule Noll.Set8.Test01.moduleMain)))
 
 abc5 :: IO ()
-abc5 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc4]
+abc5 = Kernel.testModules =<< Kernel.compileModules [moduleCore1, abc4]
 
 --
 
-abc6 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
+abc6 :: Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type)
 abc6 = fst (runIdentity (runCompilerT compilerTestEnvironment (compileModule Noll.Set9.Test01.moduleUtilities)))
 
-abc7 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
+abc7 :: Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type)
 abc7 = fst (runIdentity (runCompilerT compilerTestEnvironment (compileModule Noll.Set9.Test01.moduleMain)))
 
 abc8 :: IO ()
-abc8 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc6, abc7]
+abc8 = Kernel.testModules =<< Kernel.compileModules [moduleCore1, abc6, abc7]
 
 --
 
-abc9 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
+abc9 :: Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type)
 abc9 = fst (runIdentity (runCompilerT compilerTestEnvironment (compileModule Noll.Set10.Test01.moduleUtilities)))
 
-abc10 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
+abc10 :: Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type)
 abc10 = fst (runIdentity (runCompilerT compilerTestEnvironment (compileModule Noll.Set10.Test01.moduleMain)))
 
 abc11 :: IO ()
-abc11 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc9, abc10]
+abc11 = Kernel.testModules =<< Kernel.compileModules [moduleCore1, abc9, abc10]
 
 --
 
-abc12 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
+abc12 :: Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type)
 abc12 = fst (runIdentity (runCompilerT compilerTestEnvironment (compileModule Noll.Set11.Test01.moduleMain)))
 
 abc13 :: IO ()
-abc13 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc12]
+abc13 = Kernel.testModules =<< Kernel.compileModules [moduleCore1, abc12]
 
 --
 
-abc14 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
+abc14 :: Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type)
 abc14 = fst (runIdentity (runCompilerT compilerTestEnvironment (compileModule_ Noll.Set12.Test01.moduleUtilities)))
 
-abc15 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
+abc15 :: Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type)
 abc15 = fst (runIdentity (runCompilerT compilerTestEnvironment (compileModule_ Noll.Set12.Test01.moduleMain)))
 
 abc16 :: IO ()
-abc16 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc14, abc15]
+abc16 = Kernel.testModules =<< Kernel.compileModules [moduleCore1, abc14, abc15]
 
 --
 
-abc17 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
+abc17 :: Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type)
 abc17 = fst (runIdentity (runCompilerT compilerTestEnvironment (compileModule Noll.Set20.Test01.moduleUtilities)))
 
-abc18 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
+abc18 :: Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type)
 abc18 = fst (runIdentity (runCompilerT compilerTestEnvironment prog))
  where
   prog = do
@@ -399,13 +399,13 @@ abc18 = fst (runIdentity (runCompilerT compilerTestEnvironment prog))
     compileModule Noll.Set20.Test01.moduleMain
 
 abc19 :: IO ()
-abc19 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc17, abc18]
+abc19 = Kernel.testModules =<< Kernel.compileModules [moduleCore1, abc17, abc18]
 
 abc20 :: [Noll.Language.Module.Module () Kind ()] -> IO ()
 abc20 mods = do
   traceShowM r
-  ms5 <- Lowpass.compileModules (moduleCore1 : fst r)
-  Lowpass.testModules ms5
+  ms5 <- Kernel.compileModules (moduleCore1 : fst r)
+  Kernel.testModules ms5
   pure ()
  where
   r = runIdentity (runCompilerT compilerTestEnvironment steps)
@@ -570,8 +570,8 @@ abc22 files = do
   ms <- traverse readFile files
   let x = fmap parsing ms
   let r = runIdentity (runCompilerT compilerTestEnvironment (steps x))
-  ms5 <- Lowpass.compileModules (moduleCore1 : fst r)
-  Lowpass.testModules ms5
+  ms5 <- Kernel.compileModules (moduleCore1 : fst r)
+  Kernel.testModules ms5
  where
   steps mods = do
     traceShow mods $ do
@@ -601,7 +601,7 @@ abc23 =
 
 --
 
-abc24 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
+abc24 :: Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type)
 abc24 = fst (runIdentity (runCompilerT compilerTestEnvironment prog))
  where
   prog = do
@@ -622,9 +622,9 @@ abc24 = fst (runIdentity (runCompilerT compilerTestEnvironment prog))
     compileModule Noll.Set21.Test01.moduleMain
 
 abc25 :: IO ()
-abc25 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc24]
+abc25 = Kernel.testModules =<< Kernel.compileModules [moduleCore1, abc24]
 
-abc26 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
+abc26 :: Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type)
 abc26 = fst (runIdentity (runCompilerT compilerTestEnvironment prog))
  where
   prog = do
@@ -645,9 +645,9 @@ abc26 = fst (runIdentity (runCompilerT compilerTestEnvironment prog))
     compileModule Noll.Set22.Test01.moduleMain
 
 abc27 :: IO ()
-abc27 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc26]
+abc27 = Kernel.testModules =<< Kernel.compileModules [moduleCore1, abc26]
 
-abc28 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
+abc28 :: Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type)
 abc28 = fst (runIdentity (runCompilerT compilerTestEnvironment prog))
  where
   prog = do
@@ -688,9 +688,9 @@ abc28 = fst (runIdentity (runCompilerT compilerTestEnvironment prog))
     compileModule_ Noll.Set23.Test01.moduleMain
 
 abc29 :: IO ()
-abc29 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc28]
+abc29 = Kernel.testModules =<< Kernel.compileModules [moduleCore1, abc28]
 
-abc30 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
+abc30 :: Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type)
 abc30 = fst (runIdentity (runCompilerT compilerTestEnvironment prog))
  where
   prog = do
@@ -834,15 +834,15 @@ abc30 = fst (runIdentity (runCompilerT compilerTestEnvironment prog))
     compileModule_ Noll.Set24.Test01.moduleMain
 
 abc31 :: IO ()
-abc31 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc30]
+abc31 = Kernel.testModules =<< Kernel.compileModules [moduleCore1, abc30]
 
 abc32 :: [String] -> IO ()
 abc32 files = do
   ms <- traverse readFile files
   let x = fmap parsing ms
   let r = runIdentity (runCompilerT emptyCompilerEnvironment (steps x))
-  ms5 <- Lowpass.compileModules (moduleCore1 : fst r)
-  Lowpass.testModules ms5
+  ms5 <- Kernel.compileModules (moduleCore1 : fst r)
+  Kernel.testModules ms5
  where
   --  env = buildEnvironment
   --      CompilerEnvironment
@@ -1017,68 +1017,68 @@ abc33 =
 
 --
 
--- abc24 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
+-- abc24 :: Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type)
 -- abc24 = fst (runIdentity (runCompilerT compilerTestEnvironment (compileModule Noll.Set.Test01.moduleUtils2)))
 
--- abc15 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
+-- abc15 :: Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type)
 -- abc15 = fst (runIdentity (runCompilerT compilerTestEnvironment (compileModule_ Noll.Set12.Test01.moduleMain)))
 --
 -- abc16 :: IO ()
--- abc16 = Lowpass.testModules =<< Lowpass.compileModules [moduleCore1, abc14, abc15]
+-- abc16 = Kernel.testModules =<< Kernel.compileModules [moduleCore1, abc14, abc15]
 
-moduleCore1 :: Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type)
-moduleCore1 = Lowpass.unsafeParseExpr <$> moduleCore
+moduleCore1 :: Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type)
+moduleCore1 = Kernel.unsafeParseExpr <$> moduleCore
 
-moduleCore :: Lowpass.Module Lowpass.Type Name Text
+moduleCore :: Kernel.Module Kernel.Type Name Text
 moduleCore =
-  Lowpass.Module
+  Kernel.Module
     { moduleName = "Core$"
     , moduleImports =
         []
     , moduleObjects =
         [ OFunction
             "Core$.operator__not"
-            [ Label Lowpass.bool "a"
+            [ Label Kernel.bool "a"
             ]
             [r| 
                   if (a : bool) then false else true
               |]
         , OFunction
             "Core$.not"
-            [ Label Lowpass.bool "a"
+            [ Label Kernel.bool "a"
             ]
             [r| 
                   if (a : bool) then false else true
               |]
         , OFunction
             "Core$.operator__reverse_composition"
-            [ Label (Lowpass.opaque `Lowpass.arrow` Lowpass.opaque) "f"
-            , Label (Lowpass.opaque `Lowpass.arrow` Lowpass.opaque) "g"
-            , Label Lowpass.opaque "x"
+            [ Label (Kernel.opaque `Kernel.arrow` Kernel.opaque) "f"
+            , Label (Kernel.opaque `Kernel.arrow` Kernel.opaque) "g"
+            , Label Kernel.opaque "x"
             ]
             [r| 
                   @<*>(f : */*, @<*>(g : */*, x : *))
               |]
         , OFunction
             "Core$.operator__reverse_application"
-            [ Label Lowpass.opaque "x"
-            , Label (Lowpass.opaque `Lowpass.arrow` Lowpass.opaque) "f"
+            [ Label Kernel.opaque "x"
+            , Label (Kernel.opaque `Kernel.arrow` Kernel.opaque) "f"
             ]
             [r| 
                   @<*>(f : */*, x : *)
               |]
         , OFunction
             "Core$.always"
-            [ Label Lowpass.opaque "a"
-            , Label Lowpass.opaque "_"
+            [ Label Kernel.opaque "a"
+            , Label Kernel.opaque "_"
             ]
             [r|   
                   a : *
               |]
         , OFunction
             "Core$.operator__list_concatenation"
-            [ Label (Lowpass.TCon "list" [Lowpass.opaque]) "xs"
-            , Label (Lowpass.TCon "list" [Lowpass.opaque]) "ys"
+            [ Label (Kernel.TCon "list" [Kernel.opaque]) "xs"
+            , Label (Kernel.TCon "list" [Kernel.opaque]) "ys"
             ]
             [r| 
                   match<list(*)>(xs : list(*)) {
@@ -1102,45 +1102,45 @@ moduleCore =
               |]
         , OFunction
             "Core$.trace_int32"
-            [ Label Lowpass.int32 "n"
+            [ Label Kernel.int32 "n"
             ]
             [r|
                   #(print_int32 : int32/*, n : int32) (fn(a : *) => a : *)
               |]
         , OFunction
             "Core$.trace_string"
-            [ Label Lowpass.string "s"
+            [ Label Kernel.string "s"
             ]
             [r|
                   #(print_string : string/*, s : string) (fn(a : *) => a : *)
               |]
         , OFunction
             "Core$.trace_bool"
-            [ Label Lowpass.string "b"
+            [ Label Kernel.string "b"
             ]
             [r|
                   #(print_bool : bool/*, b : bool) (fn(a : *) => a : *)
               |]
         , OFunction
             "Core$.operator__string_concatenation"
-            [ Label Lowpass.string "s"
-            , Label Lowpass.string "t"
+            [ Label Kernel.string "s"
+            , Label Kernel.string "t"
             ]
             [r|
                   #(string_concat : string/string/string, s : string, t : string) (fn(r : string) => r : string)
               |]
         , OFunction
             "Core$.int32_to_string"
-            [ Label Lowpass.int32 "n"
+            [ Label Kernel.int32 "n"
             ]
             [r| 
                   #(int32_to_string : int32/string, n : int32) (fn(r : string) => r : string)
               |]
         , OFunction
             "Core$.pair_to_string"
-            [ Label (Lowpass.TCon "Traceable" [Lowpass.TOpq]) "$dict1"
-            , Label (Lowpass.TCon "Traceable" [Lowpass.TOpq]) "$dict2"
-            , Label (Lowpass.TCon "$Tuple2" [Lowpass.TOpq, Lowpass.TOpq]) "p"
+            [ Label (Kernel.TCon "Traceable" [Kernel.TOpq]) "$dict1"
+            , Label (Kernel.TCon "Traceable" [Kernel.TOpq]) "$dict2"
+            , Label (Kernel.TCon "$Tuple2" [Kernel.TOpq, Kernel.TOpq]) "p"
             ]
             [r| 
                   match<string>
@@ -1178,8 +1178,8 @@ moduleCore =
               |]
         , OFunction
             "Core$.list_to_string"
-            [ Label (Lowpass.TCon "Traceable" [Lowpass.TOpq]) "$dict1"
-            , Label (Lowpass.TCon "list" [Lowpass.TOpq]) "ls"
+            [ Label (Kernel.TCon "Traceable" [Kernel.TOpq]) "$dict1"
+            , Label (Kernel.TCon "list" [Kernel.TOpq]) "ls"
             ]
             [r| 
                   let
@@ -1230,7 +1230,7 @@ moduleCore =
               |]
         , OFunction
             "Core$.trace"
-            [ Label (Lowpass.TCon "Traceable" [opaque]) "$a"
+            [ Label (Kernel.TCon "Traceable" [opaque]) "$a"
             ]
             [r| 
                   match<*>($a : Traceable(*)) {
@@ -1246,7 +1246,7 @@ moduleCore =
               |]
         , OFunction
             "Core$.unpack_nat"
-            [ Label (Lowpass.TCon "$Nat" []) "nat"
+            [ Label (Kernel.TCon "$Nat" []) "nat"
             ]
             [r| 
                   match<int32>(nat: $Nat) {
@@ -1261,7 +1261,7 @@ moduleCore =
               |]
         , OFunction
             "Core$.pack_nat"
-            [ Label Lowpass.int32 "n"
+            [ Label Kernel.int32 "n"
             ]
             [r| 
                   if ([== int32](n : int32, 0))
@@ -1275,7 +1275,7 @@ moduleCore =
               |]
         , OFunction
             "Core$.from_int32"
-            [ Label (Lowpass.TCon "Numeric" [opaque]) "$a"
+            [ Label (Kernel.TCon "Numeric" [opaque]) "$a"
             ]
             [r| 
                   match<int32/*>($a : Numeric(*)) {
@@ -1291,14 +1291,14 @@ moduleCore =
               |]
         , OFunction
             "Core$.from_int32__$instance_Numeric(Intrinsic(Int32))"
-            [ Label Lowpass.int32 "n"
+            [ Label Kernel.int32 "n"
             ]
             [r| 
                   n : int32
               |]
         , OFunction
             "Core$.from_int32__$instance_Numeric(Intrinsic(Nat))"
-            [ Label Lowpass.int32 "n"
+            [ Label Kernel.int32 "n"
             ]
             [r| 
                   @<$Nat>

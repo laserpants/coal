@@ -17,11 +17,11 @@ import Noll.Compiler.Kernel.TranslateType (translateType)
 import Noll.Language
 import Noll.Language.Module
 
-import qualified Lang.Lowpass.Language as Lowpass
+import qualified Lang.Kernel.Language as Kernel
 
-type LowpassObject = Lowpass.Object Lowpass.Type (Lowpass.Expr Lowpass.Type)
+type KernelObject = Kernel.Object Kernel.Type (Kernel.Expr Kernel.Type)
 
-translateDefinition :: (Show a, MonadReader KernelEnvironment m, Data a) => Definition a Kind IndexedType -> m [LowpassObject]
+translateDefinition :: (Show a, MonadReader KernelEnvironment m, Data a) => Definition a Kind IndexedType -> m [KernelObject]
 translateDefinition =
   \case
     DAnnotation _ d ->
@@ -32,11 +32,11 @@ translateDefinition =
       qs <- traverse translatePattern (fromList1 ps)
       f <- withLocalNames (labelName <$> qs) (translateExpression e)
       moduleName <- asks kernelEnvironmentModule
-      pure [Lowpass.OFunction (moduleName <> "." <> name) qs f]
+      pure [Kernel.OFunction (moduleName <> "." <> name) qs f]
     DConstant name (Constant _ With{} e) -> do
       c <- translateExpression e
       moduleName <- asks kernelEnvironmentModule
-      pure [Lowpass.OConstant (moduleName <> "." <> name) c]
+      pure [Kernel.OConstant (moduleName <> "." <> name) c]
     DTrait name _ _ ins ->
       forM ins $
         \(n, t) ->
@@ -55,32 +55,32 @@ translateDefinition =
     _ ->
       pure []
 
-traitAccessor :: (MonadReader KernelEnvironment m) => Name -> Name -> Lowpass.Type -> m LowpassObject
+traitAccessor :: (MonadReader KernelEnvironment m) => Name -> Name -> Kernel.Type -> m KernelObject
 traitAccessor trait fn t = do
   moduleName <- asks kernelEnvironmentModule
   pure $
-    Lowpass.OFunction
+    Kernel.OFunction
       (moduleName <> "." <> fn)
       [dict]
-      ( Lowpass.match
+      ( Kernel.match
           t
-          (Lowpass.var dict)
-          ( Lowpass.Clause
-              (Label (Lowpass.functionTypeOf dict [row]) "$Record" <| row :| [])
-              ( Lowpass.sel
-                  (Lowpass.Focus fn var (Label Lowpass.opaque "_"))
-                  (Lowpass.var row)
-                  (Lowpass.var var)
+          (Kernel.var dict)
+          ( Kernel.Clause
+              (Label (Kernel.functionTypeOf dict [row]) "$Record" <| row :| [])
+              ( Kernel.sel
+                  (Kernel.Focus fn var (Label Kernel.opaque "_"))
+                  (Kernel.var row)
+                  (Kernel.var var)
               )
               :| []
           )
       )
  where
   var = Label t "$f"
-  row = Label (Lowpass.RExt fn t Lowpass.opaque) "$r"
-  dict = Label (Lowpass.TCon trait [Lowpass.opaque]) "$a"
+  row = Label (Kernel.RExt fn t Kernel.opaque) "$r"
+  dict = Label (Kernel.TCon trait [Kernel.opaque]) "$a"
 
-translateConstructor :: (MonadReader KernelEnvironment m) => (Int, Constructor Parameter () (Type Parameter ())) -> m LowpassObject
+translateConstructor :: (MonadReader KernelEnvironment m) => (Int, Constructor Parameter () (Type Parameter ())) -> m KernelObject
 translateConstructor (index, Constructor name _ (Forall _ _ t)) = do
   moduleName <- asks kernelEnvironmentModule
-  pure (Lowpass.OData (moduleName <> "." <> name) index (translateType t))
+  pure (Kernel.OData (moduleName <> "." <> name) index (translateType t))

@@ -23,6 +23,24 @@ source-repository head
 
 library
   exposed-modules:
+      Extra
+      Extra.Control.Applicative
+      Extra.Control.Monad
+      Extra.Control.Monad.State
+      Extra.Control.Monad.Writer
+      Extra.Data.Char
+      Extra.Data.Functor
+      Extra.Data.Functor.Foldable
+      Extra.Data.List
+      Extra.Data.Set
+      Extra.Data.Text
+      Extra.Operators
+      Noll.Common.Environment
+      Noll.Common.FreeVars
+      Noll.Common.Label
+      Noll.Common.List1
+      Noll.Common.Name
+      Noll.Common.Supply
       Noll.Compiler
       Noll.Compiler.Environment
       Noll.Compiler.Kernel.Environment
@@ -52,6 +70,68 @@ library
       Noll.Compiler.Transform.Type.Parameterized
       Noll.Compiler.Transform.Unfold
       Noll.Compiler.TypeInference
+      Noll.Kernel.Compiler
+      Noll.Kernel.Compiler.Ast
+      Noll.Kernel.Compiler.Pass
+      Noll.Kernel.Compiler.Pass.ClosureConversion
+      Noll.Kernel.Compiler.Pass.ExtraArgs
+      Noll.Kernel.Compiler.Pass.LambdaLifting
+      Noll.Kernel.Compiler.Pass.LetLifting
+      Noll.Kernel.Compiler.Pass.Memoize
+      Noll.Kernel.Compiler.Pass.Suffix
+      Noll.Kernel.Compiler.Pipeline
+      Noll.Kernel.Compiler.Pipeline.Kernel
+      Noll.Kernel.Language
+      Noll.Kernel.Language.Expr
+      Noll.Kernel.Language.Expr.Composite
+      Noll.Kernel.Language.Expr.Replace
+      Noll.Kernel.Language.Expr.Syntax
+      Noll.Kernel.Language.Module
+      Noll.Kernel.Language.Object
+      Noll.Kernel.Language.Op
+      Noll.Kernel.Language.Prim
+      Noll.Kernel.Language.Type
+      Noll.Kernel.Language.Type.Arrow
+      Noll.Kernel.Language.Type.Row
+      Noll.Kernel.Language.Type.Syntax
+      Noll.Kernel.Language.Typed
+      Noll.Kernel.LLVM
+      Noll.Kernel.LLVM.IR
+      Noll.Kernel.LLVM.IRConstruct
+      Noll.Kernel.LLVM.IREncodable
+      Noll.Kernel.LLVM.IREval
+      Noll.Kernel.LLVM.IREval.Closure
+      Noll.Kernel.LLVM.IREval.Closure.Apply
+      Noll.Kernel.LLVM.IREval.Closure.Call
+      Noll.Kernel.LLVM.IREval.Closure.Extend
+      Noll.Kernel.LLVM.IREval.Closure.Finalize
+      Noll.Kernel.LLVM.IREval.Comment
+      Noll.Kernel.LLVM.IREval.Conceal
+      Noll.Kernel.LLVM.IREval.Expr
+      Noll.Kernel.LLVM.IREval.Expr.App
+      Noll.Kernel.LLVM.IREval.Expr.Match
+      Noll.Kernel.LLVM.IREval.Expr.Op
+      Noll.Kernel.LLVM.IREval.Expr.Var
+      Noll.Kernel.LLVM.IREval.Malloc
+      Noll.Kernel.LLVM.IRInstruction
+      Noll.Kernel.LLVM.IRInstruction.TH
+      Noll.Kernel.LLVM.IRInterpreter
+      Noll.Kernel.LLVM.IRInterpreter.Artifact
+      Noll.Kernel.LLVM.IRInterpreter.Environment
+      Noll.Kernel.LLVM.IRInterpreter.Instruction
+      Noll.Kernel.LLVM.IRInterpreter.Monad
+      Noll.Kernel.LLVM.IRInterpreter.State
+      Noll.Kernel.LLVM.IRType
+      Noll.Kernel.LLVM.IRType.Syntax
+      Noll.Kernel.LLVM.IRValue
+      Noll.Kernel.Parser
+      Noll.Kernel.Parser.Expr
+      Noll.Kernel.Parser.Identifier
+      Noll.Kernel.Parser.Module
+      Noll.Kernel.Parser.Op
+      Noll.Kernel.Parser.Prim
+      Noll.Kernel.Parser.Symbol
+      Noll.Kernel.Parser.Type
       Noll.Language
       Noll.Language.Constructor
       Noll.Language.Expression

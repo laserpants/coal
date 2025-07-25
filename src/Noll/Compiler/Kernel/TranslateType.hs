@@ -7,72 +7,72 @@ import Noll.Language.Type
 import Noll.Language.Type.Intrinsic
 import Noll.Language.Type.Row
 
-import qualified Lang.Lowpass.Language as Lowpass
+import qualified Lang.Kernel.Language as Kernel
 
-translateIntrinsicType :: Intrinsic (Type o k) -> Lowpass.Type
+translateIntrinsicType :: Intrinsic (Type o k) -> Kernel.Type
 translateIntrinsicType =
   \case
     IBool ->
-      Lowpass.bool
+      Kernel.bool
     IChar ->
-      Lowpass.char
+      Kernel.char
     IDouble ->
-      Lowpass.double
+      Kernel.double
     IFloat ->
-      Lowpass.float
+      Kernel.float
     IInt32 ->
-      Lowpass.int32
+      Kernel.int32
     IInt64 ->
-      Lowpass.int64
+      Kernel.int64
     IBignum ->
-      Lowpass.bignum
+      Kernel.bignum
     IList t ->
-      Lowpass.list (translateType t)
+      Kernel.list (translateType t)
     IString ->
-      Lowpass.string
+      Kernel.string
     IUnit ->
-      Lowpass.unit
+      Kernel.unit
     ITuple ts ->
-      Lowpass.tuple (translateType <$> ts)
+      Kernel.tuple (translateType <$> ts)
     IRecord t ->
-      Lowpass.record (translateType t)
+      Kernel.record (translateType t)
     INat ->
-      Lowpass.TCon "nat" []
+      Kernel.TCon "nat" []
     IOption t ->
-      Lowpass.TCon "option" [translateType t]
+      Kernel.TCon "option" [translateType t]
     IResult t ->
-      Lowpass.TCon "result" [translateType t]
+      Kernel.TCon "result" [translateType t]
     IVoid ->
-      Lowpass.TCon "void" []
+      Kernel.TCon "void" []
 
-translateRow :: Row o k (Type o k) -> Lowpass.Type
+translateRow :: Row o k (Type o k) -> Kernel.Type
 translateRow =
   \case
     RExtend name t r ->
-      Lowpass.RExt name (translateType t) (translateRow r)
+      Kernel.RExt name (translateType t) (translateRow r)
     RVariable{} ->
-      Lowpass.TOpq
+      Kernel.TOpq
     RNil ->
-      Lowpass.RNil
+      Kernel.RNil
 
-translateApplication :: Lowpass.Type -> Lowpass.Type -> Lowpass.Type
-translateApplication t (Lowpass.TCon name ts) = Lowpass.TCon name (ts <> [t])
+translateApplication :: Kernel.Type -> Kernel.Type -> Kernel.Type
+translateApplication t (Kernel.TCon name ts) = Kernel.TCon name (ts <> [t])
 translateApplication _ _ = error "Implementation error"
 
-translateType :: Type o k -> Lowpass.Type
+translateType :: Type o k -> Kernel.Type
 translateType =
   \case
     TApplication _ t ts ->
       foldr (translateApplication . translateType) (translateType t) ts
     TArrow t1 t2 ->
-      Lowpass.arrow (translateType t1) (translateType t2)
+      Kernel.arrow (translateType t1) (translateType t2)
     TConstructor _ name ->
-      Lowpass.TCon name []
+      Kernel.TCon name []
     TIntrinsic t ->
       translateIntrinsicType t
     TRow r ->
       translateRow r
     TVariable{} ->
-      Lowpass.TOpq
+      Kernel.TOpq
     TAlias _ _ t ->
       translateType t

@@ -31,8 +31,8 @@ import Noll.Language.Module.Constant
 import Noll.Language.Module.Definition
 import Noll.TypeSystem.Substitution (normalizeTypeIndexes)
 
-import qualified Lang.Lowpass.Language as Lowpass
-import qualified Noll.Compiler.Kernel.Environment as Lowpass
+import qualified Lang.Kernel.Language as Kernel
+import qualified Noll.Compiler.Kernel.Environment as Kernel
 
 withSupplyC :: (Monad m) => (Int -> (c, Int)) -> CompilerT a m c
 withSupplyC f = do
@@ -116,10 +116,10 @@ placeholderInsertionC (Module p ns ds) = do
         placeholderTrans expandTraits d
   pure (Module p ns es)
 
-lowpassMonadTrans :: (Monad m) => (c -> Reader Lowpass.KernelEnvironment d) -> c -> CompilerT a m d
-lowpassMonadTrans f e = pure (runReader (f e) (Lowpass.initialKernelEnvironment mempty))
+lowpassMonadTrans :: (Monad m) => (c -> Reader Kernel.KernelEnvironment d) -> c -> CompilerT a m d
+lowpassMonadTrans f e = pure (runReader (f e) (Kernel.initialKernelEnvironment mempty))
 
-lowpassTranslationC :: (Show a, Monad m, Data a) => Module a Kind IndexedType -> CompilerT a m (Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type))
+lowpassTranslationC :: (Show a, Monad m, Data a) => Module a Kind IndexedType -> CompilerT a m (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))
 lowpassTranslationC = lowpassMonadTrans translateModule
 
 --
@@ -156,14 +156,14 @@ mainPass =
     -- Expand nats
     >=> compileNatsC
 
-compileModule :: (Monad m, Monoid a, Data a, Eq a, Show a) => Module a Kind () -> CompilerT a m (Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type))
+compileModule :: (Monad m, Monoid a, Data a, Eq a, Show a) => Module a Kind () -> CompilerT a m (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))
 compileModule =
   typePass
     >=> mainPass
     -- Final lowering
     >=> lowpassTranslationC
 
-compileModule_ :: (Monad m, Monoid a, Data a, Eq a, Show a) => Module a Kind () -> CompilerT a m (Lowpass.Module Lowpass.Type Name (Lowpass.Expr Lowpass.Type))
+compileModule_ :: (Monad m, Monoid a, Data a, Eq a, Show a) => Module a Kind () -> CompilerT a m (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))
 compileModule_ m = do
   r <- compileModule m
   s <- get
