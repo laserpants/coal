@@ -1,22 +1,13 @@
 cradle:
   stack:
     - path: "./src"
-      component: "noll:lib"
+      component: "coal:lib"
 
     - path: "./app"
-      component: "noll:exe:noll-exe"
+      component: "coal:exe:coal-exe"
 
     - path: "./test"
-      component: "noll:test:noll-test"
-
-    - path: "../lowpass/src"
-      component: "lowpass:lib"
-
-    - path: "../lowpass/app"
-      component: "lowpass:exe:lowpass-exe"
-
-    - path: "../lowpass/test"
-      component: "lowpass:test:lowpass-test"
+      component: "coal:test:coal-test"
 
     - path: "."
-      component: "noll:lib"
+      component: "coal:lib"

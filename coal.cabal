@@ -4,22 +4,23 @@ cabal-version: 2.2
 --
 -- see: https://github.com/sol/hpack
 
-name:           noll
+name:           coal
 version:        0.1.0.0
-description:    Please see the README on GitHub at <https://github.com/githubuser/noll#readme>
-homepage:       https://github.com/githubuser/noll#readme
-bug-reports:    https://github.com/githubuser/noll/issues
+description:    Please see the README on GitHub at <https://github.com/githubuser/coal#readme>
+homepage:       https://github.com/githubuser/coal#readme
+bug-reports:    https://github.com/githubuser/coal/issues
 author:         Author name here
 maintainer:     example@example.com
-copyright:      2024 Author name here
+copyright:      2025 Author name here
 license:        BSD-3-Clause
 build-type:     Simple
 extra-source-files:
     README.md
+    CHANGELOG.md
 
 source-repository head
   type: git
-  location: https://github.com/githubuser/noll
+  location: https://github.com/githubuser/coal
 
 library
   exposed-modules:
@@ -174,9 +175,9 @@ library
       Extra.Data.Traversable
       Extra.Operators
   other-modules:
-      Paths_noll
+      Paths_coal
   autogen-modules:
-      Paths_noll
+      Paths_coal
   hs-source-dirs:
       src
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
@@ -199,18 +200,19 @@ library
     , uniplate
   default-language: Haskell2010
 
-executable noll-exe
+executable coal-exe
   main-is: Main.hs
   other-modules:
-      Paths_noll
+      Paths_coal
   autogen-modules:
-      Paths_noll
+      Paths_coal
   hs-source-dirs:
       app
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
     , bytestring
+    , coal
     , containers
     , data-fix
     , deriving-compat
@@ -218,7 +220,6 @@ executable noll-exe
     , free
     , megaparsec
     , mtl
-    , noll
     , parser-combinators
     , process
     , raw-strings-qq
@@ -228,140 +229,20 @@ executable noll-exe
     , uniplate
   default-language: Haskell2010
 
-test-suite noll-test
+test-suite coal-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
-      Coal.Ast.FreeVarsSpec
-      Coal.Compiler.DictionaryEliminationSpec
-      Coal.Compiler.EnvironmentSpec
-      Coal.Compiler.Kernel.TranslateExpressionSpec
-      Coal.Compiler.PatternMatchingExamples.Test01
-      Coal.Compiler.PatternMatchingExamples.Test02
-      Coal.Compiler.PatternMatchingSpec
-      Coal.Compiler.PatternMatchingSpec.TestRunner
-      Coal.Compiler.Transform.DictionariesSpec
-      Coal.Compiler.Transform.FoldSpec
-      Coal.Compiler.Transform.NormalizeObjectsSpec
-      Coal.Compiler.Transform.Pattern.AsDesugarSpec
-      Coal.Compiler.Transform.Pattern.DesugarSpec
-      Coal.Compiler.Transform.Pattern.OrExpansionSpec
-      Coal.Compiler.Transform.Pattern.RecordDesugarSpec
-      Coal.Compiler.Transform.TreeSpec
-      Coal.Compiler.Transform.Type.AliasExpansionSpec
-      Coal.Compiler2
-      Coal.CompilerExamples.Test01
-      Coal.CompilerExamples.Test02
-      Coal.CompilerSpec
-      Coal.Examples.Test01
-      Coal.Examples.Test02
-      Coal.Examples.Test03
-      Coal.Examples.Test04
-      Coal.Examples.Test05
-      Coal.Examples.Test06
-      Coal.Examples.Test07
-      Coal.Examples.Test08
-      Coal.Examples.Test09
-      Coal.Kernel.Compiler.Utils
-      Coal.Language.Type.IndexedSpec
-      Coal.ParserSpec
-      Coal.Set.Test01
-      Coal.Set.Test02
-      Coal.Set.Test03
-      Coal.Set.Test04
-      Coal.Set.Test05
-      Coal.Set.Test06
-      Coal.Set.Test07
-      Coal.Set.Test08
-      Coal.Set.Test09
-      Coal.Set.Test10
-      Coal.Set.Test11
-      Coal.Set.Test12
-      Coal.Set.Test13
-      Coal.Set10.Test01
-      Coal.Set10.Test03
-      Coal.Set10.Test04
-      Coal.Set11.Test01
-      Coal.Set12.Test01
-      Coal.Set12.Test14
-      Coal.Set2.Test01
-      Coal.Set2.Test04
-      Coal.Set2.Test05
-      Coal.Set2.Test09
-      Coal.Set2.Test10
-      Coal.Set2.Test12
-      Coal.Set2.Test13
-      Coal.Set20.Test01
-      Coal.Set20.Test04
-      Coal.Set21.Test01
-      Coal.Set22.Test01
-      Coal.Set23.Test01
-      Coal.Set24.Test01
-      Coal.Set3.Test01
-      Coal.Set3.Test04
-      Coal.Set3.Test05
-      Coal.Set3.Test10
-      Coal.Set3.Test10x
-      Coal.Set3.Test12
-      Coal.Set3.Test12x
-      Coal.Set3.Test13
-      Coal.Set3.Test13x
-      Coal.Set4.Test02
-      Coal.Set4.Test021
-      Coal.Set4.Test03
-      Coal.Set4.Test04
-      Coal.Set4.Test05
-      Coal.Set4.Test09
-      Coal.Set4.Test10
-      Coal.Set4.Test12
-      Coal.Set4.Test14
-      Coal.Set5.Test01
-      Coal.Set5.Test03
-      Coal.Set5.Test04
-      Coal.Set5.Test05
-      Coal.Set5.Test09
-      Coal.Set5.Test10
-      Coal.Set5.Test12
-      Coal.Set5.Test13
-      Coal.Set5.Test14
-      Coal.Set6.Test12
-      Coal.Set6.Test13
-      Coal.Set6.Test14
-      Coal.Set7.Test01
-      Coal.Set8.Test01
-      Coal.Set9.Test01
-      Coal.TypeSystem.Constraint.GenerationSpec
-      Coal.TypeSystem.UnificationSpec
-      Coal.TypeSystemExamples.Test01
-      Coal.TypeSystemExamples.Test02
-      Coal.TypeSystemExamples.Test03
-      Coal.TypeSystemExamples.Test04
-      Coal.TypeSystemExamples.Test05
-      Coal.TypeSystemExamples.Test06
-      Coal.TypeSystemExamples.Test07
-      Coal.TypeSystemExamples.Test08
-      Coal.TypeSystemExamples.Test09
-      Coal.TypeSystemExamples.Test10
-      Coal.TypeSystemExamples.Test11
-      Coal.TypeSystemExamples.Test12
-      Coal.TypeSystemExamples.Test13
-      Coal.TypeSystemExamples.Test14
-      Coal.TypeSystemExamples.Test15
-      Coal.TypeSystemExamples.Test16
-      Coal.TypeSystemExamples.Test17
-      Coal.TypeSystemFixtures.Expression
-      Coal.TypeSystemSpec
-      Coal.TypeSystemSpec.TestRunner
-      Coal.UtilsSpec
-      Paths_noll
+      Paths_coal
   autogen-modules:
-      Paths_noll
+      Paths_coal
   hs-source-dirs:
       test
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
     , bytestring
+    , coal
     , containers
     , data-fix
     , deriving-compat
@@ -370,7 +251,6 @@ test-suite noll-test
     , hspec
     , megaparsec
     , mtl
-    , noll
     , parser-combinators
     , process
     , raw-strings-qq
