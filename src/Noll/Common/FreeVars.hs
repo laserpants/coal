@@ -5,9 +5,9 @@
 module Noll.Common.FreeVars (BoundVars (..), FreeVars (..), exceptNames, freeSet) where
 
 import Data.Set (Set, singleton)
-import Noll.Common.List1 (NonEmpty)
-import Noll.Common.Label (Label (..), labelName)
 import Extra (Dictionary, Map, Name, isConstructor)
+import Noll.Common.Label (Label (..), labelName)
+import Noll.Common.List1 (NonEmpty)
 
 import qualified Data.Set as Set
 

@@ -9,8 +9,8 @@ module Noll.Parser.Module (
   parseConstantDefinition,
 ) where
 
-import Noll.Common.List1 (NonEmpty (..))
 import Extra (Name)
+import Noll.Common.List1 (NonEmpty (..))
 import Noll.Language
 import Noll.Language.Module
 import Noll.Parser

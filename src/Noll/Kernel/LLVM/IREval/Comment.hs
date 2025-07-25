@@ -8,9 +8,9 @@ module Noll.Kernel.LLVM.IREval.Comment (
 
 import Control.Monad.Free (MonadFree)
 import Data.Text (Text)
+import Extra (forM_)
 import Noll.Kernel.LLVM.IRInstruction (IRInstrOp)
 import Noll.Kernel.LLVM.IRInstruction.TH
-import Extra (forM_)
 
 import qualified Data.Text as Text
 

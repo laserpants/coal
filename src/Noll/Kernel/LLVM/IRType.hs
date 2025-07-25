@@ -9,10 +9,10 @@ module Noll.Kernel.LLVM.IRType (
   pointee,
 ) where
 
+import Extra (Name)
 import Noll.Kernel.Language.Expr (Expr)
 import Noll.Kernel.Language.Type (Type (..))
 import Noll.Kernel.Language.Typed (Typed (..))
-import Extra (Name)
 
 -- | LLVM IR language types
 data IRType

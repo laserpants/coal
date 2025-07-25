@@ -16,6 +16,8 @@ module Noll.Kernel.Compiler.Pass (
 
 import Control.Monad.State (State, gets, modify, runState)
 import Control.Monad.Writer (Writer, runWriter)
+import Extra (traverse2)
+import Extra.Control.Applicative (pure1, pure3)
 import Noll.Kernel.Compiler.Ast (flattenLambdaNodes, flattenObject, simplifyLetNodes, sortMatchClauses)
 import Noll.Kernel.Compiler.Pass.ClosureConversion (closeObjects)
 import Noll.Kernel.Compiler.Pass.ExtraArgs (addImplicitArgs)
@@ -27,8 +29,6 @@ import Noll.Kernel.Compiler.Pipeline
 import Noll.Kernel.Compiler.Pipeline.Kernel (Kernel (..), overKernelSupply)
 import Noll.Kernel.LLVM (IRInterpreter, irInterpreterStateArtifacts, runInterpreter)
 import Noll.Kernel.Language
-import Extra (traverse2)
-import Extra.Control.Applicative (pure1, pure3)
 
 transformSuffixMonad :: State Int a -> Pipeline a
 transformSuffixMonad a = do

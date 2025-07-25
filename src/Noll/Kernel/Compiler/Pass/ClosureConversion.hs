@@ -9,13 +9,13 @@ import Data.Fix (Fix (..))
 import Data.Function (on)
 import Data.Functor.Foldable (cata, embed)
 import Data.List (nubBy)
-import Noll.Common.List1 (NonEmpty (..))
+import Extra (Name, (<$$>))
 import Noll.Common.FreeVars (freeSet)
 import Noll.Common.Label (Label (..))
+import Noll.Common.List1 (NonEmpty (..))
 import Noll.Kernel.Compiler.Ast (flattenAppNodes)
 import Noll.Kernel.Language (Expr, Type)
 import Noll.Kernel.Language.Object (Object (..), ObjectList, objectName)
-import Extra (Name, (<$$>))
 
 import qualified Data.Set as Set
 import qualified Noll.Kernel.Language as Core

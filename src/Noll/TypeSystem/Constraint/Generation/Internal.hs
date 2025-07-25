@@ -21,9 +21,9 @@ module Noll.TypeSystem.Constraint.Generation.Internal (
 ) where
 
 import Control.Monad.RWS
+import Extra (Dictionary, Name)
 import Noll.Common.Environment (Environment (..))
 import Noll.Common.Supply (Supply (..))
-import Extra (Dictionary, Name)
 import Noll.Language (Constructor (..), Kind (..), Type (..), TypeIndex (..))
 import Noll.TypeSystem.Constraint (Constraint (..), Monomorphic (..), overMonomorphicSet)
 import Noll.TypeSystem.Constraint.Generation.InferenceRule (InferenceRule (..))

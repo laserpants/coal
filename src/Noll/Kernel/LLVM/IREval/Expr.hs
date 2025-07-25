@@ -9,8 +9,9 @@ module Noll.Kernel.LLVM.IREval.Expr (IREval (..)) where
 import Control.Arrow ((>>>))
 import Data.Fix (Fix (..))
 import Data.Functor.Foldable (project)
-import Noll.Common.List1 (fromList1)
+import Extra (forM)
 import Noll.Common.Label (Label (..))
+import Noll.Common.List1 (fromList1)
 import Noll.Kernel.LLVM.IREval
 import Noll.Kernel.LLVM.IREval.Closure (irApplyClosure)
 import Noll.Kernel.LLVM.IREval.Comment (irCommentBlock)
@@ -25,7 +26,6 @@ import Noll.Kernel.LLVM.IRType (IRTyped (..))
 import Noll.Kernel.LLVM.IRType.Syntax (i1, i8Ptr, stringLiteral)
 import Noll.Kernel.LLVM.IRValue (IRValue (..), irPrimValue)
 import Noll.Kernel.Language.Type.Arrow (returnTypeOf)
-import Extra (forM)
 
 import qualified Data.Text as Text
 import qualified Noll.Kernel.Language as Core

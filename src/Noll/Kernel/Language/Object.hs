@@ -16,16 +16,16 @@ module Noll.Kernel.Language.Object (
 
 import Control.Arrow ((>>>))
 import Data.Functor.Foldable (embed, project)
-import Noll.Common.List1 (fromList1)
+import Extra (Name)
 import Noll.Common.FreeVars (FreeVars (..), boundIn, exceptNames)
 import Noll.Common.Label (Label (..))
+import Noll.Common.List1 (fromList1)
 import Noll.Kernel.LLVM.IRType (IRType, IRTyped (..))
 import Noll.Kernel.LLVM.IRType.Syntax (opaqueFunction)
 import Noll.Kernel.Language.Expr (Binding (..), Expr, ExprF (..))
 import Noll.Kernel.Language.Type (Type (..))
 import Noll.Kernel.Language.Type.Arrow (functionTypeOf)
 import Noll.Kernel.Language.Typed (Typed (..))
-import Extra (Name)
 
 data Object t e
   = OFunction Name [Label t] e

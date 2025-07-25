@@ -31,8 +31,8 @@ import Noll.Language.Module.Constant
 import Noll.Language.Module.Definition
 import Noll.TypeSystem.Substitution (normalizeTypeIndexes)
 
-import qualified Noll.Kernel.Language as Kernel
 import qualified Noll.Compiler.Kernel.Environment as Kernel
+import qualified Noll.Kernel.Language as Kernel
 
 withSupplyC :: (Monad m) => (Int -> (c, Int)) -> CompilerT a m c
 withSupplyC f = do

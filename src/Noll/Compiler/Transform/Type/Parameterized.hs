@@ -6,10 +6,10 @@ module Noll.Compiler.Transform.Type.Parameterized where
 import Control.Monad.Reader (ReaderT, asks, runReaderT)
 import Control.Monad.State (MonadState)
 import Control.Monad.Writer (WriterT, execWriterT, tell)
+import Extra (Name, traverse_)
 import Noll.Common.Environment (Environment (..))
 import Noll.Common.List1 (List1, fromList1)
 import Noll.Common.Supply (Supply (..), supplied)
-import Extra (Name, traverse_)
 import Noll.Language
 
 import qualified Data.Text as Text

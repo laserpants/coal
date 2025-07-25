@@ -2,8 +2,8 @@
 
 module Noll.Kernel.Language.Type.Row (normalizeRow, extend, dropField) where
 
-import Noll.Kernel.Language.Type (Type (..))
 import Extra (Map, Name)
+import Noll.Kernel.Language.Type (Type (..))
 
 import qualified Data.Map.Strict as Map
 

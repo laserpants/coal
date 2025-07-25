@@ -4,9 +4,9 @@
 module Noll.Kernel.LLVM.IRValue (IRValue (..), irPrimValue) where
 
 import Data.Int (Int32, Int64)
+import Extra (Name)
 import Noll.Kernel.LLVM.IRType (IRType (..), IRTyped (..))
 import Noll.Kernel.Language (Prim (..))
-import Extra (Name)
 
 -- | LLVM IR values
 data IRValue

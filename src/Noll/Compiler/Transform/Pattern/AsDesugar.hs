@@ -8,8 +8,8 @@ module Noll.Compiler.Transform.Pattern.AsDesugar where
 import Control.Monad.Writer
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (descend, transformM)
-import Noll.Common.List1 (NonEmpty (..))
 import Noll.Common.Label (Label (..))
+import Noll.Common.List1 (NonEmpty (..))
 import Noll.Language (Choice (..), Clause (..), Expression (..), Pattern (..))
 import Noll.Language.Module (Module (..))
 import Noll.Language.Module.Constant (Constant (..))

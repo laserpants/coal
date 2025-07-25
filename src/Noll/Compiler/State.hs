@@ -16,9 +16,9 @@ module Noll.Compiler.State (
   initialCompilerState,
 ) where
 
+import Extra (Dictionary, Over)
 import Noll.Common.Environment (Environment (..))
 import Noll.Common.Supply (Supply (..))
-import Extra (Dictionary, Over)
 import Noll.Language
 import Noll.TypeSystem
 

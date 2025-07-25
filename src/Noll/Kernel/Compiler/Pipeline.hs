@@ -18,11 +18,11 @@ module Noll.Kernel.Compiler.Pipeline (
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.State (MonadState, StateT, evalStateT, modify, runStateT)
 import Data.List (sort)
+import Extra (Name)
 import Noll.Common.Environment (Environment)
 import Noll.Kernel.Compiler.Pipeline.Kernel
 import Noll.Kernel.LLVM
 import Noll.Kernel.Language (Type)
-import Extra (Name)
 
 import qualified Noll.Common.Environment as Environment
 

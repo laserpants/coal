@@ -51,10 +51,10 @@ module Noll.Kernel.LLVM.IRInstruction.TH (
 import Control.Monad.Free (MonadFree, liftF)
 import Control.Monad.Free.TH (makeFree)
 import Data.Text (Text)
+import Noll.Common.Name (Name)
 import Noll.Kernel.LLVM.IRInstruction (FCmpCond, ICmpCond, IRInstrOp, InstrOpF (..))
 import Noll.Kernel.LLVM.IRType (IRType)
 import Noll.Kernel.LLVM.IRValue (IRValue)
-import Noll.Common.Name (Name)
 import Prelude hiding (and, or)
 
 makeFree ''InstrOpF

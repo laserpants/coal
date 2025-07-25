@@ -14,9 +14,9 @@ module Noll.Kernel.LLVM.IRInstruction (
 import Control.Monad.Free (Free)
 import Data.ByteString (ByteString)
 import Data.Text (Text)
+import Extra (Name)
 import Noll.Kernel.LLVM.IRType (IRType)
 import Noll.Kernel.LLVM.IRValue (IRValue)
-import Extra (Name)
 
 -- | icmp instruction condition codes
 data ICmpCond

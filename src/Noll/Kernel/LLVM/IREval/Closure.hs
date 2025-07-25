@@ -8,6 +8,7 @@ module Noll.Kernel.LLVM.IREval.Closure (
 
 import Control.Monad (unless)
 import Data.Text (Text)
+import Extra (Name, forM, forSM_)
 import Noll.Common.List1 (List1, fromList1)
 import Noll.Kernel.LLVM.IREval
 import Noll.Kernel.LLVM.IREval.Comment (irComment)
@@ -18,7 +19,6 @@ import Noll.Kernel.LLVM.IRInstruction.TH
 import Noll.Kernel.LLVM.IRType (IRType (..), IRTyped (..))
 import Noll.Kernel.LLVM.IRType.Syntax (i32, i8Ptr, struct)
 import Noll.Kernel.LLVM.IRValue (IRValue (..))
-import Extra (Name, forM, forSM_)
 import TextShow (showt)
 
 storeElement :: IRValue -> IRValue -> Int -> IRInstr ()

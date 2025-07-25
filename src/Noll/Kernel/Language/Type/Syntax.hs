@@ -18,8 +18,8 @@ module Noll.Kernel.Language.Type.Syntax (
   record,
 ) where
 
-import Noll.Kernel.Language.Type (Type (..))
 import Extra (Name)
+import Noll.Kernel.Language.Type (Type (..))
 import TextShow (showt)
 
 {-# INLINE tcon0 #-}

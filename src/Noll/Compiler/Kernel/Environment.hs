@@ -13,8 +13,8 @@ module Noll.Compiler.Kernel.Environment (
 ) where
 
 import Control.Monad.Reader (MonadReader, ask, local)
-import Noll.Common.Environment (Environment)
 import Extra (Name, Over, Set)
+import Noll.Common.Environment (Environment)
 
 import qualified Data.Set as Set
 import qualified Data.Text as Text

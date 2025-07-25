@@ -21,6 +21,7 @@ import Control.Monad.RWS (asks, gets, local, tell)
 import Data.Fix (Fix (..))
 import Data.Text (Text, isPrefixOf)
 import Data.Text.Encoding (encodeUtf8)
+import Extra (Name, forM, listenOnly)
 import Noll.Common.Label (Label (..))
 import Noll.Kernel.LLVM.IRConstruct (IRConstruct (..), IRLinkage (..))
 import Noll.Kernel.LLVM.IREncodable
@@ -39,7 +40,6 @@ import Noll.Kernel.LLVM.IRType (IRType (..), IRTyped (..))
 import Noll.Kernel.LLVM.IRType.Syntax
 import Noll.Kernel.LLVM.IRValue (IRValue (..))
 import Noll.Kernel.Language.Object
-import Extra (Name, forM, listenOnly)
 import TextShow (showt)
 
 import qualified Data.ByteString as ByteString

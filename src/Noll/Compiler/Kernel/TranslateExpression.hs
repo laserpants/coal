@@ -10,9 +10,9 @@ module Noll.Compiler.Kernel.TranslateExpression (
 import Control.Monad.Reader (MonadReader)
 import Data.Data (Data)
 import Data.Maybe (fromMaybe)
-import Noll.Common.List1 (List1, NonEmpty (..), fromList1, (<|))
-import Noll.Common.Label (Label (..))
 import Extra (Dictionary, Name)
+import Noll.Common.Label (Label (..))
+import Noll.Common.List1 (List1, NonEmpty (..), fromList1, (<|))
 import Noll.Compiler.Kernel.Environment (KernelEnvironment (..), qualifyName, withLocalName, withLocalNames)
 import Noll.Compiler.Kernel.TranslateType (translateType)
 import Noll.Language

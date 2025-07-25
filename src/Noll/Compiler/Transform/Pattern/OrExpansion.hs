@@ -13,9 +13,9 @@ module Noll.Compiler.Transform.Pattern.OrExpansion (
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformBiM)
 import Data.Semigroup (sconcat)
-import Noll.Common.List1 (List1, NonEmpty (..))
-import Noll.Common.Label (Label (..))
 import Extra (Map, traverseM)
+import Noll.Common.Label (Label (..))
+import Noll.Common.List1 (List1, NonEmpty (..))
 import Noll.Language (Clause (..), Expression (..), Pattern (..))
 import Noll.Language.Module (Module (..))
 

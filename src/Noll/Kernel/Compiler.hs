@@ -11,13 +11,13 @@ module Noll.Kernel.Compiler (compile, compileModules) where
 import Control.Monad (void, (>=>))
 import Control.Monad.State (gets)
 import Data.List (nub)
+import Extra (Name, forM, isConstructor, (<$$>), (||.))
 import Noll.Common.Environment (Environment (..))
 import Noll.Kernel.Compiler.Pass
 import Noll.Kernel.Compiler.Pipeline
 import Noll.Kernel.Compiler.Pipeline.Kernel (Kernel (..))
 import Noll.Kernel.LLVM
 import Noll.Kernel.Language
-import Extra (Name, forM, isConstructor, (<$$>), (||.))
 
 import qualified Data.Text as Text
 import qualified Noll.Common.Environment as Environment

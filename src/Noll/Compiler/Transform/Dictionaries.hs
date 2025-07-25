@@ -28,11 +28,11 @@ import Data.List (nub)
 import Data.Map.Strict (Map)
 import Data.Maybe (catMaybes)
 import Data.Text (isPrefixOf)
+import Extra (Dictionary, Name)
 import Noll.Common.Environment (Environment (..))
+import Noll.Common.Label (Label (..))
 import Noll.Common.List1 (NonEmpty (..), fromList1)
 import Noll.Common.Supply (supplied)
-import Noll.Common.Label (Label (..))
-import Extra (Dictionary, Name)
 import Noll.Language
 import Noll.Language.Module
 import Noll.TypeSystem.Substitution

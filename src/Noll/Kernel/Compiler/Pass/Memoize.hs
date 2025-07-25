@@ -7,11 +7,11 @@ import Control.Arrow ((>>>))
 import Control.Monad.Writer (MonadWriter, tell)
 import Data.Functor.Foldable (embed, project)
 import Data.List (partition)
-import Noll.Common.List1 (NonEmpty (..), fromList1)
+import Extra (Set, (<$$>))
 import Noll.Common.FreeVars (freeSet)
 import Noll.Common.Label (Label (..))
+import Noll.Common.List1 (NonEmpty (..), fromList1)
 import Noll.Kernel.Language (Binding (..), Expr, Type, bindingLabel, isFunction, isPrim)
-import Extra (Set, (<$$>))
 
 import qualified Noll.Kernel.Language as Core
 

@@ -3,8 +3,8 @@
 
 module Noll.Kernel.Language.Module (Module (..)) where
 
-import Noll.Kernel.Language.Object (Object)
 import Extra (Name)
+import Noll.Kernel.Language.Object (Object)
 
 data Module t i e = Module
   { moduleName :: Name

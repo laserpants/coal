@@ -20,10 +20,10 @@ import Control.Monad.Reader (MonadReader)
 import Control.Monad.State (MonadState)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformM)
+import Extra (Dictionary, Name)
+import Noll.Common.Label (Label (..))
 import Noll.Common.List1 (NonEmpty (..), (<|))
 import Noll.Common.Supply (suppliedName)
-import Noll.Common.Label (Label (..))
-import Extra (Dictionary, Name)
 import Noll.Language
 import Noll.Language.Module (Constant (..), Definition (..), Function (..), Module (..))
 

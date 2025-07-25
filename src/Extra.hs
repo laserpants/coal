@@ -11,6 +11,7 @@ module Extra (
   module Extra.Data.Functor.Foldable,
   module Extra.Data.Text,
   module Extra.Data.Set,
+  module Extra.Data.Traversable,
   module Extra.Data.List,
   module Extra.Data.Functor,
   module Extra.Control.Monad,
@@ -20,11 +21,8 @@ module Extra (
   IndexMap,
   fromMaybe,
   const2,
-  traverse2,
   optionalOr,
   Over,
-  forSM,
-  forSM_,
 )
 where
 
@@ -43,8 +41,9 @@ import Extra.Data.Functor.Foldable
 import Extra.Data.List
 import Extra.Data.Set
 import Extra.Data.Text
-import Noll.Common.Name
+import Extra.Data.Traversable
 import Extra.Operators
+import Noll.Common.Name
 
 type IndexMap = Map Int
 
@@ -54,18 +53,6 @@ type Over o n = (n -> n) -> o -> o
 const2 :: a -> b -> c -> a
 const2 = const . const
 
-{-# INLINE traverse2 #-}
-traverse2 :: (Applicative f, Traversable t1, Traversable t2) => (a -> f b) -> t2 (t1 a) -> f (t2 (t1 b))
-traverse2 = traverse . traverse
-
 {-# INLINE optionalOr #-}
 optionalOr :: (Alternative f) => a -> f a -> f a
 optionalOr def fa = fa <|> pure def
-
-{-# INLINE forSM #-}
-forSM :: (Monad m, Enum n) => n -> [a] -> (a -> n -> m b) -> m [b]
-forSM n vs = forM (zip vs [n ..]) . uncurry
-
-{-# INLINE forSM_ #-}
-forSM_ :: (Monad m, Enum n) => n -> [a] -> (a -> n -> m b) -> m ()
-forSM_ n vs = void . forSM n vs

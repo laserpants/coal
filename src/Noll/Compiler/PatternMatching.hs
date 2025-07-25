@@ -14,10 +14,10 @@ module Noll.Compiler.PatternMatching (
 
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformBiM, transformM)
+import Extra (Dictionary)
+import Noll.Common.Label (Label (..))
 import Noll.Common.List1 (List1, NonEmpty (..), fromList1)
 import Noll.Common.Supply (suppliedName)
-import Noll.Common.Label (Label (..))
-import Extra (Dictionary)
 import Noll.Compiler.PatternMatching.Compiler (TypeProxy (..), compileEnvelope)
 import Noll.Compiler.PatternMatching.Envelope (EnvelopeExpression (..), EnvelopePattern (..))
 import Noll.Compiler.PatternMatching.Equation (patternEquation)

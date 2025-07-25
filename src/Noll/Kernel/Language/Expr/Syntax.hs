@@ -14,8 +14,10 @@ module Noll.Kernel.Language.Expr.Syntax (
   mem,
 ) where
 
-import Noll.Common.List1 (List1)
+import Extra (Name)
+import Extra.Data.Functor.Foldable (embed, embed1, embed2, embed3)
 import Noll.Common.Label (Label (..))
+import Noll.Common.List1 (List1)
 import Noll.Kernel.Language.Expr (
   Binding (..),
   Clause (..),
@@ -25,8 +27,6 @@ import Noll.Kernel.Language.Expr (
  )
 import Noll.Kernel.Language.Op (Op)
 import Noll.Kernel.Language.Prim (Prim)
-import Extra (Name)
-import Extra.Data.Functor.Foldable (embed, embed1, embed2, embed3)
 
 {-# INLINE var #-}
 var :: Label t -> Expr t

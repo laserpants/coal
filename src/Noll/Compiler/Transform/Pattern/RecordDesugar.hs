@@ -19,10 +19,10 @@ import Data.Data (Data)
 import Data.Foldable (foldrM)
 import Data.Generics.Uniplate.Data (transformBiM)
 import Data.Tuple.Extra (thd3)
+import Extra (Dictionary, Map, Name)
+import Noll.Common.Label (Label (..))
 import Noll.Common.List1 (List1, NonEmpty (..))
 import Noll.Common.Supply (suppliedName)
-import Noll.Common.Label (Label (..))
-import Extra (Dictionary, Map, Name)
 import Noll.Language
 import Noll.Language.Module (Module (..))
 

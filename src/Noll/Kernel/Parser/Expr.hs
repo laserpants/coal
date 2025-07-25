@@ -5,8 +5,9 @@ module Noll.Kernel.Parser.Expr (expr, label) where
 
 import Control.Monad (void)
 import Control.Monad.Combinators.Expr (makeExprParser)
-import Noll.Common.List1 (NonEmpty (..))
+import Extra (Name)
 import Noll.Common.Label (Label (..))
+import Noll.Common.List1 (NonEmpty (..))
 import Noll.Kernel.Language.Expr (Binding (..), Clause (..), Expr, Focus (..))
 import Noll.Kernel.Language.Type (Type (..))
 import Noll.Kernel.Parser (Parser, lexeme, some, try, ($>), (<|>))
@@ -15,7 +16,6 @@ import Noll.Kernel.Parser.Op (op)
 import Noll.Kernel.Parser.Prim (prim)
 import Noll.Kernel.Parser.Symbol
 import Noll.Kernel.Parser.Type (type_)
-import Extra (Name)
 import Text.Megaparsec (takeWhileP)
 import Text.Megaparsec.Char (char)
 

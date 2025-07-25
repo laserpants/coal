@@ -7,10 +7,10 @@ module Noll.Kernel.LLVM.IRConstruct (
 ) where
 
 import Data.ByteString (ByteString)
+import Extra (Name)
 import Noll.Common.Label (Label (..))
 import Noll.Kernel.LLVM.IRType (IRType)
 import Noll.Kernel.LLVM.IRValue (IRValue)
-import Extra (Name)
 
 -- | <https://www.llvm.org/docs/LangRef.html#linkage-types>
 data IRLinkage

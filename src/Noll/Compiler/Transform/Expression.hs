@@ -8,9 +8,9 @@ module Noll.Compiler.Transform.Expression (
   lambdaAnyE,
 ) where
 
-import Noll.Common.List1 (List1, NonEmpty (..))
-import Noll.Common.Label (Label (..))
 import Extra (Name)
+import Noll.Common.Label (Label (..))
+import Noll.Common.List1 (List1, NonEmpty (..))
 import Noll.Language
 
 {-# INLINE matchE #-}

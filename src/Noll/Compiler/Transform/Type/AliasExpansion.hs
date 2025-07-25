@@ -11,9 +11,9 @@ module Noll.Compiler.Transform.Type.AliasExpansion (
 import Control.Monad.Reader (MonadReader, ask)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformM)
+import Extra (Dictionary, Name)
 import Noll.Common.Environment (Environment)
 import Noll.Common.List1 (NonEmpty (..), fromList1)
-import Extra (Dictionary, Name)
 import Noll.Language
 import Noll.Language.Module (Constant (..), Definition (..), Function (..), Module (..))
 

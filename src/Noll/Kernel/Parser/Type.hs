@@ -4,12 +4,12 @@ module Noll.Kernel.Parser.Type (type_) where
 
 import Control.Monad (void)
 import Control.Monad.Combinators.Expr (Operator (..), makeExprParser)
+import Extra (optionalOr)
 import Noll.Kernel.Language.Type (Type (..))
 import Noll.Kernel.Language.Type.Row (extend)
 import Noll.Kernel.Parser (Parser, lexeme, try, ($>), (<|>))
 import Noll.Kernel.Parser.Identifier (constructor, name)
 import Noll.Kernel.Parser.Symbol (braces, colon, commaSep, commaSepN, parens, pipe, symbol)
-import Extra (optionalOr)
 
 import qualified Noll.Kernel.Language.Type.Syntax as Type
 import qualified Text.Megaparsec.Char.Lexer as Lexer

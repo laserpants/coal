@@ -12,11 +12,11 @@ import Control.Monad.State (evalState, gets)
 import Control.Monad.Writer (execWriter)
 import Data.Data (Data)
 import Data.Either.Extra (partitionEithers)
+import Extra (Dictionary, Name, forM_)
 import Noll.Common.Environment (Environment (..))
+import Noll.Common.Label (Label (..))
 import Noll.Common.List1 (NonEmpty (..))
 import Noll.Common.Supply (supplied)
-import Noll.Common.Label (Label (..))
-import Extra (Dictionary, Name, forM_)
 import Noll.Compiler.Stack
 import Noll.Compiler.Transform.Type.Parameterized
 import Noll.Language

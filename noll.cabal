@@ -34,6 +34,7 @@ library
       Extra.Data.List
       Extra.Data.Set
       Extra.Data.Text
+      Extra.Data.Traversable
       Extra.Operators
       Noll.Common.Environment
       Noll.Common.FreeVars

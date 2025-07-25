@@ -6,8 +6,8 @@
 module Noll.Language.Trait (Trait (..), With (..)) where
 
 import Data.Data (Data, Typeable)
-import GHC.Generics (Generic)
 import Extra (Name)
+import GHC.Generics (Generic)
 
 -- | Standalone type trait
 data Trait t = Trait Name t

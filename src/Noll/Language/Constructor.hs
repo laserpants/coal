@@ -6,8 +6,8 @@
 module Noll.Language.Constructor (Constructor (..)) where
 
 import Data.Data (Data, Typeable)
-import GHC.Generics (Generic)
 import Extra (Name)
+import GHC.Generics (Generic)
 import Noll.Language.Type.Scheme (Scheme (..))
 
 -- | Data constructor

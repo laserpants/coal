@@ -7,8 +7,8 @@ module Noll.Language.HasType (HasType (..), foldTypeOf) where
 
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (universeBi)
-import Noll.Common.List1 (NonEmpty ((:|)))
 import Noll.Common.Label (Label (..))
+import Noll.Common.List1 (NonEmpty ((:|)))
 import Noll.Language.Expression (Expression (..))
 import Noll.Language.Expression.Choice (Guard (..))
 import Noll.Language.Module.Constant (Constant (..))

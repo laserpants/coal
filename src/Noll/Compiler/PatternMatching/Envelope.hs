@@ -13,8 +13,8 @@ module Noll.Compiler.PatternMatching.Envelope (
 ) where
 
 import Data.Data (Data)
-import Noll.Common.Label (Label (..))
 import Extra (Name)
+import Noll.Common.Label (Label (..))
 import Noll.Compiler.Transform.Tree (rename)
 import Noll.Language (Expression (..), HasType (..))
 

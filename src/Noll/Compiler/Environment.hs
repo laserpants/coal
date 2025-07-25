@@ -1,6 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module Noll.Compiler.Environment (
   DataConstructorEnvironment,
@@ -16,8 +16,8 @@ module Noll.Compiler.Environment (
 
 import Control.Monad.State (evalState, execState, modify)
 import Data.Map.Strict (Map)
-import Noll.Common.Environment (Environment (..))
 import Extra (Dictionary, Name, Set, traverse_, (<$$>))
+import Noll.Common.Environment (Environment (..))
 import Noll.Compiler.Transform.Type.AliasExpansion
 import Noll.Compiler.Transform.Type.Parameterized
 import Noll.Language

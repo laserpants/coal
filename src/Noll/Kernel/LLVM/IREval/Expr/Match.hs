@@ -3,8 +3,9 @@
 module Noll.Kernel.LLVM.IREval.Expr.Match (irEvalMatch) where
 
 import Data.Tuple.Extra (fst3)
-import Noll.Common.List1 (List1, NonEmpty (..), fromList1)
+import Extra (forM, forSM, (<$$>))
 import Noll.Common.Label (Label (..))
+import Noll.Common.List1 (List1, NonEmpty (..), fromList1)
 import Noll.Kernel.LLVM.IREval
 import Noll.Kernel.LLVM.IREval.Conceal (irReveal)
 import Noll.Kernel.LLVM.IRInstruction (IRInstr)
@@ -12,7 +13,6 @@ import Noll.Kernel.LLVM.IRInstruction.TH
 import Noll.Kernel.LLVM.IRType (IRType (..), IRTyped (..))
 import Noll.Kernel.LLVM.IRType.Syntax (i32, i8Ptr, ptr, struct)
 import Noll.Kernel.LLVM.IRValue (IRValue (..))
-import Extra (forM, forSM, (<$$>))
 
 import qualified Noll.Kernel.Language as Core
 

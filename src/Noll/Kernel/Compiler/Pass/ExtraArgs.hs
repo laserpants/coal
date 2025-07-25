@@ -3,8 +3,8 @@
 
 module Noll.Kernel.Compiler.Pass.ExtraArgs (addImplicitArgs) where
 
-import Noll.Common.List1 (List1, NonEmpty (..))
 import Noll.Common.Label (Label (..))
+import Noll.Common.List1 (List1, NonEmpty (..))
 import Noll.Kernel.Compiler.Ast (flattenAppNodes)
 import Noll.Kernel.Language (Expr, Type, Typed (..))
 import Noll.Kernel.Language.Object (Object (..))

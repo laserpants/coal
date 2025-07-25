@@ -4,6 +4,7 @@
 module Noll.Kernel.LLVM.IREval.Conceal (irConceal, irConcealArgs, irReveal) where
 
 import Control.Monad (unless)
+import Extra (forM)
 import Noll.Common.List1 (List1, fromList1)
 import Noll.Kernel.LLVM.IREval (IREval (..))
 import Noll.Kernel.LLVM.IREval.Comment (irComment)
@@ -13,7 +14,6 @@ import Noll.Kernel.LLVM.IRInstruction.TH
 import Noll.Kernel.LLVM.IRType (IRType (..), IRTyped (..))
 import Noll.Kernel.LLVM.IRType.Syntax (i1, i32, i64, i8, i8Ptr, ptr)
 import Noll.Kernel.LLVM.IRValue (IRValue (..))
-import Extra (forM)
 
 irBox :: IRValue -> IRType -> IRInstr IRValue
 irBox v t = do

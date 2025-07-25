@@ -10,11 +10,11 @@ module Noll.Kernel.LLVM.IRInterpreter.Environment (
   objectConstructors,
 ) where
 
+import Extra (Name, Over)
 import Noll.Common.Environment (Environment (..))
 import Noll.Kernel.LLVM.IRType (IRTyped (..))
 import Noll.Kernel.LLVM.IRValue (IRValue (..))
 import Noll.Kernel.Language.Object (ObjectList, objectConstructorInfo, objectName)
-import Extra (Name, Over)
 
 import qualified Noll.Common.Environment as Environment
 

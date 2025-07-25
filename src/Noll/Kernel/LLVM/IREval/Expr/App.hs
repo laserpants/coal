@@ -5,8 +5,9 @@ module Noll.Kernel.LLVM.IREval.Expr.App (irEvalApp) where
 
 import Control.Monad (unless)
 import Data.Text (Text)
-import Noll.Common.List1 (List1, NonEmpty (..), fromList1)
+import Extra (Name, forM, forSM_, isConstructor)
 import Noll.Common.Label (Label (..))
+import Noll.Common.List1 (List1, NonEmpty (..), fromList1)
 import Noll.Kernel.LLVM.IREncodable (irEncode)
 import Noll.Kernel.LLVM.IREval (IREval (..))
 import Noll.Kernel.LLVM.IREval.Closure (irApplyClosure, irPackClosure)
@@ -19,7 +20,6 @@ import Noll.Kernel.LLVM.IRType (IRType (..), IRTyped (..))
 import Noll.Kernel.LLVM.IRType.Syntax (i32, i8Ptr, struct)
 import Noll.Kernel.LLVM.IRValue (IRValue (..))
 import Noll.Kernel.Language (Expr)
-import Extra (Name, forM, forSM_, isConstructor)
 
 import qualified Noll.Kernel.Language as Core
 

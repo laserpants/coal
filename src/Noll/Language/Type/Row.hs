@@ -15,8 +15,8 @@ module Noll.Language.Type.Row (
 
 import Data.Data (Data, Typeable)
 import Data.Tuple.Extra (second)
-import GHC.Generics (Generic)
 import Extra (Dictionary, Name, (<$$>))
+import GHC.Generics (Generic)
 
 import qualified Data.Map.Strict as Map
 

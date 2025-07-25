@@ -3,6 +3,7 @@
 module Noll.Kernel.LLVM.IREval.Expr.Var (irEvalVar) where
 
 import Data.Text (Text)
+import Extra (Name, isConstructor)
 import Noll.Kernel.LLVM.IREncodable (irEncode)
 import Noll.Kernel.LLVM.IREval.Closure (irPackClosure)
 import Noll.Kernel.LLVM.IREval.Comment (irComment)
@@ -14,7 +15,6 @@ import Noll.Kernel.LLVM.IRType (IRType (..))
 import Noll.Kernel.LLVM.IRType.Syntax (i32, i8Ptr, struct)
 import Noll.Kernel.LLVM.IRValue (IRValue (..))
 import Noll.Kernel.Language.Type.Arrow (arity)
-import Extra (Name, isConstructor)
 
 import qualified Noll.Kernel.Language as Core
 

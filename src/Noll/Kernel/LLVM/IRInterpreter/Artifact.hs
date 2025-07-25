@@ -3,8 +3,8 @@
 module Noll.Kernel.LLVM.IRInterpreter.Artifact (IRInterpreterArtifact (..)) where
 
 import Data.ByteString (ByteString)
-import Noll.Kernel.LLVM.IRType (IRType (..))
 import Extra (Name)
+import Noll.Kernel.LLVM.IRType (IRType (..))
 
 data IRInterpreterArtifact
   = ArtifactHashMapKey Name

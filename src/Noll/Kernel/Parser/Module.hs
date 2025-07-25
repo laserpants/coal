@@ -4,6 +4,7 @@ module Noll.Kernel.Parser.Module (module_) where
 
 import Control.Applicative ((<|>))
 import Control.Monad (void)
+import Extra (Name)
 import Noll.Kernel.Language.Expr (Expr)
 import Noll.Kernel.Language.Module (Module (Module))
 import Noll.Kernel.Language.Object (Object (..))
@@ -13,7 +14,6 @@ import Noll.Kernel.Parser.Expr (expr, label)
 import Noll.Kernel.Parser.Identifier (identifier)
 import Noll.Kernel.Parser.Symbol (angleBrackets, braces, commaSep1, parens, symbol)
 import Noll.Kernel.Parser.Type (type_)
-import Extra (Name)
 import Text.Megaparsec (try)
 import Text.Megaparsec.Char (upperChar)
 

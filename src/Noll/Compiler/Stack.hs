@@ -30,8 +30,8 @@ where
 import Control.Monad.RWS (RWST, runRWST)
 import Control.Monad.Reader (MonadReader)
 import Control.Monad.State (MonadState, modify)
-import Noll.Common.Supply (Supply (..))
 import Extra (Dictionary, Name, (<$$$>))
+import Noll.Common.Supply (Supply (..))
 import Noll.Compiler.Environment (CompilerEnvironment (..))
 import Noll.Compiler.State
 import Noll.Language
