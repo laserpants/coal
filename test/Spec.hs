@@ -42,8 +42,8 @@ main2 = do
 compileFiles :: [String] -> IO ()
 compileFiles files = do
   fs <- traverse readFile files
-  let rs = fmap (parseFile . Text.pack) fs
-  case partitionEithers rs of
+  let results = fmap (parseFile . Text.pack) fs
+  case partitionEithers results of
     (e : _, _) ->
       putStrLn (errorBundlePretty e)
     (_, objs) -> do
