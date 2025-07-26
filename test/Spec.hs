@@ -6,7 +6,7 @@ import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module
 import Coal.Parser.Module
-import Control.Monad (forM_)
+import Control.Monad (forM)
 import Control.Monad.Reader (local)
 import Control.Monad.State (gets, liftIO)
 import Data.Data (Data)
@@ -39,7 +39,7 @@ compileFiles files = do
 
 bork :: (Monoid a, Data a, Eq a, Show a) => [Module a Kind ()] -> CompilerT a IO ()
 bork modules = do
-  forM_ modules $
+  tms <- forM modules $
     \m@(Module _ _ defs) -> do
       insertNamesC names
       local (\_ -> buildEnvironment defs) (typePass m)
@@ -51,6 +51,7 @@ bork modules = do
   liftIO (print x3)
   x4 <- gets compilerTypeAnnotationParams
   liftIO (print x4)
+  traceShowM tms
 
 parseFile :: Text -> Either (ParseErrorBundle Text Void) (Module () o ())
 parseFile = runParser parseModule ""

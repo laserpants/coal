@@ -6,7 +6,7 @@ cabal-version: 1.12
 
 name:           coal
 version:        0.1.0.0
-description:    Please see the README on GitHub at <https://github.com/githubuser/coal#readme>
+description:    Please see the README on GitHub at <https://github.com/laserpants/coal#readme>
 homepage:       https://github.com/laserpants/coal#readme
 bug-reports:    https://github.com/laserpants/coal/issues
 author:         Author name here
