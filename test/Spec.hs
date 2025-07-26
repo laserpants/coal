@@ -46,11 +46,11 @@ compileFiles files = do
   case partitionEithers rs of
     (e : _, _) ->
       putStrLn (errorBundlePretty e)
-    (_, ys) -> do
-      evalCompilerT emptyCompilerEnvironment (bork ys)
+    (_, objs) -> do
+      evalCompilerT emptyCompilerEnvironment (run objs)
 
-bork :: [(Text, Module Metadata Kind ())] -> CompilerT Metadata IO ()
-bork modules = do
+run :: [(Text, Module Metadata Kind ())] -> CompilerT Metadata IO ()
+run modules = do
   tms <- forM modules $
     \(src, m@(Module _ _ defs)) -> do
       setSourceText src

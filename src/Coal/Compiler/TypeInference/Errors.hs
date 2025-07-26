@@ -33,7 +33,11 @@ prettyErrorMessage src err =
                , "  expected: " <> "A" -- prettyType expected
                , "     found: " <> "B" -- prettyType actual
                ]
-   in locationLine <> ":" <> locationCol <> ":\n" <> rendered
+   in locationLine
+        <> ":"
+        <> locationCol
+        <> ":\n"
+        <> rendered
  where
   meta = getMetadata err
 
