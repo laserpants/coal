@@ -19,7 +19,6 @@ import Data.Text (Text)
 import Data.Void (Void)
 import Debug.Trace
 import Text.Megaparsec (ParseErrorBundle, errorBundlePretty, runParser)
-import TextShow
 
 import qualified Data.Set as Set
 import qualified Data.Text as Text
