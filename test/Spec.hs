@@ -1,17 +1,17 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+import Coal.Ast.Metadata (Metadata (..))
+import Coal.Common.Name (Name)
 import Coal.Compiler
 import Coal.Compiler.Environment
 import Coal.Compiler.Stack
+import Coal.Compiler.TypeInference.Errors
 import Coal.Language
 import Coal.Language.Module
-import Coal.Ast.Metadata (Metadata (..))
 import Coal.Parser.Module
-import Control.Monad (forM)
-import Coal.Common.Name (Name)
+import Control.Monad (forM, forM_)
 import Control.Monad.Reader (local)
 import Control.Monad.State (gets, liftIO)
-import Control.Monad (forM_)
 import Data.Data (Data)
 import Data.Either (partitionEithers)
 import Data.Set (Set)
@@ -19,7 +19,7 @@ import Data.Text (Text)
 import Data.Void (Void)
 import Debug.Trace
 import Text.Megaparsec (ParseErrorBundle, errorBundlePretty, runParser)
-import Coal.Compiler.TypeInference.Errors
+import TextShow
 
 import qualified Data.Set as Set
 import qualified Data.Text as Text
@@ -71,7 +71,7 @@ run modules = do
       forM_ errs $
         \err -> do
           src <- gets compilerSourceText
-          let msg = prettyErrorMessage src err
+          let msg = prettyErrorMessage [Text.pack (show err)] src err
           liftIO (Text.putStrLn msg)
   case x3 of
     [] ->
@@ -80,7 +80,13 @@ run modules = do
       forM_ errs $
         \err -> do
           src <- gets compilerSourceText
-          let msg = prettyErrorMessage src err
+          let msg =
+                prettyErrorMessage
+                  [ "\nType error:"
+                  , Text.pack (show err)
+                  ]
+                  src
+                  err
           liftIO (Text.putStrLn msg)
 
 parseFile :: Text -> Either (ParseErrorBundle Text Void) (Text, Module Metadata o ())
