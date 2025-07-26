@@ -7,6 +7,7 @@ import Coal.Language
 import Coal.Parser
 import Coal.Parser.Identifier
 import Coal.Parser.Symbol
+import Coal.Ast.Metadata (Metadata (..))
 import Coal.Parser.Type (parseType)
 import Control.Monad (void)
 import Control.Monad.Combinators.Expr
@@ -14,7 +15,7 @@ import Data.Functor (($>))
 import Text.Megaparsec (option, optional, (<|>))
 import Text.Megaparsec.Char (char)
 
-parsePattern :: Parser (Pattern () ())
+parsePattern :: Parser (Pattern Metadata ())
 parsePattern = makeExprParser go operator
  where
   go = do
@@ -33,40 +34,40 @@ parsePattern = makeExprParser go operator
           pure (Label () n)
         _ ->
           fail "Expected variable on right-hand side of 'as'"
-    pure (maybe p1 (\n -> PAs () n p1) rest)
+    pure (maybe p1 (\n -> PAs undefined n p1) rest)
 
-operator :: [[Operator Parser (Pattern () ())]]
+operator :: [[Operator Parser (Pattern Metadata ())]]
 operator =
   [ -- TODO
 
-    [ InfixR (PListCons () () <$ symbol "::")
+    [ InfixR (PListCons undefined () <$ symbol "::")
     ]
   , -- TODO
 
-    [ InfixL (POr () () <$ lexeme "or")
+    [ InfixL (POr undefined () <$ lexeme "or")
     ]
-  , [Postfix (symbol_ ":" *> (PAnnotation () <$> parseType))]
+  , [Postfix (symbol_ ":" *> (PAnnotation undefined <$> parseType))]
   ]
 
-parseAnyPattern :: Parser (Pattern () ())
-parseAnyPattern = symbol "_" $> PAny () ()
+parseAnyPattern :: Parser (Pattern Metadata ())
+parseAnyPattern = symbol "_" $> PAny undefined ()
 
-parseVariablePattern :: Parser (Pattern () ())
-parseVariablePattern = PVariable () . Label () <$> name
+parseVariablePattern :: Parser (Pattern Metadata ())
+parseVariablePattern = PVariable undefined . Label () <$> name
 
-parseLiteralPattern :: Parser (Pattern () ())
+parseLiteralPattern :: Parser (Pattern Metadata ())
 parseLiteralPattern = parseListLiteralPattern
 
-parseListLiteralPattern :: Parser (Pattern () ())
-parseListLiteralPattern = PListLiteral () () <$> brackets (commaSep parsePattern)
+parseListLiteralPattern :: Parser (Pattern Metadata ())
+parseListLiteralPattern = PListLiteral undefined () <$> brackets (commaSep parsePattern)
 
-parseAtVariablePattern :: Parser (Pattern () ())
+parseAtVariablePattern :: Parser (Pattern Metadata ())
 parseAtVariablePattern = do
   void (char '@')
-  PAtVariable () . Label () <$> name
+  PAtVariable undefined . Label () <$> name
 
-parseConstructorPattern :: Parser (Pattern () ())
+parseConstructorPattern :: Parser (Pattern Metadata ())
 parseConstructorPattern =
-  PConstructor () . Label ()
+  PConstructor undefined . Label ()
     <$> constructor
     <*> option [] (parens (commaSep1 parsePattern))

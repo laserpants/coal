@@ -23,6 +23,7 @@ source-repository head
 
 library
   exposed-modules:
+      Coal.Ast.Metadata
       Coal.Common.Environment
       Coal.Common.FreeVars
       Coal.Common.Label

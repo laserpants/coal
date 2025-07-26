@@ -7,6 +7,7 @@ import Coal.Common.List1 (NonEmpty (..))
 import Coal.Language
 import Coal.Parser
 import Coal.Parser.Identifier
+import Coal.Ast.Metadata (Metadata (..))
 import Coal.Parser.Pattern (parsePattern)
 import Coal.Parser.Symbol
 import Coal.Parser.Type (parseType)
@@ -18,7 +19,7 @@ import Text.Megaparsec (optional, some, try, (<|>))
 import qualified Data.Map.Strict as Map
 import qualified Text.Megaparsec.Char.Lexer as Lexer
 
-parseExpression :: Parser (Expression () ())
+parseExpression :: Parser (Expression Metadata ())
 parseExpression = makeExprParser go operator
  where
   go = do
@@ -36,120 +37,120 @@ parseExpression = makeExprParser go operator
         <|> parseVariableExpression
         <|> parens parseExpression
     rest <- optional (symbol_ "." *> name)
-    pure (maybe e1 (\ll -> ESelect () (Label () ll) e1) rest)
+    pure (maybe e1 (\ll -> ESelect undefined (Label () ll) e1) rest)
 
-parseFunctionApplication :: Parser (Expression () ())
+parseFunctionApplication :: Parser (Expression Metadata ())
 parseFunctionApplication =
-  EApplication () ()
+  EApplication undefined ()
     <$> (try (parens parseExpression) <|> parseDataConstructor <|> parseVariableExpression)
-    <*> parens (nonEmptyOr (pure $ ELiteral () LUnit :| []) (commaSep parseExpression))
+    <*> parens (nonEmptyOr (pure $ ELiteral undefined LUnit :| []) (commaSep parseExpression))
 
-parseDataConstructor :: Parser (Expression () ())
-parseDataConstructor = EConstructor () . Label () <$> constructor
+parseDataConstructor :: Parser (Expression Metadata ())
+parseDataConstructor = EConstructor undefined . Label () <$> constructor
 
-patternBinding :: Parser (Binding Expression () ())
-patternBinding = BPattern () <$> (parsePattern <* symbol "=") <*> parseExpression
+patternBinding :: Parser (Binding Expression Metadata ())
+patternBinding = BPattern undefined <$> (parsePattern <* symbol "=") <*> parseExpression
 
-parseBinding :: Parser (Binding Expression () ())
+parseBinding :: Parser (Binding Expression Metadata ())
 parseBinding = patternBinding -- <|> functionBinding
 
-parseLetExpression :: Parser (Expression () ())
+parseLetExpression :: Parser (Expression Metadata ())
 parseLetExpression =
-  ELet ()
+  ELet undefined
     <$> (lexeme_ "let" *> nonEmpty (semicolonSep1 parseBinding))
     <*> (lexeme_ "in" *> parseExpression)
 
-parseChoice :: Parser (Choice Expression () ())
-parseChoice = CPlain () [] <$> parseExpression
+parseChoice :: Parser (Choice Expression Metadata ())
+parseChoice = CPlain undefined [] <$> parseExpression
 
-parseClause :: Parser (Clause () ())
+parseClause :: Parser (Clause Metadata ())
 parseClause =
-  EClause ()
+  EClause undefined
     <$> (symbol_ "|" *> parsePattern)
     <*> (symbol_ "=>" *> nonEmpty (some parseChoice))
 
-parseFoldExpression :: Parser (Expression () ())
+parseFoldExpression :: Parser (Expression Metadata ())
 parseFoldExpression = do
   lexeme_ "fold"
-  EFold () ()
+  EFold undefined ()
     <$> parens (nonEmpty (commaSep1 parseExpression))
     <*> braces (nonEmpty (some parseClause))
     <*> pure Nothing
 
-parseVariableExpression :: Parser (Expression () ())
-parseVariableExpression = EVariable () . Label () <$> name
+parseVariableExpression :: Parser (Expression Metadata ())
+parseVariableExpression = EVariable undefined . Label () <$> name
 
-parseMatchClause :: Parser (Clause () ())
+parseMatchClause :: Parser (Clause Metadata ())
 parseMatchClause =
-  EClause ()
+  EClause undefined
     <$> (symbol_ "|" *> parsePattern)
     <*> (symbol_ "=>" *> nonEmpty (some parseChoice))
 
-parseMatchExpression :: Parser (Expression () ())
+parseMatchExpression :: Parser (Expression Metadata ())
 parseMatchExpression = do
   lexeme_ "match"
-  EMatch () ()
+  EMatch undefined ()
     <$> parens parseExpression
     <*> braces (nonEmpty (some parseMatchClause))
 
-parseIfExpression :: Parser (Expression () ())
+parseIfExpression :: Parser (Expression Metadata ())
 parseIfExpression =
-  EIf () ()
+  EIf undefined ()
     <$> (lexeme_ "if" *> parseExpression)
     <*> (lexeme_ "then" *> parseExpression)
     <*> (lexeme_ "else" *> parseExpression)
 
-parseLambdaExpression :: Parser (Expression () ())
+parseLambdaExpression :: Parser (Expression Metadata ())
 parseLambdaExpression =
-  ELambda ()
+  ELambda undefined
     <$> (lexeme_ "fn" *> parens (nonEmpty (commaSep1 parsePattern)))
     <*> (symbol_ "=>" *> parseExpression)
 
-parseRecordExpression :: Parser (Expression () ())
+parseRecordExpression :: Parser (Expression Metadata ())
 parseRecordExpression = do
   fields <- braces (commaSep1 field)
   -- TODO
-  pure (ERecord () () (Map.fromList fields) Nothing)
+  pure (ERecord undefined () (Map.fromList fields) Nothing)
  where
-  field :: Parser (Name, Expression () ())
+  field :: Parser (Name, Expression Metadata ())
   field = (,) <$> name <*> (symbol_ "=" *> parseExpression)
 
-parseInt :: Parser (Expression () ())
+parseInt :: Parser (Expression Metadata ())
 parseInt = do
   n <- Lexer.signed spaces (lexeme Lexer.decimal)
   pure $
     EApplication
+      undefined
       ()
-      ()
-      (EVariable () (Label () "from_int32"))
-      (ELiteral () (LInt32 n) :| [])
+      (EVariable undefined (Label () "from_int32"))
+      (ELiteral undefined (LInt32 n) :| [])
 
-parseListLiteral :: Parser (Expression () ())
-parseListLiteral = EListLiteral () () <$> brackets (commaSep parseExpression)
+parseListLiteral :: Parser (Expression Metadata ())
+parseListLiteral = EListLiteral undefined () <$> brackets (commaSep parseExpression)
 
-parseLiteralExpression :: Parser (Expression () ())
+parseLiteralExpression :: Parser (Expression Metadata ())
 parseLiteralExpression =
   parseListLiteral
-    <|> (lexeme_ "true" $> ELiteral () (LBool True))
-    <|> (lexeme_ "false" $> ELiteral () (LBool False))
+    <|> (lexeme_ "true" $> ELiteral undefined (LBool True))
+    <|> (lexeme_ "false" $> ELiteral undefined (LBool False))
 
-unaryOperator :: UnaryOperator -> Expression () () -> Expression () ()
+unaryOperator :: UnaryOperator -> Expression Metadata () -> Expression Metadata ()
 unaryOperator op e1 =
   EApplication
+    undefined
     ()
-    ()
-    (EUnaryOperator () () op)
+    (EUnaryOperator undefined () op)
     (e1 :| [])
 
-binaryOperator :: BinaryOperator -> Expression () () -> Expression () () -> Expression () ()
+binaryOperator :: BinaryOperator -> Expression Metadata () -> Expression Metadata () -> Expression Metadata ()
 binaryOperator op e1 e2 =
   EApplication
+    undefined
     ()
-    ()
-    (EBinaryOperator () () op)
+    (EBinaryOperator undefined () op)
     (e1 :| [e2])
 
-fixity9 :: [Operator Parser (Expression () ())]
+fixity9 :: [Operator Parser (Expression Metadata ())]
 fixity9 =
   [ -- TODO
     InfixR (binaryOperator OReverseComposition <$ symbol "<<")
@@ -157,19 +158,19 @@ fixity9 =
     InfixR (binaryOperator OReverseApplication <$ symbol "|.")
   ]
 
-fixity8 :: [Operator Parser (Expression () ())]
+fixity8 :: [Operator Parser (Expression Metadata ())]
 fixity8 = []
 
-fixity7 :: [Operator Parser (Expression () ())]
+fixity7 :: [Operator Parser (Expression Metadata ())]
 fixity7 =
   [ InfixL (binaryOperator OMultiplication <$ symbol "*")
   ]
 
-fixity6, fixity5, fixity4, fixity3, fixity2 :: [Operator Parser (Expression () ())]
+fixity6, fixity5, fixity4, fixity3, fixity2 :: [Operator Parser (Expression Metadata ())]
 fixity6 = []
 fixity5 =
   [ InfixR (binaryOperator OListConcatenation <$ symbol "++")
-  , InfixR (EListCons () () <$ symbol "::")
+  , InfixR (EListCons undefined () <$ symbol "::")
   ]
 fixity4 =
   []
@@ -182,7 +183,7 @@ fixity2 =
   , InfixR (binaryOperator OLogicalOr <$ symbol "||")
   ]
 
-operator :: [[Operator Parser (Expression () ())]]
+operator :: [[Operator Parser (Expression Metadata ())]]
 operator =
   [ fixity9
   , fixity8
@@ -192,5 +193,5 @@ operator =
   , fixity4
   , fixity3
   , fixity2
-  , [Postfix (symbol_ ":" *> (EAnnotation () <$> parseType))]
+  , [Postfix (symbol_ ":" *> (EAnnotation undefined <$> parseType))]
   ]

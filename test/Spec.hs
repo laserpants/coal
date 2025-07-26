@@ -5,6 +5,7 @@ import Coal.Compiler.Environment
 import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module
+import Coal.Ast.Metadata (Metadata (..))
 import Coal.Parser.Module
 import Control.Monad (forM)
 import Coal.Common.Name (Name)
@@ -38,7 +39,7 @@ compileFiles files = do
     (_, ys) -> do
       evalCompilerT emptyCompilerEnvironment (bork ys)
 
-bork :: (Monoid a, Data a, Eq a, Show a) => [Module a Kind ()] -> CompilerT a IO ()
+bork :: [Module Metadata Kind ()] -> CompilerT Metadata IO ()
 bork modules = do
   tms <- forM modules $
     \m@(Module _ _ defs) -> do
@@ -54,7 +55,7 @@ bork modules = do
   liftIO (print x4)
   traceShowM tms
 
-parseFile :: Text -> Either (ParseErrorBundle Text Void) (Module () o ())
+parseFile :: Text -> Either (ParseErrorBundle Text Void) (Module Metadata o ())
 parseFile = runParser parseModule ""
 
 names :: [(Name, IndexedScheme)]

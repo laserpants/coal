@@ -9,6 +9,7 @@ module Coal.Parser.Module (
   parseConstantDefinition,
 ) where
 
+import Coal.Ast.Metadata (Metadata (..))
 import Coal.Common.List1 (NonEmpty (..))
 import Coal.Language
 import Coal.Language.Module
@@ -24,7 +25,7 @@ import Text.Megaparsec.Char (upperChar)
 
 import qualified Data.Set as Set
 
-parseDefinition :: Parser (Definition () o ())
+parseDefinition :: Parser (Definition Metadata o ())
 parseDefinition =
   parseImport
     <|> parseFunctionDefinition
@@ -33,7 +34,7 @@ parseDefinition =
     <|> parseTraitDefinition
     <|> parseTraitInstance
 
-parseTraitDefinition :: Parser (Definition () o ())
+parseTraitDefinition :: Parser (Definition Metadata o ())
 parseTraitDefinition = do
   lexeme_ "trait"
   n <- constructor
@@ -48,7 +49,7 @@ parseParameter = do
   k <- option KType (symbol_ ":" *> parseKind)
   pure (Parameter k n)
 
-parseTraitInstance :: Parser (Definition () o ())
+parseTraitInstance :: Parser (Definition Metadata o ())
 parseTraitInstance = do
   lexeme_ "instance"
   n <- constructor
@@ -57,7 +58,7 @@ parseTraitInstance = do
   -- TODO
   pure (DInstance n t ds)
 
-parseTypeDefinition :: Parser (Definition () o ())
+parseTypeDefinition :: Parser (Definition Metadata o ())
 parseTypeDefinition = do
   lexeme_ "type"
   n <- constructor
@@ -81,7 +82,7 @@ parseConstructor c qs = do
           (TConstructor () c)
           (TVariable <$> (a :| as))
 
-parseImport :: Parser (Definition () o ())
+parseImport :: Parser (Definition Metadata o ())
 parseImport =
   endingWithSemicolon $ do
     lexeme_ "import"
@@ -89,24 +90,24 @@ parseImport =
     names <- option ["*"] (parens (commaSep (backtickString <|> name)))
     pure (DImport (Path path) names)
 
-parseFunctionDefinition :: Parser (Definition () o ())
+parseFunctionDefinition :: Parser (Definition Metadata o ())
 parseFunctionDefinition =
   endingWithSemicolon $ do
     fn <- lexeme_ "fn" *> name
-    args <- parens (nonEmptyOr (pure $ PLiteral () LUnit :| []) (commaSep parsePattern))
+    args <- parens (nonEmptyOr (pure $ PLiteral undefined LUnit :| []) (commaSep parsePattern))
     withAnnotation $ do
       expr <- symbol_ "=" *> parseExpression
-      pure (DFunction fn (Function () (With [] ()) args expr))
+      pure (DFunction fn (Function undefined (With [] ()) args expr))
 
-parseConstantDefinition :: Parser (Definition () o ())
+parseConstantDefinition :: Parser (Definition Metadata o ())
 parseConstantDefinition =
   endingWithSemicolon $ do
     c <- name
     withAnnotation $ do
       expr <- symbol_ "=" *> parseExpression
-      pure (DConstant c (Constant () (With [] ()) expr))
+      pure (DConstant c (Constant undefined (With [] ()) expr))
 
-withAnnotation :: Parser (Definition () o ()) -> Parser (Definition () o ())
+withAnnotation :: Parser (Definition Metadata o ()) -> Parser (Definition Metadata o ())
 withAnnotation p = do
   ann <- optional (symbol_ ":" *> parseType)
   d <- p
@@ -116,7 +117,7 @@ withAnnotation p = do
     Just t ->
       pure (DAnnotation (With [] t) d)
 
-parseModule :: Parser (Module () o ())
+parseModule :: Parser (Module Metadata o ())
 parseModule = do
   lexeme_ "module"
   path <- identifier upperChar `sepBy1` symbol "."
