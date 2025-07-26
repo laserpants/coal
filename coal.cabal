@@ -146,6 +146,7 @@ library
       Coal.Parser
       Coal.Parser.Expression
       Coal.Parser.Identifier
+      Coal.Parser.Metadata
       Coal.Parser.Module
       Coal.Parser.Pattern
       Coal.Parser.Symbol

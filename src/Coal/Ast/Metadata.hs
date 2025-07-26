@@ -6,8 +6,9 @@ module Coal.Ast.Metadata (Metadata (..)) where
 import Data.Data (Data)
 import Text.Megaparsec
 
-newtype Metadata = Metadata
-    { location :: SourcePos
+data Metadata = Metadata
+    { locationStart :: SourcePos
+    , locationEnd :: SourcePos
     }
   deriving (Show, Eq, Ord, Read, Data)
   
@@ -22,4 +23,4 @@ instance Semigroup Metadata where
   lhs <> _ = lhs
 
 instance Monoid Metadata where
-  mempty = Metadata defaultSourcePos
+  mempty = Metadata defaultSourcePos defaultSourcePos

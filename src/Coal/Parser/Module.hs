@@ -16,7 +16,7 @@ import Coal.Language.Module
 import Coal.Parser
 import Coal.Parser.Expression (parseExpression)
 import Coal.Parser.Identifier
-import Coal.Parser.Pattern (parsePattern)
+import Coal.Parser.Pattern (parsePattern, parseUnitPattern)
 import Coal.Parser.Symbol
 import Coal.Parser.Type
 import Extra (Name)
@@ -93,19 +93,23 @@ parseImport =
 parseFunctionDefinition :: Parser (Definition Metadata o ())
 parseFunctionDefinition =
   endingWithSemicolon $ do
+    start <- getSourcePos
     fn <- lexeme_ "fn" *> name
-    args <- parens (nonEmptyOr (pure $ PLiteral undefined LUnit :| []) (commaSep parsePattern))
+    args <- parens (nonEmptyOr parseUnitPattern (commaSep parsePattern))
     withAnnotation $ do
       expr <- symbol_ "=" *> parseExpression
-      pure (DFunction fn (Function undefined (With [] ()) args expr))
+      end <- getSourcePos
+      pure (DFunction fn (Function (Metadata start end) (With [] ()) args expr))
 
 parseConstantDefinition :: Parser (Definition Metadata o ())
 parseConstantDefinition =
   endingWithSemicolon $ do
+    start <- getSourcePos
     c <- name
     withAnnotation $ do
       expr <- symbol_ "=" *> parseExpression
-      pure (DConstant c (Constant undefined (With [] ()) expr))
+      end <- getSourcePos
+      pure (DConstant c (Constant (Metadata start end) (With [] ()) expr))
 
 withAnnotation :: Parser (Definition Metadata o ()) -> Parser (Definition Metadata o ())
 withAnnotation p = do

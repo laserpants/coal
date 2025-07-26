@@ -3,18 +3,19 @@
 module Coal.Parser.Expression (parseExpression) where
 
 import Coal.Common.Label (Label (..))
-import Coal.Common.List1 (NonEmpty (..))
+import Coal.Common.List1 (List1 (..), NonEmpty (..))
 import Coal.Language
 import Coal.Parser
 import Coal.Parser.Identifier
 import Coal.Ast.Metadata (Metadata (..))
+import Coal.Parser.Metadata
 import Coal.Parser.Pattern (parsePattern)
 import Coal.Parser.Symbol
 import Coal.Parser.Type (parseType)
 import Control.Monad.Combinators.Expr
 import Data.Functor (($>))
 import Extra (Name)
-import Text.Megaparsec (optional, some, try, (<|>))
+import Text.Megaparsec (optional, some, try, (<|>), getSourcePos)
 
 import qualified Data.Map.Strict as Map
 import qualified Text.Megaparsec.Char.Lexer as Lexer
@@ -23,6 +24,7 @@ parseExpression :: Parser (Expression Metadata ())
 parseExpression = makeExprParser go operator
  where
   go = do
+    start <- getSourcePos
     e1 <-
       try parseFunctionApplication
         <|> parseDataConstructor
@@ -37,102 +39,146 @@ parseExpression = makeExprParser go operator
         <|> parseVariableExpression
         <|> parens parseExpression
     rest <- optional (symbol_ "." *> name)
-    pure (maybe e1 (\ll -> ESelect undefined (Label () ll) e1) rest)
+    end <- getSourcePos
+    pure (maybe e1 (\ll -> ESelect (Metadata start end) (Label () ll) e1) rest)
+
+parseUnit :: Parser (List1 (Expression Metadata ()))
+parseUnit = 
+  withMetadata $ do
+    pure (\loc -> ELiteral loc LUnit :| [])
 
 parseFunctionApplication :: Parser (Expression Metadata ())
 parseFunctionApplication =
-  EApplication undefined ()
-    <$> (try (parens parseExpression) <|> parseDataConstructor <|> parseVariableExpression)
-    <*> parens (nonEmptyOr (pure $ ELiteral undefined LUnit :| []) (commaSep parseExpression))
+  withMetadata $ do
+    f <- try (parens parseExpression) <|> parseDataConstructor <|> parseVariableExpression
+    xs <- parens (nonEmptyOr parseUnit (commaSep parseExpression))
+    pure (\loc -> EApplication loc () f xs)
 
 parseDataConstructor :: Parser (Expression Metadata ())
-parseDataConstructor = EConstructor undefined . Label () <$> constructor
+parseDataConstructor = 
+  withMetadata $ do
+    ll <- Label () <$> constructor
+    pure (`EConstructor` ll)
 
 patternBinding :: Parser (Binding Expression Metadata ())
-patternBinding = BPattern undefined <$> (parsePattern <* symbol "=") <*> parseExpression
+patternBinding =  
+  withMetadata $ do
+    p <- parsePattern <* symbol "="
+    e <- parseExpression
+    pure (\loc -> BPattern loc p e)
 
 parseBinding :: Parser (Binding Expression Metadata ())
 parseBinding = patternBinding -- <|> functionBinding
 
 parseLetExpression :: Parser (Expression Metadata ())
 parseLetExpression =
-  ELet undefined
-    <$> (lexeme_ "let" *> nonEmpty (semicolonSep1 parseBinding))
-    <*> (lexeme_ "in" *> parseExpression)
+  withMetadata $ do
+    b <- lexeme_ "let" *> nonEmpty (semicolonSep1 parseBinding)
+    e <- lexeme_ "in" *> parseExpression
+    pure (\loc -> ELet loc b e)
 
 parseChoice :: Parser (Choice Expression Metadata ())
-parseChoice = CPlain undefined [] <$> parseExpression
+parseChoice = 
+  withMetadata $ do
+    e <- parseExpression
+    pure (\loc -> CPlain loc [] e)
 
 parseClause :: Parser (Clause Metadata ())
 parseClause =
-  EClause undefined
-    <$> (symbol_ "|" *> parsePattern)
-    <*> (symbol_ "=>" *> nonEmpty (some parseChoice))
+  withMetadata $ do
+    p <- symbol_ "|" *> parsePattern
+    cs <- symbol_ "=>" *> nonEmpty (some parseChoice)
+    pure (\loc -> EClause loc p cs)
 
 parseFoldExpression :: Parser (Expression Metadata ())
 parseFoldExpression = do
-  lexeme_ "fold"
-  EFold undefined ()
-    <$> parens (nonEmpty (commaSep1 parseExpression))
-    <*> braces (nonEmpty (some parseClause))
-    <*> pure Nothing
+  withMetadata $ do
+    lexeme_ "fold"
+    es <- parens (nonEmpty (commaSep1 parseExpression))
+    cs <- braces (nonEmpty (some parseClause))
+    pure (\loc -> EFold loc () es cs Nothing)
 
 parseVariableExpression :: Parser (Expression Metadata ())
-parseVariableExpression = EVariable undefined . Label () <$> name
+parseVariableExpression = 
+  withMetadata $ do
+    ll <- Label () <$> name
+    pure (`EVariable` ll)
 
 parseMatchClause :: Parser (Clause Metadata ())
 parseMatchClause =
-  EClause undefined
-    <$> (symbol_ "|" *> parsePattern)
-    <*> (symbol_ "=>" *> nonEmpty (some parseChoice))
+  withMetadata $ do
+    p <- symbol_ "|" *> parsePattern
+    cs <- symbol_ "=>" *> nonEmpty (some parseChoice)
+    pure (\loc -> EClause loc p cs)
 
 parseMatchExpression :: Parser (Expression Metadata ())
 parseMatchExpression = do
-  lexeme_ "match"
-  EMatch undefined ()
-    <$> parens parseExpression
-    <*> braces (nonEmpty (some parseMatchClause))
+  withMetadata $ do
+    lexeme_ "match"
+    e <- parens parseExpression
+    cs <- braces (nonEmpty (some parseMatchClause))
+    pure (\loc -> EMatch loc () e cs)
 
 parseIfExpression :: Parser (Expression Metadata ())
 parseIfExpression =
-  EIf undefined ()
-    <$> (lexeme_ "if" *> parseExpression)
-    <*> (lexeme_ "then" *> parseExpression)
-    <*> (lexeme_ "else" *> parseExpression)
+  withMetadata $ do
+    e1 <- lexeme_ "if" *> parseExpression
+    e2 <- lexeme_ "then" *> parseExpression
+    e3 <- lexeme_ "else" *> parseExpression
+    pure (\loc -> EIf loc () e1 e2 e3)
 
 parseLambdaExpression :: Parser (Expression Metadata ())
 parseLambdaExpression =
-  ELambda undefined
-    <$> (lexeme_ "fn" *> parens (nonEmpty (commaSep1 parsePattern)))
-    <*> (symbol_ "=>" *> parseExpression)
+  withMetadata $ do
+    ps <- lexeme_ "fn" *> parens (nonEmpty (commaSep1 parsePattern))
+    e <- symbol_ "=>" *> parseExpression
+    pure (\loc -> ELambda loc ps e)
 
 parseRecordExpression :: Parser (Expression Metadata ())
 parseRecordExpression = do
-  fields <- braces (commaSep1 field)
-  -- TODO
-  pure (ERecord undefined () (Map.fromList fields) Nothing)
+  withMetadata $ do
+    fields <- braces (commaSep1 field)
+    -- TODO
+    pure (\loc -> ERecord loc () (Map.fromList fields) Nothing)
  where
   field :: Parser (Name, Expression Metadata ())
   field = (,) <$> name <*> (symbol_ "=" *> parseExpression)
 
 parseInt :: Parser (Expression Metadata ())
 parseInt = do
-  n <- Lexer.signed spaces (lexeme Lexer.decimal)
-  pure $
-    EApplication
-      undefined
-      ()
-      (EVariable undefined (Label () "from_int32"))
-      (ELiteral undefined (LInt32 n) :| [])
+  withMetadata $ do
+    n <- Lexer.signed spaces (lexeme Lexer.decimal)
+    pure (\loc ->
+      EApplication
+        loc
+        ()
+        (EVariable loc (Label () "from_int32"))
+        (ELiteral loc (LInt32 n) :| [])
+      )
 
 parseListLiteral :: Parser (Expression Metadata ())
-parseListLiteral = EListLiteral undefined () <$> brackets (commaSep parseExpression)
+parseListLiteral = 
+  withMetadata $ do
+    es <- brackets (commaSep parseExpression)
+    pure (\loc -> EListLiteral loc () es)
+
+parseTrue :: Parser (Expression Metadata ())
+parseTrue = do
+  withMetadata $ do
+    lexeme_ "true" 
+    pure (\loc -> ELiteral loc (LBool True))
+
+parseFalse :: Parser (Expression Metadata ())
+parseFalse = do
+  withMetadata $ do
+    lexeme_ "false" 
+    pure (\loc -> ELiteral loc (LBool False))
 
 parseLiteralExpression :: Parser (Expression Metadata ())
 parseLiteralExpression =
   parseListLiteral
-    <|> (lexeme_ "true" $> ELiteral undefined (LBool True))
-    <|> (lexeme_ "false" $> ELiteral undefined (LBool False))
+    <|> parseTrue
+    <|> parseFalse
 
 unaryOperator :: UnaryOperator -> Expression Metadata () -> Expression Metadata ()
 unaryOperator op e1 =
@@ -150,48 +196,58 @@ binaryOperator op e1 e2 =
     (EBinaryOperator undefined () op)
     (e1 :| [e2])
 
-fixity9 :: [Operator Parser (Expression Metadata ())]
-fixity9 =
-  [ -- TODO
-    InfixR (binaryOperator OReverseComposition <$ symbol "<<")
-  , -- TODO
-    InfixR (binaryOperator OReverseApplication <$ symbol "|.")
-  ]
+--fixity9 :: [Operator Parser (Expression Metadata ())]
+--fixity9 =
+--  [ -- TODO
+--    InfixR (binaryOperator OReverseComposition <$ symbol "<<")
+--  , -- TODO
+--    InfixR (binaryOperator OReverseApplication <$ symbol "|.")
+--  ]
+--
+--fixity8 :: [Operator Parser (Expression Metadata ())]
+--fixity8 = []
+--
+--fixity7 :: [Operator Parser (Expression Metadata ())]
+--fixity7 =
+--  [ InfixL (binaryOperator OMultiplication <$ symbol "*")
+--  ]
+--
+--fixity6, fixity5, fixity4, fixity3, fixity2 :: [Operator Parser (Expression Metadata ())]
+--fixity6 = []
+--fixity5 =
+--  [ InfixR (binaryOperator OListConcatenation <$ symbol "++")
+--  , InfixR (EListCons undefined () <$ symbol "::")
+--  ]
+--fixity4 =
+--  []
+--fixity3 =
+--  [ InfixR (binaryOperator OLogicalAnd <$ symbol "&&")
+--  ]
+--fixity2 =
+--  [ InfixN (binaryOperator OLessThan <$ symbol "<")
+--  , InfixN (binaryOperator OGreaterThan <$ symbol ">")
+--  , InfixR (binaryOperator OLogicalOr <$ symbol "||")
+--  ]
 
-fixity8 :: [Operator Parser (Expression Metadata ())]
-fixity8 = []
+locatedBinary =
+  undefined
 
-fixity7 :: [Operator Parser (Expression Metadata ())]
-fixity7 =
-  [ InfixL (binaryOperator OMultiplication <$ symbol "*")
-  ]
-
-fixity6, fixity5, fixity4, fixity3, fixity2 :: [Operator Parser (Expression Metadata ())]
-fixity6 = []
-fixity5 =
-  [ InfixR (binaryOperator OListConcatenation <$ symbol "++")
-  , InfixR (EListCons undefined () <$ symbol "::")
-  ]
-fixity4 =
-  []
-fixity3 =
-  [ InfixR (binaryOperator OLogicalAnd <$ symbol "&&")
-  ]
-fixity2 =
-  [ InfixN (binaryOperator OLessThan <$ symbol "<")
-  , InfixN (binaryOperator OGreaterThan <$ symbol ">")
-  , InfixR (binaryOperator OLogicalOr <$ symbol "||")
-  ]
+add :: Int
+add = 
+  undefined
 
 operator :: [[Operator Parser (Expression Metadata ())]]
 operator =
-  [ fixity9
-  , fixity8
-  , fixity7
-  , fixity6
-  , fixity5
-  , fixity4
-  , fixity3
-  , fixity2
-  , [Postfix (symbol_ ":" *> (EAnnotation undefined <$> parseType))]
+  [
+    undefined -- InfixL (symbol "+" *> locatedBinary add)
+
+--  [ fixity9
+--  , fixity8
+--  , fixity7
+--  , fixity6
+--  , fixity5
+--  , fixity4
+--  , fixity3
+--  , fixity2
+--  , [Postfix (symbol_ ":" *> (EAnnotation undefined <$> parseType))]
   ]
