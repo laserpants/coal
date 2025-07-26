@@ -51,7 +51,7 @@ compileFiles files = do
 
 run :: [(Text, Module Metadata Kind ())] -> CompilerT Metadata IO ()
 run modules = do
-  tms <- forM modules $
+  out <- forM modules $
     \(src, m@(Module _ _ defs)) -> do
       setSourceText src
       insertNamesC names
@@ -75,7 +75,7 @@ run modules = do
           liftIO (Text.putStrLn msg)
   case x3 of
     [] ->
-      traceShowM tms
+      traceShowM out
     errs ->
       forM_ errs $
         \err -> do
