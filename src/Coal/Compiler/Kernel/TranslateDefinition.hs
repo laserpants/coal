@@ -43,18 +43,49 @@ translateDefinition =
         \(n, t) ->
           traitAccessor name n (translateType t)
     DInstance name t ds -> do
-      concat <$$> forM ds $
+      bs <- forM ds $
         \case
           DFunction n f -> do
-            translateDefinition (DFunction (n <> postfix) f)
+            xx1 <- translateDefinition (DFunction (n <> postfix) f)
+            pure (n, xx1)
           DConstant n c -> do
-            translateDefinition (DConstant (n <> postfix) c)
+            xx1 <- translateDefinition (DConstant (n <> postfix) c)
+            pure (n, xx1)
           _ ->
             error "TODO"
+      xx <- instanceDictionary2 postfix name t bs
+      pure (concatMap snd bs <> [xx])
      where
       postfix = "__$instance_" <> serialize (Trait name t)
     _ ->
       pure []
+
+-- dictExpr :: Expr Lang.Type -> Expr Lang.Type
+dictExpr t r =
+  Kernel.app
+    t
+    (Kernel.var (Label (Kernel.typeOf r `Kernel.arrow` t) "$Record"))
+    (r :| [])
+
+--instanceDictionary2 :: (MonadReader KernelEnvironment m) => Name -> Name -> Type Parameter Kind -> [(Name, [KernelObject])] -> m KernelObject
+instanceDictionary2 postfix name t xyz = do
+  moduleName <- asks kernelEnvironmentModule
+  pure $
+    Kernel.OConstant
+      (moduleName <> "." <> "d_" <> name <> postfix)
+      (dictExpr d (foldr hello Kernel.nil xyz))
+ where
+  d = Kernel.TCon name [translateType t]
+
+-- hello :: [Name] -> KernelObject
+hello (n, obj) = Kernel.ext n v
+ where
+  v =
+    case obj of
+      [z] ->
+        Kernel.var (Label (Kernel.typeOf z) (Kernel.objectName z))
+      _ ->
+        error "Implementation error"
 
 traitAccessor :: (MonadReader KernelEnvironment m) => Name -> Name -> Kernel.Type -> m KernelObject
 traitAccessor trait fn t = do
