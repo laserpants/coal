@@ -29,9 +29,9 @@ prettyErrorMessage src err =
                   ]
               )
               spanLines
-            <> [ "Error here:"
-               , "  expected: " <> "A" -- prettyType expected
-               , "     found: " <> "B" -- prettyType actual
+            <> [ "\nError:"
+--               , "  expected: " <> "A" -- prettyType expected
+--               , "     found: " <> "B" -- prettyType actual
                ]
    in locationLine
         <> ":"
