@@ -90,7 +90,6 @@ compileFunctionC (Function loc (With _ t) ps e) = do
     ELet
       loc
       (BFunction loc placeholder ps e :| [])
-      --(EVariable loc (Label (foldTypeOf t1 ps) placeholder))
       (EVariable loc (Label t1 placeholder))
  where
   placeholder = "###.function"
