@@ -7,6 +7,7 @@ import Coal.Language
 import Coal.Language.Module
 import Coal.Parser.Module
 import Control.Monad (forM)
+import Coal.Common.Name (Name)
 import Control.Monad.Reader (local)
 import Control.Monad.State (gets, liftIO)
 import Data.Data (Data)
@@ -56,6 +57,7 @@ bork modules = do
 parseFile :: Text -> Either (ParseErrorBundle Text Void) (Module () o ())
 parseFile = runParser parseModule ""
 
+names :: [(Name, IndexedScheme)]
 names =
   [
     ( "trace"
