@@ -8,6 +8,7 @@ module Coal.Ast.Metadata (Metadata (..), HasMetadata (..), metadataSpan) where
 import Coal.Language.Expression
 import Coal.Language.Pattern
 import Coal.TypeSystem.Constraint.Generation.InferenceRule (InferenceRule (..))
+import Coal.TypeSystem.Constraint.Generation.Internal (ConstraintsGenError (..))
 import Data.Data (Data)
 import Text.Megaparsec
 
@@ -96,6 +97,13 @@ instance HasMetadata (InferenceRule k Metadata) where
       RuleBinaryOperator a -> a
       RuleTopLevelFunction a -> a
       RuleTopLevelConstant a -> a
+
+instance HasMetadata (ConstraintsGenError Metadata) where
+  getMetadata =
+    \case
+      ENoDataConstructor a _ -> a
+      EDataConstructorArityMismatch a _ _ _ -> a
+      EIllFormedTypeAnnotation _ -> error "TODO"
 
 metadataSpan :: (HasMetadata a) => a -> a -> Metadata
 metadataSpan lhs rhs = Metadata (locationStart (getMetadata lhs)) (locationEnd (getMetadata rhs))
