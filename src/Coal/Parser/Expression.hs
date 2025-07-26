@@ -2,12 +2,12 @@
 
 module Coal.Parser.Expression (parseExpression) where
 
+import Coal.Ast.Metadata (Metadata (..), getMetadata, metadataSpan)
 import Coal.Common.Label (Label (..))
 import Coal.Common.List1 (List1 (..), NonEmpty (..))
 import Coal.Language
 import Coal.Parser
 import Coal.Parser.Identifier
-import Coal.Ast.Metadata (Metadata (..))
 import Coal.Parser.Metadata
 import Coal.Parser.Pattern (parsePattern)
 import Coal.Parser.Symbol
@@ -15,7 +15,7 @@ import Coal.Parser.Type (parseType)
 import Control.Monad.Combinators.Expr
 import Data.Functor (($>))
 import Extra (Name)
-import Text.Megaparsec (optional, some, try, (<|>), getSourcePos)
+import Text.Megaparsec (getSourcePos, optional, some, try, (<|>))
 
 import qualified Data.Map.Strict as Map
 import qualified Text.Megaparsec.Char.Lexer as Lexer
@@ -43,7 +43,7 @@ parseExpression = makeExprParser go operator
     pure (maybe e1 (\ll -> ESelect (Metadata start end) (Label () ll) e1) rest)
 
 parseUnit :: Parser (List1 (Expression Metadata ()))
-parseUnit = 
+parseUnit =
   withMetadata $ do
     pure (\loc -> ELiteral loc LUnit :| [])
 
@@ -55,13 +55,13 @@ parseFunctionApplication =
     pure (\loc -> EApplication loc () f xs)
 
 parseDataConstructor :: Parser (Expression Metadata ())
-parseDataConstructor = 
+parseDataConstructor =
   withMetadata $ do
     ll <- Label () <$> constructor
     pure (`EConstructor` ll)
 
 patternBinding :: Parser (Binding Expression Metadata ())
-patternBinding =  
+patternBinding =
   withMetadata $ do
     p <- parsePattern <* symbol "="
     e <- parseExpression
@@ -78,7 +78,7 @@ parseLetExpression =
     pure (\loc -> ELet loc b e)
 
 parseChoice :: Parser (Choice Expression Metadata ())
-parseChoice = 
+parseChoice =
   withMetadata $ do
     e <- parseExpression
     pure (\loc -> CPlain loc [] e)
@@ -99,7 +99,7 @@ parseFoldExpression = do
     pure (\loc -> EFold loc () es cs Nothing)
 
 parseVariableExpression :: Parser (Expression Metadata ())
-parseVariableExpression = 
+parseVariableExpression =
   withMetadata $ do
     ll <- Label () <$> name
     pure (`EVariable` ll)
@@ -148,16 +148,17 @@ parseInt :: Parser (Expression Metadata ())
 parseInt = do
   withMetadata $ do
     n <- Lexer.signed spaces (lexeme Lexer.decimal)
-    pure (\loc ->
-      EApplication
-        loc
-        ()
-        (EVariable loc (Label () "from_int32"))
-        (ELiteral loc (LInt32 n) :| [])
+    pure
+      ( \loc ->
+          EApplication
+            loc
+            ()
+            (EVariable loc (Label () "from_int32"))
+            (ELiteral loc (LInt32 n) :| [])
       )
 
 parseListLiteral :: Parser (Expression Metadata ())
-parseListLiteral = 
+parseListLiteral =
   withMetadata $ do
     es <- brackets (commaSep parseExpression)
     pure (\loc -> EListLiteral loc () es)
@@ -165,13 +166,13 @@ parseListLiteral =
 parseTrue :: Parser (Expression Metadata ())
 parseTrue = do
   withMetadata $ do
-    lexeme_ "true" 
+    lexeme_ "true"
     pure (\loc -> ELiteral loc (LBool True))
 
 parseFalse :: Parser (Expression Metadata ())
 parseFalse = do
   withMetadata $ do
-    lexeme_ "false" 
+    lexeme_ "false"
     pure (\loc -> ELiteral loc (LBool False))
 
 parseLiteralExpression :: Parser (Expression Metadata ())
@@ -182,72 +183,69 @@ parseLiteralExpression =
 
 unaryOperator :: UnaryOperator -> Expression Metadata () -> Expression Metadata ()
 unaryOperator op e1 =
-  EApplication
-    undefined
-    ()
-    (EUnaryOperator undefined () op)
-    (e1 :| [])
+  EApplication meta () (EUnaryOperator meta () op) (e1 :| [])
+ where
+  meta = metadataSpan e1 e1
 
 binaryOperator :: BinaryOperator -> Expression Metadata () -> Expression Metadata () -> Expression Metadata ()
 binaryOperator op e1 e2 =
-  EApplication
-    undefined
-    ()
-    (EBinaryOperator undefined () op)
-    (e1 :| [e2])
+  EApplication meta () (EBinaryOperator meta () op) (e1 :| [e2])
+ where
+  meta = metadataSpan e1 e2
 
---fixity9 :: [Operator Parser (Expression Metadata ())]
---fixity9 =
---  [ -- TODO
---    InfixR (binaryOperator OReverseComposition <$ symbol "<<")
---  , -- TODO
---    InfixR (binaryOperator OReverseApplication <$ symbol "|.")
---  ]
---
---fixity8 :: [Operator Parser (Expression Metadata ())]
---fixity8 = []
---
---fixity7 :: [Operator Parser (Expression Metadata ())]
---fixity7 =
---  [ InfixL (binaryOperator OMultiplication <$ symbol "*")
---  ]
---
---fixity6, fixity5, fixity4, fixity3, fixity2 :: [Operator Parser (Expression Metadata ())]
---fixity6 = []
---fixity5 =
---  [ InfixR (binaryOperator OListConcatenation <$ symbol "++")
---  , InfixR (EListCons undefined () <$ symbol "::")
---  ]
---fixity4 =
---  []
---fixity3 =
---  [ InfixR (binaryOperator OLogicalAnd <$ symbol "&&")
---  ]
---fixity2 =
---  [ InfixN (binaryOperator OLessThan <$ symbol "<")
---  , InfixN (binaryOperator OGreaterThan <$ symbol ">")
---  , InfixR (binaryOperator OLogicalOr <$ symbol "||")
---  ]
+listCons :: Expression Metadata () -> Expression Metadata () -> Expression Metadata ()
+listCons e1 e2 = EListCons (metadataSpan e1 e2) () e1 e2
 
-locatedBinary =
-  undefined
+fixity9 :: [Operator Parser (Expression Metadata ())]
+fixity9 =
+  [ -- TODO
+    InfixR (binaryOperator OReverseComposition <$ symbol "<<")
+  , -- TODO
+    InfixR (binaryOperator OReverseApplication <$ symbol "|.")
+  ]
 
-add :: Int
-add = 
-  undefined
+fixity8 :: [Operator Parser (Expression Metadata ())]
+fixity8 = []
+
+fixity7 :: [Operator Parser (Expression Metadata ())]
+fixity7 =
+  [ InfixL (binaryOperator OMultiplication <$ symbol "*")
+  ]
+
+fixity6, fixity5, fixity4, fixity3, fixity2 :: [Operator Parser (Expression Metadata ())]
+fixity6 = []
+fixity5 =
+  [ InfixR (binaryOperator OListConcatenation <$ symbol "++")
+  , InfixR (listCons <$ symbol "::")
+  ]
+fixity4 =
+  []
+fixity3 =
+  [ InfixR (binaryOperator OLogicalAnd <$ symbol "&&")
+  ]
+fixity2 =
+  [ InfixN (binaryOperator OLessThan <$ symbol "<")
+  , InfixN (binaryOperator OGreaterThan <$ symbol ">")
+  , InfixR (binaryOperator OLogicalOr <$ symbol "||")
+  ]
+
+annotation :: Parser (Expression Metadata () -> Expression Metadata ())
+annotation = do
+  start <- getSourcePos
+  symbol_ ":"
+  t <- parseType
+  end <- getSourcePos
+  pure (EAnnotation (Metadata start end) t)
 
 operator :: [[Operator Parser (Expression Metadata ())]]
 operator =
-  [
-    undefined -- InfixL (symbol "+" *> locatedBinary add)
-
---  [ fixity9
---  , fixity8
---  , fixity7
---  , fixity6
---  , fixity5
---  , fixity4
---  , fixity3
---  , fixity2
---  , [Postfix (symbol_ ":" *> (EAnnotation undefined <$> parseType))]
+  [ fixity9
+  , fixity8
+  , fixity7
+  , fixity6
+  , fixity5
+  , fixity4
+  , fixity3
+  , fixity2
+  , [Postfix annotation]
   ]

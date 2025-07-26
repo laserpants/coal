@@ -33,10 +33,8 @@ irEvalVar t name
       case v of
         Global (TFun _ ts) _ ->
           if arity t == 0
-            then
-              callg i8Ptr name []
-            else
-              irPackClosure name (length ts) []
+            then callg i8Ptr name []
+            else irPackClosure name (length ts) []
         Global t1 name1 | t == Core.string -> do
           v1 <- irConceal (Global t1 name1)
           bitcast v1 i8Ptr

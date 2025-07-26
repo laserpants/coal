@@ -2,23 +2,23 @@
 
 module Coal.Parser.Pattern (parsePattern, parseUnitPattern) where
 
+import Coal.Ast.Metadata (Metadata (..), getMetadata, metadataSpan)
 import Coal.Common.Label (Label (..))
+import Coal.Common.List1 (List1 (..), NonEmpty (..))
 import Coal.Language
 import Coal.Parser
 import Coal.Parser.Identifier
-import Coal.Common.List1 (NonEmpty (..), List1 (..))
-import Coal.Parser.Symbol
-import Coal.Ast.Metadata (Metadata (..))
 import Coal.Parser.Metadata
+import Coal.Parser.Symbol
 import Coal.Parser.Type (parseType)
 import Control.Monad (void)
 import Control.Monad.Combinators.Expr
 import Data.Functor (($>))
-import Text.Megaparsec (option, optional, (<|>), getSourcePos)
+import Text.Megaparsec (getSourcePos, option, optional, (<|>))
 import Text.Megaparsec.Char (char)
 
 parseUnitPattern :: Parser (List1 (Pattern Metadata ()))
-parseUnitPattern = 
+parseUnitPattern =
   withMetadata $ do
     pure (\loc -> PLiteral loc LUnit :| [])
 
@@ -45,21 +45,32 @@ parsePattern = makeExprParser go operator
     end <- getSourcePos
     pure (maybe p1 (\n -> PAs (Metadata start end) n p1) rest)
 
+patternOperator :: (Metadata -> () -> Pattern Metadata () -> Pattern Metadata () -> Pattern Metadata ()) -> Pattern Metadata () -> Pattern Metadata () -> Pattern Metadata ()
+patternOperator op p1 p2 = op (metadataSpan p1 p2) () p1 p2
+
+annotation :: Parser (Pattern Metadata () -> Pattern Metadata ())
+annotation = do
+  start <- getSourcePos
+  symbol_ ":"
+  t <- parseType
+  end <- getSourcePos
+  pure (PAnnotation (Metadata start end) t)
+
 operator :: [[Operator Parser (Pattern Metadata ())]]
 operator =
   [ -- TODO
 
-    [ InfixR (PListCons undefined () <$ symbol "::")
+    [ InfixR (patternOperator PListCons <$ symbol_ "::")
     ]
   , -- TODO
 
-    [ InfixL (POr undefined () <$ lexeme "or")
+    [ InfixL (patternOperator POr <$ lexeme "or")
     ]
-  , [Postfix (symbol_ ":" *> (PAnnotation undefined <$> parseType))]
+  , [Postfix annotation]
   ]
 
 parseAnyPattern :: Parser (Pattern Metadata ())
-parseAnyPattern = 
+parseAnyPattern =
   withMetadata $ do
     symbol "_"
     pure (`PAny` ())
