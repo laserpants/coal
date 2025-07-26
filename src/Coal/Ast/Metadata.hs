@@ -7,6 +7,7 @@ module Coal.Ast.Metadata (Metadata (..), HasMetadata (..), metadataSpan) where
 
 import Coal.Language.Expression
 import Coal.Language.Pattern
+import Coal.TypeSystem.Constraint.Generation.InferenceRule (InferenceRule (..))
 import Data.Data (Data)
 import Text.Megaparsec
 
@@ -78,6 +79,23 @@ instance HasMetadata (Pattern Metadata t) where
       PShorthand a _ -> a
       PAtVariable a _ -> a
       PPlaceholder a _ _ -> a
+
+instance HasMetadata (InferenceRule k Metadata) where
+  getMetadata =
+    \case
+      InferenceRulePlaceholder -> error "Not implemented"
+      RuleAnnotation a _ _ -> a
+      RuleApplication a _ _ -> a
+      RuleIfCondition a _ -> a
+      RuleIfBranches a _ _ -> a
+      RuleLetBindingPattern a _ _ -> a
+      RuleLetImplicit a _ _ _ -> a
+      RuleMatchClauseGuard a -> a
+      RuleMatchClauseExpressions a -> a
+      RuleMatchClausePatterns a -> a
+      RuleBinaryOperator a -> a
+      RuleTopLevelFunction a -> a
+      RuleTopLevelConstant a -> a
 
 metadataSpan :: (HasMetadata a) => a -> a -> Metadata
 metadataSpan lhs rhs = Metadata (locationStart (getMetadata lhs)) (locationEnd (getMetadata rhs))

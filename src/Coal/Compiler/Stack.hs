@@ -21,6 +21,7 @@ module Coal.Compiler.Stack (
   updateSupply,
   updateSupplyC,
   insertSupplyC,
+  setSourceText,
   compilerReportConstraintsGenErrors,
   compilerReportSolverRuleViolations,
   compilerSetTypeAnnotationParams,
@@ -36,6 +37,7 @@ import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.RWS (RWST, runRWST)
 import Control.Monad.Reader (MonadReader)
 import Control.Monad.State (MonadState, modify)
+import Data.Text (Text)
 import Extra (Dictionary, Name, (<$$$>))
 
 import qualified Coal.Common.Environment as Environment
@@ -109,3 +111,6 @@ updateSupplyC supply = modify (overCompilerSupply (const supply))
 {-# INLINE updateSubstitutionC #-}
 updateSubstitutionC :: (Monad m) => Substitution -> CompilerT a m ()
 updateSubstitutionC sub = modify (overCompilerSubstitution (const sub))
+
+setSourceText :: (Monad m) => Text -> CompilerT a m ()
+setSourceText src = modify (overCompilerSourceText (const src))

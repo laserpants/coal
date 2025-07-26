@@ -29,6 +29,13 @@ main = do
     ]
   pure ()
 
+main2 :: IO ()
+main2 = do
+  compileFiles
+    [ "./test/Coal/examples/01/Main.coal"
+    ]
+  pure ()
+
 compileFiles :: [String] -> IO ()
 compileFiles files = do
   fs <- traverse readFile files
@@ -39,10 +46,11 @@ compileFiles files = do
     (_, ys) -> do
       evalCompilerT emptyCompilerEnvironment (bork ys)
 
-bork :: [Module Metadata Kind ()] -> CompilerT Metadata IO ()
+bork :: [(Text, Module Metadata Kind ())] -> CompilerT Metadata IO ()
 bork modules = do
   tms <- forM modules $
-    \m@(Module _ _ defs) -> do
+    \(src, m@(Module _ _ defs)) -> do
+      setSourceText src
       insertNamesC names
       local (\_ -> buildEnvironment defs) (typePass m)
   x1 <- gets compilerConstraints
@@ -55,8 +63,10 @@ bork modules = do
   liftIO (print x4)
   traceShowM tms
 
-parseFile :: Text -> Either (ParseErrorBundle Text Void) (Module Metadata o ())
-parseFile = runParser parseModule ""
+parseFile :: Text -> Either (ParseErrorBundle Text Void) (Text, Module Metadata o ())
+parseFile src = do
+  m <- runParser parseModule "" src
+  pure (src, m)
 
 names :: [(Name, IndexedScheme)]
 names =
