@@ -48,13 +48,16 @@ compileFiles files = do
     (_, objs) -> do
       evalCompilerT emptyCompilerEnvironment (run objs)
 
+withLocalEnvironment :: (Monad m) => [Definition Metadata Kind ()] -> CompilerT Metadata m a -> CompilerT Metadata m a
+withLocalEnvironment = local . const . buildEnvironment
+
 run :: [(Text, Module Metadata Kind ())] -> CompilerT Metadata IO ()
 run modules = do
   out <- forM modules $
     \(src, m@(Module _ _ defs)) -> do
       setSourceText src
       insertNamesC names
-      local (\_ -> buildEnvironment defs) (typeCheckingPass m)
+      withLocalEnvironment defs (typeCheckingPass m)
   x1 <- gets compilerConstraints
   liftIO (print x1)
   x2 <- gets compilerConstraintsGenErrors
