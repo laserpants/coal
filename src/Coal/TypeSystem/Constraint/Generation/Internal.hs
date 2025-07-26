@@ -43,7 +43,7 @@ data TypeAnnotationError a
     EAnnotationNonDistinctParameters [[(Name, a)]]
   | -- | Type parameter resolves to a concrete type; e.g.,
     -- fn(x : a, y : int32) => x + y
-    EAnnotationMonomorphicType Name (Type TypeIndex Kind)
+    EAnnotationMonomorphicType a Name (Type TypeIndex Kind)
   deriving (Show, Eq, Ord, Read)
 
 data ConstraintsGenError a

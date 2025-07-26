@@ -117,7 +117,7 @@ checkTypeAnnotationParameters ps (Substitution sub) = do
       Just (TVariable (TypeIndex _ n)) ->
         pure [(n, (name, loc))]
       Just t -> do
-        tell [EAnnotationMonomorphicType name t]
+        tell [EAnnotationMonomorphicType loc name t]
         pure []
       Nothing ->
         pure [(index, (name, loc))]
