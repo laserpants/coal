@@ -122,8 +122,8 @@ kernelMonadTrans f e = pure (runReader (f e) (Kernel.initialKernelEnvironment me
 kernelTranslationC :: (Show a, Monad m, Data a) => Module a Kind IndexedType -> CompilerT a m (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))
 kernelTranslationC = kernelMonadTrans translateModule
 
-typePass :: (Monad m, Monoid a, Data a, Eq a, Show a) => Module a Kind () -> CompilerT a m (Module a Kind IndexedType)
-typePass =
+typeCheckingPass :: (Monad m, Monoid a, Data a, Eq a, Show a) => Module a Kind () -> CompilerT a m (Module a Kind IndexedType)
+typeCheckingPass =
   -- Expand type aliases
   expandAliasesC
     -- Expand unfolds (codata)
@@ -156,7 +156,7 @@ mainPass =
 
 compileModule :: (Monad m, Monoid a, Data a, Eq a, Show a) => Module a Kind () -> CompilerT a m (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))
 compileModule =
-  typePass
+  typeCheckingPass
     >=> mainPass
     -- Final lowering
     >=> kernelTranslationC

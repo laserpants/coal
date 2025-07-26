@@ -55,7 +55,7 @@ run modules = do
     \(src, m@(Module _ _ defs)) -> do
       setSourceText src
       insertNamesC names
-      local (\_ -> buildEnvironment defs) (typePass m)
+      local (\_ -> buildEnvironment defs) (typeCheckingPass m)
   x1 <- gets compilerConstraints
   liftIO (print x1)
   x2 <- gets compilerConstraintsGenErrors
