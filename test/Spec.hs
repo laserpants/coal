@@ -67,29 +67,36 @@ run modules = do
   x4 <- gets compilerTypeAnnotationParams
   liftIO (print x4)
   case x2 of
-    [] ->
-      pure ()
-    errs ->
+    errs@(_ : _) ->
       forM_ errs $
         \err -> do
           src <- gets compilerSourceText
           let msg = prettyErrorMessage [Text.pack (show err)] src err
           liftIO (Text.putStrLn msg)
-  case x3 of
     [] ->
-      traceShowM out
-    errs ->
-      forM_ errs $
-        \err -> do
-          src <- gets compilerSourceText
-          let msg =
-                prettyErrorMessage
-                  [ "\nType error:"
-                  , Text.pack (show err)
-                  ]
-                  src
-                  err
-          liftIO (Text.putStrLn msg)
+      case x3 of
+        errs@(_ : _) ->
+          forM_ errs $
+            \err -> do
+              src <- gets compilerSourceText
+              let msg =
+                    prettyErrorMessage
+                      [ "\nType error:"
+                      , Text.pack (show err)
+                      ]
+                      src
+                      err
+              liftIO (Text.putStrLn msg)
+        [] -> do
+          forM_ out $
+            \m -> do
+              b <- mainPass m
+              c <- kernelTranslationC b
+              traceShowM c
+
+-- setSourceText src
+-- insertNamesC names
+-- withLocalEnvironment defs (typeCheckingPass m)
 
 parseFile :: Text -> Either (ParseErrorBundle Text Void) (Text, Module Metadata o ())
 parseFile src = do
