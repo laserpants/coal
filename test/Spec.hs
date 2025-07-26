@@ -1,8 +1,12 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE QuasiQuotes #-}
 
+import Coal.Common.Label (Label (..))
 import Coal.Ast.Metadata (Metadata (..))
+import Coal.Kernel.LLVM.IRInterpreter.Monad 
 import Coal.Common.Name (Name)
 import Coal.Compiler
+import Coal.Kernel.LLVM.IRConstruct (IRConstruct (..))
 import Coal.Compiler.Environment
 import Coal.Compiler.Stack
 import Coal.Compiler.TypeInference.Errors
@@ -18,11 +22,19 @@ import Data.Set (Set)
 import Data.Text (Text)
 import Data.Void (Void)
 import Debug.Trace
-import Text.Megaparsec (ParseErrorBundle, errorBundlePretty, runParser)
+import Coal.Kernel.Language (Object (..), moduleImports, moduleName, moduleObjects, opaque)
+import Coal.Kernel.Parser (spaces)
+import Coal.Kernel.Parser.Expr (expr)
+import Coal.Kernel.Compiler (compileModules)
+import Coal.Kernel.LLVM.IREncodable (irEncode)
+import Coal.Kernel.Parser.Module (module_)
+import Text.Megaparsec (ParseErrorBundle, errorBundlePretty, runParser, eof)
+import Text.RawString.QQ
 
 import qualified Data.Set as Set
 import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
+import qualified Coal.Kernel.Language as Kernel
 
 main :: IO ()
 main = do
@@ -92,11 +104,8 @@ run modules = do
             \m -> do
               b <- mainPass m
               c <- kernelTranslationC b
-              traceShowM c
-
--- setSourceText src
--- insertNamesC names
--- withLocalEnvironment defs (typeCheckingPass m)
+              d <- liftIO (compileModules (moduleCore1 : [c]))
+              liftIO (testModules d)
 
 parseFile :: Text -> Either (ParseErrorBundle Text Void) (Text, Module Metadata o ())
 parseFile src = do
@@ -241,3 +250,330 @@ names =
         (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0))
     )
   ]
+
+moduleCore1 :: Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type)
+moduleCore1 = unsafeParseExpr <$> moduleCore
+
+moduleCore :: Kernel.Module Kernel.Type Name Text
+moduleCore =
+  Kernel.Module
+    { moduleName = "Core$"
+    , moduleImports =
+        []
+    , moduleObjects =
+        [ OFunction
+            "Core$.operator__not"
+            [ Label Kernel.bool "a"
+            ]
+            [r| 
+                  if (a : bool) then false else true
+              |]
+        , OFunction
+            "Core$.not"
+            [ Label Kernel.bool "a"
+            ]
+            [r| 
+                  if (a : bool) then false else true
+              |]
+        , OFunction
+            "Core$.operator__reverse_composition"
+            [ Label (Kernel.opaque `Kernel.arrow` Kernel.opaque) "f"
+            , Label (Kernel.opaque `Kernel.arrow` Kernel.opaque) "g"
+            , Label Kernel.opaque "x"
+            ]
+            [r| 
+                  @<*>(f : */*, @<*>(g : */*, x : *))
+              |]
+        , OFunction
+            "Core$.operator__reverse_application"
+            [ Label Kernel.opaque "x"
+            , Label (Kernel.opaque `Kernel.arrow` Kernel.opaque) "f"
+            ]
+            [r| 
+                  @<*>(f : */*, x : *)
+              |]
+        , OFunction
+            "Core$.always"
+            [ Label Kernel.opaque "a"
+            , Label Kernel.opaque "_"
+            ]
+            [r|   
+                  a : *
+              |]
+        , OFunction
+            "Core$.operator__list_concatenation"
+            [ Label (Kernel.TCon "list" [Kernel.opaque]) "xs"
+            , Label (Kernel.TCon "list" [Kernel.opaque]) "ys"
+            ]
+            [r| 
+                  match<list(*)>(xs : list(*)) {
+                    | ( $Cons : */list(*)/list(*)
+                      , z : *
+                      , zs : list(*)
+                      ) =>
+                        @<list(*)>
+                          ( $Cons : */list(*)/list(*)
+                          , z : *
+                          , @<list(*)>
+                              ( Core$.operator__list_concatenation : list(*)/list(*)/list(*)
+                              , zs : list(*)
+                              , ys : list(*)
+                              )
+                          )
+                    | ( $Nil : list(*)
+                      ) =>
+                        ys : list(*)
+                  }
+              |]
+        , OFunction
+            "Core$.trace_int32"
+            [ Label Kernel.int32 "n"
+            ]
+            [r|
+                  #(print_int32 : int32/*, n : int32) (fn(a : *) => a : *)
+              |]
+        , OFunction
+            "Core$.trace_string"
+            [ Label Kernel.string "s"
+            ]
+            [r|
+                  #(print_string : string/*, s : string) (fn(a : *) => a : *)
+              |]
+        , OFunction
+            "Core$.trace_bool"
+            [ Label Kernel.string "b"
+            ]
+            [r|
+                  #(print_bool : bool/*, b : bool) (fn(a : *) => a : *)
+              |]
+        , OFunction
+            "Core$.operator__string_concatenation"
+            [ Label Kernel.string "s"
+            , Label Kernel.string "t"
+            ]
+            [r|
+                  #(string_concat : string/string/string, s : string, t : string) (fn(r : string) => r : string)
+              |]
+        , OFunction
+            "Core$.int32_to_string"
+            [ Label Kernel.int32 "n"
+            ]
+            [r| 
+                  #(int32_to_string : int32/string, n : int32) (fn(r : string) => r : string)
+              |]
+        , OFunction
+            "Core$.pair_to_string"
+            [ Label (Kernel.TCon "Traceable" [Kernel.TOpq]) "$dict1"
+            , Label (Kernel.TCon "Traceable" [Kernel.TOpq]) "$dict2"
+            , Label (Kernel.TCon "$Tuple2" [Kernel.TOpq, Kernel.TOpq]) "p"
+            ]
+            [r| 
+                  match<string>
+                    ( p : $Tuple2(*,*) ) { 
+                      | ( $Tuple2 : */*/$Tuple2(*,*)
+                        , a : *
+                        , b : *
+                        ) =>
+                          @<string>
+                            ( Core$.operator__string_concatenation : string/string/string
+                            , @<string>
+                                ( Core$.operator__string_concatenation : string/string/string
+                                , "("
+                                , @<string>
+                                    ( Core$.operator__string_concatenation : string/string/string
+                                    , @<string>
+                                        ( Core$.operator__string_concatenation : string/string/string
+                                        , @<string>
+                                            ( Core$.trace : Traceable(*)/*/string
+                                            , $dict1 : Traceable(*)
+                                            , a : *
+                                            )
+                                        , ","
+                                        )
+                                    , @<string>
+                                        ( Core$.trace : Traceable(*)/*/string
+                                        , $dict2 : Traceable(*)
+                                        , b : *
+                                        )
+                                    )
+                                )
+                            , ")"
+                            )
+                    }
+              |]
+        , OFunction
+            "Core$.list_to_string"
+            [ Label (Kernel.TCon "Traceable" [Kernel.TOpq]) "$dict1"
+            , Label (Kernel.TCon "list" [Kernel.TOpq]) "ls"
+            ]
+            [r| 
+                  let
+                    f : bool/list(*)/string =
+                      fn(first : bool, l : list(*)) =>
+                        match<string>
+                          ( l : list(*)
+                          ) {
+                            | ( $Cons : */list(*)/list(*)
+                              , x : *
+                              , xs : list(*)
+                              ) =>
+                                @<string>
+                                  ( Core$.operator__string_concatenation : string/string/string
+                                  , if (first : bool) then "" else ","
+                                  , @<string>
+                                      ( Core$.operator__string_concatenation : string/string/string
+                                      , @<string>
+                                          ( Core$.trace : Traceable(*)/*/string
+                                          , $dict1 : Traceable(*)
+                                          , x : *
+                                          )
+                                      , @<string>
+                                          ( f : list(*)/string
+                                          , false
+                                          , xs : list(*)
+                                          )
+                                      )
+                                  )
+                            | ( $Nil : list(*)
+                              ) =>
+                                ""
+                          }
+                    in
+                      @<string>
+                        ( Core$.operator__string_concatenation : string/string/string
+                        , @<string>
+                            ( Core$.operator__string_concatenation : string/string/string
+                            , "["
+                            , @<string>
+                                ( f : list(*)/string
+                                , true
+                                , ls : list(*)
+                                )
+                            )
+                        , "]"
+                        )
+              |]
+        , OFunction
+            "Core$.trace"
+            [ Label (Kernel.TCon "Traceable" [opaque]) "$a"
+            ]
+            [r| 
+                  match<*>($a : Traceable(*)) {
+                    | ( $Record : { trace : * | * }/Traceable(*)
+                      , $r : { trace : * | * }
+                      ) =>
+                        select
+                          { trace = $f : * | _ : * } =
+                            $r : { trace : * | * }
+                          in
+                            $f : *
+                  }
+              |]
+        , OFunction
+            "Core$.unpack_nat"
+            [ Label (Kernel.TCon "$Nat" []) "nat"
+            ]
+            [r| 
+                  match<int32>(nat: $Nat) {
+                    | ( $Succ : int32/$Nat
+                      , succ : int32
+                      ) =>
+                        [+ int32](succ : int32, 1)
+                    | ( $Zero : $Nat
+                      ) =>
+                        0
+                  }
+              |]
+        , OFunction
+            "Core$.pack_nat"
+            [ Label Kernel.int32 "n"
+            ]
+            [r| 
+                  if ([== int32](n : int32, 0))
+                    then
+                      $Zero : $Nat
+                    else
+                      @<$Nat>
+                        ( $Succ : int32/$Nat
+                        , [- int32](n : int32, 1)
+                        )
+              |]
+        , OFunction
+            "Core$.from_int32"
+            [ Label (Kernel.TCon "Numeric" [opaque]) "$a"
+            ]
+            [r| 
+                  match<int32/*>($a : Numeric(*)) {
+                    | ( $Record : { from_int32 : int32/* | * }/Numeric(*)
+                      , $r : { from_int32 : int32/* | * }
+                      ) =>
+                        select
+                          { from_int32 = $f : int32/* | _ : * } =
+                            $r : { from_int32 : int32/* | * }
+                          in
+                            $f : int32/*
+                  }
+              |]
+        , OFunction
+            "Core$.from_int32__$instance_Numeric(Intrinsic(Int32))"
+            [ Label Kernel.int32 "n"
+            ]
+            [r| 
+                  n : int32
+              |]
+        , OFunction
+            "Core$.from_int32__$instance_Numeric(Intrinsic(Nat))"
+            [ Label Kernel.int32 "n"
+            ]
+            [r| 
+                  @<$Nat>
+                    ( Core$.pack_nat : int32/$Nat
+                    , n : int32
+                    )
+              |]
+        ]
+    }
+    
+unsafeParseModule :: Text -> Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type)
+unsafeParseModule t =
+  case runParser (spaces *> module_ <* eof) "" t of
+    Left e ->
+      error (errorBundlePretty e)
+    Right r ->
+      r
+
+unsafeParseExpr :: Text -> Kernel.Expr Kernel.Type
+unsafeParseExpr t =
+  case runParser expr "" (Text.stripStart t) of
+    Left e ->
+      error (errorBundlePretty e)
+    Right r ->
+      r
+
+testModules :: [(Name, [IRConstruct [IRLine]])] -> IO ()
+testModules mods = do
+  forM_ mods $
+    \(name, code) -> do
+      let out = irEncode code
+      Text.writeFile ("./.build/" <> Text.unpack name <> ".ll") out
+  Text.writeFile "./.build/build.sh" (buildScript (fst <$> mods))
+
+buildScript :: [Text] -> Text
+buildScript modules =
+  Text.unlines
+    ( [ "#!/bin/bash"
+      , "cd \"$(dirname \"$0\")\" || exit 1"
+      ]
+        <> [ llcCmd name | name <- modules
+           ]
+        <> [ "gcc -g -I./ -lgc -lgmp ../runtime/lib.c " <> Text.concat [name <> ".o " | name <- modules] <> "-o dist"
+           ]
+    )
+ where
+  llcCmd name =
+    "llc -filetype=obj "
+      <> name
+      <> ".ll -o "
+      <> name
+      <> ".o"
+

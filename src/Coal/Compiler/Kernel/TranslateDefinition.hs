@@ -4,6 +4,7 @@
 
 module Coal.Compiler.Kernel.TranslateDefinition (translateDefinition) where
 
+import Debug.Trace
 import Coal.Common.Label (Label (..))
 import Coal.Common.List1 (NonEmpty ((:|)), fromList1, (<|))
 import Coal.Compiler.Kernel.Environment (KernelEnvironment (..), withLocalNames)
@@ -37,19 +38,25 @@ translateDefinition =
       c <- translateExpression e
       moduleName <- asks kernelEnvironmentModule
       pure [Kernel.OConstant (moduleName <> "." <> name) c]
-    DTrait name _ _ ins ->
-      forM ins $
-        \(n, t) ->
-          traitAccessor name n (translateType t)
-    DInstance name t ds ->
-      concat <$$> forM ds $
-        \case
-          DFunction n f -> do
-            translateDefinition (DFunction (n <> postfix) f)
-          DConstant n c -> do
-            translateDefinition (DConstant (n <> postfix) c)
-          _ ->
-            error "TODO"
+    DTrait name _ _ ins -> do
+      traceShow "Trait" $
+        traceShow name $ do
+          forM ins $
+            \(n, t) ->
+              traitAccessor name n (translateType t)
+    DInstance name t ds -> do
+      traceShow "Instance" $
+        traceShow name $
+          concat <$$> forM ds $
+            \case
+              DFunction n f -> do
+                traceShow (n <> postfix) $
+                  translateDefinition (DFunction (n <> postfix) f)
+              DConstant n c -> do
+                traceShow (n <> postfix) $
+                  translateDefinition (DConstant (n <> postfix) c)
+              _ ->
+                error "TODO"
      where
       postfix = "__$instance_" <> serialize (Trait name t)
     _ ->
