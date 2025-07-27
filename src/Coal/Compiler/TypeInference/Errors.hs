@@ -14,7 +14,7 @@ import TextShow (showt)
 import qualified Data.Text as Text
 
 prettyErrorMessage :: (HasMetadata a) => [Text] -> Text -> a -> Text
-prettyErrorMessage lines src err =
+prettyErrorMessage msg src err =
   let spanLines = extractSpan src (locationStart meta) (locationEnd meta)
       locationLine = showt (unPos $ sourceLine (locationStart meta))
       locationCol = showt (unPos $ sourceColumn (locationStart meta))
@@ -23,13 +23,13 @@ prettyErrorMessage lines src err =
         Text.unlines $
           ["  |"]
             <> concatMap
-              ( \(n, line, marker) ->
+              ( \(_, line, marker) ->
                   [ "  | " <> line
                   , "  | " <> marker
                   ]
               )
               spanLines
-            <> lines
+            <> msg
    in locationLine
         <> ":"
         <> locationCol
