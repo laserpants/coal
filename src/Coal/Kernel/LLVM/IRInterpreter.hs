@@ -281,7 +281,8 @@ constructorIndex :: Name -> IRInterpreter (Maybe Int)
 constructorIndex name = do
   env <- asks irInterpreterConstructorEnv
   if name == "$Record" || "$Tuple" `isPrefixOf` name
-    then pure (Just 0)
+    then
+      pure (Just 0)
     else case Environment.lookup name env of
       Nothing ->
         pure Nothing

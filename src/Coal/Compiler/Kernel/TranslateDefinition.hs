@@ -4,7 +4,6 @@
 
 module Coal.Compiler.Kernel.TranslateDefinition (translateDefinition) where
 
-import Debug.Trace
 import Coal.Common.Label (Label (..))
 import Coal.Common.List1 (NonEmpty ((:|)), fromList1, (<|))
 import Coal.Compiler.Kernel.Environment (KernelEnvironment (..), withLocalNames)
@@ -38,54 +37,23 @@ translateDefinition =
       c <- translateExpression e
       moduleName <- asks kernelEnvironmentModule
       pure [Kernel.OConstant (moduleName <> "." <> name) c]
-    DTrait name _ _ ins -> do
+    DTrait name _ _ ins ->
       forM ins $
         \(n, t) ->
           traitAccessor name n (translateType t)
-    DInstance name t ds -> do
-      bs <- forM ds $
+    DInstance name t ds ->
+      concat <$$> forM ds $
         \case
           DFunction n f -> do
-            xx1 <- translateDefinition (DFunction (n <> postfix) f)
-            pure (n, xx1)
+            translateDefinition (DFunction (n <> postfix) f)
           DConstant n c -> do
-            xx1 <- translateDefinition (DConstant (n <> postfix) c)
-            pure (n, xx1)
+            translateDefinition (DConstant (n <> postfix) c)
           _ ->
             error "TODO"
-      xx <- instanceDictionary2 postfix name t bs
-      pure (concatMap snd bs <> [xx])
      where
       postfix = "__$instance_" <> serialize (Trait name t)
     _ ->
       pure []
-
--- dictExpr :: Expr Lang.Type -> Expr Lang.Type
-dictExpr t r =
-  Kernel.app
-    t
-    (Kernel.var (Label (Kernel.typeOf r `Kernel.arrow` t) "$Record"))
-    (r :| [])
-
---instanceDictionary2 :: (MonadReader KernelEnvironment m) => Name -> Name -> Type Parameter Kind -> [(Name, [KernelObject])] -> m KernelObject
-instanceDictionary2 postfix name t xyz = do
-  moduleName <- asks kernelEnvironmentModule
-  pure $
-    Kernel.OConstant
-      (moduleName <> "." <> "d_" <> name <> postfix)
-      (dictExpr d (foldr hello Kernel.nil xyz))
- where
-  d = Kernel.TCon name [translateType t]
-
--- hello :: [Name] -> KernelObject
-hello (n, obj) = Kernel.ext n v
- where
-  v =
-    case obj of
-      [z] ->
-        Kernel.var (Label (Kernel.typeOf z) (Kernel.objectName z))
-      _ ->
-        error "Implementation error"
 
 traitAccessor :: (MonadReader KernelEnvironment m) => Name -> Name -> Kernel.Type -> m KernelObject
 traitAccessor trait fn t = do

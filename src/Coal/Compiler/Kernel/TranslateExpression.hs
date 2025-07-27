@@ -149,8 +149,7 @@ translateExpression =
       t = translateType t1
       r = extractRow (translateLabel ll2)
     EPlaceholder _ t trait@(Trait name _) ->
-      --pure (Kernel.var (Label (translateType t) (dictVariable name trait)))
-      pure (Kernel.var (Label (translateType t) ("d_" <> name <> "__$instance_" <> serialize trait)))
+      pure (Kernel.var (Label (translateType t) (dictVariable name trait)))
     EFold _ _ _ _ (Just e) ->
       translateExpression e
     EUnfold _ _ _ _ _ _ (Just e) ->
@@ -208,7 +207,7 @@ translatePattern =
       error "TODO"
 
 dictVariable :: (Serializable t) => Name -> Trait t -> Name
-dictVariable name trait = "d_" <> name <> "__$instance_" <> serialize trait
+dictVariable name trait = "$d_" <> name <> "__$instance_" <> serialize trait
 
 translateClause :: (MonadReader KernelEnvironment m, Data a) => CompiledClause a IndexedType -> m (Kernel.Clause Kernel.Type KernelExpr)
 translateClause =
