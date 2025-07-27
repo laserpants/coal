@@ -20,6 +20,7 @@ import Coal.Language
 import Coal.Language.Module
 import Coal.Parser.Module
 import Control.Monad (forM, forM_)
+import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.Reader (local)
 import Control.Monad.State (gets, liftIO)
 import Data.Data (Data)
@@ -59,8 +60,7 @@ compileFiles files = do
     (e : _, _) ->
       putStrLn (errorBundlePretty e)
     (_, objs) -> do
-      runCompilerT emptyCompilerEnvironment (run objs)
-      pure ()
+      evalCompilerT emptyCompilerEnvironment (run objs)
 
 withLocalEnvironment :: (Monad m) => [Definition Metadata Kind ()] -> CompilerT Metadata m a -> CompilerT Metadata m a
 withLocalEnvironment = local . const . buildEnvironment
@@ -76,47 +76,42 @@ run modules = do
         ms <- Kernel.compileModules (moduleCore1 : [r])
         testModules ms
 
-compileModule :: (Monad m, Monoid a, Data a, Eq a, Show a) => Module a Kind () -> CompilerT a m (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))
+compileModule :: (MonadIO m) => Module Metadata Kind () -> CompilerT Metadata m (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))
 compileModule x = do
   a <- typeCheckingPass x
+
+  x2 <- gets compilerConstraintsGenErrors
+
+  case x2 of
+    errs@(_ : _) ->
+      forM_ errs $
+        \err -> do
+          src <- gets compilerSourceText
+          let msg = prettyErrorMessage [Text.pack (show err)] src err
+          liftIO (Text.putStrLn msg)
+    [] ->
+      pure ()
+
+  x3 <- gets compilerSolverRuleViolations
+
+  case x3 of
+    errs@(_ : _) ->
+      forM_ errs $
+        \err -> do
+          src <- gets compilerSourceText
+          let msg =
+                prettyErrorMessage
+                  [ "\nType error:"
+                  , Text.pack (show err)
+                  ]
+                  src
+                  err
+          liftIO (Text.putStrLn msg)
+    [] ->
+      pure ()
+
   b <- mainPass a
   kernelTranslationC b
-
---      withLocalEnvironment defs (typeCheckingPass m)
---  x1 <- gets compilerConstraints
---  liftIO (print x1)
---  x2 <- gets compilerConstraintsGenErrors
---  liftIO (print x2)
---  x3 <- gets compilerSolverRuleViolations
---  liftIO (print x3)
---  x4 <- gets compilerTypeAnnotationParams
---  liftIO (print x4)
---  case x2 of
---    errs@(_ : _) ->
---      forM_ errs $
---        \err -> do
---          src <- gets compilerSourceText
---          let msg = prettyErrorMessage [Text.pack (show err)] src err
---          liftIO (Text.putStrLn msg)
---    [] ->
---      case x3 of
---        errs@(_ : _) ->
---          forM_ errs $
---            \err -> do
---              src <- gets compilerSourceText
---              let msg =
---                    prettyErrorMessage
---                      [ "\nType error:"
---                      , Text.pack (show err)
---                      ]
---                      src
---                      err
---              liftIO (Text.putStrLn msg)
---        [] -> do
---          forM_ out $
---            \m -> do
---              b <- mainPass m
---              kernelTranslationC b
 
 parseFile :: Text -> Either (ParseErrorBundle Text Void) (Text, Module Metadata o ())
 parseFile src = do
