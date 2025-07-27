@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE RecordWildCards #-}
 
 import Coal.Ast.Metadata (Metadata (..))
 import Coal.Common.Label (Label (..))
@@ -32,6 +33,7 @@ import Debug.Trace
 import Text.Megaparsec (ParseErrorBundle, eof, errorBundlePretty, runParser)
 import Text.RawString.QQ
 
+import qualified Coal.Common.Environment as Environment
 import qualified Coal.Kernel.Compiler as Kernel
 import qualified Coal.Kernel.Language as Kernel
 import qualified Data.Set as Set
@@ -52,6 +54,13 @@ main2 = do
     ]
   pure ()
 
+main3 :: IO ()
+main3 = do
+  compileFiles
+    [ "./test/Coal/examples/02/Main.coal"
+    ]
+  pure ()
+
 compileFiles :: [String] -> IO ()
 compileFiles files = do
   fs <- traverse readFile files
@@ -63,7 +72,32 @@ compileFiles files = do
       evalCompilerT emptyCompilerEnvironment (run objs)
 
 withLocalEnvironment :: (Monad m) => [Definition Metadata Kind ()] -> CompilerT Metadata m a -> CompilerT Metadata m a
-withLocalEnvironment = local . const . buildEnvironment
+withLocalEnvironment = local . const . (insertBuiltinConstructors . buildEnvironment)
+
+insertBuiltinConstructors :: CompilerEnvironment -> CompilerEnvironment
+insertBuiltinConstructors CompilerEnvironment{..} =
+  CompilerEnvironment
+    { compilerDataConstructorEnvironment = Environment.insertMultiple builtinDataConstructors compilerDataConstructorEnvironment
+    , ..
+    }
+
+builtinDataConstructors :: [(Name, Constructor TypeIndex Kind IndexedType)]
+builtinDataConstructors =
+  [
+    ( "Succ"
+    , Constructor
+        "Succ"
+        1
+        (Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic INat))
+    )
+  ,
+    ( "Zero"
+    , Constructor
+        "Zero"
+        0
+        (Forall mempty [] (TIntrinsic INat))
+    )
+  ]
 
 run :: [(Text, Module Metadata Kind ())] -> CompilerT Metadata IO ()
 run modules = do

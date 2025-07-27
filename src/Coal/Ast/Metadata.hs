@@ -84,7 +84,7 @@ instance HasMetadata (Pattern Metadata t) where
 instance HasMetadata (InferenceRule k Metadata) where
   getMetadata =
     \case
-      InferenceRulePlaceholder -> error "Not implemented"
+      InferenceRulePlaceholder -> Metadata defaultSourcePos defaultSourcePos -- TODO error "Not implemented"
       RuleAnnotation a _ _ -> a
       RuleApplication a _ _ -> a
       RuleIfCondition a _ -> a
