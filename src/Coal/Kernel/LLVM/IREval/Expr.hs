@@ -109,13 +109,14 @@ instance IREval (Core.Expr Core.Type) where
             v1 <- irEval e1
             v2 <- irEval e2
             callg i8Ptr "hashmap_insert" [v2, t2, v1]
-        Core.ESel (Core.Focus field (Label _ var) (Label _ r)) e1 e2 ->
+        Core.ESel (Core.Focus field (Label t var) (Label _ r)) e1 e2 ->
           irCommentBlock "ESel" $ do
             k1 <- makeKey field
             t2 <- getelementptr (stringLiteral (Text.length field + 1)) k1 (I32 0) (I32 0)
             v1 <- irEval e1
             v2 <- callg i8Ptr "hashmap_lookup" [v1, t2]
-            bind [(var, v2), (r, v1)] (irEval e2)
+            v3 <- irReveal v2 (irTypeOf t)
+            bind [(var, v3), (r, v1)] (irEval e2)
         Core.EMem e ->
           irCommentBlock "EMem" $ do
             p1 <- memoize

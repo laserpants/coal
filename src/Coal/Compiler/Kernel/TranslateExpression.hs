@@ -244,6 +244,10 @@ translateBinaryOperator t ot =
       binop Kernel.OLtInt32 (TIntrinsic IInt32, TIntrinsic IInt32)
     OGreaterThan ->
       binop Kernel.OGtInt32 (TIntrinsic IInt32, TIntrinsic IInt32)
+    OLessThanOrEqual ->
+      binop Kernel.OLteInt32 (TIntrinsic IInt32, TIntrinsic IInt32)
+    OGreaterThanOrEqual ->
+      binop Kernel.OGteInt32 (TIntrinsic IInt32, TIntrinsic IInt32)
     OLogicalAnd ->
       binop Kernel.OAnd (TIntrinsic IBool, TIntrinsic IBool)
     OLogicalOr ->

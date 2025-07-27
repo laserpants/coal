@@ -15,7 +15,7 @@ import Coal.Parser.Type (parseType)
 import Control.Monad.Combinators.Expr
 import Data.Functor (($>))
 import Extra (Name)
-import Text.Megaparsec (getSourcePos, optional, some, try, (<|>))
+import Text.Megaparsec (getSourcePos, notFollowedBy, optional, some, try, (<|>))
 
 import qualified Data.Map.Strict as Map
 import qualified Text.Megaparsec.Char.Lexer as Lexer
@@ -219,14 +219,17 @@ fixity5 =
   , InfixR (listCons <$ symbol "::")
   ]
 fixity4 =
-  []
+  [ InfixN (binaryOperator OEqualTo <$ symbol "==")
+  , InfixN (binaryOperator OLessThanOrEqual <$ symbol "<=")
+  , InfixN (binaryOperator OGreaterThanOrEqual <$ symbol ">=")
+  , InfixN (binaryOperator OLessThan <$ (symbol "<" <* notFollowedBy (symbol "=")))
+  , InfixN (binaryOperator OGreaterThan <$ (symbol ">" <* notFollowedBy (symbol "=")))
+  ]
 fixity3 =
   [ InfixR (binaryOperator OLogicalAnd <$ symbol "&&")
   ]
 fixity2 =
-  [ InfixN (binaryOperator OLessThan <$ symbol "<")
-  , InfixN (binaryOperator OGreaterThan <$ symbol ">")
-  , InfixR (binaryOperator OLogicalOr <$ symbol "||")
+  [ InfixR (binaryOperator OLogicalOr <$ symbol "||")
   ]
 
 annotation :: Parser (Expression Metadata () -> Expression Metadata ())
