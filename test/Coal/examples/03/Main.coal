@@ -10,11 +10,6 @@ module Main {
     `compare__$instance_Ordered(Intrinsic(Int32))`
   );
 
-  type Ordering
-    = LessThan
-    | EqualTo
-    | GreaterThan
-
   type Tree(a)
     = Node(a, Tree(a), Tree(a))
     | Leaf

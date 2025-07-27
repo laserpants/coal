@@ -33,6 +33,7 @@ import Data.Set (Set)
 import Data.Text (Text)
 import Data.Void (Void)
 import Debug.Trace
+import Extra (Name, (<$$>))
 import Text.Megaparsec (ParseErrorBundle, eof, errorBundlePretty, runParser)
 import Text.RawString.QQ
 
@@ -169,11 +170,7 @@ builtinInstances =
 
 builtinTypeConstructors :: [(Name, Kind)]
 builtinTypeConstructors =
-  [
-    ( "Ordering"
-    , KType
-    )
-  ]
+  []
 
 builtinDataConstructors :: [(Name, Constructor TypeIndex Kind IndexedType)]
 builtinDataConstructors =
@@ -191,32 +188,23 @@ builtinDataConstructors =
         0
         (Forall mempty [] (TIntrinsic INat))
     )
-  ,
-    ( "LessThan"
-    , Constructor
-        "LessThan"
-        0
-        (Forall mempty [] (TConstructor KType "Ordering"))
-    )
-  ,
-    ( "EqualTo"
-    , Constructor
-        "EqualTo"
-        0
-        (Forall mempty [] (TConstructor KType "Ordering"))
-    )
-  ,
-    ( "GreaterThan"
-    , Constructor
-        "GreaterThan"
-        0
-        (Forall mempty [] (TConstructor KType "Ordering"))
-    )
   ]
+
+addBuiltinDefs :: [Definition a k t] -> [Definition a k t]
+addBuiltinDefs defs =
+  [ DType
+      "Ordering"
+      []
+      [ Constructor "LessThan" 0 (Forall mempty [] (TConstructor () "Ordering"))
+      , Constructor "GreaterThan" 0 (Forall mempty [] (TConstructor () "Ordering"))
+      , Constructor "EqualTo" 0 (Forall mempty [] (TConstructor () "Ordering"))
+      ]
+  ]
+    <> defs
 
 run :: [(Text, Module Metadata Kind ())] -> CompilerT Metadata IO ()
 run modules = do
-  forM_ modules $
+  forM_ (overModuleDefinitions addBuiltinDefs <$$> modules) $
     \(src, m@(Module _ _ defs)) -> do
       setSourceText src
       insertNamesC names
