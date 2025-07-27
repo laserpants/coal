@@ -1,6 +1,14 @@
 module Main {
 
-  import Core$(trace_int32, not, always, from_int32, `from_int32__$instance_Numeric(Intrinsic(Int32))`, compare, `compare__$instance_Ordered(Intrinsic(Int32))`);
+  import Core$(
+    trace_int32,
+    not,
+    always,
+    from_int32,
+    compare,
+    `from_int32__$instance_Numeric(Intrinsic(Int32))`,
+    `compare__$instance_Ordered(Intrinsic(Int32))`
+  );
 
   type Ordering
     = LessThan
