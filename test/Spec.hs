@@ -43,21 +43,21 @@ import qualified Data.Text.IO as Text
 main :: IO ()
 main = do
   compileFiles
-    [ "./test/Coal/examples/03/Main.coal"
+    [ "./test/Coal/examples/01/Main.coal"
     ]
   pure ()
 
 main2 :: IO ()
 main2 = do
   compileFiles
-    [ "./test/Coal/examples/01/Main.coal"
+    [ "./test/Coal/examples/02/Main.coal"
     ]
   pure ()
 
 main3 :: IO ()
 main3 = do
   compileFiles
-    [ "./test/Coal/examples/02/Main.coal"
+    [ "./test/Coal/examples/03/Main.coal"
     ]
   pure ()
 
