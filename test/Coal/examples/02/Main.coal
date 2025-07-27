@@ -1,14 +1,6 @@
 module Main {
 
-  import Core$(trace_int32, from_int32, unpack_nat, pack_nat);
-
-  trait Numeric(n) {
-    from_int32 : int32 -> n
-  }
-
-  instance Numeric(int32) {
-    fn from_int32(n) = n;
-  }
+  import Core$(trace_int32, pack_nat, unpack_nat, from_int32, `from_int32__$instance_Numeric(Intrinsic(Int32))`);
 
   fn factorial(n : int32) : int32 =
     fold(pack_nat(n)) {

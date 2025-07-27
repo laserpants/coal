@@ -3,8 +3,9 @@
 {-# LANGUAGE RecordWildCards #-}
 
 import Coal.Ast.Metadata (Metadata (..))
+import Coal.Common.Environment (Environment (..))
 import Coal.Common.Label (Label (..))
-import Coal.Common.Name (Name)
+import Coal.Common.Name (Dictionary, Name)
 import Coal.Compiler (kernelTranslationC, mainPass, typeCheckingPass)
 import Coal.Compiler.Environment
 import Coal.Compiler.Stack
@@ -22,10 +23,12 @@ import Coal.Language.Module
 import Coal.Parser.Module
 import Control.Monad (forM, forM_)
 import Control.Monad.IO.Class (MonadIO)
-import Control.Monad.Reader (local)
+import Control.Monad.Reader (ask, local)
 import Control.Monad.State (gets, liftIO)
 import Data.Data (Data)
 import Data.Either (partitionEithers)
+import Data.List (nub)
+import Data.Map.Strict (Map)
 import Data.Set (Set)
 import Data.Text (Text)
 import Data.Void (Void)
@@ -36,6 +39,7 @@ import Text.RawString.QQ
 import qualified Coal.Common.Environment as Environment
 import qualified Coal.Kernel.Compiler as Kernel
 import qualified Coal.Kernel.Language as Kernel
+import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
@@ -78,8 +82,98 @@ insertBuiltinConstructors :: CompilerEnvironment -> CompilerEnvironment
 insertBuiltinConstructors CompilerEnvironment{..} =
   CompilerEnvironment
     { compilerDataConstructorEnvironment = Environment.insertMultiple builtinDataConstructors compilerDataConstructorEnvironment
+    , compilerTraitEnvironment = Environment.insertMultiple builtinTraits compilerTraitEnvironment
+    , compilerInstanceEnvironment = Environment.insertMultiple builtinInstances compilerInstanceEnvironment
+    , compilerTypeConstructorEnvironment = Environment.insertMultiple builtinTypeConstructors compilerTypeConstructorEnvironment
     , ..
     }
+
+builtinTraits :: [(Name, (TypeIndex Kind, Environment IndexedScheme))]
+builtinTraits =
+  [
+    ( "Numeric"
+    ,
+      ( TypeIndex KType 0
+      , Environment.fromList
+          [
+            ( "from_int32"
+            , Forall
+                (Set.fromList [TypeIndex KType 0])
+                []
+                ( TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0)
+                )
+            )
+          ]
+      )
+    )
+  ,
+    ( "Ordered"
+    ,
+      ( TypeIndex KType 0
+      , Environment.fromList
+          [
+            ( "compare"
+            , Forall
+                (Set.fromList [TypeIndex KType 0])
+                []
+                ( TVariable (TypeIndex KType 0)
+                    `TArrow` TVariable (TypeIndex KType 0)
+                    `TArrow` TConstructor KType "Ordering"
+                )
+            )
+          ]
+      )
+    )
+  ]
+
+builtinInstances :: [(Name, Map IndexedType (Dictionary IndexedScheme))]
+builtinInstances =
+  [
+    ( "Numeric"
+    , Map.fromList
+        [
+          ( TIntrinsic IInt32
+          , Map.fromList
+              [
+                ( "from_int32"
+                , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
+                )
+              ]
+          )
+        ,
+          ( TIntrinsic INat
+          , Map.fromList
+              [
+                ( "from_int32"
+                , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic INat)
+                )
+              ]
+          )
+        ]
+    )
+  ,
+    ( "Ordered"
+    , Map.fromList
+        [
+          ( TIntrinsic IInt32
+          , Map.fromList
+              [
+                ( "compare"
+                , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TConstructor KType "Ordering")
+                )
+              ]
+          )
+        ]
+    )
+  ]
+
+builtinTypeConstructors :: [(Name, Kind)]
+builtinTypeConstructors =
+  [
+    ( "Ordering"
+    , KType
+    )
+  ]
 
 builtinDataConstructors :: [(Name, Constructor TypeIndex Kind IndexedType)]
 builtinDataConstructors =
@@ -96,6 +190,27 @@ builtinDataConstructors =
         "Zero"
         0
         (Forall mempty [] (TIntrinsic INat))
+    )
+  ,
+    ( "LessThan"
+    , Constructor
+        "LessThan"
+        0
+        (Forall mempty [] (TConstructor KType "Ordering"))
+    )
+  ,
+    ( "EqualTo"
+    , Constructor
+        "EqualTo"
+        0
+        (Forall mempty [] (TConstructor KType "Ordering"))
+    )
+  ,
+    ( "GreaterThan"
+    , Constructor
+        "GreaterThan"
+        0
+        (Forall mempty [] (TConstructor KType "Ordering"))
     )
   ]
 
@@ -116,7 +231,7 @@ compileModule x = do
 
   x2 <- gets compilerConstraintsGenErrors
 
-  case x2 of
+  case nub x2 of
     errs@(_ : _) ->
       forM_ errs $
         \err -> do
@@ -128,7 +243,7 @@ compileModule x = do
 
   x3 <- gets compilerSolverRuleViolations
 
-  case x3 of
+  case nub x3 of
     errs@(_ : _) ->
       forM_ errs $
         \err -> do
@@ -289,6 +404,16 @@ names =
         [Trait "Numeric" (TVariable (TypeIndex KType 0))]
         (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0))
     )
+  ,
+    ( "compare"
+    , Forall
+        (Set.fromList [TypeIndex KType 0] :: Set (TypeIndex Kind))
+        [Trait "Ordered" (TVariable (TypeIndex KType 0))]
+        ( TVariable (TypeIndex KType 0)
+            `TArrow` TVariable (TypeIndex KType 0)
+            `TArrow` TConstructor KType "Ordering"
+        )
+    )
   ]
 
 moduleCore1 :: Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type)
@@ -301,7 +426,10 @@ moduleCore =
     , moduleImports =
         []
     , moduleObjects =
-        [ OFunction
+        [ OData "EqualTo" 0 (Kernel.TCon "Ordering" [])
+        , OData "GreaterThan" 1 (Kernel.TCon "Ordering" [])
+        , OData "LessThan" 2 (Kernel.TCon "Ordering" [])
+        , OFunction
             "Core$.operator__not"
             [ Label Kernel.bool "a"
             ]
@@ -570,6 +698,38 @@ moduleCore =
                     ( Core$.pack_nat : int32/$Nat
                     , n : int32
                     )
+              |]
+        , OFunction
+            "Core$.compare"
+            [ Label (Kernel.TCon "Ordered" [opaque]) "$a"
+            ]
+            [r| 
+                  match<*/*/Ordering>($a : Ordered(*)) {
+                    | ( $Record : { compare : */*/Ordering | * }/Ordered(*)
+                      , $r : { compare : */*/Ordering | * }
+                      ) =>
+                        select
+                          { compare = $f : */*/Ordering | _ : * } =
+                            $r : { compare : */*/Ordering | * }
+                          in
+                            $f : */*/Ordering
+                  }
+              |]
+        , OFunction
+            "Core$.compare__$instance_Ordered(Intrinsic(Int32))"
+            [ Label Kernel.int32 "x"
+            , Label Kernel.int32 "y"
+            ]
+            [r| 
+                  if ([< int32](x : int32, y : int32))
+                    then
+                      LessThan : Ordering
+                    else
+                      if ([> int32](x : int32, y : int32))
+                        then
+                          GreaterThan : Ordering
+                        else
+                          EqualTo : Ordering
               |]
         ]
     }
