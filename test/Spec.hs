@@ -1,15 +1,21 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
 
-import Coal.Common.Label (Label (..))
 import Coal.Ast.Metadata (Metadata (..))
-import Coal.Kernel.LLVM.IRInterpreter.Monad 
+import Coal.Common.Label (Label (..))
 import Coal.Common.Name (Name)
-import Coal.Compiler
-import Coal.Kernel.LLVM.IRConstruct (IRConstruct (..))
+import Coal.Compiler (kernelTranslationC, mainPass, typeCheckingPass)
 import Coal.Compiler.Environment
 import Coal.Compiler.Stack
 import Coal.Compiler.TypeInference.Errors
+import Coal.Kernel.Compiler (compileModules)
+import Coal.Kernel.LLVM.IRConstruct (IRConstruct (..))
+import Coal.Kernel.LLVM.IREncodable (irEncode)
+import Coal.Kernel.LLVM.IRInterpreter.Monad
+import Coal.Kernel.Language (Object (..), moduleImports, moduleName, moduleObjects, opaque)
+import Coal.Kernel.Parser (spaces)
+import Coal.Kernel.Parser.Expr (expr)
+import Coal.Kernel.Parser.Module (module_)
 import Coal.Language
 import Coal.Language.Module
 import Coal.Parser.Module
@@ -22,19 +28,14 @@ import Data.Set (Set)
 import Data.Text (Text)
 import Data.Void (Void)
 import Debug.Trace
-import Coal.Kernel.Language (Object (..), moduleImports, moduleName, moduleObjects, opaque)
-import Coal.Kernel.Parser (spaces)
-import Coal.Kernel.Parser.Expr (expr)
-import Coal.Kernel.Compiler (compileModules)
-import Coal.Kernel.LLVM.IREncodable (irEncode)
-import Coal.Kernel.Parser.Module (module_)
-import Text.Megaparsec (ParseErrorBundle, errorBundlePretty, runParser, eof)
+import Text.Megaparsec (ParseErrorBundle, eof, errorBundlePretty, runParser)
 import Text.RawString.QQ
 
+import qualified Coal.Kernel.Compiler as Kernel
+import qualified Coal.Kernel.Language as Kernel
 import qualified Data.Set as Set
 import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
-import qualified Coal.Kernel.Language as Kernel
 
 main :: IO ()
 main = do
@@ -58,54 +59,64 @@ compileFiles files = do
     (e : _, _) ->
       putStrLn (errorBundlePretty e)
     (_, objs) -> do
-      evalCompilerT emptyCompilerEnvironment (run objs)
+      runCompilerT emptyCompilerEnvironment (run objs)
+      pure ()
 
 withLocalEnvironment :: (Monad m) => [Definition Metadata Kind ()] -> CompilerT Metadata m a -> CompilerT Metadata m a
 withLocalEnvironment = local . const . buildEnvironment
 
 run :: [(Text, Module Metadata Kind ())] -> CompilerT Metadata IO ()
 run modules = do
-  out <- forM modules $
+  forM_ modules $
     \(src, m@(Module _ _ defs)) -> do
       setSourceText src
       insertNamesC names
-      withLocalEnvironment defs (typeCheckingPass m)
-  x1 <- gets compilerConstraints
-  liftIO (print x1)
-  x2 <- gets compilerConstraintsGenErrors
-  liftIO (print x2)
-  x3 <- gets compilerSolverRuleViolations
-  liftIO (print x3)
-  x4 <- gets compilerTypeAnnotationParams
-  liftIO (print x4)
-  case x2 of
-    errs@(_ : _) ->
-      forM_ errs $
-        \err -> do
-          src <- gets compilerSourceText
-          let msg = prettyErrorMessage [Text.pack (show err)] src err
-          liftIO (Text.putStrLn msg)
-    [] ->
-      case x3 of
-        errs@(_ : _) ->
-          forM_ errs $
-            \err -> do
-              src <- gets compilerSourceText
-              let msg =
-                    prettyErrorMessage
-                      [ "\nType error:"
-                      , Text.pack (show err)
-                      ]
-                      src
-                      err
-              liftIO (Text.putStrLn msg)
-        [] -> do
-          forM_ out $
-            \m -> do
-              b <- mainPass m
-              c <- kernelTranslationC b
-              d <- liftIO (compileModules (moduleCore1 : [c]))
-              liftIO (testModules d)
+      r <- withLocalEnvironment defs (compileModule m)
+      liftIO $ do
+        ms <- Kernel.compileModules (moduleCore1 : [r])
+        testModules ms
+
+compileModule :: (Monad m, Monoid a, Data a, Eq a, Show a) => Module a Kind () -> CompilerT a m (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))
+compileModule x = do
+  a <- typeCheckingPass x
+  b <- mainPass a
+  kernelTranslationC b
+
+--      withLocalEnvironment defs (typeCheckingPass m)
+--  x1 <- gets compilerConstraints
+--  liftIO (print x1)
+--  x2 <- gets compilerConstraintsGenErrors
+--  liftIO (print x2)
+--  x3 <- gets compilerSolverRuleViolations
+--  liftIO (print x3)
+--  x4 <- gets compilerTypeAnnotationParams
+--  liftIO (print x4)
+--  case x2 of
+--    errs@(_ : _) ->
+--      forM_ errs $
+--        \err -> do
+--          src <- gets compilerSourceText
+--          let msg = prettyErrorMessage [Text.pack (show err)] src err
+--          liftIO (Text.putStrLn msg)
+--    [] ->
+--      case x3 of
+--        errs@(_ : _) ->
+--          forM_ errs $
+--            \err -> do
+--              src <- gets compilerSourceText
+--              let msg =
+--                    prettyErrorMessage
+--                      [ "\nType error:"
+--                      , Text.pack (show err)
+--                      ]
+--                      src
+--                      err
+--              liftIO (Text.putStrLn msg)
+--        [] -> do
+--          forM_ out $
+--            \m -> do
+--              b <- mainPass m
+--              kernelTranslationC b
 
 parseFile :: Text -> Either (ParseErrorBundle Text Void) (Text, Module Metadata o ())
 parseFile src = do
@@ -533,7 +544,7 @@ moduleCore =
               |]
         ]
     }
-    
+
 unsafeParseModule :: Text -> Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type)
 unsafeParseModule t =
   case runParser (spaces *> module_ <* eof) "" t of
@@ -576,4 +587,3 @@ buildScript modules =
       <> ".ll -o "
       <> name
       <> ".o"
-
