@@ -94,7 +94,7 @@ parseFunctionDefinition :: Parser (Definition Metadata o ())
 parseFunctionDefinition =
   endingWithSemicolon $ do
     start <- getSourcePos
-    fn <- lexeme_ "fn" *> name
+    fn <- lexeme_ "fun" *> name
     args <- parens (nonEmptyOr parseUnitPattern (commaSep parsePattern))
     withAnnotation $ do
       expr <- symbol_ "=" *> parseExpression

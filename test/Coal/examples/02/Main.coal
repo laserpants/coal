@@ -2,7 +2,7 @@ module Main {
 
   import Core$(trace_int32, pack_nat, unpack_nat, from_int32, `from_int32__$instance_Numeric(Intrinsic(Int32))`);
 
-  fn factorial(n : int32) : int32 =
+  fun factorial(n : int32) : int32 =
     fold(pack_nat(n)) {
       | Zero =>
           1
@@ -10,7 +10,7 @@ module Main {
           unpack_nat(m) * f
     };
 
-  fn main() =
+  fun main() =
     trace_int32(factorial(4));
 
 }

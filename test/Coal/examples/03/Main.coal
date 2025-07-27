@@ -19,7 +19,7 @@ module Main {
     = Node(a, Tree(a), Tree(a))
     | Leaf
 
-  fn less_than_or_equal_to(m) =
+  fun less_than_or_equal_to(m) =
     fn(n) =>
       match(compare(m, n)) {
         | LessThan or EqualTo =>
@@ -28,14 +28,14 @@ module Main {
             false
       };
 
-  fn greater_than(n) =
+  fun greater_than(n) =
     not << less_than_or_equal_to(n);
 
-  fn in_range(range, n) =
+  fun in_range(range, n) =
     greater_than(n, range.min) 
       && (less_than_or_equal_to(n, range.max) || less_than_or_equal_to(range.max, -1));
 
-  fn from_list(list) =
+  fun from_list(list) =
     fold(list, { min = 0, max = -1 }) {
       | (p :: @g) =>
           fn(range) =>
@@ -52,7 +52,7 @@ module Main {
           always(Leaf)
     };
 
-  fn flatten(tree) = 
+  fun flatten(tree) = 
     fold(tree) {
       | Node(y, @lhs, @rhs) =>
           lhs ++ (y :: rhs)
@@ -62,7 +62,7 @@ module Main {
 
   sort = flatten << from_list;
 
-  fn main() = 
+  fun main() = 
     let
       xs =
         [5, 3, 7, 2, 1, 6, 4] : list(int32)
