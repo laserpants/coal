@@ -1,0 +1,17 @@
+module Main {
+
+  import Core$(trace_int32, not, always, from_int32, compare, `from_int32__$instance_Numeric(Intrinsic(Int32))`, `compare__$instance_Ordered(Intrinsic(Int32))`);
+  import Qsort(sort);
+
+  fun main() = 
+    let
+      xs =
+        [5, 3, 7, 2, 1, 6, 4] : list(int32)
+      in
+        trace_int32(match(sort(xs)) {
+          | [] =>
+              12345
+          | (y :: _) =>
+              y
+        }); 
+}

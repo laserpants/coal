@@ -1,0 +1,29 @@
+module Qsort {
+
+  import Core$(trace_int32, not, always, from_int32, compare, `from_int32__$instance_Numeric(Intrinsic(Int32))`, `compare__$instance_Ordered(Intrinsic(Int32))`);
+  import Tree(flatten);
+
+  type Tree(a)
+    = Node(a, Tree(a), Tree(a))
+    | Leaf
+
+  fun from_list(list : list(int32)) : Tree(int32) =
+    fold(list, { min = 0, max = -1 }) {
+      | (p :: @g) =>
+          fn(range) =>
+            if (range.max == -1 || (p > range.min && p <= range.max))
+              then 
+                Node
+                  ( p 
+                  , g({ min = range.min, max = p })
+                  , g({ min = p, max = range.max })
+                  )
+              else
+                g(range)
+      | [] =>
+          always(Leaf)
+    };
+
+  sort = flatten << from_list;
+
+}
