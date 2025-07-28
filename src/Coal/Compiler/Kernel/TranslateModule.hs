@@ -36,23 +36,25 @@ collectImports :: [Definition a k t] -> Environment Name
 collectImports = Environment.fromList . concatMap imports
 
 coreImports :: [Name]
-coreImports =
-  [ "Core$.operator__not"
-  , "Core$.not"
-  , "Core$.operator__reverse_composition"
-  , "Core$.operator__reverse_application"
-  , "Core$.always"
-  , "Core$.operator__list_concatenation"
-  , "Core$.trace_int32"
-  , "Core$.trace_string"
-  , "Core$.operator__string_concatenation"
-  , "Core$.int32_to_string"
-  , "Core$.pair_to_string"
-  , "Core$.list_to_string"
-  , "Core$.trace"
-  , "Core$.unpack_nat"
-  , "Core$.pack_nat"
-  ]
+coreImports = []
+--  [ "Core$.operator__not"
+--  , "Core$.not"
+--  , "Core$.operator__reverse_composition"
+--  , "Core$.operator__reverse_application"
+--  , "Core$.always"
+--  , "Core$.operator__list_concatenation"
+--  , "Core$.trace_int32"
+--  , "Core$.trace_string"
+--  , "Core$.operator__string_concatenation"
+--  , "Core$.int32_to_string"
+--  , "Core$.pair_to_string"
+--  , "Core$.list_to_string"
+--  , "Core$.trace"
+--  , "Core$.unpack_nat"
+--  , "Core$.pack_nat"
+--  , "Core$.from_int32"
+--  , "Core$.compare"
+--  ]
 
 imports :: Definition a k t -> [(Name, Name)]
 imports =

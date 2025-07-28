@@ -20,6 +20,7 @@ import Coal.Kernel.Parser.Expr (expr)
 import Coal.Kernel.Parser.Module (module_)
 import Coal.Language
 import Coal.Language.Module
+import Coal.Parser (ParserError)
 import Coal.Parser.Module
 import Control.Monad (forM, forM_)
 import Control.Monad.IO.Class (MonadIO)
@@ -33,7 +34,6 @@ import Data.Set (Set)
 import Data.Text (Text)
 import Data.Void (Void)
 import Debug.Trace
-import Coal.Parser (ParserError)
 import Extra (Name, (<$$>))
 import Text.Megaparsec (eof, errorBundlePretty, runParser)
 import Text.RawString.QQ
@@ -223,6 +223,29 @@ addBuiltinDefs defs =
       [ Constructor "LessThan" 0 (Forall mempty [] (TConstructor () "Ordering"))
       , Constructor "GreaterThan" 0 (Forall mempty [] (TConstructor () "Ordering"))
       , Constructor "EqualTo" 0 (Forall mempty [] (TConstructor () "Ordering"))
+      ]
+  , DImport
+      (Path ["Core$"])
+      [ "operator__not"
+      , "not"
+      , "operator__reverse_composition"
+      , "operator__reverse_application"
+      , "always"
+      , "operator__list_concatenation"
+      , "trace_int32"
+      , "trace_string"
+      , "operator__string_concatenation"
+      , "int32_to_string"
+      , "pair_to_string"
+      , "list_to_string"
+      , "trace"
+      , "unpack_nat"
+      , "pack_nat"
+      , "from_int32"
+      , "compare"
+      , "from_int32__$instance_Numeric(Intrinsic(Int32))"
+      , "from_int32__$instance_Numeric(Intrinsic(Nat))"
+      , "compare__$instance_Ordered(Intrinsic(Int32))"
       ]
   ]
     <> defs

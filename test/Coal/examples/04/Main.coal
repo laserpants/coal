@@ -1,7 +1,5 @@
 module Main {
 
-  import Core$(trace_int32, not, always, from_int32, compare, `from_int32__$instance_Numeric(Intrinsic(Int32))`, `compare__$instance_Ordered(Intrinsic(Int32))`);
-
   type Tree(a)
     = Node(a, Tree(a), Tree(a))
     | Leaf
