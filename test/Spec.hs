@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE RecordWildCards #-}
@@ -5,6 +6,7 @@
 import Coal.Ast.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment (..))
 import Coal.Common.Label (Label (..))
+import Coal.Common.List1 (NonEmpty (..))
 import Coal.Common.Name (Dictionary, Name)
 import Coal.Compiler (kernelTranslationC, mainPass, typeCheckingPass)
 import Coal.Compiler.Environment
@@ -30,11 +32,12 @@ import Data.Data (Data)
 import Data.Either (partitionEithers)
 import Data.List (nub)
 import Data.Map.Strict (Map)
+import Data.Maybe (fromMaybe)
 import Data.Set (Set)
 import Data.Text (Text)
 import Data.Void (Void)
 import Debug.Trace
-import Extra (Name, (<$$>))
+import Extra (Name, isConstructor, (<$$>))
 import Text.Megaparsec (eof, errorBundlePretty, runParser)
 import Text.RawString.QQ
 
@@ -205,6 +208,7 @@ builtinDataConstructors =
         "Succ"
         1
         (Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic INat))
+        "$Nat"
     )
   ,
     ( "Zero"
@@ -212,6 +216,7 @@ builtinDataConstructors =
         "Zero"
         0
         (Forall mempty [] (TIntrinsic INat))
+        "$Nat"
     )
   ]
 
@@ -220,9 +225,9 @@ addBuiltinDefs defs =
   [ DType
       "Ordering"
       []
-      [ Constructor "LessThan" 0 (Forall mempty [] (TConstructor () "Ordering"))
-      , Constructor "GreaterThan" 0 (Forall mempty [] (TConstructor () "Ordering"))
-      , Constructor "EqualTo" 0 (Forall mempty [] (TConstructor () "Ordering"))
+      [ Constructor "LessThan" 0 (Forall mempty [] (TConstructor () "Ordering")) "Ordering"
+      , Constructor "GreaterThan" 0 (Forall mempty [] (TConstructor () "Ordering")) "Ordering"
+      , Constructor "EqualTo" 0 (Forall mempty [] (TConstructor () "Ordering")) "Ordering"
       ]
   , DImport
       (Path ["Core$"])
@@ -250,9 +255,58 @@ addBuiltinDefs defs =
   ]
     <> defs
 
+insertImportedTypes :: [Definition a k t] -> [Definition a k t]
+insertImportedTypes defs = concatMap go defs <> defs
+ where
+  go =
+    \case
+      DImport (Path pp) ns -> do
+        [t | t@(DType c _ _) <- ds, c `elem` filter isConstructor ns]
+       where
+        pn = Text.intercalate "." pp
+        ds = fromMaybe mempty (Environment.lookup pn borkEnv1)
+      _ ->
+        []
+
+borkEnv1 =
+  Environment.fromList
+    [
+      ( "Tree"
+      ,
+        [ DType
+            "Tree"
+            [Parameter () "a"]
+            [ Constructor
+                "Leaf"
+                0
+                ( Forall
+                    (Set.fromList [Parameter () "a"])
+                    []
+                    ( TApplication () (TConstructor () "Tree") (TVariable (Parameter () "a") :| [])
+                    )
+                )
+                "Tree"
+            , Constructor
+                "Node"
+                3
+                ( Forall
+                    (Set.fromList [Parameter () "a"])
+                    []
+                    ( TVariable (Parameter () "a")
+                        `TArrow` TApplication () (TConstructor () "Tree") (TVariable (Parameter () "a") :| [])
+                        `TArrow` TApplication () (TConstructor () "Tree") (TVariable (Parameter () "a") :| [])
+                        `TArrow` TApplication () (TConstructor () "Tree") (TVariable (Parameter () "a") :| [])
+                    )
+                )
+                "Tree"
+            ]
+        ]
+      )
+    ]
+
 run :: [(Text, Module Metadata Kind ())] -> CompilerT Metadata IO ()
 run modules = do
-  rs <- forM (overModuleDefinitions addBuiltinDefs <$$> modules) $
+  rs <- forM (overModuleDefinitions (insertImportedTypes . addBuiltinDefs) <$$> modules) $
     \(src, m@(Module _ _ defs)) -> do
       setSourceText src
       insertNamesC names

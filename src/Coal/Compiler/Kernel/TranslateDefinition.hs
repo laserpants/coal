@@ -81,6 +81,6 @@ traitAccessor trait fn t = do
   dict = Label (Kernel.TCon trait [Kernel.opaque]) "$a"
 
 translateConstructor :: (MonadReader KernelEnvironment m) => (Int, Constructor Parameter () (Type Parameter ())) -> m KernelObject
-translateConstructor (index, Constructor name _ (Forall _ _ t)) = do
+translateConstructor (index, Constructor name _ (Forall _ _ t) _) = do
   moduleName <- asks kernelEnvironmentModule
   pure (Kernel.OData (moduleName <> "." <> name) index (translateType t))

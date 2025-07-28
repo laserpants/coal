@@ -18,14 +18,11 @@ import Coal.Common.Environment (Environment (..))
 import Coal.Compiler.Transform.Type.AliasExpansion
 import Coal.Compiler.Transform.Type.Parameterized
 import Coal.Language
-import Coal.Common.List1 (NonEmpty (..))
 import Coal.Language.Module.Definition
-import Data.Maybe (fromMaybe)
-import Data.List ((\\))
 import Coal.TypeSystem.Substitution (mapsTo, substituteInScheme)
 import Control.Monad.State (evalState, execState, modify)
 import Data.Map.Strict (Map)
-import Extra (Dictionary, Name, Set, traverse_, (<$$>), isConstructor)
+import Extra (Dictionary, Name, Set, traverse_, (<$$>))
 
 import qualified Coal.Common.Environment as Environment
 import qualified Data.Map.Strict as Map
@@ -69,93 +66,31 @@ buildEnvironment defs =
   instanceEnvironment = buildInstanceEnvironment typeConstructorEnvironment traitEnvironment defs
   aliasEnvironment = buildAliasEnvironment defs
   traitEnvironment = buildTraitEnvironment typeConstructorEnvironment defs
-  dataConstructorEnvironment = buildDataConstructorEnvironment testEnv1 typeConstructorEnvironment defs
-  typeConstructorEnvironment = buildTypeConstructorEnvironment testEnv2 defs
-
-testEnv1 :: Dictionary DataConstructorEnvironment
-testEnv1 =
-  Map.fromList
-    [
-      ( "Tree"
-      , Environment.fromList
-          [ 
-            ( "Node"
-            , Constructor
-                "Node"
-                3
-                (Forall (Set.fromList [TypeIndex KType 0]) 
-                    [] 
-                    (TVariable (TypeIndex KType 0)
-                        `TArrow` TApplication KType (TConstructor (KArrow KType KType) "Tree") (TVariable (TypeIndex KType 0) :| [])
-                        `TArrow` TApplication KType (TConstructor (KArrow KType KType) "Tree") (TVariable (TypeIndex KType 0) :| [])
-                        `TArrow` TApplication KType (TConstructor (KArrow KType KType) "Tree") (TVariable (TypeIndex KType 0) :| [])
-                    )
-                )
-            )
-          , ( "Leaf"
-            , Constructor
-                "Leaf"
-                0
-                (Forall (Set.fromList [TypeIndex KType 0]) [] (TApplication KType (TConstructor (KArrow KType KType) "Tree") (TVariable (TypeIndex KType 0) :| [])))
-            )
-          ]
-      )
-    ]
-
-testEnv2 :: Dictionary TypeConstructorEnvironment
-testEnv2 =
-  Map.fromList
-    [
-      ( "Tree"
-      , Environment.fromList
-          [ 
-            ( "Tree"
-            , KType `KArrow` KType
-            )
-          ]
-      )
-    ]
+  dataConstructorEnvironment = buildDataConstructorEnvironment typeConstructorEnvironment defs
+  typeConstructorEnvironment = buildTypeConstructorEnvironment defs
 
 makeEnv :: (Definition a k t -> [(Name, e)]) -> [Definition a k t] -> Environment e
 makeEnv f = Environment.fromList . concatMap f
 
-findAll :: [Name] -> Environment a -> Either [Name] [(Name, a)]
-findAll names env = 
-    if length names == length found
-      then Right found
-      else Left (names \\ (fst <$> found))
-  where
-    found =
-      Environment.lookupAll names env
-
-buildDataConstructorEnvironment :: Dictionary DataConstructorEnvironment -> TypeConstructorEnvironment -> [Definition a k t] -> DataConstructorEnvironment
-buildDataConstructorEnvironment de env =
+buildDataConstructorEnvironment :: TypeConstructorEnvironment -> [Definition a k t] -> DataConstructorEnvironment
+buildDataConstructorEnvironment env =
   makeEnv
     ( \case
         DType _ _ cs ->
           translateConstructor <$> cs
-        DImport (Path pp) ns -> do
-          let cs = filter isConstructor ns
-              pn = Text.intercalate "." pp
-              env1 = fromMaybe mempty (Map.lookup pn de)
-          case findAll cs env1 of
-            Left missing ->
-              error (show missing)
-            Right found ->
-              found
         _ ->
           []
     )
  where
-  translateConstructor (Constructor n a s) =
-    (n, Constructor n a (translateScheme s))
+  translateConstructor (Constructor n a s tn) =
+    (n, Constructor n a (translateScheme s) tn)
   translateScheme (Forall _ _ t) =
     Forall (typeIndexesIn t1) [] t1
    where
     t1 = evalState (instantiateVars [] env t) (0 :: Int)
 
-buildTypeConstructorEnvironment :: Dictionary TypeConstructorEnvironment -> [Definition a k t] -> TypeConstructorEnvironment
-buildTypeConstructorEnvironment te =
+buildTypeConstructorEnvironment :: [Definition a k t] -> TypeConstructorEnvironment
+buildTypeConstructorEnvironment =
   makeEnv
     ( \case
         DType name ps _ ->
@@ -164,15 +99,6 @@ buildTypeConstructorEnvironment te =
             , foldr KArrow KType (replicate (length ps) KType)
             )
           ]
-        DImport (Path pp) ns -> do
-          let cs = filter isConstructor ns
-              pn = Text.intercalate "." pp
-              env1 = fromMaybe mempty (Map.lookup pn te)
-          case findAll cs env1 of
-            Left missing ->
-              error (show missing)
-            Right found ->
-              found
         _ -> []
     )
 

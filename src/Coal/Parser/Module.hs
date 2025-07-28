@@ -67,19 +67,19 @@ parseTypeDefinition = do
   pure (DType n ps cs)
 
 parseConstructor :: Name -> [Parameter ()] -> Parser (Constructor Parameter () (Type Parameter ()))
-parseConstructor c qs = do
+parseConstructor tn qs = do
   n <- constructor
   ps <- option [] (parens (commaSep1 parseType))
-  pure (Constructor n (length ps) (Forall (Set.fromList qs) [] (foldr TArrow t0 ps)))
+  pure (Constructor n (length ps) (Forall (Set.fromList qs) [] (foldr TArrow t0 ps)) tn)
  where
   t0 =
     case qs of
       [] ->
-        TConstructor () c
+        TConstructor () tn
       a : as ->
         TApplication
           ()
-          (TConstructor () c)
+          (TConstructor () tn)
           (TVariable <$> (a :| as))
 
 parseImport :: Parser (Definition Metadata o ())
