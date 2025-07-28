@@ -104,10 +104,10 @@ placeholderInsertionC :: (Monad m, Monoid a, Data a) => Module a Kind IndexedTyp
 placeholderInsertionC (Module p ns ds) = do
   es <- forM ds $
     \case
-      d@(DConstant name c) -> do
+      d@(DConstant name _) -> do
         d1 <- placeholderTrans expandTraits d
         case d1 of
-          DConstant _ (Constant _ (With ts t) e) -> do
+          DConstant _ (Constant _ (With ts t) _) -> do
             insertNameC name (Forall (typeIndexesIn t) ts t)
           _ ->
             error "Implementation error"
