@@ -2,10 +2,6 @@ module Qsort {
 
   import Tree(Tree, flatten);
 
-//  type Tree(a)
-//    = Node(a, Tree(a), Tree(a))
-//    | Leaf
-
   fun from_list(list : list(int32)) : Tree(int32) =
     fold(list, { min = 0, max = -1 }) {
       | (p :: @g) =>

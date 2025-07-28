@@ -72,6 +72,7 @@ buildEnvironment defs =
   dataConstructorEnvironment = buildDataConstructorEnvironment testEnv1 typeConstructorEnvironment defs
   typeConstructorEnvironment = buildTypeConstructorEnvironment testEnv2 defs
 
+testEnv1 :: Dictionary DataConstructorEnvironment
 testEnv1 =
   Map.fromList
     [
@@ -101,6 +102,7 @@ testEnv1 =
       )
     ]
 
+testEnv2 :: Dictionary TypeConstructorEnvironment
 testEnv2 =
   Map.fromList
     [

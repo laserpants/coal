@@ -87,7 +87,7 @@ parseImport =
   endingWithSemicolon $ do
     lexeme_ "import"
     path <- (lexeme "Core$" <|> identifier upperChar) `sepBy1` symbol "."
-    names <- option ["*"] (parens (commaSep (backtickString <|> name)))
+    names <- option ["*"] (parens (commaSep (backtickString <|> name <|> identifier upperChar)))
     pure (DImport (Path path) names)
 
 parseFunctionDefinition :: Parser (Definition Metadata o ())
