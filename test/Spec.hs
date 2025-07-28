@@ -33,8 +33,9 @@ import Data.Set (Set)
 import Data.Text (Text)
 import Data.Void (Void)
 import Debug.Trace
+import Coal.Parser (ParserError)
 import Extra (Name, (<$$>))
-import Text.Megaparsec (ParseErrorBundle, eof, errorBundlePretty, runParser)
+import Text.Megaparsec (eof, errorBundlePretty, runParser)
 import Text.RawString.QQ
 
 import qualified Coal.Common.Environment as Environment
@@ -274,7 +275,7 @@ compileModule x = do
   b <- mainPass a
   kernelTranslationC b
 
-parseFile :: Text -> Either (ParseErrorBundle Text Void) (Text, Module Metadata o ())
+parseFile :: Text -> Either ParserError (Text, Module Metadata o ())
 parseFile src = do
   m <- runParser parseModule "" src
   pure (src, m)
