@@ -253,8 +253,8 @@ addBuiltinDefs defs =
   ]
     <> defs
 
-insertImportedTypes :: [Definition a k t] -> [Definition a k t]
-insertImportedTypes defs = concatMap go defs <> defs
+insertImportedTypes :: Environment [Definition a Kind ()] -> [Definition a Kind ()] -> [Definition a Kind ()]
+insertImportedTypes env defs = concatMap go defs <> defs
  where
   go =
     \case
@@ -262,51 +262,24 @@ insertImportedTypes defs = concatMap go defs <> defs
         [t | t@(DType c _ _) <- ds, c `elem` filter isConstructor ns]
        where
         pn = Text.intercalate "." path
-        ds = fromMaybe mempty (Environment.lookup pn borkEnv1)
+        ds = fromMaybe mempty (Environment.lookup pn env)
       _ ->
         []
 
-borkEnv1 =
-  Environment.fromList
-    [
-      ( "Tree"
-      ,
-        [ DType
-            "Tree"
-            [Parameter () "a"]
-            [ Constructor
-                "Leaf"
-                0
-                ( Forall
-                    (Set.fromList [Parameter () "a"])
-                    []
-                    ( TApplication () (TConstructor () "Tree") (TVariable (Parameter () "a") :| [])
-                    )
-                )
-            , Constructor
-                "Node"
-                3
-                ( Forall
-                    (Set.fromList [Parameter () "a"])
-                    []
-                    ( TVariable (Parameter () "a")
-                        `TArrow` TApplication () (TConstructor () "Tree") (TVariable (Parameter () "a") :| [])
-                        `TArrow` TApplication () (TConstructor () "Tree") (TVariable (Parameter () "a") :| [])
-                        `TArrow` TApplication () (TConstructor () "Tree") (TVariable (Parameter () "a") :| [])
-                    )
-                )
-            ]
-        ]
-      )
-    ]
-
 run :: [(Text, Module Metadata Kind ())] -> CompilerT Metadata IO ()
 run modules = do
-  rs <- forM (overModuleDefinitions (insertImportedTypes . addBuiltinDefs) <$$> modules) $
-    \(src, m@(Module _ _ defs)) -> do
-      setSourceText src
+  rs <- forM (overModuleDefinitions addBuiltinDefs <$$> modules) $
+    \(src, m1) -> do
+      defs <- gets compilerTypeDefinitions
+      let m2 = overModuleDefinitions (insertImportedTypes defs) m1
+      setSourceTextC src
       insertNamesC names
-      withLocalEnvironment defs (compileModule m)
+      case m2 of
+        Module (Path path) _ defs -> do
+          insertTypeDefinitionsC (Text.intercalate "." path) [t | t@(DType c _ _) <- defs]
+          withLocalEnvironment defs (compileModule m2)
+        _ ->
+          error "Implementation error"
   liftIO $ do
     ms <- Kernel.compileModules (moduleCore1 : rs)
     testModules ms

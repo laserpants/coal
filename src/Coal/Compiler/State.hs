@@ -13,6 +13,7 @@ module Coal.Compiler.State (
   overCompilerSolverRuleViolations,
   overCompilerTypeAnnotationParams,
   overCompilerStateConstraintsGenErrors,
+  overCompilerTypeDefinitions,
   overCompilerSourceText,
   initialCompilerState,
 ) where
@@ -23,6 +24,7 @@ import Coal.Language
 import Coal.TypeSystem
 import Data.Text (Text)
 import Extra (Dictionary, Over)
+import Coal.Language.Module (Definition (..))
 
 type CompilerConstraint a = Constraint (InferenceRule Kind a) TypeIndex Kind IndexedType
 
@@ -37,6 +39,7 @@ data CompilerState a = CompilerState
   , compilerSolverRuleViolations :: [InferenceRule Kind a]
   , compilerAssumptions :: [CompilerAssumption]
   , compilerTypeAnnotationParams :: Dictionary (a, TypeIndex Kind)
+  , compilerTypeDefinitions :: Environment [Definition a Kind ()]
   , compilerSourceText :: Text
   }
   deriving (Show, Eq, Ord, Read)
@@ -77,6 +80,10 @@ overCompilerTypeAnnotationParams fn CompilerState{..} = CompilerState{compilerTy
 overCompilerSolverRuleViolations :: Over (CompilerState a) [InferenceRule Kind a]
 overCompilerSolverRuleViolations fn CompilerState{..} = CompilerState{compilerSolverRuleViolations = fn compilerSolverRuleViolations, ..}
 
+{-# INLINE overCompilerTypeDefinitions #-}
+overCompilerTypeDefinitions :: Over (CompilerState a) (Environment [Definition a Kind ()])
+overCompilerTypeDefinitions fn CompilerState{..} = CompilerState{compilerTypeDefinitions = fn compilerTypeDefinitions, ..}
+
 {-# INLINE overCompilerSourceText #-}
 overCompilerSourceText :: Over (CompilerState a) Text
 overCompilerSourceText fn CompilerState{..} = CompilerState{compilerSourceText = fn compilerSourceText, ..}
@@ -93,4 +100,5 @@ initialCompilerState =
     , compilerAssumptions = []
     , compilerTypeAnnotationParams = mempty
     , compilerSourceText = mempty
+    , compilerTypeDefinitions = mempty
     }

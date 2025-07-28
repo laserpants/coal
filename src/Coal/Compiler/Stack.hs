@@ -21,7 +21,8 @@ module Coal.Compiler.Stack (
   updateSupply,
   updateSupplyC,
   insertSupplyC,
-  setSourceText,
+  insertTypeDefinitionsC,
+  setSourceTextC,
   compilerReportConstraintsGenErrors,
   compilerReportSolverRuleViolations,
   compilerSetTypeAnnotationParams,
@@ -39,6 +40,7 @@ import Control.Monad.Reader (MonadReader)
 import Control.Monad.State (MonadState, modify)
 import Data.Text (Text)
 import Extra (Dictionary, Name, (<$$$>))
+import Coal.Language.Module (Definition (..))
 
 import qualified Coal.Common.Environment as Environment
 
@@ -112,5 +114,10 @@ updateSupplyC supply = modify (overCompilerSupply (const supply))
 updateSubstitutionC :: (Monad m) => Substitution -> CompilerT a m ()
 updateSubstitutionC sub = modify (overCompilerSubstitution (const sub))
 
-setSourceText :: (Monad m) => Text -> CompilerT a m ()
-setSourceText src = modify (overCompilerSourceText (const src))
+{-# INLINE setSourceTextC #-}
+setSourceTextC :: (Monad m) => Text -> CompilerT a m ()
+setSourceTextC src = modify (overCompilerSourceText (const src))
+
+{-# INLINE insertTypeDefinitionsC #-}
+insertTypeDefinitionsC :: (Monad m) => Name -> [Definition a Kind ()] -> CompilerT a m ()
+insertTypeDefinitionsC name defs = modify (overCompilerTypeDefinitions (Environment.insert name defs))
