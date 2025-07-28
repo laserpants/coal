@@ -99,10 +99,12 @@ compileFiles files = do
   fs <- traverse readFile files
   let results = fmap (parseFile . Text.pack) fs
   case partitionEithers results of
-    (e : _, _) ->
-      putStrLn (errorBundlePretty e)
-    (_, objs) -> do
+    ([], objs) -> do
       evalCompilerT emptyCompilerEnvironment (run objs)
+    (es, _) ->
+      forM_ es $
+        \e ->
+          putStrLn (errorBundlePretty e)
 
 withLocalEnvironment :: (Monad m) => [Definition Metadata Kind ()] -> CompilerT Metadata m a -> CompilerT Metadata m a
 withLocalEnvironment = local . const . (insertBuiltinConstructors . buildEnvironment)
