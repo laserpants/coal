@@ -2,9 +2,9 @@
 
 module Coal.Parser.Expression (parseExpression) where
 
-import Coal.Ast.Metadata (Metadata (..), getMetadata, metadataSpan)
+import Coal.Ast.Metadata (Metadata (..), metadataSpan)
 import Coal.Common.Label (Label (..))
-import Coal.Common.List1 (List1 (..), NonEmpty (..))
+import Coal.Common.List1 (List1, NonEmpty (..))
 import Coal.Language
 import Coal.Parser
 import Coal.Parser.Identifier
@@ -13,7 +13,6 @@ import Coal.Parser.Pattern (parsePattern)
 import Coal.Parser.Symbol
 import Coal.Parser.Type (parseType)
 import Control.Monad.Combinators.Expr
-import Data.Functor (($>))
 import Extra (Name)
 import Text.Megaparsec (getSourcePos, notFollowedBy, optional, some, try, (<|>))
 
