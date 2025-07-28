@@ -261,8 +261,7 @@ insertImportedTypes env defs = concatMap go defs <> defs
       DImport (Path path) ns -> do
         [t | t@(DType c _ _) <- ds, c `elem` filter isConstructor ns]
        where
-        pn = Text.intercalate "." path
-        ds = fromMaybe mempty (Environment.lookup pn env)
+        ds = fromMaybe mempty (Environment.lookup (Text.intercalate "." path) env)
       _ ->
         []
 
@@ -278,8 +277,6 @@ run modules = do
         Module (Path path) _ defs -> do
           insertTypeDefinitionsC (Text.intercalate "." path) [t | t@(DType c _ _) <- defs]
           withLocalEnvironment defs (compileModule m2)
-        _ ->
-          error "Implementation error"
   liftIO $ do
     ms <- Kernel.compileModules (moduleCore1 : rs)
     testModules ms
