@@ -73,6 +73,14 @@ main4 = do
     ]
   pure ()
 
+main5 :: IO ()
+main5 = do
+  compileFiles
+    [ "./test/Coal/examples/05/Math.coal"
+    , "./test/Coal/examples/05/Main.coal"
+    ]
+  pure ()
+
 compileFiles :: [String] -> IO ()
 compileFiles files = do
   fs <- traverse readFile files
@@ -211,14 +219,14 @@ addBuiltinDefs defs =
 
 run :: [(Text, Module Metadata Kind ())] -> CompilerT Metadata IO ()
 run modules = do
-  forM_ (overModuleDefinitions addBuiltinDefs <$$> modules) $
+  rs <- forM (overModuleDefinitions addBuiltinDefs <$$> modules) $
     \(src, m@(Module _ _ defs)) -> do
       setSourceText src
       insertNamesC names
-      r <- withLocalEnvironment defs (compileModule m)
-      liftIO $ do
-        ms <- Kernel.compileModules (moduleCore1 : [r])
-        testModules ms
+      withLocalEnvironment defs (compileModule m)
+  liftIO $ do
+    ms <- Kernel.compileModules (moduleCore1 : rs)
+    testModules ms
 
 compileModule :: (MonadIO m) => Module Metadata Kind () -> CompilerT Metadata m (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))
 compileModule x = do
