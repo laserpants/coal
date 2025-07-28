@@ -21,10 +21,10 @@ module Coal.Compiler.State (
 import Coal.Common.Environment (Environment (..))
 import Coal.Common.Supply (Supply (..))
 import Coal.Language
+import Coal.Language.Module (Definition (..))
 import Coal.TypeSystem
 import Data.Text (Text)
 import Extra (Dictionary, Over)
-import Coal.Language.Module (Definition (..))
 
 type CompilerConstraint a = Constraint (InferenceRule Kind a) TypeIndex Kind IndexedType
 

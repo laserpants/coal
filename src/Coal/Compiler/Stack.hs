@@ -33,6 +33,7 @@ import Coal.Common.Supply (Supply (..))
 import Coal.Compiler.Environment (CompilerEnvironment (..))
 import Coal.Compiler.State
 import Coal.Language
+import Coal.Language.Module (Definition (..))
 import Coal.TypeSystem
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.RWS (RWST, runRWST)
@@ -40,7 +41,6 @@ import Control.Monad.Reader (MonadReader)
 import Control.Monad.State (MonadState, modify)
 import Data.Text (Text)
 import Extra (Dictionary, Name, (<$$$>))
-import Coal.Language.Module (Definition (..))
 
 import qualified Coal.Common.Environment as Environment
 
