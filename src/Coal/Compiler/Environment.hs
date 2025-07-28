@@ -82,8 +82,8 @@ buildDataConstructorEnvironment env =
           []
     )
  where
-  translateConstructor (Constructor n a s tn) =
-    (n, Constructor n a (translateScheme s) tn)
+  translateConstructor (Constructor n a s) =
+    (n, Constructor n a (translateScheme s))
   translateScheme (Forall _ _ t) =
     Forall (typeIndexesIn t1) [] t1
    where

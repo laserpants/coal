@@ -208,7 +208,6 @@ builtinDataConstructors =
         "Succ"
         1
         (Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic INat))
-        "$Nat"
     )
   ,
     ( "Zero"
@@ -216,7 +215,6 @@ builtinDataConstructors =
         "Zero"
         0
         (Forall mempty [] (TIntrinsic INat))
-        "$Nat"
     )
   ]
 
@@ -225,9 +223,9 @@ addBuiltinDefs defs =
   [ DType
       "Ordering"
       []
-      [ Constructor "LessThan" 0 (Forall mempty [] (TConstructor () "Ordering")) "Ordering"
-      , Constructor "GreaterThan" 0 (Forall mempty [] (TConstructor () "Ordering")) "Ordering"
-      , Constructor "EqualTo" 0 (Forall mempty [] (TConstructor () "Ordering")) "Ordering"
+      [ Constructor "LessThan" 0 (Forall mempty [] (TConstructor () "Ordering"))
+      , Constructor "GreaterThan" 0 (Forall mempty [] (TConstructor () "Ordering"))
+      , Constructor "EqualTo" 0 (Forall mempty [] (TConstructor () "Ordering"))
       ]
   , DImport
       (Path ["Core$"])
@@ -260,10 +258,10 @@ insertImportedTypes defs = concatMap go defs <> defs
  where
   go =
     \case
-      DImport (Path pp) ns -> do
+      DImport (Path path) ns -> do
         [t | t@(DType c _ _) <- ds, c `elem` filter isConstructor ns]
        where
-        pn = Text.intercalate "." pp
+        pn = Text.intercalate "." path
         ds = fromMaybe mempty (Environment.lookup pn borkEnv1)
       _ ->
         []
@@ -285,7 +283,6 @@ borkEnv1 =
                     ( TApplication () (TConstructor () "Tree") (TVariable (Parameter () "a") :| [])
                     )
                 )
-                "Tree"
             , Constructor
                 "Node"
                 3
@@ -298,7 +295,6 @@ borkEnv1 =
                         `TArrow` TApplication () (TConstructor () "Tree") (TVariable (Parameter () "a") :| [])
                     )
                 )
-                "Tree"
             ]
         ]
       )

@@ -15,6 +15,5 @@ data Constructor o k t = Constructor
   { constructorName :: Name
   , constructorArity :: Int
   , constructorScheme :: Scheme o k t
-  , constructorTypeName :: Name
   }
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable, Generic)

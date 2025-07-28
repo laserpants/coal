@@ -70,7 +70,7 @@ parseConstructor :: Name -> [Parameter ()] -> Parser (Constructor Parameter () (
 parseConstructor tn qs = do
   n <- constructor
   ps <- option [] (parens (commaSep1 parseType))
-  pure (Constructor n (length ps) (Forall (Set.fromList qs) [] (foldr TArrow t0 ps)) tn)
+  pure (Constructor n (length ps) (Forall (Set.fromList qs) [] (foldr TArrow t0 ps)))
  where
   t0 =
     case qs of
