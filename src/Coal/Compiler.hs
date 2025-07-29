@@ -6,7 +6,6 @@
 
 module Coal.Compiler where
 
-import Coal.Compiler.Transform.Pattern.RecordDesugar
 import Coal.Compiler.Kernel.TranslateModule (translateModule)
 import Coal.Compiler.PatternMatching
 import Coal.Compiler.PatternMatching.Rule (MatchMonad (..), runMatchMonad)
@@ -18,6 +17,7 @@ import Coal.Compiler.Transform.NormalizeObjects (NormalizeObjectsTransformContex
 import Coal.Compiler.Transform.Pattern.AsDesugar
 import Coal.Compiler.Transform.Pattern.Desugar
 import Coal.Compiler.Transform.Pattern.OrExpansion
+import Coal.Compiler.Transform.Pattern.RecordDesugar
 import Coal.Compiler.Transform.Type.AliasExpansion
 import Coal.Compiler.Transform.Unfold
 import Coal.Compiler.TypeInference

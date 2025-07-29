@@ -23,10 +23,9 @@ import Coal.Language
 import Coal.Language.Module (Module (..))
 import Control.Monad.RWS
 import Data.Data (Data)
-import Data.Tuple.Extra (first)
 import Data.Foldable (foldrM)
 import Data.Generics.Uniplate.Data (transformBiM)
-import Data.Tuple.Extra (thd3)
+import Data.Tuple.Extra (first, thd3)
 import Extra (Dictionary, Map, Name, (<$$>))
 
 import qualified Data.Map.Strict as Map
@@ -35,7 +34,7 @@ type IndexedPattern a = Pattern a IndexedType
 
 type W a = [(Name, Dictionary (IndexedPattern a), Maybe (IndexedPattern a))]
 
-newtype RecordPatternStack a p = RecordPatternStack{recordPatternStack :: RWS Name (W a) Int p}
+newtype RecordPatternStack a p = RecordPatternStack {recordPatternStack :: RWS Name (W a) Int p}
   deriving
     ( Functor
     , Applicative
@@ -43,7 +42,7 @@ newtype RecordPatternStack a p = RecordPatternStack{recordPatternStack :: RWS Na
     , MonadReader Name
     , MonadWriter (W a)
     , MonadState Int
-    , MonadRWS Name (W a) Int 
+    , MonadRWS Name (W a) Int
     )
 
 compileRecordPatterns :: forall a k t. (Monoid a, Show a, Data a, Data t, Data k) => Module a k t -> RecordPatternStack a (Module a k t)
@@ -55,14 +54,14 @@ class RecordPattern a p where
 -- TODO
 runExpandRecordPatterns :: RecordPatternStack a p -> Name -> Int -> (p, Int)
 runExpandRecordPatterns a b c = (x, y)
-  where
-    (x, y, z) = runRWS (recordPatternStack a) b c
+ where
+  (x, y, z) = runRWS (recordPatternStack a) b c
 
---runExpandRecordPatterns :: RecordPatternStack a p -> Name -> Int -> (p, W a)
---runExpandRecordPatterns = evalRWS . recordPatternStack
+-- runExpandRecordPatterns :: RecordPatternStack a p -> Name -> Int -> (p, W a)
+-- runExpandRecordPatterns = evalRWS . recordPatternStack
 --
---evalExpandRecordPatterns :: RecordPatternStack a p -> Name -> Int -> p
---evalExpandRecordPatterns s = fst <$$> runExpandRecordPatterns s 
+-- evalExpandRecordPatterns :: RecordPatternStack a p -> Name -> Int -> p
+-- evalExpandRecordPatterns s = fst <$$> runExpandRecordPatterns s
 
 instance (RecordPattern a p) => RecordPattern a [p] where
   expandRecordPatterns = traverse expandRecordPatterns
