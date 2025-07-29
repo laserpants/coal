@@ -27,7 +27,7 @@ import Coal.Language.Module.Definition
 import Coal.TypeSystem.Substitution (normalizeTypeIndexes)
 import Control.Monad ((>=>))
 import Control.Monad.Reader (Reader, asks, runReader)
-import Control.Monad.State (get, gets, runState)
+import Control.Monad.State (gets, runState)
 import Data.Data (Data)
 import Extra (Name, forM)
 

@@ -2,6 +2,7 @@
 
 module Coal.Parser.Expression (parseExpression) where
 
+import Control.Monad (void)
 import Coal.Ast.Metadata (Metadata (..), metadataSpan)
 import Coal.Common.Label (Label (..))
 import Coal.Common.List1 (List1, NonEmpty (..))
@@ -14,10 +15,13 @@ import Coal.Parser.Symbol
 import Coal.Parser.Type (parseType)
 import Control.Monad.Combinators.Expr
 import Extra (Name)
-import Text.Megaparsec (getSourcePos, notFollowedBy, optional, some, try, (<|>))
+import Text.Megaparsec (getSourcePos, notFollowedBy, optional, some, try, manyTill, (<|>))
+import Text.Megaparsec.Char (char)
 
 import qualified Data.Map.Strict as Map
+import qualified Data.Text as Text
 import qualified Text.Megaparsec.Char.Lexer as Lexer
+import qualified Data.Text.Encoding as Text
 
 parseExpression :: Parser (Expression Metadata ())
 parseExpression = makeExprParser go operator
@@ -179,6 +183,17 @@ parseLiteralExpression =
   parseListLiteral
     <|> parseTrue
     <|> parseFalse
+    <|> parseStringLiteral
+
+dquote :: Parser Char
+dquote = char '"'
+
+parseStringLiteral :: Parser (Expression Metadata ())
+parseStringLiteral =
+  lexeme $ do
+    void dquote
+    chars <- manyTill Lexer.charLiteral dquote
+    pure (ELiteral undefined (LString (Text.encodeUtf8 (Text.pack chars))))
 
 unaryOperator :: UnaryOperator -> Expression Metadata () -> Expression Metadata ()
 unaryOperator op e1 =
