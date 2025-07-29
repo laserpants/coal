@@ -1,5 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -9,9 +10,12 @@
 
 module Coal.Compiler.Transform.Pattern.RecordDesugar (
   RecordPattern (..),
-  TypedPattern,
+  RecordPatternStack (..),
+  IndexedPattern,
   compileRecordPatterns,
   runExpandRecordPatterns,
+  run2ExpandRecordPatterns,
+  evalExpandRecordPatterns,
 ) where
 
 import Coal.Common.Label (Label (..))
@@ -21,27 +25,46 @@ import Coal.Language
 import Coal.Language.Module (Module (..))
 import Control.Monad.RWS
 import Data.Data (Data)
+import Data.Tuple.Extra (first)
 import Data.Foldable (foldrM)
 import Data.Generics.Uniplate.Data (transformBiM)
 import Data.Tuple.Extra (thd3)
-import Extra (Dictionary, Map, Name)
+import Extra (Dictionary, Map, Name, (<$$>))
 
 import qualified Data.Map.Strict as Map
 
-type TypedPattern a = Pattern a (Type TypeIndex Kind)
+type IndexedPattern a = Pattern a IndexedType
 
-compileRecordPatterns ::
-  forall a k t.
-  (Monoid a, Show a, Data a, Data t, Data k) =>
-  Module a k t ->
-  RWS Name [(Name, Dictionary (TypedPattern a), Maybe (TypedPattern a))] Int (Module a k t)
+type W a = [(Name, Dictionary (IndexedPattern a), Maybe (IndexedPattern a))]
+
+newtype RecordPatternStack a p = RecordPatternStack{recordPatternStack :: RWS Name (W a) Int p}
+  deriving
+    ( Functor
+    , Applicative
+    , Monad
+    , MonadReader Name
+    , MonadWriter (W a)
+    , MonadState Int
+    , MonadRWS Name (W a) Int 
+    )
+
+compileRecordPatterns :: forall a k t. (Monoid a, Show a, Data a, Data t, Data k) => Module a k t -> RecordPatternStack a (Module a k t)
 compileRecordPatterns = transformBiM (expandRecordPatterns @a @(Expression a (Type TypeIndex Kind)))
 
 class RecordPattern a p where
-  expandRecordPatterns :: p -> RWS Name [(Name, Dictionary (TypedPattern a), Maybe (TypedPattern a))] Int p
+  expandRecordPatterns :: p -> RecordPatternStack a p
 
-runExpandRecordPatterns :: RWS Name w Int a -> Name -> Int -> (a, w)
-runExpandRecordPatterns = evalRWS
+-- TODO
+run2ExpandRecordPatterns :: RecordPatternStack a p -> Name -> Int -> (p, Int)
+run2ExpandRecordPatterns a b c = (x, y)
+  where
+    (x, y, z) = runRWS (recordPatternStack a) b c
+
+runExpandRecordPatterns :: RecordPatternStack a p -> Name -> Int -> (p, W a)
+runExpandRecordPatterns = evalRWS . recordPatternStack
+
+evalExpandRecordPatterns :: RecordPatternStack a p -> Name -> Int -> p
+evalExpandRecordPatterns s = fst <$$> runExpandRecordPatterns s 
 
 instance (RecordPattern a p) => RecordPattern a [p] where
   expandRecordPatterns = traverse expandRecordPatterns
@@ -55,7 +78,7 @@ instance (RecordPattern a p) => RecordPattern a (Map k p) where
 instance (RecordPattern a p) => RecordPattern a (Maybe p) where
   expandRecordPatterns = traverse expandRecordPatterns
 
-instance (Data a, Monoid a, Show a) => RecordPattern a (Expression a (Type TypeIndex Kind)) where
+instance (Data a, Monoid a, Show a) => RecordPattern a (Expression a IndexedType) where
   expandRecordPatterns =
     \case
       EMatch a t e cs ->
@@ -65,13 +88,13 @@ instance (Data a, Monoid a, Show a) => RecordPattern a (Expression a (Type TypeI
       e ->
         pure e
 
-instance (Data a, Monoid a, Show a) => RecordPattern a (Guard Expression a (Type TypeIndex Kind)) where
+instance (Data a, Monoid a, Show a) => RecordPattern a (Guard Expression a IndexedType) where
   expandRecordPatterns =
     \case
       CGuard e ->
         CGuard <$> expandRecordPatterns e
 
-instance (Data a, Monoid a, Show a) => RecordPattern a (Clause a (Type TypeIndex Kind)) where
+instance (Data a, Monoid a, Show a) => RecordPattern a (Clause a IndexedType) where
   expandRecordPatterns =
     \case
       EClause a pat clauses -> do
@@ -123,7 +146,7 @@ instance (Data a, Monoid a, Show a) => RecordPattern a (Clause a (Type TypeIndex
 
       pure (prefix, RExtend fieldName t2 row, focusExpr)
 
-instance (Monoid a, Show a) => RecordPattern a (Pattern a (Type TypeIndex Kind)) where
+instance (Monoid a, Show a) => RecordPattern a (Pattern a IndexedType) where
   expandRecordPatterns =
     \case
       PAnnotation a t p ->

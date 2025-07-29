@@ -6,6 +6,7 @@
 
 module Coal.Compiler where
 
+import Coal.Compiler.Transform.Pattern.RecordDesugar
 import Coal.Compiler.Kernel.TranslateModule (translateModule)
 import Coal.Compiler.PatternMatching
 import Coal.Compiler.PatternMatching.Rule (MatchMonad (..), runMatchMonad)
@@ -82,6 +83,12 @@ patternDesugarTrans f e = withSupplyC (\n -> runPatternDesugar "v" n (f e))
 desugarPatternsC :: (Monad m, Sugared s TypeIndex Kind c) => c -> CompilerT a m c
 desugarPatternsC = patternDesugarTrans desugarPatterns
 
+recordPatternDesugarTrans :: (Monad m) => (c -> RecordPatternStack a c) -> c -> CompilerT a m c
+recordPatternDesugarTrans f e = withSupplyC (run2ExpandRecordPatterns (f e) "FOO")
+
+recordPatternDesugarC :: (Monad m, Monoid a, Data a, Show a) => Module a Kind IndexedType -> CompilerT a m (Module a Kind IndexedType)
+recordPatternDesugarC = recordPatternDesugarTrans compileRecordPatterns
+
 matchMonadTrans :: (Monad m) => (c -> MatchMonad c) -> c -> CompilerT a m c
 matchMonadTrans f e = withSupplyC (\n -> runMatchMonad "match" n (f e))
 
@@ -141,8 +148,8 @@ mainPass =
     >=> desugarPatternsC
     -- Compile or-patterns
     >=> compileOrPatterns
-    --    -- Translate record patterns to select operators
-    --    >=> TODO
+    -- Translate record patterns to select operators
+    >=> recordPatternDesugarC
     -- Compile as-patterns
     >=> pure . desugarAsPatterns
     -- Compile match statements
