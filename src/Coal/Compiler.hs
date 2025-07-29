@@ -84,7 +84,7 @@ desugarPatternsC :: (Monad m, Sugared s TypeIndex Kind c) => c -> CompilerT a m 
 desugarPatternsC = patternDesugarTrans desugarPatterns
 
 recordPatternDesugarTrans :: (Monad m) => (c -> RecordPatternStack a c) -> c -> CompilerT a m c
-recordPatternDesugarTrans f e = withSupplyC (runExpandRecordPatterns (f e) "FOO")
+recordPatternDesugarTrans f e = withSupplyC (runExpandRecordPatterns (f e) "row")
 
 recordPatternDesugarC :: (Monad m, Monoid a, Data a, Show a) => Module a Kind IndexedType -> CompilerT a m (Module a Kind IndexedType)
 recordPatternDesugarC = recordPatternDesugarTrans compileRecordPatterns
