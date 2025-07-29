@@ -3,10 +3,10 @@ module Main {
   fun main() =
     let 
       r = 
-        { a = "hello", b = { msg = "wat" } }
+        { b = { msg = "wat" } }
       in
         match(r) {
-          | { b = b, a = _ } =>
+          | { b = b } =>
               trace_string(b.msg)
         };
 }
