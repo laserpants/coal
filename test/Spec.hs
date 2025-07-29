@@ -129,6 +129,13 @@ main11 = do
     ]
   pure ()
 
+main12 :: IO ()
+main12 = do
+  compileFiles
+    [ "./test/Coal/examples/12/Main.coal"
+    ]
+  pure ()
+
 compileFiles :: [String] -> IO ()
 compileFiles files = do
   fs <- traverse readFile files

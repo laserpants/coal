@@ -25,13 +25,14 @@ import Control.Monad.RWS
 import Data.Data (Data)
 import Data.Foldable (foldrM)
 import Data.Generics.Uniplate.Data (transformBiM)
-import Data.Tuple.Extra (first, thd3)
-import Extra (Dictionary, Map, Name, (<$$>))
+import Data.Tuple.Extra (thd3)
+import Extra (Dictionary, Map, Name)
 
 import qualified Data.Map.Strict as Map
 
 type IndexedPattern a = Pattern a IndexedType
 
+-- TODO
 type W a = [(Name, Dictionary (IndexedPattern a), Maybe (IndexedPattern a))]
 
 newtype RecordPatternStack a p = RecordPatternStack {recordPatternStack :: RWS Name (W a) Int p}
@@ -51,17 +52,11 @@ compileRecordPatterns = transformBiM (expandRecordPatterns @a @(Expression a (Ty
 class RecordPattern a p where
   expandRecordPatterns :: p -> RecordPatternStack a p
 
--- TODO
+{-# INLINE runExpandRecordPatterns #-}
 runExpandRecordPatterns :: RecordPatternStack a p -> Name -> Int -> (p, Int)
-runExpandRecordPatterns a b c = (x, y)
+runExpandRecordPatterns a n s = (fst_, snd_)
  where
-  (x, y, z) = runRWS (recordPatternStack a) b c
-
--- runExpandRecordPatterns :: RecordPatternStack a p -> Name -> Int -> (p, W a)
--- runExpandRecordPatterns = evalRWS . recordPatternStack
---
--- evalExpandRecordPatterns :: RecordPatternStack a p -> Name -> Int -> p
--- evalExpandRecordPatterns s = fst <$$> runExpandRecordPatterns s
+  (fst_, snd_, _) = runRWS (recordPatternStack a) n s
 
 instance (RecordPattern a p) => RecordPattern a [p] where
   expandRecordPatterns = traverse expandRecordPatterns
