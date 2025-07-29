@@ -1,0 +1,12 @@
+module Main {
+
+  fun main() =
+    let 
+      r = 
+        { a = "hello", b = { msg = "wat" } }
+      in
+        match(r) {
+          | { b = b, a = _ } =>
+              trace_string(b.msg)
+        };
+}

@@ -1,0 +1,9 @@
+module Main {
+
+  fun main() =
+    let 
+      r = 
+        { a = "hello" }
+      in
+        trace_string(r.a);
+}
