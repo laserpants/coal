@@ -4,7 +4,7 @@ module Coal.Parser.Pattern (parsePattern, parseUnitPattern) where
 
 import Coal.Ast.Metadata (Metadata (..), getMetadata, metadataSpan)
 import Coal.Common.Label (Label (..))
-import Coal.Common.List1 (List1 (..), NonEmpty (..))
+import Coal.Common.List1 (List1, NonEmpty (..))
 import Coal.Language
 import Coal.Parser
 import Coal.Parser.Identifier
@@ -13,9 +13,11 @@ import Coal.Parser.Symbol
 import Coal.Parser.Type (parseType)
 import Control.Monad (void)
 import Control.Monad.Combinators.Expr
-import Data.Functor (($>))
+import Extra (Name)
 import Text.Megaparsec (getSourcePos, option, optional, (<|>))
 import Text.Megaparsec.Char (char)
+
+import qualified Data.Map.Strict as Map
 
 parseUnitPattern :: Parser (List1 (Pattern Metadata ()))
 parseUnitPattern =
@@ -31,6 +33,7 @@ parsePattern = makeExprParser go operator
       parseConstructorPattern
         <|> parseAtVariablePattern
         <|> parseLiteralPattern
+        <|> parseRecordPattern
         <|> parseAnyPattern
         <|> parseVariablePattern
         <|> parens parsePattern
@@ -72,7 +75,7 @@ operator =
 parseAnyPattern :: Parser (Pattern Metadata ())
 parseAnyPattern =
   withMetadata $ do
-    symbol "_"
+    symbol_ "_"
     pure (`PAny` ())
 
 parseVariablePattern :: Parser (Pattern Metadata ())
@@ -103,3 +106,13 @@ parseConstructorPattern =
     ll <- Label () <$> constructor
     ps <- option [] (parens (commaSep1 parsePattern))
     pure (\loc -> PConstructor loc ll ps)
+
+parseRecordPattern :: Parser (Pattern Metadata ())
+parseRecordPattern =
+  withMetadata $ do
+    fields <- braces (commaSep1 field)
+    -- TODO
+    pure (\loc -> PRecord loc () (Map.fromList fields) Nothing)
+ where
+  field :: Parser (Name, Pattern Metadata ())
+  field = (,) <$> name <*> (symbol_ "=" *> parsePattern)

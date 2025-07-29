@@ -7,6 +7,6 @@ module Main {
       in
         match(r) {
           | { a = str } =>
-            trace_string(str);
-        }
+            trace_string(str)
+        };
 }
