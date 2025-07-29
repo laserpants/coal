@@ -112,9 +112,9 @@ instance Unifiable (Row TypeIndex Kind IndexedType) where
   unify RNil RNil =
     pure mempty
   unify (RVariable v) row2 =
-    bindType v (TRow row2)
+    bindRow v row2
   unify row1 (RVariable v) =
-    bindType v (TRow row1)
+    bindRow v row1
   unify row1@(RExtend name _ _) row2@(RExtend _ _ q1) =
     case extractField name row1 of
       Just (t1, r1) ->
@@ -155,6 +155,19 @@ instance Unifiable (Row TypeIndex Kind IndexedType) where
         error "Implementation error"
   match _ _ =
     throwError ECannotMatch
+
+bindRow :: TypeIndex Kind -> Row TypeIndex Kind IndexedType -> Unifier Substitution
+bindRow (TypeIndex KRow ix1) =
+  \case
+    RVariable (TypeIndex KRow ix2)
+      | ix1 == ix2 ->
+          pure mempty
+    r
+      | ix1 `member` typeIdsIn r ->
+          throwError EInfiniteType
+      | otherwise ->
+          pure (ix1 `mapsTo` TRow r)
+bindRow _ = error "Kind mismatch"
 
 instance Unifiable IndexedType where
   unify (TAlias _ _ t1) t2 =
