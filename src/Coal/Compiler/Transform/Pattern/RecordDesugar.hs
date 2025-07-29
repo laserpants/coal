@@ -14,8 +14,6 @@ module Coal.Compiler.Transform.Pattern.RecordDesugar (
   IndexedPattern,
   compileRecordPatterns,
   runExpandRecordPatterns,
-  run2ExpandRecordPatterns,
-  evalExpandRecordPatterns,
 ) where
 
 import Coal.Common.Label (Label (..))
@@ -55,16 +53,16 @@ class RecordPattern a p where
   expandRecordPatterns :: p -> RecordPatternStack a p
 
 -- TODO
-run2ExpandRecordPatterns :: RecordPatternStack a p -> Name -> Int -> (p, Int)
-run2ExpandRecordPatterns a b c = (x, y)
+runExpandRecordPatterns :: RecordPatternStack a p -> Name -> Int -> (p, Int)
+runExpandRecordPatterns a b c = (x, y)
   where
     (x, y, z) = runRWS (recordPatternStack a) b c
 
-runExpandRecordPatterns :: RecordPatternStack a p -> Name -> Int -> (p, W a)
-runExpandRecordPatterns = evalRWS . recordPatternStack
-
-evalExpandRecordPatterns :: RecordPatternStack a p -> Name -> Int -> p
-evalExpandRecordPatterns s = fst <$$> runExpandRecordPatterns s 
+--runExpandRecordPatterns :: RecordPatternStack a p -> Name -> Int -> (p, W a)
+--runExpandRecordPatterns = evalRWS . recordPatternStack
+--
+--evalExpandRecordPatterns :: RecordPatternStack a p -> Name -> Int -> p
+--evalExpandRecordPatterns s = fst <$$> runExpandRecordPatterns s 
 
 instance (RecordPattern a p) => RecordPattern a [p] where
   expandRecordPatterns = traverse expandRecordPatterns
