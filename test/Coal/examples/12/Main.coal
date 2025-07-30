@@ -1,12 +1,8 @@
 module Main {
 
   fun main() =
-    let 
-      r = 
-        { b = { msg = "wat" } }
-      in
-        match(r) {
-          | { b = { msg = msg } } =>
-              trace_string(msg)
-        };
+    match({ b = { msg = "wat" } }) {
+      | { b = { msg = msg } } =>
+          trace_string(msg)
+    };
 }

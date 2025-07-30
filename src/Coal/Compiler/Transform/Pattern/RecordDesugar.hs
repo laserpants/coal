@@ -155,3 +155,6 @@ instance (Monoid a, Show a) => RecordPattern a (Pattern a IndexedType) where
         PListLiteral a t <$> traverse expandRecordPatterns ps
       p ->
         pure p
+
+
+borkPatterns = undefined

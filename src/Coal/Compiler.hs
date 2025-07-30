@@ -31,6 +31,7 @@ import Control.Monad.Reader (Reader, asks, runReader)
 import Control.Monad.State (gets, runState)
 import Data.Data (Data)
 import Extra (Name, forM)
+import Debug.Trace
 
 import qualified Coal.Compiler.Kernel.Environment as Kernel
 import qualified Coal.Kernel.Language as Kernel
@@ -87,7 +88,10 @@ recordPatternDesugarTrans :: (Monad m) => (c -> RecordPatternStack a c) -> c -> 
 recordPatternDesugarTrans f e = withSupplyC (runExpandRecordPatterns (f e) "row")
 
 recordPatternDesugarC :: (Monad m, Monoid a, Data a, Show a) => Module a Kind IndexedType -> CompilerT a m (Module a Kind IndexedType)
-recordPatternDesugarC = recordPatternDesugarTrans compileRecordPatterns
+recordPatternDesugarC m1 = do
+  traceShowM m1
+  m2 <- recordPatternDesugarTrans compileRecordPatterns m1
+  pure m2
 
 matchMonadTrans :: (Monad m) => (c -> MatchMonad c) -> c -> CompilerT a m c
 matchMonadTrans f e = withSupplyC (\n -> runMatchMonad "match" n (f e))

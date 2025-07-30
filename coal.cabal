@@ -231,6 +231,7 @@ test-suite coal-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      Coal.Compiler.Transform.Pattern.RecordDesugarSpec
       Paths_coal
   hs-source-dirs:
       test
