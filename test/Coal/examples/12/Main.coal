@@ -6,3 +6,12 @@ module Main {
           trace_string(msg)
     };
 }
+
+
+module Main {
+
+  fun main() =
+    match(x) {
+      | x => trace_string(x.b.msg);
+    };
+}

@@ -73,3 +73,48 @@ sampl1 =
         )
         :| []
     )
+
+sampl2 =
+  EMatch
+    ()
+    ()
+    ( ERecord
+        ()
+        ()
+        ( Map.fromList
+            [
+              ( "b"
+              , ERecord
+                  ()
+                  ()
+                  ( Map.fromList
+                      [
+                        ( "msg"
+                        , ELiteral () (LString "wat") 
+                        )
+                      ]
+                  )
+                  Nothing
+              )
+            ]
+        )
+        Nothing
+    )
+    ( EClause
+        ()
+        ( PVariable () (Label () "x"))
+        ( CPlain
+            ()
+            []
+            ( EApplication
+                ()
+                ()
+                (EVariable () (Label () "trace_string"))
+                ( EVariable () (Label () "msg")
+                    :| []
+                )
+            )
+            :| []
+        )
+        :| []
+    )
