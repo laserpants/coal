@@ -4,17 +4,18 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
 {-# LANGUAGE TypeApplications #-}
 
-module Coal.Compiler.Transform.Pattern.RecordDesugar where -- (
---  RecordPattern (..),
---  RecordPatternStack (..),
---  IndexedPattern,
---  compileRecordPatterns,
---  runExpandRecordPatterns,
--- ) where
+module Coal.Compiler.Transform.Pattern.RecordDesugar (
+  BorkStack (..),
+  Borkable (..),
+  borkRecordPatterns,
+  evalBorkStack,
+  runBorkStack,
+) where
 
 import Coal.Common.Label (Label (..))
 import Coal.Common.List1 (List1, NonEmpty (..))
@@ -32,8 +33,8 @@ import qualified Data.Map.Strict as Map
 
 type IndexedPattern a = Pattern a IndexedType
 
-borkRecordPatterns :: (Data a, Monoid a) => Module a Kind IndexedType -> BorkStack a (Module a Kind IndexedType)
-borkRecordPatterns = transformBiM borkRecordsExpression
+borkRecordPatterns :: forall a. (Data a, Monoid a) => Module a Kind IndexedType -> BorkStack a (Module a Kind IndexedType)
+borkRecordPatterns = transformBiM (bork @a @(Expression a (Type TypeIndex Kind)))
 
 type RecordInfo a = (Name, Dictionary (IndexedPattern a), Maybe (IndexedPattern a))
 
@@ -54,38 +55,68 @@ evalBorkStack a n s = (p, m) where (p, m, _) = runRWS (borkStack a) n s
 runBorkStack :: BorkStack a p -> Name -> Int -> (p, Int, [RecordInfo a])
 runBorkStack a = runRWS (borkStack a)
 
-borkRecordsExpression :: (Data a, Monoid a) => Expression a IndexedType -> BorkStack a (Expression a IndexedType)
-borkRecordsExpression =
-  \case
-    EMatch a t e cs ->
-      EMatch a t e <$> traverse borkRecordsClause cs
-    EFold a t es cs e ->
-      EFold a t es cs <$> traverse borkRecordsExpression e
-    EUnfold a t ll n ps d me ->
-      EUnfold a t ll n ps d <$> traverse borkRecordsExpression me
-    e ->
-      pure e
+class Borkable a p where
+  bork :: p -> BorkStack a p
 
-borkRecordsGuard :: (Data a, Monoid a) => Guard Expression a IndexedType -> BorkStack a (Guard Expression a IndexedType)
-borkRecordsGuard =
-  \case
-    CGuard e ->
-      CGuard <$> borkRecordsExpression e
+instance (Borkable a p) => Borkable a (Maybe p) where
+  bork = traverse bork
 
-borkRecordsClause :: (Data a, Monoid a) => Clause a IndexedType -> BorkStack a (Clause a IndexedType)
-borkRecordsClause =
-  \case
-    EClause a p cs -> do
-      (q, fs) <- listen (borkRecordsPattern p)
-      ds <- forM cs $
-        \case
-          CPlain a1 gs e -> do
-            hs <- traverse borkRecordsGuard gs
-            e1 <- foldrM borkbork e fs
-            pure (CPlain a1 hs e1)
-          CLambda{} ->
-            error "Not implemented"
-      pure (EClause a q ds)
+instance (Borkable a p) => Borkable a [p] where
+  bork = traverse bork
+
+instance (Borkable a p) => Borkable a (NonEmpty p) where
+  bork = traverse bork
+
+instance (Data a, Monoid a) => Borkable a (Expression a IndexedType) where
+  bork =
+    \case
+      EMatch a t e cs ->
+        EMatch a t e <$> bork cs
+      EFold a t es cs e ->
+        EFold a t es cs <$> bork e
+      EUnfold a t ll n ps d me ->
+        EUnfold a t ll n ps d <$> bork me
+      e ->
+        pure e
+
+instance (Data a, Monoid a) => Borkable a (Guard Expression a IndexedType) where
+  bork =
+    \case
+      CGuard e ->
+        CGuard <$> bork e
+
+instance (Data a, Monoid a) => Borkable a (Clause a IndexedType) where
+  bork =
+    \case
+      EClause a p cs -> do
+        (q, fs) <- listen (bork p)
+        ds <- forM cs $
+          \case
+            CPlain a1 gs e -> do
+              hs <- bork gs
+              e1 <- foldrM borkbork e fs
+              pure (CPlain a1 hs e1)
+            CLambda{} ->
+              error "Not implemented"
+        pure (EClause a q ds)
+
+instance (Data a, Monoid a) => Borkable a (Pattern a IndexedType) where
+  bork =
+    \case
+      PAnnotation a t p ->
+        PAnnotation a t <$> bork p
+      PConstructor a ll ps ->
+        PConstructor a ll <$> bork ps
+      PRecord _ t@(TIntrinsic (IRecord r)) d p -> do
+        name <- suppliedName
+        tell [(name, d, p)]
+        pure (PConstructor mempty (Label t "$Record") [PVariable mempty (Label r name)])
+      PListCons a t p1 p2 ->
+        PListCons a t <$> bork p1 <*> bork p2
+      PListLiteral a t ps ->
+        PListLiteral a t <$> bork ps
+      p ->
+        pure p
 
 borkbork :: (Data a, Monoid a) => RecordInfo a -> Expression a IndexedType -> BorkStack a (Expression a IndexedType)
 borkbork (name, dict, _) expr = do
@@ -105,7 +136,7 @@ go ((fname, p), prefix) (var, row, expr) = do
       var2 = EVariable mempty ll2
 
   e2 <-
-    borkRecordsExpression
+    bork
       ( EMatch
           mempty
           t1
@@ -141,21 +172,3 @@ go ((fname, p), prefix) (var, row, expr) = do
           )
 
   pure (prefix, RExtend fname t2 row, focusExpr)
-
-borkRecordsPattern :: (Data a, Monoid a) => Pattern a IndexedType -> BorkStack a (Pattern a IndexedType)
-borkRecordsPattern =
-  \case
-    PAnnotation a t p ->
-      PAnnotation a t <$> borkRecordsPattern p
-    PConstructor a ll ps ->
-      PConstructor a ll <$> traverse borkRecordsPattern ps
-    PRecord _ t@(TIntrinsic (IRecord r)) d p -> do
-      name <- suppliedName
-      tell [(name, d, p)]
-      pure (PConstructor mempty (Label t "$Record") [PVariable mempty (Label r name)])
-    PListCons a t p1 p2 ->
-      PListCons a t <$> borkRecordsPattern p1 <*> borkRecordsPattern p2
-    PListLiteral a t ps ->
-      PListLiteral a t <$> traverse borkRecordsPattern ps
-    p ->
-      pure p
