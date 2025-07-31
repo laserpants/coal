@@ -54,28 +54,24 @@ main = do
   compileFiles
     [ "./test/Coal/examples/01/Main.coal"
     ]
-  pure ()
 
 main2 :: IO ()
 main2 = do
   compileFiles
     [ "./test/Coal/examples/02/Main.coal"
     ]
-  pure ()
 
 main3 :: IO ()
 main3 = do
   compileFiles
     [ "./test/Coal/examples/03/Main.coal"
     ]
-  pure ()
 
 main4 :: IO ()
 main4 = do
   compileFiles
     [ "./test/Coal/examples/04/Main.coal"
     ]
-  pure ()
 
 main5 :: IO ()
 main5 = do
@@ -83,7 +79,6 @@ main5 = do
     [ "./test/Coal/examples/05/Math.coal"
     , "./test/Coal/examples/05/Main.coal"
     ]
-  pure ()
 
 main6 :: IO ()
 main6 = do
@@ -92,49 +87,48 @@ main6 = do
     , "./test/Coal/examples/06/Qsort.coal"
     , "./test/Coal/examples/06/Main.coal"
     ]
-  pure ()
 
 main7 :: IO ()
 main7 = do
   compileFiles
     [ "./test/Coal/examples/07/Main.coal"
     ]
-  pure ()
 
 main8 :: IO ()
 main8 = do
   compileFiles
     [ "./test/Coal/examples/08/Main.coal"
     ]
-  pure ()
 
 main9 :: IO ()
 main9 = do
   compileFiles
     [ "./test/Coal/examples/09/Main.coal"
     ]
-  pure ()
 
 main10 :: IO ()
 main10 = do
   compileFiles
     [ "./test/Coal/examples/10/Main.coal"
     ]
-  pure ()
 
 main11 :: IO ()
 main11 = do
   compileFiles
     [ "./test/Coal/examples/11/Main.coal"
     ]
-  pure ()
 
 main12 :: IO ()
 main12 = do
   compileFiles
     [ "./test/Coal/examples/12/Main.coal"
     ]
-  pure ()
+
+main13 :: IO ()
+main13 = do
+  compileFiles
+    [ "./test/Coal/examples/13/Main.coal"
+    ]
 
 compileFiles :: [String] -> IO ()
 compileFiles files = do
