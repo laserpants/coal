@@ -10,11 +10,11 @@
 {-# LANGUAGE TypeApplications #-}
 
 module Coal.Compiler.Transform.Pattern.RecordDesugar (
-  BorkStack (..),
-  Borkable (..),
-  borkRecordPatterns,
-  evalBorkStack,
-  runBorkStack,
+  RecordDesugarStack (..),
+  RecordDesugarable (..),
+  compileRecordPatterns,
+  evalRecordDesugarStack,
+  runRecordDesugarStack,
 ) where
 
 import Coal.Common.Label (Label (..))
@@ -33,12 +33,12 @@ import qualified Data.Map.Strict as Map
 
 type IndexedPattern a = Pattern a IndexedType
 
-borkRecordPatterns :: forall a. (Data a, Monoid a) => Module a Kind IndexedType -> BorkStack a (Module a Kind IndexedType)
-borkRecordPatterns = transformBiM (bork @a @(Expression a (Type TypeIndex Kind)))
+compileRecordPatterns :: forall a. (Data a, Monoid a) => Module a Kind IndexedType -> RecordDesugarStack a (Module a Kind IndexedType)
+compileRecordPatterns = transformBiM (desugarRecordPatterns @a @(Expression a (Type TypeIndex Kind)))
 
 type RecordInfo a = (Name, Dictionary (IndexedPattern a), Maybe (IndexedPattern a))
 
-newtype BorkStack a p = BorkStack {borkStack :: RWS Name [RecordInfo a] Int p}
+newtype RecordDesugarStack a p = RecordDesugarStack {desugarRecordPatternsStack :: RWS Name [RecordInfo a] Int p}
   deriving
     ( Functor
     , Applicative
@@ -49,84 +49,84 @@ newtype BorkStack a p = BorkStack {borkStack :: RWS Name [RecordInfo a] Int p}
     , MonadRWS Name [RecordInfo a] Int
     )
 
-evalBorkStack :: BorkStack a p -> Name -> Int -> (p, Int)
-evalBorkStack a n s = (p, m) where (p, m, _) = runRWS (borkStack a) n s
+evalRecordDesugarStack :: RecordDesugarStack a p -> Name -> Int -> (p, Int)
+evalRecordDesugarStack a n s = (p, m) where (p, m, _) = runRWS (desugarRecordPatternsStack a) n s
 
-runBorkStack :: BorkStack a p -> Name -> Int -> (p, Int, [RecordInfo a])
-runBorkStack a = runRWS (borkStack a)
+runRecordDesugarStack :: RecordDesugarStack a p -> Name -> Int -> (p, Int, [RecordInfo a])
+runRecordDesugarStack a = runRWS (desugarRecordPatternsStack a)
 
-class Borkable a p where
-  bork :: p -> BorkStack a p
+class RecordDesugarable a p where
+  desugarRecordPatterns :: p -> RecordDesugarStack a p
 
-instance (Borkable a p) => Borkable a (Maybe p) where
-  bork = traverse bork
+instance (RecordDesugarable a p) => RecordDesugarable a (Maybe p) where
+  desugarRecordPatterns = traverse desugarRecordPatterns
 
-instance (Borkable a p) => Borkable a [p] where
-  bork = traverse bork
+instance (RecordDesugarable a p) => RecordDesugarable a [p] where
+  desugarRecordPatterns = traverse desugarRecordPatterns
 
-instance (Borkable a p) => Borkable a (NonEmpty p) where
-  bork = traverse bork
+instance (RecordDesugarable a p) => RecordDesugarable a (NonEmpty p) where
+  desugarRecordPatterns = traverse desugarRecordPatterns
 
-instance (Data a, Monoid a) => Borkable a (Expression a IndexedType) where
-  bork =
+instance (Data a, Monoid a) => RecordDesugarable a (Expression a IndexedType) where
+  desugarRecordPatterns =
     \case
       EMatch a t e cs ->
-        EMatch a t e <$> bork cs
+        EMatch a t e <$> desugarRecordPatterns cs
       EFold a t es cs e ->
-        EFold a t es cs <$> bork e
+        EFold a t es cs <$> desugarRecordPatterns e
       EUnfold a t ll n ps d me ->
-        EUnfold a t ll n ps d <$> bork me
+        EUnfold a t ll n ps d <$> desugarRecordPatterns me
       e ->
         pure e
 
-instance (Data a, Monoid a) => Borkable a (Guard Expression a IndexedType) where
-  bork =
+instance (Data a, Monoid a) => RecordDesugarable a (Guard Expression a IndexedType) where
+  desugarRecordPatterns =
     \case
       CGuard e ->
-        CGuard <$> bork e
+        CGuard <$> desugarRecordPatterns e
 
-instance (Data a, Monoid a) => Borkable a (Clause a IndexedType) where
-  bork =
+instance (Data a, Monoid a) => RecordDesugarable a (Clause a IndexedType) where
+  desugarRecordPatterns =
     \case
       EClause a p cs -> do
-        (q, fs) <- listen (bork p)
+        (q, fs) <- listen (desugarRecordPatterns p)
         ds <- forM cs $
           \case
             CPlain a1 gs e -> do
-              hs <- bork gs
-              e1 <- foldrM borkbork e fs
+              hs <- desugarRecordPatterns gs
+              e1 <- foldrM desugarRecordPatternsdesugarRecordPatterns e fs
               pure (CPlain a1 hs e1)
             CLambda{} ->
               error "Not implemented"
         pure (EClause a q ds)
 
-instance (Data a, Monoid a) => Borkable a (Pattern a IndexedType) where
-  bork =
+instance (Data a, Monoid a) => RecordDesugarable a (Pattern a IndexedType) where
+  desugarRecordPatterns =
     \case
       PAnnotation a t p ->
-        PAnnotation a t <$> bork p
+        PAnnotation a t <$> desugarRecordPatterns p
       PConstructor a ll ps ->
-        PConstructor a ll <$> bork ps
+        PConstructor a ll <$> desugarRecordPatterns ps
       PRecord _ t@(TIntrinsic (IRecord r)) d p -> do
         name <- suppliedName
         tell [(name, d, p)]
         pure (PConstructor mempty (Label t "$Record") [PVariable mempty (Label r name)])
       PListCons a t p1 p2 ->
-        PListCons a t <$> bork p1 <*> bork p2
+        PListCons a t <$> desugarRecordPatterns p1 <*> desugarRecordPatterns p2
       PListLiteral a t ps ->
-        PListLiteral a t <$> bork ps
+        PListLiteral a t <$> desugarRecordPatterns ps
       p ->
         pure p
 
-borkbork :: (Data a, Monoid a) => RecordInfo a -> Expression a IndexedType -> BorkStack a (Expression a IndexedType)
-borkbork (name, dict, _) expr = do
+desugarRecordPatternsdesugarRecordPatterns :: (Data a, Monoid a) => RecordInfo a -> Expression a IndexedType -> RecordDesugarStack a (Expression a IndexedType)
+desugarRecordPatternsdesugarRecordPatterns (name, dict, _) expr = do
   names <- replicateM (length fields - 1) suppliedName
   (_, _, xx) <- foldrM go ("_", RNil, expr) (zip fields (name : names))
   pure xx
  where
   fields = Map.toList dict
 
-go :: (Data a, Monoid a) => ((Name, IndexedPattern a), Name) -> (Name, Row TypeIndex Kind IndexedType, Expression a IndexedType) -> BorkStack a (Name, Row TypeIndex Kind IndexedType, Expression a IndexedType)
+go :: (Data a, Monoid a) => ((Name, IndexedPattern a), Name) -> (Name, Row TypeIndex Kind IndexedType, Expression a IndexedType) -> RecordDesugarStack a (Name, Row TypeIndex Kind IndexedType, Expression a IndexedType)
 go ((fname, p), prefix) (var, row, expr) = do
   let t1 = typeOf expr
       t2 = typeOf p
@@ -136,7 +136,7 @@ go ((fname, p), prefix) (var, row, expr) = do
       var2 = EVariable mempty ll2
 
   e2 <-
-    bork
+    desugarRecordPatterns
       ( EMatch
           mempty
           t1

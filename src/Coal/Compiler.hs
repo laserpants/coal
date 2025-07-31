@@ -84,11 +84,11 @@ patternDesugarTrans f e = withSupplyC (\n -> runPatternDesugar "v" n (f e))
 desugarPatternsC :: (Monad m, Sugared s TypeIndex Kind c) => c -> CompilerT a m c
 desugarPatternsC = patternDesugarTrans desugarPatterns
 
-recordPatternDesugarTrans :: (Monad m) => (c -> BorkStack a c) -> c -> CompilerT a m c
-recordPatternDesugarTrans f e = withSupplyC (evalBorkStack (f e) "row")
+recordPatternDesugarTrans :: (Monad m) => (c -> RecordDesugarStack a c) -> c -> CompilerT a m c
+recordPatternDesugarTrans f e = withSupplyC (evalRecordDesugarStack (f e) "row")
 
 recordPatternDesugarC :: (Monad m, Monoid a, Data a, Show a) => Module a Kind IndexedType -> CompilerT a m (Module a Kind IndexedType)
-recordPatternDesugarC = recordPatternDesugarTrans borkRecordPatterns
+recordPatternDesugarC = recordPatternDesugarTrans compileRecordPatterns
 
 matchMonadTrans :: (Monad m) => (c -> MatchMonad c) -> c -> CompilerT a m c
 matchMonadTrans f e = withSupplyC (\n -> runMatchMonad "match" n (f e))

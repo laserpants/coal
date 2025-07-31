@@ -1,7 +1,7 @@
 module Main {
 
   fun main() =
-    match({ b = { msg = "bork" } }) {
+    match({ b = { msg = "bork bork bork" } }) {
       | { b = { msg = msg } } =>
           trace_string(msg)
     };
