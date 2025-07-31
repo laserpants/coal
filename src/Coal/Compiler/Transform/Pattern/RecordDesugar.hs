@@ -49,9 +49,11 @@ newtype RecordDesugarStack a p = RecordDesugarStack {desugarRecordPatternsStack 
     , MonadRWS Name [RecordInfo a] Int
     )
 
+{-# INLINE evalRecordDesugarStack #-}
 evalRecordDesugarStack :: RecordDesugarStack a p -> Name -> Int -> (p, Int)
 evalRecordDesugarStack a n s = (p, m) where (p, m, _) = runRWS (desugarRecordPatternsStack a) n s
 
+{-# INLINE runRecordDesugarStack #-}
 runRecordDesugarStack :: RecordDesugarStack a p -> Name -> Int -> (p, Int, [RecordInfo a])
 runRecordDesugarStack a = runRWS (desugarRecordPatternsStack a)
 
@@ -94,7 +96,7 @@ instance (Data a, Monoid a) => RecordDesugarable a (Clause a IndexedType) where
           \case
             CPlain a1 gs e -> do
               hs <- desugarRecordPatterns gs
-              e1 <- foldrM desugarRecordPatternsdesugarRecordPatterns e fs
+              e1 <- foldrM desugar e fs
               pure (CPlain a1 hs e1)
             CLambda{} ->
               error "Not implemented"
@@ -118,11 +120,11 @@ instance (Data a, Monoid a) => RecordDesugarable a (Pattern a IndexedType) where
       p ->
         pure p
 
-desugarRecordPatternsdesugarRecordPatterns :: (Data a, Monoid a) => RecordInfo a -> Expression a IndexedType -> RecordDesugarStack a (Expression a IndexedType)
-desugarRecordPatternsdesugarRecordPatterns (name, dict, _) expr = do
+desugar :: (Data a, Monoid a) => RecordInfo a -> Expression a IndexedType -> RecordDesugarStack a (Expression a IndexedType)
+desugar (name, dict, _) expr = do
   names <- replicateM (length fields - 1) suppliedName
-  (_, _, xx) <- foldrM go ("_", RNil, expr) (zip fields (name : names))
-  pure xx
+  (_, _, e1) <- foldrM go ("_", RNil, expr) (zip fields (name : names))
+  pure e1
  where
   fields = Map.toList dict
 
