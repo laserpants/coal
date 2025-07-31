@@ -30,8 +30,8 @@ import Control.Monad ((>=>))
 import Control.Monad.Reader (Reader, asks, runReader)
 import Control.Monad.State (gets, runState)
 import Data.Data (Data)
-import Extra (Name, forM)
 import Debug.Trace
+import Extra (Name, forM)
 
 import qualified Coal.Compiler.Kernel.Environment as Kernel
 import qualified Coal.Kernel.Language as Kernel
