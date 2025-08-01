@@ -17,14 +17,13 @@ import Coal.Language
 import Coal.Language.Module (Constant (..), Definition (..), Function (..))
 import Coal.Language.Module.Definition (definitionName)
 import Coal.TypeSystem
-import Control.Monad (void)
 import Control.Monad.Reader (ask, asks)
 import Control.Monad.State (evalState, gets)
 import Control.Monad.Writer (execWriter)
 import Data.Data (Data)
+import Debug.Trace
 import Data.Either.Extra (partitionEithers)
-import Extra
-import Extra (Dictionary, Name, forM_)
+import Extra (Dictionary, Name, forM_, void)
 
 import qualified Coal.Common.Environment as Environment
 import qualified Data.Map.Strict as Map
@@ -124,10 +123,14 @@ compileDefinitionC =
           compilerReportConstraintsGenErrors [EIllFormedTypeAnnotation err]
         Right t2 ->
           insertConstraintsC [Equality (RuleAnnotation loc t1 t2) [t1, t2]]
-    DAnnotation (With _ t) (DConstant _ c) -> do
+    DAnnotation (With _ t) (DConstant _ c@(Constant loc _ _)) -> do
       t1 <- compileConstantC c
-      -- TODO
-      pure ()
+      (r, _, _) <- runConstraintsGenC (instantiateAnnotation loc t)
+      case r of
+        Left err ->
+          compilerReportConstraintsGenErrors [EIllFormedTypeAnnotation err]
+        Right t2 ->
+          insertConstraintsC [Equality (RuleAnnotation loc t1 t2) [t1, t2]]
     _ ->
       error "TODO"
 

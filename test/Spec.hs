@@ -143,6 +143,18 @@ main15 = do
     [ "./test/Coal/examples/15/Main.coal"
     ]
 
+main16 :: IO ()
+main16 = do
+  compileFiles
+    [ "./test/Coal/examples/16/Main.coal"
+    ]
+
+main17 :: IO ()
+main17 = do
+  compileFiles
+    [ "./test/Coal/examples/17/Main.coal"
+    ]
+
 compileFiles :: [String] -> IO ()
 compileFiles files = do
   fs <- traverse readFile files
@@ -288,6 +300,7 @@ addBuiltinDefs defs =
       , "operator__list_concatenation"
       , "trace_int32"
       , "trace_string"
+      , "trace_bool"
       , "operator__string_concatenation"
       , "int32_to_string"
       , "pair_to_string"

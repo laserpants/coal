@@ -1,0 +1,9 @@
+module Main {
+
+  foo : int32 -> int32 = fn(n : int32) =>
+    false;
+
+  fun main() = 
+    trace_bool(foo(5));
+
+}
