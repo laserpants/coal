@@ -14,23 +14,24 @@ import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (transformBi)
 import Extra (Name)
 
-data Assumption t = Assumption
-  { assumptionName :: Name
+data Assumption a t = Assumption
+  { assumptionMetadata :: a
+  , assumptionName :: Name
   , assumptionType :: t
   }
   deriving (Show, Eq, Ord, Read, Data, Typeable)
 
-instance (Data t) => Substitutable (Assumption t) where
+instance (Data a, Data t) => Substitutable (Assumption a t) where
   apply = transformBi . applyT
 
 {-# INLINE assumptionNameIs #-}
-assumptionNameIs :: Name -> Assumption t -> Bool
+assumptionNameIs :: Name -> Assumption a t -> Bool
 assumptionNameIs name Assumption{..} = assumptionName == name
 
 {-# INLINE assumptionNameIsOneOf #-}
-assumptionNameIsOneOf :: [Name] -> Assumption t -> Bool
+assumptionNameIsOneOf :: [Name] -> Assumption a t -> Bool
 assumptionNameIsOneOf names Assumption{..} = assumptionName `elem` names
 
 {-# INLINE assumptionNameIsNotOneOf #-}
-assumptionNameIsNotOneOf :: [Name] -> Assumption t -> Bool
+assumptionNameIsNotOneOf :: [Name] -> Assumption a t -> Bool
 assumptionNameIsNotOneOf names Assumption{..} = assumptionName `notElem` names

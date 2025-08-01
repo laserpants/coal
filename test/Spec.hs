@@ -36,6 +36,7 @@ import Data.Maybe (fromMaybe)
 import Data.Set (Set)
 import Data.Text (Text)
 import Data.Void (Void)
+import Coal.TypeSystem.Substitution
 import Debug.Trace
 import Extra (Name, isConstructor, (<$$>))
 import Text.Megaparsec (eof, errorBundlePretty, runParser)

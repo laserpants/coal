@@ -34,13 +34,13 @@ type ConstraintsGen a = ConstraintsGenStack a TypeIndex Kind IndexedType
 lookupDataConstructor :: Name -> ConstraintsGenStack c o k t (Maybe (Constructor o k t))
 lookupDataConstructor name = asks (Environment.lookup name . constraintsGenContextDataConstructorEnv)
 
-assertEqualityAssumptions :: a -> IndexedType -> [Assumption IndexedType] -> ConstraintsGen a ()
+assertEqualityAssumptions :: a -> IndexedType -> [Assumption a IndexedType] -> ConstraintsGen a ()
 assertEqualityAssumptions _ t ms =
   tellRight $ do
     Assumption{..} <- ms
     pure (Equality InferenceRulePlaceholder [assumptionType, t])
 
-assertImplicitAssumptions :: a -> IndexedType -> [Assumption IndexedType] -> ConstraintsGen a ()
+assertImplicitAssumptions :: a -> IndexedType -> [Assumption a IndexedType] -> ConstraintsGen a ()
 assertImplicitAssumptions loc t ms = do
   set <- asks constraintsGenContextMonomorphicSet
   tellRight $ do
@@ -50,9 +50,9 @@ assertImplicitAssumptions loc t ms = do
 withMonomorphic :: (TypeIndexed Kind t) => t -> ConstraintsGen a c -> ConstraintsGen a c
 withMonomorphic = localMonoset . monosetInsertMultiple . typeIndexesIn
 
-type Assertion a = IndexedType -> [Assumption IndexedType] -> ConstraintsGen a ()
+type Assertion a = IndexedType -> [Assumption a IndexedType] -> ConstraintsGen a ()
 
-patternConstraints :: (Data a) => Assertion a -> [Assumption IndexedType] -> Pattern a IndexedType -> ConstraintsGen a [Name]
+patternConstraints :: (Data a) => Assertion a -> [Assumption a IndexedType] -> Pattern a IndexedType -> ConstraintsGen a [Name]
 patternConstraints assert ms =
   \case
     PAnnotation loc t p -> do
@@ -127,7 +127,7 @@ getRow =
     _ ->
       error "Implementation error"
 
-clauseAssumptions :: (Show a, Data a) => Clause a IndexedType -> ConstraintsGen a (IndexedType, [IndexedType], [Assumption IndexedType])
+clauseAssumptions :: (Show a, Data a) => Clause a IndexedType -> ConstraintsGen a (IndexedType, [IndexedType], [Assumption a IndexedType])
 clauseAssumptions (EClause loc p cs) = do
   (ts1, ms) <- second concat . unzip <$$> withMonomorphic p $
     forM (fromList1 cs) $
@@ -143,7 +143,7 @@ clauseAssumptions (EClause loc p cs) = do
   names <- patternConstraints (assertEqualityAssumptions loc) ms p
   pure (typeOf p, ts1, filter (assumptionNameIsNotOneOf names) ms)
 
-collectConstraints :: (Show a, Data a) => Expression a IndexedType -> ConstraintsGen a [Assumption IndexedType]
+collectConstraints :: (Show a, Data a) => Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
 collectConstraints =
   \case
     EAnnotation loc t e -> do
@@ -162,8 +162,8 @@ collectConstraints =
         Just Constructor{..} ->
           tellRight [Explicit InferenceRulePlaceholder t constructorScheme]
       pure []
-    EVariable _ (Label t name) ->
-      pure [Assumption name t]
+    EVariable loc (Label t name) ->
+      pure [Assumption loc name t]
     ELambda loc ps e -> do
       ms <- withMonomorphic ps (collectConstraints e)
       names <- concatForM ps (patternConstraints (assertEqualityAssumptions loc) ms)

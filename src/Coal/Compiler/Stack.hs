@@ -103,7 +103,7 @@ clearTypeAnnotationParamsC :: (Monad m) => CompilerT a m ()
 clearTypeAnnotationParamsC = modify (overCompilerTypeAnnotationParams (const mempty))
 
 {-# INLINE insertAssumptionsC #-}
-insertAssumptionsC :: (Monad m) => [CompilerAssumption] -> CompilerT a m ()
+insertAssumptionsC :: (Monad m) => [CompilerAssumption a] -> CompilerT a m ()
 insertAssumptionsC as = modify (overCompilerAssumptions (<> as))
 
 {-# INLINE updateSupplyC #-}

@@ -4,7 +4,7 @@
 
 module Coal.TypeSystem.Constraint.Generation.InferenceRule (InferenceRule (..)) where
 
-import Coal.Language (Kind (..), Type (..), TypeIndex (..))
+import Coal.Language (Kind (..), Scheme (..), Type (..), TypeIndex (..))
 import Coal.TypeSystem.Substitution (Substitutable (..), applyT)
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (transformBi)
@@ -36,6 +36,8 @@ data InferenceRule k a
     RuleTopLevelFunction a
   | -- | TODO
     RuleTopLevelConstant a
+  | -- | TODO
+    RuleTypeConstraint a Name (Type TypeIndex k) (Scheme TypeIndex k (Type TypeIndex k))
   deriving (Show, Eq, Ord, Read, Data, Typeable)
 
 instance (Data a) => Substitutable (InferenceRule Kind a) where

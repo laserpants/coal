@@ -45,7 +45,7 @@ runConstraintsGenC stack = do
       , constraintsGenContextTypeConstructorEnv = compilerTypeConstructorEnvironment
       }
 
-generateConstraintsC :: (Monad m, Data a, Show a) => Expression a IndexedType -> CompilerT a m ([CompilerAssumption], [CompilerConstraint a])
+generateConstraintsC :: (Monad m, Data a, Show a) => Expression a IndexedType -> CompilerT a m ([CompilerAssumption a], [CompilerConstraint a])
 generateConstraintsC e = do
   (assumptions, params, result) <- runConstraintsGenC (collectConstraints e)
   let (errors, constraints) = partitionEithers result
@@ -53,7 +53,7 @@ generateConstraintsC e = do
   compilerSetTypeAnnotationParams params
   pure (assumptions, constraints)
 
-assumptionConstraints :: (Monad m) => CompilerAssumption -> CompilerT a m (Either CompilerAssumption (CompilerConstraint a))
+assumptionConstraints :: (Monad m) => CompilerAssumption a -> CompilerT a m (Either (CompilerAssumption a) (CompilerConstraint a))
 assumptionConstraints Assumption{..} = do
   names <- gets compilerNameStore
   pure $
@@ -61,7 +61,7 @@ assumptionConstraints Assumption{..} = do
       Nothing ->
         Left Assumption{..}
       Just s ->
-        Right (Explicit InferenceRulePlaceholder assumptionType s)
+        Right (Explicit (RuleTypeConstraint assumptionMetadata assumptionName assumptionType s) assumptionType s)
 
 solveConstraintsC :: (Monad m, Data a, Eq a, Show a) => [CompilerConstraint a] -> CompilerT a m Substitution
 solveConstraintsC cs = do
@@ -127,7 +127,7 @@ solveC = do
   updateSubstitutionC (sub2 <> sub1)
   gets compilerSubstitution
 
-typeDefinitionsC :: (Monad m, Data a, Show a, Eq a) => [Definition a Kind IndexedType] -> CompilerT a m ([Definition a Kind IndexedType], [CompilerAssumption])
+typeDefinitionsC :: (Monad m, Data a, Show a, Eq a) => [Definition a Kind IndexedType] -> CompilerT a m ([Definition a Kind IndexedType], [CompilerAssumption a])
 typeDefinitionsC ds = do
   forM_ ds typeDefinitionC
   sub <- gets compilerSubstitution
@@ -135,7 +135,7 @@ typeDefinitionsC ds = do
   Environment env <- gets compilerNameStore
   insertConstraintsC $ do
     (n1, s) <- Map.toList env
-    Assumption n2 t <- ams
+    Assumption _ n2 t <- ams
     [Explicit InferenceRulePlaceholder (apply sub t) s | n1 == n2]
   sub1 <- solveC
   pure (fmap (fmap normalizeRowTypes) (apply sub1 ds), apply sub1 ams)

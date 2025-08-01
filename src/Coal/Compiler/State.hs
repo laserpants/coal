@@ -28,7 +28,7 @@ import Extra (Dictionary, Over)
 
 type CompilerConstraint a = Constraint (InferenceRule Kind a) TypeIndex Kind IndexedType
 
-type CompilerAssumption = Assumption IndexedType
+type CompilerAssumption a = Assumption a IndexedType
 
 data CompilerState a = CompilerState
   { compilerSupply :: Int
@@ -37,7 +37,7 @@ data CompilerState a = CompilerState
   , compilerConstraints :: [CompilerConstraint a]
   , compilerConstraintsGenErrors :: [ConstraintsGenError a]
   , compilerSolverRuleViolations :: [InferenceRule Kind a]
-  , compilerAssumptions :: [CompilerAssumption]
+  , compilerAssumptions :: [CompilerAssumption a]
   , compilerTypeAnnotationParams :: Dictionary (a, TypeIndex Kind)
   , compilerTypeDefinitions :: Environment [Definition a Kind ()]
   , compilerSourceText :: Text
@@ -65,7 +65,7 @@ overCompilerConstraints :: Over (CompilerState a) [CompilerConstraint a]
 overCompilerConstraints fn CompilerState{..} = CompilerState{compilerConstraints = fn compilerConstraints, ..}
 
 {-# INLINE overCompilerAssumptions #-}
-overCompilerAssumptions :: Over (CompilerState a) [CompilerAssumption]
+overCompilerAssumptions :: Over (CompilerState a) [CompilerAssumption a]
 overCompilerAssumptions fn CompilerState{..} = CompilerState{compilerAssumptions = fn compilerAssumptions, ..}
 
 {-# INLINE overCompilerStateConstraintsGenErrors #-}

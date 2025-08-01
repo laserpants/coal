@@ -97,6 +97,7 @@ instance HasMetadata (InferenceRule k Metadata) where
       RuleBinaryOperator a -> a
       RuleTopLevelFunction a -> a
       RuleTopLevelConstant a -> a
+      RuleTypeConstraint a _ _ _ -> a
 
 instance HasMetadata (ConstraintsGenError Metadata) where
   getMetadata =
