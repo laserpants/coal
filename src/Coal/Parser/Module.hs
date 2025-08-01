@@ -97,8 +97,8 @@ parseFunctionDefinition =
     fn <- lexeme_ "fun" *> name
     args <- parens (nonEmptyOr parseUnitPattern (commaSep parsePattern))
     withAnnotation $ do
-      expr <- symbol_ "=" *> parseExpression
       end <- getSourcePos
+      expr <- symbol_ "=" *> parseExpression
       pure (DFunction fn (Function (Metadata start end) (With [] ()) args expr))
 
 parseConstantDefinition :: Parser (Definition Metadata o ())
@@ -107,8 +107,8 @@ parseConstantDefinition =
     start <- getSourcePos
     c <- name
     withAnnotation $ do
-      expr <- symbol_ "=" *> parseExpression
       end <- getSourcePos
+      expr <- symbol_ "=" *> parseExpression
       pure (DConstant c (Constant (Metadata start end) (With [] ()) expr))
 
 withAnnotation :: Parser (Definition Metadata o ()) -> Parser (Definition Metadata o ())

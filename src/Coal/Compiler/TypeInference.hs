@@ -17,11 +17,13 @@ import Coal.Language
 import Coal.Language.Module (Constant (..), Definition (..), Function (..))
 import Coal.Language.Module.Definition (definitionName)
 import Coal.TypeSystem
+import Control.Monad (void)
 import Control.Monad.Reader (ask, asks)
 import Control.Monad.State (evalState, gets)
 import Control.Monad.Writer (execWriter)
 import Data.Data (Data)
 import Data.Either.Extra (partitionEithers)
+import Extra
 import Extra (Dictionary, Name, forM_)
 
 import qualified Coal.Common.Environment as Environment
@@ -63,7 +65,7 @@ assumptionConstraints Assumption{..} = do
       Just s ->
         Right (Explicit (RuleTypeConstraint assumptionMetadata assumptionName assumptionType s) assumptionType s)
 
-solveConstraintsC :: (Monad m, Data a, Eq a, Show a) => [CompilerConstraint a] -> CompilerT a m Substitution
+solveConstraintsC :: (Monad m, Data a, Eq a) => [CompilerConstraint a] -> CompilerT a m Substitution
 solveConstraintsC cs = do
   dict <- gets compilerTypeAnnotationParams
   n <- gets compilerSupply
@@ -82,7 +84,7 @@ compileConstraintsC expr = do
   insertAssumptionsC (apply sub ms2)
   insertConstraintsC (cs1 <> cs2)
 
-compileFunctionC :: (Monad m, Data a, Show a) => Function Expression a IndexedType -> CompilerT a m ()
+compileFunctionC :: (Monad m, Data a, Show a) => Function Expression a IndexedType -> CompilerT a m IndexedType
 compileFunctionC (Function loc (With _ t) ps e) = do
   insertConstraintsC [Equality (RuleTopLevelFunction loc) [t, typeOf e]]
   t1 <- supplied (TVariable . TypeIndex KType)
@@ -91,10 +93,11 @@ compileFunctionC (Function loc (With _ t) ps e) = do
       loc
       (BFunction loc placeholder ps e :| [])
       (EVariable loc (Label t1 placeholder))
+  pure t
  where
   placeholder = "###.function"
 
-compileConstantC :: (Monad m, Data a, Show a) => Constant Expression a IndexedType -> CompilerT a m ()
+compileConstantC :: (Monad m, Data a, Show a) => Constant Expression a IndexedType -> CompilerT a m IndexedType
 compileConstantC (Constant loc (With _ t) e) = do
   insertConstraintsC [Equality (RuleTopLevelConstant loc) [t, typeOf e]]
   compileConstraintsC $
@@ -102,6 +105,7 @@ compileConstantC (Constant loc (With _ t) e) = do
       loc
       (BPattern loc (PVariable loc (Label t placeholder)) e :| [])
       (EVariable loc (Label t placeholder))
+  pure t
  where
   placeholder = "###.constant"
 
@@ -109,15 +113,25 @@ compileDefinitionC :: (Monad m, Data a, Show a) => Definition a k IndexedType ->
 compileDefinitionC =
   \case
     DFunction _ f ->
-      compileFunctionC f
+      void (compileFunctionC f)
     DConstant _ c ->
-      compileConstantC c
-    DAnnotation _ d ->
-      compileDefinitionC d
+      void (compileConstantC c)
+    DAnnotation (With _ t) (DFunction _ f@(Function loc _ _ _)) -> do
+      t1 <- compileFunctionC f
+      (r, _, _) <- runConstraintsGenC (instantiateAnnotation loc t)
+      case r of
+        Left err ->
+          compilerReportConstraintsGenErrors [EIllFormedTypeAnnotation err]
+        Right t2 ->
+          insertConstraintsC [Equality (RuleAnnotation loc t1 t2) [t1, t2]]
+    DAnnotation (With _ t) (DConstant _ c) -> do
+      t1 <- compileConstantC c
+      -- TODO
+      pure ()
     _ ->
       error "TODO"
 
-solveC :: (Monad m, Data a, Eq a, Show a) => CompilerT a m Substitution
+solveC :: (Monad m, Data a, Eq a) => CompilerT a m Substitution
 solveC = do
   constraints <- gets compilerConstraints
   sub1 <- gets compilerSubstitution
