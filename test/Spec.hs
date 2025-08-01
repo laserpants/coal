@@ -24,7 +24,7 @@ import Coal.Language
 import Coal.Language.Module
 import Coal.Parser (ParserError)
 import Coal.Parser.Module
-import Control.Monad (forM, forM_)
+import Control.Monad (forM, forM_, void)
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.Reader (ask, local)
 import Control.Monad.State (gets, liftIO)
@@ -41,6 +41,8 @@ import Debug.Trace
 import Extra (Name, isConstructor, (<$$>))
 import Text.Megaparsec (eof, errorBundlePretty, runParser)
 import Text.RawString.QQ
+import System.IO.Unsafe (unsafePerformIO)
+import System.Process
 
 import qualified Coal.Common.Environment as Environment
 import qualified Coal.Kernel.Compiler as Kernel
@@ -896,3 +898,9 @@ buildScript modules =
       <> ".ll -o "
       <> name
       <> ".o"
+
+runBuild :: IO () -> IO Text
+runBuild test = do
+  test
+  void (readProcess "./.build/build.sh" [] "")
+  Text.pack <$> readProcess "./.build/dist" [] ""
