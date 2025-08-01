@@ -77,6 +77,8 @@ instance (Data a, Data k, Data (o k), Typeable o) => HasType o k (Expression a (
         typeOf t
       ESelect _ t _ ->
         typeOf t
+      EAnnotation _ _ t ->
+        typeOf t
       e ->
         head (universeBi e)
 
