@@ -89,6 +89,8 @@ spec = do
   print a
   x <- main17
   print x
+  x <- main18
+  print x
 
 runTestFiles :: [String] -> IO (Either CompilerError Text)
 runTestFiles files = do
@@ -209,6 +211,12 @@ main18 = do
   runTestFiles
     [ "./test/Coal/examples/18/Main.coal"
     ]
+
+--main19 :: IO (Either CompilerError Text)
+--main19 = do
+--  runTestFiles
+--    [ "./test/Coal/examples/19/Main.coal"
+--    ]
 
 compileFiles :: [String] -> IO (Either CompilerError ())
 compileFiles files = do
