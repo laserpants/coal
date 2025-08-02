@@ -391,6 +391,12 @@ addBuiltinDefs defs =
       , Constructor "GreaterThan" 0 (Forall mempty [] (TConstructor () "Ordering"))
       , Constructor "EqualTo" 0 (Forall mempty [] (TConstructor () "Ordering"))
       ]
+  , DType
+      "Option"
+      [Parameter () "a"]
+      [ Constructor "Some" 1 (Forall (Set.fromList [Parameter () "a"]) [] (TVariable (Parameter () "a") `TArrow` TApplication () (TConstructor () "Option") (TVariable (Parameter () "a") :| [])))
+      , Constructor "None" 0 (Forall (Set.fromList [Parameter () "a"]) [] (TApplication () (TConstructor () "Option") (TVariable (Parameter () "a") :| [])))
+      ]
   , DImport
       (Path ["Core$"])
       [ "operator__not"

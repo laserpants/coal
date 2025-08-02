@@ -2,7 +2,7 @@ module Main {
 
   trait JsonSerializable(a) {
     to_json : a -> string;
-    from_json : string -> a
+    from_json : string -> Option(a)
   }
 
   a_user_named_lazarus = 
@@ -15,7 +15,7 @@ module Main {
       fn(s) => "";
     from_json =
       fn(d) => 
-        { name = "TODO", uid = 1 };
+        Some({ name = "TODO", uid = 1 });
   }
 
   fun main() =
