@@ -29,7 +29,6 @@ import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.Reader (ask, local)
 import Control.Monad.State (gets, liftIO)
 import Data.Data (Data)
-import Data.Either (partitionEithers)
 import Data.List (nub)
 import Data.Map.Strict (Map)
 import Data.Maybe (fromMaybe)
@@ -39,10 +38,12 @@ import Data.Void (Void)
 import Coal.TypeSystem.Substitution
 import Debug.Trace
 import Extra (Name, isConstructor, (<$$>))
+import Data.Either
 import Text.Megaparsec (eof, errorBundlePretty, runParser)
 import Text.RawString.QQ
 import System.IO.Unsafe (unsafePerformIO)
 import System.Process
+import Control.Monad.Except
 
 import qualified Coal.Common.Environment as Environment
 import qualified Coal.Kernel.Compiler as Kernel
@@ -52,122 +53,169 @@ import qualified Data.Set as Set
 import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
 
-main :: IO ()
+spec :: IO ()
+spec = do
+  a <- isLeft <$> main
+  print a
+  x <- main2
+  print x
+  x <- main3
+  print x
+  x <- main4
+  print x
+  x <- main5
+  print x
+  x <- main6
+  print x
+  x <- main7
+  print x
+  x <- main8
+  print x
+  x <- main9
+  print x
+  x <- main10
+  print x
+  x <- main11
+  print x
+  x <- main12
+  print x
+  a <- isLeft <$> main13
+  print a
+  a <- isLeft <$> main14
+  print a
+  a <- isLeft <$> main15
+  print a
+  a <- isLeft <$> main16
+  print a
+  x <- main17
+  print x
+
+runTestFiles :: [String] -> IO (Either CompilerError Text)
+runTestFiles files = do
+  r <- compileFiles files
+  case r of
+    Left err ->
+      pure (Left err)
+    Right{} ->
+      Right <$> runTestBuild
+
+main :: IO (Either CompilerError Text)
 main = do
-  compileFiles
+  runTestFiles
     [ "./test/Coal/examples/01/Main.coal"
     ]
 
-main2 :: IO ()
+main2 :: IO (Either CompilerError Text)
 main2 = do
-  compileFiles
+  runTestFiles
     [ "./test/Coal/examples/02/Main.coal"
     ]
 
-main3 :: IO ()
+main3 :: IO (Either CompilerError Text)
 main3 = do
-  compileFiles
+  runTestFiles
     [ "./test/Coal/examples/03/Main.coal"
     ]
 
-main4 :: IO ()
+main4 :: IO (Either CompilerError Text)
 main4 = do
-  compileFiles
+  runTestFiles
     [ "./test/Coal/examples/04/Main.coal"
     ]
 
-main5 :: IO ()
+main5 :: IO (Either CompilerError Text)
 main5 = do
-  compileFiles
+  runTestFiles
     [ "./test/Coal/examples/05/Math.coal"
     , "./test/Coal/examples/05/Main.coal"
     ]
 
-main6 :: IO ()
+main6 :: IO (Either CompilerError Text)
 main6 = do
-  compileFiles
+  runTestFiles
     [ "./test/Coal/examples/06/Tree.coal"
     , "./test/Coal/examples/06/Qsort.coal"
     , "./test/Coal/examples/06/Main.coal"
     ]
 
-main7 :: IO ()
+main7 :: IO (Either CompilerError Text)
 main7 = do
-  compileFiles
+  runTestFiles
     [ "./test/Coal/examples/07/Main.coal"
     ]
 
-main8 :: IO ()
+main8 :: IO (Either CompilerError Text)
 main8 = do
-  compileFiles
+  runTestFiles
     [ "./test/Coal/examples/08/Main.coal"
     ]
 
-main9 :: IO ()
+main9 :: IO (Either CompilerError Text)
 main9 = do
-  compileFiles
+  runTestFiles
     [ "./test/Coal/examples/09/Main.coal"
     ]
 
-main10 :: IO ()
+main10 :: IO (Either CompilerError Text)
 main10 = do
-  compileFiles
+  runTestFiles
     [ "./test/Coal/examples/10/Main.coal"
     ]
 
-main11 :: IO ()
+main11 :: IO (Either CompilerError Text)
 main11 = do
-  compileFiles
+  runTestFiles
     [ "./test/Coal/examples/11/Main.coal"
     ]
 
-main12 :: IO ()
+main12 :: IO (Either CompilerError Text)
 main12 = do
-  compileFiles
+  runTestFiles
     [ "./test/Coal/examples/12/Main.coal"
     ]
 
-main13 :: IO ()
+main13 :: IO (Either CompilerError Text)
 main13 = do
-  compileFiles
+  runTestFiles
     [ "./test/Coal/examples/13/Main.coal"
     ]
 
-main14 :: IO ()
+main14 :: IO (Either CompilerError Text)
 main14 = do
-  compileFiles
+  runTestFiles
     [ "./test/Coal/examples/14/Main.coal"
     ]
 
-main15 :: IO ()
+main15 :: IO (Either CompilerError Text)
 main15 = do
-  compileFiles
+  runTestFiles
     [ "./test/Coal/examples/15/Main.coal"
     ]
 
-main16 :: IO ()
+main16 :: IO (Either CompilerError Text)
 main16 = do
-  compileFiles
+  runTestFiles
     [ "./test/Coal/examples/16/Main.coal"
     ]
 
-main17 :: IO ()
+main17 :: IO (Either CompilerError Text)
 main17 = do
-  compileFiles
+  runTestFiles
     [ "./test/Coal/examples/17/Main.coal"
     ]
 
-compileFiles :: [String] -> IO ()
+compileFiles :: [String] -> IO (Either CompilerError ())
 compileFiles files = do
   fs <- traverse readFile files
   let results = fmap (parseFile . Text.pack) fs
   case partitionEithers results of
     ([], objs) -> do
       evalCompilerT emptyCompilerEnvironment (run objs)
-    (es, _) ->
+    (es, _) -> do
       forM_ es $
         \e ->
           putStrLn (errorBundlePretty e)
+      pure (Right ())
 
 withLocalEnvironment :: (Monad m) => [Definition Metadata Kind ()] -> CompilerT Metadata m a -> CompilerT Metadata m a
 withLocalEnvironment = local . const . (insertBuiltinConstructors . buildEnvironment)
@@ -359,7 +407,7 @@ compileModule x = do
         \err -> do
           src <- gets compilerSourceText
           let msg = prettyErrorMessage [Text.pack (show err)] src err
-          liftIO (Text.putStrLn msg)
+          throwError (CompilerError msg)
     [] ->
       pure ()
 
@@ -377,7 +425,7 @@ compileModule x = do
                   ]
                   src
                   err
-          liftIO (Text.putStrLn msg)
+          throwError (CompilerError msg)
     [] ->
       pure ()
 
@@ -539,7 +587,7 @@ names =
   ]
 
 moduleCore1 :: Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type)
-moduleCore1 = unsafeParseExpr <$> moduleCore
+moduleCore1 = unsafeParseKernelExpr <$> moduleCore
 
 moduleCore :: Kernel.Module Kernel.Type Name Text
 moduleCore =
@@ -856,16 +904,16 @@ moduleCore =
         ]
     }
 
-unsafeParseModule :: Text -> Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type)
-unsafeParseModule t =
+unsafeParseKernelModule :: Text -> Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type)
+unsafeParseKernelModule t =
   case runParser (spaces *> module_ <* eof) "" t of
     Left e ->
       error (errorBundlePretty e)
     Right r ->
       r
 
-unsafeParseExpr :: Text -> Kernel.Expr Kernel.Type
-unsafeParseExpr t =
+unsafeParseKernelExpr :: Text -> Kernel.Expr Kernel.Type
+unsafeParseKernelExpr t =
   case runParser expr "" (Text.stripStart t) of
     Left e ->
       error (errorBundlePretty e)
@@ -899,8 +947,7 @@ buildScript modules =
       <> name
       <> ".o"
 
-runBuild :: IO () -> IO Text
-runBuild test = do
-  test
+runTestBuild :: IO Text
+runTestBuild = do
   void (readProcess "./.build/build.sh" [] "")
   Text.pack <$> readProcess "./.build/dist" [] ""

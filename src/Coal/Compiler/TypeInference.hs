@@ -21,8 +21,8 @@ import Control.Monad.Reader (ask, asks)
 import Control.Monad.State (evalState, gets)
 import Control.Monad.Writer (execWriter)
 import Data.Data (Data)
-import Debug.Trace
 import Data.Either.Extra (partitionEithers)
+import Debug.Trace
 import Extra (Dictionary, Name, forM_, void)
 
 import qualified Coal.Common.Environment as Environment

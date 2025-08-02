@@ -9,6 +9,7 @@ module Coal.Compiler.Stack (
   CompilerState (..),
   CompilerConstraint,
   CompilerAssumption,
+  CompilerError (..),
   runCompilerT,
   evalCompilerT,
   insertNameC,
@@ -35,16 +36,19 @@ import Coal.Compiler.State
 import Coal.Language
 import Coal.Language.Module (Definition (..))
 import Coal.TypeSystem
-import Control.Monad.IO.Class (MonadIO)
+import Control.Monad.Except
 import Control.Monad.RWS (RWST, runRWST)
 import Control.Monad.Reader (MonadReader)
 import Control.Monad.State (MonadState, modify)
 import Data.Text (Text)
-import Extra (Dictionary, Name, (<$$$>))
+import Extra (Dictionary, Name)
 
 import qualified Coal.Common.Environment as Environment
 
-type CompilerStack a m c = RWST CompilerEnvironment () (CompilerState a) m c
+newtype CompilerError = CompilerError Text
+  deriving (Show, Eq, Ord, Read)
+
+type CompilerStack a m c = ExceptT CompilerError (RWST CompilerEnvironment () (CompilerState a) m) c
 
 newtype CompilerT a m c = Compiler {compilerStack :: CompilerStack a m c}
   deriving
@@ -53,18 +57,21 @@ newtype CompilerT a m c = Compiler {compilerStack :: CompilerStack a m c}
     , Monad
     , MonadReader CompilerEnvironment
     , MonadState (CompilerState a)
+    , MonadError CompilerError
     , MonadIO
     )
 
 {-# INLINE runCompilerT #-}
-runCompilerT :: (Monad m) => CompilerEnvironment -> CompilerT a m c -> m (c, CompilerState a)
+runCompilerT :: (Monad m) => CompilerEnvironment -> CompilerT a m c -> m (Either CompilerError c, CompilerState a)
 runCompilerT env com = do
-  (c, s, _) <- runRWST (compilerStack com) env initialCompilerState
+  (c, s, _) <- runRWST (runExceptT (compilerStack com)) env initialCompilerState
   pure (c, s)
 
 {-# INLINE evalCompilerT #-}
-evalCompilerT :: (Monad m) => CompilerEnvironment -> CompilerT a m c -> m c
-evalCompilerT = fst <$$$> runCompilerT
+evalCompilerT :: (Monad m) => CompilerEnvironment -> CompilerT a m c -> m (Either CompilerError c)
+evalCompilerT env com = do
+  (c, _) <- runCompilerT env com
+  pure c
 
 {-# INLINE compilerReportConstraintsGenErrors #-}
 compilerReportConstraintsGenErrors :: (Monad m) => [ConstraintsGenError a] -> CompilerT a m ()
