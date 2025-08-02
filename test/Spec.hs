@@ -204,6 +204,12 @@ main17 = do
     [ "./test/Coal/examples/17/Main.coal"
     ]
 
+main18 :: IO (Either CompilerError Text)
+main18 = do
+  runTestFiles
+    [ "./test/Coal/examples/18/Main.coal"
+    ]
+
 compileFiles :: [String] -> IO (Either CompilerError ())
 compileFiles files = do
   fs <- traverse readFile files
@@ -393,7 +399,7 @@ run modules = do
           withLocalEnvironment defs (compileModule m2)
   liftIO $ do
     ms <- Kernel.compileModules (moduleCore1 : rs)
-    testModules ms
+    generateLLOutput ms
 
 compileModule :: (MonadIO m) => Module Metadata Kind () -> CompilerT Metadata m (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))
 compileModule x = do
@@ -924,8 +930,8 @@ unsafeParseKernelExpr t =
     Right r ->
       r
 
-testModules :: [(Name, [IRConstruct [IRLine]])] -> IO ()
-testModules mods = do
+generateLLOutput :: [(Name, [IRConstruct [IRLine]])] -> IO ()
+generateLLOutput mods = do
   forM_ mods $
     \(name, code) -> do
       let out = irEncode code
