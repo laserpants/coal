@@ -1,8 +1,8 @@
 module Main {
 
   trait JsonSerializable(a) {
-    toJson : a -> string;
-    fromJson : string -> a
+    to_json : a -> string;
+    from_json : string -> a
   }
 
   a_user_named_lazarus = 
@@ -11,9 +11,9 @@ module Main {
     };
 
   instance JsonSerializable({ name : string, uid : int32 }) {
-    toJson =
+    to_json =
       fn(s) => "";
-    fromJson =
+    from_json =
       fn(d) => 
         { name = "TODO", uid = 1 };
   }
