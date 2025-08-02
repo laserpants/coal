@@ -97,6 +97,8 @@ spec = do
   print x
   x <- main22
   print x
+  x <- main24
+  print x
 
 runTestFiles :: [String] -> IO (Either CompilerError Text)
 runTestFiles files = do

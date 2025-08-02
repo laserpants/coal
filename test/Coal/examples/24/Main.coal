@@ -6,10 +6,10 @@ module Main {
   }
 
   instance JsonSerializable(int32) {
-    to_json = fn(_) => "TODO";
+    to_json = int32_to_string;
     from_json = fn(_) => Some(1);
   }
 
   fun main() =
-    trace_string(to_json(123 : int32));
+    trace_string(to_json(1234 : int32));
 }
