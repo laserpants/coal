@@ -1,6 +1,21 @@
 module Main {
 
-  fun main() =
-    trace_string("FOO");
+//  trait Json a {
+//    toJson : a -> string
+//    fromJson string -> a
+//  }
 
+  type User = User({ uid : int32, name : string })
+
+  a_user_named_bob = 
+    User
+      ({ name = "Bob"
+       , uid = 1
+       });
+
+  fun main() =
+    match(a_user_named_bob) {
+      | User(r) =>
+          trace_string(r.name)
+    };
 }

@@ -9,7 +9,11 @@ import Coal.Parser.Identifier
 import Coal.Parser.Symbol
 import Control.Monad.Combinators.Expr
 import Data.Functor (($>))
+import Extra (Name)
 import Text.Megaparsec (option, try, (<|>))
+
+import qualified Coal.Language.Type.Row as Row
+import qualified Data.Map.Strict as Map
 
 parseIntrinsicType :: Parser (Intrinsic (Type Parameter ()))
 parseIntrinsicType =
@@ -33,6 +37,16 @@ parseTypeParameter = Parameter () <$> name
 parseTypeConstructor :: Parser (Type Parameter ())
 parseTypeConstructor = TConstructor () <$> constructor
 
+parseRecordType :: Parser (Type Parameter ())
+parseRecordType = do
+  fields <- braces (commaSep1 field)
+  let dict = pure <$> Map.fromList fields
+  -- TODO
+  pure (TIntrinsic (IRecord (TRow (Row.fromDictionary dict RNil))))
+ where
+  field :: Parser (Name, Type Parameter ())
+  field = (,) <$> name <*> (symbol_ ":" *> parseType)
+
 parseTypeApplication :: Parser (Type Parameter ())
 parseTypeApplication = do
   t0 <- parseTypeConstructor
@@ -49,6 +63,7 @@ parseType = makeExprParser go typeOperator
   go = do
     try parseTypeApplication
       <|> (lexeme_ "list" *> (TIntrinsic . IList <$> parens parseType))
+      <|> parseRecordType
       <|> (TIntrinsic <$> parseIntrinsicType)
       <|> (TVariable <$> parseTypeParameter)
 

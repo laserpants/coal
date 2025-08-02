@@ -24,26 +24,26 @@ import Coal.Language
 import Coal.Language.Module
 import Coal.Parser (ParserError)
 import Coal.Parser.Module
+import Coal.TypeSystem.Substitution
 import Control.Monad (forM, forM_, void)
+import Control.Monad.Except
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.Reader (ask, local)
 import Control.Monad.State (gets, liftIO)
 import Data.Data (Data)
+import Data.Either
 import Data.List (nub)
 import Data.Map.Strict (Map)
 import Data.Maybe (fromMaybe)
 import Data.Set (Set)
 import Data.Text (Text)
 import Data.Void (Void)
-import Coal.TypeSystem.Substitution
 import Debug.Trace
 import Extra (Name, isConstructor, (<$$>))
-import Data.Either
-import Text.Megaparsec (eof, errorBundlePretty, runParser)
-import Text.RawString.QQ
 import System.IO.Unsafe (unsafePerformIO)
 import System.Process
-import Control.Monad.Except
+import Text.Megaparsec (eof, errorBundlePretty, runParser)
+import Text.RawString.QQ
 
 import qualified Coal.Common.Environment as Environment
 import qualified Coal.Kernel.Compiler as Kernel
@@ -96,7 +96,8 @@ runTestFiles :: [String] -> IO (Either CompilerError Text)
 runTestFiles files = do
   r <- compileFiles files
   case r of
-    Left err ->
+    Left err@(CompilerError msg) -> do
+      liftIO $ Text.putStrLn msg
       pure (Left err)
     Right{} ->
       Right <$> runTestBuild
@@ -212,8 +213,8 @@ main18 = do
     [ "./test/Coal/examples/18/Main.coal"
     ]
 
---main19 :: IO (Either CompilerError Text)
---main19 = do
+-- main19 :: IO (Either CompilerError Text)
+-- main19 = do
 --  runTestFiles
 --    [ "./test/Coal/examples/19/Main.coal"
 --    ]
