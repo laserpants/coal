@@ -1,0 +1,23 @@
+module Main {
+
+  trait JsonSerializable(a) {
+    toJson : a -> string;
+    fromJson : string -> a
+  }
+
+  a_user_named_lazarus = 
+    { name = "Lazarus"
+    , uid = 2 : int32
+    };
+
+  instance JsonSerializable({ name : string, uid : int32 }) {
+    toJson =
+      fn(s) => "";
+    fromJson =
+      fn(d) => 
+        { name = "TODO", uid = 1 };
+  }
+
+  fun main() =
+    trace_string(a_user_named_lazarus.name);
+}
