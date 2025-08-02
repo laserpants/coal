@@ -430,6 +430,10 @@ compileModule x = do
       pure ()
 
   b <- mainPass a
+
+  cc <- gets compilerAssumptions
+  liftIO (print cc)
+
   kernelTranslationC b
 
 parseFile :: Text -> Either ParserError (Text, Module Metadata o ())
