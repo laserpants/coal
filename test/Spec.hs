@@ -689,6 +689,13 @@ names =
         []
         ( TIntrinsic IString `TArrow` TIntrinsic (IList (TIntrinsic IChar)))
     )
+  ,
+    ( "string_length"
+    , Forall
+        mempty
+        []
+        ( TIntrinsic IString `TArrow` TIntrinsic IInt32)
+    )
   ]
 
 moduleCore1 :: Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type)
