@@ -118,6 +118,11 @@ irEvalOp =
         v1 <- irEval e1
         v2 <- irEval e2
         fcmp OEq i1 v1 v2
+    Core.OEqChar e1 e2 -> do
+      irCommentBlock "OEqChar" $ do
+        v1 <- irEval e1
+        v2 <- irEval e2
+        icmp Eq i1 v1 v2
     Core.ONeInt32 e1 e2 -> do
       irCommentBlock "ONeInt32" $ do
         v1 <- irEval e1
@@ -135,6 +140,11 @@ irEvalOp =
         icmp Ne i1 v1 v2
     Core.ONeDouble e1 e2 -> do
       irCommentBlock "ONeDouble" $ do
+        v1 <- irEval e1
+        v2 <- irEval e2
+        icmp Ne i1 v1 v2
+    Core.ONeChar e1 e2 -> do
+      irCommentBlock "ONeChar" $ do
         v1 <- irEval e1
         v2 <- irEval e2
         icmp Ne i1 v1 v2
