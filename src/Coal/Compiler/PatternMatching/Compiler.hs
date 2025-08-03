@@ -50,6 +50,8 @@ instance (Data k, Data (o k), Typeable o) => TypeProxy (Type o k) where
   folded t1 lls =
     foldType t1 (labelTag <$> lls)
 
+infixr 1 `arrow`
+
 compileEnvelope :: (TypeProxy t, Ord t, Data a, Monoid a) => EnvelopeExpression (Expression a) t -> Expression a t
 compileEnvelope =
   \case
