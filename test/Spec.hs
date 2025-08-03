@@ -104,6 +104,8 @@ spec = do
   print x
   x <- main27
   print x
+  x <- main29
+  print x
 
 runTestFiles :: [String] -> IO (Either CompilerError Text)
 runTestFiles files = do
@@ -286,6 +288,12 @@ main28 = do
     [ "./test/Coal/examples/28/Main.coal"
     ]
 
+main29 :: IO (Either CompilerError Text)
+main29 = do
+  runTestFiles
+    [ "./test/Coal/examples/29/Main.coal"
+    ]
+
 compileFiles :: [String] -> IO (Either CompilerError ())
 compileFiles files = do
   fs <- traverse readFile files
@@ -462,6 +470,7 @@ addBuiltinDefs defs =
       , "string_to_list"
       , "string_head"
       , "string_tail"
+      , "string_reverse"
       ]
   ]
     <> defs

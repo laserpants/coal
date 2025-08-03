@@ -242,7 +242,9 @@ fixity7 =
   ]
 
 fixity6, fixity5, fixity4, fixity3, fixity2 :: [Operator Parser (Expression Metadata ())]
-fixity6 = []
+fixity6 =
+  [ InfixL (binaryOperator OAddition <$ try (symbol "+" <* notFollowedBy (char '+')))
+  ]
 fixity5 =
   [ InfixR (binaryOperator OListConcatenation <$ symbol "++")
   , InfixR (listCons <$ symbol "::")
@@ -251,8 +253,8 @@ fixity4 =
   [ InfixN (binaryOperator OEqualTo <$ symbol "==")
   , InfixN (binaryOperator OLessThanOrEqual <$ symbol "<=")
   , InfixN (binaryOperator OGreaterThanOrEqual <$ symbol ">=")
-  , InfixN (binaryOperator OLessThan <$ (symbol "<" <* notFollowedBy (symbol "=")))
-  , InfixN (binaryOperator OGreaterThan <$ (symbol ">" <* notFollowedBy (symbol "=")))
+  , InfixN (binaryOperator OLessThan <$ (symbol "<" <* notFollowedBy (char '=')))
+  , InfixN (binaryOperator OGreaterThan <$ (symbol ">" <* notFollowedBy (char '=')))
   ]
 fixity3 =
   [ InfixR (binaryOperator OLogicalAnd <$ symbol "&&")

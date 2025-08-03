@@ -27,7 +27,7 @@ module Main {
                   | Some(n) =>
                       match(t) {
                         | Some(x) =>
-                            Some(x)
+                            Some(t + n)
                         | None =>
                             None
                       }

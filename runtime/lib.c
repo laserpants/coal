@@ -262,6 +262,65 @@ string_tail(const char* s)
 char*
 string_reverse(const char* s)
 {
-  // TODO
-  return NULL;
+    const unsigned char* us = (const unsigned char*)s;
+    size_t len = strlen(s);
+
+    // Step 1: Collect UTF-8 character slices
+    const char** chars = (const char**)malloc(len * sizeof(char*));  // over-allocating
+    size_t* char_lens = (size_t*)malloc(len * sizeof(size_t));
+
+    if (!chars || !char_lens) {
+        free(chars);
+        free(char_lens);
+        return NULL;
+    }
+
+    size_t char_count = 0;
+    size_t i = 0;
+
+    while (i < len) {
+        size_t char_len = 1;
+        unsigned char c = us[i];
+        if ((c & 0x80) == 0x00)        char_len = 1;
+        else if ((c & 0xE0) == 0xC0)   char_len = 2;
+        else if ((c & 0xF0) == 0xE0)   char_len = 3;
+        else if ((c & 0xF8) == 0xF0)   char_len = 4;
+
+        if (i + char_len > len) break; // malformed?
+
+        chars[char_count] = (const char*)(us + i);
+        char_lens[char_count] = char_len;
+        char_count++;
+        i += char_len;
+    }
+
+    // Step 2: Compute total size for result
+    size_t total_bytes = 0;
+
+    for (size_t j = 0; j < char_count; ++j) {
+        total_bytes += char_lens[j];
+    }
+
+    char* result = (char*)malloc(total_bytes + 1);
+
+    if (!result) {
+        free(chars);
+        free(char_lens);
+        return NULL;
+    }
+
+    // Step 3: Copy characters in reverse order
+    size_t out_i = 0;
+
+    for (ssize_t j = (ssize_t)char_count - 1; j >= 0; --j) {
+        memcpy(result + out_i, chars[j], char_lens[j]);
+        out_i += char_lens[j];
+    }
+
+    result[total_bytes] = '\0';
+
+    free(chars);
+    free(char_lens);
+
+    return result;
 }

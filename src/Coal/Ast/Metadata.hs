@@ -5,9 +5,9 @@
 
 module Coal.Ast.Metadata (Metadata (..), HasMetadata (..), metadataSpan) where
 
-import Coal.TypeSystem.Constraint.Assumption (Assumption (..))
 import Coal.Language.Expression
 import Coal.Language.Pattern
+import Coal.TypeSystem.Constraint.Assumption (Assumption (..))
 import Coal.TypeSystem.Constraint.Generation.InferenceRule (InferenceRule (..))
 import Coal.TypeSystem.Constraint.Generation.Internal (ConstraintsGenError (..), TypeAnnotationError (..))
 import Data.Data (Data)
