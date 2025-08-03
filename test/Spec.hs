@@ -3,6 +3,7 @@
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE RecordWildCards #-}
 
+import Coal.TypeSystem.Constraint.Assumption (Assumption (..))
 import Coal.Ast.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment (..))
 import Coal.Common.Label (Label (..))
@@ -109,7 +110,7 @@ runTestFiles files = do
   r <- compileFiles files
   case r of
     Left err@(CompilerError msg) -> do
-      -- liftIO $ Text.putStrLn msg
+      liftIO $ Text.putStrLn msg
       pure (Left err)
     Right{} ->
       Right <$> runTestBuild
@@ -530,7 +531,21 @@ compileModule x = do
   b <- mainPass a
 
   cc <- gets compilerAssumptions
-  liftIO (print cc)
+  case nub cc of
+    as@(_ : _) ->
+      forM_ as $
+        \Assumption{..} -> do
+          src <- gets compilerSourceText
+          let msg =
+                prettyErrorMessage
+                  [ "\nName not in scope:"
+                  , assumptionName
+                  ]
+                  src
+                  Assumption{..}
+          throwError (CompilerError msg)
+    [] ->
+      pure ()
 
   kernelTranslationC b
 
@@ -700,6 +715,13 @@ names =
         mempty
         []
         (TIntrinsic IString `TArrow` TIntrinsic (IList (TIntrinsic IChar)))
+    )
+  ,
+    ( "string_reverse"
+    , Forall
+        mempty
+        []
+        (TIntrinsic IString `TArrow` TIntrinsic IString)
     )
   ,
     ( "string_length"
@@ -1054,6 +1076,13 @@ moduleCore =
                   #(string_tail : string/string, str : string) (fn(a : string) => a : string)
               |]
         , OFunction
+            "Core$.string_reverse"
+            [ Label Kernel.string "str"
+            ]
+            [r| 
+                  #(string_reverse : string/string, str : string) (fn(a : string) => a : string)
+              |]
+        , OFunction
             "Core$.string_to_list"
             [ Label Kernel.string "str"
             ]
@@ -1089,7 +1118,10 @@ moduleCore =
                     in
                       @<list(char)>
                         ( f : string/list(char)/list(char)
-                        , str : string
+                        , @<string>
+                            ( Core$.string_reverse : string/string 
+                            , str : string
+                            )
                         , $Nil : list(char)
                         )
               |]

@@ -5,6 +5,7 @@
 
 module Coal.Ast.Metadata (Metadata (..), HasMetadata (..), metadataSpan) where
 
+import Coal.TypeSystem.Constraint.Assumption (Assumption (..))
 import Coal.Language.Expression
 import Coal.Language.Pattern
 import Coal.TypeSystem.Constraint.Generation.InferenceRule (InferenceRule (..))
@@ -113,6 +114,12 @@ instance HasMetadata (TypeAnnotationError Metadata) where
       EAnnotationConstructor a _ -> a
       EAnnotationMonomorphicType a _ _ -> a
       EAnnotationNonDistinctParameters _ -> error "TODO"
+
+instance HasMetadata (Assumption Metadata t) where
+  getMetadata =
+    \case
+      Assumption a _ _ ->
+        a
 
 metadataSpan :: (HasMetadata a) => a -> a -> Metadata
 metadataSpan lhs rhs = Metadata (locationStart (getMetadata lhs)) (locationEnd (getMetadata rhs))

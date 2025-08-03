@@ -258,3 +258,10 @@ string_tail(const char* s)
 
     return tail;
 }
+
+char*
+string_reverse(const char* s)
+{
+  // TODO
+  return NULL;
+}
