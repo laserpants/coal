@@ -20,11 +20,22 @@ module Main {
       chars = 
         string_to_list(str)
       in
-        fold(chars) {
+        fold(chars, Some(0)) {
           | ch :: chs =>
-              ?
+              fn(t) =>
+                match(digit_to_int32(ch)) {
+                  | Some(n) =>
+                      match(t) {
+                        | Some(x) =>
+                            Some(x)
+                        | None =>
+                            None
+                      }
+                  | None =>
+                      None
+                }
           | [] =>
-              ?
+              fn(t) => t
         };
 
   trait JsonSerializable(a) {
@@ -38,5 +49,14 @@ module Main {
   }
 
   fun main() =
-    trace_string(to_json(1234 : int32));
+    let
+      r =
+        parse_unsigned("123")
+      in
+        match(r) {
+          | Some(n) =>
+              trace_int32(n)
+          | None =>
+              trace_int32(0 : int32)
+        };
 }

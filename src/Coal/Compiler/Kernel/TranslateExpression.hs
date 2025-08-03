@@ -328,8 +328,11 @@ equalityOperator ot (e1 :| [e2]) = do
       pure (Kernel.op (Kernel.OEqFloat o1 o2))
     (TIntrinsic IDouble `TArrow` TIntrinsic IDouble `TArrow` TIntrinsic IBool) ->
       pure (Kernel.op (Kernel.OEqDouble o1 o2))
+    (TIntrinsic IChar `TArrow` TIntrinsic IChar `TArrow` TIntrinsic IBool) ->
+      pure (Kernel.op (Kernel.OEqChar o1 o2))
     _ ->
-      error "Not implemented"
+      -- error "Not implemented"
+      error (show ot)
 equalityOperator _ _ = error "Not implemented"
 
 stringConcatenationOperator :: (MonadReader KernelEnvironment m, Data a) => List1 (Expression a IndexedType) -> m KernelExpr

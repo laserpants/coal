@@ -206,7 +206,7 @@ parseCharLiteral =
   withMetadata $ do
     lexeme $ do
       void squote
-      ch <- Lexer.charLiteral 
+      ch <- Lexer.charLiteral
       void squote
       pure (\loc -> ELiteral loc (LChar (fromIntegral (ord ch))))
 

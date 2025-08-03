@@ -109,7 +109,7 @@ runTestFiles files = do
   r <- compileFiles files
   case r of
     Left err@(CompilerError msg) -> do
-      liftIO $ Text.putStrLn msg
+      -- liftIO $ Text.putStrLn msg
       pure (Left err)
     Right{} ->
       Right <$> runTestBuild
@@ -423,6 +423,12 @@ addBuiltinDefs defs =
       ]
   , DImport
       (Path ["Core$"])
+      --      ((fst <$> names)
+      --      <> [ "from_int32__$instance_Numeric(Intrinsic(Int32))"
+      --         , "from_int32__$instance_Numeric(Intrinsic(Nat))"
+      --         , "compare__$instance_Ordered(Intrinsic(Int32))"
+      --         ]
+      --      )
       [ "operator__not"
       , "not"
       , "operator__reverse_composition"
@@ -687,14 +693,14 @@ names =
     , Forall
         mempty
         []
-        ( TIntrinsic IString `TArrow` TIntrinsic (IList (TIntrinsic IChar)))
+        (TIntrinsic IString `TArrow` TIntrinsic (IList (TIntrinsic IChar)))
     )
   ,
     ( "string_length"
     , Forall
         mempty
         []
-        ( TIntrinsic IString `TArrow` TIntrinsic IInt32)
+        (TIntrinsic IString `TArrow` TIntrinsic IInt32)
     )
   ]
 

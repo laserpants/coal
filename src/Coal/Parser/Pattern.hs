@@ -13,11 +13,13 @@ import Coal.Parser.Symbol
 import Coal.Parser.Type (parseType)
 import Control.Monad (void)
 import Control.Monad.Combinators.Expr
+import Data.Char (ord)
 import Extra (Name)
 import Text.Megaparsec (getSourcePos, option, optional, (<|>))
 import Text.Megaparsec.Char (char)
 
 import qualified Data.Map.Strict as Map
+import qualified Text.Megaparsec.Char.Lexer as Lexer
 
 parseUnitPattern :: Parser (List1 (Pattern Metadata ()))
 parseUnitPattern =
@@ -85,7 +87,21 @@ parseVariablePattern =
     pure (`PVariable` ll)
 
 parseLiteralPattern :: Parser (Pattern Metadata ())
-parseLiteralPattern = parseListLiteralPattern
+parseLiteralPattern =
+  parseListLiteralPattern
+    <|> parseCharLiteralPattern
+
+squote :: Parser Char
+squote = char '\''
+
+parseCharLiteralPattern :: Parser (Pattern Metadata ())
+parseCharLiteralPattern =
+  withMetadata $ do
+    lexeme $ do
+      void squote
+      ch <- Lexer.charLiteral
+      void squote
+      pure (\loc -> PLiteral loc (LChar (fromIntegral (ord ch))))
 
 parseListLiteralPattern :: Parser (Pattern Metadata ())
 parseListLiteralPattern =

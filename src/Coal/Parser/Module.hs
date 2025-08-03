@@ -55,7 +55,7 @@ parseTraitInstance = do
   n <- constructor
   t <- parens parseType
   ds <- braces (some parseDefinition)
-  --ds <- braces (semicolonSep1 ((,) <$> name <*> (symbol_ "=" *> parseDefinition)))
+  -- ds <- braces (semicolonSep1 ((,) <$> name <*> (symbol_ "=" *> parseDefinition)))
   -- TODO
   pure (DInstance n t ds)
 
