@@ -198,3 +198,63 @@ string_concat(const char* a, const char* b)
 
   return result;
 }
+
+int32_t
+string_length(const char* s)
+{
+  int32_t len = 0;
+  while (*s) 
+  {
+    // If the byte is not a continuation byte, it's the start of a new character
+    if ((unsigned char)(*s) >> 6 != 0b10)
+      len++;
+    s++;
+  }
+  return len;
+}
+
+wchar_t
+string_head(const char* s)
+{
+    const unsigned char *us = (const unsigned char *)s;
+    wchar_t codepoint = 0;
+
+    if (us[0] < 0x80) {
+        return us[0];
+    } else if ((us[0] & 0xE0) == 0xC0) {
+        codepoint = ((us[0] & 0x1F) << 6) | (us[1] & 0x3F);
+    } else if ((us[0] & 0xF0) == 0xE0) {
+        codepoint = ((us[0] & 0x0F) << 12) | ((us[1] & 0x3F) << 6) | (us[2] & 0x3F);
+    } else if ((us[0] & 0xF8) == 0xF0) {
+        codepoint = ((us[0] & 0x07) << 18) | ((us[1] & 0x3F) << 12) |
+                    ((us[2] & 0x3F) << 6) | (us[3] & 0x3F);
+    }
+
+    return codepoint;
+}
+
+char*
+string_tail(const char* s)
+{
+    const unsigned char *us = (const unsigned char *)s;
+    size_t skip = 0;
+
+    if (us[0] < 0x80) {
+        skip = 1;
+    } else if ((us[0] & 0xE0) == 0xC0) {
+        skip = 2;
+    } else if ((us[0] & 0xF0) == 0xE0) {
+        skip = 3;
+    } else if ((us[0] & 0xF8) == 0xF0) {
+        skip = 4;
+    }
+
+    // Return a newly allocated copy of the remaining string
+    size_t len = strlen(s + skip);
+    char* tail = (char*)malloc(len + 1);
+    if (tail != NULL) {
+        memcpy(tail, s + skip, len + 1);  // include null terminator
+    }
+
+    return tail;
+}

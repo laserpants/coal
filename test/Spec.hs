@@ -99,6 +99,10 @@ spec = do
   print x
   x <- main24
   print x
+  x <- main26
+  print x
+  x <- main27
+  print x
 
 runTestFiles :: [String] -> IO (Either CompilerError Text)
 runTestFiles files = do
@@ -263,6 +267,18 @@ main25 = do
     [ "./test/Coal/examples/25/Main.coal"
     ]
 
+main26 :: IO (Either CompilerError Text)
+main26 = do
+  runTestFiles
+    [ "./test/Coal/examples/26/Main.coal"
+    ]
+
+main27 :: IO (Either CompilerError Text)
+main27 = do
+  runTestFiles
+    [ "./test/Coal/examples/27/Main.coal"
+    ]
+
 compileFiles :: [String] -> IO (Either CompilerError ())
 compileFiles files = do
   fs <- traverse readFile files
@@ -416,6 +432,7 @@ addBuiltinDefs defs =
       , "trace_int32"
       , "trace_string"
       , "trace_bool"
+      , "trace_char"
       , "operator__string_concatenation"
       , "int32_to_string"
       , "pair_to_string"
@@ -428,6 +445,10 @@ addBuiltinDefs defs =
       , "from_int32__$instance_Numeric(Intrinsic(Int32))"
       , "from_int32__$instance_Numeric(Intrinsic(Nat))"
       , "compare__$instance_Ordered(Intrinsic(Int32))"
+      , "string_length"
+      , "string_to_list"
+      , "string_head"
+      , "string_tail"
       ]
   ]
     <> defs
@@ -606,6 +627,14 @@ names =
         )
     )
   ,
+    ( "trace_char"
+    , Forall
+        (Set.fromList [TypeIndex KType 0])
+        []
+        ( TIntrinsic IChar `TArrow` TVariable (TypeIndex KType 0)
+        )
+    )
+  ,
     ( "operator__string_concatenation"
     , Forall
         mempty
@@ -652,6 +681,13 @@ names =
             `TArrow` TVariable (TypeIndex KType 0)
             `TArrow` TConstructor KType "Ordering"
         )
+    )
+  ,
+    ( "string_to_list"
+    , Forall
+        mempty
+        []
+        ( TIntrinsic IString `TArrow` TIntrinsic (IList (TIntrinsic IChar)))
     )
   ]
 
@@ -752,6 +788,13 @@ moduleCore =
             ]
             [r|
                   #(print_bool : bool/*, b : bool) (fn(a : *) => a : *)
+              |]
+        , OFunction
+            "Core$.trace_char"
+            [ Label Kernel.char "c"
+            ]
+            [r|
+                  #(print_char : char/*, c : char) (fn(a : *) => a : *)
               |]
         , OFunction
             "Core$.operator__string_concatenation"
@@ -969,6 +1012,67 @@ moduleCore =
                           GreaterThan : Ordering
                         else
                           EqualTo : Ordering
+              |]
+        , OFunction
+            "Core$.string_length"
+            [ Label Kernel.string "str"
+            ]
+            [r| 
+                  #(string_length : string/int32, str : string) (fn(a : int32) => a : int32)
+              |]
+        , OFunction
+            "Core$.string_head"
+            [ Label Kernel.string "str"
+            ]
+            [r| 
+                  #(string_head : string/char, str : string) (fn(a : char) => a : char)
+              |]
+        , OFunction
+            "Core$.string_tail"
+            [ Label Kernel.string "str"
+            ]
+            [r| 
+                  #(string_tail : string/string, str : string) (fn(a : string) => a : string)
+              |]
+        , OFunction
+            "Core$.string_to_list"
+            [ Label Kernel.string "str"
+            ]
+            [r| 
+                  let
+                    f : string/list(char)/list(char) =
+                      fn(input : string, result : list(char)) => 
+                        if ( [== int32]
+                               ( @<int32>
+                                   ( Core$.string_length : string/int32 
+                                   , input : string
+                                   )
+                               , 0 
+                               ) )
+                          then
+                            result : list(char)
+                          else 
+                            @<list(char)>
+                              ( f : string/list(char)/list(char)
+                              , @<string>
+                                  ( Core$.string_tail : string/string
+                                  , input : string
+                                  )
+                              , @<list(char)>
+                                  ( $Cons : char/list(char)/list(char)
+                                  , @<char>
+                                      ( Core$.string_head : string/char
+                                      , input : string
+                                      )
+                                  , result : list(char)
+                                  )
+                              )
+                    in
+                      @<list(char)>
+                        ( f : string/list(char)/list(char)
+                        , str : string
+                        , $Nil : list(char)
+                        )
               |]
         ]
     }

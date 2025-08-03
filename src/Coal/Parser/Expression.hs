@@ -14,6 +14,7 @@ import Coal.Parser.Symbol
 import Coal.Parser.Type (parseType)
 import Control.Monad (void)
 import Control.Monad.Combinators.Expr
+import Data.Char (ord)
 import Extra (Name)
 import Text.Megaparsec (getSourcePos, manyTill, notFollowedBy, optional, some, try, (<|>))
 import Text.Megaparsec.Char (char)
@@ -183,6 +184,7 @@ parseLiteralExpression =
   parseListLiteral
     <|> parseTrue
     <|> parseFalse
+    <|> parseCharLiteral
     <|> parseStringLiteral
 
 dquote :: Parser Char
@@ -195,6 +197,18 @@ parseStringLiteral =
       void dquote
       chars <- manyTill Lexer.charLiteral dquote
       pure (\loc -> ELiteral loc (LString (Text.encodeUtf8 (Text.pack chars))))
+
+squote :: Parser Char
+squote = char '\''
+
+parseCharLiteral :: Parser (Expression Metadata ())
+parseCharLiteral =
+  withMetadata $ do
+    lexeme $ do
+      void squote
+      ch <- Lexer.charLiteral 
+      void squote
+      pure (\loc -> ELiteral loc (LChar (fromIntegral (ord ch))))
 
 unaryOperator :: UnaryOperator -> Expression Metadata () -> Expression Metadata ()
 unaryOperator op e1 =
