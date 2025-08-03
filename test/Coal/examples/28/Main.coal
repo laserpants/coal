@@ -1,0 +1,24 @@
+module Main {
+
+  fun digit_to_int32(ch) : int32 =
+    match(ch) {
+      | '0' => 8 
+      | '1' => 1 
+      | '2' => 2 
+      | '3' => 3 
+      | '4' => 4 
+      | '5' => 5 
+      | '6' => 6 
+      | '7' => 7 
+      | '8' => 8 
+      | '9' => 9 
+      | _ => 100 
+    };
+
+  fun main() =
+    let
+      r =
+        digit_to_int32('5')
+      in
+        trace_int32(r);
+}
