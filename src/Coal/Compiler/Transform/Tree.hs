@@ -135,8 +135,11 @@ instance TreeTransform Expression t where
         ECompiledMatch a t
           <$> transform name f e
           <*> traverse (transform name f) cs
-      EFold{} ->
-        error "EFold"
+      EFold a t es cs me ->
+        EFold a t 
+          <$> traverse (transform name f) es
+          <*> traverse (transform name f) cs
+          <*> traverse (transform name f) me
       EUnfold a t ll u ps d me ->
         EUnfold a t ll u ps
           <$> traverse (transform name f) d
