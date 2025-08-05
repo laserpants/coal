@@ -138,7 +138,7 @@ instance (Show t) => ToDot (Expression a t) where
             eid <- toDot fieldExpr
             emitEdge fid eid -- Field node -> Expression
             emitEdge nid fid -- Record -> Field node
-        -- Emit optional tail
+            -- Emit optional tail
         case maybeTail of
           Just tailExpr -> do
             tid <- toDot tailExpr
@@ -161,7 +161,47 @@ instance (Show t) => ToDot (Expression a t) where
             eid <- toDot e
             emitEdge nid eid
         return nid
+      ETuple _ t es -> do
+        nid <- freshId
+        emitNode nid ("Tuple: " <> Text.pack (show t))
+        forM_ es $
+          \e -> do
+            eid <- toDot e
+            emitEdge nid eid
+        return nid
+      EMatch _ t e cs -> do
+        nid <- freshId
+        emitNode nid ("Match: " <> Text.pack (show t))
+        -- Scrutinee
+        sid <- toDot e
+        emitEdge nid sid
+        -- Clauses
+        forM_ (fromList1 cs) $
+          \clause -> do
+            cid <- toDot clause
+            emitEdge nid cid
+        return nid
+      ECompiledMatch _ t e cs -> do
+        nid <- freshId
+        emitNode nid ("CompiledMatch: " <> Text.pack (show t))
+        -- Scrutinee
+        sid <- toDot e
+        emitEdge nid sid
+        -- Clauses
+        forM_ (fromList1 cs) $
+          \clause -> do
+            cid <- toDot clause
+            emitEdge nid cid
+        return nid
 
 instance (Show t) => ToDot (Pattern a t) where
+  toDot =
+    undefined
+
+instance (Show t) => ToDot (Clause a t) where
+  toDot =
+    undefined
+
+instance (Show t) => ToDot (CompiledClause a t) where
   toDot =
     undefined
