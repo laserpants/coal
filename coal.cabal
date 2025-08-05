@@ -60,6 +60,7 @@ library
       Coal.Compiler.Transform.Unfold
       Coal.Compiler.TypeInference
       Coal.Compiler.TypeInference.Errors
+      Coal.Dotgen.ToDot
       Coal.Kernel.Compiler
       Coal.Kernel.Compiler.Ast
       Coal.Kernel.Compiler.Pass
