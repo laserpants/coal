@@ -12,6 +12,7 @@ import Coal.Language.Pattern
 import Control.Monad.State
 import Data.Text (Text)
 
+import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
 
 type Node = (Int, Text)
@@ -107,6 +108,58 @@ instance (Show t) => ToDot (Expression a t) where
       ELiteral _ prim -> do
         nid <- freshId
         emitNode nid ("Literal: " <> Text.pack (show prim))
+        return nid
+      EIf _ t e1 e2 e3 -> do
+        nid <- freshId
+        emitNode nid ("If: " <> Text.pack (show t))
+        id1 <- toDot e1
+        id2 <- toDot e2
+        id3 <- toDot e3
+        emitEdge nid id1
+        emitEdge nid id2
+        emitEdge nid id3
+        return nid
+      EUnaryOperator _ t op -> do
+        nid <- freshId
+        emitNode nid ("UnaryOperator " <> Text.pack (show op) <> ": " <> Text.pack (show t))
+        return nid
+      EBinaryOperator _ t op -> do
+        nid <- freshId
+        emitNode nid ("BinaryOperator " <> Text.pack (show op) <> ": " <> Text.pack (show t))
+        return nid
+      ERecord _ t fields maybeTail -> do
+        nid <- freshId
+        emitNode nid ("Record: " <> Text.pack (show t))
+        -- Emit each field
+        forM_ (Map.toList fields) $
+          \(fieldName, fieldExpr) -> do
+            fid <- freshId
+            emitNode fid ("Field: " <> fieldName)
+            eid <- toDot fieldExpr
+            emitEdge fid eid -- Field node -> Expression
+            emitEdge nid fid -- Record -> Field node
+        -- Emit optional tail
+        case maybeTail of
+          Just tailExpr -> do
+            tid <- toDot tailExpr
+            emitEdge nid tid -- Record -> Tail
+          Nothing -> return ()
+        return nid
+      EListCons _ t e1 e2 -> do
+        nid <- freshId
+        emitNode nid ("ListCons: " <> Text.pack (show t))
+        id1 <- toDot e1
+        id2 <- toDot e2
+        emitEdge nid id1
+        emitEdge nid id2
+        return nid
+      EListLiteral _ t es -> do
+        nid <- freshId
+        emitNode nid ("ListLiteral: " <> Text.pack (show t))
+        forM_ es $
+          \e -> do
+            eid <- toDot e
+            emitEdge nid eid
         return nid
 
 instance (Show t) => ToDot (Pattern a t) where
