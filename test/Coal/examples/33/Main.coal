@@ -23,11 +23,17 @@ module Main {
           Some(f(val))
     };
 
+  fun is_empty(list) =
+    match(list) {
+      | [] => true
+      | _ => false
+    };
+
   fun digits_to_unsigned(chars) : Option(int32) =
-//    if (chars == []) 
-//      then
-//        None
-//      else
+    if (is_empty(chars)) 
+      then
+        None
+      else
         fold(chars, Some(0)) {
           | ch :: @go =>
               fn(t) =>
@@ -70,21 +76,27 @@ module Main {
 
   instance JsonSerializable({ name : string, uid : int32 }) {
     to_json =
-      fn(s) => "{ name = \"TODO\", uid = 1 }";
+      fn(s) => "{ name = \"" +++ s.name +++ "\", uid = " +++ to_json(s.uid) +++ " }";
     from_json =
       fn(d) => 
         Some({ name = "TODO", uid = 1 });
   }
 
+  a_test_user = { name = "Luciano Pavarotti", uid = 111 : int32 };
+
   fun main() =
-    let
-      r =
-        parse_int32("-123")
-      in
-        match(r) {
-          | Some(n) =>
-              trace_int32(n)
-          | None =>
-              trace_int32(0 : int32)
-        };
+    trace_string(to_json(a_test_user));
+
+    // trace_string(to_json(555 : int32));
+
+    //let
+    //  r =
+    //    parse_int32("-123")
+    //  in
+    //    match(r) {
+    //      | Some(n) =>
+    //          trace_int32(n)
+    //      | None =>
+    //          trace_int32(0 : int32)
+    //    };
 }

@@ -247,7 +247,8 @@ fixity6 =
   , InfixL (binaryOperator OSubtraction <$ try (symbol "-"))
   ]
 fixity5 =
-  [ InfixR (binaryOperator OListConcatenation <$ symbol "++")
+  [ InfixR (binaryOperator OListConcatenation <$ try (symbol "++" <* notFollowedBy (char '+')))
+  , InfixR (binaryOperator OStringConcatenation <$ symbol "+++")
   , InfixR (listCons <$ symbol "::")
   ]
 fixity4 =
