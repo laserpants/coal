@@ -2,7 +2,7 @@ module Main {
 
   fun digit_to_int32(ch) : int32 =
     match(ch) {
-      | '0' => 8 
+      | '0' => 0 
       | '1' => 1 
       | '2' => 2 
       | '3' => 3 
