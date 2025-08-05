@@ -29,6 +29,15 @@ module Main {
       | _ => false
     };
 
+  /*
+  fun digits_to_unsigned(chars) : Option(int32) 
+    when is_empty(chars) = None
+    otherwise =
+      fold(chars, Some(0)) {
+        // ...
+      }
+  */
+
   fun digits_to_unsigned(chars) : Option(int32) =
     if (is_empty(chars)) 
       then
@@ -76,10 +85,9 @@ module Main {
 
   instance JsonSerializable({ name : string, uid : int32 }) {
     to_json =
-      fn(s) => "{ name = \"" +++ s.name +++ "\", uid = " +++ to_json(s.uid) +++ " }";
+      fn(s) => to_json(s.uid); // "{ name = \"" +++ s.name +++ "\", uid = " +++ to_json(s.uid) +++ " }";
     from_json =
-      fn(d) => 
-        Some({ name = "TODO", uid = 1 });
+      fn(d) => Some({ name = "TODO", uid = 1 });
   }
 
   a_test_user = { name = "Luciano Pavarotti", uid = 111 : int32 };
