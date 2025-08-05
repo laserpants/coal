@@ -21,13 +21,13 @@ module Main {
         string_to_list(str)
       in
         fold(chars, Some(0)) {
-          | ch :: chs =>
+          | ch :: @go =>
               fn(t) =>
                 match(digit_to_int32(ch)) {
                   | Some(n) =>
                       match(t) {
-                        | Some(x) =>
-                            Some(t + n)
+                        | Some(s) =>
+                            go(Some(n + 10 * s))
                         | None =>
                             None
                       }

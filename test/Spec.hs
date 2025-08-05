@@ -100,6 +100,8 @@ spec = do
   print x
   x <- main24
   print x
+  x <- main25
+  print x
   x <- main26
   print x
   x <- main27
