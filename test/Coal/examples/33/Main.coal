@@ -44,7 +44,12 @@ module Main {
       in
         match(chars) {
           | '-' :: pos => 
-              0 - digits_to_unsigned(pos)
+              match(digits_to_unsigned(pos)) {
+                | None =>
+                    None
+                | Some(p) =>
+                    Some(0 - p)
+              }
           | _ =>
               digits_to_unsigned(chars)
         };
@@ -62,7 +67,7 @@ module Main {
   fun main() =
     let
       r =
-        parse_int32("123")
+        parse_int32("-123")
       in
         match(r) {
           | Some(n) =>

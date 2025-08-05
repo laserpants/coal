@@ -244,6 +244,7 @@ fixity7 =
 fixity6, fixity5, fixity4, fixity3, fixity2 :: [Operator Parser (Expression Metadata ())]
 fixity6 =
   [ InfixL (binaryOperator OAddition <$ try (symbol "+" <* notFollowedBy (char '+')))
+  , InfixL (binaryOperator OSubtraction <$ try (symbol "-"))
   ]
 fixity5 =
   [ InfixR (binaryOperator OListConcatenation <$ symbol "++")
