@@ -29,6 +29,20 @@ type DotGen = State DotState
 class ToDot a where
   toDot :: a -> DotGen Int
 
+instance (ToDot a) => ToDot (Maybe a) where
+  toDot =
+    \case
+      Nothing -> do
+        nid <- freshId
+        emitNode nid "Nothing"
+        pure nid
+      Just d -> do
+        nid <- freshId
+        emitNode nid "Just"
+        cid <- toDot d
+        emitEdge nid cid
+        pure nid
+
 -- TODO: Use supply
 freshId :: DotGen Int
 freshId = do
@@ -97,13 +111,13 @@ instance (Show t) => ToDot (Expression a t) where
         emitEdge nid rid
         emitEdge nid bid
         return nid
-      EVariable _ (Label _ name) -> do
+      EVariable _ (Label t name) -> do
         nid <- freshId
-        emitNode nid ("Variable: " <> name)
+        emitNode nid ("Variable " <> Text.pack (show t) <> ": " <> name)
         return nid
-      EConstructor _ (Label _ name) -> do
+      EConstructor _ (Label t name) -> do
         nid <- freshId
-        emitNode nid ("Constructor: " <> name)
+        emitNode nid ("Constructor " <> Text.pack (show t) <> ": " <> name)
         return nid
       ELiteral _ prim -> do
         nid <- freshId
@@ -193,15 +207,73 @@ instance (Show t) => ToDot (Expression a t) where
             cid <- toDot clause
             emitEdge nid cid
         return nid
+      EFold _ t es cs me -> do
+        nid <- freshId
+        emitNode nid ("Fold: " <> Text.pack (show t))
+        ids1 <- traverse toDot es
+        ids2 <- traverse toDot cs
+        id <- toDot me
+        traverse (emitEdge nid) ids1
+        traverse (emitEdge nid) ids2
+        emitEdge nid id
+        return nid
+      EUnfold _ t ll n ps d me -> do
+        nid <- freshId
+        emitNode nid ("Unfold: " <> Text.pack (show t))
+        error "TODO"
+      ESelect _ (Label t name) e -> do
+        nid <- freshId
+        emitNode nid ("Select " <> Text.pack (show t) <> ": " <> name)
+        sid <- toDot e
+        emitEdge nid sid
+        return nid
+      ECodataFields{} ->
+        error "TODO"
+      EFocus{} ->
+        error "TODO"
+      EPlaceholder{} ->
+        error "TODO"
 
 instance (Show t) => ToDot (Pattern a t) where
   toDot =
-    undefined
+    \case
+    PAnnotation _ t p ->
+      undefined
+    PAny _ t ->
+      undefined
+    PVariable _ (Label t name) ->
+      undefined
+    PConstructor _ (Label t name) ps ->
+      undefined
+    PLiteral _ p ->
+      undefined
+    PRecord _ t d mp ->
+      undefined
+    PListCons _ t p1 p2 ->
+      undefined
+    PListLiteral _ t ps ->
+      undefined
+    PTuple _ t ps ->
+      undefined
+    POr _ t p1 p2 ->
+      undefined
+    PAs _ (Label t name) p ->
+      undefined
+    PShorthand a (Label t name) ->
+      undefined
+    PAtVariable a (Label t name) ->
+      undefined
+    PPlaceholder _ t tr ->
+      undefined
 
 instance (Show t) => ToDot (Clause a t) where
   toDot =
-    undefined
+    \case
+      EClause{} ->
+        error "TODO"
 
 instance (Show t) => ToDot (CompiledClause a t) where
   toDot =
-    undefined
+    \case
+      ECompiledClause{} ->
+        error "TODO"
