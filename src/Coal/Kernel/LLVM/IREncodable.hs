@@ -183,10 +183,10 @@ escapeString = ByteString.foldr ((<>) . escapeByte) Text.empty
  where
   escapeByte :: Word8 -> Text
   escapeByte b
-    | b == 34 = "\\22"       -- double quote (")
-    | b == 92 = "\\5C"       -- backslash (\)
-    | b == 10 = "\\0A"       -- newline
-    | b == 9  = "\\09"       -- tab
+    | b == 34 = "\\22" -- double quote (")
+    | b == 92 = "\\5C" -- backslash (\)
+    | b == 10 = "\\0A" -- newline
+    | b == 9 = "\\09" -- tab
     | b >= 32 && b <= 126 = Text.singleton (toEnum (fromEnum b)) -- printable ASCII
     | otherwise = Text.pack $ "\\" ++ padHex (Numeric.showHex b "")
 
