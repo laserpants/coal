@@ -314,6 +314,18 @@ main31 = do
     [ "./test/Coal/examples/31/Main.coal"
     ]
 
+main32 :: IO (Either CompilerError Text)
+main32 = do
+  runTestFiles
+    [ "./test/Coal/examples/32/Main.coal"
+    ]
+
+main33 :: IO (Either CompilerError Text)
+main33 = do
+  runTestFiles
+    [ "./test/Coal/examples/33/Main.coal"
+    ]
+
 compileFiles :: [String] -> IO (Either CompilerError ())
 compileFiles files = do
   fs <- traverse readFile files
@@ -491,6 +503,7 @@ addBuiltinDefs defs =
       , "string_head"
       , "string_tail"
       , "string_reverse"
+      , "string_remove_whitespace"
       ]
   ]
     <> defs
@@ -747,6 +760,13 @@ names =
     )
   ,
     ( "string_reverse"
+    , Forall
+        mempty
+        []
+        (TIntrinsic IString `TArrow` TIntrinsic IString)
+    )
+  ,
+    ( "string_remove_whitespace"
     , Forall
         mempty
         []
@@ -1110,6 +1130,13 @@ moduleCore =
             ]
             [r| 
                   #(string_reverse : string/string, str : string) (fn(a : string) => a : string)
+              |]
+        , OFunction
+            "Core$.string_remove_whitespace"
+            [ Label Kernel.string "str"
+            ]
+            [r| 
+                  #(string_remove_whitespace : string/string, str : string) (fn(a : string) => a : string)
               |]
         , OFunction
             "Core$.string_to_list"

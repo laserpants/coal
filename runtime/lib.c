@@ -324,3 +324,62 @@ string_reverse(const char* s)
 
     return result;
 }
+
+// Simple check for common Unicode whitespace characters in UTF-8
+static bool is_utf8_whitespace(const unsigned char* s, size_t* char_len) {
+    unsigned char c = s[0];
+
+    if ((c & 0x80) == 0x00) {
+        // ASCII range
+        *char_len = 1;
+        return c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\v' || c == '\f';
+    } else if ((c & 0xE0) == 0xC0) {
+        // 2-byte UTF-8
+        *char_len = 2;
+        if (c == 0xC2 && (s[1] == 0xA0)) return true; // Non-breaking space (U+00A0)
+    } else if ((c & 0xF0) == 0xE0) {
+        *char_len = 3;
+        if (c == 0xE1 && s[1] == 0x9A && s[2] == 0x80) return true; // OGHAM SPACE MARK (U+1680)
+        if (c == 0xE2) {
+            // U+2000 to U+200A
+            if (s[1] == 0x80 && (s[2] >= 0x80 && s[2] <= 0x8A)) return true;
+            if (s[1] == 0x80 && s[2] == 0xA8) return true; // Hair space (U+200A)
+            if (s[1] == 0x80 && s[2] == 0xA9) return true; // Narrow no-break space (U+202F)
+            if (s[1] == 0x81 && s[2] == 0x9F) return true; // Medium mathematical space (U+205F)
+        }
+    } else if ((c & 0xF8) == 0xF0) {
+        *char_len = 4;
+        if (c == 0xF0 && s[1] == 0x9F && s[2] == 0xA4 && s[3] == 0x8F) return true; // Emoji or extended whitespace (rare)
+    }
+
+    // Not a known whitespace
+    return false;
+}
+
+char*
+string_remove_whitespace(const char* s)
+{
+    const unsigned char* us = (const unsigned char*)s;
+    size_t len = strlen(s);
+
+    // Allocate output buffer same size as input (worst case)
+    char* result = (char*)malloc(len + 1);
+    if (!result) return NULL;
+
+    size_t i = 0;
+    size_t out_i = 0;
+
+    while (i < len) {
+        size_t char_len = 1;
+        if (is_utf8_whitespace(us + i, &char_len)) {
+            i += char_len; // Skip whitespace
+        } else {
+            memcpy(result + out_i, us + i, char_len);
+            i += char_len;
+            out_i += char_len;
+        }
+    }
+
+    result[out_i] = '\0';
+    return result;
+}
