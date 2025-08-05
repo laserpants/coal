@@ -68,6 +68,14 @@ module Main {
     from_json = fn(_) => Some(1);
   }
 
+  instance JsonSerializable({ name : string, uid : int32 }) {
+    to_json =
+      fn(s) => "{ name = \"TODO\", uid = 1 }";
+    from_json =
+      fn(d) => 
+        Some({ name = "TODO", uid = 1 });
+  }
+
   fun main() =
     let
       r =
