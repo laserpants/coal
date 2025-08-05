@@ -24,18 +24,22 @@ module Main {
     };
 
   fun digits_to_unsigned(chars) : Option(int32) =
-    fold(chars, Some(0)) {
-      | ch :: @go =>
-          fn(t) =>
-            match(digit_to_int32(ch)) {
-              | Some(n) =>
-                  go(map_option(fn(s) => n + 10 * s, t))
-              | None =>
-                  None
-            }
-      | [] =>
-          fn(t) => t
-    };
+//    if (chars == []) 
+//      then
+//        None
+//      else
+        fold(chars, Some(0)) {
+          | ch :: @go =>
+              fn(t) =>
+                match(digit_to_int32(ch)) {
+                  | Some(n) =>
+                      go(map_option(fn(s) => n + 10 * s, t))
+                  | None =>
+                      None
+                }
+          | [] =>
+              fn(t) => t
+        };
 
   fun parse_int32(str : string) : Option(int32) =
     let 
