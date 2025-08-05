@@ -114,13 +114,17 @@ spec = do
   print x
   x <- main31
   print x
+  x <- main32
+  print x
+  x <- main34
+  print x
 
 runTestFiles :: [String] -> IO (Either CompilerError Text)
 runTestFiles files = do
   r <- compileFiles files
   case r of
     Left err@(CompilerError msg) -> do
-      liftIO $ Text.putStrLn msg
+      --liftIO $ Text.putStrLn msg
       pure (Left err)
     Right{} ->
       Right <$> runTestBuild

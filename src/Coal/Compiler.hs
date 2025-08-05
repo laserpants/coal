@@ -109,20 +109,36 @@ placeholderTrans f e = do
   withSupplyC (\n -> runDictionaryStack (DictionaryEnvironment env1 env2) n (f e))
 
 placeholderInsertionC :: (Monad m, Monoid a, Data a) => Module a Kind IndexedType -> CompilerT a m (Module a Kind IndexedType)
-placeholderInsertionC (Module p ns ds) = do
-  es <- forM ds $
+placeholderInsertionC (Module p ns ds) = Module p ns <$> traverse go ds
+ where
+  go =
     \case
       d@(DConstant name _) -> do
         d1 <- placeholderTrans expandTraits d
         case d1 of
-          DConstant _ (Constant _ (With ts t) _) -> do
+          DConstant _ (Constant _ (With ts t) _) ->
             insertNameC name (Forall (typeIndexesIn t) ts t)
           _ ->
             error "Implementation error"
         pure d1
+      DAnnotation t d ->
+        DAnnotation t <$> go d
+      DInstance name t1 ds -> do
+        es <- forM ds $
+          \case
+            c@(DConstant dname e) -> do
+              c1 <- placeholderTrans expandTraits c
+              case c1 of
+                DConstant _ (Constant _ (With ts t) _) -> do
+                  let trait = Trait name t1
+                      name1 = (dname <> "__$instance_" <> serialize trait)
+                  insertNameC name1 (Forall (typeIndexesIn t) ts t)
+                _ ->
+                  error "Implementation error"
+              pure c1
+        pure (DInstance name t1 es)
       d ->
-        placeholderTrans expandTraits d
-  pure (Module p ns es)
+        pure d
 
 kernelMonadTrans :: (Monad m) => (c -> Reader Kernel.KernelEnvironment d) -> c -> CompilerT a m d
 kernelMonadTrans f e = pure (runReader (f e) (Kernel.initialKernelEnvironment mempty))

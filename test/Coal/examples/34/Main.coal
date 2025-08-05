@@ -12,7 +12,7 @@ module Main {
     to_json = fn(s) => to_json(s.uid);
   }
 
-  fun zzz(s) = to_json(s.uid);
+  fun f(s) = to_json(s.uid);
 
   a_test_user = { uid = 111 : int32 };
 
@@ -21,5 +21,5 @@ module Main {
       a = 
          trace_string(to_json(a_test_user))
        in
-         trace_string(zzz(a_test_user));
+         trace_string(f(a_test_user));
 }

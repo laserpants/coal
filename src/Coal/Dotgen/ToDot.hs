@@ -237,34 +237,34 @@ instance (Show t) => ToDot (Expression a t) where
 instance (Show t) => ToDot (Pattern a t) where
   toDot =
     \case
-    PAnnotation _ t p ->
-      undefined
-    PAny _ t ->
-      undefined
-    PVariable _ (Label t name) ->
-      undefined
-    PConstructor _ (Label t name) ps ->
-      undefined
-    PLiteral _ p ->
-      undefined
-    PRecord _ t d mp ->
-      undefined
-    PListCons _ t p1 p2 ->
-      undefined
-    PListLiteral _ t ps ->
-      undefined
-    PTuple _ t ps ->
-      undefined
-    POr _ t p1 p2 ->
-      undefined
-    PAs _ (Label t name) p ->
-      undefined
-    PShorthand a (Label t name) ->
-      undefined
-    PAtVariable a (Label t name) ->
-      undefined
-    PPlaceholder _ t tr ->
-      undefined
+      PAnnotation _ t p ->
+        undefined
+      PAny _ t ->
+        undefined
+      PVariable _ (Label t name) ->
+        undefined
+      PConstructor _ (Label t name) ps ->
+        undefined
+      PLiteral _ p ->
+        undefined
+      PRecord _ t d mp ->
+        undefined
+      PListCons _ t p1 p2 ->
+        undefined
+      PListLiteral _ t ps ->
+        undefined
+      PTuple _ t ps ->
+        undefined
+      POr _ t p1 p2 ->
+        undefined
+      PAs _ (Label t name) p ->
+        undefined
+      PShorthand a (Label t name) ->
+        undefined
+      PAtVariable a (Label t name) ->
+        undefined
+      PPlaceholder _ t tr ->
+        undefined
 
 instance (Show t) => ToDot (Clause a t) where
   toDot =
