@@ -136,7 +136,7 @@ instance TreeTransform Expression t where
           <$> transform name f e
           <*> traverse (transform name f) cs
       EFold a t es cs me ->
-        EFold a t 
+        EFold a t
           <$> traverse (transform name f) es
           <*> traverse (transform name f) cs
           <*> traverse (transform name f) me
