@@ -203,8 +203,7 @@ int32_t
 string_length(const char* s)
 {
   int32_t len = 0;
-  while (*s) 
-  {
+  while (*s) {
     // If the byte is not a continuation byte, it's the start of a new character
     if ((unsigned char)(*s) >> 6 != 0b10)
       len++;
@@ -216,170 +215,187 @@ string_length(const char* s)
 wchar_t
 string_head(const char* s)
 {
-    const unsigned char *us = (const unsigned char *)s;
-    wchar_t codepoint = 0;
+  const unsigned char* us = (const unsigned char*)s;
+  wchar_t codepoint = 0;
 
-    if (us[0] < 0x80) {
-        return us[0];
-    } else if ((us[0] & 0xE0) == 0xC0) {
-        codepoint = ((us[0] & 0x1F) << 6) | (us[1] & 0x3F);
-    } else if ((us[0] & 0xF0) == 0xE0) {
-        codepoint = ((us[0] & 0x0F) << 12) | ((us[1] & 0x3F) << 6) | (us[2] & 0x3F);
-    } else if ((us[0] & 0xF8) == 0xF0) {
-        codepoint = ((us[0] & 0x07) << 18) | ((us[1] & 0x3F) << 12) |
-                    ((us[2] & 0x3F) << 6) | (us[3] & 0x3F);
-    }
+  if (us[0] < 0x80) {
+    return us[0];
+  } else if ((us[0] & 0xE0) == 0xC0) {
+    codepoint = ((us[0] & 0x1F) << 6) | (us[1] & 0x3F);
+  } else if ((us[0] & 0xF0) == 0xE0) {
+    codepoint = ((us[0] & 0x0F) << 12) | ((us[1] & 0x3F) << 6) | (us[2] & 0x3F);
+  } else if ((us[0] & 0xF8) == 0xF0) {
+    codepoint = ((us[0] & 0x07) << 18) | ((us[1] & 0x3F) << 12) |
+                ((us[2] & 0x3F) << 6) | (us[3] & 0x3F);
+  }
 
-    return codepoint;
+  return codepoint;
 }
 
 char*
 string_tail(const char* s)
 {
-    const unsigned char *us = (const unsigned char *)s;
-    size_t skip = 0;
+  const unsigned char* us = (const unsigned char*)s;
+  size_t skip = 0;
 
-    if (us[0] < 0x80) {
-        skip = 1;
-    } else if ((us[0] & 0xE0) == 0xC0) {
-        skip = 2;
-    } else if ((us[0] & 0xF0) == 0xE0) {
-        skip = 3;
-    } else if ((us[0] & 0xF8) == 0xF0) {
-        skip = 4;
-    }
+  if (us[0] < 0x80) {
+    skip = 1;
+  } else if ((us[0] & 0xE0) == 0xC0) {
+    skip = 2;
+  } else if ((us[0] & 0xF0) == 0xE0) {
+    skip = 3;
+  } else if ((us[0] & 0xF8) == 0xF0) {
+    skip = 4;
+  }
 
-    // Return a newly allocated copy of the remaining string
-    size_t len = strlen(s + skip);
-    char* tail = (char*)malloc(len + 1);
-    if (tail != NULL) {
-        memcpy(tail, s + skip, len + 1);  // include null terminator
-    }
+  // Return a newly allocated copy of the remaining string
+  size_t len = strlen(s + skip);
+  char* tail = (char*)malloc(len + 1);
+  if (tail != NULL) {
+    memcpy(tail, s + skip, len + 1); // include null terminator
+  }
 
-    return tail;
+  return tail;
 }
 
 char*
 string_reverse(const char* s)
 {
-    const unsigned char* us = (const unsigned char*)s;
-    size_t len = strlen(s);
+  const unsigned char* us = (const unsigned char*)s;
+  size_t len = strlen(s);
 
-    // Step 1: Collect UTF-8 character slices
-    const char** chars = (const char**)malloc(len * sizeof(char*));  // over-allocating
-    size_t* char_lens = (size_t*)malloc(len * sizeof(size_t));
+  // Step 1: Collect UTF-8 character slices
+  const char** chars =
+    (const char**)malloc(len * sizeof(char*)); // over-allocating
+  size_t* char_lens = (size_t*)malloc(len * sizeof(size_t));
 
-    if (!chars || !char_lens) {
-        free(chars);
-        free(char_lens);
-        return NULL;
-    }
-
-    size_t char_count = 0;
-    size_t i = 0;
-
-    while (i < len) {
-        size_t char_len = 1;
-        unsigned char c = us[i];
-        if ((c & 0x80) == 0x00)        char_len = 1;
-        else if ((c & 0xE0) == 0xC0)   char_len = 2;
-        else if ((c & 0xF0) == 0xE0)   char_len = 3;
-        else if ((c & 0xF8) == 0xF0)   char_len = 4;
-
-        if (i + char_len > len) break; // malformed?
-
-        chars[char_count] = (const char*)(us + i);
-        char_lens[char_count] = char_len;
-        char_count++;
-        i += char_len;
-    }
-
-    // Step 2: Compute total size for result
-    size_t total_bytes = 0;
-
-    for (size_t j = 0; j < char_count; ++j) {
-        total_bytes += char_lens[j];
-    }
-
-    char* result = (char*)malloc(total_bytes + 1);
-
-    if (!result) {
-        free(chars);
-        free(char_lens);
-        return NULL;
-    }
-
-    // Step 3: Copy characters in reverse order
-    size_t out_i = 0;
-
-    for (ssize_t j = (ssize_t)char_count - 1; j >= 0; --j) {
-        memcpy(result + out_i, chars[j], char_lens[j]);
-        out_i += char_lens[j];
-    }
-
-    result[total_bytes] = '\0';
-
+  if (!chars || !char_lens) {
     free(chars);
     free(char_lens);
+    return NULL;
+  }
 
-    return result;
+  size_t char_count = 0;
+  size_t i = 0;
+
+  while (i < len) {
+    size_t char_len = 1;
+    unsigned char c = us[i];
+    if ((c & 0x80) == 0x00)
+      char_len = 1;
+    else if ((c & 0xE0) == 0xC0)
+      char_len = 2;
+    else if ((c & 0xF0) == 0xE0)
+      char_len = 3;
+    else if ((c & 0xF8) == 0xF0)
+      char_len = 4;
+
+    if (i + char_len > len)
+      break; // malformed?
+
+    chars[char_count] = (const char*)(us + i);
+    char_lens[char_count] = char_len;
+    char_count++;
+    i += char_len;
+  }
+
+  // Step 2: Compute total size for result
+  size_t total_bytes = 0;
+
+  for (size_t j = 0; j < char_count; ++j) {
+    total_bytes += char_lens[j];
+  }
+
+  char* result = (char*)malloc(total_bytes + 1);
+
+  if (!result) {
+    free(chars);
+    free(char_lens);
+    return NULL;
+  }
+
+  // Step 3: Copy characters in reverse order
+  size_t out_i = 0;
+
+  for (ssize_t j = (ssize_t)char_count - 1; j >= 0; --j) {
+    memcpy(result + out_i, chars[j], char_lens[j]);
+    out_i += char_lens[j];
+  }
+
+  result[total_bytes] = '\0';
+
+  free(chars);
+  free(char_lens);
+
+  return result;
 }
 
 // Simple check for common Unicode whitespace characters in UTF-8
-static bool is_utf8_whitespace(const unsigned char* s, size_t* char_len) {
-    unsigned char c = s[0];
+static bool
+is_utf8_whitespace(const unsigned char* s, size_t* char_len)
+{
+  unsigned char c = s[0];
 
-    if ((c & 0x80) == 0x00) {
-        // ASCII range
-        *char_len = 1;
-        return c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\v' || c == '\f';
-    } else if ((c & 0xE0) == 0xC0) {
-        // 2-byte UTF-8
-        *char_len = 2;
-        if (c == 0xC2 && (s[1] == 0xA0)) return true; // Non-breaking space (U+00A0)
-    } else if ((c & 0xF0) == 0xE0) {
-        *char_len = 3;
-        if (c == 0xE1 && s[1] == 0x9A && s[2] == 0x80) return true; // OGHAM SPACE MARK (U+1680)
-        if (c == 0xE2) {
-            // U+2000 to U+200A
-            if (s[1] == 0x80 && (s[2] >= 0x80 && s[2] <= 0x8A)) return true;
-            if (s[1] == 0x80 && s[2] == 0xA8) return true; // Hair space (U+200A)
-            if (s[1] == 0x80 && s[2] == 0xA9) return true; // Narrow no-break space (U+202F)
-            if (s[1] == 0x81 && s[2] == 0x9F) return true; // Medium mathematical space (U+205F)
-        }
-    } else if ((c & 0xF8) == 0xF0) {
-        *char_len = 4;
-        if (c == 0xF0 && s[1] == 0x9F && s[2] == 0xA4 && s[3] == 0x8F) return true; // Emoji or extended whitespace (rare)
+  if ((c & 0x80) == 0x00) {
+    // ASCII range
+    *char_len = 1;
+    return c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\v' ||
+           c == '\f';
+  } else if ((c & 0xE0) == 0xC0) {
+    // 2-byte UTF-8
+    *char_len = 2;
+    if (c == 0xC2 && (s[1] == 0xA0))
+      return true; // Non-breaking space (U+00A0)
+  } else if ((c & 0xF0) == 0xE0) {
+    *char_len = 3;
+    if (c == 0xE1 && s[1] == 0x9A && s[2] == 0x80)
+      return true; // OGHAM SPACE MARK (U+1680)
+    if (c == 0xE2) {
+      // U+2000 to U+200A
+      if (s[1] == 0x80 && (s[2] >= 0x80 && s[2] <= 0x8A))
+        return true;
+      if (s[1] == 0x80 && s[2] == 0xA8)
+        return true; // Hair space (U+200A)
+      if (s[1] == 0x80 && s[2] == 0xA9)
+        return true; // Narrow no-break space (U+202F)
+      if (s[1] == 0x81 && s[2] == 0x9F)
+        return true; // Medium mathematical space (U+205F)
     }
+  } else if ((c & 0xF8) == 0xF0) {
+    *char_len = 4;
+    if (c == 0xF0 && s[1] == 0x9F && s[2] == 0xA4 && s[3] == 0x8F)
+      return true; // Emoji or extended whitespace (rare)
+  }
 
-    // Not a known whitespace
-    return false;
+  // Not a known whitespace
+  return false;
 }
 
 char*
 string_remove_whitespace(const char* s)
 {
-    const unsigned char* us = (const unsigned char*)s;
-    size_t len = strlen(s);
+  const unsigned char* us = (const unsigned char*)s;
+  size_t len = strlen(s);
 
-    // Allocate output buffer same size as input (worst case)
-    char* result = (char*)malloc(len + 1);
-    if (!result) return NULL;
+  // Allocate output buffer same size as input (worst case)
+  char* result = (char*)malloc(len + 1);
+  if (!result)
+    return NULL;
 
-    size_t i = 0;
-    size_t out_i = 0;
+  size_t i = 0;
+  size_t out_i = 0;
 
-    while (i < len) {
-        size_t char_len = 1;
-        if (is_utf8_whitespace(us + i, &char_len)) {
-            i += char_len; // Skip whitespace
-        } else {
-            memcpy(result + out_i, us + i, char_len);
-            i += char_len;
-            out_i += char_len;
-        }
+  while (i < len) {
+    size_t char_len = 1;
+    if (is_utf8_whitespace(us + i, &char_len)) {
+      i += char_len; // Skip whitespace
+    } else {
+      memcpy(result + out_i, us + i, char_len);
+      i += char_len;
+      out_i += char_len;
     }
+  }
 
-    result[out_i] = '\0';
-    return result;
+  result[out_i] = '\0';
+  return result;
 }
