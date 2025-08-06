@@ -97,18 +97,14 @@ module Main {
   a_test_user = { name = "Luciano Pavarotti", uid = 111 : int32 };
 
   fun main() =
-    trace_string(to_json(a_test_user));
-
-    // trace_string(to_json(555 : int32));
-
-    //let
-    //  r =
-    //    parse_int32("-123")
-    //  in
-    //    match(r) {
-    //      | Some(n) =>
-    //          trace_int32(n)
-    //      | None =>
-    //          trace_int32(0 : int32)
-    //    };
+    let
+      r =
+        parse_int32("-123")
+      in
+        match(r) {
+          | Some(n) =>
+              trace_int32(n)
+          | None =>
+              trace_int32(0 : int32)
+        };
 }

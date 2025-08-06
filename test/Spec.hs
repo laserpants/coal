@@ -120,6 +120,8 @@ spec = do
   print x
   x <- main35
   print x
+  x <- main36
+  print x
   x <- main37
   print x
 
@@ -399,6 +401,13 @@ builtinTraits =
                 ( TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0)
                 )
             )
+          , ( "negated"
+            , Forall
+                (Set.fromList [TypeIndex KType 0])
+                []
+                ( TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0)
+                )
+            )
           ]
       )
     )
@@ -434,6 +443,9 @@ builtinInstances =
                 ( "from_int32"
                 , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
                 )
+              , ( "negated"
+                , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
+                )
               ]
           )
         ,
@@ -442,6 +454,9 @@ builtinInstances =
               [
                 ( "from_int32"
                 , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic INat)
+                )
+              , ( "negated"
+                , Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic INat)
                 )
               ]
           )
@@ -505,38 +520,11 @@ addBuiltinDefs defs =
             ((fst <$> names)
             <> [ "from_int32__$instance_Numeric(Intrinsic(Int32))"
                , "from_int32__$instance_Numeric(Intrinsic(Nat))"
+               , "negated__$instance_Numeric(Intrinsic(Int32))"
+               , "negated__$instance_Numeric(Intrinsic(Nat))"
                , "compare__$instance_Ordered(Intrinsic(Int32))"
                ]
             )
---      [ "operator__not"
---      , "not"
---      , "operator__reverse_composition"
---      , "operator__reverse_application"
---      , "always"
---      , "operator__list_concatenation"
---      , "trace_int32"
---      , "trace_string"
---      , "trace_bool"
---      , "trace_char"
---      , "operator__string_concatenation"
---      , "int32_to_string"
---      , "pair_to_string"
---      , "list_to_string"
---      , "trace"
---      , "unpack_nat"
---      , "pack_nat"
---      , "from_int32"
---      , "compare"
---      , "from_int32__$instance_Numeric(Intrinsic(Int32))"
---      , "from_int32__$instance_Numeric(Intrinsic(Nat))"
---      , "compare__$instance_Ordered(Intrinsic(Int32))"
---      , "string_length"
---      , "string_to_list"
---      , "string_head"
---      , "string_tail"
---      , "string_reverse"
---      , "string_remove_whitespace"
---      ]
   ]
     <> defs
 
@@ -772,6 +760,13 @@ names =
         (Set.fromList [TypeIndex KType 0] :: Set (TypeIndex Kind))
         [Trait "Numeric" (TVariable (TypeIndex KType 0))]
         (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0))
+    )
+  ,
+    ( "negated"
+    , Forall
+        (Set.fromList [TypeIndex KType 0] :: Set (TypeIndex Kind))
+        [Trait "Numeric" (TVariable (TypeIndex KType 0))]
+        (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0))
     )
   ,
     ( "compare"
@@ -1101,11 +1096,34 @@ moduleCore =
                   }
               |]
         , OFunction
+            "Core$.negated"
+            [ Label (Kernel.TCon "Numeric" [opaque]) "$a"
+            ]
+            [r| 
+                  match<int32/*>($a : Numeric(*)) {
+                    | ( $Record : { negated : */* | * }/Numeric(*)
+                      , $r : { negated : */* | * }
+                      ) =>
+                        select
+                          { negated = $f : */* | _ : * } =
+                            $r : { negated : */* | * }
+                          in
+                            $f : */*
+                  }
+              |]
+        , OFunction
             "Core$.from_int32__$instance_Numeric(Intrinsic(Int32))"
             [ Label Kernel.int32 "n"
             ]
             [r| 
                   n : int32
+              |]
+        , OFunction
+            "Core$.negated__$instance_Numeric(Intrinsic(Int32))"
+            [ Label Kernel.int32 "n"
+            ]
+            [r| 
+                  [- int32](0, n : int32)
               |]
         , OFunction
             "Core$.from_int32__$instance_Numeric(Intrinsic(Nat))"
@@ -1116,6 +1134,13 @@ moduleCore =
                     ( Core$.pack_nat : int32/$Nat
                     , n : int32
                     )
+              |]
+        , OFunction
+            "Core$.negated__$instance_Numeric(Intrinsic(Nat))"
+            [ Label (Kernel.TCon "$Nat" []) "_"
+            ]
+            [r| 
+                  $Zero : $Nat
               |]
         , OFunction
             "Core$.compare"
