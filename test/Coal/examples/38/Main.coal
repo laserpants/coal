@@ -1,5 +1,13 @@
 module Main {
 
+  type Date = Date({ year : int32, month : int32, day : int32 })
+
+  instance Ordered(Date) {
+    compare =
+      fn(d1, d2) =>
+        EqualTo;
+  }
+
   type Tree(a)
     = Node(a, Tree(a), Tree(a))
     | Leaf
@@ -46,14 +54,6 @@ module Main {
     };
 
   sort = flatten << from_list;
-
-  type Date = Date({ year : int32, month : int32, day : int32 })
-
-  instance Ordered(Date) {
-    compare =
-      fn(d1, d2) =>
-        EqualTo;
-  }
 
   fun main() = 
     let

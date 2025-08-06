@@ -3,7 +3,6 @@
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE RecordWildCards #-}
 
-import Coal.TypeSystem.Constraint.Assumption (Assumption (..))
 import Coal.Ast.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment (..))
 import Coal.Common.Label (Label (..))
@@ -25,6 +24,7 @@ import Coal.Language
 import Coal.Language.Module
 import Coal.Parser (ParserError)
 import Coal.Parser.Module
+import Coal.TypeSystem.Constraint.Assumption (Assumption (..))
 import Coal.TypeSystem.Substitution
 import Control.Monad (forM, forM_, void)
 import Control.Monad.Except
@@ -130,7 +130,7 @@ runTestFiles files = do
   r <- compileFiles files
   case r of
     Left err@(CompilerError msg) -> do
-      --liftIO $ Text.putStrLn msg
+      -- liftIO $ Text.putStrLn msg
       pure (Left err)
     Right{} ->
       Right <$> runTestBuild
@@ -393,49 +393,7 @@ insertBuiltinConstructors CompilerEnvironment{..} =
     }
 
 builtinTraits :: [(Name, (TypeIndex Kind, Environment IndexedScheme))]
-builtinTraits =
-  [
-    ( "Numeric"
-    ,
-      ( TypeIndex KType 0
-      , Environment.fromList
-          [
-            ( "from_int32"
-            , Forall
-                (Set.fromList [TypeIndex KType 0])
-                []
-                ( TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0)
-                )
-            )
-          , ( "negated"
-            , Forall
-                (Set.fromList [TypeIndex KType 0])
-                []
-                ( TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0)
-                )
-            )
-          ]
-      )
-    )
-  ,
-    ( "Ordered"
-    ,
-      ( TypeIndex KType 0
-      , Environment.fromList
-          [
-            ( "compare"
-            , Forall
-                (Set.fromList [TypeIndex KType 0])
-                []
-                ( TVariable (TypeIndex KType 0)
-                    `TArrow` TVariable (TypeIndex KType 0)
-                    `TArrow` TConstructor KType "Ordering"
-                )
-            )
-          ]
-      )
-    )
-  ]
+builtinTraits = []
 
 builtinInstances :: [(Name, Map IndexedType (Dictionary IndexedScheme))]
 builtinInstances =
@@ -449,7 +407,8 @@ builtinInstances =
                 ( "from_int32"
                 , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
                 )
-              , ( "negated"
+              ,
+                ( "negated"
                 , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
                 )
               ]
@@ -461,7 +420,8 @@ builtinInstances =
                 ( "from_int32"
                 , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic INat)
                 )
-              , ( "negated"
+              ,
+                ( "negated"
                 , Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic INat)
                 )
               ]
@@ -506,9 +466,41 @@ builtinDataConstructors =
     )
   ]
 
-addBuiltinDefs :: [Definition a k t] -> [Definition a k t]
+addBuiltinDefs :: (Monoid a) => [Definition a Kind ()] -> [Definition a Kind ()]
 addBuiltinDefs defs =
-  [ DType
+  [ DImport
+      (Path ["Core$"])
+      ( (fst <$> names)
+          <> [ "from_int32__$instance_Numeric(Intrinsic(Int32))"
+             , "from_int32__$instance_Numeric(Intrinsic(Nat))"
+             , "negated__$instance_Numeric(Intrinsic(Int32))"
+             , "negated__$instance_Numeric(Intrinsic(Nat))"
+             , "compare__$instance_Ordered(Intrinsic(Int32))"
+             ]
+      )
+  , DTrait
+      "Numeric"
+      []
+      (Parameter KType "a")
+      [
+        ( "from_int32"
+        , TIntrinsic IInt32 `TArrow` TVariable (Parameter () "a")
+        )
+      ,
+        ( "negated"
+        , TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
+        )
+      ]
+  , DTrait
+      "Ordered"
+      []
+      (Parameter KType "a")
+      [
+        ( "compare"
+        , TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TConstructor () "Ordering"
+        )
+      ]
+  , DType
       "Ordering"
       []
       [ Constructor "LessThan" 0 (Forall mempty [] (TConstructor () "Ordering"))
@@ -521,16 +513,6 @@ addBuiltinDefs defs =
       [ Constructor "Some" 1 (Forall (Set.fromList [Parameter () "a"]) [] (TVariable (Parameter () "a") `TArrow` TApplication () (TConstructor () "Option") (TVariable (Parameter () "a") :| [])))
       , Constructor "None" 0 (Forall (Set.fromList [Parameter () "a"]) [] (TApplication () (TConstructor () "Option") (TVariable (Parameter () "a") :| [])))
       ]
-  , DImport
-      (Path ["Core$"])
-            ((fst <$> names)
-            <> [ "from_int32__$instance_Numeric(Intrinsic(Int32))"
-               , "from_int32__$instance_Numeric(Intrinsic(Nat))"
-               , "negated__$instance_Numeric(Intrinsic(Int32))"
-               , "negated__$instance_Numeric(Intrinsic(Nat))"
-               , "compare__$instance_Ordered(Intrinsic(Int32))"
-               ]
-            )
   ]
     <> defs
 
