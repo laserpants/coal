@@ -19,13 +19,15 @@ module Main {
     map : (a -> b) -> f(a) -> f(b)
   }
 
-  fun map_option(f, opt) = 
-    match(opt) {
-      | None => 
-          None
-      | Some(val) =>
-          Some(f(val))
-    };
+  instance Functor(Option) {
+    fun map(f, opt) = 
+      match(opt) {
+        | None => 
+            None
+        | Some(val) =>
+            Some(f(val))
+      };
+  }
 
   fun parse_unsigned(str : string) : Option(int32) =
     let 
@@ -37,7 +39,7 @@ module Main {
               fn(t) =>
                 match(digit_to_int32(ch)) {
                   | Some(n) =>
-                      go(map_option(fn(s) => n + 10 * s, t))
+                      go(map(fn(s) => n + 10 * s, t))
                   | None =>
                       None
                 }
@@ -58,7 +60,7 @@ module Main {
   fun main() =
     let
       r =
-        parse_unsigned("123")
+        parse_unsigned("9876")
       in
         match(r) {
           | Some(n) =>

@@ -104,8 +104,8 @@ spec = do
   print x
   x <- main26
   print x
-  x <- main27
-  print x
+  a <- isLeft <$> main27
+  print a
   x <- main28
   print x
   x <- main29
@@ -117,6 +117,8 @@ spec = do
   x <- main32
   print x
   x <- main34
+  print x
+  x <- main35
   print x
 
 runTestFiles :: [String] -> IO (Either CompilerError Text)
