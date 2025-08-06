@@ -35,8 +35,7 @@ module Main {
   }
 
   instance Applicative(Option) {
-    pure = 
-      fn(o) => Some(o);
+    pure = Some;
     ap = 
       fn(opf, x) =>
         match(opf) {
@@ -54,10 +53,9 @@ module Main {
       chars = 
         string_to_list(str)
       in
-        fold(chars, Some(0)) {
+        fold(chars, pure(0)) {
           | ch :: @go =>
-              fn(t) =>
-                go(ap(map(build, digit_to_int32(ch)), t))
+              fn(t) => go(ap(map(build, digit_to_int32(ch)), t))
           | [] =>
               fn(t) => t
         };
