@@ -336,6 +336,12 @@ main34 = do
     [ "./test/Coal/examples/34/Main.coal"
     ]
 
+main35 :: IO (Either CompilerError Text)
+main35 = do
+  runTestFiles
+    [ "./test/Coal/examples/35/Main.coal"
+    ]
+
 compileFiles :: [String] -> IO (Either CompilerError ())
 compileFiles files = do
   fs <- traverse readFile files
@@ -480,41 +486,41 @@ addBuiltinDefs defs =
       ]
   , DImport
       (Path ["Core$"])
-      --      ((fst <$> names)
-      --      <> [ "from_int32__$instance_Numeric(Intrinsic(Int32))"
-      --         , "from_int32__$instance_Numeric(Intrinsic(Nat))"
-      --         , "compare__$instance_Ordered(Intrinsic(Int32))"
-      --         ]
-      --      )
-      [ "operator__not"
-      , "not"
-      , "operator__reverse_composition"
-      , "operator__reverse_application"
-      , "always"
-      , "operator__list_concatenation"
-      , "trace_int32"
-      , "trace_string"
-      , "trace_bool"
-      , "trace_char"
-      , "operator__string_concatenation"
-      , "int32_to_string"
-      , "pair_to_string"
-      , "list_to_string"
-      , "trace"
-      , "unpack_nat"
-      , "pack_nat"
-      , "from_int32"
-      , "compare"
-      , "from_int32__$instance_Numeric(Intrinsic(Int32))"
-      , "from_int32__$instance_Numeric(Intrinsic(Nat))"
-      , "compare__$instance_Ordered(Intrinsic(Int32))"
-      , "string_length"
-      , "string_to_list"
-      , "string_head"
-      , "string_tail"
-      , "string_reverse"
-      , "string_remove_whitespace"
-      ]
+            ((fst <$> names)
+            <> [ "from_int32__$instance_Numeric(Intrinsic(Int32))"
+               , "from_int32__$instance_Numeric(Intrinsic(Nat))"
+               , "compare__$instance_Ordered(Intrinsic(Int32))"
+               ]
+            )
+--      [ "operator__not"
+--      , "not"
+--      , "operator__reverse_composition"
+--      , "operator__reverse_application"
+--      , "always"
+--      , "operator__list_concatenation"
+--      , "trace_int32"
+--      , "trace_string"
+--      , "trace_bool"
+--      , "trace_char"
+--      , "operator__string_concatenation"
+--      , "int32_to_string"
+--      , "pair_to_string"
+--      , "list_to_string"
+--      , "trace"
+--      , "unpack_nat"
+--      , "pack_nat"
+--      , "from_int32"
+--      , "compare"
+--      , "from_int32__$instance_Numeric(Intrinsic(Int32))"
+--      , "from_int32__$instance_Numeric(Intrinsic(Nat))"
+--      , "compare__$instance_Ordered(Intrinsic(Int32))"
+--      , "string_length"
+--      , "string_to_list"
+--      , "string_head"
+--      , "string_tail"
+--      , "string_reverse"
+--      , "string_remove_whitespace"
+--      ]
   ]
     <> defs
 
@@ -767,6 +773,20 @@ names =
         mempty
         []
         (TIntrinsic IString `TArrow` TIntrinsic (IList (TIntrinsic IChar)))
+    )
+  ,
+    ( "string_head"
+    , Forall
+        mempty
+        []
+        (TIntrinsic IString `TArrow` TIntrinsic IChar)
+    )
+  ,
+    ( "string_tail"
+    , Forall
+        mempty
+        []
+        (TIntrinsic IString `TArrow` TIntrinsic IString)
     )
   ,
     ( "string_reverse"
