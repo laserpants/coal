@@ -8,10 +8,7 @@ module Main {
     x = fn(z) => true;
   }
 
-  fun main() = 
-    let 
-      a =
-        x(false)
-      in
-        trace_bool(a);
+  a = x(false);  // X(a) => a
+
+  fun main() = trace_bool(a);
 }
