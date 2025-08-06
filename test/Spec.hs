@@ -59,11 +59,11 @@ spec = do
   a <- isLeft <$> main
   print a
   x <- main2
-  print x
+  print (x == Right "24\n")
   x <- main3
-  print x
+  print (x == Right "1\n")
   x <- main4
-  print x
+  print (x == Right "2\n")
   x <- main5
   print x
   x <- main6
