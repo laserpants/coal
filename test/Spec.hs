@@ -120,6 +120,8 @@ spec = do
   print x
   x <- main35
   print x
+  x <- main37
+  print x
 
 runTestFiles :: [String] -> IO (Either CompilerError Text)
 runTestFiles files = do

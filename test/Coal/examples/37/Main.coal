@@ -34,6 +34,21 @@ module Main {
     ap : f(a -> b) -> f(a) -> f(b)
   }
 
+  instance Applicative(Option) {
+    pure = 
+      fn(o) => Some(o);
+    ap = 
+      fn(opf, x) =>
+        match(opf) {
+          | Some(f) =>
+              map(f, x)
+          | None =>
+              None
+        };
+  }
+
+  fun build(m : int32, n : int32) = m + 10 * n;
+
   fun parse_unsigned(str : string) : Option(int32) =
     let 
       chars = 
@@ -42,12 +57,7 @@ module Main {
         fold(chars, Some(0)) {
           | ch :: @go =>
               fn(t) =>
-                match(digit_to_int32(ch)) {
-                  | Some(n) =>
-                      go(map(fn(s) => n + 10 * s, t))
-                  | None =>
-                      None
-                }
+                go(ap(map(build, digit_to_int32(ch)), t))
           | [] =>
               fn(t) => t
         };
@@ -65,7 +75,7 @@ module Main {
   fun main() =
     let
       r =
-        parse_unsigned("9876")
+        parse_unsigned("59876")
       in
         match(r) {
           | Some(n) =>
