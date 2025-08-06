@@ -124,6 +124,8 @@ spec = do
   print x
   x <- main37
   print x
+  x <- main39
+  print x
 
 runTestFiles :: [String] -> IO (Either CompilerError Text)
 runTestFiles files = do
@@ -366,6 +368,12 @@ main38 = do
     [ "./test/Coal/examples/38/Main.coal"
     ]
 
+main39 :: IO (Either CompilerError Text)
+main39 = do
+  runTestFiles
+    [ "./test/Coal/examples/39/Main.coal"
+    ]
+
 compileFiles :: [String] -> IO (Either CompilerError ())
 compileFiles files = do
   fs <- traverse readFile files
@@ -393,7 +401,50 @@ insertBuiltinConstructors CompilerEnvironment{..} =
     }
 
 builtinTraits :: [(Name, (TypeIndex Kind, Environment IndexedScheme))]
-builtinTraits = []
+builtinTraits =
+  [
+    ( "Numeric"
+    ,
+      ( TypeIndex KType 0
+      , Environment.fromList
+          [
+            ( "from_int32"
+            , Forall
+                (Set.fromList [TypeIndex KType 0])
+                []
+                ( TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0)
+                )
+            )
+          ,
+            ( "negated"
+            , Forall
+                (Set.fromList [TypeIndex KType 0])
+                []
+                ( TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0)
+                )
+            )
+          ]
+      )
+    )
+  ,
+    ( "Ordered"
+    ,
+      ( TypeIndex KType 0
+      , Environment.fromList
+          [
+            ( "compare"
+            , Forall
+                (Set.fromList [TypeIndex KType 0])
+                []
+                ( TVariable (TypeIndex KType 0)
+                    `TArrow` TVariable (TypeIndex KType 0)
+                    `TArrow` TConstructor KType "Ordering"
+                )
+            )
+          ]
+      )
+    )
+  ]
 
 builtinInstances :: [(Name, Map IndexedType (Dictionary IndexedScheme))]
 builtinInstances =
