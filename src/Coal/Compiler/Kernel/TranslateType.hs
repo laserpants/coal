@@ -57,7 +57,7 @@ translateRow =
 
 translateApplication :: Kernel.Type -> Kernel.Type -> Kernel.Type
 translateApplication t (Kernel.TCon name ts) = Kernel.TCon name (ts <> [t])
-translateApplication _ _ = error "Implementation error"
+translateApplication _ _ = Kernel.TOpq
 
 translateType :: Type o k -> Kernel.Type
 translateType =
