@@ -23,6 +23,7 @@ import Coal.Pretty.Type (Pretty (..), renderPretty)
 import Control.Monad.State
 import Data.Text (Text)
 import Extra (traverse_)
+import TextShow (showt)
 
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
@@ -275,7 +276,7 @@ instance (Pretty t, Show t) => ToDot (Pattern a t) where
         return nid
       PLiteral _ prim -> do
         nid <- freshId
-        emitNode nid ("Literal " <> Text.pack (show prim))
+        emitNode nid ("Literal " <> escapeQuotes (Text.pack (show prim)))
         return nid
       PRecord _ t fields maybeTail -> do
         nid <- freshId
@@ -425,12 +426,16 @@ generateDot ast =
  where
   initialState = DotState 0 [] []
   (_, finalState) = runState (toDot ast) initialState
-  dotNodes = [Text.pack (show nid) <> " [label=\"" <> label <> "\"];" | (nid, label) <- nodes finalState]
-  dotEdges = [Text.pack (show from) <> " -> " <> Text.pack (show to) <> ";" | (from, to) <- edges finalState]
+  dotNodes = [showt nid <> " [label=\"" <> label <> "\"];" | (nid, label) <- nodes finalState]
+  dotEdges = [showt from <> " -> " <> showt to <> ";" | (from, to) <- edges finalState]
 
 {-# INLINE prettyType #-}
 prettyType :: (Pretty t) => t -> Text
 prettyType t = "<" <> renderPretty t <> ">"
+
+{-# INLINE escapeQuotes #-}
+escapeQuotes :: Text -> Text
+escapeQuotes = Text.replace "\"" "\\\""
 
 writeDotFile :: (ToDot a) => Text -> a -> IO ()
 writeDotFile fname a = Text.writeFile ("./.debug/" <> Text.unpack fname <> ".dot") (generateDot a)
