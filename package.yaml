@@ -36,6 +36,7 @@ dependencies:
 - deriving-compat
 - raw-strings-qq
 - process
+- prettyprinting
 
 ghc-options:
 - -Wall
