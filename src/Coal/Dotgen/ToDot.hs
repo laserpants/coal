@@ -442,4 +442,4 @@ writeDotFiles ns (Module (Path path) _ defs) =
       _ ->
         pure ()
  where
-  prefix = ns <> "__" <> Text.intercalate "." path <> "_"
+  prefix = ns <> "__" <> Text.intercalate "_" path <> "_"
