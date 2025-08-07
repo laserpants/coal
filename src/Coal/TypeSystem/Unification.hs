@@ -78,11 +78,7 @@ instance (Substitutable u, Unifiable u, Data u) => Unifiable (NonEmpty u) where
 instance Unifiable (Intrinsic IndexedType) where
   unify (IList t1) (IList t2) =
     unify t1 t2
-  unify (IOption t1) (IOption t2) =
-    unify t1 t2
   unify (IRecord t1) (IRecord t2) =
-    unify t1 t2
-  unify (IResult t1) (IResult t2) =
     unify t1 t2
   unify (ITuple ts1) (ITuple ts2) =
     unify ts1 ts2
@@ -94,11 +90,7 @@ instance Unifiable (Intrinsic IndexedType) where
 
   match (IList t1) (IList t2) =
     match t1 t2
-  match (IOption t1) (IOption t2) =
-    match t1 t2
   match (IRecord t1) (IRecord t2) =
-    match t1 t2
-  match (IResult t1) (IResult t2) =
     match t1 t2
   match (ITuple ts1) (ITuple ts2) =
     match ts1 ts2

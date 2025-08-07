@@ -38,10 +38,6 @@ translateIntrinsicType =
       Kernel.record (translateType t)
     INat ->
       Kernel.TCon "nat" []
-    IOption t ->
-      Kernel.TCon "option" [translateType t]
-    IResult t ->
-      Kernel.TCon "result" [translateType t]
     IVoid ->
       Kernel.TCon "void" []
 

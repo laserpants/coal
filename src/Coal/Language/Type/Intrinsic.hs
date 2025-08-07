@@ -19,9 +19,7 @@ data Intrinsic t
   | IBignum
   | IList t
   | INat
-  | IOption t
   | IRecord t
-  | IResult t
   | IString
   | ITuple [t]
   | IUnit

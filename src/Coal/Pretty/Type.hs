@@ -77,12 +77,8 @@ prettyIntrinsic prettyT =
       group ("list" <> tupledCompact [prettyT t])
     INat ->
       "nat"
-    IOption t ->
-      group ("option" <> tupledCompact [prettyT t])
     IRecord t ->
       prettyT t
-    IResult t ->
-      group ("result" <> tupledCompact [prettyT t])
     IString ->
       "string"
     ITuple ts ->

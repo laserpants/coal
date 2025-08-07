@@ -1,0 +1,29 @@
+module Main {
+
+  trait Functor(f : * -> *) {
+    map : (a -> b) -> f(a) -> f(b)
+  }
+
+  instance Functor(list) {
+    map(f, xs) =
+      fold(xs) {
+        | [] =>
+            []
+        | head :: @tail =>
+            f(head) :: tail
+      };
+  }
+
+  trait Applicative(f : * -> *) {
+    mapf : f(a -> b) -> f(a) -> f(b);
+    pure : a -> f(a)
+  }
+
+  trait Monad(m : * -> *) {
+    bind : m(a) -> (a -> m(b)) -> m(b)
+  }
+
+  fun main() =
+    trace_int32(5);
+
+}
