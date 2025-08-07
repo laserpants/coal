@@ -18,9 +18,6 @@ parensIf :: Bool -> Doc ann -> Doc ann
 parensIf True = parens
 parensIf False = id
 
-prettyType :: (Pretty k, Pretty (o k)) => Type o k -> Doc ann
-prettyType = prettyTypePrec 0
-
 instance Pretty (TypeIndex k) where
   pretty (TypeIndex _ i) = "_" <> pretty i
 
@@ -113,9 +110,6 @@ precKArrow, precKAtom :: Int
 precKArrow = 1  -- a -> b
 precKAtom  = 2  -- base kinds like Type, Row, Trait
 
-prettyKind :: Kind -> Doc ann
-prettyKind = prettyKindPrec 0
-
 instance Pretty Kind where
   pretty = prettyKindPrec 0
 
@@ -132,5 +126,5 @@ prettyKindPrec prec =
       parensIf (prec > precKArrow) $
         group (prettyKindPrec (precKArrow + 1) k1 <+> "->" <+> prettyKindPrec precKArrow k2)
 
-renderTypeText :: (Pretty k, Pretty (o k)) => Type o k -> Text
-renderTypeText ty = renderStrict . layoutPretty defaultLayoutOptions $ prettyType ty
+renderPretty :: (Pretty a) => a -> Text
+renderPretty p = renderStrict . layoutPretty defaultLayoutOptions $ pretty p
