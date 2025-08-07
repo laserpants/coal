@@ -17,7 +17,6 @@ data Intrinsic t
   | IInt32
   | IInt64
   | IBignum
-  | IList t
   | INat
   | IRecord t
   | IString

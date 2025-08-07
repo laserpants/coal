@@ -101,8 +101,6 @@ instance Parameterized (Type Parameter ()) where
 instance Parameterized (Intrinsic (Type Parameter ())) where
   instantiateTypeIndexes =
     \case
-      IList t ->
-        instantiateTypeIndexes t
       IRecord t ->
         instantiateTypeIndexes t
       ITuple ts ->

@@ -4,7 +4,7 @@ module Main {
     = Node(a, Tree(a), Tree(a))
     | Leaf
 
-  fun from_list(list : list(int32)) : Tree(int32) =
+  fun from_list(list : List(int32)) : Tree(int32) =
     fold(list, { min = 0, max = -1 }) {
       | (p :: @g) =>
           fn(range) =>
@@ -34,7 +34,7 @@ module Main {
   fun main() = 
     let
       xs =
-        [5, 3, 7, 2, 100, 6, 4] : list(int32)
+        [5, 3, 7, 2, 100, 6, 4] : List(int32)
       in
         trace_int32(match(sort(xs)) {
           | [] =>

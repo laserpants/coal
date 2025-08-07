@@ -76,8 +76,6 @@ instance (Substitutable u, Unifiable u, Data u) => Unifiable (NonEmpty u) where
   match t1 t2 = match (NonEmpty.toList t1) (NonEmpty.toList t2)
 
 instance Unifiable (Intrinsic IndexedType) where
-  unify (IList t1) (IList t2) =
-    unify t1 t2
   unify (IRecord t1) (IRecord t2) =
     unify t1 t2
   unify (ITuple ts1) (ITuple ts2) =
@@ -88,8 +86,6 @@ instance Unifiable (Intrinsic IndexedType) where
   unify _ _ =
     throwError ECannotUnify
 
-  match (IList t1) (IList t2) =
-    match t1 t2
   match (IRecord t1) (IRecord t2) =
     match t1 t2
   match (ITuple ts1) (ITuple ts2) =

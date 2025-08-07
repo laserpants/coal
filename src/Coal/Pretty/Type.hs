@@ -73,8 +73,6 @@ prettyIntrinsic prettyT =
       "int64"
     IBignum ->
       "bignum"
-    IList t ->
-      group ("list" <> tupledCompact [prettyT t])
     INat ->
       "nat"
     IRecord t ->

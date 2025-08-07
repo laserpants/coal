@@ -62,9 +62,8 @@ parseTypeApplication = do
 parseType :: Parser (Type Parameter ())
 parseType = makeExprParser go typeOperator
  where
-  go = do
-    (lexeme_ "list" *> (TIntrinsic . IList <$> parens parseType))
-      <|> try parseTypeApplication
+  go =
+    try parseTypeApplication
       <|> parseRecordType
       <|> parseIntrinsicType
       <|> parseTypeParameter

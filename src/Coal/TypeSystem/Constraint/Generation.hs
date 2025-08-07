@@ -104,7 +104,7 @@ patternConstraints assert ms =
     PListLiteral _ t ps -> do
       tellRight
         [ Equality InferenceRulePlaceholder (t : (typeOf <$> ps))
-        , Explicit InferenceRulePlaceholder t (forall1 (TIntrinsic . IList))
+        , Explicit InferenceRulePlaceholder t (forall1 listType)
         ]
       concatForM ps (patternConstraints assert ms)
     PAtVariable _ (Label _ name) -> do
@@ -228,8 +228,8 @@ collectConstraints =
     EListLiteral _ t es -> do
       ms1 <- concatMapM collectConstraints es
       tellRight
-        [ Equality InferenceRulePlaceholder (t : (TIntrinsic . IList . typeOf <$> es))
-        , Explicit InferenceRulePlaceholder t (forall1 (TIntrinsic . IList))
+        [ Equality InferenceRulePlaceholder (t : (listType . typeOf <$> es))
+        , Explicit InferenceRulePlaceholder t (forall1 listType)
         ]
       pure ms1
     EMatch loc t e cs -> do
@@ -282,4 +282,4 @@ collectConstraints =
       error "Not implemented"
 
 listConstructorTypeScheme :: IndexedScheme
-listConstructorTypeScheme = forall1 (\a -> a ~> TIntrinsic (IList a) ~> TIntrinsic (IList a))
+listConstructorTypeScheme = forall1 (\a -> a ~> listType a ~> listType a)

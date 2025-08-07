@@ -12,6 +12,7 @@ import Coal.Compiler (kernelTranslationC, mainPass, typeCheckingPass)
 import Coal.Compiler.Environment
 import Coal.Compiler.Stack
 import Coal.Compiler.TypeInference.Errors
+import Coal.Dotgen.ToDot (writeDotFiles)
 import Coal.Kernel.Compiler (compileModules)
 import Coal.Kernel.LLVM.IRConstruct (IRConstruct (..))
 import Coal.Kernel.LLVM.IREncodable (irEncode)
@@ -45,7 +46,6 @@ import System.IO.Unsafe (unsafePerformIO)
 import System.Process
 import Text.Megaparsec (eof, errorBundlePretty, runParser)
 import Text.RawString.QQ
-import Coal.Dotgen.ToDot (writeDotFiles)
 
 import qualified Coal.Common.Environment as Environment
 import qualified Coal.Kernel.Compiler as Kernel
@@ -427,7 +427,8 @@ insertBuiltinConstructors CompilerEnvironment{..} =
 
 builtinTraits :: [(Name, (TypeIndex Kind, Environment IndexedScheme))]
 builtinTraits =
-  [
+  []
+
 --    ( "Numeric"
 --    ,
 --      ( TypeIndex KType 0
@@ -469,7 +470,6 @@ builtinTraits =
 --          ]
 --      )
 --    )
-  ]
 
 builtinInstances :: [(Name, Map IndexedType (Dictionary IndexedScheme))]
 builtinInstances =
@@ -522,7 +522,11 @@ builtinInstances =
 
 builtinTypeConstructors :: [(Name, Kind)]
 builtinTypeConstructors =
-  []
+  [
+    ( "List"
+    , KArrow KType KType
+    )
+  ]
 
 builtinDataConstructors :: [(Name, Constructor TypeIndex Kind IndexedType)]
 builtinDataConstructors =
@@ -707,7 +711,7 @@ names =
         (Set.fromList [TypeIndex KType 0] :: Set (TypeIndex Kind))
         [ Trait "Traceable" (TVariable (TypeIndex KType 0))
         ]
-        (TIntrinsic (IList (TVariable (TypeIndex KType 0))) `TArrow` TIntrinsic IString)
+        (listType (TVariable (TypeIndex KType 0)) `TArrow` TIntrinsic IString)
     )
   ,
     ( "operator__not"
@@ -753,9 +757,9 @@ names =
     , Forall
         (Set.fromList [TypeIndex KType 0])
         []
-        ( TIntrinsic (IList (TVariable (TypeIndex KType 0)))
-            `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 0)))
-            `TArrow` TIntrinsic (IList (TVariable (TypeIndex KType 0)))
+        ( listType (TVariable (TypeIndex KType 0))
+            `TArrow` listType (TVariable (TypeIndex KType 0))
+            `TArrow` listType (TVariable (TypeIndex KType 0))
         )
     )
   ,
@@ -850,7 +854,7 @@ names =
     , Forall
         mempty
         []
-        (TIntrinsic IString `TArrow` TIntrinsic (IList (TIntrinsic IChar)))
+        (TIntrinsic IString `TArrow` listType (TIntrinsic IChar))
     )
   ,
     ( "string_head"

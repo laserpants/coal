@@ -1,5 +1,6 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
 module Coal.Language.Expression.Operator (
@@ -8,7 +9,7 @@ module Coal.Language.Expression.Operator (
   binaryOperatorTypeScheme,
 ) where
 
-import Coal.Language.Type (Type (..), (~>))
+import Coal.Language.Type (Type (..), listType, (~>))
 import Coal.Language.Type.Intrinsic (Intrinsic (..))
 import Coal.Language.Type.Scheme (IndexedScheme, Scheme (..), forall0, forall1, forall2, forall3)
 import Data.Data (Data, Typeable)
@@ -87,7 +88,7 @@ binaryOperatorTypeScheme =
     ONotEqualTo ->
       forall1 (\a -> a ~> a ~> TIntrinsic IBool)
     OListConcatenation ->
-      forall1 (\a -> TIntrinsic (IList a) ~> TIntrinsic (IList a) ~> TIntrinsic (IList a))
+      forall1 (\a -> listType a ~> listType a ~> listType a)
     OStringConcatenation ->
       Forall mempty [] (TIntrinsic IString ~> TIntrinsic IString ~> TIntrinsic IString)
     OAddition ->

@@ -26,8 +26,6 @@ translateIntrinsicType =
       Kernel.int64
     IBignum ->
       Kernel.bignum
-    IList t ->
-      Kernel.list (translateType t)
     IString ->
       Kernel.string
     IUnit ->
@@ -62,6 +60,8 @@ translateType =
       foldr (translateApplication . translateType) (translateType t) ts
     TArrow t1 t2 ->
       Kernel.arrow (translateType t1) (translateType t2)
+    TConstructor _ "List" ->
+      Kernel.TCon "list" []
     TConstructor _ name ->
       Kernel.TCon name []
     TIntrinsic t ->

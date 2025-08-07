@@ -6,6 +6,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
 module Coal.Language.Type (
@@ -18,17 +19,17 @@ module Coal.Language.Type (
   unfoldType,
   activeIdsIn,
   normalizeRowTypes,
+  listType,
   (~>),
 ) where
 
-import Coal.Common.List1 (List1, (<|))
+import Coal.Common.List1 (List1, NonEmpty (..), (<|))
 import Coal.Common.Supply (Supply (..))
 import Coal.Language.Type.Intrinsic (Intrinsic (..))
-import Coal.Language.Type.Kind (Kind)
+import Coal.Language.Type.Kind (Kind (..))
 import Coal.Language.Type.Row (Row (..), normalizeRow)
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (transform)
-import Data.List.NonEmpty (NonEmpty)
 import Extra (Map, Name, Set)
 import GHC.Generics (Generic)
 
@@ -105,3 +106,6 @@ normalizeRowTypes = transform $
       TRow (normalizeRow r)
     t ->
       t
+
+listType :: IndexedType -> IndexedType
+listType t = TApplication KType (TConstructor (KArrow KType KType) "List") (t :| [])
