@@ -427,6 +427,7 @@ insertBuiltinConstructors CompilerEnvironment{..} =
 builtinTraits :: [(Name, (TypeIndex Kind, Environment IndexedScheme))]
 builtinTraits =
   [
+    -- TODO: remove
     ( "Numeric"
     ,
       ( TypeIndex KType 0
