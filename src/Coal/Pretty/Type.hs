@@ -56,8 +56,8 @@ prettyTypePrec prec =
             <+> "="
             <+> prettyTypePrec precArrow t
 
-prettyIntrinsic :: (Type o k -> Doc ann) -> Intrinsic (Type o k) -> Doc ann
-prettyIntrinsic go =
+prettyIntrinsic :: (t -> Doc ann) -> Intrinsic t -> Doc ann
+prettyIntrinsic prettyT =
   \case
     IBool ->
       "bool"
@@ -74,19 +74,19 @@ prettyIntrinsic go =
     IBignum ->
       "bignum"
     IList t ->
-      group ("list" <> tupledCompact [go t])
+      group ("list" <> tupledCompact [prettyT t])
     INat ->
       "nat"
     IOption t ->
-      group ("option" <> tupledCompact [go t])
+      group ("option" <> tupledCompact [prettyT t])
     IRecord t ->
-      go t
+      prettyT t
     IResult t ->
-      group ("result" <> tupledCompact [go t])
+      group ("result" <> tupledCompact [prettyT t])
     IString ->
       "string"
     ITuple ts ->
-      group ("result" <> tupledCompact (go <$> ts))
+      group ("result" <> tupledCompact (prettyT <$> ts))
     IUnit ->
       "unit"
     IVoid ->
