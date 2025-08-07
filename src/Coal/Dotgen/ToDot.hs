@@ -1,9 +1,11 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE StrictData #-}
 
 module Coal.Dotgen.ToDot where
 
+import Coal.Language.Expression.Choice
 import Coal.Common.Label (Label (..))
 import Coal.Common.List1 (fromList1)
 import Coal.Language.Expression
@@ -257,38 +259,116 @@ instance (Show t) => ToDot (Pattern a t) where
       PConstructor _ (Label t name) ps -> do
         nid <- freshId
         emitNode nid ("Constructor " <> Text.pack (show t) <> ": " <> name)
+        forM_ ps $
+          \p -> do
+            eid <- toDot p
+            emitEdge nid eid
         return nid
       PLiteral _ prim -> do
         nid <- freshId
         emitNode nid ("Literal: " <> Text.pack (show prim))
         return nid
       PRecord _ t fields maybeTail -> do
-        undefined
-      PListCons _ t p1 p2 ->
-        undefined
-      PListLiteral _ t ps ->
-        undefined
-      PTuple _ t ps ->
-        undefined
-      POr _ t p1 p2 ->
-        undefined
-      PAs _ (Label t name) p ->
-        undefined
+        nid <- freshId
+        emitNode nid ("Record: " <> Text.pack (show t))
+        -- Emit each field
+        forM_ (Map.toList fields) $
+          \(fieldName, fieldExpr) -> do
+            fid <- freshId
+            emitNode fid ("Field: " <> fieldName)
+            eid <- toDot fieldExpr
+            emitEdge fid eid -- Field node -> Pattern
+            emitEdge nid fid -- Record -> Field node
+            -- Emit optional tail
+        case maybeTail of
+          Just tailExpr -> do
+            tid <- toDot tailExpr
+            emitEdge nid tid -- Record -> Tail
+          Nothing -> return ()
+        return nid
+      PListCons _ t p1 p2 -> do
+        nid <- freshId
+        emitNode nid ("PListCons: " <> Text.pack (show t))
+        id1 <- toDot p1
+        id2 <- toDot p2
+        emitEdge nid id1
+        emitEdge nid id2
+        return nid
+      PListLiteral _ t ps -> do
+        nid <- freshId
+        emitNode nid ("ListLiteral: " <> Text.pack (show t))
+        forM_ ps $
+          \p -> do
+            eid <- toDot p
+            emitEdge nid eid
+        return nid
+      PTuple _ t ps -> do
+        nid <- freshId
+        emitNode nid ("Tuple: " <> Text.pack (show t))
+        forM_ ps $
+          \p -> do
+            eid <- toDot p
+            emitEdge nid eid
+        return nid
+      POr _ t p1 p2 -> do
+        nid <- freshId
+        emitNode nid ("POr: " <> Text.pack (show t))
+        id1 <- toDot p1
+        id2 <- toDot p2
+        emitEdge nid id1
+        emitEdge nid id2
+        return nid
+      PAs _ (Label t name) p -> do
+        nid <- freshId
+        emitNode nid ("As " <> Text.pack (show t) <> ": " <> name)
+        id1 <- toDot p
+        emitEdge nid id1
+        return nid
       PShorthand _ (Label t name) ->
-        undefined
-      PAtVariable _ (Label t name) ->
-        undefined
-      PPlaceholder _ t tr ->
-        undefined
+        error "TODO"
+      PAtVariable _ (Label t name) -> do
+        nid <- freshId
+        emitNode nid ("AtVariable " <> Text.pack (show t) <> ": " <> name)
+        return nid
+      PPlaceholder _ t tr -> do
+        nid <- freshId
+        emitNode nid ("Placeholder " <> Text.pack (show t) <> ": " <> Text.pack (show tr))
+        return nid
 
 instance (Show t) => ToDot (Clause a t) where
   toDot =
     \case
-      EClause{} ->
+      EClause _ p cs -> do
+        nid <- freshId
+        emitNode nid "Clause"
+        id1 <- toDot p
+        emitEdge nid id1
+        forM_ cs $
+          \c -> do
+            eid <- toDot c
+            emitEdge nid eid
+        return nid
+
+instance (Show t) => ToDot (Choice Expression a t) where
+  toDot =
+    \case
+      CPlain _ gs e ->
         error "TODO"
+      CLambda{} ->
+        error "TODO"
+
+instance (Show t) => ToDot (Guard Expression a t) where
+  toDot =
+    \case
+      CGuard e -> do
+        nid <- freshId
+        emitNode nid "Guard"
+        cid <- toDot e
+        emitEdge nid cid
+        return nid
 
 instance (Show t) => ToDot (CompiledClause a t) where
   toDot =
     \case
-      ECompiledClause{} ->
+      ECompiledClause lls e ->
         error "TODO"
