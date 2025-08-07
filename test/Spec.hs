@@ -427,48 +427,47 @@ insertBuiltinConstructors CompilerEnvironment{..} =
 builtinTraits :: [(Name, (TypeIndex Kind, Environment IndexedScheme))]
 builtinTraits =
   [
-    -- TODO: remove
-    ( "Numeric"
-    ,
-      ( TypeIndex KType 0
-      , Environment.fromList
-          [
-            ( "from_int32"
-            , Forall
-                (Set.fromList [TypeIndex KType 0])
-                []
-                ( TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0)
-                )
-            )
-          ,
-            ( "negated"
-            , Forall
-                (Set.fromList [TypeIndex KType 0])
-                []
-                ( TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0)
-                )
-            )
-          ]
-      )
-    )
-  ,
-    ( "Ordered"
-    ,
-      ( TypeIndex KType 0
-      , Environment.fromList
-          [
-            ( "compare"
-            , Forall
-                (Set.fromList [TypeIndex KType 0])
-                []
-                ( TVariable (TypeIndex KType 0)
-                    `TArrow` TVariable (TypeIndex KType 0)
-                    `TArrow` TConstructor KType "Ordering"
-                )
-            )
-          ]
-      )
-    )
+--    ( "Numeric"
+--    ,
+--      ( TypeIndex KType 0
+--      , Environment.fromList
+--          [
+--            ( "from_int32"
+--            , Forall
+--                (Set.fromList [TypeIndex KType 0])
+--                []
+--                ( TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0)
+--                )
+--            )
+--          ,
+--            ( "negated"
+--            , Forall
+--                (Set.fromList [TypeIndex KType 0])
+--                []
+--                ( TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0)
+--                )
+--            )
+--          ]
+--      )
+--    )
+--  ,
+--    ( "Ordered"
+--    ,
+--      ( TypeIndex KType 0
+--      , Environment.fromList
+--          [
+--            ( "compare"
+--            , Forall
+--                (Set.fromList [TypeIndex KType 0])
+--                []
+--                ( TVariable (TypeIndex KType 0)
+--                    `TArrow` TVariable (TypeIndex KType 0)
+--                    `TArrow` TConstructor KType "Ordering"
+--                )
+--            )
+--          ]
+--      )
+--    )
   ]
 
 builtinInstances :: [(Name, Map IndexedType (Dictionary IndexedScheme))]
