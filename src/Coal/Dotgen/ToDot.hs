@@ -2,6 +2,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module Coal.Dotgen.ToDot (
   ToDot (..),
@@ -9,6 +10,7 @@ module Coal.Dotgen.ToDot (
   writeDotFiles,
 ) where
 
+import Coal.Common.Supply (Supply (..), supplied)
 import Coal.Common.Label (Label (..))
 import Coal.Common.List1 (fromList1)
 import Coal.Language.Expression
@@ -34,6 +36,10 @@ data DotState = DotState
   , edges :: [Edge]
   }
 
+instance Supply DotState where
+  updateSupply f DotState{..} = DotState{ supply = f supply, .. }
+  getSupply = supply
+
 type DotGen = State DotState
 
 class ToDot a where
@@ -53,13 +59,8 @@ instance (ToDot a) => ToDot (Maybe a) where
         emitEdge nid cid
         pure nid
 
--- TODO: Use supply
 freshId :: DotGen Int
-freshId = do
-  st <- get
-  let nid = supply st
-  put st{supply = nid + 1}
-  return nid
+freshId = supplied id
 
 emitNode :: Int -> Text -> DotGen ()
 emitNode nid label = modify $ \st -> st{nodes = (nid, label) : nodes st}
