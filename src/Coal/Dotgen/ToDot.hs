@@ -246,15 +246,23 @@ instance (Show t) => ToDot (Pattern a t) where
         cid <- toDot inner
         emitEdge nid cid
         return nid
-      PAny _ t ->
-        undefined
-      PVariable _ (Label t name) ->
-        undefined
-      PConstructor _ (Label t name) ps ->
-        undefined
-      PLiteral _ p ->
-        undefined
-      PRecord _ t d mp ->
+      PAny _ t -> do
+        nid <- freshId
+        emitNode nid ("Any: " <> Text.pack (show t))
+        return nid
+      PVariable _ (Label t name) -> do
+        nid <- freshId
+        emitNode nid ("Variable " <> Text.pack (show t) <> ": " <> name)
+        return nid
+      PConstructor _ (Label t name) ps -> do
+        nid <- freshId
+        emitNode nid ("Constructor " <> Text.pack (show t) <> ": " <> name)
+        return nid
+      PLiteral _ prim -> do
+        nid <- freshId
+        emitNode nid ("Literal: " <> Text.pack (show prim))
+        return nid
+      PRecord _ t fields maybeTail -> do
         undefined
       PListCons _ t p1 p2 ->
         undefined
@@ -266,9 +274,9 @@ instance (Show t) => ToDot (Pattern a t) where
         undefined
       PAs _ (Label t name) p ->
         undefined
-      PShorthand a (Label t name) ->
+      PShorthand _ (Label t name) ->
         undefined
-      PAtVariable a (Label t name) ->
+      PAtVariable _ (Label t name) ->
         undefined
       PPlaceholder _ t tr ->
         undefined
