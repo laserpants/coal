@@ -74,13 +74,13 @@ instance (Pretty t, Show t) => ToDot (Expression a t) where
     \case
       EAnnotation _ t inner -> do
         nid <- freshId
-        emitNode nid ("Annotation: " <> prettyType t)
+        emitNode nid ("Annotation " <> prettyType t)
         cid <- toDot inner
         emitEdge nid cid
         return nid
       EApplication _ t fun args -> do
         nid <- freshId
-        emitNode nid ("Application: " <> prettyType t)
+        emitNode nid ("Application " <> prettyType t)
         fid <- toDot fun
         emitEdge nid fid
         forM_ (fromList1 args) $
@@ -125,19 +125,19 @@ instance (Pretty t, Show t) => ToDot (Expression a t) where
         return nid
       EVariable _ (Label t name) -> do
         nid <- freshId
-        emitNode nid ("Variable " <> prettyType t <> ": " <> name)
+        emitNode nid ("Variable " <> prettyType t <> " " <> name)
         return nid
       EConstructor _ (Label t name) -> do
         nid <- freshId
-        emitNode nid ("Constructor " <> prettyType t <> ": " <> name)
+        emitNode nid ("Constructor " <> prettyType t <> " " <> name)
         return nid
       ELiteral _ prim -> do
         nid <- freshId
-        emitNode nid ("Literal: " <> Text.pack (show prim))
+        emitNode nid ("Literal " <> Text.pack (show prim))
         return nid
       EIf _ t e1 e2 e3 -> do
         nid <- freshId
-        emitNode nid ("If: " <> prettyType t)
+        emitNode nid ("If " <> prettyType t)
         id1 <- toDot e1
         id2 <- toDot e2
         id3 <- toDot e3
@@ -147,20 +147,20 @@ instance (Pretty t, Show t) => ToDot (Expression a t) where
         return nid
       EUnaryOperator _ t op -> do
         nid <- freshId
-        emitNode nid ("UnaryOperator " <> Text.pack (show op) <> ": " <> prettyType t)
+        emitNode nid ("UnaryOperator " <> Text.pack (show op) <> " " <> prettyType t)
         return nid
       EBinaryOperator _ t op -> do
         nid <- freshId
-        emitNode nid ("BinaryOperator " <> Text.pack (show op) <> ": " <> prettyType t)
+        emitNode nid ("BinaryOperator " <> Text.pack (show op) <> " " <> prettyType t)
         return nid
       ERecord _ t fields maybeTail -> do
         nid <- freshId
-        emitNode nid ("Record: " <> prettyType t)
+        emitNode nid ("Record " <> prettyType t)
         -- Emit each field
         forM_ (Map.toList fields) $
           \(fieldName, fieldExpr) -> do
             fid <- freshId
-            emitNode fid ("Field: " <> fieldName)
+            emitNode fid ("Field " <> fieldName)
             eid <- toDot fieldExpr
             emitEdge fid eid -- Field node -> Expression
             emitEdge nid fid -- Record -> Field node
@@ -173,7 +173,7 @@ instance (Pretty t, Show t) => ToDot (Expression a t) where
         return nid
       EListCons _ t e1 e2 -> do
         nid <- freshId
-        emitNode nid ("ListCons: " <> prettyType t)
+        emitNode nid ("ListCons " <> prettyType t)
         id1 <- toDot e1
         id2 <- toDot e2
         emitEdge nid id1
@@ -181,7 +181,7 @@ instance (Pretty t, Show t) => ToDot (Expression a t) where
         return nid
       EListLiteral _ t es -> do
         nid <- freshId
-        emitNode nid ("ListLiteral: " <> prettyType t)
+        emitNode nid ("ListLiteral " <> prettyType t)
         forM_ es $
           \e -> do
             eid <- toDot e
@@ -189,7 +189,7 @@ instance (Pretty t, Show t) => ToDot (Expression a t) where
         return nid
       ETuple _ t es -> do
         nid <- freshId
-        emitNode nid ("Tuple: " <> prettyType t)
+        emitNode nid ("Tuple " <> prettyType t)
         forM_ es $
           \e -> do
             eid <- toDot e
@@ -197,7 +197,7 @@ instance (Pretty t, Show t) => ToDot (Expression a t) where
         return nid
       EMatch _ t e cs -> do
         nid <- freshId
-        emitNode nid ("Match: " <> prettyType t)
+        emitNode nid ("Match " <> prettyType t)
         -- Scrutinee
         sid <- toDot e
         emitEdge nid sid
@@ -209,7 +209,7 @@ instance (Pretty t, Show t) => ToDot (Expression a t) where
         return nid
       ECompiledMatch _ t e cs -> do
         nid <- freshId
-        emitNode nid ("CompiledMatch: " <> prettyType t)
+        emitNode nid ("CompiledMatch " <> prettyType t)
         -- Scrutinee
         sid <- toDot e
         emitEdge nid sid
@@ -221,7 +221,7 @@ instance (Pretty t, Show t) => ToDot (Expression a t) where
         return nid
       EFold _ t es cs me -> do
         nid <- freshId
-        emitNode nid ("Fold: " <> prettyType t)
+        emitNode nid ("Fold " <> prettyType t)
         ids1 <- traverse toDot es
         ids2 <- traverse toDot cs
         id <- toDot me
@@ -231,11 +231,11 @@ instance (Pretty t, Show t) => ToDot (Expression a t) where
         return nid
       EUnfold _ t ll n ps d me -> do
         nid <- freshId
-        emitNode nid ("Unfold: " <> prettyType t)
+        emitNode nid ("Unfold " <> prettyType t)
         error "TODO"
       ESelect _ (Label t name) e -> do
         nid <- freshId
-        emitNode nid ("Select " <> prettyType t <> ": " <> name)
+        emitNode nid ("Select " <> prettyType t <> " " <> name)
         sid <- toDot e
         emitEdge nid sid
         return nid
@@ -253,21 +253,21 @@ instance (Pretty t, Show t) => ToDot (Pattern a t) where
     \case
       PAnnotation _ t inner -> do
         nid <- freshId
-        emitNode nid ("Annotation: " <> prettyType t)
+        emitNode nid ("Annotation " <> prettyType t)
         cid <- toDot inner
         emitEdge nid cid
         return nid
       PAny _ t -> do
         nid <- freshId
-        emitNode nid ("Any: " <> prettyType t)
+        emitNode nid ("Any " <> prettyType t)
         return nid
       PVariable _ (Label t name) -> do
         nid <- freshId
-        emitNode nid ("Variable " <> prettyType t <> ": " <> name)
+        emitNode nid ("Variable " <> prettyType t <> " " <> name)
         return nid
       PConstructor _ (Label t name) ps -> do
         nid <- freshId
-        emitNode nid ("Constructor " <> prettyType t <> ": " <> name)
+        emitNode nid ("Constructor " <> prettyType t <> " " <> name)
         forM_ ps $
           \p -> do
             eid <- toDot p
@@ -275,16 +275,16 @@ instance (Pretty t, Show t) => ToDot (Pattern a t) where
         return nid
       PLiteral _ prim -> do
         nid <- freshId
-        emitNode nid ("Literal: " <> Text.pack (show prim))
+        emitNode nid ("Literal " <> Text.pack (show prim))
         return nid
       PRecord _ t fields maybeTail -> do
         nid <- freshId
-        emitNode nid ("Record: " <> prettyType t)
+        emitNode nid ("Record " <> prettyType t)
         -- Emit each field
         forM_ (Map.toList fields) $
           \(fieldName, fieldExpr) -> do
             fid <- freshId
-            emitNode fid ("Field: " <> fieldName)
+            emitNode fid ("Field " <> fieldName)
             eid <- toDot fieldExpr
             emitEdge fid eid -- Field node -> Pattern
             emitEdge nid fid -- Record -> Field node
@@ -297,7 +297,7 @@ instance (Pretty t, Show t) => ToDot (Pattern a t) where
         return nid
       PListCons _ t p1 p2 -> do
         nid <- freshId
-        emitNode nid ("PListCons: " <> prettyType t)
+        emitNode nid ("PListCons " <> prettyType t)
         id1 <- toDot p1
         id2 <- toDot p2
         emitEdge nid id1
@@ -305,7 +305,7 @@ instance (Pretty t, Show t) => ToDot (Pattern a t) where
         return nid
       PListLiteral _ t ps -> do
         nid <- freshId
-        emitNode nid ("ListLiteral: " <> prettyType t)
+        emitNode nid ("ListLiteral " <> prettyType t)
         forM_ ps $
           \p -> do
             eid <- toDot p
@@ -313,7 +313,7 @@ instance (Pretty t, Show t) => ToDot (Pattern a t) where
         return nid
       PTuple _ t ps -> do
         nid <- freshId
-        emitNode nid ("Tuple: " <> prettyType t)
+        emitNode nid ("Tuple " <> prettyType t)
         forM_ ps $
           \p -> do
             eid <- toDot p
@@ -321,7 +321,7 @@ instance (Pretty t, Show t) => ToDot (Pattern a t) where
         return nid
       POr _ t p1 p2 -> do
         nid <- freshId
-        emitNode nid ("POr: " <> prettyType t)
+        emitNode nid ("POr " <> prettyType t)
         id1 <- toDot p1
         id2 <- toDot p2
         emitEdge nid id1
@@ -329,7 +329,7 @@ instance (Pretty t, Show t) => ToDot (Pattern a t) where
         return nid
       PAs _ (Label t name) p -> do
         nid <- freshId
-        emitNode nid ("As " <> prettyType t <> ": " <> name)
+        emitNode nid ("As " <> prettyType t <> " " <> name)
         id1 <- toDot p
         emitEdge nid id1
         return nid
@@ -337,11 +337,11 @@ instance (Pretty t, Show t) => ToDot (Pattern a t) where
         error "TODO"
       PAtVariable _ (Label t name) -> do
         nid <- freshId
-        emitNode nid ("AtVariable " <> prettyType t <> ": " <> name)
+        emitNode nid ("AtVariable " <> prettyType t <> " " <> name)
         return nid
       PPlaceholder _ t tr -> do
         nid <- freshId
-        emitNode nid ("Placeholder " <> prettyType t <> ": " <> Text.pack (show tr))
+        emitNode nid ("Placeholder " <> prettyType t <> " " <> Text.pack (show tr))
         return nid
 
 instance (Pretty t, Show t) => ToDot (Clause a t) where
@@ -395,7 +395,7 @@ instance (Show t, Pretty t) => ToDot (Definition a k t) where
     \case
       DFunction name (Function _ (With _ t) ps e) -> do
         nid <- freshId
-        emitNode nid ("Function " <> prettyType t <> ": " <> name)
+        emitNode nid ("Function " <> prettyType t <> " " <> name)
         forM_ ps $
           \p -> do
             eid <- toDot p
@@ -405,7 +405,7 @@ instance (Show t, Pretty t) => ToDot (Definition a k t) where
         return nid
       DConstant name (Constant _ (With _ t) e) -> do
         nid <- freshId
-        emitNode nid ("Constant " <> prettyType t <> ": " <> name)
+        emitNode nid ("Constant " <> prettyType t <> " " <> name)
         cid <- toDot e
         emitEdge nid cid
         return nid
