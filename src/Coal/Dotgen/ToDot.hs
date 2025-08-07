@@ -336,8 +336,10 @@ instance (Pretty t, Show t) => ToDot (Pattern a t) where
         id1 <- toDot p
         emitEdge nid id1
         return nid
-      PShorthand _ (Label t name) ->
-        error "TODO"
+      PShorthand _ (Label t name) -> do
+        nid <- freshId
+        emitNode nid ("PShorthand " <> prettyType t <> " " <> name)
+        return nid
       PAtVariable _ (Label t name) -> do
         nid <- freshId
         emitNode nid ("PAtVariable " <> prettyType t <> " " <> name)
