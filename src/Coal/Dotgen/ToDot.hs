@@ -5,12 +5,13 @@
 module Coal.Dotgen.ToDot where
 
 import Coal.Common.Label (Label (..))
-import Coal.Common.List1 (NonEmpty (..), fromList1)
+import Coal.Common.List1 (fromList1)
 import Coal.Language.Expression
 import Coal.Language.Expression.Binding
 import Coal.Language.Pattern
 import Control.Monad.State
 import Data.Text (Text)
+import Extra (traverse_)
 
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
@@ -213,8 +214,8 @@ instance (Show t) => ToDot (Expression a t) where
         ids1 <- traverse toDot es
         ids2 <- traverse toDot cs
         id <- toDot me
-        traverse (emitEdge nid) ids1
-        traverse (emitEdge nid) ids2
+        traverse_ (emitEdge nid) ids1
+        traverse_ (emitEdge nid) ids2
         emitEdge nid id
         return nid
       EUnfold _ t ll n ps d me -> do
@@ -233,12 +234,18 @@ instance (Show t) => ToDot (Expression a t) where
         error "TODO"
       EPlaceholder{} ->
         error "TODO"
+      _ ->
+        error "TODO"
 
 instance (Show t) => ToDot (Pattern a t) where
   toDot =
     \case
-      PAnnotation _ t p ->
-        undefined
+      PAnnotation _ t inner -> do
+        nid <- freshId
+        emitNode nid ("Annotation: " <> Text.pack (show t))
+        cid <- toDot inner
+        emitEdge nid cid
+        return nid
       PAny _ t ->
         undefined
       PVariable _ (Label t name) ->
