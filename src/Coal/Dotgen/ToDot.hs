@@ -1,22 +1,29 @@
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Dotgen.ToDot where
+module Coal.Dotgen.ToDot (
+  ToDot (..),
+  generateDot,
+  writeDotFiles,
+) where
 
-import Coal.Language.Expression.Choice
 import Coal.Common.Label (Label (..))
 import Coal.Common.List1 (fromList1)
 import Coal.Language.Expression
 import Coal.Language.Expression.Binding
+import Coal.Language.Expression.Choice
+import Coal.Language.Module
 import Coal.Language.Pattern
+import Coal.Language.Trait (With (..))
 import Control.Monad.State
 import Data.Text (Text)
 import Extra (traverse_)
 
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
+import qualified Data.Text.IO as Text
 
 type Node = (Int, Text)
 type Edge = (Int, Int)
@@ -380,3 +387,59 @@ instance (Show t) => ToDot (CompiledClause a t) where
     \case
       ECompiledClause lls e ->
         error "TODO"
+
+instance (Show t) => ToDot (Definition a k t) where
+  toDot =
+    \case
+      DFunction name (Function _ (With _ t) ps e) -> do
+        nid <- freshId
+        emitNode nid ("Function " <> Text.pack (show t) <> ": " <> name)
+        forM_ ps $
+          \p -> do
+            eid <- toDot p
+            emitEdge nid eid
+        cid <- toDot e
+        emitEdge nid cid
+        return nid
+      DConstant name (Constant _ (With _ t) e) -> do
+        nid <- freshId
+        emitNode nid ("Constant " <> Text.pack (show t) <> ": " <> name)
+        cid <- toDot e
+        emitEdge nid cid
+        return nid
+      _ -> do
+        nid <- freshId
+        emitNode nid "TODO"
+        return nid
+
+generateDot :: (ToDot a) => a -> Text
+generateDot ast =
+  Text.unlines $
+    [ "digraph AST {"
+    , "  node [shape=box];"
+    ]
+      ++ map ("  " <>) (reverse dotNodes ++ dotEdges)
+      ++ ["}"]
+ where
+  initialState = DotState 0 [] []
+  (_, finalState) = runState (toDot ast) initialState
+  dotNodes = [Text.pack (show nid) <> " [label=\"" <> label <> "\"];" | (nid, label) <- nodes finalState]
+  dotEdges = [Text.pack (show from) <> " -> " <> Text.pack (show to) <> ";" | (from, to) <- edges finalState]
+
+writeDotFile :: (ToDot a) => Text -> a -> IO ()
+writeDotFile fname a = Text.writeFile ("./.debug/" <> Text.unpack fname <> ".dot") (generateDot a)
+
+writeDotFiles :: (Show t) => Text -> Module a k t -> IO ()
+writeDotFiles ns (Module (Path path) _ defs) =
+  forM_ defs $
+    \case
+      def@DFunction{} ->
+        writeDotFile (prefix <> definitionName def) def
+      def@DConstant{} ->
+        writeDotFile (prefix <> definitionName def) def
+      DAnnotation _ def ->
+        writeDotFile (prefix <> definitionName def) def
+      _ ->
+        pure ()
+ where
+  prefix = ns <> "__" <> Text.intercalate "." path <> "_"

@@ -45,6 +45,7 @@ import System.IO.Unsafe (unsafePerformIO)
 import System.Process
 import Text.Megaparsec (eof, errorBundlePretty, runParser)
 import Text.RawString.QQ
+import Coal.Dotgen.ToDot (writeDotFiles)
 
 import qualified Coal.Common.Environment as Environment
 import qualified Coal.Kernel.Compiler as Kernel
@@ -607,6 +608,7 @@ run :: [(Text, Module Metadata Kind ())] -> CompilerT Metadata IO ()
 run modules = do
   rs <- forM (overModuleDefinitions addBuiltinDefs <$$> modules) $
     \(src, m1) -> do
+      liftIO $ writeDotFiles "untyped" m1
       defs <- gets compilerTypeDefinitions
       let m2 = overModuleDefinitions (insertImportedTypes defs) m1
       setSourceTextC src
@@ -622,6 +624,8 @@ run modules = do
 compileModule :: (MonadIO m) => Module Metadata Kind () -> CompilerT Metadata m (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))
 compileModule x = do
   a <- typeCheckingPass x
+
+  liftIO $ writeDotFiles "typed" a
 
   x2 <- gets compilerConstraintsGenErrors
 
