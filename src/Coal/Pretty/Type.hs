@@ -47,10 +47,8 @@ prettyTypePrec prec =
     TAlias name args t ->
       parensIf (prec > precApp) $
         group $
-          pretty name
-            <+> hsep (map (prettyTypePrec (precApp + 1)) args)
-            <+> "="
-            <+> prettyTypePrec precArrow t
+          "type" <+> pretty name <> tupled (map (prettyTypePrec 0) args)
+            <+> "=" <+> prettyTypePrec precArrow t
 
 prettyIntrinsic :: (Type o k -> Doc ann) -> Intrinsic (Type o k) -> Doc ann
 prettyIntrinsic go = 
