@@ -5,7 +5,7 @@ module Main {
   fun main() = 
     let
       xs =
-        [5, 3, 7, 2, 1, 6, 4] : list(int32)
+        [105, 103, 107, 102, 101, 106, 104] : list(int32)
       in
         trace_int32(match(sort(xs)) {
           | [] =>

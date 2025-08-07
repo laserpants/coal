@@ -104,7 +104,7 @@ bignum_init(char* str)
 void
 print_bool(bool b)
 {
-  printf("%s", b ? "true" : "false");
+  printf("%s\n", b ? "true" : "false");
 }
 
 void

@@ -3,7 +3,7 @@ module Main {
   fun main() =
     let 
       r = 
-        { a = "hello", b = { msg = "wat" } }
+        { a = "hello", b = { msg = "hello from the other side" } }
       in
         match(r) {
           | { b = b1, a = _ } =>

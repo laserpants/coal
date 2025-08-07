@@ -4,7 +4,7 @@ module Main {
 
   a_user_named_bob = 
     User
-      ({ name = "Bob"
+      ({ name = "Alphonso"
        , uid = 1
        });
 

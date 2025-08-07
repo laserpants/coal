@@ -67,19 +67,19 @@ spec = do
   x <- main5
   print (x == Right "40320\n")
   x <- main6
-  print x
+  print (x == Right "101\n")
   x <- main7
-  print x
+  print (x == Right "hello\n")
   x <- main8
-  print x
+  print (x == Right "cluedo\n")
   x <- main9
-  print x
+  print (x == Right "wat\n")
   x <- main10
-  print x
+  print (x == Right "hello from the other side\n")
   x <- main11
-  print x
+  print (x == Right "Covfefe\n")
   x <- main12
-  print x
+  print (x == Right "bork bork bork\n")
   a <- isLeft <$> main13
   print a
   a <- isLeft <$> main14
@@ -89,49 +89,49 @@ spec = do
   a <- isLeft <$> main16
   print a
   x <- main17
-  print x
+  print (x == Right "false\n")
   x <- main18
-  print x
+  print (x == Right "40320\n")
   x <- main20
-  print x
+  print (x == Right "Bob\n")
   x <- main21
-  print x
+  print (x == Right "Lazarus\n")
   x <- main22
-  print x
+  print (x == Right "Alphonso\n")
   x <- main24
-  print x
+  print (x == Right "1234\n")
   x <- main25
-  print x
+  print (x == Right "123\n")
   x <- main26
-  print x
+  print (x == Right "x\n")
   a <- isLeft <$> main27
   print a
   x <- main28
-  print x
+  print (x == Right "5\n")
   x <- main29
-  print x
+  print (x == Right "ananab\n")
   x <- main30
-  print x
+  print (x == Right "2\n")
   x <- main31
-  print x
+  print (x == Right "5\n")
   x <- main32
-  print x
+  print (x == Right "123\n")
   x <- main34
-  print x
+  print (x == Right "111\n111\n")
   x <- main35
-  print x
+  print (x == Right "9876\n")
   x <- main36
-  print x
+  print (x == Right "-123\n")
   x <- main37
-  print x
+  print (x == Right "59876\n")
   x <- main39
-  print x
+  print (x == Right "true\n")
   x <- main40
-  print x
+  print (x == Right "true\n")
   x <- main41
-  print x
+  print (x == Right "true\n")
   x <- main42
-  print x
+  print (x == Right "true\n")
 
 runTestFiles :: [String] -> IO (Either CompilerError Text)
 runTestFiles files = do
