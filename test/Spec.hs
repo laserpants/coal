@@ -65,7 +65,7 @@ spec = do
   x <- main4
   print (x == Right "2\n")
   x <- main5
-  print x
+  print (x == Right "40320\n")
   x <- main6
   print x
   x <- main7

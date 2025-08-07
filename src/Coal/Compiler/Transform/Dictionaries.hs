@@ -28,7 +28,7 @@ import Control.Monad (forM)
 import Control.Monad.RWS (RWS, runRWS)
 import Control.Monad.Reader (MonadReader, asks, local)
 import Control.Monad.State (MonadState)
-import Control.Monad.Writer (MonadWriter, listen, tell, censor)
+import Control.Monad.Writer (MonadWriter, censor, listen, tell)
 import Data.Data (Data)
 import Data.Foldable (foldrM)
 import Data.Generics.Uniplate.Data (descendM)
@@ -169,8 +169,6 @@ instance (Monoid a, Data a) => TraitContext (Expression a IndexedType) where
           _ ->
             error "Implementation error"
       ELet a bs e -> do
-        -- (as, traits) <- listen (traverse transformBinding bs)
-        -- let (ds, es) = List1.unzip as
         as <- censor (const []) (traverse transformBinding bs)
         let xs = concat (fromList1 (snd <$> as))
         ELet a (fst <$> as) <$> local (overDictionaryEnvironmentNames (Environment.insertMultiple xs)) (expandTraits e)
