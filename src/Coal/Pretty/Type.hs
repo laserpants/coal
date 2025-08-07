@@ -1,7 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Coal.Pretty.Type where
+module Coal.Pretty.Type (Pretty (..), renderPretty) where
 
 import Data.Text (Text)
 import Prettyprinter.Render.Text (renderStrict)
