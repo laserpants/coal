@@ -3,11 +3,11 @@
 
 module Coal.Pretty.Type (Pretty (..), renderPretty) where
 
-import Data.Text (Text)
-import Prettyprinter.Render.Text (renderStrict)
 import Coal.Common.List1 (NonEmpty (..), fromList1)
 import Coal.Language
+import Data.Text (Text)
 import Prettyprinter
+import Prettyprinter.Render.Text (renderStrict)
 
 precArrow, precApp, precAtom :: Int
 precArrow = 1 -- e.g., a -> b
@@ -50,11 +50,14 @@ prettyTypePrec prec =
     TAlias name args t ->
       parensIf (prec > precApp) $
         group $
-          "type" <+> pretty name <> tupledCompact (map (prettyTypePrec 0) args)
-            <+> "=" <+> prettyTypePrec precArrow t
+          "type"
+            <+> pretty name
+            <> tupledCompact (map (prettyTypePrec 0) args)
+            <+> "="
+            <+> prettyTypePrec precArrow t
 
 prettyIntrinsic :: (Type o k -> Doc ann) -> Intrinsic (Type o k) -> Doc ann
-prettyIntrinsic go = 
+prettyIntrinsic go =
   \case
     IBool ->
       "bool"
@@ -108,20 +111,20 @@ prettyRow prettyT =
 
 -- Lower number = binds less tightly
 precKArrow, precKAtom :: Int
-precKArrow = 1  -- a -> b
-precKAtom  = 2  -- base kinds like Type, Row, Trait
+precKArrow = 1 -- a -> b
+precKAtom = 2 -- base kinds like Type, Row, Trait
 
 instance Pretty Kind where
   pretty = prettyKindPrec 0
 
 prettyKindPrec :: Int -> Kind -> Doc ann
-prettyKindPrec prec = 
+prettyKindPrec prec =
   \case
-    KType  -> 
+    KType ->
       "*"
-    KRow   -> 
+    KRow ->
       "Row"
-    KTrait -> 
+    KTrait ->
       "Trait"
     KArrow k1 k2 ->
       parensIf (prec > precKArrow) $

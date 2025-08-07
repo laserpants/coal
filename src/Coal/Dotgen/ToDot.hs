@@ -10,7 +10,6 @@ module Coal.Dotgen.ToDot (
   writeDotFiles,
 ) where
 
-import Coal.Pretty.Type (Pretty (..), renderPretty)
 import Coal.Common.Label (Label (..))
 import Coal.Common.List1 (fromList1)
 import Coal.Common.Supply (Supply (..), supplied)
@@ -20,6 +19,7 @@ import Coal.Language.Expression.Choice
 import Coal.Language.Module
 import Coal.Language.Pattern
 import Coal.Language.Trait (With (..))
+import Coal.Pretty.Type (Pretty (..), renderPretty)
 import Control.Monad.State
 import Data.Text (Text)
 import Extra (traverse_)
