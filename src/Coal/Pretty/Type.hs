@@ -97,7 +97,7 @@ prettyRow prettyT =
   \case
     RNil ->
       "{}"
-    (RVariable v) ->
+    RVariable v ->
       pretty v
     row ->
       braces (fields row)
@@ -109,10 +109,8 @@ prettyRow prettyT =
     fieldSep _ = "," <+> fields rest
   fields _ = mempty
 
--- Lower number = binds less tightly
-precKArrow, precKAtom :: Int
+precKArrow :: Int
 precKArrow = 1 -- a -> b
-precKAtom = 2 -- base kinds like Type, Row, Trait
 
 instance Pretty Kind where
   pretty = prettyKindPrec 0
