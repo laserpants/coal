@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE LambdaCase #-}
 
 module Coal.Compiler.Transform.Type.Parameterized where
@@ -46,6 +47,8 @@ instantiateTypeVars =
       TRow <$> instantiateRowVars r
     TAlias name ts t ->
       TAlias name <$> traverse instantiateTypeVars ts <*> instantiateTypeVars t
+    TConstructor _ "List" ->
+      pure (TConstructor (KArrow KType KType) "List")
     TConstructor _ name -> do
       env <- asks snd
       case Environment.lookup name env of
