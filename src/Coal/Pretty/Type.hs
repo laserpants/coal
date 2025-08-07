@@ -18,6 +18,9 @@ parensIf :: Bool -> Doc ann -> Doc ann
 parensIf True = parens
 parensIf False = id
 
+tupledCompact :: [Doc ann] -> Doc ann
+tupledCompact = encloseSep "(" ")" ", "
+
 instance Pretty (TypeIndex k) where
   pretty (TypeIndex _ i) = "_" <> pretty i
 
@@ -35,7 +38,7 @@ prettyTypePrec prec =
         group (prettyTypePrec (precArrow + 1) t1 <+> "->" <+> prettyTypePrec precArrow t2)
     TApplication _ f args ->
       parensIf (prec > precApp) $
-        group (prettyTypePrec precApp f <> tupled (map (prettyTypePrec 0) (fromList1 args)))
+        group (prettyTypePrec precApp f <> tupledCompact (map (prettyTypePrec 0) (fromList1 args)))
     TConstructor _ name ->
       pretty name
     TVariable v ->
@@ -47,7 +50,7 @@ prettyTypePrec prec =
     TAlias name args t ->
       parensIf (prec > precApp) $
         group $
-          "type" <+> pretty name <> tupled (map (prettyTypePrec 0) args)
+          "type" <+> pretty name <> tupledCompact (map (prettyTypePrec 0) args)
             <+> "=" <+> prettyTypePrec precArrow t
 
 prettyIntrinsic :: (Type o k -> Doc ann) -> Intrinsic (Type o k) -> Doc ann
@@ -68,19 +71,19 @@ prettyIntrinsic go =
     IBignum ->
       "bignum"
     IList t ->
-      group ("list" <> tupled [go t])
+      group ("list" <> tupledCompact [go t])
     INat ->
       "nat"
     IOption t ->
-      group ("option" <> tupled [go t])
+      group ("option" <> tupledCompact [go t])
     IRecord t ->
       go t
     IResult t ->
-      group ("result" <> tupled [go t])
+      group ("result" <> tupledCompact [go t])
     IString ->
       "string"
     ITuple ts ->
-      group ("result" <> tupled (go <$> ts))
+      group ("result" <> tupledCompact (go <$> ts))
     IUnit ->
       "unit"
     IVoid ->
