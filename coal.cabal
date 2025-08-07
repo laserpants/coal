@@ -153,6 +153,7 @@ library
       Coal.Parser.Pattern
       Coal.Parser.Symbol
       Coal.Parser.Type
+      Coal.Pretty.Type
       Coal.TypeSystem
       Coal.TypeSystem.Constraint
       Coal.TypeSystem.Constraint.Assumption
@@ -193,6 +194,7 @@ library
     , megaparsec
     , mtl
     , parser-combinators
+    , prettyprinter
     , process
     , raw-strings-qq
     , recursion-schemes
@@ -220,6 +222,7 @@ executable coal-exe
     , megaparsec
     , mtl
     , parser-combinators
+    , prettyprinter
     , process
     , raw-strings-qq
     , recursion-schemes
@@ -249,6 +252,7 @@ test-suite coal-test
     , megaparsec
     , mtl
     , parser-combinators
+    , prettyprinter
     , process
     , raw-strings-qq
     , recursion-schemes

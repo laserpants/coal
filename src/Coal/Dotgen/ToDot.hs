@@ -1,8 +1,8 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE StrictData #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE StrictData #-}
 
 module Coal.Dotgen.ToDot (
   ToDot (..),
@@ -10,9 +10,9 @@ module Coal.Dotgen.ToDot (
   writeDotFiles,
 ) where
 
-import Coal.Common.Supply (Supply (..), supplied)
 import Coal.Common.Label (Label (..))
 import Coal.Common.List1 (fromList1)
+import Coal.Common.Supply (Supply (..), supplied)
 import Coal.Language.Expression
 import Coal.Language.Expression.Binding
 import Coal.Language.Expression.Choice
@@ -37,7 +37,7 @@ data DotState = DotState
   }
 
 instance Supply DotState where
-  updateSupply f DotState{..} = DotState{ supply = f supply, .. }
+  updateSupply f DotState{..} = DotState{supply = f supply, ..}
   getSupply = supply
 
 type DotGen = State DotState
