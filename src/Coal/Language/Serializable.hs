@@ -75,8 +75,6 @@ instance (Serializable s) => Serializable (Intrinsic s) where
         "String"
       INat ->
         "Nat"
-      ITuple ts ->
-        "Tuple" <> parenthesized ts
       IRecord t ->
         "Record" <> parenthesized t
       _ ->

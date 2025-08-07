@@ -15,7 +15,7 @@ import Control.Monad (void)
 import Control.Monad.Combinators.Expr
 import Data.Char (ord)
 import Extra (Name)
-import Text.Megaparsec (getSourcePos, option, optional, (<|>))
+import Text.Megaparsec (getSourcePos, option, optional, try, (<|>))
 import Text.Megaparsec.Char (char)
 
 import qualified Data.Map.Strict as Map
@@ -38,7 +38,8 @@ parsePattern = makeExprParser go operator
         <|> parseRecordPattern
         <|> parseAnyPattern
         <|> parseVariablePattern
-        <|> parens parsePattern
+        <|> try (parens parsePattern)
+        <|> parseTuplePattern
     rest <- optional $ do
       lexeme_ "as"
       p2 <- parsePattern
@@ -132,3 +133,12 @@ parseRecordPattern =
  where
   field :: Parser (Name, Pattern Metadata ())
   field = (,) <$> name <*> (symbol_ "=" *> parsePattern)
+
+parseTuplePattern :: Parser (Pattern Metadata ())
+parseTuplePattern = do
+  withMetadata $ do
+    parens $ do
+      pats <- commaSep1 parsePattern
+      case pats of
+        [] -> fail "Empty tuple"
+        (p : ps) -> pure (\loc -> PTuple loc () (p :| ps))

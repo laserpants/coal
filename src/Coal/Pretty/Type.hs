@@ -5,7 +5,7 @@ module Coal.Pretty.Type (Pretty (..), renderPretty) where
 
 import Coal.Common.List1 (NonEmpty (..), fromList1)
 import Coal.Language
-import Data.Text (Text)
+import Data.Text (Text, isPrefixOf)
 import Prettyprinter
 import Prettyprinter.Render.Text (renderStrict)
 
@@ -36,6 +36,9 @@ prettyTypePrec prec =
     TArrow t1 t2 ->
       parensIf (prec > precArrow) $
         group (prettyTypePrec (precArrow + 1) t1 <+> "->" <+> prettyTypePrec precArrow t2)
+    TApplication _ (TConstructor _ con) args
+      | "#Tuple" `isPrefixOf` con ->
+          parensIf (prec > precApp) $ group (tupled (map (prettyTypePrec 0) (fromList1 args)))
     TApplication _ f args ->
       parensIf (prec > precApp) $
         group (prettyTypePrec precApp f <> tupledCompact (map (prettyTypePrec 0) (fromList1 args)))
@@ -52,7 +55,7 @@ prettyTypePrec prec =
         group $
           "type"
             <+> pretty name
-            <> tupledCompact (map (prettyTypePrec 0) args)
+              <> tupledCompact (map (prettyTypePrec 0) args)
             <+> "="
             <+> prettyTypePrec precArrow t
 
@@ -79,8 +82,6 @@ prettyIntrinsic prettyT =
       prettyT t
     IString ->
       "string"
-    ITuple ts ->
-      group ("result" <> tupledCompact (prettyT <$> ts))
     IUnit ->
       "unit"
     IVoid ->

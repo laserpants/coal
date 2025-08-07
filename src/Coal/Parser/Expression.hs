@@ -41,7 +41,8 @@ parseExpression = makeExprParser go operator
         <|> parseLambdaExpression
         <|> parseLetExpression
         <|> parseVariableExpression
-        <|> parens parseExpression
+        <|> try (parens parseExpression)
+        <|> parseTupleExpression
     rest <- optional (symbol_ "." *> name)
     end <- getSourcePos
     pure (maybe e1 (\ll -> ESelect (Metadata start end) (Label () ll) e1) rest)
@@ -147,6 +148,15 @@ parseRecordExpression = do
  where
   field :: Parser (Name, Expression Metadata ())
   field = (,) <$> name <*> (symbol_ "=" *> parseExpression)
+
+parseTupleExpression :: Parser (Expression Metadata ())
+parseTupleExpression = do
+  withMetadata $ do
+    parens $ do
+      exprs <- commaSep1 parseExpression
+      case exprs of
+        [] -> fail "Empty tuple"
+        (e : es) -> pure (\loc -> ETuple loc () (e :| es))
 
 parseInt :: Parser (Expression Metadata ())
 parseInt = do

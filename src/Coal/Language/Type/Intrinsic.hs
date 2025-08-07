@@ -20,7 +20,6 @@ data Intrinsic t
   | INat
   | IRecord t
   | IString
-  | ITuple [t]
   | IUnit
   | IVoid
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable, Generic)

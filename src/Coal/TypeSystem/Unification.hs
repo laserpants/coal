@@ -78,8 +78,6 @@ instance (Substitutable u, Unifiable u, Data u) => Unifiable (NonEmpty u) where
 instance Unifiable (Intrinsic IndexedType) where
   unify (IRecord t1) (IRecord t2) =
     unify t1 t2
-  unify (ITuple ts1) (ITuple ts2) =
-    unify ts1 ts2
   unify t1 t2
     | t1 == t2 =
         pure mempty
@@ -88,8 +86,6 @@ instance Unifiable (Intrinsic IndexedType) where
 
   match (IRecord t1) (IRecord t2) =
     match t1 t2
-  match (ITuple ts1) (ITuple ts2) =
-    match ts1 ts2
   match t1 t2
     | t1 == t2 =
         pure mempty

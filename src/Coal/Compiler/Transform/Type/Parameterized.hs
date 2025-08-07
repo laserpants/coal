@@ -1,6 +1,6 @@
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Coal.Compiler.Transform.Type.Parameterized where
 
@@ -106,8 +106,6 @@ instance Parameterized (Intrinsic (Type Parameter ())) where
     \case
       IRecord t ->
         instantiateTypeIndexes t
-      ITuple ts ->
-        instantiateTypeIndexes ts
       _ ->
         pure ()
 

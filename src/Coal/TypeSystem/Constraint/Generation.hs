@@ -116,6 +116,11 @@ patternConstraints assert ms =
       pure (name : ps)
     PLiteral{} ->
       pure []
+    PTuple _ t ps -> do
+      tellRight
+        [ Equality InferenceRulePlaceholder [t, tupleType (typeOf <$> ps)]
+        ]
+      concatForM ps (patternConstraints assert ms)
     _ ->
       error "TODO"
 
@@ -278,6 +283,12 @@ collectConstraints =
     ECodataSelect{} ->
       -- TODO
       pure []
+    ETuple _ t es -> do
+      ms1 <- concatMapM collectConstraints es
+      tellRight
+        [ Equality InferenceRulePlaceholder [t, tupleType (typeOf <$> es)]
+        ]
+      pure ms1
     _ ->
       error "Not implemented"
 

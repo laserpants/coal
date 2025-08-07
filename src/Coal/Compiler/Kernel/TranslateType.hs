@@ -6,6 +6,7 @@ module Coal.Compiler.Kernel.TranslateType (translateType) where
 import Coal.Language.Type
 import Coal.Language.Type.Intrinsic
 import Coal.Language.Type.Row
+import Data.Text (isPrefixOf)
 
 import qualified Coal.Kernel.Language as Kernel
 
@@ -30,8 +31,6 @@ translateIntrinsicType =
       Kernel.string
     IUnit ->
       Kernel.unit
-    ITuple ts ->
-      Kernel.tuple (translateType <$> ts)
     IRecord t ->
       Kernel.record (translateType t)
     INat ->
@@ -60,6 +59,9 @@ translateType =
       foldr (translateApplication . translateType) (translateType t) ts
     TArrow t1 t2 ->
       Kernel.arrow (translateType t1) (translateType t2)
+    TConstructor _ con
+      | "#Tuple" `isPrefixOf` con ->
+          Kernel.TCon "tuple" []
     TConstructor _ "List" ->
       Kernel.TCon "list" []
     TConstructor _ name ->

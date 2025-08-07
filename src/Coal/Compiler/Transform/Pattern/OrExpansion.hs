@@ -66,6 +66,9 @@ instance OrPattern (Pattern a t) where
       PAnnotation a t p -> do
         q1 :| qs <- expandOrPatterns p
         pure (PAnnotation a t q1 :| [PAnnotation a t q | q <- qs])
+      PTuple a t ps -> do
+        qs1 :| qss <- expandOrPatterns ps
+        pure (PTuple a t qs1 :| [PTuple a t qs | qs <- qss])
       PConstructor a (Label t name) ps -> do
         qs1 :| qss <- expandOrPatterns ps
         pure (PConstructor a (Label t name) qs1 :| [PConstructor a (Label t name) qs | qs <- qss])

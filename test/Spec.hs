@@ -137,6 +137,8 @@ spec = do
   print (x == Right "2\n")
   x <- main45
   print (x == Right "6\n")
+  x <- main46
+  print (x == Right "512\n")
 
 runTestFiles :: [String] -> IO (Either CompilerError Text)
 runTestFiles files = do
@@ -419,6 +421,12 @@ main45 :: IO (Either CompilerError Text)
 main45 = do
   runTestFiles
     [ "./test/Coal/examples/45/Main.coal"
+    ]
+
+main46 :: IO (Either CompilerError Text)
+main46 = do
+  runTestFiles
+    [ "./test/Coal/examples/46/Main.coal"
     ]
 
 compileFiles :: [String] -> IO (Either CompilerError ())
@@ -725,7 +733,7 @@ names =
         [ Trait "Traceable" (TVariable (TypeIndex KType 0))
         , Trait "Traceable" (TVariable (TypeIndex KType 1))
         ]
-        (TIntrinsic (ITuple [TVariable (TypeIndex KType 0), TVariable (TypeIndex KType 1)]) `TArrow` TIntrinsic IString)
+        (tupleType (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 1)]) `TArrow` TIntrinsic IString)
     )
   ,
     ( "list_to_string"

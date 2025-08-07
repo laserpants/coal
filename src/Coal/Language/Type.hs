@@ -20,6 +20,7 @@ module Coal.Language.Type (
   activeIdsIn,
   normalizeRowTypes,
   listType,
+  tupleType,
   (~>),
 ) where
 
@@ -32,6 +33,7 @@ import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (transform)
 import Extra (Map, Name, Set)
 import GHC.Generics (Generic)
+import TextShow (showt)
 
 import qualified Coal.Common.List1 as List1
 import qualified Data.Set as Set
@@ -109,3 +111,9 @@ normalizeRowTypes = transform $
 
 listType :: IndexedType -> IndexedType
 listType t = TApplication KType (TConstructor (KArrow KType KType) "List") (t :| [])
+
+tupleType :: List1 IndexedType -> IndexedType
+tupleType ts = TApplication KType (TConstructor kind cons) ts
+ where
+  kind = foldr KArrow KType (replicate (length ts) KType)
+  cons = "#Tuple" <> showt (length ts + 1)
