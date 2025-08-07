@@ -27,6 +27,7 @@ import Extra
 
 import qualified Coal.Common.Environment as Environment
 import qualified Data.Map.Strict as Map
+import qualified Data.Set as Set
 
 type ConstraintsGen a = ConstraintsGenStack a TypeIndex Kind IndexedType
 
@@ -119,6 +120,7 @@ patternConstraints assert ms =
     PTuple _ t ps -> do
       tellRight
         [ Equality InferenceRulePlaceholder [t, tupleType (typeOf <$> ps)]
+        , Explicit InferenceRulePlaceholder t (tupleScheme (length ps))
         ]
       concatForM ps (patternConstraints assert ms)
     _ ->
@@ -287,10 +289,16 @@ collectConstraints =
       ms1 <- concatMapM collectConstraints es
       tellRight
         [ Equality InferenceRulePlaceholder [t, tupleType (typeOf <$> es)]
+        , Explicit InferenceRulePlaceholder t (tupleScheme (length es))
         ]
       pure ms1
     _ ->
       error "Not implemented"
+
+tupleScheme :: Int -> IndexedScheme
+tupleScheme n = Forall (Set.fromList (fromList1 ixs)) [] (tupleType (TVariable <$> ixs))
+ where
+  ixs = TypeIndex KType 0 :| [TypeIndex KType ti | ti <- [1 .. n - 1]]
 
 listConstructorTypeScheme :: IndexedScheme
 listConstructorTypeScheme = forall1 (\a -> a ~> listType a ~> listType a)

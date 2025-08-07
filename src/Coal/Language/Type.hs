@@ -116,4 +116,4 @@ tupleType :: List1 IndexedType -> IndexedType
 tupleType ts = TApplication KType (TConstructor kind cons) ts
  where
   kind = foldr KArrow KType (replicate (length ts) KType)
-  cons = "#Tuple" <> showt (length ts + 1)
+  cons = "#Tuple" <> showt (length ts)
