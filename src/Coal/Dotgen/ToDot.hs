@@ -352,8 +352,16 @@ instance (Show t) => ToDot (Clause a t) where
 instance (Show t) => ToDot (Choice Expression a t) where
   toDot =
     \case
-      CPlain _ gs e ->
-        error "TODO"
+      CPlain _ gs e -> do
+        nid <- freshId
+        emitNode nid "Plain"
+        id1 <- toDot e
+        emitEdge nid id1
+        forM_ gs $
+          \g -> do
+            eid <- toDot g
+            emitEdge nid eid
+        return nid
       CLambda{} ->
         error "TODO"
 
