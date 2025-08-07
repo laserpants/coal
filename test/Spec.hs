@@ -133,6 +133,10 @@ spec = do
   print (x == Right "true\n")
   x <- main42
   print (x == Right "true\n")
+  x <- main43
+  print (x == Right "2\n")
+  x <- main45
+  print (x == Right "6\n")
 
 runTestFiles :: [String] -> IO (Either CompilerError Text)
 runTestFiles files = do
@@ -403,6 +407,18 @@ main43 :: IO (Either CompilerError Text)
 main43 = do
   runTestFiles
     [ "./test/Coal/examples/43/Main.coal"
+    ]
+
+main44 :: IO (Either CompilerError Text)
+main44 = do
+  runTestFiles
+    [ "./test/Coal/examples/44/Main.coal"
+    ]
+
+main45 :: IO (Either CompilerError Text)
+main45 = do
+  runTestFiles
+    [ "./test/Coal/examples/45/Main.coal"
     ]
 
 compileFiles :: [String] -> IO (Either CompilerError ())
