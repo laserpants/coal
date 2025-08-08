@@ -78,7 +78,7 @@ instance (ToDot a) => ToDot (Maybe a) where
       Just d -> do
         withNode "Just" (edgeTo d)
 
-instance (Pretty t, Show t) => ToDot (Label t) where
+instance (Pretty t) => ToDot (Label t) where
   toDot =
     \case
       Label t name ->
