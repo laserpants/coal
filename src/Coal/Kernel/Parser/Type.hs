@@ -4,12 +4,12 @@ module Coal.Kernel.Parser.Type (type_) where
 
 import Coal.Kernel.Language.Type (Type (..))
 import Coal.Kernel.Language.Type.Row (extend)
-import Coal.Kernel.Parser (Parser, lexeme, try, ($>), (<|>))
+import Coal.Kernel.Parser (Parser, lexeme, try, ($>), (<|>), backtickString)
 import Coal.Kernel.Parser.Identifier (constructor, name)
 import Coal.Kernel.Parser.Symbol (braces, colon, commaSep, commaSepN, parens, pipe, symbol)
 import Control.Monad (void)
 import Control.Monad.Combinators.Expr (Operator (..), makeExprParser)
-import Extra (optionalOr)
+import Extra (Name, optionalOr)
 
 import qualified Coal.Kernel.Language.Type.Syntax as Type
 import qualified Text.Megaparsec.Char.Lexer as Lexer
@@ -72,12 +72,15 @@ row p = inner braces
 
   ext =
     extend
-      <$> (name <* colon)
+      <$> (field <* colon)
       <*> (p <* pipe)
       <*> inner id
 
   nil =
     lexeme "{}" $> RNil
+
+field :: Parser Name
+field = backtickString <|> name
 
 record :: Parser Type -> Parser Type
 record p = lexeme "record" >> Type.record <$> parens (row p)

@@ -3,8 +3,7 @@
 
 module Coal.Pretty.Type (Pretty (..), renderPretty) where
 
-import Coal.Common.List1 (NonEmpty (..), fromList1)
-import Coal.Language.Trait (Trait (..))
+import Coal.Common.List1 (fromList1)
 import Coal.Language
 import Data.Text (Text, isPrefixOf)
 import Prettyprinter
@@ -23,7 +22,7 @@ tupledCompact :: [Doc ann] -> Doc ann
 tupledCompact = encloseSep "(" ")" ", "
 
 instance Pretty (TypeIndex k) where
-  pretty (TypeIndex _ i) = "_" <> pretty i
+  pretty (TypeIndex _ i) = "'" <> pretty i
 
 instance Pretty (Parameter k) where
   pretty (Parameter _ name) = pretty name
@@ -36,7 +35,7 @@ prettyTypePrec prec =
   \case
     TArrow t1 t2 ->
       parensIf (prec > precArrow) $
-        group (prettyTypePrec (precArrow + 1) t1 <+> "->" <+> prettyTypePrec precArrow t2)
+        group (prettyTypePrec (precArrow + 1) t1 <+> "→" <+> prettyTypePrec precArrow t2)
     TApplication _ (TConstructor _ con) args
       | "#Tuple" `isPrefixOf` con ->
           parensIf (prec > precApp) $ group (tupled (map (prettyTypePrec 0) (fromList1 args)))
@@ -122,7 +121,7 @@ prettyKindPrec prec =
       "Trait"
     KArrow k1 k2 ->
       parensIf (prec > precKArrow) $
-        group (prettyKindPrec (precKArrow + 1) k1 <+> "->" <+> prettyKindPrec precKArrow k2)
+        group (prettyKindPrec (precKArrow + 1) k1 <+> "→" <+> prettyKindPrec precKArrow k2)
 
 instance (Pretty t) => Pretty (Trait t) where
   pretty (Trait name t) =

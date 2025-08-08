@@ -111,7 +111,7 @@ match p = do
 focus :: Parser (Focus Type)
 focus =
   Focus
-    <$> name
+    <$> field
     <*> (equalSign *> label type_)
     <*> (pipe *> label type_)
 
@@ -132,9 +132,12 @@ record p = inner braces
 
   ext =
     Core.ext
-      <$> (name <* equalSign)
+      <$> (field <* equalSign)
       <*> (p <* pipe)
       <*> inner id
+
+field :: Parser Name
+field = backtickString <|> name
 
 call :: Parser (Expr Type) -> Parser (Expr Type)
 call p = do

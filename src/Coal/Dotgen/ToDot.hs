@@ -4,7 +4,10 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Dotgen.ToDot (ToDot (..), writeDotFiles) where
+module Coal.Dotgen.ToDot (
+  ToDot (..),
+  writeDotFiles,
+) where
 
 import Coal.Common.Label (Label (..))
 import Coal.Common.List1 (fromList1)
@@ -16,7 +19,7 @@ import Coal.Language.Module
 import Coal.Language.Pattern
 import Coal.Language.Trait (With (..))
 import Coal.Pretty.Type (Pretty (..), renderPretty)
-import Control.Monad.RWS
+import Control.Monad.State
 import Data.Text (Text)
 import Extra (traverse_)
 import TextShow (showt)
@@ -38,16 +41,13 @@ instance Supply DotState where
   updateSupply f DotState{..} = DotState{supply = f supply, ..}
   getSupply = supply
 
-type DotGen = RWS Int () DotState
+type DotGen = State DotState
 
 class ToDot a where
   toDot :: a -> DotGen Int
 
-freshNode :: Text -> DotGen Int
-freshNode text = do
-  nid <- supplied id
-  emitNode nid text
-  return nid
+freshId :: DotGen Int
+freshId = supplied id
 
 emitNode :: Int -> Text -> DotGen ()
 emitNode nid label = modify $ \st -> st{nodes = (nid, label) : nodes st}
@@ -55,217 +55,394 @@ emitNode nid label = modify $ \st -> st{nodes = (nid, label) : nodes st}
 emitEdge :: Int -> Int -> DotGen ()
 emitEdge from to = modify $ \st -> st{edges = (from, to) : edges st}
 
-withNode :: Text -> DotGen () -> DotGen Int
-withNode text f = do
-  nid <- freshNode text
-  local (const nid) f
-  return nid
-
-edgeTo :: (ToDot a) => a -> DotGen ()
-edgeTo d = do
-  from <- ask
-  to <- toDot d
-  emitEdge from to
-
-edgesTo :: (Traversable t, ToDot a) => t a -> DotGen ()
-edgesTo = traverse_ edgeTo
-
 instance (ToDot a) => ToDot (Maybe a) where
   toDot =
     \case
-      Nothing ->
-        freshNode "Nothing"
+      Nothing -> do
+        nid <- freshId
+        emitNode nid "Nothing"
+        pure nid
       Just d -> do
-        withNode "Just" (edgeTo d)
+        nid <- freshId
+        emitNode nid "Just"
+        cid <- toDot d
+        emitEdge nid cid
+        pure nid
 
 instance (Pretty t) => ToDot (Label t) where
   toDot =
     \case
-      Label t name ->
-        freshNode ("Label " <> prettyType t <> " " <> name)
+      Label t name -> do
+        nid <- freshId
+        emitNode nid ("Label" <> prettyType t <> " " <> name)
+        return nid
 
 instance (Pretty t, Show t) => ToDot (Expression a t) where
-  toDot = 
+  toDot =
     \case
       EAnnotation _ t inner -> do
-        withNode ("EAnnotation " <> prettyType t) $
-          edgeTo inner
+        nid <- freshId
+        emitNode nid ("EAnnotation " <> prettyType t)
+        cid <- toDot inner
+        emitEdge nid cid
+        return nid
       EApplication _ t fun args -> do
-        withNode ("EApplication " <> prettyType t) $ do
-          edgeTo fun
-          edgesTo args
+        nid <- freshId
+        emitNode nid ("EApplication " <> prettyType t)
+        fid <- toDot fun
+        emitEdge nid fid
+        forM_ (fromList1 args) $
+          \arg -> do
+            aid <- toDot arg
+            emitEdge nid aid
+        return nid
       ELambda _ patterns body -> do
-        withNode "ELambda" $ do
-          edgesTo patterns
-          edgeTo body
+        nid <- freshId
+        emitNode nid "ELambda"
+        forM_ (fromList1 patterns) $
+          \p -> do
+            pid <- toDot p
+            emitEdge nid pid
+        bid <- toDot body
+        emitEdge nid bid
+        return nid
       ELet _ bindings body -> do
-        withNode "ELet" $ do
-          forM_ bindings $
-            \case
-              BPattern _ pat rhs -> do
-                edgeTo pat
-                edgeTo rhs
-              BFunction{} ->
-                error "TODO"
-          edgeTo body
-      ERecursiveLet _ pat rhs body ->
-        withNode "ERecursiveLet" $ do
-          edgeTo pat
-          edgeTo rhs
-          edgeTo body
-      EVariable _ (Label t name) ->
-        freshNode ("EVariable " <> prettyType t <> " " <> name)
-      EConstructor _ (Label t name) ->
-        freshNode ("EConstructor " <> prettyType t <> " " <> name)
+        nid <- freshId
+        emitNode nid "ELet"
+        forM_ (fromList1 bindings) $
+          \case
+            BPattern _ pat rhs -> do
+              pid <- toDot pat
+              rid <- toDot rhs
+              emitEdge nid pid
+              emitEdge nid rid
+            BFunction{} ->
+              error "TODO"
+        bid <- toDot body
+        emitEdge nid bid
+        return nid
+      ERecursiveLet _ pat rhs body -> do
+        nid <- freshId
+        emitNode nid "ERecursiveLet"
+        pid <- toDot pat
+        rid <- toDot rhs
+        bid <- toDot body
+        emitEdge nid pid
+        emitEdge nid rid
+        emitEdge nid bid
+        return nid
+      EVariable _ (Label t name) -> do
+        nid <- freshId
+        emitNode nid ("EVariable " <> prettyType t <> " " <> name)
+        return nid
+      EConstructor _ (Label t name) -> do
+        nid <- freshId
+        emitNode nid ("EConstructor " <> prettyType t <> " " <> name)
+        return nid
       ELiteral _ prim -> do
-        freshNode ("ELiteral " <> Text.pack (show prim))
+        nid <- freshId
+        emitNode nid ("ELiteral " <> Text.pack (show prim))
+        return nid
       EIf _ t e1 e2 e3 -> do
-        withNode ("EIf " <> prettyType t) $
-          edgesTo [e1, e2, e3]
-      EUnaryOperator _ t op ->
-        freshNode ("EUnaryOperator " <> Text.pack (show op) <> " " <> prettyType t)
-      EBinaryOperator _ t op ->
-        freshNode ("EBinaryOperator " <> Text.pack (show op) <> " " <> prettyType t)
-      ERecord _ t fields tail -> do
-        withNode ("ERecord " <> prettyType t) $ do
-          forM_ (Map.toList fields) $
-            \(name, expr) -> do
-              withNode ("Field " <> name) (edgeTo expr)
-          edgeTo tail
+        nid <- freshId
+        emitNode nid ("EIf " <> prettyType t)
+        id1 <- toDot e1
+        id2 <- toDot e2
+        id3 <- toDot e3
+        emitEdge nid id1
+        emitEdge nid id2
+        emitEdge nid id3
+        return nid
+      EUnaryOperator _ t op -> do
+        nid <- freshId
+        emitNode nid ("EUnaryOperator " <> Text.pack (show op) <> " " <> prettyType t)
+        return nid
+      EBinaryOperator _ t op -> do
+        nid <- freshId
+        emitNode nid ("EBinaryOperator " <> Text.pack (show op) <> " " <> prettyType t)
+        return nid
+      ERecord _ t fields maybeTail -> do
+        nid <- freshId
+        emitNode nid ("ERecord " <> prettyType t)
+        -- Emit each field
+        forM_ (Map.toList fields) $
+          \(fieldName, fieldExpr) -> do
+            fid <- freshId
+            emitNode fid ("Field " <> fieldName)
+            eid <- toDot fieldExpr
+            emitEdge fid eid -- Field node -> Expression
+            emitEdge nid fid -- Record -> Field node
+            -- Emit optional tail
+        case maybeTail of
+          Just tailExpr -> do
+            tid <- toDot tailExpr
+            emitEdge nid tid -- Record -> Tail
+          Nothing -> return ()
+        return nid
       EListCons _ t e1 e2 -> do
-        withNode ("EListCons " <> prettyType t) $
-          edgesTo [e1, e2]
+        nid <- freshId
+        emitNode nid ("EListCons " <> prettyType t)
+        id1 <- toDot e1
+        id2 <- toDot e2
+        emitEdge nid id1
+        emitEdge nid id2
+        return nid
       EListLiteral _ t es -> do
-        withNode ("EListLiteral " <> prettyType t) $
-          edgesTo es
+        nid <- freshId
+        emitNode nid ("EListLiteral " <> prettyType t)
+        forM_ es $
+          \e -> do
+            eid <- toDot e
+            emitEdge nid eid
+        return nid
       ETuple _ t es -> do
-        withNode ("ETuple " <> prettyType t) $
-          edgesTo es
-      EMatch _ t e cs ->
-        withNode ("EMatch " <> prettyType t) $ do
-          edgeTo e
-          edgesTo cs
+        nid <- freshId
+        emitNode nid ("ETuple " <> prettyType t)
+        forM_ es $
+          \e -> do
+            eid <- toDot e
+            emitEdge nid eid
+        return nid
+      EMatch _ t e cs -> do
+        nid <- freshId
+        emitNode nid ("EMatch " <> prettyType t)
+        -- Scrutinee
+        sid <- toDot e
+        emitEdge nid sid
+        -- Clauses
+        forM_ (fromList1 cs) $
+          \clause -> do
+            cid <- toDot clause
+            emitEdge nid cid
+        return nid
       ECompiledMatch _ t e cs -> do
-        withNode ("ECompiledMatch " <> prettyType t) $ do
-          edgeTo e
-          edgesTo cs
-      EFold _ t es cs me ->
-        withNode ("EFold " <> prettyType t) $ do
-          edgesTo es
-          edgesTo cs
-          edgeTo me
+        nid <- freshId
+        emitNode nid ("ECompiledMatch " <> prettyType t)
+        -- Scrutinee
+        sid <- toDot e
+        emitEdge nid sid
+        -- Clauses
+        forM_ (fromList1 cs) $
+          \clause -> do
+            cid <- toDot clause
+            emitEdge nid cid
+        return nid
+      EFold _ t es cs me -> do
+        nid <- freshId
+        emitNode nid ("EFold " <> prettyType t)
+        ids1 <- traverse toDot es
+        ids2 <- traverse toDot cs
+        id <- toDot me
+        traverse_ (emitEdge nid) ids1
+        traverse_ (emitEdge nid) ids2
+        emitEdge nid id
+        return nid
       EUnfold _ t ll n ps d me -> do
-        withNode ("EUnfold " <> prettyType t <> " " <> n) $ do
-          edgeTo ll
-          edgesTo ps
-          forM_ (Map.toList d) $
-            \(name, expr) -> do
-              withNode ("Field " <> name) (edgeTo expr)
-          edgeTo me
+        nid <- freshId
+        emitNode nid ("EUnfold " <> prettyType t)
+        error "TODO"
       ESelect _ (Label t name) e -> do
-        withNode ("ESelect " <> prettyType t <> " " <> name) $
-          edgeTo e
+        nid <- freshId
+        emitNode nid ("ESelect " <> prettyType t <> " " <> name)
+        sid <- toDot e
+        emitEdge nid sid
+        return nid
       ECodataFields{} ->
         error "TODO"
-      EFocus name ll1 ll2 e1 e2 ->
-        withNode ("EFocus " <> name) $ do
-          edgeTo ll1
-          edgeTo ll2
-          edgeTo e1
-          edgeTo e2
-      EPlaceholder _ t tr ->
-        freshNode ("EPlaceholder " <> prettyType t <> " " <> prettyType tr)
+      EFocus name ll1 ll2 e1 e2 -> do
+        nid <- freshId
+        emitNode nid ("EFocus " <> name)
+        id1 <- toDot ll1
+        id2 <- toDot ll2
+        id3 <- toDot e1
+        id4 <- toDot e2
+        emitEdge nid id1
+        emitEdge nid id2
+        emitEdge nid id3
+        emitEdge nid id4
+        return nid
+      EPlaceholder _ t _ -> do
+        nid <- freshId
+        emitNode nid ("EPlaceholder " <> prettyType t)
+        return nid
       _ ->
         error "TODO"
 
 instance (Pretty t, Show t) => ToDot (Pattern a t) where
   toDot =
     \case
-      PAnnotation _ t inner ->
-        withNode ("PAnnotation " <> prettyType t) $
-          edgeTo inner
-      PAny _ t ->
-        freshNode ("PAny " <> prettyType t)
-      PVariable _ (Label t name) ->
-        freshNode ("PVariable " <> prettyType t <> " " <> name)
+      PAnnotation _ t inner -> do
+        nid <- freshId
+        emitNode nid ("PAnnotation " <> prettyType t)
+        cid <- toDot inner
+        emitEdge nid cid
+        return nid
+      PAny _ t -> do
+        nid <- freshId
+        emitNode nid ("PAny " <> prettyType t)
+        return nid
+      PVariable _ (Label t name) -> do
+        nid <- freshId
+        emitNode nid ("PVariable " <> prettyType t <> " " <> name)
+        return nid
       PConstructor _ (Label t name) ps -> do
-        withNode ("PConstructor " <> prettyType t <> " " <> name) $
-          edgesTo ps
-      PLiteral _ prim ->
-        freshNode ("PLiteral " <> escapeQuotes (Text.pack (show prim)))
-      PRecord _ t fields tail -> do
-        withNode ("PRecord " <> prettyType t) $ do
-          forM_ (Map.toList fields) $
-            \(name, expr) -> do
-              withNode ("Field " <> name) (edgeTo expr)
-          edgeTo tail
-      PListCons _ t p1 p2 ->
-        withNode ("PListCons " <> prettyType t) $ do
-          edgesTo [p1, p2]
+        nid <- freshId
+        emitNode nid ("PConstructor " <> prettyType t <> " " <> name)
+        forM_ ps $
+          \p -> do
+            eid <- toDot p
+            emitEdge nid eid
+        return nid
+      PLiteral _ prim -> do
+        nid <- freshId
+        emitNode nid ("PLiteral " <> escapeQuotes (Text.pack (show prim)))
+        return nid
+      PRecord _ t fields maybeTail -> do
+        nid <- freshId
+        emitNode nid ("PRecord " <> prettyType t)
+        -- Emit each field
+        forM_ (Map.toList fields) $
+          \(fieldName, fieldExpr) -> do
+            fid <- freshId
+            emitNode fid ("Field " <> fieldName)
+            eid <- toDot fieldExpr
+            emitEdge fid eid -- Field node -> Pattern
+            emitEdge nid fid -- Record -> Field node
+            -- Emit optional tail
+        case maybeTail of
+          Just tailExpr -> do
+            tid <- toDot tailExpr
+            emitEdge nid tid -- Record -> Tail
+          Nothing -> return ()
+        return nid
+      PListCons _ t p1 p2 -> do
+        nid <- freshId
+        emitNode nid ("PListCons " <> prettyType t)
+        id1 <- toDot p1
+        id2 <- toDot p2
+        emitEdge nid id1
+        emitEdge nid id2
+        return nid
       PListLiteral _ t ps -> do
-        withNode ("PListLiteral " <> prettyType t) $ do
-          edgesTo ps
+        nid <- freshId
+        emitNode nid ("PListLiteral " <> prettyType t)
+        forM_ ps $
+          \p -> do
+            eid <- toDot p
+            emitEdge nid eid
+        return nid
       PTuple _ t ps -> do
-        withNode ("PTuple " <> prettyType t) $
-          edgesTo ps
-      POr _ t p1 p2 ->
-        withNode ("POr " <> prettyType t) $ do
-          edgesTo [p1, p2]
-      PAs _ (Label t name) p ->
-        withNode ("PAs " <> prettyType t <> " " <> name) $ do
-          edgeTo p
-      PShorthand _ (Label t name) ->
-        freshNode ("PShorthand " <> prettyType t <> " " <> name)
-      PAtVariable _ (Label t name) ->
-        freshNode ("PAtVariable " <> prettyType t <> " " <> name)
-      PPlaceholder _ t tr ->
-        freshNode ("PPlaceholder " <> prettyType t <> " " <> prettyType tr)
+        nid <- freshId
+        emitNode nid ("PTuple " <> prettyType t)
+        forM_ ps $
+          \p -> do
+            eid <- toDot p
+            emitEdge nid eid
+        return nid
+      POr _ t p1 p2 -> do
+        nid <- freshId
+        emitNode nid ("POr " <> prettyType t)
+        id1 <- toDot p1
+        id2 <- toDot p2
+        emitEdge nid id1
+        emitEdge nid id2
+        return nid
+      PAs _ (Label t name) p -> do
+        nid <- freshId
+        emitNode nid ("PAs " <> prettyType t <> " " <> name)
+        id1 <- toDot p
+        emitEdge nid id1
+        return nid
+      PShorthand _ (Label t name) -> do
+        nid <- freshId
+        emitNode nid ("PShorthand " <> prettyType t <> " " <> name)
+        return nid
+      PAtVariable _ (Label t name) -> do
+        nid <- freshId
+        emitNode nid ("PAtVariable " <> prettyType t <> " " <> name)
+        return nid
+      PPlaceholder _ t _ -> do
+        nid <- freshId
+        emitNode nid ("PPlaceholder " <> prettyType t)
+        return nid
 
 instance (Pretty t, Show t) => ToDot (Clause a t) where
   toDot =
     \case
-      EClause _ p cs ->
-        withNode "EClause" $ do
-          edgeTo p
-          edgesTo cs
+      EClause _ p cs -> do
+        nid <- freshId
+        emitNode nid "EClause"
+        id1 <- toDot p
+        emitEdge nid id1
+        forM_ cs $
+          \c -> do
+            eid <- toDot c
+            emitEdge nid eid
+        return nid
 
 instance (Pretty t, Show t) => ToDot (Choice Expression a t) where
   toDot =
     \case
-      CPlain _ gs e ->
-        withNode "CPlain" $ do
-          edgesTo gs
-          edgeTo e
+      CPlain _ gs e -> do
+        nid <- freshId
+        emitNode nid "CPlain"
+        id1 <- toDot e
+        emitEdge nid id1
+        forM_ gs $
+          \g -> do
+            eid <- toDot g
+            emitEdge nid eid
+        return nid
       CLambda{} ->
         error "TODO"
 
 instance (Pretty t, Show t) => ToDot (Guard Expression a t) where
   toDot =
     \case
-      CGuard e ->
-        withNode "CGuard" $
-          edgeTo e
+      CGuard e -> do
+        nid <- freshId
+        emitNode nid "CGuard"
+        cid <- toDot e
+        emitEdge nid cid
+        return nid
 
 instance (Pretty t, Show t) => ToDot (CompiledClause a t) where
   toDot =
     \case
-      ECompiledClause lls e ->
-        withNode "ECompiledClause" $ do
-          edgesTo lls
-          edgeTo e
+      ECompiledClause lls e -> do
+        nid <- freshId
+        emitNode nid "ECompiledClause"
+        forM_ lls $
+          \ll -> do
+            cid <- toDot ll
+            emitEdge nid cid
+        id1 <- toDot e
+        emitEdge nid id1
+        return nid
 
 instance (Show t, Pretty t) => ToDot (Definition a k t) where
   toDot =
     \case
-      DFunction name (Function _ (With _ t) ps e) ->
-        withNode ("DFunction " <> prettyType t <> " " <> name) $ do
-          edgesTo ps
-          edgeTo e
-      DConstant name (Constant _ (With _ t) e) ->
-        withNode ("DConstant " <> prettyType t <> " " <> name) $ do
-          edgeTo e
+      DFunction name (Function _ (With _ t) ps e) -> do
+        nid <- freshId
+        emitNode nid ("DFunction " <> prettyType t <> " " <> name)
+        forM_ ps $
+          \p -> do
+            eid <- toDot p
+            emitEdge nid eid
+        cid <- toDot e
+        emitEdge nid cid
+        return nid
+      DConstant name (Constant _ (With _ t) e) -> do
+        nid <- freshId
+        emitNode nid ("DConstant " <> prettyType t <> " " <> name)
+        cid <- toDot e
+        emitEdge nid cid
+        return nid
       _ -> do
-        freshNode "TODO"
+        nid <- freshId
+        emitNode nid "TODO"
+        return nid
 
 generateDot :: (ToDot a) => a -> Text
 generateDot ast =
@@ -277,13 +454,13 @@ generateDot ast =
       ++ ["}"]
  where
   initialState = DotState 0 [] []
-  (_, finalState, _) = runRWS (toDot ast) 0 initialState
+  (_, finalState) = runState (toDot ast) initialState
   dotNodes = [showt nid <> " [label=\"" <> label <> "\"];" | (nid, label) <- nodes finalState]
   dotEdges = [showt from <> " -> " <> showt to <> ";" | (from, to) <- edges finalState]
 
 {-# INLINE prettyType #-}
 prettyType :: (Pretty t) => t -> Text
-prettyType t = "<" <> renderPretty t <> ">"
+prettyType t = "< " <> renderPretty t <> " >"
 
 {-# INLINE escapeQuotes #-}
 escapeQuotes :: Text -> Text

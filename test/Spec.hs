@@ -139,6 +139,8 @@ spec = do
   print (x == Right "6\n")
   x <- main46
   print (x == Right "512\n")
+  x <- main47
+  print (x == Right "8\n")
 
 runTestFiles :: [String] -> IO (Either CompilerError Text)
 runTestFiles files = do
@@ -523,6 +525,18 @@ builtinInstances =
                 ( "negate"
                 , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
                 )
+              ,
+                ( "(+)"
+                , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
+                )
+              ,
+                ( "(-)"
+                , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
+                )
+              ,
+                ( "(*)"
+                , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
+                )
               ]
           )
         ,
@@ -591,6 +605,9 @@ addBuiltinDefs defs =
              , "from_int32__$instance_Numeric(Intrinsic(Nat))"
              , "negate__$instance_Numeric(Intrinsic(Int32))"
              , "negate__$instance_Numeric(Intrinsic(Nat))"
+             , "(+)__$instance_Numeric(Intrinsic(Int32))"
+             , "(-)__$instance_Numeric(Intrinsic(Int32))"
+             , "(*)__$instance_Numeric(Intrinsic(Int32))"
              , "compare__$instance_Ordered(Intrinsic(Int32))"
              ]
       )
@@ -1223,7 +1240,7 @@ moduleCore =
             [ Label (Kernel.TCon "Numeric" [opaque]) "$a"
             ]
             [r| 
-                  match<int32/*>($a : Numeric(*)) {
+                  match<*/*>($a : Numeric(*)) {
                     | ( $Record : { negate : */* | * }/Numeric(*)
                       , $r : { negate : */* | * }
                       ) =>
@@ -1235,11 +1252,83 @@ moduleCore =
                   }
               |]
         , OFunction
+            "Core$.(+)"
+            [ Label (Kernel.TCon "Numeric" [opaque]) "$a"
+            ]
+            [r| 
+                  match<*/*/*>($a : Numeric(*)) {
+                    | ( $Record : { `(+)` : */*/* | * }/Numeric(*)
+                      , $r : { `(+)` : */*/* | * }
+                      ) =>
+                        select
+                          { `(+)` = $f : */*/* | _ : * } =
+                            $r : { `(+)` : */*/* | * }
+                          in
+                            $f : */*/*
+                  }
+              |]
+        , OFunction
+            "Core$.(-)"
+            [ Label (Kernel.TCon "Numeric" [opaque]) "$a"
+            ]
+            [r| 
+                  match<*/*/*>($a : Numeric(*)) {
+                    | ( $Record : { `(-)` : */*/* | * }/Numeric(*)
+                      , $r : { `(-)` : */*/* | * }
+                      ) =>
+                        select
+                          { `(-)` = $f : */*/* | _ : * } =
+                            $r : { `(-)` : */*/* | * }
+                          in
+                            $f : */*/*
+                  }
+              |]
+        , OFunction
+            "Core$.(*)"
+            [ Label (Kernel.TCon "Numeric" [opaque]) "$a"
+            ]
+            [r| 
+                  match<*/*/*>($a : Numeric(*)) {
+                    | ( $Record : { `(*)` : */*/* | * }/Numeric(*)
+                      , $r : { `(*)` : */*/* | * }
+                      ) =>
+                        select
+                          { `(*)` = $f : */*/* | _ : * } =
+                            $r : { `(*)` : */*/* | * }
+                          in
+                            $f : */*/*
+                  }
+              |]
+        , OFunction
             "Core$.from_int32__$instance_Numeric(Intrinsic(Int32))"
             [ Label Kernel.int32 "n"
             ]
             [r| 
                   n : int32
+              |]
+        , OFunction
+            "Core$.(+)__$instance_Numeric(Intrinsic(Int32))"
+            [ Label Kernel.int32 "lhs"
+            , Label Kernel.int32 "rhs"
+            ]
+            [r| 
+                  [+ int32](lhs : int32, rhs : int32)
+              |]
+        , OFunction
+            "Core$.(-)__$instance_Numeric(Intrinsic(Int32))"
+            [ Label Kernel.int32 "lhs"
+            , Label Kernel.int32 "rhs"
+            ]
+            [r| 
+                  [- int32](lhs : int32, rhs : int32)
+              |]
+        , OFunction
+            "Core$.(*)__$instance_Numeric(Intrinsic(Int32))"
+            [ Label Kernel.int32 "lhs"
+            , Label Kernel.int32 "rhs"
+            ]
+            [r| 
+                  [* int32](lhs : int32, rhs : int32)
               |]
         , OFunction
             "Core$.negate__$instance_Numeric(Intrinsic(Int32))"

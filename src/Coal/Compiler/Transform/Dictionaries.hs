@@ -172,8 +172,9 @@ instance (Monoid a, Data a) => TraitContext (Expression a IndexedType) where
         as <- censor (const []) (traverse transformBinding bs)
         let xs = concat (fromList1 (snd <$> as))
         ELet a (fst <$> as) <$> local (overDictionaryEnvironmentNames (Environment.insertMultiple xs)) (expandTraits e)
-      EVariable _ ll@(Label t name) ->
-        applyTraits ll =<< collectTraits t name
+      EVariable _ ll@(Label t name) -> do
+        traits <- collectTraits t name
+        applyTraits ll (nub traits)
       ECompiledMatch a t e cs ->
         ECompiledMatch a t
           <$> expandTraits e

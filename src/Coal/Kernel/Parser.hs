@@ -8,6 +8,7 @@ module Coal.Kernel.Parser (
   spaces,
   lexeme,
   spaced,
+  backtickString,
   module Text.Megaparsec,
   module Data.Text,
   module Control.Applicative,
@@ -86,3 +87,11 @@ word p =
 {-# INLINE cons #-}
 cons :: Parser a -> Parser [a] -> Parser [a]
 cons p ps = (:) <$> p <*> ps
+
+backtickString :: Parser Name
+backtickString =
+  lexeme $ do
+    void (char '`')
+    s <- takeWhileP (Just "Non-backtick character") (/= '`')
+    void (char '`')
+    pure s
