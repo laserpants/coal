@@ -85,97 +85,98 @@ instance (Pretty t, Show t) => ToDot (Label t) where
         freshNode ("Label " <> prettyType t <> " " <> name)
 
 instance (Pretty t, Show t) => ToDot (Expression a t) where
-  toDot = \case
-    EAnnotation _ t inner -> do
-      withNode ("EAnnotation " <> prettyType t) $
-        edgeTo inner
-    EApplication _ t fun args -> do
-      withNode ("EApplication " <> prettyType t) $ do
-        edgeTo fun
-        edgesTo args
-    ELambda _ patterns body -> do
-      withNode "ELambda" $ do
-        edgesTo patterns
-        edgeTo body
-    ELet _ bindings body -> do
-      withNode "ELet" $ do
-        forM_ bindings $
-          \case
-            BPattern _ pat rhs -> do
-              edgeTo pat
-              edgeTo rhs
-            BFunction{} ->
-              error "TODO"
-        edgeTo body
-    ERecursiveLet _ pat rhs body ->
-      withNode "ERecursiveLet" $ do
-        edgeTo pat
-        edgeTo rhs
-        edgeTo body
-    EVariable _ (Label t name) ->
-      freshNode ("EVariable " <> prettyType t <> " " <> name)
-    EConstructor _ (Label t name) ->
-      freshNode ("EConstructor " <> prettyType t <> " " <> name)
-    ELiteral _ prim -> do
-      freshNode ("ELiteral " <> Text.pack (show prim))
-    EIf _ t e1 e2 e3 -> do
-      withNode ("EIf " <> prettyType t) $
-        edgesTo [e1, e2, e3]
-    EUnaryOperator _ t op ->
-      freshNode ("EUnaryOperator " <> Text.pack (show op) <> " " <> prettyType t)
-    EBinaryOperator _ t op ->
-      freshNode ("EBinaryOperator " <> Text.pack (show op) <> " " <> prettyType t)
-    ERecord _ t fields tail -> do
-      withNode ("ERecord " <> prettyType t) $ do
-        forM_ (Map.toList fields) $
-          \(name, expr) -> do
-            withNode ("Field " <> name) (edgeTo expr)
-        edgeTo tail
-    EListCons _ t e1 e2 -> do
-      withNode ("EListCons " <> prettyType t) $
-        edgesTo [e1, e2]
-    EListLiteral _ t es -> do
-      withNode ("EListLiteral " <> prettyType t) $
-        edgesTo es
-    ETuple _ t es -> do
-      withNode ("ETuple " <> prettyType t) $
-        edgesTo es
-    EMatch _ t e cs ->
-      withNode ("EMatch " <> prettyType t) $ do
-        edgeTo e
-        edgesTo cs
-    ECompiledMatch _ t e cs -> do
-      withNode ("ECompiledMatch " <> prettyType t) $ do
-        edgeTo e
-        edgesTo cs
-    EFold _ t es cs me ->
-      withNode ("EFold " <> prettyType t) $ do
-        edgesTo es
-        edgesTo cs
-        edgeTo me
-    EUnfold _ t ll n ps d me -> do
-      withNode ("EUnfold " <> prettyType t <> " " <> n) $ do
-        edgeTo ll
-        edgesTo ps
-        forM_ (Map.toList d) $
-          \(name, expr) -> do
-            withNode ("Field " <> name) (edgeTo expr)
-        edgeTo me
-    ESelect _ (Label t name) e -> do
-      withNode ("ESelect " <> prettyType t <> " " <> name) $
-        edgeTo e
-    ECodataFields{} ->
-      error "TODO"
-    EFocus name ll1 ll2 e1 e2 ->
-      withNode ("EFocus " <> name) $ do
-        edgeTo ll1
-        edgeTo ll2
-        edgeTo e1
-        edgeTo e2
-    EPlaceholder _ t tr ->
-      freshNode ("EPlaceholder " <> prettyType t <> " " <> Text.pack (show tr))
-    _ ->
-      error "TODO"
+  toDot = 
+    \case
+      EAnnotation _ t inner -> do
+        withNode ("EAnnotation " <> prettyType t) $
+          edgeTo inner
+      EApplication _ t fun args -> do
+        withNode ("EApplication " <> prettyType t) $ do
+          edgeTo fun
+          edgesTo args
+      ELambda _ patterns body -> do
+        withNode "ELambda" $ do
+          edgesTo patterns
+          edgeTo body
+      ELet _ bindings body -> do
+        withNode "ELet" $ do
+          forM_ bindings $
+            \case
+              BPattern _ pat rhs -> do
+                edgeTo pat
+                edgeTo rhs
+              BFunction{} ->
+                error "TODO"
+          edgeTo body
+      ERecursiveLet _ pat rhs body ->
+        withNode "ERecursiveLet" $ do
+          edgeTo pat
+          edgeTo rhs
+          edgeTo body
+      EVariable _ (Label t name) ->
+        freshNode ("EVariable " <> prettyType t <> " " <> name)
+      EConstructor _ (Label t name) ->
+        freshNode ("EConstructor " <> prettyType t <> " " <> name)
+      ELiteral _ prim -> do
+        freshNode ("ELiteral " <> Text.pack (show prim))
+      EIf _ t e1 e2 e3 -> do
+        withNode ("EIf " <> prettyType t) $
+          edgesTo [e1, e2, e3]
+      EUnaryOperator _ t op ->
+        freshNode ("EUnaryOperator " <> Text.pack (show op) <> " " <> prettyType t)
+      EBinaryOperator _ t op ->
+        freshNode ("EBinaryOperator " <> Text.pack (show op) <> " " <> prettyType t)
+      ERecord _ t fields tail -> do
+        withNode ("ERecord " <> prettyType t) $ do
+          forM_ (Map.toList fields) $
+            \(name, expr) -> do
+              withNode ("Field " <> name) (edgeTo expr)
+          edgeTo tail
+      EListCons _ t e1 e2 -> do
+        withNode ("EListCons " <> prettyType t) $
+          edgesTo [e1, e2]
+      EListLiteral _ t es -> do
+        withNode ("EListLiteral " <> prettyType t) $
+          edgesTo es
+      ETuple _ t es -> do
+        withNode ("ETuple " <> prettyType t) $
+          edgesTo es
+      EMatch _ t e cs ->
+        withNode ("EMatch " <> prettyType t) $ do
+          edgeTo e
+          edgesTo cs
+      ECompiledMatch _ t e cs -> do
+        withNode ("ECompiledMatch " <> prettyType t) $ do
+          edgeTo e
+          edgesTo cs
+      EFold _ t es cs me ->
+        withNode ("EFold " <> prettyType t) $ do
+          edgesTo es
+          edgesTo cs
+          edgeTo me
+      EUnfold _ t ll n ps d me -> do
+        withNode ("EUnfold " <> prettyType t <> " " <> n) $ do
+          edgeTo ll
+          edgesTo ps
+          forM_ (Map.toList d) $
+            \(name, expr) -> do
+              withNode ("Field " <> name) (edgeTo expr)
+          edgeTo me
+      ESelect _ (Label t name) e -> do
+        withNode ("ESelect " <> prettyType t <> " " <> name) $
+          edgeTo e
+      ECodataFields{} ->
+        error "TODO"
+      EFocus name ll1 ll2 e1 e2 ->
+        withNode ("EFocus " <> name) $ do
+          edgeTo ll1
+          edgeTo ll2
+          edgeTo e1
+          edgeTo e2
+      EPlaceholder _ t tr ->
+        freshNode ("EPlaceholder " <> prettyType t <> " " <> Text.pack (show tr))
+      _ ->
+        error "TODO"
 
 instance (Pretty t, Show t) => ToDot (Pattern a t) where
   toDot =
@@ -264,8 +265,7 @@ instance (Show t, Pretty t) => ToDot (Definition a k t) where
         withNode ("DConstant " <> prettyType t <> " " <> name) $ do
           edgeTo e
       _ -> do
-        nid <- freshNode "TODO"
-        return nid
+        freshNode "TODO"
 
 generateDot :: (ToDot a) => a -> Text
 generateDot ast =
