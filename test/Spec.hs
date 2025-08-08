@@ -472,7 +472,7 @@ builtinTraits =
 --                )
 --            )
 --          ,
---            ( "negated"
+--            ( "negate"
 --            , Forall
 --                (Set.fromList [TypeIndex KType 0])
 --                []
@@ -514,7 +514,7 @@ builtinInstances =
                 , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
                 )
               ,
-                ( "negated"
+                ( "negate"
                 , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
                 )
               ]
@@ -527,7 +527,7 @@ builtinInstances =
                 , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic INat)
                 )
               ,
-                ( "negated"
+                ( "negate"
                 , Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic INat)
                 )
               ]
@@ -583,8 +583,8 @@ addBuiltinDefs defs =
       ( (fst <$> names)
           <> [ "from_int32__$instance_Numeric(Intrinsic(Int32))"
              , "from_int32__$instance_Numeric(Intrinsic(Nat))"
-             , "negated__$instance_Numeric(Intrinsic(Int32))"
-             , "negated__$instance_Numeric(Intrinsic(Nat))"
+             , "negate__$instance_Numeric(Intrinsic(Int32))"
+             , "negate__$instance_Numeric(Intrinsic(Nat))"
              , "compare__$instance_Ordered(Intrinsic(Int32))"
              ]
       )
@@ -597,7 +597,7 @@ addBuiltinDefs defs =
         , TIntrinsic IInt32 `TArrow` TVariable (Parameter () "a")
         )
       ,
-        ( "negated"
+        ( "negate"
         , TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
         )
       ,
@@ -879,7 +879,7 @@ names =
         (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0))
     )
   ,
-    ( "negated"
+    ( "negate"
     , Forall
         (Set.fromList [TypeIndex KType 0] :: Set (TypeIndex Kind))
         [Trait "Numeric" (TVariable (TypeIndex KType 0))]
@@ -1213,17 +1213,17 @@ moduleCore =
                   }
               |]
         , OFunction
-            "Core$.negated"
+            "Core$.negate"
             [ Label (Kernel.TCon "Numeric" [opaque]) "$a"
             ]
             [r| 
                   match<int32/*>($a : Numeric(*)) {
-                    | ( $Record : { negated : */* | * }/Numeric(*)
-                      , $r : { negated : */* | * }
+                    | ( $Record : { negate : */* | * }/Numeric(*)
+                      , $r : { negate : */* | * }
                       ) =>
                         select
-                          { negated = $f : */* | _ : * } =
-                            $r : { negated : */* | * }
+                          { negate = $f : */* | _ : * } =
+                            $r : { negate : */* | * }
                           in
                             $f : */*
                   }
@@ -1236,7 +1236,7 @@ moduleCore =
                   n : int32
               |]
         , OFunction
-            "Core$.negated__$instance_Numeric(Intrinsic(Int32))"
+            "Core$.negate__$instance_Numeric(Intrinsic(Int32))"
             [ Label Kernel.int32 "n"
             ]
             [r| 
@@ -1253,7 +1253,7 @@ moduleCore =
                     )
               |]
         , OFunction
-            "Core$.negated__$instance_Numeric(Intrinsic(Nat))"
+            "Core$.negate__$instance_Numeric(Intrinsic(Nat))"
             [ Label (Kernel.TCon "$Nat" []) "_"
             ]
             [r| 

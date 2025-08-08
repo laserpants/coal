@@ -71,7 +71,7 @@ module Main {
                 | None =>
                     None
                 | Some(p) =>
-                    Some(negated(p))
+                    Some(negate(p))
               }
           | _ =>
               digits_to_unsigned(chars)
