@@ -239,7 +239,7 @@ parseAdditionOperator :: Parser (Expression Metadata () -> Expression Metadata (
 parseAdditionOperator = do
   withMetadata $ do
     pure
-      ( \loc lhs rhs->
+      ( \loc lhs rhs ->
           EApplication
             loc
             ()

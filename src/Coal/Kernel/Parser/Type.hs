@@ -4,7 +4,7 @@ module Coal.Kernel.Parser.Type (type_) where
 
 import Coal.Kernel.Language.Type (Type (..))
 import Coal.Kernel.Language.Type.Row (extend)
-import Coal.Kernel.Parser (Parser, lexeme, try, ($>), (<|>), backtickString)
+import Coal.Kernel.Parser (Parser, backtickString, lexeme, try, ($>), (<|>))
 import Coal.Kernel.Parser.Identifier (constructor, name)
 import Coal.Kernel.Parser.Symbol (braces, colon, commaSep, commaSepN, parens, pipe, symbol)
 import Control.Monad (void)
