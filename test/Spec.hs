@@ -600,15 +600,15 @@ addBuiltinDefs defs =
         ( "negated"
         , TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
         )
-      , 
+      ,
         ( "(+)"
         , TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
         )
-      , 
+      ,
         ( "(-)"
         , TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
         )
-      , 
+      ,
         ( "(*)"
         , TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
         )
