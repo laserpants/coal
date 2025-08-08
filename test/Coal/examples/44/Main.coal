@@ -21,8 +21,8 @@ module Main {
   }
 
   trait Applicative(f : * -> *) {
-    mapf : f(a -> b) -> f(a) -> f(b);
-    pure : a -> f(a)
+    fmap : f(a -> b) -> f(a) -> f(b);
+    pure : a -> f(a);
   }
 
   trait Monad(m : * -> *) {
