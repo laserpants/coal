@@ -691,6 +691,8 @@ compileModule x = do
     [] ->
       pure ()
 
+  -- TODO: Num class
+
   b <- mainPass a
 
   cc <- gets compilerAssumptions

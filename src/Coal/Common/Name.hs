@@ -23,12 +23,12 @@ isConstructor :: Name -> Bool
 isConstructor qualified =
   case reverse (Text.splitOn "." qualified) of
     p : _ ->
-      nameIsConstr p
+      nameIsCtor p
     [] ->
       False
 
-nameIsConstr :: Name -> Bool
-nameIsConstr name
+nameIsCtor :: Name -> Bool
+nameIsCtor name
   | Text.null name = error "Empty name"
   | Text.null s = False
   | otherwise = isUpper (Text.head s)
