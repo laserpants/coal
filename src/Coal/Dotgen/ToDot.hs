@@ -47,17 +47,6 @@ type DotGen = State DotState
 class ToDot a where
   toDot :: a -> DotGen Int
 
-instance (ToDot a) => ToDot (Maybe a) where
-  toDot =
-    \case
-      Nothing ->
-        freshNode "Nothing"
-      Just d -> do
-        nid <- freshNode "Just"
-        cid <- toDot d
-        emitEdge nid cid
-        pure nid
-
 freshNode :: Text -> DotGen Int
 freshNode text = do
   nid <- supplied id
@@ -69,6 +58,17 @@ emitNode nid label = modify $ \st -> st{nodes = (nid, label) : nodes st}
 
 emitEdge :: Int -> Int -> DotGen ()
 emitEdge from to = modify $ \st -> st{edges = (from, to) : edges st}
+
+instance (ToDot a) => ToDot (Maybe a) where
+  toDot =
+    \case
+      Nothing ->
+        freshNode "Nothing"
+      Just d -> do
+        nid <- freshNode "Just"
+        cid <- toDot d
+        emitEdge nid cid
+        pure nid
 
 instance (Pretty t, Show t) => ToDot (Label t) where
   toDot =
