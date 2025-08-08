@@ -91,7 +91,7 @@ instance (Pretty t, Show t) => ToDot (Expression a t) where
         emitNode nid ("EApplication " <> prettyType t)
         fid <- toDot fun
         emitEdge nid fid
-        forM_ (fromList1 args) $
+        forM_ args $
           \arg -> do
             aid <- toDot arg
             emitEdge nid aid
@@ -99,7 +99,7 @@ instance (Pretty t, Show t) => ToDot (Expression a t) where
       ELambda _ patterns body -> do
         nid <- freshId
         emitNode nid "ELambda"
-        forM_ (fromList1 patterns) $
+        forM_ patterns $
           \p -> do
             pid <- toDot p
             emitEdge nid pid
@@ -109,7 +109,7 @@ instance (Pretty t, Show t) => ToDot (Expression a t) where
       ELet _ bindings body -> do
         nid <- freshId
         emitNode nid "ELet"
-        forM_ (fromList1 bindings) $
+        forM_ bindings $
           \case
             BPattern _ pat rhs -> do
               pid <- toDot pat
@@ -210,7 +210,7 @@ instance (Pretty t, Show t) => ToDot (Expression a t) where
         sid <- toDot e
         emitEdge nid sid
         -- Clauses
-        forM_ (fromList1 cs) $
+        forM_ cs $
           \clause -> do
             cid <- toDot clause
             emitEdge nid cid
@@ -222,7 +222,7 @@ instance (Pretty t, Show t) => ToDot (Expression a t) where
         sid <- toDot e
         emitEdge nid sid
         -- Clauses
-        forM_ (fromList1 cs) $
+        forM_ cs $
           \clause -> do
             cid <- toDot clause
             emitEdge nid cid
