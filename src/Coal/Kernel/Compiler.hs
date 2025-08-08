@@ -94,7 +94,7 @@ compileModules modules =
         IRInterpreterEnv{..} <- gets kernelInterpreterEnv
         pipelineInsertIRTypes (irTypeOf <$$> Environment.toList irInterpreterValueEnv)
 
-        pipelineInsertConstructors (concatMap objectConstructorInfo moduleObjects)
+        pipelineInsertConstructors (objectConstructorInfo =<< moduleObjects)
 
         pure (moduleName, ir <> [entryPoint | moduleName == "Main"])
     cc <- transformInterpreter compileClosureCode

@@ -600,6 +600,18 @@ addBuiltinDefs defs =
         ( "negated"
         , TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
         )
+      , 
+        ( "(+)"
+        , TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
+        )
+      , 
+        ( "(-)"
+        , TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
+        )
+      , 
+        ( "(*)"
+        , TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
+        )
       ]
   , DTrait
       "Ordered"
@@ -694,6 +706,8 @@ compileModule x = do
   -- TODO: Num class
 
   b <- mainPass a
+
+  liftIO $ writeDotFiles "compiled" b
 
   cc <- gets compilerAssumptions
   case nub cc of
