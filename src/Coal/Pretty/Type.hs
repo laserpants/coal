@@ -4,6 +4,7 @@
 module Coal.Pretty.Type (Pretty (..), renderPretty) where
 
 import Coal.Common.List1 (NonEmpty (..), fromList1)
+import Coal.Language.Trait (Trait (..))
 import Coal.Language
 import Data.Text (Text, isPrefixOf)
 import Prettyprinter
@@ -122,6 +123,10 @@ prettyKindPrec prec =
     KArrow k1 k2 ->
       parensIf (prec > precKArrow) $
         group (prettyKindPrec (precKArrow + 1) k1 <+> "->" <+> prettyKindPrec precKArrow k2)
+
+instance (Pretty t) => Pretty (Trait t) where
+  pretty (Trait name t) =
+    pretty name <> parens (pretty t)
 
 renderPretty :: (Pretty a) => a -> Text
 renderPretty p = renderStrict . layoutPretty defaultLayoutOptions $ pretty p

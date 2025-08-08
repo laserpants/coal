@@ -174,7 +174,7 @@ instance (Pretty t, Show t) => ToDot (Expression a t) where
           edgeTo e1
           edgeTo e2
       EPlaceholder _ t tr ->
-        freshNode ("EPlaceholder " <> prettyType t <> " " <> Text.pack (show tr))
+        freshNode ("EPlaceholder " <> prettyType t <> " " <> prettyType tr)
       _ ->
         error "TODO"
 
@@ -219,7 +219,7 @@ instance (Pretty t, Show t) => ToDot (Pattern a t) where
       PAtVariable _ (Label t name) ->
         freshNode ("PAtVariable " <> prettyType t <> " " <> name)
       PPlaceholder _ t tr ->
-        freshNode ("PPlaceholder " <> prettyType t <> " " <> Text.pack (show tr))
+        freshNode ("PPlaceholder " <> prettyType t <> " " <> prettyType tr)
 
 instance (Pretty t, Show t) => ToDot (Clause a t) where
   toDot =

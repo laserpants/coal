@@ -235,6 +235,18 @@ binaryOperator op e1 e2 =
 listCons :: Expression Metadata () -> Expression Metadata () -> Expression Metadata ()
 listCons e1 e2 = EListCons (metadataSpan e1 e2) () e1 e2
 
+parseAdditionOperator :: Parser (Expression Metadata () -> Expression Metadata () -> Expression Metadata ())
+parseAdditionOperator = do
+  withMetadata $ do
+    pure
+      ( \loc lhs rhs->
+          EApplication
+            loc
+            ()
+            (EVariable loc (Label () "(+)"))
+            (lhs :| [rhs])
+      )
+
 fixity9 :: [Operator Parser (Expression Metadata ())]
 fixity9 =
   [ -- TODO
@@ -253,7 +265,7 @@ fixity7 =
 
 fixity6, fixity5, fixity4, fixity3, fixity2 :: [Operator Parser (Expression Metadata ())]
 fixity6 =
-  [ InfixL (binaryOperator OAddition <$ try (symbol "+" <* notFollowedBy (char '+')))
+  [ InfixL (parseAdditionOperator <* try (symbol "+" <* notFollowedBy (char '+')))
   , InfixL (binaryOperator OSubtraction <$ try (symbol "-"))
   ]
 fixity5 =
