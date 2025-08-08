@@ -178,13 +178,13 @@ parseListLiteral =
     pure (\loc -> EListLiteral loc () es)
 
 parseTrue :: Parser (Expression Metadata ())
-parseTrue = do
+parseTrue =
   withMetadata $ do
     lexeme_ "true"
     pure (\loc -> ELiteral loc (LBool True))
 
 parseFalse :: Parser (Expression Metadata ())
-parseFalse = do
+parseFalse =
   withMetadata $ do
     lexeme_ "false"
     pure (\loc -> ELiteral loc (LBool False))
@@ -236,8 +236,8 @@ listCons :: Expression Metadata () -> Expression Metadata () -> Expression Metad
 listCons e1 e2 = EListCons (metadataSpan e1 e2) () e1 e2
 
 parseAdditionOperator :: Parser (Expression Metadata () -> Expression Metadata () -> Expression Metadata ())
-parseAdditionOperator = do
-  withMetadata $ do
+parseAdditionOperator =
+  withMetadata $
     pure
       ( \loc lhs rhs ->
           EApplication
@@ -248,8 +248,8 @@ parseAdditionOperator = do
       )
 
 parseSubtractionOperator :: Parser (Expression Metadata () -> Expression Metadata () -> Expression Metadata ())
-parseSubtractionOperator = do
-  withMetadata $ do
+parseSubtractionOperator =
+  withMetadata $
     pure
       ( \loc lhs rhs ->
           EApplication
@@ -260,8 +260,8 @@ parseSubtractionOperator = do
       )
 
 parseMultiplicationOperator :: Parser (Expression Metadata () -> Expression Metadata () -> Expression Metadata ())
-parseMultiplicationOperator = do
-  withMetadata $ do
+parseMultiplicationOperator =
+  withMetadata $
     pure
       ( \loc lhs rhs ->
           EApplication
