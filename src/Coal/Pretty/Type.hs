@@ -11,7 +11,7 @@ import Prettyprinter.Render.Text (renderStrict)
 
 precArrow, precApp, precAtom :: Int
 precArrow = 1 -- e.g., a -> b
-precApp = 2 -- e.g., T f x y
+precApp = 2 -- e.g., T(x, y)
 precAtom = 3 -- variables, constructors, literals
 
 parensIf :: Bool -> Doc ann -> Doc ann
