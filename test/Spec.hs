@@ -110,7 +110,7 @@ spec = do
   x <- main28
   print (x == Right "5\n")
   x <- main29
-  print (x == Right "ananab\n")
+  print ("29", x == Right "ananab\n")
   x <- main30
   print (x == Right "2\n")
   x <- main31
@@ -120,7 +120,7 @@ spec = do
   x <- main34
   print (x == Right "111\n111\n")
   x <- main35
-  print (x == Right "9876\n")
+  print ("35", x == Right "9876\n")
   x <- main36
   print (x == Right "-123\n")
   x <- main37

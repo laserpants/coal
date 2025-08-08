@@ -1,7 +1,7 @@
 module Main {
 
   trait Functor(f : * -> *) {
-    map : (a -> b) -> f(a) -> f(b) 
+    map : (a -> b) -> f(a) -> f(b);
   }
 
   instance Functor(List) {
@@ -22,11 +22,11 @@ module Main {
 
   trait Applicative(f : * -> *) {
     fmap : f(a -> b) -> f(a) -> f(b);
-    pure : a -> f(a)
+    pure : a -> f(a);
   }
 
   trait Monad(m : * -> *) {
-    bind : m(a) -> (a -> m(b)) -> m(b)
+    bind : m(a) -> (a -> m(b)) -> m(b);
   }
 
   fun main() =

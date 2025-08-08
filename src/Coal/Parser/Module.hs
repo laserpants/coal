@@ -39,7 +39,7 @@ parseTraitDefinition = do
   lexeme_ "trait"
   n <- constructor
   t <- parens parseParameter
-  ds <- braces (semicolonSep1 ((,) <$> name <*> (symbol_ ":" *> parseType)))
+  ds <- braces (some ((,) <$> name <*> endingWithSemicolon ((symbol_ ":" *> parseType))))
   -- TODO
   pure (DTrait n [] t ds)
 

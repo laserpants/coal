@@ -1,7 +1,7 @@
 module Main {
 
   trait JsonSerializable(a) {
-    to_json : a -> string
+    to_json : a -> string;
   }
 
   instance JsonSerializable(int32) {

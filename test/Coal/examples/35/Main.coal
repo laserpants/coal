@@ -16,7 +16,7 @@ module Main {
     };
 
   trait Functor(f : * -> *) {
-    map : (a -> b) -> f(a) -> f(b)
+    map : (a -> b) -> f(a) -> f(b);
   }
 
   instance Functor(Option) {
@@ -49,7 +49,7 @@ module Main {
 
   trait JsonSerializable(a) {
     to_json : a -> string;
-    from_json : string -> Option(a)
+    from_json : string -> Option(a);
   }
 
   instance JsonSerializable(int32) {
