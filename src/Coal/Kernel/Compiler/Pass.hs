@@ -22,7 +22,7 @@ import Coal.Kernel.Compiler.Pass.LetLifting (liftLetNodes)
 import Coal.Kernel.Compiler.Pass.Memoize (memoize)
 import Coal.Kernel.Compiler.Pass.Suffix (suffixExpr)
 import Coal.Kernel.Compiler.Pipeline
-import Coal.Kernel.Compiler.Pipeline.Kernel (Kernel (..), overKernelSupply)
+import Coal.Kernel.Compiler.Pipeline.State (PipelineState (..), overPipelineStateSupply)
 import Coal.Kernel.LLVM (IRInterpreter, irInterpreterStateArtifacts, runInterpreter)
 import Coal.Kernel.Language
 import Control.Monad.State (State, gets, modify, runState)
@@ -33,7 +33,7 @@ import Extra.Control.Applicative (pure1, pure3)
 transformSuffixMonad :: State Int a -> Pipeline a
 transformSuffixMonad a = do
   (v, n) <- gets (runState a . kernelSupply)
-  modify (overKernelSupply (const n))
+  modify (overPipelineStateSupply (const n))
   pure v
 
 transformInterpreter :: IRInterpreter a -> Pipeline a

@@ -11,7 +11,7 @@ module Coal.Kernel.Compiler (compile, compileModules) where
 import Coal.Common.Environment (Environment (..))
 import Coal.Kernel.Compiler.Pass
 import Coal.Kernel.Compiler.Pipeline
-import Coal.Kernel.Compiler.Pipeline.Kernel (Kernel (..))
+import Coal.Kernel.Compiler.Pipeline.State (PipelineState (..))
 import Coal.Kernel.LLVM
 import Coal.Kernel.Language
 import Control.Monad (void, (>=>))

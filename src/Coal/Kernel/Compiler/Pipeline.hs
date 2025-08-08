@@ -16,7 +16,7 @@ module Coal.Kernel.Compiler.Pipeline (
 ) where
 
 import Coal.Common.Environment (Environment)
-import Coal.Kernel.Compiler.Pipeline.Kernel
+import Coal.Kernel.Compiler.Pipeline.State
 import Coal.Kernel.LLVM
 import Coal.Kernel.Language (Type)
 import Control.Monad.IO.Class (MonadIO)
@@ -26,55 +26,55 @@ import Extra (Name)
 
 import qualified Coal.Common.Environment as Environment
 
-newtype Pipeline a = Pipeline {pipelineKernel :: StateT Kernel IO a}
+newtype Pipeline a = Pipeline {pipelineState :: StateT PipelineState IO a}
   deriving
     ( Functor
     , Applicative
     , Monad
     , MonadIO
-    , MonadState Kernel
+    , MonadState PipelineState
     )
 
 {-# INLINE runPipeline #-}
-runPipeline :: Pipeline a -> IO (a, Kernel)
-runPipeline p = runStateT (pipelineKernel p) initialKernel
+runPipeline :: Pipeline a -> IO (a, PipelineState)
+runPipeline p = runStateT (pipelineState p) initialPipelineState
 
 {-# INLINE evalPipeline #-}
 evalPipeline :: Pipeline a -> IO a
-evalPipeline p = evalStateT (pipelineKernel p) initialKernel
+evalPipeline p = evalStateT (pipelineState p) initialPipelineState
 
 {-# INLINE extendInterpreterValueEnv #-}
 extendInterpreterValueEnv :: Environment IRValue -> Pipeline ()
-extendInterpreterValueEnv env = modify (overKernelInterpreterValueEnv (<> env))
+extendInterpreterValueEnv env = modify (overPipelineStateInterpreterValueEnv (<> env))
 
 {-# INLINE extendInterpreterConstructorEnv #-}
 extendInterpreterConstructorEnv :: Environment Int -> Pipeline ()
-extendInterpreterConstructorEnv env = modify (overKernelInterpreterConstructorEnv (<> env))
+extendInterpreterConstructorEnv env = modify (overPipelineStateInterpreterConstructorEnv (<> env))
 
 {-# INLINE pipelineInsertArtifacts #-}
 pipelineInsertArtifacts :: [IRInterpreterArtifact] -> Pipeline ()
-pipelineInsertArtifacts = modify . (overKernelArtifacts . (<>))
+pipelineInsertArtifacts = modify . (overPipelineStateArtifacts . (<>))
 
 {-# INLINE pipelineInsertCode #-}
 pipelineInsertCode :: [IRConstruct [IRLine]] -> Pipeline ()
-pipelineInsertCode code = modify (overKernelCode (sort . (<> code)))
+pipelineInsertCode code = modify (overPipelineStateCode (sort . (<> code)))
 
 {-# INLINE pipelineInsertNames #-}
 pipelineInsertNames :: [(Name, Type)] -> Pipeline ()
-pipelineInsertNames names = modify (overKernelNames (Environment.insertMultiple names))
+pipelineInsertNames names = modify (overPipelineStateNames (Environment.insertMultiple names))
 
 {-# INLINE pipelineInsertIRTypes #-}
 pipelineInsertIRTypes :: [(Name, IRType)] -> Pipeline ()
-pipelineInsertIRTypes names = modify (overKernelIRTypes (Environment.insertMultiple names))
+pipelineInsertIRTypes names = modify (overPipelineStateIRTypes (Environment.insertMultiple names))
 
 {-# INLINE pipelineInsertConstructors #-}
 pipelineInsertConstructors :: [(Name, Int)] -> Pipeline ()
-pipelineInsertConstructors ctors = modify (overKernelConstructors (Environment.insertMultiple ctors))
+pipelineInsertConstructors ctors = modify (overPipelineStateConstructors (Environment.insertMultiple ctors))
 
 {-# INLINE pipelineReset #-}
 pipelineReset :: Pipeline ()
-pipelineReset = modify resetKernel
+pipelineReset = modify resetPipelineState
 
 {-# INLINE pipelineResetSupply #-}
 pipelineResetSupply :: Pipeline ()
-pipelineResetSupply = modify (overKernelSupply (const 0))
+pipelineResetSupply = modify (overPipelineStateSupply (const 0))

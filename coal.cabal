@@ -71,7 +71,7 @@ library
       Coal.Kernel.Compiler.Pass.Memoize
       Coal.Kernel.Compiler.Pass.Suffix
       Coal.Kernel.Compiler.Pipeline
-      Coal.Kernel.Compiler.Pipeline.Kernel
+      Coal.Kernel.Compiler.Pipeline.State
       Coal.Kernel.Language
       Coal.Kernel.Language.Expr
       Coal.Kernel.Language.Expr.Composite
