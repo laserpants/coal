@@ -19,6 +19,6 @@ module Qsort {
           always(Leaf)
     };
 
-  sort = flatten << binary_search_tree;
+  let sort = flatten << binary_search_tree;
 
 }

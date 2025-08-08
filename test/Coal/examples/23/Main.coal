@@ -5,15 +5,15 @@ module Main {
     from_json : string -> Option(a)
   }
 
-  a_user_named_lazarus = 
+  let a_user_named_lazarus = 
     { name = "Lazarus"
     , uid = 2 : int32
     };
 
   instance JsonSerializable({ name : string, uid : int32 }) {
-    to_json =
+    let to_json =
       fn(s) => "";
-    from_json =
+    let from_json =
       fn(d) => 
         Some({ name = "TODO", uid = 1 });
   }

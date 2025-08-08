@@ -106,7 +106,7 @@ parseConstantDefinition :: Parser (Definition Metadata o ())
 parseConstantDefinition =
   endingWithSemicolon $ do
     start <- getSourcePos
-    c <- name
+    c <- lexeme_ "let" *> name
     withAnnotation $ do
       end <- getSourcePos
       expr <- symbol_ "=" *> parseExpression

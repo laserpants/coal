@@ -3,7 +3,7 @@ module Main {
   type Date = Date({ year : int32, month : int32, day : int32 })
 
   instance Ordered(Date) {
-    compare =
+    let compare =
       fn(d1, d2) =>
         EqualTo;
   }
@@ -53,7 +53,7 @@ module Main {
           []
     };
 
-  sort = flatten << from_list;
+  let sort = flatten << from_list;
 
   fun main() = 
     let

@@ -5,10 +5,10 @@ module Main {
   }
 
   instance X(bool) {
-    x = fn(z) => true;
+    let x = fn(z) => true;
   }
 
-  a = x(false);  // X(a) => a
+  let a = x(false);  // X(a) => a
 
   fun main() = trace_bool(a);
 }

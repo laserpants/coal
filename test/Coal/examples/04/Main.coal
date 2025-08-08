@@ -29,7 +29,7 @@ module Main {
           []
     };
 
-  sort = flatten << from_list;
+  let sort = flatten << from_list;
 
   fun main() = 
     let

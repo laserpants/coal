@@ -5,16 +5,16 @@ module Main {
   }
 
   instance JsonSerializable(int32) {
-    to_json = int32_to_string;
+    let to_json = int32_to_string;
   }
 
   instance JsonSerializable({ uid : int32 }) {
-    to_json = fn(s) => to_json(s.uid);
+    let to_json = fn(s) => to_json(s.uid);
   }
 
   fun f(s) = to_json(s.uid);
 
-  a_test_user = { uid = 111 : int32 };
+  let a_test_user = { uid = 111 : int32 };
 
   fun main() = 
     let

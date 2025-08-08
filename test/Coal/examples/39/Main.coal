@@ -5,7 +5,7 @@ module Main {
   }
 
   instance X(bool) {
-    x = fn(z) => true;
+    let x = fn(z) => true;
   }
 
   fun main() = 

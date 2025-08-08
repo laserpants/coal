@@ -6,8 +6,8 @@ module Main {
   }
 
   instance JsonSerializable(int32) {
-    to_json = int32_to_string;
-    from_json = fn(_) => Some(1);
+    let to_json = int32_to_string;
+    let from_json = fn(_) => Some(1);
   }
 
   fun main() =

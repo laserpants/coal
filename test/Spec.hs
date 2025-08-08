@@ -76,9 +76,9 @@ spec = do
   x <- main9
   print (x == Right "wat\n")
   x <- main10
-  print (x == Right "hello from the other side\n")
+  print ("10", x == Right "hello from the other side\n")
   x <- main11
-  print (x == Right "Covfefe\n")
+  print ("11", x == Right "Covfefe\n")
   x <- main12
   print (x == Right "bork bork bork\n")
   a <- isLeft <$> main13
@@ -92,7 +92,7 @@ spec = do
   x <- main17
   print (x == Right "false\n")
   x <- main18
-  print (x == Right "40320\n")
+  print ("18", x == Right "40320\n")
   x <- main20
   print (x == Right "Bob\n")
   x <- main21

@@ -1,6 +1,6 @@
 module Main {
 
-  foo : int32 -> int32 = fn(n : int32) =>
+  let foo : int32 -> int32 = fn(n : int32) =>
     false;
 
   fun main() = 

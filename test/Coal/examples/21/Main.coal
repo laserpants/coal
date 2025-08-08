@@ -1,6 +1,6 @@
 module Main {
 
-  a_user_named_lazarus = 
+  let a_user_named_lazarus = 
     { name = "Lazarus"
     , uid = 2 : int32
     };

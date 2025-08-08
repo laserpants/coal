@@ -2,7 +2,7 @@ module Main {
 
   type User = User({ uid : int32, name : string })
 
-  a_user_named_bob = 
+  let a_user_named_bob = 
     User
       ({ name = "Alphonso"
        , uid = 1
