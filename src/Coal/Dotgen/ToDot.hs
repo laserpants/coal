@@ -222,8 +222,17 @@ instance (Pretty t, Show t) => ToDot (Expression a t) where
         return nid
       ECodataFields{} ->
         error "TODO"
-      EFocus name ll1 ll2 e1 e2 ->
-        error "TODO"
+      EFocus name ll1 ll2 e1 e2 -> do
+        nid <- freshNode ("EFocus " <> name)
+        id1 <- toDot ll1
+        id2 <- toDot ll2
+        id3 <- toDot e1
+        id4 <- toDot e2
+        emitEdge nid id1
+        emitEdge nid id2
+        emitEdge nid id3
+        emitEdge nid id4
+        return nid
       EPlaceholder _ t tr ->
         freshNode ("EPlaceholder " <> prettyType t <> " " <> Text.pack (show tr))
       _ ->
