@@ -247,6 +247,30 @@ parseAdditionOperator = do
             (lhs :| [rhs])
       )
 
+parseSubtractionOperator :: Parser (Expression Metadata () -> Expression Metadata () -> Expression Metadata ())
+parseSubtractionOperator = do
+  withMetadata $ do
+    pure
+      ( \loc lhs rhs ->
+          EApplication
+            loc
+            ()
+            (EVariable loc (Label () "(-)"))
+            (lhs :| [rhs])
+      )
+
+parseMultiplicationOperator :: Parser (Expression Metadata () -> Expression Metadata () -> Expression Metadata ())
+parseMultiplicationOperator = do
+  withMetadata $ do
+    pure
+      ( \loc lhs rhs ->
+          EApplication
+            loc
+            ()
+            (EVariable loc (Label () "(*)"))
+            (lhs :| [rhs])
+      )
+
 fixity9 :: [Operator Parser (Expression Metadata ())]
 fixity9 =
   [ -- TODO
@@ -260,13 +284,13 @@ fixity8 = []
 
 fixity7 :: [Operator Parser (Expression Metadata ())]
 fixity7 =
-  [ InfixL (binaryOperator OMultiplication <$ symbol "*")
+  [ InfixL (parseMultiplicationOperator <* symbol "*")
   ]
 
 fixity6, fixity5, fixity4, fixity3, fixity2 :: [Operator Parser (Expression Metadata ())]
 fixity6 =
   [ InfixL (parseAdditionOperator <* try (symbol "+" <* notFollowedBy (char '+')))
-  , InfixL (binaryOperator OSubtraction <$ try (symbol "-"))
+  , InfixL (parseSubtractionOperator <* try (symbol "-"))
   ]
 fixity5 =
   [ InfixR (binaryOperator OListConcatenation <$ try (symbol "++" <* notFollowedBy (char '+')))
