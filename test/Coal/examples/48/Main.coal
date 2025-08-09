@@ -10,11 +10,11 @@ module Main {
       | Cons(_, @next) => next + 1
     };
 
-  cotype Stream(a) = { Head : a, Tail : Nats(a) }
+  cotype Stream(a) = { Head : a, Tail : Stream(a) }
 
-  fun enum_from(n : int32) =
-    unfold(@f, n) fn(x) => { Head = x, Tail = f(x + 1) };
-
+//  fun enum_from(n : int32) =
+//    unfold(@f, n) fn(x) => { Head = x, Tail = f(x + 1) };
+//
 //  fun enum_from(n) =
 //    unfold(
 //      { Head = n
