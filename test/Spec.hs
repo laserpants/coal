@@ -1000,6 +1000,15 @@ names =
         []
         (TIntrinsic IString `TArrow` TIntrinsic IInt32)
     )
+  -- TODO: temp temp
+  , 
+    ( "$$force_Head"
+    , Forall
+        mempty -- (Set.fromList [TypeIndex KType 0] :: Set (TypeIndex Kind))
+        []
+        (TConstructor KType "Stream" `TArrow` TIntrinsic IInt32)
+--        (TIntrinsic (IRecord (TRow (RExtend "$_Head" (TIntrinsic IInt32) (RVariable (TypeIndex KRow 0))))) `TArrow` TIntrinsic IInt32)
+    )
   ]
 
 moduleCore1 :: Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type)
