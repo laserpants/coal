@@ -22,7 +22,7 @@ import Coal.Compiler.Transform.Type.AliasExpansion
 import Coal.Compiler.Transform.Unfold
 import Coal.Compiler.TypeInference
 import Coal.Language
-import Coal.Language.Module (Module (..))
+import Coal.Language.Module (Module (..), overModuleDefinitionsM)
 import Coal.Language.Module.Constant
 import Coal.Language.Module.Definition
 import Coal.TypeSystem.Substitution (normalizeTypeIndexes)
@@ -30,7 +30,6 @@ import Control.Monad ((>=>))
 import Control.Monad.Reader (Reader, asks, runReader)
 import Control.Monad.State (gets, runState)
 import Data.Data (Data)
-import Debug.Trace
 import Extra (Name, forM)
 
 import qualified Coal.Compiler.Kernel.Environment as Kernel
@@ -87,7 +86,7 @@ desugarPatternsC = patternDesugarTrans desugarPatterns
 recordPatternDesugarTrans :: (Monad m) => (c -> RecordDesugarStack a c) -> c -> CompilerT a m c
 recordPatternDesugarTrans f e = withSupplyC (evalRecordDesugarStack (f e) "row")
 
-recordPatternDesugarC :: (Monad m, Monoid a, Data a, Show a) => Module a Kind IndexedType -> CompilerT a m (Module a Kind IndexedType)
+recordPatternDesugarC :: (Monad m, Monoid a, Data a) => Module a Kind IndexedType -> CompilerT a m (Module a Kind IndexedType)
 recordPatternDesugarC = recordPatternDesugarTrans compileRecordPatterns
 
 matchMonadTrans :: (Monad m) => (c -> MatchMonad c) -> c -> CompilerT a m c
@@ -109,7 +108,7 @@ placeholderTrans f e = do
   withSupplyC (\n -> runDictionaryStack (DictionaryEnvironment env1 env2) n (f e))
 
 placeholderInsertionC :: (Monad m, Monoid a, Data a) => Module a Kind IndexedType -> CompilerT a m (Module a Kind IndexedType)
-placeholderInsertionC (Module p ns ds) = Module p ns <$> traverse go ds
+placeholderInsertionC = overModuleDefinitionsM (traverse go) 
  where
   go =
     \case
@@ -126,16 +125,18 @@ placeholderInsertionC (Module p ns ds) = Module p ns <$> traverse go ds
       DInstance name t1 ds -> do
         es <- forM ds $
           \case
-            c@(DConstant dname e) -> do
+            c@(DConstant dname _) -> do
               c1 <- placeholderTrans expandTraits c
               case c1 of
                 DConstant _ (Constant _ (With ts t) _) -> do
                   let trait = Trait name t1
-                      name1 = (dname <> "__$instance_" <> serialize trait)
+                      name1 = dname <> "__$instance_" <> serialize trait
                   insertNameC name1 (Forall (typeIndexesIn t) ts t)
                 _ ->
                   error "Implementation error"
               pure c1
+            _ ->
+              error "TODO"
         pure (DInstance name t1 es)
       d ->
         pure d
