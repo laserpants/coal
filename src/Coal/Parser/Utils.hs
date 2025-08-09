@@ -2,8 +2,6 @@
 
 module Coal.Parser.Utils (fieldList) where
 
-import Coal.Language.Pattern
-import Coal.Ast.Metadata (Metadata (..))
 import Coal.Parser
 import Coal.Parser.Symbol
 import Coal.Parser.Identifier

@@ -10,7 +10,6 @@ import Coal.Parser.Identifier
 import Coal.Parser.Symbol
 import Control.Monad.Combinators.Expr
 import Data.Functor (($>))
-import Extra (Name)
 import Text.Megaparsec (option, try, (<|>))
 
 import qualified Coal.Language.Type.Row as Row
