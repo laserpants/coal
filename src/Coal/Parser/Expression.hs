@@ -16,7 +16,7 @@ import Coal.Parser.Type (parseType)
 import Control.Monad (void)
 import Control.Monad.Combinators.Expr
 import Data.Char (ord)
-import Extra (Name)
+import Extra (Name, isConstructor)
 import Text.Megaparsec (getSourcePos, manyTill, notFollowedBy, optional, some, try, (<|>))
 import Text.Megaparsec.Char (char)
 
@@ -44,9 +44,16 @@ parseExpression = makeExprParser go operator
         <|> parseVariableExpression
         <|> try (parens parseExpression)
         <|> parseTupleExpression
-    rest <- optional (symbol_ "." *> name)
+    rest <- optional (symbol_ "." *> (name <|> constructor))
     end <- getSourcePos
-    pure (maybe e1 (\ll -> ESelect (Metadata start end) (Label () ll) e1) rest)
+    pure (maybe e1 (selector e1 (Metadata start end)) rest)
+
+selector :: Expression Metadata () -> Metadata -> Name -> Expression Metadata ()
+selector expr loc name
+  | isConstructor name = ECodataSelect loc ll expr Nothing
+  | otherwise = ESelect loc ll expr
+ where
+  ll = Label () name
 
 parseUnit :: Parser (List1 (Expression Metadata ()))
 parseUnit =

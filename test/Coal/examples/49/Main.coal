@@ -12,6 +12,9 @@ module Main {
 
   cotype Stream = { Head : int32, Tail : Stream }
 
+  fun take_head(s) = 
+    s.Head;
+
   fun main() = 
     trace_int32(1);
 
