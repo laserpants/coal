@@ -43,6 +43,7 @@ runConstraintsGenC stack = do
     ConstraintsGenContext
       { constraintsGenContextMonomorphicSet = mempty
       , constraintsGenContextDataConstructorEnv = compilerDataConstructorEnvironment
+      , constraintsGenContextCodataAccessorEnv = compilerCodataAccessorEnvironment
       , constraintsGenContextTypeConstructorEnv = compilerTypeConstructorEnvironment
       }
 

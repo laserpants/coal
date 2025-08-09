@@ -35,6 +35,10 @@ type ConstraintsGen a = ConstraintsGenStack a TypeIndex Kind IndexedType
 lookupDataConstructor :: Name -> ConstraintsGenStack c o k t (Maybe (Constructor o k t))
 lookupDataConstructor name = asks (Environment.lookup name . constraintsGenContextDataConstructorEnv)
 
+{-# INLINE lookupCodataAccessor #-}
+lookupCodataAccessor :: Name -> ConstraintsGenStack c o k t (Maybe (CodataAccessor o k t))
+lookupCodataAccessor name = asks (Environment.lookup name . constraintsGenContextCodataAccessorEnv)
+
 assertEqualityAssumptions :: a -> IndexedType -> [Assumption a IndexedType] -> ConstraintsGen a ()
 assertEqualityAssumptions _ t ms =
   tellRight $ do
@@ -282,16 +286,23 @@ collectConstraints =
           t1 = TIntrinsic (IRecord (TRow (fromDictionary d1 (fromMaybe RNil e1))))
       tellRight [Equality InferenceRulePlaceholder [t, t1]]
       pure (ms1 <> ms2)
-    ECodataSelect _ (Label t name) e e1 -> do
+    ECodataSelect loc (Label t name) e e1 -> do
       ms1 <- collectConstraints e
-      -- TODO
-      case e1 of
-        Just (EApplication _ _ (EVariable _ _) (e2 :| [])) ->
-          undefined
-        -- tellRight [Equality InferenceRulePlaceholder [foldTypeOf t (e :| es), t1]]
-        _ ->
-          pure ()
-      pure ms1
+      ms2 <- concatMapM collectConstraints e1
+      r <- lookupCodataAccessor name
+      case r of
+        Nothing ->
+          tellLeft [ENoCodataAccessor loc name]
+        Just CodataAccessor{..} -> do
+          let t1 = typeOf e `TArrow` t
+          tellRight [Explicit InferenceRulePlaceholder t1 codataAccessorScheme]
+          case e1 of
+            Just (EApplication _ _ f (e2 :| [])) -> do
+              tellRight [Equality InferenceRulePlaceholder [typeOf e, typeOf e2]]
+              tellRight [Equality InferenceRulePlaceholder [typeOf f, t1]]
+            _ ->
+              pure ()
+      pure (ms1 <> ms2)
     ETuple _ t es -> do
       ms1 <- concatMapM collectConstraints es
       tellRight

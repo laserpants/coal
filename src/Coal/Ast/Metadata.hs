@@ -104,6 +104,7 @@ instance HasMetadata (ConstraintsGenError Metadata) where
   getMetadata =
     \case
       ENoDataConstructor a _ -> a
+      ENoCodataAccessor a _ -> a
       EDataConstructorArityMismatch a _ _ _ -> a
       EIllFormedTypeAnnotation err -> getMetadata err
 
