@@ -124,6 +124,7 @@ library
       Coal.Kernel.Parser.Symbol
       Coal.Kernel.Parser.Type
       Coal.Language
+      Coal.Language.CodataField
       Coal.Language.Constructor
       Coal.Language.Expression
       Coal.Language.Expression.Binding
