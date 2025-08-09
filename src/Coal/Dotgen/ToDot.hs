@@ -4,10 +4,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Dotgen.ToDot (
-  ToDot (..),
-  writeDotFiles,
-) where
+module Coal.Dotgen.ToDot (ToDot (..), writeDotFiles) where
 
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (Supply (..), supplied)
