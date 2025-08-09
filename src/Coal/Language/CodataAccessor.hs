@@ -3,16 +3,16 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Language.CodataField where
+module Coal.Language.CodataAccessor where
 
 import Coal.Language.Type.Scheme (Scheme (..))
 import Data.Data (Data, Typeable)
 import Extra (Name)
 import GHC.Generics (Generic)
 
-data CodataField o k t = CodataField
-  { codataFieldName :: Name
-  , codataFieldType :: t
-  , codataFieldCotype :: Scheme o k t
+-- E.g., Head : Stream(a) -> a
+data CodataAccessor o k t = CodataAccessor
+  { codataAccessorName :: Name
+  , codataAccessorScheme :: Scheme o k t
   }
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable, Generic)
