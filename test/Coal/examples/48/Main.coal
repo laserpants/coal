@@ -1,0 +1,29 @@
+module Main {
+
+  type List(a) 
+    = Nil 
+    | Cons(a, List(a))
+
+//  fun len(lst) =
+//    fold(lst) {
+//      | Nil => 0
+//      | Cons(_, @next) => next + 1
+//    };
+
+  cotype Stream(a) = { Head : a, Tail : Nats(a) }
+
+//  fun enum_from(n) =
+//    unfold(
+//      { Head = n
+//      , Tail = @f
+//      }
+//
+//  let nats = 
+//    { Head = 1
+//    , Tail = f(n + 1)
+//    }
+
+  fun main() = 
+    trace_int32(1);
+
+}

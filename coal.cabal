@@ -153,6 +153,7 @@ library
       Coal.Parser.Pattern
       Coal.Parser.Symbol
       Coal.Parser.Type
+      Coal.Parser.Utils
       Coal.Pretty.Type
       Coal.TypeSystem
       Coal.TypeSystem.Constraint

@@ -2,6 +2,7 @@
 
 module Coal.Parser.Pattern (parsePattern, parseUnitPattern) where
 
+import Coal.Parser.Utils (fieldList)
 import Coal.Ast.Metadata (Metadata (..), getMetadata, metadataSpan)
 import Coal.Common.Label (Label (..))
 import Coal.Common.List1 (List1, NonEmpty (..))
@@ -127,12 +128,9 @@ parseConstructorPattern =
 parseRecordPattern :: Parser (Pattern Metadata ())
 parseRecordPattern =
   withMetadata $ do
-    fields <- braces (commaSep1 field)
+    fields <- braces (fieldList parsePattern "=")
     -- TODO
     pure (\loc -> PRecord loc () (Map.fromList fields) Nothing)
- where
-  field :: Parser (Name, Pattern Metadata ())
-  field = (,) <$> name <*> (symbol_ "=" *> parsePattern)
 
 parseTuplePattern :: Parser (Pattern Metadata ())
 parseTuplePattern = do

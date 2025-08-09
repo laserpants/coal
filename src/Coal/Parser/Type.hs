@@ -3,6 +3,7 @@
 module Coal.Parser.Type (parseType, parseKind) where
 
 import Coal.Common.List1 (NonEmpty (..))
+import Coal.Parser.Utils (fieldList)
 import Coal.Language
 import Coal.Parser
 import Coal.Parser.Identifier
@@ -41,13 +42,10 @@ parseTypeConstructor = TConstructor () <$> constructor
 
 parseRecordType :: Parser (Type Parameter ())
 parseRecordType = do
-  fields <- braces (commaSep1 field)
+  fields <- braces (fieldList parseType ":")
   let dict = pure <$> Map.fromList fields
   -- TODO
   pure (TIntrinsic (IRecord (TRow (Row.fromDictionary dict RNil))))
- where
-  field :: Parser (Name, Type Parameter ())
-  field = (,) <$> name <*> (symbol_ ":" *> parseType)
 
 parseTypeApplication :: Parser (Type Parameter ())
 parseTypeApplication = do

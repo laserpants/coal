@@ -18,6 +18,7 @@ import Coal.Parser.Expression (parseExpression)
 import Coal.Parser.Identifier
 import Coal.Parser.Pattern (parsePattern, parseUnitPattern)
 import Coal.Parser.Symbol
+import Coal.Parser.Utils (fieldList)
 import Coal.Parser.Type
 import Extra (Name)
 import Text.Megaparsec
@@ -31,6 +32,7 @@ parseDefinition =
     <|> parseFunctionDefinition
     <|> parseConstantDefinition
     <|> parseTypeDefinition
+    <|> parseCodataDefinition
     <|> parseTraitDefinition
     <|> parseTraitInstance
 
@@ -66,6 +68,15 @@ parseTypeDefinition = do
   ps <- option [] (parens (commaSep1 (Parameter () <$> name)))
   cs <- symbol_ "=" *> parseConstructor n ps `sepBy1` symbol_ "|"
   pure (DType n ps cs)
+
+parseCodataDefinition :: Parser (Definition Metadata o ())
+parseCodataDefinition = do
+  lexeme_ "cotype"
+  n <- constructor
+  ps <- option [] (parens (commaSep1 (Parameter () <$> name)))
+  symbol_ "=" 
+  fields <- braces (fieldList parseType ":")
+  pure (DCodata n ps fields)
 
 parseConstructor :: Name -> [Parameter ()] -> Parser (Constructor Parameter () (Type Parameter ()))
 parseConstructor tn qs = do

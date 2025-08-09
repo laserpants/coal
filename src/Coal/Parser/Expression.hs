@@ -2,6 +2,7 @@
 
 module Coal.Parser.Expression (parseExpression) where
 
+import Coal.Parser.Utils (fieldList)
 import Coal.Ast.Metadata (Metadata (..), metadataSpan)
 import Coal.Common.Label (Label (..))
 import Coal.Common.List1 (List1, NonEmpty (..))
@@ -142,12 +143,9 @@ parseLambdaExpression =
 parseRecordExpression :: Parser (Expression Metadata ())
 parseRecordExpression = do
   withMetadata $ do
-    fields <- braces (commaSep1 field)
+    fields <- braces (fieldList parseExpression "=")
     -- TODO
     pure (\loc -> ERecord loc () (Map.fromList fields) Nothing)
- where
-  field :: Parser (Name, Expression Metadata ())
-  field = (,) <$> name <*> (symbol_ "=" *> parseExpression)
 
 parseTupleExpression :: Parser (Expression Metadata ())
 parseTupleExpression = do
