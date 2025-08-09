@@ -18,7 +18,7 @@ import Coal.Parser.Expression (parseExpression)
 import Coal.Parser.Identifier
 import Coal.Parser.Pattern (parsePattern, parseUnitPattern)
 import Coal.Parser.Symbol
-import Coal.Parser.Utils (fieldList)
+import Coal.Parser.Utils (fieldListWithKey)
 import Coal.Parser.Type
 import Extra (Name)
 import Text.Megaparsec
@@ -75,7 +75,7 @@ parseCodataDefinition = do
   n <- constructor
   ps <- option [] (parens (commaSep1 (Parameter () <$> name)))
   symbol_ "=" 
-  fields <- braces (fieldList parseType ":")
+  fields <- braces (fieldListWithKey constructor parseType ":")
   pure (DCodata n ps fields)
 
 parseConstructor :: Name -> [Parameter ()] -> Parser (Constructor Parameter () (Type Parameter ()))
