@@ -243,6 +243,14 @@ instance (Pretty t, Show t) => ToDot (Expression a t) where
         sid <- toDot e
         emitEdge nid sid
         return nid
+      ECodataSelect _ (Label t name) e me -> do
+        nid <- freshId
+        emitNode nid ("ECodataSelect " <> prettyType t <> " " <> name)
+        id1 <- toDot e
+        id2 <- toDot me
+        emitEdge nid id1
+        emitEdge nid id2
+        return nid
       ECodataFields{} ->
         error "TODO"
       EFocus name ll1 ll2 e1 e2 -> do
