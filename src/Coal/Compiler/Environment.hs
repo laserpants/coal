@@ -33,6 +33,7 @@ type DataConstructorEnvironment = Environment (Constructor TypeIndex Kind Indexe
 type TypeConstructorEnvironment = Environment Kind
 type TraitEnvironment = Environment (TypeIndex Kind, Environment IndexedScheme)
 type InstanceEnvironment = Environment (Map IndexedType (Dictionary IndexedScheme))
+type CodataAccessorEnvironment = Environment (CodataAccessor TypeIndex Kind IndexedType)
 
 data CompilerEnvironment = CompilerEnvironment
   { compilerDataConstructorEnvironment :: DataConstructorEnvironment
@@ -40,6 +41,7 @@ data CompilerEnvironment = CompilerEnvironment
   , compilerTraitEnvironment :: TraitEnvironment
   , compilerInstanceEnvironment :: InstanceEnvironment
   , compilerAliasEnvironment :: AliasEnvironment
+  , compilerCodataAccessorEnvironment :: CodataAccessorEnvironment
   }
   deriving (Show, Eq, Ord, Read)
 
@@ -51,6 +53,7 @@ emptyCompilerEnvironment =
     , compilerTraitEnvironment = mempty
     , compilerInstanceEnvironment = mempty
     , compilerAliasEnvironment = mempty
+    , compilerCodataAccessorEnvironment = mempty
     }
 
 buildEnvironment :: [Definition a k t] -> CompilerEnvironment
@@ -61,6 +64,7 @@ buildEnvironment defs =
     , compilerTraitEnvironment = traitEnvironment
     , compilerInstanceEnvironment = instanceEnvironment
     , compilerAliasEnvironment = aliasEnvironment
+    , compilerCodataAccessorEnvironment = codataAccessorEnvironment
     }
  where
   instanceEnvironment = buildInstanceEnvironment typeConstructorEnvironment traitEnvironment defs
@@ -68,6 +72,7 @@ buildEnvironment defs =
   traitEnvironment = buildTraitEnvironment typeConstructorEnvironment defs
   dataConstructorEnvironment = buildDataConstructorEnvironment typeConstructorEnvironment defs
   typeConstructorEnvironment = buildTypeConstructorEnvironment defs
+  codataAccessorEnvironment = buildCodataAccessorEnvironment defs
 
 makeEnv :: (Definition a k t -> [(Name, e)]) -> [Definition a k t] -> Environment e
 makeEnv f = Environment.fromList . concatMap f
@@ -155,6 +160,9 @@ buildInstanceEnvironment env1 env2 ds = execState (traverse_ go ds) mempty
             error ("Trait '" <> Text.unpack name <> "' not in scope.")
       _ ->
         pure ()
+
+buildCodataAccessorEnvironment :: [Definition a k t] -> CodataAccessorEnvironment
+buildCodataAccessorEnvironment defs = mempty -- TODO:
 
 indexSet :: [IndexedScheme] -> Set (TypeIndex Kind)
 indexSet = Set.unions . fmap vars where vars (Forall vs _ _) = vs

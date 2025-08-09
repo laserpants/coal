@@ -2,7 +2,6 @@
 
 module Coal.Parser.Expression (parseExpression) where
 
-import Coal.Parser.Utils (fieldList)
 import Coal.Ast.Metadata (Metadata (..), metadataSpan)
 import Coal.Common.Label (Label (..))
 import Coal.Common.List1 (List1, NonEmpty (..))
@@ -13,6 +12,7 @@ import Coal.Parser.Metadata
 import Coal.Parser.Pattern (parsePattern)
 import Coal.Parser.Symbol
 import Coal.Parser.Type (parseType)
+import Coal.Parser.Utils (fieldList)
 import Control.Monad (void)
 import Control.Monad.Combinators.Expr
 import Data.Char (ord)

@@ -18,8 +18,8 @@ import Coal.Parser.Expression (parseExpression)
 import Coal.Parser.Identifier
 import Coal.Parser.Pattern (parsePattern, parseUnitPattern)
 import Coal.Parser.Symbol
-import Coal.Parser.Utils (fieldListWithKey)
 import Coal.Parser.Type
+import Coal.Parser.Utils (fieldListWithKey)
 import Extra (Name)
 import Text.Megaparsec
 import Text.Megaparsec.Char (upperChar)
@@ -74,7 +74,7 @@ parseCodataDefinition = do
   lexeme_ "cotype"
   n <- constructor
   ps <- option [] (parens (commaSep1 (Parameter () <$> name)))
-  symbol_ "=" 
+  symbol_ "="
   fields <- braces (fieldListWithKey constructor parseType ":")
   pure (DCodata n ps fields)
 

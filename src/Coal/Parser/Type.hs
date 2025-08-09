@@ -3,11 +3,11 @@
 module Coal.Parser.Type (parseType, parseKind) where
 
 import Coal.Common.List1 (NonEmpty (..))
-import Coal.Parser.Utils (fieldList)
 import Coal.Language
 import Coal.Parser
 import Coal.Parser.Identifier
 import Coal.Parser.Symbol
+import Coal.Parser.Utils (fieldList)
 import Control.Monad.Combinators.Expr
 import Data.Functor (($>))
 import Text.Megaparsec (option, try, (<|>))

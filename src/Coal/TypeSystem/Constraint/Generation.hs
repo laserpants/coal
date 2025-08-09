@@ -288,7 +288,7 @@ collectConstraints =
       case e1 of
         Just (EApplication _ _ (EVariable _ _) (e2 :| [])) ->
           undefined
-          --tellRight [Equality InferenceRulePlaceholder [foldTypeOf t (e :| es), t1]]
+        -- tellRight [Equality InferenceRulePlaceholder [foldTypeOf t (e :| es), t1]]
         _ ->
           pure ()
       pure ms1

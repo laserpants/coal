@@ -1,5 +1,6 @@
 module Coal.Language (
   module Coal.Language.Constructor,
+  module Coal.Language.CodataAccessor,
   module Coal.Language.Type.Indexed,
   module Coal.Language.HasKind,
   module Coal.Language.HasType,
@@ -18,6 +19,7 @@ module Coal.Language (
   module Coal.Language.Expression.Operator,
 ) where
 
+import Coal.Language.CodataAccessor
 import Coal.Language.Constructor
 import Coal.Language.Expression
 import Coal.Language.Expression.Binding

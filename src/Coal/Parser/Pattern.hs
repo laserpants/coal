@@ -2,7 +2,6 @@
 
 module Coal.Parser.Pattern (parsePattern, parseUnitPattern) where
 
-import Coal.Parser.Utils (fieldList)
 import Coal.Ast.Metadata (Metadata (..), getMetadata, metadataSpan)
 import Coal.Common.Label (Label (..))
 import Coal.Common.List1 (List1, NonEmpty (..))
@@ -12,6 +11,7 @@ import Coal.Parser.Identifier
 import Coal.Parser.Metadata
 import Coal.Parser.Symbol
 import Coal.Parser.Type (parseType)
+import Coal.Parser.Utils (fieldList)
 import Control.Monad (void)
 import Control.Monad.Combinators.Expr
 import Data.Char (ord)

@@ -108,7 +108,7 @@ placeholderTrans f e = do
   withSupplyC (\n -> runDictionaryStack (DictionaryEnvironment env1 env2) n (f e))
 
 placeholderInsertionC :: (Monad m, Monoid a, Data a) => Module a Kind IndexedType -> CompilerT a m (Module a Kind IndexedType)
-placeholderInsertionC = overModuleDefinitionsM (traverse go) 
+placeholderInsertionC = overModuleDefinitionsM (traverse go)
  where
   go =
     \case

@@ -3,10 +3,10 @@
 module Coal.Parser.Utils (fieldListWithKey, fieldList) where
 
 import Coal.Parser
-import Coal.Parser.Symbol
 import Coal.Parser.Identifier
-import Extra (Name)
+import Coal.Parser.Symbol
 import Data.Text (Text)
+import Extra (Name)
 
 fieldListWithKey :: Parser k -> Parser f -> Text -> Parser [(k, f)]
 fieldListWithKey parseKey parseField sep = commaSep1 field

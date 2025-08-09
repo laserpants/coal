@@ -472,8 +472,36 @@ insertBuiltinConstructors CompilerEnvironment{..} =
     , compilerTraitEnvironment = Environment.insertMultiple builtinTraits compilerTraitEnvironment
     , compilerInstanceEnvironment = Environment.insertMultiple builtinInstances compilerInstanceEnvironment
     , compilerTypeConstructorEnvironment = Environment.insertMultiple builtinTypeConstructors compilerTypeConstructorEnvironment
+    , compilerCodataAccessorEnvironment = Environment.insertMultiple builtinCodataAccessors compilerCodataAccessorEnvironment
     , ..
     }
+
+builtinCodataAccessors :: [(Name, CodataAccessor TypeIndex Kind IndexedType)]
+builtinCodataAccessors =
+  [ -- TODO: remove
+
+    ( "Head"
+    , CodataAccessor
+        "Head"
+        ( Forall
+            (Set.fromList mempty)
+            []
+            ( TConstructor KType "Stream" `TArrow` TIntrinsic IInt32
+            )
+        )
+    )
+  ,
+    ( "Tail"
+    , CodataAccessor
+        "Tail"
+        ( Forall
+            (Set.fromList mempty)
+            []
+            ( TConstructor KType "Stream" `TArrow` TConstructor KType "Stream"
+            )
+        )
+    )
+  ]
 
 builtinTraits :: [(Name, (TypeIndex Kind, Environment IndexedScheme))]
 builtinTraits =
