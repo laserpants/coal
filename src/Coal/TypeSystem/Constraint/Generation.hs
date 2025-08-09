@@ -282,9 +282,16 @@ collectConstraints =
           t1 = TIntrinsic (IRecord (TRow (fromDictionary d1 (fromMaybe RNil e1))))
       tellRight [Equality InferenceRulePlaceholder [t, t1]]
       pure (ms1 <> ms2)
-    ECodataSelect _ (Label t name) e _ ->
+    ECodataSelect _ (Label t name) e e1 -> do
+      ms1 <- collectConstraints e
       -- TODO
-      pure []
+      case e1 of
+        Just (EApplication _ _ (EVariable _ _) (e2 :| [])) ->
+          undefined
+          --tellRight [Equality InferenceRulePlaceholder [foldTypeOf t (e :| es), t1]]
+        _ ->
+          pure ()
+      pure ms1
     ETuple _ t es -> do
       ms1 <- concatMapM collectConstraints es
       tellRight
