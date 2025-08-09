@@ -10,7 +10,6 @@ module Coal.Dotgen.ToDot (
 ) where
 
 import Coal.Common.Label (Label (..))
-import Coal.Common.List1 (fromList1)
 import Coal.Common.Supply (Supply (..), supplied)
 import Coal.Language.Expression
 import Coal.Language.Expression.Binding
