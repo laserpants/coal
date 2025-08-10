@@ -15,12 +15,6 @@ module Main {
   fun take_head(s) = 
     s.Head;
 
-//  let nats =
-//    unfold(@f as n, 0) {
-//      Head = n,
-//      Tail = f(n + 1)
-//    }
-
   fun main() = 
     trace_int32(1);
 

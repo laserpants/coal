@@ -182,9 +182,9 @@ instance (Monoid a, Data a) => TraitContext (Expression a IndexedType) where
       EFold a t es cs (Just e) -> do
         e1 <- descendM expandTraits e
         pure (EFold a t es cs (Just e1))
-      EUnfold a t ll n ps d (Just e) -> do
+      EUnfold a t n ps d (Just e) -> do
         e1 <- descendM expandTraits e
-        pure (EUnfold a t ll n ps d (Just e1))
+        pure (EUnfold a t n ps d (Just e1))
       e ->
         descendM expandTraits e
    where

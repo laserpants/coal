@@ -16,10 +16,10 @@ module Main {
     s.Head;
 
   let nats =
-    unfold(@f as n, 0) {
+    unfold @f(n, 0) {
       Head = n,
       Tail = f(n + 1)
-    }
+    };
 
   fun main() = 
     trace_int32(1);

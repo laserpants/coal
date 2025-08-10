@@ -57,7 +57,7 @@ instance HasMetadata (Expression Metadata t) where
       EMatch a _ _ _ -> a
       ECompiledMatch a _ _ _ -> a
       EFold a _ _ _ _ -> a
-      EUnfold a _ _ _ _ _ _ -> a
+      EUnfold a _ _ _ _ _ -> a
       ESelect a _ _ -> a
       ECodataSelect a _ _ _ -> a
       ECodataFields a _ _ -> a

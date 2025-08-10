@@ -141,6 +141,8 @@ spec = do
   print (x == Right "512\n")
   x <- main47
   print (x == Right "8\n")
+  x <- main49
+  print (x == Right "1\n")
 
 runTestFiles :: [String] -> IO (Either CompilerError Text)
 runTestFiles files = do
@@ -1006,14 +1008,13 @@ names =
         []
         (TIntrinsic IString `TArrow` TIntrinsic IInt32)
     )
-  -- TODO: temp temp
-  , 
+  , -- TODO: temp temp
+
     ( "$$force_Head"
     , Forall
         mempty -- (Set.fromList [TypeIndex KType 0] :: Set (TypeIndex Kind))
         []
         (TConstructor KType "Stream" `TArrow` TIntrinsic IInt32)
---        (TIntrinsic (IRecord (TRow (RExtend "$_Head" (TIntrinsic IInt32) (RVariable (TypeIndex KRow 0))))) `TArrow` TIntrinsic IInt32)
     )
   ]
 

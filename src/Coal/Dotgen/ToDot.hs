@@ -233,10 +233,23 @@ instance (Pretty t, Show t) => ToDot (Expression a t) where
         traverse_ (emitEdge nid) ids2
         emitEdge nid id
         return nid
-      EUnfold _ t ll n ps d me -> do
+      EUnfold _ t name ps d me -> do
         nid <- freshId
-        emitNode nid ("EUnfold " <> prettyType t)
-        error "TODO"
+        emitNode nid ("EUnfold " <> prettyType t <> " " <> name)
+        forM_ ps $
+          \p -> do
+            eid <- toDot p
+            emitEdge nid eid
+        forM_ (Map.toList d) $
+          \(fieldName, fieldExpr) -> do
+            fid <- freshId
+            emitNode fid ("Field " <> fieldName)
+            eid <- toDot fieldExpr
+            emitEdge fid eid -- Field node -> Expression
+            emitEdge nid fid -- Record -> Field node
+        id1 <- toDot me
+        emitEdge nid id1
+        return nid
       ESelect _ (Label t name) e -> do
         nid <- freshId
         emitNode nid ("ESelect " <> prettyType t <> " " <> name)

@@ -145,7 +145,7 @@ translateExpression =
       pure (Kernel.var (Label (translateType t) (dictVariable name trait)))
     EFold _ _ _ _ (Just e) ->
       translateExpression e
-    EUnfold _ _ _ _ _ _ (Just e) ->
+    EUnfold _ _ _ _ _ (Just e) ->
       translateExpression e
     ECodataFields _ _ fields -> do
       exprs <- traverse translateExpression fields

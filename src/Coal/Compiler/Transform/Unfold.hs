@@ -88,9 +88,9 @@ instance (Monoid a, Data a) => CompileUnfoldsContext (Expression a ()) where
    where
     go =
       \case
-        EUnfold a t ll name ps d Nothing -> do
+        EUnfold a t name ps d Nothing -> do
           e1 <- expandUnfoldExpr name ps d
-          pure (EUnfold a t ll name ps d (Just e1))
+          pure (EUnfold a t name ps d (Just e1))
         ECodataSelect a ll@(Label _ name) e Nothing -> do
           e1 <- expandCodataSelect name e
           pure (ECodataSelect a ll e (Just e1))
