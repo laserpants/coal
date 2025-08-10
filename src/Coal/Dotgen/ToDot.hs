@@ -264,8 +264,17 @@ instance (Pretty t, Show t) => ToDot (Expression a t) where
         emitEdge nid id1
         emitEdge nid id2
         return nid
-      ECodataFields{} ->
-        error "TODO"
+      ECodataFields _ t d -> do
+        nid <- freshId
+        emitNode nid ("ECodataFields " <> prettyType t)
+        forM_ (Map.toList d) $
+          \(fieldName, fieldExpr) -> do
+            fid <- freshId
+            emitNode fid ("Field " <> fieldName)
+            eid <- toDot fieldExpr
+            emitEdge fid eid -- Field node -> Expression
+            emitEdge nid fid -- Record -> Field node
+        return nid
       EFocus name ll1 ll2 e1 e2 -> do
         nid <- freshId
         emitNode nid ("EFocus " <> name)
