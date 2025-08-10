@@ -117,15 +117,8 @@ translateExpression =
               )
               :| []
           )
-    ECodataSelect _ ll@(Label t field) e me -> do
-      d1 <- translateExpression e
-      let r = extractRow d1
-      pure
-        ( Kernel.sel
-            (Kernel.Focus field (translateLabel ll) (Label (Kernel.dropField field r) "_"))
-            (Kernel.var (Label r "$row"))
-            (Kernel.var (translateLabel ll))
-        )
+    ECodataSelect _ _ _ (Just e1) -> do
+      translateExpression e1
     EFocus name0 ll1 ll2@(Label t1 _) e1 e2 -> do
       d1 <- translateExpression e1
       d2 <- withLocalNames [labelName ll1, labelName ll2] (translateExpression e2)
