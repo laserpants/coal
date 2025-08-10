@@ -2,6 +2,7 @@
 
 module Coal.Parser.Expression (parseExpression) where
 
+import Coal.Parser.Utils (fieldListWithKey)
 import Coal.Ast.Metadata (Metadata (..), metadataSpan)
 import Coal.Common.Label (Label (..))
 import Coal.Common.List1 (List1, NonEmpty (..))
@@ -36,6 +37,7 @@ parseExpression = makeExprParser go operator
         <|> parseInt
         <|> parseLiteralExpression
         <|> parseFoldExpression
+        <|> parseUnfoldExpression
         <|> parseMatchExpression
         <|> parseRecordExpression
         <|> parseIfExpression
@@ -110,6 +112,15 @@ parseFoldExpression = do
     es <- parens (nonEmpty (commaSep1 parseExpression))
     cs <- braces (nonEmpty (some parseClause))
     pure (\loc -> EFold loc () es cs Nothing)
+
+parseUnfoldExpression :: Parser (Expression Metadata ())
+parseUnfoldExpression = do
+  withMetadata $ do
+    lexeme_ "unfold"
+    n <- symbol_ "@" *> name
+    ps <- parens (nonEmpty (commaSep1 parsePattern))
+    fields <- braces (fieldListWithKey constructor parseExpression "=")
+    pure (\loc -> EUnfold loc () n ps (Map.fromList fields) Nothing)
 
 parseVariableExpression :: Parser (Expression Metadata ())
 parseVariableExpression =
