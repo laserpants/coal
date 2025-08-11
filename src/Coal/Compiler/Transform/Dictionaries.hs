@@ -236,7 +236,8 @@ instance (Monoid a, Data a) => TraitContext (Constant Expression a IndexedType) 
   expandTraits =
     \case
       Constant a (With _ t) e -> do
-        (expr, traits) <- listen (descendM expandTraits e)
+        -- (expr, traits) <- listen (descendM expandTraits e)
+        (expr, traits) <- listen (expandTraits e)
         pure $
           case nub traits of
             [] ->

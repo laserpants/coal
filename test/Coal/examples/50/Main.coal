@@ -23,6 +23,6 @@ module Main {
         go(0);
 
   fun main() = 
-    trace_int32(1);
+    trace_int32(nats.Head);
 
 }
