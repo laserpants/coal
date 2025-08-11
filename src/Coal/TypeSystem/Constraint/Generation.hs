@@ -11,8 +11,9 @@ module Coal.TypeSystem.Constraint.Generation (
   runConstraintsGenStack,
 ) where
 
+import Debug.Trace
 import Coal.Common.Label (Label (..))
-import Coal.Common.List1 (NonEmpty ((:|)), fromList1)
+import Coal.Common.List1 (NonEmpty ((:|)), (<|), fromList1)
 import Coal.Common.Supply (supplied)
 import Coal.Language
 import Coal.TypeSystem.Constraint (Constraint (..))
@@ -278,6 +279,39 @@ collectConstraints =
         _ ->
           pure ()
       pure (ms1 <> ms2 <> ms3 <> ms4)
+    EUnfold loc t name ps d e1 -> do
+      t1 <- supplied (TVariable . TypeIndex KType)
+      let qs = PVariable loc (Label t name) <| ps
+      tellRight [Equality InferenceRulePlaceholder [t, foldTypeOf t1 ps]]
+      ms1 <- withMonomorphic qs (concatMapM collectConstraints d)
+      forM_ (Map.toList d) $ 
+        \(name, elem) ->
+          case name of
+            "Head" -> do
+              tellRight [Equality InferenceRulePlaceholder [typeOf elem, TIntrinsic IInt32]]
+            "Tail" -> do
+              tellRight [Equality InferenceRulePlaceholder [typeOf elem, TConstructor KType "Stream"]]
+            _ ->
+              pure ()
+      ms2 <- concatMapM collectConstraints e1
+      names <- concatForM qs (patternConstraints (assertEqualityAssumptions loc) ms1)
+      case e1 of
+        Just (ERecursiveLet _ (PVariable _ (Label t3 e1)) (ELambda _ qs (ECodataFields _ t fields)) e3) -> do
+          forM_ (Map.toList fields) $ 
+            \(name, elem) ->
+              case name of
+                "$$Head" -> do
+                  t0 <- supplied (TVariable . TypeIndex KType)
+                  tellRight [Equality InferenceRulePlaceholder [typeOf elem, t0 `TArrow` TIntrinsic IInt32]]
+                "$$Tail" -> do
+                  t0 <- supplied (TVariable . TypeIndex KType)
+                  tellRight [Equality InferenceRulePlaceholder [typeOf elem, t0 `TArrow` TConstructor KType "Stream"]]
+                _ ->
+                  pure ()
+      pure (filter (assumptionNameIsNotOneOf (name : names)) (ms1 <> ms2))
+    ECodataFields _ t fields -> do
+      ms1 <- concatMapM collectConstraints fields
+      pure ms1
     ERecord _ t d e -> do
       ms1 <- concatMapM collectConstraints e
       ms2 <- concatMapM collectConstraints d
