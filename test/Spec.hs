@@ -143,6 +143,8 @@ spec = do
   print (x == Right "8\n")
   x <- main49
   print (x == Right "1\n")
+  x <- main50
+  print (x == Right "5\n")
 
 runTestFiles :: [String] -> IO (Either CompilerError Text)
 runTestFiles files = do
