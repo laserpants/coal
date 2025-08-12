@@ -34,9 +34,5 @@ module Main {
         go(5);
 
   fun main() = 
-    let 
-      t1 =
-        nats.Tail
-      in
-        trace_int32(drop(100, nats).Head);
+    trace_int32(drop(100, nats).Head);
 }
