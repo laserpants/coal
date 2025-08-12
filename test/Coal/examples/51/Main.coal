@@ -1,0 +1,38 @@
+module Main {
+
+  type List(a) 
+    = Nil 
+    | Cons(a, List(a))
+
+  fun len(lst) =
+    fold(lst) {
+      | Nil => 0
+      | Cons(_, @next) => next + 1
+    };
+
+  cotype Stream = { Head : int32, Tail : Stream }
+
+  fun take_head(s) = 
+    s.Head;
+
+  let nats =
+    let 
+      go =
+        unfold @f(n) { 
+          , Head = n
+          , Tail = f(n + 1) 
+        }
+      in
+        go(5);
+
+  fun main() = 
+    let 
+      t1 =
+        nats.Tail
+      in
+        let
+          t2 =
+            t1.Tail
+          in
+            trace_int32(t2.Head);
+}
