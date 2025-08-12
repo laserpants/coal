@@ -475,6 +475,7 @@ generateDot ast =
   Text.unlines $
     [ "digraph AST {"
     , "  node [shape=box];"
+    , "  edge [arrowhead=none];"
     ]
       ++ map ("  " <>) (reverse dotNodes ++ dotEdges)
       ++ ["}"]
