@@ -22,7 +22,7 @@ module Main {
           , Head = n
           , Tail = f(n + 1) 
         }
-//        unfold(@f as n) { Head = n, Tail = f(n + 1) }
+//        unfold(@f as n, 0) { Head = n, Tail = f(n + 1) }
       in
         go(0);
 

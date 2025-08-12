@@ -119,7 +119,9 @@ parseUnfoldExpression = do
     lexeme_ "unfold"
     n <- symbol_ "@" *> name
     ps <- parens (nonEmpty (commaSep1 parsePattern))
-    fields <- braces (fieldListWithKey constructor parseExpression "=")
+    fields <- braces $ do
+      optional (symbol ",")
+      fieldListWithKey constructor parseExpression "="
     pure (\loc -> EUnfold loc () n ps (Map.fromList fields) Nothing)
 
 parseVariableExpression :: Parser (Expression Metadata ())
