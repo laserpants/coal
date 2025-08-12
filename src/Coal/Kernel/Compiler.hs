@@ -47,11 +47,11 @@ setLinkage names =
 irCodeGen :: [Name] -> Pass ObjectList [IRConstruct [IRLine]]
 irCodeGen names objs = do
   c1 <- transformInterpreter (traverse interpretObject objs)
-  c2 <- gets kernelArtifacts
+  c2 <- gets pipelineArtifacts
   c3 <- transformInterpreter (traverse interpretArtifact (nub c2))
   c4 <- traverse (setLinkage names) (concat c1)
   pipelineInsertCode (support <> closureSupport <> concat c3 <> c4)
-  gets kernelCode
+  gets pipelineCode
 
 builtInCtors :: Environment Int
 builtInCtors = Environment.fromList [("$Cons", 0), ("$Nil", 1), ("$Succ", 0), ("$Zero", 1)]
@@ -91,7 +91,7 @@ compileModules modules =
         ir <- compileModule ctors Module{moduleImports = names, ..}
         pipelineInsertNames (objectSignature <$> moduleObjects)
 
-        IRInterpreterEnv{..} <- gets kernelInterpreterEnv
+        IRInterpreterEnv{..} <- gets pipelineInterpreterEnv
         pipelineInsertIRTypes (irTypeOf <$$> Environment.toList irInterpreterValueEnv)
 
         pipelineInsertConstructors (objectConstructorInfo =<< moduleObjects)
@@ -101,7 +101,7 @@ compileModules modules =
     pure (("closures", cc) : mods)
  where
   collectNames :: [Name] -> Pipeline [(Name, Type)]
-  collectNames names = gets (Environment.lookupAll names . Environment.filterNames notConstructor . kernelNames)
+  collectNames names = gets (Environment.lookupAll names . Environment.filterNames notConstructor . pipelineNames)
 
   notConstructor :: Name -> Bool
   notConstructor name =
@@ -109,17 +109,17 @@ compileModules modules =
      in not (isConstructor (last parts))
 
   collectConstructors :: [Name] -> Pipeline [(Name, Int)]
-  collectConstructors names = gets (Environment.lookupAll names . kernelConstructors)
+  collectConstructors names = gets (Environment.lookupAll names . pipelineConstructors)
 
   objectSignature :: Object Type (Expr Type) -> (Name, Type)
   objectSignature obj = (objectName obj, typeOf obj)
 
   compileModule :: [(Name, Int)] -> Module Type (Name, Type) (Expr Type) -> Pipeline [IRConstruct [IRLine]]
   compileModule ctors Module{..} = do
-    names <- gets kernelIRTypes
+    names <- gets pipelineIRTypes
     let external = toExternal names <$> moduleImports
     compile (Environment.fromList ctors) (external <> moduleObjects)
-    gets kernelCode
+    gets pipelineCode
 
   toExternal :: Environment IRType -> (Name, Type) -> Object Type (Expr Type)
   toExternal env (name, t) =

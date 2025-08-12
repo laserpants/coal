@@ -18,7 +18,11 @@ module Main {
   let nats =
     let 
       go =
-        unfold @f(n) { Head = n, Tail = f(n + 1) }
+        unfold @f(n) { 
+          , Head = n
+          , Tail = f(n + 1) 
+        }
+//        unfold(@f as n) { Head = n, Tail = f(n + 1) }
       in
         go(0);
 

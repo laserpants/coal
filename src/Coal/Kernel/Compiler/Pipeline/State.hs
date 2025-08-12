@@ -22,13 +22,13 @@ import Coal.Kernel.Language.Type (Type)
 import Extra (Over)
 
 data PipelineState = PipelineState
-  { kernelSupply :: Int
-  , kernelInterpreterEnv :: IRInterpreterEnv
-  , kernelArtifacts :: [IRInterpreterArtifact]
-  , kernelCode :: [IRConstruct [IRLine]]
-  , kernelNames :: Environment Type
-  , kernelIRTypes :: Environment IRType
-  , kernelConstructors :: Environment Int
+  { pipelineSupply :: Int
+  , pipelineInterpreterEnv :: IRInterpreterEnv
+  , pipelineArtifacts :: [IRInterpreterArtifact]
+  , pipelineCode :: [IRConstruct [IRLine]]
+  , pipelineNames :: Environment Type
+  , pipelineIRTypes :: Environment IRType
+  , pipelineConstructors :: Environment Int
   }
   deriving (Show, Eq, Ord)
 
@@ -39,20 +39,20 @@ initialPipelineState = PipelineState 0 (IRInterpreterEnv mempty mempty) [] [] me
 resetPipelineState :: PipelineState -> PipelineState
 resetPipelineState PipelineState{..} =
   PipelineState
-    { kernelSupply = 0
-    , kernelInterpreterEnv = IRInterpreterEnv mempty mempty
-    , kernelArtifacts = []
-    , kernelCode = []
+    { pipelineSupply = 0
+    , pipelineInterpreterEnv = IRInterpreterEnv mempty mempty
+    , pipelineArtifacts = []
+    , pipelineCode = []
     , ..
     }
 
 {-# INLINE overPipelineStateSupply #-}
 overPipelineStateSupply :: Over PipelineState Int
-overPipelineStateSupply f PipelineState{..} = PipelineState{kernelSupply = f kernelSupply, ..}
+overPipelineStateSupply f PipelineState{..} = PipelineState{pipelineSupply = f pipelineSupply, ..}
 
 {-# INLINE overPipelineStateInterpreterEnv #-}
 overPipelineStateInterpreterEnv :: Over PipelineState IRInterpreterEnv
-overPipelineStateInterpreterEnv f PipelineState{..} = PipelineState{kernelInterpreterEnv = f kernelInterpreterEnv, ..}
+overPipelineStateInterpreterEnv f PipelineState{..} = PipelineState{pipelineInterpreterEnv = f pipelineInterpreterEnv, ..}
 
 {-# INLINE overPipelineStateInterpreterValueEnv #-}
 overPipelineStateInterpreterValueEnv :: Over PipelineState (Environment IRValue)
@@ -64,20 +64,20 @@ overPipelineStateInterpreterConstructorEnv = overPipelineStateInterpreterEnv . i
 
 {-# INLINE overPipelineStateArtifacts #-}
 overPipelineStateArtifacts :: Over PipelineState [IRInterpreterArtifact]
-overPipelineStateArtifacts f PipelineState{..} = PipelineState{kernelArtifacts = f kernelArtifacts, ..}
+overPipelineStateArtifacts f PipelineState{..} = PipelineState{pipelineArtifacts = f pipelineArtifacts, ..}
 
 {-# INLINE overPipelineStateCode #-}
 overPipelineStateCode :: Over PipelineState [IRConstruct [IRLine]]
-overPipelineStateCode f PipelineState{..} = PipelineState{kernelCode = f kernelCode, ..}
+overPipelineStateCode f PipelineState{..} = PipelineState{pipelineCode = f pipelineCode, ..}
 
 {-# INLINE overPipelineStateNames #-}
 overPipelineStateNames :: Over PipelineState (Environment Type)
-overPipelineStateNames f PipelineState{..} = PipelineState{kernelNames = f kernelNames, ..}
+overPipelineStateNames f PipelineState{..} = PipelineState{pipelineNames = f pipelineNames, ..}
 
 {-# INLINE overPipelineStateIRTypes #-}
 overPipelineStateIRTypes :: Over PipelineState (Environment IRType)
-overPipelineStateIRTypes f PipelineState{..} = PipelineState{kernelIRTypes = f kernelIRTypes, ..}
+overPipelineStateIRTypes f PipelineState{..} = PipelineState{pipelineIRTypes = f pipelineIRTypes, ..}
 
 {-# INLINE overPipelineStateConstructors #-}
 overPipelineStateConstructors :: Over PipelineState (Environment Int)
-overPipelineStateConstructors f PipelineState{..} = PipelineState{kernelConstructors = f kernelConstructors, ..}
+overPipelineStateConstructors f PipelineState{..} = PipelineState{pipelineConstructors = f pipelineConstructors, ..}

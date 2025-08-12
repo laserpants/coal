@@ -32,13 +32,13 @@ import Extra.Control.Applicative (pure1, pure3)
 
 transformSuffixMonad :: State Int a -> Pipeline a
 transformSuffixMonad a = do
-  (v, n) <- gets (runState a . kernelSupply)
+  (v, n) <- gets (runState a . pipelineSupply)
   modify (overPipelineStateSupply (const n))
   pure v
 
 transformInterpreter :: IRInterpreter a -> Pipeline a
 transformInterpreter p = do
-  env <- gets kernelInterpreterEnv
+  env <- gets pipelineInterpreterEnv
   let (a, s, _) = runInterpreter env p
   pipelineInsertArtifacts (irInterpreterStateArtifacts s)
   pure a

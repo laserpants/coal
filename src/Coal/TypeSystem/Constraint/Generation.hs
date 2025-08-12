@@ -310,8 +310,7 @@ collectConstraints =
                   pure ()
       pure (filter (assumptionNameIsNotOneOf (name : names)) (ms1 <> ms2))
     ECodataFields _ t fields -> do
-      ms1 <- concatMapM collectConstraints fields
-      pure ms1
+      concatMapM collectConstraints fields
     ERecord _ t d e -> do
       ms1 <- concatMapM collectConstraints e
       ms2 <- concatMapM collectConstraints d
