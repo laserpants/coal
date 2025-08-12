@@ -29,6 +29,7 @@ import Extra
 import qualified Coal.Common.Environment as Environment
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
+import qualified Data.Text as Text
 
 type ConstraintsGen a = ConstraintsGenStack a TypeIndex Kind IndexedType
 
@@ -280,35 +281,28 @@ collectConstraints =
           pure ()
       pure (ms1 <> ms2 <> ms3 <> ms4)
     EUnfold loc t name ps d e1 -> do
+      t0 <- supplied (TVariable . TypeIndex KType)
       t1 <- supplied (TVariable . TypeIndex KType)
       let qs = PVariable loc (Label t name) <| ps
       tellRight [Equality InferenceRulePlaceholder [t, foldTypeOf t1 ps]]
       ms1 <- withMonomorphic qs (concatMapM collectConstraints d)
-      -- TODO
-      forM_ (Map.toList d) $
-        \(name, elem) ->
-          case name of
-            "Head" -> do
-              tellRight [Equality InferenceRulePlaceholder [typeOf elem, TIntrinsic IInt32]]
-            "Tail" -> do
-              tellRight [Equality InferenceRulePlaceholder [typeOf elem, TConstructor KType "Stream"]]
-            _ ->
-              pure ()
+
+      case e1 of
+        Just (ERecursiveLet _ _ (ELambda _ _ (ECodataFields _ _ fields)) _) -> do
+          forM_ (Map.toList d) $
+            \(name, elem) -> do
+              q <- lookupCodataAccessor name
+              case (q, Map.lookup ("$_" <> name) fields) of
+                (Just CodataAccessor{..}, Just e4) -> do
+                  t3 <- supplied (TVariable . TypeIndex KType)
+                  tellRight [Explicit InferenceRulePlaceholder (t0 `TArrow` typeOf elem) codataAccessorScheme]
+                  tellRight [Equality InferenceRulePlaceholder [typeOf e4, t3 `TArrow` typeOf elem]]
+                _ ->
+                  tellLeft [ENoCodataAccessor loc name]
+
       ms2 <- concatMapM collectConstraints e1
       names <- concatForM qs (patternConstraints (assertEqualityAssumptions loc) ms1)
-      case e1 of
-        Just (ERecursiveLet _ (PVariable _ (Label t3 e1)) (ELambda _ qs (ECodataFields _ t fields)) e3) -> do
-          forM_ (Map.toList fields) $
-            \(name, elem) ->
-              case name of
-                "$_Head" -> do
-                  t0 <- supplied (TVariable . TypeIndex KType)
-                  tellRight [Equality InferenceRulePlaceholder [typeOf elem, t0 `TArrow` TIntrinsic IInt32]]
-                "$_Tail" -> do
-                  t0 <- supplied (TVariable . TypeIndex KType)
-                  tellRight [Equality InferenceRulePlaceholder [typeOf elem, t0 `TArrow` TConstructor KType "Stream"]]
-                _ ->
-                  pure ()
+
       pure (filter (assumptionNameIsNotOneOf (name : names)) (ms1 <> ms2))
     ECodataFields _ t fields -> do
       concatMapM collectConstraints fields

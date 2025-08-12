@@ -12,20 +12,6 @@ module Main {
 
   cotype Stream(a) = { Head : a, Tail : Stream(a) }
 
-//  fun enum_from(n : int32) =
-//    unfold(@f, n) fn(x) => { Head = x, Tail = f(x + 1) };
-//
-//  fun enum_from(n) =
-//    unfold(
-//      { Head = n
-//      , Tail = @f
-//      }
-//
-//  let nats = 
-//    { Head = 1
-//    , Tail = f(n + 1)
-//    }
-
   fun main() = 
     trace_int32(1);
 
