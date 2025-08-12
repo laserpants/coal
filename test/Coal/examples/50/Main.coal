@@ -22,9 +22,8 @@ module Main {
           , Head = n
           , Tail = f(n + 1) 
         }
-//        unfold(@f as n, 0) { Head = n, Tail = f(n + 1) }
       in
-        go(0);
+        go(5);
 
   fun main() = 
     trace_int32(nats.Head);

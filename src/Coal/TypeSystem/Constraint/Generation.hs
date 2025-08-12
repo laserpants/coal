@@ -11,9 +11,8 @@ module Coal.TypeSystem.Constraint.Generation (
   runConstraintsGenStack,
 ) where
 
-import Debug.Trace
 import Coal.Common.Label (Label (..))
-import Coal.Common.List1 (NonEmpty ((:|)), (<|), fromList1)
+import Coal.Common.List1 (NonEmpty ((:|)), fromList1, (<|))
 import Coal.Common.Supply (supplied)
 import Coal.Language
 import Coal.TypeSystem.Constraint (Constraint (..))
@@ -24,6 +23,7 @@ import Control.Monad.Reader (asks)
 import Data.Data (Data)
 import Data.Maybe (maybeToList)
 import Data.Tuple.Extra (third3)
+import Debug.Trace
 import Extra
 
 import qualified Coal.Common.Environment as Environment
@@ -284,7 +284,8 @@ collectConstraints =
       let qs = PVariable loc (Label t name) <| ps
       tellRight [Equality InferenceRulePlaceholder [t, foldTypeOf t1 ps]]
       ms1 <- withMonomorphic qs (concatMapM collectConstraints d)
-      forM_ (Map.toList d) $ 
+      -- TODO
+      forM_ (Map.toList d) $
         \(name, elem) ->
           case name of
             "Head" -> do
@@ -297,13 +298,13 @@ collectConstraints =
       names <- concatForM qs (patternConstraints (assertEqualityAssumptions loc) ms1)
       case e1 of
         Just (ERecursiveLet _ (PVariable _ (Label t3 e1)) (ELambda _ qs (ECodataFields _ t fields)) e3) -> do
-          forM_ (Map.toList fields) $ 
+          forM_ (Map.toList fields) $
             \(name, elem) ->
               case name of
-                "$$Head" -> do
+                "$_Head" -> do
                   t0 <- supplied (TVariable . TypeIndex KType)
                   tellRight [Equality InferenceRulePlaceholder [typeOf elem, t0 `TArrow` TIntrinsic IInt32]]
-                "$$Tail" -> do
+                "$_Tail" -> do
                   t0 <- supplied (TVariable . TypeIndex KType)
                   tellRight [Equality InferenceRulePlaceholder [typeOf elem, t0 `TArrow` TConstructor KType "Stream"]]
                 _ ->
@@ -321,20 +322,25 @@ collectConstraints =
       pure (ms1 <> ms2)
     ECodataSelect loc (Label t name) e e1 -> do
       ms1 <- collectConstraints e
-      ms2 <- concatMapM collectConstraints e1
       r <- lookupCodataAccessor name
-      case r of
-        Nothing ->
-          tellLeft [ENoCodataAccessor loc name]
-        Just CodataAccessor{..} -> do
-          let t1 = typeOf e `TArrow` t
-          tellRight [Explicit InferenceRulePlaceholder t1 codataAccessorScheme]
-          case e1 of
-            Just (EApplication _ _ f (e2 :| [])) -> do
-              tellRight [Equality InferenceRulePlaceholder [typeOf e, typeOf e2]]
-              tellRight [Equality InferenceRulePlaceholder [typeOf f, t1]]
-            _ ->
-              pure ()
+      ms2 <-
+        case r of
+          Nothing -> do
+            tellLeft [ENoCodataAccessor loc name]
+            pure []
+          Just CodataAccessor{..} -> do
+            let t1 = typeOf e `TArrow` t
+            tellRight [Explicit InferenceRulePlaceholder t1 codataAccessorScheme]
+            case e1 of
+              Just (ERecursiveLet loc (PVariable _ (Label t2 n)) e2 e3) -> do
+                ms2 <- collectConstraints e2
+                ms3 <- collectConstraints e3
+                assertEqualityAssumptions loc t2 (filter (assumptionNameIs n) ms3)
+                t0 <- supplied (TVariable . TypeIndex KType)
+                tellRight [Explicit InferenceRulePlaceholder (t0 `TArrow` typeOf e3) codataAccessorScheme]
+                pure (ms2 <> filter (not . assumptionNameIs n) ms3)
+              _ ->
+                pure []
       pure (ms1 <> ms2)
     ETuple _ t es -> do
       ms1 <- concatMapM collectConstraints es

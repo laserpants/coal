@@ -83,8 +83,10 @@ translateExpression =
         <$> translateExpression e1
         <*> translateExpression e2
         <*> translateExpression e3
-    ERecord _ t d me ->
-      translateRecord t d me
+    ERecord _ t d me -> do
+      exprs <- traverse translateExpression d
+      expr0 <- traverse translateExpression me
+      pure $ makeRecord (translateType t) (foldr (uncurry Kernel.ext) (fromMaybe Kernel.nil expr0) (Map.toList exprs))
     EListCons _ _ e1 e2 ->
       Kernel.cons
         <$> translateExpression e1
@@ -149,7 +151,8 @@ translateExpression =
       translateExpression e
     ECodataFields _ _ fields -> do
       exprs <- traverse translateExpression fields
-      pure (foldr (uncurry Kernel.ext) Kernel.nil (Map.toList exprs))
+      let r = foldr (uncurry Kernel.ext) Kernel.nil (Map.toList exprs)
+      pure $ makeRecord (Kernel.TCon "record" [Kernel.typeOf r]) r
     _ ->
       error "TODO"
 
@@ -161,18 +164,14 @@ extractRow e =
     _ ->
       error "Implementation error"
 
-translateRecord :: (MonadReader KernelEnvironment m, Data a) => IndexedType -> Dictionary (Expression a IndexedType) -> Maybe (Expression a IndexedType) -> m KernelExpr
-translateRecord t d me = do
-  exprs <- traverse translateExpression d
-  expr0 <- traverse translateExpression me
-  let
-    e1 = foldr (uncurry Kernel.ext) (fromMaybe Kernel.nil expr0) (Map.toList exprs)
-    t1 = Kernel.typeOf e1
-  pure $
-    Kernel.app
-      (translateType t)
-      (Kernel.var (Label (Kernel.arrow t1 (Kernel.TCon "record" [t1])) "$Record"))
-      (e1 :| [])
+makeRecord :: Kernel.Type -> KernelExpr -> KernelExpr
+makeRecord t e1 =
+  Kernel.app
+    t
+    (Kernel.var (Label (Kernel.arrow t1 (Kernel.TCon "record" [t1])) "$Record"))
+    (e1 :| [])
+ where
+  t1 = Kernel.typeOf e1
 
 translateBinding :: (MonadReader KernelEnvironment m, Data a) => Binding Expression a IndexedType -> m (Kernel.Binding Kernel.Type KernelExpr)
 translateBinding =

@@ -6,6 +6,7 @@ module Coal.Compiler.Transform.Expression (
   lambdaE,
   lambda1E,
   lambdaAnyE,
+  selectE,
 ) where
 
 import Coal.Common.Label (Label (..))
@@ -40,6 +41,10 @@ lambda1E var = ELambda mempty (PVariable mempty (label var) :| [])
 {-# INLINE lambdaAnyE #-}
 lambdaAnyE :: (Monoid a) => Expression a () -> Expression a ()
 lambdaAnyE = ELambda mempty (PAny mempty () :| [])
+
+{-# INLINE selectE #-}
+selectE :: (Monoid a) => Name -> Expression a () -> Expression a ()
+selectE = ESelect mempty . label
 
 {-# INLINE label #-}
 label :: Name -> Label ()

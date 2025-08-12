@@ -19,7 +19,7 @@ import Coal.Common.Supply (suppliedName)
 import Coal.Compiler.Transform.Expression
 import Coal.Compiler.Transform.Flattening (flattenApplication)
 import Coal.Compiler.Transform.Tree (replace)
-import Coal.Language (Expression (..), Pattern (..))
+import Coal.Language (Expression (..), Pattern (..), Primitive (..))
 import Coal.Language.Module (Constant (..), Definition (..), Function (..), Module (..))
 import Control.Monad.RWS (RWS, runRWS)
 import Control.Monad.Reader (MonadReader)
@@ -62,14 +62,21 @@ expandUnfoldExpr var ps d = do
             ( ECodataFields
                 mempty
                 ()
-                (Map.mapKeys ("$$" <>) (Map.map (lambdaAnyE . renameRecursiveCall var name) d))
+                (Map.mapKeys ("$_" <>) (Map.map (lambdaAnyE . renameRecursiveCall var name) d))
             )
         )
         (varE name)
 
 expandCodataSelect :: (Monoid a, MonadState Int m) => Name -> Expression a () -> m (Expression a ())
 expandCodataSelect field e =
-  pure $ applicationE (varE ("$$force_" <> field)) (e :| [])
+  pure $
+    letE
+      "$_fields"
+      e
+      ( applicationE
+          (selectE ("$_" <> field) (varE "$_fields"))
+          (ELiteral mempty LUnit :| [])
+      )
 
 class CompileUnfoldsContext a where
   compileUnfolds :: a -> UnfoldExpansion a
