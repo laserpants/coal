@@ -326,7 +326,7 @@ collectConstraints =
             let t1 = typeOf e `TArrow` t
             tellRight [Explicit InferenceRulePlaceholder t1 codataAccessorScheme]
             case e1 of
-              Just (ERecursiveLet loc (PVariable _ (Label t2 n)) e2 e3) -> do
+              Just (ERecursiveLet _ (PVariable _ (Label t2 n)) e2 e3) -> do
                 ms2 <- collectConstraints e2
                 ms3 <- collectConstraints e3
                 assertEqualityAssumptions loc t2 (filter (assumptionNameIs n) ms3)
