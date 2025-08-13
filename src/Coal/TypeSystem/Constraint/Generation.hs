@@ -13,7 +13,7 @@ module Coal.TypeSystem.Constraint.Generation (
 ) where
 
 import Coal.Common.Label (Label (..))
-import Coal.Common.List1 (NonEmpty ((:|)), fromList1, (<|))
+import Coal.Common.List1 (List1, NonEmpty (..), fromList1, (<|))
 import Coal.Common.Supply (supplied)
 import Coal.Language
 import Coal.TypeSystem.Constraint (Constraint (..))
@@ -159,7 +159,7 @@ clauseAssumptions (EClause loc p cs) = do
   names <- patternConstraints (assertEqualityAssumptions loc) ms p
   pure (typeOf p, ts1, filter (assumptionNameIsNotOneOf names) ms)
 
-emitEAnnotationConstraints :: (Show a, Data a) => a -> Type Parameter () -> Expression a IndexedType -> ConstraintsGen a ()
+emitEAnnotationConstraints :: (Data a) => a -> Type Parameter () -> Expression a IndexedType -> ConstraintsGen a ()
 emitEAnnotationConstraints loc t e = do
   r <- instantiateAnnotation loc t
   case r of
@@ -178,6 +178,12 @@ emitEConstructorConstraints loc (Label t name) = do
       tellRight [Explicit (RuleDataConstructor loc name t constructorScheme) t constructorScheme]
   pure []
 
+emitELambdaConstraints :: (Show a, Data a) => a -> List1 (Pattern a IndexedType) -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
+emitELambdaConstraints loc ps e = do
+  ms <- withMonomorphic ps (collectConstraints e)
+  names <- concatForM ps (patternConstraints (assertEqualityAssumptions loc) ms)
+  pure (filter (assumptionNameIsNotOneOf names) ms)
+
 -- emit
 collectConstraints :: (Show a, Data a) => Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
 collectConstraints =
@@ -189,10 +195,8 @@ collectConstraints =
       emitEConstructorConstraints loc ll
     EVariable loc (Label t name) ->
       pure [Assumption loc name t]
-    ELambda loc ps e -> do
-      ms <- withMonomorphic ps (collectConstraints e)
-      names <- concatForM ps (patternConstraints (assertEqualityAssumptions loc) ms)
-      pure (filter (assumptionNameIsNotOneOf names) ms)
+    ELambda loc ps e ->
+      emitELambdaConstraints loc ps e
     ERecursiveLet loc p e1 e2 -> do
       ms1 <- collectConstraints e2
       let t1 = typeOf p
