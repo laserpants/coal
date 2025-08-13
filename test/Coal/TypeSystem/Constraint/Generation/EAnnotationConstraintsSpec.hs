@@ -9,6 +9,12 @@ import Coal.TypeSystem.Constraint.Generation
 import Coal.TypeSystem.Constraint.Generation.InferenceRule
 import Data.Either (lefts, rights)
 
+collectEAnnotationConstraintsSpecAll = do
+  print collectEAnnotationConstraintsSpec1
+  print collectEAnnotationConstraintsSpec2
+  print collectEAnnotationConstraintsSpec3
+  print collectEAnnotationConstraintsSpec4
+
 fixture1 :: Expression () IndexedType
 fixture1 =
   EAnnotation () (TIntrinsic IInt32) (ELiteral () (LInt32 1))
@@ -66,8 +72,8 @@ fixture3 :: Expression () IndexedType
 fixture3 =
   EAnnotation () (TVariable (Parameter () "a")) (ELiteral () (LInt32 1))
 
--- collectEAnnotationConstraintsSpec4 :: Bool
-collectEAnnotationConstraintsSpec4 = outs -- constraint2 `elem` rights outs
+collectEAnnotationConstraintsSpec4 :: Bool
+collectEAnnotationConstraintsSpec4 = null (lefts outs)
  where
   (_, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (collectConstraints expr)
   expr = fixture3
