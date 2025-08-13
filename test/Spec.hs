@@ -149,6 +149,8 @@ spec = do
   print (x == Right "7\n")
   x <- main52
   print (x == Right "105\n")
+  x <- main53
+  print (x == Right "1\n")
 
 runTestFiles :: [String] -> IO (Either CompilerError Text)
 runTestFiles files = do
@@ -473,6 +475,12 @@ main52 :: IO (Either CompilerError Text)
 main52 = do
   runTestFiles
     [ "./test/Coal/examples/52/Main.coal"
+    ]
+
+main53 :: IO (Either CompilerError Text)
+main53 = do
+  runTestFiles
+    [ "./test/Coal/examples/53/Main.coal"
     ]
 
 compileFiles :: [String] -> IO (Either CompilerError ())

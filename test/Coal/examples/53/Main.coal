@@ -1,0 +1,17 @@
+module Main {
+
+  cotype Stream(a) = { Head : a, Tail : Stream(a) }
+
+  let nats =
+    let 
+      go =
+        unfold @f(n) { 
+          , Head = n
+          , Tail = f(n + 1) 
+        }
+      in
+        go(1);
+
+  fun main() = 
+    trace_int32(nats.Head);
+}
