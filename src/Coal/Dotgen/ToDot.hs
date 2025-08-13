@@ -497,6 +497,18 @@ instance (Show t, Pretty t) => ToDot t (Definition a k t) where
         emitNode (nid, "TODO", Nothing, Parallelogram)
         return nid
 
+instance (Show t, Pretty t) => ToDot t (Module a k t) where
+  toDot =
+    \case
+      Module (Path path) _ ds -> do
+        nid <- freshId
+        emitNode (nid, Text.intercalate "." path, Nothing, Ellipse)
+        forM_ ds $
+          \d -> do
+            did <- toDot d
+            emitEdge nid did
+        return nid
+
 generateDot :: (Pretty t, ToDot t a) => a -> Text
 generateDot ast =
   Text.unlines $
@@ -548,16 +560,17 @@ writeDotFile :: (Pretty t, ToDot t a) => Text -> a -> IO ()
 writeDotFile fname a = Text.writeFile ("./.debug/" <> Text.unpack fname <> ".dot") (generateDot a)
 
 writeDotFiles :: (Pretty t, Show t) => Text -> Module a k t -> IO ()
-writeDotFiles ns (Module (Path path) _ defs) =
+writeDotFiles ns m@(Module (Path path) _ defs) = do
+  writeDotFile prefix m
   forM_ defs $
     \case
       def@DFunction{} ->
-        writeDotFile (prefix <> definitionName def) def
+        writeDotFile (prefix <> "_" <> definitionName def) def
       def@DConstant{} ->
-        writeDotFile (prefix <> definitionName def) def
+        writeDotFile (prefix <> "_" <> definitionName def) def
       def@DAnnotation{} ->
-        writeDotFile (prefix <> definitionName def) def
+        writeDotFile (prefix <> "_" <> definitionName def) def
       _ ->
         pure ()
  where
-  prefix = ns <> "__" <> Text.intercalate "_" path <> "_"
+  prefix = ns <> "__" <> Text.intercalate "_" path
