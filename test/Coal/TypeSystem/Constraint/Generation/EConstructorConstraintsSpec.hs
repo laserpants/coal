@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Coal.TypeSystem.Constraint.GenerationSpec where
+module Coal.TypeSystem.Constraint.Generation.EConstructorConstraintsSpec where
 
 import Coal.Common.Label (Label (..))
 import Coal.Language
@@ -12,19 +12,20 @@ import Data.Either (lefts, rights)
 
 import qualified Coal.Common.Environment as Environment
 
-collectConstraintsSpecAll = do
-  print collectConstraintsSpec1
-  print collectConstraintsSpec2
-  print collectConstraintsSpec3
-  print collectConstraintsSpec4
-  print collectConstraintsSpec5
-  print collectConstraintsSpec6
+collectEConstructorConstraintsSpecAll = do
+  print collectEConstructorConstraintsSpec1
+  print collectEConstructorConstraintsSpec2
+  print collectEConstructorConstraintsSpec3
+  print collectEConstructorConstraintsSpec4
+  print collectEConstructorConstraintsSpec5
+  print collectEConstructorConstraintsSpec6
 
 fixture1 :: Expression () IndexedType
 fixture1 =
   EConstructor () (Label (TConstructor KType "Color") "Blue")
 
-collectConstraintsSpec1 = ENoDataConstructor () "Blue" `elem` lefts outs
+collectEConstructorConstraintsSpec1 :: Bool
+collectEConstructorConstraintsSpec1 = ENoDataConstructor () "Blue" `elem` lefts outs
  where
   (_, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (collectConstraints expr)
   expr = fixture1
@@ -36,7 +37,8 @@ collectConstraintsSpec1 = ENoDataConstructor () "Blue" `elem` lefts outs
       , constraintsGenContextTypeConstructorEnv = mempty
       }
 
-collectConstraintsSpec2 = null (lefts outs)
+collectEConstructorConstraintsSpec2 :: Bool
+collectEConstructorConstraintsSpec2 = null (lefts outs)
  where
   (_, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (collectConstraints expr)
   expr = fixture1
@@ -58,7 +60,8 @@ fixture2 :: Expression () IndexedType
 fixture2 =
   EConstructor () (Label (TVariable (TypeIndex KType 0)) "Blue")
 
-collectConstraintsSpec3 = ENoDataConstructor () "Blue" `elem` lefts outs
+collectEConstructorConstraintsSpec3 :: Bool
+collectEConstructorConstraintsSpec3 = ENoDataConstructor () "Blue" `elem` lefts outs
  where
   expr = fixture2
   (_, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (collectConstraints expr)
@@ -70,7 +73,8 @@ collectConstraintsSpec3 = ENoDataConstructor () "Blue" `elem` lefts outs
       , constraintsGenContextTypeConstructorEnv = mempty
       }
 
-collectConstraintsSpec4 = null (lefts outs)
+collectEConstructorConstraintsSpec4 :: Bool
+collectEConstructorConstraintsSpec4 = null (lefts outs)
  where
   (_, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (collectConstraints expr)
   expr = fixture2
@@ -88,13 +92,15 @@ collectConstraintsSpec4 = null (lefts outs)
       , constraintsGenContextTypeConstructorEnv = mempty
       }
 
+constraint1 :: Constraint (InferenceRule Kind ()) TypeIndex Kind IndexedType
 constraint1 =
   Explicit
     (RuleDataConstructor () "Blue" (TVariable (TypeIndex KType 0)) (Forall mempty [] (TConstructor KType "Color")))
     (TVariable (TypeIndex KType 0))
     (Forall mempty [] (TConstructor KType "Color"))
 
-collectConstraintsSpec5 = constraint1 `elem` rights outs
+collectEConstructorConstraintsSpec5 :: Bool
+collectEConstructorConstraintsSpec5 = constraint1 `elem` rights outs
  where
   (_, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (collectConstraints expr)
   expr = fixture2
@@ -112,4 +118,5 @@ collectConstraintsSpec5 = constraint1 `elem` rights outs
       , constraintsGenContextTypeConstructorEnv = mempty
       }
 
-collectConstraintsSpec6 = 1 == freshIdIn fixture2
+collectEConstructorConstraintsSpec6 :: Bool
+collectEConstructorConstraintsSpec6 = 1 == freshIdIn fixture2

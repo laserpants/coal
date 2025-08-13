@@ -237,7 +237,7 @@ test-suite coal-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
-      Coal.TypeSystem.Constraint.GenerationSpec
+      Coal.TypeSystem.Constraint.Generation.EConstructorConstraintsSpec
       Paths_coal
   hs-source-dirs:
       test

@@ -155,6 +155,16 @@ clauseAssumptions (EClause loc p cs) = do
   names <- patternConstraints (assertEqualityAssumptions loc) ms p
   pure (typeOf p, ts1, filter (assumptionNameIsNotOneOf names) ms)
 
+collectEAnnotationConstraints :: (Show a, Data a) => a -> Type Parameter () -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
+collectEAnnotationConstraints loc t e = do
+  r <- instantiateAnnotation loc t
+  case r of
+    Left err ->
+      tellLeft [EIllFormedTypeAnnotation err]
+    Right t1 ->
+      tellRight [Equality (RuleAnnotation loc (typeOf e) t1) [typeOf e, t1]]
+  collectConstraints e
+
 collectEConstructorConstraints :: a -> Label IndexedType -> ConstraintsGen a [Assumption a IndexedType]
 collectEConstructorConstraints loc (Label t name) = do
   r <- lookupDataConstructor name
@@ -169,13 +179,7 @@ collectConstraints :: (Show a, Data a) => Expression a IndexedType -> Constraint
 collectConstraints =
   \case
     EAnnotation loc t e -> do
-      r <- instantiateAnnotation loc t
-      case r of
-        Left err ->
-          tellLeft [EIllFormedTypeAnnotation err]
-        Right t1 ->
-          tellRight [Equality (RuleAnnotation loc (typeOf e) t1) [typeOf e, t1]]
-      collectConstraints e
+      collectEAnnotationConstraints loc t e
     EConstructor loc ll ->
       collectEConstructorConstraints loc ll
     EVariable loc (Label t name) ->
