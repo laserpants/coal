@@ -1,0 +1,31 @@
+module Main {
+
+  cotype Stream = { Head : int32, Tail : Stream }
+
+  fun repeat_times(n : int32, f : a -> a) =
+    fold(pack_nat(n)) {
+      | Zero =>
+          fn(t) => t
+      | Succ(@next) =>
+          fn(t) => next(f(t))
+    };
+
+  let nats =
+    let 
+      enum_from =
+        unfold @f(n) { 
+          , Head = n
+          , Tail = f(n + 1) 
+        }
+      in
+        enum_from(0);
+
+  fun drop_one(s) = s.Tail;
+
+  fun main() = 
+    let
+      go =
+        repeat_times(1000, drop_one)
+      in
+        trace_int32(go(nats).Head);
+}
