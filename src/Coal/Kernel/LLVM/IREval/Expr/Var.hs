@@ -10,10 +10,11 @@ import Coal.Kernel.LLVM.IREval.Malloc (irMalloc)
 import Coal.Kernel.LLVM.IRInstruction (IRConstructor (..), IRInstr)
 import Coal.Kernel.LLVM.IRInstruction.TH
 import Coal.Kernel.LLVM.IRType (IRType (..))
-import Coal.Kernel.LLVM.IRType.Syntax (i32, i8Ptr, struct)
+import Coal.Kernel.LLVM.IRType.Syntax (i32, i8Ptr, ptr, struct)
 import Coal.Kernel.LLVM.IRValue (IRValue (..))
 import Coal.Kernel.Language.Type.Arrow (arity)
 import Data.Text (Text)
+import Debug.Trace
 import Extra (Name, isConstructor)
 
 import qualified Coal.Kernel.Language as Core
@@ -39,7 +40,8 @@ irEvalVar t name
           v1 <- irConceal (Global t1 name1)
           bitcast v1 i8Ptr
         Global t1 name1 -> do
-          irConceal (Global t1 name1)
+          v1 <- load t1 (Global (ptr t1) name1)
+          irConceal v1
         _ ->
           pure v
 
