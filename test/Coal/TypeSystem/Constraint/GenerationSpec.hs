@@ -10,9 +10,9 @@ fixture1 :: Expression () IndexedType
 fixture1 =
   EConstructor () (Label (TConstructor KType "Color") "Blue")
 
-collectConstraintsSpec = r
+collectConstraintsSpec = Left (ENoDataConstructor () "Blue") `elem` outs
  where
-  r = evalConstraintsGenStack (freshIdIn fixture1) ctx (collectConstraints fixture1)
+  (_, outs) = evalConstraintsGenStack (freshIdIn fixture1) ctx (collectConstraints fixture1)
   ctx =
     ConstraintsGenContext
       { constraintsGenContextMonomorphicSet = mempty
