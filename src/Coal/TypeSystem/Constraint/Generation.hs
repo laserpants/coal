@@ -23,13 +23,11 @@ import Control.Monad.Reader (asks)
 import Data.Data (Data)
 import Data.Maybe (maybeToList)
 import Data.Tuple.Extra (third3)
-import Debug.Trace
 import Extra
 
 import qualified Coal.Common.Environment as Environment
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
-import qualified Data.Text as Text
 
 type ConstraintsGen a = ConstraintsGenStack a TypeIndex Kind IndexedType
 
