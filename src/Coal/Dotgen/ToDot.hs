@@ -84,7 +84,7 @@ instance ToDot t (Label t) where
     \case
       Label t name -> do
         nid <- freshId
-        emitNode (nid, "Label " <> name, Just t, Rectangle)
+        emitNode (nid, "Label\\n" <> name, Just t, Rectangle)
         return nid
 
 instance (Pretty t, Show t) => ToDot t (Expression a t) where
@@ -92,7 +92,7 @@ instance (Pretty t, Show t) => ToDot t (Expression a t) where
     \case
       EAnnotation _ t inner -> do
         nid <- freshId
-        emitNode (nid, "EAnnotation " <> prettyType t, Nothing, Rectangle)
+        emitNode (nid, "EAnnotation\\n" <> prettyType t, Nothing, Rectangle)
         cid <- toDot inner
         emitEdge nid cid
         return nid
@@ -143,15 +143,15 @@ instance (Pretty t, Show t) => ToDot t (Expression a t) where
         return nid
       EVariable _ (Label t name) -> do
         nid <- freshId
-        emitNode (nid, "EVariable " <> name, Just t, Rectangle)
+        emitNode (nid, "EVariable\\n" <> name, Just t, Rectangle)
         return nid
       EConstructor _ (Label t name) -> do
         nid <- freshId
-        emitNode (nid, "EConstructor " <> name, Just t, Rectangle)
+        emitNode (nid, "EConstructor\\n" <> name, Just t, Rectangle)
         return nid
       ELiteral _ prim -> do
         nid <- freshId
-        emitNode (nid, "ELiteral " <> Text.pack (show prim), Nothing, Rectangle)
+        emitNode (nid, "ELiteral\\n" <> Text.pack (show prim), Nothing, Rectangle)
         return nid
       EIf _ t e1 e2 e3 -> do
         nid <- freshId
@@ -165,11 +165,11 @@ instance (Pretty t, Show t) => ToDot t (Expression a t) where
         return nid
       EUnaryOperator _ t op -> do
         nid <- freshId
-        emitNode (nid, "EUnaryOperator " <> Text.pack (show op), Just t, Rectangle)
+        emitNode (nid, "EUnaryOperator\\n" <> Text.pack (show op), Just t, Rectangle)
         return nid
       EBinaryOperator _ t op -> do
         nid <- freshId
-        emitNode (nid, "EBinaryOperator " <> Text.pack (show op), Just t, Rectangle)
+        emitNode (nid, "EBinaryOperator\\n" <> Text.pack (show op), Just t, Rectangle)
         return nid
       ERecord _ t fields maybeTail -> do
         nid <- freshId
@@ -178,7 +178,7 @@ instance (Pretty t, Show t) => ToDot t (Expression a t) where
         forM_ (Map.toList fields) $
           \(fieldName, fieldExpr) -> do
             fid <- freshId
-            emitNode (fid, "Field " <> fieldName, Nothing, Hexagon)
+            emitNode (fid, "Field\\n" <> fieldName, Nothing, Hexagon)
             eid <- toDot fieldExpr
             emitEdge fid eid -- Field node -> Expression
             emitEdge nid fid -- Record -> Field node
@@ -249,7 +249,7 @@ instance (Pretty t, Show t) => ToDot t (Expression a t) where
         return nid
       EUnfold _ t name ps d me -> do
         nid <- freshId
-        emitNode (nid, "EUnfold " <> name, Just t, Rectangle)
+        emitNode (nid, "EUnfold\\n" <> name, Just t, Rectangle)
         forM_ ps $
           \p -> do
             eid <- toDot p
@@ -257,7 +257,7 @@ instance (Pretty t, Show t) => ToDot t (Expression a t) where
         forM_ (Map.toList d) $
           \(fieldName, fieldExpr) -> do
             fid <- freshId
-            emitNode (fid, "Field " <> fieldName, Nothing, Hexagon)
+            emitNode (fid, "Field\\n" <> fieldName, Nothing, Hexagon)
             eid <- toDot fieldExpr
             emitEdge fid eid -- Field node -> Expression
             emitEdge nid fid -- Record -> Field node
@@ -266,13 +266,13 @@ instance (Pretty t, Show t) => ToDot t (Expression a t) where
         return nid
       ESelect _ (Label t name) e -> do
         nid <- freshId
-        emitNode (nid, "ESelect " <> name, Just t, Rectangle)
+        emitNode (nid, "ESelect\\n" <> name, Just t, Rectangle)
         sid <- toDot e
         emitEdge nid sid
         return nid
       ECodataSelect _ (Label t name) e me -> do
         nid <- freshId
-        emitNode (nid, "ECodataSelect " <> name, Just t, Rectangle)
+        emitNode (nid, "ECodataSelect\\n" <> name, Just t, Rectangle)
         id1 <- toDot e
         id2 <- toDot me
         emitEdge nid id1
@@ -284,14 +284,14 @@ instance (Pretty t, Show t) => ToDot t (Expression a t) where
         forM_ (Map.toList d) $
           \(fieldName, fieldExpr) -> do
             fid <- freshId
-            emitNode (fid, "Field " <> fieldName, Nothing, Hexagon)
+            emitNode (fid, "Field\\n" <> fieldName, Nothing, Hexagon)
             eid <- toDot fieldExpr
             emitEdge fid eid -- Field node -> Expression
             emitEdge nid fid -- Record -> Field node
         return nid
       EFocus name ll1 ll2 e1 e2 -> do
         nid <- freshId
-        emitNode (nid, "EFocus " <> name, Nothing, Rectangle)
+        emitNode (nid, "EFocus\\n" <> name, Nothing, Rectangle)
         id1 <- toDot ll1
         id2 <- toDot ll2
         id3 <- toDot e1
@@ -311,7 +311,7 @@ instance (Pretty t, Show t) => ToDot t (Pattern a t) where
     \case
       PAnnotation _ t inner -> do
         nid <- freshId
-        emitNode (nid, "PAnnotation " <> prettyType t, Nothing, Ellipse)
+        emitNode (nid, "PAnnotation\\n" <> prettyType t, Nothing, Ellipse)
         cid <- toDot inner
         emitEdge nid cid
         return nid
@@ -321,11 +321,11 @@ instance (Pretty t, Show t) => ToDot t (Pattern a t) where
         return nid
       PVariable _ (Label t name) -> do
         nid <- freshId
-        emitNode (nid, "PVariable " <> name, Just t, Ellipse)
+        emitNode (nid, "PVariable\\n" <> name, Just t, Ellipse)
         return nid
       PConstructor _ (Label t name) ps -> do
         nid <- freshId
-        emitNode (nid, "PConstructor " <> name, Just t, Ellipse)
+        emitNode (nid, "PConstructor\\n" <> name, Just t, Ellipse)
         forM_ ps $
           \p -> do
             eid <- toDot p
@@ -333,7 +333,7 @@ instance (Pretty t, Show t) => ToDot t (Pattern a t) where
         return nid
       PLiteral _ prim -> do
         nid <- freshId
-        emitNode (nid, "PLiteral " <> escapeQuotes (Text.pack (show prim)), Nothing, Ellipse)
+        emitNode (nid, "PLiteral\\n" <> escapeQuotes (Text.pack (show prim)), Nothing, Ellipse)
         return nid
       PRecord _ t fields maybeTail -> do
         nid <- freshId
@@ -342,7 +342,7 @@ instance (Pretty t, Show t) => ToDot t (Pattern a t) where
         forM_ (Map.toList fields) $
           \(fieldName, fieldExpr) -> do
             fid <- freshId
-            emitNode (fid, "Field " <> fieldName, Nothing, Hexagon)
+            emitNode (fid, "Field\\n" <> fieldName, Nothing, Hexagon)
             eid <- toDot fieldExpr
             emitEdge fid eid -- Field node -> Pattern
             emitEdge nid fid -- Record -> Field node
@@ -387,17 +387,17 @@ instance (Pretty t, Show t) => ToDot t (Pattern a t) where
         return nid
       PAs _ (Label t name) p -> do
         nid <- freshId
-        emitNode (nid, "PAs " <> name, Just t, Ellipse)
+        emitNode (nid, "PAs\\n" <> name, Just t, Ellipse)
         id1 <- toDot p
         emitEdge nid id1
         return nid
       PShorthand _ (Label t name) -> do
         nid <- freshId
-        emitNode (nid, "PShorthand " <> name, Just t, Ellipse)
+        emitNode (nid, "PShorthand\\n" <> name, Just t, Ellipse)
         return nid
       PAtVariable _ (Label t name) -> do
         nid <- freshId
-        emitNode (nid, "PAtVariable " <> name, Just t, Ellipse)
+        emitNode (nid, "PAtVariable\\n" <> name, Just t, Ellipse)
         return nid
       PPlaceholder _ t _ -> do
         nid <- freshId
@@ -463,7 +463,7 @@ instance (Show t, Pretty t) => ToDot t (Definition a k t) where
     \case
       DFunction name (Function _ (With _ t) ps e) -> do
         nid <- freshId
-        emitNode (nid, "DFunction " <> name, Just t, Parallelogram)
+        emitNode (nid, "DFunction\\n" <> name, Just t, Parallelogram)
         forM_ ps $
           \p -> do
             eid <- toDot p
@@ -473,7 +473,7 @@ instance (Show t, Pretty t) => ToDot t (Definition a k t) where
         return nid
       DConstant name (Constant _ (With _ t) e) -> do
         nid <- freshId
-        emitNode (nid, "DConstant " <> name, Just t, Parallelogram)
+        emitNode (nid, "DConstant\\n" <> name, Just t, Parallelogram)
         cid <- toDot e
         emitEdge nid cid
         return nid
