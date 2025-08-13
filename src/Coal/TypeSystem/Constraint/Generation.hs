@@ -175,6 +175,7 @@ collectEConstructorConstraints loc (Label t name) = do
       tellRight [Explicit (RuleDataConstructor loc name t constructorScheme) t constructorScheme]
   pure []
 
+-- emit
 collectConstraints :: (Show a, Data a) => Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
 collectConstraints =
   \case
