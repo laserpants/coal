@@ -55,7 +55,7 @@ prettyTypePrec prec =
         group $
           "type"
             <+> pretty name
-              <> tupledCompact (map (prettyTypePrec 0) args)
+            <> tupledCompact (map (prettyTypePrec 0) args)
             <+> "="
             <+> prettyTypePrec precArrow t
 

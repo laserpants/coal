@@ -42,3 +42,39 @@ collectEAnnotationConstraintsSpec2 = constraint1 `elem` rights outs
       , constraintsGenContextTypeConstructorEnv = mempty
       }
 
+fixture2 :: Expression () IndexedType
+fixture2 =
+  EAnnotation () (TIntrinsic IBool) (ELiteral () (LInt32 1))
+
+constraint2 :: Constraint (InferenceRule Kind ()) TypeIndex Kind IndexedType
+constraint2 = Equality (RuleAnnotation () (TIntrinsic IInt32) (TIntrinsic IBool)) [TIntrinsic IInt32, TIntrinsic IBool]
+
+collectEAnnotationConstraintsSpec3 :: Bool
+collectEAnnotationConstraintsSpec3 = constraint2 `elem` rights outs
+ where
+  (_, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (collectConstraints expr)
+  expr = fixture2
+  ctx =
+    ConstraintsGenContext
+      { constraintsGenContextMonomorphicSet = mempty
+      , constraintsGenContextDataConstructorEnv = mempty
+      , constraintsGenContextCodataAccessorEnv = mempty
+      , constraintsGenContextTypeConstructorEnv = mempty
+      }
+
+fixture3 :: Expression () IndexedType
+fixture3 =
+  EAnnotation () (TVariable (Parameter () "a")) (ELiteral () (LInt32 1))
+
+-- collectEAnnotationConstraintsSpec4 :: Bool
+collectEAnnotationConstraintsSpec4 = outs -- constraint2 `elem` rights outs
+ where
+  (_, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (collectConstraints expr)
+  expr = fixture3
+  ctx =
+    ConstraintsGenContext
+      { constraintsGenContextMonomorphicSet = mempty
+      , constraintsGenContextDataConstructorEnv = mempty
+      , constraintsGenContextCodataAccessorEnv = mempty
+      , constraintsGenContextTypeConstructorEnv = mempty
+      }

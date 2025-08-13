@@ -15,7 +15,8 @@ import Coal.Language.Expression.Binding
 import Coal.Language.Expression.Choice
 import Coal.Language.Module
 import Coal.Language.Pattern
-import Coal.Language.Trait (With (..))
+import Coal.Language.Trait (Trait (..), With (..))
+import Coal.Language.Type
 import Coal.Pretty.Type (Pretty (..), renderPretty)
 import Control.Monad.State
 import Data.Text (Text)
@@ -480,6 +481,17 @@ instance (Show t, Pretty t) => ToDot t (Definition a k t) where
         cid <- toDot e
         emitEdge nid cid
         return nid
+      DAnnotation (With ts t) d -> do
+        nid <- freshId
+        emitNode (nid, "DAnnotation\\n" <> prettyType t, Nothing, Parallelogram)
+        forM_ ts $
+          \tr -> do
+            tid <- freshId
+            emitNode (tid, "Trait\\n" <> prettyType tr, Nothing, Triangle)
+            emitEdge nid tid
+        did <- toDot d
+        emitEdge nid did
+        return nid
       _ -> do
         nid <- freshId
         emitNode (nid, "TODO", Nothing, Parallelogram)
@@ -543,7 +555,7 @@ writeDotFiles ns (Module (Path path) _ defs) =
         writeDotFile (prefix <> definitionName def) def
       def@DConstant{} ->
         writeDotFile (prefix <> definitionName def) def
-      DAnnotation _ def ->
+      def@DAnnotation{} ->
         writeDotFile (prefix <> definitionName def) def
       _ ->
         pure ()
