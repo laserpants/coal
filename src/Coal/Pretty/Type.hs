@@ -22,7 +22,7 @@ tupledCompact :: [Doc ann] -> Doc ann
 tupledCompact = encloseSep "(" ")" ", "
 
 instance Pretty (TypeIndex k) where
-  pretty (TypeIndex _ i) = "'" <> pretty i
+  pretty (TypeIndex _ i) = "τ" <> pretty i
 
 instance Pretty (Parameter k) where
   pretty (Parameter _ name) = pretty name
