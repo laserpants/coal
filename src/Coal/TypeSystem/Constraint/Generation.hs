@@ -155,7 +155,7 @@ clauseAssumptions (EClause loc p cs) = do
   names <- patternConstraints (assertEqualityAssumptions loc) ms p
   pure (typeOf p, ts1, filter (assumptionNameIsNotOneOf names) ms)
 
-collectEConstructorConstraints :: (Show a, Data a) => a -> Label IndexedType -> ConstraintsGen a [Assumption a IndexedType]
+collectEConstructorConstraints :: a -> Label IndexedType -> ConstraintsGen a [Assumption a IndexedType]
 collectEConstructorConstraints loc (Label t name) = do
   r <- lookupDataConstructor name
   case r of
