@@ -39,7 +39,7 @@ data InferenceRule k a
   | -- | TODO
     RuleTypeConstraint a Name (Type TypeIndex k) (Scheme TypeIndex k (Type TypeIndex k))
   | -- | TODO
-    InferenceRuleDataConstructor a Name (Type TypeIndex k) (Scheme TypeIndex k (Type TypeIndex k))
+    RuleDataConstructor a Name (Type TypeIndex k) (Scheme TypeIndex k (Type TypeIndex k))
   deriving (Show, Eq, Ord, Read, Data, Typeable)
 
 instance (Data a) => Substitutable (InferenceRule Kind a) where

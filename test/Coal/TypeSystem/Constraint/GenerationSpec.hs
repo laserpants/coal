@@ -90,7 +90,7 @@ collectConstraintsSpec4 = null (lefts outs)
 
 constraint1 =
   Explicit
-    (InferenceRuleDataConstructor () "Blue" (TVariable (TypeIndex KType 0)) (Forall mempty [] (TConstructor KType "Color")))
+    (RuleDataConstructor () "Blue" (TVariable (TypeIndex KType 0)) (Forall mempty [] (TConstructor KType "Color")))
     (TVariable (TypeIndex KType 0))
     (Forall mempty [] (TConstructor KType "Color"))
 
