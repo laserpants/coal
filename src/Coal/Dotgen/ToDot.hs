@@ -565,12 +565,13 @@ writeDotFiles ns m@(Module (Path path) _ defs) = do
   forM_ defs $
     \case
       def@DFunction{} ->
-        writeDotFile (prefix <> "_" <> definitionName def) def
+        writeDotFile (prefixed $ definitionName def) def
       def@DConstant{} ->
-        writeDotFile (prefix <> "_" <> definitionName def) def
+        writeDotFile (prefixed $ definitionName def) def
       def@DAnnotation{} ->
-        writeDotFile (prefix <> "_" <> definitionName def) def
+        writeDotFile (prefixed $ definitionName def) def
       _ ->
         pure ()
  where
   prefix = ns <> "__" <> Text.intercalate "_" path
+  prefixed n = prefix <> "_" <> n
