@@ -172,7 +172,7 @@ collectConstraints =
         Nothing ->
           tellLeft [ENoDataConstructor loc name]
         Just Constructor{..} ->
-          tellRight [Explicit InferenceRulePlaceholder t constructorScheme]
+          tellRight [Explicit (InferenceRuleDataConstructor loc name t constructorScheme) t constructorScheme]
       pure []
     EVariable loc (Label t name) ->
       pure [Assumption loc name t]

@@ -16,9 +16,9 @@ data InferenceRule k a
     RuleAnnotation a (Type TypeIndex k) (Type TypeIndex k)
   | -- | Function application
     RuleApplication a (Type TypeIndex k) [Type TypeIndex k]
-  | -- | Type of if-condition is bool
+  | -- | If-condition must be of type bool
     RuleIfCondition a (Type TypeIndex k)
-  | -- | If-expression 'then' and 'else' branches must have the same type
+  | -- | The types of an if-expression's 'then' and 'else' branches must agree
     RuleIfBranches a (Type TypeIndex k) (Type TypeIndex k)
   | -- Type of binding expression matches binding pattern
     RuleLetBindingPattern a (Type TypeIndex k) (Type TypeIndex k)
@@ -38,6 +38,8 @@ data InferenceRule k a
     RuleTopLevelConstant a
   | -- | TODO
     RuleTypeConstraint a Name (Type TypeIndex k) (Scheme TypeIndex k (Type TypeIndex k))
+  | -- | TODO
+    InferenceRuleDataConstructor a Name (Type TypeIndex k) (Scheme TypeIndex k (Type TypeIndex k))
   deriving (Show, Eq, Ord, Read, Data, Typeable)
 
 instance (Data a) => Substitutable (InferenceRule Kind a) where
