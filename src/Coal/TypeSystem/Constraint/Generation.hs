@@ -58,16 +58,20 @@ withMonomorphic = localMonoset . monosetInsertMultiple . typeIndexesIn
 
 type Assertion a = IndexedType -> [Assumption a IndexedType] -> ConstraintsGen a ()
 
+emitPAnnotationConstraints :: (Data a) => a -> Type Parameter () -> Pattern a IndexedType -> ConstraintsGen a ()
+emitPAnnotationConstraints loc t p = do
+  r <- instantiateAnnotation loc t
+  case r of
+    Left err ->
+      tellLeft [EIllFormedTypeAnnotation err]
+    Right t1 ->
+      tellRight [Equality (RuleAnnotation loc (typeOf p) t1) [typeOf p, t1]]
+
 patternConstraints :: (Data a) => Assertion a -> [Assumption a IndexedType] -> Pattern a IndexedType -> ConstraintsGen a [Name]
 patternConstraints assert ms =
   \case
     PAnnotation loc t p -> do
-      r <- instantiateAnnotation loc t
-      case r of
-        Left err ->
-          tellLeft [EIllFormedTypeAnnotation err]
-        Right t1 ->
-          tellRight [Equality (RuleAnnotation loc (typeOf p) t1) [typeOf p, t1]]
+      emitPAnnotationConstraints loc t p
       patternConstraints assert ms p
     PVariable _ (Label t name) -> do
       assert t (filter (assumptionNameIs name) ms)
@@ -155,18 +159,17 @@ clauseAssumptions (EClause loc p cs) = do
   names <- patternConstraints (assertEqualityAssumptions loc) ms p
   pure (typeOf p, ts1, filter (assumptionNameIsNotOneOf names) ms)
 
-collectEAnnotationConstraints :: (Show a, Data a) => a -> Type Parameter () -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
-collectEAnnotationConstraints loc t e = do
+emitEAnnotationConstraints :: (Show a, Data a) => a -> Type Parameter () -> Expression a IndexedType -> ConstraintsGen a ()
+emitEAnnotationConstraints loc t e = do
   r <- instantiateAnnotation loc t
   case r of
     Left err ->
       tellLeft [EIllFormedTypeAnnotation err]
     Right t1 ->
       tellRight [Equality (RuleAnnotation loc (typeOf e) t1) [typeOf e, t1]]
-  collectConstraints e
 
-collectEConstructorConstraints :: a -> Label IndexedType -> ConstraintsGen a [Assumption a IndexedType]
-collectEConstructorConstraints loc (Label t name) = do
+emitEConstructorConstraints :: a -> Label IndexedType -> ConstraintsGen a [Assumption a IndexedType]
+emitEConstructorConstraints loc (Label t name) = do
   r <- lookupDataConstructor name
   case r of
     Nothing ->
@@ -180,9 +183,10 @@ collectConstraints :: (Show a, Data a) => Expression a IndexedType -> Constraint
 collectConstraints =
   \case
     EAnnotation loc t e -> do
-      collectEAnnotationConstraints loc t e
+      emitEAnnotationConstraints loc t e
+      collectConstraints e
     EConstructor loc ll ->
-      collectEConstructorConstraints loc ll
+      emitEConstructorConstraints loc ll
     EVariable loc (Label t name) ->
       pure [Assumption loc name t]
     ELambda loc ps e -> do
