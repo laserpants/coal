@@ -38,7 +38,7 @@ data Shape
   deriving (Show, Eq, Read)
 
 type Node t = (Int, Text, Maybe t, Shape)
-type Edge = (Int, Int)
+type Edge = (Int, Int, Maybe Text)
 
 data DotState t = DotState
   { supply :: Int
@@ -62,8 +62,11 @@ freshId = supplied id
 emitNode :: Node t -> DotGen t ()
 emitNode node = modify $ \st -> st{nodes = node : nodes st}
 
+emitEdgeWithLabel :: Text -> Int -> Int -> DotGen t ()
+emitEdgeWithLabel label from to = modify $ \st -> st{edges = (from, to, Just label) : edges st}
+
 emitEdge :: Int -> Int -> DotGen t ()
-emitEdge from to = modify $ \st -> st{edges = (from, to) : edges st}
+emitEdge from to = modify $ \st -> st{edges = (from, to, Nothing) : edges st}
 
 instance (ToDot t a) => ToDot t (Maybe a) where
   toDot =
@@ -138,8 +141,8 @@ instance (Pretty t, Show t) => ToDot t (Expression a t) where
         rid <- toDot rhs
         bid <- toDot body
         emitEdge nid pid
-        emitEdge nid rid
-        emitEdge nid bid
+        emitEdgeWithLabel "=" nid rid
+        emitEdgeWithLabel "in" nid bid
         return nid
       EVariable _ (Label t name) -> do
         nid <- freshId
@@ -160,8 +163,8 @@ instance (Pretty t, Show t) => ToDot t (Expression a t) where
         id2 <- toDot e2
         id3 <- toDot e3
         emitEdge nid id1
-        emitEdge nid id2
-        emitEdge nid id3
+        emitEdgeWithLabel "then" nid id2
+        emitEdgeWithLabel "else" nid id3
         return nid
       EUnaryOperator _ t op -> do
         nid <- freshId
@@ -495,7 +498,13 @@ generateDot ast =
   initialState = DotState 0 [] []
   (_, finalState) = runState (toDot ast) initialState
   dotNodes = [showt nid <> " [shape=" <> renderShape shape <> ", label=\"" <> label <> "\\n" <> maybe "" prettyType tinfo <> "\"];" | (nid, label, tinfo, shape) <- nodes finalState]
-  dotEdges = [showt from <> " -> " <> showt to <> ";" | (from, to) <- edges finalState]
+  dotEdges = [showt from <> " -> " <> showt to <> renderEdgeLabel label <> ";" | (from, to, label) <- edges finalState]
+  renderEdgeLabel =
+    \case
+      Nothing ->
+        ""
+      Just ll ->
+        " [label=\"  " <> ll <> "\", labeldistance=2]"
   renderShape =
     \case
       Rectangle ->
