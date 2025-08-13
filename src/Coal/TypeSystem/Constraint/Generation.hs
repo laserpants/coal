@@ -9,6 +9,7 @@ module Coal.TypeSystem.Constraint.Generation (
   ConstraintsGenError (..),
   collectConstraints,
   runConstraintsGenStack,
+  evalConstraintsGenStack,
 ) where
 
 import Coal.Common.Label (Label (..))

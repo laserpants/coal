@@ -12,7 +12,7 @@ fixture1 =
 
 collectConstraintsSpec = a
  where
-  a = runConstraintsGenStack (freshIdIn fixture1) ctx (collectConstraints fixture1)
+  a = evalConstraintsGenStack (freshIdIn fixture1) ctx (collectConstraints fixture1)
   ctx =
     ConstraintsGenContext
       { constraintsGenContextMonomorphicSet = mempty
