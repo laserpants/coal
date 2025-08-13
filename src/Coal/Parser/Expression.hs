@@ -50,11 +50,11 @@ parseExpression = makeExprParser go operator
     pure (maybe e1 (selector e1 (Metadata start end)) rest)
 
 selector :: Expression Metadata () -> Metadata -> Name -> Expression Metadata ()
-selector expr loc name
-  | isConstructor name = ECodataSelect loc ll expr Nothing
+selector expr loc lname
+  | isConstructor lname = ECodataSelect loc ll expr Nothing
   | otherwise = ESelect loc ll expr
  where
-  ll = Label () name
+  ll = Label () lname
 
 parseUnit :: Parser (List1 (Expression Metadata ()))
 parseUnit =
