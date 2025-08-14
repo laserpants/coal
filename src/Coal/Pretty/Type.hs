@@ -5,6 +5,7 @@ module Coal.Pretty.Type where
 
 import Coal.Common.List1 (fromList1)
 import Coal.Language
+import Coal.Pretty.Utils (parensIf, tupledCompact)
 import Data.Text (Text, isPrefixOf)
 import Prettyprinter
 
@@ -12,13 +13,6 @@ precArrow, precApp, precAtom :: Int
 precArrow = 1 -- e.g., a -> b
 precApp = 2 -- e.g., T(x, y)
 precAtom = 3 -- variables, constructors, literals
-
-parensIf :: Bool -> Doc ann -> Doc ann
-parensIf True = parens
-parensIf False = id
-
-tupledCompact :: [Doc ann] -> Doc ann
-tupledCompact = encloseSep "(" ")" ", "
 
 instance Pretty (TypeIndex k) where
   pretty (TypeIndex _ i) = "τ" <> pretty i

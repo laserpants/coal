@@ -4,6 +4,7 @@
 module Coal.Pretty.Kernel.Type where
 
 import Coal.Kernel.Language.Type
+import Coal.Pretty.Utils (parensIf, tupledCompact)
 import Prettyprinter
 
 import qualified Coal.Kernel.Language.Type as Kernel
@@ -11,13 +12,6 @@ import qualified Coal.Kernel.Language.Type as Kernel
 precArrow, precApp :: Int
 precArrow = 1
 precApp = 2
-
-parensIf :: Bool -> Doc ann -> Doc ann
-parensIf True = parens
-parensIf False = id
-
-tupledCompact :: [Doc ann] -> Doc ann
-tupledCompact = encloseSep "(" ")" ", "
 
 prettyTypePrec :: Int -> Kernel.Type -> Doc ann
 prettyTypePrec prec =

@@ -157,6 +157,7 @@ library
       Coal.Parser.Utils
       Coal.Pretty.Kernel.Type
       Coal.Pretty.Type
+      Coal.Pretty.Utils
       Coal.TypeSystem
       Coal.TypeSystem.Constraint
       Coal.TypeSystem.Constraint.Assumption
