@@ -46,7 +46,9 @@ prettyTypePrec prec =
             <+> "="
             <+> prettyTypePrec precArrow t
      where
-      prettyArgs = if null args then "" else tupledCompact (map (prettyTypePrec 0) args)
+      prettyArgs
+        | null args = ""
+        | otherwise = tupledCompact (map (prettyTypePrec 0) args)
 
 prettyIntrinsic :: (t -> Doc ann) -> Intrinsic t -> Doc ann
 prettyIntrinsic prettyT =
