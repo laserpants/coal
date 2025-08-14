@@ -17,10 +17,8 @@ import Coal.Language.Expression.Binding
 import Coal.Language.Expression.Choice
 import Coal.Language.Module
 import Coal.Language.Pattern
-import Coal.Language.Trait (Trait (..), With (..))
+import Coal.Language.Trait (With (..))
 import Coal.Language.Type
-import Coal.Pretty.Kernel.Type
-import Coal.Pretty.Type
 import Control.Monad.State
 import Data.Functor.Foldable (cata)
 import Data.Text (Text)
