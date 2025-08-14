@@ -52,8 +52,8 @@ prettyRow = braces . fields
  where
   fields =
     \case
-      RExt f t1 t2 ->
-        pretty f <+> ":" <+> pretty t1 <+> "|" <+> fields t2
+      RExt f t1 r ->
+        pretty f <+> ":" <+> pretty t1 <+> "|" <+> fields r
       RNil ->
         "{}"
       TOpq ->
