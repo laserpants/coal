@@ -15,7 +15,7 @@ precApp = 2 -- e.g., T(x, y)
 precAtom = 3 -- variables, constructors, literals
 
 instance Pretty (TypeIndex k) where
-  pretty (TypeIndex _ i) = "τ" <> pretty i
+  pretty (TypeIndex _ i) = pretty i
 
 instance Pretty (Parameter k) where
   pretty (Parameter _ name) = pretty name
