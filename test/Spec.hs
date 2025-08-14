@@ -12,7 +12,7 @@ import Coal.Compiler (kernelTranslationC, mainPass, typeCheckingPass)
 import Coal.Compiler.Environment
 import Coal.Compiler.Stack
 import Coal.Compiler.TypeInference.Errors
-import Coal.Dotgen.ToDot (writeDotFiles)
+import Coal.Dotgen.ToDot (writeDotFiles, writeDotFilesK)
 import Coal.Kernel.Compiler (compileModules)
 import Coal.Kernel.LLVM.IRConstruct (IRConstruct (..))
 import Coal.Kernel.LLVM.IREncodable (irEncode)
@@ -853,7 +853,11 @@ compileModule x = do
     [] ->
       pure ()
 
-  kernelTranslationC b
+  r <- kernelTranslationC b
+
+  liftIO $ writeDotFilesK "kernel" r
+
+  pure r
 
 parseFile :: Text -> Either ParserError (Text, Module Metadata o ())
 parseFile src = do

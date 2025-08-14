@@ -1,13 +1,12 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Coal.Pretty.Type (Pretty (..), renderPretty) where
+module Coal.Pretty.Type where
 
 import Coal.Common.List1 (fromList1)
 import Coal.Language
 import Data.Text (Text, isPrefixOf)
 import Prettyprinter
-import Prettyprinter.Render.Text (renderStrict)
 
 precArrow, precApp, precAtom :: Int
 precArrow = 1 -- e.g., a -> b
@@ -53,11 +52,13 @@ prettyTypePrec prec =
     TAlias name args t ->
       parensIf (prec > precApp) $
         group $
-          "type"
+          "alias"
             <+> pretty name
-            <> tupledCompact (map (prettyTypePrec 0) args)
+              <> prettyArgs
             <+> "="
             <+> prettyTypePrec precArrow t
+     where
+      prettyArgs = if null args then "" else tupledCompact (map (prettyTypePrec 0) args)
 
 prettyIntrinsic :: (t -> Doc ann) -> Intrinsic t -> Doc ann
 prettyIntrinsic prettyT =
@@ -122,6 +123,3 @@ prettyKindPrec prec =
 instance (Pretty t) => Pretty (Trait t) where
   pretty (Trait name t) =
     pretty name <> parens (pretty t)
-
-renderPretty :: (Pretty a) => a -> Text
-renderPretty p = renderStrict . layoutPretty defaultLayoutOptions $ pretty p
