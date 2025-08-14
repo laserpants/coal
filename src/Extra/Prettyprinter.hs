@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Coal.Pretty.Utils (parensIf, tupledCompact) where
+module Extra.Prettyprinter (parensIf, tupledCompact) where
 
 import Prettyprinter
 

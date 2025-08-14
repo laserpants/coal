@@ -14,9 +14,9 @@ module Coal.Language.Type.Kind (
 ) where
 
 import Coal.Common.List1 (List1, fromList1, (<|))
-import Coal.Pretty.Utils (parensIf)
 import Data.Data (Data, Typeable)
 import Data.List (isPrefixOf)
+import Extra.Prettyprinter (parensIf)
 import GHC.Generics (Generic)
 import Prettyprinter
 

@@ -5,9 +5,9 @@
 
 module Coal.Kernel.Language.Type (Type (..)) where
 
-import Coal.Pretty.Utils (parensIf, tupledCompact)
 import Data.Data (Data, Typeable)
 import Extra (Name)
+import Extra.Prettyprinter (parensIf, tupledCompact)
 import Prettyprinter
 
 -- | Core language types
