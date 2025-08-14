@@ -14,12 +14,6 @@ precArrow = 1 -- e.g., a -> b
 precApp = 2 -- e.g., T(x, y)
 precAtom = 3 -- variables, constructors, literals
 
-instance Pretty (TypeIndex k) where
-  pretty (TypeIndex _ i) = pretty i
-
-instance Pretty (Parameter k) where
-  pretty (Parameter _ name) = pretty name
-
 instance (Pretty k, Pretty (o k)) => Pretty (Type o k) where
   pretty = prettyTypePrec 0
 
@@ -113,7 +107,3 @@ prettyKindPrec prec =
     KArrow k1 k2 ->
       parensIf (prec > precKArrow) $
         group (prettyKindPrec (precKArrow + 1) k1 <+> "→" <+> prettyKindPrec precKArrow k2)
-
-instance (Pretty t) => Pretty (Trait t) where
-  pretty (Trait name t) =
-    pretty name <> parens (pretty t)

@@ -33,6 +33,7 @@ import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (transform)
 import Extra (Map, Name, Set)
 import GHC.Generics (Generic)
+import Prettyprinter (Pretty (..))
 import TextShow (showt)
 
 import qualified Coal.Common.List1 as List1
@@ -61,11 +62,17 @@ data TypeIndex k = TypeIndex
   }
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Data, Typeable, Generic)
 
+instance Pretty (TypeIndex k) where
+  pretty (TypeIndex _ i) = pretty i
+
 data Parameter k = Parameter
   { parameterKind :: k
   , parameterName :: Name
   }
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Data, Typeable, Generic)
+
+instance Pretty (Parameter k) where
+  pretty (Parameter _ name) = pretty name
 
 type IndexedType = Type TypeIndex Kind
 
