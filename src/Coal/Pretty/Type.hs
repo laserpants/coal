@@ -81,15 +81,17 @@ prettyIntrinsic prettyT =
 prettyRow :: (Pretty (o k)) => (t -> Doc ann) -> Row o k t -> Doc ann
 prettyRow prettyT = braces . fields
  where
-  fields (RExtend name ty rest) =
-    pretty name <+> ":" <+> prettyT ty <> fieldSep rest
-   where
-    fieldSep RNil = mempty
-    fieldSep _ = "," <+> fields rest
-  fields (RVariable v) =
-    pretty v
-  fields RNil =
-    "{}"
+  fields =
+    \case
+      RExtend name ty rest ->
+        pretty name <+> ":" <+> prettyT ty <> fieldSep rest
+       where
+        fieldSep RNil = mempty
+        fieldSep _ = "," <+> fields rest
+      RVariable v ->
+        pretty v
+      RNil ->
+        "{}"
 
 precKArrow :: Int
 precKArrow = 1 -- a -> b
