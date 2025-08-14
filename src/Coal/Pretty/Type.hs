@@ -73,14 +73,14 @@ prettyIntrinsic prettyT =
       "bignum"
     INat ->
       "nat"
-    IRecord t ->
-      prettyT t
     IString ->
       "string"
     IUnit ->
       "unit"
     IVoid ->
       "void"
+    IRecord t ->
+      prettyT t
 
 prettyRow :: (Pretty (o k)) => (t -> Doc ann) -> Row o k t -> Doc ann
 prettyRow prettyT = braces . fields
