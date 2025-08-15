@@ -24,15 +24,18 @@ module Coal.Language.Type (
   (~>),
 ) where
 
-import Coal.Common.List1 (List1, NonEmpty (..), (<|))
+import Coal.Common.List1 (List1, NonEmpty (..), fromList1, (<|))
 import Coal.Common.Supply (Supply (..))
 import Coal.Language.Type.Intrinsic (Intrinsic (..))
 import Coal.Language.Type.Kind (Kind (..), foldKind)
 import Coal.Language.Type.Row (Row (..), normalizeRow)
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (transform)
+import Data.Text (isPrefixOf)
 import Extra (Map, Name, Set)
+import Extra.Prettyprinter (parensIf, tupledCompact)
 import GHC.Generics (Generic)
+import Prettyprinter
 import TextShow (showt)
 
 import qualified Coal.Common.List1 as List1
@@ -61,11 +64,17 @@ data TypeIndex k = TypeIndex
   }
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Data, Typeable, Generic)
 
+instance Pretty (TypeIndex k) where
+  pretty (TypeIndex _ i) = pretty i
+
 data Parameter k = Parameter
   { parameterKind :: k
   , parameterName :: Name
   }
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Data, Typeable, Generic)
+
+instance Pretty (Parameter k) where
+  pretty (Parameter _ name) = pretty name
 
 type IndexedType = Type TypeIndex Kind
 
@@ -117,3 +126,87 @@ tupleType ts = TApplication KType (TConstructor kind cons) ts
  where
   kind = foldKind KType (replicate (length ts) KType)
   cons = "#Tuple" <> showt (length ts)
+
+precArrow, precApp, precAtom :: Int
+precArrow = 1 -- e.g., a -> b
+precApp = 2 -- e.g., T(x, y)
+precAtom = 3 -- variables, constructors, literals
+
+instance (Pretty k, Pretty (o k)) => Pretty (Type o k) where
+  pretty = prettyTypePrec 0
+
+prettyTypePrec :: (Pretty k, Pretty (o k)) => Int -> Type o k -> Doc ann
+prettyTypePrec prec =
+  \case
+    TArrow t1 t2 ->
+      parensIf (prec > precArrow) $
+        group (prettyTypePrec (precArrow + 1) t1 <+> "→" <+> prettyTypePrec precArrow t2)
+    TApplication _ (TConstructor _ con) args
+      | "#Tuple" `isPrefixOf` con ->
+          parensIf (prec > precApp) $ group (tupled (map (prettyTypePrec 0) (fromList1 args)))
+    TApplication _ f args ->
+      parensIf (prec > precApp) $
+        group (prettyTypePrec precApp f <> tupledCompact (map (prettyTypePrec 0) (fromList1 args)))
+    TConstructor _ name ->
+      pretty name
+    TVariable v ->
+      pretty v
+    TIntrinsic i ->
+      prettyIntrinsic (prettyTypePrec precAtom) i
+    TRow row ->
+      prettyRow (prettyTypePrec precAtom) row
+    TAlias name args t ->
+      parensIf (prec > precApp) $
+        group $
+          "alias"
+            <+> pretty name
+              <> prettyArgs
+            <+> "="
+            <+> prettyTypePrec precArrow t
+     where
+      prettyArgs
+        | null args = ""
+        | otherwise = tupledCompact (map (prettyTypePrec 0) args)
+
+prettyIntrinsic :: (t -> Doc ann) -> Intrinsic t -> Doc ann
+prettyIntrinsic prettyT =
+  \case
+    IBool ->
+      "bool"
+    IChar ->
+      "char"
+    IDouble ->
+      "double"
+    IFloat ->
+      "float"
+    IInt32 ->
+      "int32"
+    IInt64 ->
+      "int64"
+    IBignum ->
+      "bignum"
+    INat ->
+      "nat"
+    IString ->
+      "string"
+    IUnit ->
+      "unit"
+    IVoid ->
+      "void"
+    IRecord t ->
+      prettyT t
+
+prettyRow :: (Pretty (o k)) => (t -> Doc ann) -> Row o k t -> Doc ann
+prettyRow prettyT = braces . fields
+ where
+  fields =
+    \case
+      RExtend name ty rest ->
+        pretty name <+> ":" <+> prettyT ty <> fieldSep rest
+       where
+        fieldSep RNil = mempty
+        fieldSep _ = "," <+> fields rest
+      RVariable v ->
+        pretty v
+      RNil ->
+        "{}"

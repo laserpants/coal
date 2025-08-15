@@ -3,6 +3,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
 module Coal.Language.Type.Kind (
@@ -15,7 +16,9 @@ module Coal.Language.Type.Kind (
 import Coal.Common.List1 (List1, fromList1, (<|))
 import Data.Data (Data, Typeable)
 import Data.List (isPrefixOf)
+import Extra.Prettyprinter (parensIf)
 import GHC.Generics (Generic)
+import Prettyprinter
 
 import qualified Coal.Common.List1 as List1
 
@@ -48,3 +51,22 @@ applyKind ks k
       Nothing
  where
   ls = fromList1 (unfoldKind k)
+
+precKArrow :: Int
+precKArrow = 1 -- a -> b
+
+instance Pretty Kind where
+  pretty = prettyKindPrec 0
+
+prettyKindPrec :: Int -> Kind -> Doc ann
+prettyKindPrec prec =
+  \case
+    KType ->
+      "*"
+    KRow ->
+      "Row"
+    KTrait ->
+      "Trait"
+    KArrow k1 k2 ->
+      parensIf (prec > precKArrow) $
+        group (prettyKindPrec (precKArrow + 1) k1 <+> "→" <+> prettyKindPrec precKArrow k2)
