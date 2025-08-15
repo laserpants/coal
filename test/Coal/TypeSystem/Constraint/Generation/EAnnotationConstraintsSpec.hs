@@ -20,9 +20,9 @@ fixture1 =
   EAnnotation () (TIntrinsic IInt32) (ELiteral () (LInt32 1))
 
 collectEAnnotationConstraintsSpec1 :: Bool
-collectEAnnotationConstraintsSpec1 = null (lefts outs)
+collectEAnnotationConstraintsSpec1 = null ms && null (lefts outs)
  where
-  (_, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (collectConstraints expr)
+  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (collectConstraints expr)
   expr = fixture1
   ctx =
     ConstraintsGenContext
@@ -36,9 +36,9 @@ constraint1 :: Constraint (InferenceRule Kind ()) TypeIndex Kind IndexedType
 constraint1 = Equality (RuleAnnotation () (TIntrinsic IInt32) (TIntrinsic IInt32)) [TIntrinsic IInt32, TIntrinsic IInt32]
 
 collectEAnnotationConstraintsSpec2 :: Bool
-collectEAnnotationConstraintsSpec2 = constraint1 `elem` rights outs
+collectEAnnotationConstraintsSpec2 = null ms && constraint1 `elem` rights outs
  where
-  (_, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (collectConstraints expr)
+  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (collectConstraints expr)
   expr = fixture1
   ctx =
     ConstraintsGenContext
@@ -56,9 +56,9 @@ constraint2 :: Constraint (InferenceRule Kind ()) TypeIndex Kind IndexedType
 constraint2 = Equality (RuleAnnotation () (TIntrinsic IInt32) (TIntrinsic IBool)) [TIntrinsic IInt32, TIntrinsic IBool]
 
 collectEAnnotationConstraintsSpec3 :: Bool
-collectEAnnotationConstraintsSpec3 = constraint2 `elem` rights outs
+collectEAnnotationConstraintsSpec3 = null ms && constraint2 `elem` rights outs
  where
-  (_, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (collectConstraints expr)
+  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (collectConstraints expr)
   expr = fixture2
   ctx =
     ConstraintsGenContext
@@ -73,9 +73,9 @@ fixture3 =
   EAnnotation () (TVariable (Parameter () "a")) (ELiteral () (LInt32 1))
 
 collectEAnnotationConstraintsSpec4 :: Bool
-collectEAnnotationConstraintsSpec4 = null (lefts outs)
+collectEAnnotationConstraintsSpec4 = null ms && null (lefts outs)
  where
-  (_, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (collectConstraints expr)
+  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (collectConstraints expr)
   expr = fixture3
   ctx =
     ConstraintsGenContext

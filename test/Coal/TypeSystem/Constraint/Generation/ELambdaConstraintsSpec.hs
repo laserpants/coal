@@ -1,0 +1,64 @@
+{-# LANGUAGE OverloadedStrings #-}
+
+module Coal.TypeSystem.Constraint.Generation.ELambdaConstraintsSpec where
+
+import Coal.Common.Label (Label (..))
+import Coal.Common.List1 (List1, NonEmpty (..), fromList1, (<|))
+import Coal.Language
+import Coal.TypeSystem.Constraint
+import Coal.TypeSystem.Constraint.Generation
+import Coal.TypeSystem.Constraint.Generation.InferenceRule
+import Data.Either (lefts, rights)
+
+import qualified Coal.Common.Environment as Environment
+
+fixture1 :: Expression () IndexedType
+fixture1 =
+  ELambda
+    ()
+    (PVariable () (Label (TVariable (TypeIndex KType 0)) "x") :| [])
+    (EVariable () (Label (TVariable (TypeIndex KType 1)) "x"))
+
+constraint1 :: Constraint (InferenceRule Kind ()) TypeIndex Kind IndexedType
+constraint1 =
+  Equality
+    InferenceRulePlaceholder
+    [ TVariable (TypeIndex KType 1)
+    , TVariable (TypeIndex KType 0)
+    ]
+
+collectELambdaConstraintsSpec1 :: Bool
+collectELambdaConstraintsSpec1 = null ms && constraint1 `elem` rights outs
+ where
+  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (collectConstraints expr)
+  expr = fixture1
+  ctx =
+    ConstraintsGenContext
+      { constraintsGenContextMonomorphicSet = mempty
+      , constraintsGenContextDataConstructorEnv = mempty
+      , constraintsGenContextCodataAccessorEnv = mempty
+      , constraintsGenContextTypeConstructorEnv = mempty
+      }
+
+fixture2 :: Expression () IndexedType
+fixture2 =
+  ELambda
+    ()
+    (PVariable () (Label (TVariable (TypeIndex KType 0)) "x") :| [])
+    (EVariable () (Label (TVariable (TypeIndex KType 1)) "y"))
+
+-- collectELambdaConstraintsSpec1 :: Bool
+collectELambdaConstraintsSpec2 = (ms, outs)
+ where
+  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (collectConstraints expr)
+  expr = fixture2
+  ctx =
+    ConstraintsGenContext
+      { constraintsGenContextMonomorphicSet = mempty
+      , constraintsGenContextDataConstructorEnv = mempty
+      , constraintsGenContextCodataAccessorEnv = mempty
+      , constraintsGenContextTypeConstructorEnv = mempty
+      }
+
+collectELambdaConstraintsSpec3 :: Bool
+collectELambdaConstraintsSpec3 = 2 == freshIdIn fixture2

@@ -25,9 +25,9 @@ fixture1 =
   EConstructor () (Label (TConstructor KType "Color") "Blue")
 
 collectEConstructorConstraintsSpec1 :: Bool
-collectEConstructorConstraintsSpec1 = ENoDataConstructor () "Blue" `elem` lefts outs
+collectEConstructorConstraintsSpec1 = null ms && ENoDataConstructor () "Blue" `elem` lefts outs
  where
-  (_, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (collectConstraints expr)
+  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (collectConstraints expr)
   expr = fixture1
   ctx =
     ConstraintsGenContext
@@ -38,9 +38,9 @@ collectEConstructorConstraintsSpec1 = ENoDataConstructor () "Blue" `elem` lefts 
       }
 
 collectEConstructorConstraintsSpec2 :: Bool
-collectEConstructorConstraintsSpec2 = null (lefts outs)
+collectEConstructorConstraintsSpec2 = null ms && null (lefts outs)
  where
-  (_, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (collectConstraints expr)
+  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (collectConstraints expr)
   expr = fixture1
   ctx =
     ConstraintsGenContext
@@ -61,10 +61,10 @@ fixture2 =
   EConstructor () (Label (TVariable (TypeIndex KType 0)) "Blue")
 
 collectEConstructorConstraintsSpec3 :: Bool
-collectEConstructorConstraintsSpec3 = ENoDataConstructor () "Blue" `elem` lefts outs
+collectEConstructorConstraintsSpec3 = null ms && ENoDataConstructor () "Blue" `elem` lefts outs
  where
   expr = fixture2
-  (_, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (collectConstraints expr)
+  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (collectConstraints expr)
   ctx =
     ConstraintsGenContext
       { constraintsGenContextMonomorphicSet = mempty
@@ -74,9 +74,9 @@ collectEConstructorConstraintsSpec3 = ENoDataConstructor () "Blue" `elem` lefts 
       }
 
 collectEConstructorConstraintsSpec4 :: Bool
-collectEConstructorConstraintsSpec4 = null (lefts outs)
+collectEConstructorConstraintsSpec4 = null ms && null (lefts outs)
  where
-  (_, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (collectConstraints expr)
+  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (collectConstraints expr)
   expr = fixture2
   ctx =
     ConstraintsGenContext
@@ -100,9 +100,9 @@ constraint1 =
     (Forall mempty [] (TConstructor KType "Color"))
 
 collectEConstructorConstraintsSpec5 :: Bool
-collectEConstructorConstraintsSpec5 = constraint1 `elem` rights outs
+collectEConstructorConstraintsSpec5 = null ms && constraint1 `elem` rights outs
  where
-  (_, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (collectConstraints expr)
+  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (collectConstraints expr)
   expr = fixture2
   ctx =
     ConstraintsGenContext
