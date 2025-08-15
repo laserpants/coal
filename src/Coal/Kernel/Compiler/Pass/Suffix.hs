@@ -70,6 +70,6 @@ mapping lls = runStateT (traverse go lls) mempty
         pure ll
     | otherwise = do
         n <- lift (supplied id)
-        let name1 = name <> ".[" <> showt n <> "]"
-        modify (Map.insert name name1)
-        pure (Label t name1)
+        let name' = name <> ".[" <> showt n <> "]"
+        modify (Map.insert name name')
+        pure (Label t name')
