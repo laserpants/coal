@@ -96,6 +96,16 @@ emitHouse = emitShape House
 
 emitTriangle = emitShape Triangle
 
+emitFields :: (ToDot t a) => Int -> [(Name, a)] -> DotGen t Int
+emitFields = foldM go
+ where
+  go id1 (name, expr) = do
+    id2 <- emitHexagon ("Field\\n" <> name) Nothing
+    id3 <- toDot expr
+    emitEdge id1 id2
+    emitEdge id2 id3
+    return id2
+
 instance (ToDot t a) => ToDot t (Maybe a) where
   toDot =
     \case
@@ -184,22 +194,8 @@ instance (Pretty t, Show t) => ToDot t (Expression a t) where
       ERecord _ t fields maybeTail -> do
         nid <- emitRectangle "ERecord" (Just t)
         -- Emit each field
-        zid <- foldM (
-            \x (fieldName, fieldExpr) -> do
-              fid <- emitHexagon ("Field\\n" <> fieldName) Nothing
-              eid <- toDot fieldExpr
-              emitEdge x fid
-              emitEdge fid eid
-              return fid
-          ) nid (Map.toList fields)
+        zid <- emitFields nid (Map.toList fields)
 
-        --forM_ (Map.toList fields) $
-        --  \(fieldName, fieldExpr) -> do
-        --    fid <- emitHexagon ("Field\\n" <> fieldName) Nothing
-        --    eid <- toDot fieldExpr
-        --    emitEdge fid eid -- Field node -> Expression
-        --    emitEdge nid fid -- Record -> Field node
-        --    -- Emit optional tail
         case maybeTail of
           Just tailExpr -> do
             tid <- toDot tailExpr
@@ -287,23 +283,8 @@ instance (Pretty t, Show t) => ToDot t (Expression a t) where
         return nid
       ECodataFields _ t d -> do
         nid <- emitRectangle "ECodataFields" (Just t)
-        foldM_ (
-            \x (fieldName, fieldExpr) -> do
-              fid <- emitHexagon ("Field\\n" <> fieldName) Nothing
-              eid <- toDot fieldExpr
-              emitEdge x fid
-              emitEdge fid eid
-              return fid
-          ) nid (Map.toList d)
-
+        void (emitFields nid (Map.toList d))
         return nid
-
-        --forM_ (Map.toList d) $
-        --  \(fieldName, fieldExpr) -> do
-        --    fid <- emitHexagon ("Field\\n" <> fieldName) Nothing
-        --    eid <- toDot fieldExpr
-        --    emitEdge fid eid -- Field node -> Expression
-        --    emitEdge nid fid -- Record -> Field node
       EFocus name ll1 ll2 e1 e2 -> do
         nid <- emitRectangle ("EFocus\\n" <> name) Nothing
         id1 <- toDot ll1
@@ -341,26 +322,7 @@ instance (Pretty t, Show t) => ToDot t (Pattern a t) where
         emitEllipse ("PLiteral\\n" <> escapeQuotes (Text.pack (show prim))) Nothing
       PRecord _ t fields maybeTail -> do
         nid <- emitEllipse "PRecord" (Just t)
-
-        -- TODO: DRY
-        zid <- foldM (
-            \x (fieldName, fieldExpr) -> do
-              fid <- emitHexagon ("Field\\n" <> fieldName) Nothing
-              eid <- toDot fieldExpr
-              emitEdge x fid
-              emitEdge fid eid
-              return fid
-          ) nid (Map.toList fields)
-
---        -- Emit each field
---        --
---        forM_ (Map.toList fields) $
---          \(fieldName, fieldExpr) -> do
---            fid <- emitHexagon ("Field\\n" <> fieldName) Nothing
---            eid <- toDot fieldExpr
---            emitEdge fid eid -- Field node -> Pattern
---            emitEdge nid fid -- Record -> Field node
---            -- Emit optional tail
+        zid <- emitFields nid (Map.toList fields)
         case maybeTail of
           Just tailExpr -> do
             tid <- toDot tailExpr
