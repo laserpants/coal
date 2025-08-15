@@ -7,6 +7,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 
 -- module Coal.Dotgen.ToDot (ToDot (..), writeDotFiles) where
+-- Graphviz Dot
 module Coal.Dotgen.ToDot where
 
 import Coal.Common.Label (Label (..))
@@ -18,7 +19,7 @@ import Coal.Language.Expression.Choice
 import Coal.Language.Module
 import Coal.Language.Pattern
 import Coal.Language.Trait (With (..))
-import Coal.Language.Type
+import Control.Monad.Reader (ReaderT, ask, runReaderT)
 import Control.Monad.State
 import Data.Functor.Foldable (cata)
 import Data.Text (Text)
@@ -75,26 +76,55 @@ emitEdgeWithLabel label from to = modify $ \st -> st{edges = (from, to, Just lab
 emitEdge :: Int -> Int -> DotGen t ()
 emitEdge from to = modify $ \st -> st{edges = (from, to, Nothing) : edges st}
 
+emitShape :: Shape -> Text -> Maybe t -> DotGen t Int
 emitShape shape txt t = do
   nid <- freshId
   emitNode (nid, txt, t, shape)
   return nid
 
+emitRectangle
+  , emitEllipse
+  , emitDiamond
+  , emitHexagon
+  , emitNote
+  , emitParallelogram
+  , emitHouse
+  , emitTriangle ::
+    Text -> Maybe t -> DotGen t Int
 emitRectangle = emitShape Rectangle
-
 emitEllipse = emitShape Ellipse
-
 emitDiamond = emitShape Diamond
-
 emitHexagon = emitShape Hexagon
-
 emitNote = emitShape Note
-
 emitParallelogram = emitShape Parallelogram
-
 emitHouse = emitShape House
-
 emitTriangle = emitShape Triangle
+
+fromNode :: DotGen t Int -> ReaderT Int (DotGen t) () -> DotGen t Int
+fromNode f g = do
+  nid <- f
+  runReaderT g nid
+  return nid
+
+emitEdgeTo :: (ToDot t a) => a -> ReaderT Int (DotGen t) ()
+emitEdgeTo d = do
+  nid <- ask
+  id1 <- lift (toDot d)
+  lift (emitEdge nid id1)
+
+emitEdgeToWithLabel :: (ToDot t a) => Text -> a -> ReaderT Int (DotGen t) ()
+emitEdgeToWithLabel label d = do
+  nid <- ask
+  id1 <- lift (toDot d)
+  lift (emitEdgeWithLabel label nid id1)
+
+emitEdgeToFields :: (ToDot t a) => [(Name, a)] -> ReaderT Int (DotGen t) Int
+emitEdgeToFields f = do
+  nid <- ask
+  lift (emitFields nid f)
+
+emitEdgesTo :: (Foldable f, ToDot t a) => f a -> ReaderT Int (DotGen t) ()
+emitEdgesTo = traverse_ emitEdgeTo
 
 emitFields :: (ToDot t a) => Int -> [(Name, a)] -> DotGen t Int
 emitFields = foldM go
@@ -123,55 +153,39 @@ instance ToDot t (Label t) where
       Label t name ->
         emitNote ("Label\\n" <> name) (Just t)
 
+instance (Pretty t, Show t) => ToDot t (Binding Expression a t) where
+  toDot =
+    \case
+      BPattern _ pat rhs -> do
+        fromNode (emitRectangle "BPattern\\n" Nothing) $ do
+          emitEdgeTo pat
+          emitEdgeTo rhs
+      BFunction{} ->
+        error "TODO"
+
 instance (Pretty t, Show t) => ToDot t (Expression a t) where
   toDot =
     \case
       EAnnotation _ t inner -> do
-        nid <- emitRectangle ("EAnnotation\\n" <> prettyType t) Nothing
-        cid <- toDot inner
-        emitEdge nid cid
-        return nid
+        fromNode (emitRectangle ("EAnnotation\\n" <> prettyType t) Nothing) $ do
+          emitEdgeTo inner
       EApplication _ t fun args -> do
-        nid <- emitDiamond "EApplication" (Just t)
-        fid <- toDot fun
-        emitEdge nid fid
-        forM_ args $
-          \arg -> do
-            aid <- toDot arg
-            emitEdge nid aid
-        return nid
+        fromNode (emitDiamond "EApplication" (Just t)) $ do
+          emitEdgeTo fun
+          emitEdgesTo args
       ELambda _ patterns body -> do
-        nid <- emitHouse "ELambda" Nothing
-        forM_ patterns $
-          \p -> do
-            pid <- toDot p
-            emitEdge nid pid
-        bid <- toDot body
-        emitEdge nid bid
-        return nid
-      ELet _ bindings body -> do
-        nid <- emitRectangle "ELet" Nothing
-        forM_ bindings $
-          \case
-            BPattern _ pat rhs -> do
-              pid <- toDot pat
-              rid <- toDot rhs
-              emitEdge nid pid
-              emitEdge nid rid
-            BFunction{} ->
-              error "TODO"
-        bid <- toDot body
-        emitEdge nid bid
-        return nid
+        fromNode (emitHouse "ELambda" Nothing) $ do
+          emitEdgesTo patterns
+          emitEdgeTo body
+      ELet _ bnds body -> do
+        fromNode (emitRectangle "ELet" Nothing) $ do
+          emitEdgesTo bnds
+          emitEdgeTo body
       ERecursiveLet _ pat rhs body -> do
-        nid <- emitRectangle "ERecursiveLet" Nothing
-        pid <- toDot pat
-        rid <- toDot rhs
-        bid <- toDot body
-        emitEdge nid pid
-        emitEdgeWithLabel "=" nid rid
-        emitEdgeWithLabel "in" nid bid
-        return nid
+        fromNode (emitRectangle "ERecursiveLet" Nothing) $ do
+          emitEdgeTo pat
+          emitEdgeToWithLabel "=" rhs
+          emitEdgeToWithLabel "in" body
       EVariable _ (Label t name) ->
         emitRectangle ("EVariable\\n" <> name) (Just t)
       EConstructor _ (Label t name) ->
@@ -179,123 +193,64 @@ instance (Pretty t, Show t) => ToDot t (Expression a t) where
       ELiteral _ prim ->
         emitRectangle ("ELiteral\\n" <> Text.pack (show prim)) Nothing
       EIf _ t e1 e2 e3 -> do
-        nid <- emitRectangle "EIf" (Just t)
-        id1 <- toDot e1
-        id2 <- toDot e2
-        id3 <- toDot e3
-        emitEdge nid id1
-        emitEdgeWithLabel "then" nid id2
-        emitEdgeWithLabel "else" nid id3
-        return nid
+        fromNode (emitRectangle "EIf" (Just t)) $ do
+          emitEdgeTo e1
+          emitEdgeToWithLabel "then" e2
+          emitEdgeToWithLabel "else" e3
       EUnaryOperator _ t op ->
         emitRectangle ("EUnaryOperator\\n" <> Text.pack (show op)) (Just t)
       EBinaryOperator _ t op ->
         emitRectangle ("EBinaryOperator\\n" <> Text.pack (show op)) (Just t)
-      ERecord _ t fields maybeTail -> do
-        nid <- emitRectangle "ERecord" (Just t)
-        -- Emit each field
-        zid <- emitFields nid (Map.toList fields)
-
-        case maybeTail of
-          Just tailExpr -> do
-            tid <- toDot tailExpr
-            emitEdge zid tid -- Record -> Tail
-          Nothing -> return ()
-        return nid
-      EListCons _ t e1 e2 -> do
-        nid <- emitRectangle "EListCons" (Just t)
-        id1 <- toDot e1
-        id2 <- toDot e2
-        emitEdge nid id1
-        emitEdge nid id2
-        return nid
+      ERecord _ t fields mtail -> do
+        fromNode (emitRectangle "ERecord" (Just t)) $ do
+          id1 <- emitEdgeToFields (Map.toList fields)
+          lift $ do
+            id2 <- toDot mtail
+            emitEdge id1 id2
+      EListCons _ t e1 e2 ->
+        fromNode (emitRectangle "EListCons" (Just t)) $ do
+          emitEdgeTo e1
+          emitEdgeTo e2
       EListLiteral _ t es -> do
-        nid <- emitRectangle "EListLiteral" (Just t)
-        forM_ es $
-          \e -> do
-            eid <- toDot e
-            emitEdge nid eid
-        return nid
+        fromNode (emitRectangle "EListLiteral" (Just t)) $
+          emitEdgesTo es
       ETuple _ t es -> do
-        nid <- emitRectangle "ETuple" (Just t)
-        forM_ es $
-          \e -> do
-            eid <- toDot e
-            emitEdge nid eid
-        return nid
+        fromNode (emitRectangle "ETuple" (Just t)) $
+          emitEdgesTo es
       EMatch _ t e cs -> do
-        nid <- emitRectangle "EMatch" (Just t)
-        -- Scrutinee
-        sid <- toDot e
-        emitEdge nid sid
-        -- Clauses
-        forM_ cs $
-          \clause -> do
-            cid <- toDot clause
-            emitEdge nid cid
-        return nid
+        fromNode (emitRectangle "EMatch" (Just t)) $ do
+          emitEdgeTo e
+          emitEdgesTo cs
       ECompiledMatch _ t e cs -> do
-        nid <- emitRectangle "ECompiledMatch" (Just t)
-        -- Scrutinee
-        sid <- toDot e
-        emitEdge nid sid
-        -- Clauses
-        forM_ cs $
-          \clause -> do
-            cid <- toDot clause
-            emitEdge nid cid
-        return nid
+        fromNode (emitRectangle "ECompiledMatch" (Just t)) $ do
+          emitEdgeTo e
+          emitEdgesTo cs
       EFold _ t es cs me -> do
-        nid <- emitRectangle "EFold" (Just t)
-        ids1 <- traverse toDot es
-        ids2 <- traverse toDot cs
-        id1 <- toDot me
-        traverse_ (emitEdge nid) ids1
-        traverse_ (emitEdge nid) ids2
-        emitEdge nid id1
-        return nid
+        fromNode (emitRectangle "EFold" (Just t)) $ do
+          emitEdgesTo es
+          emitEdgesTo cs
+          emitEdgeTo me
       EUnfold _ t name ps d me -> do
-        nid <- emitRectangle ("EUnfold\\n" <> name) (Just t)
-        forM_ ps $
-          \p -> do
-            eid <- toDot p
-            emitEdge nid eid
-        forM_ (Map.toList d) $
-          \(fieldName, fieldExpr) -> do
-            fid <- emitHexagon ("Field\\n" <> fieldName) Nothing
-            eid <- toDot fieldExpr
-            emitEdge fid eid -- Field node -> Expression
-            emitEdge nid fid -- Record -> Field node
-        id1 <- toDot me
-        emitEdge nid id1
-        return nid
+        fromNode (emitRectangle ("EUnfold\\n" <> name) (Just t)) $ do
+          emitEdgesTo ps
+          void (emitEdgeToFields (Map.toList d))
+          emitEdgeTo me
       ESelect _ (Label t name) e -> do
-        nid <- emitRectangle ("ESelect\\n" <> name) (Just t)
-        sid <- toDot e
-        emitEdge nid sid
-        return nid
+        fromNode (emitRectangle ("ESelect\\n" <> name) (Just t)) $ do
+          emitEdgeTo e
       ECodataSelect _ (Label t name) e me -> do
-        nid <- emitRectangle ("ECodataSelect\\n" <> name) (Just t)
-        id1 <- toDot e
-        id2 <- toDot me
-        emitEdge nid id1
-        emitEdge nid id2
-        return nid
+        fromNode (emitRectangle ("ECodataSelect\\n" <> name) (Just t)) $ do
+          emitEdgeTo e
+          emitEdgeTo me
       ECodataFields _ t d -> do
-        nid <- emitRectangle "ECodataFields" (Just t)
-        void (emitFields nid (Map.toList d))
-        return nid
+        fromNode (emitRectangle "ECodataFields" (Just t)) $
+          void (emitEdgeToFields (Map.toList d))
       EFocus name ll1 ll2 e1 e2 -> do
-        nid <- emitRectangle ("EFocus\\n" <> name) Nothing
-        id1 <- toDot ll1
-        id2 <- toDot ll2
-        id3 <- toDot e1
-        id4 <- toDot e2
-        emitEdge nid id1
-        emitEdge nid id2
-        emitEdge nid id3
-        emitEdge nid id4
-        return nid
+        fromNode (emitRectangle ("EFocus\\n" <> name) Nothing) $ do
+          emitEdgeTo ll1
+          emitEdgeTo ll2
+          emitEdgeTo e1
+          emitEdgeTo e2
       EPlaceholder _ t _ ->
         emitRectangle "EPlaceholder" (Just t)
 
@@ -303,65 +258,40 @@ instance (Pretty t, Show t) => ToDot t (Pattern a t) where
   toDot =
     \case
       PAnnotation _ t inner -> do
-        nid <- emitEllipse ("PAnnotation\\n" <> prettyType t) Nothing
-        cid <- toDot inner
-        emitEdge nid cid
-        return nid
+        fromNode (emitEllipse ("PAnnotation\\n" <> prettyType t) Nothing) $ do
+          emitEdgeTo inner
       PAny _ t ->
         emitEllipse "PAny" (Just t)
       PVariable _ (Label t name) ->
         emitEllipse ("PVariable\\n" <> name) (Just t)
       PConstructor _ (Label t name) ps -> do
-        nid <- emitEllipse ("PConstructor\\n" <> name) (Just t)
-        forM_ ps $
-          \p -> do
-            eid <- toDot p
-            emitEdge nid eid
-        return nid
+        fromNode (emitEllipse ("PConstructor\\n" <> name) (Just t)) $
+          emitEdgesTo ps
       PLiteral _ prim ->
         emitEllipse ("PLiteral\\n" <> escapeQuotes (Text.pack (show prim))) Nothing
-      PRecord _ t fields maybeTail -> do
-        nid <- emitEllipse "PRecord" (Just t)
-        zid <- emitFields nid (Map.toList fields)
-        case maybeTail of
-          Just tailExpr -> do
-            tid <- toDot tailExpr
-            emitEdge zid tid -- Record -> Tail
-          Nothing -> return ()
-        return nid
+      PRecord _ t fields mtail -> do
+        fromNode (emitEllipse "PRecord" (Just t)) $ do
+          id1 <- emitEdgeToFields (Map.toList fields)
+          lift $ do
+            id2 <- toDot mtail
+            emitEdge id1 id2
       PListCons _ t p1 p2 -> do
-        nid <- emitEllipse "PListCons" (Just t)
-        id1 <- toDot p1
-        id2 <- toDot p2
-        emitEdge nid id1
-        emitEdge nid id2
-        return nid
+        fromNode (emitEllipse "PListCons" (Just t)) $ do
+          emitEdgeTo p1
+          emitEdgeTo p2
       PListLiteral _ t ps -> do
-        nid <- emitEllipse "PListLiteral" (Just t)
-        forM_ ps $
-          \p -> do
-            eid <- toDot p
-            emitEdge nid eid
-        return nid
+        fromNode (emitEllipse "PListLiteral" (Just t)) $
+          emitEdgesTo ps
       PTuple _ t ps -> do
-        nid <- emitEllipse "PTuple" (Just t)
-        forM_ ps $
-          \p -> do
-            eid <- toDot p
-            emitEdge nid eid
-        return nid
+        fromNode (emitEllipse "PTuple" (Just t)) $
+          emitEdgesTo ps
       POr _ t p1 p2 -> do
-        nid <- emitEllipse "POr" (Just t)
-        id1 <- toDot p1
-        id2 <- toDot p2
-        emitEdge nid id1
-        emitEdge nid id2
-        return nid
+        fromNode (emitEllipse "POr" (Just t)) $ do
+          emitEdgeTo p1
+          emitEdgeTo p2
       PAs _ (Label t name) p -> do
-        nid <- emitEllipse ("PAs\\n" <> name) (Just t)
-        id1 <- toDot p
-        emitEdge nid id1
-        return nid
+        fromNode (emitEllipse ("PAs\\n" <> name) (Just t)) $
+          emitEdgeTo p
       PShorthand _ (Label t name) ->
         emitEllipse ("PShorthand\\n" <> name) (Just t)
       PAtVariable _ (Label t name) ->
@@ -373,27 +303,17 @@ instance (Pretty t, Show t) => ToDot t (Clause a t) where
   toDot =
     \case
       EClause _ p cs -> do
-        nid <- emitRectangle "EClause" Nothing
-        id1 <- toDot p
-        emitEdge nid id1
-        forM_ cs $
-          \c -> do
-            eid <- toDot c
-            emitEdge nid eid
-        return nid
+        fromNode (emitRectangle "EClause" Nothing) $ do
+          emitEdgeTo p
+          emitEdgesTo cs
 
 instance (Pretty t, Show t) => ToDot t (Choice Expression a t) where
   toDot =
     \case
       CPlain _ gs e -> do
-        nid <- emitRectangle "CPlain" Nothing
-        id1 <- toDot e
-        emitEdge nid id1
-        forM_ gs $
-          \g -> do
-            eid <- toDot g
-            emitEdge nid eid
-        return nid
+        fromNode (emitRectangle "CPlain" Nothing) $ do
+          emitEdgesTo gs
+          emitEdgeTo e
       CLambda{} ->
         error "TODO"
 
@@ -401,50 +321,36 @@ instance (Pretty t, Show t) => ToDot t (Guard Expression a t) where
   toDot =
     \case
       CGuard e -> do
-        nid <- emitRectangle "CGuard" Nothing
-        cid <- toDot e
-        emitEdge nid cid
-        return nid
+        fromNode (emitRectangle "CGuard" Nothing) $ do
+          emitEdgeTo e
 
 instance (Pretty t, Show t) => ToDot t (CompiledClause a t) where
   toDot =
     \case
       ECompiledClause lls e -> do
-        nid <- emitRectangle "ECompiledClause" Nothing
-        forM_ lls $
-          \ll -> do
-            cid <- toDot ll
-            emitEdge nid cid
-        id1 <- toDot e
-        emitEdge nid id1
-        return nid
+        fromNode (emitRectangle "ECompiledClause" Nothing) $ do
+          emitEdgesTo lls
+          emitEdgeTo e
 
 instance (Show t, Pretty t) => ToDot t (Definition a k t) where
   toDot =
     \case
       DFunction name (Function _ (With _ t) ps e) -> do
-        nid <- emitParallelogram ("DFunction\\n" <> name) (Just t)
-        forM_ ps $
-          \p -> do
-            eid <- toDot p
-            emitEdge nid eid
-        cid <- toDot e
-        emitEdge nid cid
-        return nid
+        fromNode (emitParallelogram ("DFunction\\n" <> name) (Just t)) $ do
+          emitEdgesTo ps
+          emitEdgeTo e
       DConstant name (Constant _ (With _ t) e) -> do
-        nid <- emitParallelogram ("DConstant\\n" <> name) (Just t)
-        cid <- toDot e
-        emitEdge nid cid
-        return nid
+        fromNode (emitParallelogram ("DConstant\\n" <> name) (Just t)) $ do
+          emitEdgeTo e
       DAnnotation (With ts t) d -> do
-        nid <- emitParallelogram ("DAnnotation\\n" <> prettyType t) Nothing
-        forM_ ts $
-          \tr -> do
-            tid <- emitTriangle ("Trait\\n" <> prettyType tr) Nothing
-            emitEdge nid tid
-        did <- toDot d
-        emitEdge nid did
-        return nid
+        fromNode (emitParallelogram ("DAnnotation\\n" <> prettyType t) Nothing) $ do
+          nid <- ask
+          lift $ do
+            forM_ ts $
+              \tr -> do
+                id1 <- emitTriangle ("Trait\\n" <> prettyType tr) Nothing
+                emitEdge nid id1
+          emitEdgeTo d
       _ ->
         emitParallelogram "TODO" Nothing
 
@@ -525,142 +431,128 @@ writeDotFiles ns m@(Module (Path path) _ defs) = do
   prefix = ns <> "__" <> Text.intercalate "_" path
   prefixed n = prefix <> "_" <> n
 
-instance ToDot Kernel.Type (Kernel.Binding Kernel.Type Int) where
+instance ToDot Kernel.Type (DotGen Kernel.Type Int) where
+  toDot = id
+
+instance ToDot Kernel.Type (Kernel.Binding Kernel.Type (DotGen Kernel.Type Int)) where
   toDot =
     \case
-      Kernel.Binding (Label t name) id1 -> do
-        nid <- emitRectangle ("Binding\\n" <> name) (Just t)
-        emitEdge nid id1
-        return nid
+      Kernel.Binding (Label t name) e -> do
+        fromNode (emitRectangle ("Binding\\n" <> name) (Just t)) $ do
+          emitEdgeTo e
 
--- TODO: ???
 instance ToDot Kernel.Type (Kernel.Clause Kernel.Type (DotGen Kernel.Type Int)) where
   toDot =
     \case
-      Kernel.Clause lls x -> do
-        nid <- emitRectangle "Clause" Nothing
-        forM_ lls $
-          \ll -> do
-            pid <- toDot ll
-            emitEdge nid pid
-        zzz <- x
-        emitEdge nid zzz
-        return nid
-
--- instance ToDot Kernel.Type (Kernel.Clause Kernel.Type Int) where
+      Kernel.Clause lls e -> do
+        fromNode (emitRectangle "Clause" Nothing) $ do
+          emitEdgesTo lls
+          emitEdgeTo e
 
 instance ToDot Kernel.Type (Kernel.Focus Kernel.Type) where
   toDot =
     \case
       Kernel.Focus name ll1 ll2 -> do
-        nid <- emitRectangle ("Focus\\n" <> name) Nothing
-        id1 <- toDot ll1
-        id2 <- toDot ll2
-        emitEdge nid id1
-        emitEdge nid id2
-        pure nid
+        fromNode (emitRectangle ("Focus\\n" <> name) Nothing) $ do
+          emitEdgeTo ll1
+          emitEdgeTo ll2
 
-emitOp txt id1 id2 = do
-  nid <- emitRectangle txt Nothing
-  emitEdge nid id1
-  emitEdge nid id2
-  pure nid
+emitOp :: (ToDot t a) => Text -> [a] -> DotGen t Int
+emitOp text = fromNode (emitRectangle text Nothing) . emitEdgesTo
 
-instance ToDot Kernel.Type (Kernel.Op Int) where
+instance ToDot Kernel.Type (Kernel.Op (DotGen Kernel.Type Int)) where
   toDot =
     \case
-      Kernel.OEqInt32 id1 id2 ->
-        emitOp "OEqInt32" id1 id2
-      Kernel.OEqInt64 id1 id2 ->
-        emitOp "OEqInt64" id1 id2
-      Kernel.OEqFloat id1 id2 ->
-        emitOp "OEqFloat" id1 id2
-      Kernel.OEqDouble id1 id2 ->
-        emitOp "OEqDouble" id1 id2
-      Kernel.OEqChar id1 id2 ->
-        emitOp "OEqChar" id1 id2
-      Kernel.ONeInt32 id1 id2 ->
-        emitOp "ONeInt32" id1 id2
-      Kernel.ONeInt64 id1 id2 ->
-        emitOp "ONeInt64" id1 id2
-      Kernel.ONeFloat id1 id2 ->
-        emitOp "ONeFloat" id1 id2
-      Kernel.ONeDouble id1 id2 ->
-        emitOp "ONeDouble" id1 id2
-      Kernel.ONeChar id1 id2 ->
-        emitOp "ONeChar" id1 id2
-      Kernel.OLtInt32 id1 id2 ->
-        emitOp "OLtInt32" id1 id2
-      Kernel.OLtInt64 id1 id2 ->
-        emitOp "OLtInt64" id1 id2
-      Kernel.OLtFloat id1 id2 ->
-        emitOp "OLtFloat" id1 id2
-      Kernel.OLtDouble id1 id2 ->
-        emitOp "OLtDouble" id1 id2
-      Kernel.OGtInt32 id1 id2 ->
-        emitOp "OGtInt32" id1 id2
-      Kernel.OGtInt64 id1 id2 ->
-        emitOp "OGtInt64" id1 id2
-      Kernel.OGtFloat id1 id2 ->
-        emitOp "OGtFloat" id1 id2
-      Kernel.OGtDouble id1 id2 ->
-        emitOp "OGtDouble" id1 id2
-      Kernel.OLteInt32 id1 id2 ->
-        emitOp "OLteInt32" id1 id2
-      Kernel.OLteInt64 id1 id2 ->
-        emitOp "OLteInt64" id1 id2
-      Kernel.OLteFloat id1 id2 ->
-        emitOp "OLteFloat" id1 id2
-      Kernel.OLteDouble id1 id2 ->
-        emitOp "OLteDouble" id1 id2
-      Kernel.OGteInt32 id1 id2 ->
-        emitOp "OGteInt32" id1 id2
-      Kernel.OGteInt64 id1 id2 ->
-        emitOp "OGteInt64" id1 id2
-      Kernel.OGteFloat id1 id2 ->
-        emitOp "OGteFloat" id1 id2
-      Kernel.OGteDouble id1 id2 ->
-        emitOp "OGteDouble" id1 id2
-      Kernel.OAddInt32 id1 id2 ->
-        emitOp "OAddInt32" id1 id2
-      Kernel.OAddInt64 id1 id2 ->
-        emitOp "OAddInt64" id1 id2
-      Kernel.OAddFloat id1 id2 ->
-        emitOp "OAddFloat" id1 id2
-      Kernel.OAddDouble id1 id2 ->
-        emitOp "OAddDouble" id1 id2
-      Kernel.OSubInt32 id1 id2 ->
-        emitOp "OSubInt32" id1 id2
-      Kernel.OSubInt64 id1 id2 ->
-        emitOp "OSubInt64" id1 id2
-      Kernel.OSubFloat id1 id2 ->
-        emitOp "OSubFloat" id1 id2
-      Kernel.OSubDouble id1 id2 ->
-        emitOp "OSubDouble" id1 id2
-      Kernel.OMulInt32 id1 id2 ->
-        emitOp "OMulInt32" id1 id2
-      Kernel.OMulInt64 id1 id2 ->
-        emitOp "OMulInt64" id1 id2
-      Kernel.OMulFloat id1 id2 ->
-        emitOp "OMulFloat" id1 id2
-      Kernel.OMulDouble id1 id2 ->
-        emitOp "OMulDouble" id1 id2
-      Kernel.ODivInt32 id1 id2 ->
-        emitOp "ODivInt32" id1 id2
-      Kernel.ODivInt64 id1 id2 ->
-        emitOp "ODivInt64" id1 id2
-      Kernel.ODivFloat id1 id2 ->
-        emitOp "ODivFloat" id1 id2
-      Kernel.ODivDouble id1 id2 ->
-        emitOp "ODivDouble" id1 id2
-      Kernel.OOr id1 id2 ->
-        emitOp "OOr" id1 id2
-      Kernel.OAnd id1 id2 ->
-        emitOp "OAnd" id1 id2
-      Kernel.ONot id1 -> do
-        nid <- emitRectangle "ONot" Nothing
-        emitEdge nid id1
-        pure nid
+      Kernel.OEqInt32 op1 op2 ->
+        emitOp "OEqInt32" [op1, op2]
+      Kernel.OEqInt64 op1 op2 ->
+        emitOp "OEqInt64" [op1, op2]
+      Kernel.OEqFloat op1 op2 ->
+        emitOp "OEqFloat" [op1, op2]
+      Kernel.OEqDouble op1 op2 ->
+        emitOp "OEqDouble" [op1, op2]
+      Kernel.OEqChar op1 op2 ->
+        emitOp "OEqChar" [op1, op2]
+      Kernel.ONeInt32 op1 op2 ->
+        emitOp "ONeInt32" [op1, op2]
+      Kernel.ONeInt64 op1 op2 ->
+        emitOp "ONeInt64" [op1, op2]
+      Kernel.ONeFloat op1 op2 ->
+        emitOp "ONeFloat" [op1, op2]
+      Kernel.ONeDouble op1 op2 ->
+        emitOp "ONeDouble" [op1, op2]
+      Kernel.ONeChar op1 op2 ->
+        emitOp "ONeChar" [op1, op2]
+      Kernel.OLtInt32 op1 op2 ->
+        emitOp "OLtInt32" [op1, op2]
+      Kernel.OLtInt64 op1 op2 ->
+        emitOp "OLtInt64" [op1, op2]
+      Kernel.OLtFloat op1 op2 ->
+        emitOp "OLtFloat" [op1, op2]
+      Kernel.OLtDouble op1 op2 ->
+        emitOp "OLtDouble" [op1, op2]
+      Kernel.OGtInt32 op1 op2 ->
+        emitOp "OGtInt32" [op1, op2]
+      Kernel.OGtInt64 op1 op2 ->
+        emitOp "OGtInt64" [op1, op2]
+      Kernel.OGtFloat op1 op2 ->
+        emitOp "OGtFloat" [op1, op2]
+      Kernel.OGtDouble op1 op2 ->
+        emitOp "OGtDouble" [op1, op2]
+      Kernel.OLteInt32 op1 op2 ->
+        emitOp "OLteInt32" [op1, op2]
+      Kernel.OLteInt64 op1 op2 ->
+        emitOp "OLteInt64" [op1, op2]
+      Kernel.OLteFloat op1 op2 ->
+        emitOp "OLteFloat" [op1, op2]
+      Kernel.OLteDouble op1 op2 ->
+        emitOp "OLteDouble" [op1, op2]
+      Kernel.OGteInt32 op1 op2 ->
+        emitOp "OGteInt32" [op1, op2]
+      Kernel.OGteInt64 op1 op2 ->
+        emitOp "OGteInt64" [op1, op2]
+      Kernel.OGteFloat op1 op2 ->
+        emitOp "OGteFloat" [op1, op2]
+      Kernel.OGteDouble op1 op2 ->
+        emitOp "OGteDouble" [op1, op2]
+      Kernel.OAddInt32 op1 op2 ->
+        emitOp "OAddInt32" [op1, op2]
+      Kernel.OAddInt64 op1 op2 ->
+        emitOp "OAddInt64" [op1, op2]
+      Kernel.OAddFloat op1 op2 ->
+        emitOp "OAddFloat" [op1, op2]
+      Kernel.OAddDouble op1 op2 ->
+        emitOp "OAddDouble" [op1, op2]
+      Kernel.OSubInt32 op1 op2 ->
+        emitOp "OSubInt32" [op1, op2]
+      Kernel.OSubInt64 op1 op2 ->
+        emitOp "OSubInt64" [op1, op2]
+      Kernel.OSubFloat op1 op2 ->
+        emitOp "OSubFloat" [op1, op2]
+      Kernel.OSubDouble op1 op2 ->
+        emitOp "OSubDouble" [op1, op2]
+      Kernel.OMulInt32 op1 op2 ->
+        emitOp "OMulInt32" [op1, op2]
+      Kernel.OMulInt64 op1 op2 ->
+        emitOp "OMulInt64" [op1, op2]
+      Kernel.OMulFloat op1 op2 ->
+        emitOp "OMulFloat" [op1, op2]
+      Kernel.OMulDouble op1 op2 ->
+        emitOp "OMulDouble" [op1, op2]
+      Kernel.ODivInt32 op1 op2 ->
+        emitOp "ODivInt32" [op1, op2]
+      Kernel.ODivInt64 op1 op2 ->
+        emitOp "ODivInt64" [op1, op2]
+      Kernel.ODivFloat op1 op2 ->
+        emitOp "ODivFloat" [op1, op2]
+      Kernel.ODivDouble op1 op2 ->
+        emitOp "ODivDouble" [op1, op2]
+      Kernel.OOr op1 op2 ->
+        emitOp "OOr" [op1, op2]
+      Kernel.OAnd op1 op2 ->
+        emitOp "OAnd" [op1, op2]
+      Kernel.ONot op1 -> do
+        emitOp "ONot" [op1]
 
 instance ToDot Kernel.Type (Kernel.Expr Kernel.Type) where
   toDot =
@@ -669,109 +561,60 @@ instance ToDot Kernel.Type (Kernel.Expr Kernel.Type) where
         Kernel.EVar (Label t name) -> do
           emitRectangle ("EVar\\n" <> name) (Just t)
         Kernel.ELet bs e -> do
-          nid <- emitRectangle "ELet" Nothing
-          xs <- traverse sequence bs
-          forM_ xs $
-            \b -> do
-              cid <- toDot b
-              emitEdge nid cid
-          bid <- e
-          emitEdge nid bid
-          return nid
+          fromNode (emitRectangle "ELet" Nothing) $ do
+            emitEdgesTo bs
+            emitEdgeTo e
         Kernel.ELit p ->
           emitRectangle ("ELit\\n" <> Text.pack (show p)) Nothing
         Kernel.ELam lls e -> do
-          nid <- emitHouse "ELam" Nothing
-          forM_ lls $
-            \ll -> do
-              pid <- toDot ll
-              emitEdge nid pid
-          bid <- e
-          emitEdge nid bid
-          return nid
+          fromNode (emitHouse "ELam" Nothing) $ do
+            emitEdgesTo lls
+            emitEdgeTo e
         Kernel.EApp t e es -> do
-          nid <- emitDiamond "EApp" (Just t)
-          fid <- e
-          emitEdge nid fid
-          forM_ es $
-            \e1 -> do
-              aid <- e1
-              emitEdge nid aid
-          return nid
+          fromNode (emitDiamond "EApp" (Just t)) $ do
+            emitEdgeTo e
+            emitEdgesTo es
         Kernel.EIf e1 e2 e3 -> do
-          nid <- emitRectangle "EIf" Nothing
-          id1 <- e1
-          id2 <- e2
-          id3 <- e3
-          emitEdge nid id1
-          emitEdgeWithLabel "then" nid id2
-          emitEdgeWithLabel "else" nid id3
-          return nid
+          fromNode (emitRectangle "EIf" Nothing) $ do
+            emitEdgeTo e1
+            emitEdgeToWithLabel "then" e2
+            emitEdgeToWithLabel "else" e3
         Kernel.EOp op -> do
-          nid <- emitRectangle "EOp\\n" Nothing
-          x <- sequence op
-          id1 <- toDot x
-          emitEdge nid id1
-          return nid
+          fromNode (emitRectangle "EOp\\n" Nothing) $ do
+            emitEdgeTo op
         Kernel.EMat t e cs -> do
-          nid <- emitRectangle "EMat" (Just t)
-          id1 <- e
-          emitEdge nid id1
-          forM_ cs $
-            \c -> do
-              pid <- toDot c
-              emitEdge nid pid
-          return nid
+          fromNode (emitRectangle "EMat" (Just t)) $ do
+            emitEdgeTo e
+            emitEdgesTo cs
         Kernel.EExt fname e1 e2 -> do
-          nid <- emitHexagon ("EExt\\n" <> fname) Nothing
-          id1 <- e1
-          id2 <- e2
-          emitEdge nid id1
-          emitEdge nid id2
-          return nid
+          fromNode (emitHexagon ("EExt\\n" <> fname) Nothing) $ do
+            emitEdgeTo e1
+            emitEdgeTo e2
         Kernel.ENil ->
           emitHexagon "ENil" Nothing
         Kernel.ESel f e1 e2 -> do
-          nid <- emitHexagon "ESel" Nothing
-          cid <- toDot f
-          emitEdge nid cid
-          id1 <- e1
-          id2 <- e2
-          emitEdge nid id1
-          emitEdge nid id2
-          return nid
+          fromNode (emitHexagon "ESel" Nothing) $ do
+            emitEdgeTo f
+            emitEdgeTo e1
+            emitEdgeTo e2
         Kernel.ECall (Label t name) es e -> do
-          nid <- emitHexagon ("ECall\\n" <> name) (Just t)
-          forM_ es $
-            \c -> do
-              cid <- c
-              emitEdge nid cid
-          id1 <- e
-          emitEdge nid id1
-          return nid
+          fromNode (emitHexagon ("ECall\\n" <> name) (Just t)) $ do
+            emitEdgesTo es
+            emitEdgeTo e
         Kernel.EMem e -> do
-          nid <- emitHexagon "EMem" Nothing
-          id1 <- e
-          emitEdge nid id1
-          return nid
+          fromNode (emitHexagon "EMem" Nothing) $ do
+            emitEdgeTo e
 
 instance ToDot Kernel.Type (Kernel.Object Kernel.Type (Kernel.Expr Kernel.Type)) where
   toDot =
     \case
       Kernel.OFunction name lls e -> do
-        nid <- emitParallelogram ("OFunction\\n" <> name) Nothing
-        forM_ lls $
-          \ll -> do
-            cid <- toDot ll
-            emitEdge nid cid
-        cid <- toDot e
-        emitEdge nid cid
-        return nid
+        fromNode (emitParallelogram ("OFunction\\n" <> name) Nothing) $ do
+          emitEdgesTo lls
+          emitEdgeTo e
       Kernel.OConstant name e -> do
-        nid <- emitParallelogram ("OConstant\\n" <> name) Nothing
-        cid <- toDot e
-        emitEdge nid cid
-        return nid
+        fromNode (emitParallelogram ("OConstant\\n" <> name) Nothing) $ do
+          emitEdgeTo e
       Kernel.OExternal{} ->
         emitParallelogram "TODO" Nothing
       Kernel.OData{} ->
@@ -780,8 +623,8 @@ instance ToDot Kernel.Type (Kernel.Object Kernel.Type (Kernel.Expr Kernel.Type))
 instance ToDot Kernel.Type (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type)) where
   toDot =
     \case
-      Kernel.Module mname _ objs -> do
-        nid <- emitEllipse mname Nothing
+      Kernel.Module modn _ objs -> do
+        nid <- emitEllipse modn Nothing
         traverse_ toDot objs
         return nid
 
