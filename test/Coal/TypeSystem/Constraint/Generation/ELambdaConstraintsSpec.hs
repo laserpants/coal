@@ -106,7 +106,7 @@ collectELambdaConstraintsSpec4 =
   constraint2 `elem` constraints && constraint3 `elem` constraints && constraint4 `elem` constraints
  where
   constraints = muteConstraint <$> rights outs
-  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (collectConstraints expr)
+  (_, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (collectConstraints expr)
   expr = fixture3
   ctx =
     ConstraintsGenContext
