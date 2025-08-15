@@ -159,8 +159,7 @@ prettyTypePrec prec =
       parensIf (prec > precApp) $
         group $
           "alias"
-            <+> pretty name
-              <> prettyArgs
+            <+> (pretty name <> prettyArgs)
             <+> "="
             <+> prettyTypePrec precArrow t
      where
