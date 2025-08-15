@@ -184,17 +184,26 @@ instance (Pretty t, Show t) => ToDot t (Expression a t) where
       ERecord _ t fields maybeTail -> do
         nid <- emitRectangle "ERecord" (Just t)
         -- Emit each field
-        forM_ (Map.toList fields) $
-          \(fieldName, fieldExpr) -> do
-            fid <- emitHexagon ("Field\\n" <> fieldName) Nothing
-            eid <- toDot fieldExpr
-            emitEdge fid eid -- Field node -> Expression
-            emitEdge nid fid -- Record -> Field node
-            -- Emit optional tail
+        zid <- foldM (
+            \x (fieldName, fieldExpr) -> do
+              fid <- emitHexagon ("Field\\n" <> fieldName) Nothing
+              eid <- toDot fieldExpr
+              emitEdge x fid
+              emitEdge fid eid
+              return fid
+          ) nid (Map.toList fields)
+
+        --forM_ (Map.toList fields) $
+        --  \(fieldName, fieldExpr) -> do
+        --    fid <- emitHexagon ("Field\\n" <> fieldName) Nothing
+        --    eid <- toDot fieldExpr
+        --    emitEdge fid eid -- Field node -> Expression
+        --    emitEdge nid fid -- Record -> Field node
+        --    -- Emit optional tail
         case maybeTail of
           Just tailExpr -> do
             tid <- toDot tailExpr
-            emitEdge nid tid -- Record -> Tail
+            emitEdge zid tid -- Record -> Tail
           Nothing -> return ()
         return nid
       EListCons _ t e1 e2 -> do
@@ -278,13 +287,23 @@ instance (Pretty t, Show t) => ToDot t (Expression a t) where
         return nid
       ECodataFields _ t d -> do
         nid <- emitRectangle "ECodataFields" (Just t)
-        forM_ (Map.toList d) $
-          \(fieldName, fieldExpr) -> do
-            fid <- emitHexagon ("Field\\n" <> fieldName) Nothing
-            eid <- toDot fieldExpr
-            emitEdge fid eid -- Field node -> Expression
-            emitEdge nid fid -- Record -> Field node
+        foldM_ (
+            \x (fieldName, fieldExpr) -> do
+              fid <- emitHexagon ("Field\\n" <> fieldName) Nothing
+              eid <- toDot fieldExpr
+              emitEdge x fid
+              emitEdge fid eid
+              return fid
+          ) nid (Map.toList d)
+
         return nid
+
+        --forM_ (Map.toList d) $
+        --  \(fieldName, fieldExpr) -> do
+        --    fid <- emitHexagon ("Field\\n" <> fieldName) Nothing
+        --    eid <- toDot fieldExpr
+        --    emitEdge fid eid -- Field node -> Expression
+        --    emitEdge nid fid -- Record -> Field node
       EFocus name ll1 ll2 e1 e2 -> do
         nid <- emitRectangle ("EFocus\\n" <> name) Nothing
         id1 <- toDot ll1
@@ -322,18 +341,30 @@ instance (Pretty t, Show t) => ToDot t (Pattern a t) where
         emitEllipse ("PLiteral\\n" <> escapeQuotes (Text.pack (show prim))) Nothing
       PRecord _ t fields maybeTail -> do
         nid <- emitEllipse "PRecord" (Just t)
-        -- Emit each field
-        forM_ (Map.toList fields) $
-          \(fieldName, fieldExpr) -> do
-            fid <- emitHexagon ("Field\\n" <> fieldName) Nothing
-            eid <- toDot fieldExpr
-            emitEdge fid eid -- Field node -> Pattern
-            emitEdge nid fid -- Record -> Field node
-            -- Emit optional tail
+
+        -- TODO: DRY
+        zid <- foldM (
+            \x (fieldName, fieldExpr) -> do
+              fid <- emitHexagon ("Field\\n" <> fieldName) Nothing
+              eid <- toDot fieldExpr
+              emitEdge x fid
+              emitEdge fid eid
+              return fid
+          ) nid (Map.toList fields)
+
+--        -- Emit each field
+--        --
+--        forM_ (Map.toList fields) $
+--          \(fieldName, fieldExpr) -> do
+--            fid <- emitHexagon ("Field\\n" <> fieldName) Nothing
+--            eid <- toDot fieldExpr
+--            emitEdge fid eid -- Field node -> Pattern
+--            emitEdge nid fid -- Record -> Field node
+--            -- Emit optional tail
         case maybeTail of
           Just tailExpr -> do
             tid <- toDot tailExpr
-            emitEdge nid tid -- Record -> Tail
+            emitEdge zid tid -- Record -> Tail
           Nothing -> return ()
         return nid
       PListCons _ t p1 p2 -> do
