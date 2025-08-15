@@ -112,8 +112,8 @@ emitEdgeTo d = do
   id1 <- lift (toDot d)
   lift (emitEdge nid id1)
 
-emitEdgeToWithLabel :: (ToDot t a) => Text -> a -> ReaderT Int (DotGen t) ()
-emitEdgeToWithLabel label d = do
+emitEdgeWithLabelTo :: (ToDot t a) => Text -> a -> ReaderT Int (DotGen t) ()
+emitEdgeWithLabelTo label d = do
   nid <- ask
   id1 <- lift (toDot d)
   lift (emitEdgeWithLabel label nid id1)
@@ -184,8 +184,8 @@ instance (Pretty t, Show t) => ToDot t (Expression a t) where
       ERecursiveLet _ pat rhs body -> do
         fromNode (emitRectangle "ERecursiveLet" Nothing) $ do
           emitEdgeTo pat
-          emitEdgeToWithLabel "=" rhs
-          emitEdgeToWithLabel "in" body
+          emitEdgeWithLabelTo "=" rhs
+          emitEdgeWithLabelTo "in" body
       EVariable _ (Label t name) ->
         emitRectangle ("EVariable\\n" <> name) (Just t)
       EConstructor _ (Label t name) ->
@@ -195,8 +195,8 @@ instance (Pretty t, Show t) => ToDot t (Expression a t) where
       EIf _ t e1 e2 e3 -> do
         fromNode (emitRectangle "EIf" (Just t)) $ do
           emitEdgeTo e1
-          emitEdgeToWithLabel "then" e2
-          emitEdgeToWithLabel "else" e3
+          emitEdgeWithLabelTo "then" e2
+          emitEdgeWithLabelTo "else" e3
       EUnaryOperator _ t op ->
         emitRectangle ("EUnaryOperator\\n" <> Text.pack (show op)) (Just t)
       EBinaryOperator _ t op ->
@@ -577,8 +577,8 @@ instance ToDot Kernel.Type (Kernel.Expr Kernel.Type) where
         Kernel.EIf e1 e2 e3 -> do
           fromNode (emitRectangle "EIf" Nothing) $ do
             emitEdgeTo e1
-            emitEdgeToWithLabel "then" e2
-            emitEdgeToWithLabel "else" e3
+            emitEdgeWithLabelTo "then" e2
+            emitEdgeWithLabelTo "else" e3
         Kernel.EOp op -> do
           fromNode (emitRectangle "EOp\\n" Nothing) $ do
             emitEdgeTo op
