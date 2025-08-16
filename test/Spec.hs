@@ -168,6 +168,10 @@ spec = do
   print a
   x <- main62
   print (x == Right "720\n")
+  x <- main64
+  print (x == Right "Prot\n")
+  x <- main65
+  print (x == Right "prot\n")
 
 runTestFiles :: [String] -> IO (Either CompilerError Text)
 runTestFiles files = do
@@ -558,6 +562,18 @@ main64 :: IO (Either CompilerError Text)
 main64 = do
   runTestFiles
     [ "./test/Coal/examples/64/Main.coal"
+    ]
+
+main65 :: IO (Either CompilerError Text)
+main65 = do
+  runTestFiles
+    [ "./test/Coal/examples/65/Main.coal"
+    ]
+
+main66 :: IO (Either CompilerError Text)
+main66 = do
+  runTestFiles
+    [ "./test/Coal/examples/66/Main.coal"
     ]
 
 compileFiles :: [String] -> IO (Either CompilerError ())

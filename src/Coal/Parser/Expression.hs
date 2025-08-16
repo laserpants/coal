@@ -17,7 +17,7 @@ import Coal.Parser.Utils (fieldList, fieldListWithKey)
 import Control.Monad (void)
 import Control.Monad.Combinators.Expr
 import Extra (Name, isConstructor)
-import Text.Megaparsec (getSourcePos, notFollowedBy, optional, some, try, (<|>))
+import Text.Megaparsec (getSourcePos, notFollowedBy, option, optional, some, try, (<|>))
 import Text.Megaparsec.Char (char)
 
 import qualified Data.Map.Strict as Map
@@ -159,9 +159,12 @@ parseLambdaExpression =
 parseRecordExpression :: Parser (Expression Metadata ())
 parseRecordExpression = do
   withMetadata $ do
-    fields <- braces (fieldList parseExpression "=")
-    -- TODO
-    pure (\loc -> ERecord loc () (Map.fromList fields) Nothing)
+    braces $ do
+      fields <- fieldList parseExpression "="
+      tail_ <- optional rest
+      pure (\loc -> ERecord loc () (Map.fromList fields) tail_)
+ where
+  rest = pipe >> parseExpression
 
 parseTupleExpression :: Parser (Expression Metadata ())
 parseTupleExpression = do

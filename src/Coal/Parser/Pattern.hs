@@ -128,9 +128,12 @@ parseConstructorPattern =
 parseRecordPattern :: Parser (Pattern Metadata ())
 parseRecordPattern =
   withMetadata $ do
-    fields <- braces (fieldList parsePattern "=")
-    -- TODO
-    pure (\loc -> PRecord loc () (Map.fromList fields) Nothing)
+    braces $ do
+      fields <- fieldList parsePattern "="
+      tail_ <- optional rest
+      pure (\loc -> PRecord loc () (Map.fromList fields) tail_)
+ where
+  rest = pipe >> parsePattern
 
 parseTuplePattern :: Parser (Pattern Metadata ())
 parseTuplePattern = do

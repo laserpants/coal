@@ -140,8 +140,8 @@ getRow =
   \case
     TIntrinsic (IRecord (TRow r)) ->
       r
-    _ ->
-      error "Implementation error"
+    q ->
+      error (show q) -- "Implementation error"
 
 clauseAssumptions :: (Show a, Data a) => Clause a IndexedType -> ConstraintsGen a (IndexedType, [IndexedType], [Assumption a IndexedType])
 clauseAssumptions (EClause loc p cs) = do
