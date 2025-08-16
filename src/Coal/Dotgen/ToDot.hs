@@ -6,7 +6,6 @@
 {-# LANGUAGE StrictData #-}
 {-# LANGUAGE UndecidableInstances #-}
 
--- Graphviz Dot
 module Coal.Dotgen.ToDot (ToDot (..), writeDotFile) where
 
 import Coal.Common.Label (Label (..))
