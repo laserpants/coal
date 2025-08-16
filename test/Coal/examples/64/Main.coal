@@ -4,6 +4,6 @@ module Main {
     trace_string(r.name);
 
   fun main() =
-    trace_int32(123123);
+    print_name({ name = "Prot" });
 
 }

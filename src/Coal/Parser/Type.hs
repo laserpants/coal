@@ -10,7 +10,8 @@ import Coal.Parser.Symbol
 import Coal.Parser.Utils (fieldList)
 import Control.Monad.Combinators.Expr
 import Data.Functor (($>))
-import Text.Megaparsec (option, try, (<|>))
+import Data.Maybe (fromMaybe)
+import Text.Megaparsec (option, optional, try, (<|>))
 import TextShow (showt)
 
 import qualified Coal.Language.Type.Row as Row
@@ -46,11 +47,14 @@ parseTupleType = do
   pure $ TApplication () (TConstructor () ("#Tuple" <> showt (length ts))) ts
 
 parseRecordType :: Parser (Type Parameter ())
-parseRecordType = do
-  fields <- braces (fieldList parseType ":")
-  let dict = pure <$> Map.fromList fields
-  -- TODO
-  pure (TIntrinsic (IRecord (TRow (Row.fromDictionary dict RNil))))
+parseRecordType =
+  braces $ do
+    fields <- fieldList parseType ":"
+    let dict = pure <$> Map.fromList fields
+    param <- optional rest
+    pure (TIntrinsic (IRecord (TRow (Row.fromDictionary dict (maybe RNil RVariable param)))))
+ where
+  rest = pipe >> Parameter () <$> name
 
 parseTypeApplication :: Parser (Type Parameter ())
 parseTypeApplication = do
