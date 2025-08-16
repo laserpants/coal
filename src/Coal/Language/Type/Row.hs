@@ -14,7 +14,6 @@ module Coal.Language.Type.Row (
 ) where
 
 import Data.Data (Data, Typeable)
-import Data.Tuple.Extra (second)
 import Extra (Dictionary, Name, (<$$>))
 import GHC.Generics (Generic)
 
@@ -26,7 +25,7 @@ data Row o k t
   | RNil
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable, Generic)
 
-data RowData o k t = RowData (Dictionary [t]) (Row o k t)
+data RowData o k t = RowData (Dictionary t) (Row o k t)
   deriving (Show, Eq, Ord, Read)
 
 toRowData :: Row o k t -> RowData o k t
@@ -35,16 +34,16 @@ toRowData = go mempty
   go m =
     \case
       RExtend name t r ->
-        go (Map.insertWith (<>) name [t] m) r
+        go (Map.insert name t m) r
       r ->
         RowData m r
 
 {-# INLINE fromRowData #-}
 fromRowData :: RowData o k t -> Row o k t
-fromRowData (RowData d row) = Map.foldrWithKey (flip . foldr . RExtend) row d
+fromRowData (RowData d row) = Map.foldrWithKey RExtend row d
 
 {-# INLINE fromDictionary #-}
-fromDictionary :: Dictionary [t] -> Row o k t -> Row o k t
+fromDictionary :: Dictionary t -> Row o k t -> Row o k t
 fromDictionary = fromRowData <$$> RowData
 
 {-# INLINE normalizeRow #-}
@@ -53,14 +52,12 @@ normalizeRow = fromRowData . toRowData
 
 extractField :: Name -> Row o k t -> Maybe (t, Row o k t)
 extractField name row =
-  second (fromRowData . (`RowData` r)) <$> go
+  case Map.lookup name dict of
+    Nothing ->
+      Nothing
+    Just t ->
+      Just (t, fromDictionary (Map.delete name dict) r)
  where
-  go =
-    case Map.lookup name dict of
-      Just (t : ts) ->
-        Just (t, Map.filter (not . null) (Map.insert name ts dict))
-      _ ->
-        Nothing
   RowData dict r =
     toRowData row
 

@@ -96,7 +96,7 @@ patternConstraints assert ms =
       assert t (filter (assumptionNameIs name) ms)
       pure [name]
     PRecord _ t d p -> do
-      let d1 = pure . typeOf <$> d
+      let d1 = typeOf <$> d
           p1 = getRow . typeOf <$> p
           t1 = TIntrinsic (IRecord (TRow (fromDictionary d1 (fromMaybe RNil p1))))
       forM_ (Map.toList d) $ \(name, e) ->
@@ -325,7 +325,7 @@ collectConstraints =
     ERecord _ t d e -> do
       ms1 <- concatMapM collectConstraints e
       ms2 <- concatMapM collectConstraints d
-      let d1 = pure . typeOf <$> d
+      let d1 = typeOf <$> d
           e1 = getRow . typeOf <$> e
           t1 = TIntrinsic (IRecord (TRow (fromDictionary d1 (fromMaybe RNil e1))))
       tellRight [Equality InferenceRulePlaceholder [t, t1]]

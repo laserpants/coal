@@ -50,7 +50,7 @@ parseRecordType :: Parser (Type Parameter ())
 parseRecordType =
   braces $ do
     fields <- fieldList parseType ":"
-    let dict = pure <$> Map.fromList fields
+    let dict = Map.fromList fields
     param <- optional rest
     pure (TIntrinsic (IRecord (TRow (Row.fromDictionary dict (maybe RNil RVariable param)))))
  where
