@@ -119,7 +119,7 @@ parseUnfoldExpression = do
     n <- symbol_ "@" *> name
     ps <- parens (nonEmpty (commaSep1 parsePattern))
     fields <- braces $ do
-      optional (symbol ",")
+      void $ optional (symbol ",")
       fieldListWithKey constructor parseExpression "="
     pure (\loc -> EUnfold loc () n ps (Map.fromList fields) Nothing)
 
