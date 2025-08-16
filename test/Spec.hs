@@ -12,7 +12,7 @@ import Coal.Compiler (kernelTranslationC, mainPass, typeCheckingPass)
 import Coal.Compiler.Environment
 import Coal.Compiler.Stack
 import Coal.Compiler.TypeInference.Errors
-import Coal.Dotgen.ToDot (writeDotFile)
+import Coal.Graphviz.ToDot (writeDotFile)
 import Coal.Kernel.Compiler (compileModules)
 import Coal.Kernel.LLVM.IRConstruct (IRConstruct (..))
 import Coal.Kernel.LLVM.IREncodable (irEncode)

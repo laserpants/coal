@@ -6,7 +6,7 @@
 {-# LANGUAGE StrictData #-}
 {-# LANGUAGE UndecidableInstances #-}
 
-module Coal.Dotgen.ToDot (ToDot (..), writeDotFile) where
+module Coal.Graphviz.Dot (Dot (..), writeDotFile) where
 
 import Coal.Common.Label (Label (..))
 import Coal.Common.Name (Name)
@@ -59,7 +59,7 @@ instance Supply (DotState t) where
 
 type DotGen t = State (DotState t)
 
-class ToDot t a | a -> t where
+class Dot t a | a -> t where
   toDot :: a -> DotGen t Int
 
 freshId :: DotGen t Int
@@ -104,28 +104,28 @@ fromNode f g = do
   runReaderT g nid
   return nid
 
-emitEdgeTo :: (ToDot t a) => a -> ReaderT Int (DotGen t) ()
+emitEdgeTo :: (Dot t a) => a -> ReaderT Int (DotGen t) ()
 emitEdgeTo d = do
   nid <- ask
   id1 <- lift (toDot d)
   lift (emitEdge nid id1)
 
-emitEdgeWithLabelTo :: (ToDot t a) => Text -> a -> ReaderT Int (DotGen t) ()
+emitEdgeWithLabelTo :: (Dot t a) => Text -> a -> ReaderT Int (DotGen t) ()
 emitEdgeWithLabelTo label d = do
   nid <- ask
   id1 <- lift (toDot d)
   lift (emitEdgeWithLabel label nid id1)
 
-emitEdgeToFields :: (ToDot t a) => [(Name, a)] -> ReaderT Int (DotGen t) Int
+emitEdgeToFields :: (Dot t a) => [(Name, a)] -> ReaderT Int (DotGen t) Int
 emitEdgeToFields f = do
   nid <- ask
   lift (emitFields nid f)
 
 {-# INLINE emitEdgesTo #-}
-emitEdgesTo :: (Foldable f, ToDot t a) => f a -> ReaderT Int (DotGen t) ()
+emitEdgesTo :: (Foldable f, Dot t a) => f a -> ReaderT Int (DotGen t) ()
 emitEdgesTo = traverse_ emitEdgeTo
 
-emitFields :: (ToDot t a) => Int -> [(Name, a)] -> DotGen t Int
+emitFields :: (Dot t a) => Int -> [(Name, a)] -> DotGen t Int
 emitFields = foldM go
  where
   go id1 (name, expr) = do
@@ -135,7 +135,7 @@ emitFields = foldM go
     emitEdge id2 id3
     return id2
 
-instance (ToDot t a) => ToDot t (Maybe a) where
+instance (Dot t a) => Dot t (Maybe a) where
   toDot =
     \case
       Nothing -> do
@@ -146,13 +146,13 @@ instance (ToDot t a) => ToDot t (Maybe a) where
         emitEdge nid cid
         pure nid
 
-instance ToDot t (Label t) where
+instance Dot t (Label t) where
   toDot =
     \case
       Label t name ->
         emitNote ("Label\\n" <> name) (Just t)
 
-instance (Pretty t, Show t) => ToDot t (Binding Expression a t) where
+instance (Pretty t, Show t) => Dot t (Binding Expression a t) where
   toDot =
     \case
       BPattern _ pat rhs -> do
@@ -162,7 +162,7 @@ instance (Pretty t, Show t) => ToDot t (Binding Expression a t) where
       BFunction{} ->
         error "TODO"
 
-instance (Pretty t, Show t) => ToDot t (Expression a t) where
+instance (Pretty t, Show t) => Dot t (Expression a t) where
   toDot =
     \case
       EAnnotation _ t inner -> do
@@ -253,7 +253,7 @@ instance (Pretty t, Show t) => ToDot t (Expression a t) where
       EPlaceholder _ t _ ->
         emitRectangle "EPlaceholder" (Just t)
 
-instance (Pretty t, Show t) => ToDot t (Pattern a t) where
+instance (Pretty t, Show t) => Dot t (Pattern a t) where
   toDot =
     \case
       PAnnotation _ t inner -> do
@@ -298,7 +298,7 @@ instance (Pretty t, Show t) => ToDot t (Pattern a t) where
       PPlaceholder _ t _ ->
         emitEllipse "PPlaceholder" (Just t)
 
-instance (Pretty t, Show t) => ToDot t (Clause a t) where
+instance (Pretty t, Show t) => Dot t (Clause a t) where
   toDot =
     \case
       EClause _ p cs -> do
@@ -306,7 +306,7 @@ instance (Pretty t, Show t) => ToDot t (Clause a t) where
           emitEdgeTo p
           emitEdgesTo cs
 
-instance (Pretty t, Show t) => ToDot t (Choice Expression a t) where
+instance (Pretty t, Show t) => Dot t (Choice Expression a t) where
   toDot =
     \case
       CPlain _ gs e -> do
@@ -316,14 +316,14 @@ instance (Pretty t, Show t) => ToDot t (Choice Expression a t) where
       CLambda{} ->
         error "TODO"
 
-instance (Pretty t, Show t) => ToDot t (Guard Expression a t) where
+instance (Pretty t, Show t) => Dot t (Guard Expression a t) where
   toDot =
     \case
       CGuard e -> do
         fromNode (emitRectangle "CGuard" Nothing) $ do
           emitEdgeTo e
 
-instance (Pretty t, Show t) => ToDot t (CompiledClause a t) where
+instance (Pretty t, Show t) => Dot t (CompiledClause a t) where
   toDot =
     \case
       ECompiledClause lls e -> do
@@ -331,7 +331,7 @@ instance (Pretty t, Show t) => ToDot t (CompiledClause a t) where
           emitEdgesTo lls
           emitEdgeTo e
 
-instance (Show t, Pretty t) => ToDot t (Definition a k t) where
+instance (Show t, Pretty t) => Dot t (Definition a k t) where
   toDot =
     \case
       DFunction name (Function _ (With _ t) ps e) -> do
@@ -350,7 +350,7 @@ instance (Show t, Pretty t) => ToDot t (Definition a k t) where
                 id1 <- emitTriangle ("Trait\\n" <> prettyType tr) Nothing
                 emitEdge nid id1
           emitEdgeTo d
-      DImport (Path path) ns ->
+      DImport (Path _) _ ->
         emitParallelogram "DImport" Nothing
       DType name _ _ ->
         emitParallelogram ("DType\\n" <> name) Nothing
@@ -363,7 +363,7 @@ instance (Show t, Pretty t) => ToDot t (Definition a k t) where
       _ ->
         emitParallelogram "TODO" Nothing
 
-instance (Show t, Pretty t) => ToDot t (Module a k t) where
+instance (Show t, Pretty t) => Dot t (Module a k t) where
   toDot =
     \case
       Module (Path path) _ ds -> do
@@ -371,7 +371,7 @@ instance (Show t, Pretty t) => ToDot t (Module a k t) where
         traverse_ toDot ds
         return nid
 
-generateDot :: (Pretty t, ToDot t a) => a -> Text
+generateDot :: (Pretty t, Dot t a) => a -> Text
 generateDot ast =
   Text.unlines $
     [ "digraph AST {"
@@ -420,20 +420,20 @@ prettyType p = renderStrict . layoutPretty defaultLayoutOptions $ pretty p
 escapeQuotes :: Text -> Text
 escapeQuotes = Text.replace "\"" "\\\""
 
-writeDotFile :: (Pretty t, ToDot t a) => Text -> a -> IO ()
+writeDotFile :: (Pretty t, Dot t a) => Text -> a -> IO ()
 writeDotFile fname a = Text.writeFile ("./.debug/" <> Text.unpack fname <> ".gv") (generateDot a)
 
-instance ToDot Kernel.Type (DotGen Kernel.Type Int) where
+instance Dot Kernel.Type (DotGen Kernel.Type Int) where
   toDot = id
 
-instance ToDot Kernel.Type (Kernel.Binding Kernel.Type (DotGen Kernel.Type Int)) where
+instance Dot Kernel.Type (Kernel.Binding Kernel.Type (DotGen Kernel.Type Int)) where
   toDot =
     \case
       Kernel.Binding (Label t name) e -> do
         fromNode (emitRectangle ("Binding\\n" <> name) (Just t)) $ do
           emitEdgeTo e
 
-instance ToDot Kernel.Type (Kernel.Clause Kernel.Type (DotGen Kernel.Type Int)) where
+instance Dot Kernel.Type (Kernel.Clause Kernel.Type (DotGen Kernel.Type Int)) where
   toDot =
     \case
       Kernel.Clause lls e -> do
@@ -441,7 +441,7 @@ instance ToDot Kernel.Type (Kernel.Clause Kernel.Type (DotGen Kernel.Type Int)) 
           emitEdgesTo lls
           emitEdgeTo e
 
-instance ToDot Kernel.Type (Kernel.Focus Kernel.Type) where
+instance Dot Kernel.Type (Kernel.Focus Kernel.Type) where
   toDot =
     \case
       Kernel.Focus name ll1 ll2 -> do
@@ -449,10 +449,10 @@ instance ToDot Kernel.Type (Kernel.Focus Kernel.Type) where
           emitEdgeTo ll1
           emitEdgeTo ll2
 
-emitOp :: (ToDot t a) => Text -> [a] -> DotGen t Int
+emitOp :: (Dot t a) => Text -> [a] -> DotGen t Int
 emitOp text = fromNode (emitRectangle text Nothing) . emitEdgesTo
 
-instance ToDot Kernel.Type (Kernel.Op (DotGen Kernel.Type Int)) where
+instance Dot Kernel.Type (Kernel.Op (DotGen Kernel.Type Int)) where
   toDot =
     \case
       Kernel.OEqInt32 op1 op2 ->
@@ -546,7 +546,7 @@ instance ToDot Kernel.Type (Kernel.Op (DotGen Kernel.Type Int)) where
       Kernel.ONot op1 -> do
         emitOp "ONot" [op1]
 
-instance ToDot Kernel.Type (Kernel.Expr Kernel.Type) where
+instance Dot Kernel.Type (Kernel.Expr Kernel.Type) where
   toDot =
     cata $
       \case
@@ -597,7 +597,7 @@ instance ToDot Kernel.Type (Kernel.Expr Kernel.Type) where
           fromNode (emitHexagon "EMem" Nothing) $ do
             emitEdgeTo e
 
-instance ToDot Kernel.Type (Kernel.Object Kernel.Type (Kernel.Expr Kernel.Type)) where
+instance Dot Kernel.Type (Kernel.Object Kernel.Type (Kernel.Expr Kernel.Type)) where
   toDot =
     \case
       Kernel.OFunction name lls e -> do
@@ -612,7 +612,7 @@ instance ToDot Kernel.Type (Kernel.Object Kernel.Type (Kernel.Expr Kernel.Type))
       Kernel.OData{} ->
         emitParallelogram "TODO" Nothing
 
-instance ToDot Kernel.Type (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type)) where
+instance Dot Kernel.Type (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type)) where
   toDot =
     \case
       Kernel.Module modn _ objs -> do
