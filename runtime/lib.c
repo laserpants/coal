@@ -161,6 +161,24 @@ print_bignum(mpz_t* big_int)
 
 /*
  * ////////////////////////////////////////////////////////////////////////////
+ * Type conversions
+ *
+ */
+
+float
+int32_to_float(int32_t n)
+{
+  return (float) n;
+}
+
+double
+int32_to_double(int32_t n)
+{
+  return (double) n;
+}
+
+/*
+ * ////////////////////////////////////////////////////////////////////////////
  * String utilities
  *
  */

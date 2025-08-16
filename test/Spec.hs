@@ -158,6 +158,8 @@ spec = do
   print (x == Right "false\n")
   x <- main57
   print (x == Right "1\n")
+  x <- main58
+  print (x == Right "22.500000\n")
 
 runTestFiles :: [String] -> IO (Either CompilerError Text)
 runTestFiles files = do
@@ -651,6 +653,56 @@ builtinInstances =
               ]
           )
         ,
+          ( TIntrinsic IFloat
+          , Map.fromList
+              [
+                ( "from_int32"
+                , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IFloat)
+                )
+              ,
+                ( "negate"
+                , Forall mempty [] (TIntrinsic IFloat `TArrow` TIntrinsic IFloat)
+                )
+              ,
+                ( "(+)"
+                , Forall mempty [] (TIntrinsic IFloat `TArrow` TIntrinsic IFloat `TArrow` TIntrinsic IFloat)
+                )
+              ,
+                ( "(-)"
+                , Forall mempty [] (TIntrinsic IFloat `TArrow` TIntrinsic IFloat `TArrow` TIntrinsic IFloat)
+                )
+              ,
+                ( "(*)"
+                , Forall mempty [] (TIntrinsic IFloat `TArrow` TIntrinsic IFloat `TArrow` TIntrinsic IFloat)
+                )
+              ]
+          )
+        ,
+          ( TIntrinsic IDouble
+          , Map.fromList
+              [
+                ( "from_int32"
+                , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IDouble)
+                )
+              ,
+                ( "negate"
+                , Forall mempty [] (TIntrinsic IDouble `TArrow` TIntrinsic IDouble)
+                )
+              ,
+                ( "(+)"
+                , Forall mempty [] (TIntrinsic IDouble `TArrow` TIntrinsic IDouble `TArrow` TIntrinsic IDouble)
+                )
+              ,
+                ( "(-)"
+                , Forall mempty [] (TIntrinsic IDouble `TArrow` TIntrinsic IDouble `TArrow` TIntrinsic IDouble)
+                )
+              ,
+                ( "(*)"
+                , Forall mempty [] (TIntrinsic IDouble `TArrow` TIntrinsic IDouble `TArrow` TIntrinsic IDouble)
+                )
+              ]
+          )
+        ,
           ( TIntrinsic INat
           , Map.fromList
               [
@@ -713,12 +765,26 @@ addBuiltinDefs defs =
       (Path ["Core$"])
       ( (fst <$> names)
           <> [ "from_int32__$instance_Numeric(Intrinsic(Int32))"
-             , "from_int32__$instance_Numeric(Intrinsic(Nat))"
-             , "negate__$instance_Numeric(Intrinsic(Int32))"
-             , "negate__$instance_Numeric(Intrinsic(Nat))"
              , "(+)__$instance_Numeric(Intrinsic(Int32))"
              , "(-)__$instance_Numeric(Intrinsic(Int32))"
              , "(*)__$instance_Numeric(Intrinsic(Int32))"
+             , "negate__$instance_Numeric(Intrinsic(Int32))"
+             --
+             , "from_int32__$instance_Numeric(Intrinsic(Float))"
+             , "(+)__$instance_Numeric(Intrinsic(Float))"
+             , "(-)__$instance_Numeric(Intrinsic(Float))"
+             , "(*)__$instance_Numeric(Intrinsic(Float))"
+             , "negate__$instance_Numeric(Intrinsic(Float))"
+             --
+             , "from_int32__$instance_Numeric(Intrinsic(Double))"
+             , "(+)__$instance_Numeric(Intrinsic(Double))"
+             , "(-)__$instance_Numeric(Intrinsic(Double))"
+             , "(*)__$instance_Numeric(Intrinsic(Double))"
+             , "negate__$instance_Numeric(Intrinsic(Double))"
+             --
+             , "from_int32__$instance_Numeric(Intrinsic(Nat))"
+             , "negate__$instance_Numeric(Intrinsic(Nat))"
+             --
              , "compare__$instance_Ordered(Intrinsic(Int32))"
              ]
       )
@@ -1444,6 +1510,7 @@ moduleCore =
                             $f : */*/*
                   }
               |]
+        -- Numeric(int32)
         , OFunction
             "Core$.from_int32__$instance_Numeric(Intrinsic(Int32))"
             [ Label Kernel.int32 "n"
@@ -1482,6 +1549,88 @@ moduleCore =
             [r| 
                   [- int32](0, n : int32)
               |]
+        -- TODO: Numeric(int64)
+        -- Numeric(float)
+        , OFunction
+            "Core$.from_int32__$instance_Numeric(Intrinsic(Float))"
+            [ Label Kernel.int32 "n"
+            ]
+            [r| 
+                  #(int32_to_float : int32/float, n : int32) (fn(a : *) => a : *)
+              |]
+        , OFunction
+            "Core$.(+)__$instance_Numeric(Intrinsic(Float))"
+            [ Label Kernel.float "lhs"
+            , Label Kernel.float "rhs"
+            ]
+            [r| 
+                  [+ float](lhs : float, rhs : float)
+              |]
+        , OFunction
+            "Core$.(-)__$instance_Numeric(Intrinsic(Float))"
+            [ Label Kernel.float "lhs"
+            , Label Kernel.float "rhs"
+            ]
+            [r| 
+                  [- float](lhs : float, rhs : float)
+              |]
+        , OFunction
+            "Core$.(*)__$instance_Numeric(Intrinsic(Float))"
+            [ Label Kernel.float "lhs"
+            , Label Kernel.float "rhs"
+            ]
+            [r| 
+                  [* float](lhs : float, rhs : float)
+              |]
+        , OFunction
+            "Core$.negate__$instance_Numeric(Intrinsic(Float))"
+            [ Label Kernel.float "f"
+            ]
+            -- TODO: Use fneg
+            [r| 
+                  [- float](0.0f, f : float)
+              |]
+        -- Numeric(double)
+        , OFunction
+            "Core$.from_int32__$instance_Numeric(Intrinsic(Double))"
+            [ Label Kernel.int32 "n"
+            ]
+            [r| 
+                  #(int32_to_double : int32/double, n : int32) (fn(a : *) => a : *)
+              |]
+        , OFunction
+            "Core$.(+)__$instance_Numeric(Intrinsic(Double))"
+            [ Label Kernel.double "lhs"
+            , Label Kernel.double "rhs"
+            ]
+            [r| 
+                  [+ double](lhs : double, rhs : double)
+              |]
+        , OFunction
+            "Core$.(-)__$instance_Numeric(Intrinsic(Double))"
+            [ Label Kernel.double "lhs"
+            , Label Kernel.double "rhs"
+            ]
+            [r| 
+                  [- double](lhs : double, rhs : double)
+              |]
+        , OFunction
+            "Core$.(*)__$instance_Numeric(Intrinsic(Double))"
+            [ Label Kernel.double "lhs"
+            , Label Kernel.double "rhs"
+            ]
+            [r| 
+                  [* double](lhs : double, rhs : double)
+              |]
+        , OFunction
+            "Core$.negate__$instance_Numeric(Intrinsic(Double))"
+            [ Label Kernel.double "d"
+            ]
+            -- TODO: Use fneg
+            [r| 
+                  [- double](0.0, d : double)
+              |]
+        -- Numeric(nat)
         , OFunction
             "Core$.from_int32__$instance_Numeric(Intrinsic(Nat))"
             [ Label Kernel.int32 "n"

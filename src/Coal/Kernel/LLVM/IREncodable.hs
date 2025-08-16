@@ -63,9 +63,9 @@ instance IREncodable IRValue where
       I64 n ->
         showt n
       Float f ->
-        showt f
+        Text.pack (Numeric.showFFloat Nothing f "")
       Double d ->
-        showt d
+        Text.pack (Numeric.showFFloat Nothing d "")
       Null ->
         "null"
       Array _ vs ->
