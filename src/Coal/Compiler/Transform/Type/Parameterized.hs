@@ -31,6 +31,10 @@ instantiateTypeVars =
           pure (TVariable v)
         Nothing ->
           error "Implementation error"
+    TApplication _ (TConstructor _ name) ts
+      | "#Tuple" `Text.isPrefixOf` name ->
+          TApplication KType (TConstructor (tupleKind (length ts)) name)
+            <$> traverse instantiateTypeVars ts
     TApplication _ t ts -> do
       u <- instantiateTypeVars t
       us <- traverse instantiateTypeVars ts

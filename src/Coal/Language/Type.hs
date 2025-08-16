@@ -27,7 +27,7 @@ module Coal.Language.Type (
 import Coal.Common.List1 (List1, NonEmpty (..), fromList1, (<|))
 import Coal.Common.Supply (Supply (..))
 import Coal.Language.Type.Intrinsic (Intrinsic (..))
-import Coal.Language.Type.Kind (Kind (..), foldKind)
+import Coal.Language.Type.Kind (Kind (..), foldKind, tupleKind)
 import Coal.Language.Type.Row (Row (..), normalizeRow)
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (transform)
@@ -122,9 +122,8 @@ listType :: IndexedType -> IndexedType
 listType t = TApplication KType (TConstructor (KArrow KType KType) "List") (t :| [])
 
 tupleType :: List1 IndexedType -> IndexedType
-tupleType ts = TApplication KType (TConstructor kind cons) ts
+tupleType ts = TApplication KType (TConstructor (tupleKind (length ts)) cons) ts
  where
-  kind = foldKind KType (replicate (length ts) KType)
   cons = "#Tuple" <> showt (length ts)
 
 precArrow, precApp, precAtom :: Int

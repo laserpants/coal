@@ -11,6 +11,7 @@ module Coal.Language.Type.Kind (
   foldKind,
   unfoldKind,
   applyKind,
+  tupleKind,
 ) where
 
 import Coal.Common.List1 (List1, fromList1, (<|))
@@ -51,6 +52,10 @@ applyKind ks k
       Nothing
  where
   ls = fromList1 (unfoldKind k)
+
+{-# INLINE tupleKind #-}
+tupleKind :: Int -> Kind
+tupleKind n = foldKind KType (replicate n KType)
 
 precKArrow :: Int
 precKArrow = 1 -- a -> b

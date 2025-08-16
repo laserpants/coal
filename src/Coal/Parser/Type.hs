@@ -11,6 +11,7 @@ import Coal.Parser.Utils (fieldList)
 import Control.Monad.Combinators.Expr
 import Data.Functor (($>))
 import Text.Megaparsec (option, try, (<|>))
+import TextShow (showt)
 
 import qualified Coal.Language.Type.Row as Row
 import qualified Data.Map.Strict as Map
@@ -39,13 +40,17 @@ parseTypeParameter = TVariable . Parameter () <$> name
 parseTypeConstructor :: Parser (Type Parameter ())
 parseTypeConstructor = TConstructor () <$> constructor
 
+parseTupleType :: Parser (Type Parameter ())
+parseTupleType = do
+  ts <- parens (nonEmpty (commaSep2 parseType))
+  pure $ TApplication () (TConstructor () ("#Tuple" <> showt (length ts))) ts
+
 parseRecordType :: Parser (Type Parameter ())
 parseRecordType = do
   fields <- braces (fieldList parseType ":")
   let dict = pure <$> Map.fromList fields
   -- TODO
   pure (TIntrinsic (IRecord (TRow (Row.fromDictionary dict RNil))))
-
 parseTypeApplication :: Parser (Type Parameter ())
 parseTypeApplication = do
   t0 <- parseTypeConstructor <|> parseTypeParameter
@@ -61,6 +66,7 @@ parseType = makeExprParser go typeOperator
  where
   go =
     try parseTypeApplication
+      <|> try parseTupleType
       <|> parseRecordType
       <|> parseIntrinsicType
       <|> parseTypeParameter
