@@ -3,7 +3,7 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Language.CodataAccessor where
+module Coal.Language.CodataAccessor (CodataAccessor (..)) where
 
 import Coal.Language.Type.Scheme (Scheme (..))
 import Data.Data (Data, Typeable)
