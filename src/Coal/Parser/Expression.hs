@@ -16,14 +16,11 @@ import Coal.Parser.Type (parseType)
 import Coal.Parser.Utils (fieldList, fieldListWithKey)
 import Control.Monad (void)
 import Control.Monad.Combinators.Expr
-import Data.Char (ord)
 import Extra (Name, isConstructor)
-import Text.Megaparsec (getSourcePos, manyTill, notFollowedBy, optional, some, try, (<|>))
+import Text.Megaparsec (getSourcePos, notFollowedBy, optional, some, try, (<|>))
 import Text.Megaparsec.Char (char)
 
 import qualified Data.Map.Strict as Map
-import qualified Data.Text as Text
-import qualified Data.Text.Encoding as Text
 import qualified Text.Megaparsec.Char.Lexer as Lexer
 
 parseExpression :: Parser (Expression Metadata ())
