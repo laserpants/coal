@@ -240,6 +240,7 @@ test-suite coal-test
       Coal.TypeSystem.Constraint.Generation.EAnnotationConstraintsSpec
       Coal.TypeSystem.Constraint.Generation.EConstructorConstraintsSpec
       Coal.TypeSystem.Constraint.Generation.ELambdaConstraintsSpec
+      Coal.TypeSystem.UnificationSpec
       Paths_coal
   hs-source-dirs:
       test
