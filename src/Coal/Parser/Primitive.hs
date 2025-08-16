@@ -22,8 +22,8 @@ import qualified Text.Megaparsec.Char.Lexer as Lexer
 parsePrimitive :: Parser (Expression Metadata ())
 parsePrimitive =
   withMetadata $ do
-    prim <- parser
-    pure (\loc -> ELiteral loc prim)
+    lit <- parser
+    pure (\loc -> ELiteral loc lit)
  where
   parser =
     parseTrue
