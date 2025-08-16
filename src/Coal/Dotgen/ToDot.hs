@@ -123,6 +123,7 @@ emitEdgeToFields f = do
   nid <- ask
   lift (emitFields nid f)
 
+{-# INLINE emitEdgesTo #-}
 emitEdgesTo :: (Foldable f, ToDot t a) => f a -> ReaderT Int (DotGen t) ()
 emitEdgesTo = traverse_ emitEdgeTo
 
@@ -351,6 +352,16 @@ instance (Show t, Pretty t) => ToDot t (Definition a k t) where
                 id1 <- emitTriangle ("Trait\\n" <> prettyType tr) Nothing
                 emitEdge nid id1
           emitEdgeTo d
+      DImport (Path path) ns ->
+        emitParallelogram "DImport" Nothing
+      DType name _ _ ->
+        emitParallelogram ("DType\\n" <> name) Nothing
+      DCodata name _ _ ->
+        emitParallelogram ("DCodata\\n" <> name) Nothing
+      DTrait name _ _ _ ->
+        emitParallelogram ("DTrait\\n" <> name) Nothing
+      DInstance name _ _ ->
+        emitParallelogram ("DInstance\\n" <> name) Nothing
       _ ->
         emitParallelogram "TODO" Nothing
 
@@ -413,23 +424,6 @@ escapeQuotes = Text.replace "\"" "\\\""
 
 writeDotFile :: (Pretty t, ToDot t a) => Text -> a -> IO ()
 writeDotFile fname a = Text.writeFile ("./.debug/" <> Text.unpack fname <> ".dot") (generateDot a)
-
-writeDotFiles :: (Pretty t, Show t) => Text -> Module a k t -> IO ()
-writeDotFiles ns m@(Module (Path path) _ defs) = do
-  writeDotFile prefix m
-  forM_ defs $
-    \case
-      def@DFunction{} ->
-        writeDotFile (prefixed $ definitionName def) def
-      def@DConstant{} ->
-        writeDotFile (prefixed $ definitionName def) def
-      def@DAnnotation{} ->
-        writeDotFile (prefixed $ definitionName def) def
-      _ ->
-        pure ()
- where
-  prefix = ns <> "__" <> Text.intercalate "_" path
-  prefixed n = prefix <> "_" <> n
 
 instance ToDot Kernel.Type (DotGen Kernel.Type Int) where
   toDot = id
@@ -627,6 +621,3 @@ instance ToDot Kernel.Type (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.T
         nid <- emitEllipse modn Nothing
         traverse_ toDot objs
         return nid
-
-writeDotFilesK :: Text -> Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type) -> IO ()
-writeDotFilesK ns m@(Kernel.Module mname _ _) = writeDotFile (ns <> "__" <> mname) m

@@ -12,7 +12,7 @@ import Coal.Compiler (kernelTranslationC, mainPass, typeCheckingPass)
 import Coal.Compiler.Environment
 import Coal.Compiler.Stack
 import Coal.Compiler.TypeInference.Errors
-import Coal.Dotgen.ToDot (writeDotFiles, writeDotFilesK)
+import Coal.Dotgen.ToDot (writeDotFile)
 import Coal.Kernel.Compiler (compileModules)
 import Coal.Kernel.LLVM.IRConstruct (IRConstruct (..))
 import Coal.Kernel.LLVM.IREncodable (irEncode)
@@ -42,6 +42,7 @@ import Data.Text (Text)
 import Data.Void (Void)
 import Debug.Trace
 import Extra (Name, isConstructor, (<$$>))
+import Prettyprinter (Pretty (..))
 import System.IO.Unsafe (unsafePerformIO)
 import System.Process
 import Text.Megaparsec (eof, errorBundlePretty, runParser)
@@ -855,7 +856,7 @@ compileModule x = do
 
   r <- kernelTranslationC b
 
-  liftIO $ writeDotFilesK "kernel" r
+  liftIO $ writeDotFile ("kernel__" <> Kernel.moduleName r) r
 
   pure r
 
@@ -1622,3 +1623,20 @@ runTestBuild :: IO Text
 runTestBuild = do
   void (readProcess "./.build/build.sh" [] "")
   Text.pack <$> readProcess "./.build/dist" [] ""
+
+writeDotFiles :: (Pretty t, Show t) => Text -> Module a k t -> IO ()
+writeDotFiles ns m@(Module (Path path) _ defs) = do
+  writeDotFile prefix m
+  forM_ defs $
+    \case
+      def@DFunction{} ->
+        writeDotFile (prefixed $ definitionName def) def
+      def@DConstant{} ->
+        writeDotFile (prefixed $ definitionName def) def
+      def@DAnnotation{} ->
+        writeDotFile (prefixed $ definitionName def) def
+      _ ->
+        pure ()
+ where
+  prefix = ns <> "__" <> Text.intercalate "_" path
+  prefixed n = prefix <> "_" <> n
