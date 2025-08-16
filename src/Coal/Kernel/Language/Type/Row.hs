@@ -20,13 +20,13 @@ dropField field t = fromMap (Map.delete field m, r)
  where
   (m, r) = toMap mempty t
 
-toMap :: Map Name [Type] -> Type -> (Map Name [Type], Type)
+toMap :: Map Name Type -> Type -> (Map Name Type, Type)
 toMap m =
   \case
     RExt name t r ->
-      toMap (Map.insertWith (<>) name [t] m) r
+      toMap (Map.insert name t m) r
     r ->
       (m, r)
 
-fromMap :: (Map Name [Type], Type) -> Type
-fromMap (d, row) = Map.foldrWithKey (flip . foldr . RExt) row d
+fromMap :: (Map Name Type, Type) -> Type
+fromMap (d, row) = Map.foldrWithKey RExt row d
