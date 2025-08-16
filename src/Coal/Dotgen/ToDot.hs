@@ -6,9 +6,8 @@
 {-# LANGUAGE StrictData #-}
 {-# LANGUAGE UndecidableInstances #-}
 
--- module Coal.Dotgen.ToDot (ToDot (..), writeDotFiles) where
 -- Graphviz Dot
-module Coal.Dotgen.ToDot where
+module Coal.Dotgen.ToDot (ToDot (..), writeDotFile) where
 
 import Coal.Common.Label (Label (..))
 import Coal.Common.Name (Name)
