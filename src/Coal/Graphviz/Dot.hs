@@ -12,10 +12,10 @@ import Coal.Common.Label (Label (..))
 import Coal.Common.Name (Name)
 import Coal.Common.Supply (Supply (..), supplied)
 import Coal.Language.Expression
-import Coal.Language.Expression.Binding
+import Coal.Language.Expression.Binding (Binding (..))
 import Coal.Language.Expression.Choice
 import Coal.Language.Module
-import Coal.Language.Pattern
+import Coal.Language.Pattern (Pattern (..))
 import Coal.Language.Trait (With (..))
 import Control.Monad.Reader (ReaderT, ask, runReaderT)
 import Control.Monad.State
