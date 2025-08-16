@@ -2,14 +2,14 @@ module Main {
 
   type Date = Date({ year : int32, month : int32, day : int32 })
 
-  instance Ordered(Date) {
+  instance Ordered<Date> {
     let compare =
       fn(d1, d2) =>
         EqualTo;
   }
 
-  type Tree(a)
-    = Node(a, Tree(a), Tree(a))
+  type Tree<a>
+    = Node(a, Tree<a>, Tree<a>)
     | Leaf
 
   fun less_than_or_equal_to(m) =
@@ -58,7 +58,7 @@ module Main {
   fun main() = 
     let
       dates =
-        [] : list(Date)
+        [] : list<Date>
       in
         trace_int32(match(sort(dates)) {
           | [] =>

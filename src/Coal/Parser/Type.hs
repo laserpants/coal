@@ -51,10 +51,11 @@ parseRecordType = do
   let dict = pure <$> Map.fromList fields
   -- TODO
   pure (TIntrinsic (IRecord (TRow (Row.fromDictionary dict RNil))))
+
 parseTypeApplication :: Parser (Type Parameter ())
 parseTypeApplication = do
   t0 <- parseTypeConstructor <|> parseTypeParameter
-  ts <- option [] (parens (commaSep1 parseType))
+  ts <- option [] (angleBrackets (commaSep1 parseType))
   case ts of
     t : ts1 ->
       pure (TApplication () t0 (t :| ts1))

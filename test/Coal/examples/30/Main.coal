@@ -3,7 +3,7 @@ module Main {
   fun main() =
     let 
       chrs = 
-        [] : List(char)
+        [] : List<char>
       in
         trace_int32 
         (

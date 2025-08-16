@@ -7,7 +7,7 @@ module Coal.Kernel.Language.Type (Type (..)) where
 
 import Data.Data (Data, Typeable)
 import Extra (Name)
-import Extra.Prettyprinter (parensIf, tupledCompact)
+import Extra.Prettyprinter (parensIf)
 import Prettyprinter
 
 -- | Core language types
@@ -25,6 +25,9 @@ data Type
 precArrow, precApp :: Int
 precArrow = 1
 precApp = 2
+
+tupledCompact :: [Doc ann] -> Doc ann
+tupledCompact = encloseSep "(" ")" ", "
 
 prettyTypePrec :: Int -> Type -> Doc ann
 prettyTypePrec prec =

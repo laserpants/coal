@@ -1,8 +1,8 @@
 module Main {
 
-  type List(a) 
+  type List<a> 
     = Nil 
-    | Cons(a, List(a))
+    | Cons(a, List<a>)
 
   fun len(lst) =
     fold(lst) {

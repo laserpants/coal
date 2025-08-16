@@ -1,10 +1,10 @@
 module Main {
 
-  trait X(a) {
+  trait X<a> {
     x : bool -> a;
   }
 
-  instance X(bool) {
+  instance X<bool> {
     let x = fn(z) => true;
   }
 

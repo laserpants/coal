@@ -1,10 +1,10 @@
 module Main {
 
-  trait Functor(f : * -> *) {
-    map : (a -> b) -> f(a) -> f(b);
+  trait Functor<f : * -> *> {
+    map : (a -> b) -> f<a> -> f<b>;
   }
 
-  instance Functor(List) {
+  instance Functor<List> {
     fun map(f, xs) =
       fold(xs) {
         | [] => []
@@ -12,7 +12,7 @@ module Main {
       };
   }
 
-  instance Functor(Option) {
+  instance Functor<Option> {
     fun map(f, opt) =
       match(opt) {
         | None => None
@@ -20,13 +20,13 @@ module Main {
       };
   }
 
-  trait Applicative(f : * -> *) {
-    fmap : f(a -> b) -> f(a) -> f(b);
-    pure : a -> f(a);
+  trait Applicative<f : * -> *> {
+    fmap : f<a -> b> -> f<a> -> f<b>;
+    pure : a -> f<a>;
   }
 
-  trait Monad(m : * -> *) {
-    bind : m(a) -> (a -> m(b)) -> m(b);
+  trait Monad<m : * -> *> {
+    bind : m<a> -> (a -> m<b>) -> m<b>;
   }
 
   fun main() =

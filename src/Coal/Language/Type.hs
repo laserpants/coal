@@ -27,13 +27,13 @@ module Coal.Language.Type (
 import Coal.Common.List1 (List1, NonEmpty (..), fromList1, (<|))
 import Coal.Common.Supply (Supply (..))
 import Coal.Language.Type.Intrinsic (Intrinsic (..))
-import Coal.Language.Type.Kind (Kind (..), foldKind, tupleKind)
+import Coal.Language.Type.Kind (Kind (..), tupleKind)
 import Coal.Language.Type.Row (Row (..), normalizeRow)
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (transform)
 import Data.Text (isPrefixOf)
 import Extra (Map, Name, Set)
-import Extra.Prettyprinter (parensIf, tupledCompact)
+import Extra.Prettyprinter (parensIf)
 import GHC.Generics (Generic)
 import Prettyprinter
 import TextShow (showt)
@@ -131,6 +131,9 @@ precArrow = 1 -- e.g., a -> b
 precApp = 2 -- e.g., T(x, y)
 precAtom = 3 -- variables, constructors, literals
 
+typeBrackets :: [Doc ann] -> Doc ann
+typeBrackets = encloseSep "<" ">" ", "
+
 instance (Pretty k, Pretty (o k)) => Pretty (Type o k) where
   pretty = prettyTypePrec 0
 
@@ -145,7 +148,7 @@ prettyTypePrec prec =
           parensIf (prec > precApp) $ group (tupled (map (prettyTypePrec 0) (fromList1 args)))
     TApplication _ f args ->
       parensIf (prec > precApp) $
-        group (prettyTypePrec precApp f <> tupledCompact (map (prettyTypePrec 0) (fromList1 args)))
+        group (prettyTypePrec precApp f <> typeBrackets (map (prettyTypePrec 0) (fromList1 args)))
     TConstructor _ name ->
       pretty name
     TVariable v ->
@@ -164,7 +167,7 @@ prettyTypePrec prec =
      where
       prettyArgs
         | null args = ""
-        | otherwise = tupledCompact (map (prettyTypePrec 0) args)
+        | otherwise = typeBrackets (map (prettyTypePrec 0) args)
 
 prettyIntrinsic :: (t -> Doc ann) -> Intrinsic t -> Doc ann
 prettyIntrinsic prettyT =

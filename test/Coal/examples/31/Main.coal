@@ -1,6 +1,6 @@
 module Main {
 
-  fun parse_unsigned(a : bool) : Option(int32) =
+  fun parse_unsigned(a : bool) : Option<int32> =
     fold([], Some(5)) {
       | ch :: _ =>
           fn(t) => Some(3)

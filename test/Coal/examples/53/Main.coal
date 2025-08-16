@@ -1,6 +1,6 @@
 module Main {
 
-  cotype Stream(a) = { Head : a, Tail : Stream(a) }
+  cotype Stream<a> = { Head : a, Tail : Stream<a> }
 
   let nats =
     let 

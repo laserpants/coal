@@ -40,7 +40,7 @@ parseTraitDefinition :: Parser (Definition Metadata o ())
 parseTraitDefinition = do
   lexeme_ "trait"
   n <- constructor
-  t <- parens parseParameter
+  t <- angleBrackets parseParameter
   ds <- braces (some ((,) <$> name <*> endingWithSemicolon ((symbol_ ":" *> parseType))))
   -- TODO
   pure (DTrait n [] t ds)
@@ -55,7 +55,7 @@ parseTraitInstance :: Parser (Definition Metadata o ())
 parseTraitInstance = do
   lexeme_ "instance"
   n <- constructor
-  t <- parens parseType
+  t <- angleBrackets parseType
   ds <- braces (some parseDefinition)
   -- ds <- braces (semicolonSep1 ((,) <$> name <*> (symbol_ "=" *> parseDefinition)))
   -- TODO
@@ -65,7 +65,8 @@ parseTypeDefinition :: Parser (Definition Metadata o ())
 parseTypeDefinition = do
   lexeme_ "type"
   n <- constructor
-  ps <- option [] (parens (commaSep1 (Parameter () <$> name)))
+  -- TODO: DRY
+  ps <- option [] (angleBrackets (commaSep1 (Parameter () <$> name)))
   cs <- symbol_ "=" *> parseConstructor n ps `sepBy1` symbol_ "|"
   pure (DType n ps cs)
 
@@ -73,7 +74,7 @@ parseCodataDefinition :: Parser (Definition Metadata o ())
 parseCodataDefinition = do
   lexeme_ "cotype"
   n <- constructor
-  ps <- option [] (parens (commaSep1 (Parameter () <$> name)))
+  ps <- option [] (angleBrackets (commaSep1 (Parameter () <$> name)))
   symbol_ "="
   fields <- braces (fieldListWithKey constructor parseType ":")
   pure (DCodata n ps fields)
