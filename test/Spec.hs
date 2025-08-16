@@ -979,6 +979,22 @@ names =
         )
     )
   ,
+    ( "trace_float"
+    , Forall
+        (Set.fromList [TypeIndex KType 0])
+        []
+        ( TIntrinsic IFloat `TArrow` TVariable (TypeIndex KType 0)
+        )
+    )
+  ,
+    ( "trace_double"
+    , Forall
+        (Set.fromList [TypeIndex KType 0])
+        []
+        ( TIntrinsic IDouble `TArrow` TVariable (TypeIndex KType 0)
+        )
+    )
+  ,
     ( "operator__string_concatenation"
     , Forall
         mempty
@@ -1181,6 +1197,20 @@ moduleCore =
             ]
             [r|
                   #(print_char : char/*, c : char) (fn(a : *) => a : *)
+              |]
+        , OFunction
+            "Core$.trace_float"
+            [ Label Kernel.float "f"
+            ]
+            [r|
+                  #(print_float : float/*, f : float) (fn(a : *) => a : *)
+              |]
+        , OFunction
+            "Core$.trace_double"
+            [ Label Kernel.double "d"
+            ]
+            [r|
+                  #(print_double : double/*, d : double) (fn(a : *) => a : *)
               |]
         , OFunction
             "Core$.operator__string_concatenation"

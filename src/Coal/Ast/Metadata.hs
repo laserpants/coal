@@ -99,6 +99,7 @@ instance HasMetadata (InferenceRule k Metadata) where
       RuleTopLevelFunction a -> a
       RuleTopLevelConstant a -> a
       RuleTypeConstraint a _ _ _ -> a
+      RuleDataConstructor a _ _ _ -> a
 
 instance HasMetadata (ConstraintsGenError Metadata) where
   getMetadata =

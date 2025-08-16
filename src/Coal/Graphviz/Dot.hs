@@ -158,7 +158,7 @@ instance (Pretty t, Show t) => Dot t (Binding Expression a t) where
       BPattern _ pat rhs -> do
         fromNode (emitRectangle "BPattern\\n" Nothing) $ do
           emitEdgeTo pat
-          emitEdgeTo rhs
+          emitEdgeWithLabelTo "=" rhs
       BFunction{} ->
         error "TODO"
 
@@ -179,7 +179,7 @@ instance (Pretty t, Show t) => Dot t (Expression a t) where
       ELet _ bnds body -> do
         fromNode (emitRectangle "ELet" Nothing) $ do
           emitEdgesTo bnds
-          emitEdgeTo body
+          emitEdgeWithLabelTo "in" body
       ERecursiveLet _ pat rhs body -> do
         fromNode (emitRectangle "ERecursiveLet" Nothing) $ do
           emitEdgeTo pat

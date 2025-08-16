@@ -33,7 +33,6 @@ parseExpression = makeExprParser go operator
     e1 <-
       try parseFunctionApplication
         <|> parseDataConstructor
-        <|> parseInt
         <|> parseLiteralExpression
         <|> parseFoldExpression
         <|> parseUnfoldExpression
@@ -213,6 +212,9 @@ parseLiteralExpression =
     <|> parseFalse
     <|> parseCharLiteral
     <|> parseStringLiteral
+    <|> try parseFloat
+    <|> try parseDouble
+    <|> parseInt
 
 dquote :: Parser Char
 dquote = char '"'
@@ -236,6 +238,18 @@ parseCharLiteral =
       ch <- Lexer.charLiteral
       void squote
       pure (\loc -> ELiteral loc (LChar (fromIntegral (ord ch))))
+
+parseFloat :: Parser (Expression Metadata ())
+parseFloat =
+  withMetadata $ do
+    n <- LFloat <$> lexeme (Lexer.float <* (char 'f' <|> char 'F'))
+    pure (`ELiteral` n)
+
+parseDouble :: Parser (Expression Metadata ())
+parseDouble =
+  withMetadata $ do
+    n <- LDouble <$> lexeme (Lexer.float :: Parser Double)
+    pure (`ELiteral` n)
 
 unaryOperator :: UnaryOperator -> Expression Metadata () -> Expression Metadata ()
 unaryOperator op e1 =
