@@ -7,9 +7,7 @@ import Coal.Language.Expression (Expression (..))
 import Coal.Language.Primitive
 import Coal.Parser
 import Coal.Parser.Metadata
-import Coal.Parser.Symbol
 import Control.Monad (void)
-import Control.Monad.Combinators.Expr
 import Data.Char (ord)
 import Data.Functor (($>))
 import Text.Megaparsec
@@ -23,7 +21,7 @@ parsePrimitive :: Parser (Expression Metadata ())
 parsePrimitive =
   withMetadata $ do
     lit <- parser
-    pure (\loc -> ELiteral loc lit)
+    pure (`ELiteral` lit)
  where
   parser =
     parseTrue

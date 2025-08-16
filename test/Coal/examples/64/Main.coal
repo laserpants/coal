@@ -1,0 +1,9 @@
+module Main {
+
+  fun print_name(r : { name : string | r }) =
+    trace_string(r.name);
+
+  fun main() =
+    trace_int32(123123);
+
+}
