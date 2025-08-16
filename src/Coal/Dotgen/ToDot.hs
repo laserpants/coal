@@ -421,7 +421,7 @@ escapeQuotes :: Text -> Text
 escapeQuotes = Text.replace "\"" "\\\""
 
 writeDotFile :: (Pretty t, ToDot t a) => Text -> a -> IO ()
-writeDotFile fname a = Text.writeFile ("./.debug/" <> Text.unpack fname <> ".dot") (generateDot a)
+writeDotFile fname a = Text.writeFile ("./.debug/" <> Text.unpack fname <> ".gv") (generateDot a)
 
 instance ToDot Kernel.Type (DotGen Kernel.Type Int) where
   toDot = id
