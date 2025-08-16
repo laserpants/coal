@@ -10,6 +10,7 @@ import Coal.Parser
 import Coal.Parser.Identifier
 import Coal.Parser.Metadata
 import Coal.Parser.Pattern (parsePattern)
+import Coal.Parser.Primitive (parsePrimitive)
 import Coal.Parser.Symbol
 import Coal.Parser.Type (parseType)
 import Coal.Parser.Utils (fieldList, fieldListWithKey)
@@ -193,63 +194,8 @@ parseListLiteral =
     es <- brackets (commaSep parseExpression)
     pure (\loc -> EListLiteral loc () es)
 
-parseTrue :: Parser (Expression Metadata ())
-parseTrue =
-  withMetadata $ do
-    lexeme_ "true"
-    pure (\loc -> ELiteral loc (LBool True))
-
-parseFalse :: Parser (Expression Metadata ())
-parseFalse =
-  withMetadata $ do
-    lexeme_ "false"
-    pure (\loc -> ELiteral loc (LBool False))
-
 parseLiteralExpression :: Parser (Expression Metadata ())
-parseLiteralExpression =
-  parseListLiteral
-    <|> parseTrue
-    <|> parseFalse
-    <|> parseCharLiteral
-    <|> parseStringLiteral
-    <|> try parseFloat
-    <|> try parseDouble
-    <|> parseInt
-
-dquote :: Parser Char
-dquote = char '"'
-
-parseStringLiteral :: Parser (Expression Metadata ())
-parseStringLiteral =
-  withMetadata $ do
-    lexeme $ do
-      void dquote
-      chars <- manyTill Lexer.charLiteral dquote
-      pure (\loc -> ELiteral loc (LString (Text.encodeUtf8 (Text.pack chars))))
-
-squote :: Parser Char
-squote = char '\''
-
-parseCharLiteral :: Parser (Expression Metadata ())
-parseCharLiteral =
-  withMetadata $ do
-    lexeme $ do
-      void squote
-      ch <- Lexer.charLiteral
-      void squote
-      pure (\loc -> ELiteral loc (LChar (fromIntegral (ord ch))))
-
-parseFloat :: Parser (Expression Metadata ())
-parseFloat =
-  withMetadata $ do
-    n <- LFloat <$> lexeme (Lexer.float <* (char 'f' <|> char 'F'))
-    pure (`ELiteral` n)
-
-parseDouble :: Parser (Expression Metadata ())
-parseDouble =
-  withMetadata $ do
-    n <- LDouble <$> lexeme (Lexer.float :: Parser Double)
-    pure (`ELiteral` n)
+parseLiteralExpression = parseListLiteral <|> parsePrimitive <|> parseInt
 
 unaryOperator :: UnaryOperator -> Expression Metadata () -> Expression Metadata ()
 unaryOperator op e1 =

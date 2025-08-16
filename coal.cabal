@@ -152,6 +152,7 @@ library
       Coal.Parser.Metadata
       Coal.Parser.Module
       Coal.Parser.Pattern
+      Coal.Parser.Primitive
       Coal.Parser.Symbol
       Coal.Parser.Type
       Coal.Parser.Utils
