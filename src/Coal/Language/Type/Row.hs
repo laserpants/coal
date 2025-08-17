@@ -7,6 +7,8 @@
 module Coal.Language.Type.Row (
   Row (..),
   RowData (..),
+  toRowData,
+  fromRowData,
   fromDictionary,
   normalizeRow,
   extractField,

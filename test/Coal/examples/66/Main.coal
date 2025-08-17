@@ -7,7 +7,7 @@ module Main {
     match(a) {
       | { name = name | q } =>
           print_name(q)
-    }
+    };
 
   fun main() =
     trace_int32(2);
