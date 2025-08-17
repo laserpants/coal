@@ -75,7 +75,7 @@ data Expression a t
   | -- | Row restriction
     EFocus Name (Label t) (Label t) (Expression a t) (Expression a t)
   | -- | Trait dictionary placeholder
-  -- TODO: Rename
+    -- TODO: Rename
     EPlaceholder a t (Trait t)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
 
