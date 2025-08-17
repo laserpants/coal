@@ -80,6 +80,9 @@ instance Substitutable (Constraint c TypeIndex Kind IndexedType) where
         Implicit c (apply sub t1) (apply sub t2) (apply sub m)
       Explicit c t1 s ->
         Explicit c (apply sub t1) (apply sub s)
+      Lacks c t name ->
+        -- TODO
+        Lacks c t name
 
 instance (Substitutable s) => Substitutable (Map k s) where
   apply = fmap . apply

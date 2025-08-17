@@ -29,7 +29,7 @@ data Constraint c o k t
   = Equality c [t]
   | Implicit c t t (Monomorphic (o k))
   | Explicit c t (Scheme o k t)
---  | Lacks c (o k) Name 
+  | Lacks c (o k) Name
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
 
 instance TypeIndexed k (Monomorphic (TypeIndex k)) where
@@ -44,6 +44,8 @@ instance (Ord k, TypeIndexed k t) => TypeIndexed k (Constraint c TypeIndex k t) 
         typeIndexesIn t1 <> typeIndexesIn t2 <> typeIndexesIn m
       Explicit _ t s ->
         typeIndexesIn t <> typeIndexesIn s
+      Lacks{} ->
+        mempty
 
 instance (Ord k, TypeIndexed k t) => HasActive k (Constraint c TypeIndex k t) where
   activeIn =
@@ -54,3 +56,5 @@ instance (Ord k, TypeIndexed k t) => HasActive k (Constraint c TypeIndex k t) wh
         typeIndexesIn t1 `union` (typeIndexesIn t2 `intersection` typeIndexesIn m)
       Explicit _ t s ->
         typeIndexesIn t `union` typeIndexesIn s
+      Lacks{} ->
+        mempty

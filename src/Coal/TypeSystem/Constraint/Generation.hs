@@ -24,6 +24,7 @@ import Control.Monad.Reader (asks)
 import Data.Data (Data)
 import Data.Maybe (maybeToList)
 import Data.Tuple.Extra (third3)
+import Debug.Trace
 import Extra
 
 import qualified Coal.Common.Environment as Environment
@@ -95,15 +96,32 @@ patternConstraints assert ms =
     PShorthand _ (Label t name) -> do
       assert t (filter (assumptionNameIs name) ms)
       pure [name]
-    PRecord _ t d p -> do
-      let d1 = typeOf <$> d
-          p1 = getRow . typeOf <$> p
-          t1 = TIntrinsic (IRecord (TRow (fromDictionary d1 (fromMaybe RNil p1))))
-      forM_ (Map.toList d) $ \(name, e) ->
-        assert (typeOf e) (filter (assumptionNameIs name) ms)
+    PRecord _ t fields p -> do
+      r1 <- tailRow p
+      let t1 = TIntrinsic (IRecord (TRow (fromDictionary (typeOf <$> fields) r1)))
       tellRight [Equality InferenceRulePlaceholder [t, t1]]
-      ps1 <- concatForM (Map.elems d <> maybeToList p) (patternConstraints assert ms)
-      pure (ps1 <> Map.keys d)
+      forM_ (Map.toList fields) $
+        \(name, p1) ->
+          assert (typeOf p1) (filter (assumptionNameIs name) ms)
+      case r1 of
+        RVariable v ->
+          forM_ (Map.keys fields) $
+            \field ->
+              tellRight [Lacks InferenceRulePlaceholder v field]
+        _ ->
+          pure ()
+      ps1 <- concatForM (Map.elems fields <> maybeToList p) (patternConstraints assert ms)
+      pure (ps1 <> Map.keys fields)
+
+--      -- let d1 = typeOf <$> d
+--      --    p1 = getRow . typeOf <$> p
+--      --    t1 = TIntrinsic (IRecord (TRow (fromDictionary d1 (fromMaybe RNil p1))))
+--      forM_ (Map.toList d) $
+--        \(name, e) ->
+--          assert (typeOf e) (filter (assumptionNameIs name) ms)
+--      -- tellRight [Equality InferenceRulePlaceholder [t, t1]]
+--      ps1 <- concatForM (Map.elems d <> maybeToList p) (patternConstraints assert ms)
+--      pure (ps1 <> Map.keys d)
     PAny{} ->
       pure []
     PListCons _ t p1 p2 -> do
@@ -183,6 +201,32 @@ emitELambdaConstraints loc ps e = do
   ms <- withMonomorphic ps (collectConstraints e)
   names <- concatForM ps (patternConstraints (assertEqualityAssumptions loc) ms)
   pure (filter (assumptionNameIsNotOneOf names) ms)
+
+emitERecordConstraints :: (Show a, Data a) => a -> IndexedType -> Dictionary (Expression a IndexedType) -> Maybe (Expression a IndexedType) -> ConstraintsGen a [Assumption a IndexedType]
+emitERecordConstraints loc t fields expr = do
+  ms1 <- concatMapM collectConstraints expr
+  ms2 <- concatMapM collectConstraints fields
+  r1 <- tailRow expr
+  let t1 = TIntrinsic (IRecord (TRow (fromDictionary (typeOf <$> fields) r1)))
+  tellRight [Equality InferenceRulePlaceholder [t, t1]]
+  case r1 of
+    RVariable v ->
+      forM_ (Map.keys fields) $
+        \field ->
+          tellRight [Lacks InferenceRulePlaceholder v field]
+    _ ->
+      pure ()
+  pure (ms1 <> ms2)
+
+tailRow :: (HasType TypeIndex Kind t) => Maybe t -> ConstraintsGen a (Row TypeIndex Kind IndexedType)
+tailRow =
+  \case
+    Nothing ->
+      pure RNil
+    Just t -> do
+      r <- supplied (RVariable . TypeIndex KRow)
+      tellRight [Equality InferenceRulePlaceholder [TIntrinsic (IRecord (TRow r)), typeOf t]]
+      pure r
 
 -- emit
 collectConstraints :: (Show a, Data a) => Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
@@ -320,16 +364,10 @@ collectConstraints =
       names <- concatForM qs (patternConstraints (assertEqualityAssumptions loc) ms1)
 
       pure (filter (assumptionNameIsNotOneOf (name : names)) (ms1 <> ms2))
-    ECodataFields _ t fields -> do
-      concatMapM collectConstraints fields
-    ERecord _ t d e -> do
-      ms1 <- concatMapM collectConstraints e
-      ms2 <- concatMapM collectConstraints d
-      let d1 = typeOf <$> d
-          e1 = getRow . typeOf <$> e
-          t1 = TIntrinsic (IRecord (TRow (fromDictionary d1 (fromMaybe RNil e1))))
-      tellRight [Equality InferenceRulePlaceholder [t, t1]]
-      pure (ms1 <> ms2)
+    ECodataFields _ _ d -> do
+      concatMapM collectConstraints d
+    ERecord loc t d me ->
+      emitERecordConstraints loc t d me
     ECodataSelect loc (Label t name) e e1 -> do
       ms1 <- collectConstraints e
       r <- lookupCodataAccessor name

@@ -95,6 +95,8 @@ solve constraints =
     Choice cs (Explicit c t1 s) -> do
       t2 <- instantiate s
       solve (Equality c [t1, t2] : cs)
+    Choice cs Lacks{} ->
+      solve cs
 
 {-# INLINE generalize #-}
 generalize :: (TypeIndexed k t) => Monomorphic (TypeIndex k) -> t -> Scheme TypeIndex k t

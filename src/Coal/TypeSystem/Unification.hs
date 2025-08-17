@@ -15,15 +15,18 @@ module Coal.TypeSystem.Unification (
 
 import Coal.Common.Supply (supplied)
 import Coal.Language
+import Coal.Language.Type.Row
 import Coal.TypeSystem.Substitution (Substitutable (..), Substitution (..), mapsTo, merge)
 import Control.Monad.Except (ExceptT, MonadError, runExceptT, throwError)
 import Control.Monad.State (MonadState, State, runState)
 import Data.Data (Data)
 import Data.List.NonEmpty (NonEmpty, (<|))
+import Data.Map.Strict (Map)
 import Data.Set (member)
-import Extra (foldrM, (<$$>))
+import Extra (Name, foldrM, (<$$>))
 
 import qualified Data.List.NonEmpty as NonEmpty
+import qualified Data.Map.Strict as Map
 
 newtype Unifier a = Unifier {unifierStack :: ExceptT UnificationError (State Int) a}
   deriving
@@ -116,7 +119,6 @@ instance Unifiable (Row TypeIndex Kind IndexedType) where
         error "Implementation error"
   unify _ _ =
     throwError ECannotUnify
-
   match RNil RNil =
     pure mempty
   match (RVariable (TypeIndex _ t)) row2 =
