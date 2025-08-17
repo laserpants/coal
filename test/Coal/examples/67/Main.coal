@@ -1,0 +1,17 @@
+module Main {
+
+  fun foo(a : { name : string | r }) =
+    let
+      print_name =
+        fn(b : { name : string | q }) =>
+          trace_string(b.name)
+        in
+          match(a) {
+            | { name = name | t } =>
+                print_name(t)
+          };
+
+  fun main() =
+    trace_int32(2);
+
+}
