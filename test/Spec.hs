@@ -178,7 +178,7 @@ runTestFiles files = do
   r <- compileFiles files
   case r of
     Left err@(CompilerError msg) -> do
-      --liftIO $ Text.putStrLn msg
+      -- liftIO $ Text.putStrLn msg
       pure (Left err)
     Right{} ->
       Right <$> runTestBuild
@@ -582,6 +582,12 @@ main67 = do
     [ "./test/Coal/examples/67/Main.coal"
     ]
 
+main68 :: IO (Either CompilerError Text)
+main68 = do
+  runTestFiles
+    [ "./test/Coal/examples/68/Main.coal"
+    ]
+
 compileFiles :: [String] -> IO (Either CompilerError ())
 compileFiles files = do
   fs <- traverse readFile files
@@ -829,23 +835,23 @@ addBuiltinDefs defs =
              , "(-)__$instance_Numeric(Intrinsic(Int32))"
              , "(*)__$instance_Numeric(Intrinsic(Int32))"
              , "negate__$instance_Numeric(Intrinsic(Int32))"
-             --
-             , "from_int32__$instance_Numeric(Intrinsic(Float))"
+             , --
+               "from_int32__$instance_Numeric(Intrinsic(Float))"
              , "(+)__$instance_Numeric(Intrinsic(Float))"
              , "(-)__$instance_Numeric(Intrinsic(Float))"
              , "(*)__$instance_Numeric(Intrinsic(Float))"
              , "negate__$instance_Numeric(Intrinsic(Float))"
-             --
-             , "from_int32__$instance_Numeric(Intrinsic(Double))"
+             , --
+               "from_int32__$instance_Numeric(Intrinsic(Double))"
              , "(+)__$instance_Numeric(Intrinsic(Double))"
              , "(-)__$instance_Numeric(Intrinsic(Double))"
              , "(*)__$instance_Numeric(Intrinsic(Double))"
              , "negate__$instance_Numeric(Intrinsic(Double))"
-             --
-             , "from_int32__$instance_Numeric(Intrinsic(Nat))"
+             , --
+               "from_int32__$instance_Numeric(Intrinsic(Nat))"
              , "negate__$instance_Numeric(Intrinsic(Nat))"
-             --
-             , "compare__$instance_Ordered(Intrinsic(Int32))"
+             , --
+               "compare__$instance_Ordered(Intrinsic(Int32))"
              ]
       )
   , DTrait
@@ -1570,8 +1576,8 @@ moduleCore =
                             $f : */*/*
                   }
               |]
-        -- Numeric(int32)
-        , OFunction
+        , -- Numeric(int32)
+          OFunction
             "Core$.from_int32__$instance_Numeric(Intrinsic(Int32))"
             [ Label Kernel.int32 "n"
             ]
@@ -1609,9 +1615,9 @@ moduleCore =
             [r| 
                   [- int32](0, n : int32)
               |]
-        -- TODO: Numeric(int64)
-        -- Numeric(float)
-        , OFunction
+        , -- TODO: Numeric(int64)
+          -- Numeric(float)
+          OFunction
             "Core$.from_int32__$instance_Numeric(Intrinsic(Float))"
             [ Label Kernel.int32 "n"
             ]
@@ -1650,8 +1656,8 @@ moduleCore =
             [r| 
                   [- float](0.0f, f : float)
               |]
-        -- Numeric(double)
-        , OFunction
+        , -- Numeric(double)
+          OFunction
             "Core$.from_int32__$instance_Numeric(Intrinsic(Double))"
             [ Label Kernel.int32 "n"
             ]
@@ -1690,8 +1696,8 @@ moduleCore =
             [r| 
                   [- double](0.0, d : double)
               |]
-        -- Numeric(nat)
-        , OFunction
+        , -- Numeric(nat)
+          OFunction
             "Core$.from_int32__$instance_Numeric(Intrinsic(Nat))"
             [ Label Kernel.int32 "n"
             ]

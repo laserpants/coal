@@ -383,7 +383,7 @@ generateDot ast =
  where
   initialState = DotState 0 [] []
   (_, finalState) = runState (toDot ast) initialState
-  dotNodes = [showt nid <> " [shape=" <> renderShape shape <> ", label=\"" <> label <> "\\n" <> maybe "" prettyType tinfo <> "\"];" | (nid, label, tinfo, shape) <- nodes finalState]
+  dotNodes = [showt nid <> " [shape=" <> renderShape shape <> ", label=\"" <> escapeQuotes label <> "\\n" <> maybe "" prettyType tinfo <> "\"];" | (nid, label, tinfo, shape) <- nodes finalState]
   dotEdges = [showt from <> " -> " <> showt to <> renderEdgeLabel label <> ";" | (from, to, label) <- edges finalState]
   renderEdgeLabel =
     \case

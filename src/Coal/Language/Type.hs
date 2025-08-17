@@ -198,7 +198,7 @@ prettyIntrinsic prettyT =
       prettyT t
 
 prettyRow :: (Pretty (o k)) => (t -> Doc ann) -> Row o k t -> Doc ann
-prettyRow prettyT = braces . fields
+prettyRow prettyT = braces . enclose space space . fields
  where
   fields =
     \case
@@ -206,6 +206,7 @@ prettyRow prettyT = braces . fields
         pretty name <+> ":" <+> prettyT ty <> fieldSep rest
        where
         fieldSep RNil = mempty
+        fieldSep (RVariable v) = " |" <+> fields rest
         fieldSep _ = "," <+> fields rest
       RVariable v ->
         pretty v
