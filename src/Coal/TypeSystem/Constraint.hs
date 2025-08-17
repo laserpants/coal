@@ -15,7 +15,7 @@ module Coal.TypeSystem.Constraint (
 import Coal.Language (HasActive (..), Scheme (..), TypeIndex (..), TypeIndexed (..))
 import Data.Data (Data, Typeable)
 import Data.Set (Set, intersection, union)
-import Extra (Over)
+import Extra (Name, Over)
 
 -- | Monomorphic type variable set
 newtype Monomorphic m = Monomorphic {monomorphicSet :: Set m}
@@ -29,6 +29,7 @@ data Constraint c o k t
   = Equality c [t]
   | Implicit c t t (Monomorphic (o k))
   | Explicit c t (Scheme o k t)
+--  | Lacks c (o k) Name 
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
 
 instance TypeIndexed k (Monomorphic (TypeIndex k)) where
