@@ -29,7 +29,7 @@ data Constraint c o k t
   = Equality c [t]
   | Implicit c t t (Monomorphic (o k))
   | Explicit c t (Scheme o k t)
-  | Lacks c (o k) Name
+  | Lacks c t Name
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
 
 instance TypeIndexed k (Monomorphic (TypeIndex k)) where

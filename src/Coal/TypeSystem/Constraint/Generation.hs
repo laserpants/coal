@@ -104,10 +104,10 @@ patternConstraints assert ms =
         \(name, p1) ->
           assert (typeOf p1) (filter (assumptionNameIs name) ms)
       case r1 of
-        RVariable v ->
+        r@RVariable{} ->
           forM_ (Map.keys fields) $
             \field ->
-              tellRight [Lacks InferenceRulePlaceholder v field]
+              tellRight [Lacks InferenceRulePlaceholder (TRow r) field]
         _ ->
           pure ()
       ps1 <- concatForM (Map.elems fields <> maybeToList p) (patternConstraints assert ms)
@@ -210,10 +210,10 @@ emitERecordConstraints loc t fields expr = do
   let t1 = TIntrinsic (IRecord (TRow (fromDictionary (typeOf <$> fields) r1)))
   tellRight [Equality InferenceRulePlaceholder [t, t1]]
   case r1 of
-    RVariable v ->
+    r@RVariable{} ->
       forM_ (Map.keys fields) $
         \field ->
-          tellRight [Lacks InferenceRulePlaceholder v field]
+          tellRight [Lacks InferenceRulePlaceholder (TRow r) field]
     _ ->
       pure ()
   pure (ms1 <> ms2)
