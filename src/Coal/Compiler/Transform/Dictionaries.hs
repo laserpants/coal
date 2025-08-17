@@ -194,9 +194,10 @@ instance (Monoid a, Data a) => TraitContext (Expression a IndexedType) where
           | "$fold" `isPrefixOf` name -> do
               body <- expandTraits e
               pure (BPattern a var body, [])
-        BPattern _ var@(PVariable _ (Label t name)) e -> do
+        BPattern _ (PVariable a (Label t name)) e -> do
           (e1, traits) <- transformScope e
-          pure (BPattern mempty var e1, [(name, Forall (typeIndexesIn t) traits t)])
+          let t1 = foldType t (typeOf <$> traits)
+          pure (BPattern mempty (PVariable a (Label t1 name)) e1, [(name, Forall (typeIndexesIn t) traits t)])
         _ ->
           error "Not implemented"
 
@@ -236,7 +237,7 @@ instance (Monoid a, Data a) => TraitContext (Constant Expression a IndexedType) 
   expandTraits =
     \case
       Constant a (With _ t) e -> do
-        -- (expr, traits) <- listen (descendM expandTraits e)
+        --(expr, traits) <- listen (descendM expandTraits e)
         (expr, traits) <- listen (expandTraits e)
         pure $
           case nub traits of
