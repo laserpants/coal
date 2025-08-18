@@ -1,0 +1,11 @@
+module Main {
+
+  fun main() =
+    let
+      extend = 
+        fn(r) =>
+          { name = "Wat" | r }
+        in
+          extend({ baz = "hellO" });
+
+}
