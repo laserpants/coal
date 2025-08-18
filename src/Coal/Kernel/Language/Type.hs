@@ -9,6 +9,7 @@ import Data.Data (Data, Typeable)
 import Extra (Name)
 import Extra.Prettyprinter (parensIf)
 import Prettyprinter
+import qualified Data.Text as Text
 
 -- | Core language types
 data Type
@@ -74,8 +75,9 @@ prettyRow = braces . fields
         "{}"
       TOpq ->
         "*"
-      _ ->
-        error "Implementation error"
+      x ->
+        -- FIX:
+        pretty (Text.replace "\"" "\\\"" (Text.pack (show x))) -- "??" -- error "Implementation error"
 
 instance Pretty Type where
   pretty = prettyTypePrec 0

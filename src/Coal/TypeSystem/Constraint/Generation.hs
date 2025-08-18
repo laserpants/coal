@@ -103,13 +103,14 @@ patternConstraints assert ms =
       forM_ (Map.toList fields) $
         \(name, p1) ->
           assert (typeOf p1) (filter (assumptionNameIs name) ms)
-      case r1 of
-        r@RVariable{} ->
-          forM_ (Map.keys fields) $
-            \field ->
-              tellRight [Lacks InferenceRulePlaceholder (TRow r) field]
-        _ ->
-          pure ()
+      -- FIX:
+      --case r1 of
+      --  r@RVariable{} ->
+      --    forM_ (Map.keys fields) $
+      --      \field ->
+      --        tellRight [Lacks InferenceRulePlaceholder (TRow r) field]
+      --  _ ->
+      --    pure ()
       ps1 <- concatForM (Map.elems fields <> maybeToList p) (patternConstraints assert ms)
       pure (ps1 <> Map.keys fields)
 
@@ -209,13 +210,14 @@ emitERecordConstraints loc t fields expr = do
   r1 <- tailRow expr
   let t1 = TIntrinsic (IRecord (TRow (fromDictionary (typeOf <$> fields) r1)))
   tellRight [Equality InferenceRulePlaceholder [t, t1]]
-  case r1 of
-    r@RVariable{} ->
-      forM_ (Map.keys fields) $
-        \field ->
-          tellRight [Lacks InferenceRulePlaceholder (TRow r) field]
-    _ ->
-      pure ()
+  -- FIX:
+  --case r1 of
+  --  r@RVariable{} ->
+  --    forM_ (Map.keys fields) $
+  --      \field ->
+  --        tellRight [Lacks InferenceRulePlaceholder (TRow r) field]
+  --  _ ->
+  --    pure ()
   pure (ms1 <> ms2)
 
 tailRow :: (HasType TypeIndex Kind t) => Maybe t -> ConstraintsGen a (Row TypeIndex Kind IndexedType)
