@@ -66,10 +66,14 @@ instance Substitutable (Row TypeIndex Kind IndexedType) where
         case substitutionIndex r sub of
           Just (TRow row) ->
             row
+          Just (TVariable t) ->
+            RVariable t
           _ ->
             RVariable r
-      r ->
-        r
+      RExtend name t r ->
+        RExtend name (apply sub t) (apply sub r)
+      RNil ->
+        RNil
 
 instance Substitutable (Constraint c TypeIndex Kind IndexedType) where
   apply sub =
