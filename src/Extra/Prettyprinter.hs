@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Extra.Prettyprinter (parensIf) where
 
 import Prettyprinter
