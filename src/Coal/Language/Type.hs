@@ -206,7 +206,7 @@ prettyRow prettyT = braces . enclose space space . fields
         pretty name <+> ":" <+> prettyT ty <> fieldSep rest
        where
         fieldSep RNil = mempty
-        fieldSep (RVariable v) = " |" <+> fields rest
+        fieldSep RVariable{} = " |" <+> fields rest
         fieldSep _ = "," <+> fields rest
       RVariable v ->
         pretty v
