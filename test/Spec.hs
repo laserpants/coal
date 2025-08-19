@@ -184,7 +184,7 @@ runTestFiles files = do
   r <- compileFiles files
   case r of
     Left err@(CompilerError msg) -> do
---      liftIO $ Text.putStrLn msg
+      liftIO $ Text.putStrLn msg
       pure (Left err)
     Right{} ->
       Right <$> runTestBuild
@@ -610,6 +610,12 @@ main71 :: IO (Either CompilerError Text)
 main71 = do
   runTestFiles
     [ "./test/Coal/examples/71/Main.coal"
+    ]
+
+main72 :: IO (Either CompilerError Text)
+main72 = do
+  runTestFiles
+    [ "./test/Coal/examples/72/Main.coal"
     ]
 
 compileFiles :: [String] -> IO (Either CompilerError ())
