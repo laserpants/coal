@@ -111,16 +111,6 @@ patternConstraints assert ms =
           pure ()
       ps1 <- concatForM (Map.elems fields <> maybeToList p) (patternConstraints assert ms)
       pure (ps1 <> Map.keys fields)
-
-    --      -- let d1 = typeOf <$> d
-    --      --    p1 = getRow . typeOf <$> p
-    --      --    t1 = TIntrinsic (IRecord (TRow (fromDictionary d1 (fromMaybe RNil p1))))
-    --      forM_ (Map.toList d) $
-    --        \(name, e) ->
-    --          assert (typeOf e) (filter (assumptionNameIs name) ms)
-    --      -- tellRight [Equality InferenceRulePlaceholder [t, t1]]
-    --      ps1 <- concatForM (Map.elems d <> maybeToList p) (patternConstraints assert ms)
-    --      pure (ps1 <> Map.keys d)
     PAny{} ->
       pure []
     PListCons _ t p1 p2 -> do
@@ -151,14 +141,6 @@ patternConstraints assert ms =
       concatForM ps (patternConstraints assert ms)
     _ ->
       error "TODO"
-
---getRow :: Type TypeIndex Kind -> Row TypeIndex Kind (Type TypeIndex Kind)
---getRow =
---  \case
---    TIntrinsic (IRecord (TRow r)) ->
---      r
---    q ->
---      error (show q) -- "Implementation error"
 
 clauseAssumptions :: (Show a, Data a) => Clause a IndexedType -> ConstraintsGen a (IndexedType, [IndexedType], [Assumption a IndexedType])
 clauseAssumptions (EClause loc p cs) = do

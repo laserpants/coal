@@ -14,7 +14,6 @@ import Coal.Compiler.Kernel.TranslateType (translateType)
 import Coal.Language
 import Control.Monad.Reader (MonadReader)
 import Data.Data (Data)
-import Data.Maybe (fromMaybe)
 import Extra (Name)
 
 import qualified Coal.Kernel.Language as Kernel
@@ -86,7 +85,24 @@ translateExpression =
     ERecord _ t d me -> do
       exprs <- traverse translateExpression d
       expr0 <- traverse translateExpression me
-      pure $ makeRecord (translateType t) (foldr (uncurry Kernel.ext) (fromMaybe Kernel.nil expr0) (Map.toList exprs))
+      let e2 =
+            case expr0 of
+              Nothing ->
+                Kernel.nil
+              Just e1 -> do
+                let t1 = extractRow e1
+                Kernel.match
+                  t1
+                  e1
+                  ( Kernel.Clause
+                      (Label (Kernel.TCon "record" [t1]) "$Record" :| [Label t1 "$row"])
+                      (Kernel.var (Label t1 "$row"))
+                      :| []
+                  )
+      pure $
+        makeRecord
+          (translateType t)
+          (foldr (uncurry Kernel.ext) e2 (Map.toList exprs))
     EListCons _ _ e1 e2 ->
       Kernel.cons
         <$> translateExpression e1

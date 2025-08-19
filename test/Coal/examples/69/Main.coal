@@ -15,6 +15,6 @@ module Main {
           len =
             length([1, 2, 3 : int32])
           in
-            trace_int32(1);
+            trace_string(q.name);
 
 }

@@ -4,8 +4,12 @@ module Main {
     let
       extend = 
         fn(r) =>
-          { name = "Wat" | r }
+          { name = "world" | r }
         in
-          extend({ baz = "hellO" });
+          let 
+            q = 
+              extend({ baz = "hello" })
+            in
+              trace_string(q.baz +++ " " +++ q.name);
 
 }

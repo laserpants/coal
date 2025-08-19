@@ -6,7 +6,6 @@
 module Coal.Kernel.Language.Type (Type (..)) where
 
 import Data.Data (Data, Typeable)
-import qualified Data.Text as Text
 import Extra (Name)
 import Extra.Prettyprinter (parensIf)
 import Prettyprinter
@@ -75,9 +74,8 @@ prettyRow = braces . fields
         "{}"
       TOpq ->
         "*"
-      x ->
-        -- FIX:
-        pretty (Text.replace "\"" "\\\"" (Text.pack (show x))) -- "??" -- error "Implementation error"
+      _ ->
+        error "Implementation error"
 
 instance Pretty Type where
   pretty = prettyTypePrec 0
