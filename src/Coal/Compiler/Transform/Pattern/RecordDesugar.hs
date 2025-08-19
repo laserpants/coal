@@ -18,7 +18,7 @@ module Coal.Compiler.Transform.Pattern.RecordDesugar (
 ) where
 
 import Coal.Common.Label (Label (..))
-import Coal.Common.List1 (List1, NonEmpty (..))
+import Coal.Common.List1 (NonEmpty (..))
 import Coal.Common.Supply (suppliedName)
 import Coal.Language
 import Coal.Language.Module (Module (..))
@@ -26,8 +26,7 @@ import Control.Monad.RWS
 import Data.Data (Data)
 import Data.Foldable (foldrM)
 import Data.Generics.Uniplate.Data (transformBiM)
-import Data.Tuple.Extra (thd3)
-import Extra (Dictionary, Map, Name)
+import Extra (Dictionary, Name)
 
 import qualified Data.Map.Strict as Map
 

@@ -195,10 +195,10 @@ prettyIntrinsic prettyT =
     IVoid ->
       "void"
     IRecord t ->
-      prettyT t
+      braces $ enclose space space (prettyT t)
 
 prettyRow :: (Pretty (o k)) => (t -> Doc ann) -> Row o k t -> Doc ann
-prettyRow prettyT = braces . enclose space space . fields
+prettyRow prettyT = fields
  where
   fields =
     \case
