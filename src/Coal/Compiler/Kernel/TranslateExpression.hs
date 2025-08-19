@@ -15,7 +15,7 @@ import Coal.Language
 import Control.Monad.Reader (MonadReader)
 import Data.Data (Data)
 import Data.Maybe (fromMaybe)
-import Extra (Dictionary, Name)
+import Extra (Name)
 
 import qualified Coal.Kernel.Language as Kernel
 import qualified Data.Map.Strict as Map
