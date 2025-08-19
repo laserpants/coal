@@ -24,7 +24,6 @@ import Control.Monad.Reader (asks)
 import Data.Data (Data)
 import Data.Maybe (maybeToList)
 import Data.Tuple.Extra (third3)
-import Debug.Trace
 import Extra
 
 import qualified Coal.Common.Environment as Environment
@@ -153,13 +152,13 @@ patternConstraints assert ms =
     _ ->
       error "TODO"
 
-getRow :: Type TypeIndex Kind -> Row TypeIndex Kind (Type TypeIndex Kind)
-getRow =
-  \case
-    TIntrinsic (IRecord (TRow r)) ->
-      r
-    q ->
-      error (show q) -- "Implementation error"
+--getRow :: Type TypeIndex Kind -> Row TypeIndex Kind (Type TypeIndex Kind)
+--getRow =
+--  \case
+--    TIntrinsic (IRecord (TRow r)) ->
+--      r
+--    q ->
+--      error (show q) -- "Implementation error"
 
 clauseAssumptions :: (Show a, Data a) => Clause a IndexedType -> ConstraintsGen a (IndexedType, [IndexedType], [Assumption a IndexedType])
 clauseAssumptions (EClause loc p cs) = do
