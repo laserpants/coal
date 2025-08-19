@@ -10,7 +10,6 @@ import Coal.Parser.Symbol
 import Coal.Parser.Utils (fieldList)
 import Control.Monad.Combinators.Expr
 import Data.Functor (($>))
-import Data.Maybe (fromMaybe)
 import Text.Megaparsec (option, optional, try, (<|>))
 import TextShow (showt)
 
@@ -49,8 +48,8 @@ parseTupleType = do
 parseRecordType :: Parser (Type Parameter ())
 parseRecordType =
   braces $ do
-    fields <- fieldList parseType ":"
-    let dict = Map.fromList fields
+    fields <- optional (fieldList parseType ":")
+    let dict = maybe mempty Map.fromList fields
     param <- optional rest
     pure (TIntrinsic (IRecord (TRow (Row.fromDictionary dict (maybe RNil RVariable param)))))
  where

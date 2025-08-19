@@ -176,13 +176,15 @@ spec = do
   print (x == Right "Wat\n")
   x <- main70
   print (x == Right "hello world\n")
+  x <- main71
+  print (x == Right "Covfefe\n")
 
 runTestFiles :: [String] -> IO (Either CompilerError Text)
 runTestFiles files = do
   r <- compileFiles files
   case r of
     Left err@(CompilerError msg) -> do
-      --      liftIO $ Text.putStrLn msg
+--      liftIO $ Text.putStrLn msg
       pure (Left err)
     Right{} ->
       Right <$> runTestBuild
@@ -602,6 +604,12 @@ main70 :: IO (Either CompilerError Text)
 main70 = do
   runTestFiles
     [ "./test/Coal/examples/70/Main.coal"
+    ]
+
+main71 :: IO (Either CompilerError Text)
+main71 = do
+  runTestFiles
+    [ "./test/Coal/examples/71/Main.coal"
     ]
 
 compileFiles :: [String] -> IO (Either CompilerError ())
