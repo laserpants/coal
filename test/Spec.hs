@@ -8,7 +8,7 @@ import Coal.Common.Environment (Environment (..))
 import Coal.Common.Label (Label (..))
 import Coal.Common.List1 (NonEmpty (..))
 import Coal.Common.Name (Dictionary, Name)
-import Coal.Compiler (kernelTranslationC, mainPass, typeCheckingPass)
+import Coal.Compiler (kernelTranslationC, mainPass, typeCheckingPass, writeDotFiles)
 import Coal.Compiler.Environment
 import Coal.Compiler.Stack
 import Coal.Compiler.TypeInference.Errors
@@ -178,7 +178,7 @@ runTestFiles files = do
   r <- compileFiles files
   case r of
     Left err@(CompilerError msg) -> do
---      liftIO $ Text.putStrLn msg
+      --      liftIO $ Text.putStrLn msg
       pure (Left err)
     Right{} ->
       Right <$> runTestBuild
@@ -1886,20 +1886,3 @@ runTestBuild :: IO Text
 runTestBuild = do
   void (readProcess "./.build/build.sh" [] "")
   Text.pack <$> readProcess "./.build/dist" [] ""
-
-writeDotFiles :: (Pretty t, Show t) => Text -> Module a k t -> IO ()
-writeDotFiles ns m@(Module (Path path) _ defs) = do
-  writeDotFile prefix m
-  forM_ defs $
-    \case
-      def@DFunction{} ->
-        writeDotFile (prefixed $ definitionName def) def
-      def@DConstant{} ->
-        writeDotFile (prefixed $ definitionName def) def
-      def@DAnnotation{} ->
-        writeDotFile (prefixed $ definitionName def) def
-      _ ->
-        pure ()
- where
-  prefix = ns <> "__" <> Text.intercalate "_" path
-  prefixed n = prefix <> "_" <> n

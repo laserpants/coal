@@ -103,26 +103,25 @@ patternConstraints assert ms =
       forM_ (Map.toList fields) $
         \(name, p1) ->
           assert (typeOf p1) (filter (assumptionNameIs name) ms)
-      -- FIX:
-      --case r1 of
-      --  r@RVariable{} ->
-      --    forM_ (Map.keys fields) $
-      --      \field ->
-      --        tellRight [Lacks InferenceRulePlaceholder (TRow r) field]
-      --  _ ->
-      --    pure ()
+      case r1 of
+        r@RVariable{} ->
+          forM_ (Map.keys fields) $
+            \field ->
+              tellRight [Lacks InferenceRulePlaceholder (TRow r) field]
+        _ ->
+          pure ()
       ps1 <- concatForM (Map.elems fields <> maybeToList p) (patternConstraints assert ms)
       pure (ps1 <> Map.keys fields)
 
---      -- let d1 = typeOf <$> d
---      --    p1 = getRow . typeOf <$> p
---      --    t1 = TIntrinsic (IRecord (TRow (fromDictionary d1 (fromMaybe RNil p1))))
---      forM_ (Map.toList d) $
---        \(name, e) ->
---          assert (typeOf e) (filter (assumptionNameIs name) ms)
---      -- tellRight [Equality InferenceRulePlaceholder [t, t1]]
---      ps1 <- concatForM (Map.elems d <> maybeToList p) (patternConstraints assert ms)
---      pure (ps1 <> Map.keys d)
+    --      -- let d1 = typeOf <$> d
+    --      --    p1 = getRow . typeOf <$> p
+    --      --    t1 = TIntrinsic (IRecord (TRow (fromDictionary d1 (fromMaybe RNil p1))))
+    --      forM_ (Map.toList d) $
+    --        \(name, e) ->
+    --          assert (typeOf e) (filter (assumptionNameIs name) ms)
+    --      -- tellRight [Equality InferenceRulePlaceholder [t, t1]]
+    --      ps1 <- concatForM (Map.elems d <> maybeToList p) (patternConstraints assert ms)
+    --      pure (ps1 <> Map.keys d)
     PAny{} ->
       pure []
     PListCons _ t p1 p2 -> do
@@ -210,14 +209,13 @@ emitERecordConstraints loc t fields expr = do
   r1 <- tailRow expr
   let t1 = TIntrinsic (IRecord (TRow (fromDictionary (typeOf <$> fields) r1)))
   tellRight [Equality InferenceRulePlaceholder [t, t1]]
-  -- FIX:
-  --case r1 of
-  --  r@RVariable{} ->
-  --    forM_ (Map.keys fields) $
-  --      \field ->
-  --        tellRight [Lacks InferenceRulePlaceholder (TRow r) field]
-  --  _ ->
-  --    pure ()
+  case r1 of
+    r@RVariable{} ->
+      forM_ (Map.keys fields) $
+        \field ->
+          tellRight [Lacks InferenceRulePlaceholder (TRow r) field]
+    _ ->
+      pure ()
   pure (ms1 <> ms2)
 
 tailRow :: (HasType TypeIndex Kind t) => Maybe t -> ConstraintsGen a (Row TypeIndex Kind IndexedType)

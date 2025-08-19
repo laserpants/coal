@@ -21,19 +21,23 @@ import Coal.Compiler.Transform.Pattern.RecordDesugar
 import Coal.Compiler.Transform.Type.AliasExpansion
 import Coal.Compiler.Transform.Unfold
 import Coal.Compiler.TypeInference
+import Coal.Graphviz.Dot (writeDotFile)
 import Coal.Language
 import Coal.Language.Module (Module (..), overModuleDefinitionsM)
 import Coal.Language.Module.Constant
 import Coal.Language.Module.Definition
 import Coal.TypeSystem.Substitution (normalizeTypeIndexes)
 import Control.Monad ((>=>))
-import Control.Monad.Reader (Reader, asks, runReader)
+import Control.Monad.Reader (MonadIO, Reader, asks, liftIO, runReader)
 import Control.Monad.State (gets, runState)
 import Data.Data (Data)
-import Extra (Name, forM)
+import Data.Text (Text)
+import Extra (Name, forM, forM_)
+import Prettyprinter (Pretty (..))
 
 import qualified Coal.Compiler.Kernel.Environment as Kernel
 import qualified Coal.Kernel.Language as Kernel
+import qualified Data.Text as Text
 
 withSupplyC :: (Monad m) => (Int -> (c, Int)) -> CompilerT a m c
 withSupplyC f = do
@@ -63,9 +67,12 @@ compileFoldsC = unfoldExpansionTrans compileUnfolds
 indexedC :: (Monad m, Traversable t) => t e -> CompilerT a m (t IndexedType)
 indexedC t = withSupplyC (runState (indexed t))
 
-runTypeInferenceC :: (Monad m, Data a, Eq a, Show a) => Module a Kind () -> CompilerT a m (Module a Kind IndexedType)
+runTypeInferenceC :: (MonadIO m, Data a, Eq a, Show a) => Module a Kind () -> CompilerT a m (Module a Kind IndexedType)
 runTypeInferenceC m = do
   defs <- traverse indexedC ds
+
+  liftIO $ writeDotFiles "indexed" (Module p ns defs)
+
   (tdefs, _) <- typeDefinitionsC defs
   pure (Module p ns (normalizeTypeIndexes tdefs))
  where
@@ -147,7 +154,7 @@ kernelMonadTrans f e = pure (runReader (f e) (Kernel.initialKernelEnvironment me
 kernelTranslationC :: (Show a, Monad m, Data a) => Module a Kind IndexedType -> CompilerT a m (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))
 kernelTranslationC = kernelMonadTrans translateModule
 
-typeCheckingPass :: (Monad m, Monoid a, Data a, Eq a, Show a) => Module a Kind () -> CompilerT a m (Module a Kind IndexedType)
+typeCheckingPass :: (MonadIO m, Monoid a, Data a, Eq a, Show a) => Module a Kind () -> CompilerT a m (Module a Kind IndexedType)
 typeCheckingPass =
   -- Expand type aliases
   expandAliasesC
@@ -179,9 +186,26 @@ mainPass =
     -- Expand nats
     >=> compileNatsC
 
-compileModule :: (Monad m, Monoid a, Data a, Eq a, Show a) => Module a Kind () -> CompilerT a m (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))
+compileModule :: (MonadIO m, Monoid a, Data a, Eq a, Show a) => Module a Kind () -> CompilerT a m (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))
 compileModule =
   typeCheckingPass
     >=> mainPass
     -- Final lowering
     >=> kernelTranslationC
+
+writeDotFiles :: (Pretty t, Show t) => Text -> Module a k t -> IO ()
+writeDotFiles ns m@(Module (Path path) _ defs) = do
+  writeDotFile prefix m
+  forM_ defs $
+    \case
+      def@DFunction{} ->
+        writeDotFile (prefixed $ definitionName def) def
+      def@DConstant{} ->
+        writeDotFile (prefixed $ definitionName def) def
+      def@DAnnotation{} ->
+        writeDotFile (prefixed $ definitionName def) def
+      _ ->
+        pure ()
+ where
+  prefix = ns <> "__" <> Text.intercalate "_" path
+  prefixed n = prefix <> "_" <> n

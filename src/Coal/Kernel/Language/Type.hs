@@ -6,10 +6,10 @@
 module Coal.Kernel.Language.Type (Type (..)) where
 
 import Data.Data (Data, Typeable)
+import qualified Data.Text as Text
 import Extra (Name)
 import Extra.Prettyprinter (parensIf)
 import Prettyprinter
-import qualified Data.Text as Text
 
 -- | Core language types
 data Type

@@ -12,10 +12,10 @@ import Coal.TypeSystem.Constraint.Generation.InferenceRule
 import Data.Either (lefts, rights)
 
 import qualified Coal.Common.Environment as Environment
-import qualified Data.Set as Set
 import qualified Data.Map.Strict as Map
+import qualified Data.Set as Set
 
---collectExampleConstraintsSpec1 :: Bool
+-- collectExampleConstraintsSpec1 :: Bool
 collectExampleConstraintsSpec1 = (ms, outs)
  where
   (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (collectConstraints expr)
@@ -40,7 +40,7 @@ collectExampleConstraintsSpec1 = (ms, outs)
 
 fixture1 :: Expression () IndexedType
 fixture1 =
-   ELet
+  ELet
     ()
     ( BPattern
         ()
@@ -49,12 +49,11 @@ fixture1 =
             ()
             ( PAnnotation
                 ()
-                (TIntrinsic 
-                  (IRecord
-                    (
-                      TRow (RExtend "name" (TIntrinsic IString) (RVariable (Parameter () "q")))
+                ( TIntrinsic
+                    ( IRecord
+                        ( TRow (RExtend "name" (TIntrinsic IString) (RVariable (Parameter () "q")))
+                        )
                     )
-                  )
                 )
                 (PVariable () (Label (TVariable (TypeIndex KType 1)) "b"))
                 :| []
@@ -79,22 +78,20 @@ fixture1 =
         (TVariable (TypeIndex KType 6))
         ( EAnnotation
             ()
-            (TIntrinsic 
-              (IRecord
-                (
-                  TRow (RExtend "name" (TIntrinsic IString) (RVariable (Parameter () "r")))
+            ( TIntrinsic
+                ( IRecord
+                    ( TRow (RExtend "name" (TIntrinsic IString) (RVariable (Parameter () "r")))
+                    )
                 )
-              )
             )
             (EVariable () (Label (TVariable (TypeIndex KType 7)) "a"))
         )
         ( EClause
             ()
-            (PRecord 
-                () 
-                (TVariable (TypeIndex KType 8)) 
-                (
-                  Map.fromList
+            ( PRecord
+                ()
+                (TVariable (TypeIndex KType 8))
+                ( Map.fromList
                     [
                       ( "name"
                       , PVariable () (Label (TVariable (TypeIndex KType 9)) "name")
