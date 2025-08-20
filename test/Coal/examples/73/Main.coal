@@ -1,0 +1,16 @@
+module Main {
+
+  fun remove_name(r : { name : string | t }) : { | t } =
+    match(r) {
+      | { name = _ | q } =>
+          q
+    };
+
+  fun main() =
+    let
+      q =
+        remove_name({ name = "Tron", is_admin = false })
+      in
+        trace_bool(q.is_admin);
+
+}
