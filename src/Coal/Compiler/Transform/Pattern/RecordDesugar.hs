@@ -119,16 +119,36 @@ instance (Data a, Monoid a) => RecordDesugarable a (Pattern a IndexedType) where
       p ->
         pure p
 
+extractRow :: (HasType o k t) => t -> Row o k (Type o k)
+extractRow e =
+  case typeOf e of
+    TIntrinsic (IRecord (TRow r)) ->
+      r
+    _ ->
+      error "Implementation error"
+
+extractVarName :: Maybe (Pattern a t) -> Name
+extractVarName =
+  \case
+    Just (PVariable _ (Label _ name)) ->
+      name
+    _ ->
+      "_"
+
 desugar :: (Data a, Monoid a) => RecordInfo a -> Expression a IndexedType -> RecordDesugarStack a (Expression a IndexedType)
-desugar (name, dict, _) expr = do
+desugar (name, dict, zzz) expr = do
   names <- replicateM (length fields - 1) suppliedName
-  (_, _, e1) <- foldrM go ("_", RNil, expr) (zip fields (name : names))
+  let r1 = maybe RNil extractRow zzz
+      v1 = extractVarName zzz
+      t1 = maybe (TIntrinsic (IRecord (TRow RNil))) typeOf zzz
+      e2 = ELet mempty (BPattern mempty (PVariable mempty (Label t1 v1)) (EVariable mempty (Label t1 (name <> ".tail"))) :| [])
+  (_, _, e1) <- foldrM (go v1) (v1, r1, e2 expr) (zip fields (name : names))
   pure e1
  where
   fields = Map.toList dict
 
-go :: (Data a, Monoid a) => ((Name, IndexedPattern a), Name) -> (Name, Row TypeIndex Kind IndexedType, Expression a IndexedType) -> RecordDesugarStack a (Name, Row TypeIndex Kind IndexedType, Expression a IndexedType)
-go ((fname, p), prefix) (var, row, expr) = do
+go :: (Data a, Monoid a) => Name -> ((Name, IndexedPattern a), Name) -> (Name, Row TypeIndex Kind IndexedType, Expression a IndexedType) -> RecordDesugarStack a (Name, Row TypeIndex Kind IndexedType, Expression a IndexedType)
+go xx ((fname, p), prefix) (var, row, expr) = do
   let t1 = typeOf expr
       t2 = typeOf p
       ll1 = Label t2 (prefix <> ".field." <> fname)
@@ -150,26 +170,28 @@ go ((fname, p), prefix) (var, row, expr) = do
           )
       )
 
+  let e3 =
+        EMatch
+          mempty
+          t1
+          var2
+          ( EClause
+              mempty
+              ( PConstructor
+                  mempty
+                  (Label (TIntrinsic (IRecord (TRow row))) "$Record")
+                  [PVariable mempty (Label (TRow row) var)]
+              )
+              (CPlain mempty [] e2 :| [])
+              :| []
+          )
+
   let focusExpr =
         EFocus
           fname
           ll1
           ll2
           var1
-          ( EMatch
-              mempty
-              t1
-              var2
-              ( EClause
-                  mempty
-                  ( PConstructor
-                      mempty
-                      (Label (TIntrinsic (IRecord (TRow row))) "$Record")
-                      [PVariable mempty (Label (TRow row) var)]
-                  )
-                  (CPlain mempty [] e2 :| [])
-                  :| []
-              )
-          )
+          (if var == xx then e2 else e3)
 
   pure (prefix, RExtend fname t2 row, focusExpr)
