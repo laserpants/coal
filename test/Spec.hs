@@ -182,6 +182,10 @@ spec = do
   print (x == Right "true\n")
   x <- main74
   print (x == Right "Lorenzo\n")
+  x <- main75
+  print (x == Right "Lorenzo\n")
+  x <- main76
+  print (x == Right "a\n")
 
 runTestFiles :: [String] -> IO (Either CompilerError Text)
 runTestFiles files = do

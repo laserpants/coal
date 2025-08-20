@@ -1,5 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
 module Coal.TypeSystem.Constraint.Generation.TypeAnnotation (
@@ -29,6 +30,7 @@ import Extra (
 
 import qualified Coal.Common.Environment as Environment
 import qualified Data.Map.Strict as Map
+import qualified Data.Text as Text
 
 type TypeAnnotationContext = ConstraintsGenContext TypeIndex Kind IndexedType
 
@@ -54,6 +56,10 @@ runTypeAnnotation loc v = runStateT (runExceptT (withExceptT ($ loc) v)) mempty
 instantiate :: (MonadReader TypeAnnotationContext m) => Type Parameter () -> TypeAnnotation a m IndexedType
 instantiate =
   \case
+    TApplication _ (TConstructor _ name) ts
+      | "#Tuple" `Text.isPrefixOf` name ->
+          TApplication KType (TConstructor (tupleKind (length ts)) name)
+            <$> traverse instantiate ts
     TApplication _ (TVariable (Parameter _ v)) ts -> do
       ts1 <- traverse instantiate ts
       t1 <- TVariable <$> typeIndex (foldKind KType (kindOf <$> ts1)) v
