@@ -6,7 +6,7 @@ module Main {
           name
     };
 
-  fun get_name((name, _, _)) : string = 
+  fun get_name((name, _, _) : (string, int32, bool)) : string = 
     name; 
 
   fun main() =
