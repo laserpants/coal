@@ -431,7 +431,7 @@ instance Dot Kernel.Type (Kernel.Binding Kernel.Type (DotGen Kernel.Type Int)) w
     \case
       Kernel.Binding (Label t name) e -> do
         fromNode (emitRectangle ("Binding\\n" <> name) (Just t)) $ do
-          emitEdgeTo e
+          emitEdgeWithLabelTo "=" e
 
 instance Dot Kernel.Type (Kernel.Clause Kernel.Type (DotGen Kernel.Type Int)) where
   toDot =
@@ -555,7 +555,7 @@ instance Dot Kernel.Type (Kernel.Expr Kernel.Type) where
         Kernel.ELet bs e -> do
           fromNode (emitRectangle "ELet" Nothing) $ do
             emitEdgesTo bs
-            emitEdgeTo e
+            emitEdgeWithLabelTo "in" e
         Kernel.ELit p ->
           emitRectangle ("ELit\\n" <> Text.pack (show p)) Nothing
         Kernel.ELam lls e -> do
