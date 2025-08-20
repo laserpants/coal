@@ -93,7 +93,7 @@ desugarPatternsC = patternDesugarTrans desugarPatterns
 recordPatternDesugarTrans :: (Monad m) => (c -> RecordDesugarStack a c) -> c -> CompilerT a m c
 recordPatternDesugarTrans f e = withSupplyC (evalRecordDesugarStack (f e) "row")
 
-recordPatternDesugarC :: (Monad m, Monoid a, Data a) => Module a Kind IndexedType -> CompilerT a m (Module a Kind IndexedType)
+recordPatternDesugarC :: (Show a, Monad m, Monoid a, Data a) => Module a Kind IndexedType -> CompilerT a m (Module a Kind IndexedType)
 recordPatternDesugarC = recordPatternDesugarTrans compileRecordPatterns
 
 matchMonadTrans :: (Monad m) => (c -> MatchMonad c) -> c -> CompilerT a m c
@@ -165,7 +165,7 @@ typeCheckingPass =
     -- Type inference
     >=> runTypeInferenceC
 
-mainPass :: (Monad m, Monoid a, Data a, Show a) => Module a Kind IndexedType -> CompilerT a m (Module a Kind IndexedType)
+mainPass :: (MonadIO m, Monoid a, Data a, Show a) => Module a Kind IndexedType -> CompilerT a m (Module a Kind IndexedType)
 mainPass =
   -- Normalize top-level expressions
   normalizeObjectC
@@ -173,12 +173,15 @@ mainPass =
     >=> desugarPatternsC
     -- Compile or-patterns
     >=> compileOrPatterns
+    >=> writeDotFilesC "patterns"
     -- Translate record patterns to select operators
     >=> recordPatternDesugarC
+    >=> writeDotFilesC "record_patterns"
     -- Compile as-patterns
     >=> pure . desugarAsPatterns
     -- Compile match statements
     >=> compileMatchExprsC
+    >=> writeDotFilesC "match_exprs"
     -- Placeholder insertion
     >=> placeholderInsertionC
     -- Denormalize top-level expressions
@@ -192,6 +195,11 @@ compileModule =
     >=> mainPass
     -- Final lowering
     >=> kernelTranslationC
+
+writeDotFilesC :: (MonadIO m, Pretty t, Show t) => Text -> Module a k t -> m (Module a k t)
+writeDotFilesC ns m = do
+  liftIO $ writeDotFiles ns m
+  pure m
 
 writeDotFiles :: (Pretty t, Show t) => Text -> Module a k t -> IO ()
 writeDotFiles ns m@(Module (Path path) _ defs) = do
