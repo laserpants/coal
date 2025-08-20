@@ -2,14 +2,14 @@ module Main {
 
   fun remove_name(r) =
     match(r) {
-      | { name = _ | q } =>
+      | { name = x | q } =>
           q
     };
 
   fun main() =
     let
       q =
-        remove_name({ name = false, is_admin = true })
+        remove_name({ name = "Tron", is_admin = true })
       in
         trace_bool(q.is_admin);
 
