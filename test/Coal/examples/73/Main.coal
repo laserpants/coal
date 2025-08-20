@@ -1,0 +1,18 @@
+module Main {
+
+  fun add((x, y)) : int32 =
+    x + y;
+
+  fun curry(f, x, y) =
+    f((x, y));
+
+  fun uncurry(f, (x, y)) =
+    f(x, y);
+
+  let res : int32 =
+    (curry(add))(5, 3);
+
+  fun main() =
+    trace_int32(res);
+
+}
