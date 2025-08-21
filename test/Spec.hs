@@ -1829,7 +1829,7 @@ moduleCore =
                             )
                         , @<int32>
                             ( Core$.unpack_nat : $Nat/int32
-                            , ths : $Nat
+                            , rhs : $Nat
                             )
                         )
                     )
@@ -1849,7 +1849,7 @@ moduleCore =
                             )
                         , @<int32>
                             ( Core$.unpack_nat : $Nat/int32
-                            , ths : $Nat
+                            , rhs : $Nat
                             )
                         )
                     )
@@ -1869,7 +1869,7 @@ moduleCore =
                             )
                         , @<int32>
                             ( Core$.unpack_nat : $Nat/int32
-                            , ths : $Nat
+                            , rhs : $Nat
                             )
                         )
                     )

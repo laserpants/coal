@@ -179,6 +179,7 @@ mainPass =
     >=> writeDotFilesC "record_patterns"
     -- Compile as-patterns
     >=> pure . desugarAsPatterns
+    >=> writeDotFilesC "as_patterns"
     -- Compile match statements
     >=> compileMatchExprsC
     >=> writeDotFilesC "match_exprs"
