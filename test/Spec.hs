@@ -192,6 +192,8 @@ spec = do
   print a
   a <- isLeft <$> main79
   print a
+  x <- main80
+  print (x == Right "24\n")
 
 runTestFiles :: [String] -> IO (Either CompilerError Text)
 runTestFiles files = do
