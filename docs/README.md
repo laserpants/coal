@@ -1,9 +1,8 @@
 # Coal
 
-This repository is home for the Coal programming language and compiler. The
-project is under mega-construction.
+This repository is the home of the Coal programming language and compiler. The project is under mega-construction. 👷
 
-## Synopsis
+## About
 
 Coal is a purely functional, total programming language with
 
@@ -13,25 +12,133 @@ Coal is a purely functional, total programming language with
 - extensible records, 
 - codata, 
 - traits (type classes), and 
-- effect system (work in progress)
+- effect handlers (work in progress)
 
-among other features. Coal's type system supports type inference and parametric
-polymorphism, similar to Haskell, ML, and other languages based on the [System-F](https://en.wikipedia.org/wiki/System_F)
-lambda calculus. The Coal compiler is implemented in Haskell and targets LLVM
-for code generation.
+&hellip; among other features. Coal's type system supports type inference and parametric polymorphism, similar to Haskell, ML, and other languages based on the [System-F](https://en.wikipedia.org/wiki/System_F) lambda calculus. The Coal compiler is implemented in Haskell and targets LLVM for code generation.
+
+### Rethinking recursion
+
+Since Coal is a [total](https://en.wikipedia.org/wiki/Total_functional_programming) language, it takes a different approach to recursion, following the motto that "recursion is the GOTO of functional programming." To ensure that programs are provably terminating, recursion is only permitted in a restricted form, known as *structural recursion*. In this paradigm, each recursive call operates on a strictly smaller part of some finite data structure, progressing toward a base case. 
+
+```
+  fun sum(numbers : List<int32>) : int32 =
+    fold(numbers) {
+      | [] => 0 
+      | x :: @sum => x + sum
+    }
+```
+
+### Programs = Expressions + Effects
+
+Purely functional programming is declarative and [expression-oriented](https://en.wikipedia.org/wiki/Expression-oriented_programming_language): a program is, at its core, just an expression that evaluates to a value. In this model, there are no observable side effects, no explicit mutable state, and all data is immutable. These properties make programs more predictable, easier to reason about, highly testable, and allows for code to be verified using formal mathematical methods. On the other hand, programs need to have the ability to interact with the outside world. Side-effects are what make them useful.
+
+TODO
+
+## Project status and roadmap
+
+TODO
+
+## Installation and setup
+
+TODO
+
+### Prerequisites
+
+TODO
+
+### Compiler
+
+TODO
+
+## How to contribute
+
+TODO
+
+## Language overview
+
+TODO
+
+### Syntax
+
+TODO
+
+### Modules and imports
+
+Programs in Coal are organized as collections of modules. Modules provide a way to group related functionality into distinct namespaces.  Each module is typically focused on a specific purpose within a library or application.  A module can contain functions, type definitions, traits, and other language constructs, defined together in a single file.
+
+```
+module MerkleTree {
+  // ... code  
+}
+```
+
+### Language constructs
+
+TODO
+
+#### Control flow
+
+TODO
+
+##### If-then-else
+
+TODO
+
+### Types
+
+#### Built-in types
+
+Coal provides the following built-in basic language types:
+
+| Type               | Description                             | Example values                    |                       
+| ------------------ | --------------------------------------- | ------------------------- |                       
+| `bool`             | Booleans                                | `true` \| `false`         |                       
+| `char`             | A single Unicode character              | `'a'`, `'b'`, `'🤖'`, ... |                        
+| `float`            | Single precision floating point numbers | `3.1519f`                 |                        
+| `double`           | Double precision floating point numbers | `3.1519`                  |                        
+| `int32`            | 32-bit integers                         | `0`, `1`, `2`, `3`, ...   |                        
+| `int64`            | 64-bit integers                         | `0`, `1`, `2`, `3`, ...   |                        
+| `bignum`           | Arbitrary precision integers            | `0`, `1`, `2`, `3`, ...   |                        
+| `string`           | UTF-8 text string                       |  `"Hello, ✨ world!"`      |                        
+| `unit`             | Singleton type                          | `()`                      |                        
+| `void`             | The uninhabited type                    |                           |                        
+| `nat`              | Natural numbers (Peano construction)    | `Zero`, `Succ(Zero)`, ... |                        
+
+##### Integral types
+
+#### Algebraic data types
+
+TODO
+
+### Pattern matching
+
+TODO
+
+### Recursion and corecursion
+
+TODO
+
+## License 
+
+TODO
+
+## Code of conduct
+
+TODO
+
+
+---
+---
+---
+---
+
+
+## About
 
 ## Rethinking recursion
 
-Since Coal is a [total](https://en.wikipedia.org/wiki/Total_functional_programming) 
-language, it takes a different approach to recursion, following the motto that 
-"recursion is the GOTO of functional programming." To ensure that programs are 
-provably terminating, recursion is only permitted in a restricted form, known 
-as *structural recursion*. In this paradigm, each recursive call operates on a 
-strictly smaller part of some finite data structure, progressing toward a base 
-case. 
-
 In most languages, a typical (recursive) implementation of the factorial 
-function, would look something like the following:
+function looks something like the following:
 
 ```
 fun factorial(n : int32) =
@@ -49,15 +156,40 @@ If we pass this function to the Coal compiler, it is rejected with the following
 Name not in scope: factorial
 ```
 
+Structural recursion works with recursive data structures like lists, trees, or other algebraic data types. This pattern is known as a *fold*. A common example is where an array of numbers is reduced into a single value, for example by adding
+
 ```
-  fun factorial(n : int32) =
-    fold(pack_nat(n)) {
+let sum = reduce(fn(n, a) => f + a, [1, 2, 3])
+```
+
+Folding doesn't work with an integers, at least not those of the machine variety. But we can define one that works.  in fact, the natural numbers are an example of the most basic inductievly defined type.
+
+> Every natural number is either zero or the successor of another natural number.
+
+This is known as the Peano construction of the natural numbers, named after the Italian mathematician [Giuseppe Peano](https://en.wikipedia.org/wiki/Giuseppe_Peano).
+Here is how we express this as an algebraic data type:
+
+```
+type nat
+ = Zero
+ | Succ(nat)
+```
+
+Here is how we use the `nat` data type to define the factorial function:
+
+```
+  fun factorial(n : nat) =
+    fold(n) {
       | Zero =>
           1
       | Succ(@p) as m =>
-          unpack_nat(m) * p
+          m * p
     }
 ```
+
+Note that `fold` is a language keyword in Coal, not an ordinary function.
+
+> Why is the function rejected?
 
 ```
   fun factorial(n : int32) =
@@ -66,7 +198,7 @@ Name not in scope: factorial
 ```
 
 A strict distinction is made between finite data, which is produced and 
-consumed in this manner, and data that is allowed to be infinite. The latter is 
+consumed in this way, and data that that we treat as potentially infinite. The latter is 
 known is *codata*. The codata equivalents of lists, for example,  are streams.
 
 ```
@@ -76,7 +208,10 @@ known is *codata*. The codata equivalents of lists, for example,  are streams.
 ```
 
 ```
-  cotype Stream<a> = { Head : a, Tail : Stream<a> }
+  cotype Stream<a> = 
+    { Head : a
+    , Tail : Stream<a> 
+    }
 ```
 
 The opposite ...
@@ -89,6 +224,8 @@ The opposite ...
 ## Language overview
 
 ### Built-in types
+
+Coal provides the following built-in basic language types:
 
 | Type               | Description                             | Values                    |                       
 | ------------------ | --------------------------------------- | ------------------------- |                       
@@ -172,7 +309,7 @@ let tree_of_gondor =
 ### List, Option, etc.
 
 A list is an ordered collection of elements where all entries are of the same type. 
-It is an essential data structure in functional programming, commonly used to store and manipulate collections of data. 
+It is a foundational data structure in functional programming, commonly used to store and manipulate collections of data. 
 In Coal, list literals are denoted by a sequence of comma-separated expressions, enclosed in square brackets:
 
 ```
@@ -195,7 +332,7 @@ type List<a>
 
 ```
 type Option<a>
-  = Some<a>
+  = Some(a)
   | None
 ```
 
@@ -203,7 +340,7 @@ type Option<a>
 
 Just like lists, tuples are ordered sequences of values. Unlike lists, however:
 
-1. A tuple's length is fixed (determined at compile-time), and
+1. A tuple's length is fixed (i.e. determined at compile-time), and
 2. Its elements may have different types.
 
 In code, a tuple is written as a comma-separated sequence of expressions enclosed in parentheses:
@@ -252,7 +389,7 @@ f : a -> b -> c
 g : (a, b) -> c
 ```
 
-Note that these have incompatible types.
+Note that `f` and `g` have incompatible types.
 The first is known as a *curried* function type, and it is usually more convenient to work with. 
 Curried functions can be partially applied, which is useful, for example, when working with higher-order functions. 
 If you really intend to specify a tuple as the only argument to a function, you need to use an extra pair of parentheses:
@@ -317,7 +454,7 @@ Each field consists of a name, referred to as the *label*, paired with a value. 
 ### Traits
 
 A trait describes a collection of functions that must be defined for the 
-underlying type. Traits in Coal are similar to type classes in Haskell. 
+underlying type. Traits in Coal are similar to type classes in Haskell. A common analogy is to think of them as interfaces in object-oriented programming. 
 
 
 ```
@@ -386,15 +523,14 @@ module MerkleTree {
 
 ## Effects as a side business
 
+> Programs = Expressions + Effects
+
+Purely functional programming is declarative and [expression-oriented](https://en.wikipedia.org/wiki/Expression-oriented_programming_language): a program is, at its core, just an expression that evaluates to a value. In this model, there are no observable side effects, no explicit mutable state, and all data is immutable. These properties make programs more predictable, easier to reason about, highly testable, and allows for code to be verified using formal mathematical methods. On the other hand, programs need to have the ability to interact with the outside world. Side-effects are what make them useful.
+
+
 Purely functional programming is declarative and [expression-oriented](https://en.wikipedia.org/wiki/Expression-oriented_programming_language). 
 A program is, in essence, just an expression that evaluates to a value.
-There are no observable side-effects, no *explicit state*, and all data is immutable. This leads to 
-more predictable program behavior, makes the code easier to reason about, 
-improves testability, and allows for code to be verified using formal 
-mathematical methods. On the other hand, programs need to have the ability to 
-interact with the outside world. Side-effects are what make them useful.
-
-> Programs = Expressions + Effects
+There are no observable side-effects, no *explicit state*, and all data is immutable. This leads to more predictable program behavior, makes the code easier to reason about, improves testability, and allows for code to be verified using formal mathematical methods. On the other hand, programs need to have the ability to interact with the outside world. Side-effects are what make them useful.
 
 Similar to how the user interface describes
 is a 
