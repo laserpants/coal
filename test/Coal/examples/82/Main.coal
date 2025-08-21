@@ -1,0 +1,31 @@
+module Main {
+
+  type JsonValue
+    = JsonNull
+    | JsonBool(bool)
+    | JsonNumber(double)
+    | JsonString(string)
+    | JsonArray(List<JsonValue>)
+    | JsonObject(List<(string, JsonValue)>)
+
+  fun encode(json : JsonValue) : string =
+    match(json) {
+      | JsonNull =>
+          "null"
+
+//      | JsonBool(false) =>
+//          "false"
+
+      | JsonNumber(d) =>
+          double_to_string(d)
+
+//      | JsonString(str)
+//          "\"" +++ str +++ "\""
+//      | JsonArray(List<JsonValue>)
+//      | JsonObject(List<(string, JsonValue)>)
+    };
+
+  fun main() =
+    trace_string(encode(JsonNull));
+
+}

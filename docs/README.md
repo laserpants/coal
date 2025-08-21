@@ -18,7 +18,7 @@ Coal is a purely functional, total programming language with
 
 ### Rethinking recursion
 
-Since Coal is a [total](https://en.wikipedia.org/wiki/Total_functional_programming) language, it takes a different approach to recursion, following the motto that "recursion is the GOTO of functional programming." To ensure that programs are provably terminating, recursion is only permitted in a restricted form, known as *structural recursion*. In this paradigm, each recursive call operates on a strictly smaller part of some finite data structure, progressing toward a base case. 
+Since Coal is a [total](https://en.wikipedia.org/wiki/Total_functional_programming) language, it takes a different approach to recursion, following the motto that "recursion is the GOTO of functional programming." To ensure that programs are provably terminating, recursion is only available in a restricted form, known as *structural recursion*. In this paradigm, each recursive call operates on a strictly smaller part of some finite data structure, progressing toward a base case. 
 
 ```
   fun sum(numbers : List<int32>) : int32 =
@@ -108,7 +108,56 @@ Coal provides the following built-in basic language types:
 
 #### Algebraic data types
 
-TODO
+User-defined data types are introduced with the `type` keyword.
+
+- A *product* type combines multiple fields into a single value: All of the specified components are present together (e.g. an RGB color value that contains separate red, green, and blue components).
+
+   ```
+   type Color = Rgb(int8, int8, int8)
+   ```
+
+- A *sum* type represents a choice between alternatives: A value belongs to exactly one of the specified variants (e.g. a shape that can be either a `Circle` or a `Rectangle`).
+
+   ```
+   type Shape = Circle | Rectangle
+   ```
+
+More interesting types can be built from combinations of product and sum constructors. Here is a type that defines a binary tree, parameterized by the type (`a`) of its nodes:
+
+```
+type Tree<a> 
+  = Leaf
+  | Node(a, Tree<a>, Tree<a>)
+```
+
+```
+          (4)
+       ---------
+       /       \
+     (2)       (6)
+    -----     -----
+    /   \     /   \ 
+  (1)   (3) (5)   (7)  
+```
+
+Here is how this tree is encoded with the `Tree` data type:
+
+```
+let tree_of_gondor = 
+  Node 
+    ( 4
+    , Node
+        ( 2
+        , Node(1, Leaf, Leaf)
+        , Node(3, Leaf, Leaf)
+        )
+    , Node
+        ( 6
+        , Node(5, Leaf, Leaf)
+        , Node(7, Leaf, Leaf)
+        )
+    )
+```
 
 ### Pattern matching
 
@@ -259,7 +308,7 @@ User-defined data types are introduced with the `type` keyword.
    type Shape = Circle | Rectangle
    ```
 
-More interesting types can be built from combinations of product and sum constructors. Here is a type that defines a binary tree, parameterized by the type (`a`) of its nodes:
+More interesting types can be built from combinations of product and sum constructors. Here is a type that describes a binary tree, parameterized by the type (`a`) of its nodes:
 
 ```
 type Tree<a> 
