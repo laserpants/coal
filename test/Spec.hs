@@ -194,6 +194,8 @@ spec = do
   print a
   x <- main80
   print (x == Right "24\n")
+  x <- main81
+  print (x == Right "6\n")
 
 runTestFiles :: [String] -> IO (Either CompilerError Text)
 runTestFiles files = do
@@ -680,6 +682,18 @@ main80 :: IO (Either CompilerError Text)
 main80 = do
   runTestFiles
     [ "./test/Coal/examples/80/Main.coal"
+    ]
+
+main81 :: IO (Either CompilerError Text)
+main81 = do
+  runTestFiles
+    [ "./test/Coal/examples/81/Main.coal"
+    ]
+
+main82 :: IO (Either CompilerError Text)
+main82 = do
+  runTestFiles
+    [ "./test/Coal/examples/82/Main.coal"
     ]
 
 compileFiles :: [String] -> IO (Either CompilerError ())
@@ -1251,6 +1265,22 @@ names =
         )
     )
   ,
+    ( "float_to_string"
+    , Forall
+        mempty
+        []
+        ( TIntrinsic IFloat `TArrow` TIntrinsic IString
+        )
+    )
+  ,
+    ( "double_to_string"
+    , Forall
+        mempty
+        []
+        ( TIntrinsic IDouble `TArrow` TIntrinsic IString
+        )
+    )
+  ,
     ( "unpack_nat"
     , Forall
         mempty
@@ -1467,6 +1497,20 @@ moduleCore =
             ]
             [r| 
                   #(int32_to_string : int32/string, n : int32) (fn(r : string) => r : string)
+              |]
+        , OFunction
+            "Core$.float_to_string"
+            [ Label Kernel.float "f"
+            ]
+            [r| 
+                  #(float_to_string : float/string, f : float) (fn(r : string) => r : string)
+              |]
+        , OFunction
+            "Core$.double_to_string"
+            [ Label Kernel.double "d"
+            ]
+            [r| 
+                  #(double_to_string : double/string, d : double) (fn(r : string) => r : string)
               |]
         , OFunction
             "Core$.pair_to_string"

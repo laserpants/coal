@@ -168,13 +168,13 @@ print_bignum(mpz_t* big_int)
 float
 int32_to_float(int32_t n)
 {
-  return (float) n;
+  return (float)n;
 }
 
 double
 int32_to_double(int32_t n)
 {
-  return (double) n;
+  return (double)n;
 }
 
 /*
@@ -193,6 +193,36 @@ int32_to_string(int32_t value)
     return NULL;
 
   snprintf(result, buffer_size, "%d", value);
+
+  return result;
+}
+
+char*
+float_to_string(float value)
+{
+  const size_t buffer_size = 32; // enough to hold float with precision
+
+  char* result = GC_malloc(buffer_size);
+
+  if (!result)
+    return NULL;
+
+  snprintf(result, buffer_size, "%g", value);
+
+  return result;
+}
+
+char*
+double_to_string(double value)
+{
+  const size_t buffer_size = 64; // enough to hold double with precision
+
+  char* result = GC_malloc(buffer_size);
+
+  if (!result)
+    return NULL;
+
+  snprintf(result, buffer_size, "%g", value);
 
   return result;
 }
