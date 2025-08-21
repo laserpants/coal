@@ -91,10 +91,24 @@ parseVariablePattern =
 parseLiteralPattern :: Parser (Pattern Metadata ())
 parseLiteralPattern =
   parseListLiteralPattern
+    <|> parseLiteralTrue
+    <|> parseLiteralFalse
     <|> parseCharLiteralPattern
 
 squote :: Parser Char
 squote = char '\''
+
+parseLiteralTrue :: Parser (Pattern Metadata ())
+parseLiteralTrue =
+  withMetadata $ do
+    lexeme_ "true"
+    pure (\loc -> PLiteral loc (LBool True))
+
+parseLiteralFalse :: Parser (Pattern Metadata ())
+parseLiteralFalse =
+  withMetadata $ do
+    lexeme_ "false"
+    pure (\loc -> PLiteral loc (LBool False))
 
 parseCharLiteralPattern :: Parser (Pattern Metadata ())
 parseCharLiteralPattern =

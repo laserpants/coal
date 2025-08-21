@@ -338,6 +338,8 @@ equalityOperator ot (e1 :| [e2]) = do
       pure (Kernel.op (Kernel.OEqDouble o1 o2))
     (TIntrinsic IChar `TArrow` TIntrinsic IChar `TArrow` TIntrinsic IBool) ->
       pure (Kernel.op (Kernel.OEqChar o1 o2))
+    (TIntrinsic IBool `TArrow` TIntrinsic IBool `TArrow` TIntrinsic IBool) ->
+      pure (Kernel.op (Kernel.OEqBool o1 o2))
     _ ->
       -- error "Not implemented"
       error (show ot)

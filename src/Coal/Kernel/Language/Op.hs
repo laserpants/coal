@@ -23,12 +23,14 @@ data Op a
   | OEqFloat a a
   | OEqDouble a a
   | OEqChar a a
+  | OEqBool a a
   | -- | Inequality
     ONeInt32 a a
   | ONeInt64 a a
   | ONeFloat a a
   | ONeDouble a a
   | ONeChar a a
+  | ONeBool a a
   | -- | Less than
     OLtInt32 a a
   | OLtInt64 a a

@@ -465,6 +465,8 @@ instance Dot Kernel.Type (Kernel.Op (DotGen Kernel.Type Int)) where
         emitOp "OEqDouble" [op1, op2]
       Kernel.OEqChar op1 op2 ->
         emitOp "OEqChar" [op1, op2]
+      Kernel.OEqBool op1 op2 ->
+        emitOp "OEqBool" [op1, op2]
       Kernel.ONeInt32 op1 op2 ->
         emitOp "ONeInt32" [op1, op2]
       Kernel.ONeInt64 op1 op2 ->
@@ -475,6 +477,8 @@ instance Dot Kernel.Type (Kernel.Op (DotGen Kernel.Type Int)) where
         emitOp "ONeDouble" [op1, op2]
       Kernel.ONeChar op1 op2 ->
         emitOp "ONeChar" [op1, op2]
+      Kernel.ONeBool op1 op2 ->
+        emitOp "ONeBool" [op1, op2]
       Kernel.OLtInt32 op1 op2 ->
         emitOp "OLtInt32" [op1, op2]
       Kernel.OLtInt64 op1 op2 ->

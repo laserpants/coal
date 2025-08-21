@@ -10,11 +10,9 @@ module Main {
 
   fun encode(json : JsonValue) : string =
     match(json) {
-      | JsonNull =>
-          "null"
-
-//      | JsonBool(false) =>
-//          "false"
+      | JsonNull => "null"
+      | JsonBool(false) => "false"
+      | JsonBool(true) => "true"
 
       | JsonNumber(d) =>
           double_to_string(d)
@@ -23,9 +21,10 @@ module Main {
 //          "\"" +++ str +++ "\""
 //      | JsonArray(List<JsonValue>)
 //      | JsonObject(List<(string, JsonValue)>)
+      | _ => "TODO"
     };
 
   fun main() =
-    trace_string(encode(JsonNull));
+    trace_string(encode(JsonBool(true)));
 
 }
