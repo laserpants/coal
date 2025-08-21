@@ -190,6 +190,8 @@ spec = do
   print (x == Right "true\n")
   a <- isLeft <$> main78
   print a
+  a <- isLeft <$> main79
+  print a
 
 runTestFiles :: [String] -> IO (Either CompilerError Text)
 runTestFiles files = do
@@ -664,6 +666,12 @@ main78 :: IO (Either CompilerError Text)
 main78 = do
   runTestFiles
     [ "./test/Coal/examples/78/Main.coal"
+    ]
+
+main79 :: IO (Either CompilerError Text)
+main79 = do
+  runTestFiles
+    [ "./test/Coal/examples/79/Main.coal"
     ]
 
 compileFiles :: [String] -> IO (Either CompilerError ())

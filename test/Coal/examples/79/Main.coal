@@ -1,0 +1,9 @@
+module Main {
+
+  fun fst3((fst, _, _) : (a, b, c)) : b =
+    fst;
+
+  fun main() =
+    trace_string(fst3(("a", "b", "c")));
+
+}
