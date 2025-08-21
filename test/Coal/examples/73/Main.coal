@@ -1,16 +1,18 @@
 module Main {
 
-  fun remove_name(r : { name : string | t }) : { | t } =
-    match(r) {
-      | { name = _ | q } =>
-          q
-    };
+  fun add((x, y)) : int32 =
+    x + y;
+
+  fun curry(f, x, y) =
+    f((x, y));
+
+  fun uncurry(f, (x, y)) =
+    f(x, y);
+
+  let res : int32 =
+    (curry(add))(5, 3);
 
   fun main() =
-    let
-      q =
-        remove_name({ name = "Tron", is_admin = false })
-      in
-        trace_bool(q.is_admin);
+    trace_int32(res);
 
 }
