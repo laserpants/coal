@@ -1,0 +1,14 @@
+module Main {
+
+  fun factorial(n : nat) =
+    fold(n) {
+      | Zero =>
+          1
+      | Succ(@p) as m =>
+          m * p
+    };
+
+  fun main() =
+    trace_int32(unpack_nat(factorial(4)));
+
+}

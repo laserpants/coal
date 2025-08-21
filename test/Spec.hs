@@ -674,6 +674,12 @@ main79 = do
     [ "./test/Coal/examples/79/Main.coal"
     ]
 
+main80 :: IO (Either CompilerError Text)
+main80 = do
+  runTestFiles
+    [ "./test/Coal/examples/80/Main.coal"
+    ]
+
 compileFiles :: [String] -> IO (Either CompilerError ())
 compileFiles files = do
   fs <- traverse readFile files
@@ -865,6 +871,18 @@ builtinInstances =
                 ( "negate"
                 , Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic INat)
                 )
+              ,
+                ( "(+)"
+                , Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic INat `TArrow` TIntrinsic INat)
+                )
+              ,
+                ( "(-)"
+                , Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic INat `TArrow` TIntrinsic INat)
+                )
+              ,
+                ( "(*)"
+                , Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic INat `TArrow` TIntrinsic INat)
+                )
               ]
           )
         ]
@@ -935,6 +953,9 @@ addBuiltinDefs defs =
              , "negate__$instance_Numeric(Intrinsic(Double))"
              , --
                "from_int32__$instance_Numeric(Intrinsic(Nat))"
+             , "(+)__$instance_Numeric(Intrinsic(Nat))"
+             , "(-)__$instance_Numeric(Intrinsic(Nat))"
+             , "(*)__$instance_Numeric(Intrinsic(Nat))"
              , "negate__$instance_Numeric(Intrinsic(Nat))"
              , --
                "compare__$instance_Ordered(Intrinsic(Int32))"
@@ -1794,12 +1815,74 @@ moduleCore =
                     )
               |]
         , OFunction
+            "Core$.(+)__$instance_Numeric(Intrinsic(Nat))"
+            [ Label (Kernel.TCon "$Nat" []) "lhs"
+            , Label (Kernel.TCon "$Nat" []) "rhs"
+            ]
+            [r| 
+                  @<$Nat>
+                    ( Core$.pack_nat : int32/$Nat
+                    , [+ int32]
+                        ( @<int32>
+                            ( Core$.unpack_nat : $Nat/int32
+                            , lhs : $Nat
+                            )
+                        , @<int32>
+                            ( Core$.unpack_nat : $Nat/int32
+                            , ths : $Nat
+                            )
+                        )
+                    )
+              |]
+        , OFunction
+            "Core$.(-)__$instance_Numeric(Intrinsic(Nat))"
+            [ Label (Kernel.TCon "$Nat" []) "lhs"
+            , Label (Kernel.TCon "$Nat" []) "rhs"
+            ]
+            [r| 
+                  @<$Nat>
+                    ( Core$.pack_nat : int32/$Nat
+                    , [- int32]
+                        ( @<int32>
+                            ( Core$.unpack_nat : $Nat/int32
+                            , lhs : $Nat
+                            )
+                        , @<int32>
+                            ( Core$.unpack_nat : $Nat/int32
+                            , ths : $Nat
+                            )
+                        )
+                    )
+              |]
+        , OFunction
+            "Core$.(*)__$instance_Numeric(Intrinsic(Nat))"
+            [ Label (Kernel.TCon "$Nat" []) "lhs"
+            , Label (Kernel.TCon "$Nat" []) "rhs"
+            ]
+            [r| 
+                  @<$Nat>
+                    ( Core$.pack_nat : int32/$Nat
+                    , [* int32]
+                        ( @<int32>
+                            ( Core$.unpack_nat : $Nat/int32
+                            , lhs : $Nat
+                            )
+                        , @<int32>
+                            ( Core$.unpack_nat : $Nat/int32
+                            , ths : $Nat
+                            )
+                        )
+                    )
+              |]
+
+        , OFunction
             "Core$.negate__$instance_Numeric(Intrinsic(Nat))"
             [ Label (Kernel.TCon "$Nat" []) "_"
             ]
             [r| 
                   $Zero : $Nat
               |]
+        -- /
         , OFunction
             "Core$.compare"
             [ Label (Kernel.TCon "Ordered" [opaque]) "$a"
