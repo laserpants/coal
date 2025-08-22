@@ -196,6 +196,8 @@ spec = do
   print (x == Right "24\n")
   x <- main81
   print (x == Right "6\n")
+  x <- main84
+  print (x == Right "true\n")
 
 runTestFiles :: [String] -> IO (Either CompilerError Text)
 runTestFiles files = do

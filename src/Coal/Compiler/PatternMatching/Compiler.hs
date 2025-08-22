@@ -52,7 +52,7 @@ instance (Data k, Data (o k), Typeable o) => TypeProxy (Type o k) where
 
 infixr 1 `arrow`
 
-compileEnvelope :: (TypeProxy t, Ord t, Data a, Monoid a) => EnvelopeExpression (Expression a) t -> Expression a t
+compileEnvelope :: (Eq a, TypeProxy t, Ord t, Data a, Monoid a) => EnvelopeExpression (Expression a) t -> Expression a t
 compileEnvelope =
   \case
     MFail ->
@@ -72,13 +72,14 @@ compileEnvelope =
             (EVariable mempty ll :| [e1])
         )
         (compileEnvelope e2)
-        (compileEnvelope e3)
+        -- TODO: Why is this if-condition needed?
+        (if MFail == e3 then compileEnvelope e2 else compileEnvelope e3)
 
-compileEnvelopeClause :: (TypeProxy t, Ord t, Data a, Monoid a) => EnvelopeClause (Expression a) t -> CompiledClause a t
+compileEnvelopeClause :: (Eq a, TypeProxy t, Ord t, Data a, Monoid a) => EnvelopeClause (Expression a) t -> CompiledClause a t
 compileEnvelopeClause (EnvelopeClause (Label t name) ls e) =
   ECompiledClause (Label (folded t ls) name :| ls) (compileEnvelope e)
 
-clauseList :: (TypeProxy t, Ord t, Data a, Monoid a) => [EnvelopeClause (Expression a) t] -> List1 (CompiledClause a t)
+clauseList :: (Eq a, TypeProxy t, Ord t, Data a, Monoid a) => [EnvelopeClause (Expression a) t] -> List1 (CompiledClause a t)
 clauseList ecs =
   case filter (not . fails) ecs of
     c : cs ->

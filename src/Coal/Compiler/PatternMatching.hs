@@ -44,28 +44,28 @@ instance (MatchExpressionContext a) => MatchExpressionContext (Dictionary a) whe
 
 type MatchClasses a t = (Show a, Data a, Monoid a, Show t, Data t, TypeProxy t, Ord t)
 
-instance (MatchClasses a t, Data k) => MatchExpressionContext (Module a k t) where
+instance (Eq a, MatchClasses a t, Data k) => MatchExpressionContext (Module a k t) where
   compileMatchExprs = transformBiM (compileMatchExprsE :: Expression a t -> MatchMonad (Expression a t))
 
-instance (MatchClasses a t, Data k) => MatchExpressionContext (Definition a k t) where
+instance (Eq a, MatchClasses a t, Data k) => MatchExpressionContext (Definition a k t) where
   compileMatchExprs = transformBiM (compileMatchExprsE :: Expression a t -> MatchMonad (Expression a t))
 
-instance (MatchClasses a t) => MatchExpressionContext (Function Expression a t) where
+instance (Eq a, MatchClasses a t) => MatchExpressionContext (Function Expression a t) where
   compileMatchExprs = transformBiM (compileMatchExprsE :: Expression a t -> MatchMonad (Expression a t))
 
-instance (MatchClasses a t) => MatchExpressionContext (Constant Expression a t) where
+instance (Eq a, MatchClasses a t) => MatchExpressionContext (Constant Expression a t) where
   compileMatchExprs = transformBiM (compileMatchExprsE :: Expression a t -> MatchMonad (Expression a t))
 
-instance (MatchClasses a t) => MatchExpressionContext (Clause a t) where
+instance (Eq a, MatchClasses a t) => MatchExpressionContext (Clause a t) where
   compileMatchExprs = transformBiM (compileMatchExprsE :: Expression a t -> MatchMonad (Expression a t))
 
-instance (MatchClasses a t) => MatchExpressionContext (Binding Expression a t) where
+instance (Eq a, MatchClasses a t) => MatchExpressionContext (Binding Expression a t) where
   compileMatchExprs = transformBiM (compileMatchExprsE :: Expression a t -> MatchMonad (Expression a t))
 
-instance (MatchClasses a t) => MatchExpressionContext (Expression a t) where
+instance (Eq a, MatchClasses a t) => MatchExpressionContext (Expression a t) where
   compileMatchExprs = transformM compileMatchExprsE
 
-compileMatchExprsE :: (MatchClasses a t) => Expression a t -> MatchMonad (Expression a t)
+compileMatchExprsE :: (Eq a, MatchClasses a t) => Expression a t -> MatchMonad (Expression a t)
 compileMatchExprsE =
   \case
     EMatch _ _ e cs -> do
@@ -74,7 +74,7 @@ compileMatchExprsE =
     e ->
       pure e
 
-compileClauses :: (MatchClasses a t) => Label t -> List1 (Clause a t) -> MatchMonad (Expression a t)
+compileClauses :: (Eq a, MatchClasses a t) => Label t -> List1 (Clause a t) -> MatchMonad (Expression a t)
 compileClauses ll cs = compileEnvelope <$> matchPatterns [ll] eqs MFail
  where
   eqs = uncurry patternEquation . translateClause <$> fromList1 cs

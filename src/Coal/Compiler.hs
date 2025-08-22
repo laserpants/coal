@@ -165,7 +165,7 @@ typeCheckingPass =
     -- Type inference
     >=> runTypeInferenceC
 
-mainPass :: (MonadIO m, Monoid a, Data a, Show a) => Module a Kind IndexedType -> CompilerT a m (Module a Kind IndexedType)
+mainPass :: (Eq a, MonadIO m, Monoid a, Data a, Show a) => Module a Kind IndexedType -> CompilerT a m (Module a Kind IndexedType)
 mainPass =
   -- Normalize top-level expressions
   normalizeObjectC
