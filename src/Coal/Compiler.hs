@@ -162,6 +162,7 @@ typeCheckingPass =
     >=> compileUnfoldsC
     -- Expand folds
     >=> compileFoldsC
+    >=> writeDotFilesC "expand_folds"
     -- Type inference
     >=> runTypeInferenceC
 
