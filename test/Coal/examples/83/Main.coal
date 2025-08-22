@@ -19,7 +19,6 @@ module Main {
       | JsonArray(@xs) => xs
       | Cons(@x, @xs) => x +++ xs
       | Nil => ""
-      | _ => "?"
     };
 
   let xs = JsonArray(Cons(JsonString("a"), Cons(JsonString("b"), Nil)));
