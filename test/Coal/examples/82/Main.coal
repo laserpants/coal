@@ -8,23 +8,23 @@ module Main {
     | JsonArray(List<JsonValue>)
     | JsonObject(List<(string, JsonValue)>)
 
+  fun in_quotes(str) = "\"" +++ str +++ "\"";
+
   fun encode(json : JsonValue) : string =
-    match(json) {
+    fold encode_value(json) {
       | JsonNull => "null"
       | JsonBool(false) => "false"
       | JsonBool(true) => "true"
-
-      | JsonNumber(d) =>
-          double_to_string(d)
-
-//      | JsonString(str)
-//          "\"" +++ str +++ "\""
-//      | JsonArray(List<JsonValue>)
-//      | JsonObject(List<(string, JsonValue)>)
-      | _ => "TODO"
+      | JsonNumber(d) => double_to_string(d)
+      | JsonString(str) => in_quotes(str)
+      | JsonArray(values) =>
+          fold encode_array(values) {
+            | [] => ""
+            | encode_value(@x) :: encode_array(@xs) => x +++ xs
+          }
     };
 
   fun main() =
-    trace_string(encode(JsonBool(true)));
+    trace_string(encode(JsonArray([JsonString("a"), JsonString("b"), JsonString("c")])));
 
 }
