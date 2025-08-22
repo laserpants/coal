@@ -9,13 +9,15 @@ module Main {
     | Cons(JsonValue, JsonValue)
     | Nil
 
+  fun in_quotes(str) = "\"" +++ str +++ "\"";
+
   fun encode(json : JsonValue) : string =
     fold(json) {
       | JsonNull => "null"
       | JsonBool(false) => "false"
       | JsonBool(true) => "true"
       | JsonNumber(d) => double_to_string(d)
-      | JsonString(str) => "\"" +++ str +++ "\""
+      | JsonString(str) => in_quotes(str)
       | JsonArray(@xs) => xs
       | Cons(@x, @xs) => x +++ xs
       | Nil => ""
