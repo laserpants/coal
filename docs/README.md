@@ -132,6 +132,7 @@ type Tree<a>
 
 ```
           (4)
+          / \
        ---------
        /       \
      (2)       (6)
@@ -205,13 +206,13 @@ If we pass this function to the Coal compiler, it is rejected with the following
 Name not in scope: factorial
 ```
 
-Structural recursion works with recursive data structures like lists, trees, or other algebraic data types. This pattern is known as a *fold*. A common example is where an array of numbers is reduced into a single value, for example by adding
+Structural recursion works in conjunction with a recursive data structure, like lists, trees, and other algebraic data types. A common example is where an array of numbers is reduced into a single value, for example by adding
 
 ```
 let sum = reduce(fn(n, a) => f + a, [1, 2, 3])
 ```
 
-Folding doesn't work with an integers, at least not those of the machine variety. But we can define one that works.  in fact, the natural numbers are an example of the most basic inductievly defined type.
+This pattern is also known as a *fold*. Folding doesn't work with an integers, at least not those of the usual machine variety. But we can define one that works.  in fact, the natural numbers are an example of the most basic inductievly defined type.
 
 > Every natural number is either zero or the successor of another natural number.
 
@@ -272,78 +273,9 @@ The opposite ...
 
 ## Language overview
 
-### Built-in types
-
-Coal provides the following built-in basic language types:
-
-| Type               | Description                             | Values                    |                       
-| ------------------ | --------------------------------------- | ------------------------- |                       
-| `bool`             | Booleans                                | `true` \| `false`         |                       
-| `char`             | A single Unicode character              | `'a'`, `'b'`, `'🤖'`, ... |                        
-| `float`            | Single precision floating point numbers | `3.1519f`                 |                        
-| `double`           | Double precision floating point numbers | `3.1519`                  |                        
-| `int32`            | 32-bit integers                         | `0`, `1`, `2`, `3`, ...   |                        
-| `int64`            | 64-bit integers                         | `0`, `1`, `2`, `3`, ...   |                        
-| `bignum`           | Arbitrary precision integers            | `0`, `1`, `2`, `3`, ...   |                        
-| `string`           | UTF-8 string values                     | `"Hello, ✨ world!"`      |                        
-| `unit`             | Singleton type                          | `()`                      |                        
-| `void`             | The uninhabited type                    |                           |                        
-| `nat`              | Natural numbers (Peano construction)    | `Zero`, `Succ(Zero)`, ... |                        
-
 #### Integral types
 
 ### Algebraic data types
-
-User-defined data types are introduced with the `type` keyword.
-
-- A *product* type combines multiple fields into a single value: All of the specified components are present in the data (e.g. an RGB color value that contains individual red, green, and blue components).
-
-   ```
-   type Color = Rgb(int8, int8, int8)
-   ```
-
-- A *sum* type represents a choice between alternatives: A value belongs to exactly one of the specified variants (e.g. a shape that can be either a `Circle` or a `Rectangle`).
-
-   ```
-   type Shape = Circle | Rectangle
-   ```
-
-More interesting types can be built from combinations of product and sum constructors. Here is a type that describes a binary tree, parameterized by the type (`a`) of its nodes:
-
-```
-type Tree<a> 
-  = Leaf
-  | Node(a, Tree<a>, Tree<a>)
-```
-
-```
-          (4)
-       ---------
-       /       \
-     (2)       (6)
-    -----     -----
-    /   \     /   \ 
-  (1)   (3) (5)   (7)  
-```
-
-Here is how this tree is encoded with the `Tree` data type:
-
-```
-let tree_of_gondor = 
-  Node 
-    ( 4
-    , Node
-        ( 2
-        , Node(1, Leaf, Leaf)
-        , Node(3, Leaf, Leaf)
-        )
-    , Node
-        ( 6
-        , Node(5, Leaf, Leaf)
-        , Node(7, Leaf, Leaf)
-        )
-    )
-```
 
 ```
   type JsonValue
@@ -357,9 +289,7 @@ let tree_of_gondor =
 
 ### List, Option, etc.
 
-A list is an ordered collection of elements where all entries are of the same type. 
-It is a foundational data structure in functional programming, commonly used to store and manipulate collections of data. 
-In Coal, list literals are denoted by a sequence of comma-separated expressions, enclosed in square brackets:
+A list is an ordered collection of elements where all entries are of the same type.  It is a foundational data structure in functional programming, commonly used to store and manipulate collections of data.  In Coal, list literals are denoted by a sequence of comma-separated expressions, enclosed in square brackets:
 
 ```
 [<expr_1 : t>, <expr_2 : t>, ..., <expr_n : t>] : List<t>
