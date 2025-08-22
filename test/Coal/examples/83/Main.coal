@@ -1,0 +1,30 @@
+module Main {
+
+  type JsonValue
+    = JsonNull
+    | JsonBool(bool)
+    | JsonNumber(double)
+    | JsonString(string)
+    | JsonArray(JsonValue)
+    | Cons(JsonValue, JsonValue)
+    | Nil
+
+  fun encode(json : JsonValue) : string =
+    fold(json) {
+      | JsonNull => "null"
+      | JsonBool(false) => "false"
+      | JsonBool(true) => "true"
+      | JsonNumber(d) => double_to_string(d)
+      | JsonString(str) => "\"" +++ str +++ "\""
+      | JsonArray(@xs) => xs
+      | Cons(@x, @xs) => x +++ xs
+      | Nil => ""
+      | _ => "?"
+    };
+
+  let xs = JsonArray(Cons(JsonString("a"), Cons(JsonString("b"), Nil)));
+
+  fun main() =
+    trace_string(encode(xs));
+
+}
