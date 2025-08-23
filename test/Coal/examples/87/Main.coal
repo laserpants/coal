@@ -29,7 +29,7 @@ module Main {
   fun to_comma_separated_str(strs : List<string>) : string =
     match(uncons(strs)) {
       | None => ""
-      | Some((head, tail)) => head +++ reduce(fn(t, s) => s +++ "," +++ t, "", tail)
+      | Some((head, tail)) => head +++ reduce(fn(t, s) => enclosed(s, t, ","), "", tail)
     }
 
   fun encode(value : JsonValue) : string =

@@ -10,6 +10,7 @@ Coal is a declarative, purely functional programming language with
 - algebraic data types, 
 - rich pattern matching capabilities,
 - extensible records, 
+- recursion schemes,
 - codata, 
 - traits (type classes), and 
 - effect handlers (work in progress)
@@ -18,7 +19,7 @@ Coal is a declarative, purely functional programming language with
 
 ### Rethinking recursion
 
-Since Coal is a [total](https://en.wikipedia.org/wiki/Total_functional_programming) language, it takes a different approach to recursion, following the motto that "recursion is the GOTO of functional programming." To ensure that programs are provably terminating, recursion is only available in a restricted form, known as *structural recursion*. In this paradigm, each recursive call operates on a strictly smaller part of some finite data structure, progressing toward a base case. 
+As a [total](https://en.wikipedia.org/wiki/Total_functional_programming) language, Coal takes a different approach to recursion, following the motto that "recursion is the GOTO of functional programming." To ensure that programs are provably terminating, recursion is only available in a restricted form, known as *structural recursion*. In this paradigm, each recursive call operates on a strictly smaller part of some finite data structure, progressing toward a base case. 
 
 ```
   fun sum(numbers : List<int32>) : int32 =
@@ -107,7 +108,7 @@ Coal provides the following built-in basic language types:
 | `int32`            | 32-bit integers                         | `0`, `1`, `2`, `3`, ...   |                        
 | `int64`            | 64-bit integers                         | `0`, `1`, `2`, `3`, ...   |                        
 | `bignum`           | Arbitrary precision integers            | `0`, `1`, `2`, `3`, ...   |                        
-| `string`           | UTF-8 text string                       |  `"Hello, ✨ world!"`      |                        
+| `string`           | UTF-8 text strings                      |  `"Hello, ✨ world!"`      |                        
 | `unit`             | Singleton type                          | `()`                      |                        
 | `void`             | The uninhabited type                    |                           |                        
 | `nat`              | Natural numbers (Peano construction)    | `Zero`, `Succ(Zero)`, ... |                        
@@ -214,7 +215,7 @@ If we pass this function to the Coal compiler, it is rejected with the following
 Name not in scope: factorial
 ```
 
-Structural recursion works in conjunction with a recursive data structure, like lists, trees, and other algebraic data types. A common example is where an array of numbers is reduced into a single value, for example by adding
+Structural recursion works in close conjunction with a recursive data structure, like lists, trees, and other algebraic data types. A common example is where an array of numbers is reduced into a single value, for example by adding
 
 ```
 let sum = reduce(fn(n, a) => f + a, [1, 2, 3])
@@ -245,9 +246,14 @@ Here is how we use the `nat` data type to define the factorial function:
     }
 ```
 
+The key here is the special @-pattern used in the second match-clause
+
 Note that `fold` is a language keyword in Coal, not an ordinary function.
+It is very similar to an ordinary `match` expression, but with some extra powers.
 
 > Why is the function rejected?
+
+A more idiomatic version of the factorial function ...
 
 ```
   fun factorial(n : int32) =
@@ -276,10 +282,6 @@ The opposite ...
 | ------------------ | ----------------------| --------------------- | -------------------- |
 | **Data**           | Recursion (fold)      | Always finite         | Eager (strict)       |
 | **Codata**         | Corecursion (unfold)  | Potentially infinite  | Lazy (non-strict)    | 
-
-## Language overview
-
-#### Integral types
 
 ### Algebraic data types
 
