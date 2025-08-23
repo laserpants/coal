@@ -10,12 +10,12 @@ Coal is a declarative, purely functional programming language with
 - algebraic data types, 
 - rich pattern matching capabilities,
 - extensible records, 
-- recursion schemes,
+- structural recursion,
 - codata, 
 - traits (type classes), and 
 - effect handlers (work in progress)
 
-&hellip; among other features. Coal's type system supports type inference and parametric polymorphism, similar to Haskell, ML, and other languages based on the [System-F](https://en.wikipedia.org/wiki/System_F) lambda calculus. The Coal compiler is implemented in Haskell and targets LLVM for code generation.
+&hellip; among other features. Coal's type system supports type inference and parametric polymorphism, similar to Haskell, ML, and other languages based on the [System-F](https://en.wikipedia.org/wiki/System_F) lambda calculus. The Coal compiler is written in Haskell and targets LLVM for code generation.
 
 ### Rethinking recursion
 
@@ -115,6 +115,8 @@ Coal provides the following built-in basic language types:
 
 ##### Integral types
 
+##### Unit
+
 #### Algebraic data types
 
 User-defined data types in Coal are of the product-sum variety. These types are introduced with the `type` keyword. 
@@ -169,9 +171,186 @@ let tree_of_gondor =
     )
 ```
 
+#### Lists
+
+A list is an ordered collection of elements where all entries are of the same type. It is a foundational data structure in functional programming, commonly used to store and manipulate collections of data. In Coal, list literals are denoted by a sequence of comma-separated expressions, enclosed in square brackets:
+
+```
+[<expr_1 : t>, <expr_2 : t>, ..., <expr_n : t>] : List<t>
+```
+
+The `List` type is defined inductively, and implemented as a one-way *linked list* of nodes. This means that a list of type `List<a>` is either:
+
+- The empty list; or
+- A value of type `a`, coupled with another `List<a>` list. 
+
+These last two are sometimes referred to as the *head* and *tail* of the list. 
+
+```
+type List<a>
+  = []
+  | a :: List<a>
+```
+
+#### Option
+
+```
+type Option<a>
+  = Some(a)
+  | None
+```
+
+#### Tuples
+
+Just like lists, tuples are ordered sequences of values. Unlike lists, however:
+
+1. A tuple's length is fixed (i.e. determined at compile-time), and
+2. Its elements may have different types.
+
+In code, a tuple is written as a comma-separated sequence of expressions enclosed in parentheses:
+
+```
+(<expr_1>, <expr_2>, ..., <expr_n>)
+```
+
+##### Examples:
+
+```
+(10, "covfefe", false)
+```
+
+The type of the tuple in this example is: 
+
+```
+(int32, string, bool)
+```
+
+Tuples of length two and three are often called *pairs* and *triples*, respectively. 
+There is no singleton tuple type. A single value in parentheses is just the value itself:
+
+```
+(42)  // Not a tuple -- just the integer 42
+```
+
+The empty tuple *does* exist. It is written `()` and is known as the unit value. Its type is `unit`. (See *Built-in types* for more details.)
+
+```
+()            : unit                           // unit value
+(1, 2)        : (int32, int32)                 // 2-tuple
+(1, 2, 3)     : (int32, int32, int32)          // 3-tuple
+(1, 2, 3, 4)  : (int32, int32, int32, int32)   // 4-tuple
+// ...
+```
+
+##### Tuples and currying
+
+By default, function definitions in Coal are *curried*. 
+This means that there is a distinction between a function that takes multiple arguments and one that takes a single tuple as its argument.
+Consider the following two type signatures:
+
+```
+f : a -> b -> c
+g : (a, b) -> c
+```
+
+The first of these functions is in curried form, which is usually more convenient to work with. 
+Curried functions can be partially applied, which is useful, for example, when working with higher-order functions. 
+Suppose we define an addition function:
+
+```
+fun add(x, y) = x + y
+```
+
+Using partial application, we can create a new function `increment` by supplying just one argument:
+
+```
+fun increment = add(1)
+```
+
+Now, increment can be passed directly to a higher-order function like `map`:
+
+```
+map(increment, [1, 2, 3, 4])
+```
+
+If you really intend to specify a tuple as the only argument to a function, you need to use an extra pair of parentheses:
+
+```
+fun add((a, b)) = a + b
+
+let five = add((1, 4))
+```
+
+The `curry` and `uncurry` combinators convert an uncurried function into a curried one, and vice versa.
+
+```
+curry : ((a, b) -> c) -> a -> b -> c
+uncurry : (a -> b -> c) -> (a, b) -> c
+```
+
+Here is how `curry` is used with the uncurried version of `add`, to change it into curried form.
+
+```
+let five = curry(add, 1, 4)         // or (curry(add))(1, 4)
+```
+
+#### Records
+
+Records are unordered collections of name-value pairs, where the values can be of any type, including other records. They are suitable for representing structured data with multiple properties, and nested objects: 
+
+```
+user =
+  { id = 99
+  , name = "Obi-Wan Kenobi"
+  , permissions = ["read", "write", "karaoke"]
+  }
+```
+
+a
+
+```
+user : { name : string, id : int32, permissions : List(string) }
+```
+
 ### Pattern matching
 
 TODO
+
+### Traits
+
+A trait describes a collection of functions that must be defined for the underlying type. Traits in Coal are similar to type classes in Haskell. A common analogy is to think of them as interfaces in object-oriented programming. 
+
+```
+trait Functor<f : * -> *> {
+  map : (a -> b) -> f<a> -> f<b>;
+}
+```
+
+Recall that the `Option` type is defined as:
+
+```
+type Option<a>
+  = Some<a>
+  | None
+```
+
+```
+// Make Option an instance of the Functor trait
+instance Functor<Option> {
+  fun map(f, opt) =
+    match(opt) {
+      | Some(a) => Some(f(a))
+      | None => None
+    }
+}
+```
+
+baz
+
+```
+map(fn(x) => x * 100, Some(1))    // ==> Some(100)
+map(fn(x) => x * 100, [1, 2, 3])  // ==> [100, 200, 300]
+```
 
 ### Recursion and corecursion
 
@@ -181,10 +360,7 @@ TODO
 
 TODO
 
-## Code of conduct
-
-TODO
-
+<!--
 
 ---
 ---
@@ -246,9 +422,8 @@ Here is how we use the `nat` data type to define the factorial function:
     }
 ```
 
-The key here is the special @-pattern used in the second match-clause
+The key here is the special `@`-pattern used in the second match-clause. Note also that `fold` is a language keyword, not an ordinary function.
 
-Note that `fold` is a language keyword in Coal, not an ordinary function.
 It is very similar to an ordinary `match` expression, but with some extra powers.
 
 > Why is the function rejected?
@@ -295,110 +470,6 @@ The opposite ...
     | JsonObject(List<(string, JsonValue)>)
 ```
 
-### List, Option, etc.
-
-A list is an ordered collection of elements where all entries are of the same type. It is a foundational data structure in functional programming, commonly used to store and manipulate collections of data. In Coal, list literals are denoted by a sequence of comma-separated expressions, enclosed in square brackets:
-
-```
-[<expr_1 : t>, <expr_2 : t>, ..., <expr_n : t>] : List<t>
-```
-
-The `List` type is defined inductively, and implemented as a one-way *linked list* of nodes. This means that a list of type `List<a>` is either:
-
-- The empty list; or
-- A value of type `a`, coupled with another `List<a>` list. 
-
-These last two are sometimes referred to as the *head* and *tail* of the list. 
-
-```
-type List<a>
-  = []
-  | a :: List<a>
-```
-
-```
-type Option<a>
-  = Some(a)
-  | None
-```
-
-### Tuples
-
-Just like lists, tuples are ordered sequences of values. Unlike lists, however:
-
-1. A tuple's length is fixed (i.e. determined at compile-time), and
-2. Its elements may have different types.
-
-In code, a tuple is written as a comma-separated sequence of expressions enclosed in parentheses:
-
-```
-(<expr_1>, <expr_2>, ..., <expr_n>)
-```
-
-#### Examples:
-
-```
-(10, "covfefe", false)
-```
-
-The type of the tuple in this example is: 
-
-```
-(int32, string, bool)
-```
-
-Tuples of length two and three are often called *pairs* and *triples*, respectively. 
-There is no singleton tuple type. A single value in parentheses is just the value itself:
-
-```
-(42)  // Not a tuple -- just the integer 42
-```
-
-The empty tuple *does* exist. It is written `()` and is known as the unit value. Its type is `unit`. (See *Built-in types* for more details.)
-
-```
-()            : unit                           // unit value
-(1, 2)        : (int32, int32)                 // 2-tuple
-(1, 2, 3)     : (int32, int32, int32)          // 3-tuple
-(1, 2, 3, 4)  : (int32, int32, int32, int32)   // 4-tuple
-// ...
-```
-
-#### Tuples and currying
-
-It is important to distinguish between a function that takes multiple arguments and one that takes a single tuple as its argument.
-
-Consider the two following function signatures:
-
-```
-f : a -> b -> c
-g : (a, b) -> c
-```
-
-Note that `f` and `g` have incompatible types.
-The first is known as a *curried* function type, and it is usually more convenient to work with. 
-Curried functions can be partially applied, which is useful, for example, when working with higher-order functions. 
-If you really intend to specify a tuple as the only argument to a function, you need to use an extra pair of parentheses:
-
-```
-fun add((a, b)) = a + b
-
-let five = add((1, 4))
-```
-
-The `curry` and `uncurry` combinators convert an uncurried function into a curried one, and vice versa.
-
-```
-curry : ((a, b) -> c) -> a -> b -> c
-uncurry : (a -> b -> c) -> (a, b) -> c
-```
-
-Here is how `curry` is used with the uncurried function `add` to change it into curried form.
-
-```
-let five = curry(add, 1, 4)         // or (curry(add))(1, 4)
-```
-
 #### Pattern matching
 
 Just like with other data types, tuples can be deconstructed by means of pattern matching.
@@ -437,44 +508,6 @@ Each field consists of a name, referred to as the *label*, paired with a value. 
 
 ### Expression syntax
 
-### Traits
-
-A trait describes a collection of functions that must be defined for the 
-underlying type. Traits in Coal are similar to type classes in Haskell. A common analogy is to think of them as interfaces in object-oriented programming. 
-
-
-```
-trait Functor<f : * -> *> {
-  map : (a -> b) -> f<a> -> f<b>
-}
-```
-
-Recall that the `Option` type is defined as:
-
-```
-type Option<a>
-  = Some<a>
-  | None
-```
-
-```
-// Make Option an instance of the Functor trait
-instance Functor<Option> {
-  fun map(f, opt) =
-    match(opt) {
-      | Some(a) => Some(f(a))
-      | None => None
-    }
-}
-```
-
-baz
-
-```
-map(fn(x) => x * 100, Some(1))    // ==> Some(100)
-map(fn(x) => x * 100, [1, 2, 3])  // ==> [100, 200, 300]
-```
-
 One useful perspective is to think of traits as algebraic structures in mathematics.
 
 ```
@@ -495,28 +528,7 @@ instance Group<Additive> {
 }
 ```
 
-### Modules
-
-Programs in Coal are organized into modules. Modules provide a way to group related functionality into distinct namespaces.
-Each module is typically focused on a specific purpose within a library or application.
-A module can contain functions, type definitions, traits, and other language constructs, defined together in a single file.
-
-```
-module MerkleTree {
-  // ... code  
-}
-```
-
 ## Effects as a side business
-
-> Programs = Expressions + Effects
-
-Purely functional programming is declarative and [expression-oriented](https://en.wikipedia.org/wiki/Expression-oriented_programming_language): a program is, at its core, just an expression that evaluates to a value. In this model, there are no observable side effects, no explicit mutable state, and all data is immutable. These properties make programs more predictable, easier to reason about, highly testable, and allows for code to be verified using formal mathematical methods. On the other hand, programs need to have the ability to interact with the outside world. Side-effects are what make them useful.
-
-
-Purely functional programming is declarative and [expression-oriented](https://en.wikipedia.org/wiki/Expression-oriented_programming_language). 
-A program is, in essence, just an expression that evaluates to a value.
-There are no observable side-effects, no *explicit state*, and all data is immutable. This leads to more predictable program behavior, makes the code easier to reason about, improves testability, and allows for code to be verified using formal mathematical methods. On the other hand, programs need to have the ability to interact with the outside world. Side-effects are what make them useful.
 
 Similar to how the user interface describes
 is a 
@@ -529,28 +541,6 @@ effect handlers at the boundary interpret those descriptions to perform real-wor
 
 <!--
 
-### Project status and roadmap
-
-### Overview
-
-#### Built-in types
-
-##### Language primitives
-
-| Type               | Description                             | Values                    |                       
-| ------------------ | --------------------------------------- | ------------------------- |                       
-| `bool`             | Booleans                                | `true` \| `false`         |                       
-| `char`             | A single Unicode character              | `'a'`, `'b'`, `'🤖'`, ... |                        
-| `float`            | Single precision floating point numbers | `3.1519f`                 |                        
-| `double`           | Double precision floating point numbers | `3.1519`                  |                        
-| `int32`            |                                         | `0`, `1`, `2`, `3`, ...   |                        
-| `int64`            |                                         | `0`, `1`, `2`, `3`, ...   |                        
-| `bignum`           | Arbitrary precision integers            | `0`, `1`, `2`, `3`, ...   |                        
-| `string`           |                                         | `"Hello, ✨ world!"`      |                        
-| `unit`             |                                         | `()`                      |                        
-| `void`             | The uninhabited type                    |                           |                        
-| `nat`              | Natural numbers                         | `Zero`, `Succ(Zero)`, ... |                        
-
 
 ##### The unit type
 
@@ -559,112 +549,6 @@ one-and-only value of type `unit`.
 
 ```
 () : unit
-```
-
-#### Algebraic data types
-
-User-defined data types are introduced with the `type` keyword.
-
-
-```
-<type_definition>       ::= "type" <type_name> [ "(" <type_parameters> ")" ] 
-                            "=" <constructor> { "|" <constructor> }
-
-<constructor>           ::= <constructor_name> [ "(" <constructor_arguments> ")" ]
-<constructor_arguments> ::= <type_expression> { "," <type_expression> }
-<type_expression>       ::= <basic_type> | <type_name> [ "(" <type_arguments> ")" ]
-<type_arguments>        ::= <type_expression> { "," <type_expression> }
-<type_parameters>       ::= <type_parameter> { "," <type_parameter> }
-<type_name>             ::= <uppercase_identifier>
-<type_parameter>        ::= <lowercase_identifier>
-<constructor_name>      ::= <uppercase_identifier>
-```
-
-Here is a type that defines a binary tree, parameterized by the type (`a`) of
-its nodes.
-
-```
-type Tree(a) 
-  = Leaf
-  | Node(a, Tree(a), Tree(a))
-```
-
-adsfdsf
-
-```
-          (4)
-       ---------
-       /       \
-     (2)       (6)
-    -----     -----
-    /   \     /   \ 
-  (1)   (3) (5)   (7)  
-```
-
-Here is how this tree is encoded with the Tree data type:
-
-```
-my_tree = Node(4, 
-  Node(2, Node(1, Leaf, Leaf), Node(3, Leaf, Leaf)), 
-  Node(6, Node(5, Leaf, Leaf), Node(7, Leaf, Leaf)))
-```
-
-#### Pattern matching
-
-#### Records
-
-Records are suitable for representing structured data with multiple properties, and nested objects: 
-
-```
-user =
-  { id = 99
-  , name = "Obi-Wan Kenobi"
-  , permissions = ["read", "write", "karaoke"]
-  }
-```
-
-a
-
-```
-user : { name : string, id : int32, permissions : List(string) }
-```
-
-#### Traits
-
-A trait describes a collection of functions that must be defined for the 
-underlying type. Traits are analogous to type classes in Haskell. 
-
-
-```
-trait Functor(f : * -> *) {
-  map : (a -> b) -> f(a) -> f(b)
-}
-```
-
-aa
-
-```
-type Option(a)
-  = Some(a)
-  | None
-```
-
-```
-// Make Option an instance of the Functor trait
-instance Functor(Option) {
-  map(f, opt) =
-    match(opt) {
-      | Some(a) => Some(f(a))
-      | None => None
-    }
-}
-```
-
-baz
-
-```
-map(fn(x) => x * 100, Some(1))    // ==> Some(100)
-map(fn(x) => x * 100, [1, 2, 3])  // ==> [100, 200, 300]
 ```
 
 One useful perspective is to think of traits as algebraic structures in mathematics.
@@ -686,16 +570,6 @@ instance Group(Additive) {
   identity = AddInt32(0)
 }
 ```
-
-#### Side-effects
-
-Code in purely functional programming has no observable side-effects. This has the advantage that programs can 
-be reasoned about and verified formally, using mathematical proof techniques.
-
-be reasoned about equationally, and verified using formal mathematical proof techniques. 
-examples...
-On the other hand, it 
-I/O monad
 
 ```
 main : IO()
