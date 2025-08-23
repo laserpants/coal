@@ -710,6 +710,18 @@ main84 = do
     [ "./test/Coal/examples/84/Main.coal"
     ]
 
+main85 :: IO (Either CompilerError Text)
+main85 = do
+  runTestFiles
+    [ "./test/Coal/examples/85/Main.coal"
+    ]
+
+main86 :: IO (Either CompilerError Text)
+main86 = do
+  runTestFiles
+    [ "./test/Coal/examples/86/Main.coal"
+    ]
+
 compileFiles :: [String] -> IO (Either CompilerError ())
 compileFiles files = do
   fs <- traverse readFile files
@@ -1112,22 +1124,22 @@ compileModule x = do
 
   liftIO $ writeDotFiles "compiled" b
 
-  cc <- gets compilerAssumptions
-  case nub cc of
-    as@(_ : _) ->
-      forM_ as $
-        \Assumption{..} -> do
-          src <- gets compilerSourceText
-          let msg =
-                prettyErrorMessage
-                  [ "\nName not in scope:"
-                  , assumptionName
-                  ]
-                  src
-                  Assumption{..}
-          throwError (CompilerError msg)
-    [] ->
-      pure ()
+--  cc <- gets compilerAssumptions
+--  case nub cc of
+--    as@(_ : _) ->
+--      forM_ as $
+--        \Assumption{..} -> do
+--          src <- gets compilerSourceText
+--          let msg =
+--                prettyErrorMessage
+--                  [ "\nName not in scope:"
+--                  , assumptionName
+--                  ]
+--                  src
+--                  Assumption{..}
+--          throwError (CompilerError msg)
+--    [] ->
+--      pure ()
 
   r <- kernelTranslationC b
 

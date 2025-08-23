@@ -179,9 +179,9 @@ instance (Monoid a, Data a) => TraitContext (Expression a IndexedType) where
         ECompiledMatch a t
           <$> expandTraits e
           <*> traverse expandTraits cs
-      EFold a t es cs (Just e) -> do
+      EFold a t n es cs (Just e) -> do
         e1 <- descendM expandTraits e
-        pure (EFold a t es cs (Just e1))
+        pure (EFold a t n es cs (Just e1))
       EUnfold a t n ps d (Just e) -> do
         e1 <- descendM expandTraits e
         pure (EUnfold a t n ps d (Just e1))

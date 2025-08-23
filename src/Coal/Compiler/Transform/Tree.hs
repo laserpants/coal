@@ -135,8 +135,8 @@ instance TreeTransform Expression t where
         ECompiledMatch a t
           <$> transform name f e
           <*> traverse (transform name f) cs
-      EFold a t es cs me ->
-        EFold a t
+      EFold a t n es cs me ->
+        EFold a t n
           <$> traverse (transform name f) es
           <*> traverse (transform name f) cs
           <*> traverse (transform name f) me

@@ -63,7 +63,7 @@ data Expression a t
   | -- | Compiled match expression
     ECompiledMatch a t (Expression a t) (List1 (CompiledClause a t))
   | -- | Fold expression
-    EFold a t (List1 (Expression a t)) (List1 (Clause a t)) (Maybe (Expression a t))
+    EFold a t Name (List1 (Expression a t)) (List1 (Clause a t)) (Maybe (Expression a t))
   | -- | Codata unfold
     EUnfold a t Name (List1 (Pattern a t)) (Dictionary (Expression a t)) (Maybe (Expression a t))
   | -- | Record field selector

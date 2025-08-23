@@ -224,8 +224,8 @@ instance (Pretty t, Show t) => Dot t (Expression a t) where
         fromNode (emitRectangle "ECompiledMatch" (Just t)) $ do
           emitEdgeTo e
           emitEdgesTo cs
-      EFold _ t es cs me -> do
-        fromNode (emitRectangle "EFold" (Just t)) $ do
+      EFold _ t name es cs me -> do
+        fromNode (emitRectangle ("EFold\\n" <> name) (Just t)) $ do
           emitEdgesTo es
           emitEdgesTo cs
           emitEdgeTo me
@@ -293,8 +293,9 @@ instance (Pretty t, Show t) => Dot t (Pattern a t) where
           emitEdgeTo p
       PShorthand _ (Label t name) ->
         emitEllipse ("PShorthand\\n" <> name) (Just t)
-      PAtVariable _ (Label t name) ->
-        emitEllipse ("PAtVariable\\n" <> name) (Just t)
+      PAtVariable _ name ll ->
+        fromNode (emitEllipse ("PAtVariable\\n" <> name) Nothing) $
+          emitEdgeTo ll
       PPlaceholder _ t _ ->
         emitEllipse "PPlaceholder" (Just t)
 

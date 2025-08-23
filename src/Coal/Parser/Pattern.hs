@@ -128,9 +128,21 @@ parseListLiteralPattern =
 parseAtVariablePattern :: Parser (Pattern Metadata ())
 parseAtVariablePattern = do
   withMetadata $ do
+    p <- try parseAtFunction <|> parseAtVar
+    pure (\loc -> uncurry (PAtVariable loc) p)
+
+parseAtFunction = do
+  n <- name
+  ll <- parens $ do
     void (char '@')
-    ll <- Label () <$> name
-    pure (`PAtVariable` ll)
+    x <- name
+    pure (Label () x)
+  pure (n, ll)
+
+parseAtVar = do
+  void (char '@')
+  ll <- Label () <$> name
+  pure ("foo", ll)
 
 parseConstructorPattern :: Parser (Pattern Metadata ())
 parseConstructorPattern =

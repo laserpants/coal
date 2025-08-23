@@ -124,7 +124,7 @@ patternConstraints assert ms =
         , Explicit InferenceRulePlaceholder t (forall1 listType)
         ]
       concatForM ps (patternConstraints assert ms)
-    PAtVariable _ (Label _ name) -> do
+    PAtVariable _ _ (Label _ name) -> do
       pure [name]
     PAs _ (Label t name) p -> do
       ps <- patternConstraints assert ms p
@@ -306,7 +306,7 @@ collectConstraints =
       let t1 = TIntrinsic (IRecord (TRow (RExtend name t rvar)))
       tellRight [Equality InferenceRulePlaceholder [t1, typeOf e]]
       collectConstraints e
-    EFold _ t (e :| es) cs e1 -> do
+    EFold _ t name (e :| es) cs e1 -> do
       ms1 <- collectConstraints e
       ms2 <- concatMapM collectConstraints es
       (ts1, ts2, ms3) <- (third3 concat . unzip3 <$$> traverse clauseAssumptions) (fromList1 cs)

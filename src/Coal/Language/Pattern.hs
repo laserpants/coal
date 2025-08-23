@@ -11,7 +11,7 @@ import Coal.Language.Trait (Trait (..))
 import Coal.Language.Type (Parameter (..), Type)
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (universeBi)
-import Extra (Dictionary)
+import Extra (Name, Dictionary)
 
 import qualified Data.Set as Set
 
@@ -41,7 +41,7 @@ data Pattern a t
   | -- | Shorthand variable binding of the form { name }, which desugars to { name = name }
     PShorthand a (Label t)
   | -- | Recursion operator pattern used in fold catamorphisms
-    PAtVariable a (Label t)
+    PAtVariable a Name (Label t)
   | -- | Dictionary
     PPlaceholder a t (Trait t)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)

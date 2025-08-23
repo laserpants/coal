@@ -56,7 +56,7 @@ instance HasMetadata (Expression Metadata t) where
       ETuple a _ _ -> a
       EMatch a _ _ _ -> a
       ECompiledMatch a _ _ _ -> a
-      EFold a _ _ _ _ -> a
+      EFold a _ _ _ _ _ -> a
       EUnfold a _ _ _ _ _ -> a
       ESelect a _ _ -> a
       ECodataSelect a _ _ _ -> a
@@ -79,7 +79,7 @@ instance HasMetadata (Pattern Metadata t) where
       POr a _ _ _ -> a
       PAs a _ _ -> a
       PShorthand a _ -> a
-      PAtVariable a _ -> a
+      PAtVariable a _ _ -> a
       PPlaceholder a _ _ -> a
 
 instance HasMetadata (InferenceRule k Metadata) where
