@@ -1,5 +1,5 @@
 module Main {
 
   fun main() =
-    baz;
+    baz
 }

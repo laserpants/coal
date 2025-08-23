@@ -57,7 +57,6 @@ parseTraitInstance = do
   n <- constructor
   t <- angleBrackets parseType
   ds <- braces (some parseDefinition)
-  -- ds <- braces (semicolonSep1 ((,) <$> name <*> (symbol_ "=" *> parseDefinition)))
   -- TODO
   pure (DInstance n t ds)
 
@@ -96,33 +95,30 @@ parseConstructor tn qs = do
           (TVariable <$> (a :| as))
 
 parseImport :: Parser (Definition Metadata o ())
-parseImport =
-  endingWithSemicolon $ do
-    lexeme_ "import"
-    path <- (lexeme "Core$" <|> identifier upperChar) `sepBy1` symbol "."
-    names <- option ["*"] (parens (commaSep (backtickString <|> name <|> identifier upperChar)))
-    pure (DImport (Path path) names)
+parseImport = do
+  lexeme_ "import"
+  path <- (lexeme "Core$" <|> identifier upperChar) `sepBy1` symbol "."
+  names <- option ["*"] (parens (commaSep (backtickString <|> name <|> identifier upperChar)))
+  pure (DImport (Path path) names)
 
 parseFunctionDefinition :: Parser (Definition Metadata o ())
-parseFunctionDefinition =
-  endingWithSemicolon $ do
-    start <- getSourcePos
-    fn <- lexeme_ "fun" *> name
-    args <- parens (nonEmptyOr parseUnitPattern (commaSep parsePattern))
-    withAnnotation $ do
-      end <- getSourcePos
-      expr <- symbol_ "=" *> parseExpression
-      pure (DFunction fn (Function (Metadata start end) (With [] ()) args expr))
+parseFunctionDefinition = do
+  start <- getSourcePos
+  fn <- lexeme_ "fun" *> name
+  args <- parens (nonEmptyOr parseUnitPattern (commaSep parsePattern))
+  withAnnotation $ do
+    end <- getSourcePos
+    expr <- symbol_ "=" *> parseExpression
+    pure (DFunction fn (Function (Metadata start end) (With [] ()) args expr))
 
 parseConstantDefinition :: Parser (Definition Metadata o ())
-parseConstantDefinition =
-  endingWithSemicolon $ do
-    start <- getSourcePos
-    c <- lexeme_ "let" *> name
-    withAnnotation $ do
-      end <- getSourcePos
-      expr <- symbol_ "=" *> parseExpression
-      pure (DConstant c (Constant (Metadata start end) (With [] ()) expr))
+parseConstantDefinition = do
+  start <- getSourcePos
+  c <- lexeme_ "let" *> name
+  withAnnotation $ do
+    end <- getSourcePos
+    expr <- symbol_ "=" *> parseExpression
+    pure (DConstant c (Constant (Metadata start end) (With [] ()) expr))
 
 withAnnotation :: Parser (Definition Metadata o ()) -> Parser (Definition Metadata o ())
 withAnnotation p = do

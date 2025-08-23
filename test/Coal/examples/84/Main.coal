@@ -4,9 +4,9 @@ module Main {
     match(b) {
       | true => "true"
       | false => "false"
-    };
+    }
 
   fun main() = 
-    trace_string(baz(true));
+    trace_string(baz(true))
 
 }

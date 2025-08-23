@@ -5,6 +5,6 @@ module Main {
       f =
         fn(x) => x
       in
-        f(true, true);
+        f(true, true)
 }
 

@@ -6,7 +6,7 @@ module Main {
           fn(t) => Some(3)
       | [] =>
           fn(t) => t
-    };
+    }
 
   fun main() =
     match(parse_unsigned(false)) {
@@ -14,5 +14,6 @@ module Main {
           trace_int32(a)
       | None =>
           trace_string("b")
-    };
+    }
+
 }

@@ -8,7 +8,7 @@ module Main {
           fn(t) => t
       | Succ(@next) =>
           fn(t) => next(f(t))
-    };
+    }
 
   let nats =
     let 
@@ -18,14 +18,14 @@ module Main {
           , Tail = f(n + 1) 
         }
       in
-        enum_from(0);
+        enum_from(0)
 
-  fun drop_one(s) = s.Tail;
+  fun drop_one(s) = s.Tail
 
   fun main() = 
     let
       go =
         repeat_times(1000, drop_one)
       in
-        trace_int32(go(nats).Head);
+        trace_int32(go(nats).Head)
 }

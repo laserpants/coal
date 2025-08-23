@@ -10,6 +10,6 @@ module Tree {
           lhs ++ (y :: rhs)
       | Leaf =>
           []
-    };
+    }
 
 }

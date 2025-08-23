@@ -1,16 +1,16 @@
 module Main {
 
   fun extend(r : { | t }) : { name : string | t } =
-    { name = "Covfefe" | r };
+    { name = "Covfefe" | r }
 
   fun length(xs) = 
-    5 : int32;
+    5 : int32
 
   fun main() =
     let
       q =
         extend({ baz = "hellO" })
       in
-        trace_string(q.name);
+        trace_string(q.name)
 
 }

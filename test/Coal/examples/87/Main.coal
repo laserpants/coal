@@ -4,13 +4,13 @@ module Main {
     fold(list, init) {
       | [] => fn(r) => r
       | q :: @go => fn(r) => go(op(q, r))
-    };
+    }
 
   fun uncons(list : List<a>) : Option<(a, List<a>)> =
     match(list) {
       | x :: xs => Some((x, xs))
       | [] => None
-    };
+    }
 
   type JsonValue
     = JsonNull
@@ -21,16 +21,16 @@ module Main {
     | JsonObject(List<(string, JsonValue)>)
 
   fun enclosed(lhs, rhs, str) =
-    lhs +++ str +++ rhs;
+    lhs +++ str +++ rhs
 
   fun field_pair(lhs, rhs) =
-    enclosed("\"", "\"", lhs) +++ ":" +++ rhs;
+    enclosed("\"", "\"", lhs) +++ ":" +++ rhs
 
   fun to_comma_separated_str(strs : List<string>) : string =
     match(uncons(strs)) {
       | None => ""
       | Some((head, tail)) => head +++ reduce(fn(t, s) => s +++ "," +++ t, "", tail)
-    };
+    }
 
   fun encode(value : JsonValue) : string =
     fold encode_value(value) {
@@ -58,15 +58,15 @@ module Main {
                     field_pair(key, value) :: rest 
               })
             )
-    };
+    }
 
   let test_obj = 
     JsonObject(
       [ ("abc", JsonArray([JsonString("a"), JsonString("b"), JsonString("c")]))
       , ("pi", JsonNumber(3.14159))
-      ]);
+      ])
 
   fun main() =
-    trace_string(encode(test_obj));
+    trace_string(encode(test_obj))
 
 }

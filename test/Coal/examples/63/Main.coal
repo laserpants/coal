@@ -6,12 +6,12 @@ module Main {
           fn(a) => f(x, a)
       | n :: @next as ns =>
           fn(a) => next(f(n, a))
-    };
+    }
 
   fun main() = 
     let
       z =
         fold_list(fn(a, b) => a * b, [2, 3, 4, 5], 1)
       in
-        trace_int32(z);
+        trace_int32(z)
 }

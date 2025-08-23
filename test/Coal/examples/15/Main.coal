@@ -3,8 +3,8 @@ module Main {
   // Type error
   //
   fun factorial(n : int32) =
-    false : int32;
+    false : int32
 
-  fun main() = 0;
+  fun main() = 0
 
 }

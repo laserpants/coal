@@ -9,10 +9,10 @@ module Main {
     | JsonObject(List<(string, JsonValue)>)
 
   fun enclosed(lhs, rhs, str) =
-    lhs +++ str +++ rhs;
+    lhs +++ str +++ rhs
 
   fun field_pair(lhs, rhs) =
-    enclosed("\"", "\"", lhs) +++ ":" +++ rhs;
+    enclosed("\"", "\"", lhs) +++ ":" +++ rhs
 
   fun reduce(f : a -> b -> b, init : b, list : List<a>) : b =
     fold(list, init) {
@@ -20,13 +20,13 @@ module Main {
           fn(r) => r
       | q :: @go =>
           fn(r) => go(f(q, r))
-    };
+    }
 
   fun to_comma_separated_str(strs : List<string>) : string =
     match(strs) {
       | [] => ""
       | head :: tail => head +++ reduce(fn(t, s) => s +++ "," +++ t, "", tail)
-    };
+    }
 
   fun encode(value : JsonValue) : string =
     fold encode_value(value) {
@@ -54,15 +54,15 @@ module Main {
                     field_pair(key, value) :: rest 
               })
             )
-    };
+    }
 
   let test_obj = 
     JsonObject(
       [ ("abc", JsonArray([JsonString("a"), JsonString("b"), JsonString("c")]))
       , ("pi", JsonNumber(3.14159))
-      ]);
+      ])
 
   fun main() =
-    trace_string(encode(test_obj));
+    trace_string(encode(test_obj))
 
 }

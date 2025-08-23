@@ -9,7 +9,7 @@ module Main {
       fold(xs) {
         | [] => []
         | head :: @tail => f(head) :: tail
-      };
+      }
   }
 
   instance Functor(Option) {
@@ -17,7 +17,7 @@ module Main {
       match(opt) {
         | None => None
         | Some(x) => Some(f(x))
-      };
+      }
   }
 
   trait Applicative(f : * -> *) {
@@ -48,5 +48,5 @@ module Main {
                     | Some(y) =>
                         trace_int32(y)
                   }
-            };
+            }
 }

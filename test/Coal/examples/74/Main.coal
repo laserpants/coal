@@ -4,12 +4,12 @@ module Main {
     match(p) {
       | ((name, _, _)) =>
           name
-    };
+    }
 
   fun get_name((name, _, _)) : string = 
-    name; 
+    name 
 
   fun main() =
-    trace_string(get_name(("Lorenzo", 42 : int32, false)));
+    trace_string(get_name(("Lorenzo", 42 : int32, false)))
 
 }

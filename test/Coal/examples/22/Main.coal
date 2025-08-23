@@ -6,14 +6,14 @@ module Main {
     User
       ({ name = "Alphonso"
        , uid = 1
-       });
+       })
 
   fun get_user(user) = 
     match(user) {
       | User(o) =>
           o
-    };
+    }
 
   fun main() =
-    trace_string(get_user(a_user_named_bob).name);
+    trace_string(get_user(a_user_named_bob).name)
 }

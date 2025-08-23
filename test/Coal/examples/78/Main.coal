@@ -4,13 +4,13 @@ module Main {
     match(r) {
       | { name = x | q } =>
           q
-    };
+    }
 
   fun main() =
     let
       q =
         remove_name({ name = "Tron", is_admin = true })
       in
-        trace_bool(q.name);
+        trace_bool(q.name)
 
 }

@@ -9,9 +9,9 @@ module Main {
           match(a) {
             | { name = name | t } =>
                 print_name(t)
-          };
+          }
 
   fun main() =
-    trace_int32(2);
+    trace_int32(2)
 
 }

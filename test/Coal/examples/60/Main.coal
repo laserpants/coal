@@ -9,6 +9,6 @@ module Main {
     | JsonObject(List<(string, JsonValue)>)
 
   fun main() =
-    trace_int32(123);
+    trace_int32(123)
 
 }

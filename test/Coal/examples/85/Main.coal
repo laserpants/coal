@@ -12,12 +12,12 @@ module Main {
             | [] => "a"
             | on_struct(@x) :: on_list(@xs) => x +++ xs
           }
-    };
+    }
 
   let my_struct = 
-    A(B([B([])]));
+    A(B([B([])]))
 
   fun main() =
-    trace_string(fold_struct(my_struct));
+    trace_string(fold_struct(my_struct))
 
 }

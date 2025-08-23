@@ -8,12 +8,12 @@ module Main {
     fold(lst) {
       | Nil => 0
       | Cons(_, @next) => next + 1
-    };
+    }
 
   cotype Stream = { Head : int32, Tail : Stream }
 
   fun take_head(s) = 
-    s.Head;
+    s.Head
 
   fun drop(n : int32, s) =
     fold(pack_nat(n), s) {
@@ -21,7 +21,7 @@ module Main {
           fn(t) => t
       | Succ(@next) =>
           fn(t) => next(t.Tail)
-    };
+    }
 
   let nats =
     let 
@@ -31,8 +31,8 @@ module Main {
           , Tail = f(n + 1) 
         }
       in
-        go(5);
+        go(5)
 
   fun main() = 
-    trace_int32(drop(100, nats).Head);
+    trace_int32(drop(100, nats).Head)
 }

@@ -10,5 +10,5 @@ module Main {
               trace_char(c)
           | [] =>
               trace_string("nope")
-        };
+        }
 }

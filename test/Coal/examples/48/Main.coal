@@ -8,11 +8,11 @@ module Main {
     fold(lst) {
       | Nil => 0
       | Cons(_, @next) => next + 1
-    };
+    }
 
   cotype Stream<a> = { Head : a, Tail : Stream<a> }
 
   fun main() = 
-    trace_int32(1);
+    trace_int32(1)
 
 }

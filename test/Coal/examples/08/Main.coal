@@ -5,5 +5,5 @@ module Main {
       r = 
         { a = "cluedo" }
       in
-        trace_string(r.a);
+        trace_string(r.a)
 }

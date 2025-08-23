@@ -1,6 +1,6 @@
 module Qsort {
 
-  import Tree(Tree, flatten);
+  import Tree(Tree, flatten)
 
   fun binary_search_tree(list : List<int32>) : Tree<int32> =
     fold(list, { min = 0, max = -1 }) {
@@ -17,8 +17,8 @@ module Qsort {
                 g(range)
       | [] =>
           always(Leaf)
-    };
+    }
 
-  let sort = flatten << binary_search_tree;
+  let sort = flatten << binary_search_tree
 
 }

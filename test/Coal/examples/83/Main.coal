@@ -9,7 +9,7 @@ module Main {
     | Cons(JsonValue, JsonValue)
     | Nil
 
-  fun in_quotes(str) = "\"" +++ str +++ "\"";
+  fun in_quotes(str) = "\"" +++ str +++ "\""
 
   fun encode(json : JsonValue) : string =
     fold(json) {
@@ -21,11 +21,11 @@ module Main {
       | JsonArray(@xs) => xs
       | Cons(@x, @xs) => x +++ xs
       | Nil => ""
-    };
+    }
 
-  let xs = JsonArray(Cons(JsonString("a"), Cons(JsonString("b"), Nil)));
+  let xs = JsonArray(Cons(JsonString("a"), Cons(JsonString("b"), Nil)))
 
   fun main() =
-    trace_string(encode(xs));
+    trace_string(encode(xs))
 
 }

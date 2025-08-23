@@ -8,9 +8,9 @@ module Main {
           1
       | Succ(@f) as m =>
           m * f
-    };
+    }
 
   fun main() =
-    trace_int32(factorial(4));
+    trace_int32(factorial(4))
 
 }

@@ -6,11 +6,11 @@ module Main {
     User
       ({ name = "Bob"
        , uid = 1
-       });
+       })
 
   fun main() =
     match(a_user_named_bob) {
       | User(r) =>
           trace_string(r.name)
-    };
+    }
 }

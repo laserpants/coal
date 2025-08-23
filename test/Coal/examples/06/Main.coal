@@ -1,6 +1,6 @@
 module Main {
 
-  import Qsort(sort);
+  import Qsort(sort)
 
   fun main() = 
     let
@@ -12,5 +12,5 @@ module Main {
               12345
           | (y :: _) =>
               y
-        }); 
+        })
 }

@@ -6,7 +6,7 @@ module Main {
           fn(r) => r
       | n :: @go =>
           fn(r) => go(f(n, r))
-    };
+    }
 
   fun product(nums : List<int32>) : int32 =
     match(nums) {
@@ -14,7 +14,7 @@ module Main {
           1
       | x :: xs =>
           fold_list(fn(a, b) => a * b, xs, x)
-    };
+    }
 
   fun enum_to(n : int32) : List<int32> =
     fold(pack_nat(n)) {
@@ -22,11 +22,11 @@ module Main {
           []
       | Succ(@next) as m =>
           next ++ [unpack_nat(m)]
-    };
+    }
 
   fun factorial(n : int32) =
-    product(enum_to(n));  // product of numbers 1, 2, ..., n
+    product(enum_to(n))  // product of numbers 1, 2, ..., n
 
   fun main() = 
-    trace_int32(factorial(6));
+    trace_int32(factorial(6))
 }

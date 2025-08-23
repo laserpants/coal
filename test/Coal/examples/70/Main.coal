@@ -10,6 +10,6 @@ module Main {
             q = 
               extend({ baz = "hello" })
             in
-              trace_string(q.baz +++ " " +++ q.name);
+              trace_string(q.baz +++ " " +++ q.name)
 
 }

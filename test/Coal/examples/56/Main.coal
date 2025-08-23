@@ -1,8 +1,8 @@
 module Main {
 
-  let baz = false;
+  let baz = false
 
   fun main() =
-    trace_bool(baz);
+    trace_bool(baz)
 
 }

@@ -5,5 +5,5 @@ module Main {
       res =
         string_reverse("banana")
       in
-        trace_string(res);
+        trace_string(res)
 }

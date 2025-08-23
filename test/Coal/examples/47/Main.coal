@@ -5,5 +5,5 @@ module Main {
       x =
         5 + 3
       in
-        trace_int32(x);
+        trace_int32(x)
 }

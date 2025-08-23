@@ -1,8 +1,8 @@
 module Main {
 
-  let num : a = 1;
+  let num : a = 1
 
   fun main() =
-    trace_int32(num);
+    trace_int32(num)
 
 }

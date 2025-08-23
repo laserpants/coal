@@ -4,7 +4,7 @@ This repository is the home of the Coal programming language and compiler. The p
 
 ## About
 
-Coal is a purely functional, total programming language with
+Coal is a declarative, purely functional programming language with
 
 - simple and intuitive syntax, 
 - algebraic data types, 
@@ -30,7 +30,7 @@ Since Coal is a [total](https://en.wikipedia.org/wiki/Total_functional_programmi
 
 ### Programs = Expressions + Effects
 
-Purely functional programming is declarative and [expression-oriented](https://en.wikipedia.org/wiki/Expression-oriented_programming_language): a program is, at its core, just an expression that evaluates to a value. In this model, there are no observable side effects, no explicit state, and all data is immutable. These properties make programs more predictable, easier to reason about, highly testable, and allows for code to be verified using formal mathematical methods. On the other hand, programs need to have the ability to interact with the outside world. Side-effects are what make them useful.
+Purely functional programming is [expression-oriented](https://en.wikipedia.org/wiki/Expression-oriented_programming_language): a program is, at its core, just an expression that evaluates to a value. In this model, there are no observable side-effects, no explicit state, and all data is immutable. These properties make programs more predictable, easier to reason about, highly testable, and allows for code to be verified using formal mathematical methods. On the other hand, programs need to have the ability to interact with the outside world. Side-effects are what make them useful.
 
 TODO
 
@@ -64,7 +64,7 @@ TODO
 
 ### Modules and imports
 
-Programs in Coal are organized as collections of modules. Modules provide a way to group related functionality into distinct namespaces.  Each module is typically focused on a specific purpose within a library or application.  A module can contain functions, type definitions, traits, and other language constructs, defined together in a single file.
+Programs in Coal are organized as collections of modules. Modules provide a way to group related functionality into distinct namespaces. Each module is typically focused on a specific purpose within a library or application.  A module can contain functions, type definitions, traits, and other language constructs, defined together in a single file.
 
 ```
 module MerkleTree {

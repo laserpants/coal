@@ -1,10 +1,10 @@
 module Main {
 
   fun extend(r) =
-    { name = "Wat" | r };
+    { name = "Wat" | r }
 
   fun length(xs) = 
-    5 : int32;
+    5 : int32
 
   fun main() =
     let
@@ -15,6 +15,6 @@ module Main {
           len =
             length([1, 2, 3 : int32])
           in
-            trace_string(q.name);
+            trace_string(q.name)
 
 }

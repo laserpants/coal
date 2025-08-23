@@ -1,9 +1,9 @@
 module Main {
 
   fun fst3((fst, _, _) : (a, b, c)) : a =
-    fst;
+    fst
 
   fun main() =
-    trace_string(fst3(("a", "b", "c")));
+    trace_string(fst3(("a", "b", "c")))
 
 }

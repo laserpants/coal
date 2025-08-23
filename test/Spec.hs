@@ -212,7 +212,7 @@ runTestFiles files = do
   r <- compileFiles files
   case r of
     Left err@(CompilerError msg) -> do
---      liftIO $ Text.putStrLn msg
+      --      liftIO $ Text.putStrLn msg
       pure (Left err)
     Right{} ->
       Right <$> runTestBuild

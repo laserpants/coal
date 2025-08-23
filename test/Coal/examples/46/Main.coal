@@ -7,5 +7,5 @@ module Main {
       in
         match(p) {
           | ( _, _, c ) => trace_int32(c)
-        };
+        }
 }

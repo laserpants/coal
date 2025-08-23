@@ -10,8 +10,8 @@ module Main {
           , Tail = f(n + 1) 
         }
       in
-        go(1);
+        go(1)
 
   fun main() = 
-    trace_int32(nats.Head);
+    trace_int32(nats.Head)
 }

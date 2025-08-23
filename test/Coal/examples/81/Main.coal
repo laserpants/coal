@@ -6,9 +6,9 @@ module Main {
          0
       | x :: @sum =>
          x + sum
-    };
+    }
 
   fun main() =
-    trace_int32(sum([1,2,3]));
+    trace_int32(sum([1,2,3]))
 
 }

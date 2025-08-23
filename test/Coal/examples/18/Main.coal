@@ -6,9 +6,9 @@ module Main {
           1
       | Succ(@f) as m =>
           unpack_nat(m) * f
-    };
+    }
 
   fun main() =
-    trace_int32(factorial(8));
+    trace_int32(factorial(8))
 
 }

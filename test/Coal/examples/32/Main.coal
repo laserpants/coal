@@ -13,7 +13,7 @@ module Main {
       | '8' => Some(8)
       | '9' => Some(9)
       | _ => None
-    };
+    }
 
   fun map_option(f, opt) = 
     match(opt) {
@@ -21,7 +21,7 @@ module Main {
           None
       | Some(val) =>
           Some(f(val))
-    };
+    }
 
   fun parse_unsigned(str : string) : Option<int32> =
     let 
@@ -39,7 +39,7 @@ module Main {
                 }
           | [] =>
               fn(t) => t
-        };
+        }
 
   trait JsonSerializable<a> {
     to_json : a -> string;
@@ -47,8 +47,8 @@ module Main {
   }
 
   instance JsonSerializable<int32> {
-    let to_json = int32_to_string;
-    let from_json = fn(_) => Some(1);
+    let to_json = int32_to_string
+    let from_json = fn(_) => Some(1)
   }
 
   fun main() =
@@ -61,5 +61,5 @@ module Main {
               trace_int32(n)
           | None =>
               trace_int32(0 : int32)
-        };
+        }
 }

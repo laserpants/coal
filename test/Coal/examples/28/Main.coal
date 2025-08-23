@@ -13,12 +13,12 @@ module Main {
       | '8' => 8 
       | '9' => 9 
       | _ => 100 
-    };
+    }
 
   fun main() =
     let
       r =
         digit_to_int32('5')
       in
-        trace_int32(r);
+        trace_int32(r)
 }

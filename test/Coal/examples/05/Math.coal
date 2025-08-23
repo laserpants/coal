@@ -6,7 +6,7 @@ module Math {
           1
       | Succ(@f) as m =>
           unpack_nat(m) * f
-    };
+    }
 
 }
 

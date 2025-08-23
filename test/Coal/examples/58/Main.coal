@@ -9,6 +9,6 @@ module Main {
           y =
             4.5f
           in
-            trace_float(x * y);
+            trace_float(x * y)
 
 }

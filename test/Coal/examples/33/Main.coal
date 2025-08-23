@@ -13,7 +13,7 @@ module Main {
       | '8' => Some(8)
       | '9' => Some(9)
       | _ => None
-    };
+    }
 
   fun map_option(f, opt) = 
     match(opt) {
@@ -21,13 +21,13 @@ module Main {
           None
       | Some(val) =>
           Some(f(val))
-    };
+    }
 
   fun is_empty(list) =
     match(list) {
       | [] => true
       | _ => false
-    };
+    }
 
   /*
   fun digits_to_unsigned(chars) : Option<int32> 
@@ -54,7 +54,7 @@ module Main {
                 }
           | [] =>
               fn(t) => t
-        };
+        }
 
   fun parse_int32(str : string) : Option<int32> =
     let 
@@ -71,7 +71,7 @@ module Main {
               }
           | _ =>
               digits_to_unsigned(chars)
-        };
+        }
 
   trait JsonSerializable<a> {
     to_json : a -> string;
@@ -79,21 +79,21 @@ module Main {
   }
 
   instance JsonSerializable<int32> {
-    let to_json = int32_to_string;
-    let from_json = fn(_) => Some(1);
+    let to_json = int32_to_string
+    let from_json = fn(_) => Some(1)
   }
 
   instance JsonSerializable<{ name : string, uid : int32 }> {
     let to_json =
-      fn(s) => to_json(s.uid); // "{ name = \"" +++ s.name +++ "\", uid = " +++ to_json(s.uid) +++ " }";
+      fn(s) => to_json(s.uid)  // "{ name = \"" +++ s.name +++ "\", uid = " +++ to_json(s.uid) +++ " }";
     let from_json =
-      fn(d) => Some({ name = "TODO", uid = 1 });
+      fn(d) => Some({ name = "TODO", uid = 1 }) 
   }
 
-  let a_test_user = { name = "Luciano Pavarotti", uid = 111 : int32 };
+  let a_test_user = { name = "Luciano Pavarotti", uid = 111 : int32 }
 
   fun main() =
-    trace_string(to_json(a_test_user));
+    trace_string(to_json(a_test_user))
 
     // trace_string(to_json(555 : int32));
 

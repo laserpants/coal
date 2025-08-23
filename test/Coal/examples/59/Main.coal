@@ -9,6 +9,6 @@ module Main {
           y =
             4.6
           in
-            trace_double(x * y);
+            trace_double(x * y)
 
 }

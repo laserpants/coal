@@ -19,7 +19,7 @@ module Main {
                 g(range)
       | [] =>
           always(Leaf)
-    };
+    }
 
   fun flatten(tree) = 
     fold(tree) {
@@ -27,9 +27,9 @@ module Main {
           lhs ++ (y :: rhs)
       | Leaf =>
           []
-    };
+    }
 
-  let sort = flatten << from_list;
+  let sort = flatten << from_list
 
   fun main() = 
     let
@@ -41,5 +41,5 @@ module Main {
               12345
           | (y :: _) =>
               y
-        }); 
+        }) 
 }

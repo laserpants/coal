@@ -5,7 +5,7 @@ module Main {
   }
 
   instance X<bool> {
-    let x = fn(z) => true;
+    let x = fn(z) => true
   }
 
   fun foo(z) = 
@@ -13,8 +13,8 @@ module Main {
       a =
         x(false)
       in
-        trace_bool(a);
+        trace_bool(a)
 
   fun main() = 
-    foo(2 : int32);
+    foo(2 : int32)
 }

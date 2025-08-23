@@ -1,15 +1,15 @@
 module Main {
 
   fun print_name(a : { name : string | r }) =
-    trace_string(a.name);
+    trace_string(a.name)
 
   fun foo(a : { name : string | r }) =
     match(a) {
       | { name = name | q } =>
           print_name(q)
-    };
+    }
 
   fun main() =
-    trace_int32(2);
+    trace_int32(2)
 
 }

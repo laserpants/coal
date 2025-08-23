@@ -8,5 +8,5 @@ module Main {
         match(r) {
           | { b = b } =>
               trace_string(b.msg)
-        };
+        }
 }
