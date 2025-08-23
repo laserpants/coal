@@ -105,7 +105,7 @@ parseFoldExpression :: Parser (Expression Metadata ())
 parseFoldExpression = do
   withMetadata $ do
     lexeme_ "fold"
-    n <- option "foo" name
+    n <- option "$fold" name
     es <- parens (nonEmpty (commaSep1 parseExpression))
     cs <- braces (nonEmpty (some parseClause))
     pure (\loc -> EFold loc () n es cs Nothing)
