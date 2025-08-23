@@ -13,7 +13,6 @@ module Coal.Compiler.Transform.Fold (
   expandFoldExpr,
 ) where
 
-import Debug.Trace
 import Coal.Common.Label (Label (..), labelName)
 import Coal.Common.List1 (List1, NonEmpty (..))
 import Coal.Common.Supply (suppliedName)
@@ -77,13 +76,10 @@ instance (Monoid a, Data a) => FoldContext (Expression a ()) where
   expandFolds = flip . foldr . updateName
 
 updateName :: (Monoid a, Data a) => Name -> (Name, Label ()) -> Expression a () -> Expression a ()
-updateName name (xxx, label) =
---  traceShow name $
---    traceShow xxx $
-      replace (labelName label) $
-        const2 $
---          applicationE (varE name) (EVariable mempty label :| [])
-          applicationE (varE xxx) (EVariable mempty label :| [])
+updateName _ (name, label) =
+  replace (labelName label) $
+    const2 $
+      applicationE (varE name) (EVariable mempty label :| [])
 
 eliminateAtPatterns :: Pattern a () -> Pattern a ()
 eliminateAtPatterns =
@@ -106,8 +102,6 @@ atLabels = execWriter . transformM go
 
 expandFoldExpr :: (Monoid a, Data a, MonadState Int m, MonadReader Name m) => Name -> List1 (Expression a ()) -> List1 (Clause a ()) -> m (Expression a ())
 expandFoldExpr name args clauses = do
---  s <- suppliedName
-  --let name = "todo"
   let var = name <> ".expr"
   pure $
     transform flattenApplication $
