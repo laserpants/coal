@@ -121,7 +121,7 @@ Coal provides the following built-in basic language types:
 
 User-defined data types in Coal are of the product-sum variety. These types are introduced with the `type` keyword. 
 
-- A *product* type combines multiple fields into a single value: All of the components are composed together (e.g. an RGB color value that contains individual red, green, and blue components).
+- A *product* type combines multiple fields into one single value: All of the components appear together in the constructed data (e.g. an RGB color triplet that contains individual red, green, and blue values).
 
    ```
    type Color = Rgb(int8, int8, int8)
@@ -210,19 +210,13 @@ Just like lists, tuples are ordered sequences of values. Unlike lists, however:
 In code, a tuple is written as a comma-separated sequence of expressions enclosed in parentheses:
 
 ```
-(<expr_1>, <expr_2>, ..., <expr_n>)
+(<expr_1> : t_1, <expr_2> : t_2, ..., <expr_n> : t_n) : (t_1, t_2, ..., t_n)
 ```
 
 ##### Examples:
 
 ```
-(10, "covfefe", false)
-```
-
-The type of the tuple in this example is: 
-
-```
-(int32, string, bool)
+(10, "covfefe", false)  // The type of this tuple is: (int32, string, bool)
 ```
 
 Tuples of length two and three are often called *pairs* and *triples*, respectively. 
@@ -253,7 +247,7 @@ f : a -> b -> c
 g : (a, b) -> c
 ```
 
-The first of these functions is in curried form, which is usually more convenient to work with. 
+The first of these is in curried form, which is usually more convenient to work with. 
 Curried functions can be partially applied, which is useful, for example, when working with higher-order functions. 
 Suppose we define an addition function:
 
@@ -296,20 +290,18 @@ let five = curry(add, 1, 4)         // or (curry(add))(1, 4)
 
 #### Records
 
-Records are unordered collections of name-value pairs, where the values can be of any type, including other records. They are suitable for representing structured data with multiple properties, and nested objects: 
+Records are unordered collections of name-value pairs, where the values can be of any type, including other records. They are suitable for representing structured data with multiple properties, and nested objects: A record is written as a sequence of comma-separated fields enclosed in curly braces. Each field consists of a name, referred to as the *label*, paired with a value. These two are separated by an equals sign (`=`). 
 
 ```
-user =
-  { id = 99
-  , name = "Obi-Wan Kenobi"
-  , permissions = ["read", "write", "karaoke"]
-  }
+{ 
+  name = "Eros Ramazzotti", 
+  shoe_size = 43, 
+  privileges = ["read", "edit", "karaoke"]
+}
 ```
 
-a
-
 ```
-user : { name : string, id : int32, permissions : List(string) }
+{ name : string, shoe_size : int32, privileges : List<string> }
 ```
 
 ### Pattern matching
@@ -325,6 +317,8 @@ trait Functor<f : * -> *> {
   map : (a -> b) -> f<a> -> f<b>;
 }
 ```
+
+To make a type ...
 
 Recall that the `Option` type is defined as:
 
@@ -354,26 +348,7 @@ map(fn(x) => x * 100, [1, 2, 3])  // ==> [100, 200, 300]
 
 ### Recursion and corecursion
 
-TODO
-
-## License 
-
-TODO
-
-<!--
-
----
----
----
----
-
-
-## About
-
-## Rethinking recursion
-
-In most languages, a typical (recursive) implementation of the factorial 
-function looks something like the following:
+In most languages, a typical (recursive) implementation of the factorial function looks something like the following:
 
 ```
 fun factorial(n : int32) =
@@ -391,7 +366,20 @@ If we pass this function to the Coal compiler, it is rejected with the following
 Name not in scope: factorial
 ```
 
-Structural recursion works in close conjunction with a recursive data structure, like lists, trees, and other algebraic data types. A common example is where an array of numbers is reduced into a single value, for example by adding
+Structural recursion works in close conjunction with a recursive data structure, like lists, trees, and other algebraic data types. 
+
+## License 
+
+TODO
+
+<!--
+
+---
+---
+---
+---
+
+A common example is where an array of numbers is reduced into a single value, for example by adding
 
 ```
 let sum = reduce(fn(n, a) => f + a, [1, 2, 3])
@@ -401,7 +389,7 @@ This pattern is also known as a *fold*. Folding doesn't work with an integers, a
 
 > Every natural number is either zero or the successor of another natural number.
 
-This is known as the Peano construction of the natural numbers, named after the Italian mathematician [Giuseppe Peano](https://en.wikipedia.org/wiki/Giuseppe_Peano).
+This is known as the *Peano construction* of the natural numbers, named after the Italian mathematician [Giuseppe Peano](https://en.wikipedia.org/wiki/Giuseppe_Peano).
 Here is how we express this as an algebraic data type:
 
 ```
@@ -422,9 +410,12 @@ Here is how we use the `nat` data type to define the factorial function:
     }
 ```
 
-The key here is the special `@`-pattern used in the second match-clause. Note also that `fold` is a language keyword, not an ordinary function.
+Note that `fold` is a language keyword, not an ordinary function.
+A fold is very similar to an ordinary `match` expression, but with some extra powers.
 
-It is very similar to an ordinary `match` expression, but with some extra powers.
+The key here is the special `@`-pattern used in the second clause. 
+This type of pattern can only appear where _
+
 
 > Why is the function rejected?
 
@@ -485,25 +476,6 @@ asfd
 fun fst3((fst, _, _) : (a, b, c)) : a = fst
 fun snd3((_, snd, _) : (a, b, c)) : b = snd
 fun thd3((_, _, thd) : (a, b, c)) : c = thd 
-```
-
-### Records
-
-Records are unordered collections of name-value pairs, where the values can be of arbitrary type, including other records. 
-They are suitable for representing structured data with multiple properties, and nested objects. 
-A record is written as a sequence of comma-separated fields enclosed in curly braces. 
-Each field consists of a name, referred to as the *label*, paired with a value. These two are separated by an equals sign (`=`). 
-
-```
-{ 
-  name = "Eros Ramazzotti", 
-  shoe_size = 43, 
-  privileges = ["read", "edit", "karaoke"]
-}
-```
-
-```
-{ name : string, shoe_size : int32, privileges : List<string> }
 ```
 
 ### Expression syntax
