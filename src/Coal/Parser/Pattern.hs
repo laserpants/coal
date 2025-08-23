@@ -131,18 +131,19 @@ parseAtVariablePattern = do
     p <- try parseAtFunction <|> parseAtVar
     pure (\loc -> uncurry (PAtVariable loc) p)
 
+parseAtFunction :: Parser (Name, Label ())
 parseAtFunction = do
   n <- name
   ll <- parens $ do
     void (char '@')
-    x <- name
-    pure (Label () x)
+    Label () <$> name
   pure (n, ll)
 
+parseAtVar :: Parser (Name, Label ())
 parseAtVar = do
   void (char '@')
   ll <- Label () <$> name
-  pure ("foo", ll)
+  pure ("$fold", ll)
 
 parseConstructorPattern :: Parser (Pattern Metadata ())
 parseConstructorPattern =
