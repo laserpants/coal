@@ -11,7 +11,7 @@ import Coal.Language.Trait (Trait (..))
 import Coal.Language.Type (Parameter (..), Type)
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (universeBi)
-import Extra (Name, Dictionary)
+import Extra (Dictionary, Name)
 
 import qualified Data.Set as Set
 
