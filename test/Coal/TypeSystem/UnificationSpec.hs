@@ -6,9 +6,15 @@ module Coal.TypeSystem.UnificationSpec where
 import Coal.Language
 import Coal.TypeSystem.Substitution
 import Coal.TypeSystem.Unification
+import Control.Monad (forM_)
+import Data.Text (Text)
+import Prettyprinter
+import Prettyprinter.Render.String (renderString)
+import Test.Hspec
 
 import qualified Coal.Common.List1 as List1
 import qualified Coal.TypeSystem.Substitution as Substitution
+import qualified Data.Text as Text
 
 data UnificationSpecTestCase t = UnificationSpecTestCase t t (Either UnificationError Substitution)
   deriving (Show, Eq, Ord)
@@ -16,11 +22,8 @@ data UnificationSpecTestCase t = UnificationSpecTestCase t t (Either Unification
 testCase :: UnificationSpecTestCase IndexedType -> Either UnificationError Substitution
 testCase (UnificationSpecTestCase t1 t2 _) = evalUnifier (freshIdIn [t1, t2]) (unify t1 t2)
 
-runTestCase :: UnificationSpecTestCase IndexedType -> Bool
-runTestCase test = testCase test == s where (UnificationSpecTestCase _ _ s) = test
-
-runAllTestCases :: [Bool]
-runAllTestCases = runTestCase <$> testCases
+-- runTestCase :: UnificationSpecTestCase IndexedType -> Bool
+-- runTestCase test = testCase test == s where (UnificationSpecTestCase _ _ s) = test
 
 testCases :: [UnificationSpecTestCase IndexedType]
 testCases =
@@ -304,5 +307,19 @@ testCases =
       )
   ]
 
+runHspecTestCase :: UnificationSpecTestCase IndexedType -> Spec
+runHspecTestCase (UnificationSpecTestCase t1 t2 expected) =
+  it description $ do
+    let actual = testCase (UnificationSpecTestCase t1 t2 expected)
+    actual `shouldBe` expected
+ where
+  description =
+    prettyType t1 ++ " ~ " ++ prettyType t2 ++ " ⇒ " ++ show expected
+
+unificationSpec :: SpecWith ()
 unificationSpec =
-  error "TODO"
+  describe "Unification tests" $ do
+    forM_ testCases runHspecTestCase
+
+prettyType :: (Pretty t) => t -> String
+prettyType p = renderString . layoutPretty defaultLayoutOptions $ pretty p
