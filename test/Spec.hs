@@ -198,13 +198,17 @@ spec = do
   print (x == Right "6\n")
   x <- main84
   print (x == Right "true\n")
+  x <- main85
+  print (x == Right "aa\n")
+  x <- main86
+  print (x == Right "24\n")
 
 runTestFiles :: [String] -> IO (Either CompilerError Text)
 runTestFiles files = do
   r <- compileFiles files
   case r of
     Left err@(CompilerError msg) -> do
---      liftIO $ Text.putStrLn msg
+      --      liftIO $ Text.putStrLn msg
       pure (Left err)
     Right{} ->
       Right <$> runTestBuild
@@ -1124,22 +1128,22 @@ compileModule x = do
 
   liftIO $ writeDotFiles "compiled" b
 
---  cc <- gets compilerAssumptions
---  case nub cc of
---    as@(_ : _) ->
---      forM_ as $
---        \Assumption{..} -> do
---          src <- gets compilerSourceText
---          let msg =
---                prettyErrorMessage
---                  [ "\nName not in scope:"
---                  , assumptionName
---                  ]
---                  src
---                  Assumption{..}
---          throwError (CompilerError msg)
---    [] ->
---      pure ()
+  cc <- gets compilerAssumptions
+  case nub cc of
+    as@(_ : _) ->
+      forM_ as $
+        \Assumption{..} -> do
+          src <- gets compilerSourceText
+          let msg =
+                prettyErrorMessage
+                  [ "\nName not in scope:"
+                  , assumptionName
+                  ]
+                  src
+                  Assumption{..}
+          throwError (CompilerError msg)
+    [] ->
+      pure ()
 
   r <- kernelTranslationC b
 
@@ -1946,7 +1950,6 @@ moduleCore =
                         )
                     )
               |]
-
         , OFunction
             "Core$.negate__$instance_Numeric(Intrinsic(Nat))"
             [ Label (Kernel.TCon "$Nat" []) "_"
@@ -1954,8 +1957,8 @@ moduleCore =
             [r| 
                   $Zero : $Nat
               |]
-        -- /
-        , OFunction
+        , -- /
+          OFunction
             "Core$.compare"
             [ Label (Kernel.TCon "Ordered" [opaque]) "$a"
             ]
