@@ -10,7 +10,7 @@ module Main {
       | B(xs) => 
           fold on_list(xs) {
             | [] => "a"
-            | on_struct(@x) :: _ => x
+            | on_struct(@x) :: on_list(@xs) => x +++ xs
           }
     };
 
