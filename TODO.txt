@@ -1,4 +1,0 @@
-[-] folds
-[-] semicolons
-[-] rename placeholders
-[-] uni tests
