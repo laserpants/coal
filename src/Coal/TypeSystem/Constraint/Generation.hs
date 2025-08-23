@@ -124,7 +124,7 @@ patternConstraints assert ms =
         , Explicit InferenceRulePlaceholder t (forall1 listType)
         ]
       concatForM ps (patternConstraints assert ms)
-    PAtVariable _ _ (Label _ name) -> do
+    PAtVariable _ n (Label _ name) -> do
       pure [name]
     PAs _ (Label t name) p -> do
       ps <- patternConstraints assert ms p
@@ -209,7 +209,7 @@ tailRow =
       tellRight [Equality InferenceRulePlaceholder [TIntrinsic (IRecord (TRow r)), typeOf t]]
       pure r
 
--- emit
+-- TODO: emit
 collectConstraints :: (Show a, Data a) => Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
 collectConstraints =
   \case
@@ -320,7 +320,7 @@ collectConstraints =
           tellRight [Equality InferenceRulePlaceholder [foldTypeOf t (e :| es), t1]]
         _ ->
           pure ()
-      pure (ms1 <> ms2 <> ms3 <> ms4)
+      pure (filter (assumptionNameIsNotOneOf [name]) (ms1 <> ms2 <> ms3 <> ms4))
     EUnfold loc t name ps d e1 -> do
       t0 <- supplied (TVariable . TypeIndex KType)
       t1 <- supplied (TVariable . TypeIndex KType)
