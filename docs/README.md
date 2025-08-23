@@ -72,6 +72,14 @@ module MerkleTree {
 }
 ```
 
+The `import` keyword is used to import functions and other definitions from other modules. 
+
+```
+import List(concat, head, tail)
+```
+
+Import statements must appear at the top of a module, before any other code.
+
 ### Language constructs
 
 TODO
@@ -95,7 +103,7 @@ Coal provides the following built-in basic language types:
 | `bool`             | Booleans                                | `true` \| `false`         |                       
 | `char`             | A single Unicode character              | `'a'`, `'b'`, `'🤖'`, ... |                        
 | `float`            | Single precision floating point numbers | `3.1519f`                 |                        
-| `double`           | Double precision floating point numbers | `3.1519`                  |                        
+| `double`           | Double precision floating point numbers | `3.141592653589793`                  |                        
 | `int32`            | 32-bit integers                         | `0`, `1`, `2`, `3`, ...   |                        
 | `int64`            | 64-bit integers                         | `0`, `1`, `2`, `3`, ...   |                        
 | `bignum`           | Arbitrary precision integers            | `0`, `1`, `2`, `3`, ...   |                        
@@ -108,9 +116,9 @@ Coal provides the following built-in basic language types:
 
 #### Algebraic data types
 
-User-defined data types are introduced with the `type` keyword.
+User-defined data types in Coal are of the product-sum variety. These types are introduced with the `type` keyword. 
 
-- A *product* type combines multiple fields into a single value: All of the specified components are present together (e.g. an RGB color value that contains separate red, green, and blue components).
+- A *product* type combines multiple fields into a single value: All of the components are composed together (e.g. an RGB color value that contains individual red, green, and blue components).
 
    ```
    type Color = Rgb(int8, int8, int8)
@@ -247,9 +255,7 @@ Note that `fold` is a language keyword in Coal, not an ordinary function.
 
 ```
 
-A strict distinction is made between finite data, which is produced and 
-consumed in this way, and data that that we treat as potentially infinite. The latter is 
-known is *codata*. The codata equivalents of lists, for example,  are streams.
+A strict distinction is made between finite data, which is produced and consumed in this way, and data that that we treat as potentially infinite. The latter is known is *codata*. The codata equivalents of lists, for example, are streams.
 
 ```
   type List<a> 
@@ -289,19 +295,18 @@ The opposite ...
 
 ### List, Option, etc.
 
-A list is an ordered collection of elements where all entries are of the same type.  It is a foundational data structure in functional programming, commonly used to store and manipulate collections of data.  In Coal, list literals are denoted by a sequence of comma-separated expressions, enclosed in square brackets:
+A list is an ordered collection of elements where all entries are of the same type. It is a foundational data structure in functional programming, commonly used to store and manipulate collections of data. In Coal, list literals are denoted by a sequence of comma-separated expressions, enclosed in square brackets:
 
 ```
 [<expr_1 : t>, <expr_2 : t>, ..., <expr_n : t>] : List<t>
 ```
 
-The `List` type is defined inductively, and implemented as a one-way *linked list* of nodes. 
-This means that a list of type `List<a>` is either:
+The `List` type is defined inductively, and implemented as a one-way *linked list* of nodes. This means that a list of type `List<a>` is either:
 
 - The empty list; or
 - A value of type `a`, coupled with another `List<a>` list. 
 
-These last two are referred to as the *head* and *tail* of the list. 
+These last two are sometimes referred to as the *head* and *tail* of the list. 
 
 ```
 type List<a>
@@ -344,7 +349,7 @@ Tuples of length two and three are often called *pairs* and *triples*, respectiv
 There is no singleton tuple type. A single value in parentheses is just the value itself:
 
 ```
-(42)  // Not a tuple, just the integer 42
+(42)  // Not a tuple -- just the integer 42
 ```
 
 The empty tuple *does* exist. It is written `()` and is known as the unit value. Its type is `unit`. (See *Built-in types* for more details.)
