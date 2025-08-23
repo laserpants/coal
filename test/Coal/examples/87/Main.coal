@@ -1,5 +1,19 @@
 module Main {
 
+  fun reduce(f : a -> b -> b, init : b, list : List<a>) : b =
+    fold(list, init) {
+      | [] => 
+          fn(r) => r
+      | q :: @go =>
+          fn(r) => go(f(q, r))
+    };
+
+  fun uncons(list : List<a>) : Option<(a, List<a>)> =
+    match(list) {
+      | x :: xs => Some((x, xs))
+      | [] => None
+    };
+
   type JsonValue
     = JsonNull
     | JsonBool(bool)
@@ -14,18 +28,10 @@ module Main {
   fun field_pair(lhs, rhs) =
     enclosed("\"", "\"", lhs) +++ ":" +++ rhs;
 
-  fun reduce(f : a -> b -> b, init : b, list : List<a>) : b =
-    fold(list, init) {
-      | [] => 
-          fn(r) => r
-      | q :: @go =>
-          fn(r) => go(f(q, r))
-    };
-
   fun to_comma_separated_str(strs : List<string>) : string =
-    match(strs) {
-      | [] => ""
-      | head :: tail => head +++ reduce(fn(t, s) => s +++ "," +++ t, "", tail)
+    match(uncons(strs)) {
+      | None => ""
+      | Some((head, tail)) => head +++ reduce(fn(t, s) => s +++ "," +++ t, "", tail)
     };
 
   fun encode(value : JsonValue) : string =

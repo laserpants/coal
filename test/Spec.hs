@@ -197,20 +197,22 @@ spec = do
   x <- main81
   print (x == Right "6\n")
   x <- main82
-  print (x == Right "\"a\"\"b\"\"c\"\n")
+  print (x == Right "{\"abc\":[\"a\",\"b\",\"c\"],\"pi\":3.14159}\n")
   x <- main84
   print (x == Right "true\n")
   x <- main85
   print (x == Right "aa\n")
   x <- main86
   print (x == Right "24\n")
+  x <- main87
+  print (x == Right "{\"abc\":[\"a\",\"b\",\"c\"],\"pi\":3.14159}\n")
 
 runTestFiles :: [String] -> IO (Either CompilerError Text)
 runTestFiles files = do
   r <- compileFiles files
   case r of
     Left err@(CompilerError msg) -> do
-      --      liftIO $ Text.putStrLn msg
+--      liftIO $ Text.putStrLn msg
       pure (Left err)
     Right{} ->
       Right <$> runTestBuild
@@ -726,6 +728,12 @@ main86 :: IO (Either CompilerError Text)
 main86 = do
   runTestFiles
     [ "./test/Coal/examples/86/Main.coal"
+    ]
+
+main87 :: IO (Either CompilerError Text)
+main87 = do
+  runTestFiles
+    [ "./test/Coal/examples/87/Main.coal"
     ]
 
 compileFiles :: [String] -> IO (Either CompilerError ())
