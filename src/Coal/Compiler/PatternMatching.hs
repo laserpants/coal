@@ -118,7 +118,7 @@ translatePattern =
       error "TODO"
     PAtVariable{} ->
       error "TODO"
-    PPlaceholder{} ->
+    PTraitDictionary{} ->
       error "TODO"
 
 translateListLiteral :: (MatchClasses a t) => a -> t -> [Pattern a t] -> Pattern a t

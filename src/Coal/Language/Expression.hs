@@ -74,9 +74,8 @@ data Expression a t
     ECodataFields a t (Dictionary (Expression a t))
   | -- | Row restriction
     EFocus Name (Label t) (Label t) (Expression a t) (Expression a t)
-  | -- | Trait dictionary placeholder
-    -- TODO: Rename
-    EPlaceholder a t (Trait t)
+  | -- | Trait instance dictionary 
+    ETraitDictionary a t (Trait t)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
 
 instance (Ord t, Data a, Data t) => FreeVars (Expression a t) t where

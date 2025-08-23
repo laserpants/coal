@@ -159,7 +159,7 @@ translateExpression =
      where
       t = translateType t1
       r = extractRow (translateLabel ll2)
-    EPlaceholder _ t trait@(Trait name _) ->
+    ETraitDictionary _ t trait@(Trait name _) ->
       pure (Kernel.var (Label (translateType t) (dictVariable name trait)))
     EFold _ _ _ _ _ (Just e) ->
       translateExpression e
@@ -209,7 +209,7 @@ translatePattern =
       translatePattern p
     PLiteral _ p ->
       pure (Label (translateType (typeOf p)) "_")
-    PPlaceholder _ t trait@(Trait name _) ->
+    PTraitDictionary _ t trait@(Trait name _) ->
       pure (Label (translateType t) (dictVariable name trait))
     _ ->
       error "TODO"

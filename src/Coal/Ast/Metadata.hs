@@ -61,7 +61,7 @@ instance HasMetadata (Expression Metadata t) where
       ESelect a _ _ -> a
       ECodataSelect a _ _ _ -> a
       ECodataFields a _ _ -> a
-      EPlaceholder a _ _ -> a
+      ETraitDictionary a _ _ -> a
       EFocus{} -> error "Not implemented"
 
 instance HasMetadata (Pattern Metadata t) where
@@ -80,7 +80,7 @@ instance HasMetadata (Pattern Metadata t) where
       PAs a _ _ -> a
       PShorthand a _ -> a
       PAtVariable a _ _ -> a
-      PPlaceholder a _ _ -> a
+      PTraitDictionary a _ _ -> a
 
 instance HasMetadata (InferenceRule k Metadata) where
   getMetadata =

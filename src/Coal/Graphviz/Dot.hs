@@ -250,8 +250,8 @@ instance (Pretty t, Show t) => Dot t (Expression a t) where
           emitEdgeTo ll2
           emitEdgeTo e1
           emitEdgeTo e2
-      EPlaceholder _ t _ ->
-        emitRectangle "EPlaceholder" (Just t)
+      ETraitDictionary _ t _ ->
+        emitRectangle "ETraitDictionary" (Just t)
 
 instance (Pretty t, Show t) => Dot t (Pattern a t) where
   toDot =
@@ -296,8 +296,8 @@ instance (Pretty t, Show t) => Dot t (Pattern a t) where
       PAtVariable _ name ll ->
         fromNode (emitEllipse ("PAtVariable\\n" <> name) Nothing) $
           emitEdgeTo ll
-      PPlaceholder _ t _ ->
-        emitEllipse "PPlaceholder" (Just t)
+      PTraitDictionary _ t _ ->
+        emitEllipse "PTraitDictionary" (Just t)
 
 instance (Pretty t, Show t) => Dot t (Clause a t) where
   toDot =

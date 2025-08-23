@@ -151,7 +151,7 @@ applyTraits ll@(Label t name) =
         case mm of
           Nothing -> do
             tell [trait]
-            pure (EPlaceholder mempty (typeOf trait) trait)
+            pure (ETraitDictionary mempty (typeOf trait) trait)
           Just r ->
             pure (ERecord mempty (typeOf trait) r Nothing)
 
@@ -211,7 +211,7 @@ transformScope e = do
       pure (ELambda mempty (toPattern <$> (tr :| trs)) expr, traits)
  where
   toPattern tr =
-    PPlaceholder mempty (typeOf tr) tr
+    PTraitDictionary mempty (typeOf tr) tr
 
 instance (Monoid a, Data a) => TraitContext (CompiledClause a IndexedType) where
   expandTraits =
@@ -248,4 +248,4 @@ instance (Monoid a, Data a) => TraitContext (Constant Expression a IndexedType) 
                 (With (tr : trs) t)
                 (ELambda mempty (toPattern <$> (tr :| trs)) expr)
        where
-        toPattern tr = PPlaceholder mempty (typeOf tr) tr
+        toPattern tr = PTraitDictionary mempty (typeOf tr) tr
