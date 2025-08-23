@@ -30,7 +30,7 @@ Since Coal is a [total](https://en.wikipedia.org/wiki/Total_functional_programmi
 
 ### Programs = Expressions + Effects
 
-Purely functional programming is [expression-oriented](https://en.wikipedia.org/wiki/Expression-oriented_programming_language): a program is, at its core, just an expression that evaluates to a value. In this model, there are no observable side-effects, no explicit state, and all data is immutable. These properties make programs more predictable, easier to reason about, highly testable, and allows for code to be verified using formal mathematical methods. On the other hand, programs need to have the ability to interact with the outside world. Side-effects are what make them useful.
+Coal  is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-oriented_programming_language) language: a program is, at its core, just an expression that evaluates to a value. In this model, there are no observable side-effects, no explicit state, and all data is immutable. These properties make programs more predictable, easier to reason about, highly testable, and allows for code to be verified using formal mathematical methods. On the other hand, programs need to have the ability to interact with the outside world. Side-effects are what make them useful.
 
 TODO
 
