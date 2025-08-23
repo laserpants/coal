@@ -196,6 +196,8 @@ spec = do
   print (x == Right "24\n")
   x <- main81
   print (x == Right "6\n")
+  x <- main82
+  print (x == Right "\"a\"\"b\"\"c\"\n")
   x <- main84
   print (x == Right "true\n")
   x <- main85
