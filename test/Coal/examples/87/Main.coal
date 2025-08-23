@@ -1,11 +1,9 @@
 module Main {
 
-  fun reduce(f : a -> b -> b, init : b, list : List<a>) : b =
+  fun reduce(op : a -> b -> b, init : b, list : List<a>) : b =
     fold(list, init) {
-      | [] => 
-          fn(r) => r
-      | q :: @go =>
-          fn(r) => go(f(q, r))
+      | [] => fn(r) => r
+      | q :: @go => fn(r) => go(op(q, r))
     };
 
   fun uncons(list : List<a>) : Option<(a, List<a>)> =
