@@ -14,6 +14,7 @@ module Coal.Common.Environment (
   elems,
   filter,
   filterNames,
+  names,
 ) where
 
 import Extra (Dictionary, Name, Over)
@@ -82,3 +83,7 @@ restrict names = filterNames (`elem` names)
 {-# INLINE elems #-}
 elems :: Environment a -> [a]
 elems = Map.elems . envDictionary
+
+{-# INLINE names #-}
+names :: Environment a -> [Name]
+names = Map.keys . envDictionary
