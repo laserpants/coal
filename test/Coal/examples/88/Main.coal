@@ -47,7 +47,7 @@ module Main {
               })
             )
     }
-  where
+  where {
     fun enclosed(lhs, rhs, str) =
       lhs +++ str +++ rhs
 
@@ -59,6 +59,7 @@ module Main {
         | None => ""
         | Some((head, tail)) => head +++ reduce(fn(t, s) => enclosed(s, t, ","), "", tail)
       }
+  }
 
   let test_obj = 
     JsonObject(
