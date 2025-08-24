@@ -179,9 +179,11 @@ let tree_of_gondor =
 
 Fold-recursion ...
 
+standard axiomatization of the natural numbers
+
 > Every natural number is either zero or the successor of another natural number.
 
-This is known as the *Peano construction* of the natural numbers, named after the Italian mathematician [Giuseppe Peano](https://en.wikipedia.org/wiki/Giuseppe_Peano).
+This is known as the *Peano construction*, named after the Italian mathematician [Giuseppe Peano](https://en.wikipedia.org/wiki/Giuseppe_Peano).
 
 Here is how we express this as an algebraic data type:
 
