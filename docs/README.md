@@ -93,25 +93,29 @@ TODO
 
 TODO
 
+##### Comments
+
+TODO
+
 ### Types
 
 #### Built-in types
 
 Coal provides the following built-in basic language types:
 
-| Type               | Description                             | Example values                    |                       
+| Type               | Description                             | Example values            |                       
 | ------------------ | --------------------------------------- | ------------------------- |                       
 | `bool`             | Booleans                                | `true` \| `false`         |                       
 | `char`             | A single Unicode character              | `'a'`, `'b'`, `'🤖'`, ... |                        
 | `float`            | Single precision floating point numbers | `3.1519f`                 |                        
-| `double`           | Double precision floating point numbers | `3.141592653589793`                  |                        
+| `double`           | Double precision floating point numbers | `3.141592653589793`       |                        
 | `int32`            | 32-bit integers                         | `0`, `1`, `2`, `3`, ...   |                        
 | `int64`            | 64-bit integers                         | `0`, `1`, `2`, `3`, ...   |                        
 | `bignum`           | Arbitrary precision integers            | `0`, `1`, `2`, `3`, ...   |                        
-| `string`           | UTF-8 text strings                      |  `"Hello, ✨ world!"`      |                        
+| `string`           | UTF-8 text strings                      |  `"Hello, ✨ world!"`     |                        
 | `unit`             | Singleton type                          | `()`                      |                        
 | `void`             | The uninhabited type                    |                           |                        
-| `nat`              | Natural numbers (Peano construction)    | `Zero`, `Succ(Zero)`, ... |                        
+| `nat`              | Natural numbers (Peano arithmetic)      | `Zero`, `Succ(Zero)`, ... |                        
 
 ##### Integral types
 
@@ -141,20 +145,20 @@ type Tree<a>
   | Node(a, Tree<a>, Tree<a>)
 ```
 
-```
-          (4)
-          / \
-       ---------
-       /       \
-     (2)       (6)
-    -----     -----
-    /   \     /   \ 
-  (1)   (3) (5)   (7)  
-```
-
-Here is how this tree is encoded with the `Tree` data type:
+Here is how a simple tree can be encoded with the `Tree` data type:
 
 ```
+// Let's build this tree:
+//
+//          (4)
+//          / \
+//       ---------
+//       /       \
+//     (2)       (6)
+//    -----     -----
+//    /   \     /   \ 
+//  (1)   (3) (5)   (7)  
+
 let tree_of_gondor = 
   Node 
     ( 4
@@ -169,6 +173,22 @@ let tree_of_gondor =
         , Node(7, Leaf, Leaf)
         )
     )
+```
+
+##### Natural numbers
+
+Fold-recursion ...
+
+> Every natural number is either zero or the successor of another natural number.
+
+This is known as the *Peano construction* of the natural numbers, named after the Italian mathematician [Giuseppe Peano](https://en.wikipedia.org/wiki/Giuseppe_Peano).
+
+Here is how we express this as an algebraic data type:
+
+```
+type nat
+ = Zero
+ | Succ(nat)
 ```
 
 #### Lists
@@ -290,7 +310,7 @@ let five = curry(add, 1, 4)         // or (curry(add))(1, 4)
 
 #### Records
 
-Records are unordered collections of name-value pairs, where the values can be of any type, including other records. They are suitable for representing structured data with multiple properties, and nested objects: A record is written as a sequence of comma-separated fields enclosed in curly braces. Each field consists of a name, referred to as the *label*, paired with a value. These two are separated by an equals sign (`=`). 
+Records are unordered collections of name-value pairs, where the values can be of any type, including other records. They are suitable for representing structured data with multiple properties, and nested objects: A record is written as a sequence of comma-separated fields enclosed in curly braces. A field consists of a name, referred to as the *label*, paired with a value. These two are separated by an equals sign (`=`). 
 
 ```
 { 
@@ -366,7 +386,27 @@ If we pass this function to the Coal compiler, it is rejected with the following
 Name not in scope: factorial
 ```
 
-Structural recursion works in close conjunction with a recursive data structure, like lists, trees, and other algebraic data types. 
+Structural recursion works side-by-side with a recursive data structure, like lists, trees, or other algebraic data types. 
+Ordinary integers are not ...
+
+Here is how we use the `nat` data type to define the factorial function:
+
+```
+  fun factorial(n : nat) =
+    fold(n) {
+      | Zero =>
+          1
+      | Succ(@p) as m =>
+          m * p
+    }
+```
+
+The key here is the special `@`-pattern used in the second clause. 
+This type of pattern can only appear where _
+
+Note that `fold` is a language keyword, not an ordinary function.
+A fold is very similar to an ordinary `match` expression, but with some extra powers.
+
 
 ## License 
 
@@ -386,36 +426,6 @@ let sum = reduce(fn(n, a) => f + a, [1, 2, 3])
 ```
 
 This pattern is also known as a *fold*. Folding doesn't work with an integers, at least not those of the usual machine variety. But we can define one that works.  in fact, the natural numbers are an example of the most basic inductievly defined type.
-
-> Every natural number is either zero or the successor of another natural number.
-
-This is known as the *Peano construction* of the natural numbers, named after the Italian mathematician [Giuseppe Peano](https://en.wikipedia.org/wiki/Giuseppe_Peano).
-Here is how we express this as an algebraic data type:
-
-```
-type nat
- = Zero
- | Succ(nat)
-```
-
-Here is how we use the `nat` data type to define the factorial function:
-
-```
-  fun factorial(n : nat) =
-    fold(n) {
-      | Zero =>
-          1
-      | Succ(@p) as m =>
-          m * p
-    }
-```
-
-Note that `fold` is a language keyword, not an ordinary function.
-A fold is very similar to an ordinary `match` expression, but with some extra powers.
-
-The key here is the special `@`-pattern used in the second clause. 
-This type of pattern can only appear where _
-
 
 > Why is the function rejected?
 
