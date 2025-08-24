@@ -359,16 +359,28 @@ instance (Show t, Pretty t) => Dot t (Definition a k t) where
                 id1 <- emitTriangle ("Trait\\n" <> prettyType tr) Nothing
                 emitEdge nid id1
           emitEdgeTo d
-      DImport (Path _) _ ->
+      DImport (Path _) ns ->
         emitParallelogram "DImport" Nothing
       DType name _ _ ->
         emitParallelogram ("DType\\n" <> name) Nothing
       DCodata name _ _ ->
         emitParallelogram ("DCodata\\n" <> name) Nothing
-      DTrait name _ _ _ ->
-        emitParallelogram ("DTrait\\n" <> name) Nothing
-      DInstance name _ _ ->
-        emitParallelogram ("DInstance\\n" <> name) Nothing
+      DTrait name ts ps ds ->
+        fromNode (emitParallelogram ("DTrait\\n" <> name) Nothing) $ do
+          nid <- ask
+          lift $ do
+            forM_ ps $
+              \p -> do
+                id1 <- emitRectangle (prettyType p) Nothing
+                emitEdge nid id1
+          lift $ do
+            forM_ ds $
+              \(name, t) -> do
+                id1 <- emitRectangle (name <> "\\n" <> prettyType t) Nothing
+                emitEdge nid id1
+      DInstance name t ds ->
+        fromNode (emitParallelogram ("DInstance\\n" <> name <> "\\n" <> prettyType t) Nothing) $ do
+          emitEdgesTo ds
       _ ->
         emitParallelogram "TODO" Nothing
 
