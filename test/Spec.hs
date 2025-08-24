@@ -8,7 +8,7 @@ import Coal.Common.Environment (Environment (..))
 import Coal.Common.Label (Label (..))
 import Coal.Common.List1 (NonEmpty (..))
 import Coal.Common.Name (Dictionary, Name)
-import Coal.Compiler (kernelTranslationC, mainPass, typeCheckingPass, writeDotFiles)
+import Coal.Compiler (expandWhereClausesC, kernelTranslationC, mainPass, typeCheckingPass, writeDotFiles)
 import Coal.Compiler.Environment
 import Coal.Compiler.Stack
 import Coal.Compiler.TypeInference.Errors
@@ -206,6 +206,9 @@ spec = do
   print (x == Right "24\n")
   x <- main87
   print (x == Right "{\"abc\":[\"a\",\"b\",\"c\"],\"pi\":3.14159}\n")
+
+-- 88
+-- 89
 
 runTestFiles :: [String] -> IO (Either CompilerError Text)
 runTestFiles files = do
@@ -736,6 +739,18 @@ main87 = do
     [ "./test/Coal/examples/87/Main.coal"
     ]
 
+main88 :: IO (Either CompilerError Text)
+main88 = do
+  runTestFiles
+    [ "./test/Coal/examples/88/Main.coal"
+    ]
+
+main89 :: IO (Either CompilerError Text)
+main89 = do
+  runTestFiles
+    [ "./test/Coal/examples/89/Main.coal"
+    ]
+
 compileFiles :: [String] -> IO (Either CompilerError ())
 compileFiles files = do
   fs <- traverse readFile files
@@ -1086,12 +1101,13 @@ run modules = do
       liftIO $ writeDotFiles "untyped" m1
       defs <- gets compilerTypeDefinitions
       let m2 = overModuleDefinitions (insertImportedTypes defs) m1
+      m3 <- expandWhereClausesC m2
       setSourceTextC src
       insertNamesC names
-      case m2 of
+      case m3 of
         Module (Path path) _ defs -> do
           insertTypeDefinitionsC (Text.intercalate "." path) [t | t@(DType c _ _) <- defs]
-          withLocalEnvironment defs (compileModule m2)
+          withLocalEnvironment defs (compileModule m3)
   liftIO $ do
     ms <- Kernel.compileModules (moduleCore1 : rs)
     generateLLOutput ms

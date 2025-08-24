@@ -20,6 +20,7 @@ import Coal.Compiler.Transform.Pattern.OrExpansion
 import Coal.Compiler.Transform.Pattern.RecordDesugar
 import Coal.Compiler.Transform.Type.AliasExpansion
 import Coal.Compiler.Transform.Unfold
+import Coal.Compiler.Transform.WhereClauses
 import Coal.Compiler.TypeInference
 import Coal.Graphviz.Dot (writeDotFile)
 import Coal.Language
@@ -30,6 +31,7 @@ import Coal.TypeSystem.Substitution (normalizeTypeIndexes)
 import Control.Monad ((>=>))
 import Control.Monad.Reader (MonadIO, Reader, asks, liftIO, runReader)
 import Control.Monad.State (gets, runState)
+import Control.Monad.Writer (Writer, runWriter)
 import Data.Data (Data)
 import Data.Text (Text)
 import Extra (Name, forM, forM_)
@@ -45,6 +47,12 @@ withSupplyC f = do
   let (r, n') = f n
   insertSupplyC n'
   pure r
+
+whereClausesExpansionTrans :: (Monad m) => (c -> Writer [(Name, Name)] c) -> c -> CompilerT a m c
+whereClausesExpansionTrans f e = pure (fst $ runWriter (f e))
+
+expandWhereClausesC :: (Monad m, Data a) => Module a Kind () -> CompilerT a m (Module a Kind ())
+expandWhereClausesC = whereClausesExpansionTrans expandWhereClausesModule
 
 aliasExpansionTrans :: (Monad m) => (c -> Reader AliasEnvironment c) -> c -> CompilerT a m c
 aliasExpansionTrans f e = asks (runReader (f e) . compilerAliasEnvironment)

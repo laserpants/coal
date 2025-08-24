@@ -343,10 +343,10 @@ instance (Show t, Pretty t) => Dot t (Function Expression a t) where
 instance (Show t, Pretty t) => Dot t (Definition a k t) where
   toDot =
     \case
-      DFunction name f fs -> do
+      DFunction name f ws -> do
         fromNode (emitParallelogram ("DFunction\\n" <> name) Nothing) $ do
           emitEdgeTo f
-          emitEdgesTo fs
+          emitEdgesTo ws
       DConstant name (Constant _ (With _ t) e) -> do
         fromNode (emitParallelogram ("DConstant\\n" <> name) (Just t)) $ do
           emitEdgeTo e
