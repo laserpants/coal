@@ -1,0 +1,22 @@
+module Main {
+
+  trait Baz<a> {
+    baz : a -> string;
+  }
+
+  instance Baz<string> {
+    fun baz(s) = s
+  }
+
+  trait Foo<a> {
+    foo : a -> string;
+  }
+
+  instance Foo<string> {
+    fun foo(s) = baz(s)
+  }
+
+  fun main() = 
+    trace_string(baz("baz"))
+
+}
