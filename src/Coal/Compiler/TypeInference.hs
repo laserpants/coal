@@ -114,7 +114,7 @@ compileDefinitionC =
   \case
     DFunction _ f _ ->
       void (compileFunctionC f)
-    DConstant _ c ->
+    DConstant _ c _ ->
       void (compileConstantC c)
     DAnnotation (With _ t) (DFunction _ f@(Function loc _ _ _) _) -> do
       t1 <- compileFunctionC f
@@ -124,7 +124,7 @@ compileDefinitionC =
           compilerReportConstraintsGenErrors [EIllFormedTypeAnnotation err]
         Right t2 ->
           insertConstraintsC [Equality (RuleAnnotation loc t1 t2) [t1, t2]]
-    DAnnotation (With _ t) (DConstant _ c@(Constant loc _ _)) -> do
+    DAnnotation (With _ t) (DConstant _ c@(Constant loc _ _) _) -> do
       t1 <- compileConstantC c
       (r, _, _) <- runConstraintsGenC (instantiateAnnotation loc t)
       case r of

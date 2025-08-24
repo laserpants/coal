@@ -129,8 +129,8 @@ instance (Monoid a, Data a) => CompileUnfoldsContext (Definition a k ()) where
         DAnnotation u <$> compileUnfolds o
       DFunction name f fs ->
         DFunction name <$> compileUnfolds f <*> traverse compileUnfolds fs
-      DConstant name g ->
-        DConstant name <$> compileUnfolds g
+      DConstant name g fs ->
+        DConstant name <$> compileUnfolds g <*> traverse compileUnfolds fs
       -- TODO
       o ->
         pure o

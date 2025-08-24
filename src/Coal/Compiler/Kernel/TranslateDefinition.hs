@@ -33,7 +33,7 @@ translateDefinition =
       f <- withLocalNames (labelName <$> qs) (translateExpression e)
       moduleName <- asks kernelEnvironmentModule
       pure [Kernel.OFunction (moduleName <> "." <> name) qs f]
-    DConstant name (Constant _ With{} e) -> do
+    DConstant name (Constant _ With{} e) _ -> do
       c <- translateExpression e
       moduleName <- asks kernelEnvironmentModule
       pure [Kernel.OConstant (moduleName <> "." <> name) c]
@@ -46,8 +46,8 @@ translateDefinition =
         \case
           DFunction n f _ -> do
             translateDefinition (DFunction (n <> postfix) f [])
-          DConstant n c -> do
-            translateDefinition (DConstant (n <> postfix) c)
+          DConstant n c _ -> do
+            translateDefinition (DConstant (n <> postfix) c [])
           _ ->
             error "TODO"
      where

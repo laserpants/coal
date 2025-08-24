@@ -209,6 +209,8 @@ spec = do
   x <- main88
   print (x == Right "{\"abc\":[\"a\",\"b\",\"c\"],\"yes\":true}\n")
 -- 89
+  x <- main91
+  print (x == Right "5\n")
 
 runTestFiles :: [String] -> IO (Either CompilerError Text)
 runTestFiles files = do
@@ -749,6 +751,12 @@ main89 :: IO (Either CompilerError Text)
 main89 = do
   runTestFiles
     [ "./test/Coal/examples/89/Main.coal"
+    ]
+
+main91 :: IO (Either CompilerError Text)
+main91 = do
+  runTestFiles
+    [ "./test/Coal/examples/91/Main.coal"
     ]
 
 compileFiles :: [String] -> IO (Either CompilerError ())

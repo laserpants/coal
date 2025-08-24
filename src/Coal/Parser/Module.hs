@@ -122,7 +122,8 @@ parseConstantDefinition = do
   withAnnotation $ do
     end <- getSourcePos
     expr <- symbol_ "=" *> parseExpression
-    pure (DConstant c (Constant (Metadata start end) (With [] ()) expr))
+    ws <- option [] parseWhereClauses
+    pure (DConstant c (Constant (Metadata start end) (With [] ()) expr) ws)
 
 withAnnotation :: Parser (Definition Metadata o ()) -> Parser (Definition Metadata o ())
 withAnnotation p = do

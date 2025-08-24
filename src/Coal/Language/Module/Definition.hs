@@ -32,7 +32,7 @@ data Definition a k t
   | -- | Function definition
     DFunction Name (Function Expression a t) [Definition a k t]
   | -- | Other (constant) top-level definitions
-    DConstant Name (Constant Expression a t)
+    DConstant Name (Constant Expression a t) [Definition a k t]
   | -- | Stand-alone type signature
     DSignature Name (With ParameterizedType)
   | -- | Import statement
@@ -50,7 +50,7 @@ definitionName =
   \case
     DFunction name _ _ ->
       name
-    DConstant name _ ->
+    DConstant name _ _ ->
       name
     DAnnotation _ d ->
       definitionName d

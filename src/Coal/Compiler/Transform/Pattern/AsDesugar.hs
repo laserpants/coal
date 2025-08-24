@@ -96,8 +96,8 @@ instance (Data a, Data t, Monoid a) => AsDesugarContext (Definition a k t) where
         DAnnotation u (desugarAsPatterns d)
       DFunction name f fs ->
         DFunction name (desugarAsPatterns f) (desugarAsPatterns <$> fs)
-      DConstant name g ->
-        DConstant name (desugarAsPatterns g)
+      DConstant name g fs ->
+        DConstant name (desugarAsPatterns g) (desugarAsPatterns <$> fs)
       d ->
         d
 

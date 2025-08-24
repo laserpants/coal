@@ -131,8 +131,8 @@ instance (Monoid c, Data k, Data c, Data (o k), Typeable o) => Sugared c o k (De
         DAnnotation u <$> desugarPatterns d
       DFunction name f fs ->
         DFunction name <$> desugarPatterns f <*> traverse desugarPatterns fs
-      DConstant name g ->
-        DConstant name <$> desugarPatterns g
+      DConstant name g fs ->
+        DConstant name <$> desugarPatterns g <*> traverse desugarPatterns fs
       d ->
         pure d
 

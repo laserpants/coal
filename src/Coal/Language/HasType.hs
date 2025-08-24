@@ -89,7 +89,7 @@ instance (Data a, Data k, Ord k, Data (o k), Typeable o) => HasType o k (Definit
         typeOf d
       DFunction _ (Function _ _ ps e) _ ->
         foldTypeOf e ps
-      DConstant _ (Constant _ _ e) ->
+      DConstant _ (Constant _ _ e) _ ->
         typeOf e
       d ->
         head (universeBi d)
