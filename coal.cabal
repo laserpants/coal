@@ -13,6 +13,7 @@ author:         Author name here
 maintainer:     example@example.com
 copyright:      2025 Author name here
 license:        MIT
+license-file:   LICENSE
 build-type:     Simple
 extra-source-files:
     README.md
@@ -58,6 +59,7 @@ library
       Coal.Compiler.Transform.Type.AliasExpansion
       Coal.Compiler.Transform.Type.Parameterized
       Coal.Compiler.Transform.Unfold
+      Coal.Compiler.Transform.WhereClauses
       Coal.Compiler.TypeInference
       Coal.Compiler.TypeInference.Errors
       Coal.Graphviz.Dot
