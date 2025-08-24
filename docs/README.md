@@ -175,7 +175,7 @@ let tree_of_gondor =
     )
 ```
 
-##### Natural numbers
+#### Natural numbers
 
 Fold-recursion ...
 
