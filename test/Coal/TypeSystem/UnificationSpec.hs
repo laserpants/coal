@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Coal.TypeSystem.UnificationSpec where
@@ -7,29 +8,27 @@ import Coal.Language
 import Coal.TypeSystem.Substitution
 import Coal.TypeSystem.Unification
 import Control.Monad (forM_)
-import Data.Text (Text)
 import Prettyprinter
 import Prettyprinter.Render.String (renderString)
 import Test.Hspec
 
 import qualified Coal.Common.List1 as List1
 import qualified Coal.TypeSystem.Substitution as Substitution
-import qualified Data.Text as Text
 
-data UnificationSpecTestCase t = UnificationSpecTestCase t t (Either UnificationError Substitution)
+data UnificationSpecTestCase t
+  = UnifyTestCase t t (Either UnificationError Substitution)
+  | MatchTestCase t t (Either UnificationError Substitution)
   deriving (Show, Eq, Ord)
 
 testCase :: UnificationSpecTestCase IndexedType -> Either UnificationError Substitution
-testCase (UnificationSpecTestCase t1 t2 _) = evalUnifier (freshIdIn [t1, t2]) (unify t1 t2)
-
--- runTestCase :: UnificationSpecTestCase IndexedType -> Bool
--- runTestCase test = testCase test == s where (UnificationSpecTestCase _ _ s) = test
+testCase (UnifyTestCase t1 t2 _) = evalUnifier (freshIdIn [t1, t2]) (unify t1 t2)
+testCase (MatchTestCase t1 t2 _) = evalUnifier (freshIdIn [t1, t2]) (match t1 t2)
 
 testCases :: [UnificationSpecTestCase IndexedType]
 testCases =
   [ -- '0 ~ int32
     -- Substitution [ 0 :=> int32 ]
-    UnificationSpecTestCase
+    UnifyTestCase
       (TVariable (TypeIndex KType 0))
       (TIntrinsic IInt32)
       ( Right $
@@ -42,19 +41,19 @@ testCases =
       )
   , -- '0 ~ '0
     -- Substitution []
-    UnificationSpecTestCase
+    UnifyTestCase
       (TVariable (TypeIndex KType 0))
       (TVariable (TypeIndex KType 0))
       (Right mempty)
   , -- int32 ~ int32
     -- Substitution []
-    UnificationSpecTestCase
+    UnifyTestCase
       (TIntrinsic IInt32)
       (TIntrinsic IInt32)
       (Right mempty)
   , -- '0 -> '1 ~ int32 -> int32
     -- Substitution [ 0 :=> int32, 1 :=> int32 ]
-    UnificationSpecTestCase
+    UnifyTestCase
       (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 1))
       (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
       ( Right $
@@ -71,25 +70,25 @@ testCases =
       )
   , -- int32 -> int32 ~ int32 -> int32
     -- Substitution []
-    UnificationSpecTestCase
+    UnifyTestCase
       (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
       (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
       (Right mempty)
   , -- bool -> int32 ~ int32 -> int32
     -- ECannotUnify
-    UnificationSpecTestCase
+    UnifyTestCase
       (TIntrinsic IBool `TArrow` TIntrinsic IInt32)
       (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
       (Left ECannotUnify)
   , -- bool ~ int32
     -- ECannotUnify
-    UnificationSpecTestCase
+    UnifyTestCase
       (TIntrinsic IBool)
       (TIntrinsic IInt32)
       (Left ECannotUnify)
   , -- { | '0 } ~ { id : int32, name : string }
     -- Substitution [ 0 :=> { id : int32, name : string } ]
-    UnificationSpecTestCase
+    UnifyTestCase
       (TRow (RVariable (TypeIndex KRow 0)))
       (TRow (RExtend "id" (TIntrinsic IInt32) (RExtend "name" (TIntrinsic IString) RNil)))
       ( Right $
@@ -102,7 +101,7 @@ testCases =
       )
   , -- { name : '0 | '1 } ~ { id : int32, name : string }
     -- Substitution [ 0 :=> string, 1 :=> { id : int32 } ]
-    UnificationSpecTestCase
+    UnifyTestCase
       (TRow (RExtend "name" (TVariable (TypeIndex KType 0)) (RVariable (TypeIndex KRow 1))))
       (TRow (RExtend "id" (TIntrinsic IInt32) (RExtend "name" (TIntrinsic IString) RNil)))
       ( Right $
@@ -119,19 +118,19 @@ testCases =
       )
   , -- { name : string, id : int32 } ~ { id : int32, name : string }
     -- Substitution []
-    UnificationSpecTestCase
+    UnifyTestCase
       (TRow (RExtend "name" (TIntrinsic IString) (RExtend "id" (TIntrinsic IInt32) RNil)))
       (TRow (RExtend "id" (TIntrinsic IInt32) (RExtend "name" (TIntrinsic IString) RNil)))
       (Right mempty)
   , -- { name : string, id : int32 } ~ { name : int32, id : int32 }
     -- ECannotUnify
-    UnificationSpecTestCase
+    UnifyTestCase
       (TRow (RExtend "name" (TIntrinsic IString) (RExtend "id" (TIntrinsic IInt32) RNil)))
       (TRow (RExtend "name" (TIntrinsic IInt32) (RExtend "id" (TIntrinsic IInt32) RNil)))
       (Left ECannotUnify)
   , -- { name : '0 | '1 } ~ { name : string }
     -- [ 0 :=> string, 1 :=> {} ]
-    UnificationSpecTestCase
+    UnifyTestCase
       (TRow (RExtend "name" (TVariable (TypeIndex KType 0)) (RVariable (TypeIndex KRow 1))))
       (TRow (RExtend "name" (TIntrinsic IString) RNil))
       ( Right $
@@ -148,43 +147,43 @@ testCases =
       )
   , -- '0:Type ~ '0:Row
     -- EKindMismatch
-    UnificationSpecTestCase
+    UnifyTestCase
       (TVariable (TypeIndex KType 0))
       (TVariable (TypeIndex KRow 0))
       (Left EKindMismatch)
   , -- '0 ~ '0 -> int32
     -- EInfiniteType
-    UnificationSpecTestCase
+    UnifyTestCase
       (TVariable (TypeIndex KType 0))
       (TArrow (TVariable (TypeIndex KType 0)) (TIntrinsic IInt32))
       (Left EInfiniteType)
   , -- '0:Row ~ { x : int32 | '0 }
     -- EInfiniteType
-    UnificationSpecTestCase
+    UnifyTestCase
       (TVariable (TypeIndex KRow 0))
       (TRow (RExtend "x" (TIntrinsic IInt32) (RVariable (TypeIndex KRow 0))))
       (Left EInfiniteType)
   , -- string ~ int32
     -- ECannotUnify
-    UnificationSpecTestCase
+    UnifyTestCase
       (TIntrinsic IString)
       (TIntrinsic IInt32)
       (Left ECannotUnify)
   , -- record { x : int32 } ~ record { x : int32 }
     -- Substitution []
-    UnificationSpecTestCase
+    UnifyTestCase
       (TIntrinsic (IRecord (TRow (RExtend "x" (TIntrinsic IInt32) RNil))))
       (TIntrinsic (IRecord (TRow (RExtend "x" (TIntrinsic IInt32) RNil))))
       (Right mempty)
   , -- int32 -> string ~ int32 -> int32
     -- ECannotUnify
-    UnificationSpecTestCase
+    UnifyTestCase
       (TArrow (TIntrinsic IInt32) (TIntrinsic IString))
       (TArrow (TIntrinsic IInt32) (TIntrinsic IInt32))
       (Left ECannotUnify)
   , -- '0 -> ('1 -> int32) ~ bool -> (string -> int32)
     -- Substitution [ 0 :=> bool, 1 :=> string ]
-    UnificationSpecTestCase
+    UnifyTestCase
       ( TArrow
           (TVariable (TypeIndex KType 0))
           (TArrow (TVariable (TypeIndex KType 1)) (TIntrinsic IInt32))
@@ -201,7 +200,7 @@ testCases =
       )
   , -- { x : int32, y : string } ~ { y : string, x : int32 }
     -- Substitution []
-    UnificationSpecTestCase
+    UnifyTestCase
       ( TRow
           ( RExtend
               "x"
@@ -219,7 +218,7 @@ testCases =
       (Right mempty)
   , -- { x : int32 | '0 } ~ { x : int32, y : string }
     -- Substitution [ 0 :=> { y : string } ]
-    UnificationSpecTestCase
+    UnifyTestCase
       (TRow (RExtend "x" (TIntrinsic IInt32) (RVariable (TypeIndex KRow 0))))
       ( TRow
           ( RExtend
@@ -234,13 +233,13 @@ testCases =
       )
   , -- { x : int32 } ~ { x : string }
     -- ECannotUnify
-    UnificationSpecTestCase
+    UnifyTestCase
       (TRow (RExtend "x" (TIntrinsic IInt32) RNil))
       (TRow (RExtend "x" (TIntrinsic IString) RNil))
       (Left ECannotUnify)
   , -- List '0 ~ int32
     -- ECannotUnify
-    UnificationSpecTestCase
+    UnifyTestCase
       ( TApplication
           KType
           (TConstructor KType "List")
@@ -250,21 +249,21 @@ testCases =
       (Left ECannotUnify)
   , -- type alias T a = a
     -- T int32 ~ int32
-    UnificationSpecTestCase
+    UnifyTestCase
       (TAlias "T" [TIntrinsic IInt32] (TIntrinsic IInt32))
       (TIntrinsic IInt32)
       (Right mempty)
   , -- type alias T a = a
     -- T int32 ~ string
     -- ECannotUnify
-    UnificationSpecTestCase
+    UnifyTestCase
       (TAlias "T" [TIntrinsic IInt32] (TIntrinsic IInt32))
       (TIntrinsic IString)
       (Left ECannotUnify)
   , -- type alias Id a = a
     -- Id '0 ~ int32
     -- Substitution [ 0 :=> int32 ]
-    UnificationSpecTestCase
+    UnifyTestCase
       (TAlias "Id" [TVariable (TypeIndex KType 0)] (TVariable (TypeIndex KType 0)))
       (TIntrinsic IInt32)
       ( Right $
@@ -274,7 +273,7 @@ testCases =
   , -- type alias Pair a b = (a -> b)
     -- Pair '0 '1 ~ (int32 -> string)
     -- Substitution [ 0 :=> int32, 1 :=> string ]
-    UnificationSpecTestCase
+    UnifyTestCase
       ( TAlias
           "Pair"
           [TVariable (TypeIndex KType 0), TVariable (TypeIndex KType 1)]
@@ -289,7 +288,7 @@ testCases =
       )
   , -- '0 ~ '1, '1 ~ int32
     -- Substitution [ 0 :=> int32, 1 :=> int32 ]
-    UnificationSpecTestCase
+    UnifyTestCase
       (TVariable (TypeIndex KType 0))
       (TVariable (TypeIndex KType 1))
       ( Right $
@@ -298,23 +297,60 @@ testCases =
       )
   , -- '0 ~ '1 -> '1, '1 ~ int32
     -- Substitution [ 1 :=> int32, 0 :=> (int32 -> int32) ]
-    UnificationSpecTestCase
+    UnifyTestCase
       (TVariable (TypeIndex KType 0))
       (TArrow (TVariable (TypeIndex KType 1)) (TVariable (TypeIndex KType 1)))
       ( Right $
           Substitution.fromList
             [(0, TArrow (TVariable (TypeIndex KType 1)) (TVariable (TypeIndex KType 1)))]
       )
+  , -- int32 >~ int32
+    -- Substitution []
+    MatchTestCase
+      (TIntrinsic IInt32)
+      (TIntrinsic IInt32)
+      (Right mempty)
+  , -- int32 >~ List<'0>
+    -- Substitution []
+    MatchTestCase
+      (TIntrinsic IInt32)
+      ( TApplication
+          KType
+          (TConstructor KType "List")
+          (List1.singleton (TVariable (TypeIndex KType 0)))
+      )
+      (Left ECannotMatch)
+  , -- '0 >~ int32
+    -- Substitution [ 0 :=> int32 ]
+    MatchTestCase
+      (TVariable (TypeIndex KType 0))
+      (TIntrinsic IInt32)
+      ( Right $
+          Substitution.fromList
+            [ (0, TIntrinsic IInt32)
+            ]
+      )
+  , -- int32 >~ '0
+    -- ECannotMatch
+    MatchTestCase
+      (TIntrinsic IInt32)
+      (TVariable (TypeIndex KType 0))
+      (Left ECannotMatch)
   ]
 
 runHspecTestCase :: UnificationSpecTestCase IndexedType -> Spec
-runHspecTestCase (UnificationSpecTestCase t1 t2 expected) =
-  it description $ do
-    let actual = testCase (UnificationSpecTestCase t1 t2 expected)
-    actual `shouldBe` expected
- where
-  description =
-    prettyType t1 ++ " ~ " ++ prettyType t2 ++ " ⇒ " ++ show expected
+runHspecTestCase =
+  \case
+    UnifyTestCase t1 t2 expected -> do
+      let description = prettyType t1 ++ " ~ " ++ prettyType t2 ++ " ⇒ " ++ show expected
+      it description $ do
+        let actual = testCase (UnifyTestCase t1 t2 expected)
+        actual `shouldBe` expected
+    MatchTestCase t1 t2 expected -> do
+      let description = prettyType t1 ++ " >~ " ++ prettyType t2 ++ " ⇒ " ++ show expected
+      it description $ do
+        let actual = testCase (MatchTestCase t1 t2 expected)
+        actual `shouldBe` expected
 
 unificationSpec :: SpecWith ()
 unificationSpec =

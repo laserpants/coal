@@ -204,7 +204,7 @@ The `List` type is defined inductively, and implemented as a one-way *linked lis
 - The empty list; or
 - A value of type `a`, coupled with another `List<a>` list. 
 
-These last two are sometimes referred to as the *head* and *tail* of the list. 
+These last two are usually referred to as the *head* and *tail* of the list. 
 
 ```
 type List<a>
@@ -259,7 +259,7 @@ The empty tuple *does* exist. It is written `()` and is known as the unit value.
 ##### Tuples and currying
 
 By default, function definitions in Coal are *curried*. 
-This means that there is a distinction between a function that takes multiple arguments and one that takes a single tuple as its argument.
+There is a difference between a function that takes multiple arguments and one that takes a single tuple as its argument.
 Consider the following two type signatures:
 
 ```
@@ -281,7 +281,7 @@ Using partial application, we can create a new function `increment` by supplying
 fun increment = add(1)
 ```
 
-Now, increment can be passed directly to a higher-order function like `map`:
+Now, `increment` can be passed directly to a higher-order function like `map`:
 
 ```
 map(increment, [1, 2, 3, 4])
@@ -330,7 +330,7 @@ TODO
 
 ### Traits
 
-A trait describes a collection of functions that must be defined for the underlying type. Traits in Coal are similar to type classes in Haskell. A common analogy is to think of them as interfaces in object-oriented programming. 
+Traits in Coal are similar to type classes in Haskell. A trait describes a collection of functions that must be defined for the underlying type. A common analogy is to think of them as interfaces in object-oriented programming. 
 
 ```
 trait Functor<f : * -> *> {
