@@ -1,8 +1,10 @@
 module Main {
+ 
+  fun identity(x : a) : a = x
 
   fun reduce(op : a -> b -> b, init : b, list : List<a>) : b =
     fold(list, init) {
-      | [] => fn(r) => r
+      | [] => identity
       | q :: @go => go << op(q)
     }
 
