@@ -21,6 +21,7 @@ newtype Path = Path {pathComponents :: [Name]}
 
 type ParameterizedType = Type Parameter ()
 
+-- TODO: Make DAnnotation separate object?
 data Definition a k t
   = -- | Type-annotated definition
     DAnnotation (With ParameterizedType) (Definition a k t)
