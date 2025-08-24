@@ -24,8 +24,8 @@ testCase :: UnificationSpecTestCase IndexedType -> Either UnificationError Subst
 testCase (UnifyTestCase t1 t2 _) = evalUnifier (freshIdIn [t1, t2]) (unify t1 t2)
 testCase (MatchTestCase t1 t2 _) = evalUnifier (freshIdIn [t1, t2]) (match t1 t2)
 
-testCases :: [UnificationSpecTestCase IndexedType]
-testCases =
+unifyTestCases :: [UnificationSpecTestCase IndexedType]
+unifyTestCases =
   [ -- '0 ~ int32
     -- Substitution [ 0 :=> int32 ]
     UnifyTestCase
@@ -304,7 +304,11 @@ testCases =
           Substitution.fromList
             [(0, TArrow (TVariable (TypeIndex KType 1)) (TVariable (TypeIndex KType 1)))]
       )
-  , -- int32 >~ int32
+    ]
+
+matchTestCases :: [UnificationSpecTestCase IndexedType]
+matchTestCases =
+  [ -- int32 >~ int32
     -- Substitution []
     MatchTestCase
       (TIntrinsic IInt32)
@@ -336,26 +340,200 @@ testCases =
       (TIntrinsic IInt32)
       (TVariable (TypeIndex KType 0))
       (Left ECannotMatch)
+  , -- '0 -> '1 >~ int32 -> int32
+    -- Substitution [ 0 :=> int32, 1 :=> int32 ]
+    MatchTestCase
+      (TArrow (TVariable (TypeIndex KType 0)) (TVariable (TypeIndex KType 1)))
+      (TArrow (TIntrinsic IInt32) (TIntrinsic IInt32))
+      ( Right $
+          Substitution.fromList
+            [ (0, TIntrinsic IInt32)
+            , (1, TIntrinsic IInt32)
+            ]
+      )
+  , -- int32 -> int32 >~ int32 -> int32
+    -- Substitution []
+    MatchTestCase
+      (TArrow (TIntrinsic IInt32) (TIntrinsic IInt32))
+      (TArrow (TIntrinsic IInt32) (TIntrinsic IInt32))
+      (Right mempty)
+  , -- bool -> int32 >~ int32 -> int32
+    -- ECannotMatch
+    MatchTestCase
+      (TArrow (TIntrinsic IBool) (TIntrinsic IInt32))
+      (TArrow (TIntrinsic IInt32) (TIntrinsic IInt32))
+      (Left ECannotMatch)
+  , -- { | '0 } >~ { id : int32, name : string }
+    -- Substitution [ 0 :=> { id : int32, name : string } ]
+    MatchTestCase
+      (TRow (RVariable (TypeIndex KRow 0)))
+      (TRow (RExtend "id" (TIntrinsic IInt32)
+             (RExtend "name" (TIntrinsic IString) RNil)))
+      ( Right $
+          Substitution.fromList
+            [ (0, TRow (RExtend "id" (TIntrinsic IInt32)
+                         (RExtend "name" (TIntrinsic IString) RNil)))
+            ]
+      )
+  , -- { name : '0 | '1 } >~ { id : int32, name : string }
+    -- Substitution [ 0 :=> string, 1 :=> { id : int32 } ]
+    MatchTestCase
+      (TRow (RExtend "name" (TVariable (TypeIndex KType 0))
+             (RVariable (TypeIndex KRow 1))))
+      (TRow (RExtend "id" (TIntrinsic IInt32)
+             (RExtend "name" (TIntrinsic IString) RNil)))
+      ( Right $
+          Substitution.fromList
+            [ (0, TIntrinsic IString)
+            , (1, TRow (RExtend "id" (TIntrinsic IInt32) RNil))
+            ]
+      )
+  , -- { name : string, id : int32 } >~ { id : int32, name : string }
+    -- Substitution []
+    MatchTestCase
+      (TRow (RExtend "name" (TIntrinsic IString)
+             (RExtend "id" (TIntrinsic IInt32) RNil)))
+      (TRow (RExtend "id" (TIntrinsic IInt32)
+             (RExtend "name" (TIntrinsic IString) RNil)))
+      (Right mempty)
+  , -- { name : string, id : int32 } >~ { name : int32, id : int32 }
+    -- ECannotMatch
+    MatchTestCase
+      (TRow (RExtend "name" (TIntrinsic IString)
+             (RExtend "id" (TIntrinsic IInt32) RNil)))
+      (TRow (RExtend "name" (TIntrinsic IInt32)
+             (RExtend "id" (TIntrinsic IInt32) RNil)))
+      (Left ECannotMatch)
+  , -- { name : '0 | '1 } >~ { name : string }
+    -- Substitution [ 0 :=> string, 1 :=> {} ]
+    MatchTestCase
+      (TRow (RExtend "name" (TVariable (TypeIndex KType 0))
+             (RVariable (TypeIndex KRow 1))))
+      (TRow (RExtend "name" (TIntrinsic IString) RNil))
+      ( Right $
+          Substitution.fromList
+            [ (0, TIntrinsic IString)
+            , (1, TRow RNil)
+            ]
+      )
+  , -- { name : string } >~ { name : string, id : int32 }
+    -- ECannotMatch (extra field in target not covered by pattern)
+    MatchTestCase
+      (TRow (RExtend "name" (TIntrinsic IString) RNil))
+      (TRow (RExtend "name" (TIntrinsic IString)
+             (RExtend "id" (TIntrinsic IInt32) RNil)))
+      (Left ECannotMatch)
+  , -- '0 >~ '0 -> int32
+    -- EInfiniteType (occurs check still applies in matching)
+    MatchTestCase
+      (TVariable (TypeIndex KType 0))
+      (TArrow (TVariable (TypeIndex KType 0)) (TIntrinsic IInt32))
+      (Left EInfiniteType)
+  , -- type alias Id a = a
+    -- Id '0 >~ int32
+    -- Substitution [ 0 :=> int32 ]
+    MatchTestCase
+      (TAlias "Id" [TVariable (TypeIndex KType 0)] (TVariable (TypeIndex KType 0)))
+      (TIntrinsic IInt32)
+      ( Right $
+          Substitution.fromList
+            [ (0, TIntrinsic IInt32) ]
+      )
+  , -- type alias T a = a
+    -- T int32 >~ int32
+    -- Substitution []
+    MatchTestCase
+      (TAlias "T" [TIntrinsic IInt32] (TIntrinsic IInt32))
+      (TIntrinsic IInt32)
+      (Right mempty)
+  , -- type alias T a = a
+    -- T int32 >~ string
+    -- ECannotMatch
+    MatchTestCase
+      (TAlias "T" [TIntrinsic IInt32] (TIntrinsic IInt32))
+      (TIntrinsic IString)
+      (Left ECannotMatch)
+  , -- type alias Pair a b = a -> b
+    -- Pair '0 '1 >~ int32 -> string
+    -- Substitution [ 0 :=> int32, 1 :=> string ]
+    MatchTestCase
+      (TAlias "Pair"
+        [TVariable (TypeIndex KType 0), TVariable (TypeIndex KType 1)]
+        (TArrow (TVariable (TypeIndex KType 0)) (TVariable (TypeIndex KType 1))))
+      (TArrow (TIntrinsic IInt32) (TIntrinsic IString))
+      ( Right $
+          Substitution.fromList
+            [ (0, TIntrinsic IInt32)
+            , (1, TIntrinsic IString)
+            ]
+      )
+  , -- type alias R a = { x : a }
+    -- R '0 >~ { x : int32 }
+    -- Substitution [ 0 :=> int32 ]
+    MatchTestCase
+      (TAlias "R"
+        [TVariable (TypeIndex KType 0)]
+        (TRow (RExtend "x" (TVariable (TypeIndex KType 0)) RNil)))
+      (TRow (RExtend "x" (TIntrinsic IInt32) RNil))
+      ( Right $
+          Substitution.fromList
+            [ (0, TIntrinsic IInt32) ]
+      )
+  , -- type alias R a = { x : a }
+    -- R int32 >~ { x : string }
+    -- ECannotMatch
+    MatchTestCase
+      (TAlias "R"
+        [TIntrinsic IInt32]
+        (TRow (RExtend "x" (TIntrinsic IInt32) RNil)))
+      (TRow (RExtend "x" (TIntrinsic IString) RNil))
+      (Left ECannotMatch)
+  , -- type alias Self a = a -> a
+    -- Self '0 >~ int32 -> int32
+    -- Substitution [ 0 :=> int32 ]
+    MatchTestCase
+      (TAlias "Self"
+        [TVariable (TypeIndex KType 0)]
+        (TArrow (TVariable (TypeIndex KType 0)) (TVariable (TypeIndex KType 0))))
+      (TArrow (TIntrinsic IInt32) (TIntrinsic IInt32))
+      ( Right $
+          Substitution.fromList
+            [ (0, TIntrinsic IInt32) ]
+      )
+  , -- type alias Self a = a -> a
+    -- Self '0 >~ int32 -> string
+    -- ECannotMatch (lhs forces both args to match, rhs does not)
+    MatchTestCase
+      (TAlias "Self"
+        [TVariable (TypeIndex KType 0)]
+        (TArrow (TVariable (TypeIndex KType 0)) (TVariable (TypeIndex KType 0))))
+      (TArrow (TIntrinsic IInt32) (TIntrinsic IString))
+      (Left ECannotMatch)
   ]
 
 runHspecTestCase :: UnificationSpecTestCase IndexedType -> Spec
-runHspecTestCase =
-  \case
-    UnifyTestCase t1 t2 expected -> do
-      let description = prettyType t1 ++ " ~ " ++ prettyType t2 ++ " ⇒ " ++ show expected
-      it description $ do
-        let actual = testCase (UnifyTestCase t1 t2 expected)
-        actual `shouldBe` expected
-    MatchTestCase t1 t2 expected -> do
-      let description = prettyType t1 ++ " >~ " ++ prettyType t2 ++ " ⇒ " ++ show expected
-      it description $ do
-        let actual = testCase (MatchTestCase t1 t2 expected)
-        actual `shouldBe` expected
+runHspecTestCase specTestCase = do
+  it testDescription $ 
+    testCase specTestCase `shouldBe` expected
+ where
+  expected =
+    case specTestCase of
+      UnifyTestCase _ _ e -> e
+      MatchTestCase _ _ e -> e
+  testDescription =
+    case specTestCase of
+      UnifyTestCase t1 t2 expected ->
+        prettyType t1 ++ " ~ " ++ prettyType t2 ++ " ⇒ " ++ show expected
+      MatchTestCase t1 t2 expected ->
+        prettyType t1 ++ " >~ " ++ prettyType t2 ++ " ⇒ " ++ show expected
 
 unificationSpec :: SpecWith ()
 unificationSpec =
   describe "Unification tests" $ do
-    forM_ testCases runHspecTestCase
+    describe "unify" $ do
+      forM_ unifyTestCases runHspecTestCase
+    describe "match" $ do
+      forM_ matchTestCases runHspecTestCase
 
 prettyType :: (Pretty t) => t -> String
 prettyType p = renderString . layoutPretty defaultLayoutOptions $ pretty p

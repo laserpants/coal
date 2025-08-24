@@ -180,8 +180,8 @@ instance Unifiable IndexedType where
     match t1 t2
   match t1 (TAlias _ _ t2) =
     match t1 t2
-  match (TVariable (TypeIndex _ t)) t2 =
-    pure (t `mapsTo` t2)
+  match (TVariable t@(TypeIndex _ _)) t2 =
+    bindType t t2
   match (TArrow t1 u1) (TArrow t2 u2) =
     match [t1, u1] [t2, u2]
   match (TApplication _ t1 ts1) (TApplication _ t2 ts2) = do
