@@ -88,8 +88,8 @@ collectTraits u name = do
         Right sub2 ->
           pure (apply (sub2 <> sub1) ts)
  where
-  instantiate (TypeIndex _ index) acc = do
-    var <- supplied (TVariable . TypeIndex KType)
+  instantiate (TypeIndex k index) acc = do
+    var <- supplied (TVariable . TypeIndex k)
     pure (index `mapsTo` var <> acc)
 
 tryMatch :: IndexedType -> IndexedType -> DictionaryStack (Either UnificationError Substitution)
