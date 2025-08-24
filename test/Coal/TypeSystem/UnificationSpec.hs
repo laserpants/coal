@@ -304,7 +304,7 @@ unifyTestCases =
           Substitution.fromList
             [(0, TArrow (TVariable (TypeIndex KType 1)) (TVariable (TypeIndex KType 1)))]
       )
-    ]
+  ]
 
 matchTestCases :: [UnificationSpecTestCase IndexedType]
 matchTestCases =
@@ -367,21 +367,43 @@ matchTestCases =
     -- Substitution [ 0 :=> { id : int32, name : string } ]
     MatchTestCase
       (TRow (RVariable (TypeIndex KRow 0)))
-      (TRow (RExtend "id" (TIntrinsic IInt32)
-             (RExtend "name" (TIntrinsic IString) RNil)))
+      ( TRow
+          ( RExtend
+              "id"
+              (TIntrinsic IInt32)
+              (RExtend "name" (TIntrinsic IString) RNil)
+          )
+      )
       ( Right $
           Substitution.fromList
-            [ (0, TRow (RExtend "id" (TIntrinsic IInt32)
-                         (RExtend "name" (TIntrinsic IString) RNil)))
+            [
+              ( 0
+              , TRow
+                  ( RExtend
+                      "id"
+                      (TIntrinsic IInt32)
+                      (RExtend "name" (TIntrinsic IString) RNil)
+                  )
+              )
             ]
       )
   , -- { name : '0 | '1 } >~ { id : int32, name : string }
     -- Substitution [ 0 :=> string, 1 :=> { id : int32 } ]
     MatchTestCase
-      (TRow (RExtend "name" (TVariable (TypeIndex KType 0))
-             (RVariable (TypeIndex KRow 1))))
-      (TRow (RExtend "id" (TIntrinsic IInt32)
-             (RExtend "name" (TIntrinsic IString) RNil)))
+      ( TRow
+          ( RExtend
+              "name"
+              (TVariable (TypeIndex KType 0))
+              (RVariable (TypeIndex KRow 1))
+          )
+      )
+      ( TRow
+          ( RExtend
+              "id"
+              (TIntrinsic IInt32)
+              (RExtend "name" (TIntrinsic IString) RNil)
+          )
+      )
       ( Right $
           Substitution.fromList
             [ (0, TIntrinsic IString)
@@ -391,24 +413,49 @@ matchTestCases =
   , -- { name : string, id : int32 } >~ { id : int32, name : string }
     -- Substitution []
     MatchTestCase
-      (TRow (RExtend "name" (TIntrinsic IString)
-             (RExtend "id" (TIntrinsic IInt32) RNil)))
-      (TRow (RExtend "id" (TIntrinsic IInt32)
-             (RExtend "name" (TIntrinsic IString) RNil)))
+      ( TRow
+          ( RExtend
+              "name"
+              (TIntrinsic IString)
+              (RExtend "id" (TIntrinsic IInt32) RNil)
+          )
+      )
+      ( TRow
+          ( RExtend
+              "id"
+              (TIntrinsic IInt32)
+              (RExtend "name" (TIntrinsic IString) RNil)
+          )
+      )
       (Right mempty)
   , -- { name : string, id : int32 } >~ { name : int32, id : int32 }
     -- ECannotMatch
     MatchTestCase
-      (TRow (RExtend "name" (TIntrinsic IString)
-             (RExtend "id" (TIntrinsic IInt32) RNil)))
-      (TRow (RExtend "name" (TIntrinsic IInt32)
-             (RExtend "id" (TIntrinsic IInt32) RNil)))
+      ( TRow
+          ( RExtend
+              "name"
+              (TIntrinsic IString)
+              (RExtend "id" (TIntrinsic IInt32) RNil)
+          )
+      )
+      ( TRow
+          ( RExtend
+              "name"
+              (TIntrinsic IInt32)
+              (RExtend "id" (TIntrinsic IInt32) RNil)
+          )
+      )
       (Left ECannotMatch)
   , -- { name : '0 | '1 } >~ { name : string }
     -- Substitution [ 0 :=> string, 1 :=> {} ]
     MatchTestCase
-      (TRow (RExtend "name" (TVariable (TypeIndex KType 0))
-             (RVariable (TypeIndex KRow 1))))
+      ( TRow
+          ( RExtend
+              "name"
+              (TVariable (TypeIndex KType 0))
+              (RVariable (TypeIndex KRow 1))
+          )
+      )
       (TRow (RExtend "name" (TIntrinsic IString) RNil))
       ( Right $
           Substitution.fromList
@@ -420,8 +467,13 @@ matchTestCases =
     -- ECannotMatch (extra field in target not covered by pattern)
     MatchTestCase
       (TRow (RExtend "name" (TIntrinsic IString) RNil))
-      (TRow (RExtend "name" (TIntrinsic IString)
-             (RExtend "id" (TIntrinsic IInt32) RNil)))
+      ( TRow
+          ( RExtend
+              "name"
+              (TIntrinsic IString)
+              (RExtend "id" (TIntrinsic IInt32) RNil)
+          )
+      )
       (Left ECannotMatch)
   , -- '0 >~ '0 -> int32
     -- EInfiniteType (occurs check still applies in matching)
@@ -437,7 +489,7 @@ matchTestCases =
       (TIntrinsic IInt32)
       ( Right $
           Substitution.fromList
-            [ (0, TIntrinsic IInt32) ]
+            [(0, TIntrinsic IInt32)]
       )
   , -- type alias T a = a
     -- T int32 >~ int32
@@ -457,9 +509,11 @@ matchTestCases =
     -- Pair '0 '1 >~ int32 -> string
     -- Substitution [ 0 :=> int32, 1 :=> string ]
     MatchTestCase
-      (TAlias "Pair"
-        [TVariable (TypeIndex KType 0), TVariable (TypeIndex KType 1)]
-        (TArrow (TVariable (TypeIndex KType 0)) (TVariable (TypeIndex KType 1))))
+      ( TAlias
+          "Pair"
+          [TVariable (TypeIndex KType 0), TVariable (TypeIndex KType 1)]
+          (TArrow (TVariable (TypeIndex KType 0)) (TVariable (TypeIndex KType 1)))
+      )
       (TArrow (TIntrinsic IInt32) (TIntrinsic IString))
       ( Right $
           Substitution.fromList
@@ -471,49 +525,57 @@ matchTestCases =
     -- R '0 >~ { x : int32 }
     -- Substitution [ 0 :=> int32 ]
     MatchTestCase
-      (TAlias "R"
-        [TVariable (TypeIndex KType 0)]
-        (TRow (RExtend "x" (TVariable (TypeIndex KType 0)) RNil)))
+      ( TAlias
+          "R"
+          [TVariable (TypeIndex KType 0)]
+          (TRow (RExtend "x" (TVariable (TypeIndex KType 0)) RNil))
+      )
       (TRow (RExtend "x" (TIntrinsic IInt32) RNil))
       ( Right $
           Substitution.fromList
-            [ (0, TIntrinsic IInt32) ]
+            [(0, TIntrinsic IInt32)]
       )
   , -- type alias R a = { x : a }
     -- R int32 >~ { x : string }
     -- ECannotMatch
     MatchTestCase
-      (TAlias "R"
-        [TIntrinsic IInt32]
-        (TRow (RExtend "x" (TIntrinsic IInt32) RNil)))
+      ( TAlias
+          "R"
+          [TIntrinsic IInt32]
+          (TRow (RExtend "x" (TIntrinsic IInt32) RNil))
+      )
       (TRow (RExtend "x" (TIntrinsic IString) RNil))
       (Left ECannotMatch)
   , -- type alias Self a = a -> a
     -- Self '0 >~ int32 -> int32
     -- Substitution [ 0 :=> int32 ]
     MatchTestCase
-      (TAlias "Self"
-        [TVariable (TypeIndex KType 0)]
-        (TArrow (TVariable (TypeIndex KType 0)) (TVariable (TypeIndex KType 0))))
+      ( TAlias
+          "Self"
+          [TVariable (TypeIndex KType 0)]
+          (TArrow (TVariable (TypeIndex KType 0)) (TVariable (TypeIndex KType 0)))
+      )
       (TArrow (TIntrinsic IInt32) (TIntrinsic IInt32))
       ( Right $
           Substitution.fromList
-            [ (0, TIntrinsic IInt32) ]
+            [(0, TIntrinsic IInt32)]
       )
   , -- type alias Self a = a -> a
     -- Self '0 >~ int32 -> string
     -- ECannotMatch (lhs forces both args to match, rhs does not)
     MatchTestCase
-      (TAlias "Self"
-        [TVariable (TypeIndex KType 0)]
-        (TArrow (TVariable (TypeIndex KType 0)) (TVariable (TypeIndex KType 0))))
+      ( TAlias
+          "Self"
+          [TVariable (TypeIndex KType 0)]
+          (TArrow (TVariable (TypeIndex KType 0)) (TVariable (TypeIndex KType 0)))
+      )
       (TArrow (TIntrinsic IInt32) (TIntrinsic IString))
       (Left ECannotMatch)
   ]
 
 runHspecTestCase :: UnificationSpecTestCase IndexedType -> Spec
 runHspecTestCase specTestCase = do
-  it testDescription $ 
+  it testDescription $
     testCase specTestCase `shouldBe` expected
  where
   expected =
