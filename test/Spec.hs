@@ -206,8 +206,8 @@ spec = do
   print (x == Right "24\n")
   x <- main87
   print (x == Right "{\"abc\":[\"a\",\"b\",\"c\"],\"pi\":3.14159}\n")
-
--- 88
+  x <- main88
+  print (x == Right "{\"abc\":[\"a\",\"b\",\"c\"],\"yes\":true}\n")
 -- 89
 
 runTestFiles :: [String] -> IO (Either CompilerError Text)

@@ -64,7 +64,7 @@ module Main {
   let test_obj = 
     JsonObject(
       [ ("abc", JsonArray([JsonString("a"), JsonString("b"), JsonString("c")]))
-      , ("pi", JsonNumber(3.14159))
+      , ("yes", JsonBool(true))
       ])
 
   fun main() =

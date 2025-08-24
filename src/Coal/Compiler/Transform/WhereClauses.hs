@@ -16,6 +16,7 @@ liftWhereClause name =
   \case
     DFunction old f _ -> do
       let new = "local_$" <> name <> "__" <> old
+      tell [(old, new)]
       pure (DFunction new f [])
     DAnnotation w d ->
       DAnnotation w <$> liftWhereClause name d
