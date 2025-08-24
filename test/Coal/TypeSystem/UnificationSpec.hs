@@ -4,6 +4,7 @@
 
 module Coal.TypeSystem.UnificationSpec where
 
+import Coal.Common.List1
 import Coal.Language
 import Coal.TypeSystem.Substitution
 import Coal.TypeSystem.Unification
@@ -304,6 +305,22 @@ unifyTestCases =
           Substitution.fromList
             [(0, TArrow (TVariable (TypeIndex KType 1)) (TVariable (TypeIndex KType 1)))]
       )
+  , UnifyTestCase
+      ( (TVariable (TypeIndex KType 312) `TArrow` TVariable (TypeIndex KType 311))
+          `TArrow` TApplication KType (TVariable (TypeIndex (KArrow KType KType) 310)) (TVariable (TypeIndex KType 312) :| [])
+          `TArrow` TApplication KType (TVariable (TypeIndex (KArrow KType KType) 310)) (TVariable (TypeIndex KType 311) :| [])
+      )
+      ( (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
+          `TArrow` TApplication KType (TConstructor (KArrow KType KType) "Option") (TIntrinsic IInt32 :| [])
+          `TArrow` TApplication KType (TConstructor (KArrow KType KType) "Option") (TIntrinsic IInt32 :| [])
+      )
+      ( Right $
+          Substitution.fromList
+            [ (310, TConstructor (KArrow KType KType) "Option")
+            , (311, TIntrinsic IInt32)
+            , (312, TIntrinsic IInt32)
+            ]
+      )
   ]
 
 matchTestCases :: [UnificationSpecTestCase IndexedType]
@@ -571,6 +588,22 @@ matchTestCases =
       )
       (TArrow (TIntrinsic IInt32) (TIntrinsic IString))
       (Left ECannotMatch)
+  , MatchTestCase
+      ( (TVariable (TypeIndex KType 312) `TArrow` TVariable (TypeIndex KType 311))
+          `TArrow` TApplication KType (TVariable (TypeIndex (KArrow KType KType) 310)) (TVariable (TypeIndex KType 312) :| [])
+          `TArrow` TApplication KType (TVariable (TypeIndex (KArrow KType KType) 310)) (TVariable (TypeIndex KType 311) :| [])
+      )
+      ( (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
+          `TArrow` TApplication KType (TConstructor (KArrow KType KType) "Option") (TIntrinsic IInt32 :| [])
+          `TArrow` TApplication KType (TConstructor (KArrow KType KType) "Option") (TIntrinsic IInt32 :| [])
+      )
+      ( Right $
+          Substitution.fromList
+            [ (310, TConstructor (KArrow KType KType) "Option")
+            , (311, TIntrinsic IInt32)
+            , (312, TIntrinsic IInt32)
+            ]
+      )
   ]
 
 runHspecTestCase :: UnificationSpecTestCase IndexedType -> Spec
