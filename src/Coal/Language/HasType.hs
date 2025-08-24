@@ -87,7 +87,7 @@ instance (Data a, Data k, Ord k, Data (o k), Typeable o) => HasType o k (Definit
     \case
       DAnnotation _ d ->
         typeOf d
-      DFunction _ (Function _ _ ps e) ->
+      DFunction _ (Function _ _ ps e) _ ->
         foldTypeOf e ps
       DConstant _ (Constant _ _ e) ->
         typeOf e

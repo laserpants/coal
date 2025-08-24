@@ -112,11 +112,11 @@ compileConstantC (Constant loc (With _ t) e) = do
 compileDefinitionC :: (Monad m, Data a, Show a) => Definition a k IndexedType -> CompilerT a m ()
 compileDefinitionC =
   \case
-    DFunction _ f ->
+    DFunction _ f _ ->
       void (compileFunctionC f)
     DConstant _ c ->
       void (compileConstantC c)
-    DAnnotation (With _ t) (DFunction _ f@(Function loc _ _ _)) -> do
+    DAnnotation (With _ t) (DFunction _ f@(Function loc _ _ _) _) -> do
       t1 <- compileFunctionC f
       (r, _, _) <- runConstraintsGenC (instantiateAnnotation loc t)
       case r of

@@ -109,7 +109,8 @@ parseFunctionDefinition = do
   withAnnotation $ do
     end <- getSourcePos
     expr <- symbol_ "=" *> parseExpression
-    pure (DFunction fn (Function (Metadata start end) (With [] ()) args expr))
+    -- TODO: where clauses
+    pure (DFunction fn (Function (Metadata start end) (With [] ()) args expr) [])
 
 parseConstantDefinition :: Parser (Definition Metadata o ())
 parseConstantDefinition = do

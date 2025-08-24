@@ -29,7 +29,7 @@ data Definition a k t
   | -- | Codata type definition
     DCodata Name [Parameter ()] [(Name, ParameterizedType)]
   | -- | Function definition
-    DFunction Name (Function Expression a t)
+    DFunction Name (Function Expression a t) [Function Expression a t]
   | -- | Other (constant) top-level definitions
     DConstant Name (Constant Expression a t)
   | -- | Stand-alone type signature
@@ -47,7 +47,7 @@ data Definition a k t
 definitionName :: Definition a k t -> Name
 definitionName =
   \case
-    DFunction name _ ->
+    DFunction name _ _ ->
       name
     DConstant name _ ->
       name

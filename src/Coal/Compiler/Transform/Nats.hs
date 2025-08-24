@@ -173,11 +173,11 @@ instance (Monoid a, Data a) => CompileNatsContext (Constant Expression a Indexed
 instance (Monoid a, Data a) => CompileNatsContext (Definition a Kind IndexedType) where
   compileNats =
     \case
-      DAnnotation u o -> do
+      DAnnotation u o ->
         DAnnotation u <$> compileNats o
-      DFunction name f -> do
-        DFunction name <$> compileNats f
-      DConstant name g -> do
+      DFunction name f fs ->
+        DFunction name <$> compileNats f <*> traverse compileNats fs
+      DConstant name g ->
         DConstant name <$> compileNats g
       -- TODO
       o ->

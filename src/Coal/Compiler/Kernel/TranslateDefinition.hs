@@ -28,7 +28,7 @@ translateDefinition =
       translateDefinition d
     DType _ _ ctors ->
       traverse translateConstructor (zip [0 ..] (sortOn constructorName ctors))
-    DFunction name (Function _ _ ps e) -> do
+    DFunction name (Function _ _ ps e) _ -> do
       qs <- traverse translatePattern (fromList1 ps)
       f <- withLocalNames (labelName <$> qs) (translateExpression e)
       moduleName <- asks kernelEnvironmentModule
@@ -44,8 +44,8 @@ translateDefinition =
     DInstance name t ds ->
       concat <$$> forM ds $
         \case
-          DFunction n f -> do
-            translateDefinition (DFunction (n <> postfix) f)
+          DFunction n f _ -> do
+            translateDefinition (DFunction (n <> postfix) f [])
           DConstant n c -> do
             translateDefinition (DConstant (n <> postfix) c)
           _ ->

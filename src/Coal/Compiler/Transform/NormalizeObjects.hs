@@ -48,7 +48,7 @@ instance (Monoid a, Data a, Data k, Data (o k), Typeable o) => NormalizeObjectsT
     \case
       DAnnotation u d ->
         DAnnotation u (normalizeObject d)
-      DFunction name (Function a (With ts t) ps e) ->
+      DFunction name (Function a (With ts t) ps e) _ ->
         DConstant name (Constant a (With ts (foldTypeOf t ps)) (flattenLambda (ELambda mempty ps e)))
       DInstance name t ds ->
         DInstance name t (normalizeObject ds)
@@ -71,6 +71,6 @@ denormalizeConstant name =
     Constant a with (ELambda a1 ps (ELambda _ qs e)) ->
       denormalizeConstant name (Constant a with (ELambda a1 (ps <> qs) e))
     Constant a (With ts _) (ELambda _ ps e) ->
-      DFunction name (Function a (With ts (typeOf e)) ps e)
+      DFunction name (Function a (With ts (typeOf e)) ps e) []
     c@Constant{} ->
       DConstant name c

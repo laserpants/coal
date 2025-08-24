@@ -332,13 +332,21 @@ instance (Pretty t, Show t) => Dot t (CompiledClause a t) where
           emitEdgesTo lls
           emitEdgeTo e
 
+instance (Show t, Pretty t) => Dot t (Function Expression a t) where
+  toDot =
+    \case
+      Function _ (With _ t) ps e ->
+        fromNode (emitParallelogram "Function" (Just t)) $ do
+          emitEdgesTo ps
+          emitEdgeTo e
+
 instance (Show t, Pretty t) => Dot t (Definition a k t) where
   toDot =
     \case
-      DFunction name (Function _ (With _ t) ps e) -> do
-        fromNode (emitParallelogram ("DFunction\\n" <> name) (Just t)) $ do
-          emitEdgesTo ps
-          emitEdgeTo e
+      DFunction name f fs -> do
+        fromNode (emitParallelogram ("DFunction\\n" <> name) Nothing) $ do
+          emitEdgeTo f
+          emitEdgesTo fs
       DConstant name (Constant _ (With _ t) e) -> do
         fromNode (emitParallelogram ("DConstant\\n" <> name) (Just t)) $ do
           emitEdgeTo e
