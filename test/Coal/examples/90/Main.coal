@@ -1,7 +1,7 @@
 module Main {
 
   trait Baz<a> {
-    baz : a -> string;
+    baz : a -> string
   }
 
   instance Baz<string> {
@@ -9,7 +9,7 @@ module Main {
   }
 
   trait Foo<a> {
-    foo : a -> string;
+    foo : a -> string
   }
 
   instance Foo<string> {

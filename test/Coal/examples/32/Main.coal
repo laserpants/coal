@@ -42,8 +42,8 @@ module Main {
         }
 
   trait JsonSerializable<a> {
-    to_json : a -> string;
-    from_json : string -> Option<a>;
+    to_json : a -> string
+    from_json : string -> Option<a>
   }
 
   instance JsonSerializable<int32> {
