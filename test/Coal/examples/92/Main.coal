@@ -8,7 +8,7 @@ module Main {
     fun show(s) = s
   }
 
-  instance Show<List<a>> {
+  instance Show<List<a>> with Show<a> {
     fun show(list) =
       fold(list) {
         | [] => ""

@@ -56,9 +56,15 @@ parseTraitInstance = do
   lexeme_ "instance"
   n <- constructor
   t <- angleBrackets parseType
+  ts <- option [] (lexeme_ "with" *> commaSep1 parseTrait)
   ds <- braces (some parseDefinition)
-  -- TODO
-  pure (DInstance n [] t ds)
+  pure (DInstance n ts t ds)
+
+parseTrait :: Parser (Trait (Type Parameter ()))
+parseTrait = do
+  n <- constructor
+  t <- angleBrackets parseType
+  pure (Trait n t) 
 
 parseTypeDefinition :: Parser (Definition Metadata o ())
 parseTypeDefinition = do
