@@ -38,9 +38,10 @@ data Definition a k t
   | -- | Import statement
     DImport Path [Name]
   | -- | Trait
+    -- TODO: Remove traits?
     DTrait Name [Trait t] (Parameter Kind) [(Name, ParameterizedType)]
   | -- | Trait instance
-    DInstance Name ParameterizedType [Definition a k t]
+    DInstance Name [Trait ParameterizedType] ParameterizedType [Definition a k t]
   | -- | Trait instance
     DTypeAlias Name [Parameter ()] ParameterizedType
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)

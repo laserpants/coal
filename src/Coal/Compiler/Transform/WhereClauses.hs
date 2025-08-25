@@ -15,6 +15,7 @@ liftWhereClause :: (MonadWriter [(Name, Name)] m) => Name -> Definition a k t ->
 liftWhereClause name =
   \case
     DFunction old f _ -> do
+      -- TODO:  name__$local_old??
       let new = "local_$" <> name <> "__" <> old
       tell [(old, new)]
       pure (DFunction new f [])

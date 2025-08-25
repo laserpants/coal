@@ -17,7 +17,10 @@ data Metadata = Metadata
   { locationStart :: SourcePos
   , locationEnd :: SourcePos
   }
-  deriving (Show, Eq, Ord, Read, Data)
+  deriving (Eq, Ord, Read, Data)
+
+instance Show Metadata where
+  show _ = ""
 
 defaultSourcePos :: SourcePos
 defaultSourcePos =
