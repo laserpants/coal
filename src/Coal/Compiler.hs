@@ -137,7 +137,7 @@ placeholderInsertionC = overModuleDefinitionsM (traverse go)
         pure d1
       DAnnotation t d ->
         DAnnotation t <$> go d
-      DInstance name ts t1 ds -> do
+      DInstance name ts1 t1 ds -> do
         es <- forM ds $
           \case
             c@(DConstant dname _ _) -> do
@@ -152,7 +152,7 @@ placeholderInsertionC = overModuleDefinitionsM (traverse go)
               pure c1
             _ ->
               error "TODO"
-        pure (DInstance name ts t1 es)
+        pure (DInstance name ts1 t1 es)
       d ->
         pure d
 

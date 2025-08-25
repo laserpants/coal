@@ -147,7 +147,7 @@ buildInstanceEnvironment env1 env2 ds = execState (traverse_ go ds) mempty
  where
   go =
     \case
-      DInstance name ts t _ ->
+      DInstance name _ t _ ->
         case Environment.lookup name env2 of
           Just (TypeIndex{..}, env3) -> do
             modify (Environment.insertWith Map.union name val)
