@@ -1,0 +1,22 @@
+module Main {
+
+  trait Show<a> {
+    show : a -> string
+  }
+
+  instance Show<string> {
+    fun show(s) = s
+  }
+
+  instance Show<List<a>> {
+    fun show(list) =
+      fold(list) {
+        | [] => ""
+        | show(@s) :: xs => s
+      }
+  }
+
+  fun main() = 
+    trace_string("S")
+
+}
