@@ -50,8 +50,8 @@ instance (Monoid a, Data a, Data k, Data (o k), Typeable o) => NormalizeObjectsT
         DAnnotation u (normalizeObject d)
       DFunction name (Function a (With ts t) ps e) _ ->
         DConstant name (Constant a (With ts (foldTypeOf t ps)) (flattenLambda (ELambda mempty ps e))) []
-      DInstance name t ds ->
-        DInstance name t (normalizeObject ds)
+      DInstance name ts t ds ->
+        DInstance name ts t (normalizeObject ds)
       d ->
         d
   denormalizeObject =
@@ -60,8 +60,8 @@ instance (Monoid a, Data a, Data k, Data (o k), Typeable o) => NormalizeObjectsT
         DAnnotation u (denormalizeObject d)
       DConstant name c _ ->
         denormalizeConstant name c
-      DInstance name t ds ->
-        DInstance name t (denormalizeObject ds)
+      DInstance name ts t ds ->
+        DInstance name ts t (denormalizeObject ds)
       d ->
         d
 

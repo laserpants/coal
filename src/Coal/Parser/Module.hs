@@ -58,7 +58,7 @@ parseTraitInstance = do
   t <- angleBrackets parseType
   ds <- braces (some parseDefinition)
   -- TODO
-  pure (DInstance n t ds)
+  pure (DInstance n [] t ds)
 
 parseTypeDefinition :: Parser (Definition Metadata o ())
 parseTypeDefinition = do
