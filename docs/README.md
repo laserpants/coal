@@ -412,7 +412,7 @@ A fold is very similar to an ordinary `match` expression, but with some extra po
 
 ## License 
 
-TODO
+This project is licensed under the terms of the MIT license. See the `LICENSE` file included in this repository for details.
 
 <!--
 
