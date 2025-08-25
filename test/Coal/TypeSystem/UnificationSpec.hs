@@ -243,7 +243,7 @@ unifyTestCases =
     UnifyTestCase
       ( TApplication
           KType
-          (TConstructor KType "List")
+          (TConstructor (KArrow KType KType) "List")
           (List1.singleton (TVariable (TypeIndex KType 0)))
       )
       (TIntrinsic IInt32)
@@ -337,7 +337,7 @@ matchTestCases =
       (TIntrinsic IInt32)
       ( TApplication
           KType
-          (TConstructor KType "List")
+          (TConstructor (KArrow KType KType) "List")
           (List1.singleton (TVariable (TypeIndex KType 0)))
       )
       (Left ECannotMatch)
