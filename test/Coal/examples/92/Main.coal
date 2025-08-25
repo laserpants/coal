@@ -16,7 +16,9 @@ module Main {
       }
   }
 
+  let some_list = ["a", "b", "c"]
+
   fun main() = 
-    trace_string("S")
+    trace_string(show(some_list))
 
 }
