@@ -12,7 +12,7 @@ module Main {
     fun show(list) =
       fold(list) {
         | [] => ""
-        | show(@s) :: xs => s
+        | x :: xs => show(x)
       }
   }
 
