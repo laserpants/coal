@@ -819,7 +819,7 @@ builtinCodataAccessors =
     )
   ]
 
-builtinTraits :: [(Name, (TypeIndex Kind, Environment IndexedScheme))]
+builtinTraits :: [(Name, (Parameter Kind, TypeIndex Kind, Environment IndexedScheme))]
 builtinTraits =
   []
 
