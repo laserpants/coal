@@ -155,14 +155,10 @@ buildInstanceEnvironment env1 env2 ds = execState (traverse_ go ds) mempty
         case Environment.lookup name env2 of
           Just (p1, TypeIndex{..}, env3) -> do
             let (t1t1, tsts) = evalState bork (freshId fs)
-            let sub = typeIndexId `mapsTo` t1t1
-            let mppp = Map.fromList (insertTraits tsts . substituteInScheme sub <$$> fs)
-            let val = Map.singleton t1t1 (t, mppp)
---            let ts1 = evalState (execWriterT (instantiateTypeIndexes t)) (freshId fs)
---                env4 = Environment.insert (parameterName p1) (TypeIndex (parameterKind p1) typeIndexId) (Environment.fromList ts1)
---                tt1 = runReader (instantiateTypeVars t) (env4, env1)
+                sub = typeIndexId `mapsTo` t1t1
+                mppp = Map.fromList (insertTraits tsts . substituteInScheme sub <$$> fs)
+                val = Map.singleton t1t1 (t, mppp)
             modify (Environment.insertWith Map.union name val)
---            modify (Environment.insert name undefined)
            where
             bork = do 
                 ts1 <- execWriterT (instantiateTypeIndexes t) 
@@ -171,11 +167,7 @@ buildInstanceEnvironment env1 env2 ds = execState (traverse_ go ds) mempty
                    aa <- instantiateTypeVars t
                    bb <- traverse2 instantiateTypeVars ts
                    pure (aa, nub bb)
---            sub = typeIndexId `mapsTo` t1
---            val = Map.singleton t1 (Map.fromList (substituteInScheme sub <$$> fs))
-----            gs = insertTraits ts <$$> fs
             fs = Environment.toList env3
---            t1 = evalState (instantiateVars [] env1 t) (freshId fs)
             freshId = freshIdIn . indexSet . fmap snd
           Nothing ->
             error ("Trait '" <> Text.unpack name <> "' not in scope.")
