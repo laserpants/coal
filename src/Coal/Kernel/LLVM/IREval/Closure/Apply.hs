@@ -15,7 +15,7 @@ import Coal.Kernel.LLVM.IRValue (IRValue (..))
 
 irClosureApply :: IRValue -> IRValue -> IRValue -> IRInstr ()
 irClosureApply argF argN argAs = do
-  let t = closureStructType
+  let t = closureStructType 0
   r1 <- bitcast argF (ptr t)
   r2 <- getelementptr t r1 (I32 0) (I32 1)
   irComment ["Remaining argument count"]

@@ -18,7 +18,7 @@ import Coal.Kernel.LLVM.IRValue (IRValue (..))
 
 irClosureFinalize :: IRValue -> IRValue -> IRInstr ()
 irClosureFinalize argF argAs = do
-  let t = TNamed "closure" closureStructType
+  let t = TNamed "closure" (closureStructType 0)
   r1 <- bitcast argF (ptr t)
   r2 <- getelementptr t r1 (I32 0) (I32 2)
   irComment ["Target function"]

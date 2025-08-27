@@ -46,8 +46,8 @@ irPackClosure ::
   [IRValue] ->
   IRInstr IRValue
 irPackClosure name k vs = do
-  let t = TNamed "closure" closureStructType
-  r1 <- irMalloc t
+  let t = closureStructType (length vs)
+  r1 <- irMalloc (closureStructType (length vs))
   r2 <- getelementptr t r1 (I32 0) (I32 0)
   store (I32 (fromIntegral (length vs))) r2
   r3 <- getelementptr t r1 (I32 0) (I32 1)
@@ -62,12 +62,8 @@ irPackClosure name k vs = do
     forSM_ 0 vs (storeElement base)
   bitcast r1 i8Ptr
 
--- TODO:
--- =====
--- The last i8Ptr shouldn't be necessary, but removing causes a segfault
--- This needs to be investigated further to locate where this issue occurs.
-closureStructType :: IRType
-closureStructType = struct [i32, i32, i8Ptr, i8Ptr, i8Ptr]
+closureStructType :: Int -> IRType
+closureStructType n = struct [i32, i32, i8Ptr, TArray n i8Ptr]
 
 comment1 :: Name -> Int -> Int -> Text
 comment1 name args adds =
