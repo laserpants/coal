@@ -43,7 +43,7 @@ import qualified Data.Map.Strict as Map
 
 data DictionaryEnvironment = DictionaryEnvironment
   { dictionaryEnvironmentNames :: Environment IndexedScheme
-  , dictionaryEnvironmentInstances :: Environment (Map IndexedType (Dictionary IndexedScheme))
+  , dictionaryEnvironmentInstances :: Environment (Map IndexedType (Type Parameter (), Dictionary IndexedScheme))
   }
   deriving (Show, Eq, Ord, Read)
 
@@ -97,7 +97,7 @@ tryMatch t u = do
   var <- supplied id
   pure (evalUnifier var (match t u))
 
-findFirstMatch :: Trait IndexedType -> DictionaryStack (Maybe (IndexedType, Map Name IndexedScheme))
+findFirstMatch :: Trait IndexedType -> DictionaryStack (Maybe (Type Parameter (), IndexedType, Map Name IndexedScheme))
 findFirstMatch (Trait name t1) = do
   env <- asks dictionaryEnvironmentInstances
   case Environment.lookup name env of
@@ -108,18 +108,18 @@ findFirstMatch (Trait name t1) = do
       case kvs of
         [] ->
           pure Nothing
-        (k, v) : _ ->
-          pure (Just (k, v))
+        (x, k, v) : _ ->
+          pure (Just (x, k, v))
  where
   go f m = fmap catMaybes . forM (Map.toList m) $
-    \(k, env) -> do
+    \(k, (x, env)) -> do
       result <- f k
       pure $
         case result of
           Left{} ->
             Nothing
           Right sub ->
-            Just (k, Map.map (substituteInScheme sub) env)
+            Just (x, k, Map.map (substituteInScheme sub) env)
 
 mapEntriesM :: (Monad m) => Dictionary IndexedScheme -> ((Name, IndexedScheme) -> m (Name, Expression a IndexedType)) -> m (Maybe (Dictionary (Expression a IndexedType)))
 mapEntriesM b f = Just . Map.fromList <$> traverse f (Map.toList b)
@@ -130,11 +130,11 @@ lookupTraitInstance tr@(Trait name _) = do
   case found of
     Nothing ->
       pure Nothing
-    Just (a, b) ->
-      mapEntriesM b (uncurry (go (Trait name a)))
+    Just (x, a, b) ->
+      mapEntriesM b (uncurry (go x (Trait name a)))
  where
-  go trait n (Forall _ ts t) = do
-    expr <- applyTraits (Label t (n <> "__$instance_" <> serialize trait)) ts
+  go x trait@(Trait tn _) n (Forall _ ts t) = do
+    expr <- applyTraits (Label t (n <> "__$instance_" <> serialize (Trait tn x))) ts
     pure (n, expr)
 
 applyTraits :: (Monoid a) => Label IndexedType -> [Trait IndexedType] -> DictionaryStack (Expression a IndexedType)
