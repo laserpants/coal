@@ -73,13 +73,13 @@ module List {
   fun element_at(n : nat, list : List<a>) : Option<a> =
     head(drop(n, list)) 
 
-  fun list_map(f : a -> b, list : List<a>) : List<b> =
+  fun map(f : a -> b, list : List<a>) : List<b> =
     fold(list) {
       | [] => []
       | x :: @xs => f(x) :: xs
     }
 
-  fun list_filter(p : a -> bool, list : List<a>) : List<a> =
+  fun filter(p : a -> bool, list : List<a>) : List<a> =
     fold(list) {
       | [] => []
       | x :: @xs => if p(x) then x :: xs else xs
