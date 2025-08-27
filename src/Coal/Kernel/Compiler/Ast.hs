@@ -11,9 +11,7 @@ module Coal.Kernel.Compiler.Ast (
 
 import Coal.Common.Label (Label (..))
 import Coal.Common.List1 (NonEmpty (..), fromList1)
-import Coal.Kernel.Language (Binding (..), Clause (..), Expr, ExprF (..), Type)
-import Coal.Kernel.Language.Expr.Replace (relabel)
-import Coal.Kernel.Language.Object (Object (..))
+import Coal.Kernel.Language
 import Control.Monad.Writer (runWriter, tell)
 import Data.Fix (Fix (..))
 import Data.Function (on)
@@ -21,7 +19,6 @@ import Data.Functor.Foldable (cata, embed)
 import Extra (foldrM)
 
 import qualified Coal.Common.List1 as List1
-import qualified Coal.Kernel.Language as Core
 import qualified Data.Map.Strict as Map
 
 flattenObject :: Object Type (Expr Type) -> Object Type (Expr Type)
@@ -38,8 +35,8 @@ flattenLambdaNodes :: Expr Type -> Expr Type
 flattenLambdaNodes =
   cata $
     \case
-      Core.ELam vs1 (Fix (Core.ELam vs2 e1)) ->
-        Core.lam (vs1 <> vs2) e1
+      ELam vs1 (Fix (ELam vs2 e1)) ->
+        lam (vs1 <> vs2) e1
       e ->
         embed e
 
@@ -47,8 +44,8 @@ flattenAppNodes :: Expr t -> Expr t
 flattenAppNodes =
   cata $
     \case
-      Core.EApp t (Fix (Core.EApp _ e1 es1)) es2 ->
-        Core.app t e1 (es1 <> es2)
+      EApp t (Fix (EApp _ e1 es1)) es2 ->
+        app t e1 (es1 <> es2)
       e ->
         embed e
 
@@ -62,13 +59,13 @@ simplifyLetNodes e = relabel (Map.fromList sub) e1
           binds <- foldrM go [] =<< traverse sequence vs
           case binds of
             a : as ->
-              Core.let_ (a :| as) <$> f
+              let_ (a :| as) <$> f
             [] ->
               f
         f ->
           embed <$> sequence f
 
-  go (Binding ll1 (Fix (Core.EVar ll2))) ls = do
+  go (Binding ll1 (Fix (EVar ll2))) ls = do
     tell [(labelName ll1, labelName ll2)]
     pure ls
   go l ls =
@@ -81,7 +78,7 @@ sortMatchClauses =
   cata $
     \case
       EMat t e1 cs ->
-        Core.match t e1 (List1.sortBy clauseOrder cs)
+        match t e1 (List1.sortBy clauseOrder cs)
       e ->
         embed e
  where

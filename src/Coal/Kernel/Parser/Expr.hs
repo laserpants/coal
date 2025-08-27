@@ -7,7 +7,7 @@ import Coal.Common.Label (Label (..))
 import Coal.Common.List1 (NonEmpty (..))
 import Coal.Kernel.Language.Expr (Binding (..), Clause (..), Expr, Focus (..))
 import Coal.Kernel.Language.Type (Type (..))
-import Coal.Kernel.Parser (Parser, lexeme, some, try, ($>), (<|>))
+import Coal.Kernel.Parser (Parser, backtickString, lexeme, some, try, ($>), (<|>))
 import Coal.Kernel.Parser.Identifier (constructor, name)
 import Coal.Kernel.Parser.Op (op)
 import Coal.Kernel.Parser.Prim (prim)
@@ -16,8 +16,6 @@ import Coal.Kernel.Parser.Type (type_)
 import Control.Monad (void)
 import Control.Monad.Combinators.Expr (makeExprParser)
 import Extra (Name)
-import Text.Megaparsec (takeWhileP)
-import Text.Megaparsec.Char (char)
 
 import qualified Coal.Kernel.Language.Expr.Syntax as Core
 
@@ -26,14 +24,6 @@ label p = do
   l <- backtickString <|> name <|> constructor
   t <- colon *> p
   pure (Label t l)
-
-backtickString :: Parser Name
-backtickString =
-  lexeme $ do
-    void (char '`')
-    s <- takeWhileP (Just "Non-backtick character") (/= '`')
-    void (char '`')
-    pure s
 
 binding :: Parser e -> Parser (Binding Type e)
 binding p = Binding <$> (label type_ <* equalSign) <*> p
