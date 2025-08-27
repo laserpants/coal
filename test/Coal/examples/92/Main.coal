@@ -8,11 +8,11 @@ module Main {
     fun show(s) = s
   }
 
-  instance Show<List<a>> with Show<a> {
+  instance Show<List<a>> with Show<a> {  // as item 
     fun show(list) =
       fold(list) {
         | [] => ""
-        | x :: xs => show(x)
+        | x :: xs => "FFF"   // item.show(x)
       }
   }
 
