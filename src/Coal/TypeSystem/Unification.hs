@@ -147,7 +147,8 @@ bindRow (TypeIndex KRow ix1) =
           throwError EInfiniteType
       | otherwise ->
           pure (ix1 `mapsTo` TRow r)
-bindRow _ = error "Kind mismatch"
+bindRow _ =
+  const (throwError EKindMismatch)
 
 instance Unifiable IndexedType where
   unify (TAlias _ _ t1) t2 =
