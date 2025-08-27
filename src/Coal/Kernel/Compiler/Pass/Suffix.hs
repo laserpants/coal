@@ -7,8 +7,7 @@ module Coal.Kernel.Compiler.Pass.Suffix (suffixExpr) where
 import Coal.Common.Label (Label (..))
 import Coal.Common.List1 (List1, NonEmpty (..))
 import Coal.Common.Supply (supplied)
-import Coal.Kernel.Language (Binding (..), Clause (..), Expr, Focus (..), unzipBindings)
-import Coal.Kernel.Language.Expr.Replace (Sub, relabel)
+import Coal.Kernel.Language 
 import Control.Monad.State (MonadState, modify, runStateT)
 import Control.Monad.Trans (lift)
 import Data.Functor.Foldable (cata, embed)
@@ -16,30 +15,29 @@ import Extra (Dictionary, Name, applyM1, applyM2, isConstructor)
 import TextShow (showt)
 
 import qualified Coal.Common.List1 as List1
-import qualified Coal.Kernel.Language as Core
 import qualified Data.Map.Strict as Map
 
 suffixExpr :: (MonadState Int m) => Expr t -> m (Expr t)
 suffixExpr =
   cata $
     \case
-      Core.ELet vs e -> do
+      ELet vs e -> do
         let (lls, es) = unzipBindings vs
         (lls1, a1, a2) <- applyM2 (addSuffix2 lls) (sequence es) e
-        pure (Core.let_ (List1.zipWith Binding lls1 a1) a2)
-      Core.ELam lls e -> do
+        pure (let_ (List1.zipWith Binding lls1 a1) a2)
+      ELam lls e -> do
         (lls1, a1) <- applyM1 (addSuffix lls) e
-        pure (Core.lam lls1 a1)
-      Core.ESel (Focus name ll2 ll3) e1 e2 -> do
+        pure (lam lls1 a1)
+      ESel (Focus name ll2 ll3) e1 e2 -> do
         a1 <- e1
         (lls1, a2) <- applyM1 (addSuffix (ll2 :| [ll3])) e2
         case lls1 of
           (lls4 :| lls5 : _) ->
-            pure (Core.sel (Focus name lls4 lls5) a1 a2)
+            pure (sel (Focus name lls4 lls5) a1 a2)
           _ ->
             error "Implementation error"
-      Core.EMat t e cs ->
-        Core.match t
+      EMat t e cs ->
+        match t
           <$> e
           <*> (traverse suffixClause =<< traverse sequence cs)
       e ->
