@@ -1,0 +1,11 @@
+module Combinators {
+
+  fun identity(x) = x
+
+  fun always(x : a, _) : a = x
+
+  fun fst((a, _)) = a
+
+  fun snd((_, b)) = b
+
+}

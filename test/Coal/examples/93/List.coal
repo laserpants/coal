@@ -1,0 +1,85 @@
+module List {
+
+  import Combinators(identity, always)
+
+  fun head(list : List<a>) : Option<a> =
+    match(list) {
+      | [] => None
+      | x :: _ => Some(x)
+    }
+
+  fun tail(list : List<a>) : Option<List<a>> =
+    match(list) {
+      | [] => None
+      | _ :: xs => Some(xs)
+    }
+
+  fun uncons(list : List<a>) : Option<(a, List<a>)> =
+    match(list) {
+      | [] => None
+      | x :: xs => Some((x, xs))
+    }
+
+  fun length(list : List<a>) : nat =
+    fold(list) {
+      | [] => Zero
+      | _ :: @xs => Succ(xs)
+    }
+
+  fun reduce(f : a -> b -> b, init : b, list : List<a>) : b =
+    fold(list, init) {
+      | [] => identity
+      | q :: @go => go << f(q)
+    }
+
+  fun singleton(elem : a) : List<a> = [elem]
+
+  fun is_empty(list : List<a>) : bool =
+    match(list) {
+      | [] => true
+      | _ => false
+    }
+
+  fun concat(list : List<List<a>>) : List<a> =
+    fold(list) {
+      | [] => []
+      | xs :: @xss => xs ++ xss
+    }
+
+  fun take(n : nat, list : List<a>) : List<a> =
+    fold(n, list) {
+      | Zero => 
+          always([])
+      | Succ(@m) => 
+          fn(xs) =>
+            match(xs) {
+              | [] => []
+              | head :: tail => head :: m(tail)
+            }
+    }
+
+  fun drop(n : nat, list : List<a>) : List<a> =
+    fold(n, list) {
+      | Zero => 
+          identity
+      | Succ(@m) => 
+          fn(xs) => 
+            match(xs) {
+              | [] => m([])
+              | _ :: tail => m(tail)
+            }
+    }
+
+  fun list_map(f : a -> b, list : List<a>) : List<b> =
+    fold(list) {
+      | [] => []
+      | x :: @xs => f(x) :: xs
+    }
+
+  fun list_filter(p : a -> bool, list : List<a>) : List<a> =
+    fold(list) {
+      | [] => []
+      | x :: @xs => if p(x) then x :: xs else xs
+    }
+
+}
