@@ -350,15 +350,15 @@ instance (Show t, Pretty t) => Dot t (Constant Expression a t) where
 instance (Show t, Pretty t) => Dot t (Definition a k t) where
   toDot =
     \case
-      DFunction name f ws -> do
+      DFunction name f ws ->
         fromNode (emitParallelogram ("DFunction\\n" <> name) Nothing) $ do
           emitEdgeTo f
           emitEdgesTo ws
-      DConstant name c ws -> do
+      DConstant name c ws ->
         fromNode (emitParallelogram ("DConstant\\n" <> name) Nothing) $ do
           emitEdgeTo c
           emitEdgesTo ws
-      DAnnotation (With ts t) d -> do
+      DAnnotation (With ts t) d ->
         fromNode (emitParallelogram ("DAnnotation\\n" <> prettyType t) Nothing) $ do
           nid <- ask
           lift $ do
@@ -381,7 +381,7 @@ instance (Show t, Pretty t) => Dot t (Definition a k t) where
               \p -> do
                 id1 <- emitRectangle (prettyType p) Nothing
                 emitEdge nid id1
-          lift $ do
+          lift $
             forM_ ds $
               \(name, t) -> do
                 id1 <- emitRectangle (name <> "\\n" <> prettyType t) Nothing
@@ -464,14 +464,14 @@ instance Dot Kernel.Type (DotGen Kernel.Type Int) where
 instance Dot Kernel.Type (Kernel.Binding Kernel.Type (DotGen Kernel.Type Int)) where
   toDot =
     \case
-      Kernel.Binding (Label t name) e -> do
+      Kernel.Binding (Label t name) e ->
         fromNode (emitRectangle ("Binding\\n" <> name) (Just t)) $ do
           emitEdgeWithLabelTo "=" e
 
 instance Dot Kernel.Type (Kernel.Clause Kernel.Type (DotGen Kernel.Type Int)) where
   toDot =
     \case
-      Kernel.Clause lls e -> do
+      Kernel.Clause lls e ->
         fromNode (emitRectangle "Clause" Nothing) $ do
           emitEdgesTo lls
           emitEdgeTo e
@@ -479,7 +479,7 @@ instance Dot Kernel.Type (Kernel.Clause Kernel.Type (DotGen Kernel.Type Int)) wh
 instance Dot Kernel.Type (Kernel.Focus Kernel.Type) where
   toDot =
     \case
-      Kernel.Focus name ll1 ll2 -> do
+      Kernel.Focus name ll1 ll2 ->
         fromNode (emitRectangle ("Focus\\n" <> name) Nothing) $ do
           emitEdgeTo ll1
           emitEdgeTo ll2
@@ -582,16 +582,16 @@ instance Dot Kernel.Type (Kernel.Op (DotGen Kernel.Type Int)) where
         emitOp "OOr" [op1, op2]
       Kernel.OAnd op1 op2 ->
         emitOp "OAnd" [op1, op2]
-      Kernel.ONot op1 -> do
+      Kernel.ONot op1 ->
         emitOp "ONot" [op1]
 
 instance Dot Kernel.Type (Kernel.Expr Kernel.Type) where
   toDot =
     cata $
       \case
-        Kernel.EVar (Label t name) -> do
+        Kernel.EVar (Label t name) ->
           emitRectangle ("EVar\\n" <> name) (Just t)
-        Kernel.ELet bs e -> do
+        Kernel.ELet bs e ->
           fromNode (emitRectangle "ELet" Nothing) $ do
             emitEdgesTo bs
             emitEdgeWithLabelTo "in" e
@@ -601,49 +601,49 @@ instance Dot Kernel.Type (Kernel.Expr Kernel.Type) where
           fromNode (emitHouse "ELam" Nothing) $ do
             emitEdgesTo lls
             emitEdgeTo e
-        Kernel.EApp t e es -> do
+        Kernel.EApp t e es ->
           fromNode (emitDiamond "EApp" (Just t)) $ do
             emitEdgeTo e
             emitEdgesTo es
-        Kernel.EIf e1 e2 e3 -> do
+        Kernel.EIf e1 e2 e3 ->
           fromNode (emitRectangle "EIf" Nothing) $ do
             emitEdgeTo e1
             emitEdgeWithLabelTo "then" e2
             emitEdgeWithLabelTo "else" e3
-        Kernel.EOp op -> do
+        Kernel.EOp op ->
           fromNode (emitRectangle "EOp\\n" Nothing) $ do
             emitEdgeTo op
-        Kernel.EMat t e cs -> do
+        Kernel.EMat t e cs ->
           fromNode (emitRectangle "EMat" (Just t)) $ do
             emitEdgeTo e
             emitEdgesTo cs
-        Kernel.EExt fname e1 e2 -> do
+        Kernel.EExt fname e1 e2 ->
           fromNode (emitHexagon ("EExt\\n" <> fname) Nothing) $ do
             emitEdgeTo e1
             emitEdgeTo e2
         Kernel.ENil ->
           emitHexagon "ENil" Nothing
-        Kernel.ESel f e1 e2 -> do
+        Kernel.ESel f e1 e2 ->
           fromNode (emitHexagon "ESel" Nothing) $ do
             emitEdgeTo f
             emitEdgeTo e1
             emitEdgeTo e2
-        Kernel.ECall (Label t name) es e -> do
+        Kernel.ECall (Label t name) es e ->
           fromNode (emitHexagon ("ECall\\n" <> name) (Just t)) $ do
             emitEdgesTo es
             emitEdgeTo e
-        Kernel.EMem e -> do
-          fromNode (emitHexagon "EMem" Nothing) $ do
+        Kernel.EMem e ->
+          fromNode (emitHexagon "EMem" Nothing) $
             emitEdgeTo e
 
 instance Dot Kernel.Type (Kernel.Object Kernel.Type (Kernel.Expr Kernel.Type)) where
   toDot =
     \case
-      Kernel.OFunction name lls e -> do
+      Kernel.OFunction name lls e ->
         fromNode (emitParallelogram ("OFunction\\n" <> name) Nothing) $ do
           emitEdgesTo lls
           emitEdgeTo e
-      Kernel.OConstant name e -> do
+      Kernel.OConstant name e ->
         fromNode (emitParallelogram ("OConstant\\n" <> name) Nothing) $ do
           emitEdgeTo e
       Kernel.OExternal{} ->
