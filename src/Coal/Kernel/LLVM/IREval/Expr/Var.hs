@@ -14,12 +14,11 @@ import Coal.Kernel.LLVM.IRType.Syntax (i32, i8Ptr, ptr, struct)
 import Coal.Kernel.LLVM.IRValue (IRValue (..))
 import Coal.Kernel.Language.Type.Arrow (arity)
 import Data.Text (Text)
-import Debug.Trace
 import Extra (Name, isConstructor)
 
-import qualified Coal.Kernel.Language as Core
+import qualified Coal.Kernel.Language as Syntax
 
-irEvalVar :: Core.Type -> Name -> IRInstr IRValue
+irEvalVar :: Syntax.Type -> Name -> IRInstr IRValue
 irEvalVar t name
   | isConstructor name = do
       irComment (comment1 name)
@@ -36,7 +35,7 @@ irEvalVar t name
           if arity t == 0
             then callg i8Ptr name []
             else irPackClosure name (length ts) []
-        Global t1 name1 | t == Core.string -> do
+        Global t1 name1 | t == Syntax.string -> do
           v1 <- irConceal (Global t1 name1)
           bitcast v1 i8Ptr
         Global t1 name1 -> do

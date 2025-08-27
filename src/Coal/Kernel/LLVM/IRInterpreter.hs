@@ -43,7 +43,7 @@ import Extra (Name, forM, listenOnly)
 import TextShow (showt)
 
 import qualified Coal.Common.Environment as Environment
-import qualified Coal.Kernel.Language as Core
+import qualified Coal.Kernel.Language as Syntax
 import qualified Data.ByteString as ByteString
 import qualified Data.Text as Text
 
@@ -70,7 +70,7 @@ interpretFunction name f args = do
   refreshInterpreterState
   CDefine name i8Ptr Nothing args <$> listenOnly (interpret f)
 
-irEvalFun :: (IREval e) => [Label Core.Type] -> e -> IRInstr ()
+irEvalFun :: (IREval e) => [Label Syntax.Type] -> e -> IRInstr ()
 irEvalFun lls e = do
   bound <- forM lls $ \(Label t name) -> do
     let v = Local i8Ptr name
@@ -82,27 +82,27 @@ irEvalFun lls e = do
   unless (r1 == r2) (irComment ["^ Conceal return value"])
   ret r2
 
-interpretObject :: Object Core.Type (Core.Expr Core.Type) -> IRInterpreter [IRConstruct [IRLine]]
+interpretObject :: Object Syntax.Type (Syntax.Expr Syntax.Type) -> IRInterpreter [IRConstruct [IRLine]]
 interpretObject =
   \case
     OFunction name lls e -> do
       ir <- interpretFunction name (irEvalFun lls e) [Label i8Ptr n | Label _ n <- lls]
       pure [ir]
-    OConstant name (Fix (Core.ELit (Core.PInt32 n))) ->
+    OConstant name (Fix (Syntax.ELit (Syntax.PInt32 n))) ->
       pure [CGlobal name i32 Nothing (I32 n)]
-    OConstant name (Fix (Core.ELit (Core.PInt64 n))) ->
+    OConstant name (Fix (Syntax.ELit (Syntax.PInt64 n))) ->
       pure [CGlobal name i64 Nothing (I64 n)]
-    OConstant name (Fix (Core.ELit (Core.PFloat f))) ->
+    OConstant name (Fix (Syntax.ELit (Syntax.PFloat f))) ->
       pure [CGlobal name TFloat Nothing (Float f)]
-    OConstant name (Fix (Core.ELit (Core.PDouble d))) ->
+    OConstant name (Fix (Syntax.ELit (Syntax.PDouble d))) ->
       pure [CGlobal name TDouble Nothing (Double d)]
-    OConstant name (Fix (Core.ELit (Core.PBool b))) ->
+    OConstant name (Fix (Syntax.ELit (Syntax.PBool b))) ->
       pure [CGlobal name TInt1 Nothing (I1 b)]
-    OConstant name (Fix (Core.ELit Core.PUnit)) ->
+    OConstant name (Fix (Syntax.ELit Syntax.PUnit)) ->
       pure [CGlobal name TInt1 Nothing (I1 True)]
-    OConstant name (Fix (Core.ELit (Core.PChar c))) ->
+    OConstant name (Fix (Syntax.ELit (Syntax.PChar c))) ->
       pure [CGlobal name TInt32 Nothing (I32 c)]
-    OConstant name (Fix (Core.ELit (Core.PString str))) ->
+    OConstant name (Fix (Syntax.ELit (Syntax.PString str))) ->
       pure [CString name str]
     OConstant name e -> do
       ir <- interpretFunction name (irEvalFun [] e) []

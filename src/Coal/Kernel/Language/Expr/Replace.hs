@@ -11,7 +11,7 @@ import Control.Monad.Identity (runIdentity)
 import Data.Functor.Foldable (embed, para)
 import Extra (Dictionary, Map, Name, (<$$>))
 
-import qualified Coal.Kernel.Language.Expr.Syntax as Core
+import qualified Coal.Kernel.Language.Expr.Syntax as Syntax
 import qualified Data.Map.Strict as Map
 
 replaceVarM :: (Monad m) => Name -> (Label t -> m (Expr t)) -> Expr t -> m (Expr t)
@@ -20,27 +20,27 @@ replaceVarM name fn =
     \case
       EVar ll@(Label _ var)
         | var == name -> fn ll
-        | otherwise -> pure (Core.var ll)
+        | otherwise -> pure (Syntax.var ll)
       ELet vs e1
         | name `matchesAnyLabel` (bindingLabel <$> vs) -> do
-            pure (Core.let_ (fst <$$> vs) (fst e1))
+            pure (Syntax.let_ (fst <$$> vs) (fst e1))
         | otherwise -> do
             ws <- traverse sequence (snd <$$> vs)
-            Core.let_ ws <$> snd e1
+            Syntax.let_ ws <$> snd e1
       ELam vs e1
         | name `matchesAnyLabel` vs ->
-            pure (Core.lam vs (fst e1))
+            pure (Syntax.lam vs (fst e1))
         | otherwise ->
-            Core.lam vs <$> snd e1
+            Syntax.lam vs <$> snd e1
       ESel s@(Focus _ ll1 ll2) e1 e2
         | name `matchesAnyLabel` [ll1, ll2] ->
-            pure (Core.sel s (fst e1) (fst e2))
+            pure (Syntax.sel s (fst e1) (fst e2))
         | otherwise ->
-            Core.sel s
+            Syntax.sel s
               <$> snd e1
               <*> snd e2
       EMat t e1 cs ->
-        Core.match t
+        Syntax.match t
           <$> snd e1
           <*> traverse modClause cs
       e ->
@@ -56,7 +56,7 @@ replaceVar :: Name -> (Label t -> Expr t) -> Expr t -> Expr t
 replaceVar name fn = runIdentity . replaceVarM name (pure . fn)
 
 rewrite :: Name -> Name -> Expr t -> Expr t
-rewrite old new = replaceVar old (Core.var . setLabelName new)
+rewrite old new = replaceVar old (Syntax.var . setLabelName new)
 
 class Sub a where
   relabel :: Dictionary Name -> a -> a

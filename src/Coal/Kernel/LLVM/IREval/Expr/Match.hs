@@ -14,9 +14,9 @@ import Coal.Kernel.LLVM.IRValue (IRValue (..))
 import Data.Tuple.Extra (fst3)
 import Extra (forM, forSM, (<$$>))
 
-import qualified Coal.Kernel.Language as Core
+import qualified Coal.Kernel.Language as Syntax
 
-irEvalClause :: (IREval e) => IRValue -> [Label Core.Type] -> e -> IRInstr IRValue
+irEvalClause :: (IREval e) => IRValue -> [Label Syntax.Type] -> e -> IRInstr IRValue
 irEvalClause v1 lls e = do
   let t = structType (length lls)
   r1 <- bitcast v1 (ptr t)
@@ -31,7 +31,7 @@ irEvalClause v1 lls e = do
 structType :: Int -> IRType
 structType n = struct (i32 : replicate n i8Ptr)
 
-irEvalMatch :: (IREval e, IRTyped t) => t -> e -> List1 (Core.Clause Core.Type e) -> IRInstr IRValue
+irEvalMatch :: (IREval e, IRTyped t) => t -> e -> List1 (Syntax.Clause Syntax.Type e) -> IRInstr IRValue
 irEvalMatch t e1 cs = do
   v1 <- irEval e1
   r1 <- bitcast v1 (ptr (struct [i32]))
@@ -39,16 +39,16 @@ irEvalMatch t e1 cs = do
   r3 <- load i32 r2
   labelEnd <- label "end"
   case cs of
-    Core.Clause (Label{} :| lls) e :| [] ->
+    Syntax.Clause (Label{} :| lls) e :| [] ->
       irEvalClause v1 lls e
     _ -> do
       ds <- forM (fromList1 cs) $
-        \(Core.Clause ((Label _ con) :| lls) e) -> do
+        \(Syntax.Clause ((Label _ con) :| lls) e) -> do
           n <- label con
           pure (n, lls, e)
 
       xs <- concat <$$> forM (fromList1 cs) $
-        \(Core.Clause ((Label _ con) :| _) _) -> do
+        \(Syntax.Clause ((Label _ con) :| _) _) -> do
           ix <- constructorLookup con
           case ix of
             Nothing -> do

@@ -11,7 +11,7 @@ import Coal.Kernel.Language.Object (Object (..))
 import TextShow (showt)
 
 import qualified Coal.Common.List1 as List1
-import qualified Coal.Kernel.Language as Core
+import qualified Coal.Kernel.Language as Syntax
 
 addImplicitArgs :: Object Type (Expr Type) -> Object Type (Expr Type)
 addImplicitArgs =
@@ -21,21 +21,21 @@ addImplicitArgs =
           OFunction
             name
             (lls1 <> lls2)
-            (flattenAppNodes (Core.app (List1.last ts) expr (exprs lls2)))
+            (flattenAppNodes (Syntax.app (List1.last ts) expr (exprs lls2)))
       | otherwise ->
           f
      where
       isExprFun =
         length ts > 1
       ts =
-        Core.unfoldType (typeOf expr)
+        Syntax.unfoldType (typeOf expr)
       lls2 =
         labels (List1.init ts)
     o ->
       o
 
 exprs :: [Label t] -> List1 (Expr t)
-exprs (ll : lls) = Core.var <$> ll :| lls
+exprs (ll : lls) = Syntax.var <$> ll :| lls
 exprs _ = error "Implementation error"
 
 labels :: [a] -> [Label a]

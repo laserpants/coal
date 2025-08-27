@@ -21,7 +21,7 @@ import Control.Monad (unless)
 import Data.Text (Text)
 import Extra (Name, forM, forSM_, isConstructor)
 
-import qualified Coal.Kernel.Language as Core
+import qualified Coal.Kernel.Language as Syntax
 
 irEvalApp :: (IRTyped t, IREval (Expr t)) => t -> Label t -> List1 (Expr t) -> IRInstr IRValue
 irEvalApp t ll@(Label _ var) es
@@ -56,10 +56,10 @@ irEvalApp t ll@(Label _ var) es
             | otherwise ->
                 case splitAt (length ts) (fromList1 es) of
                   (a : as, b : bs) -> do
-                    r1 <- irEval (Core.app t (Core.var ll) (a :| as))
+                    r1 <- irEval (Syntax.app t (Syntax.var ll) (a :| as))
                     irApplyClosure t r1 (b :| bs)
                   ([], b : bs) -> do
-                    r1 <- irEval (Core.var ll)
+                    r1 <- irEval (Syntax.var ll)
                     irApplyClosure t r1 (b :| bs)
                   (_, []) ->
                     error "Implementation error"

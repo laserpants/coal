@@ -17,7 +17,7 @@ import Control.Monad (void)
 import Control.Monad.Combinators.Expr (makeExprParser)
 import Extra (Name)
 
-import qualified Coal.Kernel.Language.Expr.Syntax as Core
+import qualified Coal.Kernel.Language.Expr.Syntax as Syntax
 
 label :: Parser t -> Parser (Label t)
 label p = do
@@ -35,23 +35,23 @@ let_ p = do
     >>= \case
       b : bs -> do
         void (lexeme "in")
-        Core.let_ (b :| bs) <$> p
+        Syntax.let_ (b :| bs) <$> p
       _ ->
         fail "Empty list"
 
 nil :: Parser (Expr Type)
-nil = symbol "{}" $> Core.nil
+nil = symbol "{}" $> Syntax.nil
 
 if_ :: Parser (Expr Type) -> Parser (Expr Type)
 if_ p =
-  Core.if_
+  Syntax.if_
     <$> (lexeme "if" *> parens p)
     <*> (lexeme "then" *> p)
     <*> (lexeme "else" *> p)
 
 {-# INLINE var #-}
 var :: Parser (Expr Type)
-var = Core.var <$> label type_
+var = Syntax.var <$> label type_
 
 lam :: Parser (Expr Type) -> Parser (Expr Type)
 lam p = do
@@ -60,7 +60,7 @@ lam p = do
   void (symbol "=>")
   case args of
     a : as ->
-      Core.lam (a :| as) <$> p
+      Syntax.lam (a :| as) <$> p
     _ ->
       fail "Empty list"
 
@@ -71,7 +71,7 @@ app p = do
   parens (commaSep1 p)
     >>= \case
       e1 : e2 : es ->
-        pure (Core.app t e1 (e2 :| es))
+        pure (Syntax.app t e1 (e2 :| es))
       _ ->
         fail "Too few expressions"
 
@@ -94,7 +94,7 @@ match p = do
   braces (some (clause p))
     >>= \case
       c : cs ->
-        pure (Core.match t e (c :| cs))
+        pure (Syntax.match t e (c :| cs))
       _ ->
         fail "Empty list"
 
@@ -107,7 +107,7 @@ focus =
 
 select :: Parser (Expr Type) -> Parser (Expr Type)
 select p =
-  Core.sel
+  Syntax.sel
     <$> (lexeme "select" *> braces focus)
     <*> (equalSign *> p)
     <*> (lexeme "in" *> p)
@@ -121,7 +121,7 @@ record p = inner braces
       <|> f ext
 
   ext =
-    Core.ext
+    Syntax.ext
       <$> (field <* equalSign)
       <*> (p <* pipe)
       <*> inner id
@@ -132,20 +132,20 @@ field = backtickString <|> name
 call :: Parser (Expr Type) -> Parser (Expr Type)
 call p = do
   void (symbol "#")
-  uncurry Core.call
+  uncurry Syntax.call
     <$> pair (label type_) (commaSep1 p)
     <*> parens p
 
 atom :: Parser (Expr Type) -> Parser (Expr Type)
 atom p =
-  (Core.lit <$> prim)
+  (Syntax.lit <$> prim)
     <|> let_ p
     <|> if_ p
     <|> lam p
     <|> app p
     <|> match p
     <|> select p
-    <|> (Core.op <$> op p)
+    <|> (Syntax.op <$> op p)
     <|> record p
     <|> var
     <|> call p

@@ -13,7 +13,7 @@ import Data.Functor.Foldable (embed, project)
 import Data.List (partition)
 import Extra (Set, (<$$>))
 
-import qualified Coal.Kernel.Language as Core
+import qualified Coal.Kernel.Language as Syntax
 
 canMemo :: Binding Type (Expr Type) -> Bool
 canMemo b
@@ -29,12 +29,12 @@ memoize :: (MonadWriter [Binding Type (Expr Type)] m) => Expr Type -> m (Expr Ty
 memoize =
   project
     >>> \case
-      Core.ELet vs e -> do
+      Syntax.ELet vs e -> do
         let (ps, qs) = partition canMemo (fromList1 vs)
-        tell (Core.mem <$$> ps)
+        tell (Syntax.mem <$$> ps)
         case qs of
           u : us ->
-            pure (Core.let_ (u :| us) e)
+            pure (Syntax.let_ (u :| us) e)
           [] ->
             pure e
       e ->

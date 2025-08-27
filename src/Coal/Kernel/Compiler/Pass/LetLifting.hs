@@ -10,19 +10,19 @@ import Control.Monad.Writer (MonadWriter, tell)
 import Data.Functor.Foldable (cata, embed)
 
 import qualified Coal.Common.List1 as List1
-import qualified Coal.Kernel.Language as Core
+import qualified Coal.Kernel.Language as Syntax
 
 liftLetNodes :: (MonadWriter [Binding Type (Expr Type)] m) => Expr Type -> m (Expr Type)
 liftLetNodes =
   cata $
     \case
-      Core.ELet vs e -> do
+      Syntax.ELet vs e -> do
         as <- traverse sequence vs
         let (fs, es) = List1.partition (isFunction . bindingLabel) as
         tell fs
         case es of
           w : ws ->
-            Core.let_ (w :| ws) <$> e
+            Syntax.let_ (w :| ws) <$> e
           [] ->
             e
       e ->

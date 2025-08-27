@@ -17,7 +17,7 @@ import Data.Functor.Foldable (cata, embed)
 import Data.List (nubBy)
 import Extra (Name, (<$$>))
 
-import qualified Coal.Kernel.Language as Core
+import qualified Coal.Kernel.Language as Syntax
 import qualified Data.Set as Set
 
 evalWS0 :: RWS () w Int a -> (a, w)
@@ -39,7 +39,7 @@ closeObjects objs = uncurry app (evalWS0 (traverse closed objs))
       OFunction name lls expr -> do
         tell [(name, extra)]
         pure (OFunction name (extra <> lls) expr)
-      OConstant name expr@(Fix Core.ELit{}) | null extra -> do
+      OConstant name expr@(Fix Syntax.ELit{}) | null extra -> do
         pure (OConstant name expr)
       OConstant name expr -> do
         tell [(name, extra)]
@@ -55,12 +55,12 @@ applyArgs name (a : as) =
   flattenAppNodes
     >>> cata
       ( \case
-          Core.EVar (Label t n)
+          Syntax.EVar (Label t n)
             | name == n -> do
-                let expr = Core.var (Label (Core.foldType t (Core.typeOf <$> (a : as))) n)
-                Core.app t expr (Core.var <$> a :| as)
+                let expr = Syntax.var (Label (Syntax.foldType t (Syntax.typeOf <$> (a : as))) n)
+                Syntax.app t expr (Syntax.var <$> a :| as)
             | otherwise ->
-                Core.var (Label t n)
+                Syntax.var (Label t n)
           e ->
             embed e
       )

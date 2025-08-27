@@ -27,43 +27,43 @@ import Data.Fix (Fix (..))
 import Data.Functor.Foldable (project)
 import Extra (forM)
 
-import qualified Coal.Kernel.Language as Core
+import qualified Coal.Kernel.Language as Syntax
 import qualified Data.Text as Text
 
-instance IREval (Core.Expr Core.Type) where
+instance IREval (Syntax.Expr Syntax.Type) where
   irEval =
     project
       >>> \case
-        Core.EOp op ->
+        Syntax.EOp op ->
           irCommentBlock "EOp" $
             irEvalOp op
-        Core.ELit (Core.PString str) -> do
+        Syntax.ELit (Syntax.PString str) -> do
           v1 <- makeString str
           bitcast v1 i8Ptr
-        Core.ELit (Core.PBignum n) -> do
+        Syntax.ELit (Syntax.PBignum n) -> do
           p1 <- makeBignum n
           callg i8Ptr "bignum_init" [p1]
-        Core.ELit prim ->
+        Syntax.ELit prim ->
           pure (irPrimValue prim)
-        Core.EVar (Label t var) ->
+        Syntax.EVar (Label t var) ->
           irCommentBlock "EVar" $
             irEvalVar t var
-        Core.ELet vs e1 ->
+        Syntax.ELet vs e1 ->
           irCommentBlock "ELet" $ do
             bound <- forM vs $
-              \(Core.Binding (Label _ name) e) -> do
+              \(Syntax.Binding (Label _ name) e) -> do
                 v1 <- irEval e
                 pure (name, v1)
             bind (fromList1 bound) (irEval e1)
-        Core.EApp t e1 es ->
+        Syntax.EApp t e1 es ->
           irCommentBlock "EApp" $
             case e1 of
-              Fix (Core.EVar var) ->
+              Fix (Syntax.EVar var) ->
                 irEvalApp t var es
               _ -> do
                 v1 <- irEval e1
                 irApplyClosure t v1 es
-        Core.EIf e1 e2 e3 ->
+        Syntax.EIf e1 e2 e3 ->
           irCommentBlock "EIf" $ do
             labelThen <- label "then"
             labelElse <- label "else"
@@ -82,7 +82,7 @@ instance IREval (Core.Expr Core.Type) where
               block labelExit $
                 phi (irTypeOf e2) [thenBlock, elseBlock]
             pure v
-        Core.ECall (Label _ ll) es e ->
+        Syntax.ECall (Label _ ll) es e ->
           irCommentBlock "ECall" $ do
             rs <- traverse irEval es
             v1 <- ccall i8Ptr ll rs
@@ -96,20 +96,20 @@ instance IREval (Core.Expr Core.Type) where
                 irReveal r (irTypeOf (returnTypeOf e))
               _ ->
                 error "Implementation error"
-        Core.EMat t e1 cs ->
+        Syntax.EMat t e1 cs ->
           irCommentBlock "EMat" $
             irEvalMatch t e1 cs
-        Core.ENil ->
+        Syntax.ENil ->
           irCommentBlock "ENil" $
             callg i8Ptr "hashmap_init" []
-        Core.EExt field e1 e2 ->
+        Syntax.EExt field e1 e2 ->
           irCommentBlock "EExt" $ do
             k1 <- makeKey field
             t2 <- getelementptr (stringLiteral (Text.length field + 1)) k1 (I32 0) (I32 0)
             v1 <- irEval e1
             v2 <- irEval e2
             callg i8Ptr "hashmap_insert" [v2, t2, v1]
-        Core.ESel (Core.Focus field (Label t var) (Label _ r)) e1 e2 ->
+        Syntax.ESel (Syntax.Focus field (Label t var) (Label _ r)) e1 e2 ->
           irCommentBlock "ESel" $ do
             k1 <- makeKey field
             t2 <- getelementptr (stringLiteral (Text.length field + 1)) k1 (I32 0) (I32 0)
@@ -117,7 +117,7 @@ instance IREval (Core.Expr Core.Type) where
             v2 <- callg i8Ptr "hashmap_lookup" [v1, t2]
             v3 <- irReveal v2 (irTypeOf t)
             bind [(var, v3), (r, v1)] (irEval e2)
-        Core.EMem e ->
+        Syntax.EMem e ->
           irCommentBlock "EMem" $ do
             p1 <- memoize
             r1 <- load i8Ptr p1
