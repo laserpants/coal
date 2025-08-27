@@ -654,7 +654,7 @@ instance Dot Kernel.Type (Kernel.Object Kernel.Type (Kernel.Expr Kernel.Type)) w
 instance Dot Kernel.Type (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type)) where
   toDot =
     \case
-      Kernel.Module modn _ objs -> do
-        nid <- emitEllipse modn Nothing
-        traverse_ toDot objs
+      Kernel.Module{..} -> do
+        nid <- emitEllipse moduleName Nothing
+        traverse_ toDot moduleObjects
         return nid
