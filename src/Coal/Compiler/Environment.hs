@@ -14,15 +14,19 @@ module Coal.Compiler.Environment (
   buildInstanceEnvironment,
 ) where
 
+import Debug.Trace
 import Coal.Common.Environment (Environment (..))
 import Coal.Compiler.Transform.Type.AliasExpansion
 import Coal.Compiler.Transform.Type.Parameterized
 import Coal.Language
 import Coal.Language.Module.Definition
-import Coal.TypeSystem.Substitution (mapsTo, substituteInScheme)
+import Coal.TypeSystem.Substitution (apply, mapsTo, substituteInScheme)
 import Control.Monad.State (evalState, execState, modify)
+import Control.Monad.Writer (execWriterT)
+import Control.Monad.Reader
 import Data.Map.Strict (Map)
-import Extra (Dictionary, Name, Set, traverse_, (<$$>))
+import Extra (Dictionary, Name, Set, traverse_, (<$$>), traverse2)
+import Data.List (nub)
 
 import qualified Coal.Common.Environment as Environment
 import qualified Data.Map.Strict as Map
@@ -31,8 +35,8 @@ import qualified Data.Text as Text
 
 type DataConstructorEnvironment = Environment (Constructor TypeIndex Kind IndexedType)
 type TypeConstructorEnvironment = Environment Kind
-type TraitEnvironment = Environment (TypeIndex Kind, Environment IndexedScheme)
-type InstanceEnvironment = Environment (Map IndexedType (Dictionary IndexedScheme))
+type TraitEnvironment = Environment (Parameter Kind, TypeIndex Kind, Environment IndexedScheme)
+type InstanceEnvironment = Environment (Map IndexedType (Type Parameter (), Dictionary IndexedScheme))
 type CodataAccessorEnvironment = Environment (CodataAccessor TypeIndex Kind IndexedType)
 
 data CompilerEnvironment = CompilerEnvironment
@@ -114,7 +118,7 @@ buildTraitEnvironment env =
         DTrait name _ (Parameter k n) ds ->
           [
             ( name
-            , (TypeIndex k 0, Environment.fromList (f <$$> ds))
+            , (Parameter k n, TypeIndex k 0, Environment.fromList (f <$$> ds))
             )
           ]
          where
@@ -147,19 +151,42 @@ buildInstanceEnvironment env1 env2 ds = execState (traverse_ go ds) mempty
  where
   go =
     \case
-      DInstance name _ t _ ->
+      DInstance name ts t _ ->
         case Environment.lookup name env2 of
-          Just (TypeIndex{..}, env3) -> do
+          Just (p1, TypeIndex{..}, env3) -> do
+            let (t1t1, tsts) = evalState bork (freshId fs)
+            let sub = typeIndexId `mapsTo` t1t1
+            let mppp = Map.fromList (insertTraits tsts . substituteInScheme sub <$$> fs)
+            let val = Map.singleton t1t1 (t, mppp)
+--            let ts1 = evalState (execWriterT (instantiateTypeIndexes t)) (freshId fs)
+--                env4 = Environment.insert (parameterName p1) (TypeIndex (parameterKind p1) typeIndexId) (Environment.fromList ts1)
+--                tt1 = runReader (instantiateTypeVars t) (env4, env1)
             modify (Environment.insertWith Map.union name val)
+--            modify (Environment.insert name undefined)
            where
-            val = Map.singleton t1 (Map.fromList (substituteInScheme (typeIndexId `mapsTo` t1) <$$> fs))
+            bork = do 
+                ts1 <- execWriterT (instantiateTypeIndexes t) 
+                let env4 = Environment.insert (parameterName p1) (TypeIndex (parameterKind p1) typeIndexId) (Environment.fromList ts1)
+                flip runReaderT (env4, env1) $ do
+                   aa <- instantiateTypeVars t
+                   bb <- traverse2 instantiateTypeVars ts
+                   pure (aa, nub bb)
+--            sub = typeIndexId `mapsTo` t1
+--            val = Map.singleton t1 (Map.fromList (substituteInScheme sub <$$> fs))
+----            gs = insertTraits ts <$$> fs
             fs = Environment.toList env3
-            t1 = evalState (instantiateVars [] env1 t) (freshId fs)
+--            t1 = evalState (instantiateVars [] env1 t) (freshId fs)
             freshId = freshIdIn . indexSet . fmap snd
           Nothing ->
             error ("Trait '" <> Text.unpack name <> "' not in scope.")
       _ ->
         pure ()
+
+-- TODO
+insertTraits ts (Forall ds _ s) = Forall ds ts (foldType s xs)
+  where
+    xs :: [IndexedType]
+    xs = fmap typeOf ts
 
 buildCodataAccessorEnvironment :: [Definition a k t] -> CodataAccessorEnvironment
 buildCodataAccessorEnvironment defs = mempty -- TODO:
