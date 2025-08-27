@@ -373,7 +373,7 @@ instance (Show t, Pretty t) => Dot t (Definition a k t) where
         emitParallelogram ("DType\\n" <> name) Nothing
       DCodata name _ _ ->
         emitParallelogram ("DCodata\\n" <> name) Nothing
-      DTrait name ts ps ds ->
+      DTrait name _ ps ds ->
         fromNode (emitParallelogram ("DTrait\\n" <> name) Nothing) $ do
           nid <- ask
           lift $ do
