@@ -7,7 +7,7 @@ module Coal.Kernel.Compiler.Pass.Suffix (suffixExpr) where
 import Coal.Common.Label (Label (..))
 import Coal.Common.List1 (List1, NonEmpty (..))
 import Coal.Common.Supply (supplied)
-import Coal.Kernel.Language 
+import Coal.Kernel.Language
 import Control.Monad.State (MonadState, modify, runStateT)
 import Control.Monad.Trans (lift)
 import Data.Functor.Foldable (cata, embed)
