@@ -19,9 +19,6 @@ data Metadata = Metadata
   }
   deriving (Show, Eq, Ord, Read, Data)
 
---instance Show Metadata where
---  show _ = ""
-
 defaultSourcePos :: SourcePos
 defaultSourcePos =
   SourcePos
