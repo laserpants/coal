@@ -12,8 +12,8 @@ module Main {
     fun show(list) =
       fold(list) {
         | [] => ""
-//        | x :: xs => show(x)   // item.show(x)
-        | x :: xs => "BAZ"   // item.show(x)
+        | x :: xs => show(x)   // item.show(x)
+//        | x :: xs => "BAZ"   // item.show(x)
       }
   }
 

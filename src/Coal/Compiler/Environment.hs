@@ -14,19 +14,19 @@ module Coal.Compiler.Environment (
   buildInstanceEnvironment,
 ) where
 
-import Debug.Trace
 import Coal.Common.Environment (Environment (..))
 import Coal.Compiler.Transform.Type.AliasExpansion
 import Coal.Compiler.Transform.Type.Parameterized
 import Coal.Language
 import Coal.Language.Module.Definition
 import Coal.TypeSystem.Substitution (apply, mapsTo, substituteInScheme)
+import Control.Monad.Reader
 import Control.Monad.State (evalState, execState, modify)
 import Control.Monad.Writer (execWriterT)
-import Control.Monad.Reader
-import Data.Map.Strict (Map)
-import Extra (Dictionary, Name, Set, traverse_, (<$$>), traverse2)
 import Data.List (nub)
+import Data.Map.Strict (Map)
+import Debug.Trace
+import Extra (Dictionary, Name, Set, traverse2, traverse_, (<$$>))
 
 import qualified Coal.Common.Environment as Environment
 import qualified Data.Map.Strict as Map
@@ -160,13 +160,13 @@ buildInstanceEnvironment env1 env2 ds = execState (traverse_ go ds) mempty
                 val = Map.singleton t1t1 (t, mppp)
             modify (Environment.insertWith Map.union name val)
            where
-            bork = do 
-                ts1 <- execWriterT (instantiateTypeIndexes t) 
-                let env4 = Environment.insert (parameterName p1) (TypeIndex (parameterKind p1) typeIndexId) (Environment.fromList ts1)
-                flip runReaderT (env4, env1) $ do
-                   aa <- instantiateTypeVars t
-                   bb <- traverse2 instantiateTypeVars ts
-                   pure (aa, nub bb)
+            bork = do
+              ts1 <- execWriterT (instantiateTypeIndexes t)
+              let env4 = Environment.insert (parameterName p1) (TypeIndex (parameterKind p1) typeIndexId) (Environment.fromList ts1)
+              flip runReaderT (env4, env1) $ do
+                aa <- instantiateTypeVars t
+                bb <- traverse2 instantiateTypeVars ts
+                pure (aa, nub bb)
             fs = Environment.toList env3
             freshId = freshIdIn . indexSet . fmap snd
           Nothing ->
@@ -176,9 +176,9 @@ buildInstanceEnvironment env1 env2 ds = execState (traverse_ go ds) mempty
 
 -- TODO
 insertTraits ts (Forall ds _ s) = Forall ds ts (foldType s xs)
-  where
-    xs :: [IndexedType]
-    xs = fmap typeOf ts
+ where
+  xs :: [IndexedType]
+  xs = fmap typeOf ts
 
 buildCodataAccessorEnvironment :: [Definition a k t] -> CodataAccessorEnvironment
 buildCodataAccessorEnvironment defs = mempty -- TODO:

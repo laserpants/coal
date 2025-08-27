@@ -64,7 +64,7 @@ parseTrait :: Parser (Trait (Type Parameter ()))
 parseTrait = do
   n <- constructor
   t <- angleBrackets parseType
-  pure (Trait n t) 
+  pure (Trait n t)
 
 parseTypeDefinition :: Parser (Definition Metadata o ())
 parseTypeDefinition = do

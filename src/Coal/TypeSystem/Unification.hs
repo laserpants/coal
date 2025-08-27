@@ -121,7 +121,7 @@ instance Unifiable (Row TypeIndex Kind IndexedType) where
     pure mempty
   match (RVariable (TypeIndex _ t)) row2 =
     pure (t `mapsTo` TRow row2)
-  match row1@(RExtend name _ _) row2@(RExtend _ _ q1) =
+  match row1@(RExtend name _ _) row2@RExtend{} =
     case extractField name row1 of
       Just (t1, r1) ->
         case extractField name row2 of
@@ -131,10 +131,6 @@ instance Unifiable (Row TypeIndex Kind IndexedType) where
             maybe (throwError ECannotMatch) pure (merge sub1 sub2)
           Nothing -> do
             error "Not implemented"
-      -- r2 <- freshRow
-      -- sub1 <- match q1 (RExtend name t1 r2)
-      -- sub2 <- match r1 (updateRowTail r2 row2)
-      -- maybe (throwError ECannotMatch) pure (merge sub1 sub2)
       Nothing ->
         error "Implementation error"
   match _ _ =
