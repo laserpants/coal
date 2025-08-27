@@ -66,7 +66,7 @@ lookup name = Map.lookup name . envDictionary
 
 {-# INLINE lookupAll #-}
 lookupAll :: [Name] -> Environment a -> [(Name, a)]
-lookupAll names env = Map.toList e where Environment e = restrict names env
+lookupAll names_ env = Map.toList e where Environment e = restrict names_ env
 
 {-# INLINE filter #-}
 filter :: (a -> Bool) -> Environment a -> Environment a
@@ -78,7 +78,7 @@ filterNames f (Environment e) = Environment (Map.filterWithKey (const . f) e)
 
 {-# INLINE restrict #-}
 restrict :: [Name] -> Environment a -> Environment a
-restrict names = filterNames (`elem` names)
+restrict names_ = filterNames (`elem` names_)
 
 {-# INLINE elems #-}
 elems :: Environment a -> [a]
