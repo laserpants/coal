@@ -865,14 +865,16 @@ builtinTraits =
 --      )
 --    )
 
-builtinInstances :: [(Name, Map IndexedType (Dictionary IndexedScheme))]
+builtinInstances :: [(Name, Map IndexedType (Type Parameter (), Dictionary IndexedScheme))]
 builtinInstances =
   [
     ( "Numeric"
     , Map.fromList
         [
           ( TIntrinsic IInt32
-          , Map.fromList
+          , ( TIntrinsic IInt32
+            ,
+              Map.fromList
               [
                 ( "from_int32"
                 , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
@@ -894,10 +896,12 @@ builtinInstances =
                 , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
                 )
               ]
+            )
           )
         ,
           ( TIntrinsic IFloat
-          , Map.fromList
+          , ( TIntrinsic IFloat
+            , Map.fromList
               [
                 ( "from_int32"
                 , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IFloat)
@@ -919,10 +923,12 @@ builtinInstances =
                 , Forall mempty [] (TIntrinsic IFloat `TArrow` TIntrinsic IFloat `TArrow` TIntrinsic IFloat)
                 )
               ]
+            )
           )
         ,
           ( TIntrinsic IDouble
-          , Map.fromList
+          , ( TIntrinsic IDouble
+            , Map.fromList
               [
                 ( "from_int32"
                 , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IDouble)
@@ -944,10 +950,12 @@ builtinInstances =
                 , Forall mempty [] (TIntrinsic IDouble `TArrow` TIntrinsic IDouble `TArrow` TIntrinsic IDouble)
                 )
               ]
+            )
           )
         ,
           ( TIntrinsic INat
-          , Map.fromList
+          , ( TIntrinsic INat
+            , Map.fromList
               [
                 ( "from_int32"
                 , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic INat)
@@ -969,6 +977,7 @@ builtinInstances =
                 , Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic INat `TArrow` TIntrinsic INat)
                 )
               ]
+            )
           )
         ]
     )
@@ -977,12 +986,14 @@ builtinInstances =
     , Map.fromList
         [
           ( TIntrinsic IInt32
-          , Map.fromList
+          , ( TIntrinsic IInt32
+            , Map.fromList
               [
                 ( "compare"
                 , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TConstructor KType "Ordering")
                 )
               ]
+            )
           )
         ]
     )
@@ -1128,6 +1139,7 @@ run modules = do
 
 compileModule :: (MonadIO m) => Module Metadata Kind () -> CompilerT Metadata m (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))
 compileModule x = do
+
   a <- typeCheckingPass x
 
   liftIO $ writeDotFiles "typed" a
