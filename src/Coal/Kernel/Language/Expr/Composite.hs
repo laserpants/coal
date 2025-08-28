@@ -21,7 +21,11 @@ tupleExpr es = app t (var (Label (foldType t ts) ("$Tuple" <> showt n))) es
   ts = typeOf <$> es
 
 cons :: Expr Lang.Type -> Expr Lang.Type -> Expr Lang.Type
-cons x xs = app (Lang.list t) (var (Label (t `arrow` Lang.list t `arrow` Lang.list t) "$Cons")) (x :| [xs])
+cons x xs =
+  app
+    (Lang.list t)
+    (var (Label (t `arrow` Lang.list t `arrow` Lang.list t) "$Cons"))
+    (x :| [xs])
  where
   t = typeOf x
 
