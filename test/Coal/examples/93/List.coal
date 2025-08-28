@@ -29,7 +29,7 @@ module List {
   fun reduce(f : a -> b -> b, init : b, list : List<a>) : b =
     fold(list, init) {
       | [] => identity
-      | q :: @go => go << f(q)
+      | x :: @go => go << f(x)
     }
 
   fun singleton(elem : a) : List<a> = [elem]
