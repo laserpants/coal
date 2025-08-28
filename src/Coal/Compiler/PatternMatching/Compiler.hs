@@ -72,8 +72,9 @@ compileEnvelope =
             (EVariable mempty ll :| [e1])
         )
         (compileEnvelope e2)
-        -- TODO: Why is this if-condition needed?
-        (if MFail == e3 then compileEnvelope e2 else compileEnvelope e3)
+        -- This if-condition is needed for boolean literal patterns
+        -- TODO: Is there a better way to do this?
+        (compileEnvelope $ if MFail == e3 then e2 else e3)
 
 compileEnvelopeClause :: (Eq a, TypeProxy t, Ord t, Data a, Monoid a) => EnvelopeClause (Expression a) t -> CompiledClause a t
 compileEnvelopeClause (EnvelopeClause (Label t name) ls e) =
