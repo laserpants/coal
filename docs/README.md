@@ -137,7 +137,7 @@ User-defined data types in Coal are of the product-sum variety. These types are 
    type Shape = Circle | Rectangle
    ```
 
-More interesting types can be built from combinations of product and sum constructors. Here is a type that defines a binary tree, parameterized by the type (`a`) of its nodes:
+More interesting types can be built from combinations of product and sum constructors. The following example is a type that defines a binary tree, parameterized by the type (`a`) of its nodes:
 
 ```
 type Tree<a> 
@@ -195,7 +195,7 @@ type nat
 
 #### Lists
 
-A list is an ordered collection of elements where all entries are of the same type. It is a foundational data structure in functional programming, commonly used to store and manipulate collections of data. In Coal, list literals are denoted by a sequence of comma-separated expressions, enclosed in square brackets:
+A list is an ordered collection of elements where all entries are of the same type. Lists are a foundational data structure in functional programming, commonly used to store and manipulate collections of data. In Coal, list literals are denoted by a sequence of comma-separated expressions, enclosed in square brackets:
 
 ```
 [<expr_1 : t>, <expr_2 : t>, ..., <expr_n : t>] : List<t>
