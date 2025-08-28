@@ -171,9 +171,9 @@ parseTupleExpression :: Parser (Expression Metadata ())
 parseTupleExpression = do
   withMetadata $ do
     parens $ do
-      exprs <- commaSep1 parseExpression
+      exprs <- commaSep parseExpression
       case exprs of
-        [] -> fail "Empty tuple"
+        [] -> pure (\loc -> ELiteral loc LUnit)
         (e : es) -> pure (\loc -> ETuple loc () (e :| es))
 
 parseInt :: Parser (Expression Metadata ())
