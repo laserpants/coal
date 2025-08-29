@@ -25,10 +25,10 @@ newtype Monomorphic m = Monomorphic {monomorphicSet :: Set m}
 overMonomorphicSet :: Over (Monomorphic m) (Set m)
 overMonomorphicSet fn (Monomorphic s) = Monomorphic (fn s)
 
-data Constraint c o k t
+data Constraint c o a t
   = Equality c [t]
-  | Implicit c t t (Monomorphic (o k))
-  | Explicit c t (Scheme o k t)
+  | Implicit c t t (Monomorphic (o a))
+  | Explicit c t (Scheme o a t)
   | Lacks c t Name
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
 

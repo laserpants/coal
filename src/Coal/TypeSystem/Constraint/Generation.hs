@@ -33,11 +33,11 @@ import qualified Data.Set as Set
 type ConstraintsGen a = ConstraintsGenStack a TypeIndex Kind IndexedType
 
 {-# INLINE lookupDataConstructor #-}
-lookupDataConstructor :: Name -> ConstraintsGenStack c o k t (Maybe (DataConstructor o k t))
+lookupDataConstructor :: Name -> ConstraintsGenStack c o a t (Maybe (DataConstructor o a t))
 lookupDataConstructor name = asks (Environment.lookup name . constraintsGenContextDataConstructorEnv)
 
 {-# INLINE lookupCodataAccessor #-}
-lookupCodataAccessor :: Name -> ConstraintsGenStack c o k t (Maybe (CodataAccessor o k t))
+lookupCodataAccessor :: Name -> ConstraintsGenStack c o a t (Maybe (CodataAccessor o a t))
 lookupCodataAccessor name = asks (Environment.lookup name . constraintsGenContextCodataAccessorEnv)
 
 assertEqualityAssumptions :: a -> IndexedType -> [Assumption a IndexedType] -> ConstraintsGen a ()

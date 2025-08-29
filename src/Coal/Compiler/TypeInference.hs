@@ -22,14 +22,13 @@ import Control.Monad.State (evalState, gets)
 import Control.Monad.Writer (execWriter)
 import Data.Data (Data)
 import Data.Either.Extra (partitionEithers)
-import Debug.Trace
 import Extra (Dictionary, Name, forM_, void)
 
 import qualified Coal.Common.Environment as Environment
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
 
-type ConstraintsGenResult c o k t r = (r, Dictionary (c, o k), [ConstraintsGenOutput c o k t])
+type ConstraintsGenResult c o a t s = (s, Dictionary (c, o a), [ConstraintsGenOutput c o a t])
 
 runConstraintsGenC :: (Monad m) => ConstraintsGenStack c TypeIndex Kind IndexedType r -> CompilerT a m (ConstraintsGenResult c TypeIndex Kind IndexedType r)
 runConstraintsGenC stack = do
