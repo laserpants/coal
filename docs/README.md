@@ -78,7 +78,7 @@ The `import` keyword is used to import functions and other definitions from othe
 import List(concat, head, tail)
 ```
 
-Just like in most languages, import statements must appear at the top of a module, preceding any other code.
+Like in most other languages, import statements must appear at the top of a module, preceding any other code.
 
 ### Language constructs
 
