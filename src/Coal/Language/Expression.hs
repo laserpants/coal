@@ -94,7 +94,7 @@ instance (Ord t, Data a, Data t) => FreeVars (Expression a t) t where
       ECompiledMatch _ _ e cs ->
         freeIn e <> freeIn cs
       EFocus{} ->
-        error "TODO"
+        error "Not implemented"
       e ->
         Set.fromList (universeBi e)
 
