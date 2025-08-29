@@ -115,50 +115,6 @@ normalizeTests =
     )
   ]
 
-rowSpec :: Spec
-rowSpec =
-  describe "Row substitution" $ do
-    it "substitutes a row variable with a concrete row" $ do
-      let rVar = RVariable (TypeIndex KRow 0)
-          sub = fromList [(0, TRow (RExtend "x" (TIntrinsic IInt32) RNil))]
-          expected = RExtend "x" (TIntrinsic IInt32) RNil :: Row TypeIndex Kind IndexedType
-      apply sub rVar `shouldBe` expected
-    it "substitutes a row variable with a type variable" $ do
-      let rVar = RVariable (TypeIndex KRow 0)
-          sub = fromList [(0, TVariable (TypeIndex KRow 1))]
-          expected = RVariable (TypeIndex KRow 1) :: Row TypeIndex Kind IndexedType
-      apply sub rVar `shouldBe` expected
-    it "leaves a row variable unchanged if no substitution applies" $ do
-      let rVar = RVariable (TypeIndex KRow 0) :: Row TypeIndex Kind IndexedType
-          sub = mempty
-      apply sub rVar `shouldBe` rVar
-    it "applies substitution inside RExtend field type" $ do
-      let row = RExtend "x" (TVariable (TypeIndex KType 0)) (RVariable (TypeIndex KRow 1))
-          sub =
-            fromList
-              [ (0, TIntrinsic IInt32)
-              , (1, TRow RNil)
-              ]
-          expected = RExtend "x" (TIntrinsic IInt32) RNil :: Row TypeIndex Kind IndexedType
-      apply sub row `shouldBe` expected
-    it "applies substitution recursively in nested RExtend rows" $ do
-      let row =
-            RExtend
-              "x"
-              (TIntrinsic IInt32)
-              (RExtend "y" (TVariable (TypeIndex KType 0)) (RVariable (TypeIndex KRow 1)))
-          sub =
-            fromList
-              [ (0, TIntrinsic IBool)
-              , (1, TRow RNil)
-              ]
-          expected = RExtend "x" (TIntrinsic IInt32) (RExtend "y" (TIntrinsic IBool) RNil) :: Row TypeIndex Kind IndexedType
-      apply sub row `shouldBe` expected
-    it "leaves RExtend row unchanged if substitution is empty" $ do
-      let row = RExtend "x" (TVariable (TypeIndex KType 0)) (RVariable (TypeIndex KRow 1))
-          sub = mempty
-      apply sub row `shouldBe` row
-
 substitutionSpec :: Spec
 substitutionSpec =
   describe "Substitution tests" $ do
@@ -174,4 +130,44 @@ substitutionSpec =
       forM_ normalizeTests $ \(inp, expected) ->
         it (show inp) $
           normalizeTypeIndexes inp `shouldBe` expected
-    rowSpec
+    describe "Row substitution" $ do
+      it "substitutes a row variable with a concrete row" $ do
+        let rVar = RVariable (TypeIndex KRow 0)
+            sub = fromList [(0, TRow (RExtend "x" (TIntrinsic IInt32) RNil))]
+            expected = RExtend "x" (TIntrinsic IInt32) RNil :: Row TypeIndex Kind IndexedType
+        apply sub rVar `shouldBe` expected
+      it "substitutes a row variable with a type variable" $ do
+        let rVar = RVariable (TypeIndex KRow 0)
+            sub = fromList [(0, TVariable (TypeIndex KRow 1))]
+            expected = RVariable (TypeIndex KRow 1) :: Row TypeIndex Kind IndexedType
+        apply sub rVar `shouldBe` expected
+      it "leaves a row variable unchanged if no substitution applies" $ do
+        let rVar = RVariable (TypeIndex KRow 0) :: Row TypeIndex Kind IndexedType
+            sub = mempty
+        apply sub rVar `shouldBe` rVar
+      it "applies substitution inside RExtend field type" $ do
+        let row = RExtend "x" (TVariable (TypeIndex KType 0)) (RVariable (TypeIndex KRow 1))
+            sub =
+              fromList
+                [ (0, TIntrinsic IInt32)
+                , (1, TRow RNil)
+                ]
+            expected = RExtend "x" (TIntrinsic IInt32) RNil :: Row TypeIndex Kind IndexedType
+        apply sub row `shouldBe` expected
+      it "applies substitution recursively in nested RExtend rows" $ do
+        let row =
+              RExtend
+                "x"
+                (TIntrinsic IInt32)
+                (RExtend "y" (TVariable (TypeIndex KType 0)) (RVariable (TypeIndex KRow 1)))
+            sub =
+              fromList
+                [ (0, TIntrinsic IBool)
+                , (1, TRow RNil)
+                ]
+            expected = RExtend "x" (TIntrinsic IInt32) (RExtend "y" (TIntrinsic IBool) RNil) :: Row TypeIndex Kind IndexedType
+        apply sub row `shouldBe` expected
+      it "leaves RExtend row unchanged if substitution is empty" $ do
+        let row = RExtend "x" (TVariable (TypeIndex KType 0)) (RVariable (TypeIndex KRow 1))
+            sub = mempty
+        apply sub row `shouldBe` row
