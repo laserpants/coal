@@ -9,7 +9,7 @@ Coal is a declarative, purely functional programming language with
 - simple and intuitive syntax, 
 - algebraic data types/pattern matching,
 - extensible records, 
-- Mendler-style fold recursion,
+- recursion scheme-folds,
 - codata, 
 - traits (type classes), and 
 - effect handlers (work in progress)
@@ -18,7 +18,7 @@ Coal is a declarative, purely functional programming language with
 
 ### Rethinking recursion
 
-As a [total](https://en.wikipedia.org/wiki/Total_functional_programming) language, Coal takes a different approach to recursion, following the motto that "recursion is the GOTO of functional programming." To ensure that programs are provably terminating, recursion is only available in a restricted form, known as *structural recursion*. In this paradigm, each recursive call operates on a strictly smaller part of some finite data structure, progressing toward a base case. 
+As a [total](https://en.wikipedia.org/wiki/Total_functional_programming) language, Coal takes a different approach to recursion, following the motto that "[explicit] recursion is the GOTO of functional programming." To ensure that programs are provably terminating, recursion is only available in a restricted form, known as *structural recursion*. In this paradigm, each recursive call operates on a strictly smaller part of some finite data structure, progressing toward a base case. 
 
 ```
   fun sum(numbers : List<int32>) : int32 =
@@ -180,9 +180,22 @@ let tree_of_gondor =
     )
 ```
 
+asdfad grammars
+
+```
+  type JsonValue
+    = JsonNull
+    | JsonBool(bool)
+    | JsonNumber(double)
+    | JsonString(string)
+    | JsonArray(List<JsonValue>)
+    | JsonObject(List<(string, JsonValue)>)
+```
+
 #### Natural numbers
 
-Fold-recursion ...
+Recursion in Coal works side-by-side with a recursive data structure, like lists, trees, or other algebraic data types. 
+Ordinary integers are not ...
 
 standard axiomatization of the natural numbers
 
@@ -340,12 +353,31 @@ TODO
 Traits in Coal are similar to type classes in Haskell. A trait describes a collection of functions that must be defined for the underlying type. A common analogy is to think of them as interfaces in object-oriented programming. 
 
 ```
-trait Functor<f : * -> *> {
-  map : (a -> b) -> f<a> -> f<b>;
+trait Ordered(t) {
+  compare : t -> t -> Order
 }
 ```
 
 To make a type ...
+
+```
+instance Ordered(bool) {
+  compare(a, b) =
+    match((a, b)) {
+      (false, true) => Lt
+      (true, false) => Gt
+      (_, _) => Eq
+    }
+}
+```
+
+afsd
+
+```
+trait Functor<f : * -> *> {
+  map : (a -> b) -> f<a> -> f<b>;
+}
+```
 
 Recall that the `Option` type is defined as:
 
@@ -373,6 +405,10 @@ map(fn(x) => x * 100, Some(1))    // ==> Some(100)
 map(fn(x) => x * 100, [1, 2, 3])  // ==> [100, 200, 300]
 ```
 
+#### Trait inheritance
+
+TODO
+
 ### Recursion and corecursion
 
 In most languages, a typical (recursive) implementation of the factorial function would look something like the following:
@@ -392,9 +428,6 @@ If we pass this function to the Coal compiler, it is rejected with the following
 
 Name not in scope: factorial
 ```
-
-Structural recursion works side-by-side with a recursive data structure, like lists, trees, or other algebraic data types. 
-Ordinary integers are not ...
 
 Here is how we use the `nat` data type to define the factorial function:
 
