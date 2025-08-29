@@ -93,7 +93,8 @@ module List {
 
   fun zip(lhs : List<a>, rhs : List<b>) : List<(a, b)> =
     fold(lhs, []) {
-      | [] => always([])
+      | [] => 
+          always([])
       | x :: @f =>
           fn(rhs) => 
             match(rhs) {
@@ -105,7 +106,8 @@ module List {
 
   fun unzip(list : List<(a, b)>) : (List<a>, List<b>) =
     fold(list, ([], [])) {
-      | [] => identity
+      | [] => 
+          identity
       | (x, y) :: @f =>
           fn((xs, ys)) =>
             f((x :: xs, y :: ys))
