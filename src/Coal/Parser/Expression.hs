@@ -173,7 +173,7 @@ parseTupleExpression = do
     parens $ do
       exprs <- commaSep parseExpression
       case exprs of
-        [] -> pure (\loc -> ELiteral loc LUnit)
+        [] -> pure (`ELiteral` LUnit)
         (e : es) -> pure (\loc -> ETuple loc () (e :| es))
 
 parseInt :: Parser (Expression Metadata ())
