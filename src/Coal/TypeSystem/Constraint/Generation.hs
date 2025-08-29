@@ -221,6 +221,15 @@ emitIfConstraints loc t e1 e2 e3 = do
   tellRight [Equality (RuleIfBranches loc t2 t3) [t, t2, t3]]
   pure (ms1 <> ms2 <> ms3)
 
+emitTupleConstraints :: (Show a, Data a) => a -> IndexedType -> List1 (Expression a IndexedType) -> ConstraintsGen a [Assumption a IndexedType]
+emitTupleConstraints loc t es = do
+  ms1 <- concatMapM collectConstraints es
+  tellRight
+    [ Equality InferenceRulePlaceholder [t, tupleType (typeOf <$> es)]
+    , Explicit InferenceRulePlaceholder t (tupleScheme (length es))
+    ]
+  pure ms1
+
 -- TODO: emit
 collectConstraints :: (Show a, Data a) => Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
 collectConstraints =
@@ -375,13 +384,8 @@ collectConstraints =
               _ ->
                 pure []
       pure (ms1 <> ms2)
-    ETuple _ t es -> do
-      ms1 <- concatMapM collectConstraints es
-      tellRight
-        [ Equality InferenceRulePlaceholder [t, tupleType (typeOf <$> es)]
-        , Explicit InferenceRulePlaceholder t (tupleScheme (length es))
-        ]
-      pure ms1
+    ETuple loc t es ->
+      emitTupleConstraints loc t es
     _ ->
       error "Not implemented"
 
