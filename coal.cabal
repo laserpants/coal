@@ -127,7 +127,7 @@ library
       Coal.Kernel.Parser.Type
       Coal.Language
       Coal.Language.CodataAccessor
-      Coal.Language.Constructor
+      Coal.Language.DataConstructor
       Coal.Language.Expression
       Coal.Language.Expression.Binding
       Coal.Language.Expression.Choice

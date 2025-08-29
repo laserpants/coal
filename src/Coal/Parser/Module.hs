@@ -84,11 +84,11 @@ parseCodataDefinition = do
   fields <- braces (fieldListWithKey constructor parseType ":")
   pure (DCodata n ps fields)
 
-parseConstructor :: Name -> [Parameter ()] -> Parser (Constructor Parameter () (Type Parameter ()))
+parseConstructor :: Name -> [Parameter ()] -> Parser (DataConstructor Parameter () (Type Parameter ()))
 parseConstructor tn qs = do
   n <- constructor
   ps <- option [] (parens (commaSep1 parseType))
-  pure (Constructor n (length ps) (Forall (Set.fromList qs) [] (foldr TArrow t0 ps)))
+  pure (DataConstructor n (length ps) (Forall (Set.fromList qs) [] (foldr TArrow t0 ps)))
  where
   t0 =
     case qs of

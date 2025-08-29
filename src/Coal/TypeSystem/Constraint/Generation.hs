@@ -33,7 +33,7 @@ import qualified Data.Set as Set
 type ConstraintsGen a = ConstraintsGenStack a TypeIndex Kind IndexedType
 
 {-# INLINE lookupDataConstructor #-}
-lookupDataConstructor :: Name -> ConstraintsGenStack c o k t (Maybe (Constructor o k t))
+lookupDataConstructor :: Name -> ConstraintsGenStack c o k t (Maybe (DataConstructor o k t))
 lookupDataConstructor name = asks (Environment.lookup name . constraintsGenContextDataConstructorEnv)
 
 {-# INLINE lookupCodataAccessor #-}
@@ -81,10 +81,10 @@ patternConstraints assert ms =
       case r of
         Nothing ->
           tellLeft [ENoDataConstructor loc name]
-        Just Constructor{..}
+        Just DataConstructor{..}
           | constructorArity /= length ps ->
               tellLeft [EDataConstructorArityMismatch loc name constructorArity (length ps)]
-        Just Constructor{..} ->
+        Just DataConstructor{..} ->
           tellRight [Explicit InferenceRulePlaceholder (foldTypeOf t ps) constructorScheme]
       concatForM ps (patternConstraints assert ms)
     POr _ t p1 p2 -> do
@@ -173,7 +173,7 @@ emitEConstructorConstraints loc (Label t name) = do
   case r of
     Nothing ->
       tellLeft [ENoDataConstructor loc name]
-    Just Constructor{..} ->
+    Just DataConstructor{..} ->
       tellRight [Explicit (RuleDataConstructor loc name t constructorScheme) t constructorScheme]
   pure []
 

@@ -6,7 +6,7 @@
 
 module Coal.Language.Module.Definition (Definition (..), Path (..), definitionName) where
 
-import Coal.Language.Constructor (Constructor (..))
+import Coal.Language.DataConstructor (DataConstructor (..))
 import Coal.Language.Expression (Expression (..))
 import Coal.Language.Module.Constant (Constant (..))
 import Coal.Language.Module.Function (Function (..))
@@ -26,7 +26,7 @@ data Definition a k t
   = -- | Type-annotated definition
     DAnnotation (With ParameterizedType) (Definition a k t)
   | -- | Type definition
-    DType Name [Parameter ()] [Constructor Parameter () ParameterizedType]
+    DType Name [Parameter ()] [DataConstructor Parameter () ParameterizedType]
   | -- | Codata type definition
     DCodata Name [Parameter ()] [(Name, ParameterizedType)]
   | -- | Function definition

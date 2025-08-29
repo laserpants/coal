@@ -4,7 +4,7 @@ module Coal.TypeSystem.Constraint.Generation.EConstructorConstraintsSpec where
 
 import Coal.Common.Label (Label (..))
 import Coal.Language
-import Coal.Language.Constructor (Constructor (..))
+import Coal.Language.DataConstructor (DataConstructor (..))
 import Coal.TypeSystem.Constraint
 import Coal.TypeSystem.Constraint.Generation
 import Coal.TypeSystem.Constraint.Generation.InferenceRule
@@ -49,7 +49,7 @@ collectEConstructorConstraintsSpec2 = null ms && null (lefts outs)
           Environment.fromList
             [
               ( "Blue"
-              , Constructor "Blue" 0 (Forall mempty [] (TConstructor KType "Color"))
+              , DataConstructor "Blue" 0 (Forall mempty [] (TConstructor KType "Color"))
               )
             ]
       , constraintsGenContextCodataAccessorEnv = mempty
@@ -85,7 +85,7 @@ collectEConstructorConstraintsSpec4 = null ms && null (lefts outs)
           Environment.fromList
             [
               ( "Blue"
-              , Constructor "Blue" 0 (Forall mempty [] (TConstructor KType "Color"))
+              , DataConstructor "Blue" 0 (Forall mempty [] (TConstructor KType "Color"))
               )
             ]
       , constraintsGenContextCodataAccessorEnv = mempty
@@ -111,7 +111,7 @@ collectEConstructorConstraintsSpec5 = null ms && constraint1 `elem` rights outs
           Environment.fromList
             [
               ( "Blue"
-              , Constructor "Blue" 0 (Forall mempty [] (TConstructor KType "Color"))
+              , DataConstructor "Blue" 0 (Forall mempty [] (TConstructor KType "Color"))
               )
             ]
       , constraintsGenContextCodataAccessorEnv = mempty

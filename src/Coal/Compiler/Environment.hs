@@ -33,7 +33,7 @@ import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import qualified Data.Text as Text
 
-type DataConstructorEnvironment = Environment (Constructor TypeIndex Kind IndexedType)
+type DataConstructorEnvironment = Environment (DataConstructor TypeIndex Kind IndexedType)
 type TypeConstructorEnvironment = Environment Kind
 type TraitEnvironment = Environment (Parameter Kind, TypeIndex Kind, Environment IndexedScheme)
 type InstanceEnvironment = Environment (Map IndexedType (Type Parameter (), Dictionary IndexedScheme))
@@ -91,8 +91,8 @@ buildDataConstructorEnvironment env =
           []
     )
  where
-  translateConstructor (Constructor n a s) =
-    (n, Constructor n a (translateScheme s))
+  translateConstructor (DataConstructor n a s) =
+    (n, DataConstructor n a (translateScheme s))
   translateScheme (Forall _ _ t) =
     Forall (typeIndexesIn t1) [] t1
    where
