@@ -209,6 +209,18 @@ tailRow =
       tellRight [Equality InferenceRulePlaceholder [TIntrinsic (IRecord (TRow r)), typeOf t]]
       pure r
 
+emitIfConstraints :: (Show a, Data a) => a -> IndexedType -> Expression a IndexedType -> Expression a IndexedType -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
+emitIfConstraints loc t e1 e2 e3 = do
+  ms1 <- collectConstraints e1
+  ms2 <- collectConstraints e2
+  ms3 <- collectConstraints e3
+  let t1 = typeOf e1
+      t2 = typeOf e2
+      t3 = typeOf e3
+  tellRight [Equality (RuleIfCondition loc t1) [t1, TIntrinsic IBool]]
+  tellRight [Equality (RuleIfBranches loc t2 t3) [t, t2, t3]]
+  pure (ms1 <> ms2 <> ms3)
+
 -- TODO: emit
 collectConstraints :: (Show a, Data a) => Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
 collectConstraints =
@@ -253,16 +265,8 @@ collectConstraints =
             names <- concatMapM (patternConstraints (assertEqualityAssumptions loc) ms1) ps
             pure (name : names)
       pure (filter (assumptionNameIsNotOneOf names) ms1 <> ms2)
-    EIf loc t e1 e2 e3 -> do
-      ms1 <- collectConstraints e1
-      ms2 <- collectConstraints e2
-      ms3 <- collectConstraints e3
-      let t1 = typeOf e1
-          t2 = typeOf e2
-          t3 = typeOf e3
-      tellRight [Equality (RuleIfCondition loc t1) [t1, TIntrinsic IBool]]
-      tellRight [Equality (RuleIfBranches loc t2 t3) [t, t2, t3]]
-      pure (ms1 <> ms2 <> ms3)
+    EIf loc t e1 e2 e3 ->
+      emitIfConstraints loc t e1 e2 e3
     EApplication loc t e1 es -> do
       ms1 <- collectConstraints e1
       ms2 <- concatMapM collectConstraints es
