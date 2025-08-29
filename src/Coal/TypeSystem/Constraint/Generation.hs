@@ -221,6 +221,23 @@ emitIfConstraints loc t e1 e2 e3 = do
   tellRight [Equality (RuleIfBranches loc t2 t3) [t, t2, t3]]
   pure (ms1 <> ms2 <> ms3)
 
+emitListCons :: (Show a, Data a) => a -> IndexedType -> Expression a IndexedType -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
+emitListCons loc t e1 e2 = do
+  ms1 <- collectConstraints e1
+  ms2 <- collectConstraints e2
+  let t1 = typeOf e1 `TArrow` typeOf e2 `TArrow` t
+  tellRight [Explicit InferenceRulePlaceholder t1 listConstructorTypeScheme]
+  pure (ms1 <> ms2)
+
+emitListLiteral :: (Show a, Data a) => a -> IndexedType -> [Expression a IndexedType] -> ConstraintsGen a [Assumption a IndexedType]
+emitListLiteral loc t es = do
+  ms1 <- concatMapM collectConstraints es
+  tellRight
+    [ Equality InferenceRulePlaceholder (t : (listType . typeOf <$> es))
+    , Explicit InferenceRulePlaceholder t (forall1 listType)
+    ]
+  pure ms1
+
 emitTupleConstraints :: (Show a, Data a) => a -> IndexedType -> List1 (Expression a IndexedType) -> ConstraintsGen a [Assumption a IndexedType]
 emitTupleConstraints loc t es = do
   ms1 <- concatMapM collectConstraints es
@@ -291,19 +308,10 @@ collectConstraints =
       pure (ms1 <> ms2)
     ELiteral{} ->
       pure []
-    EListCons _ t e1 e2 -> do
-      ms1 <- collectConstraints e1
-      ms2 <- collectConstraints e2
-      let t1 = typeOf e1 `TArrow` typeOf e2 `TArrow` t
-      tellRight [Explicit InferenceRulePlaceholder t1 listConstructorTypeScheme]
-      pure (ms1 <> ms2)
-    EListLiteral _ t es -> do
-      ms1 <- concatMapM collectConstraints es
-      tellRight
-        [ Equality InferenceRulePlaceholder (t : (listType . typeOf <$> es))
-        , Explicit InferenceRulePlaceholder t (forall1 listType)
-        ]
-      pure ms1
+    EListCons loc t e1 e2 ->
+      emitListCons loc t e1 e2
+    EListLiteral loc t es ->
+      emitListLiteral loc t es
     EMatch loc t e cs -> do
       ms1 <- collectConstraints e
       (ts1, ts2, ms2) <- (third3 concat . unzip3 <$$> traverse clauseAssumptions) (fromList1 cs)
