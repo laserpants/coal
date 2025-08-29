@@ -214,23 +214,36 @@ emitIfConstraints loc t e1 e2 e3 = do
   ms1 <- collectConstraints e1
   ms2 <- collectConstraints e2
   ms3 <- collectConstraints e3
-  let t1 = typeOf e1
-      t2 = typeOf e2
-      t3 = typeOf e3
   tellRight [Equality (RuleIfCondition loc t1) [t1, TIntrinsic IBool]]
   tellRight [Equality (RuleIfBranches loc t2 t3) [t, t2, t3]]
   pure (ms1 <> ms2 <> ms3)
+ where
+  t1 = typeOf e1
+  t2 = typeOf e2
+  t3 = typeOf e3
 
-emitListCons :: (Show a, Data a) => a -> IndexedType -> Expression a IndexedType -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
-emitListCons loc t e1 e2 = do
+emitApplicationConstraints :: (Show a, Data a) => a -> IndexedType -> Expression a IndexedType -> List1 (Expression a IndexedType) -> ConstraintsGen a [Assumption a IndexedType]
+emitApplicationConstraints loc t e1 es = do
+  ms1 <- collectConstraints e1
+  ms2 <- concatMapM collectConstraints es
+  tellRight [Equality (RuleApplication loc t1 (fromList1 ts)) [t1, t2]]
+  pure (ms1 <> ms2)
+ where
+  t1 = typeOf e1
+  t2 = foldType t ts
+  ts = typeOf <$> es
+
+emitListConsConstraints :: (Show a, Data a) => a -> IndexedType -> Expression a IndexedType -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
+emitListConsConstraints loc t e1 e2 = do
   ms1 <- collectConstraints e1
   ms2 <- collectConstraints e2
-  let t1 = typeOf e1 `TArrow` typeOf e2 `TArrow` t
   tellRight [Explicit InferenceRulePlaceholder t1 listConstructorTypeScheme]
   pure (ms1 <> ms2)
+ where
+  t1 = typeOf e1 `TArrow` typeOf e2 `TArrow` t
 
-emitListLiteral :: (Show a, Data a) => a -> IndexedType -> [Expression a IndexedType] -> ConstraintsGen a [Assumption a IndexedType]
-emitListLiteral loc t es = do
+emitListLiteralConstraints :: (Show a, Data a) => a -> IndexedType -> [Expression a IndexedType] -> ConstraintsGen a [Assumption a IndexedType]
+emitListLiteralConstraints loc t es = do
   ms1 <- concatMapM collectConstraints es
   tellRight
     [ Equality InferenceRulePlaceholder (t : (listType . typeOf <$> es))
@@ -298,20 +311,14 @@ collectConstraints =
       pure (filter (assumptionNameIsNotOneOf names) ms1 <> ms2)
     EIf loc t e1 e2 e3 ->
       emitIfConstraints loc t e1 e2 e3
-    EApplication loc t e1 es -> do
-      ms1 <- collectConstraints e1
-      ms2 <- concatMapM collectConstraints es
-      let t1 = typeOf e1
-          t2 = foldType t ts
-          ts = typeOf <$> es
-      tellRight [Equality (RuleApplication loc t1 (fromList1 ts)) [t1, t2]]
-      pure (ms1 <> ms2)
+    EApplication loc t e1 es ->
+      emitApplicationConstraints loc t e1 es
     ELiteral{} ->
       pure []
     EListCons loc t e1 e2 ->
-      emitListCons loc t e1 e2
+      emitListConsConstraints loc t e1 e2
     EListLiteral loc t es ->
-      emitListLiteral loc t es
+      emitListLiteralConstraints loc t es
     EMatch loc t e cs -> do
       ms1 <- collectConstraints e
       (ts1, ts2, ms2) <- (third3 concat . unzip3 <$$> traverse clauseAssumptions) (fromList1 cs)
