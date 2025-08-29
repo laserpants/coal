@@ -183,6 +183,7 @@ merge (Substitution m1) (Substitution m2)
   restricted = (`Map.restrictKeys` keys)
   keys = keysSet m1 `intersection` keysSet m2
 
+-- TODO: move?
 substituteInScheme :: Substitution -> Scheme o Kind IndexedType -> IndexedScheme
 substituteInScheme sub (Forall _ ts t) = Forall (typeIndexesIn r <> typeIndexesIn rs) rs r
  where

@@ -117,7 +117,7 @@ translatePattern =
     PShorthand{} ->
       error "TODO"
     PAtVariable{} ->
-      -- TODO: SHould be reported as an error, since this means that an at-pattern appears in an ordinary match
+      -- TODO: Should be reported as an error, since this means that an at-pattern appears in an ordinary match
       error "TODO"
     PTraitDictionary{} ->
       error "TODO"
