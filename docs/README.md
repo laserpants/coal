@@ -7,8 +7,7 @@ This repository is the home of the Coal programming language and compiler. The p
 Coal is a declarative, purely functional programming language with
 
 - simple and intuitive syntax, 
-- algebraic data types, 
-- rich pattern matching capabilities,
+- algebraic data types/pattern matching,
 - extensible records, 
 - Mendler-style fold recursion,
 - codata, 
@@ -79,7 +78,7 @@ The `import` keyword is used to import functions and other definitions from othe
 import List(concat, head, tail)
 ```
 
-Import statements must appear at the top of a module, before any other code.
+Just like in most languages, import statements must appear at the top of a module, preceding any other code.
 
 ### Language constructs
 
@@ -119,6 +118,14 @@ Coal provides the following built-in basic language types:
 
 ##### Integral types
 
+Integer literals introduced in code, such as
+
+```
+let solution = 42
+```
+
+have type `n with Numeric(n)`, which means that `n` can be any type, as long it is a member of the `Numeric` trait. This includes `int32`, `int64`, `bignum`, and `nat`.
+
 ##### Unit
 
 #### Algebraic data types
@@ -145,11 +152,9 @@ type Tree<a>
   | Node(a, Tree<a>, Tree<a>)
 ```
 
-Here is how a simple tree can be encoded with the `Tree` data type:
+Here is how a simple tree can be encoded with this type:
 
 ```
-// Let's build this tree:
-//
 //          (4)
 //          / \
 //       ---------
@@ -370,7 +375,7 @@ map(fn(x) => x * 100, [1, 2, 3])  // ==> [100, 200, 300]
 
 ### Recursion and corecursion
 
-In most languages, a typical (recursive) implementation of the factorial function looks something like the following:
+In most languages, a typical (recursive) implementation of the factorial function would look something like the following:
 
 ```
 fun factorial(n : int32) =
