@@ -622,6 +622,9 @@ runHspecTestCase specTestCase = do
       MatchTestCase t1 t2 expected ->
         prettyType t1 ++ " >~ " ++ prettyType t2 ++ " ⇒ " ++ show expected
 
+prettyType :: (Pretty t) => t -> String
+prettyType p = renderString . layoutPretty defaultLayoutOptions $ pretty p
+
 unificationSpec :: SpecWith ()
 unificationSpec =
   describe "Unification tests" $ do
@@ -629,6 +632,3 @@ unificationSpec =
       forM_ unifyTestCases runHspecTestCase
     describe "match" $ do
       forM_ matchTestCases runHspecTestCase
-
-prettyType :: (Pretty t) => t -> String
-prettyType p = renderString . layoutPretty defaultLayoutOptions $ pretty p

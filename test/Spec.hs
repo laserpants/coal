@@ -208,9 +208,11 @@ spec = do
   print (x == Right "{\"abc\":[\"a\",\"b\",\"c\"],\"pi\":3.14159}\n")
   x <- main88
   print (x == Right "{\"abc\":[\"a\",\"b\",\"c\"],\"yes\":true}\n")
--- 89
+  -- 89
   x <- main91
   print (x == Right "5\n")
+  x <- main94
+  print (x == Right "1\n2\n3\n4\n5\n")
 
 runTestFiles :: [String] -> IO (Either CompilerError Text)
 runTestFiles files = do
@@ -773,6 +775,18 @@ main93 = do
     , "./test/Coal/examples/93/Main.coal"
     ]
 
+main94 :: IO (Either CompilerError Text)
+main94 = do
+  runTestFiles
+    [ "./test/Coal/examples/94/Main.coal"
+    ]
+
+main95 :: IO (Either CompilerError Text)
+main95 = do
+  runTestFiles
+    [ "./test/Coal/examples/95/Main.coal"
+    ]
+
 compileFiles :: [String] -> IO (Either CompilerError ())
 compileFiles files = do
   fs <- traverse readFile files
@@ -880,111 +894,114 @@ builtinInstances =
     , Map.fromList
         [
           ( TIntrinsic IInt32
-          , ( TIntrinsic IInt32
-            ,
-              Map.fromList
-              [
-                ( "from_int32"
-                , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
-                )
-              ,
-                ( "negate"
-                , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
-                )
-              ,
-                ( "(+)"
-                , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
-                )
-              ,
-                ( "(-)"
-                , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
-                )
-              ,
-                ( "(*)"
-                , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
-                )
-              ]
+          ,
+            ( TIntrinsic IInt32
+            , Map.fromList
+                [
+                  ( "from_int32"
+                  , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
+                  )
+                ,
+                  ( "negate"
+                  , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
+                  )
+                ,
+                  ( "(+)"
+                  , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
+                  )
+                ,
+                  ( "(-)"
+                  , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
+                  )
+                ,
+                  ( "(*)"
+                  , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
+                  )
+                ]
             )
           )
         ,
           ( TIntrinsic IFloat
-          , ( TIntrinsic IFloat
+          ,
+            ( TIntrinsic IFloat
             , Map.fromList
-              [
-                ( "from_int32"
-                , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IFloat)
-                )
-              ,
-                ( "negate"
-                , Forall mempty [] (TIntrinsic IFloat `TArrow` TIntrinsic IFloat)
-                )
-              ,
-                ( "(+)"
-                , Forall mempty [] (TIntrinsic IFloat `TArrow` TIntrinsic IFloat `TArrow` TIntrinsic IFloat)
-                )
-              ,
-                ( "(-)"
-                , Forall mempty [] (TIntrinsic IFloat `TArrow` TIntrinsic IFloat `TArrow` TIntrinsic IFloat)
-                )
-              ,
-                ( "(*)"
-                , Forall mempty [] (TIntrinsic IFloat `TArrow` TIntrinsic IFloat `TArrow` TIntrinsic IFloat)
-                )
-              ]
+                [
+                  ( "from_int32"
+                  , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IFloat)
+                  )
+                ,
+                  ( "negate"
+                  , Forall mempty [] (TIntrinsic IFloat `TArrow` TIntrinsic IFloat)
+                  )
+                ,
+                  ( "(+)"
+                  , Forall mempty [] (TIntrinsic IFloat `TArrow` TIntrinsic IFloat `TArrow` TIntrinsic IFloat)
+                  )
+                ,
+                  ( "(-)"
+                  , Forall mempty [] (TIntrinsic IFloat `TArrow` TIntrinsic IFloat `TArrow` TIntrinsic IFloat)
+                  )
+                ,
+                  ( "(*)"
+                  , Forall mempty [] (TIntrinsic IFloat `TArrow` TIntrinsic IFloat `TArrow` TIntrinsic IFloat)
+                  )
+                ]
             )
           )
         ,
           ( TIntrinsic IDouble
-          , ( TIntrinsic IDouble
+          ,
+            ( TIntrinsic IDouble
             , Map.fromList
-              [
-                ( "from_int32"
-                , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IDouble)
-                )
-              ,
-                ( "negate"
-                , Forall mempty [] (TIntrinsic IDouble `TArrow` TIntrinsic IDouble)
-                )
-              ,
-                ( "(+)"
-                , Forall mempty [] (TIntrinsic IDouble `TArrow` TIntrinsic IDouble `TArrow` TIntrinsic IDouble)
-                )
-              ,
-                ( "(-)"
-                , Forall mempty [] (TIntrinsic IDouble `TArrow` TIntrinsic IDouble `TArrow` TIntrinsic IDouble)
-                )
-              ,
-                ( "(*)"
-                , Forall mempty [] (TIntrinsic IDouble `TArrow` TIntrinsic IDouble `TArrow` TIntrinsic IDouble)
-                )
-              ]
+                [
+                  ( "from_int32"
+                  , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IDouble)
+                  )
+                ,
+                  ( "negate"
+                  , Forall mempty [] (TIntrinsic IDouble `TArrow` TIntrinsic IDouble)
+                  )
+                ,
+                  ( "(+)"
+                  , Forall mempty [] (TIntrinsic IDouble `TArrow` TIntrinsic IDouble `TArrow` TIntrinsic IDouble)
+                  )
+                ,
+                  ( "(-)"
+                  , Forall mempty [] (TIntrinsic IDouble `TArrow` TIntrinsic IDouble `TArrow` TIntrinsic IDouble)
+                  )
+                ,
+                  ( "(*)"
+                  , Forall mempty [] (TIntrinsic IDouble `TArrow` TIntrinsic IDouble `TArrow` TIntrinsic IDouble)
+                  )
+                ]
             )
           )
         ,
           ( TIntrinsic INat
-          , ( TIntrinsic INat
+          ,
+            ( TIntrinsic INat
             , Map.fromList
-              [
-                ( "from_int32"
-                , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic INat)
-                )
-              ,
-                ( "negate"
-                , Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic INat)
-                )
-              ,
-                ( "(+)"
-                , Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic INat `TArrow` TIntrinsic INat)
-                )
-              ,
-                ( "(-)"
-                , Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic INat `TArrow` TIntrinsic INat)
-                )
-              ,
-                ( "(*)"
-                , Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic INat `TArrow` TIntrinsic INat)
-                )
-              ]
+                [
+                  ( "from_int32"
+                  , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic INat)
+                  )
+                ,
+                  ( "negate"
+                  , Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic INat)
+                  )
+                ,
+                  ( "(+)"
+                  , Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic INat `TArrow` TIntrinsic INat)
+                  )
+                ,
+                  ( "(-)"
+                  , Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic INat `TArrow` TIntrinsic INat)
+                  )
+                ,
+                  ( "(*)"
+                  , Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic INat `TArrow` TIntrinsic INat)
+                  )
+                ]
             )
           )
         ]
@@ -994,13 +1011,14 @@ builtinInstances =
     , Map.fromList
         [
           ( TIntrinsic IInt32
-          , ( TIntrinsic IInt32
+          ,
+            ( TIntrinsic IInt32
             , Map.fromList
-              [
-                ( "compare"
-                , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TConstructor KType "Ordering")
-                )
-              ]
+                [
+                  ( "compare"
+                  , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TConstructor KType "Ordering")
+                  )
+                ]
             )
           )
         ]
@@ -1147,7 +1165,6 @@ run modules = do
 
 compileModule :: (MonadIO m) => Module Metadata Kind () -> CompilerT Metadata m (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))
 compileModule x = do
-
   a <- typeCheckingPass x
 
   liftIO $ writeDotFiles "typed" a
