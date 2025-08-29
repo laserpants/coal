@@ -1,7 +1,6 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StrictData #-}
 
@@ -11,9 +10,8 @@ module Coal.Language.Expression (
   CompiledClause (..),
 ) where
 
-import Coal.Common.FreeVars (BoundVars (..), FreeVars (..), exceptNames)
 import Coal.Common.Label (Label (..))
-import Coal.Common.List1 (List1, NonEmpty ((:|)))
+import Coal.Common.List1 (List1)
 import Coal.Language.Expression.Binding (Binding (..))
 import Coal.Language.Expression.Choice (Choice (..))
 import Coal.Language.Expression.Operator (BinaryOperator, UnaryOperator)
@@ -22,10 +20,7 @@ import Coal.Language.Primitive (Primitive (..))
 import Coal.Language.Trait (Trait (..))
 import Coal.Language.Type (Parameter (..), Type)
 import Data.Data (Data, Typeable)
-import Data.Generics.Uniplate.Data (universeBi)
 import Extra (Dictionary, Name)
-
-import qualified Data.Set as Set
 
 data Expression a t
   = -- | Type-annotated expression
@@ -63,6 +58,7 @@ data Expression a t
   | -- | Compiled match expression
     ECompiledMatch a t (Expression a t) (List1 (CompiledClause a t))
   | -- | Fold expression
+    -- TODO: remove name
     EFold a t Name (List1 (Expression a t)) (List1 (Clause a t)) (Maybe (Expression a t))
   | -- | Codata unfold
     EUnfold a t Name (List1 (Pattern a t)) (Dictionary (Expression a t)) (Maybe (Expression a t))
@@ -78,42 +74,8 @@ data Expression a t
     ETraitDictionary a t (Trait t)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
 
-instance (Ord t, Data a, Data t) => FreeVars (Expression a t) t where
-  freeIn =
-    \case
-      EConstructor{} ->
-        mempty
-      ELambda _ ps e ->
-        freeIn e `exceptNames` boundIn ps
-      ELet _ gs e1 ->
-        freeIn gs <> (freeIn e1 `exceptNames` boundIn gs)
-      ERecursiveLet _ p e1 e2 ->
-        (freeIn e1 <> freeIn e2) `exceptNames` boundIn p
-      EMatch _ _ e cs ->
-        freeIn e <> freeIn cs
-      ECompiledMatch _ _ e cs ->
-        freeIn e <> freeIn cs
-      ERecord _ _ d e ->
-        freeIn d <> freeIn e
-      EFocus{} ->
-        error "Not implemented"
-      e ->
-        Set.fromList (universeBi e)
-
 data Clause a t = EClause a (Pattern a t) (List1 (Choice Expression a t))
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
 
-instance (Ord t, Data a, Data t) => FreeVars (Clause a t) t where
-  freeIn =
-    \case
-      EClause _ p cs ->
-        freeIn cs `exceptNames` boundIn p
-
 data CompiledClause a t = ECompiledClause (List1 (Label t)) (Expression a t)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
-
-instance (Ord t, Data a, Data t) => FreeVars (CompiledClause a t) t where
-  freeIn =
-    \case
-      ECompiledClause (_ :| lls) e ->
-        freeIn e `exceptNames` boundIn lls
