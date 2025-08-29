@@ -2,7 +2,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Coal.TypeSystem.SubstitutionSpec where
+module Coal.TypeSystem.SubstitutionSpec (substitutionSpec) where
 
 import Coal.Common.List1
 import Coal.Language
@@ -115,19 +115,49 @@ normalizeTests =
     )
   ]
 
--- schemeTests :: [(Substitution, IndexedScheme, IndexedScheme)]
--- schemeTests =
---  [ -- [0 ↦ int32] inside a simple scheme
---    ( mapsTo 0 (TIntrinsic IInt32)
---    , Forall mempty mempty (TVariable (TypeIndex KType 0))
---    , Forall mempty mempty (TIntrinsic IInt32)
---    )
---  , -- quantified var is protected
---    ( mapsTo 0 (TIntrinsic IInt32)
---    , Forall (Set.singleton (TypeIndex KType 0)) mempty (TVariable (TypeIndex KType 0))
---    , Forall (Set.singleton (TypeIndex KType 0)) mempty (TVariable (TypeIndex KType 0))
---    )
---  ]
+rowSpec :: Spec
+rowSpec =
+  describe "Row substitution" $ do
+    it "substitutes a row variable with a concrete row" $ do
+      let rVar = RVariable (TypeIndex KRow 0)
+          sub = fromList [(0, TRow (RExtend "x" (TIntrinsic IInt32) RNil))]
+          expected = RExtend "x" (TIntrinsic IInt32) RNil :: Row TypeIndex Kind IndexedType
+      apply sub rVar `shouldBe` expected
+    it "substitutes a row variable with a type variable" $ do
+      let rVar = RVariable (TypeIndex KRow 0)
+          sub = fromList [(0, TVariable (TypeIndex KRow 1))]
+          expected = RVariable (TypeIndex KRow 1) :: Row TypeIndex Kind IndexedType
+      apply sub rVar `shouldBe` expected
+    it "leaves a row variable unchanged if no substitution applies" $ do
+      let rVar = RVariable (TypeIndex KRow 0) :: Row TypeIndex Kind IndexedType
+          sub = mempty
+      apply sub rVar `shouldBe` rVar
+    it "applies substitution inside RExtend field type" $ do
+      let row = RExtend "x" (TVariable (TypeIndex KType 0)) (RVariable (TypeIndex KRow 1))
+          sub =
+            fromList
+              [ (0, TIntrinsic IInt32)
+              , (1, TRow RNil)
+              ]
+          expected = RExtend "x" (TIntrinsic IInt32) RNil :: Row TypeIndex Kind IndexedType
+      apply sub row `shouldBe` expected
+    it "applies substitution recursively in nested RExtend rows" $ do
+      let row =
+            RExtend
+              "x"
+              (TIntrinsic IInt32)
+              (RExtend "y" (TVariable (TypeIndex KType 0)) (RVariable (TypeIndex KRow 1)))
+          sub =
+            fromList
+              [ (0, TIntrinsic IBool)
+              , (1, TRow RNil)
+              ]
+          expected = RExtend "x" (TIntrinsic IInt32) (RExtend "y" (TIntrinsic IBool) RNil) :: Row TypeIndex Kind IndexedType
+      apply sub row `shouldBe` expected
+    it "leaves RExtend row unchanged if substitution is empty" $ do
+      let row = RExtend "x" (TVariable (TypeIndex KType 0)) (RVariable (TypeIndex KRow 1))
+          sub = mempty
+      apply sub row `shouldBe` row
 
 substitutionSpec :: Spec
 substitutionSpec =
@@ -136,18 +166,12 @@ substitutionSpec =
       forM_ substitutionTests $ \(SubstitutionSpecTestCase sub inp expct) ->
         it (show inp ++ " under " ++ show sub) $
           apply sub inp `shouldBe` expct
-
     describe "merge" $ do
       forM_ mergeTests $ \(s1, s2, expected) ->
         it (show s1 ++ " <> " ++ show s2) $
           merge s1 s2 `shouldBe` expected
-
     describe "normalizeTypeIndexes" $ do
       forM_ normalizeTests $ \(inp, expected) ->
         it (show inp) $
           normalizeTypeIndexes inp `shouldBe` expected
-
---    describe "substituteInScheme" $ do
---      forM_ schemeTests $ \(sub, sch, expected) ->
---        it (show sch ++ " under " ++ show sub) $
---          substituteInScheme sub sch `shouldBe` expected
+    rowSpec

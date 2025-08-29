@@ -2,7 +2,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Coal.TypeSystem.UnificationSpec where
+module Coal.TypeSystem.UnificationSpec (unificationSpec) where
 
 import Coal.Common.List1
 import Coal.Language
