@@ -2,7 +2,14 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Common.FreeVars (BoundVars (..), FreeVars (..), exceptNames, freeSet) where
+module Coal.Common.FreeVars (
+  BoundVars (..),
+  FreeVars (..),
+  exceptNames,
+  freeSet,
+  notConstructor,
+  notOneOf,
+) where
 
 import Coal.Common.Label (Label (..), labelName)
 import Coal.Common.List1 (NonEmpty)

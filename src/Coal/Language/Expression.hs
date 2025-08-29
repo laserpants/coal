@@ -93,6 +93,8 @@ instance (Ord t, Data a, Data t) => FreeVars (Expression a t) t where
         freeIn e <> freeIn cs
       ECompiledMatch _ _ e cs ->
         freeIn e <> freeIn cs
+      ERecord _ _ d e ->
+        freeIn d <> freeIn e
       EFocus{} ->
         error "Not implemented"
       e ->
