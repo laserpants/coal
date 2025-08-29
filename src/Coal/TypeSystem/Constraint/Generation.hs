@@ -230,6 +230,11 @@ emitTupleConstraints loc t es = do
     ]
   pure ms1
 
+tupleScheme :: Int -> IndexedScheme
+tupleScheme n = Forall (Set.fromList (fromList1 ixs)) [] (tupleType (TVariable <$> ixs))
+ where
+  ixs = TypeIndex KType 0 :| [TypeIndex KType ti | ti <- [1 .. n - 1]]
+
 -- TODO: emit
 collectConstraints :: (Show a, Data a) => Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
 collectConstraints =
@@ -388,11 +393,6 @@ collectConstraints =
       emitTupleConstraints loc t es
     _ ->
       error "Not implemented"
-
-tupleScheme :: Int -> IndexedScheme
-tupleScheme n = Forall (Set.fromList (fromList1 ixs)) [] (tupleType (TVariable <$> ixs))
- where
-  ixs = TypeIndex KType 0 :| [TypeIndex KType ti | ti <- [1 .. n - 1]]
 
 listConstructorTypeScheme :: IndexedScheme
 listConstructorTypeScheme = forall1 (\a -> a ~> listType a ~> listType a)
