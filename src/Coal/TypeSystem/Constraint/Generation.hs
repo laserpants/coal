@@ -183,6 +183,17 @@ emitELambdaConstraints loc ps e = do
   names <- concatForM ps (patternConstraints (assertEqualityAssumptions loc) ms)
   pure (filter (assumptionNameIsNotOneOf names) ms)
 
+emitERecursiveLetConstraints :: (Show a, Data a) => a -> Pattern a IndexedType -> Expression a IndexedType -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
+emitERecursiveLetConstraints loc p e1 e2 = do
+  ms1 <- collectConstraints e2
+  tellRight [Equality (RuleLetBindingPattern loc t1 t2) [t1, t2]]
+  ms2 <- collectConstraints e1
+  names <- patternConstraints (assertEqualityAssumptions loc) (ms1 <> ms2) p
+  pure (filter (assumptionNameIsNotOneOf names) (ms1 <> ms2))
+ where
+  t1 = typeOf p
+  t2 = typeOf e1
+
 emitERecordConstraints :: (Show a, Data a) => a -> IndexedType -> Dictionary (Expression a IndexedType) -> Maybe (Expression a IndexedType) -> ConstraintsGen a [Assumption a IndexedType]
 emitERecordConstraints loc t fields expr = do
   ms1 <- concatMapM collectConstraints expr
@@ -278,14 +289,8 @@ collectConstraints =
       pure [Assumption loc name t]
     ELambda loc ps e ->
       emitELambdaConstraints loc ps e
-    ERecursiveLet loc p e1 e2 -> do
-      ms1 <- collectConstraints e2
-      let t1 = typeOf p
-          t2 = typeOf e1
-      tellRight [Equality (RuleLetBindingPattern loc t1 t2) [t1, t2]]
-      ms2 <- collectConstraints e1
-      names <- patternConstraints (assertEqualityAssumptions loc) (ms1 <> ms2) p
-      pure (filter (assumptionNameIsNotOneOf names) (ms1 <> ms2))
+    ERecursiveLet loc p e1 e2 ->
+      emitERecursiveLetConstraints loc p e1 e2
     ELet loc gs e1 -> do
       ms1 <- collectConstraints e1
       ms2 <- concatForM gs $
