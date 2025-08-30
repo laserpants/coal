@@ -27,6 +27,7 @@ import Coal.Parser (ParserError)
 import Coal.Parser.Module
 import Coal.TypeSystem.Constraint.Assumption (Assumption (..))
 import Coal.TypeSystem.Substitution
+import Coal.TypeSystemSpec (typeSystemSpec)
 import Control.Monad (forM, forM_, void)
 import Control.Monad.Except
 import Control.Monad.IO.Class (MonadIO)
@@ -45,6 +46,7 @@ import Extra (Name, isConstructor, (<$$>))
 import Prettyprinter (Pretty (..))
 import System.IO.Unsafe (unsafePerformIO)
 import System.Process
+import Test.Hspec
 import Text.Megaparsec (eof, errorBundlePretty, runParser)
 import Text.RawString.QQ
 
@@ -55,6 +57,11 @@ import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
+
+unitSpec :: SpecWith ()
+unitSpec =
+  describe "Unit tests" $ do
+    typeSystemSpec
 
 spec :: IO ()
 spec = do
