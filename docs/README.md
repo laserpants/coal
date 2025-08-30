@@ -95,7 +95,7 @@ TODO
 
 ##### If-then-else
 
-If-expressions have a format familiar to most programmers. 
+If-expressions have a format similar to those in most other languages: 
 
 ```
   if (<e_1> : bool) then <e_2> : t_1 else <e_3> : t_1
@@ -123,14 +123,14 @@ Coal provides the following built-in basic language types:
 
 | Type               | Description                             | Example values            |                       
 | ------------------ | --------------------------------------- | ------------------------- |                       
-| `bool`             | Booleans                                | `true` \| `false`         |                       
+| `bool`             | Booleans                                | `true`, `false`         |                       
 | `char`             | A single Unicode character              | `'a'`, `'b'`, `'🤖'`, ... |                        
 | `float`            | Single precision floating point numbers | `3.1519f`                 |                        
 | `double`           | Double precision floating point numbers | `3.141592653589793`       |                        
 | `int32`            | 32-bit integers                         | `0`, `1`, `2`, `3`, ...   |                        
 | `int64`            | 64-bit integers                         | `0`, `1`, `2`, `3`, ...   |                        
 | `bignum`           | Arbitrary precision integers            | `0`, `1`, `2`, `3`, ...   |                        
-| `string`           | UTF-8 text strings                      |  `"Hello, ✨ world!"`     |                        
+| `string`           | UTF-8 text                              |  `"Hello, ✨ world!"`     |                        
 | `unit`             | Singleton type                          | `()`                      |                        
 | `void`             | The uninhabited type                    |                           |                        
 | `nat`              | Natural numbers (Peano arithmetic)      | `Zero`, `Succ(Zero)`, ... |                        
@@ -213,22 +213,28 @@ asdfad grammars
 
 #### Natural numbers
 
-Recursion in Coal always works side-by-side with a recursive data structure, like lists, trees, or other algebraic data types. 
-Ordinary (machine type) integers are not ...
-
-standard axiomatization of the natural numbers
+Structural recursion in Coal realies on pattern matching to take data apart, always working side-by-side with a recursive data structure like lists, trees, or other algebraic data types. Ordinary (machine type) integers do not have this characteristic, so they cannot be used to this end. Instead, we can represent natural numbers recursively, following their standard axiomatization:
 
 > Every natural number is either zero or the successor of another natural number.
 
-This is known as the *Peano construction*, named after the Italian mathematician [Giuseppe Peano](https://en.wikipedia.org/wiki/Giuseppe_Peano).
-
-Here is how we express this as an algebraic data type:
+This is known as the *Peano construction* of the natural numbers, named after the Italian mathematician [Giuseppe Peano](https://en.wikipedia.org/wiki/Giuseppe_Peano).
+The built-in `nat` type is based directly on this definition:
 
 ```
 type nat
  = Zero
  | Succ(nat)
 ```
+
+The number five, for example, would then be written as:
+
+```
+Succ(Succ(Succ(Succ(Succ(Zero)))))
+```
+
+Writing numbers using this notation quickly becomes tedious.  Fortunately, we can use 
+
+These are constant time (**O**(1)) operations
 
 #### Lists
 
@@ -285,7 +291,7 @@ There is no singleton tuple type. A single value in parentheses is just the valu
 (42)  // Not a tuple -- just the integer 42
 ```
 
-The empty tuple *does* exist. It is written `()` and is known as the unit value. Its type is `unit`. (See *Built-in types* for more details.)
+The empty tuple *does* exist, and has special meaning. It is written `()` and is known as the unit value. Its type is `unit`. (See *Built-in types* for more details.)
 
 ```
 ()            : unit                           // unit value
