@@ -9,8 +9,7 @@ Coal is a declarative, purely functional programming language with
 - simple and intuitive syntax, 
 - algebraic data types/pattern matching,
 - extensible records, 
-- recursion scheme-folds,
-- codata, 
+- recursion scheme-fold and (codata) unfold syntax, 
 - traits (type classes), and 
 - effect handlers (work in progress)
 

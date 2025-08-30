@@ -1,0 +1,33 @@
+module Main {
+
+  type JsonValue
+    = JsonNull
+    | JsonBool(bool)
+    | JsonNumber(double)
+    | JsonString(string)
+    | JsonArray(List<JsonValue>)
+    | JsonObject(List<(string, JsonValue)>)
+
+  fold encode_json_value : JsonValue -> string {
+    | JsonNull => "null"
+    | JsonBool(false) => "false"
+    | JsonBool(true) => "true"
+    | JsonArray(encode_json_array(@values)) => "[" +++ values +++ "]"
+    | JsonObject(encode_json_object(@key_value_pairs)) => "{" +++ key_value_pairs +++ "}"
+  }
+
+  fold encode_json_array : JsonArray(List<JsonValue>) -> string {
+    | [] => ""
+    | encode_json_value(@value) :: encode_json_array(@values) => 
+        value +++ "," +++ values
+  }
+
+  fold encode_json_object : JsonObject(List<(string, JsonValue)>) -> string {
+    | [] => ""
+    | (key, encode_json_value(@value)) :: encode_json_object(@pairs) => 
+        in_quotes(key) +++ ":" value +++ "," +++ pairs
+  }
+
+  fun encode_json(value : JsonValue) = encode_json_value(value)
+
+}
