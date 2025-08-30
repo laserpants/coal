@@ -19,13 +19,12 @@ import Coal.Compiler.Transform.Type.AliasExpansion
 import Coal.Compiler.Transform.Type.Parameterized
 import Coal.Language
 import Coal.Language.Module.Definition
-import Coal.TypeSystem.Substitution (apply, mapsTo, substituteInScheme)
+import Coal.TypeSystem.Substitution (mapsTo, substituteInScheme)
 import Control.Monad.Reader
 import Control.Monad.State (evalState, execState, modify)
 import Control.Monad.Writer (execWriterT)
 import Data.List (nub)
 import Data.Map.Strict (Map)
-import Debug.Trace
 import Extra (Dictionary, Name, Set, traverse2, traverse_, (<$$>))
 
 import qualified Coal.Common.Environment as Environment
