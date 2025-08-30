@@ -343,8 +343,9 @@ emitConstraints =
       pure (ms1 <> ms2)
     ECompiledMatch{} ->
       error "TODO"
-    EUnaryOperator{} ->
-      error "TODO"
+    EUnaryOperator loc t op -> do
+      tellRight [Explicit (RuleUnaryOperator loc) t (unaryOperatorTypeScheme op)]
+      pure []
     EBinaryOperator loc t op -> do
       tellRight [Explicit (RuleBinaryOperator loc) t (binaryOperatorTypeScheme op)]
       pure []

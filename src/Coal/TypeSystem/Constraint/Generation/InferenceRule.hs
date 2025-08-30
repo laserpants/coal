@@ -31,6 +31,8 @@ data InferenceRule k a
   | -- | Match clause patterns have compatible types
     RuleMatchClausePatterns a
   | -- | TODO
+    RuleUnaryOperator a
+  | -- | TODO
     RuleBinaryOperator a
   | -- | TODO
     RuleTopLevelFunction a

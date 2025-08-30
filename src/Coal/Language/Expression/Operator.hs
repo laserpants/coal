@@ -6,6 +6,7 @@
 module Coal.Language.Expression.Operator (
   BinaryOperator (..),
   UnaryOperator (..),
+  unaryOperatorTypeScheme,
   binaryOperatorTypeScheme,
 ) where
 
@@ -67,6 +68,14 @@ data BinaryOperator
   | -- | List concatenation (++)
     OListConcatenation
   deriving (Show, Eq, Ord, Read, Data, Typeable)
+
+unaryOperatorTypeScheme :: UnaryOperator -> IndexedScheme
+unaryOperatorTypeScheme =
+  \case
+    OLogicalNot ->
+      forall0 (TIntrinsic IBool ~> TIntrinsic IBool)
+    ONegate ->
+      forall1 (\a -> a ~> a)
 
 binaryOperatorTypeScheme :: BinaryOperator -> IndexedScheme
 binaryOperatorTypeScheme =
