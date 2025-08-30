@@ -304,9 +304,7 @@ f : a -> b -> c
 g : (a, b) -> c
 ```
 
-The first of these is in curried form, which is usually more convenient to work with. 
-Curried functions can be partially applied, which is useful, for example, when working with higher-order functions. 
-Suppose we define an addition function:
+The first of these is in curried form, which is usually more convenient to work with. Curried functions can be partially applied. This is useful, for example, when working with higher-order functions. Suppose we define an addition function:
 
 ```
 fun add(x, y) = x + y
@@ -356,6 +354,8 @@ Records are unordered collections of name-value pairs, where the values can be o
   privileges = ["read", "edit", "karaoke"]
 }
 ```
+
+A valid type for the above record is:
 
 ```
 { name : string, shoe_size : int32, privileges : List<string> }
