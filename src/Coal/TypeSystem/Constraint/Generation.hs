@@ -158,7 +158,7 @@ clauseAssumptions (EClause loc p cs) = do
   names <- patternConstraints (assertEqualityAssumptions loc) ms p
   pure (typeOf p, ts1, filter (assumptionNameIsNotOneOf names) ms)
 
-emitEAnnotationConstraints :: (Data a) => a -> Type Parameter () -> Expression a IndexedType -> ConstraintsGen a ()
+emitEAnnotationConstraints :: (Show a, Data a) => a -> Type Parameter () -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
 emitEAnnotationConstraints loc t e = do
   r <- instantiateAnnotation loc t
   case r of
@@ -166,6 +166,7 @@ emitEAnnotationConstraints loc t e = do
       tellLeft [EIllFormedTypeAnnotation err]
     Right t1 ->
       tellRight [Equality (RuleAnnotation loc (typeOf e) t1) [typeOf e, t1]]
+  emitConstraints e
 
 emitEConstructorConstraints :: a -> Label IndexedType -> ConstraintsGen a [Assumption a IndexedType]
 emitEConstructorConstraints loc (Label t name) = do
@@ -289,9 +290,8 @@ tupleScheme n = Forall (Set.fromList (fromList1 ixs)) [] (tupleType (TVariable <
 emitConstraints :: (Show a, Data a) => Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
 emitConstraints =
   \case
-    EAnnotation loc t e -> do
+    EAnnotation loc t e ->
       emitEAnnotationConstraints loc t e
-      emitConstraints e
     EConstructor loc ll ->
       emitEConstructorConstraints loc ll
     EVariable loc (Label t name) ->
