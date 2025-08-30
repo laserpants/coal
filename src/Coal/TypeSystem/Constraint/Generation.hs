@@ -68,13 +68,13 @@ emitPAnnotationConstraints loc t p = do
       tellRight [Equality (RuleAnnotation loc (typeOf p) t1) [typeOf p, t1]]
 
 patternConstraints :: (Data a) => Assertion a -> [Assumption a IndexedType] -> Pattern a IndexedType -> ConstraintsGen a [Name]
-patternConstraints assert ms =
+patternConstraints assertF ms =
   \case
     PAnnotation loc t p -> do
       emitPAnnotationConstraints loc t p
-      patternConstraints assert ms p
+      patternConstraints assertF ms p
     PVariable _ (Label t name) -> do
-      assert t (filter (assumptionNameIs name) ms)
+      assertF t (filter (assumptionNameIs name) ms)
       pure [name]
     PConstructor loc (Label t name) ps -> do
       r <- lookupDataConstructor name
@@ -86,14 +86,14 @@ patternConstraints assert ms =
               tellLeft [EDataConstructorArityMismatch loc name constructorArity (length ps)]
         Just DataConstructor{..} ->
           tellRight [Explicit InferenceRulePlaceholder (foldTypeOf t ps) constructorScheme]
-      concatForM ps (patternConstraints assert ms)
+      concatForM ps (patternConstraints assertF ms)
     POr _ t p1 p2 -> do
       tellRight [Equality InferenceRulePlaceholder [t, typeOf p1, typeOf p2]]
-      ps1 <- patternConstraints assert ms p1
-      ps2 <- patternConstraints assert ms p2
+      ps1 <- patternConstraints assertF ms p1
+      ps2 <- patternConstraints assertF ms p2
       pure (ps1 <> ps2)
     PShorthand _ (Label t name) -> do
-      assert t (filter (assumptionNameIs name) ms)
+      assertF t (filter (assumptionNameIs name) ms)
       pure [name]
     PRecord _ t fields p -> do
       r1 <- tailRow p
@@ -101,7 +101,7 @@ patternConstraints assert ms =
       tellRight [Equality InferenceRulePlaceholder [t, t1]]
       forM_ (Map.toList fields) $
         \(name, p1) ->
-          assert (typeOf p1) (filter (assumptionNameIs name) ms)
+          assertF (typeOf p1) (filter (assumptionNameIs name) ms)
       case r1 of
         r@RVariable{} ->
           forM_ (Map.keys fields) $
@@ -109,13 +109,13 @@ patternConstraints assert ms =
               tellRight [Lacks InferenceRulePlaceholder (TRow r) field]
         _ ->
           pure ()
-      ps1 <- concatForM (Map.elems fields <> maybeToList p) (patternConstraints assert ms)
+      ps1 <- concatForM (Map.elems fields <> maybeToList p) (patternConstraints assertF ms)
       pure (ps1 <> Map.keys fields)
     PAny{} ->
       pure []
     PListCons _ t p1 p2 -> do
-      ms1 <- patternConstraints assert ms p1
-      ms2 <- patternConstraints assert ms p2
+      ms1 <- patternConstraints assertF ms p1
+      ms2 <- patternConstraints assertF ms p2
       tellRight [Explicit InferenceRulePlaceholder (foldTypeOf t [p1, p2]) listConstructorTypeScheme]
       pure (ms1 <> ms2)
     PListLiteral _ t ps -> do
@@ -123,13 +123,13 @@ patternConstraints assert ms =
         [ Equality InferenceRulePlaceholder (t : (typeOf <$> ps))
         , Explicit InferenceRulePlaceholder t (forall1 listType)
         ]
-      concatForM ps (patternConstraints assert ms)
+      concatForM ps (patternConstraints assertF ms)
     PAtVariable _ n (Label _ name) -> do
       pure [name]
     PAs _ (Label t name) p -> do
-      ps <- patternConstraints assert ms p
+      ps <- patternConstraints assertF ms p
       tellRight [Equality InferenceRulePlaceholder [t, typeOf p]]
-      assert t (filter (assumptionNameIs name) ms)
+      assertF t (filter (assumptionNameIs name) ms)
       pure (name : ps)
     PLiteral{} ->
       pure []
@@ -138,7 +138,7 @@ patternConstraints assert ms =
         [ Equality InferenceRulePlaceholder [t, tupleType (typeOf <$> ps)]
         , Explicit InferenceRulePlaceholder t (tupleScheme (length ps))
         ]
-      concatForM ps (patternConstraints assert ms)
+      concatForM ps (patternConstraints assertF ms)
     _ ->
       error "TODO"
 
