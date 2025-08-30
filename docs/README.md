@@ -8,8 +8,8 @@ Coal is a declarative, purely functional programming language with
 
 - simple and intuitive syntax, 
 - algebraic data types/pattern matching,
-- extensible records, 
 - recursion scheme-fold and (codata) unfold syntax, 
+- extensible records, 
 - traits (type classes), and 
 - effect handlers (work in progress)
 
@@ -17,14 +17,20 @@ Coal is a declarative, purely functional programming language with
 
 ### Rethinking recursion
 
-As a [total](https://en.wikipedia.org/wiki/Total_functional_programming) language, Coal takes a different approach to recursion, following the motto that "[explicit] recursion is the GOTO of functional programming." To ensure that programs are provably terminating, recursion is only available in a restricted form, known as *structural recursion*. In this paradigm, each recursive call operates on a strictly smaller part of some finite data structure, progressing toward a base case. 
+As a [total](https://en.wikipedia.org/wiki/Total_functional_programming) language, Coal takes a different approach to recursion, following the motto that "[explicit] recursion is the GOTO of functional programming." To ensure that programs are provably terminating, recursion is only present in a restricted form, known as *structural recursion*. In this paradigm, each recursive call operates on a strictly smaller part of some finite data structure, progressing toward a base case. 
 
 ```
   fun sum(numbers : List<int32>) : int32 =
     fold(numbers) {
       | [] => 0 
-      | x :: @sum => x + sum
+      | x :: @tot  => x + tot
     }
+```
+
+A distinction is made between finite data, which is produced and consumed in this way, and data that is potentially infinite. The latter is known is *codata*. The codata equivalent of lists, for example, are streams.
+
+```
+  cotype Stream<a> = { Head : a, Tail : Stream<a> }
 ```
 
 ### Programs = Expressions + Effects
@@ -63,7 +69,7 @@ TODO
 
 ### Modules and imports
 
-Programs in Coal are organized as collections of modules. Modules provide a way to group related functionality into distinct namespaces. Each module is typically focused on a specific purpose within a library or application.  A module can contain functions, type definitions, traits, and other language constructs, defined together in a single file.
+Programs in Coal are organized as collections of modules. Modules provide a way to group related functionality into distinct namespaces. Each module is typically focused on a specific purpose within a library or application. A module can contain functions, type definitions, traits, and other language constructs, defined together in one file.
 
 ```
 module MerkleTree {
@@ -89,15 +95,29 @@ TODO
 
 ##### If-then-else
 
-TODO
+If-expressions have a format familiar to most programmers. 
+
+```
+  if (<e_1> : bool) then <e_2> : t_1 else <e_3> : t_1
+```
 
 ##### Comments
 
-TODO
+```
+  foo(1)  // Leave any comments about this comment in the comment field below.
+```
+
+```
+  /* This is a long comment. It can extend over multiple 
+     lines and may or may not self-destruct in five seconds. 
+   */
+  fun sqrt(d : double) =
+    ...
+```
 
 ### Types
 
-#### Built-in types
+#### Built-in language primitives
 
 Coal provides the following built-in basic language types:
 
@@ -123,7 +143,7 @@ Integer literals introduced in code, such as
 let solution = 42
 ```
 
-have type `n with Numeric(n)`, which means that `n` can be any type, as long it is a member of the `Numeric` trait. This includes `int32`, `int64`, `bignum`, and `nat`.
+are *polymorphic*. Their type is written `n with Numeric(n)`, which means that `n` can be any type, as long it is a member of the `Numeric` trait. This includes `int32`, `int64`, `bignum`, and `nat`.
 
 ##### Unit
 
@@ -193,8 +213,8 @@ asdfad grammars
 
 #### Natural numbers
 
-Recursion in Coal works side-by-side with a recursive data structure, like lists, trees, or other algebraic data types. 
-Ordinary integers are not ...
+Recursion in Coal always works side-by-side with a recursive data structure, like lists, trees, or other algebraic data types. 
+Ordinary (machine type) integers are not ...
 
 standard axiomatization of the natural numbers
 
@@ -212,7 +232,7 @@ type nat
 
 #### Lists
 
-A list is an ordered collection of elements where all entries are of the same type. Lists are a foundational data structure in functional programming, commonly used to store and manipulate collections of data. In Coal, list literals are denoted by a sequence of comma-separated expressions, enclosed in square brackets:
+A list is an ordered collection where all elements are of the same type. Lists are a foundational data structure in functional programming, commonly used to store and manipulate collections of data. In Coal, list literals are denoted by a sequence of comma-separated expressions, enclosed in square brackets:
 
 ```
 [<expr_1 : t>, <expr_2 : t>, ..., <expr_n : t>] : List<t>
@@ -277,9 +297,7 @@ The empty tuple *does* exist. It is written `()` and is known as the unit value.
 
 ##### Tuples and currying
 
-By default, function definitions in Coal are *curried*. 
-There is a difference between a function that takes multiple arguments and one that takes a single tuple as its argument.
-Consider the following two type signatures:
+By default, function definitions in Coal are *curried*. There is a difference between a function that takes multiple arguments and one that takes a single tuple as its argument. Consider the following two type signatures:
 
 ```
 f : a -> b -> c
