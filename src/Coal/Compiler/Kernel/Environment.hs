@@ -14,6 +14,7 @@ module Coal.Compiler.Kernel.Environment (
 
 import Coal.Common.Environment (Environment)
 import Control.Monad.Reader (MonadReader, ask, local)
+import Data.Text (isPrefixOf)
 import Extra (Name, Over, Set)
 
 import qualified Coal.Common.Environment as Environment
@@ -45,13 +46,21 @@ overKernelEnvironmentQualifiedNames fn KernelEnvironment{..} =
 qualifyName :: (MonadReader KernelEnvironment m) => Name -> m Name
 qualifyName name = do
   KernelEnvironment{..} <- ask
-  if name == "_" || Text.head name == '$' || Text.isPrefixOf "Core$" name || Set.member name kernelEnvironmentLocalNames
+  if isFinalName name kernelEnvironmentLocalNames
     then pure name
     else case Environment.lookup name kernelEnvironmentQualifiedNames of
       Just qname ->
         pure qname
       Nothing ->
         pure (kernelEnvironmentModule <> "." <> name)
+
+isFinalName :: Name -> Set Name -> Bool
+isFinalName name localNames
+  | name == "_" = True
+  | Text.head name == '$' = True
+  | "Core$" `isPrefixOf` name = True
+  | name `Set.member` localNames = True
+  | otherwise = False
 
 withLocalName :: (MonadReader KernelEnvironment m) => Name -> m a -> m a
 withLocalName = local . overKernelEnvironmentLocalNames . Set.insert
