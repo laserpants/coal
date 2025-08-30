@@ -87,6 +87,8 @@ As in most other languages, import statements must appear at the top of a module
 
 ### Language constructs
 
+#### Top-level constructs
+
 TODO
 
 #### Control flow
@@ -100,6 +102,10 @@ If-expressions have a format similar to those in most other languages:
 ```
   if (<e_1> : bool) then <e_2> : t_1 else <e_3> : t_1
 ```
+
+##### Let-bindings
+
+TODO
 
 ##### Comments
 
@@ -291,7 +297,7 @@ There is no singleton tuple type. A single value in parentheses is just the valu
 (42)  // Not a tuple -- just the integer 42
 ```
 
-The empty tuple *does* exist, and has special meaning. It is written `()` and is known as the unit value. Its type is `unit`. (See *Built-in types* for more details.)
+The empty tuple *does* exist, and has special meaning. It is written `()` and is known as the unit value. The type of `()` is `unit`. (See **Built-in types** for more details.)
 
 ```
 ()            : unit                           // unit value
@@ -351,7 +357,7 @@ let five = curry(add, 1, 4)         // or (curry(add))(1, 4)
 
 #### Records
 
-Records are unordered collections of name-value pairs, where the values can be of any type, including other records. They are suitable for representing structured data with multiple properties, and nested objects: A record is written as a sequence of comma-separated fields enclosed in curly braces. A field consists of a name, referred to as the *label*, paired with a value. These two are separated by an equals sign (`=`). 
+Records are unordered collections of name-value pairs, where the values can be of any type, including other records. They are suitable for representing structured data with multiple properties, and nested objects: A record is written as a sequence of comma-separated fields enclosed in curly braces. A field consists of a name, referred to as the *label*, paired with its value. These two are separated by an equals sign (`=`). 
 
 ```
 { 
@@ -432,9 +438,9 @@ map(fn(x) => x * 100, [1, 2, 3])  // ==> [100, 200, 300]
 
 TODO
 
-### Recursion and corecursion
+### Recursion 
 
-In most languages, a typical (recursive) implementation of the factorial function would look something like the following:
+In most languages, a typical implementation of the factorial function would look something like the following:
 
 ```
 fun factorial(n : int32) =
@@ -465,11 +471,14 @@ Here is how we use the `nat` data type to define the factorial function:
 ```
 
 The key here is the special `@`-pattern used in the second clause. 
-This type of pattern can only appear where _
+This type of pattern needs to follow some specific rules. It can only appear inside a constructor. 
 
 Note that `fold` is a language keyword, not an ordinary function.
-A fold is very similar to an ordinary `match` expression, but with some extra powers.
+A fold is similar to an ordinary `match` expression, but with some extra powers.
 
+#### Top-level folds and mutual recursion
+
+### Corecursion 
 
 ## License 
 
