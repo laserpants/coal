@@ -105,7 +105,15 @@ If-expressions have a format similar to those in most other languages:
 
 ##### Let-bindings
 
-TODO
+```
+  let <name> = <e_1> in <e_2>
+```
+
+Polymorphism
+
+An important detail that makes let-bindings in Coal different from those in most other languages is that 
+
+This prevents ill-formed expressions such as `let f = f in f`.
 
 ##### Comments
 
@@ -244,7 +252,9 @@ These are constant time (**O**(1)) operations
 
 #### Lists
 
-A list is an ordered collection where all elements are of the same type. Lists are a foundational data structure in functional programming, commonly used to store and manipulate collections of data. In Coal, list literals are denoted by a sequence of comma-separated expressions, enclosed in square brackets:
+A list is an ordered collection where all elements are of the same type. Lists are a foundational data structure in functional programming, commonly used to store and manipulate collections of data, and as a building block for defining more ...
+
+In Coal, list literals are denoted by a sequence of comma-separated expressions, enclosed in square brackets:
 
 ```
 [<expr_1 : t>, <expr_2 : t>, ..., <expr_n : t>] : List<t>
