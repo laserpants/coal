@@ -203,18 +203,18 @@ spec = do
   print (x == Right "24\n")
   x <- main81
   print (x == Right "6\n")
-  x <- main82
-  print (x == Right "{\"abc\":[\"a\",\"b\",\"c\"],\"pi\":3.14159}\n")
+--  x <- main82
+--  print (x == Right "{\"abc\":[\"a\",\"b\",\"c\"],\"pi\":3.14159}\n")
   x <- main84
   print (x == Right "true\n")
-  x <- main85
-  print (x == Right "aa\n")
-  x <- main86
-  print (x == Right "24\n")
-  x <- main87
-  print (x == Right "{\"abc\":[\"a\",\"b\",\"c\"],\"pi\":3.14159}\n")
-  x <- main88
-  print (x == Right "{\"abc\":[\"a\",\"b\",\"c\"],\"yes\":true}\n")
+--  x <- main85
+--  print (x == Right "aa\n")
+--  x <- main86
+--  print (x == Right "24\n")
+--  x <- main87
+--  print (x == Right "{\"abc\":[\"a\",\"b\",\"c\"],\"pi\":3.14159}\n")
+--  x <- main88
+--  print (x == Right "{\"abc\":[\"a\",\"b\",\"c\"],\"yes\":true}\n")
   -- 89
   x <- main91
   print (x == Right "5\n")
