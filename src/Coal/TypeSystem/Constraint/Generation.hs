@@ -209,8 +209,8 @@ tailRow =
       tellRight [Equality InferenceRulePlaceholder [TIntrinsic (IRecord (TRow r)), typeOf t]]
       pure r
 
-emitIfConstraints :: (Show a, Data a) => a -> IndexedType -> Expression a IndexedType -> Expression a IndexedType -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
-emitIfConstraints loc t e1 e2 e3 = do
+emitEIfConstraints :: (Show a, Data a) => a -> IndexedType -> Expression a IndexedType -> Expression a IndexedType -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
+emitEIfConstraints loc t e1 e2 e3 = do
   ms1 <- collectConstraints e1
   ms2 <- collectConstraints e2
   ms3 <- collectConstraints e3
@@ -222,8 +222,8 @@ emitIfConstraints loc t e1 e2 e3 = do
   t2 = typeOf e2
   t3 = typeOf e3
 
-emitApplicationConstraints :: (Show a, Data a) => a -> IndexedType -> Expression a IndexedType -> List1 (Expression a IndexedType) -> ConstraintsGen a [Assumption a IndexedType]
-emitApplicationConstraints loc t e1 es = do
+emitEApplicationConstraints :: (Show a, Data a) => a -> IndexedType -> Expression a IndexedType -> List1 (Expression a IndexedType) -> ConstraintsGen a [Assumption a IndexedType]
+emitEApplicationConstraints loc t e1 es = do
   ms1 <- collectConstraints e1
   ms2 <- concatMapM collectConstraints es
   tellRight [Equality (RuleApplication loc t1 (fromList1 ts)) [t1, t2]]
@@ -233,8 +233,8 @@ emitApplicationConstraints loc t e1 es = do
   t2 = foldType t ts
   ts = typeOf <$> es
 
-emitListConsConstraints :: (Show a, Data a) => a -> IndexedType -> Expression a IndexedType -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
-emitListConsConstraints loc t e1 e2 = do
+emitEListConsConstraints :: (Show a, Data a) => a -> IndexedType -> Expression a IndexedType -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
+emitEListConsConstraints loc t e1 e2 = do
   ms1 <- collectConstraints e1
   ms2 <- collectConstraints e2
   tellRight [Explicit InferenceRulePlaceholder t1 listConstructorTypeScheme]
@@ -242,8 +242,8 @@ emitListConsConstraints loc t e1 e2 = do
  where
   t1 = typeOf e1 `TArrow` typeOf e2 `TArrow` t
 
-emitListLiteralConstraints :: (Show a, Data a) => a -> IndexedType -> [Expression a IndexedType] -> ConstraintsGen a [Assumption a IndexedType]
-emitListLiteralConstraints loc t es = do
+emitEListLiteralConstraints :: (Show a, Data a) => a -> IndexedType -> [Expression a IndexedType] -> ConstraintsGen a [Assumption a IndexedType]
+emitEListLiteralConstraints loc t es = do
   ms1 <- concatMapM collectConstraints es
   tellRight
     [ Equality InferenceRulePlaceholder (t : (listType . typeOf <$> es))
@@ -251,8 +251,8 @@ emitListLiteralConstraints loc t es = do
     ]
   pure ms1
 
-emitTupleConstraints :: (Show a, Data a) => a -> IndexedType -> List1 (Expression a IndexedType) -> ConstraintsGen a [Assumption a IndexedType]
-emitTupleConstraints loc t es = do
+emitETupleConstraints :: (Show a, Data a) => a -> IndexedType -> List1 (Expression a IndexedType) -> ConstraintsGen a [Assumption a IndexedType]
+emitETupleConstraints loc t es = do
   ms1 <- concatMapM collectConstraints es
   tellRight
     [ Equality InferenceRulePlaceholder [t, tupleType (typeOf <$> es)]
@@ -310,15 +310,15 @@ collectConstraints =
             pure (name : names)
       pure (filter (assumptionNameIsNotOneOf names) ms1 <> ms2)
     EIf loc t e1 e2 e3 ->
-      emitIfConstraints loc t e1 e2 e3
+      emitEIfConstraints loc t e1 e2 e3
     EApplication loc t e1 es ->
-      emitApplicationConstraints loc t e1 es
+      emitEApplicationConstraints loc t e1 es
     ELiteral{} ->
       pure []
     EListCons loc t e1 e2 ->
-      emitListConsConstraints loc t e1 e2
+      emitEListConsConstraints loc t e1 e2
     EListLiteral loc t es ->
-      emitListLiteralConstraints loc t es
+      emitEListLiteralConstraints loc t es
     EMatch loc t e cs -> do
       ms1 <- collectConstraints e
       (ts1, ts2, ms2) <- (third3 concat . unzip3 <$$> traverse clauseAssumptions) (fromList1 cs)
@@ -405,7 +405,7 @@ collectConstraints =
                 pure []
       pure (ms1 <> ms2)
     ETuple loc t es ->
-      emitTupleConstraints loc t es
+      emitETupleConstraints loc t es
     _ ->
       error "Not implemented"
 
