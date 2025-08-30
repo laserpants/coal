@@ -194,6 +194,16 @@ emitERecursiveLetConstraints loc p e1 e2 = do
   t1 = typeOf p
   t2 = typeOf e1
 
+emitESelectConstraints :: (Show a, Data a) => a -> Label IndexedType -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
+emitESelectConstraints loc (Label t name) e = do
+  t1 <- recordType
+  tellRight [Equality InferenceRulePlaceholder [t1, typeOf e]]
+  emitConstraints e
+ where
+  recordType = do
+    rvar <- supplied (RVariable . TypeIndex KRow)
+    pure $ TIntrinsic (IRecord (TRow (RExtend name t rvar)))
+
 emitERecordConstraints :: (Show a, Data a) => a -> IndexedType -> Dictionary (Expression a IndexedType) -> Maybe (Expression a IndexedType) -> ConstraintsGen a [Assumption a IndexedType]
 emitERecordConstraints loc t fields expr = do
   ms1 <- concatMapM emitConstraints expr
@@ -338,11 +348,8 @@ emitConstraints =
     EBinaryOperator loc t op -> do
       tellRight [Explicit (RuleBinaryOperator loc) t (binaryOperatorTypeScheme op)]
       pure []
-    ESelect _ (Label t name) e -> do
-      rvar <- supplied (RVariable . TypeIndex KRow)
-      let t1 = TIntrinsic (IRecord (TRow (RExtend name t rvar)))
-      tellRight [Equality InferenceRulePlaceholder [t1, typeOf e]]
-      emitConstraints e
+    ESelect loc ll e ->
+      emitESelectConstraints loc ll e
     EFold _ t name (e :| es) cs e1 -> do
       ms1 <- emitConstraints e
       ms2 <- concatMapM emitConstraints es
