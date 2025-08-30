@@ -3,12 +3,8 @@
 module Coal.Compiler.TypeInference.Errors where
 
 import Coal.Ast.Metadata
-import Coal.TypeSystem.Constraint.Generation.InferenceRule
-import Coal.TypeSystem.Constraint.Generation.Internal
-import Data.List (dropWhileEnd)
 import Data.Text (Text)
 import Text.Megaparsec
-import Text.Megaparsec.Pos
 import TextShow (showt)
 
 import qualified Data.Text as Text
