@@ -46,7 +46,7 @@ overKernelEnvironmentQualifiedNames fn KernelEnvironment{..} =
 qualifyName :: (MonadReader KernelEnvironment m) => Name -> m Name
 qualifyName name = do
   KernelEnvironment{..} <- ask
-  if isFinalName name kernelEnvironmentLocalNames
+  if isFinal name kernelEnvironmentLocalNames
     then pure name
     else case Environment.lookup name kernelEnvironmentQualifiedNames of
       Just qname ->
@@ -54,8 +54,8 @@ qualifyName name = do
       Nothing ->
         pure (kernelEnvironmentModule <> "." <> name)
 
-isFinalName :: Name -> Set Name -> Bool
-isFinalName name localNames
+isFinal :: Name -> Set Name -> Bool
+isFinal name localNames
   | name == "_" = True
   | Text.head name == '$' = True
   | "Core$" `isPrefixOf` name = True
