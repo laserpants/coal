@@ -32,7 +32,7 @@ constraint1 =
 collectELambdaConstraintsSpec1 :: Bool
 collectELambdaConstraintsSpec1 = null ms && constraint1 `elem` rights outs
  where
-  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (collectConstraints expr)
+  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (emitConstraints expr)
   expr = fixture1
   ctx =
     ConstraintsGenContext
@@ -52,7 +52,7 @@ fixture2 =
 collectELambdaConstraintsSpec2 :: Bool
 collectELambdaConstraintsSpec2 = null outs
  where
-  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (collectConstraints expr)
+  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (emitConstraints expr)
   expr = fixture2
   ctx =
     ConstraintsGenContext
@@ -106,7 +106,7 @@ collectELambdaConstraintsSpec4 =
   constraint2 `elem` constraints && constraint3 `elem` constraints && constraint4 `elem` constraints
  where
   constraints = muteConstraint <$> rights outs
-  (_, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (collectConstraints expr)
+  (_, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (emitConstraints expr)
   expr = fixture3
   ctx =
     ConstraintsGenContext

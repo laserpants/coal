@@ -48,7 +48,7 @@ runConstraintsGenC stack = do
 
 generateConstraintsC :: (Monad m, Data a, Show a) => Expression a IndexedType -> CompilerT a m ([CompilerAssumption a], [CompilerConstraint a])
 generateConstraintsC e = do
-  (assumptions, params, result) <- runConstraintsGenC (collectConstraints e)
+  (assumptions, params, result) <- runConstraintsGenC (emitConstraints e)
   let (errors, constraints) = partitionEithers result
   compilerReportConstraintsGenErrors errors
   compilerSetTypeAnnotationParams params

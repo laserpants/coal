@@ -27,7 +27,7 @@ fixture1 =
 collectEConstructorConstraintsSpec1 :: Bool
 collectEConstructorConstraintsSpec1 = null ms && ENoDataConstructor () "Blue" `elem` lefts outs
  where
-  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (collectConstraints expr)
+  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (emitConstraints expr)
   expr = fixture1
   ctx =
     ConstraintsGenContext
@@ -40,7 +40,7 @@ collectEConstructorConstraintsSpec1 = null ms && ENoDataConstructor () "Blue" `e
 collectEConstructorConstraintsSpec2 :: Bool
 collectEConstructorConstraintsSpec2 = null ms && null (lefts outs)
  where
-  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (collectConstraints expr)
+  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (emitConstraints expr)
   expr = fixture1
   ctx =
     ConstraintsGenContext
@@ -64,7 +64,7 @@ collectEConstructorConstraintsSpec3 :: Bool
 collectEConstructorConstraintsSpec3 = null ms && ENoDataConstructor () "Blue" `elem` lefts outs
  where
   expr = fixture2
-  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (collectConstraints expr)
+  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (emitConstraints expr)
   ctx =
     ConstraintsGenContext
       { constraintsGenContextMonomorphicSet = mempty
@@ -76,7 +76,7 @@ collectEConstructorConstraintsSpec3 = null ms && ENoDataConstructor () "Blue" `e
 collectEConstructorConstraintsSpec4 :: Bool
 collectEConstructorConstraintsSpec4 = null ms && null (lefts outs)
  where
-  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (collectConstraints expr)
+  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (emitConstraints expr)
   expr = fixture2
   ctx =
     ConstraintsGenContext
@@ -102,7 +102,7 @@ constraint1 =
 collectEConstructorConstraintsSpec5 :: Bool
 collectEConstructorConstraintsSpec5 = null ms && constraint1 `elem` rights outs
  where
-  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (collectConstraints expr)
+  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (emitConstraints expr)
   expr = fixture2
   ctx =
     ConstraintsGenContext

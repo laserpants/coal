@@ -7,7 +7,7 @@
 module Coal.TypeSystem.Constraint.Generation (
   ConstraintsGenContext (..),
   ConstraintsGenError (..),
-  collectConstraints,
+  emitConstraints,
   runConstraintsGenStack,
   evalConstraintsGenStack,
 ) where
@@ -150,8 +150,8 @@ clauseAssumptions (EClause loc p cs) = do
         CPlain _ gs e -> do
           ms1 <- concatForM gs $ \(CGuard g) -> do
             tellRight [Equality (RuleMatchClauseGuard loc) [typeOf g, TIntrinsic IBool]]
-            collectConstraints g
-          ms2 <- collectConstraints e
+            emitConstraints g
+          ms2 <- emitConstraints e
           pure (typeOf e, ms1 <> ms2)
         CLambda{} ->
           error "TODO"
@@ -179,15 +179,15 @@ emitEConstructorConstraints loc (Label t name) = do
 
 emitELambdaConstraints :: (Show a, Data a) => a -> List1 (Pattern a IndexedType) -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
 emitELambdaConstraints loc ps e = do
-  ms <- withMonomorphic ps (collectConstraints e)
+  ms <- withMonomorphic ps (emitConstraints e)
   names <- concatForM ps (patternConstraints (assertEqualityAssumptions loc) ms)
   pure (filter (assumptionNameIsNotOneOf names) ms)
 
 emitERecursiveLetConstraints :: (Show a, Data a) => a -> Pattern a IndexedType -> Expression a IndexedType -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
 emitERecursiveLetConstraints loc p e1 e2 = do
-  ms1 <- collectConstraints e2
+  ms1 <- emitConstraints e2
   tellRight [Equality (RuleLetBindingPattern loc t1 t2) [t1, t2]]
-  ms2 <- collectConstraints e1
+  ms2 <- emitConstraints e1
   names <- patternConstraints (assertEqualityAssumptions loc) (ms1 <> ms2) p
   pure (filter (assumptionNameIsNotOneOf names) (ms1 <> ms2))
  where
@@ -196,8 +196,8 @@ emitERecursiveLetConstraints loc p e1 e2 = do
 
 emitERecordConstraints :: (Show a, Data a) => a -> IndexedType -> Dictionary (Expression a IndexedType) -> Maybe (Expression a IndexedType) -> ConstraintsGen a [Assumption a IndexedType]
 emitERecordConstraints loc t fields expr = do
-  ms1 <- concatMapM collectConstraints expr
-  ms2 <- concatMapM collectConstraints fields
+  ms1 <- concatMapM emitConstraints expr
+  ms2 <- concatMapM emitConstraints fields
   r1 <- tailRow expr
   let t1 = TIntrinsic (IRecord (TRow (fromDictionary (typeOf <$> fields) r1)))
   tellRight [Equality InferenceRulePlaceholder [t, t1]]
@@ -222,9 +222,9 @@ tailRow =
 
 emitEIfConstraints :: (Show a, Data a) => a -> IndexedType -> Expression a IndexedType -> Expression a IndexedType -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
 emitEIfConstraints loc t e1 e2 e3 = do
-  ms1 <- collectConstraints e1
-  ms2 <- collectConstraints e2
-  ms3 <- collectConstraints e3
+  ms1 <- emitConstraints e1
+  ms2 <- emitConstraints e2
+  ms3 <- emitConstraints e3
   tellRight [Equality (RuleIfCondition loc t1) [t1, TIntrinsic IBool]]
   tellRight [Equality (RuleIfBranches loc t2 t3) [t, t2, t3]]
   pure (ms1 <> ms2 <> ms3)
@@ -235,8 +235,8 @@ emitEIfConstraints loc t e1 e2 e3 = do
 
 emitEApplicationConstraints :: (Show a, Data a) => a -> IndexedType -> Expression a IndexedType -> List1 (Expression a IndexedType) -> ConstraintsGen a [Assumption a IndexedType]
 emitEApplicationConstraints loc t e1 es = do
-  ms1 <- collectConstraints e1
-  ms2 <- concatMapM collectConstraints es
+  ms1 <- emitConstraints e1
+  ms2 <- concatMapM emitConstraints es
   tellRight [Equality (RuleApplication loc t1 (fromList1 ts)) [t1, t2]]
   pure (ms1 <> ms2)
  where
@@ -246,8 +246,8 @@ emitEApplicationConstraints loc t e1 es = do
 
 emitEListConsConstraints :: (Show a, Data a) => a -> IndexedType -> Expression a IndexedType -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
 emitEListConsConstraints loc t e1 e2 = do
-  ms1 <- collectConstraints e1
-  ms2 <- collectConstraints e2
+  ms1 <- emitConstraints e1
+  ms2 <- emitConstraints e2
   tellRight [Explicit InferenceRulePlaceholder t1 listConstructorTypeScheme]
   pure (ms1 <> ms2)
  where
@@ -255,7 +255,7 @@ emitEListConsConstraints loc t e1 e2 = do
 
 emitEListLiteralConstraints :: (Show a, Data a) => a -> IndexedType -> [Expression a IndexedType] -> ConstraintsGen a [Assumption a IndexedType]
 emitEListLiteralConstraints loc t es = do
-  ms1 <- concatMapM collectConstraints es
+  ms1 <- concatMapM emitConstraints es
   tellRight
     [ Equality InferenceRulePlaceholder (t : (listType . typeOf <$> es))
     , Explicit InferenceRulePlaceholder t (forall1 listType)
@@ -264,7 +264,7 @@ emitEListLiteralConstraints loc t es = do
 
 emitETupleConstraints :: (Show a, Data a) => a -> IndexedType -> List1 (Expression a IndexedType) -> ConstraintsGen a [Assumption a IndexedType]
 emitETupleConstraints loc t es = do
-  ms1 <- concatMapM collectConstraints es
+  ms1 <- concatMapM emitConstraints es
   tellRight
     [ Equality InferenceRulePlaceholder [t, tupleType (typeOf <$> es)]
     , Explicit InferenceRulePlaceholder t (tupleScheme (length es))
@@ -276,13 +276,12 @@ tupleScheme n = Forall (Set.fromList (fromList1 ixs)) [] (tupleType (TVariable <
  where
   ixs = TypeIndex KType 0 :| [TypeIndex KType ti | ti <- [1 .. n - 1]]
 
--- TODO: emit
-collectConstraints :: (Show a, Data a) => Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
-collectConstraints =
+emitConstraints :: (Show a, Data a) => Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
+emitConstraints =
   \case
     EAnnotation loc t e -> do
       emitEAnnotationConstraints loc t e
-      collectConstraints e
+      emitConstraints e
     EConstructor loc ll ->
       emitEConstructorConstraints loc ll
     EVariable loc (Label t name) ->
@@ -292,16 +291,16 @@ collectConstraints =
     ERecursiveLet loc p e1 e2 ->
       emitERecursiveLetConstraints loc p e1 e2
     ELet loc gs e1 -> do
-      ms1 <- collectConstraints e1
+      ms1 <- emitConstraints e1
       ms2 <- concatForM gs $
         \case
           BPattern _ p e -> do
             let t1 = typeOf p
                 t2 = typeOf e
             tellRight [Equality (RuleLetBindingPattern loc t1 t2) [t1, t2]]
-            collectConstraints e
+            emitConstraints e
           BFunction _ _ ps e -> do
-            ms <- withMonomorphic ps (collectConstraints e)
+            ms <- withMonomorphic ps (emitConstraints e)
             names <- concatForM ps (patternConstraints (assertEqualityAssumptions loc) ms)
             pure (filter (assumptionNameIsNotOneOf names) ms)
       names <- concatForM gs $
@@ -325,7 +324,7 @@ collectConstraints =
     EListLiteral loc t es ->
       emitEListLiteralConstraints loc t es
     EMatch loc t e cs -> do
-      ms1 <- collectConstraints e
+      ms1 <- emitConstraints e
       (ts1, ts2, ms2) <- (third3 concat . unzip3 <$$> traverse clauseAssumptions) (fromList1 cs)
       -- Pattern types
       tellRight [Equality (RuleMatchClausePatterns loc) (typeOf e : ts1)]
@@ -343,16 +342,16 @@ collectConstraints =
       rvar <- supplied (RVariable . TypeIndex KRow)
       let t1 = TIntrinsic (IRecord (TRow (RExtend name t rvar)))
       tellRight [Equality InferenceRulePlaceholder [t1, typeOf e]]
-      collectConstraints e
+      emitConstraints e
     EFold _ t name (e :| es) cs e1 -> do
-      ms1 <- collectConstraints e
-      ms2 <- concatMapM collectConstraints es
+      ms1 <- emitConstraints e
+      ms2 <- concatMapM emitConstraints es
       (ts1, ts2, ms3) <- (third3 concat . unzip3 <$$> traverse clauseAssumptions) (fromList1 cs)
       -- Pattern types
       tellRight [Equality InferenceRulePlaceholder (typeOf e : ts1)]
       -- Expression types
       tellRight [Equality InferenceRulePlaceholder (foldTypeOf t es : concat ts2)]
-      ms4 <- concatMapM collectConstraints e1
+      ms4 <- concatMapM emitConstraints e1
       case e1 of
         Just (ERecursiveLet _ (PVariable _ (Label t1 _)) _ _) ->
           tellRight [Equality InferenceRulePlaceholder [foldTypeOf t (e :| es), t1]]
@@ -364,7 +363,7 @@ collectConstraints =
       t1 <- supplied (TVariable . TypeIndex KType)
       let qs = PVariable loc (Label t name) <| ps
       tellRight [Equality InferenceRulePlaceholder [t, foldTypeOf t1 ps]]
-      ms1 <- withMonomorphic qs (concatMapM collectConstraints d)
+      ms1 <- withMonomorphic qs (concatMapM emitConstraints d)
 
       case e1 of
         Just (ERecursiveLet _ _ (ELambda _ _ (ECodataFields _ _ fields)) _) -> do
@@ -379,16 +378,16 @@ collectConstraints =
                 _ ->
                   tellLeft [ENoCodataAccessor loc name]
 
-      ms2 <- concatMapM collectConstraints e1
+      ms2 <- concatMapM emitConstraints e1
       names <- concatForM qs (patternConstraints (assertEqualityAssumptions loc) ms1)
 
       pure (filter (assumptionNameIsNotOneOf (name : names)) (ms1 <> ms2))
     ECodataFields _ _ d -> do
-      concatMapM collectConstraints d
+      concatMapM emitConstraints d
     ERecord loc t d me ->
       emitERecordConstraints loc t d me
     ECodataSelect loc (Label t name) e e1 -> do
-      ms1 <- collectConstraints e
+      ms1 <- emitConstraints e
       r <- lookupCodataAccessor name
       ms2 <-
         case r of
@@ -400,8 +399,8 @@ collectConstraints =
             tellRight [Explicit InferenceRulePlaceholder t1 codataAccessorScheme]
             case e1 of
               Just (ERecursiveLet _ (PVariable _ (Label t2 n)) e2 e3) -> do
-                ms2 <- collectConstraints e2
-                ms3 <- collectConstraints e3
+                ms2 <- emitConstraints e2
+                ms3 <- emitConstraints e3
                 assertEqualityAssumptions loc t2 (filter (assumptionNameIs n) ms3)
                 t0 <- supplied (TVariable . TypeIndex KType)
                 tellRight [Explicit InferenceRulePlaceholder (t0 `TArrow` typeOf e3) codataAccessorScheme]

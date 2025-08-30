@@ -22,7 +22,7 @@ fixture1 =
 collectEAnnotationConstraintsSpec1 :: Bool
 collectEAnnotationConstraintsSpec1 = null ms && null (lefts outs)
  where
-  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (collectConstraints expr)
+  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (emitConstraints expr)
   expr = fixture1
   ctx =
     ConstraintsGenContext
@@ -38,7 +38,7 @@ constraint1 = Equality (RuleAnnotation () (TIntrinsic IInt32) (TIntrinsic IInt32
 collectEAnnotationConstraintsSpec2 :: Bool
 collectEAnnotationConstraintsSpec2 = null ms && constraint1 `elem` rights outs
  where
-  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (collectConstraints expr)
+  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (emitConstraints expr)
   expr = fixture1
   ctx =
     ConstraintsGenContext
@@ -58,7 +58,7 @@ constraint2 = Equality (RuleAnnotation () (TIntrinsic IInt32) (TIntrinsic IBool)
 collectEAnnotationConstraintsSpec3 :: Bool
 collectEAnnotationConstraintsSpec3 = null ms && constraint2 `elem` rights outs
  where
-  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (collectConstraints expr)
+  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (emitConstraints expr)
   expr = fixture2
   ctx =
     ConstraintsGenContext
@@ -75,7 +75,7 @@ fixture3 =
 collectEAnnotationConstraintsSpec4 :: Bool
 collectEAnnotationConstraintsSpec4 = null ms && null (lefts outs)
  where
-  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (collectConstraints expr)
+  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (emitConstraints expr)
   expr = fixture3
   ctx =
     ConstraintsGenContext

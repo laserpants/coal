@@ -18,7 +18,7 @@ import qualified Data.Set as Set
 -- collectExampleConstraintsSpec1 :: Bool
 collectExampleConstraintsSpec1 = (ms, outs)
  where
-  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (collectConstraints expr)
+  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (emitConstraints expr)
   expr = fixture1
   ctx =
     ConstraintsGenContext
