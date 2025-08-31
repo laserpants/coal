@@ -74,8 +74,8 @@ instance (Data a, Monoid a) => RecordDesugarable a (Expression a IndexedType) wh
     \case
       EMatch a t e cs ->
         EMatch a t e <$> desugarRecordPatterns cs
-      EFold a t n es cs e ->
-        EFold a t n es cs <$> desugarRecordPatterns e
+      EFold a t es cs e ->
+        EFold a t es cs <$> desugarRecordPatterns e
       EUnfold a t n ps d me ->
         EUnfold a t n ps d <$> desugarRecordPatterns me
       e ->

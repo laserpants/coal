@@ -14,6 +14,7 @@ module Coal.Compiler.Transform.Fold (
 ) where
 
 import Coal.Common.Label (Label (..), labelName)
+import Coal.Common.Supply (suppliedName)
 import Coal.Compiler.Transform.Expression
 import Coal.Compiler.Transform.Flattening (flattenApplication)
 import Coal.Compiler.Transform.Tree (replace)
@@ -46,7 +47,7 @@ runFoldExpansion r s e = (a, s')
   (a, s', _) = runRWS (foldExpansionStack e) r s
 
 class FoldContext e where
-  expandFolds :: Name -> [(Name, Label ())] -> e -> e
+  expandFolds :: Name -> [Label ()] -> e -> e
 
 instance (FoldContext e) => FoldContext [e] where
   expandFolds name = fmap . expandFolds name
@@ -74,8 +75,8 @@ instance (Monoid a, Data a) => FoldContext (Choice Expression a ()) where
 instance (Monoid a, Data a) => FoldContext (Expression a ()) where
   expandFolds = flip . foldr . updateName
 
-updateName :: (Monoid a, Data a) => Name -> (Name, Label ()) -> Expression a () -> Expression a ()
-updateName _ (name, label) =
+updateName :: (Monoid a, Data a) => Name -> Label () -> Expression a () -> Expression a ()
+updateName name label =
   replace (labelName label) $
     const2 $
       applicationE (varE name) (EVariable mempty label :| [])
@@ -83,24 +84,26 @@ updateName _ (name, label) =
 eliminateAtPatterns :: Pattern a () -> Pattern a ()
 eliminateAtPatterns =
   \case
-    PAtVariable a _ ll ->
+    PAtVariable a ll ->
       PVariable a ll
     p ->
       p
 
-atLabels :: (Data a, Data t) => Pattern a t -> [(Name, Label t)]
+atLabels :: (Data a, Data t) => Pattern a t -> [Label t]
 atLabels = execWriter . transformM go
  where
   go =
     \case
-      p@(PAtVariable _ name label) -> do
-        tell [(name, label)]
+      p@(PAtVariable _ label) -> do
+        tell [label]
         pure p
       p ->
         pure p
 
-expandFoldExpr :: (Monoid a, Data a, MonadState Int m) => Name -> NonEmpty (Expression a ()) -> NonEmpty (Clause a ()) -> m (Expression a ())
-expandFoldExpr name args clauses = do
+expandFoldExpr :: (Monoid a, Data a, MonadState Int m, MonadReader Name m) => NonEmpty (Expression a ()) -> NonEmpty (Clause a ()) -> m (Expression a ())
+expandFoldExpr args clauses = do
+  name <- suppliedName
+  let var = name <> ".expr"
   pure $
     transform flattenApplication $
       letE
@@ -113,8 +116,6 @@ expandFoldExpr name args clauses = do
             )
         )
         (applicationE (varE name) args)
- where
-  var = name <> ".expr"
 
 class CompileFoldsContext a where
   compileFolds :: a -> FoldExpansion a
@@ -133,9 +134,9 @@ instance (Monoid a, Data a) => CompileFoldsContext (Expression a ()) where
    where
     go =
       \case
-        EFold a t name es cs Nothing -> do
-          e1 <- expandFoldExpr name es cs
-          pure (EFold a t name es cs (Just e1))
+        EFold a t es cs Nothing -> do
+          e1 <- expandFoldExpr es cs
+          pure (EFold a t es cs (Just e1))
         e ->
           pure e
 
@@ -166,7 +167,7 @@ instance (Monoid a, Data a) => CompileFoldsContext (Definition a k ()) where
         DFunction name <$> compileFolds f <*> traverse compileFolds fs
       DConstant name g fs -> do
         DConstant name <$> compileFolds g <*> traverse compileFolds fs
-      DInstance name ts t ds ->
-        DInstance name ts t <$> compileFolds ds
+      DInstance name ps t ds ->
+        DInstance name ps t <$> compileFolds ds
       o ->
         pure o

@@ -161,7 +161,7 @@ translateExpression =
       r = extractRow (translateLabel ll2)
     ETraitDictionary _ t trait@(Trait name _) ->
       pure (Kernel.var (Label (translateType t) (dictVariable name trait)))
-    EFold _ _ _ _ _ (Just e) ->
+    EFold _ _ _ _ (Just e) ->
       translateExpression e
     EUnfold _ _ _ _ _ (Just e) ->
       translateExpression e

@@ -41,7 +41,7 @@ data Pattern a t
   | -- | Shorthand variable binding of the form { name }, which desugars to { name = name }
     PShorthand a (Label t)
   | -- | Recursion operator pattern used in fold catamorphisms
-    PAtVariable a Name (Label t)
+    PAtVariable a (Label t)
   | -- | Trait instance dictionary
     PTraitDictionary a t (Trait t)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)

@@ -29,8 +29,8 @@ expandExpression =
   \case
     EMatch a t e cs ->
       EMatch a t e . sconcat <$> traverse expandOrPatterns cs
-    EFold a t n es cs e ->
-      EFold a t n es . sconcat <$> traverse expandOrPatterns cs <*> pure e
+    EFold a t es cs e ->
+      EFold a t es . sconcat <$> traverse expandOrPatterns cs <*> pure e
     e ->
       pure e
 

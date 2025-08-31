@@ -108,7 +108,7 @@ parseFoldExpression = do
     -- n <- option "$fold" name
     es <- parens (nonEmpty (commaSep1 parseExpression))
     cs <- braces (nonEmpty (some parseClause))
-    pure (\loc -> EFold loc () "$fold" es cs Nothing)
+    pure (\loc -> EFold loc () es cs Nothing)
 
 parseUnfoldExpression :: Parser (Expression Metadata ())
 parseUnfoldExpression = do

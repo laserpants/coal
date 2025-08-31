@@ -124,7 +124,7 @@ patternConstraints assertF ms =
         , Explicit InferenceRulePlaceholder t (forall1 listType)
         ]
       concatForM ps (patternConstraints assertF ms)
-    PAtVariable _ n (Label _ name) -> do
+    PAtVariable _ (Label _ name) -> do
       pure [name]
     PAs _ (Label t name) p -> do
       ps <- patternConstraints assertF ms p
@@ -351,7 +351,7 @@ emitConstraints =
       pure []
     ESelect loc ll e ->
       emitESelectConstraints loc ll e
-    EFold _ t name (e :| es) cs e1 -> do
+    EFold _ t (e :| es) cs e1 -> do
       ms1 <- emitConstraints e
       ms2 <- concatMapM emitConstraints es
       (ts1, ts2, ms3) <- (third3 concat . unzip3 <$$> traverse clauseAssumptions) (toList cs)
@@ -365,7 +365,7 @@ emitConstraints =
           tellRight [Equality InferenceRulePlaceholder [foldTypeOf t (e :| es), t1]]
         _ ->
           pure ()
-      pure (filter (assumptionNameIsNotOneOf [name]) (ms1 <> ms2 <> ms3 <> ms4))
+      pure (ms1 <> ms2 <> ms3 <> ms4)
     EUnfold loc t name ps d e1 -> do
       t0 <- supplied (TVariable . TypeIndex KType)
       t1 <- supplied (TVariable . TypeIndex KType)

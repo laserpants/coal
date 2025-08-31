@@ -58,8 +58,7 @@ data Expression a t
   | -- | Compiled match expression
     ECompiledMatch a t (Expression a t) (NonEmpty (CompiledClause a t))
   | -- | Fold expression
-    -- TODO: remove name
-    EFold a t Name (NonEmpty (Expression a t)) (NonEmpty (Clause a t)) (Maybe (Expression a t))
+    EFold a t (NonEmpty (Expression a t)) (NonEmpty (Clause a t)) (Maybe (Expression a t))
   | -- | Codata unfold
     EUnfold a t Name (NonEmpty (Pattern a t)) (Dictionary (Expression a t)) (Maybe (Expression a t))
   | -- | Record field selector

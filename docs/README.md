@@ -83,7 +83,7 @@ module MerkleTree {
 }
 ```
 
-The `import` keyword is used to import functions and other definitions from other modules. 
+The `import` keyword is used to introduce functions and other definitions from other modules. 
 
 ```
 import List(concat, head, tail)
@@ -106,7 +106,7 @@ TODO
 If-expressions have a format similar to that used in most other languages: 
 
 ```
-  if (<e_1> : bool) then <e_2> : t_1 else <e_3> : t_1
+  if (<e_1 : bool>) then <e_2 : t_1> else <e_3 : t_1>
 ```
 
 ##### Let-bindings
@@ -115,7 +115,7 @@ If-expressions have a format similar to that used in most other languages:
   let <name> = <e_1> in <e_2>
 ```
 
-###### Polymorphism
+###### Polymorphism (type generalization)
 
 ```
     let
@@ -126,7 +126,7 @@ If-expressions have a format similar to that used in most other languages:
     (fn(f) => (f(3), f("three")))(fn(x) => x)
 ```
 
-###### Binding?
+###### Semantics
 
 A subtle but important detail that makes let-bindings in Coal different from those in most other languages is that when you ...
 
@@ -134,7 +134,7 @@ the name is not in scope inside the ?
 
 This prevents ill-formed expressions such as `let f = f in f`.
 
-As far as the compiler is concerned, a function defined at the top-level is also a let-binding. That is why a function such as the factorial function cannot be _
+As far as the compiler is concerned, a function defined at the top level is also a let-binding. That is why a function such as the standard factorial function is rejected by the _compiler.
 
 ```
 let fact = 
@@ -186,7 +186,7 @@ Integer literals introduced in code without an explicit type annotation, such as
 let answer = 42
 ```
 
-are *polymorphic*. Their inferred type is `n with Numeric(n)`, which means that `n` can be any type, as long it is a member of the `Numeric` trait. This includes `int32`, `int64`, `bignum`, and `nat`.
+are polymorphic. Their inferred type is `n with Numeric(n)`, which means that `n` can be any type, as long it is a member of the `Numeric` trait. This includes `int32`, `int64`, `bignum`, and `nat`.
 
 In addition to.. supports the basic arithmetic operations addition, subtraction, and multiplication.
 
@@ -289,11 +289,18 @@ Succ(Succ(Succ(Succ(Succ(Zero)))))
 
 Writing numbers using this notation quickly becomes tedious. Fortunately, we do not have to.
 
+Internally, the compiler stores values of type `nat` as normal integers. 
+
+```
+pack_nat : int32 -> nat
+unpack_nat : nat -> int32
+```
+
 These are constant time (**O**(1)) operations
 
 #### Lists
 
-A list is an ordered collection where all elements are of the same type. Lists are a foundational data structure in functional programming, commonly used to store and manipulate collections of data, and as a building block for implementing other abstractions.
+A list is an ordered collection where all elements are of the same type. Lists are a foundational data structure in functional programming, commonly used to store and manipulate collections of data, and as a building block for implementing other higher-level abstractions.
 
 In Coal, list literals are denoted by a sequence of comma-separated expressions, enclosed in square brackets:
 
@@ -332,7 +339,7 @@ Just like lists, tuples are ordered sequences of values. Unlike lists, however:
 In code, a tuple is written as a comma-separated sequence of expressions enclosed in parentheses:
 
 ```
-(<expr_1> : t_1, <expr_2> : t_2, ..., <expr_n> : t_n) : (t_1, t_2, ..., t_n)
+(<expr_1 : t_1>, <expr_2 : t_2>, ..., <expr_n : t_n>) : (t_1, t_2, ..., t_n)
 ```
 
 ##### Examples:
@@ -533,7 +540,7 @@ A fold is similar to an ordinary `match` expression, but with some extra powers.
 
 ## License 
 
-This project is licensed under the terms of the MIT license. See the `LICENSE` file included in this repository for details.
+This project is licensed under the terms of the MIT license. See the `LICENSE` file in this repository for details.
 
 <!--
 
@@ -707,7 +714,7 @@ the limitation imposed by the compiler is that
 let <name> = <expr> in <body>
 ```
 
-A function defined at the top-level is (technically) a let-binding, which means that the function itself is not in scope inside the function body:
+A function defined at the top level is (technically) a let-binding, which means that the function itself is not in scope inside the function body:
 
 ```
 let fact = 
@@ -723,7 +730,7 @@ construct, but this can easily be overridden using the `let rec` keyword. As an
 aside, Coal actually has a recursive let binding too, but it is only available
 to the compiler.
 
-A function defined at the top-level is (technically) a let-binding, which means that the function itself is not in scope inside the function body:
+A function defined at the top level is (technically) a let-binding, which means that the function itself is not in scope inside the function body:
 
 ```
 fact(n) =
