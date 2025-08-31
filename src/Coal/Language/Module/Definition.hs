@@ -7,14 +7,16 @@
 module Coal.Language.Module.Definition (Definition (..), Path (..), definitionName) where
 
 import Coal.Language.DataConstructor (DataConstructor (..))
-import Coal.Language.Expression (Expression (..))
+import Coal.Language.Expression (Clause (..), Expression (..))
 import Coal.Language.Module.Constant (Constant (..))
 import Coal.Language.Module.Function (Function (..))
+import Coal.Language.Pattern (Pattern (..))
 import Coal.Language.Trait (Trait (..), With (..))
 import Coal.Language.Type (Parameter, Type (..))
 import Coal.Language.Type.Kind (Kind (..))
 import Data.Data (Data, Typeable)
-import Extra (Name)
+import Data.List.NonEmpty (NonEmpty)
+import Extra (Dictionary, Name)
 
 newtype Path = Path {pathComponents :: [Name]}
   deriving (Show, Eq, Ord, Read, Data, Typeable)
@@ -42,9 +44,9 @@ data Definition a k t
   | -- | Type alias
     DTypeAlias Name [Parameter ()] ParameterizedType
   | -- | Top-level fold
-    DFold Name -- TODO
+    DFold Name (NonEmpty (Clause a t)) (Maybe (Constant Expression a t))
   | -- | Top-level unfold
-    DUnfold Name -- TODO
+    DUnfold Name (NonEmpty (Pattern a t)) (Dictionary (Expression a t)) (Maybe (Constant Expression a t))
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
 
 definitionName :: Definition a k t -> Name
@@ -58,9 +60,9 @@ definitionName =
       definitionName d
     DCodata name _ _ ->
       name
-    DFold name ->
+    DFold name _ _ ->
       name
-    DUnfold name ->
+    DUnfold name _ _ _ ->
       name
     _ ->
       error "Not implemented"
