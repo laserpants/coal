@@ -27,7 +27,7 @@ As a [total](https://en.wikipedia.org/wiki/Total_functional_programming) languag
     }
 ```
 
-A distinction is made between ordinary, finite data, which is produced and consumed in this way, and data that is potentially infinite. The latter is known is *codata*. The codata equivalent of lists, for example, are streams.
+A distinction is made between ordinary, finite data, which is produced and consumed in this way, and data that is potentially infinite. The latter is known as *codata*. The codata equivalent of lists, for example, are streams.
 
 ```
   cotype Stream<a> = { Head : a, Tail : Stream<a> }
@@ -40,6 +40,7 @@ A distinction is made between ordinary, finite data, which is produced and consu
   let nats = enum_from(0)
 ```
 
+See **Recursion** and 
 
 ### Programs = Expressions + Effects
 
@@ -124,7 +125,7 @@ Consider the following expression, which doesn't type check:
     (fn(f) => (f(3 : int32), f("three")))(fn(x) => x)
 ```
 
-The type inference algorithm will try to determine the type of `f` and pick a monomorphic type
+Here `f` is monomorphic. The type inference algorithm will try to determine its type ...
 
 On the other hand, if we _ the anonymous function to
 
@@ -197,7 +198,7 @@ Integer literals introduced in code without an explicit type annotation, such as
 let answer = 42
 ```
 
-are polymorphic. Their inferred type is `n with Numeric(n)`, which means that `n` can be any type, as long it is a member of the `Numeric` trait. This includes `int32`, `int64`, `bignum`, and `nat`. All `Numeric` types support the basic arithmetic operations of addition, subtraction, and multiplication.
+&hellip; are polymorphic. Their inferred type is `n with Numeric(n)`, which means that `n` can be any type, as long it is a member of the `Numeric` trait. This includes `int32`, `int64`, `bignum`, and `nat`. All `Numeric` types support the basic arithmetic operations of addition, subtraction, and multiplication.
 
 ```
   // 
@@ -277,8 +278,12 @@ Algebraic data types work very well to describe language grammars.
 
 #### Natural numbers
 
-Structural recursion in Coal realies on pattern matching to take data apart, always working hand-in-hand with a recursive data structure like lists, trees, or other algebraic data types. 
-This do not work with ordinary (machine type) integers, since do not meet this requirement. 
+Recursion in Coal relies on pattern matching to take layered data apart in a stepwise manner,
+
+stepwise peel of layers of data constructors ..?
+
+always working hand-in-hand with a recursive data structure like lists, trees, or other algebraic data types. 
+This doesn't work with ordinary (machine type) integers, since do not meet this requirement. 
 Instead, we need to define a recursive number type. This is typically done according to the standard axiomatization of the natural numbers:
 
 > Every natural number is either zero or the successor of another natural number.
