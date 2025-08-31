@@ -8,8 +8,8 @@ Coal is a declarative, purely functional programming language with
 
 - simple and intuitive syntax, 
 - algebraic data types/pattern matching,
-- structural recursion (`fold` and `unfold` recursion schemes), 
 - extensible records, 
+- structural recursion/corecursion (`fold` and `unfold`), 
 - traits (type classes), and 
 - effect handlers (work in progress)
 
@@ -277,7 +277,9 @@ Algebraic data types work very well to describe language grammars.
 
 #### Natural numbers
 
-Structural recursion in Coal realies on pattern matching to take data apart, always working hand-in-hand with a recursive data structure like lists, trees, or other algebraic data types. Ordinary (machine type) integers do not meet this requirement, and therefore cannot be used for this purpose. Instead, we need to define a recursive number type. This is typically done according to the standard axiomatization of the natural numbers:
+Structural recursion in Coal realies on pattern matching to take data apart, always working hand-in-hand with a recursive data structure like lists, trees, or other algebraic data types. 
+This do not work with ordinary (machine type) integers, since do not meet this requirement. 
+Instead, we need to define a recursive number type. This is typically done according to the standard axiomatization of the natural numbers:
 
 > Every natural number is either zero or the successor of another natural number.
 
@@ -525,7 +527,15 @@ If we pass this function to the Coal compiler, it is rejected with the following
 Name not in scope: factorial
 ```
 
-To do this we need to use a construct know as a *fold*. Note that `fold` is a language keyword in Coal, not an ordinary function. Folds are similar to `match` expressions, but with some extra powers.
+To do this we need to use a construct know as a *fold*. 
+A common example is where an array of numbers is reduced into a single value, for example by adding
+
+```
+let sum = reduce(fn(n, a) => f + a, [1, 2, 3])
+```
+
+Note that `fold` is a language keyword in Coal, not an ordinary function. 
+Folds are similar to `match` expressions, but with some extra powers.
 
 We are going to use the `nat` data type to define the factorial function:
 
@@ -553,6 +563,8 @@ This type of pattern needs to follow specific rules. It can only appear inside a
 
 #### Top-level folds and mutual recursion
 
+The type of folds we have seen so far are ...
+
 ### Corecursion and codata
 
 |                    | Access pattern        | Structure             | Evaluation strategy  |
@@ -571,15 +583,8 @@ This project is licensed under the terms of the MIT license. See the `LICENSE` f
 ---
 ---
 
-A common example is where an array of numbers is reduced into a single value, for example by adding
 
-```
-let sum = reduce(fn(n, a) => f + a, [1, 2, 3])
-```
 
-This pattern is also known as a *fold*. Folding doesn't work with an integers, at least not those of the usual machine variety. But we can define one that works.  in fact, the natural numbers are an example of the most basic inductievly defined type.
-
-> Why is the function rejected?
 
 A more idiomatic version of the factorial function ...
 
@@ -587,27 +592,6 @@ A more idiomatic version of the factorial function ...
   fun factorial(n : int32) =
     product(enum_to(n))  // product of numbers 1, 2, ..., n
 
-```
-
-A strict distinction is made between finite data, which is produced and consumed in this way, and data that that we treat as potentially infinite. The latter is known is *codata*. The codata equivalents of lists, for example, are streams.
-
-The opposite ...
-
-|                    | Access pattern        | Structure             | Evaluation strategy  |
-| ------------------ | ----------------------| --------------------- | -------------------- |
-| **Data**           | Recursion (fold)      | Always finite         | Eager (strict)       |
-| **Codata**         | Corecursion (unfold)  | Potentially infinite  | Lazy (non-strict)    | 
-
-### Algebraic data types
-
-```
-  type JsonValue
-    = JsonNull
-    | JsonBool(bool)
-    | JsonNumber(double)
-    | JsonString(string)
-    | JsonArray(List<JsonValue>)
-    | JsonObject(List<(string, JsonValue)>)
 ```
 
 #### Pattern matching
