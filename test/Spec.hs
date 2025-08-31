@@ -795,6 +795,12 @@ main95 = do
     [ "./test/Coal/examples/95/Main.coal"
     ]
 
+main98 :: IO (Either CompilerError Text)
+main98 = do
+  runTestFiles
+    [ "./test/Coal/examples/98/Main.coal"
+    ]
+
 compileFiles :: [String] -> IO (Either CompilerError ())
 compileFiles files = do
   fs <- traverse readFile files

@@ -43,7 +43,7 @@ A distinction is made between finite data, which is produced and consumed in thi
 
 ### Programs = Expressions + Effects
 
-Coal  is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-oriented_programming_language) language: a program is, at its core, just an expression that evaluates to a value. In this model, there are no observable side-effects, and all data is immutable. These properties make programs more predictable, easier to reason about, highly testable, and allows for code to be verified using formal mathematical methods. On the other hand, programs need to have the ability to interact with the outside world. Side-effects are what make them useful. As part of this project, a goal is to develop a system for managing effects, such as I/O and exceptions, in the Coal language. This work is still in progress.
+Coal  is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-oriented_programming_language) language: a program is, at its core, just an expression that evaluates to a value. In this model, all data is immutable and there are no observable side-effects. These properties make programs more predictable, easier to reason about, highly testable, and allows for code to be verified using formal mathematical methods. On the other hand, programs need to have the ability to interact with the outside world. Side-effects are what make them useful. As part of this project, a goal is to develop a system for managing effects, such as I/O and exceptions, in the Coal language. This work is still in progress.
 
 ## Project status and roadmap
 
@@ -115,13 +115,19 @@ If-expressions have a format similar to those in most other languages:
   let <name> = <e_1> in <e_2>
 ```
 
-Polymorphism
+###### Polymorphism
+
+    let
+      identity = fn(x) => x in 
+        (identity(3), identity("three"))
+
+###### Binding?
 
 An important detail that makes let-bindings in Coal different from those in most other languages is that the name is not in scope inside the ?
 
 This prevents ill-formed expressions such as `let f = f in f`.
 
-As far as the compiler is concerned, a function defined at the top-level is also a let-binding. That is why a function such as the following
+As far as the compiler is concerned, a function defined at the top-level is also a let-binding. That is why a function such as the factorial function cannot be _
 
 ```
 let fact = 
@@ -173,7 +179,17 @@ Integer literals introduced in code, such as
 let solution = 42
 ```
 
-are *polymorphic*. Their type is written `n with Numeric(n)`, which means that `n` can be any type, as long it is a member of the `Numeric` trait. This includes `int32`, `int64`, `bignum`, and `nat`.
+are *polymorphic*. Their inferred type is `n with Numeric(n)`, which means that `n` can be any type, as long it is a member of the `Numeric` trait. This includes `int32`, `int64`, `bignum`, and `nat`.
+
+```
+  // 
+
+  type Complex = Complex(double, double)
+
+  instance Numeric(Complex) {
+    // ...
+  }
+```
 
 ##### Unit
 

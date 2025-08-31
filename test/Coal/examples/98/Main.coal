@@ -1,0 +1,16 @@
+module Main {
+
+  fun fst((a, b)) = a
+
+  fun main() =
+    let
+      identity = 
+        fn(x) => x
+      in
+        let p =
+          (identity(3), identity("three"))
+        in
+          trace_int32(fst(p))
+
+}
+
