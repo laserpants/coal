@@ -30,8 +30,7 @@ fabricatedName name old = do
   tell [(old, new)]
   pure new
  where
-  new =
-    name <> "__$local_" <> old
+  new = name <> "__$local_" <> old
 
 expandWhereClausesModule :: (Data a, Data t, Ord t, MonadWriter [(Name, Name)] m) => Module a k t -> m (Module a k t)
 expandWhereClausesModule (Module p ns ds) =
