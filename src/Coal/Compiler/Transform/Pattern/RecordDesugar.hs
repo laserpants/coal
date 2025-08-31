@@ -9,6 +9,7 @@
 {-# LANGUAGE StrictData #-}
 {-# LANGUAGE TypeApplications #-}
 
+-- TODO
 module Coal.Compiler.Transform.Pattern.RecordDesugar (
   RecordDesugarStack (..),
   RecordDesugarable (..),
