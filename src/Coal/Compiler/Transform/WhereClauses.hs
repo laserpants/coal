@@ -2,7 +2,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Coal.Compiler.Transform.WhereClauses where
+module Coal.Compiler.Transform.WhereClauses (expandWhereClausesModule) where
 
 import Coal.Compiler.Transform.Tree
 import Coal.Language
@@ -15,18 +15,23 @@ liftWhereClause :: (MonadWriter [(Name, Name)] m) => Name -> Definition a k t ->
 liftWhereClause name =
   \case
     DFunction old f _ -> do
-      -- TODO:  name__$local_old??
-      let new = "local_$" <> name <> "__" <> old
-      tell [(old, new)]
+      new <- fabricatedName name old
       pure (DFunction new f [])
     DConstant old c _ -> do
-      let new = "local_$" <> name <> "__" <> old
-      tell [(old, new)]
+      new <- fabricatedName name old
       pure (DConstant new c [])
     DAnnotation w d ->
       DAnnotation w <$> liftWhereClause name d
     d ->
       pure d
+
+fabricatedName :: (MonadWriter [(Name, Name)] m) => Name -> Name -> m Name
+fabricatedName name old = do
+  tell [(old, new)]
+  pure new
+ where
+  new =
+    name <> "__$local_" <> old
 
 expandWhereClausesDefinition :: (Data a, Data t, Ord t, MonadWriter [(Name, Name)] m) => Definition a k t -> m [Definition a k t]
 expandWhereClausesDefinition =
