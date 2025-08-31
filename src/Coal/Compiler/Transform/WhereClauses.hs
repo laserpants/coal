@@ -33,6 +33,10 @@ fabricatedName name old = do
   new =
     name <> "__$local_" <> old
 
+expandWhereClausesModule :: (Data a, Data t, Ord t, MonadWriter [(Name, Name)] m) => Module a k t -> m (Module a k t)
+expandWhereClausesModule (Module p ns ds) =
+  Module p ns . concat <$> traverse expandWhereClausesDefinition ds
+
 expandWhereClausesDefinition :: (Data a, Data t, Ord t, MonadWriter [(Name, Name)] m) => Definition a k t -> m [Definition a k t]
 expandWhereClausesDefinition =
   \case
@@ -75,7 +79,3 @@ replaceConstantNames names =
   \case
     Constant a w e ->
       Constant a w (foldr (uncurry rename) e names)
-
-expandWhereClausesModule :: (Data a, Data t, Ord t, MonadWriter [(Name, Name)] m) => Module a k t -> m (Module a k t)
-expandWhereClausesModule (Module p ns ds) =
-  Module p ns . concat <$> traverse expandWhereClausesDefinition ds
