@@ -24,7 +24,7 @@ import Data.List.NonEmpty (NonEmpty (..))
 import Extra (Dictionary, Name, const2)
 
 class TopLevelFoldContext e where
-  expandFolds :: Name -> [Label ()] -> e -> e
+  expandFolds :: Name -> [(Name, Label ())] -> e -> e
 
 instance (TopLevelFoldContext e) => TopLevelFoldContext [e] where
   expandFolds name = fmap . expandFolds name
@@ -52,8 +52,8 @@ instance (Monoid a, Data a) => TopLevelFoldContext (Choice Expression a ()) wher
 instance (Monoid a, Data a) => TopLevelFoldContext (Expression a ()) where
   expandFolds = flip . foldr . updateName
 
-updateName :: (Monoid a, Data a) => Name -> Label () -> Expression a () -> Expression a ()
-updateName name label =
+updateName :: (Monoid a, Data a) => Name -> (Name, Label ()) -> Expression a () -> Expression a ()
+updateName _ (name, label) =
   replace (labelName label) $
     const2 $
       applicationE (varE name) (EVariable mempty label :| [])
@@ -61,23 +61,23 @@ updateName name label =
 eliminateAtPatterns :: Pattern a () -> Pattern a ()
 eliminateAtPatterns =
   \case
-    PAtVariable a ll ->
+    PNamedAtVariable a _ ll ->
       PVariable a ll
     p ->
       p
 
-atLabels :: (Data a, Data t) => Pattern a t -> [Label t]
+atLabels :: (Data a, Data t) => Pattern a t -> [(Name, Label t)]
 atLabels = execWriter . transformM go
  where
   go =
     \case
-      p@(PAtVariable _ label) -> do
-        tell [label]
+      p@(PNamedAtVariable _ name label) -> do
+        tell [(name, label)]
         pure p
       p ->
         pure p
 
-compileTopLevelFolds :: (Monoid a, Monad m) => Definition a k () -> m (Definition a k ())
+compileTopLevelFolds :: (Data a, Monoid a, Monad m) => Definition a k () -> m (Definition a k ())
 compileTopLevelFolds =
   \case
     DFold name cs _ -> do
@@ -86,13 +86,14 @@ compileTopLevelFolds =
     o ->
       pure o
 
-expandTopLevelFold :: (Monoid a, Monad m) => Name -> NonEmpty (Clause a ()) -> m (Expression a ())
+expandTopLevelFold :: (Data a, Monoid a, Monad m) => Name -> NonEmpty (Clause a ()) -> m (Expression a ())
 expandTopLevelFold name clauses = do
-  let var = "$fold.expr"
   pure $
     lambda1E
       var
       ( matchE
           (varE var)
-          undefined -- (expandFolds name [] <$> clauses)
+          (expandFolds name [] <$> clauses)
       )
+ where
+  var = "$fold.expr"
