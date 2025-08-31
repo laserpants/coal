@@ -27,7 +27,7 @@ As a [total](https://en.wikipedia.org/wiki/Total_functional_programming) languag
     }
 ```
 
-A distinction is made between finite data, which is produced and consumed in this way, and data that is potentially infinite. The latter is known is *codata*. The codata equivalent of lists, for example, are streams.
+A distinction is made between ordinary, finite data, which is produced and consumed in this way, and data that is potentially infinite. The latter is known is *codata*. The codata equivalent of lists, for example, are streams.
 
 ```
   cotype Stream<a> = { Head : a, Tail : Stream<a> }
@@ -83,7 +83,7 @@ module MerkleTree {
 }
 ```
 
-The `import` keyword is used to introduce functions and other definitions from other modules. 
+The `import` keyword is used to bring in functions and other definitions from other modules. 
 
 ```
 import List(concat, head, tail)
@@ -103,7 +103,7 @@ TODO
 
 ##### If-then-else
 
-If-expressions have a format similar to that used in most other languages: 
+If-expressions have a format similar to that found in most other languages: 
 
 ```
   if (<e_1 : bool>) then <e_2 : t_1> else <e_3 : t_1>
@@ -117,13 +117,23 @@ If-expressions have a format similar to that used in most other languages:
 
 ###### Polymorphism (type generalization)
 
+In Hindley-Milner languages, it is let-bindings that enable polymorphism.
+Consider the following expression, which doesn't type check:
+
+```
+    (fn(f) => (f(3 : int32), f("three")))(fn(x) => x)
+```
+
+The type inference algorithm will try to determine the type of `f` and pick a monomorphic type
+
+On the other hand, if we _ the anonymous function to
+
+then it is generalized and receives a quantified type `∀ a : a -> a`.
+
 ```
     let
       identity = fn(x) => x in 
         (identity(3), identity("three"))
-
-    // This doesn't type check:
-    (fn(f) => (f(3), f("three")))(fn(x) => x)
 ```
 
 ###### Semantics
@@ -134,7 +144,8 @@ the name is not in scope inside the ?
 
 This prevents ill-formed expressions such as `let f = f in f`.
 
-As far as the compiler is concerned, a function defined at the top level is also a let-binding. That is why a function such as the standard factorial function is rejected by the _compiler.
+As far as the compiler is concerned, a function defined at the top level is also a let-binding. 
+That is why a function such as the standard factorial function is rejected by the compiler.
 
 ```
 let fact = 

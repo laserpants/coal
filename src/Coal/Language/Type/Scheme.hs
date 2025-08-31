@@ -11,10 +11,11 @@ module Coal.Language.Type.Scheme (
   forall3,
   forall4,
   IndexedScheme,
+  listConstructorScheme,
 ) where
 
 import Coal.Language.Trait (Trait (..))
-import Coal.Language.Type (IndexedType, Type (..), TypeIndex (..))
+import Coal.Language.Type (IndexedType, Type (..), TypeIndex (..), listType, (~>))
 import Coal.Language.Type.Kind (Kind (..))
 import Data.Data (Data, Typeable)
 import Data.Set (Set)
@@ -54,3 +55,6 @@ forall4 :: (IndexedType -> IndexedType -> IndexedType -> IndexedType -> IndexedT
 forall4 f = Forall (Set.fromList [a0, a1, a2, a3]) [] (f (TVariable a0) (TVariable a1) (TVariable a2) (TVariable a3))
  where
   (a0, a1, a2, a3) = (index 0, index 1, index 2, index 3)
+
+listConstructorScheme :: IndexedScheme
+listConstructorScheme = forall1 (\a -> a ~> listType a ~> listType a)

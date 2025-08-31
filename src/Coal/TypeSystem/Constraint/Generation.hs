@@ -116,7 +116,7 @@ patternConstraints assertF ms =
     PListCons _ t p1 p2 -> do
       ms1 <- patternConstraints assertF ms p1
       ms2 <- patternConstraints assertF ms p2
-      tellRight [Explicit InferenceRulePlaceholder (foldTypeOf t [p1, p2]) listConstructorTypeScheme]
+      tellRight [Explicit InferenceRulePlaceholder (foldTypeOf t [p1, p2]) listConstructorScheme]
       pure (ms1 <> ms2)
     PListLiteral _ t ps -> do
       tellRight
@@ -259,7 +259,7 @@ emitEListConsConstraints :: (Show a, Data a) => a -> IndexedType -> Expression a
 emitEListConsConstraints loc t e1 e2 = do
   ms1 <- emitConstraints e1
   ms2 <- emitConstraints e2
-  tellRight [Explicit InferenceRulePlaceholder t1 listConstructorTypeScheme]
+  tellRight [Explicit InferenceRulePlaceholder t1 listConstructorScheme]
   pure (ms1 <> ms2)
  where
   t1 = typeOf e1 `TArrow` typeOf e2 `TArrow` t
@@ -420,6 +420,3 @@ emitConstraints =
       emitETupleConstraints loc t es
     _ ->
       error "Not implemented"
-
-listConstructorTypeScheme :: IndexedScheme
-listConstructorTypeScheme = forall1 (\a -> a ~> listType a ~> listType a)
