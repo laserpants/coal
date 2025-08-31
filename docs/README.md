@@ -8,7 +8,7 @@ Coal is a declarative, purely functional programming language with
 
 - simple and intuitive syntax, 
 - algebraic data types/pattern matching,
-- recursion scheme-fold and (codata) unfold constructs, 
+- structural recursion (`fold` and `unfold` constructs), 
 - extensible records, 
 - traits (type classes), and 
 - effect handlers (work in progress)
@@ -35,9 +35,7 @@ A distinction is made between finite data, which is produced and consumed in thi
 
 ### Programs = Expressions + Effects
 
-Coal  is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-oriented_programming_language) language: a program is, at its core, just an expression that evaluates to a value. In this model, there are no observable side-effects, no explicit state, and all data is immutable. These properties make programs more predictable, easier to reason about, highly testable, and allows for code to be verified using formal mathematical methods. On the other hand, programs need to have the ability to interact with the outside world. Side-effects are what make them useful.
-
-TODO
+Coal  is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-oriented_programming_language) language: a program is, at its core, just an expression that evaluates to a value. In this model, there are no observable side-effects, no explicit state, and all data is immutable. These properties make programs more predictable, easier to reason about, highly testable, and allows for code to be verified using formal mathematical methods. On the other hand, programs need to have the ability to interact with the outside world. Side-effects are what make them useful. A goal of this project is to develop a system for managing effects, such as I/O and exceptions, in the Coal language. This work is still in progress.
 
 ## Project status and roadmap
 
@@ -213,7 +211,7 @@ let tree_of_gondor =
     )
 ```
 
-asdfad grammars
+Algebraic data types work very well to describe language grammars.
 
 ```
   type JsonValue
@@ -227,7 +225,7 @@ asdfad grammars
 
 #### Natural numbers
 
-Structural recursion in Coal realies on pattern matching to take data apart, always working side-by-side with a recursive data structure like lists, trees, or other algebraic data types. Ordinary (machine type) integers do not have this characteristic, so they cannot be used to this end. Instead, we can represent natural numbers recursively, following their standard axiomatization:
+Structural recursion in Coal realies on pattern matching to take data apart, always working hand-in-hand with a recursive data structure like lists, trees, or other algebraic data types. Ordinary (machine type) integers do not belong to this category, so they cannot be used for this purpose. Instead, we can define the counting numbers recursively, following their standard axiomatization:
 
 > Every natural number is either zero or the successor of another natural number.
 
@@ -246,13 +244,13 @@ The number five, for example, would then be written as:
 Succ(Succ(Succ(Succ(Succ(Zero)))))
 ```
 
-Writing numbers using this notation quickly becomes tedious.  Fortunately, we can use 
+Writing numbers using this notation quickly becomes tedious. Fortunately, we do not have to.
 
 These are constant time (**O**(1)) operations
 
 #### Lists
 
-A list is an ordered collection where all elements are of the same type. Lists are a foundational data structure in functional programming, commonly used to store and manipulate collections of data, and as a building block for defining more ...
+A list is an ordered collection where all elements are of the same type. Lists are a foundational data structure in functional programming, commonly used to store and manipulate collections of data, and as a building block for implementing other abstractions.
 
 In Coal, list literals are denoted by a sequence of comma-separated expressions, enclosed in square brackets:
 
