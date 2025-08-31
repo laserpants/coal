@@ -5,7 +5,6 @@ module Coal.Kernel.Compiler.Pass.ClosureConversion (closeObjects) where
 
 import Coal.Common.FreeVars (freeSet)
 import Coal.Common.Label (Label (..))
-import Coal.Common.List1 (NonEmpty (..))
 import Coal.Kernel.Compiler.Ast (flattenAppNodes)
 import Coal.Kernel.Language (Expr, Type)
 import Coal.Kernel.Language.Object (Object (..), ObjectList, objectName)
@@ -15,6 +14,7 @@ import Data.Fix (Fix (..))
 import Data.Function (on)
 import Data.Functor.Foldable (cata, embed)
 import Data.List (nubBy)
+import Data.List.NonEmpty (NonEmpty (..))
 import Extra (Name, (<$$>))
 
 import qualified Coal.Kernel.Language as Syntax

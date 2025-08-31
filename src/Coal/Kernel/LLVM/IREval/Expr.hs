@@ -7,7 +7,6 @@
 module Coal.Kernel.LLVM.IREval.Expr (IREval (..)) where
 
 import Coal.Common.Label (Label (..))
-import Coal.Common.List1 (fromList1)
 import Coal.Kernel.LLVM.IREval
 import Coal.Kernel.LLVM.IREval.Closure (irApplyClosure)
 import Coal.Kernel.LLVM.IREval.Comment (irCommentBlock)
@@ -25,6 +24,7 @@ import Coal.Kernel.Language.Type.Arrow (returnTypeOf)
 import Control.Arrow ((>>>))
 import Data.Fix (Fix (..))
 import Data.Functor.Foldable (project)
+import Data.List.NonEmpty (toList)
 import Extra (forM)
 
 import qualified Coal.Kernel.Language as Syntax
@@ -54,7 +54,7 @@ instance IREval (Syntax.Expr Syntax.Type) where
               \(Syntax.Binding (Label _ name) e) -> do
                 v1 <- irEval e
                 pure (name, v1)
-            bind (fromList1 bound) (irEval e1)
+            bind (toList bound) (irEval e1)
         Syntax.EApp t e1 es ->
           irCommentBlock "EApp" $
             case e1 of

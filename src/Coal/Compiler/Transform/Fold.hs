@@ -14,7 +14,6 @@ module Coal.Compiler.Transform.Fold (
 ) where
 
 import Coal.Common.Label (Label (..), labelName)
-import Coal.Common.List1 (List1, NonEmpty (..))
 import Coal.Common.Supply (suppliedName)
 import Coal.Compiler.Transform.Expression
 import Coal.Compiler.Transform.Flattening (flattenApplication)
@@ -27,6 +26,7 @@ import Control.Monad.State (MonadState)
 import Control.Monad.Writer (execWriter, tell)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transform, transformM)
+import Data.List.NonEmpty (NonEmpty (..))
 import Extra (Dictionary, Name, const2)
 
 newtype FoldExpansion a = FoldExpansion {foldExpansionStack :: RWS Name () Int a}
@@ -100,7 +100,7 @@ atLabels = execWriter . transformM go
       p ->
         pure p
 
-expandFoldExpr :: (Monoid a, Data a, MonadState Int m, MonadReader Name m) => Name -> List1 (Expression a ()) -> List1 (Clause a ()) -> m (Expression a ())
+expandFoldExpr :: (Monoid a, Data a, MonadState Int m, MonadReader Name m) => Name -> NonEmpty (Expression a ()) -> NonEmpty (Clause a ()) -> m (Expression a ())
 expandFoldExpr name args clauses = do
   let var = name <> ".expr"
   pure $

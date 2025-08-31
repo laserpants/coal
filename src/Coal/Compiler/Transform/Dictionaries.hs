@@ -18,7 +18,6 @@ module Coal.Compiler.Transform.Dictionaries (
 
 import Coal.Common.Environment (Environment (..))
 import Coal.Common.Label (Label (..))
-import Coal.Common.List1 (NonEmpty (..), fromList1)
 import Coal.Common.Supply (supplied)
 import Coal.Language
 import Coal.Language.Module
@@ -33,6 +32,7 @@ import Data.Data (Data)
 import Data.Foldable (foldrM)
 import Data.Generics.Uniplate.Data (descendM)
 import Data.List (nub)
+import Data.List.NonEmpty (NonEmpty (..), toList)
 import Data.Map.Strict (Map)
 import Data.Maybe (catMaybes)
 import Data.Text (isPrefixOf)
@@ -170,7 +170,7 @@ instance (Monoid a, Data a) => TraitContext (Expression a IndexedType) where
             error "Implementation error"
       ELet a bs e -> do
         as <- censor (const []) (traverse transformBinding bs)
-        let xs = concat (fromList1 (snd <$> as))
+        let xs = concat (toList (snd <$> as))
         ELet a (fst <$> as) <$> local (overDictionaryEnvironmentNames (Environment.insertMultiple xs)) (expandTraits e)
       EVariable _ ll@(Label t name) -> do
         traits <- collectTraits t name

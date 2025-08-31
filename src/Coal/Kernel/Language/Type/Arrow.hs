@@ -11,12 +11,12 @@ module Coal.Kernel.Language.Type.Arrow (
   functionTypeOf,
 ) where
 
-import Coal.Common.List1 (List1, (<|))
 import Coal.Kernel.Language.Type (Type (..))
 import Coal.Kernel.Language.Type.Syntax (arrow)
 import Coal.Kernel.Language.Typed (Typed (..))
+import Data.List.NonEmpty (NonEmpty (..), (<|))
 
-import qualified Coal.Common.List1 as List1
+import qualified Data.List.NonEmpty as NonEmpty
 
 {-# INLINE (~>) #-}
 (~>) :: Type -> Type -> Type
@@ -28,17 +28,17 @@ infixr 1 ~>
 foldType :: (Foldable f) => Type -> f Type -> Type
 foldType = foldr arrow
 
-unfoldType :: Type -> List1 Type
+unfoldType :: Type -> NonEmpty Type
 unfoldType =
   \case
     TCon "/" [t1, t2] ->
       t1 <| unfoldType t2
     t ->
-      List1.singleton t
+      NonEmpty.singleton t
 
 {-# INLINE arity #-}
 arity :: Type -> Int
-arity t = List1.length (unfoldType t) - 1
+arity t = NonEmpty.length (unfoldType t) - 1
 
 {-# INLINE isFunction #-}
 isFunction :: (Typed t) => t -> Bool
@@ -46,7 +46,7 @@ isFunction f = arity (typeOf f) > 0
 
 {-# INLINE returnTypeOf #-}
 returnTypeOf :: (Typed t) => t -> Type
-returnTypeOf = List1.last . unfoldType . typeOf
+returnTypeOf = NonEmpty.last . unfoldType . typeOf
 
 {-# INLINE functionTypeOf #-}
 functionTypeOf :: (Functor f, Foldable f, Typed t, Typed u) => t -> f u -> Type

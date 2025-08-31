@@ -11,15 +11,15 @@ module Coal.Compiler.Transform.Pattern.OrExpansion (
 ) where
 
 import Coal.Common.Label (Label (..))
-import Coal.Common.List1 (List1, NonEmpty (..))
 import Coal.Language (Clause (..), Expression (..), Pattern (..))
 import Coal.Language.Module (Module (..))
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformBiM)
+import Data.List.NonEmpty (NonEmpty (..))
 import Data.Semigroup (sconcat)
 import Extra (Map, traverseM)
 
-import qualified Coal.Common.List1 as List1
+import qualified Data.List.NonEmpty as NonEmpty
 
 compileOrPatterns :: forall m a k t. (Monad m, Data a, Data k, Data t) => Module a k t -> m (Module a k t)
 compileOrPatterns = transformBiM (expandExpression :: Expression a t -> m (Expression a t))
@@ -35,12 +35,12 @@ expandExpression =
       pure e
 
 class OrPattern a where
-  expandOrPatterns :: (Monad m) => a -> m (List1 a)
+  expandOrPatterns :: (Monad m) => a -> m (NonEmpty a)
 
 instance (OrPattern a) => OrPattern [a] where
   expandOrPatterns = traverseM expandOrPatterns
 
-instance (OrPattern a) => OrPattern (List1 a) where
+instance (OrPattern a) => OrPattern (NonEmpty a) where
   expandOrPatterns = traverseM expandOrPatterns
 
 instance (OrPattern a) => OrPattern (Map k a) where
@@ -76,13 +76,13 @@ instance OrPattern (Pattern a t) where
         qs1 :| qss <- expandOrPatterns ps
         pure (PListLiteral a t qs1 :| [PListLiteral a t qs | qs <- qss])
       q@(PListCons a t p1 p2) -> do
-        pure (List1.singleton q)
+        pure (NonEmpty.singleton q)
       -- TODO
       -- q1 :| qs1 <- expandOrPatterns p1
       -- q2 :| qs2 <- expandOrPatterns p2
       -- error "TODO"
       q@(PRecord a t d p) -> do
-        pure (List1.singleton q)
+        pure (NonEmpty.singleton q)
       -- TODO
       -- d1 :| ds <- expandOrPatterns d
       -- q1 :| qs <- expandOrPatterns p
@@ -91,14 +91,14 @@ instance OrPattern (Pattern a t) where
         q1 :| qs <- expandOrPatterns p
         pure (PAs a ll q1 :| [PAs a ll q | q <- qs])
       p@PAny{} ->
-        pure (List1.singleton p)
+        pure (NonEmpty.singleton p)
       p@PVariable{} ->
-        pure (List1.singleton p)
+        pure (NonEmpty.singleton p)
       p@PLiteral{} ->
-        pure (List1.singleton p)
+        pure (NonEmpty.singleton p)
       p@PAtVariable{} ->
-        pure (List1.singleton p)
+        pure (NonEmpty.singleton p)
       p@PShorthand{} ->
-        pure (List1.singleton p)
+        pure (NonEmpty.singleton p)
       _ ->
         error "TODO"

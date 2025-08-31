@@ -8,12 +8,12 @@ module Coal.Compiler.Kernel.TranslateExpression (
 ) where
 
 import Coal.Common.Label (Label (..))
-import Coal.Common.List1 (List1, NonEmpty (..), fromList1, (<|))
 import Coal.Compiler.Kernel.Environment (KernelEnvironment (..), qualifyName, withLocalName, withLocalNames)
 import Coal.Compiler.Kernel.TranslateType (translateType)
 import Coal.Language
 import Control.Monad.Reader (MonadReader)
 import Data.Data (Data)
+import Data.List.NonEmpty (NonEmpty (..), toList, (<|))
 import Extra (Name)
 
 import qualified Coal.Kernel.Language as Kernel
@@ -59,7 +59,7 @@ translateExpression =
         <*> traverse translateExpression es
     ELambda _ ps e -> do
       qs <- traverse translatePattern ps
-      e1 <- withLocalNames (labelName <$> fromList1 qs) (translateExpression e)
+      e1 <- withLocalNames (labelName <$> toList qs) (translateExpression e)
       pure (Kernel.lam qs e1)
     ELet _ vs e -> do
       ws <- traverse translateBinding vs
@@ -238,7 +238,7 @@ translateBinaryOperator ::
   IndexedType ->
   IndexedType ->
   BinaryOperator ->
-  List1 (Expression a IndexedType) ->
+  NonEmpty (Expression a IndexedType) ->
   m KernelExpr
 translateBinaryOperator t ot =
   \case
@@ -323,7 +323,7 @@ translateBinaryOperator t ot =
     _ ->
       error "Not implemented"
 
-equalityOperator :: (MonadReader KernelEnvironment m, Data a) => IndexedType -> List1 (Expression a IndexedType) -> m KernelExpr
+equalityOperator :: (MonadReader KernelEnvironment m, Data a) => IndexedType -> NonEmpty (Expression a IndexedType) -> m KernelExpr
 equalityOperator ot (e1 :| [e2]) = do
   o1 <- translateExpression e1
   o2 <- translateExpression e2
@@ -345,7 +345,7 @@ equalityOperator ot (e1 :| [e2]) = do
       error (show ot)
 equalityOperator _ _ = error "Not implemented"
 
-stringConcatenationOperator :: (MonadReader KernelEnvironment m, Data a) => List1 (Expression a IndexedType) -> m KernelExpr
+stringConcatenationOperator :: (MonadReader KernelEnvironment m, Data a) => NonEmpty (Expression a IndexedType) -> m KernelExpr
 stringConcatenationOperator es = do
   args <- traverse translateExpression es
   let t1 = translateType (TIntrinsic IString)
@@ -355,7 +355,7 @@ stringConcatenationOperator es = do
       (Kernel.var (Label (t1 `Kernel.arrow` t1 `Kernel.arrow` t1) "Core$.operator__string_concatenation"))
       args
 
-listConcatenationOperator :: (MonadReader KernelEnvironment m, Data a) => IndexedType -> List1 (Expression a IndexedType) -> m KernelExpr
+listConcatenationOperator :: (MonadReader KernelEnvironment m, Data a) => IndexedType -> NonEmpty (Expression a IndexedType) -> m KernelExpr
 listConcatenationOperator t es = do
   args <- traverse translateExpression es
   let t1 = translateType t
@@ -365,7 +365,7 @@ listConcatenationOperator t es = do
       (Kernel.var (Label (t1 `Kernel.arrow` t1 `Kernel.arrow` t1) "Core$.operator__list_concatenation"))
       args
 
-reverseCompositionOperator :: (MonadReader KernelEnvironment m, Data a) => IndexedType -> List1 (Expression a IndexedType) -> m KernelExpr
+reverseCompositionOperator :: (MonadReader KernelEnvironment m, Data a) => IndexedType -> NonEmpty (Expression a IndexedType) -> m KernelExpr
 reverseCompositionOperator t es = do
   args <- traverse translateExpression es
   let t1 = translateType t
@@ -375,7 +375,7 @@ reverseCompositionOperator t es = do
       (Kernel.var (Label (Kernel.foldType t1 (Kernel.typeOf <$> args)) "Core$.operator__reverse_composition"))
       args
 
-reverseApplicationOperator :: (MonadReader KernelEnvironment m, Data a) => IndexedType -> List1 (Expression a IndexedType) -> m KernelExpr
+reverseApplicationOperator :: (MonadReader KernelEnvironment m, Data a) => IndexedType -> NonEmpty (Expression a IndexedType) -> m KernelExpr
 reverseApplicationOperator t es = do
   args <- traverse translateExpression es
   let t1 = translateType t
@@ -385,7 +385,7 @@ reverseApplicationOperator t es = do
       (Kernel.var (Label (Kernel.foldType t1 (Kernel.typeOf <$> args)) "Core$.operator__reverse_application"))
       args
 
-binop :: (MonadReader KernelEnvironment m, Data a) => (KernelExpr -> KernelExpr -> Kernel.Op KernelExpr) -> (IndexedType, IndexedType) -> List1 (Expression a IndexedType) -> m KernelExpr
+binop :: (MonadReader KernelEnvironment m, Data a) => (KernelExpr -> KernelExpr -> Kernel.Op KernelExpr) -> (IndexedType, IndexedType) -> NonEmpty (Expression a IndexedType) -> m KernelExpr
 binop op (t1, t2) (e1 :| [e2])
   | e1 `hasType` t1 && e2 `hasType` t2 = do
       o1 <- translateExpression e1

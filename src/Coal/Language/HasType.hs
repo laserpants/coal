@@ -6,7 +6,6 @@
 module Coal.Language.HasType (HasType (..), foldTypeOf) where
 
 import Coal.Common.Label (Label (..))
-import Coal.Common.List1 (NonEmpty ((:|)))
 import Coal.Language.Expression (Expression (..))
 import Coal.Language.Expression.Choice (Guard (..))
 import Coal.Language.Module.Constant (Constant (..))
@@ -20,6 +19,7 @@ import Coal.Language.Type.Intrinsic (Intrinsic (..))
 import Coal.Language.Type.Kind (Kind (..))
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (universeBi)
+import Data.List.NonEmpty (NonEmpty ((:|)))
 
 class HasType o k t where
   typeOf :: t -> Type o k

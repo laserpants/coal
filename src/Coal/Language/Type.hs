@@ -24,13 +24,13 @@ module Coal.Language.Type (
   (~>),
 ) where
 
-import Coal.Common.List1 (List1, NonEmpty (..), fromList1, (<|))
 import Coal.Common.Supply (Supply (..))
 import Coal.Language.Type.Intrinsic (Intrinsic (..))
 import Coal.Language.Type.Kind (Kind (..), tupleKind)
 import Coal.Language.Type.Row (Row (..), normalizeRow)
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (transform)
+import Data.List.NonEmpty (NonEmpty (..), toList, (<|))
 import Data.Text (isPrefixOf)
 import Extra (Map, Name, Set)
 import Extra.Prettyprinter (parensIf)
@@ -38,11 +38,11 @@ import GHC.Generics (Generic)
 import Prettyprinter
 import TextShow (showt)
 
-import qualified Coal.Common.List1 as List1
+import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Set as Set
 
 data Type o k
-  = TApplication k (Type o k) (List1 (Type o k))
+  = TApplication k (Type o k) (NonEmpty (Type o k))
   | TArrow (Type o k) (Type o k)
   | TConstructor k Name
   | TIntrinsic (Intrinsic (Type o k))
@@ -102,13 +102,13 @@ activeIdsIn = Set.map typeIndexId . activeIn
 foldType :: (Foldable f) => Type o k -> f (Type o k) -> Type o k
 foldType = foldr TArrow
 
-unfoldType :: Type o k -> List1 (Type o k)
+unfoldType :: Type o k -> NonEmpty (Type o k)
 unfoldType =
   \case
     TArrow t1 t2 ->
       t1 <| unfoldType t2
     t ->
-      List1.singleton t
+      NonEmpty.singleton t
 
 normalizeRowTypes :: (Typeable o, Data k, Data (o k)) => Type o k -> Type o k
 normalizeRowTypes = transform $
@@ -121,7 +121,7 @@ normalizeRowTypes = transform $
 listType :: IndexedType -> IndexedType
 listType t = TApplication KType (TConstructor (KArrow KType KType) "List") (t :| [])
 
-tupleType :: List1 IndexedType -> IndexedType
+tupleType :: NonEmpty IndexedType -> IndexedType
 tupleType ts = TApplication KType (TConstructor (tupleKind (length ts)) cons) ts
  where
   cons = "#Tuple" <> showt (length ts)
@@ -145,10 +145,10 @@ prettyTypePrec prec =
         group (prettyTypePrec (precArrow + 1) t1 <+> "→" <+> prettyTypePrec precArrow t2)
     TApplication _ (TConstructor _ con) args
       | "#Tuple" `isPrefixOf` con ->
-          parensIf (prec > precApp) $ group (tupled (map (prettyTypePrec 0) (fromList1 args)))
+          parensIf (prec > precApp) $ group (tupled (map (prettyTypePrec 0) (toList args)))
     TApplication _ f args ->
       parensIf (prec > precApp) $
-        group (prettyTypePrec precApp f <> typeBrackets (map (prettyTypePrec 0) (fromList1 args)))
+        group (prettyTypePrec precApp f <> typeBrackets (map (prettyTypePrec 0) (toList args)))
     TConstructor _ name ->
       pretty name
     TVariable v ->

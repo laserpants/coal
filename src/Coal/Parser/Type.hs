@@ -2,7 +2,6 @@
 
 module Coal.Parser.Type (parseType, parseKind) where
 
-import Coal.Common.List1 (NonEmpty (..))
 import Coal.Language
 import Coal.Parser
 import Coal.Parser.Identifier
@@ -10,6 +9,7 @@ import Coal.Parser.Symbol
 import Coal.Parser.Utils (fieldList)
 import Control.Monad.Combinators.Expr
 import Data.Functor (($>))
+import Data.List.NonEmpty (NonEmpty (..))
 import Text.Megaparsec (option, optional, try, (<|>))
 import TextShow (showt)
 

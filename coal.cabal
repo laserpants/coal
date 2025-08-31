@@ -28,7 +28,6 @@ library
       Coal.Common.Environment
       Coal.Common.FreeVars
       Coal.Common.Label
-      Coal.Common.List1
       Coal.Common.Name
       Coal.Common.Supply
       Coal.Compiler

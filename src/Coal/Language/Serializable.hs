@@ -4,11 +4,11 @@
 
 module Coal.Language.Serializable (Serializable (..)) where
 
-import Coal.Common.List1 (List1, fromList1)
 import Coal.Language.Trait
 import Coal.Language.Type
 import Coal.Language.Type.Intrinsic
 import Coal.Language.Type.Row
+import Data.List.NonEmpty (NonEmpty (..), toList)
 import Data.Text (Text)
 import TextShow (showt)
 
@@ -36,8 +36,8 @@ instance Serializable (Parameter k) where
       Parameter _ n ->
         "Parameter" <> parenthesized n
 
-instance (Serializable s) => Serializable (List1 s) where
-  serialize = serialize . fromList1
+instance (Serializable s) => Serializable (NonEmpty s) where
+  serialize = serialize . toList
 
 instance (Serializable s) => Serializable [s] where
   serialize =

@@ -10,12 +10,12 @@ module Coal.Compiler.Transform.Expression (
 ) where
 
 import Coal.Common.Label (Label (..))
-import Coal.Common.List1 (List1, NonEmpty (..))
 import Coal.Language
+import Data.List.NonEmpty (NonEmpty (..))
 import Extra (Name)
 
 {-# INLINE matchE #-}
-matchE :: (Monoid a) => Expression a () -> List1 (Clause a ()) -> Expression a ()
+matchE :: (Monoid a) => Expression a () -> NonEmpty (Clause a ()) -> Expression a ()
 matchE = EMatch mempty ()
 
 {-# INLINE varE #-}
@@ -27,11 +27,11 @@ letE :: (Monoid a) => Name -> Expression a () -> Expression a () -> Expression a
 letE name = ERecursiveLet mempty (PVariable mempty (label name))
 
 {-# INLINE applicationE #-}
-applicationE :: (Monoid a) => Expression a () -> List1 (Expression a ()) -> Expression a ()
+applicationE :: (Monoid a) => Expression a () -> NonEmpty (Expression a ()) -> Expression a ()
 applicationE = EApplication mempty ()
 
 {-# INLINE lambdaE #-}
-lambdaE :: (Monoid a) => List1 (Pattern a ()) -> Expression a () -> Expression a ()
+lambdaE :: (Monoid a) => NonEmpty (Pattern a ()) -> Expression a () -> Expression a ()
 lambdaE = ELambda mempty
 
 {-# INLINE lambda1E #-}

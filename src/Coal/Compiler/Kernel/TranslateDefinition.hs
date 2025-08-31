@@ -5,7 +5,6 @@
 module Coal.Compiler.Kernel.TranslateDefinition (translateDefinition) where
 
 import Coal.Common.Label (Label (..))
-import Coal.Common.List1 (NonEmpty ((:|)), fromList1, (<|))
 import Coal.Compiler.Kernel.Environment (KernelEnvironment (..), withLocalNames)
 import Coal.Compiler.Kernel.TranslateExpression (translateExpression, translatePattern)
 import Coal.Compiler.Kernel.TranslateType (translateType)
@@ -15,6 +14,7 @@ import Control.Monad (forM)
 import Control.Monad.Reader (MonadReader, asks)
 import Data.Data (Data)
 import Data.List.Extra (sortOn)
+import Data.List.NonEmpty (NonEmpty ((:|)), toList, (<|))
 import Extra (Name, (<$$>))
 
 import qualified Coal.Kernel.Language as Kernel
@@ -29,7 +29,7 @@ translateDefinition =
     DType _ _ ctors ->
       traverse translateConstructor (zip [0 ..] (sortOn constructorName ctors))
     DFunction name (Function _ _ ps e) _ -> do
-      qs <- traverse translatePattern (fromList1 ps)
+      qs <- traverse translatePattern (toList ps)
       f <- withLocalNames (labelName <$> qs) (translateExpression e)
       moduleName <- asks kernelEnvironmentModule
       pure [Kernel.OFunction (moduleName <> "." <> name) qs f]

@@ -3,7 +3,6 @@
 
 module Coal.Compiler.Transform.NormalizeObjects (NormalizeObjectsTransformContext (..)) where
 
-import Coal.Common.List1 (List1)
 import Coal.Compiler.Transform.Flattening
 import Coal.Language.Expression (Expression (..))
 import Coal.Language.HasType (HasType (..), foldTypeOf)
@@ -14,6 +13,7 @@ import Coal.Language.Module.Function (Function (..))
 import Coal.Language.Trait (With (..))
 import Coal.Language.Type (Type (..))
 import Data.Data (Data, Typeable)
+import Data.List.NonEmpty (NonEmpty)
 import Data.Map.Strict (Map)
 import Extra (Name)
 
@@ -25,7 +25,7 @@ instance (NormalizeObjectsTransformContext a) => NormalizeObjectsTransformContex
   normalizeObject = fmap normalizeObject
   denormalizeObject = fmap denormalizeObject
 
-instance (NormalizeObjectsTransformContext a) => NormalizeObjectsTransformContext (List1 a) where
+instance (NormalizeObjectsTransformContext a) => NormalizeObjectsTransformContext (NonEmpty a) where
   normalizeObject = fmap normalizeObject
   denormalizeObject = fmap denormalizeObject
 

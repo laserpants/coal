@@ -4,7 +4,6 @@
 module Coal.Kernel.LLVM.IREval.Expr.App (irEvalApp) where
 
 import Coal.Common.Label (Label (..))
-import Coal.Common.List1 (List1, NonEmpty (..), fromList1)
 import Coal.Kernel.LLVM.IREncodable (irEncode)
 import Coal.Kernel.LLVM.IREval (IREval (..))
 import Coal.Kernel.LLVM.IREval.Closure (irApplyClosure, irPackClosure)
@@ -18,12 +17,13 @@ import Coal.Kernel.LLVM.IRType.Syntax (i32, i8Ptr, struct)
 import Coal.Kernel.LLVM.IRValue (IRValue (..))
 import Coal.Kernel.Language (Expr)
 import Control.Monad (unless)
+import Data.List.NonEmpty (NonEmpty (..), toList)
 import Data.Text (Text)
 import Extra (Name, forM, forSM_, isConstructor)
 
 import qualified Coal.Kernel.Language as Syntax
 
-irEvalApp :: (IRTyped t, IREval (Expr t)) => t -> Label t -> List1 (Expr t) -> IRInstr IRValue
+irEvalApp :: (IRTyped t, IREval (Expr t)) => t -> Label t -> NonEmpty (Expr t) -> IRInstr IRValue
 irEvalApp t ll@(Label _ var) es
   | isConstructor var = do
       irComment (comment1 var)
@@ -52,9 +52,9 @@ irEvalApp t ll@(Label _ var) es
                 pure r2
             | length ts > length es -> do
                 vs <- forM es irEval
-                irPackClosure var (length ts - length vs) (fromList1 vs)
+                irPackClosure var (length ts - length vs) (toList vs)
             | otherwise ->
-                case splitAt (length ts) (fromList1 es) of
+                case splitAt (length ts) (toList es) of
                   (a : as, b : bs) -> do
                     r1 <- irEval (Syntax.app t (Syntax.var ll) (a :| as))
                     irApplyClosure t r1 (b :| bs)

@@ -4,7 +4,6 @@
 module Coal.Kernel.Parser.Expr (expr, label) where
 
 import Coal.Common.Label (Label (..))
-import Coal.Common.List1 (NonEmpty (..))
 import Coal.Kernel.Language.Expr (Binding (..), Clause (..), Expr, Focus (..))
 import Coal.Kernel.Language.Type (Type (..))
 import Coal.Kernel.Parser (Parser, backtickString, lexeme, some, try, ($>), (<|>))
@@ -15,6 +14,7 @@ import Coal.Kernel.Parser.Symbol
 import Coal.Kernel.Parser.Type (type_)
 import Control.Monad (void)
 import Control.Monad.Combinators.Expr (makeExprParser)
+import Data.List.NonEmpty (NonEmpty (..))
 import Extra (Name)
 
 import qualified Coal.Kernel.Language.Expr.Syntax as Syntax

@@ -5,11 +5,11 @@
 module Coal.Kernel.Compiler.Pass.LambdaLifting (liftLambdaNodes) where
 
 import Coal.Common.Label (Label (..))
-import Coal.Common.List1 (List1, fromList1)
 import Coal.Common.Supply (supplied)
 import Coal.Kernel.Language
 import Control.Monad.RWS (MonadWriter, RWS, ask, evalRWS, local, tell)
 import Data.Functor.Foldable (cata, embed)
+import Data.List.NonEmpty (NonEmpty, toList)
 import Extra (Name, forM, traverse2)
 import TextShow (showt)
 
@@ -41,7 +41,7 @@ liftLambdaNodes objs = objs1 <> objs2
         e ->
           local mempty (embed <$> sequence e)
 
-moveUp :: (MonadWriter ObjectList m) => Name -> List1 (Label Type) -> Expr Type -> m (Expr Type)
+moveUp :: (MonadWriter ObjectList m) => Name -> NonEmpty (Label Type) -> Expr Type -> m (Expr Type)
 moveUp name vs f = do
-  tell [OFunction name (fromList1 vs) f]
+  tell [OFunction name (toList vs) f]
   pure (var (Label (functionTypeOf f vs) name))

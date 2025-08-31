@@ -9,7 +9,6 @@ module Coal.Compiler.TypeInference (typeDefinitionsC) where
 
 import Coal.Common.Environment (Environment (..))
 import Coal.Common.Label (Label (..))
-import Coal.Common.List1 (NonEmpty (..))
 import Coal.Common.Supply (supplied)
 import Coal.Compiler.Stack
 import Coal.Compiler.Transform.Type.Parameterized
@@ -22,6 +21,7 @@ import Control.Monad.State (evalState, gets)
 import Control.Monad.Writer (execWriter)
 import Data.Data (Data)
 import Data.Either.Extra (partitionEithers)
+import Data.List.NonEmpty (NonEmpty (..))
 import Extra (Dictionary, Name, forM_, void)
 
 import qualified Coal.Common.Environment as Environment

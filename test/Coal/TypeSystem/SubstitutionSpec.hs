@@ -4,16 +4,16 @@
 
 module Coal.TypeSystem.SubstitutionSpec (substitutionSpec) where
 
-import Coal.Common.List1
 import Coal.Language
 import Coal.TypeSystem.Substitution
 import Coal.TypeSystem.Unification
 import Control.Monad (forM_)
+import Data.List.NonEmpty (NonEmpty)
 import Prettyprinter
 import Prettyprinter.Render.String (renderString)
 import Test.Hspec
 
-import qualified Coal.Common.List1 as List1
+import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Set as Set
 
 data SubstitutionSpecTestCase = SubstitutionSpecTestCase
@@ -41,14 +41,14 @@ substitutionTests =
           ( TApplication
               KType
               (TConstructor KType "List")
-              (List1.singleton (TVariable (TypeIndex KType 1)))
+              (NonEmpty.singleton (TVariable (TypeIndex KType 1)))
           )
       )
       (TVariable (TypeIndex KType 0))
       ( TApplication
           KType
           (TConstructor KType "List")
-          (List1.singleton (TVariable (TypeIndex KType 1)))
+          (NonEmpty.singleton (TVariable (TypeIndex KType 1)))
       )
   , -- [0 ↦ int32] applied to List<'0>
     SubstitutionSpecTestCase
@@ -56,12 +56,12 @@ substitutionTests =
       ( TApplication
           KType
           (TConstructor KType "List")
-          (List1.singleton (TVariable (TypeIndex KType 0)))
+          (NonEmpty.singleton (TVariable (TypeIndex KType 0)))
       )
       ( TApplication
           KType
           (TConstructor KType "List")
-          (List1.singleton (TIntrinsic IInt32))
+          (NonEmpty.singleton (TIntrinsic IInt32))
       )
   , -- row variable substitution
     SubstitutionSpecTestCase
@@ -107,11 +107,11 @@ normalizeTests =
     ( TApplication
         KType
         (TConstructor KType "List")
-        (List1.singleton (TVariable (TypeIndex KType 5)))
+        (NonEmpty.singleton (TVariable (TypeIndex KType 5)))
     , TApplication
         KType
         (TConstructor KType "List")
-        (List1.singleton (TVariable (TypeIndex KType 0)))
+        (NonEmpty.singleton (TVariable (TypeIndex KType 0)))
     )
   ]
 

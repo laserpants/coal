@@ -4,11 +4,11 @@
 module Coal.Kernel.Language.Expr.Replace (rewrite, Sub (..)) where
 
 import Coal.Common.Label (Label (..), labelName, setLabelName)
-import Coal.Common.List1 (List1)
 import Coal.Kernel.Language.Expr (Binding (..), Clause (..), Expr, ExprF (..), Focus (..), bindingLabel)
 import Control.Arrow ((>>>))
 import Control.Monad.Identity (runIdentity)
 import Data.Functor.Foldable (embed, para)
+import Data.List.NonEmpty (NonEmpty)
 import Extra (Dictionary, Map, Name, (<$$>))
 
 import qualified Coal.Kernel.Language.Expr.Syntax as Syntax
@@ -64,7 +64,7 @@ class Sub a where
 instance (Sub s) => Sub [s] where
   relabel = fmap . relabel
 
-instance (Sub s) => Sub (List1 s) where
+instance (Sub s) => Sub (NonEmpty s) where
   relabel = fmap . relabel
 
 instance (Sub s) => Sub (Map k s) where

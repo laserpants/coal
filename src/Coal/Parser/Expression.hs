@@ -4,7 +4,6 @@ module Coal.Parser.Expression (parseExpression) where
 
 import Coal.Ast.Metadata (Metadata (..), metadataSpan)
 import Coal.Common.Label (Label (..))
-import Coal.Common.List1 (List1, NonEmpty (..))
 import Coal.Language
 import Coal.Parser
 import Coal.Parser.Identifier
@@ -16,8 +15,9 @@ import Coal.Parser.Type (parseType)
 import Coal.Parser.Utils (fieldList, fieldListWithKey)
 import Control.Monad (void)
 import Control.Monad.Combinators.Expr
+import Data.List.NonEmpty (NonEmpty (..))
 import Extra (Name, isConstructor)
-import Text.Megaparsec (getSourcePos, notFollowedBy, option, optional, some, try, (<|>))
+import Text.Megaparsec (getSourcePos, notFollowedBy, optional, some, try, (<|>))
 import Text.Megaparsec.Char (char)
 
 import qualified Data.Map.Strict as Map
@@ -53,7 +53,7 @@ selector expr loc lname
  where
   ll = Label () lname
 
-parseUnit :: Parser (List1 (Expression Metadata ()))
+parseUnit :: Parser (NonEmpty (Expression Metadata ()))
 parseUnit =
   withMetadata $ do
     pure (\loc -> ELiteral loc LUnit :| [])

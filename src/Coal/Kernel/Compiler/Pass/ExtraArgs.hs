@@ -4,14 +4,14 @@
 module Coal.Kernel.Compiler.Pass.ExtraArgs (addImplicitArgs) where
 
 import Coal.Common.Label (Label (..))
-import Coal.Common.List1 (List1, NonEmpty (..))
 import Coal.Kernel.Compiler.Ast (flattenAppNodes)
 import Coal.Kernel.Language (Expr, Type, Typed (..))
 import Coal.Kernel.Language.Object (Object (..))
+import Data.List.NonEmpty (NonEmpty (..))
 import TextShow (showt)
 
-import qualified Coal.Common.List1 as List1
 import qualified Coal.Kernel.Language as Syntax
+import qualified Data.List.NonEmpty as NonEmpty
 
 addImplicitArgs :: Object Type (Expr Type) -> Object Type (Expr Type)
 addImplicitArgs =
@@ -21,7 +21,7 @@ addImplicitArgs =
           OFunction
             name
             (lls1 <> lls2)
-            (flattenAppNodes (Syntax.app (List1.last ts) expr (exprs lls2)))
+            (flattenAppNodes (Syntax.app (NonEmpty.last ts) expr (exprs lls2)))
       | otherwise ->
           f
      where
@@ -30,11 +30,11 @@ addImplicitArgs =
       ts =
         Syntax.unfoldType (typeOf expr)
       lls2 =
-        labels (List1.init ts)
+        labels (NonEmpty.init ts)
     o ->
       o
 
-exprs :: [Label t] -> List1 (Expr t)
+exprs :: [Label t] -> NonEmpty (Expr t)
 exprs (ll : lls) = Syntax.var <$> ll :| lls
 exprs _ = error "Implementation error"
 

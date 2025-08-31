@@ -10,7 +10,6 @@ module Coal.Parser.Module (
 ) where
 
 import Coal.Ast.Metadata (Metadata (..))
-import Coal.Common.List1 (NonEmpty (..))
 import Coal.Language
 import Coal.Language.Module
 import Coal.Parser
@@ -20,6 +19,7 @@ import Coal.Parser.Pattern (parsePattern, parseUnitPattern)
 import Coal.Parser.Symbol
 import Coal.Parser.Type
 import Coal.Parser.Utils (fieldListWithKey)
+import Data.List.NonEmpty (NonEmpty (..))
 import Extra (Name)
 import Text.Megaparsec
 import Text.Megaparsec.Char (upperChar)

@@ -19,7 +19,6 @@ module Coal.Kernel.Language.Expr (
 
 import Coal.Common.FreeVars (BoundVars (..), FreeVars (..), exceptNames)
 import Coal.Common.Label (Label (..))
-import Coal.Common.List1 (List1, NonEmpty (..))
 import Coal.Kernel.Language.Op (Op (..))
 import Coal.Kernel.Language.Prim (Prim (..))
 import Coal.Kernel.Language.Type (Type (..))
@@ -30,15 +29,16 @@ import Data.Data (Data)
 import Data.Eq.Deriving (deriveEq1)
 import Data.Fix (Fix (..))
 import Data.Functor.Foldable (cata, project)
+import Data.List.NonEmpty (NonEmpty (..))
 import Data.Set (singleton)
 import Extra (Name, Over)
 import Text.Show.Deriving (deriveShow1)
 
-import qualified Coal.Common.List1 as List1
+import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Set as Set
 
 -- | Pattern matching clause
-data Clause t a = Clause (List1 (Label t)) a
+data Clause t a = Clause (NonEmpty (Label t)) a
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
 
 deriveShow1 ''Clause
@@ -70,8 +70,8 @@ unpackBinding :: Binding t a -> (Label t, a)
 unpackBinding (Binding ll e) = (ll, e)
 
 {-# INLINE unzipBindings #-}
-unzipBindings :: List1 (Binding t a) -> (List1 (Label t), List1 a)
-unzipBindings = List1.unzip . fmap unpackBinding
+unzipBindings :: NonEmpty (Binding t a) -> (NonEmpty (Label t), NonEmpty a)
+unzipBindings = NonEmpty.unzip . fmap unpackBinding
 
 deriveShow1 ''Binding
 deriveEq1 ''Binding
@@ -87,19 +87,19 @@ data ExprF t a
   = -- | Variable
     EVar (Label t)
   | -- | Let-binding
-    ELet (List1 (Binding t a)) a
+    ELet (NonEmpty (Binding t a)) a
   | -- | Literal value
     ELit Prim
   | -- | Lambda abstraction
-    ELam (List1 (Label t)) a
+    ELam (NonEmpty (Label t)) a
   | -- | Function application
-    EApp t a (List1 a)
+    EApp t a (NonEmpty a)
   | -- | If-statement
     EIf a a a
   | -- | Operators
     EOp (Op a)
   | -- | Pattern matching expression
-    EMat t a (List1 (Clause t a))
+    EMat t a (NonEmpty (Clause t a))
   | -- | Record field extension
     EExt Name a a
   | -- | Empty record

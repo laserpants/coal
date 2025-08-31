@@ -6,7 +6,6 @@ module Coal.Kernel.LLVM.IREval.Closure (
   closureStructType,
 ) where
 
-import Coal.Common.List1 (List1, fromList1)
 import Coal.Kernel.LLVM.IREval
 import Coal.Kernel.LLVM.IREval.Comment (irComment)
 import Coal.Kernel.LLVM.IREval.Conceal (irConceal, irReveal)
@@ -17,6 +16,7 @@ import Coal.Kernel.LLVM.IRType (IRType (..), IRTyped (..))
 import Coal.Kernel.LLVM.IRType.Syntax (i32, i8Ptr, struct)
 import Coal.Kernel.LLVM.IRValue (IRValue (..))
 import Control.Monad (unless)
+import Data.List.NonEmpty (NonEmpty, toList)
 import Data.Text (Text)
 import Extra (Name, forM, forSM_)
 import TextShow (showt)
@@ -27,11 +27,11 @@ storeElement base v i = do
   v2 <- irConceal v
   store v2 v1
 
-irApplyClosure :: (IRTyped t, IREval e) => t -> IRValue -> List1 e -> IRInstr IRValue
+irApplyClosure :: (IRTyped t, IREval e) => t -> IRValue -> NonEmpty e -> IRInstr IRValue
 irApplyClosure t v es = do
   r1 <- alloca i8Ptr (I32 n)
   vs <- forM es irEval
-  forSM_ 0 (fromList1 vs) (storeElement r1)
+  forSM_ 0 (toList vs) (storeElement r1)
   r2 <- callg i8Ptr "apply" [v, I32 n, r1]
   irReveal r2 (irTypeOf t)
  where

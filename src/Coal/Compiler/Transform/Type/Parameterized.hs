@@ -5,12 +5,12 @@
 module Coal.Compiler.Transform.Type.Parameterized where
 
 import Coal.Common.Environment (Environment (..))
-import Coal.Common.List1 (List1, fromList1)
 import Coal.Common.Supply (Supply (..), supplied)
 import Coal.Language
 import Control.Monad.Reader (ReaderT, asks, runReaderT)
 import Control.Monad.State (MonadState)
 import Control.Monad.Writer (WriterT, execWriterT, tell)
+import Data.List.NonEmpty (NonEmpty, toList)
 import Extra (Name, traverse_)
 
 import qualified Coal.Common.Environment as Environment
@@ -38,7 +38,7 @@ instantiateTypeVars =
     TApplication _ t ts -> do
       u <- instantiateTypeVars t
       us <- traverse instantiateTypeVars ts
-      case applyKind (kindOf <$> fromList1 us) (kindOf u) of
+      case applyKind (kindOf <$> toList us) (kindOf u) of
         Nothing ->
           error "Kind mismatch"
         Just k ->
@@ -82,7 +82,7 @@ class Parameterized p where
 instance (Parameterized a) => Parameterized [a] where
   instantiateTypeIndexes = traverse_ instantiateTypeIndexes
 
-instance (Parameterized a) => Parameterized (List1 a) where
+instance (Parameterized a) => Parameterized (NonEmpty a) where
   instantiateTypeIndexes = traverse_ instantiateTypeIndexes
 
 instance Parameterized (Type Parameter ()) where

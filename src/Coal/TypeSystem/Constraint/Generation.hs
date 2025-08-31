@@ -13,7 +13,6 @@ module Coal.TypeSystem.Constraint.Generation (
 ) where
 
 import Coal.Common.Label (Label (..))
-import Coal.Common.List1 (List1, NonEmpty (..), fromList1, (<|))
 import Coal.Common.Supply (supplied)
 import Coal.Language
 import Coal.TypeSystem.Constraint (Constraint (..))
@@ -22,6 +21,7 @@ import Coal.TypeSystem.Constraint.Generation.Internal
 import Coal.TypeSystem.Constraint.Generation.TypeAnnotation (instantiateAnnotation)
 import Control.Monad.Reader (asks)
 import Data.Data (Data)
+import Data.List.NonEmpty (NonEmpty (..), toList, (<|))
 import Data.Maybe (maybeToList)
 import Data.Tuple.Extra (third3)
 import Extra
@@ -145,7 +145,7 @@ patternConstraints assertF ms =
 clauseAssumptions :: (Show a, Data a) => Clause a IndexedType -> ConstraintsGen a (IndexedType, [IndexedType], [Assumption a IndexedType])
 clauseAssumptions (EClause loc p cs) = do
   (ts1, ms) <- second concat . unzip <$$> withMonomorphic p $
-    forM (fromList1 cs) $
+    forM (toList cs) $
       \case
         CPlain _ gs e -> do
           ms1 <- concatForM gs $ \(CGuard g) -> do
@@ -178,7 +178,7 @@ emitEConstructorConstraints loc (Label t name) = do
       tellRight [Explicit (RuleDataConstructor loc name t constructorScheme) t constructorScheme]
   pure []
 
-emitELambdaConstraints :: (Show a, Data a) => a -> List1 (Pattern a IndexedType) -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
+emitELambdaConstraints :: (Show a, Data a) => a -> NonEmpty (Pattern a IndexedType) -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
 emitELambdaConstraints loc ps e = do
   ms <- withMonomorphic ps (emitConstraints e)
   names <- concatForM ps (patternConstraints (assertEqualityAssumptions loc) ms)
@@ -244,11 +244,11 @@ emitEIfConstraints loc t e1 e2 e3 = do
   t2 = typeOf e2
   t3 = typeOf e3
 
-emitEApplicationConstraints :: (Show a, Data a) => a -> IndexedType -> Expression a IndexedType -> List1 (Expression a IndexedType) -> ConstraintsGen a [Assumption a IndexedType]
+emitEApplicationConstraints :: (Show a, Data a) => a -> IndexedType -> Expression a IndexedType -> NonEmpty (Expression a IndexedType) -> ConstraintsGen a [Assumption a IndexedType]
 emitEApplicationConstraints loc t e1 es = do
   ms1 <- emitConstraints e1
   ms2 <- concatMapM emitConstraints es
-  tellRight [Equality (RuleApplication loc t1 (fromList1 ts)) [t1, t2]]
+  tellRight [Equality (RuleApplication loc t1 (toList ts)) [t1, t2]]
   pure (ms1 <> ms2)
  where
   t1 = typeOf e1
@@ -273,7 +273,7 @@ emitEListLiteralConstraints loc t es = do
     ]
   pure ms1
 
-emitETupleConstraints :: (Show a, Data a) => a -> IndexedType -> List1 (Expression a IndexedType) -> ConstraintsGen a [Assumption a IndexedType]
+emitETupleConstraints :: (Show a, Data a) => a -> IndexedType -> NonEmpty (Expression a IndexedType) -> ConstraintsGen a [Assumption a IndexedType]
 emitETupleConstraints loc t es = do
   ms1 <- concatMapM emitConstraints es
   tellRight
@@ -283,7 +283,7 @@ emitETupleConstraints loc t es = do
   pure ms1
 
 tupleScheme :: Int -> IndexedScheme
-tupleScheme n = Forall (Set.fromList (fromList1 ixs)) [] (tupleType (TVariable <$> ixs))
+tupleScheme n = Forall (Set.fromList (toList ixs)) [] (tupleType (TVariable <$> ixs))
  where
   ixs = TypeIndex KType 0 :| [TypeIndex KType ti | ti <- [1 .. n - 1]]
 
@@ -335,7 +335,7 @@ emitConstraints =
       emitEListLiteralConstraints loc t es
     EMatch loc t e cs -> do
       ms1 <- emitConstraints e
-      (ts1, ts2, ms2) <- (third3 concat . unzip3 <$$> traverse clauseAssumptions) (fromList1 cs)
+      (ts1, ts2, ms2) <- (third3 concat . unzip3 <$$> traverse clauseAssumptions) (toList cs)
       -- Pattern types
       tellRight [Equality (RuleMatchClausePatterns loc) (typeOf e : ts1)]
       -- Expression types
@@ -354,7 +354,7 @@ emitConstraints =
     EFold _ t name (e :| es) cs e1 -> do
       ms1 <- emitConstraints e
       ms2 <- concatMapM emitConstraints es
-      (ts1, ts2, ms3) <- (third3 concat . unzip3 <$$> traverse clauseAssumptions) (fromList1 cs)
+      (ts1, ts2, ms3) <- (third3 concat . unzip3 <$$> traverse clauseAssumptions) (toList cs)
       -- Pattern types
       tellRight [Equality InferenceRulePlaceholder (typeOf e : ts1)]
       -- Expression types

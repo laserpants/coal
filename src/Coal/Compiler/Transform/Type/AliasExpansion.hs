@@ -9,12 +9,12 @@ module Coal.Compiler.Transform.Type.AliasExpansion (
 ) where
 
 import Coal.Common.Environment (Environment)
-import Coal.Common.List1 (NonEmpty (..), fromList1)
 import Coal.Language
 import Coal.Language.Module (Constant (..), Definition (..), Function (..), Module (..))
 import Control.Monad.Reader (MonadReader, ask)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformM)
+import Data.List.NonEmpty (NonEmpty (..), toList)
 import Extra (Dictionary, Name)
 
 import qualified Coal.Common.Environment as Environment
@@ -106,9 +106,9 @@ instance AliasContext ParameterizedType where
   expandAliases =
     \case
       t@(TApplication _ (TVariable (Parameter _ name)) ts) -> do
-        lookupAlias t (fromList1 ts) name
+        lookupAlias t (toList ts) name
       t@(TApplication _ (TConstructor _ name) ts) -> do
-        lookupAlias t (fromList1 ts) name
+        lookupAlias t (toList ts) name
       TApplication k t ts ->
         TApplication k <$> expandAliases t <*> expandAliases ts
       TArrow t1 t2 ->

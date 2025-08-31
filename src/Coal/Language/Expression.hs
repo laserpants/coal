@@ -11,7 +11,6 @@ module Coal.Language.Expression (
 ) where
 
 import Coal.Common.Label (Label (..))
-import Coal.Common.List1 (List1)
 import Coal.Language.Expression.Binding (Binding (..))
 import Coal.Language.Expression.Choice (Choice (..))
 import Coal.Language.Expression.Operator (BinaryOperator, UnaryOperator)
@@ -20,17 +19,18 @@ import Coal.Language.Primitive (Primitive (..))
 import Coal.Language.Trait (Trait (..))
 import Coal.Language.Type (Parameter (..), Type)
 import Data.Data (Data, Typeable)
+import Data.List.NonEmpty (NonEmpty)
 import Extra (Dictionary, Name)
 
 data Expression a t
   = -- | Type-annotated expression
     EAnnotation a (Type Parameter ()) (Expression a t)
   | -- | Function application
-    EApplication a t (Expression a t) (List1 (Expression a t))
+    EApplication a t (Expression a t) (NonEmpty (Expression a t))
   | -- | Lambda function expression
-    ELambda a (List1 (Pattern a t)) (Expression a t)
+    ELambda a (NonEmpty (Pattern a t)) (Expression a t)
   | -- | Let-binding
-    ELet a (List1 (Binding Expression a t)) (Expression a t)
+    ELet a (NonEmpty (Binding Expression a t)) (Expression a t)
   | -- | Recursive let-binding
     ERecursiveLet a (Pattern a t) (Expression a t) (Expression a t)
   | -- | Variable
@@ -52,16 +52,16 @@ data Expression a t
   | -- | List literal
     EListLiteral a t [Expression a t]
   | -- | Tuples
-    ETuple a t (List1 (Expression a t))
+    ETuple a t (NonEmpty (Expression a t))
   | -- | Pattern matching expression
-    EMatch a t (Expression a t) (List1 (Clause a t))
+    EMatch a t (Expression a t) (NonEmpty (Clause a t))
   | -- | Compiled match expression
-    ECompiledMatch a t (Expression a t) (List1 (CompiledClause a t))
+    ECompiledMatch a t (Expression a t) (NonEmpty (CompiledClause a t))
   | -- | Fold expression
     -- TODO: remove name
-    EFold a t Name (List1 (Expression a t)) (List1 (Clause a t)) (Maybe (Expression a t))
+    EFold a t Name (NonEmpty (Expression a t)) (NonEmpty (Clause a t)) (Maybe (Expression a t))
   | -- | Codata unfold
-    EUnfold a t Name (List1 (Pattern a t)) (Dictionary (Expression a t)) (Maybe (Expression a t))
+    EUnfold a t Name (NonEmpty (Pattern a t)) (Dictionary (Expression a t)) (Maybe (Expression a t))
   | -- | Record field selector
     ESelect a (Label t) (Expression a t)
   | -- | Codata field selector
@@ -74,8 +74,8 @@ data Expression a t
     ETraitDictionary a t (Trait t)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
 
-data Clause a t = EClause a (Pattern a t) (List1 (Choice Expression a t))
+data Clause a t = EClause a (Pattern a t) (NonEmpty (Choice Expression a t))
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
 
-data CompiledClause a t = ECompiledClause (List1 (Label t)) (Expression a t)
+data CompiledClause a t = ECompiledClause (NonEmpty (Label t)) (Expression a t)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)

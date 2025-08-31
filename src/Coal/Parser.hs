@@ -12,8 +12,8 @@ module Coal.Parser (
   nonEmptyOr,
 ) where
 
-import Coal.Common.List1 (List1, NonEmpty (..))
 import Control.Monad (void, when)
+import Data.List.NonEmpty (NonEmpty (..))
 import Data.Text (Text)
 import Data.Void (Void)
 import Extra (Name)
@@ -92,10 +92,10 @@ word p =
 cons :: Parser a -> Parser [a] -> Parser [a]
 cons p ps = (:) <$> p <*> ps
 
-nonEmpty :: Parser [a] -> Parser (List1 a)
+nonEmpty :: Parser [a] -> Parser (NonEmpty a)
 nonEmpty = nonEmptyOr (fail "Empty list")
 
-nonEmptyOr :: Parser (List1 a) -> Parser [a] -> Parser (List1 a)
+nonEmptyOr :: Parser (NonEmpty a) -> Parser [a] -> Parser (NonEmpty a)
 nonEmptyOr ls p = do
   ps <- p
   case ps of

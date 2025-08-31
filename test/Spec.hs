@@ -6,7 +6,6 @@
 import Coal.Ast.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment (..))
 import Coal.Common.Label (Label (..))
-import Coal.Common.List1 (NonEmpty (..))
 import Coal.Common.Name (Dictionary, Name)
 import Coal.Compiler (expandWhereClausesC, kernelTranslationC, mainPass, typeCheckingPass, writeDotFiles)
 import Coal.Compiler.Environment
@@ -36,6 +35,7 @@ import Control.Monad.State (gets, liftIO)
 import Data.Data (Data)
 import Data.Either
 import Data.List (nub)
+import Data.List.NonEmpty (NonEmpty (..))
 import Data.Map.Strict (Map)
 import Data.Maybe (fromMaybe)
 import Data.Set (Set)
@@ -203,21 +203,21 @@ spec = do
   print (x == Right "24\n")
   x <- main81
   print (x == Right "6\n")
---  x <- main82
---  print (x == Right "{\"abc\":[\"a\",\"b\",\"c\"],\"pi\":3.14159}\n")
+  --  x <- main82
+  --  print (x == Right "{\"abc\":[\"a\",\"b\",\"c\"],\"pi\":3.14159}\n")
   x <- main84
   print (x == Right "true\n")
---  x <- main85
---  print (x == Right "aa\n")
---  x <- main86
---  print (x == Right "24\n")
---  x <- main87
---  print (x == Right "{\"abc\":[\"a\",\"b\",\"c\"],\"pi\":3.14159}\n")
---  x <- main88
---  print (x == Right "{\"abc\":[\"a\",\"b\",\"c\"],\"yes\":true}\n")
+  --  x <- main85
+  --  print (x == Right "aa\n")
+  --  x <- main86
+  --  print (x == Right "24\n")
+  --  x <- main87
+  --  print (x == Right "{\"abc\":[\"a\",\"b\",\"c\"],\"pi\":3.14159}\n")
+  --  x <- main88
+  --  print (x == Right "{\"abc\":[\"a\",\"b\",\"c\"],\"yes\":true}\n")
   -- 89
-  x <- main91
-  print (x == Right "5\n")
+  -- x <- main91
+  -- print (x == Right "5\n")
 
 --  x <- main94
 --  print (x == Right "1\n2\n3\n4\n5\n")

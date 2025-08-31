@@ -8,17 +8,17 @@
 module Coal.Language.Expression.Binding (Binding (..)) where
 
 import Coal.Common.FreeVars (BoundVars (..), FreeVars (..), exceptNames)
-import Coal.Common.List1 (List1)
 import Coal.Language.Pattern (Pattern (..))
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (universeBi)
+import Data.List.NonEmpty (NonEmpty)
 import Extra (Name)
 
 import qualified Data.Set as Set
 
 data Binding e a t
   = BPattern a (Pattern a t) (e a t)
-  | BFunction a Name (List1 (Pattern a t)) (e a t)
+  | BFunction a Name (NonEmpty (Pattern a t)) (e a t)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
 
 instance (Data a, Data t) => BoundVars (Binding e a t) where

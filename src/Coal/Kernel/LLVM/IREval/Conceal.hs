@@ -3,7 +3,6 @@
 
 module Coal.Kernel.LLVM.IREval.Conceal (irConceal, irConcealArgs, irReveal) where
 
-import Coal.Common.List1 (List1, fromList1)
 import Coal.Kernel.LLVM.IREval (IREval (..))
 import Coal.Kernel.LLVM.IREval.Comment (irComment)
 import Coal.Kernel.LLVM.IREval.Malloc (irMalloc)
@@ -13,6 +12,7 @@ import Coal.Kernel.LLVM.IRType (IRType (..), IRTyped (..))
 import Coal.Kernel.LLVM.IRType.Syntax (i1, i32, i64, i8, i8Ptr, ptr)
 import Coal.Kernel.LLVM.IRValue (IRValue (..))
 import Control.Monad (unless)
+import Data.List.NonEmpty (NonEmpty, toList)
 import Extra (forM)
 
 irBox :: IRValue -> IRType -> IRInstr IRValue
@@ -44,7 +44,7 @@ irUnbox v t = do
   p1 <- bitcast v (ptr t)
   load t p1
 
-irConcealArgs :: (IREval e) => List1 e -> IRInstr [IRValue]
+irConcealArgs :: (IREval e) => NonEmpty e -> IRInstr [IRValue]
 irConcealArgs args = do
   vs <- forM args $
     \e -> do
@@ -52,7 +52,7 @@ irConcealArgs args = do
       v2 <- irConceal v1
       unless (v1 == v2) (irComment ["^ Conceal arg."])
       pure v2
-  pure (fromList1 vs)
+  pure (toList vs)
 
 irReveal :: IRValue -> IRType -> IRInstr IRValue
 irReveal v =

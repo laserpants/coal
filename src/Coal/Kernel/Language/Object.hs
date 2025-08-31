@@ -16,7 +16,6 @@ module Coal.Kernel.Language.Object (
 
 import Coal.Common.FreeVars (FreeVars (..), boundIn, exceptNames)
 import Coal.Common.Label (Label (..))
-import Coal.Common.List1 (fromList1)
 import Coal.Kernel.LLVM.IRType (IRType, IRTyped (..))
 import Coal.Kernel.LLVM.IRType.Syntax (opaqueFunction)
 import Coal.Kernel.Language.Expr (Binding (..), Expr, ExprF (..))
@@ -25,6 +24,7 @@ import Coal.Kernel.Language.Type.Arrow (functionTypeOf)
 import Coal.Kernel.Language.Typed (Typed (..))
 import Control.Arrow ((>>>))
 import Data.Functor.Foldable (embed, project)
+import Data.List.NonEmpty (toList)
 import Extra (Name)
 
 data Object t e
@@ -91,7 +91,7 @@ fromBinding (Binding (Label _ name) expr) = go expr
     project
       >>> \case
         ELam vs e ->
-          OFunction name (fromList1 vs) e
+          OFunction name (toList vs) e
         e ->
           OConstant name (embed e)
 

@@ -4,12 +4,12 @@
 module Coal.TypeSystem.Constraint.Generation.ELambdaConstraintsSpec where
 
 import Coal.Common.Label (Label (..))
-import Coal.Common.List1 (List1, NonEmpty (..), fromList1, (<|))
 import Coal.Language
 import Coal.TypeSystem.Constraint
 import Coal.TypeSystem.Constraint.Generation
 import Coal.TypeSystem.Constraint.Generation.InferenceRule
 import Data.Either (lefts, rights)
+import Data.List.NonEmpty (NonEmpty (..), toList, (<|))
 
 import qualified Coal.Common.Environment as Environment
 import qualified Data.Set as Set

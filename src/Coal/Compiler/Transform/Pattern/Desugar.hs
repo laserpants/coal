@@ -13,7 +13,6 @@ module Coal.Compiler.Transform.Pattern.Desugar (
 ) where
 
 import Coal.Common.Label (Label (..))
-import Coal.Common.List1 (NonEmpty ((:|)))
 import Coal.Common.Supply (suppliedName)
 import Coal.Language.Expression (Clause (..), Expression (..))
 import Coal.Language.Expression.Binding (Binding (..))
@@ -29,6 +28,7 @@ import Control.Monad.RWS (MonadReader, MonadState, MonadWriter, RWS, runRWS, tel
 import Control.Monad.Writer (runWriterT)
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (transformM)
+import Data.List.NonEmpty (NonEmpty ((:|)))
 import Extra (Name)
 
 type NamedPattern c o k = (Name, Pattern c (Type o k))

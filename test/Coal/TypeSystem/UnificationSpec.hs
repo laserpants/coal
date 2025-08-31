@@ -4,17 +4,17 @@
 
 module Coal.TypeSystem.UnificationSpec (unificationSpec) where
 
-import Coal.Common.List1
 import Coal.Language
 import Coal.TypeSystem.Substitution
 import Coal.TypeSystem.Unification
 import Control.Monad (forM_)
+import Data.List.NonEmpty (NonEmpty (..))
 import Prettyprinter
 import Prettyprinter.Render.String (renderString)
 import Test.Hspec
 
-import qualified Coal.Common.List1 as List1
 import qualified Coal.TypeSystem.Substitution as Substitution
+import qualified Data.List.NonEmpty as NonEmpty
 
 data UnificationSpecTestCase t
   = UnifyTestCase t t (Either UnificationError Substitution)
@@ -244,7 +244,7 @@ unifyTestCases =
       ( TApplication
           KType
           (TConstructor (KArrow KType KType) "List")
-          (List1.singleton (TVariable (TypeIndex KType 0)))
+          (NonEmpty.singleton (TVariable (TypeIndex KType 0)))
       )
       (TIntrinsic IInt32)
       (Left ECannotUnify)
@@ -338,7 +338,7 @@ matchTestCases =
       ( TApplication
           KType
           (TConstructor (KArrow KType KType) "List")
-          (List1.singleton (TVariable (TypeIndex KType 0)))
+          (NonEmpty.singleton (TVariable (TypeIndex KType 0)))
       )
       (Left ECannotMatch)
   , -- '0 >~ int32

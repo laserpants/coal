@@ -15,7 +15,6 @@ module Coal.Compiler.Transform.Nats (
 where
 
 import Coal.Common.Label (Label (..))
-import Coal.Common.List1 (NonEmpty (..), (<|))
 import Coal.Common.Supply (suppliedName)
 import Coal.Language
 import Coal.Language.Module (Constant (..), Definition (..), Function (..), Module (..))
@@ -25,6 +24,7 @@ import Control.Monad.Reader (MonadReader)
 import Control.Monad.State (MonadState)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformM)
+import Data.List.NonEmpty (NonEmpty (..), (<|))
 import Extra (Dictionary, Name)
 
 newtype NatExpansion a = NatExpansion {natExpansionStack :: RWS Name () Int a}

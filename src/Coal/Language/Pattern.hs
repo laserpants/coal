@@ -5,12 +5,12 @@ module Coal.Language.Pattern (Pattern (..)) where
 
 import Coal.Common.FreeVars (BoundVars (..))
 import Coal.Common.Label (Label (..))
-import Coal.Common.List1 (List1)
 import Coal.Language.Primitive (Primitive (..))
 import Coal.Language.Trait (Trait (..))
 import Coal.Language.Type (Parameter (..), Type)
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (universeBi)
+import Data.List.NonEmpty (NonEmpty)
 import Extra (Dictionary, Name)
 
 import qualified Data.Set as Set
@@ -33,7 +33,7 @@ data Pattern a t
   | -- | List literal
     PListLiteral a t [Pattern a t]
   | -- | Or-pattern
-    PTuple a t (List1 (Pattern a t))
+    PTuple a t (NonEmpty (Pattern a t))
   | -- | Pattern matching expression
     POr a t (Pattern a t) (Pattern a t)
   | -- | As-pattern

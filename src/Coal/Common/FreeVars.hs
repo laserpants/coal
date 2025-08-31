@@ -12,7 +12,7 @@ module Coal.Common.FreeVars (
 ) where
 
 import Coal.Common.Label (Label (..), labelName)
-import Coal.Common.List1 (NonEmpty)
+import Data.List.NonEmpty (NonEmpty (..))
 import Data.Set (Set, singleton)
 import Extra (Dictionary, Map, Name, isConstructor)
 

@@ -8,10 +8,10 @@ module Coal.Compiler.PatternMatching.Compiler (
 ) where
 
 import Coal.Common.Label (Label (..))
-import Coal.Common.List1 (List1, NonEmpty (..))
 import Coal.Compiler.PatternMatching.Envelope
 import Coal.Language
 import Data.Data (Data, Typeable)
+import Data.List.NonEmpty (NonEmpty (..))
 import Extra (const2)
 
 class TypeProxy t where
@@ -80,7 +80,7 @@ compileEnvelopeClause :: (Eq a, TypeProxy t, Ord t, Data a, Monoid a) => Envelop
 compileEnvelopeClause (EnvelopeClause (Label t name) ls e) =
   ECompiledClause (Label (folded t ls) name :| ls) (compileEnvelope e)
 
-clauseList :: (Eq a, TypeProxy t, Ord t, Data a, Monoid a) => [EnvelopeClause (Expression a) t] -> List1 (CompiledClause a t)
+clauseList :: (Eq a, TypeProxy t, Ord t, Data a, Monoid a) => [EnvelopeClause (Expression a) t] -> NonEmpty (CompiledClause a t)
 clauseList ecs =
   case filter (not . fails) ecs of
     c : cs ->

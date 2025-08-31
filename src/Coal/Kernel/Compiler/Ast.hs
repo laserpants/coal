@@ -10,24 +10,24 @@ module Coal.Kernel.Compiler.Ast (
 ) where
 
 import Coal.Common.Label (Label (..))
-import Coal.Common.List1 (NonEmpty (..), fromList1)
 import Coal.Kernel.Language
 import Control.Monad.Writer (runWriter, tell)
 import Data.Fix (Fix (..))
 import Data.Function (on)
 import Data.Functor.Foldable (cata, embed)
+import Data.List.NonEmpty (NonEmpty (..), toList)
 import Extra (foldrM)
 
-import qualified Coal.Common.List1 as List1
+import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map.Strict as Map
 
 flattenObject :: Object Type (Expr Type) -> Object Type (Expr Type)
 flattenObject =
   \case
     OFunction name lls1 (Fix (ELam lls2 e)) ->
-      OFunction name (lls1 <> fromList1 lls2) e
+      OFunction name (lls1 <> toList lls2) e
     OConstant name (Fix (ELam lls e)) ->
-      OFunction name (fromList1 lls) e
+      OFunction name (toList lls) e
     o ->
       o
 
@@ -78,7 +78,7 @@ sortMatchClauses =
   cata $
     \case
       EMat t e1 cs ->
-        match t e1 (List1.sortBy clauseOrder cs)
+        match t e1 (NonEmpty.sortBy clauseOrder cs)
       e ->
         embed e
  where

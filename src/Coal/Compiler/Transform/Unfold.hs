@@ -14,7 +14,6 @@ module Coal.Compiler.Transform.Unfold (
 ) where
 
 import Coal.Common.Label (Label (..))
-import Coal.Common.List1 (List1, NonEmpty (..))
 import Coal.Common.Supply (suppliedName)
 import Coal.Compiler.Transform.Expression
 import Coal.Compiler.Transform.Flattening (flattenApplication)
@@ -26,6 +25,7 @@ import Control.Monad.Reader (MonadReader)
 import Control.Monad.State (MonadState)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transform, transformM)
+import Data.List.NonEmpty (NonEmpty (..))
 import Extra (Dictionary, Name, const2)
 
 import qualified Data.Map.Strict as Map
@@ -50,7 +50,7 @@ runUnfoldExpansion r s e = (a, s')
 renameRecursiveCall :: (Monoid a, Data a) => Name -> Name -> Expression a () -> Expression a ()
 renameRecursiveCall old new = replace old (const2 $ varE new)
 
-expandUnfoldExpr :: (Monoid a, Data a, MonadState Int m, MonadReader Name m) => Name -> List1 (Pattern a ()) -> Dictionary (Expression a ()) -> m (Expression a ())
+expandUnfoldExpr :: (Monoid a, Data a, MonadState Int m, MonadReader Name m) => Name -> NonEmpty (Pattern a ()) -> Dictionary (Expression a ()) -> m (Expression a ())
 expandUnfoldExpr var ps d = do
   name <- suppliedName
   pure $

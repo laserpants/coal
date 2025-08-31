@@ -14,14 +14,14 @@ module Coal.Language.Type.Kind (
   tupleKind,
 ) where
 
-import Coal.Common.List1 (List1, fromList1, (<|))
 import Data.Data (Data, Typeable)
 import Data.List (isPrefixOf)
+import Data.List.NonEmpty (NonEmpty (..), (<|))
 import Extra.Prettyprinter (parensIf)
 import GHC.Generics (Generic)
 import Prettyprinter
 
-import qualified Coal.Common.List1 as List1
+import qualified Data.List.NonEmpty as NonEmpty
 
 data Kind
   = KType
@@ -36,13 +36,13 @@ infixr 1 `KArrow`
 foldKind :: (Foldable f) => Kind -> f Kind -> Kind
 foldKind = foldr KArrow
 
-unfoldKind :: Kind -> List1 Kind
+unfoldKind :: Kind -> NonEmpty Kind
 unfoldKind =
   \case
     KArrow k1 k2 ->
       k1 <| unfoldKind k2
     k ->
-      List1.singleton k
+      NonEmpty.singleton k
 
 applyKind :: [Kind] -> Kind -> Maybe Kind
 applyKind ks k
@@ -51,7 +51,7 @@ applyKind ks k
   | otherwise =
       Nothing
  where
-  ls = fromList1 (unfoldKind k)
+  ls = NonEmpty.toList (unfoldKind k)
 
 {-# INLINE tupleKind #-}
 tupleKind :: Int -> Kind

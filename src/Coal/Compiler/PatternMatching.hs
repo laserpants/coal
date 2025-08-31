@@ -13,7 +13,6 @@ module Coal.Compiler.PatternMatching (
 ) where
 
 import Coal.Common.Label (Label (..))
-import Coal.Common.List1 (List1, NonEmpty (..), fromList1)
 import Coal.Common.Supply (suppliedName)
 import Coal.Compiler.PatternMatching.Compiler (TypeProxy (..), compileEnvelope)
 import Coal.Compiler.PatternMatching.Envelope (EnvelopeExpression (..), EnvelopePattern (..))
@@ -24,6 +23,7 @@ import Coal.Language (Binding (..), Choice (..), Clause (..), Expression (..), P
 import Coal.Language.Module (Constant (..), Definition (..), Function (..), Module (..))
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformBiM, transformM)
+import Data.List.NonEmpty (NonEmpty (..), toList)
 import Extra (Dictionary)
 import TextShow
 
@@ -36,7 +36,7 @@ instance (MatchExpressionContext a) => MatchExpressionContext [a] where
 instance (MatchExpressionContext a) => MatchExpressionContext (Maybe a) where
   compileMatchExprs = traverse compileMatchExprs
 
-instance (MatchExpressionContext a) => MatchExpressionContext (List1 a) where
+instance (MatchExpressionContext a) => MatchExpressionContext (NonEmpty a) where
   compileMatchExprs = traverse compileMatchExprs
 
 instance (MatchExpressionContext a) => MatchExpressionContext (Dictionary a) where
@@ -74,10 +74,10 @@ compileMatchExprsE =
     e ->
       pure e
 
-compileClauses :: (Eq a, MatchClasses a t) => Label t -> List1 (Clause a t) -> MatchMonad (Expression a t)
+compileClauses :: (Eq a, MatchClasses a t) => Label t -> NonEmpty (Clause a t) -> MatchMonad (Expression a t)
 compileClauses ll cs = compileEnvelope <$> matchPatterns [ll] eqs MFail
  where
-  eqs = uncurry patternEquation . translateClause <$> fromList1 cs
+  eqs = uncurry patternEquation . translateClause <$> toList cs
 
 type TranslatedClause e a t = ([EnvelopePattern (e a) t], EnvelopeExpression (e a) t)
 

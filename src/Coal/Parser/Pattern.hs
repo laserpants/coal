@@ -2,9 +2,8 @@
 
 module Coal.Parser.Pattern (parsePattern, parseUnitPattern) where
 
-import Coal.Ast.Metadata (Metadata (..), getMetadata, metadataSpan)
+import Coal.Ast.Metadata (Metadata (..), metadataSpan)
 import Coal.Common.Label (Label (..))
-import Coal.Common.List1 (List1, NonEmpty (..))
 import Coal.Language
 import Coal.Parser
 import Coal.Parser.Identifier
@@ -15,6 +14,7 @@ import Coal.Parser.Utils (fieldList)
 import Control.Monad (void)
 import Control.Monad.Combinators.Expr
 import Data.Char (ord)
+import Data.List.NonEmpty (NonEmpty (..))
 import Extra (Name)
 import Text.Megaparsec (getSourcePos, option, optional, try, (<|>))
 import Text.Megaparsec.Char (char)
@@ -22,7 +22,7 @@ import Text.Megaparsec.Char (char)
 import qualified Data.Map.Strict as Map
 import qualified Text.Megaparsec.Char.Lexer as Lexer
 
-parseUnitPattern :: Parser (List1 (Pattern Metadata ()))
+parseUnitPattern :: Parser (NonEmpty (Pattern Metadata ()))
 parseUnitPattern =
   withMetadata $ do
     pure (\loc -> PLiteral loc LUnit :| [])

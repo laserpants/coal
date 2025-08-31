@@ -4,18 +4,17 @@
 module Coal.TypeSystem.TypeIndexedSpec (typeIndexedSpec, typeIndexedTrickySpec) where
 
 import Coal.Common.Label (Label (..))
-import Coal.Common.List1
 import Coal.Language
 import Coal.Language.Type.Indexed
 import Coal.TypeSystem.Substitution
 import Coal.TypeSystem.Unification
 import Control.Monad (forM_)
+import Data.List.NonEmpty (NonEmpty (..))
 import Data.Set (Set)
 import Prettyprinter
 import Prettyprinter.Render.String (renderString)
 import Test.Hspec
 
-import qualified Coal.Common.List1 as List1
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Set as Set
 
@@ -96,7 +95,7 @@ typeIndexedTrickySpec =
                   , TApplication
                       KType
                       (TConstructor KType "Option")
-                      (List1.singleton (TVariable (TypeIndex KType 16)))
+                      (NonEmpty.singleton (TVariable (TypeIndex KType 16)))
                   ]
               )
       typeIndexesIn t
