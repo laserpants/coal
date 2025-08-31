@@ -186,9 +186,7 @@ Integer literals introduced in code without an explicit type annotation, such as
 let answer = 42
 ```
 
-are polymorphic. Their inferred type is `n with Numeric(n)`, which means that `n` can be any type, as long it is a member of the `Numeric` trait. This includes `int32`, `int64`, `bignum`, and `nat`.
-
-In addition to.. supports the basic arithmetic operations addition, subtraction, and multiplication.
+are polymorphic. Their inferred type is `n with Numeric(n)`, which means that `n` can be any type, as long it is a member of the `Numeric` trait. This includes `int32`, `int64`, `bignum`, and `nat`. All `Numeric` types support the basic arithmetic operations of addition, subtraction, and multiplication.
 
 ```
   // 
@@ -536,7 +534,12 @@ A fold is similar to an ordinary `match` expression, but with some extra powers.
 
 #### Top-level folds and mutual recursion
 
-### Corecursion 
+### Corecursion and codata
+
+|                    | Access pattern        | Structure             | Evaluation strategy  |
+| ------------------ | ----------------------| --------------------- | -------------------- |
+| **Data**           | Recursion (fold)      | Always finite         | Eager (strict)       |
+| **Codata**         | Corecursion (unfold)  | Potentially infinite  | Lazy (non-strict)    | 
 
 ## License 
 
@@ -568,19 +571,6 @@ A more idiomatic version of the factorial function ...
 ```
 
 A strict distinction is made between finite data, which is produced and consumed in this way, and data that that we treat as potentially infinite. The latter is known is *codata*. The codata equivalents of lists, for example, are streams.
-
-```
-  type List<a> 
-    = Nil 
-    | Cons(a, List<a>)
-```
-
-```
-  cotype Stream<a> = 
-    { Head : a
-    , Tail : Stream<a> 
-    }
-```
 
 The opposite ...
 
