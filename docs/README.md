@@ -103,7 +103,7 @@ TODO
 
 ##### If-then-else
 
-If-expressions have a format similar to those in most other languages: 
+If-expressions have a format similar to that used in most other languages: 
 
 ```
   if (<e_1> : bool) then <e_2> : t_1 else <e_3> : t_1
@@ -117,13 +117,20 @@ If-expressions have a format similar to those in most other languages:
 
 ###### Polymorphism
 
+```
     let
       identity = fn(x) => x in 
         (identity(3), identity("three"))
 
+    // This doesn't type check:
+    (fn(f) => (f(3), f("three")))(fn(x) => x)
+```
+
 ###### Binding?
 
-An important detail that makes let-bindings in Coal different from those in most other languages is that the name is not in scope inside the ?
+A subtle but important detail that makes let-bindings in Coal different from those in most other languages is that when you ...
+
+the name is not in scope inside the ?
 
 This prevents ill-formed expressions such as `let f = f in f`.
 
@@ -173,13 +180,15 @@ Coal provides the following built-in basic language types:
 
 ##### Integral types
 
-Integer literals introduced in code, such as
+Integer literals introduced in code without an explicit type annotation, such as
 
 ```
-let solution = 42
+let answer = 42
 ```
 
 are *polymorphic*. Their inferred type is `n with Numeric(n)`, which means that `n` can be any type, as long it is a member of the `Numeric` trait. This includes `int32`, `int64`, `bignum`, and `nat`.
+
+In addition to.. supports the basic arithmetic operations addition, subtraction, and multiplication.
 
 ```
   // 
@@ -259,7 +268,7 @@ Algebraic data types work very well to describe language grammars.
 
 #### Natural numbers
 
-Structural recursion in Coal realies on pattern matching to take data apart, always working hand-in-hand with a recursive data structure like lists, trees, or other algebraic data types. Ordinary (machine type) integers do not belong to this category, so they cannot be used for this purpose. Instead, we can define the counting numbers recursively, following their standard axiomatization:
+Structural recursion in Coal realies on pattern matching to take data apart, always working hand-in-hand with a recursive data structure like lists, trees, or other algebraic data types. Ordinary (machine type) integers are not in this category, and therefore cannot be used for this purpose. Instead, we need to define a recursive number type. This is typically done according to the standard axiomatization of the natural numbers:
 
 > Every natural number is either zero or the successor of another natural number.
 
