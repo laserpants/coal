@@ -55,6 +55,8 @@ data Expression a t
     ETuple a t (NonEmpty (Expression a t))
   | -- | Pattern matching expression
     EMatch a t (Expression a t) (NonEmpty (Clause a t))
+  | -- | Lambda-style match expression
+    ELambdaMatch a t (NonEmpty (Clause a t))
   | -- | Compiled match expression
     ECompiledMatch a t (Expression a t) (NonEmpty (CompiledClause a t))
   | -- | Fold expression
