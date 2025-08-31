@@ -28,7 +28,12 @@ import Extra (Dictionary, Name, const2)
 compileTopLevelUnfolds :: (Monad m) => Definition a k t -> m (Definition a k t)
 compileTopLevelUnfolds =
   \case
-    DUnfold name ps d _ ->
-      pure undefined
+    DUnfold name ps d _ -> do
+      e1 <- expandTopLevelUnfold name ps d
+      pure $ DUnfold name ps d (Just e1)
     o ->
       pure o
+
+expandTopLevelUnfold :: Name -> NonEmpty (Pattern a t) -> Dictionary (Expression a t) -> m (Constant Expression a t)
+expandTopLevelUnfold name ps d =
+  undefined

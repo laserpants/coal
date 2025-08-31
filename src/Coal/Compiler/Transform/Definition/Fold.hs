@@ -28,7 +28,12 @@ import Extra (Dictionary, Name, const2)
 compileTopLevelFolds :: (Monad m) => Definition a k t -> m (Definition a k t)
 compileTopLevelFolds =
   \case
-    DFold name cs _ ->
-      pure undefined
+    DFold name cs _ -> do
+      e1 <- expandTopLevelFold name cs
+      pure $ DFold name cs (Just e1)
     o ->
       pure o
+
+expandTopLevelFold :: Name -> NonEmpty (Clause a t) -> m (Constant Expression a t)
+expandTopLevelFold name cs =
+  undefined
