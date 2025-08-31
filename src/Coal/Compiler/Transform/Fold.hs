@@ -14,7 +14,6 @@ module Coal.Compiler.Transform.Fold (
 ) where
 
 import Coal.Common.Label (Label (..), labelName)
-import Coal.Common.Supply (suppliedName)
 import Coal.Compiler.Transform.Expression
 import Coal.Compiler.Transform.Flattening (flattenApplication)
 import Coal.Compiler.Transform.Tree (replace)
@@ -100,7 +99,7 @@ atLabels = execWriter . transformM go
       p ->
         pure p
 
-expandFoldExpr :: (Monoid a, Data a, MonadState Int m, MonadReader Name m) => Name -> NonEmpty (Expression a ()) -> NonEmpty (Clause a ()) -> m (Expression a ())
+expandFoldExpr :: (Monoid a, Data a, MonadState Int m) => Name -> NonEmpty (Expression a ()) -> NonEmpty (Clause a ()) -> m (Expression a ())
 expandFoldExpr name args clauses = do
   let var = name <> ".expr"
   pure $
