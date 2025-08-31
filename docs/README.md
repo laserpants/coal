@@ -8,7 +8,7 @@ Coal is a declarative, purely functional programming language with
 
 - simple and intuitive syntax, 
 - algebraic data types/pattern matching,
-- structural recursion (`fold` and `unfold` constructs), 
+- structural recursion (`fold` and `unfold` recursion schemes), 
 - extensible records, 
 - traits (type classes), and 
 - effect handlers (work in progress)
@@ -144,7 +144,7 @@ the name is not in scope inside the ?
 
 This prevents ill-formed expressions such as `let f = f in f`.
 
-As far as the compiler is concerned, a function defined at the top level is also a let-binding. 
+As far as the compiler is concerned, a function defined at the top level is (technically) also a let-binding. 
 That is why a function such as the standard factorial function is rejected by the compiler.
 
 ```
@@ -235,7 +235,7 @@ type Tree<a>
   | Node(a, Tree<a>, Tree<a>)
 ```
 
-Here is how a simple tree can be encoded with this type:
+Here is how a simple (nicely balanced) tree can be encoded with this type:
 
 ```
 //          (4)
@@ -277,7 +277,7 @@ Algebraic data types work very well to describe language grammars.
 
 #### Natural numbers
 
-Structural recursion in Coal realies on pattern matching to take data apart, always working hand-in-hand with a recursive data structure like lists, trees, or other algebraic data types. Ordinary (machine type) integers are not in this category, and therefore cannot be used for this purpose. Instead, we need to define a recursive number type. This is typically done according to the standard axiomatization of the natural numbers:
+Structural recursion in Coal realies on pattern matching to take data apart, always working hand-in-hand with a recursive data structure like lists, trees, or other algebraic data types. Ordinary (machine type) integers do not meet this requirement, and therefore cannot be used for this purpose. Instead, we need to define a recursive number type. This is typically done according to the standard axiomatization of the natural numbers:
 
 > Every natural number is either zero or the successor of another natural number.
 
@@ -290,13 +290,13 @@ type nat
  | Succ(nat)
 ```
 
-The number five, for example, would then be written as:
+The number five, for example, would then be written:
 
 ```
 Succ(Succ(Succ(Succ(Succ(Zero)))))
 ```
 
-Writing numbers using this notation quickly becomes tedious. Fortunately, we do not have to.
+Writing numbers in this syntax quickly becomes tedious. Fortunately, we do not have to.
 
 Internally, the compiler stores values of type `nat` as normal integers. 
 
@@ -424,7 +424,7 @@ let five = curry(add, 1, 4)         // or (curry(add))(1, 4)
 
 #### Records
 
-Records are unordered collections of name-value pairs, where the values can be of any type, including other records. They are suitable for representing structured data with multiple properties, and nested objects: A record is written as a sequence of comma-separated fields enclosed in curly braces. A field consists of a name, referred to as the *label*, paired with its value. These two are separated by an equals sign (`=`). 
+Records are unordered collections of name-value pairs, where the values can be of any type, including other records. They are suitable for representing structured data with multiple properties, and nested objects: A record is written as a sequence of comma-separated fields enclosed in curly braces. A field consists of a name, referred to as the *label*, paired with a value. These two are separated by an equals sign (`=`). 
 
 ```
 { 
@@ -525,7 +525,9 @@ If we pass this function to the Coal compiler, it is rejected with the following
 Name not in scope: factorial
 ```
 
-Here is how we use the `nat` data type to define the factorial function:
+To do this we need to use a construct know as a *fold*. Note that `fold` is a language keyword in Coal, not an ordinary function. Folds are similar to `match` expressions, but with some extra powers.
+
+We are going to use the `nat` data type to define the factorial function:
 
 ```
   fun factorial(n : nat) =
@@ -538,10 +540,16 @@ Here is how we use the `nat` data type to define the factorial function:
 ```
 
 The key here is the special `@`-pattern used in the second clause. 
-This type of pattern needs to follow some specific rules. It can only appear inside a constructor. 
 
-Note that `fold` is a language keyword, not an ordinary function.
-A fold is similar to an ordinary `match` expression, but with some extra powers.
+The variable `p` is 
+
+```
+      | Succ(r) as m =>
+          m * fold(r)
+```
+
+This type of pattern needs to follow specific rules. It can only appear inside a constructor. 
+
 
 #### Top-level folds and mutual recursion
 
