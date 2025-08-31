@@ -34,6 +34,6 @@ compileTopLevelUnfolds =
     o ->
       pure o
 
-expandTopLevelUnfold :: Name -> NonEmpty (Pattern a t) -> Dictionary (Expression a t) -> m (Constant Expression a t)
+expandTopLevelUnfold :: Name -> NonEmpty (Pattern a t) -> Dictionary (Expression a t) -> m (Expression a t)
 expandTopLevelUnfold name ps d =
   undefined

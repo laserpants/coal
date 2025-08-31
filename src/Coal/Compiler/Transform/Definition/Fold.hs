@@ -23,9 +23,61 @@ import Data.Generics.Uniplate.Data (transform, transformM)
 import Data.List.NonEmpty (NonEmpty (..))
 import Extra (Dictionary, Name, const2)
 
--- TODO
+class TopLevelFoldContext e where
+  expandFolds :: Name -> [Label ()] -> e -> e
 
-compileTopLevelFolds :: (Monad m) => Definition a k t -> m (Definition a k t)
+instance (TopLevelFoldContext e) => TopLevelFoldContext [e] where
+  expandFolds name = fmap . expandFolds name
+
+instance (TopLevelFoldContext e) => TopLevelFoldContext (NonEmpty e) where
+  expandFolds name = fmap . expandFolds name
+
+instance (Monoid a, Data a) => TopLevelFoldContext (Clause a ()) where
+  expandFolds name _ =
+    \case
+      EClause a p cs ->
+        EClause
+          a
+          (transform eliminateAtPatterns p)
+          (expandFolds name (atLabels p) cs)
+
+instance (Monoid a, Data a) => TopLevelFoldContext (Choice Expression a ()) where
+  expandFolds name lls =
+    \case
+      CPlain a gs e ->
+        CPlain a gs (expandFolds name lls e)
+      CLambda{} ->
+        error "TODO"
+
+instance (Monoid a, Data a) => TopLevelFoldContext (Expression a ()) where
+  expandFolds = flip . foldr . updateName
+
+updateName :: (Monoid a, Data a) => Name -> Label () -> Expression a () -> Expression a ()
+updateName name label =
+  replace (labelName label) $
+    const2 $
+      applicationE (varE name) (EVariable mempty label :| [])
+
+eliminateAtPatterns :: Pattern a () -> Pattern a ()
+eliminateAtPatterns =
+  \case
+    PAtVariable a ll ->
+      PVariable a ll
+    p ->
+      p
+
+atLabels :: (Data a, Data t) => Pattern a t -> [Label t]
+atLabels = execWriter . transformM go
+ where
+  go =
+    \case
+      p@(PAtVariable _ label) -> do
+        tell [label]
+        pure p
+      p ->
+        pure p
+
+compileTopLevelFolds :: (Monoid a, Monad m) => Definition a k () -> m (Definition a k ())
 compileTopLevelFolds =
   \case
     DFold name cs _ -> do
@@ -34,6 +86,13 @@ compileTopLevelFolds =
     o ->
       pure o
 
-expandTopLevelFold :: Name -> NonEmpty (Clause a t) -> m (Constant Expression a t)
-expandTopLevelFold name cs =
-  undefined
+expandTopLevelFold :: (Monoid a, Monad m) => Name -> NonEmpty (Clause a ()) -> m (Expression a ())
+expandTopLevelFold name clauses = do
+  let var = "$fold.expr"
+  pure $
+    lambda1E
+      var
+      ( matchE
+          (varE var)
+          undefined -- (expandFolds name [] <$> clauses)
+      )
