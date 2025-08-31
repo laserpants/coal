@@ -113,8 +113,8 @@ expandFoldExpr name args clauses = do
             )
         )
         (applicationE (varE name) args)
-  where
-    var = name <> ".expr"
+ where
+  var = name <> ".expr"
 
 class CompileFoldsContext a where
   compileFolds :: a -> FoldExpansion a
@@ -168,6 +168,5 @@ instance (Monoid a, Data a) => CompileFoldsContext (Definition a k ()) where
         DConstant name <$> compileFolds g <*> traverse compileFolds fs
       DInstance name ts t ds ->
         DInstance name ts t <$> compileFolds ds
-      -- TODO
       o ->
         pure o

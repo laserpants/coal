@@ -33,17 +33,19 @@ data Definition a k t
     DFunction Name (Function Expression a t) [Definition a k t]
   | -- | Other (constant) top-level definitions
     DConstant Name (Constant Expression a t) [Definition a k t]
-  | -- | Stand-alone type signature
-    DSignature Name (With ParameterizedType)
-  | -- | Import statement
+  | --  | -- | Stand-alone type signature
+    --    DSignature Name (With ParameterizedType)
+
+    -- | Import statement
     DImport Path [Name]
   | -- | Trait
-    -- TODO: Remove traits?
     DTrait Name [Trait t] (Parameter Kind) [(Name, ParameterizedType)]
   | -- | Trait instance
     DInstance Name [Trait ParameterizedType] ParameterizedType [Definition a k t]
-  | -- | Trait instance
+  | -- | Type alias
     DTypeAlias Name [Parameter ()] ParameterizedType
+  --  | -- | Top-level fold
+  --    DFold TODO
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
 
 definitionName :: Definition a k t -> Name

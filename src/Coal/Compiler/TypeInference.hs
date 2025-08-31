@@ -168,8 +168,6 @@ typeDefinitionC =
       pure ()
     DCodata{} ->
       pure ()
-    DSignature{} ->
-      pure ()
     DTrait name _ (Parameter k q) ds ->
       forM_ ds $
         \(n, s) -> do
