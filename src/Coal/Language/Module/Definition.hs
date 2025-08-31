@@ -42,9 +42,9 @@ data Definition a k t
   | -- | Type alias
     DTypeAlias Name [Parameter ()] ParameterizedType
   | -- | Top-level fold
-    DFold -- TODO
+    DFold Name -- TODO
   | -- | Top-level unfold
-    DUnfold -- TODO
+    DUnfold Name -- TODO
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
 
 definitionName :: Definition a k t -> Name
@@ -57,6 +57,10 @@ definitionName =
     DAnnotation _ d ->
       definitionName d
     DCodata name _ _ ->
+      name
+    DFold name ->
+      name
+    DUnfold name ->
       name
     _ ->
       error "Not implemented"
