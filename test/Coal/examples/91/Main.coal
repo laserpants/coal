@@ -14,7 +14,7 @@ module Main {
 
   unfold(0) {
     , Head(n) = n
-    , Tail(@s) = Some(s(n + 1))
+    , Tail(@s) = s(n + 1)
     }
 
   cotype Cotree = { Node : int32, Left : Cotree, Right : Cotree }
