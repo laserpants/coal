@@ -44,6 +44,8 @@ library
       Coal.Compiler.PatternMatching.Rule
       Coal.Compiler.Stack
       Coal.Compiler.State
+      Coal.Compiler.Transform.Definition.Fold
+      Coal.Compiler.Transform.Definition.Unfold
       Coal.Compiler.Transform.Dictionaries
       Coal.Compiler.Transform.Expression
       Coal.Compiler.Transform.Flattening
