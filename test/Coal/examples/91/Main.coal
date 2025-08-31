@@ -10,26 +10,11 @@ module Main {
       | Cons(_, @next) => next + 1
     }
 
-  cotype Stream = { Head : int32, Tail : Stream }
-
-  unfold(0) {
-    , Head(n) = n
-    , Tail(@s) = s(n + 1)
-    }
-
-  cotype Cotree = { Node : int32, Left : Cotree, Right : Cotree }
-
-  unfold(0) { 
-    , Node(n) = n
-    , Left(@s) = s(n + 1)
-    , Right(@s) = s(n + 1)
-  }
-
   cotype MStream = { Head : int32, Tail : Option<MStream> }
 
-  unfold(0) { 
-    , Head(n) = n
-    , Tail(@s) = Some(s(n + 1))
+  unfold my_stream(n : int32) : MStream { 
+    , Head = n
+    , Tail = Some(my_stream(n + 1))
   }
 
 //  unfold nats(n) {

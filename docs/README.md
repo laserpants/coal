@@ -31,11 +31,19 @@ A distinction is made between finite data, which is produced and consumed in thi
 
 ```
   cotype Stream<a> = { Head : a, Tail : Stream<a> }
+
+  unfold enum_from(n : int32) : Stream<int32> {
+    , Head = n
+    , Tail = enum_from(n + 1)
+  }
+
+  let nats = enum_from(0)
 ```
+
 
 ### Programs = Expressions + Effects
 
-Coal  is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-oriented_programming_language) language: a program is, at its core, just an expression that evaluates to a value. In this model, there are no observable side-effects, no explicit state, and all data is immutable. These properties make programs more predictable, easier to reason about, highly testable, and allows for code to be verified using formal mathematical methods. On the other hand, programs need to have the ability to interact with the outside world. Side-effects are what make them useful. A goal of this project is to develop a system for managing effects, such as I/O and exceptions, in the Coal language. This work is still in progress.
+Coal  is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-oriented_programming_language) language: a program is, at its core, just an expression that evaluates to a value. In this model, there are no observable side-effects, and all data is immutable. These properties make programs more predictable, easier to reason about, highly testable, and allows for code to be verified using formal mathematical methods. On the other hand, programs need to have the ability to interact with the outside world. Side-effects are what make them useful. As part of this project, a goal is to develop a system for managing effects, such as I/O and exceptions, in the Coal language. This work is still in progress.
 
 ## Project status and roadmap
 
@@ -109,9 +117,19 @@ If-expressions have a format similar to those in most other languages:
 
 Polymorphism
 
-An important detail that makes let-bindings in Coal different from those in most other languages is that 
+An important detail that makes let-bindings in Coal different from those in most other languages is that the name is not in scope inside the ?
 
 This prevents ill-formed expressions such as `let f = f in f`.
+
+As far as the compiler is concerned, a function defined at the top-level is also a let-binding. That is why a function such as the following
+
+```
+let fact = 
+  fn(n) => 
+    if (n == 0)
+      then 1 
+      else n * fact(n - 1) // <-- This will not work
+```
 
 ##### Comments
 
@@ -664,7 +682,7 @@ the limitation imposed by the compiler is that
 let <name> = <expr> in <body>
 ```
 
-asfd
+A function defined at the top-level is (technically) a let-binding, which means that the function itself is not in scope inside the function body:
 
 ```
 let fact = 
