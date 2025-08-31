@@ -101,7 +101,6 @@ atLabels = execWriter . transformM go
 
 expandFoldExpr :: (Monoid a, Data a, MonadState Int m) => Name -> NonEmpty (Expression a ()) -> NonEmpty (Clause a ()) -> m (Expression a ())
 expandFoldExpr name args clauses = do
-  let var = name <> ".expr"
   pure $
     transform flattenApplication $
       letE
@@ -114,6 +113,8 @@ expandFoldExpr name args clauses = do
             )
         )
         (applicationE (varE name) args)
+  where
+    var = name <> ".expr"
 
 class CompileFoldsContext a where
   compileFolds :: a -> FoldExpansion a
