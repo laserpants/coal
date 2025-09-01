@@ -131,6 +131,14 @@ compileDefinitionC =
           compilerReportConstraintsGenErrors [EIllFormedTypeAnnotation err]
         Right t2 ->
           insertConstraintsC [Equality (RuleAnnotation loc t1 t2) [t1, t2]]
+    DFold name cs x ->
+      error (show x)
+    DUnfold name ps d x ->
+      error (show x)
+    DAnnotation (With _ t) (DFold name cs x) ->
+      error (show x)
+    DAnnotation (With _ t) (DUnfold name ps d x) ->
+      error (show x)
     _ ->
       error "TODO"
 

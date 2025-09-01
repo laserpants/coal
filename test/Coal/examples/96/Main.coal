@@ -16,13 +16,13 @@ module Main {
     | JsonObject(encode_json_object(@key_value_pairs)) => "{" +++ key_value_pairs +++ "}"
   }
 
-  fold encode_json_array : JsonArray(List<JsonValue>) -> string {
+  fold encode_json_array : JsonArray<List<JsonValue>> -> string {
     | [] => ""
     | encode_json_value(@value) :: encode_json_array(@values) => 
         value +++ "," +++ values
   }
 
-  fold encode_json_object : JsonObject(List<(string, JsonValue)>) -> string {
+  fold encode_json_object : JsonObject<List<(string, JsonValue)>> -> string {
     | [] => ""
     | (key, encode_json_value(@value)) :: encode_json_object(@pairs) => 
         in_quotes(key) +++ ":" value +++ "," +++ pairs

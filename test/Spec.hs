@@ -796,6 +796,12 @@ main95 = do
     [ "./test/Coal/examples/95/Main.coal"
     ]
 
+main96 :: IO (Either CompilerError Text)
+main96 = do
+  runTestFiles
+    [ "./test/Coal/examples/96/Main.coal"
+    ]
+
 main98 :: IO (Either CompilerError Text)
 main98 = do
   runTestFiles

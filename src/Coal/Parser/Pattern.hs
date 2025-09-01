@@ -15,7 +15,6 @@ import Control.Monad (void)
 import Control.Monad.Combinators.Expr
 import Data.Char (ord)
 import Data.List.NonEmpty (NonEmpty (..))
-import Extra (Name)
 import Text.Megaparsec (getSourcePos, option, optional, try, (<|>))
 import Text.Megaparsec.Char (char)
 
@@ -38,6 +37,7 @@ parsePattern = makeExprParser go operator
         <|> parseLiteralPattern
         <|> parseRecordPattern
         <|> parseAnyPattern
+        <|> try parseAtFunction
         <|> parseVariablePattern
         <|> try (parens parsePattern)
         <|> parseTuplePattern
@@ -128,17 +128,17 @@ parseListLiteralPattern =
 parseAtVariablePattern :: Parser (Pattern Metadata ())
 parseAtVariablePattern = do
   withMetadata $ do
-    --    p <- try parseAtFunction <|> parseAtVar
     p <- parseAtVar
     pure (`PAtVariable` p)
 
--- parseAtFunction :: Parser (Name, Label ())
--- parseAtFunction = do
---  n <- name
---  ll <- parens $ do
---    void (char '@')
---    Label () <$> name
---  pure (n, ll)
+parseAtFunction :: Parser (Pattern Metadata ())
+parseAtFunction = do
+  withMetadata $ do
+    n <- name
+    ll <- parens $ do
+      void (char '@')
+      Label () <$> name
+    pure (\loc -> PNamedAtVariable loc n ll)
 
 parseAtVar :: Parser (Label ())
 parseAtVar = do
