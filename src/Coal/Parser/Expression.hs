@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Coal.Parser.Expression (parseExpression) where
+module Coal.Parser.Expression (parseExpression, parseMatchClause) where
 
 import Coal.Ast.Metadata (Metadata (..), metadataSpan)
 import Coal.Common.Label (Label (..))

@@ -13,17 +13,19 @@ import Coal.Ast.Metadata (Metadata (..))
 import Coal.Language
 import Coal.Language.Module
 import Coal.Parser
-import Coal.Parser.Expression (parseExpression)
+import Coal.Parser.Expression (parseExpression, parseMatchClause)
 import Coal.Parser.Identifier
 import Coal.Parser.Pattern (parsePattern, parseUnitPattern)
 import Coal.Parser.Symbol
 import Coal.Parser.Type
 import Coal.Parser.Utils (fieldListWithKey)
+import Control.Monad (void)
 import Data.List.NonEmpty (NonEmpty (..))
 import Extra (Name)
 import Text.Megaparsec
 import Text.Megaparsec.Char (upperChar)
 
+import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 
 parseDefinition :: Parser (Definition Metadata o ())
@@ -35,6 +37,8 @@ parseDefinition =
     <|> parseCodataDefinition
     <|> parseTraitDefinition
     <|> parseTraitInstance
+    <|> parseTopLevelFold
+    <|> parseTopLevelUnfold
 
 parseTraitDefinition :: Parser (Definition Metadata o ())
 parseTraitDefinition = do
@@ -130,6 +134,23 @@ parseConstantDefinition = do
     expr <- symbol_ "=" *> parseExpression
     ws <- option [] parseWhereClauses
     pure (DConstant c (Constant (Metadata start end) (With [] ()) expr) ws)
+
+parseTopLevelFold :: Parser (Definition Metadata o ())
+parseTopLevelFold = do
+  n <- lexeme_ "fold" *> name
+  withAnnotation $ do
+    cs <- braces (nonEmpty (some parseMatchClause))
+    pure (DFold n cs Nothing)
+
+parseTopLevelUnfold :: Parser (Definition Metadata o ())
+parseTopLevelUnfold = do
+  n <- lexeme_ "unfold" *> name
+  withAnnotation $ do
+    ps <- parens (nonEmpty (commaSep1 parsePattern))
+    fields <- braces $ do
+      void $ optional (symbol ",")
+      fieldListWithKey constructor parseExpression "="
+    pure (DUnfold n ps (Map.fromList fields) Nothing)
 
 withAnnotation :: Parser (Definition Metadata o ()) -> Parser (Definition Metadata o ())
 withAnnotation p = do
