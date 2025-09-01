@@ -126,6 +126,9 @@ patternConstraints assertF ms =
       concatForM ps (patternConstraints assertF ms)
     PAtVariable _ (Label _ name) -> do
       pure [name]
+    PNamedAtVariable _ f (Label t name) -> do
+      assertF t (filter (assumptionNameIs f) ms)
+      pure [name]
     PAs _ (Label t name) p -> do
       ps <- patternConstraints assertF ms p
       tellRight [Equality InferenceRulePlaceholder [t, typeOf p]]

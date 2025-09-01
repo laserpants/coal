@@ -28,6 +28,8 @@ import Extra (Dictionary, Name, const2)
 compileTopLevelUnfolds :: (Monad m) => Definition a k t -> m (Definition a k t)
 compileTopLevelUnfolds =
   \case
+    DAnnotation t d ->
+      DAnnotation t <$> compileTopLevelUnfolds d
     DUnfold name ps d _ -> do
       e1 <- expandTopLevelUnfold name ps d
       pure $ DUnfold name ps d (Just e1)

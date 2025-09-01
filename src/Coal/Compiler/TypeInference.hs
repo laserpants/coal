@@ -7,6 +7,7 @@
 
 module Coal.Compiler.TypeInference (typeDefinitionsC) where
 
+import Debug.Trace
 import Coal.Common.Environment (Environment (..))
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (supplied)
@@ -132,15 +133,16 @@ compileDefinitionC =
         Right t2 ->
           insertConstraintsC [Equality (RuleAnnotation loc t1 t2) [t1, t2]]
     DFold name cs (Just e) ->
-      undefined
+      compileConstraintsC e
     DUnfold name ps d (Just e) ->
       undefined
-    DAnnotation (With _ t) (DFold name cs (Just e)) ->
-      undefined
+    DAnnotation (With _ t) (DFold name cs (Just e)) -> do
+      -- TODO
+      compileConstraintsC e
     DAnnotation (With _ t) (DUnfold name ps d (Just e)) ->
       undefined
     _ ->
-      error "TODO"
+      error "Not implemented"
 
 solveC :: (Monad m, Data a, Eq a) => CompilerT a m Substitution
 solveC = do

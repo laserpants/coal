@@ -10,6 +10,8 @@ import Coal.Compiler.Kernel.TranslateModule (translateModule)
 import Coal.Compiler.PatternMatching
 import Coal.Compiler.PatternMatching.Rule (MatchMonad (..), runMatchMonad)
 import Coal.Compiler.Stack
+import Coal.Compiler.Transform.Definition.Fold
+import Coal.Compiler.Transform.Definition.Unfold
 import Coal.Compiler.Transform.Dictionaries
 import Coal.Compiler.Transform.Fold
 import Coal.Compiler.Transform.Nats
@@ -73,10 +75,10 @@ compileFoldsC :: (Monad m, Data a, Monoid a) => Module a Kind () -> CompilerT a 
 compileFoldsC = foldExpansionTrans compileFolds
 
 compileTopLevelFoldsC :: (Monad m, Data a, Monoid a) => Module a Kind () -> CompilerT a m (Module a Kind ())
-compileTopLevelFoldsC = error "TODO" -- unfoldExpansionTrans compileTopLevelFolds
+compileTopLevelFoldsC = foldExpansionTrans (overModuleDefinitionsM (traverse compileTopLevelFolds))
 
-compileTopLevelUnfoldsC :: (Monad m, Data a, Monoid a) => Module a Kind () -> CompilerT a m (Module a Kind ())
-compileTopLevelUnfoldsC = error "TODO"
+compileTopLevelUnfoldsC :: (Monad m) => Module a Kind () -> CompilerT a m (Module a Kind ())
+compileTopLevelUnfoldsC = unfoldExpansionTrans (overModuleDefinitionsM (traverse compileTopLevelUnfolds))
 
 indexedC :: (Monad m, Traversable t) => t e -> CompilerT a m (t IndexedType)
 indexedC t = withSupplyC (runState (indexed t))
@@ -141,6 +143,10 @@ placeholderInsertionC = overModuleDefinitionsM (traverse go)
           _ ->
             error "Implementation error"
         pure d1
+--      DFold{} ->
+--        TODO
+--      DUnfold{} ->
+--        TODO
       DAnnotation t d ->
         DAnnotation t <$> go d
       DInstance name ts1 t1 ds -> do
@@ -172,6 +178,8 @@ typeCheckingPass :: (MonadIO m, Monoid a, Data a, Eq a, Show a) => Module a Kind
 typeCheckingPass =
   -- Expand type aliases
   expandAliasesC
+    --    >=> compileTopLevelUnfoldsC
+    >=> compileTopLevelFoldsC
     -- Expand unfolds (codata)
     >=> compileUnfoldsC
     -- Expand folds

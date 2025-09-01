@@ -80,6 +80,7 @@ instance HasMetadata (Pattern Metadata t) where
       PAs a _ _ -> a
       PShorthand a _ -> a
       PAtVariable a _ -> a
+      PNamedAtVariable a _ _ -> a
       PTraitDictionary a _ _ -> a
 
 instance HasMetadata (InferenceRule k Metadata) where

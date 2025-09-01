@@ -30,4 +30,13 @@ module Main {
 
   fun encode_json(value : JsonValue) = encode_json_value(value)
 
+  let test_obj : JsonValue = 
+    JsonObject(
+      [ ("abc", JsonArray([JsonString("a"), JsonString("b"), JsonString("c")]))
+      , ("pi", JsonNumber(3.14159))
+      ])
+
+  fun main() =
+    trace_string(encode_json(test_obj))
+
 }

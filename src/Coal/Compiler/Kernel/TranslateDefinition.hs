@@ -37,6 +37,12 @@ translateDefinition =
       c <- translateExpression e
       moduleName <- asks kernelEnvironmentModule
       pure [Kernel.OConstant (moduleName <> "." <> name) c]
+    DFold name _ (Just e) -> do
+      c <- translateExpression e
+      moduleName <- asks kernelEnvironmentModule
+      pure [Kernel.OConstant (moduleName <> "." <> name) c]
+    DUnfold{} ->
+      error "TODO"
     DTrait name _ _ ins ->
       forM ins $
         \(n, t) ->

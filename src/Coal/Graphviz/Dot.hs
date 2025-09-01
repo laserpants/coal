@@ -252,6 +252,8 @@ instance (Pretty t, Show t) => Dot t (Expression a t) where
           emitEdgeTo e2
       ETraitDictionary _ t _ ->
         emitRectangle "ETraitDictionary" (Just t)
+      ELambdaMatch{} ->
+        error "TODO"
 
 instance (Pretty t, Show t) => Dot t (Pattern a t) where
   toDot =
@@ -295,6 +297,9 @@ instance (Pretty t, Show t) => Dot t (Pattern a t) where
         emitEllipse ("PShorthand\\n" <> name) (Just t)
       PAtVariable _ ll ->
         fromNode (emitEllipse "PAtVariable" Nothing) $
+          emitEdgeTo ll
+      PNamedAtVariable _ name ll ->
+        fromNode (emitEllipse ("PNamedAtVariable\\n" <> name) Nothing) $
           emitEdgeTo ll
       PTraitDictionary _ t _ ->
         emitEllipse "PTraitDictionary" (Just t)
@@ -395,6 +400,15 @@ instance (Show t, Pretty t) => Dot t (Definition a k t) where
                 id1 <- emitTriangle ("Trait\\n" <> prettyType tr) Nothing
                 emitEdge nid id1
           emitEdgesTo ds
+      DFold name cs me ->
+        fromNode (emitParallelogram ("DFold\\n" <> name) Nothing) $ do
+          emitEdgesTo cs
+          emitEdgeTo me
+      DUnfold name ps d me ->
+        fromNode (emitParallelogram ("DUnfold\\n" <> name) Nothing) $ do
+          emitEdgesTo ps
+          void (emitEdgeToFields (Map.toList d))
+          emitEdgeTo me
       _ ->
         emitParallelogram "TODO" Nothing
 
