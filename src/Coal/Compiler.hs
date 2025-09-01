@@ -143,10 +143,10 @@ placeholderInsertionC = overModuleDefinitionsM (traverse go)
           _ ->
             error "Implementation error"
         pure d1
---      DFold{} ->
---        TODO
---      DUnfold{} ->
---        TODO
+      --      DFold{} ->
+      --        TODO
+      --      DUnfold{} ->
+      --        TODO
       DAnnotation t d ->
         DAnnotation t <$> go d
       DInstance name ts1 t1 ds -> do

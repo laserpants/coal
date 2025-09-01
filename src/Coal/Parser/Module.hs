@@ -21,6 +21,7 @@ import Coal.Parser.Type
 import Coal.Parser.Utils (fieldListWithKey)
 import Control.Monad (void)
 import Data.List.NonEmpty (NonEmpty (..))
+import Debug.Trace
 import Extra (Name)
 import Text.Megaparsec
 import Text.Megaparsec.Char (upperChar)
@@ -137,20 +138,24 @@ parseConstantDefinition = do
 
 parseTopLevelFold :: Parser (Definition Metadata o ())
 parseTopLevelFold = do
+  start <- getSourcePos
   n <- lexeme_ "fold" *> name
   withAnnotation $ do
+    end <- getSourcePos
     cs <- braces (nonEmpty (some parseMatchClause))
-    pure (DFold n cs Nothing)
+    pure (DFold (Metadata start end) n cs Nothing)
 
 parseTopLevelUnfold :: Parser (Definition Metadata o ())
 parseTopLevelUnfold = do
+  start <- getSourcePos
   n <- lexeme_ "unfold" *> name
   withAnnotation $ do
+    end <- getSourcePos
     ps <- parens (nonEmpty (commaSep1 parsePattern))
     fields <- braces $ do
       void $ optional (symbol ",")
       fieldListWithKey constructor parseExpression "="
-    pure (DUnfold n ps (Map.fromList fields) Nothing)
+    pure (DUnfold (Metadata start end) n ps (Map.fromList fields) Nothing)
 
 withAnnotation :: Parser (Definition Metadata o ()) -> Parser (Definition Metadata o ())
 withAnnotation p = do

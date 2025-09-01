@@ -400,11 +400,11 @@ instance (Show t, Pretty t) => Dot t (Definition a k t) where
                 id1 <- emitTriangle ("Trait\\n" <> prettyType tr) Nothing
                 emitEdge nid id1
           emitEdgesTo ds
-      DFold name cs me ->
+      DFold _ name cs me ->
         fromNode (emitParallelogram ("DFold\\n" <> name) Nothing) $ do
           emitEdgesTo cs
           emitEdgeTo me
-      DUnfold name ps d me ->
+      DUnfold _ name ps d me ->
         fromNode (emitParallelogram ("DUnfold\\n" <> name) Nothing) $ do
           emitEdgesTo ps
           void (emitEdgeToFields (Map.toList d))

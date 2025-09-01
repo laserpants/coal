@@ -20,6 +20,7 @@ import Extra (Name, isConstructor)
 import Text.Megaparsec (getSourcePos, notFollowedBy, optional, some, try, (<|>))
 import Text.Megaparsec.Char (char)
 
+import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map.Strict as Map
 import qualified Text.Megaparsec.Char.Lexer as Lexer
 
@@ -98,8 +99,11 @@ parseClause :: Parser (Clause Metadata ())
 parseClause =
   withMetadata $ do
     p <- symbol_ "|" *> parsePattern
-    cs <- symbol_ "=>" *> nonEmpty (some parseChoice)
-    pure (\loc -> EClause loc p cs)
+    symbol_ "=>"
+    c <- parseChoice
+    -- TODO
+    -- cs <- symbol_ "=>" *> nonEmpty (some parseChoice)
+    pure (\loc -> EClause loc p (NonEmpty.singleton c))
 
 parseFoldExpression :: Parser (Expression Metadata ())
 parseFoldExpression = do
@@ -131,8 +135,14 @@ parseMatchClause :: Parser (Clause Metadata ())
 parseMatchClause =
   withMetadata $ do
     p <- symbol_ "|" *> parsePattern
-    cs <- symbol_ "=>" *> nonEmpty (some parseChoice)
-    pure (\loc -> EClause loc p cs)
+    cs <- symbol_ "=>"
+    -- \*> nonEmpty (some parseChoice)
+    c <- parseChoice
+    pure (\loc -> EClause loc p (NonEmpty.singleton c))
+
+-- TODO
+-- cs <- symbol_ "=>" *> nonEmpty (some parseChoice)
+--    pure (\loc -> EClause loc p (NonEmpty.singleton c))
 
 parseMatchExpression :: Parser (Expression Metadata ())
 parseMatchExpression = do

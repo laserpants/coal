@@ -7,7 +7,6 @@
 
 module Coal.Compiler.TypeInference (typeDefinitionsC) where
 
-import Debug.Trace
 import Coal.Common.Environment (Environment (..))
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (supplied)
@@ -132,14 +131,20 @@ compileDefinitionC =
           compilerReportConstraintsGenErrors [EIllFormedTypeAnnotation err]
         Right t2 ->
           insertConstraintsC [Equality (RuleAnnotation loc t1 t2) [t1, t2]]
-    DFold name cs (Just e) ->
+    DFold _ name cs (Just e) ->
       compileConstraintsC e
-    DUnfold name ps d (Just e) ->
+    DUnfold _ name ps d (Just e) ->
       undefined
-    DAnnotation (With _ t) (DFold name cs (Just e)) -> do
-      -- TODO
+    DAnnotation (With _ t) (DFold loc name cs (Just e)) -> do
       compileConstraintsC e
-    DAnnotation (With _ t) (DUnfold name ps d (Just e)) ->
+      let t1 = typeOf e
+      (r, _, _) <- runConstraintsGenC (instantiateAnnotation loc t)
+      case r of
+        Left err ->
+          compilerReportConstraintsGenErrors [EIllFormedTypeAnnotation err]
+        Right t2 ->
+          insertConstraintsC [Equality (RuleAnnotation loc t1 t2) [t1, t2]]
+    DAnnotation (With _ t) (DUnfold loc name ps d (Just e)) ->
       undefined
     _ ->
       error "Not implemented"
