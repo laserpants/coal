@@ -61,6 +61,9 @@ compileEnvelope =
       expr
     e@(MCase ll cs) ->
       ECompiledMatch mempty (envelopeExprType e) (EVariable mempty ll) (clauseList cs)
+    MConditional _ _ e2 e3
+      | MFail == e3 ->
+          compileEnvelope e2
     MConditional ll e1 e2 e3 ->
       EIf
         mempty
@@ -72,9 +75,7 @@ compileEnvelope =
             (EVariable mempty ll :| [e1])
         )
         (compileEnvelope e2)
-        -- This if-condition is needed for boolean literal patterns
-        -- TODO: Is there a better way to do this?
-        (compileEnvelope $ if MFail == e3 then e2 else e3)
+        (compileEnvelope e3)
 
 compileEnvelopeClause :: (Eq a, TypeProxy t, Ord t, Data a, Monoid a) => EnvelopeClause (Expression a) t -> CompiledClause a t
 compileEnvelopeClause (EnvelopeClause (Label t name) ls e) =
