@@ -64,13 +64,19 @@ foldExpansionTrans :: (Monad m) => (c -> FoldExpansion c) -> c -> CompilerT a m 
 foldExpansionTrans f e = withSupplyC (\n -> runFoldExpansion "fold" n (f e))
 
 compileUnfoldsC :: (Monad m, Data a, Monoid a) => Module a Kind () -> CompilerT a m (Module a Kind ())
-compileUnfoldsC = foldExpansionTrans compileFolds
+compileUnfoldsC = unfoldExpansionTrans compileUnfolds
 
 unfoldExpansionTrans :: (Monad m) => (c -> UnfoldExpansion c) -> c -> CompilerT a m c
 unfoldExpansionTrans f e = withSupplyC (\n -> runUnfoldExpansion "unfold" n (f e))
 
 compileFoldsC :: (Monad m, Data a, Monoid a) => Module a Kind () -> CompilerT a m (Module a Kind ())
-compileFoldsC = unfoldExpansionTrans compileUnfolds
+compileFoldsC = foldExpansionTrans compileFolds
+
+compileTopLevelFoldsC :: (Monad m, Data a, Monoid a) => Module a Kind () -> CompilerT a m (Module a Kind ())
+compileTopLevelFoldsC = error "TODO" -- unfoldExpansionTrans compileTopLevelFolds
+
+compileTopLevelUnfoldsC :: (Monad m, Data a, Monoid a) => Module a Kind () -> CompilerT a m (Module a Kind ())
+compileTopLevelUnfoldsC = error "TODO"
 
 indexedC :: (Monad m, Traversable t) => t e -> CompilerT a m (t IndexedType)
 indexedC t = withSupplyC (runState (indexed t))
