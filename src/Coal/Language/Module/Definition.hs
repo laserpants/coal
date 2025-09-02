@@ -12,7 +12,7 @@ import Coal.Language.Module.Constant (Constant (..))
 import Coal.Language.Module.Function (Function (..))
 import Coal.Language.Pattern (Pattern (..))
 import Coal.Language.Trait (Trait (..), With (..))
-import Coal.Language.Type (Parameter, Type (..))
+import Coal.Language.Type (Parameter, ParameterizedType)
 import Coal.Language.Type.Kind (Kind (..))
 import Data.Data (Data, Typeable)
 import Data.List.NonEmpty (NonEmpty)
@@ -20,8 +20,6 @@ import Extra (Dictionary, Name)
 
 newtype Path = Path {pathComponents :: [Name]}
   deriving (Show, Eq, Ord, Read, Data, Typeable)
-
-type ParameterizedType = Type Parameter ()
 
 -- TODO: Make DAnnotation separate object?
 data Definition a k t

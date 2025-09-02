@@ -15,6 +15,7 @@ module Coal.Language.Type (
   Parameter (..),
   HasActive (..),
   IndexedType,
+  ParameterizedType,
   foldType,
   unfoldType,
   activeIdsIn,
@@ -77,6 +78,8 @@ instance Pretty (Parameter k) where
   pretty (Parameter _ name) = pretty name
 
 type IndexedType = Type TypeIndex Kind
+
+type ParameterizedType = Type Parameter ()
 
 instance Supply (TypeIndex k) where
   updateSupply f (TypeIndex k t) = TypeIndex k (f t)

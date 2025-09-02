@@ -19,8 +19,6 @@ import Extra (Dictionary, Name)
 
 import qualified Coal.Common.Environment as Environment
 
-type ParameterizedType = Type Parameter ()
-
 type AliasEnvironment = Environment ([Name], ParameterizedType)
 
 class AliasContext c where
