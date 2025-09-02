@@ -40,6 +40,7 @@ type TraitEnvironment = Environment (Parameter Kind, TypeIndex Kind, Environment
 type InstanceEnvironment = Environment (Map IndexedType (Type Parameter (), Dictionary IndexedScheme))
 type CodataAccessorEnvironment = Environment (CodataAccessor TypeIndex Kind IndexedType)
 type FoldEnvironment = Environment IndexedScheme
+type UnfoldEnvironment = Environment IndexedScheme
 
 data CompilerEnvironment = CompilerEnvironment
   { compilerDataConstructorEnvironment :: DataConstructorEnvironment
@@ -49,6 +50,7 @@ data CompilerEnvironment = CompilerEnvironment
   , compilerAliasEnvironment :: AliasEnvironment
   , compilerCodataAccessorEnvironment :: CodataAccessorEnvironment
   , compilerFoldEnvironment :: FoldEnvironment
+  , compilerUnfoldEnvironment :: UnfoldEnvironment
   }
   deriving (Show, Eq, Ord, Read)
 
@@ -62,6 +64,7 @@ emptyCompilerEnvironment =
     , compilerAliasEnvironment = mempty
     , compilerCodataAccessorEnvironment = mempty
     , compilerFoldEnvironment = mempty
+    , compilerUnfoldEnvironment = mempty
     }
 
 buildEnvironment :: [Definition a k t] -> CompilerEnvironment
@@ -74,6 +77,7 @@ buildEnvironment defs =
     , compilerAliasEnvironment = aliasEnvironment
     , compilerCodataAccessorEnvironment = codataAccessorEnvironment
     , compilerFoldEnvironment = foldEnvironment
+    , compilerUnfoldEnvironment = unfoldEnvironment
     }
  where
   instanceEnvironment = buildInstanceEnvironment typeConstructorEnvironment traitEnvironment defs
@@ -109,6 +113,11 @@ buildEnvironment defs =
             ( TConstructor KType "JsonValue" `TArrow` TIntrinsic IString
             )
         )
+      ]
+  -- TODO:
+  unfoldEnvironment =
+    Environment.fromList
+      [
       ]
 
 makeEnv :: (Definition a k t -> [(Name, e)]) -> [Definition a k t] -> Environment e
