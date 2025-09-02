@@ -174,7 +174,7 @@ buildAliasEnvironment :: [Definition a k t] -> AliasEnvironment
 buildAliasEnvironment =
   makeEnv
     ( \case
-        DTypeAlias name ps t ->
+        DTypeAlias _ name ps t ->
           [
             ( name
             ,

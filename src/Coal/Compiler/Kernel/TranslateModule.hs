@@ -60,7 +60,7 @@ coreImports = []
 imports :: Definition a k t -> [(Name, Name)]
 imports =
   \case
-    DImport (Path p) names ->
+    DImport _ (Path p) names ->
       flip map names $
         \name ->
           (name, Text.intercalate "." p <> "." <> name)

@@ -83,12 +83,14 @@ parseTypeDefinition = do
 
 parseCodataDefinition :: Parser (Definition Metadata o ())
 parseCodataDefinition = do
+  start <- getSourcePos
   lexeme_ "cotype"
   n <- constructor
   ps <- option [] (angleBrackets (commaSep1 (Parameter () <$> name)))
+  end <- getSourcePos
   symbol_ "="
   fields <- braces (fieldListWithKey constructor parseType ":")
-  pure (DCodata n ps fields)
+  pure (DCodata (Metadata start end) n ps fields)
 
 parseConstructor :: Name -> [Parameter ()] -> Parser (DataConstructor Parameter () (Type Parameter ()))
 parseConstructor tn qs = do
@@ -108,10 +110,12 @@ parseConstructor tn qs = do
 
 parseImport :: Parser (Definition Metadata o ())
 parseImport = do
+  start <- getSourcePos
   lexeme_ "import"
   path <- (lexeme "Core$" <|> identifier upperChar) `sepBy1` symbol "."
   names <- option ["*"] (parens (commaSep (backtickString <|> name <|> identifier upperChar)))
-  pure (DImport (Path path) names)
+  end <- getSourcePos
+  pure (DImport (Metadata start end) (Path path) names)
 
 parseFunctionDefinition :: Parser (Definition Metadata o ())
 parseFunctionDefinition = do

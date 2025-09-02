@@ -1077,6 +1077,7 @@ builtinDataConstructors =
 addBuiltinDefs :: (Monoid a) => [Definition a Kind ()] -> [Definition a Kind ()]
 addBuiltinDefs defs =
   [ DImport
+      mempty
       (Path ["Core$"])
       ( (fst <$> names)
           <> [ "from_int32__$instance_Numeric(Intrinsic(Int32))"
@@ -1163,7 +1164,7 @@ insertImportedTypes env defs = concatMap go defs <> defs
  where
   go =
     \case
-      DImport (Path path) ns -> do
+      DImport _ (Path path) ns -> do
         [t | t@(DType _ c _ _) <- ds, c `elem` filter isConstructor ns]
        where
         ds = fromMaybe mempty (Environment.lookup (Text.intercalate "." path) env)

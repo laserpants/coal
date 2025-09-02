@@ -372,11 +372,11 @@ instance (Show t, Pretty t) => Dot t (Definition a k t) where
                 id1 <- emitTriangle ("Trait\\n" <> prettyType tr) Nothing
                 emitEdge nid id1
           emitEdgeTo d
-      DImport (Path _) ns ->
+      DImport _ (Path _) ns ->
         emitParallelogram "DImport" Nothing
       DType _ name _ _ ->
         emitParallelogram ("DType\\n" <> name) Nothing
-      DCodata name _ _ ->
+      DCodata _ name _ _ ->
         emitParallelogram ("DCodata\\n" <> name) Nothing
       DTrait name _ ps ds ->
         fromNode (emitParallelogram ("DTrait\\n" <> name) Nothing) $ do

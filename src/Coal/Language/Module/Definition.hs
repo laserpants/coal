@@ -30,19 +30,19 @@ data Definition a k t
   | -- | Type definition
     DType a Name [Parameter ()] [DataConstructor Parameter () ParameterizedType]
   | -- | Codata type definition
-    DCodata Name [Parameter ()] [(Name, ParameterizedType)]
+    DCodata a Name [Parameter ()] [(Name, ParameterizedType)]
   | -- | Function definition
     DFunction Name (Function Expression a t) [Definition a k t]
   | -- | Other (constant) top-level definitions
     DConstant Name (Constant Expression a t) [Definition a k t]
   | -- | Import statement
-    DImport Path [Name]
+    DImport a Path [Name]
   | -- | Trait
     DTrait Name [Trait t] (Parameter Kind) [(Name, ParameterizedType)]
   | -- | Trait instance
     DInstance Name [Trait ParameterizedType] ParameterizedType [Definition a k t]
   | -- | Type alias
-    DTypeAlias Name [Parameter ()] ParameterizedType
+    DTypeAlias a Name [Parameter ()] ParameterizedType
   | -- | Top-level fold
     DFold a Name (NonEmpty (Clause a t)) (Maybe (Expression a t))
   | -- | Top-level unfold
@@ -58,7 +58,7 @@ definitionName =
       name
     DAnnotation _ d ->
       definitionName d
-    DCodata name _ _ ->
+    DCodata _ name _ _ ->
       name
     DFold _ name _ _ ->
       name
