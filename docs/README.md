@@ -13,7 +13,7 @@ Coal is a declarative, purely functional programming language with
 - traits (type classes), and 
 - effect handlers (work in progress)
 
-&hellip; among other features. Coal's type system supports type inference and parametric polymorphism, similar to Haskell, ML, and other languages based on the [System-F](https://en.wikipedia.org/wiki/System_F) lambda calculus. The Coal compiler is written in Haskell and targets LLVM for code generation.
+&hellip; among other features. Coal's type system supports type inference and parametric polymorphism, similar to Haskell, ML, and other languages based on the [System-F](https://en.wikipedia.org/wiki/System_F) lambda calculus. The Coal compiler is written in Haskell and targets [LLVM](https://llvm.org/) for code generation.
 
 ### Rethinking recursion
 
@@ -44,7 +44,7 @@ See **Recursion** and
 
 ### Programs = Expressions + Effects
 
-Coal  is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-oriented_programming_language) language: a program is, at its core, just an expression that evaluates to a value. In this model, all data is immutable and there are no observable side-effects. These properties make programs more predictable, easier to reason about, highly testable, and allows for code to be verified using formal mathematical methods. On the other hand, programs need to have the ability to interact with the outside world. Side-effects are what make them useful. As part of this project, a goal is to develop a system for managing effects, such as I/O and exceptions, in the Coal language. This work is still in progress.
+Coal  is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-oriented_programming_language) language: a program is, at its core, just an expression that evaluates to a value. In this model, all data is immutable and there are no observable side-effects. These properties make programs more predictable, easier to reason about, highly testable, and allows for code to be verified using formal mathematical methods. On the other hand, practical applications need to have the ability to interact with the outside world. Side-effects are what make them useful. As part of this project, a goal is to develop a system for managing effects, such as I/O and exceptions, in the Coal language. This work is still in progress.
 
 ## Project status and roadmap
 
@@ -92,6 +92,12 @@ import List(concat, head, tail)
 
 As in most other languages, import statements must appear at the top of a module, preceding any other code.
 
+TODO
+
+```
+import namespace List
+```
+
 ### Language constructs
 
 #### Top-level constructs
@@ -107,7 +113,7 @@ TODO
 If-expressions have a format similar to that found in most other languages: 
 
 ```
-  if (<e_1 : bool>) then <e_2 : t_1> else <e_3 : t_1>
+  if (<e_1 : bool>) then <e_2 : t> else <e_3 : t>
 ```
 
 ##### Let-bindings
@@ -125,7 +131,7 @@ Consider the following expression, which doesn't type check:
     (fn(f) => (f(3 : int32), f("three")))(fn(x) => x)
 ```
 
-Here `f` is monomorphic. The type inference algorithm will try to determine its type ...
+Here `f` is monomorphic. The type inference algorithm will try to determine its type but fail to unify `int32 -> int32` with `string -> string`.
 
 On the other hand, if we _ the anonymous function to
 
@@ -164,7 +170,8 @@ let fact =
 
 ```
   /* This is a long comment. It can extend over multiple 
-     lines and may or may not self-destruct in five seconds. 
+     lines and may or may not contain ASCII art depicting 
+     a giraffe. 
    */
   fun sqrt(d : double) =
     ...
@@ -283,7 +290,10 @@ Recursion in Coal relies on pattern matching to take layered data apart in a ste
 stepwise peel of layers of data constructors ..?
 
 always working hand-in-hand with a recursive data structure like lists, trees, or other algebraic data types. 
-This doesn't work with ordinary (machine type) integers, since do not meet this requirement. 
+
+If we want to .. similar to how a for-loop works in imperative programming languages.
+
+Ordinary (machine type) integers do not meet this requirement. 
 Instead, we need to define a recursive number type. This is typically done according to the standard axiomatization of the natural numbers:
 
 > Every natural number is either zero or the successor of another natural number.
@@ -350,7 +360,7 @@ type Option<a>
 Just like lists, tuples are ordered sequences of values. Unlike lists, however:
 
 1. A tuple's length is fixed (i.e. determined at compile-time), and
-2. Its elements may have different types.
+2. Its elements can have different types.
 
 In code, a tuple is written as a comma-separated sequence of expressions enclosed in parentheses:
 
@@ -431,7 +441,7 @@ let five = curry(add, 1, 4)         // or (curry(add))(1, 4)
 
 #### Records
 
-Records are unordered collections of name-value pairs, where the values can be of any type, including other records. They are suitable for representing structured data with multiple properties, and nested objects: A record is written as a sequence of comma-separated fields enclosed in curly braces. A field consists of a name, referred to as the *label*, paired with a value. These two are separated by an equals sign (`=`). 
+Records are unordered collections of name-value pairs, where the values can be of any type, including other records. They are suitable for representing structured data with multiple properties, and nested objects: A record is written as a sequence of comma-separated *fields* enclosed in curly braces. A field consists of a name, referred to as the *label*, paired with a value. These two are separated by an equals sign (`=`). 
 
 ```
 { 
@@ -532,8 +542,10 @@ If we pass this function to the Coal compiler, it is rejected with the following
 Name not in scope: factorial
 ```
 
-To do this we need to use a construct know as a *fold*. 
-A common example is where an array of numbers is reduced into a single value, for example by adding
+Calling a function from within itself in this way is not possible in Coal.
+Instead, recursion needs to be expressed in terms of a pattern know as a *fold*. 
+A fold takes some collection of data and combines it into a single value.
+A common instance is where an array of numbers is reduced into a single value, for example by adding
 
 ```
 let sum = reduce(fn(n, a) => f + a, [1, 2, 3])
@@ -556,15 +568,25 @@ We are going to use the `nat` data type to define the factorial function:
 
 The key here is the special `@`-pattern used in the second clause. 
 
-The variable `p` is 
+Note that `p` is not an ordinary variable
 
 ```
       | Succ(r) as m =>
           m * fold(r)
 ```
 
-This type of pattern needs to follow specific rules. It can only appear inside a constructor. 
+This type of pattern is subject to some rules. Most importantly, it can only appear inside a constructor. 
+For structural recursion to work, progress must be guaranteed in each iterative step. The constructor rule is how this is enforced by the language, since 
+the data inside of the constructor is structurally 
+This follows the basic principles of induction in mathematics.
 
+The following is not possible:
+
+```
+    fold(n) {
+      | @p => p
+    }
+```
 
 #### Top-level folds and mutual recursion
 
