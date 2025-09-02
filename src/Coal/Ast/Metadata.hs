@@ -63,6 +63,7 @@ instance HasMetadata (Expression Metadata t) where
       ECodataFields a _ _ -> a
       ETraitDictionary a _ _ -> a
       EFocus{} -> error "Not implemented"
+      ELambdaMatch{} -> error "Not implemented"
 
 instance HasMetadata (Pattern Metadata t) where
   getMetadata =
