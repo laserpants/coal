@@ -76,9 +76,9 @@ compileTopLevelFolds =
   \case
     DAnnotation loc t d ->
       DAnnotation loc t <$> compileTopLevelFolds d
-    DFold loc name cs _ -> do
+    DFold loc name with cs _ -> do
       e1 <- expandTopLevelFold name cs
-      pure $ DFold loc name cs (Just e1)
+      pure $ DFold loc name with cs (Just e1)
     o ->
       pure o
 

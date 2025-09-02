@@ -133,8 +133,15 @@ compileDefinitionC =
           compilerReportConstraintsGenErrors [EIllFormedTypeAnnotation err]
         Right t2 ->
           insertConstraintsC [Equality (RuleAnnotation loc t1 t2) [t1, t2]]
-    DFold loc name cs (Just e) -> do
+    DFold loc name (With _ t) cs (Just e) -> do
       compileConstraintsC e
+      let t1 = typeOf e
+      (r, _, _) <- runConstraintsGenC (instantiateAnnotation loc t)
+      case r of
+        Left err ->
+          compilerReportConstraintsGenErrors [EIllFormedTypeAnnotation err]
+        Right t2 -> do
+          insertConstraintsC [Equality (RuleAnnotation loc t1 t2) [t1, t2]]
     --      t1 <- supplied (TVariable . TypeIndex KType)
     --      t2 <- supplied (TVariable . TypeIndex KType)
     --      compileConstraintsC $
@@ -148,17 +155,17 @@ compileDefinitionC =
     --              (EVariable undefined (Label t1 "#.a"))
     --              cs
     --          )
-    DUnfold _ name ps d (Just e) ->
+    DUnfold _ name (With _ t) ps d (Just e) ->
       undefined
-    DAnnotation _ (With _ t) (DFold loc name cs (Just e)) -> do
-      compileConstraintsC e
-      let t1 = typeOf e
-      (r, _, _) <- runConstraintsGenC (instantiateAnnotation loc t)
-      case r of
-        Left err ->
-          compilerReportConstraintsGenErrors [EIllFormedTypeAnnotation err]
-        Right t2 -> do
-          insertConstraintsC [Equality (RuleAnnotation loc t1 t2) [t1, t2]]
+    -- DAnnotation _ (With _ t) (DFold loc name cs (Just e)) -> do
+    --  compileConstraintsC e
+    --  let t1 = typeOf e
+    --  (r, _, _) <- runConstraintsGenC (instantiateAnnotation loc t)
+    --  case r of
+    --    Left err ->
+    --      compilerReportConstraintsGenErrors [EIllFormedTypeAnnotation err]
+    --    Right t2 -> do
+    --      insertConstraintsC [Equality (RuleAnnotation loc t1 t2) [t1, t2]]
     --          t1 <- supplied (TVariable . TypeIndex KType)
     --          t3 <- supplied (TVariable . TypeIndex KType)
     --          insertConstraintsC [Equality InferenceRulePlaceholder [t2, t1 `TArrow` t3]]
@@ -172,8 +179,6 @@ compileDefinitionC =
     --                  (EVariable loc (Label t1 "#.a"))
     --                  cs
     --              )
-    DAnnotation _ (With _ t) (DUnfold loc name ps d (Just e)) ->
-      undefined
     _ ->
       error "Not implemented"
 

@@ -98,8 +98,8 @@ instance (Data a, Data t, Monoid a) => AsDesugarContext (Definition a k t) where
         DFunction loc name (desugarAsPatterns f) (desugarAsPatterns <$> fs)
       DConstant loc name g fs ->
         DConstant loc name (desugarAsPatterns g) (desugarAsPatterns <$> fs)
-      DFold loc n cs e ->
-        DFold loc n cs (desugarAsPatterns <$> e)
+      DFold loc n with cs e ->
+        DFold loc n with cs (desugarAsPatterns <$> e)
       DUnfold{} ->
         error "TODO"
       d ->

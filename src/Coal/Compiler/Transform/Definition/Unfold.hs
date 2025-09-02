@@ -30,9 +30,9 @@ compileTopLevelUnfolds =
   \case
     DAnnotation loc t d ->
       DAnnotation loc t <$> compileTopLevelUnfolds d
-    DUnfold loc name ps d _ -> do
+    DUnfold loc name with ps d _ -> do
       e1 <- expandTopLevelUnfold name ps d
-      pure $ DUnfold loc name ps d (Just e1)
+      pure $ DUnfold loc name with ps d (Just e1)
     o ->
       pure o
 

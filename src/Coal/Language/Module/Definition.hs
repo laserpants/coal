@@ -42,9 +42,9 @@ data Definition a k t
   | -- | Type alias
     DTypeAlias a Name [Parameter ()] ParameterizedType
   | -- | Top-level fold
-    DFold a Name (NonEmpty (Clause a t)) (Maybe (Expression a t))
+    DFold a Name (With ParameterizedType) (NonEmpty (Clause a t)) (Maybe (Expression a t))
   | -- | Top-level unfold
-    DUnfold a Name (NonEmpty (Pattern a t)) (Dictionary (Expression a t)) (Maybe (Expression a t))
+    DUnfold a Name (With ParameterizedType) (NonEmpty (Pattern a t)) (Dictionary (Expression a t)) (Maybe (Expression a t))
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
 
 definitionName :: Definition a k t -> Name
@@ -58,9 +58,9 @@ definitionName =
       name
     DCodata _ name _ _ ->
       name
-    DFold _ name _ _ ->
+    DFold _ name _ _ _ ->
       name
-    DUnfold _ name _ _ _ ->
+    DUnfold _ name _ _ _ _ ->
       name
     _ ->
       error "Not implemented"

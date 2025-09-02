@@ -91,9 +91,9 @@ instance (Data a, Data k, Ord k, Data (o k), Typeable o) => HasType o k (Definit
         foldTypeOf e ps
       DConstant _ _ (Constant _ _ e) _ ->
         typeOf e
-      DFold _ _ _ (Just e) ->
+      DFold _ _ _ _ (Just e) ->
         typeOf e
-      DUnfold _ _ _ _ (Just e) ->
+      DUnfold _ _ _ _ _ (Just e) ->
         typeOf e
       d ->
         head (universeBi d)
