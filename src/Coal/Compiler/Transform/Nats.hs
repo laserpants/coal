@@ -175,10 +175,10 @@ instance (Monoid a, Data a) => CompileNatsContext (Definition a Kind IndexedType
     \case
       DAnnotation u o ->
         DAnnotation u <$> compileNats o
-      DFunction name f fs ->
-        DFunction name <$> compileNats f <*> traverse compileNats fs
-      DConstant name g fs ->
-        DConstant name <$> compileNats g <*> traverse compileNats fs
+      DFunction loc name f fs ->
+        DFunction loc name <$> compileNats f <*> traverse compileNats fs
+      DConstant loc name g fs ->
+        DConstant loc name <$> compileNats g <*> traverse compileNats fs
       -- TODO
       o ->
         pure o

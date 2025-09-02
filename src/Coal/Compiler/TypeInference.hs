@@ -113,11 +113,11 @@ compileConstantC (Constant loc (With _ t) e) = do
 compileDefinitionC :: (Monad m, Data a, Show a) => Definition a k IndexedType -> CompilerT a m ()
 compileDefinitionC =
   \case
-    DFunction _ f _ ->
+    DFunction _ _ f _ ->
       void (compileFunctionC f)
-    DConstant _ c _ ->
+    DConstant _ _ c _ ->
       void (compileConstantC c)
-    DAnnotation (With _ t) (DFunction _ f@(Function loc _ _ _) _) -> do
+    DAnnotation (With _ t) (DFunction _ _ f@(Function loc _ _ _) _) -> do
       t1 <- compileFunctionC f
       (r, _, _) <- runConstraintsGenC (instantiateAnnotation loc t)
       case r of
@@ -125,7 +125,7 @@ compileDefinitionC =
           compilerReportConstraintsGenErrors [EIllFormedTypeAnnotation err]
         Right t2 ->
           insertConstraintsC [Equality (RuleAnnotation loc t1 t2) [t1, t2]]
-    DAnnotation (With _ t) (DConstant _ c@(Constant loc _ _) _) -> do
+    DAnnotation (With _ t) (DConstant _ _ c@(Constant loc _ _) _) -> do
       t1 <- compileConstantC c
       (r, _, _) <- runConstraintsGenC (instantiateAnnotation loc t)
       case r of

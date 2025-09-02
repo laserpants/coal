@@ -93,10 +93,10 @@ instance (AliasContext t, Data a, Data t) => AliasContext (Definition a k t) whe
     \case
       DAnnotation u o ->
         DAnnotation <$> expandAliases u <*> expandAliases o
-      DFunction name f fs ->
-        DFunction name <$> expandAliases f <*> traverse expandAliases fs
-      DConstant name c fs ->
-        DConstant name <$> expandAliases c <*> traverse expandAliases fs
+      DFunction loc name f fs ->
+        DFunction loc name <$> expandAliases f <*> traverse expandAliases fs
+      DConstant loc name c fs ->
+        DConstant loc name <$> expandAliases c <*> traverse expandAliases fs
       DInstance name ts t ds ->
         DInstance name ts t <$> traverse expandAliases ds
       o ->

@@ -129,10 +129,10 @@ instance (Monoid c, Data k, Data c, Data (o k), Typeable o) => Sugared c o k (De
     \case
       DAnnotation u d ->
         DAnnotation u <$> desugarPatterns d
-      DFunction name f fs ->
-        DFunction name <$> desugarPatterns f <*> traverse desugarPatterns fs
-      DConstant name g fs ->
-        DConstant name <$> desugarPatterns g <*> traverse desugarPatterns fs
+      DFunction loc name f fs ->
+        DFunction loc name <$> desugarPatterns f <*> traverse desugarPatterns fs
+      DConstant loc name g fs ->
+        DConstant loc name <$> desugarPatterns g <*> traverse desugarPatterns fs
       DFold loc n cs e ->
         DFold loc n cs <$> traverse desugarPatterns e
       DUnfold loc n ps d e ->

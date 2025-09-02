@@ -28,12 +28,12 @@ translateDefinition =
       translateDefinition d
     DType _ _ _ ctors ->
       traverse translateConstructor (zip [0 ..] (sortOn constructorName ctors))
-    DFunction name (Function _ _ ps e) _ -> do
+    DFunction _ name (Function _ _ ps e) _ -> do
       qs <- traverse translatePattern (toList ps)
       f <- withLocalNames (labelName <$> qs) (translateExpression e)
       moduleName <- asks kernelEnvironmentModule
       pure [Kernel.OFunction (moduleName <> "." <> name) qs f]
-    DConstant name (Constant _ With{} e) _ -> do
+    DConstant _ name (Constant _ With{} e) _ -> do
       c <- translateExpression e
       moduleName <- asks kernelEnvironmentModule
       pure [Kernel.OConstant (moduleName <> "." <> name) c]
@@ -50,10 +50,10 @@ translateDefinition =
     DInstance name _ t ds ->
       concat <$$> forM ds $
         \case
-          DFunction n f _ -> do
-            translateDefinition (DFunction (n <> postfix) f [])
-          DConstant n c _ -> do
-            translateDefinition (DConstant (n <> postfix) c [])
+          DFunction loc n f _ -> do
+            translateDefinition (DFunction loc (n <> postfix) f [])
+          DConstant loc n c _ -> do
+            translateDefinition (DConstant loc (n <> postfix) c [])
           _ ->
             error "TODO"
      where

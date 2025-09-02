@@ -32,9 +32,9 @@ data Definition a k t
   | -- | Codata type definition
     DCodata a Name [Parameter ()] [(Name, ParameterizedType)]
   | -- | Function definition
-    DFunction Name (Function Expression a t) [Definition a k t]
+    DFunction a Name (Function Expression a t) [Definition a k t]
   | -- | Other (constant) top-level definitions
-    DConstant Name (Constant Expression a t) [Definition a k t]
+    DConstant a Name (Constant Expression a t) [Definition a k t]
   | -- | Import statement
     DImport a Path [Name]
   | -- | Trait
@@ -52,9 +52,9 @@ data Definition a k t
 definitionName :: Definition a k t -> Name
 definitionName =
   \case
-    DFunction name _ _ ->
+    DFunction _ name _ _ ->
       name
-    DConstant name _ _ ->
+    DConstant _ name _ _ ->
       name
     DAnnotation _ d ->
       definitionName d

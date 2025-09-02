@@ -14,12 +14,12 @@ import Extra (Name)
 liftWhereClause :: (MonadWriter [(Name, Name)] m) => Name -> Definition a k t -> m (Definition a k t)
 liftWhereClause name =
   \case
-    DFunction old f _ -> do
+    DFunction loc old f _ -> do
       new <- fabricatedName name old
-      pure (DFunction new f [])
-    DConstant old c _ -> do
+      pure (DFunction loc new f [])
+    DConstant loc old c _ -> do
       new <- fabricatedName name old
-      pure (DConstant new c [])
+      pure (DConstant loc new c [])
     DAnnotation w d ->
       DAnnotation w <$> liftWhereClause name d
     d ->
@@ -46,22 +46,22 @@ expandWhereClausesDefinition =
           error "Implementation error"
         d1 : ds ->
           pure (DAnnotation w d1 : ds)
-    DFunction name f ws -> do
+    DFunction loc name f ws -> do
       (ds, names) <- listen $ traverse (liftWhereClause name) ws
-      pure (replaceNames names <$> (ds <> [DFunction name f []]))
-    DConstant name c ws -> do
+      pure (replaceNames names <$> (ds <> [DFunction loc name f []]))
+    DConstant loc name c ws -> do
       (ds, names) <- listen $ traverse (liftWhereClause name) ws
-      pure (replaceNames names <$> (ds <> [DConstant name c []]))
+      pure (replaceNames names <$> (ds <> [DConstant loc name c []]))
     d ->
       pure [d]
 
 replaceNames :: (Data a, Data t, Ord t) => [(Name, Name)] -> Definition a k t -> Definition a k t
 replaceNames names =
   \case
-    DFunction n f _ ->
-      DFunction n (replaceFunctionNames names f) []
-    DConstant n c _ ->
-      DConstant n (replaceConstantNames names c) []
+    DFunction loc n f _ ->
+      DFunction loc n (replaceFunctionNames names f) []
+    DConstant loc n c _ ->
+      DConstant loc n (replaceConstantNames names c) []
     DAnnotation w d ->
       DAnnotation w (replaceNames names d)
     d ->
