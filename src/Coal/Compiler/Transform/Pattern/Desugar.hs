@@ -127,12 +127,10 @@ instance (Monoid c, Data c, Data k, Typeable o, Data (o k)) => Sugared c o k (Co
 instance (Monoid c, Data k, Data c, Data (o k), Typeable o) => Sugared c o k (Definition c k (Type o k)) where
   desugarPatterns =
     \case
-      DAnnotation loc u d ->
-        DAnnotation loc u <$> desugarPatterns d
-      DFunction loc name f fs ->
-        DFunction loc name <$> desugarPatterns f <*> traverse desugarPatterns fs
-      DConstant loc name g fs ->
-        DConstant loc name <$> desugarPatterns g <*> traverse desugarPatterns fs
+      DFunction loc name with f fs ->
+        DFunction loc name with <$> desugarPatterns f <*> traverse desugarPatterns fs
+      DConstant loc name with g fs ->
+        DConstant loc name with <$> desugarPatterns g <*> traverse desugarPatterns fs
       DFold loc n with cs e ->
         DFold loc n with cs <$> traverse desugarPatterns e
       DUnfold loc n with ps d e ->

@@ -226,10 +226,8 @@ instance (Monoid a, Data a) => TraitContext (Module a Kind IndexedType) where
 instance (Monoid a, Data a) => TraitContext (Definition a Kind IndexedType) where
   expandTraits =
     \case
-      DConstant loc name c fs ->
-        DConstant loc name <$> expandTraits c <*> traverse expandTraits fs
-      DAnnotation loc a d ->
-        DAnnotation loc a <$> expandTraits d
+      DConstant loc name with c fs ->
+        DConstant loc name with <$> expandTraits c <*> traverse expandTraits fs
       d ->
         pure d
 

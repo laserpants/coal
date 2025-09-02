@@ -126,11 +126,12 @@ parseFunctionDefinition = do
   start <- getSourcePos
   fn <- lexeme_ "fun" *> name
   args <- parens (nonEmptyOr parseUnitPattern (commaSep parsePattern))
-  withAnnotation $ do
-    end <- getSourcePos
-    expr <- symbol_ "=" *> parseExpression
-    ws <- option [] parseWhereClauses
-    pure (DFunction (Metadata start end) fn (Function (Metadata start end) (With [] ()) args expr) ws)
+  ann <- optional (symbol_ ":" *> parseType)
+  --  withAnnotation $ do
+  end <- getSourcePos
+  expr <- symbol_ "=" *> parseExpression
+  ws <- option [] parseWhereClauses
+  pure (DFunction (Metadata start end) fn (With [] <$> ann) (Function (Metadata start end) (With [] ()) args expr) ws)
 
 parseWhereClauses :: Parser [Definition Metadata o ()]
 parseWhereClauses = lexeme_ "where" *> braces (some parseFunctionDefinition)
@@ -139,11 +140,12 @@ parseConstantDefinition :: Parser (Definition Metadata o ())
 parseConstantDefinition = do
   start <- getSourcePos
   c <- lexeme_ "let" *> name
-  withAnnotation $ do
-    end <- getSourcePos
-    expr <- symbol_ "=" *> parseExpression
-    ws <- option [] parseWhereClauses
-    pure (DConstant (Metadata start end) c (Constant (Metadata start end) (With [] ()) expr) ws)
+  ann <- optional (symbol_ ":" *> parseType)
+  --  withAnnotation $ do
+  end <- getSourcePos
+  expr <- symbol_ "=" *> parseExpression
+  ws <- option [] parseWhereClauses
+  pure (DConstant (Metadata start end) c (With [] <$> ann) (Constant (Metadata start end) (With [] ()) expr) ws)
 
 parseTopLevelFold :: Parser (Definition Metadata o ())
 parseTopLevelFold = do
@@ -166,17 +168,17 @@ parseTopLevelUnfold = do
     fieldListWithKey constructor parseExpression "="
   pure (DUnfold (Metadata start end) n (With [] ann) ps (Map.fromList fields) Nothing)
 
-withAnnotation :: Parser (Definition Metadata o ()) -> Parser (Definition Metadata o ())
-withAnnotation p = do
-  start <- getSourcePos
-  ann <- optional (symbol_ ":" *> parseType)
-  end <- getSourcePos
-  d <- p
-  case ann of
-    Nothing ->
-      pure d
-    Just t ->
-      pure (DAnnotation (Metadata start end) (With [] t) d)
+-- withAnnotation :: Parser (Definition Metadata o ()) -> Parser (Definition Metadata o ())
+-- withAnnotation p = do
+--  start <- getSourcePos
+--  ann <- optional (symbol_ ":" *> parseType)
+--  end <- getSourcePos
+--  d <- p
+--  case ann of
+--    Nothing ->
+--      pure d
+--    Just t ->
+--      pure (DAnnotation (Metadata start end) (With [] t) d)
 
 parseModule :: Parser (Module Metadata o ())
 parseModule = do

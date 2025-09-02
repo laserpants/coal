@@ -14,14 +14,12 @@ import Extra (Name)
 liftWhereClause :: (MonadWriter [(Name, Name)] m) => Name -> Definition a k t -> m (Definition a k t)
 liftWhereClause name =
   \case
-    DFunction loc old f _ -> do
+    DFunction loc old with f _ -> do
       new <- fabricatedName name old
-      pure (DFunction loc new f [])
-    DConstant loc old c _ -> do
+      pure (DFunction loc new with f [])
+    DConstant loc old with c _ -> do
       new <- fabricatedName name old
-      pure (DConstant loc new c [])
-    DAnnotation loc w d ->
-      DAnnotation loc w <$> liftWhereClause name d
+      pure (DConstant loc new with c [])
     d ->
       pure d
 
@@ -39,31 +37,29 @@ expandWhereClausesModule (Module p ns ds) =
 expandWhereClausesDefinition :: (Data a, Data t, Ord t, MonadWriter [(Name, Name)] m) => Definition a k t -> m [Definition a k t]
 expandWhereClausesDefinition =
   \case
-    DAnnotation loc w d -> do
-      defs <- expandWhereClausesDefinition d
-      case defs of
-        [] ->
-          error "Implementation error"
-        d1 : ds ->
-          pure (DAnnotation loc w d1 : ds)
-    DFunction loc name f ws -> do
+    --    DAnnotation loc w d -> do
+    --      defs <- expandWhereClausesDefinition d
+    --      case defs of
+    --        [] ->
+    --          error "Implementation error"
+    --        d1 : ds ->
+    --          pure (DAnnotation loc w d1 : ds)
+    DFunction loc name with f ws -> do
       (ds, names) <- listen $ traverse (liftWhereClause name) ws
-      pure (replaceNames names <$> (ds <> [DFunction loc name f []]))
-    DConstant loc name c ws -> do
+      pure (replaceNames names <$> (ds <> [DFunction loc name with f []]))
+    DConstant loc name with c ws -> do
       (ds, names) <- listen $ traverse (liftWhereClause name) ws
-      pure (replaceNames names <$> (ds <> [DConstant loc name c []]))
+      pure (replaceNames names <$> (ds <> [DConstant loc name with c []]))
     d ->
       pure [d]
 
 replaceNames :: (Data a, Data t, Ord t) => [(Name, Name)] -> Definition a k t -> Definition a k t
 replaceNames names =
   \case
-    DFunction loc n f _ ->
-      DFunction loc n (replaceFunctionNames names f) []
-    DConstant loc n c _ ->
-      DConstant loc n (replaceConstantNames names c) []
-    DAnnotation loc w d ->
-      DAnnotation loc w (replaceNames names d)
+    DFunction loc n with f _ ->
+      DFunction loc n with (replaceFunctionNames names f) []
+    DConstant loc n with c _ ->
+      DConstant loc n with (replaceConstantNames names c) []
     d ->
       d
 

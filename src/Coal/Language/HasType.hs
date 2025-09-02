@@ -82,14 +82,12 @@ instance (Data a, Data k, Data (o k), Typeable o) => HasType o k (Expression a (
       e ->
         head (universeBi e)
 
-instance (Data a, Data k, Ord k, Data (o k), Typeable o) => HasType o k (Definition a k (Type o k)) where
+instance (Data a, Data k, Data (o k), Typeable o) => HasType o k (Definition a k (Type o k)) where
   typeOf =
     \case
-      DAnnotation _ _ d ->
-        typeOf d
-      DFunction _ _ (Function _ _ ps e) _ ->
+      DFunction _ _ _ (Function _ _ ps e) _ ->
         foldTypeOf e ps
-      DConstant _ _ (Constant _ _ e) _ ->
+      DConstant _ _ _ (Constant _ _ e) _ ->
         typeOf e
       DFold _ _ _ _ (Just e) ->
         typeOf e

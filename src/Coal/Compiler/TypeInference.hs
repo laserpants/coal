@@ -113,11 +113,7 @@ compileConstantC (Constant loc (With _ t) e) = do
 compileDefinitionC :: (Monad m, Data a, Show a) => Definition a k IndexedType -> CompilerT a m ()
 compileDefinitionC =
   \case
-    DFunction _ _ f _ ->
-      void (compileFunctionC f)
-    DConstant _ _ c _ ->
-      void (compileConstantC c)
-    DAnnotation _ (With _ t) (DFunction _ _ f@(Function loc _ _ _) _) -> do
+    DFunction _ _ (Just (With _ t)) f@(Function loc _ _ _) _ -> do
       t1 <- compileFunctionC f
       (r, _, _) <- runConstraintsGenC (instantiateAnnotation loc t)
       case r of
@@ -125,7 +121,7 @@ compileDefinitionC =
           compilerReportConstraintsGenErrors [EIllFormedTypeAnnotation err]
         Right t2 ->
           insertConstraintsC [Equality (RuleAnnotation loc t1 t2) [t1, t2]]
-    DAnnotation _ (With _ t) (DConstant _ _ c@(Constant loc _ _) _) -> do
+    DConstant _ _ (Just (With _ t)) c@(Constant loc _ _) _ -> do
       t1 <- compileConstantC c
       (r, _, _) <- runConstraintsGenC (instantiateAnnotation loc t)
       case r of
@@ -133,6 +129,26 @@ compileDefinitionC =
           compilerReportConstraintsGenErrors [EIllFormedTypeAnnotation err]
         Right t2 ->
           insertConstraintsC [Equality (RuleAnnotation loc t1 t2) [t1, t2]]
+    DFunction _ _ _ f _ ->
+      void (compileFunctionC f)
+    DConstant _ _ _ c _ ->
+      void (compileConstantC c)
+    --    DAnnotation _ (With _ t) (DFunction _ _ f@(Function loc _ _ _) _) -> do
+    --      t1 <- compileFunctionC f
+    --      (r, _, _) <- runConstraintsGenC (instantiateAnnotation loc t)
+    --      case r of
+    --        Left err ->
+    --          compilerReportConstraintsGenErrors [EIllFormedTypeAnnotation err]
+    --        Right t2 ->
+    --          insertConstraintsC [Equality (RuleAnnotation loc t1 t2) [t1, t2]]
+    --    DAnnotation _ (With _ t) (DConstant _ _ c@(Constant loc _ _) _) -> do
+    --      t1 <- compileConstantC c
+    --      (r, _, _) <- runConstraintsGenC (instantiateAnnotation loc t)
+    --      case r of
+    --        Left err ->
+    --          compilerReportConstraintsGenErrors [EIllFormedTypeAnnotation err]
+    --        Right t2 ->
+    --          insertConstraintsC [Equality (RuleAnnotation loc t1 t2) [t1, t2]]
     DFold loc name (With _ t) cs (Just e) -> do
       compileConstraintsC e
       let t1 = typeOf e

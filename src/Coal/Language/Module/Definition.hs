@@ -21,18 +21,15 @@ import Extra (Dictionary, Name)
 newtype Path = Path {pathComponents :: [Name]}
   deriving (Show, Eq, Ord, Read, Data, Typeable)
 
--- TODO: Make DAnnotation separate object?
 data Definition a k t
-  = -- | Type-annotated definition
-    DAnnotation a (With ParameterizedType) (Definition a k t)
-  | -- | Type definition
+  = -- | Type definition
     DType a Name [Parameter ()] [DataConstructor Parameter () ParameterizedType]
   | -- | Codata type definition
     DCodata a Name [Parameter ()] [(Name, ParameterizedType)]
   | -- | Function definition
-    DFunction a Name (Function Expression a t) [Definition a k t]
+    DFunction a Name (Maybe (With ParameterizedType)) (Function Expression a t) [Definition a k t]
   | -- | Other (constant) top-level definitions
-    DConstant a Name (Constant Expression a t) [Definition a k t]
+    DConstant a Name (Maybe (With ParameterizedType)) (Constant Expression a t) [Definition a k t]
   | -- | Import statement
     DImport a Path [Name]
   | -- | Trait
@@ -50,11 +47,9 @@ data Definition a k t
 definitionName :: Definition a k t -> Name
 definitionName =
   \case
-    DAnnotation _ _ d ->
-      definitionName d
-    DFunction _ name _ _ ->
+    DFunction _ name _ _ _ ->
       name
-    DConstant _ name _ _ ->
+    DConstant _ name _ _ _ ->
       name
     DCodata _ name _ _ ->
       name

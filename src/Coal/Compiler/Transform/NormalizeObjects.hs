@@ -46,31 +46,27 @@ instance (Monoid a, Data a, Data k, Data (o k), Typeable o) => NormalizeObjectsT
 instance (Monoid a, Data a, Data k, Data (o k), Typeable o) => NormalizeObjectsTransformContext (Definition a k (Type o k)) where
   normalizeObject =
     \case
-      DAnnotation loc u d ->
-        DAnnotation loc u (normalizeObject d)
-      DFunction loc name (Function a (With ts t) ps e) _ ->
-        DConstant loc name (Constant a (With ts (foldTypeOf t ps)) (flattenLambda (ELambda mempty ps e))) []
+      DFunction loc name with (Function a (With ts t) ps e) _ ->
+        DConstant loc name with (Constant a (With ts (foldTypeOf t ps)) (flattenLambda (ELambda mempty ps e))) []
       DInstance loc name ts t ds ->
         DInstance loc name ts t (normalizeObject ds)
       d ->
         d
   denormalizeObject =
     \case
-      DAnnotation loc u d ->
-        DAnnotation loc u (denormalizeObject d)
-      DConstant _ name c _ ->
-        denormalizeConstant name c
+      DConstant _ name with c _ ->
+        denormalizeConstant name with c
       DInstance loc name ts t ds ->
         DInstance loc name ts t (denormalizeObject ds)
       d ->
         d
 
-denormalizeConstant :: (Data a, Data k, Data (o k), Typeable o) => Name -> Constant Expression a (Type o k) -> Definition a k (Type o k)
-denormalizeConstant name =
+-- denormalizeConstant :: (Data a, Data k, Data (o k), Typeable o) => Name -> Constant Expression a (Type o k) -> Definition a k (Type o k)
+denormalizeConstant name with =
   \case
-    Constant loc with (ELambda a1 ps (ELambda _ qs e)) ->
-      denormalizeConstant name (Constant loc with (ELambda a1 (ps <> qs) e))
+    Constant loc w1 (ELambda a1 ps (ELambda _ qs e)) ->
+      denormalizeConstant name with (Constant loc w1 (ELambda a1 (ps <> qs) e))
     Constant loc (With ts _) (ELambda _ ps e) ->
-      DFunction loc name (Function loc (With ts (typeOf e)) ps e) []
+      DFunction loc name with (Function loc (With ts (typeOf e)) ps e) []
     c@(Constant loc _ _) ->
-      DConstant loc name c []
+      DConstant loc name with c []

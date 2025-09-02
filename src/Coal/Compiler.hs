@@ -135,10 +135,10 @@ placeholderInsertionC = overModuleDefinitionsM (traverse go)
  where
   go =
     \case
-      d@(DConstant _ name _ _) -> do
+      d@(DConstant _ name _ _ _) -> do
         d1 <- placeholderTrans expandTraits d
         case d1 of
-          DConstant _ _ (Constant _ (With ts t) _) _ ->
+          DConstant _ _ _ (Constant _ (With ts t) _) _ ->
             insertNameC name (Forall (typeIndexesIn t) ts t)
           _ ->
             error "Implementation error"
@@ -147,15 +147,15 @@ placeholderInsertionC = overModuleDefinitionsM (traverse go)
       --        TODO
       --      DUnfold{} ->
       --        TODO
-      DAnnotation loc t d ->
-        DAnnotation loc t <$> go d
+      --      DAnnotation loc t d ->
+      --        DAnnotation loc t <$> go d
       DInstance loc name ts1 t1 ds -> do
         es <- forM ds $
           \case
-            c@(DConstant _ dname _ _) -> do
+            c@(DConstant _ dname _ _ _) -> do
               c1 <- placeholderTrans expandTraits c
               case c1 of
-                DConstant _ _ (Constant _ (With ts t) _) _ -> do
+                DConstant _ _ _ (Constant _ (With ts t) _) _ -> do
                   let trait = Trait name t1
                       name1 = dname <> "__$instance_" <> serialize trait
                   insertNameC name1 (Forall (typeIndexesIn t) ts t)
@@ -233,8 +233,6 @@ writeDotFiles ns m@(Module (Path path) _ defs) = do
       def@DFunction{} ->
         writeDotFile (prefixed $ definitionName def) def
       def@DConstant{} ->
-        writeDotFile (prefixed $ definitionName def) def
-      def@DAnnotation{} ->
         writeDotFile (prefixed $ definitionName def) def
       _ ->
         pure ()
