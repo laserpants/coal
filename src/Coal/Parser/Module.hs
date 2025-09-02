@@ -42,12 +42,14 @@ parseDefinition =
 
 parseTraitDefinition :: Parser (Definition Metadata o ())
 parseTraitDefinition = do
+  start <- getSourcePos
   lexeme_ "trait"
   n <- constructor
   t <- angleBrackets parseParameter
+  end <- getSourcePos
   ds <- braces (some ((,) <$> name <*> (symbol_ ":" *> parseType)))
   -- TODO
-  pure (DTrait n [] t ds)
+  pure (DTrait (Metadata start end) n [] t ds)
 
 parseParameter :: Parser (Parameter Kind)
 parseParameter = do
@@ -57,12 +59,14 @@ parseParameter = do
 
 parseTraitInstance :: Parser (Definition Metadata o ())
 parseTraitInstance = do
+  start <- getSourcePos
   lexeme_ "instance"
   n <- constructor
   t <- angleBrackets parseType
+  end <- getSourcePos
   ts <- option [] (lexeme_ "with" *> commaSep1 parseTrait)
   ds <- braces (some parseDefinition)
-  pure (DInstance n ts t ds)
+  pure (DInstance (Metadata start end) n ts t ds)
 
 parseTrait :: Parser (Trait (Type Parameter ()))
 parseTrait = do
@@ -164,13 +168,15 @@ parseTopLevelUnfold = do
 
 withAnnotation :: Parser (Definition Metadata o ()) -> Parser (Definition Metadata o ())
 withAnnotation p = do
+  start <- getSourcePos
   ann <- optional (symbol_ ":" *> parseType)
+  end <- getSourcePos
   d <- p
   case ann of
     Nothing ->
       pure d
     Just t ->
-      pure (DAnnotation (With [] t) d)
+      pure (DAnnotation (Metadata start end) (With [] t) d)
 
 parseModule :: Parser (Module Metadata o ())
 parseModule = do

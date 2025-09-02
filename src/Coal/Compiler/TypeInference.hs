@@ -117,7 +117,7 @@ compileDefinitionC =
       void (compileFunctionC f)
     DConstant _ _ c _ ->
       void (compileConstantC c)
-    DAnnotation (With _ t) (DFunction _ _ f@(Function loc _ _ _) _) -> do
+    DAnnotation _ (With _ t) (DFunction _ _ f@(Function loc _ _ _) _) -> do
       t1 <- compileFunctionC f
       (r, _, _) <- runConstraintsGenC (instantiateAnnotation loc t)
       case r of
@@ -125,7 +125,7 @@ compileDefinitionC =
           compilerReportConstraintsGenErrors [EIllFormedTypeAnnotation err]
         Right t2 ->
           insertConstraintsC [Equality (RuleAnnotation loc t1 t2) [t1, t2]]
-    DAnnotation (With _ t) (DConstant _ _ c@(Constant loc _ _) _) -> do
+    DAnnotation _ (With _ t) (DConstant _ _ c@(Constant loc _ _) _) -> do
       t1 <- compileConstantC c
       (r, _, _) <- runConstraintsGenC (instantiateAnnotation loc t)
       case r of
@@ -150,7 +150,7 @@ compileDefinitionC =
     --          )
     DUnfold _ name ps d (Just e) ->
       undefined
-    DAnnotation (With _ t) (DFold loc name cs (Just e)) -> do
+    DAnnotation _ (With _ t) (DFold loc name cs (Just e)) -> do
       compileConstraintsC e
       let t1 = typeOf e
       (r, _, _) <- runConstraintsGenC (instantiateAnnotation loc t)
@@ -172,7 +172,7 @@ compileDefinitionC =
     --                  (EVariable loc (Label t1 "#.a"))
     --                  cs
     --              )
-    DAnnotation (With _ t) (DUnfold loc name ps d (Just e)) ->
+    DAnnotation _ (With _ t) (DUnfold loc name ps d (Just e)) ->
       undefined
     _ ->
       error "Not implemented"
@@ -211,13 +211,13 @@ typeDefinitionC =
       pure ()
     DCodata{} ->
       pure ()
-    DTrait name _ (Parameter k q) ds ->
+    DTrait _ name _ (Parameter k q) ds ->
       forM_ ds $
         \(n, s) -> do
           env <- asks compilerTypeConstructorEnvironment
           let s1 = evalState (instantiateVars [(q, TypeIndex k 0)] env s) (1 :: Int)
           insertNameC n (Forall (typeIndexesIn s1) [Trait name (TVariable (TypeIndex k 0))] s1)
-    DInstance trait _ t1 ds -> do
+    DInstance _ trait _ t1 ds -> do
       env <- asks compilerTraitEnvironment
       case Environment.lookup trait env of
         Nothing ->

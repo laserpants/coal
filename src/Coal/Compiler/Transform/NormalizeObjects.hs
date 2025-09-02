@@ -46,22 +46,22 @@ instance (Monoid a, Data a, Data k, Data (o k), Typeable o) => NormalizeObjectsT
 instance (Monoid a, Data a, Data k, Data (o k), Typeable o) => NormalizeObjectsTransformContext (Definition a k (Type o k)) where
   normalizeObject =
     \case
-      DAnnotation u d ->
-        DAnnotation u (normalizeObject d)
+      DAnnotation loc u d ->
+        DAnnotation loc u (normalizeObject d)
       DFunction loc name (Function a (With ts t) ps e) _ ->
         DConstant loc name (Constant a (With ts (foldTypeOf t ps)) (flattenLambda (ELambda mempty ps e))) []
-      DInstance name ts t ds ->
-        DInstance name ts t (normalizeObject ds)
+      DInstance loc name ts t ds ->
+        DInstance loc name ts t (normalizeObject ds)
       d ->
         d
   denormalizeObject =
     \case
-      DAnnotation u d ->
-        DAnnotation u (denormalizeObject d)
+      DAnnotation loc u d ->
+        DAnnotation loc u (denormalizeObject d)
       DConstant _ name c _ ->
         denormalizeConstant name c
-      DInstance name ts t ds ->
-        DInstance name ts t (denormalizeObject ds)
+      DInstance loc name ts t ds ->
+        DInstance loc name ts t (denormalizeObject ds)
       d ->
         d
 

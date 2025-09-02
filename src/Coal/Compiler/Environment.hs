@@ -156,7 +156,7 @@ buildTraitEnvironment :: TypeConstructorEnvironment -> [Definition a k t] -> Tra
 buildTraitEnvironment env =
   makeEnv
     ( \case
-        DTrait name _ (Parameter k n) ds ->
+        DTrait _ name _ (Parameter k n) ds ->
           [
             ( name
             , (Parameter k n, TypeIndex k 0, Environment.fromList (f <$$> ds))
@@ -192,7 +192,7 @@ buildInstanceEnvironment env1 env2 ds = execState (traverse_ go ds) mempty
  where
   go =
     \case
-      DInstance name ts t _ ->
+      DInstance loc name ts t _ ->
         case Environment.lookup name env2 of
           Just (p1, TypeIndex{..}, env3) -> do
             let (t1t1, tsts) = evalState bork (freshId fs)

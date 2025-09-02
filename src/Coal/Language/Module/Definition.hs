@@ -26,7 +26,7 @@ type ParameterizedType = Type Parameter ()
 -- TODO: Make DAnnotation separate object?
 data Definition a k t
   = -- | Type-annotated definition
-    DAnnotation (With ParameterizedType) (Definition a k t)
+    DAnnotation a (With ParameterizedType) (Definition a k t)
   | -- | Type definition
     DType a Name [Parameter ()] [DataConstructor Parameter () ParameterizedType]
   | -- | Codata type definition
@@ -38,9 +38,9 @@ data Definition a k t
   | -- | Import statement
     DImport a Path [Name]
   | -- | Trait
-    DTrait Name [Trait t] (Parameter Kind) [(Name, ParameterizedType)]
+    DTrait a Name [Trait t] (Parameter Kind) [(Name, ParameterizedType)]
   | -- | Trait instance
-    DInstance Name [Trait ParameterizedType] ParameterizedType [Definition a k t]
+    DInstance a Name [Trait ParameterizedType] ParameterizedType [Definition a k t]
   | -- | Type alias
     DTypeAlias a Name [Parameter ()] ParameterizedType
   | -- | Top-level fold
@@ -52,12 +52,12 @@ data Definition a k t
 definitionName :: Definition a k t -> Name
 definitionName =
   \case
+    DAnnotation _ _ d ->
+      definitionName d
     DFunction _ name _ _ ->
       name
     DConstant _ name _ _ ->
       name
-    DAnnotation _ d ->
-      definitionName d
     DCodata _ name _ _ ->
       name
     DFold _ name _ _ ->

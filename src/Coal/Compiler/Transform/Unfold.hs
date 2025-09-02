@@ -125,8 +125,8 @@ instance (Monoid a, Data a) => CompileUnfoldsContext (Constant Expression a ()) 
 instance (Monoid a, Data a) => CompileUnfoldsContext (Definition a k ()) where
   compileUnfolds =
     \case
-      DAnnotation u o ->
-        DAnnotation u <$> compileUnfolds o
+      DAnnotation loc u o ->
+        DAnnotation loc u <$> compileUnfolds o
       DFunction loc name f fs ->
         DFunction loc name <$> compileUnfolds f <*> traverse compileUnfolds fs
       DConstant loc name g fs ->

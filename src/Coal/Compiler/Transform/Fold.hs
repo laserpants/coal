@@ -161,13 +161,13 @@ instance (Monoid a, Data a) => CompileFoldsContext (Constant Expression a ()) wh
 instance (Monoid a, Data a) => CompileFoldsContext (Definition a k ()) where
   compileFolds =
     \case
-      DAnnotation u o -> do
-        DAnnotation u <$> compileFolds o
+      DAnnotation loc u o -> do
+        DAnnotation loc u <$> compileFolds o
       DFunction loc name f fs -> do
         DFunction loc name <$> compileFolds f <*> traverse compileFolds fs
       DConstant loc name g fs -> do
         DConstant loc name <$> compileFolds g <*> traverse compileFolds fs
-      DInstance name ps t ds ->
-        DInstance name ps t <$> compileFolds ds
+      DInstance loc name ps t ds ->
+        DInstance loc name ps t <$> compileFolds ds
       o ->
         pure o

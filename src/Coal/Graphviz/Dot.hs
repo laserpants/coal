@@ -363,7 +363,7 @@ instance (Show t, Pretty t) => Dot t (Definition a k t) where
         fromNode (emitParallelogram ("DConstant\\n" <> name) Nothing) $ do
           emitEdgeTo c
           emitEdgesTo ws
-      DAnnotation (With ts t) d ->
+      DAnnotation _ (With ts t) d ->
         fromNode (emitParallelogram ("DAnnotation\\n" <> prettyType t) Nothing) $ do
           nid <- ask
           lift $ do
@@ -378,7 +378,7 @@ instance (Show t, Pretty t) => Dot t (Definition a k t) where
         emitParallelogram ("DType\\n" <> name) Nothing
       DCodata _ name _ _ ->
         emitParallelogram ("DCodata\\n" <> name) Nothing
-      DTrait name _ ps ds ->
+      DTrait _ name _ ps ds ->
         fromNode (emitParallelogram ("DTrait\\n" <> name) Nothing) $ do
           nid <- ask
           lift $ do
@@ -391,7 +391,7 @@ instance (Show t, Pretty t) => Dot t (Definition a k t) where
               \(name, t) -> do
                 id1 <- emitRectangle (name <> "\\n" <> prettyType t) Nothing
                 emitEdge nid id1
-      DInstance name ts t ds ->
+      DInstance _ name ts t ds ->
         fromNode (emitParallelogram ("DInstance\\n" <> name <> "\\n" <> prettyType t) Nothing) $ do
           nid <- ask
           lift $ do

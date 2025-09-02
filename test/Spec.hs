@@ -1108,6 +1108,7 @@ addBuiltinDefs defs =
              ]
       )
   , DTrait
+      mempty
       "Numeric"
       []
       (Parameter KType "a")
@@ -1133,6 +1134,7 @@ addBuiltinDefs defs =
         )
       ]
   , DTrait
+      mempty
       "Ordered"
       []
       (Parameter KType "a")

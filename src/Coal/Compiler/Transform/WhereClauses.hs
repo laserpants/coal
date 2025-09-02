@@ -20,8 +20,8 @@ liftWhereClause name =
     DConstant loc old c _ -> do
       new <- fabricatedName name old
       pure (DConstant loc new c [])
-    DAnnotation w d ->
-      DAnnotation w <$> liftWhereClause name d
+    DAnnotation loc w d ->
+      DAnnotation loc w <$> liftWhereClause name d
     d ->
       pure d
 
@@ -39,13 +39,13 @@ expandWhereClausesModule (Module p ns ds) =
 expandWhereClausesDefinition :: (Data a, Data t, Ord t, MonadWriter [(Name, Name)] m) => Definition a k t -> m [Definition a k t]
 expandWhereClausesDefinition =
   \case
-    DAnnotation w d -> do
+    DAnnotation loc w d -> do
       defs <- expandWhereClausesDefinition d
       case defs of
         [] ->
           error "Implementation error"
         d1 : ds ->
-          pure (DAnnotation w d1 : ds)
+          pure (DAnnotation loc w d1 : ds)
     DFunction loc name f ws -> do
       (ds, names) <- listen $ traverse (liftWhereClause name) ws
       pure (replaceNames names <$> (ds <> [DFunction loc name f []]))
@@ -62,8 +62,8 @@ replaceNames names =
       DFunction loc n (replaceFunctionNames names f) []
     DConstant loc n c _ ->
       DConstant loc n (replaceConstantNames names c) []
-    DAnnotation w d ->
-      DAnnotation w (replaceNames names d)
+    DAnnotation loc w d ->
+      DAnnotation loc w (replaceNames names d)
     d ->
       d
 

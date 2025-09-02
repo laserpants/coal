@@ -85,7 +85,7 @@ instance (Data a, Data k, Data (o k), Typeable o) => HasType o k (Expression a (
 instance (Data a, Data k, Ord k, Data (o k), Typeable o) => HasType o k (Definition a k (Type o k)) where
   typeOf =
     \case
-      DAnnotation _ d ->
+      DAnnotation _ _ d ->
         typeOf d
       DFunction _ _ (Function _ _ ps e) _ ->
         foldTypeOf e ps

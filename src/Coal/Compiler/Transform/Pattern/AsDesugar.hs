@@ -92,8 +92,8 @@ instance (Data a, Data t, Monoid a) => AsDesugarContext (Function Expression a t
 instance (Data a, Data t, Monoid a) => AsDesugarContext (Definition a k t) where
   desugarAsPatterns =
     \case
-      DAnnotation u d ->
-        DAnnotation u (desugarAsPatterns d)
+      DAnnotation loc u d ->
+        DAnnotation loc u (desugarAsPatterns d)
       DFunction loc name f fs ->
         DFunction loc name (desugarAsPatterns f) (desugarAsPatterns <$> fs)
       DConstant loc name g fs ->

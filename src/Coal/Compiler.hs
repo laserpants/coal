@@ -147,9 +147,9 @@ placeholderInsertionC = overModuleDefinitionsM (traverse go)
       --        TODO
       --      DUnfold{} ->
       --        TODO
-      DAnnotation t d ->
-        DAnnotation t <$> go d
-      DInstance name ts1 t1 ds -> do
+      DAnnotation loc t d ->
+        DAnnotation loc t <$> go d
+      DInstance loc name ts1 t1 ds -> do
         es <- forM ds $
           \case
             c@(DConstant _ dname _ _) -> do
@@ -164,7 +164,7 @@ placeholderInsertionC = overModuleDefinitionsM (traverse go)
               pure c1
             _ ->
               error "TODO"
-        pure (DInstance name ts1 t1 es)
+        pure (DInstance loc name ts1 t1 es)
       d ->
         pure d
 

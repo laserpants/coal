@@ -24,7 +24,7 @@ type KernelObject = Kernel.Object Kernel.Type (Kernel.Expr Kernel.Type)
 translateDefinition :: (Show a, MonadReader KernelEnvironment m, Data a) => Definition a Kind IndexedType -> m [KernelObject]
 translateDefinition =
   \case
-    DAnnotation _ d ->
+    DAnnotation _ _ d ->
       translateDefinition d
     DType _ _ _ ctors ->
       traverse translateConstructor (zip [0 ..] (sortOn constructorName ctors))
@@ -43,11 +43,11 @@ translateDefinition =
       pure [Kernel.OConstant (moduleName <> "." <> name) c]
     DUnfold{} ->
       error "TODO"
-    DTrait name _ _ ins ->
+    DTrait _ name _ _ ins ->
       forM ins $
         \(n, t) ->
           traitAccessor name n (translateType t)
-    DInstance name _ t ds ->
+    DInstance _ name _ t ds ->
       concat <$$> forM ds $
         \case
           DFunction loc n f _ -> do
