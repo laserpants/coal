@@ -1,5 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
 module Coal.Compiler.Environment (
@@ -24,6 +25,7 @@ import Control.Monad.Reader
 import Control.Monad.State (evalState, execState, modify)
 import Control.Monad.Writer (execWriterT)
 import Data.List (nub)
+import Data.List.NonEmpty (NonEmpty (..))
 import Data.Map.Strict (Map)
 import Extra (Dictionary, Name, Set, traverse2, traverse_, (<$$>))
 
@@ -83,7 +85,31 @@ buildEnvironment defs =
   -- TODO:
   foldEnvironment =
     Environment.fromList
-      []
+      [
+        ( "encode_json_array"
+        , Forall
+            (Set.fromList mempty)
+            []
+            ( TApplication KType (TConstructor (KArrow KType KType) "List") (TConstructor KType "JsonValue" :| []) `TArrow` TIntrinsic IString
+            )
+        )
+      ,
+        ( "encode_json_object"
+        , Forall
+            (Set.fromList mempty)
+            []
+            ( TApplication KType (TConstructor (KArrow KType KType) "List") (tupleType (TIntrinsic IString :| [TConstructor KType "JsonValue"]) :| []) `TArrow` TIntrinsic IString
+            )
+        )
+      ,
+        ( "encode_json_value"
+        , Forall
+            (Set.fromList mempty)
+            []
+            ( TConstructor KType "JsonValue" `TArrow` TIntrinsic IString
+            )
+        )
+      ]
 
 makeEnv :: (Definition a k t -> [(Name, e)]) -> [Definition a k t] -> Environment e
 makeEnv f = Environment.fromList . concatMap f

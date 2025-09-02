@@ -131,15 +131,17 @@ patternConstraints assertF ms =
       concatForM ps (patternConstraints assertF ms)
     PAtVariable _ (Label _ name) -> do
       pure [name]
-    PNamedAtVariable loc f (Label t name) -> do
-      assertF t (filter (assumptionNameIs f) ms)
-      r <- lookupTopLevelFold f
-      case r of
-        Nothing ->
-          error "Fold not found" -- undefined -- tellLeft [ENoDataConstructor loc name]
-        Just s ->
-          tellRight [Explicit InferenceRulePlaceholder t s]
-      pure [name]
+    --    PNamedAtVariable loc f (Label t name) -> do
+    --      --assertF t (filter (assumptionNameIs f) ms)
+    --      r <- lookupTopLevelFold f
+    --      case r of
+    --        Nothing ->
+    --          error "Fold not found" -- undefined -- tellLeft [ENoDataConstructor loc name]
+    --        Just s ->
+    --          traceShow (f, s) $
+    --            tellRight [Explicit InferenceRulePlaceholder t s]
+    --      pure []
+    --      pure [name]
     PAs _ (Label t name) p -> do
       ps <- patternConstraints assertF ms p
       tellRight [Equality InferenceRulePlaceholder [t, typeOf p]]

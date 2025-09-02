@@ -159,19 +159,19 @@ compileDefinitionC =
           compilerReportConstraintsGenErrors [EIllFormedTypeAnnotation err]
         Right t2 -> do
           insertConstraintsC [Equality (RuleAnnotation loc t1 t2) [t1, t2]]
-          t1 <- supplied (TVariable . TypeIndex KType)
-          t3 <- supplied (TVariable . TypeIndex KType)
-          insertConstraintsC [Equality InferenceRulePlaceholder [t2, t1 `TArrow` t3]]
-          compileConstraintsC $
-            ELambda
-              loc
-              (PVariable loc (Label t1 "#.a") :| [])
-              ( EMatch
-                  loc
-                  t3
-                  (EVariable loc (Label t1 "#.a"))
-                  cs
-              )
+    --          t1 <- supplied (TVariable . TypeIndex KType)
+    --          t3 <- supplied (TVariable . TypeIndex KType)
+    --          insertConstraintsC [Equality InferenceRulePlaceholder [t2, t1 `TArrow` t3]]
+    --          compileConstraintsC $
+    --            ELambda
+    --              loc
+    --              (PVariable loc (Label t1 "#.a") :| [])
+    --              ( EMatch
+    --                  loc
+    --                  t3
+    --                  (EVariable loc (Label t1 "#.a"))
+    --                  cs
+    --              )
     DAnnotation (With _ t) (DUnfold loc name ps d (Just e)) ->
       undefined
     _ ->

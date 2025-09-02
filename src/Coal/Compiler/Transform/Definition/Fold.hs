@@ -41,7 +41,7 @@ instance (Monoid a, Data a) => TopLevelFoldContext (Choice Expression a ()) wher
       CPlain a gs e ->
         CPlain a gs (expandFolds name lls e)
       CLambda{} ->
-        error "TODO"
+        error "Not implemented"
 
 instance (Monoid a, Data a) => TopLevelFoldContext (Expression a ()) where
   expandFolds = flip . foldr . updateName
@@ -50,7 +50,7 @@ updateName :: (Monoid a, Data a) => Name -> (Name, Label ()) -> Expression a () 
 updateName _ (name, label) =
   replace (labelName label) $
     const2 $
-      applicationE (varE name) (EVariable mempty label :| [])
+      applicationE (varE ("!" <> name)) (EVariable mempty label :| [])
 
 eliminateAtPatterns :: Pattern a () -> Pattern a ()
 eliminateAtPatterns =

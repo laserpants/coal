@@ -1230,16 +1230,18 @@ compileModule x = do
   case nub cc of
     as@(_ : _) ->
       forM_ as $
-        \Assumption{..} -> do
-          src <- gets compilerSourceText
-          let msg =
-                prettyErrorMessage
-                  [ "\nName not in scope:"
-                  , assumptionName
-                  ]
-                  src
-                  Assumption{..}
-          throwError (CompilerError msg)
+        \Assumption{..} ->
+          -- TODO: Maybe look up these in environment and add additional constraints
+          unless ("!" `Text.isPrefixOf` assumptionName) $ do
+            src <- gets compilerSourceText
+            let msg =
+                  prettyErrorMessage
+                    [ "\nName not in scope:"
+                    , assumptionName
+                    ]
+                    src
+                    Assumption{..}
+            throwError (CompilerError msg)
     [] ->
       pure ()
 
