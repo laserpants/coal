@@ -37,6 +37,7 @@ type TypeConstructorEnvironment = Environment Kind
 type TraitEnvironment = Environment (Parameter Kind, TypeIndex Kind, Environment IndexedScheme)
 type InstanceEnvironment = Environment (Map IndexedType (Type Parameter (), Dictionary IndexedScheme))
 type CodataAccessorEnvironment = Environment (CodataAccessor TypeIndex Kind IndexedType)
+type FoldEnvironment = Environment IndexedScheme
 
 data CompilerEnvironment = CompilerEnvironment
   { compilerDataConstructorEnvironment :: DataConstructorEnvironment
@@ -45,6 +46,7 @@ data CompilerEnvironment = CompilerEnvironment
   , compilerInstanceEnvironment :: InstanceEnvironment
   , compilerAliasEnvironment :: AliasEnvironment
   , compilerCodataAccessorEnvironment :: CodataAccessorEnvironment
+  , compilerFoldEnvironment :: FoldEnvironment
   }
   deriving (Show, Eq, Ord, Read)
 
@@ -57,6 +59,7 @@ emptyCompilerEnvironment =
     , compilerInstanceEnvironment = mempty
     , compilerAliasEnvironment = mempty
     , compilerCodataAccessorEnvironment = mempty
+    , compilerFoldEnvironment = mempty
     }
 
 buildEnvironment :: [Definition a k t] -> CompilerEnvironment
@@ -68,6 +71,7 @@ buildEnvironment defs =
     , compilerInstanceEnvironment = instanceEnvironment
     , compilerAliasEnvironment = aliasEnvironment
     , compilerCodataAccessorEnvironment = codataAccessorEnvironment
+    , compilerFoldEnvironment = foldEnvironment
     }
  where
   instanceEnvironment = buildInstanceEnvironment typeConstructorEnvironment traitEnvironment defs
@@ -76,6 +80,10 @@ buildEnvironment defs =
   dataConstructorEnvironment = buildDataConstructorEnvironment typeConstructorEnvironment defs
   typeConstructorEnvironment = buildTypeConstructorEnvironment defs
   codataAccessorEnvironment = buildCodataAccessorEnvironment defs
+  -- TODO:
+  foldEnvironment = Environment.fromList 
+    [
+    ]
 
 makeEnv :: (Definition a k t -> [(Name, e)]) -> [Definition a k t] -> Environment e
 makeEnv f = Environment.fromList . concatMap f

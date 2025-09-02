@@ -7,6 +7,7 @@
 
 module Coal.Compiler.TypeInference (typeDefinitionsC) where
 
+import Debug.Trace
 import Coal.Common.Environment (Environment (..))
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (supplied)
@@ -44,6 +45,7 @@ runConstraintsGenC stack = do
       , constraintsGenContextDataConstructorEnv = compilerDataConstructorEnvironment
       , constraintsGenContextCodataAccessorEnv = compilerCodataAccessorEnvironment
       , constraintsGenContextTypeConstructorEnv = compilerTypeConstructorEnvironment
+      , constraintsGenContextTopLevelFoldEnv = compilerFoldEnvironment
       }
 
 generateConstraintsC :: (Monad m, Data a, Show a) => Expression a IndexedType -> CompilerT a m ([CompilerAssumption a], [CompilerConstraint a])
@@ -131,8 +133,21 @@ compileDefinitionC =
           compilerReportConstraintsGenErrors [EIllFormedTypeAnnotation err]
         Right t2 ->
           insertConstraintsC [Equality (RuleAnnotation loc t1 t2) [t1, t2]]
-    DFold _ name cs (Just e) ->
+    DFold loc name cs (Just e) -> do
       compileConstraintsC e
+--      t1 <- supplied (TVariable . TypeIndex KType)
+--      t2 <- supplied (TVariable . TypeIndex KType)
+--      compileConstraintsC $
+--        ELambda
+--          loc
+--          (PVariable undefined (Label t1 "#.a") :| [])
+--          (
+--            EMatch
+--              loc
+--              t2
+--              (EVariable undefined (Label t1 "#.a"))
+--              cs
+--          )
     DUnfold _ name ps d (Just e) ->
       undefined
     DAnnotation (With _ t) (DFold loc name cs (Just e)) -> do
@@ -142,8 +157,22 @@ compileDefinitionC =
       case r of
         Left err ->
           compilerReportConstraintsGenErrors [EIllFormedTypeAnnotation err]
-        Right t2 ->
+        Right t2 -> do
           insertConstraintsC [Equality (RuleAnnotation loc t1 t2) [t1, t2]]
+          t1 <- supplied (TVariable . TypeIndex KType)
+          t3 <- supplied (TVariable . TypeIndex KType)
+          insertConstraintsC [Equality InferenceRulePlaceholder [t2, t1 `TArrow` t3]]
+          compileConstraintsC $
+            ELambda
+              loc
+              (PVariable loc (Label t1 "#.a") :| [])
+              (
+                EMatch
+                  loc
+                  t3
+                  (EVariable loc (Label t1 "#.a"))
+                  cs
+              )
     DAnnotation (With _ t) (DUnfold loc name ps d (Just e)) ->
       undefined
     _ ->

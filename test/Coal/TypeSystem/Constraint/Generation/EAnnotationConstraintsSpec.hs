@@ -30,6 +30,7 @@ collectEAnnotationConstraintsSpec1 = null ms && null (lefts outs)
       , constraintsGenContextDataConstructorEnv = mempty
       , constraintsGenContextCodataAccessorEnv = mempty
       , constraintsGenContextTypeConstructorEnv = mempty
+      , constraintsGenContextTopLevelFoldEnv = mempty
       }
 
 constraint1 :: Constraint (InferenceRule Kind ()) TypeIndex Kind IndexedType
@@ -46,6 +47,7 @@ collectEAnnotationConstraintsSpec2 = null ms && constraint1 `elem` rights outs
       , constraintsGenContextDataConstructorEnv = mempty
       , constraintsGenContextCodataAccessorEnv = mempty
       , constraintsGenContextTypeConstructorEnv = mempty
+      , constraintsGenContextTopLevelFoldEnv = mempty
       }
 
 fixture2 :: Expression () IndexedType
@@ -66,6 +68,7 @@ collectEAnnotationConstraintsSpec3 = null ms && constraint2 `elem` rights outs
       , constraintsGenContextDataConstructorEnv = mempty
       , constraintsGenContextCodataAccessorEnv = mempty
       , constraintsGenContextTypeConstructorEnv = mempty
+      , constraintsGenContextTopLevelFoldEnv = mempty
       }
 
 fixture3 :: Expression () IndexedType
@@ -83,4 +86,5 @@ collectEAnnotationConstraintsSpec4 = null ms && null (lefts outs)
       , constraintsGenContextDataConstructorEnv = mempty
       , constraintsGenContextCodataAccessorEnv = mempty
       , constraintsGenContextTypeConstructorEnv = mempty
+      , constraintsGenContextTopLevelFoldEnv = mempty
       }

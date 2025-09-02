@@ -40,6 +40,7 @@ collectELambdaConstraintsSpec1 = null ms && constraint1 `elem` rights outs
       , constraintsGenContextDataConstructorEnv = mempty
       , constraintsGenContextCodataAccessorEnv = mempty
       , constraintsGenContextTypeConstructorEnv = mempty
+      , constraintsGenContextTopLevelFoldEnv = mempty
       }
 
 fixture2 :: Expression () IndexedType
@@ -60,6 +61,7 @@ collectELambdaConstraintsSpec2 = null outs
       , constraintsGenContextDataConstructorEnv = mempty
       , constraintsGenContextCodataAccessorEnv = mempty
       , constraintsGenContextTypeConstructorEnv = mempty
+      , constraintsGenContextTopLevelFoldEnv = mempty
       }
 
 collectELambdaConstraintsSpec3 :: Bool
@@ -114,4 +116,5 @@ collectELambdaConstraintsSpec4 =
       , constraintsGenContextDataConstructorEnv = mempty
       , constraintsGenContextCodataAccessorEnv = mempty
       , constraintsGenContextTypeConstructorEnv = mempty
+      , constraintsGenContextTopLevelFoldEnv = mempty
       }

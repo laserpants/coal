@@ -12,6 +12,7 @@ module Coal.TypeSystem.Constraint.Generation (
   evalConstraintsGenStack,
 ) where
 
+import Debug.Trace
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (supplied)
 import Coal.Language
@@ -40,6 +41,10 @@ lookupDataConstructor name = asks (Environment.lookup name . constraintsGenConte
 lookupCodataAccessor :: Name -> ConstraintsGenStack c o a t (Maybe (CodataAccessor o a t))
 lookupCodataAccessor name = asks (Environment.lookup name . constraintsGenContextCodataAccessorEnv)
 
+{-# INLINE lookupTopLevelFold #-}
+lookupTopLevelFold :: Name -> ConstraintsGenStack c o a t (Maybe IndexedScheme)
+lookupTopLevelFold name = asks (Environment.lookup name . constraintsGenContextTopLevelFoldEnv)
+
 assertEqualityAssumptions :: a -> IndexedType -> [Assumption a IndexedType] -> ConstraintsGen a ()
 assertEqualityAssumptions _ t ms =
   tellRight $ do
@@ -67,7 +72,7 @@ emitPAnnotationConstraints loc t p = do
     Right t1 ->
       tellRight [Equality (RuleAnnotation loc (typeOf p) t1) [typeOf p, t1]]
 
-patternConstraints :: (Data a) => Assertion a -> [Assumption a IndexedType] -> Pattern a IndexedType -> ConstraintsGen a [Name]
+patternConstraints :: (Show a, Data a) => Assertion a -> [Assumption a IndexedType] -> Pattern a IndexedType -> ConstraintsGen a [Name]
 patternConstraints assertF ms =
   \case
     PAnnotation loc t p -> do
@@ -126,8 +131,14 @@ patternConstraints assertF ms =
       concatForM ps (patternConstraints assertF ms)
     PAtVariable _ (Label _ name) -> do
       pure [name]
-    PNamedAtVariable _ f (Label t name) -> do
+    PNamedAtVariable loc f (Label t name) -> do
       assertF t (filter (assumptionNameIs f) ms)
+      r <- lookupTopLevelFold f
+      case r of
+        Nothing ->
+          error "Fold not found" -- undefined -- tellLeft [ENoDataConstructor loc name]
+        Just s ->
+          tellRight [Explicit InferenceRulePlaceholder t s]
       pure [name]
     PAs _ (Label t name) p -> do
       ps <- patternConstraints assertF ms p

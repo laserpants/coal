@@ -26,6 +26,7 @@ collectExampleConstraintsSpec1 = (ms, outs)
       , constraintsGenContextDataConstructorEnv = mempty
       , constraintsGenContextCodataAccessorEnv = mempty
       , constraintsGenContextTypeConstructorEnv = mempty
+      , constraintsGenContextTopLevelFoldEnv = mempty
       }
 
 --    let
