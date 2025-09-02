@@ -12,7 +12,6 @@ module Coal.TypeSystem.Constraint.Generation (
   evalConstraintsGenStack,
 ) where
 
-import Debug.Trace
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (supplied)
 import Coal.Language
@@ -25,6 +24,7 @@ import Data.Data (Data)
 import Data.List.NonEmpty (NonEmpty (..), toList, (<|))
 import Data.Maybe (maybeToList)
 import Data.Tuple.Extra (third3)
+import Debug.Trace
 import Extra
 
 import qualified Coal.Common.Environment as Environment

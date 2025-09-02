@@ -81,9 +81,9 @@ buildEnvironment defs =
   typeConstructorEnvironment = buildTypeConstructorEnvironment defs
   codataAccessorEnvironment = buildCodataAccessorEnvironment defs
   -- TODO:
-  foldEnvironment = Environment.fromList 
-    [
-    ]
+  foldEnvironment =
+    Environment.fromList
+      []
 
 makeEnv :: (Definition a k t -> [(Name, e)]) -> [Definition a k t] -> Environment e
 makeEnv f = Environment.fromList . concatMap f

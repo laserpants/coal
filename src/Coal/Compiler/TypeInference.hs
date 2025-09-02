@@ -7,7 +7,6 @@
 
 module Coal.Compiler.TypeInference (typeDefinitionsC) where
 
-import Debug.Trace
 import Coal.Common.Environment (Environment (..))
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (supplied)
@@ -23,6 +22,7 @@ import Control.Monad.Writer (execWriter)
 import Data.Data (Data)
 import Data.Either.Extra (partitionEithers)
 import Data.List.NonEmpty (NonEmpty (..))
+import Debug.Trace
 import Extra (Dictionary, Name, forM_, void)
 
 import qualified Coal.Common.Environment as Environment
@@ -135,19 +135,19 @@ compileDefinitionC =
           insertConstraintsC [Equality (RuleAnnotation loc t1 t2) [t1, t2]]
     DFold loc name cs (Just e) -> do
       compileConstraintsC e
---      t1 <- supplied (TVariable . TypeIndex KType)
---      t2 <- supplied (TVariable . TypeIndex KType)
---      compileConstraintsC $
---        ELambda
---          loc
---          (PVariable undefined (Label t1 "#.a") :| [])
---          (
---            EMatch
---              loc
---              t2
---              (EVariable undefined (Label t1 "#.a"))
---              cs
---          )
+    --      t1 <- supplied (TVariable . TypeIndex KType)
+    --      t2 <- supplied (TVariable . TypeIndex KType)
+    --      compileConstraintsC $
+    --        ELambda
+    --          loc
+    --          (PVariable undefined (Label t1 "#.a") :| [])
+    --          (
+    --            EMatch
+    --              loc
+    --              t2
+    --              (EVariable undefined (Label t1 "#.a"))
+    --              cs
+    --          )
     DUnfold _ name ps d (Just e) ->
       undefined
     DAnnotation (With _ t) (DFold loc name cs (Just e)) -> do
@@ -166,8 +166,7 @@ compileDefinitionC =
             ELambda
               loc
               (PVariable loc (Label t1 "#.a") :| [])
-              (
-                EMatch
+              ( EMatch
                   loc
                   t3
                   (EVariable loc (Label t1 "#.a"))

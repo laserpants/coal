@@ -22,7 +22,7 @@ module Coal.TypeSystem.Constraint.Generation.Internal (
 
 import Coal.Common.Environment (Environment (..))
 import Coal.Common.Supply (Supply (..))
-import Coal.Language (CodataAccessor (..), DataConstructor (..), Kind (..), Type (..), TypeIndex (..), IndexedScheme)
+import Coal.Language (CodataAccessor (..), DataConstructor (..), IndexedScheme, Kind (..), Type (..), TypeIndex (..))
 import Coal.TypeSystem.Constraint (Constraint (..), Monomorphic (..), overMonomorphicSet)
 import Coal.TypeSystem.Constraint.Generation.InferenceRule (InferenceRule (..))
 import Control.Monad.RWS
