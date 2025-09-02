@@ -15,16 +15,16 @@ liftWhereClause :: (MonadWriter [(Name, Name)] m) => Name -> Definition a k t ->
 liftWhereClause name =
   \case
     DFunction loc old with f _ -> do
-      new <- fabricatedName name old
+      new <- manufacturedName name old
       pure (DFunction loc new with f [])
     DConstant loc old with c _ -> do
-      new <- fabricatedName name old
+      new <- manufacturedName name old
       pure (DConstant loc new with c [])
     d ->
       pure d
 
-fabricatedName :: (MonadWriter [(Name, Name)] m) => Name -> Name -> m Name
-fabricatedName name old = do
+manufacturedName :: (MonadWriter [(Name, Name)] m) => Name -> Name -> m Name
+manufacturedName name old = do
   tell [(old, new)]
   pure new
  where
