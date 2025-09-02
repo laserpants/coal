@@ -57,6 +57,7 @@ reserved =
   , "match"
   , "with"
   , "when"
+  , "where"
   , "or"
   , "type"
   , "cotype"

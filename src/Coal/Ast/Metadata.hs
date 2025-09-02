@@ -97,7 +97,7 @@ instance HasMetadata (InferenceRule k Metadata) where
       RuleMatchClauseGuard a -> a
       RuleMatchClauseExpressions a -> a
       RuleMatchClausePatterns a -> a
-      RuleUnaryOperator a -> a 
+      RuleUnaryOperator a -> a
       RuleBinaryOperator a -> a
       RuleTopLevelFunction a -> a
       RuleTopLevelConstant a -> a
