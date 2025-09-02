@@ -23,7 +23,7 @@ As a [total](https://en.wikipedia.org/wiki/Total_functional_programming) languag
   fun sum(numbers : List<int32>) : int32 =
     fold(numbers) {
       | [] => 0 
-      | x :: @tot  => x + tot
+      | x :: @tot => x + tot
     }
 ```
 
