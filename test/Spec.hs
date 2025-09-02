@@ -1141,6 +1141,7 @@ addBuiltinDefs defs =
         )
       ]
   , DType
+      mempty
       "Ordering"
       []
       [ DataConstructor "LessThan" 0 (Forall mempty [] (TConstructor () "Ordering"))
@@ -1148,6 +1149,7 @@ addBuiltinDefs defs =
       , DataConstructor "EqualTo" 0 (Forall mempty [] (TConstructor () "Ordering"))
       ]
   , DType
+      mempty
       "Option"
       [Parameter () "a"]
       [ DataConstructor "Some" 1 (Forall (Set.fromList [Parameter () "a"]) [] (TVariable (Parameter () "a") `TArrow` TApplication () (TConstructor () "Option") (TVariable (Parameter () "a") :| [])))
@@ -1162,7 +1164,7 @@ insertImportedTypes env defs = concatMap go defs <> defs
   go =
     \case
       DImport (Path path) ns -> do
-        [t | t@(DType c _ _) <- ds, c `elem` filter isConstructor ns]
+        [t | t@(DType _ c _ _) <- ds, c `elem` filter isConstructor ns]
        where
         ds = fromMaybe mempty (Environment.lookup (Text.intercalate "." path) env)
       _ ->
@@ -1180,7 +1182,7 @@ run modules = do
       insertNamesC names
       case m3 of
         Module (Path path) _ defs -> do
-          insertTypeDefinitionsC (Text.intercalate "." path) [t | t@(DType c _ _) <- defs]
+          insertTypeDefinitionsC (Text.intercalate "." path) [t | t@(DType _ c _ _) <- defs]
           withLocalEnvironment defs (compileModule m3)
   liftIO $ do
     ms <- Kernel.compileModules (moduleCore1 : rs)

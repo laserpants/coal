@@ -374,7 +374,7 @@ instance (Show t, Pretty t) => Dot t (Definition a k t) where
           emitEdgeTo d
       DImport (Path _) ns ->
         emitParallelogram "DImport" Nothing
-      DType name _ _ ->
+      DType _ name _ _ ->
         emitParallelogram ("DType\\n" <> name) Nothing
       DCodata name _ _ ->
         emitParallelogram ("DCodata\\n" <> name) Nothing

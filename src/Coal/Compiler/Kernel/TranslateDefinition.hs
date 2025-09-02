@@ -26,7 +26,7 @@ translateDefinition =
   \case
     DAnnotation _ d ->
       translateDefinition d
-    DType _ _ ctors ->
+    DType _ _ _ ctors ->
       traverse translateConstructor (zip [0 ..] (sortOn constructorName ctors))
     DFunction name (Function _ _ ps e) _ -> do
       qs <- traverse translatePattern (toList ps)

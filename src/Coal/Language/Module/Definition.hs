@@ -28,7 +28,7 @@ data Definition a k t
   = -- | Type-annotated definition
     DAnnotation (With ParameterizedType) (Definition a k t)
   | -- | Type definition
-    DType Name [Parameter ()] [DataConstructor Parameter () ParameterizedType]
+    DType a Name [Parameter ()] [DataConstructor Parameter () ParameterizedType]
   | -- | Codata type definition
     DCodata Name [Parameter ()] [(Name, ParameterizedType)]
   | -- | Function definition

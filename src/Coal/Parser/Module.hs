@@ -21,7 +21,6 @@ import Coal.Parser.Type
 import Coal.Parser.Utils (fieldListWithKey)
 import Control.Monad (void)
 import Data.List.NonEmpty (NonEmpty (..))
-import Debug.Trace
 import Extra (Name)
 import Text.Megaparsec
 import Text.Megaparsec.Char (upperChar)
@@ -73,12 +72,14 @@ parseTrait = do
 
 parseTypeDefinition :: Parser (Definition Metadata o ())
 parseTypeDefinition = do
+  start <- getSourcePos
   lexeme_ "type"
   n <- constructor
   -- TODO: DRY
   ps <- option [] (angleBrackets (commaSep1 (Parameter () <$> name)))
+  end <- getSourcePos
   cs <- symbol_ "=" *> parseConstructor n ps `sepBy1` symbol_ "|"
-  pure (DType n ps cs)
+  pure (DType (Metadata start end) n ps cs)
 
 parseCodataDefinition :: Parser (Definition Metadata o ())
 parseCodataDefinition = do

@@ -117,8 +117,7 @@ buildEnvironment defs =
   -- TODO:
   unfoldEnvironment =
     Environment.fromList
-      [
-      ]
+      []
 
 makeEnv :: (Definition a k t -> [(Name, e)]) -> [Definition a k t] -> Environment e
 makeEnv f = Environment.fromList . concatMap f
@@ -127,7 +126,7 @@ buildDataConstructorEnvironment :: TypeConstructorEnvironment -> [Definition a k
 buildDataConstructorEnvironment env =
   makeEnv
     ( \case
-        DType _ _ cs ->
+        DType _ _ _ cs ->
           translateConstructor <$> cs
         _ ->
           []
@@ -144,7 +143,7 @@ buildTypeConstructorEnvironment :: [Definition a k t] -> TypeConstructorEnvironm
 buildTypeConstructorEnvironment =
   makeEnv
     ( \case
-        DType name ps _ ->
+        DType _ name ps _ ->
           [
             ( name
             , foldr KArrow KType (replicate (length ps) KType)
