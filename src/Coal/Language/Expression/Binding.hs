@@ -27,7 +27,7 @@ instance (Data a, Data t) => BoundVars (Binding e a t) where
       BPattern _ p _ ->
         Set.fromList (universeBi p)
       BFunction{} ->
-        error "TODO"
+        error "Not implemented"
 
 instance (Data a, Data t, FreeVars (e a t) t) => FreeVars (Binding e a t) t where
   freeIn =
