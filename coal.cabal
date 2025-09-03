@@ -137,16 +137,16 @@ library
       Coal.Language.HasKind
       Coal.Language.HasType
       Coal.Language.Module
-      Coal.Language.Module.Alias
-      Coal.Language.Module.Constant
-      Coal.Language.Module.Cotype
       Coal.Language.Module.Definition
-      Coal.Language.Module.Fold
-      Coal.Language.Module.Function
-      Coal.Language.Module.Instance
-      Coal.Language.Module.Trait
-      Coal.Language.Module.Type
-      Coal.Language.Module.Unfold
+      Coal.Language.Module.Definition.Alias
+      Coal.Language.Module.Definition.Constant
+      Coal.Language.Module.Definition.Cotype
+      Coal.Language.Module.Definition.Fold
+      Coal.Language.Module.Definition.Function
+      Coal.Language.Module.Definition.Instance
+      Coal.Language.Module.Definition.Trait
+      Coal.Language.Module.Definition.Type
+      Coal.Language.Module.Definition.Unfold
       Coal.Language.Pattern
       Coal.Language.Primitive
       Coal.Language.Serializable

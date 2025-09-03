@@ -8,10 +8,10 @@ module Coal.Compiler.Transform.Pattern.AsDesugar where
 import Coal.Common.Label (Label (..))
 import Coal.Language (Choice (..), Clause (..), Expression (..), Pattern (..))
 import Coal.Language.Module (Module (..))
-import Coal.Language.Module.Constant (ConstantDef (..))
 import Coal.Language.Module.Definition (Definition (..))
-import Coal.Language.Module.Fold (FoldDef (..))
-import Coal.Language.Module.Function (FunctionDef (..))
+import Coal.Language.Module.Definition.Constant (ConstantDef (..))
+import Coal.Language.Module.Definition.Fold (FoldDef (..))
+import Coal.Language.Module.Definition.Function (FunctionDef (..))
 import Control.Monad.Writer
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (descend, transformM)

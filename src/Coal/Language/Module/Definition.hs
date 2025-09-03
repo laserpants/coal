@@ -6,15 +6,15 @@
 
 module Coal.Language.Module.Definition (Definition (..), Path (..), definitionName) where
 
-import Coal.Language.Module.Alias (AliasDef (..))
-import Coal.Language.Module.Constant (ConstantDef (..))
-import Coal.Language.Module.Cotype (CotypeDef (..))
-import Coal.Language.Module.Fold (FoldDef (..))
-import Coal.Language.Module.Function (FunctionDef (..))
-import Coal.Language.Module.Instance (InstanceDef (..))
-import Coal.Language.Module.Trait (TraitDef (..))
-import Coal.Language.Module.Type (TypeDef (..))
-import Coal.Language.Module.Unfold (UnfoldDef (..))
+import Coal.Language.Module.Definition.Alias (AliasDef (..))
+import Coal.Language.Module.Definition.Constant (ConstantDef (..))
+import Coal.Language.Module.Definition.Cotype (CotypeDef (..))
+import Coal.Language.Module.Definition.Fold (FoldDef (..))
+import Coal.Language.Module.Definition.Function (FunctionDef (..))
+import Coal.Language.Module.Definition.Instance (InstanceDef (..))
+import Coal.Language.Module.Definition.Trait (TraitDef (..))
+import Coal.Language.Module.Definition.Type (TypeDef (..))
+import Coal.Language.Module.Definition.Unfold (UnfoldDef (..))
 import Data.Data (Data, Typeable)
 import Extra (Name)
 

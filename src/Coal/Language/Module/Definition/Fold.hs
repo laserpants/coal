@@ -2,12 +2,13 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Language.Module.Constant (ConstantDef (..)) where
+module Coal.Language.Module.Definition.Fold (FoldDef (..)) where
 
-import Coal.Language.Expression (Expression)
+import Coal.Language.Expression (Clause (..), Expression (..))
 import Coal.Language.Trait (With (..))
 import Coal.Language.Type (ParameterizedType)
 import Data.Data (Data, Typeable)
+import Data.List.NonEmpty (NonEmpty)
 
-data ConstantDef a t = ConstantDef a (Maybe (With ParameterizedType)) (With t) (Expression a t)
+data FoldDef a t = FoldDef (With ParameterizedType) (NonEmpty (Clause a t)) (Maybe (Expression a t))
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)

@@ -28,9 +28,9 @@ import Coal.Compiler.TypeInference
 import Coal.Graphviz.Dot (writeDotFile)
 import Coal.Language
 import Coal.Language.Module (Module (..), overModuleDefinitionsM)
-import Coal.Language.Module.Constant
 import Coal.Language.Module.Definition
-import Coal.Language.Module.Instance
+import Coal.Language.Module.Definition.Constant
+import Coal.Language.Module.Definition.Instance
 import Coal.TypeSystem.Substitution (normalizeTypeIndexes)
 import Control.Monad ((>=>))
 import Control.Monad.Reader (MonadIO, Reader, asks, liftIO, runReader)

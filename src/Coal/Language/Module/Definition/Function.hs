@@ -2,7 +2,7 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Language.Module.Function (FunctionDef (..)) where
+module Coal.Language.Module.Definition.Function (FunctionDef (..)) where
 
 import Coal.Language.Expression (Expression)
 import Coal.Language.Pattern (Pattern)

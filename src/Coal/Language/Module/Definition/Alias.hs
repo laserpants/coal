@@ -1,7 +1,7 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Language.Module.Alias (AliasDef (..)) where
+module Coal.Language.Module.Definition.Alias (AliasDef (..)) where
 
 import Coal.Language.Type (Parameter, ParameterizedType)
 import Data.Data (Data, Typeable)

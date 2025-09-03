@@ -2,7 +2,7 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Language.Module.Trait (TraitDef (..)) where
+module Coal.Language.Module.Definition.Trait (TraitDef (..)) where
 
 import Coal.Language.Trait (Trait (..))
 import Coal.Language.Type (Parameter, ParameterizedType)

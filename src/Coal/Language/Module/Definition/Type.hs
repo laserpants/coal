@@ -1,7 +1,7 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Language.Module.Type (TypeDef (..)) where
+module Coal.Language.Module.Definition.Type (TypeDef (..)) where
 
 import Coal.Language.DataConstructor (DataConstructor (..))
 import Coal.Language.Type (Parameter, ParameterizedType)
