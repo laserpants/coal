@@ -140,6 +140,7 @@ library
       Coal.Language.Module.Cotype
       Coal.Language.Module.Definition
       Coal.Language.Module.Function
+      Coal.Language.Module.Instance
       Coal.Language.Module.Trait
       Coal.Language.Module.Type
       Coal.Language.Pattern
