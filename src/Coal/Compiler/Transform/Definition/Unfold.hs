@@ -13,7 +13,7 @@ import Coal.Compiler.Transform.Expression
 import Coal.Compiler.Transform.Flattening (flattenApplication)
 import Coal.Compiler.Transform.Tree (replace)
 import Coal.Language (Choice (..), Clause (..), Expression (..), Pattern (..))
-import Coal.Language.Module (ConstantDef (..), Definition (..), FunctionDef (..), Module (..))
+import Coal.Language.Module (ConstantDef (..), Definition (..), FunctionDef (..), Module (..), UnfoldDef (..))
 import Control.Monad.RWS (RWS, runRWS)
 import Control.Monad.Reader (MonadReader)
 import Control.Monad.State (MonadState)
@@ -28,9 +28,9 @@ import Extra (Dictionary, Name, const2)
 compileTopLevelUnfolds :: (Monad m) => Definition a k t -> m (Definition a k t)
 compileTopLevelUnfolds =
   \case
-    DUnfold loc name with ps d _ -> do
+    DUnfold loc name (UnfoldDef with ps d _) -> do
       e1 <- expandTopLevelUnfold name ps d
-      pure $ DUnfold loc name with ps d (Just e1)
+      pure $ DUnfold loc name (UnfoldDef with ps d (Just e1))
     o ->
       pure o
 

@@ -9,10 +9,12 @@ module Coal.Language.Module.Definition (Definition (..), Path (..), definitionNa
 import Coal.Language.Expression (Clause (..), Expression (..))
 import Coal.Language.Module.Constant (ConstantDef (..))
 import Coal.Language.Module.Cotype (CotypeDef (..))
+import Coal.Language.Module.Fold (FoldDef (..))
 import Coal.Language.Module.Function (FunctionDef (..))
 import Coal.Language.Module.Instance (InstanceDef (..))
 import Coal.Language.Module.Trait (TraitDef (..))
 import Coal.Language.Module.Type (TypeDef (..))
+import Coal.Language.Module.Unfold (UnfoldDef (..))
 import Coal.Language.Pattern (Pattern (..))
 import Coal.Language.Trait (With (..))
 import Coal.Language.Type (Parameter, ParameterizedType)
@@ -41,9 +43,9 @@ data Definition a k t
   | -- | Type alias
     DTypeAlias a Name [Parameter ()] ParameterizedType
   | -- | Top-level fold
-    DFold a Name (With ParameterizedType) (NonEmpty (Clause a t)) (Maybe (Expression a t))
+    DFold a Name (FoldDef a t)
   | -- | Top-level unfold
-    DUnfold a Name (With ParameterizedType) (NonEmpty (Pattern a t)) (Dictionary (Expression a t)) (Maybe (Expression a t))
+    DUnfold a Name (UnfoldDef a t)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
 
 definitionName :: Definition a k t -> Name
@@ -55,9 +57,9 @@ definitionName =
       name
     DCotype _ name _ ->
       name
-    DFold _ name _ _ _ ->
+    DFold _ name _ ->
       name
-    DUnfold _ name _ _ _ _ ->
+    DUnfold _ name _ ->
       name
     _ ->
       error "Not implemented"

@@ -10,7 +10,7 @@ import Coal.Common.Label (Label (..), labelName)
 import Coal.Compiler.Transform.Expression
 import Coal.Compiler.Transform.Tree (replace)
 import Coal.Language (Choice (..), Clause (..), Expression (..), Pattern (..))
-import Coal.Language.Module (Definition (..))
+import Coal.Language.Module (Definition (..), FoldDef (..))
 import Control.Monad.Writer (execWriter, tell)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transform, transformM)
@@ -74,9 +74,9 @@ atLabels = execWriter . transformM go
 compileTopLevelFolds :: (Data a, Monoid a, Monad m) => Definition a k () -> m (Definition a k ())
 compileTopLevelFolds =
   \case
-    DFold loc name with cs _ -> do
+    DFold loc name (FoldDef with cs _) -> do
       e1 <- expandTopLevelFold name cs
-      pure $ DFold loc name with cs (Just e1)
+      pure $ DFold loc name (FoldDef with cs (Just e1))
     o ->
       pure o
 

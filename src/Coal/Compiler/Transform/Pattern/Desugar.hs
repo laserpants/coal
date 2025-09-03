@@ -21,7 +21,9 @@ import Coal.Language.HasType (HasType (..))
 import Coal.Language.Module (Module (..))
 import Coal.Language.Module.Constant (ConstantDef (..))
 import Coal.Language.Module.Definition (Definition (..))
+import Coal.Language.Module.Fold (FoldDef (..))
 import Coal.Language.Module.Function (FunctionDef (..))
+import Coal.Language.Module.Unfold (UnfoldDef (..))
 import Coal.Language.Pattern (Pattern (..))
 import Coal.Language.Type (Type (..))
 import Control.Monad.RWS (MonadReader, MonadState, MonadWriter, RWS, runRWS, tell)
@@ -131,10 +133,10 @@ instance (Monoid c, Data k, Data c, Data (o k), Typeable o) => Sugared c o k (De
         DFunction loc name <$> desugarPatterns f <*> traverse desugarPatterns fs
       DConstant loc name g fs ->
         DConstant loc name <$> desugarPatterns g <*> traverse desugarPatterns fs
-      DFold loc n with cs e ->
-        DFold loc n with cs <$> traverse desugarPatterns e
-      DUnfold loc n with ps d e ->
-        DUnfold loc n with ps d <$> traverse desugarPatterns e
+      DFold loc n (FoldDef with cs e) ->
+        DFold loc n . FoldDef with cs <$> traverse desugarPatterns e
+      DUnfold loc n (UnfoldDef with ps d e) ->
+        DUnfold loc n . UnfoldDef with ps d <$> traverse desugarPatterns e
       d ->
         pure d
 

@@ -10,7 +10,9 @@ import Coal.Language.Expression (Expression (..))
 import Coal.Language.Expression.Choice (Guard (..))
 import Coal.Language.Module.Constant (ConstantDef (..))
 import Coal.Language.Module.Definition (Definition (..))
+import Coal.Language.Module.Fold (FoldDef (..))
 import Coal.Language.Module.Function (FunctionDef (..))
+import Coal.Language.Module.Unfold (UnfoldDef (..))
 import Coal.Language.Pattern (Pattern (..))
 import Coal.Language.Primitive (Primitive (..))
 import Coal.Language.Trait (Trait (..))
@@ -89,9 +91,9 @@ instance (Data a, Data k, Data (o k), Typeable o) => HasType o k (Definition a k
         foldTypeOf e ps
       DConstant _ _ (ConstantDef _ _ _ e) _ ->
         typeOf e
-      DFold _ _ _ _ (Just e) ->
+      DFold _ _ (FoldDef _ _ (Just e)) ->
         typeOf e
-      DUnfold _ _ _ _ _ (Just e) ->
+      DUnfold _ _ (UnfoldDef _ _ _ (Just e)) ->
         typeOf e
       d ->
         head (universeBi d)

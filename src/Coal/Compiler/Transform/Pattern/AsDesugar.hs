@@ -10,6 +10,7 @@ import Coal.Language (Choice (..), Clause (..), Expression (..), Pattern (..))
 import Coal.Language.Module (Module (..))
 import Coal.Language.Module.Constant (ConstantDef (..))
 import Coal.Language.Module.Definition (Definition (..))
+import Coal.Language.Module.Fold (FoldDef (..))
 import Coal.Language.Module.Function (FunctionDef (..))
 import Control.Monad.Writer
 import Data.Data (Data)
@@ -96,8 +97,8 @@ instance (Data a, Data t, Monoid a) => AsDesugarContext (Definition a k t) where
         DFunction loc name (desugarAsPatterns f) (desugarAsPatterns <$> fs)
       DConstant loc name g fs ->
         DConstant loc name (desugarAsPatterns g) (desugarAsPatterns <$> fs)
-      DFold loc n with cs e ->
-        DFold loc n with cs (desugarAsPatterns <$> e)
+      DFold loc n (FoldDef with cs e) ->
+        DFold loc n (FoldDef with cs (desugarAsPatterns <$> e))
       DUnfold{} ->
         error "TODO"
       d ->

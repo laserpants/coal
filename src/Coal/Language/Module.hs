@@ -10,6 +10,8 @@ module Coal.Language.Module (
   module Coal.Language.Module.Definition,
   module Coal.Language.Module.Function,
   module Coal.Language.Module.Constant,
+  module Coal.Language.Module.Fold,
+  module Coal.Language.Module.Unfold,
   module Coal.Language.Module.Trait,
   module Coal.Language.Module.Type,
   module Coal.Language.Module.Cotype,
@@ -19,10 +21,12 @@ module Coal.Language.Module (
 import Coal.Language.Module.Constant
 import Coal.Language.Module.Cotype
 import Coal.Language.Module.Definition (Definition (..), Path (..), definitionName)
+import Coal.Language.Module.Fold
 import Coal.Language.Module.Function
 import Coal.Language.Module.Instance
 import Coal.Language.Module.Trait
 import Coal.Language.Module.Type
+import Coal.Language.Module.Unfold
 import Data.Data (Data, Typeable)
 import Extra (Name, Over)
 

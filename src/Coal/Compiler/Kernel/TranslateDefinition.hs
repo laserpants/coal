@@ -35,7 +35,7 @@ translateDefinition =
       c <- translateExpression e
       moduleName <- asks kernelEnvironmentModule
       pure [Kernel.OConstant (moduleName <> "." <> name) c]
-    DFold _ name _ _ (Just e) -> do
+    DFold _ name (FoldDef _ _ (Just e)) -> do
       c <- translateExpression e
       moduleName <- asks kernelEnvironmentModule
       pure [Kernel.OConstant (moduleName <> "." <> name) c]

@@ -139,10 +139,12 @@ library
       Coal.Language.Module.Constant
       Coal.Language.Module.Cotype
       Coal.Language.Module.Definition
+      Coal.Language.Module.Fold
       Coal.Language.Module.Function
       Coal.Language.Module.Instance
       Coal.Language.Module.Trait
       Coal.Language.Module.Type
+      Coal.Language.Module.Unfold
       Coal.Language.Pattern
       Coal.Language.Primitive
       Coal.Language.Serializable

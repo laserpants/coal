@@ -154,7 +154,7 @@ parseTopLevelFold = do
   ann <- symbol_ ":" *> parseType
   end <- getSourcePos
   cs <- braces (nonEmpty (some parseMatchClause))
-  pure (DFold (Metadata start end) n (With [] ann) cs Nothing)
+  pure (DFold (Metadata start end) n (FoldDef (With [] ann) cs Nothing))
 
 parseTopLevelUnfold :: Parser (Definition Metadata o ())
 parseTopLevelUnfold = do
@@ -166,7 +166,7 @@ parseTopLevelUnfold = do
   fields <- braces $ do
     void $ optional (symbol ",")
     fieldListWithKey constructor parseExpression "="
-  pure (DUnfold (Metadata start end) n (With [] ann) ps (Map.fromList fields) Nothing)
+  pure (DUnfold (Metadata start end) n (UnfoldDef (With [] ann) ps (Map.fromList fields) Nothing))
 
 -- withAnnotation :: Parser (Definition Metadata o ()) -> Parser (Definition Metadata o ())
 -- withAnnotation p = do

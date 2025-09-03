@@ -147,7 +147,7 @@ compileDefinitionC =
     --          compilerReportConstraintsGenErrors [EIllFormedTypeAnnotation err]
     --        Right t2 ->
     --          insertConstraintsC [Equality (RuleAnnotation loc t1 t2) [t1, t2]]
-    DFold loc name (With _ t) cs (Just e) -> do
+    DFold loc name (FoldDef (With _ t) cs (Just e)) -> do
       compileConstraintsC e
       let t1 = typeOf e
       (r, _, _) <- runConstraintsGenC (instantiateAnnotation loc t)
@@ -169,7 +169,7 @@ compileDefinitionC =
     --              (EVariable undefined (Label t1 "#.a"))
     --              cs
     --          )
-    DUnfold _ name (With _ t) ps d (Just e) ->
+    DUnfold _ name (UnfoldDef (With _ t) ps d (Just e)) ->
       undefined
     -- DAnnotation _ (With _ t) (DFold loc name cs (Just e)) -> do
     --  compileConstraintsC e
