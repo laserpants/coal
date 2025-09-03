@@ -126,11 +126,11 @@ natExpansionTrans f e = withSupplyC (\n -> runNatExpansion "succ" n (f e))
 compileNatsC :: (Monad m, Monoid a, Data a) => Module a Kind IndexedType -> CompilerT a m (Module a Kind IndexedType)
 compileNatsC = natExpansionTrans compileNats
 
-lambdaMatchExpansionTrans :: (Monad m, Monoid a, Data a) => (c -> LambdaMatchExpansion c) -> c -> CompilerT a m c
+lambdaMatchExpansionTrans :: (Monad m) => (c -> LambdaMatchExpansion c) -> c -> CompilerT a m c
 lambdaMatchExpansionTrans f e = withSupplyC (\n -> runLambdaMatchExpansion "lambda_match" n (f e))
 
 expandLambdaMatchC :: (Monad m, Monoid a, Data a) => Module a Kind () -> CompilerT a m (Module a Kind ())
-expandLambdaMatchC = lambdaMatchExpansionTrans (overModuleDefinitionsM compileLambdaMatch)
+expandLambdaMatchC = lambdaMatchExpansionTrans compileLambdaMatch
 
 placeholderTrans :: (Monad m) => (c -> DictionaryStack c) -> c -> CompilerT a m c
 placeholderTrans f e = do
