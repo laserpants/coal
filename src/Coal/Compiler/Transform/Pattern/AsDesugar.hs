@@ -64,13 +64,13 @@ collectAsPatterns =
     p ->
       pure p
 
-instance (Data a, Data t, Monoid a) => AsDesugarContext (ConstantDef Expression a t) where
+instance (Data a, Data t, Monoid a) => AsDesugarContext (ConstantDef a t) where
   desugarAsPatterns =
     \case
       ConstantDef a u w e ->
         ConstantDef a u w (desugarAsPatterns e)
 
-instance (Data a, Data t, Monoid a) => AsDesugarContext (FunctionDef Expression a t) where
+instance (Data a, Data t, Monoid a) => AsDesugarContext (FunctionDef a t) where
   desugarAsPatterns =
     \case
       FunctionDef a u w ps e ->

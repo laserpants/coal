@@ -110,13 +110,13 @@ instance (Monoid a, Data a) => CompileUnfoldsContext (Module a k ()) where
       Module p ns o ->
         Module p ns <$> compileUnfolds o
 
-instance (Monoid a, Data a) => CompileUnfoldsContext (FunctionDef Expression a ()) where
+instance (Monoid a, Data a) => CompileUnfoldsContext (FunctionDef a ()) where
   compileUnfolds =
     \case
       FunctionDef a u w ps e ->
         FunctionDef a u w ps <$> compileUnfolds e
 
-instance (Monoid a, Data a) => CompileUnfoldsContext (ConstantDef Expression a ()) where
+instance (Monoid a, Data a) => CompileUnfoldsContext (ConstantDef a ()) where
   compileUnfolds =
     \case
       ConstantDef a u w e ->

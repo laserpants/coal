@@ -114,10 +114,10 @@ instance (Data a) => Substitutable (Pattern a IndexedType) where
 instance (Data a) => Substitutable (Expression a IndexedType) where
   apply = transformBi . applyT
 
-instance (Data a) => Substitutable (FunctionDef Expression a IndexedType) where
+instance (Data a) => Substitutable (FunctionDef a IndexedType) where
   apply = transformBi . applyT
 
-instance (Data a) => Substitutable (ConstantDef Expression a IndexedType) where
+instance (Data a) => Substitutable (ConstantDef a IndexedType) where
   apply = transformBi . applyT
 
 instance (Data a, Data k) => Substitutable (Definition a k IndexedType) where

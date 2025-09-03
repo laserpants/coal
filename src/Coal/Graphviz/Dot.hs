@@ -337,7 +337,7 @@ instance (Pretty t, Show t) => Dot t (CompiledClause a t) where
           emitEdgesTo lls
           emitEdgeTo e
 
-instance (Show t, Pretty t) => Dot t (FunctionDef Expression a t) where
+instance (Show t, Pretty t) => Dot t (FunctionDef a t) where
   toDot =
     \case
       FunctionDef _ (Just (With ts u)) (With _ t) ps e ->
@@ -349,7 +349,7 @@ instance (Show t, Pretty t) => Dot t (FunctionDef Expression a t) where
           emitEdgesTo ps
           emitEdgeTo e
 
-instance (Show t, Pretty t) => Dot t (ConstantDef Expression a t) where
+instance (Show t, Pretty t) => Dot t (ConstantDef a t) where
   toDot =
     \case
       ConstantDef _ (Just (With ts u)) (With _ t) e ->

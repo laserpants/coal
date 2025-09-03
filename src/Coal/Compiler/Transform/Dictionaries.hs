@@ -231,7 +231,7 @@ instance (Monoid a, Data a) => TraitContext (Definition a Kind IndexedType) wher
       d ->
         pure d
 
-instance (Monoid a, Data a) => TraitContext (ConstantDef Expression a IndexedType) where
+instance (Monoid a, Data a) => TraitContext (ConstantDef a IndexedType) where
   expandTraits =
     \case
       ConstantDef a w1 (With _ t) e -> do

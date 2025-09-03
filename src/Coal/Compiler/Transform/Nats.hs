@@ -158,13 +158,13 @@ instance (Monoid a, Data a) => CompileNatsContext (Module a Kind IndexedType) wh
       Module p ns o ->
         Module p ns <$> compileNats o
 
-instance (Monoid a, Data a) => CompileNatsContext (FunctionDef Expression a IndexedType) where
+instance (Monoid a, Data a) => CompileNatsContext (FunctionDef a IndexedType) where
   compileNats =
     \case
       FunctionDef a u w ps e ->
         FunctionDef a u w ps <$> compileNats e
 
-instance (Monoid a, Data a) => CompileNatsContext (ConstantDef Expression a IndexedType) where
+instance (Monoid a, Data a) => CompileNatsContext (ConstantDef a IndexedType) where
   compileNats =
     \case
       ConstantDef a u w e ->

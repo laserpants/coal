@@ -110,7 +110,7 @@ unrollMatch (name, p) e =
     (EVariable mempty (Label (typeOf p) name))
     (EClause mempty p (CPlain mempty [] e :| []) :| [])
 
-instance (Monoid c, Data c, Data k, Typeable o, Data (o k)) => Sugared c o k (FunctionDef Expression c (Type o k)) where
+instance (Monoid c, Data c, Data k, Typeable o, Data (o k)) => Sugared c o k (FunctionDef c (Type o k)) where
   desugarPatterns =
     \case
       FunctionDef a u w ps e -> do
@@ -118,7 +118,7 @@ instance (Monoid c, Data c, Data k, Typeable o, Data (o k)) => Sugared c o k (Fu
         (qs, rs) <- runWriterT (traverse desugarPatterns ps)
         pure (FunctionDef a u w qs (foldr unrollMatch e1 rs))
 
-instance (Monoid c, Data c, Data k, Typeable o, Data (o k)) => Sugared c o k (ConstantDef Expression c (Type o k)) where
+instance (Monoid c, Data c, Data k, Typeable o, Data (o k)) => Sugared c o k (ConstantDef c (Type o k)) where
   desugarPatterns =
     \case
       ConstantDef a u w e ->

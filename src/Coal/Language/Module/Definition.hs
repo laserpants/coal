@@ -28,9 +28,9 @@ data Definition a k t
   | -- | Codata type definition
     DCotype a Name CotypeDef
   | -- | Function definition
-    DFunction a Name (FunctionDef Expression a t) [Definition a k t]
+    DFunction a Name (FunctionDef a t) [Definition a k t]
   | -- | Other (constant) top-level definitions
-    DConstant a Name (ConstantDef Expression a t) [Definition a k t]
+    DConstant a Name (ConstantDef a t) [Definition a k t]
   | -- | Import statement
     DImport a Path [Name]
   | -- | Trait

@@ -92,10 +92,10 @@ instance (Ord k, Data a, Data k) => TypeIndexed k (CompiledClause a (Type TypeIn
 instance (Ord k, Data k, Data a) => TypeIndexed k (Expression a (Type TypeIndex k)) where
   typeIndexesIn = Set.fromList . universeBi
 
-instance (Ord k, Data a, Data k) => TypeIndexed k (FunctionDef Expression a (Type TypeIndex k)) where
+instance (Ord k, Data a, Data k) => TypeIndexed k (FunctionDef a (Type TypeIndex k)) where
   typeIndexesIn = Set.fromList . universeBi
 
-instance (Ord k, Data a, Data k) => TypeIndexed k (ConstantDef Expression a (Type TypeIndex k)) where
+instance (Ord k, Data a, Data k) => TypeIndexed k (ConstantDef a (Type TypeIndex k)) where
   typeIndexesIn = Set.fromList . universeBi
 
 instance (Ord k, Data t, Data k) => TypeIndexed k (With t) where

@@ -69,7 +69,7 @@ instance (AliasContext t, Data e, Data t) => AliasContext (Module e a t) where
       Module p ns o ->
         Module p ns <$> expandAliases o
 
-instance (AliasContext (e a t), AliasContext t, Data a, Data t) => AliasContext (FunctionDef e a t) where
+instance (AliasContext t, Data a, Data t) => AliasContext (FunctionDef a t) where
   expandAliases =
     \case
       FunctionDef a u w ps e ->
@@ -78,7 +78,7 @@ instance (AliasContext (e a t), AliasContext t, Data a, Data t) => AliasContext 
           <*> expandAliases ps
           <*> expandAliases e
 
-instance (AliasContext (e a t), AliasContext t) => AliasContext (ConstantDef e a t) where
+instance (AliasContext t, Data a, Data t) => AliasContext (ConstantDef a t) where
   expandAliases =
     \case
       ConstantDef a u w e ->

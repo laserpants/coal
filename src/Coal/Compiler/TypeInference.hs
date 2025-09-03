@@ -85,7 +85,7 @@ compileConstraintsC expr = do
   insertAssumptionsC (apply sub ms2)
   insertConstraintsC (cs1 <> cs2)
 
-compileFunctionC :: (Monad m, Data a, Show a) => FunctionDef Expression a IndexedType -> CompilerT a m IndexedType
+compileFunctionC :: (Monad m, Data a, Show a) => FunctionDef a IndexedType -> CompilerT a m IndexedType
 compileFunctionC (FunctionDef loc _ (With _ t) ps e) = do
   insertConstraintsC [Equality (RuleTopLevelFunction loc) [t, typeOf e]]
   t1 <- supplied (TVariable . TypeIndex KType)
@@ -98,7 +98,7 @@ compileFunctionC (FunctionDef loc _ (With _ t) ps e) = do
  where
   placeholder = "###.function"
 
-compileConstantC :: (Monad m, Data a, Show a) => ConstantDef Expression a IndexedType -> CompilerT a m IndexedType
+compileConstantC :: (Monad m, Data a, Show a) => ConstantDef a IndexedType -> CompilerT a m IndexedType
 compileConstantC (ConstantDef loc _ (With _ t) e) = do
   insertConstraintsC [Equality (RuleTopLevelConstant loc) [t, typeOf e]]
   compileConstraintsC $

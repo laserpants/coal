@@ -146,13 +146,13 @@ instance (Monoid a, Data a) => CompileFoldsContext (Module a k ()) where
       Module p ns o ->
         Module p ns <$> compileFolds o
 
-instance (Monoid a, Data a) => CompileFoldsContext (FunctionDef Expression a ()) where
+instance (Monoid a, Data a) => CompileFoldsContext (FunctionDef a ()) where
   compileFolds =
     \case
       FunctionDef a u w ps e ->
         FunctionDef a u w ps <$> compileFolds e
 
-instance (Monoid a, Data a) => CompileFoldsContext (ConstantDef Expression a ()) where
+instance (Monoid a, Data a) => CompileFoldsContext (ConstantDef a ()) where
   compileFolds =
     \case
       ConstantDef a u w e ->

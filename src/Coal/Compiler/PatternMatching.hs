@@ -50,10 +50,10 @@ instance (Eq a, MatchClasses a t, Data k) => MatchExpressionContext (Module a k 
 instance (Eq a, MatchClasses a t, Data k) => MatchExpressionContext (Definition a k t) where
   compileMatchExprs = transformBiM (compileMatchExprsE :: Expression a t -> MatchMonad (Expression a t))
 
-instance (Eq a, MatchClasses a t) => MatchExpressionContext (FunctionDef Expression a t) where
+instance (Eq a, MatchClasses a t) => MatchExpressionContext (FunctionDef a t) where
   compileMatchExprs = transformBiM (compileMatchExprsE :: Expression a t -> MatchMonad (Expression a t))
 
-instance (Eq a, MatchClasses a t) => MatchExpressionContext (ConstantDef Expression a t) where
+instance (Eq a, MatchClasses a t) => MatchExpressionContext (ConstantDef a t) where
   compileMatchExprs = transformBiM (compileMatchExprsE :: Expression a t -> MatchMonad (Expression a t))
 
 instance (Eq a, MatchClasses a t) => MatchExpressionContext (Clause a t) where
