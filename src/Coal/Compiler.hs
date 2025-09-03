@@ -79,8 +79,11 @@ compileFoldsC = foldExpansionTrans compileFolds
 compileTopLevelFoldsC :: (Monad m, Data a, Monoid a) => Module a Kind () -> CompilerT a m (Module a Kind ())
 compileTopLevelFoldsC = foldExpansionTrans (overModuleDefinitionsM (traverse compileTopLevelFolds))
 
-compileTopLevelUnfoldsC :: (Monad m) => Module a Kind () -> CompilerT a m (Module a Kind ())
-compileTopLevelUnfoldsC = unfoldExpansionTrans (overModuleDefinitionsM (traverse compileTopLevelUnfolds))
+topLevelUnfoldExpansionTrans :: (Monad m) => (c -> UnfoldTopLevelUnfolds c) -> c -> CompilerT a m c
+topLevelUnfoldExpansionTrans f e = withSupplyC (\n -> runTopLevelUnfolds "unfold" n (f e))
+
+compileTopLevelUnfoldsC :: (Monad m, Monoid a, Data a) => Module a Kind () -> CompilerT a m (Module a Kind ())
+compileTopLevelUnfoldsC = topLevelUnfoldExpansionTrans (overModuleDefinitionsM (traverse compileTopLevelUnfolds))
 
 indexedC :: (Monad m, Traversable t) => t e -> CompilerT a m (t IndexedType)
 indexedC t = withSupplyC (runState (indexed t))
@@ -186,8 +189,7 @@ typeCheckingPass :: (MonadIO m, Monoid a, Data a, Eq a, Show a) => Module a Kind
 typeCheckingPass =
   -- Expand type aliases
   expandAliasesC
-    -- TODO
-    --    >=> compileTopLevelUnfoldsC
+    >=> compileTopLevelUnfoldsC
     >=> compileTopLevelFoldsC
     -- Expand unfolds (codata)
     >=> compileUnfoldsC

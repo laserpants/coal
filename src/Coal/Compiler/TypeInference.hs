@@ -21,6 +21,7 @@ import Control.Monad.Writer (execWriter)
 import Data.Data (Data)
 import Data.Either.Extra (partitionEithers)
 import Data.List.NonEmpty (NonEmpty (..))
+import Debug.Trace
 import Extra (Dictionary, Name, forM_, void)
 
 import qualified Coal.Common.Environment as Environment
@@ -169,8 +170,18 @@ compileDefinitionC =
     --              (EVariable undefined (Label t1 "#.a"))
     --              cs
     --          )
-    DUnfold _ name (UnfoldDef (With _ t) ps d (Just e)) ->
-      undefined
+    DUnfold loc _ (UnfoldDef (With _ t) ps d (Just e)) -> do
+      compileConstraintsC e
+      let t1 = typeOf e
+      (r, _, _) <- runConstraintsGenC (instantiateAnnotation loc t)
+      case r of
+        Left err ->
+          --          error (show err)
+          compilerReportConstraintsGenErrors [EIllFormedTypeAnnotation err]
+        Right t2 -> do
+          let t3 = foldType t2 (typeOf <$> ps)
+          insertConstraintsC [Equality (RuleAnnotation loc t1 t3) [t1, t3]]
+
     -- DAnnotation _ (With _ t) (DFold loc name cs (Just e)) -> do
     --  compileConstraintsC e
     --  let t1 = typeOf e

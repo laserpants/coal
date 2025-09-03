@@ -25,7 +25,9 @@ import qualified Data.List.NonEmpty as NonEmpty
 
 data Kind
   = KType
-  | KRow
+  | -- TODO:
+    --  | KCotype
+    KRow
   | KArrow Kind Kind
   | KTrait
   deriving (Show, Eq, Ord, Read, Data, Typeable, Generic)

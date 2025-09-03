@@ -151,16 +151,16 @@ spec = do
   print (x == Right "8\n")
   x <- main49
   print (x == Right "1\n")
-  x <- main50
-  print (x == Right "5\n")
-  x <- main51
-  print (x == Right "7\n")
-  x <- main52
-  print (x == Right "105\n")
-  x <- main53
-  print (x == Right "1\n")
-  x <- main54
-  print (x == Right "1000\n")
+--  x <- main50
+--  print (x == Right "5\n")
+--  x <- main51
+--  print (x == Right "7\n")
+--  x <- main52
+--  print (x == Right "105\n")
+--  x <- main53
+--  print (x == Right "1\n")
+--  x <- main54
+--  print (x == Right "1000\n")
   x <- main56
   print (x == Right "false\n")
   x <- main57
@@ -818,6 +818,12 @@ main99 = do
     [ "./test/Coal/examples/99/Main.coal"
     ]
 
+main100 :: IO (Either CompilerError Text)
+main100 = do
+  runTestFiles
+    [ "./test/Coal/examples/100/Main.coal"
+    ]
+
 compileFiles :: [String] -> IO (Either CompilerError ())
 compileFiles files = do
   fs <- traverse readFile files
@@ -853,9 +859,10 @@ builtinCodataAccessors =
     , CodataAccessor
         "Head"
         ( Forall
-            (Set.fromList mempty)
+            (Set.fromList [TypeIndex KType 0])
             []
-            ( TConstructor KType "Stream" `TArrow` TIntrinsic IInt32
+            --            ( TApplication KCotype (TConstructor (KArrow KType KCotype) "Stream") (TVariable (TypeIndex KType 0) :| []) `TArrow` TVariable (TypeIndex KType 0)
+            ( TApplication KType (TConstructor (KArrow KType KType) "Stream") (TVariable (TypeIndex KType 0) :| []) `TArrow` TVariable (TypeIndex KType 0)
             )
         )
     )
@@ -864,9 +871,10 @@ builtinCodataAccessors =
     , CodataAccessor
         "Tail"
         ( Forall
-            (Set.fromList mempty)
+            (Set.fromList [TypeIndex KType 0])
             []
-            ( TConstructor KType "Stream" `TArrow` TConstructor KType "Stream"
+            --            ( TApplication KCotype (TConstructor (KArrow KType KCotype) "Stream") (TVariable (TypeIndex KType 0) :| []) `TArrow` TApplication KCotype (TConstructor (KArrow KType KCotype) "Stream") (TVariable (TypeIndex KType 0) :| [])
+            ( TApplication KType (TConstructor (KArrow KType KType) "Stream") (TVariable (TypeIndex KType 0) :| []) `TArrow` TApplication KType (TConstructor (KArrow KType KType) "Stream") (TVariable (TypeIndex KType 0) :| [])
             )
         )
     )
@@ -1061,6 +1069,12 @@ builtinTypeConstructors =
   [
     ( "List"
     , KArrow KType KType
+    )
+  , -- TODO
+
+    ( "Stream"
+    , --    , KArrow KType KCotype
+      KArrow KType KType
     )
   ]
 

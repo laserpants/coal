@@ -160,9 +160,9 @@ parseTopLevelUnfold :: Parser (Definition Metadata o ())
 parseTopLevelUnfold = do
   start <- getSourcePos
   n <- lexeme_ "unfold" *> name
+  ps <- parens (nonEmpty (commaSep1 parsePattern))
   ann <- symbol_ ":" *> parseType
   end <- getSourcePos
-  ps <- parens (nonEmpty (commaSep1 parsePattern))
   fields <- braces $ do
     void $ optional (symbol ",")
     fieldListWithKey constructor parseExpression "="

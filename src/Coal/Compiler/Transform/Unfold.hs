@@ -10,7 +10,7 @@ module Coal.Compiler.Transform.Unfold (
   UnfoldExpansion (..),
   runUnfoldExpansion,
   evalUnfoldExpansion,
-  expandUnfoldExpr,
+  --  expandUnfoldExpr,
 ) where
 
 import Coal.Common.Label (Label (..))
@@ -47,25 +47,25 @@ runUnfoldExpansion r s e = (a, s')
  where
   (a, s', _) = runRWS (unfoldExpansionStack e) r s
 
-renameRecursiveCall :: (Monoid a, Data a) => Name -> Name -> Expression a () -> Expression a ()
-renameRecursiveCall old new = replace old (const2 $ varE new)
-
-expandUnfoldExpr :: (Monoid a, Data a, MonadState Int m, MonadReader Name m) => Name -> NonEmpty (Pattern a ()) -> Dictionary (Expression a ()) -> m (Expression a ())
-expandUnfoldExpr var ps d = do
-  name <- suppliedName
-  pure $
-    transform flattenApplication $
-      letE
-        name
-        ( lambdaE
-            ps
-            ( ECodataFields
-                mempty
-                ()
-                (Map.mapKeys ("$_" <>) (Map.map (lambdaAnyE . renameRecursiveCall var name) d))
-            )
-        )
-        (varE name)
+-- renameRecursiveCall :: (Monoid a, Data a) => Name -> Name -> Expression a () -> Expression a ()
+-- renameRecursiveCall old new = replace old (const2 $ varE new)
+--
+-- expandUnfoldExpr :: (Monoid a, Data a, MonadState Int m, MonadReader Name m) => Name -> NonEmpty (Pattern a ()) -> Dictionary (Expression a ()) -> m (Expression a ())
+-- expandUnfoldExpr var ps d = do
+--  name <- suppliedName
+--  pure $
+--    transform flattenApplication $
+--      letE
+--        name
+--        ( lambdaE
+--            ps
+--            ( ECodataFields
+--                mempty
+--                ()
+--                (Map.mapKeys ("$_" <>) (Map.map (lambdaAnyE . renameRecursiveCall var name) d))
+--            )
+--        )
+--        (varE name)
 
 expandCodataSelect :: (Monoid a, MonadState Int m) => Name -> Expression a () -> m (Expression a ())
 expandCodataSelect field e =
@@ -95,9 +95,9 @@ instance (Monoid a, Data a) => CompileUnfoldsContext (Expression a ()) where
    where
     go =
       \case
-        EUnfold a t name ps d Nothing -> do
-          e1 <- expandUnfoldExpr name ps d
-          pure (EUnfold a t name ps d (Just e1))
+        --        EUnfold a t name ps d Nothing -> do
+        --          e1 <- expandUnfoldExpr name ps d
+        --          pure (EUnfold a t name ps d (Just e1))
         ECodataSelect a ll@(Label _ name) e Nothing -> do
           e1 <- expandCodataSelect name e
           pure (ECodataSelect a ll e (Just e1))
