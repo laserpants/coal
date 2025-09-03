@@ -11,6 +11,7 @@ module Coal.Language.Module (
   module Coal.Language.Module.Function,
   module Coal.Language.Module.Constant,
   module Coal.Language.Module.Fold,
+  module Coal.Language.Module.Alias,
   module Coal.Language.Module.Unfold,
   module Coal.Language.Module.Trait,
   module Coal.Language.Module.Type,
@@ -18,6 +19,7 @@ module Coal.Language.Module (
   module Coal.Language.Module.Instance,
 ) where
 
+import Coal.Language.Module.Alias
 import Coal.Language.Module.Constant
 import Coal.Language.Module.Cotype
 import Coal.Language.Module.Definition (Definition (..), Path (..), definitionName)

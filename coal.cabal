@@ -136,6 +136,7 @@ library
       Coal.Language.HasKind
       Coal.Language.HasType
       Coal.Language.Module
+      Coal.Language.Module.Alias
       Coal.Language.Module.Constant
       Coal.Language.Module.Cotype
       Coal.Language.Module.Definition

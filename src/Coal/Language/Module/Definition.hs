@@ -7,6 +7,7 @@
 module Coal.Language.Module.Definition (Definition (..), Path (..), definitionName) where
 
 import Coal.Language.Expression (Clause (..), Expression (..))
+import Coal.Language.Module.Alias (AliasDef (..))
 import Coal.Language.Module.Constant (ConstantDef (..))
 import Coal.Language.Module.Cotype (CotypeDef (..))
 import Coal.Language.Module.Fold (FoldDef (..))
@@ -41,7 +42,7 @@ data Definition a k t
   | -- | Trait instance
     DInstance a Name (InstanceDef Definition a k t)
   | -- | Type alias
-    DTypeAlias a Name [Parameter ()] ParameterizedType
+    DTypeAlias a Name AliasDef
   | -- | Top-level fold
     DFold a Name (FoldDef a t)
   | -- | Top-level unfold
