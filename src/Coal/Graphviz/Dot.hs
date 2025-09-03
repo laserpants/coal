@@ -393,8 +393,8 @@ instance (Show t, Pretty t) => Dot t (Definition a k t) where
         emitParallelogram "DImport" Nothing
       DType _ name _ _ ->
         emitParallelogram ("DType\\n" <> name) Nothing
-      DCodata _ name _ _ ->
-        emitParallelogram ("DCodata\\n" <> name) Nothing
+      DCotype _ name _ ->
+        emitParallelogram ("DCotype\\n" <> name) Nothing
       DTrait _ name _ ps ds ->
         fromNode (emitParallelogram ("DTrait\\n" <> name) Nothing) $ do
           nid <- ask

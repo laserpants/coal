@@ -12,6 +12,7 @@ module Coal.Parser.Module (
 import Coal.Ast.Metadata (Metadata (..))
 import Coal.Language
 import Coal.Language.Module
+import Coal.Language.Module.Cotype (Cotype (..))
 import Coal.Parser
 import Coal.Parser.Expression (parseExpression, parseMatchClause)
 import Coal.Parser.Identifier
@@ -94,7 +95,7 @@ parseCodataDefinition = do
   end <- getSourcePos
   symbol_ "="
   fields <- braces (fieldListWithKey constructor parseType ":")
-  pure (DCodata (Metadata start end) n ps fields)
+  pure (DCotype (Metadata start end) n (Cotype ps fields))
 
 parseConstructor :: Name -> [Parameter ()] -> Parser (DataConstructor Parameter () (Type Parameter ()))
 parseConstructor tn qs = do

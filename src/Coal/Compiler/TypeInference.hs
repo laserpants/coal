@@ -230,7 +230,7 @@ typeDefinitionC =
       pure ()
     DType{} ->
       pure ()
-    DCodata{} ->
+    DCotype{} ->
       pure ()
     DTrait _ name _ (Parameter k q) ds ->
       forM_ ds $

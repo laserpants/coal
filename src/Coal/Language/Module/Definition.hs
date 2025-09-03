@@ -9,6 +9,7 @@ module Coal.Language.Module.Definition (Definition (..), Path (..), definitionNa
 import Coal.Language.DataConstructor (DataConstructor (..))
 import Coal.Language.Expression (Clause (..), Expression (..))
 import Coal.Language.Module.Constant (Constant (..))
+import Coal.Language.Module.Cotype (Cotype (..))
 import Coal.Language.Module.Function (Function (..))
 import Coal.Language.Pattern (Pattern (..))
 import Coal.Language.Trait (Trait (..), With (..))
@@ -25,7 +26,7 @@ data Definition a k t
   = -- | Type definition
     DType a Name [Parameter ()] [DataConstructor Parameter () ParameterizedType]
   | -- | Codata type definition
-    DCodata a Name [Parameter ()] [(Name, ParameterizedType)]
+    DCotype a Name Cotype
   | -- | Function definition
     DFunction a Name (Function Expression a t) [Definition a k t]
   | -- | Other (constant) top-level definitions
@@ -51,7 +52,7 @@ definitionName =
       name
     DConstant _ name _ _ ->
       name
-    DCodata _ name _ _ ->
+    DCotype _ name _ ->
       name
     DFold _ name _ _ _ ->
       name
