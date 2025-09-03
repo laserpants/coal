@@ -1,0 +1,15 @@
+module Main {
+
+  let foo =
+    match {
+      | (a, b, c) => c
+    }
+
+  fun main() =
+    let
+      p = 
+        (true, false, 512 : int32)
+      in
+        trace_int32(foo(p))
+
+}
