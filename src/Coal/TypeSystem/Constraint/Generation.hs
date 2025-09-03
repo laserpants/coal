@@ -357,6 +357,8 @@ emitConstraints =
       -- Expression types
       tellRight [Equality (RuleMatchClauseExpressions loc) (t : concat ts2)]
       pure (ms1 <> ms2)
+    ELambdaMatch _ _ _ (Just e) ->
+      emitConstraints e
     ECompiledMatch{} ->
       error "TODO"
     EUnaryOperator loc t op -> do

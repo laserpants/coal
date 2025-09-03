@@ -14,6 +14,7 @@ import Coal.Compiler.Transform.Definition.Fold
 import Coal.Compiler.Transform.Definition.Unfold
 import Coal.Compiler.Transform.Dictionaries
 import Coal.Compiler.Transform.Fold
+import Coal.Compiler.Transform.LambdaMatch
 import Coal.Compiler.Transform.Nats
 import Coal.Compiler.Transform.NormalizeObjects (NormalizeObjectsTransformContext (..))
 import Coal.Compiler.Transform.Pattern.AsDesugar
@@ -125,6 +126,12 @@ natExpansionTrans f e = withSupplyC (\n -> runNatExpansion "succ" n (f e))
 compileNatsC :: (Monad m, Monoid a, Data a) => Module a Kind IndexedType -> CompilerT a m (Module a Kind IndexedType)
 compileNatsC = natExpansionTrans compileNats
 
+lambdaMatchExpansionTrans :: (Monad m, Monoid a, Data a) => (c -> LambdaMatchExpansion c) -> c -> CompilerT a m c
+lambdaMatchExpansionTrans f e = withSupplyC (\n -> runLambdaMatchExpansion "lambda_match" n (f e))
+
+expandLambdaMatchC :: (Monad m, Monoid a, Data a) => Module a Kind () -> CompilerT a m (Module a Kind ())
+expandLambdaMatchC = lambdaMatchExpansionTrans (overModuleDefinitionsM compileLambdaMatch)
+
 placeholderTrans :: (Monad m) => (c -> DictionaryStack c) -> c -> CompilerT a m c
 placeholderTrans f e = do
   env1 <- gets compilerNameStore
@@ -187,6 +194,9 @@ typeCheckingPass =
     -- Expand folds
     >=> compileFoldsC
     >=> writeDotFilesC "expand_folds"
+    -- Lambda match expressions
+    >=> expandLambdaMatchC
+    >=> writeDotFilesC "lambda_match"
     -- Type inference
     >=> runTypeInferenceC
 

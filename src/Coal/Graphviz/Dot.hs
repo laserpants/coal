@@ -252,8 +252,10 @@ instance (Pretty t, Show t) => Dot t (Expression a t) where
           emitEdgeTo e2
       ETraitDictionary _ t _ ->
         emitRectangle "ETraitDictionary" (Just t)
-      ELambdaMatch{} ->
-        error "TODO"
+      ELambdaMatch _ t cs me ->
+        fromNode (emitRectangle "ELambdaMatch" (Just t)) $ do
+          emitEdgesTo cs
+          emitEdgesTo me
 
 instance (Pretty t, Show t) => Dot t (Pattern a t) where
   toDot =

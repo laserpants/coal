@@ -119,6 +119,8 @@ translateExpression =
       Kernel.tupleExpr <$> traverse translateExpression es
     EMatch{} ->
       error "Implementation error"
+    ELambdaMatch _ _ _ (Just e) ->
+      translateExpression e
     ECompiledMatch _ t e cs ->
       Kernel.match (translateType t) <$> translateExpression e <*> traverse translateClause cs
     ESelect _ ll@(Label t field) e -> do

@@ -50,6 +50,7 @@ library
       Coal.Compiler.Transform.Expression
       Coal.Compiler.Transform.Flattening
       Coal.Compiler.Transform.Fold
+      Coal.Compiler.Transform.LambdaMatch
       Coal.Compiler.Transform.Nats
       Coal.Compiler.Transform.NormalizeObjects
       Coal.Compiler.Transform.Pattern.AsDesugar

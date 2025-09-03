@@ -35,6 +35,7 @@ parseExpression = makeExprParser go operator
         <|> parseLiteralExpression
         <|> parseFoldExpression
         <|> parseUnfoldExpression
+        <|> try parseLambdaMatchExpression
         <|> parseMatchExpression
         <|> parseRecordExpression
         <|> parseIfExpression
@@ -143,6 +144,13 @@ parseMatchClause =
 -- TODO
 -- cs <- symbol_ "=>" *> nonEmpty (some parseChoice)
 --    pure (\loc -> EClause loc p (NonEmpty.singleton c))
+
+parseLambdaMatchExpression :: Parser (Expression Metadata ())
+parseLambdaMatchExpression = do
+  withMetadata $ do
+    lexeme_ "match"
+    cs <- braces (nonEmpty (some parseMatchClause))
+    pure (\loc -> ELambdaMatch loc () cs Nothing)
 
 parseMatchExpression :: Parser (Expression Metadata ())
 parseMatchExpression = do

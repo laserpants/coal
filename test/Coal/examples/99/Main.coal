@@ -2,7 +2,7 @@ module Main {
 
   let foo =
     match {
-      | (a, b, c) => c
+      | (_, _, c) => c
     }
 
   fun main() =
