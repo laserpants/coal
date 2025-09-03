@@ -1110,6 +1110,7 @@ addBuiltinDefs defs =
   , DTrait
       mempty
       "Numeric"
+      (TraitDef 
       []
       (Parameter KType "a")
       [
@@ -1133,9 +1134,11 @@ addBuiltinDefs defs =
         , TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
         )
       ]
+      )
   , DTrait
       mempty
       "Ordered"
+      (TraitDef 
       []
       (Parameter KType "a")
       [
@@ -1143,6 +1146,7 @@ addBuiltinDefs defs =
         , TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TConstructor () "Ordering"
         )
       ]
+      )
   , DType
       mempty
       "Ordering"

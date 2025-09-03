@@ -156,7 +156,7 @@ buildTraitEnvironment :: TypeConstructorEnvironment -> [Definition a k t] -> Tra
 buildTraitEnvironment env =
   makeEnv
     ( \case
-        DTrait _ name _ (Parameter k n) ds ->
+        DTrait _ name (TraitDef _ (Parameter k n) ds) ->
           [
             ( name
             , (Parameter k n, TypeIndex k 0, Environment.fromList (f <$$> ds))

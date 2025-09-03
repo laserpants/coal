@@ -10,11 +10,11 @@ import Coal.Language.Expression (Clause (..), Expression (..))
 import Coal.Language.Module.Constant (ConstantDef (..))
 import Coal.Language.Module.Cotype (CotypeDef (..))
 import Coal.Language.Module.Function (FunctionDef (..))
+import Coal.Language.Module.Trait (TraitDef (..))
 import Coal.Language.Module.Type (TypeDef (..))
 import Coal.Language.Pattern (Pattern (..))
 import Coal.Language.Trait (Trait (..), With (..))
 import Coal.Language.Type (Parameter, ParameterizedType)
-import Coal.Language.Type.Kind (Kind (..))
 import Data.Data (Data, Typeable)
 import Data.List.NonEmpty (NonEmpty)
 import Extra (Dictionary, Name)
@@ -34,7 +34,7 @@ data Definition a k t
   | -- | Import statement
     DImport a Path [Name]
   | -- | Trait
-    DTrait a Name [Trait t] (Parameter Kind) [(Name, ParameterizedType)]
+    DTrait a Name (TraitDef t)
   | -- | Trait instance
     DInstance a Name [Trait ParameterizedType] ParameterizedType [Definition a k t]
   | -- | Type alias

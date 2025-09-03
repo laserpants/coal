@@ -13,8 +13,7 @@ import Coal.Common.Supply (supplied)
 import Coal.Compiler.Stack
 import Coal.Compiler.Transform.Type.Parameterized
 import Coal.Language
-import Coal.Language.Module (ConstantDef (..), Definition (..), FunctionDef (..))
-import Coal.Language.Module.Definition (definitionName)
+import Coal.Language.Module
 import Coal.TypeSystem
 import Control.Monad.Reader (ask, asks)
 import Control.Monad.State (evalState, gets)
@@ -22,7 +21,6 @@ import Control.Monad.Writer (execWriter)
 import Data.Data (Data)
 import Data.Either.Extra (partitionEithers)
 import Data.List.NonEmpty (NonEmpty (..))
-import Debug.Trace
 import Extra (Dictionary, Name, forM_, void)
 
 import qualified Coal.Common.Environment as Environment
@@ -232,7 +230,7 @@ typeDefinitionC =
       pure ()
     DCotype{} ->
       pure ()
-    DTrait _ name _ (Parameter k q) ds ->
+    DTrait _ name (TraitDef _ (Parameter k q) ds) ->
       forM_ ds $
         \(n, s) -> do
           env <- asks compilerTypeConstructorEnvironment

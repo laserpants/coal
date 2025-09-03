@@ -12,7 +12,6 @@ module Coal.Parser.Module (
 import Coal.Ast.Metadata (Metadata (..))
 import Coal.Language
 import Coal.Language.Module
-import Coal.Language.Module.Cotype (CotypeDef (..))
 import Coal.Parser
 import Coal.Parser.Expression (parseExpression, parseMatchClause)
 import Coal.Parser.Identifier
@@ -50,7 +49,7 @@ parseTraitDefinition = do
   end <- getSourcePos
   ds <- braces (some ((,) <$> name <*> (symbol_ ":" *> parseType)))
   -- TODO
-  pure (DTrait (Metadata start end) n [] t ds)
+  pure (DTrait (Metadata start end) n (TraitDef [] t ds))
 
 parseParameter :: Parser (Parameter Kind)
 parseParameter = do

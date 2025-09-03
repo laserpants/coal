@@ -41,7 +41,7 @@ translateDefinition =
       pure [Kernel.OConstant (moduleName <> "." <> name) c]
     DUnfold{} ->
       error "TODO"
-    DTrait _ name _ _ ins ->
+    DTrait _ name (TraitDef _ _ ins) ->
       forM ins $
         \(n, t) ->
           traitAccessor name n (translateType t)

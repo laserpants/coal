@@ -395,7 +395,7 @@ instance (Show t, Pretty t) => Dot t (Definition a k t) where
         emitParallelogram ("DType\\n" <> name) Nothing
       DCotype _ name _ ->
         emitParallelogram ("DCotype\\n" <> name) Nothing
-      DTrait _ name _ ps ds ->
+      DTrait _ name (TraitDef _ ps ds) ->
         fromNode (emitParallelogram ("DTrait\\n" <> name) Nothing) $ do
           nid <- ask
           lift $ do
