@@ -67,18 +67,18 @@ collectAsPatterns =
 instance (Data a, Data t, Monoid a) => AsDesugarContext (Constant Expression a t) where
   desugarAsPatterns =
     \case
-      Constant a u e ->
-        Constant a u (desugarAsPatterns e)
+      Constant a u w e ->
+        Constant a u w (desugarAsPatterns e)
 
 instance (Data a, Data t, Monoid a) => AsDesugarContext (Function Expression a t) where
   desugarAsPatterns =
     \case
-      Function a u ps e ->
+      Function a u w ps e ->
         case ps1 of
           [] ->
-            Function a u ps (desugarAsPatterns e)
+            Function a u w ps (desugarAsPatterns e)
           _ ->
-            Function a u qs (foldr go (desugarAsPatterns e) ps1)
+            Function a u w qs (foldr go (desugarAsPatterns e) ps1)
        where
         (qs, ps1) =
           runWriter (traverse (transformM collectAsPatterns) ps)
@@ -92,10 +92,10 @@ instance (Data a, Data t, Monoid a) => AsDesugarContext (Function Expression a t
 instance (Data a, Data t, Monoid a) => AsDesugarContext (Definition a k t) where
   desugarAsPatterns =
     \case
-      DFunction loc name with f fs ->
-        DFunction loc name with (desugarAsPatterns f) (desugarAsPatterns <$> fs)
-      DConstant loc name with g fs ->
-        DConstant loc name with (desugarAsPatterns g) (desugarAsPatterns <$> fs)
+      DFunction loc name f fs ->
+        DFunction loc name (desugarAsPatterns f) (desugarAsPatterns <$> fs)
+      DConstant loc name g fs ->
+        DConstant loc name (desugarAsPatterns g) (desugarAsPatterns <$> fs)
       DFold loc n with cs e ->
         DFold loc n with cs (desugarAsPatterns <$> e)
       DUnfold{} ->

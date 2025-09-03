@@ -161,22 +161,22 @@ instance (Monoid a, Data a) => CompileNatsContext (Module a Kind IndexedType) wh
 instance (Monoid a, Data a) => CompileNatsContext (Function Expression a IndexedType) where
   compileNats =
     \case
-      Function a u ps e ->
-        Function a u ps <$> compileNats e
+      Function a u w ps e ->
+        Function a u w ps <$> compileNats e
 
 instance (Monoid a, Data a) => CompileNatsContext (Constant Expression a IndexedType) where
   compileNats =
     \case
-      Constant a u e ->
-        Constant a u <$> compileNats e
+      Constant a u w e ->
+        Constant a u w <$> compileNats e
 
 instance (Monoid a, Data a) => CompileNatsContext (Definition a Kind IndexedType) where
   compileNats =
     \case
-      DFunction loc name with f fs ->
-        DFunction loc name with <$> compileNats f <*> traverse compileNats fs
-      DConstant loc name with g fs ->
-        DConstant loc name with <$> compileNats g <*> traverse compileNats fs
+      DFunction loc name f fs ->
+        DFunction loc name <$> compileNats f <*> traverse compileNats fs
+      DConstant loc name g fs ->
+        DConstant loc name <$> compileNats g <*> traverse compileNats fs
       -- TODO
       o ->
         pure o

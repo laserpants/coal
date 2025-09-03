@@ -113,22 +113,22 @@ instance (Monoid a, Data a) => CompileUnfoldsContext (Module a k ()) where
 instance (Monoid a, Data a) => CompileUnfoldsContext (Function Expression a ()) where
   compileUnfolds =
     \case
-      Function a u ps e ->
-        Function a u ps <$> compileUnfolds e
+      Function a u w ps e ->
+        Function a u w ps <$> compileUnfolds e
 
 instance (Monoid a, Data a) => CompileUnfoldsContext (Constant Expression a ()) where
   compileUnfolds =
     \case
-      Constant a u e ->
-        Constant a u <$> compileUnfolds e
+      Constant a u w e ->
+        Constant a u w <$> compileUnfolds e
 
 instance (Monoid a, Data a) => CompileUnfoldsContext (Definition a k ()) where
   compileUnfolds =
     \case
-      DFunction loc name with f fs ->
-        DFunction loc name with <$> compileUnfolds f <*> traverse compileUnfolds fs
-      DConstant loc name with g fs ->
-        DConstant loc name with <$> compileUnfolds g <*> traverse compileUnfolds fs
+      DFunction loc name f fs ->
+        DFunction loc name <$> compileUnfolds f <*> traverse compileUnfolds fs
+      DConstant loc name g fs ->
+        DConstant loc name <$> compileUnfolds g <*> traverse compileUnfolds fs
       -- TODO
       o ->
         pure o

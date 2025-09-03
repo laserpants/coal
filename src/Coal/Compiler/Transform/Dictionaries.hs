@@ -226,23 +226,24 @@ instance (Monoid a, Data a) => TraitContext (Module a Kind IndexedType) where
 instance (Monoid a, Data a) => TraitContext (Definition a Kind IndexedType) where
   expandTraits =
     \case
-      DConstant loc name with c fs ->
-        DConstant loc name with <$> expandTraits c <*> traverse expandTraits fs
+      DConstant loc name c fs ->
+        DConstant loc name <$> expandTraits c <*> traverse expandTraits fs
       d ->
         pure d
 
 instance (Monoid a, Data a) => TraitContext (Constant Expression a IndexedType) where
   expandTraits =
     \case
-      Constant a (With _ t) e -> do
+      Constant a w1 (With _ t) e -> do
         (expr, traits) <- listen (expandTraits e)
         pure $
           case nub traits of
             [] ->
-              Constant a (With [] t) expr
+              Constant a w1 (With [] t) expr
             tr : trs ->
               Constant
                 a
+                w1
                 (With (tr : trs) t)
                 (ELambda mempty (toPattern <$> (tr :| trs)) expr)
        where

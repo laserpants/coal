@@ -149,22 +149,22 @@ instance (Monoid a, Data a) => CompileFoldsContext (Module a k ()) where
 instance (Monoid a, Data a) => CompileFoldsContext (Function Expression a ()) where
   compileFolds =
     \case
-      Function a u ps e ->
-        Function a u ps <$> compileFolds e
+      Function a u w ps e ->
+        Function a u w ps <$> compileFolds e
 
 instance (Monoid a, Data a) => CompileFoldsContext (Constant Expression a ()) where
   compileFolds =
     \case
-      Constant a u e ->
-        Constant a u <$> compileFolds e
+      Constant a u w e ->
+        Constant a u w <$> compileFolds e
 
 instance (Monoid a, Data a) => CompileFoldsContext (Definition a k ()) where
   compileFolds =
     \case
-      DFunction loc name with f fs -> do
-        DFunction loc name with <$> compileFolds f <*> traverse compileFolds fs
-      DConstant loc name with g fs -> do
-        DConstant loc name with <$> compileFolds g <*> traverse compileFolds fs
+      DFunction loc name f fs -> do
+        DFunction loc name <$> compileFolds f <*> traverse compileFolds fs
+      DConstant loc name g fs -> do
+        DConstant loc name <$> compileFolds g <*> traverse compileFolds fs
       DInstance loc name ps t ds ->
         DInstance loc name ps t <$> compileFolds ds
       o ->

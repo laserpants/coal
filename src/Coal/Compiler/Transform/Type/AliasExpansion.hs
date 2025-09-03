@@ -72,8 +72,8 @@ instance (AliasContext t, Data e, Data t) => AliasContext (Module e a t) where
 instance (AliasContext (e a t), AliasContext t, Data a, Data t) => AliasContext (Function e a t) where
   expandAliases =
     \case
-      Function a w ps e ->
-        Function a
+      Function a u w ps e ->
+        Function a u
           <$> expandAliases w
           <*> expandAliases ps
           <*> expandAliases e
@@ -81,18 +81,18 @@ instance (AliasContext (e a t), AliasContext t, Data a, Data t) => AliasContext 
 instance (AliasContext (e a t), AliasContext t) => AliasContext (Constant e a t) where
   expandAliases =
     \case
-      Constant a w e ->
-        Constant a
+      Constant a u w e ->
+        Constant a u
           <$> expandAliases w
           <*> expandAliases e
 
 instance (AliasContext t, Data a, Data t) => AliasContext (Definition a k t) where
   expandAliases =
     \case
-      DFunction loc name with f fs ->
-        DFunction loc name with <$> expandAliases f <*> traverse expandAliases fs
-      DConstant loc name with c fs ->
-        DConstant loc name with <$> expandAliases c <*> traverse expandAliases fs
+      DFunction loc name f fs ->
+        DFunction loc name <$> expandAliases f <*> traverse expandAliases fs
+      DConstant loc name c fs ->
+        DConstant loc name <$> expandAliases c <*> traverse expandAliases fs
       DInstance loc name ts t ds ->
         DInstance loc name ts t <$> traverse expandAliases ds
       o ->

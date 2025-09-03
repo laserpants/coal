@@ -340,7 +340,11 @@ instance (Pretty t, Show t) => Dot t (CompiledClause a t) where
 instance (Show t, Pretty t) => Dot t (Function Expression a t) where
   toDot =
     \case
-      Function _ (With _ t) ps e ->
+      Function _ (Just (With ts u)) (With _ t) ps e ->
+        fromNode (emitParallelogram ("Function\\n" <> prettyType u) (Just t)) $ do
+          emitEdgesTo ps
+          emitEdgeTo e
+      Function _ _ (With _ t) ps e ->
         fromNode (emitParallelogram "Function" (Just t)) $ do
           emitEdgesTo ps
           emitEdgeTo e
@@ -348,28 +352,31 @@ instance (Show t, Pretty t) => Dot t (Function Expression a t) where
 instance (Show t, Pretty t) => Dot t (Constant Expression a t) where
   toDot =
     \case
-      Constant _ (With _ t) e ->
+      Constant _ (Just (With ts u)) (With _ t) e ->
+        fromNode (emitParallelogram ("Constant\\n" <> prettyType u) (Just t)) $ do
+          emitEdgeTo e
+      Constant _ _ (With _ t) e ->
         fromNode (emitParallelogram "Constant" (Just t)) $ do
           emitEdgeTo e
 
 instance (Show t, Pretty t) => Dot t (Definition a k t) where
   toDot =
     \case
-      DFunction _ name (Just (With ts t)) f ws ->
-        -- TODO
-        fromNode (emitParallelogram ("DFunction\\n" <> name <> "\\n" <> prettyType t) Nothing) $ do
-          emitEdgeTo f
-          emitEdgesTo ws
-      DFunction _ name _ f ws ->
+      --      DFunction _ name (Just (With ts t)) f ws ->
+      --        -- TODO
+      --        fromNode (emitParallelogram ("DFunction\\n" <> name <> "\\n" <> prettyType t) Nothing) $ do
+      --          emitEdgeTo f
+      --          emitEdgesTo ws
+      DFunction _ name f ws ->
         fromNode (emitParallelogram ("DFunction\\n" <> name) Nothing) $ do
           emitEdgeTo f
           emitEdgesTo ws
-      DConstant _ name (Just (With ts t)) c ws ->
-        -- TODO
-        fromNode (emitParallelogram ("DConstant\\n" <> name <> "\\n" <> prettyType t) Nothing) $ do
-          emitEdgeTo c
-          emitEdgesTo ws
-      DConstant _ name _ c ws ->
+      --      DConstant _ name (Just (With ts t)) c ws ->
+      --        -- TODO
+      --        fromNode (emitParallelogram ("DConstant\\n" <> name <> "\\n" <> prettyType t) Nothing) $ do
+      --          emitEdgeTo c
+      --          emitEdgesTo ws
+      DConstant _ name c ws ->
         fromNode (emitParallelogram ("DConstant\\n" <> name) Nothing) $ do
           emitEdgeTo c
           emitEdgesTo ws

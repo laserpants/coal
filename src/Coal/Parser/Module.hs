@@ -131,7 +131,7 @@ parseFunctionDefinition = do
   end <- getSourcePos
   expr <- symbol_ "=" *> parseExpression
   ws <- option [] parseWhereClauses
-  pure (DFunction (Metadata start end) fn (With [] <$> ann) (Function (Metadata start end) (With [] ()) args expr) ws)
+  pure (DFunction (Metadata start end) fn (Function (Metadata start end) (With [] <$> ann) (With [] ()) args expr) ws)
 
 parseWhereClauses :: Parser [Definition Metadata o ()]
 parseWhereClauses = lexeme_ "where" *> braces (some parseFunctionDefinition)
@@ -145,7 +145,7 @@ parseConstantDefinition = do
   end <- getSourcePos
   expr <- symbol_ "=" *> parseExpression
   ws <- option [] parseWhereClauses
-  pure (DConstant (Metadata start end) c (With [] <$> ann) (Constant (Metadata start end) (With [] ()) expr) ws)
+  pure (DConstant (Metadata start end) c (Constant (Metadata start end) (With [] <$> ann) (With [] ()) expr) ws)
 
 parseTopLevelFold :: Parser (Definition Metadata o ())
 parseTopLevelFold = do
