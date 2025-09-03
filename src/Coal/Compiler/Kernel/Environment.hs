@@ -58,9 +58,13 @@ isFinal :: Name -> Set Name -> Bool
 isFinal name localNames
   | name == "_" = True
   | Text.head name == '$' = True
-  | "Core$" `isPrefixOf` name = True
+  | isCore name = True
   | name `Set.member` localNames = True
   | otherwise = False
+
+{-# INLINE isCore #-}
+isCore :: Name -> Bool
+isCore = ("Core$" `isPrefixOf`)
 
 withLocalName :: (MonadReader KernelEnvironment m) => Name -> m a -> m a
 withLocalName = local . overKernelEnvironmentLocalNames . Set.insert
