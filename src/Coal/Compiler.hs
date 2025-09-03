@@ -179,6 +179,7 @@ typeCheckingPass :: (MonadIO m, Monoid a, Data a, Eq a, Show a) => Module a Kind
 typeCheckingPass =
   -- Expand type aliases
   expandAliasesC
+    -- TODO
     --    >=> compileTopLevelUnfoldsC
     >=> compileTopLevelFoldsC
     -- Expand unfolds (codata)
