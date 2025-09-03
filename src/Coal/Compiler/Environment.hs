@@ -192,7 +192,7 @@ buildInstanceEnvironment env1 env2 ds = execState (traverse_ go ds) mempty
  where
   go =
     \case
-      DInstance loc name ts t _ ->
+      DInstance loc name (InstanceDef ts t _) ->
         case Environment.lookup name env2 of
           Just (p1, TypeIndex{..}, env3) -> do
             let (t1t1, tsts) = evalState bork (freshId fs)

@@ -10,6 +10,7 @@ import Coal.Language.Module (Module (..))
 import Coal.Language.Module.Constant (ConstantDef (..))
 import Coal.Language.Module.Definition (Definition (..))
 import Coal.Language.Module.Function (FunctionDef (..))
+import Coal.Language.Module.Instance (InstanceDef (..))
 import Coal.Language.Trait (With (..))
 import Coal.Language.Type (Type (..))
 import Data.Data (Data, Typeable)
@@ -48,16 +49,16 @@ instance (Monoid a, Data a, Data k, Data (o k), Typeable o) => NormalizeObjectsT
     \case
       DFunction loc name (FunctionDef a w1 (With ts t) ps e) _ ->
         DConstant loc name (ConstantDef a w1 (With ts (foldTypeOf t ps)) (flattenLambda (ELambda mempty ps e))) []
-      DInstance loc name ts t ds ->
-        DInstance loc name ts t (normalizeObject ds)
+      DInstance loc name (InstanceDef ts t ds) ->
+        DInstance loc name (InstanceDef ts t (normalizeObject ds))
       d ->
         d
   denormalizeObject =
     \case
       DConstant _ name c _ ->
         denormalizeConstant name c
-      DInstance loc name ts t ds ->
-        DInstance loc name ts t (denormalizeObject ds)
+      DInstance loc name (InstanceDef ts t ds) ->
+        DInstance loc name (InstanceDef ts t (denormalizeObject ds))
       d ->
         d
 

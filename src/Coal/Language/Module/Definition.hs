@@ -10,10 +10,11 @@ import Coal.Language.Expression (Clause (..), Expression (..))
 import Coal.Language.Module.Constant (ConstantDef (..))
 import Coal.Language.Module.Cotype (CotypeDef (..))
 import Coal.Language.Module.Function (FunctionDef (..))
+import Coal.Language.Module.Instance (InstanceDef (..))
 import Coal.Language.Module.Trait (TraitDef (..))
 import Coal.Language.Module.Type (TypeDef (..))
 import Coal.Language.Pattern (Pattern (..))
-import Coal.Language.Trait (Trait (..), With (..))
+import Coal.Language.Trait (With (..))
 import Coal.Language.Type (Parameter, ParameterizedType)
 import Data.Data (Data, Typeable)
 import Data.List.NonEmpty (NonEmpty)
@@ -36,7 +37,7 @@ data Definition a k t
   | -- | Trait
     DTrait a Name (TraitDef t)
   | -- | Trait instance
-    DInstance a Name [Trait ParameterizedType] ParameterizedType [Definition a k t]
+    DInstance a Name (InstanceDef Definition a k t)
   | -- | Type alias
     DTypeAlias a Name [Parameter ()] ParameterizedType
   | -- | Top-level fold

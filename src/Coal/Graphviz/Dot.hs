@@ -408,7 +408,7 @@ instance (Show t, Pretty t) => Dot t (Definition a k t) where
               \(name, t) -> do
                 id1 <- emitRectangle (name <> "\\n" <> prettyType t) Nothing
                 emitEdge nid id1
-      DInstance _ name ts t ds ->
+      DInstance _ name (InstanceDef ts t ds) ->
         fromNode (emitParallelogram ("DInstance\\n" <> name <> "\\n" <> prettyType t) Nothing) $ do
           nid <- ask
           lift $ do

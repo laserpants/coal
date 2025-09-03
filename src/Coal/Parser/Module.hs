@@ -66,7 +66,7 @@ parseTraitInstance = do
   end <- getSourcePos
   ts <- option [] (lexeme_ "with" *> commaSep1 parseTrait)
   ds <- braces (some parseDefinition)
-  pure (DInstance (Metadata start end) n ts t ds)
+  pure (DInstance (Metadata start end) n (InstanceDef ts t ds))
 
 parseTrait :: Parser (Trait (Type Parameter ()))
 parseTrait = do

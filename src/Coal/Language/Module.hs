@@ -13,12 +13,14 @@ module Coal.Language.Module (
   module Coal.Language.Module.Trait,
   module Coal.Language.Module.Type,
   module Coal.Language.Module.Cotype,
+  module Coal.Language.Module.Instance,
 ) where
 
 import Coal.Language.Module.Constant
 import Coal.Language.Module.Cotype
 import Coal.Language.Module.Definition (Definition (..), Path (..), definitionName)
 import Coal.Language.Module.Function
+import Coal.Language.Module.Instance
 import Coal.Language.Module.Trait
 import Coal.Language.Module.Type
 import Data.Data (Data, Typeable)

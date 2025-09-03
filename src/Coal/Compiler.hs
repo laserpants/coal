@@ -29,6 +29,7 @@ import Coal.Language
 import Coal.Language.Module (Module (..), overModuleDefinitionsM)
 import Coal.Language.Module.Constant
 import Coal.Language.Module.Definition
+import Coal.Language.Module.Instance
 import Coal.TypeSystem.Substitution (normalizeTypeIndexes)
 import Control.Monad ((>=>))
 import Control.Monad.Reader (MonadIO, Reader, asks, liftIO, runReader)
@@ -149,7 +150,7 @@ placeholderInsertionC = overModuleDefinitionsM (traverse go)
       --        TODO
       --      DAnnotation loc t d ->
       --        DAnnotation loc t <$> go d
-      DInstance loc name ts1 t1 ds -> do
+      DInstance loc name (InstanceDef ts1 t1 ds) -> do
         es <- forM ds $
           \case
             c@(DConstant _ dname _ _) -> do
@@ -164,7 +165,7 @@ placeholderInsertionC = overModuleDefinitionsM (traverse go)
               pure c1
             _ ->
               error "TODO"
-        pure (DInstance loc name ts1 t1 es)
+        pure (DInstance loc name (InstanceDef ts1 t1 es))
       d ->
         pure d
 

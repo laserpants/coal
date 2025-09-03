@@ -10,7 +10,7 @@ module Coal.Compiler.Transform.Type.AliasExpansion (
 
 import Coal.Common.Environment (Environment)
 import Coal.Language
-import Coal.Language.Module (ConstantDef (..), Definition (..), FunctionDef (..), Module (..))
+import Coal.Language.Module (ConstantDef (..), Definition (..), FunctionDef (..), InstanceDef (..), Module (..))
 import Control.Monad.Reader (MonadReader, ask)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformM)
@@ -93,8 +93,8 @@ instance (AliasContext t, Data a, Data t) => AliasContext (Definition a k t) whe
         DFunction loc name <$> expandAliases f <*> traverse expandAliases fs
       DConstant loc name c fs ->
         DConstant loc name <$> expandAliases c <*> traverse expandAliases fs
-      DInstance loc name ts t ds ->
-        DInstance loc name ts t <$> traverse expandAliases ds
+      DInstance loc name (InstanceDef ts t ds) ->
+        DInstance loc name . InstanceDef ts t <$> traverse expandAliases ds
       o ->
         pure o
 

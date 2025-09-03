@@ -45,7 +45,7 @@ translateDefinition =
       forM ins $
         \(n, t) ->
           traitAccessor name n (translateType t)
-    DInstance _ name _ t ds ->
+    DInstance _ name (InstanceDef _ t ds) ->
       concat <$$> forM ds $
         \case
           DFunction loc n f _ -> do

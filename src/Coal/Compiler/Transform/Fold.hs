@@ -19,7 +19,7 @@ import Coal.Compiler.Transform.Expression
 import Coal.Compiler.Transform.Flattening (flattenApplication)
 import Coal.Compiler.Transform.Tree (replace)
 import Coal.Language (Choice (..), Clause (..), Expression (..), Pattern (..))
-import Coal.Language.Module (ConstantDef (..), Definition (..), FunctionDef (..), Module (..))
+import Coal.Language.Module (ConstantDef (..), Definition (..), FunctionDef (..), InstanceDef (..), Module (..))
 import Control.Monad.RWS (RWS, runRWS)
 import Control.Monad.Reader (MonadReader)
 import Control.Monad.State (MonadState)
@@ -165,7 +165,7 @@ instance (Monoid a, Data a) => CompileFoldsContext (Definition a k ()) where
         DFunction loc name <$> compileFolds f <*> traverse compileFolds fs
       DConstant loc name g fs -> do
         DConstant loc name <$> compileFolds g <*> traverse compileFolds fs
-      DInstance loc name ps t ds ->
-        DInstance loc name ps t <$> compileFolds ds
+      DInstance loc name (InstanceDef ps t ds) ->
+        DInstance loc name . InstanceDef ps t <$> compileFolds ds
       o ->
         pure o

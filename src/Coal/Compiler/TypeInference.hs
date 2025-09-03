@@ -236,7 +236,7 @@ typeDefinitionC =
           env <- asks compilerTypeConstructorEnvironment
           let s1 = evalState (instantiateVars [(q, TypeIndex k 0)] env s) (1 :: Int)
           insertNameC n (Forall (typeIndexesIn s1) [Trait name (TVariable (TypeIndex k 0))] s1)
-    DInstance _ trait _ t1 ds -> do
+    DInstance _ trait (InstanceDef _ t1 ds) -> do
       env <- asks compilerTraitEnvironment
       case Environment.lookup trait env of
         Nothing ->
