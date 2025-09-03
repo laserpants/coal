@@ -6,7 +6,6 @@
 
 module Coal.Language.Module.Definition (Definition (..), Path (..), definitionName) where
 
-import Coal.Language.Expression (Clause (..), Expression (..))
 import Coal.Language.Module.Alias (AliasDef (..))
 import Coal.Language.Module.Constant (ConstantDef (..))
 import Coal.Language.Module.Cotype (CotypeDef (..))
@@ -16,12 +15,8 @@ import Coal.Language.Module.Instance (InstanceDef (..))
 import Coal.Language.Module.Trait (TraitDef (..))
 import Coal.Language.Module.Type (TypeDef (..))
 import Coal.Language.Module.Unfold (UnfoldDef (..))
-import Coal.Language.Pattern (Pattern (..))
-import Coal.Language.Trait (With (..))
-import Coal.Language.Type (Parameter, ParameterizedType)
 import Data.Data (Data, Typeable)
-import Data.List.NonEmpty (NonEmpty)
-import Extra (Dictionary, Name)
+import Extra (Name)
 
 newtype Path = Path {pathComponents :: [Name]}
   deriving (Show, Eq, Ord, Read, Data, Typeable)
