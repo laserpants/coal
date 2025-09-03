@@ -138,7 +138,7 @@ placeholderInsertionC = overModuleDefinitionsM (traverse go)
       d@(DConstant _ name _ _) -> do
         d1 <- placeholderTrans expandTraits d
         case d1 of
-          DConstant _ _ (Constant _ _ (With ts t) _) _ ->
+          DConstant _ _ (ConstantDef _ _ (With ts t) _) _ ->
             insertNameC name (Forall (typeIndexesIn t) ts t)
           _ ->
             error "Implementation error"
@@ -155,7 +155,7 @@ placeholderInsertionC = overModuleDefinitionsM (traverse go)
             c@(DConstant _ dname _ _) -> do
               c1 <- placeholderTrans expandTraits c
               case c1 of
-                DConstant _ _ (Constant _ _ (With ts t) _) _ -> do
+                DConstant _ _ (ConstantDef _ _ (With ts t) _) _ -> do
                   let trait = Trait name t1
                       name1 = dname <> "__$instance_" <> serialize trait
                   insertNameC name1 (Forall (typeIndexesIn t) ts t)

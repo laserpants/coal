@@ -1,11 +1,11 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Language.Module.Cotype (CotypeDef (..)) where
+module Coal.Language.Module.Type (TypeDef (..)) where
 
+import Coal.Language.DataConstructor (DataConstructor (..))
 import Coal.Language.Type (Parameter, ParameterizedType)
 import Data.Data (Data, Typeable)
-import Extra (Name)
 
-data CotypeDef = CotypeDef [Parameter ()] [(Name, ParameterizedType)]
+data TypeDef = TypeDef [Parameter ()] [DataConstructor Parameter () ParameterizedType]
   deriving (Show, Eq, Ord, Read, Data, Typeable)

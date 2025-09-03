@@ -13,7 +13,7 @@ import Coal.Compiler.Transform.Expression
 import Coal.Compiler.Transform.Flattening (flattenApplication)
 import Coal.Compiler.Transform.Tree (replace)
 import Coal.Language (Choice (..), Clause (..), Expression (..), Pattern (..))
-import Coal.Language.Module (Constant (..), Definition (..), Function (..), Module (..))
+import Coal.Language.Module (ConstantDef (..), Definition (..), FunctionDef (..), Module (..))
 import Control.Monad.RWS (RWS, runRWS)
 import Control.Monad.Reader (MonadReader)
 import Control.Monad.State (MonadState)

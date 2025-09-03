@@ -231,17 +231,17 @@ instance (Monoid a, Data a) => TraitContext (Definition a Kind IndexedType) wher
       d ->
         pure d
 
-instance (Monoid a, Data a) => TraitContext (Constant Expression a IndexedType) where
+instance (Monoid a, Data a) => TraitContext (ConstantDef Expression a IndexedType) where
   expandTraits =
     \case
-      Constant a w1 (With _ t) e -> do
+      ConstantDef a w1 (With _ t) e -> do
         (expr, traits) <- listen (expandTraits e)
         pure $
           case nub traits of
             [] ->
-              Constant a w1 (With [] t) expr
+              ConstantDef a w1 (With [] t) expr
             tr : trs ->
-              Constant
+              ConstantDef
                 a
                 w1
                 (With (tr : trs) t)

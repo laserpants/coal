@@ -12,7 +12,7 @@ module Coal.Parser.Module (
 import Coal.Ast.Metadata (Metadata (..))
 import Coal.Language
 import Coal.Language.Module
-import Coal.Language.Module.Cotype (Cotype (..))
+import Coal.Language.Module.Cotype (CotypeDef (..))
 import Coal.Parser
 import Coal.Parser.Expression (parseExpression, parseMatchClause)
 import Coal.Parser.Identifier
@@ -84,7 +84,7 @@ parseTypeDefinition = do
   ps <- option [] (angleBrackets (commaSep1 (Parameter () <$> name)))
   end <- getSourcePos
   cs <- symbol_ "=" *> parseConstructor n ps `sepBy1` symbol_ "|"
-  pure (DType (Metadata start end) n ps cs)
+  pure (DType (Metadata start end) n (TypeDef ps cs))
 
 parseCodataDefinition :: Parser (Definition Metadata o ())
 parseCodataDefinition = do
@@ -95,7 +95,7 @@ parseCodataDefinition = do
   end <- getSourcePos
   symbol_ "="
   fields <- braces (fieldListWithKey constructor parseType ":")
-  pure (DCotype (Metadata start end) n (Cotype ps fields))
+  pure (DCotype (Metadata start end) n (CotypeDef ps fields))
 
 parseConstructor :: Name -> [Parameter ()] -> Parser (DataConstructor Parameter () (Type Parameter ()))
 parseConstructor tn qs = do
@@ -132,7 +132,7 @@ parseFunctionDefinition = do
   end <- getSourcePos
   expr <- symbol_ "=" *> parseExpression
   ws <- option [] parseWhereClauses
-  pure (DFunction (Metadata start end) fn (Function (Metadata start end) (With [] <$> ann) (With [] ()) args expr) ws)
+  pure (DFunction (Metadata start end) fn (FunctionDef (Metadata start end) (With [] <$> ann) (With [] ()) args expr) ws)
 
 parseWhereClauses :: Parser [Definition Metadata o ()]
 parseWhereClauses = lexeme_ "where" *> braces (some parseFunctionDefinition)
@@ -146,7 +146,7 @@ parseConstantDefinition = do
   end <- getSourcePos
   expr <- symbol_ "=" *> parseExpression
   ws <- option [] parseWhereClauses
-  pure (DConstant (Metadata start end) c (Constant (Metadata start end) (With [] <$> ann) (With [] ()) expr) ws)
+  pure (DConstant (Metadata start end) c (ConstantDef (Metadata start end) (With [] <$> ann) (With [] ()) expr) ws)
 
 parseTopLevelFold :: Parser (Definition Metadata o ())
 parseTopLevelFold = do

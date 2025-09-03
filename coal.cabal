@@ -137,8 +137,10 @@ library
       Coal.Language.HasType
       Coal.Language.Module
       Coal.Language.Module.Constant
+      Coal.Language.Module.Cotype
       Coal.Language.Module.Definition
       Coal.Language.Module.Function
+      Coal.Language.Module.Type
       Coal.Language.Pattern
       Coal.Language.Primitive
       Coal.Language.Serializable

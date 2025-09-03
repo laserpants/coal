@@ -19,7 +19,7 @@ import Coal.Common.Environment (Environment (..))
 import Coal.Compiler.Transform.Type.AliasExpansion
 import Coal.Compiler.Transform.Type.Parameterized
 import Coal.Language
-import Coal.Language.Module.Definition
+import Coal.Language.Module
 import Coal.TypeSystem.Substitution (mapsTo, substituteInScheme)
 import Control.Monad.Reader
 import Control.Monad.State (evalState, execState, modify)
@@ -126,7 +126,7 @@ buildDataConstructorEnvironment :: TypeConstructorEnvironment -> [Definition a k
 buildDataConstructorEnvironment env =
   makeEnv
     ( \case
-        DType _ _ _ cs ->
+        DType _ _ (TypeDef _ cs) ->
           translateConstructor <$> cs
         _ ->
           []
@@ -143,7 +143,7 @@ buildTypeConstructorEnvironment :: [Definition a k t] -> TypeConstructorEnvironm
 buildTypeConstructorEnvironment =
   makeEnv
     ( \case
-        DType _ name ps _ ->
+        DType _ name (TypeDef ps _) ->
           [
             ( name
             , foldr KArrow KType (replicate (length ps) KType)

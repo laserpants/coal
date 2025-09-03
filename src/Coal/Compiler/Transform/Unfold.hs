@@ -19,7 +19,7 @@ import Coal.Compiler.Transform.Expression
 import Coal.Compiler.Transform.Flattening (flattenApplication)
 import Coal.Compiler.Transform.Tree (replace)
 import Coal.Language (Expression (..), Pattern (..), Primitive (..))
-import Coal.Language.Module (Constant (..), Definition (..), Function (..), Module (..))
+import Coal.Language.Module (ConstantDef (..), Definition (..), FunctionDef (..), Module (..))
 import Control.Monad.RWS (RWS, runRWS)
 import Control.Monad.Reader (MonadReader)
 import Control.Monad.State (MonadState)
@@ -110,17 +110,17 @@ instance (Monoid a, Data a) => CompileUnfoldsContext (Module a k ()) where
       Module p ns o ->
         Module p ns <$> compileUnfolds o
 
-instance (Monoid a, Data a) => CompileUnfoldsContext (Function Expression a ()) where
+instance (Monoid a, Data a) => CompileUnfoldsContext (FunctionDef Expression a ()) where
   compileUnfolds =
     \case
-      Function a u w ps e ->
-        Function a u w ps <$> compileUnfolds e
+      FunctionDef a u w ps e ->
+        FunctionDef a u w ps <$> compileUnfolds e
 
-instance (Monoid a, Data a) => CompileUnfoldsContext (Constant Expression a ()) where
+instance (Monoid a, Data a) => CompileUnfoldsContext (ConstantDef Expression a ()) where
   compileUnfolds =
     \case
-      Constant a u w e ->
-        Constant a u w <$> compileUnfolds e
+      ConstantDef a u w e ->
+        ConstantDef a u w <$> compileUnfolds e
 
 instance (Monoid a, Data a) => CompileUnfoldsContext (Definition a k ()) where
   compileUnfolds =

@@ -13,7 +13,7 @@ import Coal.Common.Supply (supplied)
 import Coal.Compiler.Stack
 import Coal.Compiler.Transform.Type.Parameterized
 import Coal.Language
-import Coal.Language.Module (Constant (..), Definition (..), Function (..))
+import Coal.Language.Module (ConstantDef (..), Definition (..), FunctionDef (..))
 import Coal.Language.Module.Definition (definitionName)
 import Coal.TypeSystem
 import Control.Monad.Reader (ask, asks)
@@ -85,8 +85,8 @@ compileConstraintsC expr = do
   insertAssumptionsC (apply sub ms2)
   insertConstraintsC (cs1 <> cs2)
 
-compileFunctionC :: (Monad m, Data a, Show a) => Function Expression a IndexedType -> CompilerT a m IndexedType
-compileFunctionC (Function loc _ (With _ t) ps e) = do
+compileFunctionC :: (Monad m, Data a, Show a) => FunctionDef Expression a IndexedType -> CompilerT a m IndexedType
+compileFunctionC (FunctionDef loc _ (With _ t) ps e) = do
   insertConstraintsC [Equality (RuleTopLevelFunction loc) [t, typeOf e]]
   t1 <- supplied (TVariable . TypeIndex KType)
   compileConstraintsC $
@@ -98,8 +98,8 @@ compileFunctionC (Function loc _ (With _ t) ps e) = do
  where
   placeholder = "###.function"
 
-compileConstantC :: (Monad m, Data a, Show a) => Constant Expression a IndexedType -> CompilerT a m IndexedType
-compileConstantC (Constant loc _ (With _ t) e) = do
+compileConstantC :: (Monad m, Data a, Show a) => ConstantDef Expression a IndexedType -> CompilerT a m IndexedType
+compileConstantC (ConstantDef loc _ (With _ t) e) = do
   insertConstraintsC [Equality (RuleTopLevelConstant loc) [t, typeOf e]]
   compileConstraintsC $
     ELet
@@ -113,7 +113,7 @@ compileConstantC (Constant loc _ (With _ t) e) = do
 compileDefinitionC :: (Monad m, Data a, Show a) => Definition a k IndexedType -> CompilerT a m ()
 compileDefinitionC =
   \case
-    DFunction _ _ f@(Function loc (Just (With _ t)) _ _ _) _ -> do
+    DFunction _ _ f@(FunctionDef loc (Just (With _ t)) _ _ _) _ -> do
       t1 <- compileFunctionC f
       (r, _, _) <- runConstraintsGenC (instantiateAnnotation loc t)
       case r of
@@ -121,7 +121,7 @@ compileDefinitionC =
           compilerReportConstraintsGenErrors [EIllFormedTypeAnnotation err]
         Right t2 ->
           insertConstraintsC [Equality (RuleAnnotation loc t1 t2) [t1, t2]]
-    DConstant _ _ c@(Constant loc (Just (With _ t)) _ _) _ -> do
+    DConstant _ _ c@(ConstantDef loc (Just (With _ t)) _ _) _ -> do
       t1 <- compileConstantC c
       (r, _, _) <- runConstraintsGenC (instantiateAnnotation loc t)
       case r of

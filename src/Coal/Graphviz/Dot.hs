@@ -337,26 +337,26 @@ instance (Pretty t, Show t) => Dot t (CompiledClause a t) where
           emitEdgesTo lls
           emitEdgeTo e
 
-instance (Show t, Pretty t) => Dot t (Function Expression a t) where
+instance (Show t, Pretty t) => Dot t (FunctionDef Expression a t) where
   toDot =
     \case
-      Function _ (Just (With ts u)) (With _ t) ps e ->
-        fromNode (emitParallelogram ("Function\\n" <> prettyType u) (Just t)) $ do
+      FunctionDef _ (Just (With ts u)) (With _ t) ps e ->
+        fromNode (emitParallelogram ("FunctionDef\\n" <> prettyType u) (Just t)) $ do
           emitEdgesTo ps
           emitEdgeTo e
-      Function _ _ (With _ t) ps e ->
-        fromNode (emitParallelogram "Function" (Just t)) $ do
+      FunctionDef _ _ (With _ t) ps e ->
+        fromNode (emitParallelogram "FunctionDef" (Just t)) $ do
           emitEdgesTo ps
           emitEdgeTo e
 
-instance (Show t, Pretty t) => Dot t (Constant Expression a t) where
+instance (Show t, Pretty t) => Dot t (ConstantDef Expression a t) where
   toDot =
     \case
-      Constant _ (Just (With ts u)) (With _ t) e ->
-        fromNode (emitParallelogram ("Constant\\n" <> prettyType u) (Just t)) $ do
+      ConstantDef _ (Just (With ts u)) (With _ t) e ->
+        fromNode (emitParallelogram ("ConstantDef\\n" <> prettyType u) (Just t)) $ do
           emitEdgeTo e
-      Constant _ _ (With _ t) e ->
-        fromNode (emitParallelogram "Constant" (Just t)) $ do
+      ConstantDef _ _ (With _ t) e ->
+        fromNode (emitParallelogram "ConstantDef" (Just t)) $ do
           emitEdgeTo e
 
 instance (Show t, Pretty t) => Dot t (Definition a k t) where
@@ -391,7 +391,7 @@ instance (Show t, Pretty t) => Dot t (Definition a k t) where
       --          emitEdgeTo d
       DImport _ (Path _) ns ->
         emitParallelogram "DImport" Nothing
-      DType _ name _ _ ->
+      DType _ name _ ->
         emitParallelogram ("DType\\n" <> name) Nothing
       DCotype _ name _ ->
         emitParallelogram ("DCotype\\n" <> name) Nothing

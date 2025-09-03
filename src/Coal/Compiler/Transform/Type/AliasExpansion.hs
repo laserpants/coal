@@ -10,7 +10,7 @@ module Coal.Compiler.Transform.Type.AliasExpansion (
 
 import Coal.Common.Environment (Environment)
 import Coal.Language
-import Coal.Language.Module (Constant (..), Definition (..), Function (..), Module (..))
+import Coal.Language.Module (ConstantDef (..), Definition (..), FunctionDef (..), Module (..))
 import Control.Monad.Reader (MonadReader, ask)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformM)
@@ -69,20 +69,20 @@ instance (AliasContext t, Data e, Data t) => AliasContext (Module e a t) where
       Module p ns o ->
         Module p ns <$> expandAliases o
 
-instance (AliasContext (e a t), AliasContext t, Data a, Data t) => AliasContext (Function e a t) where
+instance (AliasContext (e a t), AliasContext t, Data a, Data t) => AliasContext (FunctionDef e a t) where
   expandAliases =
     \case
-      Function a u w ps e ->
-        Function a u
+      FunctionDef a u w ps e ->
+        FunctionDef a u
           <$> expandAliases w
           <*> expandAliases ps
           <*> expandAliases e
 
-instance (AliasContext (e a t), AliasContext t) => AliasContext (Constant e a t) where
+instance (AliasContext (e a t), AliasContext t) => AliasContext (ConstantDef e a t) where
   expandAliases =
     \case
-      Constant a u w e ->
-        Constant a u
+      ConstantDef a u w e ->
+        ConstantDef a u
           <$> expandAliases w
           <*> expandAliases e
 

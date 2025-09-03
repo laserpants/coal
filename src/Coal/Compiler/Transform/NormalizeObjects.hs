@@ -7,9 +7,9 @@ import Coal.Compiler.Transform.Flattening
 import Coal.Language.Expression (Expression (..))
 import Coal.Language.HasType (HasType (..), foldTypeOf)
 import Coal.Language.Module (Module (..))
-import Coal.Language.Module.Constant (Constant (..))
+import Coal.Language.Module.Constant (ConstantDef (..))
 import Coal.Language.Module.Definition (Definition (..))
-import Coal.Language.Module.Function (Function (..))
+import Coal.Language.Module.Function (FunctionDef (..))
 import Coal.Language.Trait (With (..))
 import Coal.Language.Type (Type (..))
 import Data.Data (Data, Typeable)
@@ -46,8 +46,8 @@ instance (Monoid a, Data a, Data k, Data (o k), Typeable o) => NormalizeObjectsT
 instance (Monoid a, Data a, Data k, Data (o k), Typeable o) => NormalizeObjectsTransformContext (Definition a k (Type o k)) where
   normalizeObject =
     \case
-      DFunction loc name (Function a w1 (With ts t) ps e) _ ->
-        DConstant loc name (Constant a w1 (With ts (foldTypeOf t ps)) (flattenLambda (ELambda mempty ps e))) []
+      DFunction loc name (FunctionDef a w1 (With ts t) ps e) _ ->
+        DConstant loc name (ConstantDef a w1 (With ts (foldTypeOf t ps)) (flattenLambda (ELambda mempty ps e))) []
       DInstance loc name ts t ds ->
         DInstance loc name ts t (normalizeObject ds)
       d ->
@@ -64,9 +64,9 @@ instance (Monoid a, Data a, Data k, Data (o k), Typeable o) => NormalizeObjectsT
 -- denormalizeConstant :: (Data a, Data k, Data (o k), Typeable o) => Name -> Constant Expression a (Type o k) -> Definition a k (Type o k)
 denormalizeConstant name =
   \case
-    Constant loc w1 w2 (ELambda a1 ps (ELambda _ qs e)) ->
-      denormalizeConstant name (Constant loc w1 w2 (ELambda a1 (ps <> qs) e))
-    Constant loc w1 (With ts _) (ELambda _ ps e) ->
-      DFunction loc name (Function loc w1 (With ts (typeOf e)) ps e) []
-    c@(Constant loc _ _ _) ->
+    ConstantDef loc w1 w2 (ELambda a1 ps (ELambda _ qs e)) ->
+      denormalizeConstant name (ConstantDef loc w1 w2 (ELambda a1 (ps <> qs) e))
+    ConstantDef loc w1 (With ts _) (ELambda _ ps e) ->
+      DFunction loc name (FunctionDef loc w1 (With ts (typeOf e)) ps e) []
+    c@(ConstantDef loc _ _ _) ->
       DConstant loc name c []

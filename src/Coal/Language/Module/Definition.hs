@@ -6,11 +6,11 @@
 
 module Coal.Language.Module.Definition (Definition (..), Path (..), definitionName) where
 
-import Coal.Language.DataConstructor (DataConstructor (..))
 import Coal.Language.Expression (Clause (..), Expression (..))
-import Coal.Language.Module.Constant (Constant (..))
-import Coal.Language.Module.Cotype (Cotype (..))
-import Coal.Language.Module.Function (Function (..))
+import Coal.Language.Module.Constant (ConstantDef (..))
+import Coal.Language.Module.Cotype (CotypeDef (..))
+import Coal.Language.Module.Function (FunctionDef (..))
+import Coal.Language.Module.Type (TypeDef (..))
 import Coal.Language.Pattern (Pattern (..))
 import Coal.Language.Trait (Trait (..), With (..))
 import Coal.Language.Type (Parameter, ParameterizedType)
@@ -24,13 +24,13 @@ newtype Path = Path {pathComponents :: [Name]}
 
 data Definition a k t
   = -- | Type definition
-    DType a Name [Parameter ()] [DataConstructor Parameter () ParameterizedType]
+    DType a Name TypeDef
   | -- | Codata type definition
-    DCotype a Name Cotype
+    DCotype a Name CotypeDef
   | -- | Function definition
-    DFunction a Name (Function Expression a t) [Definition a k t]
+    DFunction a Name (FunctionDef Expression a t) [Definition a k t]
   | -- | Other (constant) top-level definitions
-    DConstant a Name (Constant Expression a t) [Definition a k t]
+    DConstant a Name (ConstantDef Expression a t) [Definition a k t]
   | -- | Import statement
     DImport a Path [Name]
   | -- | Trait

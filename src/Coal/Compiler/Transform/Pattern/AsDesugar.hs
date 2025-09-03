@@ -8,9 +8,9 @@ module Coal.Compiler.Transform.Pattern.AsDesugar where
 import Coal.Common.Label (Label (..))
 import Coal.Language (Choice (..), Clause (..), Expression (..), Pattern (..))
 import Coal.Language.Module (Module (..))
-import Coal.Language.Module.Constant (Constant (..))
+import Coal.Language.Module.Constant (ConstantDef (..))
 import Coal.Language.Module.Definition (Definition (..))
-import Coal.Language.Module.Function (Function (..))
+import Coal.Language.Module.Function (FunctionDef (..))
 import Control.Monad.Writer
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (descend, transformM)
@@ -64,21 +64,21 @@ collectAsPatterns =
     p ->
       pure p
 
-instance (Data a, Data t, Monoid a) => AsDesugarContext (Constant Expression a t) where
+instance (Data a, Data t, Monoid a) => AsDesugarContext (ConstantDef Expression a t) where
   desugarAsPatterns =
     \case
-      Constant a u w e ->
-        Constant a u w (desugarAsPatterns e)
+      ConstantDef a u w e ->
+        ConstantDef a u w (desugarAsPatterns e)
 
-instance (Data a, Data t, Monoid a) => AsDesugarContext (Function Expression a t) where
+instance (Data a, Data t, Monoid a) => AsDesugarContext (FunctionDef Expression a t) where
   desugarAsPatterns =
     \case
-      Function a u w ps e ->
+      FunctionDef a u w ps e ->
         case ps1 of
           [] ->
-            Function a u w ps (desugarAsPatterns e)
+            FunctionDef a u w ps (desugarAsPatterns e)
           _ ->
-            Function a u w qs (foldr go (desugarAsPatterns e) ps1)
+            FunctionDef a u w qs (foldr go (desugarAsPatterns e) ps1)
        where
         (qs, ps1) =
           runWriter (traverse (transformM collectAsPatterns) ps)

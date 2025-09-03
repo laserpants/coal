@@ -10,11 +10,15 @@ module Coal.Language.Module (
   module Coal.Language.Module.Definition,
   module Coal.Language.Module.Function,
   module Coal.Language.Module.Constant,
+  module Coal.Language.Module.Type,
+  module Coal.Language.Module.Cotype,
 ) where
 
 import Coal.Language.Module.Constant
+import Coal.Language.Module.Cotype
 import Coal.Language.Module.Definition (Definition (..), Path (..), definitionName)
 import Coal.Language.Module.Function
+import Coal.Language.Module.Type
 import Data.Data (Data, Typeable)
 import Extra (Name, Over)
 

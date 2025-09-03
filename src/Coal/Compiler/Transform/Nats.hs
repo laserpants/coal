@@ -17,7 +17,7 @@ where
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (suppliedName)
 import Coal.Language
-import Coal.Language.Module (Constant (..), Definition (..), Function (..), Module (..))
+import Coal.Language.Module (ConstantDef (..), Definition (..), FunctionDef (..), Module (..))
 import Control.Monad ((<=<))
 import Control.Monad.RWS (RWS, runRWS)
 import Control.Monad.Reader (MonadReader)
@@ -158,17 +158,17 @@ instance (Monoid a, Data a) => CompileNatsContext (Module a Kind IndexedType) wh
       Module p ns o ->
         Module p ns <$> compileNats o
 
-instance (Monoid a, Data a) => CompileNatsContext (Function Expression a IndexedType) where
+instance (Monoid a, Data a) => CompileNatsContext (FunctionDef Expression a IndexedType) where
   compileNats =
     \case
-      Function a u w ps e ->
-        Function a u w ps <$> compileNats e
+      FunctionDef a u w ps e ->
+        FunctionDef a u w ps <$> compileNats e
 
-instance (Monoid a, Data a) => CompileNatsContext (Constant Expression a IndexedType) where
+instance (Monoid a, Data a) => CompileNatsContext (ConstantDef Expression a IndexedType) where
   compileNats =
     \case
-      Constant a u w e ->
-        Constant a u w <$> compileNats e
+      ConstantDef a u w e ->
+        ConstantDef a u w <$> compileNats e
 
 instance (Monoid a, Data a) => CompileNatsContext (Definition a Kind IndexedType) where
   compileNats =

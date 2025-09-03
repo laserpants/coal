@@ -19,9 +19,9 @@ import Coal.Language.Expression.Binding (Binding (..))
 import Coal.Language.Expression.Choice (Choice (..))
 import Coal.Language.HasType (HasType (..))
 import Coal.Language.Module (Module (..))
-import Coal.Language.Module.Constant (Constant (..))
+import Coal.Language.Module.Constant (ConstantDef (..))
 import Coal.Language.Module.Definition (Definition (..))
-import Coal.Language.Module.Function (Function (..))
+import Coal.Language.Module.Function (FunctionDef (..))
 import Coal.Language.Pattern (Pattern (..))
 import Coal.Language.Type (Type (..))
 import Control.Monad.RWS (MonadReader, MonadState, MonadWriter, RWS, runRWS, tell)
@@ -110,19 +110,19 @@ unrollMatch (name, p) e =
     (EVariable mempty (Label (typeOf p) name))
     (EClause mempty p (CPlain mempty [] e :| []) :| [])
 
-instance (Monoid c, Data c, Data k, Typeable o, Data (o k)) => Sugared c o k (Function Expression c (Type o k)) where
+instance (Monoid c, Data c, Data k, Typeable o, Data (o k)) => Sugared c o k (FunctionDef Expression c (Type o k)) where
   desugarPatterns =
     \case
-      Function a u w ps e -> do
+      FunctionDef a u w ps e -> do
         e1 <- desugarPatterns e
         (qs, rs) <- runWriterT (traverse desugarPatterns ps)
-        pure (Function a u w qs (foldr unrollMatch e1 rs))
+        pure (FunctionDef a u w qs (foldr unrollMatch e1 rs))
 
-instance (Monoid c, Data c, Data k, Typeable o, Data (o k)) => Sugared c o k (Constant Expression c (Type o k)) where
+instance (Monoid c, Data c, Data k, Typeable o, Data (o k)) => Sugared c o k (ConstantDef Expression c (Type o k)) where
   desugarPatterns =
     \case
-      Constant a u w e ->
-        Constant a u w <$> desugarPatterns e
+      ConstantDef a u w e ->
+        ConstantDef a u w <$> desugarPatterns e
 
 instance (Monoid c, Data k, Data c, Data (o k), Typeable o) => Sugared c o k (Definition c k (Type o k)) where
   desugarPatterns =

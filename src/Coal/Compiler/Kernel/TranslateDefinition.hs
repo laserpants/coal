@@ -24,14 +24,14 @@ type KernelObject = Kernel.Object Kernel.Type (Kernel.Expr Kernel.Type)
 translateDefinition :: (Show a, MonadReader KernelEnvironment m, Data a) => Definition a Kind IndexedType -> m [KernelObject]
 translateDefinition =
   \case
-    DType _ _ _ ctors ->
+    DType _ _ (TypeDef _ ctors) ->
       traverse translateConstructor (zip [0 ..] (sortOn constructorName ctors))
-    DFunction _ name (Function _ _ _ ps e) _ -> do
+    DFunction _ name (FunctionDef _ _ _ ps e) _ -> do
       qs <- traverse translatePattern (toList ps)
       f <- withLocalNames (labelName <$> qs) (translateExpression e)
       moduleName <- asks kernelEnvironmentModule
       pure [Kernel.OFunction (moduleName <> "." <> name) qs f]
-    DConstant _ name (Constant _ _ With{} e) _ -> do
+    DConstant _ name (ConstantDef _ _ With{} e) _ -> do
       c <- translateExpression e
       moduleName <- asks kernelEnvironmentModule
       pure [Kernel.OConstant (moduleName <> "." <> name) c]
