@@ -1110,61 +1110,61 @@ addBuiltinDefs defs =
   , DTrait
       mempty
       "Numeric"
-      (TraitDef 
-      []
-      (Parameter KType "a")
-      [
-        ( "from_int32"
-        , TIntrinsic IInt32 `TArrow` TVariable (Parameter () "a")
-        )
-      ,
-        ( "negate"
-        , TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
-        )
-      ,
-        ( "(+)"
-        , TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
-        )
-      ,
-        ( "(-)"
-        , TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
-        )
-      ,
-        ( "(*)"
-        , TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
-        )
-      ]
+      ( TraitDef
+          []
+          (Parameter KType "a")
+          [
+            ( "from_int32"
+            , TIntrinsic IInt32 `TArrow` TVariable (Parameter () "a")
+            )
+          ,
+            ( "negate"
+            , TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
+            )
+          ,
+            ( "(+)"
+            , TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
+            )
+          ,
+            ( "(-)"
+            , TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
+            )
+          ,
+            ( "(*)"
+            , TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
+            )
+          ]
       )
   , DTrait
       mempty
       "Ordered"
-      (TraitDef 
-      []
-      (Parameter KType "a")
-      [
-        ( "compare"
-        , TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TConstructor () "Ordering"
-        )
-      ]
+      ( TraitDef
+          []
+          (Parameter KType "a")
+          [
+            ( "compare"
+            , TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TConstructor () "Ordering"
+            )
+          ]
       )
   , DType
       mempty
       "Ordering"
       ( TypeDef
-        []
-        [ DataConstructor "LessThan" 0 (Forall mempty [] (TConstructor () "Ordering"))
-        , DataConstructor "GreaterThan" 0 (Forall mempty [] (TConstructor () "Ordering"))
-        , DataConstructor "EqualTo" 0 (Forall mempty [] (TConstructor () "Ordering"))
-        ]
+          []
+          [ DataConstructor "LessThan" 0 (Forall mempty [] (TConstructor () "Ordering"))
+          , DataConstructor "GreaterThan" 0 (Forall mempty [] (TConstructor () "Ordering"))
+          , DataConstructor "EqualTo" 0 (Forall mempty [] (TConstructor () "Ordering"))
+          ]
       )
   , DType
       mempty
       "Option"
       ( TypeDef
-        [Parameter () "a"]
-        [ DataConstructor "Some" 1 (Forall (Set.fromList [Parameter () "a"]) [] (TVariable (Parameter () "a") `TArrow` TApplication () (TConstructor () "Option") (TVariable (Parameter () "a") :| [])))
-        , DataConstructor "None" 0 (Forall (Set.fromList [Parameter () "a"]) [] (TApplication () (TConstructor () "Option") (TVariable (Parameter () "a") :| [])))
-        ]
+          [Parameter () "a"]
+          [ DataConstructor "Some" 1 (Forall (Set.fromList [Parameter () "a"]) [] (TVariable (Parameter () "a") `TArrow` TApplication () (TConstructor () "Option") (TVariable (Parameter () "a") :| [])))
+          , DataConstructor "None" 0 (Forall (Set.fromList [Parameter () "a"]) [] (TApplication () (TConstructor () "Option") (TVariable (Parameter () "a") :| [])))
+          ]
       )
   ]
     <> defs
