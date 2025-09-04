@@ -67,14 +67,16 @@ runUnfoldExpansion r s e = (a, s')
 --        )
 --        (varE name)
 
-expandCodataSelect :: (Monoid a, MonadState Int m) => Name -> Expression a () -> m (Expression a ())
-expandCodataSelect field e =
+expandCodataSelect :: (Monoid a, MonadReader Name m, MonadState Int m) => Name -> Expression a () -> m (Expression a ())
+expandCodataSelect field e = do
+  name <- suppliedName
+  let var = name <> "$_fields"
   pure $
     letE
-      "$_fields"
+      var
       e
       ( applicationE
-          (selectE ("$_" <> field) (varE "$_fields"))
+          (selectE ("$_" <> field) (varE var))
           (ELiteral mempty LUnit :| [])
       )
 

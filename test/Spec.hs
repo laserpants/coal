@@ -151,16 +151,16 @@ spec = do
   print (x == Right "8\n")
   x <- main49
   print (x == Right "1\n")
---  x <- main50
---  print (x == Right "5\n")
---  x <- main51
---  print (x == Right "7\n")
---  x <- main52
---  print (x == Right "105\n")
---  x <- main53
---  print (x == Right "1\n")
---  x <- main54
---  print (x == Right "1000\n")
+  --  x <- main50
+  --  print (x == Right "5\n")
+  --  x <- main51
+  --  print (x == Right "7\n")
+  --  x <- main52
+  --  print (x == Right "105\n")
+  --  x <- main53
+  --  print (x == Right "1\n")
+  --  x <- main54
+  --  print (x == Right "1000\n")
   x <- main56
   print (x == Right "false\n")
   x <- main57
@@ -211,6 +211,14 @@ spec = do
   print (x == Right "3\n")
   x <- main99
   print (x == Right "512\n")
+  x <- main100
+  print (x == Right "1\n")
+  x <- main101
+  print (x == Right "2\n")
+  x <- main102
+  print (x == Right "100\n")
+  x <- main103
+  print (x == Right "1000\n")
 
 --  x <- main85
 --  print (x == Right "aa\n")
@@ -824,6 +832,24 @@ main100 = do
     [ "./test/Coal/examples/100/Main.coal"
     ]
 
+main101 :: IO (Either CompilerError Text)
+main101 = do
+  runTestFiles
+    [ "./test/Coal/examples/101/Main.coal"
+    ]
+
+main102 :: IO (Either CompilerError Text)
+main102 = do
+  runTestFiles
+    [ "./test/Coal/examples/102/Main.coal"
+    ]
+
+main103 :: IO (Either CompilerError Text)
+main103 = do
+  runTestFiles
+    [ "./test/Coal/examples/103/Main.coal"
+    ]
+
 compileFiles :: [String] -> IO (Either CompilerError ())
 compileFiles files = do
   fs <- traverse readFile files
@@ -1094,6 +1120,7 @@ builtinDataConstructors =
         0
         (Forall mempty [] (TIntrinsic INat))
     )
+    -- TODO
   ]
 
 addBuiltinDefs :: (Monoid a) => [Definition a Kind ()] -> [Definition a Kind ()]

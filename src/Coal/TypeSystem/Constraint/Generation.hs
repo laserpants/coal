@@ -415,6 +415,7 @@ emitConstraints =
       emitERecordConstraints loc t d me
     ECodataSelect loc (Label t name) e e1 -> do
       ms1 <- emitConstraints e
+
       r <- lookupCodataAccessor name
       ms2 <-
         case r of
@@ -431,6 +432,8 @@ emitConstraints =
                 assertEqualityAssumptions loc t2 (filter (assumptionNameIs n) ms3)
                 t0 <- supplied (TVariable . TypeIndex KType)
                 tellRight [Explicit InferenceRulePlaceholder (t0 `TArrow` typeOf e3) codataAccessorScheme]
+                let t5 = typeOf e3
+                tellRight [Equality InferenceRulePlaceholder [t, t5]]
                 pure (ms2 <> filter (not . assumptionNameIs n) ms3)
               _ ->
                 pure []
