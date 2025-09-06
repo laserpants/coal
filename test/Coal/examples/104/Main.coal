@@ -1,6 +1,6 @@
 module Main {
 
-  cotype Stream<a> = { Head : a , Tail : Option<Stream<a>> }
+  cotype Stream<a> = { Head : a, Tail : Option<Stream<a>> }
 
 //  unfold enum_from(n : int32) : Stream<int32> { 
 //    , Head = n
@@ -18,13 +18,21 @@ module Main {
 
   unfold enum_from(n : int32) : Stream<int32> { 
     , Head = n
-    , enum_from(Tail) = @(n + 1)
+    , @Tail = n + 1
   }
 
-  fun baz(n : int32) =
-    { head = fn(_) => n
-    , tail = fn(_) => baz(n)
-    } 
+//  {
+//  , $_Head = fn(_) => n
+//  , $_Tail = fn(_) => enum_from(n + 1)
+//  }
+//
+//  {
+//  , $_Head = fn(_) => n
+//  , $_Tail = fn(_) => {
+//                      , $_Head = fn(_) => n +1
+//                      , $_Tail = fn(_) => enum_from(n + 2)
+//                      }
+//  }
 
   fun main() = 
     //trace_int32((enum_from(0).Tail).Head)
