@@ -7,15 +7,14 @@ module Main {
     , @Tail = n + 1
   }
 
-  cotype OStream<a> = { Head : a, Tail : Option<OStream<a>> }
-
-  unfold enum_from(n : int32) : OStream<int32> { 
-    , Head = n
-    , @Tail = @Some(n + 1)
-  }
+//  cotype OStream<a> = { Head : a, Tail : Option<OStream<a>> }
+//
+//  unfold enum_from(n : int32) : OStream<int32> { 
+//    , Head = n
+//    , @Tail = @Some(n + 1)
+//  }
 
   fun main() = 
-    //trace_int32((enum_from(0).Tail).Head)
-    trace_int32((enum_from(0).Tail).Head)
+    trace_int32(((enum_from(0).Tail).Tail).Head)
 
 }

@@ -10,7 +10,6 @@ module Coal.Compiler.Transform.Definition.Unfold where
 import Coal.Common.Supply (suppliedName)
 import Coal.Compiler.Transform.Expression
 import Coal.Compiler.Transform.Flattening (flattenApplication)
-import Coal.Compiler.Transform.Tree (replace)
 import Coal.Language (Expression (..), Kind (..), Pattern (..))
 import Coal.Language.Module (Definition (..), UnfoldDef (..))
 import Control.Monad.RWS (RWS, runRWS)
@@ -19,9 +18,10 @@ import Control.Monad.State (MonadState)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transform)
 import Data.List.NonEmpty (NonEmpty (..))
-import Extra (Dictionary, Name, const2)
+import Extra (Dictionary, Name)
 
 import qualified Data.Map.Strict as Map
+import qualified Data.Text as Text
 
 newtype UnfoldTopLevelUnfolds a = UnfoldTopLevelUnfolds {unfoldExpansionStack :: RWS Name () Int a}
   deriving
@@ -46,12 +46,23 @@ compileTopLevelUnfolds =
     o ->
       pure o
 
---renameRecursiveCall :: (Monoid a, Data a) => Name -> Name -> Expression a () -> Expression a ()
---renameRecursiveCall old new = replace old (const2 $ varE new)
+foobaz :: (Monoid a) => Name -> (Name, Expression a ()) -> UnfoldTopLevelUnfolds (Name, Expression a ())
+foobaz var (name, e)
+  | "@" `Text.isPrefixOf` name =
+      pure
+        ( "$_" <> Text.drop 1 name
+        , lambdaAnyE $
+            applicationE
+              (varE var)
+              (e :| [])
+        )
+  | otherwise =
+      pure ("$_" <> name, lambdaAnyE e)
 
 expandTopLevelUnfold :: (Monoid a, Data a) => Name -> NonEmpty (Pattern a ()) -> Dictionary (Expression a ()) -> UnfoldTopLevelUnfolds (Expression a ())
 expandTopLevelUnfold var ps d = do
   name <- suppliedName
+  d1 <- mapM (foobaz name) (Map.toList d)
   pure $
     transform flattenApplication $
       letE
@@ -61,9 +72,7 @@ expandTopLevelUnfold var ps d = do
             ( ECodataFields
                 mempty
                 ()
-                undefined
-                --(Map.mapKeys ("$_" <>) (Map.map (lambdaAnyE . renameRecursiveCall var name) d))
+                (Map.fromList d1)
             )
         )
         (varE name)
-

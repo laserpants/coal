@@ -21,6 +21,7 @@ import Coal.Parser.Type
 import Coal.Parser.Utils (fieldListWithKey)
 import Control.Monad (void)
 import Data.List.NonEmpty (NonEmpty (..))
+import Data.Text (Text)
 import Extra (Name)
 import Text.Megaparsec
 import Text.Megaparsec.Char (upperChar)
@@ -165,8 +166,14 @@ parseTopLevelUnfold = do
   end <- getSourcePos
   fields <- braces $ do
     void $ optional (symbol ",")
-    fieldListWithKey constructor parseExpression "="
+    fieldListWithKey (specialConstructor <|> constructor) parseExpression "="
   pure (DUnfold (Metadata start end) n (UnfoldDef (With [] ann) ps (Map.fromList fields) Nothing))
+
+specialConstructor :: Parser Text
+specialConstructor = do
+  symbol_ "@"
+  n <- constructor
+  pure ("@" <> n)
 
 -- withAnnotation :: Parser (Definition Metadata o ()) -> Parser (Definition Metadata o ())
 -- withAnnotation p = do
