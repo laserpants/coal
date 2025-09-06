@@ -211,14 +211,18 @@ spec = do
   print (x == Right "3\n")
   x <- main99
   print (x == Right "512\n")
-  x <- main100
-  print (x == Right "1\n")
-  x <- main101
+--  x <- main100
+--  print (x == Right "1\n")
+--  x <- main101
+--  print (x == Right "2\n")
+--  x <- main102
+--  print (x == Right "100\n")
+--  x <- main103
+--  print (x == Right "1000\n")
+  x <- main104
   print (x == Right "2\n")
-  x <- main102
+  x <- main105
   print (x == Right "100\n")
-  x <- main103
-  print (x == Right "1000\n")
 
 --  x <- main85
 --  print (x == Right "aa\n")
@@ -854,6 +858,18 @@ main104 :: IO (Either CompilerError Text)
 main104 = do
   runTestFiles
     [ "./test/Coal/examples/104/Main.coal"
+    ]
+
+main105 :: IO (Either CompilerError Text)
+main105 = do
+  runTestFiles
+    [ "./test/Coal/examples/105/Main.coal"
+    ]
+
+main106 :: IO (Either CompilerError Text)
+main106 = do
+  runTestFiles
+    [ "./test/Coal/examples/106/Main.coal"
     ]
 
 compileFiles :: [String] -> IO (Either CompilerError ())
