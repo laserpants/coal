@@ -46,8 +46,8 @@ compileTopLevelUnfolds =
     o ->
       pure o
 
-renameRecursiveCall :: (Monoid a, Data a) => Name -> Name -> Expression a () -> Expression a ()
-renameRecursiveCall old new = replace old (const2 $ varE new)
+--renameRecursiveCall :: (Monoid a, Data a) => Name -> Name -> Expression a () -> Expression a ()
+--renameRecursiveCall old new = replace old (const2 $ varE new)
 
 expandTopLevelUnfold :: (Monoid a, Data a) => Name -> NonEmpty (Pattern a ()) -> Dictionary (Expression a ()) -> UnfoldTopLevelUnfolds (Expression a ())
 expandTopLevelUnfold var ps d = do
@@ -61,7 +61,9 @@ expandTopLevelUnfold var ps d = do
             ( ECodataFields
                 mempty
                 ()
-                (Map.mapKeys ("$_" <>) (Map.map (lambdaAnyE . renameRecursiveCall var name) d))
+                undefined
+                --(Map.mapKeys ("$_" <>) (Map.map (lambdaAnyE . renameRecursiveCall var name) d))
             )
         )
         (varE name)
+
