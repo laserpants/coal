@@ -7,19 +7,17 @@
 
 module Coal.Compiler.Transform.Definition.Unfold where
 
-import Coal.Common.Label (Label (..), labelName)
 import Coal.Common.Supply (suppliedName)
 import Coal.Compiler.Transform.Expression
 import Coal.Compiler.Transform.Flattening (flattenApplication)
 import Coal.Compiler.Transform.Tree (replace)
-import Coal.Language (Choice (..), Clause (..), Expression (..), Kind (..), Pattern (..))
-import Coal.Language.Module (ConstantDef (..), Definition (..), FunctionDef (..), Module (..), UnfoldDef (..))
+import Coal.Language (Expression (..), Kind (..), Pattern (..))
+import Coal.Language.Module (Definition (..), UnfoldDef (..))
 import Control.Monad.RWS (RWS, runRWS)
 import Control.Monad.Reader (MonadReader)
 import Control.Monad.State (MonadState)
-import Control.Monad.Writer (execWriter, tell)
 import Data.Data (Data)
-import Data.Generics.Uniplate.Data (transform, transformM)
+import Data.Generics.Uniplate.Data (transform)
 import Data.List.NonEmpty (NonEmpty (..))
 import Extra (Dictionary, Name, const2)
 
