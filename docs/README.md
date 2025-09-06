@@ -34,12 +34,15 @@ A distinction is made between ordinary, finite data, which is produced and consu
 
   unfold enum_from(n : int32) : Stream<int32> {
     , Head = n
-    , Tail = enum_from(n + 1)
+    , @Tail = n + 1
   }
 
   let nats = enum_from(0)
 ```
 
+The `@` symbol which appears in the `fold` pattern (first example) and `unfold` field (second example) give special meaning to
+the ...
+and are key to how recursion and corecursion is effectuated in Coal.
 See **Recursion** and 
 
 ### Programs = Expressions + Effects
