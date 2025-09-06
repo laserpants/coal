@@ -17,7 +17,7 @@ Coal is a declarative, purely functional programming language with
 
 ### Rethinking recursion
 
-As a [total](https://en.wikipedia.org/wiki/Total_functional_programming) language, Coal takes a different approach to recursion, following the motto that "[explicit] recursion is the GOTO of functional programming." To ensure that programs are provably terminating, recursion is only present in a restricted form, known as *structural recursion*. In this paradigm, each recursive call operates on a strictly smaller part of some finite data structure, progressing toward a base case. 
+As a [total](https://en.wikipedia.org/wiki/Total_functional_programming) language, Coal takes a different approach to recursion, following the motto that "[explicit] recursion is [the GOTO of functional programming](https://www.semanticscholar.org/paper/Functional-Programming-with-Bananas%2C-Lenses%2C-and-Meijer-Fokkinga/5db3c6793c07285bf0f5e95fe5a25f53e7488051)." To ensure that programs are provably terminating, recursion is only available in a restricted form, known as *structural recursion*. In this paradigm, each recursive call operates on a strictly smaller part of some finite data structure, progressing toward a base case. 
 
 ```
   fun sum(numbers : List<int32>) : int32 =
@@ -27,7 +27,7 @@ As a [total](https://en.wikipedia.org/wiki/Total_functional_programming) languag
     }
 ```
 
-A distinction is made between ordinary, finite data, which is produced and consumed in this way, and data that is potentially infinite. The latter is known as *codata*. The codata equivalent of lists, for example, are streams.
+A distinction is made between ordinary, finite data, which is produced and consumed in this way, and potentially infinite data, which may arise from processes that do not terminate. The latter is known as *codata*. The codata equivalent of lists, for example, are streams.
 
 ```
   cotype Stream<a> = { Head : a, Tail : Stream<a> }
@@ -40,14 +40,11 @@ A distinction is made between ordinary, finite data, which is produced and consu
   let nats = enum_from(0)
 ```
 
-The `@` symbol which appears in the `fold` pattern (first example) and `unfold` field (second example) give special meaning to
-the ...
-and are key to how recursion and corecursion is effectuated in Coal.
-See **Recursion** and 
+The `@` symbol appearing in the `fold` pattern variable (first example) as well as in the `unfold` field label (second example) give special meaning to these expressions. They are key to how recursion and corecursion is expressed in Coal. See **Recursion, corecursion, and codata** for a more detailed discussion.
 
 ### Programs = Expressions + Effects
 
-Coal  is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-oriented_programming_language) language: a program is, at its core, just an expression that evaluates to a value. In this model, all data is immutable and there are no observable side-effects. These properties make programs more predictable, easier to reason about, highly testable, and allows for code to be verified using formal mathematical methods. On the other hand, practical applications need to have the ability to interact with the outside world. Side-effects are what make them useful. As part of this project, a goal is to develop a system for managing effects, such as I/O and exceptions, in the Coal language. This work is still in progress.
+Coal  is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-oriented_programming_language) language: a program is, at its core, just an expression that evaluates to a value. In this programming model, all data is immutable and there are no observable side-effects. These properties make programs more predictable, easier to reason about, highly testable, and allows for code to be verified using formal mathematical methods. On the other hand, practical applications need to have the ability to interact with the outside world. Side-effects are what make them useful. As part of this project, a goal is to develop a system for managing effects, such as I/O and exceptions, in the Coal language. This work is still in progress.
 
 ## Project status and roadmap
 
@@ -93,7 +90,7 @@ The `import` keyword is used to bring in functions and other definitions from ot
 import List(concat, head, tail)
 ```
 
-As in most other languages, import statements must appear at the top of a module, preceding any other code.
+As in most other languages, import statements must appear at the beginning of a module, preceding any other code.
 
 TODO
 
@@ -121,28 +118,27 @@ If-expressions have a format similar to that found in most other languages:
 
 ##### Let-bindings
 
+A let-binding associates a name with an expression within a given scope:
+
 ```
   let <name> = <e_1> in <e_2>
 ```
 
 ###### Polymorphism (type generalization)
 
-In Hindley-Milner languages, it is let-bindings that enable polymorphism.
-Consider the following expression, which doesn't type check:
+In Hindley-Milner languages, it is let-bindings that enable polymorphism. Consider the following expression, which doesn't type check:
 
 ```
     (fn(f) => (f(3 : int32), f("three")))(fn(x) => x)
 ```
 
-Here `f` is monomorphic. The type inference algorithm will try to determine its type but fail to unify `int32 -> int32` with `string -> string`.
-
-On the other hand, if we _ the anonymous function to
-
-then it is generalized and receives a quantified type `∀ a : a -> a`.
+Here, the type of `f` is monomorphic. The type inference algorithm will try to determine its type but fail to unify `int32 -> int32` with `string -> string`.
+On the other hand, if we bind the anonymous function to a new variable `identity`, then its type is *generalized* and becomes a quantified type `∀a : a -> a`.
+We can now apply this function to both elements of the tuple, even though their types are different:
 
 ```
-    let
-      identity = fn(x) => x in 
+    let identity = fn(x) => x 
+      in 
         (identity(3), identity("three"))
 ```
 
@@ -294,7 +290,7 @@ stepwise peel of layers of data constructors ..?
 
 always working hand-in-hand with a recursive data structure like lists, trees, or other algebraic data types. 
 
-If we want to .. similar to how a for-loop works in imperative programming languages.
+If we want to .. similar to how a for-loop behaves in imperative programming languages.
 
 Ordinary (machine type) integers do not meet this requirement. 
 Instead, we need to define a recursive number type. This is typically done according to the standard axiomatization of the natural numbers:
@@ -525,7 +521,7 @@ map(fn(x) => x * 100, [1, 2, 3])  // ==> [100, 200, 300]
 
 TODO
 
-### Recursion 
+### Recursion, corecursion, and codata
 
 In most languages, a typical implementation of the factorial function would look something like the following:
 
@@ -595,7 +591,7 @@ The following is not possible:
 
 The type of folds we have seen so far are ...
 
-### Corecursion and codata
+#### Duality
 
 |                    | Access pattern        | Structure             | Evaluation strategy  |
 | ------------------ | ----------------------| --------------------- | -------------------- |
