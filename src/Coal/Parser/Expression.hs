@@ -17,41 +17,42 @@ import Control.Monad (void)
 import Control.Monad.Combinators.Expr
 import Data.List.NonEmpty (NonEmpty (..))
 import Extra (Name, isConstructor)
-import Text.Megaparsec (getSourcePos, notFollowedBy, optional, some, many, try, (<|>))
+import Text.Megaparsec (getSourcePos, notFollowedBy, optional, some, try, (<|>))
 import Text.Megaparsec.Char (char)
 
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map.Strict as Map
 import qualified Text.Megaparsec.Char.Lexer as Lexer
 
+parseAtom :: Parser (Expression Metadata ())
+parseAtom =
+  try parseFunctionApplication
+    <|> parseDataConstructor
+    <|> parseLiteralExpression
+    <|> parseFoldExpression
+    <|> parseUnfoldExpression
+    <|> try parseLambdaMatchExpression
+    <|> parseMatchExpression
+    <|> parseRecordExpression
+    <|> parseIfExpression
+    <|> parseLambdaExpression
+    <|> parseLetExpression
+    <|> parseVariableExpression
+    <|> try (parens parseExpression)
+    <|> parseTupleExpression
+
+parseSelectorOp :: Parser (Expression Metadata () -> Expression Metadata ())
+parseSelectorOp = do
+  start <- getSourcePos
+  field <- symbol_ "." *> (name <|> constructor)
+  end <- getSourcePos
+  pure (\expr -> selector expr (Metadata start end) field)
+
+selectorPostfix :: Operator Parser (Expression Metadata ())
+selectorPostfix = Postfix (foldl (flip (.)) id <$> some parseSelectorOp)
+
 parseExpression :: Parser (Expression Metadata ())
-parseExpression = makeExprParser go operator
- where
-  go = do
-    e1 <-
-      try parseFunctionApplication
-        <|> parseDataConstructor
-        <|> parseLiteralExpression
-        <|> parseFoldExpression
-        <|> parseUnfoldExpression
-        <|> try parseLambdaMatchExpression
-        <|> parseMatchExpression
-        <|> parseRecordExpression
-        <|> parseIfExpression
-        <|> parseLambdaExpression
-        <|> parseLetExpression
-        <|> parseVariableExpression
-        <|> try (parens parseExpression)
-        <|> parseTupleExpression
-
-    selectors <-
-      many $ do
-        start' <- getSourcePos
-        field <- symbol_ "." *> (name <|> constructor)
-        end' <- getSourcePos
-        pure (field, Metadata start' end')
-
-    pure (foldl (\acc (field, meta) -> selector acc meta field) e1 selectors)
+parseExpression = makeExprParser parseAtom operator
 
 selector :: Expression Metadata () -> Metadata -> Name -> Expression Metadata ()
 selector expr loc lname
@@ -322,7 +323,8 @@ annotation = do
 
 operator :: [[Operator Parser (Expression Metadata ())]]
 operator =
-  [ fixity9
+  [ [selectorPostfix]
+  , fixity9
   , fixity8
   , fixity7
   , fixity6
