@@ -223,6 +223,8 @@ spec = do
   print (x == Right "2\n")
   x <- main105
   print (x == Right "100\n")
+  x <- main106
+  print (x == Right "2\n")
 
 --  x <- main85
 --  print (x == Right "aa\n")

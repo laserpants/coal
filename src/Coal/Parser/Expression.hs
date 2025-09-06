@@ -17,7 +17,7 @@ import Control.Monad (void)
 import Control.Monad.Combinators.Expr
 import Data.List.NonEmpty (NonEmpty (..))
 import Extra (Name, isConstructor)
-import Text.Megaparsec (getSourcePos, notFollowedBy, optional, some, try, (<|>))
+import Text.Megaparsec (getSourcePos, notFollowedBy, optional, some, many, try, (<|>))
 import Text.Megaparsec.Char (char)
 
 import qualified Data.List.NonEmpty as NonEmpty
@@ -28,7 +28,6 @@ parseExpression :: Parser (Expression Metadata ())
 parseExpression = makeExprParser go operator
  where
   go = do
-    start <- getSourcePos
     e1 <-
       try parseFunctionApplication
         <|> parseDataConstructor
@@ -44,9 +43,15 @@ parseExpression = makeExprParser go operator
         <|> parseVariableExpression
         <|> try (parens parseExpression)
         <|> parseTupleExpression
-    rest <- optional (symbol_ "." *> (name <|> constructor))
-    end <- getSourcePos
-    pure (maybe e1 (selector e1 (Metadata start end)) rest)
+
+    selectors <-
+      many $ do
+        start' <- getSourcePos
+        field <- symbol_ "." *> (name <|> constructor)
+        end' <- getSourcePos
+        pure (field, Metadata start' end')
+
+    pure (foldl (\acc (field, meta) -> selector acc meta field) e1 selectors)
 
 selector :: Expression Metadata () -> Metadata -> Name -> Expression Metadata ()
 selector expr loc lname
