@@ -21,10 +21,9 @@ import Coal.TypeSystem.Constraint.Generation.Internal
 import Coal.TypeSystem.Constraint.Generation.TypeAnnotation (instantiateAnnotation)
 import Control.Monad.Reader (asks)
 import Data.Data (Data)
-import Data.List.NonEmpty (NonEmpty (..), toList, (<|))
+import Data.List.NonEmpty (NonEmpty (..), toList)
 import Data.Maybe (maybeToList)
 import Data.Tuple.Extra (third3)
-import Debug.Trace
 import Extra
 
 import qualified Coal.Common.Environment as Environment
