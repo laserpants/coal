@@ -40,7 +40,7 @@ A distinction is made between ordinary, finite data, which is produced and consu
   let nats = enum_from(0)
 ```
 
-The `@` symbol appearing in the `fold` pattern variable (first example) as well as in the `unfold` field label (second example) give special meaning to these expressions. They are key to how recursion and corecursion is expressed in Coal. See **Recursion, corecursion, and codata** for a more detailed discussion.
+The `@` symbol appearing in the `fold` pattern variable (first example) and in the `unfold` field label (second example) gives special meaning to the expression in which context it appears. This syntax is key to how recursion and corecursion is expressed in Coal. See **Recursion, corecursion, and codata** for a more detailed discussion.
 
 ### Programs = Expressions + Effects
 
@@ -60,12 +60,16 @@ TODO
 
 ### Compiler
 
-TODO
+TODO 
 
 ```
-  + ------------ +        + ------------ +
-  |              |  >>>>  |              |
-  + ------------ +        + ------------ +
+                     +---------------------------------------+                
+                     |                                       |
+  +--------------+   |   +------------+       +----------+   |   +--------------+
+  |              |  >>>  |   Kernel   |  >>>  |   LLVM   |  >>>  |  Executable  |
+  +--------------+   |   +------------+       +----------+   |   +--------------+
+                     |                                       |
+                     +---------------------------------------+
 ```
 
 ## How to contribute
@@ -96,8 +100,6 @@ The `import` keyword is used to bring in functions and other definitions from ot
 import List(concat, head, tail)
 ```
 
-As in most other languages, import statements must appear at the beginning of a module, preceding any other code.
-
 A namespace import is a 
 
 ```
@@ -110,9 +112,31 @@ asdasdf
   let zs = List.concat(xs, ys)
 ```
 
+As in most other languages, import statements must appear at the beginning of a module, preceding any other code.
+
 ### Language constructs
 
 #### Top-level constructs
+
+##### Functions
+
+```
+  fun <name>(<arg_1>, <arg_2>, ..., <arg_n>) =
+    <expr>
+```
+
+```
+  fun is_even(n : int32) : bool =
+    n % 2 == 0
+```
+
+```
+  fun head(list : List<a>) : Option<a> =
+    match(list) {
+      | [] => None
+      | x :: _ => Some(x)
+    }
+```
 
 TODO
 
@@ -124,7 +148,7 @@ TODO
 
 ##### If-then-else
 
-If-expressions have a format similar to that found in most other functional languages, requiring both the `then` and `else` branches to be present and of the same type:
+If-expressions have a format similar to that found in most other languages in the functional family, requiring both the `then` and `else` branches to be present (and to have the same type):
 
 ```
   if (<e_1 : bool>) then <e_2 : t> else <e_3 : t>
@@ -137,31 +161,54 @@ A let-binding associates a name with an expression within a given scope:
 ```
   let <name> = <e_1> in <e_2>
 ```
+>  #### A note about let-generalization
+>
+> In Hindley-Milner languages, it is let-bindings that introduce polymorphism. Consider the following expression, which doesn't type check:
+> 
+> ```
+>     (fn(f) => (f(3 : int32), f("three")))(fn(x) => x)
+> ```
+> 
+> Here, the type of `f` is monomorphic. The type inference algorithm will try to determine its type but fail to unify `int32 -> int32` with `string -> string`.
+> If we instead bind the anonymous function to a new identifier, then its type is *generalized* and acquires the quantified type `∀a : a -> a` (known as a *type scheme*).
+> We can now apply this function to both elements of the tuple, even though they have two different types:
+> 
+> ```
+>     let id = fn(x) => x 
+>       in 
+>         (id(3), id("three"))
+> ```
 
-###### Polymorphism (type generalization)
+###### Top-level let-bindings
 
-In Hindley-Milner languages, it is let-bindings that effectuate polymorphism. Consider the following expression, which doesn't type check:
+.. look like those those used inside of an expression, except that there is no body:
 
 ```
-    (fn(f) => (f(3 : int32), f("three")))(fn(x) => x)
+  let <name> = <e>
 ```
 
-Here, the type of `f` is monomorphic. The type inference algorithm will try to determine its type but fail to unify `int32 -> int32` with `string -> string`.
-On the other hand, if we bind the anonymous function to a new variable `identity`, then its type is *generalized* and becomes a quantified type `∀a : a -> a`.
-We can now apply this function to both elements of the tuple, even though they have different types:
-
 ```
-    let identity = fn(x) => x 
-      in 
-        (identity(3), identity("three"))
+module Utils {
+
+  let days = 
+    [ "Monday"
+    , "Tuesday"
+    , "Wednesday"
+    , "Thursday"
+    , "Friday"
+    , "Saturday"
+    , "Sunday" 
+    ]
+
+}
 ```
 
 ###### Semantics
 
-A subtle but important detail that makes let-bindings in Coal different from those in most other languages is that the identifier introduced by a let-binding is not in scope within its own definition. 
+A subtle but important detail that makes let-bindings in Coal different from those in most other languages is that the identifier introduced by a let-binding is not in scope within the definition itself.  
 In other words, `let x = e1 in e2` makes `x` available only in `e2`. This prevents ill-formed expressions such as `let f = f in f`.
 But this 
-It is also why a function such as the standard factorial function is rejected by the compiler. As far as the compiler is concerned, a function defined at the top level is also (technically) a let-binding. 
+It is also why recursive functions such as the standard factorial function are rejected by the compiler. As far as the compiler is concerned, a function defined at the top level is also (technically) a let-binding. 
 
 ```
 let fact = 
@@ -171,7 +218,7 @@ let fact =
       else n * fact(n - 1) // <-- This will not work
 ```
 
-In OCaml (and F#) this same rule applies with regards to the standard `let` construct, but this can easily be overridden using the `let rec` keyword. 
+In OCaml (and F#) this same rule applies with regards to the standard `let` keyword. In these languages, this can easily be overridden using a `let rec` 
 
 ##### Comments
 
@@ -254,7 +301,7 @@ type Tree<a>
   | Node(a, Tree<a>, Tree<a>)
 ```
 
-Here is how a simple (nicely balanced) tree can be encoded with this type:
+Here is how a typical tree is encoded with this type:
 
 ```
 //          (4)
@@ -304,7 +351,11 @@ always working hand-in-hand with a recursive data structure like lists, trees, o
 
 If we want to .. similar to how a for-loop behaves in imperative programming languages.
 
-Ordinary (machine type) integers do not meet this requirement. 
+Ordinary (machine type) integers are insufficient
+
+do not meet this requirement. 
+
+
 Instead, we need to define a recursive number type. This is typically done according to the standard axiomatization of the natural numbers:
 
 > Every natural number is either zero or the successor of another natural number.
