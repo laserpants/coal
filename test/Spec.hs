@@ -821,7 +821,8 @@ main95 = do
 main96 :: IO (Either CompilerError Text)
 main96 = do
   runTestFiles
-    [ "./test/Coal/examples/96/Main.coal"
+    [ "./test/Coal/examples/96/List.coal"
+    , "./test/Coal/examples/96/Main.coal"
     ]
 
 main98 :: IO (Either CompilerError Text)

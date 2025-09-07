@@ -1,10 +1,6 @@
 module Main {
 
-  fun reduce(f : a -> b -> b, init : b, list : List<a>) : b =
-    fold(list, init) {
-      | [] => fn(r) => r
-      | q :: @go => fn(r) => go(f(q, r))
-    }
+  import List(reduce)
 
   fun to_comma_separated_str(strs : List<string>) : string =
     match(strs) {

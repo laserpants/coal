@@ -103,6 +103,13 @@ src
         └── Trigonometry.coal
 ```
 
+TODO
+
+```
+module Utils.Math.Trigonometry(sin, cos, tan) {
+  // ...
+```
+
 The `import` keyword is used to bring in functions and other definitions from other modules. 
 
 ```
