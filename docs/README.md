@@ -543,6 +543,10 @@ A valid type for the above record is:
 
 TODO
 
+#### Patterns
+
+Variable, tuple, record, etc..
+
 ### Traits
 
 Traits in Coal are similar to type classes in Haskell. A trait describes a collection of functions that must be defined for the underlying type. A common analogy is to think of them as interfaces in object-oriented programming. 
