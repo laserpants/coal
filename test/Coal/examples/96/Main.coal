@@ -1,12 +1,6 @@
 module Main {
 
-  import List(reduce)
-
-  fun to_comma_separated_str(strs : List<string>) : string =
-    match(strs) {
-      | [] => ""
-      | head :: tail => head +++ reduce(fn(t, s) => s +++ "," +++ t, "", tail)
-    }
+  import String(intercalate)
 
   type JsonValue
     = JsonNull
@@ -22,8 +16,8 @@ module Main {
     | JsonBool(true) => "true"
     | JsonNumber(d) => double_to_string(d)
     | JsonString(str) => "\"" +++ str +++ "\""
-    | JsonArray(encode_json_array(@values)) => "[" +++ to_comma_separated_str(values) +++ "]"
-    | JsonObject(encode_json_object(@key_value_pairs)) => "{" +++ to_comma_separated_str(key_value_pairs) +++ "}"
+    | JsonArray(encode_json_array(@values)) => "[" +++ intercalate(",", values) +++ "]"
+    | JsonObject(encode_json_object(@key_value_pairs)) => "{" +++ intercalate(",", key_value_pairs) +++ "}"
   }
 
   fold encode_json_array : List<JsonValue> -> List<string> {

@@ -1,0 +1,11 @@
+module String {
+
+  import List(reduce)
+
+  fun intercalate(sep : string, strs : List<string>) : string =
+    match(strs) {
+      | [] => ""
+      | head :: tail => head +++ reduce(fn(t, s) => s +++ sep +++ t, "", tail)
+    }
+
+}

@@ -822,6 +822,7 @@ main96 :: IO (Either CompilerError Text)
 main96 = do
   runTestFiles
     [ "./test/Coal/examples/96/List.coal"
+    , "./test/Coal/examples/96/String.coal"
     , "./test/Coal/examples/96/Main.coal"
     ]
 
