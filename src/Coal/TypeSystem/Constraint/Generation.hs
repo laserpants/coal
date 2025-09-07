@@ -359,7 +359,7 @@ emitConstraints =
     ELambdaMatch _ _ _ (Just e) ->
       emitConstraints e
     ECompiledMatch{} ->
-      error "TODO"
+      error "Not implemented"
     EUnaryOperator loc t op -> do
       tellRight [Explicit (RuleUnaryOperator loc) t (unaryOperatorTypeScheme op)]
       pure []
