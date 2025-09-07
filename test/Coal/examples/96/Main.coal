@@ -1,5 +1,17 @@
 module Main {
 
+  fun reduce(f : a -> b -> b, init : b, list : List<a>) : b =
+    fold(list, init) {
+      | [] => fn(r) => r
+      | q :: @go => fn(r) => go(f(q, r))
+    }
+
+  fun to_comma_separated_str(strs : List<string>) : string =
+    match(strs) {
+      | [] => ""
+      | head :: tail => head +++ reduce(fn(t, s) => s +++ "," +++ t, "", tail)
+    }
+
   type JsonValue
     = JsonNull
     | JsonBool(bool)
@@ -12,33 +24,32 @@ module Main {
     | JsonNull => "null"
     | JsonBool(false) => "false"
     | JsonBool(true) => "true"
-    | JsonNumber(d) => "TODO"
+    | JsonNumber(d) => double_to_string(d)
     | JsonString(str) => "\"" +++ str +++ "\""
-    | JsonArray(encode_json_array(@values)) => "[" +++ values +++ "]"
-    | JsonObject(encode_json_object(@key_value_pairs)) => "{" +++ key_value_pairs +++ "}"
+    | JsonArray(encode_json_array(@values)) => "[" +++ to_comma_separated_str(values) +++ "]"
+    | JsonObject(encode_json_object(@key_value_pairs)) => "{" +++ to_comma_separated_str(key_value_pairs) +++ "}"
   }
 
-  fold encode_json_array : List<JsonValue> -> string {
-    | [] => ""
-    | encode_json_value(@value) :: encode_json_array(@values) => 
-        value +++ "," +++ values
+  fold encode_json_array : List<JsonValue> -> List<string> {
+    | [] => []
+    | encode_json_value(@value) :: encode_json_array(@values) => value :: values
   }
 
-  fold encode_json_object : List<(string, JsonValue)> -> string {
-    | [] => ""
+  fold encode_json_object : List<(string, JsonValue)> -> List<string> {
+    | [] => []
     | (key, encode_json_value(@value)) :: encode_json_object(@pairs) => 
-        key +++ ":" +++ value +++ "," +++ pairs
-  }
+        let label = "\"" +++ key +++ "\":"
+        in (label +++ value) :: pairs
+  } 
 
   fun encode_json(value : JsonValue) = encode_json_value(value)
 
   let test_obj : JsonValue = 
     JsonObject(
       [ ("abc", JsonArray([JsonString("a"), JsonString("b"), JsonString("c")]))
-      , ("pi", JsonNumber(3.14159))
+      , ("pi", JsonNumber(3.141591415914159))
       ])
 
-  fun main() =
-    trace_string(encode_json(test_obj))
+  fun main() = trace_string(encode_json(test_obj))
 
 }
