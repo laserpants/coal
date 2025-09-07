@@ -236,8 +236,8 @@ instance (Pretty t, Show t) => Dot t (Expression a t) where
         fromNode (emitRectangle ("ECodataSelect\\n" <> name) (Just t)) $ do
           emitEdgeTo e
           emitEdgeTo me
-      ECodataFields _ t d -> do
-        fromNode (emitRectangle "ECodataFields" (Just t)) $
+      ECodataRecord _ t d -> do
+        fromNode (emitRectangle "ECodataRecord" (Just t)) $
           void (emitEdgeToFields (Map.toList d))
       EFocus name ll1 ll2 e1 e2 -> do
         fromNode (emitRectangle ("EFocus\\n" <> name) Nothing) $ do

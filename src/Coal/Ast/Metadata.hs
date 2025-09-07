@@ -59,7 +59,7 @@ instance HasMetadata (Expression Metadata t) where
       EFold a _ _ _ _ -> a
       ESelect a _ _ -> a
       ECodataSelect a _ _ _ -> a
-      ECodataFields a _ _ -> a
+      ECodataRecord a _ _ -> a
       ETraitDictionary a _ _ -> a
       EFocus{} -> error "Not implemented"
       ELambdaMatch{} -> error "Not implemented"

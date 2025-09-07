@@ -69,7 +69,7 @@ expandTopLevelUnfold var ps d = do
         name
         ( lambdaE
             ps
-            ( ECodataFields
+            ( ECodataRecord
                 mempty
                 ()
                 (Map.fromList d1)

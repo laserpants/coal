@@ -169,7 +169,7 @@ translateExpression =
       pure (Kernel.var (Label (translateType t) (dictVariable name trait)))
     EFold _ _ _ _ (Just e) ->
       translateExpression e
-    ECodataFields _ _ fields -> do
+    ECodataRecord _ _ fields -> do
       exprs <- traverse translateExpression fields
       let r = foldr (uncurry Kernel.ext) Kernel.nil (Map.toList exprs)
       pure $ makeRecord (Kernel.TCon "record" [Kernel.typeOf r]) r

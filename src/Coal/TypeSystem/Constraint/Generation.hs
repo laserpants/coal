@@ -391,7 +391,7 @@ emitConstraints =
     --      ms1 <- withMonomorphic qs (concatMapM emitConstraints d)
     --
     --      case e1 of
-    --        Just (ERecursiveLet _ _ (ELambda _ _ (ECodataFields _ _ fields)) _) -> do
+    --        Just (ERecursiveLet _ _ (ELambda _ _ (ECodataRecord _ _ fields)) _) -> do
     --          forM_ (Map.toList d) $
     --            \(name, elem) -> do
     --              q <- lookupCodataAccessor name
@@ -407,7 +407,7 @@ emitConstraints =
     --      names <- concatForM qs (patternConstraints (assertEqualityAssumptions loc) ms1)
     --
     --      pure (filter (assumptionNameIsNotOneOf (name : names)) (ms1 <> ms2))
-    ECodataFields _ _ d -> do
+    ECodataRecord _ _ d -> do
       concatMapM emitConstraints d
     ERecord loc t d me ->
       emitERecordConstraints loc t d me
