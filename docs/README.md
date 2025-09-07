@@ -331,7 +331,7 @@ type Tree<a>
   | Node(a, Tree<a>, Tree<a>)
 ```
 
-Here is how a typical tree is encoded with this type:
+Here is how a basic tree is encoded with this type:
 
 ```
 //          (4)
