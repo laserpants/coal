@@ -65,12 +65,10 @@ annotation = do
 
 operator :: [[Operator Parser (Pattern Metadata ())]]
 operator =
-  [ -- TODO
-
+  [
     [ InfixR (patternOperator PListCons <$ symbol_ "::")
     ]
-  , -- TODO
-
+  ,
     [ InfixL (patternOperator POr <$ lexeme "or")
     ]
   , [Postfix annotation]
