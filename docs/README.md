@@ -62,6 +62,12 @@ TODO
 
 TODO
 
+```
+  + ------------ +        + ------------ +
+  |              |  >>>>  |              |
+  + ------------ +        + ------------ +
+```
+
 ## How to contribute
 
 TODO
@@ -92,10 +98,16 @@ import List(concat, head, tail)
 
 As in most other languages, import statements must appear at the beginning of a module, preceding any other code.
 
-TODO
+A namespace import is a 
 
 ```
 import namespace List
+```
+
+asdasdf
+
+```
+  let zs = List.concat(xs, ys)
 ```
 
 ### Language constructs
@@ -104,13 +116,15 @@ import namespace List
 
 TODO
 
+<!--
 #### Control flow
 
 TODO
+-->
 
 ##### If-then-else
 
-If-expressions have a format similar to that found in most other languages: 
+If-expressions have a format similar to that found in most other functional languages, requiring both the `then` and `else` branches to be present and of the same type:
 
 ```
   if (<e_1 : bool>) then <e_2 : t> else <e_3 : t>
@@ -126,7 +140,7 @@ A let-binding associates a name with an expression within a given scope:
 
 ###### Polymorphism (type generalization)
 
-In Hindley-Milner languages, it is let-bindings that enable polymorphism. Consider the following expression, which doesn't type check:
+In Hindley-Milner languages, it is let-bindings that effectuate polymorphism. Consider the following expression, which doesn't type check:
 
 ```
     (fn(f) => (f(3 : int32), f("three")))(fn(x) => x)
@@ -134,7 +148,7 @@ In Hindley-Milner languages, it is let-bindings that enable polymorphism. Consid
 
 Here, the type of `f` is monomorphic. The type inference algorithm will try to determine its type but fail to unify `int32 -> int32` with `string -> string`.
 On the other hand, if we bind the anonymous function to a new variable `identity`, then its type is *generalized* and becomes a quantified type `∀a : a -> a`.
-We can now apply this function to both elements of the tuple, even though their types are different:
+We can now apply this function to both elements of the tuple, even though they have different types:
 
 ```
     let identity = fn(x) => x 
@@ -144,14 +158,10 @@ We can now apply this function to both elements of the tuple, even though their 
 
 ###### Semantics
 
-A subtle but important detail that makes let-bindings in Coal different from those in most other languages is that when you ...
-
-the name is not in scope inside the ?
-
-This prevents ill-formed expressions such as `let f = f in f`.
-
-As far as the compiler is concerned, a function defined at the top level is (technically) also a let-binding. 
-That is why a function such as the standard factorial function is rejected by the compiler.
+A subtle but important detail that makes let-bindings in Coal different from those in most other languages is that the identifier introduced by a let-binding is not in scope within its own definition. 
+In other words, `let x = e1 in e2` makes `x` available only in `e2`. This prevents ill-formed expressions such as `let f = f in f`.
+But this 
+It is also why a function such as the standard factorial function is rejected by the compiler. As far as the compiler is concerned, a function defined at the top level is also (technically) a let-binding. 
 
 ```
 let fact = 
@@ -160,6 +170,8 @@ let fact =
       then 1 
       else n * fact(n - 1) // <-- This will not work
 ```
+
+In OCaml (and F#) this same rule applies with regards to the standard `let` construct, but this can easily be overridden using the `let rec` keyword. 
 
 ##### Comments
 
@@ -744,7 +756,7 @@ let fact =
   in fact(5)
 ```
 
-In OCaml, for example, this same rule applies with regards to the default `let` 
+In OCaml, for example, this same rule applies with regards to the standard `let` 
 construct, but this can easily be overridden using the `let rec` keyword. As an
 aside, Coal actually has a recursive let binding too, but it is only available
 to the compiler.
