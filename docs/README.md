@@ -293,7 +293,7 @@ Integer literals introduced in code without an explicit type annotation, such as
 let answer = 42
 ```
 
-&hellip; are polymorphic. Their inferred type is `n with Numeric(n)`, which means that `n` can be any type, as long it is a member of the `Numeric` trait. This includes `int32`, `int64`, `bignum`, and `nat`. All `Numeric` types support the basic arithmetic operations of addition, subtraction, and multiplication.
+&hellip; are polymorphic. Their inferred type is `n with Numeric(n)`, which means that `n` can be any type, as long as it is a member of the `Numeric` trait. This includes `int32`, `int64`, `bignum`, and `nat`. All `Numeric` types support the basic arithmetic operations of addition, subtraction, and multiplication.
 
 ```
   // 
