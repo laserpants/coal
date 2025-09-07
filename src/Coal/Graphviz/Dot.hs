@@ -229,11 +229,6 @@ instance (Pretty t, Show t) => Dot t (Expression a t) where
           emitEdgesTo es
           emitEdgesTo cs
           emitEdgeTo me
-      EUnfold _ t name ps d me -> do
-        fromNode (emitRectangle ("EUnfold\\n" <> name) (Just t)) $ do
-          emitEdgesTo ps
-          void (emitEdgeToFields (Map.toList d))
-          emitEdgeTo me
       ESelect _ (Label t name) e -> do
         fromNode (emitRectangle ("ESelect\\n" <> name) (Just t)) $ do
           emitEdgeTo e

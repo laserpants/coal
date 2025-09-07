@@ -384,8 +384,6 @@ emitConstraints =
         _ ->
           pure ()
       pure (ms1 <> ms2 <> ms3 <> ms4)
-    EUnfold loc t name ps d e1 -> do
-      pure []
     --      t0 <- supplied (TVariable . TypeIndex KType)
     --      t1 <- supplied (TVariable . TypeIndex KType)
     --      let qs = PVariable loc (Label t name) <| ps

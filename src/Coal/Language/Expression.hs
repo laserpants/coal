@@ -61,9 +61,6 @@ data Expression a t
     ECompiledMatch a t (Expression a t) (NonEmpty (CompiledClause a t))
   | -- | Fold expression
     EFold a t (NonEmpty (Expression a t)) (NonEmpty (Clause a t)) (Maybe (Expression a t))
-  | -- | Codata unfold
-    -- TODO: replace with top level DUnfold
-    EUnfold a t Name (NonEmpty (Pattern a t)) (Dictionary (Expression a t)) (Maybe (Expression a t))
   | -- | Record field selector
     ESelect a (Label t) (Expression a t)
   | -- | Codata field selector

@@ -140,10 +140,6 @@ instance TreeTransform Expression t where
           <$> traverse (transform name f) es
           <*> traverse (transform name f) cs
           <*> traverse (transform name f) me
-      EUnfold a t u ps d me ->
-        EUnfold a t u ps
-          <$> traverse (transform name f) d
-          <*> traverse (transform name f) me
       ECodataSelect a ll e me ->
         ECodataSelect a ll
           <$> transform name f e

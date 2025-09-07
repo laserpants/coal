@@ -30,7 +30,7 @@ parseAtom =
     <|> parseDataConstructor
     <|> parseLiteralExpression
     <|> parseFoldExpression
-    <|> parseUnfoldExpression
+    --    <|> parseUnfoldExpression
     <|> try parseLambdaMatchExpression
     <|> parseMatchExpression
     <|> parseRecordExpression
@@ -121,16 +121,16 @@ parseFoldExpression = do
     cs <- braces (nonEmpty (some parseClause))
     pure (\loc -> EFold loc () es cs Nothing)
 
-parseUnfoldExpression :: Parser (Expression Metadata ())
-parseUnfoldExpression = do
-  withMetadata $ do
-    lexeme_ "unfold"
-    n <- symbol_ "@" *> name
-    ps <- parens (nonEmpty (commaSep1 parsePattern))
-    fields <- braces $ do
-      void $ optional (symbol ",")
-      fieldListWithKey constructor parseExpression "="
-    pure (\loc -> EUnfold loc () n ps (Map.fromList fields) Nothing)
+-- parseUnfoldExpression :: Parser (Expression Metadata ())
+-- parseUnfoldExpression = do
+--  withMetadata $ do
+--    lexeme_ "unfold"
+--    n <- symbol_ "@" *> name
+--    ps <- parens (nonEmpty (commaSep1 parsePattern))
+--    fields <- braces $ do
+--      void $ optional (symbol ",")
+--      fieldListWithKey constructor parseExpression "="
+--    pure (\loc -> EUnfold loc () n ps (Map.fromList fields) Nothing)
 
 parseVariableExpression :: Parser (Expression Metadata ())
 parseVariableExpression =
