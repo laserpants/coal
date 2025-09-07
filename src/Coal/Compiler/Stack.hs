@@ -73,13 +73,13 @@ evalCompilerT env com = do
   (c, _) <- runCompilerT env com
   pure c
 
-{-# INLINE compilerReportConstraintsGenErrors #-}
-compilerReportConstraintsGenErrors :: (Monad m) => [ConstraintsGenError a] -> CompilerT a m ()
-compilerReportConstraintsGenErrors errors = modify (overCompilerStateConstraintsGenErrors (<> errors))
-
 {-# INLINE compilerSetTypeAnnotationParams #-}
 compilerSetTypeAnnotationParams :: (Monad m) => Dictionary (a, TypeIndex Kind) -> CompilerT a m ()
 compilerSetTypeAnnotationParams params = modify (overCompilerTypeAnnotationParams (const params))
+
+{-# INLINE compilerReportConstraintsGenErrors #-}
+compilerReportConstraintsGenErrors :: (Monad m) => [ConstraintsGenError a] -> CompilerT a m ()
+compilerReportConstraintsGenErrors errors = modify (overCompilerStateConstraintsGenErrors (<> errors))
 
 {-# INLINE compilerReportSolverRuleViolations #-}
 compilerReportSolverRuleViolations :: (Monad m) => [InferenceRule Kind a] -> CompilerT a m ()
