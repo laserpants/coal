@@ -23,7 +23,7 @@ module Coal.Compiler.Stack (
   updateSupplyC,
   insertSupplyC,
   insertTypeDefinitionsC,
-  setSourceTextC,
+  setVerbatimSourceC,
   compilerReportConstraintsGenErrors,
   compilerReportSolverRuleViolations,
   compilerSetTypeAnnotationParams,
@@ -121,9 +121,9 @@ updateSupplyC supply = modify (overCompilerSupply (const supply))
 updateSubstitutionC :: (Monad m) => Substitution -> CompilerT a m ()
 updateSubstitutionC sub = modify (overCompilerSubstitution (const sub))
 
-{-# INLINE setSourceTextC #-}
-setSourceTextC :: (Monad m) => Text -> CompilerT a m ()
-setSourceTextC src = modify (overCompilerSourceText (const src))
+{-# INLINE setVerbatimSourceC #-}
+setVerbatimSourceC :: (Monad m) => Text -> CompilerT a m ()
+setVerbatimSourceC src = modify (overCompilerVerbatimSource (const src))
 
 {-# INLINE insertTypeDefinitionsC #-}
 insertTypeDefinitionsC :: (Monad m) => Name -> [Definition a Kind ()] -> CompilerT a m ()

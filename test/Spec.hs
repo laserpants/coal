@@ -1268,7 +1268,7 @@ run modules = do
       defs <- gets compilerTypeDefinitions
       let m2 = overModuleDefinitions (insertImportedTypes defs) m1
       m3 <- expandWhereClausesC m2
-      setSourceTextC src
+      setVerbatimSourceC src
       insertNamesC names
       case m3 of
         Module (Path path) _ defs -> do
@@ -1290,7 +1290,7 @@ compileModule x = do
     errs@(_ : _) ->
       forM_ errs $
         \err -> do
-          src <- gets compilerSourceText
+          src <- gets compilerVerbatimSource
           let msg = prettyErrorMessage [Text.pack (show err)] src err
           throwError (CompilerError msg)
     [] ->
@@ -1302,7 +1302,7 @@ compileModule x = do
     errs@(_ : _) ->
       forM_ errs $
         \err -> do
-          src <- gets compilerSourceText
+          src <- gets compilerVerbatimSource
           let msg =
                 prettyErrorMessage
                   [ "\nType error:"
@@ -1327,7 +1327,7 @@ compileModule x = do
         \Assumption{..} ->
           -- TODO: Maybe look up these in environment and add additional constraints
           unless ("!" `Text.isPrefixOf` assumptionName) $ do
-            src <- gets compilerSourceText
+            src <- gets compilerVerbatimSource
             let msg =
                   prettyErrorMessage
                     [ "\nName not in scope:"

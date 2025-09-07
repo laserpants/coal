@@ -14,7 +14,7 @@ module Coal.Compiler.State (
   overCompilerTypeAnnotationParams,
   overCompilerStateConstraintsGenErrors,
   overCompilerTypeDefinitions,
-  overCompilerSourceText,
+  overCompilerVerbatimSource,
   initialCompilerState,
 ) where
 
@@ -40,7 +40,7 @@ data CompilerState a = CompilerState
   , compilerAssumptions :: [CompilerAssumption a]
   , compilerTypeAnnotationParams :: Dictionary (a, TypeIndex Kind)
   , compilerTypeDefinitions :: Environment [Definition a Kind ()]
-  , compilerSourceText :: Text
+  , compilerVerbatimSource :: Text
   }
   deriving (Show, Eq, Ord, Read)
 
@@ -84,9 +84,9 @@ overCompilerSolverRuleViolations fn CompilerState{..} = CompilerState{compilerSo
 overCompilerTypeDefinitions :: Over (CompilerState a) (Environment [Definition a Kind ()])
 overCompilerTypeDefinitions fn CompilerState{..} = CompilerState{compilerTypeDefinitions = fn compilerTypeDefinitions, ..}
 
-{-# INLINE overCompilerSourceText #-}
-overCompilerSourceText :: Over (CompilerState a) Text
-overCompilerSourceText fn CompilerState{..} = CompilerState{compilerSourceText = fn compilerSourceText, ..}
+{-# INLINE overCompilerVerbatimSource #-}
+overCompilerVerbatimSource :: Over (CompilerState a) Text
+overCompilerVerbatimSource fn CompilerState{..} = CompilerState{compilerVerbatimSource = fn compilerVerbatimSource, ..}
 
 initialCompilerState :: CompilerState a
 initialCompilerState =
@@ -99,6 +99,6 @@ initialCompilerState =
     , compilerSolverRuleViolations = []
     , compilerAssumptions = []
     , compilerTypeAnnotationParams = mempty
-    , compilerSourceText = mempty
+    , compilerVerbatimSource = mempty
     , compilerTypeDefinitions = mempty
     }
