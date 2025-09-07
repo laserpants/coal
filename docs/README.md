@@ -136,7 +136,7 @@ As in most other languages, import statements must appear at the beginning of a 
 
 ##### Functions
 
-A function is defined using the `fun` keyword, followed by the function's namne and a list of comma-separated arguments enclosed in parentheses.
+A function is defined using the `fun` keyword, followed by the function's name and a list of comma-separated arguments enclosed in parentheses.
 
 ```
   fun <name>(<arg_1>, <arg_2>, ..., <arg_n>) =
@@ -604,7 +604,7 @@ TODO
 
 ### Recursion, corecursion, and codata
 
-In most languages, a typical implementation of the factorial function would look something like the following:
+In most languages, a typical implementation of the factorial function looks something like the following:
 
 ```
 fun factorial(n : int32) =
@@ -622,9 +622,8 @@ If we pass this function to the Coal compiler, it is rejected with the following
 Name not in scope: factorial
 ```
 
-Calling a function from within itself in this way is not possible in Coal.
-Instead, recursion needs to be expressed in terms of a pattern know as a *fold*. 
-A fold takes some collection of data and combines it into a single value.
+Referencing a function from within itself in this way is not possible in Coal. Instead, recursion needs to be expressed in terms of a pattern know as a *fold*. 
+A fold takes some collection of data and combines it into a single result.
 A common instance is where an array of numbers is reduced into a single value, for example by adding
 
 ```
@@ -648,19 +647,18 @@ We are going to use the `nat` data type to define the factorial function:
 
 The key here is the special `@`-pattern used in the second clause. 
 
-Note that `p` is not an ordinary variable
+Note that `p` is not an ordinary variable. .. and evaluates fold recursively with the value 
 
 ```
       | Succ(r) as m =>
           m * fold(r)
 ```
 
-This type of pattern is subject to some rules. Most importantly, it can only appear inside a constructor. 
+This type of pattern is subject to specific rules. Most importantly, it can only appear inside a constructor. 
 For structural recursion to work, progress must be guaranteed in each iterative step. The constructor rule is how this is enforced by the language, since 
-the data inside of the constructor is structurally 
-This follows the basic principles of induction in mathematics.
+the data inside of the constructor is structurally smaller 
 
-The following is not possible:
+The following is therefore not possible:
 
 ```
     fold(n) {
@@ -672,12 +670,51 @@ The following is not possible:
 
 The type of folds we have seen so far are ...
 
+```
+module Json {
+
+  import String(intercalate)
+
+  type JsonValue
+    = JsonNull
+    | JsonBool(bool)
+    | JsonNumber(double)
+    | JsonString(string)
+    | JsonArray(List<JsonValue>)
+    | JsonObject(List<(string, JsonValue)>)
+
+  fold encode_json_value : JsonValue -> string {
+    | JsonNull => "null"
+    | JsonBool(false) => "false"
+    | JsonBool(true) => "true"
+    | JsonNumber(d) => double_to_string(d)
+    | JsonString(str) => "\"" +++ str +++ "\""
+    | JsonArray(encode_json_array(@values)) => "[" +++ intercalate(",", values) +++ "]"
+    | JsonObject(encode_json_object(@key_value_pairs)) => "{" +++ intercalate(",", key_value_pairs) +++ "}"
+  }
+
+  fold encode_json_array : List<JsonValue> -> List<string> {
+    | [] => []
+    | encode_json_value(@value) :: encode_json_array(@values) => value :: values
+  }
+
+  fold encode_json_object : List<(string, JsonValue)> -> List<string> {
+    | [] => []
+    | (key, encode_json_value(@value)) :: encode_json_object(@pairs) => 
+        let label = "\"" +++ key +++ "\":" in (label +++ value) :: pairs
+  } 
+
+  fun encode_json(value : JsonValue) = encode_json_value(value)
+
+}
+```
+
 #### Duality
 
-|                    | Access pattern        | Structure             | Evaluation strategy  |
-| ------------------ | ----------------------| --------------------- | -------------------- |
-| **Data**           | Recursion (fold)      | Always finite         | Eager (strict)       |
-| **Codata**         | Corecursion (unfold)  | Potentially infinite  | Lazy (non-strict)    | 
+|                    | Access pattern        | Structure             | Evaluation strategy  | Invariant               |
+| ------------------ | ----------------------| --------------------- | -------------------- | ----------------------- |
+| **Data**           | Recursion (fold)      | Always finite         | Eager (strict)       |                         |
+| **Codata**         | Corecursion (unfold)  | Potentially infinite  | Lazy (non-strict)    |                         |
 
 ## License 
 
