@@ -17,7 +17,7 @@ Coal is a declarative, purely functional programming language with
 
 ### Rethinking recursion
 
-As a [total](https://en.wikipedia.org/wiki/Total_functional_programming) language, Coal takes a different approach to recursion, following the motto that "[explicit] recursion is [the GOTO of functional programming](https://www.semanticscholar.org/paper/Functional-Programming-with-Bananas%2C-Lenses%2C-and-Meijer-Fokkinga/5db3c6793c07285bf0f5e95fe5a25f53e7488051)." To ensure that programs are provably terminating, recursion is only available in a restricted form, known as *structural recursion*. In this paradigm, each recursive call operates on a strictly smaller part of some finite data structure, progressing toward a base case. 
+As a [total](https://en.wikipedia.org/wiki/Total_functional_programming) language, Coal takes a different approach to recursion, following the motto that "[explicit] recursion is [the GOTO of functional programming](https://www.semanticscholar.org/paper/Functional-Programming-with-Bananas%2C-Lenses%2C-and-Meijer-Fokkinga/5db3c6793c07285bf0f5e95fe5a25f53e7488051)." To ensure that programs are provably terminating, recursion is only available in a restricted form, known as *structural recursion*. In this scheme, each recursive call operates on a strictly smaller part of some finite data structure, progressing toward a base case. 
 
 ```
   fun sum(numbers : List<int32>) : int32 =
@@ -27,7 +27,7 @@ As a [total](https://en.wikipedia.org/wiki/Total_functional_programming) languag
     }
 ```
 
-A distinction is made between ordinary, finite data, which is produced and consumed in this way, and potentially infinite data, which may arise from processes that do not terminate. The latter is known as *codata*. The codata equivalent of lists, for example, are streams.
+A distinction is made between ordinary, finite data, which is produced and consumed in this way, and potentially infinite data, which may arise from processes that run indefinitely. The latter is known as *codata*. The codata equivalent of lists, for example, are streams.
 
 ```
   cotype Stream<a> = { Head : a, Tail : Stream<a> }
@@ -40,7 +40,7 @@ A distinction is made between ordinary, finite data, which is produced and consu
   let nats = enum_from(0)
 ```
 
-The `@` symbol appearing in the `fold` pattern variable (first example) and in the `unfold` field label (second example) gives special meaning to the expression in which context it appears. This syntax is key to how recursion and corecursion is expressed in Coal. See **Recursion, corecursion, and codata** for a more detailed discussion.
+The `@` symbol appearing in the `fold` pattern variable (first example) and in the `unfold` field label (second example) gives special meaning to the expression context where it appears. This syntax is key to how recursion and corecursion is expressed in Coal. See **Recursion, corecursion, and codata** for a more detailed discussion.
 
 ### Programs = Expressions + Effects
 
@@ -128,6 +128,8 @@ As in most other languages, import statements must appear at the beginning of a 
 #### Top-level constructs
 
 ##### Functions
+
+A function is defined using the `fun` keyword, followed by the function's namne and a list of comma-separated arguments enclosed in parentheses.
 
 ```
   fun <name>(<arg_1>, <arg_2>, ..., <arg_n>) =
@@ -230,6 +232,14 @@ This is why functions such as the standard factorial function are rejected by th
 
 In OCaml (and F#) this same rule actually applies with regards to the standard `let` keyword. In these languages, a `let rec`
 this can easily be overridden using a `let rec` 
+
+##### Lambda expressions
+
+TODO
+
+```
+  fn(x) => x + 1
+```
 
 ##### Comments
 
