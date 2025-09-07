@@ -207,6 +207,10 @@ spec = do
   --  print (x == Right "{\"abc\":[\"a\",\"b\",\"c\"],\"pi\":3.14159}\n")
   x <- main84
   print (x == Right "true\n")
+  x <- main93
+  print (x == Right "7\n")
+  x <- main96
+  print (x == Right "{\"abc\":[\"a\",\"b\",\"c\"],\"pi\":3.14159}\n")
   x <- main98
   print (x == Right "3\n")
   x <- main99
