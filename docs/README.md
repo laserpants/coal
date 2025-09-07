@@ -94,13 +94,22 @@ module MerkleTree {
 }
 ```
 
+The module `Utils.Math.Trigonometry` is 
+
+```
+src
+└── Utils
+    └── Math
+        └── Trigonometry.coal
+```
+
 The `import` keyword is used to bring in functions and other definitions from other modules. 
 
 ```
 import List(concat, head, tail)
 ```
 
-A namespace import is a 
+A namespace import makes it possible to bring in an entire module .. qualified
 
 ```
 import namespace List
@@ -205,10 +214,8 @@ module Utils {
 
 ###### Semantics
 
-A subtle but important detail that makes let-bindings in Coal different from those in most other languages is that the identifier introduced by a let-binding is not in scope within the definition itself.  
-In other words, `let x = e1 in e2` makes `x` available only in `e2`. This prevents ill-formed expressions such as `let f = f in f`.
-But this 
-It is also why recursive functions such as the standard factorial function are rejected by the compiler. As far as the compiler is concerned, a function defined at the top level is also (technically) a let-binding. 
+A subtle but important detail that makes let-bindings in Coal different from those in most other languages is that the identifier introduced by a let-binding is **not in scope within the definition itself**. In other words, `let x = e1 in e2` makes `x` available only in `e2`. This prevents ill-formed expressions such as `let f = f in f`.
+As far as the compiler is concerned, a function defined at the top level has the form:
 
 ```
 let fact = 
@@ -218,7 +225,11 @@ let fact =
       else n * fact(n - 1) // <-- This will not work
 ```
 
-In OCaml (and F#) this same rule applies with regards to the standard `let` keyword. In these languages, this can easily be overridden using a `let rec` 
+More generally, it makes it impossible for any function to call itself. (explicit recursion) 
+This is why functions such as the standard factorial function are rejected by the compiler. 
+
+In OCaml (and F#) this same rule actually applies with regards to the standard `let` keyword. In these languages, a `let rec`
+this can easily be overridden using a `let rec` 
 
 ##### Comments
 
@@ -349,7 +360,7 @@ stepwise peel of layers of data constructors ..?
 
 always working hand-in-hand with a recursive data structure like lists, trees, or other algebraic data types. 
 
-If we want to .. similar to how a for-loop behaves in imperative programming languages.
+If we want to use an integer counter, similar to how for-loops behaves in imperative programming languages.
 
 Ordinary (machine type) integers are insufficient
 
@@ -375,7 +386,7 @@ The number five, for example, would then be written:
 Succ(Succ(Succ(Succ(Succ(Zero)))))
 ```
 
-Writing numbers in this syntax quickly becomes tedious. Fortunately, we do not have to.
+Writing numbers in this way quickly becomes tedious. Fortunately, it is not necessary.
 
 Internally, the compiler stores values of type `nat` as normal integers. 
 
@@ -384,7 +395,7 @@ pack_nat : int32 -> nat
 unpack_nat : nat -> int32
 ```
 
-These are constant time (**O**(1)) operations
+Converting back and forth between these are constant time (**O**(1)) operations.
 
 #### Lists
 
@@ -396,12 +407,7 @@ In Coal, list literals are denoted by a sequence of comma-separated expressions,
 [<expr_1 : t>, <expr_2 : t>, ..., <expr_n : t>] : List<t>
 ```
 
-The `List` type is defined inductively, and implemented as a one-way *linked list* of nodes. This means that a list of type `List<a>` is either:
-
-- The empty list; or
-- A value of type `a`, coupled with another `List<a>` list. 
-
-These last two are usually referred to as the *head* and *tail* of the list. 
+The `List` type is defined inductively, and implemented as a one-way *linked list* of nodes. This means that a list of type `List<a>` is either (1) the empty list; or (2) a value of type `a`, coupled with another `List<a>` list. These last two are usually referred to as the *head* and *tail* of the list. 
 
 ```
 type List<a>
@@ -419,12 +425,7 @@ type Option<a>
 
 #### Tuples
 
-Just like lists, tuples are ordered sequences of values. Unlike lists, however:
-
-1. A tuple's length is fixed (i.e. determined at compile-time), and
-2. Its elements can have different types.
-
-In code, a tuple is written as a comma-separated sequence of expressions enclosed in parentheses:
+Just like lists, tuples are ordered sequences of values. Unlike lists, however, a tuple's length is fixed (i.e. determined at compile-time), and its elements can have different types. In code, a tuple is written as a comma-separated sequence of expressions enclosed in parentheses:
 
 ```
 (<expr_1 : t_1>, <expr_2 : t_2>, ..., <expr_n : t_n>) : (t_1, t_2, ..., t_n)
