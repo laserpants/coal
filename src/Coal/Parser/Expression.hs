@@ -12,8 +12,7 @@ import Coal.Parser.Pattern (parsePattern)
 import Coal.Parser.Primitive (parsePrimitive)
 import Coal.Parser.Symbol
 import Coal.Parser.Type (parseType)
-import Coal.Parser.Utils (fieldList, fieldListWithKey)
-import Control.Monad (void)
+import Coal.Parser.Utils (fieldList)
 import Control.Monad.Combinators.Expr
 import Data.List.NonEmpty (NonEmpty (..))
 import Extra (Name, isConstructor)
@@ -30,7 +29,6 @@ parseAtom =
     <|> parseDataConstructor
     <|> parseLiteralExpression
     <|> parseFoldExpression
-    --    <|> parseUnfoldExpression
     <|> try parseLambdaMatchExpression
     <|> parseMatchExpression
     <|> parseRecordExpression
@@ -120,17 +118,6 @@ parseFoldExpression = do
     es <- parens (nonEmpty (commaSep1 parseExpression))
     cs <- braces (nonEmpty (some parseClause))
     pure (\loc -> EFold loc () es cs Nothing)
-
--- parseUnfoldExpression :: Parser (Expression Metadata ())
--- parseUnfoldExpression = do
---  withMetadata $ do
---    lexeme_ "unfold"
---    n <- symbol_ "@" *> name
---    ps <- parens (nonEmpty (commaSep1 parsePattern))
---    fields <- braces $ do
---      void $ optional (symbol ",")
---      fieldListWithKey constructor parseExpression "="
---    pure (\loc -> EUnfold loc () n ps (Map.fromList fields) Nothing)
 
 parseVariableExpression :: Parser (Expression Metadata ())
 parseVariableExpression =
