@@ -143,6 +143,8 @@ A function is defined using the `fun` keyword, followed by the function's name a
     <expr>
 ```
 
+To be more specific, `<arg_1>, <arg_2>, ..., <arg_n>` in the above are *patterns*.
+
 ```
   fun is_even(n : int32) : bool =
     n % 2 == 0
@@ -645,13 +647,14 @@ We are going to use the `nat` data type to define the factorial function:
     }
 ```
 
-The key here is the special `@`-pattern used in the second clause. 
+The real _ here is done by the `@`-pattern used in the second clause. 
 
 Note that `p` is not an ordinary variable. .. and evaluates fold recursively with the value 
 
+The result is the same as ...
+
 ```
-      | Succ(r) as m =>
-          m * fold(r)
+      | Succ(r) as m => m * fold(r)
 ```
 
 This type of pattern is subject to specific rules. Most importantly, it can only appear inside a constructor. 
