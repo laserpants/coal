@@ -40,12 +40,12 @@ A distinction is made between ordinary, finite data, which is produced and consu
   let nats = enum_from(0)
 ```
 
-The `@` symbol which appears in these two examples gives special meaning to the expression where it appears. 
+The `@` symbol that shows up in these two examples gives special meaning to the expression where it appears. 
 familiar with recursion schemes, this 
 
-In the first example `fold` pattern variable (first example) it means that `tot` recieves the result from calling the fold recursively with the list that appears in the location of ..?
+In the first example, the `fold` pattern variable .. means that `tot` recieves the result from calling the fold recursively with the list that appears in the location of ..?
 
-In the `unfold` field label (second example) the value on the right-hand side is used as input to call the function again
+In the `unfold` field label (second example), the value on the right-hand side becomes the input to call the function again
 
 This is how recursion and corecursion is expressed in Coal. Scroll down to **Recursion, corecursion, and codata** for a more detailed discussion.
 
