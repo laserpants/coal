@@ -58,6 +58,9 @@ instance (FoldContext e) => FoldContext (NonEmpty e) where
 instance (Monoid a, Data a) => FoldContext (Clause a ()) where
   expandFolds name _ =
     \case
+      EClause _ PAtVariable{} _ ->
+        -- TODO
+        error "Fold-pattern outside constructor"
       EClause a p cs ->
         EClause
           a
