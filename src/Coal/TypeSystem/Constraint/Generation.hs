@@ -302,6 +302,16 @@ tupleScheme n = Forall (Set.fromList (toList ixs)) [] (tupleType (TVariable <$> 
  where
   ixs = TypeIndex KType 0 :| [TypeIndex KType ti | ti <- [1 .. n - 1]]
 
+emitMatchConstraints :: (Show a, Data a) => a -> IndexedType -> Expression a IndexedType -> NonEmpty (Clause a IndexedType) -> ConstraintsGen a [Assumption a IndexedType]
+emitMatchConstraints loc t e cs = do
+  ms1 <- emitConstraints e
+  (ts1, ts2, ms2) <- (third3 concat . unzip3 <$$> traverse clauseAssumptions) (toList cs)
+  -- Pattern types
+  tellRight [Equality (RuleMatchClausePatterns loc) (typeOf e : ts1)]
+  -- Expression types
+  tellRight [Equality (RuleMatchClauseExpressions loc) (t : concat ts2)]
+  pure (ms1 <> ms2)
+
 emitConstraints :: (Show a, Data a) => Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
 emitConstraints =
   \case
@@ -348,14 +358,8 @@ emitConstraints =
       emitEListConsConstraints loc t e1 e2
     EListLiteral loc t es ->
       emitEListLiteralConstraints loc t es
-    EMatch loc t e cs -> do
-      ms1 <- emitConstraints e
-      (ts1, ts2, ms2) <- (third3 concat . unzip3 <$$> traverse clauseAssumptions) (toList cs)
-      -- Pattern types
-      tellRight [Equality (RuleMatchClausePatterns loc) (typeOf e : ts1)]
-      -- Expression types
-      tellRight [Equality (RuleMatchClauseExpressions loc) (t : concat ts2)]
-      pure (ms1 <> ms2)
+    EMatch loc t e cs ->
+      emitMatchConstraints loc t e cs
     ELambdaMatch _ _ _ (Just e) ->
       emitConstraints e
     ECompiledMatch{} ->
