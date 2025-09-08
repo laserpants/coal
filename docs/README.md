@@ -40,14 +40,10 @@ A distinction is made between ordinary, finite data, which is produced and consu
   let nats = enum_from(0)
 ```
 
-The `@` symbol that shows up in these two examples gives special meaning to the expression where it appears. 
-familiar with recursion schemes, this 
-
-In the first example, the `fold` pattern variable .. means that `tot` recieves the result from calling the fold recursively with the list that appears in the location of ..?
-
-In the `unfold` field label (second example), the value on the right-hand side becomes the input to call the function again
-
-This is how recursion and corecursion is expressed in Coal. Scroll down to **Recursion, corecursion, and codata** for a more detailed discussion.
+The `@` symbol that appears in these examples describe two kinds of recursive control flow. 
+In the first example, the `fold` pattern variable means that `tot` recieves the result from calling the fold again using the sub-list matched by the pattern. In the second example, the expression on the right (`n + 1`) becomes the next seed value, which is fed back into `enum_from` to generate the rest of the stream.
+If you are familiar with [recursion schemes](https://blog.sumtypeofway.com/posts/introduction-to-recursion-schemes.html) in a language like Haskell, these rules are based on exactly the same principles.
+Scroll down to **Recursion, corecursion, and codata** for a more detailed explanation of how the `fold` and `unfold` syntaxes work in Coal.
 
 ### Programs = Expressions + Effects
 
@@ -150,12 +146,12 @@ A function is defined using the `fun` keyword, followed by the function's name a
     <expr>
 ```
 
-To be more specific, `<arg_1>, <arg_2>, ..., <arg_n>` in the above are *patterns*.
-
 ```
   fun is_even(n : int32) : bool =
     n % 2 == 0
 ```
+
+To be more specific, `<arg_1>, <arg_2>, ..., <arg_n>` in the above are *patterns*.
 
 ```
   fun head(list : List<a>) : Option<a> =
@@ -530,7 +526,7 @@ let five = curry(add, 1, 4)         // or (curry(add))(1, 4)
 
 #### Records
 
-Records are unordered collections of name-value pairs, where the values can be of any type, including other records. They are suitable for representing structured data with multiple properties, and nested objects: A record is written as a sequence of comma-separated *fields* enclosed in curly braces. A field consists of a name, referred to as the *label*, paired with a value. These two are separated by an equals sign (`=`). 
+Records are unordered collections of name-value pairs in which the values can be of arbitrary type, including other records. They are suitable for representing structured data with multiple properties, and nested objects: A record is written as a sequence of comma-separated *fields* enclosed in curly braces. A field consists of a name, referred to as the *label*, paired with a value. These two are separated by an equals sign (`=`). 
 
 ```
 { 
