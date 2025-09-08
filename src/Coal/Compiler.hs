@@ -176,6 +176,8 @@ placeholderInsertionC = overModuleDefinitionsM (traverse go)
             _ ->
               error "TODO"
         pure (DInstance loc name (InstanceDef ts1 t1 es))
+      d@DFold{} ->
+        placeholderTrans expandTraits d
       d@DUnfold{} ->
         placeholderTrans expandTraits d
       d ->
