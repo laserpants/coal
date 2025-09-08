@@ -49,6 +49,7 @@ data TypeAnnotationError a
 data ConstraintsGenError a
   = ENoDataConstructor a Name
   | ENoCodataAccessor a Name
+  | ECodataFieldMismatch a
   | EDataConstructorArityMismatch a Name Int Int
   | EIllFormedTypeAnnotation (TypeAnnotationError a)
   deriving (Show, Eq, Ord, Read)

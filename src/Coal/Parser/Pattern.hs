@@ -15,42 +15,29 @@ import Control.Monad (void)
 import Control.Monad.Combinators.Expr
 import Data.Char (ord)
 import Data.List.NonEmpty (NonEmpty (..))
-import Text.Megaparsec (getSourcePos, option, optional, try, (<|>))
+import Text.Megaparsec (getSourcePos, option, optional, some, try, (<|>))
 import Text.Megaparsec.Char (char)
 
 import qualified Data.Map.Strict as Map
 import qualified Text.Megaparsec.Char.Lexer as Lexer
 
-parseUnitPattern :: Parser (NonEmpty (Pattern Metadata ()))
-parseUnitPattern =
-  withMetadata $ do
-    pure (\loc -> PLiteral loc LUnit :| [])
+parseAtomPattern :: Parser (Pattern Metadata ())
+parseAtomPattern =
+  parseConstructorPattern
+    <|> parseAtVariablePattern
+    <|> parseLiteralPattern
+    <|> parseRecordPattern
+    <|> parseAnyPattern
+    <|> try parseAtFunction
+    <|> parseVariablePattern
+    <|> try (parens parsePattern)
+    <|> parseTuplePattern
 
 parsePattern :: Parser (Pattern Metadata ())
-parsePattern = makeExprParser go operator
- where
-  go = do
-    start <- getSourcePos
-    p1 <-
-      parseConstructorPattern
-        <|> parseAtVariablePattern
-        <|> parseLiteralPattern
-        <|> parseRecordPattern
-        <|> parseAnyPattern
-        <|> try parseAtFunction
-        <|> parseVariablePattern
-        <|> try (parens parsePattern)
-        <|> parseTuplePattern
-    rest <- optional $ do
-      lexeme_ "as"
-      p2 <- parsePattern
-      case p2 of
-        PVariable _ (Label _ n) ->
-          pure (Label () n)
-        _ ->
-          fail "Expected variable on right-hand side of 'as'"
-    end <- getSourcePos
-    pure (maybe p1 (\n -> PAs (Metadata start end) n p1) rest)
+parsePattern = makeExprParser parseAtomPattern patternOperators
+
+parseUnitPattern :: Parser (NonEmpty (Pattern Metadata ()))
+parseUnitPattern = withMetadata $ pure (\loc -> PLiteral loc LUnit :| [])
 
 patternOperator :: (Metadata -> () -> Pattern Metadata () -> Pattern Metadata () -> Pattern Metadata ()) -> Pattern Metadata () -> Pattern Metadata () -> Pattern Metadata ()
 patternOperator op p1 p2 = op (metadataSpan p1 p2) () p1 p2
@@ -63,15 +50,23 @@ annotation = do
   end <- getSourcePos
   pure (PAnnotation (Metadata start end) t)
 
-operator :: [[Operator Parser (Pattern Metadata ())]]
-operator =
-  [
-    [ InfixR (patternOperator PListCons <$ symbol_ "::")
-    ]
-  ,
-    [ InfixL (patternOperator POr <$ lexeme "or")
-    ]
-  , [Postfix annotation]
+asPattern :: Parser (Pattern Metadata () -> Pattern Metadata ())
+asPattern = do
+  start <- getSourcePos
+  lexeme_ "as"
+  p2 <- parseVariablePattern
+  end <- getSourcePos
+  case p2 of
+    PVariable _ (Label _ n) ->
+      pure (PAs (Metadata start end) (Label () n))
+    _ ->
+      fail "Expected variable on right-hand side of 'as'"
+
+patternOperators :: [[Operator Parser (Pattern Metadata ())]]
+patternOperators =
+  [ [InfixR (patternOperator PListCons <$ symbol_ "::")]
+  , [InfixL (patternOperator POr <$ lexeme "or")]
+  , [Postfix (foldl (.) id <$> some (asPattern <|> annotation))]
   ]
 
 parseAnyPattern :: Parser (Pattern Metadata ())

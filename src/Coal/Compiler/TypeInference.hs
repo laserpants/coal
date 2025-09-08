@@ -8,6 +8,7 @@
 module Coal.Compiler.TypeInference (typeDefinitionsC) where
 
 import Coal.Common.Environment (Environment (..))
+import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (supplied)
 import Coal.Compiler.Stack
@@ -21,12 +22,10 @@ import Control.Monad.Writer (execWriter)
 import Data.Data (Data)
 import Data.Either.Extra (partitionEithers)
 import Data.List.NonEmpty (NonEmpty (..))
-import Debug.Trace
-import Extra (Dictionary, Name, forM_, void)
-
-import qualified Coal.Common.Environment as Environment
+import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
+import Extra (Dictionary, Name, forM, forM_, void, (<$$>))
 
 type ConstraintsGenResult c o a t s = (s, Dictionary (c, o a), [ConstraintsGenOutput c o a t])
 
@@ -176,11 +175,32 @@ compileDefinitionC =
       (r, _, _) <- runConstraintsGenC (instantiateAnnotation loc t)
       case r of
         Left err ->
-          --          error (show err)
           compilerReportConstraintsGenErrors [EIllFormedTypeAnnotation err]
         Right t2 -> do
           let t3 = foldType t2 (typeOf <$> ps)
+              fields = Map.toList d
           insertConstraintsC [Equality (RuleAnnotation loc t1 t3) [t1, t3]]
+
+          cs <- concat <$$> forM fields $
+            \(name, elem1) -> do
+              env <- asks compilerCodataAccessorEnvironment
+              case Environment.lookup (Text.replace "@" "" name) env of
+                Just CodataAccessor{..} -> do
+                  if "@" `Text.isPrefixOf` name
+                    then pure [Equality InferenceRulePlaceholder [typeOf (NonEmpty.head ps), typeOf elem1]]
+                    else pure [Explicit InferenceRulePlaceholder (t2 `TArrow` typeOf elem1) codataAccessorScheme]
+                Nothing ->
+                  pure []
+          if length cs == length fields
+            then insertConstraintsC cs
+            else compilerReportConstraintsGenErrors [ECodataFieldMismatch loc]
+
+    -- case (q, Map.lookup ("$_" <> name) fields) of
+    --  (Just CodataAccessor{..}, Just e4) -> do
+    --    t3 <- supplied (TVariable . TypeIndex KType)
+    --    tellRight [Explicit InferenceRulePlaceholder (t0 `TArrow` typeOf elem) codataAccessorScheme]
+    --    tellRight [Equality InferenceRulePlaceholder [typeOf e4, t3 `TArrow` typeOf elem]]
+    --  _ ->
 
     -- DAnnotation _ (With _ t) (DFold loc name cs (Just e)) -> do
     --  compileConstraintsC e
