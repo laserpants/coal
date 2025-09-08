@@ -27,7 +27,7 @@ As a [total](https://en.wikipedia.org/wiki/Total_functional_programming) languag
     }
 ```
 
-A distinction is made between ordinary, finite data, which is produced and consumed in this way, and potentially infinite data, which may arise from processes that run indefinitely. The latter is known as *codata*. The codata equivalent of lists, for example, are streams.
+A distinction is made between ordinary, finite data, which is produced and consumed in this way, and potentially infinite data, which may emerge from processes that run indefinitely. The latter is known as *codata*. The codata equivalent of lists, for example, are streams.
 
 ```
   cotype Stream<a> = { Head : a, Tail : Stream<a> }
@@ -40,11 +40,11 @@ A distinction is made between ordinary, finite data, which is produced and consu
   let nats = enum_from(0)
 ```
 
-The `@` symbol appearing in the `fold` pattern variable (first example) and in the `unfold` field label (second example) gives special meaning to the expression context where it appears. This syntax is key to how recursion and corecursion is expressed in Coal. See **Recursion, corecursion, and codata** for a more detailed discussion.
+The `@` symbol appearing in the `fold` pattern variable (first example) and in the `unfold` field label (second example) gives special meaning to the expression context where it appears. This syntax is key to how recursion and corecursion is expressed in Coal. Scroll down to **Recursion, corecursion, and codata** for a more detailed discussion.
 
 ### Programs = Expressions + Effects
 
-Coal  is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-oriented_programming_language) language: a program is, at its core, just an expression that evaluates to a value. In this programming model, all data is immutable and there are no observable side-effects. These properties make programs more predictable, easier to reason about, highly testable, and allows for code to be verified using formal mathematical methods. On the other hand, practical applications need to have the ability to interact with the outside world. Side-effects are what make them useful. As part of this project, a goal is to develop a system for managing effects, such as I/O and exceptions, in the Coal language. This work is still in progress.
+Coal  is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-oriented_programming_language) language: a program is, at its core, just an expression that evaluates to a value. In this programming model, all data is immutable and there are no observable side-effects. These properties make programs more predictable, easier to reason about, highly testable, and allows for code to be verified using mathematical formalism. On the other hand, practical applications need to have the ability to interact with the outside world. Side-effects are what make them useful. As part of this project, a goal is to develop a system for managing effects, such as I/O and exceptions, in the Coal language. This work is still in progress.
 
 ## Project status and roadmap
 
@@ -168,7 +168,7 @@ TODO
 
 ##### If-then-else
 
-If-expressions have a format similar to that found in most other languages in the functional family, requiring both the `then` and `else` branches to be present (and to have the same type):
+If-expressions are similar to those found in most other languages in the functional family, requiring both the `then` and `else` branches to be present (and to have the same type):
 
 ```
   if (<e_1 : bool>) then <e_2 : t> else <e_3 : t>
@@ -629,8 +629,7 @@ Name not in scope: factorial
 ```
 
 Referencing a function from within itself in this way is not possible in Coal. Instead, recursion needs to be expressed in terms of a pattern know as a *fold*. 
-A fold takes some collection of data and combines it into a single result.
-A common instance is where an array of numbers is reduced into a single value, for example by adding
+A fold takes some collection of data and combines it into a single result. A common instance is where an array of numbers is reduced into a single value, for example by continually adding each number to the parital sum.
 
 ```
 let sum = reduce(fn(n, a) => f + a, [1, 2, 3])
