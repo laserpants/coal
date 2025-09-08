@@ -12,6 +12,7 @@ module Coal.TypeSystem.Constraint.Generation (
   evalConstraintsGenStack,
 ) where
 
+import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (supplied)
 import Coal.Language
@@ -22,13 +23,11 @@ import Coal.TypeSystem.Constraint.Generation.TypeAnnotation (instantiateAnnotati
 import Control.Monad.Reader (asks)
 import Data.Data (Data)
 import Data.List.NonEmpty (NonEmpty (..), toList)
+import qualified Data.Map.Strict as Map
 import Data.Maybe (maybeToList)
+import qualified Data.Set as Set
 import Data.Tuple.Extra (third3)
 import Extra
-
-import qualified Coal.Common.Environment as Environment
-import qualified Data.Map.Strict as Map
-import qualified Data.Set as Set
 
 type ConstraintsGen a = ConstraintsGenStack a TypeIndex Kind IndexedType
 
@@ -40,9 +39,9 @@ lookupDataConstructor name = asks (Environment.lookup name . constraintsGenConte
 lookupCodataAccessor :: Name -> ConstraintsGenStack c o a t (Maybe (CodataAccessor o a t))
 lookupCodataAccessor name = asks (Environment.lookup name . constraintsGenContextCodataAccessorEnv)
 
-{-# INLINE lookupTopLevelFold #-}
-lookupTopLevelFold :: Name -> ConstraintsGenStack c o a t (Maybe IndexedScheme)
-lookupTopLevelFold name = asks (Environment.lookup name . constraintsGenContextTopLevelFoldEnv)
+-- {-# INLINE lookupTopLevelFold #-}
+-- lookupTopLevelFold :: Name -> ConstraintsGenStack c o a t (Maybe IndexedScheme)
+-- lookupTopLevelFold name = asks (Environment.lookup name . constraintsGenContextTopLevelFoldEnv)
 
 assertEqualityAssumptions :: a -> IndexedType -> [Assumption a IndexedType] -> ConstraintsGen a ()
 assertEqualityAssumptions _ t ms =

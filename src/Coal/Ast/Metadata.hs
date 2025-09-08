@@ -109,6 +109,7 @@ instance HasMetadata (ConstraintsGenError Metadata) where
       ENoDataConstructor a _ -> a
       ENoCodataAccessor a _ -> a
       EDataConstructorArityMismatch a _ _ _ -> a
+      ECodataFieldMismatch a -> a
       EIllFormedTypeAnnotation err -> getMetadata err
 
 instance HasMetadata (TypeAnnotationError Metadata) where
