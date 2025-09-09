@@ -40,14 +40,13 @@ A distinction is made between ordinary, finite data, which is produced and consu
   let nats = enum_from(0)
 ```
 
-The `@` symbol that appears in these examples describe two kinds of recursive control flow. 
-In the first example, the `fold` pattern variable means that `tot` recieves the result from calling the fold again using the sub-list matched by the pattern. In the second example, the expression on the right (`n + 1`) becomes the next seed value, which is fed back into `enum_from` to generate the rest of the stream.
+The `@` symbol in these examples is used to describe two kinds of recursive control flow. In the first example, the `fold` pattern variable means that `tot` recieves the result from calling the fold again using the sub-list matched by the pattern. In the second example, the expression on the right (`n + 1`) becomes the next seed value, which is fed back into `enum_from` to generate the rest of the stream.
 If you are familiar with [recursion schemes](https://blog.sumtypeofway.com/posts/introduction-to-recursion-schemes.html) in a language like Haskell, these rules are based on exactly the same principles.
 Scroll down to **Recursion, corecursion, and codata** for a more detailed explanation of how the `fold` and `unfold` syntaxes work in Coal.
 
 ### Programs = Expressions + Effects
 
-Coal  is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-oriented_programming_language) language: a program is, at its core, just an expression that evaluates to a value. In this programming model, all data is immutable and there are no observable side-effects. These properties make programs more predictable, easier to reason about, highly testable, and allows for code to be verified using mathematical formalism. On the other hand, practical applications need to have the ability to interact with the outside world. Side-effects are what make them useful. As part of this project, a goal is to develop a system for managing effects, such as I/O and exceptions, in the Coal language. This work is still in progress.
+Coal is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-oriented_programming_language) language: a program is, at its core, just an expression that evaluates to a value. In this programming model, all data is immutable and there are no observable side-effects. These properties make programs more predictable, easier to reason about, highly testable, and allows for code to be verified using mathematical formalism. On the other hand, practical applications need to have the ability to interact with the outside world. Side-effects are what make them useful. As part of this project, a goal is to develop a system for managing effects, such as I/O and exceptions, in the Coal language. This work is still in progress.
 
 ## Project status and roadmap
 
@@ -228,7 +227,12 @@ module Utils {
 
 ###### Semantics
 
-A subtle but important detail that makes let-bindings in Coal different from those in most other languages is that the identifier introduced by a let-binding is **not in scope within the definition itself**. In other words, `let x = e1 in e2` makes `x` available only in `e2`. This prevents ill-formed expressions such as `let f = f in f`.
+A subtle but important detail that makes let-bindings in Coal different from those in most other languages is that the identifier introduced by a let-binding is **not in scope within the definition itself**. 
+In other words, `let x = e1 in e2` makes `x` available in `e2`, but not in `e1`. 
+In OCaml (and F#) this same restriction applies to the standard `let` keyword. In these languages, a `let rec`
+
+This prevents ill-formed expressions such as `let f = f in f`.
+
 As far as the compiler is concerned, a function defined at the top level has the form:
 
 ```
@@ -241,9 +245,6 @@ let fact =
 
 More generally, it makes it impossible for any function to call itself. (explicit recursion) 
 This is why functions such as the standard factorial function are rejected by the compiler. 
-
-In OCaml (and F#) this same rule actually applies with regards to the standard `let` keyword. In these languages, a `let rec`
-this can easily be overridden using a `let rec` 
 
 ##### Lambda expressions
 
@@ -720,7 +721,7 @@ module Json {
 
 #### Duality
 
-Data and codata are each others counterparts. This *duality* goes deeper than mere superficial resemblance.
+Data and codata can be seen as two sides of the same coin. This *duality* goes deeper than mere superficial resemblance.
 The idea originates in category theory, where folds and unfolds have very precise meaning ...
 An algebraic data type can be seen as the [initial algebra](https://en.wikipedia.org/wiki/Initial_algebra) of a functor: it provides the smallest, well-founded solution that can be consumed by a fold (a catamorphism).
 In the other direction, a codata type corresponds to the [final coalgebra](https://en.wikipedia.org/wiki/Initial_algebra#Final_coalgebra) of a functor: it is the largest (potentially infinite) solution that can be observed or generated by an unfold (an anamorphism).
