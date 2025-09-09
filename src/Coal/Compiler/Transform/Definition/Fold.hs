@@ -15,16 +15,16 @@ import Control.Monad.Writer (execWriter, tell)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transform, transformM)
 import Data.List.NonEmpty (NonEmpty (..))
-import Extra (Name, const2)
+import Extra (Name, const2, foldrM)
 
 class TopLevelFoldContext e where
-  expandFolds :: Name -> [(Name, Label ())] -> e -> e
+  expandFolds :: (Monad m) => Name -> [(Name, Label ())] -> e -> m e
 
 instance (TopLevelFoldContext e) => TopLevelFoldContext [e] where
-  expandFolds name = fmap . expandFolds name
+  expandFolds name = traverse . expandFolds name
 
 instance (TopLevelFoldContext e) => TopLevelFoldContext (NonEmpty e) where
-  expandFolds name = fmap . expandFolds name
+  expandFolds name = traverse . expandFolds name
 
 instance (Monoid a, Data a) => TopLevelFoldContext (Clause a ()) where
   expandFolds name _ =
@@ -36,24 +36,26 @@ instance (Monoid a, Data a) => TopLevelFoldContext (Clause a ()) where
         EClause
           a
           (transform eliminateAtPatterns p)
-          (expandFolds name (atLabels p) cs)
+          <$> (expandFolds name (atLabels p) cs)
 
 instance (Monoid a, Data a) => TopLevelFoldContext (Choice Expression a ()) where
   expandFolds name lls =
     \case
       CPlain a gs e ->
-        CPlain a gs (expandFolds name lls e)
+        CPlain a gs <$> (expandFolds name lls e)
       CLambda{} ->
         error "Not implemented"
 
 instance (Monoid a, Data a) => TopLevelFoldContext (Expression a ()) where
-  expandFolds = flip . foldr . updateName
+  expandFolds = flip . foldrM . updateName
 
-updateName :: (Monoid a, Data a) => Name -> (Name, Label ()) -> Expression a () -> Expression a ()
+updateName :: (Monoid a, Data a, Monad m) => Name -> (Name, Label ()) -> Expression a () -> m (Expression a ())
 updateName _ (name, label) =
-  replace (labelName label) $
-    const2 $
-      applicationE (varE ("!" <> name)) (EVariable mempty label :| [])
+  pure
+    . ( replace (labelName label) $
+          const2 $
+            applicationE (varE ("!" <> name)) (EVariable mempty label :| [])
+      )
 
 eliminateAtPatterns :: Pattern a () -> Pattern a ()
 eliminateAtPatterns =
@@ -85,12 +87,10 @@ compileTopLevelFolds =
 
 expandTopLevelFold :: (Data a, Monoid a, Monad m) => Name -> NonEmpty (Clause a ()) -> m (Expression a ())
 expandTopLevelFold name clauses = do
+  e1 <- traverse (expandFolds name []) clauses
   pure $
     lambda1E
       var
-      ( matchE
-          (varE var)
-          (expandFolds name [] <$> clauses)
-      )
+      (matchE (varE var) e1)
  where
   var = "$fold.expr"

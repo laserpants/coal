@@ -27,7 +27,7 @@ import Control.Monad.Writer (execWriter, tell)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transform, transformM)
 import Data.List.NonEmpty (NonEmpty (..))
-import Extra (Dictionary, Name, const2)
+import Extra (Dictionary, Name, const2, foldrM)
 
 newtype FoldExpansion a = FoldExpansion {foldExpansionStack :: RWS Name () Int a}
   deriving
@@ -47,13 +47,13 @@ runFoldExpansion r s e = (a, s')
   (a, s', _) = runRWS (foldExpansionStack e) r s
 
 class FoldContext e where
-  expandFolds :: Name -> [Label ()] -> e -> e
+  expandFolds :: (Monad m) => Name -> [Label ()] -> e -> m e
 
 instance (FoldContext e) => FoldContext [e] where
-  expandFolds name = fmap . expandFolds name
+  expandFolds name = traverse . expandFolds name
 
 instance (FoldContext e) => FoldContext (NonEmpty e) where
-  expandFolds name = fmap . expandFolds name
+  expandFolds name = traverse . expandFolds name
 
 instance (Monoid a, Data a) => FoldContext (Clause a ()) where
   expandFolds name _ =
@@ -65,24 +65,26 @@ instance (Monoid a, Data a) => FoldContext (Clause a ()) where
         EClause
           a
           (transform eliminateAtPatterns p)
-          (expandFolds name (atLabels p) cs)
+          <$> (expandFolds name (atLabels p) cs)
 
 instance (Monoid a, Data a) => FoldContext (Choice Expression a ()) where
   expandFolds name lls =
     \case
       CPlain a gs e ->
-        CPlain a gs (expandFolds name lls e)
+        CPlain a gs <$> (expandFolds name lls e)
       CLambda{} ->
         error "TODO"
 
 instance (Monoid a, Data a) => FoldContext (Expression a ()) where
-  expandFolds = flip . foldr . updateName
+  expandFolds = flip . foldrM . updateName
 
-updateName :: (Monoid a, Data a) => Name -> Label () -> Expression a () -> Expression a ()
+updateName :: (Monoid a, Data a, Monad m) => Name -> Label () -> Expression a () -> m (Expression a ())
 updateName name label =
-  replace (labelName label) $
-    const2 $
-      applicationE (varE name) (EVariable mempty label :| [])
+  pure
+    . ( replace (labelName label) $
+          const2 $
+            applicationE (varE name) (EVariable mempty label :| [])
+      )
 
 eliminateAtPatterns :: Pattern a () -> Pattern a ()
 eliminateAtPatterns =
@@ -107,16 +109,14 @@ expandFoldExpr :: (Monoid a, Data a, MonadState Int m, MonadReader Name m) => No
 expandFoldExpr args clauses = do
   name <- suppliedName
   let var = name <> ".expr"
+  e1 <- traverse (expandFolds name []) clauses
   pure $
     transform flattenApplication $
       letE
         name
         ( lambda1E
             var
-            ( matchE
-                (varE var)
-                (expandFolds name [] <$> clauses)
-            )
+            (matchE (varE var) e1)
         )
         (applicationE (varE name) args)
 
