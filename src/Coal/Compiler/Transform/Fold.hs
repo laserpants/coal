@@ -71,7 +71,7 @@ instance (Monoid a, Data a) => FoldContext (Choice Expression a ()) where
   expandFolds name lls =
     \case
       CPlain a gs e ->
-        CPlain a gs <$> (expandFolds name lls e)
+        CPlain a gs <$> expandFolds name lls e
       CLambda{} ->
         error "TODO"
 

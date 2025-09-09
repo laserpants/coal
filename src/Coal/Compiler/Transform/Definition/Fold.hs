@@ -42,7 +42,7 @@ instance (Monoid a, Data a) => TopLevelFoldContext (Choice Expression a ()) wher
   expandFolds name lls =
     \case
       CPlain a gs e ->
-        CPlain a gs <$> (expandFolds name lls e)
+        CPlain a gs <$> expandFolds name lls e
       CLambda{} ->
         error "Not implemented"
 
