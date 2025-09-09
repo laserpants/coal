@@ -65,7 +65,7 @@ instance (Monoid a, Data a) => FoldContext (Clause a ()) where
         EClause
           a
           (transform eliminateAtPatterns p)
-          <$> (expandFolds name (atLabels p) cs)
+          <$> expandFolds name (atLabels p) cs
 
 instance (Monoid a, Data a) => FoldContext (Choice Expression a ()) where
   expandFolds name lls =

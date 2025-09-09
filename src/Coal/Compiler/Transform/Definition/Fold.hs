@@ -36,7 +36,7 @@ instance (Monoid a, Data a) => TopLevelFoldContext (Clause a ()) where
         EClause
           a
           (transform eliminateAtPatterns p)
-          <$> (expandFolds name (atLabels p) cs)
+          <$> expandFolds name (atLabels p) cs
 
 instance (Monoid a, Data a) => TopLevelFoldContext (Choice Expression a ()) where
   expandFolds name lls =
