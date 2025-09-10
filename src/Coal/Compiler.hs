@@ -33,6 +33,7 @@ import Coal.Language.Module.Definition.Constant
 import Coal.Language.Module.Definition.Instance
 import Coal.TypeSystem.Substitution (normalizeTypeIndexes)
 import Control.Monad ((>=>))
+import Control.Monad.Except
 import Control.Monad.Reader (MonadIO, Reader, asks, liftIO, runReader)
 import Control.Monad.State (gets, runState)
 import Control.Monad.Writer (Writer, runWriter)
@@ -52,6 +53,13 @@ withSupplyC f = do
   insertSupplyC n'
   pure r
 
+withSupplyC2 :: (Monad m) => (Int -> CompilerT a m (c, Int)) -> CompilerT a m c
+withSupplyC2 f = do
+  n <- gets compilerSupply
+  (r, n') <- f n
+  insertSupplyC n'
+  pure r
+
 whereClausesExpansionTrans :: (Monad m) => (c -> Writer [(Name, Name)] c) -> c -> CompilerT a m c
 whereClausesExpansionTrans f e = pure (fst $ runWriter (f e))
 
@@ -65,7 +73,16 @@ expandAliasesC :: (Monad m, Data a) => Module a Kind () -> CompilerT a m (Module
 expandAliasesC = aliasExpansionTrans expandAliases
 
 foldExpansionTrans :: (Monad m) => (c -> FoldExpansion c) -> c -> CompilerT a m c
-foldExpansionTrans f e = withSupplyC (\n -> runFoldExpansion "fold" n (f e))
+foldExpansionTrans f e =
+  withSupplyC2
+    ( \n ->
+        case runFoldExpansion "fold" n (f e) of
+          (Left{}, n) ->
+            -- TODO
+            throwError (CompilerError "TODO")
+          (Right r, n) ->
+            pure (r, n)
+    )
 
 compileUnfoldsC :: (Monad m, Data a, Monoid a) => Module a Kind () -> CompilerT a m (Module a Kind ())
 compileUnfoldsC = unfoldExpansionTrans compileUnfolds

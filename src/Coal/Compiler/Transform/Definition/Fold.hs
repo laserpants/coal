@@ -8,9 +8,11 @@ module Coal.Compiler.Transform.Definition.Fold where
 
 import Coal.Common.Label (Label (..), labelName)
 import Coal.Compiler.Transform.Expression
+import Coal.Compiler.Transform.Fold (FoldError (..))
 import Coal.Compiler.Transform.Tree (replace)
 import Coal.Language (Choice (..), Clause (..), Expression (..), Pattern (..))
 import Coal.Language.Module (Definition (..), FoldDef (..))
+import Control.Monad.Error
 import Control.Monad.Writer (execWriter, tell)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transform, transformM)
@@ -18,7 +20,7 @@ import Data.List.NonEmpty (NonEmpty (..))
 import Extra (Name, const2, foldrM)
 
 class TopLevelFoldContext e where
-  expandFolds :: (Monad m) => Name -> [(Name, Label ())] -> e -> m e
+  expandFolds :: (MonadError FoldError m) => Name -> [(Name, Label ())] -> e -> m e
 
 instance (TopLevelFoldContext e) => TopLevelFoldContext [e] where
   expandFolds name = traverse . expandFolds name
@@ -29,9 +31,10 @@ instance (TopLevelFoldContext e) => TopLevelFoldContext (NonEmpty e) where
 instance (Monoid a, Data a) => TopLevelFoldContext (Clause a ()) where
   expandFolds name _ =
     \case
+      EClause _ PAtVariable{} _ ->
+        throwError FoldError
       EClause _ PNamedAtVariable{} _ ->
-        -- TODO
-        error "Fold-pattern outside constructor"
+        throwError FoldError
       EClause a p cs ->
         EClause
           a
@@ -62,6 +65,8 @@ eliminateAtPatterns =
   \case
     PNamedAtVariable a _ ll ->
       PVariable a ll
+    PAtVariable a ll ->
+      PVariable a ll
     p ->
       p
 
@@ -76,7 +81,7 @@ atLabels = execWriter . transformM go
       p ->
         pure p
 
-compileTopLevelFolds :: (Data a, Monoid a, Monad m) => Definition a k () -> m (Definition a k ())
+compileTopLevelFolds :: (Data a, Monoid a, MonadError FoldError m) => Definition a k () -> m (Definition a k ())
 compileTopLevelFolds =
   \case
     DFold loc name (FoldDef with cs _) -> do
@@ -85,7 +90,7 @@ compileTopLevelFolds =
     o ->
       pure o
 
-expandTopLevelFold :: (Data a, Monoid a, Monad m) => Name -> NonEmpty (Clause a ()) -> m (Expression a ())
+expandTopLevelFold :: (Data a, Monoid a, MonadError FoldError m) => Name -> NonEmpty (Clause a ()) -> m (Expression a ())
 expandTopLevelFold name clauses = do
   e1 <- traverse (expandFolds name []) clauses
   pure $

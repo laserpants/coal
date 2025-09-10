@@ -8,6 +8,7 @@
 module Coal.Compiler.Transform.Fold (
   CompileFoldsContext (..),
   FoldExpansion (..),
+  FoldError (..),
   runFoldExpansion,
   evalFoldExpansion,
   expandFoldExpr,
@@ -20,6 +21,7 @@ import Coal.Compiler.Transform.Flattening (flattenApplication)
 import Coal.Compiler.Transform.Tree (replace)
 import Coal.Language (Choice (..), Clause (..), Expression (..), Pattern (..))
 import Coal.Language.Module (ConstantDef (..), Definition (..), FunctionDef (..), InstanceDef (..), Module (..))
+import Control.Monad.Except
 import Control.Monad.RWS (RWS, runRWS)
 import Control.Monad.Reader (MonadReader)
 import Control.Monad.State (MonadState)
@@ -29,25 +31,28 @@ import Data.Generics.Uniplate.Data (transform, transformM)
 import Data.List.NonEmpty (NonEmpty (..))
 import Extra (Dictionary, Name, const2, foldrM)
 
-newtype FoldExpansion a = FoldExpansion {foldExpansionStack :: RWS Name () Int a}
+data FoldError = FoldError
+
+newtype FoldExpansion a = FoldExpansion {foldExpansionStack :: ExceptT FoldError (RWS Name () Int) a}
   deriving
     ( Functor
     , Applicative
     , Monad
     , MonadReader Name
+    , MonadError FoldError
     , MonadState Int
     )
 
-evalFoldExpansion :: Name -> Int -> FoldExpansion a -> a
+evalFoldExpansion :: Name -> Int -> FoldExpansion a -> Either FoldError a
 evalFoldExpansion name s = fst . runFoldExpansion name s
 
-runFoldExpansion :: Name -> Int -> FoldExpansion a -> (a, Int)
+runFoldExpansion :: Name -> Int -> FoldExpansion a -> (Either FoldError a, Int)
 runFoldExpansion r s e = (a, s')
  where
-  (a, s', _) = runRWS (foldExpansionStack e) r s
+  (a, s', _) = runRWS (runExceptT (foldExpansionStack e)) r s
 
 class FoldContext e where
-  expandFolds :: (Monad m) => Name -> [Label ()] -> e -> m e
+  expandFolds :: (MonadError FoldError m) => Name -> [Label ()] -> e -> m e
 
 instance (FoldContext e) => FoldContext [e] where
   expandFolds name = traverse . expandFolds name
@@ -60,7 +65,8 @@ instance (Monoid a, Data a) => FoldContext (Clause a ()) where
     \case
       EClause _ PAtVariable{} _ ->
         -- TODO
-        error "Fold-pattern outside constructor"
+        -- error "Fold-pattern outside constructor"
+        throwError FoldError
       EClause a p cs ->
         EClause
           a
@@ -105,7 +111,7 @@ atLabels = execWriter . transformM go
       p ->
         pure p
 
-expandFoldExpr :: (Monoid a, Data a, MonadState Int m, MonadReader Name m) => NonEmpty (Expression a ()) -> NonEmpty (Clause a ()) -> m (Expression a ())
+expandFoldExpr :: (Monoid a, Data a, MonadState Int m, MonadReader Name m, MonadError FoldError m) => NonEmpty (Expression a ()) -> NonEmpty (Clause a ()) -> m (Expression a ())
 expandFoldExpr args clauses = do
   name <- suppliedName
   let var = name <> ".expr"
