@@ -50,7 +50,14 @@ Coal is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-
 
 ## Project status and roadmap
 
-An alpha release of the Coal compiler is planned for __? TODO
+The following features are either missing or incomplete:
+
+| Feature                          | Milestone              |                                                                         
+| -------------------------------- | ---------------------- |                                                                         
+| Pattern match totality checking  |                        |                                                                         
+| Trait inheritance                |                        |                                                                         
+| Qualified (namespace) imports    |                        | 
+| Package system                   |                        |                                                                         
 
 ## Installation and setup
 
@@ -91,12 +98,14 @@ A function is defined using the `fun` keyword, followed by the function's name a
     <expr>
 ```
 
+In the above, `<arg_1>, <arg_2>, ..., <arg_n>` are *patterns*.
+
+An explicit type annotion can be provided to indicate a function's return value; as in the following example:
+
 ```
   fun is_even(n : int32) : bool =
     n % 2 == 0
 ```
-
-To be a bit more specific, `<arg_1>, <arg_2>, ..., <arg_n>` in the above are *patterns*.
 
 ```
   fun head(list : List<a>) : Option<a> =
@@ -108,16 +117,18 @@ To be a bit more specific, `<arg_1>, <arg_2>, ..., <arg_n>` in the above are *pa
 
 TODO
 
-#### Constants
+#### Expressions
+
+Other types of expressions can also be defined at this level using the `let` keyword:
 
 ```
-  val <name> = <e>
+  let <name> = <e>
 ```
 
 ```
 module Utils {
 
-  val days = 
+  let days = 
     [ "Monday"
     , "Tuesday"
     , "Wednesday"
@@ -128,6 +139,12 @@ module Utils {
     ]
 
 }
+```
+
+baz
+
+```
+let add = fn(x, y) => x + y
 ```
 
 ### Expression syntax
