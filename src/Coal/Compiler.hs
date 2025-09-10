@@ -53,8 +53,8 @@ withSupplyC f = do
   insertSupplyC n'
   pure r
 
-withSupplyC2 :: (Monad m) => (Int -> CompilerT a m (c, Int)) -> CompilerT a m c
-withSupplyC2 f = do
+withSupplyMC :: (Monad m) => (Int -> CompilerT a m (c, Int)) -> CompilerT a m c
+withSupplyMC f = do
   n <- gets compilerSupply
   (r, n') <- f n
   insertSupplyC n'
@@ -74,7 +74,7 @@ expandAliasesC = aliasExpansionTrans expandAliases
 
 foldExpansionTrans :: (Monad m) => (c -> FoldExpansion c) -> c -> CompilerT a m c
 foldExpansionTrans f e =
-  withSupplyC2
+  withSupplyMC
     ( \n ->
         case runFoldExpansion "fold" n (f e) of
           (Left{}, n) ->
