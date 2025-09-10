@@ -209,6 +209,31 @@ emitERecursiveLetConstraints loc p e1 e2 = do
   t1 = typeOf p
   t2 = typeOf e1
 
+emitELetConstraints :: (Show a, Data a) => a -> NonEmpty (Binding Expression a IndexedType) -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
+emitELetConstraints loc gs e1 = do
+  ms1 <- emitConstraints e1
+  ms2 <- concatForM gs $
+    \case
+      BPattern _ p e -> do
+        let t1 = typeOf p
+            t2 = typeOf e
+        tellRight [Equality (RuleLetBindingPattern loc t1 t2) [t1, t2]]
+        emitConstraints e
+      BFunction _ _ ps e -> do
+        ms <- withMonomorphic ps (emitConstraints e)
+        names <- concatForM ps (patternConstraints (assertEqualityAssumptions loc) ms)
+        pure (filter (assumptionNameIsNotOneOf names) ms)
+  names <- concatForM gs $
+    \case
+      BPattern _ p _ ->
+        patternConstraints (assertImplicitAssumptions loc) ms1 p
+      BFunction _ name ps e -> do
+        let t1 = foldTypeOf e ps
+        assertImplicitAssumptions loc t1 (filter (assumptionNameIs name) ms1)
+        names <- concatMapM (patternConstraints (assertEqualityAssumptions loc) ms1) ps
+        pure (name : names)
+  pure (filter (assumptionNameIsNotOneOf names) ms1 <> ms2)
+
 emitESelectConstraints :: (Show a, Data a) => a -> Label IndexedType -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
 emitESelectConstraints loc (Label t name) e = do
   t1 <- recordType
@@ -324,29 +349,8 @@ emitConstraints =
       emitELambdaConstraints loc ps e
     ERecursiveLet loc p e1 e2 ->
       emitERecursiveLetConstraints loc p e1 e2
-    ELet loc gs e1 -> do
-      ms1 <- emitConstraints e1
-      ms2 <- concatForM gs $
-        \case
-          BPattern _ p e -> do
-            let t1 = typeOf p
-                t2 = typeOf e
-            tellRight [Equality (RuleLetBindingPattern loc t1 t2) [t1, t2]]
-            emitConstraints e
-          BFunction _ _ ps e -> do
-            ms <- withMonomorphic ps (emitConstraints e)
-            names <- concatForM ps (patternConstraints (assertEqualityAssumptions loc) ms)
-            pure (filter (assumptionNameIsNotOneOf names) ms)
-      names <- concatForM gs $
-        \case
-          BPattern _ p _ ->
-            patternConstraints (assertImplicitAssumptions loc) ms1 p
-          BFunction _ name ps e -> do
-            let t1 = foldTypeOf e ps
-            assertImplicitAssumptions loc t1 (filter (assumptionNameIs name) ms1)
-            names <- concatMapM (patternConstraints (assertEqualityAssumptions loc) ms1) ps
-            pure (name : names)
-      pure (filter (assumptionNameIsNotOneOf names) ms1 <> ms2)
+    ELet loc gs e1 ->
+      emitELetConstraints loc gs e1
     EIf loc t e1 e2 e3 ->
       emitEIfConstraints loc t e1 e2 e3
     EApplication loc t e1 es ->
