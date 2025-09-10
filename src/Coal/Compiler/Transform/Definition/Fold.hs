@@ -58,9 +58,10 @@ instance (Monoid a, Data a) => TopLevelFoldContext (Expression a ()) where
 updateName :: (Monoid a, Data a, Monad m) => Name -> (Name, Label ()) -> Expression a () -> m (Expression a ())
 updateName _ (name, label) =
   pure
-    . ( replace (labelName label) $
-          const2 $
-            applicationE (varE ("!" <> name)) (EVariable mempty label :| [])
+    . replace
+      (labelName label)
+      ( const2 $
+          applicationE (varE ("!" <> name)) (EVariable mempty label :| [])
       )
 
 eliminateAtPatterns :: Pattern a () -> Pattern a ()
