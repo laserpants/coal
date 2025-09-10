@@ -17,7 +17,7 @@ Coal is a declarative, purely functional programming language with
 
 ### Rethinking recursion
 
-As a [total](https://en.wikipedia.org/wiki/Total_functional_programming) language, Coal takes a different approach to recursion, following the motto that "[explicit] recursion is [the GOTO of functional programming](https://www.semanticscholar.org/paper/Functional-Programming-with-Bananas%2C-Lenses%2C-and-Meijer-Fokkinga/5db3c6793c07285bf0f5e95fe5a25f53e7488051)." To ensure that programs are provably terminating, recursion is only available in a restricted form, known as *structural recursion*. In this scheme, each recursive call operates on a strictly smaller part of some finite data structure, progressing toward a base case. 
+As a [total](https://en.wikipedia.org/wiki/Total_functional_programming) language, Coal takes a different approach to recursion, following the motto that "[explicit] recursion is [the GOTO of functional programming](https://www.semanticscholar.org/paper/Functional-Programming-with-Bananas%2C-Lenses%2C-and-Meijer-Fokkinga/5db3c6793c07285bf0f5e95fe5a25f53e7488051)." To ensure that programs are provably terminating, recursion is only available in a restricted form, known as *structural recursion*. In this regime, each recursive call operates on a strictly smaller part of some finite data structure, progressing toward a base case. 
 
 ```
   fun sum(numbers : List<int32>) : int32 =
@@ -40,13 +40,13 @@ A distinction is made between ordinary, finite data, which is produced and consu
   let nats = enum_from(0)
 ```
 
-The `@` symbol in these examples describes two different kinds of recursive control flow. In the first example, the `fold` pattern variable means that `tot` recieves the result from calling the fold again using the sub-list matched by the pattern. In the second example, the expression on the right (`n + 1`) becomes the next seed value, which is fed back into `enum_from` to generate the rest of the stream.
-If you are familiar with [recursion schemes](https://blog.sumtypeofway.com/posts/introduction-to-recursion-schemes.html) in a language like Haskell, these rules are based on exactly the same principles.
+The `@` symbol in these examples describes two different forms of recursive control flow. In the first example, the `fold` pattern variable means that `tot` recieves the result from calling the fold again using the sub-list matched by the pattern. In the second example, the expression on the right (`n + 1`) becomes the next seed value, which is fed back into `enum_from` to generate the rest of the stream.
+If you are familiar with [recursion schemes](https://blog.sumtypeofway.com/posts/introduction-to-recursion-schemes.html) in a language like Haskell, those are based on exactly the same principles.
 Scroll down to **Recursion, corecursion, and codata** for a more detailed explanation of how the `fold` and `unfold` syntaxes work in Coal.
 
 ### Programs = Expressions + Effects
 
-Coal is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-oriented_programming_language) language: a program is, at its core, just an expression that evaluates to a value. In this programming model, all data is immutable and there are no observable side-effects. These properties make programs more predictable, easier to reason about, highly testable, and allows for code to be verified using mathematical formalism. On the other hand, practical applications need to have the ability to interact with the outside world. Side-effects are what make them useful. As part of this project, a goal is to develop a system for managing effects, such as I/O and exceptions, in the Coal language. This work is still in progress.
+Coal is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-oriented_programming_language) language: a program is, at its core, just an expression that evaluates to a value. In this programming model, all data is immutable and there are no observable side-effects. These properties make programs more predictable, easier to reason about, highly testable, and allows for code to be verified using formal mathematical techniques. On the other hand, practical applications need to have the ability to interact with the outside world. Side-effects are what make them useful. As part of this project, a goal is to develop a system for managing effects, such as I/O and exceptions, in the Coal language. This work is still in progress.
 
 ## Project status and roadmap
 
@@ -80,9 +80,57 @@ TODO
 
 ## Language overview
 
+### Top-level definitions
+
+#### Functions
+
+A function is defined using the `fun` keyword, followed by the function's name and a list of comma-separated arguments enclosed in parentheses.
+
+```
+  fun <name>(<arg_1>, <arg_2>, ..., <arg_n>) =
+    <expr>
+```
+
+```
+  fun is_even(n : int32) : bool =
+    n % 2 == 0
+```
+
+To be a bit more specific, `<arg_1>, <arg_2>, ..., <arg_n>` in the above are *patterns*.
+
+```
+  fun head(list : List<a>) : Option<a> =
+    match(list) {
+      | [] => None
+      | x :: _ => Some(x)
+    }
+```
+
 TODO
 
-### Syntax
+#### Constants
+
+```
+  val <name> = <e>
+```
+
+```
+module Utils {
+
+  val days = 
+    [ "Monday"
+    , "Tuesday"
+    , "Wednesday"
+    , "Thursday"
+    , "Friday"
+    , "Saturday"
+    , "Sunday" 
+    ]
+
+}
+```
+
+### Expression syntax
 
 TODO
 
@@ -134,34 +182,6 @@ As in most other languages, import statements must appear at the beginning of a 
 
 ### Language constructs
 
-#### Top-level constructs
-
-##### Functions
-
-A function is defined using the `fun` keyword, followed by the function's name and a list of comma-separated arguments enclosed in parentheses.
-
-```
-  fun <name>(<arg_1>, <arg_2>, ..., <arg_n>) =
-    <expr>
-```
-
-```
-  fun is_even(n : int32) : bool =
-    n % 2 == 0
-```
-
-To be more specific, `<arg_1>, <arg_2>, ..., <arg_n>` in the above are *patterns*.
-
-```
-  fun head(list : List<a>) : Option<a> =
-    match(list) {
-      | [] => None
-      | x :: _ => Some(x)
-    }
-```
-
-TODO
-
 <!--
 #### Control flow
 
@@ -185,51 +205,31 @@ A let-binding associates a name with an expression within a given scope:
 ```
 >  #### A note about let-generalization
 >
-> In Hindley-Milner languages, it is let-bindings that introduce polymorphism. Consider the following expression, which doesn't type check:
+> In [Hindley-Milner](https://en.wikipedia.org/wiki/Hindley%E2%80%93Milner_type_system) languages, it is let-bindings that introduce polymorphism. Consider the following expression, which doesn't type check:
 > 
 > ```
 >     (fn(f) => (f(3 : int32), f("three")))(fn(x) => x)
 > ```
 > 
 > Here, the type of `f` is monomorphic. The type inference algorithm will try to determine its type but fail to unify `int32 -> int32` with `string -> string`.
-> If we instead bind the anonymous function to a new identifier, then its type is *generalized* and acquires the quantified type `∀a : a -> a` (known as a *type scheme*).
-> We can now apply this function to both elements of the tuple, even though they have two different types:
+> If we instead bind the anonymous function to a new identifier, then its type is *generalized* and obtains the quantified type `∀a : a -> a` (known as a *type scheme*).
+> We can now apply this function to both elements of the tuple, even though they have different types:
 > 
 > ```
 >     let id = fn(x) => x 
 >       in 
->         (id(3), id("three"))
+>         (id(3 : int32), id("three"))
 > ```
 
 ###### Top-level let-bindings
 
-.. look like those those used inside of an expression, except that there is no body:
-
-```
-  let <name> = <e>
-```
-
-```
-module Utils {
-
-  let days = 
-    [ "Monday"
-    , "Tuesday"
-    , "Wednesday"
-    , "Thursday"
-    , "Friday"
-    , "Saturday"
-    , "Sunday" 
-    ]
-
-}
-```
+.. look like those those used inside an expression, except that there is no body:
 
 ###### Semantics
 
-A subtle but important detail that makes let-bindings in Coal different from those in most other languages is that the identifier introduced by a let-binding is **not in scope within the definition itself**. 
+A subtle but important detail that makes let-bindings in Coal different from those in most other languages is that the identifier introduced by `let` is **not in scope within the definition itself**. 
 In other words, `let x = e1 in e2` makes `x` available in `e2`, but not in `e1`. 
-In OCaml (and F#) this same restriction applies to the standard `let` keyword. In these languages, a `let rec`
+In OCaml (and F#) this is also the case for the standard `let` syntax, but in these languages, a special `let rec` keyword can be used to evade this restriction. Coal doesn't have an equivalent to `let rec`.
 
 This prevents ill-formed expressions such as `let f = f in f`.
 
@@ -395,7 +395,7 @@ Instead, we need to define a recursive number type. This is typically done accor
 > Every natural number is either zero or the successor of another natural number.
 
 This is known as the *Peano construction* of the natural numbers, named after the Italian mathematician [Giuseppe Peano](https://en.wikipedia.org/wiki/Giuseppe_Peano).
-The built-in `nat` type is based directly on this definition:
+The definition of the built-in `nat` type is simply this idea expressed in code:
 
 ```
 type nat
