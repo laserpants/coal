@@ -39,8 +39,8 @@ newtype FoldExpansion a = FoldExpansion {foldExpansionStack :: ExceptT FoldError
     , Applicative
     , Monad
     , MonadReader Name
-    , MonadError FoldError
     , MonadState Int
+    , MonadError FoldError
     )
 
 evalFoldExpansion :: Name -> Int -> FoldExpansion a -> Either FoldError a
