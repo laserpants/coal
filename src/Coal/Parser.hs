@@ -15,12 +15,11 @@ module Coal.Parser (
 import Control.Monad (void, when)
 import Data.List.NonEmpty (NonEmpty (..))
 import Data.Text (Text)
+import qualified Data.Text as Text
 import Data.Void (Void)
 import Extra (Name)
 import Text.Megaparsec
 import Text.Megaparsec.Char (space1)
-
-import qualified Data.Text as Text
 import qualified Text.Megaparsec.Char.Lexer as Lexer
 
 type Parser = Parsec Void Text

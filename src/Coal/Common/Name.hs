@@ -9,10 +9,10 @@ module Coal.Common.Name (
 import Data.Char (isAlpha, isUpper)
 import Data.Map.Strict (Map)
 import Data.Text (Text)
+import qualified Data.Text as Text
 import Extra.Data.Char (isUnderscore)
 import Extra.Data.Text (dropWhileNot)
 import Extra.Operators ((||.))
-import qualified Data.Text as Text
 
 type Name = Text
 

@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Coal.Parser.Module.Definition (parseDefinition) where
 
 import Coal.Ast.Metadata (Metadata (..))
@@ -12,13 +14,12 @@ import Coal.Parser.Type
 import Coal.Parser.Utils (fieldListWithKey)
 import Control.Monad (void)
 import Data.List.NonEmpty (NonEmpty (..))
+import qualified Data.Map.Strict as Map
+import qualified Data.Set as Set
 import Data.Text (Text)
 import Extra (Name)
 import Text.Megaparsec
 import Text.Megaparsec.Char (upperChar)
-
-import qualified Data.Map.Strict as Map
-import qualified Data.Set as Set
 
 parseDefinition :: Parser (Definition Metadata o ())
 parseDefinition =
@@ -157,11 +158,11 @@ parseTopLevelUnfold = do
   end <- getSourcePos
   fields <- braces $ do
     void $ optional (symbol ",")
-    fieldListWithKey (specialConstructor <|> constructor) parseExpression "="
+    fieldListWithKey (atConstructor <|> constructor) parseExpression "="
   pure (DUnfold (Metadata start end) n (UnfoldDef (With [] ann) ps (Map.fromList fields) Nothing))
 
-specialConstructor :: Parser Text
-specialConstructor = do
+atConstructor :: Parser Text
+atConstructor = do
   symbol_ "@"
   n <- constructor
   pure ("@" <> n)
