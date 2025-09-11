@@ -121,6 +121,13 @@ findFirstMatch (Trait name t1) = do
           Right sub ->
             Just (x, k, Map.map (substituteInScheme sub) env)
 
+-- TODO: move?
+substituteInScheme :: Substitution -> Scheme o Kind IndexedType -> IndexedScheme
+substituteInScheme sub (Forall _ ts t) = Forall (typeIndexesIn r <> typeIndexesIn rs) rs r
+ where
+  r = apply sub t
+  rs = apply sub ts
+
 mapEntriesM :: (Monad m) => Dictionary IndexedScheme -> ((Name, IndexedScheme) -> m (Name, Expression a IndexedType)) -> m (Maybe (Dictionary (Expression a IndexedType)))
 mapEntriesM b f = Just . Map.fromList <$> traverse f (Map.toList b)
 

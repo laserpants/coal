@@ -20,7 +20,7 @@ import Coal.Compiler.Transform.Type.AliasExpansion
 import Coal.Compiler.Transform.Type.Parameterized
 import Coal.Language
 import Coal.Language.Module
-import Coal.TypeSystem.Substitution (mapsTo, substituteInScheme)
+import Coal.TypeSystem.Substitution
 import Control.Monad.Reader
 import Control.Monad.State (evalState, execState, modify)
 import Control.Monad.Writer (execWriterT)
@@ -214,6 +214,13 @@ buildInstanceEnvironment env1 env2 ds = execState (traverse_ go ds) mempty
             error ("Trait '" <> Text.unpack name <> "' not in scope.")
       _ ->
         pure ()
+
+-- TODO: move?
+substituteInScheme :: Substitution -> Scheme o Kind IndexedType -> IndexedScheme
+substituteInScheme sub (Forall _ ts t) = Forall (typeIndexesIn r <> typeIndexesIn rs) rs r
+ where
+  r = apply sub t
+  rs = apply sub ts
 
 -- TODO
 insertTraits ts (Forall ds _ s) = Forall ds ts (foldType s xs)
