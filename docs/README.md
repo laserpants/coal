@@ -50,16 +50,20 @@ Coal is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-
 
 ## Project status and roadmap
 
+#### Current milestone: 1
+
 The following is a list of features that are either missing or incomplete, and :
 
-|                  | Feature                          | Milestone              |                                                                         
-| ---------------- | -------------------------------- | ---------------------- |                                                                         
-|                  | CLI                              |                        |                                                                         
-|                  | Pattern match totality checking  |                        |                                                                         
-|                  | Trait inheritance                |                        |                                                                         
-|                  | Qualified (namespace) imports    |                        | 
-|                  | Package system                   |                        |                                                                         
-|                  | Effects                          |                        |                                                                         
+#### Roadmap
+
+| Feature                          | Milestone              | Criteria         |                                                                        
+| -------------------------------- | ---------------------- | ---------------- |                                                                        
+| CLI                              | 2                      | Compile programs from the terminal using a command like `coal Main.coal -o example` |                                                                        
+| Pattern match totality checking  | 2                      |                  |                                                                        
+| Trait inheritance                | 3                      |                  |                                                                        
+| Qualified (namespace) imports    | 3                      |                  |
+| Package system                   | 4                      |                  |                                                                        
+| Effects                          | 5                      |                  |                                                                        
 
 ## Installation and setup
 
