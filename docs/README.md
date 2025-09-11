@@ -173,6 +173,8 @@ Other types of expressions can be defined at this level using the `let` keyword:
   let <name> = <expr>
 ```
 
+.. look like those those used inside an expression, except that there is no body:
+
 ```
 module Utils {
 
@@ -231,10 +233,6 @@ A let-binding associates a name with an expression within a given scope:
 >       in 
 >         (id(3 : int32), id("three"))
 > ```
-
-###### Top-level let-bindings
-
-.. look like those those used inside an expression, except that there is no body:
 
 ###### Semantics
 
