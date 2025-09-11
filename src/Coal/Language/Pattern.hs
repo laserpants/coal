@@ -40,7 +40,7 @@ data Pattern a t
     PAs a (Label t) (Pattern a t)
   | -- | Shorthand variable binding of the form { name }, which desugars to { name = name }
     PShorthand a (Label t)
-  | -- | Recursion operator pattern used in fold catamorphisms
+  | -- | Recursion operator pattern used in fold expressions
     PAtVariable a (Label t)
   | -- | TODO
     PNamedAtVariable a Name (Label t)
