@@ -23,7 +23,6 @@ import Coal.Parser
 import Control.Monad (void)
 import Data.Text (Text)
 import Text.Megaparsec
-
 import qualified Text.Megaparsec.Char.Lexer as Lexer
 
 {-# INLINE symbol #-}
