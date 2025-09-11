@@ -14,7 +14,6 @@ import Data.Text (Text)
 import Extra (Name)
 import Text.Megaparsec
 import Text.Megaparsec.Char (alphaNumChar, char, lowerChar, upperChar)
-
 import qualified Data.Text as Text
 
 {-# INLINE underscore #-}
