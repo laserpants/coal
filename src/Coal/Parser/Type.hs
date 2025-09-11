@@ -13,7 +13,6 @@ import Data.Functor (($>))
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
 import Text.Megaparsec (option, optional, try, (<|>))
-import TextShow (showt)
 
 parseInt32 :: Parser (Intrinsic (Type Parameter ()))
 parseInt32 = lexeme "int32" $> IInt32
