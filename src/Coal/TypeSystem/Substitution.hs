@@ -22,11 +22,10 @@ import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transform, transformBi)
 import Data.List.NonEmpty (NonEmpty)
 import Data.Map.Strict (Map, keysSet, union)
-import Data.Set (Set, intersection)
-import Extra (IndexMap, fromMaybe)
-
 import qualified Data.Map.Strict as Map
+import Data.Set (Set, intersection)
 import qualified Data.Set as Set
+import Extra (IndexMap, fromMaybe)
 
 class Substitutable s where
   apply :: Substitution -> s -> s
