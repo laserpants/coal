@@ -22,6 +22,7 @@ module Coal.Language.Type (
   normalizeRowTypes,
   listType,
   tupleType,
+  tupleTypeCons,
   (~>),
 ) where
 
@@ -125,9 +126,11 @@ listType :: IndexedType -> IndexedType
 listType t = TApplication KType (TConstructor (KArrow KType KType) "List") (t :| [])
 
 tupleType :: NonEmpty IndexedType -> IndexedType
-tupleType ts = TApplication KType (TConstructor (tupleKind (length ts)) cons) ts
- where
-  cons = "#Tuple" <> showt (length ts)
+tupleType ts = TApplication KType (TConstructor (tupleKind (length ts)) (tupleTypeCons (length ts))) ts
+
+{-# INLINE tupleTypeCons #-}
+tupleTypeCons :: Int -> Name
+tupleTypeCons n = "#Tuple" <> showt n
 
 precArrow, precApp, precAtom :: Int
 precArrow = 1 -- e.g., a -> b
