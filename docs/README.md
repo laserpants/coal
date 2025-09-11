@@ -95,7 +95,7 @@ TODO
 
 ### Modules and imports
 
-Programs in Coal are organized as collections of modules. Modules provide a way to group related functionality into distinct namespaces. Each module is typically focused on a specific purpose within a library or application. A module can contain functions, type definitions, traits, and other language constructs, defined together in one file.
+Projects in Coal are organized as collections of modules. Modules provide a way to group related functionality into distinct namespaces. Each module is typically focused on a specific purpose within a library or application. A module can contain functions, type definitions, traits, and other language constructs, defined together in one file.
 
 ```
 module MerkleTree {
@@ -103,7 +103,13 @@ module MerkleTree {
 }
 ```
 
-The module `Utils.Math.Trigonometry` is 
+A module name consists of a sequence of identifiers, each beginning with an uppercase letter
+
+Module names follow the file-path hierarchy, 
+
+, separated with dots ...
+
+The module `Utils.Math.Trigonometry` is thus located in the following sub-tree, relative to your project's root directory:
 
 ```
 src
@@ -119,7 +125,7 @@ module Utils.Math.Trigonometry(sin, cos, tan) {
   // ...
 ```
 
-The `import` keyword is used to bring in functions and other definitions from other modules. 
+An `import` statement is used to bring in functions and other definitions from another module. 
 
 ```
 import List(concat, head, tail)
@@ -131,7 +137,7 @@ A namespace import makes it possible to bring in an entire module .. qualified
 import namespace List
 ```
 
-asdasdf
+In your code, you can then access functions and other code defined in `List` through their fully qualified names:
 
 ```
   let zs = List.concat(xs, ys)
