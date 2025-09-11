@@ -70,12 +70,12 @@ emitPAnnotationConstraints loc t p = do
     Right t1 ->
       tellRight [Equality (RuleAnnotation loc (typeOf p) t1) [typeOf p, t1]]
 
-patternConstraints :: (Show a, Data a) => Assertion a -> [Assumption a IndexedType] -> Pattern a IndexedType -> ConstraintsGen a [Name]
-patternConstraints assertF ms =
+emitPatternConstraints :: (Show a, Data a) => Assertion a -> [Assumption a IndexedType] -> Pattern a IndexedType -> ConstraintsGen a [Name]
+emitPatternConstraints assertF ms =
   \case
     PAnnotation loc t p -> do
       emitPAnnotationConstraints loc t p
-      patternConstraints assertF ms p
+      emitPatternConstraints assertF ms p
     PVariable _ (Label t name) -> do
       assertF t (filter (assumptionNameIs name) ms)
       pure [name]
@@ -89,11 +89,11 @@ patternConstraints assertF ms =
               tellLeft [EDataConstructorArityMismatch loc name constructorArity (length ps)]
         Just DataConstructor{..} ->
           tellRight [Explicit InferenceRulePlaceholder (foldTypeOf t ps) constructorScheme]
-      concatForM ps (patternConstraints assertF ms)
+      concatForM ps (emitPatternConstraints assertF ms)
     POr _ t p1 p2 -> do
       tellRight [Equality InferenceRulePlaceholder [t, typeOf p1, typeOf p2]]
-      ps1 <- patternConstraints assertF ms p1
-      ps2 <- patternConstraints assertF ms p2
+      ps1 <- emitPatternConstraints assertF ms p1
+      ps2 <- emitPatternConstraints assertF ms p2
       pure (ps1 <> ps2)
     PShorthand _ (Label t name) -> do
       assertF t (filter (assumptionNameIs name) ms)
@@ -112,13 +112,13 @@ patternConstraints assertF ms =
               tellRight [Lacks InferenceRulePlaceholder (TRow r) field]
         _ ->
           pure ()
-      ps1 <- concatForM (Map.elems fields <> maybeToList p) (patternConstraints assertF ms)
+      ps1 <- concatForM (Map.elems fields <> maybeToList p) (emitPatternConstraints assertF ms)
       pure (ps1 <> Map.keys fields)
     PAny{} ->
       pure []
     PListCons _ t p1 p2 -> do
-      ms1 <- patternConstraints assertF ms p1
-      ms2 <- patternConstraints assertF ms p2
+      ms1 <- emitPatternConstraints assertF ms p1
+      ms2 <- emitPatternConstraints assertF ms p2
       tellRight [Explicit InferenceRulePlaceholder (foldTypeOf t [p1, p2]) listConstructorScheme]
       pure (ms1 <> ms2)
     PListLiteral _ t ps -> do
@@ -126,7 +126,7 @@ patternConstraints assertF ms =
         [ Equality InferenceRulePlaceholder (t : (typeOf <$> ps))
         , Explicit InferenceRulePlaceholder t (forall1 listType)
         ]
-      concatForM ps (patternConstraints assertF ms)
+      concatForM ps (emitPatternConstraints assertF ms)
     PAtVariable _ (Label _ name) -> do
       pure [name]
     --    PNamedAtVariable loc f (Label t name) -> do
@@ -141,7 +141,7 @@ patternConstraints assertF ms =
     --      pure []
     --      pure [name]
     PAs _ (Label t name) p -> do
-      ps <- patternConstraints assertF ms p
+      ps <- emitPatternConstraints assertF ms p
       tellRight [Equality InferenceRulePlaceholder [t, typeOf p]]
       assertF t (filter (assumptionNameIs name) ms)
       pure (name : ps)
@@ -152,7 +152,7 @@ patternConstraints assertF ms =
         [ Equality InferenceRulePlaceholder [t, tupleType (typeOf <$> ps)]
         , Explicit InferenceRulePlaceholder t (tupleScheme (length ps))
         ]
-      concatForM ps (patternConstraints assertF ms)
+      concatForM ps (emitPatternConstraints assertF ms)
     _ ->
       error "TODO"
 
@@ -169,7 +169,7 @@ clauseAssumptions (EClause loc p cs) = do
           pure (typeOf e, ms1 <> ms2)
         CLambda{} ->
           error "TODO"
-  names <- patternConstraints (assertEqualityAssumptions loc) ms p
+  names <- emitPatternConstraints (assertEqualityAssumptions loc) ms p
   pure (typeOf p, ts1, filter (assumptionNameIsNotOneOf names) ms)
 
 emitEAnnotationConstraints :: (Show a, Data a) => a -> Type Parameter () -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
@@ -195,7 +195,7 @@ emitEConstructorConstraints loc (Label t name) = do
 emitELambdaConstraints :: (Show a, Data a) => a -> NonEmpty (Pattern a IndexedType) -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
 emitELambdaConstraints loc ps e = do
   ms <- withMonomorphic ps (emitConstraints e)
-  names <- concatForM ps (patternConstraints (assertEqualityAssumptions loc) ms)
+  names <- concatForM ps (emitPatternConstraints (assertEqualityAssumptions loc) ms)
   pure (filter (assumptionNameIsNotOneOf names) ms)
 
 emitERecursiveLetConstraints :: (Show a, Data a) => a -> Pattern a IndexedType -> Expression a IndexedType -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
@@ -203,7 +203,7 @@ emitERecursiveLetConstraints loc p e1 e2 = do
   ms1 <- emitConstraints e2
   tellRight [Equality (RuleLetBindingPattern loc t1 t2) [t1, t2]]
   ms2 <- emitConstraints e1
-  names <- patternConstraints (assertEqualityAssumptions loc) (ms1 <> ms2) p
+  names <- emitPatternConstraints (assertEqualityAssumptions loc) (ms1 <> ms2) p
   pure (filter (assumptionNameIsNotOneOf names) (ms1 <> ms2))
  where
   t1 = typeOf p
@@ -221,16 +221,16 @@ emitELetConstraints loc gs e1 = do
         emitConstraints e
       BFunction _ _ ps e -> do
         ms <- withMonomorphic ps (emitConstraints e)
-        names <- concatForM ps (patternConstraints (assertEqualityAssumptions loc) ms)
+        names <- concatForM ps (emitPatternConstraints (assertEqualityAssumptions loc) ms)
         pure (filter (assumptionNameIsNotOneOf names) ms)
   names <- concatForM gs $
     \case
       BPattern _ p _ ->
-        patternConstraints (assertImplicitAssumptions loc) ms1 p
+        emitPatternConstraints (assertImplicitAssumptions loc) ms1 p
       BFunction _ name ps e -> do
         let t1 = foldTypeOf e ps
         assertImplicitAssumptions loc t1 (filter (assumptionNameIs name) ms1)
-        names <- concatMapM (patternConstraints (assertEqualityAssumptions loc) ms1) ps
+        names <- concatMapM (emitPatternConstraints (assertEqualityAssumptions loc) ms1) ps
         pure (name : names)
   pure (filter (assumptionNameIsNotOneOf names) ms1 <> ms2)
 
@@ -410,7 +410,7 @@ emitConstraints =
     --                  tellLeft [ENoCodataAccessor loc name]
     --
     --      ms2 <- concatMapM emitConstraints e1
-    --      names <- concatForM qs (patternConstraints (assertEqualityAssumptions loc) ms1)
+    --      names <- concatForM qs (emitPatternConstraints (assertEqualityAssumptions loc) ms1)
     --
     --      pure (filter (assumptionNameIsNotOneOf (name : names)) (ms1 <> ms2))
     ECodataRecord _ _ d -> do
