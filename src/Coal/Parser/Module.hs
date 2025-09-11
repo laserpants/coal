@@ -187,10 +187,16 @@ specialConstructor = do
 --    Just t ->
 --      pure (DAnnotation (Metadata start end) (With [] t) d)
 
+parseModulePath :: Parser [Name]
+parseModulePath = identifier upperChar `sepBy1` symbol "."
+
+parseModuleExports :: Parser [Name]
+parseModuleExports = option ["*"] (parens (commaSep name))
+
 parseModule :: Parser (Module Metadata o ())
 parseModule = do
   lexeme_ "module"
-  path <- identifier upperChar `sepBy1` symbol "."
-  exps <- option ["*"] (parens (commaSep name))
-  ds <- braces (some parseDefinition) <* eof
-  pure (Module (Path path) exps ds)
+  path <- parseModulePath
+  exports <- parseModuleExports
+  defs <- braces (some parseDefinition) <* eof
+  pure (Module (Path path) exports defs)
