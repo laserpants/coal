@@ -15,7 +15,6 @@ import Coal.Common.Label (Label (..), labelName)
 import Data.List.NonEmpty (NonEmpty (..))
 import Data.Set (Set, singleton)
 import Extra (Dictionary, Map, Name, isConstructor)
-
 import qualified Data.Set as Set
 
 class BoundVars b where

@@ -12,7 +12,6 @@ import Data.Text (Text)
 import Extra.Data.Char (isUnderscore)
 import Extra.Data.Text (dropWhileNot)
 import Extra.Operators ((||.))
-
 import qualified Data.Text as Text
 
 type Name = Text
