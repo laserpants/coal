@@ -11,10 +11,10 @@ module Coal.Parser.Identifier (
 import Coal.Parser
 import Control.Monad (void)
 import Data.Text (Text)
+import qualified Data.Text as Text
 import Extra (Name)
 import Text.Megaparsec
 import Text.Megaparsec.Char (alphaNumChar, char, lowerChar, upperChar)
-import qualified Data.Text as Text
 
 {-# INLINE underscore #-}
 underscore :: Parser Char

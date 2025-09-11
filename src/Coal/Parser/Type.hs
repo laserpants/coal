@@ -16,21 +16,54 @@ import TextShow (showt)
 import qualified Coal.Language.Type.Row as Row
 import qualified Data.Map.Strict as Map
 
+parseInt32 :: Parser (Intrinsic (Type Parameter ()))
+parseInt32 = lexeme "int32" $> IInt32
+
+parseInt64 :: Parser (Intrinsic (Type Parameter ()))
+parseInt64 = lexeme "int64" $> IInt64
+
+parseBool :: Parser (Intrinsic (Type Parameter ()))
+parseBool = lexeme "bool" $> IBool
+
+parseChar :: Parser (Intrinsic (Type Parameter ()))
+parseChar = lexeme "char" $> IChar
+
+parseDouble :: Parser (Intrinsic (Type Parameter ()))
+parseDouble = lexeme "double" $> IDouble
+
+parseFloat :: Parser (Intrinsic (Type Parameter ()))
+parseFloat = lexeme "float" $> IFloat
+
+parseBignum :: Parser (Intrinsic (Type Parameter ()))
+parseBignum = lexeme "bignum" $> IBignum
+
+parseNat :: Parser (Intrinsic (Type Parameter ()))
+parseNat = lexeme "nat" $> INat
+
+parseString :: Parser (Intrinsic (Type Parameter ()))
+parseString = lexeme "string" $> IString
+
+parseUnit :: Parser (Intrinsic (Type Parameter ()))
+parseUnit = lexeme "unit" $> IUnit
+
+parseVoid :: Parser (Intrinsic (Type Parameter ()))
+parseVoid = lexeme "void" $> IVoid
+
 parseIntrinsicType :: Parser (Type Parameter ())
 parseIntrinsicType = TIntrinsic <$> parser
  where
   parser =
-    (lexeme "int32" $> IInt32)
-      <|> (lexeme "int64" $> IInt64)
-      <|> (lexeme "bool" $> IBool)
-      <|> (lexeme "char" $> IChar)
-      <|> (lexeme "double" $> IDouble)
-      <|> (lexeme "float" $> IFloat)
-      <|> (lexeme "bignum" $> IBignum)
-      <|> (lexeme "nat" $> INat)
-      <|> (lexeme "string" $> IString)
-      <|> (lexeme "unit" $> IUnit)
-      <|> (lexeme "void" $> IVoid)
+    parseInt32
+      <|> parseInt64
+      <|> parseBool
+      <|> parseChar
+      <|> parseDouble
+      <|> parseFloat
+      <|> parseBignum
+      <|> parseNat
+      <|> parseString
+      <|> parseUnit
+      <|> parseVoid
 
 {-# INLINE parseTypeParameter #-}
 parseTypeParameter :: Parser (Type Parameter ())
