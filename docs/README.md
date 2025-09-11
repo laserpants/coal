@@ -240,18 +240,19 @@ A let-binding associates a name with an expression within a given scope:
 
 A subtle but important detail that makes let-bindings in Coal different from those in most other languages is that the identifier introduced by `let` is **not in scope within the definition itself**. 
 In other words, `let x = e1 in e2` makes `x` available in `e2`, but not in `e1`. 
-In OCaml (and F#) this is also the case for the standard `let` syntax, but in these languages, a special `let rec` keyword can be used to evade this restriction. Coal doesn't have an equivalent to `let rec`.
+In OCaml (and F#) this is also the case for the standard `let` keyword. However, in these languages, a special `let rec` syntax can be used to evade this restriction. Coal doesn't have an equivalent to `let rec`.
 
-This prevents ill-formed expressions such as `let f = f in f`.
+This prevents ill-formed expressions such as `let f = f in f`, but also excludes any form of explicit recursion
+
 
 As far as the compiler is concerned, a function defined at the top level has the form:
 
 ```
-let fact = 
+let fib = 
   fn(n) => 
-    if (n == 0)
-      then 1 
-      else n * fact(n - 1) // <-- This will not work
+    if (n == 0 || n == 1)
+      then n
+      else fib(n - 1) + fib(n - 2)
 ```
 
 More generally, it makes it impossible for any function to call itself. (explicit recursion) 
