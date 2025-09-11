@@ -1,0 +1,23 @@
+module Main {
+
+  // TODO
+  fun fib(n : nat) =
+    fold(n) {
+      | Zero =>
+          Zero
+      | Succ(Zero) =>
+          Succ(Zero)
+      | Succ(@m as n) =>
+          fold(n) {
+            | Zero =>
+                Zero
+            | Succ(Zero) =>
+                Succ(Zero)
+            | Succ(Succ(@p)) => p + m
+          }
+    }
+
+  fun main() =
+    trace_int32(unpack_nat(fib(pack_nat(5))))
+
+}

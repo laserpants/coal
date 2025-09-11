@@ -727,7 +727,9 @@ module Json {
   fold encode_json_object : List<(string, JsonValue)> -> List<string> {
     | [] => []
     | (key, encode_json_value(@value)) :: encode_json_object(@pairs) => 
-        let label = "\"" +++ key +++ "\":" in (label +++ value) :: pairs
+        let label = "\"" +++ key +++ "\"" 
+        in 
+        (label +++ ":" +++ value) :: pairs
   } 
 
   fun encode_json(value : JsonValue) = encode_json_value(value)
