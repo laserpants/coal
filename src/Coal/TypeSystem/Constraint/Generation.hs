@@ -418,7 +418,7 @@ emitConstraints =
     --      names <- concatForM qs (emitPatternConstraints (assertEqualityAssumptions loc) ms1)
     --
     --      pure (filter (assumptionNameIsNotOneOf (name : names)) (ms1 <> ms2))
-    ECodataRecord _ _ d -> do
+    ECodataRecord _ _ d ->
       concatMapM emitConstraints d
     ERecord loc t d me ->
       emitERecordConstraints loc t d me
