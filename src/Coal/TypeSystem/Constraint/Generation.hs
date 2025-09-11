@@ -70,6 +70,18 @@ emitPAnnotationConstraints loc t p = do
     Right t1 ->
       tellRight [Equality (RuleAnnotation loc (typeOf p) t1) [typeOf p, t1]]
 
+emitPConstructorConstraints :: (Data a) => a -> Label IndexedType -> [Pattern a IndexedType] -> ConstraintsGen a ()
+emitPConstructorConstraints loc (Label t name) ps = do
+  r <- lookupDataConstructor name
+  case r of
+    Nothing ->
+      tellLeft [ENoDataConstructor loc name]
+    Just DataConstructor{..}
+      | constructorArity /= length ps ->
+          tellLeft [EDataConstructorArityMismatch loc name constructorArity (length ps)]
+    Just DataConstructor{..} ->
+      tellRight [Explicit InferenceRulePlaceholder (foldTypeOf t ps) constructorScheme]
+
 emitPatternConstraints :: (Show a, Data a) => Assertion a -> [Assumption a IndexedType] -> Pattern a IndexedType -> ConstraintsGen a [Name]
 emitPatternConstraints assertF ms =
   \case
@@ -79,16 +91,8 @@ emitPatternConstraints assertF ms =
     PVariable _ (Label t name) -> do
       assertF t (filter (assumptionNameIs name) ms)
       pure [name]
-    PConstructor loc (Label t name) ps -> do
-      r <- lookupDataConstructor name
-      case r of
-        Nothing ->
-          tellLeft [ENoDataConstructor loc name]
-        Just DataConstructor{..}
-          | constructorArity /= length ps ->
-              tellLeft [EDataConstructorArityMismatch loc name constructorArity (length ps)]
-        Just DataConstructor{..} ->
-          tellRight [Explicit InferenceRulePlaceholder (foldTypeOf t ps) constructorScheme]
+    PConstructor loc ll ps -> do
+      emitPConstructorConstraints loc ll ps
       concatForM ps (emitPatternConstraints assertF ms)
     POr _ t p1 p2 -> do
       tellRight [Equality InferenceRulePlaceholder [t, typeOf p1, typeOf p2]]
