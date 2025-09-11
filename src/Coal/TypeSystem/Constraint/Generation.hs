@@ -162,9 +162,10 @@ clauseAssumptions (EClause loc p cs) = do
     forM (toList cs) $
       \case
         CPlain _ gs e -> do
-          ms1 <- concatForM gs $ \(CGuard g) -> do
-            tellRight [Equality (RuleMatchClauseGuard loc) [typeOf g, TIntrinsic IBool]]
-            emitConstraints g
+          ms1 <- concatForM gs $
+            \(CGuard g) -> do
+              tellRight [Equality (RuleMatchClauseGuard loc) [typeOf g, TIntrinsic IBool]]
+              emitConstraints g
           ms2 <- emitConstraints e
           pure (typeOf e, ms1 <> ms2)
         CLambda{} ->
