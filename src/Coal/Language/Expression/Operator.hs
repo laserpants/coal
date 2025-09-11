@@ -45,6 +45,8 @@ data BinaryOperator
     OMultiplication
   | -- | Exponentiation (^)
     OExponentiation
+  | -- | Modulus (%)
+    OModulus
   | -- | Division (/)
     ODivision
   | -- | Logical OR (||)
