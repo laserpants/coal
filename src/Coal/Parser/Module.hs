@@ -12,9 +12,11 @@ import Extra (Name)
 import Text.Megaparsec
 import Text.Megaparsec.Char (upperChar)
 
+{-# INLINE parseModulePath #-}
 parseModulePath :: Parser [Name]
 parseModulePath = identifier upperChar `sepBy1` symbol "."
 
+{-# INLINE parseModuleExports #-}
 parseModuleExports :: Parser [Name]
 parseModuleExports = option ["*"] (parens (commaSep name))
 
