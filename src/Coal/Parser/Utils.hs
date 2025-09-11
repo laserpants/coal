@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Coal.Parser.Utils (fieldListWithKey, fieldList) where
 
 import Coal.Parser
@@ -13,5 +11,6 @@ fieldListWithKey parseKey parseField sep = commaSep1 field
  where
   field = (,) <$> parseKey <*> (symbol_ sep *> parseField)
 
+{-# INLINE fieldList #-}
 fieldList :: Parser f -> Text -> Parser [(Name, f)]
 fieldList = fieldListWithKey name
