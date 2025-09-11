@@ -50,14 +50,16 @@ Coal is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-
 
 ## Project status and roadmap
 
-The following features are either missing or incomplete:
+The following is a list of features that are either missing or incomplete, and :
 
-| Feature                          | Milestone              |                                                                         
-| -------------------------------- | ---------------------- |                                                                         
-| Pattern match totality checking  |                        |                                                                         
-| Trait inheritance                |                        |                                                                         
-| Qualified (namespace) imports    |                        | 
-| Package system                   |                        |                                                                         
+|                  | Feature                          | Milestone              |                                                                         
+| ---------------- | -------------------------------- | ---------------------- |                                                                         
+|                  | CLI                              |                        |                                                                         
+|                  | Pattern match totality checking  |                        |                                                                         
+|                  | Trait inheritance                |                        |                                                                         
+|                  | Qualified (namespace) imports    |                        | 
+|                  | Package system                   |                        |                                                                         
+|                  | Effects                          |                        |                                                                         
 
 ## Installation and setup
 
@@ -86,70 +88,6 @@ TODO
 TODO
 
 ## Language overview
-
-### Top-level definitions
-
-#### Functions
-
-A function is defined using the `fun` keyword, followed by the function's name and a list of comma-separated arguments enclosed in parentheses.
-
-```
-  fun <name>(<arg_1>, <arg_2>, ..., <arg_n>) =
-    <expr>
-```
-
-In the above, `<arg_1>, <arg_2>, ..., <arg_n>` are *patterns*.
-
-An explicit type annotion can be provided to indicate a function's return value; as in the following example:
-
-```
-  fun is_even(n : int32) : bool =
-    n % 2 == 0
-```
-
-```
-  fun head(list : List<a>) : Option<a> =
-    match(list) {
-      | [] => None
-      | x :: _ => Some(x)
-    }
-```
-
-TODO
-
-#### Expressions
-
-Other types of expressions can also be defined at this level using the `let` keyword:
-
-```
-  let <name> = <e>
-```
-
-```
-module Utils {
-
-  let days = 
-    [ "Monday"
-    , "Tuesday"
-    , "Wednesday"
-    , "Thursday"
-    , "Friday"
-    , "Saturday"
-    , "Sunday" 
-    ]
-
-}
-```
-
-baz
-
-```
-let add = fn(x, y) => x + y
-```
-
-### Expression syntax
-
-TODO
 
 ### Modules and imports
 
@@ -197,15 +135,71 @@ asdasdf
 
 As in most other languages, import statements must appear at the beginning of a module, preceding any other code.
 
-### Language constructs
+### Top-level definitions
 
-<!--
-#### Control flow
+#### Functions
+
+A function is defined using the `fun` keyword, followed by the function's name and a list of comma-separated arguments enclosed in parentheses.
+
+```
+  fun <name>(<arg_1>, <arg_2>, ..., <arg_n>) =
+    <expr>
+```
+
+In the above, `<arg_1>, <arg_2>, ..., <arg_n>` are *patterns*.
+
+An explicit type annotion can be provided to indicate a function's return value; as in the following example:
+
+```
+  fun is_even(n : int32) : bool =
+    n % 2 == 0
+```
+
+```
+  fun head(list : List<a>) : Option<a> =
+    match(list) {
+      | [] => None
+      | x :: _ => Some(x)
+    }
+```
 
 TODO
--->
 
-##### If-then-else
+#### Expressions
+
+Other types of expressions can be defined at this level using the `let` keyword:
+
+```
+  let <name> = <expr>
+```
+
+```
+module Utils {
+
+  let days = 
+    [ "Monday"
+    , "Tuesday"
+    , "Wednesday"
+    , "Thursday"
+    , "Friday"
+    , "Saturday"
+    , "Sunday" 
+    ]
+
+}
+```
+
+baz
+
+```
+let add = fn(x, y) => x + y
+```
+
+### Expression syntax
+
+TODO
+
+#### If-then-else
 
 If-expressions are similar to those found in most other languages in the functional family, requiring both the `then` and `else` branches to be present (and to have the same type):
 
@@ -213,7 +207,7 @@ If-expressions are similar to those found in most other languages in the functio
   if (<e_1 : bool>) then <e_2 : t> else <e_3 : t>
 ```
 
-##### Let-bindings
+#### Let-bindings
 
 A let-binding associates a name with an expression within a given scope:
 
@@ -263,7 +257,11 @@ let fact =
 More generally, it makes it impossible for any function to call itself. (explicit recursion) 
 This is why functions such as the standard factorial function are rejected by the compiler. 
 
-##### Lambda expressions
+#### Lambda expressions
+
+```
+  fn(<arg_1>, <arg_2>, ..., <arg_n>) => <expr>
+```
 
 TODO
 
@@ -271,7 +269,7 @@ TODO
   fn(x) => x + 1
 ```
 
-##### Comments
+#### Comments
 
 ```
   foo(1)  // Leave any comments about this comment in the comment field below.
