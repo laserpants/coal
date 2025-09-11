@@ -54,12 +54,16 @@ Coal is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-
 
 The following is a list of features that are either missing or incomplete, and :
 
+| Feature                          | Milestone              | Criteria         |                                                                        
+| -------------------------------- | ---------------------- | ---------------- |                                                                        
+| Module imports/exports           | 1                      |                  |
+
 #### Roadmap
 
 | Feature                          | Milestone              | Criteria         |                                                                        
 | -------------------------------- | ---------------------- | ---------------- |                                                                        
-| CLI                              | 2                      | Compile programs from the terminal using a command like `coal Main.coal -o example` |                                                                        
-| Pattern match totality checking  | 2                      |                  |                                                                        
+| CLI                              | 2                      | It is possible to compile programs from the terminal using a command like `coal Main.coal -o example` |                                                                        
+| Pattern match totality checking  | 2                      | Partial match statements are reported at compile-time.                                          |                                                                        
 | Trait inheritance                | 3                      |                  |                                                                        
 | Qualified (namespace) imports    | 3                      |                  |
 | Package system                   | 4                      |                  |                                                                        
@@ -95,21 +99,17 @@ TODO
 
 ### Modules and imports
 
-Projects in Coal are organized as collections of modules. Modules provide a way to group related functionality into distinct namespaces. Each module is typically focused on a specific purpose within a library or application. A module can contain functions, type definitions, traits, and other language constructs, defined together in one file.
+Projects in Coal are organized as collections of modules. Modules provide a way to group related functionality into distinct namespaces. 
+A module can contain functions, type definitions, traits, and other language constructs, typically focused on a specific purpose within a library or application.
 
 ```
-module MerkleTree {
-  // ... code  
+module <path>(<export_list>) {
+  <definitions>
 }
 ```
 
-A module name consists of a sequence of identifiers, each beginning with an uppercase letter
-
-Module names follow the file-path hierarchy, 
-
-, separated with dots ...
-
-The module `Utils.Math.Trigonometry` is thus located in the following sub-tree, relative to your project's root directory:
+Each module is identified by its *path*, reflecting the directory structure of the file in which it is defined. The path segments begin with an uppercase letter and are separated by a dot.
+A module `Utils.Math.Trigonometry`, for instance, is defined in a file located at `Utils/Math/Trigonometry.coal`, relative to your project's root directory.
 
 ```
 src
@@ -118,32 +118,33 @@ src
         └── Trigonometry.coal
 ```
 
-TODO
+When declaring a module, the path is followed by an optional list of exported names, enclosed in parentheses. 
 
 ```
 module Utils.Math.Trigonometry(sin, cos, tan) {
   // ...
 ```
 
-An `import` statement is used to bring in functions and other definitions from another module. 
+If this list is left out, everything in the module is exported.
+
+#### Imports
+
+An `import` statement is used to bring in functions and other definitions from a separate module. 
+As in most other languages, import statements must appear at the beginning of a module, preceding any other code.
 
 ```
 import List(concat, head, tail)
 ```
 
-A namespace import makes it possible to bring in an entire module .. qualified
+A *namespace* import allows you to access functions, types, and other definitions from a module using their qualified names. A qualified name is formed by prefixing the definition’s name with the module’s path:
 
 ```
+// Import the List module under its namespace
 import namespace List
-```
 
-In your code, you can then access functions and other code defined in `List` through their fully qualified names:
-
-```
+  // And use it like this:
   let zs = List.concat(xs, ys)
 ```
-
-As in most other languages, import statements must appear at the beginning of a module, preceding any other code.
 
 ### Top-level definitions
 
