@@ -3,6 +3,7 @@
 module Coal.Parser.Type (parseType, parseKind) where
 
 import Coal.Language
+import qualified Coal.Language.Type.Row as Row
 import Coal.Parser
 import Coal.Parser.Identifier
 import Coal.Parser.Symbol
@@ -10,11 +11,9 @@ import Coal.Parser.Utils (fieldList)
 import Control.Monad.Combinators.Expr
 import Data.Functor (($>))
 import Data.List.NonEmpty (NonEmpty (..))
+import qualified Data.Map.Strict as Map
 import Text.Megaparsec (option, optional, try, (<|>))
 import TextShow (showt)
-
-import qualified Coal.Language.Type.Row as Row
-import qualified Data.Map.Strict as Map
 
 parseInt32 :: Parser (Intrinsic (Type Parameter ()))
 parseInt32 = lexeme "int32" $> IInt32
@@ -49,21 +48,34 @@ parseUnit = lexeme "unit" $> IUnit
 parseVoid :: Parser (Intrinsic (Type Parameter ()))
 parseVoid = lexeme "void" $> IVoid
 
+parseIntrinsic :: Parser (Intrinsic (Type Parameter ()))
+parseIntrinsic =
+  parseInt32
+    <|> parseInt64
+    <|> parseBool
+    <|> parseChar
+    <|> parseDouble
+    <|> parseFloat
+    <|> parseBignum
+    <|> parseNat
+    <|> parseString
+    <|> parseUnit
+    <|> parseVoid
+
 parseIntrinsicType :: Parser (Type Parameter ())
-parseIntrinsicType = TIntrinsic <$> parser
- where
-  parser =
-    parseInt32
-      <|> parseInt64
-      <|> parseBool
-      <|> parseChar
-      <|> parseDouble
-      <|> parseFloat
-      <|> parseBignum
-      <|> parseNat
-      <|> parseString
-      <|> parseUnit
-      <|> parseVoid
+parseIntrinsicType = TIntrinsic <$> parseIntrinsic
+
+parseAtomType :: Parser (Type Parameter ())
+parseAtomType =
+  try parseTypeApplication
+    <|> try parseTupleType
+    <|> parseRecordType
+    <|> parseIntrinsicType
+    <|> parseTypeParameter
+    <|> parens parseType
+
+parseType :: Parser (Type Parameter ())
+parseType = makeExprParser parseAtomType typeOperator
 
 {-# INLINE parseTypeParameter #-}
 parseTypeParameter :: Parser (Type Parameter ())
@@ -97,17 +109,6 @@ parseTypeApplication = do
       pure (TApplication () t0 (t :| ts1))
     [] ->
       pure t0
-
-parseType :: Parser (Type Parameter ())
-parseType = makeExprParser go typeOperator
- where
-  go =
-    try parseTypeApplication
-      <|> try parseTupleType
-      <|> parseRecordType
-      <|> parseIntrinsicType
-      <|> parseTypeParameter
-      <|> parens parseType
 
 typeOperator :: [[Operator Parser (Type Parameter ())]]
 typeOperator = [[InfixR (TArrow <$ symbol "->")]]
