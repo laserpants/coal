@@ -4,6 +4,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
+-- FIXME
 module Coal.TypeSystem.Constraint.Generation (
   ConstraintsGenContext (..),
   ConstraintsGenError (..),
@@ -133,7 +134,7 @@ emitPatternConstraints assertF ms =
       concatForM ps (emitPatternConstraints assertF ms)
     PAtVariable _ (Label _ name) -> do
       pure [name]
-    --    PNamedAtVariable loc f (Label t name) -> do
+    --    PNamedFold loc f (Label t name) -> do
     --      --assertF t (filter (assumptionNameIs f) ms)
     --      r <- lookupTopLevelFold f
     --      case r of

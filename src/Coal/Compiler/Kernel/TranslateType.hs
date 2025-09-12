@@ -1,14 +1,14 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
+-- FIXME
 module Coal.Compiler.Kernel.TranslateType (translateType) where
 
+import qualified Coal.Kernel.Language as Kernel
 import Coal.Language.Type
 import Coal.Language.Type.Intrinsic
 import Coal.Language.Type.Row
 import Data.Text (isPrefixOf)
-
-import qualified Coal.Kernel.Language as Kernel
 
 translateIntrinsicType :: Intrinsic (Type o k) -> Kernel.Type
 translateIntrinsicType =

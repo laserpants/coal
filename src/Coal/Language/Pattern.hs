@@ -40,10 +40,10 @@ data Pattern a t
     PAs a (Label t) (Pattern a t)
   | -- | Shorthand variable binding of the form { name }, which desugars to { name = name }
     PShorthand a (Label t)
-  | -- | Recursion operator pattern used in fold expressions
+  | -- | Recursive operator pattern used in fold expressions
     PAtVariable a (Label t)
-  | -- | TODO
-    PNamedAtVariable a Name (Label t)
+  | -- | Pattern fold
+    PNamedFold a Name (Label t)
   | -- | Trait instance dictionary
     PTraitDictionary a t (Trait t)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)

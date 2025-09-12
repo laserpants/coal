@@ -4,6 +4,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
 
+-- FIXME
 module Coal.Compiler where
 
 import Coal.Compiler.Kernel.TranslateModule (translateModule)

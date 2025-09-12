@@ -97,7 +97,7 @@ updateName name label =
 eliminateAtPatterns :: Pattern a () -> Pattern a ()
 eliminateAtPatterns =
   \case
-    PNamedAtVariable a _ ll ->
+    PNamedFold a _ ll ->
       PVariable a ll
     PAtVariable a ll ->
       PVariable a ll

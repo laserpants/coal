@@ -3,6 +3,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
+-- FIXME
 module Coal.Language.Expression.Operator (
   BinaryOperator (..),
   UnaryOperator (..),

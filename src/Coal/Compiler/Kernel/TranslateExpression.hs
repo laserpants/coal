@@ -2,6 +2,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
+-- FIXME
 module Coal.Compiler.Kernel.TranslateExpression (
   translateExpression,
   translatePattern,

@@ -2,6 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
+-- FIXME
 module Coal.Compiler.Kernel.Environment (
   KernelEnvironment (..),
   initialKernelEnvironment,
@@ -13,13 +14,12 @@ module Coal.Compiler.Kernel.Environment (
 ) where
 
 import Coal.Common.Environment (Environment)
-import Control.Monad.Reader (MonadReader, ask, local)
-import Data.Text (isPrefixOf)
-import Extra (Name, Over, Set)
-
 import qualified Coal.Common.Environment as Environment
+import Control.Monad.Reader (MonadReader, ask, local)
 import qualified Data.Set as Set
+import Data.Text (isPrefixOf)
 import qualified Data.Text as Text
+import Extra (Name, Over, Set)
 
 data KernelEnvironment = KernelEnvironment
   { kernelEnvironmentModule :: Name

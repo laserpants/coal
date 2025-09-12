@@ -131,7 +131,7 @@ parseAtFunction = do
     ll <- parens $ do
       void (char '@')
       Label () <$> name
-    pure (\loc -> PNamedAtVariable loc n ll)
+    pure (\loc -> PNamedFold loc n ll)
 
 parseAtVar :: Parser (Label ())
 parseAtVar = do

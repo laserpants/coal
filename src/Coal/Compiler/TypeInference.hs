@@ -5,6 +5,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
+-- FIXME
 module Coal.Compiler.TypeInference (typeDefinitionsC) where
 
 import Coal.Common.Environment (Environment (..))

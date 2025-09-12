@@ -6,6 +6,7 @@
 {-# LANGUAGE StrictData #-}
 {-# LANGUAGE UndecidableInstances #-}
 
+-- FIXME
 module Coal.Graphviz.Dot (Dot (..), writeDotFile) where
 
 import Coal.Common.Label (Label (..))
@@ -295,8 +296,8 @@ instance (Pretty t, Show t) => Dot t (Pattern a t) where
       PAtVariable _ ll ->
         fromNode (emitEllipse "PAtVariable" Nothing) $
           emitEdgeTo ll
-      PNamedAtVariable _ name ll ->
-        fromNode (emitEllipse ("PNamedAtVariable\\n" <> name) Nothing) $
+      PNamedFold _ name ll ->
+        fromNode (emitEllipse ("PNamedFold\\n" <> name) Nothing) $
           emitEdgeTo ll
       PTraitDictionary _ t _ ->
         emitEllipse "PTraitDictionary" (Just t)

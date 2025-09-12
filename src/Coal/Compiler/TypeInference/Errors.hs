@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+-- FIXME
 module Coal.Compiler.TypeInference.Errors where
 
 import Coal.Ast.Metadata

@@ -2,6 +2,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE StrictData #-}
 
+-- FIXME
 module Coal.TypeSystem.Constraint.Generation.InferenceRule (InferenceRule (..)) where
 
 import Coal.Language (Kind (..), Scheme (..), Type (..), TypeIndex (..))

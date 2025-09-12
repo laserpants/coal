@@ -36,7 +36,7 @@ instance (Monoid a, Data a) => TopLevelFoldContext (Clause a ()) where
     \case
       EClause _ PAtVariable{} _ ->
         throwError FoldError
-      EClause _ PNamedAtVariable{} _ ->
+      EClause _ PNamedFold{} _ ->
         throwError FoldError
       EClause a p cs ->
         EClause
@@ -67,7 +67,7 @@ updateName _ (name, label) =
 eliminateAtPatterns :: Pattern a () -> Pattern a ()
 eliminateAtPatterns =
   \case
-    PNamedAtVariable a _ ll ->
+    PNamedFold a _ ll ->
       PVariable a ll
     PAtVariable a ll ->
       PVariable a ll
@@ -79,7 +79,7 @@ atLabels = execWriter . transformM go
  where
   go =
     \case
-      p@(PNamedAtVariable _ name label) -> do
+      p@(PNamedFold _ name label) -> do
         tell [(name, label)]
         pure p
       p ->
