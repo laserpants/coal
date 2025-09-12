@@ -62,9 +62,9 @@ The following is a list of features that are either missing or incomplete, and :
 
 | Feature                          | Milestone              | Criteria         |                                                                        
 | -------------------------------- | ---------------------- | ---------------- |                                                                        
-| CLI                              | 2                      | It is possible to compile programs from the terminal using a command like `coal Main.coal -o example` |                                                                        
-| Pattern match totality checking  | 2                      | Partial match statements are reported at compile-time.                                          |                                                                        
-| Trait inheritance                | 3                      |                  |                                                                        
+| CLI                              | 2                      | It should be possible to compile programs from the terminal using a command like `coal Main.coal -o example` |                                                                        
+| Pattern match totality checking  | 2                      | Partial match statements are reported as errors at compile-time.                                             |                                                                        
+| Trait inheritance                | 3                      | Traits like `Show<List<a>> with Show<a>` should work.                                                        |                                                                        
 | Qualified (namespace) imports    | 3                      |                  |
 | Package system                   | 4                      |                  |                                                                        
 | Effects                          | 5                      |                  |                                                                        
