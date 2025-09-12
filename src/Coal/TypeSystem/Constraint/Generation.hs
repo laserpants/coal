@@ -390,6 +390,7 @@ emitConstraints =
     EFold _ t (e :| es) cs e1 -> do
       ms1 <- emitConstraints e
       ms2 <- concatMapM emitConstraints es
+      -- TODO: DRY
       (ts1, ts2, ms3) <- (third3 concat . unzip3 <$$> traverse clauseAssumptions) (toList cs)
       -- Pattern types
       tellRight [Equality InferenceRulePlaceholder (typeOf e : ts1)]
