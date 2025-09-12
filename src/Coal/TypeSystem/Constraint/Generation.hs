@@ -338,14 +338,15 @@ tupleScheme n = Forall (Set.fromList (toList ixs)) [] (tupleType (TVariable <$> 
  where
   ixs = TypeIndex KType 0 :| [TypeIndex KType ti | ti <- [1 .. n - 1]]
 
-emitMatchConstraints :: (Show a, Data a) => a -> IndexedType -> Expression a IndexedType -> NonEmpty (Clause a IndexedType) -> ConstraintsGen a [Assumption a IndexedType]
-emitMatchConstraints loc t e cs = do
+-- TODO
+emitMatchConstraints :: (Show a, Data a) => a -> IndexedType -> Expression a IndexedType -> [Expression a IndexedType] -> NonEmpty (Clause a IndexedType) -> ConstraintsGen a [Assumption a IndexedType]
+emitMatchConstraints loc t e es cs = do
   ms1 <- emitConstraints e
   (ts1, ts2, ms2) <- (third3 concat . unzip3 <$$> traverse clauseAssumptions) (toList cs)
   -- Pattern types
   tellRight [Equality (RuleMatchClausePatterns loc) (typeOf e : ts1)]
   -- Expression types
-  tellRight [Equality (RuleMatchClauseExpressions loc) (t : concat ts2)]
+  tellRight [Equality (RuleMatchClauseExpressions loc) (foldTypeOf t es : concat ts2)]
   pure (ms1 <> ms2)
 
 emitConstraints :: (Show a, Data a) => Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
@@ -374,7 +375,7 @@ emitConstraints =
     EListLiteral loc t es ->
       emitEListLiteralConstraints loc t es
     EMatch loc t e cs ->
-      emitMatchConstraints loc t e cs
+      emitMatchConstraints loc t e [] cs
     ELambdaMatch _ _ _ (Just e) ->
       emitConstraints e
     ECompiledMatch{} ->
@@ -387,22 +388,16 @@ emitConstraints =
       pure []
     ESelect loc ll e ->
       emitESelectConstraints loc ll e
-    EFold _ t (e :| es) cs e1 -> do
-      ms1 <- emitConstraints e
+    EFold loc t (e :| es) cs e1 -> do
+      ms1 <- emitMatchConstraints loc t e es cs
       ms2 <- concatMapM emitConstraints es
-      -- TODO: DRY
-      (ts1, ts2, ms3) <- (third3 concat . unzip3 <$$> traverse clauseAssumptions) (toList cs)
-      -- Pattern types
-      tellRight [Equality InferenceRulePlaceholder (typeOf e : ts1)]
-      -- Expression types
-      tellRight [Equality InferenceRulePlaceholder (foldTypeOf t es : concat ts2)]
-      ms4 <- concatMapM emitConstraints e1
+      ms3 <- concatMapM emitConstraints e1
       case e1 of
         Just (ERecursiveLet _ (PVariable _ (Label t1 _)) _ _) ->
           tellRight [Equality InferenceRulePlaceholder [foldTypeOf t (e :| es), t1]]
         _ ->
           pure ()
-      pure (ms1 <> ms2 <> ms3 <> ms4)
+      pure (ms1 <> ms2 <> ms3)
     --      t0 <- supplied (TVariable . TypeIndex KType)
     --      t1 <- supplied (TVariable . TypeIndex KType)
     --      let qs = PVariable loc (Label t name) <| ps
