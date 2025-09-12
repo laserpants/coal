@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+-- FIXME
 module Coal.Parser.Expression (parseExpression, parseMatchClause) where
 
 import Coal.Ast.Metadata (Metadata (..), metadataSpan)

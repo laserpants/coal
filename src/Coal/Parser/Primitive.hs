@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+-- FIXME
 module Coal.Parser.Primitive (parsePrimitive) where
 
 import Coal.Ast.Metadata (Metadata (..))

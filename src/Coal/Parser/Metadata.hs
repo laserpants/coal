@@ -1,3 +1,4 @@
+-- FIXME
 module Coal.Parser.Metadata (withMetadata) where
 
 import Coal.Ast.Metadata (Metadata (..))

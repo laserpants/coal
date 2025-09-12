@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+-- FIXME
 module Coal.Parser.Type (parseType, parseKind) where
 
 import Coal.Language
