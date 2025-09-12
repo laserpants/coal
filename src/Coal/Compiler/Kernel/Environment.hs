@@ -2,7 +2,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
--- FIXME
 module Coal.Compiler.Kernel.Environment (
   KernelEnvironment (..),
   initialKernelEnvironment,
