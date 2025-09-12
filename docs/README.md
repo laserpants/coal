@@ -42,7 +42,7 @@ A distinction is made between ordinary, finite data, which is produced and consu
 
 The `@` symbol in these examples denotes two different forms of recursive control flow. In the first example, the `fold` pattern variable means that `tot` recieves the result from calling the fold again using the sub-list matched by the pattern. In the second example, the expression on the right (`n + 1`) becomes the next seed value, which is fed back into `enum_from` to generate the rest of the stream.
 If you are familiar with [recursion schemes](https://blog.sumtypeofway.com/posts/introduction-to-recursion-schemes.html) in a language like Haskell, it is based on exactly the same principles.
-Scroll down to **Recursion, corecursion, and codata** for a more detailed explanation of how the `fold` and `unfold` syntaxes work in Coal.
+Scroll down to **Recursion, corecursion, and codata** for a more detailed explanation of how `fold` and `unfold` work in Coal.
 
 ### Programs = Expressions + Effects
 
@@ -118,7 +118,7 @@ src
         └── Trigonometry.coal
 ```
 
-When declaring a module, the path is followed by an optional list of exported names, enclosed in parentheses. 
+In a module declaration, the path is followed by an optional list of exported names enclosed in parentheses. 
 
 ```
 module Utils.Math.Trigonometry(sin, cos, tan) {
@@ -159,7 +159,12 @@ A function is defined using the `fun` keyword, followed by the function's name a
 
 In the above, `<arg_1>, <arg_2>, ..., <arg_n>` are *patterns*.
 
-An explicit type annotion can be provided to indicate a function's return value; as in the following example:
+```
+  fun baz({ num : int32 }) =
+    ...
+```
+
+An explicit type annotion can be given to indicate a function's return type; as in the following example:
 
 ```
   fun is_even(n : int32) : bool =
