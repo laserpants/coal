@@ -3,7 +3,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
--- FIXME
 module Coal.Language.Expression.Operator (
   BinaryOperator (..),
   UnaryOperator (..),
@@ -117,5 +116,13 @@ binaryOperatorTypeScheme =
       forall1 (\a -> a ~> a ~> TIntrinsic IBool)
     OGreaterThanOrEqual ->
       forall1 (\a -> a ~> a ~> TIntrinsic IBool)
-    o ->
-      error ("TODO: " <> show o)
+    OExponentiation{} ->
+      forall1 (\a -> a ~> a ~> a)
+    OModulus{} ->
+      forall1 (\a -> a ~> a ~> a)
+    ODivision{} ->
+      forall1 (\a -> a ~> a ~> a)
+    OFlippedForwardApplication{} ->
+      error "TODO"
+    OFlippedReverseApplication{} ->
+      error "TODO"
