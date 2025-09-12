@@ -100,7 +100,7 @@ TODO
 
 ### Modules and imports
 
-Projects in Coal are organized as collections of modules. Modules provide a way to group related functionality into distinct namespaces. 
+Projects in Coal are organized as collections of *modules*. Modules provide a way to group related functionality into distinct namespaces. 
 A module can contain functions, type definitions, traits, and other language constructs, typically focused on a specific purpose within a library or application.
 
 ```
@@ -177,15 +177,15 @@ A type annotion can be given to indicate a function's return type; as in the fol
     n % 2 == 0
 ```
 
-#### Expressions
+#### Other expressions
 
-Other types of expressions can also be defined in this scope, using the `let` keyword.
+Expressions that are not functions can also be defined in this scope, using the `let` keyword:
 
 ```
   let <name> = <expr>
 ```
 
-A module-level let-binding looks similar to one used inside an expression, except that there is no body:
+A module-level let-binding is similar to those used inside an expression (explained below), except that there is no body:
 
 ```
 module Utils {
