@@ -148,10 +148,10 @@ emitPatternConstraints assertF ms =
     PAtVariable _ (Label _ name) -> do
       pure [name]
     PAs _ (Label t name) p -> do
-      ps <- emitPatternConstraints assertF ms p
+      names <- emitPatternConstraints assertF ms p
       tellRight [Equality InferenceRulePlaceholder [t, typeOf p]]
       assertF t (filter (assumptionNameIs name) ms)
-      pure (name : ps)
+      pure (name : names)
     PLiteral{} ->
       pure []
     PTuple _ t ps -> do
