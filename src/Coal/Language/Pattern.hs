@@ -11,9 +11,8 @@ import Coal.Language.Type (Parameter (..), Type)
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (universeBi)
 import Data.List.NonEmpty (NonEmpty)
-import Extra (Dictionary, Name)
-
 import qualified Data.Set as Set
+import Extra (Dictionary, Name)
 
 data Pattern a t
   = -- | Type-annotated pattern
