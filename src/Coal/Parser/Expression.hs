@@ -19,7 +19,6 @@ import Data.List.NonEmpty (NonEmpty (..))
 import Extra (Name, isConstructor)
 import Text.Megaparsec (getSourcePos, notFollowedBy, optional, some, try, (<|>))
 import Text.Megaparsec.Char (char)
-
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map.Strict as Map
 import qualified Text.Megaparsec.Char.Lexer as Lexer
