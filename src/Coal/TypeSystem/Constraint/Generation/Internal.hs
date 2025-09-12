@@ -84,31 +84,31 @@ instance Supply (ConstraintsGenState c) where
   updateSupply = overConstraintsGenStateSupply
   getSupply = constraintsGenStateSupply
 
-type ConstraintsGenOutput c o a t = Either (ConstraintsGenError c) (Constraint (InferenceRule a c) o a t)
+type ConstraintsGenOutput g o a t = Either (ConstraintsGenError g) (Constraint (InferenceRule a g) o a t)
 
-type ConstraintsGenMonad c o a t = RWS (ConstraintsGenContext o a t) [ConstraintsGenOutput c o a t] (ConstraintsGenState c)
+type ConstraintsGenMonad g o a t = RWS (ConstraintsGenContext o a t) [ConstraintsGenOutput g o a t] (ConstraintsGenState g)
 
-newtype ConstraintsGenStack c o a t s = ConstraintsGenStack {constraintsGenMonad :: ConstraintsGenMonad c o a t s}
+newtype ConstraintsGenStack g o a t s = ConstraintsGenStack {constraintsGenMonad :: ConstraintsGenMonad g o a t s}
   deriving
     ( Functor
     , Applicative
     , Monad
     , MonadReader (ConstraintsGenContext o a t)
-    , MonadWriter [ConstraintsGenOutput c o a t]
-    , MonadState (ConstraintsGenState c)
-    , MonadRWS (ConstraintsGenContext o a t) [ConstraintsGenOutput c o a t] (ConstraintsGenState c)
+    , MonadWriter [ConstraintsGenOutput g o a t]
+    , MonadState (ConstraintsGenState g)
+    , MonadRWS (ConstraintsGenContext o a t) [ConstraintsGenOutput g o a t] (ConstraintsGenState g)
     )
 
 {-# INLINE evalConstraintsGenStack #-}
-evalConstraintsGenStack :: Int -> ConstraintsGenContext o a t -> ConstraintsGenStack c o a t s -> (s, [ConstraintsGenOutput c o a t])
+evalConstraintsGenStack :: Int -> ConstraintsGenContext o a t -> ConstraintsGenStack g o a t s -> (s, [ConstraintsGenOutput g o a t])
 evalConstraintsGenStack supply ctx a = evalRWS (constraintsGenMonad a) ctx (ConstraintsGenState mempty supply)
 
 {-# INLINE runConstraintsGenStack #-}
-runConstraintsGenStack :: Int -> ConstraintsGenContext o a t -> ConstraintsGenStack c o a t s -> (s, ConstraintsGenState c, [ConstraintsGenOutput c o a t])
+runConstraintsGenStack :: Int -> ConstraintsGenContext o a t -> ConstraintsGenStack g o a t s -> (s, ConstraintsGenState g, [ConstraintsGenOutput g o a t])
 runConstraintsGenStack supply ctx a = runRWS (constraintsGenMonad a) ctx (ConstraintsGenState mempty supply)
 
 {-# INLINE updateConstraintsGenSupply #-}
-updateConstraintsGenSupply :: Int -> ConstraintsGenStack c o a t ()
+updateConstraintsGenSupply :: Int -> ConstraintsGenStack g o a t ()
 updateConstraintsGenSupply supply = modify (overConstraintsGenStateSupply (const supply))
 
 {-# INLINE monosetInsert #-}
@@ -120,5 +120,5 @@ monosetInsertMultiple :: (Ord k, Foldable f) => f (TypeIndex k) -> Monomorphic (
 monosetInsertMultiple = flip (foldr monosetInsert)
 
 {-# INLINE localMonoset #-}
-localMonoset :: (Monomorphic (o a) -> Monomorphic (o a)) -> ConstraintsGenStack c o a t s -> ConstraintsGenStack c o a t s
+localMonoset :: (Monomorphic (o a) -> Monomorphic (o a)) -> ConstraintsGenStack g o a t s -> ConstraintsGenStack g o a t s
 localMonoset = local . overConstraintsGenMonomorphicSet

@@ -33,11 +33,11 @@ import Extra
 type ConstraintsGen a = ConstraintsGenStack a TypeIndex Kind IndexedType
 
 {-# INLINE lookupDataConstructor #-}
-lookupDataConstructor :: Name -> ConstraintsGenStack c o a t (Maybe (DataConstructor o a t))
+lookupDataConstructor :: Name -> ConstraintsGenStack g o a t (Maybe (DataConstructor o a t))
 lookupDataConstructor name = asks (Environment.lookup name . constraintsGenContextDataConstructorEnv)
 
 {-# INLINE lookupCodataAccessor #-}
-lookupCodataAccessor :: Name -> ConstraintsGenStack c o a t (Maybe (CodataAccessor o a t))
+lookupCodataAccessor :: Name -> ConstraintsGenStack g o a t (Maybe (CodataAccessor o a t))
 lookupCodataAccessor name = asks (Environment.lookup name . constraintsGenContextCodataAccessorEnv)
 
 assertEqualityAssumptions :: a -> IndexedType -> [Assumption a IndexedType] -> ConstraintsGen a ()

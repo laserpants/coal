@@ -28,7 +28,7 @@ import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
 import Extra (Dictionary, Name, forM, forM_, void, (<$$>))
 
-type ConstraintsGenResult c o a t s = (s, Dictionary (c, o a), [ConstraintsGenOutput c o a t])
+type ConstraintsGenResult g o a t s = (s, Dictionary (g, o a), [ConstraintsGenOutput g o a t])
 
 runConstraintsGenC :: (Monad m) => ConstraintsGenStack c TypeIndex Kind IndexedType r -> CompilerT a m (ConstraintsGenResult c TypeIndex Kind IndexedType r)
 runConstraintsGenC stack = do

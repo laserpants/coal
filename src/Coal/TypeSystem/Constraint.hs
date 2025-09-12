@@ -25,11 +25,11 @@ newtype Monomorphic m = Monomorphic {monomorphicSet :: Set m}
 overMonomorphicSet :: Over (Monomorphic m) (Set m)
 overMonomorphicSet fn (Monomorphic s) = Monomorphic (fn s)
 
-data Constraint c o a t
-  = Equality c [t]
-  | Implicit c t t (Monomorphic (o a))
-  | Explicit c t (Scheme o a t)
-  | Lacks c t Name
+data Constraint g o a t
+  = Equality g [t]
+  | Implicit g t t (Monomorphic (o a))
+  | Explicit g t (Scheme o a t)
+  | Lacks g t Name
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
 
 instance TypeIndexed k (Monomorphic (TypeIndex k)) where
