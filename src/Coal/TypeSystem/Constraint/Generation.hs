@@ -86,6 +86,9 @@ emitPConstructorConstraints loc (Label t name) ps = do
 emitPOrConstraints :: (Data a) => IndexedType -> Pattern a IndexedType -> Pattern a IndexedType -> ConstraintsGen a ()
 emitPOrConstraints t p1 p2 = tellRight [Equality InferenceRulePlaceholder [t, typeOf p1, typeOf p2]]
 
+emitPListConsConstraints :: (Data a) => IndexedType -> Pattern a IndexedType -> Pattern a IndexedType -> ConstraintsGen a ()
+emitPListConsConstraints t p1 p2 = tellRight [Explicit InferenceRulePlaceholder (foldTypeOf t [p1, p2]) listConstructorScheme]
+
 emitPatternConstraints :: (Show a, Data a) => Assertion a -> [Assumption a IndexedType] -> Pattern a IndexedType -> ConstraintsGen a [Name]
 emitPatternConstraints assertF ms =
   \case
@@ -125,9 +128,9 @@ emitPatternConstraints assertF ms =
     PAny{} ->
       pure []
     PListCons _ t p1 p2 -> do
+      emitPListConsConstraints t p1 p2
       ms1 <- emitPatternConstraints assertF ms p1
       ms2 <- emitPatternConstraints assertF ms p2
-      tellRight [Explicit InferenceRulePlaceholder (foldTypeOf t [p1, p2]) listConstructorScheme]
       pure (ms1 <> ms2)
     PListLiteral _ t ps -> do
       tellRight
