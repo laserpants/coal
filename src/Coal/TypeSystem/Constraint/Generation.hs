@@ -175,23 +175,6 @@ emitPatternConstraints assertF ms =
     _ ->
       error "TODO"
 
-clauseAssumptions :: (Show a, Data a) => Clause a IndexedType -> ConstraintsGen a (IndexedType, [IndexedType], [Assumption a IndexedType])
-clauseAssumptions (EClause loc p cs) = do
-  (ts1, ms) <- second concat . unzip <$$> withMonomorphic p $
-    forM (toList cs) $
-      \case
-        CPlain _ gs e -> do
-          ms1 <- concatForM gs $
-            \(CGuard g) -> do
-              tellRight [Equality (RuleMatchClauseGuard loc) [typeOf g, TIntrinsic IBool]]
-              emitConstraints g
-          ms2 <- emitConstraints e
-          pure (typeOf e, ms1 <> ms2)
-        CLambda{} ->
-          error "TODO"
-  names <- emitPatternConstraints (assertEqualityAssumptions loc) ms p
-  pure (typeOf p, ts1, filter (assumptionNameIsNotOneOf names) ms)
-
 emitEAnnotationConstraints :: (Show a, Data a) => a -> Type Parameter () -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
 emitEAnnotationConstraints loc t e = do
   r <- instantiateAnnotation loc t
@@ -356,6 +339,23 @@ emitMatchConstraints loc t e es cs = do
   -- Expression types
   tellRight [Equality (RuleMatchClauseExpressions loc) (foldTypeOf t es : concat ts2)]
   pure (ms1 <> ms2)
+
+clauseAssumptions :: (Show a, Data a) => Clause a IndexedType -> ConstraintsGen a (IndexedType, [IndexedType], [Assumption a IndexedType])
+clauseAssumptions (EClause loc p cs) = do
+  (ts1, ms) <- second concat . unzip <$$> withMonomorphic p $
+    forM (toList cs) $
+      \case
+        CPlain _ gs e -> do
+          ms1 <- concatForM gs $
+            \(CGuard g) -> do
+              tellRight [Equality (RuleMatchClauseGuard loc) [typeOf g, TIntrinsic IBool]]
+              emitConstraints g
+          ms2 <- emitConstraints e
+          pure (typeOf e, ms1 <> ms2)
+        CLambda{} ->
+          error "TODO"
+  names <- emitPatternConstraints (assertEqualityAssumptions loc) ms p
+  pure (typeOf p, ts1, filter (assumptionNameIsNotOneOf names) ms)
 
 emitConstraints :: (Show a, Data a) => Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
 emitConstraints =
