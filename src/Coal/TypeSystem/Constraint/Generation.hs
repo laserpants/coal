@@ -96,6 +96,13 @@ emitPListLiteralConstraints t ps =
     , Explicit InferenceRulePlaceholder t (forall1 listType)
     ]
 
+emitPTupleConstraints :: (Data a) => IndexedType -> NonEmpty (Pattern a IndexedType) -> ConstraintsGen a ()
+emitPTupleConstraints t ps =
+  tellRight
+    [ Equality InferenceRulePlaceholder [t, tupleType (typeOf <$> ps)]
+    , Explicit InferenceRulePlaceholder t (tupleScheme (length ps))
+    ]
+
 emitPatternConstraints :: (Show a, Data a) => Assertion a -> [Assumption a IndexedType] -> Pattern a IndexedType -> ConstraintsGen a [Name]
 emitPatternConstraints assertF ms =
   \case
@@ -163,10 +170,7 @@ emitPatternConstraints assertF ms =
     PLiteral{} ->
       pure []
     PTuple _ t ps -> do
-      tellRight
-        [ Equality InferenceRulePlaceholder [t, tupleType (typeOf <$> ps)]
-        , Explicit InferenceRulePlaceholder t (tupleScheme (length ps))
-        ]
+      emitPTupleConstraints t ps
       concatForM ps (emitPatternConstraints assertF ms)
     _ ->
       error "TODO"
