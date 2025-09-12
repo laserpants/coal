@@ -44,23 +44,21 @@ patternOperator op p1 p2 = op (metadataSpan p1 p2) () p1 p2
 
 annotation :: Parser (Pattern Metadata () -> Pattern Metadata ())
 annotation = do
-  start <- getSourcePos
-  symbol_ ":"
-  t <- parseType
-  end <- getSourcePos
-  pure (PAnnotation (Metadata start end) t)
+  withMetadata $ do
+    symbol_ ":"
+    t <- parseType
+    pure (`PAnnotation` t)
 
 asPattern :: Parser (Pattern Metadata () -> Pattern Metadata ())
 asPattern = do
-  start <- getSourcePos
-  lexeme_ "as"
-  p2 <- parseVariablePattern
-  end <- getSourcePos
-  case p2 of
-    PVariable _ (Label _ n) ->
-      pure (PAs (Metadata start end) (Label () n))
-    _ ->
-      fail "Expected a variable on the right-hand side of 'as'"
+  withMetadata $ do
+    lexeme_ "as"
+    p2 <- parseVariablePattern
+    case p2 of
+      PVariable _ (Label _ n) ->
+        pure (\loc -> PAs loc (Label () n))
+      _ ->
+        fail "Expected a variable on the right-hand side of 'as'"
 
 patternOperators :: [[Operator Parser (Pattern Metadata ())]]
 patternOperators =
