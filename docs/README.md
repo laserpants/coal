@@ -137,7 +137,7 @@ As in most other languages, import statements must appear at the beginning of a 
 import List(concat, head, tail)
 ```
 
-A *namespace* import allows you to access functions, types, and other definitions from a module using their qualified names. A qualified name is formed by prefixing the definition’s name with the module’s path:
+A *namespace* import allows you to access functions, types, and other definitions from a module using their qualified names. The qualified name is formed by prefixing the definition’s name with the module’s path:
 
 ```
 // Import the List module under its namespace
@@ -149,7 +149,7 @@ import namespace List
 
 ### Top-level definitions
 
-Definitions that can appear in the outermost scope of a module are functions, let-expressions, data and codata type definitions, traits, trait instances, folds, and unfolds.
+Definitions that can appear in the outermost scope of a module are functions, (let-)expressions, data and codata type definitions, traits, trait instances, folds, and unfolds.
 
 #### Functions
 
@@ -160,41 +160,32 @@ A function is defined using the `fun` keyword, followed by the function's name a
     <expr>
 ```
 
-In the above, `<arg_1>, <arg_2>, ..., <arg_n>` are *patterns*.
+In the above, `<arg_1>, <arg_2>, ..., <arg_n>` are *patterns*, allowing functions to directly deconstruct their arguments.
+In addition to basic variables, records, tuples, and other data constructors, patterns may also include wildcards, literals, and nested structures.
 
 ```
-  fun baz({ num : int32 }) =
+  fun stuff({ a : int32 }, (b, c), _) =
     ...
 ```
 
 See **Pattern matching** for an overview of available patterns.
 
-An explicit type annotion can be given to indicate a function's return type; as in the following example:
+A type annotion can be given to indicate a function's return type; as in the following example:
 
 ```
   fun is_even(n : int32) : bool =
     n % 2 == 0
 ```
 
-```
-  fun head(list : List<a>) : Option<a> =
-    match(list) {
-      | [] => None
-      | x :: _ => Some(x)
-    }
-```
-
-TODO
-
 #### Expressions
 
-Other types of expressions can be defined at this level using the `let` keyword:
+Other types of expressions can also be defined in this scope, using the `let` keyword.
 
 ```
   let <name> = <expr>
 ```
 
-.. look like those those used inside an expression, except that there is no body:
+A module-level let-binding looks similar to one used inside an expression, except that there is no body:
 
 ```
 module Utils {
@@ -212,10 +203,10 @@ module Utils {
 }
 ```
 
-baz
+Functions can also be written by way of the `let` keyword, for example:
 
 ```
-let add = fn(x, y) => x + y
+let add = fn(x, y) => x + y     // This is the same as fun(x, y) = x + y
 ```
 
 ### Expression syntax
