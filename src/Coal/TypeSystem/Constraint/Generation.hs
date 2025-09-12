@@ -40,10 +40,6 @@ lookupDataConstructor name = asks (Environment.lookup name . constraintsGenConte
 lookupCodataAccessor :: Name -> ConstraintsGenStack c o a t (Maybe (CodataAccessor o a t))
 lookupCodataAccessor name = asks (Environment.lookup name . constraintsGenContextCodataAccessorEnv)
 
--- {-# INLINE lookupTopLevelFold #-}
--- lookupTopLevelFold :: Name -> ConstraintsGenStack c o a t (Maybe IndexedScheme)
--- lookupTopLevelFold name = asks (Environment.lookup name . constraintsGenContextTopLevelFoldEnv)
-
 assertEqualityAssumptions :: a -> IndexedType -> [Assumption a IndexedType] -> ConstraintsGen a ()
 assertEqualityAssumptions _ t ms =
   tellRight $ do
@@ -151,17 +147,6 @@ emitPatternConstraints assertF ms =
       concatForM ps (emitPatternConstraints assertF ms)
     PAtVariable _ (Label _ name) -> do
       pure [name]
-    --    PNamedFold loc f (Label t name) -> do
-    --      --assertF t (filter (assumptionNameIs f) ms)
-    --      r <- lookupTopLevelFold f
-    --      case r of
-    --        Nothing ->
-    --          error "Fold not found" -- undefined -- tellLeft [ENoDataConstructor loc name]
-    --        Just s ->
-    --          traceShow (f, s) $
-    --            tellRight [Explicit InferenceRulePlaceholder t s]
-    --      pure []
-    --      pure [name]
     PAs _ (Label t name) p -> do
       ps <- emitPatternConstraints assertF ms p
       tellRight [Equality InferenceRulePlaceholder [t, typeOf p]]
