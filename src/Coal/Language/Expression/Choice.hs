@@ -11,7 +11,6 @@ import Coal.Language.Pattern (Pattern)
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (universeBi)
 import Data.List.NonEmpty (NonEmpty)
-
 import qualified Data.Set as Set
 
 newtype Guard e a t = CGuard (e a t)
