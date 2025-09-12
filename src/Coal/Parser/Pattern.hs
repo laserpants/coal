@@ -1,6 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
 
--- FIXME
 module Coal.Parser.Pattern (parsePattern, parseUnitPattern) where
 
 import Coal.Ast.Metadata (Metadata (..), metadataSpan)
@@ -17,7 +16,7 @@ import Control.Monad.Combinators.Expr
 import Data.Char (ord)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
-import Text.Megaparsec (getSourcePos, option, optional, some, try, (<|>))
+import Text.Megaparsec (option, optional, some, try, (<|>))
 import Text.Megaparsec.Char (char)
 import qualified Text.Megaparsec.Char.Lexer as Lexer
 
@@ -27,7 +26,7 @@ parseAtom =
     <|> parseAtVariablePattern
     <|> parseLiteralPattern
     <|> parseRecordPattern
-    <|> parseAnyPattern
+    <|> parseWildcardPattern
     <|> try parseAtFunction
     <|> parseVariablePattern
     <|> try (parens parsePattern)
@@ -67,8 +66,8 @@ patternOperators =
   , [Postfix (foldl (.) id <$> some (asPattern <|> annotation))]
   ]
 
-parseAnyPattern :: Parser (Pattern Metadata ())
-parseAnyPattern =
+parseWildcardPattern :: Parser (Pattern Metadata ())
+parseWildcardPattern =
   withMetadata $ do
     symbol_ "_"
     pure (`PAny` ())
