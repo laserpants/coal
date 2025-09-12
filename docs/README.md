@@ -40,7 +40,7 @@ A distinction is made between ordinary, finite data, which is produced and consu
   let nats = enum_from(0)
 ```
 
-The `@` symbol in these examples denotes two different forms of recursive control flow. In the first example, the `fold` pattern variable means that `tot` recieves the result from calling the fold again using the sub-list matched by the pattern. In the second example, the expression on the right (`n + 1`) becomes the next seed value, which is fed back into `enum_from` to generate the rest of the stream.
+The `@` symbol in these examples denotes two different types of recursive control flow. In the first example, the `fold` pattern variable means that `tot` recieves the result from calling the fold again using the sub-list matched by the pattern. In the second example, the expression on the right (`n + 1`) becomes the next seed value, which is fed back into `enum_from` to generate the rest of the stream.
 If you are familiar with [recursion schemes](https://blog.sumtypeofway.com/posts/introduction-to-recursion-schemes.html) in a language like Haskell, it is based on exactly the same principles.
 Scroll down to **Recursion, corecursion, and codata** for a more detailed explanation of how `fold` and `unfold` work in Coal.
 
@@ -185,7 +185,7 @@ Expressions that are not functions can also be defined in this scope, using the 
   let <name> = <expr>
 ```
 
-A module-level let-binding is similar to those used inside an expression (explained below), except that there is no body:
+A module-level let-binding looks like those used inside an expression (explained below), except that there is no body:
 
 ```
 module Utils {
@@ -456,7 +456,7 @@ In Coal, list literals are denoted by a sequence of comma-separated expressions,
 [<expr_1 : t>, <expr_2 : t>, ..., <expr_n : t>] : List<t>
 ```
 
-The `List` type is defined inductively, and implemented as a one-way *linked list* of nodes. This means that a list of type `List<a>` is either (1) the empty list; or (2) a value of type `a`, coupled with another `List<a>` list. These last two are usually referred to as the *head* and *tail* of the list. 
+The `List` type is defined inductively, and implemented as a one-way *linked list* of nodes. This means that a list of type `List<a>` is either (1) the empty list; or (2) a value of type `a` coupled with another `List<a>` list. These last two are usually referred to as the *head* and *tail* of the list. 
 
 ```
 type List<a>
