@@ -1,4 +1,3 @@
--- FIXME
 module Coal.Parser.Metadata (withMetadata) where
 
 import Coal.Ast.Metadata (Metadata (..))
@@ -10,4 +9,4 @@ withMetadata p = do
   start <- getSourcePos
   f <- p
   end <- getSourcePos
-  pure (f (Metadata start end))
+  pure $ f (Metadata start end)
