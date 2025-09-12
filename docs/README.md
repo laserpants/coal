@@ -203,7 +203,7 @@ module Utils {
 }
 ```
 
-Functions can also be written by way of the `let` keyword, for example:
+Functions can also be written as a let-expression, for example:
 
 ```
 let add = fn(x, y) => x + y     // This is the same as fun(x, y) = x + y
