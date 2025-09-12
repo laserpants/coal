@@ -149,6 +149,8 @@ import namespace List
 
 ### Top-level definitions
 
+Definitions that can appear in the outermost scope of a module are functions, let-expressions, data and codata type definitions, traits, trait instances, folds, and unfolds.
+
 #### Functions
 
 A function is defined using the `fun` keyword, followed by the function's name and a list of comma-separated arguments enclosed in parentheses.
@@ -164,6 +166,8 @@ In the above, `<arg_1>, <arg_2>, ..., <arg_n>` are *patterns*.
   fun baz({ num : int32 }) =
     ...
 ```
+
+See **Pattern matching** for an overview of available patterns.
 
 An explicit type annotion can be given to indicate a function's return type; as in the following example:
 
@@ -253,7 +257,7 @@ A let-binding associates a name with an expression within a given scope:
 
 ###### Semantics
 
-A subtle but important detail that makes let-bindings in Coal different from those in most other languages is that the identifier introduced by `let` is **not in scope within the definition itself**. 
+A subtle but important detail that makes let-bindings in Coal different from those in most other languages is that the identifier introduced by a `let` is **not in scope within the definition itself**. 
 In other words, `let x = e1 in e2` makes `x` available in `e2`, but not in `e1`. 
 In OCaml (and F#) this is also the case for the standard `let` keyword. However, in these languages, a special `let rec` syntax can be used to evade this restriction. Coal doesn't have an equivalent to `let rec`.
 
