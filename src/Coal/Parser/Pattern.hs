@@ -16,14 +16,13 @@ import Control.Monad (void)
 import Control.Monad.Combinators.Expr
 import Data.Char (ord)
 import Data.List.NonEmpty (NonEmpty (..))
+import qualified Data.Map.Strict as Map
 import Text.Megaparsec (getSourcePos, option, optional, some, try, (<|>))
 import Text.Megaparsec.Char (char)
-
-import qualified Data.Map.Strict as Map
 import qualified Text.Megaparsec.Char.Lexer as Lexer
 
-parseAtomPattern :: Parser (Pattern Metadata ())
-parseAtomPattern =
+parseAtom :: Parser (Pattern Metadata ())
+parseAtom =
   parseConstructorPattern
     <|> parseAtVariablePattern
     <|> parseLiteralPattern
@@ -35,7 +34,7 @@ parseAtomPattern =
     <|> parseTuplePattern
 
 parsePattern :: Parser (Pattern Metadata ())
-parsePattern = makeExprParser parseAtomPattern patternOperators
+parsePattern = makeExprParser parseAtom patternOperators
 
 parseUnitPattern :: Parser (NonEmpty (Pattern Metadata ()))
 parseUnitPattern = withMetadata $ pure (\loc -> PLiteral loc LUnit :| [])
@@ -61,7 +60,7 @@ asPattern = do
     PVariable _ (Label _ n) ->
       pure (PAs (Metadata start end) (Label () n))
     _ ->
-      fail "Expected variable on right-hand side of 'as'"
+      fail "Expected a variable on the right-hand side of 'as'"
 
 patternOperators :: [[Operator Parser (Pattern Metadata ())]]
 patternOperators =
