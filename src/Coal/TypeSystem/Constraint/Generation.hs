@@ -148,7 +148,7 @@ emitPatternConstraints assertF ms =
     PListLiteral _ t ps -> do
       emitPListLiteralConstraints t ps
       concatForM ps (emitPatternConstraints assertF ms)
-    PAtVariable _ (Label _ name) -> do
+    PAtVariable _ (Label _ name) ->
       pure [name]
     PAs _ (Label t name) p -> do
       names <- emitPatternConstraints assertF ms p
