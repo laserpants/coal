@@ -1,14 +1,12 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
--- FIXME
 module Coal.Compiler.Kernel.TranslateType (translateType) where
 
 import qualified Coal.Kernel.Language as Kernel
 import Coal.Language.Type
 import Coal.Language.Type.Intrinsic
 import Coal.Language.Type.Row
-import Data.Text (isPrefixOf)
 
 translateIntrinsicType :: Intrinsic (Type o k) -> Kernel.Type
 translateIntrinsicType =
@@ -59,8 +57,8 @@ translateType =
       foldr (translateApplication . translateType) (translateType t) ts
     TArrow t1 t2 ->
       Kernel.arrow (translateType t1) (translateType t2)
-    TConstructor _ con
-      | "#Tuple" `isPrefixOf` con ->
+    con@TConstructor{}
+      | isTupleType con ->
           Kernel.TCon "tuple" []
     TConstructor _ "List" ->
       Kernel.TCon "list" []

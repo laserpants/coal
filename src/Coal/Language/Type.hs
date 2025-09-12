@@ -23,6 +23,7 @@ module Coal.Language.Type (
   listType,
   tupleType,
   tupleTypeCons,
+  isTupleType,
   (~>),
 ) where
 
@@ -128,6 +129,15 @@ listType t = TApplication KType (TConstructor (KArrow KType KType) "List") (t :|
 tupleType :: NonEmpty IndexedType -> IndexedType
 tupleType ts = TApplication KType (TConstructor (tupleKind (length ts)) (tupleTypeCons (length ts))) ts
 
+isTupleType :: Type o k -> Bool
+isTupleType =
+  \case
+    TConstructor _ con
+      | "#Tuple" `isPrefixOf` con ->
+          True
+    _ ->
+      False
+
 {-# INLINE tupleTypeCons #-}
 tupleTypeCons :: Int -> Name
 tupleTypeCons n = "#Tuple" <> showt n
@@ -149,8 +159,8 @@ prettyTypePrec prec =
     TArrow t1 t2 ->
       parensIf (prec > precArrow) $
         group (prettyTypePrec (precArrow + 1) t1 <+> "→" <+> prettyTypePrec precArrow t2)
-    TApplication _ (TConstructor _ con) args
-      | "#Tuple" `isPrefixOf` con ->
+    TApplication _ con args
+      | isTupleType con ->
           parensIf (prec > precApp) $ group (tupled (map (prettyTypePrec 0) (toList args)))
     TApplication _ f args ->
       parensIf (prec > precApp) $

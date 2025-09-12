@@ -30,7 +30,6 @@ import Extra (
 
 import qualified Coal.Common.Environment as Environment
 import qualified Data.Map.Strict as Map
-import qualified Data.Text as Text
 
 type TypeAnnotationContext = ConstraintsGenContext TypeIndex Kind IndexedType
 
@@ -56,8 +55,8 @@ runTypeAnnotation loc v = runStateT (runExceptT (withExceptT ($ loc) v)) mempty
 instantiate :: (MonadReader TypeAnnotationContext m) => Type Parameter () -> TypeAnnotation a m IndexedType
 instantiate =
   \case
-    TApplication _ (TConstructor _ name) ts
-      | "#Tuple" `Text.isPrefixOf` name ->
+    TApplication _ con@(TConstructor _ name) ts
+      | isTupleType con ->
           TApplication KType (TConstructor (tupleKind (length ts)) name)
             <$> traverse instantiate ts
     TApplication _ (TVariable (Parameter _ v)) ts -> do
