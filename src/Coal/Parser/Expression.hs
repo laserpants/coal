@@ -1,6 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
 
--- FIXME
 module Coal.Parser.Expression (parseExpression, parseMatchClause) where
 
 import Coal.Ast.Metadata (Metadata (..), metadataSpan)
@@ -106,15 +105,12 @@ parseClause =
     p <- symbol_ "|" *> parsePattern
     symbol_ "=>"
     c <- parseChoice
-    -- TODO
-    -- cs <- symbol_ "=>" *> nonEmpty (some parseChoice)
     pure (\loc -> EClause loc p (NonEmpty.singleton c))
 
 parseFoldExpression :: Parser (Expression Metadata ())
 parseFoldExpression = do
   withMetadata $ do
     lexeme_ "fold"
-    -- n <- option "$fold" name
     es <- parens (nonEmpty (commaSep1 parseExpression))
     cs <- braces (nonEmpty (some parseClause))
     pure (\loc -> EFold loc () es cs Nothing)
@@ -130,13 +126,8 @@ parseMatchClause =
   withMetadata $ do
     p <- symbol_ "|" *> parsePattern
     cs <- symbol_ "=>"
-    -- \*> nonEmpty (some parseChoice)
     c <- parseChoice
     pure (\loc -> EClause loc p (NonEmpty.singleton c))
-
--- TODO
--- cs <- symbol_ "=>" *> nonEmpty (some parseChoice)
---    pure (\loc -> EClause loc p (NonEmpty.singleton c))
 
 parseLambdaMatchExpression :: Parser (Expression Metadata ())
 parseLambdaMatchExpression = do
@@ -262,10 +253,8 @@ parseMultiplicationOperator =
 
 fixity9 :: [Operator Parser (Expression Metadata ())]
 fixity9 =
-  [ -- TODO
-    InfixR (binaryOperator OReverseComposition <$ symbol "<<")
-  , -- TODO
-    InfixR (binaryOperator OReverseApplication <$ symbol "|.")
+  [ InfixR (binaryOperator OReverseComposition <$ symbol "<<")
+  , InfixR (binaryOperator OReverseApplication <$ symbol "|.")
   ]
 
 fixity8 :: [Operator Parser (Expression Metadata ())]
