@@ -1,6 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
 
--- FIXME
 module Coal.Parser.Primitive (parsePrimitive) where
 
 import Coal.Ast.Metadata (Metadata (..))
@@ -11,26 +10,26 @@ import Coal.Parser.Metadata
 import Control.Monad (void)
 import Data.Char (ord)
 import Data.Functor (($>))
-import Text.Megaparsec
-import Text.Megaparsec.Char (char)
-
 import qualified Data.Text as Text
 import qualified Data.Text.Encoding as Text
+import Text.Megaparsec
+import Text.Megaparsec.Char (char)
 import qualified Text.Megaparsec.Char.Lexer as Lexer
+
+parseAtom :: Parser Primitive
+parseAtom =
+  parseTrue
+    <|> parseFalse
+    <|> parseChar
+    <|> parseString
+    <|> try parseFloat
+    <|> try parseDouble
 
 parsePrimitive :: Parser (Expression Metadata ())
 parsePrimitive =
   withMetadata $ do
-    lit <- parser
+    lit <- parseAtom
     pure (`ELiteral` lit)
- where
-  parser =
-    parseTrue
-      <|> parseFalse
-      <|> parseChar
-      <|> parseString
-      <|> try parseFloat
-      <|> try parseDouble
 
 parseTrue :: Parser Primitive
 parseTrue = lexeme_ "true" $> LBool True
