@@ -99,6 +99,9 @@ emitPTupleConstraints t ps =
     , Explicit InferenceRulePlaceholder t (tupleScheme (length ps))
     ]
 
+emitPAsConstraints :: (Data a) => IndexedType -> Pattern a IndexedType -> ConstraintsGen a ()
+emitPAsConstraints t p = tellRight [Equality InferenceRulePlaceholder [t, typeOf p]]
+
 emitPatternConstraints :: (Show a, Data a) => Assertion a -> [Assumption a IndexedType] -> Pattern a IndexedType -> ConstraintsGen a [Name]
 emitPatternConstraints assertF ms =
   \case
@@ -149,7 +152,7 @@ emitPatternConstraints assertF ms =
       pure [name]
     PAs _ (Label t name) p -> do
       names <- emitPatternConstraints assertF ms p
-      tellRight [Equality InferenceRulePlaceholder [t, typeOf p]]
+      emitPAsConstraints t p
       assertF t (filter (assumptionNameIs name) ms)
       pure (name : names)
     PLiteral{} ->
