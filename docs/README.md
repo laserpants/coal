@@ -265,7 +265,7 @@ let fib =
       else fib(n - 1) + fib(n - 2)
 ```
 
-More generally, it makes it impossible for any function to call itself. (explicit recursion) 
+More generally, this makes it impossible for any function to call itself. (explicit recursion) 
 This is why functions such as the standard factorial function are rejected by the compiler. 
 
 #### Lambda expressions
