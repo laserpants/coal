@@ -6,7 +6,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
 
--- FIXME
 module Coal.Compiler.PatternMatching (
   MatchExpressionContext (..),
   TypeProxy (..),
