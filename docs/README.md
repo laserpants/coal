@@ -40,8 +40,12 @@ A distinction is made between ordinary, finite data, which is produced and consu
   let nats = enum_from(0)
 ```
 
-The `@` symbol in these examples denotes two different types of recursive control flow. In the first example, the `fold` pattern variable means that `tot` recieves the result from calling the fold again using the sub-list matched by the pattern. In the second example, the expression on the right (`n + 1`) becomes the next seed value, which is fed back into `enum_from` to generate the rest of the stream.
-If you are familiar with [recursion schemes](https://blog.sumtypeofway.com/posts/introduction-to-recursion-schemes.html) in a language like Haskell, it is based on exactly the same principles.
+The `@` symbol in these examples denotes two different types of recursive control flow: 
+
+- In the first example, the `fold` pattern variable means that `tot` recieves the result from calling the fold again using the sub-list matched by the pattern. 
+- In the second example, the expression on the right (`n + 1`) becomes the next seed value, which is fed back into `enum_from` to generate the rest of the stream.
+
+If you are familiar with [recursion schemes](https://blog.sumtypeofway.com/posts/introduction-to-recursion-schemes.html) in a language like Haskell, it is based on the exact same principles.
 Scroll down to **Recursion, corecursion, and codata** for a more detailed explanation of how `fold` and `unfold` work in Coal.
 
 ### Programs = Expressions + Effects
@@ -100,7 +104,7 @@ TODO
 
 ### Modules and imports
 
-Projects in Coal are organized as collections of *modules*. Modules provide a way to group related functionality into distinct namespaces. 
+Projects in Coal are organized as collections of *modules*. Modules provide a way to group related functionality into distinct [namespaces](https://en.wikipedia.org/wiki/Namespace). 
 A module can contain functions, type definitions, traits, and other language constructs, typically focused on a specific purpose within a library or application.
 
 ```
@@ -109,7 +113,7 @@ module <path>(<export_list>) {
 }
 ```
 
-Each module is identified by its *path*, reflecting the directory structure of the file in which it is defined. The path segments begin with an uppercase letter and are separated by a dot.
+Each module is identified by its *path*, reflecting the directory structure of the file in which it is defined. Path segments begin with an uppercase letter and are separated by a dot.
 A module `Utils.Math.Trigonometry`, for instance, is defined in a file located at `Utils/Math/Trigonometry.coal`, relative to your project's root directory.
 
 ```
@@ -119,7 +123,7 @@ src
         └── Trigonometry.coal
 ```
 
-In a module declaration, the path is followed by an optional list of exported names enclosed in parentheses. Only exported names are visible outside of the module (i.e., *public* in OOP terminology).
+In a module declaration, the path identifier is followed by an optional list of exported names enclosed in parentheses. Only exported names are visible outside of the module (or *public* in OOP terminology).
 
 ```
 module Utils.Math.Trigonometry(sin, cos, tan) {
@@ -130,14 +134,14 @@ If this list is left out, everything in the module is exported.
 
 #### Imports
 
-An `import` statement is used to bring in functions and other definitions from a separate module. 
+An `import` statement is used to bring in functions and other definitions from a different module. 
 As in most other languages, import statements must appear at the beginning of a module, preceding any other code.
 
 ```
 import List(concat, head, tail)
 ```
 
-A *namespace* import allows you to access functions, types, and other definitions from a module using their qualified names. The qualified name is formed by prefixing the definition’s name with the module’s path:
+A *namespace* import allows you to access functions, types, and other definitions from a module using their qualified names. A qualified name is formed by prefixing the name with the path of the module:
 
 ```
 // Import the List module under its namespace
@@ -165,7 +169,7 @@ In the above, `<arg_1>, <arg_2>, ..., <arg_n>` are *patterns*, allowing function
 In addition to basic variables, records, tuples, and other data constructors, patterns may also include wildcards, literals, and nested structures.
 
 ```
-  fun stuff({ n : int32 }, (fst, snd), _) =
+  fun bork({ n : int32 }, (fst, snd), _) =
     ...
 ```
 
@@ -204,17 +208,36 @@ module Utils {
 }
 ```
 
-Since a let-expression is TODO, top-level functions can also be defined in the following way:
+Since a `let` can be any expression, top-level functions may also be defined in the following way:
 
 ```
 let add = fn(x, y) => x + y     // This is the same as fun(x, y) = x + y
 ```
 
+#### Main
+
+TODO
+
+```
+module Main {
+
+  fun main() =
+    ...
+    
+}
+```
+
 ### Expression syntax
+
+Expressions, such as variables, literals, let-bindings, and if-statement, are the basic building blocks of all programs.
+
+#### Variables
+
+TODO
 
 #### If-then-else
 
-If-expressions are similar to those found in most other languages in the functional family, requiring both the `then` and `else` branches to be present (and to have the same type):
+If-expressions are similar to those in most other languages in the functional family, requiring both the `then` and `else` branches to be present (and to have the same type):
 
 ```
   if (<e_1 : bool>) then <e_2 : t> else <e_3 : t>
