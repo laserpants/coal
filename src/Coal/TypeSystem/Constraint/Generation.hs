@@ -105,7 +105,7 @@ emitPAsConstraints t p = tellRight [Equality InferenceRulePlaceholder [t, typeOf
 emitPRecordConstraints :: (Data a) => IndexedType -> Dictionary (Pattern a IndexedType) -> Maybe (Pattern a IndexedType) -> ConstraintsGen a ()
 emitPRecordConstraints t fields p = do
   row <- tailRow p
-  tellRight [Equality InferenceRulePlaceholder [t, recordType (typeOf <$> fields) row]]
+  tellRight [Equality InferenceRulePlaceholder [t, fieldsRecordType (typeOf <$> fields) row]]
   case row of
     r@RVariable{} ->
       forM_ (Map.keys fields) $
@@ -233,13 +233,10 @@ emitELetConstraints loc gs e1 = do
 
 emitESelectConstraints :: (Show a, Data a) => a -> Label IndexedType -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
 emitESelectConstraints loc (Label t name) e = do
-  t1 <- recordType
+  row <- supplied (RVariable . TypeIndex KRow)
+  let t1 = recordType (RExtend name t row)
   tellRight [Equality InferenceRulePlaceholder [t1, typeOf e]]
   emitConstraints e
- where
-  recordType = do
-    rvar <- supplied (RVariable . TypeIndex KRow)
-    pure $ TIntrinsic (IRecord (TRow (RExtend name t rvar)))
 
 emitERecordConstraints :: (Show a, Data a) => a -> IndexedType -> Dictionary (Expression a IndexedType) -> Maybe (Expression a IndexedType) -> ConstraintsGen a [Assumption a IndexedType]
 emitERecordConstraints loc t fields expr = do

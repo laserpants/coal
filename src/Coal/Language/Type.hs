@@ -24,6 +24,7 @@ module Coal.Language.Type (
   tupleType,
   tupleTypeCons,
   isTupleType,
+  fieldsRecordType,
   recordType,
   (~>),
 ) where
@@ -143,8 +144,11 @@ isTupleType =
 tupleTypeCons :: Int -> Name
 tupleTypeCons n = "#Tuple" <> showt n
 
-recordType :: Dictionary (Type o k) -> Row o k (Type o k) -> Type o k
-recordType fields row = TIntrinsic (IRecord (TRow (fromDictionary fields row)))
+recordType :: Row o k (Type o k) -> Type o k
+recordType = TIntrinsic . IRecord . TRow
+
+fieldsRecordType :: Dictionary (Type o k) -> Row o k (Type o k) -> Type o k
+fieldsRecordType fields row = recordType (fromDictionary fields row)
 
 precArrow, precApp, precAtom :: Int
 precArrow = 1 -- e.g., a -> b
