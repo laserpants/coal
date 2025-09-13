@@ -4,7 +4,6 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
--- FIXME
 module Coal.TypeSystem.Constraint.Generation (
   ConstraintsGenContext (..),
   ConstraintsGenError (..),
@@ -340,6 +339,30 @@ clauseConstraintsImpl (EClause loc p cs) = do
   names <- emitPatternConstraints (assertEqualityAssumptions loc) ms p
   pure (typeOf p, ts1, filter (assumptionNameIsNotOneOf names) ms)
 
+emitECodataSelectConstraints :: (Show a, Data a) => a -> Label IndexedType -> Expression a IndexedType -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
+emitECodataSelectConstraints loc (Label t name) e e1 = do
+  ms1 <- emitConstraints e
+  r <- lookupCodataAccessor name
+  case r of
+    Nothing -> do
+      tellLeft [ENoCodataAccessor loc name]
+      pure []
+    Just CodataAccessor{..} -> do
+      tellRight [Explicit InferenceRulePlaceholder t1 codataAccessorScheme]
+      case e1 of
+        ERecursiveLet _ (PVariable _ (Label t2 n)) e2 e3 -> do
+          ms2 <- emitConstraints e2
+          ms3 <- emitConstraints e3
+          assertEqualityAssumptions loc t2 (filter (assumptionNameIs n) ms3)
+          t0 <- supplied (TVariable . TypeIndex KType)
+          tellRight [Explicit InferenceRulePlaceholder (t0 `TArrow` typeOf e3) codataAccessorScheme]
+          tellRight [Equality InferenceRulePlaceholder [t, typeOf e3]]
+          pure (ms1 <> ms2 <> filter (not . assumptionNameIs n) ms3)
+        _ ->
+          pure []
+ where
+  t1 = typeOf e `TArrow` t
+
 emitConstraints :: (Show a, Data a) => Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
 emitConstraints =
   \case
@@ -393,30 +416,8 @@ emitConstraints =
       concatMapM emitConstraints d
     ERecord loc t d me ->
       emitERecordConstraints loc t d me
-    ECodataSelect loc (Label t name) e e1 -> do
-      ms1 <- emitConstraints e
-      r <- lookupCodataAccessor name
-      ms2 <-
-        case r of
-          Nothing -> do
-            tellLeft [ENoCodataAccessor loc name]
-            pure []
-          Just CodataAccessor{..} -> do
-            let t1 = typeOf e `TArrow` t
-            tellRight [Explicit InferenceRulePlaceholder t1 codataAccessorScheme]
-            case e1 of
-              Just (ERecursiveLet _ (PVariable _ (Label t2 n)) e2 e3) -> do
-                ms2 <- emitConstraints e2
-                ms3 <- emitConstraints e3
-                assertEqualityAssumptions loc t2 (filter (assumptionNameIs n) ms3)
-                t0 <- supplied (TVariable . TypeIndex KType)
-                tellRight [Explicit InferenceRulePlaceholder (t0 `TArrow` typeOf e3) codataAccessorScheme]
-                let t5 = typeOf e3
-                tellRight [Equality InferenceRulePlaceholder [t, t5]]
-                pure (ms2 <> filter (not . assumptionNameIs n) ms3)
-              _ ->
-                pure []
-      pure (ms1 <> ms2)
+    ECodataSelect loc ll e (Just e1) ->
+      emitECodataSelectConstraints loc ll e e1
     ETuple loc t es ->
       emitETupleConstraints loc t es
     _ ->
