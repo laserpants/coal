@@ -319,15 +319,15 @@ emitETupleConstraints loc t es = do
 emitMatchConstraints :: (Show a, Data a) => a -> IndexedType -> Expression a IndexedType -> [Expression a IndexedType] -> NonEmpty (Clause a IndexedType) -> ConstraintsGen a [Assumption a IndexedType]
 emitMatchConstraints loc t e es cs = do
   ms1 <- emitConstraints e
-  (ts1, ts2, ms2) <- (third3 concat . unzip3 <$$> traverse clauseAssumptions) (toList cs)
+  (ts1, ts2, ms2) <- (third3 concat . unzip3 <$$> traverse emitClauseConstraints) (toList cs)
   -- Pattern types
   tellRight [Equality (RuleMatchClausePatterns loc) (typeOf e : ts1)]
   -- Expression types
   tellRight [Equality (RuleMatchClauseExpressions loc) (foldTypeOf t es : concat ts2)]
   pure (ms1 <> ms2)
 
-clauseAssumptions :: (Show a, Data a) => Clause a IndexedType -> ConstraintsGen a (IndexedType, [IndexedType], [Assumption a IndexedType])
-clauseAssumptions (EClause loc p cs) = do
+emitClauseConstraints :: (Show a, Data a) => Clause a IndexedType -> ConstraintsGen a (IndexedType, [IndexedType], [Assumption a IndexedType])
+emitClauseConstraints (EClause loc p cs) = do
   (ts1, ms) <- second concat . unzip <$$> withMonomorphic p $
     forM (toList cs) $
       \case
