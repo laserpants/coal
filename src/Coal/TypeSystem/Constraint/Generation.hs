@@ -26,7 +26,6 @@ import Data.Data (Data)
 import Data.List.NonEmpty (NonEmpty (..), toList)
 import qualified Data.Map.Strict as Map
 import Data.Maybe (maybeToList)
-import qualified Data.Set as Set
 import Data.Tuple.Extra (third3)
 import Extra
 
@@ -315,19 +314,18 @@ emitETupleConstraints loc t es = do
     ]
   pure ms1
 
--- TODO
-emitMatchConstraints :: (Show a, Data a) => a -> IndexedType -> Expression a IndexedType -> [Expression a IndexedType] -> NonEmpty (Clause a IndexedType) -> ConstraintsGen a [Assumption a IndexedType]
-emitMatchConstraints loc t e es cs = do
+emitClauseConstraints :: (Show a, Data a) => a -> IndexedType -> Expression a IndexedType -> [Expression a IndexedType] -> NonEmpty (Clause a IndexedType) -> ConstraintsGen a [Assumption a IndexedType]
+emitClauseConstraints loc t e es cs = do
   ms1 <- emitConstraints e
-  (ts1, ts2, ms2) <- (third3 concat . unzip3 <$$> traverse emitClauseConstraints) (toList cs)
+  (ts1, ts2, ms2) <- (third3 concat . unzip3 <$$> traverse clauseConstraintsImpl) (toList cs)
   -- Pattern types
   tellRight [Equality (RuleMatchClausePatterns loc) (typeOf e : ts1)]
   -- Expression types
   tellRight [Equality (RuleMatchClauseExpressions loc) (foldTypeOf t es : concat ts2)]
   pure (ms1 <> ms2)
 
-emitClauseConstraints :: (Show a, Data a) => Clause a IndexedType -> ConstraintsGen a (IndexedType, [IndexedType], [Assumption a IndexedType])
-emitClauseConstraints (EClause loc p cs) = do
+clauseConstraintsImpl :: (Show a, Data a) => Clause a IndexedType -> ConstraintsGen a (IndexedType, [IndexedType], [Assumption a IndexedType])
+clauseConstraintsImpl (EClause loc p cs) = do
   (ts1, ms) <- second concat . unzip <$$> withMonomorphic p $
     forM (toList cs) $
       \case
@@ -369,7 +367,7 @@ emitConstraints =
     EListLiteral loc t es ->
       emitEListLiteralConstraints loc t es
     EMatch loc t e cs ->
-      emitMatchConstraints loc t e [] cs
+      emitClauseConstraints loc t e [] cs
     ELambdaMatch _ _ _ (Just e) ->
       emitConstraints e
     ECompiledMatch{} ->
@@ -383,7 +381,7 @@ emitConstraints =
     ESelect loc ll e ->
       emitESelectConstraints loc ll e
     EFold loc t (e :| es) cs e1 -> do
-      ms1 <- emitMatchConstraints loc t e es cs
+      ms1 <- emitClauseConstraints loc t e es cs
       ms2 <- concatMapM emitConstraints es
       ms3 <- concatMapM emitConstraints e1
       case e1 of
