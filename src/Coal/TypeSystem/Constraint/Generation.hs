@@ -26,7 +26,6 @@ import Data.Data (Data)
 import Data.List.NonEmpty (NonEmpty (..), toList)
 import qualified Data.Map.Strict as Map
 import Data.Maybe (maybeToList)
-import Data.Tuple.Extra (third3)
 import Extra
 
 type ConstraintsGen a = ConstraintsGenStack a TypeIndex Kind IndexedType
@@ -317,12 +316,12 @@ emitETupleConstraints loc t es = do
 emitClauseConstraints :: (Show a, Data a) => a -> IndexedType -> Expression a IndexedType -> [Expression a IndexedType] -> NonEmpty (Clause a IndexedType) -> ConstraintsGen a [Assumption a IndexedType]
 emitClauseConstraints loc t e es cs = do
   ms1 <- emitConstraints e
-  (ts1, ts2, ms2) <- (third3 concat . unzip3 <$$> traverse clauseConstraintsImpl) (toList cs)
+  (ts1, ts2, ms2) <- unzip3 <$> traverse clauseConstraintsImpl (toList cs)
   -- Pattern types
   tellRight [Equality (RuleMatchClausePatterns loc) (typeOf e : ts1)]
   -- Expression types
   tellRight [Equality (RuleMatchClauseExpressions loc) (foldTypeOf t es : concat ts2)]
-  pure (ms1 <> ms2)
+  pure (ms1 <> concat ms2)
 
 clauseConstraintsImpl :: (Show a, Data a) => Clause a IndexedType -> ConstraintsGen a (IndexedType, [IndexedType], [Assumption a IndexedType])
 clauseConstraintsImpl (EClause loc p cs) = do
