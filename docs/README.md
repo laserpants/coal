@@ -229,7 +229,7 @@ module Main {
 
 ### Expression syntax
 
-Expressions, such as variables, literals, let-bindings, and if-statement, are the basic building blocks of all programs.
+Expressions, such as variables, literals, let-bindings, operators, and if-then-else-blocks, are the basic building blocks of all programs.
 
 #### Variables
 
