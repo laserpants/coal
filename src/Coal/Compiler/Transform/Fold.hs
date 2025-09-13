@@ -27,11 +27,14 @@ import Control.Monad.Reader (MonadReader)
 import Control.Monad.State (MonadState)
 import Control.Monad.Writer (execWriter, tell)
 import Data.Data (Data)
-import Data.Generics.Uniplate.Data (transform, transformM)
+import Data.Generics.Uniplate.Data (descendM, transform, transformM)
 import Data.List.NonEmpty (NonEmpty (..))
-import Extra (Dictionary, Name, const2, foldrM)
+import Extra (Dictionary, Name, const2, foldrM, traverse_)
 
-data FoldError = FoldError
+data FoldError
+  = FoldPatternOutsideConstructor
+  | FoldPatternInRegularMatch
+  deriving (Show, Eq, Ord, Read)
 
 newtype FoldExpansion a = FoldExpansion {foldExpansionStack :: ExceptT FoldError (RWS Name () Int) a}
   deriving
@@ -53,25 +56,39 @@ runFoldExpansion r s e = (a, s')
 
 class FoldContext e where
   expandFolds :: (MonadError FoldError m) => Name -> [Label ()] -> e -> m e
+  expandMatch :: (MonadError FoldError m) => e -> m ()
 
 instance (FoldContext e) => FoldContext [e] where
   expandFolds name = traverse . expandFolds name
+  expandMatch = traverse_ expandMatch
 
 instance (FoldContext e) => FoldContext (NonEmpty e) where
   expandFolds name = traverse . expandFolds name
+  expandMatch = traverse_ expandMatch
 
 instance (Monoid a, Data a) => FoldContext (Clause a ()) where
   expandFolds name _ =
     \case
       EClause _ PAtVariable{} _ ->
-        -- TODO
-        -- error "Fold-pattern outside constructor"
-        throwError FoldError
+        throwError FoldPatternOutsideConstructor
       EClause a p cs ->
         EClause
           a
           (transform eliminateAtPatterns p)
           <$> expandFolds name (atLabels p) cs
+  expandMatch =
+    \case
+      EClause _ p cs -> do
+        void (checkPatterns p)
+        expandMatch cs
+
+checkPatterns :: (MonadError FoldError m, Data o, Data k) => Pattern o k -> m (Pattern o k)
+checkPatterns =
+  \case
+    PAtVariable{} ->
+      throwError FoldPatternInRegularMatch
+    p ->
+      descendM checkPatterns p
 
 instance (Monoid a, Data a) => FoldContext (Choice Expression a ()) where
   expandFolds name lls =
@@ -80,9 +97,16 @@ instance (Monoid a, Data a) => FoldContext (Choice Expression a ()) where
         CPlain a gs <$> expandFolds name lls e
       CLambda{} ->
         error "TODO"
+  expandMatch =
+    \case
+      CPlain _ _ e -> do
+        expandMatch e
+      CLambda{} ->
+        error "TODO"
 
 instance (Monoid a, Data a) => FoldContext (Expression a ()) where
   expandFolds = flip . foldrM . updateName
+  expandMatch _ = pure ()
 
 updateName :: (Monoid a, Data a, Monad m) => Name -> Label () -> Expression a () -> m (Expression a ())
 updateName name label =
@@ -150,6 +174,9 @@ instance (Monoid a, Data a) => CompileFoldsContext (Expression a ()) where
         EFold a t es cs Nothing -> do
           e1 <- expandFoldExpr es cs
           pure (EFold a t es cs (Just e1))
+        e@(EMatch _ _ _ cs) -> do
+          expandMatch cs
+          pure e
         e ->
           pure e
 

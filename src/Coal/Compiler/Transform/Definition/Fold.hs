@@ -35,9 +35,9 @@ instance (Monoid a, Data a) => TopLevelFoldContext (Clause a ()) where
   expandFolds name _ =
     \case
       EClause _ PAtVariable{} _ ->
-        throwError FoldError
+        throwError FoldPatternOutsideConstructor
       EClause _ PNamedFold{} _ ->
-        throwError FoldError
+        throwError FoldPatternOutsideConstructor
       EClause a p cs ->
         EClause
           a
