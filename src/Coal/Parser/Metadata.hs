@@ -1,12 +1,15 @@
-module Coal.Parser.Metadata (withMetadata) where
+module Coal.Parser.Metadata (withMetadata, withMetadataM) where
 
 import Coal.Ast.Metadata (Metadata (..))
 import Coal.Parser
 import Text.Megaparsec (getSourcePos)
 
 withMetadata :: Parser (Metadata -> p) -> Parser p
-withMetadata p = do
+withMetadata = withMetadataM . fmap (pure .)
+
+withMetadataM :: Parser (Metadata -> Parser p) -> Parser p
+withMetadataM p = do
   start <- getSourcePos
   f <- p
   end <- getSourcePos
-  pure $ f (Metadata start end)
+  f (Metadata start end)
