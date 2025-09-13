@@ -211,8 +211,6 @@ let add = fn(x, y) => x + y     // This is the same as fun(x, y) = x + y
 
 ### Expression syntax
 
-TODO
-
 #### If-then-else
 
 If-expressions are similar to those found in most other languages in the functional family, requiring both the `then` and `else` branches to be present (and to have the same type):
@@ -236,7 +234,7 @@ A let-binding associates a name with an expression within a given scope:
 >     (fn(f) => (f(3 : int32), f("three")))(fn(x) => x)
 > ```
 > 
-> Here, the type of `f` is monomorphic. The type inference algorithm will try to determine its type but fail to unify `int32 -> int32` with `string -> string`.
+> In this example, the type of `f` is monomorphic. The type inference algorithm will try to determine its type but fail to unify `int32 -> int32` with `string -> string`.
 > If we instead bind the anonymous function to a new identifier, then its type is *generalized* and obtains the quantified type `∀a : a -> a` (known as a *type scheme*).
 > We can now apply this function to both elements of the tuple, even though they have different types:
 > 
@@ -254,7 +252,6 @@ In OCaml (and F#) this is also the case for the standard `let` keyword. However,
 
 This prevents ill-formed expressions such as `let f = f in f`, but also excludes any form of explicit recursion
 
-
 As far as the compiler is concerned, a function defined at the top level has the form:
 
 ```
@@ -269,6 +266,11 @@ More generally, this makes it impossible for any function to call itself. (expli
 This is why functions such as the standard factorial function are rejected by the compiler. 
 
 #### Lambda expressions
+
+Function expressions are first-class objects
+They can be passed as arguments to functions and also ...
+
+An anonymous function is declared using the `fn` keyword:
 
 ```
   fn(<arg_1>, <arg_2>, ..., <arg_n>) => <expr>
