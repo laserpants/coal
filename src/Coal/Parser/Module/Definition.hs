@@ -65,12 +65,15 @@ parseTrait = do
   t <- angleBrackets parseType
   pure (Trait n t)
 
+parseParameterList :: Parser [Parameter ()]
+parseParameterList = angleBrackets (commaSep1 (Parameter () <$> name))
+
 parseTypeDefinition :: Parser (Definition Metadata o ())
 parseTypeDefinition = do
   start <- getSourcePos
   lexeme_ "type"
   n <- constructor
-  ps <- option [] (angleBrackets (commaSep1 (Parameter () <$> name)))
+  ps <- option [] parseParameterList
   end <- getSourcePos
   cs <- symbol_ "=" *> parseConstructor n ps `sepBy1` symbol_ "|"
   pure (DType (Metadata start end) n (TypeDef ps cs))
@@ -80,7 +83,7 @@ parseCodataDefinition = do
   start <- getSourcePos
   lexeme_ "cotype"
   n <- constructor
-  ps <- option [] (angleBrackets (commaSep1 (Parameter () <$> name)))
+  ps <- option [] parseParameterList
   end <- getSourcePos
   symbol_ "="
   fields <- braces (fieldListWithKey constructor parseType ":")
