@@ -116,7 +116,7 @@ parseFunctionDefinition = do
   start <- getSourcePos
   fn <- lexeme_ "fun" *> name
   args <- parens (nonEmptyOr parseUnitPattern (commaSep parsePattern))
-  ann <- optional (symbol_ ":" *> parseType)
+  ann <- optional parseAnnotation
   end <- getSourcePos
   expr <- symbol_ "=" *> parseExpression
   ws <- option [] parseWhereClauses
@@ -129,7 +129,7 @@ parseLetDefinition :: Parser (Definition Metadata o ())
 parseLetDefinition = do
   start <- getSourcePos
   c <- lexeme_ "let" *> name
-  ann <- optional (symbol_ ":" *> parseType)
+  ann <- optional parseAnnotation
   end <- getSourcePos
   expr <- symbol_ "=" *> parseExpression
   ws <- option [] parseWhereClauses
@@ -139,7 +139,7 @@ parseTopLevelFold :: Parser (Definition Metadata o ())
 parseTopLevelFold = do
   start <- getSourcePos
   n <- lexeme_ "fold" *> name
-  ann <- symbol_ ":" *> parseType
+  ann <- parseAnnotation
   end <- getSourcePos
   cs <- braces (nonEmpty (some parseMatchClause))
   pure (DFold (Metadata start end) n (FoldDef (With [] ann) cs Nothing))
@@ -149,9 +149,13 @@ parseTopLevelUnfold = do
   start <- getSourcePos
   n <- lexeme_ "unfold" *> name
   ps <- parens (nonEmpty (commaSep1 parsePattern))
-  ann <- symbol_ ":" *> parseType
+  ann <- parseAnnotation
   end <- getSourcePos
   fields <- braces $ do
     void $ optional (symbol ",")
     fieldListWithKey (magicConstructor <|> constructor) parseExpression "="
   pure (DUnfold (Metadata start end) n (UnfoldDef (With [] ann) ps (Map.fromList fields) Nothing))
+
+{-# INLINE parseAnnotation #-}
+parseAnnotation :: Parser (Type Parameter ())
+parseAnnotation = symbol_ ":" *> parseType
