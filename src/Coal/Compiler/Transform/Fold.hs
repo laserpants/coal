@@ -36,7 +36,7 @@ data FoldError
   | FoldPatternInRegularMatch
   deriving (Show, Eq, Ord, Read)
 
-newtype FoldExpansion a = FoldExpansion {foldExpansionStack :: ExceptT FoldError (RWS Name () Int) a}
+newtype FoldExpansion e = FoldExpansion {foldExpansionStack :: ExceptT FoldError (RWS Name () Int) e}
   deriving
     ( Functor
     , Applicative
@@ -46,10 +46,10 @@ newtype FoldExpansion a = FoldExpansion {foldExpansionStack :: ExceptT FoldError
     , MonadError FoldError
     )
 
-evalFoldExpansion :: Name -> Int -> FoldExpansion a -> Either FoldError a
+evalFoldExpansion :: Name -> Int -> FoldExpansion e -> Either FoldError e
 evalFoldExpansion name s = fst . runFoldExpansion name s
 
-runFoldExpansion :: Name -> Int -> FoldExpansion a -> (Either FoldError a, Int)
+runFoldExpansion :: Name -> Int -> FoldExpansion e -> (Either FoldError e, Int)
 runFoldExpansion r s e = (a, s')
  where
   (a, s', _) = runRWS (runExceptT (foldExpansionStack e)) r s
@@ -154,16 +154,16 @@ expandFoldExpr args clauses = do
         )
         (applicationE (varE name) args)
 
-class CompileFoldsContext a where
-  compileFolds :: a -> FoldExpansion a
+class CompileFoldsContext e where
+  compileFolds :: e -> FoldExpansion e
 
-instance (CompileFoldsContext a) => CompileFoldsContext [a] where
+instance (CompileFoldsContext e) => CompileFoldsContext [e] where
   compileFolds = traverse compileFolds
 
-instance (CompileFoldsContext a) => CompileFoldsContext (NonEmpty a) where
+instance (CompileFoldsContext e) => CompileFoldsContext (NonEmpty e) where
   compileFolds = traverse compileFolds
 
-instance (CompileFoldsContext a) => CompileFoldsContext (Dictionary a) where
+instance (CompileFoldsContext e) => CompileFoldsContext (Dictionary e) where
   compileFolds = traverse compileFolds
 
 instance (Monoid a, Data a) => CompileFoldsContext (Expression a ()) where
