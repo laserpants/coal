@@ -33,7 +33,6 @@ import Coal.Language.Module.Definition
 import Coal.Language.Module.Definition.Constant
 import Coal.Language.Module.Definition.Instance
 import Coal.TypeSystem.Substitution (normalizeTypeIndexes)
-import Control.Monad ((>=>))
 import Control.Monad.Except
 import Control.Monad.Reader (MonadIO, Reader, asks, liftIO, runReader)
 import Control.Monad.State (gets, runState)
@@ -78,9 +77,9 @@ foldExpansionTrans f e =
   withSupplyMC
     ( \n ->
         case runFoldExpansion "fold" n (f e) of
-          (Left{}, n) ->
+          (Left e, n) ->
             -- TODO
-            throwError (CompilerError "TODO")
+            throwError (CompilerError (Text.pack (show e)))
           (Right r, n) ->
             pure (r, n)
     )
