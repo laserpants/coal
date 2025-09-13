@@ -1,14 +1,12 @@
 {-# LANGUAGE OverloadedStrings #-}
 
--- FIXME
-module Coal.Compiler.TypeInference.Errors where
+module Coal.Compiler.TypeInference.Errors (prettyErrorMessage) where
 
 import Coal.Ast.Metadata
 import Data.Text (Text)
+import qualified Data.Text as Text
 import Text.Megaparsec
 import TextShow (showt)
-
-import qualified Data.Text as Text
 
 prettyErrorMessage :: (HasMetadata a) => [Text] -> Text -> a -> Text
 prettyErrorMessage msg src err =
