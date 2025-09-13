@@ -69,7 +69,7 @@ instance (FoldContext e) => FoldContext (NonEmpty e) where
 instance (Monoid a, Data a) => FoldContext (Clause a ()) where
   expandFolds name _ =
     \case
-      EClause _ PAtVariable{} _ ->
+      EClause _ (PAtVariable loc _) _ ->
         throwError FoldPatternOutsideConstructor
       EClause a p cs ->
         EClause
@@ -85,7 +85,7 @@ instance (Monoid a, Data a) => FoldContext (Clause a ()) where
 checkPatterns :: (MonadError FoldError m, Data o, Data k) => Pattern o k -> m (Pattern o k)
 checkPatterns =
   \case
-    PAtVariable{} ->
+    PAtVariable loc _ ->
       throwError FoldPatternInRegularMatch
     p ->
       descendM checkPatterns p
