@@ -193,6 +193,7 @@ library
       Extra.Data.Traversable
       Extra.Operators
       Extra.Prettyprinter
+      Extra.Text.Megaparsec.Char
   other-modules:
       Paths_coal
   hs-source-dirs:
