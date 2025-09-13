@@ -244,7 +244,7 @@ A let-binding associates a name with an expression within a given scope:
 >         (id(3 : int32), id("three"))
 > ```
 
-###### Semantics
+###### Name binding semantics
 
 A subtle but important detail that makes let-bindings in Coal different from those in most other languages is that the identifier introduced by a `let` is **not in scope within the definition itself**. 
 In other words, `let x = e1 in e2` makes `x` available in `e2`, but not in `e1`. 
@@ -267,14 +267,16 @@ This is why functions such as the standard factorial function are rejected by th
 
 #### Lambda expressions
 
-Function expressions are first-class objects
-They can be passed as arguments to functions and also ...
-
 An anonymous function is declared using the `fn` keyword:
 
 ```
   fn(<arg_1>, <arg_2>, ..., <arg_n>) => <expr>
 ```
+
+Function expressions are first-class objects
+They can be passed as arguments to other functions, assigned and stored inside data structures.
+
+Function definitions are curried.
 
 TODO
 
