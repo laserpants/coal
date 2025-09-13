@@ -204,7 +204,7 @@ module Utils {
 }
 ```
 
-Functions can also be written as a let-expression, for example:
+Since a let-expression is TODO, top-level functions can also be defined in the following way:
 
 ```
 let add = fn(x, y) => x + y     // This is the same as fun(x, y) = x + y
