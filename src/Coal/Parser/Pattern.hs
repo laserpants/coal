@@ -16,6 +16,7 @@ import Control.Monad.Combinators.Expr
 import Data.Char (ord)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
+import Extra.Text.Megaparsec.Char (singleQuote)
 import Text.Megaparsec (option, optional, some, try, (<|>))
 import Text.Megaparsec.Char (char)
 import qualified Text.Megaparsec.Char.Lexer as Lexer
@@ -85,9 +86,6 @@ parseLiteralPattern =
     <|> parseLiteralFalse
     <|> parseCharLiteralPattern
 
-squote :: Parser Char
-squote = char '\''
-
 parseLiteralTrue :: Parser (Pattern Metadata ())
 parseLiteralTrue =
   withMetadata $ do
@@ -104,9 +102,9 @@ parseCharLiteralPattern :: Parser (Pattern Metadata ())
 parseCharLiteralPattern =
   withMetadata $ do
     lexeme $ do
-      void squote
+      void singleQuote
       ch <- Lexer.charLiteral
-      void squote
+      void singleQuote
       pure (\loc -> PLiteral loc (LChar (fromIntegral (ord ch))))
 
 parseListLiteralPattern :: Parser (Pattern Metadata ())

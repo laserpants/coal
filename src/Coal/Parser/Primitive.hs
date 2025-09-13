@@ -12,6 +12,7 @@ import Data.Char (ord)
 import Data.Functor (($>))
 import qualified Data.Text as Text
 import qualified Data.Text.Encoding as Text
+import Extra.Text.Megaparsec.Char (doubleQuote, singleQuote)
 import Text.Megaparsec
 import Text.Megaparsec.Char (char)
 import qualified Text.Megaparsec.Char.Lexer as Lexer
@@ -37,25 +38,19 @@ parseTrue = lexeme_ "true" $> LBool True
 parseFalse :: Parser Primitive
 parseFalse = lexeme_ "false" $> LBool False
 
-squote :: Parser Char
-squote = char '\''
-
 parseChar :: Parser Primitive
 parseChar = do
   lexeme $ do
-    void squote
+    void singleQuote
     ch <- Lexer.charLiteral
-    void squote
+    void singleQuote
     pure (LChar (fromIntegral (ord ch)))
-
-dquote :: Parser Char
-dquote = char '"'
 
 parseString :: Parser Primitive
 parseString = do
   lexeme $ do
-    void dquote
-    chars <- manyTill Lexer.charLiteral dquote
+    void doubleQuote
+    chars <- manyTill Lexer.charLiteral doubleQuote
     pure (LString (Text.encodeUtf8 (Text.pack chars)))
 
 parseFloat :: Parser Primitive
