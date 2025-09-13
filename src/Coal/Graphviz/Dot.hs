@@ -6,7 +6,6 @@
 {-# LANGUAGE StrictData #-}
 {-# LANGUAGE UndecidableInstances #-}
 
--- FIXME
 module Coal.Graphviz.Dot (Dot (..), writeDotFile) where
 
 import Coal.Common.Label (Label (..))
@@ -359,33 +358,14 @@ instance (Show t, Pretty t) => Dot t (ConstantDef a t) where
 instance (Show t, Pretty t) => Dot t (Definition a k t) where
   toDot =
     \case
-      --      DFunction _ name (Just (With ts t)) f ws ->
-      --        -- TODO
-      --        fromNode (emitParallelogram ("DFunction\\n" <> name <> "\\n" <> prettyType t) Nothing) $ do
-      --          emitEdgeTo f
-      --          emitEdgesTo ws
       DFunction _ name f ws ->
         fromNode (emitParallelogram ("DFunction\\n" <> name) Nothing) $ do
           emitEdgeTo f
           emitEdgesTo ws
-      --      DConstant _ name (Just (With ts t)) c ws ->
-      --        -- TODO
-      --        fromNode (emitParallelogram ("DConstant\\n" <> name <> "\\n" <> prettyType t) Nothing) $ do
-      --          emitEdgeTo c
-      --          emitEdgesTo ws
       DConstant _ name c ws ->
         fromNode (emitParallelogram ("DConstant\\n" <> name) Nothing) $ do
           emitEdgeTo c
           emitEdgesTo ws
-      --      DAnnotation _ (With ts t) d ->
-      --        fromNode (emitParallelogram ("DAnnotation\\n" <> prettyType t) Nothing) $ do
-      --          nid <- ask
-      --          lift $ do
-      --            forM_ ts $
-      --              \tr -> do
-      --                id1 <- emitTriangle ("Trait\\n" <> prettyType tr) Nothing
-      --                emitEdge nid id1
-      --          emitEdgeTo d
       DImport _ (Path _) ns ->
         emitParallelogram "DImport" Nothing
       DType _ name _ ->
