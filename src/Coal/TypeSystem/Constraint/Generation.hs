@@ -315,11 +315,6 @@ emitETupleConstraints loc t es = do
     ]
   pure ms1
 
-tupleScheme :: Int -> IndexedScheme
-tupleScheme n = Forall (Set.fromList (toList ixs)) [] (tupleType (TVariable <$> ixs))
- where
-  ixs = TypeIndex KType 0 :| [TypeIndex KType ti | ti <- [1 .. n - 1]]
-
 -- TODO
 emitMatchConstraints :: (Show a, Data a) => a -> IndexedType -> Expression a IndexedType -> [Expression a IndexedType] -> NonEmpty (Clause a IndexedType) -> ConstraintsGen a [Assumption a IndexedType]
 emitMatchConstraints loc t e es cs = do

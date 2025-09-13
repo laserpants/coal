@@ -12,12 +12,14 @@ module Coal.Language.Type.Scheme (
   forall4,
   IndexedScheme,
   listConstructorScheme,
+  tupleScheme,
 ) where
 
 import Coal.Language.Trait (Trait (..))
-import Coal.Language.Type (IndexedType, Type (..), TypeIndex (..), listType, (~>))
+import Coal.Language.Type (IndexedType, Type (..), TypeIndex (..), listType, tupleType, (~>))
 import Coal.Language.Type.Kind (Kind (..))
 import Data.Data (Data, Typeable)
+import Data.List.NonEmpty (NonEmpty (..), toList)
 import Data.Set (Set)
 import GHC.Generics (Generic)
 
@@ -58,3 +60,8 @@ forall4 f = Forall (Set.fromList [a0, a1, a2, a3]) [] (f (TVariable a0) (TVariab
 
 listConstructorScheme :: IndexedScheme
 listConstructorScheme = forall1 (\a -> a ~> listType a ~> listType a)
+
+tupleScheme :: Int -> IndexedScheme
+tupleScheme n = Forall (Set.fromList (toList ixs)) [] (tupleType (TVariable <$> ixs))
+ where
+  ixs = TypeIndex KType 0 :| [TypeIndex KType ti | ti <- [1 .. n - 1]]
