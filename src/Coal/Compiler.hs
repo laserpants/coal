@@ -72,7 +72,7 @@ aliasExpansionTrans f e = asks (runReader (f e) . compilerAliasEnvironment)
 expandAliasesC :: (Monad m, Data a) => Module a Kind () -> CompilerT a m (Module a Kind ())
 expandAliasesC = aliasExpansionTrans expandAliases
 
-foldExpansionTrans :: (Monad m) => (c -> FoldExpansion c) -> c -> CompilerT a m c
+foldExpansionTrans :: (Monad m, Show a) => (c -> FoldExpansion a c) -> c -> CompilerT a m c
 foldExpansionTrans f e =
   withSupplyMC
     ( \n ->
@@ -90,10 +90,10 @@ compileUnfoldsC = unfoldExpansionTrans compileUnfolds
 unfoldExpansionTrans :: (Monad m) => (c -> UnfoldExpansion c) -> c -> CompilerT a m c
 unfoldExpansionTrans f e = withSupplyC (\n -> runUnfoldExpansion "unfold" n (f e))
 
-compileFoldsC :: (Monad m, Data a, Monoid a) => Module a Kind () -> CompilerT a m (Module a Kind ())
+compileFoldsC :: (Monad m, Data a, Monoid a, Show a) => Module a Kind () -> CompilerT a m (Module a Kind ())
 compileFoldsC = foldExpansionTrans compileFolds
 
-compileTopLevelFoldsC :: (Monad m, Data a, Monoid a) => Module a Kind () -> CompilerT a m (Module a Kind ())
+compileTopLevelFoldsC :: (Monad m, Data a, Monoid a, Show a) => Module a Kind () -> CompilerT a m (Module a Kind ())
 compileTopLevelFoldsC = foldExpansionTrans (overModuleDefinitionsM (traverse compileTopLevelFolds))
 
 topLevelUnfoldExpansionTrans :: (Monad m) => (c -> UnfoldTopLevelUnfolds c) -> c -> CompilerT a m c

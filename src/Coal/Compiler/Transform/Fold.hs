@@ -2,6 +2,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
@@ -31,46 +32,46 @@ import Data.Generics.Uniplate.Data (descendM, transform, transformM)
 import Data.List.NonEmpty (NonEmpty (..))
 import Extra (Dictionary, Name, const2, foldrM, traverse_)
 
-data FoldError
-  = FoldPatternOutsideConstructor
-  | FoldPatternInRegularMatch
+data FoldError a
+  = FoldPatternOutsideConstructor a
+  | FoldPatternInRegularMatch a
   deriving (Show, Eq, Ord, Read)
 
-newtype FoldExpansion e = FoldExpansion {foldExpansionStack :: ExceptT FoldError (RWS Name () Int) e}
+newtype FoldExpansion a e = FoldExpansion {foldExpansionStack :: ExceptT (FoldError a) (RWS Name () Int) e}
   deriving
     ( Functor
     , Applicative
     , Monad
     , MonadReader Name
     , MonadState Int
-    , MonadError FoldError
+    , MonadError (FoldError a)
     )
 
-evalFoldExpansion :: Name -> Int -> FoldExpansion e -> Either FoldError e
+evalFoldExpansion :: Name -> Int -> FoldExpansion a e -> Either (FoldError a) e
 evalFoldExpansion name s = fst . runFoldExpansion name s
 
-runFoldExpansion :: Name -> Int -> FoldExpansion e -> (Either FoldError e, Int)
+runFoldExpansion :: Name -> Int -> FoldExpansion a e -> (Either (FoldError a) e, Int)
 runFoldExpansion r s e = (a, s')
  where
   (a, s', _) = runRWS (runExceptT (foldExpansionStack e)) r s
 
-class FoldContext e where
-  expandFolds :: (MonadError FoldError m) => Name -> [Label ()] -> e -> m e
-  expandMatch :: (MonadError FoldError m) => e -> m ()
+class FoldContext a e where
+  expandFolds :: (MonadError (FoldError a) m) => Name -> [Label ()] -> e -> m e
+  expandMatch :: (MonadError (FoldError a) m) => e -> m ()
 
-instance (FoldContext e) => FoldContext [e] where
+instance (FoldContext a e) => FoldContext a [e] where
   expandFolds name = traverse . expandFolds name
   expandMatch = traverse_ expandMatch
 
-instance (FoldContext e) => FoldContext (NonEmpty e) where
+instance (FoldContext a e) => FoldContext a (NonEmpty e) where
   expandFolds name = traverse . expandFolds name
   expandMatch = traverse_ expandMatch
 
-instance (Monoid a, Data a) => FoldContext (Clause a ()) where
+instance (Monoid a, Data a) => FoldContext a (Clause a ()) where
   expandFolds name _ =
     \case
       EClause _ (PAtVariable loc _) _ ->
-        throwError FoldPatternOutsideConstructor
+        throwError (FoldPatternOutsideConstructor loc)
       EClause a p cs ->
         EClause
           a
@@ -82,15 +83,15 @@ instance (Monoid a, Data a) => FoldContext (Clause a ()) where
         void (checkPatterns p)
         expandMatch cs
 
-checkPatterns :: (MonadError FoldError m, Data o, Data k) => Pattern o k -> m (Pattern o k)
+checkPatterns :: (MonadError (FoldError o) m, Data o, Data k) => Pattern o k -> m (Pattern o k)
 checkPatterns =
   \case
     PAtVariable loc _ ->
-      throwError FoldPatternInRegularMatch
+      throwError (FoldPatternInRegularMatch loc)
     p ->
       descendM checkPatterns p
 
-instance (Monoid a, Data a) => FoldContext (Choice Expression a ()) where
+instance (Monoid a, Data a) => FoldContext a (Choice Expression a ()) where
   expandFolds name lls =
     \case
       CPlain a gs e ->
@@ -104,7 +105,7 @@ instance (Monoid a, Data a) => FoldContext (Choice Expression a ()) where
       CLambda{} ->
         error "TODO"
 
-instance (Monoid a, Data a) => FoldContext (Expression a ()) where
+instance (Monoid a, Data a) => FoldContext a (Expression a ()) where
   expandFolds = flip . foldrM . updateName
   expandMatch _ = pure ()
 
@@ -139,7 +140,7 @@ atLabels = execWriter . transformM go
       p ->
         pure p
 
-expandFoldExpr :: (Monoid a, Data a, MonadState Int m, MonadReader Name m, MonadError FoldError m) => NonEmpty (Expression a ()) -> NonEmpty (Clause a ()) -> m (Expression a ())
+expandFoldExpr :: (Monoid a, Data a, MonadState Int m, MonadReader Name m, MonadError (FoldError a) m) => NonEmpty (Expression a ()) -> NonEmpty (Clause a ()) -> m (Expression a ())
 expandFoldExpr args clauses = do
   name <- suppliedName
   let var = name <> ".expr"
@@ -154,19 +155,19 @@ expandFoldExpr args clauses = do
         )
         (applicationE (varE name) args)
 
-class CompileFoldsContext e where
-  compileFolds :: e -> FoldExpansion e
+class CompileFoldsContext a e where
+  compileFolds :: e -> FoldExpansion a e
 
-instance (CompileFoldsContext e) => CompileFoldsContext [e] where
+instance (CompileFoldsContext a e) => CompileFoldsContext a [e] where
   compileFolds = traverse compileFolds
 
-instance (CompileFoldsContext e) => CompileFoldsContext (NonEmpty e) where
+instance (CompileFoldsContext a e) => CompileFoldsContext a (NonEmpty e) where
   compileFolds = traverse compileFolds
 
-instance (CompileFoldsContext e) => CompileFoldsContext (Dictionary e) where
+instance (CompileFoldsContext a e) => CompileFoldsContext a (Dictionary e) where
   compileFolds = traverse compileFolds
 
-instance (Monoid a, Data a) => CompileFoldsContext (Expression a ()) where
+instance (Monoid a, Data a) => CompileFoldsContext a (Expression a ()) where
   compileFolds = transformM go
    where
     go =
@@ -180,25 +181,25 @@ instance (Monoid a, Data a) => CompileFoldsContext (Expression a ()) where
         e ->
           pure e
 
-instance (Monoid a, Data a) => CompileFoldsContext (Module a k ()) where
+instance (Monoid a, Data a) => CompileFoldsContext a (Module a k ()) where
   compileFolds =
     \case
       Module p ns o ->
         Module p ns <$> compileFolds o
 
-instance (Monoid a, Data a) => CompileFoldsContext (FunctionDef a ()) where
+instance (Monoid a, Data a) => CompileFoldsContext a (FunctionDef a ()) where
   compileFolds =
     \case
       FunctionDef a u w ps e ->
         FunctionDef a u w ps <$> compileFolds e
 
-instance (Monoid a, Data a) => CompileFoldsContext (ConstantDef a ()) where
+instance (Monoid a, Data a) => CompileFoldsContext a (ConstantDef a ()) where
   compileFolds =
     \case
       ConstantDef a u w e ->
         ConstantDef a u w <$> compileFolds e
 
-instance (Monoid a, Data a) => CompileFoldsContext (Definition a k ()) where
+instance (Monoid a, Data a) => CompileFoldsContext a (Definition a k ()) where
   compileFolds =
     \case
       DFunction loc name f fs ->

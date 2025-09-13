@@ -1,6 +1,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
@@ -22,29 +23,29 @@ import Data.Generics.Uniplate.Data (transform, transformM)
 import Data.List.NonEmpty (NonEmpty (..))
 import Extra (Name, const2, foldrM)
 
-class TopLevelFoldContext e where
-  expandFolds :: (MonadError FoldError m) => Name -> [(Name, Label ())] -> e -> m e
+class TopLevelFoldContext a e where
+  expandFolds :: (MonadError (FoldError a) m) => Name -> [(Name, Label ())] -> e -> m e
 
-instance (TopLevelFoldContext e) => TopLevelFoldContext [e] where
+instance (TopLevelFoldContext a e) => TopLevelFoldContext a [e] where
   expandFolds name = traverse . expandFolds name
 
-instance (TopLevelFoldContext e) => TopLevelFoldContext (NonEmpty e) where
+instance (TopLevelFoldContext a e) => TopLevelFoldContext a (NonEmpty e) where
   expandFolds name = traverse . expandFolds name
 
-instance (Monoid a, Data a) => TopLevelFoldContext (Clause a ()) where
+instance (Monoid a, Data a) => TopLevelFoldContext a (Clause a ()) where
   expandFolds name _ =
     \case
-      EClause _ PAtVariable{} _ ->
-        throwError FoldPatternOutsideConstructor
-      EClause _ PNamedFold{} _ ->
-        throwError FoldPatternOutsideConstructor
+      EClause _ (PAtVariable loc _) _ ->
+        throwError (FoldPatternOutsideConstructor loc)
+      EClause _ (PNamedFold loc _ _) _ ->
+        throwError (FoldPatternOutsideConstructor loc)
       EClause a p cs ->
         EClause
           a
           (transform eliminateAtPatterns p)
           <$> expandFolds name (atLabels p) cs
 
-instance (Monoid a, Data a) => TopLevelFoldContext (Choice Expression a ()) where
+instance (Monoid a, Data a) => TopLevelFoldContext a (Choice Expression a ()) where
   expandFolds name lls =
     \case
       CPlain a gs e ->
@@ -52,7 +53,7 @@ instance (Monoid a, Data a) => TopLevelFoldContext (Choice Expression a ()) wher
       CLambda{} ->
         error "Not implemented"
 
-instance (Monoid a, Data a) => TopLevelFoldContext (Expression a ()) where
+instance (Monoid a, Data a) => TopLevelFoldContext a (Expression a ()) where
   expandFolds = flip . foldrM . updateName
 
 updateName :: (Monoid a, Data a, Monad m) => Name -> (Name, Label ()) -> Expression a () -> m (Expression a ())
@@ -85,7 +86,7 @@ atLabels = execWriter . transformM go
       p ->
         pure p
 
-compileTopLevelFolds :: (Data a, Monoid a, MonadState Int m, MonadReader Name m, MonadError FoldError m) => Definition a k () -> m (Definition a k ())
+compileTopLevelFolds :: (Data a, Monoid a, MonadState Int m, MonadReader Name m, MonadError (FoldError a) m) => Definition a k () -> m (Definition a k ())
 compileTopLevelFolds =
   \case
     DFold loc name (FoldDef with cs _) -> do
@@ -94,7 +95,7 @@ compileTopLevelFolds =
     o ->
       pure o
 
-expandTopLevelFold :: (Data a, Monoid a, MonadState Int m, MonadReader Name m, MonadError FoldError m) => Name -> NonEmpty (Clause a ()) -> m (Expression a ())
+expandTopLevelFold :: (Data a, Monoid a, MonadState Int m, MonadReader Name m, MonadError (FoldError a) m) => Name -> NonEmpty (Clause a ()) -> m (Expression a ())
 expandTopLevelFold name clauses = do
   name <- suppliedName
   let var = name <> ".expr"
