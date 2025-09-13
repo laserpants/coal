@@ -47,11 +47,7 @@ import qualified Coal.Kernel.Language as Kernel
 import qualified Data.Text as Text
 
 withSupplyC :: (Monad m) => (Int -> (c, Int)) -> CompilerT a m c
-withSupplyC f = do
-  n <- gets compilerSupply
-  let (r, n') = f n
-  insertSupplyC n'
-  pure r
+withSupplyC = withSupplyMC . (pure .)
 
 withSupplyMC :: (Monad m) => (Int -> CompilerT a m (c, Int)) -> CompilerT a m c
 withSupplyMC f = do
