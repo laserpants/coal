@@ -12,6 +12,7 @@ module Coal.Graphviz.Dot (Dot (..), writeDotFile) where
 import Coal.Common.Label (Label (..))
 import Coal.Common.Name (Name)
 import Coal.Common.Supply (Supply (..), supplied)
+import qualified Coal.Kernel.Language as Kernel
 import Coal.Language.Expression
 import Coal.Language.Expression.Binding (Binding (..))
 import Coal.Language.Expression.Choice
@@ -21,16 +22,14 @@ import Coal.Language.Trait (With (..))
 import Control.Monad.Reader (ReaderT, ask, runReaderT)
 import Control.Monad.State
 import Data.Functor.Foldable (cata)
+import qualified Data.Map.Strict as Map
 import Data.Text (Text)
+import qualified Data.Text as Text
+import qualified Data.Text.IO as Text
 import Extra (traverse_)
 import Prettyprinter
 import Prettyprinter.Render.Text (renderStrict)
 import TextShow (showt)
-
-import qualified Coal.Kernel.Language as Kernel
-import qualified Data.Map.Strict as Map
-import qualified Data.Text as Text
-import qualified Data.Text.IO as Text
 
 data Shape
   = Rectangle
