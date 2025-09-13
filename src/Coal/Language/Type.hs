@@ -24,18 +24,19 @@ module Coal.Language.Type (
   tupleType,
   tupleTypeCons,
   isTupleType,
+  recordType,
   (~>),
 ) where
 
 import Coal.Common.Supply (Supply (..))
 import Coal.Language.Type.Intrinsic (Intrinsic (..))
 import Coal.Language.Type.Kind (Kind (..), tupleKind)
-import Coal.Language.Type.Row (Row (..), normalizeRow)
+import Coal.Language.Type.Row (Row (..), fromDictionary, normalizeRow)
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (transform)
 import Data.List.NonEmpty (NonEmpty (..), toList, (<|))
 import Data.Text (isPrefixOf)
-import Extra (Map, Name, Set)
+import Extra (Dictionary, Map, Name, Set)
 import Extra.Prettyprinter (parensIf)
 import GHC.Generics (Generic)
 import Prettyprinter
@@ -141,6 +142,9 @@ isTupleType =
 {-# INLINE tupleTypeCons #-}
 tupleTypeCons :: Int -> Name
 tupleTypeCons n = "#Tuple" <> showt n
+
+recordType :: Dictionary (Type o k) -> Row o k (Type o k) -> Type o k
+recordType fields row = TIntrinsic (IRecord (TRow (fromDictionary fields row)))
 
 precArrow, precApp, precAtom :: Int
 precArrow = 1 -- e.g., a -> b

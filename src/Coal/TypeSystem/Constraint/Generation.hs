@@ -102,6 +102,18 @@ emitPTupleConstraints t ps =
 emitPAsConstraints :: (Data a) => IndexedType -> Pattern a IndexedType -> ConstraintsGen a ()
 emitPAsConstraints t p = tellRight [Equality InferenceRulePlaceholder [t, typeOf p]]
 
+emitPRecordConstraints :: (Data a) => IndexedType -> Dictionary (Pattern a IndexedType) -> Maybe (Pattern a IndexedType) -> ConstraintsGen a ()
+emitPRecordConstraints t fields p = do
+  row <- tailRow p
+  tellRight [Equality InferenceRulePlaceholder [t, recordType (typeOf <$> fields) row]]
+  case row of
+    r@RVariable{} ->
+      forM_ (Map.keys fields) $
+        \field ->
+          tellRight [Lacks InferenceRulePlaceholder (TRow r) field]
+    _ ->
+      pure ()
+
 emitPatternConstraints :: (Show a, Data a) => Assertion a -> [Assumption a IndexedType] -> Pattern a IndexedType -> ConstraintsGen a [Name]
 emitPatternConstraints assertF ms =
   \case
@@ -123,21 +135,12 @@ emitPatternConstraints assertF ms =
       assertF t (filter (assumptionNameIs name) ms)
       pure [name]
     PRecord _ t fields p -> do
-      r1 <- tailRow p
-      let t1 = TIntrinsic (IRecord (TRow (fromDictionary (typeOf <$> fields) r1)))
-      tellRight [Equality InferenceRulePlaceholder [t, t1]]
+      emitPRecordConstraints t fields p
       forM_ (Map.toList fields) $
         \(name, p1) ->
           assertF (typeOf p1) (filter (assumptionNameIs name) ms)
-      case r1 of
-        r@RVariable{} ->
-          forM_ (Map.keys fields) $
-            \field ->
-              tellRight [Lacks InferenceRulePlaceholder (TRow r) field]
-        _ ->
-          pure ()
-      ps1 <- concatForM (Map.elems fields <> maybeToList p) (emitPatternConstraints assertF ms)
-      pure (ps1 <> Map.keys fields)
+      ms1 <- concatForM (Map.elems fields <> maybeToList p) (emitPatternConstraints assertF ms)
+      pure (ms1 <> Map.keys fields)
     PAny{} ->
       pure []
     PListCons _ t p1 p2 -> do
