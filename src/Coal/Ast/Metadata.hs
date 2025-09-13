@@ -3,7 +3,6 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
--- FIXME
 module Coal.Ast.Metadata (Metadata (..), HasMetadata (..), metadataSpan) where
 
 import Coal.Language.Expression
@@ -62,8 +61,8 @@ instance HasMetadata (Expression Metadata t) where
       ECodataSelect a _ _ _ -> a
       ECodataRecord a _ _ -> a
       ETraitDictionary a _ _ -> a
+      ELambdaMatch a _ _ _ -> a
       EFocus{} -> error "Not implemented"
-      ELambdaMatch{} -> error "Not implemented"
 
 instance HasMetadata (Pattern Metadata t) where
   getMetadata =
@@ -120,13 +119,12 @@ instance HasMetadata (TypeAnnotationError Metadata) where
       EAnnotationKindMismatch a -> a
       EAnnotationConstructor a _ -> a
       EAnnotationMonomorphicType a _ _ -> a
-      EAnnotationNonDistinctParameters _ -> error "TODO"
+      EAnnotationNonDistinctParameter a _ -> a
 
 instance HasMetadata (Assumption Metadata t) where
   getMetadata =
     \case
-      Assumption a _ _ ->
-        a
+      Assumption a _ _ -> a
 
 metadataSpan :: (HasMetadata a) => a -> a -> Metadata
 metadataSpan lhs rhs = Metadata (locationStart (getMetadata lhs)) (locationEnd (getMetadata rhs))
