@@ -144,6 +144,7 @@ isTupleType =
 tupleTypeCons :: Int -> Name
 tupleTypeCons n = "#Tuple" <> showt n
 
+{-# INLINE recordType #-}
 recordType :: Row o k (Type o k) -> Type o k
 recordType = TIntrinsic . IRecord . TRow
 
