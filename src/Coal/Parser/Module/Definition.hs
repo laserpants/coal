@@ -60,10 +60,7 @@ parseTraitInstance = do
   pure (DInstance (Metadata start end) n (InstanceDef ts t ds))
 
 parseTrait :: Parser (Trait (Type Parameter ()))
-parseTrait = do
-  n <- constructor
-  t <- angleBrackets parseType
-  pure (Trait n t)
+parseTrait = Trait <$> constructor <*> angleBrackets parseType
 
 parseParameterList :: Parser [Parameter ()]
 parseParameterList = angleBrackets (commaSep1 (Parameter () <$> name))
