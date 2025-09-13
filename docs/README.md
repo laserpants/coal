@@ -164,13 +164,13 @@ In the above, `<arg_1>, <arg_2>, ..., <arg_n>` are *patterns*, allowing function
 In addition to basic variables, records, tuples, and other data constructors, patterns may also include wildcards, literals, and nested structures.
 
 ```
-  fun stuff({ a : int32 }, (b, c), _) =
+  fun stuff({ n : int32 }, (fst, snd), _) =
     ...
 ```
 
 See **Pattern matching** for an overview of available patterns.
 
-A type annotion can be given to indicate a function's return type; as in the following example:
+A type annotion can be given to indicate a function's return type; like in the following example:
 
 ```
   fun is_even(n : int32) : bool =
