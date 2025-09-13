@@ -201,9 +201,9 @@ instance (Monoid a, Data a) => CompileFoldsContext (ConstantDef a ()) where
 instance (Monoid a, Data a) => CompileFoldsContext (Definition a k ()) where
   compileFolds =
     \case
-      DFunction loc name f fs -> do
+      DFunction loc name f fs ->
         DFunction loc name <$> compileFolds f <*> traverse compileFolds fs
-      DConstant loc name g fs -> do
+      DConstant loc name g fs ->
         DConstant loc name <$> compileFolds g <*> traverse compileFolds fs
       DInstance loc name (InstanceDef ps t ds) ->
         DInstance loc name . InstanceDef ps t <$> compileFolds ds
