@@ -397,36 +397,12 @@ emitConstraints =
         _ ->
           pure ()
       pure (ms1 <> ms2 <> ms3)
-    --      t0 <- supplied (TVariable . TypeIndex KType)
-    --      t1 <- supplied (TVariable . TypeIndex KType)
-    --      let qs = PVariable loc (Label t name) <| ps
-    --      tellRight [Equality InferenceRulePlaceholder [t, foldTypeOf t1 ps]]
-    --      ms1 <- withMonomorphic qs (concatMapM emitConstraints d)
-    --
-    --      case e1 of
-    --        Just (ERecursiveLet _ _ (ELambda _ _ (ECodataRecord _ _ fields)) _) -> do
-    --          forM_ (Map.toList d) $
-    --            \(name, elem) -> do
-    --              q <- lookupCodataAccessor name
-    --              case (q, Map.lookup ("$_" <> name) fields) of
-    --                (Just CodataAccessor{..}, Just e4) -> do
-    --                  t3 <- supplied (TVariable . TypeIndex KType)
-    --                  tellRight [Explicit InferenceRulePlaceholder (t0 `TArrow` typeOf elem) codataAccessorScheme]
-    --                  tellRight [Equality InferenceRulePlaceholder [typeOf e4, t3 `TArrow` typeOf elem]]
-    --                _ ->
-    --                  tellLeft [ENoCodataAccessor loc name]
-    --
-    --      ms2 <- concatMapM emitConstraints e1
-    --      names <- concatForM qs (emitPatternConstraints (assertEqualityAssumptions loc) ms1)
-    --
-    --      pure (filter (assumptionNameIsNotOneOf (name : names)) (ms1 <> ms2))
     ECodataRecord _ _ d ->
       concatMapM emitConstraints d
     ERecord loc t d me ->
       emitERecordConstraints loc t d me
     ECodataSelect loc (Label t name) e e1 -> do
       ms1 <- emitConstraints e
-
       r <- lookupCodataAccessor name
       ms2 <-
         case r of
