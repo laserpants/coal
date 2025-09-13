@@ -15,10 +15,8 @@ module Coal.Compiler.Transform.LambdaMatch (
 where
 
 import Coal.Common.Label (Label (..))
-import Coal.Common.Supply (suppliedName)
 import Coal.Language
 import Coal.Language.Module (ConstantDef (..), Definition (..), FunctionDef (..), Module (..))
-import Control.Monad ((<=<))
 import Control.Monad.RWS (RWS, runRWS)
 import Control.Monad.Reader (MonadReader)
 import Control.Monad.State (MonadState)
