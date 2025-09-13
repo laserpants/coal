@@ -1,14 +1,18 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Coal.Parser.Identifier (
   underscore,
   validChar,
   name,
   constructor,
+  magicConstructor,
   withInitial,
   identifier,
   backtickString,
 ) where
 
 import Coal.Parser
+import Coal.Parser.Symbol (symbol)
 import Control.Monad (void)
 import Data.Text (Text)
 import qualified Data.Text as Text
@@ -31,6 +35,12 @@ name = identifier (lowerChar <|> underscore)
 {-# INLINE constructor #-}
 constructor :: Parser Text
 constructor = identifier upperChar
+
+magicConstructor :: Parser Text
+magicConstructor = do
+  s <- symbol "@"
+  n <- constructor
+  pure (s <> n)
 
 withInitial :: Parser [Char] -> Parser Char -> Parser Text
 withInitial chrs chr = Text.pack <$> cons chr chrs

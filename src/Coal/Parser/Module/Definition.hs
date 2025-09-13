@@ -17,7 +17,6 @@ import Control.Monad (void)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
-import Data.Text (Text)
 import Extra (Name)
 import Text.Megaparsec
 import Text.Megaparsec.Char (upperChar)
@@ -159,11 +158,5 @@ parseTopLevelUnfold = do
   end <- getSourcePos
   fields <- braces $ do
     void $ optional (symbol ",")
-    fieldListWithKey (atConstructor <|> constructor) parseExpression "="
+    fieldListWithKey (magicConstructor <|> constructor) parseExpression "="
   pure (DUnfold (Metadata start end) n (UnfoldDef (With [] ann) ps (Map.fromList fields) Nothing))
-
-atConstructor :: Parser Text
-atConstructor = do
-  symbol_ "@"
-  n <- constructor
-  pure ("@" <> n)
