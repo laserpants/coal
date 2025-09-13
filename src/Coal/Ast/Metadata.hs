@@ -112,6 +112,7 @@ instance HasMetadata (ConstraintsGenError Metadata) where
       EDataConstructorArityMismatch a _ _ _ -> a
       ECodataFieldMismatch a -> a
       EIllFormedTypeAnnotation err -> getMetadata err
+      EFoldPatternInRegularMatch a -> a
 
 instance HasMetadata (TypeAnnotationError Metadata) where
   getMetadata =
