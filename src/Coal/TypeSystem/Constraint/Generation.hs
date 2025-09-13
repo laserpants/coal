@@ -160,8 +160,11 @@ emitPatternConstraints assertF ms =
     PTuple _ t ps -> do
       emitPTupleConstraints t ps
       concatForM ps (emitPatternConstraints assertF ms)
+    PNamedFold a _ _ -> do
+      tellLeft [EFoldPatternInRegularMatch a]
+      pure []
     _ ->
-      error "TODO"
+      error "Not implemented"
 
 emitEAnnotationConstraints :: (Show a, Data a) => a -> Type Parameter () -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
 emitEAnnotationConstraints loc t e = do

@@ -103,25 +103,14 @@ translatePattern =
       translatePattern p
     PAny _ t ->
       MVariable (Label t "_")
-    PRecord{} ->
-      error "TODO"
     PListCons a t p1 p2 ->
       translatePattern (PConstructor a (Label t "$Cons") [p1, p2])
     PListLiteral a t ps ->
       translatePattern (translateListLiteral a t ps)
     PTuple a t (p :| ps) ->
       translatePattern (PConstructor a (Label t ("$Tuple" <> showt (length ps + 1))) (p : ps))
-    PAs{} ->
-      error "TODO"
-    POr{} ->
-      error "TODO"
-    PShorthand{} ->
-      error "TODO"
-    PAtVariable{} ->
-      -- TODO: Should be reported as an error, since this means that an at-pattern appears in an ordinary match
-      error "TODO"
-    PTraitDictionary{} ->
-      error "TODO"
+    _ ->
+      error "Implementation error"
 
 translateListLiteral :: (MatchClasses a t) => a -> t -> [Pattern a t] -> Pattern a t
 translateListLiteral a t [] = PConstructor a (Label t "$Nil") []

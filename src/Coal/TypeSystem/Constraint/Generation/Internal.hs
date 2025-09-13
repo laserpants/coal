@@ -51,6 +51,7 @@ data ConstraintsGenError a
   | ECodataFieldMismatch a
   | EDataConstructorArityMismatch a Name Int Int
   | EIllFormedTypeAnnotation (TypeAnnotationError a)
+  | EFoldPatternInRegularMatch a
   deriving (Show, Eq, Ord, Read)
 
 data ConstraintsGenContext o k t = ConstraintsGenContext
