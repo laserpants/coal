@@ -1,6 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
 
--- FIXME
 module Coal.Parser.Module.Definition (parseDefinition) where
 
 import Coal.Ast.Metadata (Metadata (..))
@@ -25,7 +24,7 @@ parseDefinition :: Parser (Definition Metadata o ())
 parseDefinition =
   parseImport
     <|> parseFunctionDefinition
-    <|> parseConstantDefinition
+    <|> parseLetDefinition
     <|> parseTypeDefinition
     <|> parseCodataDefinition
     <|> parseTraitDefinition
@@ -41,7 +40,6 @@ parseTraitDefinition = do
   t <- angleBrackets parseParameter
   end <- getSourcePos
   ds <- braces (some ((,) <$> name <*> (symbol_ ":" *> parseType)))
-  -- TODO
   pure (DTrait (Metadata start end) n (TraitDef [] t ds))
 
 parseParameter :: Parser (Parameter Kind)
@@ -72,7 +70,6 @@ parseTypeDefinition = do
   start <- getSourcePos
   lexeme_ "type"
   n <- constructor
-  -- TODO: DRY
   ps <- option [] (angleBrackets (commaSep1 (Parameter () <$> name)))
   end <- getSourcePos
   cs <- symbol_ "=" *> parseConstructor n ps `sepBy1` symbol_ "|"
@@ -120,7 +117,6 @@ parseFunctionDefinition = do
   fn <- lexeme_ "fun" *> name
   args <- parens (nonEmptyOr parseUnitPattern (commaSep parsePattern))
   ann <- optional (symbol_ ":" *> parseType)
-  --  withAnnotation $ do
   end <- getSourcePos
   expr <- symbol_ "=" *> parseExpression
   ws <- option [] parseWhereClauses
@@ -129,12 +125,11 @@ parseFunctionDefinition = do
 parseWhereClauses :: Parser [Definition Metadata o ()]
 parseWhereClauses = lexeme_ "where" *> braces (some parseFunctionDefinition)
 
-parseConstantDefinition :: Parser (Definition Metadata o ())
-parseConstantDefinition = do
+parseLetDefinition :: Parser (Definition Metadata o ())
+parseLetDefinition = do
   start <- getSourcePos
   c <- lexeme_ "let" *> name
   ann <- optional (symbol_ ":" *> parseType)
-  --  withAnnotation $ do
   end <- getSourcePos
   expr <- symbol_ "=" *> parseExpression
   ws <- option [] parseWhereClauses
