@@ -247,6 +247,8 @@ spec = do
   print a
   a <- isLeft <$> main116
   print a
+  a <- isLeft <$> main117
+  print a
 
 --  x <- main85
 --  print (x == Right "aa\n")
@@ -268,7 +270,7 @@ runTestFiles files = do
   r <- compileFiles files
   case r of
     Left err@(CompilerError msg) -> do
-      --      liftIO $ Text.putStrLn msg
+--      liftIO $ Text.putStrLn msg
       pure (Left err)
     Right{} ->
       Right <$> runTestBuild
@@ -956,6 +958,12 @@ main116 :: IO (Either CompilerError Text)
 main116 = do
   runTestFiles
     [ "./test/Coal/examples/116/Main.coal"
+    ]
+
+main117 :: IO (Either CompilerError Text)
+main117 = do
+  runTestFiles
+    [ "./test/Coal/examples/117/Main.coal"
     ]
 
 compileFiles :: [String] -> IO (Either CompilerError ())
