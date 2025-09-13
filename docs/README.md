@@ -154,6 +154,7 @@ Definitions that can appear in the outermost scope of a module are functions, (l
 #### Functions
 
 A function is defined using the `fun` keyword, followed by the function's name and a list of comma-separated arguments enclosed in parentheses.
+The function body is simply an expression, which follows the arguments and is preceded by an equals sign:
 
 ```
   fun <name>(<arg_1>, <arg_2>, ..., <arg_n>) =

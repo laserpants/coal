@@ -249,6 +249,8 @@ spec = do
   print a
   a <- isLeft <$> main117
   print a
+  x <- main118
+  print (x == Right "3\n")
 
 --  x <- main85
 --  print (x == Right "aa\n")
@@ -964,6 +966,12 @@ main117 :: IO (Either CompilerError Text)
 main117 = do
   runTestFiles
     [ "./test/Coal/examples/117/Main.coal"
+    ]
+
+main118 :: IO (Either CompilerError Text)
+main118 = do
+  runTestFiles
+    [ "./test/Coal/examples/118/Main.coal"
     ]
 
 compileFiles :: [String] -> IO (Either CompilerError ())
