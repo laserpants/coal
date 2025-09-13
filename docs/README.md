@@ -119,7 +119,7 @@ src
         └── Trigonometry.coal
 ```
 
-In a module declaration, the path is followed by an optional list of exported names enclosed in parentheses. 
+In a module declaration, the path is followed by an optional list of exported names enclosed in parentheses. Only exported names are visible outside of the module (i.e., *public* in OOP terminology).
 
 ```
 module Utils.Math.Trigonometry(sin, cos, tan) {
