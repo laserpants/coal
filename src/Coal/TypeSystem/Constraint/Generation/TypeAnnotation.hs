@@ -113,8 +113,8 @@ checkTypeAnnotationParameters ps (Substitution sub) = do
   case filter (lengthMoreThan 1) params of
     [] ->
       pure ()
-    qs ->
-      tell [EAnnotationNonDistinctParameters (snd <$$> qs)]
+    qs -> do
+      tell [EAnnotationNonDistinctParameter loc p | (_, (p, loc)) <- concat qs]
  where
   lengthMoreThan n = length >>> (> n)
   go (name, (loc, TypeIndex _ index)) =

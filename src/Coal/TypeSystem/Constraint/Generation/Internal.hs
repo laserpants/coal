@@ -39,7 +39,7 @@ data TypeAnnotationError a
     -- function is fn(f, x) => f(x), which would require 'a' and 'c' to be the
     -- same type. The type signature claims that the function is polymorphic
     -- with respect to any choice of variables a, b, and c.
-    EAnnotationNonDistinctParameters [[(Name, a)]]
+    EAnnotationNonDistinctParameter a Name
   | -- | Type parameter resolves to a concrete type; e.g.,
     -- fn(x : a, y : int32) => x + y
     EAnnotationMonomorphicType a Name (Type TypeIndex Kind)
