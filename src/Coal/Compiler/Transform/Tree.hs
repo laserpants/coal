@@ -3,7 +3,6 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StrictData #-}
 
--- FIXME
 module Coal.Compiler.Transform.Tree (
   TreeTransform (..),
   replace,
