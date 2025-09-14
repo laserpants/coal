@@ -3,7 +3,6 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
--- FIXME
 module Coal.Compiler.Transform.Type.AliasExpansion (
   AliasEnvironment,
   AliasContext (..),
