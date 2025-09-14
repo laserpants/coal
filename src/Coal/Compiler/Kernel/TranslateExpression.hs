@@ -11,15 +11,14 @@ module Coal.Compiler.Kernel.TranslateExpression (
 import Coal.Common.Label (Label (..))
 import Coal.Compiler.Kernel.Environment (KernelEnvironment (..), qualifyName, withLocalName, withLocalNames)
 import Coal.Compiler.Kernel.TranslateType (translateType)
+import qualified Coal.Kernel.Language as Kernel
 import Coal.Language
 import Control.Monad.Reader (MonadReader)
 import Data.Data (Data)
 import Data.List.NonEmpty (NonEmpty (..), toList, (<|))
-import Extra (Name)
-
-import qualified Coal.Kernel.Language as Kernel
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
+import Extra (Name)
 
 type KernelExpr = Kernel.Expr Kernel.Type
 

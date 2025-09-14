@@ -30,6 +30,7 @@ module Coal.Compiler.Stack (
 )
 where
 
+import qualified Coal.Common.Environment as Environment
 import Coal.Common.Supply (Supply (..))
 import Coal.Compiler.Environment (CompilerEnvironment (..))
 import Coal.Compiler.State
@@ -42,8 +43,6 @@ import Control.Monad.Reader (MonadReader)
 import Control.Monad.State (MonadState, modify)
 import Data.Text (Text)
 import Extra (Dictionary, Name)
-
-import qualified Coal.Common.Environment as Environment
 
 newtype CompilerError = CompilerError Text
   deriving (Show, Eq, Ord, Read)
