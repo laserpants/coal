@@ -192,7 +192,7 @@ Expressions that are not functions can also be defined in this scope, using the 
   let <name> = <expr>
 ```
 
-A module-level let-binding looks like those used inside an expression (explained below), except that there is no body:
+A module-level let-binding looks like an ordinary let-expression (explained below), except that there is no body:
 
 ```
 module Utils {
@@ -257,6 +257,7 @@ A let-binding associates a name with an expression within a given scope:
 ```
   let <name> = <e_1> in <e_2>
 ```
+
 >  #### A note about let-generalization
 >
 > In [Hindley-Milner](https://en.wikipedia.org/wiki/Hindley%E2%80%93Milner_type_system) languages, it is let-bindings that introduce polymorphism. Consider the following expression, which doesn't type check:
@@ -280,8 +281,7 @@ A let-binding associates a name with an expression within a given scope:
 A subtle but important detail that makes let-bindings in Coal different from those in most other languages is that the identifier introduced by a `let` is **not in scope within the definition itself**. 
 In other words, `let x = e1 in e2` makes `x` available in `e2`, but not in `e1`. 
 In OCaml (and F#) this is also the case for the standard `let` keyword. However, in these languages, a special `let rec` syntax can be utilized to evade this restriction. Coal doesn't have an equivalent to `let rec`.
-
-This prevents ill-formed expressions such as `let f = f in f`, but also excludes any form of explicit recursion
+This prevents non-well-founded expressions, such as `let f = f in f`. More generally, it excludes any form of explicit recursion.
 
 As far as the compiler is concerned, a function defined at the top level has the form:
 
@@ -304,8 +304,7 @@ An anonymous function is declared using the `fn` keyword:
   fn(<arg_1>, <arg_2>, ..., <arg_n>) => <expr>
 ```
 
-Function expressions are first-class objects
-They can be passed as arguments to other functions, assigned and stored inside data structures.
+Function expressions are first-class objects; they can be passed as arguments to other functions, assigned and stored inside data structures.
 
 Function definitions are curried.
 
