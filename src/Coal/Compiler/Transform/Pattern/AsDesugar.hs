@@ -3,8 +3,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
--- FIXME
-module Coal.Compiler.Transform.Pattern.AsDesugar where
+module Coal.Compiler.Transform.Pattern.AsDesugar (desugarAsPatterns) where
 
 import Coal.Common.Label (Label (..))
 import Coal.Language (Choice (..), Clause (..), Expression (..), Pattern (..))
@@ -12,7 +11,6 @@ import Coal.Language.Module (Module (..))
 import Coal.Language.Module.Definition (Definition (..))
 import Coal.Language.Module.Definition.Constant (ConstantDef (..))
 import Coal.Language.Module.Definition.Fold (FoldDef (..))
-import Coal.Language.Module.Definition.Function (FunctionDef (..))
 import Coal.Language.Module.Definition.Unfold (UnfoldDef (..))
 import Control.Monad.Writer
 import Data.Data (Data)
@@ -39,10 +37,8 @@ instance (Data a, Data t, Monoid a) => AsDesugarContext (Expression a t) where
 desugarClause :: (Monoid a, Data a, Data t) => t -> Clause a t -> Clause a t
 desugarClause t cl@(EClause a p cs) =
   case ps of
-    [] ->
-      cl
-    _ ->
-      EClause a q (foldr go cs ps)
+    [] -> cl
+    _ -> EClause a q (foldr go cs ps)
  where
   (q, ps) =
     runWriter (transformM collectAsPatterns p)
@@ -73,30 +69,9 @@ instance (Data a, Data t, Monoid a) => AsDesugarContext (ConstantDef a t) where
       ConstantDef a u w e ->
         ConstantDef a u w (desugarAsPatterns e)
 
-instance (Data a, Data t, Monoid a) => AsDesugarContext (FunctionDef a t) where
-  desugarAsPatterns =
-    \case
-      FunctionDef a u w ps e ->
-        case ps1 of
-          [] ->
-            FunctionDef a u w ps (desugarAsPatterns e)
-          _ ->
-            FunctionDef a u w qs (foldr go (desugarAsPatterns e) ps1)
-       where
-        (qs, ps1) =
-          runWriter (traverse (transformM collectAsPatterns) ps)
-        go (ll@(Label t _), p1) e1 =
-          EMatch
-            mempty
-            t -- TODO
-            (EVariable mempty ll)
-            (EClause mempty p1 (CPlain mempty [] e1 :| []) :| [])
-
 instance (Data a, Data t, Monoid a) => AsDesugarContext (Definition a k t) where
   desugarAsPatterns =
     \case
-      DFunction loc name f fs ->
-        DFunction loc name (desugarAsPatterns f) (desugarAsPatterns <$> fs)
       DConstant loc name g fs ->
         DConstant loc name (desugarAsPatterns g) (desugarAsPatterns <$> fs)
       DFold loc n (FoldDef with cs e) ->

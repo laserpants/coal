@@ -18,6 +18,7 @@ module Coal.Compiler.Transform.Dictionaries (
 ) where
 
 import Coal.Common.Environment (Environment (..))
+import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (supplied)
 import Coal.Language
@@ -35,12 +36,10 @@ import Data.Generics.Uniplate.Data (descendM)
 import Data.List (nub)
 import Data.List.NonEmpty (NonEmpty (..), toList)
 import Data.Map.Strict (Map)
+import qualified Data.Map.Strict as Map
 import Data.Maybe (catMaybes)
 import Data.Text (isPrefixOf)
 import Extra (Dictionary, Name)
-
-import qualified Coal.Common.Environment as Environment
-import qualified Data.Map.Strict as Map
 
 data DictionaryEnvironment = DictionaryEnvironment
   { dictionaryEnvironmentNames :: Environment IndexedScheme
@@ -245,16 +244,16 @@ instance (Monoid a, Data a) => TraitContext (Definition a Kind IndexedType) wher
 instance (Monoid a, Data a) => TraitContext (ConstantDef a IndexedType) where
   expandTraits =
     \case
-      ConstantDef a w1 (With _ t) e -> do
+      ConstantDef a with (With _ t) e -> do
         (expr, traits) <- listen (expandTraits e)
         pure $
           case nub traits of
             [] ->
-              ConstantDef a w1 (With [] t) expr
+              ConstantDef a with (With [] t) expr
             tr : trs ->
               ConstantDef
                 a
-                w1
+                with
                 (With (tr : trs) t)
                 (ELambda mempty (toPattern <$> (tr :| trs)) expr)
        where
