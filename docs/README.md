@@ -599,7 +599,7 @@ Records are unordered collections of name-value pairs in which the values can be
 ```
 { 
   name = "Eros Ramazzotti", 
-  shoe_size = 43, 
+  shoe_size = 43.0, 
   privileges = ["read", "edit", "karaoke"]
 }
 ```
