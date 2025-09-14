@@ -2,13 +2,13 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
--- FIXME
 module Coal.Compiler.Kernel.TranslateDefinition (translateDefinition) where
 
 import Coal.Common.Label (Label (..))
 import Coal.Compiler.Kernel.Environment (KernelEnvironment (..), withLocalNames)
 import Coal.Compiler.Kernel.TranslateExpression (translateExpression, translatePattern)
 import Coal.Compiler.Kernel.TranslateType (translateType)
+import qualified Coal.Kernel.Language as Kernel
 import Coal.Language
 import Coal.Language.Module
 import Control.Monad (forM)
@@ -17,8 +17,6 @@ import Data.Data (Data)
 import Data.List.Extra (sortOn)
 import Data.List.NonEmpty (NonEmpty ((:|)), toList, (<|))
 import Extra (Name, (<$$>))
-
-import qualified Coal.Kernel.Language as Kernel
 
 type KernelObject = Kernel.Object Kernel.Type (Kernel.Expr Kernel.Type)
 
@@ -44,8 +42,8 @@ translateDefinition =
       c <- translateExpression e
       moduleName <- asks kernelEnvironmentModule
       pure [Kernel.OConstant (moduleName <> "." <> name) c]
-    DTrait _ name (TraitDef _ _ ins) ->
-      forM ins $
+    DTrait _ name (TraitDef _ _ ds) ->
+      forM ds $
         \(n, t) ->
           traitAccessor name n (translateType t)
     DInstance _ name (InstanceDef _ t ds) ->
