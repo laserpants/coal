@@ -115,7 +115,8 @@ module <path>(<export_list>) {
 ```
 
 Each module is identified by its *path*, reflecting the directory structure of the file in which it is defined. Path segments begin with an uppercase letter and are separated by a dot (`.`) character.
-A module `Utils.Math.Trigonometry`, for instance, is defined in a file located at `Utils/Math/Trigonometry.coal`, relative to your project's root directory.
+A module `Utils.Math.Trigonometry`, for instance, is defined in a file located at `Utils/Math/Trigonometry.coal` relative to your project's root directory.
+Source files are saved with a `.coal` extension.
 
 ```
 src
