@@ -402,7 +402,7 @@ type Tree<a>
   | Node(a, Tree<a>, Tree<a>)
 ```
 
-Here is how a basic tree is encoded with this type:
+Here is how a basic tree is described with this type:
 
 ```
 //          (4)
@@ -607,7 +607,7 @@ Records are unordered collections of name-value pairs in which the values can be
 A valid type for the above record is:
 
 ```
-{ name : string, shoe_size : int32, privileges : List<string> }
+{ name : string, shoe_size : float, privileges : List<string> }
 ```
 
 ### Pattern matching
