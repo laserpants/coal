@@ -1,6 +1,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 
+-- FIXME
 module Coal.Compiler.Transform.NormalizeObjects (NormalizeObjectsTransformContext (..)) where
 
 import Coal.Compiler.Transform.Flattening

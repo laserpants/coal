@@ -17,6 +17,7 @@ module Coal.Compiler.Environment (
 ) where
 
 import Coal.Common.Environment (Environment (..))
+import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Transform.Type.AliasExpansion
 import Coal.Compiler.Transform.Type.Parameterized
 import Coal.Language
@@ -28,12 +29,10 @@ import Control.Monad.Writer (execWriterT)
 import Data.List (nub)
 import Data.List.NonEmpty (NonEmpty (..))
 import Data.Map.Strict (Map)
-import Extra (Dictionary, Name, Set, traverse2, traverse_, (<$$>))
-
-import qualified Coal.Common.Environment as Environment
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import qualified Data.Text as Text
+import Extra (Dictionary, Name, Set, traverse2, traverse_, (<$$>))
 
 type DataConstructorEnvironment = Environment (DataConstructor TypeIndex Kind IndexedType)
 type TypeConstructorEnvironment = Environment Kind

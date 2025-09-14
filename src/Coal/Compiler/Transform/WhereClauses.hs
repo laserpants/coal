@@ -2,6 +2,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
+-- FIXME
 module Coal.Compiler.Transform.WhereClauses (expandWhereClausesModule) where
 
 import Coal.Compiler.Transform.Tree

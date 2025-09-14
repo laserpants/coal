@@ -4,6 +4,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
 
+-- FIXME
 module Coal.Compiler.Transform.Pattern.OrExpansion (
   OrPattern (..),
   compileOrPatterns,

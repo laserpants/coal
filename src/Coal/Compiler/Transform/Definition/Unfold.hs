@@ -5,6 +5,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
+-- FIXME
 module Coal.Compiler.Transform.Definition.Unfold where
 
 import Coal.Common.Supply (suppliedName)

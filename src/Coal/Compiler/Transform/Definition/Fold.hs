@@ -5,6 +5,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
+-- FIXME
 module Coal.Compiler.Transform.Definition.Fold where
 
 import Coal.Common.Label (Label (..), labelName)

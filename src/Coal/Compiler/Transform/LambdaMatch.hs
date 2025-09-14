@@ -6,6 +6,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
 
+-- FIXME
 module Coal.Compiler.Transform.LambdaMatch (
   LambdaMatchExpansion (..),
   CompileLambdaMatchContext (..),

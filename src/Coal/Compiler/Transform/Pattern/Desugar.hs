@@ -5,6 +5,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
+-- FIXME
 module Coal.Compiler.Transform.Pattern.Desugar (
   Sugared (..),
   PatternDesugar (..),
