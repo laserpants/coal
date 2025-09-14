@@ -43,7 +43,7 @@ import Extra (Dictionary, Name)
 
 data DictionaryEnvironment = DictionaryEnvironment
   { dictionaryEnvironmentNames :: Environment IndexedScheme
-  , dictionaryEnvironmentInstances :: Environment (Map IndexedType (Type Parameter (), Dictionary IndexedScheme))
+  , dictionaryEnvironmentInstances :: Environment (Map IndexedType (ParameterizedType, Dictionary IndexedScheme))
   }
   deriving (Show, Eq, Ord, Read)
 
@@ -97,7 +97,7 @@ tryMatch t u = do
   var <- supplied id
   pure (evalUnifier var (match t u))
 
-findFirstMatch :: Trait IndexedType -> DictionaryStack (Maybe (Type Parameter (), IndexedType, Map Name IndexedScheme))
+findFirstMatch :: Trait IndexedType -> DictionaryStack (Maybe (ParameterizedType, IndexedType, Map Name IndexedScheme))
 findFirstMatch (Trait name t1) = do
   env <- asks dictionaryEnvironmentInstances
   case Environment.lookup name env of
@@ -140,7 +140,7 @@ lookupTraitInstance tr@(Trait name _) = do
     Just (x, a, b) ->
       mapEntriesM b (uncurry (go x (Trait name a)))
  where
-  go x trait@(Trait tn _) n (Forall _ ts t) = do
+  go x (Trait tn _) n (Forall _ ts t) = do
     expr <- applyTraits (Label t (n <> "__$instance_" <> serialize (Trait tn x))) ts
     pure (n, expr)
 
