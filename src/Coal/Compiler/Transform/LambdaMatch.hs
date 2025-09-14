@@ -6,7 +6,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
 
--- FIXME
 module Coal.Compiler.Transform.LambdaMatch (
   LambdaMatchExpansion (..),
   CompileLambdaMatchContext (..),
@@ -23,7 +22,7 @@ import Control.Monad.Reader (MonadReader)
 import Control.Monad.State (MonadState)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformM)
-import Data.List.NonEmpty (NonEmpty (..), (<|))
+import Data.List.NonEmpty (NonEmpty (..))
 import Extra (Dictionary, Name)
 
 newtype LambdaMatchExpansion a = LambdaMatchExpansion {natExpansionStack :: RWS Name () Int a}
@@ -61,12 +60,13 @@ instance (Monoid a, Data a) => CompileLambdaMatchContext (Expression a ()) where
     go =
       \case
         ELambdaMatch a t cs Nothing -> do
-          e1 <- expandLambdaMatch a t cs
+          e1 <- expandLambdaMatch cs
           pure (ELambdaMatch a t cs (Just e1))
         e ->
           pure e
 
-expandLambdaMatch a t cs =
+expandLambdaMatch :: (Monoid a) => NonEmpty (Clause a ()) -> LambdaMatchExpansion (Expression a ())
+expandLambdaMatch cs =
   pure $
     ELambda
       mempty
