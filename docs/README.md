@@ -310,15 +310,21 @@ TODO
 
 #### Comments
 
+There are two types of comments:
+
+- Single-line comments begin with a double forward slash (`//`) and extend to the end of the line. Any text following `//` is considered a comment.
+
 ```
   foo(1)  // Leave any comments about this comment in the comment field below.
 ```
 
+- Multi-line comments (also called *block comments*) start with `/*` and end with `*/`. All text between these delimiters is treated as a comment.
+
 ```
   /* This is a long comment. It can extend over multiple 
-     lines and may or may not contain ASCII art depicting 
-     a giraffe. 
-   */
+     lines. It may or may not contain ASCII art depicting,
+     for example, a giraffe. 
+  */
   fun sqrt(d : double) =
     ...
 ```
