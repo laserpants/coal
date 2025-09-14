@@ -10,11 +10,11 @@ import Coal.Kernel.LLVM.IRInstruction.TH
 import Coal.Kernel.LLVM.IRType (IRType (..), IRTyped (..))
 import Coal.Kernel.LLVM.IRType.Syntax (i32, i8Ptr, ptr, struct)
 import Coal.Kernel.LLVM.IRValue (IRValue (..))
+import qualified Coal.Kernel.Language as Syntax
+import Control.Monad.Extra (concatForM)
 import Data.List.NonEmpty (NonEmpty (..), toList)
 import Data.Tuple.Extra (fst3)
-import Extra (forM, forSM, (<$$>))
-
-import qualified Coal.Kernel.Language as Syntax
+import Extra (forM, forSM)
 
 irEvalClause :: (IREval e) => IRValue -> [Label Syntax.Type] -> e -> IRInstr IRValue
 irEvalClause v1 lls e = do
@@ -47,7 +47,7 @@ irEvalMatch t e1 cs = do
           n <- label con
           pure (n, lls, e)
 
-      xs <- concat <$$> forM (toList cs) $
+      xs <- concatForM (toList cs) $
         \(Syntax.Clause ((Label _ con) :| _) _) -> do
           ix <- constructorLookup con
           case ix of

@@ -17,6 +17,7 @@ import Coal.Compiler.Transform.Type.Parameterized
 import Coal.Language
 import Coal.Language.Module
 import Coal.TypeSystem
+import Control.Monad.Extra (concatForM)
 import Control.Monad.Reader (ask, asks)
 import Control.Monad.State (evalState, gets)
 import Control.Monad.Writer (execWriter)
@@ -26,7 +27,7 @@ import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
-import Extra (Dictionary, Name, forM, forM_, void, (<$$>))
+import Extra (Dictionary, Name, forM_, void)
 
 type ConstraintsGenResult g o a t s = (s, Dictionary (g, o a), [ConstraintsGenOutput g o a t])
 
@@ -182,7 +183,7 @@ compileDefinitionC =
               fields = Map.toList d
           insertConstraintsC [Equality (RuleAnnotation loc t1 t3) [t1, t3]]
 
-          cs <- concat <$$> forM fields $
+          cs <- concatForM fields $
             \(name, elem1) -> do
               env <- asks compilerCodataAccessorEnvironment
               case Environment.lookup (Text.replace "@" "" name) env of

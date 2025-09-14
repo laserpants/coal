@@ -2,7 +2,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Coal.Compiler.Kernel.TranslateDefinition (translateDefinition) where
+module Coal.Compiler.Kernel.TranslateDefinition where -- (translateDefinition) where
 
 import Coal.Common.Label (Label (..))
 import Coal.Compiler.Kernel.Environment (KernelEnvironment (..), withLocalNames)
@@ -12,11 +12,12 @@ import qualified Coal.Kernel.Language as Kernel
 import Coal.Language
 import Coal.Language.Module
 import Control.Monad (forM)
+import Control.Monad.Extra (concatForM)
 import Control.Monad.Reader (MonadReader, asks)
 import Data.Data (Data)
 import Data.List.Extra (sortOn)
 import Data.List.NonEmpty (NonEmpty ((:|)), toList, (<|))
-import Extra (Name, (<$$>))
+import Extra (Name)
 
 type KernelObject = Kernel.Object Kernel.Type (Kernel.Expr Kernel.Type)
 
@@ -47,7 +48,7 @@ translateDefinition =
         \(n, t) ->
           traitAccessor name n (translateType t)
     DInstance _ name (InstanceDef _ t ds) ->
-      concat <$$> forM ds $
+      concatForM ds $
         \case
           DFunction loc n f _ -> do
             translateDefinition (DFunction loc (n <> postfix) f [])
