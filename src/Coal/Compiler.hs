@@ -7,6 +7,7 @@
 -- FIXME
 module Coal.Compiler where
 
+import qualified Coal.Compiler.Kernel.Environment as Kernel
 import Coal.Compiler.Kernel.TranslateModule (translateModule)
 import Coal.Compiler.PatternMatching
 import Coal.Compiler.PatternMatching.Rule (MatchMonad (..), runMatchMonad)
@@ -27,6 +28,7 @@ import Coal.Compiler.Transform.Unfold
 import Coal.Compiler.Transform.WhereClauses
 import Coal.Compiler.TypeInference
 import Coal.Graphviz.Dot (writeDotFile)
+import qualified Coal.Kernel.Language as Kernel
 import Coal.Language
 import Coal.Language.Module (Module (..), overModuleDefinitionsM)
 import Coal.Language.Module.Definition
@@ -34,17 +36,14 @@ import Coal.Language.Module.Definition.Constant
 import Coal.Language.Module.Definition.Instance
 import Coal.TypeSystem.Substitution (normalizeTypeIndexes)
 import Control.Monad.Except
-import Control.Monad.Reader (MonadIO, Reader, asks, liftIO, runReader)
+import Control.Monad.Reader (Reader, asks, runReader)
 import Control.Monad.State (gets, runState)
 import Control.Monad.Writer (Writer, runWriter)
 import Data.Data (Data)
 import Data.Text (Text)
-import Extra (Name, forM, forM_)
-import Prettyprinter (Pretty (..))
-
-import qualified Coal.Compiler.Kernel.Environment as Kernel
-import qualified Coal.Kernel.Language as Kernel
 import qualified Data.Text as Text
+import Extra (Name)
+import Prettyprinter (Pretty (..))
 
 withSupplyC :: (Monad m) => (Int -> (c, Int)) -> CompilerT a m c
 withSupplyC = withSupplyMC . (pure .)
