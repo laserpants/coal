@@ -399,4 +399,4 @@ binop _ _ _ = error "Implementation error"
 
 {-# INLINE hasType #-}
 hasType :: (Data a) => Expression a IndexedType -> IndexedType -> Bool
-hasType e t = (typeOf e :: IndexedType) == t
+hasType e t = typeOf e == t
