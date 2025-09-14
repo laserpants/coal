@@ -125,7 +125,7 @@ src
         └── Trigonometry.coal
 ```
 
-In a module declaration, the path identifier is followed by an optional list of exported names enclosed in parentheses. Only exported names are visible outside of the module (or *public* in OOP terminology).
+In a module declaration, the path identifier is followed by an optional list of exported names enclosed in parentheses. Only exported names are visible outside the module (or *public* in OOP terminology).
 
 ```
 module Utils.Math.Trigonometry(sin, cos, tan) {
@@ -155,7 +155,7 @@ import namespace List
 
 ### Top-level definitions
 
-Definitions that can appear in the outermost scope of a module are functions, (let-)expressions, data and codata type definitions, traits, trait instances, folds, and unfolds.
+Definitions that can appear in the outermost scope of a module are functions, top-level let-expressions, data and codata type definitions, traits, trait instances, folds, and unfolds.
 
 #### Functions
 
