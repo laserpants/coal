@@ -257,9 +257,21 @@ fixity9 =
   , InfixR (binaryOperator OReverseApplication <$ symbol "|.")
   ]
 
+negationOperator :: Parser (Expression Metadata () -> Expression Metadata ())
+negationOperator =
+  withMetadata $ do
+    symbol_ "-"
+    pure $
+      \loc e ->
+        EApplication
+          loc
+          ()
+          (EVariable loc (Label () "negate"))
+          (e :| [])
+
 fixity8 :: [Operator Parser (Expression Metadata ())]
 fixity8 =
-  [ Prefix (unaryOperator ONegate <$ symbol "-")
+  [ Prefix negationOperator
   , Prefix (unaryOperator OLogicalNot <$ symbol "!")
   ]
 

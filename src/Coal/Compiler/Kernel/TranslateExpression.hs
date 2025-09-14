@@ -249,8 +249,8 @@ translateUnaryOperator t ot =
   \case
     OLogicalNot ->
       logicalNotOperator t
-    ONegate ->
-      negationOperator t
+    ONegate{} ->
+      error "Not implemented"
 
 logicalNotOperator :: (MonadReader KernelEnvironment m, Data a) => IndexedType -> NonEmpty (Expression a IndexedType) -> m KernelExpr
 logicalNotOperator t es = do
@@ -260,16 +260,6 @@ logicalNotOperator t es = do
     Kernel.app
       t1
       (Kernel.var (Label (t1 `Kernel.arrow` t1) "Core$.operator__not"))
-      args
-
-negationOperator :: (MonadReader KernelEnvironment m, Data a) => IndexedType -> NonEmpty (Expression a IndexedType) -> m KernelExpr
-negationOperator t es = do
-  args <- traverse translateExpression es
-  let t1 = translateType t
-  pure $
-    Kernel.app
-      t1
-      (Kernel.var (Label (t1 `Kernel.arrow` t1) "Core$.negate"))
       args
 
 translateBinaryOperator ::
