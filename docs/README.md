@@ -232,6 +232,7 @@ module Main {
 ### Expression syntax
 
 Expressions, such as variables, literals, let-bindings, operators, and if-then-else-blocks, are the basic building blocks of all programs.
+Most control structures in Coal have a syntax that is >>
 
 #### Variables
 
@@ -243,6 +244,10 @@ If-expressions are similar to those in most other languages in the functional fa
 
 ```
   if (<e_1 : bool>) then <e_2 : t> else <e_3 : t>
+```
+
+```
+  if (temperature > 20) then wear("shorts") else go_home()
 ```
 
 #### Let-bindings
@@ -274,7 +279,7 @@ A let-binding associates a name with an expression within a given scope:
 
 A subtle but important detail that makes let-bindings in Coal different from those in most other languages is that the identifier introduced by a `let` is **not in scope within the definition itself**. 
 In other words, `let x = e1 in e2` makes `x` available in `e2`, but not in `e1`. 
-In OCaml (and F#) this is also the case for the standard `let` keyword. However, in these languages, a special `let rec` syntax can be used to evade this restriction. Coal doesn't have an equivalent to `let rec`.
+In OCaml (and F#) this is also the case for the standard `let` keyword. However, in these languages, a special `let rec` syntax can be utilized to evade this restriction. Coal doesn't have an equivalent to `let rec`.
 
 This prevents ill-formed expressions such as `let f = f in f`, but also excludes any form of explicit recursion
 
