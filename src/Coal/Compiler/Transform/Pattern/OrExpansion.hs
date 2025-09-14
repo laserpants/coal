@@ -4,7 +4,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
 
--- FIXME
 module Coal.Compiler.Transform.Pattern.OrExpansion (
   OrPattern (..),
   compileOrPatterns,
@@ -17,10 +16,9 @@ import Coal.Language.Module (Module (..))
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformBiM)
 import Data.List.NonEmpty (NonEmpty (..))
+import qualified Data.List.NonEmpty as NonEmpty
 import Data.Semigroup (sconcat)
 import Extra (Map, traverseM)
-
-import qualified Data.List.NonEmpty as NonEmpty
 
 compileOrPatterns :: forall m a k t. (Monad m, Data a, Data k, Data t) => Module a k t -> m (Module a k t)
 compileOrPatterns = transformBiM (expandExpression :: Expression a t -> m (Expression a t))
