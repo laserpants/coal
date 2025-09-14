@@ -44,13 +44,14 @@ translatePrimitive =
     LString str ->
       Kernel.PString str
 
+-- FIXME
 translateExpression :: (MonadReader KernelEnvironment m, Data a) => Expression a IndexedType -> m KernelExpr
 translateExpression =
   \case
     EAnnotation _ _ e ->
       translateExpression e
     EApplication _ t (EUnaryOperator _ ot op) es ->
-      error "TODO"
+      translateUnaryOperator t ot op es
     EApplication _ t (EBinaryOperator _ ot op) es ->
       translateBinaryOperator t ot op es
     EApplication _ t e es ->
@@ -236,6 +237,40 @@ qualifyLabel (Label t name) = Label t <$> qualifyName name
 {-# INLINE translateLabel #-}
 translateLabel :: Label IndexedType -> Label Kernel.Type
 translateLabel (Label t name) = Label (translateType t) name
+
+translateUnaryOperator ::
+  (MonadReader KernelEnvironment m, Data a) =>
+  IndexedType ->
+  IndexedType ->
+  UnaryOperator ->
+  NonEmpty (Expression a IndexedType) ->
+  m KernelExpr
+translateUnaryOperator t ot =
+  \case
+    OLogicalNot ->
+      logicalNotOperator t
+    ONegate ->
+      negationOperator t
+
+logicalNotOperator :: (MonadReader KernelEnvironment m, Data a) => IndexedType -> NonEmpty (Expression a IndexedType) -> m KernelExpr
+logicalNotOperator t es = do
+  args <- traverse translateExpression es
+  let t1 = translateType (TIntrinsic IBool)
+  pure $
+    Kernel.app
+      t1
+      (Kernel.var (Label (t1 `Kernel.arrow` t1) "Core$.operator__not"))
+      args
+
+negationOperator :: (MonadReader KernelEnvironment m, Data a) => IndexedType -> NonEmpty (Expression a IndexedType) -> m KernelExpr
+negationOperator t es = do
+  args <- traverse translateExpression es
+  let t1 = translateType t
+  pure $
+    Kernel.app
+      t1
+      (Kernel.var (Label (t1 `Kernel.arrow` t1) "Core$.negate"))
+      args
 
 translateBinaryOperator ::
   (MonadReader KernelEnvironment m, Data a) =>

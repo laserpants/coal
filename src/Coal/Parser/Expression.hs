@@ -258,7 +258,10 @@ fixity9 =
   ]
 
 fixity8 :: [Operator Parser (Expression Metadata ())]
-fixity8 = []
+fixity8 =
+  [ Prefix (unaryOperator ONegate <$ symbol "-")
+  , Prefix (unaryOperator OLogicalNot <$ symbol "!")
+  ]
 
 fixity7 :: [Operator Parser (Expression Metadata ())]
 fixity7 =
