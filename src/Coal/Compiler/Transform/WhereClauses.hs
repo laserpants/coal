@@ -2,11 +2,9 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
--- FIXME
 module Coal.Compiler.Transform.WhereClauses (expandWhereClausesModule) where
 
 import Coal.Compiler.Transform.Tree
-import Coal.Language
 import Coal.Language.Module
 import Control.Monad.Writer
 import Data.Data (Data)
@@ -38,13 +36,6 @@ expandWhereClausesModule (Module p ns ds) =
 expandWhereClausesDefinition :: (Data a, Data t, Ord t, MonadWriter [(Name, Name)] m) => Definition a k t -> m [Definition a k t]
 expandWhereClausesDefinition =
   \case
-    --    DAnnotation loc w d -> do
-    --      defs <- expandWhereClausesDefinition d
-    --      case defs of
-    --        [] ->
-    --          error "Implementation error"
-    --        d1 : ds ->
-    --          pure (DAnnotation loc w d1 : ds)
     DFunction loc name f ws -> do
       (ds, names) <- listen $ traverse (liftWhereClause name) ws
       pure (replaceNames names <$> (ds <> [DFunction loc name f []]))
