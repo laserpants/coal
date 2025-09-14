@@ -74,12 +74,10 @@ translateExpression =
       -- Top-level fold
       | "!" `Text.isPrefixOf` name ->
           translateExpression (EVariable loc (Label t (Text.drop 1 name)))
-    EVariable _ (Label t name) -> do
-      qq <- qualifyName name
-      pure (Kernel.var (Label (translateType t) qq))
-    EConstructor _ (Label t name) -> do
-      qq <- qualifyName name
-      pure (Kernel.var (Label (translateType t) qq))
+    EVariable _ (Label t name) ->
+      Kernel.var . Label (translateType t) <$> qualifyName name
+    EConstructor _ (Label t name) ->
+      Kernel.var . Label (translateType t) <$> qualifyName name
     ELiteral _ p ->
       pure (Kernel.lit (translatePrimitive p))
     EIf _ _ e1 e2 e3 ->
