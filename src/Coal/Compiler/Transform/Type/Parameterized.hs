@@ -2,20 +2,18 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
--- FIXME
 module Coal.Compiler.Transform.Type.Parameterized where
 
 import Coal.Common.Environment (Environment (..))
+import qualified Coal.Common.Environment as Environment
 import Coal.Common.Supply (Supply (..), supplied)
 import Coal.Language
 import Control.Monad.Reader (ReaderT, asks, runReaderT)
 import Control.Monad.State (MonadState)
 import Control.Monad.Writer (WriterT, execWriterT, tell)
 import Data.List.NonEmpty (NonEmpty, toList)
-import Extra (Name, traverse_)
-
-import qualified Coal.Common.Environment as Environment
 import qualified Data.Text as Text
+import Extra (Name, traverse_)
 
 instantiateVars :: (MonadState s m, Supply s) => [(Name, TypeIndex Kind)] -> Environment Kind -> Type Parameter () -> m IndexedType
 instantiateVars ts0 env t = do
