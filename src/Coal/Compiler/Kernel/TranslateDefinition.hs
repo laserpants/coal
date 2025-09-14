@@ -2,7 +2,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Coal.Compiler.Kernel.TranslateDefinition where -- (translateDefinition) where
+module Coal.Compiler.Kernel.TranslateDefinition (translateDefinition) where
 
 import Coal.Common.Label (Label (..))
 import Coal.Compiler.Kernel.Environment (KernelEnvironment (..), withLocalNames)
