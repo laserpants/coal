@@ -2,7 +2,6 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
--- FIXME
 module Coal.Compiler.Kernel.TranslateExpression (
   translateExpression,
   translatePattern,
@@ -44,14 +43,13 @@ translatePrimitive =
     LString str ->
       Kernel.PString str
 
--- FIXME
 translateExpression :: (MonadReader KernelEnvironment m, Data a) => Expression a IndexedType -> m KernelExpr
 translateExpression =
   \case
     EAnnotation _ _ e ->
       translateExpression e
-    EApplication _ t (EUnaryOperator _ ot op) es ->
-      translateUnaryOperator t ot op es
+    EApplication _ t (EUnaryOperator _ _ op) es ->
+      translateUnaryOperator t op es
     EApplication _ t (EBinaryOperator _ ot op) es ->
       translateBinaryOperator t ot op es
     EApplication _ t e es ->
@@ -239,19 +237,18 @@ translateLabel (Label t name) = Label (translateType t) name
 translateUnaryOperator ::
   (MonadReader KernelEnvironment m, Data a) =>
   IndexedType ->
-  IndexedType ->
   UnaryOperator ->
   NonEmpty (Expression a IndexedType) ->
   m KernelExpr
-translateUnaryOperator t ot =
+translateUnaryOperator _ =
   \case
     OLogicalNot ->
-      logicalNotOperator t
+      logicalNotOperator
     ONegate{} ->
       error "Not implemented"
 
-logicalNotOperator :: (MonadReader KernelEnvironment m, Data a) => IndexedType -> NonEmpty (Expression a IndexedType) -> m KernelExpr
-logicalNotOperator t es = do
+logicalNotOperator :: (MonadReader KernelEnvironment m, Data a) => NonEmpty (Expression a IndexedType) -> m KernelExpr
+logicalNotOperator es = do
   args <- traverse translateExpression es
   let t1 = translateType (TIntrinsic IBool)
   pure $
