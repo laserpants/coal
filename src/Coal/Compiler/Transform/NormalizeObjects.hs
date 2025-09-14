@@ -1,7 +1,6 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 
--- FIXME
 module Coal.Compiler.Transform.NormalizeObjects (NormalizeObjectsTransformContext (..)) where
 
 import Coal.Compiler.Transform.Flattening
@@ -63,7 +62,7 @@ instance (Monoid a, Data a, Data k, Data (o k), Typeable o) => NormalizeObjectsT
       d ->
         d
 
--- denormalizeConstant :: (Data a, Data k, Data (o k), Typeable o) => Name -> Constant Expression a (Type o k) -> Definition a k (Type o k)
+denormalizeConstant :: (Data a, Data k, Data (o k), Typeable o) => Name -> ConstantDef a (Type o k) -> Definition a k (Type o k)
 denormalizeConstant name =
   \case
     ConstantDef loc w1 w2 (ELambda a1 ps (ELambda _ qs e)) ->
