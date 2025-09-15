@@ -5,7 +5,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
--- FIXME
 module Coal.Compiler.Transform.Definition.Fold where
 
 import Coal.Common.Label (Label (..), labelName)
@@ -15,7 +14,7 @@ import Coal.Compiler.Transform.Fold (FoldError (..))
 import Coal.Compiler.Transform.Tree (replace)
 import Coal.Language (Choice (..), Clause (..), Expression (..), Pattern (..))
 import Coal.Language.Module (Definition (..), FoldDef (..))
-import Control.Monad.Error
+import Control.Monad.Except
 import Control.Monad.Reader (MonadReader)
 import Control.Monad.State (MonadState)
 import Control.Monad.Writer (execWriter, tell)
@@ -91,13 +90,13 @@ compileTopLevelFolds :: (Data a, Monoid a, MonadState Int m, MonadReader Name m,
 compileTopLevelFolds =
   \case
     DFold loc name (FoldDef with cs _) -> do
-      e1 <- expandTopLevelFold name cs
+      e1 <- expandTopLevelFold cs
       pure $ DFold loc name (FoldDef with cs (Just e1))
     o ->
       pure o
 
-expandTopLevelFold :: (Data a, Monoid a, MonadState Int m, MonadReader Name m, MonadError (FoldError a) m) => Name -> NonEmpty (Clause a ()) -> m (Expression a ())
-expandTopLevelFold name clauses = do
+expandTopLevelFold :: (Data a, Monoid a, MonadState Int m, MonadReader Name m, MonadError (FoldError a) m) => NonEmpty (Clause a ()) -> m (Expression a ())
+expandTopLevelFold clauses = do
   name <- suppliedName
   let var = name <> ".expr"
   e1 <- traverse (expandFolds name []) clauses
