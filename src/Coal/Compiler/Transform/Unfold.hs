@@ -5,31 +5,25 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
--- FIXME
 module Coal.Compiler.Transform.Unfold (
   CompileUnfoldsContext (..),
   UnfoldExpansion (..),
   runUnfoldExpansion,
   evalUnfoldExpansion,
-  --  expandUnfoldExpr,
 ) where
 
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (suppliedName)
 import Coal.Compiler.Transform.Expression
-import Coal.Compiler.Transform.Flattening (flattenApplication)
-import Coal.Compiler.Transform.Tree (replace)
-import Coal.Language (Expression (..), Pattern (..), Primitive (..))
+import Coal.Language (Expression (..), Primitive (..))
 import Coal.Language.Module (ConstantDef (..), Definition (..), FunctionDef (..), Module (..))
 import Control.Monad.RWS (RWS, runRWS)
 import Control.Monad.Reader (MonadReader)
 import Control.Monad.State (MonadState)
 import Data.Data (Data)
-import Data.Generics.Uniplate.Data (transform, transformM)
+import Data.Generics.Uniplate.Data (transformM)
 import Data.List.NonEmpty (NonEmpty (..))
-import Extra (Dictionary, Name, const2)
-
-import qualified Data.Map.Strict as Map
+import Extra (Dictionary, Name)
 
 newtype UnfoldExpansion a = UnfoldExpansion {unfoldExpansionStack :: RWS Name () Int a}
   deriving
@@ -47,26 +41,6 @@ runUnfoldExpansion :: Name -> Int -> UnfoldExpansion a -> (a, Int)
 runUnfoldExpansion r s e = (a, s')
  where
   (a, s', _) = runRWS (unfoldExpansionStack e) r s
-
--- renameRecursiveCall :: (Monoid a, Data a) => Name -> Name -> Expression a () -> Expression a ()
--- renameRecursiveCall old new = replace old (const2 $ varE new)
---
--- expandUnfoldExpr :: (Monoid a, Data a, MonadState Int m, MonadReader Name m) => Name -> NonEmpty (Pattern a ()) -> Dictionary (Expression a ()) -> m (Expression a ())
--- expandUnfoldExpr var ps d = do
---  name <- suppliedName
---  pure $
---    transform flattenApplication $
---      letE
---        name
---        ( lambdaE
---            ps
---            ( ECodataRecord
---                mempty
---                ()
---                (Map.mapKeys ("$_" <>) (Map.map (lambdaAnyE . renameRecursiveCall var name) d))
---            )
---        )
---        (varE name)
 
 expandCodataSelect :: (Monoid a, MonadReader Name m, MonadState Int m) => Name -> Expression a () -> m (Expression a ())
 expandCodataSelect field e = do
@@ -98,9 +72,6 @@ instance (Monoid a, Data a) => CompileUnfoldsContext (Expression a ()) where
    where
     go =
       \case
-        --        EUnfold a t name ps d Nothing -> do
-        --          e1 <- expandUnfoldExpr name ps d
-        --          pure (EUnfold a t name ps d (Just e1))
         ECodataSelect a ll@(Label _ name) e Nothing -> do
           e1 <- expandCodataSelect name e
           pure (ECodataSelect a ll e (Just e1))

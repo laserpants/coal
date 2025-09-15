@@ -131,6 +131,7 @@ substituteInScheme sub (Forall _ ts t) = Forall (typeIndexesIn r <> typeIndexesI
 mapEntriesM :: (Monad m) => Dictionary IndexedScheme -> ((Name, IndexedScheme) -> m (Name, Expression a IndexedType)) -> m (Maybe (Dictionary (Expression a IndexedType)))
 mapEntriesM b f = Just . Map.fromList <$> traverse f (Map.toList b)
 
+-- FIXME
 lookupTraitInstance :: (Monoid a) => Trait IndexedType -> DictionaryStack (Maybe (Map Name (Expression a IndexedType)))
 lookupTraitInstance tr@(Trait name _) = do
   found <- findFirstMatch tr
