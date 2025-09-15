@@ -46,7 +46,7 @@ The `@` symbol in these examples denotes two separate types of recursive control
 - In the second example, the expression on the right (`n + 1`) becomes the next seed value, which is fed back into `enum_from` to generate the rest of the stream.
 
 If you are familiar with [recursion schemes](https://blog.sumtypeofway.com/posts/introduction-to-recursion-schemes.html) in a language like Haskell, it is based on the exact same principles.
-Scroll down to **Recursion, corecursion, and codata** for a more detailed explanation of how `fold` and `unfold` work in Coal.
+Scroll down to **Recursion, corecursion, and codata** for a more detailed explanation of how this syntax works in Coal.
 
 ### Programs = Expressions + Effects
 
@@ -114,7 +114,7 @@ module <path>(<export_list>) {
 }
 ```
 
-Each module is identified by its *path*, reflecting the directory structure of the file in which it is defined. Path segments begin with an uppercase letter and are separated by a dot (`.`) character.
+Each module is identified by its *path*. A path always reflects the directory structure of the file in which it is defined. Path segments begin with an uppercase letter and are separated by a dot (`.`) character.
 A module `Utils.Math.Trigonometry`, for instance, is defined in a file located at `Utils/Math/Trigonometry.coal` relative to your project's root directory.
 Source files are saved with a `.coal` extension.
 
