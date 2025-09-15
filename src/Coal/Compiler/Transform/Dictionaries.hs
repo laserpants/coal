@@ -166,16 +166,20 @@ applyTraits ll@(Label t name) =
 class TraitContext d where
   expandTraits :: d -> DictionaryStack d
 
+expandRecursiveLet :: (Monoid a, Data a) => Expression a IndexedType -> DictionaryStack (Expression a IndexedType)
+expandRecursiveLet e = do
+  res <- expandTraits e
+  case res of
+    ELet a (BPattern _ p e1 :| []) e2 ->
+      pure (ERecursiveLet a p e1 e2)
+    _ ->
+      error "Implementation error"
+
 instance (Monoid a, Data a) => TraitContext (Expression a IndexedType) where
   expandTraits =
     \case
-      ERecursiveLet a p e1 e2 -> do
-        res <- expandTraits (ELet a (BPattern a p e1 :| []) e2)
-        case res of
-          ELet a2 (BPattern _ p2 e8 :| []) e9 ->
-            pure (ERecursiveLet a2 p2 e8 e9)
-          _ ->
-            error "Implementation error"
+      ERecursiveLet a p e1 e2 ->
+        expandRecursiveLet (ELet a (BPattern a p e1 :| []) e2)
       ELet a bs e -> do
         as <- censor (const []) (traverse transformBinding bs)
         let xs = concat (toList (snd <$> as))
