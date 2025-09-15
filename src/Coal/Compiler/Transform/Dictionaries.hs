@@ -210,10 +210,8 @@ transformScope :: (Monoid a, Data a) => Expression a IndexedType -> DictionarySt
 transformScope e = do
   (expr, traits) <- listen (expandTraits e)
   case nub traits of
-    [] ->
-      pure (expr, traits)
-    tr : trs ->
-      pure (ELambda mempty (toPattern <$> (tr :| trs)) expr, traits)
+    [] -> pure (expr, traits)
+    tr : trs -> pure (ELambda mempty (toPattern <$> (tr :| trs)) expr, traits)
  where
   toPattern tr =
     PTraitDictionary mempty (typeOf tr) tr
@@ -232,7 +230,9 @@ instance (Monoid a, Data a) => TraitContext (Definition a Kind IndexedType) wher
   expandTraits =
     \case
       DConstant loc name c fs ->
-        DConstant loc name <$> expandTraits c <*> traverse expandTraits fs
+        DConstant loc name
+          <$> expandTraits c
+          <*> traverse expandTraits fs
       DFold loc name (FoldDef with cs (Just e)) ->
         DFold loc name . FoldDef with cs . Just <$> expandTraits e
       DUnfold loc name (UnfoldDef with ps d (Just e)) ->
