@@ -138,11 +138,11 @@ lookupTraitInstance tr@(Trait name _) = do
   case found of
     Nothing ->
       pure Nothing
-    Just (x, a, b) ->
-      mapEntriesM b (uncurry (go x (Trait name a)))
+    Just (t, a, b) ->
+      mapEntriesM b (uncurry (go t (Trait name a)))
  where
-  go x (Trait tn _) n (Forall _ ts t) = do
-    expr <- applyTraits (Label t (n <> "__$instance_" <> serialize (Trait tn x))) ts
+  go t1 (Trait tn _) n (Forall _ ts t) = do
+    expr <- applyTraits (Label t (n <> "__$instance_" <> serialize (Trait tn t1))) ts
     pure (n, expr)
 
 applyTraits :: (Monoid a) => Label IndexedType -> [Trait IndexedType] -> DictionaryStack (Expression a IndexedType)
@@ -155,8 +155,8 @@ applyTraits ll@(Label t name) =
      where
       t1 = foldType t (typeOf <$> (tr : trs))
       insertInstance trait = do
-        mm <- lookupTraitInstance trait
-        case mm of
+        fields <- lookupTraitInstance trait
+        case fields of
           Nothing -> do
             tell [trait]
             pure (ETraitDictionary mempty (typeOf trait) trait)
