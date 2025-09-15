@@ -168,13 +168,12 @@ The function body is simply an expression, which follows the arguments and is pr
 
 In the above, `<arg_1>, <arg_2>, ..., <arg_n>` are *patterns*, allowing functions to directly deconstruct their arguments.
 In addition to basic variables, records, tuples, and other data constructors, patterns may also include wildcards, literals, and nested structures.
+See **Pattern matching** for an overview of available patterns.
 
 ```
   fun bork({ n : int32 }, (fst, snd), _) =
     ...
 ```
-
-See **Pattern matching** for an overview of available patterns.
 
 A type annotion can be given to indicate a function's return type; like in the following example:
 
@@ -237,6 +236,10 @@ Most control structures in Coal have a syntax that is >>
 
 TODO
 
+#### Function application
+
+TODO
+
 #### If-then-else
 
 If-expressions are similar to those in most other languages in the functional family, requiring both the `then` and `else` branches to be present (and to have the same type):
@@ -251,7 +254,7 @@ If-expressions are similar to those in most other languages in the functional fa
 
 #### Let-bindings
 
-A let-binding associates a name with an expression within a given scope:
+A let-binding associates a name with an expression within the given scope:
 
 ```
   let <name> = <e_1> in <e_2>
