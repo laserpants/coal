@@ -114,9 +114,8 @@ module <path>(<export_list>) {
 }
 ```
 
-Each module is identified by its *path*. A path always reflects the directory structure of the file in which it is defined. Path segments begin with an uppercase letter and are separated by a dot (`.`) character.
+Each module is identified by its *path*. A path always reflects the directory structure of the source file in which it is defined. Path segments begin with an uppercase letter and are separated by a dot (`.`) character. Source files are saved with a `.coal` extension.
 A module `Utils.Math.Trigonometry`, for instance, is defined in a file located at `Utils/Math/Trigonometry.coal` relative to your project's root directory.
-Source files are saved with a `.coal` extension.
 
 ```
 src
@@ -260,6 +259,7 @@ A let-binding associates a name with an expression within a given scope:
 
 >  #### A note about let-generalization
 >
+> In some ways, A let-binding is similarto 
 > In [Hindley-Milner](https://en.wikipedia.org/wiki/Hindley%E2%80%93Milner_type_system) languages, it is let-bindings that introduce polymorphism. Consider the following expression, which doesn't type check:
 > 
 > ```
