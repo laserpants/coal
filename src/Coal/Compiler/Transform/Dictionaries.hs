@@ -8,14 +8,14 @@
 {-# LANGUAGE StrictData #-}
 
 -- FIXME
-module Coal.Compiler.Transform.Dictionaries (
-  TraitContext (..),
-  DictionaryEnvironment (..),
-  DictionaryStack (..),
-  runDictionaryStack,
-  transformScope,
-  collectTraits,
-) where
+module Coal.Compiler.Transform.Dictionaries where -- (
+--  TraitContext (..),
+--  DictionaryEnvironment (..),
+--  DictionaryStack (..),
+--  runDictionaryStack,
+--  transformScope,
+--  collectTraits,
+-- ) where
 
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
@@ -129,9 +129,8 @@ substituteInScheme sub (Forall _ ts t) = Forall (typeIndexesIn r <> typeIndexesI
   rs = apply sub ts
 
 mapEntriesM :: (Monad m) => Dictionary IndexedScheme -> ((Name, IndexedScheme) -> m (Name, Expression a IndexedType)) -> m (Maybe (Dictionary (Expression a IndexedType)))
-mapEntriesM b f = Just . Map.fromList <$> traverse f (Map.toList b)
+mapEntriesM d f = Just . Map.fromList <$> traverse f (Map.toList d)
 
--- FIXME
 lookupTraitInstance :: (Monoid a) => Trait IndexedType -> DictionaryStack (Maybe (Map Name (Expression a IndexedType)))
 lookupTraitInstance tr@(Trait name _) = do
   found <- findFirstMatch tr
@@ -142,7 +141,7 @@ lookupTraitInstance tr@(Trait name _) = do
       mapEntriesM b (uncurry (go t (Trait name a)))
  where
   go t1 (Trait tn _) n (Forall _ ts t) = do
-    expr <- applyTraits (Label t (n <> "__$instance_" <> serialize (Trait tn t1))) ts
+    expr <- applyTraits (Label t (instanceDescriptor (Trait tn t1) n)) ts
     pure (n, expr)
 
 applyTraits :: (Monoid a) => Label IndexedType -> [Trait IndexedType] -> DictionaryStack (Expression a IndexedType)

@@ -2,7 +2,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Coal.Language.Serializable (Serializable (..)) where
+module Coal.Language.Serializable (Serializable (..), instanceDescriptor) where
 
 import Coal.Language.Trait
 import Coal.Language.Type
@@ -10,6 +10,7 @@ import Coal.Language.Type.Intrinsic
 import Coal.Language.Type.Row
 import Data.List.NonEmpty (NonEmpty (..), toList)
 import Data.Text (Text)
+import Extra (Name)
 import TextShow (showt)
 
 class Serializable s where
@@ -113,3 +114,6 @@ instance (Serializable s) => Serializable (Trait s) where
     \case
       Trait name t ->
         name <> parenthesized t
+
+instanceDescriptor :: (Serializable t) => Trait t -> Name -> Name
+instanceDescriptor t name = name <> "__$instance_" <> serialize t

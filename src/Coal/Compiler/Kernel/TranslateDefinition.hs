@@ -51,13 +51,13 @@ translateDefinition =
       concatForM ds $
         \case
           DFunction loc n f _ -> do
-            translateDefinition (DFunction loc (n <> postfix) f [])
+            translateDefinition (DFunction loc (instanceDescriptor trait n) f [])
           DConstant loc n c _ -> do
-            translateDefinition (DConstant loc (n <> postfix) c [])
+            translateDefinition (DConstant loc (instanceDescriptor trait n) c [])
           _ ->
             error "TODO"
      where
-      postfix = "__$instance_" <> serialize (Trait name t)
+      trait = Trait name t
     _ ->
       pure []
 
