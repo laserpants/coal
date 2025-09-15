@@ -5,7 +5,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
--- FIXME
 module Coal.Compiler.Transform.Definition.Unfold where
 
 import Coal.Common.Supply (suppliedName)
@@ -19,10 +18,9 @@ import Control.Monad.State (MonadState)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transform)
 import Data.List.NonEmpty (NonEmpty (..))
-import Extra (Dictionary, Name)
-
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
+import Extra (Dictionary, Name)
 
 newtype UnfoldTopLevelUnfolds a = UnfoldTopLevelUnfolds {unfoldExpansionStack :: RWS Name () Int a}
   deriving
@@ -42,13 +40,13 @@ compileTopLevelUnfolds :: (Monoid a, Data a) => Definition a Kind () -> UnfoldTo
 compileTopLevelUnfolds =
   \case
     DUnfold loc name (UnfoldDef with ps d _) -> do
-      e1 <- expandTopLevelUnfold name ps d
+      e1 <- expandTopLevelUnfold ps d
       pure $ DUnfold loc name (UnfoldDef with ps d (Just e1))
     o ->
       pure o
 
-foobaz :: (Monoid a) => Name -> (Name, Expression a ()) -> UnfoldTopLevelUnfolds (Name, Expression a ())
-foobaz var (name, e)
+translateFields :: (Monoid a) => Name -> (Name, Expression a ()) -> UnfoldTopLevelUnfolds (Name, Expression a ())
+translateFields var (name, e)
   | "@" `Text.isPrefixOf` name =
       pure
         ( "$_" <> Text.drop 1 name
@@ -60,10 +58,10 @@ foobaz var (name, e)
   | otherwise =
       pure ("$_" <> name, lambdaAnyE e)
 
-expandTopLevelUnfold :: (Monoid a, Data a) => Name -> NonEmpty (Pattern a ()) -> Dictionary (Expression a ()) -> UnfoldTopLevelUnfolds (Expression a ())
-expandTopLevelUnfold var ps d = do
+expandTopLevelUnfold :: (Monoid a, Data a) => NonEmpty (Pattern a ()) -> Dictionary (Expression a ()) -> UnfoldTopLevelUnfolds (Expression a ())
+expandTopLevelUnfold ps d = do
   name <- suppliedName
-  d1 <- mapM (foobaz name) (Map.toList d)
+  d1 <- mapM (translateFields name) (Map.toList d)
   pure $
     transform flattenApplication $
       letE
