@@ -49,10 +49,10 @@ If you are familiar with [recursion schemes](https://blog.sumtypeofway.com/posts
 
 ### Programs = Expressions + Effects
 
-Coal is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-oriented_programming_language) language: a program is, at its core, just an expression that evaluates to a value. In this programming model, all data is immutable and there are no observable side-effects. These properties make programs more predictable, easier to reason about, highly testable, and allows for code to be verified using formal mathematical techniques. On the other hand, practical applications need to have the ability to interact with the outside world. Side-effects are what make them useful. 
-As part of this project, a goal is to develop a system for managing effects, such as I/O and exceptions, in the Coal language. This work is still in progress. See **How to contribute** if you are interested.
-
-in order to develop Coal into a language that can be used to write practical programs
+Coal is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-oriented_programming_language) language: a program is, at its core, just an expression that evaluates to a value. In this programming model, all data is immutable and there are no observable side-effects. These properties make programs more predictable, easier to reason about, highly testable, and allows for code to be verified using formal mathematical techniques. On the other hand, practical applications need to have the ability to interact with the outside world. 
+Side-effects are what make them useful. 
+A system for managing effects, such as I/O and exceptions, is still lacking in Coal. This is essential in order to develop Coal into a language that can be used to write practical programs.
+See **How to contribute** if you feel motivated to work on this.
 
 ## Project status and roadmap
 
@@ -114,7 +114,7 @@ module <path>(<export_list>) {
 }
 ```
 
-Each module is identified by its *path*. A path always reflects the directory structure of the source file in which it is defined. Path segments begin with an uppercase letter and are separated by a dot (`.`) character. Source files are saved with a `.coal` extension. A module `Utils.Math.Trigonometry`, for instance, is defined in a file located at `Utils/Math/Trigonometry.coal` relative to your project's root directory.
+Each module is identified by its *path*. A path always mirrors the directory structure of the source file in which it is defined. Path segments begin with an uppercase letter and are separated by a dot (`.`) character. Source files are saved with a `.coal` extension. A module `Utils.Math.Trigonometry`, for instance, is defined in a file located at `Utils/Math/Trigonometry.coal` relative to your project's root directory.
 
 ```
 src
