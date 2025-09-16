@@ -4,7 +4,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
 
--- FIXME
 module Coal.Compiler where
 
 import qualified Coal.Compiler.Kernel.Environment as Kernel
@@ -72,11 +71,11 @@ foldExpansionTrans f e =
   withSupplyMC
     ( \n ->
         case runFoldExpansion "fold" n (f e) of
-          (Left e, n) ->
+          (Left expr, _) ->
             -- TODO
-            throwError (CompilerError (Text.pack (show e)))
-          (Right r, n) ->
-            pure (r, n)
+            throwError (CompilerError (Text.pack (show expr)))
+          (Right r, m) ->
+            pure (r, m)
     )
 
 compileUnfoldsC :: (Monad m, Data a, Monoid a) => Module a Kind () -> CompilerT a m (Module a Kind ())
@@ -103,9 +102,7 @@ indexedC t = withSupplyC (runState (indexed t))
 runTypeInferenceC :: (MonadIO m, Data a, Eq a, Show a) => Module a Kind () -> CompilerT a m (Module a Kind IndexedType)
 runTypeInferenceC m = do
   defs <- traverse indexedC ds
-
-  liftIO $ writeDotFiles "indexed" (Module p ns defs)
-
+  void $ writeDotFilesC "indexed" (Module p ns defs)
   (tdefs, _) <- typeDefinitionsC defs
   pure (Module p ns (normalizeTypeIndexes tdefs))
  where
@@ -166,21 +163,13 @@ placeholderInsertionC = overModuleDefinitionsM (traverse go)
           _ ->
             error "Implementation error"
         pure d1
-      --      DFold{} ->
-      --        TODO
-      --      DUnfold{} ->
-      --        TODO
-      --      DAnnotation loc t d ->
-      --        DAnnotation loc t <$> go d
       DInstance loc name (InstanceDef ts1 t1 ds) -> do
         es <- forM ds $
           \case
             c@(DConstant _ dname _ _) -> do
               c1 <- placeholderTrans expandTraits c
               case c1 of
-                DConstant _ _ (ConstantDef _ _ (With ts t) _) _ -> do
-                  -- let trait = Trait name t1
-                  -- name1 = dname <> "__$instance_" <> serialize trait
+                DConstant _ _ (ConstantDef _ _ (With ts t) _) _ ->
                   insertNameC (instanceLabel (Trait name t1) dname) (Forall (typeIndexesIn t) ts t)
                 _ ->
                   error "Implementation error"
