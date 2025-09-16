@@ -3,7 +3,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
--- FIXME
 module Coal.Compiler.Environment (
   DataConstructorEnvironment,
   TypeConstructorEnvironment,
@@ -27,7 +26,6 @@ import Control.Monad.Reader
 import Control.Monad.State (evalState, execState, modify)
 import Control.Monad.Writer (execWriterT)
 import Data.List (nub)
-import Data.List.NonEmpty (NonEmpty (..))
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
@@ -86,41 +84,46 @@ buildEnvironment defs =
   dataConstructorEnvironment = buildDataConstructorEnvironment typeConstructorEnvironment defs
   typeConstructorEnvironment = buildTypeConstructorEnvironment defs
   codataAccessorEnvironment = buildCodataAccessorEnvironment defs
-  -- TODO:
-  foldEnvironment =
-    Environment.fromList
-      [
-        ( "encode_json_array"
-        , Forall
-            (Set.fromList mempty)
-            []
-            ( TApplication KType (TConstructor (KArrow KType KType) "List") (TConstructor KType "JsonValue" :| []) `TArrow` TIntrinsic IString
-            )
-        )
-      ,
-        ( "encode_json_object"
-        , Forall
-            (Set.fromList mempty)
-            []
-            ( TApplication KType (TConstructor (KArrow KType KType) "List") (tupleType (TIntrinsic IString :| [TConstructor KType "JsonValue"]) :| []) `TArrow` TIntrinsic IString
-            )
-        )
-      ,
-        ( "encode_json_value"
-        , Forall
-            (Set.fromList mempty)
-            []
-            ( TConstructor KType "JsonValue" `TArrow` TIntrinsic IString
-            )
-        )
-      ]
-  -- TODO:
-  unfoldEnvironment =
-    Environment.fromList
-      []
+  foldEnvironment = buildFoldEnvironment defs
+  unfoldEnvironment = buildUnfoldEnvironment defs
 
 makeEnv :: (Definition a k t -> [(Name, e)]) -> [Definition a k t] -> Environment e
 makeEnv f = Environment.fromList . concatMap f
+
+-- TODO
+buildFoldEnvironment :: [Definition a k t] -> UnfoldEnvironment
+buildFoldEnvironment _ = mempty
+
+--    Environment.fromList
+--      [
+--        ( "encode_json_array"
+--        , Forall
+--            (Set.fromList mempty)
+--            []
+--            ( TApplication KType (TConstructor (KArrow KType KType) "List") (TConstructor KType "JsonValue" :| []) `TArrow` TIntrinsic IString
+--            )
+--        )
+--      ,
+--        ( "encode_json_object"
+--        , Forall
+--            (Set.fromList mempty)
+--            []
+--            ( TApplication KType (TConstructor (KArrow KType KType) "List") (tupleType (TIntrinsic IString :| [TConstructor KType "JsonValue"]) :| []) `TArrow` TIntrinsic IString
+--            )
+--        )
+--      ,
+--        ( "encode_json_value"
+--        , Forall
+--            (Set.fromList mempty)
+--            []
+--            ( TConstructor KType "JsonValue" `TArrow` TIntrinsic IString
+--            )
+--        )
+--      ]
+
+-- TODO
+buildUnfoldEnvironment :: [Definition a k t] -> FoldEnvironment
+buildUnfoldEnvironment _ = mempty
 
 buildDataConstructorEnvironment :: TypeConstructorEnvironment -> [Definition a k t] -> DataConstructorEnvironment
 buildDataConstructorEnvironment env =
@@ -187,6 +190,7 @@ buildAliasEnvironment =
           []
     )
 
+-- FIXME
 buildInstanceEnvironment :: TypeConstructorEnvironment -> TraitEnvironment -> [Definition a k t] -> InstanceEnvironment
 buildInstanceEnvironment env1 env2 ds = execState (traverse_ go ds) mempty
  where
@@ -218,14 +222,15 @@ buildInstanceEnvironment env1 env2 ds = execState (traverse_ go ds) mempty
 substituteInScheme :: Substitution -> Scheme o Kind IndexedType -> IndexedScheme
 substituteInScheme sub (Forall _ ts t) = scheme (apply sub ts) (apply sub t)
 
--- TODO
+-- FIXME
 insertTraits ts (Forall ds _ s) = Forall ds ts (foldType s xs)
  where
   xs :: [IndexedType]
   xs = fmap typeOf ts
 
+-- TODO
 buildCodataAccessorEnvironment :: [Definition a k t] -> CodataAccessorEnvironment
-buildCodataAccessorEnvironment defs = mempty -- TODO:
+buildCodataAccessorEnvironment defs = mempty
 
 indexSet :: [IndexedScheme] -> Set (TypeIndex Kind)
 indexSet = Set.unions . fmap vars where vars (Forall vs _ _) = vs
