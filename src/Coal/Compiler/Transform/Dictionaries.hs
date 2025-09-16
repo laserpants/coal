@@ -98,28 +98,28 @@ tryMatch t u = do
   pure (evalUnifier var (match t u))
 
 findFirstMatch :: Trait IndexedType -> DictionaryStack (Maybe (ParameterizedType, IndexedType, Map Name IndexedScheme))
-findFirstMatch (Trait name t1) = do
+findFirstMatch (Trait name t) = do
   env <- asks dictionaryEnvironmentInstances
   case Environment.lookup name env of
     Nothing ->
       pure Nothing
     Just env1 -> do
-      kvs <- go (`tryMatch` t1) env1
+      kvs <- go (`tryMatch` t) env1
       case kvs of
         [] ->
           pure Nothing
-        (x, k, v) : _ ->
-          pure (Just (x, k, v))
+        (t1, k, v) : _ -> do
+          pure (Just (t1, k, v))
  where
   go f m = fmap catMaybes . forM (Map.toList m) $
-    \(k, (x, env)) -> do
+    \(k, (t1, env)) -> do
       result <- f k
       pure $
         case result of
           Left{} ->
             Nothing
           Right sub ->
-            Just (x, k, Map.map (substituteInScheme sub) env)
+            Just (t1, k, Map.map (substituteInScheme sub) env)
 
 -- TODO: move?
 substituteInScheme :: Substitution -> Scheme o Kind IndexedType -> IndexedScheme
@@ -132,8 +132,8 @@ mapEntriesM :: (Monad m) => Dictionary IndexedScheme -> ((Name, IndexedScheme) -
 mapEntriesM d f = Just . Map.fromList <$> traverse f (Map.toList d)
 
 lookupTraitInstance :: (Monoid a) => Trait IndexedType -> DictionaryStack (Maybe (Map Name (Expression a IndexedType)))
-lookupTraitInstance tr@(Trait name _) = do
-  found <- findFirstMatch tr
+lookupTraitInstance trait@(Trait name _) = do
+  found <- findFirstMatch trait
   case found of
     Nothing ->
       pure Nothing
@@ -145,10 +145,10 @@ lookupTraitInstance tr@(Trait name _) = do
     pure (n, expr)
 
 applyTraits :: (Monoid a) => Label IndexedType -> [Trait IndexedType] -> DictionaryStack (Expression a IndexedType)
-applyTraits ll@(Label t name) =
+applyTraits (Label t name) =
   \case
     [] ->
-      pure (EVariable mempty ll)
+      pure (EVariable mempty (Label t name))
     tr : trs ->
       EApplication mempty t (EVariable mempty (Label t1 name)) <$> traverse insertInstance (tr :| trs)
      where
@@ -209,10 +209,7 @@ transformScope e = do
   (expr, traits) <- listen (expandTraits e)
   case nub traits of
     [] -> pure (expr, traits)
-    tr : trs -> pure (ELambda mempty (toPattern <$> (tr :| trs)) expr, traits)
- where
-  toPattern tr =
-    PTraitDictionary mempty (typeOf tr) tr
+    tr : trs -> pure (dictionaryLambda tr trs expr, traits)
 
 instance (Monoid a, Data a) => TraitContext (CompiledClause a IndexedType) where
   expandTraits =
@@ -228,9 +225,7 @@ instance (Monoid a, Data a) => TraitContext (Definition a Kind IndexedType) wher
   expandTraits =
     \case
       DConstant loc name c fs ->
-        DConstant loc name
-          <$> expandTraits c
-          <*> traverse expandTraits fs
+        DConstant loc name <$> expandTraits c <*> traverse expandTraits fs
       DFold loc name (FoldDef with cs (Just e)) ->
         DFold loc name . FoldDef with cs . Just <$> expandTraits e
       DUnfold loc name (UnfoldDef with ps d (Just e)) ->
@@ -248,10 +243,9 @@ instance (Monoid a, Data a) => TraitContext (ConstantDef a IndexedType) where
             [] ->
               ConstantDef a with (With [] t) expr
             tr : trs ->
-              ConstantDef
-                a
-                with
-                (With (tr : trs) t)
-                (ELambda mempty (toPattern <$> (tr :| trs)) expr)
-       where
-        toPattern tr = PTraitDictionary mempty (typeOf tr) tr
+              ConstantDef a with (With (tr : trs) t) (dictionaryLambda tr trs expr)
+
+dictionaryLambda :: (Monoid a, HasType o k (Trait (Type o k))) => Trait (Type o k) -> [Trait (Type o k)] -> Expression a (Type o k) -> Expression a (Type o k)
+dictionaryLambda tr trs = ELambda mempty (dict <$> (tr :| trs))
+ where
+  dict t = PTraitDictionary mempty (typeOf t) t
