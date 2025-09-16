@@ -148,7 +148,7 @@ applyTraits (Label t name) =
     tr : trs ->
       EApplication mempty t (EVariable mempty (Label t1 name)) <$> traverse insertInstance (tr :| trs)
      where
-      t1 = foldType t (typeOf <$> (tr : trs))
+      t1 = foldTypeOf t (tr : trs)
       insertInstance trait = do
         fields <- lookupTraitInstance trait
         case fields of
@@ -193,7 +193,7 @@ instance (Monoid a, Data a) => TraitContext (Expression a IndexedType) where
               pure (BPattern a var body, [])
         BPattern _ (PVariable a (Label t name)) e -> do
           (e1, traits) <- transformScope e
-          let ll = Label (foldType t (typeOf <$> traits)) name
+          let ll = Label (foldTypeOf t traits) name
           pure (BPattern mempty (PVariable a ll) e1, [(name, Forall (typeIndexesIn t) traits t)])
         _ ->
           error "Not implemented"

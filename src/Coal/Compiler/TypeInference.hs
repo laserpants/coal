@@ -179,7 +179,7 @@ compileDefinitionC =
         Left err ->
           compilerReportConstraintsGenErrors [EIllFormedTypeAnnotation err]
         Right t2 -> do
-          let t3 = foldType t2 (typeOf <$> ps)
+          let t3 = foldTypeOf t2 ps
               fields = Map.toList d
           insertConstraintsC [Equality (RuleAnnotation loc t1 t3) [t1, t3]]
 
