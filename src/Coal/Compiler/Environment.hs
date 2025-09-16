@@ -230,7 +230,7 @@ insertTraits ts (Forall ds _ s) = Forall ds ts (foldType s xs)
 
 -- TODO
 buildCodataAccessorEnvironment :: [Definition a k t] -> CodataAccessorEnvironment
-buildCodataAccessorEnvironment defs = mempty
+buildCodataAccessorEnvironment _ = mempty
 
 indexSet :: [IndexedScheme] -> Set (TypeIndex Kind)
 indexSet = Set.unions . fmap vars where vars (Forall vs _ _) = vs
