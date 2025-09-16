@@ -7,7 +7,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
 
--- FIXME
 module Coal.Compiler.Transform.Dictionaries (
   TraitContext (..),
   DictionaryEnvironment (..),
@@ -114,12 +113,11 @@ findFirstMatch (Trait name t) = do
   go f m = fmap catMaybes . forM (Map.toList m) $
     \(k, (t1, env)) -> do
       result <- f k
-      pure $
-        case result of
-          Left{} ->
-            Nothing
-          Right sub ->
-            Just (t1, k, Map.map (substituteInScheme sub) env)
+      case result of
+        Left{} ->
+          pure Nothing
+        Right sub ->
+          pure $ Just (t1, k, Map.map (substituteInScheme sub) env)
 
 substituteInScheme :: Substitution -> Scheme o Kind IndexedType -> IndexedScheme
 substituteInScheme sub (Forall _ ts t) = scheme (apply sub ts) (apply sub t)
