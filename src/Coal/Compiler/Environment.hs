@@ -196,7 +196,7 @@ buildInstanceEnvironment ctorEnv traitEnv ds = execState (traverse_ go ds) mempt
  where
   go =
     \case
-      DInstance loc name (InstanceDef ts t _) ->
+      DInstance _ name (InstanceDef ts t _) ->
         case Environment.lookup name traitEnv of
           Just (p1, TypeIndex{..}, env3) -> do
             let (t1t1, tsts) = evalState bork (freshId fs)

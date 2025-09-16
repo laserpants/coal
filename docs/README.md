@@ -203,7 +203,7 @@ module Utils {
 }
 ```
 
-Since a `let` can contain any expression, top-level functions may also be defined in the following way:
+Since a `let` can contain anything that is an expression, top-level functions may also be defined in the following way:
 
 ```
 let add = fn(x, y) => x + y     // This is the same as fun(x, y) = x + y
@@ -302,7 +302,9 @@ About patterns: TODO
 
 A subtle but important detail that makes let-bindings in Coal different from those in most other languages is that the identifier introduced by a `let` is **not in scope within the definition itself**. In other words, `let x = e1 in e2` makes `x` available in `e2`, but not in `e1`. In OCaml (and F#) this is also the case for the standard `let` keyword. However, in these languages, a special `let rec` syntax can be utilized to evade this restriction. Coal doesn't have an equivalent to `let rec`.
 
-This prevents non-well-founded expressions, such as `let f = f in f`. More generally, it excludes any form of explicit recursion.
+This prevents non-well-founded expressions, such as `let f = f in f`. 
+More generally, it excludes *any* form of explicit recursion.
+This restriction also applies to 
 
 As far as the compiler is concerned, a function defined at the top level has the form:
 
