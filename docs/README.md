@@ -45,13 +45,11 @@ The `@` symbol in these examples denotes two separate types of recursive control
 - In the first example, the `fold` pattern variable means that `tot` recieves the result from calling the fold again using the sub-list matched by the pattern. 
 - In the second example, the expression on the right (`n + 1`) becomes the next seed value, which is fed back into `enum_from` to generate the rest of the stream.
 
-If you are familiar with [recursion schemes](https://blog.sumtypeofway.com/posts/introduction-to-recursion-schemes.html) in a language like Haskell, it is based on the exact same principles.
-Scroll down to **Recursion, corecursion, and codata** for a more detailed explanation of how this syntax works in Coal.
+If you are familiar with [recursion schemes](https://blog.sumtypeofway.com/posts/introduction-to-recursion-schemes.html) in a language like Haskell, it is based on the exact same principles. Scroll down to **Recursion, corecursion, and codata** for a more detailed explanation of how this syntax works in Coal.
 
 ### Programs = Expressions + Effects
 
-Coal is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-oriented_programming_language) language: a program is, at its core, just an expression that evaluates to a value. In this programming model, all data is immutable and there are no observable side-effects. These properties make programs more predictable, easier to reason about, highly testable, and allows for code to be verified using formal mathematical techniques. On the other hand, practical applications need to have the ability to interact with the outside world. Side-effects are what make them useful. As part of this project, a goal is to develop a system for managing effects, such as I/O and exceptions, in the Coal language. This work is still in progress.
-See **How to contribute** if you are interested.
+Coal is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-oriented_programming_language) language: a program is, at its core, just an expression that evaluates to a value. In this programming model, all data is immutable and there are no observable side-effects. These properties make programs more predictable, easier to reason about, highly testable, and allows for code to be verified using formal mathematical techniques. On the other hand, practical applications need to have the ability to interact with the outside world. Side-effects are what make them useful. As part of this project, a goal is to develop a system for managing effects, such as I/O and exceptions, in the Coal language. This work is still in progress. See **How to contribute** if you are interested.
 
 ## Project status and roadmap
 
@@ -105,8 +103,7 @@ TODO
 
 ### Modules and imports
 
-Projects in Coal are organized as collections of *modules*. Modules provide a way to group related functionality into distinct [namespaces](https://en.wikipedia.org/wiki/Namespace). 
-A module can contain functions, type definitions, traits, and other language constructs, typically focused on a specific purpose within a library or application.
+Projects in Coal are organized as collections of *modules*. Modules provide a way to group related functionality into distinct [namespaces](https://en.wikipedia.org/wiki/Namespace). A module can contain functions, type definitions, traits, and other language constructs, typically focused on a specific purpose within a library or application.
 
 ```
 module <path>(<export_list>) {
@@ -114,8 +111,7 @@ module <path>(<export_list>) {
 }
 ```
 
-Each module is identified by its *path*. A path always reflects the directory structure of the source file in which it is defined. Path segments begin with an uppercase letter and are separated by a dot (`.`) character. Source files are saved with a `.coal` extension.
-A module `Utils.Math.Trigonometry`, for instance, is defined in a file located at `Utils/Math/Trigonometry.coal` relative to your project's root directory.
+Each module is identified by its *path*. A path always reflects the directory structure of the source file in which it is defined. Path segments begin with an uppercase letter and are separated by a dot (`.`) character. Source files are saved with a `.coal` extension. A module `Utils.Math.Trigonometry`, for instance, is defined in a file located at `Utils/Math/Trigonometry.coal` relative to your project's root directory.
 
 ```
 src
@@ -135,8 +131,7 @@ If this list is left out, everything in the module is exported.
 
 #### Imports
 
-An `import` statement is used to bring in functions and other definitions from a different module. 
-As in most other languages, import statements must appear at the beginning of a module, preceding any other code.
+An `import` statement is used to bring in functions and other definitions from a different module. As in most other languages, import statements must appear at the beginning of a module, preceding any other code.
 
 ```
 import List(concat, head, tail)
@@ -158,17 +153,14 @@ Definitions that can appear in the outermost scope of a module are functions, to
 
 #### Functions
 
-A function is defined using the `fun` keyword, followed by the function's name and a list of comma-separated arguments enclosed in parentheses.
-The function body is simply an expression, which follows the arguments and is preceded by an equals sign:
+A function is defined using the `fun` keyword, followed by the function's name and a list of comma-separated arguments enclosed in parentheses. The function body is simply an expression, which follows the arguments and is preceded by an equals sign:
 
 ```
   fun <name>(<arg_1>, <arg_2>, ..., <arg_n>) =
     <expr>
 ```
 
-In the above, `<arg_1>, <arg_2>, ..., <arg_n>` are *patterns*, allowing functions to directly deconstruct their arguments.
-In addition to basic variables, records, tuples, and other data constructors, patterns may also include wildcards, literals, and nested structures.
-See **Pattern matching** for an overview of available patterns.
+In the above, `<arg_1>, <arg_2>, ..., <arg_n>` are *patterns*, allowing functions to directly deconstruct their arguments. In addition to basic variables, records, tuples, and other data constructors, patterns may also include wildcards, literals, and nested structures. See **Pattern matching** for an overview of available patterns.
 
 ```
   fun bork({ n : int32 }, (fst, snd), _) =
@@ -208,7 +200,7 @@ module Utils {
 }
 ```
 
-Since a `let` can be any expression, top-level functions may also be defined in the following way:
+Since a `let` can contain any expression, top-level functions may also be defined in the following way:
 
 ```
 let add = fn(x, y) => x + y     // This is the same as fun(x, y) = x + y
@@ -230,7 +222,7 @@ module Main {
 ### Expression syntax
 
 Expressions, such as variables, literals, let-bindings, operators, and if-then-else-blocks, are the basic building blocks of all programs.
-Most control structures in Coal have a syntax that is >>
+Control structures in Coal have a familiar syntax
 
 #### Variables
 
@@ -239,6 +231,10 @@ TODO
 #### Function application
 
 TODO
+
+```
+  to_int32("5")
+```
 
 #### If-then-else
 
@@ -281,9 +277,8 @@ A let-binding associates a name with an expression within the given scope:
 
 ###### Name binding semantics
 
-A subtle but important detail that makes let-bindings in Coal different from those in most other languages is that the identifier introduced by a `let` is **not in scope within the definition itself**. 
-In other words, `let x = e1 in e2` makes `x` available in `e2`, but not in `e1`. 
-In OCaml (and F#) this is also the case for the standard `let` keyword. However, in these languages, a special `let rec` syntax can be utilized to evade this restriction. Coal doesn't have an equivalent to `let rec`.
+A subtle but important detail that makes let-bindings in Coal different from those in most other languages is that the identifier introduced by a `let` is **not in scope within the definition itself**. In other words, `let x = e1 in e2` makes `x` available in `e2`, but not in `e1`. In OCaml (and F#) this is also the case for the standard `let` keyword. However, in these languages, a special `let rec` syntax can be utilized to evade this restriction. Coal doesn't have an equivalent to `let rec`.
+
 This prevents non-well-founded expressions, such as `let f = f in f`. More generally, it excludes any form of explicit recursion.
 
 As far as the compiler is concerned, a function defined at the top level has the form:
@@ -308,10 +303,6 @@ An anonymous function is declared using the `fn` keyword:
 ```
 
 Function expressions are first-class objects; they can be passed as arguments to other functions, assigned and stored inside data structures.
-
-Function definitions are curried.
-
-TODO
 
 ```
   fn(x) => x + 1
