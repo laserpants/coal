@@ -5,7 +5,6 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
--- FIXME
 module Coal.Compiler.TypeInference (typeDefinitionsC) where
 
 import Coal.Common.Environment (Environment (..))
@@ -27,6 +26,7 @@ import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
+import Data.Tuple.Extra (fst3)
 import Extra (Dictionary, Name, forM_, void)
 
 type ConstraintsGenResult g o a t s = (s, Dictionary (g, o a), [ConstraintsGenOutput g o a t])
@@ -115,16 +115,16 @@ compileDefinitionC =
   \case
     DFunction _ _ f@(FunctionDef loc (Just (With _ t)) _ _ _) _ -> do
       t1 <- compileFunctionC f
-      (r, _, _) <- runConstraintsGenC (instantiateAnnotation loc t)
-      case r of
+      r <- runConstraintsGenC (instantiateAnnotation loc t)
+      case fst3 r of
         Left err ->
           compilerReportConstraintsGenErrors [EIllFormedTypeAnnotation err]
         Right t2 ->
           insertConstraintsC [Equality (RuleAnnotation loc t1 t2) [t1, t2]]
     DConstant _ _ c@(ConstantDef loc (Just (With _ t)) _ _) _ -> do
       t1 <- compileConstantC c
-      (r, _, _) <- runConstraintsGenC (instantiateAnnotation loc t)
-      case r of
+      r <- runConstraintsGenC (instantiateAnnotation loc t)
+      case fst3 r of
         Left err ->
           compilerReportConstraintsGenErrors [EIllFormedTypeAnnotation err]
         Right t2 ->
@@ -133,22 +133,6 @@ compileDefinitionC =
       void (compileFunctionC f)
     DConstant _ _ c _ ->
       void (compileConstantC c)
-    --    DAnnotation _ (With _ t) (DFunction _ _ f@(Function loc _ _ _) _) -> do
-    --      t1 <- compileFunctionC f
-    --      (r, _, _) <- runConstraintsGenC (instantiateAnnotation loc t)
-    --      case r of
-    --        Left err ->
-    --          compilerReportConstraintsGenErrors [EIllFormedTypeAnnotation err]
-    --        Right t2 ->
-    --          insertConstraintsC [Equality (RuleAnnotation loc t1 t2) [t1, t2]]
-    --    DAnnotation _ (With _ t) (DConstant _ _ c@(Constant loc _ _) _) -> do
-    --      t1 <- compileConstantC c
-    --      (r, _, _) <- runConstraintsGenC (instantiateAnnotation loc t)
-    --      case r of
-    --        Left err ->
-    --          compilerReportConstraintsGenErrors [EIllFormedTypeAnnotation err]
-    --        Right t2 ->
-    --          insertConstraintsC [Equality (RuleAnnotation loc t1 t2) [t1, t2]]
     DFold loc name (FoldDef (With _ t) cs (Just e)) -> do
       compileConstraintsC e
       let t1 = typeOf e
@@ -196,36 +180,6 @@ compileDefinitionC =
           if length cs == length fields
             then insertConstraintsC cs
             else compilerReportConstraintsGenErrors [ECodataFieldMismatch loc]
-
-    -- case (q, Map.lookup ("$_" <> name) fields) of
-    --  (Just CodataAccessor{..}, Just e4) -> do
-    --    t3 <- supplied (TVariable . TypeIndex KType)
-    --    tellRight [Explicit InferenceRulePlaceholder (t0 `TArrow` typeOf elem) codataAccessorScheme]
-    --    tellRight [Equality InferenceRulePlaceholder [typeOf e4, t3 `TArrow` typeOf elem]]
-    --  _ ->
-
-    -- DAnnotation _ (With _ t) (DFold loc name cs (Just e)) -> do
-    --  compileConstraintsC e
-    --  let t1 = typeOf e
-    --  (r, _, _) <- runConstraintsGenC (instantiateAnnotation loc t)
-    --  case r of
-    --    Left err ->
-    --      compilerReportConstraintsGenErrors [EIllFormedTypeAnnotation err]
-    --    Right t2 -> do
-    --      insertConstraintsC [Equality (RuleAnnotation loc t1 t2) [t1, t2]]
-    --          t1 <- supplied (TVariable . TypeIndex KType)
-    --          t3 <- supplied (TVariable . TypeIndex KType)
-    --          insertConstraintsC [Equality InferenceRulePlaceholder [t2, t1 `TArrow` t3]]
-    --          compileConstraintsC $
-    --            ELambda
-    --              loc
-    --              (PVariable loc (Label t1 "#.a") :| [])
-    --              ( EMatch
-    --                  loc
-    --                  t3
-    --                  (EVariable loc (Label t1 "#.a"))
-    --                  cs
-    --              )
     _ ->
       error "Not implemented"
 
