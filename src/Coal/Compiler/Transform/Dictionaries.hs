@@ -8,14 +8,14 @@
 {-# LANGUAGE StrictData #-}
 
 -- FIXME
-module Coal.Compiler.Transform.Dictionaries where -- (
---  TraitContext (..),
---  DictionaryEnvironment (..),
---  DictionaryStack (..),
---  runDictionaryStack,
---  transformScope,
---  collectTraits,
--- ) where
+module Coal.Compiler.Transform.Dictionaries (
+  TraitContext (..),
+  DictionaryEnvironment (..),
+  DictionaryStack (..),
+  runDictionaryStack,
+  transformScope,
+  collectTraits,
+) where
 
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
@@ -122,10 +122,7 @@ findFirstMatch (Trait name t) = do
             Just (t1, k, Map.map (substituteInScheme sub) env)
 
 substituteInScheme :: Substitution -> Scheme o Kind IndexedType -> IndexedScheme
-substituteInScheme sub (Forall _ ts t) = bork (apply sub ts) (apply sub t)
-
-bork :: (Ord k, TypeIndexed k t) => [Trait t] -> t -> Scheme TypeIndex k t
-bork ts t = Forall (typeIndexesIn t <> typeIndexesIn ts) ts t
+substituteInScheme sub (Forall _ ts t) = scheme (apply sub ts) (apply sub t)
 
 mapEntriesM :: (Monad m) => Dictionary IndexedScheme -> ((Name, IndexedScheme) -> m (Name, Expression a IndexedType)) -> m (Maybe (Dictionary (Expression a IndexedType)))
 mapEntriesM d f = Just . Map.fromList <$> traverse f (Map.toList d)

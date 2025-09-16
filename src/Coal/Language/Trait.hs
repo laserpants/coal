@@ -3,7 +3,7 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Language.Trait (Trait (..), With (..)) where
+module Coal.Language.Trait (Trait (..), With (..), traitName) where
 
 import Data.Data (Data, Typeable)
 import Extra (Name)
@@ -20,3 +20,7 @@ instance (Pretty t) => Pretty (Trait t) where
 
 data With t = With [Trait t] t
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
+
+{-# INLINE traitName #-}
+traitName :: Trait t -> Name
+traitName (Trait name _) = name

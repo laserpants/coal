@@ -11,6 +11,7 @@ module Coal.Language.Type.Indexed (
   notBoundIn,
   freshIdIn,
   indexed,
+  scheme,
 ) where
 
 import Coal.Common.Label (Label (..))
@@ -132,3 +133,7 @@ indexed :: (Traversable t) => t a -> State Int (t (Type TypeIndex Kind))
 indexed = traverse (fmap tVar . const supply)
  where
   tVar = TVariable . TypeIndex KType
+
+{-# INLINE scheme #-}
+scheme :: (Ord k, TypeIndexed k t) => [Trait t] -> t -> Scheme TypeIndex k t
+scheme ts t = Forall (typeIndexesIn t <> typeIndexesIn ts) ts t
