@@ -192,12 +192,12 @@ buildAliasEnvironment =
 
 -- FIXME
 buildInstanceEnvironment :: TypeConstructorEnvironment -> TraitEnvironment -> [Definition a k t] -> InstanceEnvironment
-buildInstanceEnvironment env1 env2 ds = execState (traverse_ go ds) mempty
+buildInstanceEnvironment ctorEnv traitEnv ds = execState (traverse_ go ds) mempty
  where
   go =
     \case
       DInstance loc name (InstanceDef ts t _) ->
-        case Environment.lookup name env2 of
+        case Environment.lookup name traitEnv of
           Just (p1, TypeIndex{..}, env3) -> do
             let (t1t1, tsts) = evalState bork (freshId fs)
                 sub = typeIndexId `mapsTo` t1t1
@@ -208,7 +208,7 @@ buildInstanceEnvironment env1 env2 ds = execState (traverse_ go ds) mempty
             bork = do
               ts1 <- execWriterT (instantiateTypeIndexes t)
               let env4 = Environment.insert (parameterName p1) (TypeIndex (parameterKind p1) typeIndexId) (Environment.fromList ts1)
-              flip runReaderT (env4, env1) $ do
+              flip runReaderT (env4, ctorEnv) $ do
                 aa <- instantiateTypeVars t
                 bb <- traverse2 instantiateTypeVars ts
                 pure (aa, nub bb)
