@@ -2,7 +2,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Coal.Language.Serializable (Serializable (..), instanceDescriptor) where
+module Coal.Language.Serializable (Serializable (..), instanceLabel) where
 
 import Coal.Language.Trait
 import Coal.Language.Type
@@ -115,5 +115,5 @@ instance (Serializable s) => Serializable (Trait s) where
       Trait name t ->
         name <> parenthesized t
 
-instanceDescriptor :: (Serializable t) => Trait t -> Name -> Name
-instanceDescriptor t name = name <> "__$instance_" <> serialize t
+instanceLabel :: (Serializable t) => Trait t -> Name -> Name
+instanceLabel t name = name <> "__$instance_" <> serialize t

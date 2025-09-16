@@ -108,7 +108,7 @@ findFirstMatch (Trait name t) = do
       case kvs of
         [] ->
           pure Nothing
-        (t1, k, v) : _ -> do
+        (t1, k, v) : _ ->
           pure (Just (t1, k, v))
  where
   go f m = fmap catMaybes . forM (Map.toList m) $
@@ -121,12 +121,11 @@ findFirstMatch (Trait name t) = do
           Right sub ->
             Just (t1, k, Map.map (substituteInScheme sub) env)
 
--- TODO: move?
 substituteInScheme :: Substitution -> Scheme o Kind IndexedType -> IndexedScheme
-substituteInScheme sub (Forall _ ts t) = Forall (typeIndexesIn r <> typeIndexesIn rs) rs r
- where
-  r = apply sub t
-  rs = apply sub ts
+substituteInScheme sub (Forall _ ts t) = bork (apply sub ts) (apply sub t)
+
+bork :: (Ord k, TypeIndexed k t) => [Trait t] -> t -> Scheme TypeIndex k t
+bork ts t = Forall (typeIndexesIn t <> typeIndexesIn ts) ts t
 
 mapEntriesM :: (Monad m) => Dictionary IndexedScheme -> ((Name, IndexedScheme) -> m (Name, Expression a IndexedType)) -> m (Maybe (Dictionary (Expression a IndexedType)))
 mapEntriesM d f = Just . Map.fromList <$> traverse f (Map.toList d)
@@ -141,7 +140,7 @@ lookupTraitInstance trait@(Trait name _) = do
       mapEntriesM b (uncurry (go t (Trait name a)))
  where
   go t1 (Trait tn _) n (Forall _ ts t) = do
-    expr <- applyTraits (Label t (instanceDescriptor (Trait tn t1) n)) ts
+    expr <- applyTraits (Label t (instanceLabel (Trait tn t1) n)) ts
     pure (n, expr)
 
 applyTraits :: (Monoid a) => Label IndexedType -> [Trait IndexedType] -> DictionaryStack (Expression a IndexedType)
@@ -178,13 +177,11 @@ instance (Monoid a, Data a) => TraitContext (Expression a IndexedType) where
         as <- censor (const []) (traverse transformBinding bs)
         let xs = concat (toList (snd <$> as))
         ELet a (fst <$> as) <$> local (overDictionaryEnvironmentNames (Environment.insertMultiple xs)) (expandTraits e)
-      EVariable _ ll@(Label t name) -> do
+      EVariable _ (Label t name) -> do
         traits <- collectTraits t name
-        applyTraits ll (nub traits)
+        applyTraits (Label t name) (nub traits)
       ECompiledMatch a t e cs ->
-        ECompiledMatch a t
-          <$> expandTraits e
-          <*> traverse expandTraits cs
+        ECompiledMatch a t <$> expandTraits e <*> traverse expandTraits cs
       EFold a t es cs (Just e) -> do
         e1 <- descendM expandTraits e
         pure (EFold a t es cs (Just e1))
@@ -199,8 +196,8 @@ instance (Monoid a, Data a) => TraitContext (Expression a IndexedType) where
               pure (BPattern a var body, [])
         BPattern _ (PVariable a (Label t name)) e -> do
           (e1, traits) <- transformScope e
-          let t1 = foldType t (typeOf <$> traits)
-          pure (BPattern mempty (PVariable a (Label t1 name)) e1, [(name, Forall (typeIndexesIn t) traits t)])
+          let ll = Label (foldType t (typeOf <$> traits)) name
+          pure (BPattern mempty (PVariable a ll) e1, [(name, Forall (typeIndexesIn t) traits t)])
         _ ->
           error "Not implemented"
 
@@ -238,12 +235,11 @@ instance (Monoid a, Data a) => TraitContext (ConstantDef a IndexedType) where
     \case
       ConstantDef a with (With _ t) e -> do
         (expr, traits) <- listen (expandTraits e)
-        pure $
-          case nub traits of
-            [] ->
-              ConstantDef a with (With [] t) expr
-            tr : trs ->
-              ConstantDef a with (With (tr : trs) t) (dictionaryLambda tr trs expr)
+        case nub traits of
+          [] ->
+            pure $ ConstantDef a with (With [] t) expr
+          tr : trs ->
+            pure $ ConstantDef a with (With (tr : trs) t) (dictionaryLambda tr trs expr)
 
 dictionaryLambda :: (Monoid a, HasType o k (Trait (Type o k))) => Trait (Type o k) -> [Trait (Type o k)] -> Expression a (Type o k) -> Expression a (Type o k)
 dictionaryLambda tr trs = ELambda mempty (dict <$> (tr :| trs))

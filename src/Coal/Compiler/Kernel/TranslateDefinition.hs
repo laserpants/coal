@@ -51,9 +51,9 @@ translateDefinition =
       concatForM ds $
         \case
           DFunction loc n f _ -> do
-            translateDefinition (DFunction loc (instanceDescriptor trait n) f [])
+            translateDefinition (DFunction loc (instanceLabel trait n) f [])
           DConstant loc n c _ -> do
-            translateDefinition (DConstant loc (instanceDescriptor trait n) c [])
+            translateDefinition (DConstant loc (instanceLabel trait n) c [])
           _ ->
             error "TODO"
      where

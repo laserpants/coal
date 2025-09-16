@@ -181,7 +181,7 @@ placeholderInsertionC = overModuleDefinitionsM (traverse go)
                 DConstant _ _ (ConstantDef _ _ (With ts t) _) _ -> do
                   -- let trait = Trait name t1
                   -- name1 = dname <> "__$instance_" <> serialize trait
-                  insertNameC (instanceDescriptor (Trait name t1) dname) (Forall (typeIndexesIn t) ts t)
+                  insertNameC (instanceLabel (Trait name t1) dname) (Forall (typeIndexesIn t) ts t)
                 _ ->
                   error "Implementation error"
               pure c1
