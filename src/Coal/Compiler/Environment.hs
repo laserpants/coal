@@ -199,16 +199,16 @@ buildInstanceEnvironment ctorEnv traitEnv ds = execState (traverse_ go ds) mempt
       DInstance _ name (InstanceDef ts t _) ->
         case Environment.lookup name traitEnv of
           Just (p1, TypeIndex{..}, env3) -> do
-            let (t1t1, tsts) = evalState bork (freshId fs)
-                sub = typeIndexId `mapsTo` t1t1
-                mppp = Map.fromList (insertTraits tsts . substituteInScheme sub <$$> fs)
-                val = Map.singleton t1t1 (t, mppp)
+            let (t1, traits) = evalState bork (freshId fs)
+                sub = typeIndexId `mapsTo` t1
+                map_ = Map.fromList (insertTraits traits . substituteInScheme sub <$$> fs)
+                val = Map.singleton t1 (t, map_)
             modify (Environment.insertWith Map.union name val)
            where
             bork = do
               ts1 <- execWriterT (instantiateTypeIndexes t)
-              let env4 = Environment.insert (parameterName p1) (TypeIndex (parameterKind p1) typeIndexId) (Environment.fromList ts1)
-              flip runReaderT (env4, ctorEnv) $ do
+              let env = Environment.insert (parameterName p1) (TypeIndex (parameterKind p1) typeIndexId) (Environment.fromList ts1)
+              flip runReaderT (env, ctorEnv) $ do
                 aa <- instantiateTypeVars t
                 bb <- traverse2 instantiateTypeVars ts
                 pure (aa, nub bb)
