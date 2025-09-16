@@ -45,7 +45,7 @@ The `@` symbol in these examples denotes two separate kinds of recursive control
 - In the first example, the `fold` pattern variable means that `tot` recieves the result from calling the fold again using the sub-list matched by the pattern. 
 - In the second example, the expression on the right (`n + 1`) becomes the next seed value, which is fed back into `enum_from` to generate the rest of the stream.
 
-If you are familiar with [recursion schemes](https://blog.sumtypeofway.com/posts/introduction-to-recursion-schemes.html) in a language like Haskell, recursion in Coal is based on the exact same principles. Scroll down to **Recursion, corecursion, and codata** for a more detailed explanation of how this syntax works in Coal.
+If you are familiar with [recursion schemes](https://blog.sumtypeofway.com/posts/introduction-to-recursion-schemes.html) in a language like Haskell, recursion in Coal is based on the exact same principles. Scroll down to **Recursion, corecursion, and codata** for a more detailed explanation of how the `fold` and `unfold` constructs work in Coal.
 
 ### Programs = Expressions + Effects
 
@@ -233,6 +233,8 @@ TODO
 
 #### Function application
 
+Unlike Haskell and OCaml, function applications in Coal uses parentheses and commas between arguments.
+
 TODO
 
 ```
@@ -241,7 +243,7 @@ TODO
 
 #### If-then-else
 
-If-expressions are similar to those in most other languages in the functional family, requiring both the `then` and `else` branches to be present (and to have the same type):
+If-expressions are similar to those in most other languages, especially those in the functional family. Both the `then` and `else` branches need to be present (and have the same type):
 
 ```
   if (<e_1 : bool>) then <e_2 : t> else <e_3 : t>
@@ -321,7 +323,7 @@ This is why functions such as the standard factorial function are rejected by th
 
 #### Lambda expressions
 
-An anonymous function is declared using the `fn` keyword:
+An anonymous function is declared with the `fn` keyword:
 
 ```
   fn(<arg_1>, <arg_2>, ..., <arg_n>) => <expr>
