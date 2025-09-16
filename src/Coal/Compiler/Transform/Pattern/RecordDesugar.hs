@@ -9,7 +9,6 @@
 {-# LANGUAGE StrictData #-}
 {-# LANGUAGE TypeApplications #-}
 
--- TODO
 module Coal.Compiler.Transform.Pattern.RecordDesugar (
   RecordDesugarStack (..),
   RecordDesugarable (..),
@@ -27,9 +26,8 @@ import Data.Data (Data)
 import Data.Foldable (foldrM)
 import Data.Generics.Uniplate.Data (transformBiM)
 import Data.List.NonEmpty (NonEmpty (..))
-import Extra (Dictionary, Name)
-
 import qualified Data.Map.Strict as Map
+import Extra (Dictionary, Name)
 
 type IndexedPattern a = Pattern a IndexedType
 
@@ -137,11 +135,11 @@ extractVarName =
       "_"
 
 desugar :: (Data a, Monoid a) => RecordInfo a -> Expression a IndexedType -> RecordDesugarStack a (Expression a IndexedType)
-desugar (name, dict, zzz) expr = do
+desugar (name, dict, p1) expr = do
   names <- replicateM (length fields - 1) suppliedName
-  let r1 = maybe RNil extractRow zzz
-      v1 = extractVarName zzz
-      t1 = maybe (TIntrinsic (IRecord (TRow RNil))) typeOf zzz
+  let r1 = maybe RNil extractRow p1
+      v1 = extractVarName p1
+      t1 = maybe (TIntrinsic (IRecord (TRow RNil))) typeOf p1
       e2 = ELet mempty (BPattern mempty (PVariable mempty (Label t1 v1)) (EVariable mempty (Label t1 (name <> ".tail"))) :| [])
   (_, _, e1) <- foldrM (go v1) (v1, r1, e2 expr) (zip fields (name : names))
   pure e1
@@ -149,7 +147,7 @@ desugar (name, dict, zzz) expr = do
   fields = Map.toList dict
 
 go :: (Data a, Monoid a) => Name -> ((Name, IndexedPattern a), Name) -> (Name, Row TypeIndex Kind IndexedType, Expression a IndexedType) -> RecordDesugarStack a (Name, Row TypeIndex Kind IndexedType, Expression a IndexedType)
-go xx ((fname, p), prefix) (var, row, expr) = do
+go n ((fname, p), prefix) (var, row, expr) = do
   let t1 = typeOf expr
       t2 = typeOf p
       ll1 = Label t2 (prefix <> ".field." <> fname)
@@ -187,12 +185,6 @@ go xx ((fname, p), prefix) (var, row, expr) = do
               :| []
           )
 
-  let focusExpr =
-        EFocus
-          fname
-          ll1
-          ll2
-          var1
-          (if var == xx then e2 else e3)
+  let focusExpr = EFocus fname ll1 ll2 var1 (if var == n then e2 else e3)
 
   pure (prefix, RExtend fname t2 row, focusExpr)
