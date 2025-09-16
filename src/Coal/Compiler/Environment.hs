@@ -215,12 +215,8 @@ buildInstanceEnvironment env1 env2 ds = execState (traverse_ go ds) mempty
       _ ->
         pure ()
 
--- TODO: move?
 substituteInScheme :: Substitution -> Scheme o Kind IndexedType -> IndexedScheme
-substituteInScheme sub (Forall _ ts t) = Forall (typeIndexesIn r <> typeIndexesIn rs) rs r
- where
-  r = apply sub t
-  rs = apply sub ts
+substituteInScheme sub (Forall _ ts t) = scheme (apply sub ts) (apply sub t)
 
 -- TODO
 insertTraits ts (Forall ds _ s) = Forall ds ts (foldType s xs)
