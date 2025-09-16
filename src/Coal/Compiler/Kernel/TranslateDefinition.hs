@@ -50,9 +50,9 @@ translateDefinition =
     DInstance _ name (InstanceDef _ t ds) ->
       concatForM ds $
         \case
-          DFunction loc n f _ -> do
+          DFunction loc n f _ ->
             translateDefinition (DFunction loc (instanceLabel trait n) f [])
-          DConstant loc n c _ -> do
+          DConstant loc n c _ ->
             translateDefinition (DConstant loc (instanceLabel trait n) c [])
           _ ->
             error "TODO"
