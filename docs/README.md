@@ -253,7 +253,7 @@ If-expressions are similar to those in most other languages in the functional fa
 A let-binding associates a name with an expression within the given scope:
 
 ```
-  let <name> = <e_1> in <e_2>
+  let <pattern> = <e_1> in <e_2>
 ```
 
 >  #### A note about let-generalization
@@ -274,6 +274,26 @@ A let-binding associates a name with an expression within the given scope:
 >       in 
 >         (id(3 : int32), id("three"))
 > ```
+
+About patterns: TODO
+
+```
+  fun faz(n : int32) =
+    { baz = 
+      { f = (n, "wat") 
+      } 
+    }
+
+  fun main() =
+    let 
+      { baz = 
+        { f = (a, b) 
+        } 
+      } = 
+        faz(4)
+    in
+      trace_int32(a)
+```
 
 ###### Name binding semantics
 
@@ -305,7 +325,20 @@ An anonymous function is declared using the `fn` keyword:
 Function expressions are first-class objects; they can be passed as arguments to other functions, assigned and stored inside data structures.
 
 ```
-  fn(x) => x + 1
+  fun app_fst(xs, x : int32) =
+     match(xs) {
+       | f :: _ => f(x)
+       | [] => 0
+     }
+
+  fun main() =
+    let fns = 
+      [ fn(x) => x + 1
+      , fn(x) => x + 2
+      , fn(x) => x + 3
+      ]
+    in
+      trace_int32(app_fst(fns, 3))
 ```
 
 #### Comments

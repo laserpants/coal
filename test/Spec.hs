@@ -259,6 +259,8 @@ spec = do
   print (x == Right "-5\n")
   x <- main122
   print (x == Right "1\n")
+  x <- main123
+  print (x == Right "4\n")
 
 --  x <- main85
 --  print (x == Right "aa\n")
@@ -1004,6 +1006,12 @@ main122 :: IO (Either CompilerError Text)
 main122 = do
   runTestFiles
     [ "./test/Coal/examples/122/Main.coal"
+    ]
+
+main123 :: IO (Either CompilerError Text)
+main123 = do
+  runTestFiles
+    [ "./test/Coal/examples/123/Main.coal"
     ]
 
 compileFiles :: [String] -> IO (Either CompilerError ())
