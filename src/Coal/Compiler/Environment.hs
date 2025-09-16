@@ -190,7 +190,6 @@ buildAliasEnvironment =
           []
     )
 
--- FIXME
 buildInstanceEnvironment :: TypeConstructorEnvironment -> TraitEnvironment -> [Definition a k t] -> InstanceEnvironment
 buildInstanceEnvironment ctorEnv traitEnv ds = execState (traverse_ go ds) mempty
  where
@@ -198,21 +197,21 @@ buildInstanceEnvironment ctorEnv traitEnv ds = execState (traverse_ go ds) mempt
     \case
       DInstance _ name (InstanceDef ts t _) ->
         case Environment.lookup name traitEnv of
-          Just (p1, TypeIndex{..}, env3) -> do
-            let (t1, traits) = evalState bork (freshId fs)
+          Just (p1, TypeIndex{..}, sigs) -> do
+            let (t1, traits) = evalState f (freshId fs)
                 sub = typeIndexId `mapsTo` t1
                 map_ = Map.fromList (insertTraits traits . substituteInScheme sub <$$> fs)
                 val = Map.singleton t1 (t, map_)
             modify (Environment.insertWith Map.union name val)
            where
-            bork = do
+            f = do
               ts1 <- execWriterT (instantiateTypeIndexes t)
               let env = Environment.insert (parameterName p1) (TypeIndex (parameterKind p1) typeIndexId) (Environment.fromList ts1)
               flip runReaderT (env, ctorEnv) $ do
-                aa <- instantiateTypeVars t
-                bb <- traverse2 instantiateTypeVars ts
-                pure (aa, nub bb)
-            fs = Environment.toList env3
+                y <- instantiateTypeVars t
+                ys <- traverse2 instantiateTypeVars ts
+                pure (y, nub ys)
+            fs = Environment.toList sigs
             freshId = freshIdIn . indexSet . fmap snd
           Nothing ->
             error ("Trait '" <> Text.unpack name <> "' not in scope.")
@@ -222,11 +221,8 @@ buildInstanceEnvironment ctorEnv traitEnv ds = execState (traverse_ go ds) mempt
 substituteInScheme :: Substitution -> Scheme o Kind IndexedType -> IndexedScheme
 substituteInScheme sub (Forall _ ts t) = scheme (apply sub ts) (apply sub t)
 
--- FIXME
-insertTraits ts (Forall ds _ s) = Forall ds ts (foldType s xs)
- where
-  xs :: [IndexedType]
-  xs = fmap typeOf ts
+insertTraits :: (HasType o k (Trait (Type o k))) => [Trait (Type o k)] -> Scheme o k (Type o k) -> Scheme o k (Type o k)
+insertTraits ts (Forall ds _ s) = Forall ds ts (foldTypeOf s ts)
 
 -- TODO
 buildCodataAccessorEnvironment :: [Definition a k t] -> CodataAccessorEnvironment
