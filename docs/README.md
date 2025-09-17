@@ -234,7 +234,7 @@ For example, the following is
 
 #### Variables
 
-A *variable* in Coal means a name that is associated with an immutable value. Unlike in imperative languages, it is not so helpful to think of a variable as a “box” that contains some data in memory. Expressions in functional programming read more like mathematical expressions. Variables get defined once, and cannot change.
+A *variable* in Coal means a name that is associated with an immutable value. Unlike in imperative languages, it is not so helpful to think of a variable as a “box” that contains some data in memory. Expressions in functional programming read more like mathematical expressions. Variables get defined once, and cannot change after that.
 Variables are also the basic constituents of patterns; they are patterns that match any value:
 
 ```
