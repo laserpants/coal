@@ -114,7 +114,7 @@ module <path>(<export_list>) {
 }
 ```
 
-Each module is identified by its *path*. A module's path always mirrors the directory structure of the source file in which it is defined. Path segments begin with an uppercase letter and are separated by a dot (`.`) character. Source files are saved with a `.coal` extension. A module `Utils.Math.Trigonometry`, for instance, is defined in a file located at `Utils/Math/Trigonometry.coal` relative to your project's root directory.
+Each module is identified by its *path*. A module's path always mirrors the directory structure of the source file in which it is defined. Path segments begin with an uppercase letter and are separated by a dot (`.`) character. Source file names should have a `.coal` suffix. A module `Utils.Math.Trigonometry`, for instance, is defined in a file named `Trigonometry.coal`, located at `Utils/Math/` relative to your project's root directory.
 
 ```
 src
@@ -225,11 +225,33 @@ module Main {
 ### Expression syntax
 
 Expressions, such as variables, literals, let-bindings, operators, and if-then-else-blocks, are the basic building blocks of all programs.
-Control structures in Coal are 
 
 #### Variables
 
-TODO
+A *variable* in Coal means a name that is associated with an immutable value.
+
+It is the most basic form of a pattern
+when you write
+
+Variable names 
+
+* Variable names can consist of letters (`A-Z`, `a-z`), digits (`0-9`), and the underscore character (`_`).
+* The first character of a variable name must be a letter or an underscore. (It cannot be a digit.)
+* Variable names are case-sensitive, meaning that `My_Var` and `my_var` refer to different variables.
+* Variable names cannot contain spaces or other whitespace characters.
+* Special characters other than the underscore (e.g., `!`, `#`, `%`, `@`) are not permitted in variable names.
+* Reserved keywords (e.g., `int32`, `float`, `if`, `fold`) cannot be used as variable names.
+
+##### Shadowing 
+
+> This feature is not implemented.
+
+Shadowning should not be possible. I.e., an expression such as the following should result in a compilation error:
+
+```
+  fun go(x) =
+    let x = 3 in x + 3
+```
 
 #### Function application
 
