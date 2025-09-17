@@ -221,20 +221,21 @@ module Main {
 
 ### Expression syntax
 
-Expressions, such as variables, literals, let-bindings, operators, and if-then-else-blocks, are the basic building blocks of all programs.
-Expressions themselves are often made up of other expressions.
-For example, the following is 
+Expressions, such as variables, literals, let-bindings, operators, and if-then-else-blocks, are the basic building blocks of programs.
+The different definitions that appear in a module
+Language constructs consist of expressions.
+Expressions themselves are often made up of other expressions. For example, the following diagram shows how a binary addition operator is comprised of two sub-expressions; a left-hand side and a righ-hand side operand.
 
 ```
        (+)
        / \
       /   \
-   expr   expr
+  <expr> <expr>
 ```
 
 #### Variables
 
-A *variable* in Coal means a name that is associated with an immutable value. Unlike in imperative languages, it is not so helpful to think of a variable as a “box” that contains some data in memory. Expressions in functional programming read more like mathematical expressions. Variables get defined once, and cannot change after that.
+A *variable* in Coal simply means a name that is associated with a value. Unlike in imperative languages, it is not so helpful to think of a variable as a “box” that contains some data in memory. Expressions in functional programming read more like mathematical expressions. Variables get defined once, and cannot change after that.
 Variables are also the basic constituents of patterns; they are patterns that match any value:
 
 ```
