@@ -221,24 +221,15 @@ module Main {
 
 ### Expression syntax
 
-Expressions, such as variables, literals, let-bindings, operators, and if-then-else-blocks, are the basic building blocks of programs
-and the different language objects that make up a module.
-Expressions themselves are often made up of other expressions. For example, the following diagram shows how a binary addition operator is comprised of two sub-expressions; a left-hand side and a righ-hand side operand.
-
-```
-       (+)
-       / \
-      /   \
-  <expr> <expr>
-```
+Expressions are the core building blocks of programs. They include variables, literals, let-bindings, operators, and control structures like `if-then-else`. An expression can often be composed of smaller expressions. For example, a binary operator consists of two sub-expressions: its left-hand side and right-hand side operands.
 
 #### Variables
 
-A *variable* in Coal simply means a name that is associated with a value. Unlike in imperative languages, it is not so helpful to think of a variable as a “box” that contains some data in memory. Expressions in functional programming read more like mathematical expressions. Variables get defined once, and cannot change after that.
-Variables are also the basic constituents of patterns; they are patterns that match any value:
+A *variable* in Coal is a name bound to a value. Unlike in imperative languages, it is not helpful to think of a variable as a “box” that represent some data storage in memory. In functional programming, expressions behave more like mathematical expressions: once a variable is defined, its value never changes.
+Variables also form the simplest form of pattern; they match any value and bind it to a name:
 
 ```
-  let (a, b) = ("a", "b")
+  let name = "Zlatan" 
 ```
 
 The following rules apply to variable names:
@@ -264,7 +255,7 @@ An expression such as the following should result in a compilation error:
 
 #### Function application
 
-Unlike Haskell and OCaml, function applications in Coal use parentheses and commas between arguments. So, for example, `concat("one", "two")` means the function `concat` applied to the arguments `"one"` and `"two"`.
+Unlike Haskell and OCaml, function applications use parentheses and commas between arguments. So, for example, `concat("one", "two")` means the function `concat` applied to the arguments `"one"` and `"two"`.
 
 #### If-then-else
 
@@ -348,7 +339,7 @@ This is why functions such as the standard factorial function are rejected by th
 
 #### Lambda expressions
 
-An anonymous function is declared with the `fn` keyword:
+An anonymous (lambda) function is declared with the `fn` keyword:
 
 ```
   fn(<arg_1>, <arg_2>, ..., <arg_n>) => <expr>
