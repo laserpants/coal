@@ -222,6 +222,15 @@ module Main {
 ### Expression syntax
 
 Expressions, such as variables, literals, let-bindings, operators, and if-then-else-blocks, are the basic building blocks of all programs.
+Expressions themselves are often made up of other expressions.
+For example, the following is 
+
+```
+       (+)
+       / \
+      /   \
+   expr   expr
+```
 
 #### Variables
 
