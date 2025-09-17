@@ -255,11 +255,11 @@ An expression such as the following should result in a compilation error:
 
 #### Function application
 
-Unlike Haskell and OCaml, function applications in Coal uses parentheses and commas between arguments. So, for example, `concat("one", "two")` means the function `concat` applied to the arguments `"one"` and `"two"`.
+Unlike Haskell and OCaml, function applications in Coal use parentheses and commas between arguments. So, for example, `concat("one", "two")` means the function `concat` applied to the arguments `"one"` and `"two"`.
 
 #### If-then-else
 
-If-expressions are similar to those in most other languages, especially those in the functional family. Both the `then` and `else` branches need to be present (and have the same type):
+If-expressions are similar to those in most other languages, in particular those in the functional family. Both the `then` and `else` branches need to be present (and have the same type):
 
 ```
   if (<e_1 : bool>) then <e_2 : t> else <e_3 : t>
@@ -271,7 +271,7 @@ If-expressions are similar to those in most other languages, especially those in
 
 #### Let-bindings
 
-A let-binding associates a name with an expression within the given scope:
+A let-binding associates a name with an expression within the scope of the expression following the `in` keyword:
 
 ```
   let <pattern> = <e_1> in <e_2>
