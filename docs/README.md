@@ -111,7 +111,7 @@ module <path>(<export_list>) {
 }
 ```
 
-Each module is uniquely identified by its *path*. A module's path mirrors the directory structure of the source file in which it is defined. Path segments begin with an uppercase letter and are separated by a dot (`.`) character. Source file names must have a `.coal` suffix. A module `Utils.Math.Trigonometry`, for instance, is defined in a file named `Trigonometry.coal`, located at `Utils/Math/` relative to your project's root directory.
+Each module is uniquely identified by its *path*. A module's path mirrors the directory structure of the source file in which it is defined. Path segments begin with an uppercase letter and are separated by a dot (`.`) character. File names must have a `.coal` suffix. A module `Utils.Math.Trigonometry`, for instance, is defined in a file named `Trigonometry.coal`, located at `Utils/Math/` relative to your project's root directory.
 
 ```
 src
