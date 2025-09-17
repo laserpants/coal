@@ -49,10 +49,7 @@ If you are familiar with [recursion schemes](https://blog.sumtypeofway.com/posts
 
 ### Programs = Expressions + Effects
 
-Coal is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-oriented_programming_language) language: a program is, at its core, just an expression that evaluates to a value. In this programming model, all data is immutable and there are no observable side-effects. These properties make programs more predictable, easier to reason about, highly testable, and allows for code to be verified using formal mathematical techniques. On the other hand, practical applications need to have the ability to interact with the outside world. 
-Side-effects are what make them useful. 
-A system for managing effects, such as I/O and exceptions, is still lacking in Coal. This is essential in order to advance the language into one that can be used to write practical programs.
-See **How to contribute** if you feel motivated to work on this.
+Coal is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-oriented_programming_language) language: a program is, at its core, just an expression that evaluates to a value. In this programming model, all data is immutable and there are no observable side-effects. These properties make programs more predictable, easier to reason about, highly testable, and allows for code to be verified using formal mathematical techniques. On the other hand, practical applications need to have the ability to interact with the outside world. Side-effects are what make them useful. A system for managing effects, such as I/O and exceptions, is still lacking in Coal. This is essential in order to advance the language into one that can be used to write practical programs. See **How to contribute** if you're keen to work on this.
 
 ## Project status and roadmap
 
@@ -114,7 +111,7 @@ module <path>(<export_list>) {
 }
 ```
 
-Each module is identified by its *path*. A module's path always mirrors the directory structure of the source file in which it is defined. Path segments begin with an uppercase letter and are separated by a dot (`.`) character. Source file names should have a `.coal` suffix. A module `Utils.Math.Trigonometry`, for instance, is defined in a file named `Trigonometry.coal`, located at `Utils/Math/` relative to your project's root directory.
+Each module is uniquely identified by its *path*. A module's path mirrors the directory structure of the source file in which it is defined. Path segments begin with an uppercase letter and are separated by a dot (`.`) character. Source file names must have a `.coal` suffix. A module `Utils.Math.Trigonometry`, for instance, is defined in a file named `Trigonometry.coal`, located at `Utils/Math/` relative to your project's root directory.
 
 ```
 src
@@ -134,7 +131,7 @@ If this list is left out, everything in the module is exported.
 
 #### Imports
 
-An `import` statement is used to bring in functions and other definitions from a different module. As in most other languages, import statements must appear at the beginning of a module, preceding any other code.
+An `import` statement is used to bring in functions and other definitions from a different module. As in most other languages, these must appear at the beginning of a module, preceding any other code.
 
 ```
 import List(concat, head, tail)
@@ -170,7 +167,7 @@ In the above, `<arg_1>, <arg_2>, ..., <arg_n>` are *patterns*, allowing function
     ...
 ```
 
-A type annotion can be given to indicate a function's return type; like in the following example:
+A type annotion can be given to indicate a function's return type; just like in the following example:
 
 ```
   fun is_even(n : int32) : bool =
@@ -203,7 +200,7 @@ module Utils {
 }
 ```
 
-Since a `let` can contain anything that is an expression, top-level functions may also be defined in the following way:
+Since a `let` can contain any other expression, top-level functions may also be defined in the following way:
 
 ```
 let add = fn(x, y) => x + y     // This is the same as fun(x, y) = x + y
@@ -228,12 +225,8 @@ Expressions, such as variables, literals, let-bindings, operators, and if-then-e
 
 #### Variables
 
-
-A *variable* in Coal means a name that is associated with an immutable value.
-
-Unlike in imperative languages, it is not really a “box” that represents some data in memory.
-
-Variables are the basic constituents of patterns; it is a pattern that matches any value:
+A *variable* in Coal means a name that is associated with an immutable value. Unlike in imperative languages, it is not so helpful to think of a variable as a “box” that contains some data in memory. Expressions in functional programming read more like mathematical expressions. Variables get defined once, and cannot change.
+Variables are also the basic constituents of patterns; they are patterns that match any value:
 
 ```
   let (a, b) = ("a", "b")
@@ -242,7 +235,7 @@ Variables are the basic constituents of patterns; it is a pattern that matches a
 The following rules apply to variable names:
 
 * Variable names can consist of letters (`A-Z`, `a-z`), digits (`0-9`), and the underscore character (`_`).
-* The first character of a variable name must be a letter or an underscore, but not a digit.
+* The first character of a variable name must be a lowercase letter or an underscore.
 * Variable names are case-sensitive, meaning that `my_VAR` and `my_var` refer to different variables.
 * Variable names cannot contain spaces.
 * Special characters other than the underscore (e.g., `!`, `#`, `%`, `@`) are not permitted in variable names.
@@ -252,7 +245,7 @@ The following rules apply to variable names:
 
 > This feature is not implemented.
 
-Shadowing — i.e., declaring a variable in an inner scope with the same name as an existing variable — should not be possible.
+Shadowing — i.e., declaring a variable in an inner scope with the same name as an existing variable — is not allowed.
 An expression such as the following should result in a compilation error:
 
 ```
@@ -262,8 +255,7 @@ An expression such as the following should result in a compilation error:
 
 #### Function application
 
-Unlike Haskell and OCaml, function applications in Coal uses parentheses and commas between arguments.
-So, for example, `concat("one", "two")` means the function `concat` applied to the arguments `"one"` and `"two"`.
+Unlike Haskell and OCaml, function applications in Coal uses parentheses and commas between arguments. So, for example, `concat("one", "two")` means the function `concat` applied to the arguments `"one"` and `"two"`.
 
 #### If-then-else
 
@@ -330,7 +322,7 @@ A subtle but important detail that makes let-bindings in Coal different from tho
 
 This prevents non-well-founded expressions, such as `let f = f in f`. 
 More generally, it excludes *any* form of explicit recursion.
-This restriction also applies to 
+This restriction also applies to top-level definitions.
 
 As far as the compiler is concerned, a function defined at the top level has the form:
 
