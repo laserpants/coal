@@ -263,8 +263,8 @@ Shadowing — i.e., declaring a variable in an inner scope with the same name as
 An expression such as the following should result in a compilation error:
 
 ```
-  fun go(x) =
-    let x = 3 in x + 3
+fun go(x) =
+  let x = 3 in x + 3
 ```
 
 #### Function application
