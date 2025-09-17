@@ -40,7 +40,7 @@ A distinction is made between ordinary, finite data, which is produced and consu
   let nats = enum_from(0)
 ```
 
-The `@` symbol in these examples denotes two separate kinds of recursive control flow. If you are familiar with [recursion schemes](https://blog.sumtypeofway.com/posts/introduction-to-recursion-schemes.html) in a language like Haskell, recursion in Coal is based on the same principles. 
+The `@` symbol in these examples denotes two modes of recursive control flow. If you are familiar with [recursion schemes](https://blog.sumtypeofway.com/posts/introduction-to-recursion-schemes.html) in a language like Haskell, recursion in Coal is based on the same principles. 
 
 - In the first example, the special `@`-pattern variable means that `tot` recieves the result from calling the fold again using the sub-list matched by the pattern. 
 - In the second example, the `@` in the field name causes the expression on the right (`n + 1`) to become the next seed value, which is fed back into `enum_from` to generate the rest of the stream.
@@ -223,23 +223,37 @@ module Main {
 
 Expressions are the core building blocks of programs. They include variables, literals, let-bindings, operators, and control structures like `if-then-else`. An expression can often be composed of other, smaller expressions. For example, a binary operator consists of two sub-expressions: its left-hand side and right-hand side operands.
 
+```
+  (+)     
+  / \     -- x and y are sub-expressions of the expression x + y
+ x   y
+```
+
 #### Variables
 
-A *variable* in Coal is a name bound to a value. Unlike in imperative languages, it is not helpful to think of a variable as a “box” that represent some data storage in memory. In functional programming, expressions behave more like mathematical expressions: once a variable is defined, its value never changes.
-Variables also form the simplest form of pattern; they match any value and bind it to a name:
+A *variable* in Coal is a name bound to a value. Unlike in imperative languages, it is not very helpful to think of a variable as a “box” that represent some data storage in memory. In functional programming, expressions behave more like mathematical expressions: once a variable is defined, its value never changes.
+Variables also form the simplest form of pattern; one that matches any value and binds it to a name:
 
 ```
-  let name = "Zlatan" 
+let name = "Zlatan" 
 ```
 
-The following rules apply to variable names:
+##### Naming rules
 
-* Variable names can consist of letters (`A-Z`, `a-z`), digits (`0-9`), and the underscore character (`_`).
+Variable names are subject to the following rules:
+
+* A name can consist of letters (`A-Z`, `a-z`), digits (`0-9`), and the underscore character (`_`).
 * The first character of a variable name must be a lowercase letter or an underscore.
 * Variable names are case-sensitive, meaning that `my_VAR` and `my_var` refer to different variables.
 * Variable names cannot contain spaces.
-* Special characters other than the underscore (e.g., `!`, `#`, `%`, `@`) are not permitted in variable names.
-* Reserved keywords (e.g., `int32`, `float`, `if`, `fold`) cannot be used as variable names.
+* Special characters other than underscores (e.g., `!`, `#`, `%`, `@`) are not permitted in variable names.
+* Reserved language keywords (see below) cannot be used as variable names.
+
+##### Reserved keywords
+
+```
+alias, as, bignum, bool, char, cotype, double, else, false, float, fn, fold, fun, if, import, in, instance, int32, int64, let, match, module, nat, or, string, then, trait, true, type, unfold, unit, when, where, with
+```
 
 ##### Shadowing 
 
