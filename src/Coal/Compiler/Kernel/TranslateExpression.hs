@@ -365,8 +365,7 @@ equalityOperator ot (e1 :| [e2]) = do
     (TIntrinsic IBool `TArrow` TIntrinsic IBool `TArrow` TIntrinsic IBool) ->
       pure (Kernel.op (Kernel.OEqBool o1 o2))
     _ ->
-      -- error "Not implemented"
-      error (show ot)
+      error "Not implemented"
 equalityOperator _ _ = error "Not implemented"
 
 stringConcatenationOperator :: (MonadReader KernelEnvironment m, Data a) => NonEmpty (Expression a IndexedType) -> m KernelExpr
