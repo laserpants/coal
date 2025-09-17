@@ -40,12 +40,12 @@ A distinction is made between ordinary, finite data, which is produced and consu
   let nats = enum_from(0)
 ```
 
-The `@` symbol in these examples denotes two separate kinds of recursive control flow: 
+The `@` symbol in these examples denotes two separate kinds of recursive control flow. If you are familiar with [recursion schemes](https://blog.sumtypeofway.com/posts/introduction-to-recursion-schemes.html) in a language like Haskell, recursion in Coal is based on the same principles. 
 
-- In the first example, the `fold` pattern variable means that `tot` recieves the result from calling the fold again using the sub-list matched by the pattern. 
-- In the second example, the expression on the right (`n + 1`) becomes the next seed value, which is fed back into `enum_from` to generate the rest of the stream.
+- In the first example, the special `@`-pattern variable means that `tot` recieves the result from calling the fold again using the sub-list matched by the pattern. 
+- In the second example, the `@` in the field name causes the expression on the right (`n + 1`) to become the next seed value, which is fed back into `enum_from` to generate the rest of the stream.
 
-If you are familiar with [recursion schemes](https://blog.sumtypeofway.com/posts/introduction-to-recursion-schemes.html) in a language like Haskell, recursion in Coal is based on the exact same principles. Scroll down to **Recursion, corecursion, and codata** for a more detailed explanation of how the `fold` and `unfold` constructs work in Coal.
+Scroll down to **Recursion, corecursion, and codata** for a more detailed explanation of how the `fold` and `unfold` constructs work in Coal.
 
 ### Programs = Expressions + Effects
 
