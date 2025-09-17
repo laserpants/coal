@@ -90,7 +90,7 @@ insertSupplyC = modify . overCompilerSupply . const
 
 {-# INLINE insertNameC #-}
 insertNameC :: (Monad m) => Name -> IndexedScheme -> CompilerT a m ()
-insertNameC name scheme = modify (overCompilerNameStore (Environment.insert name scheme))
+insertNameC name scheme_ = modify (overCompilerNameStore (Environment.insert name scheme_))
 
 {-# INLINE insertNamesC #-}
 insertNamesC :: (Monad m) => [(Name, IndexedScheme)] -> CompilerT a m ()
