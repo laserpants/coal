@@ -27,7 +27,7 @@ As a [total](https://en.wikipedia.org/wiki/Total_functional_programming) languag
     }
 ```
 
-A distinction is made between ordinary, finite data, which is produced and consumed in this way, and potentially infinite data, which may emerge from processes that run indefinitely. The latter is known as *codata*. The codata equivalent of lists, for example, are streams.
+A distinction is made between ordinary, finite data, which is produced and consumed in this way, and potentially infinite data, which may result from processes that run indefinitely. The latter is known as *codata*. The codata equivalent of lists, for example, are streams.
 
 ```
   cotype Stream<a> = { Head : a, Tail : Stream<a> }
