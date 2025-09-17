@@ -221,9 +221,8 @@ module Main {
 
 ### Expression syntax
 
-Expressions, such as variables, literals, let-bindings, operators, and if-then-else-blocks, are the basic building blocks of programs.
-The different definitions that appear in a module
-Language constructs consist of expressions.
+Expressions, such as variables, literals, let-bindings, operators, and if-then-else-blocks, are the basic building blocks of programs
+and the different language objects that make up a module.
 Expressions themselves are often made up of other expressions. For example, the following diagram shows how a binary addition operator is comprised of two sub-expressions; a left-hand side and a righ-hand side operand.
 
 ```
