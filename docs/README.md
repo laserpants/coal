@@ -131,7 +131,7 @@ If this list is left out, everything in the module is exported.
 
 #### Imports
 
-An `import` statement is used to bring in functions and other definitions from a different module. As in most other languages, these must appear at the beginning of a module, preceding any other code.
+An `import` statement is used to bring in functions and other definitions from other modules. As in most other languages, these must appear at the beginning of a module, preceding any other code.
 
 ```
 import List(concat, head, tail)
@@ -221,7 +221,7 @@ module Main {
 
 ### Expression syntax
 
-Expressions are the core building blocks of programs. They include variables, literals, let-bindings, operators, and control structures like `if-then-else`. An expression can often be composed of smaller expressions. For example, a binary operator consists of two sub-expressions: its left-hand side and right-hand side operands.
+Expressions are the core building blocks of programs. They include variables, literals, let-bindings, operators, and control structures like `if-then-else`. An expression can often be composed of other, smaller expressions. For example, a binary operator consists of two sub-expressions: its left-hand side and right-hand side operands.
 
 #### Variables
 
