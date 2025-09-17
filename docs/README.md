@@ -228,17 +228,23 @@ Expressions, such as variables, literals, let-bindings, operators, and if-then-e
 
 #### Variables
 
+
 A *variable* in Coal means a name that is associated with an immutable value.
 
-It is the most basic form of a pattern
-when you write
+Unlike in imperative languages, it is not really a “box” that represents some data in memory.
 
-Variable names 
+Variables are the basic constituents of patterns; it is a pattern that matches any value:
+
+```
+  let (a, b) = ("a", "b")
+```
+
+The following rules apply to variable names:
 
 * Variable names can consist of letters (`A-Z`, `a-z`), digits (`0-9`), and the underscore character (`_`).
-* The first character of a variable name must be a letter or an underscore. (It cannot be a digit.)
-* Variable names are case-sensitive, meaning that `My_Var` and `my_var` refer to different variables.
-* Variable names cannot contain spaces or other whitespace characters.
+* The first character of a variable name must be a letter or an underscore, but not a digit.
+* Variable names are case-sensitive, meaning that `my_VAR` and `my_var` refer to different variables.
+* Variable names cannot contain spaces.
 * Special characters other than the underscore (e.g., `!`, `#`, `%`, `@`) are not permitted in variable names.
 * Reserved keywords (e.g., `int32`, `float`, `if`, `fold`) cannot be used as variable names.
 
@@ -246,7 +252,8 @@ Variable names
 
 > This feature is not implemented.
 
-Shadowning should not be possible. I.e., an expression such as the following should result in a compilation error:
+Shadowing — i.e., declaring a variable in an inner scope with the same name as an existing variable — should not be possible.
+An expression such as the following should result in a compilation error:
 
 ```
   fun go(x) =
@@ -256,12 +263,7 @@ Shadowning should not be possible. I.e., an expression such as the following sho
 #### Function application
 
 Unlike Haskell and OCaml, function applications in Coal uses parentheses and commas between arguments.
-
-TODO
-
-```
-  to_int32("5")
-```
+So, for example, `concat("one", "two")` means the function `concat` applied to the arguments `"one"` and `"two"`.
 
 #### If-then-else
 
