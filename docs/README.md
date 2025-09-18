@@ -474,7 +474,7 @@ type Tree<a>
   | Node(a, Tree<a>, Tree<a>)
 ```
 
-Here is how a basic tree is described with this type:
+Here is how a basic tree is described in terms of this type:
 
 ```
 //          (4)
