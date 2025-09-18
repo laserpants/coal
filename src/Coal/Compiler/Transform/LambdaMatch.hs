@@ -1,49 +1,23 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Transform.LambdaMatch (
-  LambdaMatchExpansion (..),
-  CompileLambdaMatchContext (..),
-  evalLambdaMatchExpansion,
-  runLambdaMatchExpansion,
-)
-where
+module Coal.Compiler.Transform.LambdaMatch (CompileLambdaMatchContext (..)) where
 
 import Coal.Common.Label (Label (..))
+import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module (ConstantDef (..), Definition (..), FunctionDef (..), Module (..))
-import Control.Monad.RWS (RWS, runRWS)
-import Control.Monad.Reader (MonadReader)
-import Control.Monad.State (MonadState)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformM)
 import Data.List.NonEmpty (NonEmpty (..))
-import Extra (Dictionary, Name)
+import Extra (Dictionary)
 
-newtype LambdaMatchExpansion a = LambdaMatchExpansion {natExpansionStack :: RWS Name () Int a}
-  deriving
-    ( Functor
-    , Applicative
-    , Monad
-    , MonadReader Name
-    , MonadState Int
-    )
-
-evalLambdaMatchExpansion :: Name -> Int -> LambdaMatchExpansion a -> a
-evalLambdaMatchExpansion r s = fst . runLambdaMatchExpansion r s
-
-runLambdaMatchExpansion :: Name -> Int -> LambdaMatchExpansion a -> (a, Int)
-runLambdaMatchExpansion r s e = (a, s')
- where
-  (a, s', _) = runRWS (natExpansionStack e) r s
-
-class CompileLambdaMatchContext a where
-  compileLambdaMatch :: a -> LambdaMatchExpansion a
+class CompileLambdaMatchContext c where
+  compileLambdaMatch :: (Monad m) => c -> CompilerT a m c
 
 instance (CompileLambdaMatchContext a) => CompileLambdaMatchContext [a] where
   compileLambdaMatch = traverse compileLambdaMatch
@@ -65,7 +39,7 @@ instance (Monoid a, Data a) => CompileLambdaMatchContext (Expression a ()) where
         e ->
           pure e
 
-expandLambdaMatch :: (Monoid a) => NonEmpty (Clause a ()) -> LambdaMatchExpansion (Expression a ())
+expandLambdaMatch :: (Monoid a, Monad m) => NonEmpty (Clause a ()) -> CompilerT o m (Expression a ())
 expandLambdaMatch cs =
   pure $
     ELambda
