@@ -273,7 +273,7 @@ So, for example, `concat("one", "two")` means the function `concat` applied to t
 
 #### If-then-else
 
-If-expressions are similar to those in most other languages, in particular those in the functional family. Both the `then` and `else` branches need to be present (and have the same type):
+If-expressions are similar to those in most programming languages, in particular those in the functional family. Both the `then` and `else` branches need to be present (and have the same type):
 
 ```
   if (<e_1 : bool>) then <e_2 : t> else <e_3 : t>
