@@ -182,7 +182,7 @@ Expressions that are not functions can also be defined in this scope, using the 
   let <name> = <expr>
 ```
 
-A module-level let-binding looks like an ordinary let-expression (explained below), except that there is no body:
+A module-level let-binding looks like an ordinary let-expression (explained below), except that there is no expression body:
 
 ```
 module Utils {
@@ -200,7 +200,7 @@ module Utils {
 }
 ```
 
-Since a `let` can contain any other expression, top-level functions may also be defined in the following way:
+Since a `let` can hold any other expression, top-level functions may also be defined in the following way:
 
 ```
 let add = fn(x, y) => x + y     // This is the same as fun(x, y) = x + y
@@ -221,11 +221,11 @@ module Main {
 
 ### Expression syntax
 
-Expressions are the core building blocks of programs. They include variables, literals, let-bindings, operators, and control structures like `if-then-else`. An expression can often be composed of other, smaller expressions. For example, a binary operator consists of two sub-expressions: its left-hand side and right-hand side operands.
+Expressions are the core building blocks of programs. They include variables, literals, let-bindings, operators, and control structures like `if-then-else`. An expression can often be composed of other, smaller expressions. For example, a binary operator consists of two sub-expressions: its left-hand side and right-hand side operands:
 
 ```
   (+)     
-  / \     -- x and y are sub-expressions of the expression x + y
+  / \     x and y are sub-expressions of the expression x + y
  x   y
 ```
 
@@ -257,7 +257,7 @@ alias, as, bignum, bool, char, cotype, double, else, false, float, fn, fold, fun
 
 ##### Shadowing 
 
-> This feature is not implemented.
+> This feature is not yet implemented.
 
 Shadowing — i.e., declaring a variable in an inner scope with the same name as an existing variable — is not allowed.
 An expression such as the following should result in a compilation error:
@@ -266,6 +266,10 @@ An expression such as the following should result in a compilation error:
 fun go(x) =
   let x = 3 in x + 3
 ```
+
+#### Literal expressions
+
+TODO
 
 #### Function application
 
@@ -291,25 +295,6 @@ A let-binding associates a name with an expression within the scope of the expre
   let <pattern> = <e_1> in <e_2>
 ```
 
->  #### A note about let-generalization
->
-> In some ways, A let-binding is similarto 
-> In [Hindley-Milner](https://en.wikipedia.org/wiki/Hindley%E2%80%93Milner_type_system) languages, it is let-bindings that introduce polymorphism. Consider the following expression, which doesn't type check:
-> 
-> ```
->     (fn(f) => (f(3 : int32), f("three")))(fn(x) => x)
-> ```
-> 
-> In this example, the type of `f` is monomorphic. The type inference algorithm will try to determine its type but fail to unify `int32 -> int32` with `string -> string`.
-> If we instead bind the anonymous function to a new identifier, then its type is *generalized* and obtains the quantified type `∀a : a -> a` (known as a *type scheme*).
-> We can now apply this function to both elements of the tuple, even though they have different types:
-> 
-> ```
->     let id = fn(x) => x 
->       in 
->         (id(3 : int32), id("three"))
-> ```
-
 About patterns: TODO
 
 ```
@@ -330,36 +315,68 @@ About patterns: TODO
       trace_int32(a)
 ```
 
+>  #### A note about let-generalization
+>
+> In some ways, A let-binding is similarto 
+> In [Hindley-Milner](https://en.wikipedia.org/wiki/Hindley%E2%80%93Milner_type_system) languages, it is let-bindings that introduce polymorphism. Consider the following expression, which doesn't type check:
+> 
+> ```
+>     (fn(f) => (f(3 : int32), f("three")))(fn(x) => x)
+> ```
+> 
+> In this example, the type of `f` is monomorphic. The type inference algorithm will try to determine its type but fail to unify `int32 -> int32` with `string -> string`.
+> If we instead bind the anonymous function to a new identifier, then its type is *generalized* and obtains the quantified type `∀a : a -> a` (known as a *type scheme*).
+> We can now apply this function to both elements of the tuple, even though they have different types:
+> 
+> ```
+>     let id = fn(x) => x 
+>       in 
+>         (id(3 : int32), id("three"))
+> ```
+
 ###### Name binding semantics
 
-A subtle but important detail that makes let-bindings in Coal different from those in most other languages is that the identifier introduced by a `let` is **not in scope within the definition itself**. In other words, `let x = e1 in e2` makes `x` available in `e2`, but not in `e1`. In OCaml (and F#) this is also the case for the standard `let` keyword. However, in these languages, a special `let rec` syntax can be utilized to evade this restriction. Coal doesn't have an equivalent to `let rec`.
-
-This prevents non-well-founded expressions, such as `let f = f in f`. 
-More generally, it excludes *any* form of explicit recursion.
-This restriction also applies to top-level definitions.
-
-As far as the compiler is concerned, a function defined at the top level has the form:
+A subtle but important detail that makes let-bindings in Coal different from those in most other languages is that the identifier introduced by a `let` is **not in scope within the definition itself**. In other words, `let x = e1 in e2` makes `x` available in `e2`, but not in `e1`. In OCaml (and F#) this is also the case for the standard `let` keyword. However, in these languages, a special `let rec` syntax makes it possible to evade this restriction. Coal doesn't have an equivalent to `let rec`.
+This prevents non-well-founded expressions, such as `let f = f in f`, but more generally makes explicit recursion impossible (i.e., for any function to reference itself).
+The restriction also applies to top-level definitions. As far as the compiler is concerned, a function 
 
 ```
-let fib = 
-  fn(n) => 
-    if (n == 0 || n == 1)
-      then n
-      else fib(n - 1) + fib(n - 2)
+fun fib(n) = if (n == 0 || n == 1) then n else fib(n - 1) + fib(n - 2)
 ```
 
-More generally, this makes it impossible for any function to call itself. (explicit recursion) 
-This is why functions such as the standard factorial function are rejected by the compiler. 
+&hellip; (defined at the top level) translates into:
+
+```
+let fib = fn(n) => if (n == 0 || n == 1) then n else fib(n - 1) + fib(n - 2)
+                                                     ^^^
+Error: Name "fib" not in scope
+```
+
+In fact, one can think of a module as one big let-binding, only laid out in a more readable way:
+
+```
+  let
+    some_function = fn(...) => ...
+      in
+        let
+          some_other_function = fn(...) => ...
+            in
+              let 
+                main = fn() => 
+                  ...
+```
+
+This is why functions such as fibonacci function above are rejected by the compiler. 
 
 #### Lambda expressions
 
-An anonymous (lambda) function is declared with the `fn` keyword:
+An anonymous (lambda) function is declared with the `fn` keyword and the “fat” arrow (`=>`) symbol:
 
 ```
   fn(<arg_1>, <arg_2>, ..., <arg_n>) => <expr>
 ```
 
-Function expressions are first-class objects; they can be passed as arguments to other functions, assigned and stored inside data structures.
+Function expressions are first-class objects; they can be passed as arguments to other functions, assigned and stored inside data structures, etc.
 
 ```
   fun app_fst(xs, x : int32) =
