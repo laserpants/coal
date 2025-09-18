@@ -61,12 +61,6 @@ whereClausesExpansionTrans f e = pure (fst $ runWriter (f e))
 expandWhereClausesC :: (Monad m, Data a) => Module a Kind () -> CompilerT a m (Module a Kind ())
 expandWhereClausesC = whereClausesExpansionTrans expandWhereClausesModule
 
--- aliasExpansionTrans :: (Monad m) => (c -> Reader AliasEnvironment c) -> c -> CompilerT a m c
--- aliasExpansionTrans f e = asks (runReader (f e) . compilerAliasEnvironment)
-
--- expandAliasesC :: (Monad m, Data a) => Module a Kind () -> CompilerT a m (Module a Kind ())
--- expandAliasesC = expandAliases
-
 foldExpansionTrans :: (Monad m, Show a) => (c -> FoldExpansion a c) -> c -> CompilerT a m c
 foldExpansionTrans f e =
   withSupplyMC
