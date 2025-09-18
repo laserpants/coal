@@ -232,11 +232,6 @@ Expressions are the core building blocks of programs. They include variables, li
 #### Variables
 
 A *variable* in Coal is a name bound to a value. Unlike in imperative languages, it is not very helpful to think of a variable as a “box” that represent some data storage in memory. In functional programming, expressions behave more like mathematical expressions: once a variable is defined, its value never changes.
-Variables also form the simplest form of pattern; one that matches any value and binds it to a name:
-
-```
-let name = "Zlatan" 
-```
 
 ##### Naming rules
 
@@ -289,26 +284,26 @@ If-expressions are similar to those in most other languages, in particular those
 
 #### Let-bindings
 
-A let-binding associates a name with an expression within the scope of the expression following the `in` keyword:
+A let-binding introduces a new scope by matching a pattern against the result of an expression. The variables bound by the pattern become available within the expression following the `in` keyword:
 
 ```
-  let <pattern> = <e_1> in <e_2>
+let <pattern> = <e_1> in <e_2>
 ```
 
-About patterns: TODO
+The pattern used on the left-hand side must be such that it is guaranteed to match the result of the expression `<e_1>`. For example:
 
 ```
-  fun faz(n : int32) = { baz = { f = (n, "wat") } }
+-- Destructuring with a tuple
+let (x, y) = (1, 2) in x + y
 
-  fun main() =
-    let 
-      { baz = 
-        { f = (a, b) 
-        } 
-      } = 
-        faz(4)
-    in
-      trace_int32(a)
+-- Matching nested records
+let { baz = { f = a | _ } } = faz(4)
+```
+
+Variables form the simplest form of pattern; one that matches any value and binds it to a name:
+
+```
+let name = "Zlatan" 
 ```
 
 >  #### A note about let-generalization
@@ -362,7 +357,7 @@ In fact, one can think of a module as one big let-binding, only laid out in a mo
                   ...
 ```
 
-This is why functions such as fibonacci function above are rejected by the compiler. 
+This is why functions such as the fibonacci function above are rejected by the compiler. 
 
 #### Lambda expressions
 
