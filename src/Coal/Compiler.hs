@@ -103,12 +103,6 @@ runTypeInferenceC m = do
  where
   Module p ns ds = m
 
-normalizeObjectsC :: (Monad m, NormalizeObjectsTransformContext c) => c -> CompilerT a m c
-normalizeObjectsC = pure . normalizeObject
-
-denormalizeObjectsC :: (Monad m, NormalizeObjectsTransformContext c) => c -> CompilerT a m c
-denormalizeObjectsC = pure . denormalizeObject
-
 patternDesugarTrans :: (Monad m) => (c -> PatternDesugar s TypeIndex Kind c) -> c -> CompilerT a m c
 patternDesugarTrans f e = withSupplyC (\n -> runPatternDesugar "v" n (f e))
 
@@ -205,7 +199,7 @@ typeCheckingPass =
 mainPass :: (Eq a, MonadIO m, Monoid a, Data a, Show a) => Module a Kind IndexedType -> CompilerT a m (Module a Kind IndexedType)
 mainPass =
   -- Normalize top-level functions and constants
-  normalizeObjectsC
+  pure . normalizeObject
     -- Translate patterns in expression bindings to match expressions
     >=> desugarPatternsC
     -- Compile or-patterns
@@ -223,7 +217,7 @@ mainPass =
     -- Placeholder insertion
     >=> placeholderInsertionC
     -- Denormalize top-level functions and constants
-    >=> denormalizeObjectsC
+    >=> pure . denormalizeObject
     -- Expand nats
     >=> compileNatsC
 
