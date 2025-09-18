@@ -268,7 +268,7 @@ TODO
 
 #### Function application
 
-Unlike Haskell and OCaml, function applications are written in a syntax more familiar from languages like C, Java, and Python, where applications use parentheses and commas between arguments. 
+Unlike Haskell, ML, and OCaml, function applications are written in a syntax more familiar from languages like C, Java, and Python, where applications use parentheses and commas between arguments. 
 So, for example, `concat("one", "two")` means the function `concat` applied to the arguments `"one"` and `"two"`.
 
 #### If-then-else
