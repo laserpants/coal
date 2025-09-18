@@ -259,7 +259,7 @@ alias, as, bignum, bool, char, cotype, double, else, false, float, fn, fold, fun
 
 > This feature is not yet implemented.
 
-Shadowing — i.e., declaring a variable in an inner scope with the same name as an existing variable — is not allowed.
+Shadowing — i.e., declaring a variable in an inner scope with the same name as an existing variable — is often a source of subtle bugs, and therefore not allowed.
 An expression such as the following should result in a compilation error:
 
 ```
@@ -273,7 +273,7 @@ TODO
 
 #### Function application
 
-Unlike Haskell and OCaml, function applications use parentheses and commas between arguments. This syntax is familiar from languages like C, Java, and Python. So, for example, `concat("one", "two")` means the function `concat` applied to the arguments `"one"` and `"two"`.
+Unlike Haskell and OCaml, function applications are written with parentheses and commas between arguments. This syntax is familiar from languages like C, Java, and Python. So, for example, `concat("one", "two")` means the function `concat` applied to the arguments `"one"` and `"two"`.
 
 #### If-then-else
 
