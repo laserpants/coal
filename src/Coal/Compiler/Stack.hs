@@ -6,6 +6,7 @@
 module Coal.Compiler.Stack (
   CompilerT (..),
   CompilerEnvironment (..),
+  CompilerStack,
   CompilerState (..),
   CompilerConstraint,
   CompilerAssumption,

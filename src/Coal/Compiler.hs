@@ -6,6 +6,7 @@
 
 module Coal.Compiler where
 
+import Coal.Compiler.Environment (AliasEnvironment)
 import qualified Coal.Compiler.Kernel.Environment as Kernel
 import Coal.Compiler.Kernel.TranslateModule (translateModule)
 import Coal.Compiler.PatternMatching
@@ -22,7 +23,7 @@ import Coal.Compiler.Transform.Pattern.AsDesugar
 import Coal.Compiler.Transform.Pattern.Desugar
 import Coal.Compiler.Transform.Pattern.OrExpansion
 import Coal.Compiler.Transform.Pattern.RecordDesugar
-import Coal.Compiler.Transform.Type.AliasExpansion
+import Coal.Compiler.Transform.Type.AliasExpansion (AliasContext (..))
 import Coal.Compiler.Transform.Unfold
 import Coal.Compiler.Transform.WhereClauses
 import Coal.Compiler.TypeInference
@@ -60,11 +61,11 @@ whereClausesExpansionTrans f e = pure (fst $ runWriter (f e))
 expandWhereClausesC :: (Monad m, Data a) => Module a Kind () -> CompilerT a m (Module a Kind ())
 expandWhereClausesC = whereClausesExpansionTrans expandWhereClausesModule
 
-aliasExpansionTrans :: (Monad m) => (c -> Reader AliasEnvironment c) -> c -> CompilerT a m c
-aliasExpansionTrans f e = asks (runReader (f e) . compilerAliasEnvironment)
+-- aliasExpansionTrans :: (Monad m) => (c -> Reader AliasEnvironment c) -> c -> CompilerT a m c
+-- aliasExpansionTrans f e = asks (runReader (f e) . compilerAliasEnvironment)
 
-expandAliasesC :: (Monad m, Data a) => Module a Kind () -> CompilerT a m (Module a Kind ())
-expandAliasesC = aliasExpansionTrans expandAliases
+-- expandAliasesC :: (Monad m, Data a) => Module a Kind () -> CompilerT a m (Module a Kind ())
+-- expandAliasesC = expandAliases
 
 foldExpansionTrans :: (Monad m, Show a) => (c -> FoldExpansion a c) -> c -> CompilerT a m c
 foldExpansionTrans f e =
@@ -193,7 +194,7 @@ kernelTranslationC = kernelMonadTrans translateModule
 typeCheckingPass :: (MonadIO m, Monoid a, Data a, Eq a, Show a) => Module a Kind () -> CompilerT a m (Module a Kind IndexedType)
 typeCheckingPass =
   -- Expand type aliases
-  expandAliasesC
+  expandAliases
     >=> compileTopLevelUnfoldsC
     >=> compileTopLevelFoldsC
     -- Expand unfolds (codata)

@@ -3,23 +3,20 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Transform.Type.AliasExpansion (
-  AliasEnvironment,
-  AliasContext (..),
-) where
+module Coal.Compiler.Transform.Type.AliasExpansion (AliasContext (..)) where
 
 import qualified Coal.Common.Environment as Environment
-import Coal.Compiler.Environment (AliasEnvironment)
+import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module (ConstantDef (..), Definition (..), FunctionDef (..), InstanceDef (..), Module (..))
-import Control.Monad.Reader (MonadReader, ask)
+import Control.Monad.Reader (asks)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformM)
 import Data.List.NonEmpty (NonEmpty (..), toList)
 import Extra (Dictionary, Name)
 
 class AliasContext c where
-  expandAliases :: (MonadReader AliasEnvironment m) => c -> m c
+  expandAliases :: (Monad m) => c -> CompilerT a m c
 
 instance AliasContext () where
   expandAliases _ = pure ()
@@ -117,9 +114,9 @@ instance AliasContext ParameterizedType where
       t@(TConstructor _ name) ->
         lookupAlias t [] name
 
-lookupAlias :: (MonadReader AliasEnvironment m) => ParameterizedType -> [ParameterizedType] -> Name -> m ParameterizedType
+lookupAlias :: (Monad m) => ParameterizedType -> [ParameterizedType] -> Name -> CompilerT a m ParameterizedType
 lookupAlias t ts name = do
-  env <- ask
+  env <- asks compilerAliasEnvironment
   case Environment.lookup name env of
     Nothing ->
       pure t
