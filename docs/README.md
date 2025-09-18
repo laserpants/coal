@@ -298,11 +298,7 @@ A let-binding associates a name with an expression within the scope of the expre
 About patterns: TODO
 
 ```
-  fun faz(n : int32) =
-    { baz = 
-      { f = (n, "wat") 
-      } 
-    }
+  fun faz(n : int32) = { baz = { f = (n, "wat") } }
 
   fun main() =
     let 
@@ -474,7 +470,7 @@ User-defined data types in Coal are of the product-sum variety. These types are 
    type Shape = Circle | Rectangle
    ```
 
-More interesting types can be built from combinations of product and sum constructors. The following example is a type that defines a binary tree, parameterized by the type (`a`) of its nodes:
+More interesting types can be formed from combinations of product and sum constructors. The following example is a type that defines a binary tree, parameterized by the type (`a`) of its nodes:
 
 ```
 type Tree<a> 
