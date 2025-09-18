@@ -4,6 +4,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module Coal.Compiler.Environment (
+  AliasEnvironment,
   DataConstructorEnvironment,
   TypeConstructorEnvironment,
   TraitEnvironment,
@@ -17,7 +18,6 @@ module Coal.Compiler.Environment (
 
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
-import Coal.Compiler.Transform.Type.AliasExpansion
 import Coal.Compiler.Transform.Type.Parameterized
 import Coal.Language
 import Coal.Language.Module
@@ -32,6 +32,7 @@ import qualified Data.Set as Set
 import qualified Data.Text as Text
 import Extra (Dictionary, Name, Set, traverse2, traverse_, (<$$>))
 
+type AliasEnvironment = Environment ([Name], ParameterizedType)
 type DataConstructorEnvironment = Environment (DataConstructor TypeIndex Kind IndexedType)
 type TypeConstructorEnvironment = Environment Kind
 type TraitEnvironment = Environment (Parameter Kind, TypeIndex Kind, Environment IndexedScheme)

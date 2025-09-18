@@ -8,8 +8,8 @@ module Coal.Compiler.Transform.Type.AliasExpansion (
   AliasContext (..),
 ) where
 
-import Coal.Common.Environment (Environment)
 import qualified Coal.Common.Environment as Environment
+import Coal.Compiler.Environment (AliasEnvironment)
 import Coal.Language
 import Coal.Language.Module (ConstantDef (..), Definition (..), FunctionDef (..), InstanceDef (..), Module (..))
 import Control.Monad.Reader (MonadReader, ask)
@@ -17,8 +17,6 @@ import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformM)
 import Data.List.NonEmpty (NonEmpty (..), toList)
 import Extra (Dictionary, Name)
-
-type AliasEnvironment = Environment ([Name], ParameterizedType)
 
 class AliasContext c where
   expandAliases :: (MonadReader AliasEnvironment m) => c -> m c
