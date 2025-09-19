@@ -32,6 +32,7 @@ library
       Coal.Common.Supply
       Coal.Compiler
       Coal.Compiler.Environment
+      Coal.Compiler.Journal
       Coal.Compiler.Kernel.Environment
       Coal.Compiler.Kernel.TranslateDefinition
       Coal.Compiler.Kernel.TranslateExpression
