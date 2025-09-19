@@ -102,10 +102,10 @@ runTypeInferenceC m = do
  where
   Module p ns ds = m
 
-patternDesugarTrans :: (Monad m) => (c -> PatternDesugar s TypeIndex Kind c) -> c -> CompilerT a m c
+patternDesugarTrans :: (Monad m) => (c -> PatternDesugar s (Module a Kind IndexedType)) -> c -> CompilerT a m (Module a Kind IndexedType)
 patternDesugarTrans f e = withSupplyC (\n -> runPatternDesugar "v" n (f e))
 
-desugarPatternsC :: (Monad m, Sugared s TypeIndex Kind c) => c -> CompilerT a m c
+desugarPatternsC :: (Monad m, Monoid a, Data a) => Module a Kind IndexedType -> CompilerT a m (Module a Kind IndexedType)
 desugarPatternsC = patternDesugarTrans desugarPatterns
 
 recordPatternDesugarTrans :: (Monad m) => (c -> RecordDesugarStack a c) -> c -> CompilerT a m c

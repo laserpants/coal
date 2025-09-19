@@ -1,8 +1,8 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StrictData #-}
 
 module Coal.Compiler.Transform.Pattern.Desugar (
@@ -25,45 +25,43 @@ import Coal.Language.Module.Definition.Fold (FoldDef (..))
 import Coal.Language.Module.Definition.Function (FunctionDef (..))
 import Coal.Language.Module.Definition.Unfold (UnfoldDef (..))
 import Coal.Language.Pattern (Pattern (..))
-import Coal.Language.Type (Type (..))
+import Coal.Language.Type (IndexedType, Type (..), TypeIndex)
+import Coal.Language.Type.Kind (Kind (..))
 import Control.Monad.RWS (MonadReader, MonadState, MonadWriter, RWS, runRWS, tell)
 import Control.Monad.Writer (runWriterT)
-import Data.Data (Data, Typeable)
+import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformM)
 import Data.List.NonEmpty (NonEmpty ((:|)))
 import Extra (Name)
 
-type NamedPattern c o k = (Name, Pattern c (Type o k))
+type NamedPattern a = (Name, Pattern a (Type TypeIndex Kind))
 
-type PatternDesugarStack c o k = RWS Name [NamedPattern c o k] Int
+type PatternDesugarStack a = RWS Name [NamedPattern a] Int
 
-newtype PatternDesugar c o k e = PatternDesugar {patternDesugarStack :: PatternDesugarStack c o k e}
+newtype PatternDesugar a s = PatternDesugar {patternDesugarStack :: PatternDesugarStack a s}
   deriving
     ( Functor
     , Applicative
     , Monad
     , MonadReader Name
     , MonadState Int
-    , MonadWriter [NamedPattern c o k]
+    , MonadWriter [NamedPattern a]
     )
 
 {-# INLINE evalPatternDesugar #-}
-evalPatternDesugar :: Name -> Int -> PatternDesugar c o k e -> e
+evalPatternDesugar :: Name -> Int -> PatternDesugar c e -> e
 evalPatternDesugar r s e = fst (runPatternDesugar r s e)
 
 {-# INLINE runPatternDesugar #-}
-runPatternDesugar :: Name -> Int -> PatternDesugar c o k e -> (e, Int)
+runPatternDesugar :: Name -> Int -> PatternDesugar c e -> (e, Int)
 runPatternDesugar r s e = (a, s')
  where
   (a, s', _) = runRWS (patternDesugarStack e) r s
 
-class Sugared c o k e | e -> c, e -> o k where
-  desugarPatterns ::
-    (MonadWriter [NamedPattern c o k] m, MonadReader Name m, MonadState Int m) =>
-    e ->
-    m e
+class Sugared a s where
+  desugarPatterns :: (MonadWriter [NamedPattern a] m, MonadReader Name m, MonadState Int m) => s -> m s
 
-instance (Monoid c, Data c, Data k, Data (o k), Typeable o) => Sugared c o k (Pattern c (Type o k)) where
+instance (Data a, Monoid a) => Sugared a (Pattern a IndexedType) where
   desugarPatterns =
     \case
       p@PVariable{} ->
@@ -75,7 +73,7 @@ instance (Monoid c, Data c, Data k, Data (o k), Typeable o) => Sugared c o k (Pa
         tell [(name, p)]
         pure (PVariable mempty (Label (typeOf p) name))
 
-instance (Monoid c, Data c, Data k, Typeable o, Data (o k)) => Sugared c o k (Binding Expression c (Type o k)) where
+instance (Data a, Monoid a) => Sugared a (Binding Expression a IndexedType) where
   desugarPatterns =
     \case
       BPattern a p e ->
@@ -83,7 +81,7 @@ instance (Monoid c, Data c, Data k, Typeable o, Data (o k)) => Sugared c o k (Bi
       BFunction a name ps e ->
         BFunction a name <$> traverse desugarPatterns ps <*> desugarPatterns e
 
-instance (Monoid c, Data c, Data k, Typeable o, Data (o k)) => Sugared c o k (Expression c (Type o k)) where
+instance (Data s, Monoid s) => Sugared a (Expression s IndexedType) where
   desugarPatterns = transformM go
    where
     go =
@@ -104,7 +102,7 @@ instance (Monoid c, Data c, Data k, Typeable o, Data (o k)) => Sugared c o k (Ex
         e ->
           pure e
 
-unrollMatch :: (Monoid c, Data c, Data k, Typeable o, Data (o k)) => (Name, Pattern c (Type o k)) -> Expression c (Type o k) -> Expression c (Type o k)
+unrollMatch :: (Data s, Monoid s) => (Name, Pattern s IndexedType) -> Expression s IndexedType -> Expression s IndexedType
 unrollMatch (name, p) e =
   EMatch
     mempty
@@ -112,7 +110,7 @@ unrollMatch (name, p) e =
     (EVariable mempty (Label (typeOf p) name))
     (EClause mempty p (CPlain mempty [] e :| []) :| [])
 
-instance (Monoid c, Data c, Data k, Typeable o, Data (o k)) => Sugared c o k (FunctionDef c (Type o k)) where
+instance (Data s, Monoid s) => Sugared a (FunctionDef s IndexedType) where
   desugarPatterns =
     \case
       FunctionDef a u w ps e -> do
@@ -120,13 +118,13 @@ instance (Monoid c, Data c, Data k, Typeable o, Data (o k)) => Sugared c o k (Fu
         (qs, rs) <- runWriterT (traverse desugarPatterns ps)
         pure (FunctionDef a u w qs (foldr unrollMatch e1 rs))
 
-instance (Monoid c, Data c, Data k, Typeable o, Data (o k)) => Sugared c o k (ConstantDef c (Type o k)) where
+instance (Data s, Monoid s) => Sugared a (ConstantDef s IndexedType) where
   desugarPatterns =
     \case
       ConstantDef a u w e ->
         ConstantDef a u w <$> desugarPatterns e
 
-instance (Monoid c, Data k, Data c, Data (o k), Typeable o) => Sugared c o k (Definition c k (Type o k)) where
+instance (Data s, Monoid s) => Sugared a (Definition s Kind IndexedType) where
   desugarPatterns =
     \case
       DFunction loc name f fs ->
@@ -140,7 +138,7 @@ instance (Monoid c, Data k, Data c, Data (o k), Typeable o) => Sugared c o k (De
       d ->
         pure d
 
-instance (Monoid c, Data k, Data c, Data (o k), Typeable o) => Sugared c o k (Module c k (Type o k)) where
+instance (Data s, Monoid s) => Sugared a (Module s Kind IndexedType) where
   desugarPatterns =
     \case
       Module p ns ds ->

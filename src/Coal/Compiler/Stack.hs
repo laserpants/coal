@@ -48,7 +48,10 @@ import Extra (Dictionary, Name)
 newtype CompilerError = CompilerError Text
   deriving (Show, Eq, Ord, Read)
 
-type CompilerStack a m c = ExceptT CompilerError (RWST CompilerEnvironment () (CompilerState a) m) c
+-- type CompilerJournal a m c = NamedPattern a o k
+type CompilerJournal a = ()
+
+type CompilerStack a m c = ExceptT CompilerError (RWST CompilerEnvironment (CompilerJournal a) (CompilerState a) m) c
 
 newtype CompilerT a m c = Compiler {compilerStack :: CompilerStack a m c}
   deriving
