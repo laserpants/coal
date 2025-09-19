@@ -548,7 +548,7 @@ The number five, for example, would then be written:
 Succ(Succ(Succ(Succ(Succ(Zero)))))
 ```
 
-Writing numbers in this way quickly becomes tedious. Fortunately, it is not necessary.
+Writing numbers in this notation quickly becomes tedious. Fortunately, it is not necessary.
 
 Internally, the compiler stores values of type `nat` as normal integers. 
 
