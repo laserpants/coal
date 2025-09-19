@@ -268,7 +268,7 @@ TODO
 
 #### Function application
 
-Unlike Haskell, ML, and OCaml, function applications are written in a syntax more akin to languages like C, Java, and Python, where applications use parentheses and commas between arguments. 
+Unlike Haskell, ML, and OCaml, function applications are written in a syntax more akin to languages like C, Java, and Python, using parentheses and commas between arguments. 
 So, for example, `concat("one", "two")` means the function `concat` applied to the arguments `"one"` and `"two"`.
 
 #### If-then-else
@@ -301,7 +301,7 @@ let (x, y) = (1, 2) in x + y
 let { baz = { f = a | _ } } = faz(4)
 ```
 
-Variables form the simplest form of pattern; one that matches any value and binds it to a name:
+Variables form the simplest form of pattern; namely one that matches any value and binds it to a name:
 
 ```
 let name = "Zlatan" 
