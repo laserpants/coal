@@ -6,6 +6,7 @@
 module Coal.Compiler.Stack (
   CompilerT (..),
   CompilerEnvironment (..),
+  CompilerJournal (..),
   CompilerStack,
   CompilerState (..),
   CompilerConstraint,
@@ -34,6 +35,7 @@ where
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Supply (Supply (..))
 import Coal.Compiler.Environment (CompilerEnvironment (..))
+import Coal.Compiler.Journal
 import Coal.Compiler.State
 import Coal.Language
 import Coal.Language.Module (Definition (..))
@@ -42,14 +44,12 @@ import Control.Monad.Except
 import Control.Monad.RWS (RWST, runRWST)
 import Control.Monad.Reader (MonadReader)
 import Control.Monad.State (MonadState, modify)
+import Control.Monad.Writer (MonadWriter)
 import Data.Text (Text)
 import Extra (Dictionary, Name)
 
 newtype CompilerError = CompilerError Text
   deriving (Show, Eq, Ord, Read)
-
--- type CompilerJournal a m c = NamedPattern a o k
-type CompilerJournal a = ()
 
 type CompilerStack a m c = ExceptT CompilerError (RWST CompilerEnvironment (CompilerJournal a) (CompilerState a) m) c
 
@@ -59,6 +59,7 @@ newtype CompilerT a m c = Compiler {compilerStack :: CompilerStack a m c}
     , Applicative
     , Monad
     , MonadReader CompilerEnvironment
+    , MonadWriter (CompilerJournal a)
     , MonadState (CompilerState a)
     , MonadError CompilerError
     , MonadIO

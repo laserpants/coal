@@ -9,6 +9,7 @@ module Coal.Common.Supply (
   supply,
   supplied,
   suppliedName,
+  freshName,
 ) where
 
 import Control.Monad.Reader (MonadReader, ask)
