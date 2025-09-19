@@ -9,7 +9,7 @@ module Coal.Compiler.Transform.Pattern.Desugar (Sugared (..)) where
 
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (freshName, supplied)
-import Coal.Compiler.Journal (listenPatterns, tellPatterns)
+import Coal.Compiler.Journal (listenPatterns, tellPatterns1)
 import Coal.Compiler.Stack
 import Coal.Language.Expression (Clause (..), Expression (..))
 import Coal.Language.Expression.Binding (Binding (..))
@@ -41,7 +41,7 @@ instance (Data s, Monoid s) => Sugared s (IndexedPattern s) where
         pure p
       p -> do
         name <- supplied (freshName "v")
-        tellPatterns (name, p)
+        tellPatterns1 (name, p)
         pure (PVariable mempty (Label (typeOf p) name))
 
 instance (Data s, Monoid s) => Sugared s (Binding Expression s IndexedType) where
