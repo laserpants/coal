@@ -137,7 +137,7 @@ An `import` statement is used to bring in functions and other definitions from o
 import List(concat, head, tail)
 ```
 
-A *namespace* import allows you to access functions, types, and other definitions from a module using their qualified names. A qualified name is formed by prefixing the name with the path of the module:
+A *namespace* import allows you to access all functions, types, and other definitions from a module using their qualified names. A qualified name is formed by prefixing the name with the path of the module:
 
 ```
 // Import the List module under its namespace
