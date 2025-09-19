@@ -24,7 +24,7 @@ import Coal.Language.Module.Definition.Constant (ConstantDef (..))
 import Coal.Language.Module.Definition.Fold (FoldDef (..))
 import Coal.Language.Module.Definition.Function (FunctionDef (..))
 import Coal.Language.Module.Definition.Unfold (UnfoldDef (..))
-import Coal.Language.Pattern (Pattern (..))
+import Coal.Language.Pattern (IndexedPattern, Pattern (..))
 import Coal.Language.Type (IndexedType, Type (..), TypeIndex)
 import Coal.Language.Type.Kind (Kind (..))
 import Control.Monad.RWS (MonadReader, MonadState, MonadWriter, RWS, runRWS, tell)
@@ -61,7 +61,7 @@ runPatternDesugar r s e = (a, s')
 class Sugared a s where
   desugarPatterns :: (MonadWriter [NamedPattern a] m, MonadReader Name m, MonadState Int m) => s -> m s
 
-instance (Data a, Monoid a) => Sugared a (Pattern a IndexedType) where
+instance (Data a, Monoid a) => Sugared a (IndexedPattern a) where
   desugarPatterns =
     \case
       p@PVariable{} ->

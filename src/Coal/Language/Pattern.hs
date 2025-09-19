@@ -1,13 +1,14 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveTraversable #-}
 
-module Coal.Language.Pattern (Pattern (..)) where
+module Coal.Language.Pattern (Pattern (..), IndexedPattern) where
 
 import Coal.Common.FreeVars (BoundVars (..))
 import Coal.Common.Label (Label (..))
 import Coal.Language.Primitive (Primitive (..))
 import Coal.Language.Trait (Trait (..))
-import Coal.Language.Type (Parameter (..), Type)
+import Coal.Language.Type (Parameter (..), Type, TypeIndex)
+import Coal.Language.Type.Kind (Kind (..))
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (universeBi)
 import Data.List.NonEmpty (NonEmpty)
@@ -49,3 +50,5 @@ data Pattern a t
 
 instance (Data a, Data t) => BoundVars (Pattern a t) where
   boundIn = Set.fromList . universeBi
+
+type IndexedPattern a = Pattern a (Type TypeIndex Kind)

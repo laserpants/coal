@@ -21,6 +21,7 @@ import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (suppliedName)
 import Coal.Language
 import Coal.Language.Module (Module (..))
+import Coal.Language.Pattern (IndexedPattern)
 import Control.Monad.RWS
 import Data.Data (Data)
 import Data.Foldable (foldrM)
@@ -28,8 +29,6 @@ import Data.Generics.Uniplate.Data (transformBiM)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
 import Extra (Dictionary, Name)
-
-type IndexedPattern a = Pattern a IndexedType
 
 compileRecordPatterns :: forall a. (Data a, Monoid a) => Module a Kind IndexedType -> RecordDesugarStack a (Module a Kind IndexedType)
 compileRecordPatterns = transformBiM (desugarRecordPatterns @a @(Expression a (Type TypeIndex Kind)))
