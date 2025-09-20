@@ -17,7 +17,7 @@ Coal is a declarative, purely functional programming language with
 
 ### Rethinking recursion
 
-As a [total](https://en.wikipedia.org/wiki/Total_functional_programming) language, Coal takes a different approach to recursion, following the motto that "[recursion is the GOTO of functional programming](https://www.semanticscholar.org/paper/Functional-Programming-with-Bananas%2C-Lenses%2C-and-Meijer-Fokkinga/5db3c6793c07285bf0f5e95fe5a25f53e7488051)." To ensure that programs are provably terminating, recursion is only available in a restricted form, known as *structural recursion*. In this regime, each recursive call operates on a strictly smaller part of some finite data structure, progressing toward a base case. 
+As a [total](https://en.wikipedia.org/wiki/Total_functional_programming) language, Coal takes a different approach to recursion, following the motto that "[recursion is the GOTO of functional programming](https://www.semanticscholar.org/paper/Functional-Programming-with-Bananas%2C-Lenses%2C-and-Meijer-Fokkinga/5db3c6793c07285bf0f5e95fe5a25f53e7488051)." To guarantee that programs are provably terminating, recursion is only available in a restricted form, known as *structural recursion*. In this regime, each recursive call operates on a strictly smaller part of some finite data structure, progressing toward a base case. 
 
 ```
   fun sum(numbers : List<int32>) : int32 =
