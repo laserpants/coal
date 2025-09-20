@@ -106,6 +106,7 @@ extractVarName =
     _ ->
       "_"
 
+-- FIXME
 desugar :: (Data a, Monoid a, Monad m) => RecordInfo a -> Expression a IndexedType -> CompilerT a m (Expression a IndexedType)
 desugar (name, dict, p1) expr = do
   names <- replicateM (length fields - 1) (supplied (freshName "row"))
@@ -118,6 +119,7 @@ desugar (name, dict, p1) expr = do
  where
   fields = Map.toList dict
 
+-- FIXME
 go :: (Data a, Monoid a, Monad m) => Name -> ((Name, IndexedPattern a), Name) -> (Name, Row TypeIndex Kind IndexedType, Expression a IndexedType) -> CompilerT a m (Name, Row TypeIndex Kind IndexedType, Expression a IndexedType)
 go n ((fname, p), prefix) (var, row, expr) = do
   let t1 = typeOf expr
