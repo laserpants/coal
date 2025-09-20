@@ -22,12 +22,6 @@ import Data.Generics.Uniplate.Data (descendM, transform, transformM)
 import Data.List.NonEmpty (NonEmpty (..))
 import Extra (Dictionary, Name, const2, foldrM, traverse_)
 
--- TODO
--- data FoldError a
---  = FoldPatternOutsideConstructor a
---  | FoldPatternInRegularMatch a
---  deriving (Show, Eq, Ord, Read)
-
 class FoldContext a e where
   expandFolds :: (Monad m) => Name -> [Label ()] -> e -> CompilerT a m e
   expandMatch :: (Monad m) => e -> CompilerT a m ()
