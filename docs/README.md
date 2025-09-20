@@ -309,11 +309,11 @@ let name = "Zlatan"
 
 >  #### A note about let-generalization
 >
-> In some ways, A let-binding is similarto 
-> In [Hindley-Milner](https://en.wikipedia.org/wiki/Hindley%E2%80%93Milner_type_system) languages, it is let-bindings that introduce polymorphism. Consider the following expression, which doesn't type check:
+> In some ways, a let-binding is almost interchangeable with a lambda function. For example, writing `let x = 1 in increment(x)` yields the same result as `(fn(x) => increment(x))(1)`.
+> But besides being more readable, a let-binding also has another purpose. In [Hindley-Milner](https://en.wikipedia.org/wiki/Hindley%E2%80%93Milner_type_system) languages, it is let-bindings that introduce polymorphism. Consider the following expression, which doesn't type check:
 > 
 > ```
->     (fn(f) => (f(3 : int32), f("three")))(fn(x) => x)
+>   (fn(f) => (f(3 : int32), f("three")))(fn(x) => x)
 > ```
 > 
 > In this example, the type of `f` is monomorphic. The type inference algorithm will try to determine its type but fail to unify `int32 -> int32` with `string -> string`.
@@ -321,9 +321,9 @@ let name = "Zlatan"
 > We can now apply this function to both elements of the tuple, even though they have different types:
 > 
 > ```
->     let id = fn(x) => x 
->       in 
->         (id(3 : int32), id("three"))
+>   let id = fn(x) => x 
+>     in 
+>       (id(3 : int32), id("three"))
 > ```
 
 ###### Name binding semantics
