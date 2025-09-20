@@ -1,34 +1,25 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Transform.Dictionaries (
-  TraitContext (..),
-  DictionaryEnvironment (..),
-  DictionaryStack (..),
-  runDictionaryStack,
-  transformScope,
-  collectTraits,
-) where
+module Coal.Compiler.Transform.Dictionaries (TraitContext (..), transformScope, collectTraits) where
 
-import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (supplied)
+import Coal.Compiler.Environment (overCompilerDictionaryNameEnvironment)
+import Coal.Compiler.Journal (censorDictionaryTraits, listenDictionaryTraits, tellDictionaryTraits)
+import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module
 import Coal.TypeSystem.Substitution
 import Coal.TypeSystem.Unification
 import Control.Monad (forM)
-import Control.Monad.RWS (RWS, runRWS)
-import Control.Monad.Reader (MonadReader, asks, local)
-import Control.Monad.State (MonadState)
-import Control.Monad.Writer (MonadWriter, censor, listen, tell)
+import Control.Monad.Reader (asks, local)
 import Data.Data (Data)
 import Data.Foldable (foldrM)
 import Data.Generics.Uniplate.Data (descendM)
@@ -40,39 +31,9 @@ import Data.Maybe (catMaybes)
 import Data.Text (isPrefixOf)
 import Extra (Dictionary, Name)
 
-data DictionaryEnvironment = DictionaryEnvironment
-  { dictionaryEnvironmentNames :: Environment IndexedScheme
-  , dictionaryEnvironmentInstances :: Environment (Map IndexedType (ParameterizedType, Dictionary IndexedScheme))
-  }
-  deriving (Show, Eq, Ord, Read)
-
-overDictionaryEnvironmentNames ::
-  ( Environment IndexedScheme ->
-    Environment IndexedScheme
-  ) ->
-  DictionaryEnvironment ->
-  DictionaryEnvironment
-overDictionaryEnvironmentNames f DictionaryEnvironment{..} =
-  DictionaryEnvironment{dictionaryEnvironmentNames = f dictionaryEnvironmentNames, ..}
-
-newtype DictionaryStack a = DictionaryStack {dictionaryStack :: RWS DictionaryEnvironment [Trait IndexedType] Int a}
-  deriving
-    ( Functor
-    , Applicative
-    , Monad
-    , MonadReader DictionaryEnvironment
-    , MonadState Int
-    , MonadWriter [Trait IndexedType]
-    )
-
-runDictionaryStack :: DictionaryEnvironment -> Int -> DictionaryStack a -> (a, Int)
-runDictionaryStack e s d = (a, n)
- where
-  (a, n, _) = runRWS (dictionaryStack d) e s
-
-collectTraits :: IndexedType -> Name -> DictionaryStack [Trait IndexedType]
+collectTraits :: (Monad m) => IndexedType -> Name -> CompilerT a m [Trait IndexedType]
 collectTraits u name = do
-  env <- asks dictionaryEnvironmentNames
+  env <- asks compilerDictionaryNameEnvironment
   case Environment.lookup name env of
     Nothing ->
       pure []
@@ -91,14 +52,14 @@ collectTraits u name = do
     var <- supplied (TVariable . TypeIndex k)
     pure (index `mapsTo` var <> acc)
 
-tryMatch :: IndexedType -> IndexedType -> DictionaryStack (Either UnificationError Substitution)
+tryMatch :: (Monad m) => IndexedType -> IndexedType -> CompilerT a m (Either UnificationError Substitution)
 tryMatch t u = do
   var <- supplied id
   pure (evalUnifier var (match t u))
 
-findFirstMatch :: Trait IndexedType -> DictionaryStack (Maybe (ParameterizedType, IndexedType, Map Name IndexedScheme))
+findFirstMatch :: (Monad m) => Trait IndexedType -> CompilerT a m (Maybe (ParameterizedType, IndexedType, Map Name IndexedScheme))
 findFirstMatch (Trait name t) = do
-  env <- asks dictionaryEnvironmentInstances
+  env <- asks compilerInstanceEnvironment
   case Environment.lookup name env of
     Nothing ->
       pure Nothing
@@ -125,7 +86,7 @@ substituteInScheme sub (Forall _ ts t) = scheme (apply sub ts) (apply sub t)
 mapEntriesM :: (Monad m) => Dictionary IndexedScheme -> ((Name, IndexedScheme) -> m (Name, Expression a IndexedType)) -> m (Maybe (Dictionary (Expression a IndexedType)))
 mapEntriesM d f = Just . Map.fromList <$> traverse f (Map.toList d)
 
-lookupTraitInstance :: (Monoid a) => Trait IndexedType -> DictionaryStack (Maybe (Map Name (Expression a IndexedType)))
+lookupTraitInstance :: (Monoid a, Monad m) => Trait IndexedType -> CompilerT a m (Maybe (Map Name (Expression a IndexedType)))
 lookupTraitInstance trait@(Trait name _) = do
   found <- findFirstMatch trait
   case found of
@@ -138,7 +99,7 @@ lookupTraitInstance trait@(Trait name _) = do
     expr <- applyTraits (Label t (instanceLabel (Trait tn t1) n)) ts
     pure (n, expr)
 
-applyTraits :: (Monoid a) => Label IndexedType -> [Trait IndexedType] -> DictionaryStack (Expression a IndexedType)
+applyTraits :: (Monoid a, Monad m) => Label IndexedType -> [Trait IndexedType] -> CompilerT a m (Expression a IndexedType)
 applyTraits (Label t name) =
   \case
     [] ->
@@ -151,27 +112,27 @@ applyTraits (Label t name) =
         fields <- lookupTraitInstance trait
         case fields of
           Nothing -> do
-            tell [trait]
+            tellDictionaryTraits [trait]
             pure (ETraitDictionary mempty (typeOf trait) trait)
           Just r ->
             pure (ERecord mempty (typeOf trait) r Nothing)
 
-class TraitContext d where
-  expandTraits :: d -> DictionaryStack d
+class TraitContext a d where
+  expandTraits :: (Monad m) => d -> CompilerT a m d
 
 expandRecursiveLet :: Expression a IndexedType -> Expression a IndexedType
 expandRecursiveLet (ELet a (BPattern _ p e1 :| []) e2) = ERecursiveLet a p e1 e2
 expandRecursiveLet _ = error "Implementation error"
 
-instance (Monoid a, Data a) => TraitContext (Expression a IndexedType) where
+instance (Monoid a, Data a) => TraitContext a (Expression a IndexedType) where
   expandTraits =
     \case
       ERecursiveLet a p e1 e2 ->
         expandRecursiveLet <$> expandTraits (ELet a (BPattern a p e1 :| []) e2)
       ELet a bs e -> do
-        as <- censor (const []) (traverse transformBinding bs)
+        as <- censorDictionaryTraits (const []) (traverse transformBinding bs)
         let xs = concat (toList (snd <$> as))
-        ELet a (fst <$> as) <$> local (overDictionaryEnvironmentNames (Environment.insertMultiple xs)) (expandTraits e)
+        ELet a (fst <$> as) <$> local (overCompilerDictionaryNameEnvironment (Environment.insertMultiple xs)) (expandTraits e)
       EVariable _ (Label t name) -> do
         traits <- collectTraits t name
         applyTraits (Label t name) (nub traits)
@@ -182,38 +143,39 @@ instance (Monoid a, Data a) => TraitContext (Expression a IndexedType) where
         pure (EFold a t es cs (Just e1))
       e ->
         descendM expandTraits e
-   where
-    transformBinding =
-      \case
-        BPattern a var@(PVariable _ (Label _ name)) e
-          | "$fold" `isPrefixOf` name -> do
-              body <- expandTraits e
-              pure (BPattern a var body, [])
-        BPattern _ (PVariable a (Label t name)) e -> do
-          (e1, traits) <- transformScope e
-          let ll = Label (foldTypeOf t traits) name
-          pure (BPattern mempty (PVariable a ll) e1, [(name, Forall (typeIndexesIn t) traits t)])
-        _ ->
-          error "Not implemented"
 
-transformScope :: (Monoid a, Data a) => Expression a IndexedType -> DictionaryStack (Expression a IndexedType, [Trait IndexedType])
+transformBinding :: (Monoid a, Data a, Monad m) => Binding Expression a IndexedType -> CompilerT a m (Binding Expression a IndexedType, [(Name, IndexedScheme)])
+transformBinding =
+  \case
+    BPattern a var@(PVariable _ (Label _ name)) e
+      | "$fold" `isPrefixOf` name -> do
+          body <- expandTraits e
+          pure (BPattern a var body, [])
+    BPattern _ (PVariable a (Label t name)) e -> do
+      (e1, traits) <- transformScope e
+      let ll = Label (foldTypeOf t traits) name
+      pure (BPattern mempty (PVariable a ll) e1, [(name, Forall (typeIndexesIn t) traits t)])
+    _ ->
+      error "Not implemented"
+
+transformScope :: (Monoid a, Data a, Monad m) => Expression a IndexedType -> CompilerT a m (Expression a IndexedType, [Trait IndexedType])
 transformScope e = do
-  (expr, traits) <- listen (expandTraits e)
+  (expr, traits) <- listenDictionaryTraits (expandTraits e)
   case nub traits of
     [] -> pure (expr, traits)
     tr : trs -> pure (dictionaryLambda tr trs expr, traits)
 
-instance (Monoid a, Data a) => TraitContext (CompiledClause a IndexedType) where
+instance (Monoid a, Data a) => TraitContext a (CompiledClause a IndexedType) where
   expandTraits =
     \case
       ECompiledClause lls e ->
         ECompiledClause lls <$> expandTraits e
 
-instance (Monoid a, Data a) => TraitContext (Module a Kind IndexedType) where
+instance (Monoid a, Data a) => TraitContext a (Module a Kind IndexedType) where
   expandTraits =
     overModuleDefinitionsM (traverse expandTraits)
 
-instance (Monoid a, Data a) => TraitContext (Definition a Kind IndexedType) where
+instance (Monoid a, Data a) => TraitContext a (Definition a Kind IndexedType) where
   expandTraits =
     \case
       DConstant loc name c fs ->
@@ -225,11 +187,11 @@ instance (Monoid a, Data a) => TraitContext (Definition a Kind IndexedType) wher
       d ->
         pure d
 
-instance (Monoid a, Data a) => TraitContext (ConstantDef a IndexedType) where
+instance (Monoid a, Data a) => TraitContext a (ConstantDef a IndexedType) where
   expandTraits =
     \case
       ConstantDef a with (With _ t) e -> do
-        (expr, traits) <- listen (expandTraits e)
+        (expr, traits) <- listenDictionaryTraits (expandTraits e)
         case nub traits of
           [] ->
             pure $ ConstantDef a with (With [] t) expr

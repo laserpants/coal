@@ -14,6 +14,7 @@ module Coal.Compiler.Environment (
   buildEnvironment,
   buildAliasEnvironment,
   buildInstanceEnvironment,
+  overCompilerDictionaryNameEnvironment,
 ) where
 
 import Coal.Common.Environment (Environment (..))
@@ -40,6 +41,7 @@ type InstanceEnvironment = Environment (Map IndexedType (Type Parameter (), Dict
 type CodataAccessorEnvironment = Environment (CodataAccessor TypeIndex Kind IndexedType)
 type FoldEnvironment = Environment IndexedScheme
 type UnfoldEnvironment = Environment IndexedScheme
+type DictionaryNameEnvironment = Environment IndexedScheme
 
 data CompilerEnvironment = CompilerEnvironment
   { compilerDataConstructorEnvironment :: DataConstructorEnvironment
@@ -50,6 +52,7 @@ data CompilerEnvironment = CompilerEnvironment
   , compilerCodataAccessorEnvironment :: CodataAccessorEnvironment
   , compilerFoldEnvironment :: FoldEnvironment
   , compilerUnfoldEnvironment :: UnfoldEnvironment
+  , compilerDictionaryNameEnvironment :: DictionaryNameEnvironment
   }
   deriving (Show, Eq, Ord, Read)
 
@@ -64,7 +67,16 @@ emptyCompilerEnvironment =
     , compilerCodataAccessorEnvironment = mempty
     , compilerFoldEnvironment = mempty
     , compilerUnfoldEnvironment = mempty
+    , compilerDictionaryNameEnvironment = mempty
     }
+
+overCompilerDictionaryNameEnvironment ::
+  ( Environment IndexedScheme ->
+    Environment IndexedScheme
+  ) ->
+  CompilerEnvironment ->
+  CompilerEnvironment
+overCompilerDictionaryNameEnvironment f CompilerEnvironment{..} = CompilerEnvironment{compilerDictionaryNameEnvironment = f compilerDictionaryNameEnvironment, ..}
 
 buildEnvironment :: [Definition a k t] -> CompilerEnvironment
 buildEnvironment defs =
@@ -77,6 +89,7 @@ buildEnvironment defs =
     , compilerCodataAccessorEnvironment = codataAccessorEnvironment
     , compilerFoldEnvironment = foldEnvironment
     , compilerUnfoldEnvironment = unfoldEnvironment
+    , compilerDictionaryNameEnvironment = dictionaryNameEnvironment
     }
  where
   instanceEnvironment = buildInstanceEnvironment typeConstructorEnvironment traitEnvironment defs
@@ -87,6 +100,7 @@ buildEnvironment defs =
   codataAccessorEnvironment = buildCodataAccessorEnvironment defs
   foldEnvironment = buildFoldEnvironment defs
   unfoldEnvironment = buildUnfoldEnvironment defs
+  dictionaryNameEnvironment = mempty
 
 makeEnv :: (Definition a k t -> [(Name, e)]) -> [Definition a k t] -> Environment e
 makeEnv f = Environment.fromList . concatMap f

@@ -6,6 +6,7 @@
 
 module Coal.Compiler where
 
+import Coal.Compiler.Environment (overCompilerDictionaryNameEnvironment)
 import qualified Coal.Compiler.Kernel.Environment as Kernel
 import Coal.Compiler.Kernel.TranslateModule (translateModule)
 import Coal.Compiler.PatternMatching
@@ -34,7 +35,7 @@ import Coal.Language.Module.Definition.Constant
 import Coal.Language.Module.Definition.Instance
 import Coal.TypeSystem.Substitution (normalizeTypeIndexes)
 import Control.Monad.Except
-import Control.Monad.Reader (Reader, asks, runReader)
+import Control.Monad.Reader (Reader, asks, local, runReader)
 import Control.Monad.State (gets, runState)
 import Control.Monad.Writer (Writer, runWriter)
 import Data.Data (Data)
@@ -86,11 +87,10 @@ matchMonadTrans f e = withSupplyC (\n -> runMatchMonad "match" n (f e))
 compileMatchExprsC :: (Monad m, MatchExpressionContext c) => c -> CompilerT a m c
 compileMatchExprsC = matchMonadTrans compileMatchExprs
 
-placeholderTrans :: (Monad m) => (c -> DictionaryStack c) -> c -> CompilerT a m c
+placeholderTrans :: (Monad m) => (c -> CompilerT a m c) -> c -> CompilerT a m c
 placeholderTrans f e = do
   env1 <- gets compilerNameStore
-  env2 <- asks compilerInstanceEnvironment
-  withSupplyC (\n -> runDictionaryStack (DictionaryEnvironment env1 env2) n (f e))
+  local (overCompilerDictionaryNameEnvironment (const env1)) (f e)
 
 placeholderInsertionC :: (Monad m, Monoid a, Data a) => Module a Kind IndexedType -> CompilerT a m (Module a Kind IndexedType)
 placeholderInsertionC = overModuleDefinitionsM (traverse go)
