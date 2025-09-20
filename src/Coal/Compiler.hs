@@ -87,6 +87,7 @@ matchMonadTrans f e = withSupplyC (\n -> runMatchMonad "match" n (f e))
 compileMatchExprsC :: (Monad m, MatchExpressionContext c) => c -> CompilerT a m c
 compileMatchExprsC = matchMonadTrans compileMatchExprs
 
+-- TODO
 placeholderTrans :: (Monad m) => (c -> CompilerT a m c) -> c -> CompilerT a m c
 placeholderTrans f e = do
   env1 <- gets compilerNameStore
