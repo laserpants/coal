@@ -29,15 +29,13 @@ instance (CompileLambdaMatchContext a) => CompileLambdaMatchContext (Dictionary 
   compileLambdaMatch = traverse compileLambdaMatch
 
 instance (Monoid a, Data a) => CompileLambdaMatchContext (Expression a ()) where
-  compileLambdaMatch = transformM go
-   where
-    go =
-      \case
-        ELambdaMatch a t cs Nothing -> do
-          e1 <- expandLambdaMatch cs
-          pure (ELambdaMatch a t cs (Just e1))
-        e ->
-          pure e
+  compileLambdaMatch = transformM $
+    \case
+      ELambdaMatch a t cs Nothing -> do
+        e1 <- expandLambdaMatch cs
+        pure (ELambdaMatch a t cs (Just e1))
+      e ->
+        pure e
 
 expandLambdaMatch :: (Monoid a, Monad m) => NonEmpty (Clause a ()) -> CompilerT o m (Expression a ())
 expandLambdaMatch cs =
@@ -77,6 +75,5 @@ instance (Monoid a, Data a) => CompileLambdaMatchContext (Definition a Kind ()) 
         DFunction loc name <$> compileLambdaMatch f <*> traverse compileLambdaMatch fs
       DConstant loc name g fs ->
         DConstant loc name <$> compileLambdaMatch g <*> traverse compileLambdaMatch fs
-      -- TODO
       o ->
         pure o
