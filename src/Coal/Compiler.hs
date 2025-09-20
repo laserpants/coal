@@ -86,6 +86,7 @@ placeholderTrans f e = do
   env1 <- gets compilerNameStore
   local (overCompilerDictionaryNameEnvironment (const env1)) (f e)
 
+-- TODO
 placeholderInsertionC :: (Monad m, Monoid a, Data a) => Module a Kind IndexedType -> CompilerT a m (Module a Kind IndexedType)
 placeholderInsertionC = overModuleDefinitionsM (traverse go)
  where
