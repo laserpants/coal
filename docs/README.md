@@ -27,7 +27,7 @@ As a [total](https://en.wikipedia.org/wiki/Total_functional_programming) languag
     }
 ```
 
-A distinction is made between ordinary, finite data, which is produced and consumed in this way, and potentially infinite data, which may result from processes that run indefinitely. The latter is known as *codata*. The codata equivalent of lists, for example, are streams.
+A distinction is made between ordinary, finite data, which is produced and consumed in this way, and potentially infinite data &mdash; the kind that may result from processes that run indefinitely. The latter is known as *codata*. The codata equivalent of lists, for example, are streams.
 
 ```
   cotype Stream<a> = { Head : a, Tail : Stream<a> }
@@ -107,7 +107,9 @@ Projects in Coal are organized as collections of *modules*. Modules provide a wa
 
 ```
 module <path>(<export_list>) {
-  <definitions>
+  <definition>
+  <definition>
+  ...
 }
 ```
 
@@ -167,7 +169,7 @@ In the above, `<arg_1>, <arg_2>, ..., <arg_n>` are *patterns*, allowing function
     ...
 ```
 
-A type annotion can be given to indicate a function's return type; just like in the following example:
+A type annotion can be given to indicate a function's return type; as in the following example:
 
 ```
   fun is_even(n : int32) : bool =
@@ -271,7 +273,7 @@ TODO
 Unlike Haskell, ML, and OCaml, function applications are written in a syntax more akin to languages like C, Java, and Python, using parentheses and commas between arguments. 
 So, for example, `concat("one", "two")` means the function `concat` applied to the arguments `"one"` and `"two"`.
 
-By default, functions in Coal are *curried*. There is a difference between a function that takes multiple arguments and one that takes a single tuple as its argument. Consider the following two type signatures:
+By default, functions in Coal are *curried*. There is a difference between a function that takes multiple arguments, and one that takes a single tuple as its argument. Consider the following two type signatures:
 
 ```
 f : a -> b -> c
@@ -672,7 +674,7 @@ let five = curry(add, 1, 4)         // or (curry(add))(1, 4)
 
 #### Records
 
-Records are unordered collections of name-value pairs in which the values can be of arbitrary type, including other records. They are suitable for representing structured data with multiple properties, and nested objects: A record is written as a sequence of comma-separated *fields* enclosed in curly braces. A field consists of a name, referred to as the *label*, paired with a value. These two are separated by an equals sign (`=`). 
+Records are unordered collections of name-value pairs in which the values can be of any type, including other records. The record type is suitable for representing structured data with multiple properties, and nested objects: A record is written as a sequence of comma-separated *fields* enclosed in curly braces. A field consists of a name, referred to as the *label*, paired with a value. These two are separated by an equals sign (`=`). 
 
 ```
 { 
@@ -698,41 +700,38 @@ Variable, tuple, record, etc..
 
 ### Traits
 
-A *trait* describes a collection of functions that must be defined for its underlying type. 
+A *trait* describes a collection of functions that must be defined for its affiliated type. 
 
 ```
 trait <name>(<type_parameter>) {
-  <definition_1>: <type> 
-  <definition_2>: <type> 
+  <definition_1>: <type_1> 
+  <definition_2>: <type_2> 
   ...
-  <definition_n>: <type> 
+  <definition_n>: <type_n> 
 }
 ```
 
-It is very similar to a type class in Haskell. A common analogy is to think of these as interfaces in object-oriented programming. 
+Traits are very similar to type classes in Haskell. A common analogy is to think of these as interfaces in object-oriented programming. 
 
 ```
 trait Ordered(t) {
-  compare : t -> t -> Order
+  compare : t -> t -> Order   // where we define type Order = Lt | Gt | Eq
 }
 ```
 
-The usefulness of a trait is that any function 
-and functions defined in terms of these are 
+When you describe a set of behaviors as a trait, you can reuse the same functionality across all types that support it. This reduces duplication and promotes code reusability.
 
 ```
 fun is_less_than(x : t, y : t) : bool with Ordered(t) =
-  compare(x, y) == LessThan
+  compare(x, y) == Lt
 ```
 
 The type of `is_less_than` is `t -> t -> bool with Ordered(t)`
 Type parameters, like `t` in this type, are *universally quantified*.
-adds a constraint to this
+The keyword `with` adds one or more constraints to this 
 
 
-To make a type ...
-
-For example, we can define an ordering on the `bool` type as follows:
+To make a type support a trait, we create an `instance` of the trait for that particular type. For example, extending our `Ordered` trait as follows, we can define an ordering on the booleans:
 
 ```
 instance Ordered(bool) {
@@ -746,6 +745,8 @@ instance Ordered(bool) {
 ```
 
 afsd
+
+<!--
 
 ```
 trait Functor<f : * -> *> {
@@ -778,6 +779,7 @@ baz
 map(fn(x) => x * 100, Some(1))    // ==> Some(100)
 map(fn(x) => x * 100, [1, 2, 3])  // ==> [100, 200, 300]
 ```
+-->
 
 #### Trait inheritance
 
