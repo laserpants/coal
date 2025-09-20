@@ -7,6 +7,7 @@ module Coal.Compiler.Stack (
   CompilerT (..),
   CompilerEnvironment (..),
   CompilerJournal (..),
+  CompilerError (..),
   CompilerStack,
   CompilerState (..),
   CompilerConstraint,
@@ -35,6 +36,7 @@ where
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Supply (Supply (..))
 import Coal.Compiler.Environment (CompilerEnvironment (..))
+import Coal.Compiler.Error
 import Coal.Compiler.Journal
 import Coal.Compiler.State
 import Coal.Language
@@ -47,9 +49,6 @@ import Control.Monad.State (MonadState, modify)
 import Control.Monad.Writer (MonadWriter)
 import Data.Text (Text)
 import Extra (Dictionary, Name)
-
-newtype CompilerError = CompilerError Text
-  deriving (Show, Eq, Ord, Read)
 
 type CompilerStack a m c = ExceptT CompilerError (RWST CompilerEnvironment (CompilerJournal a) (CompilerState a) m) c
 
