@@ -13,13 +13,10 @@ import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module (ConstantDef (..), Definition (..), FunctionDef (..), Module (..))
 import Control.Monad ((<=<))
-import Control.Monad.RWS (RWS, runRWS)
-import Control.Monad.Reader (MonadReader)
-import Control.Monad.State (MonadState)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformM)
 import Data.List.NonEmpty (NonEmpty (..), (<|))
-import Extra (Dictionary, Name)
+import Extra (Dictionary)
 
 class CompileNatsContext e where
   compileNats :: (Monad m) => e -> CompilerT a m e
