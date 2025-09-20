@@ -7,7 +7,6 @@
 module Coal.Compiler where
 
 import Coal.Compiler.Environment (overCompilerDictionaryNameEnvironment)
-import qualified Coal.Compiler.Kernel.Environment as Kernel
 import Coal.Compiler.Kernel.TranslateModule (translateModule)
 import Coal.Compiler.PatternMatching
 import Coal.Compiler.PatternMatching.Rule (MatchMonad (..), runMatchMonad)
@@ -35,7 +34,7 @@ import Coal.Language.Module.Definition.Constant
 import Coal.Language.Module.Definition.Instance
 import Coal.TypeSystem.Substitution (normalizeTypeIndexes)
 import Control.Monad.Except
-import Control.Monad.Reader (Reader, asks, local, runReader)
+import Control.Monad.Reader (local)
 import Control.Monad.State (gets, runState)
 import Control.Monad.Writer (Writer, runWriter)
 import Data.Data (Data)
@@ -127,12 +126,6 @@ placeholderInsertionC = overModuleDefinitionsM (traverse go)
       d ->
         pure d
 
-kernelMonadTrans :: (Monad m) => (c -> Reader Kernel.KernelEnvironment d) -> c -> CompilerT a m d
-kernelMonadTrans f e = pure (runReader (f e) (Kernel.initialKernelEnvironment mempty))
-
-kernelTranslationC :: (Show a, Monad m, Data a) => Module a Kind IndexedType -> CompilerT a m (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))
-kernelTranslationC = kernelMonadTrans translateModule
-
 typeCheckingPass :: (MonadIO m, Monoid a, Data a, Eq a, Show a) => Module a Kind () -> CompilerT a m (Module a Kind IndexedType)
 typeCheckingPass =
   -- Expand type aliases
@@ -180,7 +173,7 @@ compileModule =
   typeCheckingPass
     >=> mainPass
     -- Final lowering
-    >=> kernelTranslationC
+    >=> translateModule
 
 writeDotFilesC :: (MonadIO m, Pretty t, Show t) => Text -> Module a k t -> m (Module a k t)
 writeDotFilesC ns m = do

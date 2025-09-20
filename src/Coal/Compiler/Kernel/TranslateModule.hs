@@ -8,6 +8,7 @@ import Coal.Common.Environment
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Kernel.Environment (KernelEnvironment, insertQualifiedNames, withModuleName)
 import Coal.Compiler.Kernel.TranslateDefinition (translateDefinition)
+import Coal.Compiler.Stack
 import qualified Coal.Kernel.Language as Kernel
 import Coal.Language
 import Coal.Language.Module
@@ -16,7 +17,7 @@ import Data.Data (Data)
 import qualified Data.Text as Text
 import Extra (Name)
 
-translateModule :: (Show a, MonadReader KernelEnvironment m, Data a) => Module a Kind IndexedType -> m (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))
+translateModule :: (Data a, Monad m) => Module a Kind IndexedType -> CompilerT a m (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))
 translateModule =
   \case
     Module (Path p) _ defs ->

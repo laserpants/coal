@@ -4,7 +4,6 @@
 
 module Coal.Compiler.Kernel.Environment (
   KernelEnvironment (..),
-  initialKernelEnvironment,
   qualifyName,
   withLocalName,
   withLocalNames,
@@ -14,37 +13,17 @@ module Coal.Compiler.Kernel.Environment (
 
 import Coal.Common.Environment (Environment)
 import qualified Coal.Common.Environment as Environment
-import Control.Monad.Reader (MonadReader, ask, local)
+import Coal.Compiler.Environment
+import Coal.Compiler.Stack
+import Control.Monad.Reader (asks, local)
 import qualified Data.Set as Set
 import Data.Text (isPrefixOf)
 import qualified Data.Text as Text
-import Extra (Name, Over, Set)
+import Extra (Name, Set)
 
-data KernelEnvironment = KernelEnvironment
-  { kernelEnvironmentModule :: Name
-  , kernelEnvironmentLocalNames :: Set Name
-  , kernelEnvironmentQualifiedNames :: Environment Name
-  }
-  deriving (Show, Eq, Ord)
-
-initialKernelEnvironment :: Environment Name -> KernelEnvironment
-initialKernelEnvironment = KernelEnvironment mempty mempty
-
-overKernelEnvironmentModule :: Over KernelEnvironment Name
-overKernelEnvironmentModule fn KernelEnvironment{..} =
-  KernelEnvironment{kernelEnvironmentModule = fn kernelEnvironmentModule, ..}
-
-overKernelEnvironmentLocalNames :: Over KernelEnvironment (Set Name)
-overKernelEnvironmentLocalNames fn KernelEnvironment{..} =
-  KernelEnvironment{kernelEnvironmentLocalNames = fn kernelEnvironmentLocalNames, ..}
-
-overKernelEnvironmentQualifiedNames :: Over KernelEnvironment (Environment Name)
-overKernelEnvironmentQualifiedNames fn KernelEnvironment{..} =
-  KernelEnvironment{kernelEnvironmentQualifiedNames = fn kernelEnvironmentQualifiedNames, ..}
-
-qualifyName :: (MonadReader KernelEnvironment m) => Name -> m Name
+qualifyName :: (Monad m) => Name -> CompilerT a m Name
 qualifyName name = do
-  KernelEnvironment{..} <- ask
+  KernelEnvironment{..} <- asks compilerKernelEnvironment
   if isFinal name kernelEnvironmentLocalNames
     then pure name
     else case Environment.lookup name kernelEnvironmentQualifiedNames of
@@ -65,14 +44,14 @@ isFinal name localNames
 isCore :: Name -> Bool
 isCore = ("Core$" `isPrefixOf`)
 
-withLocalName :: (MonadReader KernelEnvironment m) => Name -> m a -> m a
-withLocalName = local . overKernelEnvironmentLocalNames . Set.insert
+withLocalName :: (Monad m) => Name -> CompilerT a m e -> CompilerT a m e
+withLocalName = local . overCompilerKernelEnvironment . overKernelEnvironmentLocalNames . Set.insert
 
-withLocalNames :: (Foldable f, MonadReader KernelEnvironment m) => f Name -> m a -> m a
+withLocalNames :: (Foldable f, Monad m) => f Name -> CompilerT a m e -> CompilerT a m e
 withLocalNames = flip (foldr withLocalName)
 
-withModuleName :: (MonadReader KernelEnvironment m) => Name -> m a -> m a
-withModuleName = local . overKernelEnvironmentModule . const
+withModuleName :: (Monad m) => Name -> CompilerT a m e -> CompilerT a m e
+withModuleName = local . overCompilerKernelEnvironment . overKernelEnvironmentModule . const
 
-insertQualifiedNames :: (MonadReader KernelEnvironment m) => Environment Name -> m a -> m a
-insertQualifiedNames names = local (overKernelEnvironmentQualifiedNames (names <>))
+insertQualifiedNames :: (Monad m) => Environment Name -> CompilerT a m e -> CompilerT a m e
+insertQualifiedNames names = local (overCompilerKernelEnvironment $ overKernelEnvironmentQualifiedNames (names <>))

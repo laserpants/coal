@@ -8,12 +8,13 @@ import Coal.Common.Label (Label (..))
 import Coal.Compiler.Kernel.Environment (KernelEnvironment (..), withLocalNames)
 import Coal.Compiler.Kernel.TranslateExpression (translateExpression, translatePattern)
 import Coal.Compiler.Kernel.TranslateType (translateType)
+import Coal.Compiler.Stack
 import qualified Coal.Kernel.Language as Kernel
 import Coal.Language
 import Coal.Language.Module
 import Control.Monad (forM)
 import Control.Monad.Extra (concatForM)
-import Control.Monad.Reader (MonadReader, asks)
+import Control.Monad.Reader (asks)
 import Data.Data (Data)
 import Data.List.Extra (sortOn)
 import Data.List.NonEmpty (NonEmpty ((:|)), toList, (<|))
@@ -21,7 +22,7 @@ import Extra (Name)
 
 type KernelObject = Kernel.Object Kernel.Type (Kernel.Expr Kernel.Type)
 
-translateDefinition :: (Show a, MonadReader KernelEnvironment m, Data a) => Definition a Kind IndexedType -> m [KernelObject]
+translateDefinition :: (Monad m, Data a) => Definition a Kind IndexedType -> CompilerT a m [KernelObject]
 translateDefinition =
   \case
     DType _ _ (TypeDef _ ctors) ->
@@ -29,19 +30,19 @@ translateDefinition =
     DFunction _ name (FunctionDef _ _ _ ps e) _ -> do
       qs <- traverse translatePattern (toList ps)
       f <- withLocalNames (labelName <$> qs) (translateExpression e)
-      moduleName <- asks kernelEnvironmentModule
+      moduleName <- asks (kernelEnvironmentModule . compilerKernelEnvironment)
       pure [Kernel.OFunction (moduleName <> "." <> name) qs f]
     DConstant _ name (ConstantDef _ _ With{} e) _ -> do
       c <- translateExpression e
-      moduleName <- asks kernelEnvironmentModule
+      moduleName <- asks (kernelEnvironmentModule . compilerKernelEnvironment)
       pure [Kernel.OConstant (moduleName <> "." <> name) c]
     DFold _ name (FoldDef _ _ (Just e)) -> do
       c <- translateExpression e
-      moduleName <- asks kernelEnvironmentModule
+      moduleName <- asks (kernelEnvironmentModule . compilerKernelEnvironment)
       pure [Kernel.OConstant (moduleName <> "." <> name) c]
     DUnfold _ name (UnfoldDef _ _ _ (Just e)) -> do
       c <- translateExpression e
-      moduleName <- asks kernelEnvironmentModule
+      moduleName <- asks (kernelEnvironmentModule . compilerKernelEnvironment)
       pure [Kernel.OConstant (moduleName <> "." <> name) c]
     DTrait _ name (TraitDef _ _ ds) ->
       forM ds $
@@ -61,9 +62,9 @@ translateDefinition =
     _ ->
       pure []
 
-traitAccessor :: (MonadReader KernelEnvironment m) => Name -> Name -> Kernel.Type -> m KernelObject
+traitAccessor :: (Monad m) => Name -> Name -> Kernel.Type -> CompilerT a m KernelObject
 traitAccessor trait fn t = do
-  moduleName <- asks kernelEnvironmentModule
+  moduleName <- asks (kernelEnvironmentModule . compilerKernelEnvironment)
   pure $
     Kernel.OFunction
       (moduleName <> "." <> fn)
@@ -86,7 +87,7 @@ traitAccessor trait fn t = do
   row = Label (Kernel.RExt fn t Kernel.opaque) "$r"
   dict = Label (Kernel.TCon trait [Kernel.opaque]) "$a"
 
-translateConstructor :: (MonadReader KernelEnvironment m) => (Int, DataConstructor Parameter () (Type Parameter ())) -> m KernelObject
+translateConstructor :: (Monad m) => (Int, DataConstructor Parameter () (Type Parameter ())) -> CompilerT a m KernelObject
 translateConstructor (index, DataConstructor name _ (Forall _ _ t)) = do
-  moduleName <- asks kernelEnvironmentModule
+  moduleName <- asks (kernelEnvironmentModule . compilerKernelEnvironment)
   pure (Kernel.OData (moduleName <> "." <> name) index (translateType t))
