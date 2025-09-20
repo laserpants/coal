@@ -7,7 +7,7 @@ import Coal.Ast.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment (..))
 import Coal.Common.Label (Label (..))
 import Coal.Common.Name (Dictionary, Name)
-import Coal.Compiler (kernelTranslationC, mainPass, typeCheckingPass, writeDotFiles)
+import Coal.Compiler (mainPass, typeCheckingPass, writeDotFiles)
 import Coal.Compiler.Environment
 import Coal.Compiler.Stack
 import Coal.Compiler.Transform.WhereClauses
@@ -50,6 +50,7 @@ import System.Process
 import Test.Hspec
 import Text.Megaparsec (eof, errorBundlePretty, runParser)
 import Text.RawString.QQ
+import Coal.Compiler.Kernel.TranslateModule (translateModule)
 
 import qualified Coal.Common.Environment as Environment
 import qualified Coal.Kernel.Compiler as Kernel
@@ -1496,7 +1497,7 @@ compileModule x = do
     [] ->
       pure ()
 
-  r <- kernelTranslationC b
+  r <- translateModule b
 
   liftIO $ writeDotFile ("kernel__" <> Kernel.moduleName r) r
 
