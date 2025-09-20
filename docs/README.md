@@ -231,7 +231,7 @@ Expressions are the core building blocks of programs. They include variables, li
 
 #### Variables
 
-A *variable* in Coal is a name bound to a value. Unlike in imperative languages, it is not very helpful to think of a variable as a “box” that represent some data storage in memory. In functional programming, expressions behave more like mathematical expressions: once a variable is defined, its value never changes.
+A *variable* in Coal is a name bound to a value. Unlike in imperative languages, it is not very helpful to think of a variable as a “box” that represents some data storage in memory. In functional programming, expressions behave more like mathematical expressions: once a variable is defined, its value never changes.
 
 ##### Naming rules
 
