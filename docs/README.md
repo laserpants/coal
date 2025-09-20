@@ -111,7 +111,7 @@ module <path>(<export_list>) {
 }
 ```
 
-Each module is uniquely identified by its *path*. A module's path mirrors the directory structure of the source file in which it is defined. Path segments begin with an uppercase letter and are separated by a dot (`.`) character. File names have a `.coal` suffix. A module `Utils.Math.Trigonometry`, for instance, is defined in a file named `Trigonometry.coal`, located at `Utils/Math/` relative to your project's root directory.
+Each module is uniquely identified by its *path*. A module's path mirrors the directory structure of the source file in which it is defined. Path segments begin with an uppercase letter and are separated by a dot (`.`) character. File names have a `.coal` suffix. A module `Utils.Math.Trigonometry`, for instance, is defined in a file named `Trigonometry.coal`, located under `Utils/Math/` relative to your project's root directory.
 
 ```
 src
@@ -231,7 +231,7 @@ Expressions are the core building blocks of programs. They include variables, li
 
 #### Variables
 
-A *variable* in Coal is a name bound to a value. Unlike in imperative languages, it is not very helpful to think of a variable as a “box” that represents some data storage in memory. In functional programming, expressions behave more like mathematical expressions: once a variable is defined, its value never changes.
+A *variable* in Coal is simply a name bound to a value. Unlike in imperative languages, it is not very helpful to think of a variable as a “box” that represents some data storage in memory. In functional programming, expressions behave more like mathematical expressions: once a variable is defined, its value never changes.
 
 ##### Naming rules
 
@@ -271,6 +271,44 @@ TODO
 Unlike Haskell, ML, and OCaml, function applications are written in a syntax more akin to languages like C, Java, and Python, using parentheses and commas between arguments. 
 So, for example, `concat("one", "two")` means the function `concat` applied to the arguments `"one"` and `"two"`.
 
+By default, functions in Coal are *curried*. There is a difference between a function that takes multiple arguments and one that takes a single tuple as its argument. Consider the following two type signatures:
+
+```
+f : a -> b -> c
+g : (a, b) -> c
+```
+
+The first of these is in curried form, which is usually more convenient to work with. Curried functions can be partially applied. This is useful, for example, when working with higher-order functions. Suppose we define an addition function:
+
+```
+fun add(x, y) = x + y
+```
+
+Using partial application, we can create a new function `increment` by supplying just one argument:
+
+```
+fun increment = add(1)
+```
+
+Now, `increment` can be passed directly to a higher-order function like `map`:
+
+```
+map(increment, [1, 2, 3, 4])
+```
+
+The `curry` and `uncurry` combinators convert an uncurried function into a curried one, and vice versa.
+
+```
+curry : ((a, b) -> c) -> a -> b -> c
+uncurry : (a -> b -> c) -> (a, b) -> c
+```
+
+Here is how `curry` is used with the uncurried version of `add`, to change it into curried form.
+
+```
+let five = curry(add, 1, 4)         // or (curry(add))(1, 4)
+```
+
 #### If-then-else
 
 If-expressions are similar to those in most programming languages, in particular those in the functional family. Both the `then` and `else` branches need to be present (and have the same type):
@@ -309,7 +347,7 @@ let name = "Zlatan"
 
 >  #### A note about let-generalization
 >
-> In some ways, a let-binding is almost interchangeable with a lambda function. For example, writing `let x = 1 in increment(x)` yields the same result as `(fn(x) => increment(x))(1)`.
+> In some ways, a let-binding is interchangeable with a lambda function. For example, writing `let x = 1 in increment(x)` yields the same result as `(fn(x) => increment(x))(1)`.
 > But besides being more readable, a let-binding also has another purpose. In [Hindley-Milner](https://en.wikipedia.org/wiki/Hindley%E2%80%93Milner_type_system) languages, it is let-bindings that introduce polymorphism. Consider the following expression, which doesn't type check:
 > 
 > ```
@@ -385,6 +423,12 @@ Function expressions are first-class objects; they can be passed as arguments to
       ]
     in
       trace_int32(app_fst(fns, 3))
+```
+
+Just like with let-bindings, the arguments in a lambda-function are patterns:
+
+```
+  fn((lhs, rhs)) => lhs
 ```
 
 #### Comments
@@ -618,50 +662,12 @@ The empty tuple *does* exist, and has special meaning. It is written `()` and is
 
 ##### Tuples and currying
 
-By default, function definitions in Coal are *curried*. There is a difference between a function that takes multiple arguments and one that takes a single tuple as its argument. Consider the following two type signatures:
-
-```
-f : a -> b -> c
-g : (a, b) -> c
-```
-
-The first of these is in curried form, which is usually more convenient to work with. Curried functions can be partially applied. This is useful, for example, when working with higher-order functions. Suppose we define an addition function:
-
-```
-fun add(x, y) = x + y
-```
-
-Using partial application, we can create a new function `increment` by supplying just one argument:
-
-```
-fun increment = add(1)
-```
-
-Now, `increment` can be passed directly to a higher-order function like `map`:
-
-```
-map(increment, [1, 2, 3, 4])
-```
-
-If you really intend to specify a tuple as the only argument to a function, you need to use an extra pair of parentheses:
+To specify a tuple as the only argument to a function, you need to use an extra pair of parentheses:
 
 ```
 fun add((a, b)) = a + b
 
 let five = add((1, 4))
-```
-
-The `curry` and `uncurry` combinators convert an uncurried function into a curried one, and vice versa.
-
-```
-curry : ((a, b) -> c) -> a -> b -> c
-uncurry : (a -> b -> c) -> (a, b) -> c
-```
-
-Here is how `curry` is used with the uncurried version of `add`, to change it into curried form.
-
-```
-let five = curry(add, 1, 4)         // or (curry(add))(1, 4)
 ```
 
 #### Records
