@@ -711,7 +711,7 @@ trait <name>(<type_parameter>) {
 }
 ```
 
-Traits are very similar to type classes in Haskell. A common analogy is to think of these as interfaces in object-oriented programming. 
+When you describe a set of behaviors as a trait, you can reuse the same functionality across all types that support it. This reduces duplication and promotes code reusability. Traits are very similar to type classes in Haskell. A common analogy is to think of them as interfaces in object-oriented programming. 
 
 ```
 trait Ordered(t) {
@@ -719,7 +719,7 @@ trait Ordered(t) {
 }
 ```
 
-When you describe a set of behaviors as a trait, you can reuse the same functionality across all types that support it. This reduces duplication and promotes code reusability.
+TODO
 
 ```
 fun is_less_than(x : t, y : t) : bool with Ordered(t) =
@@ -827,7 +827,7 @@ We are going to use the `nat` data type to define the factorial function:
     }
 ```
 
-The real _ here is done by the `@`-pattern used in the second clause. 
+The magic happens _ the `@`-pattern used in the second clause. 
 
 Note that `p` is not an ordinary variable. .. and evaluates fold recursively with the value 
 
