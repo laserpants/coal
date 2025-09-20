@@ -56,12 +56,6 @@ withSupplyMC f = do
 whereClausesExpansionTrans :: (Monad m) => (c -> Writer [(Name, Name)] c) -> c -> CompilerT a m c
 whereClausesExpansionTrans f e = pure (fst $ runWriter (f e))
 
-compileUnfoldsC :: (Monad m, Data a, Monoid a) => Module a Kind () -> CompilerT a m (Module a Kind ())
-compileUnfoldsC = compileUnfolds
-
-compileFoldsC :: (Monad m, Data a, Monoid a) => Module a Kind () -> CompilerT a m (Module a Kind ())
-compileFoldsC = compileFolds
-
 compileTopLevelFoldsC :: (Monad m, Data a, Monoid a) => Module a Kind () -> CompilerT a m (Module a Kind ())
 compileTopLevelFoldsC = overModuleDefinitionsM (traverse compileTopLevelFolds)
 
@@ -133,9 +127,9 @@ typeCheckingPass =
     >=> compileTopLevelUnfoldsC
     >=> compileTopLevelFoldsC
     -- Expand unfolds (codata)
-    >=> compileUnfoldsC
+    >=> compileUnfolds
     -- Expand folds
-    >=> compileFoldsC
+    >=> compileFolds
     >=> writeDotFilesC "expand_folds"
     -- Lambda match expressions
     >=> compileLambdaMatch
