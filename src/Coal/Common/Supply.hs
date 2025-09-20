@@ -4,15 +4,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Common.Supply (
-  Supply (..),
-  supply,
-  supplied,
-  suppliedName,
-  freshName,
-) where
+module Coal.Common.Supply (Supply (..), supply, supplied, freshName) where
 
-import Control.Monad.Reader (MonadReader, ask)
 import Control.Monad.State (MonadState)
 import Extra (Name, getAndModify)
 import TextShow (showt)
@@ -27,9 +20,6 @@ instance Supply Int where
 
 supply :: (MonadState s m, Supply s) => m s
 supply = getAndModify (updateSupply succ)
-
-suppliedName :: (MonadReader Name m, MonadState s m, Supply s) => m Name
-suppliedName = ask >>= supplied . freshName
 
 {-# INLINE supplied #-}
 supplied :: (MonadState s m, Supply s) => (Int -> a) -> m a
