@@ -287,26 +287,13 @@ fun add(x, y) = x + y
 Using partial application, we can create a new function `increment` by supplying just one argument:
 
 ```
-fun increment = add(1)
+let increment = add(1)
 ```
 
 Now, `increment` can be passed directly to a higher-order function like `map`:
 
 ```
-map(increment, [1, 2, 3, 4])
-```
-
-The `curry` and `uncurry` combinators convert an uncurried function into a curried one, and vice versa.
-
-```
-curry : ((a, b) -> c) -> a -> b -> c
-uncurry : (a -> b -> c) -> (a, b) -> c
-```
-
-Here is how `curry` is used with the uncurried version of `add`, to change it into curried form.
-
-```
-let five = curry(add, 1, 4)         // or (curry(add))(1, 4)
+map(increment, [1, 2, 3, 4])   // which is the same as map(add(1), [1, 2, 3, 4])
 ```
 
 #### If-then-else
@@ -670,6 +657,19 @@ fun add((a, b)) = a + b
 let five = add((1, 4))
 ```
 
+The `curry` and `uncurry` combinators convert an uncurried function into a curried one, and vice versa.
+
+```
+curry : ((a, b) -> c) -> a -> b -> c
+uncurry : (a -> b -> c) -> (a, b) -> c
+```
+
+Here is how `curry` is used with the uncurried version of `add`, to change it into curried form.
+
+```
+let five = curry(add, 1, 4)         // or (curry(add))(1, 4)
+```
+
 #### Records
 
 Records are unordered collections of name-value pairs in which the values can be of arbitrary type, including other records. They are suitable for representing structured data with multiple properties, and nested objects: A record is written as a sequence of comma-separated *fields* enclosed in curly braces. A field consists of a name, referred to as the *label*, paired with a value. These two are separated by an equals sign (`=`). 
@@ -698,7 +698,18 @@ Variable, tuple, record, etc..
 
 ### Traits
 
-Traits in Coal are similar to type classes in Haskell. A trait describes a collection of functions that must be defined for the underlying type. A common analogy is to think of them as interfaces in object-oriented programming. 
+A *trait* describes a collection of functions that must be defined for its underlying type. 
+
+```
+trait <name>(<type_parameter>) {
+  <definition_1>: <type> 
+  <definition_2>: <type> 
+  ...
+  <definition_n>: <type> 
+}
+```
+
+It is very similar to a type class in Haskell. A common analogy is to think of these as interfaces in object-oriented programming. 
 
 ```
 trait Ordered(t) {
@@ -706,7 +717,22 @@ trait Ordered(t) {
 }
 ```
 
+The usefulness of a trait is that any function 
+and functions defined in terms of these are 
+
+```
+fun is_less_than(x : t, y : t) : bool with Ordered(t) =
+  compare(x, y) == LessThan
+```
+
+The type of `is_less_than` is `t -> t -> bool with Ordered(t)`
+Type parameters, like `t` in this type, are *universally quantified*.
+adds a constraint to this
+
+
 To make a type ...
+
+For example, we can define an ordering on the `bool` type as follows:
 
 ```
 instance Ordered(bool) {
