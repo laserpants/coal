@@ -3,24 +3,11 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Transform.Tree (
-  TreeTransform (..),
-  replace,
-  replaceWith,
-  replaceMultipleWith,
-  rename,
-) where
+module Coal.Compiler.Transform.Tree (replace, replaceWith, replaceMultipleWith, rename) where
 
 import Coal.Common.FreeVars (BoundVars (..))
 import Coal.Common.Label (Label (..))
-import Coal.Language (
-  Binding (..),
-  Choice (..),
-  Clause (..),
-  CompiledClause (..),
-  Expression (..),
-  Guard (..),
- )
+import Coal.Language
 import Control.Monad.Identity (runIdentity)
 import Data.Data (Data)
 import Extra (Name, const2, (<$$>))

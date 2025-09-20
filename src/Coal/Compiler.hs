@@ -80,12 +80,6 @@ runTypeInferenceC m = do
  where
   Module p ns ds = m
 
-recordPatternDesugarTrans :: (Monad m) => (c -> RecordDesugarStack a c) -> c -> CompilerT a m c
-recordPatternDesugarTrans f e = withSupplyC (evalRecordDesugarStack (f e) "row")
-
-recordPatternDesugarC :: (Monad m, Monoid a, Data a) => Module a Kind IndexedType -> CompilerT a m (Module a Kind IndexedType)
-recordPatternDesugarC = recordPatternDesugarTrans compileRecordPatterns
-
 matchMonadTrans :: (Monad m) => (c -> MatchMonad c) -> c -> CompilerT a m c
 matchMonadTrans f e = withSupplyC (\n -> runMatchMonad "match" n (f e))
 
@@ -165,7 +159,7 @@ mainPass =
     >=> compileOrPatterns
     >=> writeDotFilesC "patterns"
     -- Translate record patterns to select operators
-    >=> recordPatternDesugarC
+    >=> compileRecordPatterns
     >=> writeDotFilesC "record_patterns"
     -- Compile as-patterns
     >=> pure . desugarAsPatterns

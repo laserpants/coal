@@ -5,7 +5,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Transform.Fold (CompileFoldsContext (..), FoldError (..), expandFoldExpr) where
+module Coal.Compiler.Transform.Fold (CompileFoldsContext (..), expandFoldExpr) where
 
 import Coal.Common.Label (Label (..), labelName)
 import Coal.Common.Supply (freshName, supplied)
@@ -22,10 +22,11 @@ import Data.Generics.Uniplate.Data (descendM, transform, transformM)
 import Data.List.NonEmpty (NonEmpty (..))
 import Extra (Dictionary, Name, const2, foldrM, traverse_)
 
-data FoldError a
-  = FoldPatternOutsideConstructor a
-  | FoldPatternInRegularMatch a
-  deriving (Show, Eq, Ord, Read)
+-- TODO
+-- data FoldError a
+--  = FoldPatternOutsideConstructor a
+--  | FoldPatternInRegularMatch a
+--  deriving (Show, Eq, Ord, Read)
 
 class FoldContext a e where
   expandFolds :: (Monad m) => Name -> [Label ()] -> e -> CompilerT a m e

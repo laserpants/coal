@@ -1,6 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -9,53 +8,27 @@
 {-# LANGUAGE StrictData #-}
 {-# LANGUAGE TypeApplications #-}
 
-module Coal.Compiler.Transform.Pattern.RecordDesugar (
-  RecordDesugarStack (..),
-  RecordDesugarable (..),
-  compileRecordPatterns,
-  evalRecordDesugarStack,
-  runRecordDesugarStack,
-) where
+module Coal.Compiler.Transform.Pattern.RecordDesugar (RecordDesugarable (..), compileRecordPatterns) where
 
 import Coal.Common.Label (Label (..))
-import Coal.Common.Supply (suppliedName)
+import Coal.Common.Supply (freshName, supplied)
+import Coal.Compiler.Journal (RecordInfo, listenRecordInfo, tellRecordInfo)
+import Coal.Compiler.Stack
 import Coal.Language
-import Coal.Language.Module (Module (..))
-import Coal.Language.Pattern (IndexedPattern)
+import Coal.Language.Module
 import Control.Monad.RWS
 import Data.Data (Data)
 import Data.Foldable (foldrM)
 import Data.Generics.Uniplate.Data (transformBiM)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
-import Extra (Dictionary, Name)
+import Extra (Name)
 
-compileRecordPatterns :: forall a. (Data a, Monoid a) => Module a Kind IndexedType -> RecordDesugarStack a (Module a Kind IndexedType)
+compileRecordPatterns :: forall m a. (Monad m, Data a, Monoid a) => Module a Kind IndexedType -> CompilerT a m (Module a Kind IndexedType)
 compileRecordPatterns = transformBiM (desugarRecordPatterns @a @(Expression a (Type TypeIndex Kind)))
 
-type RecordInfo a = (Name, Dictionary (IndexedPattern a), Maybe (IndexedPattern a))
-
-newtype RecordDesugarStack a p = RecordDesugarStack {desugarRecordPatternsStack :: RWS Name [RecordInfo a] Int p}
-  deriving
-    ( Functor
-    , Applicative
-    , Monad
-    , MonadReader Name
-    , MonadWriter [RecordInfo a]
-    , MonadState Int
-    , MonadRWS Name [RecordInfo a] Int
-    )
-
-{-# INLINE evalRecordDesugarStack #-}
-evalRecordDesugarStack :: RecordDesugarStack a p -> Name -> Int -> (p, Int)
-evalRecordDesugarStack a n s = (p, m) where (p, m, _) = runRWS (desugarRecordPatternsStack a) n s
-
-{-# INLINE runRecordDesugarStack #-}
-runRecordDesugarStack :: RecordDesugarStack a p -> Name -> Int -> (p, Int, [RecordInfo a])
-runRecordDesugarStack a = runRWS (desugarRecordPatternsStack a)
-
 class RecordDesugarable a p where
-  desugarRecordPatterns :: p -> RecordDesugarStack a p
+  desugarRecordPatterns :: (Monad m) => p -> CompilerT a m p
 
 instance (RecordDesugarable a p) => RecordDesugarable a (Maybe p) where
   desugarRecordPatterns = traverse desugarRecordPatterns
@@ -86,7 +59,7 @@ instance (Data a, Monoid a) => RecordDesugarable a (Clause a IndexedType) where
   desugarRecordPatterns =
     \case
       EClause a p cs -> do
-        (q, fs) <- listen (desugarRecordPatterns p)
+        (q, fs) <- listenRecordInfo (desugarRecordPatterns p)
         ds <- forM cs $
           \case
             CPlain a1 gs e -> do
@@ -105,8 +78,8 @@ instance (Data a, Monoid a) => RecordDesugarable a (Pattern a IndexedType) where
       PConstructor a ll ps ->
         PConstructor a ll <$> desugarRecordPatterns ps
       PRecord _ t@(TIntrinsic (IRecord r)) d p -> do
-        name <- suppliedName
-        tell [(name, d, p)]
+        name <- supplied (freshName "row")
+        tellRecordInfo [(name, d, p)]
         pure (PConstructor mempty (Label t "$Record") [PVariable mempty (Label r name)])
       PListCons a t p1 p2 ->
         PListCons a t <$> desugarRecordPatterns p1 <*> desugarRecordPatterns p2
@@ -133,9 +106,9 @@ extractVarName =
     _ ->
       "_"
 
-desugar :: (Data a, Monoid a) => RecordInfo a -> Expression a IndexedType -> RecordDesugarStack a (Expression a IndexedType)
+desugar :: (Data a, Monoid a, Monad m) => RecordInfo a -> Expression a IndexedType -> CompilerT a m (Expression a IndexedType)
 desugar (name, dict, p1) expr = do
-  names <- replicateM (length fields - 1) suppliedName
+  names <- replicateM (length fields - 1) (supplied (freshName "row"))
   let r1 = maybe RNil extractRow p1
       v1 = extractVarName p1
       t1 = maybe (TIntrinsic (IRecord (TRow RNil))) typeOf p1
@@ -145,7 +118,7 @@ desugar (name, dict, p1) expr = do
  where
   fields = Map.toList dict
 
-go :: (Data a, Monoid a) => Name -> ((Name, IndexedPattern a), Name) -> (Name, Row TypeIndex Kind IndexedType, Expression a IndexedType) -> RecordDesugarStack a (Name, Row TypeIndex Kind IndexedType, Expression a IndexedType)
+go :: (Data a, Monoid a, Monad m) => Name -> ((Name, IndexedPattern a), Name) -> (Name, Row TypeIndex Kind IndexedType, Expression a IndexedType) -> CompilerT a m (Name, Row TypeIndex Kind IndexedType, Expression a IndexedType)
 go n ((fname, p), prefix) (var, row, expr) = do
   let t1 = typeOf expr
       t2 = typeOf p

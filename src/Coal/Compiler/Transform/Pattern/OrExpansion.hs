@@ -20,7 +20,7 @@ import qualified Data.List.NonEmpty as NonEmpty
 import Data.Semigroup (sconcat)
 import Extra (Map, traverseM)
 
-compileOrPatterns :: forall m a k t. (Monad m, Data a, Data k, Data t) => Module a k t -> m (Module a k t)
+compileOrPatterns :: forall a k t m. (Monad m, Data a, Data k, Data t) => Module a k t -> m (Module a k t)
 compileOrPatterns = transformBiM (expandExpression :: Expression a t -> m (Expression a t))
 
 expandExpression :: (Monad m) => Expression a t -> m (Expression a t)
