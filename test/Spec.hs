@@ -7,9 +7,10 @@ import Coal.Ast.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment (..))
 import Coal.Common.Label (Label (..))
 import Coal.Common.Name (Dictionary, Name)
-import Coal.Compiler (expandWhereClausesC, kernelTranslationC, mainPass, typeCheckingPass, writeDotFiles)
+import Coal.Compiler (kernelTranslationC, mainPass, typeCheckingPass, writeDotFiles)
 import Coal.Compiler.Environment
 import Coal.Compiler.Stack
+import Coal.Compiler.Transform.WhereClauses
 import Coal.Compiler.TypeInference.Errors
 import Coal.Graphviz.Dot (writeDotFile)
 import Coal.Kernel.Compiler (compileModules)
@@ -215,14 +216,14 @@ spec = do
   print (x == Right "3\n")
   x <- main99
   print (x == Right "512\n")
---  x <- main100
---  print (x == Right "1\n")
---  x <- main101
---  print (x == Right "2\n")
---  x <- main102
---  print (x == Right "100\n")
---  x <- main103
---  print (x == Right "1000\n")
+  --  x <- main100
+  --  print (x == Right "1\n")
+  --  x <- main101
+  --  print (x == Right "2\n")
+  --  x <- main102
+  --  print (x == Right "100\n")
+  --  x <- main103
+  --  print (x == Right "1000\n")
   x <- main104
   print (x == Right "2\n")
   x <- main105
@@ -264,7 +265,6 @@ spec = do
   x <- main124
   print (x == Right "5\n")
 
-
 --  x <- main85
 --  print (x == Right "aa\n")
 --  x <- main86
@@ -285,7 +285,7 @@ runTestFiles files = do
   r <- compileFiles files
   case r of
     Left err@(CompilerError msg) -> do
---      liftIO $ Text.putStrLn msg
+      --      liftIO $ Text.putStrLn msg
       pure (Left err)
     Right{} ->
       Right <$> runTestBuild
@@ -1416,7 +1416,7 @@ run modules = do
       liftIO $ writeDotFiles "untyped" m1
       defs <- gets compilerTypeDefinitions
       let m2 = overModuleDefinitions (insertImportedTypes defs) m1
-      m3 <- expandWhereClausesC m2
+      m3 <- expandWhereClausesModule m2
       setVerbatimSourceC src
       insertNamesC names
       case m3 of

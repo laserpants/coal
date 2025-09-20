@@ -6,6 +6,8 @@ module Coal.Compiler.Journal (
   tellPatterns,
   tellPatterns1,
   listenPatterns,
+  listenWhereClauses,
+  tellWhereClauses,
 ) where
 
 import Coal.Language
@@ -15,23 +17,33 @@ import Extra (Name)
 
 data CompilerJournal a = CompilerJournal
   { compilerJournalPatterns :: [(Name, Pattern a IndexedType)]
+  , compilerJournalWhereClauses :: [(Name, Name)]
   }
   deriving (Show, Eq, Ord, Read)
 
 instance Semigroup (CompilerJournal a) where
-  (<>) (CompilerJournal a1) (CompilerJournal b1) =
-    CompilerJournal (a1 <> b1)
+  (<>) (CompilerJournal a1 a2) (CompilerJournal b1 b2) =
+    CompilerJournal
+      (a1 <> b1)
+      (a2 <> b2)
 
 instance Monoid (CompilerJournal a) where
-  mempty = CompilerJournal []
+  mempty = CompilerJournal [] []
 
 {-# INLINE tellPatterns #-}
 tellPatterns :: (MonadWriter (CompilerJournal a) m) => [(Name, Pattern a IndexedType)] -> m ()
-tellPatterns a = tell $ CompilerJournal a
+tellPatterns w = tell $ CompilerJournal w []
 
 {-# INLINE tellPatterns1 #-}
 tellPatterns1 :: (MonadWriter (CompilerJournal a) m) => (Name, Pattern a IndexedType) -> m ()
-tellPatterns1 a = tellPatterns [a]
+tellPatterns1 w = tellPatterns [w]
+
+{-# INLINE tellWhereClauses #-}
+tellWhereClauses :: (MonadWriter (CompilerJournal a) m) => [(Name, Name)] -> m ()
+tellWhereClauses w = tell $ CompilerJournal [] w
 
 listenPatterns :: (MonadWriter (CompilerJournal a) m) => m e -> m (e, [(Name, Pattern a IndexedType)])
-listenPatterns a = second compilerJournalPatterns <$> listen a
+listenPatterns w = second compilerJournalPatterns <$> listen w
+
+listenWhereClauses :: (MonadWriter (CompilerJournal a) m) => m e -> m (e, [(Name, Name)])
+listenWhereClauses w = second compilerJournalWhereClauses <$> listen w

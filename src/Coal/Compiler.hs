@@ -24,7 +24,6 @@ import Coal.Compiler.Transform.Pattern.OrExpansion
 import Coal.Compiler.Transform.Pattern.RecordDesugar
 import Coal.Compiler.Transform.Type.AliasExpansion (AliasContext (..))
 import Coal.Compiler.Transform.Unfold
-import Coal.Compiler.Transform.WhereClauses
 import Coal.Compiler.TypeInference
 import Coal.Graphviz.Dot (writeDotFile)
 import qualified Coal.Kernel.Language as Kernel
@@ -56,9 +55,6 @@ withSupplyMC f = do
 
 whereClausesExpansionTrans :: (Monad m) => (c -> Writer [(Name, Name)] c) -> c -> CompilerT a m c
 whereClausesExpansionTrans f e = pure (fst $ runWriter (f e))
-
-expandWhereClausesC :: (Monad m, Data a) => Module a Kind () -> CompilerT a m (Module a Kind ())
-expandWhereClausesC = whereClausesExpansionTrans expandWhereClausesModule
 
 compileUnfoldsC :: (Monad m, Data a, Monoid a) => Module a Kind () -> CompilerT a m (Module a Kind ())
 compileUnfoldsC = compileUnfolds

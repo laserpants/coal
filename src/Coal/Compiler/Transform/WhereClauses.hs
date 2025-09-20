@@ -4,13 +4,14 @@
 
 module Coal.Compiler.Transform.WhereClauses (expandWhereClausesModule) where
 
+import Coal.Compiler.Journal
+import Coal.Compiler.Stack
 import Coal.Compiler.Transform.Tree
 import Coal.Language.Module
-import Control.Monad.Writer
 import Data.Data (Data)
 import Extra (Name)
 
-liftWhereClause :: (MonadWriter [(Name, Name)] m) => Name -> Definition a k t -> m (Definition a k t)
+liftWhereClause :: (Monad m) => Name -> Definition a k t -> CompilerT a m (Definition a k t)
 liftWhereClause name =
   \case
     DFunction loc old f _ -> do
@@ -22,25 +23,25 @@ liftWhereClause name =
     d ->
       pure d
 
-manufacturedName :: (MonadWriter [(Name, Name)] m) => Name -> Name -> m Name
+manufacturedName :: (Monad m) => Name -> Name -> CompilerT a m Name
 manufacturedName name old = do
-  tell [(old, new)]
+  tellWhereClauses [(old, new)]
   pure new
  where
   new = name <> "__$local_" <> old
 
-expandWhereClausesModule :: (Data a, Data t, Ord t, MonadWriter [(Name, Name)] m) => Module a k t -> m (Module a k t)
+expandWhereClausesModule :: (Monad m, Data a, Ord t, Data t) => Module a k t -> CompilerT a m (Module a k t)
 expandWhereClausesModule (Module p ns ds) =
   Module p ns . concat <$> traverse expandWhereClausesDefinition ds
 
-expandWhereClausesDefinition :: (Data a, Data t, Ord t, MonadWriter [(Name, Name)] m) => Definition a k t -> m [Definition a k t]
+expandWhereClausesDefinition :: (Monad m, Data a, Ord t, Data t) => Definition a k t -> CompilerT a m [Definition a k t]
 expandWhereClausesDefinition =
   \case
     DFunction loc name f ws -> do
-      (ds, names) <- listen $ traverse (liftWhereClause name) ws
+      (ds, names) <- listenWhereClauses $ traverse (liftWhereClause name) ws
       pure (replaceNames names <$> (ds <> [DFunction loc name f []]))
     DConstant loc name c ws -> do
-      (ds, names) <- listen $ traverse (liftWhereClause name) ws
+      (ds, names) <- listenWhereClauses $ traverse (liftWhereClause name) ws
       pure (replaceNames names <$> (ds <> [DConstant loc name c []]))
     d ->
       pure [d]
