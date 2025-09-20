@@ -715,7 +715,7 @@ Traits are very similar to type classes in Haskell. A common analogy is to think
 
 ```
 trait Ordered(t) {
-  compare : t -> t -> Order   // where we define type Order = Lt | Gt | Eq
+  compare : t -> t -> Order   // where type Order = Lt | Gt | Eq
 }
 ```
 
