@@ -1,21 +1,15 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Transform.Nats (
-  NatExpansion (..),
-  CompileNatsContext (..),
-  evalNatExpansion,
-  runNatExpansion,
-)
-where
+module Coal.Compiler.Transform.Nats (compileNats) where
 
 import Coal.Common.Label (Label (..))
-import Coal.Common.Supply (suppliedName)
+import Coal.Common.Supply (freshName, supplied)
+import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module (ConstantDef (..), Definition (..), FunctionDef (..), Module (..))
 import Control.Monad ((<=<))
@@ -27,25 +21,8 @@ import Data.Generics.Uniplate.Data (transformM)
 import Data.List.NonEmpty (NonEmpty (..), (<|))
 import Extra (Dictionary, Name)
 
-newtype NatExpansion a = NatExpansion {natExpansionStack :: RWS Name () Int a}
-  deriving
-    ( Functor
-    , Applicative
-    , Monad
-    , MonadReader Name
-    , MonadState Int
-    )
-
-evalNatExpansion :: Name -> Int -> NatExpansion a -> a
-evalNatExpansion r s = fst . runNatExpansion r s
-
-runNatExpansion :: Name -> Int -> NatExpansion a -> (a, Int)
-runNatExpansion r s e = (a, s')
- where
-  (a, s', _) = runRWS (natExpansionStack e) r s
-
-class CompileNatsContext a where
-  compileNats :: a -> NatExpansion a
+class CompileNatsContext e where
+  compileNats :: (Monad m) => e -> CompilerT a m e
 
 instance (CompileNatsContext a) => CompileNatsContext [a] where
   compileNats = traverse compileNats
@@ -56,7 +33,7 @@ instance (CompileNatsContext a) => CompileNatsContext (NonEmpty a) where
 instance (CompileNatsContext a) => CompileNatsContext (Dictionary a) where
   compileNats = traverse compileNats
 
-convertConstructor :: IndexedType -> NatExpansion IndexedType
+convertConstructor :: (Monad m) => IndexedType -> CompilerT a m IndexedType
 convertConstructor =
   \case
     TIntrinsic INat ->
@@ -103,7 +80,7 @@ instance (Monoid a) => CompileNatsContext (CompiledClause a IndexedType) where
   compileNats =
     \case
       ECompiledClause (Label _ "Succ" :| [Label _ s]) e -> do
-        name <- suppliedName
+        name <- supplied (freshName "nats")
         pure $
           ECompiledClause (Label (TConstructor KType "$Nat" `TArrow` TConstructor KType "$Nat") "$Succ" :| [Label (TIntrinsic IInt32) name]) $
             ERecursiveLet

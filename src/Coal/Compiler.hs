@@ -92,12 +92,6 @@ matchMonadTrans f e = withSupplyC (\n -> runMatchMonad "match" n (f e))
 compileMatchExprsC :: (Monad m, MatchExpressionContext c) => c -> CompilerT a m c
 compileMatchExprsC = matchMonadTrans compileMatchExprs
 
-natExpansionTrans :: (Monad m) => (c -> NatExpansion c) -> c -> CompilerT a m c
-natExpansionTrans f e = withSupplyC (\n -> runNatExpansion "succ" n (f e))
-
-compileNatsC :: (Monad m, Monoid a, Data a) => Module a Kind IndexedType -> CompilerT a m (Module a Kind IndexedType)
-compileNatsC = natExpansionTrans compileNats
-
 placeholderTrans :: (Monad m) => (c -> DictionaryStack c) -> c -> CompilerT a m c
 placeholderTrans f e = do
   env1 <- gets compilerNameStore
@@ -184,7 +178,7 @@ mainPass =
     -- Denormalize top-level functions and constants
     >=> pure . denormalizeObject
     -- Expand nats
-    >=> compileNatsC
+    >=> compileNats
 
 compileModule :: (MonadIO m, Monoid a, Data a, Eq a, Show a) => Module a Kind () -> CompilerT a m (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))
 compileModule =
