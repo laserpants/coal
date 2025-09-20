@@ -1,17 +1,11 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.PatternMatching.Rule (
-  MatchMonad (..),
-  matchPatterns,
-  evalMatchMonad,
-  runMatchMonad,
-) where
+module Coal.Compiler.PatternMatching.Rule (matchPatterns) where
 
 import Coal.Common.Label (Label (..))
-import Coal.Common.Supply (suppliedName)
+import Coal.Common.Supply (freshName, supplied)
 import Coal.Compiler.PatternMatching.Envelope (
   EnvelopeClause (..),
   EnvelopeExpression (..),
@@ -19,28 +13,12 @@ import Coal.Compiler.PatternMatching.Envelope (
   EnvelopePattern (..),
  )
 import Coal.Compiler.PatternMatching.Equation
-import Control.Monad.Reader (MonadReader, ReaderT, runReaderT)
-import Control.Monad.State (MonadState, State, evalState, runState)
-import Extra (Name, foldrM)
+import Coal.Compiler.Stack
+import Extra (foldrM)
 
-newtype MatchMonad a = MatchMonad {matchMonadStack :: ReaderT Name (State Int) a}
-  deriving
-    ( Functor
-    , Applicative
-    , Monad
-    , MonadState Int
-    , MonadReader Name
-    )
+type MatchRule a m p e t = [Label t] -> [p e t] -> EnvelopeExpression e t -> CompilerT a m (EnvelopeExpression e t)
 
-evalMatchMonad :: Name -> Int -> MatchMonad a -> a
-evalMatchMonad name n e = evalState (runReaderT (matchMonadStack e) name) n
-
-runMatchMonad :: Name -> Int -> MatchMonad a -> (a, Int)
-runMatchMonad name n e = runState (runReaderT (matchMonadStack e) name) n
-
-type MatchRule p e t = [Label t] -> [p e t] -> EnvelopeExpression e t -> MatchMonad (EnvelopeExpression e t)
-
-matchPatterns :: (Ord t, EnvelopeHost e t) => MatchRule PatternEquation e t
+matchPatterns :: (Ord t, EnvelopeHost e t, Monad m) => MatchRule a m PatternEquation e t
 matchPatterns us qs e =
   case patternEquationSet qs of
     AllEmpty ees ->
@@ -54,7 +32,7 @@ matchPatterns us qs e =
     Mixed eqss ->
       foldrM (matchPatterns us) e eqss
 
-emptyRule :: (EnvelopeHost e t) => MatchRule EnvelopeExpression e t
+emptyRule :: (EnvelopeHost e t, Monad m) => MatchRule a m EnvelopeExpression e t
 emptyRule us eqs e =
   case eqs of
     (MFail : es) ->
@@ -64,7 +42,7 @@ emptyRule us eqs e =
     [] ->
       pure e
 
-literalRule :: (Ord t, EnvelopeHost e t) => MatchRule HeadLiteralEquation e t
+literalRule :: (Ord t, EnvelopeHost e t, Monad m) => MatchRule a m HeadLiteralEquation e t
 literalRule [] _ _ = error "Implementation error"
 literalRule (u : us) eqs ex = foldrM go ex eqs
  where
@@ -72,14 +50,13 @@ literalRule (u : us) eqs ex = foldrM go ex eqs
     e2 <- matchPatterns us [patternEquation qs e] e1
     pure (MConditional u lit e2 e1)
 
-variableRule :: (Ord t, EnvelopeHost e t) => MatchRule HeadVariableEquation e t
+variableRule :: (Ord t, EnvelopeHost e t, Monad m) => MatchRule a m HeadVariableEquation e t
 variableRule [] _ _ = error "Implementation error"
 variableRule (Label _ u : us) eqs ex = matchPatterns us (updateEq <$> eqs) ex
  where
   updateEq (HeadVariableEquation (Label _ name) (PatternEquationBody ps e)) =
     patternEquation ps (replace name u e)
-
-constructorRule :: (Ord t, EnvelopeHost e t) => MatchRule HeadConstructorEquation e t
+constructorRule :: (Ord t, EnvelopeHost e t, Monad m) => MatchRule a m HeadConstructorEquation e t
 constructorRule [] _ _ = error "Implementation error"
 constructorRule (u@(Label t _) : us) eqs ex = do
   cs <- traverse processGroup (groupByHeadConstructor eqs)
@@ -93,13 +70,13 @@ constructorRule (u@(Label t _) : us) eqs ex = do
   shift (HeadConstructorEquation _ ps (PatternEquationBody qs e)) =
     patternEquation (ps <> qs) e
 
-suppliedLabel :: EnvelopePattern e t -> MatchMonad (Label t)
+suppliedLabel :: (Monad m) => EnvelopePattern e t -> CompilerT a m (Label t)
 suppliedLabel =
   \case
     MVariable (Label t name) -> do
-      prefix <- suppliedName
+      prefix <- supplied (freshName "match")
       pure (Label t (prefix <> "." <> name))
     MConstructor (Label t _) _ ->
-      Label t <$> suppliedName
+      Label t <$> supplied (freshName "match")
     MLiteral t _ ->
-      Label t <$> suppliedName
+      Label t <$> supplied (freshName "match")

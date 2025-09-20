@@ -2,6 +2,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
@@ -13,11 +14,12 @@ module Coal.Compiler.PatternMatching (
 ) where
 
 import Coal.Common.Label (Label (..))
-import Coal.Common.Supply (suppliedName)
+import Coal.Common.Supply (freshName, supplied)
 import Coal.Compiler.PatternMatching.Compiler (TypeProxy (..), compileEnvelope)
 import Coal.Compiler.PatternMatching.Envelope (EnvelopeExpression (..), EnvelopePattern (..))
 import Coal.Compiler.PatternMatching.Equation (patternEquation)
-import Coal.Compiler.PatternMatching.Rule (MatchMonad (..), matchPatterns)
+import Coal.Compiler.PatternMatching.Rule (matchPatterns)
+import Coal.Compiler.Stack
 import Coal.Compiler.Transform.Tree (replaceWith)
 import Coal.Language (Binding (..), Choice (..), Clause (..), Expression (..), Pattern (..), Primitive (..))
 import Coal.Language.Module (ConstantDef (..), Definition (..), FunctionDef (..), Module (..))
@@ -27,54 +29,55 @@ import Data.List.NonEmpty (NonEmpty (..), toList)
 import Extra (Dictionary)
 import TextShow
 
-class MatchExpressionContext a where
-  compileMatchExprs :: a -> MatchMonad a
+class MatchExpressionContext a c where
+  compileMatchExprs :: (Monad m) => c -> CompilerT a m c
 
-instance (MatchExpressionContext a) => MatchExpressionContext [a] where
+instance (MatchExpressionContext a c) => MatchExpressionContext a [c] where
   compileMatchExprs = traverse compileMatchExprs
 
-instance (MatchExpressionContext a) => MatchExpressionContext (Maybe a) where
+instance (MatchExpressionContext a c) => MatchExpressionContext a (Maybe c) where
   compileMatchExprs = traverse compileMatchExprs
 
-instance (MatchExpressionContext a) => MatchExpressionContext (NonEmpty a) where
+instance (MatchExpressionContext a c) => MatchExpressionContext a (NonEmpty c) where
   compileMatchExprs = traverse compileMatchExprs
 
-instance (MatchExpressionContext a) => MatchExpressionContext (Dictionary a) where
+instance (MatchExpressionContext a c) => MatchExpressionContext a (Dictionary c) where
   compileMatchExprs = traverse compileMatchExprs
 
 type MatchClasses a t = (Show a, Data a, Monoid a, Show t, Data t, TypeProxy t, Ord t)
 
-instance (Eq a, MatchClasses a t, Data k) => MatchExpressionContext (Module a k t) where
-  compileMatchExprs = transformBiM (compileMatchExprsE :: Expression a t -> MatchMonad (Expression a t))
+instance (Eq a, MatchClasses a t, Data k) => MatchExpressionContext a (Module a k t) where
+  compileMatchExprs = transformBiM (compileMatchExprsE :: (Monad m) => Expression a t -> CompilerT a m (Expression a t))
 
-instance (Eq a, MatchClasses a t, Data k) => MatchExpressionContext (Definition a k t) where
-  compileMatchExprs = transformBiM (compileMatchExprsE :: Expression a t -> MatchMonad (Expression a t))
+instance (Eq a, MatchClasses a t, Data k) => MatchExpressionContext a (Definition a k t) where
+  compileMatchExprs = transformBiM (compileMatchExprsE :: (Monad m) => Expression a t -> CompilerT a m (Expression a t))
 
-instance (Eq a, MatchClasses a t) => MatchExpressionContext (FunctionDef a t) where
-  compileMatchExprs = transformBiM (compileMatchExprsE :: Expression a t -> MatchMonad (Expression a t))
+instance (Eq a, MatchClasses a t) => MatchExpressionContext a (FunctionDef a t) where
+  compileMatchExprs = transformBiM (compileMatchExprsE :: (Monad m) => Expression a t -> CompilerT a m (Expression a t))
 
-instance (Eq a, MatchClasses a t) => MatchExpressionContext (ConstantDef a t) where
-  compileMatchExprs = transformBiM (compileMatchExprsE :: Expression a t -> MatchMonad (Expression a t))
+instance (Eq a, MatchClasses a t) => MatchExpressionContext a (ConstantDef a t) where
+  compileMatchExprs = transformBiM (compileMatchExprsE :: (Monad m) => Expression a t -> CompilerT a m (Expression a t))
 
-instance (Eq a, MatchClasses a t) => MatchExpressionContext (Clause a t) where
-  compileMatchExprs = transformBiM (compileMatchExprsE :: Expression a t -> MatchMonad (Expression a t))
+instance (Eq a, MatchClasses a t) => MatchExpressionContext a (Clause a t) where
+  compileMatchExprs = transformBiM (compileMatchExprsE :: (Monad m) => Expression a t -> CompilerT a m (Expression a t))
 
-instance (Eq a, MatchClasses a t) => MatchExpressionContext (Binding Expression a t) where
-  compileMatchExprs = transformBiM (compileMatchExprsE :: Expression a t -> MatchMonad (Expression a t))
+instance (Eq a, MatchClasses a t) => MatchExpressionContext a (Binding Expression a t) where
+  compileMatchExprs = transformBiM (compileMatchExprsE :: (Monad m) => Expression a t -> CompilerT a m (Expression a t))
 
-instance (Eq a, MatchClasses a t) => MatchExpressionContext (Expression a t) where
+instance (Eq a, MatchClasses a t) => MatchExpressionContext a (Expression a t) where
   compileMatchExprs = transformM compileMatchExprsE
 
-compileMatchExprsE :: (Eq a, MatchClasses a t) => Expression a t -> MatchMonad (Expression a t)
+compileMatchExprsE :: (Eq a, MatchClasses a t, Monad m) => Expression a t -> CompilerT a m (Expression a t)
 compileMatchExprsE =
   \case
     EMatch _ _ e cs -> do
-      name <- suppliedName
+      -- TODO
+      name <- supplied (freshName "match")
       replaceWith name e <$> compileClauses (Label (expressionType e) name) cs
     e ->
       pure e
 
-compileClauses :: (Eq a, MatchClasses a t) => Label t -> NonEmpty (Clause a t) -> MatchMonad (Expression a t)
+compileClauses :: (Eq a, MatchClasses a t, Monad m) => Label t -> NonEmpty (Clause a t) -> CompilerT a m (Expression a t)
 compileClauses ll cs = compileEnvelope <$> matchPatterns [ll] eqs MFail
  where
   eqs = uncurry patternEquation . translateClause <$> toList cs

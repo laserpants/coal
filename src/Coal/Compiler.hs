@@ -9,7 +9,7 @@ module Coal.Compiler where
 import Coal.Compiler.Environment (overCompilerDictionaryNameEnvironment)
 import Coal.Compiler.Kernel.TranslateModule (translateModule)
 import Coal.Compiler.PatternMatching
-import Coal.Compiler.PatternMatching.Rule (MatchMonad (..), runMatchMonad)
+import Coal.Compiler.PatternMatching.Rule -- (MatchMonad (..), runMatchMonad)
 import Coal.Compiler.Stack
 import Coal.Compiler.Transform.Definition.Fold
 import Coal.Compiler.Transform.Definition.Unfold
@@ -73,12 +73,6 @@ runTypeInferenceC m = do
   pure (Module p ns (normalizeTypeIndexes tdefs))
  where
   Module p ns ds = m
-
-matchMonadTrans :: (Monad m) => (c -> MatchMonad c) -> c -> CompilerT a m c
-matchMonadTrans f e = withSupplyC (\n -> runMatchMonad "match" n (f e))
-
-compileMatchExprsC :: (Monad m, MatchExpressionContext c) => c -> CompilerT a m c
-compileMatchExprsC = matchMonadTrans compileMatchExprs
 
 -- TODO
 placeholderTrans :: (Monad m) => (c -> CompilerT a m c) -> c -> CompilerT a m c
@@ -154,7 +148,7 @@ mainPass =
     >=> pure . desugarAsPatterns
     >=> writeDotFilesC "as_patterns"
     -- Compile match statements
-    >=> compileMatchExprsC
+    >=> compileMatchExprs
     >=> writeDotFilesC "match_exprs"
     -- Placeholder insertion
     >=> placeholderInsertionC
