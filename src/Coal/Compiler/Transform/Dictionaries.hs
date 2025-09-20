@@ -82,8 +82,12 @@ findFirstMatch (Trait name t) = do
 substituteInScheme :: Substitution -> Scheme o Kind IndexedType -> IndexedScheme
 substituteInScheme sub (Forall _ ts t) = scheme (apply sub ts) (apply sub t)
 
-mapEntriesM :: (Monad m) => Dictionary IndexedScheme -> ((Name, IndexedScheme) -> m (Name, Expression a IndexedType)) -> m (Maybe (Dictionary (Expression a IndexedType)))
-mapEntriesM d f = Just . Map.fromList <$> traverse f (Map.toList d)
+mapEntriesM ::
+  (Monad m) =>
+  Dictionary IndexedScheme ->
+  ((Name, IndexedScheme) -> m (Name, Expression a IndexedType)) ->
+  m (Dictionary (Expression a IndexedType))
+mapEntriesM d f = Map.fromList <$> traverse f (Map.toList d)
 
 lookupTraitInstance :: (Monoid a, Monad m) => Trait IndexedType -> CompilerT a m (Maybe (Dictionary (Expression a IndexedType)))
 lookupTraitInstance trait@(Trait name _) = do
@@ -92,7 +96,7 @@ lookupTraitInstance trait@(Trait name _) = do
     Nothing ->
       pure Nothing
     Just (t, a, b) ->
-      mapEntriesM b (uncurry (go t (Trait name a)))
+      Just <$> mapEntriesM b (uncurry (go t (Trait name a)))
  where
   go t1 (Trait tn _) n (Forall _ ts t) = do
     expr <- applyTraits (Label t (instanceLabel (Trait tn t1) n)) ts
