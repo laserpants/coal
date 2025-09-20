@@ -25,7 +25,6 @@ import Data.Foldable (foldrM)
 import Data.Generics.Uniplate.Data (descendM)
 import Data.List (nub)
 import Data.List.NonEmpty (NonEmpty (..), toList)
-import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import Data.Maybe (catMaybes)
 import Data.Text (isPrefixOf)
@@ -57,7 +56,7 @@ tryMatch t u = do
   var <- supplied id
   pure (evalUnifier var (match t u))
 
-findFirstMatch :: (Monad m) => Trait IndexedType -> CompilerT a m (Maybe (ParameterizedType, IndexedType, Map Name IndexedScheme))
+findFirstMatch :: (Monad m) => Trait IndexedType -> CompilerT a m (Maybe (ParameterizedType, IndexedType, Dictionary IndexedScheme))
 findFirstMatch (Trait name t) = do
   env <- asks compilerInstanceEnvironment
   case Environment.lookup name env of
@@ -86,7 +85,7 @@ substituteInScheme sub (Forall _ ts t) = scheme (apply sub ts) (apply sub t)
 mapEntriesM :: (Monad m) => Dictionary IndexedScheme -> ((Name, IndexedScheme) -> m (Name, Expression a IndexedType)) -> m (Maybe (Dictionary (Expression a IndexedType)))
 mapEntriesM d f = Just . Map.fromList <$> traverse f (Map.toList d)
 
-lookupTraitInstance :: (Monoid a, Monad m) => Trait IndexedType -> CompilerT a m (Maybe (Map Name (Expression a IndexedType)))
+lookupTraitInstance :: (Monoid a, Monad m) => Trait IndexedType -> CompilerT a m (Maybe (Dictionary (Expression a IndexedType)))
 lookupTraitInstance trait@(Trait name _) = do
   found <- findFirstMatch trait
   case found of
