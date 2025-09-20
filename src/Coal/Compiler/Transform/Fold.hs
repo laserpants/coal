@@ -1,31 +1,21 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Transform.Fold (
-  CompileFoldsContext (..),
-  FoldExpansion (..),
-  FoldError (..),
-  runFoldExpansion,
-  evalFoldExpansion,
-  expandFoldExpr,
-) where
+module Coal.Compiler.Transform.Fold (CompileFoldsContext (..), FoldError (..), expandFoldExpr) where
 
 import Coal.Common.Label (Label (..), labelName)
-import Coal.Common.Supply (suppliedName)
+import Coal.Common.Supply (freshName, supplied)
+import Coal.Compiler.Stack
 import Coal.Compiler.Transform.Expression
 import Coal.Compiler.Transform.Flattening (flattenApplication)
 import Coal.Compiler.Transform.Tree (replace)
 import Coal.Language (Choice (..), Clause (..), Expression (..), Pattern (..))
 import Coal.Language.Module (ConstantDef (..), Definition (..), FunctionDef (..), InstanceDef (..), Module (..))
 import Control.Monad.Except
-import Control.Monad.RWS (RWS, runRWS)
-import Control.Monad.Reader (MonadReader)
-import Control.Monad.State (MonadState)
 import Control.Monad.Writer (execWriter, tell)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (descendM, transform, transformM)
@@ -37,27 +27,9 @@ data FoldError a
   | FoldPatternInRegularMatch a
   deriving (Show, Eq, Ord, Read)
 
-newtype FoldExpansion a e = FoldExpansion {foldExpansionStack :: ExceptT (FoldError a) (RWS Name () Int) e}
-  deriving
-    ( Functor
-    , Applicative
-    , Monad
-    , MonadReader Name
-    , MonadState Int
-    , MonadError (FoldError a)
-    )
-
-evalFoldExpansion :: Name -> Int -> FoldExpansion a e -> Either (FoldError a) e
-evalFoldExpansion name s = fst . runFoldExpansion name s
-
-runFoldExpansion :: Name -> Int -> FoldExpansion a e -> (Either (FoldError a) e, Int)
-runFoldExpansion r s e = (a, s')
- where
-  (a, s', _) = runRWS (runExceptT (foldExpansionStack e)) r s
-
 class FoldContext a e where
-  expandFolds :: (MonadError (FoldError a) m) => Name -> [Label ()] -> e -> m e
-  expandMatch :: (MonadError (FoldError a) m) => e -> m ()
+  expandFolds :: (Monad m) => Name -> [Label ()] -> e -> CompilerT a m e
+  expandMatch :: (Monad m) => e -> CompilerT a m ()
 
 instance (FoldContext a e) => FoldContext a [e] where
   expandFolds name = traverse . expandFolds name
@@ -71,7 +43,9 @@ instance (Monoid a, Data a) => FoldContext a (Clause a ()) where
   expandFolds name _ =
     \case
       EClause _ (PAtVariable loc _) _ ->
-        throwError (FoldPatternOutsideConstructor loc)
+        -- throwError (FoldPatternOutsideConstructor loc)
+        -- TODO
+        throwError (CompilerError "FoldPatternOutsideConstructor")
       EClause a p cs ->
         EClause
           a
@@ -83,11 +57,13 @@ instance (Monoid a, Data a) => FoldContext a (Clause a ()) where
         void (checkPatterns p)
         expandMatch cs
 
-checkPatterns :: (MonadError (FoldError o) m, Data o, Data k) => Pattern o k -> m (Pattern o k)
+checkPatterns :: (Monoid a, Data a, Data k, Monad m) => Pattern a k -> CompilerT a m (Pattern a k)
 checkPatterns =
   \case
     PAtVariable loc _ ->
-      throwError (FoldPatternInRegularMatch loc)
+      -- throwError (FoldPatternInRegularMatch loc)
+      -- TODO
+      throwError (CompilerError "FoldPatternInRegularMatch")
     p ->
       descendM checkPatterns p
 
@@ -140,9 +116,9 @@ atLabels = execWriter . transformM go
       p ->
         pure p
 
-expandFoldExpr :: (Monoid a, Data a, MonadState Int m, MonadReader Name m, MonadError (FoldError a) m) => NonEmpty (Expression a ()) -> NonEmpty (Clause a ()) -> m (Expression a ())
+expandFoldExpr :: (Monad m, Monoid a, Data a) => NonEmpty (Expression a ()) -> NonEmpty (Clause a ()) -> CompilerT a m (Expression a ())
 expandFoldExpr args clauses = do
-  name <- suppliedName
+  name <- supplied (freshName "fold")
   let var = name <> ".expr"
   e1 <- traverse (expandFolds name []) clauses
   pure $
@@ -156,7 +132,7 @@ expandFoldExpr args clauses = do
         (applicationE (varE name) args)
 
 class CompileFoldsContext a e where
-  compileFolds :: e -> FoldExpansion a e
+  compileFolds :: (Monad m) => e -> CompilerT a m e
 
 instance (CompileFoldsContext a e) => CompileFoldsContext a [e] where
   compileFolds = traverse compileFolds

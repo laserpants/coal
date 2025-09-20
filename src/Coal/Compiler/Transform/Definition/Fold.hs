@@ -8,15 +8,13 @@
 module Coal.Compiler.Transform.Definition.Fold where
 
 import Coal.Common.Label (Label (..), labelName)
-import Coal.Common.Supply (suppliedName)
+import Coal.Common.Supply (freshName, supplied)
+import Coal.Compiler.Stack
 import Coal.Compiler.Transform.Expression
-import Coal.Compiler.Transform.Fold (FoldError (..))
 import Coal.Compiler.Transform.Tree (replace)
 import Coal.Language (Choice (..), Clause (..), Expression (..), Pattern (..))
 import Coal.Language.Module (Definition (..), FoldDef (..))
 import Control.Monad.Except
-import Control.Monad.Reader (MonadReader)
-import Control.Monad.State (MonadState)
 import Control.Monad.Writer (execWriter, tell)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transform, transformM)
@@ -24,7 +22,7 @@ import Data.List.NonEmpty (NonEmpty (..))
 import Extra (Name, const2, foldrM)
 
 class TopLevelFoldContext a e where
-  expandFolds :: (MonadError (FoldError a) m) => Name -> [(Name, Label ())] -> e -> m e
+  expandFolds :: (Monad m) => Name -> [(Name, Label ())] -> e -> CompilerT a m e
 
 instance (TopLevelFoldContext a e) => TopLevelFoldContext a [e] where
   expandFolds name = traverse . expandFolds name
@@ -36,9 +34,13 @@ instance (Monoid a, Data a) => TopLevelFoldContext a (Clause a ()) where
   expandFolds name _ =
     \case
       EClause _ (PAtVariable loc _) _ ->
-        throwError (FoldPatternOutsideConstructor loc)
+        -- throwError (FoldPatternOutsideConstructor loc)
+        -- TODO
+        throwError (CompilerError "FoldPatternOutsideConstructor")
       EClause _ (PNamedFold loc _ _) _ ->
-        throwError (FoldPatternOutsideConstructor loc)
+        -- throwError (FoldPatternOutsideConstructor loc)
+        -- TODO
+        throwError (CompilerError "FoldPatternOutsideConstructor")
       EClause a p cs ->
         EClause
           a
@@ -56,7 +58,7 @@ instance (Monoid a, Data a) => TopLevelFoldContext a (Choice Expression a ()) wh
 instance (Monoid a, Data a) => TopLevelFoldContext a (Expression a ()) where
   expandFolds = flip . foldrM . updateName
 
-updateName :: (Monoid a, Data a, Monad m) => Name -> (Name, Label ()) -> Expression a () -> m (Expression a ())
+updateName :: (Monad m, Monoid a, Data a) => Name -> (Name, Label ()) -> Expression a () -> CompilerT a m (Expression a ())
 updateName _ (name, label) =
   pure
     . replace
@@ -86,7 +88,7 @@ atLabels = execWriter . transformM go
       p ->
         pure p
 
-compileTopLevelFolds :: (Data a, Monoid a, MonadState Int m, MonadReader Name m, MonadError (FoldError a) m) => Definition a k () -> m (Definition a k ())
+compileTopLevelFolds :: (Monad m, Monoid a, Data a) => Definition a k () -> CompilerT a m (Definition a k ())
 compileTopLevelFolds =
   \case
     DFold loc name (FoldDef with cs _) -> do
@@ -95,9 +97,9 @@ compileTopLevelFolds =
     o ->
       pure o
 
-expandTopLevelFold :: (Data a, Monoid a, MonadState Int m, MonadReader Name m, MonadError (FoldError a) m) => NonEmpty (Clause a ()) -> m (Expression a ())
+expandTopLevelFold :: (Monad m, Monoid a, Data a) => NonEmpty (Clause a ()) -> CompilerT a m (Expression a ())
 expandTopLevelFold clauses = do
-  name <- suppliedName
+  name <- supplied (freshName "fold")
   let var = name <> ".expr"
   e1 <- traverse (expandFolds name []) clauses
   pure $

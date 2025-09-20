@@ -60,29 +60,17 @@ whereClausesExpansionTrans f e = pure (fst $ runWriter (f e))
 expandWhereClausesC :: (Monad m, Data a) => Module a Kind () -> CompilerT a m (Module a Kind ())
 expandWhereClausesC = whereClausesExpansionTrans expandWhereClausesModule
 
-foldExpansionTrans :: (Monad m, Show a) => (c -> FoldExpansion a c) -> c -> CompilerT a m c
-foldExpansionTrans f e =
-  withSupplyMC
-    ( \n ->
-        case runFoldExpansion "fold" n (f e) of
-          (Left expr, _) ->
-            -- TODO
-            throwError (CompilerError (Text.pack (show expr)))
-          (Right r, m) ->
-            pure (r, m)
-    )
-
 compileUnfoldsC :: (Monad m, Data a, Monoid a) => Module a Kind () -> CompilerT a m (Module a Kind ())
 compileUnfoldsC = unfoldExpansionTrans compileUnfolds
 
 unfoldExpansionTrans :: (Monad m) => (c -> UnfoldExpansion c) -> c -> CompilerT a m c
 unfoldExpansionTrans f e = withSupplyC (\n -> runUnfoldExpansion "unfold" n (f e))
 
-compileFoldsC :: (Monad m, Data a, Monoid a, Show a) => Module a Kind () -> CompilerT a m (Module a Kind ())
-compileFoldsC = foldExpansionTrans compileFolds
+compileFoldsC :: (Monad m, Data a, Monoid a) => Module a Kind () -> CompilerT a m (Module a Kind ())
+compileFoldsC = compileFolds
 
-compileTopLevelFoldsC :: (Monad m, Data a, Monoid a, Show a) => Module a Kind () -> CompilerT a m (Module a Kind ())
-compileTopLevelFoldsC = foldExpansionTrans (overModuleDefinitionsM (traverse compileTopLevelFolds))
+compileTopLevelFoldsC :: (Monad m, Data a, Monoid a) => Module a Kind () -> CompilerT a m (Module a Kind ())
+compileTopLevelFoldsC = overModuleDefinitionsM (traverse compileTopLevelFolds)
 
 topLevelUnfoldExpansionTrans :: (Monad m) => (c -> UnfoldTopLevelUnfolds c) -> c -> CompilerT a m c
 topLevelUnfoldExpansionTrans f e = withSupplyC (\n -> runTopLevelUnfolds "unfold" n (f e))
