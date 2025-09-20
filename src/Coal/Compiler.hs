@@ -61,10 +61,7 @@ expandWhereClausesC :: (Monad m, Data a) => Module a Kind () -> CompilerT a m (M
 expandWhereClausesC = whereClausesExpansionTrans expandWhereClausesModule
 
 compileUnfoldsC :: (Monad m, Data a, Monoid a) => Module a Kind () -> CompilerT a m (Module a Kind ())
-compileUnfoldsC = unfoldExpansionTrans compileUnfolds
-
-unfoldExpansionTrans :: (Monad m) => (c -> UnfoldExpansion c) -> c -> CompilerT a m c
-unfoldExpansionTrans f e = withSupplyC (\n -> runUnfoldExpansion "unfold" n (f e))
+compileUnfoldsC = compileUnfolds
 
 compileFoldsC :: (Monad m, Data a, Monoid a) => Module a Kind () -> CompilerT a m (Module a Kind ())
 compileFoldsC = compileFolds
@@ -72,11 +69,8 @@ compileFoldsC = compileFolds
 compileTopLevelFoldsC :: (Monad m, Data a, Monoid a) => Module a Kind () -> CompilerT a m (Module a Kind ())
 compileTopLevelFoldsC = overModuleDefinitionsM (traverse compileTopLevelFolds)
 
-topLevelUnfoldExpansionTrans :: (Monad m) => (c -> UnfoldTopLevelUnfolds c) -> c -> CompilerT a m c
-topLevelUnfoldExpansionTrans f e = withSupplyC (\n -> runTopLevelUnfolds "unfold" n (f e))
-
 compileTopLevelUnfoldsC :: (Monad m, Monoid a, Data a) => Module a Kind () -> CompilerT a m (Module a Kind ())
-compileTopLevelUnfoldsC = topLevelUnfoldExpansionTrans (overModuleDefinitionsM (traverse compileTopLevelUnfolds))
+compileTopLevelUnfoldsC = overModuleDefinitionsM (traverse compileTopLevelUnfolds)
 
 indexedC :: (Monad m, Traversable t) => t e -> CompilerT a m (t IndexedType)
 indexedC t = withSupplyC (runState (indexed t))

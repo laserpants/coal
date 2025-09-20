@@ -1,50 +1,26 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Transform.Unfold (
-  CompileUnfoldsContext (..),
-  UnfoldExpansion (..),
-  runUnfoldExpansion,
-  evalUnfoldExpansion,
-) where
+module Coal.Compiler.Transform.Unfold (CompileUnfoldsContext (..)) where
 
 import Coal.Common.Label (Label (..))
-import Coal.Common.Supply (suppliedName)
+import Coal.Common.Supply (freshName, supplied)
+import Coal.Compiler.Stack
 import Coal.Compiler.Transform.Expression
 import Coal.Language (Expression (..), Primitive (..))
 import Coal.Language.Module (ConstantDef (..), Definition (..), FunctionDef (..), Module (..))
-import Control.Monad.RWS (RWS, runRWS)
-import Control.Monad.Reader (MonadReader)
-import Control.Monad.State (MonadState)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformM)
 import Data.List.NonEmpty (NonEmpty (..))
 import Extra (Dictionary, Name)
 
-newtype UnfoldExpansion a = UnfoldExpansion {unfoldExpansionStack :: RWS Name () Int a}
-  deriving
-    ( Functor
-    , Applicative
-    , Monad
-    , MonadReader Name
-    , MonadState Int
-    )
-
-evalUnfoldExpansion :: Name -> Int -> UnfoldExpansion a -> a
-evalUnfoldExpansion name s = fst . runUnfoldExpansion name s
-
-runUnfoldExpansion :: Name -> Int -> UnfoldExpansion a -> (a, Int)
-runUnfoldExpansion r s e = (a, s')
- where
-  (a, s', _) = runRWS (unfoldExpansionStack e) r s
-
-expandCodataSelect :: (Monoid a, MonadReader Name m, MonadState Int m) => Name -> Expression a () -> m (Expression a ())
+expandCodataSelect :: (Monoid a, Monad m) => Name -> Expression a () -> CompilerT a m (Expression a ())
 expandCodataSelect field e = do
-  name <- suppliedName
+  name <- supplied (freshName "unfold")
   let var = name <> "$_fields"
   pure $
     letE
@@ -55,19 +31,19 @@ expandCodataSelect field e = do
           (ELiteral mempty LUnit :| [])
       )
 
-class CompileUnfoldsContext a where
-  compileUnfolds :: a -> UnfoldExpansion a
+class CompileUnfoldsContext a e where
+  compileUnfolds :: (Monad m) => e -> CompilerT a m e
 
-instance (CompileUnfoldsContext a) => CompileUnfoldsContext [a] where
+instance (CompileUnfoldsContext a e) => CompileUnfoldsContext a [e] where
   compileUnfolds = traverse compileUnfolds
 
-instance (CompileUnfoldsContext a) => CompileUnfoldsContext (NonEmpty a) where
+instance (CompileUnfoldsContext a e) => CompileUnfoldsContext a (NonEmpty e) where
   compileUnfolds = traverse compileUnfolds
 
-instance (CompileUnfoldsContext a) => CompileUnfoldsContext (Dictionary a) where
+instance (CompileUnfoldsContext a e) => CompileUnfoldsContext a (Dictionary e) where
   compileUnfolds = traverse compileUnfolds
 
-instance (Monoid a, Data a) => CompileUnfoldsContext (Expression a ()) where
+instance (Monoid a, Data a) => CompileUnfoldsContext a (Expression a ()) where
   compileUnfolds = transformM go
    where
     go =
@@ -78,25 +54,25 @@ instance (Monoid a, Data a) => CompileUnfoldsContext (Expression a ()) where
         e ->
           pure e
 
-instance (Monoid a, Data a) => CompileUnfoldsContext (Module a k ()) where
+instance (Monoid a, Data a) => CompileUnfoldsContext a (Module a k ()) where
   compileUnfolds =
     \case
       Module p ns o ->
         Module p ns <$> compileUnfolds o
 
-instance (Monoid a, Data a) => CompileUnfoldsContext (FunctionDef a ()) where
+instance (Monoid a, Data a) => CompileUnfoldsContext a (FunctionDef a ()) where
   compileUnfolds =
     \case
       FunctionDef a u w ps e ->
         FunctionDef a u w ps <$> compileUnfolds e
 
-instance (Monoid a, Data a) => CompileUnfoldsContext (ConstantDef a ()) where
+instance (Monoid a, Data a) => CompileUnfoldsContext a (ConstantDef a ()) where
   compileUnfolds =
     \case
       ConstantDef a u w e ->
         ConstantDef a u w <$> compileUnfolds e
 
-instance (Monoid a, Data a) => CompileUnfoldsContext (Definition a k ()) where
+instance (Monoid a, Data a) => CompileUnfoldsContext a (Definition a k ()) where
   compileUnfolds =
     \case
       DFunction loc name f fs ->
