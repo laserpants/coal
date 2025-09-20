@@ -150,6 +150,5 @@ instance (Monoid a, Data a) => CompileNatsContext (Definition a Kind IndexedType
         DFunction loc name <$> compileNats f <*> traverse compileNats fs
       DConstant loc name g fs ->
         DConstant loc name <$> compileNats g <*> traverse compileNats fs
-      -- TODO
       o ->
         pure o
