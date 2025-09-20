@@ -76,7 +76,12 @@ overCompilerDictionaryNameEnvironment ::
   ) ->
   CompilerEnvironment ->
   CompilerEnvironment
-overCompilerDictionaryNameEnvironment f CompilerEnvironment{..} = CompilerEnvironment{compilerDictionaryNameEnvironment = f compilerDictionaryNameEnvironment, ..}
+overCompilerDictionaryNameEnvironment f CompilerEnvironment{..} =
+  CompilerEnvironment
+    { compilerDictionaryNameEnvironment =
+        f compilerDictionaryNameEnvironment
+    , ..
+    }
 
 buildEnvironment :: [Definition a k t] -> CompilerEnvironment
 buildEnvironment defs =
