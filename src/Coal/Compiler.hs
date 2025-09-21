@@ -75,19 +75,13 @@ runTypeInferenceC m = do
   Module p ns ds = m
 
 -- TODO
-placeholderTrans :: (Monad m) => (c -> CompilerT a m c) -> c -> CompilerT a m c
-placeholderTrans f e = do
-  env1 <- gets compilerNameStore
-  local (overCompilerDictionaryNameEnvironment (const env1)) (f e)
-
--- TODO
 placeholderInsertionC :: (Monad m, Monoid a, Data a) => Module a Kind IndexedType -> CompilerT a m (Module a Kind IndexedType)
 placeholderInsertionC = overModuleDefinitionsM (traverse go)
  where
   go =
     \case
       d@(DConstant _ name _ _) -> do
-        d1 <- placeholderTrans expandTraits d
+        d1 <- withLocalNameEnvironment expandTraits d
         case d1 of
           DConstant _ _ (ConstantDef _ _ (With ts t) _) _ ->
             insertNameC name (Forall (typeIndexesIn t) ts t)
@@ -98,7 +92,7 @@ placeholderInsertionC = overModuleDefinitionsM (traverse go)
         es <- forM ds $
           \case
             c@(DConstant _ dname _ _) -> do
-              c1 <- placeholderTrans expandTraits c
+              c1 <- withLocalNameEnvironment expandTraits c
               case c1 of
                 DConstant _ _ (ConstantDef _ _ (With ts t) _) _ ->
                   insertNameC (instanceLabel (Trait name t1) dname) (Forall (typeIndexesIn t) ts t)
@@ -109,11 +103,16 @@ placeholderInsertionC = overModuleDefinitionsM (traverse go)
               error "TODO"
         pure (DInstance loc name (InstanceDef ts1 t1 es))
       d@DFold{} ->
-        placeholderTrans expandTraits d
+        withLocalNameEnvironment expandTraits d
       d@DUnfold{} ->
-        placeholderTrans expandTraits d
+        withLocalNameEnvironment expandTraits d
       d ->
         pure d
+
+withLocalNameEnvironment :: (Monad m) => (c -> CompilerT a m c) -> c -> CompilerT a m c
+withLocalNameEnvironment f e = do
+  env1 <- gets compilerNameStore
+  local (overCompilerDictionaryNameEnvironment (const env1)) (f e)
 
 typeCheckingPass :: (MonadIO m, Monoid a, Data a, Eq a, Show a) => Module a Kind () -> CompilerT a m (Module a Kind IndexedType)
 typeCheckingPass =
