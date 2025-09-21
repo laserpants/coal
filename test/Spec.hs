@@ -1425,8 +1425,8 @@ run modules = do
       liftIO $ writeDotFiles "untyped" m1
       defs <- gets compilerTypeDefinitions
       let m2 = overModuleDefinitions (insertImportedTypes defs) m1
-      m3 <- expandWhereClausesModule m2
       setVerbatimSourceC src
+      m3 <- expandWhereClausesModule m2
       insertNamesC names
       case m3 of
         Module (Path path) _ defs -> do
