@@ -42,10 +42,10 @@ A distinction is made between ordinary, finite data, which is produced and consu
 
 These examples illustrate two modes of recursive control flow. If you are familiar with [recursion schemes](https://blog.sumtypeofway.com/posts/introduction-to-recursion-schemes.html) in a language like Haskell, recursion in Coal is based on the same principles. 
 
-- In the first example, the special `@`-pattern variable means that `tot` recieves the result from calling the fold again using the sub-list matched by the pattern. 
-- In the second example, the `@` in the field name causes the expression on the right (`n + 1`) to become the next seed value, which is fed back into `enum_from` to generate the rest of the stream.
+- **First example:** The special `@`-pattern variable means that `tot` recieves the result from calling the fold again using the sub-list matched by the pattern. 
+- **Second example:** The `@` in the field name causes the expression on the right (`n + 1`) to become the next seed value, which is fed back into `enum_from` to generate the rest of the stream.
 
-In the recursion schemes framework, `fold` and `unfold` are called *catamorphisms* and *anamorphisms*. Scroll down to **Recursion, corecursion, and codata** for a more detailed explanation of how these constructs work in Coal.
+In the recursion scheme framework, `fold` and `unfold` are called *catamorphisms* and *anamorphisms*. Scroll down to **Recursion, corecursion, and codata** for a more detailed explanation of how these constructs work in Coal.
 
 ### Programs = Expressions + Effects
 
