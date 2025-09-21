@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Pass.PassPreflight (preflightPass) where
+module Coal.Compiler.Pass.Preflight (preflightPass) where
 
 import Coal.Compiler.Pass
 import Coal.Compiler.Stack (CompilerT)
