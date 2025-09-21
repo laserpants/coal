@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Pass.Parsing (parsingPass) where
+module Coal.Compiler.Pass.PassParsing (parsingPass) where
 
 import Coal.Compiler.Journal
 import Coal.Compiler.Pass
