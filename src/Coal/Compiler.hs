@@ -69,45 +69,42 @@ runTypeInferenceC m = do
  where
   Module p ns ds = m
 
--- TODO
-placeholderInsertionC :: (Monad m, Monoid a, Data a) => Module a Kind IndexedType -> CompilerT a m (Module a Kind IndexedType)
-placeholderInsertionC = overModuleDefinitionsM (traverse go)
- where
-  go =
-    \case
-      d@(DConstant _ name _ _) -> do
-        d1 <- withLocalNameEnvironment expandTraits d
-        case d1 of
-          DConstant _ _ (ConstantDef _ _ (With ts t) _) _ ->
-            insertNameC name (Forall (typeIndexesIn t) ts t)
-          _ ->
-            error "Implementation error"
-        pure d1
-      DInstance loc name (InstanceDef ts1 t1 ds) -> do
-        es <- forM ds $
-          \case
-            c@(DConstant _ dname _ _) -> do
-              c1 <- withLocalNameEnvironment expandTraits c
-              case c1 of
-                DConstant _ _ (ConstantDef _ _ (With ts t) _) _ ->
-                  insertNameC (instanceLabel (Trait name t1) dname) (Forall (typeIndexesIn t) ts t)
-                _ ->
-                  error "Implementation error"
-              pure c1
-            _ ->
-              error "TODO"
-        pure (DInstance loc name (InstanceDef ts1 t1 es))
-      d@DFold{} ->
-        withLocalNameEnvironment expandTraits d
-      d@DUnfold{} ->
-        withLocalNameEnvironment expandTraits d
-      d ->
-        pure d
+insertPlaceholders :: (Monad m, Monoid a, Data a) => Definition a Kind IndexedType -> CompilerT a m (Definition a Kind IndexedType)
+insertPlaceholders =
+  \case
+    d@(DConstant _ name _ _) ->
+      insertTypeInfo name =<< expandInLocalEnv d
+    DInstance loc name (InstanceDef ts t ds) -> do
+      es <- forM ds (insertPlaceholdersInDef (Trait name t))
+      pure (DInstance loc name (InstanceDef ts t es))
+    d@DFold{} ->
+      expandInLocalEnv d
+    d@DUnfold{} ->
+      expandInLocalEnv d
+    d ->
+      pure d
 
-withLocalNameEnvironment :: (Monad m) => (c -> CompilerT a m c) -> c -> CompilerT a m c
-withLocalNameEnvironment f e = do
+insertPlaceholdersInDef :: (Monad m, Monoid a, Data a) => Trait ParameterizedType -> Definition a Kind IndexedType -> CompilerT a m (Definition a Kind IndexedType)
+insertPlaceholdersInDef name =
+  \case
+    c@(DConstant _ dname _ _) ->
+      insertTypeInfo (instanceLabel name dname) =<< expandInLocalEnv c
+    _ ->
+      error "TODO"
+
+expandInLocalEnv :: (Monad m, TraitContext a b) => b -> CompilerT a m b
+expandInLocalEnv d = do
   env1 <- gets compilerNameStore
-  local (overCompilerDictionaryNameEnvironment (const env1)) (f e)
+  local (overCompilerDictionaryNameEnvironment (const env1)) (expandTraits d)
+
+insertTypeInfo :: (Monad m) => Name -> Definition a k IndexedType -> CompilerT a m (Definition a k IndexedType)
+insertTypeInfo name d = do
+  insertName d name
+  pure d
+
+insertName :: (Monad m) => Definition a k IndexedType -> Name -> CompilerT a m ()
+insertName (DConstant _ _ (ConstantDef _ _ (With ts t) _) _) name = insertNameC name (Forall (typeIndexesIn t) ts t)
+insertName _ _ = error "Implementation error"
 
 typeCheckingPass :: (MonadIO m, Monoid a, Data a, Eq a, Show a) => Module a Kind () -> CompilerT a m (Module a Kind IndexedType)
 typeCheckingPass =
@@ -145,7 +142,7 @@ mainPass =
     >=> compileMatchExprs
     >=> writeDotFilesC "match_exprs"
     -- Placeholder insertion
-    >=> placeholderInsertionC
+    >=> overModuleDefinitionsM (traverse insertPlaceholders)
     -- Denormalize top-level functions and constants
     >=> pure . denormalizeObject
     -- Expand nats

@@ -39,6 +39,7 @@ library
       Coal.Compiler.Kernel.TranslateExpression
       Coal.Compiler.Kernel.TranslateModule
       Coal.Compiler.Kernel.TranslateType
+      Coal.Compiler.Pass
       Coal.Compiler.PatternMatching
       Coal.Compiler.PatternMatching.Compiler
       Coal.Compiler.PatternMatching.Envelope

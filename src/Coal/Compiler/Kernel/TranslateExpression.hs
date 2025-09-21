@@ -8,12 +8,11 @@ module Coal.Compiler.Kernel.TranslateExpression (
 ) where
 
 import Coal.Common.Label (Label (..))
-import Coal.Compiler.Kernel.Environment (KernelEnvironment (..), qualifyName, withLocalName, withLocalNames)
+import Coal.Compiler.Kernel.Environment (qualifyName, withLocalName, withLocalNames)
 import Coal.Compiler.Kernel.TranslateType (translateType)
 import Coal.Compiler.Stack
 import qualified Coal.Kernel.Language as Kernel
 import Coal.Language
-import Control.Monad.Reader (MonadReader)
 import Data.Data (Data)
 import Data.List.NonEmpty (NonEmpty (..), toList, (<|))
 import qualified Data.Map.Strict as Map
@@ -211,8 +210,8 @@ translatePattern =
       translatePattern p
     PLiteral _ p ->
       pure (Label (translateType (typeOf p)) "_")
-    PTraitDictionary _ t trait@(Trait name _) ->
-      pure (Label (translateType t) (dictVariable name trait))
+    PTraitDictionary _ t trait ->
+      pure (Label (translateType t) (dictVariable (traitName trait) trait))
     _ ->
       error "TODO"
 
