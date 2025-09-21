@@ -1052,21 +1052,21 @@ compileFiles files = do
       pure (Right ())
 
 withLocalEnvironment :: (Monad m) => [Definition Metadata Kind ()] -> CompilerT Metadata m a -> CompilerT Metadata m a
-withLocalEnvironment = local . const . (insertBuiltinConstructors . buildEnvironment)
+withLocalEnvironment = local . const . (insertBuiltInConstructors . buildEnvironment)
 
-insertBuiltinConstructors :: CompilerEnvironment -> CompilerEnvironment
-insertBuiltinConstructors CompilerEnvironment{..} =
+insertBuiltInConstructors :: CompilerEnvironment -> CompilerEnvironment
+insertBuiltInConstructors CompilerEnvironment{..} =
   CompilerEnvironment
-    { compilerDataConstructorEnvironment = Environment.insertMultiple builtinDataConstructors compilerDataConstructorEnvironment
-    , compilerTraitEnvironment = Environment.insertMultiple builtinTraits compilerTraitEnvironment
-    , compilerInstanceEnvironment = Environment.insertMultiple builtinInstances compilerInstanceEnvironment
-    , compilerTypeConstructorEnvironment = Environment.insertMultiple builtinTypeConstructors compilerTypeConstructorEnvironment
-    , compilerCodataAccessorEnvironment = Environment.insertMultiple builtinCodataAccessors compilerCodataAccessorEnvironment
+    { compilerDataConstructorEnvironment = Environment.insertMultiple builtInDataConstructors compilerDataConstructorEnvironment
+    , compilerTraitEnvironment = Environment.insertMultiple builtInTraits compilerTraitEnvironment
+    , compilerInstanceEnvironment = Environment.insertMultiple builtInInstances compilerInstanceEnvironment
+    , compilerTypeConstructorEnvironment = Environment.insertMultiple builtInTypeConstructors compilerTypeConstructorEnvironment
+    , compilerCodataAccessorEnvironment = Environment.insertMultiple builtInCodataAccessors compilerCodataAccessorEnvironment
     , ..
     }
 
-builtinCodataAccessors :: [(Name, CodataAccessor TypeIndex Kind IndexedType)]
-builtinCodataAccessors =
+builtInCodataAccessors :: [(Name, CodataAccessor TypeIndex Kind IndexedType)]
+builtInCodataAccessors =
   [ -- TODO: remove
 
     ( "Head"
@@ -1094,8 +1094,8 @@ builtinCodataAccessors =
     )
   ]
 
-builtinTraits :: [(Name, (Parameter Kind, TypeIndex Kind, Environment IndexedScheme))]
-builtinTraits =
+builtInTraits :: [(Name, (Parameter Kind, TypeIndex Kind, Environment IndexedScheme))]
+builtInTraits =
   []
 
 --    ( "Numeric"
@@ -1140,8 +1140,8 @@ builtinTraits =
 --      )
 --    )
 
-builtinInstances :: [(Name, Map IndexedType (Type Parameter (), Dictionary IndexedScheme))]
-builtinInstances =
+builtInInstances :: [(Name, Map IndexedType (Type Parameter (), Dictionary IndexedScheme))]
+builtInInstances =
   [
     ( "Numeric"
     , Map.fromList
@@ -1278,8 +1278,8 @@ builtinInstances =
     )
   ]
 
-builtinTypeConstructors :: [(Name, Kind)]
-builtinTypeConstructors =
+builtInTypeConstructors :: [(Name, Kind)]
+builtInTypeConstructors =
   [
     ( "List"
     , KArrow KType KType
@@ -1292,8 +1292,8 @@ builtinTypeConstructors =
     )
   ]
 
-builtinDataConstructors :: [(Name, DataConstructor TypeIndex Kind IndexedType)]
-builtinDataConstructors =
+builtInDataConstructors :: [(Name, DataConstructor TypeIndex Kind IndexedType)]
+builtInDataConstructors =
   [
     ( "Succ"
     , DataConstructor
@@ -1311,8 +1311,8 @@ builtinDataConstructors =
     -- TODO
   ]
 
-addBuiltinDefs :: (Monoid a) => [Definition a Kind ()] -> [Definition a Kind ()]
-addBuiltinDefs defs =
+addBuiltInDefs :: (Monoid a) => [Definition a Kind ()] -> [Definition a Kind ()]
+addBuiltInDefs defs =
   [ DImport
       mempty
       (Path ["Core$"])
@@ -1420,7 +1420,7 @@ insertImportedTypes env defs = concatMap go defs <> defs
 
 run :: [(Text, Module Metadata Kind ())] -> CompilerT Metadata IO ()
 run modules = do
-  rs <- forM (overModuleDefinitions addBuiltinDefs <$$> modules) $
+  rs <- forM (overModuleDefinitions addBuiltInDefs <$$> modules) $
     \(src, m1) -> do
       liftIO $ writeDotFiles "untyped" m1
       defs <- gets compilerTypeDefinitions

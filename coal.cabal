@@ -41,6 +41,7 @@ library
       Coal.Compiler.Kernel.TranslateType
       Coal.Compiler.Pass
       Coal.Compiler.Pass.Parsing
+      Coal.Compiler.Pass.Preflight
       Coal.Compiler.PatternMatching
       Coal.Compiler.PatternMatching.Compiler
       Coal.Compiler.PatternMatching.Envelope

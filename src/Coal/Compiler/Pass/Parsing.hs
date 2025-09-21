@@ -3,12 +3,9 @@
 
 module Coal.Compiler.Pass.Parsing (parsingPass) where
 
-import Coal.Ast.Metadata (Metadata (..))
 import Coal.Compiler.Journal
 import Coal.Compiler.Pass
 import Coal.Compiler.Stack
-import Coal.Language
-import Coal.Language.Module
 import Coal.Parser (ParserError)
 import Coal.Parser.Module (parseModule)
 import Control.Monad.Except (throwError)
@@ -18,8 +15,6 @@ import Data.Text (Text)
 import qualified Data.Text as Text
 import Extra (forM_)
 import Text.Megaparsec (runParser)
-
-type ModuleBundle = (Text, Module Metadata Kind ())
 
 parsingPass :: (MonadIO m) => Pass a m [FilePath] [ModuleBundle]
 parsingPass =
