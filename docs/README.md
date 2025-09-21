@@ -45,7 +45,7 @@ These examples illustrate two modes of recursive control flow. If you are famili
 - In the first example, the special `@`-pattern variable means that `tot` recieves the result from calling the fold again using the sub-list matched by the pattern. 
 - In the second example, the `@` in the field name causes the expression on the right (`n + 1`) to become the next seed value, which is fed back into `enum_from` to generate the rest of the stream.
 
-Scroll down to **Recursion, corecursion, and codata** for a more detailed explanation of how the `fold` and `unfold` constructs work in Coal.
+In the recursion schemes framework, `fold` and `unfold` are called *catamorphisms* and *anamorphisms*. Scroll down to **Recursion, corecursion, and codata** for a more detailed explanation of how these constructs work in Coal.
 
 ### Programs = Expressions + Effects
 
@@ -713,28 +713,31 @@ trait <name>(<type_parameter>) {
 
 When you describe a set of behaviors as a trait, you can reuse the same functionality across all types that support it. This reduces duplication and promotes code reusability. Traits are very similar to type classes in Haskell. A common analogy is to think of them as interfaces in object-oriented programming. 
 
+The following example shows how the `Ordered` trait is defined
+It has a function `compare` that 
+
 ```
-trait Ordered(t) {
+trait Ordered<t> {
   compare : t -> t -> Order   // where type Order = Lt | Gt | Eq
 }
 ```
 
-TODO
+
 
 ```
-fun is_less_than(x : t, y : t) : bool with Ordered(t) =
+fun is_less_than(x : t, y : t) : bool with Ordered<t> =
   compare(x, y) == Lt
 ```
 
-The type of `is_less_than` is `t -> t -> bool with Ordered(t)`
+The type of `is_less_than` is `t -> t -> bool with Ordered<t>`
 Type parameters, like `t` in this type, are *universally quantified*.
-The keyword `with` adds one or more constraints to this 
+The keyword `with` adds one or more constraints, saying that the 
 
 
-To make a type support a trait, we create an `instance` of the trait for that particular type. For example, extending our `Ordered` trait as follows, we can define an ordering on the booleans:
+To make a type support a trait, we create an *instance* of the trait for that particular type. For example, instantiating our `Ordered` trait as follows, we can define an ordering on the booleans:
 
 ```
-instance Ordered(bool) {
+instance Ordered<bool> {
   compare(a, b) =
     match((a, b)) {
       (false, true) => Lt
@@ -904,7 +907,7 @@ In this description, algebras and coalgebras are mirror images: by simply revers
 
 |                    | Access pattern        | Structure             | Evaluation strategy  | Invariant               |
 | ------------------ | ----------------------| --------------------- | -------------------- | ----------------------- |
-| **Data**           | Recursion (fold)      | Always finite         | Eager (strict)       | Must make progress      |
+| **Data**           | Recursion (fold)      | Always finite         | Eager (strict)       | Progress                |
 | **Codata**         | Corecursion (unfold)  | Potentially infinite  | Lazy (non-strict)    | Productivity            |
 
 ## License 
