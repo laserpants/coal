@@ -42,6 +42,7 @@ library
       Coal.Compiler.Pass
       Coal.Compiler.Pass.Parsing
       Coal.Compiler.Pass.Preflight
+      Coal.Compiler.Pass.TypeImports
       Coal.Compiler.PatternMatching
       Coal.Compiler.PatternMatching.Compiler
       Coal.Compiler.PatternMatching.Envelope
