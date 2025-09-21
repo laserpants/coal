@@ -283,7 +283,7 @@ spec = do
 --  x <- main94
 --  print (x == Right "1\n2\n3\n4\n5\n")
 
-runTestFiles :: [String] -> IO (Either CompilerError Text)
+runTestFiles :: [String] -> IO (Either CompilerFailureMode Text)
 runTestFiles files = do
   r <- compileFiles files
   case r of
@@ -293,38 +293,38 @@ runTestFiles files = do
     Right{} ->
       Right <$> runTestBuild
 
-main :: IO (Either CompilerError Text)
+main :: IO (Either CompilerFailureMode Text)
 main = do
   runTestFiles
     [ "./test/Coal/examples/01/Main.coal"
     ]
 
-main2 :: IO (Either CompilerError Text)
+main2 :: IO (Either CompilerFailureMode Text)
 main2 = do
   runTestFiles
     [ "./test/Coal/examples/02/Main.coal"
     ]
 
-main3 :: IO (Either CompilerError Text)
+main3 :: IO (Either CompilerFailureMode Text)
 main3 = do
   runTestFiles
     [ "./test/Coal/examples/03/Main.coal"
     ]
 
-main4 :: IO (Either CompilerError Text)
+main4 :: IO (Either CompilerFailureMode Text)
 main4 = do
   runTestFiles
     [ "./test/Coal/examples/04/Main.coal"
     ]
 
-main5 :: IO (Either CompilerError Text)
+main5 :: IO (Either CompilerFailureMode Text)
 main5 = do
   runTestFiles
     [ "./test/Coal/examples/05/Math.coal"
     , "./test/Coal/examples/05/Main.coal"
     ]
 
-main6 :: IO (Either CompilerError Text)
+main6 :: IO (Either CompilerFailureMode Text)
 main6 = do
   runTestFiles
     [ "./test/Coal/examples/06/Tree.coal"
@@ -332,511 +332,511 @@ main6 = do
     , "./test/Coal/examples/06/Main.coal"
     ]
 
-main7 :: IO (Either CompilerError Text)
+main7 :: IO (Either CompilerFailureMode Text)
 main7 = do
   runTestFiles
     [ "./test/Coal/examples/07/Main.coal"
     ]
 
-main8 :: IO (Either CompilerError Text)
+main8 :: IO (Either CompilerFailureMode Text)
 main8 = do
   runTestFiles
     [ "./test/Coal/examples/08/Main.coal"
     ]
 
-main9 :: IO (Either CompilerError Text)
+main9 :: IO (Either CompilerFailureMode Text)
 main9 = do
   runTestFiles
     [ "./test/Coal/examples/09/Main.coal"
     ]
 
-main10 :: IO (Either CompilerError Text)
+main10 :: IO (Either CompilerFailureMode Text)
 main10 = do
   runTestFiles
     [ "./test/Coal/examples/10/Main.coal"
     ]
 
-main11 :: IO (Either CompilerError Text)
+main11 :: IO (Either CompilerFailureMode Text)
 main11 = do
   runTestFiles
     [ "./test/Coal/examples/11/Main.coal"
     ]
 
-main12 :: IO (Either CompilerError Text)
+main12 :: IO (Either CompilerFailureMode Text)
 main12 = do
   runTestFiles
     [ "./test/Coal/examples/12/Main.coal"
     ]
 
-main13 :: IO (Either CompilerError Text)
+main13 :: IO (Either CompilerFailureMode Text)
 main13 = do
   runTestFiles
     [ "./test/Coal/examples/13/Main.coal"
     ]
 
-main14 :: IO (Either CompilerError Text)
+main14 :: IO (Either CompilerFailureMode Text)
 main14 = do
   runTestFiles
     [ "./test/Coal/examples/14/Main.coal"
     ]
 
-main15 :: IO (Either CompilerError Text)
+main15 :: IO (Either CompilerFailureMode Text)
 main15 = do
   runTestFiles
     [ "./test/Coal/examples/15/Main.coal"
     ]
 
-main16 :: IO (Either CompilerError Text)
+main16 :: IO (Either CompilerFailureMode Text)
 main16 = do
   runTestFiles
     [ "./test/Coal/examples/16/Main.coal"
     ]
 
-main17 :: IO (Either CompilerError Text)
+main17 :: IO (Either CompilerFailureMode Text)
 main17 = do
   runTestFiles
     [ "./test/Coal/examples/17/Main.coal"
     ]
 
-main18 :: IO (Either CompilerError Text)
+main18 :: IO (Either CompilerFailureMode Text)
 main18 = do
   runTestFiles
     [ "./test/Coal/examples/18/Main.coal"
     ]
 
--- main19 :: IO (Either CompilerError Text)
+-- main19 :: IO (Either CompilerFailureMode Text)
 -- main19 = do
 --  runTestFiles
 --    [ "./test/Coal/examples/19/Main.coal"
 --    ]
 
-main20 :: IO (Either CompilerError Text)
+main20 :: IO (Either CompilerFailureMode Text)
 main20 = do
   runTestFiles
     [ "./test/Coal/examples/20/Main.coal"
     ]
 
-main21 :: IO (Either CompilerError Text)
+main21 :: IO (Either CompilerFailureMode Text)
 main21 = do
   runTestFiles
     [ "./test/Coal/examples/21/Main.coal"
     ]
 
-main22 :: IO (Either CompilerError Text)
+main22 :: IO (Either CompilerFailureMode Text)
 main22 = do
   runTestFiles
     [ "./test/Coal/examples/22/Main.coal"
     ]
 
-main23 :: IO (Either CompilerError Text)
+main23 :: IO (Either CompilerFailureMode Text)
 main23 = do
   runTestFiles
     [ "./test/Coal/examples/23/Main.coal"
     ]
 
-main24 :: IO (Either CompilerError Text)
+main24 :: IO (Either CompilerFailureMode Text)
 main24 = do
   runTestFiles
     [ "./test/Coal/examples/24/Main.coal"
     ]
 
-main25 :: IO (Either CompilerError Text)
+main25 :: IO (Either CompilerFailureMode Text)
 main25 = do
   runTestFiles
     [ "./test/Coal/examples/25/Main.coal"
     ]
 
-main26 :: IO (Either CompilerError Text)
+main26 :: IO (Either CompilerFailureMode Text)
 main26 = do
   runTestFiles
     [ "./test/Coal/examples/26/Main.coal"
     ]
 
-main27 :: IO (Either CompilerError Text)
+main27 :: IO (Either CompilerFailureMode Text)
 main27 = do
   runTestFiles
     [ "./test/Coal/examples/27/Main.coal"
     ]
 
-main28 :: IO (Either CompilerError Text)
+main28 :: IO (Either CompilerFailureMode Text)
 main28 = do
   runTestFiles
     [ "./test/Coal/examples/28/Main.coal"
     ]
 
-main29 :: IO (Either CompilerError Text)
+main29 :: IO (Either CompilerFailureMode Text)
 main29 = do
   runTestFiles
     [ "./test/Coal/examples/29/Main.coal"
     ]
 
-main30 :: IO (Either CompilerError Text)
+main30 :: IO (Either CompilerFailureMode Text)
 main30 = do
   runTestFiles
     [ "./test/Coal/examples/30/Main.coal"
     ]
 
-main31 :: IO (Either CompilerError Text)
+main31 :: IO (Either CompilerFailureMode Text)
 main31 = do
   runTestFiles
     [ "./test/Coal/examples/31/Main.coal"
     ]
 
-main32 :: IO (Either CompilerError Text)
+main32 :: IO (Either CompilerFailureMode Text)
 main32 = do
   runTestFiles
     [ "./test/Coal/examples/32/Main.coal"
     ]
 
-main33 :: IO (Either CompilerError Text)
+main33 :: IO (Either CompilerFailureMode Text)
 main33 = do
   runTestFiles
     [ "./test/Coal/examples/33/Main.coal"
     ]
 
-main34 :: IO (Either CompilerError Text)
+main34 :: IO (Either CompilerFailureMode Text)
 main34 = do
   runTestFiles
     [ "./test/Coal/examples/34/Main.coal"
     ]
 
-main35 :: IO (Either CompilerError Text)
+main35 :: IO (Either CompilerFailureMode Text)
 main35 = do
   runTestFiles
     [ "./test/Coal/examples/35/Main.coal"
     ]
 
-main36 :: IO (Either CompilerError Text)
+main36 :: IO (Either CompilerFailureMode Text)
 main36 = do
   runTestFiles
     [ "./test/Coal/examples/36/Main.coal"
     ]
 
-main37 :: IO (Either CompilerError Text)
+main37 :: IO (Either CompilerFailureMode Text)
 main37 = do
   runTestFiles
     [ "./test/Coal/examples/37/Main.coal"
     ]
 
-main38 :: IO (Either CompilerError Text)
+main38 :: IO (Either CompilerFailureMode Text)
 main38 = do
   runTestFiles
     [ "./test/Coal/examples/38/Main.coal"
     ]
 
-main39 :: IO (Either CompilerError Text)
+main39 :: IO (Either CompilerFailureMode Text)
 main39 = do
   runTestFiles
     [ "./test/Coal/examples/39/Main.coal"
     ]
 
-main40 :: IO (Either CompilerError Text)
+main40 :: IO (Either CompilerFailureMode Text)
 main40 = do
   runTestFiles
     [ "./test/Coal/examples/40/Main.coal"
     ]
 
-main41 :: IO (Either CompilerError Text)
+main41 :: IO (Either CompilerFailureMode Text)
 main41 = do
   runTestFiles
     [ "./test/Coal/examples/41/Main.coal"
     ]
 
-main42 :: IO (Either CompilerError Text)
+main42 :: IO (Either CompilerFailureMode Text)
 main42 = do
   runTestFiles
     [ "./test/Coal/examples/42/Main.coal"
     ]
 
-main43 :: IO (Either CompilerError Text)
+main43 :: IO (Either CompilerFailureMode Text)
 main43 = do
   runTestFiles
     [ "./test/Coal/examples/43/Main.coal"
     ]
 
-main44 :: IO (Either CompilerError Text)
+main44 :: IO (Either CompilerFailureMode Text)
 main44 = do
   runTestFiles
     [ "./test/Coal/examples/44/Main.coal"
     ]
 
-main45 :: IO (Either CompilerError Text)
+main45 :: IO (Either CompilerFailureMode Text)
 main45 = do
   runTestFiles
     [ "./test/Coal/examples/45/Main.coal"
     ]
 
-main46 :: IO (Either CompilerError Text)
+main46 :: IO (Either CompilerFailureMode Text)
 main46 = do
   runTestFiles
     [ "./test/Coal/examples/46/Main.coal"
     ]
 
-main47 :: IO (Either CompilerError Text)
+main47 :: IO (Either CompilerFailureMode Text)
 main47 = do
   runTestFiles
     [ "./test/Coal/examples/47/Main.coal"
     ]
 
-main48 :: IO (Either CompilerError Text)
+main48 :: IO (Either CompilerFailureMode Text)
 main48 = do
   runTestFiles
     [ "./test/Coal/examples/48/Main.coal"
     ]
 
-main49 :: IO (Either CompilerError Text)
+main49 :: IO (Either CompilerFailureMode Text)
 main49 = do
   runTestFiles
     [ "./test/Coal/examples/49/Main.coal"
     ]
 
-main50 :: IO (Either CompilerError Text)
+main50 :: IO (Either CompilerFailureMode Text)
 main50 = do
   runTestFiles
     [ "./test/Coal/examples/50/Main.coal"
     ]
 
-main51 :: IO (Either CompilerError Text)
+main51 :: IO (Either CompilerFailureMode Text)
 main51 = do
   runTestFiles
     [ "./test/Coal/examples/51/Main.coal"
     ]
 
-main52 :: IO (Either CompilerError Text)
+main52 :: IO (Either CompilerFailureMode Text)
 main52 = do
   runTestFiles
     [ "./test/Coal/examples/52/Main.coal"
     ]
 
-main53 :: IO (Either CompilerError Text)
+main53 :: IO (Either CompilerFailureMode Text)
 main53 = do
   runTestFiles
     [ "./test/Coal/examples/53/Main.coal"
     ]
 
-main54 :: IO (Either CompilerError Text)
+main54 :: IO (Either CompilerFailureMode Text)
 main54 = do
   runTestFiles
     [ "./test/Coal/examples/54/Main.coal"
     ]
 
-main55 :: IO (Either CompilerError Text)
+main55 :: IO (Either CompilerFailureMode Text)
 main55 = do
   runTestFiles
     [ "./test/Coal/examples/55/Main.coal"
     ]
 
-main56 :: IO (Either CompilerError Text)
+main56 :: IO (Either CompilerFailureMode Text)
 main56 = do
   runTestFiles
     [ "./test/Coal/examples/56/Main.coal"
     ]
 
-main57 :: IO (Either CompilerError Text)
+main57 :: IO (Either CompilerFailureMode Text)
 main57 = do
   runTestFiles
     [ "./test/Coal/examples/57/Main.coal"
     ]
 
-main58 :: IO (Either CompilerError Text)
+main58 :: IO (Either CompilerFailureMode Text)
 main58 = do
   runTestFiles
     [ "./test/Coal/examples/58/Main.coal"
     ]
 
-main59 :: IO (Either CompilerError Text)
+main59 :: IO (Either CompilerFailureMode Text)
 main59 = do
   runTestFiles
     [ "./test/Coal/examples/59/Main.coal"
     ]
 
-main60 :: IO (Either CompilerError Text)
+main60 :: IO (Either CompilerFailureMode Text)
 main60 = do
   runTestFiles
     [ "./test/Coal/examples/60/Main.coal"
     ]
 
-main61 :: IO (Either CompilerError Text)
+main61 :: IO (Either CompilerFailureMode Text)
 main61 = do
   runTestFiles
     [ "./test/Coal/examples/61/Main.coal"
     ]
 
-main62 :: IO (Either CompilerError Text)
+main62 :: IO (Either CompilerFailureMode Text)
 main62 = do
   runTestFiles
     [ "./test/Coal/examples/62/Main.coal"
     ]
 
-main64 :: IO (Either CompilerError Text)
+main64 :: IO (Either CompilerFailureMode Text)
 main64 = do
   runTestFiles
     [ "./test/Coal/examples/64/Main.coal"
     ]
 
-main65 :: IO (Either CompilerError Text)
+main65 :: IO (Either CompilerFailureMode Text)
 main65 = do
   runTestFiles
     [ "./test/Coal/examples/65/Main.coal"
     ]
 
-main66 :: IO (Either CompilerError Text)
+main66 :: IO (Either CompilerFailureMode Text)
 main66 = do
   runTestFiles
     [ "./test/Coal/examples/66/Main.coal"
     ]
 
-main67 :: IO (Either CompilerError Text)
+main67 :: IO (Either CompilerFailureMode Text)
 main67 = do
   runTestFiles
     [ "./test/Coal/examples/67/Main.coal"
     ]
 
-main68 :: IO (Either CompilerError Text)
+main68 :: IO (Either CompilerFailureMode Text)
 main68 = do
   runTestFiles
     [ "./test/Coal/examples/68/Main.coal"
     ]
 
-main69 :: IO (Either CompilerError Text)
+main69 :: IO (Either CompilerFailureMode Text)
 main69 = do
   runTestFiles
     [ "./test/Coal/examples/69/Main.coal"
     ]
 
-main70 :: IO (Either CompilerError Text)
+main70 :: IO (Either CompilerFailureMode Text)
 main70 = do
   runTestFiles
     [ "./test/Coal/examples/70/Main.coal"
     ]
 
-main71 :: IO (Either CompilerError Text)
+main71 :: IO (Either CompilerFailureMode Text)
 main71 = do
   runTestFiles
     [ "./test/Coal/examples/71/Main.coal"
     ]
 
-main72 :: IO (Either CompilerError Text)
+main72 :: IO (Either CompilerFailureMode Text)
 main72 = do
   runTestFiles
     [ "./test/Coal/examples/72/Main.coal"
     ]
 
-main73 :: IO (Either CompilerError Text)
+main73 :: IO (Either CompilerFailureMode Text)
 main73 = do
   runTestFiles
     [ "./test/Coal/examples/73/Main.coal"
     ]
 
-main74 :: IO (Either CompilerError Text)
+main74 :: IO (Either CompilerFailureMode Text)
 main74 = do
   runTestFiles
     [ "./test/Coal/examples/74/Main.coal"
     ]
 
-main75 :: IO (Either CompilerError Text)
+main75 :: IO (Either CompilerFailureMode Text)
 main75 = do
   runTestFiles
     [ "./test/Coal/examples/75/Main.coal"
     ]
 
-main76 :: IO (Either CompilerError Text)
+main76 :: IO (Either CompilerFailureMode Text)
 main76 = do
   runTestFiles
     [ "./test/Coal/examples/76/Main.coal"
     ]
 
-main77 :: IO (Either CompilerError Text)
+main77 :: IO (Either CompilerFailureMode Text)
 main77 = do
   runTestFiles
     [ "./test/Coal/examples/77/Main.coal"
     ]
 
-main78 :: IO (Either CompilerError Text)
+main78 :: IO (Either CompilerFailureMode Text)
 main78 = do
   runTestFiles
     [ "./test/Coal/examples/78/Main.coal"
     ]
 
-main79 :: IO (Either CompilerError Text)
+main79 :: IO (Either CompilerFailureMode Text)
 main79 = do
   runTestFiles
     [ "./test/Coal/examples/79/Main.coal"
     ]
 
-main80 :: IO (Either CompilerError Text)
+main80 :: IO (Either CompilerFailureMode Text)
 main80 = do
   runTestFiles
     [ "./test/Coal/examples/80/Main.coal"
     ]
 
-main81 :: IO (Either CompilerError Text)
+main81 :: IO (Either CompilerFailureMode Text)
 main81 = do
   runTestFiles
     [ "./test/Coal/examples/81/Main.coal"
     ]
 
-main82 :: IO (Either CompilerError Text)
+main82 :: IO (Either CompilerFailureMode Text)
 main82 = do
   runTestFiles
     [ "./test/Coal/examples/82/Main.coal"
     ]
 
-main83 :: IO (Either CompilerError Text)
+main83 :: IO (Either CompilerFailureMode Text)
 main83 = do
   runTestFiles
     [ "./test/Coal/examples/83/Main.coal"
     ]
 
-main84 :: IO (Either CompilerError Text)
+main84 :: IO (Either CompilerFailureMode Text)
 main84 = do
   runTestFiles
     [ "./test/Coal/examples/84/Main.coal"
     ]
 
-main85 :: IO (Either CompilerError Text)
+main85 :: IO (Either CompilerFailureMode Text)
 main85 = do
   runTestFiles
     [ "./test/Coal/examples/85/Main.coal"
     ]
 
-main86 :: IO (Either CompilerError Text)
+main86 :: IO (Either CompilerFailureMode Text)
 main86 = do
   runTestFiles
     [ "./test/Coal/examples/86/Main.coal"
     ]
 
-main87 :: IO (Either CompilerError Text)
+main87 :: IO (Either CompilerFailureMode Text)
 main87 = do
   runTestFiles
     [ "./test/Coal/examples/87/Main.coal"
     ]
 
-main88 :: IO (Either CompilerError Text)
+main88 :: IO (Either CompilerFailureMode Text)
 main88 = do
   runTestFiles
     [ "./test/Coal/examples/88/Main.coal"
     ]
 
-main89 :: IO (Either CompilerError Text)
+main89 :: IO (Either CompilerFailureMode Text)
 main89 = do
   runTestFiles
     [ "./test/Coal/examples/89/Main.coal"
     ]
 
-main91 :: IO (Either CompilerError Text)
+main91 :: IO (Either CompilerFailureMode Text)
 main91 = do
   runTestFiles
     [ "./test/Coal/examples/91/Main.coal"
     ]
 
-main92 :: IO (Either CompilerError Text)
+main92 :: IO (Either CompilerFailureMode Text)
 main92 = do
   runTestFiles
     [ "./test/Coal/examples/92/Main.coal"
     ]
 
-main93 :: IO (Either CompilerError Text)
+main93 :: IO (Either CompilerFailureMode Text)
 main93 = do
   runTestFiles
     [ "./test/Coal/examples/93/Combinators.coal"
@@ -844,19 +844,19 @@ main93 = do
     , "./test/Coal/examples/93/Main.coal"
     ]
 
-main94 :: IO (Either CompilerError Text)
+main94 :: IO (Either CompilerFailureMode Text)
 main94 = do
   runTestFiles
     [ "./test/Coal/examples/94/Main.coal"
     ]
 
-main95 :: IO (Either CompilerError Text)
+main95 :: IO (Either CompilerFailureMode Text)
 main95 = do
   runTestFiles
     [ "./test/Coal/examples/95/Main.coal"
     ]
 
-main96 :: IO (Either CompilerError Text)
+main96 :: IO (Either CompilerFailureMode Text)
 main96 = do
   runTestFiles
     [ "./test/Coal/examples/96/List.coal"
@@ -864,186 +864,186 @@ main96 = do
     , "./test/Coal/examples/96/Main.coal"
     ]
 
-main98 :: IO (Either CompilerError Text)
+main98 :: IO (Either CompilerFailureMode Text)
 main98 = do
   runTestFiles
     [ "./test/Coal/examples/98/Main.coal"
     ]
 
-main99 :: IO (Either CompilerError Text)
+main99 :: IO (Either CompilerFailureMode Text)
 main99 = do
   runTestFiles
     [ "./test/Coal/examples/99/Main.coal"
     ]
 
-main100 :: IO (Either CompilerError Text)
+main100 :: IO (Either CompilerFailureMode Text)
 main100 = do
   runTestFiles
     [ "./test/Coal/examples/100/Main.coal"
     ]
 
-main101 :: IO (Either CompilerError Text)
+main101 :: IO (Either CompilerFailureMode Text)
 main101 = do
   runTestFiles
     [ "./test/Coal/examples/101/Main.coal"
     ]
 
-main102 :: IO (Either CompilerError Text)
+main102 :: IO (Either CompilerFailureMode Text)
 main102 = do
   runTestFiles
     [ "./test/Coal/examples/102/Main.coal"
     ]
 
-main103 :: IO (Either CompilerError Text)
+main103 :: IO (Either CompilerFailureMode Text)
 main103 = do
   runTestFiles
     [ "./test/Coal/examples/103/Main.coal"
     ]
 
-main104 :: IO (Either CompilerError Text)
+main104 :: IO (Either CompilerFailureMode Text)
 main104 = do
   runTestFiles
     [ "./test/Coal/examples/104/Main.coal"
     ]
 
-main105 :: IO (Either CompilerError Text)
+main105 :: IO (Either CompilerFailureMode Text)
 main105 = do
   runTestFiles
     [ "./test/Coal/examples/105/Main.coal"
     ]
 
-main106 :: IO (Either CompilerError Text)
+main106 :: IO (Either CompilerFailureMode Text)
 main106 = do
   runTestFiles
     [ "./test/Coal/examples/106/Main.coal"
     ]
 
-main107 :: IO (Either CompilerError Text)
+main107 :: IO (Either CompilerFailureMode Text)
 main107 = do
   runTestFiles
     [ "./test/Coal/examples/107/Main.coal"
     ]
 
-main108 :: IO (Either CompilerError Text)
+main108 :: IO (Either CompilerFailureMode Text)
 main108 = do
   runTestFiles
     [ "./test/Coal/examples/108/Main.coal"
     ]
 
-main109 :: IO (Either CompilerError Text)
+main109 :: IO (Either CompilerFailureMode Text)
 main109 = do
   runTestFiles
     [ "./test/Coal/examples/109/Main.coal"
     ]
 
-main110 :: IO (Either CompilerError Text)
+main110 :: IO (Either CompilerFailureMode Text)
 main110 = do
   runTestFiles
     [ "./test/Coal/examples/110/Main.coal"
     ]
 
-main111 :: IO (Either CompilerError Text)
+main111 :: IO (Either CompilerFailureMode Text)
 main111 = do
   runTestFiles
     [ "./test/Coal/examples/111/Main.coal"
     ]
 
-main112 :: IO (Either CompilerError Text)
+main112 :: IO (Either CompilerFailureMode Text)
 main112 = do
   runTestFiles
     [ "./test/Coal/examples/112/Main.coal"
     ]
 
-main113 :: IO (Either CompilerError Text)
+main113 :: IO (Either CompilerFailureMode Text)
 main113 = do
   runTestFiles
     [ "./test/Coal/examples/113/Main.coal"
     ]
 
-main114 :: IO (Either CompilerError Text)
+main114 :: IO (Either CompilerFailureMode Text)
 main114 = do
   runTestFiles
     [ "./test/Coal/examples/114/Main.coal"
     ]
 
-main115 :: IO (Either CompilerError Text)
+main115 :: IO (Either CompilerFailureMode Text)
 main115 = do
   runTestFiles
     [ "./test/Coal/examples/115/Main.coal"
     ]
 
-main116 :: IO (Either CompilerError Text)
+main116 :: IO (Either CompilerFailureMode Text)
 main116 = do
   runTestFiles
     [ "./test/Coal/examples/116/Main.coal"
     ]
 
-main117 :: IO (Either CompilerError Text)
+main117 :: IO (Either CompilerFailureMode Text)
 main117 = do
   runTestFiles
     [ "./test/Coal/examples/117/Main.coal"
     ]
 
-main118 :: IO (Either CompilerError Text)
+main118 :: IO (Either CompilerFailureMode Text)
 main118 = do
   runTestFiles
     [ "./test/Coal/examples/118/Main.coal"
     ]
 
-main119 :: IO (Either CompilerError Text)
+main119 :: IO (Either CompilerFailureMode Text)
 main119 = do
   runTestFiles
     [ "./test/Coal/examples/119/Main.coal"
     ]
 
-main120 :: IO (Either CompilerError Text)
+main120 :: IO (Either CompilerFailureMode Text)
 main120 = do
   runTestFiles
     [ "./test/Coal/examples/120/Main.coal"
     ]
 
-main121 :: IO (Either CompilerError Text)
+main121 :: IO (Either CompilerFailureMode Text)
 main121 = do
   runTestFiles
     [ "./test/Coal/examples/121/Main.coal"
     ]
 
-main122 :: IO (Either CompilerError Text)
+main122 :: IO (Either CompilerFailureMode Text)
 main122 = do
   runTestFiles
     [ "./test/Coal/examples/122/Main.coal"
     ]
 
-main123 :: IO (Either CompilerError Text)
+main123 :: IO (Either CompilerFailureMode Text)
 main123 = do
   runTestFiles
     [ "./test/Coal/examples/123/Main.coal"
     ]
 
-main124 :: IO (Either CompilerError Text)
+main124 :: IO (Either CompilerFailureMode Text)
 main124 = do
   runTestFiles
     [ "./test/Coal/examples/124/Main.coal"
     ]
 
-main125 :: IO (Either CompilerError Text)
+main125 :: IO (Either CompilerFailureMode Text)
 main125 = do
   runTestFiles
     [ "./test/Coal/examples/125/Main.coal"
     ]
 
-main126 :: IO (Either CompilerError Text)
+main126 :: IO (Either CompilerFailureMode Text)
 main126 = do
   runTestFiles
     [ "./test/Coal/examples/126/Main.coal"
     ]
 
-compileFiles :: [String] -> IO (Either CompilerError ())
+compileFiles :: [String] -> IO (Either CompilerFailureMode ())
 compileFiles files = do
   fs <- traverse readFile files
   let results = fmap (parseFile . Text.pack) fs
   case partitionEithers results of
-    ([], objs) -> do
+    ([], objs) ->
       evalCompilerT emptyCompilerEnvironment (run objs)
     (es, _) -> do
       forM_ es $

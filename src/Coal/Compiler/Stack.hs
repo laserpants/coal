@@ -8,6 +8,7 @@ module Coal.Compiler.Stack (
   CompilerEnvironment (..),
   CompilerJournal (..),
   CompilerError (..),
+  CompilerFailureMode (..),
   CompilerStack,
   CompilerState (..),
   CompilerConstraint,
@@ -49,7 +50,7 @@ import Control.Monad.Writer (MonadWriter)
 import Data.Text (Text)
 import Extra (Dictionary, Name)
 
-type CompilerStack a m c = ExceptT CompilerError (RWST CompilerEnvironment (CompilerJournal a) (CompilerState a) m) c
+type CompilerStack a m c = ExceptT CompilerFailureMode (RWST CompilerEnvironment (CompilerJournal a) (CompilerState a) m) c
 
 newtype CompilerT a m c = Compiler {compilerStack :: CompilerStack a m c}
   deriving
@@ -59,18 +60,18 @@ newtype CompilerT a m c = Compiler {compilerStack :: CompilerStack a m c}
     , MonadReader CompilerEnvironment
     , MonadWriter (CompilerJournal a)
     , MonadState (CompilerState a)
-    , MonadError CompilerError
+    , MonadError CompilerFailureMode
     , MonadIO
     )
 
 {-# INLINE runCompilerT #-}
-runCompilerT :: (Monad m) => CompilerEnvironment -> CompilerT a m c -> m (Either CompilerError c, CompilerState a)
+runCompilerT :: (Monad m) => CompilerEnvironment -> CompilerT a m c -> m (Either CompilerFailureMode c, CompilerState a)
 runCompilerT env com = do
   (c, s, _) <- runRWST (runExceptT (compilerStack com)) env initialCompilerState
   pure (c, s)
 
 {-# INLINE evalCompilerT #-}
-evalCompilerT :: (Monad m) => CompilerEnvironment -> CompilerT a m c -> m (Either CompilerError c)
+evalCompilerT :: (Monad m) => CompilerEnvironment -> CompilerT a m c -> m (Either CompilerFailureMode c)
 evalCompilerT env com = do
   (c, _) <- runCompilerT env com
   pure c

@@ -14,9 +14,11 @@ module Coal.Compiler.Journal (
   tellWhereClauses,
   tellRecordInfo,
   tellDictionaryTraits,
+  tellErrors,
   censorDictionaryTraits,
 ) where
 
+import Coal.Compiler.Error (CompilerError (..))
 import Coal.Language
 import Control.Monad.Writer (MonadWriter, censor, listen, tell)
 import Data.Tuple.Extra (second)
@@ -29,23 +31,25 @@ data CompilerJournal a = CompilerJournal
   , compilerJournalWhereClauses :: [(Name, Name)]
   , compilerJournalRecordInfo :: [RecordInfo a]
   , compilerJournalDictionaryTraits :: [Trait IndexedType]
+  , compilerJournalErrors :: [CompilerError]
   }
-  deriving (Show, Eq, Ord, Read)
+  deriving (Show, Eq)
 
 instance Semigroup (CompilerJournal a) where
-  (<>) (CompilerJournal a1 a2 a3 a4) (CompilerJournal b1 b2 b3 b4) =
+  (<>) (CompilerJournal a1 a2 a3 a4 a5) (CompilerJournal b1 b2 b3 b4 b5) =
     CompilerJournal
       (a1 <> b1)
       (a2 <> b2)
       (a3 <> b3)
       (a4 <> b4)
+      (a5 <> b5)
 
 instance Monoid (CompilerJournal a) where
-  mempty = CompilerJournal [] [] [] []
+  mempty = CompilerJournal [] [] [] [] []
 
 {-# INLINE tellPatterns #-}
 tellPatterns :: (MonadWriter (CompilerJournal a) m) => [(Name, Pattern a IndexedType)] -> m ()
-tellPatterns w = tell $ CompilerJournal w [] [] []
+tellPatterns w = tell $ CompilerJournal w [] [] [] []
 
 {-# INLINE tellPatterns1 #-}
 tellPatterns1 :: (MonadWriter (CompilerJournal a) m) => (Name, Pattern a IndexedType) -> m ()
@@ -53,15 +57,19 @@ tellPatterns1 w = tellPatterns [w]
 
 {-# INLINE tellWhereClauses #-}
 tellWhereClauses :: (MonadWriter (CompilerJournal a) m) => [(Name, Name)] -> m ()
-tellWhereClauses w = tell $ CompilerJournal [] w [] []
+tellWhereClauses w = tell $ CompilerJournal [] w [] [] []
 
 {-# INLINE tellRecordInfo #-}
 tellRecordInfo :: (MonadWriter (CompilerJournal a) m) => [RecordInfo a] -> m ()
-tellRecordInfo w = tell $ CompilerJournal [] [] w []
+tellRecordInfo w = tell $ CompilerJournal [] [] w [] []
 
 {-# INLINE tellDictionaryTraits #-}
 tellDictionaryTraits :: (MonadWriter (CompilerJournal a) m) => [Trait IndexedType] -> m ()
-tellDictionaryTraits w = tell $ CompilerJournal [] [] [] w
+tellDictionaryTraits w = tell $ CompilerJournal [] [] [] w []
+
+{-# INLINE tellErrors #-}
+tellErrors :: (MonadWriter (CompilerJournal a) m) => [CompilerError] -> m ()
+tellErrors w = tell $ CompilerJournal [] [] [] [] w
 
 {-# INLINE listenPatterns #-}
 listenPatterns :: (MonadWriter (CompilerJournal a) m) => m e -> m (e, [(Name, Pattern a IndexedType)])

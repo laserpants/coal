@@ -1,7 +1,8 @@
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Error (CompilerError (..)) where
+module Coal.Compiler.Error (CompilerError (..), CompilerFailureMode (..)) where
 
+import Coal.Parser (ParserError)
 import Data.Text (Text)
 
 -- TODO
@@ -10,6 +11,12 @@ import Data.Text (Text)
 --  | FoldPatternInRegularMatch a
 --  deriving (Show, Eq, Ord, Read)
 
--- TODO
-newtype CompilerError = CompilerError Text
+data CompilerError
+  = ParserError ParserError
+  | TODO
+  deriving (Show, Eq)
+
+data CompilerFailureMode
+  = ParserFailure
+  | CompilerError Text
   deriving (Show, Eq, Ord, Read)
