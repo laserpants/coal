@@ -53,9 +53,6 @@ withSupplyMC f = do
   insertSupplyC n'
   pure r
 
-whereClausesExpansionTrans :: (Monad m) => (c -> Writer [(Name, Name)] c) -> c -> CompilerT a m c
-whereClausesExpansionTrans f e = pure (fst $ runWriter (f e))
-
 compileTopLevelFoldsC :: (Monad m, Data a, Monoid a) => Module a Kind () -> CompilerT a m (Module a Kind ())
 compileTopLevelFoldsC = overModuleDefinitionsM (traverse compileTopLevelFolds)
 
