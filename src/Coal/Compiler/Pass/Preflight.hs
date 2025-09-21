@@ -22,4 +22,4 @@ insertBuiltInDefinitions :: [Definition a k ()] -> [Definition a k ()]
 insertBuiltInDefinitions = (builtInDefinitions <>)
 
 builtInDefinitions :: [Definition a k ()]
-builtInDefinitions = undefined
+builtInDefinitions = []
