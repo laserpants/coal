@@ -85,10 +85,10 @@ insertPlaceholders =
       pure d
 
 insertPlaceholdersInDef :: (Monad m, Monoid a, Data a) => Trait ParameterizedType -> Definition a Kind IndexedType -> CompilerT a m (Definition a Kind IndexedType)
-insertPlaceholdersInDef name =
+insertPlaceholdersInDef trait =
   \case
-    c@(DConstant _ dname _ _) ->
-      insertTypeInfo (instanceLabel name dname) =<< expandInLocalEnv c
+    c@DConstant{} ->
+      insertTypeInfo (instanceLabel trait (definitionName c)) =<< expandInLocalEnv c
     _ ->
       error "TODO"
 
