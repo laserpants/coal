@@ -3,13 +3,13 @@
 
 module Coal.Compiler.Pass (Pass (..), (>->)) where
 
-import Coal.Compiler.Stack (CompilerStack)
+import Coal.Compiler.Stack (CompilerT)
 import Control.Monad ((>=>))
 import Extra (Name)
 
 data Pass a m i o = Pass
   { passName :: Name
-  , runPass :: i -> CompilerStack a m o
+  , runPass :: i -> CompilerT a m o
   }
 
 (>->) :: (Monad m) => Pass a m p q -> Pass a m q r -> Pass a m p r
