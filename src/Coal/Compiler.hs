@@ -9,7 +9,6 @@ module Coal.Compiler where
 import Coal.Compiler.Environment (overCompilerDictionaryNameEnvironment)
 import Coal.Compiler.Kernel.TranslateModule (translateModule)
 import Coal.Compiler.PatternMatching
-import Coal.Compiler.PatternMatching.Rule -- (MatchMonad (..), runMatchMonad)
 import Coal.Compiler.Stack
 import Coal.Compiler.Transform.Definition.Fold
 import Coal.Compiler.Transform.Definition.Unfold
@@ -36,7 +35,6 @@ import Coal.TypeSystem.Substitution (normalizeTypeIndexes)
 import Control.Monad.Except
 import Control.Monad.Reader (local)
 import Control.Monad.State (gets, runState)
-import Control.Monad.Writer (Writer, runWriter)
 import Data.Data (Data)
 import Data.Text (Text)
 import qualified Data.Text as Text
