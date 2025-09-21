@@ -337,7 +337,7 @@ let name = "Zlatan"
 >  #### A note about let-generalization
 >
 > In some ways, a let-binding is interchangeable with a lambda function. For example, writing `let x = 1 in increment(x)` yields the same result as `(fn(x) => increment(x))(1)`.
-> But besides being more readable, a let-binding also has another purpose. In [Hindley-Milner](https://en.wikipedia.org/wiki/Hindley%E2%80%93Milner_type_system) languages, it is let-bindings that introduce polymorphism. Consider the following expression, which doesn't type check:
+> But besides being more readable, the let-binding also has another purpose. In [Hindley-Milner](https://en.wikipedia.org/wiki/Hindley%E2%80%93Milner_type_system) languages, it is let-bindings that introduce polymorphism. Consider the following expression, which doesn't type check:
 > 
 > ```
 >   (fn(f) => (f(3 : int32), f("three")))(fn(x) => x)
