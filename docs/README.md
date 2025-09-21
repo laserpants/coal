@@ -113,7 +113,7 @@ module <path>(<export_list>) {
 }
 ```
 
-Each module is uniquely identified by its *path*. A module's path mirrors the directory structure of the source file in which it is defined. Path segments begin with an uppercase letter and are separated by a dot (`.`) character. File names have a `.coal` suffix. A module `Utils.Math.Trigonometry`, for instance, is defined in a file named `Trigonometry.coal`, located under `Utils/Math/` relative to your project's root directory.
+Every module is uniquely identified by its *path*. A module's path mirrors the directory structure of the source file in which it is defined. Path segments begin with an uppercase letter and are separated by a dot (`.`) character. File names have a `.coal` suffix. A module `Utils.Math.Trigonometry`, for instance, is defined in a file named `Trigonometry.coal`, located under `Utils/Math/` relative to your project's root directory.
 
 ```
 src
@@ -482,6 +482,51 @@ let answer = 42
 ```
 
 ##### Unit
+
+The `unit` type has only a single value, written as an empty pair of parentheses: `()`. At a first glance, this type appears to be of no purpose, but it actually has a number of applications. 
+
+In C, for example, we can define the following function:
+
+```
+int five() {
+  /* ... */
+  
+  return 5;
+}
+```
+
+What a function such as this one translates to in this context is simply a value:
+
+```
+let five : int32 = 5
+```
+
+There is a difference, though; and in many instances it is useful to be able to express that a function accepts some input, but that this input doesn't have any significance in the _.
+
+This is where `unit` comes in handy
+
+```
+fun five(() : unit) : int32 = 5
+```
+
+TODO
+
+Removing the type annotation, this becomes `fun five(()) = 5`, which is perfectly fine to write, and valid syntax. 
+But since an expression like `five()` doesn't have any other meaningful interpretation, the compiler accepts this as a shorthand for the slightly awkward `five(())`.
+
+```
+fun five() = 5   // i.e., fun five(() : unit) = 5
+```
+
+Similarly, when calling a function that only takes a unit value as argument, the extra parentheses can be omitted:
+
+```
+let 
+  x = 
+    five()   // we could have written five(()) here
+  in
+    x + 5
+```
 
 #### Algebraic data types
 
