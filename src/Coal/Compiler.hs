@@ -58,7 +58,7 @@ compileTopLevelUnfoldsC :: (Monad m, Monoid a, Data a) => Module a Kind () -> Co
 compileTopLevelUnfoldsC = overModuleDefinitionsM (traverse compileTopLevelUnfolds)
 
 indexedC :: (Monad m, Traversable t) => t e -> CompilerT a m (t IndexedType)
-indexedC t = withSupplyC (runState (indexed t))
+indexedC = withSupplyC . runState . indexed
 
 runTypeInferenceC :: (MonadIO m, Data a, Eq a, Show a) => Module a Kind () -> CompilerT a m (Module a Kind IndexedType)
 runTypeInferenceC m = do
