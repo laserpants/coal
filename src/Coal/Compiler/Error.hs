@@ -11,12 +11,14 @@ import Data.Text (Text)
 --  | FoldPatternInRegularMatch a
 --  deriving (Show, Eq, Ord, Read)
 
-data CompilerError
+data CompilerError a
   = ParserError ParserError
+  | MisplacedImportStatement a
   | TODO
   deriving (Show, Eq)
 
 data CompilerFailureMode
   = ParserFailure
+  | PreflightFailure
   | CompilerError Text
   deriving (Show, Eq, Ord, Read)

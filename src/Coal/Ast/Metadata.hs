@@ -6,6 +6,7 @@
 module Coal.Ast.Metadata (Metadata (..), HasMetadata (..), metadataSpan) where
 
 import Coal.Language.Expression
+import Coal.Language.Module.Definition (Definition (..))
 import Coal.Language.Pattern
 import Coal.TypeSystem.Constraint.Assumption (Assumption (..))
 import Coal.TypeSystem.Constraint.Generation.InferenceRule (InferenceRule (..))
@@ -125,6 +126,20 @@ instance HasMetadata (Assumption Metadata t) where
   getMetadata =
     \case
       Assumption a _ _ -> a
+
+instance HasMetadata (Definition Metadata k ()) where
+  getMetadata =
+    \case
+      DType a _ _ -> a
+      DCotype a _ _ -> a
+      DFunction a _ _ _ -> a
+      DConstant a _ _ _ -> a
+      DImport a _ _ -> a
+      DTrait a _ _ -> a
+      DInstance a _ _ -> a
+      DTypeAlias a _ _ -> a
+      DFold a _ _ -> a
+      DUnfold a _ _ -> a
 
 metadataSpan :: (HasMetadata a) => a -> a -> Metadata
 metadataSpan lhs rhs = Metadata (locationStart (getMetadata lhs)) (locationEnd (getMetadata rhs))

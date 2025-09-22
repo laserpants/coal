@@ -10,6 +10,11 @@ import Coal.Common.Name (Dictionary, Name)
 import Coal.Compiler (mainPass, typeCheckingPass, writeDotFiles)
 import Coal.Compiler.Environment
 import Coal.Compiler.Kernel.TranslateModule (translateModule)
+import Coal.Compiler.Pass (ModuleBundle, Pass (..), (>->))
+import Coal.Compiler.Pass.ImportsTopRule (importsTopRulePass)
+import Coal.Compiler.Pass.Parsing (parsingPass)
+import Coal.Compiler.Pass.Setup (setupPass)
+import Coal.Compiler.Pass.TypeImports (typeImportsPass)
 import Coal.Compiler.Stack
 import Coal.Compiler.Transform.WhereClauses
 import Coal.Compiler.TypeInference.Errors
@@ -2470,3 +2475,24 @@ runTestBuild :: IO Text
 runTestBuild = do
   void (readProcess "./.build/build.sh" [] "")
   Text.pack <$> readProcess "./.build/dist" [] ""
+
+--
+
+runCompiler :: [FilePath] -> IO (Either CompilerFailureMode [ModuleBundle], CompilerState Metadata, [CompilerError Metadata])
+runCompiler files = do
+  runCompilerT emptyCompilerEnvironment (runPass prefligthPhase files)
+
+prefligthPhase :: (MonadIO m) => Pass Metadata m [FilePath] [ModuleBundle]
+prefligthPhase = do
+  parsingPass
+    >-> importsTopRulePass
+
+--    >-> setupPass
+--    >-> typeImportsPass
+--
+
+main127 :: IO (Either CompilerFailureMode [ModuleBundle], CompilerState Metadata, [CompilerError Metadata])
+main127 = do
+  runCompiler
+    [ "./test/Coal/examples/128/Main.coal"
+    ]

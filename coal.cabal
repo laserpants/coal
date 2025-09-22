@@ -40,8 +40,9 @@ library
       Coal.Compiler.Kernel.TranslateModule
       Coal.Compiler.Kernel.TranslateType
       Coal.Compiler.Pass
+      Coal.Compiler.Pass.ImportsTopRule
       Coal.Compiler.Pass.Parsing
-      Coal.Compiler.Pass.Preflight
+      Coal.Compiler.Pass.Setup
       Coal.Compiler.Pass.TypeImports
       Coal.Compiler.PatternMatching
       Coal.Compiler.PatternMatching.Compiler

@@ -1,17 +1,17 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Pass.Preflight (preflightPass) where
+module Coal.Compiler.Pass.Setup (setupPass) where
 
 import Coal.Compiler.Pass
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Language.Module
 import Extra ((<$$>))
 
-preflightPass :: (Monad m) => Pass a m [ModuleBundle] [ModuleBundle]
-preflightPass =
+setupPass :: (Monad m) => Pass a m [ModuleBundle] [ModuleBundle]
+setupPass =
   Pass
-    { passName = "Preflight"
+    { passName = "Setup"
     , runPass = pass
     }
 

@@ -31,7 +31,7 @@ data CompilerJournal a = CompilerJournal
   , compilerJournalWhereClauses :: [(Name, Name)]
   , compilerJournalRecordInfo :: [RecordInfo a]
   , compilerJournalDictionaryTraits :: [Trait IndexedType]
-  , compilerJournalErrors :: [CompilerError]
+  , compilerJournalErrors :: [CompilerError a]
   }
   deriving (Show, Eq)
 
@@ -68,7 +68,7 @@ tellDictionaryTraits :: (MonadWriter (CompilerJournal a) m) => [Trait IndexedTyp
 tellDictionaryTraits w = tell $ CompilerJournal [] [] [] w []
 
 {-# INLINE tellErrors #-}
-tellErrors :: (MonadWriter (CompilerJournal a) m) => [CompilerError] -> m ()
+tellErrors :: (MonadWriter (CompilerJournal a) m) => [CompilerError a] -> m ()
 tellErrors w = tell $ CompilerJournal [] [] [] [] w
 
 {-# INLINE listenPatterns #-}

@@ -65,15 +65,15 @@ newtype CompilerT a m c = Compiler {compilerStack :: CompilerStack a m c}
     )
 
 {-# INLINE runCompilerT #-}
-runCompilerT :: (Monad m) => CompilerEnvironment -> CompilerT a m c -> m (Either CompilerFailureMode c, CompilerState a)
+runCompilerT :: (Monad m) => CompilerEnvironment -> CompilerT a m c -> m (Either CompilerFailureMode c, CompilerState a, [CompilerError a])
 runCompilerT env com = do
-  (c, s, _) <- runRWST (runExceptT (compilerStack com)) env initialCompilerState
-  pure (c, s)
+  (c, s, w) <- runRWST (runExceptT (compilerStack com)) env initialCompilerState
+  pure (c, s, compilerJournalErrors w)
 
 {-# INLINE evalCompilerT #-}
 evalCompilerT :: (Monad m) => CompilerEnvironment -> CompilerT a m c -> m (Either CompilerFailureMode c)
 evalCompilerT env com = do
-  (c, _) <- runCompilerT env com
+  (c, _, _) <- runCompilerT env com
   pure c
 
 {-# INLINE compilerSetTypeAnnotationParams #-}
