@@ -3,7 +3,7 @@
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE RecordWildCards #-}
 
-import Coal.Ast.Metadata (Metadata (..))
+import Coal.Ast.Metadata (HasMetadata (..), Metadata (..))
 import Coal.Common.Environment (Environment (..))
 import Coal.Common.Label (Label (..))
 import Coal.Common.Name (Dictionary, Name)
@@ -2480,7 +2480,17 @@ runTestBuild = do
 
 runCompiler :: [FilePath] -> IO (Either CompilerFailureMode [ModuleBundle], CompilerState Metadata, [CompilerError Metadata])
 runCompiler files = do
-  runCompilerT emptyCompilerEnvironment (runPass prefligthPhase files)
+  r@(_, _, es) <- runCompilerT emptyCompilerEnvironment (runPass prefligthPhase files)
+  forM_ es $
+    \e -> do
+      Text.putStrLn (printError e)
+  pure r
+
+printError =
+  \case
+    MisplacedImportStatement loc ->
+      -- TODO
+      prettyErrorMessage ["foo"] "baz" loc
 
 prefligthPhase :: (MonadIO m) => Pass Metadata m [FilePath] [ModuleBundle]
 prefligthPhase = do

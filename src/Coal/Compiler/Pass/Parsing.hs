@@ -37,4 +37,5 @@ pass files = do
 parseFile :: Text -> Either ParserError ModuleBundle
 parseFile src = do
   m <- runParser parseModule "" src
+  -- TODO: set source ??
   pure (src, m)

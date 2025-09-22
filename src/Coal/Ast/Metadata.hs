@@ -37,6 +37,9 @@ instance Monoid Metadata where
 class HasMetadata a where
   getMetadata :: a -> Metadata
 
+instance HasMetadata Metadata where
+  getMetadata = id
+
 instance HasMetadata (Expression Metadata t) where
   getMetadata =
     \case
