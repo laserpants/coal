@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE StrictData #-}
 
@@ -7,6 +8,7 @@ module Coal.Language.Module (
   overModuleDefinitions,
   overModuleDefinitionsM,
   fromDefinitionList,
+  modulePathName,
   module Coal.Language.Module.Definition,
   module Coal.Language.Module.Definition.Function,
   module Coal.Language.Module.Definition.Constant,
@@ -31,6 +33,7 @@ import Coal.Language.Module.Definition.Type
 import Coal.Language.Module.Definition.Unfold
 import Data.Data (Data, Typeable)
 import Extra (Name, Over)
+import qualified Data.Text as Text
 
 data Module a k t = Module Path [Name] [Definition a k t]
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
@@ -50,3 +53,11 @@ insertDefinition def = overModuleDefinitions (def :)
 {-# INLINE fromDefinitionList #-}
 fromDefinitionList :: Path -> [Name] -> [Definition a k t] -> Module a k t
 fromDefinitionList path names = foldr insertDefinition (Module path names mempty)
+
+{-# INLINE modulePath #-}
+modulePath :: Module a k t -> Path
+modulePath (Module path _ _) = path
+
+{-# INLINE modulePathName #-}
+modulePathName :: Module a k t -> Name
+modulePathName module_ = Text.intercalate "." path where Path path = modulePath module_

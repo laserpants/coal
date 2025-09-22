@@ -1430,7 +1430,7 @@ run modules = do
       liftIO $ writeDotFiles "untyped" m1
       defs <- gets compilerTypeDefinitions
       let m2 = overModuleDefinitions (insertImportedTypes defs) m1
-      setVerbatimSourceC src
+      setVerbatimSourceC (modulePathName m1) src
       m3 <- expandWhereClausesModule m2
       insertNamesC names
       case m3 of
@@ -1453,7 +1453,7 @@ compileModule x = do
     errs@(_ : _) ->
       forM_ errs $
         \err -> do
-          src <- gets compilerVerbatimSource
+          src <- getVerbatimSourceC (modulePathName x) 
           let msg = prettyErrorMessage [Text.pack (show err)] src err
           throwError (CompilerError msg)
     [] ->
@@ -1465,7 +1465,7 @@ compileModule x = do
     errs@(_ : _) ->
       forM_ errs $
         \err -> do
-          src <- gets compilerVerbatimSource
+          src <- getVerbatimSourceC (modulePathName x) 
           let msg =
                 prettyErrorMessage
                   [ "\nType error:"
@@ -1490,7 +1490,7 @@ compileModule x = do
         \Assumption{..} ->
           -- TODO: Maybe look up these in environment and add additional constraints
           unless ("!" `Text.isPrefixOf` assumptionName) $ do
-            src <- gets compilerVerbatimSource
+            src <- getVerbatimSourceC (modulePathName x) 
             let msg =
                   prettyErrorMessage
                     [ "\nName not in scope:"

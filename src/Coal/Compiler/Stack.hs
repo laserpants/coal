@@ -27,6 +27,8 @@ module Coal.Compiler.Stack (
   insertSupplyC,
   insertTypeDefinitionsC,
   setVerbatimSourceC,
+  setVerbatimSourceForC,
+  getVerbatimSourceC,
   compilerReportConstraintsGenErrors,
   compilerReportSolverRuleViolations,
   compilerSetTypeAnnotationParams,
@@ -40,12 +42,12 @@ import Coal.Compiler.Error
 import Coal.Compiler.Journal
 import Coal.Compiler.State
 import Coal.Language
-import Coal.Language.Module (Definition (..))
+import Coal.Language.Module (Module (..), Definition (..), modulePathName)
 import Coal.TypeSystem
 import Control.Monad.Except
 import Control.Monad.RWS (RWST, runRWST)
 import Control.Monad.Reader (MonadReader)
-import Control.Monad.State (MonadState, modify)
+import Control.Monad.State (MonadState, modify, gets)
 import Control.Monad.Writer (MonadWriter)
 import Data.Text (Text)
 import Extra (Dictionary, Name)
@@ -125,8 +127,22 @@ updateSubstitutionC :: (Monad m) => Substitution -> CompilerT a m ()
 updateSubstitutionC sub = modify (overCompilerSubstitution (const sub))
 
 {-# INLINE setVerbatimSourceC #-}
-setVerbatimSourceC :: (Monad m) => Text -> CompilerT a m ()
-setVerbatimSourceC src = modify (overCompilerVerbatimSource (const src))
+setVerbatimSourceC :: (Monad m) => Name -> Text -> CompilerT a m ()
+setVerbatimSourceC name src = modify (overCompilerVerbatimSource (Environment.insert name src))
+
+{-# INLINE setVerbatimSourceForC #-}
+setVerbatimSourceForC :: (Monad m) => Module a k t -> Text -> CompilerT a m ()
+setVerbatimSourceForC module_ = setVerbatimSourceC (modulePathName module_) 
+
+{-# INLINE getVerbatimSourceC #-}
+getVerbatimSourceC :: (Monad m) => Name -> CompilerT a m Text
+getVerbatimSourceC name = do
+  s <- gets compilerVerbatimSource
+  case Environment.lookup name s of
+    Nothing ->
+      error "Implementation error"
+    Just src ->
+      pure src
 
 {-# INLINE insertTypeDefinitionsC #-}
 insertTypeDefinitionsC :: (Monad m) => Name -> [Definition a Kind ()] -> CompilerT a m ()

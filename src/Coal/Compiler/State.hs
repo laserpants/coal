@@ -40,7 +40,7 @@ data CompilerState a = CompilerState
   , compilerAssumptions :: [CompilerAssumption a]
   , compilerTypeAnnotationParams :: Dictionary (a, TypeIndex Kind)
   , compilerTypeDefinitions :: Environment [Definition a Kind ()]
-  , compilerVerbatimSource :: Text
+  , compilerVerbatimSource :: Environment Text
   }
   deriving (Show, Eq, Ord, Read)
 
@@ -85,7 +85,7 @@ overCompilerTypeDefinitions :: Over (CompilerState a) (Environment [Definition a
 overCompilerTypeDefinitions fn CompilerState{..} = CompilerState{compilerTypeDefinitions = fn compilerTypeDefinitions, ..}
 
 {-# INLINE overCompilerVerbatimSource #-}
-overCompilerVerbatimSource :: Over (CompilerState a) Text
+overCompilerVerbatimSource :: Over (CompilerState a) (Environment Text)
 overCompilerVerbatimSource fn CompilerState{..} = CompilerState{compilerVerbatimSource = fn compilerVerbatimSource, ..}
 
 initialCompilerState :: CompilerState a
