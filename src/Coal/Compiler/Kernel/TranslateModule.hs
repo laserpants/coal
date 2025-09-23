@@ -20,7 +20,7 @@ import Extra (Name)
 translateModule :: (Data a, Monad m) => Module a Kind IndexedType -> CompilerT a m (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))
 translateModule =
   \case
-    Module (Path p) _ defs ->
+    Module path _ defs ->
       insertQualifiedNames env $
         withModuleName name $
           Kernel.Module
@@ -29,7 +29,7 @@ translateModule =
             . concat
             <$> traverse translateDefinition defs
      where
-      name = Text.intercalate "." p
+      name = principalPath path
       env = collectImports defs
 
 collectImports :: [Definition a k t] -> Environment Name
@@ -38,9 +38,9 @@ collectImports = Environment.fromList . concatMap imports
 imports :: Definition a k t -> [(Name, Name)]
 imports =
   \case
-    DImport _ (Path p) ns ->
+    DImport _ path ns ->
       flip map ns $
         \name ->
-          (name, Text.intercalate "." p <> "." <> name)
+          (name, principalPath path <> "." <> name)
     _ ->
       []

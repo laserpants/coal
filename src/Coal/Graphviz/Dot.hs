@@ -409,8 +409,8 @@ instance (Show t, Pretty t) => Dot t (Definition a k t) where
 instance (Show t, Pretty t) => Dot t (Module a k t) where
   toDot =
     \case
-      Module (Path path) _ ds -> do
-        nid <- emitEllipse (Text.intercalate "." path) Nothing
+      Module path _ ds -> do
+        nid <- emitEllipse (principalPath path) Nothing
         traverse_ toDot ds
         return nid
 

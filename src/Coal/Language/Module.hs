@@ -9,6 +9,7 @@ module Coal.Language.Module (
   overModuleDefinitionsM,
   fromDefinitionList,
   modulePathName,
+  principalPath,
   module Coal.Language.Module.Definition,
   module Coal.Language.Module.Definition.Function,
   module Coal.Language.Module.Definition.Constant,
@@ -58,6 +59,10 @@ fromDefinitionList path names = foldr insertDefinition (Module path names mempty
 modulePath :: Module a k t -> Path
 modulePath (Module path _ _) = path
 
+{-# INLINE principalPath #-}
+principalPath :: Path -> Name
+principalPath p = Text.intercalate "." path where Path path = p
+
 {-# INLINE modulePathName #-}
 modulePathName :: Module a k t -> Name
-modulePathName module_ = Text.intercalate "." path where Path path = modulePath module_
+modulePathName = principalPath . modulePath
