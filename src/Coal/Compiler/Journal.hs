@@ -11,6 +11,7 @@ module Coal.Compiler.Journal (
   listenWhereClauses,
   listenRecordInfo,
   listenDictionaryTraits,
+  listenErrors,
   tellWhereClauses,
   tellRecordInfo,
   tellDictionaryTraits,
@@ -86,6 +87,10 @@ listenRecordInfo w = second compilerJournalRecordInfo <$> listen w
 {-# INLINE listenDictionaryTraits #-}
 listenDictionaryTraits :: (MonadWriter (CompilerJournal a) m) => m e -> m (e, [Trait IndexedType])
 listenDictionaryTraits w = second compilerJournalDictionaryTraits <$> listen w
+
+{-# INLINE listenErrors #-}
+listenErrors :: (MonadWriter (CompilerJournal a) m) => m e -> m (e, [CompilerError a])
+listenErrors w = second compilerJournalErrors <$> listen w
 
 {-# INLINE censorDictionaryTraits #-}
 censorDictionaryTraits :: (MonadWriter (CompilerJournal a) m) => ([Trait IndexedType] -> [Trait IndexedType]) -> m b -> m b

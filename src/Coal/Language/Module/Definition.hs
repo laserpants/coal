@@ -4,7 +4,12 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Language.Module.Definition (Definition (..), Path (..), definitionName) where
+module Coal.Language.Module.Definition (
+  Definition (..),
+  Path (..),
+  definitionName,
+  isImport,
+) where
 
 import Coal.Language.Module.Definition.Alias (AliasDef (..))
 import Coal.Language.Module.Definition.Constant (ConstantDef (..))
@@ -59,3 +64,11 @@ definitionName =
       name
     _ ->
       error "Not implemented"
+
+isImport :: Definition a k t -> Bool
+isImport =
+  \case
+    DImport{} ->
+      True
+    _ ->
+      False
