@@ -1,6 +1,6 @@
 {-# LANGUAGE DeriveDataTypeable #-}
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
 module Coal.Language.Module (
@@ -32,8 +32,8 @@ import Coal.Language.Module.Definition.Trait
 import Coal.Language.Module.Definition.Type
 import Coal.Language.Module.Definition.Unfold
 import Data.Data (Data, Typeable)
-import Extra (Name, Over)
 import qualified Data.Text as Text
+import Extra (Name, Over)
 
 data Module a k t = Module Path [Name] [Definition a k t]
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)

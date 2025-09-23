@@ -10,7 +10,7 @@ import Coal.Common.Name (Dictionary, Name)
 import Coal.Compiler (mainPass, typeCheckingPass, writeDotFiles)
 import Coal.Compiler.Environment
 import Coal.Compiler.Kernel.TranslateModule (translateModule)
-import Coal.Compiler.Pass (ModuleBundle, Pass (..), (>->))
+import Coal.Compiler.Pass (Pass (..), (>->))
 import Coal.Compiler.Pass.ImportsTopRule (importsTopRulePass)
 import Coal.Compiler.Pass.Parsing (parsingPass)
 import Coal.Compiler.Pass.Setup (setupPass)
@@ -2478,31 +2478,33 @@ runTestBuild = do
 
 --
 
-runCompiler :: [FilePath] -> IO (Either CompilerFailureMode [ModuleBundle], CompilerState Metadata, [CompilerError Metadata])
+runCompiler :: [FilePath] -> IO (Either CompilerFailureMode [Module Metadata Kind ()], CompilerState Metadata, [CompilerError Metadata])
 runCompiler files = do
-  r@(_, _, es) <- runCompilerT emptyCompilerEnvironment (runPass prefligthPhase files)
+  r@(_, CompilerState{..}, es) <- runCompilerT emptyCompilerEnvironment (runPass prefligthPhase files)
   forM_ es $
     \e -> do
-      Text.putStrLn (printError e)
+      t <- prettyError compilerVerbatimSource e
+      Text.putStrLn t
   pure r
 
-printError =
+prettyError :: Environment Text -> CompilerError Metadata -> IO Text
+prettyError src =
   \case
-    MisplacedImportStatement loc ->
-      -- TODO
-      prettyErrorMessage ["foo"] "baz" loc
+    MisplacedImportStatement path loc -> do
+      case Environment.lookup path src of
+        Just src ->
+          pure $ prettyErrorMessage ["Misplaced import statement"] src loc
 
-prefligthPhase :: (MonadIO m) => Pass Metadata m [FilePath] [ModuleBundle]
+prefligthPhase :: (MonadIO m) => Pass Metadata m [FilePath] [Module Metadata Kind ()]
 prefligthPhase = do
   parsingPass
     >-> importsTopRulePass
-
 --    >-> setupPass
 --    >-> typeImportsPass
 --
 
-main127 :: IO (Either CompilerFailureMode [ModuleBundle], CompilerState Metadata, [CompilerError Metadata])
+main127 :: IO (Either CompilerFailureMode [Module Metadata Kind ()], CompilerState Metadata, [CompilerError Metadata])
 main127 = do
   runCompiler
-    [ "./test/Coal/examples/128/Main.coal"
+    [ "./test/Coal/examples/127/Main.coal"
     ]

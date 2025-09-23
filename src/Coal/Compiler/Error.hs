@@ -4,6 +4,7 @@ module Coal.Compiler.Error (CompilerError (..), CompilerFailureMode (..)) where
 
 import Coal.Parser (ParserError)
 import Data.Text (Text)
+import Extra (Name)
 
 -- TODO
 -- data FoldError a
@@ -13,7 +14,7 @@ import Data.Text (Text)
 
 data CompilerError a
   = ParserError ParserError
-  | MisplacedImportStatement a
+  | MisplacedImportStatement Name a
   | TODO
   deriving (Show, Eq)
 

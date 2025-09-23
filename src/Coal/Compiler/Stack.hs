@@ -42,12 +42,12 @@ import Coal.Compiler.Error
 import Coal.Compiler.Journal
 import Coal.Compiler.State
 import Coal.Language
-import Coal.Language.Module (Module (..), Definition (..), modulePathName)
+import Coal.Language.Module (Definition (..), Module (..), modulePathName)
 import Coal.TypeSystem
 import Control.Monad.Except
 import Control.Monad.RWS (RWST, runRWST)
 import Control.Monad.Reader (MonadReader)
-import Control.Monad.State (MonadState, modify, gets)
+import Control.Monad.State (MonadState, gets, modify)
 import Control.Monad.Writer (MonadWriter)
 import Data.Text (Text)
 import Extra (Dictionary, Name)
@@ -132,7 +132,7 @@ setVerbatimSourceC name src = modify (overCompilerVerbatimSource (Environment.in
 
 {-# INLINE setVerbatimSourceForC #-}
 setVerbatimSourceForC :: (Monad m) => Module a k t -> Text -> CompilerT a m ()
-setVerbatimSourceForC module_ = setVerbatimSourceC (modulePathName module_) 
+setVerbatimSourceForC module_ = setVerbatimSourceC (modulePathName module_)
 
 {-# INLINE getVerbatimSourceC #-}
 getVerbatimSourceC :: (Monad m) => Name -> CompilerT a m Text

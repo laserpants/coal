@@ -7,6 +7,8 @@ import Coal.Ast.Metadata (Metadata (..))
 import Coal.Compiler.Journal
 import Coal.Compiler.Pass
 import Coal.Compiler.Stack
+import Coal.Language
+import Coal.Language.Module
 import Coal.Parser (ParserError)
 import Coal.Parser.Module (parseModule)
 import Control.Monad.Except (throwError)
@@ -17,14 +19,14 @@ import qualified Data.Text as Text
 import Extra (forM_)
 import Text.Megaparsec (runParser)
 
-parsingPass :: (MonadIO m) => Pass Metadata m [FilePath] [ModuleBundle]
+parsingPass :: (MonadIO m) => Pass Metadata m [FilePath] [Module Metadata Kind ()]
 parsingPass =
   Pass
     { passName = "Parsing"
     , runPass = pass
     }
 
-pass :: (MonadIO m) => [FilePath] -> CompilerT Metadata m [ModuleBundle]
+pass :: (MonadIO m) => [FilePath] -> CompilerT Metadata m [Module Metadata Kind ()]
 pass files = do
   contents <- liftIO (traverse readFile files)
   results <- traverse (parseFile . Text.pack) contents
@@ -35,11 +37,13 @@ pass files = do
       forM_ es (\e -> tellErrors [ParserError e])
       throwError ParserFailure
 
-parseFile :: (Monad m) => Text -> CompilerT Metadata m (Either ParserError ModuleBundle)
-parseFile src = do
-  case runParser parseModule "" src of
-    Left e ->
-      pure $ Left e
-    Right module_ -> do
-      setVerbatimSourceForC module_ src
-      pure $ Right (src, module_)
+parseFile :: (Monad m) => Text -> CompilerT Metadata m (Either ParserError (Module Metadata Kind ()))
+parseFile src = setSource >> pure r
+ where
+  r = runParser parseModule "" src
+  setSource =
+    case r of
+      Left{} ->
+        pure ()
+      Right module_ -> do
+        setVerbatimSourceForC module_ src

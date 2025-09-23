@@ -8,34 +8,33 @@ import Coal.Ast.Metadata (HasMetadata (..), Metadata (..))
 import Coal.Compiler.Journal
 import Coal.Compiler.Pass
 import Coal.Compiler.Stack
+import Coal.Language
 import Coal.Language.Module
 import Control.Monad.Except
-import Control.Monad.IO.Class (MonadIO)
-import Data.Tuple.Extra (secondM)
-import Extra (forM_)
+import Extra (Name)
 
-importsTopRulePass :: (MonadIO m) => Pass Metadata m [ModuleBundle] [ModuleBundle]
+importsTopRulePass :: (MonadIO m) => Pass Metadata m [Module Metadata Kind ()] [Module Metadata Kind ()]
 importsTopRulePass =
   Pass
     { passName = "ImportsTopRule"
     , runPass = pass
     }
 
-pass :: (Monad m) => [ModuleBundle] -> CompilerT Metadata m [ModuleBundle]
+pass :: (Monad m) => [Module Metadata Kind ()] -> CompilerT Metadata m [Module Metadata Kind ()]
 pass ms = do
-  ps <- traverse (secondM (overModuleDefinitionsM checkImports)) ms
+  ps <- traverse (\m -> overModuleDefinitionsM (checkImports (modulePathName m)) m) ms
   throwError PreflightFailure
   pure ps
 
-checkImports :: (Monad m) => [Definition Metadata k ()] -> CompilerT Metadata m [Definition Metadata k ()]
-checkImports defs = do
+checkImports :: (Monad m) => Name -> [Definition Metadata k ()] -> CompilerT Metadata m [Definition Metadata k ()]
+checkImports name defs = do
   case es of
     [] ->
       pure ()
     rs -> do
       forM_ (filter isImport rs) $
         \d ->
-          tellErrors [MisplacedImportStatement (getMetadata d)]
+          tellErrors [MisplacedImportStatement name (getMetadata d)]
   pure defs
  where
   ds = dropWhile isImport defs

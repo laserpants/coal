@@ -1,17 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Pass (Pass (..), (>->), ModuleBundle) where
+module Coal.Compiler.Pass (Pass (..), (>->)) where
 
-import Coal.Ast.Metadata (Metadata (..))
 import Coal.Compiler.Stack (CompilerT)
-import Coal.Language
-import Coal.Language.Module
 import Control.Monad ((>=>))
-import Data.Text (Text)
 import Extra (Name)
-
-type ModuleBundle = (Text, Module Metadata Kind ())
 
 data Pass a m i o = Pass
   { passName :: Name
