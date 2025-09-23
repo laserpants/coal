@@ -2499,8 +2499,7 @@ prefligthPhase :: (MonadIO m) => Pass Metadata m [FilePath] [Module Metadata Kin
 prefligthPhase = do
   parsingPass
     >-> importsTopRulePass
-
---    >-> setupPass
+    >-> setupPass
 --    >-> typeImportsPass
 --
 
