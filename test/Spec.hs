@@ -2482,8 +2482,8 @@ runCompiler :: [FilePath] -> IO (Either CompilerFailureMode [Module Metadata Kin
 runCompiler files = do
   r@(_, CompilerState{..}, es) <- runCompilerT emptyCompilerEnvironment (runPass prefligthPhase files)
   forM_ es $
-    \e -> do
-      t <- prettyError compilerVerbatimSource e
+    \err -> do
+      t <- prettyError compilerVerbatimSource err
       Text.putStrLn t
   pure r
 
@@ -2499,6 +2499,7 @@ prefligthPhase :: (MonadIO m) => Pass Metadata m [FilePath] [Module Metadata Kin
 prefligthPhase = do
   parsingPass
     >-> importsTopRulePass
+--    >-> topologicalSortPass
     >-> setupPass
     >-> typeImportsPass
 

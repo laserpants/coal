@@ -485,6 +485,7 @@ let answer = 42
 
 The `unit` type has only a single value, written as an empty pair of parentheses: `()`. At a first glance, this type appears to be of no purpose, but it actually has a number of applications. 
 
+In many instances it is useful to be able to express that a function accepts some input, but that this input doesn't have any significance in the _.
 In C, for example, we can define the following function:
 
 ```
@@ -495,15 +496,7 @@ int five() {
 }
 ```
 
-What a function such as this one translates to in this context is simply a value:
-
-```
-let five : int32 = 5
-```
-
-There is a difference, though; and in many instances it is useful to be able to express that a function accepts some input, but that this input doesn't have any significance in the _.
-
-This is where `unit` comes in handy
+This is where the `unit` type comes in handy
 
 ```
 fun five(() : unit) : int32 = 5
@@ -756,28 +749,17 @@ trait <name>(<type_parameter>) {
 }
 ```
 
-When you describe a set of behaviors as a trait, you can reuse the same functionality across all types that support it. This reduces duplication and promotes code reusability. Traits are very similar to type classes in Haskell. A common analogy is to think of them as interfaces in object-oriented programming. 
+By defining a set of behaviors as a trait, you can reuse the same functionality across all types that support it. This reduces duplication and promotes code reusability. Traits are very similar to type classes in Haskell. A common analogy is to think of these as interfaces in object-oriented programming. 
 
 The following example shows how the `Ordered` trait is defined
-It has a function `compare` that 
+`Ordered` has a single function `compare`. It takes two inputs of the same type and returns a value to indicate 
+
 
 ```
 trait Ordered<t> {
   compare : t -> t -> Order   // where type Order = Lt | Gt | Eq
 }
 ```
-
-
-
-```
-fun is_less_than(x : t, y : t) : bool with Ordered<t> =
-  compare(x, y) == Lt
-```
-
-The type of `is_less_than` is `t -> t -> bool with Ordered<t>`
-Type parameters, like `t` in this type, are *universally quantified*.
-The keyword `with` adds one or more constraints, saying that the 
-
 
 To make a type support a trait, we create an *instance* of the trait for that particular type. For example, instantiating our `Ordered` trait as follows, we can define an ordering on the booleans:
 
@@ -791,6 +773,17 @@ instance Ordered<bool> {
     }
 }
 ```
+
+TODO
+
+```
+fun is_less_than(x : t, y : t) : bool with Ordered<t> =
+  compare(x, y) == Lt
+```
+
+The type of `is_less_than` is `t -> t -> bool with Ordered<t>`
+Type parameters, like `t` in this type, are *universally quantified*.
+The keyword `with` adds one or more constraints, saying that the 
 
 afsd
 
