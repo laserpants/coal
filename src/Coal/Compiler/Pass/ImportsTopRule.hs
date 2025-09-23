@@ -1,4 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
@@ -23,8 +22,8 @@ importsTopRulePass =
 
 pass :: (Monad m) => [Module Metadata Kind ()] -> CompilerT Metadata m [Module Metadata Kind ()]
 pass ms = do
-  (ps, errs) <- listenErrors $ traverse (\m -> overModuleDefinitionsM (checkImports (modulePathName m)) m) ms
-  unless (null errs) $
+  (ps, errors) <- listenErrors $ traverse (\m -> overModuleDefinitionsM (checkImports (modulePathName m)) m) ms
+  unless (null errors) $
     throwError PreflightFailure
   pure ps
 
