@@ -1453,7 +1453,7 @@ compileModule x = do
     errs@(_ : _) ->
       forM_ errs $
         \err -> do
-          src <- getVerbatimSourceC (modulePathName x) 
+          src <- getVerbatimSourceC (modulePathName x)
           let msg = prettyErrorMessage [Text.pack (show err)] src err
           throwError (CompilerError msg)
     [] ->
@@ -1465,7 +1465,7 @@ compileModule x = do
     errs@(_ : _) ->
       forM_ errs $
         \err -> do
-          src <- getVerbatimSourceC (modulePathName x) 
+          src <- getVerbatimSourceC (modulePathName x)
           let msg =
                 prettyErrorMessage
                   [ "\nType error:"
@@ -1490,7 +1490,7 @@ compileModule x = do
         \Assumption{..} ->
           -- TODO: Maybe look up these in environment and add additional constraints
           unless ("!" `Text.isPrefixOf` assumptionName) $ do
-            src <- getVerbatimSourceC (modulePathName x) 
+            src <- getVerbatimSourceC (modulePathName x)
             let msg =
                   prettyErrorMessage
                     [ "\nName not in scope:"
@@ -2499,6 +2499,7 @@ prefligthPhase :: (MonadIO m) => Pass Metadata m [FilePath] [Module Metadata Kin
 prefligthPhase = do
   parsingPass
     >-> importsTopRulePass
+
 --    >-> setupPass
 --    >-> typeImportsPass
 --
