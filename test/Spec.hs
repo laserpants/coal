@@ -2500,8 +2500,7 @@ prefligthPhase = do
   parsingPass
     >-> importsTopRulePass
     >-> setupPass
---    >-> typeImportsPass
---
+    >-> typeImportsPass
 
 main127 :: IO (Either CompilerFailureMode [Module Metadata Kind ()], CompilerState Metadata, [CompilerError Metadata])
 main127 = do
