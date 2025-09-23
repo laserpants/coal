@@ -4,21 +4,14 @@
 
 module Coal.Compiler.Pass.TypeImports where
 
-import Coal.Ast.Metadata (Metadata (..))
-import Coal.Compiler.Journal
+import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Pass
 import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module
-import Coal.Parser (ParserError)
-import Coal.Parser.Module (parseModule)
-import Control.Monad.Except (throwError)
-import Control.Monad.IO.Class (MonadIO, liftIO)
-import Data.Either (partitionEithers)
-import Data.Text (Text)
-import qualified Data.Text as Text
-import Extra (concatMapM, forM_, isConstructor)
-import Text.Megaparsec (runParser)
+import Control.Monad.IO.Class (MonadIO)
+import Control.Monad.State (gets)
+import Extra (forM, fromMaybe, isConstructor)
 
 typeImportsPass :: (MonadIO m) => Pass a m [Module a Kind ()] [Module a Kind ()]
 typeImportsPass =
@@ -28,20 +21,19 @@ typeImportsPass =
     }
 
 pass :: (Monad m) => [Module a Kind ()] -> CompilerT a m [Module a Kind ()]
-pass = traverse (overModuleDefinitionsM xxx)
+pass = traverse (overModuleDefinitionsM insertTypes)
 
-xxx :: (Monad m) => [Definition a k ()] -> CompilerT a m [Definition a k ()]
-xxx defs = do
-  z <- traverse go defs
-  pure (concat z <> defs)
-
-go :: (Monad m) => Definition a k () -> CompilerT a m [Definition a k ()]
-go =
-  \case
-    DImport _ (Path path) ns ->
-      pure [t | t@(DType _ c _) <- ds, c `elem` constructors]
-     where
-      constructors = filter isConstructor ns
-      ds = undefined -- fromMaybe mempty (Environment.lookup (Text.intercalate "." path) env)
-    _ ->
-      pure []
+insertTypes :: (Monad m) => [Definition a Kind ()] -> CompilerT a m [Definition a Kind ()]
+insertTypes defs = do
+  defss <-
+    forM defs $
+      \case
+        DImport _ path ns -> do
+          env <- gets compilerTypeDefinitions
+          let ds = fromMaybe mempty (Environment.lookup (principalPath path) env)
+          pure [t | t@(DType _ c _) <- ds, c `elem` constructors]
+         where
+          constructors = filter isConstructor ns
+        _ ->
+          pure []
+  pure (concat defss <> defs)
