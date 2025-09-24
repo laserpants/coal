@@ -31,7 +31,7 @@ insertTypes defs = do
         DImport _ path ns -> do
           env <- gets compilerTypeDefinitions
           let ds = fromMaybe mempty (Environment.lookup (principalPath path) env)
-          pure [t | t@(DType _ c _) <- ds, c `elem` constructors]
+          pure [t | t@(DType _ ctor _) <- ds, ctor `elem` constructors]
          where
           constructors = filter isConstructor ns
         _ ->
