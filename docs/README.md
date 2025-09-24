@@ -782,8 +782,10 @@ fun is_less_than(x : t, y : t) : bool with Ordered<t> =
 ```
 
 The type of `is_less_than` is `t -> t -> bool with Ordered<t>`.
-Type parameters, like `t` in this type, are *universally quantified*.
-The keyword `with` adds one or more constraints, requiring that the 
+Type parameters, like `t` in this type, are *universally quantified*. `∀t : t -> t -> bool` 
+
+The keyword `with` adds one or more constraints with respect to the type variables that appear in the type. 
+in this case requiring that an instance of `Ordered` exists for the type `t`.
 
 <!--
 
@@ -876,9 +878,11 @@ The result is the same as ...
       | Succ(r) as m => m * fold(r)
 ```
 
-This type of pattern is subject to specific rules. Most importantly, it can only appear inside a constructor. 
-For structural recursion to work, progress must be guaranteed in each iterative step. The constructor rule is how this is enforced by the language, since 
-the data inside of the constructor is structurally smaller 
+There are specific rules as to how this pattern can be used.
+Most importantly, it can only appear inside a constructor. 
+For recursion to be well-defined, progress must be guaranteed in each iterative step. 
+The constructor rule is how this is enforced by the language. 
+The data inside of the constructor is structurally smaller 
 
 The following is therefore not possible:
 
