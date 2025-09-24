@@ -10,7 +10,7 @@ import Coal.Common.Name (Dictionary, Name)
 import Coal.Compiler (mainPass, typeCheckingPass, writeDotFiles)
 import Coal.Compiler.Environment
 import Coal.Compiler.Kernel.TranslateModule (translateModule)
-import Coal.Compiler.Pass (Pass (..), (>->))
+import Coal.Compiler.Pass (Pass (..), mapPass, (>->))
 import Coal.Compiler.Pass.ImportsTopRule (importsTopRulePass)
 import Coal.Compiler.Pass.Parsing (parsingPass)
 import Coal.Compiler.Pass.Setup (setupPass)
@@ -29,6 +29,7 @@ import Coal.Kernel.Parser.Expr (expr)
 import Coal.Kernel.Parser.Module (module_)
 import Coal.Language
 import Coal.Language.Module
+import Coal.Language.Module.Definition (isDType)
 import Coal.Parser (ParserError)
 import Coal.Parser.Module
 import Coal.TypeSystem.Constraint.Assumption (Assumption (..))
@@ -1425,6 +1426,7 @@ insertImportedTypes env defs = concatMap go defs <> defs
 
 run :: [(Text, Module Metadata Kind ())] -> CompilerT Metadata IO ()
 run modules = do
+  insertNamesC names
   rs <- forM (overModuleDefinitions addBuiltInDefs <$$> modules) $
     \(src, m1) -> do
       liftIO $ writeDotFiles "untyped" m1
@@ -1432,10 +1434,9 @@ run modules = do
       let m2 = overModuleDefinitions (insertImportedTypes defs) m1
       setVerbatimSourceC (modulePathName m1) src
       m3 <- expandWhereClausesModule m2
-      insertNamesC names
       case m3 of
         Module (Path path) _ defs -> do
-          insertTypeDefinitionsC (Text.intercalate "." path) [t | t@(DType _ c _) <- defs]
+          insertTypeDefinitionsC (Text.intercalate "." path) (filter isDType defs) -- [t | t@(DType _ c _) <- defs]
           withLocalEnvironment defs (compileModule m3)
   liftIO $ do
     ms <- Kernel.compileModules (moduleCore1 : rs)
@@ -2480,7 +2481,7 @@ runTestBuild = do
 
 runCompiler :: [FilePath] -> IO (Either CompilerFailureMode [Module Metadata Kind ()], CompilerState Metadata, [CompilerError Metadata])
 runCompiler files = do
-  r@(_, CompilerState{..}, es) <- runCompilerT emptyCompilerEnvironment (runPass prefligthPhase files)
+  r@(_, CompilerState{..}, es) <- runCompilerT emptyCompilerEnvironment (runPass preflightPhase files)
   forM_ es $
     \err -> do
       t <- prettyError compilerVerbatimSource err
@@ -2495,13 +2496,25 @@ prettyError src =
         Just src ->
           pure $ prettyErrorMessage ["Misplaced import statement"] src loc
 
-prefligthPhase :: (MonadIO m) => Pass Metadata m [FilePath] [Module Metadata Kind ()]
-prefligthPhase = do
+preflightPhase :: (MonadIO m) => Pass Metadata m [FilePath] [Module Metadata Kind ()]
+preflightPhase = do
   parsingPass
     >-> importsTopRulePass
---    >-> topologicalSortPass
     >-> setupPass
-    >-> typeImportsPass
+
+--    >-> topologicalSortPass
+
+typePhase :: (MonadIO m) => Pass Metadata m (Module Metadata Kind ()) (Module Metadata Kind ())
+typePhase = undefined
+
+mainPhase :: (MonadIO m) => Pass Metadata m (Module Metadata Kind ()) (Module Metadata Kind ())
+mainPhase = typePhase
+
+-- >-> typeImportsPass
+-- expandWhereClausesModule
+
+pipeline :: (MonadIO m) => Pass Metadata m [FilePath] [Module Metadata Kind ()]
+pipeline = preflightPhase >-> mapPass mainPhase
 
 main127 :: IO (Either CompilerFailureMode [Module Metadata Kind ()], CompilerState Metadata, [CompilerError Metadata])
 main127 = do
