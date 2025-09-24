@@ -40,7 +40,7 @@ A distinction is made between ordinary, finite data, which is produced and consu
   let nats = enum_from(0)
 ```
 
-These examples illustrate two modes of recursive control flow. If you are familiar with [recursion schemes](https://blog.sumtypeofway.com/posts/introduction-to-recursion-schemes.html) in a language like Haskell, recursion in Coal is based on the same principles. 
+These examples show two modes of recursive control flow. If you are familiar with [recursion schemes](https://blog.sumtypeofway.com/posts/introduction-to-recursion-schemes.html) in a language like Haskell, recursion in Coal is based on the same principles. 
 
 - **First example:** The special `@`-pattern variable means that `tot` recieves the result from calling the fold again using the sub-list matched by the pattern. 
 - **Second example:** The `@` in the field name causes the expression on the right (`n + 1`) to become the next seed value, which is fed back into `enum_from` to generate the rest of the stream.
@@ -233,7 +233,7 @@ Expressions are the core building blocks of programs. They include variables, li
 
 #### Variables
 
-A *variable* in Coal is simply a name bound to a value. Unlike in imperative languages, it is not very helpful to think of a variable as a “box” that represents some data storage in memory. In functional programming, expressions behave more like mathematical expressions: once a variable is defined, its value never changes.
+A *variable* in Coal is simply a name bound to a value. Unlike in imperative languages, it is not very helpful to think of a variable as a “box” that represents some data store in memory. In functional programming, expressions behave more like mathematical expressions: once a variable is defined, its value never changes.
 
 ##### Naming rules
 
@@ -256,8 +256,7 @@ alias, as, bignum, bool, char, cotype, double, else, false, float, fn, fold, fun
 
 > This feature is not yet implemented.
 
-Shadowing — i.e., declaring a variable in an inner scope with the same name as an existing variable — is often a source of subtle bugs, and therefore not allowed.
-An expression such as the following should result in a compilation error:
+*Shadowing* is to declare a variable in an inner scope with the same name as an existing variable. This is often a source of subtle bugs &mdash; it is therefore not allowed. An expression such as the following should result in a compilation error:
 
 ```
 fun go(x) =
@@ -292,10 +291,10 @@ Using partial application, we can create a new function `increment` by supplying
 let increment = add(1)
 ```
 
-Now, `increment` can be passed directly to a higher-order function like `map`:
+Partially applied functions can also be passed directly to a higher-order function like `map`:
 
 ```
-map(increment, [1, 2, 3, 4])   // which is the same as map(add(1), [1, 2, 3, 4])
+map(add(1), [1, 2, 3, 4])   // which yields the same result as map(increment, [1, 2, 3, 4])
 ```
 
 #### If-then-else
@@ -469,7 +468,8 @@ Integer literals introduced in code without an explicit type annotation, such as
 let answer = 42
 ```
 
-&hellip; are polymorphic. Their inferred type is `n with Numeric(n)`, which means that `n` can be any type, as long as it is a member of the `Numeric` trait. This includes `int32`, `int64`, `bignum`, and `nat`. All `Numeric` types support the basic arithmetic operations of addition, subtraction, and multiplication.
+&hellip; are polymorphic. Their inferred type is `n with Numeric(n)`, which isn't so much a type, but rather means that `n` can be *any* type, as long as it is a member of the `Numeric` trait (see **Traits**). 
+This includes the built-in `int32`, `int64`, `bignum`, and `nat` types. All `Numeric` types support the basic arithmetic operations of addition, subtraction, and multiplication.
 
 ```
   // 
@@ -484,9 +484,7 @@ let answer = 42
 ##### Unit
 
 The `unit` type has only a single value, written as an empty pair of parentheses: `()`. At a first glance, this type appears to be of no purpose, but it actually has a number of applications. 
-
-In many instances it is useful to be able to express that a function accepts some input, but that this input doesn't have any significance in the _.
-In C, for example, we can define the following function:
+In many instances it is useful to be able to express that a function accepts some input, but that the input isn't actually used to compute the return value. In C, for example, we can define the following function:
 
 ```
 int five() {
@@ -496,16 +494,13 @@ int five() {
 }
 ```
 
-This is where the `unit` type comes in handy
+This is where the `unit` type comes in handy:
 
 ```
 fun five(() : unit) : int32 = 5
 ```
 
-TODO
-
-Removing the type annotation, this becomes `fun five(()) = 5`, which is perfectly fine to write, and valid syntax. 
-But since an expression like `five()` doesn't have any other meaningful interpretation, the compiler accepts this as a shorthand for the slightly awkward `five(())`.
+Removing the type annotation, the above becomes `fun five(()) = 5`, which is perfectly valid. But since an expression like `five()` doesn't have any other meaningful interpretation, the compiler accepts this as a shorthand for the slightly awkward double-parentheses form.
 
 ```
 fun five() = 5   // i.e., fun five(() : unit) = 5
@@ -519,6 +514,12 @@ let
     five()   // we could have written five(()) here
   in
     x + 5
+```
+
+Keep in mind that this only works with `unit`. For non-empty tuples, you still need the extra parentheses:
+
+```
+fun fst4((fst, _, _, _)) = fst
 ```
 
 #### Algebraic data types
@@ -751,21 +752,20 @@ trait <name>(<type_parameter>) {
 
 By defining a set of behaviors as a trait, you can reuse the same functionality across all types that support it. This reduces duplication and promotes code reusability. Traits are very similar to type classes in Haskell. A common analogy is to think of these as interfaces in object-oriented programming. 
 
-The following example shows how the `Ordered` trait is defined
-`Ordered` has a single function `compare`. It takes two inputs of the same type and returns a value to indicate 
-
+The following example shows a trait `Ordered`, describing a total order. 
+`Ordered` has a single function `compare`. This function takes two inputs *a* and *b* of the same type and returns a value to indicate if *a* is less than *b*, the opposite, or if the two values are equal.
 
 ```
 trait Ordered<t> {
-  compare : t -> t -> Order   // where type Order = Lt | Gt | Eq
+  fun compare : t -> t -> Order   // where type Order = Lt | Gt | Eq
 }
 ```
 
-To make a type support a trait, we create an *instance* of the trait for that particular type. For example, instantiating our `Ordered` trait as follows, we can define an ordering on the booleans:
+To make some type support a trait, we define an *instance* of the trait for that specific type. For example, instantiating our `Ordered` trait as follows, we can define an ordering on the booleans:
 
 ```
 instance Ordered<bool> {
-  compare(a, b) =
+  fun compare(a, b) =
     match((a, b)) {
       (false, true) => Lt
       (true, false) => Gt
@@ -781,11 +781,9 @@ fun is_less_than(x : t, y : t) : bool with Ordered<t> =
   compare(x, y) == Lt
 ```
 
-The type of `is_less_than` is `t -> t -> bool with Ordered<t>`
+The type of `is_less_than` is `t -> t -> bool with Ordered<t>`.
 Type parameters, like `t` in this type, are *universally quantified*.
-The keyword `with` adds one or more constraints, saying that the 
-
-afsd
+The keyword `with` adds one or more constraints, requiring that the 
 
 <!--
 
