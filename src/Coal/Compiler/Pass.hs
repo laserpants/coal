@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Pass (Pass (..), (>->)) where
+module Coal.Compiler.Pass (Pass (..), (>->), mapPass) where
 
 import Coal.Compiler.Stack (CompilerT)
 import Control.Monad ((>=>))
@@ -17,4 +17,11 @@ p1 >-> p2 =
   Pass
     { passName = passName p1 <> " > " <> passName p2
     , runPass = runPass p1 >=> runPass p2
+    }
+
+mapPass :: (Monad m) => Pass a m i o -> Pass a m [i] [o]
+mapPass p =
+  Pass
+    { passName = "map<" <> passName p <> ">"
+    , runPass = traverse (runPass p)
     }
