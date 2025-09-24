@@ -641,6 +641,12 @@ In Coal, list literals are denoted by a sequence of comma-separated expressions,
 [<expr_1 : t>, <expr_2 : t>, ..., <expr_n : t>] : List<t>
 ```
 
+Example:
+
+```
+[1, 1, 2, 5, 14, 42, 132, 429] : List<int32>
+```
+
 The `List` type is defined inductively, and implemented as a one-way *linked list* of nodes. This means that a list of type `List<a>` is either (1) the empty list; or (2) a value of type `a` coupled with another `List<a>` list. These last two are usually referred to as the *head* and *tail* of the list. 
 
 ```
@@ -730,6 +736,10 @@ A valid type for the above record is:
 ```
 
 ### Pattern matching
+
+The `match` expression lets you to deconstruct data by reversing what data constructors do 
+
+
 
 TODO
 
