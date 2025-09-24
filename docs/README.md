@@ -151,7 +151,7 @@ import namespace List
 
 ### Top-level definitions
 
-Definitions that can appear in the outermost scope of a module are functions, top-level let-expressions, data and codata type definitions, traits, trait instances, folds, and unfolds.
+Definitions that appear in the outermost scope of a module are functions, top-level let-expressions, data and codata type definitions, traits, trait instances, folds, and unfolds.
 
 #### Functions
 
@@ -468,7 +468,7 @@ Integer literals introduced in code without an explicit type annotation, such as
 let answer = 42
 ```
 
-&hellip; are polymorphic. Their inferred type is `n with Numeric(n)`, which isn't so much a type, but rather means that `n` can be *any* type, as long as it is a member of the `Numeric` trait (see **Traits**). 
+&hellip; are polymorphic. Their inferred type is `n with Numeric(n)`, which isn't so much a type but rather means that `n` can be *any* type, as long as it is a member of the `Numeric` trait (see **Traits**). 
 This includes the built-in `int32`, `int64`, `bignum`, and `nat` types. All `Numeric` types support the basic arithmetic operations of addition, subtraction, and multiplication.
 
 ```
@@ -484,7 +484,7 @@ This includes the built-in `int32`, `int64`, `bignum`, and `nat` types. All `Num
 ##### Unit
 
 The `unit` type has only a single value, written as an empty pair of parentheses: `()`. At a first glance, this type appears to be of no purpose, but it actually has a number of applications. 
-In many instances it is useful to be able to express that a function accepts some input, but that the input isn't actually used to compute the return value. In C, for example, we can define the following function:
+In many instances it is useful to be able to express that a function argument isn't used to compute the return value. In C, for example, we can define the following function:
 
 ```
 int five() {
