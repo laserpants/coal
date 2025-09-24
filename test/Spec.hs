@@ -2501,7 +2501,6 @@ preflightPhase = do
   parsingPass
     >-> importsTopRulePass
     >-> setupPass
-
 --    >-> topologicalSortPass
 
 typePhase :: (MonadIO m) => Pass Metadata m (Module Metadata Kind ()) (Module Metadata Kind ())
