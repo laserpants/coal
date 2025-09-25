@@ -795,6 +795,26 @@ Open and closed records
 
 Here is the function signature for tagged again, this time with added type annotations:
 
+```
+tagged(rec : { | r }, t : string) : { tag : string | r } = 
+  { tag = t | rec }
+```
+
+These types look a bit different from earlier examples. Here, the pipe (|) symbol appears in the type of the record. It serves a similar purpose to that of its expression-level counterpart. The type variable r represents, what is known as, a row, which is essentially a type-level list of fields. We refer to a record type of this variety as open. This is different from closed records, where all the fields are explicitly specified in the type. 
+The following example further illustrates the difference between open and closed records. The record in these examples represents a GPS coordinate pair with two fields; lat and lng, for latitude and longitude respectively.
+fn(p : { lat : float, lng : float }) => p.lat
+This function requires the argument's fields to exactly match the fields in the type signature. The type in this example is closed. 
+fn(p : { lat : float, lng : float | q }) => p.lat
+This function, on the other hand, is polymorphic in the row variable q. It can be called with any record, as long as its type includes the labels lat and lng, and both of these fields have type float. For instance, 
+{ lat =-3.067425, lng = 37.355625, alt = 5895 } , 
+{ location = "Great Pyramid", time = "2024-09-15T10:57:19Z", lat = 29.9792, lng = 31.1342 }, and 
+{ lat = 0.0, lng = 1.0 },
+are all accepted. This type is open. The general format of an open record type is 
+{ <label_1> : <t_1>, <label_2> : <t_2>, ..., <label_n> : <t_n> | <r> },
+for some n ≥ 0.  Recall the earlier example involving the function tagged and the type of the argument rec in that function:
+rec : { | r }
+In this type we want the type variable r to capture all available fields, and so n becomes 0. That is how we end up with the funny-looking type { | r }.
+
 ### Pattern matching
 
 The `match` expression in Coal lets you to deconstruct data based on its shape, reversing what the data constructors of algebraic data types do.
