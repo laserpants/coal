@@ -151,7 +151,7 @@ import namespace List
 
 ### Top-level definitions
 
-Definitions that appear in the outermost scope of a module are functions, top-level let-expressions, data and codata type definitions, traits, trait instances, folds, and unfolds.
+Definitions that occupy the outermost scope of a module are functions, top-level let-expressions, data and codata type definitions, traits, trait instances, folds, and unfolds.
 
 #### Functions
 
