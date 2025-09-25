@@ -744,7 +744,7 @@ A valid type for the above record is:
 { name : string, shoe_size : float, privileges : List<string> }
 ```
 
-The notation to describe the type of a record looks similar to the record itself, except that the fields consist of the label and the field's type. So, instead of the equals sign, a colon (:) appears after the label.
+The notation to describe the type of a record looks similar to the expression itself, except that the fields consist of the label and the field's type. So, instead of the equals sign, a colon (:) appears after the label.
 
 Since the order of fields is irrelevant, the following two records are considered identical:
 
