@@ -744,12 +744,56 @@ A valid type for the above record is:
 { name : string, shoe_size : float, privileges : List<string> }
 ```
 
+The notation to describe the type of a record looks similar to the record itself, except that the fields consist of the label and the field's type. So, instead of the equals sign, a colon (:) appears after the label.
+
 Since the order of fields is irrelevant, the following two records are considered identical:
 
 ```
 { x = 1, y = 2 }
 { y = 2, x = 1 }
 ```
+
+The naming rules for labels are the same as those for variables; all characters must be either alphanumeric or an underscore (_), and the first character cannot be a number. 
+
+##### Field access
+
+The contents of a field of a record can be obtained using the field access operator. The syntax is just a dot (`.`) followed by the field's label: 
+
+```
+let language = { name = "Java", paradigm = "OOP" }
+  in language.name
+```
+
+##### Extending records
+
+Records in Noll are said to be **extensible**, meaning that it is possible to add fields to a record at run-time.
+
+Example:
+
+```
+fun tagged(rec, t : string) = { tag = t | rec }  
+```
+
+The function in this example accepts two arguments; an existing record rec, and a string t. It returns a copy of rec augmented with a new field labelled tag. This new field assumes the value of the argument t. The pipe symbol (|) is an infix operator which takes the record on the right-hand side of the expression and extends it with the list of fields on the left. So, in this example, if we have a record r = { day = "monday", humidity = 73.5 }, and apply tagged to (r, "wet"), then we get back a new record:
+
+```
+{ day = "monday", humidity = 73.5, tag = "wet" }
+```
+
+What makes this especially useful is that the type of the original record doesn't matter. Its labels and field types do not have to be known at compile time.
+
+Also notice that the expression on the left-hand side of the pipe is a list of fields, so any number of fields can be added at once: 
+
+```
+{ a = 1, b = 2 | { c = 3 } } 
+  == { a = 1 | { b = 2 | { c = 3 } } } 
+  == { a = 1 | { b = 2, c = 3 } }
+  => { a = 1, b = 2, c = 3 }  
+```
+
+Open and closed records
+
+Here is the function signature for tagged again, this time with added type annotations:
 
 ### Pattern matching
 
