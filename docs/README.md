@@ -793,7 +793,7 @@ Also notice that the expression on the left-hand side of the pipe is a list of f
 
 Open and closed records
 
-Here is the function signature for tagged again, this time with added type annotations:
+Here is the function signature for `tagged` again, this time with added type annotations:
 
 ```
 tagged(rec : { | r }, t : string) : { tag : string | r } = 
