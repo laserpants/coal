@@ -113,7 +113,7 @@ module <path>(<export_list>) {
 }
 ```
 
-Every module is uniquely identified by its *path*. A module's path mirrors the directory structure of the source file in which it is defined. Path segments begin with an uppercase letter and are separated by a dot (`.`) character. File names have a `.coal` suffix. A module `Utils.Math.Trigonometry`, for instance, is defined in a file named `Trigonometry.coal`, located under `Utils/Math/` relative to your project's root directory.
+Every module is uniquely identified by its *path*. A module's path mirrors the directory structure of the source file in which it is defined. Path segments begin with an uppercase letter and are separated by a dot (`.`). File names have a `.coal` suffix. A module `Utils.Math.Trigonometry`, for instance, is defined in a file named `Trigonometry.coal`, located under `Utils/Math/` relative to your project's root directory.
 
 ```
 src
@@ -267,9 +267,58 @@ fun go(x) =
 
 TODO
 
+#### Built-in language primitives
+
+Coal provides the following built-in basic language types:
+
+| Type               | Description                             | Example values            |                       
+| ------------------ | --------------------------------------- | ------------------------- |                       
+| `bool`             | Booleans                                | `true`, `false`         |                       
+| `char`             | A single Unicode character              | `'a'`, `'b'`, `'🤖'`, ... |                        
+| `float`            | Single precision floating point numbers | `3.1519f`                 |                        
+| `double`           | Double precision floating point numbers | `3.141592653589793`       |                        
+| `int32`            | 32-bit integers                         | `0`, `1`, `2`, `3`, ...   |                        
+| `int64`            | 64-bit integers                         | `0`, `1`, `2`, `3`, ...   |                        
+| `bignum`           | Arbitrary precision integers            | `0`, `1`, `2`, `3`, ...   |                        
+| `string`           | UTF-8 text                              |  `"Hello, ✨ world!"`     |                        
+| `unit`             | Singleton type                          | `()`                      |                        
+| `void`             | The uninhabited type                    |                           |                        
+| `nat`              | Natural numbers (Peano arithmetic)      | `Zero`, `Succ(Zero)`, ... |                        
+
+##### Integral types
+
+Integer literals introduced in code without an explicit type annotation, such as
+
+```
+let answer = 42
+```
+
+&hellip; are polymorphic. Their inferred type is `n with Numeric(n)`, which isn't an ordinary type. It rather means that `n` can be *any* type, as long as it is a member of the `Numeric` trait (see **Traits**). 
+This includes the built-in `int32`, `int64`, `bignum`, and `nat` types. All `Numeric` types support the basic arithmetic operations of addition, subtraction, and multiplication.
+
+```
+fun sum_of(x, y, z) = 
+  x + y + z 
+
+let n : int32 = sum(1, 2, 3)
+let d : double = sum(0.5, 1.0, 1.5)
+```
+
+<!--
+```
+  // 
+
+  type Complex = Complex(double, double)
+
+  instance Numeric(Complex) {
+    // ...
+  }
+```
+-->
+
 #### Function application
 
-Unlike Haskell, ML, and OCaml, function applications are written in a syntax more akin to languages like C, Java, and Python, using parentheses and commas between arguments. 
+Unlike Haskell, ML, and OCaml, function applications are written using parentheses and commas between arguments &mdash; a syntax more akin to languages like C, Java, and Python. 
 So, for example, `concat("one", "two")` means the function `concat` applied to the arguments `"one"` and `"two"`.
 
 By default, functions in Coal are *curried*. There is a difference between a function that takes multiple arguments, and one that takes a single tuple as its argument. Consider the following two type signatures:
@@ -441,55 +490,6 @@ There are two types of comments:
 ```
 
 ### Types
-
-#### Built-in language primitives
-
-Coal provides the following built-in basic language types:
-
-| Type               | Description                             | Example values            |                       
-| ------------------ | --------------------------------------- | ------------------------- |                       
-| `bool`             | Booleans                                | `true`, `false`         |                       
-| `char`             | A single Unicode character              | `'a'`, `'b'`, `'🤖'`, ... |                        
-| `float`            | Single precision floating point numbers | `3.1519f`                 |                        
-| `double`           | Double precision floating point numbers | `3.141592653589793`       |                        
-| `int32`            | 32-bit integers                         | `0`, `1`, `2`, `3`, ...   |                        
-| `int64`            | 64-bit integers                         | `0`, `1`, `2`, `3`, ...   |                        
-| `bignum`           | Arbitrary precision integers            | `0`, `1`, `2`, `3`, ...   |                        
-| `string`           | UTF-8 text                              |  `"Hello, ✨ world!"`     |                        
-| `unit`             | Singleton type                          | `()`                      |                        
-| `void`             | The uninhabited type                    |                           |                        
-| `nat`              | Natural numbers (Peano arithmetic)      | `Zero`, `Succ(Zero)`, ... |                        
-
-##### Integral types
-
-Integer literals introduced in code without an explicit type annotation, such as
-
-```
-let answer = 42
-```
-
-&hellip; are polymorphic. Their inferred type is `n with Numeric(n)`, which isn't an ordinary type. It rather means that `n` can be *any* type, as long as it is a member of the `Numeric` trait (see **Traits**). 
-This includes the built-in `int32`, `int64`, `bignum`, and `nat` types. All `Numeric` types support the basic arithmetic operations of addition, subtraction, and multiplication.
-
-```
-fun sum_of(x, y, z) = 
-  x + y + z 
-
-let n : int32 = sum(1, 2, 3)
-let d : double = sum(0.5, 1.0, 1.5)
-```
-
-<!--
-```
-  // 
-
-  type Complex = Complex(double, double)
-
-  instance Numeric(Complex) {
-    // ...
-  }
-```
--->
 
 ##### Unit
 
