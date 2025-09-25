@@ -273,6 +273,8 @@ spec = do
   print (x == Right "5\n")
   x <- main126
   print (x == Right "3\n")
+  x <- main128
+  print (x == Right "3.000000\n")
 
 --  x <- main85
 --  print (x == Right "aa\n")
@@ -1042,6 +1044,12 @@ main126 :: IO (Either CompilerFailureMode Text)
 main126 = do
   runTestFiles
     [ "./test/Coal/examples/126/Main.coal"
+    ]
+
+main128 :: IO (Either CompilerFailureMode Text)
+main128 = do
+  runTestFiles
+    [ "./test/Coal/examples/128/Main.coal"
     ]
 
 compileFiles :: [String] -> IO (Either CompilerFailureMode ())
