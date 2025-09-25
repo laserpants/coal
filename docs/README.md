@@ -49,7 +49,7 @@ In the recursion scheme framework, `fold` and `unfold` are called *catamorphisms
 
 ### Programs = Expressions + Effects
 
-Coal is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-oriented_programming_language) language: a program is, at its core, just an expression that evaluates to a value. In this programming model, all data is immutable and there are no observable side-effects. These properties make programs more predictable, easier to reason about, highly testable, and allows for code to be verified using formal mathematical techniques. On the other hand, practical applications need to have the ability to interact with the outside world. Side-effects are what make them useful. A system for managing effects, such as I/O and exceptions, is still lacking in Coal. This is essential in order to advance the language into one that can be used to write actual programs. See **How to contribute** if you're keen to work on this.
+Coal is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-oriented_programming_language) language: a program is, at its core, just an expression that evaluates to a value. In this programming model, all data is immutable and there are no observable side-effects. These properties make programs more predictable, easier to reason about, highly testable, and allows for code to be verified using formal mathematical techniques. On the other hand, practical applications need to have the ability to interact with the outside world. Side-effects are what make them useful. A system for managing effects, such as I/O and exceptions, is still lacking in Coal. This is an essential step to promote the language into one that can be used to write actual programs. See **How to contribute** if you're keen to work on this.
 
 ## Project status and roadmap
 
@@ -162,7 +162,7 @@ A function is defined using the `fun` keyword, followed by the function's name a
     <expr>
 ```
 
-In the above, `<arg_1>, <arg_2>, ..., <arg_n>` are *patterns*, allowing functions to directly deconstruct their arguments. In addition to basic variables, records, tuples, and other data constructors, patterns may also include wildcards, literals, and nested structures. See **Pattern matching** for an overview of available patterns.
+In the above, `<arg_1>, <arg_2>, ..., <arg_n>` are *patterns*, allowing functions to directly deconstruct their arguments. In addition to basic variables, records, tuples, and other data constructors, patterns can also include wildcards, literals, and nested structures. See **Pattern matching** for an overview of available patterns.
 
 ```
   fun bork({ n : int32 }, (fst, snd), _) =
@@ -468,9 +468,18 @@ Integer literals introduced in code without an explicit type annotation, such as
 let answer = 42
 ```
 
-&hellip; are polymorphic. Their inferred type is `n with Numeric(n)`, which isn't so much a type but rather means that `n` can be *any* type, as long as it is a member of the `Numeric` trait (see **Traits**). 
+&hellip; are polymorphic. Their inferred type is `n with Numeric(n)`, which isn't an ordinary type. It rather means that `n` can be *any* type, as long as it is a member of the `Numeric` trait (see **Traits**). 
 This includes the built-in `int32`, `int64`, `bignum`, and `nat` types. All `Numeric` types support the basic arithmetic operations of addition, subtraction, and multiplication.
 
+```
+fun sum_of(x, y, z) = 
+  x + y + z 
+
+let n : int32 = sum(1, 2, 3)
+let d : double = sum(0.5, 1.0, 1.5)
+```
+
+<!--
 ```
   // 
 
@@ -480,6 +489,7 @@ This includes the built-in `int32`, `int64`, `bignum`, and `nat` types. All `Num
     // ...
   }
 ```
+-->
 
 ##### Unit
 
@@ -677,8 +687,7 @@ Just like lists, tuples are ordered sequences of values. Unlike lists, however, 
 (10, "covfefe", false)  // The type of this tuple is: (int32, string, bool)
 ```
 
-Tuples of length two and three are often called *pairs* and *triples*, respectively. 
-There is no singleton tuple type. A single value in parentheses is just the value itself:
+Tuples of length two and three are often called *pairs* and *triples*, respectively. There is no singleton tuple type &mdash; a single value in parentheses is just the value itself:
 
 ```
 (42)  // Not a tuple -- just the integer 42
@@ -735,11 +744,16 @@ A valid type for the above record is:
 { name : string, shoe_size : float, privileges : List<string> }
 ```
 
+Since the order of fields is irrelevant, the following two records are considered identical:
+
+```
+{ x = 1, y = 2 }
+{ y = 2, x = 1 }
+```
+
 ### Pattern matching
 
-The `match` expression lets you to deconstruct data by reversing what data constructors do 
-
-
+The `match` expression in Coal lets you to deconstruct data based on its shape, reversing what the data constructors of algebraic data types do.
 
 TODO
 
@@ -749,7 +763,7 @@ Variable, tuple, record, etc..
 
 ### Traits
 
-A *trait* describes a collection of functions that must be defined for its affiliated type. 
+A *trait* describes a collection of functions that must be defined for a given type.
 
 ```
 trait <name>(<type_parameter>) {
@@ -760,10 +774,9 @@ trait <name>(<type_parameter>) {
 }
 ```
 
-By defining a set of behaviors as a trait, you can reuse the same functionality across all types that support it. This reduces duplication and promotes code reusability. Traits are very similar to type classes in Haskell. A common analogy is to think of these as interfaces in object-oriented programming. 
+By defining a set of behaviors as a trait, you can reuse the same functionality across all types that support it. This reduces duplication and encourages reusable code. Traits are conceptually similar to type classes in Haskell and a common analogy is to think of them as interfaces in object-oriented programming.
 
-The following example shows a trait `Ordered`, describing a total order. 
-`Ordered` has a single function `compare`. This function takes two inputs *a* and *b* of the same type and returns a value to indicate if *a* is less than *b*, the opposite, or if the two values are equal.
+The following example defines a trait with a single function, `compare`. This function takes two inputs *a* and *b* of the same type and returns a value to indicate if *a* is less than *b* (`Lt`), greater than (`Gt`), or if the two values are equal (`Eq`). In other words, this trait captures the notion of a [total order](https://en.wikipedia.org/wiki/Total_order) on the type `t`.
 
 ```
 trait Ordered<t> {
@@ -771,7 +784,8 @@ trait Ordered<t> {
 }
 ```
 
-To make some type support a trait, we define an *instance* of the trait for that specific type. For example, instantiating our `Ordered` trait as follows, we can define an ordering on the booleans:
+Making a type support a trait involves defining an *instance* of that trait. An instance provides concrete implementations of all functions declared in the trait, specialized for the chosen type. 
+For example, by instantiating the `Ordered` trait for `bool`, we define an ordering on the booleans:
 
 ```
 instance Ordered<bool> {
@@ -784,18 +798,19 @@ instance Ordered<bool> {
 }
 ```
 
-TODO
+Code that uses `compare` now works uniformly for all types that have an `Ordered` instance:
 
 ```
 fun is_less_than(x : t, y : t) : bool with Ordered<t> =
   compare(x, y) == Lt
 ```
 
-The type of `is_less_than` is `t -> t -> bool with Ordered<t>`.
-Type parameters, like `t` in this type, are *universally quantified*. `∀t : t -> t -> bool` 
+Here, the type parameter `t` in the type of `is_less_than` is *universally quantified*. The `with` keyword introduces one or more constraints on type variables appearing in a type. In this case it demands that an instance of `Ordered` exists for the type `t`.
+We can read the type of `is_less_than` as: `t -> t -> bool with Ordered<t>`.
 
-The keyword `with` adds one or more constraints with respect to the type variables that appear in the type. 
-in this case requiring that an instance of `Ordered` exists for the type `t`.
+#### Higher-kinded traits
+
+TODO
 
 <!--
 
