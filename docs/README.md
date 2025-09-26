@@ -1,6 +1,6 @@
 # Coal
 
-This repository is the home of the Coal programming language and compiler. The project is under mega-construction. 👷
+This repository is the home of the Coal programming language and compiler. The project is under mega-construction. 🚧
 
 ## About
 
