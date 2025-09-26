@@ -17,7 +17,7 @@ Coal is a declarative, purely functional programming language with
 
 ### Rethinking recursion
 
-As a [total](https://en.wikipedia.org/wiki/Total_functional_programming) language, Coal takes a different approach to recursion, following the motto that "[recursion is the GOTO of functional programming](https://www.semanticscholar.org/paper/Functional-Programming-with-Bananas%2C-Lenses%2C-and-Meijer-Fokkinga/5db3c6793c07285bf0f5e95fe5a25f53e7488051)." To guarantee that programs are provably terminating, recursion is only available in a restricted form, known as *structural recursion*. In this regime, each recursive call operates on a strictly smaller part of some finite data structure, progressing toward a base case. 
+As a [total](https://en.wikipedia.org/wiki/Total_functional_programming) language, Coal takes a different approach to recursion, following the motto that "[recursion is the GOTO of functional programming](https://www.semanticscholar.org/paper/Functional-Programming-with-Bananas%2C-Lenses%2C-and-Meijer-Fokkinga/5db3c6793c07285bf0f5e95fe5a25f53e7488051)." To guarantee that programs are provably terminating, recursion is only available in a restricted form, known as *structural recursion*. Under this regime, each recursive call operates on a strictly smaller part of some finite data structure, progressing toward a base case. 
 
 ```
   fun sum(numbers : List<int32>) : int32 =
@@ -40,7 +40,7 @@ A distinction is made between ordinary, finite data, which is produced and consu
   let nats = enum_from(0)
 ```
 
-These examples show two modes of recursive control flow. If you are familiar with [recursion schemes](https://blog.sumtypeofway.com/posts/introduction-to-recursion-schemes.html) in a language like Haskell, recursion in Coal is based on the same principles. 
+These examples show two distinct modes of recursive control flow. If you are familiar with [recursion schemes](https://blog.sumtypeofway.com/posts/introduction-to-recursion-schemes.html) in a language like Haskell, recursion in Coal is based on the same principles. 
 
 - **First example:** The special `@`-pattern variable means that `tot` recieves the result from calling the fold again using the sub-list matched by the pattern. 
 - **Second example:** The `@` in the field name causes the expression on the right (`n + 1`) to become the next seed value, which is fed back into `enum_from` to generate the rest of the stream.
@@ -113,7 +113,7 @@ module <path>(<export_list>) {
 }
 ```
 
-Every module is uniquely identified by its *path*. A module's path mirrors the directory structure of the source file in which it is defined. Path segments begin with an uppercase letter and are separated by a dot (`.`). File names have a `.coal` suffix. A module `Utils.Math.Trigonometry`, for instance, is defined in a file named `Trigonometry.coal`, located under `Utils/Math/` relative to your project's root directory.
+Every module is uniquely identified by its *path*. A module's path mirrors the directory structure of the source file in which it is defined. Path segments begin with an uppercase letter and are separated by a dot (`.`). Files have a `.coal` extension. A module `Utils.Math.Trigonometry`, for instance, is defined in a file named `Trigonometry.coal`, located under `Utils/Math/` relative to your project's root directory.
 
 ```
 src
@@ -728,23 +728,27 @@ let five = curry(add, 1, 4)         // or (curry(add))(1, 4)
 
 #### Records
 
-Records are unordered collections of name-value pairs in which the values can be of any type, including other records. The record type is suitable for representing structured data with multiple properties, and nested objects: A record is written as a sequence of comma-separated *fields* enclosed in curly braces. A field consists of a name, referred to as the *label*, paired with a value. These two are separated by an equals sign (`=`). 
+Records are unordered collections of name–value pairs, where the values may be of any type, including other records.
+They are suitable for representing structured data with multiple properties, or nested objects. 
+A record expression is written as a sequence of comma-separated *fields* enclosed in curly braces.
+Each field consists of a name, called the *label*, paired with a value. The two are separated by an equals sign (`=`):
 
 ```
 { 
-  name = "Eros Ramazzotti", 
-  shoe_size = 43.0, 
+  name = "Robert Sixkiller", 
+  shoe_size = 43.0f, 
   privileges = ["read", "edit", "karaoke"]
 }
 ```
 
-A valid type for the above record is:
+The corresponding type for the above record is:
 
 ```
 { name : string, shoe_size : float, privileges : List<string> }
 ```
 
-The notation to describe the type of a record looks similar to the expression itself, except that the fields consist of the label and the field's type. So, instead of the equals sign, a colon (:) appears after the label.
+The type of a record looks similar to the expression itself, except that each field is written as a label followed by its type.
+Instead of an equals sign, a colon (`:`) separates the label and the type.
 
 Since the order of fields is irrelevant, the following two records are considered identical:
 
@@ -753,11 +757,11 @@ Since the order of fields is irrelevant, the following two records are considere
 { y = 2, x = 1 }
 ```
 
-The naming rules for labels are the same as those for variables; all characters must be either alphanumeric or an underscore (_), and the first character cannot be a number. 
+The naming rules for labels are the same as for variables: labels must consist of alphanumeric characters or underscores (`_`), and the first character cannot be a digit.
 
 ##### Field access
 
-The contents of a field of a record can be obtained using the field access operator. The syntax is just a dot (`.`) followed by the field's label: 
+The contents of a record field can be obtained using the field-access operator, which is simply a dot (`.`) followed by the field’s label:
 
 ```
 let language = { name = "Java", paradigm = "OOP" }
@@ -766,23 +770,25 @@ let language = { name = "Java", paradigm = "OOP" }
 
 ##### Extending records
 
-Records in Noll are said to be **extensible**, meaning that it is possible to add fields to a record at run-time.
-
-Example:
+Records in Coal are said to be **extensible**, meaning that new fields can be added to a record at run time.
 
 ```
 fun tagged(rec, t : string) = { tag = t | rec }  
 ```
 
-The function in this example accepts two arguments; an existing record rec, and a string t. It returns a copy of rec augmented with a new field labelled tag. This new field assumes the value of the argument t. The pipe symbol (|) is an infix operator which takes the record on the right-hand side of the expression and extends it with the list of fields on the left. So, in this example, if we have a record r = { day = "monday", humidity = 73.5 }, and apply tagged to (r, "wet"), then we get back a new record:
+This function accepts two arguments: an existing record `rec` and a string `t`.
+It returns a copy of `rec` augmented with a new field labelled `tag`. This new field assumes the value of the argument `t`. 
+The pipe symbol (`|`) is an infix operator that takes the record on the right-hand side and extends it with the fields on the left.
+
+For example, if we define a record `r = { day = "monday", humidity = 73.5 }` and apply `tagged(r, "wet")`, we obtain a new record:
 
 ```
 { day = "monday", humidity = 73.5, tag = "wet" }
 ```
 
-What makes this especially useful is that the type of the original record doesn't matter. Its labels and field types do not have to be known at compile time.
+This is especially useful because the type of the original record does not matter; its labels and field types need not be known at compile time.
 
-Also notice that the expression on the left-hand side of the pipe is a list of fields, so any number of fields can be added at once: 
+The left-hand side of the pipe is itself a list of fields, so any number of fields can be added at once:
 
 ```
 { a = 1, b = 2 | { c = 3 } } 
@@ -791,7 +797,7 @@ Also notice that the expression on the left-hand side of the pipe is a list of f
   => { a = 1, b = 2, c = 3 }  
 ```
 
-Open and closed records
+##### Open and closed records
 
 Here is the function signature for `tagged` again, this time with added type annotations:
 
@@ -800,20 +806,93 @@ tagged(rec : { | r }, t : string) : { tag : string | r } =
   { tag = t | rec }
 ```
 
-These types look a bit different from earlier examples. Here, the pipe (|) symbol appears in the type of the record. It serves a similar purpose to that of its expression-level counterpart. The type variable r represents, what is known as, a row, which is essentially a type-level list of fields. We refer to a record type of this variety as open. This is different from closed records, where all the fields are explicitly specified in the type. 
-The following example further illustrates the difference between open and closed records. The record in these examples represents a GPS coordinate pair with two fields; lat and lng, for latitude and longitude respectively.
+These types look a bit different from earlier examples. Here, the pipe (|) also appears at the type level.
+It serves a similar purpose: combining fields with an existing record type.
+
+The type variable `r` represents a *row*, which can be thought of as a type-level list of fields.
+A record type of this form is called *open*. By contrast, a *closed* record type explicitly lists all its fields.
+
+The following example illustrates the difference. Suppose we want to represent GPS coordinates with two fields, `lat` and `lng`:
+
+```
 fn(p : { lat : float, lng : float }) => p.lat
-This function requires the argument's fields to exactly match the fields in the type signature. The type in this example is closed. 
+```
+
+Here, the function requires its argument to have exactly two fields: `lat` and `lng`, both of type `float`. This type is closed.
+
+```
 fn(p : { lat : float, lng : float | q }) => p.lat
-This function, on the other hand, is polymorphic in the row variable q. It can be called with any record, as long as its type includes the labels lat and lng, and both of these fields have type float. For instance, 
-{ lat =-3.067425, lng = 37.355625, alt = 5895 } , 
-{ location = "Great Pyramid", time = "2024-09-15T10:57:19Z", lat = 29.9792, lng = 31.1342 }, and 
-{ lat = 0.0, lng = 1.0 },
-are all accepted. This type is open. The general format of an open record type is 
+```
+
+This function, on the other hand, is polymorphic in the row variable `q`. It accepts any record that includes `lat` and `lng` (both floats), regardless of any additional fields.
+For instance, all of the following are valid:
+
+- `{ lat =-3.067425, lng = 37.355625, alt = 5895 }` , 
+- `{ location = "Great Pyramid", time = "2024-09-15T10:57:19Z", lat = 29.9792, lng = 31.1342 }`, and 
+- `{ lat = 0.0, lng = 1.0 }`,
+
+This type is open. The general format of an open record type is 
+
+```
 { <label_1> : <t_1>, <label_2> : <t_2>, ..., <label_n> : <t_n> | <r> },
-for some n ≥ 0.  Recall the earlier example involving the function tagged and the type of the argument rec in that function:
+```
+
+for some *n* ≥ 0. Recall the earlier `tagged` example and the type of the argument `rec` in that function:
+
+```
 rec : { | r }
-In this type we want the type variable r to capture all available fields, and so n becomes 0. That is how we end up with the funny-looking type { | r }.
+```
+
+In this type, the variable `r` captures all fields of the input record, so *n* is zero. This explains the somewhat unusual-looking type `{ | r }`.
+
+##### Pattern matching
+
+As with other data types, it is possible to pattern match on records. In this context, the right-hand side of a field acts as the binding pattern used to match the sub-expression. The simplest case is to bind a field directly to a variable:
+
+```
+  fun full_name({ first_name = fn, last_name = ln }) = fn +++ " " +++ ln 
+```
+
+(For more details, see the section on **Pattern matching**.)
+
+##### Deconstructing records
+
+The pipe (`|`) operator allows you to deconstruct records by matching against a subset of their fields:
+
+```
+  fun get_name({ name = n | _ }) = n
+```
+
+The right-hand side pattern must be either a variable or a wildcard (`_`). If you use a variable here, it will capture the remainder of the record (all fields not explicitly matched). A common use case is to remove one or more fields from a record. For example:
+
+```
+  fun drop_name({ name = _ | fields } : { name : string | q }) : { | q } = fields
+```
+
+Here, the name field is removed and all remaining fields are returned.
+
+If you only need to retrieve a single field, the dot syntax (`record.field`) is simpler and more concise. Pattern matching becomes necessary when you want to extract multiple fields at once, remove fields, or work with the remainder of a record.
+
+##### Updating a field
+
+By combining field extension with pattern matching, you can replace an existing field in a record. For instance, here is a function that updates the `tag` field:
+
+```
+  fun set_tag({ tag = _ | fields }, new_tag : string) =
+    { tag = new_tag | fields }    
+```
+
+This proceeds in two steps: first remove the old field using pattern matching, then reinsert it with the new value. With type annotations:
+
+```
+  fun set_tag(
+    { tag = _ | fields } : { tag : string | r }, 
+    new_tag : string
+  ) : { tag : string | r } = 
+    { tag = new_tag | fields }
+```
+
+This function requires not only that the `tag` field is present, but also that it has the expected type. For example, `{ tag = false }` would be rejected, since `tag` is required to have type `string`.
 
 ### Pattern matching
 
