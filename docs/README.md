@@ -772,7 +772,7 @@ TODO
 
 #### Option
 
-The `Option` type is a built-in algebraic data type that represents *optiona*l values &mdash; values that may or may not be present.
+The `Option` type is a built-in algebraic data type that represents *optional* values &mdash; values that may or may not be present.
 
 ```
 type Option<a>
