@@ -365,6 +365,12 @@ A let-binding introduces a new scope by matching a pattern against the result of
 let <pattern> = <e_1> in <e_2>
 ```
 
+Variables form the simplest form of pattern; namely one that matches any value and binds it to a name:
+
+```
+let name = "Zlatan" 
+```
+
 The pattern used on the left-hand side must be such that it is guaranteed to match the result of the expression `<e_1>`. For example:
 
 ```
@@ -373,12 +379,6 @@ let (x, y) = (1, 2) in x + y
 
 -- Matching nested records
 let { baz = { f = a | _ } } = faz(4)
-```
-
-Variables form the simplest form of pattern; namely one that matches any value and binds it to a name:
-
-```
-let name = "Zlatan" 
 ```
 
 >  #### A note about let-generalization
@@ -640,27 +640,6 @@ unpack_nat : nat -> int32
 
 Converting back and forth between these are constant time (**O**(1)) operations.
 
-#### Option
-
-To ensure that all functions are total, match statements always need to be exhaustive, meaning that the list of pattern clauses covers all possible cases. The compiler will check this condition and fail with an error if it is not met. A consequence of this is that we cannot, for example, define a generic function head that returns the first element of a list. Let's think about what such a function would look like, and why it fails to be total:
-head(list : List(a)) : a =
-  match(list) {
-    | head :: _ => head
-    | [] => // What should I return here?
-  }
-Variables in a type signature are universally quantified, so the head function's type can be described, more formally, as ∀a : List(a) -> a. It reads as: Given any type a and a list of elements of this type, return an a value. We know nothing about a, except that the list's elements has this type. But if list is empty, then we have no a-values to look at.  The head function provided by the standard List package solves this problem by instead returning a value wrapped in an Option(a):  gg
-head(list : List(a)) : Option(a) =
-  match(list) {
-    | head :: _ => Some(head)
-    | [] => None
-  }
-
-```
-type Option<a>
-  = Some(a)
-  | None
-```
-
 #### Lists
 
 A *list* is an ordered collection in which all elements share the same type. Lists are one of the most fundamental data structures in functional programming. 
@@ -726,23 +705,25 @@ This example matches a list of exactly three elements and checks if they form a 
 
 ##### Common list operations
 
-The function `length` counts the number of elements in a list:
+The function `length` returns the number of elements in a list:
 
 ```
 length([0, 1, 2, 3, 4])   // returns 5
 ```
 
+Its type is:
+
 ```
 length : List<a> -> nat
 ```
 
-Note that, because lists are implemented as chains of linked nodes, the time complexity of many list operations, including `length`, is O(n).
+Since lists are implemented as chains of linked nodes, the time complexity of many list operations, including `length`, is O(n).
 
 ###### Head, tail, and uncons
 
-- `head` returns the first element of a non-empty list, enclosed in an `Option` type (to accommodate for the empty list). 
-- `tail` returns all elements of the list except the first
-- `uncons` combines these two by returning both the head and tail (of a non-empty list), together as a tuple. In a way, it undoes what the `::` constructor does. 
+- `head` returns the first element of a list, wrapped in an `Option` to account for the empty list.
+- `tail` returns all elements except the first, also as an `Option`.
+- `uncons` combines the two: it returns both the head and tail as a tuple, or `None` if the list is empty. In a sense, it undoes what the cons (`::`) constructor does.
 
 ```
 head : List<a> -> Option<a>
@@ -778,6 +759,50 @@ TODO
 // == [3, 4, 5]
 
 TODO
+
+#### Option
+
+The `Option` type is a built-in algebraic data type that represents *optiona*l values &mdash; values that may or may not be present.
+
+```
+type Option<a>
+  = Some(a)
+  | None
+```
+
+This type is called `Maybe` in Haskell and is similar to `Option` in languages like Rust or Scala.
+
+Why do we need this type:
+To ensure that all functions are total, match statements always need to be exhaustive, meaning that the list of pattern clauses covers all possible cases. 
+The compiler will check this condition and fail with an error if it is not met. 
+A consequence of this is that we cannot define a function `head` that returns the first element of a list, in general. 
+Let's think about what such a function would look like, and why it fails to be total:
+
+A good example is the `head` function on lists. At first glance, we might try to define it like this:
+
+```
+  fun head(list : List<a>) : a =
+    match(list) {
+      | head :: _ => head
+      | [] => // What should I return here?
+    }
+```
+
+The type of this function would be:
+
+```
+head : List<a> -> a
+```
+
+This function's type can be described as `∀a : List(a) -> a`. It reads as: Given any type a and a list of elements of this type, return an a value. 
+We know nothing about a, except that the list's elements has this type. 
+But if list is empty, then we have no a-values to look at.  The head function provided by the standard List package solves this problem by instead returning a value wrapped in an `Option` type:
+
+head(list : List(a)) : Option(a) =
+  match(list) {
+    | head :: _ => Some(head)
+    | [] => None
+  }
 
 #### Tuples
 
