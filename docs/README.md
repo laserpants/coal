@@ -484,6 +484,15 @@ There are two types of comments:
   /* This is a long comment. It can extend over multiple 
      lines. It may or may not contain ASCII art depicting,
      for example, a giraffe. 
+
+         (\-/)
+        (:O O:)
+         \   /o\
+          | |\o \  
+          (:) \ o\  
+               \o \--_ 
+               ( o O
+               (  O
   */
   fun sqrt(d : double) =
     ...
