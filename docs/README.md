@@ -9,7 +9,8 @@ Coal is a declarative, purely functional programming language with
 - simple and intuitive syntax
 - algebraic data types and pattern matching
 - extensible records
-- structural recursion and corecursion
+- structural recursion 
+- codata and corecursion
 - traits (type classes)
 - semantic effects (work-in-progress)
 
@@ -384,7 +385,7 @@ let { baz = { f = a | _ } } = faz(4)
 >  #### A note about let-generalization
 >
 > In some ways, a let-binding is interchangeable with a lambda function. For example, writing `let x = 1 in increment(x)` yields the same result as `(fn(x) => increment(x))(1)`.
-> But besides being more readable, the let-binding also has another purpose. In [Hindley-Milner](https://en.wikipedia.org/wiki/Hindley%E2%80%93Milner_type_system) languages, it is let-bindings that introduce polymorphism. Consider the following expression, which doesn't type check:
+> But besides being more readable, the let-binding also serves another purpose. In [Hindley-Milner](https://en.wikipedia.org/wiki/Hindley%E2%80%93Milner_type_system) languages, it is let-bindings that introduce polymorphism. Consider the following expression, which doesn't type check:
 > 
 > ```
 >   (fn(f) => (f(3 : int32), f("three")))(fn(x) => x)
@@ -721,7 +722,7 @@ Since lists are implemented as chains of linked nodes, the time complexity of ma
 
 ###### Head, tail, and uncons
 
-- `head` returns the first element of a list, wrapped in an `Option` to account for the empty list.
+- `head` returns the first element of a list, wrapped in an `Option` (described below) to account for the empty list.
 - `tail` returns all elements except the first, also as an `Option`.
 - `uncons` combines the two: it returns both the head and tail as a tuple, or `None` if the list is empty. In a sense, it undoes what the cons (`::`) constructor does.
 
@@ -774,11 +775,13 @@ This type is called `Maybe` in Haskell and is similar to `Option` in languages l
 
 Why do we need this type:
 To ensure that all functions are total, match statements always need to be exhaustive, meaning that the list of pattern clauses covers all possible cases. 
+
 The compiler will check this condition and fail with an error if it is not met. 
+
 A consequence of this is that we cannot define a function `head` that returns the first element of a list, in general. 
 Let's think about what such a function would look like, and why it fails to be total:
 
-A good example is the `head` function on lists. At first glance, we might try to define it like this:
+A good example is the `head` function on lists. We might try to define it like this:
 
 ```
   fun head(list : List<a>) : a =
@@ -794,15 +797,17 @@ The type of this function would be:
 head : List<a> -> a
 ```
 
-This function's type can be described as `∀a : List(a) -> a`. It reads as: Given any type a and a list of elements of this type, return an a value. 
-We know nothing about a, except that the list's elements has this type. 
-But if list is empty, then we have no a-values to look at.  The head function provided by the standard List package solves this problem by instead returning a value wrapped in an `Option` type:
+This function's type can be described as `∀a : List(a) -> a`. It reads as: Given any type `a` and a list of elements of this type, return an a value. 
+That is to say; we know nothing about `a`, except that the list's elements has this type. 
+But if the input list is empty, then we have nothing to look at. The head function provided by the standard List package solves this problem by instead returning a value wrapped in an `Option` type:
 
-head(list : List(a)) : Option(a) =
-  match(list) {
-    | head :: _ => Some(head)
-    | [] => None
-  }
+```
+  fun head(list : List(a)) : Option(a) =
+    match(list) {
+      | head :: _ => Some(head)
+      | [] => None
+    }
+```
 
 #### Tuples
 
