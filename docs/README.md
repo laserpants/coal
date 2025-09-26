@@ -1,6 +1,6 @@
 # Coal
 
-This repository is the home of the Coal programming language and compiler. The project is under mega-construction. 🚧
+This repository is the home of the Coal programming language and compiler. 🚧 The project is under mega-construction. 🚧
 
 ## About
 
@@ -265,11 +265,11 @@ fun go(x) =
 
 #### Literal expressions
 
-TODO
+A *literal* is an expression that directly represents a fixed value of one of the built-in primitive types, such as integers, booleans, or strings.
 
 #### Built-in language primitives
 
-Coal provides the following built-in basic language types:
+Coal defines the following built-in types:
 
 | Type               | Description                             | Example values            |                       
 | ------------------ | --------------------------------------- | ------------------------- |                       
@@ -293,7 +293,7 @@ Integer literals introduced in code without an explicit type annotation, such as
 let answer = 42
 ```
 
-&hellip; are polymorphic. Their inferred type is `n with Numeric(n)`, which isn't an ordinary type. It rather means that `n` can be *any* type, as long as it is a member of the `Numeric` trait (see **Traits**). 
+&hellip; are polymorphic. Their inferred type is `n with Numeric(n)`, which isn't an ordinary type. It means that `n` can be *any* type, as long as it is a member of the `Numeric` trait (see **Traits**). 
 This includes the built-in `int32`, `int64`, `bignum`, and `nat` types. All `Numeric` types support the basic arithmetic operations of addition, subtraction, and multiplication.
 
 ```
