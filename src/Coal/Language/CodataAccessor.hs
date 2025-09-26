@@ -11,7 +11,7 @@ import Extra (Name)
 import GHC.Generics (Generic)
 
 {- | Codata field accessor
-e.g., Head : Stream(a) -> a
+e.g., Head : Stream<a> -> a
 -}
 data CodataAccessor o k t = CodataAccessor
   { codataAccessorName :: Name
