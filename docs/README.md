@@ -27,6 +27,8 @@ As a [total](https://en.wikipedia.org/wiki/Total_functional_programming) languag
     }
 ```
 
+The special `@`-pattern variable used here means that `tot` recieves the result from calling the fold again using the sub-list matched by the pattern. 
+
 A distinction is made between ordinary, finite data, which is produced and consumed in this way, and potentially infinite data &mdash; the kind that may result from processes that run indefinitely. The latter is known as *codata*. The codata equivalent of lists, for example, are streams.
 
 ```
@@ -40,12 +42,9 @@ A distinction is made between ordinary, finite data, which is produced and consu
   let nats = enum_from(0)
 ```
 
-These examples show two distinct modes of recursive control flow. If you are familiar with [recursion schemes](https://blog.sumtypeofway.com/posts/introduction-to-recursion-schemes.html) in a language like Haskell, recursion in Coal is based on the same principles. 
+In this code, the `@` in the field name causes the expression on the right (`n + 1`) to become the next seed value, which is fed back into `enum_from` to generate the rest of the stream.
 
-- **First example:** The special `@`-pattern variable means that `tot` recieves the result from calling the fold again using the sub-list matched by the pattern. 
-- **Second example:** The `@` in the field name causes the expression on the right (`n + 1`) to become the next seed value, which is fed back into `enum_from` to generate the rest of the stream.
-
-In the recursion scheme framework, `fold` and `unfold` are called *catamorphisms* and *anamorphisms*. Scroll down to **Recursion, corecursion, and codata** for a more detailed explanation of how these constructs work in Coal.
+These examples show two distinct modes of recursive control flow. If you are familiar with [recursion schemes](https://blog.sumtypeofway.com/posts/introduction-to-recursion-schemes.html) in a language like Haskell, recursion in Coal is based on the same principles. In that framework, `fold` and `unfold` are called *catamorphisms* and *anamorphisms*. Scroll down to **Recursion, corecursion, and codata** for a more detailed explanation of how these constructs work in Coal.
 
 ### Programs = Expressions + Effects
 
@@ -113,7 +112,7 @@ module <path>(<export_list>) {
 }
 ```
 
-Every module is uniquely identified by its *path*. A module's path mirrors the directory structure of the source file in which it is defined. Path segments begin with an uppercase letter and are separated by a dot (`.`). Files have a `.coal` extension. A module `Utils.Math.Trigonometry`, for instance, is defined in a file named `Trigonometry.coal`, located under `Utils/Math/` relative to your project's root directory.
+Every module is uniquely identified by its *path*. A module's path mirrors the directory structure of the source file in which it is defined. Path segments begin with an uppercase letter and are separated by a dot (`.`). Files have a `.coal` extension. A module `Utils.Math.Trigonometry`, for instance, is defined in a file named `Trigonometry.coal`, located under `Utils/Math/` relative to your project's root directory:
 
 ```
 src
@@ -641,23 +640,50 @@ unpack_nat : nat -> int32
 
 Converting back and forth between these are constant time (**O**(1)) operations.
 
+#### Option
+
+To ensure that all functions are total, match statements always need to be exhaustive, meaning that the list of pattern clauses covers all possible cases. The compiler will check this condition and fail with an error if it is not met. A consequence of this is that we cannot, for example, define a generic function head that returns the first element of a list. Let's think about what such a function would look like, and why it fails to be total:
+head(list : List(a)) : a =
+  match(list) {
+    | head :: _ => head
+    | [] => // What should I return here?
+  }
+Variables in a type signature are universally quantified, so the head function's type can be described, more formally, as ∀a : List(a) -> a. It reads as: Given any type a and a list of elements of this type, return an a value. We know nothing about a, except that the list's elements has this type. But if list is empty, then we have no a-values to look at.  The head function provided by the standard List package solves this problem by instead returning a value wrapped in an Option(a):  gg
+head(list : List(a)) : Option(a) =
+  match(list) {
+    | head :: _ => Some(head)
+    | [] => None
+  }
+
+```
+type Option<a>
+  = Some(a)
+  | None
+```
+
 #### Lists
 
-A list is an ordered collection where all elements are of the same type. Lists are a foundational data structure in functional programming, commonly used to store and manipulate collections of data, and as a building block for implementing other higher-level abstractions.
+A *list* is an ordered collection in which all elements share the same type. Lists are one of the most fundamental data structures in functional programming. 
+They are commonly used to store and manipulate collections of data, and serve as a building block for many higher-level abstractions.
 
-In Coal, list literals are denoted by a sequence of comma-separated expressions, enclosed in square brackets:
+In Coal, list literals are written as a sequence of comma-separated expressions enclosed in square brackets:
 
 ```
 [<expr_1 : t>, <expr_2 : t>, ..., <expr_n : t>] : List<t>
 ```
 
-Example:
+For example:
 
 ```
 [1, 1, 2, 5, 14, 42, 132, 429] : List<int32>
 ```
 
-The `List` type is defined inductively, and implemented as a one-way *linked list* of nodes. This means that a list of type `List<a>` is either (1) the empty list; or (2) a value of type `a` coupled with another `List<a>` list. These last two are usually referred to as the *head* and *tail* of the list. 
+Lists are defined inductively and implemented internally as a *singly linked list*. This means that a list of type `List<a>` is either:
+
+1. the empty list `[]`; or
+2. a value of type `a` (the *head*) followed by another list of type `List<a>` (the *tail*).
+
+Formally:
 
 ```
 type List<a>
@@ -665,13 +691,93 @@ type List<a>
   | a :: List<a>
 ```
 
-#### Option
+Here `::` is the *cons*-operator, which constructs a new list by prepending an element to an existing list.
+
+Lists can be deconstructed using pattern matching. For example, the following function removes the first element of a list if it is zero:
 
 ```
-type Option<a>
-  = Some(a)
-  | None
+  fun remove_head_if_zero(list) = 
+    match(list) {
+      | [] => []
+      | head :: tail =>
+          if (head == 0)
+            then tail     // remove the first element, if it is zero
+            else list     // otherwise return the original list
+    }
 ```
+
+This style of unpacking data is common with all algebraic data types (see **Pattern matching**).
+
+You can also match lists using literal patterns:
+
+```
+  fun is_pythagorean(numbers) =
+    match(numbers) {
+      | [a, b, c] =>
+          a^2 + b^2 == c^2 || 
+          a^2 + c^2 == b^2 || 
+          b^2 + c^2 == a^2
+      | _ =>
+          false
+    }
+```
+
+This example matches a list of exactly three elements and checks if they form a [Pythagorean triple](https://en.wikipedia.org/wiki/Pythagorean_triple).
+
+##### Common list operations
+
+The function `length` counts the number of elements in a list:
+
+```
+length([0, 1, 2, 3, 4])   // returns 5
+```
+
+```
+length : List<a> -> nat
+```
+
+Note that, because lists are implemented as chains of linked nodes, the time complexity of many list operations, including `length`, is O(n).
+
+###### Head, tail, and uncons
+
+- `head` returns the first element of a non-empty list, enclosed in an `Option` type (to accommodate for the empty list). 
+- `tail` returns all elements of the list except the first
+- `uncons` combines these two by returning both the head and tail (of a non-empty list), together as a tuple. In a way, it undoes what the `::` constructor does. 
+
+```
+head : List<a> -> Option<a>
+tail : List<a> -> Option<List<a>>
+uncons : List<a> -> Option<(a, List<a>)>
+```
+
+###### Take and drop
+
+Use take to get another list with the first n elements of the given list:
+take : nat -> List(a) -> List(a)
+Example:
+[1, 2, 3, 4, 5, 6, 7] |.take(3)     // [1, 2, 3]
+Note that, if the list's length is less than the requested number of elements, then take returns the entire list. So, for example, take(5, [1, 2, 3]) returns [1, 2, 3] . take(0) always returns an empty list.
+The function drop removes the first n elements from a list.
+drop : nat -> List(a) -> List(a)
+Example:
+[1, 2, 3, 4, 5, 6, 7] |.drop(3)     // [4, 5, 6, 7]
+If you try to drop a greater number of elements than what the list contains, drop returns an empty list.
+
+slice
+Combining drop and take allows you to obtain a range of elements from within a list:
+[1, 2, 3, 4, 5, 6, 7] 
+  |.drop(2)
+  |.take(3)
+
+// == [3, 4, 5]
+
+TODO
+
+[1, 2, 3, 4, 5, 6, 7] |.slice(2, 5)
+// == [1, 2, 3, 4, 5, 6, 7] |.drop(2) |.take(5 - 2)
+// == [3, 4, 5]
+
+TODO
 
 #### Tuples
 
@@ -701,6 +807,14 @@ The empty tuple *does* exist, and has special meaning. It is written `()` and is
 (1, 2, 3)     : (int32, int32, int32)          // 3-tuple
 (1, 2, 3, 4)  : (int32, int32, int32, int32)   // 4-tuple
 // ...
+```
+
+As with other data types, tuples can be deconstructed by means of pattern matching:
+
+```
+  fun fst3((fst, _, _) : (a, b, c)) : a = fst
+  fun snd3((_, snd, _) : (a, b, c)) : b = snd
+  fun thd3((_, _, thd) : (a, b, c)) : c = thd 
 ```
 
 ##### Tuples and currying
@@ -770,15 +884,13 @@ let language = { name = "Java", paradigm = "OOP" }
 
 ##### Extending records
 
-Records in Coal are said to be **extensible**, meaning that new fields can be added to a record at run time.
+Records in Coal are described as **extensible**, meaning that new fields can be added to a record at run time.
 
 ```
 fun tagged(rec, t : string) = { tag = t | rec }  
 ```
 
-This function accepts two arguments: an existing record `rec` and a string `t`.
-It returns a copy of `rec` augmented with a new field labelled `tag`. This new field assumes the value of the argument `t`. 
-The pipe symbol (`|`) is an infix operator that takes the record on the right-hand side and extends it with the fields on the left.
+This function accepts two arguments: an existing record `rec` and a string `t`. It returns a copy of `rec` augmented with a new field `tag` which assumes the value of `t`. The pipe symbol (`|`) is an infix operator that takes the record on the right-hand side and extends it with the fields on the left.
 
 For example, if we define a record `r = { day = "monday", humidity = 73.5 }` and apply `tagged(r, "wet")`, we obtain a new record:
 
@@ -786,7 +898,7 @@ For example, if we define a record `r = { day = "monday", humidity = 73.5 }` and
 { day = "monday", humidity = 73.5, tag = "wet" }
 ```
 
-This is especially useful because the type of the original record does not matter; its labels and field types need not be known at compile time.
+What makes this especially useful is that the type of the original record does not matter; its labels and field types need not be known at compile time.
 
 The left-hand side of the pipe is itself a list of fields, so any number of fields can be added at once:
 
@@ -806,11 +918,7 @@ tagged(rec : { | r }, t : string) : { tag : string | r } =
   { tag = t | rec }
 ```
 
-These types look a bit different from earlier examples. Here, the pipe (|) also appears at the type level.
-It serves a similar purpose: combining fields with an existing record type.
-
-The type variable `r` represents a *row*, which can be thought of as a type-level list of fields.
-A record type of this form is called *open*. By contrast, a *closed* record type explicitly lists all its fields.
+These types look a bit different from earlier examples. Here, the pipe (|) also appears at the type level. It serves a similar purpose: combining fields with an existing record type. The type variable `r` represents a *row*, which can be thought of as a type-level list of fields. A record type of this form is called *open*. By contrast, a *closed* record type explicitly lists all its fields.
 
 The following example illustrates the difference. Suppose we want to represent GPS coordinates with two fields, `lat` and `lng`:
 
@@ -1046,7 +1154,7 @@ The result is the same as ...
       | Succ(r) as m => m * fold(r)
 ```
 
-There are specific rules as to how this pattern can be used.
+There are specific rules for how this pattern can be used.
 Most importantly, it can only appear inside a constructor. 
 For recursion to be well-defined, progress must be guaranteed in each iterative step. 
 The constructor rule is how this is enforced by the language. 
