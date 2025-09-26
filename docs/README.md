@@ -867,10 +867,7 @@ let five = curry(add, 1, 4)         // or (curry(add))(1, 4)
 
 #### Records
 
-Records are unordered collections of name–value pairs, where the values may be of any type, including other records.
-They are suitable for representing structured data with multiple properties, or nested objects. 
-A record expression is written as a sequence of comma-separated *fields* enclosed in curly braces.
-Each field consists of a name, called the *label*, paired with a value. The two are separated by an equals sign (`=`):
+Records are unordered collections of name–value pairs, where the values may be of any type, including other records. They are suitable for representing structured data with multiple properties, or nested objects. A record expression is written as a sequence of comma-separated *fields* enclosed in curly braces. Each field consists of a name, called the *label*, paired with a value. The two are separated by an equals sign (`=`):
 
 ```
 { 
@@ -886,8 +883,7 @@ The corresponding type for the above record is:
 { name : string, shoe_size : float, privileges : List<string> }
 ```
 
-The type of a record looks similar to the expression itself, except that each field is written as a label followed by its type.
-Instead of an equals sign, a colon (`:`) separates the label and the type.
+The type of a record looks similar to the expression itself, except that each field is written as a label followed by its type. Instead of an equals sign, a colon (`:`) separates the label and the type.
 
 Since the order of fields is irrelevant, the following two records are considered identical:
 
