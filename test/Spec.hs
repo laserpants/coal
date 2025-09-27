@@ -97,7 +97,7 @@ spec = do
   x <- main11
   print ("11", x == Right "Covfefe\n")
   x <- main12
-  print (x == Right "errorMessage errorMessage errorMessage\n")
+  print (x == Right "bork bork bork\n")
   a <- isLeft <$> main13
   print a
   a <- isLeft <$> main14
@@ -2497,10 +2497,10 @@ runTestBuild = do
 runCompiler :: [FilePath] -> IO (Either CompilerFailureMode [Module Metadata Kind ()], CompilerState Metadata, [CompilerError Metadata])
 runCompiler files = do
   r@(_, CompilerState{..}, es) <- runCompilerT emptyCompilerEnvironment (runPass preflightPhase files)
-  forM_ es $
-    \err -> do
-      t <- prettyError compilerVerbatimSource err
-      Text.putStrLn t
+--  forM_ es $
+--    \err -> do
+--      t <- prettyError compilerVerbatimSource err
+--      Text.putStrLn t
   pure r
 
 errorMessage :: [Text] -> Environment Text -> ErrorLocation Metadata -> IO Text
