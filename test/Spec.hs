@@ -11,10 +11,10 @@ import Coal.Compiler (mainPass, typeCheckingPass, writeDotFiles)
 import Coal.Compiler.Environment
 import Coal.Compiler.Kernel.TranslateModule (translateModule)
 import Coal.Compiler.Pass (Pass (..), mapPass, (>->))
-import Coal.Compiler.Pass.ImportsTopRule (importsTopRulePass)
-import Coal.Compiler.Pass.Parsing (parsingPass)
-import Coal.Compiler.Pass.Setup (setupPass)
-import Coal.Compiler.Pass.TypeImports (typeImportsPass)
+import Coal.Compiler.Pass.ImportsTopRule (passImportsTopRule)
+import Coal.Compiler.Pass.Parsing (passParsing)
+import Coal.Compiler.Pass.Setup (passSetup)
+import Coal.Compiler.Pass.TypeImports (passTypeImports)
 import Coal.Compiler.Stack
 import Coal.Compiler.Transform.WhereClauses
 import Coal.Compiler.TypeInference.Errors
@@ -2506,9 +2506,9 @@ prettyError src =
 
 preflightPhase :: (MonadIO m) => Pass Metadata m [FilePath] [Module Metadata Kind ()]
 preflightPhase = do
-  parsingPass
-    >-> importsTopRulePass
-    >-> setupPass
+  passParsing
+    >-> passImportsTopRule
+    >-> passSetup
 --    >-> topologicalSortPass
 
 typePhase :: (MonadIO m) => Pass Metadata m (Module Metadata Kind ()) (Module Metadata Kind ())
@@ -2517,7 +2517,7 @@ typePhase = undefined
 mainPhase :: (MonadIO m) => Pass Metadata m (Module Metadata Kind ()) (Module Metadata Kind ())
 mainPhase = typePhase
 
--- >-> typeImportsPass
+-- >-> passTypeImports
 -- expandWhereClausesModule
 
 pipeline :: (MonadIO m) => Pass Metadata m [FilePath] [Module Metadata Kind ()]

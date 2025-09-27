@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Pass.Parsing (parsingPass) where
+module Coal.Compiler.Pass.Parsing (passParsing) where
 
 import Coal.Ast.Metadata (Metadata (..))
 import Coal.Compiler.Journal
@@ -19,8 +19,8 @@ import qualified Data.Text as Text
 import Extra (forM_)
 import Text.Megaparsec (runParser)
 
-parsingPass :: (MonadIO m) => Pass Metadata m [FilePath] [Module Metadata Kind ()]
-parsingPass =
+passParsing :: (MonadIO m) => Pass Metadata m [FilePath] [Module Metadata Kind ()]
+passParsing =
   Pass
     { passName = "Parsing"
     , runPass = pass

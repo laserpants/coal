@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Pass.ImportsTopRule (importsTopRulePass) where
+module Coal.Compiler.Pass.ImportsTopRule (passImportsTopRule) where
 
 import Coal.Ast.Metadata (HasMetadata (..), Metadata (..))
 import Coal.Compiler.Journal
@@ -13,8 +13,8 @@ import Coal.Language.Module.Definition (isDImport)
 import Control.Monad.Except
 import Extra (Name)
 
-importsTopRulePass :: (MonadIO m) => Pass Metadata m [Module Metadata Kind ()] [Module Metadata Kind ()]
-importsTopRulePass =
+passImportsTopRule :: (MonadIO m) => Pass Metadata m [Module Metadata Kind ()] [Module Metadata Kind ()]
+passImportsTopRule =
   Pass
     { passName = "ImportsTopRule"
     , runPass = pass

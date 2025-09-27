@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Pass.Setup (setupPass) where
+module Coal.Compiler.Pass.Setup (passSetup) where
 
 import Coal.Ast.Metadata (Metadata (..))
 import Coal.Compiler.Pass
@@ -10,8 +10,8 @@ import Coal.Language
 import Coal.Language.Module
 import Extra (Name)
 
-setupPass :: (Monad m) => Pass a m [Module Metadata Kind ()] [Module Metadata Kind ()]
-setupPass =
+passSetup :: (Monad m) => Pass a m [Module Metadata Kind ()] [Module Metadata Kind ()]
+passSetup =
   Pass
     { passName = "Setup"
     , runPass = pass

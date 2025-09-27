@@ -13,8 +13,8 @@ import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.State (gets)
 import Extra (forM, fromMaybe, isConstructor)
 
-typeImportsPass :: (MonadIO m) => Pass a m [Module a Kind ()] [Module a Kind ()]
-typeImportsPass =
+passTypeImports :: (MonadIO m) => Pass a m [Module a Kind ()] [Module a Kind ()]
+passTypeImports =
   Pass
     { passName = "TypeImports"
     , runPass = pass
