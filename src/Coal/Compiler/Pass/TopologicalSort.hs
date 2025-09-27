@@ -17,7 +17,7 @@ import Data.Maybe (fromJust)
 import Data.Set (Set)
 import qualified Data.Set as Set
 import Data.Tuple.Extra (fst3)
-import Extra (Name)
+import Extra (Name, concatForM)
 
 passTopologicalSort :: (Monad m) => Pass Metadata m [Module Metadata Kind ()] [Module Metadata Kind ()]
 passTopologicalSort =
@@ -36,7 +36,7 @@ pass modules = do
 
 collectEdges :: (Monad m) => Set Name -> Module Metadata Kind () -> CompilerT Metadata m (Module Metadata Kind (), Int, [Int])
 collectEdges s m = do
-  ks <- forM deps $
+  ks <- concatForM deps $
     \(loc, dep) ->
       case index dep of
         Just i ->
@@ -45,7 +45,7 @@ collectEdges s m = do
           tellErrors [ModuleNotFound dep (ErrorLocation name loc)]
           pure []
   if length ks == length deps
-    then pure (m, k, concat ks)
+    then pure (m, k, ks)
     else throwError PreflightFailure
  where
   name = modulePathName m
