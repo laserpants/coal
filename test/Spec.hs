@@ -14,8 +14,8 @@ import Coal.Compiler.Pass (Pass (..), mapPass, (>->))
 import Coal.Compiler.Pass.ImportsTopRule (passImportsTopRule)
 import Coal.Compiler.Pass.Parsing (passParsing)
 import Coal.Compiler.Pass.Setup (passSetup)
-import Coal.Compiler.Pass.TypeImports (passTypeImports)
 import Coal.Compiler.Pass.TopologicalSort (passTopologicalSort)
+import Coal.Compiler.Pass.TypeImports (passTypeImports)
 import Coal.Compiler.Stack
 import Coal.Compiler.Transform.WhereClauses
 import Coal.Compiler.TypeInference.Errors
@@ -2543,10 +2543,11 @@ main129 = do
     , "./test/Coal/examples/129/List.coal"
     ]
 
+main129_ :: IO ()
 main129_ = do
   res <- main129
   let (Right r, _, _) = res
-  liftIO $ forM_ (modulePathName <$> r) Text.putStrLn 
+  liftIO $ forM_ (modulePathName <$> r) Text.putStrLn
 
 main130 :: IO (Either CompilerFailureMode [Module Metadata Kind ()], CompilerState Metadata, [CompilerError Metadata])
 main130 = do
@@ -2555,4 +2556,3 @@ main130 = do
     , "./test/Coal/examples/130/Utils.coal"
     , "./test/Coal/examples/130/List.coal"
     ]
-

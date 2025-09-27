@@ -8,16 +8,16 @@ import Coal.Ast.Metadata (Metadata (..))
 import Coal.Compiler.Error (CompilerError (..))
 import Coal.Compiler.Journal
 import Coal.Compiler.Pass
-import Coal.Compiler.Stack (CompilerT, CompilerFailureMode (..))
+import Coal.Compiler.Stack (CompilerFailureMode (..), CompilerT)
 import Coal.Language
 import Coal.Language.Module
 import Control.Monad.Except
 import Data.Graph (graphFromEdges, reverseTopSort)
 import Data.Maybe (fromJust)
 import Data.Set (Set)
+import qualified Data.Set as Set
 import Data.Tuple.Extra (fst3)
 import Extra (Name)
-import qualified Data.Set as Set
 
 passTopologicalSort :: (Monad m) => Pass a m [Module Metadata Kind ()] [Module Metadata Kind ()]
 passTopologicalSort =
@@ -30,7 +30,7 @@ pass :: (Monad m) => [Module Metadata Kind ()] -> CompilerT a m [Module Metadata
 pass modules = do
   edges <- traverse (collectEdges s) modules
   let (graph, vertexToNode, _) = graphFromEdges edges
-  pure (map (fst3 . vertexToNode) (reverseTopSort graph))
+  pure (fst3 . vertexToNode <$> reverseTopSort graph)
  where
   s = Set.fromList (modulePathName <$> modules)
 
