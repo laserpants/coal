@@ -12,7 +12,7 @@ Coal is a declarative, purely functional programming language with
 - structural recursion 
 - codata and corecursion
 - traits (type classes)
-- semantic effects (work-in-progress)
+- <strike>effects</strike> (planned)
 
 among other features. Coal’s type system, like Haskell’s and ML’s, supports type inference and parametric polymorphism, drawing on the [System-F](https://en.wikipedia.org/wiki/System_F) lambda calculus. The Coal compiler is implemented in Haskell and targets [LLVM](https://llvm.org/) for code generation.
 
@@ -252,7 +252,7 @@ Variable names are subject to the following rules:
 alias, as, bignum, bool, char, cotype, double, else, false, float, fn, fold, fun, if, import, in, instance, int32, int64, let, match, module, nat, or, string, then, trait, true, type, unfold, unit, when, where, with
 ```
 
-##### Shadowing 
+##### Shadowing considered harmful
 
 > This feature is not yet implemented.
 
@@ -502,8 +502,7 @@ There are two types of comments:
 
 ##### Unit
 
-The `unit` type has only a single value, written as an empty pair of parentheses: `()`. At a first glance, this type appears to be of no purpose, but it actually has a number of applications. 
-In many instances it is useful to be able to express that a function argument isn't used to compute the return value. In C, for example, we can define the following function:
+The `unit` type has only a single value, written as an empty pair of parentheses: `()`. At first glance this type may appear to serve no purpose, but it has several practical uses. For example, it is often useful to indicate that a function does not take any meaningful input. In C, we might write the following function:
 
 ```
 int five() {
@@ -519,7 +518,7 @@ This is where the `unit` type comes in handy:
 fun five(() : unit) : int32 = 5
 ```
 
-Removing the type annotation, the above becomes `fun five(()) = 5`, which is perfectly valid. But since an expression like `five()` doesn't have any other meaningful interpretation, the compiler accepts this as a shorthand for the slightly awkward double-parentheses form.
+Removing the type annotation, the above becomes `fun five(()) = 5`, which is perfectly valid. But since an expression like `five()` doesn't have any other meaningful interpretation, the compiler accepts this as a shorthand for the slightly awkward double-parentheses.
 
 ```
 fun five() = 5   // i.e., fun five(() : unit) = 5
