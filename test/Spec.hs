@@ -2516,13 +2516,10 @@ prettyError env =
   \case
     ParserError file err ->
       pure ("In file \"" <> Text.pack file <> "\":\n\n" <> Text.pack (errorBundlePretty err))
-    MisplacedImportStatement errl -> do
-      errorMessage ["Misplaced import statement"] env errl
-    ModuleNotFound name errl ->
-      errorMessage ["No such module: " <> name] env errl
---    e ->
---      -- TODO
---      error (show e)
+    MisplacedImportStatement erl -> do
+      errorMessage ["Misplaced import statement"] env erl
+    ModuleNotFound name erl ->
+      errorMessage ["No such module: " <> name] env erl
 
 preflightPhase :: (MonadIO m) => Pass Metadata m [FilePath] [Module Metadata Kind ()]
 preflightPhase = do
