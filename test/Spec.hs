@@ -276,6 +276,12 @@ spec = do
   print (x == Right "3\n")
   x <- main128
   print (x == Right "3.000000\n")
+  (a, _, _) <- main127
+  print (isLeft a)
+  r <- main129_
+  print (r == ["Utils", "List", "Main"])
+  (a, _, _) <- main130
+  print (isLeft a)
 
 --  x <- main85
 --  print (x == Right "aa\n")
@@ -2500,12 +2506,16 @@ runCompiler files = do
 prettyError :: Environment Text -> CompilerError Metadata -> IO Text
 prettyError src =
   \case
-    MisplacedImportStatement path loc -> do
+    MisplacedImportStatement (ErrorLocation path loc) -> do
       case Environment.lookup path src of
         Just src ->
           pure $ prettyErrorMessage ["Misplaced import statement"] src loc
     ParserError file err ->
       pure ("In file \"" <> Text.pack file <> "\":\n\n" <> Text.pack (errorBundlePretty err))
+    ModuleNotFound name (ErrorLocation path loc) -> do
+      case Environment.lookup path src of
+        Just src ->
+          pure $ prettyErrorMessage ["No such module: " <> name] src loc
     e ->
       -- TODO
       error (show e)
@@ -2543,11 +2553,11 @@ main129 = do
     , "./test/Coal/examples/129/List.coal"
     ]
 
-main129_ :: IO ()
+main129_ :: IO [Text]
 main129_ = do
   res <- main129
   let (Right r, _, _) = res
-  liftIO $ forM_ (modulePathName <$> r) Text.putStrLn
+  pure (modulePathName <$> r)
 
 main130 :: IO (Either CompilerFailureMode [Module Metadata Kind ()], CompilerState Metadata, [CompilerError Metadata])
 main130 = do

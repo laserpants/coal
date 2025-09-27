@@ -1,6 +1,6 @@
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Error (CompilerError (..), CompilerFailureMode (..)) where
+module Coal.Compiler.Error (ErrorLocation (..), CompilerError (..), CompilerFailureMode (..)) where
 
 import Coal.Parser (ParserError)
 import Data.Text (Text)
@@ -12,10 +12,13 @@ import Extra (Name)
 --  | FoldPatternInRegularMatch a
 --  deriving (Show, Eq, Ord, Read)
 
+data ErrorLocation a = ErrorLocation Name a
+  deriving (Show, Eq)
+
 data CompilerError a
   = ParserError FilePath ParserError
-  | MisplacedImportStatement Name a
-  | ModuleNotFound Name
+  | MisplacedImportStatement (ErrorLocation a)
+  | ModuleNotFound Name (ErrorLocation a)
   | TODO
   deriving (Show, Eq)
 

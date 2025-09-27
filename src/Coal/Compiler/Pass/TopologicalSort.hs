@@ -5,7 +5,7 @@
 module Coal.Compiler.Pass.TopologicalSort (passTopologicalSort) where
 
 import Coal.Ast.Metadata (Metadata (..))
-import Coal.Compiler.Error (CompilerError (..))
+import Coal.Compiler.Error (CompilerError (..), ErrorLocation (..))
 import Coal.Compiler.Journal
 import Coal.Compiler.Pass
 import Coal.Compiler.Stack (CompilerFailureMode (..), CompilerT)
@@ -19,14 +19,14 @@ import qualified Data.Set as Set
 import Data.Tuple.Extra (fst3)
 import Extra (Name)
 
-passTopologicalSort :: (Monad m) => Pass a m [Module Metadata Kind ()] [Module Metadata Kind ()]
+passTopologicalSort :: (Monad m) => Pass Metadata m [Module Metadata Kind ()] [Module Metadata Kind ()]
 passTopologicalSort =
   Pass
     { passName = "TopologicalSort"
     , runPass = pass
     }
 
-pass :: (Monad m) => [Module Metadata Kind ()] -> CompilerT a m [Module Metadata Kind ()]
+pass :: (Monad m) => [Module Metadata Kind ()] -> CompilerT Metadata m [Module Metadata Kind ()]
 pass modules = do
   edges <- traverse (collectEdges s) modules
   let (graph, vertexToNode, _) = graphFromEdges edges
@@ -34,33 +34,34 @@ pass modules = do
  where
   s = Set.fromList (modulePathName <$> modules)
 
-collectEdges :: (Monad m) => Set Name -> Module Metadata Kind () -> CompilerT a m (Module Metadata Kind (), Int, [Int])
+collectEdges :: (Monad m) => Set Name -> Module Metadata Kind () -> CompilerT Metadata m (Module Metadata Kind (), Int, [Int])
 collectEdges s m = do
   ks <- forM deps $
-    \dep ->
+    \(loc, dep) ->
       case index dep of
         Just i ->
           pure [i]
         Nothing -> do
-          tellErrors [ModuleNotFound dep]
+          tellErrors [ModuleNotFound dep (ErrorLocation name loc)]
           pure []
   if length ks == length deps
     then pure (m, k, concat ks)
     else throwError PreflightFailure
  where
-  k = fromJust (index (modulePathName m))
+  name = modulePathName m
+  k = fromJust (index name)
   deps = dependencies m
 
   index :: Name -> Maybe Int
   index n = Set.lookupIndex n s
 
-dependencies :: Module Metadata Kind () -> [Name]
+dependencies :: Module Metadata Kind () -> [(Metadata, Name)]
 dependencies (Module _ _ ds) = concatMap importPath ds
 
-importPath :: Definition Metadata Kind () -> [Name]
+importPath :: Definition Metadata Kind () -> [(Metadata, Name)]
 importPath =
   \case
-    DImport _ p _ ->
-      [principalPath p]
+    DImport loc p _ ->
+      [(loc, principalPath p)]
     _ ->
       []

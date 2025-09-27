@@ -35,7 +35,7 @@ checkImports name defs = do
     rs -> do
       forM_ (filter isDImport rs) $
         \d ->
-          tellErrors [MisplacedImportStatement name (getMetadata d)]
+          tellErrors [MisplacedImportStatement (ErrorLocation name (getMetadata d))]
   pure defs
  where
   ds = dropWhile isDImport defs

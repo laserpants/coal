@@ -13,6 +13,7 @@ module Coal.Compiler.Stack (
   CompilerState (..),
   CompilerConstraint,
   CompilerAssumption,
+  ErrorLocation (..),
   runCompilerT,
   evalCompilerT,
   insertNameC,
