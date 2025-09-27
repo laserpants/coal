@@ -43,6 +43,7 @@ library
       Coal.Compiler.Pass.ImportsTopRule
       Coal.Compiler.Pass.Parsing
       Coal.Compiler.Pass.Setup
+      Coal.Compiler.Pass.TopologicalSort
       Coal.Compiler.Pass.TypeImports
       Coal.Compiler.PatternMatching
       Coal.Compiler.PatternMatching.Compiler

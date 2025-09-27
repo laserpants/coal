@@ -15,6 +15,7 @@ import Coal.Compiler.Pass.ImportsTopRule (passImportsTopRule)
 import Coal.Compiler.Pass.Parsing (passParsing)
 import Coal.Compiler.Pass.Setup (passSetup)
 import Coal.Compiler.Pass.TypeImports (passTypeImports)
+import Coal.Compiler.Pass.TopologicalSort (passTopologicalSort)
 import Coal.Compiler.Stack
 import Coal.Compiler.Transform.WhereClauses
 import Coal.Compiler.TypeInference.Errors
@@ -2509,7 +2510,7 @@ preflightPhase = do
   passParsing
     >-> passImportsTopRule
     >-> passSetup
---    >-> topologicalSortPass
+    >-> passTopologicalSort
 
 typePhase :: (MonadIO m) => Pass Metadata m (Module Metadata Kind ()) (Module Metadata Kind ())
 typePhase = undefined
