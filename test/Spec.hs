@@ -2504,6 +2504,11 @@ prettyError src =
       case Environment.lookup path src of
         Just src ->
           pure $ prettyErrorMessage ["Misplaced import statement"] src loc
+    ParserError file err ->
+      pure ("In file \"" <> Text.pack file <> "\":\n\n" <> Text.pack (errorBundlePretty err))
+    e ->
+      -- TODO
+      error (show e)
 
 preflightPhase :: (MonadIO m) => Pass Metadata m [FilePath] [Module Metadata Kind ()]
 preflightPhase = do
@@ -2522,10 +2527,32 @@ mainPhase = typePhase
 -- expandWhereClausesModule
 
 pipeline :: (MonadIO m) => Pass Metadata m [FilePath] [Module Metadata Kind ()]
-pipeline = preflightPhase >-> mapPass mainPhase
+pipeline = preflightPhase -- >-> mapPass mainPhase
 
 main127 :: IO (Either CompilerFailureMode [Module Metadata Kind ()], CompilerState Metadata, [CompilerError Metadata])
 main127 = do
   runCompiler
     [ "./test/Coal/examples/127/Main.coal"
     ]
+
+main129 :: IO (Either CompilerFailureMode [Module Metadata Kind ()], CompilerState Metadata, [CompilerError Metadata])
+main129 = do
+  runCompiler
+    [ "./test/Coal/examples/129/Main.coal"
+    , "./test/Coal/examples/129/Utils.coal"
+    , "./test/Coal/examples/129/List.coal"
+    ]
+
+main129_ = do
+  res <- main129
+  let (Right r, _, _) = res
+  liftIO $ forM_ (modulePathName <$> r) Text.putStrLn 
+
+main130 :: IO (Either CompilerFailureMode [Module Metadata Kind ()], CompilerState Metadata, [CompilerError Metadata])
+main130 = do
+  runCompiler
+    [ "./test/Coal/examples/130/Main.coal"
+    , "./test/Coal/examples/130/Utils.coal"
+    , "./test/Coal/examples/130/List.coal"
+    ]
+

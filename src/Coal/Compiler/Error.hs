@@ -13,7 +13,7 @@ import Extra (Name)
 --  deriving (Show, Eq, Ord, Read)
 
 data CompilerError a
-  = ParserError ParserError
+  = ParserError FilePath ParserError
   | MisplacedImportStatement Name a
   | TODO
   deriving (Show, Eq)

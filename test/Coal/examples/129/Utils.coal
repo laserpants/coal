@@ -1,0 +1,5 @@
+module Utils {
+
+  let a : int32 = 1
+  
+}

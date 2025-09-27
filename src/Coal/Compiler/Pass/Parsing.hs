@@ -14,7 +14,6 @@ import Coal.Parser.Module (parseModule)
 import Control.Monad.Except (throwError)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Data.Either (partitionEithers)
-import Data.Text (Text)
 import qualified Data.Text as Text
 import Extra (forM_)
 import Text.Megaparsec (runParser)
@@ -28,22 +27,20 @@ passParsing =
 
 pass :: (MonadIO m) => [FilePath] -> CompilerT Metadata m [Module Metadata Kind ()]
 pass files = do
-  contents <- liftIO (traverse readFile files)
-  results <- traverse (parseFile . Text.pack) contents
+  results <- traverse parseFile files
   case partitionEithers results of
     ([], bundle) ->
       pure bundle
     (es, _) -> do
-      forM_ es (\e -> tellErrors [ParserError e])
+      forM_ es (\(file, e) -> tellErrors [ParserError file e])
       throwError ParserFailure
 
-parseFile :: (Monad m) => Text -> CompilerT Metadata m (Either ParserError (Module Metadata Kind ()))
-parseFile src = setSource >> pure r
- where
-  r = runParser parseModule "" src
-  setSource =
-    case r of
-      Left{} ->
-        pure ()
-      Right module_ -> do
-        setVerbatimSourceForC module_ src
+parseFile :: (MonadIO m) => FilePath -> CompilerT Metadata m (Either (FilePath, ParserError) (Module Metadata Kind ()))
+parseFile file = do
+  src <- Text.pack <$> liftIO (readFile file)
+  case runParser parseModule "" src of
+    Left err ->
+      pure $ Left (file, err)
+    Right module_ -> do
+      setVerbatimSourceForC module_ src
+      pure $ Right module_
