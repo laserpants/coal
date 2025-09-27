@@ -45,7 +45,7 @@ A distinction is made between ordinary, finite data, which is produced and consu
 
 In this code, the `@` in the field name causes the expression on the right (`n + 1`) to become the next seed value, which is fed back into `enum_from` to generate the rest of the stream.
 
-These examples show two distinct modes of recursive control flow. If you are familiar with [recursion schemes](https://blog.sumtypeofway.com/posts/introduction-to-recursion-schemes.html) in a language like Haskell, recursion in Coal is based on the same principles. In that framework, `fold` and `unfold` are called *catamorphisms* and *anamorphisms*. Scroll down to **Recursion, corecursion, and codata** for a more detailed explanation of how these constructs work in Coal.
+These code snippets exemplify two distinct modes of recursive control flow. If you are familiar with [recursion schemes](https://blog.sumtypeofway.com/posts/introduction-to-recursion-schemes.html) in a language like Haskell, recursion in Coal is based on the same principles. In that framework, `fold` and `unfold` are called *catamorphisms* and *anamorphisms*. Scroll down to **Recursion, corecursion, and codata** for a more detailed explanation of how these constructs work in Coal.
 
 ### Programs = Expressions + Effects
 
@@ -293,7 +293,7 @@ Integer literals introduced in code without an explicit type annotation, such as
 let answer = 42
 ```
 
-&hellip; are polymorphic. Their inferred type is `n with Numeric(n)`, which isn't an ordinary type. It means that `n` can be *any* type, as long as it is a member of the `Numeric` trait (see **Traits**). 
+are polymorphic. Their inferred type is `n with Numeric(n)`, which isn't an ordinary type. It means that `n` can be *any* type, as long as it is a member of the `Numeric` trait (see **Traits**). 
 This includes the built-in `int32`, `int64`, `bignum`, and `nat` types. All `Numeric` types support the basic arithmetic operations of addition, subtraction, and multiplication.
 
 ```
@@ -404,14 +404,14 @@ let { baz = { f = a | _ } } = faz(4)
 ###### Name binding semantics
 
 A subtle but important detail that makes let-bindings in Coal different from those in most other languages is that the identifier introduced by a `let` is **not in scope within the definition itself**. In other words, `let x = e1 in e2` makes `x` available in `e2`, but not in `e1`. In OCaml (and F#) this is also the case for the standard `let` keyword. However, in these languages, a special `let rec` syntax makes it possible to evade this restriction. Coal doesn't have an equivalent to `let rec`.
-This prevents non-well-founded expressions, such as `let f = f in f`, but more generally makes explicit recursion impossible (i.e., for any function to reference itself).
+This prevents non-well-founded expressions, such as `let f = f in f`, but more generally, makes it impossible for any function to refer to itself. 
 The restriction also applies to top-level definitions. As far as the compiler is concerned, this function:
 
 ```
 fun fib(n) = if (n == 0 || n == 1) then n else fib(n - 1) + fib(n - 2)
 ```
 
-&hellip; (defined at the top level) translates into:
+(defined at the top level) translates into:
 
 ```
 let fib = fn(n) => if (n == 0 || n == 1) then n else fib(n - 1) + fib(n - 2)
@@ -433,7 +433,7 @@ In fact, one can think of a module as one big let-binding, only laid out in a mo
                   ...
 ```
 
-This is why functions such as the fibonacci function above are rejected by the compiler. 
+This is why functions such as the fibonacci function above are straight out rejected by the compiler. 
 
 #### Lambda expressions
 
@@ -772,7 +772,7 @@ TODO
 
 #### Option
 
-The `Option` type is a built-in algebraic data type that represents *optional* values &mdash; values that may or may not be present.
+The `Option` type is a built-in algebraic data type that represents *optional* values &mdash; values that may or may not be present. This type is called `Maybe` in Haskell and is similar to `Option` in languages like Rust or Scala. 
 
 ```
 type Option<a>
@@ -780,17 +780,7 @@ type Option<a>
   | None
 ```
 
-This type is called `Maybe` in Haskell and is similar to `Option` in languages like Rust or Scala.
-
-Why do we need this type:
-To ensure that all functions are total, match statements always need to be exhaustive, meaning that the list of pattern clauses covers all possible cases. 
-
-The compiler will check this condition and fail with an error if it is not met. 
-
-A consequence of this is that we cannot define a function `head` that returns the first element of a list, in general. 
-Let's think about what such a function would look like, and why it fails to be total:
-
-A good example is the `head` function on lists. We might try to define it like this:
+Since `match` statements in Coal need to be exhaustive, `Option` is useful to express the fact that a value cannot be produced in certain cases. For example, let’s say that we are trying to define a function `head`, returning the first element of a list:
 
 ```
   fun head(list : List<a>) : a =
@@ -806,12 +796,11 @@ The type of this function would be:
 head : List<a> -> a
 ```
 
-This function's type can be described as `∀a : List(a) -> a`. It reads as: Given any type `a` and a list of elements of this type, return an a value. 
-That is to say; we know nothing about `a`, except that the list's elements has this type. 
-But if the input list is empty, then we have nothing to look at. The head function provided by the standard List package solves this problem by instead returning a value wrapped in an `Option` type:
+We can read this type as: Given any type `a` and a list of elements of this type, return an `a` value. That is to say; we know nothing about `a`, except that the list's elements has this type. 
+Therefore, if the input list is empty, then we have nothing to look at. `Option` solves this problem. The `head` function provided by the stanard `List` package is defined in the following way: 
 
 ```
-  fun head(list : List(a)) : Option(a) =
+  fun head(list : List<a>) : Option<a> =
     match(list) {
       | head :: _ => Some(head)
       | [] => None
