@@ -15,6 +15,7 @@ import Extra (Name)
 data CompilerError a
   = ParserError FilePath ParserError
   | MisplacedImportStatement Name a
+  | ModuleNotFound Name
   | TODO
   deriving (Show, Eq)
 
