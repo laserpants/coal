@@ -26,5 +26,5 @@ parseModule = do
   Module . Path
     <$> parseModulePath
     <*> parseModuleExports
-    <*> braces (some parseDefinition)
+    <*> braces (many parseDefinition)
     <* eof

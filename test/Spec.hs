@@ -2497,10 +2497,10 @@ runTestBuild = do
 runCompiler :: [FilePath] -> IO (Either CompilerFailureMode [Module Metadata Kind ()], CompilerState Metadata, [CompilerError Metadata])
 runCompiler files = do
   r@(_, CompilerState{..}, es) <- runCompilerT emptyCompilerEnvironment (runPass preflightPhase files)
---  forM_ es $
---    \err -> do
---      t <- prettyError compilerVerbatimSource err
---      Text.putStrLn t
+  forM_ es $
+    \err -> do
+      t <- prettyError compilerVerbatimSource err
+      Text.putStrLn t
   pure r
 
 errorMessage :: [Text] -> Environment Text -> ErrorLocation Metadata -> IO Text
@@ -2566,4 +2566,12 @@ main130 = do
     [ "./test/Coal/examples/130/Main.coal"
     , "./test/Coal/examples/130/Utils.coal"
     , "./test/Coal/examples/130/List.coal"
+    ]
+
+main131 :: IO (Either CompilerFailureMode [Module Metadata Kind ()], CompilerState Metadata, [CompilerError Metadata])
+main131 = do
+  runCompiler
+    [ "./test/Coal/examples/131/Main.coal"
+    , "./test/Coal/examples/131/Utils.coal"
+    , "./test/Coal/examples/131/List.coal"
     ]
