@@ -97,7 +97,7 @@ spec = do
   x <- main11
   print ("11", x == Right "Covfefe\n")
   x <- main12
-  print (x == Right "bork bork bork\n")
+  print (x == Right "errorMessage errorMessage errorMessage\n")
   a <- isLeft <$> main13
   print a
   a <- isLeft <$> main14
@@ -2503,22 +2503,26 @@ runCompiler files = do
       Text.putStrLn t
   pure r
 
+errorMessage :: [Text] -> Environment Text -> ErrorLocation Metadata -> IO Text
+errorMessage msg env (ErrorLocation path loc) =
+  case Environment.lookup path env of
+    Just src ->
+      pure $ prettyErrorMessage msg src loc
+    _ ->
+      error "Implementation error"
+
 prettyError :: Environment Text -> CompilerError Metadata -> IO Text
-prettyError src =
+prettyError env =
   \case
-    MisplacedImportStatement (ErrorLocation path loc) -> do
-      case Environment.lookup path src of
-        Just src ->
-          pure $ prettyErrorMessage ["Misplaced import statement"] src loc
     ParserError file err ->
       pure ("In file \"" <> Text.pack file <> "\":\n\n" <> Text.pack (errorBundlePretty err))
-    ModuleNotFound name (ErrorLocation path loc) -> do
-      case Environment.lookup path src of
-        Just src ->
-          pure $ prettyErrorMessage ["No such module: " <> name] src loc
-    e ->
-      -- TODO
-      error (show e)
+    MisplacedImportStatement errl -> do
+      errorMessage ["Misplaced import statement"] env errl
+    ModuleNotFound name errl ->
+      errorMessage ["No such module: " <> name] env errl
+--    e ->
+--      -- TODO
+--      error (show e)
 
 preflightPhase :: (MonadIO m) => Pass Metadata m [FilePath] [Module Metadata Kind ()]
 preflightPhase = do
