@@ -15,6 +15,7 @@ module Coal.Common.Environment (
   filter,
   filterNames,
   names,
+  union,
 ) where
 
 import qualified Data.Map.Strict as Map
@@ -86,3 +87,7 @@ elems = Map.elems . envDictionary
 {-# INLINE names #-}
 names :: Environment a -> [Name]
 names = Map.keys . envDictionary
+
+{-# INLINE union #-}
+union :: Environment a -> Environment a -> Environment a
+union (Environment e1) (Environment e2) = Environment (e1 `Map.union` e2)

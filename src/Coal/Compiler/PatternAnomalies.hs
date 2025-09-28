@@ -1,15 +1,23 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
 module Coal.Compiler.PatternAnomalies where
 
 import Coal.Common.Environment (Environment (..))
+import qualified Coal.Common.Environment as Environment
 import Coal.Language.Primitive (Primitive (..))
 import Control.Monad.Reader (MonadReader, ask)
-import Extra (Name)
+import Data.Maybe (fromMaybe)
+import Data.Set (Set)
+import qualified Data.Set as Set
+import Extra (Name, (<$$>))
 
-type AnomaliesEnvironment = Environment [Name]
+type AnomaliesEnvironment = Environment (Set Name)
+
+anomaliesEnvironment :: [(Name, [Name])] -> AnomaliesEnvironment
+anomaliesEnvironment = Environment.fromList . (Set.fromList <$$>)
 
 data Pat
   = Con Name [Pat]
@@ -89,9 +97,23 @@ isUseful px@(ps : _) qs =
 
 isComplete :: (MonadReader AnomaliesEnvironment m) => [Name] -> m Bool
 isComplete [] = pure False
-isComplete names = do
+isComplete names@(name : _) = do
   defined <- ask
-  undefined
+  let constructors = defined `Environment.union` builtIn
+      set_ = fromMaybe mempty (Environment.lookup name constructors)
+  pure (Set.fromList names == set_)
+ where
+  builtIn =
+    anomaliesEnvironment
+      [ ("%True", ["%True", "%False"])
+      , ("%False", ["%True", "%False"])
+      , ("%()", ["%()"])
+      , ("%Int", [])
+      , ("%Integer", [])
+      , ("%Float", [])
+      , ("%Char", [])
+      , ("%String", [])
+      ]
 
 --        (Fix (ConP name rs):_, _) ->
 --            let special = specialized name (length rs)
