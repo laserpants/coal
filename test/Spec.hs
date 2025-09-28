@@ -60,6 +60,7 @@ import Text.Megaparsec (eof, errorBundlePretty, runParser)
 import Text.RawString.QQ
 
 import qualified Coal.Common.Environment as Environment
+import Coal.Compiler.PatternAnomaliesSpec (patternAnomaliesSpec)
 import qualified Coal.Kernel.Compiler as Kernel
 import qualified Coal.Kernel.Language as Kernel
 import qualified Data.Map.Strict as Map
@@ -71,6 +72,7 @@ unitSpec :: SpecWith ()
 unitSpec =
   describe "Unit tests" $ do
     typeSystemSpec
+    patternAnomaliesSpec
 
 spec :: IO ()
 spec = do

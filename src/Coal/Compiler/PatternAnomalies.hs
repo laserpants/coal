@@ -8,7 +8,9 @@ module Coal.Compiler.PatternAnomalies where
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Language.Primitive (Primitive (..))
+import Control.Monad.Extra (anyM)
 import Control.Monad.Reader (MonadReader, ask)
+import Data.Function ((&))
 import Data.Maybe (fromMaybe)
 import Data.Set (Set)
 import qualified Data.Set as Set
@@ -25,8 +27,11 @@ data Pat
   | Any
   deriving (Show, Eq, Ord, Read)
 
-specialized :: Int -> Name -> [[Pat]] -> [[Pat]]
-specialized a name = concatMap go
+exhaustive :: (MonadReader AnomaliesEnvironment m) => [Pat] -> m Bool
+exhaustive ps = not <$> isUseful ((: []) <$> ps) [Any]
+
+specialized :: Name -> Int -> [[Pat]] -> [[Pat]]
+specialized name a = concatMap go
  where
   go [] =
     error "Implementation error"
@@ -88,12 +93,16 @@ isUseful px@(ps : _) qs =
     ([], _) ->
       error "Implementation error in pattern anomalies check"
     -- Pattern q_1 is a constructed pattern
-    (Con name rs : _, _) -> do
-      undefined
-      undefined
+    (Con name rs : _, _) ->
+      go name (length rs)
     (_ : qs1, _) -> do
-      let cs = headCons px
-      undefined
+      complete <- isComplete (fst <$> cs)
+      if complete
+        then cs & anyM (uncurry go)
+        else isUseful (defaultMatrix px) qs1
+ where
+  cs = headCons px
+  go name n = isUseful (specialized name n px) (head (specialized name n [qs]))
 
 isComplete :: (MonadReader AnomaliesEnvironment m) => [Name] -> m Bool
 isComplete [] = pure False
@@ -108,22 +117,11 @@ isComplete names@(name : _) = do
       [ ("%True", ["%True", "%False"])
       , ("%False", ["%True", "%False"])
       , ("%()", ["%()"])
-      , ("%Int", [])
-      , ("%Integer", [])
+      , ("%Int32", [])
+      , ("%Int64", [])
+      , ("%Bignum", [])
       , ("%Float", [])
+      , ("%Double", [])
       , ("%Char", [])
       , ("%String", [])
       ]
-
---        (Fix (ConP name rs):_, _) ->
---            let special = specialized name (length rs)
---             in useful (special px) (head (special [qs]))
---
---        (_:qs1, _) -> do
---            cs <- headCons px
---            isComplete <- complete (fst <$> cs)
---            if isComplete
---                then cs & anyM (\con ->
---                    let special = uncurry specialized con
---                     in useful (special px) (head (special [qs])))
---                else useful (defaultMatrix px) qs1
