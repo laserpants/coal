@@ -45,6 +45,7 @@ library
       Coal.Compiler.Pass.Setup
       Coal.Compiler.Pass.TopologicalSort
       Coal.Compiler.Pass.TypeImports
+      Coal.Compiler.PatternAnomalies
       Coal.Compiler.PatternMatching
       Coal.Compiler.PatternMatching.Compiler
       Coal.Compiler.PatternMatching.Envelope
