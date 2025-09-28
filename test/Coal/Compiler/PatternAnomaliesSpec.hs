@@ -78,14 +78,14 @@ example9 =
       (PConstructor () (Label () "Cons") [PAny () (), PAny () ()])
   ]
 
-example10 :: [Pattern () ()] 
+example10 :: [Pattern () ()]
 example10 =
   [ PConstructor () (Label () "Cons") [PVariable () (Label () "x"), PConstructor () (Label () "Cons") [PVariable () (Label () "y"), PVariable () (Label () "ys")]]
   , PConstructor () (Label () "Cons") [PAny () (), PAny () ()]
   , PAny () ()
   ]
 
-example11 :: [Pattern () ()] 
+example11 :: [Pattern () ()]
 example11 =
   [ PAny () ()
   ]

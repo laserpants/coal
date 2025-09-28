@@ -21,6 +21,7 @@ import Coal.Compiler.Transform.Pattern.AsDesugar
 import Coal.Compiler.Transform.Pattern.Desugar
 import Coal.Compiler.Transform.Pattern.OrExpansion
 import Coal.Compiler.Transform.Pattern.RecordDesugar
+import Coal.Compiler.Transform.PatternExhaustiveCheck
 import Coal.Compiler.Transform.Type.AliasExpansion (AliasContext (..))
 import Coal.Compiler.Transform.Unfold
 import Coal.Compiler.TypeInference
@@ -138,6 +139,7 @@ mainPass =
     -- Compile as-patterns
     >=> pure . desugarAsPatterns
     >=> writeDotFilesC "as_patterns"
+    >=> patternExhaustiveCheck
     -- Compile match statements
     >=> compileMatchExprs
     >=> writeDotFilesC "match_exprs"
