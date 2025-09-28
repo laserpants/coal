@@ -139,7 +139,7 @@ An `import` statement is used to bring in functions and other definitions from o
 import List(concat, head, tail)
 ```
 
-A *namespace* import allows you to access all functions, types, and other definitions from a module using their qualified names. A qualified name is formed by prefixing the name with the path of the module:
+A *namespace* import allows you to access all functions, types, and other definitions from a module via their qualified names. A qualified name is formed by prefixing the name with the path of the module:
 
 ```
 // Import the List module under its namespace
@@ -517,6 +517,8 @@ This is where the `unit` type comes in handy:
 ```
 fun five(() : unit) : int32 = 5
 ```
+
+###### Two for the price of one
 
 Removing the type annotation, the above becomes `fun five(()) = 5`, which is perfectly valid. But since an expression like `five()` doesn't have any other meaningful interpretation, the compiler accepts this as a shorthand for the slightly awkward double-parentheses.
 
