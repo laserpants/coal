@@ -45,7 +45,7 @@ A distinction is made between ordinary, finite data, which is produced and consu
 
 In this code, the `@` in the field name causes the expression on the right (`n + 1`) to become the next seed value, which is fed back into `enum_from` to generate the rest of the stream.
 
-These code snippets exemplify two distinct modes of recursive control flow. If you are familiar with [recursion schemes](https://blog.sumtypeofway.com/posts/introduction-to-recursion-schemes.html) in a language like Haskell, recursion in Coal is based on the same principles. In that framework, `fold` and `unfold` are called *catamorphisms* and *anamorphisms*. Scroll down to **Recursion, corecursion, and codata** for a more detailed explanation of how these constructs work in Coal.
+These code snippets illustrate two distinct modes of recursive control flow. If you are familiar with [recursion schemes](https://blog.sumtypeofway.com/posts/introduction-to-recursion-schemes.html) in a language like Haskell, recursion in Coal is based on the same principles. In that framework, `fold` and `unfold` are called *catamorphisms* and *anamorphisms*. Scroll down to **Recursion, corecursion, and codata** for a more detailed explanation of how these constructs work in Coal.
 
 ### Programs = Expressions + Effects
 
@@ -176,7 +176,7 @@ A type annotion can be given to indicate a function's return type; as in the fol
     n % 2 == 0
 ```
 
-#### Other expressions
+#### Let-expressions
 
 Expressions that are not functions can also be defined in this scope, using the `let` keyword:
 
@@ -683,7 +683,7 @@ type List<a>
 
 Here `::` is the *cons*-operator, which constructs a new list by prepending an element to an existing list.
 
-Lists can be deconstructed using pattern matching. For example, the following function removes the first element of a list if it is zero:
+Lists can be deconstructed using pattern matching. For example, the following function removes the first element from a list if it happens to be a zero:
 
 ```
   fun remove_head_if_zero(list) = 
@@ -698,7 +698,7 @@ Lists can be deconstructed using pattern matching. For example, the following fu
 
 This style of unpacking data is common with all algebraic data types (see **Pattern matching**).
 
-You can also match lists using literal patterns:
+You can also match lists using literal patterns. The following example matches a list of exactly three elements and checks if they form a [Pythagorean triple](https://en.wikipedia.org/wiki/Pythagorean_triple):
 
 ```
   fun is_pythagorean(numbers) =
@@ -711,8 +711,6 @@ You can also match lists using literal patterns:
           false
     }
 ```
-
-This example matches a list of exactly three elements and checks if they form a [Pythagorean triple](https://en.wikipedia.org/wiki/Pythagorean_triple).
 
 ##### Common list operations
 
@@ -735,6 +733,8 @@ Since lists are implemented as chains of linked nodes, the time complexity of ma
 - `head` returns the first element of a list, wrapped in an `Option` (described below) to account for the empty list.
 - `tail` returns all elements except the first, also as an `Option`.
 - `uncons` combines the two: it returns both the head and tail as a tuple, or `None` if the list is empty. In a sense, it undoes what the cons (`::`) constructor does.
+
+Unlike `length`, these functions take constant (O(1)) time.
 
 ```
 head : List<a> -> Option<a>
@@ -1180,8 +1180,8 @@ The result is the same as ...
 ```
 
 There are specific rules for how this pattern can be used.
-Most importantly, it can only appear inside a constructor. 
-For recursion to be well-defined, progress must be guaranteed in each iterative step. 
+Most importantly, an `@`-pattern can only appear inside a constructor. 
+For recursion to be well-founded, progress must be guaranteed in each iterative step. 
 The constructor rule is how this is enforced by the language. 
 The data inside of the constructor is structurally smaller 
 
