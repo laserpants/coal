@@ -1,0 +1,7 @@
+module Main {
+
+  fun main() =
+    let (x :: xs) = ["a", "b"]
+     in trace_int32(1)
+
+}
