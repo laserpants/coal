@@ -7,8 +7,10 @@ module Coal.Compiler.PatternAnomalies where
 
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
+import Coal.Common.Label (Label (..))
+import Coal.Language.Pattern (Pattern (..))
 import Coal.Language.Primitive (Primitive (..))
-import Control.Monad.Extra (anyM)
+import Control.Monad.Extra (anyM, (||^))
 import Control.Monad.Reader (MonadReader, ask)
 import Data.Function ((&))
 import Data.Maybe (fromMaybe)
@@ -24,6 +26,7 @@ anomaliesEnvironment = Environment.fromList . (Set.fromList <$$>)
 data Pat
   = Con Name [Pat]
   | Lit Primitive
+  | Or Pat Pat
   | Any
   deriving (Show, Eq, Ord, Read)
 
@@ -40,6 +43,8 @@ specialized name a = concatMap go
       Con name' rs
         | name' == name -> [rs <> ps]
         | otherwise -> []
+      Or r1 r2 ->
+        specialized name a [r1 : ps, r2 : ps]
       _ ->
         [replicate a Any <> ps]
 
@@ -52,6 +57,8 @@ defaultMatrix = concatMap go
         []
       Lit{} ->
         []
+      Or r1 r2 ->
+        [r1 : ps, r2 : ps]
       _ ->
         [ps]
   go [] =
@@ -67,6 +74,8 @@ headCons = concatMap go
         [(prim p, 0)]
       Con name rs ->
         [(name, length rs)]
+      Or r1 r2 ->
+        go [r1] <> go [r2]
       _ ->
         []
 
@@ -95,6 +104,8 @@ isUseful px@(ps : _) qs =
     -- Pattern q_1 is a constructed pattern
     (Con name rs : _, _) ->
       go name (length rs)
+    (Or r1 r2 : _, _) ->
+      isUseful px (r1 : qs) ||^ isUseful px (r2 : qs)
     (_ : qs1, _) -> do
       complete <- isComplete (fst <$> cs)
       if complete
@@ -124,4 +135,40 @@ isComplete names@(name : _) = do
       , ("%Double", [])
       , ("%Char", [])
       , ("%String", [])
+      , ("::", ["::", "[]"])
+      , ("[]", ["::", "[]"])
       ]
+
+translatePattern :: Pattern a t -> Pat
+translatePattern =
+  \case
+    PAnnotation _ _ p ->
+      translatePattern p
+    PAny{} ->
+      Any
+    PVariable{} ->
+      Any
+    PConstructor _ (Label _ name) ps ->
+      Con name (translatePattern <$> ps)
+    PLiteral _ p ->
+      Lit p
+    PRecord{} ->
+      error "TODO"
+    PListCons _ _ p q ->
+      Con "::" [translatePattern p, translatePattern q]
+    PListLiteral _ _ ps ->
+      foldr (\p q -> Con "::" [translatePattern p, q]) (Con "[]" []) ps
+    PTuple _ _ ps ->
+      error "TODO"
+    POr _ _ p q ->
+      Or (translatePattern p) (translatePattern q)
+    PAs _ _ p ->
+      translatePattern p
+    PShorthand _ _ ->
+      error "TODO"
+    PAtVariable _ _ ->
+      error "TODO"
+    PNamedFold{} ->
+      error "TODO"
+    PTraitDictionary{} ->
+      error "TODO"
