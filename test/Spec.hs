@@ -286,6 +286,10 @@ spec = do
   print (isLeft a)
   x <- main133
   print (x == Right "123\n")
+  x <- main134
+  print (x == Right "321\n")
+  a <- isLeft <$> main135
+  print a
 
 --  x <- main85
 --  print (x == Right "aa\n")
@@ -309,6 +313,8 @@ runTestFiles files = do
     Left err@(CompilerError msg) -> do
       --      liftIO $ Text.putStrLn msg
       pure (Left err)
+    Left e -> do
+      pure (Left e)
     Right{} ->
       Right <$> runTestBuild
 

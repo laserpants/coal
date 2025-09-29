@@ -26,5 +26,6 @@ data CompilerError a
 data CompilerFailureMode
   = ParserFailure
   | PreflightFailure
+  | PatternAnomaly
   | CompilerError Text
   deriving (Show, Eq, Ord, Read)

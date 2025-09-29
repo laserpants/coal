@@ -1,5 +1,6 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
 module Coal.Compiler.Transform.PatternExhaustiveCheck (PatternExhaustiveCheckContext (..), patternExhaustiveCheckM) where
@@ -15,12 +16,18 @@ import Coal.Language.Expression.Choice (Choice (..), Guard (..))
 import Coal.Language.Module
 import Coal.Language.Pattern (Pattern (..))
 import Control.Monad (unless)
+import Control.Monad.Except (throwError)
 import Data.List.NonEmpty (NonEmpty)
 import qualified Data.List.NonEmpty as NonEmpty
 import Extra (Name)
 
 patternExhaustiveCheckM :: (Monad m) => Module Metadata k t -> CompilerT Metadata m (Module Metadata k t)
-patternExhaustiveCheckM m = overModuleDefinitionsM (traverse (patternExhaustiveCheck (modulePathName m))) m
+patternExhaustiveCheckM m = do
+  (m', es) <-
+    listenErrors $
+      overModuleDefinitionsM (traverse (patternExhaustiveCheck (modulePathName m))) m
+  unless (null es) (throwError PatternAnomaly)
+  pure m'
 
 class PatternExhaustiveCheckContext c where
   patternExhaustiveCheck :: (Monad m) => Name -> c -> CompilerT Metadata m c
@@ -184,7 +191,6 @@ checkExhaustive name loc cs = do
   isExhaustive <- exhaustive patterns
   unless isExhaustive $ do
     tellErrors [NonExhaustivePatterns (ErrorLocation name loc)]
-    error ("NonExhaustivePatterns" <> show patterns)
   pure cs
  where
   patterns = NonEmpty.toList (translatePattern . clausePattern <$> cs)
