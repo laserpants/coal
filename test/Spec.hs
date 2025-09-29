@@ -284,6 +284,8 @@ spec = do
   print (r == ["Utils", "List", "Main"])
   (a, _, _) <- main130
   print (isLeft a)
+  a <- isLeft <$> main132
+  print a
   x <- main133
   print (x == Right "123\n")
   x <- main134
