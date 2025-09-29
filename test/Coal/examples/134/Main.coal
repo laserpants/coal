@@ -1,0 +1,11 @@
+module Main {
+
+  fun main() =
+    match((true, "b")) {
+      | (false, _) =>
+          trace_int32(123)
+      | (true, _) =>
+          trace_int32(321)
+    }
+
+}
