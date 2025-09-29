@@ -123,7 +123,7 @@ isComplete names@(name : _) = do
   defined <- asks (mapEnvironment snd . compilerDataConstructorEnvironment)
   let constructors = defined `Environment.union` builtIn
       set_ =
-        if "$Tuple" `Text.isPrefixOf` name
+        if "%Tuple" `Text.isPrefixOf` name
           then Set.singleton name
           else fromMaybe mempty (Environment.lookup name constructors)
   pure (Set.fromList names == set_)
@@ -167,7 +167,7 @@ translatePattern =
     PListLiteral _ _ ps ->
       foldr listCons (Con "[]" []) ps
     PTuple _ _ ps ->
-      Con ("$Tuple" <> showt (length ps)) (translatePattern <$> NonEmpty.toList ps)
+      Con ("%Tuple" <> showt (length ps)) (translatePattern <$> NonEmpty.toList ps)
     POr _ _ p q ->
       Or (translatePattern p) (translatePattern q)
     PAs _ _ p ->
