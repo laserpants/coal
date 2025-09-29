@@ -45,8 +45,8 @@ specialized name a = concatMap go
       Con name' rs
         | name' == name -> [rs <> ps]
         | otherwise -> []
-      Lit p ->
-        go (Con (prim p) [] : ps)
+      Lit l ->
+        go (Con (prim l) [] : ps)
       Or r1 r2 ->
         specialized name a [r1 : ps, r2 : ps]
       _ ->
@@ -108,8 +108,8 @@ isUseful px@(ps : _) qs =
     -- Pattern q_1 is a constructed pattern
     (Con name rs : _, _) ->
       go name (length rs)
-    (Lit p : _, _) ->
-      go (prim p) 0
+--    (Lit p : _, _) ->
+--      go (prim p) 0
     (Or r1 r2 : _, _) ->
       isUseful px (r1 : qs) ||^ isUseful px (r2 : qs)
     (_ : qs1, _) -> do
