@@ -3,7 +3,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.PatternAnomalies where
+module Coal.Compiler.PatternAnomalies (Pat (..), exhaustive, translatePattern) where
 
 import Coal.Common.Environment (Environment (..), mapEnvironment)
 import qualified Coal.Common.Environment as Environment
