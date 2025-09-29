@@ -653,8 +653,7 @@ Converting back and forth between these are constant time (**O**(1)) operations.
 
 #### Lists
 
-A *list* is an ordered collection in which all elements share the same type. Lists are one of the most fundamental data structures in functional programming. 
-They are commonly used to store and manipulate collections of data, and serve as a building block for many higher-level abstractions.
+A *list* is an ordered collection in which all elements share the same type. Lists are one of the most fundamental data structures in functional programming. They are commonly used to store and manipulate collections of data, and serve as a building block for many higher-level abstractions.
 
 In Coal, list literals are written as a sequence of comma-separated expressions enclosed in square brackets:
 
@@ -673,7 +672,7 @@ Lists are defined inductively and implemented internally as a *singly linked lis
 1. the empty list `[]`; or
 2. a value of type `a` (the *head*) followed by another list of type `List<a>` (the *tail*).
 
-Formally:
+In pseudo-code:
 
 ```
 type List<a>
@@ -726,7 +725,7 @@ Its type is:
 length : List<a> -> nat
 ```
 
-Since lists are implemented as chains of linked nodes, the time complexity of many list operations, including `length`, is O(n).
+Since lists are implemented in a chain-like manner, the time complexity of many list operations, including `length`, is O(n).
 
 ###### Head, tail, and uncons
 
@@ -734,7 +733,7 @@ Since lists are implemented as chains of linked nodes, the time complexity of ma
 - `tail` returns all elements except the first, also as an `Option`.
 - `uncons` combines the two: it returns both the head and tail as a tuple, or `None` if the list is empty. In a sense, it undoes what the cons (`::`) constructor does.
 
-Unlike `length`, these functions take constant (O(1)) time.
+These functions take constant (O(1)) time.
 
 ```
 head : List<a> -> Option<a>
@@ -943,7 +942,7 @@ tagged(rec : { | r }, t : string) : { tag : string | r } =
   { tag = t | rec }
 ```
 
-These types look a bit different from earlier examples. Here, the pipe (|) also appears at the type level. It serves a similar purpose: combining fields with an existing record type. The type variable `r` represents a *row*, which can be thought of as a type-level list of fields. A record type of this form is called *open*. By contrast, a *closed* record type explicitly lists all its fields.
+These types look a bit different from earlier examples. Here, the pipe (`|`) also appears at the type level. It serves a similar purpose: combining fields with an existing record type. The type variable `r` represents a *row*, which can be thought of as a type-level list of fields. A record type of this form is called *open*. By contrast, a *closed* record type explicitly lists all its fields.
 
 The following example illustrates the difference. Suppose we want to represent GPS coordinates with two fields, `lat` and `lng`:
 
