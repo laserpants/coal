@@ -6,6 +6,7 @@
 
 module Coal.Compiler where
 
+import Coal.Ast.Metadata (Metadata (..))
 import Coal.Compiler.Environment (overCompilerDictionaryNameEnvironment)
 import Coal.Compiler.Kernel.TranslateModule (translateModule)
 import Coal.Compiler.PatternMatching
@@ -124,7 +125,7 @@ typeCheckingPass =
     -- Type inference
     >=> runTypeInferenceC
 
-mainPass :: (Eq a, MonadIO m, Monoid a, Data a, Show a) => Module a Kind IndexedType -> CompilerT a m (Module a Kind IndexedType)
+mainPass :: (MonadIO m) => Module Metadata Kind IndexedType -> CompilerT Metadata m (Module Metadata Kind IndexedType)
 mainPass =
   -- Normalize top-level functions and constants
   pure . normalizeObject
@@ -150,7 +151,7 @@ mainPass =
     -- Expand nats
     >=> compileNats
 
-compileModule :: (MonadIO m, Monoid a, Data a, Eq a, Show a) => Module a Kind () -> CompilerT a m (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))
+compileModule :: (MonadIO m) => Module Metadata Kind () -> CompilerT Metadata m (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))
 compileModule =
   typeCheckingPass
     >=> mainPass

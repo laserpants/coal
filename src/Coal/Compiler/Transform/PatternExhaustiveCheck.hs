@@ -4,6 +4,7 @@
 
 module Coal.Compiler.Transform.PatternExhaustiveCheck (PatternExhaustiveCheckContext (..), patternExhaustiveCheckM) where
 
+import Coal.Ast.Metadata (Metadata (..))
 import Coal.Compiler.Error (CompilerError (..), ErrorLocation (..))
 import Coal.Compiler.Journal
 import Coal.Compiler.PatternAnomalies
@@ -18,13 +19,13 @@ import Data.List.NonEmpty (NonEmpty)
 import qualified Data.List.NonEmpty as NonEmpty
 import Extra (Name)
 
-patternExhaustiveCheckM :: (Monad m) => Module a k t -> CompilerT a m (Module a k t)
+patternExhaustiveCheckM :: (Monad m) => Module Metadata k t -> CompilerT Metadata m (Module Metadata k t)
 patternExhaustiveCheckM m = overModuleDefinitionsM (traverse (patternExhaustiveCheck (modulePathName m))) m
 
 class PatternExhaustiveCheckContext c where
-  patternExhaustiveCheck :: (Monad m) => Name -> c -> CompilerT a m c
+  patternExhaustiveCheck :: (Monad m) => Name -> c -> CompilerT Metadata m c
 
-instance PatternExhaustiveCheckContext (Definition a k t) where
+instance PatternExhaustiveCheckContext (Definition Metadata k t) where
   patternExhaustiveCheck name =
     \case
       DFunction loc n f ws ->
@@ -40,37 +41,37 @@ instance PatternExhaustiveCheckContext (Definition a k t) where
       d ->
         pure d
 
-instance PatternExhaustiveCheckContext (InstanceDef Definition a k t) where
+instance PatternExhaustiveCheckContext (InstanceDef Definition Metadata k t) where
   patternExhaustiveCheck name =
     \case
       InstanceDef ts t ds ->
         InstanceDef ts t <$> traverse (patternExhaustiveCheck name) ds
 
-instance PatternExhaustiveCheckContext (FoldDef a t) where
+instance PatternExhaustiveCheckContext (FoldDef Metadata t) where
   patternExhaustiveCheck name =
     \case
       FoldDef w t e ->
         FoldDef w t <$> traverse (patternExhaustiveCheck name) e
 
-instance PatternExhaustiveCheckContext (UnfoldDef a t) where
+instance PatternExhaustiveCheckContext (UnfoldDef Metadata t) where
   patternExhaustiveCheck name =
     \case
       UnfoldDef w t ps e ->
         UnfoldDef w t ps <$> traverse (patternExhaustiveCheck name) e
 
-instance PatternExhaustiveCheckContext (FunctionDef a t) where
+instance PatternExhaustiveCheckContext (FunctionDef Metadata t) where
   patternExhaustiveCheck name =
     \case
       FunctionDef loc w1 w2 ps e1 ->
         FunctionDef loc w1 w2 ps <$> patternExhaustiveCheck name e1
 
-instance PatternExhaustiveCheckContext (ConstantDef a t) where
+instance PatternExhaustiveCheckContext (ConstantDef Metadata t) where
   patternExhaustiveCheck name =
     \case
       ConstantDef loc w1 w2 e1 ->
         ConstantDef loc w1 w2 <$> patternExhaustiveCheck name e1
 
-instance PatternExhaustiveCheckContext (Binding Expression a t) where
+instance PatternExhaustiveCheckContext (Binding Expression Metadata t) where
   patternExhaustiveCheck name =
     \case
       BPattern a p e ->
@@ -78,7 +79,7 @@ instance PatternExhaustiveCheckContext (Binding Expression a t) where
       BFunction{} ->
         error "TODO"
 
-instance PatternExhaustiveCheckContext (Choice Expression a t) where
+instance PatternExhaustiveCheckContext (Choice Expression Metadata t) where
   patternExhaustiveCheck name =
     \case
       CPlain a gs e ->
@@ -88,19 +89,19 @@ instance PatternExhaustiveCheckContext (Choice Expression a t) where
       CLambda{} ->
         error "Not implemented"
 
-instance PatternExhaustiveCheckContext (Guard Expression a t) where
+instance PatternExhaustiveCheckContext (Guard Expression Metadata t) where
   patternExhaustiveCheck name =
     \case
       CGuard e ->
         CGuard <$> patternExhaustiveCheck name e
 
-instance PatternExhaustiveCheckContext (Clause a t) where
+instance PatternExhaustiveCheckContext (Clause Metadata t) where
   patternExhaustiveCheck name =
     \case
       EClause a p cs ->
         EClause a p <$> traverse (patternExhaustiveCheck name) cs
 
-instance PatternExhaustiveCheckContext (Expression a t) where
+instance PatternExhaustiveCheckContext (Expression Metadata t) where
   patternExhaustiveCheck name =
     \case
       EAnnotation a t e ->
@@ -178,11 +179,11 @@ instance PatternExhaustiveCheckContext (Expression a t) where
       trait@ETraitDictionary{} ->
         pure trait
 
-checkExhaustive :: (Monad m) => Name -> a -> NonEmpty (Clause a t) -> CompilerT b m (NonEmpty (Clause a t))
+checkExhaustive :: (Monad m) => Name -> Metadata -> NonEmpty (Clause Metadata t) -> CompilerT Metadata m (NonEmpty (Clause Metadata t))
 checkExhaustive name loc cs = do
   isExhaustive <- exhaustive patterns
   unless isExhaustive $ do
-    -- tellErrors [NonExhaustivePatterns (ErrorLocation name loc)]
+    tellErrors [NonExhaustivePatterns (ErrorLocation name loc)]
     error ("NonExhaustivePatterns" <> show patterns)
   pure cs
  where
