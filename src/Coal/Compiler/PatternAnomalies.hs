@@ -15,7 +15,6 @@ import Control.Monad.Extra (anyM, (||^))
 import Control.Monad.Reader (asks)
 import Data.Function ((&))
 import qualified Data.List.NonEmpty as NonEmpty
-import Data.Maybe (fromMaybe)
 import Data.Set (Set)
 import qualified Data.Set as Set
 import qualified Data.Text as Text
@@ -108,8 +107,6 @@ isUseful px@(ps : _) qs =
     -- Pattern q_1 is a constructed pattern
     (Con name rs : _, _) ->
       go name (length rs)
---    (Lit p : _, _) ->
---      go (prim p) 0
     (Or r1 r2 : _, _) ->
       isUseful px (r1 : qs) ||^ isUseful px (r2 : qs)
     (_ : qs1, _) -> do

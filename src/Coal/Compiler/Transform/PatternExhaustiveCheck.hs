@@ -16,7 +16,6 @@ import Coal.Language.Pattern (Pattern (..))
 import Control.Monad (unless)
 import Data.List.NonEmpty (NonEmpty)
 import qualified Data.List.NonEmpty as NonEmpty
-import Debug.Trace
 import Extra (Name)
 
 patternExhaustiveCheckM :: (Monad m) => Module a k t -> CompilerT a m (Module a k t)
