@@ -49,6 +49,60 @@ example5 =
   [ Any
   ]
 
+example12 :: [Pat]
+example12 =
+  [ Lit (LBool False)
+  , Lit (LBool True)
+  ]
+
+example13 :: [Pat]
+example13 =
+  [ Con "Fez" [Lit (LBool False), Con "A" []]
+  , Con "Fez" [Lit (LBool True), Con "B" []]
+  ]
+
+example14 :: [Pat]
+example14 =
+  [ Con "Fez" [Lit (LBool False), Con "A" []]
+  , Con "Fez" [Lit (LBool True), Any]
+  ]
+
+example15 :: [Pat]
+example15 =
+  [ Con "Fez" [Lit (LBool False), Any]
+  , Con "Fez" [Lit (LBool True), Con "A" []]
+  ]
+
+example16 :: [Pat]
+example16 =
+  [ Con "Fez" [Con "A" [], Con "A" []]
+  , Con "Fez" [Con "B" [], Any]
+  ]
+
+example17 :: [Pat]
+example17 =
+  [ Con "Fez" [Con "A" [], Con "A" []]
+  , Con "Fez" [Con "B" [], Con "B" []]
+  ]
+
+example18 :: [Pat]
+example18 =
+  [ Con "Fez" [Con "A" [], Any]
+  , Con "Fez" [Con "B" [], Con "A" []]
+  ]
+
+example19 :: [Pat]
+example19 =
+  [ Con "Fez" [Con "A" [], Lit (LBool False)]
+  , Con "Fez" [Con "B" [], Lit (LBool True)]
+  ]
+
+example20 :: [Pat]
+example20 =
+  [ Con "Fez" [Lit (LBool False), Con "A" []]
+  , Con "Fez" [Lit (LBool False), Con "B" []]
+  ]
+
 testEnv :: Environment (DataConstructor TypeIndex Kind IndexedType, Set Name)
 testEnv =
   Environment.fromList
@@ -70,6 +124,36 @@ testEnv =
             0
             (Forall mempty [] (TApplication KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| [])))
         , Set.fromList ["Cons", "Nil"]
+        )
+      )
+    ,
+      ( "A"
+      ,
+        ( DataConstructor
+            "A"
+            0
+            (Forall mempty [] (TConstructor KType "X"))
+        , Set.fromList ["A", "B"]
+        )
+      )
+    ,
+      ( "B"
+      ,
+        ( DataConstructor
+            "B"
+            0
+            (Forall mempty [] (TConstructor KType "X"))
+        , Set.fromList ["A", "B"]
+        )
+      )
+    ,
+      ( "Fez"
+      ,
+        ( DataConstructor
+            "Fez"
+            2
+            (Forall mempty [] (TIntrinsic IBool `TArrow` TConstructor KType "X" `TArrow` TConstructor KType "Fez"))
+        , Set.fromList ["Fez"]
         )
       )
     ]
@@ -141,3 +225,12 @@ patternAnomaliesSpec =
     it "example9" (runTest2 example9)
     it "example10" (runTest2 example10)
     it "example11" (runTest2 example11)
+    it "example12" (runTest example12)
+    it "example13" (not $ runTest example13)
+    it "example14" (not $ runTest example14)
+    it "example15" (not $ runTest example15)
+    it "example16" (not $ runTest example16)
+    it "example17" (not $ runTest example17)
+    it "example18" (not $ runTest example18)
+    it "example19" (not $ runTest example19)
+    it "example20" (not $ runTest example20)

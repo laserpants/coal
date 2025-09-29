@@ -45,6 +45,8 @@ specialized name a = concatMap go
       Con name' rs
         | name' == name -> [rs <> ps]
         | otherwise -> []
+      Lit p ->
+        go (Con (prim p) [] : ps)
       Or r1 r2 ->
         specialized name a [r1 : ps, r2 : ps]
       _ ->
@@ -106,6 +108,8 @@ isUseful px@(ps : _) qs =
     -- Pattern q_1 is a constructed pattern
     (Con name rs : _, _) ->
       go name (length rs)
+    (Lit p : _, _) ->
+      go (prim p) 0
     (Or r1 r2 : _, _) ->
       isUseful px (r1 : qs) ||^ isUseful px (r2 : qs)
     (_ : qs1, _) -> do
@@ -121,25 +125,17 @@ isComplete :: (Monad m) => [Name] -> CompilerT a m Bool
 isComplete [] = pure False
 isComplete names@(name : _) = do
   defined <- asks (mapEnvironment snd . compilerDataConstructorEnvironment)
-  let constructors = defined `Environment.union` builtIn
-      set_ =
-        if "%Tuple" `Text.isPrefixOf` name
-          then Set.singleton name
-          else fromMaybe mempty (Environment.lookup name constructors)
-  pure (Set.fromList names == set_)
+  case Environment.lookup name (defined `Environment.union` builtIn) of
+    Nothing ->
+      pure ("%Tuple" `Text.isPrefixOf` name)
+    Just set_ ->
+      pure (Set.fromList names == set_)
  where
   builtIn =
     anomaliesEnvironment
       [ ("%True", ["%True", "%False"])
       , ("%False", ["%True", "%False"])
       , ("%()", ["%()"])
-      , ("%Int32", [])
-      , ("%Int64", [])
-      , ("%Bignum", [])
-      , ("%Float", [])
-      , ("%Double", [])
-      , ("%Char", [])
-      , ("%String", [])
       , ("::", ["::", "[]"])
       , ("[]", ["::", "[]"])
       , ("Zero", ["Zero", "Succ"])

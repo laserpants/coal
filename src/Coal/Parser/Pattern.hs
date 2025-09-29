@@ -2,13 +2,13 @@
 
 module Coal.Parser.Pattern (parsePattern, parseUnitPattern) where
 
-import qualified Coal.Parser.Primitive as Primitive
 import Coal.Ast.Metadata (Metadata (..), metadataSpan)
 import Coal.Common.Label (Label (..))
 import Coal.Language
 import Coal.Parser
 import Coal.Parser.Identifier
 import Coal.Parser.Metadata
+import qualified Coal.Parser.Primitive as Primitive
 import Coal.Parser.Symbol
 import Coal.Parser.Type (parseType)
 import Coal.Parser.Utils (fieldList)
@@ -84,6 +84,7 @@ parseLiteralPattern :: Parser (Pattern Metadata ())
 parseLiteralPattern =
   parseListLiteralPattern
     <|> parseBasicLiteralPattern
+
 --    <|> parseLiteralTrue
 --    <|> parseLiteralFalse
 --    <|> parseCharLiteralPattern
@@ -92,28 +93,28 @@ parseBasicLiteralPattern :: Parser (Pattern Metadata ())
 parseBasicLiteralPattern = do
   withMetadata $ do
     lit <- Primitive.parseAtom
-    pure (\loc -> PLiteral loc lit)
+    pure (`PLiteral` lit)
 
-parseLiteralTrue :: Parser (Pattern Metadata ())
-parseLiteralTrue =
-  withMetadata $ do
-    lexeme_ "true"
-    pure (\loc -> PLiteral loc (LBool True))
-
-parseLiteralFalse :: Parser (Pattern Metadata ())
-parseLiteralFalse =
-  withMetadata $ do
-    lexeme_ "false"
-    pure (\loc -> PLiteral loc (LBool False))
-
-parseCharLiteralPattern :: Parser (Pattern Metadata ())
-parseCharLiteralPattern =
-  withMetadata $ do
-    lexeme $ do
-      void singleQuote
-      ch <- Lexer.charLiteral
-      void singleQuote
-      pure (\loc -> PLiteral loc (LChar (fromIntegral (ord ch))))
+-- parseLiteralTrue :: Parser (Pattern Metadata ())
+-- parseLiteralTrue =
+--  withMetadata $ do
+--    lexeme_ "true"
+--    pure (\loc -> PLiteral loc (LBool True))
+--
+-- parseLiteralFalse :: Parser (Pattern Metadata ())
+-- parseLiteralFalse =
+--  withMetadata $ do
+--    lexeme_ "false"
+--    pure (\loc -> PLiteral loc (LBool False))
+--
+-- parseCharLiteralPattern :: Parser (Pattern Metadata ())
+-- parseCharLiteralPattern =
+--  withMetadata $ do
+--    lexeme $ do
+--      void singleQuote
+--      ch <- Lexer.charLiteral
+--      void singleQuote
+--      pure (\loc -> PLiteral loc (LChar (fromIntegral (ord ch))))
 
 parseListLiteralPattern :: Parser (Pattern Metadata ())
 parseListLiteralPattern =
