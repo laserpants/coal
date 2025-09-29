@@ -741,34 +741,53 @@ tail : List<a> -> Option<List<a>>
 uncons : List<a> -> Option<(a, List<a>)>
 ```
 
-###### Take and drop
+###### Take, drop and slice
 
-Use take to get another list with the first n elements of the given list:
-take : nat -> List(a) -> List(a)
+Use `take` to get another list with the first *n* elements from a given list:
+
+```
+take : nat -> List<a> -> List<a>
+```
+
 Example:
+
+```
 [1, 2, 3, 4, 5, 6, 7] |.take(3)     // [1, 2, 3]
-Note that, if the list's length is less than the requested number of elements, then take returns the entire list. So, for example, take(5, [1, 2, 3]) returns [1, 2, 3] . take(0) always returns an empty list.
-The function drop removes the first n elements from a list.
-drop : nat -> List(a) -> List(a)
-Example:
-[1, 2, 3, 4, 5, 6, 7] |.drop(3)     // [4, 5, 6, 7]
-If you try to drop a greater number of elements than what the list contains, drop returns an empty list.
+```
 
-slice
-Combining drop and take allows you to obtain a range of elements from within a list:
+Note that, if the list's length is less than the requested number of elements, then `take` returns the entire list. So, for example, `take(5, [1, 2, 3])` returns `[1, 2, 3]`. `take(0)` always returns an empty list.
+
+The function `drop` removes the first *n* elements from a list.
+
+```
+drop : nat -> List(a) -> List(a)
+```
+
+Example:
+
+```
+[1, 2, 3, 4, 5, 6, 7] |.drop(3)     // [4, 5, 6, 7]
+```
+
+If you attempt to drop a greater number of elements than what the list contains, `drop` returns an empty list.
+
+Combining `drop` and `take` allows you to obtain a range of elements from within a list:
+
+```
 [1, 2, 3, 4, 5, 6, 7] 
   |.drop(2)
   |.take(3)
 
 // == [3, 4, 5]
+```
 
-TODO
+The function `slice` does this in a way that allows you to specify the range of elements to keep from the input list:
 
+```
 [1, 2, 3, 4, 5, 6, 7] |.slice(2, 5)
 // == [1, 2, 3, 4, 5, 6, 7] |.drop(2) |.take(5 - 2)
 // == [3, 4, 5]
-
-TODO
+```
 
 #### Option
 
