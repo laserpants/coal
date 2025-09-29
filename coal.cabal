@@ -66,6 +66,7 @@ library
       Coal.Compiler.Transform.Pattern.Desugar
       Coal.Compiler.Transform.Pattern.OrExpansion
       Coal.Compiler.Transform.Pattern.RecordDesugar
+      Coal.Compiler.Transform.PatternExhaustiveCheck
       Coal.Compiler.Transform.Tree
       Coal.Compiler.Transform.Type.AliasExpansion
       Coal.Compiler.Transform.Type.Parameterized

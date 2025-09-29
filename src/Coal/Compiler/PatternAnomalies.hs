@@ -5,22 +5,24 @@
 
 module Coal.Compiler.PatternAnomalies where
 
-import Coal.Common.Environment (Environment (..))
+import Coal.Common.Environment (Environment (..), mapEnvironment)
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
+import Coal.Compiler.Stack
 import Coal.Language.Pattern (Pattern (..))
 import Coal.Language.Primitive (Primitive (..))
 import Control.Monad.Extra (anyM, (||^))
-import Control.Monad.Reader (MonadReader, ask)
+import Control.Monad.Reader (asks)
 import Data.Function ((&))
+import qualified Data.List.NonEmpty as NonEmpty
 import Data.Maybe (fromMaybe)
 import Data.Set (Set)
 import qualified Data.Set as Set
+import qualified Data.Text as Text
 import Extra (Name, (<$$>))
+import TextShow (showt)
 
-type AnomaliesEnvironment = Environment (Set Name)
-
-anomaliesEnvironment :: [(Name, [Name])] -> AnomaliesEnvironment
+anomaliesEnvironment :: [(Name, [Name])] -> Environment (Set Name)
 anomaliesEnvironment = Environment.fromList . (Set.fromList <$$>)
 
 data Pat
@@ -30,7 +32,7 @@ data Pat
   | Any
   deriving (Show, Eq, Ord, Read)
 
-exhaustive :: (MonadReader AnomaliesEnvironment m) => [Pat] -> m Bool
+exhaustive :: (Monad m) => [Pat] -> CompilerT a m Bool
 exhaustive ps = not <$> isUseful ((: []) <$> ps) [Any]
 
 specialized :: Name -> Int -> [[Pat]] -> [[Pat]]
@@ -93,7 +95,7 @@ prim =
     LChar{} -> "%Char"
     LString{} -> "%String"
 
-isUseful :: (MonadReader AnomaliesEnvironment m) => [[Pat]] -> [Pat] -> m Bool
+isUseful :: (Monad m) => [[Pat]] -> [Pat] -> CompilerT a m Bool
 isUseful [] _ = pure True -- zero rows (0x0 matrix)
 isUseful px@(ps : _) qs =
   case (qs, length ps) of
@@ -115,12 +117,15 @@ isUseful px@(ps : _) qs =
   cs = headCons px
   go name n = isUseful (specialized name n px) (head (specialized name n [qs]))
 
-isComplete :: (MonadReader AnomaliesEnvironment m) => [Name] -> m Bool
+isComplete :: (Monad m) => [Name] -> CompilerT a m Bool
 isComplete [] = pure False
 isComplete names@(name : _) = do
-  defined <- ask
+  defined <- asks (mapEnvironment snd . compilerDataConstructorEnvironment)
   let constructors = defined `Environment.union` builtIn
-      set_ = fromMaybe mempty (Environment.lookup name constructors)
+      set_ =
+        if "$Tuple" `Text.isPrefixOf` name
+          then Set.singleton name
+          else fromMaybe mempty (Environment.lookup name constructors)
   pure (Set.fromList names == set_)
  where
   builtIn =
@@ -137,6 +142,9 @@ isComplete names@(name : _) = do
       , ("%String", [])
       , ("::", ["::", "[]"])
       , ("[]", ["::", "[]"])
+      , ("Zero", ["Zero", "Succ"])
+      , ("Succ", ["Zero", "Succ"])
+      , ("$Record", ["$Record"])
       ]
 
 translatePattern :: Pattern a t -> Pat
@@ -157,18 +165,21 @@ translatePattern =
     PListCons _ _ p q ->
       Con "::" [translatePattern p, translatePattern q]
     PListLiteral _ _ ps ->
-      foldr (\p q -> Con "::" [translatePattern p, q]) (Con "[]" []) ps
+      foldr listCons (Con "[]" []) ps
     PTuple _ _ ps ->
-      error "TODO"
+      Con ("$Tuple" <> showt (length ps)) (translatePattern <$> NonEmpty.toList ps)
     POr _ _ p q ->
       Or (translatePattern p) (translatePattern q)
     PAs _ _ p ->
       translatePattern p
     PShorthand _ _ ->
       error "TODO"
-    PAtVariable _ _ ->
-      error "TODO"
+    PAtVariable{} ->
+      Any
     PNamedFold{} ->
       error "TODO"
     PTraitDictionary{} ->
       error "TODO"
+
+listCons :: Pattern a t -> Pat -> Pat
+listCons p q = Con "::" [translatePattern p, q]

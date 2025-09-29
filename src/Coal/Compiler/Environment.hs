@@ -39,7 +39,7 @@ import qualified Data.Text as Text
 import Extra (Dictionary, Name, Over, Set, traverse2, traverse_, (<$$>))
 
 type AliasEnvironment = Environment ([Name], ParameterizedType)
-type DataConstructorEnvironment = Environment (DataConstructor TypeIndex Kind IndexedType)
+type DataConstructorEnvironment = Environment (DataConstructor TypeIndex Kind IndexedType, Set Name)
 type TypeConstructorEnvironment = Environment Kind
 type TraitEnvironment = Environment (Parameter Kind, TypeIndex Kind, Environment IndexedScheme)
 type InstanceEnvironment = Environment (Map IndexedType (Type Parameter (), Dictionary IndexedScheme))
@@ -191,13 +191,14 @@ buildDataConstructorEnvironment env =
   makeEnv
     ( \case
         DType _ _ (TypeDef _ cs) ->
-          translateConstructor <$> cs
+          let ctors = Set.fromList (constructorName <$> cs)
+           in translateConstructor ctors <$> cs
         _ ->
           []
     )
  where
-  translateConstructor (DataConstructor n a s) =
-    (n, DataConstructor n a (translateScheme s))
+  translateConstructor ctors (DataConstructor n a s) =
+    (n, (DataConstructor n a (translateScheme s), ctors))
   translateScheme (Forall _ _ t) =
     Forall (typeIndexesIn t1) [] t1
    where

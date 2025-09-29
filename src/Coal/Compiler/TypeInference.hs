@@ -7,7 +7,7 @@
 
 module Coal.Compiler.TypeInference (typeDefinitionsC) where
 
-import Coal.Common.Environment (Environment (..))
+import Coal.Common.Environment (Environment (..), mapEnvironment)
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (supplied)
@@ -25,6 +25,7 @@ import Data.Either.Extra (partitionEithers)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map.Strict as Map
+import Data.Set (Set)
 import qualified Data.Text as Text
 import Data.Tuple.Extra (fst3)
 import Extra (Dictionary, Name, forM_, void)
@@ -42,7 +43,7 @@ runConstraintsGenC stack = do
   context CompilerEnvironment{..} =
     ConstraintsGenContext
       { constraintsGenContextMonomorphicSet = mempty
-      , constraintsGenContextDataConstructorEnv = compilerDataConstructorEnvironment
+      , constraintsGenContextDataConstructorEnv = mapEnvironment fst compilerDataConstructorEnvironment
       , constraintsGenContextCodataAccessorEnv = compilerCodataAccessorEnvironment
       , constraintsGenContextTypeConstructorEnv = compilerTypeConstructorEnvironment
       , constraintsGenContextTopLevelFoldEnv = compilerFoldEnvironment

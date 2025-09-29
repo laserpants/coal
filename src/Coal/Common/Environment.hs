@@ -2,6 +2,7 @@
 
 module Coal.Common.Environment (
   Environment (..),
+  mapEnvironment,
   new,
   insert,
   insertWith,
@@ -35,6 +36,10 @@ newtype Environment e = Environment {envDictionary :: Dictionary e}
 {-# INLINE overEnvironment #-}
 overEnvironment :: Over (Environment e) (Dictionary e)
 overEnvironment fn (Environment e) = Environment (fn e)
+
+{-# INLINE mapEnvironment #-}
+mapEnvironment :: (a -> b) -> Environment a -> Environment b
+mapEnvironment f (Environment e) = Environment (fmap f e)
 
 {-# INLINE new #-}
 new :: Environment a

@@ -2,10 +2,20 @@
 
 module Coal.Compiler.PatternAnomaliesSpec (patternAnomaliesSpec) where
 
+import Coal.Common.Environment (Environment (..))
+import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
+import Coal.Compiler.Environment
 import Coal.Compiler.PatternAnomalies
+import Coal.Compiler.Stack
+import Coal.Language
 import Coal.Language.Pattern (Pattern (..))
+import Control.Monad.Identity (runIdentity)
 import Control.Monad.Reader
+import Data.List.NonEmpty (NonEmpty (..))
+import Data.Set (Set)
+import qualified Data.Set as Set
+import Extra (Name)
 import Test.Hspec
 
 example1 :: [Pat]
@@ -39,15 +49,36 @@ example5 =
   [ Any
   ]
 
-testEnv :: AnomaliesEnvironment
+testEnv :: Environment (DataConstructor TypeIndex Kind IndexedType, Set Name)
 testEnv =
-  anomaliesEnvironment
-    [ ("Cons", ["Cons", "Nil"])
-    , ("Nil", ["Cons", "Nil"])
+  Environment.fromList
+    [
+      ( "Cons"
+      ,
+        ( DataConstructor
+            "Cons"
+            2
+            (Forall mempty [] (TApplication KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| [])))
+        , Set.fromList ["Cons", "Nil"]
+        )
+      )
+    ,
+      ( "Nil"
+      ,
+        ( DataConstructor
+            "Nil"
+            0
+            (Forall mempty [] (TApplication KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| [])))
+        , Set.fromList ["Cons", "Nil"]
+        )
+      )
     ]
 
 runTest :: [Pat] -> Bool
-runTest px = runReader (exhaustive px) testEnv
+runTest px = res
+ where
+  Right res = runIdentity (evalCompilerT env (exhaustive px))
+  env = emptyCompilerEnvironment{compilerDataConstructorEnvironment = testEnv}
 
 example6 :: [Pattern () ()]
 example6 =
@@ -91,7 +122,10 @@ example11 =
   ]
 
 runTest2 :: [Pattern a t] -> Bool
-runTest2 px = runReader (exhaustive (translatePattern <$> px)) testEnv
+runTest2 px = res
+ where
+  Right res = runIdentity (evalCompilerT env (exhaustive (translatePattern <$> px)))
+  env = emptyCompilerEnvironment{compilerDataConstructorEnvironment = testEnv}
 
 patternAnomaliesSpec :: Spec
 patternAnomaliesSpec =

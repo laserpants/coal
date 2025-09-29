@@ -2,94 +2,124 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Transform.PatternExhaustiveCheck (PatternExhaustiveCheckContext (..)) where
+module Coal.Compiler.Transform.PatternExhaustiveCheck (PatternExhaustiveCheckContext (..), patternExhaustiveCheckM) where
 
+import Coal.Compiler.Error (CompilerError (..), ErrorLocation (..))
+import Coal.Compiler.Journal
+import Coal.Compiler.PatternAnomalies
 import Coal.Compiler.Stack
 import Coal.Language.Expression
 import Coal.Language.Expression.Binding (Binding (..))
+import Coal.Language.Expression.Choice (Choice (..), Guard (..))
 import Coal.Language.Module
 import Coal.Language.Pattern (Pattern (..))
+import Control.Monad (unless)
 import Data.List.NonEmpty (NonEmpty)
+import qualified Data.List.NonEmpty as NonEmpty
+import Debug.Trace
+import Extra (Name)
+
+patternExhaustiveCheckM :: (Monad m) => Module a k t -> CompilerT a m (Module a k t)
+patternExhaustiveCheckM m = overModuleDefinitionsM (traverse (patternExhaustiveCheck (modulePathName m))) m
 
 class PatternExhaustiveCheckContext c where
-  patternExhaustiveCheck :: (Monad m) => c -> CompilerT a m c
-
-instance PatternExhaustiveCheckContext (Module a k t) where
-  patternExhaustiveCheck = overModuleDefinitionsM (traverse patternExhaustiveCheck)
+  patternExhaustiveCheck :: (Monad m) => Name -> c -> CompilerT a m c
 
 instance PatternExhaustiveCheckContext (Definition a k t) where
-  patternExhaustiveCheck =
+  patternExhaustiveCheck name =
     \case
-      DFunction loc name f ws ->
-        DFunction loc name <$> patternExhaustiveCheck f <*> traverse patternExhaustiveCheck ws
-      DConstant loc name c ws ->
-        DConstant loc name <$> patternExhaustiveCheck c <*> traverse patternExhaustiveCheck ws
-      DFold loc name d ->
-        DFold loc name <$> patternExhaustiveCheck d
-      DUnfold loc name d ->
-        DUnfold loc name <$> patternExhaustiveCheck d
-      DInstance loc name d ->
-        DInstance loc name <$> patternExhaustiveCheck d
+      DFunction loc n f ws ->
+        DFunction loc n <$> patternExhaustiveCheck name f <*> traverse (patternExhaustiveCheck name) ws
+      DConstant loc n c ws ->
+        DConstant loc n <$> patternExhaustiveCheck name c <*> traverse (patternExhaustiveCheck name) ws
+      DFold loc n d ->
+        DFold loc n <$> patternExhaustiveCheck name d
+      DUnfold loc n d ->
+        DUnfold loc n <$> patternExhaustiveCheck name d
+      DInstance loc n d ->
+        DInstance loc n <$> patternExhaustiveCheck name d
       d ->
         pure d
 
 instance PatternExhaustiveCheckContext (InstanceDef Definition a k t) where
-  patternExhaustiveCheck =
+  patternExhaustiveCheck name =
     \case
       InstanceDef ts t ds ->
-        InstanceDef ts t <$> traverse patternExhaustiveCheck ds
+        InstanceDef ts t <$> traverse (patternExhaustiveCheck name) ds
 
 instance PatternExhaustiveCheckContext (FoldDef a t) where
-  patternExhaustiveCheck =
+  patternExhaustiveCheck name =
     \case
       FoldDef w t e ->
-        FoldDef w t <$> traverse patternExhaustiveCheck e
+        FoldDef w t <$> traverse (patternExhaustiveCheck name) e
 
 instance PatternExhaustiveCheckContext (UnfoldDef a t) where
-  patternExhaustiveCheck =
+  patternExhaustiveCheck name =
     \case
       UnfoldDef w t ps e ->
-        UnfoldDef w t ps <$> traverse patternExhaustiveCheck e
+        UnfoldDef w t ps <$> traverse (patternExhaustiveCheck name) e
 
 instance PatternExhaustiveCheckContext (FunctionDef a t) where
-  patternExhaustiveCheck =
+  patternExhaustiveCheck name =
     \case
       FunctionDef loc w1 w2 ps e1 ->
-        FunctionDef loc w1 w2 ps <$> patternExhaustiveCheck e1
+        FunctionDef loc w1 w2 ps <$> patternExhaustiveCheck name e1
 
 instance PatternExhaustiveCheckContext (ConstantDef a t) where
-  patternExhaustiveCheck =
+  patternExhaustiveCheck name =
     \case
       ConstantDef loc w1 w2 e1 ->
-        ConstantDef loc w1 w2 <$> patternExhaustiveCheck e1
+        ConstantDef loc w1 w2 <$> patternExhaustiveCheck name e1
 
 instance PatternExhaustiveCheckContext (Binding Expression a t) where
-  patternExhaustiveCheck =
+  patternExhaustiveCheck name =
     \case
       BPattern a p e ->
-        BPattern a p <$> patternExhaustiveCheck e
+        BPattern a p <$> patternExhaustiveCheck name e
       BFunction{} ->
         error "TODO"
 
+instance PatternExhaustiveCheckContext (Choice Expression a t) where
+  patternExhaustiveCheck name =
+    \case
+      CPlain a gs e ->
+        CPlain a
+          <$> traverse (patternExhaustiveCheck name) gs
+          <*> patternExhaustiveCheck name e
+      CLambda{} ->
+        error "Not implemented"
+
+instance PatternExhaustiveCheckContext (Guard Expression a t) where
+  patternExhaustiveCheck name =
+    \case
+      CGuard e ->
+        CGuard <$> patternExhaustiveCheck name e
+
+instance PatternExhaustiveCheckContext (Clause a t) where
+  patternExhaustiveCheck name =
+    \case
+      EClause a p cs ->
+        EClause a p <$> traverse (patternExhaustiveCheck name) cs
+
 instance PatternExhaustiveCheckContext (Expression a t) where
-  patternExhaustiveCheck =
+  patternExhaustiveCheck name =
     \case
       EAnnotation a t e ->
-        EAnnotation a t <$> patternExhaustiveCheck e
+        EAnnotation a t <$> patternExhaustiveCheck name e
       EApplication a t e es ->
         EApplication a t
-          <$> patternExhaustiveCheck e
-          <*> traverse patternExhaustiveCheck es
+          <$> patternExhaustiveCheck name e
+          <*> traverse (patternExhaustiveCheck name) es
       ELambda a ps e ->
-        ELambda a ps <$> patternExhaustiveCheck e
+        ELambda a ps <$> patternExhaustiveCheck name e
       ELet a gs e1 ->
         ELet a
-          <$> traverse patternExhaustiveCheck gs
-          <*> patternExhaustiveCheck e1
+          <$> traverse (patternExhaustiveCheck name) gs
+          <*> patternExhaustiveCheck name e1
       ERecursiveLet a p e1 e2 ->
         ERecursiveLet a p
-          <$> patternExhaustiveCheck e1
-          <*> patternExhaustiveCheck e2
+          <$> patternExhaustiveCheck name e1
+          <*> patternExhaustiveCheck name e2
       var@EVariable{} ->
         pure var
       con@EConstructor{} ->
@@ -98,62 +128,66 @@ instance PatternExhaustiveCheckContext (Expression a t) where
         pure lit
       EIf a t e1 e2 e3 ->
         EIf a t
-          <$> patternExhaustiveCheck e1
-          <*> patternExhaustiveCheck e2
-          <*> patternExhaustiveCheck e3
+          <$> patternExhaustiveCheck name e1
+          <*> patternExhaustiveCheck name e2
+          <*> patternExhaustiveCheck name e3
       op@EUnaryOperator{} ->
         pure op
       op@EBinaryOperator{} ->
         pure op
       ERecord a t d me ->
         ERecord a t
-          <$> traverse patternExhaustiveCheck d
-          <*> traverse patternExhaustiveCheck me
+          <$> traverse (patternExhaustiveCheck name) d
+          <*> traverse (patternExhaustiveCheck name) me
       EListCons a t e1 e2 ->
         EListCons a t
-          <$> patternExhaustiveCheck e1
-          <*> patternExhaustiveCheck e2
+          <$> patternExhaustiveCheck name e1
+          <*> patternExhaustiveCheck name e2
       EListLiteral a t es ->
         EListLiteral a t
-          <$> traverse patternExhaustiveCheck es
+          <$> traverse (patternExhaustiveCheck name) es
       ETuple a t es ->
-        ETuple a t <$> traverse patternExhaustiveCheck es
+        ETuple a t <$> traverse (patternExhaustiveCheck name) es
       EMatch a t e cs ->
         EMatch a t
-          <$> patternExhaustiveCheck e
-          <*> baz cs
+          <$> patternExhaustiveCheck name e
+          <*> (checkExhaustive name a cs >> traverse (patternExhaustiveCheck name) cs)
       ELambdaMatch a t cs me ->
         ELambdaMatch a t
-          <$> baz cs
-          <*> traverse patternExhaustiveCheck me
+          <$> (checkExhaustive name a cs >> traverse (patternExhaustiveCheck name) cs)
+          <*> traverse (patternExhaustiveCheck name) me
       ECompiledMatch{} ->
         error "Implementation error"
       EFold a t es cs me ->
         EFold a t
-          <$> traverse patternExhaustiveCheck es
-          <*> baz cs
-          <*> traverse patternExhaustiveCheck me
+          <$> traverse (patternExhaustiveCheck name) es
+          <*> (checkExhaustive name a cs >> traverse (patternExhaustiveCheck name) cs)
+          <*> traverse (patternExhaustiveCheck name) me
       ESelect a ll e ->
-        ESelect a ll <$> patternExhaustiveCheck e
+        ESelect a ll <$> patternExhaustiveCheck name e
       ECodataSelect a ll e me ->
         ECodataSelect a ll
-          <$> patternExhaustiveCheck e
-          <*> traverse patternExhaustiveCheck me
+          <$> patternExhaustiveCheck name e
+          <*> traverse (patternExhaustiveCheck name) me
       ECodataRecord a t d ->
         ECodataRecord a t
-          <$> traverse patternExhaustiveCheck d
-      EFocus name ll1 ll2 e1 e2 ->
-        EFocus name ll1 ll2
-          <$> patternExhaustiveCheck e1
-          <*> patternExhaustiveCheck e2
+          <$> traverse (patternExhaustiveCheck name) d
+      EFocus n ll1 ll2 e1 e2 ->
+        EFocus n ll1 ll2
+          <$> patternExhaustiveCheck name e1
+          <*> patternExhaustiveCheck name e2
       trait@ETraitDictionary{} ->
         pure trait
 
--- TODO
-baz :: NonEmpty (Clause a t) -> CompilerT b m (NonEmpty (Clause a t))
-baz cs = undefined
+checkExhaustive :: (Monad m) => Name -> a -> NonEmpty (Clause a t) -> CompilerT b m (NonEmpty (Clause a t))
+checkExhaustive name loc cs = do
+  isExhaustive <- exhaustive patterns
+  unless isExhaustive $ do
+    -- tellErrors [NonExhaustivePatterns (ErrorLocation name loc)]
+    error ("NonExhaustivePatterns" <> show patterns)
+  pure cs
  where
-  patterns = clausePattern <$> cs
+  patterns = NonEmpty.toList (translatePattern . clausePattern <$> cs)
 
 clausePattern :: Clause a t -> Pattern a t
 clausePattern =

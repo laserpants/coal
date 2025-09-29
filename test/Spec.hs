@@ -1067,6 +1067,12 @@ main132 = do
     [ "./test/Coal/examples/132/Main.coal"
     ]
 
+main133 :: IO (Either CompilerFailureMode Text)
+main133 = do
+  runTestFiles
+    [ "./test/Coal/examples/133/Main.coal"
+    ]
+
 compileFiles :: [String] -> IO (Either CompilerFailureMode ())
 compileFiles files = do
   fs <- traverse readFile files
@@ -1321,21 +1327,27 @@ builtInTypeConstructors =
     )
   ]
 
-builtInDataConstructors :: [(Name, DataConstructor TypeIndex Kind IndexedType)]
+builtInDataConstructors :: [(Name, (DataConstructor TypeIndex Kind IndexedType, Set Name))]
 builtInDataConstructors =
   [
     ( "Succ"
-    , DataConstructor
-        "Succ"
-        1
-        (Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic INat))
+    ,
+      ( DataConstructor
+          "Succ"
+          1
+          (Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic INat))
+      , Set.fromList ["Succ", "Zero"]
+      )
     )
   ,
     ( "Zero"
-    , DataConstructor
-        "Zero"
-        0
-        (Forall mempty [] (TIntrinsic INat))
+    ,
+      ( DataConstructor
+          "Zero"
+          0
+          (Forall mempty [] (TIntrinsic INat))
+      , Set.fromList ["Succ", "Zero"]
+      )
     )
     -- TODO
   ]

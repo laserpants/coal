@@ -19,6 +19,7 @@ data CompilerError a
   = ParserError FilePath ParserError
   | MisplacedImportStatement (ErrorLocation a)
   | ModuleNotFound Name (ErrorLocation a)
+  | NonExhaustivePatterns (ErrorLocation a)
   | TODO
   deriving (Show, Eq)
 
