@@ -781,7 +781,7 @@ Combining `drop` and `take` allows you to obtain a range of elements from within
 // == [3, 4, 5]
 ```
 
-The function `slice` does this in a way that allows you to specify the range of elements to keep from the input list:
+The function `slice` does exactly this, in a way that allows you to specify the range of elements to keep from the input list:
 
 ```
 [1, 2, 3, 4, 5, 6, 7] |.slice(2, 5)
