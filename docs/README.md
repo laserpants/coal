@@ -741,6 +741,8 @@ tail : List<a> -> Option<List<a>>
 uncons : List<a> -> Option<(a, List<a>)>
 ```
 
+> The operator `|.` is used in the following examples. ...
+
 ###### Take, drop and slice
 
 Use `take` to get another list with the first *n* elements from a given list:
@@ -749,7 +751,7 @@ Use `take` to get another list with the first *n* elements from a given list:
 take : nat -> List<a> -> List<a>
 ```
 
-Example:
+For example:
 
 ```
 [1, 2, 3, 4, 5, 6, 7] |.take(3)     // [1, 2, 3]
@@ -760,10 +762,10 @@ Note that, if the list's length is less than the requested number of elements, t
 The function `drop` removes the first *n* elements from a list.
 
 ```
-drop : nat -> List(a) -> List(a)
+drop : nat -> List<a> -> List<a>
 ```
 
-Example:
+For example:
 
 ```
 [1, 2, 3, 4, 5, 6, 7] |.drop(3)     // [4, 5, 6, 7]
@@ -782,6 +784,10 @@ Combining `drop` and `take` allows you to obtain a range of elements from within
 ```
 
 The function `slice` does exactly this, in a way that allows you to specify the range of elements to keep from the input list:
+
+```
+slice : nat -> nat -> List<a> -> List<a>
+```
 
 ```
 [1, 2, 3, 4, 5, 6, 7] |.slice(2, 5)
