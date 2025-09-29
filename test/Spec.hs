@@ -284,6 +284,8 @@ spec = do
   print (r == ["Utils", "List", "Main"])
   (a, _, _) <- main130
   print (isLeft a)
+  x <- main133
+  print (x == Right "123\n")
 
 --  x <- main85
 --  print (x == Right "aa\n")
@@ -1077,6 +1079,12 @@ main134 :: IO (Either CompilerFailureMode Text)
 main134 = do
   runTestFiles
     [ "./test/Coal/examples/134/Main.coal"
+    ]
+
+main135 :: IO (Either CompilerFailureMode Text)
+main135 = do
+  runTestFiles
+    [ "./test/Coal/examples/135/Main.coal"
     ]
 
 compileFiles :: [String] -> IO (Either CompilerFailureMode ())

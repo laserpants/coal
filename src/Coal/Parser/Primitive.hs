@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Coal.Parser.Primitive (parsePrimitive) where
+module Coal.Parser.Primitive (parseAtom, parsePrimitive) where
 
 import Coal.Ast.Metadata (Metadata (..))
 import Coal.Language.Expression (Expression (..))

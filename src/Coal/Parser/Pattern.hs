@@ -2,6 +2,7 @@
 
 module Coal.Parser.Pattern (parsePattern, parseUnitPattern) where
 
+import qualified Coal.Parser.Primitive as Primitive
 import Coal.Ast.Metadata (Metadata (..), metadataSpan)
 import Coal.Common.Label (Label (..))
 import Coal.Language
@@ -82,9 +83,16 @@ parseVariablePattern =
 parseLiteralPattern :: Parser (Pattern Metadata ())
 parseLiteralPattern =
   parseListLiteralPattern
-    <|> parseLiteralTrue
-    <|> parseLiteralFalse
-    <|> parseCharLiteralPattern
+    <|> parseBasicLiteralPattern
+--    <|> parseLiteralTrue
+--    <|> parseLiteralFalse
+--    <|> parseCharLiteralPattern
+
+parseBasicLiteralPattern :: Parser (Pattern Metadata ())
+parseBasicLiteralPattern = do
+  withMetadata $ do
+    lit <- Primitive.parseAtom
+    pure (\loc -> PLiteral loc lit)
 
 parseLiteralTrue :: Parser (Pattern Metadata ())
 parseLiteralTrue =
