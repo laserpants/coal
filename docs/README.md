@@ -777,11 +777,11 @@ uncons : List<a> -> Option<(a, List<a>)>
 
 > The operator `|.` is used in the following examples. It is an infix operator that denotes function application, but with the arguments reversed. So the expression 
 > ```
-> arg |.map(f)
+>   xs |.map(f)
 > ```
 > is really syntactic sugar for
 > ```
-> map(f, arg)
+>   map(f, xs)
 > ```
 > where the first is meant to resemble object-oriented style of programming. 
 
