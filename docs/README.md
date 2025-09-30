@@ -209,6 +209,12 @@ module Utils {
 }
 ```
 
+Type annotions look similar to those for functions:
+
+```
+  let days : List<string> = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+```
+
 Since a `let` can hold any other expression, top-level functions may also be defined in the following way:
 
 ```
@@ -479,13 +485,13 @@ Just like with let-bindings, the arguments in a lambda-function are patterns:
 
 ##### Arithmetic and comparison
 
-|               | Description            | Type                          |                                                                        
-| ------------- | ---------------------- | ----------------------------- |                                                                        
-| `+`           | Addition               | `n -> n -> n with Numeric(n)` |                                                                        
-| `-`           | Subtraction            | `n -> n -> n with Numeric(n)` |                                                                        
-| `*`           | Multiplication         | `n -> n -> n with Numeric(n)` |                                           
-| `/`           | Division               |                               |                                                                        
-| `^`           | Exponentiation         |                               |                                                                        
+|               | Description            | Type                               |                                                                        
+| ------------- | ---------------------- | ---------------------------------- |                                                                        
+| `+`           | Addition               | `∀n : n -> n -> n with Numeric(n)` |                                                                        
+| `-`           | Subtraction            | `∀n : n -> n -> n with Numeric(n)` |                                                                        
+| `*`           | Multiplication         | `∀n : n -> n -> n with Numeric(n)` |                                           
+| `/`           | Division               |                                    |                                                                        
+| `^`           | Exponentiation         |                                    |                                                                        
 
 |               | Description            | Type                          |                                                                        
 | ------------- | ---------------------- | ----------------------------- |                                                                        
@@ -527,9 +533,9 @@ Just like with let-bindings, the arguments in a lambda-function are patterns:
 
 ##### Lists
 
-|               | Description            | Type                            |                                                                         
-| ------------- | ---------------------- | ------------------------------- |                                                                        
-| `++`          | List concatenation     | `List<a> -> List<a> -> List<a>` |                                                                        
+|               | Description            | Type                                 |                                                                         
+| ------------- | ---------------------- | ------------------------------------ |                                                                        
+| `++`          | List concatenation     | `∀a : List<a> -> List<a> -> List<a>` |                                                                        
 
 ##### Strings
 
@@ -815,11 +821,7 @@ uncons : List<a> -> Option<(a, List<a>)>
 > ```
 >   xs |.map(f)
 > ```
-> is really syntactic sugar for
-> ```
->   map(f, xs)
-> ```
-> where the first is meant to resemble object-oriented style of programming. 
+> is really syntactic sugar for `map(f, xs)` where the first is meant to resemble object-oriented style of programming. 
 
 ###### Take, drop and slice
 
