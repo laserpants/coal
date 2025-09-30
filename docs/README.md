@@ -1158,7 +1158,7 @@ For instance, matching on integers can use literal patterns along with a wildcar
 
 Variable, tuple, record, etc..
 
-| Type               |                      | Description                                |                                                   
+| Type               | Example              | Description                                |                                                   
 | ------------------ | -------------------- | ------------------------------------------ |                                                   
 | Constructor        | `Color(r, g, b)`     |                                            |                                                 
 | Variable           | `x`                  |                                            |                                                 
@@ -1167,10 +1167,10 @@ Variable, tuple, record, etc..
 | List-cons          | `x :: xs`            |                                            |                                                 
 | List (literal)     | `[a, b, c]`          |                                            |                                                 
 | Tuples             | `(lhs, rhs)`         |                                            |                                                 
-| Records            | `{ name = n | _ }`   |                                            |                                                 
+| Records            | `{ name = n \| _ }`  |                                            |                                                 
 | As                 | `(lhs, _) as pair`   |                                            |                                                 
 | @                  | `Succ(@n)`           | See **Recursion, corecursion, and codata** |                                                 
-| TODO               |                      |                                            |                                                 
+| Or                 | `1 or 2`             |      
 
 ### Traits
 
