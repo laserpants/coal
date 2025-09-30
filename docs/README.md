@@ -1195,8 +1195,7 @@ trait Ordered<t> {
 }
 ```
 
-Making a type support a trait involves defining an *instance* of that trait. An instance provides concrete implementations of all functions declared in the trait, specialized for the chosen type. 
-For example, by instantiating the `Ordered` trait for `bool`, we define an ordering on the booleans:
+Making a type support a trait amounts to defining an *instance* of that trait. An instance provides concrete implementations of all functions declared in the trait, specialized for the chosen type. For example, by instantiating the `Ordered` trait for `bool`, we define an ordering on the booleans:
 
 ```
 instance Ordered<bool> {
@@ -1220,6 +1219,9 @@ Here, the type parameter `t` in the type of `is_less_than` is *universally quant
 We can read the type of `is_less_than` as: `t -> t -> bool with Ordered<t>`.
 
 #### Higher-kinded traits
+
+The trait we have looked at up to this point have all been of the form `T<t>`,
+where `t` is a placeholder for an ordinary type.
 
 TODO
 
@@ -1314,10 +1316,8 @@ The result is the same as ...
       | Succ(r) as m => m * fold(r)
 ```
 
-There are specific rules for how this pattern can be used.
-Most importantly, an `@`-pattern can only appear inside a constructor. 
-For recursion to be well-founded, progress must be guaranteed in each iterative step. 
-The constructor rule is how this is enforced by the language. 
+There are restriction as to how this pattern can be used. Most importantly, an `@`-pattern can only appear inside a constructor. For recursion to be well-founded, progress must be guaranteed in each iterative step, and the constructor rule is how this is enforced by the language. 
+
 The data inside of the constructor is structurally smaller 
 
 The following is therefore not possible:
