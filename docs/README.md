@@ -1160,14 +1160,14 @@ Variable, tuple, record, etc..
 
 | Type               |                      | Description                             |                                                   
 | ------------------ | -------------------- | --------------------------------------- |                                                   
-| Constructor        |                      |                                         |                                                 
+| Constructor        | `Color(r, g, b)`     |                                         |                                                 
 | Variable           | `x`                  |                                         |                                                 
 | Wildcard           | `_`                  | Ignores the matched value               |
 | Literal            | `"Hello"`, `0`, `()` |                                         |                                                 
-| List-cons          |                      |                                         |                                                 
-| List (literal)     |                      |                                         |                                                 
-| Tuples             |                      |                                         |                                                 
-| Records            |                      |                                         |                                                 
+| List-cons          | `x :: xs`            |                                         |                                                 
+| List (literal)     | `[a, b, c]`          |                                         |                                                 
+| Tuples             | `(lhs, rhs)`         |                                         |                                                 
+| Records            | `{ name = n | _ }`   |                                         |                                                 
 | As                 |                      |                                         |                                                 
 | TODO               |                      |                                         |                                                 
 
