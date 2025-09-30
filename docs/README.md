@@ -1158,18 +1158,19 @@ For instance, matching on integers can use literal patterns along with a wildcar
 
 Variable, tuple, record, etc..
 
-| Type               |                      | Description                             |                                                   
-| ------------------ | -------------------- | --------------------------------------- |                                                   
-| Constructor        | `Color(r, g, b)`     |                                         |                                                 
-| Variable           | `x`                  |                                         |                                                 
-| Wildcard           | `_`                  | Ignores the matched value               |
-| Literal            | `"Hello"`, `0`, `()` |                                         |                                                 
-| List-cons          | `x :: xs`            |                                         |                                                 
-| List (literal)     | `[a, b, c]`          |                                         |                                                 
-| Tuples             | `(lhs, rhs)`         |                                         |                                                 
-| Records            | `{ name = n | _ }`   |                                         |                                                 
-| As                 |                      |                                         |                                                 
-| TODO               |                      |                                         |                                                 
+| Type               |                      | Description                                |                                                   
+| ------------------ | -------------------- | ------------------------------------------ |                                                   
+| Constructor        | `Color(r, g, b)`     |                                            |                                                 
+| Variable           | `x`                  |                                            |                                                 
+| Wildcard           | `_`                  | Ignores the matched value                  |
+| Literal            | `"Hello"`, `0`, `()` |                                            |                                                 
+| List-cons          | `x :: xs`            |                                            |                                                 
+| List (literal)     | `[a, b, c]`          |                                            |                                                 
+| Tuples             | `(lhs, rhs)`         |                                            |                                                 
+| Records            | `{ name = n | _ }`   |                                            |                                                 
+| As                 | `(lhs, _) as pair`   |                                            |                                                 
+| @                  | `Succ(@n)`           | See **Recursion, corecursion, and codata** |                                                 
+| TODO               |                      |                                            |                                                 
 
 ### Traits
 
