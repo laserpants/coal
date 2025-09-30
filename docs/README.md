@@ -1220,8 +1220,7 @@ We can read the type of `is_less_than` as: `t -> t -> bool with Ordered<t>`.
 
 #### Higher-kinded traits
 
-The trait we have looked at up to this point have all been of the form `T<t>`,
-where `t` is a placeholder for an ordinary type.
+All the traits we have looked at up to this point have all been of the form `T<t>`, where `t` is a placeholder for an ordinary type.
 
 TODO
 
