@@ -468,6 +468,10 @@ Just like with let-bindings, the arguments in a lambda-function are patterns:
   fn((lhs, rhs)) => lhs
 ```
 
+#### Operators
+
+TODO
+
 #### Comments
 
 There are two types of comments:
@@ -795,6 +799,34 @@ slice : nat -> nat -> List<a> -> List<a>
 // == [3, 4, 5]
 ```
 
+##### List concatenation
+
+TODO
+
+##### Sorting
+
+TODO
+
+#### Higher-order list functions
+
+TODO
+
+##### Mapping over a list
+
+TODO
+
+###### Filtering a list
+
+TODO
+
+###### Reducing a list
+
+TODO
+
+#### Predicates
+
+TODO
+
 #### Option
 
 The `Option` type is a built-in algebraic data type that represents *optional* values &mdash; values that may or may not be present. This type is called `Maybe` in Haskell and is similar to `Option` in languages like Rust or Scala. 
@@ -895,7 +927,7 @@ let five = curry(add, 1, 4)         // or (curry(add))(1, 4)
 
 #### Records
 
-Records are unordered collections of name–value pairs, where the values may be of any type, including other records. They are suitable for representing structured data with multiple properties, or nested objects. A record expression is written as a sequence of comma-separated *fields* enclosed in curly braces. Each field consists of a name, called the *label*, paired with a value. The two are separated by an equals sign (`=`):
+Records are unordered collections of name–value pairs, where the values may be of any type, including other records. In Coal, records are first-class values. They are suitable for representing structured data with multiple properties, or nested objects. A record expression is written as a sequence of comma-separated *fields* enclosed in curly braces. Each field consists of a name, called the *label*, paired with a value. The two are separated by an equals sign (`=`):
 
 ```
 { 
@@ -933,7 +965,7 @@ let language = { name = "Java", paradigm = "OOP" }
 
 ##### Extending records
 
-Records in Coal are described as **extensible**, meaning that new fields can be added to a record at run time.
+Records in Coal are *extensible*, meaning that new fields can be added to a record at run time.
 
 ```
 fun tagged(rec, t : string) = { tag = t | rec }  
@@ -975,7 +1007,7 @@ The following example illustrates the difference. Suppose we want to represent G
 fn(p : { lat : float, lng : float }) => p.lat
 ```
 
-Here, the function requires its argument to have exactly two fields: `lat` and `lng`, both of type `float`. This type is closed.
+This function requires its argument `p` to have exactly two fields: `lat` and `lng`, both of type `float`. This type is closed.
 
 ```
 fn(p : { lat : float, lng : float | q }) => p.lat
@@ -1053,9 +1085,23 @@ This function requires not only that the `tag` field is present, but also that i
 
 ### Pattern matching
 
-The `match` expression in Coal lets you to deconstruct data based on its shape, reversing what the data constructors of algebraic data types do.
+The `match` expression in Coal is used to deconstruct data based on its shape, effectively reversing what the data constructors of algebraic data types do. It allows you to branch on the structure of a value and directly bind its components to variables.
 
-TODO
+```
+  type Shape = Rectangle(float, float) | Circle(float)
+
+  fun area(shape) : float =
+    match(shape) {
+      | Rectangle(w, h) => w * h
+      | Circle(r) => pi * r^2
+    }
+```
+
+Pattern matching proceeds by checking each branch in order until it finds one whose pattern matches the value. The corresponding right-hand side expression is then evaluated, with any variables in the pattern bound to the matched sub-components.
+
+Match expressions must be *exhaustive*, meaning that all possible cases for a type are covered by the given patterns. If a case is missing, the compiler will reject the program. This guarantees that every `match` expression is total and well-defined for every possible input.
+
+TODO: example
 
 #### Patterns
 
