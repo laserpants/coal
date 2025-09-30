@@ -470,7 +470,37 @@ Just like with let-bindings, the arguments in a lambda-function are patterns:
 
 #### Operators
 
-TODO
+##### Unary
+
+##### Arithmetic and comparison
+
+|               | Description            |                                                                         
+| ------------- | ---------------------- |                                                                         
+| `+`           |                        |                                                                         
+| `-`           |                        |                                                                         
+| `*`           |                        |                                                                         
+
+##### Logical
+
+|               | Description            |                                                                         
+| ------------- | ---------------------- |                                                                         
+| `&&`          | AND                    |                                                                         
+| `||`          | OR                     |                                                                         
+
+##### Data
+
+|               | Description            |                                                                         
+| ------------- | ---------------------- |                                                                         
+| `.`           | Record field access    |                                                                         
+
+##### Function composition and pipelining
+
+|               | Description            |                                                                         
+| ------------- | ---------------------- |                                                                         
+| `>>`          |                        |                                                                         
+| `<<`          |                        |                                                                         
+| `|.`          |                        |                                                                         
+| `.|`          |                        |                                                                         
 
 #### Comments
 
@@ -745,7 +775,15 @@ tail : List<a> -> Option<List<a>>
 uncons : List<a> -> Option<(a, List<a>)>
 ```
 
-> The operator `|.` is used in the following examples. ...
+> The operator `|.` is used in the following examples. It is an infix operator that denotes function application, but with the arguments reversed. So the expression 
+> ```
+> arg |.map(f)
+> ```
+> is really syntactic sugar for
+> ```
+> map(f, arg)
+> ```
+> where the first is meant to resemble object-oriented style of programming. 
 
 ###### Take, drop and slice
 
@@ -1097,14 +1135,7 @@ The `match` expression in Coal is used to deconstruct data based on its shape, e
     }
 ```
 
-Patterns can take several forms, including:
-
-- Data constructors, e.g. `Some(n)`
-- Literals, e.g. `0`, `"hello"`, or `true`
-- Tuples and records
-- Variables, which bind the whole value, e.g. `x`
-- Wildcards (`_`), which ignore the matched value
-- Combinations of the above
+Patterns can take several forms, including data constructors, literals, tuples, records, variables, wildcards, or combinations of these.
 
 See below for a complete list of available patterns. 
 
@@ -1126,6 +1157,19 @@ For instance, matching on integers can use literal patterns along with a wildcar
 #### Patterns
 
 Variable, tuple, record, etc..
+
+| Type               |                      | Description                             |                                                   
+| ------------------ | -------------------- | --------------------------------------- |                                                   
+| Constructor        |                      |                                         |                                                 
+| Variable           | `x`                  |                                         |                                                 
+| Wildcard           | `_`                  | Ignores the matched value               |
+| Literal            | `"Hello"`, `0`, `()` |                                         |                                                 
+| List-cons          |                      |                                         |                                                 
+| List (literal)     |                      |                                         |                                                 
+| Tuples             |                      |                                         |                                                 
+| Records            |                      |                                         |                                                 
+| As                 |                      |                                         |                                                 
+| TODO               |                      |                                         |                                                 
 
 ### Traits
 
