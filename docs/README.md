@@ -4,7 +4,7 @@ This repository is the home of the Coal programming language and compiler. 🚧 
 
 ## About
 
-Coal is a declarative, purely functional programming language with
+Coal is a declarative, statically typed, purely functional programming language with
 
 - simple and intuitive syntax
 - algebraic data types and pattern matching
@@ -1085,11 +1085,11 @@ This function requires not only that the `tag` field is present, but also that i
 
 ### Pattern matching
 
-The `match` expression in Coal is used to deconstruct data based on its shape, effectively reversing what the data constructors of algebraic data types do. It allows you to branch on the structure of a value and directly bind its components to variables.
+The `match` expression in Coal is used to deconstruct data based on its shape, effectively reversing what the data constructors of algebraic data types do. It allows you to branch on the structure of a value and directly bind its components to variables. For example:
 
 ```
   type Shape = Rectangle(float, float) | Circle(float)
-
+  
   fun area(shape) : float =
     match(shape) {
       | Rectangle(w, h) => w * h
@@ -1097,11 +1097,31 @@ The `match` expression in Coal is used to deconstruct data based on its shape, e
     }
 ```
 
+Patterns can take several forms, including:
+
+- Data constructors, e.g. `Some(n)`
+- Literals, e.g. `0`, `"hello"`, or `true`
+- Tuples and records
+- Variables, which bind the whole value, e.g. `x`
+- Wildcards (`_`), which ignore the matched value
+- Combinations of the above
+
+See below for a complete list of available patterns. 
+
 Pattern matching proceeds by checking each branch in order until it finds one whose pattern matches the value. The corresponding right-hand side expression is then evaluated, with any variables in the pattern bound to the matched sub-components.
 
-Match expressions must be *exhaustive*, meaning that all possible cases for a type are covered by the given patterns. If a case is missing, the compiler will reject the program. This guarantees that every `match` expression is total and well-defined for every possible input.
+Match expressions must be *exhaustive*, meaning that all possible cases for a type are covered by the given patterns. If a case is missing, the compiler will reject the program. 
 
-TODO: example
+For instance, matching on integers can use literal patterns along with a wildcard to guarantee exhaustiveness:
+
+```
+  fun describe_int(n : int32) : string =
+    match(n) {
+      | 0 => "zero"
+      | 1 => "one"
+      | _ => "something else"
+    }
+```
 
 #### Patterns
 
