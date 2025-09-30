@@ -60,7 +60,6 @@ The following is a list of features that are either missing or incomplete, and :
 | Feature                          | Milestone              | Criteria         |                                                                        
 | -------------------------------- | ---------------------- | ---------------- |                                                                        
 | Module imports/exports           | 1                      |                  |
-| Topological sort                 | 1                      |                  |
 
 #### Roadmap
 
@@ -80,6 +79,14 @@ TODO
 ### Prerequisites
 
 TODO
+
+### Mac
+
+TODO 
+
+### Linux
+
+TODO 
 
 ### Compiler
 
@@ -470,22 +477,36 @@ Just like with let-bindings, the arguments in a lambda-function are patterns:
 
 #### Operators
 
-##### Unary
-
 ##### Arithmetic and comparison
 
-|               | Description            |                                                                         
-| ------------- | ---------------------- |                                                                         
-| `+`           |                        |                                                                         
-| `-`           |                        |                                                                         
-| `*`           |                        |                                                                         
+|               | Description            | Type                          |                                                                        
+| ------------- | ---------------------- | ----------------------------- |                                                                        
+| `+`           | Addition               | `n -> n -> n with Numeric(n)` |                                                                        
+| `-`           | Subtraction            | `n -> n -> n with Numeric(n)` |                                                                        
+| `*`           | Multiplication         | `n -> n -> n with Numeric(n)` |                                           
+| `/`           | Division               |                               |                                                                        
+| `^`           | Exponentiation         |                               |                                                                        
+
+|               | Description            | Type                          |                                                                        
+| ------------- | ---------------------- | ----------------------------- |                                                                        
+| `==`          | Equality               |                               |                                                                        
+| `!=`          | Inequality             |                               |                                                                        
+| `<`           | Less than              |                               |                                           
+| `>`           | Greater than           |                               |                                                                        
+| `<=`          | Less than or equal     |                               |                                           
+| `>=`          | Greater than or equal  |                               |                                                                        
+
+|               | Description            | Type                          |                                                                        
+| ------------- | ---------------------- | ----------------------------- |                                                                        
+| `%`           | Modulus                |                               |                                                                        
 
 ##### Logical
 
-|               | Description            |                                                                         
-| ------------- | ---------------------- |                                                                         
-| `&&`          | AND                    |                                                                         
-| `||`          | OR                     |                                                                         
+|               | Description            | Arity      | Type                   |                                                                         
+| ------------- | ---------------------- | ---------- | ---------------------- |                                                                        
+| `&&`          | AND                    | 2          | `bool -> bool -> bool` |                                                                        
+| `\|\|`        | OR                     | 2          | `bool -> bool -> bool` |                                                                        
+| `!`           | NOT                    | 1          | `bool -> bool`         |                                                                        
 
 ##### Data
 
@@ -495,12 +516,27 @@ Just like with let-bindings, the arguments in a lambda-function are patterns:
 
 ##### Function composition and pipelining
 
-|               | Description            |                                                                         
-| ------------- | ---------------------- |                                                                         
-| `>>`          |                        |                                                                         
-| `<<`          |                        |                                                                         
-| `|.`          |                        |                                                                         
-| `.|`          |                        |                                                                         
+|               | Description                 |                                                                         
+| ------------- | --------------------------- |                                                                         
+| `>>`          | Forward composition         |                                                                         
+| `<<`          | Reverse composition         |                                                                         
+| `\|.`         | Reverse application         |                                                                         
+| `.\|`         | Forward application         |                                                                         
+| `$.`          | Flipped reverse application |                                                                         
+| `.$`          | Flipped forward application |                                                                         
+
+##### Lists
+
+|               | Description            | Type                            |                                                                         
+| ------------- | ---------------------- | ------------------------------- |                                                                        
+| `++`          | List concatenation     | `List<a> -> List<a> -> List<a>` |                                                                        
+
+##### Strings
+
+|               | Description            | Type                            |                                                                         
+| ------------- | ---------------------- | ------------------------------- |                                                                        
+| ????          | String concatenation   | `string -> string -> string`    |                                                                        
+
 
 #### Comments
 
@@ -1037,9 +1073,7 @@ tagged(rec : { | r }, t : string) : { tag : string | r } =
   { tag = t | rec }
 ```
 
-These types look a bit different from earlier examples. Here, the pipe (`|`) also appears at the type level. It serves a similar purpose: combining fields with an existing record type. The type variable `r` represents a *row*, which can be thought of as a type-level list of fields. A record type of this form is called *open*. By contrast, a *closed* record type explicitly lists all its fields.
-
-The following example illustrates the difference. Suppose we want to represent GPS coordinates with two fields, `lat` and `lng`:
+These types look a bit different from earlier examples. Here, the pipe (`|`) also appears at the type level. It serves a similar purpose: combining fields with an existing record type. The type variable `r` represents a *row*, which can be thought of as a type-level list of fields. A record type of this form is called *open*. By contrast, a *closed* record type explicitly lists all its fields. The following example illustrates the difference. Suppose we want to represent GPS coordinates with two fields, `lat` and `lng`:
 
 ```
 fn(p : { lat : float, lng : float }) => p.lat
@@ -1143,6 +1177,10 @@ Pattern matching proceeds by checking each branch in order until it finds one wh
 
 Match expressions must be *exhaustive*, meaning that all possible cases for a type are covered by the given patterns. If a case is missing, the compiler will reject the program. 
 
+TODO: example
+
+Wildcard patterns
+
 For instance, matching on integers can use literal patterns along with a wildcard to guarantee exhaustiveness:
 
 ```
@@ -1155,8 +1193,6 @@ For instance, matching on integers can use literal patterns along with a wildcar
 ```
 
 #### Patterns
-
-Variable, tuple, record, etc..
 
 | Type               | Example              | Description                                |                                                   
 | ------------------ | -------------------- | ------------------------------------------ |                                                   
