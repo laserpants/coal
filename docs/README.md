@@ -1166,8 +1166,8 @@ Variable, tuple, record, etc..
 | Literal            | `"Hello"`, `0`, `()` |                                            |                                                 
 | List-cons          | `x :: xs`            |                                            |                                                 
 | List (literal)     | `[a, b, c]`          |                                            |                                                 
-| Tuples             | `(lhs, rhs)`         |                                            |                                                 
-| Records            | `{ name = n \| _ }`  |                                            |                                                 
+| Tuple              | `(lhs, rhs)`         |                                            |                                                 
+| Record             | `{ name = n \| _ }`  |                                            |                                                 
 | As                 | `(lhs, _) as pair`   |                                            |                                                 
 | @                  | `Succ(@n)`           | See **Recursion, corecursion, and codata** |                                                 
 | Or                 | `1 or 2`             |      
@@ -1284,7 +1284,7 @@ If we pass this function to the Coal compiler, it is rejected with the following
 Name not in scope: factorial
 ```
 
-Referencing a function from within itself in this way is not possible in Coal. Instead, recursion needs to be expressed in terms of a pattern know as a *fold*. 
+To call a function from within itself in this way is not possible in Coal. Instead, recursion needs to be expressed in terms of a pattern know as a *fold*. 
 A fold takes some collection of data and combines it into a single result. A common instance is where an array of numbers is reduced into a single value, for example by continually adding each number to the parital sum.
 
 ```
