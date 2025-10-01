@@ -108,14 +108,16 @@ TODO
 
 ## Language overview
 
-  1. Modules
+### Table of contents
+
+  1. [Modules](#modules)
      - Imports
      - Exports
-  1. Top-level definitions
+  1. [Top-level definitions](#top-level-definitions)
      - Functions
      - Let-expressions
      - Data types 
-  1. Expression syntax
+  1. [Expression syntax](#expression-syntax)
      - Variables
      - Literal expressions
      - Function application
@@ -124,7 +126,7 @@ TODO
      - Lambda expressions
      - Operators
      - Comments
-  1. Types
+  1. [Types](#types)
      - Natural numbers
      - Unit
      - Lists
@@ -132,12 +134,12 @@ TODO
      - Option
      - Tuples
      - Records
-  1. Pattern matching
+  1. [Pattern matching](#pattern-matching)
      - Supported patterns
-  1. Traits
+  1. [Traits](#traits)
      - Higher-kinded traits
      - Trait inheritance
-  1. Recursion, corecursion, and codata
+  1. [Recursion, corecursion, and codata](#recursion-corecursion-and-codata)
      - Top-level folds and mutual recursion
      - Duality
 
@@ -433,8 +435,13 @@ let d : double = sum(0.5, 1.0, 1.5)
 
 #### Function application
 
-Unlike Haskell, ML, and OCaml, function applications are written using parentheses and commas between arguments &mdash; a syntax more akin to languages like C, Java, and Python. 
-So, for example, `concat("one", "two")` means the function `concat` applied to the arguments `"one"` and `"two"`.
+Unlike Haskell, ML, and OCaml, Coal uses parentheses and commas to separate arguments in function applications — a syntax more similar to languages like C, Java, or Python. For example:
+
+```
+concat("one", "two")
+```
+
+This applies the function `concat` to the arguments `"one"` and `"two"`.
 
 By default, functions in Coal are *curried*. There is a difference between a function that takes multiple arguments, and one that takes a single tuple as its argument. Consider the following two type signatures:
 
@@ -838,7 +845,7 @@ Its type is:
 length : List<a> -> nat
 ```
 
-Since lists are implemented in a chain-like linear manner, the time complexity of many list operations, including `length`, is O(n).
+Since lists are laid out in a chain-like manner in memory, the time complexity of many list operations, including `length`, is O(n).
 
 ###### Head, tail, and uncons
 
@@ -920,10 +927,6 @@ TODO
 
 TODO
 
-##### Higher-order list functions
-
-TODO
-
 ###### Mapping over a list
 
 TODO
@@ -933,6 +936,10 @@ TODO
 TODO
 
 ###### Reducing a list
+
+TODO
+
+#### Useful higher-order list functions
 
 TODO
 
@@ -1210,9 +1217,11 @@ The `match` expression in Coal is used to deconstruct data based on its shape, e
 
 Patterns can take several forms, including data constructors, literals, tuples, records, variables, wildcards, or combinations of these. See below for a complete list of available patterns. 
 
-Pattern matching proceeds by checking each branch in order until it finds one whose pattern matches the value. The corresponding right-hand side expression is then evaluated, with any variables in the pattern bound to the matched sub-components.
+Pattern matching proceeds by checking each clause in order until it finds one whose pattern matches the value. The corresponding right-hand side expression is then evaluated, with any variables in the pattern bound to the matched sub-components.
 
-Match expressions must be *exhaustive*, meaning that all possible cases for a type are covered by the given patterns. If a case is missing, the compiler will reject the program. 
+TODO: example
+
+An important point is that match expressions must be *exhaustive*, meaning that all possible cases for a type are covered by the given patterns. If a case is missing, the compiler will reject the program. 
 
 TODO: example
 
