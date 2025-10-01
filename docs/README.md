@@ -45,7 +45,7 @@ A distinction is made between ordinary, finite data, which is produced and consu
 
 In this example, the `@` in the field name causes the expression on the right (`n + 1`) to become the next seed value, which is fed back into `enum_from` to generate the rest of the stream.
 
-These code snippets illustrate two distinct modes of recursive control flow. If you are familiar with [recursion schemes](https://blog.sumtypeofway.com/posts/introduction-to-recursion-schemes.html) in a language like Haskell, recursion in Coal is based on the same principles. In that framework, `fold` and `unfold` are called *catamorphisms* and *anamorphisms*. Jump to **Recursion, corecursion, and codata** for a more detailed description of these constructs.
+These code snippets illustrate two distinct modes of recursive control flow. If you are familiar with [recursion schemes](https://blog.sumtypeofway.com/posts/introduction-to-recursion-schemes.html) in a language like Haskell, recursion in Coal is based on the same principles. In that framework, `fold` and `unfold` are called *catamorphisms* and *anamorphisms*, respectively. Jump to **Recursion, corecursion, and codata** for a more detailed description of `fold` and `unfold`.
 
 ### Programs = Expressions + Effects
 
@@ -793,7 +793,7 @@ type List<a>
   | a :: List<a>
 ```
 
-Here `::` is the *cons*-operator, which constructs a new list by prepending an element to an existing list.
+Here `::` denotes the *cons*-operator, which constructs a new list by prepending an element to an existing list.
 
 Lists can be deconstructed using pattern matching. For example, the following function removes the first element from a list if it happens to be a zero:
 
