@@ -504,7 +504,7 @@ let (x, y) = (1, 2) in x + y
 let { baz = { f = a | _ } } = faz(4)
 ```
 
->  #### A note about let-generalization
+> #### A note about let-generalization
 >
 > In some ways, a let-binding is interchangeable with a lambda function. For example, writing `let x = 1 in increment(x)` yields the same result as `(fn(x) => increment(x))(1)`.
 > But besides being more readable, the let-binding also serves another purpose. In [Hindley-Milner](https://en.wikipedia.org/wiki/Hindley%E2%80%93Milner_type_system) languages, it is let-bindings that introduce polymorphism. Consider the following expression, which doesn't type check:
@@ -861,11 +861,35 @@ tail : List<a> -> Option<List<a>>
 uncons : List<a> -> Option<(a, List<a>)>
 ```
 
-> The operator `|.` is used in the following examples. It is an infix operator that denotes function application, but with the arguments reversed. So the expression 
+> #### Reverse function application operator
+> 
+> The operator `|.` is used in the following examples. It is an infix operator that denotes function application, but with the arguments reversed. So, for example, the expression 
 > ```
 >   xs |.map(f)
 > ```
-> is really syntactic sugar for `map(f, xs)` where the first is meant to resemble object-oriented style of programming. 
+> is really syntactic sugar for `map(f, xs)`. This operator is very convenient when chaining together multiple function calls. For example:
+>
+> ```
+> circle({ radius = 5.0 })
+>   |.fill("blue")
+>   |.set_position(10.0, 5.0)
+>   $.draw_shape(canvas)
+> ```
+>
+> TODO
+>
+> ```
+> circle : Config -> Shape
+> fill : string -> Shape -> Shape
+> set_position : float -> float -> Shape -> Shape
+> draw_shape : Shape -> Canvas -> Canvas
+> ```
+>
+> TODO
+>
+> ```
+> draw(set_position(10, 5, fill("blue", circle({ radius = 5.0 }))), canvas)
+> ```
 
 ###### Take, drop and slice
 
