@@ -597,8 +597,8 @@ Just like with let-bindings, the arguments in a lambda-function are patterns:
 
 |               | Description            | Type                                  |                                                                        
 | ------------- | ---------------------- | ------------------------------------- |                                                                        
-| `==`          | Equality               |                                       |                                                                        
-| `!=`          | Inequality             |                                       |                                                                        
+| `==`          | Equality               | `∀n : n -> n -> bool with Equal(n)`   |                                                                        
+| `!=`          | Inequality             | `∀n : n -> n -> bool with Equal(n)`   |                                                                        
 | `<`           | Less than              | `∀n : n -> n -> bool with Ordered(n)` |                                           
 | `>`           | Greater than           | `∀n : n -> n -> bool with Ordered(n)` |                                                                        
 | `<=`          | Less than or equal     | `∀n : n -> n -> bool with Ordered(n)` |                                           
