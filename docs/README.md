@@ -53,7 +53,7 @@ Coal is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-
 
 ## Project status and roadmap
 
-#### Current milestone: 1
+### Current milestone: 1
 
 The following is a list of features that are either missing or incomplete, and :
 
@@ -61,7 +61,7 @@ The following is a list of features that are either missing or incomplete, and :
 | -------------------------------- | ---------------------- | ---------------- |                                                                        
 | Module imports/exports           | 1                      |                  |
 
-#### Roadmap
+### Roadmap
 
 | Feature                          | Milestone              | Criteria         |                                                                        
 | -------------------------------- | ---------------------- | ---------------- |                                                                        
@@ -108,7 +108,7 @@ TODO
 
 ## Language overview
 
-### Modules and imports
+### Modules 
 
 Projects in Coal are organized as collections of *modules*. Modules provide a way to group related functionality into distinct [namespaces](https://en.wikipedia.org/wiki/Namespace). A module can contain functions, type definitions, traits, and other language constructs, typically focused on a specific purpose within a library or application.
 
@@ -146,7 +146,7 @@ An `import` statement is used to bring in functions and other definitions from o
 import List(concat, head, tail)
 ```
 
-A *namespace* import allows you to access all functions, types, and other definitions from a module via their qualified names. A qualified name is formed by prefixing the name with the path of the module:
+The special `namespace` keyword allows you to access all functions, types, and other definitions from a module via their qualified names. A qualified name is formed by prefixing the name with the path of the module:
 
 ```
 // Import the List module under its namespace
@@ -183,6 +183,17 @@ A type annotion can be given to indicate a function's return type; as in the fol
     n % 2 == 0
 ```
 
+##### Main
+
+TODO
+
+```
+module Main {
+
+  fun main() =
+    ...
+```
+
 #### Let-expressions
 
 Expressions that are not functions can also be defined in this scope, using the `let` keyword:
@@ -205,8 +216,6 @@ module Utils {
     , "Saturday"
     , "Sunday" 
     ]
-
-}
 ```
 
 Type annotions look similar to those for functions:
@@ -221,17 +230,75 @@ Since a `let` can hold any other expression, top-level functions may also be def
 let add = fn(x, y) => x + y     // This is the same as fun(x, y) = x + y
 ```
 
-#### Main
+#### Data types
 
-TODO
+User-defined data types in Coal are of the product-sum variety. These types are introduced with the `type` keyword. 
+
+A *product* type combines multiple fields into one single value: All of the components appear together in the constructed data. For example, an RGB color triplet that contains individual red, green, and blue values:
 
 ```
-module Main {
+type Color = Rgb(int8, int8, int8)
+```
 
-  fun main() =
-    ...
-    
-}
+A *sum* type represents a choice between alternatives: A value belongs to exactly one of the specified variants. For example, a shape that can be either a `Circle` or a `Rectangle`:
+
+```
+type Shape = Circle | Rectangle
+```
+
+More complex types can be built by combining product and sum constructors. The following is a type that defines a binary tree, parameterized by the type (`a`) of its nodes:
+
+```
+type Tree<a> 
+  = Leaf
+  | Node(a, Tree<a>, Tree<a>)
+```
+
+This definition says that a `Tree<a>` is either:
+
+- a `Leaf` (the empty tree), or
+- a `Node` containing a value of type `a` along with two sub-trees (the left and right branches).
+
+Using this type, we can represent any finite binary tree. For example, here is a tree of integers:
+
+```
+//          (4)
+//          / \
+//       ---------
+//       /       \
+//     (2)       (6)
+//    -----     -----
+//    /   \     /   \ 
+//  (1)   (3) (5)   (7)  
+
+let tree_of_gondor = 
+  Node 
+    ( 4
+    , Node
+        ( 2
+        , Node(1, Leaf, Leaf)
+        , Node(3, Leaf, Leaf)
+        )
+    , Node
+        ( 6
+        , Node(5, Leaf, Leaf)
+        , Node(7, Leaf, Leaf)
+        )
+    )
+```
+
+The structure of the tree is entirely determined by its constructors (`Leaf` and `Node`), which makes recursion natural. 
+
+Algebraic data types are especially useful for describing language grammars and other hierarchical structures. Consider this JSON representation:
+
+```
+  type JsonValue
+    = Null
+    | Bool(bool)
+    | Number(double)
+    | String(string)
+    | Array(List<JsonValue>)
+    | Object(List<(string, JsonValue)>)
 ```
 
 ### Expression syntax
@@ -280,7 +347,7 @@ fun go(x) =
 
 A *literal* is an expression that directly represents a fixed value of one of the built-in primitive types, such as integers, booleans, or strings.
 
-#### Built-in language primitives
+##### Built-in language primitives
 
 Coal defines the following built-in types:
 
@@ -347,7 +414,7 @@ The first of these is in curried form, which is usually more convenient to work 
 fun add(x, y) = x + y
 ```
 
-Using partial application, we can create a new function `increment` by supplying just one argument:
+Using partial application, we can create a new function `increment` by supplying just one argument to `add`:
 
 ```
 let increment = add(1)
@@ -414,7 +481,7 @@ let { baz = { f = a | _ } } = faz(4)
 >       (id(3 : int32), id("three"))
 > ```
 
-###### Name binding semantics
+##### Name binding semantics
 
 A subtle but important detail that makes let-bindings in Coal different from those in most other languages is that the identifier introduced by a `let` is **not in scope within the definition itself**. In other words, `let x = e1 in e2` makes `x` available in `e2`, but not in `e1`. In OCaml (and F#) this is also the case for the standard `let` keyword. However, in these languages, a special `let rec` syntax makes it possible to evade this restriction. Coal doesn't have an equivalent to `let rec`.
 This prevents non-well-founded expressions, such as `let f = f in f`, but more generally, makes it impossible for any function to refer to itself. 
@@ -543,7 +610,6 @@ Just like with let-bindings, the arguments in a lambda-function are patterns:
 | ------------- | ---------------------- | ------------------------------- |                                                                        
 | ????          | String concatenation   | `string -> string -> string`    |                                                                        
 
-
 #### Comments
 
 There are two types of comments:
@@ -574,9 +640,9 @@ There are two types of comments:
     ...
 ```
 
-### Types
+### More types
 
-##### Unit
+#### Unit
 
 The `unit` type has only a single value, written as an empty pair of parentheses: `()`. At first glance this type may appear to serve no purpose, but it has several practical uses. For example, it is often useful to indicate that a function does not take any meaningful input. In C, we might write the following function:
 
@@ -594,7 +660,7 @@ This is where the `unit` type comes in handy:
 fun five(() : unit) : int32 = 5
 ```
 
-###### Two for the price of one
+##### Two pairs of parentheses for the price of one
 
 Removing the type annotation, the above becomes `fun five(()) = 5`, which is perfectly valid. But since an expression like `five()` doesn't have any other meaningful interpretation, the compiler accepts this as a shorthand for the slightly awkward double-parentheses.
 
@@ -616,70 +682,6 @@ Keep in mind that this only works with `unit`. For non-empty tuples, you still n
 
 ```
 fun fst4((fst, _, _, _)) = fst
-```
-
-#### Algebraic data types
-
-User-defined data types in Coal are of the product-sum variety. These types are introduced with the `type` keyword. 
-
-- A *product* type combines multiple fields into one single value: All of the components appear together in the constructed data (e.g. an RGB color triplet that contains individual red, green, and blue values).
-
-   ```
-   type Color = Rgb(int8, int8, int8)
-   ```
-
-- A *sum* type represents a choice between alternatives: A value belongs to exactly one of the specified variants (e.g. a shape that can be either a `Circle` or a `Rectangle`).
-
-   ```
-   type Shape = Circle | Rectangle
-   ```
-
-More interesting types can be formed from combinations of product and sum constructors. The following example is a type that defines a binary tree, parameterized by the type (`a`) of its nodes:
-
-```
-type Tree<a> 
-  = Leaf
-  | Node(a, Tree<a>, Tree<a>)
-```
-
-Here is how a basic tree is described in terms of this type:
-
-```
-//          (4)
-//          / \
-//       ---------
-//       /       \
-//     (2)       (6)
-//    -----     -----
-//    /   \     /   \ 
-//  (1)   (3) (5)   (7)  
-
-let tree_of_gondor = 
-  Node 
-    ( 4
-    , Node
-        ( 2
-        , Node(1, Leaf, Leaf)
-        , Node(3, Leaf, Leaf)
-        )
-    , Node
-        ( 6
-        , Node(5, Leaf, Leaf)
-        , Node(7, Leaf, Leaf)
-        )
-    )
-```
-
-Algebraic data types work very well to describe language grammars.
-
-```
-  type JsonValue
-    = JsonNull
-    | JsonBool(bool)
-    | JsonNumber(double)
-    | JsonString(string)
-    | JsonArray(List<JsonValue>)
-    | JsonObject(List<(string, JsonValue)>)
 ```
 
 #### Natural numbers
@@ -891,11 +893,11 @@ TODO
 
 TODO
 
-###### Filtering a list
+##### Filtering a list
 
 TODO
 
-###### Reducing a list
+##### Reducing a list
 
 TODO
 
