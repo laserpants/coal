@@ -111,31 +111,50 @@ TODO
 ### Table of contents
 
   1. [Modules](#modules)
-     - Imports
-     - Exports
+     - [Imports](#imports)
+     - [Exports](#exports)
   1. [Top-level definitions](#top-level-definitions)
-     - Functions
-     - Let-expressions
-     - Data types 
+     - [Functions](#functions)
+     - [Let-expressions](#let-expressions)
+     - [Data types](#data-types)
   1. [Expression syntax](#expression-syntax)
-     - Variables
-     - Literal expressions
-     - Function application
-     - If-then-else
-     - Let-bindings
-     - Lambda expressions
-     - Operators
-     - Comments
+     - [Variables](#variables)
+       - [Naming rules](#naming-rules)
+       - [Reserved keywords](#reserved-keywords)
+       - [Shadowing considered harmful](#shadowing-considered-harmful)
+     - [Literal expressions](#literal-expressions)
+       - [Built-in language primitives](#built-in-language-primitives)
+       - [Integral types](#integral-types)
+     - [Function application](#function-application)
+     - [If-then-else](#if-then-else)
+     - [Let-bindings](#let-bindings)
+       - [Name binding semantics](#name-binding-semantics)
+     - [Lambda expressions](#lambda-expressions)
+     - [Operators](#operators)
+       - [Arithmetic and comparison](#arithmetic-and-comparison)
+       - [Logical](#logical)
+       - [Data](#data)
+       - [Function composition and pipelining](#function-composition-and-pipelining)
+       - [List manipulation](#list-manipulation)
+       - [String manipulation](#string-manipulation)
+     - [Comments](#comments)
   1. [Types](#types)
-     - Natural numbers
-     - Unit
-     - Lists
-     - Predicates
-     - Option
-     - Tuples
-     - Records
+     - [Natural numbers](#natural-numbers)
+     - [Unit](#unit)
+     - [Lists](#lists)
+       - [Common list operations](#common-list-operations)
+       - [Useful higher-order list functions](#useful-higher-order-list-functions)
+       - [List predicates](#list-predicates)
+     - [Option](#option)
+     - [Tuples](#tuples)
+     - [Records](#records)
+       - [Field access](#field-access)
+       - [Extending records](#extending-records)
+       - [Open and closed records](#open-and-closed-records)
+       - [Pattern matching over records](#pattern-matching-over-records)
+       - [Deconstructing records](#deconstructing-records)
   1. [Pattern matching](#pattern-matching)
-     - Supported patterns
+     - [Supported patterns](#supported-patterns)
   1. [Traits](#traits)
      - Higher-kinded traits
      - Trait inheritance
@@ -640,13 +659,13 @@ Just like with let-bindings, the arguments in a lambda-function are patterns:
 | `$.`          | Flipped reverse application |                                                                         
 | `.$`          | Flipped forward application |                                                                         
 
-##### Lists
+##### List manipulation
 
 |               | Description            | Type                                 |                                                                         
 | ------------- | ---------------------- | ------------------------------------ |                                                                        
 | `++`          | List concatenation     | `∀a : List<a> -> List<a> -> List<a>` |                                                                        
 
-##### Strings
+##### String manipulation
 
 |               | Description            | Type                            |                                                                         
 | ------------- | ---------------------- | ------------------------------- |                                                                        
@@ -863,7 +882,7 @@ uncons : List<a> -> Option<(a, List<a>)>
 
 > #### Reverse function application operator
 > 
-> The operator `|.` is used in the following examples. It is an infix operator that denotes function application, but with the arguments reversed. So, for example, the expression 
+> The operator `|.` is used in the following examples. It is an infix operator that performs function application, but with the arguments reversed. So, for example, the expression 
 > ```
 >   xs |.map(f)
 > ```
@@ -943,13 +962,15 @@ slice : nat -> nat -> List<a> -> List<a>
 // == [3, 4, 5]
 ```
 
-##### List concatenation
+###### List concatenation
 
 TODO
 
-##### Sorting
+###### Sorting
 
 TODO
+
+##### Useful higher-order list functions
 
 ###### Mapping over a list
 
@@ -963,11 +984,7 @@ TODO
 
 TODO
 
-#### Useful higher-order list functions
-
-TODO
-
-#### Predicates
+##### List predicates
 
 TODO
 
@@ -1176,7 +1193,7 @@ rec : { | r }
 
 In this type, the variable `r` captures all fields of the input record, so *n* is zero. This explains the somewhat unusual-looking type `{ | r }`.
 
-##### Pattern matching
+##### Pattern matching over records
 
 As with other data types, it is possible to pattern match on records. In this context, the right-hand side of a field acts as the binding pattern used to match the sub-expression. The simplest case is to bind a field directly to a variable:
 
@@ -1275,7 +1292,7 @@ For instance, matching on integers can use literal patterns along with a wildcar
 | Tuple              | `(lhs, rhs)`         | Matches a tuple by decomposing it into its components.                                          |                                                 
 | Record             | `{ name = n \| _ }`  | Matches a record by specifying patterns for one or more fields. See **Pattern matching** under **Records** for details. |                                                 
 | As                 | `(lhs, _) as pair`   | Matches the inner pattern, while also binding the entire value to a variable.                   |                                                 
-| @                  | `Succ(@n)`           | See **Recursion, corecursion, and codata**                                                      |                                                 
+| @                  | `Succ(@n)`           | See **Recursion, corecursion, and codata**.                                                     |                                                 
 | Or                 | `1 or 2`             | Matches if the value satisfies at least one of the given alternative patterns.                  |      
 
 ### Traits
