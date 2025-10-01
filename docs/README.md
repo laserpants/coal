@@ -43,9 +43,9 @@ A distinction is made between ordinary, finite data, which is produced and consu
   let nats = enum_from(0)
 ```
 
-In this code, the `@` in the field name causes the expression on the right (`n + 1`) to become the next seed value, which is fed back into `enum_from` to generate the rest of the stream.
+In this example, the `@` in the field name causes the expression on the right (`n + 1`) to become the next seed value, which is fed back into `enum_from` to generate the rest of the stream.
 
-These code snippets illustrate two distinct modes of recursive control flow. If you are familiar with [recursion schemes](https://blog.sumtypeofway.com/posts/introduction-to-recursion-schemes.html) in a language like Haskell, recursion in Coal is based on the same principles. In that framework, `fold` and `unfold` are called *catamorphisms* and *anamorphisms*. Jump to **Recursion, corecursion, and codata** for a more detailed explanation of how these constructs work in Coal.
+These code snippets illustrate two distinct modes of recursive control flow. If you are familiar with [recursion schemes](https://blog.sumtypeofway.com/posts/introduction-to-recursion-schemes.html) in a language like Haskell, recursion in Coal is based on the same principles. In that framework, `fold` and `unfold` are called *catamorphisms* and *anamorphisms*. Jump to **Recursion, corecursion, and codata** for a more detailed description of these constructs.
 
 ### Programs = Expressions + Effects
 
@@ -107,6 +107,38 @@ TODO
 TODO
 
 ## Language overview
+
+  1. Modules
+     - Imports
+  1. Top-level definitions
+     - Functions
+     - Let-expressions
+     - Data types 
+  1. Expression syntax
+     - Variables
+     - Literal expressions
+     - Function application
+     - If-then-else
+     - Let-bindings
+     - Lambda expressions
+     - Operators
+     - Comments
+  1. Types
+     - Natural numbers
+     - Unit
+     - Lists
+     - Predicates
+     - Option
+     - Tuples
+     - Records
+  1. Pattern matching
+     - Supported patterns
+  1. Traits
+     - Higher-kinded traits
+     - Trait inheritance
+  1. Recursion, corecursion, and codata
+     - Top-level folds and mutual recursion
+     - Duality
 
 ### Modules 
 
@@ -640,49 +672,7 @@ There are two types of comments:
     ...
 ```
 
-### More types
-
-#### Unit
-
-The `unit` type has only a single value, written as an empty pair of parentheses: `()`. At first glance this type may appear to serve no purpose, but it has several practical uses. For example, it is often useful to indicate that a function does not take any meaningful input. In C, we might write the following function:
-
-```
-int five() {
-  /* ... */
-  
-  return 5;
-}
-```
-
-This is where the `unit` type comes in handy:
-
-```
-fun five(() : unit) : int32 = 5
-```
-
-##### Two pairs of parentheses for the price of one
-
-Removing the type annotation, the above becomes `fun five(()) = 5`, which is perfectly valid. But since an expression like `five()` doesn't have any other meaningful interpretation, the compiler accepts this as a shorthand for the slightly awkward double-parentheses.
-
-```
-fun five() = 5   // i.e., fun five(() : unit) = 5
-```
-
-Similarly, when calling a function that only takes a unit value as argument, the extra parentheses can be omitted:
-
-```
-let 
-  x = 
-    five()   // we could have written five(()) here
-  in
-    x + 5
-```
-
-Keep in mind that this only works with `unit`. For non-empty tuples, you still need the extra parentheses:
-
-```
-fun fst4((fst, _, _, _)) = fst
-```
+### Types
 
 #### Natural numbers
 
@@ -729,6 +719,48 @@ unpack_nat : nat -> int32
 
 Converting back and forth between these are constant time (**O**(1)) operations.
 
+#### Unit
+
+The `unit` type has only a single value, written as an empty pair of parentheses: `()`. At first glance this type may appear to serve no purpose, but it has several practical uses. For example, it is often useful to indicate that a function does not take any meaningful input. In C, we might write the following function:
+
+```
+int five() {
+  /* ... */
+  
+  return 5;
+}
+```
+
+This is where the `unit` type comes in handy:
+
+```
+fun five(() : unit) : int32 = 5
+```
+
+##### Two pairs of parentheses for the price of one
+
+Removing the type annotation, the above becomes `fun five(()) = 5`, which is perfectly valid. But since an expression like `five()` doesn't have any other meaningful interpretation, the compiler accepts this as a shorthand for the slightly awkward double-parentheses.
+
+```
+fun five() = 5   // i.e., fun five(() : unit) = 5
+```
+
+Similarly, when calling a function that only takes a unit value as argument, the extra parentheses can be omitted:
+
+```
+let 
+  x = 
+    five()   // we could have written five(()) here
+  in
+    x + 5
+```
+
+Keep in mind that this only works with `unit`. For non-empty tuples, you still need the extra parentheses:
+
+```
+fun fst4((fst, _, _, _)) = fst
+```
+
 #### Lists
 
 A *list* is an ordered collection in which all elements share the same type. Lists are one of the most fundamental data structures in functional programming. They are commonly used to store and manipulate collections of data, and serve as a building block for many higher-level abstractions.
@@ -745,7 +777,7 @@ For example:
 [1, 1, 2, 5, 14, 42, 132, 429] : List<int32>
 ```
 
-Lists are defined inductively and implemented internally as a *singly linked list*. This means that a list of type `List<a>` is either:
+Lists are defined inductively and implemented internally as a [singly linked list](https://en.wikipedia.org/wiki/Linked_list). This means that a list of type `List<a>` is either:
 
 1. the empty list `[]`; or
 2. a value of type `a` (the *head*) followed by another list of type `List<a>` (the *tail*).
@@ -803,7 +835,7 @@ Its type is:
 length : List<a> -> nat
 ```
 
-Since lists are implemented in a chain-like manner, the time complexity of many list operations, including `length`, is O(n).
+Since lists are implemented in a chain-like linear manner, the time complexity of many list operations, including `length`, is O(n).
 
 ###### Head, tail, and uncons
 
@@ -885,19 +917,19 @@ TODO
 
 TODO
 
-#### Higher-order list functions
+##### Higher-order list functions
 
 TODO
 
-##### Mapping over a list
+###### Mapping over a list
 
 TODO
 
-##### Filtering a list
+###### Filtering a list
 
 TODO
 
-##### Reducing a list
+###### Reducing a list
 
 TODO
 
@@ -1196,7 +1228,7 @@ For instance, matching on integers can use literal patterns along with a wildcar
     }
 ```
 
-#### Patterns
+#### Supported patterns
 
 | Type               | Example              | Description                                |                                                   
 | ------------------ | -------------------- | ------------------------------------------ |                                                   
