@@ -643,7 +643,7 @@ Just like with let-bindings, the arguments in a lambda-function are patterns:
 
 |               | Description            | Type                            |                                                                         
 | ------------- | ---------------------- | ------------------------------- |                                                                        
-| ????          | String concatenation   | `string -> string -> string`    |                                                                        
+| `...`         | String concatenation   | `string -> string -> string`    |                                                                        
 
 #### Comments
 
@@ -900,7 +900,7 @@ Combining `drop` and `take` allows you to obtain a range of elements from within
 // == [3, 4, 5]
 ```
 
-The function `slice` does exactly this, in a way that allows you to specify the range of elements to keep from the input list:
+The function `slice` does exactly this, in a way that allows you to specify the range of elements to extract from the input list:
 
 ```
 slice : nat -> nat -> List<a> -> List<a>
