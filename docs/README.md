@@ -595,14 +595,14 @@ Just like with let-bindings, the arguments in a lambda-function are patterns:
 | `/`           | Division               |                                    |                                                                        
 | `^`           | Exponentiation         |                                    |                                                                        
 
-|               | Description            | Type                          |                                                                        
-| ------------- | ---------------------- | ----------------------------- |                                                                        
-| `==`          | Equality               |                               |                                                                        
-| `!=`          | Inequality             |                               |                                                                        
-| `<`           | Less than              |                               |                                           
-| `>`           | Greater than           |                               |                                                                        
-| `<=`          | Less than or equal     |                               |                                           
-| `>=`          | Greater than or equal  |                               |                                                                        
+|               | Description            | Type                                  |                                                                        
+| ------------- | ---------------------- | ------------------------------------- |                                                                        
+| `==`          | Equality               |                                       |                                                                        
+| `!=`          | Inequality             |                                       |                                                                        
+| `<`           | Less than              | `∀n : n -> n -> bool with Ordered(n)` |                                           
+| `>`           | Greater than           | `∀n : n -> n -> bool with Ordered(n)` |                                                                        
+| `<=`          | Less than or equal     | `∀n : n -> n -> bool with Ordered(n)` |                                           
+| `>=`          | Greater than or equal  | `∀n : n -> n -> bool with Ordered(n)` |                                                                        
 
 |               | Description            | Type                          |                                                                        
 | ------------- | ---------------------- | ----------------------------- |                                                                        
@@ -618,9 +618,9 @@ Just like with let-bindings, the arguments in a lambda-function are patterns:
 
 ##### Data
 
-|               | Description            |                                                                         
-| ------------- | ---------------------- |                                                                         
-| `.`           | Record field access    |                                                                         
+|               | Description            |                |                                                          
+| ------------- | ---------------------- | -------------- |                                                                      
+| `.`           | Record field access    | See ?          |                                                               
 
 ##### Function composition and pipelining
 
@@ -1208,9 +1208,7 @@ The `match` expression in Coal is used to deconstruct data based on its shape, e
     }
 ```
 
-Patterns can take several forms, including data constructors, literals, tuples, records, variables, wildcards, or combinations of these.
-
-See below for a complete list of available patterns. 
+Patterns can take several forms, including data constructors, literals, tuples, records, variables, wildcards, or combinations of these. See below for a complete list of available patterns. 
 
 Pattern matching proceeds by checking each branch in order until it finds one whose pattern matches the value. The corresponding right-hand side expression is then evaluated, with any variables in the pattern bound to the matched sub-components.
 
@@ -1239,7 +1237,7 @@ For instance, matching on integers can use literal patterns along with a wildcar
 | Variable           | `x`                  |                                            |                                                 
 | Wildcard           | `_`                  | Ignores the matched value                  |
 | Literal            | `"Hello"`, `0`, `()` |                                            |                                                 
-| List-cons          | `x :: xs`            |                                            |                                                 
+| List constructor   | `x :: xs`            |                                            |                                                 
 | List (literal)     | `[a, b, c]`          |                                            |                                                 
 | Tuple              | `(lhs, rhs)`         |                                            |                                                 
 | Record             | `{ name = n \| _ }`  |                                            |                                                 
