@@ -388,7 +388,7 @@ Coal defines the following built-in types:
 
 | Type               | Description                             | Example values            |                       
 | ------------------ | --------------------------------------- | ------------------------- |                       
-| `bool`             | Booleans                                | `true`, `false`         |                       
+| `bool`             | Booleans                                | `true`, `false`           |                       
 | `char`             | A single Unicode character              | `'a'`, `'b'`, `'🤖'`, ... |                        
 | `float`            | Single precision floating point numbers | `3.1519f`                 |                        
 | `double`           | Double precision floating point numbers | `3.141592653589793`       |                        
@@ -643,7 +643,7 @@ Just like with let-bindings, the arguments in a lambda-function are patterns:
 
 |               | Description            | Type                            |                                                                         
 | ------------- | ---------------------- | ------------------------------- |                                                                        
-| `...`         | String concatenation   | `string -> string -> string`    |                                                                        
+| `+++`         | String concatenation   | `string -> string -> string`    |                                                                        
 
 #### Comments
 
