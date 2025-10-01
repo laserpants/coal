@@ -110,6 +110,7 @@ TODO
 
   1. Modules
      - Imports
+     - Exports
   1. Top-level definitions
      - Functions
      - Let-expressions
@@ -161,15 +162,6 @@ src
         └── Trigonometry.coal
 ```
 
-In a module declaration, the path identifier is followed by an optional list of exported names enclosed in parentheses. Only exported names are visible outside the module (or *public* in OOP terminology).
-
-```
-module Utils.Math.Trigonometry(sin, cos, tan) {
-  // ...
-```
-
-If this list is left out, everything in the module is exported.
-
 #### Imports
 
 An `import` statement is used to bring in functions and other definitions from other modules. As in most other languages, these must appear at the beginning of a module, preceding any other code.
@@ -187,6 +179,17 @@ import namespace List
   // And use it like this:
   let zs = List.concat(xs, ys)
 ```
+
+#### Exports
+
+In a module declaration, the path identifier is followed by an optional list of exported names enclosed in parentheses. Only exported names are visible outside the module (or *public* in OOP terminology).
+
+```
+module Utils.Math.Trigonometry(sin, cos, tan) {
+  // ...
+```
+
+If this list is left out, everything in the module is exported.
 
 ### Top-level definitions
 
