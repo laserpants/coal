@@ -618,9 +618,9 @@ Just like with let-bindings, the arguments in a lambda-function are patterns:
 
 ##### Data
 
-|               | Description            |                |                                                          
-| ------------- | ---------------------- | -------------- |                                                                      
-| `.`           | Record field access    | See ?          |                                                               
+|               | Description            |                      |                                                          
+| ------------- | ---------------------- | -------------------- |                                                                      
+| `.`           | Record field access    | See **Field access** |                                                               
 
 ##### Function composition and pipelining
 
@@ -1078,7 +1078,7 @@ let language = { name = "Java", paradigm = "OOP" }
 
 ##### Extending records
 
-Records in Coal are *extensible*, meaning that new fields can be added to a record at run time.
+Records in Coal are characterized as *extensible*, meaning that new fields can be added to a record at run time.
 
 ```
 fun tagged(rec, t : string) = { tag = t | rec }  
@@ -1231,19 +1231,19 @@ For instance, matching on integers can use literal patterns along with a wildcar
 
 #### Supported patterns
 
-| Type               | Example              | Description                                |                                                   
-| ------------------ | -------------------- | ------------------------------------------ |                                                   
-| Constructor        | `Color(r, g, b)`     |                                            |                                                 
-| Variable           | `x`                  |                                            |                                                 
-| Wildcard           | `_`                  | Ignores the matched value                  |
-| Literal            | `"Hello"`, `0`, `()` |                                            |                                                 
-| List constructor   | `x :: xs`            |                                            |                                                 
-| List (literal)     | `[a, b, c]`          |                                            |                                                 
-| Tuple              | `(lhs, rhs)`         |                                            |                                                 
-| Record             | `{ name = n \| _ }`  |                                            |                                                 
-| As                 | `(lhs, _) as pair`   |                                            |                                                 
-| @                  | `Succ(@n)`           | See **Recursion, corecursion, and codata** |                                                 
-| Or                 | `1 or 2`             |      
+| Type               | Example              | Description                                                                                     |                                                   
+| ------------------ | -------------------- | ----------------------------------------------------------------------------------------------- |                                                   
+| Constructor        | `Color(r, g, b)`     | Matches a value built with a specific data constructor, binding sub-components to variables.    |                                                 
+| Variable           | `x`                  | Matches any value and binds it to the variable.                                                 |                                                 
+| Wildcard           | `_`                  | Ignores the matched value                                                                       |
+| Literal            | `"Hello"`, `0`, `()` | Matches values that are exactly equal to the given literal.                                     |                                                 
+| List constructor   | `x :: xs`            | Matches a list by separating it into head and tail.                                             |                                                 
+| List literal       | `[f, s, t]`          | Matches a list of fixed length with elements matching the given sub-patterns.                   |                                                 
+| Tuple              | `(lhs, rhs)`         | Matches a tuple by decomposing it into its components.                                          |                                                 
+| Record             | `{ name = n \| _ }`  | Matches a record by specifying patterns for one or more fields. See **Pattern matching** under **Records** for details. |                                                 
+| As                 | `(lhs, _) as pair`   | Matches the inner pattern, while also binding the entire value to a variable.                   |                                                 
+| @                  | `Succ(@n)`           | See **Recursion, corecursion, and codata**                                                      |                                                 
+| Or                 | `1 or 2`             | Matches if the value satisfies at least one of the given alternative patterns.                  |      
 
 ### Traits
 
