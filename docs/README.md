@@ -191,7 +191,7 @@ An `import` statement is used to bring in functions and other definitions from o
 import List(concat, head, tail)
 ```
 
-The special `namespace` keyword allows you to access all functions, types, and other definitions from a module via their qualified names. A qualified name is formed by prefixing the name with the path of the module:
+The special `namespace` keyword allows you to import and access all functions, types, and other definitions from a module via their qualified names. A qualified name is formed by prefixing the name with the path of the module:
 
 ```
 // Import the List module under its namespace
@@ -1033,7 +1033,7 @@ Just like lists, tuples are ordered sequences of values. Unlike lists, however, 
 (<expr_1 : t_1>, <expr_2 : t_2>, ..., <expr_n : t_n>) : (t_1, t_2, ..., t_n)
 ```
 
-##### Examples:
+For example:
 
 ```
 (10, "covfefe", false)  // The type of this tuple is: (int32, string, bool)
