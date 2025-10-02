@@ -155,6 +155,7 @@ TODO
        - [Deconstructing records](#deconstructing-records)
   1. [Pattern matching](#pattern-matching)
      - [Supported patterns](#supported-patterns)
+     - [Totality requirement](#totality-requirement)
   1. [Traits](#traits)
      - Higher-kinded traits
      - Trait inheritance
@@ -185,7 +186,7 @@ src
 
 #### Imports
 
-An `import` statement is used to bring in functions and other definitions from other modules. As in most other languages, these must appear at the beginning of a module, preceding any other code.
+An `import` statement is used to bring in functions and other definitions from other modules. These must appear at the beginning of a module, preceding any other code.
 
 ```
 import List(concat, head, tail)
@@ -290,13 +291,13 @@ let add = fn(x, y) => x + y     // This is the same as fun(x, y) = x + y
 
 User-defined data types in Coal are of the product-sum variety. These types are introduced with the `type` keyword. 
 
-A *product* type combines multiple fields into one single value: All of the components appear together in the constructed data. For example, an RGB color triplet that contains individual red, green, and blue values:
+A *product* type combines multiple fields into one single value: All of the components appear together in the constructed data. An RGB color triplet that contains individual red, green, and blue values can be described with a type:
 
 ```
 type Color = Rgb(int8, int8, int8)
 ```
 
-A *sum* type represents a choice between alternatives: A value belongs to exactly one of the specified variants. For example, a shape that can be either a `Circle` or a `Rectangle`:
+A *sum* type is a choice between alternatives: A value belongs to exactly one of the specified variants. A type that represents a shape that can be either a `Circle` or a `Rectangle` can be defined as:
 
 ```
 type Shape = Circle | Rectangle
@@ -544,7 +545,7 @@ let { baz = { f = a | _ } } = faz(4)
 
 ##### Name binding semantics
 
-A subtle but important detail that makes let-bindings in Coal different from those in most other languages is that the identifier introduced by a `let` is **not in scope within the definition itself**. In other words, `let x = e1 in e2` makes `x` available in `e2`, but not in `e1`. In OCaml (and F#) this is also the case for the standard `let` keyword. However, in these languages, a special `let rec` syntax makes it possible to evade this restriction. Coal doesn't have an equivalent to `let rec`.
+A subtle but important detail that makes let-bindings in Coal different from those in most other languages is that the identifier introduced by a `let` is **not in scope within the definition itself**. In other words, `let x = e1 in e2` makes `x` available in `e2`, but not in `e1`. In the ML-family of languages (e.g. OCaml), this is also the case for the standard `let` keyword. However, in these languages, a special `let rec` syntax makes it possible to evade this restriction. Coal doesn't have an equivalent to `let rec`.
 This prevents non-well-founded expressions, such as `let f = f in f`, but more generally, makes it impossible for any function to refer to itself. 
 The restriction also applies to top-level definitions. As far as the compiler is concerned, this function:
 
@@ -1326,7 +1327,9 @@ Pattern matching proceeds by checking each clause in order until it finds one wh
 
 TODO: example
 
-An important property of match expressions is that they must be *exhaustive*. In other words, all possible cases for a type need to be covered by the given patterns. If a case is missing, the compiler will reject the program. 
+#### Totality requirement
+
+For a function to be total, it must be defined for all inputs of its corresponding type. A consequence of this in the context of `match` expressions is that all possible cases for a type need to be covered by the given patterns. In other words, the patterns must be *exhaustive*. If a case is missing, the compiler will reject the program. 
 
 TODO: example
 
