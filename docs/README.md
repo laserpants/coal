@@ -135,7 +135,7 @@ TODO
        - [Logical](#logical)
        - [Data](#data)
        - [Function composition and pipelining](#function-composition-and-pipelining)
-       - [List manipulation](#list-manipulation)
+       - [List operations](#list-operations)
        - [String manipulation](#string-manipulation)
      - [Comments](#comments)
   1. [Types](#types)
@@ -225,7 +225,7 @@ A function is defined using the `fun` keyword, followed by the function's name a
     <expr>
 ```
 
-In the above, `<arg_1>, <arg_2>, ..., <arg_n>` are *patterns*, allowing functions to directly deconstruct their arguments. In addition to basic variables, records, tuples, and other data constructors, patterns can also include wildcards, literals, and nested structures. See **Pattern matching** for an overview of available patterns.
+In the above, `<arg_1>, <arg_2>, ..., <arg_n>` are *patterns*, allowing functions to directly deconstruct their arguments. In addition to basic variables, records, tuples, and other data constructors, patterns can also include wildcards, literals, and nested structures. See **[Pattern matching](#pattern-matching)** for an overview of available patterns.
 
 ```
   fun bork({ n : int32 }, (fst, snd), _) =
@@ -429,7 +429,7 @@ Integer literals introduced in code without an explicit type annotation, such as
 let answer = 42
 ```
 
-are polymorphic. Their inferred type is `n with Numeric(n)`, which isn't an ordinary type. It means that `n` can be *any* type, as long as it is a member of the `Numeric` trait (see **Traits**). 
+are polymorphic. The inferred type of this expression is `n with Numeric(n)`, which isn't an ordinary type. It means that `n` can be *any* type, as long as it is a member of the `Numeric` trait (see **Traits**). 
 This includes the built-in `int32`, `int64`, `bignum`, and `nat` types. All `Numeric` types support the basic arithmetic operations of addition, subtraction, and multiplication.
 
 ```
@@ -659,7 +659,7 @@ Just like with let-bindings, the arguments in a lambda-function are patterns:
 | `$.`          | Flipped reverse application |                                                                         
 | `.$`          | Flipped forward application |                                                                         
 
-##### List manipulation
+##### List operations
 
 |               | Description            | Type                                 |                                                                         
 | ------------- | ---------------------- | ------------------------------------ |                                                                        
@@ -834,7 +834,7 @@ Lists can be deconstructed using pattern matching. For example, the following fu
     }
 ```
 
-This style of unpacking data is common with all algebraic data types (see **Pattern matching**).
+This style of unpacking data is common with all algebraic data types (see **[Pattern matching](#pattern-matching)**).
 
 You can also match lists using literal patterns. The following example matches a list of exactly three elements and checks if they form a [Pythagorean triple](https://en.wikipedia.org/wiki/Pythagorean_triple):
 
@@ -1384,7 +1384,7 @@ trait Ordered<t> {
 }
 ```
 
-Making a type support a trait amounts to defining an *instance* of that trait. An instance provides concrete implementations of all functions declared in the trait, specialized for the chosen type. For example, by instantiating the `Ordered` trait for `bool`, we define an ordering on the booleans:
+Making a type support a trait comes down to defining an *instance* of the trait. An instance provides concrete implementations of all functions declared in the trait, specialized for the chosen type. For example, by instantiating the `Ordered` trait for `bool`, we define an ordering on the booleans:
 
 ```
 instance Ordered<bool> {
@@ -1404,12 +1404,12 @@ fun is_less_than(x : t, y : t) : bool with Ordered<t> =
   compare(x, y) == Lt
 ```
 
-Here, the type parameter `t` in the type of `is_less_than` is *universally quantified*. The `with` keyword introduces one or more constraints on type variables appearing in a type. In this case it demands that an instance of `Ordered` exists for the type `t`.
-We can read the type of `is_less_than` as: `t -> t -> bool with Ordered<t>`.
+Type parameters, like `t` in the type of `is_less_than` are [universally quantified](https://en.wikipedia.org/wiki/Universal_quantification). The `with` keyword introduces one or more constraints on type variables appearing in a type. In this case it demands that an instance of `Ordered` exists for the type substituted for `t`.
+We write the full type of `is_less_than` as: `t -> t -> bool with Ordered<t>`.
 
 #### Higher-kinded traits
 
-All the traits we have looked at up to this point have all been of the form `T<t>`, where `t` is a placeholder for an ordinary type.
+The traits we have looked at up to this point have all been of the form `T<t>`, where `t` is a placeholder for an ordinary type.
 
 TODO
 
@@ -1473,7 +1473,7 @@ Name not in scope: factorial
 ```
 
 To call a function from within itself in this way is not possible in Coal. Instead, recursion needs to be expressed in terms of a pattern know as a *fold*. 
-A fold takes some collection of data and combines it into a single result. A common instance is where an array of numbers is reduced into a single value, for example by continually adding each number to the parital sum.
+A fold takes some collection of data and combines it into a single result. A common instance of this is where an array of numbers is reduced into a single value, for example by continually adding each number to the parital sum.
 
 ```
 let sum = reduce(fn(n, a) => f + a, [1, 2, 3])
