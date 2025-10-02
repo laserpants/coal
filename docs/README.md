@@ -45,11 +45,11 @@ A distinction is made between ordinary, finite data, which is produced and consu
 
 In this example, the `@` in the field name causes the expression on the right (`n + 1`) to become the next seed value, which is fed back into `enum_from` to generate the rest of the stream.
 
-These code snippets illustrate two distinct modes of recursive control flow. If you are familiar with [recursion schemes](https://blog.sumtypeofway.com/posts/introduction-to-recursion-schemes.html) in a language like Haskell, recursion in Coal is based on the same principles. In that framework, `fold` and `unfold` are called *catamorphisms* and *anamorphisms*, respectively. Jump to **Recursion, corecursion, and codata** for a more detailed description of `fold` and `unfold`.
+These code snippets illustrate two distinct modes of recursive control flow. If you are familiar with [recursion schemes](https://blog.sumtypeofway.com/posts/introduction-to-recursion-schemes.html) in a language like Haskell, recursion in Coal is based on the same principles. In that framework, `fold` and `unfold` are called *catamorphisms* and *anamorphisms*, respectively. Jump to **[Recursion, corecursion, and codata](#recursion-corecursion-and-codata)** for a more detailed description of `fold` and `unfold`.
 
 ### Programs = Expressions + Effects
 
-Coal is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-oriented_programming_language) language: a program is, at its core, just an expression that evaluates to a value. In this programming model, all data is immutable and there are no observable side-effects. These properties make programs more predictable, easier to reason about, highly testable, and allows for code to be verified using formal mathematical techniques. On the other hand, practical applications need to have the ability to interact with the outside world. Side-effects are what make them useful. A system for managing effects, such as I/O and exceptions, is still lacking in Coal. This is an essential step to promote the language into one that can be used to write actual programs. See **How to contribute** if you're keen to work on this.
+Coal is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-oriented_programming_language) language: a program is, at its core, just an expression that evaluates to a value. In this programming model, all data is immutable and there are no observable side-effects. These properties make programs more predictable, easier to reason about, highly testable, and allows for code to be verified using formal mathematical techniques. On the other hand, practical applications need to have the ability to interact with the outside world. Side-effects are what make them useful. A system for managing effects, such as I/O and exceptions, is still lacking in Coal. This is an essential step to promote the language into one that can be used to write actual programs. See **[How to contribute](#how-to-contribute)** if you're keen to work on this.
 
 ## Project status and roadmap
 
@@ -644,9 +644,9 @@ Just like with let-bindings, the arguments in a lambda-function are patterns:
 
 ##### Data
 
-|               | Description            |                      |                                                          
-| ------------- | ---------------------- | -------------------- |                                                                      
-| `.`           | Record field access    | See **Field access** |                                                               
+|               | Description            |                                       |                                                          
+| ------------- | ---------------------- | ------------------------------------- |                                                                      
+| `.`           | Record field access    | See **[Field access](#field-access)** |                                                               
 
 ##### Function composition and pipelining
 
@@ -972,19 +972,87 @@ TODO
 
 ##### Useful higher-order list functions
 
+These are functions that take some other function as input, and modify the given list in some way based on the behavior of this function.
+
 ###### Mapping over a list
 
-TODO
+The function `map` applies a function to each element of a list.
+
+For example:
+
+```
+[0, 1, 2, 3, 4] |.map(fn(x) => 2 ^ x)       // [1, 2, 4, 8, 16]
+```
+
+The type of map is:
+
+```
+map : (a -> b) -> List<a> -> List<b>
+```
+
+> #### Mapping and the `Functor` trait
+>
+> TODO
 
 ###### Filtering a list
 
-TODO
+Filtering is a technique for removing all elements of a list, except those that meet a given condition.
+
+For example:
+
+```
+[0, 1, 2, 3, 4] |.filter(fn(x) => x > 2)    // [3, 4] 
+```
+
+The type of filter is:
+
+```
+filter : (a -> bool) -> List<a> -> List<a>
+```
 
 ###### Reducing a list
+
+>
+> TODO
+>
+
+```
+[0, 1, 2, 3, 4] |.reduce(fn(x, a) => a + x, 0)   // 10 
+```
+
+The type of `reduce` is 
+
+```
+reduce : (a -> b -> b) -> b -> List<a> -> b
+```
+
+###### Left vs. right folds
+
+TODO
+
+###### Examples of folds
 
 TODO
 
 ##### List predicates
+
+A *predicate* is a function that tests for some condition with respect to its argument and returns `true` or `false`. A common convention is to name functions that serve this purpose with a prefix `is_`.
+
+###### `is_empty`
+
+A common theme is to check whether a list is empty or not. This is what the function `is_empty` does. 
+
+The type of `is_empty` is:
+
+```
+is_empty : List<a> -> bool
+```
+
+###### `is_nonempty`
+
+TODO
+
+###### `is_singleton`
 
 TODO
 
@@ -1166,7 +1234,7 @@ These types look a bit different from earlier examples. Here, the pipe (`|`) als
 fn(p : { lat : float, lng : float }) => p.lat
 ```
 
-This function requires its argument `p` to have exactly two fields: `lat` and `lng`, both of type `float`. This type is closed.
+This function requires its argument `p` (a record) to have exactly two fields: `lat` and `lng`, both of type `float`. This type is closed.
 
 ```
 fn(p : { lat : float, lng : float | q }) => p.lat
@@ -1201,8 +1269,6 @@ As with other data types, it is possible to pattern match on records. In this co
   fun full_name({ first_name = fn, last_name = ln }) = fn +++ " " +++ ln 
 ```
 
-(For more details, see the section on **Pattern matching**.)
-
 ##### Deconstructing records
 
 The pipe (`|`) operator allows you to deconstruct records by matching against a subset of their fields:
@@ -1217,9 +1283,9 @@ The right-hand side pattern must be either a variable or a wildcard (`_`). If yo
   fun drop_name({ name = _ | fields } : { name : string | q }) : { | q } = fields
 ```
 
-Here, the name field is removed and all remaining fields are returned.
+Here, the name field is removed and a record with all remaining fields are returned.
 
-If you only need to retrieve a single field, the dot syntax (`record.field`) is simpler and more concise. Pattern matching becomes necessary when you want to extract multiple fields at once, remove fields, or work with the remainder of a record.
+If you only need to retrieve a single field, the dot syntax (`record.field`) is simpler and more concise. Pattern matching is necessary when you want to extract multiple fields at once, remove fields, or work with the remainder of a record.
 
 ##### Updating a field
 
@@ -1262,7 +1328,7 @@ Pattern matching proceeds by checking each clause in order until it finds one wh
 
 TODO: example
 
-An important point is that match expressions must be *exhaustive*, meaning that all possible cases for a type are covered by the given patterns. If a case is missing, the compiler will reject the program. 
+An important property of match expressions is that they must be *exhaustive*. In other words, all possible cases for a type need to be covered by the given patterns. If a case is missing, the compiler will reject the program. 
 
 TODO: example
 
@@ -1290,9 +1356,9 @@ For instance, matching on integers can use literal patterns along with a wildcar
 | List constructor   | `x :: xs`            | Matches a list by separating it into head and tail.                                             |                                                 
 | List literal       | `[f, s, t]`          | Matches a list of fixed length with elements matching the given sub-patterns.                   |                                                 
 | Tuple              | `(lhs, rhs)`         | Matches a tuple by decomposing it into its components.                                          |                                                 
-| Record             | `{ name = n \| _ }`  | Matches a record by specifying patterns for one or more fields. See **Pattern matching** under **Records** for details. |                                                 
+| Record             | `{ name = n \| _ }`  | Matches a record by specifying patterns for one or more fields. See **[Pattern matching over records](#pattern-matching-over-records)** for details. |                                                 
 | As                 | `(lhs, _) as pair`   | Matches the inner pattern, while also binding the entire value to a variable.                   |                                                 
-| @                  | `Succ(@n)`           | See **Recursion, corecursion, and codata**.                                                     |                                                 
+| @                  | `Succ(@n)`           | See **[Recursion, corecursion, and codata](#recursion-corecursion-and-codata)**.                                                     |                                                 
 | Or                 | `1 or 2`             | Matches if the value satisfies at least one of the given alternative patterns.                  |      
 
 ### Traits
