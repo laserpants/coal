@@ -156,6 +156,7 @@ TODO
   1. [Pattern matching](#pattern-matching)
      - [Supported patterns](#supported-patterns)
      - [Totality requirement](#totality-requirement)
+     - [Wildcard patterns](#wildcard-patterns)
   1. [Traits](#traits)
      - Higher-kinded traits
      - Trait inheritance
@@ -1321,7 +1322,7 @@ The `match` expression in Coal is used to deconstruct data based on its shape, e
     }
 ```
 
-Patterns can take several forms, including data constructors, literals, tuples, records, variables, wildcards, or combinations of these. See below for a complete list of available patterns. 
+Patterns can take several forms, including data constructors, literals, tuples, records, variables, wildcards, or combinations of these. See [below](#supported-patterns) for a complete list of available patterns. 
 
 Pattern matching proceeds by checking each clause in order until it finds one whose pattern matches the value. The corresponding right-hand side expression is then evaluated, with any variables in the pattern bound to the matched sub-components.
 
@@ -1333,9 +1334,9 @@ For a function to be total, it must be defined for all inputs of its correspondi
 
 TODO: example
 
-Wildcard patterns
+#### Wildcard patterns
 
-For instance, matching on integers can use literal patterns along with a wildcard to guarantee exhaustiveness:
+A *wildcard* pattern is a pattern that matches any value without binding it to a name. These are often useful to guarantee exhaustiveness in `match` expressions. For instance, we can use literal patterns along with a wildcard when matching on integers:
 
 ```
   fun describe_int(n : int32) : string =
@@ -1352,14 +1353,14 @@ For instance, matching on integers can use literal patterns along with a wildcar
 | ------------------ | -------------------- | ----------------------------------------------------------------------------------------------- |                                                   
 | Constructor        | `Color(r, g, b)`     | Matches a value built with a specific data constructor, binding sub-components to variables.    |                                                 
 | Variable           | `x`                  | Matches any value and binds it to the variable.                                                 |                                                 
-| Wildcard           | `_`                  | Ignores the matched value                                                                       |
+| Wildcard           | `_`                  | Ignores the matched value (see above).                                                          |
 | Literal            | `"Hello"`, `0`, `()` | Matches values that are exactly equal to the given literal.                                     |                                                 
 | List constructor   | `x :: xs`            | Matches a list by separating it into head and tail.                                             |                                                 
 | List literal       | `[f, s, t]`          | Matches a list of fixed length with elements matching the given sub-patterns.                   |                                                 
 | Tuple              | `(lhs, rhs)`         | Matches a tuple by decomposing it into its components.                                          |                                                 
 | Record             | `{ name = n \| _ }`  | Matches a record by specifying patterns for one or more fields. See **[Pattern matching over records](#pattern-matching-over-records)** for details. |                                                 
 | As                 | `(lhs, _) as pair`   | Matches the inner pattern, while also binding the entire value to a variable.                   |                                                 
-| @                  | `Succ(@n)`           | See **[Recursion, corecursion, and codata](#recursion-corecursion-and-codata)**.                                                     |                                                 
+| @                  | `Succ(@n)`           | See **[Recursion, corecursion, and codata](#recursion-corecursion-and-codata)**.                |                                                 
 | Or                 | `1 or 2`             | Matches if the value satisfies at least one of the given alternative patterns.                  |      
 
 ### Traits
