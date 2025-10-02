@@ -615,13 +615,13 @@ Just like with let-bindings, the arguments in a lambda-function are patterns:
 
 ##### Arithmetic and comparison
 
-|               | Description            | Type                               |                                                                        
-| ------------- | ---------------------- | ---------------------------------- |                                                                        
-| `+`           | Addition               | `∀n : n -> n -> n with Numeric(n)` |                                                                        
-| `-`           | Subtraction            | `∀n : n -> n -> n with Numeric(n)` |                                                                        
-| `*`           | Multiplication         | `∀n : n -> n -> n with Numeric(n)` |                                           
-| `/`           | Division               | TODO                               |                                                                        
-| `^`           | Exponentiation         | TODO                               |                                                                        
+|               | Description            | Type                                 |                                                                        
+| ------------- | ---------------------- | ------------------------------------ |                                                                        
+| `+`           | Addition               | `∀n : n -> n -> n with Numeric(n)`   |                                                                        
+| `-`           | Subtraction            | `∀n : n -> n -> n with Numeric(n)`   |                                                                        
+| `*`           | Multiplication         | `∀n : n -> n -> n with Numeric(n)`   |                                           
+| `/`           | Division               | TODO                                 |                                                                        
+| `^`           | Exponentiation         | `∀n : n -> nat -> n with Numeric(n)` |                                                                        
 
 |               | Description            | Type                                  |                                                                        
 | ------------- | ---------------------- | ------------------------------------- |                                                                        
