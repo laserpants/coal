@@ -489,7 +489,7 @@ map(add(1), [1, 2, 3, 4])   // which yields the same result as map(increment, [1
 
 #### If-then-else
 
-If-expressions are similar to those in most programming languages, in particular those in the functional family. Both the `then` and `else` branches need to be present (and have the same type):
+If-expressions in Coal are similar to those found in many programming languages, especially other functional languages. Both the `then` and `else` clauses must be present, and they must produce values of the same type:
 
 ```
   if (<e_1 : bool>) then <e_2 : t> else <e_3 : t>
@@ -1040,9 +1040,7 @@ A *predicate* is a function that tests for some condition with respect to its ar
 
 ###### `is_empty`
 
-A common theme is to check whether a list is empty or not. This is what the function `is_empty` does. 
-
-The type of `is_empty` is:
+A recurring theme is to check whether a list is empty or not. This is what the function `is_empty` does. Its type is:
 
 ```
 is_empty : List<a> -> bool
