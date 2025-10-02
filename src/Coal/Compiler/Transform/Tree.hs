@@ -62,11 +62,11 @@ instance TreeTransform Expression t where
     \case
       EAnnotation _ _ e ->
         transform name f e
-      EVariable a ll@(Label t name1)
+      var@(EVariable a (Label t name1))
         | name == name1 ->
             f a t
         | otherwise ->
-            pure (EVariable a ll)
+            pure var
       expr@(ELambda a ps e)
         | name `isNotBoundIn` ps ->
             ELambda a ps <$> transform name f e

@@ -128,7 +128,8 @@ typeCheckingPass =
 mainPass :: (MonadIO m) => Module Metadata Kind IndexedType -> CompilerT Metadata m (Module Metadata Kind IndexedType)
 mainPass =
   -- Normalize top-level functions and constants
-  pure . normalizeObject
+  pure
+    . normalizeObject
     -- Translate patterns in expression bindings to match expressions
     >=> desugarPatterns
     -- Compile or-patterns
@@ -139,7 +140,8 @@ mainPass =
     >=> writeDotFilesC "record_patterns"
     >=> patternExhaustiveCheckM
     -- Compile as-patterns
-    >=> pure . desugarAsPatterns
+    >=> pure
+    . desugarAsPatterns
     >=> writeDotFilesC "as_patterns"
     -- Compile match statements
     >=> compileMatchExprs
@@ -147,7 +149,8 @@ mainPass =
     -- Placeholder insertion
     >=> overModuleDefinitionsM (traverse insertPlaceholders)
     -- Denormalize top-level functions and constants
-    >=> pure . denormalizeObject
+    >=> pure
+    . denormalizeObject
     -- Expand nats
     >=> compileNats
 
