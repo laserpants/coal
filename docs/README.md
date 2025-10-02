@@ -1324,15 +1324,32 @@ The `match` expression in Coal is used to deconstruct data based on its shape, e
 
 Patterns can take several forms, including data constructors, literals, tuples, records, variables, wildcards, or combinations of these. See [below](#supported-patterns) for a complete list of available patterns. 
 
-Pattern matching proceeds by checking each clause in order until it finds one whose pattern matches the value. The corresponding right-hand side expression is then evaluated, with any variables in the pattern bound to the matched sub-components.
-
-TODO: example
-
 #### Totality requirement
 
 For a function to be total, it must be defined for all inputs of its corresponding type. A consequence of this in the context of `match` expressions is that all possible cases for a type need to be covered by the given patterns. In other words, the patterns must be *exhaustive*. If a case is missing, the compiler will reject the program. 
 
-TODO: example
+For example, the following function
+
+```
+  fun head(input) =
+    match(input) {
+      | x :: xs => x
+    }
+```
+
+will produce an error:
+
+```
+4:5:
+  |
+  |     match(input) {
+  |     ^^^^^^^^^^^^^^
+  |       | x :: xs => x
+  | ^^^^^^^^^^^^^^^^^^^^
+  |     }
+
+Non-exhaustive patterns
+```
 
 #### Wildcard patterns
 
@@ -1346,6 +1363,20 @@ A *wildcard* pattern is a pattern that matches any value without binding it to a
       | _ => "something else"
     }
 ```
+
+Pattern matching proceeds by checking each clause in order until it finds one whose pattern matches the value. The corresponding right-hand side expression is then evaluated, with any variables in the pattern bound to the matched sub-components.
+
+```
+  match(list : List<int32>) {
+    | [a] => a
+    | [a, _] => a
+    | [a, _, _] => a
+    | _ => 0
+```
+
+#### Lambda match 
+
+TODO
 
 #### Supported patterns
 
