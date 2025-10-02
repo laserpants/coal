@@ -619,8 +619,8 @@ Just like with let-bindings, the arguments in a lambda-function are patterns:
 | `+`           | Addition               | `∀n : n -> n -> n with Numeric(n)` |                                                                        
 | `-`           | Subtraction            | `∀n : n -> n -> n with Numeric(n)` |                                                                        
 | `*`           | Multiplication         | `∀n : n -> n -> n with Numeric(n)` |                                           
-| `/`           | Division               |                                    |                                                                        
-| `^`           | Exponentiation         |                                    |                                                                        
+| `/`           | Division               | TODO                               |                                                                        
+| `^`           | Exponentiation         | TODO                               |                                                                        
 
 |               | Description            | Type                                  |                                                                        
 | ------------- | ---------------------- | ------------------------------------- |                                                                        
@@ -633,7 +633,7 @@ Just like with let-bindings, the arguments in a lambda-function are patterns:
 
 |               | Description            | Type                          |                                                                        
 | ------------- | ---------------------- | ----------------------------- |                                                                        
-| `%`           | Modulus                |                               |                                                                        
+| `%`           | Modulus                | TODO                          |                                                                        
 
 ##### Logical
 
@@ -651,14 +651,14 @@ Just like with let-bindings, the arguments in a lambda-function are patterns:
 
 ##### Function composition and pipelining
 
-|               | Description                 |                                                                         
-| ------------- | --------------------------- |                                                                         
-| `>>`          | Forward composition         |                                                                         
-| `<<`          | Reverse composition         |                                                                         
-| `\|.`         | Reverse application         |                                                                         
-| `.\|`         | Forward application         |                                                                         
-| `$.`          | Flipped reverse application |                                                                         
-| `.$`          | Flipped forward application |                                                                         
+|               | Description                 | Type                             |                                                                        
+| ------------- | --------------------------- | -------------------------------- |                                                                        
+| `>>`          | Forward composition         | `(a -> b) -> (b -> c) -> a -> c` |                                                                        
+| `<<`          | Reverse composition         | `(b -> c) -> (a -> b) -> a -> c` |                                                                        
+| `\|.`         | Reverse application         | `a -> (a -> b) -> b`             |                                                                        
+| `.\|`         | Forward application         | `(a -> b) -> a -> b`             |                                                                        
+| `$.`          | Flipped reverse application | TODO                             |                                                                        
+| `.$`          | Flipped forward application | TODO                             |                                                                        
 
 ##### List operations
 
