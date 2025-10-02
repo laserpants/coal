@@ -1,0 +1,10 @@
+module Main {
+
+  fun head(input) =
+    match(input) {
+      | x :: xs => x
+    }
+
+  fun main() = trace_int32(1)
+
+}
