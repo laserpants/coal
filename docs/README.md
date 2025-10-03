@@ -244,7 +244,7 @@ A type annotion can be given to indicate a function's return type, as in the fol
 
 ##### Main
 
-TODO
+Just like in many other programming languages, the `main` function serves as the entry point of a program:
 
 ```
 module Main {
@@ -255,7 +255,7 @@ module Main {
 
 #### Let-expressions
 
-Expressions that are not functions can also be defined in this scope, using the `let` keyword:
+Expressions that are not functions can also be defined in the top-level scope, using the `let` keyword:
 
 ```
   let <name> = <expr>
@@ -967,7 +967,11 @@ slice : nat -> nat -> List<a> -> List<a>
 
 ###### List concatenation
 
-TODO
+The list concatenation operator (`++`) appends one list to the end of another, resulting in a new list.
+
+```
+  let s = ["Khufu", "Hatshepsut", "Akhenaten"] ++ ["Tutankhamun"]
+```
 
 ###### Sorting
 
