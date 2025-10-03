@@ -221,14 +221,14 @@ Definitions that occupy the outermost scope of a module are functions, top-level
 
 #### Functions
 
-A function is defined using the `fun` keyword, followed by the function's name and a list of comma-separated arguments enclosed in parentheses. The function body is simply an expression, which follows the arguments and is preceded by an equals sign:
+A function is defined with the `fun` keyword, followed by the function’s name and a list of comma-separated arguments enclosed in parentheses. The function body is simply an expression, which follows the arguments and is preceded by an equals sign:
 
 ```
   fun <name>(<arg_1>, <arg_2>, ..., <arg_n>) =
     <expr>
 ```
 
-In the above, `<arg_1>, <arg_2>, ..., <arg_n>` are *patterns*, allowing functions to directly deconstruct their arguments. In addition to basic variables, records, tuples, and other data constructors, patterns can also include wildcards, literals, and nested structures. See **[Pattern matching](#pattern-matching)** for a list of available patterns.
+Function parameters are *patterns*, allowing functions to directly deconstruct their arguments. In addition to basic variables, records, tuples, and other data constructors, patterns can also include wildcards, literals, and nested structures. See **[Pattern matching](#pattern-matching)** for a list of available patterns.
 
 ```
   fun bork({ n : int32 }, (fst, snd), _) =
