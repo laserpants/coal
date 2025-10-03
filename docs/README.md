@@ -141,7 +141,7 @@ TODO
   1. [Types](#types)
      - [Natural numbers](#natural-numbers)
      - [Unit](#unit)
-     - [Lists](#lists)
+     - [List](#list)
        - [Common list operations](#common-list-operations)
        - [Useful higher-order list functions](#useful-higher-order-list-functions)
        - [List predicates](#list-predicates)
@@ -421,12 +421,14 @@ alias, as, bignum, bool, char, cotype, double, else, false, float, fn, fold, fun
 
 ##### Shadowing considered harmful
 
-*Shadowing* occurs when a variable declared in an inner scope has the same name as a variable from an outer scope. For example:
+*Shadowing* occurs when a variable declared in an inner scope has the same name as a variable from an outer scope. 
 
 ```
 fun go(x) =
   let x = 3 in x + 3
 ```
+
+In this example, the inner `let` attempts to declare a new variable that has the same name as the function parameter `x`.
 
 Because shadowing is often a source of subtle bugs, the Coal compiler treats it as an error.
 
@@ -805,7 +807,7 @@ Keep in mind that this only works with `unit`. For non-empty tuples, you still n
 fun fst4((fst, _, _, _)) = fst
 ```
 
-#### Lists
+#### List
 
 A *list* is an ordered collection in which all elements share the same type. Lists are one of the most fundamental data structures in functional programming. They are commonly used to store and manipulate collections of data, and serve as a building block for many higher-level abstractions.
 
@@ -901,16 +903,7 @@ uncons : List<a> -> Option<(a, List<a>)>
 > ```
 >   xs |.map(f)
 > ```
-> is really syntactic sugar for `map(f, xs)`. This operator is very convenient when chaining together multiple function calls. For example:
->
-> ```
-> circle({ radius = 5.0 })
->   |.fill("blue")
->   |.set_position(10.0, 5.0)
->   $.draw_shape(canvas)
-> ```
->
-> TODO
+> is really syntactic sugar for `map(f, xs)`. This operator is very convenient when chaining together multiple function calls. Suppose we have the following basic drawing API:
 >
 > ```
 > circle : Config -> Shape
@@ -918,11 +911,20 @@ uncons : List<a> -> Option<(a, List<a>)>
 > set_position : float -> float -> Shape -> Shape
 > draw_shape : Shape -> Canvas -> Canvas
 > ```
->
-> TODO
+> 
+> To describe a sequence of steps that creates a circle, sets properties such as its color and position, and finally places it on the canvas, we would normally write:
 >
 > ```
 > draw(set_position(10, 5, fill("blue", circle({ radius = 5.0 }))), canvas)
+> ```
+>
+> Using the reverse function application operator (and the associated `$.` operator), we could instead write the above in a more readable pipeline-style:
+>
+> ```
+> circle({ radius = 5.0 })
+>   |.fill("blue")
+>   |.set_position(10.0, 5.0)
+>   $.draw_shape(canvas)
 > ```
 
 ###### Take, drop and slice
@@ -1011,7 +1013,22 @@ map : (a -> b) -> List<a> -> List<b>
 
 > #### Mapping and the `Functor` trait
 >
-> TODO
+> The actual type of `map` is more general than the one above, which is in a form specialized to lists. In fact, any value of type `f<a>` can be mapped over, as long as `f` implements the `Functor` trait:
+>
+> ```
+> map : (a -> b) -> f<a> -> f<b> with Functor<f>
+> ```
+>
+> This type of transformation is a structure-preserving map which corresponds to the notion of a *homomorphism* in mathematics. Homomorphisms are the basic topic of study in category theory. 
+> A functor, in this context, is a mapping between categories – that is, one that sends objects and morphisms from one category to another, subject to certain laws. 
+> In code, the objects are the types and morphisms are simply functions between these: 
+> 
+> ```
+> a           ==>  f<a>
+> f : a -> b  ==>  map(f) : f<a> -> f<b>
+> ```
+> 
+> Note that we are partially applying `map` to f. There are two ways to look at this; we can think of it as a function that takes a function and
 
 ###### Filtering a list
 
@@ -1031,9 +1048,20 @@ filter : (a -> bool) -> List<a> -> List<a>
 
 ###### Reducing a list
 
+> The operation described here is also commonly referred to as a *fold*, but that name isn't used since it is a built-in language feature in Coal. The `fold` keyword and the special `@`-pattern syntax form the basis for how recursive functions, including `reduce`, are implemented. This topic is discussed in depth in ___. 
+> For now, here is how reduce is implemented:
 >
-> TODO
->
+> ```
+> reduce(f, acc, list) =
+>   fold(list, acc) {
+>     x :: @rec =>
+>       fn(a) => rec(f(x, a))
+>     [] =>
+>       fn(a) => a
+>   }
+> ```
+
+TODO
 
 ```
 [0, 1, 2, 3, 4] |.reduce(fn(x, a) => a + x, 0)   // 10 
@@ -1089,7 +1117,7 @@ Since `match` statements in Coal need to be exhaustive, `Option` is useful to ex
   fun head(list : List<a>) : a =
     match(list) {
       | head :: _ => head
-      | [] => // What should I return here?
+      | [] => // 💥 What should I return here?
     }
 ```
 
@@ -1558,7 +1586,7 @@ If we pass this function to the Coal compiler, it is rejected with the following
 Name not in scope: factorial
 ```
 
-To call a function from within itself in this way is not possible in Coal. Instead, recursion needs to be expressed in terms of a pattern know as a *fold*. 
+To call a function from within itself in this way is not possible. Instead, recursion needs to be expressed in terms of a pattern know as a *fold*. 
 A fold takes some collection of data and combines it into a single result. A common instance of this is where an array of numbers is reduced into a single value, for example by continually adding each number to the parital sum.
 
 ```
