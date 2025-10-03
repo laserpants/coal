@@ -2629,4 +2629,3 @@ main131 = do
     , "./test/Coal/examples/131/Utils.coal"
     , "./test/Coal/examples/131/List.coal"
     ]
-
