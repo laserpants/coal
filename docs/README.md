@@ -154,9 +154,10 @@ TODO
        - [Pattern matching over records](#pattern-matching-over-records)
        - [Deconstructing records](#deconstructing-records)
   1. [Pattern matching](#pattern-matching)
-     - [Supported patterns](#supported-patterns)
      - [Totality requirement](#totality-requirement)
      - [Wildcard patterns](#wildcard-patterns)
+     - [Lambda match](#lambda-match)
+     - [Supported patterns](#supported-patterns)
   1. [Traits](#traits)
      - [Higher-kinded traits](#higher-kinded-traits)
      - [Trait inheritance](#trait-inheritance)
@@ -392,14 +393,14 @@ alias, as, bignum, bool, char, cotype, double, else, false, float, fn, fold, fun
 
 ##### Shadowing considered harmful
 
-> This feature is not yet implemented.
-
-*Shadowing* is to declare a variable in an inner scope with the same name as an existing variable. This is often a source of subtle bugs &mdash; it is therefore not allowed. An expression such as the following should result in a compilation error:
+*Shadowing* occurs when a variable declared in an inner scope has the same name as a variable from an outer scope. For example:
 
 ```
 fun go(x) =
   let x = 3 in x + 3
 ```
+
+Because shadowing is often a source of subtle bugs, the Coal compiler treats it as an error.
 
 #### Literal expressions
 
@@ -1372,11 +1373,29 @@ Pattern matching proceeds by checking each clause in order until it finds one wh
     | [a, _] => a
     | [a, _, _] => a
     | _ => 0
+  }
 ```
 
 #### Lambda match 
 
-TODO
+A lambda match is a special syntax that lets you get rid of the variable in a `match` expression. For example, this expression:
+
+```
+  match {
+    | [] => true
+    | _ => false 
+  }
+```
+
+is a shorthand version of this:
+
+```
+  fn(v) =>
+    match(v) {
+      | [] => true
+      | _ => false
+    }
+```
 
 #### Supported patterns
 
