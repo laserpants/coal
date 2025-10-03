@@ -227,14 +227,14 @@ A function is defined using the `fun` keyword, followed by the function's name a
     <expr>
 ```
 
-In the above, `<arg_1>, <arg_2>, ..., <arg_n>` are *patterns*, allowing functions to directly deconstruct their arguments. In addition to basic variables, records, tuples, and other data constructors, patterns can also include wildcards, literals, and nested structures. See **[Pattern matching](#pattern-matching)** for an overview of available patterns.
+In the above, `<arg_1>, <arg_2>, ..., <arg_n>` are *patterns*, allowing functions to directly deconstruct their arguments. In addition to basic variables, records, tuples, and other data constructors, patterns can also include wildcards, literals, and nested structures. See **[Pattern matching](#pattern-matching)** for a list of available patterns.
 
 ```
   fun bork({ n : int32 }, (fst, snd), _) =
     ...
 ```
 
-A type annotion can be given to indicate a function's return type; as in the following example:
+A type annotion can be given to indicate a function's return type, as in the following example:
 
 ```
   fun is_even(n : int32) : bool =
@@ -431,7 +431,7 @@ Integer literals introduced in code without an explicit type annotation, such as
 let answer = 42
 ```
 
-are polymorphic. The inferred type of this expression is `n with Numeric(n)`, which isn't an ordinary type. It means that `n` can be *any* type, as long as it is a member of the `Numeric` trait (see **Traits**). 
+are polymorphic. The inferred type of this expression is `n with Numeric(n)`, which isn't an ordinary type. It means that `n` can be *any* type, as long as it is a member of the `Numeric` trait (see **[Traits](#traits)**). 
 This includes the built-in `int32`, `int64`, `bignum`, and `nat` types. All `Numeric` types support the basic arithmetic operations of addition, subtraction, and multiplication.
 
 ```
@@ -464,7 +464,7 @@ concat("one", "two")
 
 This applies the function `concat` to the arguments `"one"` and `"two"`.
 
-By default, functions in Coal are *curried*. There is a difference between a function that takes multiple arguments, and one that takes a single tuple as its argument. Consider the following two type signatures:
+By default, functions are *curried*. There is a difference between a function that takes multiple arguments, and one that takes a single tuple as its argument. Consider the following two type signatures:
 
 ```
 f : a -> b -> c
@@ -527,7 +527,7 @@ let { baz = { f = a | _ } } = faz(4)
 
 > #### A note about let-generalization
 >
-> In some ways, a let-binding is interchangeable with a lambda function. For example, writing `let x = 1 in increment(x)` yields the same result as `(fn(x) => increment(x))(1)`.
+> In some sense, a let-binding is interchangeable with a lambda function. For example, writing `let x = 1 in increment(x)` yields the same result as `(fn(x) => increment(x))(1)`.
 > But besides being more readable, the let-binding also serves another purpose. In [Hindley-Milner](https://en.wikipedia.org/wiki/Hindley%E2%80%93Milner_type_system) languages, it is let-bindings that introduce polymorphism. Consider the following expression, which doesn't type check:
 > 
 > ```
