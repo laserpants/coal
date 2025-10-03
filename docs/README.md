@@ -117,13 +117,13 @@ TODO
      - [Functions](#functions)
      - [Let-expressions](#let-expressions)
      - [Data types](#data-types)
+  1. [Built-in language primitives](#built-in-language-primitives)
   1. [Expression syntax](#expression-syntax)
      - [Variables](#variables)
        - [Naming rules](#naming-rules)
        - [Reserved keywords](#reserved-keywords)
        - [Shadowing considered harmful](#shadowing-considered-harmful)
      - [Literal expressions](#literal-expressions)
-       - [Built-in language primitives](#built-in-language-primitives)
        - [Integral types](#integral-types)
      - [Function application](#function-application)
      - [If-then-else](#if-then-else)
@@ -221,7 +221,7 @@ Definitions that occupy the outermost scope of a module are functions, top-level
 
 #### Functions
 
-A function is defined with the `fun` keyword, followed by the function’s name and a list of comma-separated arguments enclosed in parentheses. The function body is simply an expression, which follows the arguments and is preceded by an equals sign:
+A function is defined with the `fun` keyword, followed by the function’s name and a list of comma-separated arguments enclosed in parentheses. The function body is simply an expression, which comes after the arguments and is preceded by an equals sign:
 
 ```
   fun <name>(<arg_1>, <arg_2>, ..., <arg_n>) =
@@ -370,6 +370,24 @@ Algebraic data types are especially useful for describing language grammars and 
     | Object(List<(string, JsonValue)>)
 ```
 
+### Built-in language primitives
+
+Coal defines the following built-in types:
+
+| Type               | Description                             | Example values            |                       
+| ------------------ | --------------------------------------- | ------------------------- |                       
+| `bool`             | Booleans                                | `true`, `false`           |                       
+| `char`             | A single Unicode character              | `'a'`, `'b'`, `'🤖'`, ... |                        
+| `float`            | Single precision floating point numbers | `3.1519f`                 |                        
+| `double`           | Double precision floating point numbers | `3.141592653589793`       |                        
+| `int32`            | 32-bit integers                         | `0`, `1`, `2`, `3`, ...   |                        
+| `int64`            | 64-bit integers                         | `0`, `1`, `2`, `3`, ...   |                        
+| `bignum`           | Arbitrary precision integers            | `0`, `1`, `2`, `3`, ...   |                        
+| `string`           | UTF-8 text                              |  `"Hello, ✨ world!"`     |                        
+| `unit`             | Singleton type                          | `()`                      |                        
+| `void`             | The uninhabited type                    |                           |                        
+| `nat`              | Natural numbers (Peano arithmetic)      | `Zero`, `Succ(Zero)`, ... |                        
+
 ### Expression syntax
 
 Expressions are the core building blocks of programs. They include variables, literals, let-bindings, operators, and control structures like `if-then-else`. An expression can often be composed of other, smaller expressions. For example, a binary operator consists of two sub-expressions: its left-hand side and right-hand side operands:
@@ -414,25 +432,7 @@ Because shadowing is often a source of subtle bugs, the Coal compiler treats it 
 
 #### Literal expressions
 
-A *literal* is an expression that directly represents a fixed value of one of the built-in primitive types, such as integers, booleans, or strings.
-
-##### Built-in language primitives
-
-Coal defines the following built-in types:
-
-| Type               | Description                             | Example values            |                       
-| ------------------ | --------------------------------------- | ------------------------- |                       
-| `bool`             | Booleans                                | `true`, `false`           |                       
-| `char`             | A single Unicode character              | `'a'`, `'b'`, `'🤖'`, ... |                        
-| `float`            | Single precision floating point numbers | `3.1519f`                 |                        
-| `double`           | Double precision floating point numbers | `3.141592653589793`       |                        
-| `int32`            | 32-bit integers                         | `0`, `1`, `2`, `3`, ...   |                        
-| `int64`            | 64-bit integers                         | `0`, `1`, `2`, `3`, ...   |                        
-| `bignum`           | Arbitrary precision integers            | `0`, `1`, `2`, `3`, ...   |                        
-| `string`           | UTF-8 text                              |  `"Hello, ✨ world!"`     |                        
-| `unit`             | Singleton type                          | `()`                      |                        
-| `void`             | The uninhabited type                    |                           |                        
-| `nat`              | Natural numbers (Peano arithmetic)      | `Zero`, `Succ(Zero)`, ... |                        
+A *literal* is an expression that directly represents a fixed value of one of the [built-in primitive types](#built-in-language-primitives), such as integers, booleans, or strings.
 
 ##### Integral types
 
