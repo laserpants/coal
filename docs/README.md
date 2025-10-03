@@ -255,13 +255,19 @@ module Main {
 
 #### Let-expressions
 
-Expressions that are not functions can also be defined in the top-level scope, using the `let` keyword:
+The `let` keyword introduces a new name bound to the result of an expression. Inside functions, a `let` is often used to give names to intermediate values:
 
 ```
-  let <name> = <expr>
+  fun hypotenuse(a, b) =
+    let sqr_a = a * a;
+        sqr_b = b * b
+    in 
+      sqrt(sqr_a + sqr_b)
 ```
 
-A module-level let-binding looks like an ordinary let-expression (explained below), except that there is no expression body:
+Here, `sqr_a` and `sqr_b` are local bindings, only visible in the body that follows the `in`.
+
+At the top level of a module, a `let` works in the same way, except there is no enclosing body expression — the binding simply introduces a global name that can be referenced elsewhere in the module (or from other modules):
 
 ```
 module Utils {
@@ -275,18 +281,22 @@ module Utils {
     , "Saturday"
     , "Sunday" 
     ]
+}
 ```
 
-Type annotions look similar to those for functions:
+Type annotations for let-bindings look similar to those for functions:
 
 ```
-  let days : List<string> = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+  let days : List<string> =
+    [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" ]
 ```
 
-Since a `let` can hold any other expression, top-level functions may also be defined in the following way:
+Since a `let` can hold any expression, top-level functions can also be defined this way:
 
 ```
-let add = fn(x, y) => x + y     // This is the same as fun(x, y) = x + y
+  let add = fn(x, y) => x + y
+  // Equivalent to:
+  // fun add(x, y) = x + y
 ```
 
 #### Data types
