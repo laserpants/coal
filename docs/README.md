@@ -508,6 +508,8 @@ If-expressions in Coal are similar to those found in many programming languages,
   if (<e_1 : bool>) then <e_2 : t> else <e_3 : t>
 ```
 
+For example:
+
 ```
   if (temperature > 20) then wear("shorts") else go_home()
 ```
