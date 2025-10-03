@@ -267,7 +267,7 @@ The `let` keyword introduces a new name bound to the result of an expression. In
 
 Here, `sqr_a` and `sqr_b` are local bindings, only visible in the body that follows the `in`.
 
-At the top level of a module, a `let` works in the same way, except there is no enclosing body expression — the binding simply introduces a global name that can be referenced elsewhere in the module (or from other modules):
+At the top level of a module, a `let` works in the same way, except there is no enclosing body — the binding simply introduces a global name that can be referenced elsewhere in the module (or from other modules):
 
 ```
 module Utils {
@@ -524,7 +524,7 @@ A let-binding introduces a new scope by matching a pattern against the result of
 let <pattern> = <e_1> in <e_2>
 ```
 
-Variables form the simplest form of pattern; namely one that matches any value and binds it to a name:
+Variables form the simplest form of pattern, namely one that matches any value and binds it to a name:
 
 ```
 let name = "Zlatan" 
@@ -1029,6 +1029,7 @@ map : (a -> b) -> List<a> -> List<b>
 > ```
 > 
 > Note that we are partially applying `map` to f. There are two ways to look at this; we can think of it as a function that takes a function and
+> TODO
 
 ###### Filtering a list
 
