@@ -1319,11 +1319,29 @@ The `match` expression in Coal is used to deconstruct data based on its shape, e
   fun area(shape) : float =
     match(shape) {
       | Rectangle(w, h) => w * h
-      | Circle(r) => pi * r^2
+      | Circle(r)       => pi * r^2
     }
 ```
 
-Patterns can take several forms, including data constructors, literals, tuples, records, variables, wildcards, or combinations of these. See [below](#supported-patterns) for a complete list of available patterns. 
+Each case in a match expression is called a *clause*, consisting of a pattern on the left and an expression on the right. Variables introduced by a pattern are only in scope in the corresponding right-hand side expression:
+
+```
+  match(opt) {
+    | Some(x) => x + 1  // x is bound here
+    | None    => 0      // x is not in scope here
+  }
+```
+
+Patterns can take several forms, including data constructors, literals, tuples, records, variables, wildcards, or combinations of these: 
+
+```
+  match(shape) {
+    | Rectangle(0.0, _) => "flat rectangle"
+    | Rectangle(w, h)   => "rectangle with width " +++ show(w)
+  }
+```
+
+See [below](#supported-patterns) for a complete list of available patterns. 
 
 #### Totality requirement
 
