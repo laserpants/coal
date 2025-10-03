@@ -1053,7 +1053,7 @@ TODO
 
 ##### List predicates
 
-A *predicate* is a function that tests for some condition with respect to its argument and returns `true` or `false`. A common convention is to name functions that serve this purpose with a prefix `is_`.
+A *predicate* is a function that tests for some condition with respect to its argument and returns `true` or `false`. By convention, functions that serve this purpose are often prefixed with `is_`.
 
 ###### `is_empty`
 
@@ -1187,7 +1187,7 @@ The corresponding type for the above record is:
 { name : string, shoe_size : float, privileges : List<string> }
 ```
 
-The type of a record looks similar to the expression itself, except that each field is written as a label followed by its type. Instead of an equals sign, a colon (`:`) separates the label and the type.
+The type of a record resembles the expression itself, except that each field is written as a label followed by its type. Instead of an equals sign, a colon (`:`) separates the label and the type.
 
 Since the order of fields is irrelevant, the following two records are considered identical:
 
@@ -1249,7 +1249,7 @@ These types look a bit different from earlier examples. Here, the pipe (`|`) als
 fn(p : { lat : float, lng : float }) => p.lat
 ```
 
-This function requires its argument `p` (a record) to have exactly two fields: `lat` and `lng`, both of type `float`. This type is closed.
+In this example, the function requires its argument `p` (a record) to have exactly two fields: `lat` and `lng`, both of type `float`. This type is closed.
 
 ```
 fn(p : { lat : float, lng : float | q }) => p.lat
@@ -1337,7 +1337,7 @@ The `match` expression in Coal is used to deconstruct data based on its shape, e
     }
 ```
 
-Each case in a match expression is called a *clause*, consisting of a pattern on the left and an expression on the right. Variables introduced by a pattern are only in scope in the corresponding right-hand side expression:
+A case in a match expression is called a *clause* and consists of a pattern on the left and an expression on the right. Variables introduced by a pattern are only in scope in the corresponding right-hand side expression:
 
 ```
   match(opt) {
@@ -1386,7 +1386,7 @@ Non-exhaustive patterns
 
 #### Wildcard patterns
 
-A *wildcard* pattern is a pattern that matches any value without binding it to a name. These are often useful to guarantee exhaustiveness in `match` expressions. For instance, we can use literal patterns along with a wildcard when matching on integers:
+A *wildcard* pattern is a pattern that matches any value without binding it to a name and is written as an underscore (`_`). These are often useful to guarantee exhaustiveness in `match` expressions. For instance, we can use literal patterns along with a wildcard when matching on integers:
 
 ```
   fun describe_int(n : int32) : string =
