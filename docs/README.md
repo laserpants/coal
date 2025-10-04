@@ -722,25 +722,11 @@ There are two types of comments:
 
 #### Natural numbers
 
-Recursion in Coal relies on pattern matching to take layered data apart in a stepwise manner,
-
-stepwise peel of layers of data constructors ..?
-
-always working hand-in-hand with a recursive data structure like lists, trees, or other algebraic data types. 
-
-If we want to use an integer counter, similar to how for-loops behaves in imperative programming languages.
-
-Ordinary (machine type) integers are insufficient
-
-do not meet this requirement. 
-
-
-Instead, we need to define a recursive number type. This is typically done according to the standard axiomatization of the natural numbers:
+Recursion in Coal is closely tied to pattern matching: we peel away layers of a recursive data structure step by step, until reaching its base case. This works naturally with lists, trees, and other algebraic data types. Ordinary machine integers (`int32`, `int64`), however, cannot be pattern matched on. Nevertheless, we often want to use integers in recursive computations &mdash; for example, when counting, repeating an action, or simulating the behavior of loops in imperative languages. To describe numbers in a recursive way, we instead need to rely on the standard axiomatization of the natural numbers:
 
 > Every natural number is either zero or the successor of another natural number.
 
-This is known as the *Peano construction* of the natural numbers, named after the Italian mathematician [Giuseppe Peano](https://en.wikipedia.org/wiki/Giuseppe_Peano).
-The definition of the built-in `nat` type is simply this idea expressed in code:
+This is known as the *Peano construction* of the natural numbers, named after the Italian mathematician [Giuseppe Peano](https://en.wikipedia.org/wiki/Giuseppe_Peano). In code, the Peano numbers are expressed as the built-in type `nat`:
 
 ```
 type nat
@@ -748,22 +734,27 @@ type nat
  | Succ(nat)
 ```
 
-The number five, for example, would then be written:
+The number five, for example, can then be written:
 
 ```
 Succ(Succ(Succ(Succ(Succ(Zero)))))
 ```
 
-Writing numbers in this notation quickly becomes tedious. Fortunately, it is not necessary.
+This makes it possible to use numbers directly in patterns, just like with other algebraic data types:
 
-Internally, the compiler stores values of type `nat` as normal integers. 
+```
+  match(n : nat) {
+    | Zero => "Yay"
+    | Succ(_) => "nay"
+  }
+```
+
+Writing numbers in this style quickly becomes impractical, however. To make working with naturals convenient, the compiler internally represents values of type `nat` as ordinary integers. Converting between the two views is called *packing* and *unpacking*. These are constant time (O(1)) operations:
 
 ```
 pack_nat : int32 -> nat
 unpack_nat : nat -> int32
 ```
-
-Converting back and forth between these are constant time (**O**(1)) operations.
 
 #### Unit
 
@@ -1491,7 +1482,7 @@ trait <name>(<type_parameter>) {
 
 By defining a set of behaviors as a trait, you can reuse the same functionality across all types that support it. This reduces duplication and encourages reusable code. Traits are conceptually similar to type classes in Haskell and a common analogy is to think of them as interfaces in object-oriented programming.
 
-The following example defines a trait with a single function, `compare`. This function takes two inputs *a* and *b* of the same type and returns a value to indicate if *a* is less than *b* (`Lt`), greater than (`Gt`), or if the two values are equal (`Eq`). In other words, this trait captures the notion of a [total order](https://en.wikipedia.org/wiki/Total_order) on the type `t`, similar to Haskell’s `Eq` type class.
+The following example defines a trait with a single function, `compare`. This function takes two inputs *a* and *b* of the same type and returns a value to indicate if *a* is less than *b* (`Lt`), greater than (`Gt`), or if the two values are equal (`Eq`). In other words, this trait captures the notion of a [total order](https://en.wikipedia.org/wiki/Total_order) on the type `t` (similar to Haskell’s `Ord` type class).
 
 ```
 trait Ordered<t> {
@@ -1525,6 +1516,16 @@ We write the full type of `is_less_than` as: `t -> t -> bool with Ordered<t>`.
 #### Higher-kinded traits
 
 The traits we have looked at up to this point have all been of the form `T<t>`, where `t` is a placeholder for an ordinary type.
+Unlike these types, a *type constructor* is a type-level function which takes one or more types as arguments and returns a type.
+For example, in the type `Option<int>`, `Option` is a type constructor.
+
+```
+Option : * -> *
+```
+
+where `*` means a concrete type.
+
+
 
 TODO
 
