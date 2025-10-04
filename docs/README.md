@@ -162,7 +162,9 @@ TODO
      - [Higher-kinded traits](#higher-kinded-traits)
      - [Trait inheritance](#trait-inheritance)
   1. [Recursion, corecursion, and codata](#recursion-corecursion-and-codata)
+     - [Fold](#fold)
      - Top-level folds and mutual recursion
+     - [Codata and unfold](#codata-and-unfold)
      - [Duality](#duality)
 
 ### Modules 
@@ -411,9 +413,10 @@ Variable names are subject to the following rules:
 * Variable names are case-sensitive, meaning that `my_VAR` and `my_var` refer to different variables.
 * Variable names cannot contain spaces.
 * Special characters other than underscores (e.g., `!`, `#`, `%`, `@`) are not permitted in variable names.
-* Reserved language keywords (see below) cannot be used as variable names.
 
 ##### Reserved keywords
+
+Reserved language keywords cannot be used as variable names. These are:
 
 ```
 alias, as, bignum, bool, char, cotype, double, else, false, float, fn, fold, fun, if, import, in, instance, int32, int64, let, match, module, nat, or, string, then, trait, true, type, unfold, unit, when, where, with
@@ -721,7 +724,7 @@ There are two types of comments:
 
 #### Natural numbers
 
-Recursion in Coal is closely tied to pattern matching: we peel off layers of a recursive data structure step by step, until reaching its base case. This works naturally with lists, trees, and other algebraic data types. Ordinary machine integers (`int32`, `int64`), however, cannot be pattern matched on. Nevertheless, we often want to use integers in recursive computations &mdash; for example, when counting, repeating an action, or simulating the behavior of loops in imperative languages. To describe numbers in such a way, we instead need to rely on the standard axiomatization of the natural numbers:
+Recursion in Coal is closely tied to pattern matching: we peel off layers of a recursive data structure step by step, until reaching its base case. This works naturally with lists, trees, and other algebraic data types. Ordinary machine integers (`int32`, `int64`), however, cannot be pattern matched on. Nevertheless, we often want to use counting numbers in recursive computations &mdash; for example, when repeating an action, or simulating the behavior of loops in imperative languages. To describe numbers in a way compatible with recursion, we need to rely on the standard axiomatization of the natural numbers:
 
 > Every natural number is either zero or the successor of another natural number.
 
@@ -999,31 +1002,45 @@ For example:
 [0, 1, 2, 3, 4] |.map(fn(x) => 2 ^ x)       // [1, 2, 4, 8, 16]
 ```
 
-The type of map is:
+The type of `map` is:
 
 ```
 map : (a -> b) -> List<a> -> List<b>
 ```
 
-> #### Mapping and the `Functor` trait
+> #### Mapping and `Functor`s
 >
-> The actual type of `map` is more general than the one above, which is in a form specialized to lists. In fact, any value of type `f<a>` can be mapped over, as long as `f` implements the `Functor` trait:
+> The actual type of `map` is more general than the one above, which is in a form specialized to lists. In fact, any value of type `f<a>` can be mapped over, as long as `f` implements the `Functor` [trait](#traits):
 >
 > ```
 > map : (a -> b) -> f<a> -> f<b> with Functor<f>
 > ```
 >
 > This type of transformation is a structure-preserving map which corresponds to the notion of a *homomorphism* in mathematics. Homomorphisms are the basic topic of study in category theory. 
-> A functor, in this context, is a mapping between categories – that is, one that sends objects and morphisms from one category to another, subject to certain laws. 
-> In code, the objects are the types and morphisms are simply functions between these: 
+> A functor, in this context, is a mapping between categories &mdash; that is, one that sends objects and morphisms from one category to another, subject to certain laws. 
+> In the context of programming languages, the objects are the types and morphisms are simply functions: 
 > 
 > ```
 > a           ==>  f<a>
-> f : a -> b  ==>  map(f) : f<a> -> f<b>
+> z : a -> b  ==>  map(z) : f<a> -> f<b>
 > ```
 > 
-> Note that we are partially applying `map` to f. There are two ways to interpret this; we can think of it as a function that takes a function and
-> TODO
+> Note that we are partially applying `map` to `z`. There are two ways to interpret `map`; we can think of it as a function that applies the function `z` to the value of type `a`, in the `f`-context, which could be .
+> The other interpretation is that `map` that takes a function `(a -> b)` and *lifts* it into one in the target category, i.e., one of type `f<a> -> f<b>`.
+> Here we are mostly interested in the latter.
+> 
+> Functors are subject to the following laws:
+> 
+> ```
+> fmap id == id
+> fmap (f << g) == fmap f << fmap g
+> ```
+> 
+> The first says that ...
+> The second law means ...
+>
+>
+> 
 
 ###### Filtering a list
 
@@ -1035,7 +1052,7 @@ For example:
 [0, 1, 2, 3, 4] |.filter(fn(x) => x > 2)    // [3, 4] 
 ```
 
-The type of filter is:
+The type of `filter` is:
 
 ```
 filter : (a -> bool) -> List<a> -> List<a>
@@ -1392,7 +1409,18 @@ The `match` expression in Coal is used to deconstruct data based on its shape, e
     }
 ```
 
-A case in a match expression is called a *clause* and consists of a pattern on the left and an expression on the right. Variables introduced by a pattern are only in scope in the corresponding right-hand side expression:
+A case in a match expression is called a *clause* and consists of a pattern on the left and an expression on the right. Pattern matching proceeds by checking each clause in order until it finds one whose pattern matches the value. The corresponding right-hand side expression is then evaluated, with any variables in the pattern bound to the matched sub-components.
+
+```
+  match(list : List<int32>) {
+    | [a] => a
+    | [a, _] => a
+    | [a, _, _] => a
+    | _ => 0
+  }
+```
+
+Variables introduced by a pattern are only in scope in the corresponding right-hand side expression:
 
 ```
   match(opt) {
@@ -1414,7 +1442,7 @@ See [below](#supported-patterns) for a complete list of available patterns.
 
 #### Totality requirement
 
-For a function to be total, it must be defined for all inputs of its corresponding type. A consequence of this in the context of `match` expressions is that all possible cases for a type need to be covered by the given patterns. In other words, the patterns must be *exhaustive*. If a case is missing, the compiler will reject the program. 
+For a function to be *total*, it must be defined for all inputs of its corresponding type. A consequence of this in the context of `match` expressions is that all possible cases for a type need to be covered by the patterns. In other words, the patterns must be *exhaustive*. If a case is missing, the compiler will reject the program. 
 
 For example, the following function
 
@@ -1450,17 +1478,6 @@ A *wildcard* pattern is a pattern that matches any value without binding it to a
       | 1 => "one"
       | _ => "something else"
     }
-```
-
-Pattern matching proceeds by checking each clause in order until it finds one whose pattern matches the value. The corresponding right-hand side expression is then evaluated, with any variables in the pattern bound to the matched sub-components.
-
-```
-  match(list : List<int32>) {
-    | [a] => a
-    | [a, _] => a
-    | [a, _, _] => a
-    | _ => 0
-  }
 ```
 
 #### Lambda match 
@@ -1541,6 +1558,9 @@ Code that uses `compare` now works uniformly for all types that have an `Ordered
 ```
 fun is_less_than(x : t, y : t) : bool with Ordered<t> =
   compare(x, y) == Lt
+
+// is_less_than(3, 5)
+// is_less_than(false, true)
 ```
 
 Type parameters, like `t` in the type of `is_less_than` are [universally quantified](https://en.wikipedia.org/wiki/Universal_quantification). The `with` keyword introduces one or more constraints on type variables appearing in a type. In this case it demands that an instance of `Ordered` exists for the type substituted for `t`.
@@ -1548,21 +1568,19 @@ We write the full type of `is_less_than` as: `t -> t -> bool with Ordered<t>`.
 
 #### Higher-kinded traits
 
-The traits we have looked at up to this point have all been of the form `T<t>`, where `t` is a placeholder for an ordinary type.
-Unlike these types, a *type constructor* is a type-level function which takes one or more types as arguments and returns a type.
-For example, in the type `Option<int>`, `Option` is a type constructor.
+So far, all the traits we’ve looked at have been of the form `T<t>`, where `t` is a placeholder for an ordinary type. Unlike these types, a *type constructor* is a type-level function which takes one or more types as arguments and returns a type. That is, a type constructor on its own isn't really a type, until it is provided with all necessary type arguments. For example, in the type `Option<int>`, `Option` is a type constructor with [kind](https://en.wikipedia.org/wiki/Kind_(type_theory))
 
 ```
-Option : * -> *
+* -> *
 ```
 
-where `*` means a concrete type.
+where `*` denotes a *proper* type (i.e., a fully applied type with no parameters). We can read `Option : * -> *` as:
 
+> Option is a type constructor that takes a type as input and produces a type.
 
+This generalizes to constructors of higher kinds. For example, `Result<e, a>` has kind `* -> * -> *`.
 
-TODO
-
-<!--
+Traits can be parameterized by type constructors. Instead of `T<t : *>`, we then get a trait of the form `T<f : * -> ... -> *>`. A common example is the `Functor` trait, which abstracts the idea of [mapping a function](#mapping-over-a-list) over some container-like structure:
 
 ```
 trait Functor<f : * -> *> {
@@ -1570,13 +1588,7 @@ trait Functor<f : * -> *> {
 }
 ```
 
-Recall that the `Option` type is defined as:
-
-```
-type Option<a>
-  = Some<a>
-  | None
-```
+The `Option` type forms a `Functor` in the following way:
 
 ```
 // Make Option an instance of the Functor trait
@@ -1589,17 +1601,30 @@ instance Functor<Option> {
 }
 ```
 
-baz
+This instance ensures that `map` can be used on `Option` values, just like on lists:
 
 ```
-map(fn(x) => x * 100, Some(1))    // ==> Some(100)
-map(fn(x) => x * 100, [1, 2, 3])  // ==> [100, 200, 300]
+let times100 = fn(x) => x * 100
+
+map(times100, Some(1))    // ==> Some(100)
+map(times100, [1, 2, 3])  // ==> [100, 200, 300]
 ```
--->
 
 #### Trait inheritance
 
-TODO
+A trait can declare that it depends on another trait by *inheriting* from it. The inheriting trait is then able to access to the methods of the parent trait, and can build its own functionality on top of them. For example, the following instance defines how to display an `Option<a>` value, provided that there is already a way to display values of type `a`:
+
+```
+  trait Show<Option<a>> with Show<a> {
+    fun show(opt) =
+      match(opt) {
+        | Some(v) => "Some(" +++ show(v) +++ ")"
+        | None => "None"
+      }
+  } 
+```
+
+Here, the `Show<Option<a>>` instance inherits from `Show<a>`. This means the compiler will only accept this instance if a `Show` implementation for `a` is available. Inside the trait body, we can call `show(v)` on the inner value `v : a`. The parent trait `Show<a>` guarantees that `show` is defined for this type. In other words, the ability to show an `Option<a>` depends directly on the ability to show its element type `a`.
 
 ### Recursion, corecursion, and codata
 
@@ -1623,7 +1648,9 @@ Name not in scope: factorial
 
 To call a function from within itself in this way is not possible. Instead, recursion needs to be expressed in terms of a pattern know as a *fold*. Note that `fold` is a language keyword in Coal, not an ordinary function. Folds are similar to `match` expressions, but with some extra powers.
 
-We are going to use the `nat` data type to define the factorial function:
+#### Fold
+
+We are going to use the `nat` data type (explained [here](#natural-numbers)) to define the factorial function:
 
 ```
   fun factorial(n : nat) =
@@ -1716,6 +1743,8 @@ module Json {
 
 }
 ```
+
+#### Codata and unfold
 
 #### Duality
 
