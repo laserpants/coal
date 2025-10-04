@@ -49,7 +49,7 @@ These code snippets illustrate two distinct modes of recursive control flow. If 
 
 ### Programs = Expressions + Effects
 
-Coal is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-oriented_programming_language) language: a program is, at its core, just an expression that evaluates to a value. In this programming model, all data is immutable and there are no observable side-effects. These properties make programs more predictable, easier to reason about, highly testable, and allows for code to be verified using formal mathematical techniques. On the other hand, practical applications need to have the ability to interact with the outside world. Side-effects are what make them useful. A [system for managing effects](https://en.wikipedia.org/wiki/Effect_system), such as I/O and exceptions, is still lacking in Coal. This is an essential step to promote the language into one that can be used to write actual programs. See **[How to contribute](#how-to-contribute)** if you're keen to work on this.
+Coal is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-oriented_programming_language) language: a program is, at its core, just an expression that evaluates to a value. In this programming model, all data is immutable and there are no observable side-effects. These properties make programs more predictable, easier to reason about, highly testable, and allows for code to be verified using formal mathematical techniques. On the other hand, practical applications need to have the ability to interact with the outside world. Side-effects are what make them useful. A [system for managing effects](https://en.wikipedia.org/wiki/Effect_system), such as I/O and exceptions, is still lacking in Coal. This is an essential step to promote the language into one that can be used to write actual programs. See **[How to contribute](#how-to-contribute)** if you’re keen to work on this.
 
 ## Project status and roadmap
 
@@ -179,7 +179,7 @@ module <path>(<export_list>) {
 }
 ```
 
-Every module is uniquely identified by its *path*. A module's path mirrors the directory structure of the source file in which it is defined. Path segments begin with an uppercase letter and are separated by a dot (`.`). Files have a `.coal` extension. A module `Utils.Math.Trigonometry`, for instance, is defined in a file named `Trigonometry.coal`, located under `Utils/Math/` relative to your project's root directory:
+Every module is uniquely identified by its *path*. A module’s path mirrors the directory structure of the source file in which it is defined. Path segments begin with an uppercase letter and are separated by a dot (`.`). Files have a `.coal` extension. A module `Utils.Math.Trigonometry`, for instance, is defined in a file named `Trigonometry.coal`, located under `Utils/Math/` relative to your project’s root directory:
 
 ```
 src
@@ -237,7 +237,7 @@ Function parameters are *patterns*, allowing functions to directly deconstruct t
     ...
 ```
 
-A type annotion can be given to indicate a function's return type, as in the following example:
+A type annotion can be given to indicate a function’s return type, as in the following example:
 
 ```
   fun is_even(n : int32) : bool =
@@ -431,7 +431,7 @@ fun go(x) =
   let x = 3 in x + 3
 ```
 
-In this example, the inner `let` attempts to declare a new variable that has the same name as the function parameter `x`.
+In this example, the inner `let` attempts to declare a new variable that has the same name as the function parameter, namely `x`.
 
 Because shadowing is often a source of subtle bugs, the Coal compiler treats it as an error.
 
@@ -447,7 +447,7 @@ Integer literals introduced in code without an explicit type annotation, such as
 let answer = 42
 ```
 
-are polymorphic. The inferred type of this expression is `n with Numeric(n)`, which isn't an ordinary type. It means that `n` can be *any* type, as long as it is a member of the `Numeric` trait (see **[Traits](#traits)**). This includes the built-in `int32`, `int64`, `bignum`, and `nat` types. All `Numeric` types support the basic arithmetic operations of addition, subtraction, and multiplication.
+are polymorphic. The inferred type of this expression is `n with Numeric(n)`, which isn’t an ordinary type. It means that `n` can be *any* type, as long as it implements the `Numeric` trait (see **[Traits](#traits)**). This includes the built-in `int32`, `int64`, `bignum`, and `nat` types. All `Numeric` types support the basic arithmetic operations of addition, subtraction, and multiplication.
 
 ```
 fun sum_of(x, y, z) = 
@@ -545,7 +545,7 @@ let { baz = { f = a | _ } } = faz(4)
 > #### A note about let-generalization
 >
 > In some sense, a let-binding is interchangeable with a lambda function. For example, writing `let x = 1 in increment(x)` yields the same result as `(fn(x) => increment(x))(1)`.
-> But besides being more readable, the let-binding also serves another purpose. In [Hindley-Milner](https://en.wikipedia.org/wiki/Hindley%E2%80%93Milner_type_system) languages, it is let-bindings that introduce polymorphism. Consider the following expression, which doesn't type check:
+> But besides being more readable, the let-binding also serves another purpose; in [Hindley-Milner](https://en.wikipedia.org/wiki/Hindley%E2%80%93Milner_type_system) languages, it is let-bindings that introduce polymorphism. Consider the following expression, which doesn’t type check:
 > 
 > ```
 >   (fn(f) => (f(3 : int32), f("three")))(fn(x) => x)
@@ -563,7 +563,7 @@ let { baz = { f = a | _ } } = faz(4)
 
 ##### Name binding semantics
 
-A subtle but important detail that makes let-bindings in Coal different from those in most other languages is that the identifier introduced by a `let` is **not in scope within the definition itself**. In other words, `let x = e1 in e2` makes `x` available in `e2`, but not in `e1`. In the ML-family of languages (e.g. OCaml), this is also the case for the standard `let` keyword. However, in these languages, a special `let rec` syntax makes it possible to evade this restriction. Coal doesn't have an equivalent to `let rec`.
+A subtle but important detail that makes let-bindings in Coal different from those in most other languages is that the identifier introduced by a `let` is **not in scope within the definition itself**. In other words, `let x = e1 in e2` makes `x` available in `e2`, but not in `e1`. In the ML-family of languages (e.g. OCaml), this is also the case for the standard `let` keyword. However, in these languages, a special `let rec` syntax makes it possible to evade this restriction. Coal doesn’t have an equivalent to `let rec`.
 This prevents non-well-founded expressions, such as `let f = f in f`, but more generally, makes it impossible for any function to refer to itself. 
 The restriction also applies to top-level definitions. As far as the compiler is concerned, this function
 
@@ -754,8 +754,8 @@ This makes it possible to use numbers directly in patterns, just like with other
 Writing numbers in this style quickly becomes impractical, however. To make working with naturals convenient (and efficient), the compiler internally represents values of type `nat` as ordinary integers. Converting between the two views is called *packing* and *unpacking*. These are constant time (O(1)) operations:
 
 ```
-pack_nat : int32 -> nat
-unpack_nat : nat -> int32
+pack : int32 -> nat
+unpack : nat -> int32
 ```
 
 #### Unit
@@ -778,7 +778,7 @@ fun five(() : unit) : int32 = 5
 
 ##### Two pairs of parentheses for the price of one
 
-Removing the type annotation, the above becomes `fun five(()) = 5`, which is perfectly valid. But since an expression like `five()` doesn't have any other meaningful interpretation, the compiler accepts this as a shorthand for the slightly awkward double-parentheses.
+Removing the type annotation, the above becomes `fun five(()) = 5`, which is perfectly valid. But since an expression like `five()` doesn’t have any other meaningful interpretation, the compiler accepts this as a shorthand for the slightly awkward double-parentheses.
 
 ```
 fun five() = 5   // i.e., fun five(() : unit) = 5
@@ -890,7 +890,7 @@ tail : List<a> -> Option<List<a>>
 uncons : List<a> -> Option<(a, List<a>)>
 ```
 
-> #### Reverse function application operator
+> #### Function pipelining
 > 
 > The operator `|.` is used in the following examples. It is an infix operator that performs function application, but with the arguments reversed. So, for example, the expression 
 > ```
@@ -908,10 +908,10 @@ uncons : List<a> -> Option<(a, List<a>)>
 > To describe a sequence of steps that creates a circle, sets properties such as its color and position, and finally places it on the canvas, we would normally write:
 >
 > ```
-> draw(set_position(10, 5, fill("blue", circle({ radius = 5.0 }))), canvas)
+> draw_shape(set_position(10, 5, fill("blue", circle({ radius = 5.0 }))), canvas)
 > ```
 >
-> Using the reverse function application operator (and the associated `$.`-operator), we could instead write the above in a more readable pipeline-style:
+> Using the reverse function application operator (and the associated `$.`-operator), we could instead write the above in a more readable *pipeline*-style:
 >
 > ```
 > circle({ radius = 5.0 })
@@ -934,7 +934,7 @@ For example:
 [1, 2, 3, 4, 5, 6, 7] |.take(3)     // [1, 2, 3]
 ```
 
-Note that, if the list's length is less than the requested number of elements, then `take` returns the entire list. So, for example, `take(5, [1, 2, 3])` returns `[1, 2, 3]`. `take(0)` always returns an empty list.
+Note that, if the list’s length is less than the requested number of elements, then `take` returns the entire list. So, for example, `take(5, [1, 2, 3])` returns `[1, 2, 3]`. As expected, `take(0)` always returns an empty list.
 
 The function `drop` removes the first *n* elements from a list.
 
@@ -980,7 +980,7 @@ The list concatenation operator (`++`) appends one list to the end of another, r
   let s = ["Khufu", "Hatshepsut", "Akhenaten"] ++ ["Tutankhamun"]
 ```
 
-**Note:** The time complecity of `++` is linear (O(n)) in the length of the first string.
+**Note:** The time complecity of `++` is linear (O(n)) in the length of the first list.
 
 <!--
 ###### Sorting
@@ -1016,8 +1016,13 @@ map : (a -> b) -> List<a> -> List<b>
 > map : (a -> b) -> f<a> -> f<b> with Functor<f>
 > ```
 >
+> This gives us a more general meaning of mappning, which is something like "transforming values inside a fixed context".
+>
 > This type of transformation is a structure-preserving map which corresponds to the notion of a *homomorphism* in mathematics. Homomorphisms are the basic topic of study in category theory. 
 > A functor, in this context, is a mapping between categories &mdash; that is, one that sends objects and morphisms from one category to another, subject to certain laws. 
+> 
+> TODO: illustration
+>
 > In the context of programming languages, the objects are the types and morphisms are simply functions: 
 > 
 > ```
@@ -1025,27 +1030,57 @@ map : (a -> b) -> List<a> -> List<b>
 > z : a -> b  ==>  map(z) : f<a> -> f<b>
 > ```
 > 
-> Note that we are partially applying `map` to `z`. There are two ways to interpret `map`; we can think of it as a function that applies the function `z` to the value of type `a`, in the `f`-context, which could be a list of values, or an optional.
-> The other interpretation is that `map` that takes a function `(a -> b)` and *lifts* it into one in the target category, i.e., one of type `f<a> -> f<b>`.
-> Here we are mostly interested in the latter.
+> Note that we are partially applying `map` to `z`. This suggests that there are two ways to interpret `map`; we can think of it as a function that applies the function `z` to the value of type `a`, in the `f`-context, which could be a list of values, or an optional.
+> The other is that `map` takes some function `a -> b` and *lifts* it into one that acts on `f`-values &mdash; that is one of type `f<a> -> f<b>`.
+> The latter interpretation is more in line with the definition of a functor in category theory.
+>
+> ##### Laws
 > 
 > Functors are subject to the following laws:
+> 
+> F(id) = id
+> F(g o f) = F(g) o F(f)
+>
+> In code:
 > 
 > ```
 > map(id) == id
 > map(f << g) == map(f) << map(g)
 > ```
 > 
-> The first says that 
-> The second law means that functors preserve composition.
+> These laws aren’t enforced by the compiler, but following them is always a good idea. The first says that `map` ..? k
+> The second law means that functors must preserve composition.  
+> Together, these laws ensure that mapping behaves in a way that preserves the structure of the ? . 
 >
 > ##### List
 >
-> TODO
+> ```
+> instance Functor<List> {
+>   fun map(f, xs) =
+>     fold(xs) {
+>       | [] => []                // (1)
+>       | x :: @xs = f(x) :: xs   // (2)
+>     }
+> }
+> ```
 >
-> ##### Option
+> ###### Identity law:
 > 
-> TODO
+> For the `List` instance to satisfy this law, we must have that:
+> 
+> ```
+> map(id, xs) === id(xs)
+> ```
+>
+> For an empty list, ..
+>
+> ```
+> map(id, []) == []      // Follows from (1)
+>             == id([])  // By the definition of id
+> ```
+>
+> ###### The other law (?):
+>
 > 
 
 ###### Filtering a list
@@ -1181,7 +1216,7 @@ The type of this function would be:
 head : List<a> -> a
 ```
 
-We can read this type as: Given any type `a` and a list of elements of this type, return an `a` value. That is to say; we know nothing about `a`, except that the list's elements has this type. 
+We can read this type as: Given any type `a` and a list of elements of this type, return an `a` value. That is to say; we know nothing about `a`, except that the list’s elements has this type. 
 Therefore, if the input list is empty, then we have nothing to look at. `Option` solves this problem. The `head` function provided by the stanard `List` package is defined in the following way: 
 
 ```
@@ -1194,7 +1229,7 @@ Therefore, if the input list is empty, then we have nothing to look at. `Option`
 
 #### Tuples
 
-Just like lists, tuples are ordered sequences of values. Unlike lists, however, a tuple's length is fixed (i.e. determined at compile-time), and its elements can have different types. In code, a tuple is written as a comma-separated sequence of expressions enclosed in parentheses:
+Just like lists, tuples are ordered sequences of values. Unlike lists, however, a tuple’s length is fixed (i.e. determined at compile-time), and its elements can have different types. In code, a tuple is written as a comma-separated sequence of expressions enclosed in parentheses:
 
 ```
 (<expr_1 : t_1>, <expr_2 : t_2>, ..., <expr_n : t_n>) : (t_1, t_2, ..., t_n)
@@ -1255,7 +1290,7 @@ let five = curry(add, 1, 4)         // or (curry(add))(1, 4)
 
 #### Records
 
-Records are unordered collections of name–value pairs, where the values may be of any type, including other records. In Coal, records are first-class values. They are suitable for representing structured data with multiple properties, or nested objects. A record expression is written as a sequence of comma-separated *fields* enclosed in curly braces. Each field consists of a name, called the *label*, paired with a value. The two are separated by an equals sign (`=`):
+Records are unordered collections of name–value pairs, where the values can be of any type, including other records. In Coal, records are first-class values. They are suitable for representing structured data with multiple properties, or nested objects. A record expression is written as a sequence of comma-separated *fields* enclosed in curly braces. Each field consists of a name, called the *label*, paired with a value. The two are separated by an equals sign (`=`):
 
 ```
 { 
@@ -1580,7 +1615,7 @@ We write the full type of `is_less_than` as: `t -> t -> bool with Ordered<t>`.
 
 #### Higher-kinded traits
 
-So far, all the traits we’ve looked at have been of the form `T<t>`, where `t` is a placeholder for an ordinary type. Unlike these types, a *type constructor* is a type-level function which takes one or more types as arguments and returns a type. That is, a type constructor on its own isn't really a type, until it is provided with all necessary type arguments. For example, in the type `Option<int>`, `Option` is a type constructor with [kind](https://en.wikipedia.org/wiki/Kind_(type_theory))
+So far, all the traits we’ve looked at have been of the form `T<t>`, where `t` is a placeholder for an ordinary type. Unlike these types, a *type constructor* is a type-level function which takes one or more types as arguments and returns a type. That is, a type constructor on its own isn’t really a type, until it is provided with all necessary type arguments. For example, in the type `Option<int>`, `Option` is a type constructor with [kind](https://en.wikipedia.org/wiki/Kind_(type_theory))
 
 ```
 * -> *
@@ -1915,7 +1950,7 @@ let fact =
   fn(n) => 
     if (n == 0)
       then 1 
-      else n * fact(n - 1) // <-- This doesn't work
+      else n * fact(n - 1) // <-- This doesn’t work
   in fact(5)
 ```
 
@@ -1970,7 +2005,7 @@ factorial(n : nat) =
       }
 ```
 
-This is pseudo-code since letrec doesn't really exist as a language keyword. 
+This is pseudo-code since letrec doesn’t really exist as a language keyword. 
 
 #### Corecursion and codata
 
