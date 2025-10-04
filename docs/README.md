@@ -45,11 +45,11 @@ A distinction is made between ordinary, finite data, which is produced and consu
 
 In this example, the `@` in the field name causes the expression on the right (`n + 1`) to become the next seed value, which is fed back into `enum_from` to generate the rest of the stream.
 
-These code snippets illustrate two distinct modes of recursive control flow. If you are familiar with [recursion schemes](https://blog.sumtypeofway.com/posts/introduction-to-recursion-schemes.html) in a language like Haskell, recursion in Coal is based on the same principles. In that framework, `fold` and `unfold` are called *catamorphisms* and *anamorphisms*, respectively. Jump to **Recursion, corecursion, and codata** for a more detailed description of `fold` and `unfold`.
+These code snippets illustrate two distinct modes of recursive control flow. If you are familiar with [recursion schemes](https://blog.sumtypeofway.com/posts/introduction-to-recursion-schemes.html) in a language like Haskell, recursion in Coal is based on the same principles. In that framework, `fold` and `unfold` are called *catamorphisms* and *anamorphisms*, respectively. Jump to **[Recursion, corecursion, and codata](#recursion-corecursion-and-codata)** for a more detailed description of `fold` and `unfold`.
 
 ### Programs = Expressions + Effects
 
-Coal is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-oriented_programming_language) language: a program is, at its core, just an expression that evaluates to a value. In this programming model, all data is immutable and there are no observable side-effects. These properties make programs more predictable, easier to reason about, highly testable, and allows for code to be verified using formal mathematical techniques. On the other hand, practical applications need to have the ability to interact with the outside world. Side-effects are what make them useful. A system for managing effects, such as I/O and exceptions, is still lacking in Coal. This is an essential step to promote the language into one that can be used to write actual programs. See **How to contribute** if you're keen to work on this.
+Coal is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-oriented_programming_language) language: a program is, at its core, just an expression that evaluates to a value. In this programming model, all data is immutable and there are no observable side-effects. These properties make programs more predictable, easier to reason about, highly testable, and allows for code to be verified using formal mathematical techniques. On the other hand, practical applications need to have the ability to interact with the outside world. Side-effects are what make them useful. A [system for managing effects](https://en.wikipedia.org/wiki/Effect_system), such as I/O and exceptions, is still lacking in Coal. This is an essential step to promote the language into one that can be used to write actual programs. See **[How to contribute](#how-to-contribute)** if you’re keen to work on this.
 
 ## Project status and roadmap
 
@@ -74,19 +74,25 @@ The following is a list of features that are either missing or incomplete, and :
 
 ## Installation and setup
 
-TODO
+The compiler has been tested on Linux and Mac OS.
 
 ### Prerequisites
 
-TODO
+#### Haskell/GHC
 
-### Mac
+https://www.haskell.org/ghcup/
 
-TODO 
+#### LLVM
 
-### Linux
+https://llvm.org/
 
-TODO 
+#### Boehm–Demers–Weiser garbage collector
+
+https://github.com/ivmai/bdwgc
+
+#### The GNU Multiple Precision Arithmetic Library
+
+https://gmplib.org/
 
 ### Compiler
 
@@ -117,13 +123,13 @@ TODO
      - [Functions](#functions)
      - [Let-expressions](#let-expressions)
      - [Data types](#data-types)
+  1. [Built-in language primitives](#built-in-language-primitives)
   1. [Expression syntax](#expression-syntax)
      - [Variables](#variables)
        - [Naming rules](#naming-rules)
        - [Reserved keywords](#reserved-keywords)
        - [Shadowing considered harmful](#shadowing-considered-harmful)
      - [Literal expressions](#literal-expressions)
-       - [Built-in language primitives](#built-in-language-primitives)
        - [Integral types](#integral-types)
      - [Function application](#function-application)
      - [If-then-else](#if-then-else)
@@ -135,13 +141,13 @@ TODO
        - [Logical](#logical)
        - [Data](#data)
        - [Function composition and pipelining](#function-composition-and-pipelining)
-       - [List manipulation](#list-manipulation)
+       - [List operations](#list-operations)
        - [String manipulation](#string-manipulation)
      - [Comments](#comments)
   1. [Types](#types)
      - [Natural numbers](#natural-numbers)
      - [Unit](#unit)
-     - [Lists](#lists)
+     - [List](#list)
        - [Common list operations](#common-list-operations)
        - [Useful higher-order list functions](#useful-higher-order-list-functions)
        - [List predicates](#list-predicates)
@@ -154,13 +160,18 @@ TODO
        - [Pattern matching over records](#pattern-matching-over-records)
        - [Deconstructing records](#deconstructing-records)
   1. [Pattern matching](#pattern-matching)
+     - [Totality requirement](#totality-requirement)
+     - [Wildcard patterns](#wildcard-patterns)
+     - [Lambda match](#lambda-match)
      - [Supported patterns](#supported-patterns)
   1. [Traits](#traits)
-     - Higher-kinded traits
-     - Trait inheritance
+     - [Higher-kinded traits](#higher-kinded-traits)
+     - [Trait inheritance](#trait-inheritance)
   1. [Recursion, corecursion, and codata](#recursion-corecursion-and-codata)
-     - Top-level folds and mutual recursion
-     - Duality
+     - [Fold](#fold)
+     - [Top-level folds and mutual recursion](#top-level-folds-and-mutual-recursion)
+     - [Codata and unfold](#codata-and-unfold)
+     - [Duality](#duality)
 
 ### Modules 
 
@@ -174,7 +185,7 @@ module <path>(<export_list>) {
 }
 ```
 
-Every module is uniquely identified by its *path*. A module's path mirrors the directory structure of the source file in which it is defined. Path segments begin with an uppercase letter and are separated by a dot (`.`). Files have a `.coal` extension. A module `Utils.Math.Trigonometry`, for instance, is defined in a file named `Trigonometry.coal`, located under `Utils/Math/` relative to your project's root directory:
+Every module is uniquely identified by its *path*. A module’s path mirrors the directory structure of the source file in which it is defined. Path segments begin with an uppercase letter and are separated by a dot (`.`). Files have a `.coal` extension. A module `Utils.Math.Trigonometry`, for instance, is defined in a file named `Trigonometry.coal`, located under `Utils/Math/` relative to your project’s root directory:
 
 ```
 src
@@ -185,13 +196,13 @@ src
 
 #### Imports
 
-An `import` statement is used to bring in functions and other definitions from other modules. As in most other languages, these must appear at the beginning of a module, preceding any other code.
+An `import` statement is used to bring in functions and other definitions from other modules. These must appear at the beginning of a module, preceding any other code.
 
 ```
 import List(concat, head, tail)
 ```
 
-The special `namespace` keyword allows you to access all functions, types, and other definitions from a module via their qualified names. A qualified name is formed by prefixing the name with the path of the module:
+The special `namespace` keyword allows you to import and access all functions, types, and other definitions from a module via their qualified names. A qualified name is formed by prefixing the name with the path of the module:
 
 ```
 // Import the List module under its namespace
@@ -218,21 +229,21 @@ Definitions that occupy the outermost scope of a module are functions, top-level
 
 #### Functions
 
-A function is defined using the `fun` keyword, followed by the function's name and a list of comma-separated arguments enclosed in parentheses. The function body is simply an expression, which follows the arguments and is preceded by an equals sign:
+A function is defined with the `fun` keyword, followed by the function’s name and a list of comma-separated arguments enclosed in parentheses. The function body is simply an expression, which comes after the arguments and is preceded by an equals sign:
 
 ```
   fun <name>(<arg_1>, <arg_2>, ..., <arg_n>) =
     <expr>
 ```
 
-In the above, `<arg_1>, <arg_2>, ..., <arg_n>` are *patterns*, allowing functions to directly deconstruct their arguments. In addition to basic variables, records, tuples, and other data constructors, patterns can also include wildcards, literals, and nested structures. See **Pattern matching** for an overview of available patterns.
+Function parameters are *patterns*, allowing functions to directly deconstruct their arguments. In addition to basic variables, records, tuples, and other data constructors, patterns can also include wildcards, literals, and nested structures. See **[Pattern matching](#pattern-matching)** for a list of available patterns.
 
 ```
   fun bork({ n : int32 }, (fst, snd), _) =
     ...
 ```
 
-A type annotion can be given to indicate a function's return type; as in the following example:
+A type annotion can be given to indicate a function’s return type, as in the following example:
 
 ```
   fun is_even(n : int32) : bool =
@@ -241,7 +252,7 @@ A type annotion can be given to indicate a function's return type; as in the fol
 
 ##### Main
 
-TODO
+Just like in many other programming languages, the `main` function serves as the entry point of a program:
 
 ```
 module Main {
@@ -252,13 +263,19 @@ module Main {
 
 #### Let-expressions
 
-Expressions that are not functions can also be defined in this scope, using the `let` keyword:
+The `let` keyword introduces a new name bound to the result of an expression. Inside functions, a `let` is often used to give names to intermediate values:
 
 ```
-  let <name> = <expr>
+  fun hypotenuse(a, b) =
+    let sqr_a = a * a;
+        sqr_b = b * b
+    in 
+      sqrt(sqr_a + sqr_b)
 ```
 
-A module-level let-binding looks like an ordinary let-expression (explained below), except that there is no expression body:
+Here, `sqr_a` and `sqr_b` are local bindings, only visible in the body that follows the `in`.
+
+At the top level of a module, a `let` works in the same way, except there is no enclosing body — the binding simply introduces a global name that can be referenced elsewhere in the module (or from other modules):
 
 ```
 module Utils {
@@ -272,31 +289,35 @@ module Utils {
     , "Saturday"
     , "Sunday" 
     ]
+}
 ```
 
-Type annotions look similar to those for functions:
+Type annotations for let-bindings look similar to those for functions:
 
 ```
-  let days : List<string> = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+  let days : List<string> =
+    [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" ]
 ```
 
-Since a `let` can hold any other expression, top-level functions may also be defined in the following way:
+Since a `let` can hold any expression, top-level functions can also be defined this way:
 
 ```
-let add = fn(x, y) => x + y     // This is the same as fun(x, y) = x + y
+  let add = fn(x, y) => x + y
+  // Equivalent to:
+  // fun add(x, y) = x + y
 ```
 
 #### Data types
 
 User-defined data types in Coal are of the product-sum variety. These types are introduced with the `type` keyword. 
 
-A *product* type combines multiple fields into one single value: All of the components appear together in the constructed data. For example, an RGB color triplet that contains individual red, green, and blue values:
+A *product* type combines multiple fields into one single value: All of the components appear together in the constructed data. An RGB color triplet that contains individual red, green, and blue values can be described with a type:
 
 ```
 type Color = Rgb(int8, int8, int8)
 ```
 
-A *sum* type represents a choice between alternatives: A value belongs to exactly one of the specified variants. For example, a shape that can be either a `Circle` or a `Rectangle`:
+A *sum* type is a choice between alternatives: A value belongs to exactly one of the specified variants. A type that represents a shape that can be either a `Circle` or a `Rectangle` can be defined as:
 
 ```
 type Shape = Circle | Rectangle
@@ -357,6 +378,24 @@ Algebraic data types are especially useful for describing language grammars and 
     | Object(List<(string, JsonValue)>)
 ```
 
+### Built-in language primitives
+
+Coal defines the following built-in types:
+
+| Type               | Description                             | Example values            |                       
+| ------------------ | --------------------------------------- | ------------------------- |                       
+| `bool`             | Booleans                                | `true`, `false`           |                       
+| `char`             | A single Unicode character              | `'a'`, `'b'`, `'🤖'`, ... |                        
+| `float`            | Single precision floating point numbers | `3.1519f`                 |                        
+| `double`           | Double precision floating point numbers | `3.141592653589793`       |                        
+| `int32`            | 32-bit integers                         | `0`, `1`, `2`, `3`, ...   |                        
+| `int64`            | 64-bit integers                         | `0`, `1`, `2`, `3`, ...   |                        
+| `bignum`           | Arbitrary precision integers            | `0`, `1`, `2`, `3`, ...   |                        
+| `string`           | UTF-8 text                              |  `"Hello, ✨ world!"`     |                        
+| `unit`             | Singleton type                          | `()`                      |                        
+| `void`             | The uninhabited type                    |                           |                        
+| `nat`              | Natural numbers (Peano arithmetic)      | `Zero`, `Succ(Zero)`, ... |                        
+
 ### Expression syntax
 
 Expressions are the core building blocks of programs. They include variables, literals, let-bindings, operators, and control structures like `if-then-else`. An expression can often be composed of other, smaller expressions. For example, a binary operator consists of two sub-expressions: its left-hand side and right-hand side operands:
@@ -380,9 +419,10 @@ Variable names are subject to the following rules:
 * Variable names are case-sensitive, meaning that `my_VAR` and `my_var` refer to different variables.
 * Variable names cannot contain spaces.
 * Special characters other than underscores (e.g., `!`, `#`, `%`, `@`) are not permitted in variable names.
-* Reserved language keywords (see below) cannot be used as variable names.
 
 ##### Reserved keywords
+
+Reserved language keywords cannot be used as variable names. These are:
 
 ```
 alias, as, bignum, bool, char, cotype, double, else, false, float, fn, fold, fun, if, import, in, instance, int32, int64, let, match, module, nat, or, string, then, trait, true, type, unfold, unit, when, where, with
@@ -390,36 +430,20 @@ alias, as, bignum, bool, char, cotype, double, else, false, float, fn, fold, fun
 
 ##### Shadowing considered harmful
 
-> This feature is not yet implemented.
-
-*Shadowing* is to declare a variable in an inner scope with the same name as an existing variable. This is often a source of subtle bugs &mdash; it is therefore not allowed. An expression such as the following should result in a compilation error:
+*Shadowing* occurs when a variable declared in an inner scope has the same name as a variable from an outer scope. 
 
 ```
 fun go(x) =
   let x = 3 in x + 3
 ```
 
+In this example, the inner `let` attempts to declare a new variable that has the same name as the function parameter, namely `x`.
+
+Because shadowing is often a source of subtle bugs, the Coal compiler treats it as an error.
+
 #### Literal expressions
 
-A *literal* is an expression that directly represents a fixed value of one of the built-in primitive types, such as integers, booleans, or strings.
-
-##### Built-in language primitives
-
-Coal defines the following built-in types:
-
-| Type               | Description                             | Example values            |                       
-| ------------------ | --------------------------------------- | ------------------------- |                       
-| `bool`             | Booleans                                | `true`, `false`           |                       
-| `char`             | A single Unicode character              | `'a'`, `'b'`, `'🤖'`, ... |                        
-| `float`            | Single precision floating point numbers | `3.1519f`                 |                        
-| `double`           | Double precision floating point numbers | `3.141592653589793`       |                        
-| `int32`            | 32-bit integers                         | `0`, `1`, `2`, `3`, ...   |                        
-| `int64`            | 64-bit integers                         | `0`, `1`, `2`, `3`, ...   |                        
-| `bignum`           | Arbitrary precision integers            | `0`, `1`, `2`, `3`, ...   |                        
-| `string`           | UTF-8 text                              |  `"Hello, ✨ world!"`     |                        
-| `unit`             | Singleton type                          | `()`                      |                        
-| `void`             | The uninhabited type                    |                           |                        
-| `nat`              | Natural numbers (Peano arithmetic)      | `Zero`, `Succ(Zero)`, ... |                        
+A *literal* is an expression that directly represents a fixed value of one of the [built-in primitive types](#built-in-language-primitives), such as integers, booleans, or strings.
 
 ##### Integral types
 
@@ -429,8 +453,7 @@ Integer literals introduced in code without an explicit type annotation, such as
 let answer = 42
 ```
 
-are polymorphic. Their inferred type is `n with Numeric(n)`, which isn't an ordinary type. It means that `n` can be *any* type, as long as it is a member of the `Numeric` trait (see **Traits**). 
-This includes the built-in `int32`, `int64`, `bignum`, and `nat` types. All `Numeric` types support the basic arithmetic operations of addition, subtraction, and multiplication.
+are polymorphic. The inferred type of this expression is `n with Numeric(n)`, which isn’t an ordinary type. It means that `n` can be *any* type, as long as it implements the `Numeric` trait (see **[Traits](#traits)**). This includes the built-in `int32`, `int64`, `bignum`, and `nat` types. All `Numeric` types support the basic arithmetic operations of addition, subtraction, and multiplication.
 
 ```
 fun sum_of(x, y, z) = 
@@ -462,7 +485,7 @@ concat("one", "two")
 
 This applies the function `concat` to the arguments `"one"` and `"two"`.
 
-By default, functions in Coal are *curried*. There is a difference between a function that takes multiple arguments, and one that takes a single tuple as its argument. Consider the following two type signatures:
+By default, functions are *curried*. There is a difference between a function that takes multiple arguments, and one that takes a single tuple as its argument. Consider the following two type signatures:
 
 ```
 f : a -> b -> c
@@ -489,11 +512,13 @@ map(add(1), [1, 2, 3, 4])   // which yields the same result as map(increment, [1
 
 #### If-then-else
 
-If-expressions are similar to those in most programming languages, in particular those in the functional family. Both the `then` and `else` branches need to be present (and have the same type):
+If-expressions in Coal are similar to those found in many programming languages, especially other functional languages. Both the `then` and `else` clauses must be present, and they must produce values of the same type:
 
 ```
   if (<e_1 : bool>) then <e_2 : t> else <e_3 : t>
 ```
+
+For example:
 
 ```
   if (temperature > 20) then wear("shorts") else go_home()
@@ -507,7 +532,7 @@ A let-binding introduces a new scope by matching a pattern against the result of
 let <pattern> = <e_1> in <e_2>
 ```
 
-Variables form the simplest form of pattern; namely one that matches any value and binds it to a name:
+Variables form the simplest form of pattern, namely one that matches any value and binds it to a name:
 
 ```
 let name = "Zlatan" 
@@ -525,8 +550,8 @@ let { baz = { f = a | _ } } = faz(4)
 
 > #### A note about let-generalization
 >
-> In some ways, a let-binding is interchangeable with a lambda function. For example, writing `let x = 1 in increment(x)` yields the same result as `(fn(x) => increment(x))(1)`.
-> But besides being more readable, the let-binding also serves another purpose. In [Hindley-Milner](https://en.wikipedia.org/wiki/Hindley%E2%80%93Milner_type_system) languages, it is let-bindings that introduce polymorphism. Consider the following expression, which doesn't type check:
+> In some sense, a let-binding is interchangeable with a lambda function. For example, writing `let x = 1 in increment(x)` yields the same result as `(fn(x) => increment(x))(1)`.
+> But besides being more readable, the let-binding also serves another purpose; in [Hindley-Milner](https://en.wikipedia.org/wiki/Hindley%E2%80%93Milner_type_system) languages, it is let-bindings that introduce polymorphism. Consider the following expression, which doesn’t type check:
 > 
 > ```
 >   (fn(f) => (f(3 : int32), f("three")))(fn(x) => x)
@@ -544,15 +569,15 @@ let { baz = { f = a | _ } } = faz(4)
 
 ##### Name binding semantics
 
-A subtle but important detail that makes let-bindings in Coal different from those in most other languages is that the identifier introduced by a `let` is **not in scope within the definition itself**. In other words, `let x = e1 in e2` makes `x` available in `e2`, but not in `e1`. In OCaml (and F#) this is also the case for the standard `let` keyword. However, in these languages, a special `let rec` syntax makes it possible to evade this restriction. Coal doesn't have an equivalent to `let rec`.
+A subtle but important detail that makes let-bindings in Coal different from those in most other languages is that the identifier introduced by a `let` is **not in scope within the definition itself**. In other words, `let x = e1 in e2` makes `x` available in `e2`, but not in `e1`. In the ML-family of languages (e.g. OCaml), this is also the case for the standard `let` keyword. However, in these languages, a special `let rec` syntax makes it possible to evade this restriction. Coal doesn’t have an equivalent to `let rec`.
 This prevents non-well-founded expressions, such as `let f = f in f`, but more generally, makes it impossible for any function to refer to itself. 
-The restriction also applies to top-level definitions. As far as the compiler is concerned, this function:
+The restriction also applies to top-level definitions. As far as the compiler is concerned, this function
 
 ```
 fun fib(n) = if (n == 0 || n == 1) then n else fib(n - 1) + fib(n - 2)
 ```
 
-(defined at the top level) translates into:
+translates into:
 
 ```
 let fib = fn(n) => if (n == 0 || n == 1) then n else fib(n - 1) + fib(n - 2)
@@ -587,7 +612,7 @@ An anonymous (lambda) function is declared with the `fn` keyword and the “fat�
 Function expressions are first-class objects; they can be passed as arguments to other functions, assigned and stored inside data structures, etc.
 
 ```
-  fun app_fst(xs, x : int32) =
+  fun apply_fst(xs, x : int32) =
      match(xs) {
        | f :: _ => f(x)
        | [] => 0
@@ -600,7 +625,7 @@ Function expressions are first-class objects; they can be passed as arguments to
       , fn(x) => x + 3
       ]
     in
-      trace_int32(app_fst(fns, 3))
+      trace_int32(apply_fst(fns, 3))
 ```
 
 Just like with let-bindings, the arguments in a lambda-function are patterns:
@@ -613,13 +638,13 @@ Just like with let-bindings, the arguments in a lambda-function are patterns:
 
 ##### Arithmetic and comparison
 
-|               | Description            | Type                               |                                                                        
-| ------------- | ---------------------- | ---------------------------------- |                                                                        
-| `+`           | Addition               | `∀n : n -> n -> n with Numeric(n)` |                                                                        
-| `-`           | Subtraction            | `∀n : n -> n -> n with Numeric(n)` |                                                                        
-| `*`           | Multiplication         | `∀n : n -> n -> n with Numeric(n)` |                                           
-| `/`           | Division               |                                    |                                                                        
-| `^`           | Exponentiation         |                                    |                                                                        
+|               | Description            | Type                                 |                                                                        
+| ------------- | ---------------------- | ------------------------------------ |                                                                        
+| `+`           | Addition               | `∀n : n -> n -> n with Numeric(n)`   |                                                                        
+| `-`           | Subtraction            | `∀n : n -> n -> n with Numeric(n)`   |                                                                        
+| `*`           | Multiplication         | `∀n : n -> n -> n with Numeric(n)`   |                                           
+| `/`           | Division               |                                      |                                                                        
+| `^`           | Exponentiation         | `∀n : n -> nat -> n with Numeric(n)` |                                                                        
 
 |               | Description            | Type                                  |                                                                        
 | ------------- | ---------------------- | ------------------------------------- |                                                                        
@@ -644,22 +669,22 @@ Just like with let-bindings, the arguments in a lambda-function are patterns:
 
 ##### Data
 
-|               | Description            |                      |                                                          
-| ------------- | ---------------------- | -------------------- |                                                                      
-| `.`           | Record field access    | See **Field access** |                                                               
+|               | Description            |                                       |                                                          
+| ------------- | ---------------------- | ------------------------------------- |                                                                      
+| `.`           | Record field access    | See **[Field access](#field-access)** |                                                               
 
 ##### Function composition and pipelining
 
-|               | Description                 |                                                                         
-| ------------- | --------------------------- |                                                                         
-| `>>`          | Forward composition         |                                                                         
-| `<<`          | Reverse composition         |                                                                         
-| `\|.`         | Reverse application         |                                                                         
-| `.\|`         | Forward application         |                                                                         
-| `$.`          | Flipped reverse application |                                                                         
-| `.$`          | Flipped forward application |                                                                         
+|               | Description                 | Type                             |                                                                        
+| ------------- | --------------------------- | -------------------------------- |                                                                        
+| `>>`          | Forward composition         | `(a -> b) -> (b -> c) -> a -> c` |                                                                        
+| `<<`          | Reverse composition         | `(b -> c) -> (a -> b) -> a -> c` |                                                                        
+| `\|.`         | Reverse application         | `a -> (a -> b) -> b`             |                                                                        
+| `.\|`         | Forward application         | `(a -> b) -> a -> b`             |                                                                        
+| `$.`          | Flipped reverse application | TODO                             |                                                                        
+| `.$`          | Flipped forward application | TODO                             |                                                                        
 
-##### List manipulation
+##### List operations
 
 |               | Description            | Type                                 |                                                                         
 | ------------- | ---------------------- | ------------------------------------ |                                                                        
@@ -705,25 +730,11 @@ There are two types of comments:
 
 #### Natural numbers
 
-Recursion in Coal relies on pattern matching to take layered data apart in a stepwise manner,
-
-stepwise peel of layers of data constructors ..?
-
-always working hand-in-hand with a recursive data structure like lists, trees, or other algebraic data types. 
-
-If we want to use an integer counter, similar to how for-loops behaves in imperative programming languages.
-
-Ordinary (machine type) integers are insufficient
-
-do not meet this requirement. 
-
-
-Instead, we need to define a recursive number type. This is typically done according to the standard axiomatization of the natural numbers:
+Recursion in Coal is closely tied to pattern matching: we peel off layers of a recursive data structure step by step, until reaching its base case. This works naturally with lists, trees, and other algebraic data types. Ordinary machine integers (`int32`, `int64`), however, cannot be pattern matched on. Nevertheless, we often want to use counting numbers in recursive computations &mdash; for example, when repeating an action, or simulating the behavior of loops in imperative languages. To describe numbers in a way compatible with recursion, we need to rely on the standard axiomatization of the natural numbers:
 
 > Every natural number is either zero or the successor of another natural number.
 
-This is known as the *Peano construction* of the natural numbers, named after the Italian mathematician [Giuseppe Peano](https://en.wikipedia.org/wiki/Giuseppe_Peano).
-The definition of the built-in `nat` type is simply this idea expressed in code:
+This is known as the *Peano construction* of the natural numbers, named after the Italian mathematician [Giuseppe Peano](https://en.wikipedia.org/wiki/Giuseppe_Peano). In code, the Peano numbers are expressed as the built-in type `nat`:
 
 ```
 type nat
@@ -731,22 +742,27 @@ type nat
  | Succ(nat)
 ```
 
-The number five, for example, would then be written:
+The number five, for example, can then be written:
 
 ```
 Succ(Succ(Succ(Succ(Succ(Zero)))))
 ```
 
-Writing numbers in this notation quickly becomes tedious. Fortunately, it is not necessary.
-
-Internally, the compiler stores values of type `nat` as normal integers. 
+This makes it possible to use numbers directly in patterns, just like with other algebraic data types:
 
 ```
-pack_nat : int32 -> nat
-unpack_nat : nat -> int32
+  match(n : nat) {
+    | Zero => "yay"
+    | Succ(_) => "nay"
+  }
 ```
 
-Converting back and forth between these are constant time (**O**(1)) operations.
+Writing numbers in this style quickly becomes impractical, however. To make working with naturals convenient (and efficient), the compiler internally represents values of type `nat` as ordinary integers. Converting between the two views is called *packing* and *unpacking*. These are constant time (O(1)) operations:
+
+```
+pack : int32 -> nat
+unpack : nat -> int32
+```
 
 #### Unit
 
@@ -768,7 +784,7 @@ fun five(() : unit) : int32 = 5
 
 ##### Two pairs of parentheses for the price of one
 
-Removing the type annotation, the above becomes `fun five(()) = 5`, which is perfectly valid. But since an expression like `five()` doesn't have any other meaningful interpretation, the compiler accepts this as a shorthand for the slightly awkward double-parentheses.
+Removing the type annotation, the above becomes `fun five(()) = 5`, which is perfectly valid. But since an expression like `five()` doesn’t have any other meaningful interpretation, the compiler accepts this as a shorthand for the slightly awkward double-parentheses.
 
 ```
 fun five() = 5   // i.e., fun five(() : unit) = 5
@@ -779,7 +795,7 @@ Similarly, when calling a function that only takes a unit value as argument, the
 ```
 let 
   x = 
-    five()   // we could have written five(()) here
+    five()   // we could have written five(()) here, but less is more
   in
     x + 5
 ```
@@ -790,7 +806,7 @@ Keep in mind that this only works with `unit`. For non-empty tuples, you still n
 fun fst4((fst, _, _, _)) = fst
 ```
 
-#### Lists
+#### List
 
 A *list* is an ordered collection in which all elements share the same type. Lists are one of the most fundamental data structures in functional programming. They are commonly used to store and manipulate collections of data, and serve as a building block for many higher-level abstractions.
 
@@ -834,7 +850,7 @@ Lists can be deconstructed using pattern matching. For example, the following fu
     }
 ```
 
-This style of unpacking data is common with all algebraic data types (see **Pattern matching**).
+This style of unpacking data is common with all algebraic data types (see **[Pattern matching](#pattern-matching)**).
 
 You can also match lists using literal patterns. The following example matches a list of exactly three elements and checks if they form a [Pythagorean triple](https://en.wikipedia.org/wiki/Pythagorean_triple):
 
@@ -880,22 +896,13 @@ tail : List<a> -> Option<List<a>>
 uncons : List<a> -> Option<(a, List<a>)>
 ```
 
-> #### Reverse function application operator
+> #### Function pipelining
 > 
 > The operator `|.` is used in the following examples. It is an infix operator that performs function application, but with the arguments reversed. So, for example, the expression 
 > ```
 >   xs |.map(f)
 > ```
-> is really syntactic sugar for `map(f, xs)`. This operator is very convenient when chaining together multiple function calls. For example:
->
-> ```
-> circle({ radius = 5.0 })
->   |.fill("blue")
->   |.set_position(10.0, 5.0)
->   $.draw_shape(canvas)
-> ```
->
-> TODO
+> is really syntactic sugar for `map(f, xs)`. This operator is very convenient when chaining together multiple function calls. Suppose we have the following basic drawing API:
 >
 > ```
 > circle : Config -> Shape
@@ -903,11 +910,20 @@ uncons : List<a> -> Option<(a, List<a>)>
 > set_position : float -> float -> Shape -> Shape
 > draw_shape : Shape -> Canvas -> Canvas
 > ```
->
-> TODO
+> 
+> To describe a sequence of steps that creates a circle, sets properties such as its color and position, and finally places it on the canvas, we would normally write:
 >
 > ```
-> draw(set_position(10, 5, fill("blue", circle({ radius = 5.0 }))), canvas)
+> draw_shape(set_position(10, 5, fill("blue", circle({ radius = 5.0 }))), canvas)
+> ```
+>
+> Using the reverse function application operator (and the associated `$.`-operator), we could instead write the above in a more readable *pipeline*-style:
+>
+> ```
+> circle({ radius = 5.0 })
+>   |.fill("blue")
+>   |.set_position(10.0, 5.0)
+>   $.draw_shape(canvas)
 > ```
 
 ###### Take, drop and slice
@@ -924,7 +940,7 @@ For example:
 [1, 2, 3, 4, 5, 6, 7] |.take(3)     // [1, 2, 3]
 ```
 
-Note that, if the list's length is less than the requested number of elements, then `take` returns the entire list. So, for example, `take(5, [1, 2, 3])` returns `[1, 2, 3]`. `take(0)` always returns an empty list.
+Note that, if the list’s length is less than the requested number of elements, then `take` returns the entire list. So, for example, `take(5, [1, 2, 3])` returns `[1, 2, 3]`. As expected, `take(0)` always returns an empty list.
 
 The function `drop` removes the first *n* elements from a list.
 
@@ -964,29 +980,226 @@ slice : nat -> nat -> List<a> -> List<a>
 
 ###### List concatenation
 
-TODO
+The list concatenation operator (`++`) appends one list to the end of another, resulting in a new list.
 
+```
+  let s = ["Khufu", "Hatshepsut", "Akhenaten"] ++ ["Tutankhamun"]
+```
+
+**Note:** The time complecity of `++` is linear (O(n)) in the length of the first list.
+
+<!--
 ###### Sorting
 
 TODO
+-->
 
 ##### Useful higher-order list functions
 
+These are functions that take some other function as input, and modify the given list in some way based on the behavior of this function.
+
 ###### Mapping over a list
 
-TODO
+The function `map` applies a function to each element of a list.
+
+For example:
+
+```
+[0, 1, 2, 3, 4] |.map(fn(x) => 2 ^ x)       // [1, 2, 4, 8, 16]
+```
+
+The type of `map` is:
+
+```
+map : (a -> b) -> List<a> -> List<b>
+```
+
+> #### Mapping and `Functor`s
+>
+> The actual type of `map` is more general than the one above, which is in a form specialized to lists. In fact, any value of type `f<a>` can be mapped over, as long as `f` implements the `Functor` [trait](#traits):
+>
+> ```
+> map : (a -> b) -> f<a> -> f<b> with Functor<f>
+> ```
+>
+> This gives us a more general meaning of mappning, which is something like "transforming values inside a fixed context".
+>
+> This type of transformation is a structure-preserving map which corresponds to the notion of a *homomorphism* in mathematics. Homomorphisms are the basic topic of study in category theory. 
+> A functor, in this context, is a mapping between categories &mdash; that is, one that sends objects and morphisms from one category to another, subject to certain laws. 
+> 
+> TODO: illustration
+>
+> In the context of programming languages, the objects are the types and morphisms are simply functions: 
+> 
+> ```
+> a           ==>  f<a>
+> z : a -> b  ==>  map(z) : f<a> -> f<b>
+> ```
+> 
+> Note that we are partially applying `map` to `z`. This suggests that there are two ways to interpret `map`; we can think of it as a function that applies the function `z` to the value of type `a`, in the `f`-context, which could be a list of values, or an optional.
+> The other is that `map` takes some function `a -> b` and *lifts* it into one that acts on `f`-values &mdash; that is, one of type `f<a> -> f<b>`.
+> The latter interpretation is more in line with the definition of a functor in category theory.
+>
+> ##### Laws
+> 
+> Functors are subject to the following laws:
+> 
+> F(id) = id
+> F(g o f) = F(g) o F(f)
+>
+> In code:
+> 
+> ```
+> map(id) == id
+> map(f << g) == map(f) << map(g)
+> ```
+> 
+> These laws aren’t enforced by the compiler, but following them is always a good idea. The first says that `map` ..? k
+> The second law means that functors must preserve composition.  
+> Together, these laws ensure that mapping behaves in a way that preserves the structure of the ? . 
+>
+> ##### List
+>
+> ```
+> instance Functor<List> {
+>   fun map(f, xs) =
+>     fold(xs) {
+>       | [] => []                // (1)
+>       | x :: @xs = f(x) :: xs   // (2)
+>     }
+> }
+> ```
+>
+> ###### Identity law:
+> 
+> For the `List` instance to satisfy this law, we must have that:
+> 
+> ```
+> map(id, xs) === id(xs)
+> ```
+>
+> For an empty list, ..
+>
+> ```
+> map(id, []) == []      // Follows from (1)
+>             == id([])  // By the definition of id
+> ```
+>
+> ###### The other law (?):
+>
+> The claim here is that, for any list `xs`:
+>
+> ```
+> map(f << g, xs) == (map(f) << map(g))(xs)
+> ```
+> 
 
 ###### Filtering a list
 
-TODO
+Filtering is a technique for removing all elements of a list, except those that meet a given condition.
+
+For example:
+
+```
+[0, 1, 2, 3, 4] |.filter(fn(x) => x > 2)    // [3, 4] 
+```
+
+The type of `filter` is:
+
+```
+filter : (a -> bool) -> List<a> -> List<a>
+```
+
+That is, `filter` takes a [predicate](#list-predicates) and a list as input, and returns a new list with only the elements that return `true` for the predicate.
 
 ###### Reducing a list
 
+The higher-order function `reduce` takes a collection of data and combines its elements into a single result. A common example is reducing a list of numbers to a single value by repeatedly applying an operation, such as summing each element with a running total:
+
+```
+let sum = reduce(fn(n, a) => n + a, 0, [1, 2, 3])
+```
+
+> The operation described here is also commonly referred to as a *fold*. That name is not used, however, since it is a reserved language keyword in Coal. Along with the special `@`-pattern syntax, it provides the foundation for implementing recursive functions, including `reduce`. This is explored in detail in **[Recursion, corecursion, and codata](#recursion-corecursion-and-codata)**.
+
+The type of `reduce` is:
+
+```
+reduce : (e -> a -> a) -> a -> List<e> -> a
+```
+
+- The first argument is a function that combines an element of type `e` with an *accumulator* of type `a` to produce a new accumulator.
+- The second argument is the initial value of the accumulator.
+- The third argument is the list to reduce.
+
+###### Examples of using `reduce`
+
+Concatenating strings:
+
+```
+let words = ["Hello", " ", "world", "!"]
+let sentence = reduce(fn(w, a) => w +++ a, "", words)
+// sentence = "Hello world!"
+```
+
+Finding the maximum element:
+
+```
+let max_val = reduce(fn(n, a) => if n > a then n else a, -Infinity, [3, 7, 2, 9])
+// max_val = 9
+```
+
+Counting elements satisfying a condition:
+
+```
+let numbers = [1, 2, 3, 4, 5]
+let number_of_evens = reduce(fn(n, a) => if n % 2 == 0 then a + 1 else a, 0, numbers)
+// number_of_evens = 2
+```
+
+<!--
+###### Left vs. right folds
+
 TODO
+-->
 
 ##### List predicates
 
-TODO
+A *predicate* is a function that tests for some condition with respect to its argument and returns `true` or `false`. By convention, functions that serve this purpose are often prefixed with `is_`. The below predicates are available in the standard `List` package:
+
+```
+is_empty     : List<a> -> bool
+is_nonempty  : List<a> -> bool
+is_singleton : List<a> -> bool
+```
+
+###### `is_empty`
+
+A common operation on lists is to check if a list is empty or not. This is what the function `is_empty` does. 
+
+```
+is_empty([])                                   // true
+is_empty(["wheat", "oats", "rye", "barley"])   // false
+```
+
+
+###### `is_nonempty`
+
+This is the opposite of `is_empty`. That is: 
+
+```
+is_nonempty(xs) <==> ! is_empty(xs)
+```
+
+###### `is_singleton`
+
+This function returns `true` when the input list has precisely **one** element. 
+
+```
+is_singleton(["oats"])                             // true  
+is_singleton([])                                   // false
+is_singleton(["wheat", "oats", "rye", "barley"])   // false
+```
 
 #### Option
 
@@ -1004,7 +1217,7 @@ Since `match` statements in Coal need to be exhaustive, `Option` is useful to ex
   fun head(list : List<a>) : a =
     match(list) {
       | head :: _ => head
-      | [] => // What should I return here?
+      | [] => // 💥 What should I return here?
     }
 ```
 
@@ -1014,7 +1227,7 @@ The type of this function would be:
 head : List<a> -> a
 ```
 
-We can read this type as: Given any type `a` and a list of elements of this type, return an `a` value. That is to say; we know nothing about `a`, except that the list's elements has this type. 
+We can read this type as: Given any type `a` and a list of elements of this type, return an `a` value. That is to say; we know nothing about `a`, except that the list’s elements has this type. 
 Therefore, if the input list is empty, then we have nothing to look at. `Option` solves this problem. The `head` function provided by the stanard `List` package is defined in the following way: 
 
 ```
@@ -1027,13 +1240,13 @@ Therefore, if the input list is empty, then we have nothing to look at. `Option`
 
 #### Tuples
 
-Just like lists, tuples are ordered sequences of values. Unlike lists, however, a tuple's length is fixed (i.e. determined at compile-time), and its elements can have different types. In code, a tuple is written as a comma-separated sequence of expressions enclosed in parentheses:
+Just like lists, tuples are ordered sequences of values. Unlike lists, however, a tuple’s length is fixed (i.e. determined at compile-time), and its elements can have different types. In code, a tuple is written as a comma-separated sequence of expressions enclosed in parentheses:
 
 ```
 (<expr_1 : t_1>, <expr_2 : t_2>, ..., <expr_n : t_n>) : (t_1, t_2, ..., t_n)
 ```
 
-##### Examples:
+For example:
 
 ```
 (10, "covfefe", false)  // The type of this tuple is: (int32, string, bool)
@@ -1088,7 +1301,7 @@ let five = curry(add, 1, 4)         // or (curry(add))(1, 4)
 
 #### Records
 
-Records are unordered collections of name–value pairs, where the values may be of any type, including other records. In Coal, records are first-class values. They are suitable for representing structured data with multiple properties, or nested objects. A record expression is written as a sequence of comma-separated *fields* enclosed in curly braces. Each field consists of a name, called the *label*, paired with a value. The two are separated by an equals sign (`=`):
+Records are unordered collections of name–value pairs, where the values can be of any type, including other records. In Coal, records are first-class values. They are suitable for representing structured data with multiple properties, or nested objects. A record expression is written as a sequence of comma-separated *fields* enclosed in curly braces. Each field consists of a name, called the *label*, paired with a value. The two are separated by an equals sign (`=`):
 
 ```
 { 
@@ -1104,7 +1317,7 @@ The corresponding type for the above record is:
 { name : string, shoe_size : float, privileges : List<string> }
 ```
 
-The type of a record looks similar to the expression itself, except that each field is written as a label followed by its type. Instead of an equals sign, a colon (`:`) separates the label and the type.
+The type of a record resembles the expression itself, except that each field is written as a label followed by its type. Instead of an equals sign, a colon (`:`) separates the label and the type.
 
 Since the order of fields is irrelevant, the following two records are considered identical:
 
@@ -1166,7 +1379,7 @@ These types look a bit different from earlier examples. Here, the pipe (`|`) als
 fn(p : { lat : float, lng : float }) => p.lat
 ```
 
-This function requires its argument `p` to have exactly two fields: `lat` and `lng`, both of type `float`. This type is closed.
+In this example, the function requires its argument `p` (a record) to have exactly two fields: `lat` and `lng`, both of type `float`. This type is closed.
 
 ```
 fn(p : { lat : float, lng : float | q }) => p.lat
@@ -1201,8 +1414,6 @@ As with other data types, it is possible to pattern match on records. In this co
   fun full_name({ first_name = fn, last_name = ln }) = fn +++ " " +++ ln 
 ```
 
-(For more details, see the section on **Pattern matching**.)
-
 ##### Deconstructing records
 
 The pipe (`|`) operator allows you to deconstruct records by matching against a subset of their fields:
@@ -1217,9 +1428,9 @@ The right-hand side pattern must be either a variable or a wildcard (`_`). If yo
   fun drop_name({ name = _ | fields } : { name : string | q }) : { | q } = fields
 ```
 
-Here, the name field is removed and all remaining fields are returned.
+Here, the name field is removed and a record with all remaining fields are returned.
 
-If you only need to retrieve a single field, the dot syntax (`record.field`) is simpler and more concise. Pattern matching becomes necessary when you want to extract multiple fields at once, remove fields, or work with the remainder of a record.
+If you only need to retrieve a single field, the dot syntax (`record.field`) is simpler and more concise. Pattern matching is necessary when you want to extract multiple fields at once, remove fields, or work with the remainder of a record.
 
 ##### Updating a field
 
@@ -1252,23 +1463,71 @@ The `match` expression in Coal is used to deconstruct data based on its shape, e
   fun area(shape) : float =
     match(shape) {
       | Rectangle(w, h) => w * h
-      | Circle(r) => pi * r^2
+      | Circle(r)       => pi * r^2
     }
 ```
 
-Patterns can take several forms, including data constructors, literals, tuples, records, variables, wildcards, or combinations of these. See below for a complete list of available patterns. 
+A case in a match expression is called a *clause* and consists of a pattern on the left and an expression on the right. Pattern matching proceeds by checking each clause in order until it finds one whose pattern matches the value. The corresponding right-hand side expression is then evaluated, with any variables in the pattern bound to the matched sub-components.
 
-Pattern matching proceeds by checking each clause in order until it finds one whose pattern matches the value. The corresponding right-hand side expression is then evaluated, with any variables in the pattern bound to the matched sub-components.
+```
+  match(list : List<int32>) {
+    | [a]       => a
+    | [a, _]    => a
+    | [a, _, _] => a
+    | _ => 0
+  }
+```
 
-TODO: example
+Variables introduced by a pattern are only in scope in the corresponding right-hand side expression:
 
-An important point is that match expressions must be *exhaustive*, meaning that all possible cases for a type are covered by the given patterns. If a case is missing, the compiler will reject the program. 
+```
+  match(opt) {
+    | Some(x) => x + 1  // x is bound here
+    | None    => 0      // x is not in scope here
+  }
+```
 
-TODO: example
+Patterns can take several forms, including data constructors, literals, tuples, records, variables, wildcards, or combinations of these: 
 
-Wildcard patterns
+```
+  match(shape) {
+    | Rectangle(0.0, _) => "flat rectangle"
+    | Rectangle(w, h)   => "rectangle with width " +++ show(w)
+  }
+```
 
-For instance, matching on integers can use literal patterns along with a wildcard to guarantee exhaustiveness:
+See [below](#supported-patterns) for a complete list of available patterns. 
+
+#### Totality requirement
+
+For a function to be *total*, it must be defined for all inputs of its corresponding type. A consequence of this in the context of `match` expressions is that all possible cases for a type need to be covered by the patterns. In other words, the patterns must be *exhaustive*. If a case is missing, the compiler will reject the program. 
+
+For example, the following function
+
+```
+  fun head(input) =
+    match(input) {
+      | x :: xs => x
+    }
+```
+
+will produce an error:
+
+```
+4:5:
+  |
+  |     match(input) {
+  |     ^^^^^^^^^^^^^^
+  |       | x :: xs => x
+  | ^^^^^^^^^^^^^^^^^^^^
+  |     }
+
+Non-exhaustive patterns
+```
+
+#### Wildcard patterns
+
+A *wildcard* pattern is a pattern that matches any value without binding it to a name and is written as an underscore (`_`). These are often useful to guarantee exhaustiveness in `match` expressions. For instance, we can use literal patterns along with a wildcard when matching on integers:
 
 ```
   fun describe_int(n : int32) : string =
@@ -1279,20 +1538,41 @@ For instance, matching on integers can use literal patterns along with a wildcar
     }
 ```
 
+#### Lambda match 
+
+A lambda match is a special syntax that lets you get rid of the variable in a `match` expression. For example, this expression:
+
+```
+  match {
+    | [] => true
+    | _ => false 
+  }
+```
+
+is a shorthand version of this:
+
+```
+  fn(v) =>
+    match(v) {
+      | [] => true
+      | _ => false
+    }
+```
+
 #### Supported patterns
 
 | Type               | Example              | Description                                                                                     |                                                   
 | ------------------ | -------------------- | ----------------------------------------------------------------------------------------------- |                                                   
 | Constructor        | `Color(r, g, b)`     | Matches a value built with a specific data constructor, binding sub-components to variables.    |                                                 
 | Variable           | `x`                  | Matches any value and binds it to the variable.                                                 |                                                 
-| Wildcard           | `_`                  | Ignores the matched value                                                                       |
+| Wildcard           | `_`                  | Ignores the matched value (see above).                                                          |
 | Literal            | `"Hello"`, `0`, `()` | Matches values that are exactly equal to the given literal.                                     |                                                 
 | List constructor   | `x :: xs`            | Matches a list by separating it into head and tail.                                             |                                                 
 | List literal       | `[f, s, t]`          | Matches a list of fixed length with elements matching the given sub-patterns.                   |                                                 
 | Tuple              | `(lhs, rhs)`         | Matches a tuple by decomposing it into its components.                                          |                                                 
-| Record             | `{ name = n \| _ }`  | Matches a record by specifying patterns for one or more fields. See **Pattern matching** under **Records** for details. |                                                 
+| Record             | `{ name = n \| _ }`  | Matches a record by specifying patterns for one or more fields. See **[Pattern matching over records](#pattern-matching-over-records)** for details. |                                                 
 | As                 | `(lhs, _) as pair`   | Matches the inner pattern, while also binding the entire value to a variable.                   |                                                 
-| @                  | `Succ(@n)`           | See **Recursion, corecursion, and codata**.                                                     |                                                 
+| @                  | `Succ(@n)`           | See **[Recursion, corecursion, and codata](#recursion-corecursion-and-codata)**.                |                                                 
 | Or                 | `1 or 2`             | Matches if the value satisfies at least one of the given alternative patterns.                  |      
 
 ### Traits
@@ -1310,7 +1590,7 @@ trait <name>(<type_parameter>) {
 
 By defining a set of behaviors as a trait, you can reuse the same functionality across all types that support it. This reduces duplication and encourages reusable code. Traits are conceptually similar to type classes in Haskell and a common analogy is to think of them as interfaces in object-oriented programming.
 
-The following example defines a trait with a single function, `compare`. This function takes two inputs *a* and *b* of the same type and returns a value to indicate if *a* is less than *b* (`Lt`), greater than (`Gt`), or if the two values are equal (`Eq`). In other words, this trait captures the notion of a [total order](https://en.wikipedia.org/wiki/Total_order) on the type `t`.
+The following example defines a trait with a single function, `compare`. This function takes two inputs *a* and *b* of the same type and returns a value to indicate if *a* is less than *b* (`Lt`), greater than (`Gt`), or if the two values are equal (`Eq`). In other words, this trait captures the notion of a [total order](https://en.wikipedia.org/wiki/Total_order) on the type `t` (similar to Haskell’s `Ord` type class).
 
 ```
 trait Ordered<t> {
@@ -1318,7 +1598,7 @@ trait Ordered<t> {
 }
 ```
 
-Making a type support a trait amounts to defining an *instance* of that trait. An instance provides concrete implementations of all functions declared in the trait, specialized for the chosen type. For example, by instantiating the `Ordered` trait for `bool`, we define an ordering on the booleans:
+Making a type support a trait comes down to defining an *instance* of the trait. An instance provides concrete implementations of all functions declared in the trait, specialized for the chosen type. For example, by instantiating the `Ordered` trait for `bool`, we define an ordering on the booleans:
 
 ```
 instance Ordered<bool> {
@@ -1336,18 +1616,29 @@ Code that uses `compare` now works uniformly for all types that have an `Ordered
 ```
 fun is_less_than(x : t, y : t) : bool with Ordered<t> =
   compare(x, y) == Lt
+
+// is_less_than(3, 5)
+// is_less_than(false, true)
 ```
 
-Here, the type parameter `t` in the type of `is_less_than` is *universally quantified*. The `with` keyword introduces one or more constraints on type variables appearing in a type. In this case it demands that an instance of `Ordered` exists for the type `t`.
-We can read the type of `is_less_than` as: `t -> t -> bool with Ordered<t>`.
+Type parameters, like `t` in the type of `is_less_than` are [universally quantified](https://en.wikipedia.org/wiki/Universal_quantification). The `with` keyword introduces one or more constraints on type variables appearing in a type. In this case it demands that an instance of `Ordered` exists for the type substituted for `t`.
+We write the full type of `is_less_than` as: `t -> t -> bool with Ordered<t>`.
 
 #### Higher-kinded traits
 
-All the traits we have looked at up to this point have all been of the form `T<t>`, where `t` is a placeholder for an ordinary type.
+So far, all the traits we’ve looked at have been of the form `T<t>`, where `t` is a placeholder for an ordinary type. Unlike these types, a *type constructor* is a type-level function which takes one or more types as arguments and returns a type. That is, a type constructor on its own isn’t really a type, until it is provided with all necessary type arguments. For example, in the type `Option<int>`, `Option` is a type constructor with [kind](https://en.wikipedia.org/wiki/Kind_(type_theory))
 
-TODO
+```
+* -> *
+```
 
-<!--
+where `*` denotes a *proper* type (i.e., a fully applied type with no parameters). We can read `Option : * -> *` as:
+
+> Option is a type constructor that takes a type as input and produces a type.
+
+This generalizes to constructors of higher kinds. For example, `Result<e, a>` has kind `* -> * -> *`.
+
+Traits can be parameterized by type constructors. Instead of `T<t : *>`, we then get a trait of the form `T<f : * -> ... -> *>`. A common example is the `Functor` trait, which abstracts the idea of [mapping a function](#mapping-over-a-list) over some container-like structure:
 
 ```
 trait Functor<f : * -> *> {
@@ -1355,13 +1646,7 @@ trait Functor<f : * -> *> {
 }
 ```
 
-Recall that the `Option` type is defined as:
-
-```
-type Option<a>
-  = Some<a>
-  | None
-```
+The `Option` type forms a `Functor` in the following way:
 
 ```
 // Make Option an instance of the Functor trait
@@ -1374,17 +1659,30 @@ instance Functor<Option> {
 }
 ```
 
-baz
+This instance ensures that `map` can be used on `Option` values, just like on lists:
 
 ```
-map(fn(x) => x * 100, Some(1))    // ==> Some(100)
-map(fn(x) => x * 100, [1, 2, 3])  // ==> [100, 200, 300]
+let times100 = fn(x) => x * 100
+
+map(times100, Some(1))    // ==> Some(100)
+map(times100, [1, 2, 3])  // ==> [100, 200, 300]
 ```
--->
 
 #### Trait inheritance
 
-TODO
+A trait can declare that it depends on another trait by *inheriting* from it. The inheriting trait is then able to access to the methods of the parent trait, and can build its own functionality on top of them. For example, the following instance defines how to display an `Option<a>` value, provided that there is already a way to display values of type `a`:
+
+```
+  trait Show<Option<a>> with Show<a> {
+    fun show(opt) =
+      match(opt) {
+        | Some(v) => "Some(" +++ show(v) +++ ")"
+        | None => "None"
+      }
+  } 
+```
+
+Here, the `Show<Option<a>>` instance inherits from `Show<a>`. The compiler will only accept this instance if a `Show` implementation for `a` is available. Inside the trait body, we can call `show(v)` on the inner value `v : a`. The parent trait `Show<a>` guarantees that `show` is defined for this type. In other words, the ability to show an `Option<a>` depends directly on the ability to show its element type `a`.
 
 ### Recursion, corecursion, and codata
 
@@ -1406,17 +1704,13 @@ If we pass this function to the Coal compiler, it is rejected with the following
 Name not in scope: factorial
 ```
 
-To call a function from within itself in this way is not possible in Coal. Instead, recursion needs to be expressed in terms of a pattern know as a *fold*. 
-A fold takes some collection of data and combines it into a single result. A common instance is where an array of numbers is reduced into a single value, for example by continually adding each number to the parital sum.
+To call a function from within itself in this way is not possible. Instead, recursion is accomplished via a pattern know as a *fold*. Note that `fold` is a language keyword in Coal, not an ordinary function. 
 
-```
-let sum = reduce(fn(n, a) => f + a, [1, 2, 3])
-```
+#### Fold
 
-Note that `fold` is a language keyword in Coal, not an ordinary function. 
-Folds are similar to `match` expressions, but with some extra powers.
+A `fold` is similar to a `match` expression, but with some extra powers.
 
-We are going to use the `nat` data type to define the factorial function:
+We are going to use the `nat` data type (explained [here](#natural-numbers)) to define the factorial function:
 
 ```
   fun factorial(n : nat) =
@@ -1449,6 +1743,21 @@ The following is therefore not possible:
       | @p => p
     }
 ```
+
+TODO
+
+here is how `reduce` can be implemented using the fold construct:
+
+```
+reduce(f, acc, list) =
+  fold(list, acc) {
+    x :: @rec =>
+      fn(a) => rec(f(x, a))
+    [] =>
+      fn(a) => a
+  }
+```
+
 
 #### Top-level folds and mutual recursion
 
@@ -1495,18 +1804,20 @@ module Json {
 }
 ```
 
-#### Duality
-
-Data and codata can be seen as two sides of the same coin. This *duality* goes deeper than mere superficial resemblance.
-The idea originates in category theory, where folds and unfolds have very precise meanings.
-An algebraic data type can be seen as the [initial algebra](https://en.wikipedia.org/wiki/Initial_algebra) of a functor: it provides the smallest, well-founded solution that can be consumed by a fold (a catamorphism).
-In the other direction, a codata type corresponds to the [final coalgebra](https://en.wikipedia.org/wiki/Initial_algebra#Final_coalgebra) of a functor: it is the largest (potentially infinite) solution that can be observed or generated by an unfold (an anamorphism).
-In this description, algebras and coalgebras are mirror images: by simply reversing the direction of the arrows in their diagrams, an algebra turns into a coalgebra and vice versa.
+#### Codata and unfold
 
 |                    | Access pattern        | Structure             | Evaluation strategy  | Invariant               |
 | ------------------ | ----------------------| --------------------- | -------------------- | ----------------------- |
 | **Data**           | Recursion (fold)      | Always finite         | Eager (strict)       | Progress                |
 | **Codata**         | Corecursion (unfold)  | Potentially infinite  | Lazy (non-strict)    | Productivity            |
+
+#### Duality
+
+Data and codata can be seen as two sides of the same coin. This *duality* goes deeper than mere superficial resemblance.
+The idea originates in category theory, where folds and unfolds have very precise meanings.
+An algebraic data type can be seen as the [initial algebra](https://en.wikipedia.org/wiki/Initial_algebra) of a functor: it provides the smallest, well-founded solution that can be consumed by a fold (a catamorphism).
+In the other direction, a codata type corresponds to the [final coalgebra](https://en.wikipedia.org/wiki/Initial_algebra#Final_coalgebra) of a functor: it is the largest (potentially infinite) solution that can be observed or generated by an unfold (anamorphism).
+In this description, algebras and coalgebras are mirror images: by simply reversing the direction of the arrows in their diagrams, an algebra turns into a coalgebra and vice versa.
 
 ## License 
 
@@ -1650,7 +1961,7 @@ let fact =
   fn(n) => 
     if (n == 0)
       then 1 
-      else n * fact(n - 1) // <-- This doesn't work
+      else n * fact(n - 1) // <-- This doesn’t work
   in fact(5)
 ```
 
@@ -1705,7 +2016,7 @@ factorial(n : nat) =
       }
 ```
 
-This is pseudo-code since letrec doesn't really exist as a language keyword. 
+This is pseudo-code since letrec doesn’t really exist as a language keyword. 
 
 #### Corecursion and codata
 

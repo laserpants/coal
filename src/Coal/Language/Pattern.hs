@@ -1,5 +1,6 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE LambdaCase #-}
 
 module Coal.Language.Pattern (Pattern (..), IndexedPattern) where
 
@@ -12,6 +13,7 @@ import Coal.Language.Type.Kind (Kind (..))
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (universeBi)
 import Data.List.NonEmpty (NonEmpty)
+import Data.Set (unions)
 import qualified Data.Set as Set
 import Extra (Dictionary, Name)
 
@@ -49,6 +51,11 @@ data Pattern a t
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
 
 instance (Data a, Data t) => BoundVars (Pattern a t) where
-  boundIn = Set.fromList . universeBi
+  boundIn =
+    \case
+      PRecord _ _ d mp ->
+        boundIn mp <> unions (fmap boundIn d)
+      p ->
+        Set.fromList (universeBi p)
 
 type IndexedPattern a = Pattern a (Type TypeIndex Kind)

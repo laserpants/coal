@@ -1,0 +1,8 @@
+module Main {
+
+  fun foo(x : int32)  : int32 =
+    let x = 5 in x
+
+  fun main() = trace_int32(1)
+
+}

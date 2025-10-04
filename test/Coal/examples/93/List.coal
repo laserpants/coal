@@ -91,18 +91,20 @@ module List {
       | x :: xs => reduce(fn(head, tail) => head :: tail, [x], xs)
     }
 
-  fun zip(lhs : List<a>, rhs : List<b>) : List<(a, b)> =
-    fold(lhs, []) {
-      | [] => 
-          always([])
-      | x :: @f =>
-          fn(rhs) => 
-            match(rhs) {
-              | [] => []
-              | y :: ys =>
-                  (x, y) :: f(ys) 
-            }
-    }
+// TODO
+//
+//  fun zip(lhs : List<a>, rhs : List<b>) : List<(a, b)> =
+//    fold(lhs, []) {
+//      | [] => 
+//          always([])
+//      | x :: @f =>
+//          fn(rhs) => 
+//            match(rhs) {
+//              | [] => []
+//              | y :: ys =>
+//                  (x, y) :: f(ys) 
+//            }
+//    }
 
   fun unzip(list : List<(a, b)>) : (List<a>, List<b>) =
     fold(list, ([], [])) {

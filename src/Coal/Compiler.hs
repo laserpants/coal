@@ -23,6 +23,7 @@ import Coal.Compiler.Transform.Pattern.Desugar
 import Coal.Compiler.Transform.Pattern.OrExpansion
 import Coal.Compiler.Transform.Pattern.RecordDesugar
 import Coal.Compiler.Transform.PatternExhaustiveCheck
+import Coal.Compiler.Transform.Shadowing
 import Coal.Compiler.Transform.Type.AliasExpansion (AliasContext (..))
 import Coal.Compiler.Transform.Unfold
 import Coal.Compiler.TypeInference
@@ -110,8 +111,9 @@ insertName _ _ = error "Implementation error"
 
 typeCheckingPass :: (MonadIO m, Monoid a, Data a, Eq a, Show a) => Module a Kind () -> CompilerT a m (Module a Kind IndexedType)
 typeCheckingPass =
-  -- Expand type aliases
-  expandAliases
+  detect mempty
+    -- Expand type aliases
+    >=> expandAliases
     >=> compileTopLevelUnfoldsC
     >=> compileTopLevelFoldsC
     -- Expand unfolds (codata)

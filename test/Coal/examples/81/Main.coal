@@ -4,8 +4,8 @@ module Main {
     fold(numbers) {
       | [] =>
          0
-      | x :: @sum =>
-         x + sum
+      | x :: @tot =>
+         x + tot
     }
 
   fun main() =
