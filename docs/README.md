@@ -49,7 +49,7 @@ These code snippets illustrate two distinct modes of recursive control flow. If 
 
 ### Programs = Expressions + Effects
 
-Coal is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-oriented_programming_language) language: a program is, at its core, just an expression that evaluates to a value. In this programming model, all data is immutable and there are no observable side-effects. These properties make programs more predictable, easier to reason about, highly testable, and allows for code to be verified using formal mathematical techniques. On the other hand, practical applications need to have the ability to interact with the outside world. Side-effects are what make them useful. A system for managing effects, such as I/O and exceptions, is still lacking in Coal. This is an essential step to promote the language into one that can be used to write actual programs. See **[How to contribute](#how-to-contribute)** if you're keen to work on this.
+Coal is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-oriented_programming_language) language: a program is, at its core, just an expression that evaluates to a value. In this programming model, all data is immutable and there are no observable side-effects. These properties make programs more predictable, easier to reason about, highly testable, and allows for code to be verified using formal mathematical techniques. On the other hand, practical applications need to have the ability to interact with the outside world. Side-effects are what make them useful. A [system for managing effects](https://en.wikipedia.org/wiki/Effect_system), such as I/O and exceptions, is still lacking in Coal. This is an essential step to promote the language into one that can be used to write actual programs. See **[How to contribute](#how-to-contribute)** if you're keen to work on this.
 
 ## Project status and roadmap
 
@@ -444,8 +444,7 @@ Integer literals introduced in code without an explicit type annotation, such as
 let answer = 42
 ```
 
-are polymorphic. The inferred type of this expression is `n with Numeric(n)`, which isn't an ordinary type. It means that `n` can be *any* type, as long as it is a member of the `Numeric` trait (see **[Traits](#traits)**). 
-This includes the built-in `int32`, `int64`, `bignum`, and `nat` types. All `Numeric` types support the basic arithmetic operations of addition, subtraction, and multiplication.
+are polymorphic. The inferred type of this expression is `n with Numeric(n)`, which isn't an ordinary type. It means that `n` can be *any* type, as long as it is a member of the `Numeric` trait (see **[Traits](#traits)**). This includes the built-in `int32`, `int64`, `bignum`, and `nat` types. All `Numeric` types support the basic arithmetic operations of addition, subtraction, and multiplication.
 
 ```
 fun sum_of(x, y, z) = 
@@ -722,7 +721,7 @@ There are two types of comments:
 
 #### Natural numbers
 
-Recursion in Coal is closely tied to pattern matching: we peel away layers of a recursive data structure step by step, until reaching its base case. This works naturally with lists, trees, and other algebraic data types. Ordinary machine integers (`int32`, `int64`), however, cannot be pattern matched on. Nevertheless, we often want to use integers in recursive computations &mdash; for example, when counting, repeating an action, or simulating the behavior of loops in imperative languages. To describe numbers in a recursive way, we instead need to rely on the standard axiomatization of the natural numbers:
+Recursion in Coal is closely tied to pattern matching: we peel off layers of a recursive data structure step by step, until reaching its base case. This works naturally with lists, trees, and other algebraic data types. Ordinary machine integers (`int32`, `int64`), however, cannot be pattern matched on. Nevertheless, we often want to use integers in recursive computations &mdash; for example, when counting, repeating an action, or simulating the behavior of loops in imperative languages. To describe numbers in such a way, we instead need to rely on the standard axiomatization of the natural numbers:
 
 > Every natural number is either zero or the successor of another natural number.
 
@@ -744,12 +743,12 @@ This makes it possible to use numbers directly in patterns, just like with other
 
 ```
   match(n : nat) {
-    | Zero => "Yay"
+    | Zero => "yay"
     | Succ(_) => "nay"
   }
 ```
 
-Writing numbers in this style quickly becomes impractical, however. To make working with naturals convenient, the compiler internally represents values of type `nat` as ordinary integers. Converting between the two views is called *packing* and *unpacking*. These are constant time (O(1)) operations:
+Writing numbers in this style quickly becomes impractical, however. To make working with naturals convenient (and efficient), the compiler internally represents values of type `nat` as ordinary integers. Converting between the two views is called *packing* and *unpacking*. These are constant time (O(1)) operations:
 
 ```
 pack_nat : int32 -> nat
@@ -787,7 +786,7 @@ Similarly, when calling a function that only takes a unit value as argument, the
 ```
 let 
   x = 
-    five()   // we could have written five(()) here
+    five()   // we could have written five(()) here, but less is more
   in
     x + 5
 ```
@@ -978,9 +977,13 @@ The list concatenation operator (`++`) appends one list to the end of another, r
   let s = ["Khufu", "Hatshepsut", "Akhenaten"] ++ ["Tutankhamun"]
 ```
 
+**Note:** The time complecity of `++` is linear (O(n)) in the length of the first string.
+
+<!--
 ###### Sorting
 
 TODO
+-->
 
 ##### Useful higher-order list functions
 
@@ -1038,60 +1041,90 @@ The type of filter is:
 filter : (a -> bool) -> List<a> -> List<a>
 ```
 
+That is, filter takes a [predicate](#list-predicates) and a list as input, and returns a new list with only the elements that return `true` for the predicate.
+
 ###### Reducing a list
 
-> The operation described here is also commonly referred to as a *fold*, but that name isn't used since it is a built-in language feature in Coal. The `fold` keyword and the special `@`-pattern syntax form the basis for how recursive functions, including `reduce`, are implemented. This topic is discussed in depth in ___. 
-> For now, here is how reduce is implemented:
->
-> ```
-> reduce(f, acc, list) =
->   fold(list, acc) {
->     x :: @rec =>
->       fn(a) => rec(f(x, a))
->     [] =>
->       fn(a) => a
->   }
-> ```
-
-TODO
+The higher-order function `reduce` takes a collection of data and combines its elements into a single result. A common example is reducing a list of numbers to a single value by repeatedly applying an operation, such as summing each element with a running total:
 
 ```
-[0, 1, 2, 3, 4] |.reduce(fn(x, a) => a + x, 0)   // 10 
+let sum = reduce(fn(n, a) => n + a, 0, [1, 2, 3])
 ```
 
-The type of `reduce` is 
+> The operation described here is also commonly referred to as a *fold*. That name is not used, however, since it is a reserved language keyword in Coal. Along with the special `@`-pattern syntax, it provides the foundation for implementing recursive functions, including `reduce`. This is explored in detail in **[Recursion, corecursion, and codata](#recursion-corecursion-and-codata)**.
+
+The type of `reduce` is:
 
 ```
-reduce : (a -> b -> b) -> b -> List<a> -> b
+reduce : (e -> a -> a) -> a -> List<e> -> a
 ```
 
+- The first argument is a function that combines an element of type `e` with an *accumulator* of type `a` to produce a new accumulator.
+- The second argument is the initial value of the accumulator.
+- The third argument is the list to reduce.
+
+###### Examples of using `reduce`
+
+Concatenating strings:
+
+```
+let words = ["Hello", " ", "world", "!"]
+let sentence = reduce(fn(w, a) => w +++ a, "", words)
+// sentence = "Hello world!"
+```
+
+Finding the maximum element:
+
+```
+let max_val = reduce(fn(n, a) => if n > a then n else a, -Infinity, [3, 7, 2, 9])
+// max_val = 9
+```
+
+Counting elements satisfying a condition:
+
+```
+let numbers = [1, 2, 3, 4, 5]
+let number_of_evens = reduce(fn(n, a) => if n % 2 == 0 then a + 1 else a, 0, numbers)
+// number_of_evens = 2
+```
+
+<!--
 ###### Left vs. right folds
 
 TODO
-
-###### Examples of folds
-
-TODO
+-->
 
 ##### List predicates
 
-A *predicate* is a function that tests for some condition with respect to its argument and returns `true` or `false`. By convention, functions that serve this purpose are often prefixed with `is_`.
+A *predicate* is a function that tests for some condition with respect to its argument and returns `true` or `false`. By convention, functions that serve this purpose are often prefixed with `is_`. The below predicates are available in the standard `List` package:
+
+```
+is_empty     : List<a> -> bool
+is_nonempty  : List<a> -> bool
+is_singleton : List<a> -> bool
+```
 
 ###### `is_empty`
 
-A recurring theme is to check whether a list is empty or not. This is what the function `is_empty` does. Its type is:
-
-```
-is_empty : List<a> -> bool
-```
+A common operation on lists is to check if a list is empty or not. This is what the function `is_empty` does. 
 
 ###### `is_nonempty`
 
-TODO
+This is the opposite of `is_empty`. That is: 
+
+```
+is_nonempty(xs) <==> ! is_empty(xs)
+```
 
 ###### `is_singleton`
 
-TODO
+This function returns `true` when the input list has precisely **one** element. 
+
+```
+is_singleton(["oats"])                             // true  
+is_singleton([])                                   // false
+is_singleton(["wheat", "oats", "rye", "barley"])   // false
+```
 
 #### Option
 
@@ -1588,15 +1621,7 @@ If we pass this function to the Coal compiler, it is rejected with the following
 Name not in scope: factorial
 ```
 
-To call a function from within itself in this way is not possible. Instead, recursion needs to be expressed in terms of a pattern know as a *fold*. 
-A fold takes some collection of data and combines it into a single result. A common instance of this is where an array of numbers is reduced into a single value, for example by continually adding each number to the parital sum.
-
-```
-let sum = reduce(fn(n, a) => f + a, [1, 2, 3])
-```
-
-Note that `fold` is a language keyword in Coal, not an ordinary function. 
-Folds are similar to `match` expressions, but with some extra powers.
+To call a function from within itself in this way is not possible. Instead, recursion needs to be expressed in terms of a pattern know as a *fold*. Note that `fold` is a language keyword in Coal, not an ordinary function. Folds are similar to `match` expressions, but with some extra powers.
 
 We are going to use the `nat` data type to define the factorial function:
 
@@ -1631,6 +1656,21 @@ The following is therefore not possible:
       | @p => p
     }
 ```
+
+TODO
+
+here is how `reduce` can be implemented using the fold construct:
+
+```
+reduce(f, acc, list) =
+  fold(list, acc) {
+    x :: @rec =>
+      fn(a) => rec(f(x, a))
+    [] =>
+      fn(a) => a
+  }
+```
+
 
 #### Top-level folds and mutual recursion
 
