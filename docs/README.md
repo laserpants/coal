@@ -637,7 +637,7 @@ Just like with let-bindings, the arguments in a lambda-function are patterns:
 | `+`           | Addition               | `∀n : n -> n -> n with Numeric(n)`   |                                                                        
 | `-`           | Subtraction            | `∀n : n -> n -> n with Numeric(n)`   |                                                                        
 | `*`           | Multiplication         | `∀n : n -> n -> n with Numeric(n)`   |                                           
-| `/`           | Division               | TODO                                 |                                                                        
+| `/`           | Division               |                                      |                                                                        
 | `^`           | Exponentiation         | `∀n : n -> nat -> n with Numeric(n)` |                                                                        
 
 |               | Description            | Type                                  |                                                                        
@@ -651,7 +651,7 @@ Just like with let-bindings, the arguments in a lambda-function are patterns:
 
 |               | Description            | Type                          |                                                                        
 | ------------- | ---------------------- | ----------------------------- |                                                                        
-| `%`           | Modulus                | TODO                          |                                                                        
+| `%`           | Modulus                |                               |                                                                        
 
 ##### Logical
 
@@ -1031,7 +1031,7 @@ map : (a -> b) -> List<a> -> List<b>
 > ```
 > 
 > Note that we are partially applying `map` to `z`. This suggests that there are two ways to interpret `map`; we can think of it as a function that applies the function `z` to the value of type `a`, in the `f`-context, which could be a list of values, or an optional.
-> The other is that `map` takes some function `a -> b` and *lifts* it into one that acts on `f`-values &mdash; that is one of type `f<a> -> f<b>`.
+> The other is that `map` takes some function `a -> b` and *lifts* it into one that acts on `f`-values &mdash; that is, one of type `f<a> -> f<b>`.
 > The latter interpretation is more in line with the definition of a functor in category theory.
 >
 > ##### Laws
@@ -1081,6 +1081,11 @@ map : (a -> b) -> List<a> -> List<b>
 >
 > ###### The other law (?):
 >
+> The claim here is that, for any list `xs`:
+>
+> ```
+> map(f << g, xs) == (map(f) << map(g))(xs)
+> ```
 > 
 
 ###### Filtering a list
