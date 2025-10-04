@@ -1019,7 +1019,7 @@ map : (a -> b) -> List<a> -> List<b>
 > f : a -> b  ==>  map(f) : f<a> -> f<b>
 > ```
 > 
-> Note that we are partially applying `map` to f. There are two ways to look at this; we can think of it as a function that takes a function and
+> Note that we are partially applying `map` to f. There are two ways to interpret this; we can think of it as a function that takes a function and
 > TODO
 
 ###### Filtering a list
