@@ -74,19 +74,25 @@ The following is a list of features that are either missing or incomplete, and :
 
 ## Installation and setup
 
-TODO
+The compiler has been tested on Linux and Mac OS.
 
 ### Prerequisites
 
-TODO
+#### Haskell/GHC
 
-### Mac
+https://www.haskell.org/ghcup/
 
-TODO 
+#### LLVM
 
-### Linux
+https://llvm.org/
 
-TODO 
+#### Boehm–Demers–Weiser garbage collector
+
+https://github.com/ivmai/bdwgc
+
+#### The GNU Multiple Precision Arithmetic Library
+
+https://gmplib.org/
 
 ### Compiler
 
