@@ -163,7 +163,7 @@ TODO
      - [Trait inheritance](#trait-inheritance)
   1. [Recursion, corecursion, and codata](#recursion-corecursion-and-codata)
      - [Fold](#fold)
-     - Top-level folds and mutual recursion
+     - [Top-level folds and mutual recursion](#top-level-folds-and-mutual-recursion)
      - [Codata and unfold](#codata-and-unfold)
      - [Duality](#duality)
 
@@ -565,13 +565,13 @@ let { baz = { f = a | _ } } = faz(4)
 
 A subtle but important detail that makes let-bindings in Coal different from those in most other languages is that the identifier introduced by a `let` is **not in scope within the definition itself**. In other words, `let x = e1 in e2` makes `x` available in `e2`, but not in `e1`. In the ML-family of languages (e.g. OCaml), this is also the case for the standard `let` keyword. However, in these languages, a special `let rec` syntax makes it possible to evade this restriction. Coal doesn't have an equivalent to `let rec`.
 This prevents non-well-founded expressions, such as `let f = f in f`, but more generally, makes it impossible for any function to refer to itself. 
-The restriction also applies to top-level definitions. As far as the compiler is concerned, this function:
+The restriction also applies to top-level definitions. As far as the compiler is concerned, this function
 
 ```
 fun fib(n) = if (n == 0 || n == 1) then n else fib(n - 1) + fib(n - 2)
 ```
 
-(defined at the top level) translates into:
+translates into:
 
 ```
 let fib = fn(n) => if (n == 0 || n == 1) then n else fib(n - 1) + fib(n - 2)
@@ -606,7 +606,7 @@ An anonymous (lambda) function is declared with the `fn` keyword and the â€œfatâ
 Function expressions are first-class objects; they can be passed as arguments to other functions, assigned and stored inside data structures, etc.
 
 ```
-  fun app_fst(xs, x : int32) =
+  fun apply_fst(xs, x : int32) =
      match(xs) {
        | f :: _ => f(x)
        | [] => 0
@@ -619,7 +619,7 @@ Function expressions are first-class objects; they can be passed as arguments to
       , fn(x) => x + 3
       ]
     in
-      trace_int32(app_fst(fns, 3))
+      trace_int32(apply_fst(fns, 3))
 ```
 
 Just like with let-bindings, the arguments in a lambda-function are patterns:
@@ -911,7 +911,7 @@ uncons : List<a> -> Option<(a, List<a>)>
 > draw(set_position(10, 5, fill("blue", circle({ radius = 5.0 }))), canvas)
 > ```
 >
-> Using the reverse function application operator (and the associated `$.` operator), we could instead write the above in a more readable pipeline-style:
+> Using the reverse function application operator (and the associated `$.`-operator), we could instead write the above in a more readable pipeline-style:
 >
 > ```
 > circle({ radius = 5.0 })
@@ -1025,21 +1025,27 @@ map : (a -> b) -> List<a> -> List<b>
 > z : a -> b  ==>  map(z) : f<a> -> f<b>
 > ```
 > 
-> Note that we are partially applying `map` to `z`. There are two ways to interpret `map`; we can think of it as a function that applies the function `z` to the value of type `a`, in the `f`-context, which could be .
+> Note that we are partially applying `map` to `z`. There are two ways to interpret `map`; we can think of it as a function that applies the function `z` to the value of type `a`, in the `f`-context, which could be a list of values, or an optional.
 > The other interpretation is that `map` that takes a function `(a -> b)` and *lifts* it into one in the target category, i.e., one of type `f<a> -> f<b>`.
 > Here we are mostly interested in the latter.
 > 
 > Functors are subject to the following laws:
 > 
 > ```
-> fmap id == id
-> fmap (f << g) == fmap f << fmap g
+> map(id) == id
+> map(f << g) == map(f) << map(g)
 > ```
 > 
-> The first says that ...
-> The second law means ...
+> The first says that 
+> The second law means that functors preserve composition.
 >
+> ##### List
 >
+> TODO
+>
+> ##### Option
+> 
+> TODO
 > 
 
 ###### Filtering a list
@@ -1058,7 +1064,7 @@ The type of `filter` is:
 filter : (a -> bool) -> List<a> -> List<a>
 ```
 
-That is, filter takes a [predicate](#list-predicates) and a list as input, and returns a new list with only the elements that return `true` for the predicate.
+That is, `filter` takes a [predicate](#list-predicates) and a list as input, and returns a new list with only the elements that return `true` for the predicate.
 
 ###### Reducing a list
 
@@ -1124,6 +1130,12 @@ is_singleton : List<a> -> bool
 ###### `is_empty`
 
 A common operation on lists is to check if a list is empty or not. This is what the function `is_empty` does. 
+
+```
+is_empty([])                                   // true
+is_empty(["wheat", "oats", "rye", "barley"])   // false
+```
+
 
 ###### `is_nonempty`
 
@@ -1413,8 +1425,8 @@ A case in a match expression is called a *clause* and consists of a pattern on t
 
 ```
   match(list : List<int32>) {
-    | [a] => a
-    | [a, _] => a
+    | [a]       => a
+    | [a, _]    => a
     | [a, _, _] => a
     | _ => 0
   }
@@ -1624,7 +1636,7 @@ A trait can declare that it depends on another trait by *inheriting* from it. Th
   } 
 ```
 
-Here, the `Show<Option<a>>` instance inherits from `Show<a>`. This means the compiler will only accept this instance if a `Show` implementation for `a` is available. Inside the trait body, we can call `show(v)` on the inner value `v : a`. The parent trait `Show<a>` guarantees that `show` is defined for this type. In other words, the ability to show an `Option<a>` depends directly on the ability to show its element type `a`.
+Here, the `Show<Option<a>>` instance inherits from `Show<a>`. The compiler will only accept this instance if a `Show` implementation for `a` is available. Inside the trait body, we can call `show(v)` on the inner value `v : a`. The parent trait `Show<a>` guarantees that `show` is defined for this type. In other words, the ability to show an `Option<a>` depends directly on the ability to show its element type `a`.
 
 ### Recursion, corecursion, and codata
 
@@ -1646,9 +1658,11 @@ If we pass this function to the Coal compiler, it is rejected with the following
 Name not in scope: factorial
 ```
 
-To call a function from within itself in this way is not possible. Instead, recursion needs to be expressed in terms of a pattern know as a *fold*. Note that `fold` is a language keyword in Coal, not an ordinary function. Folds are similar to `match` expressions, but with some extra powers.
+To call a function from within itself in this way is not possible. Instead, recursion is accomplished via a pattern know as a *fold*. Note that `fold` is a language keyword in Coal, not an ordinary function. 
 
 #### Fold
+
+A `fold` is similar to a `match` expression, but with some extra powers.
 
 We are going to use the `nat` data type (explained [here](#natural-numbers)) to define the factorial function:
 
@@ -1746,6 +1760,11 @@ module Json {
 
 #### Codata and unfold
 
+|                    | Access pattern        | Structure             | Evaluation strategy  | Invariant               |
+| ------------------ | ----------------------| --------------------- | -------------------- | ----------------------- |
+| **Data**           | Recursion (fold)      | Always finite         | Eager (strict)       | Progress                |
+| **Codata**         | Corecursion (unfold)  | Potentially infinite  | Lazy (non-strict)    | Productivity            |
+
 #### Duality
 
 Data and codata can be seen as two sides of the same coin. This *duality* goes deeper than mere superficial resemblance.
@@ -1753,11 +1772,6 @@ The idea originates in category theory, where folds and unfolds have very precis
 An algebraic data type can be seen as the [initial algebra](https://en.wikipedia.org/wiki/Initial_algebra) of a functor: it provides the smallest, well-founded solution that can be consumed by a fold (a catamorphism).
 In the other direction, a codata type corresponds to the [final coalgebra](https://en.wikipedia.org/wiki/Initial_algebra#Final_coalgebra) of a functor: it is the largest (potentially infinite) solution that can be observed or generated by an unfold (anamorphism).
 In this description, algebras and coalgebras are mirror images: by simply reversing the direction of the arrows in their diagrams, an algebra turns into a coalgebra and vice versa.
-
-|                    | Access pattern        | Structure             | Evaluation strategy  | Invariant               |
-| ------------------ | ----------------------| --------------------- | -------------------- | ----------------------- |
-| **Data**           | Recursion (fold)      | Always finite         | Eager (strict)       | Progress                |
-| **Codata**         | Corecursion (unfold)  | Potentially infinite  | Lazy (non-strict)    | Productivity            |
 
 ## License 
 
