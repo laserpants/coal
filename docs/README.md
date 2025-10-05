@@ -57,18 +57,22 @@ Coal is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-
 
 The following is a list of features that are either missing or incomplete, and :
 
-| Feature                          | Milestone              | Criteria         |                                                                        
-| -------------------------------- | ---------------------- | ---------------- |                                                                        
-| Module imports/exports           | 1                      |                  |
+| Feature                          | Milestone              |                                                                         
+| -------------------------------- | ---------------------- |                                                                         
+| Module imports/exports           | 1                      | 
+| Operators                        | 1                      | 
+| Translation pipeline             | 1                      | 
+| Default instance for Numeric     | 1                      | 
+| Bug: double precision            | 1                      | 
 
 ### Roadmap
 
 | Feature                          | Milestone              | Criteria         |                                                                        
 | -------------------------------- | ---------------------- | ---------------- |                                                                        
-| CLI                              | 2                      | It should be possible to compile programs from the terminal using a command like `coal Main.coal -o example` |                                                                        
+| CLI                              | 2                      | It is possible to compile programs from the terminal using a command like `coal Main.coal -o example` |                                                                        
 | Pattern match totality checking  | 2                      | Partial match statements are reported as errors at compile-time.                                             |                                                                        
 | Trait inheritance                | 3                      | Traits like `Show<List<a>> with Show<a>` should work.                                                        |                                                                        
-| Qualified (namespace) imports    | 3                      | For example, `import namespace List` works.                                                                  |
+| Qualified (namespace) imports    | 3                      | `import namespace X` works.                                                                  |
 | Package system                   | 4                      |                  |                                                                        
 | Effects                          | 5                      |                  |                                                                        
 
@@ -80,7 +84,7 @@ The compiler has been tested on Linux and Mac OS.
 
 #### Haskell/GHC
 
-https://www.haskell.org/ghcup/
+**Recommended:** Install Haskell, GHC and Stack using the [GHCup](https://www.haskell.org/ghcup/) tool.
 
 #### LLVM
 
@@ -1016,48 +1020,46 @@ map : (a -> b) -> List<a> -> List<b>
 
 > #### Mapping and `Functor`s
 >
-> The actual type of `map` is more general than the one above, which is in a form specialized to lists. In fact, any value of type `f<a>` can be mapped over, as long as `f` implements the `Functor` [trait](#traits):
+> The actual type of `map` is more general than the specialized `List` version above. In fact, any value of type `f<a>` can be mapped over, as long as `f` implements the `Functor` [trait](#traits):
 >
 > ```
 > map : (a -> b) -> f<a> -> f<b> with Functor<f>
 > ```
 >
-> This gives us a more general meaning of mappning, which is something like "transforming values inside a fixed context".
->
-> This type of transformation is a structure-preserving map which corresponds to the notion of a *homomorphism* in mathematics. Homomorphisms are the basic topic of study in category theory. 
-> A functor, in this context, is a mapping between categories &mdash; that is, one that sends objects and morphisms from one category to another, subject to certain laws. 
+> We can think of this more abstractly as **"transforming values inside a fixed context"**. In mathematical terms, this corresponds to a structure-preserving map, also known as a *homomorphism*. 
+> Homomorphisms are the topic of study in category theory. A functor, in this context, is a mapping between categories &mdash; one that sends objects and morphisms from one category to another (subject to certain laws). In programming languages, objects correspond to types, and morphisms are simply functions.
 > 
-> TODO: illustration
+> There are two ways to interpret `map`; we can think of it as a function that applies the function argument to a value of type `a`, in the `f`-context, which could be a list of values, or an optional. The other is that `map` takes some function `a -> b` and *lifts* it into one that acts on `f`-values &mdash; that is, one of type `f<a> -> f<b>`. This second interpretation is more in line with the definition of a functor in category theory. We then have:
 >
-> In the context of programming languages, the objects are the types and morphisms are simply functions: 
-> 
 > ```
-> a           ==>  f<a>
-> z : a -> b  ==>  map(z) : f<a> -> f<b>
+> a           ==>  f<a>                         // The functor transforms objects
+> z : a -> b  ==>  map(z) : f<a> -> f<b>        // and functions
 > ```
 > 
-> Note that we are partially applying `map` to `z`. This suggests that there are two ways to interpret `map`; we can think of it as a function that applies the function `z` to the value of type `a`, in the `f`-context, which could be a list of values, or an optional.
-> The other is that `map` takes some function `a -> b` and *lifts* it into one that acts on `f`-values &mdash; that is, one of type `f<a> -> f<b>`.
-> The latter interpretation is more in line with the definition of a functor in category theory.
+> Functors are expected to obey the following two laws:
 >
-> ##### Laws
-> 
-> Functors are subject to the following laws:
-> 
-> F(id) = id
-> F(g o f) = F(g) o F(f)
+> ##### 1. Identity law
 >
-> In code:
-> 
 > ```
 > map(id) == id
+> ```
+>
+> This says that mapping the identity function over a functor doesn’t change the structure or its contents. 
+>
+> ##### 2. Composition law
+>
+> The operator `<<` denotes function composition, so `f << g = f(g(x)))`: 
+>
+> ```
 > map(f << g) == map(f) << map(g)
 > ```
-> 
-> These laws aren’t enforced by the compiler, but following them is always a good idea. The first says that `map` ..? k
-> The second law means that functors must preserve composition.  
-> Together, these laws ensure that mapping behaves in a way that preserves the structure of the ? . 
 >
+> This law ensures that mapping the composition of two functions is the same as first mapping one function and then the other. In other words, functors preserve function composition. 
+>
+> Together, these laws guarantee that mapping behaves consistently: the shape of the container is unchanged, and each element inside the context is transformed individually, and in the same way as if the function were applied directly to that element. These laws aren’t enforced by the compiler, but following them is always a good idea. 
+> 
+
+<!--
 > ##### List
 >
 > ```
@@ -1092,7 +1094,13 @@ map : (a -> b) -> List<a> -> List<b>
 > ```
 > map(f << g, xs) == (map(f) << map(g))(xs)
 > ```
+>
+> Inductive hypothesis:
 > 
+> Base case:
+> Inductive step:
+> 
+-->
 
 ###### Filtering a list
 
