@@ -1448,7 +1448,7 @@ A case in a match expression is called a *clause* and consists of a pattern on t
     | [a]       => a
     | [a, _]    => a
     | [a, _, _] => a
-    | _ => 0
+    | _         => 0
   }
 ```
 
