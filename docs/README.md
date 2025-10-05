@@ -1807,7 +1807,36 @@ A recent version of GHC is needed. It is recommended to install Haskell, GHC and
 
 #### LLVM
 
-https://llvm.org/
+An [LLVM](https://llvm.org/) toolchain that provides `llc` (the LLVM static compiler) is also needed.
+
+##### Linux
+
+- Debian/Ubuntu (or derivatives):
+
+  ```
+  sudo apt update
+  sudo apt install llvm clang     # or specific version: llvm-21 clang-21
+  ```
+
+- Fedora, RHEL, or CentOS:
+
+  ```
+  sudo dnf install llvm clang
+  ```
+
+- Arch Linux:
+
+  ```
+  sudo pacman -S llvm
+  ```
+
+##### Mac OS
+
+```
+brew install llvm
+```
+
+**Note:** If you use Homebrew to install LLVM, you may need to add the binaries to your `PATH` manually. 
 
 #### Additional dependencies
 
