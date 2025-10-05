@@ -1737,7 +1737,7 @@ but without referring to the function by name.
 
 ##### Well-foundedness
 
-To ensure that recursion is well-founded (guaranteed to terminate), the use of `@`-patterns is restricted. Most importantly, they can only appear inside constructors. The reason for this is that a constructor’s fields are *structurally smaller* than the value being folded. Progress toward the base case can be therefore be guaranteed on each step.
+To ensure that recursion is well-founded (guaranteed to terminate), the use of `@`-patterns is restricted. Most importantly, they can only appear inside constructors. The reason for this is that a constructor’s fields are *structurally smaller* than the value being folded. Progress toward the base case is thereby guaranteed on each step.
 
 The following, for example, is invalid:
 
