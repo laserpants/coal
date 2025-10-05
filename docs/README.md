@@ -64,90 +64,15 @@ Coal is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-
 
 ### Roadmap
 
-<table cellspacing="0" cellpadding="0" border="0">
-  <tr>
-    <td valign="top" border="0">
-      <table cellspacing="0" cellpadding="4" border="0">
-        <thead>
-          <tr>
-            <th>Milestone</th>
-            <th>Feature/Fix</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>1</td>
-            <td>Module imports/exports</td>
-          </tr>
-          <tr>
-            <td>1</td>
-            <td>Operators</td>
-          </tr>
-          <tr>
-            <td>1</td>
-            <td>Translation pipeline</td>
-          </tr>
-          <tr>
-            <td>1</td>
-            <td>Default instance for Numeric</td>
-          </tr>
-          <tr>
-            <td>1</td>
-            <td>Bug: double precision</td>
-          </tr>
-        </tbody>
-      </table>
-    </td>
-    <td valign="top">
-      <table cellspacing="0" cellpadding="4" border="0">
-        <thead>
-          <tr>
-            <th>Milestone</th>
-            <th>Feature</th>
-            <th>Criteria</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>2</td>
-            <td>Compiler monolith</td>
-            <td></td>
-          </tr>
-          <tr>
-            <td>2</td>
-            <td>CLI</td>
-            <td>It is possible to compile programs from the terminal using a command like <code>coal Main.coal -o example</code></td>
-          </tr>
-          <tr>
-            <td>2</td>
-            <td>Pattern match totality checking</td>
-            <td>Partial match statements are reported as errors at compile-time.</td>
-          </tr>
-          <tr>
-            <td>3</td>
-            <td>Trait inheritance</td>
-            <td>Traits like <code>Show&lt;List&lt;a&gt;&gt; with Show&lt;a&gt;</code> should work.</td>
-          </tr>
-          <tr>
-            <td>3</td>
-            <td>Qualified imports</td>
-            <td><code>import namespace X</code> works.</td>
-          </tr>
-          <tr>
-            <td>4</td>
-            <td>Package system</td>
-            <td></td>
-          </tr>
-          <tr>
-            <td>5</td>
-            <td>Effects</td>
-            <td></td>
-          </tr>
-        </tbody>
-      </table>
-    </td>
-  </tr>
-</table>
+| Milestone  | Feature                          |\|| Milestone  | Feature                           | Criteria                                                                                              |                                                                                                                                                                                                                                      
+| ---------- | -------------------------------- |--| -----------| --------------------------------  | ----------------------------------------------------------------------------------------------------- |                                                                                                                                                                                                                                      
+| 1          | Module imports/exports           |\|| 2          | Compiler monolith                 |                                                                                                       |                                                                                                                                                              
+| 1          | Operators                        |\|| 2          | CLI                               | It is possible to compile programs from the terminal using a command like `coal Main.coal -o example` |                                                                         
+| 1          | Translation pipeline             |\|| 2          | Pattern match totality checking   | Partial match statements are reported as errors at compile-time.                                      |                                                                         
+| 1          | Default instance for Numeric     |\|| 3          | Trait inheritance                 | Traits like `Show<List<a>> with Show<a>` should work.                                                 |                                                                         
+| 1          | Bug: double precision            |\|| 3          | Qualified (namespace) imports     | `import namespace X` works.                                                                           |                                                                         
+|            |                                  |\|| 4          | Package system                    |                                                                                                       |                                                                        
+|            |                                  |\|| 5          | Effects                           |                                                                                                       |                                                                        
 
 ## Language overview
 
