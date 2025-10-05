@@ -539,7 +539,7 @@ let { baz = { f = a | _ } } = faz(4)
 
 A subtle but important detail that makes let-bindings in Coal different from those in most other languages is that the identifier introduced by a `let` is **not in scope within the definition itself**. In other words, `let x = e1 in e2` makes `x` available in `e2`, but not in `e1`. In the ML-family of languages (e.g. OCaml), this is also the case for the standard `let` keyword. However, in these languages, a special `let rec` syntax makes it possible to evade this restriction. Coal doesn’t have an equivalent to `let rec`.
 This prevents non-well-founded expressions, such as `let f = f in f`, but more generally, makes it impossible for any function to refer to itself. 
-The restriction also applies to top-level definitions. As far as the compiler is concerned, this function
+The restriction also applies to top-level definitions. For example, as far as the compiler is concerned, the function
 
 ```
 fun fib(n) = if (n == 0 || n == 1) then n else fib(n - 1) + fib(n - 2)
@@ -1533,19 +1533,19 @@ is a shorthand version of this:
 
 #### Supported patterns
 
-| Type               | Example              | Description                                                                                     |                                                   
-| ------------------ | -------------------- | ----------------------------------------------------------------------------------------------- |                                                   
-| Constructor        | `Color(r, g, b)`     | Matches a value built with a specific data constructor, binding sub-components to variables.    |                                                 
-| Variable           | `x`                  | Matches any value and binds it to the variable.                                                 |                                                 
-| Wildcard           | `_`                  | Ignores the matched value (see above).                                                          |
-| Literal            | `"Hello"`, `0`, `()` | Matches values that are exactly equal to the given literal.                                     |                                                 
-| List constructor   | `x :: xs`            | Matches a list by separating it into head and tail.                                             |                                                 
-| List literal       | `[f, s, t]`          | Matches a list of fixed length with elements matching the given sub-patterns.                   |                                                 
-| Tuple              | `(lhs, rhs)`         | Matches a tuple by decomposing it into its components.                                          |                                                 
+| Type               | Example              | Description                                                                                      |                                                   
+| ------------------ | -------------------- | ------------------------------------------------------------------------------------------------ |                                                   
+| Constructor        | `Color(r, g, b)`     | Matches a value built with a specific data constructor, binding sub-components to variables.     |                                                 
+| Variable           | `x`                  | Matches any value and binds it to the variable.                                                  |                                                 
+| Wildcard           | `_`                  | Ignores the matched value (see above).                                                           |
+| Literal            | `"Hello"`, `0`, `()` | Matches values that are exactly equal to the given literal.                                      |                                                 
+| List constructor   | `x :: xs`            | Matches a list by separating it into head and tail.                                              |                                                 
+| List literal       | `[f, s, t]`          | Matches a list of fixed length with elements matching the given sub-patterns.                    |                                                 
+| Tuple              | `(lhs, rhs)`         | Matches a tuple by decomposing it into its components.                                           |                                                 
 | Record             | `{ name = n \| _ }`  | Matches a record by specifying patterns for one or more fields. See **[Pattern matching over records](#pattern-matching-over-records)** for details. |                                                 
-| As                 | `(lhs, _) as pair`   | Matches the inner pattern, while also binding the entire value to a variable.                   |                                                 
-| @                  | `Succ(@n)`           | See **[Recursion, corecursion, and codata](#recursion-corecursion-and-codata)**.                |                                                 
-| Or                 | `1 or 2`             | Matches if the value satisfies at least one of the given alternative patterns.                  |      
+| As                 | `(lhs, _) as pair`   | Matches the inner pattern, while also binding the entire value to a variable.                    |                                                 
+| @                  | `Succ(@n)`           | Fold recursion. See **[Recursion, corecursion, and codata](#recursion-corecursion-and-codata)**. |                                                 
+| Or                 | `1 or 2`             | Matches if the value satisfies at least one of the given alternative patterns.                   |      
 
 ### Traits
 
@@ -1658,7 +1658,7 @@ Here, the `Show<Option<a>>` instance inherits from `Show<a>`. The compiler will 
 
 ### Recursion, corecursion, and codata
 
-In most programming languages, a typical implementation of the factorial function looks something like the following:
+In most programming languages, a typical implementation of the factorial function looks something like this:
 
 ```
 fun factorial(n : int32) =
@@ -1676,7 +1676,7 @@ If we pass this function to the Coal compiler, it is rejected with the following
 Name not in scope: factorial
 ```
 
-To call a function from itself in this way is not possible. Instead, recursion must be accomplished through a pattern know as a *fold*. A fold (or *catamorphism*) abstracts the notion of a structurally recursive computation over some data type. It is a way to deconstruct data, layer by layer.
+To call a function from itself in this way is not possible. Instead, recursion must be accomplished through a pattern know as a *fold*. A fold (or *catamorphism*) abstracts the notion of a structurally recursive computation over some algebraic data type. It is a way to deconstruct data, layer by layer.
 
 #### Fold syntax
 
@@ -1696,7 +1696,7 @@ type nat
   | Succ(nat)
 ```
 
-It is recursive, because `nat` appears inside one of its own constructors. We mark this recursive position with the special symbol `@`:
+It is recursive because `nat` appears inside one of its own constructors. We mark this recursive position with the special symbol `@`:
 
 ```
 type nat 
@@ -1704,7 +1704,7 @@ type nat
   | Succ(@)
 ```
 
-This location is significant. It is precisely where the `fold` mechanism will recurse. We can now express the factorial function:
+This location is significant. It is precisely where the `fold` mechanism will recurse. Using a special pattern-syntax only available in `fold` expressions, we can now express the factorial function as:
 
 ```
   fun factorial(n : nat) =
@@ -1735,7 +1735,7 @@ but without referring to the function by name.
 
 ##### Well-foundedness
 
-To ensure that all recursion is well-founded (guaranteed to terminate), the use of the `@`-pattern is restricted. Most importantly, it can only appear inside a constructor, because each constructor’s fields are *structurally smaller* than the value being folded. This guarantees progress toward a base case on each step.
+To ensure that all recursion is well-founded (guaranteed to terminate), the use of the `@`-pattern is restricted. Most importantly, it can only appear inside a constructor, because each of the constructor’s fields is *structurally smaller* than the value being folded. This guarantees progress toward a base case on each step.
 
 For example, the following is invalid:
 
