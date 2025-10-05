@@ -71,7 +71,7 @@ Coal is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-
 | 1          | Translation pipeline             |            | <strike>Pattern match totality checking</strike> | <strike>Partial match statements are reported as errors at compile-time.</strike>      |                                                                         
 | 1          | Default instance for Numeric     | 3          | Trait inheritance                 | Traits like `Show<List<a>> with Show<a>` should work.                                                 |                                                                         
 | 1          | Bug: double precision            | 3          | Qualified (namespace) imports     | `import namespace X` works.                                                                           |                                                                         
-|            |                                  | 4          | Package system                    |                                                                                                       |                                                                        
+| 1          | Standard library                 | 4          | Package system                    |                                                                                                       |                                                                        
 |            |                                  | 5          | Effects                           |                                                                                                       |                                                                        
 
 ## Language overview
