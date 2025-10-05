@@ -1805,26 +1805,50 @@ The compiler has been tested on Linux and Mac OS.
 
 #### Haskell/GHC
 
-A recent version of GHC is required. **Recommended:** Install Haskell, GHC and Stack using the [GHCup](https://www.haskell.org/ghcup/) tool.
+A recent version of GHC is needed. It is recommended to install Haskell, GHC and Stack using the [GHCup](https://www.haskell.org/ghcup/) tool.
 
 #### LLVM
 
 https://llvm.org/
 
-#### GCC
+#### Additional dependencies
 
-#### Boehm–Demers–Weiser garbage collector
+- GCC (probably not needed on Mac)
+- [Boehm–Demers–Weiser garbage collector](https://github.com/ivmai/bdwgc)
+- [The GNU Multiple Precision Arithmetic Library](https://gmplib.org/)
 
-https://github.com/ivmai/bdwgc
+##### Linux
 
-#### The GNU Multiple Precision Arithmetic Library
+- Debian/Ubuntu (or derivatives):
 
-https://gmplib.org/
+  ```
+  sudo apt update
+  sudo apt install libgc-dev libgmp-dev build-essential
+  ```
+
+- Fedora, RHEL, or CentOS:
+
+  ```
+  sudo dnf install gc-devel gmp-devel gcc make
+  ```
+
+- Arch Linux:
+
+  ```
+  sudo pacman -S gc gmp base-devel
+  ```
+
+##### Mac OS
+
+```
+brew install bdw-gc gmp
+```
 
 ### Compiler
 
 TODO 
 
+<!--
 ```
                      +---------------------------------------+                
                      |                                       |
@@ -1834,6 +1858,7 @@ TODO
                      |                                       |
                      +---------------------------------------+
 ```
+-->
 
 ## How to contribute
 
