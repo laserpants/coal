@@ -62,27 +62,17 @@ Coal is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-
 
 ## Project status and roadmap
 
-The following is a list of features that are either missing or incomplete, and :
-
-| Feature                          | Milestone              |                                                                         
-| -------------------------------- | ---------------------- |                                                                         
-| Module imports/exports           | 1                      | 
-| Operators                        | 1                      | 
-| Translation pipeline             | 1                      | 
-| Default instance for Numeric     | 1                      | 
-| Bug: double precision            | 1                      | 
-
 ### Roadmap
 
-| Feature                          | Milestone              | Criteria         |                                                                        
-| -------------------------------- | ---------------------- | ---------------- |                                                                        
-| Compiler monolith                | 2                      |                  |                                                                        
-| CLI                              | 2                      | It is possible to compile programs from the terminal using a command like `coal Main.coal -o example` |                                                                        
-| Pattern match totality checking  | 2                      | Partial match statements are reported as errors at compile-time.                                      |                                                                        
-| Trait inheritance                | 3                      | Traits like `Show<List<a>> with Show<a>` should work.                                                 |                                                                        
-| Qualified (namespace) imports    | 3                      | `import namespace X` works.                                                                           |
-| Package system                   | 4                      |                  |                                                                        
-| Effects                          | 5                      |                  |                                                                        
+| Milestone  | Feature                          |\|| Milestone  | Feature                           | Criteria                                                                                              |                                                                                                                                                                                                                                      
+| ---------- | -------------------------------- |--| -----------| --------------------------------  | ----------------------------------------------------------------------------------------------------- |                                                                                                                                                                                                                                      
+| 1          | Module imports/exports           |\|| 2          | Compiler monolith                 |                                                                                                       |                                                                                                                                                              
+| 1          | Operators                        |\|| 2          | CLI                               | It is possible to compile programs from the terminal using a command like `coal Main.coal -o example` |                                                                         
+| 1          | Translation pipeline             |\|| 2          | Pattern match totality checking   | Partial match statements are reported as errors at compile-time.                                      |                                                                         
+| 1          | Default instance for Numeric     |\|| 3          | Trait inheritance                 | Traits like `Show<List<a>> with Show<a>` should work.                                                 |                                                                         
+| 1          | Bug: double precision            |\|| 3          | Qualified (namespace) imports     | `import namespace X` works.                                                                           |                                                                         
+|            |                                  |\|| 4          | Package system                    |                                                                                                       |                                                                        
+|            |                                  |\|| 5          | Effects                           |                                                                                                       |                                                                        
 
 ## Language overview
 
@@ -1803,7 +1793,7 @@ The compiler has been tested on Linux and Mac OS.
 
 #### Haskell/GHC
 
-A recent version of GHC is needed. It is recommended to install Haskell, GHC and Stack using the [GHCup](https://www.haskell.org/ghcup/) tool.
+A recent version of [GHC](https://www.haskell.org/ghc/) is needed. It is **recommended** to install Haskell, GHC and Stack using the [GHCup](https://www.haskell.org/ghcup/) tool.
 
 #### LLVM
 
@@ -1815,7 +1805,7 @@ An [LLVM](https://llvm.org/) toolchain that provides `llc` (the LLVM static comp
 
   ```
   sudo apt update
-  sudo apt install llvm clang     # or specific version: llvm-21 clang-21
+  sudo apt install llvm clang     
   ```
 
 - Fedora, RHEL, or CentOS:
@@ -1831,6 +1821,8 @@ An [LLVM](https://llvm.org/) toolchain that provides `llc` (the LLVM static comp
   ```
 
 ##### Mac OS
+
+See [Getting Started with the LLVM System](https://llvm.org/docs/GettingStarted.html), or install using Homebrew:
 
 ```
 brew install llvm
