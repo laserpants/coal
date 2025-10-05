@@ -1682,7 +1682,7 @@ To call a function from itself in this way is not possible. Instead, recursion m
 
 #### Fold syntax
 
-Syntactically, a `fold` is similar to a `match` expression (explained [here](#pattern-matching)), but with one crucial difference: it carries built-in support for recursion. Note that `fold` is a language keyword, not an ordinary function. 
+In Coal, `fold` is a language keyword, not an ordinary function. Syntactically, it is similar to a `match` expression (explained [here](#pattern-matching)), but with one crucial difference: a `fold` carries built-in support for recursion. 
 
 To implement the factorial function using a fold, we will use the `nat` data type, which [defines the natural numbers](#natural-numbers) recursively:
 
