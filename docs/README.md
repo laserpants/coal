@@ -66,7 +66,7 @@ Coal is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-
 
 <table cellspacing="0" cellpadding="0" border="0">
   <tr>
-    <td valign="top">
+    <td valign="top" border="0">
       <table cellspacing="0" cellpadding="4" border="0">
         <thead>
           <tr>
