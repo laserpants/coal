@@ -62,8 +62,6 @@ Coal is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-
 
 ## Project status and roadmap
 
-### Current milestone: 1
-
 The following is a list of features that are either missing or incomplete, and :
 
 | Feature                          | Milestone              |                                                                         
