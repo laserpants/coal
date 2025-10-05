@@ -72,7 +72,7 @@ Coal is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-
 | 1          | Default instance for Numeric     | 3          | Trait inheritance                 | Traits like `Show<List<a>> with Show<a>` should work.                                                 |                                                                         
 | 1          | Bug: double precision            | 3          | Qualified (namespace) imports     | `import namespace X` works.                                                                           |                                                                         
 | 1          | Standard library                 | 4          | Package system                    |                                                                                                       |                                                                        
-| [x]        | <strike>Basic documentation</strike> | 5      | Effects                           |                                                                                                       |                                                                        
+| - [x]      | <strike>Basic documentation</strike> | 5      | Effects                           |                                                                                                       |                                                                        
 
 ## Language overview
 
