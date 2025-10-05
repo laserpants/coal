@@ -139,7 +139,7 @@ Coal is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-
        - [Beyond factorial](#beyond-factorial)
      - [Top-level folds and mutual recursion](#top-level-folds-and-mutual-recursion)
      - [Codata and unfold](#codata-and-unfold)
-       - [Data vs. codata](#data-vs-codata)
+       - [Data on demand](#data-on-demand)
        - [A basic counter](#a-basic-counter)
      - [Duality](#duality)
 
@@ -700,7 +700,7 @@ There are two types of comments:
 
 #### Natural numbers
 
-Recursion in Coal is closely tied to pattern matching: we peel off layers of a recursive data structure step by step, until reaching its base case. This works naturally with lists, trees, and other algebraic data types. Ordinary machine integers (`int32`, `int64`), however, cannot be pattern matched on. Nevertheless, we often want to use counting numbers in recursive computations &mdash; for example, when repeating an action, or simulating the behavior of loops in imperative languages. To describe numbers in a way compatible with recursion, we need to rely on the standard axiomatization of the natural numbers:
+Recursion in Coal is closely tied to pattern matching: we peel off layers of a recursive data structure step by step, until reaching its base case. This works naturally with lists, trees, and other algebraic data types. Ordinary machine integers (`int32`, `int64`), however, cannot be pattern matched on. Nevertheless, we often want to use numbers in recursive computations &mdash; for example, when repeating an action, or simulating the behavior of loops in imperative languages. To describe numbers in a way compatible with recursion, we need to rely on the standard axiomatization of the natural numbers:
 
 > Every natural number is either zero or the successor of another natural number.
 
@@ -1824,7 +1824,7 @@ Recursion over ordinary data in Coal (or any language with well-founded recursio
 
 In Coal, ordinary data cannot be infinite: a `List`, `Tree`, or any recursive data type must eventually reach a base case. To express potentially infinite or ongoing computations, Coal provides a separate mechanism called *codata*.
 
-##### Data vs. codata
+##### Data on demand
 
 The key difference between data and codata lies in how values are produced and consumed. Whereas, data is finite and *constructed*, codata is potentially infinite and *observed*: you unfold it step by step. The following table gives a more thorough comparison between the two:
 
