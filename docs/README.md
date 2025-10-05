@@ -1669,12 +1669,11 @@ If we pass this function to the Coal compiler, it is rejected with the following
 Name not in scope: factorial
 ```
 
-To call a function from itself in this way is not possible. Instead, recursion is accomplished via a pattern know as a *fold*. A fold (or *catamorphism*) abstracts the pattern of structurally recursive computations over some data type. 
+To call a function from itself in this way is not possible. Instead, recursion must be accomplished via a pattern know as a *fold*. A fold (or *catamorphism*) abstracts the notion of a structurally recursive computation over some data type. 
 
 #### Fold syntax
 
-In code, a `fold` is similar to a `match` expression, but with some extra powers. Note that `fold` is a language keyword in Coal, not an ordinary function.
-To define the factorial function using a fold, we need to use the `nat` data type (explained [here](#natural-numbers)), which describes the natural numbers recursively:
+In code, a `fold` is similar to a `match` expression (explained [here](#pattern-matching)), but with some extra powers. Note that `fold` is a language keyword in Coal, **not** an ordinary function. To define the factorial function using a fold, we need to use the [`nat` data type](#natural-numbers), which describes the natural numbers recursively:
 
 ```
 Zero, Succ(Zero), Succ(Succ(Zero)), ...
@@ -1683,20 +1682,20 @@ Zero, Succ(Zero), Succ(Succ(Zero)), ...
 This type is defined as:
 
 ```
-type nat
- = Zero
- | Succ(nat)
+type nat 
+  = Zero 
+  | Succ(nat)
 ```
 
-This type is recursive, since `nat` appears in the 
+This type is recursive, since `nat` appears where the `@` symbol is inserted here:
 
 ```
-type nat
- = Zero
- | Succ(@)
+type nat 
+  = Zero 
+  | Succ(@)
 ```
 
-asdf
+This location is where we are going to use the fold expression's special capabilities:
 
 ```
   fun factorial(n : nat) =
@@ -1708,11 +1707,10 @@ asdf
     }
 ```
 
-The magic happens _ the `@`-pattern used in the second clause. 
+The part of interest here is the `@`-pattern used in the second clause
+Here, `p` is not an ordinary pattern. Instead, the name `p` is bound to the result from calling the fold recursively with the value that would normally be __ .
 
-Clearly, `p` is not an ordinary variable. and evaluates fold recursively with the value 
-
-What this translates to, The result is the same as if we would have 
+The result is the same as if we would have been able to use explicit recursion and write:
 
 ```
       | Succ(r) => Succ(r) * fold(r)
@@ -1741,7 +1739,6 @@ reduce(f, acc, list) =
       fn(a) => a
   }
 ```
-
 
 #### Top-level folds and mutual recursion
 
