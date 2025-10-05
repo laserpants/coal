@@ -1838,7 +1838,7 @@ A simple codata type is a counter, which represents an infinite sequence of inte
 cotype Counter = { Current : int32, Next : Counter }
 ```
 
-This definition involves two codata fields: `Current` gives access to the current value, and `Next` produces the next state of the counter. The corecursive counterpart of `fold` is `unfold`. To define a counter using the `Counter` codata type, we can write:
+This definition involves two codata fields: `Current` gives access to the current value, and `Next` produces the next state of the counter. The corecursive counterpart of `fold` is `unfold`. To define a counter based on the `Counter` codata type, we can write:
 
 ```
   unfold count_from(n : int32) : Counter {
