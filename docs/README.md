@@ -65,7 +65,7 @@ Coal is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-
 
 #### Next milestone: 1
 
-![](https://geps.dev/progress/50)
+![](https://geps.dev/progress/40)
 
 | Milestone  | Feature/Fix                      | Milestone  | Feature/Fix                       | Criteria                                                                                              |                                                                                                                                                                                                                                      
 | ---------- | -------------------------------- | -----------| --------------------------------  | ----------------------------------------------------------------------------------------------------- |                                                                                                                                                                                                                                      
@@ -135,6 +135,8 @@ Coal is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-
      - [Trait inheritance](#trait-inheritance)
   1. [Recursion, corecursion, and codata](#recursion-corecursion-and-codata)
      - [Fold syntax](#fold-syntax)
+       - [Well-foundedness](#well-foundedness)
+       - [Beyond factorial](#beyond-factorial)
      - [Top-level folds and mutual recursion](#top-level-folds-and-mutual-recursion)
      - [Codata and unfold](#codata-and-unfold)
      - [Duality](#duality)
@@ -1731,22 +1733,11 @@ This produces the same behavior as if you could have written an explicitly recur
 
 but without referring to the function by name.
 
-<!--
-The part of interest here is the `@`-pattern used in the second clause. This is not an ordinary pattern. Instead, the name `p` is bound to the result from calling the fold recursively with the value that would normally be _.._ .
-
-The end result is the same as if we would have been able to use explicit recursion and write:
-
-```
-      | Succ(r) => Succ(r) * fold(r)
-```
--->
-
 ##### Well-foundedness
 
-There are restriction as to how this pattern can be used. Most importantly, an `@`-pattern can only appear inside a constructor. For recursion to be well-founded, progress must be guaranteed in each iterative step, and the constructor rule is how this is enforced by the language. 
-This is because, by definition, the data inside of the constructor is *structurally smaller* than the outer value.
+To ensure that all recursion is well-founded (guaranteed to terminate), the use of the `@`-pattern is restricted. Most importantly, it can only appear inside a constructor, because each constructor’s fields are *structurally smaller* than the value being folded. This guarantees progress toward a base case on each step.
 
-The following is therefore not possible:
+For example, the following is invalid:
 
 ```
     fold(n) {
@@ -1754,7 +1745,11 @@ The following is therefore not possible:
     }
 ```
 
-Using `fold`, a large family of recursive functions can be implemented. Here is how `reduce` is implemented using the fold construct:
+Here, `@p` appears at the top level, and not inside a constructor. This means that the fold would have no smaller sub-structure to recurse into.
+
+##### Beyond factorial
+
+Folds can express a wide range of recursive computations over algebraic data types. For example, here is an implementation of `reduce` for lists using `fold`:
 
 ```
 reduce(f, acc, list) =
