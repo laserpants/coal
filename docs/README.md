@@ -990,9 +990,9 @@ map : (a -> b) -> List<a> -> List<b>
 > ```
 >
 > We can think of this more abstractly as **"transforming values inside a fixed context"**. In mathematical terms, this corresponds to a structure-preserving map, also known as a *homomorphism*. 
-> Homomorphisms are the topic of study in category theory. A functor, in this context, is a mapping between categories &mdash; one that sends objects and morphisms from one category to another (subject to certain laws). In programming languages, objects correspond to types, and morphisms are simply functions.
+> Homomorphisms are the topic of study in category theory. A functor, in this context, is a mapping between categories &mdash; one that sends objects and morphisms from one category to another (subject to certain laws). 
 > 
-> There are two ways to interpret `map`; we can think of it as a function that applies the function argument to a value of type `a`, in the `f`-context, which could be a list of values, or an optional. The other is that `map` takes some function `a -> b` and *lifts* it into one that acts on `f`-values &mdash; that is, one of type `f<a> -> f<b>`. This second interpretation is more in line with the definition of a functor in category theory. We then have:
+> There are two ways to interpret `map`; we can think of it as a function that applies the function argument to a value of type `a`, in the `f`-context, which could be a list of values, or an optional. The other is that `map` takes some function `a -> b` and *lifts* it into one that acts on `f`-values &mdash; that is, one of type `f<a> -> f<b>`. This second interpretation is more in line with the definition of a functor in category theory. In programming languages, objects correspond to types, and morphisms are simply functions. We then have:
 >
 > ```
 > a           ==>  f<a>                         // The functor transforms objects
@@ -1011,10 +1011,8 @@ map : (a -> b) -> List<a> -> List<b>
 >
 > ##### 2. Composition law
 >
-> The operator `<<` denotes function composition, so `f << g = f(g(x)))`: 
->
 > ```
-> map(f << g) == map(f) << map(g)
+> map(f << g) == map(f) << map(g)     // The operator `<<` denotes function composition, so `f << g = f(g(x)))`.
 > ```
 >
 > This law ensures that mapping the composition of two functions is the same as first mapping one function and then the other. In other words, functors preserve function composition. 
