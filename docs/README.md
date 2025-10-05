@@ -1821,7 +1821,7 @@ In Coal, ordinary data cannot be infinite: a `List`, `Tree`, or any recursive da
 
 ##### Data on demand
 
-The key difference between data and codata lies in how values are produced and consumed. Whereas, data is finite and *constructed*, codata is potentially infinite and *observed*: you unfold it step by step. The following table gives a comparison between the two:
+The key difference between data and codata lies in how values are produced and consumed. Whereas data is finite and *constructed*, codata is potentially infinite and *observed*: you unfold it step by step. The following table gives a comparison between the two:
 
 |                    | Access pattern        | Structure             | Evaluation strategy  | Invariant               |
 | ------------------ | ----------------------| --------------------- | -------------------- | ----------------------- |
@@ -1838,7 +1838,7 @@ A simple codata type is a counter, which represents an infinite sequence of inte
 cotype Counter = { Current : int32, Next : Counter }
 ```
 
-This definition involves two codata fields: `Current` gives access to the current value, and `Next` produces the next state of the counter. The corecursive counterpart of `fold` is `unfold`. To define a counter based on the `Counter` codata type, we can write:
+This definition involves two codata fields: `Current` gives access to the current value, and `Next` produces the next rendition of the counter. The corecursive counterpart of `fold` is `unfold`. To define a counter based on the `Counter` codata type, we can write:
 
 ```
   unfold count_from(n : int32) : Counter {
@@ -1866,7 +1866,7 @@ c.Next.Nurrent        // => 11
 c.Next.Next.Current   // => 12
 ```
 
-Each observation reveals one additional layer of the codata structure, producing a value that can itself be further observed. Unlike ordinary data, a `Counter` can be observed indefinitely &mdash; you can keep asking for `Next` without ever reaching a base case.
+Each observation reveals one additional layer of the codata structure, producing a value that can itself be further observed. Unlike ordinary data, this can continue indefinitely &mdash; you can keep asking for `Next` without ever reaching a base case.
 
 --
 
