@@ -1676,11 +1676,11 @@ If we pass this function to the Coal compiler, it is rejected with the following
 Name not in scope: factorial
 ```
 
-To call a function from itself in this way is not possible. Instead, recursion must be accomplished through a pattern know as a *fold*. A fold (or *catamorphism*) abstracts the notion of a structurally recursive computation over some data type. It is a way to deconstruct data layer by layer.
+To call a function from itself in this way is not possible. Instead, recursion must be accomplished through a pattern know as a *fold*. A fold (or *catamorphism*) abstracts the notion of a structurally recursive computation over some data type. It is a way to deconstruct data, layer by layer.
 
 #### Fold syntax
 
-Syntactically, a `fold` is similar to a `match` expression (explained [here](#pattern-matching)), but with one crucial difference: it carries built-in support for recursion. Note that `fold` is a **language keyword** in Coal, not an ordinary function. 
+Syntactically, a `fold` is similar to a `match` expression (explained [here](#pattern-matching)), but with one crucial difference: it carries built-in support for recursion. Note that `fold` is a language keyword, not an ordinary function. 
 
 To implement the factorial function using a fold, we will use the `nat` data type, which [defines the natural numbers](#natural-numbers) recursively:
 
@@ -1749,7 +1749,7 @@ Here, `@p` appears at the top level, and not inside a constructor. This means th
 
 ##### Beyond factorial
 
-Folds can express a wide range of recursive computations over algebraic data types. For example, here is an implementation of `reduce` for lists using `fold`:
+Folds can express a wide range of recursive computations over algebraic data types. For example, here is an implementation of `reduce` for lists:
 
 ```
 reduce(f, acc, list) =
@@ -1760,6 +1760,8 @@ reduce(f, acc, list) =
       fn(a) => a
   }
 ```
+
+This definition captures the standard pattern of consuming a list by repeatedly applying a function `f` to its elements and an accumulator. The recursive descent through the list happens implicitly — the programmer specifies only what to do at each layer.
 
 #### Top-level folds and mutual recursion
 
