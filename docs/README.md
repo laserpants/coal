@@ -1,6 +1,6 @@
 # Coal
 
-This repository is the home of the Coal programming language and compiler. 
+This repository is the home of the **Coal programming language** and compiler. 
 
 > 🚧 The project is under mega-construction. 🚧
 
@@ -21,13 +21,12 @@ Coal is a declarative, statically typed, purely functional programming language 
 - structural recursion 
 - codata and corecursion
 - traits (type classes)
-- <strike>effects</strike> (planned)
 
 among other features. Coal’s type system, like Haskell’s and ML’s, supports type inference and parametric polymorphism, drawing on the [System-F](https://en.wikipedia.org/wiki/System_F) lambda calculus. The Coal compiler is implemented in Haskell and targets [LLVM](https://llvm.org/) for code generation.
 
 ### Rethinking recursion
 
-As a [total](https://en.wikipedia.org/wiki/Total_functional_programming) language, Coal takes a different approach to recursion, following the motto that "[recursion is the GOTO of functional programming](https://www.semanticscholar.org/paper/Functional-Programming-with-Bananas%2C-Lenses%2C-and-Meijer-Fokkinga/5db3c6793c07285bf0f5e95fe5a25f53e7488051)." To guarantee that programs are provably terminating, recursion is only available in a restricted form, known as *structural recursion*. Under this regime, each recursive call operates on a strictly smaller part of some finite data structure, progressing toward a base case. 
+As a [total](https://en.wikipedia.org/wiki/Total_functional_programming) language, Coal takes a different approach to recursion, following the motto that "[recursion is the `goto` of functional programming](https://www.semanticscholar.org/paper/Functional-Programming-with-Bananas%2C-Lenses%2C-and-Meijer-Fokkinga/5db3c6793c07285bf0f5e95fe5a25f53e7488051)." To guarantee that programs are provably terminating, recursion is only available in a restricted form, known as *structural recursion*. Under this regime, each recursive call operates on a strictly smaller part of some finite data structure, progressing toward a base case. 
 
 ```
   fun sum(numbers : List<int32>) : int32 =
@@ -54,7 +53,7 @@ A distinction is made between ordinary, finite data, which is produced and consu
 
 In this example, the `@` in the field name causes the expression on the right (`n + 1`) to become the next seed value, which is fed back into `enum_from` to generate the rest of the stream.
 
-These code snippets illustrate two distinct modes of recursive control flow. If you are familiar with [recursion schemes](https://blog.sumtypeofway.com/posts/introduction-to-recursion-schemes.html) in a language like Haskell, recursion in Coal is based on the same principles. In that framework, `fold` and `unfold` are called *catamorphisms* and *anamorphisms*, respectively. Jump to **[Recursion, corecursion, and codata](#recursion-corecursion-and-codata)** for a more detailed discussion.
+These code samples illustrate two distinct modes of recursive control flow. If you are familiar with [recursion schemes](https://blog.sumtypeofway.com/posts/introduction-to-recursion-schemes.html) in a language like Haskell, recursion in Coal is based on the same principles. In that framework, `fold` and `unfold` are called *catamorphisms* and *anamorphisms*, respectively. Jump to **[Recursion, corecursion, and codata](#recursion-corecursion-and-codata)** for a more detailed discussion.
 
 ### Programs = Expressions + Effects
 
@@ -64,7 +63,7 @@ Coal is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-
 
 ### Roadmap
 
-| Milestone  | Feature/Fix                      | Milestone  | Feature                           | Criteria                                                                                              |                                                                                                                                                                                                                                      
+| Milestone  | Feature/Fix                      | Milestone  | Feature/Fix                       | Criteria                                                                                              |                                                                                                                                                                                                                                      
 | ---------- | -------------------------------- | -----------| --------------------------------  | ----------------------------------------------------------------------------------------------------- |                                                                                                                                                                                                                                      
 | 1          | Module imports/exports           | 2          | Compiler monolith                 |                                                                                                       |                                                                                                                                                              
 | 1          | Operators                        | 2          | CLI                               | It is possible to compile programs from the terminal using a command like `coal Main.coal -o example` |                                                                         
@@ -130,7 +129,7 @@ Coal is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-
      - [Higher-kinded traits](#higher-kinded-traits)
      - [Trait inheritance](#trait-inheritance)
   1. [Recursion, corecursion, and codata](#recursion-corecursion-and-codata)
-     - [Fold](#fold)
+     - [Fold syntax](#fold-syntax)
      - [Top-level folds and mutual recursion](#top-level-folds-and-mutual-recursion)
      - [Codata and unfold](#codata-and-unfold)
      - [Duality](#duality)
@@ -1670,13 +1669,34 @@ If we pass this function to the Coal compiler, it is rejected with the following
 Name not in scope: factorial
 ```
 
-To call a function from within itself in this way is not possible. Instead, recursion is accomplished via a pattern know as a *fold*. Note that `fold` is a language keyword in Coal, not an ordinary function. 
+To call a function from itself in this way is not possible. Instead, recursion is accomplished via a pattern know as a *fold*. A fold (or *catamorphism*) abstracts the pattern of structurally recursive computations over some data type. 
 
-#### Fold
+#### Fold syntax
 
-A `fold` is similar to a `match` expression, but with some extra powers.
+In code, a `fold` is similar to a `match` expression, but with some extra powers. Note that `fold` is a language keyword in Coal, not an ordinary function.
+To define the factorial function using a fold, we need to use the `nat` data type (explained [here](#natural-numbers)), which describes the natural numbers recursively:
 
-We are going to use the `nat` data type (explained [here](#natural-numbers)) to define the factorial function:
+```
+Zero, Succ(Zero), Succ(Succ(Zero)), ...
+```
+
+This type is defined as:
+
+```
+type nat
+ = Zero
+ | Succ(nat)
+```
+
+This type is recursive, since `nat` appears in the 
+
+```
+type nat
+ = Zero
+ | Succ(@)
+```
+
+asdf
 
 ```
   fun factorial(n : nat) =
@@ -1690,17 +1710,17 @@ We are going to use the `nat` data type (explained [here](#natural-numbers)) to 
 
 The magic happens _ the `@`-pattern used in the second clause. 
 
-Note that `p` is not an ordinary variable. .. and evaluates fold recursively with the value 
+Clearly, `p` is not an ordinary variable. and evaluates fold recursively with the value 
 
-The result is the same as ...
+What this translates to, The result is the same as if we would have 
 
 ```
-      | Succ(r) as m => m * fold(r)
+      | Succ(r) => Succ(r) * fold(r)
 ```
 
 There are restriction as to how this pattern can be used. Most importantly, an `@`-pattern can only appear inside a constructor. For recursion to be well-founded, progress must be guaranteed in each iterative step, and the constructor rule is how this is enforced by the language. 
 
-The data inside of the constructor is structurally smaller 
+The data inside of the constructor is *structurally smaller* than
 
 The following is therefore not possible:
 
@@ -1710,9 +1730,7 @@ The following is therefore not possible:
     }
 ```
 
-TODO
-
-here is how `reduce` can be implemented using the fold construct:
+Using `fold`, a large family of recursive functions can be implemented. Here is how `reduce` is implemented using the fold construct:
 
 ```
 reduce(f, acc, list) =
