@@ -64,10 +64,10 @@ Coal is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-
 
 ### Roadmap
 
-<table cellspacing="0" cellpadding="0">
+<table cellspacing="0" cellpadding="0" border="0">
   <tr>
     <td valign="top">
-      <table cellspacing="0" cellpadding="4">
+      <table cellspacing="0" cellpadding="4" border="0">
         <thead>
           <tr>
             <th>Milestone</th>
@@ -99,7 +99,7 @@ Coal is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-
       </table>
     </td>
     <td valign="top">
-      <table cellspacing="0" cellpadding="4">
+      <table cellspacing="0" cellpadding="4" border="0">
         <thead>
           <tr>
             <th>Milestone</th>
