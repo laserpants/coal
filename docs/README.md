@@ -1737,9 +1737,9 @@ but without referring to the function by name.
 
 ##### Well-foundedness
 
-To ensure that all recursion is well-founded (guaranteed to terminate), the use of the `@`-pattern is restricted. Most importantly, it can only appear inside a constructor, because each of the constructor’s fields is *structurally smaller* than the value being folded. This guarantees progress toward a base case on each step.
+To ensure that recursion is well-founded (guaranteed to terminate), the use of `@`-patterns is restricted. Most importantly, they can only appear inside constructors. The reason for this is that a constructor’s fields are *structurally smaller* than the value being folded. This means that progress toward a base case on each step can be guaranteed.
 
-For example, the following is invalid:
+The following, for example, is invalid:
 
 ```
     fold(n) {
