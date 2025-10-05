@@ -248,8 +248,6 @@ Here, `sqr_a` and `sqr_b` are local bindings, only visible in the body that foll
 At the top level of a module, a `let` works in the same way, except there is no enclosing body — the binding simply introduces a global name that can be referenced elsewhere in the module (or from other modules):
 
 ```
-module Utils {
-
   let days = 
     [ "Monday"
     , "Tuesday"
@@ -259,7 +257,6 @@ module Utils {
     , "Saturday"
     , "Sunday" 
     ]
-}
 ```
 
 Type annotations for let-bindings look similar to those for functions:
@@ -1763,7 +1760,7 @@ reduce(f, acc, list) =
   }
 ```
 
-This definition captures the standard pattern of consuming a list by repeatedly applying a function `f` to its elements and an accumulator. The recursive descent through the list happens implicitly — the programmer specifies only what to do at each layer.
+This definition captures the standard pattern of consuming a list by repeatedly applying a function (`f`) to its elements and an accumulator. The recursive descent through the list happens implicitly — the programmer specifies only what to do at each layer.
 
 #### Top-level folds and mutual recursion
 
