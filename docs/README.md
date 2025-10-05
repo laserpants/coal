@@ -1746,19 +1746,19 @@ Here, `@p` appears at the top level, and not inside a constructor. This means th
 
 ##### Beyond factorial
 
-Folds can express a wide range of recursive computations over algebraic data types. For example, here is an implementation of `reduce` for lists:
+Folds can express a wide range of recursive computations over algebraic data types. For example, here is the implementation of `reduce` for lists:
 
 ```
-reduce(f, acc, list) =
-  fold(list, acc) {
-    x :: @rec =>
-      fn(a) => rec(f(x, a))
-    [] =>
-      fn(a) => a
-  }
+  fun reduce(f, acc, list) =
+    fold(list, acc) {
+      x :: @rec =>
+        fn(a) => rec(f(x, a))
+      [] =>
+        fn(a) => a
+    }
 ```
 
-This definition captures the standard pattern of consuming a list by repeatedly applying a function (`f`) to its elements and an accumulator. The recursive descent through the list happens implicitly — the programmer specifies only what to do at each layer.
+This definition captures the standard way of consuming a list by repeatedly applying a function (`f`) to its elements and an accumulator. The recursive descent through the list happens implicitly — the programmer specifies only what to do at each layer.
 
 #### Top-level folds and mutual recursion
 
