@@ -1838,9 +1838,7 @@ A simple codata type is a counter, which represents an infinite sequence of inte
 cotype Counter = { Current : int32, Next : Counter }
 ```
 
-Here, `Current` exposes the current value, and `Next` produces the next state of the counter. Notice the recursive type definition: unlike ordinary data, a `Counter` can be observed indefinitely &mdash; you can keep asking for `Next` and never reach a “base case.”
-
-The corecursive equivalent of `fold` is `unfold`. To create a counter using our `Counter` definition above, we use the following syntax:
+This definition involves two codata fields: `Current` gives access to the current value, and `Next` produces the next state of the counter. The corecursive counterpart of `fold` is `unfold`. To define a counter using the `Counter` codata type, we can write:
 
 ```
   unfold count_from(n : int32) : Counter {
@@ -1850,16 +1848,19 @@ The corecursive equivalent of `fold` is `unfold`. To create a counter using our 
 ```
 
 Here, the `@` symbol resurfaces, but this time in the name of the field.  
-In this situation, the result is the same as if we could have called `count_from` from within itself in the following way:
+
+In this context, `@Next` means that the value for `Next` is obtained corecursively, by invoking `count_from` again with the field value (in this case, `n + 1`). Conceptually, the result is equivalent to writing the following, if explicit recursion were allowed:
+
+Notice that unlike ordinary data, a `Counter` can be observed indefinitely &mdash; you can keep asking for `Next` without ever reaching a base case.
 
 ```
   unfold count_from(n : int32) : Counter {
     , Current = n
-    , Next = counter(n + 1)
+    , Next = count_from(n + 1)
   }
 ```
 
-We can now “look at” a counter by asking for its fields:
+We can now observe the counter, by accessing its fields:
 
 ```
 let counter = count_from(10)
@@ -1869,7 +1870,9 @@ c.Next.Nurrent        // => 11
 c.Next.Next.Current   // => 12
 ```
 
-Each observation reveals one layer of the codata structure and gives you a new object you can continue observing.
+Each observation reveals one additional layer of the codata structure, producing a new value that can itself be further observed.
+
+--
 
 It is also possible to define operations that transform counters while preserving their infinite, coinductive structure:
 
