@@ -1673,19 +1673,19 @@ If we pass this function to the Coal compiler, it is rejected with the following
 Name not in scope: factorial
 ```
 
-To call a function from itself in this way is not possible. Instead, recursion must be accomplished through a pattern know as a *fold*. A fold (or *catamorphism*) abstracts the notion of a structurally recursive computation over some algebraic data type. It is a way to deconstruct data, layer by layer.
+To call a function from itself in this way is not possible. Instead, recursion must be accomplished through a pattern know as a *fold*. A fold (or *catamorphism*) is a way to deconstruct data, layer by layer. It abstracts the notion of a structurally recursive computation over some algebraic data type. 
 
 #### Fold syntax
 
 In Coal, `fold` is a language keyword, not an ordinary function. Syntactically, it is similar to a `match` expression (explained [here](#pattern-matching)), but with one crucial difference: a `fold` carries built-in support for recursion. 
 
-To implement the factorial function using a fold, we will use the `nat` data type, which [defines the natural numbers](#natural-numbers) recursively:
+To implement the factorial function using a fold, we are going to use the `nat` data type, which [defines the natural numbers](#natural-numbers) recursively:
 
 ```
 Zero, Succ(Zero), Succ(Succ(Zero)), ...
 ```
 
-The `nat` type is defined as:
+It is defined as:
 
 ```
 type nat 
@@ -1693,7 +1693,7 @@ type nat
   | Succ(nat)
 ```
 
-It is recursive because `nat` appears inside one of its own constructors. We mark this recursive position with the special symbol `@`:
+This type is recursive because `nat` appears inside one of its own constructors. We mark this recursive position with the special symbol `@`:
 
 ```
 type nat 
@@ -1807,7 +1807,7 @@ module Json {
 
 #### Codata and unfold
 
-Recursion over ordinary data in Coal (or any language with well-founded recursion) is guaranteed to terminate. This ensures that all data is also finite. In many cases, this is desirable &mdash; it makes reasoning about programs predictable and safe. However, there are situations where we want potentially infinite structures or non-terminating behavior. For example:
+Recursion over ordinary data in Coal (or any language with well-founded recursion) is guaranteed to terminate. This ensures that all data is finite as well. In many cases, this is desirable &mdash; it makes reasoning about programs predictable and safe. However, there are situations where we want potentially infinite structures or non-terminating behavior. For example:
 
 - Infinite sequences of numbers, like the natural numbers, are easy to define in Haskell using laziness:
 
@@ -1821,7 +1821,7 @@ In Coal, ordinary data cannot be infinite: a `List`, `Tree`, or any recursive da
 
 ##### Data on demand
 
-The key difference between data and codata lies in how values are produced and consumed. Whereas, data is finite and *constructed*, codata is potentially infinite and *observed*: you unfold it step by step. The following table gives a more thorough comparison between the two:
+The key difference between data and codata lies in how values are produced and consumed. Whereas, data is finite and *constructed*, codata is potentially infinite and *observed*: you unfold it step by step. The following table gives a comparison between the two:
 
 |                    | Access pattern        | Structure             | Evaluation strategy  | Invariant               |
 | ------------------ | ----------------------| --------------------- | -------------------- | ----------------------- |
@@ -1847,11 +1847,7 @@ This definition involves two codata fields: `Current` gives access to the curren
   }
 ```
 
-Here, the `@` symbol resurfaces, but this time in the name of the field.  
-
-In this context, `@Next` means that the value for `Next` is obtained corecursively, by invoking `count_from` again with the field value (in this case, `n + 1`). Conceptually, the result is equivalent to writing the following, if explicit recursion were allowed:
-
-Notice that unlike ordinary data, a `Counter` can be observed indefinitely &mdash; you can keep asking for `Next` without ever reaching a base case.
+Here, the `@` symbol resurfaces, but this time in the name of the field. In this context, `@Next` means that the value for `Next` is obtained corecursively, by invoking `count_from` again with the field value (in this case, `n + 1`). Conceptually, the result is equivalent to writing the following, if explicit recursion were allowed:
 
 ```
   unfold count_from(n : int32) : Counter {
@@ -1870,7 +1866,7 @@ c.Next.Nurrent        // => 11
 c.Next.Next.Current   // => 12
 ```
 
-Each observation reveals one additional layer of the codata structure, producing a new value that can itself be further observed.
+Each observation reveals one additional layer of the codata structure, producing a value that can itself be further observed. Unlike ordinary data, a `Counter` can be observed indefinitely &mdash; you can keep asking for `Next` without ever reaching a base case.
 
 --
 
