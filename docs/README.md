@@ -36,7 +36,7 @@ As a [total](https://en.wikipedia.org/wiki/Total_functional_programming) languag
     }
 ```
 
-The special `@`-pattern variable used here implies that `tot` recieves the result from calling the fold again using the sub-list matched by the pattern. 
+The special `@`-pattern variable used here makes `tot` recieve the result from calling the fold again using the sub-list matched by the pattern. 
 
 A distinction is made between ordinary, finite data, which is produced and consumed in this way, and potentially infinite data &mdash; the kind that may result from processes that run indefinitely. The latter is known as *codata*. The codata equivalent of lists, for example, are *streams*.
 
@@ -63,6 +63,10 @@ Coal is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-
 
 ### Roadmap
 
+#### Next milestone: 1
+
+![](https://geps.dev/progress/50)
+
 | Milestone  | Feature/Fix                      | Milestone  | Feature/Fix                       | Criteria                                                                                              |                                                                                                                                                                                                                                      
 | ---------- | -------------------------------- | -----------| --------------------------------  | ----------------------------------------------------------------------------------------------------- |                                                                                                                                                                                                                                      
 | 1          | Module imports/exports           | 2          | Compiler monolith                 |                                                                                                       |                                                                                                                                                              
@@ -72,6 +76,7 @@ Coal is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-
 | 1          | Bug: double precision            | 3          | Qualified (namespace) imports     | `import namespace X` works.                                                                           |                                                                         
 | 1          | Standard library                 | 4          | Package system                    |                                                                                                       |                                                                        
 | ☑️         | <strike>Basic documentation</strike> | 5      | Effects                           |                                                                                                       |                                                                        
+| 1          | Semicolon-separators in let-bindings |        |                                   |                                                                                                       |                                                                        
 
 ## Language overview
 
@@ -1635,7 +1640,7 @@ map(times100, [1, 2, 3])  // ==> [100, 200, 300]
 
 #### Trait inheritance
 
-A trait can declare that it depends on another trait by *inheriting* from it. The inheriting trait is then able to access to the methods of the parent trait, and can build its own functionality on top of them. For example, the following instance defines how to display an `Option<a>` value, provided that there is already a way to display values of type `a`:
+A trait can declare that it depends on another trait by *inheriting* from it. The inheriting trait is then able to access to the methods of the parent trait, and build its own functionality on top of them. For example, the following instance defines how to display an `Option<a>` value, provided that there is already a way to display values of type `a`:
 
 ```
   trait Show<Option<a>> with Show<a> {
@@ -1647,11 +1652,11 @@ A trait can declare that it depends on another trait by *inheriting* from it. Th
   } 
 ```
 
-Here, the `Show<Option<a>>` instance inherits from `Show<a>`. The compiler will only accept this instance if a `Show` implementation for `a` is available. Inside the trait body, we can call `show(v)` on the inner value `v : a`. The parent trait `Show<a>` guarantees that `show` is defined for this type. In other words, the ability to show an `Option<a>` depends directly on the ability to show its element type `a`.
+Here, the `Show<Option<a>>` instance inherits from `Show<a>`. The compiler will only accept this instance assuming a `Show` implementation for `a` is available. Inside the trait body, we can call `show(v)` on the inner value `v : a`. The parent trait `Show<a>` guarantees that `show` is defined for this type. In other words, the ability to show an `Option<a>` depends directly on the ability to show its element type `a`.
 
 ### Recursion, corecursion, and codata
 
-In most languages, a typical implementation of the factorial function looks something like the following:
+In most programming languages, a typical implementation of the factorial function looks something like the following:
 
 ```
 fun factorial(n : int32) =
@@ -1669,17 +1674,19 @@ If we pass this function to the Coal compiler, it is rejected with the following
 Name not in scope: factorial
 ```
 
-To call a function from itself in this way is not possible. Instead, recursion must be accomplished via a pattern know as a *fold*. A fold (or *catamorphism*) abstracts the notion of a structurally recursive computation over some data type. 
+To call a function from itself in this way is not possible. Instead, recursion must be accomplished through a pattern know as a *fold*. A fold (or *catamorphism*) abstracts the notion of a structurally recursive computation over some data type. It is a way to deconstruct data layer by layer.
 
 #### Fold syntax
 
-In code, a `fold` is similar to a `match` expression (explained [here](#pattern-matching)), but with some extra powers. Note that `fold` is a language keyword in Coal, **not** an ordinary function. To define the factorial function using a fold, we need to use the [`nat` data type](#natural-numbers), which describes the natural numbers recursively:
+Syntactically, a `fold` is similar to a `match` expression (explained [here](#pattern-matching)), but with one crucial difference: it carries built-in support for recursion. Note that `fold` is a **language keyword** in Coal, not an ordinary function. 
+
+To implement the factorial function using a fold, we will use the `nat` data type, which [defines the natural numbers](#natural-numbers) recursively:
 
 ```
 Zero, Succ(Zero), Succ(Succ(Zero)), ...
 ```
 
-This type is defined as:
+The `nat` type is defined as:
 
 ```
 type nat 
@@ -1687,7 +1694,7 @@ type nat
   | Succ(nat)
 ```
 
-This type is recursive, since `nat` appears where the `@` symbol is inserted here:
+It is recursive, because `nat` appears inside one of its own constructors. We mark this recursive position with the special symbol `@`:
 
 ```
 type nat 
@@ -1695,7 +1702,7 @@ type nat
   | Succ(@)
 ```
 
-This location is where we are going to use the fold expression's special capabilities:
+This location is significant. It is precisely where the `fold` mechanism will recurse. We can now express the factorial function:
 
 ```
   fun factorial(n : nat) =
@@ -1707,18 +1714,37 @@ This location is where we are going to use the fold expression's special capabil
     }
 ```
 
-The part of interest here is the `@`-pattern used in the second clause
-Here, `p` is not an ordinary pattern. Instead, the name `p` is bound to the result from calling the fold recursively with the value that would normally be __ .
+Here is how to unpack the meaning of this:
 
-The result is the same as if we would have been able to use explicit recursion and write:
+- In the base case `Zero`, the result is simply `1`.
+- In the recursive case `Succ(@p) as m`:
+  - `m` is bound to the current value being matched (e.g., `Succ(Succ(Zero))`),
+  - `p` is bound to the result of recursively folding over the inner value — the one inside the constructor (`Succ`).
+
+So intuitively, `@p` behaves like “the result of recursively applying this same fold to the inner structure.” In other words, the compiler performs the recursion for you.
+
+This produces the same behavior as if you could have written an explicitly recursive definition such as:
 
 ```
       | Succ(r) => Succ(r) * fold(r)
 ```
 
-There are restriction as to how this pattern can be used. Most importantly, an `@`-pattern can only appear inside a constructor. For recursion to be well-founded, progress must be guaranteed in each iterative step, and the constructor rule is how this is enforced by the language. 
+but without referring to the function by name.
 
-The data inside of the constructor is *structurally smaller* than
+<!--
+The part of interest here is the `@`-pattern used in the second clause. This is not an ordinary pattern. Instead, the name `p` is bound to the result from calling the fold recursively with the value that would normally be _.._ .
+
+The end result is the same as if we would have been able to use explicit recursion and write:
+
+```
+      | Succ(r) => Succ(r) * fold(r)
+```
+-->
+
+##### Well-foundedness
+
+There are restriction as to how this pattern can be used. Most importantly, an `@`-pattern can only appear inside a constructor. For recursion to be well-founded, progress must be guaranteed in each iterative step, and the constructor rule is how this is enforced by the language. 
+This is because, by definition, the data inside of the constructor is *structurally smaller* than the outer value.
 
 The following is therefore not possible:
 
