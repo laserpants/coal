@@ -347,7 +347,7 @@ Algebraic data types are especially useful for describing language grammars and 
 
 ### Built-in language primitives
 
-Coal defines the following built-in types:
+Coal provides the following built-in types:
 
 | Type               | Description                             | Example values            |                       
 | ------------------ | --------------------------------------- | ------------------------- |                       
