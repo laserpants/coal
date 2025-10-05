@@ -1838,29 +1838,49 @@ A simple codata type is a counter, which represents an infinite sequence of inte
 cotype Counter = { Current : int32, Next : Counter }
 ```
 
-Here, `Current` exposes the current value, and `Next` produces the next state of the counter. Notice the recursive type definition: unlike ordinary data, a `Counter` can be observed indefinitely — you can keep asking for `Next` and never reach a “base case.”
+Here, `Current` exposes the current value, and `Next` produces the next state of the counter. Notice the recursive type definition: unlike ordinary data, a `Counter` can be observed indefinitely &mdash; you can keep asking for `Next` and never reach a “base case.”
 
-The codata equivalent of `fold` is `unfold`. This is how we use it to create a counter using our `Counter` definition above:
+The corecursive equivalent of `fold` is `unfold`. To create a counter using our `Counter` definition above, we use the following syntax:
 
 ```
-  unfold counter(n : int32) : Counter {
+  unfold count_from(n : int32) : Counter {
     , Current = n
     , @Next = n + 1
   }
 ```
 
 Here, the `@` symbol resurfaces, but this time in the name of the field.  
+In this situation, the result is the same as if we could have called `count_from` from within itself in the following way:
 
 ```
-  unfold counter(n : int32) : Counter {
+  unfold count_from(n : int32) : Counter {
     , Current = n
     , Next = counter(n + 1)
   }
 ```
 
-This means ...
+We can now “look at” a counter by asking for its fields:
 
-Aside: You may wonder, why can't we simply write `counter(n + 1)` then? Well, the situation is similar to that of folds. But instead of being concerned with progress in each step, here we are worried about *productivity*. 
+```
+let counter = count_from(10)
+
+c.Current             // => 10
+c.Next.Nurrent        // => 11
+c.Next.Next.Current   // => 12
+```
+
+Each observation reveals one layer of the codata structure and gives you a new object you can continue observing.
+
+It is also possible to define operations that transform counters while preserving their infinite, coinductive structure:
+
+```
+  unfold counter_map(f : int32 -> int32, c : Counter) : Counter {
+    , Current = f(c.Current),
+    , @Next(f) = n + 1
+  }
+```
+
+Aside: You may wonder, why can't we simply write `counter(n + 1)` then? Well, the reason is similar to that of folds. But instead of being concerned with progress in each step, here we are worried about *productivity*. 
 Consider what would happen if we could write, for example:
 
 ```
