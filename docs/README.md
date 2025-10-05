@@ -39,7 +39,7 @@ As a [total](https://en.wikipedia.org/wiki/Total_functional_programming) languag
 
 The special `@`-pattern variable used here implies that `tot` recieves the result from calling the fold again using the sub-list matched by the pattern. 
 
-A distinction is made between ordinary, finite data, which is produced and consumed in this way, and potentially infinite data &mdash; the kind that may result from processes that run indefinitely. The latter is known as *codata*. The codata equivalent of lists, for example, are streams.
+A distinction is made between ordinary, finite data, which is produced and consumed in this way, and potentially infinite data &mdash; the kind that may result from processes that run indefinitely. The latter is known as *codata*. The codata equivalent of lists, for example, are *streams*.
 
 ```
   cotype Stream<a> = { Head : a, Tail : Stream<a> }
@@ -72,7 +72,7 @@ Coal is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-
 | 1          | Default instance for Numeric     | 3          | Trait inheritance                 | Traits like `Show<List<a>> with Show<a>` should work.                                                 |                                                                         
 | 1          | Bug: double precision            | 3          | Qualified (namespace) imports     | `import namespace X` works.                                                                           |                                                                         
 | 1          | Standard library                 | 4          | Package system                    |                                                                                                       |                                                                        
-|            | <strike>Basic documentation</strike> | 5      | Effects                           |                                                                                                       |                                                                        
+| [x]        | <strike>Basic documentation</strike> | 5      | Effects                           |                                                                                                       |                                                                        
 
 ## Language overview
 
