@@ -139,6 +139,8 @@ Coal is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-
        - [Beyond factorial](#beyond-factorial)
      - [Top-level folds and mutual recursion](#top-level-folds-and-mutual-recursion)
      - [Codata and unfold](#codata-and-unfold)
+       - [Data vs. codata](#data-vs-codata)
+       - [A basic counter](#a-basic-counter)
      - [Duality](#duality)
 
 ### Modules 
@@ -1704,7 +1706,7 @@ type nat
   | Succ(@)
 ```
 
-This location is significant. It is precisely where the `fold` mechanism will recurse. Using a special pattern-syntax only available in `fold` expressions, we can now express the factorial function as:
+This location is significant. It is precisely where the `fold` mechanism will recurse. Using the special `@`-pattern syntax only available in `fold` expressions, we can now express the factorial function as:
 
 ```
   fun factorial(n : nat) =
@@ -1810,10 +1812,60 @@ module Json {
 
 #### Codata and unfold
 
+Recursion over ordinary data in Coal (or any language with well-founded recursion) is guaranteed to terminate. This ensures that all data is also finite. In many cases, this is desirable &mdash; it makes reasoning about programs predictable and safe. However, there are situations where we want potentially infinite structures or non-terminating behavior. For example:
+
+- Infinite sequences of numbers, like the natural numbers, are easy to define in Haskell using laziness:
+
+  ```
+  nats = [0..]
+  ```
+
+- Programs that continuously run in the background, such as web servers or event loops, inherently involve non-terminating processes.
+
+In Coal, ordinary data cannot be infinite: a `List`, `Tree`, or any recursive data type must eventually reach a base case. To express potentially infinite or ongoing computations, Coal provides a separate mechanism called *codata*.
+
+##### Data vs. codata
+
+The key difference between data and codata lies in how values are produced and consumed. Whereas, data is finite and *constructed*, codata is potentially infinite and *observed*: you unfold it step by step. The following table gives a more thorough comparison between the two:
+
 |                    | Access pattern        | Structure             | Evaluation strategy  | Invariant               |
 | ------------------ | ----------------------| --------------------- | -------------------- | ----------------------- |
 | **Data**           | Recursion (fold)      | Always finite         | Eager (strict)       | Progress                |
 | **Codata**         | Corecursion (unfold)  | Potentially infinite  | Lazy (non-strict)    | Productivity            |
+
+Codata is ideal for representing streams, event sequences, or any ongoing process, where you only need to observe a finite part at a time. 
+
+##### A basic counter
+
+A simple codata type is a counter, which represents an infinite sequence of integers:
+
+```
+cotype Counter = { Current : int32, Next : Counter }
+```
+
+Here, `Current` exposes the current value, and `Next` produces the next state of the counter. Notice the recursive type definition: unlike ordinary data, `Counter` can be observed indefinitely — you can keep asking for `Next` and never reach a “base case.”
+
+--
+
+Corecursion is _ using the `unfold` keyword:
+
+```
+  unfold counter(n : int32) : Counter {
+    , Current = n
+    , @Next = n + 1
+  }
+```
+
+```
+  fun increment(counter : Counter) =
+    counter.Next
+```
+
+```
+  fun main() {
+    trace_int32(counter(1).Current)
+  }
+```
 
 #### Duality
 
