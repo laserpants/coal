@@ -1847,7 +1847,7 @@ This definition involves two codata fields: `Current` gives access to the curren
   }
 ```
 
-Here, the `@` symbol resurfaces, but this time in the name of the field. In this context, `@Next` means that the value for `Next` is obtained corecursively, by invoking `count_from` again with the field value (in this case, `n + 1`). Conceptually, the result is equivalent to writing the following, if explicit recursion were allowed:
+Here, the `@` symbol resurfaces, but this time in the name of the field. In this context, `@Next` means that the value for `Next` is obtained corecursively, by invoking `count_from` again with the field value (in this case, `n + 1`). Conceptually, the result is equivalent to writing the following, if explicit recursion were possible:
 
 ```
   unfold count_from(n : int32) : Counter {
