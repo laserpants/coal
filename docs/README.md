@@ -378,7 +378,7 @@ Expressions are the core building blocks of programs. They include variables, li
 
 #### Variables
 
-A *variable* in Coal is simply a name bound to a value. Unlike in imperative languages, it is not very helpful to think of a variable as a “box” that represents some data store in memory. In functional programming, expressions behave more like mathematical expressions: once a variable is defined, its value never changes.
+A *variable* in Coal is simply a name bound to a value. Unlike in imperative languages, it is not very meaningful to think of a variable as a “box” that represents some data store in memory. In functional programming, expressions behave more like mathematical expressions: once a variable is defined, its value never changes.
 
 ##### Naming rules
 
@@ -700,7 +700,7 @@ There are two types of comments:
 
 #### Natural numbers
 
-Recursion in Coal is closely tied to pattern matching: we peel off layers of a recursive data structure step by step, until reaching its base case. This works naturally with lists, trees, and other algebraic data types. Ordinary machine integers (`int32`, `int64`), however, cannot be pattern matched on. Nevertheless, we often want to use numbers in recursive computations &mdash; for example, when repeating an action, or simulating the behavior of loops in imperative languages. To describe numbers in a way compatible with recursion, we need to rely on the standard axiomatization of the natural numbers:
+Recursion in Coal is closely tied to pattern matching: we peel off layers of a recursive data structure step by step, until reaching its base case. This works naturally with lists, trees, and other algebraic data types. Ordinary machine integers (`int32`, `int64`), however, cannot be pattern matched on. Nevertheless, we often want to use numbers in recursive computations &mdash; for example, when repeating an action, or simulating the behavior of loops in imperative languages. To describe numbers in a way compatible with recursion, we take guidance from the standard axiomatization of the natural numbers:
 
 > Every natural number is either zero or the successor of another natural number.
 
@@ -850,7 +850,7 @@ Its type is:
 length : List<a> -> nat
 ```
 
-Since lists are laid out in a chain-like manner in memory, the time complexity of many list operations, including `length`, is O(n).
+Since lists are laid out in memory as a chain of nodes connected by pointers, the time complexity of many list operations, including `length`, is O(n).
 
 ###### Head, tail, and uncons
 
