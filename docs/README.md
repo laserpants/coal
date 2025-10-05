@@ -84,7 +84,9 @@ The compiler has been tested on Linux and Mac OS.
 
 #### Haskell/GHC
 
-**Recommended:** Install Haskell, GHC and Stack using the [GHCup](https://www.haskell.org/ghcup/) tool.
+A recent version of GHC is required.
+
+- **Recommended:** Install Haskell, GHC and Stack using the [GHCup](https://www.haskell.org/ghcup/) tool.
 
 #### LLVM
 
