@@ -76,7 +76,7 @@ Coal is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-
 | 1          | Bug: double precision            | 3          | Qualified (namespace) imports     | `import namespace X` works.                                                                           |                                                                         
 | 1          | Standard library                 | 4          | Package system                    |                                                                                                       |                                                                        
 | ☑️         | <strike>Basic documentation</strike> | 5      | Effects                           |                                                                                                       |                                                                        
-| 1          | Semicolon-separators in let-bindings |        |                                   |                                                                                                       |                                                                        
+| 1          | Semicolon-separators in let-bindings | 5      | User-defined operators            |                                                                                                       |                                                                        
 
 ## Language overview
 
