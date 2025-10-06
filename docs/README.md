@@ -78,6 +78,7 @@ Coal is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-
 | ☑️         | <strike>Basic documentation</strike>                  | 5          | Effects                           |                                                                                                       |                                                                        
 | ☑️         | <strike>Semicolon-separators in let-bindings</strike> | 5          | User-defined operators            |                                                                                                       |                                                                        
 | 1          | Error messages                                        |            |                                   |                                                                                                       |                                                                        
+| 1          | Bug: unfold type annotations                          |            |                                   |                                                                                                       |                                                                        
 
 ## Language overview
 
@@ -854,7 +855,7 @@ Its type is:
 length : List<a> -> nat
 ```
 
-Since lists are laid out in memory as a chain of nodes connected by pointers, the time complexity of many list operations, including `length`, is O(n).
+Since lists are laid out in memory as linked nodes connected by pointers, the time complexity of many list operations, including `length`, is O(n).
 
 ###### Head, tail, and uncons
 
