@@ -1122,7 +1122,7 @@ let sentence = reduce(fn(w, a) => w +++ a, "", words)
 Finding the maximum element:
 
 ```
-let max_val = reduce(fn(n, a) => if n > a then n else a, -Infinity, [3, 7, 2, 9])
+let max_val = reduce(fn(n, a) => if n > a then n else a, 0, [3, 7, 2, 9])
 // max_val = 9
 ```
 
@@ -1266,7 +1266,7 @@ let five = add((1, 4))
 The `curry` and `uncurry` combinators convert an uncurried function into a curried one, and vice versa.
 
 ```
-curry : ((a, b) -> c) -> a -> b -> c
+curry   : ((a, b) -> c) -> a -> b -> c
 uncurry : (a -> b -> c) -> (a, b) -> c
 ```
 
@@ -1770,6 +1770,16 @@ Folds can express a wide range of recursive computations over algebraic data typ
 
 This definition captures the standard way of consuming a list by repeatedly applying a function (`f`) to its elements and an accumulator. The recursive descent through the list happens implicitly — the programmer specifies only what to do at each layer.
 
+<!--
+A more idiomatic version of the factorial function ...
+
+```
+  fun factorial(n : int32) =
+    product(enum_to(n))  // product of numbers 1, 2, ..., n
+
+```
+-->
+
 #### Top-level folds and mutual recursion
 
 The type of folds we have seen so far are ...
@@ -2044,238 +2054,3 @@ TODO
 ## License 
 
 This project is licensed under the terms of the MIT license. See the `LICENSE` file in this repository for details.
-
-<!--
-
----
----
----
----
-
-
-
-
-A more idiomatic version of the factorial function ...
-
-```
-  fun factorial(n : int32) =
-    product(enum_to(n))  // product of numbers 1, 2, ..., n
-
-```
-
-#### Pattern matching
-
-Just like with other data types, tuples can be deconstructed by means of pattern matching.
-
-```
-fun get_name((name, _, _) : (string, t1, t2)) : string = 
-  name 
-```
-
-asfd
-
-```
-fun fst3((fst, _, _) : (a, b, c)) : a = fst
-fun snd3((_, snd, _) : (a, b, c)) : b = snd
-fun thd3((_, _, thd) : (a, b, c)) : c = thd 
-```
-
-### Expression syntax
-
-One useful perspective is to think of traits as algebraic structures in mathematics.
-
-```
-trait Group<g> {
-  combine : g -> g -> g
-  inverse : g -> g
-  identity : g
-}
-```
-
-```
-type Additive = AddInt32(int32)
-
-instance Group<Additive> {
-  combine = fn(AddInt32(x), AddInt32(y)) => AddInt32(x + y)
-  inverse = fn(AddInt32(x)) => AddInt32(-x)
-  identity = AddInt32(0)
-}
-```
-
-## Effects as a side business
-
-Similar to how the user interface describes
-is a 
-we can think of an effect boundary as similar to a user interface — but instead 
-of mediating between a human and a program, it mediates between pure logic and 
-the external world. Pure code produces structured descriptions of effects, and 
-effect handlers at the boundary interpret those descriptions to perform real-world actions.
-
-
-
-<!--
-
-
-##### The unit type
-
-The unit value is written as an empty pair of parentheses. It is the 
-one-and-only value of type `unit`. 
-
-```
-() : unit
-```
-
-One useful perspective is to think of traits as algebraic structures in mathematics.
-
-```
-trait Group(g) {
-  combine : g -> g -> g
-  inverse : g -> g
-  identity : g
-}
-```
-
-```
-type Additive = AddInt32 int32
-
-instance Group(Additive) {
-  combine = fn(AddInt32(x), AddInt32(y)) => AddInt32(x + y)
-  inverse = fn(AddInt32(x)) => AddInt32(-x)
-  identity = AddInt32(0)
-}
-```
-
-```
-main : IO()
-main = 
-  readFile("file") 
-    >>= putStrLn
-    >> return()
-```
-
-Semantic effects
-
-```
-main =
-```
-
-#### Recursion
-
-In a total language, all programs are provably terminating, and (at least in
-theory) have no runtime bugs. On the other hand, a limitation that applies
-to all languages with this property is that they fail to be Turing complete.
-In practical terms, this means that, in Coal, recursion is only allowed in a
-restricted form, known as structural recursion.
-
-A trivial proof for this is that a Turing machine has the ability to go into an infinite loop, and this would mean a contradiction when computations are invariably required to terminate. 
-
-
-the limitation imposed by the compiler is that 
-
-```
-let <name> = <expr> in <body>
-```
-
-A function defined at the top level is (technically) a let-binding, which means that the function itself is not in scope inside the function body:
-
-```
-let fact = 
-  fn(n) => 
-    if (n == 0)
-      then 1 
-      else n * fact(n - 1) // <-- This doesn’t work
-  in fact(5)
-```
-
-In OCaml, for example, this same rule applies with regards to the standard `let` 
-construct, but this can easily be overridden using the `let rec` keyword. As an
-aside, Coal actually has a recursive let binding too, but it is only available
-to the compiler.
-
-A function defined at the top level is (technically) a let-binding, which means that the function itself is not in scope inside the function body:
-
-```
-fact(n) =
-  if (n == 0) then 1
-              else n * fact(n - 1) // <-- No cigar
-```
-
-based on a  .. known as recursion schemes 
-The fold keyword and the special @-syntax used in the following example implements a pattern known as a catamorphism in this paradigm. 
-
-```
-factorial(n : nat) =
-  fold(n) {
-    | Zero => 
-        1
-    | Succ(@m) =>
-        n * m          // m == fold(m)
-  }
-```
-
-The key here is the built-in `nat` data type.
-
-The built-in nat data type defines the natural numbers inductively, as follows: 
-
-```
-// Peano construction of the counting numbers
-type nat
-  = Zero
-  | Succ(nat)
-```
-
-The utility of this type is that we can pattern match to 
-
-The compiler translates the _ into something that looks like the following:
-
-```
-factorial(n : nat) =
-  letrec
-    fold(n) =
-      match(n) {
-        | Zero => 1
-        | Succ(m) => n * fold(m)
-      }
-```
-
-This is pseudo-code since letrec doesn’t really exist as a language keyword. 
-
-#### Corecursion and codata
-
-Despite of this limitation, infinite data structures and non-terminating behavior still exist in Coal. They are represented using codata and corecursion. 
-
-```
-codata Stream(s) =
-  { Head : s
-  , Tail : Stream(s) 
-  }
-```
-
-asdf
-
-```
-nats : Stream(int32)
-nats = seq(0) 
-seq(n).Head = n
-seq : int32 -> Stream(int32)
-seq = Stream(next, n) {
-  Head = n, 
-  Tail = next(n + 1)
-}
-head : Stream(a) -> a
-head(Stream{ Head = head, Tail = _ }) = head
-// ...
-seq : int32 -> Stream(int32)
-seq(n) = Stream{
-  Head = n, 
-  Tail(@next) = next(n + 1) 
-}
-zeros = Stream(next) {
-  Head = 0, 
-  Tail = next
-}
-type StreamImpl(s) =
-  fn(f) => { Head = ?, Tail = f }
-```
-
--->
