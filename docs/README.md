@@ -727,7 +727,7 @@ This makes it possible to use numbers directly in patterns, just like with other
 Writing numbers in this style quickly becomes impractical, however. To make working with naturals convenient (and efficient), the compiler internally represents values of type `nat` as ordinary integers. Converting between the two views is called *packing* and *unpacking*. These are constant time (O(1)) operations:
 
 ```
-pack : int32 -> nat
+pack   : int32 -> nat
 unpack : nat -> int32
 ```
 
