@@ -1197,7 +1197,7 @@ head : List<a> -> a
 ```
 
 We can read this type as: Given any type `a` and a list of elements of this type, return an `a` value. That is to say; we know nothing about `a`, except that the list’s elements has this type. 
-Therefore, if the input list is empty, then we have nothing to look at. `Option` solves this problem. The `head` function provided by the stanard `List` package is defined in the following way: 
+Therefore, if the input list is empty, then we have nothing to look at. `Option` solves this problem. The `head` function provided by the standard `List` package is defined in the following way: 
 
 ```
   fun head(list : List<a>) : Option<a> =
@@ -1807,7 +1807,7 @@ module Json {
 
 #### Codata and unfold
 
-Recursion over ordinary data in Coal (or any language with well-founded recursion) is guaranteed to terminate. This ensures that all data is finite as well. In many cases, this is desirable &mdash; it makes reasoning about programs predictable and safe. However, there are situations where we want potentially infinite structures or non-terminating behavior. For example:
+Recursion over ordinary data in Coal (or any language with well-founded recursion) is always guaranteed to terminate. This ensures that all data is finite as well. In many cases, this is desirable &mdash; it makes reasoning about programs predictable and safe. However, there are situations where we want potentially infinite structures or non-terminating behavior. For example:
 
 - Infinite sequences of numbers, like the natural numbers, are easy to define in Haskell using laziness:
 
@@ -1829,6 +1829,12 @@ The key difference between data and codata lies in how values are produced and c
 | **Codata**         | Corecursion (unfold)  | Potentially infinite  | Lazy (non-strict)    | Productivity            |
 
 Codata is ideal for representing streams, event sequences, or any ongoing process, where you only need to observe a finite part at a time. 
+
+A codata type is introduced using the `cotype` keyword and, like a record type, is defined by a set of comma-separated fields enclosed in curly braces:
+
+```
+cotype <Name> = { <Field_1> : <t_1>, ..., <Field_n> : <t_n> }
+```
 
 ##### A basic counter
 
@@ -1862,7 +1868,7 @@ We can now observe the counter, by accessing its fields:
 let counter = count_from(10)
 
 c.Current             // => 10
-c.Next.Nurrent        // => 11
+c.Next.Current        // => 11
 c.Next.Next.Current   // => 12
 ```
 
@@ -1873,9 +1879,9 @@ Each observation reveals one additional layer of the codata structure, producing
 It is also possible to define operations that transform counters while preserving their infinite, coinductive structure:
 
 ```
-  unfold counter_map(f : int32 -> int32, c : Counter) : Counter {
+  unfold counter_map((f : int32 -> int32, c : Counter)) : Counter {
     , Current = f(c.Current),
-    , @Next(f) = n + 1
+    , @Next = (f, n + 1)
   }
 ```
 
