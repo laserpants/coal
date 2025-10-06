@@ -118,6 +118,10 @@ instance TreeTransform Expression t where
         EMatch a t
           <$> transform name f e
           <*> traverse (transform name f) cs
+      ELambdaMatch a t cs me ->
+        ELambdaMatch a t
+          <$> traverse (transform name f) cs
+          <*> traverse (transform name f) me
       ECompiledMatch a t e cs ->
         ECompiledMatch a t
           <$> transform name f e
@@ -139,6 +143,8 @@ instance TreeTransform Expression t where
         EListLiteral a t <$> traverse (transform name f) es
       ETuple a t es ->
         ETuple a t <$> traverse (transform name f) es
+      ECodataRecord a t d ->
+        ECodataRecord a t <$> traverse (transform name f) d
       _ ->
         error "TODO"
 

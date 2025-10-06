@@ -143,7 +143,7 @@ mainPass =
     >=> patternExhaustiveCheckM
     -- Compile as-patterns
     >=> pure
-    . desugarAsPatterns
+      . desugarAsPatterns
     >=> writeDotFilesC "as_patterns"
     -- Compile match statements
     >=> compileMatchExprs
@@ -152,7 +152,7 @@ mainPass =
     >=> overModuleDefinitionsM (traverse insertPlaceholders)
     -- Denormalize top-level functions and constants
     >=> pure
-    . denormalizeObject
+      . denormalizeObject
     -- Expand nats
     >=> compileNats
 
