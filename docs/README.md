@@ -1890,7 +1890,7 @@ It is also possible to define operations that transform counters while preservin
 
 ```
   unfold counter_map((f : int32 -> int32, c : Counter)) : Counter {
-    , Current = f(c.Current),
+    , Current = f(c.Current)
     , @Next = (f, n + 1)
   }
 ```
