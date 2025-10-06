@@ -1107,6 +1107,12 @@ main137 = do
     [ "./test/Coal/examples/137/Main.coal"
     ]
 
+main138 :: IO (Either CompilerFailureMode Text)
+main138 = do
+  runTestFiles
+    [ "./test/Coal/examples/138/Main.coal"
+    ]
+
 compileFiles :: [String] -> IO (Either CompilerFailureMode ())
 compileFiles files = do
   fs <- traverse readFile files
@@ -1158,6 +1164,28 @@ builtInCodataAccessors =
             []
             --            ( TApplication KCotype (TConstructor (KArrow KType KCotype) "Stream") (TVariable (TypeIndex KType 0) :| []) `TArrow` TApplication KCotype (TConstructor (KArrow KType KCotype) "Stream") (TVariable (TypeIndex KType 0) :| [])
             ( TApplication KType (TConstructor (KArrow KType KType) "Stream") (TVariable (TypeIndex KType 0) :| []) `TArrow` TApplication KType (TConstructor (KArrow KType KType) "Stream") (TVariable (TypeIndex KType 0) :| [])
+            )
+        )
+    )
+  ,
+    ( "Current"
+    , CodataAccessor
+        "Current"
+        ( Forall
+            mempty
+            []
+            ( TConstructor KType "Counter" `TArrow` TIntrinsic IInt32
+            )
+        )
+    )
+  ,
+    ( "Next"
+    , CodataAccessor
+        "Next"
+        ( Forall
+            mempty
+            []
+            ( TConstructor KType "Counter" `TArrow` TConstructor KType "Counter"
             )
         )
     )
@@ -1358,6 +1386,11 @@ builtInTypeConstructors =
     ( "Stream"
     , --    , KArrow KType KCotype
       KArrow KType KType
+    )
+  ,
+    ( "Counter"
+    , --    , KArrow KType KCotype
+      KType
     )
   ]
 

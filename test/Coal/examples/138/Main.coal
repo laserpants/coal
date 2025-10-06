@@ -1,0 +1,15 @@
+module Main {
+
+  cotype Counter = { Current : int32, Next : Counter }
+
+  unfold count_from(n) : Counter {
+    , Current = n
+    , @Next = n + 1
+  }
+
+  let counter = count_from(1)
+
+  fun main() =
+    trace_int32(333)
+
+}
