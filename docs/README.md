@@ -276,7 +276,7 @@ Since a `let` can hold any expression, top-level functions can also be defined t
 
 #### Data types
 
-User-defined data types in Coal are of the product-sum variety. These types are introduced with the `type` keyword. 
+User-defined data types in Coal are introduced using the `type` keyword. They are of the product-sum variety.
 
 A *product* type combines multiple fields into one single value: All of the components appear together in the constructed data. An RGB color triplet that contains individual red, green, and blue values can be described with a type:
 
@@ -872,10 +872,10 @@ uncons : List<a> -> Option<(a, List<a>)>
 > is really syntactic sugar for `map(f, xs)`. This operator is very convenient when chaining together multiple function calls. Suppose we have the following basic drawing API:
 >
 > ```
-> circle : Config -> Shape
-> fill : string -> Shape -> Shape
+> circle       : Config -> Shape
+> fill         : string -> Shape -> Shape
 > set_position : float -> float -> Shape -> Shape
-> draw_shape : Shape -> Canvas -> Canvas
+> draw_shape   : Shape -> Canvas -> Canvas
 > ```
 > 
 > To describe a sequence of steps that creates a circle, sets properties such as its color and position, and finally places it on the canvas, we would normally write:
@@ -1083,7 +1083,7 @@ That is, `filter` takes a [predicate](#list-predicates) and a list as input, and
 
 ###### Reducing a list
 
-The higher-order function `reduce` takes a collection of data and combines its elements into a single result. A common example is reducing a list of numbers to a single value by repeatedly applying an operation, such as summing each element with a running total:
+The higher-order function `reduce` takes a list and combines its elements into a single result. A common example is reducing a list of numbers to a single value by repeatedly applying an operation, such as summing each element with a running total:
 
 ```
 let sum = reduce(fn(n, a) => n + a, 0, [1, 2, 3])
@@ -1308,7 +1308,7 @@ let language = { name = "Java", paradigm = "OOP" }
 
 ##### Extending records
 
-Records in Coal are characterized as *extensible*, meaning that new fields can be added to a record at run time.
+Records in Coal are *extensible*, meaning that new fields can be added to a record at run time.
 
 ```
 fun tagged(rec, t : string) = { tag = t | rec }  
@@ -1399,7 +1399,7 @@ The right-hand side pattern must be either a variable or a wildcard (`_`). If yo
 
 Here, the name field is removed and a record with all remaining fields are returned.
 
-If you only need to retrieve a single field, the dot syntax (`record.field`) is simpler and more concise. Pattern matching is necessary when you want to extract multiple fields at once, remove fields, or work with the remainder of a record.
+If you only need to retrieve a single field, the dot syntax (`record.field`) is simpler and more concise. [Pattern matching](#pattern-matching) becomes necessary when you want to extract multiple fields at once, remove fields, or work with the remainder of a record.
 
 ##### Updating a field
 
@@ -1521,8 +1521,8 @@ A lambda match is a special syntax that lets you get rid of the variable in a `m
 is a shorthand version of this:
 
 ```
-  fn(v) =>
-    match(v) {
+  fn(val) =>
+    match(val) {
       | [] => true
       | _ => false
     }
