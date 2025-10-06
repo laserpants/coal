@@ -78,7 +78,7 @@ Coal is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-
 | ☑️         | <strike>Basic documentation</strike>                  | 5          | Effects                           |                                                                                                       |                                                                        
 | ☑️         | <strike>Semicolon-separators in let-bindings</strike> | 5          | User-defined operators            |                                                                                                       |                                                                        
 | 1          | Error messages                                        |            |                                   |                                                                                                       |                                                                        
-| 1          | Bug: unfold type annotations                          |            |                                   |                                                                                                       |                                                                        
+| ☑️         | <strike>Bug: unfold type annotations</strike>         |            |                                   |                                                                                                       |                                                                        
 
 ## Language overview
 
