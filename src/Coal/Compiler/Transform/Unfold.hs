@@ -11,8 +11,9 @@ import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (freshName, supplied)
 import Coal.Compiler.Stack
 import Coal.Compiler.Transform.Expression
-import Coal.Language (Expression (..), Primitive (..))
+import Coal.Language (Choice (..), Clause (..), Expression (..), Guard (..), Primitive (..))
 import Coal.Language.Module (ConstantDef (..), Definition (..), FunctionDef (..), Module (..))
+import Coal.Language.Module.Definition.Fold (FoldDef (..))
 import Coal.Language.Module.Definition.Unfold (UnfoldDef (..))
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformM)
@@ -53,6 +54,26 @@ instance (Monoid a, Data a) => CompileUnfoldsContext a (Expression a ()) where
       e ->
         pure e
 
+instance (Monoid a, Data a) => CompileUnfoldsContext a (Clause a ()) where
+  compileUnfolds =
+    \case
+      EClause a p cs ->
+        EClause a p <$> traverse compileUnfolds cs
+
+instance (Monoid a, Data a) => CompileUnfoldsContext a (Choice Expression a ()) where
+  compileUnfolds =
+    \case
+      CPlain a gs e ->
+        CPlain a <$> traverse compileUnfolds gs <*> compileUnfolds e
+      CLambda{} ->
+        error "TODO"
+
+instance (Monoid a, Data a) => CompileUnfoldsContext a (Guard Expression a ()) where
+  compileUnfolds =
+    \case
+      CGuard e ->
+        CGuard <$> compileUnfolds e
+
 instance (Monoid a, Data a) => CompileUnfoldsContext a (Module a k ()) where
   compileUnfolds =
     \case
@@ -71,6 +92,12 @@ instance (Monoid a, Data a) => CompileUnfoldsContext a (ConstantDef a ()) where
       ConstantDef a u w e ->
         ConstantDef a u w <$> compileUnfolds e
 
+instance (Monoid a, Data a) => CompileUnfoldsContext a (FoldDef a ()) where
+  compileUnfolds =
+    \case
+      FoldDef with cs e ->
+        FoldDef with <$> traverse compileUnfolds cs <*> traverse compileUnfolds e
+
 instance (Monoid a, Data a) => CompileUnfoldsContext a (UnfoldDef a ()) where
   compileUnfolds =
     \case
@@ -84,7 +111,9 @@ instance (Monoid a, Data a) => CompileUnfoldsContext a (Definition a k ()) where
         DFunction loc name <$> compileUnfolds f <*> traverse compileUnfolds fs
       DConstant loc name g fs ->
         DConstant loc name <$> compileUnfolds g <*> traverse compileUnfolds fs
-      DUnfold loc name u ->
-        DUnfold loc name <$> compileUnfolds u
+      DFold loc name d ->
+        DFold loc name <$> compileUnfolds d
+      DUnfold loc name d ->
+        DUnfold loc name <$> compileUnfolds d
       o ->
         pure o

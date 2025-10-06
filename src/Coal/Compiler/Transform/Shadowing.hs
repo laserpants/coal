@@ -5,8 +5,7 @@
 
 module Coal.Compiler.Transform.Shadowing where
 
-import Coal.Common.FreeVars (BoundVars (..), notConstructor)
-import Coal.Common.Label (Label (..), labelName)
+import Coal.Common.FreeVars (BoundVars (..))
 import Coal.Common.Name (isConstructor)
 import Coal.Compiler.Stack
 import Coal.Language
@@ -16,7 +15,6 @@ import Data.Data (Data)
 import Data.List.NonEmpty (NonEmpty (..))
 import Data.Set (Set)
 import qualified Data.Set as Set
-import Debug.Trace
 import Extra (Name, forM_)
 
 -- Detect?
