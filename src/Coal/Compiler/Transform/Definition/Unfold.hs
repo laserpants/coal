@@ -34,13 +34,17 @@ translateFields var (name, e)
   | "@" `Text.isPrefixOf` name =
       pure
         ( "$_" <> Text.drop 1 name
-        , lambdaAnyE $
-            applicationE
-              (varE var)
-              (e :| [])
+        , lambdaAnyE $ applicationE (varE var) exprs
         )
   | otherwise =
       pure ("$_" <> name, lambdaAnyE e)
+ where
+  exprs =
+    case e of
+      ETuple _ _ es ->
+        es
+      e1 ->
+        e1 :| []
 
 expandTopLevelUnfold :: (Monoid a, Data a, Monad m) => NonEmpty (Pattern a ()) -> Dictionary (Expression a ()) -> CompilerT a m (Expression a ())
 expandTopLevelUnfold ps d = do
