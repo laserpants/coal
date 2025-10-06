@@ -7,6 +7,7 @@
 
 module Coal.Compiler.Transform.Unfold (CompileUnfoldsContext (..)) where
 
+import Coal.Language.Module.Definition.Unfold (UnfoldDef (..))
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (freshName, supplied)
 import Coal.Compiler.Stack
@@ -70,6 +71,12 @@ instance (Monoid a, Data a) => CompileUnfoldsContext a (ConstantDef a ()) where
       ConstantDef a u w e ->
         ConstantDef a u w <$> compileUnfolds e
 
+instance (Monoid a, Data a) => CompileUnfoldsContext a (UnfoldDef a ()) where
+  compileUnfolds =
+    \case
+      UnfoldDef with ps d e ->
+        UnfoldDef with ps d <$> traverse compileUnfolds e
+
 instance (Monoid a, Data a) => CompileUnfoldsContext a (Definition a k ()) where
   compileUnfolds =
     \case
@@ -77,5 +84,7 @@ instance (Monoid a, Data a) => CompileUnfoldsContext a (Definition a k ()) where
         DFunction loc name <$> compileUnfolds f <*> traverse compileUnfolds fs
       DConstant loc name g fs ->
         DConstant loc name <$> compileUnfolds g <*> traverse compileUnfolds fs
+      DUnfold loc name u -> 
+        DUnfold loc name <$> compileUnfolds u
       o ->
         pure o
