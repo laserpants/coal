@@ -1905,6 +1905,7 @@ It is also possible to define operations that transform counters while preservin
   }
 ```
 
+<!--
 
 
 --
@@ -1939,7 +1940,11 @@ Example: pseudo-randomness
   }
 ```
 
+-->
+
 ##### Does codata have to be infinite?
+
+TODO
 
 #### Duality
 
@@ -2031,11 +2036,11 @@ brew install llvm
 brew install bdw-gc gmp
 ```
 
+<!--
 ### Compiler
 
 TODO 
 
-<!--
 ```
                      +---------------------------------------+                
                      |                                       |
