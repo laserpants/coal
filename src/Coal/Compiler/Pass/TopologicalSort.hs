@@ -45,11 +45,10 @@ collectEdges s m = do
           tellErrors [ModuleNotFound dep (ErrorLocation name loc)]
           pure []
   if length ks == length deps
-    then pure (m, k, ks)
+    then pure (m, fromJust (index name), ks)
     else throwError PreflightFailure
  where
   name = modulePathName m
-  k = fromJust (index name)
   deps = dependencies m
 
   index :: Name -> Maybe Int
