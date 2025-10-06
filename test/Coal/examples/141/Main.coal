@@ -15,8 +15,8 @@ module Main {
 
   let counter : Counter = count_from(1)
 
-  //let counter_2 = counter_map(fn(x) => x * 1103515245 + 12345, counter)
-  let counter_2 = counter_map(fn(x) => x + 1000, counter)
+  let counter_2 = counter_map(fn(x) => x * 1103515245 + 12345, counter)
+  //let counter_2 = counter_map(fn(x) => x + 1000, counter)
 
   fun main() =
     trace_int32(counter_2.Next.Next.Next.Next.Next.Next.Next.Current)

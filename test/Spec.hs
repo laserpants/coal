@@ -1131,6 +1131,12 @@ main140 = do
     [ "./test/Coal/examples/140/Main.coal"
     ]
 
+main141 :: IO (Either CompilerFailureMode Text)
+main141 = do
+  runTestFiles
+    [ "./test/Coal/examples/141/Main.coal"
+    ]
+
 compileFiles :: [String] -> IO (Either CompilerFailureMode ())
 compileFiles files = do
   fs <- traverse readFile files
