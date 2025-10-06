@@ -292,6 +292,8 @@ spec = do
   print (x == Right "321\n")
   a <- isLeft <$> main135
   print a
+  x <- main138
+  print (x == Right "3\n")
 
 --  x <- main85
 --  print (x == Right "aa\n")
