@@ -155,7 +155,13 @@ module <path>(<export_list>) {
 }
 ```
 
-Every module is uniquely identified by its *path*. A module’s path mirrors the directory structure of the source file in which it is defined. Path segments begin with an uppercase letter and are separated by a dot (`.`). Files have a `.coal` extension. A module `Utils.Math.Trigonometry`, for instance, is defined in a file named `Trigonometry.coal`, located under `Utils/Math/` relative to your project’s root directory:
+Every module is uniquely identified by its *path*. 
+
+- A module’s path mirrors the directory structure of the source file in which it is defined. 
+- Path segments begin with an uppercase letter and are separated by a dot (`.`). 
+- Files have a `.coal` extension. 
+
+A module `Utils.Math.Trigonometry`, for instance, is defined in a file named `Trigonometry.coal`, located under `Utils/Math/` relative to your project’s root directory:
 
 ```
 src
