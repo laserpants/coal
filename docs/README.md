@@ -1885,16 +1885,18 @@ c.Next.Next.Current   // => 12
 
 Each observation reveals one additional layer of the codata structure, producing a value that can itself be further observed. Unlike ordinary data, this can continue indefinitely &mdash; you can keep asking for `Next` without ever reaching a base case.
 
---
-
 It is also possible to define operations that transform counters while preserving their infinite, coinductive structure:
 
 ```
-  unfold counter_map((f : int32 -> int32, c : Counter)) : Counter {
+  unfold counter_map(f : int32 -> int32, c : Counter) : Counter {
     , Current = f(c.Current)
-    , @Next = (f, n + 1)
+    , @Next = (f, c.Next)
   }
 ```
+
+
+
+--
 
 Aside: You may wonder, why can't we simply write `counter(n + 1)` then? Well, the reason is similar to that of folds. But instead of being concerned with progress in each step, here we are worried about *productivity*. 
 Consider what would happen if we could write, for example:
