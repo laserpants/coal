@@ -294,6 +294,8 @@ spec = do
   print a
   x <- main138
   print (x == Right "3\n")
+  x <- main139
+  print (x == Right "Hello Space\n")
 
 --  x <- main85
 --  print (x == Right "aa\n")
@@ -1113,6 +1115,12 @@ main138 :: IO (Either CompilerFailureMode Text)
 main138 = do
   runTestFiles
     [ "./test/Coal/examples/138/Main.coal"
+    ]
+
+main139 :: IO (Either CompilerFailureMode Text)
+main139 = do
+  runTestFiles
+    [ "./test/Coal/examples/139/Main.coal"
     ]
 
 compileFiles :: [String] -> IO (Either CompilerFailureMode ())

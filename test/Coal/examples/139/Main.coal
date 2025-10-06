@@ -1,0 +1,11 @@
+module Main {
+
+  fun main() =
+    let 
+      a = "Hello";
+      b = "Space";
+      c = " "
+    in
+      trace_string(a +++ c +++ b)
+
+}
