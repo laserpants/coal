@@ -1845,7 +1845,7 @@ A codata type is introduced using the `cotype` keyword and (like a record type) 
 cotype <Name> = { <Field_1> : <t_1>, ..., <Field_n> : <t_n> }
 ```
 
-Unlike records, the codata field labels start with an uppercase letter.
+Unlike records, the codata field labels start with an **uppercase** letter.
 
 ##### A basic counter
 
