@@ -13,9 +13,11 @@ module Main {
     , @Next = (f, c.Next)
   }
 
-  let counter = count_from(1)
+  let counter : Counter = count_from(1)
+
+  let counter_2 = counter_map((fn(x) => x + 1, counter))
 
   fun main() =
-    trace_int32(counter.Current)
+    trace_int32(counter_2.Next.Current)
 
 }
