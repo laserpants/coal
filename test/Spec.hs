@@ -296,6 +296,8 @@ spec = do
   print (x == Right "3\n")
   x <- main139
   print (x == Right "Hello Space\n")
+  x <- main140
+  print (x == Right "2\n")
 
 --  x <- main85
 --  print (x == Right "aa\n")
