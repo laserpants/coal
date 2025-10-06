@@ -178,7 +178,7 @@ An `import` statement is used to bring in functions and other definitions from o
 import List(concat, head, tail)
 ```
 
-The special `namespace` keyword allows you to import and access all functions, types, and other definitions from a module via their qualified names. A qualified name is formed by prefixing the name with the path of the module:
+The special `namespace` keyword allows you to import and access all functions, types, and other definitions from a module via their *qualified* names. A qualified name is formed by prefixing the name with the path of the module:
 
 ```
 // Import the List module under its namespace
@@ -725,7 +725,7 @@ This makes it possible to use numbers directly in patterns, just like with other
 
 ```
   match(n : nat) {
-    | Zero => "yay"
+    | Zero    => "yay"
     | Succ(_) => "nay"
   }
 ```
@@ -1831,18 +1831,20 @@ In Coal, ordinary data cannot be infinite: a `List`, `Tree`, or any recursive da
 
 The key difference between data and codata lies in how values are produced and consumed. Whereas data is finite and *constructed*, codata is potentially infinite and *observed*: you unfold it step by step. The following table gives a comparison between the two:
 
-|                    | Access pattern        | Structure             | Evaluation strategy  | Invariant               |
-| ------------------ | ----------------------| --------------------- | -------------------- | ----------------------- |
-| **Data**           | Recursion (fold)      | Always finite         | Eager (strict)       | Progress                |
-| **Codata**         | Corecursion (unfold)  | Potentially infinite  | Lazy (non-strict)    | Productivity            |
+|                    | Access pattern         | Structure             | Evaluation strategy  | Invariant               |
+| ------------------ | -----------------------| --------------------- | -------------------- | ----------------------- |
+| **Data**           | Recursion (`fold`)     | Always finite         | Eager (strict)       | Progress                |
+| **Codata**         | Corecursion (`unfold`) | Potentially infinite  | Lazy (non-strict)    | Productivity            |
 
 Codata is ideal for representing streams, event sequences, or any ongoing process, where you only need to observe a finite part at a time. 
 
-A codata type is introduced using the `cotype` keyword and, like a record type, is defined by a set of comma-separated fields enclosed in curly braces:
+A codata type is introduced using the `cotype` keyword and (like a record type) is defined by a set of comma-separated fields enclosed in curly braces:
 
 ```
 cotype <Name> = { <Field_1> : <t_1>, ..., <Field_n> : <t_n> }
 ```
+
+Unlike records, the codata field labels start with an uppercase letter.
 
 ##### A basic counter
 
