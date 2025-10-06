@@ -75,7 +75,7 @@ instance (Monoid a, Data a) => CompileUnfoldsContext a (UnfoldDef a ()) where
   compileUnfolds =
     \case
       UnfoldDef with ps d e ->
-        UnfoldDef with ps d <$> traverse compileUnfolds e
+        UnfoldDef with ps <$> traverse compileUnfolds d <*> traverse compileUnfolds e
 
 instance (Monoid a, Data a) => CompileUnfoldsContext a (Definition a k ()) where
   compileUnfolds =
