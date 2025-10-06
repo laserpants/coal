@@ -1878,9 +1878,9 @@ We can now observe the counter, by accessing its fields:
 ```
 let counter = count_from(10)
 
-c.Current             // => 10
-c.Next.Current        // => 11
-c.Next.Next.Current   // => 12
+counter.Current             // => 10
+counter.Next.Current        // => 11
+counter.Next.Next.Current   // => 12
 ```
 
 Each observation reveals one additional layer of the codata structure, producing a value that can itself be further observed. Unlike ordinary data, this can continue indefinitely &mdash; you can keep asking for `Next` without ever reaching a base case.
@@ -1888,7 +1888,7 @@ Each observation reveals one additional layer of the codata structure, producing
 It is also possible to define operations that transform counters while preserving their infinite, coinductive structure:
 
 ```
-  unfold counter_map(f : int32 -> int32, c : Counter) : Counter {
+  unfold transform_counter(f : int32 -> int32, c : Counter) : Counter {
     , Current = f(c.Current)
     , @Next = (f, c.Next)
   }
