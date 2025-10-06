@@ -415,7 +415,7 @@ emitConstraints =
           pure ()
       pure (ms1 <> ms2 <> ms3)
     ECodataRecord _ _ d -> do
-      forM_ (Map.toList d) $
+      concatForM (Map.toList d) $
         \(field, e) -> do
           env <- asks constraintsGenContextCodataAccessorEnv
           case Environment.lookup (Text.drop 2 field) env of
@@ -428,7 +428,7 @@ emitConstraints =
                   error "Implementation error"
             Nothing ->
               pure ()
-      concatMapM emitConstraints d
+          emitConstraints e
     ERecord loc t d me ->
       emitERecordConstraints loc t d me
     ECodataSelect loc ll e (Just e1) ->
