@@ -25,6 +25,8 @@ import Data.Data (Data)
 import Data.List.NonEmpty (NonEmpty (..), toList)
 import qualified Data.Map.Strict as Map
 import Data.Maybe (maybeToList)
+import qualified Data.Text as Text
+import Debug.Trace
 import Extra
 
 type ConstraintsGen a = ConstraintsGenStack a TypeIndex Kind IndexedType
@@ -412,7 +414,20 @@ emitConstraints =
         _ ->
           pure ()
       pure (ms1 <> ms2 <> ms3)
-    ECodataRecord _ _ d ->
+    ECodataRecord _ _ d -> do
+      forM_ (Map.toList d) $
+        \(field, e) -> do
+          env <- asks constraintsGenContextCodataAccessorEnv
+          case Environment.lookup (Text.drop 2 field) env of
+            Just (CodataAccessor _ s) -> do
+              case typeOf e of
+                TArrow _ t2 -> do
+                  t1 <- supplied (TVariable . TypeIndex KType)
+                  tellRight [Explicit InferenceRulePlaceholder (t1 `TArrow` t2) s]
+                _ ->
+                  error "Implementation error"
+            Nothing ->
+              pure ()
       concatMapM emitConstraints d
     ERecord loc t d me ->
       emitERecordConstraints loc t d me
