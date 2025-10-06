@@ -1161,7 +1161,7 @@ is_empty(["wheat", "oats", "rye", "barley"])   // false
 
 ###### `is_nonempty`
 
-This is the opposite of `is_empty`. That is: 
+This function is the opposite of `is_empty`. That is: 
 
 ```
 is_nonempty(xs) <==> ! is_empty(xs)
