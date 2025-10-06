@@ -2,7 +2,7 @@ module Main {
 
   cotype Counter = { Current : int32, Next : Counter }
 
-  // TODO: bug when removing type annotation
+  // bug when removing type annotation
   unfold count_from(n) : Counter {
     , Current = n
     , @Next = n + 1
