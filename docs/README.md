@@ -2064,7 +2064,7 @@ This is an open and evolving project &mdash; contributions are welcome.
 
 ### Bug reports 
 
-If you want to report a bug, 🐞 [open an issue](https://codeberg.org/laserpants/coal/issues) with:
+If you want to report a bug 🐞, [open an issue](https://codeberg.org/laserpants/coal/issues) with:
 
 - A description of the problem
 - Steps to reproduce it
