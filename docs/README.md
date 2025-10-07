@@ -2053,7 +2053,30 @@ TODO
 
 ## How to contribute
 
-TODO
+This is an open and evolving project &mdash; contributions are welcome.
+
+### Bug reports 🐞
+
+If you want to report a bug, open an issue with:
+
+- A description of the problem
+- Steps to reproduce it
+- What you expected to happen
+- What actually happened (include error messages or stack traces)
+
+If possible, include a small code example that demonstrates the issue — this makes debugging much easier.
+
+### Contributing code
+
+If you want to work on a feature or bug fix, fork the repository and create a new branch for your work. Then submit a pull request with a description of:
+
+- What you changed
+- Why you changed it
+- Relevant issue number (if any)
+
+### Documentation
+
+Suggest changes to the documentation as PRs. Simply edit the `README.md` file, following the same steps as under **[Contributing code](#contributing-code)**.
 
 ## License 
 
