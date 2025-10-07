@@ -18,8 +18,7 @@ Coal is a declarative, statically typed, purely functional programming language 
 - simple and intuitive syntax
 - algebraic data types and pattern matching
 - extensible records
-- structural recursion 
-- codata and corecursion
+- structural recursion, codata and corecursion
 - traits (type classes)
 
 among other features. Coal’s type system, like Haskell’s and ML’s, supports type inference and parametric polymorphism, drawing on the [System-F](https://en.wikipedia.org/wiki/System_F) lambda calculus. The Coal compiler is implemented in Haskell and targets [LLVM](https://llvm.org/) for code generation.
