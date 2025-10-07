@@ -25,7 +25,7 @@ import Coal.Language.Pattern (IndexedPattern, Pattern (..))
 import Coal.Language.Type (IndexedType)
 import Coal.Language.Type.Kind (Kind (..))
 import Data.Data (Data)
-import Data.Generics.Uniplate.Data (transformM)
+import Data.Generics.Uniplate.Data (descendM)
 import Data.List.NonEmpty (NonEmpty ((:|)))
 import Extra (Name)
 
@@ -53,7 +53,7 @@ instance (Data s, Monoid s) => Sugared s (Binding Expression s IndexedType) wher
         BFunction a name <$> traverse desugarPatterns ps <*> desugarPatterns e
 
 instance (Data s, Monoid s) => Sugared s (Expression s IndexedType) where
-  desugarPatterns = transformM go
+  desugarPatterns = go 
    where
     go =
       \case
@@ -71,7 +71,7 @@ instance (Data s, Monoid s) => Sugared s (Expression s IndexedType) where
           (qs, rs) <- listenPatterns (traverse desugarPatterns ps)
           pure (ELambda a qs (foldr unrollMatch e1 rs))
         e ->
-          pure e
+          descendM go e
 
 unrollMatch :: (Data s, Monoid s) => (Name, Pattern s IndexedType) -> Expression s IndexedType -> Expression s IndexedType
 unrollMatch (name, p) e =
