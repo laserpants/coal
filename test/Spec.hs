@@ -298,6 +298,8 @@ spec = do
   print (x == Right "Hello Space\n")
   x <- main140
   print (x == Right "2\n")
+  x <- main141
+  print (x == Right "-627128164\n")
 
 --  x <- main85
 --  print (x == Right "aa\n")
