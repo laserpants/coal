@@ -1826,7 +1826,7 @@ module Json {
 
 #### Codata and unfold
 
-Recursion over ordinary data in Coal (or any language with well-founded recursion) is always guaranteed to terminate. This ensures that all data is finite as well. In many cases, this is desirable &mdash; it makes reasoning about programs predictable and safe. However, there are situations where we want potentially infinite structures or non-terminating behavior. For example:
+Recursion over ordinary data in Coal (or any language with well-founded recursion) is always guaranteed to terminate. This implies that all data is finite as well. In many cases, this is desirable &mdash; it makes reasoning about programs predictable and safe. However, there are situations where we want potentially infinite structures or non-terminating behavior. For example:
 
 - Infinite sequences of numbers, like the natural numbers, are easy to define in Haskell using laziness:
 
