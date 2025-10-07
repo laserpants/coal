@@ -53,7 +53,7 @@ instance (Data s, Monoid s) => Sugared s (Binding Expression s IndexedType) wher
         BFunction a name <$> traverse desugarPatterns ps <*> desugarPatterns e
 
 instance (Data s, Monoid s) => Sugared s (Expression s IndexedType) where
-  desugarPatterns = go 
+  desugarPatterns = go
    where
     go =
       \case

@@ -101,15 +101,16 @@ eliminateAtPatterns =
       p
 
 atLabels :: (Data a, Data t) => Pattern a t -> [Label t]
-atLabels = execWriter . transformM go
+atLabels = execWriter . go
  where
   go =
-    \case
-      p@(PAtVariable _ label) -> do
-        tell [label]
-        pure p
-      p ->
-        pure p
+    transformM $
+      \case
+        p@(PAtVariable _ label) -> do
+          tell [label]
+          pure p
+        p ->
+          pure p
 
 expandFoldExpr :: (Monad m, Monoid a, Data a) => NonEmpty (Expression a ()) -> NonEmpty (Clause a ()) -> CompilerT a m (Expression a ())
 expandFoldExpr args clauses = do

@@ -341,18 +341,18 @@ clauseConstraintsImpl (EClause loc p cs) = do
   names <- emitPatternConstraints (assertEqualityAssumptions loc) ms p
   pure (typeOf p, ts1, filter (assumptionNameIsNotOneOf names) ms)
 
---emitECodataSelectConstraints :: (Show a, Data a) => a -> Label IndexedType -> Expression a IndexedType -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
---emitECodataSelectConstraints loc (Label t name) e e1 = do
+-- emitECodataSelectConstraints :: (Show a, Data a) => a -> Label IndexedType -> Expression a IndexedType -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
+-- emitECodataSelectConstraints loc (Label t name) e e1 = do
 emitECodataSelectConstraints :: (Show a, Data a) => a -> Label IndexedType -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
 emitECodataSelectConstraints loc (Label t name) e1 = do
---  ms1 <- emitConstraints e
+  --  ms1 <- emitConstraints e
   r <- lookupCodataAccessor name
   case r of
     Nothing -> do
       tellLeft [ENoCodataAccessor loc name]
       pure []
     Just CodataAccessor{..} -> do
-      --tellRight [Explicit InferenceRulePlaceholder t1 codataAccessorScheme]
+      -- tellRight [Explicit InferenceRulePlaceholder t1 codataAccessorScheme]
       case e1 of
         ERecursiveLet _ (PVariable _ (Label t2 n)) e2 e3 -> do
           ms2 <- emitConstraints e2
@@ -365,6 +365,7 @@ emitECodataSelectConstraints loc (Label t name) e1 = do
           pure (ms2 <> filter (not . assumptionNameIs n) ms3)
         _ ->
           pure []
+
 -- where
 --  t1 = typeOf e `TArrow` t
 --  t1 = typeOf e1 `TArrow` t
