@@ -341,16 +341,18 @@ clauseConstraintsImpl (EClause loc p cs) = do
   names <- emitPatternConstraints (assertEqualityAssumptions loc) ms p
   pure (typeOf p, ts1, filter (assumptionNameIsNotOneOf names) ms)
 
-emitECodataSelectConstraints :: (Show a, Data a) => a -> Label IndexedType -> Expression a IndexedType -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
-emitECodataSelectConstraints loc (Label t name) e e1 = do
-  ms1 <- emitConstraints e
+--emitECodataSelectConstraints :: (Show a, Data a) => a -> Label IndexedType -> Expression a IndexedType -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
+--emitECodataSelectConstraints loc (Label t name) e e1 = do
+emitECodataSelectConstraints :: (Show a, Data a) => a -> Label IndexedType -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
+emitECodataSelectConstraints loc (Label t name) e1 = do
+--  ms1 <- emitConstraints e
   r <- lookupCodataAccessor name
   case r of
     Nothing -> do
       tellLeft [ENoCodataAccessor loc name]
       pure []
     Just CodataAccessor{..} -> do
-      tellRight [Explicit InferenceRulePlaceholder t1 codataAccessorScheme]
+      --tellRight [Explicit InferenceRulePlaceholder t1 codataAccessorScheme]
       case e1 of
         ERecursiveLet _ (PVariable _ (Label t2 n)) e2 e3 -> do
           ms2 <- emitConstraints e2
@@ -359,11 +361,13 @@ emitECodataSelectConstraints loc (Label t name) e e1 = do
           t0 <- supplied (TVariable . TypeIndex KType)
           tellRight [Explicit InferenceRulePlaceholder (t0 `TArrow` typeOf e3) codataAccessorScheme]
           tellRight [Equality InferenceRulePlaceholder [t, typeOf e3]]
-          pure (ms1 <> ms2 <> filter (not . assumptionNameIs n) ms3)
+          -- pure (ms1 <> ms2 <> filter (not . assumptionNameIs n) ms3)
+          pure (ms2 <> filter (not . assumptionNameIs n) ms3)
         _ ->
           pure []
- where
-  t1 = typeOf e `TArrow` t
+-- where
+--  t1 = typeOf e `TArrow` t
+--  t1 = typeOf e1 `TArrow` t
 
 emitConstraints :: (Show a, Data a) => Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
 emitConstraints =
@@ -431,8 +435,8 @@ emitConstraints =
           emitConstraints e
     ERecord loc t d me ->
       emitERecordConstraints loc t d me
-    ECodataSelect loc ll e (Just e1) ->
-      emitECodataSelectConstraints loc ll e e1
+    ECodataSelect loc ll _ (Just e1) ->
+      emitECodataSelectConstraints loc ll e1
     ETuple loc t es ->
       emitETupleConstraints loc t es
     _ ->

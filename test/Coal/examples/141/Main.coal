@@ -19,6 +19,6 @@ module Main {
   //let counter_2 = counter_map(fn(x) => x + 1000, counter)
 
   fun main() =
-    trace_int32(counter_2.Next.Next.Next.Next.Next.Next.Next.Current)
+    trace_int32(counter_2.Next.Next.Next.Next.Next.Next.Next.Next.Next.Next.Next.Next.Next.Next.Current)
 
 }

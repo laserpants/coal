@@ -172,10 +172,10 @@ instance PatternExhaustiveCheckContext (Expression Metadata t) where
           <*> traverse (patternExhaustiveCheck name) me
       ESelect a ll e ->
         ESelect a ll <$> patternExhaustiveCheck name e
-      ECodataSelect a ll e me ->
+      ECodataSelect a ll e1 e2 ->
         ECodataSelect a ll
-          <$> patternExhaustiveCheck name e
-          <*> traverse (patternExhaustiveCheck name) me
+          <$> traverse (patternExhaustiveCheck name) e1
+          <*> traverse (patternExhaustiveCheck name) e2
       ECodataRecord a t d ->
         ECodataRecord a t
           <$> traverse (patternExhaustiveCheck name) d

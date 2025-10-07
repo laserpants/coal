@@ -89,10 +89,10 @@ instance (Data a, Data t) => ReportShadowing (Expression a t) where
           <$> traverse (detect names) es
           <*> traverse (detect names) cs
           <*> traverse (detect names) me
-      ECodataSelect a ll e me ->
+      ECodataSelect a ll e1 e2 ->
         ECodataSelect a ll
-          <$> detect names e
-          <*> traverse (detect names) me
+          <$> traverse (detect names) e1
+          <*> traverse (detect names) e2
       expr@EUnaryOperator{} ->
         pure expr
       expr@EBinaryOperator{} ->

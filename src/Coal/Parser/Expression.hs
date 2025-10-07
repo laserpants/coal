@@ -53,7 +53,7 @@ parseExpression = makeExprParser parseAtom operator
 
 selector :: Expression Metadata () -> Metadata -> Name -> Expression Metadata ()
 selector expr loc lname
-  | isConstructor lname = ECodataSelect loc ll expr Nothing
+  | isConstructor lname = ECodataSelect loc ll (Just expr) Nothing
   | otherwise = ESelect loc ll expr
  where
   ll = Label () lname

@@ -131,10 +131,10 @@ instance TreeTransform Expression t where
           <$> traverse (transform name f) es
           <*> traverse (transform name f) cs
           <*> traverse (transform name f) me
-      ECodataSelect a ll e me ->
+      ECodataSelect a ll e1 e2 ->
         ECodataSelect a ll
-          <$> transform name f e
-          <*> traverse (transform name f) me
+          <$> traverse (transform name f) e1
+          <*> traverse (transform name f) e2
       expr@EUnaryOperator{} ->
         pure expr
       expr@EBinaryOperator{} ->

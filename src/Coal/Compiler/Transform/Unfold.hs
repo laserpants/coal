@@ -48,9 +48,9 @@ instance (CompileUnfoldsContext a e) => CompileUnfoldsContext a (Dictionary e) w
 instance (Monoid a, Data a) => CompileUnfoldsContext a (Expression a ()) where
   compileUnfolds = transformM $
     \case
-      ECodataSelect a ll@(Label _ name) e Nothing -> do
+      ECodataSelect a ll@(Label _ name) (Just e) Nothing -> do
         e1 <- expandCodataSelect name e
-        pure (ECodataSelect a ll e (Just e1))
+        pure (ECodataSelect a ll Nothing (Just e1))
       e ->
         pure e
 

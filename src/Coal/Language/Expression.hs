@@ -64,7 +64,7 @@ data Expression a t
   | -- | Record field selector
     ESelect a (Label t) (Expression a t)
   | -- | Codata field selector
-    ECodataSelect a (Label t) (Expression a t) (Maybe (Expression a t))
+    ECodataSelect a (Label t) (Maybe (Expression a t)) (Maybe (Expression a t))
   | -- | Codata field data
     ECodataRecord a t (Dictionary (Expression a t))
   | -- | Row restriction
