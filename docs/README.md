@@ -1604,7 +1604,7 @@ We write the full type of `is_less_than` as: `t -> t -> bool with Ordered<t>`.
 
 #### Higher-kinded traits
 
-So far, all the traits we’ve looked at have been of the form `T<t>`, where `t` is a placeholder for an ordinary type. Unlike these, a *type constructor* is a type-level function which takes one or more types as arguments and returns a type. That is, a type constructor on its own isn’t really a type, until it is provided with all necessary type arguments. For example, in the type `Option<int>`, `Option` is a type constructor with [kind](https://en.wikipedia.org/wiki/Kind_(type_theory))
+So far, the traits we’ve looked at have all been of the form `T<t>`, where `t` is a placeholder for an ordinary type. Unlike these, a *type constructor* is a type-level function which takes one or more types as arguments and returns a type. That is, a type constructor on its own isn’t really a type, until it is provided with all necessary type arguments. For example, in the type `Option<int>`, `Option` is a type constructor with [kind](https://en.wikipedia.org/wiki/Kind_(type_theory))
 
 ```
 * -> *
