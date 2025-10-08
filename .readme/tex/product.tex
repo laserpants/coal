@@ -1,0 +1,21 @@
+\documentclass{standalone}
+\usepackage{amsmath}
+\usepackage{tikz-cd}
+\usetikzlibrary{positioning}
+\begin{document}
+
+\begin{tikzpicture}[>=Stealth, node distance=2cm]
+  \matrix (m) [matrix of nodes,
+               row sep=2cm,
+               column sep=1.5cm,
+               nodes={anchor=center}] {
+    & $A \times B$ & \\ 
+    $A$ & & $B$ \\
+  };
+
+  % Draw arrows
+  \draw[->] (m-1-2) -- (m-2-1) node[midway,left] {$\pi_1$};
+  \draw[->] (m-1-2) -- (m-2-3) node[midway,right] {$\pi_2$};
+\end{tikzpicture}
+
+\end{document}

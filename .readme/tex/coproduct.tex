@@ -1,0 +1,21 @@
+\documentclass{standalone}
+\usepackage{amsmath}
+\usepackage{tikz-cd}
+\usetikzlibrary{positioning}
+\begin{document}
+
+\begin{tikzpicture}[>=Stealth, node distance=2cm]
+  \matrix (m) [matrix of nodes,
+               row sep=2cm,
+               column sep=1.5cm,
+               nodes={anchor=center}] {
+    $A$ & & $B$ \\
+    & $A + B$ & \\ 
+  };
+
+  % Draw arrows
+  \draw[->] (m-1-1) -- (m-2-2) node[midway,left] {$\iota_1$};
+  \draw[->] (m-1-3) -- (m-2-2) node[midway,right] {$\iota_2$};
+\end{tikzpicture}
+
+\end{document}
