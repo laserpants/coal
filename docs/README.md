@@ -1965,7 +1965,7 @@ Data and codata can be seen as two sides of the same coin. This goes deeper than
 <div class="grid" markdown>
 
 <img src="../.readme/tex/png/fold.png" />
-<img src="../.readme/tex/png/fold.png" />
+<img src="../.readme/tex/png/unfold.png" />
 
 </div>
 
