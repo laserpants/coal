@@ -1769,15 +1769,13 @@ Folds can express a wide range of recursive computations over algebraic data typ
 
 This definition captures the standard way of consuming a list by repeatedly applying a function (`f`) to its elements and an accumulator. The recursive descent through the list happens implicitly — the programmer specifies only what to do at each layer.
 
-<!--
-A more idiomatic version of the factorial function ...
-
-```
-  fun factorial(n : int32) =
-    product(enum_to(n))  // product of numbers 1, 2, ..., n
-
-```
--->
+> Instead of dealing with recursive computations directly, it is often easier and safer to build on existing combinators and higher-order functions. For example, we can express the factorial function in terms of built-in primitives:
+> 
+> ```
+> let factorial = product << enum_to  // product of numbers 1, 2, ..., n
+> ```
+> 
+> Here, `enum_to` generates the list `[1, 2, ..., n]`, and `product` multiplies its elements.
 
 #### Top-level folds and mutual recursion
 
