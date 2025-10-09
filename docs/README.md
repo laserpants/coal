@@ -1740,7 +1740,23 @@ This produces the same behavior as if you could have written an explicitly recur
 
 but without referring to the function by name.
 
-TODO: fib
+The fibonacci function can be implemented in the following way:
+
+```
+  fun fib(p : nat) =
+    let (res, _) =
+      fold(p - 1) {
+        | Zero => 
+            (1 : nat, 1)
+        | Succ(@q) => 
+            let 
+              (m, n) = q
+            in 
+              (n, m + n)
+      }
+    in
+      res
+```
 
 ##### Well-foundedness
 
