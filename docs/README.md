@@ -2026,7 +2026,7 @@ An algebraic data type can be seen as the [initial algebra](https://en.wikipedia
 <img src="../.readme/tex/png/fold.png" />
 </p>
 
-Data types are built from constructors. For example, consider the `List` type:
+Data types are built from constructors. Consider the `List` type, for example:
 
 ```
 type List<t> 
@@ -2051,9 +2051,7 @@ The recursive type itself is the [fixed point](https://en.wikipedia.org/wiki/Fix
 List<t> ≅ μF
 ```
 
-Next, an *algebra* for a functor *F* is a type *A* (the *carrier*) together with a function *F(A) → A*.
-
-Notice that this function is what the pattern matching clauses (combined with the `@`-pattern syntax) in `fold` expressions describe:
+Next, an *algebra* for a functor *F* is a type *A* (the *carrier*) together with a function *F(A) → A*. This function is what the pattern matching clauses (in combination with the `@`-pattern syntax) in `fold` expressions describe:
 
 ```
 fold(xs) {
