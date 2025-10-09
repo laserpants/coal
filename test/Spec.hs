@@ -2412,16 +2412,22 @@ moduleCore =
             [r| 
                   @<$Nat>
                     ( Core$.pack_nat : int32/$Nat
-                    , [- int32]
-                        ( @<int32>
-                            ( Core$.unpack_nat : $Nat/int32
-                            , lhs : $Nat
+                    , let
+                        n : int32 =
+                          [- int32]
+                            ( @<int32>
+                                ( Core$.unpack_nat : $Nat/int32
+                                , lhs : $Nat
+                                )
+                            , @<int32>
+                                ( Core$.unpack_nat : $Nat/int32
+                                , rhs : $Nat
+                                )
                             )
-                        , @<int32>
-                            ( Core$.unpack_nat : $Nat/int32
-                            , rhs : $Nat
-                            )
-                        )
+                        in
+                          if ([< int32] (n : int32, 0)) 
+                            then 0
+                            else n : int32
                     )
               |]
         , OFunction
