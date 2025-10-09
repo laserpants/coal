@@ -1,5 +1,7 @@
 #!/bin/bash
 
+mkdir -p tmp
+
 pdflatex -output-directory=tmp fold_unfold.tex
 pdflatex -output-directory=tmp product_coproduct.tex
 
