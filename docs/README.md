@@ -1813,7 +1813,7 @@ We might try to handle the `Array` case by matching on the list constructor:
       | Array(@head :: tail) => ?
 ```
 
-The `@head` pattern works as expected: it binds head to the result of recursively folding over that element. However, the rest of the list (`tail`) cannot be processed using an `@`-pattern in the same way. Its type is `List<JsonValue>`, not `JsonValue`. This pattern expects a value of the same type as the one being folded over.
+The `@head` pattern works as expected: it binds head to the result of recursively folding over that element. However, the rest of the list (`tail`) cannot be processed using an `@`-pattern in the same way. Its type is `List<JsonValue>`, not `JsonValue`. Fold-patterns expect a value of the same type as the one being folded over.
 
 ##### Top-level folds
 
@@ -1831,9 +1831,9 @@ We can then call other folds from within a pattern:
     | JsonArray(encode_json_array(@values)) => ...
 ```
 
-The `@`-pattern works in the same way as in expression-level folds, binding values to the result of recursively folding over the list.
+Here, the `@`-pattern works in the same way as in expression-level folds, binding values to the result of recursively folding over the list.
 
-Here is a complete implementation the JSON encoder using this approach:
+The following is a complete implementation the JSON encoder using this approach:
 
 ```
 module Json {
