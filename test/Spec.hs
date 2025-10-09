@@ -300,6 +300,8 @@ spec = do
   print (x == Right "2\n")
   x <- main141
   print (x == Right "-627128164\n")
+  x <- main142
+  print (x == Right "8\n")
 
 --  x <- main85
 --  print (x == Right "aa\n")
@@ -1137,6 +1139,12 @@ main141 :: IO (Either CompilerFailureMode Text)
 main141 = do
   runTestFiles
     [ "./test/Coal/examples/141/Main.coal"
+    ]
+
+main142 :: IO (Either CompilerFailureMode Text)
+main142 = do
+  runTestFiles
+    [ "./test/Coal/examples/142/Main.coal"
     ]
 
 compileFiles :: [String] -> IO (Either CompilerFailureMode ())
