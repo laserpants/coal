@@ -1958,9 +1958,7 @@ It is also possible to define operations that transform counters while preservin
 
 <!--
 
---
-
-Aside: You may wonder, why can't we simply write `counter(n + 1)` then? Well, the reason is similar to that of folds. But instead of being concerned with progress in each step, here we are worried about *productivity*. 
+Aside: Why can't we simply write `counter(n + 1)` then? The reason is similar to that of folds. But instead of being concerned with progress in each step, here we are worried about *productivity*. 
 Consider what would happen if we could write, for example:
 
 ```
@@ -1985,8 +1983,6 @@ Example: pseudo-randomness
   }
 ```
 
--->
-
 ##### Does codata need to be infinite?
 
 TODO
@@ -2001,6 +1997,8 @@ cotype FiniteCounter = { Current : int32, Next : Option<FiniteCounter> }
     , @Next = if (n >= 10) then @Some(n + 1) else @None
   }
 ```
+
+-->
 
 #### Duality
 
