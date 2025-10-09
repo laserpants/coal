@@ -2022,6 +2022,10 @@ Data and codata are really two sides of the same coin. This correspondence goes 
 
 An algebraic data type can be seen as the [initial algebra](https://en.wikipedia.org/wiki/Initial_algebra) of a functor: it provides the smallest, well-founded solution that can be consumed by a fold (a catamorphism). 
 
+<p>
+<img src="../.readme/tex/png/fold.png" />
+</p>
+
 Data types are built from constructors. For example, consider the `List` type:
 
 ```
