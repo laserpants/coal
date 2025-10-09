@@ -740,7 +740,7 @@ unpack : nat -> int32
 
 #### Unit
 
-The `unit` type has only a single value, written as an empty pair of parentheses: `()`. At first glance this type may appear to serve no purpose, but it has several practical uses. For example, it is often useful to indicate that a function does not take any meaningful input. In C, we might write the following function:
+The `unit` type has only a single value, written as an empty pair of parentheses: `()`. At first glance this type may appear to serve no purpose, but it has several practical uses. For example, it is often useful to indicate that a function doesn't take any meaningful input. In C, we might write the following function:
 
 ```
 int five() {
@@ -758,7 +758,7 @@ fun five(() : unit) : int32 = 5
 
 ##### Two pairs of parentheses for the price of one
 
-Removing the type annotation, the above becomes `fun five(()) = 5`, which is perfectly valid. But since an expression like `five()` doesn’t have any other meaningful interpretation, the compiler accepts this as a shorthand for the slightly awkward double-parentheses.
+Removing the type annotation, the above becomes `fun five(()) = 5`, which is perfectly valid. But since an expression like `five()` doesn’t have any other meaningful interpretation, the compiler accepts this as a shorthand for the slightly awkward-looking double parentheses:
 
 ```
 fun five() = 5   // i.e., fun five(() : unit) = 5
@@ -1739,6 +1739,8 @@ This produces the same behavior as if you could have written an explicitly recur
 
 but without referring to the function by name.
 
+TODO: fib
+
 ##### Well-foundedness
 
 To ensure that recursion is well-founded (guaranteed to terminate), the use of `@`-patterns is restricted. Most importantly, they can only appear inside constructors. The reason for this is that a constructor’s fields are always *structurally smaller* than the value being folded. Progress toward the base case is thereby guaranteed in each step.
@@ -1779,7 +1781,7 @@ This definition captures the standard way of consuming a list by repeatedly appl
 
 #### Top-level folds and mutual recursion
 
-The `fold` expression syntax is applicable to a wide range of algorithms, but there are cases where it falls short. Let’s take another look at the JSON data type concocted earlier:
+Even though the `fold` expression syntax is applicable to a wide range of algorithms, there are cases where it falls short. Let’s take another look at the JSON data type concocted earlier:
 
 ```
   type JsonValue
@@ -1791,14 +1793,14 @@ The `fold` expression syntax is applicable to a wide range of algorithms, but th
     | Object(List<(string, JsonValue)>)
 ```
 
-This type is recursive, but there is a difference between this type and the `nat` type, for example, namely that in this type, `JsonValue` doesn't appear immediately under a constructor. Instead it is wrapped inside one or more layers of data constructors.
+This type is recursive, but there is a difference between this type and the `nat` type (for example), namely that in this type, `JsonValue` doesn’t appear immediately under a constructor. Instead it is wrapped inside one or more layers of data constructors.
 
-What happens if we try to implment a function to encode JSON values:
+What happens if we try to implment a function to encode JSON values. That is, a recursive function of type `JsonValue -> string`:
 
 ```
   fun json_encode(json_value) : string =
     fold(json_value) {
-      // ... other constructors
+      // ... other constructors are straightforward
       | Array(json_values) => ?
       | Object(key_value_pairs>) => ?
     }
@@ -1810,12 +1812,9 @@ Inside the `Array` constructor, we can try to match on the list constructor:
       | Array(@head :: tail) => ?
 ```
 
-This means that `head` will bind to the result of calling the fold again. 
-But we need the algorithm to continue on the rest of the list. That doesn't work here, since ..
+This means that `head` will bind to the result of calling the fold again. But we need the algorithm to continue on the rest of the list. That doesn’t work here, since the `@`-pattern will not work on `tail`. Its type is `List<JsonValue>`, but the `@` expects a `JsonValue`.
 
-To make this work
-
-A top-level fold, unlike the expression syntax, has a name, which makes it reachable from other folds.
+To make this work, we will instead use a different construct. A top-level `fold`, unlike the expression syntax, has a name, which makes it reachable from other folds.
 
 ```
   fold encode_json_value : JsonValue -> string 
@@ -1823,11 +1822,13 @@ A top-level fold, unlike the expression syntax, has a name, which makes it reach
   fold encode_json_object : List<(string, JsonValue)> -> List<string> 
 ```
 
-What this allows us to do
+What this allows us to do is to call a different fold from within a pattern:
 
 ```
     | JsonArray(encode_json_array(@values)) => ...
 ```
+
+The semantics of the `@`-pattern is the same.
 
 Here is a full implementation of `encode_json` based on this approach:
 
@@ -1954,7 +1955,6 @@ It is also possible to define operations that transform counters while preservin
 
 <!--
 
-
 --
 
 Aside: You may wonder, why can't we simply write `counter(n + 1)` then? Well, the reason is similar to that of folds. But instead of being concerned with progress in each step, here we are worried about *productivity*. 
@@ -1968,11 +1968,6 @@ Consider what would happen if we could write, for example:
 ```
 
 Example: pseudo-randomness
-
-
-
-
-
 
 --
 
@@ -1997,14 +1992,12 @@ TODO
 cotype FiniteCounter = { Current : int32, Next : Option<FiniteCounter> }
 ```
 
-
 ```
   unfold count_from(n : int32) : Option<FiniteCounter> {
     , Current = n
     , @Next = if (n >= 10) then @Some(n + 1) else @None
   }
 ```
-
 
 #### Duality
 
