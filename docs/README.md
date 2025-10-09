@@ -56,7 +56,7 @@ These code samples illustrate two distinct modes of recursive control flow. If y
 
 ### Programs = Expressions + Effects
 
-Coal is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-oriented_programming_language) language: a program is, at its core, just an expression that evaluates to a value. In this programming model, all data is immutable and there are no observable side-effects. These properties make programs more predictable, easier to reason about, highly testable, and allows for code to be verified using formal mathematical techniques. On the other hand, practical applications need to have the ability to interact with the outside world. Side-effects are what make them useful. A [system for managing effects](https://en.wikipedia.org/wiki/Effect_system), such as I/O and exceptions, is still lacking in Coal. This is an essential step to promote the language into one that can be used to write actual programs. See **[How to contribute](#how-to-contribute)** if you’re keen to work on this.
+Coal is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-oriented_programming_language) language: a program is, at its core, just an expression that evaluates to a value. In this programming model, all data is immutable and there are no observable side-effects. These properties make programs more predictable, easier to reason about, highly testable, and allows for code to be verified using formal mathematics. On the other hand, practical applications need to have the ability to interact with the outside world. Side-effects are what make them useful. A [system for managing effects](https://en.wikipedia.org/wiki/Effect_system), such as I/O and exceptions, is still lacking in Coal. This is an essential step to promote the language into one that can be used to write actual programs. See **[How to contribute](#how-to-contribute)** if you’re keen to work on this.
 
 ## Project status and roadmap
 
@@ -216,7 +216,7 @@ A function is defined with the `fun` keyword, followed by the function’s name 
 Function parameters are *patterns*, allowing functions to directly deconstruct their arguments. In addition to basic variables, records, tuples, and other data constructors, patterns can also include wildcards, literals, and nested structures. See **[Pattern matching](#pattern-matching)** for a list of available patterns.
 
 ```
-  fun bork({ n : int32 }, (fst, snd), _) =
+  fun grok({ n : int32 }, (fst, snd), _) =
     ...
 ```
 
@@ -1769,7 +1769,7 @@ Folds can express a wide range of recursive computations over algebraic data typ
 
 This definition captures the standard way of consuming a list by repeatedly applying a function (`f`) to its elements and an accumulator. The recursive descent through the list happens implicitly — the programmer specifies only what to do at each layer.
 
-> Instead of dealing with recursive computations directly, it is often easier and safer to build on existing combinators and higher-order functions. For example, we can express the factorial function in terms of built-in primitives:
+> Instead of dealing with recursive computations directly, it is often easier and safer to build on existing combinators and higher-order functions. For example, we can express the factorial function in the following way:
 > 
 > ```
 > let factorial = product << enum_to  // product of numbers 1, 2, ..., n
@@ -1779,7 +1779,40 @@ This definition captures the standard way of consuming a list by repeatedly appl
 
 #### Top-level folds and mutual recursion
 
---> There are two type of folds
+The `fold` expression syntax is applicable to a wide range of algorithms, but there are cases where it falls short.
+Let’s take another look at the JSON data type described earlier:
+
+```
+  type JsonValue
+    = Null
+    | Bool(bool)
+    | Number(double)
+    | String(string)
+    | Array(List<JsonValue>)
+    | Object(List<(string, JsonValue)>)
+```
+
+This type is recursive, since it appears within its own constructors.
+But there is a difference between this type and the `nat` type, for example, namely that 
+`JsonValue` doesn't appear immediately under a constructor. Instead it is wrapped inside one or more other types.
+
+What happens if we try to 
+
+```
+  fun json_encode(json_value) : string =
+    fold(json_value) {
+      | Null => "null"
+      | Bool(true) => "true"
+      | Bool(false) => "false"
+      | Number(d) => double_to_string(d)
+      | String(str) => "\"" +++ str +++ "\""
+      | Array(json_values) => ?
+      | Object(key_value_pairs>) => ?
+    }
+```
+
+
+
 
 
 
@@ -1941,7 +1974,7 @@ Example: pseudo-randomness
 
 -->
 
-##### Does codata have to be infinite?
+##### Does codata need to be infinite?
 
 TODO
 
@@ -1960,11 +1993,47 @@ cotype FiniteCounter = { Current : int32, Next : Option<FiniteCounter> }
 
 #### Duality
 
-Data and codata can be seen as two sides of the same coin. This goes deeper than mere superficial resemblance. The idea originates in category theory, where precise formal meaning is given to folds and unfolds. 
+Data and codata can be seen as two sides of the same coin. This correspondence goes deeper than just intuition. It originates in category theory, where precise formal meaning is given to these concepts. 
 
+An algebraic data type can be seen as the [initial algebra](https://en.wikipedia.org/wiki/Initial_algebra) of a functor: it provides the smallest, well-founded solution that can be consumed by a fold (a catamorphism). 
 
+Data types are built from constructors. For example, consider the `List` type:
 
-An algebraic data type can be seen as the [initial algebra](https://en.wikipedia.org/wiki/Initial_algebra) of a functor: it provides the smallest, well-founded solution that can be consumed by a fold (a catamorphism). In the other direction, a codata type corresponds to the [final coalgebra](https://en.wikipedia.org/wiki/Initial_algebra#Final_coalgebra) of a functor: it is the largest (potentially infinite) solution that can be observed or generated by an unfold (anamorphism). In this description, algebras and coalgebras are mirror images: by simply reversing the direction of the arrows in their diagrams, an algebra turns into a coalgebra and vice versa.
+```
+type List<a> 
+  = Nil
+  | Cons(a, List<a>)
+```
+
+The *pattern functor* for a data type abstracts recursion by isolating one layer of the data structure, leaving the recursive part as a parameter. For `List`, the corresponding pattern functor *F* is:
+
+```
+F(X) = 1 + (a × X)
+```
+
+Here:
+
+- *1* corresponds to `Nil`,
+- *a × X* corresponds to `Cons(a, X)`.
+
+The recursive type itself is the fixed point of this functor:
+
+```
+List<a> ≅ μF
+```
+
+An *algebra* for a functor *F* is a type *A* together with a function *F(A) → A*.
+
+Notice that this is exactly what the `fold` syntax in Coal ..
+
+```
+fold(xs) {
+  Nil => 0
+  Cons(x, acc) => x + acc
+}
+```
+
+In the other direction, a codata type corresponds to the [final coalgebra](https://en.wikipedia.org/wiki/Initial_algebra#Final_coalgebra) of a functor: it is the largest (potentially infinite) solution that can be observed or generated by an unfold (anamorphism). In this description, algebras and coalgebras are mirror images: by simply reversing the direction of the arrows in their diagrams, an algebra turns into a coalgebra and vice versa.
 
 <p>
 <img src="../.readme/tex/png/fold_unfold.png" />
