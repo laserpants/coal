@@ -2018,7 +2018,7 @@ cotype FiniteCounter = { Current : int32, Next : Option<FiniteCounter> }
 
 #### Duality
 
-Data and codata can be seen as two sides of the same coin. This correspondence goes deeper than just intuition and can be traced back to category theory, where precise formal meaning is given to these concepts. 
+Data and codata are really two sides of the same coin. This correspondence goes deeper than just intuition and can be traced back to category theory, where precise formal meaning is given to these concepts. 
 
 An algebraic data type can be seen as the [initial algebra](https://en.wikipedia.org/wiki/Initial_algebra) of a functor: it provides the smallest, well-founded solution that can be consumed by a fold (a catamorphism). 
 
