@@ -1817,7 +1817,7 @@ The `@head` pattern works as expected: it binds head to the result of recursivel
 
 ##### Top-level folds
 
-A top-level `fold`, unlike the expression-level syntax, has a name, which makes it callable from other folds. This allows us to define separate folds for the three different cases: 
+A top-level `fold`, unlike the expression-level syntax, has a name, which makes it callable from other folds, and from ordinary functions. This allows us to define separate folds for the three different cases: 
 
 ```
   fold encode_json_value : JsonValue -> string 
@@ -1825,13 +1825,13 @@ A top-level `fold`, unlike the expression-level syntax, has a name, which makes 
   fold encode_json_object : List<(string, JsonValue)> -> List<string> 
 ```
 
-We can then call other folds from within a pattern:
+From one fold, we can invoke another. But folding is only possible from within a pattern, using the following syntax:
 
 ```
     | JsonArray(encode_json_array(@values)) => ...
 ```
 
-Here, the `@`-pattern works in the same way as in expression-level folds, binding values to the result of recursively folding over the list.
+The `@`-pattern works in the same way here as in expression-level folds, binding values to the result of recursively folding over the list.
 
 The following is a complete implementation the JSON encoder using this approach:
 
