@@ -137,8 +137,9 @@ Coal is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-
   1. [Recursion, corecursion, and codata](#recursion-corecursion-and-codata)
      - [Fold syntax](#fold-syntax)
        - [Well-foundedness](#well-foundedness)
-       - [Beyond factorial](#beyond-factorial)
-     - [Top-level folds and mutual recursion](#top-level-folds-and-mutual-recursion)
+       - [Beyond the factorial](#beyond-the-factorial)
+     - [Mutual recursion](#mutual-recursion)
+       - [Top-level folds](#top-level-folds)
      - [Codata and unfold](#codata-and-unfold)
        - [Data on demand](#data-on-demand)
        - [A basic counter](#a-basic-counter)
@@ -1755,7 +1756,7 @@ The following, for example, is invalid:
 
 Here, `@p` appears at the top level, and not inside a constructor. This means that the fold would have no smaller sub-structure to recurse into.
 
-##### Beyond factorial
+##### Beyond the factorial
 
 Folds can express a wide range of recursive computations over algebraic data types. For example, here is the implementation of `reduce` for lists:
 
@@ -1779,7 +1780,7 @@ This definition captures the standard way of consuming a list by repeatedly appl
 > 
 > Here, `enum_to` generates the list `[1, 2, ..., n]`, and `product` multiplies its elements.
 
-#### Top-level folds and mutual recursion
+#### Mutual recursion
 
 Even though the `fold` expression syntax is applicable to a wide range of algorithms, there are cases where it falls short. Let’s take another look at the JSON data type concocted earlier:
 
@@ -1793,9 +1794,9 @@ Even though the `fold` expression syntax is applicable to a wide range of algori
     | Object(List<(string, JsonValue)>)
 ```
 
-This type is recursive, but there is a difference between this type and the `nat` type (for example), namely that in this type, `JsonValue` doesn’t appear immediately under a constructor. Instead it is wrapped inside one or more layers of data constructors.
+This type is recursive, but it differs from a simple type like `nat` in an important way: `JsonValue` does not appear immediately under a constructor. Instead, it is wrapped inside other data structures (e.g., `List` in the `Array` constructor, or `List<(string, JsonValue)>` in the `Object` constructor).
 
-What happens if we try to implment a function to encode JSON values. That is, a recursive function of type `JsonValue -> string`:
+Suppose we want to implement a function that encodes JSON values as strings &mdash; that is, a recursive function of type `JsonValue -> string`:
 
 ```
   fun json_encode(json_value) : string =
@@ -1806,15 +1807,17 @@ What happens if we try to implment a function to encode JSON values. That is, a 
     }
 ```
 
-Inside the `Array` constructor, we can try to match on the list constructor:
+We might try to handle the `Array` case by matching on the list constructor:
 
 ```
       | Array(@head :: tail) => ?
 ```
 
-This means that `head` will bind to the result of calling the fold again. But we need the algorithm to continue on the rest of the list. That doesn’t work here, since the `@`-pattern will not work on `tail`. Its type is `List<JsonValue>`, but the `@` expects a `JsonValue`.
+The `@head` pattern works as expected: it binds head to the result of recursively folding over that element. However, the rest of the list (`tail`) cannot be processed using an `@`-pattern in the same way. Its type is `List<JsonValue>`, not `JsonValue`. This pattern expects a value of the same type as the one being folded over.
 
-To make this work, we will instead use a different construct. A top-level `fold`, unlike the expression syntax, has a name, which makes it reachable from other folds.
+##### Top-level folds
+
+A top-level `fold`, unlike the expression-level syntax, has a name, which makes it callable from other folds. This allows us to define separate folds for the three different cases: 
 
 ```
   fold encode_json_value : JsonValue -> string 
@@ -1822,15 +1825,15 @@ To make this work, we will instead use a different construct. A top-level `fold`
   fold encode_json_object : List<(string, JsonValue)> -> List<string> 
 ```
 
-What this allows us to do is to call a different fold from within a pattern:
+We can then call other folds from within a pattern:
 
 ```
     | JsonArray(encode_json_array(@values)) => ...
 ```
 
-The semantics of the `@`-pattern is the same.
+The `@`-pattern works in the same way as in expression-level folds, binding values to the result of recursively folding over the list.
 
-Here is a full implementation of `encode_json` based on this approach:
+Here is a complete implementation the JSON encoder using this approach:
 
 ```
 module Json {
