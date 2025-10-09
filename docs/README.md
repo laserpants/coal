@@ -2029,36 +2029,36 @@ An algebraic data type can be seen as the [initial algebra](https://en.wikipedia
 Data types are built from constructors. For example, consider the `List` type:
 
 ```
-type List<a> 
+type List<t> 
   = Nil
-  | Cons(a, List<a>)
+  | Cons(a, List<t>)
 ```
 
-The *pattern functor* for a data type abstracts recursion by isolating one layer of the data structure, leaving the recursive part as a parameter. For `List`, the corresponding pattern functor *F* is:
+The *pattern functor* for a data type abstracts recursion by isolating one layer of the data structure, leaving the recursive portion as a parameter. For `List`, the corresponding pattern functor *F* is:
 
 ```
-F(X) = 1 + (a × X)
+F(X) = 1 + (t × X)
 ```
 
 Here:
 
 - *1* corresponds to `Nil`,
-- *a × X* corresponds to `Cons(a, X)`.
+- *t × X* corresponds to `Cons(t, X)`.
 
-The recursive type itself is the fixed point of this functor:
+The recursive type itself is the [fixed point](https://en.wikipedia.org/wiki/Fixed_point_(mathematics)) of this functor:
 
 ```
-List<a> ≅ μF
+List<t> ≅ μF
 ```
 
-An *algebra* for a functor *F* is a type *A* together with a function *F(A) → A*.
+Next, an *algebra* for a functor *F* is a type *A* (the *carrier*) together with a function *F(A) → A*.
 
-Notice that this is exactly what the `fold` syntax in Coal ..
+Notice that this function is what the pattern matching clauses (combined with the `@`-pattern syntax) in `fold` expressions describe:
 
 ```
 fold(xs) {
   Nil => 0
-  Cons(x, acc) => x + acc
+  Cons(x, @acc) => x + acc
 }
 ```
 
