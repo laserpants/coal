@@ -2195,7 +2195,7 @@ If possible, include a small code example that demonstrates the issue — this m
 If you want to work on a feature or bug fix, fork the repository and create a new branch for your work. Then submit a pull request with a description of:
 
 - What you changed
-- Why you changed it
+- Why the change was made
 - Relevant issue number (if any)
 
 ### Documentation
