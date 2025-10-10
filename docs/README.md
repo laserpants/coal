@@ -2049,7 +2049,7 @@ The actual recursive type is the [fixed point](https://en.wikipedia.org/wiki/Fix
 
 ### Algebras and folds
 
-Next, an *algebra* for a functor 𝐹 is a type 𝐴 (the *carrier*) together with a function 𝐹(𝐴) → 𝐴. This function, called the *structure map*, is what the pattern matching clauses (along with the `@`-pattern syntax) in `fold` expressions describe:
+An *algebra* for a functor 𝐹 is a type 𝐴 (the *carrier*) together with a function 𝐹(𝐴) → 𝐴. This function, called the *structure map*, is what the pattern matching clauses (along with the `@`-pattern syntax) in `fold` expressions describe:
 
 ```
 fold(xs) {
