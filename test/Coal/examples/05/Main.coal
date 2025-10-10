@@ -1,8 +1,0 @@
-module Main {
-
-  import Math(factorial)
-
-  fun main() =
-    trace_int32(factorial(8))
-
-}

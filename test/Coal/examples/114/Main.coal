@@ -1,9 +1,0 @@
-module Main {
-
-  fun baz((x, { a = v })) =
-    v
-
-  fun main() =
-    trace_int32(baz(("what", { a = 5 })))
-
-}

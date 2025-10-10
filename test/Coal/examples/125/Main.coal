@@ -1,7 +1,0 @@
-module Main {
-
-  fun main() =
-    let (a :: b) = [1,2,3 : int32]
-    in
-      trace_int32(a)
-}

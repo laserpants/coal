@@ -1,5 +1,0 @@
-module Main {
-
-  fun main() = trace_int32(1)
-
-}

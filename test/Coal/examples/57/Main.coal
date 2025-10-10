@@ -1,8 +1,0 @@
-module Main {
-
-  let baz = 1 : int32
-
-  fun main() =
-    trace_int32(baz)
-
-}

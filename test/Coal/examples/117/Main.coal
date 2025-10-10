@@ -1,8 +1,0 @@
-module Main {
-
-  fun foo(f : a -> b, x : c) : b = f(x)
-
-  fun main() = 
-    trace_int32(1)
-
-}

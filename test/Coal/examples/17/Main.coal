@@ -1,9 +1,0 @@
-module Main {
-
-  let foo : int32 -> bool = fn(n : int32) =>
-    false
-
-  fun main() = 
-    trace_bool(foo(5))
-
-}

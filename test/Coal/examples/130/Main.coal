@@ -1,7 +1,0 @@
-module Main {
-
-  import Banan()
-
-  fun main() = trace_int32(1)
-
-}

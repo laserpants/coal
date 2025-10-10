@@ -31,50 +31,6 @@ library
       Coal.Common.Name
       Coal.Common.Supply
       Coal.Compiler
-      Coal.Compiler.Environment
-      Coal.Compiler.Error
-      Coal.Compiler.Journal
-      Coal.Compiler.Kernel.Environment
-      Coal.Compiler.Kernel.TranslateDefinition
-      Coal.Compiler.Kernel.TranslateExpression
-      Coal.Compiler.Kernel.TranslateModule
-      Coal.Compiler.Kernel.TranslateType
-      Coal.Compiler.Pass
-      Coal.Compiler.Pass.ImportsTopRule
-      Coal.Compiler.Pass.Parsing
-      Coal.Compiler.Pass.Setup
-      Coal.Compiler.Pass.TopologicalSort
-      Coal.Compiler.Pass.TypeImports
-      Coal.Compiler.PatternAnomalies
-      Coal.Compiler.PatternMatching
-      Coal.Compiler.PatternMatching.Compiler
-      Coal.Compiler.PatternMatching.Envelope
-      Coal.Compiler.PatternMatching.Equation
-      Coal.Compiler.PatternMatching.Rule
-      Coal.Compiler.Stack
-      Coal.Compiler.State
-      Coal.Compiler.Transform.Definition.Fold
-      Coal.Compiler.Transform.Definition.Unfold
-      Coal.Compiler.Transform.Dictionaries
-      Coal.Compiler.Transform.Expression
-      Coal.Compiler.Transform.Flattening
-      Coal.Compiler.Transform.Fold
-      Coal.Compiler.Transform.LambdaMatch
-      Coal.Compiler.Transform.Nats
-      Coal.Compiler.Transform.NormalizeObjects
-      Coal.Compiler.Transform.Pattern.AsDesugar
-      Coal.Compiler.Transform.Pattern.Desugar
-      Coal.Compiler.Transform.Pattern.OrExpansion
-      Coal.Compiler.Transform.Pattern.RecordDesugar
-      Coal.Compiler.Transform.PatternExhaustiveCheck
-      Coal.Compiler.Transform.Shadowing
-      Coal.Compiler.Transform.Tree
-      Coal.Compiler.Transform.Type.AliasExpansion
-      Coal.Compiler.Transform.Type.Parameterized
-      Coal.Compiler.Transform.Unfold
-      Coal.Compiler.Transform.WhereClauses
-      Coal.Compiler.TypeInference
-      Coal.Compiler.TypeInference.Errors
       Coal.Graphviz.Dot
       Coal.Kernel.Compiler
       Coal.Kernel.Compiler.Ast
@@ -262,15 +218,6 @@ test-suite coal-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
-      Coal.Compiler.PatternAnomaliesSpec
-      Coal.TypeSystem.Constraint.Generation.EAnnotationConstraintsSpec
-      Coal.TypeSystem.Constraint.Generation.EConstructorConstraintsSpec
-      Coal.TypeSystem.Constraint.Generation.ELambdaConstraintsSpec
-      Coal.TypeSystem.Constraint.GenerationSpec
-      Coal.TypeSystem.SubstitutionSpec
-      Coal.TypeSystem.TypeIndexedSpec
-      Coal.TypeSystem.UnificationSpec
-      Coal.TypeSystemSpec
       Paths_coal
   hs-source-dirs:
       test

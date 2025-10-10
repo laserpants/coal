@@ -1,9 +1,0 @@
-module Main {
-
-  fun print_name(r : { name : string | r }) =
-    trace_string(r.name)
-
-  fun main() =
-    print_name({ name = "Prot" })
-
-}

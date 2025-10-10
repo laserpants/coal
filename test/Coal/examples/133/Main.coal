@@ -1,9 +1,0 @@
-module Main {
-
-  fun main() =
-    match(("a", "b")) {
-      | (_, _) =>
-          trace_int32(123)
-    }
-
-}

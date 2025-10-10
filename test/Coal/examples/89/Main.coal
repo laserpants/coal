@@ -1,9 +1,0 @@
-module Main {
-
-  fun main() = 
-    trace_string(hello())
-
-  fun hello() =
-    "Hello"
-
-}
