@@ -2041,7 +2041,7 @@ The *pattern functor* for a data type abstracts recursion by isolating one layer
 Here:
 
 - *1* corresponds to `Nil`,
-- *t × X* corresponds to `Cons(t, X)`.
+- *(t × X)* corresponds to `Cons(t, X)`.
 
 The recursive type is the [fixed point](https://en.wikipedia.org/wiki/Fixed_point_(mathematics)) of this functor:
 
