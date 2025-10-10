@@ -397,7 +397,7 @@ Variable names are subject to the following rules:
 
 ##### Reserved keywords
 
-Reserved language keywords cannot be used as variable names. These are:
+Reserved language keywords cannot be used as variable names. They are:
 
 ```
 alias, as, bignum, bool, char, cotype, double, else, false, float, fn, fold, fun, if, import, in, instance, int32, int64, let, match, module, nat, or, string, then, trait, true, type, unfold, unit, when, where, with
@@ -520,7 +520,7 @@ The pattern used on the left-hand side must be such that it is guaranteed to mat
 let (x, y) = (1, 2) in x + y
 
 -- Matching nested records
-let { baz = { f = a | _ } } = faz(4)
+let { tidbits = { f = a | _ } } = compute(4)
 ```
 
 > #### A note about let-generalization
@@ -723,7 +723,7 @@ The number five, for example, can then be written:
 Succ(Succ(Succ(Succ(Succ(Zero)))))
 ```
 
-This makes it possible to use numbers directly in patterns, just like with other algebraic data types:
+This representation makes it possible to use numbers directly in patterns, just like with other algebraic data types:
 
 ```
   match(n : nat) {
@@ -812,7 +812,7 @@ type List<a>
 
 Here `::` denotes the *cons*-operator, which constructs a new list by prepending an element to an existing list.
 
-Lists can be deconstructed using pattern matching. For example, the following function removes the first element from a list if it happens to be a zero:
+Lists are deconstructed using pattern matching. For example, the following function removes the first element from a list if it happens to be a zero:
 
 ```
   fun remove_head_if_zero(list) = 
@@ -1235,7 +1235,7 @@ Tuples of length two and three are often called *pairs* and *triples*, respectiv
 (42)  // Not a tuple -- just the integer 42
 ```
 
-The empty tuple *does* exist, and has special meaning. It is written `()` and is known as the unit value. The type of `()` is `unit`. (See **Built-in types** for more details.)
+The empty tuple *does* exist, and has special meaning. It is written `()` and is known as the unit value. The type of `()` is `unit`. (See **[Built-in language primitives](#built-in-language-primitives)** for more details.)
 
 ```
 ()            : unit                           // unit value
@@ -1245,7 +1245,7 @@ The empty tuple *does* exist, and has special meaning. It is written `()` and is
 // ...
 ```
 
-As with other data types, tuples can be deconstructed by means of pattern matching:
+As with other data types, tuples can be deconstructed through pattern matching:
 
 ```
   fun fst3((fst, _, _) : (a, b, c)) : a = fst
