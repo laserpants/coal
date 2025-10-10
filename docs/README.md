@@ -2062,7 +2062,7 @@ fold(xs) {
 }
 ```
 
-The *initial* algebra (𝜇𝐹, in) is defined by the map in : 𝐹(𝜇𝐹) → 𝜇𝐹. That is, the carrier is the data type itself (i.e., `List<t>` in this example).
+The *initial* algebra (𝜇𝐹, in) is defined by the map in : 𝐹(𝜇𝐹) → 𝜇𝐹. The carrier of this algebra is the data type itself (i.e., `List<t>` in this example).
 The fact that this is an initial object in 
 
 algebra morphism
