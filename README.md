@@ -1235,7 +1235,7 @@ Tuples of length two and three are often called *pairs* and *triples*, respectiv
 (42)  // Not a tuple -- just the integer 42
 ```
 
-The empty tuple *does* exist, and has special meaning. It is written `()` and is known as the unit value. The type of `()` is `unit`. (See **Built-in types** for more details.)
+The empty tuple *does* exist, and has special meaning. It is written `()` and is known as the unit value. The type of `()` is `unit`. (See **[Built-in language primitives](#built-in-language-primitives)** for more details.)
 
 ```
 ()            : unit                           // unit value
@@ -1245,7 +1245,7 @@ The empty tuple *does* exist, and has special meaning. It is written `()` and is
 // ...
 ```
 
-As with other data types, tuples can be deconstructed by means of pattern matching:
+As with other data types, tuples can be deconstructed through pattern matching:
 
 ```
   fun fst3((fst, _, _) : (a, b, c)) : a = fst
