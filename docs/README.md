@@ -2038,18 +2038,12 @@ The *pattern functor* for a data type abstracts recursion by isolating one layer
 
 <p><img src="../.readme/tex/png/pattern_functor.png" /></p>
 
-<!--
-```
-F(X) = 1 + (t × X)
-```
--->
-
 Here:
 
 - *1* corresponds to `Nil`,
 - *t × X* corresponds to `Cons(t, X)`.
 
-The recursive type itself is the [fixed point](https://en.wikipedia.org/wiki/Fixed_point_(mathematics)) of this functor:
+The recursive type is the [fixed point](https://en.wikipedia.org/wiki/Fixed_point_(mathematics)) of this functor:
 
 <p><img src="../.readme/tex/png/fixed_point.png" /></p>
 
