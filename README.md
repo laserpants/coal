@@ -6,7 +6,7 @@ This repository is the home of the **Coal programming language** and compiler.
 
 1. [About](#about)
 1. [Project status and roadmap](#project-status-and-roadmap)
-1. [Language overview](#language-overview)
+1. [Language manual](#language-manual)
 1. [Initial algebras](#initial-algebras)
 1. [Installation and setup](#installation-and-setup)
 1. [How to contribute](#how-to-contribute)
@@ -80,7 +80,7 @@ Coal is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-
 | 1          | Error messages                                        |            |                                   |                                                                                                       |                                                                        
 | ✅         | <strike>Bug: unfold type annotations</strike>         |            |                                   |                                                                                                       |                                                                        
 
-## Language overview
+## Language manual
 
 ### Table of contents
 
