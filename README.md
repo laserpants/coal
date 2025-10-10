@@ -397,7 +397,7 @@ Variable names are subject to the following rules:
 
 ##### Reserved keywords
 
-Reserved language keywords cannot be used as variable names. These are:
+Reserved language keywords cannot be used as variable names. They are:
 
 ```
 alias, as, bignum, bool, char, cotype, double, else, false, float, fn, fold, fun, if, import, in, instance, int32, int64, let, match, module, nat, or, string, then, trait, true, type, unfold, unit, when, where, with
@@ -520,7 +520,7 @@ The pattern used on the left-hand side must be such that it is guaranteed to mat
 let (x, y) = (1, 2) in x + y
 
 -- Matching nested records
-let { baz = { f = a | _ } } = faz(4)
+let { tidbits = { f = a | _ } } = compute(4)
 ```
 
 > #### A note about let-generalization
@@ -812,7 +812,7 @@ type List<a>
 
 Here `::` denotes the *cons*-operator, which constructs a new list by prepending an element to an existing list.
 
-Lists can be deconstructed using pattern matching. For example, the following function removes the first element from a list if it happens to be a zero:
+Lists are deconstructed using pattern matching. For example, the following function removes the first element from a list if it happens to be a zero:
 
 ```
   fun remove_head_if_zero(list) = 
