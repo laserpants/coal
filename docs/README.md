@@ -2036,6 +2036,11 @@ type List<t>
 
 The *pattern functor* for a data type abstracts recursion by isolating one layer of the data structure, leaving the recursive portion as a parameter. For `List`, the corresponding pattern functor *F* is:
 
+<p>
+<img src="../.readme/tex/png/pattern_functor.png" />
+</p>
+
+<!--
 ```
 F(X) = 1 + (t × X)
 ```
@@ -2050,6 +2055,7 @@ The recursive type itself is the [fixed point](https://en.wikipedia.org/wiki/Fix
 <p>
 <img src="../.readme/tex/png/fixed_point.png" />
 </p>
+-->
 
 Next, an *algebra* for a functor *F* is a type *A* (the *carrier*) together with a function *a : F(A) → A*. This function is what the pattern matching clauses (in combination with the `@`-pattern syntax) in `fold` expressions describe:
 
