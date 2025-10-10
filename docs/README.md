@@ -7,7 +7,7 @@ This repository is the home of the **Coal programming language** and compiler.
 1. [About](#about)
 1. [Project status and roadmap](#project-status-and-roadmap)
 1. [Language overview](#language-overview)
-1. [Data and codata](#data-and-codata)
+1. [Initial algebras](#initial-algebras)
 1. [Installation and setup](#installation-and-setup)
 1. [How to contribute](#how-to-contribute)
 1. [License](#license)
@@ -2016,7 +2016,7 @@ cotype FiniteCounter = { Current : int32, Next : Option<FiniteCounter> }
 
 -->
 
-## Data and codata
+## Initial algebras
 
 Data and codata are really two sides of the same coin. This correspondence can be traced back to category theory, where precise formal meaning is given to these concepts. 
 
