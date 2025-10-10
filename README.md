@@ -2018,7 +2018,7 @@ cotype FiniteCounter = { Current : int32, Next : Option<FiniteCounter> }
 
 ## Initial algebras
 
-Data and codata are really two sides of the same coin. This correspondence can be traced back to category theory, where precise formal meaning is given to these concepts. 
+Data and codata are really "two sides of the same coin." This correspondence can be traced back to category theory, where precise formal meaning is given to these concepts. 
 
 An algebraic data type can be understood as the [initial algebra](https://en.wikipedia.org/wiki/Initial_algebra) of a functor. Intuitively, this means that it provides the smallest, well-founded solution to a type equation &mdash; one that can be consumed by a fold (a catamorphism). 
 
