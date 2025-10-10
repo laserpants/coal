@@ -2057,7 +2057,7 @@ The recursive type itself is the [fixed point](https://en.wikipedia.org/wiki/Fix
 <img src="../.readme/tex/png/fixed_point.png" />
 </p>
 
-Next, an *algebra* for a functor 𝐹 is a type 𝐴 (the *carrier*) together with a function *a* : 𝐹(𝐴) → 𝐴. This function is what the pattern matching clauses (in combination with the `@`-pattern syntax) in `fold` expressions describe:
+Next, an *algebra* for a functor 𝐹 is a type 𝐴 (the *carrier*) together with a function 𝐹(𝐴) → 𝐴. This function is what the pattern matching clauses (in combination with the `@`-pattern syntax) in `fold` expressions describe:
 
 ```
 fold(xs) {
