@@ -723,7 +723,7 @@ The number five, for example, can then be written:
 Succ(Succ(Succ(Succ(Succ(Zero)))))
 ```
 
-This makes it possible to use numbers directly in patterns, just like with other algebraic data types:
+This representation makes it possible to use numbers directly in patterns, just like with other algebraic data types:
 
 ```
   match(n : nat) {
