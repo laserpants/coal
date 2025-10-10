@@ -2064,7 +2064,7 @@ In the other direction, a codata type corresponds to the [final coalgebra](https
 
 <p><img src="../.readme/tex/png/fold_unfold.png" /></p>
 
-### Duality
+### More duality
 
 Duality is a recurring theme in category theory. Products and sum types describe ways of combining values: a product collects multiple values into one, while a sum, or *disjoint union*, represents a choice between alternatives. A disjoint union is sometimes also referred to as a *coproduct*. The reason is that a product is defined by a universal property that allows you to extract its components, whereas a coproduct is defined dually: it allows you to inject a value from one of the alternatives and to handle each case uniquely. In other words, a disjoint union is the categorical dual of a product.
 
