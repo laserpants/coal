@@ -2040,8 +2040,6 @@ The *pattern functor* for a data type abstracts recursion by isolating one layer
 
 <p><img src="../.readme/tex/png/pattern_functor.png" /></p>
 
-Here:
-
 - *1* corresponds to `Nil`,
 - *(t × X)* corresponds to `Cons(t, X)`.
 
