@@ -22,6 +22,13 @@ irBox v t = do
   store v r1
   bitcast r1 i8Ptr
 
+irConcealFloat :: IRValue -> IRType -> IRInstr IRValue
+irConcealFloat v t = do
+  r1 <- irMalloc t
+  tmp <- bitcast v t
+  store tmp r1
+  bitcast r1 i8Ptr
+
 irConceal :: IRValue -> IRInstr IRValue
 irConceal v =
   case irTypeOf v of
@@ -35,20 +42,14 @@ irConceal v =
       inttoptr v i8Ptr
     TFloat -> do
       case v of
-        Float f -> do
-          r1 <- irMalloc TFloat
-          tmp <- bitcast (I32 (fromIntegral (castFloatToWord32 f))) TFloat
-          store tmp r1
-          bitcast r1 i8Ptr
+        Float f ->
+          irConcealFloat (I32 (fromIntegral (castFloatToWord32 f))) TFloat
         _ ->
           irBox v TFloat
     TDouble ->
       case v of
-        Double d -> do
-          r1 <- irMalloc TDouble
-          tmp <- bitcast (I64 (fromIntegral (castDoubleToWord64 d))) TDouble
-          store tmp r1
-          bitcast r1 i8Ptr
+        Double d ->
+          irConcealFloat (I64 (fromIntegral (castDoubleToWord64 d))) TDouble
         _ ->
           irBox v TDouble
     _ ->

@@ -138,7 +138,7 @@ print_float(float f)
 void
 print_double(double d)
 {
-  printf("%lf\n", d);
+  printf("%.15f\n", d);
 }
 
 void
