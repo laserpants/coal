@@ -179,7 +179,7 @@ spec = do
   x <- main58
   print (x == Right "22.500000\n")
   x <- main59
-  print (x == Right "23.000000\n")
+  print (x == Right "23.000000000000000\n")
   x <- main60
   print (x == Right "123\n")
   a <- isLeft <$> main61
@@ -302,6 +302,10 @@ spec = do
   print (x == Right "-627128164\n")
   x <- main142
   print (x == Right "8\n")
+  x <- main143
+  print (x == Right "4.323232444322323\n")
+  x <- main144
+  print (x == Right "4.130000\n")
 
 --  x <- main85
 --  print (x == Right "aa\n")
@@ -1145,6 +1149,18 @@ main142 :: IO (Either CompilerFailureMode Text)
 main142 = do
   runTestFiles
     [ "./test/Coal/examples/142/Main.coal"
+    ]
+
+main143 :: IO (Either CompilerFailureMode Text)
+main143 = do
+  runTestFiles
+    [ "./test/Coal/examples/143/Main.coal"
+    ]
+
+main144 :: IO (Either CompilerFailureMode Text)
+main144 = do
+  runTestFiles
+    [ "./test/Coal/examples/144/Main.coal"
     ]
 
 compileFiles :: [String] -> IO (Either CompilerFailureMode ())
