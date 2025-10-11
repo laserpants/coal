@@ -2033,7 +2033,7 @@ Data types are built from constructors. Consider the `List` type, for example:
 ```
 type List<t> 
   = Nil
-  | Cons(a, List<t>)
+  | Cons(t, List<t>)
 ```
 
 The *pattern functor* for a data type abstracts recursion by isolating one layer of the data structure, leaving the recursive portion as a parameter. For `List`, the corresponding pattern functor *F* is:
