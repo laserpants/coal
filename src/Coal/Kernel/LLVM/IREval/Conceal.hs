@@ -14,6 +14,7 @@ import Coal.Kernel.LLVM.IRValue (IRValue (..))
 import Control.Monad (unless)
 import Data.List.NonEmpty (NonEmpty, toList)
 import Extra (forM)
+import GHC.Float
 
 irBox :: IRValue -> IRType -> IRInstr IRValue
 irBox v t = do
@@ -32,10 +33,24 @@ irConceal v =
       inttoptr v i8Ptr
     TInt64 ->
       inttoptr v i8Ptr
-    TFloat ->
-      irBox v TFloat
+    TFloat -> do
+      case v of
+        Float f -> do
+          r1 <- irMalloc TFloat
+          tmp <- bitcast (I32 (fromIntegral (castFloatToWord32 f))) TFloat
+          store tmp r1
+          bitcast r1 i8Ptr
+        _ ->
+          irBox v TFloat
     TDouble ->
-      irBox v TDouble
+      case v of
+        Double d -> do
+          r1 <- irMalloc TDouble
+          tmp <- bitcast (I64 (fromIntegral (castDoubleToWord64 d))) TDouble
+          store tmp r1
+          bitcast r1 i8Ptr
+        _ ->
+          irBox v TDouble
     _ ->
       pure v
 
