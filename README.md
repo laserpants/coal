@@ -705,7 +705,7 @@ There are two types of comments:
 
 #### Natural numbers
 
-Recursion in Coal is closely tied to pattern matching: we peel off layers of a recursive data structure step by step, until reaching its base case. This works naturally with lists, trees, and other algebraic data types. Ordinary machine integers (`int32`, `int64`), however, cannot be pattern matched on. Nevertheless, we often want to use numbers in recursive computations &mdash; for example, when repeating an action, or simulating the behavior of loops in imperative languages. To describe numbers in a way compatible with recursion, we take guidance from the standard axiomatization of the natural numbers:
+Recursion in Coal is closely tied to pattern matching: we peel off layers of a recursive data structure step by step, until reaching its base case. This works naturally with lists, trees, and other algebraic data types. Ordinary machine integers (`int32`, `int64`), however, cannot be pattern matched on in such a manner. Nevertheless, we often want to use numbers in recursive computations &mdash; for example, when repeating an action, or simulating the behavior of loops in imperative languages. To describe numbers in a way compatible with recursion, we take guidance from the standard axiomatization of the natural numbers:
 
 > Every natural number is either zero or the successor of another natural number.
 
@@ -1605,7 +1605,7 @@ We write the full type of `is_less_than` as: `t -> t -> bool with Ordered<t>`.
 
 #### Higher-kinded traits
 
-So far, the traits we’ve looked at have all been of the form `T<t>`, where `t` is a placeholder for an ordinary type. Unlike these, a *type constructor* is a type-level function which takes one or more types as arguments and returns a type. That is, a type constructor on its own isn’t really a type, until it is provided with all necessary type arguments. For example, in the type `Option<int>`, `Option` is a type constructor with [kind](https://en.wikipedia.org/wiki/Kind_(type_theory))
+So far, the traits we’ve looked at have all been of the form `T<t>`, where `t` is a placeholder for an ordinary type. Unlike these, a *type constructor* is a type-level function which takes one or more types as arguments and returns a type. That is, a type constructor on its own isn’t really a type, until it is provided with all necessary type arguments. For example, in the type `Option<int32>`, `Option` is a type constructor with [kind](https://en.wikipedia.org/wiki/Kind_(type_theory))
 
 ```
 * -> *
@@ -1711,7 +1711,7 @@ type nat
   | Succ(@)
 ```
 
-This location is significant. It is precisely where the `fold` mechanism will recurse. Using the special `@`-pattern syntax only available in `fold` expressions, we can now express the factorial function as:
+This location is significant since it is precisely where the `fold` mechanism will recurse. Using the special `@`-pattern syntax only available in `fold` expressions, we can now express the factorial function as:
 
 ```
   fun factorial(n : nat) =
