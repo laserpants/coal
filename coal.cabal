@@ -31,6 +31,11 @@ library
       Coal.Common.Name
       Coal.Common.Supply
       Coal.Compiler
+      Coal.Compiler.Pass
+      Coal.Compiler.Pass.ParsingPhase.ImportsTopRule
+      Coal.Compiler.Pass.ParsingPhase.Parsing
+      Coal.Compiler.Pass.PreflightPhase.TopologicalSort
+      Coal.Compiler.Pass.PreflightPhase.TypeDefinitions
       Coal.Graphviz.Dot
       Coal.Kernel.Compiler
       Coal.Kernel.Compiler.Ast
