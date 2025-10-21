@@ -1,19 +1,15 @@
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Pass.PreflightPhase.TypeDefinitions where
+module Coal.Compiler.Pass.PreflightPhase.TypeDefinitions (passTypeDefinitions) where
 
-import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Pass
 import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module
 import Coal.Language.Module.Definition (isDType)
 import Control.Monad.IO.Class (MonadIO)
-import Control.Monad.State (gets)
 import qualified Data.Text as Text
-import Extra (forM, fromMaybe, isConstructor)
 
 passTypeDefinitions :: (MonadIO m) => Pass a m (Module a Kind ()) (Module a Kind ())
 passTypeDefinitions =

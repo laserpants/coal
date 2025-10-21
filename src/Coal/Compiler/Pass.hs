@@ -16,7 +16,7 @@ data Pass a m i o = Pass
 p1 >-> p2 =
   Pass
     { passName = passName p1 <> " > " <> passName p2
-    , runPass = runPass p1 >=> runPass p2 -- TODO: logging
+    , runPass = runPass p1 >=> runPass p2
     }
 
 mapPass :: (Monad m) => Pass a m i o -> Pass a m [i] [o]
