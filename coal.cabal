@@ -32,10 +32,41 @@ library
       Coal.Common.Supply
       Coal.Compiler
       Coal.Compiler.Pass
+      Coal.Compiler.Pass.DebugOutput
+      Coal.Compiler.Pass.LoweringPhase
+      Coal.Compiler.Pass.LoweringPhase.KernelCode
+      Coal.Compiler.Pass.LoweringPhase.KernelTranslate
+      Coal.Compiler.Pass.LoweringPhase.LLVMOutput
+      Coal.Compiler.Pass.ParsingPhase
       Coal.Compiler.Pass.ParsingPhase.ImportsTopRule
       Coal.Compiler.Pass.ParsingPhase.Parsing
+      Coal.Compiler.Pass.PreflightPhase
+      Coal.Compiler.Pass.PreflightPhase.Setup
+      Coal.Compiler.Pass.PreflightPhase.ShadowingRule
       Coal.Compiler.Pass.PreflightPhase.TopologicalSort
       Coal.Compiler.Pass.PreflightPhase.TypeDefinitions
+      Coal.Compiler.Pass.PreflightPhase.TypeImports
+      Coal.Compiler.Pass.TranslationPhase
+      Coal.Compiler.Pass.TranslationPhase.DenormalizeObjects
+      Coal.Compiler.Pass.TranslationPhase.Errors
+      Coal.Compiler.Pass.TranslationPhase.ExpandAsPatterns
+      Coal.Compiler.Pass.TranslationPhase.ExpandPatterns
+      Coal.Compiler.Pass.TranslationPhase.MatchExpressions
+      Coal.Compiler.Pass.TranslationPhase.Nats
+      Coal.Compiler.Pass.TranslationPhase.NormalizeObjects
+      Coal.Compiler.Pass.TranslationPhase.OrPatterns
+      Coal.Compiler.Pass.TranslationPhase.PatternExhaustiveCheck
+      Coal.Compiler.Pass.TranslationPhase.Placeholders
+      Coal.Compiler.Pass.TranslationPhase.RecordPatterns
+      Coal.Compiler.Pass.TypePhase
+      Coal.Compiler.Pass.TypePhase.Errors
+      Coal.Compiler.Pass.TypePhase.ExpandAliases
+      Coal.Compiler.Pass.TypePhase.ExpressionFolds
+      Coal.Compiler.Pass.TypePhase.ExpressionUnfolds
+      Coal.Compiler.Pass.TypePhase.LambdaMatchExpansion
+      Coal.Compiler.Pass.TypePhase.TopLevelFolds
+      Coal.Compiler.Pass.TypePhase.TopLevelUnfolds
+      Coal.Compiler.Pass.TypePhase.TypeInference
       Coal.Graphviz.Dot
       Coal.Kernel.Compiler
       Coal.Kernel.Compiler.Ast
