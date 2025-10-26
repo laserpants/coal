@@ -31,7 +31,7 @@ optionsParser = do
   debugGenerateDotfiles <-
     switch
       ( long "debug-generate-dotfiles"
-          <> help "Generate intermediate Graphviz DOT files for debugging"
+          <> help "Generate Graphviz DOT files for debugging"
       )
 
   debugLLVMOutput <-
