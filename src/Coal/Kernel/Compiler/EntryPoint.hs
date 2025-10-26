@@ -1,0 +1,14 @@
+{-# LANGUAGE OverloadedStrings #-}
+
+module Coal.Kernel.Compiler.EntryPoint (entryPoint) where
+
+import Coal.Kernel.LLVM
+
+entryPoint :: IRConstruct [IRLine]
+entryPoint = CDefine "main" i32 Nothing [] instructions
+ where
+  instructions =
+    [ LInstruction ["call void @gc_init()"]
+    , LInstruction ["call void @\"Main.main\"(i8* null)"]
+    , LInstruction ["ret i32 0"]
+    ]

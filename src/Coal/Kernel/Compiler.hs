@@ -8,7 +8,10 @@
 
 module Coal.Kernel.Compiler (compile, compileModules) where
 
+import Coal.Kernel.Builtin.Constructors (builtinConstructors)
 import Coal.Common.Environment (Environment (..))
+import qualified Coal.Common.Environment as Environment
+import Coal.Kernel.Compiler.EntryPoint (entryPoint)
 import Coal.Kernel.Compiler.Pass
 import Coal.Kernel.Compiler.Pipeline
 import Coal.Kernel.Compiler.Pipeline.State (PipelineState (..))
@@ -17,10 +20,8 @@ import Coal.Kernel.Language
 import Control.Monad (void, (>=>))
 import Control.Monad.State (gets)
 import Data.List (nub)
-import Extras (Name, forM, isConstructor, (<$$>), (||.))
-
-import qualified Coal.Common.Environment as Environment
 import qualified Data.Text as Text
+import Extras (Name, forM, isConstructor, (<$$>), (||.))
 
 corePass :: Pass ObjectList ObjectList
 corePass =
@@ -53,14 +54,11 @@ irCodeGen names objs = do
   pipelineInsertCode (support <> closureSupport <> concat c3 <> c4)
   gets pipelineCode
 
-builtinCtors :: Environment Int
-builtinCtors = Environment.fromList [("$Cons", 0), ("$Nil", 1), ("$Succ", 0), ("$Zero", 1)]
-
 compile :: Environment Int -> Pass ObjectList ()
 compile importedCtors input = do
   objs <- corePass input
   extendInterpreterValueEnv (objectEnvironment objs)
-  extendInterpreterConstructorEnv (builtinCtors <> importedCtors <> objectConstructors objs)
+  extendInterpreterConstructorEnv (builtinConstructors <> importedCtors <> objectConstructors objs)
   void (irCodeGen names objs)
  where
   names =
@@ -128,12 +126,3 @@ compileModules modules =
         error ("Name not in scope: '" <> Text.unpack name <> "'")
       Just it ->
         OExternal name it t
-
-  entryPoint :: IRConstruct [IRLine]
-  entryPoint =
-    let instrs =
-          [ LInstruction ["call void @gc_init()"]
-          , LInstruction ["call void @\"Main.main\"(i8* null)"]
-          , LInstruction ["ret i32 0"]
-          ]
-     in CDefine "main" i32 Nothing [] instrs
