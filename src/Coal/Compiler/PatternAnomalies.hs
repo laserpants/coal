@@ -162,7 +162,7 @@ translatePattern =
     PListLiteral _ _ ps ->
       foldr listCons (Con "[]" []) ps
     PTuple _ _ ps ->
-      Con (tupleCon (length ps)) (translatePattern <$> NonEmpty.toList ps)
+      Con (tupleCons (length ps)) (translatePattern <$> NonEmpty.toList ps)
     POr _ _ p q ->
       Or (translatePattern p) (translatePattern q)
     PAs _ _ p ->
@@ -172,9 +172,9 @@ translatePattern =
     _ ->
       error "Not implemented"
 
-{-# INLINE tupleCon #-}
-tupleCon :: Int -> Name
-tupleCon n = "%Tuple" <> showt n
+{-# INLINE tupleCons #-}
+tupleCons :: Int -> Name
+tupleCons n = "%Tuple" <> showt n
 
 listCons :: Pattern a t -> Pat -> Pat
 listCons p q = Con "::" [translatePattern p, q]
