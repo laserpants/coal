@@ -20,76 +20,78 @@ insertBuiltinDefinitions = (definitions <>)
 functionNames :: [Name]
 functionNames = for functions fst
 
+traitInstances :: [Name]
+traitInstances =
+  [ "from_int32__$impl_Numeric(Intrinsic(Int32))"
+  , "(+)__$impl_Numeric(Intrinsic(Int32))"
+  , "(-)__$impl_Numeric(Intrinsic(Int32))"
+  , "(*)__$impl_Numeric(Intrinsic(Int32))"
+  , "negate__$impl_Numeric(Intrinsic(Int32))"
+  , --
+    "from_int32__$impl_Numeric(Intrinsic(Int64))"
+  , "(+)__$impl_Numeric(Intrinsic(Int64))"
+  , "(-)__$impl_Numeric(Intrinsic(Int64))"
+  , "(*)__$impl_Numeric(Intrinsic(Int64))"
+  , "negate__$impl_Numeric(Intrinsic(Int64))"
+  , --
+    "from_int32__$impl_Numeric(Intrinsic(Float))"
+  , "(+)__$impl_Numeric(Intrinsic(Float))"
+  , "(-)__$impl_Numeric(Intrinsic(Float))"
+  , "(*)__$impl_Numeric(Intrinsic(Float))"
+  , "negate__$impl_Numeric(Intrinsic(Float))"
+  , --
+    "from_int32__$impl_Numeric(Intrinsic(Double))"
+  , "(+)__$impl_Numeric(Intrinsic(Double))"
+  , "(-)__$impl_Numeric(Intrinsic(Double))"
+  , "(*)__$impl_Numeric(Intrinsic(Double))"
+  , "negate__$impl_Numeric(Intrinsic(Double))"
+  , --
+    "from_int32__$impl_Numeric(Intrinsic(Nat))"
+  , "(+)__$impl_Numeric(Intrinsic(Nat))"
+  , "(-)__$impl_Numeric(Intrinsic(Nat))"
+  , "(*)__$impl_Numeric(Intrinsic(Nat))"
+  , "negate__$impl_Numeric(Intrinsic(Nat))"
+  , --
+    "from_int32__$impl_Numeric(Intrinsic(Bignum))"
+  , "(+)__$impl_Numeric(Intrinsic(Bignum))"
+  , "(-)__$impl_Numeric(Intrinsic(Bignum))"
+  , "(*)__$impl_Numeric(Intrinsic(Bignum))"
+  , "negate__$impl_Numeric(Intrinsic(Bignum))"
+  , --
+    "compare__$impl_Ordered(Intrinsic(Int32))"
+  , "compare__$impl_Ordered(Intrinsic(Int64))"
+  , "compare__$impl_Ordered(Intrinsic(Nat))"
+  , "compare__$impl_Ordered(Intrinsic(Float))"
+  , "compare__$impl_Ordered(Intrinsic(Double))"
+  , "compare__$impl_Ordered(Intrinsic(Bool))"
+  , "compare__$impl_Ordered(Intrinsic(Char))"
+  , "compare__$impl_Ordered(Intrinsic(Bignum))"
+  , --
+    "(==)__$impl_Comparable(Intrinsic(Int32))"
+  , "(==)__$impl_Comparable(Intrinsic(Int64))"
+  , "(==)__$impl_Comparable(Intrinsic(Nat))"
+  , "(==)__$impl_Comparable(Intrinsic(Float))"
+  , "(==)__$impl_Comparable(Intrinsic(Double))"
+  , "(==)__$impl_Comparable(Intrinsic(Bool))"
+  , "(==)__$impl_Comparable(Intrinsic(Char))"
+  , "(==)__$impl_Comparable(Intrinsic(Bignum))"
+  , --
+    "(/)__$impl_Divisible(Intrinsic(Float))"
+  , "(/)__$impl_Divisible(Intrinsic(Double))"
+  , --
+    "(%)__$impl_Mod(Intrinsic(Int32))"
+  , "(%)__$impl_Mod(Intrinsic(Int64))"
+  , --
+    "(<>)__$impl_Semigroup(Intrinsic(String))"
+  , "(<>)__$impl_Semigroup(Application(Constructor(List))(Variable(Parameter(a))))"
+  ]
+
 definitions :: (Monoid a) => [Definition a k ()]
 definitions =
   [ DImport
       mempty
       (Path ["Builtin$"])
-      ( functionNames
-          <> [ "from_int32__$impl_Numeric(Intrinsic(Int32))"
-             , "(+)__$impl_Numeric(Intrinsic(Int32))"
-             , "(-)__$impl_Numeric(Intrinsic(Int32))"
-             , "(*)__$impl_Numeric(Intrinsic(Int32))"
-             , "negate__$impl_Numeric(Intrinsic(Int32))"
-             , --
-               "from_int32__$impl_Numeric(Intrinsic(Int64))"
-             , "(+)__$impl_Numeric(Intrinsic(Int64))"
-             , "(-)__$impl_Numeric(Intrinsic(Int64))"
-             , "(*)__$impl_Numeric(Intrinsic(Int64))"
-             , "negate__$impl_Numeric(Intrinsic(Int64))"
-             , --
-               "from_int32__$impl_Numeric(Intrinsic(Float))"
-             , "(+)__$impl_Numeric(Intrinsic(Float))"
-             , "(-)__$impl_Numeric(Intrinsic(Float))"
-             , "(*)__$impl_Numeric(Intrinsic(Float))"
-             , "negate__$impl_Numeric(Intrinsic(Float))"
-             , --
-               "from_int32__$impl_Numeric(Intrinsic(Double))"
-             , "(+)__$impl_Numeric(Intrinsic(Double))"
-             , "(-)__$impl_Numeric(Intrinsic(Double))"
-             , "(*)__$impl_Numeric(Intrinsic(Double))"
-             , "negate__$impl_Numeric(Intrinsic(Double))"
-             , --
-               "from_int32__$impl_Numeric(Intrinsic(Nat))"
-             , "(+)__$impl_Numeric(Intrinsic(Nat))"
-             , "(-)__$impl_Numeric(Intrinsic(Nat))"
-             , "(*)__$impl_Numeric(Intrinsic(Nat))"
-             , "negate__$impl_Numeric(Intrinsic(Nat))"
-             , --
-               "from_int32__$impl_Numeric(Intrinsic(Bignum))"
-             , "(+)__$impl_Numeric(Intrinsic(Bignum))"
-             , "(-)__$impl_Numeric(Intrinsic(Bignum))"
-             , "(*)__$impl_Numeric(Intrinsic(Bignum))"
-             , "negate__$impl_Numeric(Intrinsic(Bignum))"
-             , --
-               "compare__$impl_Ordered(Intrinsic(Int32))"
-             , "compare__$impl_Ordered(Intrinsic(Int64))"
-             , "compare__$impl_Ordered(Intrinsic(Nat))"
-             , "compare__$impl_Ordered(Intrinsic(Float))"
-             , "compare__$impl_Ordered(Intrinsic(Double))"
-             , "compare__$impl_Ordered(Intrinsic(Bool))"
-             , "compare__$impl_Ordered(Intrinsic(Char))"
-             , "compare__$impl_Ordered(Intrinsic(Bignum))"
-             , --
-               "(==)__$impl_Comparable(Intrinsic(Int32))"
-             , "(==)__$impl_Comparable(Intrinsic(Int64))"
-             , "(==)__$impl_Comparable(Intrinsic(Nat))"
-             , "(==)__$impl_Comparable(Intrinsic(Float))"
-             , "(==)__$impl_Comparable(Intrinsic(Double))"
-             , "(==)__$impl_Comparable(Intrinsic(Bool))"
-             , "(==)__$impl_Comparable(Intrinsic(Char))"
-             , "(==)__$impl_Comparable(Intrinsic(Bignum))"
-             , --
-               "(/)__$impl_Divisible(Intrinsic(Float))"
-             , "(/)__$impl_Divisible(Intrinsic(Double))"
-             , --
-               "(%)__$impl_Mod(Intrinsic(Int32))"
-             , "(%)__$impl_Mod(Intrinsic(Int64))"
-             , --
-               "(<>)__$impl_Semigroup(Intrinsic(String))"
-             , "(<>)__$impl_Semigroup(Application(Constructor(List))(Variable(Parameter(a))))"
-             ]
-      )
+      (functionNames <> traitInstances)
   , DTrait
       mempty
       "Numeric"
