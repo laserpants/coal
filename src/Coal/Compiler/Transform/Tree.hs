@@ -3,7 +3,12 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Transform.Tree (replace, replaceWith, replaceMultipleWith, rename) where
+module Coal.Compiler.Transform.Tree (
+  replace,
+  replaceWith,
+  replaceMultipleWith,
+  rename,
+) where
 
 import Coal.Common.FreeVars (BoundVars (..))
 import Coal.Common.Label (Label (..))
@@ -21,7 +26,7 @@ instance TreeTransform (Binding Expression) t where
       BPattern a p e ->
         BPattern a p <$> transform name f e
       BFunction a n ps e ->
-        BFunction a name ps <$> transform n f e -- TODO
+        BFunction a name ps <$> transform n f e
 
 instance TreeTransform (Guard Expression) t where
   transform name f =
