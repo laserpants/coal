@@ -111,11 +111,8 @@ translatePattern =
       translatePattern (translateListLiteral a t ps)
     PTuple a t (p :| ps) ->
       translatePattern (PConstructor a (Label t ("$Tuple" <> showt (length ps + 1))) (p : ps))
-    p ->
-      error (show p)
-
---    _ ->
---      error "Implementation error"
+    _ ->
+      error "Implementation error"
 
 translateListLiteral :: (MatchClasses a t) => a -> t -> [Pattern a t] -> Pattern a t
 translateListLiteral a t [] = PConstructor a (Label t "$Nil") []
