@@ -5,9 +5,8 @@ module Coal.Compiler.Builtin.Definitions (insertBuiltinDefinitions, names) where
 import Coal.Language
 import Coal.Language.Module
 import Data.List.NonEmpty (NonEmpty (..))
-import Data.Set (Set)
 import qualified Data.Set as Set
-import Extras (Name)
+import Extras (Name, for)
 
 {-# INLINE insertBuiltinDefinitions #-}
 insertBuiltinDefinitions :: (Monoid a) => [Definition a k ()] -> [Definition a k ()]
@@ -18,7 +17,7 @@ definitions =
   [ DImport
       mempty
       (Path ["Builtin$"])
-      ( (fst <$> names)
+      ( for names fst
           <> [ "from_int32__$impl_Numeric(Intrinsic(Int32))"
              , "(+)__$impl_Numeric(Intrinsic(Int32))"
              , "(-)__$impl_Numeric(Intrinsic(Int32))"
@@ -200,263 +199,138 @@ names :: [(Name, IndexedScheme)]
 names =
   [
     ( "operator$__not"
-    , Forall mempty [] (TIntrinsic IBool `TArrow` TIntrinsic IBool)
+    , forall0 (TIntrinsic IBool ~> TIntrinsic IBool)
     )
   ,
     ( "not"
-    , Forall mempty [] (TIntrinsic IBool `TArrow` TIntrinsic IBool)
+    , forall0 (TIntrinsic IBool ~> TIntrinsic IBool)
     )
   ,
     ( "operator$__reverse_composition"
-    , Forall
-        (Set.fromList [TypeIndex KType 0, TypeIndex KType 1, TypeIndex KType 2])
-        []
-        ( (TVariable (TypeIndex KType 1) `TArrow` TVariable (TypeIndex KType 2))
-            `TArrow` (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 1))
-            `TArrow` TVariable (TypeIndex KType 0)
-            `TArrow` TVariable (TypeIndex KType 2)
-        )
+    , forall3 $ \t0 t1 t2 -> (t1 ~> t2) ~> (t0 ~> t1) ~> t0 ~> t2
     )
   ,
     ( "operator$__reverse_application"
-    , Forall
-        (Set.fromList [TypeIndex KType 0, TypeIndex KType 1])
-        []
-        ( TVariable (TypeIndex KType 0)
-            `TArrow` (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 1))
-            `TArrow` TVariable (TypeIndex KType 1)
-        )
+    , forall2 $ \t0 t1 -> t0 ~> (t0 ~> t1) ~> t1
     )
   ,
     ( "always"
-    , Forall
-        (Set.fromList [TypeIndex KType 0, TypeIndex KType 1])
-        []
-        ( TVariable (TypeIndex KType 0)
-            `TArrow` TVariable (TypeIndex KType 1)
-            `TArrow` TVariable (TypeIndex KType 0)
-        )
+    , forall2 $ \t0 t1 -> t0 ~> t1 ~> t0
     )
   ,
     ( "operator$__list_concatenation"
-    , Forall
-        (Set.fromList [TypeIndex KType 0])
-        []
-        ( listType (TVariable (TypeIndex KType 0))
-            `TArrow` listType (TVariable (TypeIndex KType 0))
-            `TArrow` listType (TVariable (TypeIndex KType 0))
-        )
+    , forall1 $ \t0 -> listType t0 ~> listType t0 ~> listType t0
     )
   ,
     ( "trace_int32"
-    , Forall
-        (Set.fromList [TypeIndex KType 0])
-        []
-        ( TIntrinsic IInt32 `TArrow` TApplication KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| [])
-        )
+    , forall0 (TIntrinsic IInt32 ~> TApplication KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| []))
     )
   ,
     ( "trace_int64"
-    , Forall
-        (Set.fromList [TypeIndex KType 0])
-        []
-        ( TIntrinsic IInt64 `TArrow` TApplication KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| [])
-        )
+    , forall0 (TIntrinsic IInt64 ~> TApplication KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| []))
     )
   ,
     ( "trace_bignum"
-    , Forall
-        (Set.fromList [TypeIndex KType 0])
-        []
-        ( TIntrinsic IBignum `TArrow` TApplication KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| [])
-        )
+    , forall0 (TIntrinsic IBignum ~> TApplication KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| []))
     )
   ,
     ( "trace_string"
-    , Forall
-        (Set.fromList [TypeIndex KType 0])
-        []
-        ( TIntrinsic IString `TArrow` TApplication KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| [])
-        )
+    , forall0 (TIntrinsic IString ~> TApplication KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| []))
     )
   ,
     ( "trace_bool"
-    , Forall
-        (Set.fromList [TypeIndex KType 0])
-        []
-        ( TIntrinsic IBool `TArrow` TApplication KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| [])
-        )
+    , forall0 (TIntrinsic IBool ~> TApplication KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| []))
     )
   ,
     ( "trace_char"
-    , Forall
-        (Set.fromList [TypeIndex KType 0])
-        []
-        ( TIntrinsic IChar `TArrow` TApplication KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| [])
-        )
+    , forall0 (TIntrinsic IChar ~> TApplication KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| []))
     )
   ,
     ( "trace_float"
-    , Forall
-        (Set.fromList [TypeIndex KType 0])
-        []
-        ( TIntrinsic IFloat `TArrow` TApplication KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| [])
-        )
+    , forall0 (TIntrinsic IFloat ~> TApplication KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| []))
     )
   ,
     ( "trace_double"
-    , Forall
-        (Set.fromList [TypeIndex KType 0])
-        []
-        ( TIntrinsic IDouble `TArrow` TApplication KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| [])
-        )
+    , forall0 (TIntrinsic IDouble ~> TApplication KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| []))
     )
   ,
     ( "operator$__string_concatenation"
-    , Forall
-        mempty
-        []
-        (TIntrinsic IString `TArrow` TIntrinsic IString `TArrow` TIntrinsic IString)
+    , forall0 (TIntrinsic IString ~> TIntrinsic IString ~> TIntrinsic IString)
     )
   ,
     ( "int32_to_string"
-    , Forall
-        mempty
-        []
-        ( TIntrinsic IInt32 `TArrow` TIntrinsic IString
-        )
+    , forall0 (TIntrinsic IInt32 `TArrow` TIntrinsic IString)
     )
   ,
     ( "float_to_string"
-    , Forall
-        mempty
-        []
-        ( TIntrinsic IFloat `TArrow` TIntrinsic IString
-        )
+    , forall0 (TIntrinsic IFloat ~> TIntrinsic IString)
     )
   ,
     ( "double_to_string"
-    , Forall
-        mempty
-        []
-        ( TIntrinsic IDouble `TArrow` TIntrinsic IString
-        )
+    , forall0 (TIntrinsic IDouble ~> TIntrinsic IString)
     )
   ,
     ( "unpack_nat"
-    , Forall
-        mempty
-        []
-        ( TIntrinsic INat `TArrow` TIntrinsic IInt32
-        )
+    , forall0 (TIntrinsic INat ~> TIntrinsic IInt32)
     )
   ,
     ( "pack_nat"
-    , Forall
-        mempty
-        []
-        ( TIntrinsic IInt32 `TArrow` TIntrinsic INat
-        )
+    , forall0 (TIntrinsic IInt32 ~> TIntrinsic INat)
     )
   ,
     ( "from_int32"
-    , Forall
-        (Set.fromList [TypeIndex KType 0] :: Set (TypeIndex Kind))
-        [Trait "Numeric" (TVariable (TypeIndex KType 0))]
-        (TIntrinsic IInt32 `TArrow` TVariable (TypeIndex KType 0))
+    , forall1' ( \t0 -> ( [Trait "Numeric" t0] , TIntrinsic IInt32 `TArrow` t0))
     )
   ,
     ( "negate"
-    , Forall
-        (Set.fromList [TypeIndex KType 0] :: Set (TypeIndex Kind))
-        [Trait "Numeric" (TVariable (TypeIndex KType 0))]
-        (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0))
+    , forall1' (\t0 -> ([Trait "Numeric" t0], t0 `TArrow` t0))
     )
   ,
     ( "compare"
-    , Forall
-        (Set.fromList [TypeIndex KType 0] :: Set (TypeIndex Kind))
-        [Trait "Ordered" (TVariable (TypeIndex KType 0))]
-        ( TVariable (TypeIndex KType 0)
-            `TArrow` TVariable (TypeIndex KType 0)
-            `TArrow` TConstructor KType "Ordering"
-        )
+    , forall1' ( \t0 -> ( [Trait "Ordered" t0] , t0 ~> t0 ~> TConstructor KType "Ordering"))
     )
   ,
     ( "string_to_list"
-    , Forall
-        mempty
-        []
-        (TIntrinsic IString `TArrow` listType (TIntrinsic IChar))
+    , forall0 (TIntrinsic IString ~> listType (TIntrinsic IChar))
     )
   ,
     ( "string_head"
-    , Forall
-        mempty
-        []
-        (TIntrinsic IString `TArrow` TIntrinsic IChar)
+    , forall0 (TIntrinsic IString ~> TIntrinsic IChar)
     )
   ,
     ( "string_tail"
-    , Forall
-        mempty
-        []
-        (TIntrinsic IString `TArrow` TIntrinsic IString)
+    , forall0 (TIntrinsic IString ~> TIntrinsic IString)
     )
   ,
     ( "string_reverse"
-    , Forall
-        mempty
-        []
-        (TIntrinsic IString `TArrow` TIntrinsic IString)
+    , forall0 (TIntrinsic IString ~> TIntrinsic IString)
     )
   ,
     ( "string_remove_whitespace"
-    , Forall
-        mempty
-        []
-        (TIntrinsic IString `TArrow` TIntrinsic IString)
+    , forall0 (TIntrinsic IString ~> TIntrinsic IString)
     )
   ,
     ( "string_length"
-    , Forall
-        mempty
-        []
-        (TIntrinsic IString `TArrow` TIntrinsic IInt32)
+    , forall0 (TIntrinsic IString ~> TIntrinsic IInt32)
     )
   ,
     ( "(<)"
-    , Forall
-        (Set.fromList [TypeIndex KType 0] :: Set (TypeIndex Kind))
-        [Trait "Ordered" (TVariable (TypeIndex KType 0))]
-        (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
+    , forall1' (\t0 -> ([Trait "Ordered" t0], t0 ~> t0 ~> TIntrinsic IBool))
     )
   ,
     ( "(>)"
-    , Forall
-        (Set.fromList [TypeIndex KType 0] :: Set (TypeIndex Kind))
-        [Trait "Ordered" (TVariable (TypeIndex KType 0))]
-        (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
+    , forall1' (\t0 -> ([Trait "Ordered" t0], t0 ~> t0 ~> TIntrinsic IBool))
     )
   ,
     ( "(<=)"
-    , Forall
-        (Set.fromList [TypeIndex KType 0] :: Set (TypeIndex Kind))
-        [Trait "Ordered" (TVariable (TypeIndex KType 0))]
-        (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
+    , forall1' (\t0 -> ([Trait "Ordered" t0], t0 ~> t0 ~> TIntrinsic IBool))
     )
   ,
     ( "(>=)"
-    , Forall
-        (Set.fromList [TypeIndex KType 0] :: Set (TypeIndex Kind))
-        [Trait "Ordered" (TVariable (TypeIndex KType 0))]
-        (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0) `TArrow` TIntrinsic IBool)
+    , forall1' (\t0 -> ([Trait "Ordered" t0], t0 ~> t0 ~> TIntrinsic IBool))
     )
   ,
     ( "(^)"
-    , Forall
-        (Set.fromList [TypeIndex KType 0] :: Set (TypeIndex Kind))
-        [Trait "Numeric" (TVariable (TypeIndex KType 0))]
-        (TVariable (TypeIndex KType 0) `TArrow` TIntrinsic INat `TArrow` TVariable (TypeIndex KType 0))
+    , forall1' (\t0 -> ([Trait "Numeric" t0], t0 ~> TIntrinsic INat ~> t0))
     )
   ]
