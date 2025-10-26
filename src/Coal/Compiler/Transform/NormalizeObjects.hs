@@ -16,7 +16,7 @@ import Coal.Language.Type (Type (..))
 import Data.Data (Data, Typeable)
 import Data.List.NonEmpty (NonEmpty)
 import Data.Map.Strict (Map)
-import Extra (Name)
+import Extras (Name)
 
 class NormalizeObjectsTransformContext a where
   normalizeObject :: a -> a

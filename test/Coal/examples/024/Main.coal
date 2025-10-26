@@ -1,0 +1,14 @@
+module Main {
+
+  fun main() =
+    let
+      chrs =
+        string_to_list("xyz")
+      in
+        match(chrs) {
+          | c :: _ =>
+              trace_char(c)
+          | [] =>
+              trace_string("nope")
+        }
+}

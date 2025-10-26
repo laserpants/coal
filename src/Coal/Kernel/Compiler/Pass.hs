@@ -27,8 +27,8 @@ import Coal.Kernel.LLVM (IRInterpreter, irInterpreterStateArtifacts, runInterpre
 import Coal.Kernel.Language
 import Control.Monad.State (State, gets, modify, runState)
 import Control.Monad.Writer (Writer, runWriter)
-import Extra (traverse2)
-import Extra.Control.Applicative (pure1, pure3)
+import Extras (traverse2)
+import Extras.Control.Applicative (pure1, pure3)
 
 transformSuffixMonad :: State Int a -> Pipeline a
 transformSuffixMonad a = do

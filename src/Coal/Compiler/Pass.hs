@@ -10,7 +10,7 @@ import Coal.Language (IndexedType, Kind)
 import Coal.Language.Module (Module (..))
 import Control.Monad ((>=>))
 import Control.Monad.Reader (local)
-import Extra (Name)
+import Extras (Name)
 
 data Pass a m i o = Pass
   { passName :: Name

@@ -12,7 +12,7 @@ import Coal.Compiler.PatternMatching.Envelope
 import Coal.Language
 import Data.Data (Data, Typeable)
 import Data.List.NonEmpty (NonEmpty (..))
-import Extra (const2)
+import Extras (const2)
 
 class TypeProxy t where
   expressionType :: (Data a) => Expression a t -> t

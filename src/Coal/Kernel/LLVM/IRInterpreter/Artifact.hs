@@ -4,7 +4,7 @@ module Coal.Kernel.LLVM.IRInterpreter.Artifact (IRInterpreterArtifact (..)) wher
 
 import Coal.Kernel.LLVM.IRType (IRType (..))
 import Data.ByteString (ByteString)
-import Extra (Name)
+import Extras (Name)
 
 data IRInterpreterArtifact
   = ArtifactHashMapKey Name

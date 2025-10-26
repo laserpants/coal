@@ -212,21 +212,21 @@ library
       Coal.TypeSystem.Substitution
       Coal.TypeSystem.Unification
       Coal.Utils
-      Extra
-      Extra.Control.Applicative
-      Extra.Control.Monad
-      Extra.Control.Monad.State
-      Extra.Control.Monad.Writer
-      Extra.Data.Char
-      Extra.Data.Functor
-      Extra.Data.Functor.Foldable
-      Extra.Data.List
-      Extra.Data.Set
-      Extra.Data.Text
-      Extra.Data.Traversable
-      Extra.Operators
-      Extra.Prettyprinter
-      Extra.Text.Megaparsec.Char
+      Extras
+      Extras.Control.Applicative
+      Extras.Control.Monad
+      Extras.Control.Monad.State
+      Extras.Control.Monad.Writer
+      Extras.Data.Char
+      Extras.Data.Functor
+      Extras.Data.Functor.Foldable
+      Extras.Data.List
+      Extras.Data.Set
+      Extras.Data.Text
+      Extras.Data.Traversable
+      Extras.Operators
+      Extras.Prettyprinter
+      Extras.Text.Megaparsec.Char
   other-modules:
       Paths_coal
   hs-source-dirs:
@@ -302,6 +302,7 @@ test-suite coal-test
       Coal.TypeSystem.TypeIndexedSpec
       Coal.TypeSystem.UnificationSpec
       Coal.TypeSystemSpec
+      E2E.Spec
       Paths_coal
   hs-source-dirs:
       test

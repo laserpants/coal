@@ -20,7 +20,7 @@ import Control.Monad (unless)
 import Control.Monad.Except (throwError)
 import Data.List.NonEmpty (NonEmpty)
 import qualified Data.List.NonEmpty as NonEmpty
-import Extra (Name)
+import Extras (Name)
 
 passPatternExhaustiveCheck :: (Monad m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
 passPatternExhaustiveCheck =

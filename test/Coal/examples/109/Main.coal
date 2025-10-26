@@ -1,0 +1,6 @@
+module Main {
+
+  fun main() : IO<unit> =
+    trace_string("Hello, world!")
+
+}

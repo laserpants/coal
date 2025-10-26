@@ -5,7 +5,7 @@
 module Coal.Common.Label (Label (..), setLabelName) where
 
 import Data.Data (Data, Typeable)
-import Extra (Name)
+import Extras (Name)
 
 data Label t = Label {labelTag :: t, labelName :: Name}
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)

@@ -1,0 +1,19 @@
+module Main {
+
+  fun parse_unsigned(a : bool) : Option<int32> =
+    fold([], Some(5)) {
+      | ch :: _ =>
+          fn(t) => Some(3)
+      | [] =>
+          fn(t) => t
+    }
+
+  fun main() =
+    match(parse_unsigned(false)) {
+      | Some(a) =>
+          trace_int32(a)
+      | None =>
+          trace_string("b")
+    }
+
+}

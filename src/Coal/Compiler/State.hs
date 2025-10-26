@@ -28,7 +28,7 @@ import Coal.Language.Module (Definition (..))
 import Coal.Language.Module.Definition (Path (..))
 import Coal.TypeSystem
 import Data.Text (Text)
-import Extra (Dictionary, Over)
+import Extras (Dictionary, Over)
 
 type CompilerConstraint a = Constraint (InferenceRule Kind a) TypeIndex Kind IndexedType
 

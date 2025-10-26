@@ -1,0 +1,15 @@
+module Tree {
+
+  type Tree<a>
+    = Node(a, Tree<a>, Tree<a>)
+    | Leaf
+
+  fun flatten(tree) = 
+    fold(tree) {
+      | Node(y, @lhs, @rhs) =>
+          lhs ++ (y :: rhs)
+      | Leaf =>
+          []
+    }
+
+}

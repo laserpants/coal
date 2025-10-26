@@ -15,7 +15,7 @@ import qualified Coal.Kernel.Language as Kernel
 import Coal.Language (IndexedType, Kind (..))
 import Coal.Language.Module
 import Control.Monad.IO.Class
-import Extra (Name)
+import Extras (Name)
 
 passKernelTranslate :: (MonadIO m) => Pass Metadata m (Module Metadata Kind IndexedType) (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))
 passKernelTranslate =

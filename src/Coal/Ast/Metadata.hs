@@ -149,4 +149,7 @@ instance HasMetadata (Definition Metadata k ()) where
       DUnfold a _ _ -> a
 
 metadataSpan :: (HasMetadata a) => a -> a -> Metadata
-metadataSpan lhs rhs = Metadata (locationStart (getMetadata lhs)) (locationEnd (getMetadata rhs))
+metadataSpan lhs rhs =
+  Metadata
+    (locationStart (getMetadata lhs))
+    (locationEnd (getMetadata rhs))

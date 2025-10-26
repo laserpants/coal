@@ -1,0 +1,45 @@
+module Main {
+
+  type Tree<a>
+    = Node(a, Tree<a>, Tree<a>)
+    | Leaf
+
+  fun from_list(list : List<int32>) : Tree<int32> =
+    fold(list, { min = 0, max = -1 }) {
+      | (p :: @g) =>
+          fn(range) =>
+            if (range.max == -1 || (p > range.min && p <= range.max))
+              then 
+                Node
+                  ( p 
+                  , g({ min = range.min, max = p })
+                  , g({ min = p, max = range.max })
+                  )
+              else
+                g(range)
+      | [] =>
+          always(Leaf)
+    }
+
+  fun flatten(tree) = 
+    fold(tree) {
+      | Node(y, @lhs, @rhs) =>
+          lhs ++ (y :: rhs)
+      | Leaf =>
+          []
+    }
+
+  let sort = flatten << from_list
+
+  fun main() = 
+    let
+      xs =
+        [5, 3, 7, 2, 100, 6, 4] : List<int32>
+      in
+        trace_int32(match(sort(xs)) {
+          | [] =>
+              12345
+          | (y :: _) =>
+              y
+        }) 
+}

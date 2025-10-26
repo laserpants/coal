@@ -10,7 +10,7 @@ import Coal.Kernel.LLVM.IRInstruction (IRInstrOp)
 import Coal.Kernel.LLVM.IRInstruction.TH
 import Control.Monad.Free (MonadFree)
 import Data.Text (Text)
-import Extra (forM_)
+import Extras (forM_)
 
 import qualified Data.Text as Text
 

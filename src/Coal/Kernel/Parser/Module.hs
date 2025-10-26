@@ -13,7 +13,7 @@ import Coal.Kernel.Parser.Symbol (angleBrackets, braces, commaSep1, parens, symb
 import Coal.Kernel.Parser.Type (type_)
 import Control.Applicative ((<|>))
 import Control.Monad (void)
-import Extra (Name)
+import Extras (Name)
 import Text.Megaparsec (try)
 import Text.Megaparsec.Char (upperChar)
 

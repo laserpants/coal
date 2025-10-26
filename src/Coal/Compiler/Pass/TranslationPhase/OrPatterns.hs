@@ -16,7 +16,7 @@ import Data.Generics.Uniplate.Data (transformBiM)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NonEmpty
 import Data.Semigroup (sconcat)
-import Extra (Map, traverseM)
+import Extras (Map, traverseM)
 
 passOrPatterns :: (Monad m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
 passOrPatterns =

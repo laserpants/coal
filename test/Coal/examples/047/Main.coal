@@ -1,0 +1,14 @@
+module Main {
+
+  fun main() =
+    let 
+      x =
+        5.0
+      in
+        let 
+          y =
+            4.6
+          in
+            trace_double(x * y)
+
+}

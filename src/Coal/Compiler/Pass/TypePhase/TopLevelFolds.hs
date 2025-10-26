@@ -22,7 +22,7 @@ import Control.Monad.Writer (execWriter, tell)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transform, transformM)
 import Data.List.NonEmpty (NonEmpty (..))
-import Extra (Name, const2, foldrM)
+import Extras (Name, const2, foldrM)
 
 passTopLevelFolds :: (Monad m, Monoid a, Data a) => Pass a m (Module a Kind ()) (Module a Kind ())
 passTopLevelFolds =

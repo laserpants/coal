@@ -17,7 +17,7 @@ import Data.Maybe (fromJust)
 import Data.Set (Set)
 import qualified Data.Set as Set
 import Data.Tuple.Extra (fst3)
-import Extra (Name, concatForM)
+import Extras (Name, concatForM)
 
 passTopologicalSort :: (Monad m) => Pass Metadata m [Module Metadata Kind ()] [Module Metadata Kind ()]
 passTopologicalSort =

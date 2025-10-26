@@ -15,7 +15,7 @@ import Control.Monad.Reader (asks)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformM)
 import Data.List.NonEmpty (NonEmpty (..), toList)
-import Extra (Dictionary, Name)
+import Extras (Dictionary, Name)
 
 passExpandAliases :: (Monad m, Data a) => Pass a m (Module a k ()) (Module a k ())
 passExpandAliases =

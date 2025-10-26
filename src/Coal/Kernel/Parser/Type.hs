@@ -9,7 +9,7 @@ import Coal.Kernel.Parser.Identifier (constructor, name)
 import Coal.Kernel.Parser.Symbol (braces, colon, commaSep, commaSepN, parens, pipe, symbol)
 import Control.Monad (void)
 import Control.Monad.Combinators.Expr (Operator (..), makeExprParser)
-import Extra (Name, optionalOr)
+import Extras (Name, optionalOr)
 
 import qualified Coal.Kernel.Language.Type.Syntax as Type
 import qualified Text.Megaparsec.Char.Lexer as Lexer

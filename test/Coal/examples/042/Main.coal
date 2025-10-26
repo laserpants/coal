@@ -1,0 +1,9 @@
+module Main {
+
+  fun main() = 
+    let
+      x =
+        5 + 3
+      in
+        trace_int32(x)
+}

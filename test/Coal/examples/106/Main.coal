@@ -1,0 +1,12 @@
+module Main {
+
+  fun banan(x : int32) =
+    "banan"
+
+  fun banan(y : int32) =
+    "banan"
+
+  fun main() =
+    trace_int32(11)
+
+}

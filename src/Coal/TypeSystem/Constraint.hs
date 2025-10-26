@@ -15,7 +15,7 @@ module Coal.TypeSystem.Constraint (
 import Coal.Language (HasActive (..), Scheme (..), TypeIndex (..), TypeIndexed (..))
 import Data.Data (Data, Typeable)
 import Data.Set (Set, intersection, union)
-import Extra (Name, Over)
+import Extras (Name, Over)
 
 -- | Monomorphic type variable set
 newtype Monomorphic m = Monomorphic {monomorphicSet :: Set m}

@@ -12,7 +12,7 @@ import Data.Char (ord)
 import Data.Functor (($>))
 import qualified Data.Text as Text
 import qualified Data.Text.Encoding as Text
-import Extra.Text.Megaparsec.Char (doubleQuote, singleQuote)
+import Extras.Text.Megaparsec.Char (doubleQuote, singleQuote)
 import Text.Megaparsec
 import Text.Megaparsec.Char (char)
 import qualified Text.Megaparsec.Char.Lexer as Lexer

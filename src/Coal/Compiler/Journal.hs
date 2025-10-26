@@ -23,7 +23,7 @@ import Coal.Compiler.Error (CompilerError (..))
 import Coal.Language
 import Control.Monad.Writer (MonadWriter, censor, listen, tell)
 import Data.Tuple.Extra (second)
-import Extra (Dictionary, Name)
+import Extras (Dictionary, Name)
 
 type RecordInfo a = (Name, Dictionary (IndexedPattern a), Maybe (IndexedPattern a))
 

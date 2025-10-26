@@ -1,0 +1,11 @@
+module Main {
+
+  fun baz(a) =
+    match(a) {
+      | foo(@x) :: xs => ""
+    }
+
+  fun main() =
+    trace_int32(1)
+
+}

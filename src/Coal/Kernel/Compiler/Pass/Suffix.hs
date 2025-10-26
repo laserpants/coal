@@ -11,7 +11,7 @@ import Control.Monad.State (MonadState, modify, runStateT)
 import Control.Monad.Trans (lift)
 import Data.Functor.Foldable (cata, embed)
 import Data.List.NonEmpty (NonEmpty (..))
-import Extra (Dictionary, Name, applyM1, applyM2, isConstructor)
+import Extras (Dictionary, Name, applyM1, applyM2, isConstructor)
 import TextShow (showt)
 
 import qualified Data.List.NonEmpty as NonEmpty

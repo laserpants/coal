@@ -19,7 +19,7 @@ import Coal.Common.Label (Label (..))
 import Coal.Language
 import Coal.Language.Module
 import Data.List.NonEmpty (NonEmpty (..))
-import Extra (Name)
+import Extras (Name)
 
 {-# INLINE matchE #-}
 matchE :: (Monoid a) => Expression a () -> NonEmpty (Clause a ()) -> Expression a ()

@@ -1,0 +1,12 @@
+module Main {
+
+  fun baz(b) = 
+    match(b) {
+      | true => "true"
+      | false => "false"
+    }
+
+  fun main() = 
+    trace_string(baz(true))
+
+}

@@ -15,7 +15,7 @@ import Coal.Kernel.Parser.Type (type_)
 import Control.Monad (void)
 import Control.Monad.Combinators.Expr (makeExprParser)
 import Data.List.NonEmpty (NonEmpty (..))
-import Extra (Name)
+import Extras (Name)
 
 import qualified Coal.Kernel.Language.Expr.Syntax as Syntax
 

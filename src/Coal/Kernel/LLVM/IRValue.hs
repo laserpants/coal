@@ -6,7 +6,7 @@ module Coal.Kernel.LLVM.IRValue (IRValue (..), irPrimValue) where
 import Coal.Kernel.LLVM.IRType (IRType (..), IRTyped (..))
 import Coal.Kernel.Language (Prim (..))
 import Data.Int (Int32, Int64)
-import Extra (Name)
+import Extras (Name)
 
 -- | LLVM IR values
 data IRValue

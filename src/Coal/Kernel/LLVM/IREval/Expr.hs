@@ -25,7 +25,7 @@ import Control.Arrow ((>>>))
 import Data.Fix (Fix (..))
 import Data.Functor.Foldable (project)
 import Data.List.NonEmpty (toList)
-import Extra (forM)
+import Extras (forM)
 
 import qualified Coal.Kernel.Language as Syntax
 import qualified Data.Text as Text

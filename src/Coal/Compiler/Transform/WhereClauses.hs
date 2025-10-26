@@ -9,7 +9,7 @@ import Coal.Compiler.Stack
 import Coal.Compiler.Transform.Tree
 import Coal.Language.Module
 import Data.Data (Data)
-import Extra (Name)
+import Extras (Name)
 
 liftWhereClause :: (Monad m) => Name -> Definition a k t -> CompilerT a m (Definition a k t)
 liftWhereClause name =

@@ -12,7 +12,7 @@ module Coal.Kernel.LLVM.IRType (
 import Coal.Kernel.Language.Expr (Expr)
 import Coal.Kernel.Language.Type (Type (..))
 import Coal.Kernel.Language.Typed (Typed (..))
-import Extra (Name)
+import Extras (Name)
 
 -- | LLVM IR language types
 data IRType

@@ -26,7 +26,7 @@ import Data.List.NonEmpty (NonEmpty (..), toList)
 import qualified Data.Map.Strict as Map
 import Data.Maybe (maybeToList)
 import qualified Data.Text as Text
-import Extra
+import Extras
 
 type ConstraintsGen a = ConstraintsGenStack a TypeIndex Kind IndexedType
 

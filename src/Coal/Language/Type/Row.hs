@@ -16,7 +16,7 @@ module Coal.Language.Type.Row (
 ) where
 
 import Data.Data (Data, Typeable)
-import Extra (Dictionary, Name, (<$$>))
+import Extras (Dictionary, Name, (<$$>))
 import GHC.Generics (Generic)
 
 import qualified Data.Map.Strict as Map

@@ -22,7 +22,7 @@ import Coal.Language.Module.Definition.Trait (TraitDef (..))
 import Coal.Language.Module.Definition.Type (TypeDef (..))
 import Coal.Language.Module.Definition.Unfold (UnfoldDef (..))
 import Data.Data (Data, Typeable)
-import Extra (Name)
+import Extras (Name)
 
 newtype Path = Path {pathComponents :: [Name]}
   deriving (Show, Eq, Ord, Read, Data, Typeable)

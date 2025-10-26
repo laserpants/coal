@@ -1,16 +1,18 @@
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
 module Coal.Compiler.Error (
   ErrorLocation (..),
   CompilerError (..),
   CompilerFailureMode (..),
+  errorLocation,
 ) where
 
 import Coal.Language (IndexedType, Kind (..), Trait (..))
 import Coal.Parser (ParserError)
 import Coal.TypeSystem.Constraint.Generation.InferenceRule
 import Coal.TypeSystem.Constraint.Generation.Internal
-import Extra (Name)
+import Extras (Name)
 
 data ErrorLocation a = ErrorLocation Name a
   deriving (Show, Eq)
@@ -41,3 +43,33 @@ data CompilerFailureMode
   | TypeError
   | CompilerError
   deriving (Show, Eq, Ord, Read)
+
+errorLocation :: CompilerError a -> Maybe (ErrorLocation a)
+errorLocation =
+  \case
+    ParserError{} ->
+      Nothing
+    MisplacedImportStatement erl ->
+      Just erl
+    ModuleNotFound _ erl ->
+      Just erl
+    NonExhaustivePatterns erl ->
+      Just erl
+    ConstraintsError _ erl ->
+      Just erl
+    SolverError _ erl ->
+      Just erl
+    NameNotInScope _ erl ->
+      Just erl
+    FoldPatternInRegularMatch erl ->
+      Just erl
+    FoldPatternOutsideConstructor erl ->
+      Just erl
+    Shadowing _ erl ->
+      Just erl
+    MissingInstance _ erl ->
+      Just erl
+    NameAlreadyDefined _ erl ->
+      Just erl
+    ConflictingParameter _ erl ->
+      Just erl

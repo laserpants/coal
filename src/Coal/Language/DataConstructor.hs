@@ -7,7 +7,7 @@ module Coal.Language.DataConstructor (DataConstructor (..)) where
 
 import Coal.Language.Type.Scheme (Scheme (..))
 import Data.Data (Data, Typeable)
-import Extra (Name)
+import Extras (Name)
 import GHC.Generics (Generic)
 
 -- | Data constructor

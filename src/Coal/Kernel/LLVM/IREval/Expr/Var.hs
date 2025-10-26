@@ -14,7 +14,7 @@ import Coal.Kernel.LLVM.IRType.Syntax (i32, i8Ptr, ptr, struct)
 import Coal.Kernel.LLVM.IRValue (IRValue (..))
 import Coal.Kernel.Language.Type.Arrow (arity)
 import Data.Text (Text)
-import Extra (Name, isConstructor)
+import Extras (Name, isConstructor)
 
 import qualified Coal.Kernel.Language as Syntax
 

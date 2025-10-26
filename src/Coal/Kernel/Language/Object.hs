@@ -25,7 +25,7 @@ import Coal.Kernel.Language.Typed (Typed (..))
 import Control.Arrow ((>>>))
 import Data.Functor.Foldable (embed, project)
 import Data.List.NonEmpty (toList)
-import Extra (Name)
+import Extras (Name)
 
 data Object t e
   = OFunction Name [Label t] e

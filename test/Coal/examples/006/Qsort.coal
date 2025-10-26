@@ -1,0 +1,24 @@
+module Qsort {
+
+  import Tree(Tree, flatten)
+
+  fun binary_search_tree(list : List<int32>) : Tree<int32> =
+    fold(list, { min = 0, max = -1 }) {
+      | (p :: @g) =>
+          fn(range) =>
+            if (range.max == -1 || (p > range.min && p <= range.max))
+              then 
+                Node
+                  ( p 
+                  , g({ min = range.min, max = p })
+                  , g({ min = p, max = range.max })
+                  )
+              else
+                g(range)
+      | [] =>
+          always(Leaf)
+    }
+
+  let sort = flatten << binary_search_tree
+
+}

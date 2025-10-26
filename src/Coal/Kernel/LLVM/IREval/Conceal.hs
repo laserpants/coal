@@ -13,7 +13,7 @@ import Coal.Kernel.LLVM.IRType.Syntax (i1, i32, i64, i8, i8Ptr, ptr)
 import Coal.Kernel.LLVM.IRValue (IRValue (..))
 import Control.Monad (unless)
 import Data.List.NonEmpty (NonEmpty, toList)
-import Extra (forM)
+import Extras (forM)
 import GHC.Float
 
 irBox :: IRValue -> IRType -> IRInstr IRValue

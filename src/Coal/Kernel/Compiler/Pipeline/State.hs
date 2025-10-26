@@ -19,7 +19,7 @@ module Coal.Kernel.Compiler.Pipeline.State (
 import Coal.Common.Environment (Environment)
 import Coal.Kernel.LLVM
 import Coal.Kernel.Language.Type (Type)
-import Extra (Over)
+import Extras (Over)
 
 data PipelineState = PipelineState
   { pipelineSupply :: Int

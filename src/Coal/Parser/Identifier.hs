@@ -16,7 +16,7 @@ import Coal.Parser.Symbol (symbol)
 import Control.Monad (void)
 import Data.Text (Text)
 import qualified Data.Text as Text
-import Extra (Name)
+import Extras (Name)
 import Text.Megaparsec
 import Text.Megaparsec.Char (alphaNumChar, char, lowerChar, upperChar)
 

@@ -19,7 +19,7 @@ import Coal.Kernel.Language (Expr)
 import Control.Monad (unless)
 import Data.List.NonEmpty (NonEmpty (..), toList)
 import Data.Text (Text)
-import Extra (Name, forM, forSM_, isConstructor)
+import Extras (Name, forM, forSM_, isConstructor)
 
 import qualified Coal.Kernel.Language as Syntax
 

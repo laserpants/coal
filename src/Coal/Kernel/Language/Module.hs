@@ -4,7 +4,7 @@
 module Coal.Kernel.Language.Module (Module (..)) where
 
 import Coal.Kernel.Language.Object (Object)
-import Extra (Name)
+import Extras (Name)
 
 data Module t i e = Module
   { moduleName :: Name

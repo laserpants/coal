@@ -19,7 +19,7 @@ import Control.Monad.Reader (asks, local)
 import qualified Data.Set as Set
 import Data.Text (isPrefixOf)
 import qualified Data.Text as Text
-import Extra (Name, Set)
+import Extras (Name, Set)
 
 qualifyName :: (Monad m) => Name -> CompilerT a m Name
 qualifyName name = do

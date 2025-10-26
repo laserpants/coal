@@ -20,7 +20,7 @@ import Control.Monad (when)
 import Data.Functor (void, ($>), (<$), (<$>))
 import Data.Text (Text)
 import Data.Void (Void)
-import Extra (Name)
+import Extras (Name)
 import Text.Megaparsec
 import Text.Megaparsec.Char (alphaNumChar, char, newline, spaceChar)
 

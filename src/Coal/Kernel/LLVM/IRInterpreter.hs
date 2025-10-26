@@ -39,7 +39,7 @@ import Control.Monad.RWS (asks, gets, local, tell)
 import Data.Fix (Fix (..))
 import Data.Text (Text, isPrefixOf)
 import Data.Text.Encoding (encodeUtf8)
-import Extra (Name, forM, listenOnly)
+import Extras (Name, forM, listenOnly)
 import TextShow (showt)
 
 import qualified Coal.Common.Environment as Environment

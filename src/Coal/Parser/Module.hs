@@ -8,7 +8,7 @@ import Coal.Parser
 import Coal.Parser.Identifier
 import Coal.Parser.Module.Definition
 import Coal.Parser.Symbol
-import Extra (Name)
+import Extras (Name)
 import Text.Megaparsec
 import Text.Megaparsec.Char (upperChar)
 

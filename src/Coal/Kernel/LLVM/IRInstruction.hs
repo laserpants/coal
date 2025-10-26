@@ -16,7 +16,7 @@ import Coal.Kernel.LLVM.IRValue (IRValue)
 import Control.Monad.Free (Free)
 import Data.ByteString (ByteString)
 import Data.Text (Text)
-import Extra (Name)
+import Extras (Name)
 
 -- | icmp instruction condition codes
 data ICmpCond

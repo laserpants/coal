@@ -10,7 +10,7 @@ import Coal.Kernel.Language
 import Control.Monad.RWS (MonadWriter, RWS, ask, evalRWS, local, tell)
 import Data.Functor.Foldable (cata, embed)
 import Data.List.NonEmpty (NonEmpty, toList)
-import Extra (Name, forM, traverse2)
+import Extras (Name, forM, traverse2)
 import TextShow (showt)
 
 import qualified Data.Text as Text

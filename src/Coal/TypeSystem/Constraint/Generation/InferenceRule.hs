@@ -8,7 +8,7 @@ import Coal.Language (Kind (..), Scheme (..), Type (..), TypeIndex (..))
 import Coal.TypeSystem.Substitution (Substitutable (..), applyT)
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (transformBi)
-import Extra (Name)
+import Extras (Name)
 
 data InferenceRule k a
   = InferenceRulePlaceholder String

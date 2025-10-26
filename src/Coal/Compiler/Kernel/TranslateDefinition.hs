@@ -18,7 +18,7 @@ import Control.Monad.Reader (asks)
 import Data.Data (Data)
 import Data.List.Extra (sortOn)
 import Data.List.NonEmpty (NonEmpty ((:|)), toList, (<|))
-import Extra (Name)
+import Extras (Name)
 
 type KernelObject = Kernel.Object Kernel.Type (Kernel.Expr Kernel.Type)
 

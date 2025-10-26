@@ -22,7 +22,7 @@ import Data.Data (Data)
 import Data.List.NonEmpty (NonEmpty (..))
 import Data.Set (Set)
 import qualified Data.Set as Set
-import Extra (Name, traverse_)
+import Extras (Name, traverse_)
 
 passNoDuplicateParamsRule :: (Monad m) => Pass Metadata m [Module Metadata Kind ()] [Module Metadata Kind ()]
 passNoDuplicateParamsRule =

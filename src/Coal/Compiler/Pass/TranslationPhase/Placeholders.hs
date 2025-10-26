@@ -31,7 +31,7 @@ import Data.List.NonEmpty (NonEmpty (..), toList)
 import qualified Data.Map.Strict as Map
 import Data.Maybe (catMaybes, fromJust)
 import Data.Text (isPrefixOf)
-import Extra (Dictionary, Name)
+import Extras (Dictionary, Name)
 
 passPlaceholders :: (Monad m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
 passPlaceholders =

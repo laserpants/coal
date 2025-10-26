@@ -11,7 +11,7 @@ import Control.Monad.Writer (MonadWriter, tell)
 import Data.Functor.Foldable (embed, project)
 import Data.List (partition)
 import Data.List.NonEmpty (NonEmpty (..), toList)
-import Extra (Set, (<$$>))
+import Extras (Set, (<$$>))
 
 import qualified Coal.Kernel.Language as Syntax
 

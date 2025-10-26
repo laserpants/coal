@@ -17,7 +17,7 @@ import Control.Monad.Combinators.Expr
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map.Strict as Map
-import Extra (Name, isConstructor)
+import Extras (Name, isConstructor)
 import Text.Megaparsec (getSourcePos, notFollowedBy, optional, some, try, (<|>))
 import Text.Megaparsec.Char (char)
 import qualified Text.Megaparsec.Char.Lexer as Lexer

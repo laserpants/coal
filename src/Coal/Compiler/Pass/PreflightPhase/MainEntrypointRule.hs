@@ -15,7 +15,7 @@ import Coal.Language (Kind (..))
 import Coal.Language.Module
 import Control.Monad.Except
 import Data.List.NonEmpty (NonEmpty (..))
-import Extra (Name, traverse_)
+import Extras (Name, traverse_)
 
 passMainEntrypointRule :: (Monad m) => Pass Metadata m [Module Metadata Kind ()] [Module Metadata Kind ()]
 passMainEntrypointRule =

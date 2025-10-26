@@ -15,7 +15,7 @@ import Coal.Language.Module (ConstantDef (..), Definition (..), FunctionDef (..)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformM)
 import Data.List.NonEmpty (NonEmpty (..))
-import Extra (Dictionary)
+import Extras (Dictionary)
 
 passLambdaMatchExpansion :: (Monad m, Monoid a, Data a) => Pass a m (Module a Kind ()) (Module a Kind ())
 passLambdaMatchExpansion =

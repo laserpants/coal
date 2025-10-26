@@ -18,7 +18,7 @@ import Data.Generics.Uniplate.Data (transform)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
-import Extra (Dictionary, Name)
+import Extras (Dictionary, Name)
 
 passTopLevelUnfolds :: (Monad m, Monoid a, Data a) => Pass a m (Module a Kind ()) (Module a Kind ())
 passTopLevelUnfolds =

@@ -13,7 +13,7 @@ import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (universeBi)
 import Data.List.NonEmpty (NonEmpty)
 import qualified Data.Set as Set
-import Extra (Name)
+import Extras (Name)
 
 data Binding e a t
   = BPattern a (Pattern a t) (e a t)

@@ -29,7 +29,7 @@ import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
 import Data.Tuple.Extra (fst3)
-import Extra (Dictionary, Name)
+import Extras (Dictionary, Name)
 
 type ConstraintsGenResult g o a t s = (s, Dictionary (g, o a), [ConstraintsGenOutput g o a t])
 

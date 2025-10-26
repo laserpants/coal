@@ -17,7 +17,7 @@ import Data.Data (Data)
 import Data.List.NonEmpty (NonEmpty (..), toList, (<|))
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
-import Extra (Name)
+import Extras (Name)
 
 type KernelExpr = Kernel.Expr Kernel.Type
 

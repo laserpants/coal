@@ -16,7 +16,7 @@ import Control.Monad ((<=<))
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformM)
 import Data.List.NonEmpty (NonEmpty (..), (<|))
-import Extra (Dictionary)
+import Extras (Dictionary)
 
 passCompileNats :: (Monad m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
 passCompileNats =

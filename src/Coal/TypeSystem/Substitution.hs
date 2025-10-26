@@ -25,7 +25,7 @@ import Data.Map.Strict (Map, keysSet, union)
 import qualified Data.Map.Strict as Map
 import Data.Set (Set, intersection)
 import qualified Data.Set as Set
-import Extra (IndexMap, fromMaybe)
+import Extras (IndexMap, fromMaybe)
 
 class Substitutable s where
   apply :: Substitution -> s -> s

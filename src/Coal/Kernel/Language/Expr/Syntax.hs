@@ -25,8 +25,8 @@ import Coal.Kernel.Language.Expr (
 import Coal.Kernel.Language.Op (Op)
 import Coal.Kernel.Language.Prim (Prim)
 import Data.List.NonEmpty (NonEmpty)
-import Extra (Name)
-import Extra.Data.Functor.Foldable (embed, embed1, embed2, embed3)
+import Extras (Name)
+import Extras.Data.Functor.Foldable (embed, embed1, embed2, embed3)
 
 {-# INLINE var #-}
 var :: Label t -> Expr t

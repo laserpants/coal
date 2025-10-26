@@ -16,7 +16,7 @@ import Data.Fix (Fix (..))
 import Data.Function (on)
 import Data.Functor.Foldable (cata, embed)
 import Data.List.NonEmpty (NonEmpty (..), toList)
-import Extra (foldrM)
+import Extras (foldrM)
 
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map.Strict as Map

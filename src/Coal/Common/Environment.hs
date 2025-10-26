@@ -21,7 +21,7 @@ module Coal.Common.Environment (
 ) where
 
 import qualified Data.Map.Strict as Map
-import Extra (Dictionary, Name, Over)
+import Extras (Dictionary, Name, Over)
 import Prelude hiding (filter, lookup)
 
 newtype Environment e = Environment {envDictionary :: Dictionary e}

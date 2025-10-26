@@ -1,0 +1,9 @@
+module Main {
+
+  fun main() =
+    let
+      res =
+        string_reverse("banana")
+      in
+        trace_string(res)
+}

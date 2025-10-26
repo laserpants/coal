@@ -6,7 +6,7 @@
 module Coal.Language.Trait (Trait (..), With (..), traitName) where
 
 import Data.Data (Data, Typeable)
-import Extra (Name)
+import Extras (Name)
 import GHC.Generics (Generic)
 import Prettyprinter (Pretty (..), parens)
 

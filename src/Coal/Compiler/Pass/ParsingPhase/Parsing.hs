@@ -15,7 +15,7 @@ import Control.Monad.Except (throwError)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Data.Either (partitionEithers)
 import qualified Data.Text as Text
-import Extra (forM_)
+import Extras (forM_)
 import Text.Megaparsec (runParser)
 
 passParsing :: (MonadIO m) => Pass Metadata m [FilePath] [Module Metadata Kind ()]

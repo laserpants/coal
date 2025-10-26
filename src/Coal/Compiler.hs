@@ -12,6 +12,7 @@ import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Config (CompilerConfig)
 import Coal.Compiler.Environment
+import Coal.Compiler.Error (errorLocation)
 import Coal.Compiler.Pass (Pass (..), (>->))
 import Coal.Compiler.Pass.LoweringPhase (loweringPhase)
 import Coal.Compiler.Pass.ParsingPhase (parsingPhase)
@@ -40,7 +41,12 @@ compile config files = do
     setConfigC config
     runPass pipeline files
   forM_ es $
-    \err ->
+    \err -> do
+      case errorLocation err of
+        Just (ErrorLocation name _) ->
+          Text.putStrLn ("In module '" <> name <> "':\n")
+        Nothing ->
+          pure ()
       Text.putStrLn (prettyError compilerVerbatimSource err)
   case e of
     Left e1 ->

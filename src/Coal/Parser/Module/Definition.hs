@@ -16,7 +16,7 @@ import Control.Monad (void)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
-import Extra (Name)
+import Extras (Name)
 import Text.Megaparsec
 import Text.Megaparsec.Char (upperChar)
 

@@ -31,7 +31,7 @@ import Data.Fix (Fix (..))
 import Data.Functor.Foldable (cata, project)
 import Data.List.NonEmpty (NonEmpty (..))
 import Data.Set (singleton)
-import Extra (Name, Over)
+import Extras (Name, Over)
 import Text.Show.Deriving (deriveShow1)
 
 import qualified Data.List.NonEmpty as NonEmpty

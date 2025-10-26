@@ -1,0 +1,10 @@
+module Main {
+
+  let a_user_named_lazarus = 
+    { name = "Lazarus"
+    , uid = 2 : int32
+    }
+
+  fun main() =
+    trace_string(a_user_named_lazarus.name)
+}

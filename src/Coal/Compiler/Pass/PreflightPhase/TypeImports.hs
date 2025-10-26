@@ -11,7 +11,7 @@ import Coal.Language
 import Coal.Language.Module
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.State (gets)
-import Extra (forM, fromMaybe, isConstructor)
+import Extras (forM, fromMaybe, isConstructor)
 
 passTypeImports :: (MonadIO m) => Pass a m (Module a Kind ()) (Module a Kind ())
 passTypeImports =

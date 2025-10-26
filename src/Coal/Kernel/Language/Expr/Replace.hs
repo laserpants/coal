@@ -9,7 +9,7 @@ import Control.Arrow ((>>>))
 import Control.Monad.Identity (runIdentity)
 import Data.Functor.Foldable (embed, para)
 import Data.List.NonEmpty (NonEmpty)
-import Extra (Dictionary, Map, Name, (<$$>))
+import Extras (Dictionary, Map, Name, (<$$>))
 
 import qualified Coal.Kernel.Language.Expr.Syntax as Syntax
 import qualified Data.Map.Strict as Map

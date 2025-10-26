@@ -14,7 +14,7 @@ import qualified Coal.Kernel.Language as Syntax
 import Control.Monad.Extra (concatForM)
 import Data.List.NonEmpty (NonEmpty (..), toList)
 import Data.Tuple.Extra (fst3)
-import Extra (forM, forSM)
+import Extras (forM, forSM)
 
 irEvalClause :: (IREval e) => IRValue -> [Label Syntax.Type] -> e -> IRInstr IRValue
 irEvalClause v1 lls e = do

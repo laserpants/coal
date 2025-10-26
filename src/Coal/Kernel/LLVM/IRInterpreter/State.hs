@@ -15,7 +15,7 @@ module Coal.Kernel.LLVM.IRInterpreter.State (
 
 import Control.Monad.RWS (MonadState, modify)
 import Data.Text (Text)
-import Extra (Over)
+import Extras (Over)
 
 data IRInterpreterState a = IRInterpreterState
   { irInterpreterStateRegisterIndex :: Int

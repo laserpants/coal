@@ -20,7 +20,7 @@ import Coal.Language.Trait (Trait (..))
 import Coal.Language.Type (Parameter (..), Type)
 import Data.Data (Data, Typeable)
 import Data.List.NonEmpty (NonEmpty)
-import Extra (Dictionary, Name)
+import Extras (Dictionary, Name)
 
 data Expression a t
   = -- | Type-annotated expression

@@ -18,7 +18,7 @@ import Coal.Compiler.PatternMatching.Envelope (EnvelopeExpression (..), Envelope
 import Data.Function (on)
 import Data.List (sortBy)
 import Data.Maybe (mapMaybe)
-import Extra (Name, groupByEq)
+import Extras (Name, groupByEq)
 
 data PatternEquationBody e t = PatternEquationBody [EnvelopePattern e t] (EnvelopeExpression e t)
   deriving (Show, Eq, Ord, Read)

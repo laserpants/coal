@@ -23,7 +23,7 @@ import Control.Monad.Writer (execWriter, tell)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (descendM, transform, transformM)
 import Data.List.NonEmpty (NonEmpty (..))
-import Extra (Dictionary, Name, const2, foldrM, traverse_)
+import Extras (Dictionary, Name, const2, foldrM, traverse_)
 
 passExpressionFolds :: (Monad m, Monoid a, Data a) => Pass a m (Module a k ()) (Module a k ())
 passExpressionFolds =

@@ -24,8 +24,8 @@ import Data.Char (isAlphaNum)
 import Data.Text (Text)
 import Data.Text.Encoding (decodeUtf8Lenient)
 import Data.Word (Word8)
-import Extra (Name, (||.))
-import Extra.Data.Char (isUnderscore)
+import Extras (Name, (||.))
+import Extras.Data.Char (isUnderscore)
 import TextShow (showt)
 
 import qualified Data.ByteString as ByteString

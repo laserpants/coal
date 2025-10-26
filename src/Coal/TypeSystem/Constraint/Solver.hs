@@ -30,7 +30,7 @@ import Control.Monad.RWS (MonadState, MonadWriter, RWS, get, put, runRWS, tell)
 import Data.Data (Data)
 import Data.List (delete, find)
 import Data.Set (intersection, (\\))
-import Extra (foldrM)
+import Extras (foldrM)
 
 import qualified Data.Set as Set
 

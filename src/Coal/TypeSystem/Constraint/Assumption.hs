@@ -12,7 +12,7 @@ module Coal.TypeSystem.Constraint.Assumption (
 import Coal.TypeSystem.Substitution (Substitutable (..), applyT)
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (transformBi)
-import Extra (Name)
+import Extras (Name)
 
 data Assumption a t = Assumption
   { assumptionMetadata :: a

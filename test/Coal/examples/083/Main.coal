@@ -1,0 +1,15 @@
+module Main {
+
+  fun baz(xs, x : int32) =
+     match(xs) {
+       | f :: _ => f(x)
+       | [] => 0
+     }
+
+  fun main() =
+    let xs = 
+      [fn(x) => x + 1, fn(x) => x + 2, fn(x) => x + 3]
+    in
+      trace_int32(baz(xs, 3))
+
+}

@@ -34,7 +34,7 @@ import Coal.Language.Module.Definition.Type
 import Coal.Language.Module.Definition.Unfold
 import Data.Data (Data, Typeable)
 import qualified Data.Text as Text
-import Extra (Name, Over)
+import Extras (Name, Over)
 
 data Module a k t = Module Path [Name] [Definition a k t]
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)

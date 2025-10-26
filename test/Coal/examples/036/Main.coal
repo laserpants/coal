@@ -1,0 +1,14 @@
+module Main {
+
+  trait X<a> {
+    x : bool -> a
+  }
+
+  instance X<bool> {
+    let x = fn(z) => true
+  }
+
+  let a = x(false)  // X(a) => a
+
+  fun main() = trace_bool(a)
+}

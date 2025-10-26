@@ -28,12 +28,15 @@ defaultConfig =
 
 {-# INLINE setConfigExecutableName #-}
 setConfigExecutableName :: FilePath -> CompilerConfig -> CompilerConfig
-setConfigExecutableName name CompilerConfig{..} = CompilerConfig{configExecutableName = name, ..}
+setConfigExecutableName name CompilerConfig{..} =
+  CompilerConfig{configExecutableName = name, ..}
 
 {-# INLINE setConfigGenerateDotFiles #-}
 setConfigGenerateDotFiles :: Bool -> CompilerConfig -> CompilerConfig
-setConfigGenerateDotFiles flag CompilerConfig{..} = CompilerConfig{configGenerateDotFiles = flag, ..}
+setConfigGenerateDotFiles flag CompilerConfig{..} =
+  CompilerConfig{configGenerateDotFiles = flag, ..}
 
 {-# INLINE setConfigGenerateLLVMOutput #-}
 setConfigGenerateLLVMOutput :: Bool -> CompilerConfig -> CompilerConfig
-setConfigGenerateLLVMOutput flag CompilerConfig{..} = CompilerConfig{configGenerateLLVMOutput = flag, ..}
+setConfigGenerateLLVMOutput flag CompilerConfig{..} =
+  CompilerConfig{configGenerateLLVMOutput = flag, ..}

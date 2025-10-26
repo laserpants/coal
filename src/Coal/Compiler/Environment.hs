@@ -40,7 +40,7 @@ import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import qualified Data.Text as Text
-import Extra (Dictionary, Name, Over, Set, traverse2, traverse_, (<$$>))
+import Extras (Dictionary, Name, Over, Set, traverse2, traverse_, (<$$>))
 
 type AliasEnvironment = Environment ([Name], ParameterizedType)
 type DataConstructorEnvironment = Environment (DataConstructor TypeIndex Kind IndexedType, Set Name)

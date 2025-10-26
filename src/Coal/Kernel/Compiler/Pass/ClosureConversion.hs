@@ -15,7 +15,7 @@ import Data.Function (on)
 import Data.Functor.Foldable (cata, embed)
 import Data.List (nubBy)
 import Data.List.NonEmpty (NonEmpty (..))
-import Extra (Name, (<$$>))
+import Extras (Name, (<$$>))
 
 import qualified Coal.Kernel.Language as Syntax
 import qualified Data.Set as Set

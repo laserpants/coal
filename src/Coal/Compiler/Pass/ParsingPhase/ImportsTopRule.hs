@@ -11,7 +11,7 @@ import Coal.Language
 import Coal.Language.Module
 import Coal.Language.Module.Definition (isDImport)
 import Control.Monad.Except
-import Extra (Name)
+import Extras (Name)
 
 passImportsTopRule :: (MonadIO m) => Pass Metadata m [Module Metadata Kind ()] [Module Metadata Kind ()]
 passImportsTopRule =

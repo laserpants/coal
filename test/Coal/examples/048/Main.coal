@@ -1,0 +1,14 @@
+module Main {
+
+  type JsonValue
+    = JsonNull
+    | JsonBool(bool)
+    | JsonNumber(double)
+    | JsonString(string)
+    | JsonArray(List<JsonValue>)
+    | JsonObject(List<(string, JsonValue)>)
+
+  fun main() =
+    trace_int32(123)
+
+}

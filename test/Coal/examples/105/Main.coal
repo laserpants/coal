@@ -1,0 +1,17 @@
+module Main {
+
+  trait Foo<a> {
+    foo: a -> int32
+  }
+
+//  instance Foo<int32> {
+//    let foo = fn(x) => 1 : int32
+//  }
+
+  fun main() =
+    let
+       zs = foo(5 : int32)
+     in
+       trace_int32(zs : int32)
+
+}

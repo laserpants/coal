@@ -10,7 +10,7 @@ import qualified Coal.Kernel.Compiler as Kernel
 import Coal.Kernel.LLVM
 import qualified Coal.Kernel.Language as Kernel
 import Control.Monad.IO.Class
-import Extra (Name)
+import Extras (Name)
 
 passKernelCode :: (MonadIO m) => Pass Metadata m [Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type)] [(Name, [IRConstruct [IRLine]])]
 passKernelCode =

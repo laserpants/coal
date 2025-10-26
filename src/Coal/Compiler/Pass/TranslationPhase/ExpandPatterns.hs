@@ -28,7 +28,7 @@ import Coal.Language.Pattern (IndexedPattern, Pattern (..))
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (descendM)
 import Data.List.NonEmpty (NonEmpty ((:|)))
-import Extra (Name)
+import Extras (Name)
 
 passExpandPatterns :: (Monad m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
 passExpandPatterns =

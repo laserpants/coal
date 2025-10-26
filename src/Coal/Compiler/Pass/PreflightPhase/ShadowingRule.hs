@@ -24,7 +24,7 @@ import Data.Data (Data)
 import Data.List.NonEmpty (NonEmpty (..))
 import Data.Set (Set)
 import qualified Data.Set as Set
-import Extra (Name, forM_)
+import Extras (Name, forM_)
 
 passShadowingRule :: (Monad m) => Pass Metadata m [Module Metadata Kind ()] [Module Metadata Kind ()]
 passShadowingRule =

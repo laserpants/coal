@@ -10,7 +10,7 @@ import Coal.Common.Label (Label (..))
 import Coal.Kernel.LLVM.IRType (IRType)
 import Coal.Kernel.LLVM.IRValue (IRValue)
 import Data.ByteString (ByteString)
-import Extra (Name)
+import Extras (Name)
 
 -- | <https://www.llvm.org/docs/LangRef.html#linkage-types>
 data IRLinkage

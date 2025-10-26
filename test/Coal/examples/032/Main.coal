@@ -1,0 +1,71 @@
+module Main {
+
+  fun digit_to_int32(ch) : Option<int32> =
+    match(ch) {
+      | '0' => Some(0)
+      | '1' => Some(1)
+      | '2' => Some(2)
+      | '3' => Some(3)
+      | '4' => Some(4)
+      | '5' => Some(5)
+      | '6' => Some(6)
+      | '7' => Some(7)
+      | '8' => Some(8)
+      | '9' => Some(9)
+      | _ => None
+    }
+
+  trait Functor<f : * -> *> {
+    map : (a -> b) -> f<a> -> f<b>
+  }
+
+  instance Functor<Option> {
+    fun map(f, opt) = 
+      match(opt) {
+        | None => 
+            None
+        | Some(val) =>
+            Some(f(val))
+      }
+  }
+
+  fun parse_unsigned(str : string) : Option<int32> =
+    let 
+      chars = 
+        string_to_list(str)
+      in
+        fold(chars, Some(0)) {
+          | ch :: @go =>
+              fn(t) =>
+                match(digit_to_int32(ch)) {
+                  | Some(n) =>
+                      go(map(fn(s) => n + 10 * s, t))
+                  | None =>
+                      None
+                }
+          | [] =>
+              fn(t) => t
+        }
+
+  trait JsonSerializable<a> {
+    to_json : a -> string
+    from_json : string -> Option<a>
+  }
+
+  instance JsonSerializable<int32> {
+    let to_json = int32_to_string
+    let from_json = fn(_) => Some(1)
+  }
+
+  fun main() =
+    let
+      r =
+        parse_unsigned("9876")
+      in
+        match(r) {
+          | Some(n) =>
+              trace_int32(n)
+          | None =>
+              trace_int32(0 : int32)
+        }
+}

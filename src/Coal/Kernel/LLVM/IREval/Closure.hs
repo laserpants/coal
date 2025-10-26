@@ -18,7 +18,7 @@ import Coal.Kernel.LLVM.IRValue (IRValue (..))
 import Control.Monad (unless)
 import Data.List.NonEmpty (NonEmpty, toList)
 import Data.Text (Text)
-import Extra (Name, forM, forSM_)
+import Extras (Name, forM, forSM_)
 import TextShow (showt)
 
 storeElement :: IRValue -> IRValue -> Int -> IRInstr ()

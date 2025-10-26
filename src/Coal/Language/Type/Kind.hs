@@ -17,7 +17,7 @@ module Coal.Language.Type.Kind (
 import Data.Data (Data, Typeable)
 import Data.List (isPrefixOf)
 import Data.List.NonEmpty (NonEmpty (..), (<|))
-import Extra.Prettyprinter (parensIf)
+import Extras.Prettyprinter (parensIf)
 import GHC.Generics (Generic)
 import Prettyprinter
 

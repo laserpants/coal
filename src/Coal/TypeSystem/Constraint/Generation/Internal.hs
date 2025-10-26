@@ -27,7 +27,7 @@ import Coal.TypeSystem.Constraint (Constraint (..), Monomorphic (..), overMonomo
 import Coal.TypeSystem.Constraint.Generation.InferenceRule (InferenceRule (..))
 import Control.Monad.RWS
 import qualified Data.Set as Set
-import Extra (Dictionary, Name)
+import Extras (Dictionary, Name)
 
 data TypeAnnotationError a
   = -- Kind mismatch

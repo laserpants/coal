@@ -9,7 +9,7 @@ import qualified Coal.Kernel.Language as Kernel
 import Coal.Kernel.Parser.Expr (expr)
 import Data.Text (Text)
 import qualified Data.Text as Text
-import Extra (Name)
+import Extras (Name)
 import Text.Megaparsec (errorBundlePretty, runParser)
 import Text.RawString.QQ
 

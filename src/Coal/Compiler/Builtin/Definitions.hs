@@ -7,7 +7,7 @@ import Coal.Language.Module
 import Data.List.NonEmpty (NonEmpty (..))
 import Data.Set (Set)
 import qualified Data.Set as Set
-import Extra (Name)
+import Extras (Name)
 
 {-# INLINE insertBuiltinDefinitions #-}
 insertBuiltinDefinitions :: (Monoid a) => [Definition a k ()] -> [Definition a k ()]

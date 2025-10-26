@@ -1,0 +1,20 @@
+module Main {
+
+  fun extend(r) =
+    { name = "Wat" | r }
+
+  fun length(xs) = 
+    5 : int32
+
+  fun main() =
+    let
+      q =
+        extend({ baz = "hellO" })
+      in
+        let
+          len =
+            length([1, 2, 3 : int32])
+          in
+            trace_string(q.name)
+
+}

@@ -22,7 +22,7 @@ import qualified Data.List.NonEmpty as NonEmpty
 import Data.Set (Set)
 import qualified Data.Set as Set
 import qualified Data.Text as Text
-import Extra (Name, (<$$>))
+import Extras (Name, (<$$>))
 import TextShow (showt)
 
 anomaliesEnvironment :: [(Name, [Name])] -> Environment (Set Name)

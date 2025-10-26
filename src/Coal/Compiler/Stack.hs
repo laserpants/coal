@@ -58,7 +58,7 @@ import Control.Monad.Reader (MonadReader)
 import Control.Monad.State (MonadState, gets, modify)
 import Control.Monad.Writer (MonadWriter)
 import Data.Text (Text)
-import Extra (Dictionary, Name)
+import Extras (Dictionary, Name)
 
 type CompilerStack a m c = ExceptT CompilerFailureMode (RWST CompilerEnvironment (CompilerJournal a) (CompilerState a) m) c
 

@@ -14,7 +14,7 @@ import Coal.Common.Environment (Environment (..))
 import Coal.Kernel.LLVM.IRType (IRTyped (..))
 import Coal.Kernel.LLVM.IRValue (IRValue (..))
 import Coal.Kernel.Language.Object (ObjectList, objectConstructorInfo, objectName)
-import Extra (Name, Over)
+import Extras (Name, Over)
 
 import qualified Coal.Common.Environment as Environment
 

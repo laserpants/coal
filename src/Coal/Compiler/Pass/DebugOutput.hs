@@ -14,7 +14,7 @@ import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.State (gets)
 import Data.Text (Text)
 import qualified Data.Text as Text
-import Extra (forM_)
+import Extras (forM_)
 import Prettyprinter (Pretty (..))
 
 generateDebugArtifacts :: (MonadIO m, Pretty t, Show t) => Text -> Pass a m (Module a k t) (Module a k t)

@@ -1,0 +1,10 @@
+module Main {
+
+  let y = 5
+
+  let x = -y
+
+  fun main() =
+    trace_bool(! true)
+
+}

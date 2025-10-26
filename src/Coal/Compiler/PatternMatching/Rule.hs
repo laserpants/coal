@@ -14,7 +14,7 @@ import Coal.Compiler.PatternMatching.Envelope (
  )
 import Coal.Compiler.PatternMatching.Equation
 import Coal.Compiler.Stack
-import Extra (foldrM)
+import Extras (foldrM)
 
 type MatchRule a m p e t = [Label t] -> [p e t] -> EnvelopeExpression e t -> CompilerT a m (EnvelopeExpression e t)
 

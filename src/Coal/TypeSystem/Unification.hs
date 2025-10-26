@@ -22,7 +22,7 @@ import Data.Data (Data)
 import Data.List.NonEmpty (NonEmpty, (<|))
 import qualified Data.List.NonEmpty as NonEmpty
 import Data.Set (member)
-import Extra (foldrM, (<$$>))
+import Extras (foldrM, (<$$>))
 
 newtype Unifier a = Unifier {unifierStack :: ExceptT UnificationError (State Int) a}
   deriving

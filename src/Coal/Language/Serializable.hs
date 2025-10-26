@@ -10,7 +10,7 @@ import Coal.Language.Type.Intrinsic
 import Coal.Language.Type.Row
 import Data.List.NonEmpty (NonEmpty (..), toList)
 import Data.Text (Text)
-import Extra (Name)
+import Extras (Name)
 import TextShow (showt)
 
 class Serializable s where

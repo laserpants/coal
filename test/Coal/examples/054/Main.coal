@@ -1,0 +1,15 @@
+module Main {
+
+  fun main() =
+    let
+      extend = 
+        fn(r) =>
+          { name = "world" | r }
+        in
+          let 
+            q = 
+              extend({ baz = "hello" })
+            in
+              trace_string(q.baz +++ " " +++ q.name)
+
+}

@@ -25,7 +25,7 @@ import Data.Functor.Foldable (cata)
 import qualified Data.Map.Strict as Map
 import Data.Text (Text)
 import qualified Data.Text as Text
-import Extra (traverse_)
+import Extras (traverse_)
 import Prettyprinter
 import Prettyprinter.Render.Text (renderStrict)
 import System.FilePath ((<.>), (</>))

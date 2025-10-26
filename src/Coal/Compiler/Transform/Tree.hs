@@ -10,7 +10,7 @@ import Coal.Common.Label (Label (..))
 import Coal.Language
 import Control.Monad.Identity (runIdentity)
 import Data.Data (Data)
-import Extra (Name, const2, (<$$>))
+import Extras (Name, const2, (<$$>))
 
 class TreeTransform e t where
   transform :: (Monad m, Data a, Data t, Ord t) => Name -> (a -> t -> m (Expression a t)) -> e a t -> m (e a t)

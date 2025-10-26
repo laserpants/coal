@@ -17,7 +17,7 @@ import Coal.Language.Module
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformM)
 import Data.List.NonEmpty (NonEmpty (..))
-import Extra (Dictionary, Name)
+import Extras (Dictionary, Name)
 
 passExpressionUnfolds :: (Monad m, Monoid a, Data a) => Pass a m (Module a k ()) (Module a k ())
 passExpressionUnfolds =

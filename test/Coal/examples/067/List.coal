@@ -1,0 +1,9 @@
+module List {
+
+  fun reduce(f : a -> b -> b, init : b, list : List<a>) : b =
+    fold(list, init) {
+      | [] => fn(r) => r
+      | q :: @go => fn(r) => go(f(q, r))
+    }
+
+}

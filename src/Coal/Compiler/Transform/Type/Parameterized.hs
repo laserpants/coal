@@ -17,7 +17,7 @@ import Control.Monad.State (MonadState)
 import Control.Monad.Writer (WriterT, execWriterT, tell)
 import Data.List.NonEmpty (NonEmpty, toList)
 import qualified Data.Text as Text
-import Extra (Name, traverse_)
+import Extras (Name, traverse_)
 
 instantiateVars :: (MonadState s m, Supply s) => [(Name, TypeIndex Kind)] -> Environment Kind -> Type Parameter () -> m IndexedType
 instantiateVars ts0 env t = do

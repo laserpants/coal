@@ -1,0 +1,5 @@
+module Main {
+
+  fun main() =
+    trace_int32((fn((x, y)) => x + 1)((2, "foo")))
+}

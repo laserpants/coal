@@ -21,7 +21,7 @@ import Data.FileEmbed (embedFile)
 import Data.Foldable (for_)
 import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
-import Extra (Name)
+import Extras (Name)
 import System.Directory (copyFile)
 import System.FilePath (takeBaseName, (<.>), (</>))
 import System.IO.Temp (withSystemTempDirectory)

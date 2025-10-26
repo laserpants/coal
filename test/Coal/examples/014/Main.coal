@@ -1,0 +1,10 @@
+module Main {
+
+  // Type error
+  //
+  fun factorial(n : int32) : int32 =
+    false
+
+  fun main() = 0
+
+}

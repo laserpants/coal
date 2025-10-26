@@ -1,0 +1,18 @@
+module Main {
+
+  fun main() =
+    let 
+      chrs = 
+        [] : List<char>
+      in
+        trace_int32 
+        (
+            fold(chrs, 5 : int32) {
+              | ch :: chs =>
+                  fn(t) => 3
+              | [] =>
+                  fn(t) => 2
+            }
+        )
+
+}

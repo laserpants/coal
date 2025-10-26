@@ -1,0 +1,10 @@
+module Main {
+
+  fun main() = 
+    let
+      f =
+        fn(x) => x
+      in
+        f(true, true)
+}
+

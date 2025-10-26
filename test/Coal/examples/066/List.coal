@@ -1,0 +1,118 @@
+module List {
+
+  import Combinators(identity)
+
+  fun head(list : List<a>) : Option<a> =
+    match(list) {
+      | [] => None
+      | x :: _ => Some(x)
+    }
+
+  fun tail(list : List<a>) : Option<List<a>> =
+    match(list) {
+      | [] => None
+      | _ :: xs => Some(xs)
+    }
+
+  fun uncons(list : List<a>) : Option<(a, List<a>)> =
+    match(list) {
+      | [] => None
+      | x :: xs => Some((x, xs))
+    }
+
+  fun length(list : List<a>) : nat =
+    fold(list) {
+      | [] => Zero
+      | _ :: @xs => Succ(xs)
+    }
+
+  fun reduce(f : a -> b -> b, init : b, list : List<a>) : b =
+    fold(list, init) {
+      | [] => identity
+      | x :: @go => go << f(x)
+    }
+
+  fun singleton(elem : a) : List<a> = [elem]
+
+  fun is_empty(list : List<a>) : bool =
+    match(list) {
+      | [] => true
+      | _ => false
+    }
+
+  fun concat(list : List<List<a>>) : List<a> =
+    fold(list) {
+      | [] => []
+      | xs :: @xss => xs ++ xss
+    }
+
+  fun take(n : nat, list : List<a>) : List<a> =
+    fold(n, list) {
+      | Zero => 
+          always([])
+      | Succ(@m) => 
+          fn(xs) =>
+            match(xs) {
+              | [] => []
+              | head :: tail => head :: m(tail)
+            }
+    }
+
+  fun drop(n : nat, list : List<a>) : List<a> =
+    fold(n, list) {
+      | Zero => 
+          identity
+      | Succ(@m) => 
+          fn(xs) => 
+            match(xs) {
+              | [] => m([])
+              | _ :: tail => m(tail)
+            }
+    }
+
+  fun element_at(n : nat, list : List<a>) : Option<a> =
+    head(drop(n, list)) 
+
+  fun map(f : a -> b, list : List<a>) : List<b> =
+    fold(list) {
+      | [] => []
+      | x :: @xs => f(x) :: xs
+    }
+
+  fun filter(p : a -> bool, list : List<a>) : List<a> =
+    fold(list) {
+      | [] => []
+      | x :: @xs => if p(x) then x :: xs else xs
+    }
+
+  fun reverse(list : List<a>) : List<a> =
+    match(list) {
+      | [] => []
+      | x :: xs => reduce(fn(head, tail) => head :: tail, [x], xs)
+    }
+
+// TODO
+//
+//  fun zip(lhs : List<a>, rhs : List<b>) : List<(a, b)> =
+//    fold(lhs, []) {
+//      | [] => 
+//          always([])
+//      | x :: @f =>
+//          fn(rhs) => 
+//            match(rhs) {
+//              | [] => []
+//              | y :: ys =>
+//                  (x, y) :: f(ys) 
+//            }
+//    }
+
+  fun unzip(list : List<(a, b)>) : (List<a>, List<b>) =
+    fold(list, ([], [])) {
+      | [] => 
+          identity
+      | (x, y) :: @f =>
+          fn((xs, ys)) =>
+            f((x :: xs, y :: ys))
+    }
+
+}

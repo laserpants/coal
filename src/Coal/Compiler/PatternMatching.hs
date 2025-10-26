@@ -26,7 +26,7 @@ import Coal.Language.Module (ConstantDef (..), Definition (..), FunctionDef (..)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformBiM, transformM)
 import Data.List.NonEmpty (NonEmpty (..), toList)
-import Extra (Dictionary)
+import Extras (Dictionary)
 import TextShow
 
 class MatchExpressionContext a c where

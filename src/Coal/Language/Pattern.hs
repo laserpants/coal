@@ -15,7 +15,7 @@ import Data.Generics.Uniplate.Data (universeBi)
 import Data.List.NonEmpty (NonEmpty)
 import Data.Set (unions)
 import qualified Data.Set as Set
-import Extra (Dictionary, Name)
+import Extras (Dictionary, Name)
 
 data Pattern a t
   = -- | Type-annotated pattern

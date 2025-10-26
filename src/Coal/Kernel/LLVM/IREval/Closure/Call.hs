@@ -11,7 +11,7 @@ import Coal.Kernel.LLVM.IRInterpreter.Monad (IRInterpreter, IRLine)
 import Coal.Kernel.LLVM.IRType (IRType (..))
 import Coal.Kernel.LLVM.IRType.Syntax
 import Coal.Kernel.LLVM.IRValue (IRValue (..))
-import Extra (forM)
+import Extras (forM)
 import TextShow (showt)
 
 maxArgs :: Int

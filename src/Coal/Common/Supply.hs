@@ -7,7 +7,7 @@
 module Coal.Common.Supply (Supply (..), supply, supplied, freshName) where
 
 import Control.Monad.State (MonadState)
-import Extra (Name, getAndModify)
+import Extras (Name, getAndModify)
 import TextShow (showt)
 
 class Supply s where

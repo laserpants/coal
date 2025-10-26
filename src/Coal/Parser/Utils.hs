@@ -4,7 +4,7 @@ import Coal.Parser
 import Coal.Parser.Identifier
 import Coal.Parser.Symbol
 import Data.Text (Text)
-import Extra (Name)
+import Extras (Name)
 
 fieldListWithKey :: Parser k -> Parser f -> Text -> Parser [(k, f)]
 fieldListWithKey parseKey parseField sep = commaSep1 field
