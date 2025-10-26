@@ -259,7 +259,7 @@ names =
     )
   ,
     ( "int32_to_string"
-    , forall0 (TIntrinsic IInt32 `TArrow` TIntrinsic IString)
+    , forall0 (TIntrinsic IInt32 ~> TIntrinsic IString)
     )
   ,
     ( "float_to_string"
@@ -279,11 +279,11 @@ names =
     )
   ,
     ( "from_int32"
-    , forall1' (\t0 -> ([Trait "Numeric" t0], TIntrinsic IInt32 `TArrow` t0))
+    , forall1' (\t0 -> ([Trait "Numeric" t0], TIntrinsic IInt32 ~> t0))
     )
   ,
     ( "negate"
-    , forall1' (\t0 -> ([Trait "Numeric" t0], t0 `TArrow` t0))
+    , forall1' (\t0 -> ([Trait "Numeric" t0], t0 ~> t0))
     )
   ,
     ( "compare"
