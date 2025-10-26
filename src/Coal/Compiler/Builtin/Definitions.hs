@@ -279,7 +279,7 @@ names =
     )
   ,
     ( "from_int32"
-    , forall1' ( \t0 -> ( [Trait "Numeric" t0] , TIntrinsic IInt32 `TArrow` t0))
+    , forall1' (\t0 -> ([Trait "Numeric" t0], TIntrinsic IInt32 `TArrow` t0))
     )
   ,
     ( "negate"
@@ -287,7 +287,7 @@ names =
     )
   ,
     ( "compare"
-    , forall1' ( \t0 -> ( [Trait "Ordered" t0] , t0 ~> t0 ~> TConstructor KType "Ordering"))
+    , forall1' (\t0 -> ([Trait "Ordered" t0], t0 ~> t0 ~> TConstructor KType "Ordering"))
     )
   ,
     ( "string_to_list"
