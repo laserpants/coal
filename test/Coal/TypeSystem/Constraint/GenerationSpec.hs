@@ -1,21 +1,16 @@
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Coal.TypeSystem.Constraint.GenerationSpec where
 
 import Coal.Common.Label (Label (..))
+import Coal.Compiler.State
 import Coal.Language
-import Coal.TypeSystem.Constraint
 import Coal.TypeSystem.Constraint.Generation
-import Coal.TypeSystem.Constraint.Generation.InferenceRule
-import Data.Either (lefts, rights)
-import Data.List.NonEmpty (NonEmpty (..), toList, (<|))
-
-import qualified Coal.Common.Environment as Environment
+import Coal.TypeSystem.Constraint.Generation.Internal
+import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
-import qualified Data.Set as Set
 
--- collectExampleConstraintsSpec1 :: Bool
+collectExampleConstraintsSpec1 :: ([CompilerAssumption ()], [ConstraintsGenOutput () TypeIndex Kind IndexedType])
 collectExampleConstraintsSpec1 = (ms, outs)
  where
   (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (emitConstraints expr)

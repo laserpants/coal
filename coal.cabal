@@ -97,6 +97,7 @@ library
       Coal.Compiler.TypeInference.Errors
       Coal.DebugIO
       Coal.Graphviz.Dot
+      Coal.Kernel.Builtin.Constructors
       Coal.Kernel.Builtin.Objects
       Coal.Kernel.Compiler
       Coal.Kernel.Compiler.Ast
