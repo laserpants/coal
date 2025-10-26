@@ -67,9 +67,9 @@ prettyError env =
     NonExhaustivePatterns erl ->
       errorMessage ["Non-exhaustive patterns"] env erl
     FoldPatternInRegularMatch erl ->
-      errorMessage ["Fold pattern must not appear in regular match expression"] env erl
+      errorMessage ["Fold pattern cannot appear in regular match expression"] env erl
     FoldPatternOutsideConstructor erl ->
-      errorMessage ["Fold pattern must not appear outside constructor"] env erl
+      errorMessage ["Fold pattern cannot appear outside constructor"] env erl
     Shadowing name erl ->
       errorMessage ["Name shadowing: '" <> name <> "'"] env erl
     MissingInstance trait erl ->

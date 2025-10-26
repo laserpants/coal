@@ -221,7 +221,7 @@ If you want to work on a feature or bug fix, fork the repository and create a ne
 
 ### Documentation
 
-Suggest changes to the documentation as PRs. Simply edit the `README.md` file, following the same steps as under **[Contributing code](#contributing-code)**.
+To suggest changes to the documentation, simply edit the `README.md` file and submit a PR, following the steps described under **[Contributing code](#contributing-code)**.
 
 ## License 
 

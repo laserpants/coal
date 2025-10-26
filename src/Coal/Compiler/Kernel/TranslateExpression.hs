@@ -249,7 +249,7 @@ logicalNotOperator es = do
   pure $
     Kernel.app
       t1
-      (Kernel.var (Label (t1 `Kernel.arrow` t1) "Builtin$.operator__not"))
+      (Kernel.var (Label (t1 `Kernel.arrow` t1) "Builtin$.operator$__not"))
       args
 
 -- FIXME
@@ -365,7 +365,7 @@ stringConcatenationOperator es = do
   pure $
     Kernel.app
       t1
-      (Kernel.var (Label (t1 `Kernel.arrow` t1 `Kernel.arrow` t1) "Builtin$.operator__string_concatenation"))
+      (Kernel.var (Label (t1 `Kernel.arrow` t1 `Kernel.arrow` t1) "Builtin$.operator$__string_concatenation"))
       args
 
 listConcatenationOperator :: (Monad m, Data a) => IndexedType -> NonEmpty (Expression a IndexedType) -> CompilerT a m KernelExpr
@@ -375,7 +375,7 @@ listConcatenationOperator t es = do
   pure $
     Kernel.app
       t1
-      (Kernel.var (Label (t1 `Kernel.arrow` t1 `Kernel.arrow` t1) "Builtin$.operator__list_concatenation"))
+      (Kernel.var (Label (t1 `Kernel.arrow` t1 `Kernel.arrow` t1) "Builtin$.operator$__list_concatenation"))
       args
 
 reverseCompositionOperator :: (Monad m, Data a) => IndexedType -> NonEmpty (Expression a IndexedType) -> CompilerT a m KernelExpr
@@ -385,7 +385,7 @@ reverseCompositionOperator t es = do
   pure $
     Kernel.app
       t1
-      (Kernel.var (Label (Kernel.foldType t1 (Kernel.typeOf <$> args)) "Builtin$.operator__reverse_composition"))
+      (Kernel.var (Label (Kernel.foldType t1 (Kernel.typeOf <$> args)) "Builtin$.operator$__reverse_composition"))
       args
 
 reverseApplicationOperator :: (Monad m, Data a) => IndexedType -> NonEmpty (Expression a IndexedType) -> CompilerT a m KernelExpr
@@ -395,7 +395,7 @@ reverseApplicationOperator t es = do
   pure $
     Kernel.app
       t1
-      (Kernel.var (Label (Kernel.foldType t1 (Kernel.typeOf <$> args)) "Builtin$.operator__reverse_application"))
+      (Kernel.var (Label (Kernel.foldType t1 (Kernel.typeOf <$> args)) "Builtin$.operator$__reverse_application"))
       args
 
 binop :: (Monad m, Data a) => (KernelExpr -> KernelExpr -> Kernel.Op KernelExpr) -> (IndexedType, IndexedType) -> NonEmpty (Expression a IndexedType) -> CompilerT a m KernelExpr

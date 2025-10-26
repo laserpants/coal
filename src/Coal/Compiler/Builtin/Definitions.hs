@@ -199,24 +199,7 @@ definitions =
 names :: [(Name, IndexedScheme)]
 names =
   [
-    ( "pair_to_string"
-    , Forall
-        (Set.fromList [TypeIndex KType 0, TypeIndex KType 1] :: Set (TypeIndex Kind))
-        [ Trait "Traceable" (TVariable (TypeIndex KType 0))
-        , Trait "Traceable" (TVariable (TypeIndex KType 1))
-        ]
-        (tupleType (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 1)]) `TArrow` TIntrinsic IString)
-    )
-  ,
-    ( "list_to_string"
-    , Forall
-        (Set.fromList [TypeIndex KType 0] :: Set (TypeIndex Kind))
-        [ Trait "Traceable" (TVariable (TypeIndex KType 0))
-        ]
-        (listType (TVariable (TypeIndex KType 0)) `TArrow` TIntrinsic IString)
-    )
-  ,
-    ( "operator__not"
+    ( "operator$__not"
     , Forall mempty [] (TIntrinsic IBool `TArrow` TIntrinsic IBool)
     )
   ,
@@ -224,7 +207,7 @@ names =
     , Forall mempty [] (TIntrinsic IBool `TArrow` TIntrinsic IBool)
     )
   ,
-    ( "operator__reverse_composition"
+    ( "operator$__reverse_composition"
     , Forall
         (Set.fromList [TypeIndex KType 0, TypeIndex KType 1, TypeIndex KType 2])
         []
@@ -235,7 +218,7 @@ names =
         )
     )
   ,
-    ( "operator__reverse_application"
+    ( "operator$__reverse_application"
     , Forall
         (Set.fromList [TypeIndex KType 0, TypeIndex KType 1])
         []
@@ -255,7 +238,7 @@ names =
         )
     )
   ,
-    ( "operator__list_concatenation"
+    ( "operator$__list_concatenation"
     , Forall
         (Set.fromList [TypeIndex KType 0])
         []
@@ -329,7 +312,7 @@ names =
         )
     )
   ,
-    ( "operator__string_concatenation"
+    ( "operator$__string_concatenation"
     , Forall
         mempty
         []

@@ -27,7 +27,7 @@ objects =
         , OData "GreaterThan" 1 (Kernel.TCon "Ordering" [])
         , OData "LessThan" 2 (Kernel.TCon "Ordering" [])
         , OFunction
-            "Builtin$.operator__not"
+            "Builtin$.operator$__not"
             [ Label Kernel.bool "a"
             ]
             [r| 
@@ -41,7 +41,7 @@ objects =
                   if (a : bool) then false else true
               |]
         , OFunction
-            "Builtin$.operator__reverse_composition"
+            "Builtin$.operator$__reverse_composition"
             [ Label (Kernel.opaque `Kernel.arrow` Kernel.opaque) "f"
             , Label (Kernel.opaque `Kernel.arrow` Kernel.opaque) "g"
             , Label Kernel.opaque "x"
@@ -50,7 +50,7 @@ objects =
                   @<*>(f : */*, @<*>(g : */*, x : *))
               |]
         , OFunction
-            "Builtin$.operator__reverse_application"
+            "Builtin$.operator$__reverse_application"
             [ Label Kernel.opaque "x"
             , Label (Kernel.opaque `Kernel.arrow` Kernel.opaque) "f"
             ]
@@ -66,7 +66,7 @@ objects =
                   a : *
               |]
         , OFunction
-            "Builtin$.operator__list_concatenation"
+            "Builtin$.operator$__list_concatenation"
             [ Label (Kernel.TCon "list" [Kernel.opaque]) "xs"
             , Label (Kernel.TCon "list" [Kernel.opaque]) "ys"
             ]
@@ -80,7 +80,7 @@ objects =
                           ( $Cons : */list(*)/list(*)
                           , z : *
                           , @<list(*)>
-                              ( Builtin$.operator__list_concatenation : list(*)/list(*)/list(*)
+                              ( Builtin$.operator$__list_concatenation : list(*)/list(*)/list(*)
                               , zs : list(*)
                               , ys : list(*)
                               )
@@ -147,7 +147,7 @@ objects =
                   #(print_double : double/*, d : double) (fn(a : *) => a : *)
               |]
         , OFunction
-            "Builtin$.operator__string_concatenation"
+            "Builtin$.operator$__string_concatenation"
             [ Label Kernel.string "s"
             , Label Kernel.string "t"
             ]
@@ -189,14 +189,14 @@ objects =
                         , b : *
                         ) =>
                           @<string>
-                            ( Builtin$.operator__string_concatenation : string/string/string
+                            ( Builtin$.operator$__string_concatenation : string/string/string
                             , @<string>
-                                ( Builtin$.operator__string_concatenation : string/string/string
+                                ( Builtin$.operator$__string_concatenation : string/string/string
                                 , "("
                                 , @<string>
-                                    ( Builtin$.operator__string_concatenation : string/string/string
+                                    ( Builtin$.operator$__string_concatenation : string/string/string
                                     , @<string>
-                                        ( Builtin$.operator__string_concatenation : string/string/string
+                                        ( Builtin$.operator$__string_concatenation : string/string/string
                                         , @<string>
                                             ( Builtin$.trace : Traceable(*)/*/string
                                             , $dict1 : Traceable(*)
@@ -232,10 +232,10 @@ objects =
                               , xs : list(*)
                               ) =>
                                 @<string>
-                                  ( Builtin$.operator__string_concatenation : string/string/string
+                                  ( Builtin$.operator$__string_concatenation : string/string/string
                                   , if (first : bool) then "" else ","
                                   , @<string>
-                                      ( Builtin$.operator__string_concatenation : string/string/string
+                                      ( Builtin$.operator$__string_concatenation : string/string/string
                                       , @<string>
                                           ( Builtin$.trace : Traceable(*)/*/string
                                           , $dict1 : Traceable(*)
@@ -254,9 +254,9 @@ objects =
                           }
                     in
                       @<string>
-                        ( Builtin$.operator__string_concatenation : string/string/string
+                        ( Builtin$.operator$__string_concatenation : string/string/string
                         , @<string>
-                            ( Builtin$.operator__string_concatenation : string/string/string
+                            ( Builtin$.operator$__string_concatenation : string/string/string
                             , "["
                             , @<string>
                                 ( f : list(*)/string
@@ -1052,7 +1052,7 @@ objects =
             ]
             [r| 
                   @<string>
-                    ( `Builtin$.operator__string_concatenation` : string/string/string
+                    ( `Builtin$.operator$__string_concatenation` : string/string/string
                     , s : string
                     , t : string
                     )
@@ -1064,7 +1064,7 @@ objects =
             ]
             [r| 
                   @<list(*)>
-                    ( `Builtin$.operator__list_concatenation` : list(*)/list(*)/list(*)
+                    ( `Builtin$.operator$__list_concatenation` : list(*)/list(*)/list(*)
                     , xs : list(*)
                     , ys : list(*)
                     )
