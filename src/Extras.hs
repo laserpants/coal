@@ -22,6 +22,7 @@ module Extras (
   fromMaybe,
   const2,
   optionalOr,
+  for,
   Over,
 )
 where
@@ -56,3 +57,7 @@ const2 = const . const
 {-# INLINE optionalOr #-}
 optionalOr :: (Alternative f) => a -> f a -> f a
 optionalOr def fa = fa <|> pure def
+
+{-# INLINE for #-}
+for :: (Functor f) => f a -> (a -> b) -> f b
+for = flip fmap

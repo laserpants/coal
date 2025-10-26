@@ -15,7 +15,7 @@ import qualified Coal.Kernel.Language as Kernel
 import Coal.Language (IndexedType, Kind (..))
 import Coal.Language.Module
 import Control.Monad.IO.Class
-import Extras (Name)
+import Extras (Name, for)
 
 passKernelTranslate :: (MonadIO m) => Pass Metadata m (Module Metadata Kind IndexedType) (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))
 passKernelTranslate =
@@ -46,7 +46,7 @@ imports :: Definition a k t -> [(Name, Name)]
 imports =
   \case
     DImport _ path ns ->
-      flip map ns $
+      for ns $
         \name ->
           (name, principalPath path <> "." <> name)
     _ ->

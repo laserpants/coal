@@ -8,9 +8,9 @@
 
 module Coal.Kernel.Compiler (compile, compileModules) where
 
-import Coal.Kernel.Builtin.Constructors (builtinConstructors)
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
+import Coal.Kernel.Builtin.Constructors (builtinConstructors)
 import Coal.Kernel.Compiler.EntryPoint (entryPoint)
 import Coal.Kernel.Compiler.Pass
 import Coal.Kernel.Compiler.Pipeline
