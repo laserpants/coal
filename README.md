@@ -2,8 +2,6 @@
 
 This repository is the home of the **Coal programming language** and compiler. 
 
-> 🚧 The project is under mega-construction. 🚧
-
 1. [About](#about)
 1. [Project status and roadmap](#project-status-and-roadmap)
 1. [Documentation](#documentation)
@@ -54,9 +52,11 @@ Coal is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-
 
 ### Roadmap
 
+<!--
 #### Next milestone: 1
 
 ![](https://geps.dev/progress/75)
+-->
 
 | Milestone  | Feature/Fix                                           |                                                                                                                                                              
 | ---------- | ----------------------------------------------------- |                                                                                                                                                              
