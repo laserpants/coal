@@ -25,7 +25,7 @@ import Data.Map.Strict (Map, keysSet, union)
 import qualified Data.Map.Strict as Map
 import Data.Set (Set, intersection)
 import qualified Data.Set as Set
-import Extras (IndexMap, fromMaybe)
+import Extras (fromMaybe)
 
 class Substitutable s where
   apply :: Substitution -> s -> s
@@ -133,7 +133,7 @@ instance (Data a) => Substitutable (Choice Expression a IndexedType) where
 instance (Data a) => Substitutable (Clause a IndexedType) where
   apply = transformBi . applyT
 
-newtype Substitution = Substitution {substitutionMap :: IndexMap IndexedType}
+newtype Substitution = Substitution {substitutionMap :: Map Int IndexedType}
   deriving (Show, Eq, Ord, Read)
 
 instance Semigroup Substitution where

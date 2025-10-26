@@ -18,7 +18,6 @@ module Extras (
   module Extras.Control.Monad.State,
   module Extras.Control.Monad.Writer,
   module Data.Tuple.Extra,
-  IndexMap,
   fromMaybe,
   const2,
   optionalOr,
@@ -45,8 +44,6 @@ import Extras.Data.Set
 import Extras.Data.Text
 import Extras.Data.Traversable
 import Extras.Operators
-
-type IndexMap = Map Int
 
 type Over o n = (n -> n) -> o -> o
 
