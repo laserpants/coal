@@ -10,6 +10,7 @@ module Coal.Compiler (pipeline, compile, prettyError) where
 import Coal.Ast.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
+import Coal.Compiler.Config (CompilerConfig)
 import Coal.Compiler.Environment
 import Coal.Compiler.Pass (Pass (..), (>->))
 import Coal.Compiler.Pass.LoweringPhase (loweringPhase)
@@ -33,11 +34,10 @@ pipeline =
     >-> translationPhase
     >-> loweringPhase
 
-compile :: Bool -> FilePath -> [FilePath] -> IO ()
-compile generateDotFiles executableName files = do
+compile :: CompilerConfig -> [FilePath] -> IO ()
+compile config files = do
   (e, CompilerState{..}, es) <- runCompilerT emptyCompilerEnvironment $ do
-    setConfigExecutableNameC executableName
-    setConfigGenerateDotFilesC generateDotFiles
+    setConfigC config
     runPass pipeline files
   forM_ es $
     \err ->

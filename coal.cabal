@@ -95,6 +95,7 @@ library
       Coal.Compiler.Transform.WhereClauses
       Coal.Compiler.TypeInference
       Coal.Compiler.TypeInference.Errors
+      Coal.DebugIO
       Coal.Graphviz.Dot
       Coal.Kernel.Builtin.Objects
       Coal.Kernel.Compiler
@@ -292,6 +293,15 @@ test-suite coal-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      Coal.Compiler.PatternAnomaliesSpec
+      Coal.TypeSystem.Constraint.Generation.EAnnotationConstraintsSpec
+      Coal.TypeSystem.Constraint.Generation.EConstructorConstraintsSpec
+      Coal.TypeSystem.Constraint.Generation.ELambdaConstraintsSpec
+      Coal.TypeSystem.Constraint.GenerationSpec
+      Coal.TypeSystem.SubstitutionSpec
+      Coal.TypeSystem.TypeIndexedSpec
+      Coal.TypeSystem.UnificationSpec
+      Coal.TypeSystemSpec
       Paths_coal
   hs-source-dirs:
       test

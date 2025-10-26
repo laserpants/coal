@@ -8,6 +8,7 @@ import Coal.Ast.Metadata (Metadata (..))
 import Coal.Compiler.Config (CompilerConfig (..))
 import Coal.Compiler.Pass
 import Coal.Compiler.Stack
+import Coal.DebugIO (writeDebugFile)
 import Coal.Kernel.LLVM.IRConstruct (IRConstruct (..))
 import Coal.Kernel.LLVM.IREncodable (irEncode)
 import Coal.Kernel.LLVM.IRInterpreter.Monad
@@ -53,7 +54,10 @@ generateLLOutput CompilerConfig{..} mods = do
         forM mods $
           \(name, code) -> do
             let file = tmpDir </> Text.unpack name <.> "ll"
-            Text.writeFile file (irEncode code)
+                llCode = irEncode code
+            Text.writeFile file llCode
+            when configGenerateLLVMOutput $
+              writeDebugFile ("./.debug" </> Text.unpack name <.> "ll") llCode
             pure file
 
       B.writeFile (tmpDir </> "runtime.c") runtimeLib

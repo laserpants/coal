@@ -5,12 +5,14 @@
 module Main (main) where
 
 import Coal.Compiler (compile)
+import Coal.Compiler.Config (CompilerConfig (..))
 import Options.Applicative
 
 data CommandOptions = CommandOptions
   { inputFiles :: [FilePath]
   , outputFile :: FilePath
   , debugGenerateDotfiles :: Bool
+  , debugLLVMOutput :: Bool
   }
   deriving (Show)
 
@@ -32,12 +34,24 @@ optionsParser = do
           <> help "Generate intermediate Graphviz DOT files for debugging"
       )
 
+  debugLLVMOutput <-
+    switch
+      ( long "debug-llvm-ir"
+          <> help "Output intermediate LLVM IR"
+      )
+
   pure CommandOptions{..}
 
 main :: IO ()
 main = do
   CommandOptions{..} <- execParser optsInfo
-  compile debugGenerateDotfiles outputFile inputFiles
+  let config =
+        CompilerConfig
+          { configExecutableName = outputFile
+          , configGenerateDotFiles = debugGenerateDotfiles
+          , configGenerateLLVMOutput = debugLLVMOutput
+          }
+  compile config inputFiles
 
 optsInfo :: ParserInfo CommandOptions
 optsInfo =

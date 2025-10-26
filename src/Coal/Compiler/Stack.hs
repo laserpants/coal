@@ -36,12 +36,14 @@ module Coal.Compiler.Stack (
   setCompilerModuleC,
   setConfigExecutableNameC,
   setConfigGenerateDotFilesC,
+  setConfigGenerateLLVMOutputC,
+  setConfigC,
 )
 where
 
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Supply (Supply (..))
-import Coal.Compiler.Config (setConfigExecutableName, setConfigGenerateDotFiles)
+import Coal.Compiler.Config
 import Coal.Compiler.Environment (CompilerEnvironment (..))
 import Coal.Compiler.Error
 import Coal.Compiler.Journal
@@ -163,3 +165,9 @@ setConfigExecutableNameC name = modify (overCompilerConfig (setConfigExecutableN
 
 setConfigGenerateDotFilesC :: (Monad m) => Bool -> CompilerT a m ()
 setConfigGenerateDotFilesC flag = modify (overCompilerConfig (setConfigGenerateDotFiles flag))
+
+setConfigGenerateLLVMOutputC :: (Monad m) => Bool -> CompilerT a m ()
+setConfigGenerateLLVMOutputC flag = modify (overCompilerConfig (setConfigGenerateLLVMOutput flag))
+
+setConfigC :: (Monad m) => CompilerConfig -> CompilerT a m ()
+setConfigC config = modify (overCompilerConfig (const config))

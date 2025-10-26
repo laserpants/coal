@@ -7,11 +7,13 @@ module Coal.Compiler.Config (
   defaultConfig,
   setConfigExecutableName,
   setConfigGenerateDotFiles,
+  setConfigGenerateLLVMOutput,
 ) where
 
 data CompilerConfig = CompilerConfig
   { configExecutableName :: FilePath
   , configGenerateDotFiles :: Bool
+  , configGenerateLLVMOutput :: Bool
   }
   deriving (Show, Eq, Ord, Read)
 
@@ -21,6 +23,7 @@ defaultConfig =
   CompilerConfig
     { configExecutableName = "dist"
     , configGenerateDotFiles = True
+    , configGenerateLLVMOutput = True
     }
 
 {-# INLINE setConfigExecutableName #-}
@@ -30,3 +33,7 @@ setConfigExecutableName name CompilerConfig{..} = CompilerConfig{configExecutabl
 {-# INLINE setConfigGenerateDotFiles #-}
 setConfigGenerateDotFiles :: Bool -> CompilerConfig -> CompilerConfig
 setConfigGenerateDotFiles flag CompilerConfig{..} = CompilerConfig{configGenerateDotFiles = flag, ..}
+
+{-# INLINE setConfigGenerateLLVMOutput #-}
+setConfigGenerateLLVMOutput :: Bool -> CompilerConfig -> CompilerConfig
+setConfigGenerateLLVMOutput flag CompilerConfig{..} = CompilerConfig{configGenerateLLVMOutput = flag, ..}

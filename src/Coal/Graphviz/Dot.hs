@@ -11,6 +11,7 @@ module Coal.Graphviz.Dot (Dot (..), writeDotFile) where
 import Coal.Common.Label (Label (..))
 import Coal.Common.Name (Name)
 import Coal.Common.Supply (Supply (..), supplied)
+import Coal.DebugIO (writeDebugFile)
 import qualified Coal.Kernel.Language as Kernel
 import Coal.Language.Expression
 import Coal.Language.Expression.Binding (Binding (..))
@@ -24,12 +25,10 @@ import Data.Functor.Foldable (cata)
 import qualified Data.Map.Strict as Map
 import Data.Text (Text)
 import qualified Data.Text as Text
-import qualified Data.Text.IO as Text
 import Extra (traverse_)
 import Prettyprinter
 import Prettyprinter.Render.Text (renderStrict)
-import System.Directory (createDirectoryIfMissing)
-import System.FilePath (takeDirectory, (</>))
+import System.FilePath ((<.>), (</>))
 import TextShow (showt)
 
 data Shape
@@ -465,14 +464,9 @@ prettyType p = renderStrict . layoutPretty defaultLayoutOptions $ pretty p
 escapeQuotes :: Text -> Text
 escapeQuotes = Text.replace "\"" "\\\""
 
-writeDebugFile :: FilePath -> Text.Text -> IO ()
-writeDebugFile path content = do
-  createDirectoryIfMissing True (takeDirectory path)
-  Text.writeFile path content
-
 {-# INLINE writeDotFile #-}
 writeDotFile :: (Pretty t, Dot t a) => Text -> a -> IO ()
-writeDotFile fname a = writeDebugFile ("./.debug/" <> Text.unpack fname <> ".gv") (generateDot a)
+writeDotFile fname a = writeDebugFile ("./.debug" </> Text.unpack fname <.> "gv") (generateDot a)
 
 instance Dot Kernel.Type (DotGen Kernel.Type Int) where
   toDot = id
