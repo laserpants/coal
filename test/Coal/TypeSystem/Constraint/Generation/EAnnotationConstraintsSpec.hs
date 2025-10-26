@@ -8,6 +8,7 @@ import Coal.TypeSystem.Constraint.Generation
 import Coal.TypeSystem.Constraint.Generation.InferenceRule
 import Data.Either (lefts, rights)
 
+collectEAnnotationConstraintsSpecAll :: IO ()
 collectEAnnotationConstraintsSpecAll = do
   print collectEAnnotationConstraintsSpec1
   print collectEAnnotationConstraintsSpec2

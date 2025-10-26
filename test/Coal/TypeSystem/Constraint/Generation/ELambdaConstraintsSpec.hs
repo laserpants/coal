@@ -51,7 +51,7 @@ fixture2 =
 collectELambdaConstraintsSpec2 :: Bool
 collectELambdaConstraintsSpec2 = null outs
  where
-  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (emitConstraints expr)
+  (_, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (emitConstraints expr)
   expr = fixture2
   ctx =
     ConstraintsGenContext
@@ -91,6 +91,8 @@ muteConstraint =
       Implicit () t1 t2 m
     Explicit _ t s ->
       Explicit () t s
+    _ ->
+      error "error"
 
 constraint2 :: Constraint () TypeIndex Kind IndexedType
 constraint2 = Equality () [TVariable (TypeIndex KType 1), TVariable (TypeIndex KType 2)]

@@ -47,9 +47,9 @@ typeIndexedSpec =
 
     it "finds indexes in schemes, ignoring bound variables" $ do
       let body = TVariable (TypeIndex KType 9) ~> TVariable (TypeIndex KType 10)
-          scheme = Forall (Set.singleton (TypeIndex KType 9)) mempty body
-      typeIndexesIn scheme `shouldBe` Set.singleton (TypeIndex KType 10)
-      typeIdsIn scheme `shouldBe` Set.singleton 10
+          scheme_ = Forall (Set.singleton (TypeIndex KType 9)) mempty body
+      typeIndexesIn scheme_ `shouldBe` Set.singleton (TypeIndex KType 10)
+      typeIdsIn scheme_ `shouldBe` Set.singleton 10
 
     it "returns empty set for an empty row" $ do
       typeIndexesIn (TRow RNil :: IndexedType) `shouldBe` (Set.empty :: Set (TypeIndex Kind))
@@ -111,9 +111,9 @@ typeIndexedTrickySpec =
 
     it "finds all indexes in a scheme with multiple quantified variables" $ do
       let body = TArrow (TVariable (TypeIndex KType 19)) (TVariable (TypeIndex KType 20))
-          scheme = Forall (Set.fromList [TypeIndex KType 19, TypeIndex KType 21]) mempty body
+          scheme_ = Forall (Set.fromList [TypeIndex KType 19, TypeIndex KType 21]) mempty body
       -- 19 and 21 are bound, so only 20 should remain
-      typeIndexesIn scheme `shouldBe` Set.singleton (TypeIndex KType 20)
+      typeIndexesIn scheme_ `shouldBe` Set.singleton (TypeIndex KType 20)
 
     it "finds indexes in a deeply nested row inside a type application" $ do
       let row =

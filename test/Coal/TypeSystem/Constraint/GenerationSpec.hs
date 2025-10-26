@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Coal.TypeSystem.Constraint.GenerationSpec where
+module Coal.TypeSystem.Constraint.GenerationSpec (collectExampleConstraintsSpec1) where
 
 import Coal.Common.Label (Label (..))
 import Coal.Compiler.State
