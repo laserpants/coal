@@ -1030,7 +1030,7 @@ objects =
                   [/ double](q : double, r : double)
               |]
         , OFunction
-            "Builtin$.(%)__$impl_Mod(Intrinsic(Int32))"
+            "Builtin$.(%)__$impl_Modulo(Intrinsic(Int32))"
             [ Label Kernel.int32 "q"
             , Label Kernel.int32 "r"
             ]
@@ -1038,7 +1038,7 @@ objects =
                   #(int32_mod : int32/int32/int32, q : int32, r : int32) (fn(r : int32) => r : int32)
               |]
         , OFunction
-            "Builtin$.(%)__$impl_Mod(Intrinsic(Int64))"
+            "Builtin$.(%)__$impl_Modulo(Intrinsic(Int64))"
             [ Label Kernel.int64 "q"
             , Label Kernel.int64 "r"
             ]

@@ -79,8 +79,8 @@ traitInstances =
     "(/)__$impl_Divisible(Intrinsic(Float))"
   , "(/)__$impl_Divisible(Intrinsic(Double))"
   , --
-    "(%)__$impl_Mod(Intrinsic(Int32))"
-  , "(%)__$impl_Mod(Intrinsic(Int64))"
+    "(%)__$impl_Modulo(Intrinsic(Int32))"
+  , "(%)__$impl_Modulo(Intrinsic(Int64))"
   , --
     "(<>)__$impl_Semigroup(Intrinsic(String))"
   , "(<>)__$impl_Semigroup(Application(Constructor(List))(Variable(Parameter(a))))"
@@ -158,7 +158,7 @@ definitions =
       )
   , DTrait
       mempty
-      "Mod"
+      "Modulo"
       ( TraitDef
           []
           (Parameter KType "a")

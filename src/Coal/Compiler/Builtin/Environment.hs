@@ -457,7 +457,7 @@ instances =
         ]
     )
   ,
-    ( "Mod"
+    ( "Modulo"
     , Map.fromList
         [
           ( TIntrinsic IInt32
