@@ -1,6 +1,5 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StrictData #-}
 
 module Coal.Compiler.Transform.Tree (
@@ -17,10 +16,10 @@ import Control.Monad.Identity (runIdentity)
 import Data.Data (Data)
 import Extras (Name, const2, (<$$>))
 
-class TreeTransform e t where
+class TreeTransform e where
   transform :: (Monad m, Data a, Data t, Ord t) => Name -> (a -> t -> m (Expression a t)) -> e a t -> m (e a t)
 
-instance TreeTransform (Binding Expression) t where
+instance TreeTransform (Binding Expression) where
   transform name f =
     \case
       BPattern a p e ->
@@ -28,13 +27,13 @@ instance TreeTransform (Binding Expression) t where
       BFunction a n ps e ->
         BFunction a name ps <$> transform n f e
 
-instance TreeTransform (Guard Expression) t where
+instance TreeTransform (Guard Expression) where
   transform name f =
     \case
       CGuard e ->
         CGuard <$> transform name f e
 
-instance TreeTransform (Choice Expression) t where
+instance TreeTransform (Choice Expression) where
   transform name f =
     \case
       CPlain a gs e ->
@@ -44,7 +43,7 @@ instance TreeTransform (Choice Expression) t where
       CLambda{} ->
         error "TODO"
 
-instance TreeTransform Clause t where
+instance TreeTransform Clause where
   transform name f =
     \case
       EClause a ps cs
@@ -53,7 +52,7 @@ instance TreeTransform Clause t where
         | otherwise ->
             pure (EClause a ps cs)
 
-instance TreeTransform CompiledClause t where
+instance TreeTransform CompiledClause where
   transform name f =
     \case
       ECompiledClause loc lls e
@@ -62,7 +61,7 @@ instance TreeTransform CompiledClause t where
         | otherwise ->
             pure (ECompiledClause loc lls e)
 
-instance TreeTransform Expression t where
+instance TreeTransform Expression where
   transform name f =
     \case
       EAnnotation _ _ e ->
