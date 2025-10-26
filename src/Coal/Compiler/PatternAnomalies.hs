@@ -157,8 +157,6 @@ translatePattern =
       Con name (translatePattern <$> ps)
     PLiteral _ p ->
       Lit p
-    PRecord{} ->
-      error "TODO"
     PListCons _ _ p q ->
       Con "::" [translatePattern p, translatePattern q]
     PListLiteral _ _ ps ->
@@ -169,14 +167,10 @@ translatePattern =
       Or (translatePattern p) (translatePattern q)
     PAs _ _ p ->
       translatePattern p
-    PShorthand _ _ ->
-      error "TODO"
     PAtVariable{} ->
       Any
-    PNamedFold{} ->
-      error "TODO"
-    PTraitDictionary{} ->
-      error "TODO"
+    _ ->
+      error "Not implemented"
 
 {-# INLINE tupleCon #-}
 tupleCon :: Int -> Name
