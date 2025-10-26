@@ -34,7 +34,7 @@ compileTopLevelUnfolds :: (Monoid a, Data a, Monad m) => Definition a Kind () ->
 compileTopLevelUnfolds =
   \case
     DUnfold loc name (UnfoldDef with ps d _) -> do
-      e1 <- expandTopLevelUnfold ps d
+      e1 <- expandTopLevelUnfold loc ps d
       pure $ DUnfold loc name (UnfoldDef with ps d (Just e1))
     o ->
       pure o
@@ -56,8 +56,8 @@ translateFields var (name, e)
       e1 ->
         e1 :| []
 
-expandTopLevelUnfold :: (Monoid a, Data a, Monad m) => NonEmpty (Pattern a ()) -> Dictionary (Expression a ()) -> CompilerT a m (Expression a ())
-expandTopLevelUnfold ps d = do
+expandTopLevelUnfold :: (Monoid a, Data a, Monad m) => a -> NonEmpty (Pattern a ()) -> Dictionary (Expression a ()) -> CompilerT a m (Expression a ())
+expandTopLevelUnfold loc ps d = do
   name <- supplied (freshName "unfold")
   d1 <- mapM (translateFields name) (Map.toList d)
   pure $
@@ -67,7 +67,7 @@ expandTopLevelUnfold ps d = do
         ( lambdaE
             ps
             ( ECodataRecord
-                mempty
+                loc
                 ()
                 (Map.fromList d1)
             )

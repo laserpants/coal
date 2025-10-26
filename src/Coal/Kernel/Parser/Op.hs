@@ -96,6 +96,14 @@ op2 = do
         SymMul -> pure OMulDouble
         SymDiv -> pure ODivDouble
         _ -> fail "Invalid operator"
+    Just (TCon "bool" []) ->
+      case s of
+        SymEq -> pure OEqBool
+        _ -> fail "Invalid operator"
+    Just (TCon "char" []) ->
+      case s of
+        SymEq -> pure OEqInt32
+        _ -> fail "Invalid operator"
     Nothing ->
       case s of
         SymOr -> pure OOr

@@ -106,7 +106,7 @@ parseImport :: Parser (Definition Metadata o ())
 parseImport = do
   start <- getSourcePos
   lexeme_ "import"
-  path <- (lexeme "Core$" <|> identifier upperChar) `sepBy1` symbol "."
+  path <- (lexeme "Builtin$" <|> identifier upperChar) `sepBy1` symbol "."
   names <- option ["*"] (parens (commaSep (backtickString <|> name <|> identifier upperChar)))
   end <- getSourcePos
   pure (DImport (Metadata start end) (Path path) names)

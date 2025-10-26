@@ -11,7 +11,7 @@ import Data.Generics.Uniplate.Data (transformBi)
 import Extra (Name)
 
 data InferenceRule k a
-  = InferenceRulePlaceholder
+  = InferenceRulePlaceholder String
   | -- | Type annotation
     RuleAnnotation a (Type TypeIndex k) (Type TypeIndex k)
   | -- | Function application
@@ -42,6 +42,14 @@ data InferenceRule k a
     RuleTypeConstraint a Name (Type TypeIndex k) (Scheme TypeIndex k (Type TypeIndex k))
   | -- | TODO
     RuleDataConstructor a Name (Type TypeIndex k) (Scheme TypeIndex k (Type TypeIndex k))
+  | -- | TODO
+    RuleCodataRecord a (Type TypeIndex k) (Scheme TypeIndex k (Type TypeIndex k))
+  | -- | TODO
+    RuleUnfoldEquality a (Type TypeIndex k) (Type TypeIndex k)
+  | -- | TODO
+    RuleUnfoldExplicit a (Type TypeIndex k) (Scheme TypeIndex k (Type TypeIndex k))
+  | -- | TODO
+    RuleEntrypoint a (Type TypeIndex k)
   deriving (Show, Eq, Ord, Read, Data, Typeable)
 
 instance (Data a) => Substitutable (InferenceRule Kind a) where

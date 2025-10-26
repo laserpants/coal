@@ -14,13 +14,10 @@ import Coal.Parser.Type (parseType)
 import Coal.Parser.Utils (fieldList)
 import Control.Monad (void)
 import Control.Monad.Combinators.Expr
-import Data.Char (ord)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
-import Extra.Text.Megaparsec.Char (singleQuote)
 import Text.Megaparsec (option, optional, some, try, (<|>))
 import Text.Megaparsec.Char (char)
-import qualified Text.Megaparsec.Char.Lexer as Lexer
 
 parseAtom :: Parser (Pattern Metadata ())
 parseAtom =

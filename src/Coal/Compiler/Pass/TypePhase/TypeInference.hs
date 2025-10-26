@@ -20,7 +20,9 @@ passTypeInference =
     }
 
 pass :: (MonadIO m, Data a, Eq a, Show a) => Module a Kind () -> CompilerT a m (Module a Kind IndexedType)
-pass = runTypeInference
+pass m@(Module p _ _) = do
+  setCompilerModuleC p
+  runTypeInference m
 
 indexedC :: (Monad m, Traversable t) => t e -> CompilerT a m (t IndexedType)
 indexedC ds = run (indexed ds) =<< gets compilerSupply

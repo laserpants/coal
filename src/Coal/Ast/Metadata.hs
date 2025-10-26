@@ -90,7 +90,7 @@ instance HasMetadata (Pattern Metadata t) where
 instance HasMetadata (InferenceRule k Metadata) where
   getMetadata =
     \case
-      InferenceRulePlaceholder -> Metadata defaultSourcePos defaultSourcePos -- TODO error "Not implemented"
+      InferenceRulePlaceholder _ -> Metadata defaultSourcePos defaultSourcePos -- TODO error "Not implemented"
       RuleAnnotation a _ _ -> a
       RuleApplication a _ _ -> a
       RuleIfCondition a _ -> a
@@ -106,6 +106,10 @@ instance HasMetadata (InferenceRule k Metadata) where
       RuleTopLevelConstant a -> a
       RuleTypeConstraint a _ _ _ -> a
       RuleDataConstructor a _ _ _ -> a
+      RuleCodataRecord a _ _ -> a
+      RuleUnfoldEquality a _ _ -> a
+      RuleUnfoldExplicit a _ _ -> a
+      RuleEntrypoint a _ -> a
 
 instance HasMetadata (ConstraintsGenError Metadata) where
   getMetadata =

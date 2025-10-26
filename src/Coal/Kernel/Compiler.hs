@@ -53,14 +53,14 @@ irCodeGen names objs = do
   pipelineInsertCode (support <> closureSupport <> concat c3 <> c4)
   gets pipelineCode
 
-builtInCtors :: Environment Int
-builtInCtors = Environment.fromList [("$Cons", 0), ("$Nil", 1), ("$Succ", 0), ("$Zero", 1)]
+builtinCtors :: Environment Int
+builtinCtors = Environment.fromList [("$Cons", 0), ("$Nil", 1), ("$Succ", 0), ("$Zero", 1)]
 
 compile :: Environment Int -> Pass ObjectList ()
 compile importedCtors input = do
   objs <- corePass input
   extendInterpreterValueEnv (objectEnvironment objs)
-  extendInterpreterConstructorEnv (builtInCtors <> importedCtors <> objectConstructors objs)
+  extendInterpreterConstructorEnv (builtinCtors <> importedCtors <> objectConstructors objs)
   void (irCodeGen names objs)
  where
   names =

@@ -116,4 +116,4 @@ instance (Serializable s) => Serializable (Trait s) where
         name <> parenthesized t
 
 instanceLabel :: (Serializable t) => Trait t -> Name -> Name
-instanceLabel t name = name <> "__$instance_" <> serialize t
+instanceLabel t name = name <> "__$impl_" <> serialize t

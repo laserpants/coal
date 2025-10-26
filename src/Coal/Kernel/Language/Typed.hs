@@ -131,3 +131,5 @@ instance Typed (Op a) where
         Type.float
       ODivDouble{} ->
         Type.double
+      _ ->
+        error "TODO"

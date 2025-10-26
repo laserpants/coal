@@ -1,4 +1,4 @@
-module Extra.Text.Megaparsec.Char where
+module Extra.Text.Megaparsec.Char (singleQuote, doubleQuote) where
 
 import Data.Text (Text)
 import Text.Megaparsec (Parsec)

@@ -28,6 +28,8 @@ import qualified Data.Text.IO as Text
 import Extra (traverse_)
 import Prettyprinter
 import Prettyprinter.Render.Text (renderStrict)
+import System.Directory (createDirectoryIfMissing)
+import System.FilePath (takeDirectory, (</>))
 import TextShow (showt)
 
 data Shape
@@ -328,7 +330,7 @@ instance (Pretty t, Show t) => Dot t (Guard Expression a t) where
 instance (Pretty t, Show t) => Dot t (CompiledClause a t) where
   toDot =
     \case
-      ECompiledClause lls e -> do
+      ECompiledClause _ lls e -> do
         fromNode (emitRectangle "ECompiledClause" Nothing) $ do
           emitEdgesTo lls
           emitEdgeTo e
@@ -336,7 +338,7 @@ instance (Pretty t, Show t) => Dot t (CompiledClause a t) where
 instance (Show t, Pretty t) => Dot t (FunctionDef a t) where
   toDot =
     \case
-      FunctionDef _ (Just (With ts u)) (With _ t) ps e ->
+      FunctionDef _ (Just (With _ u)) (With _ t) ps e ->
         fromNode (emitParallelogram ("FunctionDef\\n" <> prettyType u) (Just t)) $ do
           emitEdgesTo ps
           emitEdgeTo e
@@ -348,7 +350,7 @@ instance (Show t, Pretty t) => Dot t (FunctionDef a t) where
 instance (Show t, Pretty t) => Dot t (ConstantDef a t) where
   toDot =
     \case
-      ConstantDef _ (Just (With ts u)) (With _ t) e ->
+      ConstantDef _ (Just (With _ u)) (With _ t) e ->
         fromNode (emitParallelogram ("ConstantDef\\n" <> prettyType u) (Just t)) $ do
           emitEdgeTo e
       ConstantDef _ _ (With _ t) e ->
@@ -366,7 +368,7 @@ instance (Show t, Pretty t) => Dot t (Definition a k t) where
         fromNode (emitParallelogram ("DConstant\\n" <> name) Nothing) $ do
           emitEdgeTo c
           emitEdgesTo ws
-      DImport _ (Path _) ns ->
+      DImport _ (Path _) _ ->
         emitParallelogram "DImport" Nothing
       DType _ name _ ->
         emitParallelogram ("DType\\n" <> name) Nothing
@@ -382,8 +384,8 @@ instance (Show t, Pretty t) => Dot t (Definition a k t) where
                 emitEdge nid id1
           lift $
             forM_ ds $
-              \(name, t) -> do
-                id1 <- emitRectangle (name <> "\\n" <> prettyType t) Nothing
+              \(n, t) -> do
+                id1 <- emitRectangle (n <> "\\n" <> prettyType t) Nothing
                 emitEdge nid id1
       DInstance _ name (InstanceDef ts t ds) ->
         fromNode (emitParallelogram ("DInstance\\n" <> name <> "\\n" <> prettyType t) Nothing) $ do
@@ -463,8 +465,14 @@ prettyType p = renderStrict . layoutPretty defaultLayoutOptions $ pretty p
 escapeQuotes :: Text -> Text
 escapeQuotes = Text.replace "\"" "\\\""
 
+writeDebugFile :: FilePath -> Text.Text -> IO ()
+writeDebugFile path content = do
+  createDirectoryIfMissing True (takeDirectory path)
+  Text.writeFile path content
+
+{-# INLINE writeDotFile #-}
 writeDotFile :: (Pretty t, Dot t a) => Text -> a -> IO ()
-writeDotFile fname a = Text.writeFile ("./.debug/" <> Text.unpack fname <> ".gv") (generateDot a)
+writeDotFile fname a = writeDebugFile ("./.debug/" <> Text.unpack fname <> ".gv") (generateDot a)
 
 instance Dot Kernel.Type (DotGen Kernel.Type Int) where
   toDot = id

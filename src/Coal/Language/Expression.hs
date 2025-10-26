@@ -76,5 +76,5 @@ data Expression a t
 data Clause a t = EClause a (Pattern a t) (NonEmpty (Choice Expression a t))
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
 
-data CompiledClause a t = ECompiledClause (NonEmpty (Label t)) (Expression a t)
+data CompiledClause a t = ECompiledClause a (NonEmpty (Label t)) (Expression a t)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)

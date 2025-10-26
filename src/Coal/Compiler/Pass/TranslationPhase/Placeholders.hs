@@ -13,14 +13,14 @@ import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (supplied)
 import Coal.Compiler.Environment (overCompilerDictionaryNameEnvironment)
-import Coal.Compiler.Journal (censorDictionaryTraits, listenDictionaryTraits, tellDictionaryTraits)
+import Coal.Compiler.Journal (censorDictionaryTraits, listenDictionaryTraits, tellDictionaryTraits, tellErrors)
 import Coal.Compiler.Pass
 import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module
 import Coal.TypeSystem.Substitution
 import Coal.TypeSystem.Unification
-import Control.Monad (forM)
+import Control.Monad.Except
 import Control.Monad.Reader (asks, local)
 import Control.Monad.State (gets)
 import Data.Data (Data)
@@ -29,7 +29,7 @@ import Data.Generics.Uniplate.Data (descendM)
 import Data.List (nub)
 import Data.List.NonEmpty (NonEmpty (..), toList)
 import qualified Data.Map.Strict as Map
-import Data.Maybe (catMaybes)
+import Data.Maybe (catMaybes, fromJust)
 import Data.Text (isPrefixOf)
 import Extra (Dictionary, Name)
 
@@ -41,7 +41,9 @@ passPlaceholders =
     }
 
 pass :: (Monad m) => Module Metadata Kind IndexedType -> CompilerT Metadata m (Module Metadata Kind IndexedType)
-pass = overModuleDefinitionsM (traverse insertPlaceholders)
+pass m@(Module p _ _) = do
+  setCompilerModuleC p
+  overModuleDefinitionsM (traverse insertPlaceholders) m
 
 insertPlaceholders :: (Monad m, Monoid a, Data a) => Definition a Kind IndexedType -> CompilerT a m (Definition a Kind IndexedType)
 insertPlaceholders =
@@ -139,21 +141,31 @@ mapEntriesM ::
   m (Dictionary (Expression a IndexedType))
 mapEntriesM d f = Map.fromList <$> traverse f (Map.toList d)
 
-lookupTraitInstance :: (Monoid a, Monad m) => Trait IndexedType -> CompilerT a m (Maybe (Dictionary (Expression a IndexedType)))
-lookupTraitInstance trait@(Trait name _) = do
+lookupTraitInstance :: (Monoid a, Data a, Monad m) => a -> Trait IndexedType -> CompilerT a m (Maybe (Dictionary (Expression a IndexedType)))
+lookupTraitInstance loc trait@(Trait name _) = do
   found <- findFirstMatch trait
   case found of
-    Nothing ->
-      pure Nothing
-    Just (t, a, b) ->
-      Just <$> mapEntriesM b (uncurry (go t (Trait name a)))
+    Nothing -> do
+      if isConcrete trait
+        then do
+          path <- gets compilerModule
+          tellErrors [MissingInstance trait (ErrorLocation (principalPath path) loc)]
+          throwError TraitError
+        else pure Nothing
+    Just (t, a, b) -> do
+      d1 <- mapEntriesM b (uncurry (go t (Trait name a)))
+      Just <$> traverse expandTraits d1
  where
   go t1 (Trait tn _) n (Forall _ ts t) = do
-    expr <- applyTraits (Label t (instanceLabel (Trait tn t1) n)) ts
+    expr <- applyTraits loc (Label t (instanceLabel (Trait tn t1) n)) ts
     pure (n, expr)
 
-applyTraits :: (Monoid a, Monad m) => Label IndexedType -> [Trait IndexedType] -> CompilerT a m (Expression a IndexedType)
-applyTraits (Label t name) =
+isConcrete :: Trait IndexedType -> Bool
+isConcrete (Trait _ TIntrinsic{}) = True
+isConcrete _ = False
+
+applyTraits :: (Monoid a, Data a, Monad m) => a -> Label IndexedType -> [Trait IndexedType] -> CompilerT a m (Expression a IndexedType)
+applyTraits loc (Label t name) =
   \case
     [] ->
       pure (EVariable mempty (Label t name))
@@ -162,7 +174,7 @@ applyTraits (Label t name) =
      where
       t1 = foldTypeOf t (tr : trs)
       insertInstance trait = do
-        fields <- lookupTraitInstance trait
+        fields <- lookupTraitInstance loc trait
         case fields of
           Nothing -> do
             tellDictionaryTraits [trait]
@@ -186,9 +198,9 @@ instance (Monoid a, Data a) => TraitContext a (Expression a IndexedType) where
         as <- censorDictionaryTraits (const []) (traverse transformBinding bs)
         let xs = concat (toList (snd <$> as))
         ELet a (fst <$> as) <$> local (overCompilerDictionaryNameEnvironment (Environment.insertMultiple xs)) (expandTraits e)
-      EVariable _ (Label t name) -> do
+      EVariable loc (Label t name) -> do
         traits <- collectTraits t name
-        applyTraits (Label t name) (nub traits)
+        applyTraits loc (Label t name) (nub traits)
       ECompiledMatch a t e cs ->
         ECompiledMatch a t <$> expandTraits e <*> traverse expandTraits cs
       EFold a t es cs (Just e) -> do
@@ -206,8 +218,8 @@ transformBinding =
           pure (BPattern a var body, [])
     BPattern _ (PVariable a (Label t name)) e -> do
       (e1, traits) <- transformScope e
-      let ll = Label (foldTypeOf t traits) name
-      pure (BPattern mempty (PVariable a ll) e1, [(name, Forall (typeIndexesIn t) traits t)])
+      let ll = Label (foldTypeOf t (nub traits)) name
+      pure (BPattern mempty (PVariable a ll) e1, [(name, Forall (typeIndexesIn t) (nub traits) t)])
     _ ->
       error "Not implemented"
 
@@ -232,7 +244,7 @@ instance (Monoid a, Data a) => TraitContext a (Definition a Kind IndexedType) wh
   expandTraits =
     \case
       DConstant loc name c fs ->
-        DConstant loc name <$> expandTraits c <*> traverse expandTraits fs
+        DConstant loc name <$> expandConstantDefTraits name c <*> traverse expandTraits fs
       DFold loc name (FoldDef with cs (Just e)) ->
         DFold loc name . FoldDef with cs . Just <$> expandTraits e
       DUnfold loc name (UnfoldDef with ps d (Just e)) ->
@@ -240,16 +252,36 @@ instance (Monoid a, Data a) => TraitContext a (Definition a Kind IndexedType) wh
       d ->
         pure d
 
-instance (Monoid a, Data a) => TraitContext a (ConstantDef a IndexedType) where
-  expandTraits =
-    \case
-      ConstantDef a with (With _ t) e -> do
-        (expr, traits) <- listenDictionaryTraits (expandTraits e)
-        case nub traits of
-          [] ->
-            pure $ ConstantDef a with (With [] t) expr
-          tr : trs ->
-            pure $ ConstantDef a with (With (tr : trs) t) (dictionaryLambda tr trs expr)
+expandConstantDefTraits :: (Monad m, Monoid a, Data a) => Name -> ConstantDef a IndexedType -> CompilerT a m (ConstantDef a IndexedType)
+expandConstantDefTraits name =
+  \case
+    ConstantDef a with (With _ t) e -> do
+      (expr, traits) <- listenDictionaryTraits (expandTraits e)
+      case nub traits of
+        [] ->
+          pure $ ConstantDef a with (With [] t) expr
+        tr : trs -> do
+          path <- gets compilerModule
+          -- Insert default instance for Numeric trait, which is int32
+          if "main" == name && Path ["Main"] == path && isNumericTrait tr
+            then do
+              fields <- fromJust <$> lookupTraitInstance a (Trait "Numeric" (TIntrinsic IInt32))
+              pure $
+                ConstantDef
+                  a
+                  with
+                  (With trs t)
+                  ( EApplication
+                      mempty
+                      t
+                      (dictionaryLambda tr trs expr)
+                      (ERecord mempty (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TIntrinsic IInt32 :| [])) fields Nothing :| [])
+                  )
+            else pure $ ConstantDef a with (With (tr : trs) t) (dictionaryLambda tr trs expr)
+
+isNumericTrait :: Trait a -> Bool
+isNumericTrait (Trait "Numeric" _) = True
+isNumericTrait _ = False
 
 dictionaryLambda :: (Monoid a, HasType o k (Trait (Type o k))) => Trait (Type o k) -> [Trait (Type o k)] -> Expression a (Type o k) -> Expression a (Type o k)
 dictionaryLambda tr trs = ELambda mempty (dict <$> (tr :| trs))

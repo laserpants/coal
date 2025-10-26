@@ -10,6 +10,7 @@ module Coal.Common.Environment (
   fromList,
   toList,
   lookup,
+  contains,
   restrict,
   lookupAll,
   elems,
@@ -68,6 +69,10 @@ toList = Map.toList . envDictionary
 {-# INLINE lookup #-}
 lookup :: Name -> Environment a -> Maybe a
 lookup name = Map.lookup name . envDictionary
+
+{-# INLINE contains #-}
+contains :: Name -> Environment a -> Bool
+contains name (Environment e) = name `elem` Map.keys e
 
 {-# INLINE lookupAll #-}
 lookupAll :: [Name] -> Environment a -> [(Name, a)]

@@ -23,12 +23,16 @@ passTranslationPhaseErrors =
     , runPass = pass
     }
 
+-- TODO: Maybe look these up in environment and add additional constraints?
+isFoldAssumption :: Assumption a t -> Bool
+isFoldAssumption Assumption{..} = "!" `Text.isPrefixOf` assumptionName
+
 pass :: (Monad m) => Module Metadata Kind IndexedType -> CompilerT Metadata m (Module Metadata Kind IndexedType)
 pass m@(Module path _ _) = do
-  assumptions <- gets compilerAssumptions
-  forM_ (nub assumptions) $
+  assumptions <- gets (filter (not . isFoldAssumption) . nub . compilerAssumptions)
+  forM_ assumptions $
     \Assumption{..} ->
-      -- TODO: Maybe look up these in environment and add additional constraints
-      unless ("!" `Text.isPrefixOf` assumptionName) $
-        tellErrors [NameNotInScope assumptionName (ErrorLocation (principalPath path) assumptionMetadata)]
+      tellErrors [NameNotInScope assumptionName (ErrorLocation (principalPath path) assumptionMetadata)]
+  unless (null assumptions) $
+    throwError NoSuchIdentifier
   pure m

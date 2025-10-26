@@ -4,7 +4,7 @@ cradle:
       component: "coal:lib"
 
     - path: "./app"
-      component: "coal:exe:coal-exe"
+      component: "coal:exe:coal"
 
     - path: "./test"
       component: "coal:test:coal-test"

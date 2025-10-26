@@ -26,7 +26,6 @@ import Data.List.NonEmpty (NonEmpty (..), toList)
 import qualified Data.Map.Strict as Map
 import Data.Maybe (maybeToList)
 import qualified Data.Text as Text
-import Debug.Trace
 import Extra
 
 type ConstraintsGen a = ConstraintsGenStack a TypeIndex Kind IndexedType
@@ -43,7 +42,7 @@ assertEqualityAssumptions :: a -> IndexedType -> [Assumption a IndexedType] -> C
 assertEqualityAssumptions _ t ms =
   tellRight $ do
     Assumption{..} <- ms
-    pure (Equality InferenceRulePlaceholder [assumptionType, t])
+    pure (Equality (InferenceRulePlaceholder "assertEqualityAssumptions") [assumptionType, t])
 
 assertImplicitAssumptions :: a -> IndexedType -> [Assumption a IndexedType] -> ConstraintsGen a ()
 assertImplicitAssumptions loc t ms = do
@@ -76,40 +75,40 @@ emitPConstructorConstraints loc (Label t name) ps = do
       | constructorArity /= length ps ->
           tellLeft [EDataConstructorArityMismatch loc name constructorArity (length ps)]
     Just DataConstructor{..} ->
-      tellRight [Explicit InferenceRulePlaceholder (foldTypeOf t ps) constructorScheme]
+      tellRight [Explicit (InferenceRulePlaceholder "emitPConstructorConstraints") (foldTypeOf t ps) constructorScheme]
 
 emitPOrConstraints :: (Data a) => IndexedType -> Pattern a IndexedType -> Pattern a IndexedType -> ConstraintsGen a ()
-emitPOrConstraints t p1 p2 = tellRight [Equality InferenceRulePlaceholder [t, typeOf p1, typeOf p2]]
+emitPOrConstraints t p1 p2 = tellRight [Equality (InferenceRulePlaceholder "emitPOrConstraints") [t, typeOf p1, typeOf p2]]
 
 emitPListConsConstraints :: (Data a) => IndexedType -> Pattern a IndexedType -> Pattern a IndexedType -> ConstraintsGen a ()
-emitPListConsConstraints t p1 p2 = tellRight [Explicit InferenceRulePlaceholder (foldTypeOf t [p1, p2]) listConstructorScheme]
+emitPListConsConstraints t p1 p2 = tellRight [Explicit (InferenceRulePlaceholder "emitPListConsConstraints") (foldTypeOf t [p1, p2]) listConstructorScheme]
 
 emitPListLiteralConstraints :: (Data a) => IndexedType -> [Pattern a IndexedType] -> ConstraintsGen a ()
 emitPListLiteralConstraints t ps =
   tellRight
-    [ Equality InferenceRulePlaceholder (t : (typeOf <$> ps))
-    , Explicit InferenceRulePlaceholder t (forall1 listType)
+    [ Equality (InferenceRulePlaceholder "emitPListLiteralConstraints.1") (t : (typeOf <$> ps))
+    , Explicit (InferenceRulePlaceholder "emitPListLiteralConstraints.2") t (forall1 listType)
     ]
 
 emitPTupleConstraints :: (Data a) => IndexedType -> NonEmpty (Pattern a IndexedType) -> ConstraintsGen a ()
 emitPTupleConstraints t ps =
   tellRight
-    [ Equality InferenceRulePlaceholder [t, tupleType (typeOf <$> ps)]
-    , Explicit InferenceRulePlaceholder t (tupleScheme (length ps))
+    [ Equality (InferenceRulePlaceholder "emitPTupleConstraints.1") [t, tupleType (typeOf <$> ps)]
+    , Explicit (InferenceRulePlaceholder "emitPTupleConstraints.2") t (tupleScheme (length ps))
     ]
 
 emitPAsConstraints :: (Data a) => IndexedType -> Pattern a IndexedType -> ConstraintsGen a ()
-emitPAsConstraints t p = tellRight [Equality InferenceRulePlaceholder [t, typeOf p]]
+emitPAsConstraints t p = tellRight [Equality (InferenceRulePlaceholder "emitPAsConstraints") [t, typeOf p]]
 
 emitPRecordConstraints :: (Data a) => IndexedType -> Dictionary (Pattern a IndexedType) -> Maybe (Pattern a IndexedType) -> ConstraintsGen a ()
 emitPRecordConstraints t fields p = do
   row <- tailRow p
-  tellRight [Equality InferenceRulePlaceholder [t, fieldsRecordType (typeOf <$> fields) row]]
+  tellRight [Equality (InferenceRulePlaceholder "emitPRecordConstraints.1") [t, fieldsRecordType (typeOf <$> fields) row]]
   case row of
     r@RVariable{} ->
       forM_ (Map.keys fields) $
         \field ->
-          tellRight [Lacks InferenceRulePlaceholder (TRow r) field]
+          tellRight [Lacks (InferenceRulePlaceholder "emitPRecordConstraints.2") (TRow r) field]
     _ ->
       pure ()
 
@@ -231,24 +230,24 @@ emitELetConstraints loc gs e1 = do
   pure (filter (assumptionNameIsNotOneOf names) ms1 <> ms2)
 
 emitESelectConstraints :: (Show a, Data a) => a -> Label IndexedType -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
-emitESelectConstraints loc (Label t name) e = do
+emitESelectConstraints _ (Label t name) e = do
   row <- supplied (RVariable . TypeIndex KRow)
   let t1 = recordType (RExtend name t row)
-  tellRight [Equality InferenceRulePlaceholder [t1, typeOf e]]
+  tellRight [Equality (InferenceRulePlaceholder "emitESelectConstraints") [t1, typeOf e]]
   emitConstraints e
 
 emitERecordConstraints :: (Show a, Data a) => a -> IndexedType -> Dictionary (Expression a IndexedType) -> Maybe (Expression a IndexedType) -> ConstraintsGen a [Assumption a IndexedType]
-emitERecordConstraints loc t fields expr = do
+emitERecordConstraints _ t fields expr = do
   ms1 <- concatMapM emitConstraints expr
   ms2 <- concatMapM emitConstraints fields
   r1 <- tailRow expr
   let t1 = TIntrinsic (IRecord (TRow (fromDictionary (typeOf <$> fields) r1)))
-  tellRight [Equality InferenceRulePlaceholder [t, t1]]
+  tellRight [Equality (InferenceRulePlaceholder "emitERecordConstraints.1") [t, t1]]
   case r1 of
     r@RVariable{} ->
       forM_ (Map.keys fields) $
         \field ->
-          tellRight [Lacks InferenceRulePlaceholder (TRow r) field]
+          tellRight [Lacks (InferenceRulePlaceholder "emitERecordConstraints.2") (TRow r) field]
     _ ->
       pure ()
   pure (ms1 <> ms2)
@@ -260,7 +259,7 @@ tailRow =
       pure RNil
     Just t -> do
       r <- supplied (RVariable . TypeIndex KRow)
-      tellRight [Equality InferenceRulePlaceholder [TIntrinsic (IRecord (TRow r)), typeOf t]]
+      tellRight [Equality (InferenceRulePlaceholder "tailRow") [TIntrinsic (IRecord (TRow r)), typeOf t]]
       pure r
 
 emitEIfConstraints :: (Show a, Data a) => a -> IndexedType -> Expression a IndexedType -> Expression a IndexedType -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
@@ -288,29 +287,29 @@ emitEApplicationConstraints loc t e1 es = do
   ts = typeOf <$> es
 
 emitEListConsConstraints :: (Show a, Data a) => a -> IndexedType -> Expression a IndexedType -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
-emitEListConsConstraints loc t e1 e2 = do
+emitEListConsConstraints _ t e1 e2 = do
   ms1 <- emitConstraints e1
   ms2 <- emitConstraints e2
-  tellRight [Explicit InferenceRulePlaceholder t1 listConstructorScheme]
+  tellRight [Explicit (InferenceRulePlaceholder "emitEListConsConstraints") t1 listConstructorScheme]
   pure (ms1 <> ms2)
  where
   t1 = typeOf e1 `TArrow` typeOf e2 `TArrow` t
 
 emitEListLiteralConstraints :: (Show a, Data a) => a -> IndexedType -> [Expression a IndexedType] -> ConstraintsGen a [Assumption a IndexedType]
-emitEListLiteralConstraints loc t es = do
+emitEListLiteralConstraints _ t es = do
   ms1 <- concatMapM emitConstraints es
   tellRight
-    [ Equality InferenceRulePlaceholder (t : (listType . typeOf <$> es))
-    , Explicit InferenceRulePlaceholder t (forall1 listType)
+    [ Equality (InferenceRulePlaceholder "emitEListLiteralConstraints.1") (t : (listType . typeOf <$> es))
+    , Explicit (InferenceRulePlaceholder "emitEListLiteralConstraints.2") t (forall1 listType)
     ]
   pure ms1
 
 emitETupleConstraints :: (Show a, Data a) => a -> IndexedType -> NonEmpty (Expression a IndexedType) -> ConstraintsGen a [Assumption a IndexedType]
-emitETupleConstraints loc t es = do
+emitETupleConstraints _ t es = do
   ms1 <- concatMapM emitConstraints es
   tellRight
-    [ Equality InferenceRulePlaceholder [t, tupleType (typeOf <$> es)]
-    , Explicit InferenceRulePlaceholder t (tupleScheme (length es))
+    [ Equality (InferenceRulePlaceholder "emitETupleConstraints.1") [t, tupleType (typeOf <$> es)]
+    , Explicit (InferenceRulePlaceholder "emitETupleConstraints.2") t (tupleScheme (length es))
     ]
   pure ms1
 
@@ -359,8 +358,8 @@ emitECodataSelectConstraints loc (Label t name) e1 = do
           ms3 <- emitConstraints e3
           assertEqualityAssumptions loc t2 (filter (assumptionNameIs n) ms3)
           t0 <- supplied (TVariable . TypeIndex KType)
-          tellRight [Explicit InferenceRulePlaceholder (t0 `TArrow` typeOf e3) codataAccessorScheme]
-          tellRight [Equality InferenceRulePlaceholder [t, typeOf e3]]
+          tellRight [Explicit (InferenceRulePlaceholder "emitECodataSelectConstraints.1") (t0 `TArrow` typeOf e3) codataAccessorScheme]
+          tellRight [Equality (InferenceRulePlaceholder "emitECodataSelectConstraints.2") [t, typeOf e3]]
           -- pure (ms1 <> ms2 <> filter (not . assumptionNameIs n) ms3)
           pure (ms2 <> filter (not . assumptionNameIs n) ms3)
         _ ->
@@ -415,11 +414,11 @@ emitConstraints =
       ms3 <- concatMapM emitConstraints e1
       case e1 of
         Just (ERecursiveLet _ (PVariable _ (Label t1 _)) _ _) ->
-          tellRight [Equality InferenceRulePlaceholder [foldTypeOf t (e :| es), t1]]
+          tellRight [Equality (InferenceRulePlaceholder "emitConstraints.1") [foldTypeOf t (e :| es), t1]]
         _ ->
           pure ()
       pure (ms1 <> ms2 <> ms3)
-    ECodataRecord _ _ d -> do
+    ECodataRecord loc _ d -> do
       concatForM (Map.toList d) $
         \(field, e) -> do
           env <- asks constraintsGenContextCodataAccessorEnv
@@ -428,7 +427,7 @@ emitConstraints =
               case typeOf e of
                 TArrow _ t2 -> do
                   t1 <- supplied (TVariable . TypeIndex KType)
-                  tellRight [Explicit InferenceRulePlaceholder (t1 `TArrow` t2) s]
+                  tellRight [Explicit (RuleCodataRecord loc (t1 `TArrow` t2) s) (t1 `TArrow` t2) s]
                 _ ->
                   error "Implementation error"
             Nothing ->

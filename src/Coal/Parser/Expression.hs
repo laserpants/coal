@@ -41,7 +41,7 @@ parseAtom =
 parseSelectorOp :: Parser (Expression Metadata () -> Expression Metadata ())
 parseSelectorOp = do
   start <- getSourcePos
-  field <- symbol_ "." *> (name <|> constructor)
+  field <- (symbol_ "." <* notFollowedBy (char '|')) *> (name <|> constructor)
   end <- getSourcePos
   pure (\expr -> selector expr (Metadata start end) field)
 
@@ -125,7 +125,7 @@ parseMatchClause :: Parser (Clause Metadata ())
 parseMatchClause =
   withMetadata $ do
     p <- symbol_ "|" *> parsePattern
-    cs <- symbol_ "=>"
+    symbol_ "=>"
     c <- parseChoice
     pure (\loc -> EClause loc p (NonEmpty.singleton c))
 
@@ -215,6 +215,7 @@ binaryOperator op e1 e2 =
 listCons :: Expression Metadata () -> Expression Metadata () -> Expression Metadata ()
 listCons e1 e2 = EListCons (metadataSpan e1 e2) () e1 e2
 
+-- TODO: DRY
 parseAdditionOperator :: Parser (Expression Metadata () -> Expression Metadata () -> Expression Metadata ())
 parseAdditionOperator =
   withMetadata $
@@ -251,10 +252,117 @@ parseMultiplicationOperator =
             (lhs :| [rhs])
       )
 
+parseDivisionOperator :: Parser (Expression Metadata () -> Expression Metadata () -> Expression Metadata ())
+parseDivisionOperator =
+  withMetadata $
+    pure
+      ( \loc lhs rhs ->
+          EApplication
+            loc
+            ()
+            (EVariable loc (Label () "(/)"))
+            (lhs :| [rhs])
+      )
+
+parseModulusOperator :: Parser (Expression Metadata () -> Expression Metadata () -> Expression Metadata ())
+parseModulusOperator =
+  withMetadata $
+    pure
+      ( \loc lhs rhs ->
+          EApplication
+            loc
+            ()
+            (EVariable loc (Label () "(%)"))
+            (lhs :| [rhs])
+      )
+
+parseExponentiationOperator :: Parser (Expression Metadata () -> Expression Metadata () -> Expression Metadata ())
+parseExponentiationOperator =
+  withMetadata $
+    pure
+      ( \loc lhs rhs ->
+          EApplication
+            loc
+            ()
+            (EVariable loc (Label () "(^)"))
+            (lhs :| [rhs])
+      )
+
+parseSemigroupOperator :: Parser (Expression Metadata () -> Expression Metadata () -> Expression Metadata ())
+parseSemigroupOperator =
+  withMetadata $
+    pure
+      ( \loc lhs rhs ->
+          EApplication
+            loc
+            ()
+            (EVariable loc (Label () "(<>)"))
+            (lhs :| [rhs])
+      )
+
+parseEqualityOperator :: Parser (Expression Metadata () -> Expression Metadata () -> Expression Metadata ())
+parseEqualityOperator =
+  withMetadata $
+    pure
+      ( \loc lhs rhs ->
+          EApplication
+            loc
+            ()
+            (EVariable loc (Label () "(==)"))
+            (lhs :| [rhs])
+      )
+
+parseLessThanOrEqualOperator :: Parser (Expression Metadata () -> Expression Metadata () -> Expression Metadata ())
+parseLessThanOrEqualOperator =
+  withMetadata $
+    pure
+      ( \loc lhs rhs ->
+          EApplication
+            loc
+            ()
+            (EVariable loc (Label () "(<=)"))
+            (lhs :| [rhs])
+      )
+
+parseGreaterThanOrEqualOperator :: Parser (Expression Metadata () -> Expression Metadata () -> Expression Metadata ())
+parseGreaterThanOrEqualOperator =
+  withMetadata $
+    pure
+      ( \loc lhs rhs ->
+          EApplication
+            loc
+            ()
+            (EVariable loc (Label () "(>=)"))
+            (lhs :| [rhs])
+      )
+
+parseLessThanOperator :: Parser (Expression Metadata () -> Expression Metadata () -> Expression Metadata ())
+parseLessThanOperator =
+  withMetadata $
+    pure
+      ( \loc lhs rhs ->
+          EApplication
+            loc
+            ()
+            (EVariable loc (Label () "(<)"))
+            (lhs :| [rhs])
+      )
+
+parseGreaterThanOperator :: Parser (Expression Metadata () -> Expression Metadata () -> Expression Metadata ())
+parseGreaterThanOperator =
+  withMetadata $
+    pure
+      ( \loc lhs rhs ->
+          EApplication
+            loc
+            ()
+            (EVariable loc (Label () "(>)"))
+            (lhs :| [rhs])
+      )
+
 fixity9 :: [Operator Parser (Expression Metadata ())]
 fixity9 =
   [ InfixR (binaryOperator OReverseComposition <$ symbol "<<")
-  , InfixR (binaryOperator OReverseApplication <$ symbol "|.")
   ]
 
 negationOperator :: Parser (Expression Metadata () -> Expression Metadata ())
@@ -269,21 +377,21 @@ negationOperator =
           (EVariable loc (Label () "negate"))
           (e :| [])
 
-fixity8 :: [Operator Parser (Expression Metadata ())]
+fixity8, fixity7, fixity6, fixity5, fixity4, fixity3, fixity2, fixity1 :: [Operator Parser (Expression Metadata ())]
 fixity8 =
   [ Prefix negationOperator
   , Prefix (unaryOperator OLogicalNot <$ symbol "!")
+  , InfixR (parseExponentiationOperator <* symbol "^")
   ]
-
-fixity7 :: [Operator Parser (Expression Metadata ())]
 fixity7 =
   [ InfixL (parseMultiplicationOperator <* symbol "*")
+  , InfixL (parseDivisionOperator <* symbol "/")
+  , InfixL (parseModulusOperator <* symbol "%")
   ]
-
-fixity6, fixity5, fixity4, fixity3, fixity2 :: [Operator Parser (Expression Metadata ())]
 fixity6 =
   [ InfixL (parseAdditionOperator <* try (symbol "+" <* notFollowedBy (char '+')))
   , InfixL (parseSubtractionOperator <* try (symbol "-"))
+  , InfixR (parseSemigroupOperator <* symbol "<>")
   ]
 fixity5 =
   [ InfixR (binaryOperator OListConcatenation <$ try (symbol "++" <* notFollowedBy (char '+')))
@@ -291,17 +399,21 @@ fixity5 =
   , InfixR (listCons <$ symbol "::")
   ]
 fixity4 =
-  [ InfixN (binaryOperator OEqualTo <$ symbol "==")
-  , InfixN (binaryOperator OLessThanOrEqual <$ symbol "<=")
-  , InfixN (binaryOperator OGreaterThanOrEqual <$ symbol ">=")
-  , InfixN (binaryOperator OLessThan <$ (symbol "<" <* notFollowedBy (char '=')))
-  , InfixN (binaryOperator OGreaterThan <$ (symbol ">" <* notFollowedBy (char '=')))
+  [ InfixN (parseEqualityOperator <* symbol "==")
+  , InfixN (parseLessThanOrEqualOperator <* symbol "<=")
+  , InfixN (parseGreaterThanOrEqualOperator <* symbol ">=")
+  , InfixN (parseLessThanOperator <* (symbol "<" <* notFollowedBy (char '=')))
+  , InfixN (parseGreaterThanOperator <* (symbol ">" <* notFollowedBy (char '=')))
   ]
 fixity3 =
   [ InfixR (binaryOperator OLogicalAnd <$ symbol "&&")
   ]
 fixity2 =
   [ InfixR (binaryOperator OLogicalOr <$ symbol "||")
+  ]
+fixity1 =
+  [ InfixL (binaryOperator OReverseApplication <$ symbol "|.")
+  , InfixL (binaryOperator OForwardApplication <$ symbol ".|")
   ]
 
 annotation :: Parser (Expression Metadata () -> Expression Metadata ())
@@ -323,5 +435,6 @@ operator =
   , fixity4
   , fixity3
   , fixity2
+  , fixity1
   , [Postfix annotation]
   ]

@@ -1,4 +1,49 @@
+{-# LANGUAGE ApplicativeDo #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards #-}
+
 module Main (main) where
 
+import Coal.Compiler (compile)
+import Options.Applicative
+
+data CommandOptions = CommandOptions
+  { inputFiles :: [FilePath]
+  , outputFile :: FilePath
+  , debugGenerateDotfiles :: Bool
+  }
+  deriving (Show)
+
+optionsParser :: Parser CommandOptions
+optionsParser = do
+  inputFiles <- some (strArgument (metavar "FILES..." <> help "Input files"))
+
+  outputFile <-
+    strOption
+      ( long "output"
+          <> short 'o'
+          <> metavar "FILE"
+          <> help "Excecutable file name"
+      )
+
+  debugGenerateDotfiles <-
+    switch
+      ( long "debug-generate-dotfiles"
+          <> help "Generate intermediate Graphviz DOT files for debugging"
+      )
+
+  pure CommandOptions{..}
+
 main :: IO ()
-main = pure ()
+main = do
+  CommandOptions{..} <- execParser optsInfo
+  compile debugGenerateDotfiles outputFile inputFiles
+
+optsInfo :: ParserInfo CommandOptions
+optsInfo =
+  info
+    (optionsParser <**> helper)
+    ( fullDesc
+        <> progDesc "The Coal compiler command-line interface"
+        <> header "Welcome to the Coal compiler"
+    )

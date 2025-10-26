@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include <wchar.h>
 
-#include "hashmap/hashmap.h"
+#include "hashmap.h"
 
 /*
  * ////////////////////////////////////////////////////////////////////////////
@@ -95,6 +95,70 @@ bignum_init(char* str)
   return (void*)big_int;
 }
 
+/* add two bignums, return a newly-allocated mpz_t* holding m + n */
+mpz_t*
+bignum_add(mpz_t* m, mpz_t* n)
+{
+  if (!m || !n)
+    return NULL;
+
+  mpz_t* res = (mpz_t*)gc_malloc(sizeof(mpz_t));
+  if (!res)
+    return NULL;
+
+  mpz_init(*res);
+  mpz_add(*res, *m, *n);
+  return res;
+}
+
+/* subtract two bignums, return a newly-allocated mpz_t* holding m - n */
+mpz_t*
+bignum_sub(mpz_t* m, mpz_t* n)
+{
+  if (!m || !n)
+    return NULL;
+
+  mpz_t* res = (mpz_t*)gc_malloc(sizeof(mpz_t));
+  if (!res)
+    return NULL;
+
+  mpz_init(*res);
+  mpz_sub(*res, *m, *n);
+  return res;
+}
+
+/* multiply two bignums, return a newly-allocated mpz_t* holding m * n */
+mpz_t*
+bignum_mul(mpz_t* m, mpz_t* n)
+{
+  if (!m || !n)
+    return NULL;
+
+  mpz_t* res = (mpz_t*)gc_malloc(sizeof(mpz_t));
+  if (!res)
+    return NULL;
+
+  mpz_init(*res);
+  mpz_mul(*res, *m, *n);
+  return res;
+}
+
+/* negate a bignum, return a newly-allocated mpz_t* holding -m */
+mpz_t*
+bignum_neg(mpz_t* m)
+{
+  if (!m)
+    return NULL;
+
+  mpz_t* res = (mpz_t*)gc_malloc(sizeof(mpz_t));
+  if (!res)
+    return NULL;
+
+  mpz_init(*res);
+  mpz_neg(*res, *m);
+  return res;
+}
+
 /*
  * ////////////////////////////////////////////////////////////////////////////
  * Various I/O
@@ -175,6 +239,18 @@ double
 int32_to_double(int32_t n)
 {
   return (double)n;
+}
+
+mpz_t*
+int32_to_bignum(int32_t n)
+{
+  mpz_t* result = (mpz_t*)gc_malloc(sizeof(mpz_t));
+  if (!result)
+    return NULL;
+
+  mpz_init(*result);
+  mpz_set_si(*result, (long)n); /* mpz_set_si handles negative values too */
+  return result;
 }
 
 /*
@@ -446,4 +522,22 @@ string_remove_whitespace(const char* s)
 
   result[out_i] = '\0';
   return result;
+}
+
+/*
+ * ////////////////////////////////////////////////////////////////////////////
+ * Misc.
+ *
+ */
+
+int32_t
+int32_mod(int32_t m, int32_t n)
+{
+  return m % n;
+}
+
+int64_t
+int64_mod(int64_t m, int64_t n)
+{
+  return m % n;
 }

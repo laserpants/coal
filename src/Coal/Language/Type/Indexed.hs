@@ -22,7 +22,7 @@ import Coal.Language.Expression.Choice (Choice (..), Guard (..))
 import Coal.Language.Module
 import Coal.Language.Pattern (Pattern (..))
 import Coal.Language.Trait (Trait (..), With (..))
-import Coal.Language.Type (Type (..), TypeIndex (..))
+import Coal.Language.Type (IndexedType, Type (..), TypeIndex (..))
 import Coal.Language.Type.Intrinsic (Intrinsic (..))
 import Coal.Language.Type.Kind (Kind (..))
 import Coal.Language.Type.Row (Row (..))
@@ -129,7 +129,7 @@ freshIdIn t
  where
   typeIdSet = typeIdsIn t
 
-indexed :: (Traversable t) => t a -> State Int (t (Type TypeIndex Kind))
+indexed :: (Traversable t) => t a -> State Int (t IndexedType)
 indexed = traverse (fmap tVar . const supply)
  where
   tVar = TVariable . TypeIndex KType

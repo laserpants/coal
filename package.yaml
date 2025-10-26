@@ -37,6 +37,10 @@ dependencies:
 - raw-strings-qq
 - process
 - prettyprinter
+- filepath
+- temporary
+- directory
+- file-embed
 
 ghc-options:
 - -Wall
@@ -48,12 +52,13 @@ ghc-options:
 - -Wmissing-home-modules
 - -Wpartial-fields
 - -Wredundant-constraints
+- -optP-Wno-nonportable-include-path 
 
 library:
   source-dirs: src
 
 executables:
-  coal-exe:
+  coal:
     main:                Main.hs
     source-dirs:         app
     ghc-options:
@@ -62,6 +67,7 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - coal
+    - optparse-applicative
 
 tests:
   coal-test:

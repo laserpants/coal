@@ -57,10 +57,6 @@ data BinaryOperator
     OForwardApplication
   | -- | Reverse application (|.)
     OReverseApplication
-  | -- | Flipped forward application (.$)
-    OFlippedForwardApplication
-  | -- | Flipped reverse application ($.)
-    OFlippedReverseApplication
   | -- | Forward composition (>>)
     OForwardComposition
   | -- | Reverse composition (<<)
@@ -69,6 +65,8 @@ data BinaryOperator
     OStringConcatenation
   | -- | List concatenation (++)
     OListConcatenation
+  | -- | Semmigroup operation (<>)
+    OSemigroupOp
   deriving (Show, Eq, Ord, Read, Data, Typeable)
 
 unaryOperatorTypeScheme :: UnaryOperator -> IndexedScheme
@@ -122,7 +120,5 @@ binaryOperatorTypeScheme =
       forall1 (\a -> a ~> a ~> a)
     ODivision{} ->
       forall1 (\a -> a ~> a ~> a)
-    OFlippedForwardApplication{} ->
-      error "TODO"
-    OFlippedReverseApplication{} ->
-      error "TODO"
+    OSemigroupOp{} ->
+      forall1 (\a -> a ~> a ~> a)

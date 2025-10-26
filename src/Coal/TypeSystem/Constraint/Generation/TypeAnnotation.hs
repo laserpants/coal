@@ -1,6 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
 module Coal.TypeSystem.Constraint.Generation.TypeAnnotation (
@@ -25,7 +24,6 @@ import Extra (
   Name,
   concatMapM,
   forM_,
-  (<$$>),
  )
 
 import qualified Coal.Common.Environment as Environment
