@@ -82,7 +82,7 @@ Coal is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-
 
 ## Documentation
 
-The language documentation is available at: [laserpants.github.io/coal-docs](https://laserpants.github.io/coal-docs/)
+The language documentation is available at: [coal-lang.org](https://coal-lang.org/)
 
 ## Installation and setup
 
