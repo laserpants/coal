@@ -7,7 +7,7 @@
 module Coal.Common.Supply (Supply (..), supply, supplied, freshName) where
 
 import Control.Monad.State (MonadState)
-import Extras (Name, getAndModify)
+import Extras (Name, getAndModify, (<.>))
 import TextShow (showt)
 
 class Supply s where
@@ -27,4 +27,4 @@ supplied f = f . getSupply <$> supply
 
 {-# INLINE freshName #-}
 freshName :: Name -> Int -> Name
-freshName prefix index = "$" <> prefix <> "." <> showt index
+freshName prefix index = "$" <> prefix <.> showt index

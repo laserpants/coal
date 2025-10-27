@@ -14,7 +14,7 @@ import Coal.Compiler.PatternMatching.Envelope (
  )
 import Coal.Compiler.PatternMatching.Equation
 import Coal.Compiler.Stack
-import Extras (foldrM)
+import Extras (foldrM, (<.>))
 
 type MatchRule a m p e t = [Label t] -> [p e t] -> EnvelopeExpression e t -> CompilerT a m (EnvelopeExpression e t)
 
@@ -75,7 +75,7 @@ suppliedLabel =
   \case
     MVariable (Label t name) -> do
       prefix <- supplied (freshName "match")
-      pure (Label t (prefix <> "." <> name))
+      pure (Label t (prefix <.> name))
     MConstructor (Label t _) _ ->
       Label t <$> supplied (freshName "match")
     MLiteral t _ ->

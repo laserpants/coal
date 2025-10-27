@@ -23,8 +23,7 @@ module Extras (
   optionalOr,
   for,
   Over,
-)
-where
+) where
 
 import Coal.Common.Name
 import Control.Applicative (Alternative (..))

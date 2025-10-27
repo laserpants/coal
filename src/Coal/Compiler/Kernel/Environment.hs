@@ -19,7 +19,7 @@ import Control.Monad.Reader (asks, local)
 import qualified Data.Set as Set
 import Data.Text (isPrefixOf)
 import qualified Data.Text as Text
-import Extras (Name, Set)
+import Extras (Name, Set, (<.>))
 
 qualifyName :: (Monad m) => Name -> CompilerT a m Name
 qualifyName name = do
@@ -30,7 +30,7 @@ qualifyName name = do
       Just qname ->
         pure qname
       Nothing ->
-        pure (kernelEnvironmentModule <> "." <> name)
+        pure (kernelEnvironmentModule <.> name)
 
 isFinal :: Name -> Set Name -> Bool
 isFinal name localNames

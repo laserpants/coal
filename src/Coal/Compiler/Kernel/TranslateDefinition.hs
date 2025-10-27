@@ -18,7 +18,7 @@ import Control.Monad.Reader (asks)
 import Data.Data (Data)
 import Data.List.Extra (sortOn)
 import Data.List.NonEmpty (NonEmpty ((:|)), toList, (<|))
-import Extras (Name)
+import Extras (Name, (<.>))
 
 type KernelObject = Kernel.Object Kernel.Type (Kernel.Expr Kernel.Type)
 
@@ -31,19 +31,19 @@ translateDefinition =
       qs <- traverse translatePattern (toList ps)
       f <- withLocalNames (labelName <$> qs) (translateExpression e)
       moduleName <- asks (kernelEnvironmentModule . compilerKernelEnvironment)
-      pure [Kernel.OFunction (moduleName <> "." <> name) qs f]
+      pure [Kernel.OFunction (moduleName <.> name) qs f]
     DConstant _ name (ConstantDef _ _ With{} e) _ -> do
       c <- translateExpression e
       moduleName <- asks (kernelEnvironmentModule . compilerKernelEnvironment)
-      pure [Kernel.OConstant (moduleName <> "." <> name) c]
+      pure [Kernel.OConstant (moduleName <.> name) c]
     DFold _ name (FoldDef _ _ (Just e)) -> do
       c <- translateExpression e
       moduleName <- asks (kernelEnvironmentModule . compilerKernelEnvironment)
-      pure [Kernel.OConstant (moduleName <> "." <> name) c]
+      pure [Kernel.OConstant (moduleName <.> name) c]
     DUnfold _ name (UnfoldDef _ _ _ (Just e)) -> do
       c <- translateExpression e
       moduleName <- asks (kernelEnvironmentModule . compilerKernelEnvironment)
-      pure [Kernel.OConstant (moduleName <> "." <> name) c]
+      pure [Kernel.OConstant (moduleName <.> name) c]
     DTrait _ name (TraitDef _ _ ds) ->
       forM ds $
         \(n, t) ->
@@ -67,7 +67,7 @@ traitAccessor trait fn t = do
   moduleName <- asks (kernelEnvironmentModule . compilerKernelEnvironment)
   pure $
     Kernel.OFunction
-      (moduleName <> "." <> fn)
+      (moduleName <.> fn)
       [dict]
       ( Kernel.match
           t
@@ -90,4 +90,4 @@ traitAccessor trait fn t = do
 translateConstructor :: (Monad m) => (Int, DataConstructor Parameter () (Type Parameter ())) -> CompilerT a m KernelObject
 translateConstructor (index, DataConstructor name _ (Forall _ _ t)) = do
   moduleName <- asks (kernelEnvironmentModule . compilerKernelEnvironment)
-  pure (Kernel.OData (moduleName <> "." <> name) index (translateType t))
+  pure (Kernel.OData (moduleName <.> name) index (translateType t))

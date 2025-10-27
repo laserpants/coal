@@ -39,7 +39,7 @@ import Control.Monad.RWS (asks, gets, local, tell)
 import Data.Fix (Fix (..))
 import Data.Text (Text, isPrefixOf)
 import Data.Text.Encoding (encodeUtf8)
-import Extras (Name, forM, listenOnly)
+import Extras (Name, forM, listenOnly, (<.>))
 import TextShow (showt)
 
 import qualified Coal.Common.Environment as Environment
@@ -220,7 +220,7 @@ interpreter =
       instruction1 next ["switch", commaSep [annotated v, encodeLabel n], "[" <> switchBranches cs <> "]"]
     MakeLabel name next -> do
       d <- nextLabelIndex
-      next (name <> "." <> showt d)
+      next (name <.> showt d)
     MakeIndex next -> do
       d <- nextLabelIndex
       next (showt d)
