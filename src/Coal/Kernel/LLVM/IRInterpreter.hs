@@ -15,6 +15,7 @@ module Coal.Kernel.LLVM.IRInterpreter (
   closureSupport,
 ) where
 
+import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
 import Coal.Kernel.LLVM.IRConstruct (IRConstruct (..), IRLinkage (..))
 import Coal.Kernel.LLVM.IREncodable
@@ -32,20 +33,18 @@ import Coal.Kernel.LLVM.IRInterpreter.State
 import Coal.Kernel.LLVM.IRType (IRType (..), IRTyped (..))
 import Coal.Kernel.LLVM.IRType.Syntax
 import Coal.Kernel.LLVM.IRValue (IRValue (..))
+import qualified Coal.Kernel.Language as Syntax
 import Coal.Kernel.Language.Object
 import Control.Monad (unless, void)
 import Control.Monad.Free (iterM)
 import Control.Monad.RWS (asks, gets, local, tell)
+import qualified Data.ByteString as ByteString
 import Data.Fix (Fix (..))
 import Data.Text (Text, isPrefixOf)
+import qualified Data.Text as Text
 import Data.Text.Encoding (encodeUtf8)
 import Extras (Name, forM, listenOnly, (<.>))
 import TextShow (showt)
-
-import qualified Coal.Common.Environment as Environment
-import qualified Coal.Kernel.Language as Syntax
-import qualified Data.ByteString as ByteString
-import qualified Data.Text as Text
 
 closureSupport :: [IRConstruct [IRLine]]
 closureSupport =
@@ -72,11 +71,12 @@ interpretFunction name f args = do
 
 irEvalFun :: (IREval e) => [Label Syntax.Type] -> e -> IRInstr ()
 irEvalFun lls e = do
-  bound <- forM lls $ \(Label t name) -> do
-    let v = Local i8Ptr name
-    r <- irReveal v (irTypeOf t)
-    unless (r == v) (irComment ["^ Reveal arg. " <> name])
-    pure (name, r)
+  bound <- forM lls $
+    \(Label t name) -> do
+      let v = Local i8Ptr name
+      r <- irReveal v (irTypeOf t)
+      unless (r == v) (irComment ["^ Reveal arg. " <> name])
+      pure (name, r)
   r1 <- bind bound (irEval e)
   r2 <- irConceal r1
   unless (r1 == r2) (irComment ["^ Conceal return value"])
