@@ -221,7 +221,7 @@ If you want to work on a feature or bug fix, fork the repository and create a ne
 
 ### Documentation
 
-To suggest changes to the documentation, simply edit the `README.md` file and submit a PR, following the steps described under **[Contributing code](#contributing-code)**.
+The documentation is based on MkDocs and the Material for MkDocs (mkdocs-material) theme. The source code is hosted at: [github.com/laserpants/coal-docs](https://github.com/laserpants/coal-docs).
 
 ## License 
 
