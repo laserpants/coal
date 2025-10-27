@@ -26,7 +26,7 @@ module Coal.Compiler.Environment (
 import Coal.Ast.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
-import qualified Coal.Compiler.Builtin.Environment as Builtin
+import Coal.Compiler.Builtin.Environment
 import Coal.Compiler.Transform.Type.Parameterized
 import Coal.Language
 import Coal.Language.Module
@@ -273,7 +273,7 @@ buildInstanceEnvironment ctorEnv traitEnv ds = execState (traverse_ go ds) mempt
           Just (p1, TypeIndex{..}, sigs) -> do
             let (t1, _) = evalState f (freshId fs)
                 sub = typeIndexId `mapsTo` t1
-                -- map_ = Map.fromList (insertTraits traits . substituteInScheme sub <$$> fs)
+                -- map_ = Map.fromList (insertTraits builtinTraits . substituteInScheme sub <$$> fs)
                 map_ = Map.fromList (substituteInScheme sub <$$> fs)
                 val = Map.singleton t1 (t, map_)
             modify (Environment.insertWith Map.union name val)
@@ -334,10 +334,10 @@ insertEnv (Module _ _ defs) = const $ insertBuiltInConstructors (buildEnvironmen
 insertBuiltInConstructors :: CompilerEnvironment -> CompilerEnvironment
 insertBuiltInConstructors CompilerEnvironment{..} =
   CompilerEnvironment
-    { compilerDataConstructorEnvironment = Environment.insertMultiple Builtin.dataConstructors compilerDataConstructorEnvironment
-    , compilerTraitEnvironment = Environment.insertMultiple Builtin.traits compilerTraitEnvironment
-    , compilerInstanceEnvironment = Environment.insertMultiple Builtin.instances compilerInstanceEnvironment
-    , compilerTypeConstructorEnvironment = Environment.insertMultiple Builtin.typeConstructors compilerTypeConstructorEnvironment
-    , compilerCodataAccessorEnvironment = Environment.insertMultiple Builtin.codataAccessors compilerCodataAccessorEnvironment
+    { compilerDataConstructorEnvironment = Environment.insertMultiple builtinDataConstructors compilerDataConstructorEnvironment
+    , compilerTraitEnvironment = Environment.insertMultiple builtinTraits compilerTraitEnvironment
+    , compilerInstanceEnvironment = Environment.insertMultiple builtinInstances compilerInstanceEnvironment
+    , compilerTypeConstructorEnvironment = Environment.insertMultiple builtinTypeConstructors compilerTypeConstructorEnvironment
+    , compilerCodataAccessorEnvironment = Environment.insertMultiple builtinCodataAccessors compilerCodataAccessorEnvironment
     , ..
     }

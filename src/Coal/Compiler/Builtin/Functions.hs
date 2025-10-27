@@ -1,13 +1,13 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Coal.Compiler.Builtin.Functions (functions) where
+module Coal.Compiler.Builtin.Functions (builtinFunctions) where
 
 import Coal.Language
 import Data.List.NonEmpty (NonEmpty (..))
 import Extras (Name)
 
-functions :: [(Name, IndexedScheme)]
-functions =
+builtinFunctions :: [(Name, IndexedScheme)]
+builtinFunctions =
   [
     ( "operator$__not"
     , forall0 (TIntrinsic IBool ~> TIntrinsic IBool)

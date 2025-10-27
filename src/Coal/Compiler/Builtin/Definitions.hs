@@ -5,7 +5,7 @@ module Coal.Compiler.Builtin.Definitions (
   insertBuiltinDefinitions,
 ) where
 
-import Coal.Compiler.Builtin.Functions (functions)
+import Coal.Compiler.Builtin.Functions (builtinFunctions)
 import Coal.Language
 import Coal.Language.Module
 import Data.List.NonEmpty (NonEmpty (..))
@@ -14,14 +14,14 @@ import Extras (Name, for)
 
 {-# INLINE insertBuiltinDefinitions #-}
 insertBuiltinDefinitions :: (Monoid a) => [Definition a k ()] -> [Definition a k ()]
-insertBuiltinDefinitions = (definitions <>)
+insertBuiltinDefinitions = (builtinDefinitions <>)
 
 {-# INLINE functionNames #-}
 functionNames :: [Name]
-functionNames = for functions fst
+functionNames = for builtinFunctions fst
 
-traitInstances :: [Name]
-traitInstances =
+builtinTraitInstances :: [Name]
+builtinTraitInstances =
   [ "from_int32__$impl_Numeric(Intrinsic(Int32))"
   , "(+)__$impl_Numeric(Intrinsic(Int32))"
   , "(-)__$impl_Numeric(Intrinsic(Int32))"
@@ -86,12 +86,12 @@ traitInstances =
   , "(<>)__$impl_Semigroup(Application(Constructor(List))(Variable(Parameter(a))))"
   ]
 
-definitions :: (Monoid a) => [Definition a k ()]
-definitions =
+builtinDefinitions :: (Monoid a) => [Definition a k ()]
+builtinDefinitions =
   [ DImport
       mempty
       (Path ["Builtin$"])
-      (functionNames <> traitInstances)
+      (functionNames <> builtinTraitInstances)
   , DTrait
       mempty
       "Numeric"

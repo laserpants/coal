@@ -1,11 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Coal.Compiler.Builtin.Environment (
-  typeConstructors,
-  dataConstructors,
-  instances,
-  traits,
-  codataAccessors,
+  builtinTypeConstructors,
+  builtinDataConstructors,
+  builtinInstances,
+  builtinTraits,
+  builtinCodataAccessors,
 ) where
 
 import Coal.Common.Environment (Environment (..))
@@ -18,16 +18,16 @@ import Data.Set (Set)
 import qualified Data.Set as Set
 import Extras (Name)
 
-typeConstructors :: [(Name, Kind)]
-typeConstructors =
+builtinTypeConstructors :: [(Name, Kind)]
+builtinTypeConstructors =
   [
     ( "List"
     , KArrow KType KType
     )
   ]
 
-dataConstructors :: [(Name, (DataConstructor TypeIndex Kind IndexedType, Set Name))]
-dataConstructors =
+builtinDataConstructors :: [(Name, (DataConstructor TypeIndex Kind IndexedType, Set Name))]
+builtinDataConstructors =
   [
     ( "Succ"
     ,
@@ -50,8 +50,8 @@ dataConstructors =
     )
   ]
 
-instances :: [(Name, Map IndexedType (Type Parameter (), Dictionary IndexedScheme))]
-instances =
+builtinInstances :: [(Name, Map IndexedType (Type Parameter (), Dictionary IndexedScheme))]
+builtinInstances =
   [
     ( "Numeric"
     , Map.fromList
@@ -522,10 +522,10 @@ instances =
     )
   ]
 
-traits :: [(Name, (Parameter Kind, TypeIndex Kind, Environment IndexedScheme))]
-traits =
+builtinTraits :: [(Name, (Parameter Kind, TypeIndex Kind, Environment IndexedScheme))]
+builtinTraits =
   []
 
-codataAccessors :: [(Name, CodataAccessor TypeIndex Kind IndexedType)]
-codataAccessors =
+builtinCodataAccessors :: [(Name, CodataAccessor TypeIndex Kind IndexedType)]
+builtinCodataAccessors =
   []

@@ -106,7 +106,7 @@ instance (Monoid a) => CompileNatsContext (CompiledClause a IndexedType) where
                       )
                       ( EVariable mempty (Label (TIntrinsic IInt32) name)
                           <| ELiteral mempty (LInt32 0)
-                          :| []
+                            :| []
                       )
                   )
                   (EConstructor mempty (Label (TConstructor KType "$Nat") "$Zero"))
@@ -124,7 +124,7 @@ instance (Monoid a) => CompileNatsContext (CompiledClause a IndexedType) where
                           )
                           ( EVariable mempty (Label (TIntrinsic IInt32) name)
                               <| ELiteral mempty (LInt32 1)
-                              :| []
+                                :| []
                           )
                           :| []
                       )
