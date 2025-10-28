@@ -11,7 +11,7 @@ This repository is the home of the **Coal programming language** and compiler.
 
 ## About
 
-Coal is a declarative, statically typed, purely functional programming language with simple and intuitive syntax. It provides algebraic data types and pattern matching, extensible records, structural recursion, codata, corecursion, and traits (type classes), among other features. Coal’s type system, like Haskell’s and ML’s, supports type inference and parametric polymorphism, drawing on the [System-F](https://en.wikipedia.org/wiki/System_F) lambda calculus. The Coal compiler is implemented in Haskell and targets [LLVM](https://llvm.org/) for code generation.
+Coal is a declarative, statically typed, purely functional programming language with simple and intuitive syntax. It provides algebraic data types and pattern matching, extensible records, structural recursion, codata, corecursion, and traits (type classes), among other features. Coal’s type system, like Haskell’s and ML’s, supports type inference and parametric polymorphism, drawing on the [System-F](https://en.wikipedia.org/wiki/System_F) lambda calculus. The Coal compiler is implemented in Haskell and targets [LLVM](https://llvm.org/) for code generation. The language is based on ideas where streams and other infinite data types are described as [coalgebras](https://coal-lang.org/data-and-codata/) — hence the name *Coal*.
 
 ### Rethinking recursion
 
