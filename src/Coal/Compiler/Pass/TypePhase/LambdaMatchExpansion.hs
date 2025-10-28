@@ -47,6 +47,7 @@ instance (Monoid a, Data a) => TransformContext (Expression a ()) where
 
 expandLambdaMatch :: (Monoid a, Monad m) => NonEmpty (Clause a ()) -> CompilerT o m (Expression a ())
 expandLambdaMatch cs =
+  -- TODO: use syntax helpers
   pure $
     ELambda
       mempty

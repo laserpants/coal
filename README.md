@@ -192,11 +192,6 @@ coal Main.coal -o dist
 <!--
  - from_int32 -> from_integer
 
--- fun foo : a with Numeric(a)
---   | (3)    = 5
---   | (5, 3) = 2
---   | (1, 2) = 123
-
 -- FIX: pattern mismatch (?)
 
 -->

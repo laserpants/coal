@@ -23,6 +23,7 @@ import Text.Megaparsec.Char (upperChar)
 parseDefinition :: Parser (Definition Metadata o ())
 parseDefinition =
   parseImport
+    <|> try parseFunctionGroup
     <|> parseFunctionDefinition
     <|> parseLetDefinition
     <|> parseTypeDefinition
@@ -111,6 +112,18 @@ parseImport = do
   end <- getSourcePos
   pure (DImport (Metadata start end) (Path path) names)
 
+parseFunctionGroup :: Parser (Definition Metadata o ())
+parseFunctionGroup = do
+  start <- getSourcePos
+  fn <- lexeme_ "fun" *> name
+  ann <- optional parseAnnotation
+  fns <- some (void pipe *> parseFunctionDef ann)
+  end <- getSourcePos
+  case fns of
+    [] -> fail "Empty list"
+    f : fs -> pure (DFunction (Metadata start end) fn (f :| fs) [])
+
+-- TODO: DRY
 parseFunctionDefinition :: Parser (Definition Metadata o ())
 parseFunctionDefinition = do
   start <- getSourcePos
@@ -121,6 +134,14 @@ parseFunctionDefinition = do
   expr <- symbol_ "=" *> parseExpression
   ws <- option [] parseWhereClauses
   pure (DFunction (Metadata start end) fn (FunctionDef (Metadata start end) (With [] <$> ann) (With [] ()) args expr :| []) ws)
+
+parseFunctionDef :: Maybe ParameterizedType -> Parser (FunctionDef Metadata ())
+parseFunctionDef ann = do
+  start <- getSourcePos
+  args <- parens (nonEmptyOr parseUnitPattern (commaSep parsePattern))
+  expr <- symbol_ "=" *> parseExpression
+  end <- getSourcePos
+  pure (FunctionDef (Metadata start end) (With [] <$> ann) (With [] ()) args expr)
 
 parseWhereClauses :: Parser [Definition Metadata o ()]
 parseWhereClauses = lexeme_ "where" *> braces (some parseFunctionDefinition)

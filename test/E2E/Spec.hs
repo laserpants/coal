@@ -380,6 +380,9 @@ e2eSpec = do
   describe "109" $ do
     expectOutput "Hello, world!" ["./test/Coal/examples/109/Main.coal"]
 
+  describe "110" $ do
+    expectOutput "d" ["./test/Coal/examples/110/Main.coal"]
+
 expectOutput :: String -> [FilePath] -> Spec
 expectOutput expt files = do
   res <- runIO $ runSpec files

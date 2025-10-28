@@ -7,11 +7,13 @@ module Coal.Compiler.Transform.Expression (
   lambda1E,
   lambdaAnyE,
   selectE,
+  tupleE,
   literalBoolE,
   plainClauseE,
   varP,
   constructorP,
   anyP,
+  tupleP,
   funDef,
 ) where
 
@@ -53,6 +55,10 @@ lambdaAnyE = ELambda mempty (PAny mempty () :| [])
 selectE :: (Monoid a) => Name -> Expression a () -> Expression a ()
 selectE = ESelect mempty . label
 
+{-# INLINE tupleE #-}
+tupleE :: (Monoid a) => NonEmpty (Expression a ()) -> Expression a ()
+tupleE = ETuple mempty ()
+
 {-# INLINE literalBoolE #-}
 literalBoolE :: (Monoid a) => Bool -> Expression a ()
 literalBoolE = ELiteral mempty . LBool
@@ -76,6 +82,10 @@ constructorP name = PConstructor mempty (Label () name)
 {-# INLINE anyP #-}
 anyP :: (Monoid a) => Pattern a ()
 anyP = PAny mempty ()
+
+{-# INLINE tupleP #-}
+tupleP :: (Monoid a) => NonEmpty (Pattern a ()) -> Pattern a ()
+tupleP = PTuple mempty ()
 
 {-# INLINE funDef #-}
 funDef :: (Monoid a) => NonEmpty (Pattern a ()) -> Expression a () -> FunctionDef a ()
