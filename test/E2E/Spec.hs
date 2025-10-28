@@ -12,8 +12,9 @@ import Test.Hspec
 e2eSpec :: Spec
 e2eSpec = do
   describe "001" $ do
-    res <- runIO $ runSpec ["./test/Coal/examples/001/Main.coal"]
-    it "is TypeError" (res == Left TypeError)
+    it "is TypeError" $ do
+      res <- runSpec ["./test/Coal/examples/001/Main.coal"]
+      res `shouldBe` Left TypeError
 
   describe "002" $
     expectOutput "24" ["./test/Coal/examples/002/Main.coal"]
@@ -58,20 +59,24 @@ e2eSpec = do
     expectOutput "bork bork bork" ["./test/Coal/examples/012/Main.coal"]
 
   describe "013" $ do
-    res <- runIO $ runSpec ["./test/Coal/examples/013/Main.coal"]
-    it "is TypeError" (res == Left TypeError)
+    it "is TypeError" $ do
+      res <- runSpec ["./test/Coal/examples/013/Main.coal"]
+      res `shouldBe` Left TypeError
 
   describe "014" $ do
-    res <- runIO $ runSpec ["./test/Coal/examples/014/Main.coal"]
-    it "is TypeError" (res == Left TypeError)
+    it "is TypeError" $ do
+      res <- runSpec ["./test/Coal/examples/014/Main.coal"]
+      res `shouldBe` Left TypeError
 
   describe "015" $ do
-    res <- runIO $ runSpec ["./test/Coal/examples/015/Main.coal"]
-    it "is TypeError" (res == Left TypeError)
+    it "is TypeError" $ do
+      res <- runSpec ["./test/Coal/examples/015/Main.coal"]
+      res `shouldBe` Left TypeError
 
   describe "016" $ do
-    res <- runIO $ runSpec ["./test/Coal/examples/016/Main.coal"]
-    it "is TypeError" (res == Left TypeError)
+    it "is TypeError" $ do
+      res <- runSpec ["./test/Coal/examples/016/Main.coal"]
+      res `shouldBe` Left TypeError
 
   describe "017" $
     expectOutput "false" ["./test/Coal/examples/017/Main.coal"]
@@ -98,8 +103,9 @@ e2eSpec = do
     expectOutput "x" ["./test/Coal/examples/024/Main.coal"]
 
   describe "025" $ do
-    res <- runIO $ runSpec ["./test/Coal/examples/025/Main.coal"]
-    it "is NoSuchIdentifier" (res == Left NoSuchIdentifier)
+    it "is NoSuchIdentifier" $ do
+      res <- runSpec ["./test/Coal/examples/025/Main.coal"]
+      res `shouldBe` Left NoSuchIdentifier
 
   describe "026" $
     expectOutput "5" ["./test/Coal/examples/026/Main.coal"]
@@ -171,8 +177,9 @@ e2eSpec = do
     expectOutput "123" ["./test/Coal/examples/048/Main.coal"]
 
   describe "049" $ do
-    res <- runIO $ runSpec ["./test/Coal/examples/049/Main.coal"]
-    it "is NoSuchIdentifier" (res == Left NoSuchIdentifier)
+    it "is NoSuchIdentifier" $ do
+      res <- runSpec ["./test/Coal/examples/049/Main.coal"]
+      res `shouldBe` Left NoSuchIdentifier
 
   describe "050" $
     expectOutput "720" ["./test/Coal/examples/050/Main.coal"]
@@ -208,12 +215,14 @@ e2eSpec = do
     expectOutput "true" ["./test/Coal/examples/060/Main.coal"]
 
   describe "061" $ do
-    res <- runIO $ runSpec ["./test/Coal/examples/061/Main.coal"]
-    it "is TypeError" (res == Left TypeError)
+    it "is TypeError" $ do
+      res <- runSpec ["./test/Coal/examples/061/Main.coal"]
+      res `shouldBe` Left TypeError
 
   describe "062" $ do
-    res <- runIO $ runSpec ["./test/Coal/examples/062/Main.coal"]
-    it "is TypeError" (res == Left TypeError)
+    it "is TypeError" $ do
+      res <- runSpec ["./test/Coal/examples/062/Main.coal"]
+      res `shouldBe` Left TypeError
 
   describe "063" $
     expectOutput "24" ["./test/Coal/examples/063/Main.coal"]
@@ -256,38 +265,45 @@ e2eSpec = do
     expectOutput "2" ["./test/Coal/examples/072/Main.coal"]
 
   describe "073" $ do
-    res <- runIO $ runSpec ["./test/Coal/examples/073/Main.coal"]
-    it "is TypeError" (res == Left TypeError)
+    it "is TypeError" $ do
+      res <- runSpec ["./test/Coal/examples/073/Main.coal"]
+      res `shouldBe` Left TypeError
 
   describe "074" $ do
-    res <- runIO $ runSpec ["./test/Coal/examples/074/Main.coal"]
-    it "is TypeError" (res == Left TypeError)
+    it "is TypeError" $ do
+      res <- runSpec ["./test/Coal/examples/074/Main.coal"]
+      res `shouldBe` Left TypeError
 
   describe "075" $ do
-    res <- runIO $ runSpec ["./test/Coal/examples/075/Main.coal"]
-    it "is PatternAnomaly" (res == Left PatternAnomaly)
+    it "is PatternAnomaly" $ do
+      res <- runSpec ["./test/Coal/examples/075/Main.coal"]
+      res `shouldBe` Left PatternAnomaly
 
   describe "076" $
     expectOutput "1" ["./test/Coal/examples/076/Main.coal"]
 
   describe "077" $ do
-    res <- runIO $ runSpec ["./test/Coal/examples/077/Main.coal"]
-    it "is PatternAnomaly" (res == Left PatternAnomaly)
+    it "is PatternAnomaly" $ do
+      res <- runSpec ["./test/Coal/examples/077/Main.coal"]
+      res `shouldBe` Left PatternAnomaly
 
   describe "078" $ do
-    res <- runIO $ runSpec ["./test/Coal/examples/078/Main.coal"]
-    it "is PatternAnomaly" (res == Left PatternAnomaly)
+    it "is PatternAnomaly" $ do
+      res <- runSpec ["./test/Coal/examples/078/Main.coal"]
+      res `shouldBe` Left PatternAnomaly
 
   describe "079" $
     expectOutput "5" ["./test/Coal/examples/079/Main.coal"]
 
   describe "080" $ do
-    res <- runIO $ runSpec ["./test/Coal/examples/080/Main.coal"]
-    it "is TypeError" (res == Left TypeError)
+    it "is TypeError" $ do
+      res <- runSpec ["./test/Coal/examples/080/Main.coal"]
+      res `shouldBe` Left TypeError
 
   describe "081" $ do
-    res <- runIO $ runSpec ["./test/Coal/examples/081/Main.coal"]
-    it "is PatternAnomaly" (res == Left PatternAnomaly)
+    it "is PatternAnomaly" $ do
+      res <- runSpec ["./test/Coal/examples/081/Main.coal"]
+      res `shouldBe` Left PatternAnomaly
 
   describe "082" $ do
     expectOutput "3" ["./test/Coal/examples/082/Main.coal"]
@@ -317,8 +333,9 @@ e2eSpec = do
     expectOutput "3.000000000000000" ["./test/Coal/examples/090/Main.coal"]
 
   describe "091" $ do
-    res <- runIO $ runSpec ["./test/Coal/examples/091/Main.coal"]
-    it "is PatternAnomaly" (res == Left PatternAnomaly)
+    it "is PatternAnomaly" $ do
+      res <- runSpec ["./test/Coal/examples/091/Main.coal"]
+      res `shouldBe` Left PatternAnomaly
 
   describe "092" $ do
     expectOutput "123" ["./test/Coal/examples/092/Main.coal"]
@@ -327,8 +344,9 @@ e2eSpec = do
     expectOutput "321" ["./test/Coal/examples/093/Main.coal"]
 
   describe "094" $ do
-    res <- runIO $ runSpec ["./test/Coal/examples/094/Main.coal"]
-    it "is PatternAnomaly" (res == Left PatternAnomaly)
+    it "is PatternAnomaly" $ do
+      res <- runSpec ["./test/Coal/examples/094/Main.coal"]
+      res `shouldBe` Left PatternAnomaly
 
   describe "095" $ do
     expectOutput "3" ["./test/Coal/examples/095/Main.coal"]
@@ -361,20 +379,24 @@ e2eSpec = do
     expectOutput "6" ["./test/Coal/examples/104/Main.coal"]
 
   describe "105" $ do
-    res <- runIO $ runSpec ["./test/Coal/examples/105/Main.coal"]
-    it "is TraitError" (res == Left TraitError)
+    it "is TraitError" $ do
+      res <- runSpec ["./test/Coal/examples/105/Main.coal"]
+      res `shouldBe` Left TraitError
 
   describe "106" $ do
-    res <- runIO $ runSpec ["./test/Coal/examples/106/Main.coal"]
-    it "is PreflightFailure" (res == Left PreflightFailure)
+    it "is PreflightFailure" $ do
+      res <- runSpec ["./test/Coal/examples/106/Main.coal"]
+      res `shouldBe` Left PreflightFailure
 
   describe "107" $ do
-    res <- runIO $ runSpec ["./test/Coal/examples/107/Main.coal"]
-    it "is PreflightFailure" (res == Left PreflightFailure)
+    it "is PreflightFailure" $ do
+      res <- runSpec ["./test/Coal/examples/107/Main.coal"]
+      res `shouldBe` Left PreflightFailure
 
   describe "108" $ do
-    res <- runIO $ runSpec ["./test/Coal/examples/108/Main.coal"]
-    it "is MissingMainEntryPoint" (res == Left MissingMainEntryPoint)
+    it "is MissingMainEntryPoint" $ do
+      res <- runSpec ["./test/Coal/examples/108/Main.coal"]
+      res `shouldBe` Left MissingMainEntryPoint
 
   describe "109" $ do
     expectOutput "Hello, world!" ["./test/Coal/examples/109/Main.coal"]
@@ -386,12 +408,10 @@ e2eSpec = do
     expectOutput "b" ["./test/Coal/examples/111/Main.coal"]
 
 expectOutput :: String -> [FilePath] -> Spec
-expectOutput expt files = do
-  res <- runIO $ runSpec files
-  expectRight res expt
-
-expectRight :: (Eq a) => Either a String -> String -> Spec
-expectRight res expt = it ("\"" <> expt <> "\"") (res == Right (expt <> "\n"))
+expectOutput expt files =
+  it ("\"" <> expt <> "\"") $ do
+    res <- runSpec files
+    res `shouldBe` Right (expt <> "\n")
 
 runSpec :: [FilePath] -> IO (Either CompilerFailureMode String)
 runSpec files = do
