@@ -197,6 +197,8 @@ coal Main.coal -o dist
 --   | (5, 3) = 2
 --   | (1, 2) = 123
 
+-- FIX: pattern mismatch (?)
+
 -->
 
 ## How to contribute
