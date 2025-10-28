@@ -1,5 +1,4 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards #-}
 
 module E2E.Spec (e2eSpec, runSpec) where
 
