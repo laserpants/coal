@@ -115,7 +115,7 @@ compileConstantC (ConstantDef loc _ (With _ t) e) = do
 compileDefinitionC :: (Monad m, Data a, Show a) => Definition a k IndexedType -> CompilerT a m ()
 compileDefinitionC =
   \case
-    DFunction _ _ f@(FunctionDef loc (Just (With _ t)) _ _ _) _ -> do
+    DFunction _ _ (f@(FunctionDef loc (Just (With _ t)) _ _ _) :| _) _ -> do
       t1 <- compileFunctionC f
       r <- runConstraintsGenC (instantiateAnnotation loc t)
       case fst3 r of
@@ -131,7 +131,7 @@ compileDefinitionC =
           compilerReportConstraintsGenErrors [EIllFormedTypeAnnotation err]
         Right t2 ->
           insertConstraintsC [Equality (RuleAnnotation loc t1 t2) [t1, t2]]
-    DFunction _ _ f _ ->
+    DFunction _ _ (f :| _) _ ->
       void (compileFunctionC f)
     DConstant _ _ c _ ->
       void (compileConstantC c)
@@ -245,7 +245,7 @@ typeDefinitionC =
                   ti <- instantiateVarsC t1
                   insertConstraintsC [Explicit (InferenceRulePlaceholder "typeDefinitionC") (typeOf d) (instantiateTemplateC tx ti s)]
                   compileDefinitionC d
-    d@(DFunction loc name (FunctionDef _ _ (With _ t) ps _) _) -> do
+    d@(DFunction loc name (FunctionDef _ _ (With _ t) ps _ :| _) _) -> do
       checkIfNameExists loc name
       checkMain loc t ps name
       compileDefinitionC d

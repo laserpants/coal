@@ -50,7 +50,7 @@ replaceNames :: (Data a, Data t, Ord t) => [(Name, Name)] -> Definition a k t ->
 replaceNames names =
   \case
     DFunction loc n f _ ->
-      DFunction loc n (replaceFunctionNames names f) []
+      DFunction loc n (fmap (replaceFunctionNames names) f) []
     DConstant loc n c _ ->
       DConstant loc n (replaceConstantNames names c) []
     d ->

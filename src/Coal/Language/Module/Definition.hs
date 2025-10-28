@@ -22,6 +22,7 @@ import Coal.Language.Module.Definition.Trait (TraitDef (..))
 import Coal.Language.Module.Definition.Type (TypeDef (..))
 import Coal.Language.Module.Definition.Unfold (UnfoldDef (..))
 import Data.Data (Data, Typeable)
+import Data.List.NonEmpty (NonEmpty)
 import Extras (Name)
 
 newtype Path = Path {pathComponents :: [Name]}
@@ -33,7 +34,7 @@ data Definition a k t
   | -- | Codata type definition
     DCotype a Name CotypeDef
   | -- | Function definition
-    DFunction a Name (FunctionDef a t) [Definition a k t]
+    DFunction a Name (NonEmpty (FunctionDef a t)) [Definition a k t]
   | -- | Other (constant) top-level definitions
     DConstant a Name (ConstantDef a t) [Definition a k t]
   | -- | Import statement

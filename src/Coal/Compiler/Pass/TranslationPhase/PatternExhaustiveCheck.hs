@@ -47,7 +47,7 @@ instance PatternExhaustiveCheckContext (Definition Metadata k t) where
   patternExhaustiveCheck name =
     \case
       DFunction loc n f ws ->
-        DFunction loc n <$> patternExhaustiveCheck name f <*> traverse (patternExhaustiveCheck name) ws
+        DFunction loc n <$> traverse (patternExhaustiveCheck name) f <*> traverse (patternExhaustiveCheck name) ws
       DConstant loc n c ws ->
         DConstant loc n <$> patternExhaustiveCheck name c <*> traverse (patternExhaustiveCheck name) ws
       DFold loc n d ->

@@ -27,7 +27,7 @@ translateDefinition =
   \case
     DType _ _ (TypeDef _ ctors) ->
       traverse translateConstructor (zip [0 ..] (sortOn constructorName ctors))
-    DFunction _ name (FunctionDef _ _ _ ps e) _ -> do
+    DFunction _ name (FunctionDef _ _ _ ps e :| _) _ -> do
       qs <- traverse translatePattern (toList ps)
       f <- withLocalNames (labelName <$> qs) (translateExpression e)
       moduleName <- asks (kernelEnvironmentModule . compilerKernelEnvironment)

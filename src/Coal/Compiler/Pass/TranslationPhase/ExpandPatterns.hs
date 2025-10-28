@@ -107,7 +107,7 @@ instance (Data s, Monoid s) => TransformContext s (Definition s Kind IndexedType
   desugarPatterns =
     \case
       DFunction loc name f fs ->
-        DFunction loc name <$> desugarPatterns f <*> traverse desugarPatterns fs
+        DFunction loc name <$> traverse desugarPatterns f <*> traverse desugarPatterns fs
       DConstant loc name g fs ->
         DConstant loc name <$> desugarPatterns g <*> traverse desugarPatterns fs
       DFold loc n (FoldDef with cs e) ->

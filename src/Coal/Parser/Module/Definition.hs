@@ -120,7 +120,7 @@ parseFunctionDefinition = do
   end <- getSourcePos
   expr <- symbol_ "=" *> parseExpression
   ws <- option [] parseWhereClauses
-  pure (DFunction (Metadata start end) fn (FunctionDef (Metadata start end) (With [] <$> ann) (With [] ()) args expr) ws)
+  pure (DFunction (Metadata start end) fn (FunctionDef (Metadata start end) (With [] <$> ann) (With [] ()) args expr :| []) ws)
 
 parseWhereClauses :: Parser [Definition Metadata o ()]
 parseWhereClauses = lexeme_ "where" *> braces (some parseFunctionDefinition)
