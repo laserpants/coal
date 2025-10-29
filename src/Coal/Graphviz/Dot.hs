@@ -265,6 +265,8 @@ instance (Pretty t, Show t) => Dot t (Pattern a t) where
       PConstructor _ (Label t name) ps -> do
         fromNode (emitEllipse ("PConstructor\\n" <> name) (Just t)) $
           emitEdgesTo ps
+      PInteger _ _ int ->
+        emitEllipse ("PInteger\\n" <> escapeQuotes (Text.pack (show int))) Nothing
       PLiteral _ prim ->
         emitEllipse ("PLiteral\\n" <> escapeQuotes (Text.pack (show prim))) Nothing
       PRecord _ t fields mtail -> do

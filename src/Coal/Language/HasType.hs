@@ -56,6 +56,8 @@ instance (Data a, Data k, Data (o k), Typeable o) => HasType o k (Pattern a (Typ
     \case
       PLiteral _ t ->
         typeOf t
+      PInteger _ t _ ->
+        t
       p ->
         head (universeBi p)
 

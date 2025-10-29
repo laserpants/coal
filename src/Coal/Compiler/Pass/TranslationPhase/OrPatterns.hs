@@ -98,6 +98,8 @@ instance OrPattern (Pattern a t) where
         pure (NonEmpty.singleton p)
       p@PVariable{} ->
         pure (NonEmpty.singleton p)
+      p@PInteger{} ->
+        pure (NonEmpty.singleton p)
       p@PLiteral{} ->
         pure (NonEmpty.singleton p)
       p@PAtVariable{} ->

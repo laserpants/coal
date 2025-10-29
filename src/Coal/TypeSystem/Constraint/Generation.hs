@@ -156,6 +156,8 @@ emitPatternConstraints assertF ms =
       emitPAsConstraints t p
       assertF t (filter (assumptionNameIs name) ms)
       pure (name : names)
+    PInteger{} ->
+      pure []
     PLiteral{} ->
       pure []
     PTuple _ t ps -> do

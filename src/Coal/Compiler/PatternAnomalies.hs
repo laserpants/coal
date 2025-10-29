@@ -157,6 +157,8 @@ translatePattern =
       Con name (translatePattern <$> ps)
     PLiteral _ p ->
       Lit p
+    PInteger _ _ p ->
+      Lit (LBignum p)
     PListCons _ _ p q ->
       Con "::" [translatePattern p, translatePattern q]
     PListLiteral _ _ ps ->

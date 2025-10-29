@@ -18,6 +18,7 @@ import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
 import Text.Megaparsec (option, optional, some, try, (<|>))
 import Text.Megaparsec.Char (char)
+import qualified Text.Megaparsec.Char.Lexer as Lexer
 
 parseAtom :: Parser (Pattern Metadata ())
 parseAtom =
@@ -80,7 +81,14 @@ parseVariablePattern =
 parseLiteralPattern :: Parser (Pattern Metadata ())
 parseLiteralPattern =
   parseListLiteralPattern
+    <|> parseIntegerLiteral
     <|> parseBasicLiteralPattern
+
+parseIntegerLiteral :: Parser (Pattern Metadata ())
+parseIntegerLiteral =
+  withMetadata $ do
+    n <- Lexer.signed spaces (lexeme Lexer.decimal)
+    pure (\loc -> PInteger loc () n)
 
 --    <|> parseLiteralTrue
 --    <|> parseLiteralFalse

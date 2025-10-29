@@ -24,28 +24,28 @@ passExpandAsPatterns :: (Monad m) => Pass Metadata m (Module Metadata Kind Index
 passExpandAsPatterns =
   Pass
     { passName = "ExpandAsPatterns"
-    , runPass = pure . desugarAsPatterns
+    , runPass = pure . expandAsPatterns
     }
 
 class TransformContext e where
-  desugarAsPatterns :: e -> e
+  expandAsPatterns :: e -> e
 
 instance (TransformContext e) => TransformContext [e] where
-  desugarAsPatterns = fmap desugarAsPatterns
+  expandAsPatterns = fmap expandAsPatterns
 
 instance (TransformContext e) => TransformContext (NonEmpty e) where
-  desugarAsPatterns = fmap desugarAsPatterns
+  expandAsPatterns = fmap expandAsPatterns
 
 instance (Data a, Data t, Monoid a) => TransformContext (Expression a t) where
-  desugarAsPatterns =
+  expandAsPatterns =
     \case
       EMatch a t e cs ->
-        EMatch a t e (fmap (desugarClause t) cs)
+        EMatch a t e (fmap (expandClause t) cs)
       e ->
-        descend desugarAsPatterns e
+        descend expandAsPatterns e
 
-desugarClause :: (Monoid a, Data a, Data t) => t -> Clause a t -> Clause a t
-desugarClause t cl@(EClause a p cs) =
+expandClause :: (Monoid a, Data a, Data t) => t -> Clause a t -> Clause a t
+expandClause t cl@(EClause a p cs) =
   case ps of
     [] -> cl
     _ -> EClause a q (foldr go cs ps)
@@ -74,25 +74,25 @@ collectAsPatterns =
       pure p
 
 instance (Data a, Data t, Monoid a) => TransformContext (ConstantDef a t) where
-  desugarAsPatterns =
+  expandAsPatterns =
     \case
       ConstantDef a u w e ->
-        ConstantDef a u w (desugarAsPatterns e)
+        ConstantDef a u w (expandAsPatterns e)
 
 instance (Data a, Data t, Monoid a) => TransformContext (Definition a k t) where
-  desugarAsPatterns =
+  expandAsPatterns =
     \case
       DConstant loc name g fs ->
-        DConstant loc name (desugarAsPatterns g) (desugarAsPatterns <$> fs)
+        DConstant loc name (expandAsPatterns g) (expandAsPatterns <$> fs)
       DFold loc n (FoldDef with cs e) ->
-        DFold loc n (FoldDef with cs (desugarAsPatterns <$> e))
+        DFold loc n (FoldDef with cs (expandAsPatterns <$> e))
       DUnfold loc n (UnfoldDef with ps d me) ->
-        DUnfold loc n (UnfoldDef with ps d (desugarAsPatterns <$> me))
+        DUnfold loc n (UnfoldDef with ps d (expandAsPatterns <$> me))
       d ->
         d
 
 instance (Data a, Data t, Monoid a) => TransformContext (Module a k t) where
-  desugarAsPatterns =
+  expandAsPatterns =
     \case
       Module p ns o ->
-        Module p ns (desugarAsPatterns o)
+        Module p ns (expandAsPatterns o)

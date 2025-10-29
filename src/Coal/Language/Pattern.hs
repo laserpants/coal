@@ -26,6 +26,8 @@ data Pattern a t
     PVariable a (Label t)
   | -- | Data constructor pattern
     PConstructor a (Label t) [Pattern a t]
+  | -- | Integer literal pattern
+    PInteger a t Integer
   | -- | Literal pattern
     PLiteral a Primitive
   | -- | Record pattern

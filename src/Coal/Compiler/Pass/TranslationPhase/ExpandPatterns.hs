@@ -1,7 +1,5 @@
-{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
@@ -25,7 +23,6 @@ import Coal.Language.Module.Definition.Fold (FoldDef (..))
 import Coal.Language.Module.Definition.Function (FunctionDef (..))
 import Coal.Language.Module.Definition.Unfold (UnfoldDef (..))
 import Coal.Language.Pattern (IndexedPattern, Pattern (..))
-import Data.Data (Data)
 import Data.Generics.Uniplate.Data (descendM)
 import Data.List.NonEmpty (NonEmpty ((:|)))
 import Extras (Name)
@@ -37,10 +34,10 @@ passExpandPatterns =
     , runPass = desugarPatterns
     }
 
-class TransformContext a s where
-  desugarPatterns :: (Monad m) => s -> CompilerT a m s
+class TransformContext s where
+  desugarPatterns :: (Monad m) => s -> CompilerT Metadata m s
 
-instance (Data s, Monoid s) => TransformContext s (IndexedPattern s) where
+instance TransformContext (IndexedPattern Metadata) where
   desugarPatterns =
     \case
       p@PVariable{} ->
@@ -52,7 +49,7 @@ instance (Data s, Monoid s) => TransformContext s (IndexedPattern s) where
         tellPatterns1 (name, p)
         pure (PVariable mempty (Label (typeOf p) name))
 
-instance (Data s, Monoid s) => TransformContext s (Binding Expression s IndexedType) where
+instance TransformContext (Binding Expression Metadata IndexedType) where
   desugarPatterns =
     \case
       BPattern a p e ->
@@ -60,7 +57,7 @@ instance (Data s, Monoid s) => TransformContext s (Binding Expression s IndexedT
       BFunction a name ps e ->
         BFunction a name <$> traverse desugarPatterns ps <*> desugarPatterns e
 
-instance (Data s, Monoid s) => TransformContext s (Expression s IndexedType) where
+instance TransformContext (Expression Metadata IndexedType) where
   desugarPatterns = go
    where
     go =
@@ -81,7 +78,7 @@ instance (Data s, Monoid s) => TransformContext s (Expression s IndexedType) whe
         e ->
           descendM go e
 
-unrollMatch :: (Data s, Monoid s) => (Name, Pattern s IndexedType) -> Expression s IndexedType -> Expression s IndexedType
+unrollMatch :: (Name, Pattern Metadata IndexedType) -> Expression Metadata IndexedType -> Expression Metadata IndexedType
 unrollMatch (name, p) e =
   EMatch
     mempty
@@ -89,7 +86,7 @@ unrollMatch (name, p) e =
     (EVariable mempty (Label (typeOf p) name))
     (EClause mempty p (CPlain mempty [] e :| []) :| [])
 
-instance (Data s, Monoid s) => TransformContext s (FunctionDef s IndexedType) where
+instance TransformContext (FunctionDef Metadata IndexedType) where
   desugarPatterns =
     \case
       FunctionDef a u w ps e -> do
@@ -97,13 +94,13 @@ instance (Data s, Monoid s) => TransformContext s (FunctionDef s IndexedType) wh
         (qs, rs) <- listenPatterns (traverse desugarPatterns ps)
         pure (FunctionDef a u w qs (foldr unrollMatch e1 rs))
 
-instance (Data s, Monoid s) => TransformContext s (ConstantDef s IndexedType) where
+instance TransformContext (ConstantDef Metadata IndexedType) where
   desugarPatterns =
     \case
       ConstantDef a u w e ->
         ConstantDef a u w <$> desugarPatterns e
 
-instance (Data s, Monoid s) => TransformContext s (Definition s Kind IndexedType) where
+instance TransformContext (Definition Metadata Kind IndexedType) where
   desugarPatterns =
     \case
       DFunction loc name f fs ->
@@ -117,7 +114,7 @@ instance (Data s, Monoid s) => TransformContext s (Definition s Kind IndexedType
       d ->
         pure d
 
-instance (Data s, Monoid s) => TransformContext s (Module s Kind IndexedType) where
+instance TransformContext (Module Metadata Kind IndexedType) where
   desugarPatterns =
     \case
       Module p ns ds ->
