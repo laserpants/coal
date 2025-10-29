@@ -222,7 +222,7 @@ If you want to work on a feature or bug fix, fork the repository and create a ne
 
 ### Documentation
 
-The documentation is based on MkDocs and the Material for MkDocs (mkdocs-material) theme. The source code is hosted at: [github.com/laserpants/coal-docs](https://github.com/laserpants/coal-docs).
+The [documentation](https://coal-lang.org/) is built with MkDocs and the Material for MkDocs (mkdocs-material) theme. The source code is hosted at: [github.com/laserpants/coal-docs](https://github.com/laserpants/coal-docs).
 
 ## License 
 
