@@ -150,7 +150,8 @@ instance (Data t) => RuleContext (Binding Expression Metadata t) where
 instance (Data t) => RuleContext (Module Metadata Kind t) where
   detectShadowing names =
     \case
-      Module p ns o ->
+      Module p ns o -> do
+        setCompilerModuleC p
         Module p ns <$> detectShadowing names o
 
 instance (Data t) => RuleContext (Definition Metadata k t) where
