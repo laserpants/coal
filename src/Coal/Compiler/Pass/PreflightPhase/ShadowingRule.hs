@@ -9,6 +9,7 @@ module Coal.Compiler.Pass.PreflightPhase.ShadowingRule (
   passShadowingRule,
 ) where
 
+import Control.Monad.Except
 import Coal.Ast.Metadata (Metadata (..))
 import Coal.Common.FreeVars (BoundVars (..))
 import Coal.Common.Name (isConstructor)
@@ -18,13 +19,12 @@ import Coal.Compiler.Stack
 import Coal.Language (Choice (..), Clause (..), Expression (..), Guard (..), Kind (..))
 import Coal.Language.Expression.Binding (Binding (..))
 import Coal.Language.Module
-import Control.Monad (when)
 import Control.Monad.State (gets)
 import Data.Data (Data)
 import Data.List.NonEmpty (NonEmpty (..))
 import Data.Set (Set)
 import qualified Data.Set as Set
-import Extras (Name, forM_)
+import Extras (Name)
 
 passShadowingRule :: (Monad m) => Pass Metadata m [Module Metadata Kind ()] [Module Metadata Kind ()]
 passShadowingRule =
@@ -188,8 +188,9 @@ addNames loc new names = do
   forM_ new' $
     \name -> do
       path <- gets compilerModule
-      when (name `elem` names) $
+      when (name `elem` names) $ do
         tellErrors [Shadowing name (ErrorLocation (principalPath path) loc)]
+        throwError PreflightFailure
   pure (new' <> names)
  where
   new' = Set.filter (not . isConstructor) new
