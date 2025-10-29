@@ -1,0 +1,10 @@
+module Main {
+
+  fun fst : int32
+    | ((a, _)) = 
+        a
+
+  fun main() =
+    trace_int32(fst((5, 3)))
+
+}
