@@ -25,6 +25,7 @@ import qualified Text.Megaparsec.Char.Lexer as Lexer
 parseAtom :: Parser (Expression Metadata ())
 parseAtom =
   try parseFunctionApplication
+    <|> parseVariableExpression
     <|> parseDataConstructor
     <|> parseLiteralExpression
     <|> parseFoldExpression
@@ -32,9 +33,8 @@ parseAtom =
     <|> parseMatchExpression
     <|> parseRecordExpression
     <|> parseIfExpression
-    <|> try parseLambdaExpression
+    <|> parseLambdaExpression
     <|> parseLetExpression
-    <|> parseVariableExpression
     <|> try (parens parseExpression)
     <|> parseTupleExpression
 
