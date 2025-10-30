@@ -1,0 +1,17 @@
+module Coal.Combinators {
+
+  fun identity(x) = x
+
+  fun always(x : a, _) : a = x
+
+  fun fst((a, _)) = a
+
+  fun snd((_, b)) = b
+
+  fun curry(f : (a, b) -> c, x : a, y : b) : c = 
+    f((x, y))
+
+  fun uncurry(f : a -> b -> c, (x, y) : (a, b)) : c = 
+    f(x, y)
+
+}
