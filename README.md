@@ -181,7 +181,6 @@ coal Main.coal -o dist
 | 1          | Module imports/exports                                |                                                                                      
 | 1          | Standard library                                      |
 | 1          | Error messages                                        |
-| 1          | Numeric literal patterns                              |
 | 1          | Effects, I/O                                          |             
 | 1          | FFI                                                   |             
 | 2          | Qualified imports                                     |

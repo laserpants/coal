@@ -6,11 +6,7 @@ module Main {
       | _ => "b"
     }
 
-//  fun fst((a, 5)) = 
-//    a
-
   fun main() =
-    //trace_int32(fst((5, 3)))
-    trace_string(foo(1))
+    trace_string(foo(2))
 
 }

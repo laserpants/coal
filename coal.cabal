@@ -75,6 +75,7 @@ library
       Coal.Compiler.Pass.TypePhase.Errors
       Coal.Compiler.Pass.TypePhase.ExpandAliases
       Coal.Compiler.Pass.TypePhase.ExpandFunctionGroups
+      Coal.Compiler.Pass.TypePhase.ExpandIntegerLiteralPatterns
       Coal.Compiler.Pass.TypePhase.ExpressionFolds
       Coal.Compiler.Pass.TypePhase.ExpressionUnfolds
       Coal.Compiler.Pass.TypePhase.LambdaMatchExpansion

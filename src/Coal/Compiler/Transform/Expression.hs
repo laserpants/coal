@@ -2,6 +2,7 @@ module Coal.Compiler.Transform.Expression (
   matchE,
   varE,
   letE,
+  ifE,
   applicationE,
   lambdaE,
   lambda1E,
@@ -10,6 +11,8 @@ module Coal.Compiler.Transform.Expression (
   tupleE,
   literalBoolE,
   plainClauseE,
+  opAndE,
+  opEqualToE,
   varP,
   constructorP,
   anyP,
@@ -30,6 +33,10 @@ matchE = EMatch mempty ()
 {-# INLINE varE #-}
 varE :: (Monoid a) => Name -> Expression a ()
 varE = EVariable mempty . label
+
+{-# INLINE ifE #-}
+ifE :: (Monoid a) => Expression a () -> Expression a () -> Expression a () -> Expression a ()
+ifE = EIf mempty ()
 
 {-# INLINE letE #-}
 letE :: (Monoid a) => Name -> Expression a () -> Expression a () -> Expression a ()
@@ -62,6 +69,14 @@ tupleE = ETuple mempty ()
 {-# INLINE literalBoolE #-}
 literalBoolE :: (Monoid a) => Bool -> Expression a ()
 literalBoolE = ELiteral mempty . LBool
+
+{-# INLINE opEqualToE #-}
+opEqualToE :: (Monoid a) => Expression a ()
+opEqualToE = EBinaryOperator mempty () OEqualTo
+
+{-# INLINE opAndE #-}
+opAndE :: (Monoid a) => Expression a ()
+opAndE = EBinaryOperator mempty () OLogicalAnd
 
 {-# INLINE plainClauseE #-}
 plainClauseE :: (Monoid a) => Pattern a () -> Expression a () -> Clause a ()
