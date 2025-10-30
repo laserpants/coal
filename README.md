@@ -183,14 +183,11 @@ coal Main.coal -o dist
 | 1          | Error messages                                        |
 | 1          | Effects, I/O                                          |             
 | 1          | FFI                                                   |             
-| 2          | Package system                                        |
 
 <!--
  - from_int32 -> from_integer
 
 -- FIX: pattern mismatch (?)
-
--- Kernel tests
 
 -->
 
