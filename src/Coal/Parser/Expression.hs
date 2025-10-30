@@ -32,7 +32,7 @@ parseAtom =
     <|> parseMatchExpression
     <|> parseRecordExpression
     <|> parseIfExpression
-    <|> parseLambdaExpression
+    <|> try parseLambdaExpression
     <|> parseLetExpression
     <|> parseVariableExpression
     <|> try (parens parseExpression)

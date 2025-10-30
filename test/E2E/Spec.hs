@@ -426,6 +426,8 @@ e2eSpec = do
       res <- runSpec ["./test/Coal/examples/116/Main.coal"]
       res `shouldBe` Left PatternAnomaly
 
+  describe "117" $ do
+    expectOutput "4" ["./test/Coal/examples/117/Main.coal"]
 
 expectOutput :: String -> [FilePath] -> Spec
 expectOutput expt files =

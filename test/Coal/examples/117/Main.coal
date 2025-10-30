@@ -1,0 +1,16 @@
+module Main {
+
+  fun apply_fst
+    | (f :: _, x : int32) = f(x)
+    | ([], _) = 0
+
+  fun main() =
+    let fns = 
+      [ fn(x) => x + 1
+      , fn(x) => x + 2
+      , fn(x) => x + 3
+      ]
+    in
+      trace_int32(apply_fst(fns, 3))
+
+}
