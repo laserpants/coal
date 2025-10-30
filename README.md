@@ -183,16 +183,14 @@ coal Main.coal -o dist
 | 1          | Error messages                                        |
 | 1          | Effects, I/O                                          |             
 | 1          | FFI                                                   |             
-| 2          | Qualified imports                                     |
 | 2          | Package system                                        |
-| 3          | User-defined operators                                |
-| 3          | REPL                                                  |
-| 3          | Applicative syntax                                    |
 
 <!--
  - from_int32 -> from_integer
 
 -- FIX: pattern mismatch (?)
+
+-- Kernel tests
 
 -->
 
