@@ -421,6 +421,11 @@ e2eSpec = do
   describe "115" $ do
     expectOutput "b" ["./test/Coal/examples/115/Main.coal"]
 
+  describe "116" $ do
+    it "is PreflightFailure" $ do
+      res <- runSpec ["./test/Coal/examples/116/Main.coal"]
+      res `shouldBe` Left PatternAnomaly
+
 
 expectOutput :: String -> [FilePath] -> Spec
 expectOutput expt files =
