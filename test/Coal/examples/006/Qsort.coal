@@ -1,6 +1,7 @@
 module Qsort {
 
   import Tree(Tree, flatten)
+  import Coal.Combinators(always)
 
   fun binary_search_tree(list : List<int32>) : Tree<int32> =
     fold(list, { min = 0, max = -1 }) {

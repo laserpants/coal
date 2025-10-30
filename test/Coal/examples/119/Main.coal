@@ -1,0 +1,15 @@
+module IO {
+
+  print_string(str: string) : IO<unit> =
+    #print_string(str)(fn(a) => ())
+
+  fun main() =
+    let 
+      r = 
+        { a = "hello" }
+      in
+        match(r) {
+          | { a = str } =>
+            trace_string(str)
+        }
+}

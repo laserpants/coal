@@ -1,5 +1,7 @@
 module Main {
 
+  import Coal.Combinators(always)
+
   type Tree<a>
     = Node(a, Tree<a>, Tree<a>)
     | Leaf

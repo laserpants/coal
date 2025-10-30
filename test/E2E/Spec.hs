@@ -20,10 +20,18 @@ e2eSpec = do
     expectOutput "24" ["./test/Coal/examples/002/Main.coal"]
 
   describe "003" $
-    expectOutput "1" ["./test/Coal/examples/003/Main.coal"]
+    expectOutput
+      "1"
+      [ "./test/Coal/examples/003/Main.coal"
+      , "./lang/Coal/Combinators.coal"
+      ]
 
   describe "004" $
-    expectOutput "2" ["./test/Coal/examples/004/Main.coal"]
+    expectOutput
+      "2"
+      [ "./test/Coal/examples/004/Main.coal"
+      , "./lang/Coal/Combinators.coal"
+      ]
 
   describe "005" $
     expectOutput
@@ -38,6 +46,7 @@ e2eSpec = do
       [ "./test/Coal/examples/006/Tree.coal"
       , "./test/Coal/examples/006/Qsort.coal"
       , "./test/Coal/examples/006/Main.coal"
+      , "./lang/Coal/Combinators.coal"
       ]
 
   describe "007" $
@@ -236,7 +245,7 @@ e2eSpec = do
   describe "066" $
     expectOutput
       "7"
-      [ "./test/Coal/examples/066/Combinators.coal"
+      [ "./lang/Coal/Combinators.coal"
       , "./test/Coal/examples/066/List.coal"
       , "./test/Coal/examples/066/Main.coal"
       ]

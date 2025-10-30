@@ -25,10 +25,6 @@ builtinFunctions =
     , forall2 $ \t0 t1 -> t0 ~> (t0 ~> t1) ~> t1
     )
   ,
-    ( "always"
-    , forall2 $ \t0 t1 -> t0 ~> t1 ~> t0
-    )
-  ,
     ( "operator$__list_concatenation"
     , forall1 $ \t0 -> listType t0 ~> listType t0 ~> listType t0
     )

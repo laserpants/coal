@@ -1,6 +1,6 @@
 module List {
 
-  import Combinators(identity)
+  import Coal.Combinators(always, identity)
 
   fun head(list : List<a>) : Option<a> =
     match(list) {
