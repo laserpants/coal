@@ -76,6 +76,7 @@ instance HasMetadata (Pattern Metadata t) where
       PVariable a _ -> a
       PConstructor a _ _ -> a
       PLiteral a _ -> a
+      PInteger a _ _ -> a
       PRecord a _ _ _ -> a
       PListCons a _ _ _ -> a
       PListLiteral a _ _ -> a
