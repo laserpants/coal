@@ -50,10 +50,10 @@ expandGroups =
   \case
     d@(DFunction _ _ (_ :| []) _) ->
       pure [d]
-    DFunction loc name fs@(FunctionDef _ _ _ ps _ :| _) gs ->
+    DFunction loc name fs@(FunctionDef _ w _ ps _ :| _) gs ->
       pure [DConstant loc name e1 gs]
      where
-      e1 = ConstantDef loc Nothing (With [] ()) (toExpr (NonEmpty.length ps) loc (NonEmpty.toList fs))
+      e1 = ConstantDef loc w (With [] ()) (toExpr (NonEmpty.length ps) loc (NonEmpty.toList fs))
     d ->
       pure [d]
 
