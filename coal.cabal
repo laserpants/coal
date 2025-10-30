@@ -307,6 +307,7 @@ test-suite coal-test
       Coal.TypeSystem.TypeIndexedSpec
       Coal.TypeSystem.UnificationSpec
       Coal.TypeSystemSpec
+      E2E.Kernel.Spec
       E2E.Spec
       Paths_coal
   hs-source-dirs:

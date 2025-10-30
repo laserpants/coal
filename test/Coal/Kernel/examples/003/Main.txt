@@ -1,0 +1,86 @@
+module Main {
+
+import My.Utilities.find_min
+
+data Main.Leaf<0,Main.Tree(*)>
+
+data Main.Node<1,*/Main.Tree(*)/Main.Tree(*)/Main.Tree(*)>
+
+//
+//     2
+//    / \
+//   1   4
+//      / \
+//     3   5
+//
+Main.sample_tree =
+  @<Main.Tree(int32)>
+    ( Main.Node : int32/Main.Tree(int32)/Main.Tree(int32)/Main.Tree(int32)
+    , 2
+    , @<Main.Tree(int32)>
+        ( Main.Node : int32/Main.Tree(int32)/Main.Tree(int32)/Main.Tree(int32)
+        , 1
+        , Main.Leaf : Main.Tree(int32)
+        , Main.Leaf : Main.Tree(int32)
+        )
+    , @<Main.Tree(int32)>
+        ( Main.Node : int32/Main.Tree(int32)/Main.Tree(int32)/Main.Tree(int32)
+        , 4
+        , @<Main.Tree(int32)>
+            ( Main.Node : int32/Main.Tree(int32)/Main.Tree(int32)/Main.Tree(int32)
+            , 3
+            , Main.Leaf : Main.Tree(int32)
+            , Main.Leaf : Main.Tree(int32)
+            )
+        , @<Main.Tree(int32)>
+            ( Main.Node : int32/Main.Tree(int32)/Main.Tree(int32)/Main.Tree(int32)
+            , 5
+            , Main.Leaf : Main.Tree(int32)
+            , Main.Leaf : Main.Tree(int32)
+            )
+        )
+    )
+
+Main.max(a : int32, b : int32) =
+  if ([> int32](a : int32, b : int32))
+    then a : int32
+    else b : int32
+
+Main.height(tree : Main.Tree(*)) =
+  match<int32>(tree : Main.Tree(*)) {
+    | ( Main.Leaf : Main.Tree(*)
+      ) =>
+      0
+    | ( Main.Node : */Main.Tree(*)/Main.Tree(*)/Main.Tree(*)
+      , y : *
+      , lhs : Main.Tree(*)
+      , rhs : Main.Tree(*)
+      ) =>
+        [+ int32]
+          ( 1
+          , @<int32>
+              ( Main.max : int32/int32/int32
+              , @<int32>
+                  ( Main.height : Main.Tree(*)/int32
+                  , lhs : Main.Tree(*)
+                  )
+              , @<int32>
+                  ( Main.height : Main.Tree(*)/int32
+                  , rhs : Main.Tree(*)
+                  )
+              )
+          )
+  }
+
+Main.main(_ : *) =
+  let
+    r : int32 =
+      @<int32>
+        ( Main.height : Main.Tree(*)/int32
+        , Main.sample_tree : Main.Tree(*)
+        )
+    in
+      #(print_int32 : int32/*, r : int32)
+      (fn(a : *) => r : int32)
+
+}

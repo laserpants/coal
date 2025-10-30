@@ -1,0 +1,5 @@
+module Utils {
+
+Utils.not(a : bool) = if (a : bool) then false else true
+
+}

@@ -1,0 +1,11 @@
+module Main {
+
+  Main.main(_ : *) =
+    let
+      x : bignum =
+        %%9999999999999999999999999999999999999998
+      in
+        #(print_bignum : bignum/*, x : bignum)
+         (fn(_ : *) => 123)
+
+}

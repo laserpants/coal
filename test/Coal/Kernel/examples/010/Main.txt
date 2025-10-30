@@ -1,0 +1,24 @@
+module Main {
+
+Main.main(_ : *) =
+  if ([== float](5.3, 0.5))
+    then
+      1
+    else
+      let
+        a : float =
+          [- float](5.0f, 3.5f)
+          ;
+        x : float =
+          [/ float](9.0f, 2.0f)
+        in
+          #(print_float : float/*, x : float)
+          (fn(a : *) =>
+            let
+              y : int32 =
+                [/ int32](8, 2)
+              in
+                #(print_int32 : int32/*, y : int32)
+                (fn(a : *) => 0)
+          )
+}

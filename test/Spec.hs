@@ -2,6 +2,7 @@
 
 import Coal.Compiler.PatternAnomaliesSpec (patternAnomaliesSpec)
 import Coal.TypeSystemSpec (typeSystemSpec)
+import E2E.Kernel.Spec (e2eKernelSpec)
 import E2E.Spec
 import Test.Hspec
 
@@ -16,3 +17,4 @@ main =
   hspec $ do
     spec
     e2eSpec
+    e2eKernelSpec

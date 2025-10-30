@@ -1,0 +1,93 @@
+module Main {
+
+import Ordering.LessThan
+import Ordering.GreaterThan
+import Ordering.EqualTo
+import Tree.flatten
+import Tree.from_list
+import Utils.Function.compose
+
+Main.sort(d_1 : record({ compare : */*/Ordering | from_int32 : int32/* | * })) =
+  @<list(*)/list(*)>
+    ( Utils.Function.compose : (Tree.Tree(*)/list(*))/(list(*)/Tree.Tree(*))/list(*)/list(*)
+    , Tree.flatten : Tree.Tree(*)/list(*)
+    , @<list(*)/Tree.Tree(*)>
+        ( Tree.from_list : record({ compare : */*/Ordering | from_int32 : int32/* | * })/list(*)/Tree.Tree(*)
+        , d_1 : record({ compare : */*/Ordering | from_int32 : int32/* | * })
+        )
+    )
+
+Main.sample_list =
+  @<list(int32)>
+    ( $Cons : int32/list(int32)/list(int32)
+    , 2
+    , @<list(int32)>
+        ( $Cons : int32/list(int32)/list(int32)
+        , 105
+        , @<list(int32)>
+            ( $Cons : int32/list(int32)/list(int32)
+            , 103
+            , @<list(int32)>
+              ( $Cons : int32/list(int32)/list(int32)
+              , 104
+              , @<list(int32)>
+                ( $Cons : int32/list(int32)/list(int32)
+                , 2
+                , @<list(int32)>
+                  ( $Cons : int32/list(int32)/list(int32)
+                  , 106
+                  , $Nil : list(int32)
+                  )))))
+    )
+
+Main.from_int32__int32(n : int32) =
+  n : int32
+
+Main.compare__int32(x : int32, y : int32) =
+  if ([< int32](x : int32, y : int32))
+    then
+      Ordering.LessThan : Ordering.Ordering
+    else
+      if ([> int32](x : int32, y : int32))
+        then
+          Ordering.GreaterThan : Ordering.Ordering
+        else
+          Ordering.EqualTo : Ordering.Ordering
+
+Main.sorted_list =
+  @<list(int32)>
+    ( Main.sort : record({ compare : int32/int32/Ordering.Ordering | from_int32 : int32/int32 | {} })/list(int32)/list(int32)
+    , @<record({ compare : int32/int32/Ordering.Ordering | from_int32 : int32/int32 | {} })>
+        ( $Record : { compare : int32/int32/Ordering.Ordering | from_int32 : int32/int32 | {} }/record({ compare : int32/int32/Ordering.Ordering | from_int32 : int32/int32 | {} })
+        , { compare = Main.compare__int32 : int32/int32/Ordering.Ordering
+          | from_int32 = Main.from_int32__int32 : int32/int32
+          | {}
+          }
+        )
+    , Main.sample_list : list(int32)
+    )
+
+Main.main(_ : *) =
+  let
+    r : int32 =
+      match<int32>(Main.sorted_list : list(int32)) {
+        | ($Cons : int32/list(int32)/list(int32), a : int32, b : list(int32)) =>
+            match<int32>(b : list(int32)) {
+              | ($Cons : int32/list(int32)/list(int32), c : int32, d : list(int32)) =>
+                  match<int32>(d : list(int32)) {
+                    | ($Cons : int32/list(int32)/list(int32), e : int32, f : list(int32)) =>
+                        e : int32
+                    | ($Nil : list(int32)) =>
+                        0
+                  }
+              | ($Nil : list(int32)) =>
+                  0
+            }
+        | ($Nil : list(int32)) =>
+            0
+      }
+    in
+      #(print_int32 : int32/*, r : int32)
+       (fn(a : *) => r : int32)
+
+}

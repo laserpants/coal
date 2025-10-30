@@ -21,7 +21,7 @@ module Main {
           always(Leaf)
     }
 
-  fun flatten(tree) = 
+  fun flatten(tree) : string = 
     fold(tree) {
       | Node(y, @lhs, @rhs) =>
           lhs ++ (y :: rhs)
@@ -31,7 +31,7 @@ module Main {
 
   let sort = flatten << from_list
 
-  fun main() = 
+  fun main() : bool = 
     let
       xs =
         [5, 3, 7, 2, 100, 6, 4] : List<int32>

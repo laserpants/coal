@@ -1,0 +1,136 @@
+module Main {
+
+import Core$.trace_int32
+import Core$.$Succ
+import Core$.$Zero
+
+Main.from_int32($a : Numeric(*)) =
+  match<int32/*>($a : Numeric(*)) {
+    | ( $Record : { from_int32 : int32/* | * }/Numeric(*)
+      , $r : { from_int32 : int32/* | * }
+      ) =>
+        select
+          { from_int32 = $f : int32/* | _ : * } =
+            $r : { from_int32 : int32/* | * }
+          in
+            $f : int32/*
+  }
+
+Main.from_int32__$instance.a952655fec712ed8(n : int32) =
+  if ([== int32](n : int32, 0))
+    then 
+      Core$.$Zero : $Nat
+    else
+      @<$Nat>
+        ( Core$.$Succ : int32/$Nat
+        , [- int32](n : int32, 1)
+        )
+
+Main.$$force_Head(s : { $_Head : unit/* | * }) =
+  select 
+    { $_Head = f : unit/* | _ : * } = 
+      s : { $_Head : unit/* | * }
+    in
+      @<*>
+        ( f : unit/*
+        , () 
+        )
+
+Main.$$force_Tail(s : { $_Tail : unit/* | * }) =
+  select 
+    { $_Tail = f : unit/* | _ : * } = 
+      s : { $_Tail : unit/* | * }
+    in
+      @<*>
+        ( f : unit/*
+        , () 
+        )
+
+Main.nats = 
+  @<Stream(int32)>
+    ( let
+        $unfold.1 : int32/* =
+          fn(n : int32) =>
+            { $_Head = 
+                fn(_ : unit) => 
+                  n : int32
+            | $_Tail = 
+                fn(_ : unit) =>
+                  @<*>
+                    ( $unfold.1 : int32/*
+                    , [+ int32]( n : int32, 1)
+                    )
+            | {}
+            }
+        in 
+          $unfold.1 : int32/*
+    , 0
+    )
+
+Main.nth(n : $Nat) =
+  let
+    $fold.1 : $Nat/Stream(*)/* =
+      fn($fold.1.expr : $Nat) =>
+        match<Stream(*)/*>($fold.1.expr : $Nat) {
+          | ( Core$.$Succ : int32/$Nat
+            , $succ.1 : int32
+            ) =>
+              let 
+                $match.1.f : $Nat =
+                  if ([== int32]($succ.1 : int32, 0))
+                    then
+                      Core$.$Zero : $Nat 
+                    else
+                      @<$Nat>
+                        ( Core$.$Succ : int32/$Nat
+                        , [- int32]($succ.1 : int32, 1)
+                        )
+                    in
+                      fn(stream : Stream(*)) =>
+                        @<*>
+                          ( $fold.1 : $Nat/Stream(*)/*
+                          , $match.1.f : $Nat
+                          , @<Stream(*)>
+                              ( Main.$$force_Tail : Stream(*)/Stream(*)
+                              , stream : Stream(*)
+                              )
+                          )
+          | ( Core$.$Zero : $Nat
+            ) =>
+              fn(stream : Stream(*)) =>
+                @<*>
+                  ( Main.$$force_Head : Stream(*)/*
+                  , stream : Stream(*)
+                  )
+        }
+    in
+      @<Stream(*)/*>
+        ( $fold.1 : $Nat/Stream(*)/*
+        , n : $Nat
+        )
+    
+
+Main.main(_ : *) =
+  let
+    v : int32 =
+      @<int32>
+        ( Main.nth : $Nat/Stream(int32)/int32
+        , @<$Nat>
+            ( Main.from_int32 : Numeric($Nat)/int32/$Nat
+            , @<record({ from_int32 : int32/$Nat | {} })>
+                ( $Record : { from_int32 : int32/$Nat | {} }/record({ from_int32 : int32/$Nat | {} })
+                , { from_int32 = Main.from_int32__$instance.a952655fec712ed8 : int32/$Nat
+                  | {}
+                  }
+                )
+            , 5
+            )
+        , Main.nats : Stream(int32)
+        )
+    in
+      @<*>
+        ( Core$.trace_int32 : int32/*
+        , v : int32
+        )
+
+}

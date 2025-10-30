@@ -1,0 +1,34 @@
+module Core$ {
+
+Core$.operator__not(a : bool) = if (a : bool) then false else true
+
+Core$.operator__reverse_composition(f : */*, g : */*, x : *) =
+  @<*>(f : */*, @<*>(g : */*, x : *))
+
+Core$.operator__reverse_application(x : *, f : */*) =
+  @<*>(f : */*, x : *)
+
+Core$.always(a : *, _ : *) =
+  a : *
+
+Core$.operator__list_concatenation(xs : list(*), ys : list(*)) =
+  match<list(*)>(xs : list(*)) {
+    | ( $Cons : */list(*)/list(*)
+      , z : *
+      , zs : list(*)
+      ) =>
+        @<list(*)>
+          ( $Cons : */list(*)/list(*)
+          , z : *
+          , @<list(*)>
+              ( Core$.operator__list_concatenation : list(*)/list(*)/list(*)
+              , zs : list(*)
+              , ys : list(*)
+              )
+          )
+    | ( $Nil : list(*)
+      ) =>
+        ys : list(*)
+  }
+
+}

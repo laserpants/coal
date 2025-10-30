@@ -2,7 +2,10 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TemplateHaskell #-}
 
-module Coal.Compiler.Pass.LoweringPhase.LLVMOutput (passLLVMOutput) where
+module Coal.Compiler.Pass.LoweringPhase.LLVMOutput (
+  passLLVMOutput,
+  generateLLOutput,
+) where
 
 import Coal.Ast.Metadata (Metadata (..))
 import Coal.Compiler.Config (CompilerConfig (..))

@@ -1,0 +1,16 @@
+module My.Utilities {
+
+import Data.List.head
+import Data.List.sort
+
+My.Utilities.find_min(xs : list(int32)) =
+  @<int32>
+    ( Data.List.head : int32/list(int32)/int32
+    , -1
+    , @<list(int32)>
+        ( Data.List.sort : list(int32)/list(int32)
+        , xs : list(int32)
+        )
+    )
+
+}

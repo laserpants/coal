@@ -1,0 +1,46 @@
+module Group {
+
+Group.op(dict : record({ op : */*/* | * }), a : *, b : *) =
+  match<*>(dict : record({ op : */*/* | * })) {
+    | ( $Record : { op : */*/* | * }/record({ op : */*/* | * })
+      , r : { op : */*/* | * }
+      ) =>
+        select
+          { op = group_op : */*/* | _ : * } =
+            r : { op : */*/* | * }
+          in
+            @<*>
+              ( group_op : */*/*
+              , a : *
+              , b : *
+              )
+  }
+
+Group.inv(dict : record({ inv : */* | * }), a : *) =
+  match<*>(dict : record({ inv : */* | * })) {
+    | ( $Record : { inv : */* | * }/record({ inv : */* | * })
+      , r : { inv : */* | * }
+      ) =>
+        select
+          { inv = group_inv : */* | _ : * } =
+            r : { inv : */* | * }
+          in
+            @<*>
+              ( group_inv : */*
+              , a : *
+              )
+  }
+
+Group.id(dict : record({ id : * | * })) =
+  match<*>(dict : record({ id : * | * })) {
+    | ( $Record : { id : * | * }/record({ id : * | * })
+      , r : { id : * | * }
+      ) =>
+        select
+          { id = group_id : * | _ : * } =
+            r : { id : * | * }
+          in
+            group_id : *
+  }
+
+}
