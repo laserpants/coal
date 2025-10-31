@@ -7,7 +7,6 @@ import Coal.Compiler.Environment (insertEnv)
 import Coal.Compiler.Pass (Pass (..), localPass, mapPass, (>->))
 import Coal.Compiler.Pass.DebugOutput (generateDebugArtifacts)
 import Coal.Compiler.Pass.TranslationPhase.DenormalizeObjects (passDenormalizeObjects)
-import Coal.Compiler.Pass.TranslationPhase.Errors (passTranslationPhaseErrors)
 import Coal.Compiler.Pass.TranslationPhase.ExpandAsPatterns (passExpandAsPatterns)
 import Coal.Compiler.Pass.TranslationPhase.ExpandPatterns (passExpandPatterns)
 import Coal.Compiler.Pass.TranslationPhase.MatchExpressions (passMatchExpressions)
@@ -41,6 +40,4 @@ translationPhasePasses =
     >-> generateDebugArtifacts "CompileNats"
 
 translationPhase :: (MonadIO m) => Pass Metadata m [Module Metadata Kind IndexedType] [Module Metadata Kind IndexedType]
-translationPhase =
-  mapPass (localPass insertEnv translationPhasePasses)
-    >-> mapPass passTranslationPhaseErrors
+translationPhase = mapPass (localPass insertEnv translationPhasePasses)

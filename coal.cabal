@@ -61,7 +61,6 @@ library
       Coal.Compiler.Pass.PreflightPhase.TypeImports
       Coal.Compiler.Pass.TranslationPhase
       Coal.Compiler.Pass.TranslationPhase.DenormalizeObjects
-      Coal.Compiler.Pass.TranslationPhase.Errors
       Coal.Compiler.Pass.TranslationPhase.ExpandAsPatterns
       Coal.Compiler.Pass.TranslationPhase.ExpandPatterns
       Coal.Compiler.Pass.TranslationPhase.MatchExpressions

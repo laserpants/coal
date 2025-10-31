@@ -168,11 +168,25 @@ bignum_neg(mpz_t* m)
 void
 print_bool(bool b)
 {
+  printf("%s", b ? "true" : "false");
+}
+
+void
+println_bool(bool b)
+{
   printf("%s\n", b ? "true" : "false");
 }
 
 void
 print_char(wchar_t ch)
+{
+  setlocale(LC_ALL, "");
+
+  wprintf(L"%lc", ch);
+}
+
+void
+println_char(wchar_t ch)
 {
   setlocale(LC_ALL, "");
 
@@ -188,13 +202,27 @@ print_string(const char* str)
   wchar_t* wstr = malloc(len * sizeof(wchar_t));
 
   mbstowcs(wstr, str, len);
-  wprintf(L"%ls\n", wstr);
+  wprintf(L"%ls", wstr);
 
   free(wstr);
 }
 
 void
+println_string(const char* str)
+{
+  print_string(str);
+  printf("\n");
+}
+
+
+void
 print_float(float f)
+{
+  printf("%f", f);
+}
+
+void
+println_float(float f)
 {
   printf("%f\n", f);
 }
@@ -202,11 +230,23 @@ print_float(float f)
 void
 print_double(double d)
 {
+  printf("%.15f", d);
+}
+
+void
+println_double(double d)
+{
   printf("%.15f\n", d);
 }
 
 void
 print_int32(int32_t n)
+{
+  printf("%" PRId32, n);
+}
+
+void
+println_int32(int32_t n)
 {
   printf("%" PRId32 "\n", n);
 }
@@ -214,11 +254,23 @@ print_int32(int32_t n)
 void
 print_int64(int64_t n)
 {
+  printf("%" PRId64, n);
+}
+
+void
+println_int64(int64_t n)
+{
   printf("%" PRId64 "\n", n);
 }
 
 void
 print_bignum(mpz_t* big_int)
+{
+  gmp_printf("%Zd", *big_int);
+}
+
+void
+println_bignum(mpz_t* big_int)
 {
   gmp_printf("%Zd\n", *big_int);
 }

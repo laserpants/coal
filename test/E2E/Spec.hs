@@ -55,13 +55,22 @@ e2eSpec = do
       ]
 
   describe "007" $
-    expectOutput "hello" ["./test/Coal/examples/007/Main.coal"]
+    expectOutput
+      "hello"
+      [ "./test/Coal/examples/007/Main.coal"
+      ]
 
   describe "008" $
-    expectOutput "cluedo" ["./test/Coal/examples/008/Main.coal"]
+    expectOutput
+      "cluedo"
+      [ "./test/Coal/examples/008/Main.coal"
+      ]
 
   describe "009" $
-    expectOutput "wat" ["./test/Coal/examples/009/Main.coal"]
+    expectOutput
+      "wat"
+      [ "./test/Coal/examples/009/Main.coal"
+      ]
 
   describe "010" $
     expectOutput "hello from the other side" ["./test/Coal/examples/010/Main.coal"]
@@ -74,7 +83,11 @@ e2eSpec = do
 
   describe "013" $ do
     it "is TypeError" $ do
-      res <- runSpec ["./test/Coal/examples/013/Main.coal"]
+      res <-
+        runSpec
+          [ "./test/Coal/examples/013/Main.coal"
+          , "./lang/Nat.coal"
+          ]
       res `shouldBe` Left TypeError
 
   describe "014" $ do
@@ -481,7 +494,7 @@ runSpec :: [FilePath] -> IO (Either CompilerFailureMode String)
 runSpec files = do
   (e, _, _) <-
     runCompilerT emptyCompilerEnvironment $
-      runPass pipeline files
+      runPass pipeline (files <> ["./lang/IO.coal"])
   case e of
     Left e1 ->
       pure (Left e1)
