@@ -179,16 +179,11 @@ coal Main.coal -o dist
 | Milestone  | Feature/Fix                                           |                                                                                                                                                              
 | ---------- | ----------------------------------------------------- |                                                                                                                                                              
 | 1          | Module imports/exports                                |                                                                                      
-| 1          | Standard library                                      |
 | 1          | Error messages                                        |
-| 1          | Effects, I/O                                          |             
 | 1          | FFI                                                   |             
 
 <!--
  - from_int32 -> from_integer
-
--- FIX: pattern mismatch (?)
-
 -->
 
 ## How to contribute
