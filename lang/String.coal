@@ -1,3 +1,35 @@
 module String {
 
+  fun int32_to_string(n : int32) : string =
+    string$_int32_to_string(n)
+
+  fun float_to_string(f : float) : string =
+    string$_float_to_string(f)
+
+  fun double_to_string(d : double) : string =
+    string$_double_to_string(d)
+
+  fun to_list(s : string) : List<char> =
+    string$_to_list(s)
+
+  fun length(s : string) : int32 =
+    string$_length(s)
+
+  fun is_empty(s : string) : bool =
+    0 == length(s)
+
+  fun head(s : string) : Option<char> =  
+    if (is_empty(s)) 
+      then None
+      else Some(string$_head_unsafe(s))
+
+  fun tail(s : string) : string =
+    string$_tail(s)
+
+  fun reverse(s : string) : string =
+    string$_reverse(s)
+
+  fun remove_whitespace(s : string) : string =
+    string$_remove_whitespace(s)
+
 }

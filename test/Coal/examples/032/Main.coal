@@ -1,6 +1,7 @@
 module Main {
 
   import IO(println_int32, println_bool, println_string, println_char)
+  import String(int32_to_string, to_list)
 
   fun digit_to_int32(ch) : Option<int32> =
     match(ch) {
@@ -34,7 +35,7 @@ module Main {
   fun parse_unsigned(str : string) : Option<int32> =
     let 
       chars = 
-        string_to_list(str)
+        to_list(str)
       in
         fold(chars, Some(0)) {
           | ch :: @go =>

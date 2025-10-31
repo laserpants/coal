@@ -1,6 +1,7 @@
 module Main {
 
   import IO(println_int32, println_bool, println_string)
+  import String(int32_to_string)
 
   trait JsonSerializable<a> {
     to_json : a -> string

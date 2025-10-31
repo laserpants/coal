@@ -1,0 +1,9 @@
+module Main {
+
+  import IO(println_string)
+  import String(int32_to_string)
+
+  fun main() =
+    println_string(int32_to_string(342))
+
+}

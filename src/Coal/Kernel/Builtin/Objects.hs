@@ -80,7 +80,7 @@ objects =
                           ( $Cons : */list(*)/list(*)
                           , z : *
                           , @<list(*)>
-                              ( Builtin$.operator$__list_concatenation : list(*)/list(*)/list(*)
+                              ( `Builtin$.operator$__list_concatenation` : list(*)/list(*)/list(*)
                               , zs : list(*)
                               , ys : list(*)
                               )
@@ -211,21 +211,21 @@ objects =
                   #(string_concat : string/string/string, s : string, t : string) (fn(r : string) => r : string)
               |]
         , OFunction
-            "Builtin$.int32_to_string"
+            "Builtin$.string$_int32_to_string"
             [ Label Kernel.int32 "n"
             ]
             [r| 
                   #(int32_to_string : int32/string, n : int32) (fn(r : string) => r : string)
               |]
         , OFunction
-            "Builtin$.float_to_string"
+            "Builtin$.string$_float_to_string"
             [ Label Kernel.float "f"
             ]
             [r| 
                   #(float_to_string : float/string, f : float) (fn(r : string) => r : string)
               |]
         , OFunction
-            "Builtin$.double_to_string"
+            "Builtin$.string$_double_to_string"
             [ Label Kernel.double "d"
             ]
             [r| 
@@ -505,7 +505,7 @@ objects =
             ]
             [r| 
                   @<$Nat>
-                    ( Builtin$.nat$_pack : int32/$Nat
+                    ( `Builtin$.nat$_pack` : int32/$Nat
                     , n : int32
                     )
               |]
@@ -516,14 +516,14 @@ objects =
             ]
             [r| 
                   @<$Nat>
-                    ( Builtin$.nat$_pack : int32/$Nat
+                    ( `Builtin$.nat$_pack` : int32/$Nat
                     , [+ int32]
                         ( @<int32>
-                            ( Builtin$.nat$_unpack : $Nat/int32
+                            ( `Builtin$.nat$_unpack` : $Nat/int32
                             , lhs : $Nat
                             )
                         , @<int32>
-                            ( Builtin$.nat$_unpack : $Nat/int32
+                            ( `Builtin$.nat$_unpack` : $Nat/int32
                             , rhs : $Nat
                             )
                         )
@@ -536,16 +536,16 @@ objects =
             ]
             [r| 
                   @<$Nat>
-                    ( Builtin$.nat$_pack : int32/$Nat
+                    ( `Builtin$.nat$_pack` : int32/$Nat
                     , let
                         n : int32 =
                           [- int32]
                             ( @<int32>
-                                ( Builtin$.nat$_unpack : $Nat/int32
+                                ( `Builtin$.nat$_unpack` : $Nat/int32
                                 , lhs : $Nat
                                 )
                             , @<int32>
-                                ( Builtin$.nat$_unpack : $Nat/int32
+                                ( `Builtin$.nat$_unpack` : $Nat/int32
                                 , rhs : $Nat
                                 )
                             )
@@ -562,14 +562,14 @@ objects =
             ]
             [r| 
                   @<$Nat>
-                    ( Builtin$.nat$_pack : int32/$Nat
+                    ( `Builtin$.nat$_pack` : int32/$Nat
                     , [* int32]
                         ( @<int32>
-                            ( Builtin$.nat$_unpack : $Nat/int32
+                            ( `Builtin$.nat$_unpack` : $Nat/int32
                             , lhs : $Nat
                             )
                         , @<int32>
-                            ( Builtin$.nat$_unpack : $Nat/int32
+                            ( `Builtin$.nat$_unpack` : $Nat/int32
                             , rhs : $Nat
                             )
                         )
@@ -800,42 +800,42 @@ objects =
                           EqualTo : Ordering
               |]
         , OFunction
-            "Builtin$.string_length"
+            "Builtin$.string$_length"
             [ Label Kernel.string "str"
             ]
             [r| 
                   #(string_length : string/int32, str : string) (fn(a : int32) => a : int32)
               |]
         , OFunction
-            "Builtin$.string_head"
+            "Builtin$.string$_head_unsafe"
             [ Label Kernel.string "str"
             ]
             [r| 
                   #(string_head : string/char, str : string) (fn(a : char) => a : char)
               |]
         , OFunction
-            "Builtin$.string_tail"
+            "Builtin$.string$_tail"
             [ Label Kernel.string "str"
             ]
             [r| 
                   #(string_tail : string/string, str : string) (fn(a : string) => a : string)
               |]
         , OFunction
-            "Builtin$.string_reverse"
+            "Builtin$.string$_reverse"
             [ Label Kernel.string "str"
             ]
             [r| 
                   #(string_reverse : string/string, str : string) (fn(a : string) => a : string)
               |]
         , OFunction
-            "Builtin$.string_remove_whitespace"
+            "Builtin$.string$_remove_whitespace"
             [ Label Kernel.string "str"
             ]
             [r| 
                   #(string_remove_whitespace : string/string, str : string) (fn(a : string) => a : string)
               |]
         , OFunction
-            "Builtin$.string_to_list"
+            "Builtin$.string$_to_list"
             [ Label Kernel.string "str"
             ]
             [r| 
@@ -844,7 +844,7 @@ objects =
                       fn(input : string, result : list(char)) => 
                         if ( [== int32]
                                ( @<int32>
-                                   ( Builtin$.string_length : string/int32 
+                                   ( `Builtin$.string$_length` : string/int32 
                                    , input : string
                                    )
                                , 0 
@@ -855,13 +855,13 @@ objects =
                             @<list(char)>
                               ( f : string/list(char)/list(char)
                               , @<string>
-                                  ( Builtin$.string_tail : string/string
+                                  ( `Builtin$.string$_tail` : string/string
                                   , input : string
                                   )
                               , @<list(char)>
                                   ( $Cons : char/list(char)/list(char)
                                   , @<char>
-                                      ( Builtin$.string_head : string/char
+                                      ( `Builtin$.string$_head_unsafe` : string/char
                                       , input : string
                                       )
                                   , result : list(char)
@@ -871,7 +871,7 @@ objects =
                       @<list(char)>
                         ( f : string/list(char)/list(char)
                         , @<string>
-                            ( Builtin$.string_reverse : string/string 
+                            ( `Builtin$.string$_reverse` : string/string 
                             , str : string
                             )
                         , $Nil : list(char)
@@ -950,13 +950,13 @@ objects =
                   let 
                     a : int32 = 
                       @<int32>
-                        ( Builtin$.nat$_unpack : $Nat/int32
+                        ( `Builtin$.nat$_unpack` : $Nat/int32
                         , x : $Nat )
                       in
                         let
                           b : int32 =
                             @<int32>
-                              ( Builtin$.nat$_unpack : $Nat/int32
+                              ( `Builtin$.nat$_unpack` : $Nat/int32
                               , y : $Nat )
                           in
                             if ([== int32](a : int32, b : int32)) then true else false 

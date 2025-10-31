@@ -13,10 +13,6 @@ builtinFunctions =
     , forall0 (TIntrinsic IBool ~> TIntrinsic IBool)
     )
   ,
-    ( "not"
-    , forall0 (TIntrinsic IBool ~> TIntrinsic IBool)
-    )
-  ,
     ( "operator$__reverse_composition"
     , forall3 $ \t0 t1 t2 -> (t1 ~> t2) ~> (t0 ~> t1) ~> t0 ~> t2
     )
@@ -97,16 +93,40 @@ builtinFunctions =
     , forall0 (TIntrinsic IString ~> TIntrinsic IString ~> TIntrinsic IString)
     )
   ,
-    ( "int32_to_string"
+    ( "string$_int32_to_string"
     , forall0 (TIntrinsic IInt32 ~> TIntrinsic IString)
     )
   ,
-    ( "float_to_string"
+    ( "string$_float_to_string"
     , forall0 (TIntrinsic IFloat ~> TIntrinsic IString)
     )
   ,
-    ( "double_to_string"
+    ( "string$_double_to_string"
     , forall0 (TIntrinsic IDouble ~> TIntrinsic IString)
+    )
+  ,
+    ( "string$_to_list"
+    , forall0 (TIntrinsic IString ~> listType (TIntrinsic IChar))
+    )
+  ,
+    ( "string$_tail"
+    , forall0 (TIntrinsic IString ~> TIntrinsic IString)
+    )
+  ,
+    ( "string$_reverse"
+    , forall0 (TIntrinsic IString ~> TIntrinsic IString)
+    )
+  ,
+    ( "string$_remove_whitespace"
+    , forall0 (TIntrinsic IString ~> TIntrinsic IString)
+    )
+  ,
+    ( "string$_head_unsafe"
+    , forall0 (TIntrinsic IString ~> TIntrinsic IChar)
+    )
+  ,
+    ( "string$_length"
+    , forall0 (TIntrinsic IString ~> TIntrinsic IInt32)
     )
   ,
     ( "nat$_unpack"
@@ -115,6 +135,10 @@ builtinFunctions =
   ,
     ( "nat$_pack"
     , forall0 (TIntrinsic IInt32 ~> TIntrinsic INat)
+    )
+  ,
+    ( "not"
+    , forall0 (TIntrinsic IBool ~> TIntrinsic IBool)
     )
   ,
     ( "from_int32"
@@ -127,30 +151,6 @@ builtinFunctions =
   ,
     ( "compare"
     , forall1' (\t0 -> ([Trait "Ordered" t0], t0 ~> t0 ~> TConstructor KType "Ordering"))
-    )
-  ,
-    ( "string_to_list"
-    , forall0 (TIntrinsic IString ~> listType (TIntrinsic IChar))
-    )
-  ,
-    ( "string_head"
-    , forall0 (TIntrinsic IString ~> TIntrinsic IChar)
-    )
-  ,
-    ( "string_tail"
-    , forall0 (TIntrinsic IString ~> TIntrinsic IString)
-    )
-  ,
-    ( "string_reverse"
-    , forall0 (TIntrinsic IString ~> TIntrinsic IString)
-    )
-  ,
-    ( "string_remove_whitespace"
-    , forall0 (TIntrinsic IString ~> TIntrinsic IString)
-    )
-  ,
-    ( "string_length"
-    , forall0 (TIntrinsic IString ~> TIntrinsic IInt32)
     )
   ,
     ( "(<)"

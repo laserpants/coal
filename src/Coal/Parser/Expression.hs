@@ -141,6 +141,15 @@ parseSpecialNameExpression =
         <|> "io$_print_float"
         <|> "io$_println_double"
         <|> "io$_print_double"
+        <|> "string$_int32_to_string"
+        <|> "string$_float_to_string"
+        <|> "string$_double_to_string"
+        <|> "string$_to_list"
+        <|> "string$_reverse"
+        <|> "string$_remove_whitespace"
+        <|> "string$_tail"
+        <|> "string$_length"
+        <|> "string$_head_unsafe"
     pure (\ll -> EVariable ll (Label () spec))
 
 parseVariableExpression :: Parser (Expression Metadata ())

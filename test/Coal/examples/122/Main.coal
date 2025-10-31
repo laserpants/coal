@@ -1,0 +1,10 @@
+module Main {
+
+  import IO(print_string)
+  import String(int32_to_string)
+
+  // TODO: This should be an error
+  fun main() =
+    println_string(int32_to_string(342))
+
+}

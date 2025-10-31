@@ -34,8 +34,7 @@ typePhasePasses =
     >-> passLambdaMatchExpansion
     >-> passTypeInference
     >-> generateDebugArtifacts "TypeInference"
+    >-> passTypePhaseErrors
 
 typePhase :: (MonadIO m) => Pass Metadata m [Module Metadata Kind ()] [Module Metadata Kind IndexedType]
-typePhase =
-  mapPass (localPass insertEnv typePhasePasses)
-    >-> mapPass passTypePhaseErrors
+typePhase = mapPass (localPass insertEnv typePhasePasses)

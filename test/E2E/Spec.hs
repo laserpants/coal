@@ -125,13 +125,25 @@ e2eSpec = do
     expectOutput "Alphonso" ["./test/Coal/examples/021/Main.coal"]
 
   describe "022" $
-    expectOutput "1234" ["./test/Coal/examples/022/Main.coal"]
+    expectOutput
+      "1234"
+      [ "./test/Coal/examples/022/Main.coal"
+      , "./lang/String.coal"
+      ]
 
   describe "023" $
-    expectOutput "123" ["./test/Coal/examples/023/Main.coal"]
+    expectOutput
+      "123"
+      [ "./test/Coal/examples/023/Main.coal"
+      , "./lang/String.coal"
+      ]
 
   describe "024" $
-    expectOutput "x" ["./test/Coal/examples/024/Main.coal"]
+    expectOutput
+      "x"
+      [ "./test/Coal/examples/024/Main.coal"
+      , "./lang/String.coal"
+      ]
 
   describe "025" $ do
     it "is NoSuchIdentifier" $ do
@@ -142,7 +154,11 @@ e2eSpec = do
     expectOutput "5" ["./test/Coal/examples/026/Main.coal"]
 
   describe "027" $
-    expectOutput "ananab" ["./test/Coal/examples/027/Main.coal"]
+    expectOutput
+      "ananab"
+      [ "./test/Coal/examples/027/Main.coal"
+      , "./lang/String.coal"
+      ]
 
   describe "028" $
     expectOutput "2" ["./test/Coal/examples/028/Main.coal"]
@@ -151,19 +167,39 @@ e2eSpec = do
     expectOutput "5" ["./test/Coal/examples/029/Main.coal"]
 
   describe "030" $
-    expectOutput "123" ["./test/Coal/examples/030/Main.coal"]
+    expectOutput
+      "123"
+      [ "./test/Coal/examples/030/Main.coal"
+      , "./lang/String.coal"
+      ]
 
   describe "031" $
-    expectOutput "111\n111" ["./test/Coal/examples/031/Main.coal"]
+    expectOutput
+      "111\n111"
+      [ "./test/Coal/examples/031/Main.coal"
+      , "./lang/String.coal"
+      ]
 
   describe "032" $
-    expectOutput "9876" ["./test/Coal/examples/032/Main.coal"]
+    expectOutput
+      "9876"
+      [ "./test/Coal/examples/032/Main.coal"
+      , "./lang/String.coal"
+      ]
 
   describe "033" $
-    expectOutput "-123" ["./test/Coal/examples/033/Main.coal"]
+    expectOutput
+      "-123"
+      [ "./test/Coal/examples/033/Main.coal"
+      , "./lang/String.coal"
+      ]
 
   describe "034" $
-    expectOutput "59876" ["./test/Coal/examples/034/Main.coal"]
+    expectOutput
+      "59876"
+      [ "./test/Coal/examples/034/Main.coal"
+      , "./lang/String.coal"
+      ]
 
   describe "035" $
     expectOutput "true" ["./test/Coal/examples/035/Main.coal"]
@@ -284,8 +320,9 @@ e2eSpec = do
     expectOutput
       "{\"abc\":[\"a\",\"b\",\"c\"],\"pi\":3.14159}"
       [ "./test/Coal/examples/067/List.coal"
-      , "./test/Coal/examples/067/String.coal"
+      , "./test/Coal/examples/067/StringUtils.coal"
       , "./test/Coal/examples/067/Main.coal"
+      , "./lang/String.coal"
       ]
 
   describe "068" $
@@ -483,6 +520,43 @@ e2eSpec = do
 
   describe "120" $ do
     expectOutput "true" ["./test/Coal/examples/120/Main.coal"]
+
+  describe "121" $ do
+    expectOutput
+      "342"
+      [ "./test/Coal/examples/121/Main.coal"
+      , "./lang/String.coal"
+      ]
+
+  -- 122?
+
+  describe "123" $ do
+    expectOutput
+      "4.1"
+      [ "./test/Coal/examples/123/Main.coal"
+      , "./lang/String.coal"
+      ]
+
+  describe "124" $ do
+    expectOutput
+      "ail"
+      [ "./test/Coal/examples/124/Main.coal"
+      , "./lang/String.coal"
+      ]
+
+  describe "125" $ do
+    expectOutput
+      "11"
+      [ "./test/Coal/examples/125/Main.coal"
+      , "./lang/String.coal"
+      ]
+
+  describe "126" $ do
+    expectOutput
+      "h"
+      [ "./test/Coal/examples/126/Main.coal"
+      , "./lang/String.coal"
+      ]
 
 expectOutput :: String -> [FilePath] -> Spec
 expectOutput expt files =

@@ -1,0 +1,14 @@
+module Main {
+
+  import IO(println_int32, println_char)
+  import String(head)
+
+  fun main() =
+    match(head("hello")) {
+      | Some(c) => 
+          println_char(c)
+      | None => 
+          println_int32(2)
+    }
+
+}

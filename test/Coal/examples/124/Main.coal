@@ -1,0 +1,9 @@
+module Main {
+
+  import IO(println_string)
+  import String(tail)
+
+  fun main() =
+    println_string(tail("tail"))
+
+}
