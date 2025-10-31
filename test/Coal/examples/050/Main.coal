@@ -1,5 +1,7 @@
 module Main {
 
+  import Nat(pack, unpack)
+
   fun fold_list(f : a -> b -> b, xs : List<a>, x : b) =
     fold(xs, x) {
       | [] =>
@@ -17,11 +19,11 @@ module Main {
     }
 
   fun enum_to(n : int32) : List<int32> =
-    fold(pack_nat(n)) {
+    fold(pack(n)) {
       | Zero =>
           []
       | Succ(@next) as m =>
-          next ++ [unpack_nat(m)]
+          next ++ [unpack(m)]
     }
 
   fun factorial(n : int32) =

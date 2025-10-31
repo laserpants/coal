@@ -1,5 +1,7 @@
 module Main {
 
+  import Nat(pack, unpack)
+
   cotype Stream<a> = { Head : a, Tail : Stream<a> }
 
   unfold enum_from(n : int32) : Stream<int32> { 
@@ -8,7 +10,7 @@ module Main {
   }
 
   fun drop(n : int32, s) =
-    fold(pack_nat(n), s) {
+    fold(pack(n), s) {
       | Zero =>
           fn(t) => t
       | Succ(@next) =>

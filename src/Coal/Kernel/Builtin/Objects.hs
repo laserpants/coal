@@ -176,7 +176,7 @@ objects =
                   #(double_to_string : double/string, d : double) (fn(r : string) => r : string)
               |]
         , OFunction
-            "Builtin$.unpack_nat"
+            "Builtin$.nat$_unpack"
             [ Label (Kernel.TCon "$Nat" []) "nat"
             ]
             [r| 
@@ -191,7 +191,7 @@ objects =
                   }
               |]
         , OFunction
-            "Builtin$.pack_nat"
+            "Builtin$.nat$_pack"
             [ Label Kernel.int32 "n"
             ]
             [r| 
@@ -449,7 +449,7 @@ objects =
             ]
             [r| 
                   @<$Nat>
-                    ( Builtin$.pack_nat : int32/$Nat
+                    ( Builtin$.nat$_pack : int32/$Nat
                     , n : int32
                     )
               |]
@@ -460,14 +460,14 @@ objects =
             ]
             [r| 
                   @<$Nat>
-                    ( Builtin$.pack_nat : int32/$Nat
+                    ( Builtin$.nat$_pack : int32/$Nat
                     , [+ int32]
                         ( @<int32>
-                            ( Builtin$.unpack_nat : $Nat/int32
+                            ( Builtin$.nat$_unpack : $Nat/int32
                             , lhs : $Nat
                             )
                         , @<int32>
-                            ( Builtin$.unpack_nat : $Nat/int32
+                            ( Builtin$.nat$_unpack : $Nat/int32
                             , rhs : $Nat
                             )
                         )
@@ -480,16 +480,16 @@ objects =
             ]
             [r| 
                   @<$Nat>
-                    ( Builtin$.pack_nat : int32/$Nat
+                    ( Builtin$.nat$_pack : int32/$Nat
                     , let
                         n : int32 =
                           [- int32]
                             ( @<int32>
-                                ( Builtin$.unpack_nat : $Nat/int32
+                                ( Builtin$.nat$_unpack : $Nat/int32
                                 , lhs : $Nat
                                 )
                             , @<int32>
-                                ( Builtin$.unpack_nat : $Nat/int32
+                                ( Builtin$.nat$_unpack : $Nat/int32
                                 , rhs : $Nat
                                 )
                             )
@@ -506,14 +506,14 @@ objects =
             ]
             [r| 
                   @<$Nat>
-                    ( Builtin$.pack_nat : int32/$Nat
+                    ( Builtin$.nat$_pack : int32/$Nat
                     , [* int32]
                         ( @<int32>
-                            ( Builtin$.unpack_nat : $Nat/int32
+                            ( Builtin$.nat$_unpack : $Nat/int32
                             , lhs : $Nat
                             )
                         , @<int32>
-                            ( Builtin$.unpack_nat : $Nat/int32
+                            ( Builtin$.nat$_unpack : $Nat/int32
                             , rhs : $Nat
                             )
                         )
@@ -611,7 +611,7 @@ objects =
                                     let
                                       z : int32 =
                                         @<int32>
-                                          ( `Builtin$.unpack_nat` : $Nat/int32
+                                          ( `Builtin$.nat$_unpack` : $Nat/int32
                                           , n : $Nat 
                                           )
                                       in
@@ -894,13 +894,13 @@ objects =
                   let 
                     a : int32 = 
                       @<int32>
-                        ( Builtin$.unpack_nat : $Nat/int32
+                        ( Builtin$.nat$_unpack : $Nat/int32
                         , x : $Nat )
                       in
                         let
                           b : int32 =
                             @<int32>
-                              ( Builtin$.unpack_nat : $Nat/int32
+                              ( Builtin$.nat$_unpack : $Nat/int32
                               , y : $Nat )
                           in
                             if ([== int32](a : int32, b : int32)) then true else false 

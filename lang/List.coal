@@ -1,4 +1,4 @@
-module Coal.List {
+module List {
 
   import Coal.Combinators(always, identity)
 

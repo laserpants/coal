@@ -1,0 +1,11 @@
+module Main {
+
+  fun lte
+    | (true, false) = false
+    | (false, true) = true
+    | (_, _)        = true
+
+  fun main() =
+    trace_bool(lte(false, true))
+
+}

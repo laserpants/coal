@@ -1,11 +1,13 @@
 module Math {
 
+  import Nat(pack, unpack)
+
   fun factorial(n : int32) : int32 =
-    fold(pack_nat(n)) {
+    fold(pack(n)) {
       | Zero =>
           1
       | Succ(@f) as m =>
-          unpack_nat(m) * f
+          unpack(m) * f
     }
 
 }

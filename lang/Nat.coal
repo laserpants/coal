@@ -1,0 +1,7 @@
+module Nat {
+
+  fun pack(m : int32) : nat = nat$_pack(m)
+
+  fun unpack(n : nat) : int32 = nat$_unpack(n)
+
+}

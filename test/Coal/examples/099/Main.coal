@@ -1,5 +1,7 @@
 module Main {
 
+  import Nat(pack, unpack)
+
   fun fib(p : nat) =
     let (res, _) =
       fold(p - 1) {
@@ -15,6 +17,6 @@ module Main {
       res
 
   fun main() =
-    trace_int32(unpack_nat(fib(6)))
+    trace_int32(unpack(fib(6)))
 
 }

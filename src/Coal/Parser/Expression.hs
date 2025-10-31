@@ -66,7 +66,11 @@ parseUnit =
 parseFunctionApplication :: Parser (Expression Metadata ())
 parseFunctionApplication =
   withMetadata $ do
-    f <- try (parens parseExpression) <|> parseDataConstructor <|> parseVariableExpression
+    f <-
+      try (parens parseExpression)
+        <|> parseDataConstructor
+        <|> parseSpecialNameExpression
+        <|> parseVariableExpression
     xs <- parens (nonEmptyOr parseUnit (commaSep parseExpression))
     pure (\loc -> EApplication loc () f xs)
 
@@ -114,6 +118,12 @@ parseFoldExpression = do
     es <- parens (nonEmpty (commaSep1 parseExpression))
     cs <- braces (nonEmpty (some parseClause))
     pure (\loc -> EFold loc () es cs Nothing)
+
+parseSpecialNameExpression :: Parser (Expression Metadata ())
+parseSpecialNameExpression =
+  withMetadata $ do
+    spec <- "nat$_pack" <|> "nat$_unpack"
+    pure (\ll -> EVariable ll (Label () spec))
 
 parseVariableExpression :: Parser (Expression Metadata ())
 parseVariableExpression =

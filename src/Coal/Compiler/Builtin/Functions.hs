@@ -77,11 +77,11 @@ builtinFunctions =
     , forall0 (TIntrinsic IDouble ~> TIntrinsic IString)
     )
   ,
-    ( "unpack_nat"
+    ( "nat$_unpack"
     , forall0 (TIntrinsic INat ~> TIntrinsic IInt32)
     )
   ,
-    ( "pack_nat"
+    ( "nat$_pack"
     , forall0 (TIntrinsic IInt32 ~> TIntrinsic INat)
     )
   ,
