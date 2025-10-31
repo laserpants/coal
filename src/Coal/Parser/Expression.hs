@@ -122,7 +122,25 @@ parseFoldExpression = do
 parseSpecialNameExpression :: Parser (Expression Metadata ())
 parseSpecialNameExpression =
   withMetadata $ do
-    spec <- "nat$_pack" <|> "nat$_unpack"
+    spec <-
+      "nat$_pack"
+        <|> "nat$_unpack"
+        <|> "io$_println_string"
+        <|> "io$_print_string"
+        <|> "io$_println_int32"
+        <|> "io$_print_int32"
+        <|> "io$_println_int64"
+        <|> "io$_print_int64"
+        <|> "io$_println_bignum"
+        <|> "io$_print_bignum"
+        <|> "io$_println_bool"
+        <|> "io$_print_bool"
+        <|> "io$_println_char"
+        <|> "io$_print_char"
+        <|> "io$_println_float"
+        <|> "io$_print_float"
+        <|> "io$_println_double"
+        <|> "io$_print_double"
     pure (\ll -> EVariable ll (Label () spec))
 
 parseVariableExpression :: Parser (Expression Metadata ())

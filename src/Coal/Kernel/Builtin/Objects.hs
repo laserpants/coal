@@ -91,60 +91,116 @@ objects =
                   }
               |]
         , OFunction
-            "Builtin$.trace_int32"
+            "Builtin$.io$_print_int32"
             [ Label Kernel.int32 "n"
             ]
             [r|
                   #(print_int32 : int32/*, n : int32) (fn(a : *) => a : *)
               |]
         , OFunction
-            "Builtin$.trace_int64"
+            "Builtin$.io$_print_int64"
             [ Label Kernel.int64 "n"
             ]
             [r|
                   #(print_int64 : int64/*, n : int64) (fn(a : *) => a : *)
               |]
         , OFunction
-            "Builtin$.trace_bignum"
+            "Builtin$.io$_print_bignum"
             [ Label Kernel.bignum "n"
             ]
             [r|
                   #(print_bignum : bignum/*, n : bignum) (fn(a : *) => a : *)
               |]
         , OFunction
-            "Builtin$.trace_string"
+            "Builtin$.io$_print_string"
             [ Label Kernel.string "s"
             ]
             [r|
                   #(print_string : string/*, s : string) (fn(a : *) => a : *)
               |]
         , OFunction
-            "Builtin$.trace_bool"
-            [ Label Kernel.string "b"
+            "Builtin$.io$_print_bool"
+            [ Label Kernel.bool "b"
             ]
             [r|
                   #(print_bool : bool/*, b : bool) (fn(a : *) => a : *)
               |]
         , OFunction
-            "Builtin$.trace_char"
+            "Builtin$.io$_print_char"
             [ Label Kernel.char "c"
             ]
             [r|
                   #(print_char : char/*, c : char) (fn(a : *) => a : *)
               |]
         , OFunction
-            "Builtin$.trace_float"
+            "Builtin$.io$_print_float"
             [ Label Kernel.float "f"
             ]
             [r|
                   #(print_float : float/*, f : float) (fn(a : *) => a : *)
               |]
         , OFunction
-            "Builtin$.trace_double"
+            "Builtin$.io$_print_double"
             [ Label Kernel.double "d"
             ]
             [r|
                   #(print_double : double/*, d : double) (fn(a : *) => a : *)
+              |]
+        , OFunction
+            "Builtin$.io$_println_int32"
+            [ Label Kernel.int32 "n"
+            ]
+            [r|
+                  #(println_int32 : int32/*, n : int32) (fn(a : *) => a : *)
+              |]
+        , OFunction
+            "Builtin$.io$_println_int64"
+            [ Label Kernel.int64 "n"
+            ]
+            [r|
+                  #(println_int64 : int64/*, n : int64) (fn(a : *) => a : *)
+              |]
+        , OFunction
+            "Builtin$.io$_println_bignum"
+            [ Label Kernel.bignum "n"
+            ]
+            [r|
+                  #(println_bignum : bignum/*, n : bignum) (fn(a : *) => a : *)
+              |]
+        , OFunction
+            "Builtin$.io$_println_string"
+            [ Label Kernel.string "s"
+            ]
+            [r|
+                  #(println_string : string/*, s : string) (fn(a : *) => a : *)
+              |]
+        , OFunction
+            "Builtin$.io$_println_bool"
+            [ Label Kernel.bool "b"
+            ]
+            [r|
+                  #(println_bool : bool/*, b : bool) (fn(a : *) => a : *)
+              |]
+        , OFunction
+            "Builtin$.io$_println_char"
+            [ Label Kernel.char "c"
+            ]
+            [r|
+                  #(println_char : char/*, c : char) (fn(a : *) => a : *)
+              |]
+        , OFunction
+            "Builtin$.io$_println_float"
+            [ Label Kernel.float "f"
+            ]
+            [r|
+                  #(println_float : float/*, f : float) (fn(a : *) => a : *)
+              |]
+        , OFunction
+            "Builtin$.io$_println_double"
+            [ Label Kernel.double "d"
+            ]
+            [r|
+                  #(println_double : double/*, d : double) (fn(a : *) => a : *)
               |]
         , OFunction
             "Builtin$.operator$__string_concatenation"

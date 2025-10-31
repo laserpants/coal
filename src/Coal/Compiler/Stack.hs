@@ -20,6 +20,7 @@ module Coal.Compiler.Stack (
   insertNamesC,
   insertConstraintsC,
   insertAssumptionsC,
+  clearAssumptionsC,
   updateSubstitutionC,
   clearConstraintsC,
   clearTypeAnnotationParamsC,
@@ -121,6 +122,10 @@ clearConstraintsC = modify (overCompilerConstraints (const mempty))
 {-# INLINE clearTypeAnnotationParamsC #-}
 clearTypeAnnotationParamsC :: (Monad m) => CompilerT a m ()
 clearTypeAnnotationParamsC = modify (overCompilerTypeAnnotationParams (const mempty))
+
+{-# INLINE clearAssumptionsC #-}
+clearAssumptionsC :: (Monad m) => CompilerT a m ()
+clearAssumptionsC = modify (overCompilerAssumptions (const []))
 
 {-# INLINE insertAssumptionsC #-}
 insertAssumptionsC :: (Monad m) => [CompilerAssumption a] -> CompilerT a m ()
