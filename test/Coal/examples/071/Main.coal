@@ -1,7 +1,6 @@
 module Main {
 
   import IO(println_string, println_int32, println_bool)
-
   import Nat(pack, unpack)
 
   cotype Stream<a> = { Head : a, Tail : Stream<a> }
