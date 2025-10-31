@@ -1,5 +1,7 @@
 module Main {
 
+  import IO(println_string, println_int32, println_bool)
+
   fun faz(n : int32) =
     { baz = 
       { f = (fn(_) => n, "wat") 
@@ -14,5 +16,5 @@ module Main {
       } = 
         faz(5)
     in
-      trace_int32(a(false))
+      println_int32(a(false))
 }

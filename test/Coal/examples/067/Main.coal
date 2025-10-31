@@ -1,5 +1,6 @@
 module Main {
 
+  import IO(println_string)
   import String(intercalate)
 
   type JsonValue
@@ -40,6 +41,6 @@ module Main {
       , ("pi", JsonNumber(3.141591415914159))
       ])
 
-  fun main() = trace_string(encode_json(test_obj))
+  fun main() = println_string(encode_json(test_obj))
 
 }

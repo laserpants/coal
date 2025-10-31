@@ -1,5 +1,7 @@
 module Main {
 
+  import IO(println_int32, println_bool, println_string, println_char)
+
   trait JsonSerializable<a> {
     to_json : a -> string
   }
@@ -19,7 +21,7 @@ module Main {
   fun main() = 
     let
       a = 
-         trace_string(to_json(a_test_user))
+         println_string(to_json(a_test_user))
        in
-         trace_string(f(a_test_user))
+         println_string(f(a_test_user))
 }

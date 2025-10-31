@@ -1,12 +1,14 @@
 module Main {
 
+  import IO(println_double)
+
   fun sum_of(x, y, z) = 
     x + y + z 
 
   fun main() =
     match ((sum_of(1, 2, 3 : int32), sum_of(0.5, 1.0, 1.5))) {
       | (_, f) =>
-          trace_double(f)
+          println_double(f)
     }
 
 }

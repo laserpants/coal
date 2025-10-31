@@ -10,6 +10,6 @@ module IO {
       in
         match(r) {
           | { a = str } =>
-            trace_string(str)
+            println_string(str)
         }
 }

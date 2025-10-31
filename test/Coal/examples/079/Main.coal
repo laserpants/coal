@@ -1,9 +1,11 @@
 module Main {
 
+  import IO(println_string, println_int32, println_bool)
+
   fun baz((x, { a = v })) =
     v
 
   fun main() =
-    trace_int32(baz(("what", { a = 5 })))
+    println_int32(baz(("what", { a = 5 })))
 
 }

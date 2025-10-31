@@ -1,9 +1,11 @@
 module Main {
 
+  import IO(println_string, println_int32, println_bool)
+
   fun main() =
     match(("a", "b")) {
       | (_, _) =>
-          trace_int32(123)
+          println_int32(123)
     }
 
 }

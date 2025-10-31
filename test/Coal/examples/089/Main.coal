@@ -1,5 +1,7 @@
 module Main {
 
+  import IO(println_string, println_int32, println_bool)
+
   fun main() =
-    trace_int32((fn((x, y)) => x + 1)((2, "foo")))
+    println_int32((fn((x, y)) => x + 1)((2, "foo")))
 }

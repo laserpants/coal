@@ -1,5 +1,7 @@
 module Main {
 
+  import IO(println_string, println_int32, println_bool)
+
   type MyList<a> 
     = Nil 
     | Cons(a, MyList<a>)
@@ -10,6 +12,6 @@ module Main {
   }
 
   fun main() = 
-    trace_int32(len(Cons("a", Nil)))
+    println_int32(len(Cons("a", Nil)))
 
 }

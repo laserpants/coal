@@ -1,5 +1,7 @@
 module Main {
 
+  import IO(println_int32, println_bool, println_string, println_char)
+
   fun fst((a, b)) = a
 
   fun main() =
@@ -10,7 +12,7 @@ module Main {
         let p =
           (identity(3), identity("three"))
         in
-          trace_int32(fst(p))
+          println_int32(fst(p))
 
 }
 

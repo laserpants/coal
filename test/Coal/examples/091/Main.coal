@@ -1,7 +1,9 @@
 module Main {
 
+  import IO(println_string, println_int32, println_bool)
+
   fun main() =
     let (x :: xs) = ["a", "b"]
-     in trace_int32(1)
+     in println_int32(1)
 
 }

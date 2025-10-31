@@ -1,5 +1,7 @@
 module Main {
 
+  import IO(println_string, println_int32, println_bool)
+
   fun foo 
     | ([a], true)    = "a"
     | ([a, _], true) = "b"
@@ -7,6 +9,6 @@ module Main {
     | (_, _)         = "d"
 
   fun main() =
-    trace_string(foo([1, 2], false))
+    println_string(foo([1, 2], false))
 
 }

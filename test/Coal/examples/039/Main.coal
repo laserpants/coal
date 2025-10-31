@@ -1,5 +1,7 @@
 module Main {
 
+  import IO(println_int32, println_bool, println_string, println_char)
+
   trait Functor<f : * -> *> {
     map : (a -> b) -> f<a> -> f<b>
   }
@@ -30,8 +32,8 @@ module Main {
       in
         match(xs) {
           | [] =>
-              trace_int32(-1)
+              println_int32(-1)
           | x :: _ =>
-              trace_int32(x)
+              println_int32(x)
         }
 }

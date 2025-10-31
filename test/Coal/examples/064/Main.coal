@@ -1,5 +1,7 @@
 module Main {
 
+  import IO(println_int32, println_bool, println_string, println_char)
+
   fun sum(numbers : List<int32>) : int32 =
     fold(numbers) {
       | [] =>
@@ -9,6 +11,6 @@ module Main {
     }
 
   fun main() =
-    trace_int32(sum([1,2,3]))
+    println_int32(sum([1,2,3]))
 
 }

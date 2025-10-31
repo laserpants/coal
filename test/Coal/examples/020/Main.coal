@@ -1,10 +1,12 @@
 module Main {
 
+  import IO(println_int32, println_bool, println_string)
+
   let a_user_named_lazarus = 
     { name = "Lazarus"
     , uid = 2 : int32
     }
 
   fun main() =
-    trace_string(a_user_named_lazarus.name)
+    println_string(a_user_named_lazarus.name)
 }

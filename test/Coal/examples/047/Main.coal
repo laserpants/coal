@@ -1,5 +1,7 @@
 module Main {
 
+  import IO(println_double)
+
   fun main() =
     let 
       x =
@@ -9,6 +11,6 @@ module Main {
           y =
             4.6
           in
-            trace_double(x * y)
+            println_double(x * y)
 
 }

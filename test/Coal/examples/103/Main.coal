@@ -1,5 +1,7 @@
 module Main {
 
+  import IO(println_string, println_int32, println_bool)
+
   trait Foo<a> {
     foo: a -> int32
   }
@@ -12,6 +14,6 @@ module Main {
     let
        zs = foo(5 : int32)
      in
-       trace_int32(zs : int32)
+       println_int32(zs : int32)
 
 }

@@ -1,11 +1,13 @@
 module Main {
 
+  import IO(println_string, println_int32, println_bool)
+
   fun lte
     | (true, false) = false
     | (false, true) = true
     | (_, _)        = true
 
   fun main() =
-    trace_bool(lte(false, true))
+    println_bool(lte(false, true))
 
 }

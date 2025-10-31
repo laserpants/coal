@@ -1,6 +1,7 @@
 module Main {
 
   import Coal.Combinators(always)
+  import IO(println_int32)
 
   type Tree<a>
     = Node(a, Tree<a>, Tree<a>)
@@ -38,7 +39,7 @@ module Main {
       xs =
         [5, 3, 7, 2, 100, 6, 4] : List<int32>
       in
-        trace_int32(match(sort(xs)) {
+        println_int32(match(sort(xs)) {
           | [] =>
               12345
           | (y :: _) =>

@@ -1,5 +1,7 @@
 module Main {
 
+  import IO(println_string, println_int32, println_bool)
+
   import Nat(pack, unpack)
 
   fun fib(p : nat) =
@@ -17,6 +19,6 @@ module Main {
       res
 
   fun main() =
-    trace_int32(unpack(fib(6)))
+    println_int32(unpack(fib(6)))
 
 }

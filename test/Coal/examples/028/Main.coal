@@ -1,11 +1,13 @@
 module Main {
 
+  import IO(println_int32, println_bool, println_string, println_char)
+
   fun main() =
     let 
       chrs = 
         [] : List<char>
       in
-        trace_int32 
+        println_int32 
         (
             fold(chrs, 5 : int32) {
               | ch :: chs =>

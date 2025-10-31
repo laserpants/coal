@@ -1,5 +1,6 @@
 module String {
 
+  import IO(println_int32, println_bool, println_string, println_char)
   import List(reduce)
 
   fun intercalate(sep : string, strs : List<string>) : string =

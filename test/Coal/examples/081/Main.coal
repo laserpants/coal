@@ -1,11 +1,13 @@
 module Main {
 
+  import IO(println_string, println_int32, println_bool)
+
   fun baz(a) =
     match(a) {
       | @x :: xs => ""
     }
 
   fun main() =
-    trace_int32(1)
+    println_int32(1)
 
 }

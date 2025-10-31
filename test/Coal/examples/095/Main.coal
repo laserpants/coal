@@ -1,5 +1,7 @@
 module Main {
 
+  import IO(println_string, println_int32, println_bool)
+
   cotype Counter = { Current : int32, Next : Counter }
 
   unfold count_from(n : int32) : Counter {
@@ -17,6 +19,6 @@ module Main {
   let counter_2 = counter_map(fn(x) => x + 1, counter)
 
   fun main() =
-    trace_int32(counter_2.Next.Current)
+    println_int32(counter_2.Next.Current)
 
 }

@@ -1,5 +1,7 @@
 module Main {
 
+  import IO(println_int32, println_bool, println_string, println_char)
+
   cotype Stream<a> = { Head : a, Tail : Stream<a> }
 
   unfold enum_from(n : int32) : Stream<int32> { 
@@ -15,6 +17,6 @@ module Main {
 //  }
 
   fun main() = 
-    trace_int32(((enum_from(0).Tail).Tail).Head)
+    println_int32(((enum_from(0).Tail).Tail).Head)
 
 }

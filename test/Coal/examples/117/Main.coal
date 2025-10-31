@@ -1,5 +1,7 @@
 module Main {
 
+  import IO(println_string, println_int32, println_bool)
+
   fun apply_fst
     | (f :: _, x : int32) = f(x)
     | ([], _) = 0
@@ -11,6 +13,6 @@ module Main {
       , fn(x) => x + 3
       ]
     in
-      trace_int32(apply_fst(fns, 3))
+      println_int32(apply_fst(fns, 3))
 
 }

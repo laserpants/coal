@@ -1,9 +1,11 @@
 module Main {
 
+  import IO(println_int32, println_bool, println_string)
+
   let foo : int32 -> int32 = fn(n : int32) =>
     false
 
   fun main() = 
-    trace_bool(foo(5))
+    println_bool(foo(5))
 
 }

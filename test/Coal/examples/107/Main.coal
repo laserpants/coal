@@ -1,9 +1,11 @@
 module Main {
 
+  import IO(println_string, println_int32, println_bool)
+
   fun banan(x : int32, x : bool) =
     "banan"
 
   fun main() =
-    trace_int32(152)
+    println_int32(152)
 
 }

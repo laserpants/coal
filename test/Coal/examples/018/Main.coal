@@ -1,6 +1,7 @@
 module Main {
 
   import Nat(pack, unpack)
+  import IO(println_int32, println_bool, println_string)
 
   fun factorial(n) =
     fold(pack(n)) {
@@ -11,6 +12,6 @@ module Main {
     }
 
   fun main() =
-    trace_int32(factorial(8))
+    println_int32(factorial(8))
 
 }

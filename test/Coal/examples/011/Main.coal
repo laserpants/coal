@@ -1,5 +1,7 @@
 module Main {
 
+  import IO(println_string)
+
   fun main() =
     let 
       r = 
@@ -7,6 +9,6 @@ module Main {
       in
         match(r) {
           | { b = b } =>
-              trace_string(b.msg)
+              println_string(b.msg)
         }
 }

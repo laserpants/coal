@@ -1,11 +1,13 @@
 module Main {
 
+  import IO(println_string, println_int32, println_bool)
+
   fun main() =
     let 
       a = "Hello";
       b = "Space";
       c = " "
     in
-      trace_string(a +++ c +++ b)
+      println_string(a +++ c +++ b)
 
 }

@@ -12,7 +12,7 @@ Main.main(_ : *) =
         x : float =
           [/ float](9.0f, 2.0f)
         in
-          #(print_float : float/*, x : float)
+          #(println_float : float/*, x : float)
           (fn(a : *) =>
             let
               y : int32 =

@@ -148,7 +148,7 @@ expectOutput :: String -> [FilePath] -> Spec
 expectOutput expt files =
   it ("\"" <> expt <> "\"") $ do
     res <- runKernelSpec files
-    res `shouldBe` Right (expt <> "\n")
+    res `shouldBe` Right expt
 
 runKernelSpec :: [FilePath] -> IO (Either CompilerFailureMode String)
 runKernelSpec files = do

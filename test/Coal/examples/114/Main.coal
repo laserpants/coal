@@ -1,9 +1,11 @@
 module Main {
 
+  import IO(println_string, println_int32, println_bool)
+
   fun fst((fst, _)) = 
     fst
 
   fun main() =
-    trace_int32(fst((5, 3)))
+    println_int32(fst((5, 3)))
 
 }

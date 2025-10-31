@@ -1,5 +1,7 @@
 module Main {
 
+  import IO(println_string, println_int32, println_bool)
+
   fun baz(xs, x : int32) =
      match(xs) {
        | f :: _ => f(x)
@@ -10,6 +12,6 @@ module Main {
     let xs = 
       [fn(x) => x + 1, fn(x) => x + 2, fn(x) => x + 3]
     in
-      trace_int32(baz(xs, 3))
+      println_int32(baz(xs, 3))
 
 }

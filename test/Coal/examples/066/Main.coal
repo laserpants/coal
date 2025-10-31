@@ -1,21 +1,22 @@
 module Main {
 
+  import IO(println_int32, println_bool, println_string, println_char)
   import List(head, length, is_empty, drop, take, reverse)
 
   fun main() =
-    // trace_int32(unpack_nat(length( [ 1 : int32, 2, 3, 4, 5 ] )))
-    // trace_bool(is_empty( [ 1 : int32, 2, 3, 4, 5 ] ))
+    // println_int32(unpack_nat(length( [ 1 : int32, 2, 3, 4, 5 ] )))
+    // println_bool(is_empty( [ 1 : int32, 2, 3, 4, 5 ] ))
 
     match(reverse([ 1, 2, 3, 4, 5, 6, 7 ])) {
-      | [] => trace_string("None")
-      | n :: _ => trace_int32(n)
+      | [] => println_string("None")
+      | n :: _ => println_int32(n)
     }
 
-    //trace_int32(unpack_nat(length(take(3, [ 1 : int32, 2, 3, 4, 5 ]))))
+    //println_int32(unpack_nat(length(take(3, [ 1 : int32, 2, 3, 4, 5 ]))))
 
     //match(drop(3, [ 1, 2, 3, 4, 5, 6, 7 ])) {
-    //  | [] => trace_string("None")
-    //  | n :: _ => trace_int32(n)
+    //  | [] => println_string("None")
+    //  | n :: _ => println_int32(n)
     //}
 
 }

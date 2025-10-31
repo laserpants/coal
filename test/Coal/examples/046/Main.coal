@@ -1,5 +1,7 @@
 module Main {
 
+  import IO(println_float)
+
   fun main() =
     let 
       x =
@@ -9,6 +11,6 @@ module Main {
           y =
             4.5f
           in
-            trace_float(x * y)
+            println_float(x * y)
 
 }

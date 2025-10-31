@@ -1,5 +1,7 @@
 module Main {
 
+  import IO(println_int32, println_bool, println_string, println_char)
+
   fun parse_unsigned(a : bool) : Option<int32> =
     fold([], Some(5)) {
       | ch :: _ =>
@@ -11,9 +13,9 @@ module Main {
   fun main() =
     match(parse_unsigned(false)) {
       | Some(a) =>
-          trace_int32(a)
+          println_int32(a)
       | None =>
-          trace_string("b")
+          println_string("b")
     }
 
 }

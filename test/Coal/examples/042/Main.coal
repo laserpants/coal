@@ -1,9 +1,11 @@
 module Main {
 
+  import IO(println_int32, println_bool, println_string, println_char)
+
   fun main() = 
     let
       x =
         5 + 3
       in
-        trace_int32(x)
+        println_int32(x)
 }

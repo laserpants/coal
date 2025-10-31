@@ -1,11 +1,13 @@
 module Main {
 
+  import IO(println_int32, println_bool, println_string, println_char)
+
   fun factorial(n : int32) =
     if (n == 0)
       then 1
       else n * factorial(n - 1)
 
   fun main() =
-    trace_int32(7)
+    println_int32(7)
 
 }

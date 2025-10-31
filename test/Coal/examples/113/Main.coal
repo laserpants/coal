@@ -1,5 +1,7 @@
 module Main {
 
+  import IO(println_string, println_int32, println_bool)
+
   fun foo(x : int32) =
     match(x) {
       | 1 => "a"
@@ -10,7 +12,7 @@ module Main {
 //    a
 
   fun main() =
-    //trace_int32(fst((5, 3)))
-    trace_string(foo(1))
+    //println_int32(fst((5, 3)))
+    println_string(foo(1))
 
 }

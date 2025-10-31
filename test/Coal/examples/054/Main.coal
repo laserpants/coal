@@ -1,5 +1,7 @@
 module Main {
 
+  import IO(println_int32, println_bool, println_string, println_char)
+
   fun main() =
     let
       extend = 
@@ -10,6 +12,6 @@ module Main {
             q = 
               extend({ baz = "hello" })
             in
-              trace_string(q.baz +++ " " +++ q.name)
+              println_string(q.baz +++ " " +++ q.name)
 
 }

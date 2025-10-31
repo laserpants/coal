@@ -1,5 +1,7 @@
 module Main {
 
+  import IO(println_int32, println_bool, println_string, println_char)
+
   fun digit_to_int32(ch) : Option<int32> =
     match(ch) {
       | '0' => Some(0)
@@ -103,8 +105,8 @@ module Main {
       in
         match(r) {
           | Some(n) =>
-              trace_int32(n)
+              println_int32(n)
           | None =>
-              trace_int32(0 : int32)
+              println_int32(0 : int32)
         } 
 }

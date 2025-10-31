@@ -1,5 +1,7 @@
 module Main {
 
+  import IO(println_int32, println_bool, println_string, println_char)
+
   fun digit_to_int32(ch) : int32 =
     match(ch) {
       | '0' => 0 
@@ -20,5 +22,5 @@ module Main {
       r =
         digit_to_int32('5')
       in
-        trace_int32(r)
+        println_int32(r)
 }

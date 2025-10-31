@@ -1,8 +1,10 @@
 module Main {
 
+  import IO(println_int32, println_bool, println_string, println_char)
+
   let baz = false
 
   fun main() =
-    trace_bool(baz)
+    println_bool(baz)
 
 }

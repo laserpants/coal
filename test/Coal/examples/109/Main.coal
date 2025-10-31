@@ -1,6 +1,8 @@
 module Main {
 
+  import IO(println_string, println_int32, println_bool)
+
   fun main() : IO<unit> =
-    trace_string("Hello, world!")
+    println_string("Hello, world!")
 
 }

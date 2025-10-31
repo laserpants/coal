@@ -1,3 +1,51 @@
 module IO {
 
+  fun println_string(s : string) : IO<unit> =
+    io$_println_string(s)
+
+  fun print_string(s : string) : IO<unit> =
+    io$_print_string(s)
+
+  fun println_int32(n : int32) : IO<unit> =
+    io$_println_int32(n)
+
+  fun print_int32(n : int32) : IO<unit> =
+    io$_print_int32(n)
+
+  fun println_int64(n : int64) : IO<unit> =
+    io$_println_int64(n)
+
+  fun print_int64(n : int64) : IO<unit> =
+    io$_print_int64(n)
+
+  fun println_bignum(b : bignum) : IO<unit> =
+    io$_println_bignum(b)
+
+  fun print_bignum(b : bignum) : IO<unit> =
+    io$_print_bignum(b)
+
+  fun println_bool(b : bool) : IO<unit> =
+    io$_println_bool(b)
+
+  fun print_bool(b : bool) : IO<unit> =
+    io$_print_bool(b)
+
+  fun println_char(c : char) : IO<unit> =
+    io$_println_char(c)
+
+  fun print_char(c : char) : IO<unit> =
+    io$_print_char(c)
+
+  fun println_float(f : float) : IO<unit> =
+    io$_println_float(f)
+
+  fun print_float(f : float) : IO<unit> =
+    io$_print_float(f)
+
+  fun println_double(d : double) : IO<unit> =
+    io$_println_double(d)
+
+  fun print_double(d : double) : IO<unit> =
+    io$_print_double(d)
+
 }

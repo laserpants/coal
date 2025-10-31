@@ -1,5 +1,7 @@
 module Main {
 
+  import IO(println_string, println_int32, println_bool)
+
   cotype Counter = { Current : int32, Next : Counter }
 
   // bug when removing type annotation
@@ -18,6 +20,6 @@ module Main {
   //let counter_2 = counter_map(fn(x) => x + 1, counter)
 
   fun main() =
-    trace_int32(counter.Next.Current)
+    println_int32(counter.Next.Current)
 
 }

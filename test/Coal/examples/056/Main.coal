@@ -1,5 +1,7 @@
 module Main {
 
+  import IO(println_int32, println_bool, println_string, println_char)
+
   fun remove_name(r) =
     match(r) {
       | { name = x | q } =>
@@ -11,6 +13,6 @@ module Main {
       q =
         remove_name({ name = "Tron", is_admin = true })
       in
-        trace_bool(q.is_admin)
+        println_bool(q.is_admin)
 
 }

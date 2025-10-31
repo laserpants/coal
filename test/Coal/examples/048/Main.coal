@@ -1,5 +1,7 @@
 module Main {
 
+  import IO(println_int32, println_bool, println_string, println_char)
+
   type JsonValue
     = JsonNull
     | JsonBool(bool)
@@ -9,6 +11,6 @@ module Main {
     | JsonObject(List<(string, JsonValue)>)
 
   fun main() =
-    trace_int32(123)
+    println_int32(123)
 
 }

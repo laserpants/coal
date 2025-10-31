@@ -1,9 +1,11 @@
 module Main {
 
+  import IO(println_string)
+
   fun main() =
     let 
       r = 
         { a = "cluedo" }
       in
-        trace_string(r.a)
+        println_string(r.a)
 }

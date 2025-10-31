@@ -1,9 +1,12 @@
 module Main {
 
+  import IO(println_int32)
+  import Nat(pack, unpack)
+
   // Type error
   //
   fun factorial(n : int32) : int32 =
-    fold(pack_nat(n)) {
+    fold(pack(n)) {
       | Zero =>
           1
       | Succ(@f) as m =>
@@ -11,6 +14,6 @@ module Main {
     }
 
   fun main() =
-    trace_int32(factorial(4))
+    println_int32(factorial(4))
 
 }

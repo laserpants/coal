@@ -1,5 +1,7 @@
 module Main {
 
+  import IO(println_int32, println_bool, println_string, println_char)
+
   type List<a> 
     = Nil 
     | Cons(a, List<a>)
@@ -16,6 +18,6 @@ module Main {
     s.Head
 
   fun main() = 
-    trace_int32(1)
+    println_int32(1)
 
 }

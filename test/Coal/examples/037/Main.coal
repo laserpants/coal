@@ -1,5 +1,7 @@
 module Main {
 
+  import IO(println_int32, println_bool, println_string, println_char)
+
   trait X<a> {
     x : bool -> a
   }
@@ -13,7 +15,7 @@ module Main {
       a =
         x(false)
       in
-        trace_bool(a)
+        println_bool(a)
 
   fun main() = 
     foo(2 : int32)
