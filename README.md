@@ -178,7 +178,6 @@ coal Main.coal -o dist
 
 | Milestone  | Feature/Fix                                           |                                                                                                                                                              
 | ---------- | ----------------------------------------------------- |                                                                                                                                                              
-| 1          | Error messages                                        |
 | 1          | FFI                                                   |             
 
 <!--

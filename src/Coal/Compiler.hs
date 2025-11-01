@@ -22,7 +22,8 @@ import Coal.Compiler.Pass.TypePhase (typePhase)
 import Coal.Compiler.Stack
 import Coal.Compiler.TypeInference.Errors (prettyErrorMessage)
 import Coal.Language
-import Coal.TypeSystem.Constraint.Generation.InferenceRule (InferenceRule (..))
+import Coal.TypeSystem.Constraint.Generation
+import Coal.TypeSystem.Constraint.Generation.Internal
 import Coal.TypeSystem.Substitution (normalizeTypeIndexes)
 import Control.Monad.Except
 import Data.Text (Text)
@@ -59,19 +60,35 @@ compile config files = do
     Right{} -> do
       pure ()
 
-prettyRule :: InferenceRule Kind a -> Text
+prettyRule :: (Show a) => InferenceRule Kind a -> Text
 prettyRule =
   \case
+    RuleAnnotation _ t1 _ ->
+      "Type annotation doesn't match inferred type, namely <" <> prettyType u1 <> ">"
+     where
+      u1 = normalizeTypeIndexes t1
     RuleLetImplicit _ _ t1 t2 ->
-      "Cannot unify (" <> prettyType u1 <> ") with (" <> prettyType u2 <> ")"
+      "Cannot unify <" <> prettyType u1 <> "> with <" <> prettyType u2 <> ">"
      where
       u1 = normalizeTypeIndexes t1
       u2 = normalizeTypeIndexes t2
-    _ ->
-      "TODO"
+    RuleTypeConstraint _ name t1 s ->
+      "Cannot unify " <> "<" <> name <> " : " <> prettyType s <> "> with expected type <" <> prettyType u1 <> ">"
+     where
+      u1 = normalizeTypeIndexes t1
+    e ->
+      Text.pack ("TODO: " <> show e)
 
 prettyType :: (Pretty t) => t -> Text
 prettyType p = renderStrict . layoutPretty defaultLayoutOptions $ pretty p
+
+prettyConstraintsGenError :: ConstraintsGenError a -> Text
+prettyConstraintsGenError =
+  \case
+    EIllFormedTypeAnnotation (EAnnotationNonDistinctParameter _ name) ->
+      "Type annotation is too general: error in the parameter '" <> name <> "'"
+    _ ->
+      "TODO"
 
 prettyError :: Environment Text -> CompilerError Metadata -> Text
 prettyError env =
@@ -87,7 +104,7 @@ prettyError env =
     NameNotInScope name erl ->
       errorMessage ["Name not in scope: '" <> name <> "'"] env erl
     ConstraintsError e erl ->
-      errorMessage ["TODO: " <> Text.pack (show e)] env erl
+      errorMessage ["Type error: " <> prettyConstraintsGenError e] env erl
     NonExhaustivePatterns erl ->
       errorMessage ["Non-exhaustive patterns"] env erl
     FoldPatternInRegularMatch erl ->

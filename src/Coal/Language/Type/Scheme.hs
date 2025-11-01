@@ -1,6 +1,7 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
 module Coal.Language.Type.Scheme (
@@ -26,11 +27,18 @@ import Data.Data (Data, Typeable)
 import Data.List.NonEmpty (NonEmpty (..), toList)
 import Data.Set (Set)
 import GHC.Generics (Generic)
+import Prettyprinter
 
 import qualified Data.Set as Set
 
 data Scheme o k t = Forall (Set (o k)) [Trait t] t
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable, Generic)
+
+instance (Pretty k, Pretty (o k), Pretty t) => Pretty (Scheme o k t) where
+  pretty =
+    \case
+      Forall _ _ t ->
+        pretty t
 
 {-# INLINE index #-}
 index :: Int -> TypeIndex Kind
