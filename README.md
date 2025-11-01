@@ -176,11 +176,11 @@ coal Main.coal -o dist
 ![](https://geps.dev/progress/75)
 -->
 
+<!--
 | Milestone  | Feature/Fix                                           |                                                                                                                                                              
 | ---------- | ----------------------------------------------------- |                                                                                                                                                              
 | 1          | FFI                                                   |             
 
-<!--
  - from_int32 -> from_integer
 -->
 
