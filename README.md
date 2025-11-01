@@ -5,9 +5,10 @@ This repository is the home of the **Coal programming language** and compiler.
 1. [About](#about)
 1. [Documentation](#documentation)
 1. [Installation and setup](#installation-and-setup)
-<!-- 1. [Project status and roadmap](#project-status-and-roadmap) -->
 1. [How to contribute](#how-to-contribute)
 1. [License](#license)
+
+<!-- 1. [Project status and roadmap](#project-status-and-roadmap) -->
 
 ## About
 
