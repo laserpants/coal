@@ -1,7 +1,7 @@
 module Main {
 
   import IO(println_int32, println_bool, println_string, println_char)
-  import String(to_list)
+  import String(to_list, int32_to_string)
 
   fun digit_to_int32(ch) : Option<int32> =
     match(ch) {

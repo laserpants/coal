@@ -4,9 +4,9 @@
 module Coal.Compiler.Pass.PreflightPhase.Setup (passSetup) where
 
 import Coal.Ast.Metadata (Metadata (..))
-import Coal.Compiler.Builtin.Definitions (builtinFunctions, insertBuiltinDefinitions)
+import Coal.Compiler.Builtin.Definitions (insertBuiltinDefinitions)
 import Coal.Compiler.Pass
-import Coal.Compiler.Stack (CompilerT, insertNamesC)
+import Coal.Compiler.Stack (CompilerT)
 import Coal.Language
 import Coal.Language.Module
 
@@ -18,6 +18,4 @@ passSetup =
     }
 
 pass :: (Monad m) => [Module Metadata Kind ()] -> CompilerT a m [Module Metadata Kind ()]
-pass modules = do
-  insertNamesC builtinFunctions
-  pure (overModuleDefinitions insertBuiltinDefinitions <$> modules)
+pass modules = pure (overModuleDefinitions insertBuiltinDefinitions <$> modules)

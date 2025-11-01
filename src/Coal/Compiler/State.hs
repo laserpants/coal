@@ -10,6 +10,7 @@ module Coal.Compiler.State (
   overCompilerAssumptions,
   overCompilerConstraints,
   overCompilerNameStore,
+  overCompilerGlobalNames,
   overCompilerSolverRuleViolations,
   overCompilerTypeAnnotationParams,
   overCompilerStateConstraintsGenErrors,
@@ -37,6 +38,7 @@ type CompilerAssumption a = Assumption a IndexedType
 data CompilerState a = CompilerState
   { compilerSupply :: Int
   , compilerNameStore :: Environment IndexedScheme
+  , compilerGlobalNames :: Environment (Environment IndexedScheme)
   , compilerModule :: Path
   , compilerSubstitution :: Substitution
   , compilerConstraints :: [CompilerConstraint a]
@@ -57,6 +59,10 @@ instance Supply (CompilerState a) where
 {-# INLINE overCompilerNameStore #-}
 overCompilerNameStore :: Over (CompilerState a) (Environment IndexedScheme)
 overCompilerNameStore fn CompilerState{..} = CompilerState{compilerNameStore = fn compilerNameStore, ..}
+
+{-# INLINE overCompilerGlobalNames #-}
+overCompilerGlobalNames :: Over (CompilerState a) (Environment (Environment IndexedScheme))
+overCompilerGlobalNames fn CompilerState{..} = CompilerState{compilerGlobalNames = fn compilerGlobalNames, ..}
 
 {-# INLINE overCompilerModule #-}
 overCompilerModule :: Over (CompilerState a) Path
@@ -107,6 +113,7 @@ initialCompilerState =
   CompilerState
     { compilerSupply = 0
     , compilerNameStore = mempty
+    , compilerGlobalNames = mempty
     , compilerModule = Path mempty
     , compilerSubstitution = mempty
     , compilerConstraints = []

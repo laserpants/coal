@@ -3,6 +3,7 @@
 module Coal.Compiler.Builtin.Definitions (
   module Coal.Compiler.Builtin.Functions,
   insertBuiltinDefinitions,
+  builtinTraitInstances,
 ) where
 
 import Coal.Compiler.Builtin.Functions (builtinFunctions)

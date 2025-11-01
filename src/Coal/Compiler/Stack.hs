@@ -18,12 +18,14 @@ module Coal.Compiler.Stack (
   evalCompilerT,
   insertNameC,
   insertNamesC,
+  insertGlobalNamesC,
   insertConstraintsC,
   insertAssumptionsC,
   clearAssumptionsC,
-  updateSubstitutionC,
+  clearNameStoreC,
   clearConstraintsC,
   clearTypeAnnotationParamsC,
+  updateSubstitutionC,
   updateSupply,
   updateSupplyC,
   insertSupplyC,
@@ -42,6 +44,7 @@ module Coal.Compiler.Stack (
 )
 where
 
+import Coal.Common.Environment (Environment)
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Supply (Supply (..))
 import Coal.Compiler.Config
@@ -111,6 +114,10 @@ insertNameC name scheme_ = modify (overCompilerNameStore (Environment.insert nam
 insertNamesC :: (Monad m) => [(Name, IndexedScheme)] -> CompilerT a m ()
 insertNamesC names = modify (overCompilerNameStore (Environment.insertMultiple names))
 
+{-# INLINE insertGlobalNamesC #-}
+insertGlobalNamesC :: (Monad m) => Name -> Environment IndexedScheme -> CompilerT a m ()
+insertGlobalNamesC name env = modify (overCompilerGlobalNames (Environment.insert name env))
+
 {-# INLINE insertConstraintsC #-}
 insertConstraintsC :: (Monad m) => [CompilerConstraint a] -> CompilerT a m ()
 insertConstraintsC cs = modify (overCompilerConstraints (<> cs))
@@ -126,6 +133,10 @@ clearTypeAnnotationParamsC = modify (overCompilerTypeAnnotationParams (const mem
 {-# INLINE clearAssumptionsC #-}
 clearAssumptionsC :: (Monad m) => CompilerT a m ()
 clearAssumptionsC = modify (overCompilerAssumptions (const []))
+
+{-# INLINE clearNameStoreC #-}
+clearNameStoreC :: (Monad m) => CompilerT a m ()
+clearNameStoreC = modify (overCompilerNameStore (const mempty))
 
 {-# INLINE insertAssumptionsC #-}
 insertAssumptionsC :: (Monad m) => [CompilerAssumption a] -> CompilerT a m ()

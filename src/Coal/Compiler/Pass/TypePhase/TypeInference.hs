@@ -1,8 +1,12 @@
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
 module Coal.Compiler.Pass.TypePhase.TypeInference (passTypeInference) where
 
+import qualified Coal.Common.Environment as Environment
+import Coal.Common.Name (isConstructor)
+import Coal.Compiler.Builtin.Definitions (builtinFunctions, builtinTraitInstances)
 import Coal.Compiler.Journal
 import Coal.Compiler.Pass
 import Coal.Compiler.Stack
@@ -28,11 +32,42 @@ passTypeInference =
 isFoldAssumption :: Assumption a t -> Bool
 isFoldAssumption Assumption{..} = "!" `Text.isPrefixOf` assumptionName
 
+processImports :: (Monad m) => Module a Kind () -> CompilerT a m ()
+processImports (Module _ _ ds) = do
+  env <- gets compilerGlobalNames
+  forM_ ds $
+    \case
+      DImport _ p names -> do
+        let pp = principalPath p
+        case Environment.lookup pp env of
+          Nothing ->
+            error ("No module: " <> show pp)
+          Just moduleNames -> do
+            forM_ (filter (not . isConstructor) names) $
+              \name ->
+                unless (name `elem` builtinTraitInstances || Environment.contains name moduleNames) $
+                  error ("Name missing: " <> show name <> " in module " <> show pp)
+            insertNamesC (Environment.lookupAll names moduleNames)
+      _ ->
+        pure ()
+
 pass :: (MonadIO m, Data a, Eq a, Show a) => Module a Kind () -> CompilerT a m (Module a Kind IndexedType)
-pass m@(Module p _ _) = do
+pass m@(Module p xs _) = do
   setCompilerModuleC p
   clearAssumptionsC
+  clearNameStoreC
+  insertNamesC builtinFunctions
+  insertGlobalNamesC "Builtin$" (Environment.fromList builtinFunctions)
+  processImports m
   m1 <- runTypeInference m
+  ns <- gets compilerNameStore
+  let public =
+        case xs of
+          ["*"] ->
+            ns
+          names ->
+            Environment.restrict names ns
+  insertGlobalNamesC (principalPath p) public
   assumptions <- gets (filter (not . isFoldAssumption) . nub . compilerAssumptions)
   forM_ assumptions $
     \Assumption{..} -> do

@@ -1,0 +1,11 @@
+module Main {
+
+  import IO(println_int32)
+  import Foo(baz)
+
+  fun foo() = 1 : int32
+
+  fun main() =
+    println_int32(123)
+
+}

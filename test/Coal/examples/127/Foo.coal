@@ -1,0 +1,7 @@
+module Foo {
+
+  fun foo() = 1 : int32
+
+  fun baz() = 2 : int32
+
+}
