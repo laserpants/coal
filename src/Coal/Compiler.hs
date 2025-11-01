@@ -64,31 +64,45 @@ prettyRule :: (Show a) => InferenceRule Kind a -> Text
 prettyRule =
   \case
     RuleAnnotation _ t1 _ ->
-      "Type annotation doesn't match inferred type, namely <" <> prettyType u1 <> ">"
+      "Type annotation doesn't match inferred type, namely " <> prettyType u1
      where
       u1 = normalizeTypeIndexes t1
     RuleLetImplicit _ _ t1 t2 ->
-      "Cannot unify <" <> prettyType u1 <> "> with <" <> prettyType u2 <> ">"
+      "Cannot unify " <> prettyType u1 <> " with " <> prettyType u2
      where
       u1 = normalizeTypeIndexes t1
       u2 = normalizeTypeIndexes t2
     RuleTypeConstraint _ name t1 s ->
-      "Cannot unify " <> "<" <> name <> " : " <> prettyType s <> "> with expected type <" <> prettyType u1 <> ">"
+      "Cannot unify " <> "'" <> name <> "' : " <> prettyType s <> " with expected type " <> prettyType u1
+     where
+      u1 = normalizeTypeIndexes t1
+    RuleUnfoldExplicit _ t1 s ->
+      "Cannot unify " <> prettyType s <> " with expected type " <> prettyType u1
+     where
+      u1 = normalizeTypeIndexes t1
+    RuleCodataRecord _ t1 s ->
+      "Cannot unify " <> prettyType s <> " with expected type " <> prettyType u1
      where
       u1 = normalizeTypeIndexes t1
     e ->
       Text.pack ("TODO: " <> show e)
 
 prettyType :: (Pretty t) => t -> Text
-prettyType p = renderStrict . layoutPretty defaultLayoutOptions $ pretty p
+prettyType p = "{" <> txt <> "}"
+ where
+  txt = renderStrict . layoutPretty defaultLayoutOptions $ pretty p
 
-prettyConstraintsGenError :: ConstraintsGenError a -> Text
+prettyConstraintsGenError :: (Show a) => ConstraintsGenError a -> Text
 prettyConstraintsGenError =
   \case
     EIllFormedTypeAnnotation (EAnnotationNonDistinctParameter _ name) ->
       "Type annotation is too general: error in the parameter '" <> name <> "'"
-    _ ->
-      "TODO"
+    ECodataFieldMismatch _ ->
+      "Codata type field mismatch"
+    EFoldPatternInRegularMatch _ ->
+      "Fold patterns are not allowed in regular match clauses"
+    e ->
+      Text.pack ("TODO:" <> show e)
 
 prettyError :: Environment Text -> CompilerError Metadata -> Text
 prettyError env =
@@ -114,8 +128,7 @@ prettyError env =
     Shadowing name erl ->
       errorMessage ["Name shadowing: '" <> name <> "'"] env erl
     MissingInstance trait erl ->
-      -- TODO
-      errorMessage ["Missing trait instance: '" <> Text.pack (show trait) <> "'"] env erl
+      errorMessage ["Missing trait instance " <> prettyType trait] env erl
     NameAlreadyDefined name erl ->
       errorMessage ["Name already defined: '" <> name <> "'"] env erl
     ConflictingParameter name erl ->

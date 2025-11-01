@@ -65,26 +65,26 @@ instance TransformContext (Expression Metadata IndexedType) where
         ELet a gs e1 -> do
           d1 <- desugarPatterns e1
           (hs, ps) <- listenPatterns (traverse desugarPatterns gs)
-          pure (ELet a hs (foldr unrollMatch d1 ps))
+          pure (ELet a hs (foldr (unrollMatch a) d1 ps))
         ERecursiveLet a p e1 e2 -> do
           d1 <- desugarPatterns e1
           d2 <- desugarPatterns e2
           (q, ps) <- listenPatterns (desugarPatterns p)
-          pure (ERecursiveLet a q d1 (foldr unrollMatch d2 ps))
+          pure (ERecursiveLet a q d1 (foldr (unrollMatch a) d2 ps))
         ELambda a ps e -> do
           e1 <- desugarPatterns e
           (qs, rs) <- listenPatterns (traverse desugarPatterns ps)
-          pure (ELambda a qs (foldr unrollMatch e1 rs))
+          pure (ELambda a qs (foldr (unrollMatch a) e1 rs))
         e ->
           descendM go e
 
-unrollMatch :: (Name, Pattern Metadata IndexedType) -> Expression Metadata IndexedType -> Expression Metadata IndexedType
-unrollMatch (name, p) e =
+unrollMatch :: Metadata -> (Name, Pattern Metadata IndexedType) -> Expression Metadata IndexedType -> Expression Metadata IndexedType
+unrollMatch loc (name, p) e =
   EMatch
-    mempty
+    loc
     (typeOf e)
     (EVariable mempty (Label (typeOf p) name))
-    (EClause mempty p (CPlain mempty [] e :| []) :| [])
+    (EClause loc p (CPlain mempty [] e :| []) :| [])
 
 instance TransformContext (FunctionDef Metadata IndexedType) where
   desugarPatterns =
@@ -92,7 +92,7 @@ instance TransformContext (FunctionDef Metadata IndexedType) where
       FunctionDef a u w ps e -> do
         e1 <- desugarPatterns e
         (qs, rs) <- listenPatterns (traverse desugarPatterns ps)
-        pure (FunctionDef a u w qs (foldr unrollMatch e1 rs))
+        pure (FunctionDef a u w qs (foldr (unrollMatch a) e1 rs))
 
 instance TransformContext (ConstantDef Metadata IndexedType) where
   desugarPatterns =

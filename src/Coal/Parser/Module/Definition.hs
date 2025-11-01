@@ -171,10 +171,10 @@ parseTopLevelUnfold = do
   n <- lexeme_ "unfold" *> name
   ps <- parens (nonEmpty (commaSep1 parsePattern))
   ann <- parseAnnotation
-  end <- getSourcePos
   fields <- braces $ do
     void $ optional (symbol ",")
     fieldListWithKey (magicConstructor <|> constructor) parseExpression "="
+  end <- getSourcePos
   pure (DUnfold (Metadata start end) n (UnfoldDef (With [] ann) ps (Map.fromList fields) Nothing))
 
 {-# INLINE parseAnnotation #-}
