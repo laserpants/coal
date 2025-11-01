@@ -528,7 +528,14 @@ e2eSpec = do
       , "./lang/String.coal"
       ]
 
-  -- 122?
+  describe "122" $ do
+    it "is NoSuchIdentifier" $ do
+      res <-
+        runSpec
+          [ "./test/Coal/examples/122/Main.coal"
+          , "./lang/String.coal"
+          ]
+      res `shouldBe` Left NoSuchIdentifier
 
   describe "123" $ do
     expectOutput
