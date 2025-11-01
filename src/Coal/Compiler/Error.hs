@@ -31,6 +31,7 @@ data CompilerError a
   | MissingInstance (Trait IndexedType) (ErrorLocation a)
   | NameAlreadyDefined Name (ErrorLocation a)
   | ConflictingParameter Name (ErrorLocation a)
+  | NameNotInModule Name Name (ErrorLocation a)
   deriving (Show, Eq)
 
 data CompilerFailureMode
@@ -72,4 +73,6 @@ errorLocation =
     NameAlreadyDefined _ erl ->
       Just erl
     ConflictingParameter _ erl ->
+      Just erl
+    NameNotInModule _ _ erl ->
       Just erl

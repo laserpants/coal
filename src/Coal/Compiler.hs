@@ -85,6 +85,8 @@ prettyError env =
       errorMessage ["Name already defined: '" <> name <> "'"] env erl
     ConflictingParameter name erl ->
       errorMessage ["Conflicting parameter name: '" <> name <> "'"] env erl
+    NameNotInModule name module_ erl ->
+      errorMessage ["The module " <> module_ <> " does not export '" <> name <> "'"] env erl
 
 errorMessage :: [Text] -> Environment Text -> ErrorLocation Metadata -> Text
 errorMessage msg env (ErrorLocation path loc) =

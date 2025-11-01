@@ -1,7 +1,7 @@
 module Main {
 
   import IO(println_int32)
-  import Foo(hello)
+  import Hello(hello)
 
   fun foo() = 1 : int32
 

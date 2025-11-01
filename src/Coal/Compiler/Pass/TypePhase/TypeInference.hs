@@ -37,16 +37,17 @@ processImports (Module _ _ ds) = do
   env <- gets compilerGlobalNames
   forM_ ds $
     \case
-      DImport _ p names -> do
+      DImport loc p names -> do
         let pp = principalPath p
         case Environment.lookup pp env of
           Nothing ->
-            error ("No module: " <> show pp)
+            tellErrors [ModuleNotFound pp (ErrorLocation pp loc)]
           Just moduleNames -> do
             forM_ (filter (not . isConstructor) names) $
               \name ->
-                unless (name `elem` builtinTraitInstances || Environment.contains name moduleNames) $
-                  error ("Name missing: " <> show name <> " in module " <> show pp)
+                unless (name `elem` builtinTraitInstances || Environment.contains name moduleNames) $ do
+                  tellErrors [NameNotInModule name pp (ErrorLocation pp loc)]
+                  throwError PreflightFailure
             insertNamesC (Environment.lookupAll names moduleNames)
       _ ->
         pure ()
