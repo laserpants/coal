@@ -21,10 +21,15 @@ import Coal.Compiler.Pass.TranslationPhase (translationPhase)
 import Coal.Compiler.Pass.TypePhase (typePhase)
 import Coal.Compiler.Stack
 import Coal.Compiler.TypeInference.Errors (prettyErrorMessage)
+import Coal.Language
+import Coal.TypeSystem.Constraint.Generation.InferenceRule (InferenceRule (..))
+import Coal.TypeSystem.Substitution (normalizeTypeIndexes)
 import Control.Monad.Except
 import Data.Text (Text)
 import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
+import Prettyprinter
+import Prettyprinter.Render.Text (renderStrict)
 import Text.Megaparsec (errorBundlePretty)
 
 pipeline :: (MonadIO m) => Pass Metadata m [FilePath] ()
@@ -54,6 +59,20 @@ compile config files = do
     Right{} -> do
       pure ()
 
+prettyRule :: InferenceRule Kind a -> Text
+prettyRule =
+  \case
+    RuleLetImplicit _ _ t1 t2 ->
+      "Cannot unify (" <> prettyType u1 <> ") with (" <> prettyType u2 <> ")"
+     where
+      u1 = normalizeTypeIndexes t1
+      u2 = normalizeTypeIndexes t2
+    _ ->
+      "TODO"
+
+prettyType :: (Pretty t) => t -> Text
+prettyType p = renderStrict . layoutPretty defaultLayoutOptions $ pretty p
+
 prettyError :: Environment Text -> CompilerError Metadata -> Text
 prettyError env =
   \case
@@ -64,8 +83,7 @@ prettyError env =
     ModuleNotFound name erl ->
       errorMessage ["No such module: " <> name] env erl
     SolverError rule erl ->
-      -- TODO
-      errorMessage ["Type error: " <> Text.pack (show rule)] env erl
+      errorMessage ["Type error: " <> prettyRule rule] env erl
     NameNotInScope name erl ->
       errorMessage ["Name not in scope: '" <> name <> "'"] env erl
     ConstraintsError e erl ->
