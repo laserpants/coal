@@ -166,11 +166,12 @@ Save this program as "Main.coal". Compile the program with the command:
 coal Main.coal -o dist
 ```
 
+<!--
+
 ## Project status and roadmap
 
 ### Roadmap
 
-<!--
 #### Next milestone: 1
 
 ![](https://geps.dev/progress/75)
