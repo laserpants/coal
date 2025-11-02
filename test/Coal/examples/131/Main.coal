@@ -1,0 +1,8 @@
+module Main {
+
+  import IO(println_char)
+
+  fun main() =
+    println_char('🚀')
+
+}

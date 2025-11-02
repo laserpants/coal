@@ -178,19 +178,34 @@ println_bool(bool b)
 }
 
 void
-print_char(wchar_t ch)
+print_char(uint32_t cp)
 {
-  setlocale(LC_ALL, "");
+  unsigned char utf8[5] = { 0 };
 
-  wprintf(L"%lc", ch);
+  if (cp <= 0x7F) {
+    utf8[0] = cp;
+  } else if (cp <= 0x7FF) {
+    utf8[0] = 0xC0 | (cp >> 6);
+    utf8[1] = 0x80 | (cp & 0x3F);
+  } else if (cp <= 0xFFFF) {
+    utf8[0] = 0xE0 | (cp >> 12);
+    utf8[1] = 0x80 | ((cp >> 6) & 0x3F);
+    utf8[2] = 0x80 | (cp & 0x3F);
+  } else if (cp <= 0x10FFFF) {
+    utf8[0] = 0xF0 | (cp >> 18);
+    utf8[1] = 0x80 | ((cp >> 12) & 0x3F);
+    utf8[2] = 0x80 | ((cp >> 6) & 0x3F);
+    utf8[3] = 0x80 | (cp & 0x3F);
+  }
+
+  printf("%s", utf8);
 }
 
 void
-println_char(wchar_t ch)
+println_char(uint32_t cp)
 {
-  setlocale(LC_ALL, "");
-
-  wprintf(L"%lc\n", ch);
+  print_char(cp);
+  putchar('\n');
 }
 
 void
