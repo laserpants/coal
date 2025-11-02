@@ -170,6 +170,10 @@ translateExpression =
       exprs <- traverse translateExpression fields
       let r = foldr (uncurry Kernel.ext) Kernel.nil (Map.toList exprs)
       pure $ makeRecord (Kernel.TCon "record" [Kernel.typeOf r]) r
+    EFFICall _ (Label t name) es e ->
+      Kernel.call (Label (translateType t) name)
+        <$> traverse translateExpression es
+        <*> translateExpression e
     _ ->
       error "TODO"
 

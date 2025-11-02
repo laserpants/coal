@@ -194,6 +194,10 @@ instance PatternExhaustiveCheckContext (Expression Metadata t) where
         EFocus n ll1 ll2
           <$> patternExhaustiveCheck name e1
           <*> patternExhaustiveCheck name e2
+      EFFICall a ll es e ->
+        EFFICall a ll
+          <$> traverse (patternExhaustiveCheck name) es
+          <*> patternExhaustiveCheck name e
       trait@ETraitDictionary{} ->
         pure trait
 

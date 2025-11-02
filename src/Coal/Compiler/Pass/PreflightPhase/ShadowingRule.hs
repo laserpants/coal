@@ -113,6 +113,8 @@ instance (Data t) => RuleContext (Expression Metadata t) where
         EListLiteral a t <$> traverse (detectShadowing names) es
       ETuple a t es ->
         ETuple a t <$> traverse (detectShadowing names) es
+      e@EFFICall{} ->
+        pure e
       _ ->
         error "TODO"
 

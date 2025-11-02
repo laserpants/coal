@@ -71,6 +71,8 @@ data Expression a t
     EFocus Name (Label t) (Label t) (Expression a t) (Expression a t)
   | -- | Trait instance dictionary
     ETraitDictionary a t (Trait t)
+  | -- | FFI function call
+    EFFICall a (Label (Type Parameter ())) [Expression a t] (Expression a t)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
 
 data Clause a t = EClause a (Pattern a t) (NonEmpty (Choice Expression a t))

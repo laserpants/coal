@@ -25,6 +25,7 @@ import qualified Text.Megaparsec.Char.Lexer as Lexer
 parseAtom :: Parser (Expression Metadata ())
 parseAtom =
   try parseFunctionApplication
+    <|> parseFFICall
     <|> parseVariableExpression
     <|> parseDataConstructor
     <|> parseLiteralExpression
@@ -73,6 +74,19 @@ parseFunctionApplication =
         <|> parseVariableExpression
     xs <- parens (nonEmptyOr parseUnit (commaSep parseExpression))
     pure (\loc -> EApplication loc () f xs)
+
+parseFFICall :: Parser (Expression Metadata ())
+parseFFICall =
+  withMetadata $ do
+    symbol_ "#"
+    (n, t) <- braces $ do
+      n <- name
+      symbol_ ":"
+      t <- parseType
+      pure (n, t)
+    args <- parens (commaSep parseExpression)
+    cont <- parens parseExpression
+    pure (\loc -> EFFICall loc (Label t n) args cont)
 
 parseDataConstructor :: Parser (Expression Metadata ())
 parseDataConstructor =
