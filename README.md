@@ -47,8 +47,6 @@ These code samples illustrate two distinct modes of recursive control flow. If y
 
 <!--
 ### Programs = Expressions + Effects
-
-Coal is a highly [expression-oriented](https://en.wikipedia.org/wiki/Expression-oriented_programming_language) language: a program is, at its core, just an expression that evaluates to a value. In this programming model, all data is immutable and there are no observable side-effects. These properties make programs more predictable, easier to reason about, highly testable, and allows for code to be verified using formal mathematics. On the other hand, practical applications need to have the ability to interact with the outside world. Side-effects are what make them useful. A [system for managing effects](https://en.wikipedia.org/wiki/Effect_system), such as I/O and exceptions, is still lacking in Coal. This is an essential step to promote the language into one that can be used to write actual programs. See **[How to contribute](#how-to-contribute)** if you’re keen to work on this.
 -->
 
 ## Documentation
