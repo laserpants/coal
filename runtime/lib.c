@@ -196,22 +196,17 @@ println_char(wchar_t ch)
 void
 print_string(const char* str)
 {
-  setlocale(LC_ALL, "");
+  if (!str)
+    return;
 
-  const size_t len = mbstowcs(NULL, str, 0) + 1;
-  wchar_t* wstr = malloc(len * sizeof(wchar_t));
-
-  mbstowcs(wstr, str, len);
-  wprintf(L"%ls", wstr);
-
-  free(wstr);
+  fputs(str, stdout);
 }
 
 void
 println_string(const char* str)
 {
   print_string(str);
-  printf("\n");
+  putchar('\n');
 }
 
 void
