@@ -1,0 +1,22 @@
+module Main {
+
+  import IO(println_int32)
+
+  trait Monad<m> {
+    bind : m<a> -> (a -> m<b>) -> m<b>
+  }
+
+//  import Monad(bind)
+
+//  trait Monad<m : * -> *> {
+//    bind : m<a> -> (a -> m<b>) -> m<b>
+//  }
+//
+//  instance Monad<IO> {
+//    fun bind(a, b) = "a"
+//  }
+
+  fun main() =
+    println_int32(0)
+
+}
