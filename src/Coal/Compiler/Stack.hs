@@ -78,87 +78,67 @@ newtype CompilerT a m c = Compiler {compilerStack :: CompilerStack a m c}
     , MonadIO
     )
 
-{-# INLINE runCompilerT #-}
 runCompilerT :: (Monad m) => CompilerEnvironment -> CompilerT a m c -> m (Either CompilerFailureMode c, CompilerState a, [CompilerError a])
 runCompilerT env com = do
   (c, s, w) <- runRWST (runExceptT (compilerStack com)) env initialCompilerState
   pure (c, s, compilerJournalErrors w)
 
-{-# INLINE evalCompilerT #-}
 evalCompilerT :: (Monad m) => CompilerEnvironment -> CompilerT a m c -> m (Either CompilerFailureMode c)
 evalCompilerT env com = do
   (c, _, _) <- runCompilerT env com
   pure c
 
-{-# INLINE compilerSetTypeAnnotationParams #-}
 compilerSetTypeAnnotationParams :: (Monad m) => Dictionary (a, TypeIndex Kind) -> CompilerT a m ()
 compilerSetTypeAnnotationParams params = modify (overCompilerTypeAnnotationParams (const params))
 
-{-# INLINE compilerReportConstraintsGenErrors #-}
 compilerReportConstraintsGenErrors :: (Monad m) => [ConstraintsGenError a] -> CompilerT a m ()
 compilerReportConstraintsGenErrors errors = modify (overCompilerStateConstraintsGenErrors (<> errors))
 
-{-# INLINE compilerReportSolverRuleViolations #-}
 compilerReportSolverRuleViolations :: (Monad m) => [InferenceRule Kind a] -> CompilerT a m ()
 compilerReportSolverRuleViolations errors = modify (overCompilerSolverRuleViolations (<> errors))
 
-{-# INLINE insertSupplyC #-}
 insertSupplyC :: (Monad m) => Int -> CompilerT a m ()
 insertSupplyC = modify . overCompilerSupply . const
 
-{-# INLINE insertNameC #-}
 insertNameC :: (Monad m) => Name -> IndexedScheme -> CompilerT a m ()
 insertNameC name scheme_ = modify (overCompilerNameStore (Environment.insert name scheme_))
 
-{-# INLINE insertNamesC #-}
 insertNamesC :: (Monad m) => [(Name, IndexedScheme)] -> CompilerT a m ()
 insertNamesC names = modify (overCompilerNameStore (Environment.insertMultiple names))
 
-{-# INLINE insertGlobalNamesC #-}
 insertGlobalNamesC :: (Monad m) => Name -> Environment IndexedScheme -> CompilerT a m ()
 insertGlobalNamesC name env = modify (overCompilerGlobalNames (Environment.insert name env))
 
-{-# INLINE insertConstraintsC #-}
 insertConstraintsC :: (Monad m) => [CompilerConstraint a] -> CompilerT a m ()
 insertConstraintsC cs = modify (overCompilerConstraints (<> cs))
 
-{-# INLINE clearConstraintsC #-}
 clearConstraintsC :: (Monad m) => CompilerT a m ()
 clearConstraintsC = modify (overCompilerConstraints (const mempty))
 
-{-# INLINE clearTypeAnnotationParamsC #-}
 clearTypeAnnotationParamsC :: (Monad m) => CompilerT a m ()
 clearTypeAnnotationParamsC = modify (overCompilerTypeAnnotationParams (const mempty))
 
-{-# INLINE clearAssumptionsC #-}
 clearAssumptionsC :: (Monad m) => CompilerT a m ()
 clearAssumptionsC = modify (overCompilerAssumptions (const []))
 
-{-# INLINE clearNameStoreC #-}
 clearNameStoreC :: (Monad m) => CompilerT a m ()
 clearNameStoreC = modify (overCompilerNameStore (const mempty))
 
-{-# INLINE insertAssumptionsC #-}
 insertAssumptionsC :: (Monad m) => [CompilerAssumption a] -> CompilerT a m ()
 insertAssumptionsC as = modify (overCompilerAssumptions (<> as))
 
-{-# INLINE updateSupplyC #-}
 updateSupplyC :: (Monad m) => Int -> CompilerT a m ()
 updateSupplyC supply = modify (overCompilerSupply (const supply))
 
-{-# INLINE updateSubstitutionC #-}
 updateSubstitutionC :: (Monad m) => Substitution -> CompilerT a m ()
 updateSubstitutionC sub = modify (overCompilerSubstitution (const sub))
 
-{-# INLINE setVerbatimSourceC #-}
 setVerbatimSourceC :: (Monad m) => Name -> Text -> CompilerT a m ()
 setVerbatimSourceC name src = modify (overCompilerVerbatimSource (Environment.insert name src))
 
-{-# INLINE setVerbatimSourceForC #-}
 setVerbatimSourceForC :: (Monad m) => Module a k t -> Text -> CompilerT a m ()
 setVerbatimSourceForC module_ = setVerbatimSourceC (modulePathName module_)
 
-{-# INLINE getVerbatimSourceC #-}
 getVerbatimSourceC :: (Monad m) => Name -> CompilerT a m Text
 getVerbatimSourceC name = do
   s <- gets compilerVerbatimSource
@@ -168,11 +148,9 @@ getVerbatimSourceC name = do
     Just src ->
       pure src
 
-{-# INLINE insertTypeDefinitionsC #-}
 insertTypeDefinitionsC :: (Monad m) => Name -> [Definition a Kind ()] -> CompilerT a m ()
 insertTypeDefinitionsC name defs = modify (overCompilerTypeDefinitions (Environment.insert name defs))
 
-{-# INLINE setCompilerModuleC #-}
 setCompilerModuleC :: (Monad m) => Path -> CompilerT a m ()
 setCompilerModuleC path = modify (overCompilerModule (const path))
 
