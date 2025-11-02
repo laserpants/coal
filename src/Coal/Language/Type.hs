@@ -167,7 +167,7 @@ prettyTypePrec prec =
   \case
     TArrow t1 t2 ->
       parensIf (prec > precArrow) $
-        group (prettyTypePrec (precArrow + 1) t1 <+> "→" <+> prettyTypePrec precArrow t2)
+        group (prettyTypePrec (precArrow + 1) t1 <+> "->" <+> prettyTypePrec precArrow t2)
     TApplication _ con args
       | isTupleType con ->
           parensIf (prec > precApp) $ group (tupled (map (prettyTypePrec 0) (toList args)))
