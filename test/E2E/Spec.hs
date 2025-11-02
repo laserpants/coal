@@ -516,7 +516,8 @@ e2eSpec = do
   describe "118" $ do
     expectOutput "hellohello" ["./test/Coal/examples/118/Main.coal"]
 
-  -- 119?
+  describe "119" $ do
+    expectOutput "hello" ["./test/Coal/examples/119/Main.coal"]
 
   describe "120" $ do
     expectOutput "true" ["./test/Coal/examples/120/Main.coal"]

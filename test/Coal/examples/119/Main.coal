@@ -1,7 +1,9 @@
-module IO {
+module Main {
 
-  print_string(str: string) : IO<unit> =
-    #print_string(str)(fn(a) => ())
+  import IO(__return_io)
+
+  fun print(str) =
+    #{println_string : string -> IO<unit>}(str)(fn(_) => __return_io())
 
   fun main() =
     let 
@@ -9,7 +11,6 @@ module IO {
         { a = "hello" }
       in
         match(r) {
-          | { a = str } =>
-            println_string(str)
+          | { a = str } => print(str)
         }
 }
