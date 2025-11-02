@@ -34,6 +34,7 @@ import qualified Data.Set as Set
 data Scheme o k t = Forall (Set (o k)) [Trait t] t
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable, Generic)
 
+-- FIXME
 instance (Pretty k, Pretty (o k), Pretty t) => Pretty (Scheme o k t) where
   pretty =
     \case

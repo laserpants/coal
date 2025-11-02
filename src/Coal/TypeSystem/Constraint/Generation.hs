@@ -367,9 +367,10 @@ emitECodataSelectConstraints loc (Label t name) e1 = do
         _ ->
           pure []
 
--- where
---  t1 = typeOf e `TArrow` t
---  t1 = typeOf e1 `TArrow` t
+emitEFFICallConstraints :: (Show a, Data a) => a -> Label (Type Parameter ()) -> [Expression a IndexedType] -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
+emitEFFICallConstraints loc (Label t name) es e =
+  -- TODO
+  pure []
 
 emitConstraints :: (Show a, Data a) => Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
 emitConstraints =
@@ -441,5 +442,13 @@ emitConstraints =
       emitECodataSelectConstraints loc ll e1
     ETuple loc t es ->
       emitETupleConstraints loc t es
-    _ ->
+    EFFICall loc ll es e ->
+      emitEFFICallConstraints loc ll es e
+    ECodataSelect{} ->
+      error "Not implemented"
+    EFocus{} ->
+      error "Not implemented"
+    ETraitDictionary{} ->
+      error "Not implemented"
+    ELambdaMatch{} ->
       error "Not implemented"

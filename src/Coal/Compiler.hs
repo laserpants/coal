@@ -5,12 +5,12 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler (pipeline, compile, prettyError) where
+module Coal.Compiler (pipeline, compile, compileWithCFiles, prettyError) where
 
 import Coal.Ast.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
-import Coal.Compiler.Config (CompilerConfig)
+import Coal.Compiler.Config (CompilerConfig (..))
 import Coal.Compiler.Environment
 import Coal.Compiler.Error (errorLocation)
 import Coal.Compiler.Pass (Pass (..), (>->))
@@ -41,10 +41,10 @@ pipeline =
     >-> translationPhase
     >-> loweringPhase
 
-compile :: CompilerConfig -> [FilePath] -> IO ()
-compile config files = do
+compileWithCFiles :: CompilerConfig -> [FilePath] -> [FilePath] -> IO ()
+compileWithCFiles config files cFiles = do
   (e, CompilerState{..}, es) <- runCompilerT emptyCompilerEnvironment $ do
-    setConfigC config
+    setConfigC config{configCFiles = configCFiles config <> cFiles}
     runPass pipeline files
   forM_ es $
     \err -> do
@@ -59,6 +59,9 @@ compile config files = do
       print e1
     Right{} -> do
       pure ()
+
+compile :: CompilerConfig -> [FilePath] -> IO ()
+compile config files = compileWithCFiles config files []
 
 prettyRule :: (Show a) => InferenceRule Kind a -> Text
 prettyRule =

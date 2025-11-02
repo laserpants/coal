@@ -1,0 +1,12 @@
+module Main {
+
+  import IO(read_file, println_string, __eval_io)
+
+  fun main() =
+    let
+      s =
+        read_file("./test/Coal/examples/129/message.txt")
+      in
+        println_string(__eval_io(s))
+
+}

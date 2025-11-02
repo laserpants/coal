@@ -214,7 +214,6 @@ println_string(const char* str)
   printf("\n");
 }
 
-
 void
 print_float(float f)
 {
@@ -275,6 +274,49 @@ println_bignum(mpz_t* big_int)
   gmp_printf("%Zd\n", *big_int);
 }
 
+char*
+read_file(const char* filename)
+{
+  FILE* file = fopen(filename, "rb");
+  if (!file) {
+    return NULL;
+  }
+
+  // Move to the end to determine file size
+  if (fseek(file, 0, SEEK_END) != 0) {
+    fclose(file);
+    return NULL;
+  }
+
+  long length = ftell(file);
+  if (length < 0) {
+    fclose(file);
+    return NULL;
+  }
+
+  // Go back to start of file
+  rewind(file);
+
+  // Allocate buffer (+1 for null terminator)
+  char* buffer = gc_malloc((size_t)length + 1);
+  if (!buffer) {
+    fclose(file);
+    return NULL;
+  }
+
+  // Read file contents
+  size_t read_size = fread(buffer, 1, (size_t)length, file);
+  if (read_size != (size_t)length) {
+    fclose(file);
+    return NULL;
+  }
+
+  buffer[length] = '\0'; // Null-terminate the string
+
+  fclose(file);
+  return buffer;
+}
+
 /*
  * ////////////////////////////////////////////////////////////////////////////
  * Type conversions
@@ -316,7 +358,7 @@ int32_to_string(int32_t value)
 {
   const size_t buffer_size = 12;
 
-  char* result = GC_malloc(buffer_size);
+  char* result = gc_malloc(buffer_size);
   if (!result)
     return NULL;
 
@@ -330,7 +372,7 @@ float_to_string(float value)
 {
   const size_t buffer_size = 32; // enough to hold float with precision
 
-  char* result = GC_malloc(buffer_size);
+  char* result = gc_malloc(buffer_size);
 
   if (!result)
     return NULL;
@@ -345,7 +387,7 @@ double_to_string(double value)
 {
   const size_t buffer_size = 64; // enough to hold double with precision
 
-  char* result = GC_malloc(buffer_size);
+  char* result = gc_malloc(buffer_size);
 
   if (!result)
     return NULL;
@@ -366,7 +408,7 @@ string_concat(const char* a, const char* b)
   size_t len_a = strlen(a);
   size_t len_b = strlen(b);
 
-  char* result = GC_malloc(len_a + len_b + 1);
+  char* result = gc_malloc(len_a + len_b + 1);
 
   memcpy(result, a, len_a);
   memcpy(result + len_a, b, len_b);
@@ -426,7 +468,7 @@ string_tail(const char* s)
 
   // Return a newly allocated copy of the remaining string
   size_t len = strlen(s + skip);
-  char* tail = (char*)malloc(len + 1);
+  char* tail = (char*)gc_malloc(len + 1);
   if (tail != NULL) {
     memcpy(tail, s + skip, len + 1); // include null terminator
   }

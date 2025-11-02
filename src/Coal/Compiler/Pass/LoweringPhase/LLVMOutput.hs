@@ -25,7 +25,7 @@ import Data.Foldable (for_)
 import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
 import Extras (Name)
-import System.Directory (copyFile)
+import System.Directory (canonicalizePath, copyFile)
 import System.FilePath (takeBaseName, (<.>), (</>))
 import System.IO.Temp (withSystemTempDirectory)
 import System.Process (createProcess, cwd, proc, waitForProcess)
@@ -66,11 +66,17 @@ generateLLOutput CompilerConfig{..} mods = do
       B.writeFile (tmpDir </> "runtime.c") runtimeLib
       B.writeFile (tmpDir </> "hashmap.h") hashmapLib
 
+      cFiles <- traverse canonicalizePath configCFiles
+
+      forM_ cFiles $
+        \file -> do
+          copyFile file (tmpDir </> takeBaseName file)
+
       llcRes <- traverse (runLLC tmpDir) files
 
       case lefts llcRes of
         [] -> do
-          gccRes <- runGCC tmpDir (rights llcRes)
+          gccRes <- runGCC tmpDir (rights llcRes) cFiles
           case gccRes of
             Left e -> do
               putStrLn ("gcc failed: " ++ show e)
@@ -83,8 +89,8 @@ generateLLOutput CompilerConfig{..} mods = do
           forM_ errs print
           pure (Just CompilerError)
 
-runGCC :: FilePath -> [FilePath] -> IO (Either SomeException ())
-runGCC tmpDir objFiles =
+runGCC :: FilePath -> [FilePath] -> [FilePath] -> IO (Either SomeException ())
+runGCC tmpDir objFiles cFiles =
   try $ do
     (_, _, _, ph) <- createProcess procSpec
     _ <- waitForProcess ph
@@ -94,6 +100,7 @@ runGCC tmpDir objFiles =
   args =
     ["-g", "-I."]
       <> ["runtime.c"]
+      <> cFiles
       <> objFiles
       <> ["-o", "dist"]
       <> ["-lgc", "-lgmp"]

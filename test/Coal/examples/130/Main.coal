@@ -1,0 +1,10 @@
+module Main {
+
+  import IO(println_int32)
+
+  fun head | (x :: xs) = x
+
+  fun main() =
+    println_int32(0)
+
+}

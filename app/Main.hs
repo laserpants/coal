@@ -13,6 +13,7 @@ data CommandOptions = CommandOptions
   , outputFile :: FilePath
   , debugGenerateDotfiles :: Bool
   , debugLLVMOutput :: Bool
+  , extraSourceFiles :: [FilePath]
   }
   deriving (Show)
 
@@ -40,6 +41,15 @@ optionsParser = do
           <> help "Output intermediate LLVM IR"
       )
 
+  extraSourceFiles <-
+    many
+      ( strOption
+          ( long "extra-c"
+              <> metavar "FILE"
+              <> help "Extra C source file (can be passed multiple times)"
+          )
+      )
+
   pure CommandOptions{..}
 
 main :: IO ()
@@ -50,6 +60,7 @@ main = do
           { configExecutableName = outputFile
           , configGenerateDotFiles = debugGenerateDotfiles
           , configGenerateLLVMOutput = debugLLVMOutput
+          , configCFiles = extraSourceFiles
           }
   compile config inputFiles
 
