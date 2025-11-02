@@ -54,7 +54,6 @@ insert name = overEnvironment . Map.insert name
 insertWith :: (a -> a -> a) -> Name -> a -> Environment a -> Environment a
 insertWith f name = overEnvironment . Map.insertWith f name
 
-{-# INLINE insertMultiple #-}
 insertMultiple :: (Foldable f) => f (Name, a) -> Environment a -> Environment a
 insertMultiple = flip (foldr (uncurry insert))
 
@@ -70,11 +69,9 @@ toList = Map.toList . envDictionary
 lookup :: Name -> Environment a -> Maybe a
 lookup name = Map.lookup name . envDictionary
 
-{-# INLINE contains #-}
 contains :: Name -> Environment a -> Bool
-contains name (Environment e) = name `elem` Map.keys e
+contains name (Environment e) = Map.member name e
 
-{-# INLINE lookupAll #-}
 lookupAll :: [Name] -> Environment a -> [(Name, a)]
 lookupAll names_ env = Map.toList e where Environment e = restrict names_ env
 
@@ -82,11 +79,9 @@ lookupAll names_ env = Map.toList e where Environment e = restrict names_ env
 filter :: (a -> Bool) -> Environment a -> Environment a
 filter f (Environment e) = Environment (Map.filter f e)
 
-{-# INLINE filterNames #-}
 filterNames :: (Name -> Bool) -> Environment a -> Environment a
 filterNames f (Environment e) = Environment (Map.filterWithKey (const . f) e)
 
-{-# INLINE restrict #-}
 restrict :: [Name] -> Environment a -> Environment a
 restrict names_ = filterNames (`elem` names_)
 

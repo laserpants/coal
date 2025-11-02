@@ -72,26 +72,20 @@ tellDictionaryTraits w = tell $ CompilerJournal [] [] [] w []
 tellErrors :: (MonadWriter (CompilerJournal a) m) => [CompilerError a] -> m ()
 tellErrors w = tell $ CompilerJournal [] [] [] [] w
 
-{-# INLINE listenPatterns #-}
 listenPatterns :: (MonadWriter (CompilerJournal a) m) => m e -> m (e, [(Name, Pattern a IndexedType)])
 listenPatterns w = second compilerJournalPatterns <$> listen w
 
-{-# INLINE listenWhereClauses #-}
 listenWhereClauses :: (MonadWriter (CompilerJournal a) m) => m e -> m (e, [(Name, Name)])
 listenWhereClauses w = second compilerJournalWhereClauses <$> listen w
 
-{-# INLINE listenRecordInfo #-}
 listenRecordInfo :: (MonadWriter (CompilerJournal a) m) => m e -> m (e, [RecordInfo a])
 listenRecordInfo w = second compilerJournalRecordInfo <$> listen w
 
-{-# INLINE listenDictionaryTraits #-}
 listenDictionaryTraits :: (MonadWriter (CompilerJournal a) m) => m e -> m (e, [Trait IndexedType])
 listenDictionaryTraits w = second compilerJournalDictionaryTraits <$> listen w
 
-{-# INLINE listenErrors #-}
 listenErrors :: (MonadWriter (CompilerJournal a) m) => m e -> m (e, [CompilerError a])
 listenErrors w = second compilerJournalErrors <$> listen w
 
-{-# INLINE censorDictionaryTraits #-}
 censorDictionaryTraits :: (MonadWriter (CompilerJournal a) m) => ([Trait IndexedType] -> [Trait IndexedType]) -> m b -> m b
 censorDictionaryTraits f = censor (\CompilerJournal{..} -> CompilerJournal{compilerJournalDictionaryTraits = f compilerJournalDictionaryTraits, ..})
