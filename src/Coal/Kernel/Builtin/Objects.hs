@@ -1017,6 +1017,13 @@ objects =
                     , ys : list(*)
                     )
               |]
+        , OFunction
+            "Builtin$.io$_run"
+            [ Label Kernel.TOpq "v"
+            ]
+            [r| 
+                  v : *
+              |]
         ]
     }
 
