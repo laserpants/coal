@@ -1018,7 +1018,7 @@ objects =
                     )
               |]
         , OFunction
-            "Builtin$.io$_run"
+            "Builtin$.io$_eval"
             [ Label Kernel.TOpq "v"
             ]
             [r| 

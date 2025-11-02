@@ -49,7 +49,7 @@ module IO {
     io$_print_double(d)
 
   fun __eval_io(io_val : IO<v>) : v =
-    io$_run(io_val)
+    io$_eval(io_val)
 
   fun __return_io(val : v) : IO<v> =
     io$_return(val)

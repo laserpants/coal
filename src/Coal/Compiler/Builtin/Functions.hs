@@ -89,7 +89,7 @@ builtinFunctions =
     , forall0 (TIntrinsic IDouble ~> TApplication KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| []))
     )
   ,
-    ( "io$_run"
+    ( "io$_eval"
     , forall1 $ \t0 -> TApplication KType (TConstructor (KArrow KType KType) "IO") (t0 :| []) ~> t0
     )
   ,
