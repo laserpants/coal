@@ -16,12 +16,13 @@ import Coal.Language.Module.Definition.Unfold (UnfoldDef (..))
 import Coal.Language.Pattern (Pattern (..))
 import Coal.Language.Primitive (Primitive (..))
 import Coal.Language.Trait (Trait (..))
-import Coal.Language.Type (Type (..), foldType)
+import Coal.Language.Type (Type (..), foldType, unfoldType)
 import Coal.Language.Type.Intrinsic (Intrinsic (..))
 import Coal.Language.Type.Kind (Kind (..))
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (universeBi)
 import Data.List.NonEmpty (NonEmpty ((:|)))
+import qualified Data.List.NonEmpty as NonEmpty
 
 class HasType o k t where
   typeOf :: t -> Type o k
@@ -83,6 +84,8 @@ instance (Data a, Data k, Data (o k), Typeable o) => HasType o k (Expression a (
         typeOf t
       EAnnotation _ _ t ->
         typeOf t
+      EFFICall _ _ _ t ->
+        returnTypeOf (typeOf t)
       e ->
         head (universeBi e)
 
@@ -107,3 +110,7 @@ instance HasType o Kind (Trait (Type o Kind)) where
 {-# INLINE foldTypeOf #-}
 foldTypeOf :: (HasType o k t, HasType o k s, Functor f, Foldable f) => s -> f t -> Type o k
 foldTypeOf a as = foldType (typeOf a) (typeOf <$> as)
+
+{-# INLINE returnTypeOf #-}
+returnTypeOf :: Type o k -> Type o k
+returnTypeOf = NonEmpty.last . unfoldType

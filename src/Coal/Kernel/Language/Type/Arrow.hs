@@ -15,7 +15,6 @@ import Coal.Kernel.Language.Type (Type (..))
 import Coal.Kernel.Language.Type.Syntax (arrow)
 import Coal.Kernel.Language.Typed (Typed (..))
 import Data.List.NonEmpty (NonEmpty (..), (<|))
-
 import qualified Data.List.NonEmpty as NonEmpty
 
 {-# INLINE (~>) #-}

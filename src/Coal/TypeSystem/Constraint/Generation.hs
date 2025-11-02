@@ -368,9 +368,19 @@ emitECodataSelectConstraints loc (Label t name) e1 = do
           pure []
 
 emitEFFICallConstraints :: (Show a, Data a) => a -> Label (Type Parameter ()) -> [Expression a IndexedType] -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
-emitEFFICallConstraints loc (Label t name) es e =
-  -- TODO
-  pure []
+emitEFFICallConstraints loc (Label t _) es e = do
+  ms1 <- emitConstraints e
+  ms2 <- concatMapM emitConstraints es
+  r <- instantiateAnnotation loc t
+  case r of
+    Left err -> do
+      tellLeft [EIllFormedTypeAnnotation err]
+      pure []
+    Right t1 -> do
+      t0 <- supplied (TVariable . TypeIndex KType)
+      let t2 = foldTypeOf t0 es
+      tellRight [Equality (RuleAnnotation loc t2 t1) [t2, t1]]
+      pure (ms1 <> ms2)
 
 emitConstraints :: (Show a, Data a) => Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
 emitConstraints =

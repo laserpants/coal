@@ -48,10 +48,13 @@ module IO {
   fun print_double(d : double) : IO<unit> =
     io$_print_double(d)
 
-  fun read_file(path : string) : IO<string> =
-    #{read_file : string -> string}(path)(fn(s) => s)
-
   fun __eval_io(io_val : IO<v>) : v =
     io$_run(io_val)
+
+  fun __return_io(val : v) : IO<v> =
+    io$_return(val)
+
+  fun read_file(path : string) : IO<string> =
+    #{read_file : string -> IO<string>}(path)(fn(s) => __return_io(s))
 
 }

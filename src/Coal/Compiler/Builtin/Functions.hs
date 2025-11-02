@@ -93,6 +93,10 @@ builtinFunctions =
     , forall1 $ \t0 -> TApplication KType (TConstructor (KArrow KType KType) "IO") (t0 :| []) ~> t0
     )
   ,
+    ( "io$_return"
+    , forall1 $ \t0 -> t0 ~> TApplication KType (TConstructor (KArrow KType KType) "IO") (t0 :| [])
+    )
+  ,
     ( "operator$__string_concatenation"
     , forall0 (TIntrinsic IString ~> TIntrinsic IString ~> TIntrinsic IString)
     )

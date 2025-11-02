@@ -14,4 +14,7 @@ module Coal.Combinators {
   fun uncurry(f : a -> b -> c, (x, y) : (a, b)) : c = 
     f(x, y)
 
+  fun flip(f : a -> b -> c, y : b, x : a) : c =
+    f(x, y)
+
 }

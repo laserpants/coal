@@ -1024,6 +1024,13 @@ objects =
             [r| 
                   v : *
               |]
+        , OFunction
+            "Builtin$.io$_return"
+            [ Label Kernel.TOpq "v"
+            ]
+            [r| 
+                  v : IO(*)
+              |]
         ]
     }
 
