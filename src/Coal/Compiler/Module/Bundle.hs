@@ -30,6 +30,7 @@ data AliasInfo
 
 data ModuleBundle = ModuleBundle
   { moduleDataConstructors :: Environment DataConstructorInfo
+  , moduleCodataAccessors :: Environment (CodataAccessor TypeIndex Kind IndexedType)
   , moduleTypeConstructors :: Environment Kind
   , moduleTraits :: Environment TraitInfo
   , moduleInstances :: Environment InstanceInfo
