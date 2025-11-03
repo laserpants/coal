@@ -28,21 +28,17 @@ data AliasInfo
   = AliasInfo [Name] ParameterizedType
   deriving (Show, Eq, Ord, Read)
 
-data Identifier
-  = IFunction
-  | IConstant
-  | IFold
-  | IUnfold
-  | IType
-  | IDataConstructor
-  | ICotype
-  | ICodataAccessor
-  | ITrait
-  | ITraitDefinition
-  deriving (Show, Eq, Ord, Read)
-
 data NameInfo
-  = NameInfo Identifier IndexedScheme
+  = IFunction IndexedScheme
+  | IConstant IndexedScheme
+  | IFold IndexedScheme
+  | IUnfold IndexedScheme
+  | IDataConstructor IndexedScheme
+  | ICodataAccessor IndexedScheme
+  | ITraitDefinition IndexedScheme
+  | IType
+  | ICotype
+  | ITrait
   deriving (Show, Eq, Ord, Read)
 
 data ModuleBundle = ModuleBundle
