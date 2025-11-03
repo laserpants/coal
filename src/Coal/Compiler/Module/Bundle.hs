@@ -32,6 +32,7 @@ data Identifier
   = IFunction
   | IConstant
   | IFold
+  | IUnfold
   | IType
   | IDataConstructor
   | ICotype
