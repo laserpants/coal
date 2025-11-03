@@ -50,5 +50,11 @@ data ModuleBundle = ModuleBundle
   , moduleAliases :: Environment AliasInfo
   , moduleNames :: Environment NameInfo
   , moduleExports :: Set Name
+--  , moduleDefinitions :: 
+--  , moduleObjectCode :: ByteString
   }
   deriving (Show, Eq, Ord, Read)
+
+build :: a -> ModuleBundle
+build =
+  undefined
