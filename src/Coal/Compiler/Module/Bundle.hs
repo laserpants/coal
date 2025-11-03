@@ -28,6 +28,19 @@ data AliasInfo
   = AliasInfo [Name] ParameterizedType
   deriving (Show, Eq, Ord, Read)
 
+data Identifier
+  = IFunction
+  | IFold
+  | IType
+  | IDataConstructor
+  | ITrait
+  | ITraitInstance
+  deriving (Show, Eq, Ord, Read)
+
+data NameInfo
+  = NameInfo Identifier IndexedScheme
+  deriving (Show, Eq, Ord, Read)
+
 data ModuleBundle = ModuleBundle
   { moduleDataConstructors :: Environment DataConstructorInfo
   , moduleCodataAccessors :: Environment (CodataAccessor TypeIndex Kind IndexedType)
@@ -35,5 +48,6 @@ data ModuleBundle = ModuleBundle
   , moduleTraits :: Environment TraitInfo
   , moduleInstances :: Environment InstanceInfo
   , moduleAliases :: Environment AliasInfo
+  , moduleNames :: Environment NameInfo
   }
   deriving (Show, Eq, Ord, Read)
