@@ -30,11 +30,14 @@ data AliasInfo
 
 data Identifier
   = IFunction
+  | IConstant
   | IFold
   | IType
   | IDataConstructor
+  | ICotype
+  | ICodataAccessor
   | ITrait
-  | ITraitInstance
+  | ITraitDefinition
   deriving (Show, Eq, Ord, Read)
 
 data NameInfo
@@ -49,5 +52,6 @@ data ModuleBundle = ModuleBundle
   , moduleInstances :: Environment InstanceInfo
   , moduleAliases :: Environment AliasInfo
   , moduleNames :: Environment NameInfo
+  , moduleExports :: Set Name
   }
   deriving (Show, Eq, Ord, Read)
