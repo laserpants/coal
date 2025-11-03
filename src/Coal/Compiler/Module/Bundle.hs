@@ -24,11 +24,15 @@ data InstanceInfo
       (Dictionary IndexedScheme)
   deriving (Show, Eq, Ord, Read)
 
+data AliasInfo
+  = AliasInfo [Name] ParameterizedType
+  deriving (Show, Eq, Ord, Read)
+
 data ModuleBundle = ModuleBundle
   { moduleDataConstructors :: Environment DataConstructorInfo
   , moduleTypeConstructors :: Environment Kind
   , moduleTraits :: Environment TraitInfo
   , moduleInstances :: Environment InstanceInfo
-  , moduleAliases :: Int
+  , moduleAliases :: Environment AliasInfo
   }
   deriving (Show, Eq, Ord, Read)
