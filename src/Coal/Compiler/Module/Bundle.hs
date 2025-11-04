@@ -113,6 +113,18 @@ typeConstructorInfo loc name (TypeDef ps _) = TypeConstructorInfo loc name kind
  where
   kind = foldr KArrow KType (replicate (length ps) KType)
 
+codataAccessorInfo :: Metadata -> Name -> CotypeDef -> CodataAccessorInfo
+codataAccessorInfo = undefined
+
+traitInfo :: Metadata -> Name -> TraitDef () -> TraitInfo
+traitInfo = undefined
+
+instanceInfo :: Metadata -> Name -> InstanceDef Definition Metadata Kind () -> InstanceInfo 
+instanceInfo = undefined
+
+aliasInfo :: Metadata -> Name -> AliasDef -> AliasInfo
+aliasInfo = undefined
+
 build :: (Monad m) => Module Metadata Kind () -> CompilerT Metadata m ModuleBundle
 build (Module _ exports defs) =
   flip execStateT emptyModuleBundle $ do
@@ -124,21 +136,23 @@ buildDefinition =
   \case
     DType loc name def -> do
       modify (insertTypeConstructor name (typeConstructorInfo loc name def))
-    DCotype loc name d -> do
-      modify (insertCodataAccessor name undefined)
-    DFunction loc name fs ds -> do
-      undefined
-    DConstant loc name d ds -> do
-      undefined
+    DCotype loc name def -> do
+      modify (insertCodataAccessor name (codataAccessorInfo loc name def))
+    -- DFunction loc name fs ds -> do
+    DFunction{} -> do
+      pure ()
+    -- DConstant loc name d ds -> do
+    DConstant{} -> do
+      pure ()
     DTrait loc name t -> do
-      undefined
-    DInstance loc name d -> do
-      undefined
+      modify (insertTrait name (traitInfo loc name t))
+    DInstance loc name def -> do
+      modify (insertInstance name (instanceInfo loc name def))
     DTypeAlias loc name a -> do
-      undefined
+      modify (insertAlias name (aliasInfo loc name a))
     DFold loc name d -> do
       undefined
     DUnfold loc name d -> do
-      undefined
+      pure ()
     DImport loc path ns -> do
       pure ()
