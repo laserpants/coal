@@ -9,7 +9,7 @@ import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module
-import Control.Monad.State (StateT, modify, execStateT)
+import Control.Monad.State (StateT, execStateT, modify)
 import Data.Map.Strict (Map)
 import qualified Data.Set as Set
 import Extras (Dictionary, Name, Set, forM_)
@@ -26,6 +26,10 @@ data CodataAccessorInfo
 
 data TypeConstructorInfo
   = TypeConstructorInfo Metadata Name Kind
+  deriving (Show, Eq, Ord, Read)
+
+data CotypeConstructorInfo
+  = CotypeConstructorInfo Metadata Name Kind
   deriving (Show, Eq, Ord, Read)
 
 data TraitInfo
@@ -58,6 +62,7 @@ data ModuleBundle = ModuleBundle
   { moduleDataConstructors :: Environment DataConstructorInfo
   , moduleCodataAccessors :: Environment CodataAccessorInfo
   , moduleTypeConstructors :: Environment TypeConstructorInfo
+  , moduleCotypeConstructors :: Environment CotypeConstructorInfo
   , moduleTraits :: Environment TraitInfo
   , moduleInstances :: Environment InstanceInfo
   , moduleAliases :: Environment AliasInfo
@@ -74,6 +79,7 @@ emptyModuleBundle =
     { moduleDataConstructors = mempty
     , moduleCodataAccessors = mempty
     , moduleTypeConstructors = mempty
+    , moduleCotypeConstructors = mempty
     , moduleTraits = mempty
     , moduleInstances = mempty
     , moduleAliases = mempty
@@ -84,11 +90,34 @@ emptyModuleBundle =
 insertDataConstructor :: Name -> DataConstructorInfo -> ModuleBundle -> ModuleBundle
 insertDataConstructor name info ModuleBundle{..} = ModuleBundle{moduleDataConstructors = Environment.insert name info moduleDataConstructors, ..}
 
+insertManyDataConstructors :: [DataConstructorInfo] -> ModuleBundle -> ModuleBundle
+insertManyDataConstructors infos ModuleBundle{..} =
+  ModuleBundle
+    { moduleDataConstructors =
+        Environment.insertMultiple
+          [(name, info) | info@(DataConstructorInfo _ name _ _) <- infos]
+          moduleDataConstructors
+    , ..
+    }
+
 insertCodataAccessor :: Name -> CodataAccessorInfo -> ModuleBundle -> ModuleBundle
 insertCodataAccessor name info ModuleBundle{..} = ModuleBundle{moduleCodataAccessors = Environment.insert name info moduleCodataAccessors, ..}
 
+insertManyCodataAccessors :: [CodataAccessorInfo] -> ModuleBundle -> ModuleBundle
+insertManyCodataAccessors infos ModuleBundle{..} =
+  ModuleBundle
+    { moduleCodataAccessors =
+        Environment.insertMultiple
+          [(name, info) | info@(CodataAccessorInfo _ name _) <- infos]
+          moduleCodataAccessors
+    , ..
+    }
+
 insertTypeConstructor :: Name -> TypeConstructorInfo -> ModuleBundle -> ModuleBundle
 insertTypeConstructor name info ModuleBundle{..} = ModuleBundle{moduleTypeConstructors = Environment.insert name info moduleTypeConstructors, ..}
+
+insertCotypeConstructor :: Name -> CotypeConstructorInfo -> ModuleBundle -> ModuleBundle
+insertCotypeConstructor name info ModuleBundle{..} = ModuleBundle{moduleCotypeConstructors = Environment.insert name info moduleCotypeConstructors, ..}
 
 insertTrait :: Name -> TraitInfo -> ModuleBundle -> ModuleBundle
 insertTrait name info ModuleBundle{..} = ModuleBundle{moduleTraits = Environment.insert name info moduleTraits, ..}
@@ -106,20 +135,30 @@ addExport :: Name -> ModuleBundle -> ModuleBundle
 addExport name ModuleBundle{..} = ModuleBundle{moduleExports = Set.insert name moduleExports, ..}
 
 setExports :: [Name] -> ModuleBundle -> ModuleBundle
-setExports names ModuleBundle{..} = ModuleBundle{moduleExports = Set.fromList names}  
+setExports names ModuleBundle{..} = ModuleBundle{moduleExports = Set.fromList names}
+
+dataConstructorInfo :: Metadata -> TypeDef -> [DataConstructorInfo]
+dataConstructorInfo = undefined
 
 typeConstructorInfo :: Metadata -> Name -> TypeDef -> TypeConstructorInfo
 typeConstructorInfo loc name (TypeDef ps _) = TypeConstructorInfo loc name kind
  where
   kind = foldr KArrow KType (replicate (length ps) KType)
 
-codataAccessorInfo :: Metadata -> Name -> CotypeDef -> CodataAccessorInfo
-codataAccessorInfo = undefined
+cotypeConstructorInfo :: Metadata -> Name -> CotypeDef -> CotypeConstructorInfo
+cotypeConstructorInfo loc name (CotypeDef ps _) = CotypeConstructorInfo loc name kind
+ where
+  kind = undefined -- foldr KArrow KCotype (replicate (length ps) KCotype)
+
+codataAccessorInfo :: Metadata -> CotypeDef -> [CodataAccessorInfo]
+codataAccessorInfo loc (CotypeDef ps ts) = undefined -- CodataAccessorInfo loc name accessor
+ where
+  accessor = CodataAccessor undefined undefined
 
 traitInfo :: Metadata -> Name -> TraitDef () -> TraitInfo
 traitInfo = undefined
 
-instanceInfo :: Metadata -> Name -> InstanceDef Definition Metadata Kind () -> InstanceInfo 
+instanceInfo :: Metadata -> Name -> InstanceDef Definition Metadata Kind () -> InstanceInfo
 instanceInfo = undefined
 
 aliasInfo :: Metadata -> Name -> AliasDef -> AliasInfo
@@ -136,23 +175,23 @@ buildDefinition =
   \case
     DType loc name def -> do
       modify (insertTypeConstructor name (typeConstructorInfo loc name def))
+      modify (insertManyDataConstructors (dataConstructorInfo loc def))
     DCotype loc name def -> do
-      modify (insertCodataAccessor name (codataAccessorInfo loc name def))
-    -- DFunction loc name fs ds -> do
-    DFunction{} -> do
+      modify (insertCotypeConstructor name (cotypeConstructorInfo loc name def))
+      modify (insertManyCodataAccessors (codataAccessorInfo loc def))
+    DFunction{} ->
       pure ()
-    -- DConstant loc name d ds -> do
-    DConstant{} -> do
+    DConstant{} ->
       pure ()
     DTrait loc name t -> do
       modify (insertTrait name (traitInfo loc name t))
     DInstance loc name def -> do
       modify (insertInstance name (instanceInfo loc name def))
-    DTypeAlias loc name a -> do
-      modify (insertAlias name (aliasInfo loc name a))
-    DFold loc name d -> do
-      undefined
-    DUnfold loc name d -> do
+    DTypeAlias loc name alias -> do
+      modify (insertAlias name (aliasInfo loc name alias))
+    DFold loc name d ->
       pure ()
-    DImport loc path ns -> do
+    DUnfold loc name d ->
+      pure ()
+    DImport{} ->
       pure ()
