@@ -202,6 +202,8 @@ collectTypeConstructors =
       -- look up module 
       -- take type constructors
       undefined
+    _ ->
+      pure ()
 
 --buildDefinition :: (Monad m) => Definition Metadata Kind () -> StateT ModuleBundle (CompilerT Metadata m) ()
 --buildDefinition =

@@ -49,6 +49,7 @@ data CompilerState a = CompilerState
   , compilerTypeDefinitions :: Environment [Definition a Kind ()]
   , compilerVerbatimSource :: Environment Text
   , compilerConfig :: CompilerConfig
+--  , compilerModules :: Environment ModuleBundle
   }
   deriving (Show, Eq, Ord, Read)
 
