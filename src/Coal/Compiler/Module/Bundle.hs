@@ -135,20 +135,20 @@ addExport :: Name -> ModuleBundle -> ModuleBundle
 addExport name ModuleBundle{..} = ModuleBundle{moduleExports = Set.insert name moduleExports, ..}
 
 setExports :: [Name] -> ModuleBundle -> ModuleBundle
-setExports names ModuleBundle{..} = ModuleBundle{moduleExports = Set.fromList names}
+setExports names ModuleBundle{..} = ModuleBundle{moduleExports = Set.fromList names, ..}
 
 dataConstructorInfo :: Metadata -> TypeDef -> [DataConstructorInfo]
 dataConstructorInfo = undefined
 
 typeConstructorInfo :: Metadata -> Name -> TypeDef -> TypeConstructorInfo
-typeConstructorInfo loc name (TypeDef ps _) = TypeConstructorInfo loc name kind
- where
-  kind = foldr KArrow KType (replicate (length ps) KType)
+typeConstructorInfo loc name (TypeDef ps _) = TypeConstructorInfo loc name (nKind n) where n = length ps
 
 cotypeConstructorInfo :: Metadata -> Name -> CotypeDef -> CotypeConstructorInfo
-cotypeConstructorInfo loc name (CotypeDef ps _) = CotypeConstructorInfo loc name kind
- where
-  kind = undefined -- foldr KArrow KCotype (replicate (length ps) KCotype)
+cotypeConstructorInfo loc name (CotypeDef ps _) = CotypeConstructorInfo loc name (nKind n) where n = length ps
+
+{-# INLINE nKind #-}
+nKind :: Int -> Kind
+nKind n = foldr KArrow KType (replicate n KType)
 
 codataAccessorInfo :: Metadata -> CotypeDef -> [CodataAccessorInfo]
 codataAccessorInfo loc (CotypeDef ps ts) = undefined -- CodataAccessorInfo loc name accessor
@@ -162,36 +162,79 @@ instanceInfo :: Metadata -> Name -> InstanceDef Definition Metadata Kind () -> I
 instanceInfo = undefined
 
 aliasInfo :: Metadata -> Name -> AliasDef -> AliasInfo
-aliasInfo = undefined
+aliasInfo loc name (AliasDef ps t) = AliasInfo loc name (parameterName <$> ps) t
 
 build :: (Monad m) => Module Metadata Kind () -> CompilerT Metadata m ModuleBundle
-build (Module _ exports defs) =
+build m@(Module _ exports defs) =
   flip execStateT emptyModuleBundle $ do
     modify (setExports exports)
-    forM_ defs buildDefinition
+    forM_ defs buildPass1
+    a <- importedTypeConstructors m
+    undefined
 
-buildDefinition :: (Monad m) => Definition Metadata Kind () -> StateT ModuleBundle (CompilerT Metadata m) ()
-buildDefinition =
+buildPass1 :: (Monad m) => Definition Metadata Kind () -> StateT ModuleBundle (CompilerT Metadata m) ()
+buildPass1 =
   \case
-    DType loc name def -> do
-      modify (insertTypeConstructor name (typeConstructorInfo loc name def))
-      modify (insertManyDataConstructors (dataConstructorInfo loc def))
-    DCotype loc name def -> do
-      modify (insertCotypeConstructor name (cotypeConstructorInfo loc name def))
-      modify (insertManyCodataAccessors (codataAccessorInfo loc def))
-    DFunction{} ->
-      pure ()
-    DConstant{} ->
-      pure ()
-    DTrait loc name t -> do
-      modify (insertTrait name (traitInfo loc name t))
-    DInstance loc name def -> do
-      modify (insertInstance name (instanceInfo loc name def))
+    DType loc name def ->
+      modify $ 
+        insertTypeConstructor name (typeConstructorInfo loc name def)
+          . addName name IType
+    DCotype loc name def ->
+      modify $ 
+        insertCotypeConstructor name (cotypeConstructorInfo loc name def)
+          . addName name ICotype
     DTypeAlias loc name alias -> do
-      modify (insertAlias name (aliasInfo loc name alias))
-    DFold loc name d ->
+      modify $ 
+        insertAlias name (aliasInfo loc name alias)
+          . addName name IAlias
+    _ ->
       pure ()
-    DUnfold loc name d ->
-      pure ()
-    DImport{} ->
-      pure ()
+
+importedTypeConstructors :: (Monad m) => Module Metadata Kind () -> StateT ModuleBundle (CompilerT Metadata m) ()
+importedTypeConstructors (Module _ _ defs) = do
+  forM_ defs collectTypeConstructors
+  undefined
+
+collectTypeConstructors :: (Monad m) => Definition Metadata Kind () -> StateT ModuleBundle (CompilerT Metadata m) ()
+collectTypeConstructors = 
+  \case
+    DImport loc path names ->
+      -- look up module 
+      -- take type constructors
+      undefined
+
+--buildDefinition :: (Monad m) => Definition Metadata Kind () -> StateT ModuleBundle (CompilerT Metadata m) ()
+--buildDefinition =
+--  \case
+--    DType loc name def ->
+--      modify $
+--        insertTypeConstructor name (typeConstructorInfo loc name def)
+--          . insertManyDataConstructors (dataConstructorInfo loc def)
+--          . addName name IType
+--    DCotype loc name def ->
+--      modify $
+--        insertCotypeConstructor name (cotypeConstructorInfo loc name def)
+--          . insertManyCodataAccessors (codataAccessorInfo loc def)
+--          . addName name ICotype
+--    DTrait loc name t ->
+--      modify $
+--        insertTrait name (traitInfo loc name t)
+--          . addName name ITrait
+--          -- traitdefinitions
+--    DInstance loc name def -> do
+--      modify (insertInstance name (instanceInfo loc name def))
+--    DTypeAlias loc name alias -> do
+--      modify (insertAlias name (aliasInfo loc name alias))
+--    _ ->
+--      pure ()
+--
+----    DFunction{} ->
+----      pure ()
+----    DConstant{} ->
+----      pure ()
+----    DFold loc name d ->
+----      pure ()
+----    DUnfold loc name d ->
+----      pure ()
+----    DImport{} ->
+----      pure ()
