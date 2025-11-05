@@ -6,13 +6,11 @@ import Coal.Ast.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 
--- import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module
-import Control.Monad.State (StateT, execStateT, modify)
 import Data.Map.Strict (Map)
 import qualified Data.Set as Set
-import Extras (Dictionary, Name, Set, forM_)
+import Extras (Dictionary, Name, Set)
 
 type IndexedConstructor = DataConstructor TypeIndex Kind IndexedType
 
@@ -150,14 +148,14 @@ dataConstructorInfo :: Metadata -> TypeDef -> [DataConstructorInfo]
 dataConstructorInfo = undefined
 
 typeConstructorInfo :: Metadata -> Name -> TypeDef -> TypeConstructorInfo
-typeConstructorInfo loc name (TypeDef ps _) = TypeConstructorInfo loc name (nKind n) where n = length ps
+typeConstructorInfo loc name (TypeDef ps _) = TypeConstructorInfo loc name (arity n) where n = length ps
 
 cotypeConstructorInfo :: Metadata -> Name -> CotypeDef -> CotypeConstructorInfo
-cotypeConstructorInfo loc name (CotypeDef ps _) = CotypeConstructorInfo loc name (nKind n) where n = length ps
+cotypeConstructorInfo loc name (CotypeDef ps _) = CotypeConstructorInfo loc name (arity n) where n = length ps
 
-{-# INLINE nKind #-}
-nKind :: Int -> Kind
-nKind n = foldr KArrow KType (replicate n KType)
+{-# INLINE arity #-}
+arity :: Int -> Kind
+arity n = foldr KArrow KType (replicate n KType)
 
 codataAccessorInfo :: Metadata -> CotypeDef -> [CodataAccessorInfo]
 codataAccessorInfo loc (CotypeDef ps ts) = undefined -- CodataAccessorInfo loc name accessor
