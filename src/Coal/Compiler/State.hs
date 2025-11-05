@@ -24,6 +24,7 @@ module Coal.Compiler.State (
 import Coal.Common.Environment (Environment (..))
 import Coal.Common.Supply (Supply (..))
 import Coal.Compiler.Config (CompilerConfig (..), defaultConfig)
+import Coal.Compiler.Module.Bundle (ModuleBundle)
 import Coal.Language
 import Coal.Language.Module (Definition (..))
 import Coal.Language.Module.Definition (Path (..))
@@ -49,7 +50,7 @@ data CompilerState a = CompilerState
   , compilerTypeDefinitions :: Environment [Definition a Kind ()]
   , compilerVerbatimSource :: Environment Text
   , compilerConfig :: CompilerConfig
---  , compilerModules :: Environment ModuleBundle
+  , compilerModules :: Environment ModuleBundle
   }
   deriving (Show, Eq, Ord, Read)
 
@@ -125,4 +126,5 @@ initialCompilerState =
     , compilerVerbatimSource = mempty
     , compilerTypeDefinitions = mempty
     , compilerConfig = defaultConfig
+    , compilerModules = mempty
     }

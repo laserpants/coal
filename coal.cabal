@@ -42,6 +42,7 @@ library
       Coal.Compiler.Kernel.TranslateDefinition
       Coal.Compiler.Kernel.TranslateExpression
       Coal.Compiler.Kernel.TranslateType
+      Coal.Compiler.Module.Builders
       Coal.Compiler.Module.Bundle
       Coal.Compiler.Pass
       Coal.Compiler.Pass.DebugOutput

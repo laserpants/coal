@@ -1,4 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
 
 module Coal.Compiler.Module.Bundle where
@@ -6,7 +5,8 @@ module Coal.Compiler.Module.Bundle where
 import Coal.Ast.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
-import Coal.Compiler.Stack
+
+-- import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module
 import Control.Monad.State (StateT, execStateT, modify)
@@ -52,8 +52,8 @@ data NameInfo
   | IDataConstructor IndexedScheme
   | ICodataAccessor IndexedScheme
   | ITraitDefinition IndexedScheme
-  | IType
-  | ICotype
+  | IType Kind
+  | ICotype Kind
   | ITrait
   | IAlias
   deriving (Show, Eq, Ord, Read)
@@ -72,6 +72,15 @@ data ModuleBundle = ModuleBundle
   --  , moduleObjectCode :: ByteString
   }
   deriving (Show, Eq, Ord, Read)
+
+exportedNames :: ModuleBundle -> Environment NameInfo
+exportedNames ModuleBundle{..} = Environment.filterNames (`Set.member` moduleExports) moduleNames
+
+exportedTypeConstructors :: ModuleBundle -> Environment TypeConstructorInfo
+exportedTypeConstructors ModuleBundle{..} = Environment.filterNames (`Set.member` moduleExports) moduleTypeConstructors
+
+exportedCotypeConstructors :: ModuleBundle -> Environment CotypeConstructorInfo
+exportedCotypeConstructors ModuleBundle{..} = Environment.filterNames (`Set.member` moduleExports) moduleCotypeConstructors
 
 emptyModuleBundle :: ModuleBundle
 emptyModuleBundle =
@@ -163,80 +172,3 @@ instanceInfo = undefined
 
 aliasInfo :: Metadata -> Name -> AliasDef -> AliasInfo
 aliasInfo loc name (AliasDef ps t) = AliasInfo loc name (parameterName <$> ps) t
-
-build :: (Monad m) => Module Metadata Kind () -> CompilerT Metadata m ModuleBundle
-build m@(Module _ exports defs) =
-  flip execStateT emptyModuleBundle $ do
-    modify (setExports exports)
-    forM_ defs buildPass1
-    a <- importedTypeConstructors m
-    undefined
-
-buildPass1 :: (Monad m) => Definition Metadata Kind () -> StateT ModuleBundle (CompilerT Metadata m) ()
-buildPass1 =
-  \case
-    DType loc name def ->
-      modify $ 
-        insertTypeConstructor name (typeConstructorInfo loc name def)
-          . addName name IType
-    DCotype loc name def ->
-      modify $ 
-        insertCotypeConstructor name (cotypeConstructorInfo loc name def)
-          . addName name ICotype
-    DTypeAlias loc name alias -> do
-      modify $ 
-        insertAlias name (aliasInfo loc name alias)
-          . addName name IAlias
-    _ ->
-      pure ()
-
-importedTypeConstructors :: (Monad m) => Module Metadata Kind () -> StateT ModuleBundle (CompilerT Metadata m) ()
-importedTypeConstructors (Module _ _ defs) = do
-  forM_ defs collectTypeConstructors
-  undefined
-
-collectTypeConstructors :: (Monad m) => Definition Metadata Kind () -> StateT ModuleBundle (CompilerT Metadata m) ()
-collectTypeConstructors = 
-  \case
-    DImport loc path names ->
-      -- look up module 
-      -- take type constructors
-      undefined
-    _ ->
-      pure ()
-
---buildDefinition :: (Monad m) => Definition Metadata Kind () -> StateT ModuleBundle (CompilerT Metadata m) ()
---buildDefinition =
---  \case
---    DType loc name def ->
---      modify $
---        insertTypeConstructor name (typeConstructorInfo loc name def)
---          . insertManyDataConstructors (dataConstructorInfo loc def)
---          . addName name IType
---    DCotype loc name def ->
---      modify $
---        insertCotypeConstructor name (cotypeConstructorInfo loc name def)
---          . insertManyCodataAccessors (codataAccessorInfo loc def)
---          . addName name ICotype
---    DTrait loc name t ->
---      modify $
---        insertTrait name (traitInfo loc name t)
---          . addName name ITrait
---          -- traitdefinitions
---    DInstance loc name def -> do
---      modify (insertInstance name (instanceInfo loc name def))
---    DTypeAlias loc name alias -> do
---      modify (insertAlias name (aliasInfo loc name alias))
---    _ ->
---      pure ()
---
-----    DFunction{} ->
-----      pure ()
-----    DConstant{} ->
-----      pure ()
-----    DFold loc name d ->
-----      pure ()
-----    DUnfold loc name d ->
-----      pure ()
-----    DImport{} ->
-----      pure ()
