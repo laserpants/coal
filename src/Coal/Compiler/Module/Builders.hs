@@ -17,7 +17,6 @@ build (Module _ exports defs) =
   flip execStateT emptyModuleBundle $ do
     modify (setExports exports)
     forM_ defs collectTypeConstructors
-    undefined
 
 pick :: [Name] -> Environment a -> [a]
 pick names = Environment.elems . Environment.restrict names
@@ -42,7 +41,7 @@ collectTypeConstructors =
       case Environment.lookup (principalPath path) env of
         Nothing ->
           -- TODO: No such module
-          undefined
+          error ("No module: " <> show path)
         Just bundle -> do
           -- TODO: check for missing names
           forM_ (pick names (exportedTypeConstructors bundle)) $

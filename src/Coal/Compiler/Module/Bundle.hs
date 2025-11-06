@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
 module Coal.Compiler.Module.Bundle where
@@ -71,14 +72,24 @@ data ModuleBundle = ModuleBundle
   }
   deriving (Show, Eq, Ord, Read)
 
+{-# INLINE exportsAll #-}
+exportsAll :: Set Name -> Bool
+exportsAll s = Set.fromList ["*"] == s
+
 exportedNames :: ModuleBundle -> Environment NameInfo
-exportedNames ModuleBundle{..} = Environment.filterNames (`Set.member` moduleExports) moduleNames
+exportedNames ModuleBundle{..}
+  | exportsAll moduleExports = moduleNames
+  | otherwise = Environment.filterNames (`Set.member` moduleExports) moduleNames
 
 exportedTypeConstructors :: ModuleBundle -> Environment TypeConstructorInfo
-exportedTypeConstructors ModuleBundle{..} = Environment.filterNames (`Set.member` moduleExports) moduleTypeConstructors
+exportedTypeConstructors ModuleBundle{..}
+  | exportsAll moduleExports = moduleTypeConstructors
+  | otherwise = Environment.filterNames (`Set.member` moduleExports) moduleTypeConstructors
 
 exportedCotypeConstructors :: ModuleBundle -> Environment CotypeConstructorInfo
-exportedCotypeConstructors ModuleBundle{..} = Environment.filterNames (`Set.member` moduleExports) moduleCotypeConstructors
+exportedCotypeConstructors ModuleBundle{..}
+  | exportsAll moduleExports = moduleCotypeConstructors
+  | otherwise = Environment.filterNames (`Set.member` moduleExports) moduleCotypeConstructors
 
 emptyModuleBundle :: ModuleBundle
 emptyModuleBundle =
