@@ -25,13 +25,15 @@ collectTypeConstructors :: (Monad m) => Definition Metadata Kind () -> StateT Mo
 collectTypeConstructors =
   \case
     DType loc name def -> do
-      let info@(TypeConstructorInfo _ _ kind) = typeConstructorInfo loc name def
       modify $
         insertTypeConstructor name info . addName name (IType kind)
+     where
+      info@(TypeConstructorInfo _ _ kind) = typeConstructorInfo loc name def
     DCotype loc name def -> do
-      let info@(CotypeConstructorInfo _ _ kind) = cotypeConstructorInfo loc name def
       modify $
         insertCotypeConstructor name info . addName name (ICotype kind)
+     where
+      info@(CotypeConstructorInfo _ _ kind) = cotypeConstructorInfo loc name def
     DTypeAlias loc name alias -> do
       modify $
         insertAlias name (aliasInfo loc name alias)
