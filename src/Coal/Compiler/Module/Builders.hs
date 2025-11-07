@@ -20,7 +20,8 @@ build (Module _ exports defs) =
   flip execStateT emptyModuleBundle $ do
     modify (setExports exports)
     forM_ defs collectTypeConstructors
-    forM_ defs collectDataConstructors
+    env <- typeConstructorEnv
+    forM_ defs (collectDataConstructors env)
 
 pick :: (Monad m) => [Name] -> Environment a -> StateT ModuleBundle (CompilerT Metadata m) [a]
 pick names env
@@ -88,15 +89,14 @@ typeConstructorEnv = do
   insertCotypeInfo :: CotypeConstructorInfo -> Environment Kind -> Environment Kind
   insertCotypeInfo (CotypeConstructorInfo _ name kind_) = Environment.insert name kind_
 
-collectDataConstructors :: (Monad m) => Definition Metadata Kind () -> StateT ModuleBundle (CompilerT Metadata m) ()
-collectDataConstructors =
+collectDataConstructors :: (Monad m) => Environment Kind -> Definition Metadata Kind () -> StateT ModuleBundle (CompilerT Metadata m) ()
+collectDataConstructors env =
   \case
     DCotype loc _ def -> do
-      forM_ (codataAccessorInfo loc def) $
+      forM_ (codataAccessorInfo env loc def) $
         \(CodataAccessorInfo _ _ CodataAccessor{..}) -> do
           modify (addName codataAccessorName (ICodataAccessor codataAccessorScheme))
     DType loc _ def -> do
-      env <- typeConstructorEnv
       forM_ (dataConstructorInfo env loc def) $
         \(DataConstructorInfo _ _ DataConstructor{..} names) -> do
           modify (addName constructorName (IDataConstructor constructorScheme))

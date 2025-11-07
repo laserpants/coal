@@ -196,8 +196,8 @@ translateScheme env (Forall _ _ t) = Forall (typeIndexesIn t1) [] t1
  where
   t1 = evalState (instantiateVars [] env t) (0 :: Int)
 
-codataAccessorInfo :: Metadata -> CotypeDef -> [CodataAccessorInfo]
-codataAccessorInfo loc (CotypeDef ps ts) = undefined -- CodataAccessorInfo loc name accessor
+codataAccessorInfo :: Environment Kind -> Metadata -> CotypeDef -> [CodataAccessorInfo]
+codataAccessorInfo env loc (CotypeDef ps ts) = undefined -- CodataAccessorInfo loc name accessor
  where
   accessor = CodataAccessor undefined undefined
 
