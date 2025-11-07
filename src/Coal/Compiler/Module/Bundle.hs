@@ -178,13 +178,18 @@ cotypeConstructorInfo loc name (CotypeDef ps _) = CotypeConstructorInfo loc name
 kind :: Int -> Kind
 kind n = foldr KArrow KType (replicate n KType)
 
-dataConstructorInfo :: Metadata -> TypeDef -> [DataConstructorInfo]
-dataConstructorInfo loc (TypeDef _ ctors) = getInfo <$> ctors
+dataConstructorInfo :: Environment Kind -> Metadata -> TypeDef -> [DataConstructorInfo]
+dataConstructorInfo env loc (TypeDef _ ctors) = getInfo <$> ctors
  where
   allNames = Set.fromList (constructorName <$> ctors)
+
   getInfo :: DataConstructor Parameter () ParameterizedType -> DataConstructorInfo
-  getInfo DataConstructor{..} = DataConstructorInfo loc constructorName DataConstructor{constructorScheme = translateScheme env constructorScheme, ..} allNames
-  env = undefined
+  getInfo DataConstructor{..} =
+    DataConstructorInfo
+      loc
+      constructorName
+      DataConstructor{constructorScheme = translateScheme env constructorScheme, ..}
+      allNames
 
 translateScheme :: Environment Kind -> Scheme Parameter () ParameterizedType -> Scheme TypeIndex Kind IndexedType
 translateScheme env (Forall _ _ t) = Forall (typeIndexesIn t1) [] t1

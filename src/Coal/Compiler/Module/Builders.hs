@@ -10,8 +10,9 @@ import Coal.Compiler.Module.Bundle
 import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module
-import Control.Monad.State (StateT, execStateT, gets, lift, modify)
+import Control.Monad.State (StateT, execStateT, get, gets, lift, modify)
 import Data.List ((\\))
+import Debug.Trace
 import Extras (Name, forM_)
 
 build :: (Monad m) => Module Metadata Kind () -> CompilerT Metadata m ModuleBundle
@@ -49,14 +50,14 @@ collectTypeConstructors =
   \case
     DType loc name def -> do
       modify $
-        insertTypeConstructor name info . addName name (IType kind)
+        insertTypeConstructor name info . addName name (IType kind_)
      where
-      info@(TypeConstructorInfo _ _ kind) = typeConstructorInfo loc name def
+      info@(TypeConstructorInfo _ _ kind_) = typeConstructorInfo loc name def
     DCotype loc name def -> do
       modify $
-        insertCotypeConstructor name info . addName name (ICotype kind)
+        insertCotypeConstructor name info . addName name (ICotype kind_)
      where
-      info@(CotypeConstructorInfo _ _ kind) = cotypeConstructorInfo loc name def
+      info@(CotypeConstructorInfo _ _ kind_) = cotypeConstructorInfo loc name def
     DTypeAlias loc name alias -> do
       modify $
         insertAlias name (aliasInfo loc name alias)
@@ -64,24 +65,39 @@ collectTypeConstructors =
     def@DImport{} -> do
       types <- collect def exportedTypeConstructors
       forM_ types $
-        \(TypeConstructorInfo _ name kind) ->
-          modify (addName name (IType kind))
+        \(TypeConstructorInfo _ name kind_) ->
+          modify (addName name (IType kind_))
       cotypes <- collect def exportedCotypeConstructors
       forM_ cotypes $
-        \(CotypeConstructorInfo _ name kind) ->
-          modify (addName name (ICotype kind))
+        \(CotypeConstructorInfo _ name kind_) ->
+          modify (addName name (ICotype kind_))
     _ ->
       pure ()
+
+typeConstructorEnv :: (Monad m) => StateT ModuleBundle (CompilerT Metadata m) (Environment Kind)
+typeConstructorEnv = do
+  env1 <- gets (collect_ insertTypeInfo . moduleTypeConstructors)
+  env2 <- gets (collect_ insertCotypeInfo . moduleCotypeConstructors)
+  pure (env1 <> env2)
+ where
+  collect_ f = foldr f mempty . Environment.elems
+
+  insertTypeInfo :: TypeConstructorInfo -> Environment Kind -> Environment Kind
+  insertTypeInfo (TypeConstructorInfo _ name kind_) = Environment.insert name kind_
+
+  insertCotypeInfo :: CotypeConstructorInfo -> Environment Kind -> Environment Kind
+  insertCotypeInfo (CotypeConstructorInfo _ name kind_) = Environment.insert name kind_
 
 collectDataConstructors :: (Monad m) => Definition Metadata Kind () -> StateT ModuleBundle (CompilerT Metadata m) ()
 collectDataConstructors =
   \case
-    DCotype loc name def -> do
+    DCotype loc _ def -> do
       forM_ (codataAccessorInfo loc def) $
         \(CodataAccessorInfo _ _ CodataAccessor{..}) -> do
           modify (addName codataAccessorName (ICodataAccessor codataAccessorScheme))
     DType loc _ def -> do
-      forM_ (dataConstructorInfo loc def) $
+      env <- typeConstructorEnv
+      forM_ (dataConstructorInfo env loc def) $
         \(DataConstructorInfo _ _ DataConstructor{..} names) -> do
           modify (addName constructorName (IDataConstructor constructorScheme))
     def@DImport{} -> do
