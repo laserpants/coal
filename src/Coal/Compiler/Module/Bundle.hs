@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
@@ -6,9 +7,11 @@ module Coal.Compiler.Module.Bundle where
 import Coal.Ast.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
-
+import Coal.Compiler.Transform.Type.Parameterized
 import Coal.Language
 import Coal.Language.Module
+import Coal.TypeSystem.Substitution
+import Control.Monad.State (evalState)
 import Data.Map.Strict (Map)
 import qualified Data.Set as Set
 import Extras (Dictionary, Name, Set)
@@ -176,7 +179,17 @@ kind :: Int -> Kind
 kind n = foldr KArrow KType (replicate n KType)
 
 dataConstructorInfo :: Metadata -> TypeDef -> [DataConstructorInfo]
-dataConstructorInfo = undefined
+dataConstructorInfo loc (TypeDef _ ctors) = getInfo <$> ctors
+ where
+  allNames = Set.fromList (constructorName <$> ctors)
+  getInfo :: DataConstructor Parameter () ParameterizedType -> DataConstructorInfo
+  getInfo DataConstructor{..} = DataConstructorInfo loc constructorName DataConstructor{constructorScheme = translateScheme env constructorScheme, ..} allNames
+  env = undefined
+
+translateScheme :: Environment Kind -> Scheme Parameter () ParameterizedType -> Scheme TypeIndex Kind IndexedType
+translateScheme env (Forall _ _ t) = Forall (typeIndexesIn t1) [] t1
+ where
+  t1 = evalState (instantiateVars [] env t) (0 :: Int)
 
 codataAccessorInfo :: Metadata -> CotypeDef -> [CodataAccessorInfo]
 codataAccessorInfo loc (CotypeDef ps ts) = undefined -- CodataAccessorInfo loc name accessor
