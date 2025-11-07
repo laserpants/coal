@@ -7,5 +7,6 @@ import Coal.Language.Type (Parameter, ParameterizedType)
 import Data.Data (Data, Typeable)
 import Extras (Name)
 
+-- TODO: Replace (Name, ParameterizedType) with CodataAccessor type?
 data CotypeDef = CotypeDef [Parameter ()] [(Name, ParameterizedType)]
   deriving (Show, Eq, Ord, Read, Data, Typeable)
