@@ -91,6 +91,16 @@ exportedCotypeConstructors ModuleBundle{..}
   | exportsAll moduleExports = moduleCotypeConstructors
   | otherwise = Environment.filterNames (`Set.member` moduleExports) moduleCotypeConstructors
 
+exportedDataConstructors :: ModuleBundle -> Environment DataConstructorInfo
+exportedDataConstructors ModuleBundle{..}
+  | exportsAll moduleExports = moduleDataConstructors
+  | otherwise = Environment.filterNames (`Set.member` moduleExports) moduleDataConstructors
+
+exportedCodataAccessors :: ModuleBundle -> Environment CodataAccessorInfo
+exportedCodataAccessors ModuleBundle{..}
+  | exportsAll moduleExports = moduleCodataAccessors
+  | otherwise = Environment.filterNames (`Set.member` moduleExports) moduleCodataAccessors
+
 emptyModuleBundle :: ModuleBundle
 emptyModuleBundle =
   ModuleBundle
@@ -155,18 +165,18 @@ addExport name ModuleBundle{..} = ModuleBundle{moduleExports = Set.insert name m
 setExports :: [Name] -> ModuleBundle -> ModuleBundle
 setExports names ModuleBundle{..} = ModuleBundle{moduleExports = Set.fromList names, ..}
 
-dataConstructorInfo :: Metadata -> TypeDef -> [DataConstructorInfo]
-dataConstructorInfo = undefined
-
 typeConstructorInfo :: Metadata -> Name -> TypeDef -> TypeConstructorInfo
-typeConstructorInfo loc name (TypeDef ps _) = TypeConstructorInfo loc name (arity n) where n = length ps
+typeConstructorInfo loc name (TypeDef ps _) = TypeConstructorInfo loc name (kind n) where n = length ps
 
 cotypeConstructorInfo :: Metadata -> Name -> CotypeDef -> CotypeConstructorInfo
-cotypeConstructorInfo loc name (CotypeDef ps _) = CotypeConstructorInfo loc name (arity n) where n = length ps
+cotypeConstructorInfo loc name (CotypeDef ps _) = CotypeConstructorInfo loc name (kind n) where n = length ps
 
-{-# INLINE arity #-}
-arity :: Int -> Kind
-arity n = foldr KArrow KType (replicate n KType)
+{-# INLINE kind #-}
+kind :: Int -> Kind
+kind n = foldr KArrow KType (replicate n KType)
+
+dataConstructorInfo :: Metadata -> TypeDef -> [DataConstructorInfo]
+dataConstructorInfo = undefined
 
 codataAccessorInfo :: Metadata -> CotypeDef -> [CodataAccessorInfo]
 codataAccessorInfo loc (CotypeDef ps ts) = undefined -- CodataAccessorInfo loc name accessor

@@ -201,6 +201,10 @@ buildDataConstructorEnvironment env =
           []
     )
  where
+  translateConstructor ::
+    Set Name ->
+    DataConstructor a () ParameterizedType ->
+    (Name, (DataConstructor TypeIndex Kind IndexedType, Set Name))
   translateConstructor ctors (DataConstructor n a s) =
     (n, (DataConstructor n a (translateScheme s), ctors))
   translateScheme (Forall _ _ t) =

@@ -1,4 +1,5 @@
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module Coal.Compiler.Module.Builders where
 
@@ -10,6 +11,7 @@ import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module
 import Control.Monad.State (StateT, execStateT, gets, lift, modify)
+import Data.List ((\\))
 import Extras (Name, forM_)
 
 build :: (Monad m) => Module Metadata Kind () -> CompilerT Metadata m ModuleBundle
@@ -17,9 +19,30 @@ build (Module _ exports defs) =
   flip execStateT emptyModuleBundle $ do
     modify (setExports exports)
     forM_ defs collectTypeConstructors
+    forM_ defs collectDataConstructors
 
-pick :: [Name] -> Environment a -> [a]
-pick names = Environment.elems . Environment.restrict names
+pick :: (Monad m) => [Name] -> Environment a -> StateT ModuleBundle (CompilerT Metadata m) [a]
+pick names env
+  | null missing = pure $ Environment.elems (Environment.restrict names env)
+  | otherwise = error "TODO: Module ? doesn't export name ..."
+ where
+  missing = names \\ Environment.names env
+
+collect :: (Monad m) => Definition Metadata Kind () -> (ModuleBundle -> Environment a) -> StateT ModuleBundle (CompilerT Metadata m) [a]
+collect (DImport _ path names) getter = do
+  bundle <- importedModule path
+  pick names (getter bundle)
+collect _ _ = error "Implementation error"
+
+importedModule :: (Monad m) => Path -> StateT ModuleBundle (CompilerT Metadata m) ModuleBundle
+importedModule path = do
+  env <- lift (gets compilerModules)
+  case Environment.lookup (principalPath path) env of
+    Nothing ->
+      -- TODO: No such module
+      error ("No module: " <> show path)
+    Just bundle -> do
+      return bundle
 
 collectTypeConstructors :: (Monad m) => Definition Metadata Kind () -> StateT ModuleBundle (CompilerT Metadata m) ()
 collectTypeConstructors =
@@ -38,19 +61,41 @@ collectTypeConstructors =
       modify $
         insertAlias name (aliasInfo loc name alias)
           . addName name IAlias
-    DImport loc path names -> do
-      env <- lift (gets compilerModules)
-      case Environment.lookup (principalPath path) env of
-        Nothing ->
-          -- TODO: No such module
-          error ("No module: " <> show path)
-        Just bundle -> do
-          -- TODO: check for missing names
-          forM_ (pick names (exportedTypeConstructors bundle)) $
-            \(TypeConstructorInfo _ name kind) ->
-              modify (addName name (IType kind))
-          forM_ (pick names (exportedCotypeConstructors bundle)) $
-            \(CotypeConstructorInfo _ name kind) ->
-              modify (addName name (ICotype kind))
+    def@DImport{} -> do
+      types <- collect def exportedTypeConstructors
+      forM_ types $
+        \(TypeConstructorInfo _ name kind) ->
+          modify (addName name (IType kind))
+      cotypes <- collect def exportedCotypeConstructors
+      forM_ cotypes $
+        \(CotypeConstructorInfo _ name kind) ->
+          modify (addName name (ICotype kind))
     _ ->
       pure ()
+
+collectDataConstructors :: (Monad m) => Definition Metadata Kind () -> StateT ModuleBundle (CompilerT Metadata m) ()
+collectDataConstructors =
+  \case
+    DCotype loc name def -> do
+      forM_ (codataAccessorInfo loc def) $
+        \(CodataAccessorInfo _ _ CodataAccessor{..}) -> do
+          modify (addName codataAccessorName (ICodataAccessor codataAccessorScheme))
+    DType loc _ def -> do
+      forM_ (dataConstructorInfo loc def) $
+        \(DataConstructorInfo _ _ DataConstructor{..} names) -> do
+          modify (addName constructorName (IDataConstructor constructorScheme))
+    def@DImport{} -> do
+      ctors <- collect def exportedDataConstructors
+      forM_ ctors $
+        \(DataConstructorInfo _ _ DataConstructor{..} _) ->
+          modify (addName constructorName (IDataConstructor constructorScheme))
+    _ ->
+      pure ()
+
+collectTraits =
+  undefined
+
+collectInstances =
+  \case
+    _ ->
+      undefined
