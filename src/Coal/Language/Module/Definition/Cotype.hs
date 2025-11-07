@@ -3,10 +3,9 @@
 
 module Coal.Language.Module.Definition.Cotype (CotypeDef (..)) where
 
+import Coal.Language.CodataAccessor (CodataAccessor (..))
 import Coal.Language.Type (Parameter, ParameterizedType)
 import Data.Data (Data, Typeable)
-import Extras (Name)
 
--- TODO: Replace (Name, ParameterizedType) with CodataAccessor type?
-data CotypeDef = CotypeDef [Parameter ()] [(Name, ParameterizedType)]
+data CotypeDef = CotypeDef [Parameter ()] [CodataAccessor Parameter () ParameterizedType]
   deriving (Show, Eq, Ord, Read, Data, Typeable)

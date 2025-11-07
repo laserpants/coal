@@ -302,13 +302,15 @@ substituteInScheme sub (Forall _ ts t) = scheme (apply sub ts) (apply sub t)
 -- insertTraits :: (HasType o k (Trait (Type o k))) => [Trait (Type o k)] -> Scheme o k (Type o k) -> Scheme o k (Type o k)
 -- insertTraits ts (Forall ds _ s) = Forall ds ts (foldTypeOf s ts)
 
+pt (CodataAccessor _ (Forall _ _ t)) = t
+
 buildCodataAccessorEnvironment :: TypeConstructorEnvironment -> [Definition a k t] -> CodataAccessorEnvironment
 buildCodataAccessorEnvironment env =
   makeEnv
     ( \case
         DCotype _ name (CotypeDef ps ts) -> do
-          let vs = traverse (instantiateVars params env . snd) ts
-          [(n, accessor n t) | (n, t) <- (fst <$> ts) `zip` evalState vs (freshIdIn ixs)]
+          let vs = traverse (instantiateVars params env . pt) ts
+          [(n, accessor n t) | (n, t) <- (codataAccessorName <$> ts) `zip` evalState vs (freshIdIn ixs)]
          where
           accessor n t = CodataAccessor n (Forall (typeIndexesIn t) [] (t1 `TArrow` t))
           kind =

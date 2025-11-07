@@ -85,7 +85,9 @@ parseCodataDefinition = do
   end <- getSourcePos
   symbol_ "="
   fields <- braces (fieldListWithKey constructor parseType ":")
-  pure (DCotype (Metadata start end) n (CotypeDef ps fields))
+  pure (DCotype (Metadata start end) n (CotypeDef ps (uncurry (toAccessor ps) <$> fields)))
+ where
+  toAccessor ps n t = CodataAccessor n (Forall (Set.fromList ps) [] t)
 
 parseConstructor :: Name -> [Parameter ()] -> Parser (DataConstructor Parameter () (Type Parameter ()))
 parseConstructor tn qs = do
