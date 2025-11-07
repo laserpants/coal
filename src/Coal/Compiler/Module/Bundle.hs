@@ -10,7 +10,6 @@ import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Transform.Type.Parameterized
 import Coal.Language
 import Coal.Language.Module
-import Coal.TypeSystem.Substitution
 import Control.Monad.State (evalState)
 import Data.Map.Strict (Map)
 import qualified Data.Set as Set
@@ -191,24 +190,20 @@ dataConstructorInfo env loc (TypeDef _ ctors) = getInfo <$> ctors
       DataConstructor{constructorScheme = translateScheme env constructorScheme, ..}
       allNames
 
+codataAccessorInfo :: Environment Kind -> Metadata -> CotypeDef -> [CodataAccessorInfo]
+codataAccessorInfo env loc (CotypeDef _ xsors) = getInfo <$> xsors
+ where
+  getInfo :: CodataAccessor Parameter () ParameterizedType -> CodataAccessorInfo
+  getInfo CodataAccessor{..} =
+    CodataAccessorInfo
+      loc
+      codataAccessorName
+      (CodataAccessor codataAccessorName (translateScheme env codataAccessorScheme))
+
 translateScheme :: Environment Kind -> Scheme Parameter () ParameterizedType -> Scheme TypeIndex Kind IndexedType
 translateScheme env (Forall _ _ t) = Forall (typeIndexesIn t1) [] t1
  where
   t1 = evalState (instantiateVars [] env t) (0 :: Int)
-
-codataAccessorInfo :: Environment Kind -> Metadata -> CotypeDef -> [CodataAccessorInfo]
-codataAccessorInfo env loc (CotypeDef ps ts) = getInfo <$> undefined -- CodataAccessorInfo loc name accessor
- where
-  getInfo :: CodataAccessor o k t -> CodataAccessorInfo
-  getInfo = undefined
-
---  accessor = CodataAccessor undefined undefined
-
-traitInfo :: Metadata -> Name -> TraitDef () -> TraitInfo
-traitInfo = undefined
-
-instanceInfo :: Metadata -> Name -> InstanceDef Definition Metadata Kind () -> InstanceInfo
-instanceInfo = undefined
 
 aliasInfo :: Metadata -> Name -> AliasDef -> AliasInfo
 aliasInfo loc name (AliasDef ps t) = AliasInfo loc name (parameterName <$> ps) t
