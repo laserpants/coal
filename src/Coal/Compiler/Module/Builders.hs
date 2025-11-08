@@ -12,7 +12,6 @@ import Coal.Language
 import Coal.Language.Module
 import Control.Monad.State (StateT, execStateT, get, gets, lift, modify)
 import Data.List ((\\))
-import Debug.Trace
 import Extras (Name, forM_)
 
 build :: (Monad m) => Module Metadata Kind () -> CompilerT Metadata m ModuleBundle
@@ -92,14 +91,18 @@ typeConstructorEnv = do
 collectDataConstructors :: (Monad m) => Environment Kind -> Definition Metadata Kind () -> StateT ModuleBundle (CompilerT Metadata m) ()
 collectDataConstructors env =
   \case
-    DCotype loc _ def -> do
+    DCotype loc _ def ->
       forM_ (codataAccessorInfo env loc def) $
-        \(CodataAccessorInfo _ _ CodataAccessor{..}) -> do
-          modify (addName codataAccessorName (ICodataAccessor codataAccessorScheme))
-    DType loc _ def -> do
+        \info@(CodataAccessorInfo _ _ CodataAccessor{..}) -> do
+          modify $
+            addName codataAccessorName (ICodataAccessor codataAccessorScheme)
+              . insertCodataAccessor codataAccessorName info
+    DType loc _ def ->
       forM_ (dataConstructorInfo env loc def) $
-        \(DataConstructorInfo _ _ DataConstructor{..} names) -> do
-          modify (addName constructorName (IDataConstructor constructorScheme))
+        \info@(DataConstructorInfo _ _ DataConstructor{..} names) -> do
+          modify $
+            addName constructorName (IDataConstructor constructorScheme)
+              . insertDataConstructor constructorName info
     def@DImport{} -> do
       ctors <- collect def exportedDataConstructors
       forM_ ctors $
@@ -108,10 +111,10 @@ collectDataConstructors env =
     _ ->
       pure ()
 
-collectTraits =
-  undefined
-
-collectInstances =
-  \case
-    _ ->
-      undefined
+-- collectTraits =
+--   undefined
+--
+-- collectInstances =
+--   \case
+--     _ ->
+--       undefined

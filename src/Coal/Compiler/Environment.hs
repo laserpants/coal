@@ -312,19 +312,7 @@ buildCodataAccessorEnvironment env =
           let vs = traverse (instantiateVars params env . pt) ts
           [(n, accessor n t) | (n, t) <- (codataAccessorName <$> ts) `zip` evalState vs (freshIdIn ixs)]
          where
-          accessor n t = CodataAccessor n (Forall (typeIndexesIn t) [] (t1 `TArrow` t))
-          kind =
-            case Environment.lookup name env of
-              Nothing ->
-                error "Implementation error"
-              Just k ->
-                k
-          t1 =
-            case TVariable <$> ixs of
-              [] ->
-                TConstructor kind name
-              u : us ->
-                TApplication KType (TConstructor kind name) (u :| us)
+          accessor n t = CodataAccessor n (Forall (typeIndexesIn t) [] t)
           ixs = snd <$> params
           params = [(n, TypeIndex KType t) | (Parameter _ n, t) <- zip ps [0 ..]]
         _ ->

@@ -11,7 +11,7 @@ import Coal.Parser.Identifier
 import Coal.Parser.Pattern (parsePattern, parseUnitPattern)
 import Coal.Parser.Symbol
 import Coal.Parser.Type
-import Coal.Parser.Utils (fieldListWithKey)
+import Coal.Parser.Utils (fieldList, fieldListWithKey)
 import Control.Monad (void)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
@@ -76,19 +76,6 @@ parseTypeDefinition = do
   cs <- symbol_ "=" *> parseConstructor n ps `sepBy1` symbol_ "|"
   pure (DType (Metadata start end) n (TypeDef ps cs))
 
-parseCodataDefinition :: Parser (Definition Metadata o ())
-parseCodataDefinition = do
-  start <- getSourcePos
-  lexeme_ "cotype"
-  n <- constructor
-  ps <- option [] parseParameterList
-  end <- getSourcePos
-  symbol_ "="
-  fields <- braces (fieldListWithKey constructor parseType ":")
-  pure (DCotype (Metadata start end) n (CotypeDef ps (uncurry (toAccessor ps) <$> fields)))
- where
-  toAccessor ps n t = CodataAccessor n (Forall (Set.fromList ps) [] t)
-
 parseConstructor :: Name -> [Parameter ()] -> Parser (DataConstructor Parameter () (Type Parameter ()))
 parseConstructor tn qs = do
   n <- constructor
@@ -104,6 +91,31 @@ parseConstructor tn qs = do
           ()
           (TConstructor () tn)
           (TVariable <$> (a :| as))
+
+parseCodataDefinition :: Parser (Definition Metadata o ())
+parseCodataDefinition = do
+  start <- getSourcePos
+  lexeme_ "cotype"
+  n <- constructor
+  ps <- option [] parseParameterList
+  end <- getSourcePos
+  symbol_ "="
+  let
+    t0 =
+      case ps of
+        [] ->
+          TConstructor () n
+        a : as ->
+          TApplication
+            ()
+            (TConstructor () n)
+            (TVariable <$> (a :| as))
+  ts <- braces (fieldListWithKey constructor parseType ":")
+  pure (DCotype (Metadata start end) n (CotypeDef ps (toAccessor ps t0 <$> ts)))
+
+-- TODO
+-- toAccessor :: Type Parameter () -> (Name, Type Parameter ()) -> CodataAccessor Parameter () (Type Parameter ())
+toAccessor ps t0 (n, t) = CodataAccessor n (Forall (Set.fromList ps) [] (t0 `TArrow` t))
 
 parseImport :: Parser (Definition Metadata o ())
 parseImport = do
