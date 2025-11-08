@@ -10,7 +10,7 @@ import Coal.Compiler.Module.Bundle
 import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module
-import Control.Monad.State (StateT, execStateT, get, gets, lift, modify)
+import Control.Monad.State (StateT, execStateT, gets, lift, modify)
 import Data.List ((\\))
 import Extras (Name, forM_)
 
@@ -19,10 +19,11 @@ build (Module _ exports defs) =
   flip execStateT emptyModuleBundle $ do
     modify (setExports exports)
     inEachDef collectTypeConstructors
-    env <- typeConstructorEnv
-    inEachDef (collectDataConstructors env)
-    inEachDef (collectTraits env)
-    inEachDef (collectInstances env)
+    kinds <- typeConstructorEnv
+    inEachDef (collectDataConstructors kinds)
+    inEachDef (collectTraits kinds)
+    traits <- traitEnv
+    inEachDef (collectInstances kinds traits)
  where
   inEachDef = forM_ defs
 
@@ -78,6 +79,10 @@ collectTypeConstructors =
     _ ->
       pure ()
 
+traitEnv :: (Monad m) => StateT ModuleBundle (CompilerT Metadata m) (Environment TraitInfo)
+traitEnv =
+  undefined
+
 typeConstructorEnv :: (Monad m) => StateT ModuleBundle (CompilerT Metadata m) (Environment Kind)
 typeConstructorEnv = do
   env1 <- gets (collect_ insertTypeInfo . moduleTypeConstructors)
@@ -120,14 +125,20 @@ collectTraits env =
   \case
     DTrait loc name def ->
       modify $
-        addName name ITrait . insertTrait name (traitInfo env loc name def)
+        addName name ITrait
+          . insertTrait name (traitInfo env loc name def)
     _ ->
       pure ()
 
-collectInstances :: (Monad m) => Environment Kind -> Definition Metadata Kind () -> StateT ModuleBundle (CompilerT Metadata m) ()
-collectInstances env =
+collectInstances :: (Monad m) => Environment Kind -> Environment TraitInfo -> Definition Metadata Kind () -> StateT ModuleBundle (CompilerT Metadata m) ()
+collectInstances kinds traits =
   \case
     DInstance _ name def ->
-      undefined
+      case Environment.lookup name traits of
+        Nothing ->
+          -- TODO
+          error "Trait not in scope!"
+        Just (TraitInfo loc _ p TypeIndex{..} dict) ->
+          undefined
     _ ->
       pure ()

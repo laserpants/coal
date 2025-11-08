@@ -52,8 +52,8 @@ data NameInfo
   | IUnfold IndexedScheme
   | IDataConstructor IndexedScheme
   | ICodataAccessor IndexedScheme
-  | ITraitDefinition IndexedScheme
-  | IType Kind
+  | --  | ITraitInstance IndexedScheme
+    IType Kind
   | ICotype Kind
   | ITrait
   | IAlias
