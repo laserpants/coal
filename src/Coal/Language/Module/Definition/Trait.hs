@@ -10,5 +10,6 @@ import Coal.Language.Type.Kind (Kind (..))
 import Data.Data (Data, Typeable)
 import Extras (Name)
 
+-- TODO: (Name, Scheme Parameter () ParameterizedType) ?
 data TraitDef t = TraitDef [Trait t] (Parameter Kind) [(Name, ParameterizedType)]
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)

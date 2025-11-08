@@ -13,7 +13,7 @@ import Coal.Language.Module
 import Control.Monad.State (evalState)
 import Data.Map.Strict (Map)
 import qualified Data.Set as Set
-import Extras (Dictionary, Name, Set)
+import Extras (Dictionary, Name, Set, (<$$>))
 
 type IndexedConstructor = DataConstructor TypeIndex Kind IndexedType
 
@@ -199,6 +199,13 @@ codataAccessorInfo env loc (CotypeDef _ xsors) = getInfo <$> xsors
       loc
       codataAccessorName
       (CodataAccessor codataAccessorName (translateScheme env codataAccessorScheme))
+
+traitInfo :: Environment Kind -> Metadata -> Name -> TraitDef () -> TraitInfo
+traitInfo env loc name (TraitDef _ p@(Parameter kind_ n) ps) =
+  TraitInfo loc name p ix (Environment.fromList (scheme [] . instantiate <$$> ps))
+ where
+  ix = TypeIndex kind_ 0
+  instantiate p = evalState (instantiateVars [(n, ix)] env p) (1 :: Int)
 
 translateScheme :: Environment Kind -> Scheme Parameter () ParameterizedType -> Scheme TypeIndex Kind IndexedType
 translateScheme env (Forall _ _ t) = Forall (typeIndexesIn t1) [] t1

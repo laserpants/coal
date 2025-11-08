@@ -18,9 +18,13 @@ build :: (Monad m) => Module Metadata Kind () -> CompilerT Metadata m ModuleBund
 build (Module _ exports defs) =
   flip execStateT emptyModuleBundle $ do
     modify (setExports exports)
-    forM_ defs collectTypeConstructors
+    inEachDef collectTypeConstructors
     env <- typeConstructorEnv
-    forM_ defs (collectDataConstructors env)
+    inEachDef (collectDataConstructors env)
+    inEachDef (collectTraits env)
+    inEachDef (collectInstances env)
+ where
+  inEachDef = forM_ defs
 
 pick :: (Monad m) => [Name] -> Environment a -> StateT ModuleBundle (CompilerT Metadata m) [a]
 pick names env
@@ -111,10 +115,19 @@ collectDataConstructors env =
     _ ->
       pure ()
 
--- collectTraits =
---   undefined
---
--- collectInstances =
---   \case
---     _ ->
---       undefined
+collectTraits :: (Monad m) => Environment Kind -> Definition Metadata Kind () -> StateT ModuleBundle (CompilerT Metadata m) ()
+collectTraits env =
+  \case
+    DTrait loc name def ->
+      modify $
+        addName name ITrait . insertTrait name (traitInfo env loc name def)
+    _ ->
+      pure ()
+
+collectInstances :: (Monad m) => Environment Kind -> Definition Metadata Kind () -> StateT ModuleBundle (CompilerT Metadata m) ()
+collectInstances env =
+  \case
+    DInstance _ name def ->
+      undefined
+    _ ->
+      pure ()

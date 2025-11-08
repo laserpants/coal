@@ -1,0 +1,14 @@
+module Main {
+  
+  type Option<a> = None | Some(a)
+
+  cotype Stream<a> = { Head : a, Tail : Stream<a> }
+
+  fun main() = 
+    let
+      f =
+        fn(x) => x
+      in
+        f(true)
+}
+
