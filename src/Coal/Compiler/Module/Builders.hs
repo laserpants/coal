@@ -10,7 +10,7 @@ import Coal.Compiler.Module.Bundle
 import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module
-import Control.Monad.State (StateT, execStateT, gets, lift, modify)
+import Control.Monad.State (StateT, evalState, execStateT, gets, lift, modify)
 import Data.List ((\\))
 import Extras (Name, forM_)
 
@@ -123,12 +123,22 @@ collectDataConstructors env =
 collectTraits :: (Monad m) => Environment Kind -> Definition Metadata Kind () -> StateT ModuleBundle (CompilerT Metadata m) ()
 collectTraits env =
   \case
-    DTrait loc name def ->
+    DTrait loc name def -> do
+      addTraitEntries env name def
       modify $
         addName name ITrait
           . insertTrait name (traitInfo env loc name def)
     _ ->
       pure ()
+
+addTraitEntries :: (Monad m) => Environment Kind -> Name -> TraitDef () -> StateT ModuleBundle (CompilerT Metadata m) ()
+addTraitEntries env trait (TraitDef _ p entries) =
+  forM_ entries $
+    \(name, t) ->
+      modify $
+        addName name (IFunction $ scheme [Trait trait tvar] (toIndexedType env p t))
+ where
+  tvar = TVariable (TypeIndex (parameterKind p) 0)
 
 collectInstances :: (Monad m) => Environment Kind -> Environment TraitInfo -> Definition Metadata Kind () -> StateT ModuleBundle (CompilerT Metadata m) ()
 collectInstances kinds traits =

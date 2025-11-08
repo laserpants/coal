@@ -206,11 +206,11 @@ translateScheme env (Forall _ _ t) = Forall (typeIndexesIn t1) [] t1
   t1 = evalState (instantiateVars [] env t) (0 :: Int)
 
 traitInfo :: Environment Kind -> Metadata -> Name -> TraitDef () -> TraitInfo
-traitInfo env loc name (TraitDef _ p@(Parameter kind_ n) ps) =
-  TraitInfo loc name p ix (Environment.fromList (scheme [] . instantiate <$$> ps))
- where
-  ix = TypeIndex kind_ 0
-  instantiate p = evalState (instantiateVars [(n, ix)] env p) (1 :: Int)
+traitInfo env loc name (TraitDef _ p@(Parameter kind_ _) ps) =
+  TraitInfo loc name p (TypeIndex kind_ 0) (Environment.fromList (scheme [] . toIndexedType env p <$$> ps))
+
+toIndexedType :: Environment Kind -> Parameter Kind -> Type Parameter () -> IndexedType
+toIndexedType env (Parameter k n) t = evalState (instantiateVars [(n, TypeIndex k 0)] env t) (1 :: Int)
 
 aliasInfo :: Metadata -> Name -> AliasDef -> AliasInfo
 aliasInfo loc name (AliasDef ps t) = AliasInfo loc name (parameterName <$> ps) t
