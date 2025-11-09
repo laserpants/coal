@@ -46,7 +46,7 @@ translateDefinition =
       pure [Kernel.OConstant (moduleName <.> name) c]
     DTrait _ name (TraitDef _ _ ds) ->
       forM ds $
-        \(n, t) ->
+        \(n, Forall _ _ t) ->
           traitAccessor name n (translateType t)
     DInstance _ name (InstanceDef _ t ds) ->
       concatForM ds $

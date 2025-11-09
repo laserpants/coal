@@ -246,7 +246,8 @@ buildTraitEnvironment env =
             )
           ]
          where
-          f t =
+          f :: Scheme Parameter () ParameterizedType -> Scheme TypeIndex Kind IndexedType
+          f (Forall _ _ t) =
             let t1 = evalState (instantiateVars [(n, TypeIndex k 0)] env t) (1 :: Int)
              in Forall (typeIndexesIn t1) [] t1
         _ ->

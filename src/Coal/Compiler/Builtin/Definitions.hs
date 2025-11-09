@@ -101,23 +101,23 @@ builtinDefinitions =
           (Parameter KType "a")
           [
             ( "from_int32"
-            , TIntrinsic IInt32 `TArrow` TVariable (Parameter () "a")
+            , Forall (Set.fromList [Parameter () "a"]) [] $ TIntrinsic IInt32 `TArrow` TVariable (Parameter () "a")
             )
           ,
             ( "negate"
-            , TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
+            , Forall (Set.fromList [Parameter () "a"]) [] $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
             )
           ,
             ( "(+)"
-            , TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
+            , Forall (Set.fromList [Parameter () "a"]) [] $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
             )
           ,
             ( "(-)"
-            , TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
+            , Forall (Set.fromList [Parameter () "a"]) [] $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
             )
           ,
             ( "(*)"
-            , TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
+            , Forall (Set.fromList [Parameter () "a"]) [] $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
             )
           ]
       )
@@ -129,7 +129,7 @@ builtinDefinitions =
           (Parameter KType "a")
           [
             ( "compare"
-            , TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TConstructor () "Ordering"
+            , Forall (Set.fromList [Parameter () "a"]) [] $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TConstructor () "Ordering"
             )
           ]
       )
@@ -141,7 +141,7 @@ builtinDefinitions =
           (Parameter KType "a")
           [
             ( "(==)"
-            , TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TIntrinsic IBool
+            , Forall (Set.fromList [Parameter () "a"]) [] $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TIntrinsic IBool
             )
           ]
       )
@@ -153,7 +153,7 @@ builtinDefinitions =
           (Parameter KType "a")
           [
             ( "(/)"
-            , TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
+            , Forall (Set.fromList [Parameter () "a"]) [] $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
             )
           ]
       )
@@ -165,7 +165,7 @@ builtinDefinitions =
           (Parameter KType "a")
           [
             ( "(%)"
-            , TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
+            , Forall (Set.fromList [Parameter () "a"]) [] $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
             )
           ]
       )
@@ -177,7 +177,7 @@ builtinDefinitions =
           (Parameter KType "a")
           [
             ( "(<>)"
-            , TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
+            , Forall (Set.fromList [Parameter () "a"]) [] $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
             )
           ]
       )

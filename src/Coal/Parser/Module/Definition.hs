@@ -16,7 +16,7 @@ import Control.Monad (void)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
-import Extras (Name)
+import Extras (Name, (<$$>))
 import Text.Megaparsec
 import Text.Megaparsec.Char (upperChar)
 
@@ -41,7 +41,7 @@ parseTraitDefinition = do
   t <- angleBrackets parseParameter
   end <- getSourcePos
   ds <- braces (some ((,) <$> name <*> (symbol_ ":" *> parseType)))
-  pure (DTrait (Metadata start end) n (TraitDef [] t ds))
+  pure (DTrait (Metadata start end) n (TraitDef [] t (Forall mempty [] <$$> ds)))
 
 parseParameter :: Parser (Parameter Kind)
 parseParameter = do

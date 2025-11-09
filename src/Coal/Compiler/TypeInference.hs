@@ -226,7 +226,7 @@ typeDefinitionC =
       pure ()
     DTrait _ name (TraitDef _ (Parameter k q) ds) ->
       forM_ ds $
-        \(n, s) -> do
+        \(n, Forall _ _ s) -> do
           env <- asks compilerTypeConstructorEnvironment
           let s1 = evalState (instantiateVars [(q, TypeIndex k 0)] env s) (1 :: Int)
           insertNameC n (Forall (typeIndexesIn s1) [Trait name (TVariable (TypeIndex k 0))] s1)

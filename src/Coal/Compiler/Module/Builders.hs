@@ -139,7 +139,7 @@ collectTraits env =
 addTraitEntries :: (Monad m) => Environment Kind -> Name -> TraitDef () -> StateT ModuleBundle (CompilerT Metadata m) ()
 addTraitEntries env trait (TraitDef _ p entries) =
   forM_ entries $
-    \(name, t) ->
+    \(name, Forall _ _ t) ->
       modify $
         addName name (IFunction $ scheme [Trait trait tvar] (toIndexedType env p t))
  where
