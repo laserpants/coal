@@ -9,7 +9,7 @@ module Main {
   fun len(lst) =
     fold(lst) {
       | Nil => 0
-      // TODO: This should fail
+      // This should fail
       | @next => next + 1
     }
 
