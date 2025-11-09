@@ -40,6 +40,7 @@ import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import qualified Data.Text as Text
+import Debug.Trace
 import Extras (Dictionary, Name, Over, Set, traverse2, traverse_, (<$$>))
 
 type AliasEnvironment = Environment ([Name], ParameterizedType)
@@ -128,18 +129,20 @@ overCompilerKernelEnvironment f CompilerEnvironment{..} =
 
 buildEnvironment :: [Definition a k t] -> CompilerEnvironment
 buildEnvironment defs =
-  CompilerEnvironment
-    { compilerDataConstructorEnvironment = dataConstructorEnvironment
-    , compilerTypeConstructorEnvironment = typeConstructorEnvironment
-    , compilerTraitEnvironment = traitEnvironment
-    , compilerInstanceEnvironment = instanceEnvironment
-    , compilerAliasEnvironment = aliasEnvironment
-    , compilerCodataAccessorEnvironment = codataAccessorEnvironment
-    , compilerFoldEnvironment = foldEnvironment
-    , compilerUnfoldEnvironment = unfoldEnvironment
-    , compilerDictionaryNameEnvironment = dictionaryNameEnvironment
-    , compilerKernelEnvironment = kernelEnvironment
-    }
+  let e =
+        CompilerEnvironment
+          { compilerDataConstructorEnvironment = dataConstructorEnvironment
+          , compilerTypeConstructorEnvironment = typeConstructorEnvironment
+          , compilerTraitEnvironment = traitEnvironment
+          , compilerInstanceEnvironment = instanceEnvironment
+          , compilerAliasEnvironment = aliasEnvironment
+          , compilerCodataAccessorEnvironment = codataAccessorEnvironment
+          , compilerFoldEnvironment = foldEnvironment
+          , compilerUnfoldEnvironment = unfoldEnvironment
+          , compilerDictionaryNameEnvironment = dictionaryNameEnvironment
+          , compilerKernelEnvironment = kernelEnvironment
+          }
+   in traceShow e $ e
  where
   instanceEnvironment = buildInstanceEnvironment typeConstructorEnvironment traitEnvironment defs
   aliasEnvironment = buildAliasEnvironment defs

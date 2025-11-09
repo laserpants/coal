@@ -12,6 +12,7 @@ import Coal.Language
 import Coal.Language.Module
 import Control.Monad.State (StateT, evalState, execStateT, gets, lift, modify)
 import Data.List ((\\))
+import Debug.Trace
 import Extras (Name, forM_)
 
 build :: (Monad m) => Module Metadata Kind () -> CompilerT Metadata m ModuleBundle
@@ -148,12 +149,14 @@ addTraitEntries env trait (TraitDef _ p entries) =
 collectInstances :: (Monad m) => Environment Kind -> Environment (TraitInfo Metadata) -> Definition Metadata Kind () -> StateT ModuleBundle (CompilerT Metadata m) ()
 collectInstances kinds traits =
   \case
-    DInstance _ name def ->
-      case Environment.lookup name traits of
+    DInstance loc trait def -> -- (InstanceDef _ q _) -> do
+      case Environment.lookup trait traits of
         Nothing ->
           -- TODO
           error "Trait not in scope!"
-        Just (TraitInfo loc _ p TypeIndex{..} dict) ->
-          undefined
+        Just (TraitInfo loc2 _ p TypeIndex{..} dict) ->
+          modify $
+            -- insertInstance trait undefined (instanceInfo kinds traits trait loc dict)
+            insertInstance trait undefined (instanceInfo def)
     _ ->
       pure ()

@@ -12,7 +12,9 @@ import Coal.Language
 import Coal.Language.Module
 import Control.Monad.State (evalState)
 import Data.Map.Strict (Map)
+import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
+import Debug.Trace
 import Extras (Dictionary, Name, Set, (<$$>))
 
 type IndexedConstructor = DataConstructor TypeIndex Kind IndexedType
@@ -38,7 +40,7 @@ data TraitInfo a
   deriving (Show, Eq, Ord, Read)
 
 data InstanceInfo a
-  = InstanceInfo a Name (Map IndexedType ParameterizedType) (Dictionary IndexedScheme)
+  = InstanceInfo a ParameterizedType (Dictionary IndexedScheme)
   deriving (Show, Eq, Ord, Read)
 
 data AliasInfo a
@@ -52,8 +54,7 @@ data NameInfo
   | IUnfold IndexedScheme
   | IDataConstructor IndexedScheme
   | ICodataAccessor IndexedScheme
-  | --  | ITraitInstance IndexedScheme
-    IType Kind
+  | IType Kind
   | ICotype Kind
   | ITrait
   | IAlias
@@ -66,7 +67,7 @@ data ModuleBundle = ModuleBundle
   , moduleTypeConstructors :: Environment (TypeConstructorInfo Metadata)
   , moduleCotypeConstructors :: Environment (CotypeConstructorInfo Metadata)
   , moduleTraits :: Environment (TraitInfo Metadata)
-  , moduleInstances :: Environment (InstanceInfo Metadata)
+  , moduleInstances :: Environment (Map IndexedType (InstanceInfo Metadata))
   , moduleAliases :: Environment (AliasInfo Metadata)
   , moduleNames :: Environment NameInfo
   , moduleExports :: Set Name
@@ -154,8 +155,17 @@ insertCotypeConstructor name info ModuleBundle{..} = ModuleBundle{moduleCotypeCo
 insertTrait :: Name -> TraitInfo Metadata -> ModuleBundle -> ModuleBundle
 insertTrait name info ModuleBundle{..} = ModuleBundle{moduleTraits = Environment.insert name info moduleTraits, ..}
 
-insertInstance :: Name -> InstanceInfo Metadata -> ModuleBundle -> ModuleBundle
-insertInstance name info ModuleBundle{..} = ModuleBundle{moduleInstances = Environment.insert name info moduleInstances, ..}
+insertInstance :: Name -> IndexedType -> InstanceInfo Metadata -> ModuleBundle -> ModuleBundle
+insertInstance name t info ModuleBundle{..} =
+  ModuleBundle
+    { moduleInstances =
+        case Environment.lookup name moduleInstances of
+          Nothing ->
+            moduleInstances
+          Just entries ->
+            Environment.insert name (Map.insert t info entries) moduleInstances
+    , ..
+    }
 
 insertAlias :: Name -> AliasInfo Metadata -> ModuleBundle -> ModuleBundle
 insertAlias name info ModuleBundle{..} = ModuleBundle{moduleAliases = Environment.insert name info moduleAliases, ..}
@@ -216,6 +226,19 @@ traitInfo env loc name (TraitDef _ p@(Parameter kind_ _) ps) =
 
 aliasInfo :: Metadata -> Name -> AliasDef -> AliasInfo Metadata
 aliasInfo loc name (AliasDef ps t) = AliasInfo loc name (parameterName <$> ps) t
+
+instanceInfo :: InstanceDef d Metadata k t -> InstanceInfo Metadata
+instanceInfo (InstanceDef _ p entries) = 
+--instanceInfo kinds traits trait loc dict = do
+--  traceShow dict $
+    InstanceInfo undefined undefined undefined
+
+--instanceInfo :: Environment Kind -> Environment (TraitInfo Metadata) -> Name -> Metadata -> Environment IndexedScheme -> InstanceInfo Metadata
+--instanceInfo kinds traits trait loc dict = do
+--  traceShow dict $
+--    InstanceInfo loc undefined undefined
+
+--  = InstanceInfo a ParameterizedType (Dictionary IndexedScheme)
 
 -- TODO
 toIndexedScheme :: Environment Kind -> Parameter Kind -> Scheme Parameter () ParameterizedType -> Scheme TypeIndex Kind IndexedType

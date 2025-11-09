@@ -8,6 +8,14 @@ module Main {
     map : (a -> b) -> f<a> -> f<b>
   }
 
+  instance Functor<List> {
+    fun map(f, x) = []
+  }
+
+  instance Functor<Option> {
+    fun map(f, x) = None
+  }
+
   fun main() = 
     let
       f =
