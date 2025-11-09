@@ -107,7 +107,8 @@ exportedCodataAccessors ModuleBundle{..}
 emptyModuleBundle :: ModuleBundle
 emptyModuleBundle =
   ModuleBundle
-    { moduleDataConstructors = mempty
+    { modulePath = Path []
+    , moduleDataConstructors = mempty
     , moduleCodataAccessors = mempty
     , moduleTypeConstructors = mempty
     , moduleCotypeConstructors = mempty

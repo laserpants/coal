@@ -1,0 +1,17 @@
+module Main {
+
+  type Option<a> = None | Some(a)
+
+  cotype Stream<a> = { Head : a, Tail : Stream<a> }
+
+  trait Functor<f : * -> *> {
+    map : (a -> b) -> f<a> -> f<b>
+  }
+
+  fun main() = 
+    let
+      f =
+        fn(x) => x
+      in
+        f(true)
+}

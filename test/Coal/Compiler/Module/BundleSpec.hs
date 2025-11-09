@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module Coal.Compiler.Module.BundleSpec (bundleSpec) where
+module Coal.Compiler.Module.BundleSpec (bundleSpec, runBundle) where
 
 import Coal.Ast.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment (..), mapEnvironment)
@@ -19,6 +19,7 @@ import Coal.Language
 import Coal.Language.Module
 import Data.Either (rights)
 import Data.List.NonEmpty (NonEmpty (..))
+import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import Debug.Trace
 import Extras (Name, forM, forM_)
@@ -29,10 +30,14 @@ bundleSpec :: Spec
 bundleSpec = do
   res <- runIO $ runBundle ["./lang/Nat.coal", "./lang/IO.coal", "./test/Coal/examples/133/Main.coal"]
   let bundle : _ = filter (\ModuleBundle{..} -> modulePath == Path ["Main"]) (rights (sequence res))
-  testMain bundle
+  test133 bundle
 
-testMain :: ModuleBundle -> Spec
-testMain ModuleBundle{..} = do
+  res <- runIO $ runBundle ["./lang/Nat.coal", "./lang/IO.coal", "./test/Coal/examples/134/Main.coal"]
+  let bundle : _ = filter (\ModuleBundle{..} -> modulePath == Path ["Main"]) (rights (sequence res))
+  test134 bundle
+
+test133 :: ModuleBundle -> Spec
+test133 ModuleBundle{..} = do
   describe "DataConstructors" $ do
     it "" $
       mapEnvironment stripMeta moduleDataConstructors == mainDataConstructors
@@ -57,6 +62,36 @@ testMain ModuleBundle{..} = do
     it "" $
       moduleExports == Set.fromList ["*"]
 
+test134 :: ModuleBundle -> Spec
+test134 ModuleBundle{..} = do
+  describe "DataConstructors" $ do
+    it "" $
+      mapEnvironment stripMeta moduleDataConstructors == mainDataConstructors
+
+  describe "TypeConstructors" $ do
+    it "" $
+      mapEnvironment stripMeta moduleTypeConstructors == mainTypeConstructors
+
+  describe "CodataAccessors" $ do
+    it "" $
+      mapEnvironment stripMeta moduleCodataAccessors == mainCodataAccessors
+
+  describe "CotypeConstructorInfo" $ do
+    it "" $
+      mapEnvironment stripMeta moduleCotypeConstructors == mainCotypeConstructors
+
+  describe "TraitInfo" $ do
+    it "" $ do
+      mapEnvironment stripMeta moduleTraits == mainTraits
+
+  describe "Names" $ do
+    it "" $
+      moduleNames == mainNames2
+
+  describe "Exports" $ do
+    it "" $
+      moduleExports == Set.fromList ["*"]
+
 class StripMeta i where
   stripMeta :: i a -> i ()
 
@@ -71,6 +106,9 @@ instance StripMeta CodataAccessorInfo where
 
 instance StripMeta CotypeConstructorInfo where
   stripMeta (CotypeConstructorInfo _ n k) = CotypeConstructorInfo () n k
+
+instance StripMeta TraitInfo where
+  stripMeta (TraitInfo _ n p t d) = TraitInfo () n p t d
 
 mainNames :: Environment NameInfo
 mainNames =
@@ -98,6 +136,51 @@ mainNames =
     ,
       ( "Tail"
       , ICodataAccessor (Forall (Set.fromList [TypeIndex KType 0]) [] (TApplication KType (TConstructor (KArrow KType KType) "Stream") (TVariable (TypeIndex KType 0) :| []) `TArrow` TApplication KType (TConstructor (KArrow KType KType) "Stream") (TVariable (TypeIndex KType 0) :| [])))
+      )
+    ]
+
+mainNames2 :: Environment NameInfo
+mainNames2 =
+  Environment.fromList
+    [
+      ( "Option"
+      , IType (KArrow KType KType)
+      )
+    ,
+      ( "Stream"
+      , ICotype (KArrow KType KType)
+      )
+    ,
+      ( "None"
+      , IDataConstructor (Forall (Set.fromList [TypeIndex KType 0]) [] (TApplication KType (TConstructor (KArrow KType KType) "Option") (TVariable (TypeIndex KType 0) :| [])))
+      )
+    ,
+      ( "Some"
+      , IDataConstructor (Forall (Set.fromList [TypeIndex KType 0]) [] (TVariable (TypeIndex KType 0) `TArrow` TApplication KType (TConstructor (KArrow KType KType) "Option") (TVariable (TypeIndex KType 0) :| [])))
+      )
+    ,
+      ( "Head"
+      , ICodataAccessor (Forall (Set.fromList [TypeIndex KType 0]) [] (TApplication KType (TConstructor (KArrow KType KType) "Stream") (TVariable (TypeIndex KType 0) :| []) `TArrow` TVariable (TypeIndex KType 0)))
+      )
+    ,
+      ( "Tail"
+      , ICodataAccessor (Forall (Set.fromList [TypeIndex KType 0]) [] (TApplication KType (TConstructor (KArrow KType KType) "Stream") (TVariable (TypeIndex KType 0) :| []) `TArrow` TApplication KType (TConstructor (KArrow KType KType) "Stream") (TVariable (TypeIndex KType 0) :| [])))
+      )
+    ,
+      ( "Functor"
+      , ITrait
+      )
+    ,
+      ( "map"
+      , IFunction
+          ( Forall
+              (Set.fromList [TypeIndex (KArrow KType KType) 0, TypeIndex KType 1, TypeIndex KType 2])
+              [Trait "Functor" (TVariable (TypeIndex (KArrow KType KType) 0))]
+              ( (TVariable (TypeIndex KType 1) `TArrow` TVariable (TypeIndex KType 2))
+                  `TArrow` TApplication KType (TVariable (TypeIndex (KArrow KType KType) 0)) (TVariable (TypeIndex KType 1) :| [])
+                  `TArrow` TApplication KType (TVariable (TypeIndex (KArrow KType KType) 0)) (TVariable (TypeIndex KType 2) :| [])
+              )
+          )
       )
     ]
 
@@ -166,6 +249,32 @@ mainCotypeConstructors =
           ()
           "Stream"
           (KArrow KType KType)
+      )
+    ]
+
+mainTraits :: Environment (TraitInfo ())
+mainTraits =
+  Environment.fromList
+    [
+      ( "Functor"
+      , TraitInfo
+          ()
+          "Functor"
+          (Parameter (KArrow KType KType) "f")
+          (TypeIndex (KArrow KType KType) 0)
+          ( Environment.fromList
+              [
+                ( "map"
+                , Forall
+                    (Set.fromList [TypeIndex (KArrow KType KType) 0, TypeIndex KType 1, TypeIndex KType 2])
+                    []
+                    ( (TVariable (TypeIndex KType 1) `TArrow` TVariable (TypeIndex KType 2))
+                        `TArrow` TApplication KType (TVariable (TypeIndex (KArrow KType KType) 0)) (TVariable (TypeIndex KType 1) :| [])
+                        `TArrow` TApplication KType (TVariable (TypeIndex (KArrow KType KType) 0)) (TVariable (TypeIndex KType 2) :| [])
+                    )
+                )
+              ]
+          )
       )
     ]
 
