@@ -21,7 +21,6 @@ import Data.Either (rights)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
-import Debug.Trace
 import Extras (Name, forM, forM_)
 import System.Process
 import Test.Hspec
@@ -80,11 +79,11 @@ test134 ModuleBundle{..} = do
     it "" $
       mapEnvironment stripMeta moduleCotypeConstructors == mainCotypeConstructors
 
-  describe "TraitInfo" $ do
-    it "" $ do
+  describe "TraitInfo" $
+    it "" $
       mapEnvironment stripMeta moduleTraits == mainTraits
 
-  describe "Names" $ do
+  describe "Names" $
     it "" $
       moduleNames == mainNames2
 
@@ -108,7 +107,7 @@ instance StripMeta CotypeConstructorInfo where
   stripMeta (CotypeConstructorInfo _ n k) = CotypeConstructorInfo () n k
 
 instance StripMeta TraitInfo where
-  stripMeta (TraitInfo _ n p t d) = TraitInfo () n p t d
+  stripMeta (TraitInfo _ n t d) = TraitInfo () n t d
 
 mainNames :: Environment NameInfo
 mainNames =
@@ -261,16 +260,15 @@ mainTraits =
           ()
           "Functor"
           (Parameter (KArrow KType KType) "f")
-          (TypeIndex (KArrow KType KType) 0)
           ( Environment.fromList
               [
                 ( "map"
                 , Forall
-                    (Set.fromList [TypeIndex (KArrow KType KType) 0, TypeIndex KType 1, TypeIndex KType 2])
+                    (Set.fromList [Parameter () "f", Parameter () "a", Parameter () "b"])
                     []
-                    ( (TVariable (TypeIndex KType 1) `TArrow` TVariable (TypeIndex KType 2))
-                        `TArrow` TApplication KType (TVariable (TypeIndex (KArrow KType KType) 0)) (TVariable (TypeIndex KType 1) :| [])
-                        `TArrow` TApplication KType (TVariable (TypeIndex (KArrow KType KType) 0)) (TVariable (TypeIndex KType 2) :| [])
+                    ( (TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "b"))
+                        `TArrow` TApplication () (TVariable (Parameter () "f")) (TVariable (Parameter () "a") :| [])
+                        `TArrow` TApplication () (TVariable (Parameter () "f")) (TVariable (Parameter () "b") :| [])
                     )
                 )
               ]

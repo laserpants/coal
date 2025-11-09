@@ -35,8 +35,12 @@ data CotypeConstructorInfo a
   = CotypeConstructorInfo a Name Kind
   deriving (Show, Eq, Ord, Read)
 
+-- data TraitInfo a
+--  = TraitInfo a Name (Parameter Kind) (TypeIndex Kind) (Environment IndexedScheme)
+--  deriving (Show, Eq, Ord, Read)
+
 data TraitInfo a
-  = TraitInfo a Name (Parameter Kind) (TypeIndex Kind) (Environment IndexedScheme)
+  = TraitInfo a Name (Parameter Kind) (Environment (Scheme Parameter () ParameterizedType))
   deriving (Show, Eq, Ord, Read)
 
 data InstanceInfo a
@@ -220,21 +224,20 @@ translateScheme env (Forall _ _ t) = Forall (typeIndexesIn t1) [] t1
  where
   t1 = evalState (instantiateVars [] env t) (0 :: Int)
 
-traitInfo :: Environment Kind -> Metadata -> Name -> TraitDef () -> TraitInfo Metadata
-traitInfo env loc name (TraitDef _ p@(Parameter kind_ _) ps) =
-  TraitInfo loc name p (TypeIndex kind_ 0) (Environment.fromList (toIndexedScheme env p <$$> ps))
+traitInfo :: Metadata -> Name -> TraitDef () -> TraitInfo Metadata
+traitInfo loc name (TraitDef _ p ps) = TraitInfo loc name p (Environment.fromList ps)
 
 aliasInfo :: Metadata -> Name -> AliasDef -> AliasInfo Metadata
 aliasInfo loc name (AliasDef ps t) = AliasInfo loc name (parameterName <$> ps) t
 
 instanceInfo :: InstanceDef d Metadata k t -> InstanceInfo Metadata
-instanceInfo (InstanceDef _ p entries) = 
---instanceInfo kinds traits trait loc dict = do
---  traceShow dict $
-    InstanceInfo undefined undefined undefined
+instanceInfo (InstanceDef _ p entries) =
+  -- instanceInfo kinds traits trait loc dict = do
+  --  traceShow dict $
+  undefined -- InstanceInfo undefined p entries
 
---instanceInfo :: Environment Kind -> Environment (TraitInfo Metadata) -> Name -> Metadata -> Environment IndexedScheme -> InstanceInfo Metadata
---instanceInfo kinds traits trait loc dict = do
+-- instanceInfo :: Environment Kind -> Environment (TraitInfo Metadata) -> Name -> Metadata -> Environment IndexedScheme -> InstanceInfo Metadata
+-- instanceInfo kinds traits trait loc dict = do
 --  traceShow dict $
 --    InstanceInfo loc undefined undefined
 

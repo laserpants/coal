@@ -23,9 +23,10 @@ build (Module path exports defs) =
     kinds <- typeConstructorEnv
     inEachDef (collectDataConstructors kinds)
     inEachDef (collectTraits kinds)
-    traits <- traitEnv
-    inEachDef (collectInstances kinds traits)
  where
+  --    traits <- traitEnv
+  --    inEachDef (collectInstances kinds traits)
+
   inEachDef = forM_ defs
 
 pick :: (Monad m) => [Name] -> Environment a -> StateT ModuleBundle (CompilerT Metadata m) [a]
@@ -89,7 +90,7 @@ traitEnv = do
   gets (foldElems insertTraitInfo . moduleTraits)
  where
   insertTraitInfo :: TraitInfo Metadata -> Environment (TraitInfo Metadata) -> Environment (TraitInfo Metadata)
-  insertTraitInfo info@(TraitInfo _ name _ _ _) = Environment.insert name info
+  insertTraitInfo info@(TraitInfo _ name _ _) = Environment.insert name info
 
 typeConstructorEnv :: (Monad m) => StateT ModuleBundle (CompilerT Metadata m) (Environment Kind)
 typeConstructorEnv = do
@@ -133,7 +134,7 @@ collectTraits env =
       addTraitEntries env name def
       modify $
         addName name ITrait
-          . insertTrait name (traitInfo env loc name def)
+          . insertTrait name (traitInfo loc name def)
     _ ->
       pure ()
 
@@ -149,14 +150,16 @@ addTraitEntries env trait (TraitDef _ p entries) =
 collectInstances :: (Monad m) => Environment Kind -> Environment (TraitInfo Metadata) -> Definition Metadata Kind () -> StateT ModuleBundle (CompilerT Metadata m) ()
 collectInstances kinds traits =
   \case
-    DInstance loc trait def -> -- (InstanceDef _ q _) -> do
+    DInstance loc trait def ->
+      -- (InstanceDef _ q _) -> do
       case Environment.lookup trait traits of
         Nothing ->
           -- TODO
           error "Trait not in scope!"
-        Just (TraitInfo loc2 _ p TypeIndex{..} dict) ->
+        Just _ ->
+          -- (TraitInfo loc2 _ p TypeIndex{..} dict) ->
           modify $
             -- insertInstance trait undefined (instanceInfo kinds traits trait loc dict)
-            insertInstance trait undefined (instanceInfo def)
+            undefined -- insertInstance trait undefined (instanceInfo def)
     _ ->
       pure ()

@@ -1,3 +1,5 @@
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Coal.Parser.Module.Definition (parseDefinition) where
@@ -41,7 +43,7 @@ parseTraitDefinition = do
   t <- angleBrackets parseParameter
   end <- getSourcePos
   ds <- braces (some ((,) <$> name <*> (symbol_ ":" *> parseType)))
-  pure (DTrait (Metadata start end) n (TraitDef [] t (Forall mempty [] <$$> ds)))
+  pure (DTrait (Metadata start end) n (TraitDef [] t (toScheme <$$> ds)))
 
 parseParameter :: Parser (Parameter Kind)
 parseParameter = do
@@ -194,3 +196,55 @@ parseTopLevelUnfold = do
 {-# INLINE parseAnnotation #-}
 parseAnnotation :: Parser (Type Parameter ())
 parseAnnotation = symbol_ ":" *> parseType
+
+-- TODO: move
+toScheme :: Type Parameter () -> Scheme Parameter () ParameterizedType
+toScheme t = Forall (Set.fromList (params t)) [] t
+
+class Parameterized p where
+  params :: p -> [Parameter ()]
+
+instance (Parameterized p) => Parameterized [p] where
+  params = concatMap params
+
+instance (Parameterized p) => Parameterized (NonEmpty p) where
+  params = concatMap params
+
+instance Parameterized (Type Parameter ()) where
+  params =
+    \case
+      TVariable p ->
+        params p
+      TApplication _ t ts ->
+        params t <> params ts
+      TArrow t1 t2 ->
+        params t1 <> params t2
+      TIntrinsic t ->
+        params t
+      TRow r ->
+        params r
+      TAlias _ _ t ->
+        params t
+      TConstructor{} ->
+        []
+
+instance Parameterized (Intrinsic (Type Parameter ())) where
+  params =
+    \case
+      IRecord t ->
+        params t
+      _ ->
+        []
+
+instance Parameterized (Row Parameter () (Type Parameter ())) where
+  params =
+    \case
+      RVariable p ->
+        params p
+      RExtend _ t r ->
+        params t <> params r
+      RNil ->
+        []
+
+instance Parameterized (Parameter ()) where
+  params = return
