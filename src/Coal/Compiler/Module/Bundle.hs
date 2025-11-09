@@ -17,32 +17,32 @@ import Extras (Dictionary, Name, Set, (<$$>))
 
 type IndexedConstructor = DataConstructor TypeIndex Kind IndexedType
 
-data DataConstructorInfo
-  = DataConstructorInfo Metadata Name IndexedConstructor (Set Name)
+data DataConstructorInfo a
+  = DataConstructorInfo a Name IndexedConstructor (Set Name)
   deriving (Show, Eq, Ord, Read)
 
-data CodataAccessorInfo
-  = CodataAccessorInfo Metadata Name (CodataAccessor TypeIndex Kind IndexedType)
+data CodataAccessorInfo a
+  = CodataAccessorInfo a Name (CodataAccessor TypeIndex Kind IndexedType)
   deriving (Show, Eq, Ord, Read)
 
-data TypeConstructorInfo
-  = TypeConstructorInfo Metadata Name Kind
+data TypeConstructorInfo a
+  = TypeConstructorInfo a Name Kind
   deriving (Show, Eq, Ord, Read)
 
-data CotypeConstructorInfo
-  = CotypeConstructorInfo Metadata Name Kind
+data CotypeConstructorInfo a
+  = CotypeConstructorInfo a Name Kind
   deriving (Show, Eq, Ord, Read)
 
-data TraitInfo
-  = TraitInfo Metadata Name (Parameter Kind) (TypeIndex Kind) (Environment IndexedScheme)
+data TraitInfo a
+  = TraitInfo a Name (Parameter Kind) (TypeIndex Kind) (Environment IndexedScheme)
   deriving (Show, Eq, Ord, Read)
 
-data InstanceInfo
-  = InstanceInfo Metadata Name (Map IndexedType ParameterizedType) (Dictionary IndexedScheme)
+data InstanceInfo a
+  = InstanceInfo a Name (Map IndexedType ParameterizedType) (Dictionary IndexedScheme)
   deriving (Show, Eq, Ord, Read)
 
-data AliasInfo
-  = AliasInfo Metadata Name [Name] ParameterizedType
+data AliasInfo a
+  = AliasInfo a Name [Name] ParameterizedType
   deriving (Show, Eq, Ord, Read)
 
 data NameInfo
@@ -60,13 +60,14 @@ data NameInfo
   deriving (Show, Eq, Ord, Read)
 
 data ModuleBundle = ModuleBundle
-  { moduleDataConstructors :: Environment DataConstructorInfo
-  , moduleCodataAccessors :: Environment CodataAccessorInfo
-  , moduleTypeConstructors :: Environment TypeConstructorInfo
-  , moduleCotypeConstructors :: Environment CotypeConstructorInfo
-  , moduleTraits :: Environment TraitInfo
-  , moduleInstances :: Environment InstanceInfo
-  , moduleAliases :: Environment AliasInfo
+  { modulePath :: Path
+  , moduleDataConstructors :: Environment (DataConstructorInfo Metadata)
+  , moduleCodataAccessors :: Environment (CodataAccessorInfo Metadata)
+  , moduleTypeConstructors :: Environment (TypeConstructorInfo Metadata)
+  , moduleCotypeConstructors :: Environment (CotypeConstructorInfo Metadata)
+  , moduleTraits :: Environment (TraitInfo Metadata)
+  , moduleInstances :: Environment (InstanceInfo Metadata)
+  , moduleAliases :: Environment (AliasInfo Metadata)
   , moduleNames :: Environment NameInfo
   , moduleExports :: Set Name
   --  , moduleDefinitions ::
@@ -83,22 +84,22 @@ exportedNames ModuleBundle{..}
   | exportsAll moduleExports = moduleNames
   | otherwise = Environment.filterNames (`Set.member` moduleExports) moduleNames
 
-exportedTypeConstructors :: ModuleBundle -> Environment TypeConstructorInfo
+exportedTypeConstructors :: ModuleBundle -> Environment (TypeConstructorInfo Metadata)
 exportedTypeConstructors ModuleBundle{..}
   | exportsAll moduleExports = moduleTypeConstructors
   | otherwise = Environment.filterNames (`Set.member` moduleExports) moduleTypeConstructors
 
-exportedCotypeConstructors :: ModuleBundle -> Environment CotypeConstructorInfo
+exportedCotypeConstructors :: ModuleBundle -> Environment (CotypeConstructorInfo Metadata)
 exportedCotypeConstructors ModuleBundle{..}
   | exportsAll moduleExports = moduleCotypeConstructors
   | otherwise = Environment.filterNames (`Set.member` moduleExports) moduleCotypeConstructors
 
-exportedDataConstructors :: ModuleBundle -> Environment DataConstructorInfo
+exportedDataConstructors :: ModuleBundle -> Environment (DataConstructorInfo Metadata)
 exportedDataConstructors ModuleBundle{..}
   | exportsAll moduleExports = moduleDataConstructors
   | otherwise = Environment.filterNames (`Set.member` moduleExports) moduleDataConstructors
 
-exportedCodataAccessors :: ModuleBundle -> Environment CodataAccessorInfo
+exportedCodataAccessors :: ModuleBundle -> Environment (CodataAccessorInfo Metadata)
 exportedCodataAccessors ModuleBundle{..}
   | exportsAll moduleExports = moduleCodataAccessors
   | otherwise = Environment.filterNames (`Set.member` moduleExports) moduleCodataAccessors
@@ -117,10 +118,10 @@ emptyModuleBundle =
     , moduleExports = mempty
     }
 
-insertDataConstructor :: Name -> DataConstructorInfo -> ModuleBundle -> ModuleBundle
+insertDataConstructor :: Name -> DataConstructorInfo Metadata -> ModuleBundle -> ModuleBundle
 insertDataConstructor name info ModuleBundle{..} = ModuleBundle{moduleDataConstructors = Environment.insert name info moduleDataConstructors, ..}
 
-insertManyDataConstructors :: [DataConstructorInfo] -> ModuleBundle -> ModuleBundle
+insertManyDataConstructors :: [DataConstructorInfo Metadata] -> ModuleBundle -> ModuleBundle
 insertManyDataConstructors infos ModuleBundle{..} =
   ModuleBundle
     { moduleDataConstructors =
@@ -130,10 +131,10 @@ insertManyDataConstructors infos ModuleBundle{..} =
     , ..
     }
 
-insertCodataAccessor :: Name -> CodataAccessorInfo -> ModuleBundle -> ModuleBundle
+insertCodataAccessor :: Name -> CodataAccessorInfo Metadata -> ModuleBundle -> ModuleBundle
 insertCodataAccessor name info ModuleBundle{..} = ModuleBundle{moduleCodataAccessors = Environment.insert name info moduleCodataAccessors, ..}
 
-insertManyCodataAccessors :: [CodataAccessorInfo] -> ModuleBundle -> ModuleBundle
+insertManyCodataAccessors :: [CodataAccessorInfo Metadata] -> ModuleBundle -> ModuleBundle
 insertManyCodataAccessors infos ModuleBundle{..} =
   ModuleBundle
     { moduleCodataAccessors =
@@ -143,19 +144,19 @@ insertManyCodataAccessors infos ModuleBundle{..} =
     , ..
     }
 
-insertTypeConstructor :: Name -> TypeConstructorInfo -> ModuleBundle -> ModuleBundle
+insertTypeConstructor :: Name -> TypeConstructorInfo Metadata -> ModuleBundle -> ModuleBundle
 insertTypeConstructor name info ModuleBundle{..} = ModuleBundle{moduleTypeConstructors = Environment.insert name info moduleTypeConstructors, ..}
 
-insertCotypeConstructor :: Name -> CotypeConstructorInfo -> ModuleBundle -> ModuleBundle
+insertCotypeConstructor :: Name -> CotypeConstructorInfo Metadata -> ModuleBundle -> ModuleBundle
 insertCotypeConstructor name info ModuleBundle{..} = ModuleBundle{moduleCotypeConstructors = Environment.insert name info moduleCotypeConstructors, ..}
 
-insertTrait :: Name -> TraitInfo -> ModuleBundle -> ModuleBundle
+insertTrait :: Name -> TraitInfo Metadata -> ModuleBundle -> ModuleBundle
 insertTrait name info ModuleBundle{..} = ModuleBundle{moduleTraits = Environment.insert name info moduleTraits, ..}
 
-insertInstance :: Name -> InstanceInfo -> ModuleBundle -> ModuleBundle
+insertInstance :: Name -> InstanceInfo Metadata -> ModuleBundle -> ModuleBundle
 insertInstance name info ModuleBundle{..} = ModuleBundle{moduleInstances = Environment.insert name info moduleInstances, ..}
 
-insertAlias :: Name -> AliasInfo -> ModuleBundle -> ModuleBundle
+insertAlias :: Name -> AliasInfo Metadata -> ModuleBundle -> ModuleBundle
 insertAlias name info ModuleBundle{..} = ModuleBundle{moduleAliases = Environment.insert name info moduleAliases, ..}
 
 addName :: Name -> NameInfo -> ModuleBundle -> ModuleBundle
@@ -167,22 +168,25 @@ addExport name ModuleBundle{..} = ModuleBundle{moduleExports = Set.insert name m
 setExports :: [Name] -> ModuleBundle -> ModuleBundle
 setExports names ModuleBundle{..} = ModuleBundle{moduleExports = Set.fromList names, ..}
 
-typeConstructorInfo :: Metadata -> Name -> TypeDef -> TypeConstructorInfo
+setPath :: Path -> ModuleBundle -> ModuleBundle
+setPath path ModuleBundle{..} = ModuleBundle{modulePath = path, ..}
+
+typeConstructorInfo :: Metadata -> Name -> TypeDef -> TypeConstructorInfo Metadata
 typeConstructorInfo loc name (TypeDef ps _) = TypeConstructorInfo loc name (kind n) where n = length ps
 
-cotypeConstructorInfo :: Metadata -> Name -> CotypeDef -> CotypeConstructorInfo
+cotypeConstructorInfo :: Metadata -> Name -> CotypeDef -> CotypeConstructorInfo Metadata
 cotypeConstructorInfo loc name (CotypeDef ps _) = CotypeConstructorInfo loc name (kind n) where n = length ps
 
 {-# INLINE kind #-}
 kind :: Int -> Kind
 kind n = foldr KArrow KType (replicate n KType)
 
-dataConstructorInfo :: Environment Kind -> Metadata -> TypeDef -> [DataConstructorInfo]
+dataConstructorInfo :: Environment Kind -> Metadata -> TypeDef -> [DataConstructorInfo Metadata]
 dataConstructorInfo env loc (TypeDef _ ctors) = getInfo <$> ctors
  where
   allNames = Set.fromList (constructorName <$> ctors)
 
-  getInfo :: DataConstructor Parameter () ParameterizedType -> DataConstructorInfo
+  getInfo :: DataConstructor Parameter () ParameterizedType -> DataConstructorInfo Metadata
   getInfo DataConstructor{..} =
     DataConstructorInfo
       loc
@@ -190,10 +194,10 @@ dataConstructorInfo env loc (TypeDef _ ctors) = getInfo <$> ctors
       DataConstructor{constructorScheme = translateScheme env constructorScheme, ..}
       allNames
 
-codataAccessorInfo :: Environment Kind -> Metadata -> CotypeDef -> [CodataAccessorInfo]
+codataAccessorInfo :: Environment Kind -> Metadata -> CotypeDef -> [CodataAccessorInfo Metadata]
 codataAccessorInfo env loc (CotypeDef _ xsors) = getInfo <$> xsors
  where
-  getInfo :: CodataAccessor Parameter () ParameterizedType -> CodataAccessorInfo
+  getInfo :: CodataAccessor Parameter () ParameterizedType -> CodataAccessorInfo Metadata
   getInfo CodataAccessor{..} =
     CodataAccessorInfo
       loc
@@ -205,12 +209,12 @@ translateScheme env (Forall _ _ t) = Forall (typeIndexesIn t1) [] t1
  where
   t1 = evalState (instantiateVars [] env t) (0 :: Int)
 
-traitInfo :: Environment Kind -> Metadata -> Name -> TraitDef () -> TraitInfo
+traitInfo :: Environment Kind -> Metadata -> Name -> TraitDef () -> TraitInfo Metadata
 traitInfo env loc name (TraitDef _ p@(Parameter kind_ _) ps) =
   TraitInfo loc name p (TypeIndex kind_ 0) (Environment.fromList (scheme [] . toIndexedType env p <$$> ps))
 
 toIndexedType :: Environment Kind -> Parameter Kind -> Type Parameter () -> IndexedType
 toIndexedType env (Parameter k n) t = evalState (instantiateVars [(n, TypeIndex k 0)] env t) (1 :: Int)
 
-aliasInfo :: Metadata -> Name -> AliasDef -> AliasInfo
+aliasInfo :: Metadata -> Name -> AliasDef -> AliasInfo Metadata
 aliasInfo loc name (AliasDef ps t) = AliasInfo loc name (parameterName <$> ps) t

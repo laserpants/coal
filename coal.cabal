@@ -299,6 +299,7 @@ test-suite coal-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      Coal.Compiler.Module.BundleSpec
       Coal.Compiler.PatternAnomaliesSpec
       Coal.TypeSystem.Constraint.Generation.EAnnotationConstraintsSpec
       Coal.TypeSystem.Constraint.Generation.EConstructorConstraintsSpec

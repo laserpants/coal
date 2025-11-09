@@ -15,9 +15,9 @@ import Data.List ((\\))
 import Extras (Name, forM_)
 
 build :: (Monad m) => Module Metadata Kind () -> CompilerT Metadata m ModuleBundle
-build (Module _ exports defs) =
+build (Module path exports defs) =
   flip execStateT emptyModuleBundle $ do
-    modify (setExports exports)
+    modify $ setPath path . setExports exports
     inEachDef collectTypeConstructors
     kinds <- typeConstructorEnv
     inEachDef (collectDataConstructors kinds)
@@ -79,22 +79,27 @@ collectTypeConstructors =
     _ ->
       pure ()
 
-traitEnv :: (Monad m) => StateT ModuleBundle (CompilerT Metadata m) (Environment TraitInfo)
-traitEnv =
-  undefined
+{-# INLINE foldElems #-}
+foldElems :: (Monoid m) => (a -> m -> m) -> Environment a -> m
+foldElems f = foldr f mempty . Environment.elems
+
+traitEnv :: (Monad m) => StateT ModuleBundle (CompilerT Metadata m) (Environment (TraitInfo Metadata))
+traitEnv = do
+  gets (foldElems insertTraitInfo . moduleTraits)
+ where
+  insertTraitInfo :: TraitInfo Metadata -> Environment (TraitInfo Metadata) -> Environment (TraitInfo Metadata)
+  insertTraitInfo info@(TraitInfo _ name _ _ _) = Environment.insert name info
 
 typeConstructorEnv :: (Monad m) => StateT ModuleBundle (CompilerT Metadata m) (Environment Kind)
 typeConstructorEnv = do
-  env1 <- gets (collect_ insertTypeInfo . moduleTypeConstructors)
-  env2 <- gets (collect_ insertCotypeInfo . moduleCotypeConstructors)
+  env1 <- gets (foldElems insertTypeInfo . moduleTypeConstructors)
+  env2 <- gets (foldElems insertCotypeInfo . moduleCotypeConstructors)
   pure (env1 <> env2)
  where
-  collect_ f = foldr f mempty . Environment.elems
-
-  insertTypeInfo :: TypeConstructorInfo -> Environment Kind -> Environment Kind
+  insertTypeInfo :: TypeConstructorInfo Metadata -> Environment Kind -> Environment Kind
   insertTypeInfo (TypeConstructorInfo _ name kind_) = Environment.insert name kind_
 
-  insertCotypeInfo :: CotypeConstructorInfo -> Environment Kind -> Environment Kind
+  insertCotypeInfo :: CotypeConstructorInfo Metadata -> Environment Kind -> Environment Kind
   insertCotypeInfo (CotypeConstructorInfo _ name kind_) = Environment.insert name kind_
 
 collectDataConstructors :: (Monad m) => Environment Kind -> Definition Metadata Kind () -> StateT ModuleBundle (CompilerT Metadata m) ()
@@ -140,7 +145,7 @@ addTraitEntries env trait (TraitDef _ p entries) =
  where
   tvar = TVariable (TypeIndex (parameterKind p) 0)
 
-collectInstances :: (Monad m) => Environment Kind -> Environment TraitInfo -> Definition Metadata Kind () -> StateT ModuleBundle (CompilerT Metadata m) ()
+collectInstances :: (Monad m) => Environment Kind -> Environment (TraitInfo Metadata) -> Definition Metadata Kind () -> StateT ModuleBundle (CompilerT Metadata m) ()
 collectInstances kinds traits =
   \case
     DInstance _ name def ->
