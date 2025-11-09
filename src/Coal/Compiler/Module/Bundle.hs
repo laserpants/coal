@@ -214,6 +214,7 @@ traitInfo :: Environment Kind -> Metadata -> Name -> TraitDef () -> TraitInfo Me
 traitInfo env loc name (TraitDef _ p@(Parameter kind_ _) ps) =
   TraitInfo loc name p (TypeIndex kind_ 0) (Environment.fromList (toIndexedScheme env p <$$> ps))
 
+-- TODO
 toIndexedScheme :: Environment Kind -> Parameter Kind -> Scheme Parameter () ParameterizedType -> Scheme TypeIndex Kind IndexedType
 toIndexedScheme env p (Forall _ _ t) = scheme [] (toIndexedType env p t)
 
