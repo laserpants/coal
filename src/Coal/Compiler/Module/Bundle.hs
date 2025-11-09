@@ -214,12 +214,12 @@ traitInfo :: Environment Kind -> Metadata -> Name -> TraitDef () -> TraitInfo Me
 traitInfo env loc name (TraitDef _ p@(Parameter kind_ _) ps) =
   TraitInfo loc name p (TypeIndex kind_ 0) (Environment.fromList (toIndexedScheme env p <$$> ps))
 
+aliasInfo :: Metadata -> Name -> AliasDef -> AliasInfo Metadata
+aliasInfo loc name (AliasDef ps t) = AliasInfo loc name (parameterName <$> ps) t
+
 -- TODO
 toIndexedScheme :: Environment Kind -> Parameter Kind -> Scheme Parameter () ParameterizedType -> Scheme TypeIndex Kind IndexedType
 toIndexedScheme env p (Forall _ _ t) = scheme [] (toIndexedType env p t)
 
 toIndexedType :: Environment Kind -> Parameter Kind -> Type Parameter () -> IndexedType
 toIndexedType env (Parameter k n) t = evalState (instantiateVars [(n, TypeIndex k 0)] env t) (1 :: Int)
-
-aliasInfo :: Metadata -> Name -> AliasDef -> AliasInfo Metadata
-aliasInfo loc name (AliasDef ps t) = AliasInfo loc name (parameterName <$> ps) t
