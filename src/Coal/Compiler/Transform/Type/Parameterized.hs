@@ -82,10 +82,10 @@ instantiateRowVars =
 class Parameterized p where
   instantiateTypeIndexes :: (MonadState s m, Supply s) => p -> WriterT [(Name, TypeIndex Kind)] m ()
 
-instance (Parameterized a) => Parameterized [a] where
+instance (Parameterized p) => Parameterized [p] where
   instantiateTypeIndexes = traverse_ instantiateTypeIndexes
 
-instance (Parameterized a) => Parameterized (NonEmpty a) where
+instance (Parameterized p) => Parameterized (NonEmpty p) where
   instantiateTypeIndexes = traverse_ instantiateTypeIndexes
 
 instance Parameterized (Type Parameter ()) where
