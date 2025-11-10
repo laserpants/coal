@@ -3,16 +3,13 @@
 
 module Coal.Compiler.Module.BundleSpec (bundleSpec, runBundle) where
 
-import Coal.Ast.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment (..), mapEnvironment)
 import qualified Coal.Common.Environment as Environment
-import Coal.Compiler (pipeline)
 import Coal.Compiler.Environment
 import Coal.Compiler.Module.Builders
 import Coal.Compiler.Module.Bundle
-import Coal.Compiler.Pass (Pass (..), mapPass, (>->))
+import Coal.Compiler.Pass (Pass (..), (>->))
 import Coal.Compiler.Pass.ParsingPhase (parsingPhase)
-import Coal.Compiler.Pass.PreflightPhase (preflightPhase)
 import Coal.Compiler.Pass.PreflightPhase.TopologicalSort (passTopologicalSort)
 import Coal.Compiler.Stack
 import Coal.Language
@@ -22,8 +19,7 @@ import Data.List.NonEmpty (NonEmpty (..))
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
-import Extras (Name, forM, forM_)
-import System.Process
+import Extras (forM)
 import Test.Hspec
 
 bundleSpec :: Spec
