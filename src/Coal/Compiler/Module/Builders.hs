@@ -10,9 +10,9 @@ import Coal.Compiler.Module.Bundle
 import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module
-import Control.Monad.State (StateT, evalState, execStateT, gets, lift, modify)
+import Coal.TypeSystem.Substitution
+import Control.Monad.State (StateT, execStateT, gets, lift, modify)
 import Data.List ((\\))
-import Debug.Trace
 import Extras (Name, forM_)
 
 build :: (Monad m) => Module Metadata Kind () -> CompilerT Metadata m ModuleBundle
@@ -23,10 +23,9 @@ build (Module path exports defs) =
     kinds <- typeConstructorEnv
     inEachDef (collectDataConstructors kinds)
     inEachDef (collectTraits kinds)
+    traits <- traitEnv
+    inEachDef (collectInstances kinds traits)
  where
-  --    traits <- traitEnv
-  --    inEachDef (collectInstances kinds traits)
-
   inEachDef = forM_ defs
 
 pick :: (Monad m) => [Name] -> Environment a -> StateT ModuleBundle (CompilerT Metadata m) [a]
@@ -115,7 +114,7 @@ collectDataConstructors env =
               . insertCodataAccessor codataAccessorName info
     DType loc _ def ->
       forM_ (dataConstructorInfo env loc def) $
-        \info@(DataConstructorInfo _ _ DataConstructor{..} names) -> do
+        \info@(DataConstructorInfo _ _ DataConstructor{..} _) -> do
           modify $
             addName constructorName (IDataConstructor constructorScheme)
               . insertDataConstructor constructorName info
@@ -141,6 +140,7 @@ collectTraits env =
 addTraitEntries :: (Monad m) => Environment Kind -> Name -> TraitDef () -> StateT ModuleBundle (CompilerT Metadata m) ()
 addTraitEntries env trait (TraitDef _ p entries) =
   forM_ entries $
+    -- TODO
     \(name, Forall _ _ t) ->
       modify $
         addName name (IFunction $ scheme [Trait trait tvar] (toIndexedType env p t))
@@ -150,16 +150,19 @@ addTraitEntries env trait (TraitDef _ p entries) =
 collectInstances :: (Monad m) => Environment Kind -> Environment (TraitInfo Metadata) -> Definition Metadata Kind () -> StateT ModuleBundle (CompilerT Metadata m) ()
 collectInstances kinds traits =
   \case
-    DInstance loc trait def ->
-      -- (InstanceDef _ q _) -> do
+    DInstance loc trait def@(InstanceDef _ q _) ->
       case Environment.lookup trait traits of
         Nothing ->
           -- TODO
           error "Trait not in scope!"
-        Just _ ->
-          -- (TraitInfo loc2 _ p TypeIndex{..} dict) ->
+        Just (TraitInfo _ _ p dict) -> do
           modify $
-            -- insertInstance trait undefined (instanceInfo kinds traits trait loc dict)
-            undefined -- insertInstance trait undefined (instanceInfo def)
+            insertInstance trait t1 (instanceInfo loc es def)
+         where
+          t1 = toIndexedType kinds p q
+          es = Environment.mapEnvironment (substituteInScheme (0 `mapsTo` t1) . toIndexedScheme kinds p) dict
     _ ->
       pure ()
+
+substituteInScheme :: Substitution -> Scheme o Kind IndexedType -> IndexedScheme
+substituteInScheme sub (Forall _ ts t) = scheme (apply sub ts) (apply sub t)
