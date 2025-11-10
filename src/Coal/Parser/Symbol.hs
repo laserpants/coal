@@ -19,7 +19,7 @@ module Coal.Parser.Symbol (
   equalSign,
 ) where
 
-import Coal.Parser
+import Coal.Parser.Core
 import Control.Monad (void)
 import Data.Text (Text)
 import Text.Megaparsec

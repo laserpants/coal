@@ -4,7 +4,7 @@ module Coal.Parser.Type (parseType, parseKind) where
 
 import Coal.Language
 import qualified Coal.Language.Type.Row as Row
-import Coal.Parser
+import Coal.Parser.Core
 import Coal.Parser.Identifier
 import Coal.Parser.Symbol
 import Coal.Parser.Utils (fieldList)

@@ -4,7 +4,7 @@ module Coal.Parser.Module (parseModule) where
 
 import Coal.Ast.Metadata (Metadata (..))
 import Coal.Language.Module
-import Coal.Parser
+import Coal.Parser.Core
 import Coal.Parser.Identifier
 import Coal.Parser.Module.Definition
 import Coal.Parser.Symbol

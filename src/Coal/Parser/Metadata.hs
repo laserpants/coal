@@ -1,7 +1,7 @@
 module Coal.Parser.Metadata (withMetadata, withMetadataM) where
 
 import Coal.Ast.Metadata (Metadata (..))
-import Coal.Parser
+import Coal.Parser.Core
 import Text.Megaparsec (getSourcePos)
 
 withMetadata :: Parser (Metadata -> p) -> Parser p

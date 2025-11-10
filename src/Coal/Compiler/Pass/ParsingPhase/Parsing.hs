@@ -9,8 +9,7 @@ import Coal.Compiler.Pass
 import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module
-import Coal.Parser (ParserError)
-import Coal.Parser.Module (parseModule)
+import Coal.Parser (ParserError, parseModule)
 import Control.Monad.Except (throwError)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Data.Either (partitionEithers)

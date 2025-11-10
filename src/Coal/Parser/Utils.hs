@@ -1,6 +1,6 @@
 module Coal.Parser.Utils (fieldListWithKey, fieldList) where
 
-import Coal.Parser
+import Coal.Parser.Core
 import Coal.Parser.Identifier
 import Coal.Parser.Symbol
 import Data.Text (Text)

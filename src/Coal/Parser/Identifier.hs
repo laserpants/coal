@@ -11,7 +11,7 @@ module Coal.Parser.Identifier (
   backtickString,
 ) where
 
-import Coal.Parser
+import Coal.Parser.Core
 import Coal.Parser.Symbol (symbol)
 import Control.Monad (void)
 import Data.Text (Text)

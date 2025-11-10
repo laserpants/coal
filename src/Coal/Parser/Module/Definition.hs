@@ -7,7 +7,7 @@ module Coal.Parser.Module.Definition (parseDefinition) where
 import Coal.Ast.Metadata (Metadata (..))
 import Coal.Language
 import Coal.Language.Module
-import Coal.Parser
+import Coal.Parser.Core
 import Coal.Parser.Expression (parseExpression, parseMatchClause)
 import Coal.Parser.Identifier
 import Coal.Parser.Pattern (parsePattern, parseUnitPattern)

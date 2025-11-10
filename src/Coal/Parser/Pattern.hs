@@ -5,7 +5,7 @@ module Coal.Parser.Pattern (parsePattern, parseUnitPattern) where
 import Coal.Ast.Metadata (Metadata (..), metadataSpan)
 import Coal.Common.Label (Label (..))
 import Coal.Language
-import Coal.Parser
+import Coal.Parser.Core
 import Coal.Parser.Identifier
 import Coal.Parser.Metadata
 import qualified Coal.Parser.Primitive as Primitive

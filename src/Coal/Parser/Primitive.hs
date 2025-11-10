@@ -5,7 +5,7 @@ module Coal.Parser.Primitive (parseAtom, parsePrimitive) where
 import Coal.Ast.Metadata (Metadata (..))
 import Coal.Language.Expression (Expression (..))
 import Coal.Language.Primitive
-import Coal.Parser
+import Coal.Parser.Core
 import Coal.Parser.Metadata
 import Control.Monad (void)
 import Data.Char (ord)
