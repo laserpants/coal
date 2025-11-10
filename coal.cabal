@@ -197,6 +197,7 @@ library
       Coal.Language.Type.Row
       Coal.Language.Type.Scheme
       Coal.Parser
+      Coal.Parser.Core
       Coal.Parser.Expression
       Coal.Parser.Identifier
       Coal.Parser.Metadata
