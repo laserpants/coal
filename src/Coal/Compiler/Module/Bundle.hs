@@ -13,9 +13,9 @@ import Coal.Language.Module
 import Control.Monad.State (evalState)
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
+import Data.Maybe (fromMaybe)
 import qualified Data.Set as Set
-import Debug.Trace
-import Extras (Dictionary, Name, Set, (<$$>))
+import Extras (Dictionary, Name, Set)
 
 type IndexedConstructor = DataConstructor TypeIndex Kind IndexedType
 
@@ -34,10 +34,6 @@ data TypeConstructorInfo a
 data CotypeConstructorInfo a
   = CotypeConstructorInfo a Name Kind
   deriving (Show, Eq, Ord, Read)
-
--- data TraitInfo a
---  = TraitInfo a Name (Parameter Kind) (TypeIndex Kind) (Environment IndexedScheme)
---  deriving (Show, Eq, Ord, Read)
 
 data TraitInfo a
   = TraitInfo a Name (Parameter Kind) (Environment (Scheme Parameter () ParameterizedType))
@@ -125,7 +121,12 @@ emptyModuleBundle =
     }
 
 insertDataConstructor :: Name -> DataConstructorInfo Metadata -> ModuleBundle -> ModuleBundle
-insertDataConstructor name info ModuleBundle{..} = ModuleBundle{moduleDataConstructors = Environment.insert name info moduleDataConstructors, ..}
+insertDataConstructor name info ModuleBundle{..} =
+  ModuleBundle
+    { moduleDataConstructors =
+        Environment.insert name info moduleDataConstructors
+    , ..
+    }
 
 insertManyDataConstructors :: [DataConstructorInfo Metadata] -> ModuleBundle -> ModuleBundle
 insertManyDataConstructors infos ModuleBundle{..} =
@@ -138,7 +139,12 @@ insertManyDataConstructors infos ModuleBundle{..} =
     }
 
 insertCodataAccessor :: Name -> CodataAccessorInfo Metadata -> ModuleBundle -> ModuleBundle
-insertCodataAccessor name info ModuleBundle{..} = ModuleBundle{moduleCodataAccessors = Environment.insert name info moduleCodataAccessors, ..}
+insertCodataAccessor name info ModuleBundle{..} =
+  ModuleBundle
+    { moduleCodataAccessors =
+        Environment.insert name info moduleCodataAccessors
+    , ..
+    }
 
 insertManyCodataAccessors :: [CodataAccessorInfo Metadata] -> ModuleBundle -> ModuleBundle
 insertManyCodataAccessors infos ModuleBundle{..} =
@@ -151,25 +157,38 @@ insertManyCodataAccessors infos ModuleBundle{..} =
     }
 
 insertTypeConstructor :: Name -> TypeConstructorInfo Metadata -> ModuleBundle -> ModuleBundle
-insertTypeConstructor name info ModuleBundle{..} = ModuleBundle{moduleTypeConstructors = Environment.insert name info moduleTypeConstructors, ..}
+insertTypeConstructor name info ModuleBundle{..} =
+  ModuleBundle
+    { moduleTypeConstructors =
+        Environment.insert name info moduleTypeConstructors
+    , ..
+    }
 
 insertCotypeConstructor :: Name -> CotypeConstructorInfo Metadata -> ModuleBundle -> ModuleBundle
-insertCotypeConstructor name info ModuleBundle{..} = ModuleBundle{moduleCotypeConstructors = Environment.insert name info moduleCotypeConstructors, ..}
+insertCotypeConstructor name info ModuleBundle{..} =
+  ModuleBundle
+    { moduleCotypeConstructors =
+        Environment.insert name info moduleCotypeConstructors
+    , ..
+    }
 
 insertTrait :: Name -> TraitInfo Metadata -> ModuleBundle -> ModuleBundle
-insertTrait name info ModuleBundle{..} = ModuleBundle{moduleTraits = Environment.insert name info moduleTraits, ..}
+insertTrait name info ModuleBundle{..} =
+  ModuleBundle
+    { moduleTraits =
+        Environment.insert name info moduleTraits
+    , ..
+    }
 
 insertInstance :: Name -> IndexedType -> InstanceInfo Metadata -> ModuleBundle -> ModuleBundle
 insertInstance name t info ModuleBundle{..} =
   ModuleBundle
     { moduleInstances =
-        case Environment.lookup name moduleInstances of
-          Nothing ->
-            moduleInstances
-          Just entries ->
-            Environment.insert name (Map.insert t info entries) moduleInstances
+        Environment.insert name (Map.insert t info entries) moduleInstances
     , ..
     }
+ where
+  entries = fromMaybe mempty (Environment.lookup name moduleInstances)
 
 insertAlias :: Name -> AliasInfo Metadata -> ModuleBundle -> ModuleBundle
 insertAlias name info ModuleBundle{..} = ModuleBundle{moduleAliases = Environment.insert name info moduleAliases, ..}
@@ -230,18 +249,8 @@ traitInfo loc name (TraitDef _ p ps) = TraitInfo loc name p (Environment.fromLis
 aliasInfo :: Metadata -> Name -> AliasDef -> AliasInfo Metadata
 aliasInfo loc name (AliasDef ps t) = AliasInfo loc name (parameterName <$> ps) t
 
-instanceInfo :: InstanceDef d Metadata k t -> InstanceInfo Metadata
-instanceInfo (InstanceDef _ p entries) =
-  -- instanceInfo kinds traits trait loc dict = do
-  --  traceShow dict $
-  undefined -- InstanceInfo undefined p entries
-
--- instanceInfo :: Environment Kind -> Environment (TraitInfo Metadata) -> Name -> Metadata -> Environment IndexedScheme -> InstanceInfo Metadata
--- instanceInfo kinds traits trait loc dict = do
---  traceShow dict $
---    InstanceInfo loc undefined undefined
-
---  = InstanceInfo a ParameterizedType (Dictionary IndexedScheme)
+instanceInfo :: Metadata -> Environment IndexedScheme -> InstanceDef a Metadata Kind () -> InstanceInfo Metadata
+instanceInfo loc (Environment e) (InstanceDef _ q _) = InstanceInfo loc q e
 
 -- TODO
 toIndexedScheme :: Environment Kind -> Parameter Kind -> Scheme Parameter () ParameterizedType -> Scheme TypeIndex Kind IndexedType
