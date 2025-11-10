@@ -1,5 +1,3 @@
-module Coal.Parser (
-  module Coal.Parser.Core,
-) where
+module Coal.Parser (module Coal.Parser.Core) where
 
 import Coal.Parser.Core
