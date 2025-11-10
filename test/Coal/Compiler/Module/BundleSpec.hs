@@ -19,6 +19,7 @@ import Coal.Language
 import Coal.Language.Module
 import Data.Either (rights)
 import Data.List.NonEmpty (NonEmpty (..))
+import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import Extras (Name, forM, forM_)
@@ -83,6 +84,10 @@ test134 ModuleBundle{..} = do
     it "" $
       mapEnvironment stripMeta moduleTraits == mainTraits
 
+  describe "InstanceInfo" $ do
+    it "" $
+      Environment.mapEnvironment (fmap stripMeta) moduleInstances == mainInstances
+
   describe "Names" $
     it "" $
       moduleNames == mainNames2
@@ -108,6 +113,9 @@ instance StripMeta CotypeConstructorInfo where
 
 instance StripMeta TraitInfo where
   stripMeta (TraitInfo _ n t d) = TraitInfo () n t d
+
+instance StripMeta InstanceInfo where
+  stripMeta (InstanceInfo _ t d) = InstanceInfo () t d
 
 mainNames :: Environment NameInfo
 mainNames =
@@ -273,6 +281,54 @@ mainTraits =
                 )
               ]
           )
+      )
+    ]
+
+mainInstances :: Environment (Map IndexedType (InstanceInfo ()))
+mainInstances =
+  Environment.fromList
+    [
+      ( "Functor"
+      , Map.fromList
+          [
+            ( TConstructor (KArrow KType KType) "List"
+            , InstanceInfo
+                ()
+                (TConstructor () "List")
+                ( Map.fromList
+                    [
+                      ( "map"
+                      , Forall
+                          (Set.fromList [TypeIndex KType 1, TypeIndex KType 2])
+                          []
+                          ( (TVariable (TypeIndex KType 1) `TArrow` TVariable (TypeIndex KType 2))
+                              `TArrow` TApplication KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 1) :| [])
+                              `TArrow` TApplication KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 2) :| [])
+                          )
+                      )
+                    ]
+                )
+            )
+          ,
+            ( TConstructor (KArrow KType KType) "Option"
+            , InstanceInfo
+                ()
+                (TConstructor () "Option")
+                ( Map.fromList
+                    [
+                      ( "map"
+                      , Forall
+                          (Set.fromList [TypeIndex KType 1, TypeIndex KType 2])
+                          []
+                          ( (TVariable (TypeIndex KType 1) `TArrow` TVariable (TypeIndex KType 2))
+                              `TArrow` TApplication KType (TConstructor (KArrow KType KType) "Option") (TVariable (TypeIndex KType 1) :| [])
+                              `TArrow` TApplication KType (TConstructor (KArrow KType KType) "Option") (TVariable (TypeIndex KType 2) :| [])
+                          )
+                      )
+                    ]
+                )
+            )
+          ]
       )
     ]
 
