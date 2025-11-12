@@ -1,6 +1,6 @@
 module Main {
 
-  import Nat(pack, unpack)
+  import Nat(pack, unpack, Nat, Succ, Zero)
   import IO(println_int32)
 
   fun factorial(n : int32) =

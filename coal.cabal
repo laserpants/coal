@@ -54,6 +54,7 @@ library
       Coal.Compiler.Pass.ParsingPhase.ImportsTopRule
       Coal.Compiler.Pass.ParsingPhase.Parsing
       Coal.Compiler.Pass.PreflightPhase
+      Coal.Compiler.Pass.PreflightPhase.Bundle
       Coal.Compiler.Pass.PreflightPhase.MainEntrypointRule
       Coal.Compiler.Pass.PreflightPhase.NoDuplicateParamsRule
       Coal.Compiler.Pass.PreflightPhase.Setup
