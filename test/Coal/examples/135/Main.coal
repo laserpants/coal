@@ -1,0 +1,9 @@
+module Main {
+
+  import Baz(Hello)
+  import IO(print_int32)
+
+  fun main() =
+    print_int32(1)
+
+}
