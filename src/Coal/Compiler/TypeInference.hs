@@ -7,7 +7,7 @@
 
 module Coal.Compiler.TypeInference (typeDefinitionsC) where
 
-import Coal.Common.Environment (Environment (..), mapEnvironment)
+import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (supplied)
@@ -33,21 +33,28 @@ import Extras (Dictionary, Name)
 
 type ConstraintsGenResult g o a t s = (s, Dictionary (g, o a), [ConstraintsGenOutput g o a t])
 
-runConstraintsGenC :: (Monad m) => ConstraintsGenStack c TypeIndex Kind IndexedType r -> CompilerT a m (ConstraintsGenResult c TypeIndex Kind IndexedType r)
+runConstraintsGenC :: (Monad m) => ConstraintsGenStack a TypeIndex Kind IndexedType r -> CompilerT a m (ConstraintsGenResult a TypeIndex Kind IndexedType r)
 runConstraintsGenC stack = do
   env <- ask
   sup <- gets compilerSupply
-  let (result, ConstraintsGenState{..}, output) = runConstraintsGenStack sup (context env) stack
-  updateSupplyC constraintsGenStateSupply
-  pure (result, constraintsGenStateTypeIndexes, output)
+
+  path <- gets (principalPath . compilerCurrentModule)
+  modules <- gets compilerModules
+
+  case Environment.lookup path modules of
+    Nothing ->
+      throwError PreflightFailure
+    Just bundle -> do
+      let (result, ConstraintsGenState{..}, output) = runConstraintsGenStack sup (context bundle env) stack
+      updateSupplyC constraintsGenStateSupply
+      pure (result, constraintsGenStateTypeIndexes, output)
  where
-  context CompilerEnvironment{..} =
+  context bundle CompilerEnvironment{..} =
     ConstraintsGenContext
       { constraintsGenContextMonomorphicSet = mempty
-      , constraintsGenContextDataConstructorEnv = mapEnvironment fst compilerDataConstructorEnvironment
       , constraintsGenContextCodataAccessorEnv = compilerCodataAccessorEnvironment
-      , constraintsGenContextTypeConstructorEnv = compilerTypeConstructorEnvironment
       , constraintsGenContextTopLevelFoldEnv = compilerFoldEnvironment
+      , constraintsGenContextModules = bundle
       }
 
 generateConstraintsC :: (Monad m, Data a, Show a) => Expression a IndexedType -> CompilerT a m ([CompilerAssumption a], [CompilerConstraint a])
@@ -263,7 +270,7 @@ typeDefinitionC =
 
 checkMain :: (Monad m, Data a) => a -> IndexedType -> NonEmpty (Pattern a IndexedType) -> Name -> CompilerT a m ()
 checkMain loc t ps name = do
-  path <- gets compilerModule
+  path <- gets compilerCurrentModule
   when (Path ["Main"] == path && "main" == name) $
     insertConstraintsC
       [ Explicit
@@ -278,7 +285,7 @@ checkIfNameExists :: (Monad m) => a -> Name -> CompilerT a m ()
 checkIfNameExists loc name = do
   env <- gets compilerNameStore
   when (Environment.contains name env) $ do
-    path <- gets compilerModule
+    path <- gets compilerCurrentModule
     tellErrors [NameAlreadyDefined name (ErrorLocation (principalPath path) loc)]
     throwError PreflightFailure
 
