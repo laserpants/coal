@@ -16,7 +16,6 @@ import Control.Monad (unless)
 import Control.Monad.State (StateT, execStateT, gets, lift, modify)
 import Data.List (union)
 import qualified Data.Set as Set
-import Debug.Trace
 import Extras (Name, forM_)
 
 build :: (Monad m) => Module Metadata Kind () -> CompilerT Metadata m (ModuleBundle Metadata)
@@ -27,7 +26,8 @@ build (Module path exports defs) =
     inEachDef collectTypeConstructors
 
     modify $
-      insertTypeConstructor "List" (TypeConstructorInfo mempty "List" (KArrow KType KType)) . addName "List" (IType (KArrow KType KType))
+      insertTypeConstructor "List" (TypeConstructorInfo mempty "List" (KArrow KType KType))
+        . addName "List" (IType (KArrow KType KType))
 
     kinds <- typeConstructorEnv
     inEachDef (collectDataConstructors kinds)
@@ -205,6 +205,7 @@ addTraitEntries env trait (TraitDef _ p entries) =
     \(name, Forall _ _ t) ->
       modify $
         addName name (IFunction $ scheme [Trait trait tvar] (toIndexedType env p t))
+          . addExport name
  where
   tvar = TVariable (TypeIndex (parameterKind p) 0)
 
