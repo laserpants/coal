@@ -1,6 +1,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module Coal.TypeSystem.Constraint.Generation.TypeAnnotation (
   TypeAnnotationError,
@@ -9,6 +10,7 @@ module Coal.TypeSystem.Constraint.Generation.TypeAnnotation (
   runTypeAnnotation,
 ) where
 
+import Coal.Compiler.Module.Bundle (ModuleBundle (..), CotypeConstructorInfo (..), TypeConstructorInfo (..))
 import Coal.Language
 import Coal.TypeSystem.Constraint.Generation.Internal
 import Coal.TypeSystem.Substitution (Substitution (..))
@@ -29,14 +31,25 @@ import Extras (
 import qualified Coal.Common.Environment as Environment
 import qualified Data.Map.Strict as Map
 
-type TypeAnnotationContext = ConstraintsGenContext TypeIndex Kind IndexedType
+type TypeAnnotationContext a = ConstraintsGenContext a TypeIndex Kind IndexedType
 
 {-# INLINE lookupTypeConstructor #-}
-lookupTypeConstructor :: (MonadReader TypeAnnotationContext m) => Name -> m (Maybe Kind)
-lookupTypeConstructor name = Environment.lookup name <$> asks constraintsGenContextTypeConstructorEnv
+lookupTypeConstructor :: (MonadReader (TypeAnnotationContext a) m) => Name -> m (Maybe Kind)
+lookupTypeConstructor name = do
+  -- TODO: DRY
+  ModuleBundle{..} <- asks constraintsGenContextModules
+  case Environment.lookup name moduleTypeConstructors of
+    Nothing ->
+      case Environment.lookup name moduleCotypeConstructors of
+        Nothing ->
+          pure Nothing
+        Just (CotypeConstructorInfo _ _ kind) ->
+          pure (Just kind)
+    Just (TypeConstructorInfo _ _ kind) ->
+      pure (Just kind)
 
 instantiateAnnotation ::
-  (MonadReader TypeAnnotationContext m, MonadState (ConstraintsGenState a) m) =>
+  (MonadReader (TypeAnnotationContext a) m, MonadState (ConstraintsGenState a) m) =>
   a ->
   Type Parameter () ->
   m (Either (TypeAnnotationError a) (Type TypeIndex Kind))
@@ -50,7 +63,7 @@ type TypeAnnotation a m = ExceptT (a -> TypeAnnotationError a) (StateT (Dictiona
 runTypeAnnotation :: (Monad m) => a -> TypeAnnotation a m t -> m (Either (TypeAnnotationError a) t, Dictionary (TypeIndex Kind))
 runTypeAnnotation loc v = runStateT (runExceptT (withExceptT ($ loc) v)) mempty
 
-instantiate :: (MonadReader TypeAnnotationContext m) => Type Parameter () -> TypeAnnotation a m IndexedType
+instantiate :: (MonadReader (TypeAnnotationContext a) m) => Type Parameter () -> TypeAnnotation a m IndexedType
 instantiate =
   \case
     TApplication _ con@(TConstructor _ name) ts
@@ -81,7 +94,7 @@ instantiate =
     TAlias name ts t ->
       TAlias name <$> traverse instantiate ts <*> instantiate t
 
-instantiateRow :: (MonadReader TypeAnnotationContext m) => Row Parameter () (Type Parameter ()) -> TypeAnnotation a m (Row TypeIndex Kind IndexedType)
+instantiateRow :: (MonadReader (TypeAnnotationContext a) m) => Row Parameter () (Type Parameter ()) -> TypeAnnotation a m (Row TypeIndex Kind IndexedType)
 instantiateRow =
   \case
     RVariable (Parameter _ v) ->
@@ -91,7 +104,7 @@ instantiateRow =
     RNil ->
       pure RNil
 
-typeIndex :: (MonadReader TypeAnnotationContext m) => Kind -> Name -> TypeAnnotation a m (TypeIndex Kind)
+typeIndex :: (MonadReader (TypeAnnotationContext a) m) => Kind -> Name -> TypeAnnotation a m (TypeIndex Kind)
 typeIndex k name = do
   dict <- get
   let index = TypeIndex k (negate (lexOrderRank name) - 1)
