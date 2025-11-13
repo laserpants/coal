@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE StrictData #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE StrictData #-}
 
 module Coal.TypeSystem.Constraint.Generation.TypeAnnotation (
   TypeAnnotationError,
@@ -10,7 +10,7 @@ module Coal.TypeSystem.Constraint.Generation.TypeAnnotation (
   runTypeAnnotation,
 ) where
 
-import Coal.Compiler.Module.Bundle (ModuleBundle (..), CotypeConstructorInfo (..), TypeConstructorInfo (..))
+import Coal.Compiler.Module.Bundle (CotypeConstructorInfo (..), ModuleBundle (..), TypeConstructorInfo (..))
 import Coal.Language
 import Coal.TypeSystem.Constraint.Generation.Internal
 import Coal.TypeSystem.Substitution (Substitution (..))
