@@ -14,10 +14,10 @@ module Coal.Compiler.State (
   overCompilerSolverRuleViolations,
   overCompilerTypeAnnotationParams,
   overCompilerStateConstraintsGenErrors,
-  overCompilerTypeDefinitions,
   overCompilerVerbatimSource,
-  overCompilerModule,
+  overCompilerCurrentModule,
   overCompilerConfig,
+  overCompilerModules,
   initialCompilerState,
 ) where
 
@@ -26,7 +26,6 @@ import Coal.Common.Supply (Supply (..))
 import Coal.Compiler.Config (CompilerConfig (..), defaultConfig)
 import Coal.Compiler.Module.Bundle (ModuleBundle)
 import Coal.Language
-import Coal.Language.Module (Definition (..))
 import Coal.Language.Module.Definition (Path (..))
 import Coal.TypeSystem
 import Data.Text (Text)
@@ -40,17 +39,16 @@ data CompilerState a = CompilerState
   { compilerSupply :: Int
   , compilerNameStore :: Environment IndexedScheme
   , compilerGlobalNames :: Environment (Environment IndexedScheme)
-  , compilerModule :: Path
+  , compilerCurrentModule :: Path
   , compilerSubstitution :: Substitution
   , compilerConstraints :: [CompilerConstraint a]
   , compilerConstraintsGenErrors :: [ConstraintsGenError a]
   , compilerSolverRuleViolations :: [InferenceRule Kind a]
   , compilerAssumptions :: [CompilerAssumption a]
   , compilerTypeAnnotationParams :: Dictionary (a, TypeIndex Kind)
-  , compilerTypeDefinitions :: Environment [Definition a Kind ()]
   , compilerVerbatimSource :: Environment Text
   , compilerConfig :: CompilerConfig
-  , compilerModules :: Environment ModuleBundle
+  , compilerModules :: Environment (ModuleBundle a)
   }
   deriving (Show, Eq, Ord, Read)
 
@@ -66,9 +64,9 @@ overCompilerNameStore fn CompilerState{..} = CompilerState{compilerNameStore = f
 overCompilerGlobalNames :: Over (CompilerState a) (Environment (Environment IndexedScheme))
 overCompilerGlobalNames fn CompilerState{..} = CompilerState{compilerGlobalNames = fn compilerGlobalNames, ..}
 
-{-# INLINE overCompilerModule #-}
-overCompilerModule :: Over (CompilerState a) Path
-overCompilerModule fn CompilerState{..} = CompilerState{compilerModule = fn compilerModule, ..}
+{-# INLINE overCompilerCurrentModule #-}
+overCompilerCurrentModule :: Over (CompilerState a) Path
+overCompilerCurrentModule fn CompilerState{..} = CompilerState{compilerCurrentModule = fn compilerCurrentModule, ..}
 
 {-# INLINE overCompilerSupply #-}
 overCompilerSupply :: Over (CompilerState a) Int
@@ -98,10 +96,6 @@ overCompilerTypeAnnotationParams fn CompilerState{..} = CompilerState{compilerTy
 overCompilerSolverRuleViolations :: Over (CompilerState a) [InferenceRule Kind a]
 overCompilerSolverRuleViolations fn CompilerState{..} = CompilerState{compilerSolverRuleViolations = fn compilerSolverRuleViolations, ..}
 
-{-# INLINE overCompilerTypeDefinitions #-}
-overCompilerTypeDefinitions :: Over (CompilerState a) (Environment [Definition a Kind ()])
-overCompilerTypeDefinitions fn CompilerState{..} = CompilerState{compilerTypeDefinitions = fn compilerTypeDefinitions, ..}
-
 {-# INLINE overCompilerVerbatimSource #-}
 overCompilerVerbatimSource :: Over (CompilerState a) (Environment Text)
 overCompilerVerbatimSource fn CompilerState{..} = CompilerState{compilerVerbatimSource = fn compilerVerbatimSource, ..}
@@ -110,13 +104,17 @@ overCompilerVerbatimSource fn CompilerState{..} = CompilerState{compilerVerbatim
 overCompilerConfig :: Over (CompilerState a) CompilerConfig
 overCompilerConfig fn CompilerState{..} = CompilerState{compilerConfig = fn compilerConfig, ..}
 
+{-# INLINE overCompilerModules #-}
+overCompilerModules :: Over (CompilerState a) (Environment (ModuleBundle a))
+overCompilerModules fn CompilerState{..} = CompilerState{compilerModules = fn compilerModules, ..}
+
 initialCompilerState :: CompilerState a
 initialCompilerState =
   CompilerState
     { compilerSupply = 0
     , compilerNameStore = mempty
     , compilerGlobalNames = mempty
-    , compilerModule = Path mempty
+    , compilerCurrentModule = Path mempty
     , compilerSubstitution = mempty
     , compilerConstraints = []
     , compilerConstraintsGenErrors = []
@@ -124,7 +122,6 @@ initialCompilerState =
     , compilerAssumptions = []
     , compilerTypeAnnotationParams = mempty
     , compilerVerbatimSource = mempty
-    , compilerTypeDefinitions = mempty
     , compilerConfig = defaultConfig
     , compilerModules = mempty
     }

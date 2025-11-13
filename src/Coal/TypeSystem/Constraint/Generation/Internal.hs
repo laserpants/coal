@@ -22,6 +22,7 @@ module Coal.TypeSystem.Constraint.Generation.Internal (
 
 import Coal.Common.Environment (Environment (..))
 import Coal.Common.Supply (Supply (..))
+import Coal.Compiler.Module.Bundle (ModuleBundle)
 import Coal.Language (CodataAccessor (..), DataConstructor (..), IndexedScheme, Kind (..), Type (..), TypeIndex (..))
 import Coal.TypeSystem.Constraint (Constraint (..), Monomorphic (..), overMonomorphicSet)
 import Coal.TypeSystem.Constraint.Generation.InferenceRule (InferenceRule (..))
@@ -54,17 +55,16 @@ data ConstraintsGenError a
   | EFoldPatternInRegularMatch a
   deriving (Show, Eq, Ord, Read)
 
-data ConstraintsGenContext o k t = ConstraintsGenContext
-  { constraintsGenContextMonomorphicSet :: Monomorphic (o k)
-  , constraintsGenContextDataConstructorEnv :: Environment (DataConstructor o k t)
-  , constraintsGenContextCodataAccessorEnv :: Environment (CodataAccessor o k t)
-  , constraintsGenContextTypeConstructorEnv :: Environment k
+data ConstraintsGenContext g o a t = ConstraintsGenContext
+  { constraintsGenContextMonomorphicSet :: Monomorphic (o a)
+  , constraintsGenContextCodataAccessorEnv :: Environment (CodataAccessor o a t)
   , constraintsGenContextTopLevelFoldEnv :: Environment IndexedScheme
+  , constraintsGenContextModules :: ModuleBundle g
   }
   deriving (Show, Eq, Ord, Read)
 
 {-# INLINE overConstraintsGenMonomorphicSet #-}
-overConstraintsGenMonomorphicSet :: (Monomorphic (o k) -> Monomorphic (o k)) -> ConstraintsGenContext o k t -> ConstraintsGenContext o k t
+overConstraintsGenMonomorphicSet :: (Monomorphic (o a) -> Monomorphic (o a)) -> ConstraintsGenContext g o a t -> ConstraintsGenContext g o a t
 overConstraintsGenMonomorphicSet fn ConstraintsGenContext{..} = ConstraintsGenContext{constraintsGenContextMonomorphicSet = fn constraintsGenContextMonomorphicSet, ..}
 
 data ConstraintsGenState c = ConstraintsGenState
@@ -87,25 +87,25 @@ instance Supply (ConstraintsGenState c) where
 
 type ConstraintsGenOutput g o a t = Either (ConstraintsGenError g) (Constraint (InferenceRule a g) o a t)
 
-type ConstraintsGenMonad g o a t = RWS (ConstraintsGenContext o a t) [ConstraintsGenOutput g o a t] (ConstraintsGenState g)
+type ConstraintsGenMonad g o a t = RWS (ConstraintsGenContext g o a t) [ConstraintsGenOutput g o a t] (ConstraintsGenState g)
 
 newtype ConstraintsGenStack g o a t s = ConstraintsGenStack {constraintsGenMonad :: ConstraintsGenMonad g o a t s}
   deriving
     ( Functor
     , Applicative
     , Monad
-    , MonadReader (ConstraintsGenContext o a t)
+    , MonadReader (ConstraintsGenContext g o a t)
     , MonadWriter [ConstraintsGenOutput g o a t]
     , MonadState (ConstraintsGenState g)
-    , MonadRWS (ConstraintsGenContext o a t) [ConstraintsGenOutput g o a t] (ConstraintsGenState g)
+    , MonadRWS (ConstraintsGenContext g o a t) [ConstraintsGenOutput g o a t] (ConstraintsGenState g)
     )
 
 {-# INLINE evalConstraintsGenStack #-}
-evalConstraintsGenStack :: Int -> ConstraintsGenContext o a t -> ConstraintsGenStack g o a t s -> (s, [ConstraintsGenOutput g o a t])
+evalConstraintsGenStack :: Int -> ConstraintsGenContext g o a t -> ConstraintsGenStack g o a t s -> (s, [ConstraintsGenOutput g o a t])
 evalConstraintsGenStack supply ctx a = evalRWS (constraintsGenMonad a) ctx (ConstraintsGenState mempty supply)
 
 {-# INLINE runConstraintsGenStack #-}
-runConstraintsGenStack :: Int -> ConstraintsGenContext o a t -> ConstraintsGenStack g o a t s -> (s, ConstraintsGenState g, [ConstraintsGenOutput g o a t])
+runConstraintsGenStack :: Int -> ConstraintsGenContext g o a t -> ConstraintsGenStack g o a t s -> (s, ConstraintsGenState g, [ConstraintsGenOutput g o a t])
 runConstraintsGenStack supply ctx a = runRWS (constraintsGenMonad a) ctx (ConstraintsGenState mempty supply)
 
 {-# INLINE updateConstraintsGenSupply #-}
