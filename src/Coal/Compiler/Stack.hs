@@ -29,18 +29,19 @@ module Coal.Compiler.Stack (
   updateSupply,
   updateSupplyC,
   insertSupplyC,
-  insertTypeDefinitionsC,
   setVerbatimSourceC,
   setVerbatimSourceForC,
   getVerbatimSourceC,
   compilerReportConstraintsGenErrors,
   compilerReportSolverRuleViolations,
   compilerSetTypeAnnotationParams,
-  setCompilerModuleC,
+  setCompilerCurrentModuleC,
   setConfigExecutableNameC,
   setConfigGenerateDotFilesC,
   setConfigGenerateLLVMOutputC,
   setConfigC,
+  insertModuleC,
+  getModule,
 )
 where
 
@@ -51,9 +52,10 @@ import Coal.Compiler.Config
 import Coal.Compiler.Environment (CompilerEnvironment (..))
 import Coal.Compiler.Error
 import Coal.Compiler.Journal
+import Coal.Compiler.Module.Bundle (ModuleBundle)
 import Coal.Compiler.State
 import Coal.Language
-import Coal.Language.Module (Definition (..), Module (..), modulePathName)
+import Coal.Language.Module (Module (..), modulePathName)
 import Coal.Language.Module.Definition (Path (..))
 import Coal.TypeSystem
 import Control.Monad.Except
@@ -148,11 +150,11 @@ getVerbatimSourceC name = do
     Just src ->
       pure src
 
-insertTypeDefinitionsC :: (Monad m) => Name -> [Definition a Kind ()] -> CompilerT a m ()
-insertTypeDefinitionsC name defs = modify (overCompilerTypeDefinitions (Environment.insert name defs))
+getModule :: (Monad m) => CompilerT a m Path
+getModule = gets compilerCurrentModule
 
-setCompilerModuleC :: (Monad m) => Path -> CompilerT a m ()
-setCompilerModuleC path = modify (overCompilerModule (const path))
+setCompilerCurrentModuleC :: (Monad m) => Path -> CompilerT a m ()
+setCompilerCurrentModuleC path = modify (overCompilerCurrentModule (const path))
 
 setConfigExecutableNameC :: (Monad m) => FilePath -> CompilerT a m ()
 setConfigExecutableNameC name = modify (overCompilerConfig (setConfigExecutableName name))
@@ -165,3 +167,6 @@ setConfigGenerateLLVMOutputC flag = modify (overCompilerConfig (setConfigGenerat
 
 setConfigC :: (Monad m) => CompilerConfig -> CompilerT a m ()
 setConfigC config = modify (overCompilerConfig (const config))
+
+insertModuleC :: (Monad m) => Name -> ModuleBundle a -> CompilerT a m ()
+insertModuleC name bundle = modify (overCompilerModules (Environment.insert name bundle))

@@ -42,7 +42,7 @@ passPlaceholders =
 
 pass :: (Monad m) => Module Metadata Kind IndexedType -> CompilerT Metadata m (Module Metadata Kind IndexedType)
 pass m@(Module p _ _) = do
-  setCompilerModuleC p
+  setCompilerCurrentModuleC p
   overModuleDefinitionsM (traverse insertPlaceholders) m
 
 insertPlaceholders :: (Monad m, Monoid a, Data a) => Definition a Kind IndexedType -> CompilerT a m (Definition a Kind IndexedType)
@@ -148,7 +148,7 @@ lookupTraitInstance loc trait@(Trait name _) = do
     Nothing -> do
       if isConcrete trait
         then do
-          path <- gets compilerModule
+          path <- gets compilerCurrentModule
           tellErrors [MissingInstance trait (ErrorLocation (principalPath path) loc)]
           throwError TraitError
         else pure Nothing
@@ -261,7 +261,7 @@ expandConstantDefTraits name =
         [] ->
           pure $ ConstantDef a with (With [] t) expr
         tr : trs -> do
-          path <- gets compilerModule
+          path <- gets compilerCurrentModule
           -- Insert default instance for Numeric trait, which is int32
           if "main" == name && Path ["Main"] == path && isNumericTrait tr
             then do
