@@ -15,12 +15,14 @@ module Coal.TypeSystem.Constraint.Generation (
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (supplied)
+import Coal.Compiler.Module.Bundle (DataConstructorInfo (..), moduleDataConstructors)
 import Coal.Language
 import Coal.TypeSystem.Constraint (Constraint (..))
 import Coal.TypeSystem.Constraint.Assumption
 import Coal.TypeSystem.Constraint.Generation.Internal
 import Coal.TypeSystem.Constraint.Generation.TypeAnnotation (instantiateAnnotation)
 import Control.Monad.Reader (asks)
+import Control.Monad.State
 import Data.Data (Data)
 import Data.List.NonEmpty (NonEmpty (..), toList)
 import qualified Data.Map.Strict as Map
@@ -31,11 +33,17 @@ import Extras
 type ConstraintsGen a = ConstraintsGenStack a TypeIndex Kind IndexedType
 
 {-# INLINE lookupDataConstructor #-}
-lookupDataConstructor :: Name -> ConstraintsGenStack g o a t (Maybe (DataConstructor o a t))
-lookupDataConstructor name = asks (Environment.lookup name . constraintsGenContextDataConstructorEnv)
+lookupDataConstructor :: Name -> ConstraintsGenStack a TypeIndex Kind IndexedType (Maybe (DataConstructor TypeIndex Kind IndexedType))
+lookupDataConstructor name = do
+  modules <- asks constraintsGenContextModules
+  case Environment.lookup name (moduleDataConstructors modules) of
+    Nothing ->
+      pure Nothing
+    Just (DataConstructorInfo _ _ ctor _) ->
+      pure (Just ctor)
 
 {-# INLINE lookupCodataAccessor #-}
-lookupCodataAccessor :: Name -> ConstraintsGenStack g o a t (Maybe (CodataAccessor o a t))
+lookupCodataAccessor :: Name -> ConstraintsGenStack a TypeIndex Kind IndexedType (Maybe (CodataAccessor TypeIndex Kind IndexedType))
 lookupCodataAccessor name = asks (Environment.lookup name . constraintsGenContextCodataAccessorEnv)
 
 assertEqualityAssumptions :: a -> IndexedType -> [Assumption a IndexedType] -> ConstraintsGen a ()
@@ -56,7 +64,7 @@ withMonomorphic = localMonoset . monosetInsertMultiple . typeIndexesIn
 
 type Assertion a = IndexedType -> [Assumption a IndexedType] -> ConstraintsGen a ()
 
-emitPAnnotationConstraints :: (Data a) => a -> Type Parameter () -> Pattern a IndexedType -> ConstraintsGen a ()
+emitPAnnotationConstraints :: (Data a, Show a) => a -> Type Parameter () -> Pattern a IndexedType -> ConstraintsGen a ()
 emitPAnnotationConstraints loc t p = do
   r <- instantiateAnnotation loc t
   case r of
