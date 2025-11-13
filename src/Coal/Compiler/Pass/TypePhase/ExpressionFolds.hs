@@ -51,7 +51,7 @@ instance (Monoid a, Data a) => FoldContext a (Clause a ()) where
   expandFolds name _ =
     \case
       EClause _ (PAtVariable loc _) _ -> do
-        path <- gets compilerModule
+        path <- gets compilerCurrentModule
         tellErrors [FoldPatternOutsideConstructor (ErrorLocation (principalPath path) loc)]
         throwError PatternAnomaly
       EClause a p cs ->
@@ -69,7 +69,7 @@ checkPatterns :: (Monoid a, Data a, Data k, Monad m) => Pattern a k -> CompilerT
 checkPatterns =
   \case
     PAtVariable loc _ -> do
-      path <- gets compilerModule
+      path <- gets compilerCurrentModule
       tellErrors [FoldPatternInRegularMatch (ErrorLocation (principalPath path) loc)]
       throwError PatternAnomaly
     p ->
@@ -170,7 +170,7 @@ instance (Monoid a, Data a) => CompileFoldsContext a (Module a k ()) where
   compileFolds =
     \case
       Module p ns o -> do
-        setCompilerModuleC p
+        setCompilerCurrentModuleC p
         Module p ns <$> compileFolds o
 
 instance (Monoid a, Data a) => CompileFoldsContext a (FunctionDef a ()) where

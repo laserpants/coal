@@ -62,7 +62,7 @@ expandClause _ e3 (cl@(EClause a p (CPlain a1 gs e1 :| [])), ds) = do
     ([], _) ->
       pure cl
     (_, []) -> do
-      path <- gets compilerModule
+      path <- gets compilerCurrentModule
       tellErrors [NonExhaustivePatterns (ErrorLocation (principalPath path) a)]
       throwError PatternAnomaly
     (_, c : cs) -> do
@@ -136,5 +136,5 @@ instance TransformContext (Module Metadata Kind ()) where
   expandIntegerLiteralPatterns =
     \case
       Module p ns o -> do
-        setCompilerModuleC p
+        setCompilerCurrentModuleC p
         Module p ns <$> traverse expandIntegerLiteralPatterns o

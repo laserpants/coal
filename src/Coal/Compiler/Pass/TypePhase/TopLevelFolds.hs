@@ -33,7 +33,7 @@ passTopLevelFolds =
 
 pass :: (Monad m, Monoid a, Data a) => Module a Kind () -> CompilerT a m (Module a Kind ())
 pass m@(Module p _ _) = do
-  setCompilerModuleC p
+  setCompilerCurrentModuleC p
   overModuleDefinitionsM (traverse compileTopLevelFolds) m
 
 class TopLevelFoldContext a e where
@@ -49,11 +49,11 @@ instance (Monoid a, Data a) => TopLevelFoldContext a (Clause a ()) where
   expandFolds name _ =
     \case
       EClause _ (PAtVariable loc _) _ -> do
-        path <- gets compilerModule
+        path <- gets compilerCurrentModule
         tellErrors [FoldPatternOutsideConstructor (ErrorLocation (principalPath path) loc)]
         throwError PatternAnomaly
       EClause _ (PNamedFold loc _ _) _ -> do
-        path <- gets compilerModule
+        path <- gets compilerCurrentModule
         tellErrors [FoldPatternOutsideConstructor (ErrorLocation (principalPath path) loc)]
         throwError PatternAnomaly
       EClause a p cs ->

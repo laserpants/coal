@@ -60,7 +60,6 @@ library
       Coal.Compiler.Pass.PreflightPhase.Setup
       Coal.Compiler.Pass.PreflightPhase.ShadowingRule
       Coal.Compiler.Pass.PreflightPhase.TopologicalSort
-      Coal.Compiler.Pass.PreflightPhase.TypeDefinitions
       Coal.Compiler.Pass.TranslationPhase
       Coal.Compiler.Pass.TranslationPhase.DenormalizeObjects
       Coal.Compiler.Pass.TranslationPhase.ExpandAsPatterns
