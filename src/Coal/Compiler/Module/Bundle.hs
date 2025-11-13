@@ -2,7 +2,45 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module Coal.Compiler.Module.Bundle where
+module Coal.Compiler.Module.Bundle (
+  ModuleBundle (..),
+  CotypeConstructorInfo (..),
+  DataConstructorInfo (..),
+  TypeConstructorInfo (..),
+  CodataAccessorInfo (..),
+  TraitInfo (..),
+  InstanceInfo (..),
+  AliasInfo (..),
+  NameInfo (..),
+  emptyModuleBundle,
+  addName,
+  addExport,
+  toIndexedScheme,
+  toIndexedType,
+  instanceInfo,
+  dataConstructorInfo,
+  codataAccessorInfo,
+  cotypeConstructorInfo,
+  typeConstructorInfo,
+  aliasInfo,
+  insertInstance,
+  insertTrait,
+  insertCodataAccessor,
+  insertAlias,
+  insertDataConstructor,
+  insertCotypeConstructor,
+  insertTypeConstructor,
+  insertManyDataConstructors,
+  insertManyCodataAccessors,
+  exportedCotypeConstructors,
+  exportedCodataAccessors,
+  exportedDataConstructors,
+  exportedTypeConstructors,
+  exportedNames,
+  traitInfo,
+  setExports,
+  setPath,
+) where
 
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment

@@ -13,7 +13,7 @@ import Coal.Parser.Identifier
 import Coal.Parser.Pattern (parsePattern, parseUnitPattern)
 import Coal.Parser.Symbol
 import Coal.Parser.Type
-import Coal.Parser.Utils (fieldList, fieldListWithKey)
+import Coal.Parser.Utils (fieldListWithKey)
 import Control.Monad (void)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
@@ -115,8 +115,7 @@ parseCodataDefinition = do
   ts <- braces (fieldListWithKey constructor parseType ":")
   pure (DCotype (Metadata start end) n (CotypeDef ps (toAccessor ps t0 <$> ts)))
 
--- TODO
--- toAccessor :: Type Parameter () -> (Name, Type Parameter ()) -> CodataAccessor Parameter () (Type Parameter ())
+toAccessor :: [Parameter ()] -> Type Parameter () -> (Name, Type Parameter ()) -> CodataAccessor Parameter () (Type Parameter ())
 toAccessor ps t0 (n, t) = CodataAccessor n (Forall (Set.fromList ps) [] (t0 `TArrow` t))
 
 parseImport :: Parser (Definition Metadata o ())

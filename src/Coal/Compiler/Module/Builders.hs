@@ -2,7 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module Coal.Compiler.Module.Builders where
+module Coal.Compiler.Module.Builders (build) where
 
 import Coal.Ast.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment)
@@ -67,8 +67,8 @@ build (Module path exports defs) =
     inEachDef (collectInstances kinds traits)
 
     unless (["*"] == exports) $ do
-      defs <- gets moduleExports
-      modify $ setExports (exports `union` Set.toList defs)
+      exps <- gets moduleExports
+      modify $ setExports (exports `union` Set.toList exps)
  where
   inEachDef = forM_ defs
 

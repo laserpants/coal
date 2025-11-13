@@ -64,7 +64,7 @@ withMonomorphic = localMonoset . monosetInsertMultiple . typeIndexesIn
 
 type Assertion a = IndexedType -> [Assumption a IndexedType] -> ConstraintsGen a ()
 
-emitPAnnotationConstraints :: (Data a, Show a) => a -> Type Parameter () -> Pattern a IndexedType -> ConstraintsGen a ()
+emitPAnnotationConstraints :: (Data a) => a -> Type Parameter () -> Pattern a IndexedType -> ConstraintsGen a ()
 emitPAnnotationConstraints loc t p = do
   r <- instantiateAnnotation loc t
   case r of
