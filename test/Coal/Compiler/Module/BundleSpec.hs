@@ -3,6 +3,7 @@
 
 module Coal.Compiler.Module.BundleSpec (bundleSpec, runBundle) where
 
+import Coal.Ast.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment (..), mapEnvironment)
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Environment
@@ -32,45 +33,49 @@ bundleSpec = do
   let bundle : _ = filter (\ModuleBundle{..} -> modulePath == Path ["Main"]) (rights (sequence res))
   test134 bundle
 
-test133 :: ModuleBundle -> Spec
-test133 ModuleBundle{..} = do
+test133 :: ModuleBundle Metadata -> Spec
+test133 bundle@ModuleBundle{..} = do
   describe "DataConstructors" $ do
     it "" $
-      mapEnvironment stripMeta moduleDataConstructors == mainDataConstructors
+      mapEnvironment stripMeta (exportedDataConstructors bundle) == mainExportedDataConstructors
 
   describe "TypeConstructors" $ do
     it "" $
-      mapEnvironment stripMeta moduleTypeConstructors == mainTypeConstructors
+      mapEnvironment stripMeta (exportedTypeConstructors bundle) == mainExportedTypeConstructors
 
   describe "CodataAccessors" $ do
     it "" $
-      mapEnvironment stripMeta moduleCodataAccessors == mainCodataAccessors
+      mapEnvironment stripMeta (exportedCodataAccessors bundle) == mainExportedCodataAccessors
 
   describe "CotypeConstructorInfo" $ do
     it "" $
-      mapEnvironment stripMeta moduleCotypeConstructors == mainCotypeConstructors
+      mapEnvironment stripMeta (exportedCotypeConstructors bundle) == mainCotypeConstructors
 
   describe "Names" $ do
     it "" $
-      moduleNames == mainNames
+      exportedNames bundle == mainNames
 
   describe "Exports" $ do
     it "" $
-      moduleExports == Set.fromList ["*"]
+      moduleExports == Set.fromList ["Head", "None", "Option", "Some", "Stream", "Tail"]
 
-test134 :: ModuleBundle -> Spec
-test134 ModuleBundle{..} = do
+test134 :: ModuleBundle Metadata -> Spec
+test134 bundle@ModuleBundle{..} = do
   describe "DataConstructors" $ do
     it "" $
-      mapEnvironment stripMeta moduleDataConstructors == mainDataConstructors
+      mapEnvironment stripMeta (exportedDataConstructors bundle) == mainExportedDataConstructors
 
   describe "TypeConstructors" $ do
     it "" $
       mapEnvironment stripMeta moduleTypeConstructors == mainTypeConstructors
 
+  describe "TypeConstructors" $ do
+    it "" $
+      mapEnvironment stripMeta (exportedTypeConstructors bundle) == mainExportedTypeConstructors
+
   describe "CodataAccessors" $ do
     it "" $
-      mapEnvironment stripMeta moduleCodataAccessors == mainCodataAccessors
+      mapEnvironment stripMeta moduleCodataAccessors == mainExportedCodataAccessors
 
   describe "CotypeConstructorInfo" $ do
     it "" $
@@ -86,11 +91,11 @@ test134 ModuleBundle{..} = do
 
   describe "Names" $
     it "" $
-      moduleNames == mainNames2
+      exportedNames bundle == mainNames2
 
   describe "Exports" $ do
     it "" $
-      moduleExports == Set.fromList ["*"]
+      moduleExports == Set.fromList ["Functor", "Head", "None", "Option", "Some", "Stream", "Tail", "map"]
 
 class StripMeta i where
   stripMeta :: i a -> i ()
@@ -187,8 +192,8 @@ mainNames2 =
       )
     ]
 
-mainDataConstructors :: Environment (DataConstructorInfo ())
-mainDataConstructors =
+mainExportedDataConstructors :: Environment (DataConstructorInfo ())
+mainExportedDataConstructors =
   Environment.fromList
     [
       ( "None"
@@ -216,10 +221,23 @@ mainTypeConstructors =
       ( "Option"
       , TypeConstructorInfo () "Option" (KArrow KType KType)
       )
+    ,
+      ( "List"
+      , TypeConstructorInfo () "List" (KArrow KType KType)
+      )
     ]
 
-mainCodataAccessors :: Environment (CodataAccessorInfo ())
-mainCodataAccessors =
+mainExportedTypeConstructors :: Environment (TypeConstructorInfo ())
+mainExportedTypeConstructors =
+  Environment.fromList
+    [
+      ( "Option"
+      , TypeConstructorInfo () "Option" (KArrow KType KType)
+      )
+    ]
+
+mainExportedCodataAccessors :: Environment (CodataAccessorInfo ())
+mainExportedCodataAccessors =
   Environment.fromList
     [
       ( "Head"
@@ -328,7 +346,7 @@ mainInstances =
       )
     ]
 
-runBundle :: [FilePath] -> IO (Either CompilerFailureMode [ModuleBundle])
+runBundle :: [FilePath] -> IO (Either CompilerFailureMode [ModuleBundle Metadata])
 runBundle names = do
   (r, _, _) <- runCompilerT emptyCompilerEnvironment prog
   pure r
