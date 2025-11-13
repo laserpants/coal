@@ -31,8 +31,6 @@ collectEConstructorConstraintsSpec1 = null ms && ENoDataConstructor () "Blue" `e
   ctx =
     ConstraintsGenContext
       { constraintsGenContextMonomorphicSet = mempty
-      , constraintsGenContextCodataAccessorEnv = mempty
-      , constraintsGenContextTopLevelFoldEnv = mempty
       , constraintsGenContextModules = emptyModuleBundle
       }
 
@@ -44,8 +42,6 @@ collectEConstructorConstraintsSpec2 = null ms && null (lefts outs)
   ctx =
     ConstraintsGenContext
       { constraintsGenContextMonomorphicSet = mempty
-      , constraintsGenContextCodataAccessorEnv = mempty
-      , constraintsGenContextTopLevelFoldEnv = mempty
       , constraintsGenContextModules = emptyModuleBundle
       }
 
@@ -61,8 +57,6 @@ collectEConstructorConstraintsSpec3 = null ms && ENoDataConstructor () "Blue" `e
   ctx =
     ConstraintsGenContext
       { constraintsGenContextMonomorphicSet = mempty
-      , constraintsGenContextCodataAccessorEnv = mempty
-      , constraintsGenContextTopLevelFoldEnv = mempty
       , constraintsGenContextModules = emptyModuleBundle
       }
 
@@ -74,8 +68,6 @@ collectEConstructorConstraintsSpec4 = null ms && null (lefts outs)
   ctx =
     ConstraintsGenContext
       { constraintsGenContextMonomorphicSet = mempty
-      , constraintsGenContextCodataAccessorEnv = mempty
-      , constraintsGenContextTopLevelFoldEnv = mempty
       , constraintsGenContextModules = emptyModuleBundle
       }
 
@@ -94,8 +86,6 @@ collectEConstructorConstraintsSpec5 = null ms && constraint1 `elem` rights outs
   ctx =
     ConstraintsGenContext
       { constraintsGenContextMonomorphicSet = mempty
-      , constraintsGenContextCodataAccessorEnv = mempty
-      , constraintsGenContextTopLevelFoldEnv = mempty
       , constraintsGenContextModules = emptyModuleBundle
       }
 

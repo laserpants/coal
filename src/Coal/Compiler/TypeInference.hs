@@ -19,7 +19,7 @@ import Coal.Language.Module
 import Coal.TypeSystem
 import Control.Monad.Except
 import Control.Monad.Extra (concatForM)
-import Control.Monad.Reader (ask, asks)
+import Control.Monad.Reader (asks)
 import Control.Monad.State (evalState, gets)
 import Control.Monad.Writer (execWriter)
 import Data.Data (Data)
@@ -35,7 +35,6 @@ type ConstraintsGenResult g o a t s = (s, Dictionary (g, o a), [ConstraintsGenOu
 
 runConstraintsGenC :: (Monad m) => ConstraintsGenStack a TypeIndex Kind IndexedType r -> CompilerT a m (ConstraintsGenResult a TypeIndex Kind IndexedType r)
 runConstraintsGenC stack = do
-  env <- ask
   sup <- gets compilerSupply
 
   path <- gets (principalPath . compilerCurrentModule)
@@ -45,15 +44,13 @@ runConstraintsGenC stack = do
     Nothing ->
       throwError PreflightFailure
     Just bundle -> do
-      let (result, ConstraintsGenState{..}, output) = runConstraintsGenStack sup (context bundle env) stack
+      let (result, ConstraintsGenState{..}, output) = runConstraintsGenStack sup (context bundle) stack
       updateSupplyC constraintsGenStateSupply
       pure (result, constraintsGenStateTypeIndexes, output)
  where
-  context bundle CompilerEnvironment{..} =
+  context bundle =
     ConstraintsGenContext
       { constraintsGenContextMonomorphicSet = mempty
-      , constraintsGenContextCodataAccessorEnv = compilerCodataAccessorEnvironment
-      , constraintsGenContextTopLevelFoldEnv = compilerFoldEnvironment
       , constraintsGenContextModules = bundle
       }
 

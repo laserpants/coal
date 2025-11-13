@@ -28,8 +28,6 @@ collectEAnnotationConstraintsSpec1 = null ms && null (lefts outs)
   ctx =
     ConstraintsGenContext
       { constraintsGenContextMonomorphicSet = mempty
-      , constraintsGenContextCodataAccessorEnv = mempty
-      , constraintsGenContextTopLevelFoldEnv = mempty
       , constraintsGenContextModules = emptyModuleBundle
       }
 
@@ -44,8 +42,6 @@ collectEAnnotationConstraintsSpec2 = null ms && constraint1 `elem` rights outs
   ctx =
     ConstraintsGenContext
       { constraintsGenContextMonomorphicSet = mempty
-      , constraintsGenContextCodataAccessorEnv = mempty
-      , constraintsGenContextTopLevelFoldEnv = mempty
       , constraintsGenContextModules = emptyModuleBundle
       }
 
@@ -64,8 +60,6 @@ collectEAnnotationConstraintsSpec3 = null ms && constraint2 `elem` rights outs
   ctx =
     ConstraintsGenContext
       { constraintsGenContextMonomorphicSet = mempty
-      , constraintsGenContextCodataAccessorEnv = mempty
-      , constraintsGenContextTopLevelFoldEnv = mempty
       , constraintsGenContextModules = emptyModuleBundle
       }
 
@@ -81,7 +75,5 @@ collectEAnnotationConstraintsSpec4 = null ms && null (lefts outs)
   ctx =
     ConstraintsGenContext
       { constraintsGenContextMonomorphicSet = mempty
-      , constraintsGenContextCodataAccessorEnv = mempty
-      , constraintsGenContextTopLevelFoldEnv = mempty
       , constraintsGenContextModules = emptyModuleBundle
       }

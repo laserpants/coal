@@ -36,8 +36,6 @@ collectELambdaConstraintsSpec1 = null ms && constraint1 `elem` rights outs
   ctx =
     ConstraintsGenContext
       { constraintsGenContextMonomorphicSet = mempty
-      , constraintsGenContextCodataAccessorEnv = mempty
-      , constraintsGenContextTopLevelFoldEnv = mempty
       , constraintsGenContextModules = emptyModuleBundle
       }
 
@@ -56,8 +54,6 @@ collectELambdaConstraintsSpec2 = null outs
   ctx =
     ConstraintsGenContext
       { constraintsGenContextMonomorphicSet = mempty
-      , constraintsGenContextCodataAccessorEnv = mempty
-      , constraintsGenContextTopLevelFoldEnv = mempty
       , constraintsGenContextModules = emptyModuleBundle
       }
 
@@ -112,7 +108,5 @@ collectELambdaConstraintsSpec4 =
   ctx =
     ConstraintsGenContext
       { constraintsGenContextMonomorphicSet = mempty
-      , constraintsGenContextCodataAccessorEnv = mempty
-      , constraintsGenContextTopLevelFoldEnv = mempty
       , constraintsGenContextModules = emptyModuleBundle
       }

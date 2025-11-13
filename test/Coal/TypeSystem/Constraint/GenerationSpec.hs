@@ -19,8 +19,6 @@ collectExampleConstraintsSpec1 = (ms, outs)
   ctx =
     ConstraintsGenContext
       { constraintsGenContextMonomorphicSet = mempty
-      , constraintsGenContextCodataAccessorEnv = mempty
-      , constraintsGenContextTopLevelFoldEnv = mempty
       , constraintsGenContextModules = emptyModuleBundle
       }
 

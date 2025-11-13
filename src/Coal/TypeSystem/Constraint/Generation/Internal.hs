@@ -57,8 +57,6 @@ data ConstraintsGenError a
 
 data ConstraintsGenContext g o a t = ConstraintsGenContext
   { constraintsGenContextMonomorphicSet :: Monomorphic (o a)
-  , constraintsGenContextCodataAccessorEnv :: Environment (CodataAccessor o a t)
-  , constraintsGenContextTopLevelFoldEnv :: Environment IndexedScheme
   , constraintsGenContextModules :: ModuleBundle g
   }
   deriving (Show, Eq, Ord, Read)

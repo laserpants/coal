@@ -15,7 +15,7 @@ module Coal.TypeSystem.Constraint.Generation (
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (supplied)
-import Coal.Compiler.Module.Bundle (DataConstructorInfo (..), moduleDataConstructors)
+import Coal.Compiler.Module.Bundle -- (DataConstructorInfo (..), moduleDataConstructors)
 import Coal.Language
 import Coal.TypeSystem.Constraint (Constraint (..))
 import Coal.TypeSystem.Constraint.Assumption
@@ -42,9 +42,16 @@ lookupDataConstructor name = do
     Just (DataConstructorInfo _ _ ctor _) ->
       pure (Just ctor)
 
+-- TODO: DRY
 {-# INLINE lookupCodataAccessor #-}
 lookupCodataAccessor :: Name -> ConstraintsGenStack a TypeIndex Kind IndexedType (Maybe (CodataAccessor TypeIndex Kind IndexedType))
-lookupCodataAccessor name = asks (Environment.lookup name . constraintsGenContextCodataAccessorEnv)
+lookupCodataAccessor name = do
+  modules <- asks constraintsGenContextModules
+  case Environment.lookup name (moduleCodataAccessors modules) of
+    Nothing ->
+      pure Nothing
+    Just (CodataAccessorInfo _ _ xsor) ->
+      pure (Just xsor)
 
 assertEqualityAssumptions :: a -> IndexedType -> [Assumption a IndexedType] -> ConstraintsGen a ()
 assertEqualityAssumptions _ t ms =
@@ -442,17 +449,17 @@ emitConstraints =
     ECodataRecord loc _ d -> do
       concatForM (Map.toList d) $
         \(field, e) -> do
-          env <- asks constraintsGenContextCodataAccessorEnv
-          case Environment.lookup (Text.drop 2 field) env of
-            Just (CodataAccessor _ s) -> do
+          modules <- asks constraintsGenContextModules
+          case Environment.lookup (Text.drop 2 field) (moduleCodataAccessors modules) of
+            Nothing ->
+              pure ()
+            Just (CodataAccessorInfo _ _ CodataAccessor{..}) -> do
               case typeOf e of
                 TArrow _ t2 -> do
                   t1 <- supplied (TVariable . TypeIndex KType)
-                  tellRight [Explicit (RuleCodataRecord loc (t1 `TArrow` t2) s) (t1 `TArrow` t2) s]
+                  tellRight [Explicit (RuleCodataRecord loc (t1 `TArrow` t2) codataAccessorScheme) (t1 `TArrow` t2) codataAccessorScheme]
                 _ ->
                   error "Implementation error"
-            Nothing ->
-              pure ()
           emitConstraints e
     ERecord loc t d me ->
       emitERecordConstraints loc t d me
