@@ -2,14 +2,14 @@
 
 module Coal.TypeSystem.Constraint.Generation.EConstructorConstraintsSpec where
 
+import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
+import Coal.Compiler.Module.Bundle (emptyModuleBundle)
 import Coal.Language
 import Coal.TypeSystem.Constraint
 import Coal.TypeSystem.Constraint.Generation
 import Coal.TypeSystem.Constraint.Generation.InferenceRule
 import Data.Either (lefts, rights)
-
-import qualified Coal.Common.Environment as Environment
 
 collectEConstructorConstraintsSpecAll = do
   print collectEConstructorConstraintsSpec1
@@ -31,10 +31,9 @@ collectEConstructorConstraintsSpec1 = null ms && ENoDataConstructor () "Blue" `e
   ctx =
     ConstraintsGenContext
       { constraintsGenContextMonomorphicSet = mempty
-      , constraintsGenContextDataConstructorEnv = mempty
       , constraintsGenContextCodataAccessorEnv = mempty
-      , constraintsGenContextTypeConstructorEnv = mempty
       , constraintsGenContextTopLevelFoldEnv = mempty
+      , constraintsGenContextModules = emptyModuleBundle
       }
 
 collectEConstructorConstraintsSpec2 :: Bool
@@ -45,16 +44,9 @@ collectEConstructorConstraintsSpec2 = null ms && null (lefts outs)
   ctx =
     ConstraintsGenContext
       { constraintsGenContextMonomorphicSet = mempty
-      , constraintsGenContextDataConstructorEnv =
-          Environment.fromList
-            [
-              ( "Blue"
-              , DataConstructor "Blue" 0 (Forall mempty [] (TConstructor KType "Color"))
-              )
-            ]
       , constraintsGenContextCodataAccessorEnv = mempty
-      , constraintsGenContextTypeConstructorEnv = mempty
       , constraintsGenContextTopLevelFoldEnv = mempty
+      , constraintsGenContextModules = emptyModuleBundle
       }
 
 fixture2 :: Expression () IndexedType
@@ -69,10 +61,9 @@ collectEConstructorConstraintsSpec3 = null ms && ENoDataConstructor () "Blue" `e
   ctx =
     ConstraintsGenContext
       { constraintsGenContextMonomorphicSet = mempty
-      , constraintsGenContextDataConstructorEnv = mempty
       , constraintsGenContextCodataAccessorEnv = mempty
-      , constraintsGenContextTypeConstructorEnv = mempty
       , constraintsGenContextTopLevelFoldEnv = mempty
+      , constraintsGenContextModules = emptyModuleBundle
       }
 
 collectEConstructorConstraintsSpec4 :: Bool
@@ -83,16 +74,9 @@ collectEConstructorConstraintsSpec4 = null ms && null (lefts outs)
   ctx =
     ConstraintsGenContext
       { constraintsGenContextMonomorphicSet = mempty
-      , constraintsGenContextDataConstructorEnv =
-          Environment.fromList
-            [
-              ( "Blue"
-              , DataConstructor "Blue" 0 (Forall mempty [] (TConstructor KType "Color"))
-              )
-            ]
       , constraintsGenContextCodataAccessorEnv = mempty
-      , constraintsGenContextTypeConstructorEnv = mempty
       , constraintsGenContextTopLevelFoldEnv = mempty
+      , constraintsGenContextModules = emptyModuleBundle
       }
 
 constraint1 :: Constraint (InferenceRule Kind ()) TypeIndex Kind IndexedType
@@ -110,16 +94,9 @@ collectEConstructorConstraintsSpec5 = null ms && constraint1 `elem` rights outs
   ctx =
     ConstraintsGenContext
       { constraintsGenContextMonomorphicSet = mempty
-      , constraintsGenContextDataConstructorEnv =
-          Environment.fromList
-            [
-              ( "Blue"
-              , DataConstructor "Blue" 0 (Forall mempty [] (TConstructor KType "Color"))
-              )
-            ]
       , constraintsGenContextCodataAccessorEnv = mempty
-      , constraintsGenContextTypeConstructorEnv = mempty
       , constraintsGenContextTopLevelFoldEnv = mempty
+      , constraintsGenContextModules = emptyModuleBundle
       }
 
 collectEConstructorConstraintsSpec6 :: Bool

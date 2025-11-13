@@ -4,6 +4,7 @@
 module Coal.TypeSystem.Constraint.Generation.ELambdaConstraintsSpec where
 
 import Coal.Common.Label (Label (..))
+import Coal.Compiler.Module.Bundle (emptyModuleBundle)
 import Coal.Language
 import Coal.TypeSystem.Constraint
 import Coal.TypeSystem.Constraint.Generation
@@ -35,10 +36,9 @@ collectELambdaConstraintsSpec1 = null ms && constraint1 `elem` rights outs
   ctx =
     ConstraintsGenContext
       { constraintsGenContextMonomorphicSet = mempty
-      , constraintsGenContextDataConstructorEnv = mempty
       , constraintsGenContextCodataAccessorEnv = mempty
-      , constraintsGenContextTypeConstructorEnv = mempty
       , constraintsGenContextTopLevelFoldEnv = mempty
+      , constraintsGenContextModules = emptyModuleBundle
       }
 
 fixture2 :: Expression () IndexedType
@@ -56,10 +56,9 @@ collectELambdaConstraintsSpec2 = null outs
   ctx =
     ConstraintsGenContext
       { constraintsGenContextMonomorphicSet = mempty
-      , constraintsGenContextDataConstructorEnv = mempty
       , constraintsGenContextCodataAccessorEnv = mempty
-      , constraintsGenContextTypeConstructorEnv = mempty
       , constraintsGenContextTopLevelFoldEnv = mempty
+      , constraintsGenContextModules = emptyModuleBundle
       }
 
 collectELambdaConstraintsSpec3 :: Bool
@@ -113,8 +112,7 @@ collectELambdaConstraintsSpec4 =
   ctx =
     ConstraintsGenContext
       { constraintsGenContextMonomorphicSet = mempty
-      , constraintsGenContextDataConstructorEnv = mempty
       , constraintsGenContextCodataAccessorEnv = mempty
-      , constraintsGenContextTypeConstructorEnv = mempty
       , constraintsGenContextTopLevelFoldEnv = mempty
+      , constraintsGenContextModules = emptyModuleBundle
       }
