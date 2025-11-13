@@ -54,7 +54,7 @@ processImports (Module _ _ ds) = do
 
 pass :: (MonadIO m, Data a, Eq a, Show a) => Module a Kind () -> CompilerT a m (Module a Kind IndexedType)
 pass m@(Module p xs _) = do
-  setCompilerModuleC p
+  setCompilerCurrentModuleC p
   clearAssumptionsC
   clearNameStoreC
   insertNamesC builtinFunctions

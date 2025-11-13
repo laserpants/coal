@@ -34,7 +34,7 @@ passNoDuplicateParamsRule =
 
 pass :: (Monad m) => Module Metadata Kind () -> CompilerT Metadata m (Module Metadata Kind ())
 pass m@(Module p _ _) = do
-  setCompilerModuleC p
+  setCompilerCurrentModuleC p
   detectNoDuplicateParams m
   pure m
 
@@ -103,7 +103,7 @@ checkDup :: (Monad m) => Metadata -> Name -> StateT (Set Name) (CompilerT Metada
 checkDup loc name = do
   s <- get
   when (name `elem` s) $ do
-    path <- lift (gets compilerModule)
+    path <- lift (gets compilerCurrentModule)
     tellErrors [ConflictingParameter name (ErrorLocation (principalPath path) loc)]
     throwError PreflightFailure
   modify (Set.insert name)

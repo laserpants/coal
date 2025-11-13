@@ -153,7 +153,7 @@ instance (Data t) => RuleContext (Module Metadata Kind t) where
   detectShadowing names =
     \case
       Module p ns o -> do
-        setCompilerModuleC p
+        setCompilerCurrentModuleC p
         Module p ns <$> detectShadowing names o
 
 instance (Data t) => RuleContext (Definition Metadata k t) where
@@ -189,7 +189,7 @@ addNames :: (Monad m) => Metadata -> Set Name -> Set Name -> CompilerT Metadata 
 addNames loc new names = do
   forM_ new' $
     \name -> do
-      path <- gets compilerModule
+      path <- gets compilerCurrentModule
       when (name `elem` names) $ do
         tellErrors [Shadowing name (ErrorLocation (principalPath path) loc)]
         throwError PreflightFailure

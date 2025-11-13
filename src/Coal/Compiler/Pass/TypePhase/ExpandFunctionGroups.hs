@@ -26,7 +26,7 @@ passExpandFunctionGroups =
 
 pass :: (Monad m) => Module Metadata Kind () -> CompilerT Metadata m (Module Metadata Kind ())
 pass m@(Module p _ _) = do
-  setCompilerModuleC p
+  setCompilerCurrentModuleC p
   expandFunctionGroups m
 
 class RuleContext e where

@@ -26,8 +26,8 @@ passMainEntrypointRule =
       }
 
 pass :: (Monad m) => Module Metadata Kind () -> CompilerT Metadata m (Module Metadata Kind ())
-pass m@(Module p _ _) = do
-  setCompilerModuleC p
+pass m@(Module path _ _) = do
+  setCompilerCurrentModuleC path
   detectMainEntrypoint m
   pure m
 
