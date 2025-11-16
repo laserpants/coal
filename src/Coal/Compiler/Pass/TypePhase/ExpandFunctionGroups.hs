@@ -7,9 +7,9 @@
 module Coal.Compiler.Pass.TypePhase.ExpandFunctionGroups (passExpandFunctionGroups) where
 
 import Coal.Ast.Metadata (Metadata (..))
+import Coal.Ast.Shorthand
 import Coal.Compiler.Pass
 import Coal.Compiler.Stack
-import Coal.Compiler.Transform.Expression
 import Coal.Language (Choice (..), Clause (..), Expression (..), Kind (..))
 import Coal.Language.Module
 import Coal.Language.Trait (With (..))

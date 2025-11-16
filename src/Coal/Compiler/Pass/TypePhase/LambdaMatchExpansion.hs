@@ -7,9 +7,9 @@
 
 module Coal.Compiler.Pass.TypePhase.LambdaMatchExpansion (passLambdaMatchExpansion) where
 
+import Coal.Ast.Shorthand
 import Coal.Compiler.Pass
 import Coal.Compiler.Stack
-import Coal.Compiler.Transform.Expression
 import Coal.Language
 import Coal.Language.Module (ConstantDef (..), Definition (..), FunctionDef (..), Module (..))
 import Data.Data (Data)

@@ -27,6 +27,7 @@ library
       Coal.Ast.Flattening
       Coal.Ast.Metadata
       Coal.Ast.Normalization
+      Coal.Ast.Shorthand
       Coal.Ast.Transform
       Coal.Common.Environment
       Coal.Common.FreeVars
@@ -92,7 +93,6 @@ library
       Coal.Compiler.PatternMatching.Rule
       Coal.Compiler.Stack
       Coal.Compiler.State
-      Coal.Compiler.Transform.Expression
       Coal.Compiler.Transform.Type.Parameterized
       Coal.Compiler.Transform.WhereClauses
       Coal.Compiler.TypeInference

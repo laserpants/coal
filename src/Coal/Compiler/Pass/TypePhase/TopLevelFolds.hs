@@ -7,13 +7,13 @@
 
 module Coal.Compiler.Pass.TypePhase.TopLevelFolds (passTopLevelFolds) where
 
+import Coal.Ast.Shorthand
 import Coal.Ast.Transform (replace)
 import Coal.Common.Label (Label (..), labelName)
 import Coal.Common.Supply (freshName, supplied)
 import Coal.Compiler.Journal
 import Coal.Compiler.Pass
 import Coal.Compiler.Stack
-import Coal.Compiler.Transform.Expression
 import Coal.Language (Choice (..), Clause (..), Expression (..), Kind (..), Pattern (..))
 import Coal.Language.Module
 import Control.Monad.Except

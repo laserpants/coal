@@ -7,12 +7,12 @@
 module Coal.Compiler.Pass.TypePhase.ExpandIntegerLiteralPatterns (passExpandIntegerLiteralPatterns) where
 
 import Coal.Ast.Metadata (Metadata (..))
+import Coal.Ast.Shorthand
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (supplied)
 import Coal.Compiler.Journal
 import Coal.Compiler.Pass
 import Coal.Compiler.Stack
-import Coal.Compiler.Transform.Expression
 import Coal.Language
 import Coal.Language.Module (Module (..), principalPath)
 import Coal.Language.Module.Definition (Definition (..))

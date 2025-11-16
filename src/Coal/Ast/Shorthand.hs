@@ -1,4 +1,4 @@
-module Coal.Compiler.Transform.Expression (
+module Coal.Ast.Shorthand (
   matchE,
   varE,
   letE,
