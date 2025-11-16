@@ -40,11 +40,11 @@ overKernelEnvironmentQualifiedNames fn KernelEnvironment{..} =
 
 data CompilerEnvironment = CompilerEnvironment
   { compilerDataConstructorEnvironment :: Environment (DataConstructorInfo Metadata)
+  , compilerCodataAccessorEnvironment :: Environment (CodataAccessorInfo Metadata)
   , compilerTypeConstructorEnvironment :: Environment Kind
   , compilerTraitEnvironment :: Environment (TraitInfo Metadata)
   , compilerInstanceEnvironment :: Environment (Map IndexedType (InstanceInfo Metadata))
   , compilerAliasEnvironment :: Environment (AliasInfo Metadata)
-  , compilerCodataAccessorEnvironment :: Environment (CodataAccessorInfo Metadata)
   , compilerDictionaryNameEnvironment :: Environment IndexedScheme
   , compilerKernelEnvironment :: KernelEnvironment
   }
@@ -54,11 +54,11 @@ emptyCompilerEnvironment :: CompilerEnvironment
 emptyCompilerEnvironment =
   CompilerEnvironment
     { compilerDataConstructorEnvironment = mempty
+    , compilerCodataAccessorEnvironment = mempty
     , compilerTypeConstructorEnvironment = mempty
     , compilerTraitEnvironment = mempty
     , compilerInstanceEnvironment = mempty
     , compilerAliasEnvironment = mempty
-    , compilerCodataAccessorEnvironment = mempty
     , compilerDictionaryNameEnvironment = mempty
     , compilerKernelEnvironment = KernelEnvironment mempty mempty mempty
     }
