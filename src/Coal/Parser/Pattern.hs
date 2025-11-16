@@ -90,36 +90,11 @@ parseIntegerLiteral =
     n <- Lexer.signed spaces (lexeme Lexer.decimal)
     pure (\loc -> PInteger loc () n)
 
---    <|> parseLiteralTrue
---    <|> parseLiteralFalse
---    <|> parseCharLiteralPattern
-
 parseBasicLiteralPattern :: Parser (Pattern Metadata ())
 parseBasicLiteralPattern = do
   withMetadata $ do
     lit <- Primitive.parseAtom
     pure (`PLiteral` lit)
-
--- parseLiteralTrue :: Parser (Pattern Metadata ())
--- parseLiteralTrue =
---  withMetadata $ do
---    lexeme_ "true"
---    pure (\loc -> PLiteral loc (LBool True))
---
--- parseLiteralFalse :: Parser (Pattern Metadata ())
--- parseLiteralFalse =
---  withMetadata $ do
---    lexeme_ "false"
---    pure (\loc -> PLiteral loc (LBool False))
---
--- parseCharLiteralPattern :: Parser (Pattern Metadata ())
--- parseCharLiteralPattern =
---  withMetadata $ do
---    lexeme $ do
---      void singleQuote
---      ch <- Lexer.charLiteral
---      void singleQuote
---      pure (\loc -> PLiteral loc (LChar (fromIntegral (ord ch))))
 
 parseListLiteralPattern :: Parser (Pattern Metadata ())
 parseListLiteralPattern =
