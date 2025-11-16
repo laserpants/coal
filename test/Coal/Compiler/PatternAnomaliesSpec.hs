@@ -2,10 +2,12 @@
 
 module Coal.Compiler.PatternAnomaliesSpec (patternAnomaliesSpec) where
 
+import Coal.Ast.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
 import Coal.Compiler.Environment
+import Coal.Compiler.Module.Bundle
 import Coal.Compiler.PatternAnomalies
 import Coal.Compiler.Stack
 import Coal.Language
@@ -101,58 +103,68 @@ example20 =
   , Con "Fez" [Lit (LBool False), Con "B" []]
   ]
 
-testEnv :: Environment (DataConstructor TypeIndex Kind IndexedType, Set Name)
+testEnv :: Environment (DataConstructorInfo Metadata)
 testEnv =
   Environment.fromList
     [
       ( "Cons"
-      ,
-        ( DataConstructor
-            "Cons"
-            2
-            (Forall mempty [] (TApplication KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| [])))
-        , Set.fromList ["Cons", "Nil"]
-        )
+      , DataConstructorInfo
+          mempty
+          "Cons"
+          ( DataConstructor
+              "Cons"
+              2
+              (Forall mempty [] (TApplication KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| [])))
+          )
+          (Set.fromList ["Cons", "Nil"])
       )
     ,
       ( "Nil"
-      ,
-        ( DataConstructor
-            "Nil"
-            0
-            (Forall mempty [] (TApplication KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| [])))
-        , Set.fromList ["Cons", "Nil"]
-        )
+      , DataConstructorInfo
+          mempty
+          "Nil"
+          ( DataConstructor
+              "Nil"
+              0
+              (Forall mempty [] (TApplication KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| [])))
+          )
+          (Set.fromList ["Cons", "Nil"])
       )
     ,
       ( "A"
-      ,
-        ( DataConstructor
-            "A"
-            0
-            (Forall mempty [] (TConstructor KType "X"))
-        , Set.fromList ["A", "B"]
-        )
+      , DataConstructorInfo
+          mempty
+          "A"
+          ( DataConstructor
+              "A"
+              0
+              (Forall mempty [] (TConstructor KType "X"))
+          )
+          (Set.fromList ["A", "B"])
       )
     ,
       ( "B"
-      ,
-        ( DataConstructor
-            "B"
-            0
-            (Forall mempty [] (TConstructor KType "X"))
-        , Set.fromList ["A", "B"]
-        )
+      , DataConstructorInfo
+          mempty
+          "B"
+          ( DataConstructor
+              "B"
+              0
+              (Forall mempty [] (TConstructor KType "X"))
+          )
+          (Set.fromList ["A", "B"])
       )
     ,
       ( "Fez"
-      ,
-        ( DataConstructor
-            "Fez"
-            2
-            (Forall mempty [] (TIntrinsic IBool `TArrow` TConstructor KType "X" `TArrow` TConstructor KType "Fez"))
-        , Set.fromList ["Fez"]
-        )
+      , DataConstructorInfo
+          mempty
+          "Fez"
+          ( DataConstructor
+              "Fez"
+              2
+              (Forall mempty [] (TIntrinsic IBool `TArrow` TConstructor KType "X" `TArrow` TConstructor KType "Fez"))
+          )
+          (Set.fromList ["Fez"])
       )
     ]
 

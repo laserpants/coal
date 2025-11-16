@@ -8,8 +8,10 @@ module Coal.Compiler.Builtin.Environment (
   builtinCodataAccessors,
 ) where
 
+import Coal.Ast.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment (..))
 import Coal.Common.Name (Dictionary)
+import Coal.Compiler.Module.Bundle
 import Coal.Language
 import Data.List.NonEmpty (NonEmpty (..))
 import Data.Map.Strict (Map)
@@ -26,27 +28,31 @@ builtinTypeConstructors =
     )
   ]
 
-builtinDataConstructors :: [(Name, (DataConstructor TypeIndex Kind IndexedType, Set Name))]
+builtinDataConstructors :: [(Name, DataConstructorInfo Metadata)]
 builtinDataConstructors =
   [
     ( "Succ"
-    ,
-      ( DataConstructor
-          "Succ"
-          1
-          (Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic INat))
-      , Set.fromList ["Succ", "Zero"]
-      )
+    , DataConstructorInfo
+        mempty
+        "Succ"
+        ( DataConstructor
+            "Succ"
+            1
+            (Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic INat))
+        )
+        (Set.fromList ["Succ", "Succ"])
     )
   ,
     ( "Zero"
-    ,
-      ( DataConstructor
-          "Zero"
-          0
-          (Forall mempty [] (TIntrinsic INat))
-      , Set.fromList ["Succ", "Zero"]
-      )
+    , DataConstructorInfo
+        mempty
+        "Zero"
+        ( DataConstructor
+            "Zero"
+            0
+            (Forall mempty [] (TIntrinsic INat))
+        )
+        (Set.fromList ["Succ", "Zero"])
     )
   ]
 

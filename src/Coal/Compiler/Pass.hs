@@ -4,18 +4,18 @@
 
 module Coal.Compiler.Pass (Pass (..), (>->), mapPass, localPass, localPassM) where
 
-import Coal.Compiler.Module.Builders (typeConstructorEnv)
 import Coal.Ast.Metadata (Metadata (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Environment
-import Coal.Compiler.Module.Bundle (ModuleBundle (..))
+import Coal.Compiler.Module.Builders (typeConstructorEnv)
+import Coal.Compiler.Module.Bundle -- (ModuleBundle (..))
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Compiler.State
 import Coal.Language (IndexedType, Kind)
 import Coal.Language.Module
 import Control.Monad ((>=>))
-import Control.Monad.Reader (local, ask)
-import Control.Monad.State (gets, evalStateT)
+import Control.Monad.Reader (ask, local)
+import Control.Monad.State (evalStateT, gets)
 import Debug.Trace
 import Extras (Name)
 
@@ -49,31 +49,31 @@ localPassM :: (Monad m) => Pass Metadata m (Module Metadata Kind t) (Module Meta
 localPassM p =
   Pass
     { passName = "localM<" <> passName p <> ">"
-    , runPass = avc -- \m -> local (f m) (runPass p m)
+    , runPass = pass 
     }
  where
-  avc m@(Module path _ _) = do
+  pass m@(Module path _ _) = do
     modules <- gets compilerModules
     currentEnv <- ask
 
     case Environment.lookup (principalPath path) modules of
       Nothing ->
-        undefined
+        error "TODO"
       Just ModuleBundle{..} -> do
         kinds <- evalStateT typeConstructorEnv ModuleBundle{..}
         let env =
               CompilerEnvironment
-                { compilerDataConstructorEnvironment = compilerDataConstructorEnvironment currentEnv
-                , compilerTypeConstructorEnvironment = compilerTypeConstructorEnvironment currentEnv
-                , compilerAliasEnvironment = compilerAliasEnvironment currentEnv
+                { compilerDataConstructorEnvironment = moduleDataConstructors
+                , compilerTypeConstructorEnvironment = kinds 
+                , compilerAliasEnvironment = moduleAliases 
                 , compilerCodataAccessorEnvironment = compilerCodataAccessorEnvironment currentEnv
                 , compilerTraitEnvironment = compilerTraitEnvironment currentEnv
                 , compilerInstanceEnvironment = compilerInstanceEnvironment currentEnv
-                --
-                , compilerFoldEnvironment = mempty
+                , --
+                  compilerFoldEnvironment = mempty
                 , compilerUnfoldEnvironment = mempty
-                --
-                , compilerDictionaryNameEnvironment = mempty
+                , --
+                  compilerDictionaryNameEnvironment = mempty
                 , compilerKernelEnvironment = KernelEnvironment mempty mempty mempty
                 }
 

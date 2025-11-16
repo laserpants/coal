@@ -56,8 +56,12 @@ import Extras (Dictionary, Name, Set)
 
 type IndexedConstructor = DataConstructor TypeIndex Kind IndexedType
 
-data DataConstructorInfo a
-  = DataConstructorInfo a Name IndexedConstructor (Set Name)
+data DataConstructorInfo a = DataConstructorInfo
+  { dataConstructorInfoMetaData :: a
+  , dataConstructorInfoName :: Name
+  , dataConstructorInfoContructor :: IndexedConstructor
+  , dataConstructorInfoNameSet :: Set Name
+  }
   deriving (Show, Eq, Ord, Read)
 
 data CodataAccessorInfo a
@@ -81,7 +85,12 @@ data InstanceInfo a
   deriving (Show, Eq, Ord, Read)
 
 data AliasInfo a
-  = AliasInfo a Name [Name] ParameterizedType
+  = AliasInfo 
+    { aliasInfoMetadata :: a 
+    , aliasInfoName :: Name 
+    , aliasInfoParams :: [Name] 
+    , aliasInfoType :: ParameterizedType
+    }
   deriving (Show, Eq, Ord, Read)
 
 data NameInfo

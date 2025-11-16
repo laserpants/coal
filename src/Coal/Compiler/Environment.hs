@@ -27,6 +27,7 @@ import Coal.Ast.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Builtin.Environment
+import Coal.Compiler.Module.Bundle
 import Coal.Compiler.Transform.Type.Parameterized
 import Coal.Language
 import Coal.Language.Module
@@ -41,8 +42,8 @@ import qualified Data.Set as Set
 import qualified Data.Text as Text
 import Extras (Dictionary, Name, Over, Set, traverse2, traverse_, (<$$>))
 
-type AliasEnvironment = Environment ([Name], ParameterizedType)
-type DataConstructorEnvironment = Environment (DataConstructor TypeIndex Kind IndexedType, Set Name)
+type AliasEnvironment = Environment (AliasInfo Metadata) -- ([Name], ParameterizedType)
+type DataConstructorEnvironment = Environment (DataConstructorInfo Metadata)
 type TypeConstructorEnvironment = Environment Kind
 type TraitEnvironment = Environment (Parameter Kind, TypeIndex Kind, Environment IndexedScheme)
 type InstanceEnvironment = Environment (Map IndexedType (Type Parameter (), Dictionary IndexedScheme))
@@ -128,11 +129,11 @@ overCompilerKernelEnvironment f CompilerEnvironment{..} =
 buildEnvironment :: [Definition a k t] -> CompilerEnvironment
 buildEnvironment defs =
   CompilerEnvironment
-    { compilerDataConstructorEnvironment = dataConstructorEnvironment
-    , compilerTypeConstructorEnvironment = typeConstructorEnvironment
+    { compilerDataConstructorEnvironment = mempty
+    , compilerTypeConstructorEnvironment = mempty
     , compilerTraitEnvironment = traitEnvironment
     , compilerInstanceEnvironment = instanceEnvironment
-    , compilerAliasEnvironment = aliasEnvironment
+    , compilerAliasEnvironment = mempty -- aliasEnvironment
     , compilerCodataAccessorEnvironment = codataAccessorEnvironment
     , compilerFoldEnvironment = foldEnvironment
     , compilerUnfoldEnvironment = unfoldEnvironment
@@ -143,7 +144,6 @@ buildEnvironment defs =
   instanceEnvironment = buildInstanceEnvironment typeConstructorEnvironment traitEnvironment defs
   aliasEnvironment = buildAliasEnvironment defs
   traitEnvironment = buildTraitEnvironment typeConstructorEnvironment defs
-  dataConstructorEnvironment = buildDataConstructorEnvironment typeConstructorEnvironment defs
   typeConstructorEnvironment = buildTypeConstructorEnvironment defs
   codataAccessorEnvironment = buildCodataAccessorEnvironment typeConstructorEnvironment defs
   foldEnvironment = buildFoldEnvironment defs
@@ -195,21 +195,27 @@ buildDataConstructorEnvironment env =
     ( \case
         DType _ _ (TypeDef _ cs) ->
           let ctors = Set.fromList (constructorName <$> cs)
-           in translateConstructor ctors <$> cs
+           in undefined -- translateConstructor ctors <$> cs
         _ ->
           []
     )
  where
+  --  translateConstructor ::
+  --    Set Name ->
+  --    DataConstructor a () ParameterizedType ->
+  --    (Name, (DataConstructor TypeIndex Kind IndexedType, Set Name))
   translateConstructor ::
     Set Name ->
     DataConstructor a () ParameterizedType ->
-    (Name, (DataConstructor TypeIndex Kind IndexedType, Set Name))
+    DataConstructorInfo Metadata
   translateConstructor ctors (DataConstructor n a s) =
-    (n, (DataConstructor n a (translateScheme s), ctors))
-  translateScheme (Forall _ _ t) =
-    Forall (typeIndexesIn t1) [] t1
-   where
-    t1 = evalState (instantiateVars [] env t) (0 :: Int)
+    undefined
+
+--    (n, (DataConstructor n a (translateScheme s), ctors))
+--  translateScheme (Forall _ _ t) =
+--    Forall (typeIndexesIn t1) [] t1
+--   where
+--    t1 = evalState (instantiateVars [] env t) (0 :: Int)
 
 buildTypeConstructorEnvironment :: [Definition a k t] -> TypeConstructorEnvironment
 buildTypeConstructorEnvironment =
@@ -255,20 +261,21 @@ buildTraitEnvironment env =
 
 buildAliasEnvironment :: [Definition a k t] -> AliasEnvironment
 buildAliasEnvironment =
-  makeEnv
-    ( \case
-        DTypeAlias _ name (AliasDef ps t) ->
-          [
-            ( name
-            ,
-              ( parameterName <$> ps
-              , t
-              )
-            )
-          ]
-        _ ->
-          []
-    )
+  undefined
+--  makeEnv
+--    ( \case
+--        DTypeAlias _ name (AliasDef ps t) ->
+--          [
+--            ( name
+--            ,
+--              ( parameterName <$> ps
+--              , t
+--              )
+--            )
+--          ]
+--        _ ->
+--          []
+--    )
 
 -- FIXME
 buildInstanceEnvironment :: TypeConstructorEnvironment -> TraitEnvironment -> [Definition a k t] -> InstanceEnvironment

@@ -12,6 +12,7 @@ module Coal.Compiler.PatternAnomalies (
 import Coal.Common.Environment (Environment (..), mapEnvironment)
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
+import Coal.Compiler.Module.Bundle
 import Coal.Compiler.Stack
 import Coal.Language.Pattern (Pattern (..))
 import Coal.Language.Primitive (Primitive (..))
@@ -125,7 +126,7 @@ isUseful px@(ps : _) qs =
 isComplete :: (Monad m) => [Name] -> CompilerT a m Bool
 isComplete [] = pure False
 isComplete names@(name : _) = do
-  defined <- asks (mapEnvironment snd . compilerDataConstructorEnvironment)
+  defined <- asks (mapEnvironment dataConstructorInfoNameSet . compilerDataConstructorEnvironment)
   case Environment.lookup name (defined `Environment.union` builtIn) of
     Nothing ->
       pure ("%Tuple" `Text.isPrefixOf` name)
