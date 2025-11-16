@@ -8,6 +8,22 @@ import Coal.Language.Type
 import Coal.Language.Type.Intrinsic
 import Coal.Language.Type.Row
 
+{-# INLINE tupleTCon #-}
+tupleTCon :: Kernel.Type
+tupleTCon = Kernel.TCon "tuple" []
+
+{-# INLINE listTCon #-}
+listTCon :: Kernel.Type
+listTCon = Kernel.TCon "list" []
+
+{-# INLINE natTCon #-}
+natTCon :: Kernel.Type
+natTCon = Kernel.TCon "nat" []
+
+{-# INLINE voidTCon #-}
+voidTCon :: Kernel.Type
+voidTCon = Kernel.TCon "void" []
+
 translateIntrinsicType :: Intrinsic (Type o k) -> Kernel.Type
 translateIntrinsicType =
   \case
@@ -32,9 +48,9 @@ translateIntrinsicType =
     IRecord t ->
       Kernel.record (translateType t)
     INat ->
-      Kernel.TCon "nat" []
+      natTCon
     IVoid ->
-      Kernel.TCon "void" []
+      voidTCon
 
 translateRow :: Row o k (Type o k) -> Kernel.Type
 translateRow =
@@ -59,9 +75,9 @@ translateType =
       Kernel.arrow (translateType t1) (translateType t2)
     con@TConstructor{}
       | isTupleType con ->
-          Kernel.TCon "tuple" []
+          tupleTCon
     TConstructor _ "List" ->
-      Kernel.TCon "list" []
+      listTCon
     TConstructor _ name ->
       Kernel.TCon name []
     TIntrinsic t ->
