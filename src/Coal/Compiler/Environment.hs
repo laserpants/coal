@@ -47,7 +47,7 @@ type DataConstructorEnvironment = Environment (DataConstructorInfo Metadata)
 type TypeConstructorEnvironment = Environment Kind
 type TraitEnvironment = Environment (Parameter Kind, TypeIndex Kind, Environment IndexedScheme)
 type InstanceEnvironment = Environment (Map IndexedType (Type Parameter (), Dictionary IndexedScheme))
-type CodataAccessorEnvironment = Environment (CodataAccessor TypeIndex Kind IndexedType)
+type CodataAccessorEnvironment = Environment (CodataAccessorInfo Metadata)
 type FoldEnvironment = Environment IndexedScheme
 type UnfoldEnvironment = Environment IndexedScheme
 type DictionaryNameEnvironment = Environment IndexedScheme
@@ -262,6 +262,7 @@ buildTraitEnvironment env =
 buildAliasEnvironment :: [Definition a k t] -> AliasEnvironment
 buildAliasEnvironment =
   undefined
+
 --  makeEnv
 --    ( \case
 --        DTypeAlias _ name (AliasDef ps t) ->
@@ -319,13 +320,13 @@ buildCodataAccessorEnvironment :: TypeConstructorEnvironment -> [Definition a k 
 buildCodataAccessorEnvironment env =
   makeEnv
     ( \case
-        DCotype _ name (CotypeDef ps ts) -> do
-          let vs = traverse (instantiateVars params env . pt) ts
-          [(n, accessor n t) | (n, t) <- (codataAccessorName <$> ts) `zip` evalState vs (freshIdIn ixs)]
-         where
-          accessor n t = CodataAccessor n (Forall (typeIndexesIn t) [] t)
-          ixs = snd <$> params
-          params = [(n, TypeIndex KType t) | (Parameter _ n, t) <- zip ps [0 ..]]
+        --        DCotype _ name (CotypeDef ps ts) -> do
+        --          let vs = traverse (instantiateVars params env . pt) ts
+        --          [(n, accessor n t) | (n, t) <- (codataAccessorName <$> ts) `zip` evalState vs (freshIdIn ixs)]
+        --         where
+        --          accessor n t = CodataAccessor n (Forall (typeIndexesIn t) [] t)
+        --          ixs = snd <$> params
+        --          params = [(n, TypeIndex KType t) | (Parameter _ n, t) <- zip ps [0 ..]]
         _ ->
           []
     )

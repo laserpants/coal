@@ -528,10 +528,10 @@ builtinInstances =
     )
   ]
 
-builtinTraits :: [(Name, (Parameter Kind, TypeIndex Kind, Environment IndexedScheme))]
+-- builtinTraits :: [(Name, (Parameter Kind, TypeIndex Kind, Environment IndexedScheme))]
 builtinTraits =
   []
 
-builtinCodataAccessors :: [(Name, CodataAccessor TypeIndex Kind IndexedType)]
+-- builtinCodataAccessors :: [(Name, CodataAccessor TypeIndex Kind IndexedType)]
 builtinCodataAccessors =
   []

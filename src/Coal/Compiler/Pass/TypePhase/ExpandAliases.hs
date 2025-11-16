@@ -1,14 +1,14 @@
 {-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
 module Coal.Compiler.Pass.TypePhase.ExpandAliases (passExpandAliases) where
 
-import Coal.Compiler.Module.Bundle
 import qualified Coal.Common.Environment as Environment
+import Coal.Compiler.Module.Bundle
 import Coal.Compiler.Pass
 import Coal.Compiler.Stack
 import Coal.Language

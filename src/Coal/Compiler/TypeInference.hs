@@ -12,6 +12,7 @@ import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (supplied)
 import Coal.Compiler.Journal
+import Coal.Compiler.Module.Bundle
 import Coal.Compiler.Stack
 import Coal.Compiler.Transform.Type.Parameterized
 import Coal.Language
@@ -177,7 +178,7 @@ compileDefinitionC =
             \(name, elem1) -> do
               env <- asks compilerCodataAccessorEnvironment
               case Environment.lookup (Text.replace "@" "" name) env of
-                Just CodataAccessor{..} -> do
+                Just (CodataAccessorInfo _ _ CodataAccessor{..}) -> do
                   if "@" `Text.isPrefixOf` name
                     then do
                       let tl = typeOf (NonEmpty.head ps)

@@ -49,7 +49,7 @@ localPassM :: (Monad m) => Pass Metadata m (Module Metadata Kind t) (Module Meta
 localPassM p =
   Pass
     { passName = "localM<" <> passName p <> ">"
-    , runPass = pass 
+    , runPass = pass
     }
  where
   pass m@(Module path _ _) = do
@@ -64,9 +64,9 @@ localPassM p =
         let env =
               CompilerEnvironment
                 { compilerDataConstructorEnvironment = moduleDataConstructors
-                , compilerTypeConstructorEnvironment = kinds 
-                , compilerAliasEnvironment = moduleAliases 
-                , compilerCodataAccessorEnvironment = compilerCodataAccessorEnvironment currentEnv
+                , compilerTypeConstructorEnvironment = kinds
+                , compilerAliasEnvironment = moduleAliases
+                , compilerCodataAccessorEnvironment = moduleCodataAccessors
                 , compilerTraitEnvironment = compilerTraitEnvironment currentEnv
                 , compilerInstanceEnvironment = compilerInstanceEnvironment currentEnv
                 , --

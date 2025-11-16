@@ -76,26 +76,24 @@ data CotypeConstructorInfo a
   = CotypeConstructorInfo a Name Kind
   deriving (Show, Eq, Ord, Read)
 
-data TraitInfo a
-  = TraitInfo 
-      { traitInfoMetadata :: a 
-      , traitInfoName :: Name 
-      , traitInfoParameter :: Parameter Kind
-      , traitInfoEntries :: Environment (Scheme Parameter () ParameterizedType)
-      }
+data TraitInfo a = TraitInfo
+  { traitInfoMetadata :: a
+  , traitInfoName :: Name
+  , traitInfoParameter :: Parameter Kind
+  , traitInfoEntries :: Environment (Scheme Parameter () ParameterizedType)
+  }
   deriving (Show, Eq, Ord, Read)
 
 data InstanceInfo a
   = InstanceInfo a ParameterizedType (Dictionary IndexedScheme)
   deriving (Show, Eq, Ord, Read)
 
-data AliasInfo a
-  = AliasInfo 
-    { aliasInfoMetadata :: a 
-    , aliasInfoName :: Name 
-    , aliasInfoParams :: [Name] 
-    , aliasInfoType :: ParameterizedType
-    }
+data AliasInfo a = AliasInfo
+  { aliasInfoMetadata :: a
+  , aliasInfoName :: Name
+  , aliasInfoParams :: [Name]
+  , aliasInfoType :: ParameterizedType
+  }
   deriving (Show, Eq, Ord, Read)
 
 data NameInfo
