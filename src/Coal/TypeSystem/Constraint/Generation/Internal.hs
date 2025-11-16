@@ -20,10 +20,9 @@ module Coal.TypeSystem.Constraint.Generation.Internal (
   updateConstraintsGenSupply,
 ) where
 
-import Coal.Common.Environment (Environment (..))
 import Coal.Common.Supply (Supply (..))
 import Coal.Compiler.Module.Bundle (ModuleBundle)
-import Coal.Language (CodataAccessor (..), IndexedScheme, Kind (..), Type (..), TypeIndex (..))
+import Coal.Language (Kind (..), Type (..), TypeIndex (..))
 import Coal.TypeSystem.Constraint (Constraint (..), Monomorphic (..), overMonomorphicSet)
 import Coal.TypeSystem.Constraint.Generation.InferenceRule (InferenceRule (..))
 import Control.Monad.RWS

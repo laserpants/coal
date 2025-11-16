@@ -2,7 +2,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Pass (Pass (..), (>->), mapPass, localPass, localPassM) where
+module Coal.Compiler.Pass (Pass (..), (>->), mapPass, localPassM) where
 
 import Coal.Ast.Metadata (Metadata (..))
 import qualified Coal.Common.Environment as Environment
@@ -14,7 +14,7 @@ import Coal.Compiler.State
 import Coal.Language (IndexedType, Kind)
 import Coal.Language.Module
 import Control.Monad ((>=>))
-import Control.Monad.Reader (ask, local)
+import Control.Monad.Reader (local)
 import Control.Monad.State (evalStateT, gets)
 import Extras (Name)
 
@@ -37,13 +37,6 @@ mapPass p =
     , runPass = traverse (runPass p)
     }
 
-localPass :: (Monad m) => (Module Metadata Kind t -> CompilerEnvironment -> CompilerEnvironment) -> Pass Metadata m (Module Metadata Kind t) (Module Metadata Kind IndexedType) -> Pass Metadata m (Module Metadata Kind t) (Module Metadata Kind IndexedType)
-localPass f p =
-  Pass
-    { passName = "local<" <> passName p <> ">"
-    , runPass = \m -> local (f m) (runPass p m)
-    }
-
 -- TODO: rename/move
 localPassM :: (Monad m) => Pass Metadata m (Module Metadata Kind t) (Module Metadata Kind IndexedType) -> Pass Metadata m (Module Metadata Kind t) (Module Metadata Kind IndexedType)
 localPassM p =
@@ -54,8 +47,6 @@ localPassM p =
  where
   pass m@(Module path _ _) = do
     modules <- gets compilerModules
-    currentEnv <- ask
-
     case Environment.lookup (principalPath path) modules of
       Nothing ->
         error "TODO"
@@ -67,7 +58,7 @@ localPassM p =
                 , compilerTypeConstructorEnvironment = kinds
                 , compilerAliasEnvironment = moduleAliases
                 , compilerCodataAccessorEnvironment = moduleCodataAccessors
-                , compilerTraitEnvironment = moduleTraits -- compilerTraitEnvironment currentEnv
+                , compilerTraitEnvironment = moduleTraits
                 , compilerInstanceEnvironment = moduleInstances
                 , compilerDictionaryNameEnvironment = mempty
                 , compilerKernelEnvironment = KernelEnvironment mempty mempty mempty

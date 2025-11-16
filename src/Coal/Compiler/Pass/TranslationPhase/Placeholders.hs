@@ -173,10 +173,10 @@ applyTraits loc (Label t name) =
     [] ->
       pure (EVariable mempty (Label t name))
     tr : trs ->
-      EApplication mempty t (EVariable mempty (Label t1 name)) <$> traverse insertInstance (tr :| trs)
+      EApplication mempty t (EVariable mempty (Label t1 name)) <$> traverse insert_ (tr :| trs)
      where
       t1 = foldTypeOf t (tr : trs)
-      insertInstance trait = do
+      insert_ trait = do
         fields <- lookupTraitInstance loc trait
         case fields of
           Nothing -> do

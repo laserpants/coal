@@ -2,11 +2,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module Coal.Compiler.Environment (
-  AliasEnvironment,
-  DataConstructorEnvironment,
-  TypeConstructorEnvironment,
-  TraitEnvironment,
-  InstanceEnvironment,
   CompilerEnvironment (..),
   KernelEnvironment (..),
   emptyCompilerEnvironment,
@@ -23,14 +18,6 @@ import Coal.Compiler.Module.Bundle
 import Coal.Language
 import Data.Map.Strict (Map)
 import Extras (Name, Over, Set)
-
-type AliasEnvironment = Environment (AliasInfo Metadata) -- ([Name], ParameterizedType)
-type DataConstructorEnvironment = Environment (DataConstructorInfo Metadata)
-type TypeConstructorEnvironment = Environment Kind
-type TraitEnvironment = Environment (TraitInfo Metadata) -- (Parameter Kind, TypeIndex Kind, Environment IndexedScheme)
-type InstanceEnvironment = Environment (Map IndexedType (InstanceInfo Metadata))
-type CodataAccessorEnvironment = Environment (CodataAccessorInfo Metadata)
-type DictionaryNameEnvironment = Environment IndexedScheme
 
 data KernelEnvironment = KernelEnvironment
   { kernelEnvironmentModule :: Name
@@ -52,13 +39,13 @@ overKernelEnvironmentQualifiedNames fn KernelEnvironment{..} =
   KernelEnvironment{kernelEnvironmentQualifiedNames = fn kernelEnvironmentQualifiedNames, ..}
 
 data CompilerEnvironment = CompilerEnvironment
-  { compilerDataConstructorEnvironment :: DataConstructorEnvironment
-  , compilerTypeConstructorEnvironment :: TypeConstructorEnvironment
-  , compilerTraitEnvironment :: TraitEnvironment
-  , compilerInstanceEnvironment :: InstanceEnvironment
-  , compilerAliasEnvironment :: AliasEnvironment
-  , compilerCodataAccessorEnvironment :: CodataAccessorEnvironment
-  , compilerDictionaryNameEnvironment :: DictionaryNameEnvironment
+  { compilerDataConstructorEnvironment :: Environment (DataConstructorInfo Metadata)
+  , compilerTypeConstructorEnvironment :: Environment Kind
+  , compilerTraitEnvironment :: Environment (TraitInfo Metadata)
+  , compilerInstanceEnvironment :: Environment (Map IndexedType (InstanceInfo Metadata))
+  , compilerAliasEnvironment :: Environment (AliasInfo Metadata)
+  , compilerCodataAccessorEnvironment :: Environment (CodataAccessorInfo Metadata)
+  , compilerDictionaryNameEnvironment :: Environment IndexedScheme
   , compilerKernelEnvironment :: KernelEnvironment
   }
   deriving (Show, Eq, Ord, Read)

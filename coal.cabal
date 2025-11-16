@@ -32,7 +32,6 @@ library
       Coal.Common.Supply
       Coal.Compiler
       Coal.Compiler.Builtin.Definitions
-      Coal.Compiler.Builtin.Environment
       Coal.Compiler.Builtin.Functions
       Coal.Compiler.Config
       Coal.Compiler.Environment
