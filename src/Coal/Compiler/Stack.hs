@@ -41,9 +41,7 @@ module Coal.Compiler.Stack (
   setConfigGenerateLLVMOutputC,
   setConfigC,
   insertModuleC,
-  getModule,
-)
-where
+) where
 
 import Coal.Common.Environment (Environment)
 import qualified Coal.Common.Environment as Environment
@@ -149,9 +147,6 @@ getVerbatimSourceC name = do
       error "Implementation error"
     Just src ->
       pure src
-
-getModule :: (Monad m) => CompilerT a m Path
-getModule = gets compilerCurrentModule
 
 setCompilerCurrentModuleC :: (Monad m) => Path -> CompilerT a m ()
 setCompilerCurrentModuleC path = modify (overCompilerCurrentModule (const path))
