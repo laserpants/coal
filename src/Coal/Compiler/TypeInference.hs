@@ -235,7 +235,7 @@ typeDefinitionC =
           env <- asks compilerTypeConstructorEnvironment
           let s1 = evalState (instantiateVars [(q, TypeIndex k 0)] env s) (1 :: Int)
           insertNameC n (Forall (typeIndexesIn s1) [Trait name (TVariable (TypeIndex k 0))] s1)
-    DInstance _ trait (InstanceDef _ t1 ds) -> do
+    DInstance _ trait (InstanceDef _ t0 ds) -> do
       env <- asks compilerTraitEnvironment
       kinds <- asks compilerTypeConstructorEnvironment
       case Environment.lookup trait env of
@@ -247,11 +247,10 @@ typeDefinitionC =
               case Environment.lookup (definitionName d) traitInfoEntries of
                 Nothing ->
                   error ("Missing implementation: " <> Text.unpack (definitionName d))
-                Just s -> do
-                  ti <- instantiateVarsC t1
-                  let s1 = toIndexedScheme kinds p s
-                  -- TODO: FIXME
-                  insertConstraintsC [Explicit (InferenceRulePlaceholder "typeDefinitionC") (typeOf d) (instantiateTemplateC (TypeIndex k 0) ti s1)]
+                Just s0 -> do
+                  t1 <- instantiateVarsC t0
+                  let s1 = instantiateTemplateC (TypeIndex k 0) t1 (toIndexedScheme kinds p s0)
+                  insertConstraintsC [Explicit (InferenceRulePlaceholder "typeDefinitionC") (typeOf d) s1]
                   compileDefinitionC d
     d@(DFunction loc name (FunctionDef _ _ (With _ t) ps _ :| _) _) -> do
       checkIfNameExists loc name
