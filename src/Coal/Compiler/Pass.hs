@@ -16,7 +16,6 @@ import Coal.Language.Module
 import Control.Monad ((>=>))
 import Control.Monad.Reader (ask, local)
 import Control.Monad.State (evalStateT, gets)
-import Debug.Trace
 import Extras (Name)
 
 data Pass a m i o = Pass
@@ -45,6 +44,7 @@ localPass f p =
     , runPass = \m -> local (f m) (runPass p m)
     }
 
+-- TODO: rename
 localPassM :: (Monad m) => Pass Metadata m (Module Metadata Kind t) (Module Metadata Kind IndexedType) -> Pass Metadata m (Module Metadata Kind t) (Module Metadata Kind IndexedType)
 localPassM p =
   Pass
@@ -68,7 +68,7 @@ localPassM p =
                 , compilerAliasEnvironment = moduleAliases
                 , compilerCodataAccessorEnvironment = moduleCodataAccessors
                 , compilerTraitEnvironment = compilerTraitEnvironment currentEnv
-                , compilerInstanceEnvironment = compilerInstanceEnvironment currentEnv
+                , compilerInstanceEnvironment = moduleInstances 
                 , --
                   compilerFoldEnvironment = mempty
                 , compilerUnfoldEnvironment = mempty

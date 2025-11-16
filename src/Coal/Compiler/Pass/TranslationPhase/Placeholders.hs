@@ -3,6 +3,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
 
@@ -14,6 +15,7 @@ import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (supplied)
 import Coal.Compiler.Environment (overCompilerDictionaryNameEnvironment)
 import Coal.Compiler.Journal (censorDictionaryTraits, listenDictionaryTraits, tellDictionaryTraits, tellErrors)
+import Coal.Compiler.Module.Bundle
 import Coal.Compiler.Pass
 import Coal.Compiler.Stack
 import Coal.Language
@@ -108,6 +110,7 @@ tryMatch t u = do
   var <- supplied id
   pure (evalUnifier var (match t u))
 
+-- TODO: return type is a value of type InstanceInfo{..} ??
 findFirstMatch :: (Monad m) => Trait IndexedType -> CompilerT a m (Maybe (ParameterizedType, IndexedType, Dictionary IndexedScheme))
 findFirstMatch (Trait name t) = do
   env <- asks compilerInstanceEnvironment
@@ -123,13 +126,13 @@ findFirstMatch (Trait name t) = do
           pure (Just (t1, k, v))
  where
   go f m = fmap catMaybes . forM (Map.toList m) $
-    \(k, (t1, env)) -> do
+    \(k, InstanceInfo{..}) -> do
       result <- f k
       case result of
         Left{} ->
           pure Nothing
         Right sub ->
-          pure $ Just (t1, k, Map.map (substituteInScheme sub) env)
+          pure $ Just (instanceInfoType, k, Map.map (substituteInScheme sub) instanceInfoEntries)
 
 substituteInScheme :: Substitution -> Scheme o Kind IndexedType -> IndexedScheme
 substituteInScheme sub (Forall _ ts t) = scheme (apply sub ts) (apply sub t)

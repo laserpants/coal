@@ -36,6 +36,8 @@ module Coal.Compiler.Module.Bundle (
   exportedCodataAccessors,
   exportedDataConstructors,
   exportedTypeConstructors,
+  exportedTraits,
+  exportedInstances,
   exportedNames,
   traitInfo,
   setExports,
@@ -96,6 +98,7 @@ data TraitInfo a = TraitInfo
 data InstanceInfo a = InstanceInfo
   { instanceInfoMetadata :: a
   , instanceInfoType :: ParameterizedType
+  , instanceInfoIndexedType :: IndexedType
   , instanceInfoEntries :: Dictionary IndexedScheme
   }
   deriving (Show, Eq, Ord, Read)
@@ -165,6 +168,16 @@ exportedCodataAccessors :: ModuleBundle a -> Environment (CodataAccessorInfo a)
 exportedCodataAccessors ModuleBundle{..}
   | exportsAll moduleExports = moduleCodataAccessors
   | otherwise = Environment.filterNames (`Set.member` moduleExports) moduleCodataAccessors
+
+exportedTraits :: ModuleBundle a -> Environment (TraitInfo a)
+exportedTraits ModuleBundle{..}
+  | exportsAll moduleExports = moduleTraits
+  | otherwise = Environment.filterNames (`Set.member` moduleExports) moduleTraits
+
+exportedInstances :: ModuleBundle a -> Environment (Map IndexedType (InstanceInfo a))
+exportedInstances ModuleBundle{..}
+  | exportsAll moduleExports = moduleInstances
+  | otherwise = Environment.filterNames (`Set.member` moduleExports) moduleInstances
 
 emptyModuleBundle :: ModuleBundle a
 emptyModuleBundle =
@@ -308,8 +321,9 @@ traitInfo loc name (TraitDef _ p ps) = TraitInfo loc name p (Environment.fromLis
 aliasInfo :: a -> Name -> AliasDef -> AliasInfo a
 aliasInfo loc name (AliasDef ps t) = AliasInfo loc name (parameterName <$> ps) t
 
-instanceInfo :: i -> Environment IndexedScheme -> InstanceDef a i Kind () -> InstanceInfo i
-instanceInfo loc (Environment e) (InstanceDef _ q _) = InstanceInfo loc q e
+-- TODO: FIXME
+instanceInfo :: i -> Parameter Kind -> Environment Kind -> Environment IndexedScheme -> InstanceDef a i Kind () -> InstanceInfo i
+instanceInfo loc p kinds (Environment e) (InstanceDef _ q _) = InstanceInfo loc q (toIndexedType kinds p q) e
 
 -- TODO
 toIndexedScheme :: Environment Kind -> Parameter Kind -> Scheme Parameter () ParameterizedType -> Scheme TypeIndex Kind IndexedType

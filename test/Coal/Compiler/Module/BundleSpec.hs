@@ -87,7 +87,7 @@ test134 bundle@ModuleBundle{..} = do
 
   describe "InstanceInfo" $ do
     it "" $
-      Environment.mapEnvironment (fmap stripMeta) moduleInstances == mainInstances
+      Environment.mapEnvironment (fmap stripMeta) (exportedInstances bundle) == mainExportedInstances
 
   describe "Names" $
     it "" $
@@ -116,7 +116,7 @@ instance StripMeta TraitInfo where
   stripMeta (TraitInfo _ n t d) = TraitInfo () n t d
 
 instance StripMeta InstanceInfo where
-  stripMeta (InstanceInfo _ t d) = InstanceInfo () t d
+  stripMeta (InstanceInfo _ t t2 d) = InstanceInfo () t t2 d
 
 mainNames :: Environment NameInfo
 mainNames =
@@ -298,8 +298,8 @@ mainTraits =
       )
     ]
 
-mainInstances :: Environment (Map IndexedType (InstanceInfo ()))
-mainInstances =
+mainExportedInstances :: Environment (Map IndexedType (InstanceInfo ()))
+mainExportedInstances =
   Environment.fromList
     [
       ( "Functor"
@@ -309,6 +309,7 @@ mainInstances =
             , InstanceInfo
                 ()
                 (TConstructor () "List")
+                (TConstructor (KArrow KType KType) "List")
                 ( Map.fromList
                     [
                       ( "map"
@@ -328,6 +329,7 @@ mainInstances =
             , InstanceInfo
                 ()
                 (TConstructor () "Option")
+                (TConstructor (KArrow KType KType) "Option")
                 ( Map.fromList
                     [
                       ( "map"

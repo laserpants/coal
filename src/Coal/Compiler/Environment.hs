@@ -46,7 +46,7 @@ type AliasEnvironment = Environment (AliasInfo Metadata) -- ([Name], Parameteriz
 type DataConstructorEnvironment = Environment (DataConstructorInfo Metadata)
 type TypeConstructorEnvironment = Environment Kind
 type TraitEnvironment = Environment (Parameter Kind, TypeIndex Kind, Environment IndexedScheme)
-type InstanceEnvironment = Environment (Map IndexedType (Type Parameter (), Dictionary IndexedScheme))
+type InstanceEnvironment = Environment (Map IndexedType (InstanceInfo Metadata))
 type CodataAccessorEnvironment = Environment (CodataAccessorInfo Metadata)
 type FoldEnvironment = Environment IndexedScheme
 type UnfoldEnvironment = Environment IndexedScheme
@@ -284,27 +284,27 @@ buildInstanceEnvironment ctorEnv traitEnv ds = execState (traverse_ go ds) mempt
  where
   go =
     \case
-      DInstance _ name (InstanceDef ts t _) ->
-        case Environment.lookup name traitEnv of
-          Just (p1, TypeIndex{..}, sigs) -> do
-            let (t1, _) = evalState f (freshId fs)
-                sub = typeIndexId `mapsTo` t1
-                -- map_ = Map.fromList (insertTraits builtinTraits . substituteInScheme sub <$$> fs)
-                map_ = Map.fromList (substituteInScheme sub <$$> fs)
-                val = Map.singleton t1 (t, map_)
-            modify (Environment.insertWith Map.union name val)
-           where
-            f = do
-              ts1 <- execWriterT (instantiateTypeIndexes t)
-              let env = Environment.insert (parameterName p1) (TypeIndex (parameterKind p1) typeIndexId) (Environment.fromList ts1)
-              flip runReaderT (env, ctorEnv) $ do
-                y <- instantiateTypeVars t
-                ys <- traverse2 instantiateTypeVars ts
-                pure (y, nub ys)
-            fs = Environment.toList sigs
-            freshId = freshIdIn . indexSet . fmap snd
-          Nothing ->
-            error ("Trait '" <> Text.unpack name <> "' not in scope.")
+      --      DInstance _ name (InstanceDef ts t _) ->
+      --        case Environment.lookup name traitEnv of
+      --          Just (p1, TypeIndex{..}, sigs) -> do
+      --            let (t1, _) = evalState f (freshId fs)
+      --                sub = typeIndexId `mapsTo` t1
+      --                -- map_ = Map.fromList (insertTraits builtinTraits . substituteInScheme sub <$$> fs)
+      --                map_ = Map.fromList (substituteInScheme sub <$$> fs)
+      --                val = Map.singleton t1 (t, map_)
+      --            modify (Environment.insertWith Map.union name val)
+      --           where
+      --            f = do
+      --              ts1 <- execWriterT (instantiateTypeIndexes t)
+      --              let env = Environment.insert (parameterName p1) (TypeIndex (parameterKind p1) typeIndexId) (Environment.fromList ts1)
+      --              flip runReaderT (env, ctorEnv) $ do
+      --                y <- instantiateTypeVars t
+      --                ys <- traverse2 instantiateTypeVars ts
+      --                pure (y, nub ys)
+      --            fs = Environment.toList sigs
+      --            freshId = freshIdIn . indexSet . fmap snd
+      --          Nothing ->
+      --            error ("Trait '" <> Text.unpack name <> "' not in scope.")
       _ ->
         pure ()
 

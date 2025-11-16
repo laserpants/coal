@@ -15,6 +15,8 @@ import Coal.TypeSystem.Substitution
 import Control.Monad (unless)
 import Control.Monad.State (StateT, execStateT, gets, lift, modify)
 import Data.List (union)
+import Data.List.NonEmpty (NonEmpty (..))
+import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import Extras (Name, forM_)
 
@@ -65,6 +67,584 @@ build (Module path exports defs) =
     inEachDef (collectTraits kinds)
     traits <- traitEnv
     inEachDef (collectInstances kinds traits)
+
+    modify $
+      insertInstance
+        "Numeric"
+        (TIntrinsic IInt32)
+        ( InstanceInfo
+            mempty
+            (TIntrinsic IInt32)
+            (TIntrinsic IInt32)
+            ( Map.fromList
+                [
+                  ( "from_int32"
+                  , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
+                  )
+                ,
+                  ( "negate"
+                  , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
+                  )
+                ,
+                  ( "(+)"
+                  , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
+                  )
+                ,
+                  ( "(-)"
+                  , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
+                  )
+                ,
+                  ( "(*)"
+                  , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
+                  )
+                ]
+            )
+        )
+
+    modify $
+      insertInstance
+        "Numeric"
+        (TIntrinsic IInt64)
+        ( InstanceInfo
+            mempty
+            (TIntrinsic IInt64)
+            (TIntrinsic IInt64)
+            ( Map.fromList
+                [
+                  ( "from_int32"
+                  , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt64)
+                  )
+                ,
+                  ( "negate"
+                  , Forall mempty [] (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64)
+                  )
+                ,
+                  ( "(+)"
+                  , Forall mempty [] (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64 `TArrow` TIntrinsic IInt64)
+                  )
+                ,
+                  ( "(-)"
+                  , Forall mempty [] (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64 `TArrow` TIntrinsic IInt64)
+                  )
+                ,
+                  ( "(*)"
+                  , Forall mempty [] (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64 `TArrow` TIntrinsic IInt64)
+                  )
+                ]
+            )
+        )
+
+    modify $
+      insertInstance
+        "Numeric"
+        (TIntrinsic IFloat)
+        ( InstanceInfo
+            mempty
+            (TIntrinsic IFloat)
+            (TIntrinsic IFloat)
+            ( Map.fromList
+                [
+                  ( "from_int32"
+                  , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IFloat)
+                  )
+                ,
+                  ( "negate"
+                  , Forall mempty [] (TIntrinsic IFloat `TArrow` TIntrinsic IFloat)
+                  )
+                ,
+                  ( "(+)"
+                  , Forall mempty [] (TIntrinsic IFloat `TArrow` TIntrinsic IFloat `TArrow` TIntrinsic IFloat)
+                  )
+                ,
+                  ( "(-)"
+                  , Forall mempty [] (TIntrinsic IFloat `TArrow` TIntrinsic IFloat `TArrow` TIntrinsic IFloat)
+                  )
+                ,
+                  ( "(*)"
+                  , Forall mempty [] (TIntrinsic IFloat `TArrow` TIntrinsic IFloat `TArrow` TIntrinsic IFloat)
+                  )
+                ]
+            )
+        )
+
+    modify $
+      insertInstance
+        "Numeric"
+        (TIntrinsic IDouble)
+        ( InstanceInfo
+            mempty
+            (TIntrinsic IDouble)
+            (TIntrinsic IDouble)
+            ( Map.fromList
+                [
+                  ( "from_int32"
+                  , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IDouble)
+                  )
+                ,
+                  ( "negate"
+                  , Forall mempty [] (TIntrinsic IDouble `TArrow` TIntrinsic IDouble)
+                  )
+                ,
+                  ( "(+)"
+                  , Forall mempty [] (TIntrinsic IDouble `TArrow` TIntrinsic IDouble `TArrow` TIntrinsic IDouble)
+                  )
+                ,
+                  ( "(-)"
+                  , Forall mempty [] (TIntrinsic IDouble `TArrow` TIntrinsic IDouble `TArrow` TIntrinsic IDouble)
+                  )
+                ,
+                  ( "(*)"
+                  , Forall mempty [] (TIntrinsic IDouble `TArrow` TIntrinsic IDouble `TArrow` TIntrinsic IDouble)
+                  )
+                ]
+            )
+        )
+
+    modify $
+      insertInstance
+        "Numeric"
+        (TIntrinsic INat)
+        ( InstanceInfo
+            mempty
+            (TIntrinsic INat)
+            (TIntrinsic INat)
+            ( Map.fromList
+                [
+                  ( "from_int32"
+                  , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic INat)
+                  )
+                ,
+                  ( "negate"
+                  , Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic INat)
+                  )
+                ,
+                  ( "(+)"
+                  , Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic INat `TArrow` TIntrinsic INat)
+                  )
+                ,
+                  ( "(-)"
+                  , Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic INat `TArrow` TIntrinsic INat)
+                  )
+                ,
+                  ( "(*)"
+                  , Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic INat `TArrow` TIntrinsic INat)
+                  )
+                ]
+            )
+        )
+
+    modify $
+      insertInstance
+        "Numeric"
+        (TIntrinsic IBignum)
+        ( InstanceInfo
+            mempty
+            (TIntrinsic IBignum)
+            (TIntrinsic IBignum)
+            ( Map.fromList
+                [
+                  ( "from_int32"
+                  , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IBignum)
+                  )
+                ,
+                  ( "negate"
+                  , Forall mempty [] (TIntrinsic IBignum `TArrow` TIntrinsic IBignum)
+                  )
+                ,
+                  ( "(+)"
+                  , Forall mempty [] (TIntrinsic IBignum `TArrow` TIntrinsic IBignum `TArrow` TIntrinsic IBignum)
+                  )
+                ,
+                  ( "(-)"
+                  , Forall mempty [] (TIntrinsic IBignum `TArrow` TIntrinsic IBignum `TArrow` TIntrinsic IBignum)
+                  )
+                ,
+                  ( "(*)"
+                  , Forall mempty [] (TIntrinsic IBignum `TArrow` TIntrinsic IBignum `TArrow` TIntrinsic IBignum)
+                  )
+                ]
+            )
+        )
+
+    modify $
+      insertInstance
+        "Ordered"
+        (TIntrinsic IInt32)
+        ( InstanceInfo
+            mempty
+            (TIntrinsic IInt32)
+            (TIntrinsic IInt32)
+            ( Map.fromList
+                [
+                  ( "compare"
+                  , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TConstructor KType "Ordering")
+                  )
+                ]
+            )
+        )
+
+    modify $
+      insertInstance
+        "Ordered"
+        (TIntrinsic IInt64)
+        ( InstanceInfo
+            mempty
+            (TIntrinsic IInt64)
+            (TIntrinsic IInt64)
+            ( Map.fromList
+                [
+                  ( "compare"
+                  , Forall mempty [] (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64 `TArrow` TConstructor KType "Ordering")
+                  )
+                ]
+            )
+        )
+
+    modify $
+      insertInstance
+        "Ordered"
+        (TIntrinsic IBool)
+        ( InstanceInfo
+            mempty
+            (TIntrinsic IBool)
+            (TIntrinsic IBool)
+            ( Map.fromList
+                [
+                  ( "compare"
+                  , Forall mempty [] (TIntrinsic IBool `TArrow` TIntrinsic IBool `TArrow` TConstructor KType "Ordering")
+                  )
+                ]
+            )
+        )
+
+    modify $
+      insertInstance
+        "Ordered"
+        (TIntrinsic INat)
+        ( InstanceInfo
+            mempty
+            (TIntrinsic INat)
+            (TIntrinsic INat)
+            ( Map.fromList
+                [
+                  ( "compare"
+                  , Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic INat `TArrow` TConstructor KType "Ordering")
+                  )
+                ]
+            )
+        )
+
+    modify $
+      insertInstance
+        "Ordered"
+        (TIntrinsic IFloat)
+        ( InstanceInfo
+            mempty
+            (TIntrinsic IFloat)
+            (TIntrinsic IFloat)
+            ( Map.fromList
+                [
+                  ( "compare"
+                  , Forall mempty [] (TIntrinsic IFloat `TArrow` TIntrinsic IFloat `TArrow` TConstructor KType "Ordering")
+                  )
+                ]
+            )
+        )
+
+    modify $
+      insertInstance
+        "Ordered"
+        (TIntrinsic IDouble)
+        ( InstanceInfo
+            mempty
+            (TIntrinsic IDouble)
+            (TIntrinsic IDouble)
+            ( Map.fromList
+                [
+                  ( "compare"
+                  , Forall mempty [] (TIntrinsic IDouble `TArrow` TIntrinsic IDouble `TArrow` TConstructor KType "Ordering")
+                  )
+                ]
+            )
+        )
+
+    modify $
+      insertInstance
+        "Ordered"
+        (TIntrinsic IChar)
+        ( InstanceInfo
+            mempty
+            (TIntrinsic IChar)
+            (TIntrinsic IChar)
+            ( Map.fromList
+                [
+                  ( "compare"
+                  , Forall mempty [] (TIntrinsic IChar `TArrow` TIntrinsic IChar `TArrow` TConstructor KType "Ordering")
+                  )
+                ]
+            )
+        )
+
+    modify $
+      insertInstance
+        "Ordered"
+        (TIntrinsic IBignum)
+        ( InstanceInfo
+            mempty
+            (TIntrinsic IBignum)
+            (TIntrinsic IBignum)
+            ( Map.fromList
+                [
+                  ( "compare"
+                  , Forall mempty [] (TIntrinsic IBignum `TArrow` TIntrinsic IBignum `TArrow` TConstructor KType "Ordering")
+                  )
+                ]
+            )
+        )
+
+    modify $
+      insertInstance
+        "Comparable"
+        (TIntrinsic IInt32)
+        ( InstanceInfo
+            mempty
+            (TIntrinsic IInt32)
+            (TIntrinsic IInt32)
+            ( Map.fromList
+                [
+                  ( "(==)"
+                  , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IBool)
+                  )
+                ]
+            )
+        )
+
+    modify $
+      insertInstance
+        "Comparable"
+        (TIntrinsic IInt64)
+        ( InstanceInfo
+            mempty
+            (TIntrinsic IInt64)
+            (TIntrinsic IInt64)
+            ( Map.fromList
+                [
+                  ( "(==)"
+                  , Forall mempty [] (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64 `TArrow` TIntrinsic IBool)
+                  )
+                ]
+            )
+        )
+
+    modify $
+      insertInstance
+        "Comparable"
+        (TIntrinsic IBool)
+        ( InstanceInfo
+            mempty
+            (TIntrinsic IBool)
+            (TIntrinsic IBool)
+            ( Map.fromList
+                [
+                  ( "(==)"
+                  , Forall mempty [] (TIntrinsic IBool `TArrow` TIntrinsic IBool `TArrow` TIntrinsic IBool)
+                  )
+                ]
+            )
+        )
+
+    modify $
+      insertInstance
+        "Comparable"
+        (TIntrinsic INat)
+        ( InstanceInfo
+            mempty
+            (TIntrinsic INat)
+            (TIntrinsic INat)
+            ( Map.fromList
+                [
+                  ( "(==)"
+                  , Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic INat `TArrow` TIntrinsic IBool)
+                  )
+                ]
+            )
+        )
+
+    modify $
+      insertInstance
+        "Comparable"
+        (TIntrinsic IFloat)
+        ( InstanceInfo
+            mempty
+            (TIntrinsic IFloat)
+            (TIntrinsic IFloat)
+            ( Map.fromList
+                [
+                  ( "(==)"
+                  , Forall mempty [] (TIntrinsic IFloat `TArrow` TIntrinsic IFloat `TArrow` TIntrinsic IBool)
+                  )
+                ]
+            )
+        )
+
+    modify $
+      insertInstance
+        "Comparable"
+        (TIntrinsic IDouble)
+        ( InstanceInfo
+            mempty
+            (TIntrinsic IDouble)
+            (TIntrinsic IDouble)
+            ( Map.fromList
+                [
+                  ( "(==)"
+                  , Forall mempty [] (TIntrinsic IDouble `TArrow` TIntrinsic IDouble `TArrow` TIntrinsic IBool)
+                  )
+                ]
+            )
+        )
+
+    modify $
+      insertInstance
+        "Comparable"
+        (TIntrinsic IChar)
+        ( InstanceInfo
+            mempty
+            (TIntrinsic IChar)
+            (TIntrinsic IChar)
+            ( Map.fromList
+                [
+                  ( "(==)"
+                  , Forall mempty [] (TIntrinsic IChar `TArrow` TIntrinsic IChar `TArrow` TIntrinsic IBool)
+                  )
+                ]
+            )
+        )
+
+    modify $
+      insertInstance
+        "Comparable"
+        (TIntrinsic IBignum)
+        ( InstanceInfo
+            mempty
+            (TIntrinsic IBignum)
+            (TIntrinsic IBignum)
+            ( Map.fromList
+                [
+                  ( "(==)"
+                  , Forall mempty [] (TIntrinsic IBignum `TArrow` TIntrinsic IBignum `TArrow` TIntrinsic IBool)
+                  )
+                ]
+            )
+        )
+
+    modify $
+      insertInstance
+        "Divisible"
+        (TIntrinsic IFloat)
+        ( InstanceInfo
+            mempty
+            (TIntrinsic IFloat)
+            (TIntrinsic IFloat)
+            ( Map.fromList
+                [
+                  ( "(/)"
+                  , Forall mempty [] (TIntrinsic IFloat `TArrow` TIntrinsic IFloat `TArrow` TIntrinsic IInt32)
+                  )
+                ]
+            )
+        )
+
+    modify $
+      insertInstance
+        "Divisible"
+        (TIntrinsic IDouble)
+        ( InstanceInfo
+            mempty
+            (TIntrinsic IDouble)
+            (TIntrinsic IDouble)
+            ( Map.fromList
+                [
+                  ( "(/)"
+                  , Forall mempty [] (TIntrinsic IDouble `TArrow` TIntrinsic IDouble `TArrow` TIntrinsic IInt32)
+                  )
+                ]
+            )
+        )
+
+    modify $
+      insertInstance
+        "Modulo"
+        (TIntrinsic IInt32)
+        ( InstanceInfo
+            mempty
+            (TIntrinsic IInt32)
+            (TIntrinsic IInt32)
+            ( Map.fromList
+                [
+                  ( "(%)"
+                  , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
+                  )
+                ]
+            )
+        )
+
+    modify $
+      insertInstance
+        "Modulo"
+        (TIntrinsic IInt64)
+        ( InstanceInfo
+            mempty
+            (TIntrinsic IInt64)
+            (TIntrinsic IInt64)
+            ( Map.fromList
+                [
+                  ( "(%)"
+                  , Forall mempty [] (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64 `TArrow` TIntrinsic IInt64)
+                  )
+                ]
+            )
+        )
+
+    modify $
+      insertInstance
+        "Semigroup"
+        (TIntrinsic IString)
+        ( InstanceInfo
+            mempty
+            (TIntrinsic IString)
+            (TIntrinsic IString)
+            ( Map.fromList
+                [
+                  ( "(<>)"
+                  , Forall mempty [] (TIntrinsic IString `TArrow` TIntrinsic IString `TArrow` TIntrinsic IString)
+                  )
+                ]
+            )
+        )
+
+    modify $
+      insertInstance
+        "Semigroup"
+        (TApplication KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| []))
+        ( InstanceInfo
+            mempty
+            (TApplication () (TConstructor () "List") (TVariable (Parameter () "a") :| []))
+            (TApplication KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| []))
+            ( Map.fromList
+                [
+                  ( "(<>)"
+                  , Forall
+                      mempty
+                      []
+                      ( TApplication KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| [])
+                          `TArrow` TApplication KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| [])
+                          `TArrow` TApplication KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| [])
+                      )
+                  )
+                ]
+            )
+        )
 
     unless (["*"] == exports) $ do
       exps <- gets moduleExports
@@ -219,7 +799,7 @@ collectInstances kinds traits =
           error "Trait not in scope!"
         Just (TraitInfo _ _ p dict) -> do
           modify $
-            insertInstance trait t1 (instanceInfo loc es def)
+            insertInstance trait t1 (instanceInfo loc p kinds es def)
          where
           t1 = toIndexedType kinds p q
           es = Environment.mapEnvironment (substituteInScheme (0 `mapsTo` t1) . toIndexedScheme kinds p) dict
