@@ -77,7 +77,12 @@ data CotypeConstructorInfo a
   deriving (Show, Eq, Ord, Read)
 
 data TraitInfo a
-  = TraitInfo a Name (Parameter Kind) (Environment (Scheme Parameter () ParameterizedType))
+  = TraitInfo 
+      { traitInfoMetadata :: a 
+      , traitInfoName :: Name 
+      , traitInfoParameter :: Parameter Kind
+      , traitInfoEntries :: Environment (Scheme Parameter () ParameterizedType)
+      }
   deriving (Show, Eq, Ord, Read)
 
 data InstanceInfo a
