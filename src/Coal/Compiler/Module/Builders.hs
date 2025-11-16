@@ -2,7 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module Coal.Compiler.Module.Builders (build) where
+module Coal.Compiler.Module.Builders (build, typeConstructorEnv) where
 
 import Coal.Ast.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment)

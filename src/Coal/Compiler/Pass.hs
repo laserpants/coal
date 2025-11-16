@@ -1,15 +1,22 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Pass (Pass (..), (>->), mapPass, localPass) where
+module Coal.Compiler.Pass (Pass (..), (>->), mapPass, localPass, localPassM) where
 
+import Coal.Compiler.Module.Builders (typeConstructorEnv)
 import Coal.Ast.Metadata (Metadata (..))
+import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Environment
+import Coal.Compiler.Module.Bundle (ModuleBundle (..))
 import Coal.Compiler.Stack (CompilerT)
+import Coal.Compiler.State
 import Coal.Language (IndexedType, Kind)
-import Coal.Language.Module (Module (..))
+import Coal.Language.Module
 import Control.Monad ((>=>))
-import Control.Monad.Reader (local)
+import Control.Monad.Reader (local, ask)
+import Control.Monad.State (gets, evalStateT)
+import Debug.Trace
 import Extras (Name)
 
 data Pass a m i o = Pass
@@ -37,3 +44,37 @@ localPass f p =
     { passName = "local<" <> passName p <> ">"
     , runPass = \m -> local (f m) (runPass p m)
     }
+
+localPassM :: (Monad m) => Pass Metadata m (Module Metadata Kind t) (Module Metadata Kind IndexedType) -> Pass Metadata m (Module Metadata Kind t) (Module Metadata Kind IndexedType)
+localPassM p =
+  Pass
+    { passName = "localM<" <> passName p <> ">"
+    , runPass = avc -- \m -> local (f m) (runPass p m)
+    }
+ where
+  avc m@(Module path _ _) = do
+    modules <- gets compilerModules
+    currentEnv <- ask
+
+    case Environment.lookup (principalPath path) modules of
+      Nothing ->
+        undefined
+      Just ModuleBundle{..} -> do
+        kinds <- evalStateT typeConstructorEnv ModuleBundle{..}
+        let env =
+              CompilerEnvironment
+                { compilerDataConstructorEnvironment = compilerDataConstructorEnvironment currentEnv
+                , compilerTypeConstructorEnvironment = compilerTypeConstructorEnvironment currentEnv
+                , compilerAliasEnvironment = compilerAliasEnvironment currentEnv
+                , compilerCodataAccessorEnvironment = compilerCodataAccessorEnvironment currentEnv
+                , compilerTraitEnvironment = compilerTraitEnvironment currentEnv
+                , compilerInstanceEnvironment = compilerInstanceEnvironment currentEnv
+                --
+                , compilerFoldEnvironment = mempty
+                , compilerUnfoldEnvironment = mempty
+                --
+                , compilerDictionaryNameEnvironment = mempty
+                , compilerKernelEnvironment = KernelEnvironment mempty mempty mempty
+                }
+
+        local (const env) (runPass p m)
