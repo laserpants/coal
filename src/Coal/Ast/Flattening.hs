@@ -1,6 +1,6 @@
 {-# LANGUAGE LambdaCase #-}
 
-module Coal.Compiler.Transform.Flattening (
+module Coal.Ast.Flattening (
   flattenApplication,
   flattenLambda,
 ) where

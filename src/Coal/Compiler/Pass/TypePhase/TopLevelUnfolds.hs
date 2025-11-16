@@ -6,11 +6,11 @@
 
 module Coal.Compiler.Pass.TypePhase.TopLevelUnfolds (passTopLevelUnfolds) where
 
+import Coal.Ast.Flattening (flattenApplication)
 import Coal.Common.Supply (freshName, supplied)
 import Coal.Compiler.Pass
 import Coal.Compiler.Stack
 import Coal.Compiler.Transform.Expression
-import Coal.Compiler.Transform.Flattening (flattenApplication)
 import Coal.Language (Expression (..), Kind (..), Pattern (..))
 import Coal.Language.Module
 import Data.Data (Data)

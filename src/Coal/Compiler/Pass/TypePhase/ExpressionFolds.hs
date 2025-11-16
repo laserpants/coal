@@ -7,14 +7,14 @@
 
 module Coal.Compiler.Pass.TypePhase.ExpressionFolds (passExpressionFolds) where
 
+import Coal.Ast.Flattening (flattenApplication)
+import Coal.Ast.Transform (replace)
 import Coal.Common.Label (Label (..), labelName)
 import Coal.Common.Supply (freshName, supplied)
 import Coal.Compiler.Journal
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Compiler.Transform.Expression
-import Coal.Compiler.Transform.Flattening (flattenApplication)
-import Coal.Compiler.Transform.Tree (replace)
 import Coal.Language (Choice (..), Clause (..), Expression (..), Pattern (..))
 import Coal.Language.Module (ConstantDef (..), Definition (..), FunctionDef (..), InstanceDef (..), Module (..), principalPath)
 import Control.Monad.Except

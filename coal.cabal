@@ -24,7 +24,10 @@ source-repository head
 
 library
   exposed-modules:
+      Coal.Ast.Flattening
       Coal.Ast.Metadata
+      Coal.Ast.Normalization
+      Coal.Ast.Transform
       Coal.Common.Environment
       Coal.Common.FreeVars
       Coal.Common.Label
@@ -90,9 +93,6 @@ library
       Coal.Compiler.Stack
       Coal.Compiler.State
       Coal.Compiler.Transform.Expression
-      Coal.Compiler.Transform.Flattening
-      Coal.Compiler.Transform.NormalizeObjects
-      Coal.Compiler.Transform.Tree
       Coal.Compiler.Transform.Type.Parameterized
       Coal.Compiler.Transform.WhereClauses
       Coal.Compiler.TypeInference

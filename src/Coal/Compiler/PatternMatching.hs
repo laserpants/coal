@@ -13,6 +13,7 @@ module Coal.Compiler.PatternMatching (
   compileEnvelope,
 ) where
 
+import Coal.Ast.Transform (replaceWith)
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (freshName, supplied)
 import Coal.Compiler.PatternMatching.Compiler (TypeProxy (..), compileEnvelope)
@@ -20,7 +21,6 @@ import Coal.Compiler.PatternMatching.Envelope (EnvelopeExpression (..), Envelope
 import Coal.Compiler.PatternMatching.Equation (patternEquation)
 import Coal.Compiler.PatternMatching.Rule (matchPatterns)
 import Coal.Compiler.Stack
-import Coal.Compiler.Transform.Tree (replaceWith)
 import Coal.Language (Binding (..), Choice (..), Clause (..), Expression (..), Pattern (..), Primitive (..))
 import Coal.Language.Module (ConstantDef (..), Definition (..), FunctionDef (..), Module (..))
 import Data.Data (Data)

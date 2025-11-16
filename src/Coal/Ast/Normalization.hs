@@ -1,9 +1,9 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 
-module Coal.Compiler.Transform.NormalizeObjects (NormalizeObjectsTransformContext (..)) where
+module Coal.Ast.Normalization (NormalizeObjectsTransformContext (..)) where
 
-import Coal.Compiler.Transform.Flattening
+import Coal.Ast.Flattening (flattenLambda)
 import Coal.Language.Expression (Expression (..))
 import Coal.Language.HasType (HasType (..), foldTypeOf)
 import Coal.Language.Module (Module (..))

@@ -4,9 +4,9 @@
 
 module Coal.Compiler.Transform.WhereClauses (expandWhereClausesModule) where
 
+import Coal.Ast.Transform
 import Coal.Compiler.Journal
 import Coal.Compiler.Stack
-import Coal.Compiler.Transform.Tree
 import Coal.Language.Module
 import Data.Data (Data)
 import Extras (Name)

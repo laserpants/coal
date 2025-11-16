@@ -2,7 +2,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Transform.Tree (
+module Coal.Ast.Transform (
   replace,
   replaceWith,
   replaceMultipleWith,
