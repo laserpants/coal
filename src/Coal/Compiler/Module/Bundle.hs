@@ -45,7 +45,7 @@ module Coal.Compiler.Module.Bundle (
 
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
-import Coal.Compiler.Transform.Type.Parameterized
+import Coal.Ast.Type.Parameterized
 import Coal.Language
 import Coal.Language.Module
 import Control.Monad.State (evalState)

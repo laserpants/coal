@@ -29,6 +29,7 @@ library
       Coal.Ast.Normalization
       Coal.Ast.Shorthand
       Coal.Ast.Transform
+      Coal.Ast.Type.Parameterized
       Coal.Common.Environment
       Coal.Common.FreeVars
       Coal.Common.Label
@@ -93,7 +94,6 @@ library
       Coal.Compiler.PatternMatching.Rule
       Coal.Compiler.Stack
       Coal.Compiler.State
-      Coal.Compiler.Transform.Type.Parameterized
       Coal.Compiler.Transform.WhereClauses
       Coal.Compiler.TypeInference
       Coal.Compiler.TypeInference.Errors

@@ -14,7 +14,7 @@ import Coal.Common.Supply (supplied)
 import Coal.Compiler.Journal
 import Coal.Compiler.Module.Bundle
 import Coal.Compiler.Stack
-import Coal.Compiler.Transform.Type.Parameterized
+import Coal.Ast.Type.Parameterized
 import Coal.Language
 import Coal.Language.Module
 import Coal.TypeSystem
