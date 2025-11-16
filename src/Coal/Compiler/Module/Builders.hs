@@ -791,17 +791,17 @@ addTraitEntries env trait (TraitDef _ p entries) =
 collectInstances :: (Monad m) => Environment Kind -> Environment (TraitInfo Metadata) -> Definition Metadata Kind () -> StateT (ModuleBundle Metadata) (CompilerT Metadata m) ()
 collectInstances kinds traits =
   \case
-    DInstance loc trait def@(InstanceDef _ q _) ->
+    DInstance loc trait (InstanceDef _ q _) ->
       case Environment.lookup trait traits of
         Nothing ->
           -- TODO
           error "Trait not in scope!"
         Just (TraitInfo _ _ p dict) -> do
-          modify $ insertInstance trait t1 (instanceInfo def)
+          modify $ insertInstance trait t1 instanceInfo
          where
           t1 = toIndexedType kinds p q
           Environment env = Environment.mapEnvironment (substituteInScheme (0 `mapsTo` t1) . toIndexedScheme kinds p) dict
-          instanceInfo (InstanceDef _ q _) = InstanceInfo loc q (toIndexedType kinds p q) env
+          instanceInfo = InstanceInfo loc q (toIndexedType kinds p q) env
     _ ->
       pure ()
 
