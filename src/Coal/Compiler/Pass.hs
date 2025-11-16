@@ -40,7 +40,7 @@ mapPass p =
 overlayEnvironment :: (Monad m) => Pass Metadata m (Module Metadata Kind t) (Module Metadata Kind IndexedType) -> Pass Metadata m (Module Metadata Kind t) (Module Metadata Kind IndexedType)
 overlayEnvironment p =
   Pass
-    { passName = "localM<" <> passName p <> ">"
+    { passName = "overlay<" <> passName p <> ">"
     , runPass = pass
     }
  where
