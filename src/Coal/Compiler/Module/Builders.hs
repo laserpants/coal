@@ -797,11 +797,10 @@ collectInstances kinds traits =
           -- TODO
           error "Trait not in scope!"
         Just (TraitInfo _ _ p dict) -> do
-          modify $ insertInstance trait t1 instanceInfo
+          modify $ insertInstance trait t1 (InstanceInfo loc q (toIndexedType kinds p q) env)
          where
           t1 = toIndexedType kinds p q
           Environment env = Environment.mapEnvironment (substituteInScheme (0 `mapsTo` t1) . toIndexedScheme kinds p) dict
-          instanceInfo = InstanceInfo loc q (toIndexedType kinds p q) env
     _ ->
       pure ()
 
