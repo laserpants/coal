@@ -7,9 +7,9 @@
 
 module Coal.Compiler.Pass.TypePhase.LambdaMatchExpansion (passLambdaMatchExpansion) where
 
-import Coal.Common.Label (Label (..))
 import Coal.Compiler.Pass
 import Coal.Compiler.Stack
+import Coal.Compiler.Transform.Expression
 import Coal.Language
 import Coal.Language.Module (ConstantDef (..), Definition (..), FunctionDef (..), Module (..))
 import Data.Data (Data)
@@ -47,17 +47,10 @@ instance (Monoid a, Data a) => TransformContext (Expression a ()) where
 
 expandLambdaMatch :: (Monoid a, Monad m) => NonEmpty (Clause a ()) -> CompilerT o m (Expression a ())
 expandLambdaMatch cs =
-  -- TODO: use syntax helpers
   pure $
-    ELambda
-      mempty
-      (PVariable mempty (Label () "$lambda_match") :| [])
-      ( EMatch
-          mempty
-          ()
-          (EVariable mempty (Label () "$lambda_match"))
-          cs
-      )
+    lambdaE
+      (varP "$lambda_match" :| [])
+      (matchE (varE "$lambda_match") cs)
 
 instance (Monoid a, Data a) => TransformContext (Module a Kind ()) where
   expandLambdaMatchExprs =
