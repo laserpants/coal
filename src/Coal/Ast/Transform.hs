@@ -2,12 +2,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Ast.Transform (
-  replace,
-  replaceWith,
-  replaceMultipleWith,
-  rename,
-) where
+module Coal.Ast.Transform (replace, replaceWith, replaceMultipleWith, rename) where
 
 import Coal.Common.FreeVars (BoundVars (..))
 import Coal.Common.Label (Label (..))
