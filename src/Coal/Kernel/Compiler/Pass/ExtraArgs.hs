@@ -6,12 +6,11 @@ module Coal.Kernel.Compiler.Pass.ExtraArgs (addImplicitArgs) where
 import Coal.Common.Label (Label (..))
 import Coal.Kernel.Compiler.Ast (flattenAppNodes)
 import Coal.Kernel.Language (Expr, Type, Typed (..))
+import qualified Coal.Kernel.Language as Syntax
 import Coal.Kernel.Language.Object (Object (..))
 import Data.List.NonEmpty (NonEmpty (..))
-import TextShow (showt)
-
-import qualified Coal.Kernel.Language as Syntax
 import qualified Data.List.NonEmpty as NonEmpty
+import TextShow (showt)
 
 addImplicitArgs :: Object Type (Expr Type) -> Object Type (Expr Type)
 addImplicitArgs =

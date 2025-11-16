@@ -16,6 +16,7 @@ module Coal.Kernel.Compiler.Pipeline (
 ) where
 
 import Coal.Common.Environment (Environment)
+import qualified Coal.Common.Environment as Environment
 import Coal.Kernel.Compiler.Pipeline.State
 import Coal.Kernel.LLVM
 import Coal.Kernel.Language (Type)
@@ -23,8 +24,6 @@ import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.State (MonadState, StateT, evalStateT, modify, runStateT)
 import Data.List (sort)
 import Extras (Name)
-
-import qualified Coal.Common.Environment as Environment
 
 newtype Pipeline a = Pipeline {pipelineState :: StateT PipelineState IO a}
   deriving

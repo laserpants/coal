@@ -16,7 +16,6 @@ import Control.Monad (void)
 import Extras (Name)
 import Text.Megaparsec (try)
 import Text.Megaparsec.Char (upperChar)
-
 import qualified Text.Megaparsec.Char.Lexer as Lexer
 
 {-# INLINE name #-}

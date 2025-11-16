@@ -6,14 +6,13 @@ module Coal.Kernel.Compiler.Pass.Memoize (memoize) where
 import Coal.Common.FreeVars (freeSet)
 import Coal.Common.Label (Label (..))
 import Coal.Kernel.Language (Binding (..), Expr, Type, bindingLabel, isFunction, isPrim)
+import qualified Coal.Kernel.Language as Syntax
 import Control.Arrow ((>>>))
 import Control.Monad.Writer (MonadWriter, tell)
 import Data.Functor.Foldable (embed, project)
 import Data.List (partition)
 import Data.List.NonEmpty (NonEmpty (..), toList)
 import Extras (Set, (<$$>))
-
-import qualified Coal.Kernel.Language as Syntax
 
 canMemo :: Binding Type (Expr Type) -> Bool
 canMemo b

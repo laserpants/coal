@@ -7,6 +7,7 @@ import Coal.Common.FreeVars (freeSet)
 import Coal.Common.Label (Label (..))
 import Coal.Kernel.Compiler.Ast (flattenAppNodes)
 import Coal.Kernel.Language (Expr, Type)
+import qualified Coal.Kernel.Language as Syntax
 import Coal.Kernel.Language.Object (Object (..), ObjectList, objectName)
 import Control.Arrow ((>>>))
 import Control.Monad.RWS (RWS, evalRWS, tell)
@@ -15,10 +16,8 @@ import Data.Function (on)
 import Data.Functor.Foldable (cata, embed)
 import Data.List (nubBy)
 import Data.List.NonEmpty (NonEmpty (..))
-import Extras (Name, (<$$>))
-
-import qualified Coal.Kernel.Language as Syntax
 import qualified Data.Set as Set
+import Extras (Name, (<$$>))
 
 evalWS0 :: RWS () w Int a -> (a, w)
 evalWS0 v = evalRWS v () 0

@@ -11,11 +11,10 @@ import Control.Monad.State (MonadState, modify, runStateT)
 import Control.Monad.Trans (lift)
 import Data.Functor.Foldable (cata, embed)
 import Data.List.NonEmpty (NonEmpty (..))
-import Extras (Dictionary, Name, applyM1, applyM2, isConstructor)
-import TextShow (showt)
-
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map.Strict as Map
+import Extras (Dictionary, Name, applyM1, applyM2, isConstructor)
+import TextShow (showt)
 
 suffixExpr :: (MonadState Int m) => Expr t -> m (Expr t)
 suffixExpr =

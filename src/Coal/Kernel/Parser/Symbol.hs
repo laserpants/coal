@@ -19,7 +19,6 @@ module Coal.Kernel.Parser.Symbol (
 ) where
 
 import Coal.Kernel.Parser (Parser, Text, between, cons, sepBy, sepBy1, spaces)
-
 import qualified Text.Megaparsec.Char.Lexer as Lexer
 
 {-# INLINE symbol #-}

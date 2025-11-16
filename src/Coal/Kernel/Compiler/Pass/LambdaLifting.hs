@@ -10,10 +10,9 @@ import Coal.Kernel.Language
 import Control.Monad.RWS (MonadWriter, RWS, ask, evalRWS, local, tell)
 import Data.Functor.Foldable (cata, embed)
 import Data.List.NonEmpty (NonEmpty, toList)
+import qualified Data.Text as Text
 import Extras (Name, forM, traverse2)
 import TextShow (showt)
-
-import qualified Data.Text as Text
 
 runLifting :: RWS Name ObjectList Int a -> (a, ObjectList)
 runLifting e = evalRWS e "" 1

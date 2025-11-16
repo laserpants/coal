@@ -3,10 +3,9 @@ module Coal.Kernel.Parser.Identifier (name, constructor, identifier) where
 import Coal.Kernel.Parser (Parser, cons, option, word)
 import Control.Applicative ((<|>))
 import Data.Text (Text)
+import qualified Data.Text as Text
 import Text.Megaparsec (many)
 import Text.Megaparsec.Char (alphaNumChar, char, lowerChar, upperChar)
-
-import qualified Data.Text as Text
 
 {-# INLINE underscore #-}
 underscore :: Parser Char
