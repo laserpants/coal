@@ -17,7 +17,6 @@ module Coal.Compiler.Module.Bundle (
   addExport,
   toIndexedScheme,
   toIndexedType,
-  instanceInfo,
   dataConstructorInfo,
   codataAccessorInfo,
   cotypeConstructorInfo,
@@ -320,10 +319,6 @@ traitInfo loc name (TraitDef _ p ps) = TraitInfo loc name p (Environment.fromLis
 
 aliasInfo :: a -> Name -> AliasDef -> AliasInfo a
 aliasInfo loc name (AliasDef ps t) = AliasInfo loc name (parameterName <$> ps) t
-
--- TODO: FIXME
-instanceInfo :: i -> Parameter Kind -> Environment Kind -> Environment IndexedScheme -> InstanceDef a i Kind () -> InstanceInfo i
-instanceInfo loc p kinds (Environment e) (InstanceDef _ q _) = InstanceInfo loc q (toIndexedType kinds p q) e
 
 -- TODO
 toIndexedScheme :: Environment Kind -> Parameter Kind -> Scheme Parameter () ParameterizedType -> Scheme TypeIndex Kind IndexedType
