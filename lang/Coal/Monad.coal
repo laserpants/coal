@@ -1,0 +1,7 @@
+module Monad {
+
+  trait Monad<m : * -> *> {
+    bind : m<a> -> (a -> m<b>) -> m<b>
+  }
+
+}

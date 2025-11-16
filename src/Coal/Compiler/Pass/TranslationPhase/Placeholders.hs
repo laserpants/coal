@@ -110,7 +110,6 @@ tryMatch t u = do
   var <- supplied id
   pure (evalUnifier var (match t u))
 
--- TODO: return type is a value of type InstanceInfo{..} ??
 findFirstMatch :: (Monad m) => Trait IndexedType -> CompilerT a m (Maybe (ParameterizedType, IndexedType, Dictionary IndexedScheme))
 findFirstMatch (Trait name t) = do
   env <- asks compilerInstanceEnvironment
