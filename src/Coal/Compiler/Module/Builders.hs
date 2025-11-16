@@ -656,7 +656,6 @@ pick :: [Name] -> Environment a -> [a]
 pick names = Environment.elems . Environment.restrict names
 
 collect :: (Monad m) => Definition Metadata Kind () -> (ModuleBundle Metadata -> Environment a) -> StateT (ModuleBundle Metadata) (CompilerT Metadata m) [a]
--- TODO
 collect (DImport _ (Path ["Builtin$"]) _) _ = do
   pure []
 collect (DImport _ path names) getter = do
