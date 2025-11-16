@@ -5,7 +5,7 @@
 module Coal.Compiler.Module.Builders (build, typeConstructorEnv) where
 
 import Coal.Ast.Metadata (Metadata (..))
-import Coal.Common.Environment (Environment)
+import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Module.Bundle
 import Coal.Compiler.Stack
@@ -797,11 +797,11 @@ collectInstances kinds traits =
           -- TODO
           error "Trait not in scope!"
         Just (TraitInfo _ _ p dict) -> do
-          modify $
-            insertInstance trait t1 (instanceInfo loc p kinds es def)
+          modify $ insertInstance trait t1 (instanceInfo def)
          where
           t1 = toIndexedType kinds p q
-          es = Environment.mapEnvironment (substituteInScheme (0 `mapsTo` t1) . toIndexedScheme kinds p) dict
+          Environment env = Environment.mapEnvironment (substituteInScheme (0 `mapsTo` t1) . toIndexedScheme kinds p) dict
+          instanceInfo (InstanceDef _ q _) = InstanceInfo loc q (toIndexedType kinds p q) env
     _ ->
       pure ()
 
