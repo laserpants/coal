@@ -90,16 +90,26 @@ headCons = concatMap go
 prim :: Primitive -> Name
 prim =
   \case
-    LUnit -> "%()"
-    LBool True -> "%True"
-    LBool False -> "%False"
-    LInt32{} -> "%Int32"
-    LInt64{} -> "%Int64"
-    LBignum{} -> "%Bignum"
-    LFloat{} -> "%Float"
-    LDouble{} -> "%Double"
-    LChar{} -> "%Char"
-    LString{} -> "%String"
+    LUnit ->
+      "%()"
+    LBool True ->
+      "%True"
+    LBool False ->
+      "%False"
+    LInt32{} ->
+      "%Int32"
+    LInt64{} ->
+      "%Int64"
+    LBignum{} ->
+      "%Bignum"
+    LFloat{} ->
+      "%Float"
+    LDouble{} ->
+      "%Double"
+    LChar{} ->
+      "%Char"
+    LString{} ->
+      "%String"
 
 isUseful :: (Monad m) => [[Pat]] -> [Pat] -> CompilerT a m Bool
 isUseful [] _ = pure True -- zero rows (0x0 matrix)
