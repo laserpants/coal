@@ -50,11 +50,11 @@ overlayEnvironment p =
       Nothing ->
         error "Implementation error"
       Just ModuleBundle{..} -> do
-        kinds <- evalStateT typeConstructorEnv ModuleBundle{..}
+        typeConstructors <- evalStateT typeConstructorEnv ModuleBundle{..}
         let env =
               CompilerEnvironment
                 { compilerDataConstructorEnvironment = moduleDataConstructors
-                , compilerTypeConstructorEnvironment = kinds
+                , compilerTypeConstructorEnvironment = typeConstructors
                 , compilerAliasEnvironment = moduleAliases
                 , compilerCodataAccessorEnvironment = moduleCodataAccessors
                 , compilerTraitEnvironment = moduleTraits
