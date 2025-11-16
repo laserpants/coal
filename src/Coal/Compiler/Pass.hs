@@ -2,7 +2,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Pass (Pass (..), (>->), mapPass, localPassM) where
+module Coal.Compiler.Pass (Pass (..), (>->), mapPass, overlayEnvironment) where
 
 import Coal.Ast.Metadata (Metadata (..))
 import qualified Coal.Common.Environment as Environment
@@ -37,9 +37,8 @@ mapPass p =
     , runPass = traverse (runPass p)
     }
 
--- TODO: rename/move
-localPassM :: (Monad m) => Pass Metadata m (Module Metadata Kind t) (Module Metadata Kind IndexedType) -> Pass Metadata m (Module Metadata Kind t) (Module Metadata Kind IndexedType)
-localPassM p =
+overlayEnvironment :: (Monad m) => Pass Metadata m (Module Metadata Kind t) (Module Metadata Kind IndexedType) -> Pass Metadata m (Module Metadata Kind t) (Module Metadata Kind IndexedType)
+overlayEnvironment p =
   Pass
     { passName = "localM<" <> passName p <> ">"
     , runPass = pass
@@ -49,7 +48,7 @@ localPassM p =
     modules <- gets compilerModules
     case Environment.lookup (principalPath path) modules of
       Nothing ->
-        error "TODO"
+        error "Implementation error"
       Just ModuleBundle{..} -> do
         kinds <- evalStateT typeConstructorEnv ModuleBundle{..}
         let env =
@@ -63,5 +62,4 @@ localPassM p =
                 , compilerDictionaryNameEnvironment = mempty
                 , compilerKernelEnvironment = KernelEnvironment mempty mempty mempty
                 }
-
         local (const env) (runPass p m)

@@ -3,7 +3,7 @@
 module Coal.Compiler.Pass.TranslationPhase (translationPhase) where
 
 import Coal.Ast.Metadata (Metadata (..))
-import Coal.Compiler.Pass (Pass (..), localPassM, mapPass, (>->))
+import Coal.Compiler.Pass (Pass (..), overlayEnvironment, mapPass, (>->))
 import Coal.Compiler.Pass.DebugOutput (generateDebugArtifacts)
 import Coal.Compiler.Pass.TranslationPhase.DenormalizeObjects (passDenormalizeObjects)
 import Coal.Compiler.Pass.TranslationPhase.ExpandAsPatterns (passExpandAsPatterns)
@@ -39,4 +39,4 @@ translationPhasePasses =
     >-> generateDebugArtifacts "CompileNats"
 
 translationPhase :: (MonadIO m) => Pass Metadata m [Module Metadata Kind IndexedType] [Module Metadata Kind IndexedType]
-translationPhase = mapPass (localPassM translationPhasePasses)
+translationPhase = mapPass (overlayEnvironment translationPhasePasses)
