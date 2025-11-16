@@ -7,12 +7,11 @@ import Coal.Kernel.LLVM.IREval
 import Coal.Kernel.LLVM.IREval.Comment (irCommentBlock)
 import Coal.Kernel.LLVM.IRInstruction (FCmpCond (..), ICmpCond (..), IRInstr)
 import Coal.Kernel.LLVM.IRInstruction.TH
+import qualified Coal.Kernel.LLVM.IRInstruction.TH as IR
 import Coal.Kernel.LLVM.IRType (IRType (..))
 import Coal.Kernel.LLVM.IRType.Syntax (i1, i32, i64)
 import Coal.Kernel.LLVM.IRValue (IRValue (..))
 import Coal.Kernel.Language (Op (..))
-
-import qualified Coal.Kernel.LLVM.IRInstruction.TH as IR
 
 irEvalOp :: (IREval e) => Op e -> IRInstr IRValue
 irEvalOp =

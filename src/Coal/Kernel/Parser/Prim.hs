@@ -7,10 +7,9 @@ import Coal.Kernel.Parser (Parser, lexeme, spaces, try, ($>), (<|>))
 import Coal.Kernel.Parser.Symbol (symbol)
 import Control.Monad (void)
 import Data.Char (ord)
-import Text.Megaparsec (manyTill)
-
 import qualified Data.Text as Text
 import qualified Data.Text.Encoding as Text
+import Text.Megaparsec (manyTill)
 import qualified Text.Megaparsec.Char as Megaparsec
 import qualified Text.Megaparsec.Char.Lexer as Lexer
 

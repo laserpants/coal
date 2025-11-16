@@ -30,12 +30,11 @@ import Data.Eq.Deriving (deriveEq1)
 import Data.Fix (Fix (..))
 import Data.Functor.Foldable (cata, project)
 import Data.List.NonEmpty (NonEmpty (..))
+import qualified Data.List.NonEmpty as NonEmpty
 import Data.Set (singleton)
+import qualified Data.Set as Set
 import Extras (Name, Over)
 import Text.Show.Deriving (deriveShow1)
-
-import qualified Data.List.NonEmpty as NonEmpty
-import qualified Data.Set as Set
 
 -- | Pattern matching clause
 data Clause t a = Clause (NonEmpty (Label t)) a

@@ -16,12 +16,11 @@ import Coal.Kernel.LLVM.IRType (IRType (..), IRTyped (..))
 import Coal.Kernel.LLVM.IRType.Syntax (i32, i8Ptr, struct)
 import Coal.Kernel.LLVM.IRValue (IRValue (..))
 import Coal.Kernel.Language (Expr)
+import qualified Coal.Kernel.Language as Syntax
 import Control.Monad (unless)
 import Data.List.NonEmpty (NonEmpty (..), toList)
 import Data.Text (Text)
 import Extras (Name, forM, forSM_, isConstructor)
-
-import qualified Coal.Kernel.Language as Syntax
 
 irEvalApp :: (IRTyped t, IREval (Expr t)) => t -> Label t -> NonEmpty (Expr t) -> IRInstr IRValue
 irEvalApp t ll@(Label _ var) es

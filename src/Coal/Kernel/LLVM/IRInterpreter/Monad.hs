@@ -21,9 +21,8 @@ import Coal.Kernel.LLVM.IRType (IRType (..))
 import Coal.Kernel.LLVM.IRValue (IRValue (..))
 import Control.Monad.RWS (MonadReader, MonadState, MonadWriter, RWS, evalRWS, gets, modify, runRWS)
 import Data.Text (Text)
-import TextShow (showt)
-
 import qualified Data.Text as Text
+import TextShow (showt)
 
 data IRLine
   = LInstruction [Text]

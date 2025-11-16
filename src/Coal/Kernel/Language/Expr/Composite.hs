@@ -7,11 +7,10 @@ import Coal.Kernel.Language.Expr (Expr)
 import Coal.Kernel.Language.Expr.Syntax
 import Coal.Kernel.Language.Type.Arrow (foldType)
 import Coal.Kernel.Language.Type.Syntax (arrow)
+import qualified Coal.Kernel.Language.Type.Syntax as Lang
 import Coal.Kernel.Language.Typed (Typed (..))
 import Data.List.NonEmpty (NonEmpty (..), toList)
 import TextShow (showt)
-
-import qualified Coal.Kernel.Language.Type.Syntax as Lang
 
 tupleExpr :: NonEmpty (Expr Lang.Type) -> Expr Lang.Type
 tupleExpr es = app t (var (Label (foldType t ts) ("$Tuple" <> showt n))) es

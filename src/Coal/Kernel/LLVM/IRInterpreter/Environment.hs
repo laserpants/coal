@@ -11,12 +11,11 @@ module Coal.Kernel.LLVM.IRInterpreter.Environment (
 ) where
 
 import Coal.Common.Environment (Environment (..))
+import qualified Coal.Common.Environment as Environment
 import Coal.Kernel.LLVM.IRType (IRTyped (..))
 import Coal.Kernel.LLVM.IRValue (IRValue (..))
 import Coal.Kernel.Language.Object (ObjectList, objectConstructorInfo, objectName)
 import Extras (Name, Over)
-
-import qualified Coal.Common.Environment as Environment
 
 data IRInterpreterEnv = IRInterpreterEnv
   { irInterpreterValueEnv :: Environment IRValue

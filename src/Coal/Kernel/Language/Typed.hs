@@ -8,7 +8,6 @@ import Coal.Common.Label (Label (..))
 import Coal.Kernel.Language.Op (Op (..))
 import Coal.Kernel.Language.Prim (Prim (..))
 import Coal.Kernel.Language.Type (Type (..))
-
 import qualified Coal.Kernel.Language.Type.Syntax as Type
 
 class Typed t where

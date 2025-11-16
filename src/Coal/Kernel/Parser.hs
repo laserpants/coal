@@ -19,12 +19,11 @@ import Control.Applicative ((<|>))
 import Control.Monad (when)
 import Data.Functor (void, ($>), (<$), (<$>))
 import Data.Text (Text)
+import qualified Data.Text as Text
 import Data.Void (Void)
 import Extras (Name)
 import Text.Megaparsec
 import Text.Megaparsec.Char (alphaNumChar, char, newline, spaceChar)
-
-import qualified Data.Text as Text
 import qualified Text.Megaparsec.Char.Lexer as Lexer
 
 type Parser = Parsec Void Text

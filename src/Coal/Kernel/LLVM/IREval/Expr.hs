@@ -20,15 +20,14 @@ import Coal.Kernel.LLVM.IRInstruction.TH
 import Coal.Kernel.LLVM.IRType (IRTyped (..))
 import Coal.Kernel.LLVM.IRType.Syntax (i1, i8Ptr, stringLiteral)
 import Coal.Kernel.LLVM.IRValue (IRValue (..), irPrimValue)
+import qualified Coal.Kernel.Language as Syntax
 import Coal.Kernel.Language.Type.Arrow (returnTypeOf)
 import Control.Arrow ((>>>))
 import Data.Fix (Fix (..))
 import Data.Functor.Foldable (project)
 import Data.List.NonEmpty (toList)
-import Extras (forM)
-
-import qualified Coal.Kernel.Language as Syntax
 import qualified Data.Text as Text
+import Extras (forM)
 
 instance IREval (Syntax.Expr Syntax.Type) where
   irEval =

@@ -4,12 +4,11 @@
 module Coal.Kernel.Compiler.Pass.LetLifting (liftLetNodes) where
 
 import Coal.Kernel.Language (Binding (..), Expr, Type, bindingLabel)
+import qualified Coal.Kernel.Language as Syntax
 import Coal.Kernel.Language.Type.Arrow (isFunction)
 import Control.Monad.Writer (MonadWriter, tell)
 import Data.Functor.Foldable (cata, embed)
 import Data.List.NonEmpty (NonEmpty (..))
-
-import qualified Coal.Kernel.Language as Syntax
 import qualified Data.List.NonEmpty as NonEmpty
 
 liftLetNodes :: (MonadWriter [Binding Type (Expr Type)] m) => Expr Type -> m (Expr Type)

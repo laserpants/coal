@@ -10,9 +10,8 @@ import Coal.Kernel.LLVM.IRInstruction (IRInstrOp)
 import Coal.Kernel.LLVM.IRInstruction.TH
 import Control.Monad.Free (MonadFree)
 import Data.Text (Text)
-import Extras (forM_)
-
 import qualified Data.Text as Text
+import Extras (forM_)
 
 irCommentBlock :: (MonadFree (IRInstrOp) m) => Text -> m a -> m a
 irCommentBlock text instrs = do
