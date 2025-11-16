@@ -78,8 +78,6 @@ data CompilerEnvironment = CompilerEnvironment
   , compilerInstanceEnvironment :: InstanceEnvironment
   , compilerAliasEnvironment :: AliasEnvironment
   , compilerCodataAccessorEnvironment :: CodataAccessorEnvironment
-  , compilerFoldEnvironment :: FoldEnvironment
-  , compilerUnfoldEnvironment :: UnfoldEnvironment
   , compilerDictionaryNameEnvironment :: DictionaryNameEnvironment
   , compilerKernelEnvironment :: KernelEnvironment
   }
@@ -94,8 +92,6 @@ emptyCompilerEnvironment =
     , compilerInstanceEnvironment = mempty
     , compilerAliasEnvironment = mempty
     , compilerCodataAccessorEnvironment = mempty
-    , compilerFoldEnvironment = mempty
-    , compilerUnfoldEnvironment = mempty
     , compilerDictionaryNameEnvironment = mempty
     , compilerKernelEnvironment = KernelEnvironment mempty mempty mempty
     }
@@ -135,19 +131,14 @@ buildEnvironment defs =
     , compilerInstanceEnvironment = instanceEnvironment
     , compilerAliasEnvironment = mempty -- aliasEnvironment
     , compilerCodataAccessorEnvironment = codataAccessorEnvironment
-    , compilerFoldEnvironment = foldEnvironment
-    , compilerUnfoldEnvironment = unfoldEnvironment
     , compilerDictionaryNameEnvironment = dictionaryNameEnvironment
     , compilerKernelEnvironment = kernelEnvironment
     }
  where
   instanceEnvironment = buildInstanceEnvironment typeConstructorEnvironment traitEnvironment defs
-  aliasEnvironment = buildAliasEnvironment defs
   traitEnvironment = buildTraitEnvironment typeConstructorEnvironment defs
   typeConstructorEnvironment = buildTypeConstructorEnvironment defs
   codataAccessorEnvironment = buildCodataAccessorEnvironment typeConstructorEnvironment defs
-  foldEnvironment = buildFoldEnvironment defs
-  unfoldEnvironment = buildUnfoldEnvironment defs
   dictionaryNameEnvironment = mempty
   kernelEnvironment = KernelEnvironment mempty mempty mempty
 

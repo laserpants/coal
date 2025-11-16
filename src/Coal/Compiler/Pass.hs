@@ -8,7 +8,7 @@ import Coal.Ast.Metadata (Metadata (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Environment
 import Coal.Compiler.Module.Builders (typeConstructorEnv)
-import Coal.Compiler.Module.Bundle -- (ModuleBundle (..))
+import Coal.Compiler.Module.Bundle
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Compiler.State
 import Coal.Language (IndexedType, Kind)
@@ -68,12 +68,8 @@ localPassM p =
                 , compilerAliasEnvironment = moduleAliases
                 , compilerCodataAccessorEnvironment = moduleCodataAccessors
                 , compilerTraitEnvironment = compilerTraitEnvironment currentEnv
-                , compilerInstanceEnvironment = moduleInstances 
-                , --
-                  compilerFoldEnvironment = mempty
-                , compilerUnfoldEnvironment = mempty
-                , --
-                  compilerDictionaryNameEnvironment = mempty
+                , compilerInstanceEnvironment = moduleInstances
+                , compilerDictionaryNameEnvironment = mempty
                 , compilerKernelEnvironment = KernelEnvironment mempty mempty mempty
                 }
 
