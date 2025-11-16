@@ -45,7 +45,7 @@ import Extras (Dictionary, Name, Over, Set, traverse2, traverse_, (<$$>))
 type AliasEnvironment = Environment (AliasInfo Metadata) -- ([Name], ParameterizedType)
 type DataConstructorEnvironment = Environment (DataConstructorInfo Metadata)
 type TypeConstructorEnvironment = Environment Kind
-type TraitEnvironment = Environment (Parameter Kind, TypeIndex Kind, Environment IndexedScheme)
+type TraitEnvironment = Environment (TraitInfo Metadata) -- (Parameter Kind, TypeIndex Kind, Environment IndexedScheme)
 type InstanceEnvironment = Environment (Map IndexedType (InstanceInfo Metadata))
 type CodataAccessorEnvironment = Environment (CodataAccessorInfo Metadata)
 type FoldEnvironment = Environment IndexedScheme
@@ -231,21 +231,21 @@ buildTraitEnvironment :: TypeConstructorEnvironment -> [Definition a k t] -> Tra
 buildTraitEnvironment env =
   makeEnv
     ( \case
-        DTrait _ name (TraitDef _ (Parameter k n) ds) ->
-          [
-            ( name
-            ,
-              ( Parameter k n
-              , TypeIndex k 0
-              , Environment.fromList (f <$$> ds)
-              )
-            )
-          ]
-         where
-          f :: Scheme Parameter () ParameterizedType -> Scheme TypeIndex Kind IndexedType
-          f (Forall _ _ t) =
-            let t1 = evalState (instantiateVars [(n, TypeIndex k 0)] env t) (1 :: Int)
-             in Forall (typeIndexesIn t1) [] t1
+        -- DTrait _ name (TraitDef _ (Parameter k n) ds) ->
+        --  [
+        --    ( name
+        --    ,
+        --      ( Parameter k n
+        --      , TypeIndex k 0
+        --      , Environment.fromList (f <$$> ds)
+        --      )
+        --    )
+        --  ]
+        -- where
+        --  f :: Scheme Parameter () ParameterizedType -> Scheme TypeIndex Kind IndexedType
+        --  f (Forall _ _ t) =
+        --    let t1 = evalState (instantiateVars [(n, TypeIndex k 0)] env t) (1 :: Int)
+        --     in Forall (typeIndexesIn t1) [] t1
         _ ->
           []
     )
