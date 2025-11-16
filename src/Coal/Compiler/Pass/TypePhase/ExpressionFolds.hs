@@ -7,9 +7,9 @@
 
 module Coal.Compiler.Pass.TypePhase.ExpressionFolds (passExpressionFolds) where
 
-import Coal.Ast.Flattening (flattenApplication)
-import Coal.Ast.Shorthand
-import Coal.Ast.Transform (replace)
+import Coal.AST.Flattening (flattenApplication)
+import Coal.AST.Shorthand
+import Coal.AST.Transform (replace)
 import Coal.Common.Label (Label (..), labelName)
 import Coal.Common.Supply (freshName, supplied)
 import Coal.Compiler.Journal

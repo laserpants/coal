@@ -2,7 +2,7 @@
 
 module Coal.Compiler.PatternAnomaliesSpec (patternAnomaliesSpec) where
 
-import Coal.Ast.Metadata (Metadata (..))
+import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))

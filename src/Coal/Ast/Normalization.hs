@@ -1,9 +1,9 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 
-module Coal.Ast.Normalization (AstNormalizationContext (..)) where
+module Coal.AST.Normalization (NormalizationContext (..)) where
 
-import Coal.Ast.Flattening (flattenLambda)
+import Coal.AST.Flattening (flattenLambda)
 import Coal.Language.Expression (Expression (..))
 import Coal.Language.HasType (HasType (..), foldTypeOf)
 import Coal.Language.Module (Module (..))
@@ -18,23 +18,23 @@ import Data.List.NonEmpty (NonEmpty (..))
 import Data.Map.Strict (Map)
 import Extras (Name)
 
-class AstNormalizationContext a where
+class NormalizationContext a where
   normalizeObject :: a -> a
   denormalizeObject :: a -> a
 
-instance (AstNormalizationContext a) => AstNormalizationContext [a] where
+instance (NormalizationContext a) => NormalizationContext [a] where
   normalizeObject = fmap normalizeObject
   denormalizeObject = fmap denormalizeObject
 
-instance (AstNormalizationContext a) => AstNormalizationContext (NonEmpty a) where
+instance (NormalizationContext a) => NormalizationContext (NonEmpty a) where
   normalizeObject = fmap normalizeObject
   denormalizeObject = fmap denormalizeObject
 
-instance (AstNormalizationContext a) => AstNormalizationContext (Map k a) where
+instance (NormalizationContext a) => NormalizationContext (Map k a) where
   normalizeObject = fmap normalizeObject
   denormalizeObject = fmap denormalizeObject
 
-instance (Monoid a, Data a, Data k, Data (o k), Typeable o) => AstNormalizationContext (Module a k (Type o k)) where
+instance (Monoid a, Data a, Data k, Data (o k), Typeable o) => NormalizationContext (Module a k (Type o k)) where
   normalizeObject =
     \case
       Module p ns d ->
@@ -44,7 +44,7 @@ instance (Monoid a, Data a, Data k, Data (o k), Typeable o) => AstNormalizationC
       Module p ns d ->
         Module p ns (denormalizeObject d)
 
-instance (Monoid a, Data a, Data k, Data (o k), Typeable o) => AstNormalizationContext (Definition a k (Type o k)) where
+instance (Monoid a, Data a, Data k, Data (o k), Typeable o) => NormalizationContext (Definition a k (Type o k)) where
   normalizeObject =
     \case
       DFunction loc name (FunctionDef a w1 (With ts t) ps e :| _) _ ->
@@ -69,5 +69,5 @@ denormalizeConstant name =
       denormalizeConstant name (ConstantDef loc w1 w2 (ELambda a1 (ps <> qs) e))
     ConstantDef loc w1 (With ts _) (ELambda _ ps e) ->
       DFunction loc name (FunctionDef loc w1 (With ts (typeOf e)) ps e :| []) []
-    c@(ConstantDef loc _ _ _) ->
-      DConstant loc name c []
+    def@(ConstantDef loc _ _ _) ->
+      DConstant loc name def []

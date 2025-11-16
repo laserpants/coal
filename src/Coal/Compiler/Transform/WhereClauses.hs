@@ -4,7 +4,7 @@
 
 module Coal.Compiler.Transform.WhereClauses (expandWhereClausesModule) where
 
-import Coal.Ast.Transform
+import Coal.AST.Transform
 import Coal.Compiler.Journal
 import Coal.Compiler.Stack
 import Coal.Language.Module

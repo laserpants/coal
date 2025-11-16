@@ -2,7 +2,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Ast.Transform (replace, replaceWith, replaceMultipleWith, rename) where
+module Coal.AST.Transform (replace, replaceWith, replaceMultipleWith, rename) where
 
 import Coal.Common.FreeVars (BoundVars (..))
 import Coal.Common.Label (Label (..))
@@ -11,10 +11,10 @@ import Control.Monad.Identity (runIdentity)
 import Data.Data (Data)
 import Extras (Name, const2, (<$$>))
 
-class AstTransformContext e where
+class TransformContext e where
   transform :: (Monad m, Data a, Data t, Ord t) => Name -> (a -> t -> m (Expression a t)) -> e a t -> m (e a t)
 
-instance AstTransformContext (Binding Expression) where
+instance TransformContext (Binding Expression) where
   transform name f =
     \case
       BPattern a p e ->
@@ -22,13 +22,13 @@ instance AstTransformContext (Binding Expression) where
       BFunction a n ps e ->
         BFunction a name ps <$> transform n f e
 
-instance AstTransformContext (Guard Expression) where
+instance TransformContext (Guard Expression) where
   transform name f =
     \case
       CGuard e ->
         CGuard <$> transform name f e
 
-instance AstTransformContext (Choice Expression) where
+instance TransformContext (Choice Expression) where
   transform name f =
     \case
       CPlain a gs e ->
@@ -38,7 +38,7 @@ instance AstTransformContext (Choice Expression) where
       CLambda{} ->
         error "TODO"
 
-instance AstTransformContext Clause where
+instance TransformContext Clause where
   transform name f =
     \case
       EClause a ps cs
@@ -47,7 +47,7 @@ instance AstTransformContext Clause where
         | otherwise ->
             pure (EClause a ps cs)
 
-instance AstTransformContext CompiledClause where
+instance TransformContext CompiledClause where
   transform name f =
     \case
       ECompiledClause loc lls e
@@ -56,7 +56,7 @@ instance AstTransformContext CompiledClause where
         | otherwise ->
             pure (ECompiledClause loc lls e)
 
-instance AstTransformContext Expression where
+instance TransformContext Expression where
   transform name f =
     \case
       EAnnotation _ _ e ->

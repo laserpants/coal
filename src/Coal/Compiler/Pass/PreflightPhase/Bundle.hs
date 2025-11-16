@@ -2,7 +2,7 @@
 
 module Coal.Compiler.Pass.PreflightPhase.Bundle (passBundle) where
 
-import Coal.Ast.Metadata (Metadata (..))
+import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Module.Builders
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack

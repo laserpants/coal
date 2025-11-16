@@ -2,7 +2,7 @@
 
 module Coal.Compiler.Pass.TranslationPhase.DenormalizeObjects (passDenormalizeObjects) where
 
-import Coal.Ast.Normalization
+import Coal.AST.Normalization
 import Coal.Compiler.Pass
 import Coal.Language.Module
 import Coal.Language.Type (Type (..))

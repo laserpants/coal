@@ -6,8 +6,8 @@
 
 module Coal.Compiler.Pass.TypePhase.ExpandIntegerLiteralPatterns (passExpandIntegerLiteralPatterns) where
 
-import Coal.Ast.Metadata (Metadata (..))
-import Coal.Ast.Shorthand
+import Coal.AST.Metadata (Metadata (..))
+import Coal.AST.Shorthand
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (supplied)
 import Coal.Compiler.Journal

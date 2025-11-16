@@ -3,7 +3,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Ast.Metadata (Metadata (..), HasMetadata (..), metadataSpan) where
+module Coal.AST.Metadata (Metadata (..), HasMetadata (..), metadataSpan) where
 
 import Coal.Language.Expression
 import Coal.Language.Module.Definition (Definition (..))

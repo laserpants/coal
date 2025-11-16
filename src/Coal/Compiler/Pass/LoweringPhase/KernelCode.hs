@@ -2,7 +2,7 @@
 
 module Coal.Compiler.Pass.LoweringPhase.KernelCode (passKernelCode) where
 
-import Coal.Ast.Metadata (Metadata (..))
+import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Pass
 import Coal.Compiler.Stack
 import Coal.Kernel.Builtin.Objects (builtinObjects)

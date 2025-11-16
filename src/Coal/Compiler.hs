@@ -7,7 +7,7 @@
 
 module Coal.Compiler (pipeline, compile, compileWithCFiles, prettyError) where
 
-import Coal.Ast.Metadata (Metadata (..))
+import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Config (CompilerConfig (..))

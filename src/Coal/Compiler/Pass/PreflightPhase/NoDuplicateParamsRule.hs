@@ -8,7 +8,7 @@ module Coal.Compiler.Pass.PreflightPhase.NoDuplicateParamsRule (
   passNoDuplicateParamsRule,
 ) where
 
-import Coal.Ast.Metadata (Metadata (..))
+import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Label (Label (..))
 import Coal.Compiler.Journal
 import Coal.Compiler.Pass

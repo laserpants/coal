@@ -6,8 +6,8 @@
 
 module Coal.Compiler.Pass.TypePhase.TopLevelUnfolds (passTopLevelUnfolds) where
 
-import Coal.Ast.Flattening (flattenApplication)
-import Coal.Ast.Shorthand
+import Coal.AST.Flattening (flattenApplication)
+import Coal.AST.Shorthand
 import Coal.Common.Supply (freshName, supplied)
 import Coal.Compiler.Pass
 import Coal.Compiler.Stack

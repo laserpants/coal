@@ -3,7 +3,7 @@
 
 module Coal.Compiler.Module.BundleSpec (bundleSpec, runBundle) where
 
-import Coal.Ast.Metadata (Metadata (..))
+import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment (..), mapEnvironment)
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Environment

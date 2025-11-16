@@ -5,7 +5,7 @@
 
 module Coal.Compiler.Pass.TranslationPhase.PatternExhaustiveCheck (passPatternExhaustiveCheck) where
 
-import Coal.Ast.Metadata (Metadata (..))
+import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Journal
 import Coal.Compiler.Pass
 import Coal.Compiler.PatternAnomalies

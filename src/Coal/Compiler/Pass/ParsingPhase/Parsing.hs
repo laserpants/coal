@@ -3,7 +3,7 @@
 
 module Coal.Compiler.Pass.ParsingPhase.Parsing (passParsing) where
 
-import Coal.Ast.Metadata (Metadata (..))
+import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Journal
 import Coal.Compiler.Pass
 import Coal.Compiler.Stack

@@ -5,7 +5,7 @@
 
 module Coal.Compiler.Pass.TranslationPhase.Nats (passCompileNats) where
 
-import Coal.Ast.Metadata (Metadata (..))
+import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (freshName, supplied)
 import Coal.Compiler.Pass

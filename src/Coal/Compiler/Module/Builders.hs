@@ -4,7 +4,7 @@
 
 module Coal.Compiler.Module.Builders (build, typeConstructorEnv) where
 
-import Coal.Ast.Metadata (Metadata (..))
+import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Module.Bundle

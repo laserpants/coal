@@ -1,6 +1,6 @@
 {-# LANGUAGE LambdaCase #-}
 
-module Coal.Ast.Flattening (flattenApplication, flattenLambda) where
+module Coal.AST.Flattening (flattenApplication, flattenLambda) where
 
 import Coal.Language.Expression (Expression (..))
 

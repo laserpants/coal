@@ -3,7 +3,7 @@
 
 module Coal.Compiler.Pass.PreflightPhase.Setup (passSetup) where
 
-import Coal.Ast.Metadata (Metadata (..))
+import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Builtin.Definitions (insertBuiltinDefinitions)
 import Coal.Compiler.Pass
 import Coal.Compiler.Stack (CompilerT)

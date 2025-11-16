@@ -2,7 +2,7 @@
 
 module Coal.Compiler.Pass.TranslationPhase.MatchExpressions (passMatchExpressions) where
 
-import Coal.Ast.Metadata (Metadata (..))
+import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Pass
 import Coal.Compiler.PatternMatching
 import Coal.Compiler.Stack

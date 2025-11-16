@@ -2,7 +2,7 @@
 
 module Coal.Compiler.Pass.TypePhase (typePhase) where
 
-import Coal.Ast.Metadata (Metadata (..))
+import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..), mapPass, overlayEnvironment, (>->))
 import Coal.Compiler.Pass.DebugOutput (generateDebugArtifacts)
 import Coal.Compiler.Pass.TypePhase.Errors (passTypePhaseErrors)

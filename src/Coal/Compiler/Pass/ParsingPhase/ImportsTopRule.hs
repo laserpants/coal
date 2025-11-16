@@ -3,7 +3,7 @@
 
 module Coal.Compiler.Pass.ParsingPhase.ImportsTopRule (passImportsTopRule) where
 
-import Coal.Ast.Metadata (HasMetadata (..), Metadata (..))
+import Coal.AST.Metadata (HasMetadata (..), Metadata (..))
 import Coal.Compiler.Journal
 import Coal.Compiler.Pass
 import Coal.Compiler.Stack

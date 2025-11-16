@@ -4,7 +4,7 @@
 
 module Coal.Compiler.Pass.PreflightPhase.TopologicalSort (passTopologicalSort) where
 
-import Coal.Ast.Metadata (Metadata (..))
+import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Error (CompilerError (..), ErrorLocation (..))
 import Coal.Compiler.Journal
 import Coal.Compiler.Pass

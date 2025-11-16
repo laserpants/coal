@@ -1,4 +1,4 @@
-module Coal.Ast.Shorthand (
+module Coal.AST.Shorthand (
   matchE,
   varE,
   letE,

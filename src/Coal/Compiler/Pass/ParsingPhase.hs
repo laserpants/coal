@@ -2,7 +2,7 @@
 
 module Coal.Compiler.Pass.ParsingPhase (parsingPhase) where
 
-import Coal.Ast.Metadata (Metadata (..))
+import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..), mapPass, (>->))
 import Coal.Compiler.Pass.DebugOutput (generateDebugArtifacts)
 import Coal.Compiler.Pass.ParsingPhase.ImportsTopRule (passImportsTopRule)

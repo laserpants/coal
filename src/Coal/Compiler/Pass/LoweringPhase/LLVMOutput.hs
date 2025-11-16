@@ -7,7 +7,7 @@ module Coal.Compiler.Pass.LoweringPhase.LLVMOutput (
   generateLLOutput,
 ) where
 
-import Coal.Ast.Metadata (Metadata (..))
+import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Config (CompilerConfig (..))
 import Coal.Compiler.Pass
 import Coal.Compiler.Stack

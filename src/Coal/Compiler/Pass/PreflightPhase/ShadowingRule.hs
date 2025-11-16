@@ -9,7 +9,7 @@ module Coal.Compiler.Pass.PreflightPhase.ShadowingRule (
   passShadowingRule,
 ) where
 
-import Coal.Ast.Metadata (Metadata (..))
+import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.FreeVars (BoundVars (..))
 import Coal.Common.Name (isConstructor)
 import Coal.Compiler.Journal

@@ -13,7 +13,7 @@ module Coal.Compiler.PatternMatching (
   compileEnvelope,
 ) where
 
-import Coal.Ast.Transform (replaceWith)
+import Coal.AST.Transform (replaceWith)
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (freshName, supplied)
 import Coal.Compiler.PatternMatching.Compiler (TypeProxy (..), compileEnvelope)

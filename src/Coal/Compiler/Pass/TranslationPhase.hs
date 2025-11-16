@@ -2,7 +2,7 @@
 
 module Coal.Compiler.Pass.TranslationPhase (translationPhase) where
 
-import Coal.Ast.Metadata (Metadata (..))
+import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..), mapPass, overlayEnvironment, (>->))
 import Coal.Compiler.Pass.DebugOutput (generateDebugArtifacts)
 import Coal.Compiler.Pass.TranslationPhase.DenormalizeObjects (passDenormalizeObjects)

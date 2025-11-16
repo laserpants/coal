@@ -4,7 +4,7 @@
 
 module Coal.Compiler.Pass.LoweringPhase.KernelTranslate (passKernelTranslate) where
 
-import Coal.Ast.Metadata (Metadata (..))
+import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Environment
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Kernel.Environment (insertQualifiedNames, withModuleName)

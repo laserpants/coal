@@ -6,7 +6,7 @@
 
 module Coal.Compiler.Pass.TranslationPhase.OrPatterns (passOrPatterns) where
 
-import Coal.Ast.Metadata (Metadata (..))
+import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Label (Label (..))
 import Coal.Compiler.Pass
 import Coal.Compiler.Stack

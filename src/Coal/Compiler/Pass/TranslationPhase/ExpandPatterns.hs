@@ -5,7 +5,7 @@
 
 module Coal.Compiler.Pass.TranslationPhase.ExpandPatterns (passExpandPatterns) where
 
-import Coal.Ast.Metadata (Metadata (..))
+import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (freshName, supplied)
 import Coal.Compiler.Journal (listenPatterns, tellPatterns1)

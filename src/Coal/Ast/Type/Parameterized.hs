@@ -2,7 +2,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Coal.Ast.Type.Parameterized (
+module Coal.AST.Type.Parameterized (
   instantiateVars,
   instantiateTypeVars,
   instantiateTypeIndexes,

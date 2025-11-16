@@ -4,7 +4,7 @@
 
 module Coal.Compiler.Pass.LoweringPhase (loweringPhase) where
 
-import Coal.Ast.Metadata (Metadata (..))
+import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Config (CompilerConfig (..))
 import Coal.Compiler.Pass (Pass (..), mapPass, (>->))
 import Coal.Compiler.Pass.LoweringPhase.KernelCode (passKernelCode)

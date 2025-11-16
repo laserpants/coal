@@ -4,7 +4,7 @@
 
 module Coal.Compiler.Pass (Pass (..), (>->), mapPass, overlayEnvironment) where
 
-import Coal.Ast.Metadata (Metadata (..))
+import Coal.AST.Metadata (Metadata (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Environment
 import Coal.Compiler.Module.Builders (typeConstructorEnv)

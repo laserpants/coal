@@ -2,7 +2,7 @@
 
 module Coal.Compiler.TypeInference.Errors (prettyErrorMessage) where
 
-import Coal.Ast.Metadata
+import Coal.AST.Metadata
 import Data.Text (Text)
 import qualified Data.Text as Text
 import Text.Megaparsec

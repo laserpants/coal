@@ -24,12 +24,12 @@ source-repository head
 
 library
   exposed-modules:
-      Coal.Ast.Flattening
-      Coal.Ast.Metadata
-      Coal.Ast.Normalization
-      Coal.Ast.Shorthand
-      Coal.Ast.Transform
-      Coal.Ast.Type.Parameterized
+      Coal.AST.Flattening
+      Coal.AST.Metadata
+      Coal.AST.Normalization
+      Coal.AST.Shorthand
+      Coal.AST.Transform
+      Coal.AST.Type.Parameterized
       Coal.Common.Environment
       Coal.Common.FreeVars
       Coal.Common.Label
