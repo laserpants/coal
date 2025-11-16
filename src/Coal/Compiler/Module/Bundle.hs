@@ -64,16 +64,25 @@ data DataConstructorInfo a = DataConstructorInfo
   }
   deriving (Show, Eq, Ord, Read)
 
-data CodataAccessorInfo a
-  = CodataAccessorInfo a Name (CodataAccessor TypeIndex Kind IndexedType)
+data CodataAccessorInfo a = CodataAccessorInfo
+  { codataAccessorInfoMetadata :: a
+  , codataAccessorInfoName :: Name
+  , codataAccessorInfoAccessor :: CodataAccessor TypeIndex Kind IndexedType
+  }
   deriving (Show, Eq, Ord, Read)
 
-data TypeConstructorInfo a
-  = TypeConstructorInfo a Name Kind
+data TypeConstructorInfo a = TypeConstructorInfo
+  { typeConstructorInfoMetadata :: a
+  , typeConstructorInfoName :: Name
+  , typeConstructorInfoKind :: Kind
+  }
   deriving (Show, Eq, Ord, Read)
 
-data CotypeConstructorInfo a
-  = CotypeConstructorInfo a Name Kind
+data CotypeConstructorInfo a = CotypeConstructorInfo
+  { cotypeConstructorInfoMetadata :: a
+  , cotypeConstructorInfoName :: Name
+  , cotypeConstructorInfoKind :: Kind
+  }
   deriving (Show, Eq, Ord, Read)
 
 data TraitInfo a = TraitInfo
@@ -84,8 +93,11 @@ data TraitInfo a = TraitInfo
   }
   deriving (Show, Eq, Ord, Read)
 
-data InstanceInfo a
-  = InstanceInfo a ParameterizedType (Dictionary IndexedScheme)
+data InstanceInfo a = InstanceInfo
+  { instanceInfoMetadata :: a
+  , instanceInfoType :: ParameterizedType
+  , instanceInfoEntries :: Dictionary IndexedScheme
+  }
   deriving (Show, Eq, Ord, Read)
 
 data AliasInfo a = AliasInfo
