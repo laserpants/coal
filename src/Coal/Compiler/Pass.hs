@@ -44,7 +44,7 @@ localPass f p =
     , runPass = \m -> local (f m) (runPass p m)
     }
 
--- TODO: rename
+-- TODO: rename/move
 localPassM :: (Monad m) => Pass Metadata m (Module Metadata Kind t) (Module Metadata Kind IndexedType) -> Pass Metadata m (Module Metadata Kind t) (Module Metadata Kind IndexedType)
 localPassM p =
   Pass
