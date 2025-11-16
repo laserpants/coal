@@ -16,10 +16,10 @@ import Control.Monad.Identity (runIdentity)
 import Data.Data (Data)
 import Extras (Name, const2, (<$$>))
 
-class TreeTransform e where
+class AstTransformContext e where
   transform :: (Monad m, Data a, Data t, Ord t) => Name -> (a -> t -> m (Expression a t)) -> e a t -> m (e a t)
 
-instance TreeTransform (Binding Expression) where
+instance AstTransformContext (Binding Expression) where
   transform name f =
     \case
       BPattern a p e ->
@@ -27,13 +27,13 @@ instance TreeTransform (Binding Expression) where
       BFunction a n ps e ->
         BFunction a name ps <$> transform n f e
 
-instance TreeTransform (Guard Expression) where
+instance AstTransformContext (Guard Expression) where
   transform name f =
     \case
       CGuard e ->
         CGuard <$> transform name f e
 
-instance TreeTransform (Choice Expression) where
+instance AstTransformContext (Choice Expression) where
   transform name f =
     \case
       CPlain a gs e ->
@@ -43,7 +43,7 @@ instance TreeTransform (Choice Expression) where
       CLambda{} ->
         error "TODO"
 
-instance TreeTransform Clause where
+instance AstTransformContext Clause where
   transform name f =
     \case
       EClause a ps cs
@@ -52,7 +52,7 @@ instance TreeTransform Clause where
         | otherwise ->
             pure (EClause a ps cs)
 
-instance TreeTransform CompiledClause where
+instance AstTransformContext CompiledClause where
   transform name f =
     \case
       ECompiledClause loc lls e
@@ -61,7 +61,7 @@ instance TreeTransform CompiledClause where
         | otherwise ->
             pure (ECompiledClause loc lls e)
 
-instance TreeTransform Expression where
+instance AstTransformContext Expression where
   transform name f =
     \case
       EAnnotation _ _ e ->
