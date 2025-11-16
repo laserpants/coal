@@ -646,22 +646,27 @@ build (Module path exports defs) =
             )
         )
 
+    inEachDef collectImportedNames
+
     unless (["*"] == exports) $ do
       exps <- gets moduleExports
       modify $ setExports (exports `union` Set.toList exps)
  where
   inEachDef = forM_ defs
 
-pick :: [Name] -> Environment a -> [a]
-pick names = Environment.elems . Environment.restrict names
+pick :: [Name] -> Environment a -> [(Name, a)]
+pick names = Environment.toList . Environment.restrict names
 
-collect :: (Monad m) => Definition Metadata Kind () -> (ModuleBundle Metadata -> Environment a) -> StateT (ModuleBundle Metadata) (CompilerT Metadata m) [a]
-collect (DImport _ (Path ["Builtin$"]) _) _ = do
+collectNames :: (Monad m) => Definition Metadata Kind () -> (ModuleBundle Metadata -> Environment a) -> StateT (ModuleBundle Metadata) (CompilerT Metadata m) [(Name, a)]
+collectNames (DImport _ (Path ["Builtin$"]) _) _ = do
   pure []
-collect (DImport _ path names) getter = do
+collectNames (DImport _ path names) getter = do
   bundle <- importedModule path
   pure $ pick names (getter bundle)
-collect _ _ = error "Implementation error"
+collectNames _ _ = error "Implementation error"
+
+collect :: (Monad m) => Definition Metadata Kind () -> (ModuleBundle Metadata -> Environment a) -> StateT (ModuleBundle Metadata) (CompilerT Metadata m) [a]
+collect d f = fmap snd <$> collectNames d f
 
 importedModule :: (Monad m) => Path -> StateT (ModuleBundle Metadata) (CompilerT Metadata m) (ModuleBundle Metadata)
 importedModule path = do
@@ -698,14 +703,12 @@ collectTypeConstructors =
     def@DImport{} -> do
       types <- collect def exportedTypeConstructors
       forM_ types $
-        \info@(TypeConstructorInfo _ name kind_) ->
-          modify $
-            insertTypeConstructor name info . addName name (IType kind_)
+        \info@(TypeConstructorInfo _ name _) ->
+          modify $ insertTypeConstructor name info
       cotypes <- collect def exportedCotypeConstructors
       forM_ cotypes $
-        \info@(CotypeConstructorInfo _ name kind_) ->
-          modify $
-            insertCotypeConstructor name info . addName name (ICotype kind_)
+        \info@(CotypeConstructorInfo _ name _) ->
+          modify $ insertCotypeConstructor name info
     _ ->
       pure ()
 
@@ -753,15 +756,11 @@ collectDataConstructors env =
       ctors <- collect def exportedDataConstructors
       forM_ ctors $
         \info@(DataConstructorInfo _ _ DataConstructor{..} _) ->
-          modify $
-            addName constructorName (IDataConstructor constructorScheme)
-              . insertDataConstructor constructorName info
+          modify $ insertDataConstructor constructorName info
       xsors <- collect def exportedCodataAccessors
       forM_ xsors $
         \info@(CodataAccessorInfo _ _ CodataAccessor{..}) ->
-          modify $
-            addName codataAccessorName (ICodataAccessor codataAccessorScheme)
-              . insertCodataAccessor codataAccessorName info
+          modify $ insertCodataAccessor codataAccessorName info
     _ ->
       pure ()
 
@@ -806,3 +805,14 @@ collectInstances kinds traits =
 
 substituteInScheme :: Substitution -> Scheme o Kind IndexedType -> IndexedScheme
 substituteInScheme sub (Forall _ ts t) = scheme (apply sub ts) (apply sub t)
+
+collectImportedNames :: (Monad m) => Definition Metadata Kind () -> StateT (ModuleBundle Metadata) (CompilerT Metadata m) ()
+collectImportedNames =
+  \case
+    def@DImport{} -> do
+      names <- collectNames def exportedNames
+      forM_ names $
+        \(name, info) ->
+          modify $ addName name info
+    _ ->
+      pure ()

@@ -2,6 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
+-- TODO: Rename
 module Coal.Compiler.Module.Bundle (
   ModuleBundle (..),
   CotypeConstructorInfo (..),
