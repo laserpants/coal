@@ -7,6 +7,7 @@
 module Coal.Kernel.Language.Object (
   Object (..),
   ObjectList,
+  KernelObject,
   objectName,
   fromBinding,
   objectIsFunction,
@@ -33,6 +34,8 @@ data Object t e
   | OExternal Name IRType t
   | OData Name Int t
   deriving (Show, Eq, Ord, Functor, Foldable, Traversable)
+
+type KernelObject = Object Type (Expr Type)
 
 instance (Ord t, FreeVars e t) => FreeVars (Object t e) t where
   freeIn =

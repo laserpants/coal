@@ -10,6 +10,7 @@ import Coal.Compiler.Kernel.TranslateExpression (translateExpression, translateP
 import Coal.Compiler.Kernel.TranslateType (translateType)
 import Coal.Compiler.Stack
 import qualified Coal.Kernel.Language as Kernel
+import Coal.Kernel.Language.Object (KernelObject)
 import Coal.Language
 import Coal.Language.Module
 import Control.Monad (forM)
@@ -19,8 +20,6 @@ import Data.Data (Data)
 import Data.List.Extra (sortOn)
 import Data.List.NonEmpty (NonEmpty ((:|)), toList, (<|))
 import Extras (Name, (<.>))
-
-type KernelObject = Kernel.Object Kernel.Type (Kernel.Expr Kernel.Type)
 
 translateDefinition :: (Monad m, Data a) => Definition a Kind IndexedType -> CompilerT a m [KernelObject]
 translateDefinition =
