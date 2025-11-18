@@ -1,6 +1,7 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE StrictData #-}
 
 module Coal.Language.Pattern (Pattern (..), IndexedPattern) where
 
