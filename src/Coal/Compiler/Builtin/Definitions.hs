@@ -17,9 +17,9 @@ import Extras (Name, for)
 insertBuiltinDefinitions :: (Monoid a) => [Definition a k ()] -> [Definition a k ()]
 insertBuiltinDefinitions = (builtinDefinitions <>)
 
-{-# INLINE functionNames #-}
-functionNames :: [Name]
-functionNames = for builtinFunctions fst
+{-# INLINE builtinFunctionNames #-}
+builtinFunctionNames :: [Name]
+builtinFunctionNames = for builtinFunctions fst
 
 builtinTraitInstances :: [Name]
 builtinTraitInstances =
@@ -92,7 +92,7 @@ builtinDefinitions =
   [ DImport
       mempty
       (Path ["Builtin$"])
-      (functionNames <> builtinTraitInstances)
+      (builtinFunctionNames <> builtinTraitInstances)
   , DTrait
       mempty
       "Numeric"

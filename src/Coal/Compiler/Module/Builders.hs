@@ -22,7 +22,6 @@ import Data.List (union, (\\))
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
-import Debug.Trace
 import Extras (Name, forM_)
 
 banan3 :: (Monad m) => CompilerT a m (Environment IndexedScheme)
@@ -724,7 +723,9 @@ build (Module path exports defs) =
     inEachDef collectImportedNames
     inEachDef collectPlaceholders
 
-    exps <- gets moduleExports
+    let builtin = Set.fromList ["(%)", "(*)", "(+)", "(-)", "(/)", "(<>)", "(==)", "Comparable", "Divisible", "EqualTo", "GreaterThan", "IO", "LessThan", "Modulo", "None", "Numeric", "Option", "Ordered", "Ordering", "Semigroup", "Some", "compare", "from_int32", "negate"]
+
+    exps <- gets (Set.filter (`notElem` builtin) . moduleExports)
     unless (["*"] == exports) $ do
       modify $ setExports (exports `union` Set.toList exps)
  where
