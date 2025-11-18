@@ -41,6 +41,7 @@ module Coal.Compiler.Build (
   exportedNames,
   traitInfo,
   setExports,
+  setTypeExports,
   setPath,
 ) where
 
@@ -284,6 +285,9 @@ addTypeExport name ModuleBuild{..} = ModuleBuild{moduleTypeExports = Set.insert 
 
 setExports :: [Name] -> ModuleBuild a -> ModuleBuild a
 setExports names ModuleBuild{..} = ModuleBuild{moduleExports = Set.fromList names, ..}
+
+setTypeExports :: [Name] -> ModuleBuild a -> ModuleBuild a
+setTypeExports names ModuleBuild{..} = ModuleBuild{moduleTypeExports = Set.fromList names, ..}
 
 setPath :: Path -> ModuleBuild a -> ModuleBuild a
 setPath path ModuleBuild{..} = ModuleBuild{modulePath = path, ..}

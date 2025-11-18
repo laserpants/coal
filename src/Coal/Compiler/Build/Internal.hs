@@ -75,6 +75,7 @@ prepareBuild (Module path exports defs) =
 
     inEachDef collectTypeConstructors
 
+    -- Built-in type constructors
     modify $
       insertTypeConstructor "List" (TypeConstructorInfo mempty "List" (KArrow KType KType))
         . addName "List" (IType (KArrow KType KType))
@@ -82,6 +83,7 @@ prepareBuild (Module path exports defs) =
     kinds <- typeConstructorEnv
     inEachDef (collectDataConstructors kinds)
 
+    -- Built-in data constructors
     modify $
       insertDataConstructor
         "Zero"
@@ -116,6 +118,7 @@ prepareBuild (Module path exports defs) =
     traits <- traitEnv
     inEachDef (collectInstances kinds traits)
 
+    -- Built-in instances
     modify $
       insertInstance
         "Numeric"
@@ -698,9 +701,11 @@ prepareBuild (Module path exports defs) =
     inEachDef collectPlaceholders
 
     exps <- gets (Set.filter (`notElem` builtin) . moduleExports)
+    typeExps <- gets (Set.filter (`notElem` builtin) . moduleTypeExports)
     unless (["*"] == exports) $
       modify $
         setExports (exports `union` Set.toList exps)
+          . setTypeExports (exports `union` Set.toList typeExps)
  where
   builtin =
     Set.fromList
@@ -764,21 +769,21 @@ collectTypeConstructors =
       modify $
         insertTypeConstructor name info
           . addName name (IType kind_)
-          . addExport name
+          . addTypeExport name
      where
       info@(TypeConstructorInfo _ _ kind_) = typeConstructorInfo loc name def
     DCotype loc name def -> do
       modify $
         insertCotypeConstructor name info
           . addName name (ICotype kind_)
-          . addExport name
+          . addTypeExport name
      where
       info@(CotypeConstructorInfo _ _ kind_) = cotypeConstructorInfo loc name def
     DTypeAlias loc name alias -> do
       modify $
         insertAlias name (aliasInfo loc name alias)
           . addName name IAlias
-          . addExport name
+          . addTypeExport name
     def@DImport{} -> do
       types <- collect def exportedTypeConstructors
       forM_ types $
@@ -851,7 +856,7 @@ collectTraits env =
       modify $
         addName name ITrait
           . insertTrait name (traitInfo loc name def)
-          . addExport name
+          . addTypeExport name
     _ ->
       pure ()
 
