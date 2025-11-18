@@ -38,19 +38,19 @@ overKernelEnvironmentQualifiedNames :: Over KernelEnvironment (Environment Name)
 overKernelEnvironmentQualifiedNames fn KernelEnvironment{..} =
   KernelEnvironment{kernelEnvironmentQualifiedNames = fn kernelEnvironmentQualifiedNames, ..}
 
-data CompilerEnvironment = CompilerEnvironment
-  { compilerDataConstructorEnvironment :: Environment (DataConstructorInfo Metadata)
-  , compilerCodataAccessorEnvironment :: Environment (CodataAccessorInfo Metadata)
+data CompilerEnvironment a = CompilerEnvironment
+  { compilerDataConstructorEnvironment :: Environment (DataConstructorInfo a)
+  , compilerCodataAccessorEnvironment :: Environment (CodataAccessorInfo a)
   , compilerTypeConstructorEnvironment :: Environment Kind
-  , compilerTraitEnvironment :: Environment (TraitInfo Metadata)
-  , compilerInstanceEnvironment :: Environment (Map IndexedType (InstanceInfo Metadata))
-  , compilerAliasEnvironment :: Environment (AliasInfo Metadata)
+  , compilerTraitEnvironment :: Environment (TraitInfo a)
+  , compilerInstanceEnvironment :: Environment (Map IndexedType (InstanceInfo a))
+  , compilerAliasEnvironment :: Environment (AliasInfo a)
   , compilerDictionaryNameEnvironment :: Environment IndexedScheme
   , compilerKernelEnvironment :: KernelEnvironment
   }
   deriving (Show, Eq, Ord, Read)
 
-emptyCompilerEnvironment :: CompilerEnvironment
+emptyCompilerEnvironment :: CompilerEnvironment a
 emptyCompilerEnvironment =
   CompilerEnvironment
     { compilerDataConstructorEnvironment = mempty
@@ -67,8 +67,8 @@ overCompilerDictionaryNameEnvironment ::
   ( Environment IndexedScheme ->
     Environment IndexedScheme
   ) ->
-  CompilerEnvironment ->
-  CompilerEnvironment
+  CompilerEnvironment a ->
+  CompilerEnvironment a
 overCompilerDictionaryNameEnvironment f CompilerEnvironment{..} =
   CompilerEnvironment
     { compilerDictionaryNameEnvironment =
@@ -80,8 +80,8 @@ overCompilerKernelEnvironment ::
   ( KernelEnvironment ->
     KernelEnvironment
   ) ->
-  CompilerEnvironment ->
-  CompilerEnvironment
+  CompilerEnvironment a ->
+  CompilerEnvironment a
 overCompilerKernelEnvironment f CompilerEnvironment{..} =
   CompilerEnvironment
     { compilerKernelEnvironment =
