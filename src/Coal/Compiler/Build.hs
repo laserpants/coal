@@ -15,6 +15,7 @@ module Coal.Compiler.Build (
   emptyModuleBuild,
   addName,
   addExport,
+  addTypeExport,
   toIndexedScheme,
   toIndexedType,
   dataConstructorInfo,
@@ -138,6 +139,7 @@ data ModuleBuild a = ModuleBuild
   , moduleAliases :: Environment (AliasInfo a)
   , moduleNames :: Environment NameInfo
   , moduleExports :: Set Name
+  , moduleTypeExports :: Set Name
   --  , moduleDefinitions ::
   --  , moduleObjectCode :: ByteString
   }
@@ -195,6 +197,7 @@ emptyModuleBuild =
     , moduleAliases = mempty
     , moduleNames = mempty
     , moduleExports = mempty
+    , moduleTypeExports = mempty
     }
 
 insertDataConstructor :: Name -> DataConstructorInfo a -> ModuleBuild a -> ModuleBuild a
@@ -275,6 +278,9 @@ addName name info ModuleBuild{..} = ModuleBuild{moduleNames = Environment.insert
 
 addExport :: Name -> ModuleBuild a -> ModuleBuild a
 addExport name ModuleBuild{..} = ModuleBuild{moduleExports = Set.insert name moduleExports, ..}
+
+addTypeExport :: Name -> ModuleBuild a -> ModuleBuild a
+addTypeExport name ModuleBuild{..} = ModuleBuild{moduleTypeExports = Set.insert name moduleTypeExports, ..}
 
 setExports :: [Name] -> ModuleBuild a -> ModuleBuild a
 setExports names ModuleBuild{..} = ModuleBuild{moduleExports = Set.fromList names, ..}
