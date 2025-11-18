@@ -2,25 +2,100 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module Coal.Compiler.Module.Builders (build, typeConstructorEnv) where
+module Coal.Compiler.Module.Builders (banan3, banan2, build, typeConstructorEnv) where
 
-import Coal.AST.Metadata (Metadata (..))
+import Coal.Compiler.Journal
+
+-- import Coal.AST.a (a (..))
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Module.Bundle
 import Coal.Compiler.Stack
+import Coal.Compiler.State (overCompilerModules)
 import Coal.Language
 import Coal.Language.Module
 import Coal.TypeSystem.Substitution
 import Control.Monad (unless)
+import Control.Monad.Except
 import Control.Monad.State (StateT, execStateT, gets, lift, modify)
-import Data.List (union)
+import Data.List (union, (\\))
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
+import Debug.Trace
 import Extras (Name, forM_)
 
-build :: (Monad m) => Module Metadata Kind () -> CompilerT Metadata m (ModuleBundle Metadata)
+banan3 :: (Monad m) => CompilerT a m (Environment IndexedScheme)
+banan3 = do
+  path <- gets (principalPath . compilerCurrentModule)
+  modules <- gets compilerModules
+  case Environment.lookup path modules of
+    Nothing ->
+      -- TODO
+      throwError PreflightFailure
+    Just ModuleBundle{..} -> do
+      --      traceShowM path
+      --      traceShowM "xxx >>>"
+      --      traceShowM (Environment.names moduleNames)
+
+      flip execStateT mempty $ do
+        forM_ (Environment.toList moduleNames) $
+          \case
+            (name, IFunction s) ->
+              modify (Environment.insert name s)
+            (name, IConstant s) ->
+              modify (Environment.insert name s)
+            (name, IFold s) ->
+              modify (Environment.insert name s)
+            (name, IUnfold s) ->
+              modify (Environment.insert name s)
+            _ ->
+              pure ()
+
+banan2 :: (Monad m, Show a) => Environment IndexedScheme -> CompilerT a m ()
+banan2 store = do
+  -- TODO: DRY
+  path <- gets (principalPath . compilerCurrentModule)
+  modules <- gets compilerModules
+  case Environment.lookup path modules of
+    Nothing ->
+      -- TODO
+      throwError PreflightFailure
+    Just bundle -> do
+      updatedBundle <- banan bundle
+
+      --      traceShowM "---------"
+      --      traceShowM path
+      --      traceShowM (moduleNames updatedBundle)
+
+      modify (overCompilerModules (Environment.insert path updatedBundle))
+ where
+  banan :: (Monad m) => ModuleBundle a -> CompilerT a m (ModuleBundle a)
+  banan bundle@ModuleBundle{..} = do
+    --    traceShowM "vvvvvvvvvvvvvv"
+    --    traceShowM modulePath
+    flip execStateT bundle $ do
+      forM_ (Environment.toList moduleNames) $
+        \case
+          (name, IFunctionPlaceholder) ->
+            go name IFunction
+          (name, IConstantPlaceholder) ->
+            go name IConstant
+          (name, IFoldPlaceholder) ->
+            go name IFold
+          (name, IUnfoldPlaceholder) ->
+            go name IUnfold
+          _ ->
+            pure ()
+  go :: (Monad m) => Name -> (IndexedScheme -> NameInfo) -> StateT (ModuleBundle a) (CompilerT a m) ()
+  go name info =
+    case Environment.lookup name store of
+      Nothing ->
+        error ("No name: " <> show name)
+      Just s ->
+        modify $ addName name (info s)
+
+build :: (Monad m, Monoid a, Show a) => Module a Kind () -> CompilerT a m (ModuleBundle a)
 build (Module path exports defs) =
   flip execStateT emptyModuleBundle $ do
     modify (setPath path)
@@ -647,9 +722,10 @@ build (Module path exports defs) =
         )
 
     inEachDef collectImportedNames
+    inEachDef collectPlaceholders
 
+    exps <- gets moduleExports
     unless (["*"] == exports) $ do
-      exps <- gets moduleExports
       modify $ setExports (exports `union` Set.toList exps)
  where
   inEachDef = forM_ defs
@@ -657,18 +733,21 @@ build (Module path exports defs) =
 pick :: [Name] -> Environment a -> [(Name, a)]
 pick names = Environment.toList . Environment.restrict names
 
-collectNames :: (Monad m) => Definition Metadata Kind () -> (ModuleBundle Metadata -> Environment a) -> StateT (ModuleBundle Metadata) (CompilerT Metadata m) [(Name, a)]
+collectNames :: (Monad m, Show e) => Definition a Kind () -> (ModuleBundle a -> Environment e) -> StateT (ModuleBundle a) (CompilerT a m) ([(Name, e)], [Name])
 collectNames (DImport _ (Path ["Builtin$"]) _) _ = do
-  pure []
+  pure ([], []) -- TODO
 collectNames (DImport _ path names) getter = do
   bundle <- importedModule path
-  pure $ pick names (getter bundle)
+  -- traceShowM (getter bundle)
+  let env = getter bundle
+      missing = names \\ Environment.names env
+  pure (pick names env, missing)
 collectNames _ _ = error "Implementation error"
 
-collect :: (Monad m) => Definition Metadata Kind () -> (ModuleBundle Metadata -> Environment a) -> StateT (ModuleBundle Metadata) (CompilerT Metadata m) [a]
-collect d f = fmap snd <$> collectNames d f
+collect :: (Monad m, Show e) => Definition a Kind () -> (ModuleBundle a -> Environment e) -> StateT (ModuleBundle a) (CompilerT a m) [e]
+collect d f = fmap snd . fst <$> collectNames d f
 
-importedModule :: (Monad m) => Path -> StateT (ModuleBundle Metadata) (CompilerT Metadata m) (ModuleBundle Metadata)
+importedModule :: (Monad m) => Path -> StateT (ModuleBundle a) (CompilerT a m) (ModuleBundle a)
 importedModule path = do
   env <- lift (gets compilerModules)
   case Environment.lookup (principalPath path) env of
@@ -678,7 +757,7 @@ importedModule path = do
     Just bundle -> do
       return bundle
 
-collectTypeConstructors :: (Monad m) => Definition Metadata Kind () -> StateT (ModuleBundle Metadata) (CompilerT Metadata m) ()
+collectTypeConstructors :: (Monad m, Show a) => Definition a Kind () -> StateT (ModuleBundle a) (CompilerT a m) ()
 collectTypeConstructors =
   \case
     DType loc name def -> do
@@ -716,26 +795,26 @@ collectTypeConstructors =
 foldElems :: (Monoid m) => (a -> m -> m) -> Environment a -> m
 foldElems f = foldr f mempty . Environment.elems
 
-traitEnv :: (Monad m) => StateT (ModuleBundle Metadata) (CompilerT Metadata m) (Environment (TraitInfo Metadata))
+traitEnv :: (Monad m) => StateT (ModuleBundle a) (CompilerT a m) (Environment (TraitInfo a))
 traitEnv = do
   gets (foldElems insertTraitInfo . moduleTraits)
  where
-  insertTraitInfo :: TraitInfo Metadata -> Environment (TraitInfo Metadata) -> Environment (TraitInfo Metadata)
+  insertTraitInfo :: TraitInfo a -> Environment (TraitInfo a) -> Environment (TraitInfo a)
   insertTraitInfo info@(TraitInfo _ name _ _) = Environment.insert name info
 
-typeConstructorEnv :: (Monad m) => StateT (ModuleBundle Metadata) (CompilerT Metadata m) (Environment Kind)
+typeConstructorEnv :: (Monad m) => StateT (ModuleBundle a) (CompilerT a m) (Environment Kind)
 typeConstructorEnv = do
   env1 <- gets (foldElems insertTypeInfo . moduleTypeConstructors)
   env2 <- gets (foldElems insertCotypeInfo . moduleCotypeConstructors)
   pure (env1 <> env2)
  where
-  insertTypeInfo :: TypeConstructorInfo Metadata -> Environment Kind -> Environment Kind
+  insertTypeInfo :: TypeConstructorInfo a -> Environment Kind -> Environment Kind
   insertTypeInfo (TypeConstructorInfo _ name kind_) = Environment.insert name kind_
 
-  insertCotypeInfo :: CotypeConstructorInfo Metadata -> Environment Kind -> Environment Kind
+  insertCotypeInfo :: CotypeConstructorInfo a -> Environment Kind -> Environment Kind
   insertCotypeInfo (CotypeConstructorInfo _ name kind_) = Environment.insert name kind_
 
-collectDataConstructors :: (Monad m) => Environment Kind -> Definition Metadata Kind () -> StateT (ModuleBundle Metadata) (CompilerT Metadata m) ()
+collectDataConstructors :: (Monad m, Show a) => Environment Kind -> Definition a Kind () -> StateT (ModuleBundle a) (CompilerT a m) ()
 collectDataConstructors env =
   \case
     DCotype loc _ def ->
@@ -764,7 +843,7 @@ collectDataConstructors env =
     _ ->
       pure ()
 
-collectTraits :: (Monad m) => Environment Kind -> Definition Metadata Kind () -> StateT (ModuleBundle Metadata) (CompilerT Metadata m) ()
+collectTraits :: (Monad m) => Environment Kind -> Definition a Kind () -> StateT (ModuleBundle a) (CompilerT a m) ()
 collectTraits env =
   \case
     DTrait loc name def -> do
@@ -776,7 +855,7 @@ collectTraits env =
     _ ->
       pure ()
 
-addTraitEntries :: (Monad m) => Environment Kind -> Name -> TraitDef () -> StateT (ModuleBundle Metadata) (CompilerT Metadata m) ()
+addTraitEntries :: (Monad m) => Environment Kind -> Name -> TraitDef () -> StateT (ModuleBundle a) (CompilerT a m) ()
 addTraitEntries env trait (TraitDef _ p entries) =
   forM_ entries $
     -- TODO
@@ -787,7 +866,7 @@ addTraitEntries env trait (TraitDef _ p entries) =
  where
   tvar = TVariable (TypeIndex (parameterKind p) 0)
 
-collectInstances :: (Monad m) => Environment Kind -> Environment (TraitInfo Metadata) -> Definition Metadata Kind () -> StateT (ModuleBundle Metadata) (CompilerT Metadata m) ()
+collectInstances :: (Monad m) => Environment Kind -> Environment (TraitInfo a) -> Definition a Kind () -> StateT (ModuleBundle a) (CompilerT a m) ()
 collectInstances kinds traits =
   \case
     DInstance loc trait (InstanceDef _ q _) ->
@@ -806,13 +885,56 @@ collectInstances kinds traits =
 substituteInScheme :: Substitution -> Scheme o Kind IndexedType -> IndexedScheme
 substituteInScheme sub (Forall _ ts t) = scheme (apply sub ts) (apply sub t)
 
-collectImportedNames :: (Monad m) => Definition Metadata Kind () -> StateT (ModuleBundle Metadata) (CompilerT Metadata m) ()
+collectImportedNames :: (Monad m) => Definition a Kind () -> StateT (ModuleBundle a) (CompilerT a m) ()
 collectImportedNames =
   \case
-    def@DImport{} -> do
-      names <- collectNames def exportedNames
+    def@(DImport loc nn names) -> do
+      (names, missing) <- collectNames def exportedNames
+      unless (null missing) $ do
+        path <- lift (gets (principalPath . compilerCurrentModule))
+        forM_ missing $
+          \name ->
+            tellErrors [NameNotInModule name (principalPath nn) (ErrorLocation path loc)]
+        throwError PreflightFailure
       forM_ names $
-        \(name, info) ->
-          modify $ addName name info
+        \case
+          (name, IFunctionPlaceholder) -> do
+            --            error "XXX"
+            pure ()
+          (name, IConstantPlaceholder) -> do
+            --            error "XXX"
+            pure ()
+          (name, IFoldPlaceholder) -> do
+            --            error "XXX"
+            pure ()
+          (name, IUnfoldPlaceholder) -> do
+            --            error "XXX"
+            pure ()
+          (name, info) -> do
+            --            traceShowM name
+            modify $ addName name info
+    _ ->
+      pure ()
+
+collectPlaceholders :: (Monad m) => Definition a Kind () -> StateT (ModuleBundle a) (CompilerT a m) ()
+collectPlaceholders =
+  \case
+    DFunction _ name _ _ -> do
+      --      traceShowM name
+      modify $
+        addName name IFunctionPlaceholder
+          . addExport name
+    DConstant _ name _ _ ->
+      modify $
+        addName name IConstantPlaceholder
+          . addExport name
+    DFold _ name _ ->
+      modify $
+        addName name IFoldPlaceholder
+          . addExport name
+    DUnfold _ name _ ->
+      modify $
+        addName name IUnfoldPlaceholder
+          . addExport name
     _ ->
       pure ()

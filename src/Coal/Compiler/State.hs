@@ -37,10 +37,10 @@ type CompilerAssumption a = Assumption a IndexedType
 
 data CompilerState a = CompilerState
   { compilerSupply :: Int
-  -- TODO: Deprecate
-  , compilerNameStore :: Environment IndexedScheme
-  -- TODO: Deprecate
-  , compilerGlobalNames :: Environment (Environment IndexedScheme)
+  , -- TODO: Deprecate???
+    compilerNameStore :: Environment IndexedScheme
+  , -- TODO: Deprecate
+    compilerGlobalNames :: Environment (Environment IndexedScheme)
   , compilerCurrentModule :: Path
   , compilerSubstitution :: Substitution
   , compilerConstraints :: [CompilerConstraint a]

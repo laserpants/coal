@@ -7,7 +7,10 @@ module Coal.Compiler.Pass.TypePhase.TypeInference (passTypeInference) where
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Name (isConstructor)
 import Coal.Compiler.Builtin.Definitions (builtinFunctions, builtinTraitInstances)
+import Coal.Compiler.Environment
 import Coal.Compiler.Journal
+import Coal.Compiler.Module.Builders
+import Coal.Compiler.Module.Bundle
 import Coal.Compiler.Pass
 import Coal.Compiler.Stack
 import Coal.Compiler.TypeInference (typeDefinitionsC)
@@ -16,12 +19,14 @@ import Coal.Language.Module
 import Coal.TypeSystem.Constraint.Assumption (Assumption (..))
 import Coal.TypeSystem.Substitution
 import Control.Monad.Except
-import Control.Monad.State (gets, runState)
+import Control.Monad.Reader (local)
+import Control.Monad.State
 import Data.Data (Data)
 import Data.List (nub)
 import qualified Data.Text as Text
+import Debug.Trace
 
-passTypeInference :: (MonadIO m, Data a, Eq a, Show a) => Pass a m (Module a Kind ()) (Module a Kind IndexedType)
+passTypeInference :: (MonadIO m, Monoid a, Data a, Eq a, Show a) => Pass a m (Module a Kind ()) (Module a Kind IndexedType)
 passTypeInference =
   Pass
     { passName = "TypeInference"
@@ -52,23 +57,54 @@ processImports (Module _ _ ds) = do
       _ ->
         pure ()
 
-pass :: (MonadIO m, Data a, Eq a, Show a) => Module a Kind () -> CompilerT a m (Module a Kind IndexedType)
+pass :: (MonadIO m, Monoid a, Data a, Eq a, Show a) => Module a Kind () -> CompilerT a m (Module a Kind IndexedType)
 pass m@(Module p xs _) = do
   setCompilerCurrentModuleC p
   clearAssumptionsC
   clearNameStoreC
+
+  b@ModuleBundle{..} <- build m
+  insertModuleC (principalPath p) b
+
+  typeConstructors <- evalStateT typeConstructorEnv ModuleBundle{..}
+  let benv =
+        CompilerEnvironment
+          { compilerDataConstructorEnvironment = moduleDataConstructors
+          , compilerTypeConstructorEnvironment = typeConstructors
+          , compilerAliasEnvironment = moduleAliases
+          , compilerCodataAccessorEnvironment = moduleCodataAccessors
+          , compilerTraitEnvironment = moduleTraits
+          , compilerInstanceEnvironment = moduleInstances
+          , compilerDictionaryNameEnvironment = mempty
+          , compilerKernelEnvironment = KernelEnvironment mempty mempty mempty
+          }
+
+  env <- banan3
+  setNamesC env
+
+  --  traceShowM p
+  --  traceShowM "-----------"
+  --  traceShowM (Environment.names env)
+
   insertNamesC builtinFunctions
-  insertGlobalNamesC "Builtin$" (Environment.fromList builtinFunctions)
-  processImports m
-  m1 <- runTypeInference m
+  --  insertGlobalNamesC "Builtin$" (Environment.fromList builtinFunctions)
+  --  processImports m
+
+  m1 <- local (const benv) (runTypeInference m)
+
   ns <- gets compilerNameStore
+
+  banan2 ns
+
   let public =
         case xs of
           ["*"] ->
             ns
           names ->
             Environment.restrict names ns
-  insertGlobalNamesC (principalPath p) public
+
+  --  insertGlobalNamesC (principalPath p) public
+
   assumptions <- gets (filter (not . isFoldAssumption) . nub . compilerAssumptions)
   forM_ assumptions $
     \Assumption{..} -> do
