@@ -5,6 +5,7 @@
 #include <inttypes.h>
 #include <locale.h>
 #include <stdbool.h>
+#include <stddef.h> // for ptrdiff_t
 #include <stdint.h>
 #include <stdio.h>
 #include <wchar.h>
@@ -181,24 +182,27 @@ void
 print_char(uint32_t cp)
 {
   unsigned char utf8[5] = { 0 };
-
+  int len = 0;
   if (cp <= 0x7F) {
-    utf8[0] = cp;
+    utf8[0] = (unsigned char)cp;
+    len = 1;
   } else if (cp <= 0x7FF) {
     utf8[0] = 0xC0 | (cp >> 6);
     utf8[1] = 0x80 | (cp & 0x3F);
+    len = 2;
   } else if (cp <= 0xFFFF) {
     utf8[0] = 0xE0 | (cp >> 12);
     utf8[1] = 0x80 | ((cp >> 6) & 0x3F);
     utf8[2] = 0x80 | (cp & 0x3F);
+    len = 3;
   } else if (cp <= 0x10FFFF) {
     utf8[0] = 0xF0 | (cp >> 18);
     utf8[1] = 0x80 | ((cp >> 12) & 0x3F);
     utf8[2] = 0x80 | ((cp >> 6) & 0x3F);
     utf8[3] = 0x80 | (cp & 0x3F);
+    len = 4;
   }
-
-  printf("%s", utf8);
+  fwrite(utf8, 1, len, stdout);
 }
 
 void
@@ -440,12 +444,11 @@ string_length(const char* s)
   return len;
 }
 
-wchar_t
+uint32_t
 string_head(const char* s)
 {
   const unsigned char* us = (const unsigned char*)s;
-  wchar_t codepoint = 0;
-
+  uint32_t codepoint = 0;
   if (us[0] < 0x80) {
     return us[0];
   } else if ((us[0] & 0xE0) == 0xC0) {
@@ -456,7 +459,6 @@ string_head(const char* s)
     codepoint = ((us[0] & 0x07) << 18) | ((us[1] & 0x3F) << 12) |
                 ((us[2] & 0x3F) << 6) | (us[3] & 0x3F);
   }
-
   return codepoint;
 }
 
@@ -465,7 +467,6 @@ string_tail(const char* s)
 {
   const unsigned char* us = (const unsigned char*)s;
   size_t skip = 0;
-
   if (us[0] < 0x80) {
     skip = 1;
   } else if ((us[0] & 0xE0) == 0xC0) {
@@ -475,14 +476,12 @@ string_tail(const char* s)
   } else if ((us[0] & 0xF8) == 0xF0) {
     skip = 4;
   }
-
   // Return a newly allocated copy of the remaining string
   size_t len = strlen(s + skip);
   char* tail = (char*)gc_malloc(len + 1);
   if (tail != NULL) {
     memcpy(tail, s + skip, len + 1); // include null terminator
   }
-
   return tail;
 }
 
@@ -545,7 +544,7 @@ string_reverse(const char* s)
   // Step 3: Copy characters in reverse order
   size_t out_i = 0;
 
-  for (ssize_t j = (ssize_t)char_count - 1; j >= 0; --j) {
+  for (ptrdiff_t j = (ptrdiff_t)char_count - 1; j >= 0; --j) {
     memcpy(result + out_i, chars[j], char_lens[j]);
     out_i += char_lens[j];
   }
