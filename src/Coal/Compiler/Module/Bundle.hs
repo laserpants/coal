@@ -2,7 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
--- TODO: Rename
+-- TODO: Rename to build
 module Coal.Compiler.Module.Bundle (
   ModuleBundle (..),
   CotypeConstructorInfo (..),
@@ -122,6 +122,10 @@ data NameInfo
   | ICotype Kind
   | ITrait
   | IAlias
+  | IFunctionPlaceholder
+  | IConstantPlaceholder
+  | IFoldPlaceholder
+  | IUnfoldPlaceholder
   deriving (Show, Eq, Ord, Read)
 
 data ModuleBundle a = ModuleBundle
