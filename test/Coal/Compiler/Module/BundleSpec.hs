@@ -355,4 +355,4 @@ runBundle names = do
  where
   prog = do
     s <- runPass (parsingPhase >-> passTopologicalSort) names
-    forM s build
+    forM s prepareBundle
