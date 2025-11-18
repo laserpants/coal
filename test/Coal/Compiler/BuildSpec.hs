@@ -1,14 +1,14 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module Coal.Compiler.Module.BundleSpec (bundleSpec, runBundle) where
+module Coal.Compiler.BuildSpec (bundleSpec, runBuild) where
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment (..), mapEnvironment)
 import qualified Coal.Common.Environment as Environment
+import Coal.Compiler.Build
+import Coal.Compiler.Build.Internal
 import Coal.Compiler.Environment
-import Coal.Compiler.Module.Builders
-import Coal.Compiler.Module.Bundle
 import Coal.Compiler.Pass (Pass (..), (>->))
 import Coal.Compiler.Pass.ParsingPhase (parsingPhase)
 import Coal.Compiler.Pass.PreflightPhase.TopologicalSort (passTopologicalSort)
@@ -26,16 +26,16 @@ import Test.Hspec
 
 bundleSpec :: Spec
 bundleSpec = do
-  res <- runIO $ runBundle ["./lang/Nat.coal", "./lang/IO.coal", "./test/Coal/examples/133/Main.coal"]
-  let bundle : _ = filter (\ModuleBundle{..} -> modulePath == Path ["Main"]) (rights (sequence res))
+  res <- runIO $ runBuild ["./lang/Nat.coal", "./lang/IO.coal", "./test/Coal/examples/133/Main.coal"]
+  let bundle : _ = filter (\ModuleBuild{..} -> modulePath == Path ["Main"]) (rights (sequence res))
   test133 bundle
 
-  res <- runIO $ runBundle ["./lang/Nat.coal", "./lang/IO.coal", "./test/Coal/examples/134/Main.coal"]
-  let bundle : _ = filter (\ModuleBundle{..} -> modulePath == Path ["Main"]) (rights (sequence res))
+  res <- runIO $ runBuild ["./lang/Nat.coal", "./lang/IO.coal", "./test/Coal/examples/134/Main.coal"]
+  let bundle : _ = filter (\ModuleBuild{..} -> modulePath == Path ["Main"]) (rights (sequence res))
   test134 bundle
 
-test133 :: ModuleBundle Metadata -> Spec
-test133 bundle@ModuleBundle{..} = do
+test133 :: ModuleBuild Metadata -> Spec
+test133 bundle@ModuleBuild{..} = do
   describe "DataConstructors" $ do
     it "" $
       mapEnvironment stripMeta (exportedDataConstructors bundle) == mainExportedDataConstructors
@@ -60,8 +60,8 @@ test133 bundle@ModuleBundle{..} = do
     it "" $
       moduleExports == Set.fromList ["Head", "None", "Option", "Some", "Stream", "Tail", "main"]
 
-test134 :: ModuleBundle Metadata -> Spec
-test134 bundle@ModuleBundle{..} = do
+test134 :: ModuleBuild Metadata -> Spec
+test134 bundle@ModuleBuild{..} = do
   describe "DataConstructors" $ do
     it "" $
       mapEnvironment stripMeta (exportedDataConstructors bundle) == mainExportedDataConstructors
@@ -357,11 +357,11 @@ mainExportedInstances =
       )
     ]
 
-runBundle :: [FilePath] -> IO (Either CompilerFailureMode [ModuleBundle Metadata])
-runBundle names = do
+runBuild :: [FilePath] -> IO (Either CompilerFailureMode [ModuleBuild Metadata])
+runBuild names = do
   (r, _, _) <- runCompilerT emptyCompilerEnvironment prog
   pure r
  where
   prog = do
     s <- runPass (parsingPhase >-> passTopologicalSort) names
-    forM s prepareBundle
+    forM s prepareBuild

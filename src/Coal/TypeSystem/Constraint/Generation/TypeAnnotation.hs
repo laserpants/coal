@@ -10,7 +10,7 @@ module Coal.TypeSystem.Constraint.Generation.TypeAnnotation (
   runTypeAnnotation,
 ) where
 
-import Coal.Compiler.Module.Bundle (CotypeConstructorInfo (..), ModuleBundle (..), TypeConstructorInfo (..))
+import Coal.Compiler.Build (CotypeConstructorInfo (..), ModuleBuild (..), TypeConstructorInfo (..))
 import Coal.Language
 import Coal.TypeSystem.Constraint.Generation.Internal
 import Coal.TypeSystem.Substitution (Substitution (..))
@@ -37,7 +37,7 @@ type TypeAnnotationContext a = ConstraintsGenContext a TypeIndex Kind IndexedTyp
 lookupTypeConstructor :: (MonadReader (TypeAnnotationContext a) m) => Name -> m (Maybe Kind)
 lookupTypeConstructor name = do
   -- TODO: DRY
-  ModuleBundle{..} <- asks constraintsGenContextModules
+  ModuleBuild{..} <- asks constraintsGenContextModules
   case Environment.lookup name moduleTypeConstructors of
     Nothing ->
       case Environment.lookup name moduleCotypeConstructors of

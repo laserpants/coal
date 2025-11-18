@@ -13,9 +13,9 @@ import Coal.AST.Metadata (Metadata (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (supplied)
+import Coal.Compiler.Build
 import Coal.Compiler.Environment (overCompilerDictionaryNameEnvironment)
 import Coal.Compiler.Journal (censorDictionaryTraits, listenDictionaryTraits, tellDictionaryTraits, tellErrors)
-import Coal.Compiler.Module.Bundle
 import Coal.Compiler.Pass
 import Coal.Compiler.Stack
 import Coal.Language

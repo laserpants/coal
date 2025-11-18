@@ -21,7 +21,7 @@ module Coal.TypeSystem.Constraint.Generation.Internal (
 ) where
 
 import Coal.Common.Supply (Supply (..))
-import Coal.Compiler.Module.Bundle (ModuleBundle)
+import Coal.Compiler.Build (ModuleBuild)
 import Coal.Language (Kind (..), Type (..), TypeIndex (..))
 import Coal.TypeSystem.Constraint (Constraint (..), Monomorphic (..), overMonomorphicSet)
 import Coal.TypeSystem.Constraint.Generation.InferenceRule (InferenceRule (..))
@@ -56,7 +56,7 @@ data ConstraintsGenError a
 
 data ConstraintsGenContext g o a t = ConstraintsGenContext
   { constraintsGenContextMonomorphicSet :: Monomorphic (o a)
-  , constraintsGenContextModules :: ModuleBundle g
+  , constraintsGenContextModules :: ModuleBuild g
   }
   deriving (Show, Eq, Ord, Read)
 

@@ -8,7 +8,7 @@
 module Coal.Compiler.Pass.TypePhase.ExpandAliases (passExpandAliases) where
 
 import qualified Coal.Common.Environment as Environment
-import Coal.Compiler.Module.Bundle
+import Coal.Compiler.Build
 import Coal.Compiler.Pass
 import Coal.Compiler.Stack
 import Coal.Language

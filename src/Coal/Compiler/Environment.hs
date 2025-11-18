@@ -14,7 +14,7 @@ module Coal.Compiler.Environment (
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment (..))
-import Coal.Compiler.Module.Bundle
+import Coal.Compiler.Build
 import Coal.Language
 import Data.Map.Strict (Map)
 import Extras (Name, Over, Set)

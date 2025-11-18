@@ -15,7 +15,7 @@ module Coal.TypeSystem.Constraint.Generation (
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (supplied)
-import Coal.Compiler.Module.Bundle -- (DataConstructorInfo (..), moduleDataConstructors)
+import Coal.Compiler.Build -- (DataConstructorInfo (..), moduleDataConstructors)
 import Coal.Language
 import Coal.TypeSystem.Constraint (Constraint (..))
 import Coal.TypeSystem.Constraint.Assumption

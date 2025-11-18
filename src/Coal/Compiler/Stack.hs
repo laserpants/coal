@@ -41,18 +41,18 @@ module Coal.Compiler.Stack (
   setConfigGenerateLLVMOutputC,
   setConfigC,
   insertModuleC,
-  getCurrentBundleC,
-  updateBundleC,
+  getCurrentBuildC,
+  updateBuildC,
 ) where
 
 import Coal.Common.Environment (Environment)
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Supply (Supply (..))
+import Coal.Compiler.Build (ModuleBuild)
 import Coal.Compiler.Config
 import Coal.Compiler.Environment (CompilerEnvironment (..))
 import Coal.Compiler.Error
 import Coal.Compiler.Journal
-import Coal.Compiler.Module.Bundle (ModuleBundle)
 import Coal.Compiler.State
 import Coal.Language
 import Coal.Language.Module (Module (..), modulePathName, principalPath)
@@ -165,11 +165,11 @@ setConfigGenerateLLVMOutputC flag = modify (overCompilerConfig (setConfigGenerat
 setConfigC :: (Monad m) => CompilerConfig -> CompilerT a m ()
 setConfigC config = modify (overCompilerConfig (const config))
 
-insertModuleC :: (Monad m) => Name -> ModuleBundle a -> CompilerT a m ()
+insertModuleC :: (Monad m) => Name -> ModuleBuild a -> CompilerT a m ()
 insertModuleC name bundle = modify (overCompilerModules (Environment.insert name bundle))
 
-getCurrentBundleC :: (Monad m) => CompilerT a m (ModuleBundle a)
-getCurrentBundleC = do
+getCurrentBuildC :: (Monad m) => CompilerT a m (ModuleBuild a)
+getCurrentBuildC = do
   path <- gets (principalPath . compilerCurrentModule)
   modules <- gets compilerModules
   case Environment.lookup path modules of
@@ -178,9 +178,9 @@ getCurrentBundleC = do
     Just bundle ->
       pure bundle
 
-updateBundleC :: (Monad m) => (ModuleBundle a -> CompilerT a m (ModuleBundle a)) -> CompilerT a m ()
-updateBundleC f = do
-  bundle <- getCurrentBundleC
-  updatedBundle <- f bundle
+updateBuildC :: (Monad m) => (ModuleBuild a -> CompilerT a m (ModuleBuild a)) -> CompilerT a m ()
+updateBuildC f = do
+  bundle <- getCurrentBuildC
+  updatedBuild <- f bundle
   path <- gets (principalPath . compilerCurrentModule)
-  modify (overCompilerModules (Environment.insert path updatedBundle))
+  modify (overCompilerModules (Environment.insert path updatedBuild))

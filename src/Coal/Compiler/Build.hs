@@ -2,9 +2,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
--- TODO: Rename to build
-module Coal.Compiler.Module.Bundle (
-  ModuleBundle (..),
+module Coal.Compiler.Build (
+  ModuleBuild (..),
   CotypeConstructorInfo (..),
   DataConstructorInfo (..),
   TypeConstructorInfo (..),
@@ -13,7 +12,7 @@ module Coal.Compiler.Module.Bundle (
   InstanceInfo (..),
   AliasInfo (..),
   NameInfo (..),
-  emptyModuleBundle,
+  emptyModuleBuild,
   addName,
   addExport,
   toIndexedScheme,
@@ -128,7 +127,7 @@ data NameInfo
   | IUnfoldPlaceholder
   deriving (Show, Eq, Ord, Read)
 
-data ModuleBundle a = ModuleBundle
+data ModuleBuild a = ModuleBuild
   { modulePath :: Path
   , moduleDataConstructors :: Environment (DataConstructorInfo a)
   , moduleCodataAccessors :: Environment (CodataAccessorInfo a)
@@ -148,44 +147,44 @@ data ModuleBundle a = ModuleBundle
 exportsAll :: Set Name -> Bool
 exportsAll s = Set.fromList ["*"] == s
 
-exportedNames :: ModuleBundle a -> Environment NameInfo
-exportedNames ModuleBundle{..}
+exportedNames :: ModuleBuild a -> Environment NameInfo
+exportedNames ModuleBuild{..}
   | exportsAll moduleExports = moduleNames
   | otherwise = Environment.filterNames (`Set.member` moduleExports) moduleNames
 
-exportedTypeConstructors :: ModuleBundle a -> Environment (TypeConstructorInfo a)
-exportedTypeConstructors ModuleBundle{..}
+exportedTypeConstructors :: ModuleBuild a -> Environment (TypeConstructorInfo a)
+exportedTypeConstructors ModuleBuild{..}
   | exportsAll moduleExports = moduleTypeConstructors
   | otherwise = Environment.filterNames (`Set.member` moduleExports) moduleTypeConstructors
 
-exportedCotypeConstructors :: ModuleBundle a -> Environment (CotypeConstructorInfo a)
-exportedCotypeConstructors ModuleBundle{..}
+exportedCotypeConstructors :: ModuleBuild a -> Environment (CotypeConstructorInfo a)
+exportedCotypeConstructors ModuleBuild{..}
   | exportsAll moduleExports = moduleCotypeConstructors
   | otherwise = Environment.filterNames (`Set.member` moduleExports) moduleCotypeConstructors
 
-exportedDataConstructors :: ModuleBundle a -> Environment (DataConstructorInfo a)
-exportedDataConstructors ModuleBundle{..}
+exportedDataConstructors :: ModuleBuild a -> Environment (DataConstructorInfo a)
+exportedDataConstructors ModuleBuild{..}
   | exportsAll moduleExports = moduleDataConstructors
   | otherwise = Environment.filterNames (`Set.member` moduleExports) moduleDataConstructors
 
-exportedCodataAccessors :: ModuleBundle a -> Environment (CodataAccessorInfo a)
-exportedCodataAccessors ModuleBundle{..}
+exportedCodataAccessors :: ModuleBuild a -> Environment (CodataAccessorInfo a)
+exportedCodataAccessors ModuleBuild{..}
   | exportsAll moduleExports = moduleCodataAccessors
   | otherwise = Environment.filterNames (`Set.member` moduleExports) moduleCodataAccessors
 
-exportedTraits :: ModuleBundle a -> Environment (TraitInfo a)
-exportedTraits ModuleBundle{..}
+exportedTraits :: ModuleBuild a -> Environment (TraitInfo a)
+exportedTraits ModuleBuild{..}
   | exportsAll moduleExports = moduleTraits
   | otherwise = Environment.filterNames (`Set.member` moduleExports) moduleTraits
 
-exportedInstances :: ModuleBundle a -> Environment (Map IndexedType (InstanceInfo a))
-exportedInstances ModuleBundle{..}
+exportedInstances :: ModuleBuild a -> Environment (Map IndexedType (InstanceInfo a))
+exportedInstances ModuleBuild{..}
   | exportsAll moduleExports = moduleInstances
   | otherwise = Environment.filterNames (`Set.member` moduleExports) moduleInstances
 
-emptyModuleBundle :: ModuleBundle a
-emptyModuleBundle =
-  ModuleBundle
+emptyModuleBuild :: ModuleBuild a
+emptyModuleBuild =
+  ModuleBuild
     { modulePath = Path []
     , moduleDataConstructors = mempty
     , moduleCodataAccessors = mempty
@@ -198,17 +197,17 @@ emptyModuleBundle =
     , moduleExports = mempty
     }
 
-insertDataConstructor :: Name -> DataConstructorInfo a -> ModuleBundle a -> ModuleBundle a
-insertDataConstructor name info ModuleBundle{..} =
-  ModuleBundle
+insertDataConstructor :: Name -> DataConstructorInfo a -> ModuleBuild a -> ModuleBuild a
+insertDataConstructor name info ModuleBuild{..} =
+  ModuleBuild
     { moduleDataConstructors =
         Environment.insert name info moduleDataConstructors
     , ..
     }
 
-insertManyDataConstructors :: [DataConstructorInfo a] -> ModuleBundle a -> ModuleBundle a
-insertManyDataConstructors infos ModuleBundle{..} =
-  ModuleBundle
+insertManyDataConstructors :: [DataConstructorInfo a] -> ModuleBuild a -> ModuleBuild a
+insertManyDataConstructors infos ModuleBuild{..} =
+  ModuleBuild
     { moduleDataConstructors =
         Environment.insertMultiple
           [(name, info) | info@(DataConstructorInfo _ name _ _) <- infos]
@@ -216,17 +215,17 @@ insertManyDataConstructors infos ModuleBundle{..} =
     , ..
     }
 
-insertCodataAccessor :: Name -> CodataAccessorInfo a -> ModuleBundle a -> ModuleBundle a
-insertCodataAccessor name info ModuleBundle{..} =
-  ModuleBundle
+insertCodataAccessor :: Name -> CodataAccessorInfo a -> ModuleBuild a -> ModuleBuild a
+insertCodataAccessor name info ModuleBuild{..} =
+  ModuleBuild
     { moduleCodataAccessors =
         Environment.insert name info moduleCodataAccessors
     , ..
     }
 
-insertManyCodataAccessors :: [CodataAccessorInfo a] -> ModuleBundle a -> ModuleBundle a
-insertManyCodataAccessors infos ModuleBundle{..} =
-  ModuleBundle
+insertManyCodataAccessors :: [CodataAccessorInfo a] -> ModuleBuild a -> ModuleBuild a
+insertManyCodataAccessors infos ModuleBuild{..} =
+  ModuleBuild
     { moduleCodataAccessors =
         Environment.insertMultiple
           [(name, info) | info@(CodataAccessorInfo _ name _) <- infos]
@@ -234,33 +233,33 @@ insertManyCodataAccessors infos ModuleBundle{..} =
     , ..
     }
 
-insertTypeConstructor :: Name -> TypeConstructorInfo a -> ModuleBundle a -> ModuleBundle a
-insertTypeConstructor name info ModuleBundle{..} =
-  ModuleBundle
+insertTypeConstructor :: Name -> TypeConstructorInfo a -> ModuleBuild a -> ModuleBuild a
+insertTypeConstructor name info ModuleBuild{..} =
+  ModuleBuild
     { moduleTypeConstructors =
         Environment.insert name info moduleTypeConstructors
     , ..
     }
 
-insertCotypeConstructor :: Name -> CotypeConstructorInfo a -> ModuleBundle a -> ModuleBundle a
-insertCotypeConstructor name info ModuleBundle{..} =
-  ModuleBundle
+insertCotypeConstructor :: Name -> CotypeConstructorInfo a -> ModuleBuild a -> ModuleBuild a
+insertCotypeConstructor name info ModuleBuild{..} =
+  ModuleBuild
     { moduleCotypeConstructors =
         Environment.insert name info moduleCotypeConstructors
     , ..
     }
 
-insertTrait :: Name -> TraitInfo a -> ModuleBundle a -> ModuleBundle a
-insertTrait name info ModuleBundle{..} =
-  ModuleBundle
+insertTrait :: Name -> TraitInfo a -> ModuleBuild a -> ModuleBuild a
+insertTrait name info ModuleBuild{..} =
+  ModuleBuild
     { moduleTraits =
         Environment.insert name info moduleTraits
     , ..
     }
 
-insertInstance :: Name -> IndexedType -> InstanceInfo a -> ModuleBundle a -> ModuleBundle a
-insertInstance name t info ModuleBundle{..} =
-  ModuleBundle
+insertInstance :: Name -> IndexedType -> InstanceInfo a -> ModuleBuild a -> ModuleBuild a
+insertInstance name t info ModuleBuild{..} =
+  ModuleBuild
     { moduleInstances =
         Environment.insert name (Map.insert t info entries) moduleInstances
     , ..
@@ -268,20 +267,20 @@ insertInstance name t info ModuleBundle{..} =
  where
   entries = fromMaybe mempty (Environment.lookup name moduleInstances)
 
-insertAlias :: Name -> AliasInfo a -> ModuleBundle a -> ModuleBundle a
-insertAlias name info ModuleBundle{..} = ModuleBundle{moduleAliases = Environment.insert name info moduleAliases, ..}
+insertAlias :: Name -> AliasInfo a -> ModuleBuild a -> ModuleBuild a
+insertAlias name info ModuleBuild{..} = ModuleBuild{moduleAliases = Environment.insert name info moduleAliases, ..}
 
-addName :: Name -> NameInfo -> ModuleBundle a -> ModuleBundle a
-addName name info ModuleBundle{..} = ModuleBundle{moduleNames = Environment.insert name info moduleNames, ..}
+addName :: Name -> NameInfo -> ModuleBuild a -> ModuleBuild a
+addName name info ModuleBuild{..} = ModuleBuild{moduleNames = Environment.insert name info moduleNames, ..}
 
-addExport :: Name -> ModuleBundle a -> ModuleBundle a
-addExport name ModuleBundle{..} = ModuleBundle{moduleExports = Set.insert name moduleExports, ..}
+addExport :: Name -> ModuleBuild a -> ModuleBuild a
+addExport name ModuleBuild{..} = ModuleBuild{moduleExports = Set.insert name moduleExports, ..}
 
-setExports :: [Name] -> ModuleBundle a -> ModuleBundle a
-setExports names ModuleBundle{..} = ModuleBundle{moduleExports = Set.fromList names, ..}
+setExports :: [Name] -> ModuleBuild a -> ModuleBuild a
+setExports names ModuleBuild{..} = ModuleBuild{moduleExports = Set.fromList names, ..}
 
-setPath :: Path -> ModuleBundle a -> ModuleBundle a
-setPath path ModuleBundle{..} = ModuleBundle{modulePath = path, ..}
+setPath :: Path -> ModuleBuild a -> ModuleBuild a
+setPath path ModuleBuild{..} = ModuleBuild{modulePath = path, ..}
 
 typeConstructorInfo :: a -> Name -> TypeDef -> TypeConstructorInfo a
 typeConstructorInfo loc name (TypeDef ps _) = TypeConstructorInfo loc name (kind n) where n = length ps

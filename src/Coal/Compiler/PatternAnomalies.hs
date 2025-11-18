@@ -12,7 +12,7 @@ module Coal.Compiler.PatternAnomalies (
 import Coal.Common.Environment (Environment (..), mapEnvironment)
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
-import Coal.Compiler.Module.Bundle
+import Coal.Compiler.Build
 import Coal.Compiler.Stack
 import Coal.Language.Pattern (Pattern (..))
 import Coal.Language.Primitive (Primitive (..))

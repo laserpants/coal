@@ -4,7 +4,7 @@
 module Coal.TypeSystem.Constraint.Generation.ELambdaConstraintsSpec where
 
 import Coal.Common.Label (Label (..))
-import Coal.Compiler.Module.Bundle (emptyModuleBundle)
+import Coal.Compiler.Build (emptyModuleBuild)
 import Coal.Language
 import Coal.TypeSystem.Constraint
 import Coal.TypeSystem.Constraint.Generation
@@ -36,7 +36,7 @@ collectELambdaConstraintsSpec1 = null ms && constraint1 `elem` rights outs
   ctx =
     ConstraintsGenContext
       { constraintsGenContextMonomorphicSet = mempty
-      , constraintsGenContextModules = emptyModuleBundle
+      , constraintsGenContextModules = emptyModuleBuild
       }
 
 fixture2 :: Expression () IndexedType
@@ -54,7 +54,7 @@ collectELambdaConstraintsSpec2 = null outs
   ctx =
     ConstraintsGenContext
       { constraintsGenContextMonomorphicSet = mempty
-      , constraintsGenContextModules = emptyModuleBundle
+      , constraintsGenContextModules = emptyModuleBuild
       }
 
 collectELambdaConstraintsSpec3 :: Bool
@@ -108,5 +108,5 @@ collectELambdaConstraintsSpec4 =
   ctx =
     ConstraintsGenContext
       { constraintsGenContextMonomorphicSet = mempty
-      , constraintsGenContextModules = emptyModuleBundle
+      , constraintsGenContextModules = emptyModuleBuild
       }

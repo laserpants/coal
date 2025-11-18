@@ -36,6 +36,8 @@ library
       Coal.Common.Name
       Coal.Common.Supply
       Coal.Compiler
+      Coal.Compiler.Build
+      Coal.Compiler.Build.Internal
       Coal.Compiler.Builtin.Definitions
       Coal.Compiler.Builtin.Functions
       Coal.Compiler.Config
@@ -46,8 +48,6 @@ library
       Coal.Compiler.Kernel.TranslateDefinition
       Coal.Compiler.Kernel.TranslateExpression
       Coal.Compiler.Kernel.TranslateType
-      Coal.Compiler.Module.Builders
-      Coal.Compiler.Module.Bundle
       Coal.Compiler.Pass
       Coal.Compiler.Pass.DebugOutput
       Coal.Compiler.Pass.LoweringPhase
@@ -297,7 +297,7 @@ test-suite coal-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
-      Coal.Compiler.Module.BundleSpec
+      Coal.Compiler.BuildSpec
       Coal.Compiler.PatternAnomaliesSpec
       Coal.TypeSystem.Constraint.Generation.EAnnotationConstraintsSpec
       Coal.TypeSystem.Constraint.Generation.EConstructorConstraintsSpec

@@ -22,8 +22,8 @@ module Coal.Compiler.State (
 
 import Coal.Common.Environment (Environment (..))
 import Coal.Common.Supply (Supply (..))
+import Coal.Compiler.Build (ModuleBuild)
 import Coal.Compiler.Config (CompilerConfig (..), defaultConfig)
-import Coal.Compiler.Module.Bundle (ModuleBundle)
 import Coal.Language
 import Coal.Language.Module.Definition (Path (..))
 import Coal.TypeSystem
@@ -46,7 +46,7 @@ data CompilerState a = CompilerState
   , compilerTypeAnnotationParams :: Dictionary (a, TypeIndex Kind)
   , compilerVerbatimSource :: Environment Text
   , compilerConfig :: CompilerConfig
-  , compilerModules :: Environment (ModuleBundle a)
+  , compilerModules :: Environment (ModuleBuild a)
   }
   deriving (Show, Eq, Ord, Read)
 
@@ -99,7 +99,7 @@ overCompilerConfig :: Over (CompilerState a) CompilerConfig
 overCompilerConfig fn CompilerState{..} = CompilerState{compilerConfig = fn compilerConfig, ..}
 
 {-# INLINE overCompilerModules #-}
-overCompilerModules :: Over (CompilerState a) (Environment (ModuleBundle a))
+overCompilerModules :: Over (CompilerState a) (Environment (ModuleBuild a))
 overCompilerModules fn CompilerState{..} = CompilerState{compilerModules = fn compilerModules, ..}
 
 initialCompilerState :: CompilerState a

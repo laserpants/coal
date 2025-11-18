@@ -12,8 +12,8 @@ import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (supplied)
+import Coal.Compiler.Build
 import Coal.Compiler.Journal
-import Coal.Compiler.Module.Bundle
 import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module
@@ -37,7 +37,7 @@ type ConstraintsGenResult g o a t s = (s, Dictionary (g, o a), [ConstraintsGenOu
 runConstraintsGenC :: (Monad m) => ConstraintsGenStack a TypeIndex Kind IndexedType r -> CompilerT a m (ConstraintsGenResult a TypeIndex Kind IndexedType r)
 runConstraintsGenC stack = do
   sup <- gets compilerSupply
-  bundle <- getCurrentBundleC
+  bundle <- getCurrentBuildC
   let (result, ConstraintsGenState{..}, output) = runConstraintsGenStack sup (context bundle) stack
   updateSupplyC constraintsGenStateSupply
   pure (result, constraintsGenStateTypeIndexes, output)

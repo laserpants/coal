@@ -3,11 +3,11 @@
 
 module Coal.Compiler.Pass.TypePhase.TypeInference (passTypeInference) where
 
+import Coal.Compiler.Build
+import Coal.Compiler.Build.Internal
 import Coal.Compiler.Builtin.Definitions (builtinFunctions)
 import Coal.Compiler.Environment
 import Coal.Compiler.Journal
-import Coal.Compiler.Module.Builders
-import Coal.Compiler.Module.Bundle
 import Coal.Compiler.Pass
 import Coal.Compiler.Stack
 import Coal.Compiler.TypeInference (typeDefinitionsC)
@@ -39,10 +39,10 @@ pass m@(Module path _ _) = do
   clearAssumptionsC
   clearNameStoreC
 
-  bundle@ModuleBundle{..} <- prepareBundle m
+  bundle@ModuleBuild{..} <- prepareBuild m
   insertModuleC (principalPath path) bundle
 
-  typeConstructors <- evalStateT typeConstructorEnv ModuleBundle{..}
+  typeConstructors <- evalStateT typeConstructorEnv ModuleBuild{..}
   let cmpEnv =
         CompilerEnvironment
           { compilerDataConstructorEnvironment = moduleDataConstructors

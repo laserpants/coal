@@ -6,9 +6,9 @@ module Coal.Compiler.Pass (Pass (..), (>->), mapPass, overlayEnvironment) where
 
 import Coal.AST.Metadata (Metadata (..))
 import qualified Coal.Common.Environment as Environment
+import Coal.Compiler.Build
+import Coal.Compiler.Build.Internal (typeConstructorEnv)
 import Coal.Compiler.Environment
-import Coal.Compiler.Module.Builders (typeConstructorEnv)
-import Coal.Compiler.Module.Bundle
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Compiler.State
 import Coal.Language (IndexedType, Kind)
@@ -49,8 +49,8 @@ overlayEnvironment p =
     case Environment.lookup (principalPath path) modules of
       Nothing ->
         error "Implementation error"
-      Just ModuleBundle{..} -> do
-        typeConstructors <- evalStateT typeConstructorEnv ModuleBundle{..}
+      Just ModuleBuild{..} -> do
+        typeConstructors <- evalStateT typeConstructorEnv ModuleBuild{..}
         let env =
               CompilerEnvironment
                 { compilerDataConstructorEnvironment = moduleDataConstructors
