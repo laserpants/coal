@@ -98,7 +98,7 @@ runGCC tmpDir objFiles cFiles =
  where
   procSpec = (proc "gcc" args){cwd = Just tmpDir}
   args =
-    ["-g", "-I."]
+    ["-no-pie", "-g", "-I."]
       <> ["runtime.c"]
       <> cFiles
       <> objFiles
@@ -112,5 +112,5 @@ runLLC tmpDir llFile =
     _ <- waitForProcess ph
     pure target
  where
-  procSpec = (proc "llc" ["-filetype=obj", llFile, "-o", target]){cwd = Just tmpDir}
+  procSpec = (proc "llc" ["-filetype=obj", "-relocation-model=pic", llFile, "-o", target]){cwd = Just tmpDir}
   target = takeBaseName llFile <.> "o"
