@@ -13,7 +13,6 @@ import Coal.Compiler.Stack
 import Coal.Language
 import Control.Monad.Identity (runIdentity)
 import Data.List.NonEmpty (NonEmpty (..))
-import Data.Set (Set)
 import qualified Data.Set as Set
 import Extras (Name)
 import Test.Hspec
