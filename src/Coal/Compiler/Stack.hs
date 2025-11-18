@@ -18,6 +18,7 @@ module Coal.Compiler.Stack (
   evalCompilerT,
   insertNameC,
   insertNamesC,
+  setNamesC,
   insertGlobalNamesC,
   insertConstraintsC,
   insertAssumptionsC,
@@ -64,26 +65,26 @@ import Control.Monad.Writer (MonadWriter)
 import Data.Text (Text)
 import Extras (Dictionary, Name)
 
-type CompilerStack a m c = ExceptT CompilerFailureMode (RWST CompilerEnvironment (CompilerJournal a) (CompilerState a) m) c
+type CompilerStack a m c = ExceptT CompilerFailureMode (RWST (CompilerEnvironment a) (CompilerJournal a) (CompilerState a) m) c
 
 newtype CompilerT a m c = Compiler {compilerStack :: CompilerStack a m c}
   deriving
     ( Functor
     , Applicative
     , Monad
-    , MonadReader CompilerEnvironment
+    , MonadReader (CompilerEnvironment a)
     , MonadWriter (CompilerJournal a)
     , MonadState (CompilerState a)
     , MonadError CompilerFailureMode
     , MonadIO
     )
 
-runCompilerT :: (Monad m) => CompilerEnvironment -> CompilerT a m c -> m (Either CompilerFailureMode c, CompilerState a, [CompilerError a])
+runCompilerT :: (Monad m) => CompilerEnvironment a -> CompilerT a m c -> m (Either CompilerFailureMode c, CompilerState a, [CompilerError a])
 runCompilerT env com = do
   (c, s, w) <- runRWST (runExceptT (compilerStack com)) env initialCompilerState
   pure (c, s, compilerJournalErrors w)
 
-evalCompilerT :: (Monad m) => CompilerEnvironment -> CompilerT a m c -> m (Either CompilerFailureMode c)
+evalCompilerT :: (Monad m) => CompilerEnvironment a -> CompilerT a m c -> m (Either CompilerFailureMode c)
 evalCompilerT env com = do
   (c, _, _) <- runCompilerT env com
   pure c
@@ -105,6 +106,9 @@ insertNameC name scheme_ = modify (overCompilerNameStore (Environment.insert nam
 
 insertNamesC :: (Monad m) => [(Name, IndexedScheme)] -> CompilerT a m ()
 insertNamesC names = modify (overCompilerNameStore (Environment.insertMultiple names))
+
+setNamesC :: (Monad m) => Environment IndexedScheme -> CompilerT a m ()
+setNamesC names = modify (overCompilerNameStore (const names))
 
 insertGlobalNamesC :: (Monad m) => Name -> Environment IndexedScheme -> CompilerT a m ()
 insertGlobalNamesC name env = modify (overCompilerGlobalNames (Environment.insert name env))
