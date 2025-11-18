@@ -1,6 +1,7 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE StrictData #-}
 
 module Coal.Language.Pattern (Pattern (..), IndexedPattern) where
 
@@ -15,7 +16,7 @@ import Data.Generics.Uniplate.Data (universeBi)
 import Data.List.NonEmpty (NonEmpty)
 import Data.Set (unions)
 import qualified Data.Set as Set
-import Extras (Dictionary, Name)
+import Coal.Common.Name ( Dictionary, Name )
 
 data Pattern a t
   = -- | Type-annotated pattern
@@ -36,9 +37,9 @@ data Pattern a t
     PListCons a t (Pattern a t) (Pattern a t)
   | -- | List literal
     PListLiteral a t [Pattern a t]
-  | -- | Or-pattern
+  | -- | Tuple pattern
     PTuple a t (NonEmpty (Pattern a t))
-  | -- | Pattern matching expression
+  | -- | Or-pattern
     POr a t (Pattern a t) (Pattern a t)
   | -- | As-pattern
     PAs a (Label t) (Pattern a t)
