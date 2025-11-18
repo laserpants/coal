@@ -37,26 +37,6 @@ passTypeInference =
 isFoldAssumption :: Assumption a t -> Bool
 isFoldAssumption Assumption{..} = "!" `Text.isPrefixOf` assumptionName
 
-processImports :: (Monad m) => Module a Kind () -> CompilerT a m ()
-processImports (Module _ _ ds) = do
-  env <- gets compilerGlobalNames
-  forM_ ds $
-    \case
-      DImport loc p names -> do
-        let pp = principalPath p
-        case Environment.lookup pp env of
-          Nothing ->
-            tellErrors [ModuleNotFound pp (ErrorLocation pp loc)]
-          Just moduleNames -> do
-            forM_ (filter (not . isConstructor) names) $
-              \name ->
-                unless (name `elem` builtinTraitInstances || Environment.contains name moduleNames) $ do
-                  tellErrors [NameNotInModule name pp (ErrorLocation pp loc)]
-                  throwError PreflightFailure
-            insertNamesC (Environment.lookupAll names moduleNames)
-      _ ->
-        pure ()
-
 pass :: (MonadIO m, Monoid a, Data a, Eq a, Show a) => Module a Kind () -> CompilerT a m (Module a Kind IndexedType)
 pass m@(Module p xs _) = do
   setCompilerCurrentModuleC p

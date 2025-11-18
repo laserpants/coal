@@ -19,7 +19,6 @@ module Coal.Compiler.Stack (
   insertNameC,
   insertNamesC,
   setNamesC,
-  insertGlobalNamesC,
   insertConstraintsC,
   insertAssumptionsC,
   clearAssumptionsC,
@@ -109,9 +108,6 @@ insertNamesC names = modify (overCompilerNameStore (Environment.insertMultiple n
 
 setNamesC :: (Monad m) => Environment IndexedScheme -> CompilerT a m ()
 setNamesC names = modify (overCompilerNameStore (const names))
-
-insertGlobalNamesC :: (Monad m) => Name -> Environment IndexedScheme -> CompilerT a m ()
-insertGlobalNamesC name env = modify (overCompilerGlobalNames (Environment.insert name env))
 
 insertConstraintsC :: (Monad m) => [CompilerConstraint a] -> CompilerT a m ()
 insertConstraintsC cs = modify (overCompilerConstraints (<> cs))
