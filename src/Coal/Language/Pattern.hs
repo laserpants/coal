@@ -36,9 +36,9 @@ data Pattern a t
     PListCons a t (Pattern a t) (Pattern a t)
   | -- | List literal
     PListLiteral a t [Pattern a t]
-  | -- | Or-pattern
+  | -- | Tuple pattern
     PTuple a t (NonEmpty (Pattern a t))
-  | -- | Pattern matching expression
+  | -- | Or-pattern
     POr a t (Pattern a t) (Pattern a t)
   | -- | As-pattern
     PAs a (Label t) (Pattern a t)
