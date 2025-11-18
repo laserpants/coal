@@ -20,6 +20,7 @@ import Data.List.NonEmpty (NonEmpty (..))
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
+import Debug.Trace
 import Extras (forM)
 import Test.Hspec
 
@@ -57,7 +58,7 @@ test133 bundle@ModuleBundle{..} = do
 
   describe "Exports" $ do
     it "" $
-      moduleExports == Set.fromList ["Head", "None", "Option", "Some", "Stream", "Tail"]
+      moduleExports == Set.fromList ["Head", "None", "Option", "Some", "Stream", "Tail", "main"]
 
 test134 :: ModuleBundle Metadata -> Spec
 test134 bundle@ModuleBundle{..} = do
@@ -89,13 +90,13 @@ test134 bundle@ModuleBundle{..} = do
     it "" $
       Environment.mapEnvironment (fmap stripMeta) (exportedInstances bundle) == mainExportedInstances
 
-  describe "Names" $
+  describe "Names" $ do
     it "" $
       exportedNames bundle == mainNames2
 
   describe "Exports" $ do
     it "" $
-      moduleExports == Set.fromList ["Functor", "Head", "None", "Option", "Some", "Stream", "Tail", "map"]
+      moduleExports == Set.fromList ["Functor", "Head", "None", "Option", "Some", "Stream", "Tail", "map", "main"]
 
 class StripMeta i where
   stripMeta :: i a -> i ()
@@ -145,6 +146,10 @@ mainNames =
       ( "Tail"
       , ICodataAccessor (Forall (Set.fromList [TypeIndex KType 0]) [] (TApplication KType (TConstructor (KArrow KType KType) "Stream") (TVariable (TypeIndex KType 0) :| []) `TArrow` TApplication KType (TConstructor (KArrow KType KType) "Stream") (TVariable (TypeIndex KType 0) :| [])))
       )
+    ,
+      ( "main"
+      , IFunctionPlaceholder
+      )
     ]
 
 mainNames2 :: Environment NameInfo
@@ -189,6 +194,10 @@ mainNames2 =
                   `TArrow` TApplication KType (TVariable (TypeIndex (KArrow KType KType) 0)) (TVariable (TypeIndex KType 2) :| [])
               )
           )
+      )
+    ,
+      ( "main"
+      , IFunctionPlaceholder
       )
     ]
 
