@@ -36,4 +36,4 @@ typePhasePasses =
     >-> passTypePhaseErrors
 
 typePhase :: (MonadIO m) => Pass Metadata m [Module Metadata Kind ()] [Module Metadata Kind IndexedType]
-typePhase = mapPass (overlayEnvironment typePhasePasses)
+typePhase = mapPass typePhasePasses
