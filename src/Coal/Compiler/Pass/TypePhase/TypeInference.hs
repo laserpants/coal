@@ -39,8 +39,8 @@ pass m@(Module path _ _) = do
   clearAssumptionsC
   clearNameStoreC
 
-  bundle@ModuleBuild{..} <- prepareBuild m
-  insertModuleC (principalPath path) bundle
+  build@ModuleBuild{..} <- prepareBuild m
+  insertModuleC (principalPath path) build
 
   typeConstructors <- evalStateT typeConstructorEnv ModuleBuild{..}
   let cmpEnv =

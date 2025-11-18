@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module Coal.Compiler.BuildSpec (bundleSpec, runBuild) where
+module Coal.Compiler.BuildSpec (buildSpec, runBuild) where
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment (..), mapEnvironment)
@@ -20,51 +20,50 @@ import Data.List.NonEmpty (NonEmpty (..))
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
-import Debug.Trace
 import Extras (forM)
 import Test.Hspec
 
-bundleSpec :: Spec
-bundleSpec = do
+buildSpec :: Spec
+buildSpec = do
   res <- runIO $ runBuild ["./lang/Nat.coal", "./lang/IO.coal", "./test/Coal/examples/133/Main.coal"]
-  let bundle : _ = filter (\ModuleBuild{..} -> modulePath == Path ["Main"]) (rights (sequence res))
-  test133 bundle
+  let build : _ = filter (\ModuleBuild{..} -> modulePath == Path ["Main"]) (rights (sequence res))
+  test133 build
 
   res <- runIO $ runBuild ["./lang/Nat.coal", "./lang/IO.coal", "./test/Coal/examples/134/Main.coal"]
-  let bundle : _ = filter (\ModuleBuild{..} -> modulePath == Path ["Main"]) (rights (sequence res))
-  test134 bundle
+  let build : _ = filter (\ModuleBuild{..} -> modulePath == Path ["Main"]) (rights (sequence res))
+  test134 build
 
 test133 :: ModuleBuild Metadata -> Spec
-test133 bundle@ModuleBuild{..} = do
+test133 build@ModuleBuild{..} = do
   describe "DataConstructors" $ do
     it "" $
-      mapEnvironment stripMeta (exportedDataConstructors bundle) == mainExportedDataConstructors
+      mapEnvironment stripMeta (exportedDataConstructors build) == mainExportedDataConstructors
 
   describe "TypeConstructors" $ do
     it "" $
-      mapEnvironment stripMeta (exportedTypeConstructors bundle) == mainExportedTypeConstructors
+      mapEnvironment stripMeta (exportedTypeConstructors build) == mainExportedTypeConstructors
 
   describe "CodataAccessors" $ do
     it "" $
-      mapEnvironment stripMeta (exportedCodataAccessors bundle) == mainExportedCodataAccessors
+      mapEnvironment stripMeta (exportedCodataAccessors build) == mainExportedCodataAccessors
 
   describe "CotypeConstructorInfo" $ do
     it "" $
-      mapEnvironment stripMeta (exportedCotypeConstructors bundle) == mainCotypeConstructors
+      mapEnvironment stripMeta (exportedCotypeConstructors build) == mainCotypeConstructors
 
   describe "Names" $ do
     it "" $
-      exportedNames bundle == mainNames
+      exportedNames build == mainNames
 
   describe "Exports" $ do
     it "" $
       moduleExports == Set.fromList ["Head", "None", "Option", "Some", "Stream", "Tail", "main"]
 
 test134 :: ModuleBuild Metadata -> Spec
-test134 bundle@ModuleBuild{..} = do
+test134 build@ModuleBuild{..} = do
   describe "DataConstructors" $ do
     it "" $
-      mapEnvironment stripMeta (exportedDataConstructors bundle) == mainExportedDataConstructors
+      mapEnvironment stripMeta (exportedDataConstructors build) == mainExportedDataConstructors
 
   describe "TypeConstructors" $ do
     it "" $
@@ -72,7 +71,7 @@ test134 bundle@ModuleBuild{..} = do
 
   describe "TypeConstructors" $ do
     it "" $
-      mapEnvironment stripMeta (exportedTypeConstructors bundle) == mainExportedTypeConstructors
+      mapEnvironment stripMeta (exportedTypeConstructors build) == mainExportedTypeConstructors
 
   describe "CodataAccessors" $ do
     it "" $
@@ -88,11 +87,11 @@ test134 bundle@ModuleBuild{..} = do
 
   describe "InstanceInfo" $ do
     it "" $
-      Environment.mapEnvironment (fmap stripMeta) (exportedInstances bundle) == mainExportedInstances
+      Environment.mapEnvironment (fmap stripMeta) (exportedInstances build) == mainExportedInstances
 
   describe "Names" $ do
     it "" $
-      exportedNames bundle == mainNames2
+      exportedNames build == mainNames2
 
   describe "Exports" $ do
     it "" $

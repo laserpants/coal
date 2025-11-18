@@ -37,15 +37,15 @@ type ConstraintsGenResult g o a t s = (s, Dictionary (g, o a), [ConstraintsGenOu
 runConstraintsGenC :: (Monad m) => ConstraintsGenStack a TypeIndex Kind IndexedType r -> CompilerT a m (ConstraintsGenResult a TypeIndex Kind IndexedType r)
 runConstraintsGenC stack = do
   sup <- gets compilerSupply
-  bundle <- getCurrentBuildC
-  let (result, ConstraintsGenState{..}, output) = runConstraintsGenStack sup (context bundle) stack
+  build <- getCurrentBuildC
+  let (result, ConstraintsGenState{..}, output) = runConstraintsGenStack sup (context build) stack
   updateSupplyC constraintsGenStateSupply
   pure (result, constraintsGenStateTypeIndexes, output)
  where
-  context bundle =
+  context build =
     ConstraintsGenContext
       { constraintsGenContextMonomorphicSet = mempty
-      , constraintsGenContextModules = bundle
+      , constraintsGenContextModules = build
       }
 
 generateConstraintsC :: (Monad m, Data a, Show a) => Expression a IndexedType -> CompilerT a m ([CompilerAssumption a], [CompilerConstraint a])

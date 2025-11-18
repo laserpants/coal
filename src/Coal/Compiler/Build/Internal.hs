@@ -45,8 +45,8 @@ buildEnv = do
 replacePlaceholders :: (Monad m) => Environment IndexedScheme -> CompilerT a m ()
 replacePlaceholders store =
   updateBuildC $
-    \bundle@ModuleBuild{..} ->
-      flip execStateT bundle $
+    \build@ModuleBuild{..} ->
+      flip execStateT build $
         forM_ (Environment.toList moduleNames) $
           \case
             (name, IFunctionPlaceholder) ->
@@ -739,8 +739,8 @@ collectNames :: (Monad m) => Definition a Kind () -> (ModuleBuild a -> Environme
 collectNames (DImport _ (Path ["Builtin$"]) _) _ =
   pure ([], [])
 collectNames (DImport loc path names) getter = do
-  bundle <- importedModule loc path
-  let env = getter bundle
+  build <- importedModule loc path
+  let env = getter build
   pure (pick names env, names \\ Environment.names env)
 collectNames _ _ = error "Implementation error"
 
@@ -754,8 +754,8 @@ importedModule loc path = do
     Nothing -> do
       tellErrors [ModuleNotFound (principalPath path) (ErrorLocation (principalPath path) loc)]
       throwError PreflightFailure
-    Just bundle -> do
-      return bundle
+    Just build -> do
+      return build
 
 collectTypeConstructors :: (Monad m) => Definition a Kind () -> StateT (ModuleBuild a) (CompilerT a m) ()
 collectTypeConstructors =

@@ -166,7 +166,7 @@ setConfigC :: (Monad m) => CompilerConfig -> CompilerT a m ()
 setConfigC config = modify (overCompilerConfig (const config))
 
 insertModuleC :: (Monad m) => Name -> ModuleBuild a -> CompilerT a m ()
-insertModuleC name bundle = modify (overCompilerModules (Environment.insert name bundle))
+insertModuleC name build = modify (overCompilerModules (Environment.insert name build))
 
 getCurrentBuildC :: (Monad m) => CompilerT a m (ModuleBuild a)
 getCurrentBuildC = do
@@ -175,12 +175,12 @@ getCurrentBuildC = do
   case Environment.lookup path modules of
     Nothing ->
       error "Implementation error"
-    Just bundle ->
-      pure bundle
+    Just build ->
+      pure build
 
 updateBuildC :: (Monad m) => (ModuleBuild a -> CompilerT a m (ModuleBuild a)) -> CompilerT a m ()
 updateBuildC f = do
-  bundle <- getCurrentBuildC
-  updatedBuild <- f bundle
+  build <- getCurrentBuildC
+  updatedBuild <- f build
   path <- gets (principalPath . compilerCurrentModule)
   modify (overCompilerModules (Environment.insert path updatedBuild))

@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-import Coal.Compiler.BuildSpec (bundleSpec)
+import Coal.Compiler.BuildSpec (buildSpec)
 import Coal.Compiler.PatternAnomaliesSpec (patternAnomaliesSpec)
 import Coal.TypeSystemSpec (typeSystemSpec)
 import E2E.Kernel.Spec (e2eKernelSpec)
@@ -17,6 +17,6 @@ main :: IO ()
 main =
   hspec $ do
     spec
-    bundleSpec
+    buildSpec
     e2eSpec
     e2eKernelSpec
