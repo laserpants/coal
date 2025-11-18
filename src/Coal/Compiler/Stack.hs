@@ -41,6 +41,8 @@ module Coal.Compiler.Stack (
   setConfigGenerateLLVMOutputC,
   setConfigC,
   insertModuleC,
+  getCurrentBundleC,
+  updateBundleC,
 ) where
 
 import Coal.Common.Environment (Environment)
@@ -53,7 +55,7 @@ import Coal.Compiler.Journal
 import Coal.Compiler.Module.Bundle (ModuleBundle)
 import Coal.Compiler.State
 import Coal.Language
-import Coal.Language.Module (Module (..), modulePathName)
+import Coal.Language.Module (Module (..), modulePathName, principalPath)
 import Coal.Language.Module.Definition (Path (..))
 import Coal.TypeSystem
 import Control.Monad.Except
@@ -165,3 +167,20 @@ setConfigC config = modify (overCompilerConfig (const config))
 
 insertModuleC :: (Monad m) => Name -> ModuleBundle a -> CompilerT a m ()
 insertModuleC name bundle = modify (overCompilerModules (Environment.insert name bundle))
+
+getCurrentBundleC :: (Monad m) => CompilerT a m (ModuleBundle a)
+getCurrentBundleC = do
+  path <- gets (principalPath . compilerCurrentModule)
+  modules <- gets compilerModules
+  case Environment.lookup path modules of
+    Nothing ->
+      error "Implementation error"
+    Just bundle ->
+      pure bundle
+
+updateBundleC :: (Monad m) => (ModuleBundle a -> CompilerT a m (ModuleBundle a)) -> CompilerT a m ()
+updateBundleC f = do
+  bundle <- getCurrentBundleC
+  updatedBundle <- f bundle
+  path <- gets (principalPath . compilerCurrentModule)
+  modify (overCompilerModules (Environment.insert path updatedBundle))

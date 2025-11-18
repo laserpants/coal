@@ -2,15 +2,13 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module Coal.Compiler.Module.Builders (banan3, banan2, build, typeConstructorEnv) where
-
-import Coal.Compiler.Journal
+module Coal.Compiler.Module.Builders (buildEnv, replacePlaceholders, prepareBundle, typeConstructorEnv) where
 
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
+import Coal.Compiler.Journal
 import Coal.Compiler.Module.Bundle
 import Coal.Compiler.Stack
-import Coal.Compiler.State (overCompilerModules)
 import Coal.Language
 import Coal.Language.Module
 import Coal.TypeSystem.Substitution
@@ -22,67 +20,51 @@ import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import Extras (Name)
 
-banan3 :: (Monad m) => CompilerT a m (Environment IndexedScheme)
-banan3 = do
-  path <- gets (principalPath . compilerCurrentModule)
-  modules <- gets compilerModules
-  case Environment.lookup path modules of
-    Nothing ->
-      -- TODO
-      throwError PreflightFailure
-    Just ModuleBundle{..} -> do
-      flip execStateT mempty $ do
+buildEnv :: (Monad m) => CompilerT a m (Environment IndexedScheme)
+buildEnv = do
+  ModuleBundle{..} <- getCurrentBundleC
+  flip execStateT mempty $ do
+    forM_ (Environment.toList moduleNames) $
+      \case
+        (name, IFunction s) ->
+          modify (Environment.insert name s)
+        (name, IConstant s) ->
+          modify (Environment.insert name s)
+        (name, IFold s) ->
+          modify (Environment.insert name s)
+        (name, IUnfold s) ->
+          modify (Environment.insert name s)
+        _ ->
+          pure ()
+
+replacePlaceholders :: (Monad m) => Environment IndexedScheme -> CompilerT a m ()
+replacePlaceholders store =
+  updateBundleC $
+    \bundle@ModuleBundle{..} ->
+      flip execStateT bundle $
         forM_ (Environment.toList moduleNames) $
           \case
-            (name, IFunction s) ->
-              modify (Environment.insert name s)
-            (name, IConstant s) ->
-              modify (Environment.insert name s)
-            (name, IFold s) ->
-              modify (Environment.insert name s)
-            (name, IUnfold s) ->
-              modify (Environment.insert name s)
+            (name, IFunctionPlaceholder) ->
+              go name IFunction
+            (name, IConstantPlaceholder) ->
+              go name IConstant
+            (name, IFoldPlaceholder) ->
+              go name IFold
+            (name, IUnfoldPlaceholder) ->
+              go name IUnfold
             _ ->
               pure ()
-
-banan2 :: (Monad m) => Environment IndexedScheme -> CompilerT a m ()
-banan2 store = do
-  -- TODO: DRY
-  path <- gets (principalPath . compilerCurrentModule)
-  modules <- gets compilerModules
-  case Environment.lookup path modules of
-    Nothing ->
-      -- TODO
-      throwError PreflightFailure
-    Just bundle -> do
-      updatedBundle <- banan bundle
-      modify (overCompilerModules (Environment.insert path updatedBundle))
  where
-  banan :: (Monad m) => ModuleBundle a -> CompilerT a m (ModuleBundle a)
-  banan bundle@ModuleBundle{..} = do
-    flip execStateT bundle $ do
-      forM_ (Environment.toList moduleNames) $
-        \case
-          (name, IFunctionPlaceholder) ->
-            go name IFunction
-          (name, IConstantPlaceholder) ->
-            go name IConstant
-          (name, IFoldPlaceholder) ->
-            go name IFold
-          (name, IUnfoldPlaceholder) ->
-            go name IUnfold
-          _ ->
-            pure ()
   go :: (Monad m) => Name -> (IndexedScheme -> NameInfo) -> StateT (ModuleBundle a) (CompilerT a m) ()
   go name info =
     case Environment.lookup name store of
       Nothing ->
-        error ("No name: " <> show name)
+        error "Implementation error"
       Just s ->
         modify $ addName name (info s)
 
-build :: (Monad m, Monoid a) => Module a Kind () -> CompilerT a m (ModuleBundle a)
-build (Module path exports defs) =
+prepareBundle :: (Monad m, Monoid a) => Module a Kind () -> CompilerT a m (ModuleBundle a)
+prepareBundle (Module path exports defs) =
   flip execStateT emptyModuleBundle $ do
     modify (setPath path)
 
@@ -710,36 +692,63 @@ build (Module path exports defs) =
     inEachDef collectImportedNames
     inEachDef collectPlaceholders
 
-    let builtin = Set.fromList ["(%)", "(*)", "(+)", "(-)", "(/)", "(<>)", "(==)", "Comparable", "Divisible", "EqualTo", "GreaterThan", "IO", "LessThan", "Modulo", "None", "Numeric", "Option", "Ordered", "Ordering", "Semigroup", "Some", "compare", "from_int32", "negate"]
-
     exps <- gets (Set.filter (`notElem` builtin) . moduleExports)
-    unless (["*"] == exports) $ do
-      modify $ setExports (exports `union` Set.toList exps)
+    unless (["*"] == exports) $
+      modify $
+        setExports (exports `union` Set.toList exps)
  where
+  builtin =
+    Set.fromList
+      [ "(%)"
+      , "(*)"
+      , "(+)"
+      , "(-)"
+      , "(/)"
+      , "(<>)"
+      , "(==)"
+      , "Comparable"
+      , "Divisible"
+      , "EqualTo"
+      , "GreaterThan"
+      , "IO"
+      , "LessThan"
+      , "Modulo"
+      , "None"
+      , "Numeric"
+      , "Option"
+      , "Ordered"
+      , "Ordering"
+      , "Semigroup"
+      , "Some"
+      , "compare"
+      , "from_int32"
+      , "negate"
+      ]
   inEachDef = forM_ defs
 
+{-# INLINE pick #-}
 pick :: [Name] -> Environment a -> [(Name, a)]
 pick names = Environment.toList . Environment.restrict names
 
 collectNames :: (Monad m) => Definition a Kind () -> (ModuleBundle a -> Environment e) -> StateT (ModuleBundle a) (CompilerT a m) ([(Name, e)], [Name])
 collectNames (DImport _ (Path ["Builtin$"]) _) _ =
   pure ([], [])
-collectNames (DImport _ path names) getter = do
-  bundle <- importedModule path
+collectNames (DImport loc path names) getter = do
+  bundle <- importedModule loc path
   let env = getter bundle
   pure (pick names env, names \\ Environment.names env)
 collectNames _ _ = error "Implementation error"
 
 collect :: (Monad m) => Definition a Kind () -> (ModuleBundle a -> Environment e) -> StateT (ModuleBundle a) (CompilerT a m) [e]
-collect d f = fmap snd . fst <$> collectNames d f
+collect def f = fmap snd . fst <$> collectNames def f
 
-importedModule :: (Monad m) => Path -> StateT (ModuleBundle a) (CompilerT a m) (ModuleBundle a)
-importedModule path = do
+importedModule :: (Monad m) => a -> Path -> StateT (ModuleBundle a) (CompilerT a m) (ModuleBundle a)
+importedModule loc path = do
   env <- lift (gets compilerModules)
   case Environment.lookup (principalPath path) env of
-    Nothing ->
-      -- TODO: No such module
-      error ("No module: " <> show path)
+    Nothing -> do
+      tellErrors [ModuleNotFound (principalPath path) (ErrorLocation (principalPath path) loc)]
+      throwError PreflightFailure
     Just bundle -> do
       return bundle
 

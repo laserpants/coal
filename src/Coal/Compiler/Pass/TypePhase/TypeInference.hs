@@ -1,12 +1,9 @@
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
 module Coal.Compiler.Pass.TypePhase.TypeInference (passTypeInference) where
 
-import qualified Coal.Common.Environment as Environment
-import Coal.Common.Name (isConstructor)
-import Coal.Compiler.Builtin.Definitions (builtinFunctions, builtinTraitInstances)
+import Coal.Compiler.Builtin.Definitions (builtinFunctions)
 import Coal.Compiler.Environment
 import Coal.Compiler.Journal
 import Coal.Compiler.Module.Builders
@@ -24,7 +21,6 @@ import Control.Monad.State
 import Data.Data (Data)
 import Data.List (nub)
 import qualified Data.Text as Text
-import Debug.Trace
 
 passTypeInference :: (MonadIO m, Monoid a, Data a, Eq a, Show a) => Pass a m (Module a Kind ()) (Module a Kind IndexedType)
 passTypeInference =
@@ -38,16 +34,16 @@ isFoldAssumption :: Assumption a t -> Bool
 isFoldAssumption Assumption{..} = "!" `Text.isPrefixOf` assumptionName
 
 pass :: (MonadIO m, Monoid a, Data a, Eq a, Show a) => Module a Kind () -> CompilerT a m (Module a Kind IndexedType)
-pass m@(Module p xs _) = do
-  setCompilerCurrentModuleC p
+pass m@(Module path _ _) = do
+  setCompilerCurrentModuleC path
   clearAssumptionsC
   clearNameStoreC
 
-  b@ModuleBundle{..} <- build m
-  insertModuleC (principalPath p) b
+  bundle@ModuleBundle{..} <- prepareBundle m
+  insertModuleC (principalPath path) bundle
 
   typeConstructors <- evalStateT typeConstructorEnv ModuleBundle{..}
-  let benv =
+  let cmpEnv =
         CompilerEnvironment
           { compilerDataConstructorEnvironment = moduleDataConstructors
           , compilerTypeConstructorEnvironment = typeConstructors
@@ -59,36 +55,18 @@ pass m@(Module p xs _) = do
           , compilerKernelEnvironment = KernelEnvironment mempty mempty mempty
           }
 
-  env <- banan3
+  env <- buildEnv
   setNamesC env
-
-  --  traceShowM p
-  --  traceShowM "-----------"
-  --  traceShowM (Environment.names env)
-
   insertNamesC builtinFunctions
-  --  insertGlobalNamesC "Builtin$" (Environment.fromList builtinFunctions)
-  --  processImports m
 
-  m1 <- local (const benv) (runTypeInference m)
-
-  ns <- gets compilerNameStore
-
-  banan2 ns
-
-  let public =
-        case xs of
-          ["*"] ->
-            ns
-          names ->
-            Environment.restrict names ns
-
-  --  insertGlobalNamesC (principalPath p) public
+  m1 <- local (const cmpEnv) (runTypeInference m)
+  names <- gets compilerNameStore
+  replacePlaceholders names
 
   assumptions <- gets (filter (not . isFoldAssumption) . nub . compilerAssumptions)
   forM_ assumptions $
     \Assumption{..} -> do
-      tellErrors [NameNotInScope assumptionName (ErrorLocation (principalPath p) assumptionMetadata)]
+      tellErrors [NameNotInScope assumptionName (ErrorLocation (principalPath path) assumptionMetadata)]
   unless (null assumptions) $
     throwError NoSuchIdentifier
   pure m1
