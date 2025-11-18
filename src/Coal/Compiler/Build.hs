@@ -143,44 +143,26 @@ data ModuleBuild a = ModuleBuild
   }
   deriving (Show, Eq, Ord, Read)
 
-{-# INLINE exportsAll #-}
-exportsAll :: Set Name -> Bool
-exportsAll s = Set.fromList ["*"] == s
-
 exportedNames :: ModuleBuild a -> Environment NameInfo
-exportedNames ModuleBuild{..}
-  | exportsAll moduleExports = moduleNames
-  | otherwise = Environment.filterNames (`Set.member` moduleExports) moduleNames
+exportedNames ModuleBuild{..} = Environment.filterNames (`Set.member` moduleExports) moduleNames
 
 exportedTypeConstructors :: ModuleBuild a -> Environment (TypeConstructorInfo a)
-exportedTypeConstructors ModuleBuild{..}
-  | exportsAll moduleExports = moduleTypeConstructors
-  | otherwise = Environment.filterNames (`Set.member` moduleExports) moduleTypeConstructors
+exportedTypeConstructors ModuleBuild{..} = Environment.filterNames (`Set.member` moduleExports) moduleTypeConstructors
 
 exportedCotypeConstructors :: ModuleBuild a -> Environment (CotypeConstructorInfo a)
-exportedCotypeConstructors ModuleBuild{..}
-  | exportsAll moduleExports = moduleCotypeConstructors
-  | otherwise = Environment.filterNames (`Set.member` moduleExports) moduleCotypeConstructors
+exportedCotypeConstructors ModuleBuild{..} = Environment.filterNames (`Set.member` moduleExports) moduleCotypeConstructors
 
 exportedDataConstructors :: ModuleBuild a -> Environment (DataConstructorInfo a)
-exportedDataConstructors ModuleBuild{..}
-  | exportsAll moduleExports = moduleDataConstructors
-  | otherwise = Environment.filterNames (`Set.member` moduleExports) moduleDataConstructors
+exportedDataConstructors ModuleBuild{..} = Environment.filterNames (`Set.member` moduleExports) moduleDataConstructors
 
 exportedCodataAccessors :: ModuleBuild a -> Environment (CodataAccessorInfo a)
-exportedCodataAccessors ModuleBuild{..}
-  | exportsAll moduleExports = moduleCodataAccessors
-  | otherwise = Environment.filterNames (`Set.member` moduleExports) moduleCodataAccessors
+exportedCodataAccessors ModuleBuild{..} = Environment.filterNames (`Set.member` moduleExports) moduleCodataAccessors
 
 exportedTraits :: ModuleBuild a -> Environment (TraitInfo a)
-exportedTraits ModuleBuild{..}
-  | exportsAll moduleExports = moduleTraits
-  | otherwise = Environment.filterNames (`Set.member` moduleExports) moduleTraits
+exportedTraits ModuleBuild{..} = Environment.filterNames (`Set.member` moduleExports) moduleTraits
 
 exportedInstances :: ModuleBuild a -> Environment (Map IndexedType (InstanceInfo a))
-exportedInstances ModuleBuild{..}
-  | exportsAll moduleExports = moduleInstances
-  | otherwise = Environment.filterNames (`Set.member` moduleExports) moduleInstances
+exportedInstances ModuleBuild{..} = Environment.filterNames (`Set.member` moduleExports) moduleInstances
 
 emptyModuleBuild :: ModuleBuild a
 emptyModuleBuild =
