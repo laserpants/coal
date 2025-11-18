@@ -12,7 +12,6 @@ module Coal.Compiler.Environment (
   overKernelEnvironmentQualifiedNames,
 ) where
 
-import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment (..))
 import Coal.Compiler.Build
 import Coal.Language
