@@ -46,7 +46,6 @@ module Coal.Compiler.Build (
   setExports,
   setTypeExports,
   setPath,
-  nameOf,
 ) where
 
 import Coal.AST.Type.Parameterized
