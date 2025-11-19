@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
@@ -12,6 +13,7 @@ module Coal.Compiler.Build (
   InstanceInfo (..),
   AliasInfo (..),
   NameInfo (..),
+  HasName (..),
   emptyModuleBuild,
   addName,
   addExport,
@@ -44,6 +46,7 @@ module Coal.Compiler.Build (
   setExports,
   setTypeExports,
   setPath,
+  nameOf,
 ) where
 
 import Coal.AST.Type.Parameterized
@@ -118,21 +121,71 @@ data AliasInfo a = AliasInfo
   deriving (Show, Eq, Ord, Read)
 
 data NameInfo
-  = IFunction IndexedScheme
-  | IConstant IndexedScheme
-  | IFold IndexedScheme
-  | IUnfold IndexedScheme
-  | IDataConstructor IndexedScheme
-  | ICodataAccessor IndexedScheme
-  | IType Kind
-  | ICotype Kind
-  | ITrait
-  | IAlias
-  | IFunctionPlaceholder
-  | IConstantPlaceholder
-  | IFoldPlaceholder
-  | IUnfoldPlaceholder
+  = IFunction Name IndexedScheme
+  | IConstant Name IndexedScheme
+  | IFold Name IndexedScheme
+  | IUnfold Name IndexedScheme
+  | IDataConstructor Name IndexedScheme
+  | ICodataAccessor Name IndexedScheme
+  | IType Name Kind
+  | ICotype Name Kind
+  | ITrait Name
+  | IAlias Name
+  | IFunctionPlaceholder Name
+  | IConstantPlaceholder Name
+  | IFoldPlaceholder Name
+  | IUnfoldPlaceholder Name
   deriving (Show, Eq, Ord, Read)
+
+class HasName a where
+  nameOf :: a -> Name
+
+instance HasName NameInfo where
+  nameOf =
+    \case
+      IFunction name _ ->
+        name
+      IConstant name _ ->
+        name
+      IFold name _ ->
+        name
+      IUnfold name _ ->
+        name
+      IDataConstructor name _ ->
+        name
+      ICodataAccessor name _ ->
+        name
+      IType name _ ->
+        name
+      ICotype name _ ->
+        name
+      ITrait name ->
+        name
+      IAlias name ->
+        name
+      IFunctionPlaceholder name ->
+        name
+      IConstantPlaceholder name ->
+        name
+      IFoldPlaceholder name ->
+        name
+      IUnfoldPlaceholder name ->
+        name
+
+instance HasName (DataConstructorInfo a) where
+  nameOf = dataConstructorInfoName
+
+instance HasName (CodataAccessorInfo a) where
+  nameOf = codataAccessorInfoName
+
+instance HasName (TypeConstructorInfo a) where
+  nameOf = typeConstructorInfoName
+
+instance HasName (CotypeConstructorInfo a) where
+  nameOf = cotypeConstructorInfoName
+
+instance HasName (TraitInfo a) where
+  nameOf = traitInfoName
 
 data ModuleBuild a = ModuleBuild
   { modulePath :: Path
@@ -143,7 +196,7 @@ data ModuleBuild a = ModuleBuild
   , moduleTraits :: Environment (TraitInfo a)
   , moduleInstances :: Environment (Map IndexedType (InstanceInfo a))
   , moduleAliases :: Environment (AliasInfo a)
-  , moduleNames :: Environment NameInfo -- TODO : Make list?
+  , moduleNames :: [NameInfo]
   , moduleExports :: Set Name
   , moduleTypeExports :: Set Name
   --  , moduleDefinitions ::
@@ -151,23 +204,23 @@ data ModuleBuild a = ModuleBuild
   }
   deriving (Show, Eq, Ord, Read)
 
-exportedNames :: ModuleBuild a -> Environment NameInfo
-exportedNames ModuleBuild{..} = Environment.filterNames (`Set.member` moduleExports) moduleNames
+exportedNames :: ModuleBuild a -> [NameInfo]
+exportedNames ModuleBuild{..} = filter (\info -> nameOf info `Set.member` moduleExports) moduleNames
 
-exportedTypeNames :: ModuleBuild a -> Environment NameInfo
-exportedTypeNames ModuleBuild{..} = Environment.filterNames (`Set.member` moduleTypeExports) moduleNames
+exportedTypeNames :: ModuleBuild a -> [NameInfo]
+exportedTypeNames ModuleBuild{..} = filter (\info -> nameOf info `Set.member` moduleTypeExports) moduleNames
 
-exportedTypeConstructors :: ModuleBuild a -> Environment (TypeConstructorInfo a)
-exportedTypeConstructors ModuleBuild{..} = Environment.filterNames (`Set.member` moduleTypeExports) moduleTypeConstructors
+exportedTypeConstructors :: ModuleBuild a -> [TypeConstructorInfo a]
+exportedTypeConstructors ModuleBuild{..} = snd <$> filter (\(name, _) -> name `Set.member` moduleTypeExports) (Environment.toList moduleTypeConstructors)
 
-exportedCotypeConstructors :: ModuleBuild a -> Environment (CotypeConstructorInfo a)
-exportedCotypeConstructors ModuleBuild{..} = Environment.filterNames (`Set.member` moduleTypeExports) moduleCotypeConstructors
+exportedCotypeConstructors :: ModuleBuild a -> [CotypeConstructorInfo a]
+exportedCotypeConstructors ModuleBuild{..} = snd <$> filter (\(name, _) -> name `Set.member` moduleTypeExports) (Environment.toList moduleCotypeConstructors)
 
-exportedDataConstructors :: ModuleBuild a -> Environment (DataConstructorInfo a)
-exportedDataConstructors ModuleBuild{..} = Environment.filterNames (`Set.member` moduleExports) moduleDataConstructors
+exportedDataConstructors :: ModuleBuild a -> [DataConstructorInfo a]
+exportedDataConstructors ModuleBuild{..} = snd <$> filter (\(name, _) -> name `Set.member` moduleExports) (Environment.toList moduleDataConstructors)
 
-exportedCodataAccessors :: ModuleBuild a -> Environment (CodataAccessorInfo a)
-exportedCodataAccessors ModuleBuild{..} = Environment.filterNames (`Set.member` moduleExports) moduleCodataAccessors
+exportedCodataAccessors :: ModuleBuild a -> [CodataAccessorInfo a]
+exportedCodataAccessors ModuleBuild{..} = snd <$> filter (\(name, _) -> name `Set.member` moduleExports) (Environment.toList moduleCodataAccessors)
 
 exportedTraits :: ModuleBuild a -> Environment (TraitInfo a)
 exportedTraits ModuleBuild{..} = Environment.filterNames (`Set.member` moduleTypeExports) moduleTraits
@@ -264,8 +317,8 @@ insertInstance name t info ModuleBuild{..} =
 insertAlias :: Name -> AliasInfo a -> ModuleBuild a -> ModuleBuild a
 insertAlias name info ModuleBuild{..} = ModuleBuild{moduleAliases = Environment.insert name info moduleAliases, ..}
 
-addName :: Name -> NameInfo -> ModuleBuild a -> ModuleBuild a
-addName name info ModuleBuild{..} = ModuleBuild{moduleNames = Environment.insert name info moduleNames, ..}
+addName :: NameInfo -> ModuleBuild a -> ModuleBuild a
+addName info ModuleBuild{..} = ModuleBuild{moduleNames = info : moduleNames, ..}
 
 addExport :: Name -> ModuleBuild a -> ModuleBuild a
 addExport name ModuleBuild{..} = ModuleBuild{moduleExports = Set.insert name moduleExports, ..}

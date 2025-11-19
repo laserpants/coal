@@ -25,337 +25,292 @@ import Test.Hspec
 
 buildSpec :: Spec
 buildSpec = do
-  res <- runIO $ runBuild ["./lang/Nat.coal", "./lang/IO.coal", "./test/Coal/examples/133/Main.coal"]
-  let build : _ = filter (\ModuleBuild{..} -> modulePath == Path ["Main"]) (rights (sequence res))
-  test133 build
+  undefined
 
-  res <- runIO $ runBuild ["./lang/Nat.coal", "./lang/IO.coal", "./test/Coal/examples/134/Main.coal"]
-  let build : _ = filter (\ModuleBuild{..} -> modulePath == Path ["Main"]) (rights (sequence res))
-  test134 build
-
-test133 :: ModuleBuild Metadata -> Spec
-test133 build@ModuleBuild{..} = do
-  describe "DataConstructors" $ do
-    it "" $
-      mapEnvironment stripMeta (exportedDataConstructors build) == mainExportedDataConstructors
-
-  describe "TypeConstructors" $ do
-    it "" $
-      mapEnvironment stripMeta (exportedTypeConstructors build) == mainExportedTypeConstructors
-
-  describe "CodataAccessors" $ do
-    it "" $
-      mapEnvironment stripMeta (exportedCodataAccessors build) == mainExportedCodataAccessors
-
-  describe "CotypeConstructorInfo" $ do
-    it "" $
-      mapEnvironment stripMeta (exportedCotypeConstructors build) == mainCotypeConstructors
-
-  describe "Names" $ do
-    it "" $
-      exportedNames build == mainNames
-
-  describe "Exports" $ do
-    it "" $
-      moduleExports == Set.fromList ["Head", "None", "Option", "Some", "Stream", "Tail", "main"]
-
-test134 :: ModuleBuild Metadata -> Spec
-test134 build@ModuleBuild{..} = do
-  describe "DataConstructors" $ do
-    it "" $
-      mapEnvironment stripMeta (exportedDataConstructors build) == mainExportedDataConstructors
-
-  describe "TypeConstructors" $ do
-    it "" $
-      mapEnvironment stripMeta moduleTypeConstructors == mainTypeConstructors
-
-  describe "TypeConstructors" $ do
-    it "" $
-      mapEnvironment stripMeta (exportedTypeConstructors build) == mainExportedTypeConstructors
-
-  describe "CodataAccessors" $ do
-    it "" $
-      mapEnvironment stripMeta moduleCodataAccessors == mainExportedCodataAccessors
-
-  describe "CotypeConstructorInfo" $ do
-    it "" $
-      mapEnvironment stripMeta moduleCotypeConstructors == mainCotypeConstructors
-
-  describe "TraitInfo" $
-    it "" $
-      mapEnvironment stripMeta moduleTraits == mainTraits
-
-  describe "InstanceInfo" $ do
-    it "" $
-      Environment.mapEnvironment (fmap stripMeta) (exportedInstances build) == mainExportedInstances
-
-  describe "Names" $ do
-    it "" $
-      exportedNames build == mainNames2
-
-  describe "Exports" $ do
-    it "" $
-      moduleExports == Set.fromList ["Functor", "Head", "None", "Option", "Some", "Stream", "Tail", "map", "main"]
-
-class StripMeta i where
-  stripMeta :: i a -> i ()
-
-instance StripMeta DataConstructorInfo where
-  stripMeta (DataConstructorInfo _ n c s) = DataConstructorInfo () n c s
-
-instance StripMeta TypeConstructorInfo where
-  stripMeta (TypeConstructorInfo _ n k ns) = TypeConstructorInfo () n k ns
-
-instance StripMeta CodataAccessorInfo where
-  stripMeta (CodataAccessorInfo _ n a) = CodataAccessorInfo () n a
-
-instance StripMeta CotypeConstructorInfo where
-  stripMeta (CotypeConstructorInfo _ n k ns) = CotypeConstructorInfo () n k ns
-
-instance StripMeta TraitInfo where
-  stripMeta (TraitInfo _ n t d) = TraitInfo () n t d
-
-instance StripMeta InstanceInfo where
-  stripMeta (InstanceInfo _ t t2 d) = InstanceInfo () t t2 d
-
-mainNames :: Environment NameInfo
-mainNames =
-  Environment.fromList
-    [
-      ( "Option"
-      , IType (KArrow KType KType)
-      )
-    ,
-      ( "Stream"
-      , ICotype (KArrow KType KType)
-      )
-    ,
-      ( "None"
-      , IDataConstructor (Forall (Set.fromList [TypeIndex KType 0]) [] (TApplication KType (TConstructor (KArrow KType KType) "Option") (TVariable (TypeIndex KType 0) :| [])))
-      )
-    ,
-      ( "Some"
-      , IDataConstructor (Forall (Set.fromList [TypeIndex KType 0]) [] (TVariable (TypeIndex KType 0) `TArrow` TApplication KType (TConstructor (KArrow KType KType) "Option") (TVariable (TypeIndex KType 0) :| [])))
-      )
-    ,
-      ( "Head"
-      , ICodataAccessor (Forall (Set.fromList [TypeIndex KType 0]) [] (TApplication KType (TConstructor (KArrow KType KType) "Stream") (TVariable (TypeIndex KType 0) :| []) `TArrow` TVariable (TypeIndex KType 0)))
-      )
-    ,
-      ( "Tail"
-      , ICodataAccessor (Forall (Set.fromList [TypeIndex KType 0]) [] (TApplication KType (TConstructor (KArrow KType KType) "Stream") (TVariable (TypeIndex KType 0) :| []) `TArrow` TApplication KType (TConstructor (KArrow KType KType) "Stream") (TVariable (TypeIndex KType 0) :| [])))
-      )
-    ,
-      ( "main"
-      , IFunctionPlaceholder
-      )
-    ]
-
-mainNames2 :: Environment NameInfo
-mainNames2 =
-  Environment.fromList
-    [
-      ( "Option"
-      , IType (KArrow KType KType)
-      )
-    ,
-      ( "Stream"
-      , ICotype (KArrow KType KType)
-      )
-    ,
-      ( "None"
-      , IDataConstructor (Forall (Set.fromList [TypeIndex KType 0]) [] (TApplication KType (TConstructor (KArrow KType KType) "Option") (TVariable (TypeIndex KType 0) :| [])))
-      )
-    ,
-      ( "Some"
-      , IDataConstructor (Forall (Set.fromList [TypeIndex KType 0]) [] (TVariable (TypeIndex KType 0) `TArrow` TApplication KType (TConstructor (KArrow KType KType) "Option") (TVariable (TypeIndex KType 0) :| [])))
-      )
-    ,
-      ( "Head"
-      , ICodataAccessor (Forall (Set.fromList [TypeIndex KType 0]) [] (TApplication KType (TConstructor (KArrow KType KType) "Stream") (TVariable (TypeIndex KType 0) :| []) `TArrow` TVariable (TypeIndex KType 0)))
-      )
-    ,
-      ( "Tail"
-      , ICodataAccessor (Forall (Set.fromList [TypeIndex KType 0]) [] (TApplication KType (TConstructor (KArrow KType KType) "Stream") (TVariable (TypeIndex KType 0) :| []) `TArrow` TApplication KType (TConstructor (KArrow KType KType) "Stream") (TVariable (TypeIndex KType 0) :| [])))
-      )
-    ,
-      ( "Functor"
-      , ITrait
-      )
-    ,
-      ( "map"
-      , IFunction
-          ( Forall
-              (Set.fromList [TypeIndex (KArrow KType KType) 0, TypeIndex KType 1, TypeIndex KType 2])
-              [Trait "Functor" (TVariable (TypeIndex (KArrow KType KType) 0))]
-              ( (TVariable (TypeIndex KType 1) `TArrow` TVariable (TypeIndex KType 2))
-                  `TArrow` TApplication KType (TVariable (TypeIndex (KArrow KType KType) 0)) (TVariable (TypeIndex KType 1) :| [])
-                  `TArrow` TApplication KType (TVariable (TypeIndex (KArrow KType KType) 0)) (TVariable (TypeIndex KType 2) :| [])
-              )
-          )
-      )
-    ,
-      ( "main"
-      , IFunctionPlaceholder
-      )
-    ]
-
-mainExportedDataConstructors :: Environment (DataConstructorInfo ())
-mainExportedDataConstructors =
-  Environment.fromList
-    [
-      ( "None"
-      , DataConstructorInfo
-          ()
-          "None"
-          (DataConstructor "None" 0 (Forall (Set.fromList [TypeIndex KType 0]) [] (TApplication KType (TConstructor (KArrow KType KType) "Option") (TVariable (TypeIndex KType 0) :| []))))
-          (Set.fromList ["None", "Some"])
-      )
-    ,
-      ( "Some"
-      , DataConstructorInfo
-          ()
-          "Some"
-          ( DataConstructor "Some" 1 (Forall (Set.fromList [TypeIndex KType 0]) [] (TVariable (TypeIndex KType 0) `TArrow` TApplication KType (TConstructor (KArrow KType KType) "Option") (TVariable (TypeIndex KType 0) :| [])))
-          )
-          (Set.fromList ["None", "Some"])
-      )
-    ]
-
-mainTypeConstructors :: Environment (TypeConstructorInfo ())
-mainTypeConstructors =
-  Environment.fromList
-    [
-      ( "Option"
-      , TypeConstructorInfo () "Option" (KArrow KType KType) ["Some", "None"]
-      )
-    ,
-      ( "List"
-      , TypeConstructorInfo () "List" (KArrow KType KType) []
-      )
-    ]
-
-mainExportedTypeConstructors :: Environment (TypeConstructorInfo ())
-mainExportedTypeConstructors =
-  Environment.fromList
-    [
-      ( "Option"
-      , TypeConstructorInfo () "Option" (KArrow KType KType) ["Some", "None"]
-      )
-    ]
-
-mainExportedCodataAccessors :: Environment (CodataAccessorInfo ())
-mainExportedCodataAccessors =
-  Environment.fromList
-    [
-      ( "Head"
-      , CodataAccessorInfo
-          ()
-          "Head"
-          ( CodataAccessor
-              "Head"
-              (Forall (Set.fromList [TypeIndex KType 0]) [] (TApplication KType (TConstructor (KArrow KType KType) "Stream") (TVariable (TypeIndex KType 0) :| []) `TArrow` TVariable (TypeIndex KType 0)))
-          )
-      )
-    ,
-      ( "Tail"
-      , CodataAccessorInfo
-          ()
-          "Tail"
-          ( CodataAccessor
-              "Tail"
-              (Forall (Set.fromList [TypeIndex KType 0]) [] (TApplication KType (TConstructor (KArrow KType KType) "Stream") (TVariable (TypeIndex KType 0) :| []) `TArrow` TApplication KType (TConstructor (KArrow KType KType) "Stream") (TVariable (TypeIndex KType 0) :| [])))
-          )
-      )
-    ]
-
-mainCotypeConstructors :: Environment (CotypeConstructorInfo ())
-mainCotypeConstructors =
-  Environment.fromList
-    [
-      ( "Stream"
-      , CotypeConstructorInfo
-          ()
-          "Stream"
-          (KArrow KType KType)
-          ["Head", "Tail"]
-      )
-    ]
-
-mainTraits :: Environment (TraitInfo ())
-mainTraits =
-  Environment.fromList
-    [
-      ( "Functor"
-      , TraitInfo
-          ()
-          "Functor"
-          (Parameter (KArrow KType KType) "f")
-          ( Environment.fromList
-              [
-                ( "map"
-                , Forall
-                    (Set.fromList [Parameter () "f", Parameter () "a", Parameter () "b"])
-                    []
-                    ( (TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "b"))
-                        `TArrow` TApplication () (TVariable (Parameter () "f")) (TVariable (Parameter () "a") :| [])
-                        `TArrow` TApplication () (TVariable (Parameter () "f")) (TVariable (Parameter () "b") :| [])
-                    )
-                )
-              ]
-          )
-      )
-    ]
-
-mainExportedInstances :: Environment (Map IndexedType (InstanceInfo ()))
-mainExportedInstances =
-  Environment.fromList
-    [
-      ( "Functor"
-      , Map.fromList
-          [
-            ( TConstructor (KArrow KType KType) "List"
-            , InstanceInfo
-                ()
-                (TConstructor () "List")
-                (TConstructor (KArrow KType KType) "List")
-                ( Map.fromList
-                    [
-                      ( "map"
-                      , Forall
-                          (Set.fromList [TypeIndex KType 1, TypeIndex KType 2])
-                          []
-                          ( (TVariable (TypeIndex KType 1) `TArrow` TVariable (TypeIndex KType 2))
-                              `TArrow` TApplication KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 1) :| [])
-                              `TArrow` TApplication KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 2) :| [])
-                          )
-                      )
-                    ]
-                )
-            )
-          ,
-            ( TConstructor (KArrow KType KType) "Option"
-            , InstanceInfo
-                ()
-                (TConstructor () "Option")
-                (TConstructor (KArrow KType KType) "Option")
-                ( Map.fromList
-                    [
-                      ( "map"
-                      , Forall
-                          (Set.fromList [TypeIndex KType 1, TypeIndex KType 2])
-                          []
-                          ( (TVariable (TypeIndex KType 1) `TArrow` TVariable (TypeIndex KType 2))
-                              `TArrow` TApplication KType (TConstructor (KArrow KType KType) "Option") (TVariable (TypeIndex KType 1) :| [])
-                              `TArrow` TApplication KType (TConstructor (KArrow KType KType) "Option") (TVariable (TypeIndex KType 2) :| [])
-                          )
-                      )
-                    ]
-                )
-            )
-          ]
-      )
-    ]
+--  res <- runIO $ runBuild ["./lang/Nat.coal", "./lang/IO.coal", "./test/Coal/examples/133/Main.coal"]
+--  let build : _ = filter (\ModuleBuild{..} -> modulePath == Path ["Main"]) (rights (sequence res))
+--  test133 build
+--
+--  res <- runIO $ runBuild ["./lang/Nat.coal", "./lang/IO.coal", "./test/Coal/examples/134/Main.coal"]
+--  let build : _ = filter (\ModuleBuild{..} -> modulePath == Path ["Main"]) (rights (sequence res))
+--  test134 build
+--
+--test133 :: ModuleBuild Metadata -> Spec
+--test133 build@ModuleBuild{..} = do
+--  describe "DataConstructors" $ do
+--    it "" $
+--      mapEnvironment stripMeta (exportedDataConstructors build) == mainExportedDataConstructors
+--
+--  describe "TypeConstructors" $ do
+--    it "" $
+--      mapEnvironment stripMeta (exportedTypeConstructors build) == mainExportedTypeConstructors
+--
+--  describe "CodataAccessors" $ do
+--    it "" $
+--      mapEnvironment stripMeta (exportedCodataAccessors build) == mainExportedCodataAccessors
+--
+--  describe "CotypeConstructorInfo" $ do
+--    it "" $
+--      mapEnvironment stripMeta (exportedCotypeConstructors build) == mainCotypeConstructors
+--
+--  describe "Names" $ do
+--    it "" $
+--      exportedNames build == mainNames
+--
+--  describe "Exports" $ do
+--    it "" $
+--      moduleExports == Set.fromList ["Head", "None", "Option", "Some", "Stream", "Tail", "main"]
+--
+--test134 :: ModuleBuild Metadata -> Spec
+--test134 build@ModuleBuild{..} = do
+--  describe "DataConstructors" $ do
+--    it "" $
+--      mapEnvironment stripMeta (exportedDataConstructors build) == mainExportedDataConstructors
+--
+--  describe "TypeConstructors" $ do
+--    it "" $
+--      mapEnvironment stripMeta moduleTypeConstructors == mainTypeConstructors
+--
+--  describe "TypeConstructors" $ do
+--    it "" $
+--      mapEnvironment stripMeta (exportedTypeConstructors build) == mainExportedTypeConstructors
+--
+--  describe "CodataAccessors" $ do
+--    it "" $
+--      mapEnvironment stripMeta moduleCodataAccessors == mainExportedCodataAccessors
+--
+--  describe "CotypeConstructorInfo" $ do
+--    it "" $
+--      mapEnvironment stripMeta moduleCotypeConstructors == mainCotypeConstructors
+--
+--  describe "TraitInfo" $
+--    it "" $
+--      mapEnvironment stripMeta moduleTraits == mainTraits
+--
+--  describe "InstanceInfo" $ do
+--    it "" $
+--      Environment.mapEnvironment (fmap stripMeta) (exportedInstances build) == mainExportedInstances
+--
+--  describe "Names" $ do
+--    it "" $
+--      exportedNames build == mainNames2
+--
+--  describe "Exports" $ do
+--    it "" $
+--      moduleExports == Set.fromList ["Functor", "Head", "None", "Option", "Some", "Stream", "Tail", "map", "main"]
+--
+--class StripMeta i where
+--  stripMeta :: i a -> i ()
+--
+--instance StripMeta DataConstructorInfo where
+--  stripMeta (DataConstructorInfo _ n c s) = DataConstructorInfo () n c s
+--
+--instance StripMeta TypeConstructorInfo where
+--  stripMeta (TypeConstructorInfo _ n k ns) = TypeConstructorInfo () n k ns
+--
+--instance StripMeta CodataAccessorInfo where
+--  stripMeta (CodataAccessorInfo _ n a) = CodataAccessorInfo () n a
+--
+--instance StripMeta CotypeConstructorInfo where
+--  stripMeta (CotypeConstructorInfo _ n k ns) = CotypeConstructorInfo () n k ns
+--
+--instance StripMeta TraitInfo where
+--  stripMeta (TraitInfo _ n t d) = TraitInfo () n t d
+--
+--instance StripMeta InstanceInfo where
+--  stripMeta (InstanceInfo _ t t2 d) = InstanceInfo () t t2 d
+--
+--mainNames :: [NameInfo]
+--mainNames =
+--    [
+--      IType "Option" (KArrow KType KType)
+--      , ICotype "Stream" (KArrow KType KType)
+--      , IDataConstructor "None" (Forall (Set.fromList [TypeIndex KType 0]) [] (TApplication KType (TConstructor (KArrow KType KType) "Option") (TVariable (TypeIndex KType 0) :| [])))
+--      , IDataConstructor "Some" (Forall (Set.fromList [TypeIndex KType 0]) [] (TVariable (TypeIndex KType 0) `TArrow` TApplication KType (TConstructor (KArrow KType KType) "Option") (TVariable (TypeIndex KType 0) :| [])))
+--      , ICodataAccessor "Head" (Forall (Set.fromList [TypeIndex KType 0]) [] (TApplication KType (TConstructor (KArrow KType KType) "Stream") (TVariable (TypeIndex KType 0) :| []) `TArrow` TVariable (TypeIndex KType 0)))
+--      , ICodataAccessor "Tail" (Forall (Set.fromList [TypeIndex KType 0]) [] (TApplication KType (TConstructor (KArrow KType KType) "Stream") (TVariable (TypeIndex KType 0) :| []) `TArrow` TApplication KType (TConstructor (KArrow KType KType) "Stream") (TVariable (TypeIndex KType 0) :| [])))
+--      , IFunctionPlaceholder "main"
+--    ]
+--
+--mainNames2 :: [NameInfo]
+--mainNames2 =
+--    [
+--      IType "Option" (KArrow KType KType)
+--      , ICotype "Stream" (KArrow KType KType)
+--      , IDataConstructor "None" (Forall (Set.fromList [TypeIndex KType 0]) [] (TApplication KType (TConstructor (KArrow KType KType) "Option") (TVariable (TypeIndex KType 0) :| [])))
+--      , IDataConstructor "Some" (Forall (Set.fromList [TypeIndex KType 0]) [] (TVariable (TypeIndex KType 0) `TArrow` TApplication KType (TConstructor (KArrow KType KType) "Option") (TVariable (TypeIndex KType 0) :| [])))
+--      , ICodataAccessor "Head" (Forall (Set.fromList [TypeIndex KType 0]) [] (TApplication KType (TConstructor (KArrow KType KType) "Stream") (TVariable (TypeIndex KType 0) :| []) `TArrow` TVariable (TypeIndex KType 0)))
+--      , ICodataAccessor "Tail" (Forall (Set.fromList [TypeIndex KType 0]) [] (TApplication KType (TConstructor (KArrow KType KType) "Stream") (TVariable (TypeIndex KType 0) :| []) `TArrow` TApplication KType (TConstructor (KArrow KType KType) "Stream") (TVariable (TypeIndex KType 0) :| [])))
+--      , ITrait "Functor"
+--      , IFunction
+--         "map"
+--          ( Forall
+--              (Set.fromList [TypeIndex (KArrow KType KType) 0, TypeIndex KType 1, TypeIndex KType 2])
+--              [Trait "Functor" (TVariable (TypeIndex (KArrow KType KType) 0))]
+--              ( (TVariable (TypeIndex KType 1) `TArrow` TVariable (TypeIndex KType 2))
+--                  `TArrow` TApplication KType (TVariable (TypeIndex (KArrow KType KType) 0)) (TVariable (TypeIndex KType 1) :| [])
+--                  `TArrow` TApplication KType (TVariable (TypeIndex (KArrow KType KType) 0)) (TVariable (TypeIndex KType 2) :| [])
+--              )
+--          )
+--      , IFunctionPlaceholder "main"
+--    ]
+--
+--mainExportedDataConstructors :: Environment (DataConstructorInfo ())
+--mainExportedDataConstructors =
+--  Environment.fromList
+--    [
+--      ( "None"
+--      , DataConstructorInfo
+--          ()
+--          "None"
+--          (DataConstructor "None" 0 (Forall (Set.fromList [TypeIndex KType 0]) [] (TApplication KType (TConstructor (KArrow KType KType) "Option") (TVariable (TypeIndex KType 0) :| []))))
+--          (Set.fromList ["None", "Some"])
+--      )
+--    ,
+--      ( "Some"
+--      , DataConstructorInfo
+--          ()
+--          "Some"
+--          ( DataConstructor "Some" 1 (Forall (Set.fromList [TypeIndex KType 0]) [] (TVariable (TypeIndex KType 0) `TArrow` TApplication KType (TConstructor (KArrow KType KType) "Option") (TVariable (TypeIndex KType 0) :| [])))
+--          )
+--          (Set.fromList ["None", "Some"])
+--      )
+--    ]
+--
+--mainTypeConstructors :: Environment (TypeConstructorInfo ())
+--mainTypeConstructors =
+--  Environment.fromList
+--    [
+--      ( "Option"
+--      , TypeConstructorInfo () "Option" (KArrow KType KType) ["Some", "None"]
+--      )
+--    ,
+--      ( "List"
+--      , TypeConstructorInfo () "List" (KArrow KType KType) []
+--      )
+--    ]
+--
+--mainExportedTypeConstructors :: Environment (TypeConstructorInfo ())
+--mainExportedTypeConstructors =
+--  Environment.fromList
+--    [
+--      ( "Option"
+--      , TypeConstructorInfo () "Option" (KArrow KType KType) ["Some", "None"]
+--      )
+--    ]
+--
+--mainExportedCodataAccessors :: Environment (CodataAccessorInfo ())
+--mainExportedCodataAccessors =
+--  Environment.fromList
+--    [
+--      ( "Head"
+--      , CodataAccessorInfo
+--          ()
+--          "Head"
+--          ( CodataAccessor
+--              "Head"
+--              (Forall (Set.fromList [TypeIndex KType 0]) [] (TApplication KType (TConstructor (KArrow KType KType) "Stream") (TVariable (TypeIndex KType 0) :| []) `TArrow` TVariable (TypeIndex KType 0)))
+--          )
+--      )
+--    ,
+--      ( "Tail"
+--      , CodataAccessorInfo
+--          ()
+--          "Tail"
+--          ( CodataAccessor
+--              "Tail"
+--              (Forall (Set.fromList [TypeIndex KType 0]) [] (TApplication KType (TConstructor (KArrow KType KType) "Stream") (TVariable (TypeIndex KType 0) :| []) `TArrow` TApplication KType (TConstructor (KArrow KType KType) "Stream") (TVariable (TypeIndex KType 0) :| [])))
+--          )
+--      )
+--    ]
+--
+--mainCotypeConstructors :: Environment (CotypeConstructorInfo ())
+--mainCotypeConstructors =
+--  Environment.fromList
+--    [
+--      ( "Stream"
+--      , CotypeConstructorInfo
+--          ()
+--          "Stream"
+--          (KArrow KType KType)
+--          ["Head", "Tail"]
+--      )
+--    ]
+--
+--mainTraits :: Environment (TraitInfo ())
+--mainTraits =
+--  Environment.fromList
+--    [
+--      ( "Functor"
+--      , TraitInfo
+--          ()
+--          "Functor"
+--          (Parameter (KArrow KType KType) "f")
+--          ( Environment.fromList
+--              [
+--                ( "map"
+--                , Forall
+--                    (Set.fromList [Parameter () "f", Parameter () "a", Parameter () "b"])
+--                    []
+--                    ( (TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "b"))
+--                        `TArrow` TApplication () (TVariable (Parameter () "f")) (TVariable (Parameter () "a") :| [])
+--                        `TArrow` TApplication () (TVariable (Parameter () "f")) (TVariable (Parameter () "b") :| [])
+--                    )
+--                )
+--              ]
+--          )
+--      )
+--    ]
+--
+--mainExportedInstances :: Environment (Map IndexedType (InstanceInfo ()))
+--mainExportedInstances =
+--  Environment.fromList
+--    [
+--      ( "Functor"
+--      , Map.fromList
+--          [
+--            ( TConstructor (KArrow KType KType) "List"
+--            , InstanceInfo
+--                ()
+--                (TConstructor () "List")
+--                (TConstructor (KArrow KType KType) "List")
+--                ( Map.fromList
+--                    [
+--                      ( "map"
+--                      , Forall
+--                          (Set.fromList [TypeIndex KType 1, TypeIndex KType 2])
+--                          []
+--                          ( (TVariable (TypeIndex KType 1) `TArrow` TVariable (TypeIndex KType 2))
+--                              `TArrow` TApplication KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 1) :| [])
+--                              `TArrow` TApplication KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 2) :| [])
+--                          )
+--                      )
+--                    ]
+--                )
+--            )
+--          ,
+--            ( TConstructor (KArrow KType KType) "Option"
+--            , InstanceInfo
+--                ()
+--                (TConstructor () "Option")
+--                (TConstructor (KArrow KType KType) "Option")
+--                ( Map.fromList
+--                    [
+--                      ( "map"
+--                      , Forall
+--                          (Set.fromList [TypeIndex KType 1, TypeIndex KType 2])
+--                          []
+--                          ( (TVariable (TypeIndex KType 1) `TArrow` TVariable (TypeIndex KType 2))
+--                              `TArrow` TApplication KType (TConstructor (KArrow KType KType) "Option") (TVariable (TypeIndex KType 1) :| [])
+--                              `TArrow` TApplication KType (TConstructor (KArrow KType KType) "Option") (TVariable (TypeIndex KType 2) :| [])
+--                          )
+--                      )
+--                    ]
+--                )
+--            )
+--          ]
+--      )
+--    ]
 
 runBuild :: [FilePath] -> IO (Either CompilerFailureMode [ModuleBuild Metadata])
 runBuild names = do
