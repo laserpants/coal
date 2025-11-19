@@ -7,6 +7,7 @@ module Coal.Parser.Module.Definition (parseDefinition) where
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Language
 import Coal.Language.Module
+import Coal.Language.Module.Definition (Import (..))
 import Coal.Parser.Core
 import Coal.Parser.Expression (parseExpression, parseMatchClause)
 import Coal.Parser.Identifier
@@ -118,12 +119,55 @@ parseCodataDefinition = do
 toAccessor :: [Parameter ()] -> Type Parameter () -> (Name, Type Parameter ()) -> CodataAccessor Parameter () (Type Parameter ())
 toAccessor ps t0 (n, t) = CodataAccessor n (Forall (Set.fromList ps) [] (t0 `TArrow` t))
 
+parseImportAtom :: Parser (Import Metadata)
+parseImportAtom =
+  do
+    parseImportType
+    <|> parseImportType
+    <|> parseImportCotype
+    <|> parseImportTrait
+    <|> parseImportName
+
+parseImportType :: Parser (Import Metadata)
+parseImportType = do
+  start <- getSourcePos
+  lexeme_ "type"
+  name_ <- constructor
+  names <- option ["*"] (parens (commaSep1 constructor))
+  end <- getSourcePos
+  pure (TypeImport (Metadata start end) name_ names)
+
+parseImportCotype :: Parser (Import Metadata)
+parseImportCotype = do
+  start <- getSourcePos
+  lexeme_ "cotype"
+  name_ <- constructor
+  names <- option ["*"] (parens (commaSep1 constructor))
+  end <- getSourcePos
+  pure (CotypeImport (Metadata start end) name_ names)
+
+parseImportTrait :: Parser (Import Metadata)
+parseImportTrait = do
+  start <- getSourcePos
+  lexeme_ "trait"
+  name_ <- constructor
+  names <- option ["*"] (parens (commaSep1 name))
+  end <- getSourcePos
+  pure (TraitImport (Metadata start end) name_ names)
+
+parseImportName :: Parser (Import Metadata)
+parseImportName = do
+  start <- getSourcePos
+  n <- backtickString <|> name <|> identifier upperChar
+  end <- getSourcePos
+  pure (NameImport (Metadata start end) n)
+
 parseImport :: Parser (Definition Metadata o ())
 parseImport = do
   start <- getSourcePos
   lexeme_ "import"
   path <- (lexeme "Builtin$" <|> identifier upperChar) `sepBy1` symbol "."
-  names <- option ["*"] (parens (commaSep (backtickString <|> name <|> identifier upperChar)))
+  names <- parens (commaSep parseImportAtom)
   end <- getSourcePos
   pure (DImport (Metadata start end) (Path path) names)
 

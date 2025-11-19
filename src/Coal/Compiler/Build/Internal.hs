@@ -16,10 +16,11 @@ import Coal.Compiler.Journal
 import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module
+import Coal.Language.Module.Definition (Import (..))
 import Coal.TypeSystem.Substitution
 import Control.Monad.Except
 import Control.Monad.State (StateT, execStateT, gets, modify)
-import Data.List (union, (\\))
+import Data.List (union)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
@@ -68,7 +69,7 @@ replacePlaceholders store =
       Just s ->
         modify $ addName name (info s)
 
-prepareBuild :: (Monad m, Monoid a) => Module a Kind () -> CompilerT a m (ModuleBuild a)
+prepareBuild :: (Monad m, Monoid a, Eq a) => Module a Kind () -> CompilerT a m (ModuleBuild a)
 prepareBuild (Module path exports defs) =
   flip execStateT emptyModuleBuild $ do
     modify (setPath path)
@@ -77,7 +78,7 @@ prepareBuild (Module path exports defs) =
 
     -- Built-in type constructors
     modify $
-      insertTypeConstructor "List" (TypeConstructorInfo mempty "List" (KArrow KType KType))
+      insertTypeConstructor "List" (TypeConstructorInfo mempty "List" (KArrow KType KType) [])
         . addName "List" (IType (KArrow KType KType))
 
     kinds <- typeConstructorEnv
@@ -702,10 +703,11 @@ prepareBuild (Module path exports defs) =
 
     exps <- gets (Set.filter (`notElem` builtin) . moduleExports)
     typeExps <- gets (Set.filter (`notElem` builtin) . moduleTypeExports)
-    unless (["*"] == exports) $
+
+    unless ([WildcardExport] == exports) $
       modify $
-        setExports (exports `union` Set.toList exps)
-          . setTypeExports (exports `union` Set.toList typeExps)
+        setExports (nameExports exports `union` Set.toList exps)
+          . setTypeExports (typeExports exports `union` Set.toList typeExps)
  where
   builtin =
     Set.fromList
@@ -736,21 +738,90 @@ prepareBuild (Module path exports defs) =
       ]
   inEachDef = forM_ defs
 
+nameExports :: [Export a] -> [Name]
+nameExports exports =
+  flip concatMap exports $
+    \case
+      -- TODO: Rename to ExprExport/ExprImport?
+      NameExport _ name ->
+        [name]
+      TypeExport _ _ names ->
+        names
+      _ ->
+        []
+
+typeExports :: [Export a] -> [Name]
+typeExports exports =
+  flip concatMap exports $
+    \case
+      TypeExport _ name _ ->
+        [name]
+      _ ->
+        []
+
 {-# INLINE pick #-}
 pick :: [Name] -> Environment a -> [(Name, a)]
 pick names = Environment.toList . Environment.restrict names
 
-collectNames :: (Monad m) => Definition a Kind () -> (ModuleBuild a -> Environment e) -> StateT (ModuleBuild a) (CompilerT a m) ([(Name, e)], [Name])
-collectNames (DImport _ (Path ["Builtin$"]) _) _ =
-  pure ([], [])
-collectNames (DImport loc path names) getter = do
+collectNameImports :: (Monad m) => Definition a Kind () -> (ModuleBuild a -> Environment e) -> StateT (ModuleBuild a) (CompilerT a m) [(Name, e)]
+collectNameImports (DImport _ (Path ["Builtin$"]) _) _ = pure []
+collectNameImports (DImport loc path imports) getter = do
   build <- importedModule loc path
   let env = getter build
-  pure (pick names env, names \\ Environment.names env)
-collectNames _ _ = error "Implementation error"
+  pure (pick (nameImports build imports) env)
+collectNameImports _ _ = error "Implementation error"
 
-collect :: (Monad m) => Definition a Kind () -> (ModuleBuild a -> Environment e) -> StateT (ModuleBuild a) (CompilerT a m) [e]
-collect def f = fmap snd . fst <$> collectNames def f
+collectTypeImports :: (Monad m) => Definition a Kind () -> (ModuleBuild a -> Environment e) -> StateT (ModuleBuild a) (CompilerT a m) [(Name, e)]
+collectTypeImports (DImport _ (Path ["Builtin$"]) _) _ = pure []
+collectTypeImports (DImport loc path imports) getter = do
+  build <- importedModule loc path
+  let env = getter build
+  pure (pick (typeImports imports) env)
+collectTypeImports _ _ = error "Implementation error"
+
+nameImports :: ModuleBuild a -> [Import a] -> [Name]
+nameImports ModuleBuild{..} imports =
+  flip concatMap imports $
+    \case
+      NameImport _ name ->
+        [name]
+      TypeImport _ name ["*"] ->
+        case Environment.lookup name moduleTypeConstructors of
+          Nothing ->
+            error "TODO"
+          Just TypeConstructorInfo{..} ->
+            typeConstructorInfoDataConstructors
+      TypeImport _ _ names ->
+        names
+      CotypeImport _ name ["*"] ->
+        case Environment.lookup name moduleCotypeConstructors of
+          Nothing ->
+            error "TODO"
+          Just CotypeConstructorInfo{..} ->
+            cotypeConstructorInfoDataAccessors
+      CotypeImport _ _ names ->
+        names
+      TraitImport _ name ["*"] ->
+        case Environment.lookup name moduleTraits of
+          Nothing ->
+            error "TODO"
+          Just TraitInfo{..} ->
+            Environment.names traitInfoEntries
+      TraitImport _ _ names ->
+        names
+
+typeImports :: [Import a] -> [Name]
+typeImports imports =
+  flip concatMap imports $
+    \case
+      TypeImport _ name _ ->
+        [name]
+      CotypeImport _ name _ ->
+        [name]
+      TraitImport _ name _ ->
+        [name]
+      _ ->
+        []
 
 importedModule :: (Monad m) => a -> Path -> StateT (ModuleBuild a) (CompilerT a m) (ModuleBuild a)
 importedModule loc path = do
@@ -771,27 +842,27 @@ collectTypeConstructors =
           . addName name (IType kind_)
           . addTypeExport name
      where
-      info@(TypeConstructorInfo _ _ kind_) = typeConstructorInfo loc name def
+      info@(TypeConstructorInfo _ _ kind_ _) = typeConstructorInfo loc name def
     DCotype loc name def -> do
       modify $
         insertCotypeConstructor name info
           . addName name (ICotype kind_)
           . addTypeExport name
      where
-      info@(CotypeConstructorInfo _ _ kind_) = cotypeConstructorInfo loc name def
+      info@(CotypeConstructorInfo _ _ kind_ _) = cotypeConstructorInfo loc name def
     DTypeAlias loc name alias -> do
       modify $
         insertAlias name (aliasInfo loc name alias)
           . addName name IAlias
           . addTypeExport name
     def@DImport{} -> do
-      types <- collect def exportedTypeConstructors
+      types <- collectTypeImports def exportedTypeConstructors
       forM_ types $
-        \info@(TypeConstructorInfo _ name _) ->
+        \(_, info@(TypeConstructorInfo _ name _ _)) ->
           modify $ insertTypeConstructor name info
-      cotypes <- collect def exportedCotypeConstructors
+      cotypes <- collectTypeImports def exportedCotypeConstructors
       forM_ cotypes $
-        \info@(CotypeConstructorInfo _ name _) ->
+        \(_, info@(CotypeConstructorInfo _ name _ _)) ->
           modify $ insertCotypeConstructor name info
     _ ->
       pure ()
@@ -814,10 +885,10 @@ typeConstructorEnv = do
   pure (env1 <> env2)
  where
   insertTypeInfo :: TypeConstructorInfo a -> Environment Kind -> Environment Kind
-  insertTypeInfo (TypeConstructorInfo _ name kind_) = Environment.insert name kind_
+  insertTypeInfo (TypeConstructorInfo _ name kind_ _) = Environment.insert name kind_
 
   insertCotypeInfo :: CotypeConstructorInfo a -> Environment Kind -> Environment Kind
-  insertCotypeInfo (CotypeConstructorInfo _ name kind_) = Environment.insert name kind_
+  insertCotypeInfo (CotypeConstructorInfo _ name kind_ _) = Environment.insert name kind_
 
 collectDataConstructors :: (Monad m) => Environment Kind -> Definition a Kind () -> StateT (ModuleBuild a) (CompilerT a m) ()
 collectDataConstructors env =
@@ -837,13 +908,13 @@ collectDataConstructors env =
               . insertDataConstructor constructorName info
               . addExport constructorName
     def@DImport{} -> do
-      ctors <- collect def exportedDataConstructors
+      ctors <- collectNameImports def exportedDataConstructors
       forM_ ctors $
-        \info@(DataConstructorInfo _ _ DataConstructor{..} _) ->
+        \(_, info@(DataConstructorInfo _ _ DataConstructor{..} _)) ->
           modify $ insertDataConstructor constructorName info
-      xsors <- collect def exportedCodataAccessors
+      xsors <- collectNameImports def exportedCodataAccessors
       forM_ xsors $
-        \info@(CodataAccessorInfo _ _ CodataAccessor{..}) ->
+        \(_, info@(CodataAccessorInfo _ _ CodataAccessor{..})) ->
           modify $ insertCodataAccessor codataAccessorName info
     _ ->
       pure ()
@@ -893,15 +964,32 @@ substituteInScheme sub (Forall _ ts t) = scheme (apply sub ts) (apply sub t)
 collectImportedNames :: (Monad m) => Definition a Kind () -> StateT (ModuleBuild a) (CompilerT a m) ()
 collectImportedNames =
   \case
-    def@(DImport loc module_ _) -> do
-      (names, missing) <- collectNames def exportedNames
-      unless (null missing) $ do
-        path <- lift (gets (principalPath . compilerCurrentModule))
-        forM_ missing $
-          \name ->
-            tellErrors [NameNotInModule name (principalPath module_) (ErrorLocation path loc)]
-        throwError PreflightFailure
-      forM_ names $
+    def@(DImport _ module_ imports) -> do
+      names1 <- collectNameImports def exportedNames
+      names2 <- collectTypeImports def exportedTypeNames
+
+      path <- lift $ gets (principalPath . compilerCurrentModule)
+      unless (Path ["Builtin$"] == module_) $
+        forM_ imports $
+          \case
+            NameImport loc name ->
+              unless (name `elem` fmap fst names1) $ do
+                tellErrors [NameNotInModule name (principalPath module_) (ErrorLocation path loc)]
+                throwError PreflightFailure
+            TypeImport loc name _ ->
+              unless (name `elem` fmap fst names2) $ do
+                tellErrors [NameNotInModule name (principalPath module_) (ErrorLocation path loc)]
+                throwError PreflightFailure
+            CotypeImport loc name _ ->
+              unless (name `elem` fmap fst names2) $ do
+                tellErrors [NameNotInModule name (principalPath module_) (ErrorLocation path loc)]
+                throwError PreflightFailure
+            TraitImport loc name _ ->
+              unless (name `elem` fmap fst names2) $ do
+                tellErrors [NameNotInModule name (principalPath module_) (ErrorLocation path loc)]
+                throwError PreflightFailure
+
+      forM_ (names1 <> names2) $
         \case
           (_, IFunctionPlaceholder) ->
             pure ()
@@ -916,24 +1004,32 @@ collectImportedNames =
     _ ->
       pure ()
 
+{-# INLINE exportFunction #-}
+exportFunction :: (Monad m) => Name -> StateT (ModuleBuild a) (CompilerT a m) ()
+exportFunction name = modify $ addName name IFunctionPlaceholder . addExport name
+
+{-# INLINE exportConstant #-}
+exportConstant :: (Monad m) => Name -> StateT (ModuleBuild a) (CompilerT a m) ()
+exportConstant name = modify $ addName name IConstantPlaceholder . addExport name
+
+{-# INLINE exportFold #-}
+exportFold :: (Monad m) => Name -> StateT (ModuleBuild a) (CompilerT a m) ()
+exportFold name = modify $ addName name IFoldPlaceholder . addExport name
+
+{-# INLINE exportUnfold #-}
+exportUnfold :: (Monad m) => Name -> StateT (ModuleBuild a) (CompilerT a m) ()
+exportUnfold name = modify $ addName name IUnfoldPlaceholder . addExport name
+
 collectPlaceholders :: (Monad m) => Definition a Kind () -> StateT (ModuleBuild a) (CompilerT a m) ()
 collectPlaceholders =
   \case
     DFunction _ name _ _ ->
-      modify $
-        addName name IFunctionPlaceholder
-          . addExport name
+      exportFunction name
     DConstant _ name _ _ ->
-      modify $
-        addName name IConstantPlaceholder
-          . addExport name
+      exportConstant name
     DFold _ name _ ->
-      modify $
-        addName name IFoldPlaceholder
-          . addExport name
+      exportFold name
     DUnfold _ name _ ->
-      modify $
-        addName name IUnfoldPlaceholder
-          . addExport name
+      exportUnfold name
     _ ->
       pure ()

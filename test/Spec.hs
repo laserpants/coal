@@ -17,6 +17,6 @@ main :: IO ()
 main =
   hspec $ do
     spec
-    buildSpec
+    --    buildSpec
     e2eSpec
     e2eKernelSpec

@@ -1,0 +1,17 @@
+module Main {
+
+  import Qsort(sort)
+  import IO(println_int32)
+
+  fun main() = 
+    let
+      xs =
+        [105, 103, 107, 102, 101, 106, 104] : List<int32>
+      in
+        println_int32(match(sort(xs)) {
+          | [] =>
+              12345
+          | (y :: _) =>
+              y
+        })
+}

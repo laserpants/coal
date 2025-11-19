@@ -5,6 +5,7 @@
 
 module Coal.Language.Module (
   Module (..),
+  Export (..),
   overModuleDefinitions,
   overModuleDefinitionsM,
   fromDefinitionList,
@@ -36,7 +37,13 @@ import Data.Data (Data, Typeable)
 import qualified Data.Text as Text
 import Extras (Name, Over)
 
-data Module a k t = Module Path [Name] [Definition a k t]
+data Export a
+  = NameExport a Name
+  | TypeExport a Name [Name]
+  | WildcardExport
+  deriving (Show, Eq, Ord, Read, Data, Typeable)
+
+data Module a k t = Module Path [Export a] [Definition a k t]
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
 
 {-# INLINE overModuleDefinitions #-}
@@ -52,8 +59,8 @@ insertDefinition :: Definition a k t -> Module a k t -> Module a k t
 insertDefinition def = overModuleDefinitions (def :)
 
 {-# INLINE fromDefinitionList #-}
-fromDefinitionList :: Path -> [Name] -> [Definition a k t] -> Module a k t
-fromDefinitionList path names = foldr insertDefinition (Module path names mempty)
+fromDefinitionList :: Path -> [Export a] -> [Definition a k t] -> Module a k t
+fromDefinitionList path exports = foldr insertDefinition (Module path exports mempty)
 
 {-# INLINE modulePath #-}
 modulePath :: Module a k t -> Path

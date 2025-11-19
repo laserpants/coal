@@ -1,6 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE StrictData #-}
 
 module Coal.Compiler.Build (
   ModuleBuild (..),
@@ -39,6 +39,7 @@ module Coal.Compiler.Build (
   exportedTraits,
   exportedInstances,
   exportedNames,
+  exportedTypeNames,
   traitInfo,
   setExports,
   setTypeExports,
@@ -55,7 +56,7 @@ import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import Data.Maybe (fromMaybe)
 import qualified Data.Set as Set
-import Extras (Dictionary, Name, Set)
+import Extras (Dictionary, Name, Set, for)
 
 type IndexedConstructor = DataConstructor TypeIndex Kind IndexedType
 
@@ -67,10 +68,12 @@ data DataConstructorInfo a = DataConstructorInfo
   }
   deriving (Show, Eq, Ord, Read)
 
+type IndexedCodataAccessor = CodataAccessor TypeIndex Kind IndexedType
+
 data CodataAccessorInfo a = CodataAccessorInfo
   { codataAccessorInfoMetadata :: a
   , codataAccessorInfoName :: Name
-  , codataAccessorInfoAccessor :: CodataAccessor TypeIndex Kind IndexedType
+  , codataAccessorInfoAccessor :: IndexedCodataAccessor
   }
   deriving (Show, Eq, Ord, Read)
 
@@ -78,6 +81,7 @@ data TypeConstructorInfo a = TypeConstructorInfo
   { typeConstructorInfoMetadata :: a
   , typeConstructorInfoName :: Name
   , typeConstructorInfoKind :: Kind
+  , typeConstructorInfoDataConstructors :: [Name]
   }
   deriving (Show, Eq, Ord, Read)
 
@@ -85,6 +89,7 @@ data CotypeConstructorInfo a = CotypeConstructorInfo
   { cotypeConstructorInfoMetadata :: a
   , cotypeConstructorInfoName :: Name
   , cotypeConstructorInfoKind :: Kind
+  , cotypeConstructorInfoDataAccessors :: [Name]
   }
   deriving (Show, Eq, Ord, Read)
 
@@ -138,7 +143,7 @@ data ModuleBuild a = ModuleBuild
   , moduleTraits :: Environment (TraitInfo a)
   , moduleInstances :: Environment (Map IndexedType (InstanceInfo a))
   , moduleAliases :: Environment (AliasInfo a)
-  , moduleNames :: Environment NameInfo
+  , moduleNames :: Environment NameInfo -- TODO : Make list?
   , moduleExports :: Set Name
   , moduleTypeExports :: Set Name
   --  , moduleDefinitions ::
@@ -149,11 +154,14 @@ data ModuleBuild a = ModuleBuild
 exportedNames :: ModuleBuild a -> Environment NameInfo
 exportedNames ModuleBuild{..} = Environment.filterNames (`Set.member` moduleExports) moduleNames
 
+exportedTypeNames :: ModuleBuild a -> Environment NameInfo
+exportedTypeNames ModuleBuild{..} = Environment.filterNames (`Set.member` moduleTypeExports) moduleNames
+
 exportedTypeConstructors :: ModuleBuild a -> Environment (TypeConstructorInfo a)
-exportedTypeConstructors ModuleBuild{..} = Environment.filterNames (`Set.member` moduleExports) moduleTypeConstructors
+exportedTypeConstructors ModuleBuild{..} = Environment.filterNames (`Set.member` moduleTypeExports) moduleTypeConstructors
 
 exportedCotypeConstructors :: ModuleBuild a -> Environment (CotypeConstructorInfo a)
-exportedCotypeConstructors ModuleBuild{..} = Environment.filterNames (`Set.member` moduleExports) moduleCotypeConstructors
+exportedCotypeConstructors ModuleBuild{..} = Environment.filterNames (`Set.member` moduleTypeExports) moduleCotypeConstructors
 
 exportedDataConstructors :: ModuleBuild a -> Environment (DataConstructorInfo a)
 exportedDataConstructors ModuleBuild{..} = Environment.filterNames (`Set.member` moduleExports) moduleDataConstructors
@@ -162,7 +170,7 @@ exportedCodataAccessors :: ModuleBuild a -> Environment (CodataAccessorInfo a)
 exportedCodataAccessors ModuleBuild{..} = Environment.filterNames (`Set.member` moduleExports) moduleCodataAccessors
 
 exportedTraits :: ModuleBuild a -> Environment (TraitInfo a)
-exportedTraits ModuleBuild{..} = Environment.filterNames (`Set.member` moduleExports) moduleTraits
+exportedTraits ModuleBuild{..} = Environment.filterNames (`Set.member` moduleTypeExports) moduleTraits
 
 exportedInstances :: ModuleBuild a -> Environment (Map IndexedType (InstanceInfo a))
 exportedInstances ModuleBuild{..} = Environment.filterNames (`Set.member` moduleExports) moduleInstances
@@ -275,10 +283,16 @@ setPath :: Path -> ModuleBuild a -> ModuleBuild a
 setPath path ModuleBuild{..} = ModuleBuild{modulePath = path, ..}
 
 typeConstructorInfo :: a -> Name -> TypeDef -> TypeConstructorInfo a
-typeConstructorInfo loc name (TypeDef ps _) = TypeConstructorInfo loc name (kind n) where n = length ps
+typeConstructorInfo loc name (TypeDef ps ctors) =
+  TypeConstructorInfo loc name (kind n) (for ctors constructorName)
+ where
+  n = length ps
 
 cotypeConstructorInfo :: a -> Name -> CotypeDef -> CotypeConstructorInfo a
-cotypeConstructorInfo loc name (CotypeDef ps _) = CotypeConstructorInfo loc name (kind n) where n = length ps
+cotypeConstructorInfo loc name (CotypeDef ps xsors) =
+  CotypeConstructorInfo loc name (kind n) (for xsors codataAccessorName)
+ where
+  n = length ps
 
 {-# INLINE kind #-}
 kind :: Int -> Kind

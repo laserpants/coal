@@ -6,6 +6,7 @@
 
 module Coal.Language.Module.Definition (
   Definition (..),
+  Import (..),
   Path (..),
   definitionName,
   isDImport,
@@ -28,6 +29,13 @@ import Extras (Name)
 newtype Path = Path {pathComponents :: [Name]}
   deriving (Show, Eq, Ord, Read, Data, Typeable)
 
+data Import a
+  = NameImport a Name
+  | TypeImport a Name [Name]
+  | CotypeImport a Name [Name]
+  | TraitImport a Name [Name]
+  deriving (Show, Eq, Ord, Read, Data, Typeable)
+
 data Definition a k t
   = -- | Type definition
     DType a Name TypeDef
@@ -38,7 +46,7 @@ data Definition a k t
   | -- | Other (constant) top-level definitions
     DConstant a Name (ConstantDef a t) [Definition a k t]
   | -- | Import statement
-    DImport a Path [Name]
+    DImport a Path [Import a]
   | -- | Trait
     DTrait a Name (TraitDef t)
   | -- | Trait instance

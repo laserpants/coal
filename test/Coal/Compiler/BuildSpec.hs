@@ -104,13 +104,13 @@ instance StripMeta DataConstructorInfo where
   stripMeta (DataConstructorInfo _ n c s) = DataConstructorInfo () n c s
 
 instance StripMeta TypeConstructorInfo where
-  stripMeta (TypeConstructorInfo _ n k) = TypeConstructorInfo () n k
+  stripMeta (TypeConstructorInfo _ n k ns) = TypeConstructorInfo () n k ns
 
 instance StripMeta CodataAccessorInfo where
   stripMeta (CodataAccessorInfo _ n a) = CodataAccessorInfo () n a
 
 instance StripMeta CotypeConstructorInfo where
-  stripMeta (CotypeConstructorInfo _ n k) = CotypeConstructorInfo () n k
+  stripMeta (CotypeConstructorInfo _ n k ns) = CotypeConstructorInfo () n k ns
 
 instance StripMeta TraitInfo where
   stripMeta (TraitInfo _ n t d) = TraitInfo () n t d
@@ -227,11 +227,11 @@ mainTypeConstructors =
   Environment.fromList
     [
       ( "Option"
-      , TypeConstructorInfo () "Option" (KArrow KType KType)
+      , TypeConstructorInfo () "Option" (KArrow KType KType) ["Some", "None"]
       )
     ,
       ( "List"
-      , TypeConstructorInfo () "List" (KArrow KType KType)
+      , TypeConstructorInfo () "List" (KArrow KType KType) []
       )
     ]
 
@@ -240,7 +240,7 @@ mainExportedTypeConstructors =
   Environment.fromList
     [
       ( "Option"
-      , TypeConstructorInfo () "Option" (KArrow KType KType)
+      , TypeConstructorInfo () "Option" (KArrow KType KType) ["Some", "None"]
       )
     ]
 
@@ -278,6 +278,7 @@ mainCotypeConstructors =
           ()
           "Stream"
           (KArrow KType KType)
+          ["Head", "Tail"]
       )
     ]
 

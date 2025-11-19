@@ -43,9 +43,9 @@ lookupTypeConstructor name = do
       case Environment.lookup name moduleCotypeConstructors of
         Nothing ->
           pure Nothing
-        Just (CotypeConstructorInfo _ _ kind) ->
+        Just (CotypeConstructorInfo _ _ kind _) ->
           pure (Just kind)
-    Just (TypeConstructorInfo _ _ kind) ->
+    Just (TypeConstructorInfo _ _ kind _) ->
       pure (Just kind)
 
 instantiateAnnotation ::

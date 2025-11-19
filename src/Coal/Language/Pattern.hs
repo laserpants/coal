@@ -7,6 +7,7 @@ module Coal.Language.Pattern (Pattern (..), IndexedPattern) where
 
 import Coal.Common.FreeVars (BoundVars (..))
 import Coal.Common.Label (Label (..))
+import Coal.Common.Name (Dictionary, Name)
 import Coal.Language.Primitive (Primitive (..))
 import Coal.Language.Trait (Trait (..))
 import Coal.Language.Type (Parameter (..), Type, TypeIndex)
@@ -16,7 +17,6 @@ import Data.Generics.Uniplate.Data (universeBi)
 import Data.List.NonEmpty (NonEmpty)
 import Data.Set (unions)
 import qualified Data.Set as Set
-import Coal.Common.Name ( Dictionary, Name )
 
 data Pattern a t
   = -- | Type-annotated pattern
