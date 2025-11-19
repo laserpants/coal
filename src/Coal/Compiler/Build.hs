@@ -203,23 +203,29 @@ data ModuleBuild a = ModuleBuild
   }
   deriving (Show, Eq, Ord, Read)
 
+memberOf :: (HasName a) => Set Name -> a -> Bool
+memberOf s info = nameOf info `Set.member` s
+
 exportedNames :: ModuleBuild a -> [NameInfo]
-exportedNames ModuleBuild{..} = filter (\info -> nameOf info `Set.member` moduleExports) moduleNames
+exportedNames ModuleBuild{..} = filter (memberOf moduleExports) moduleNames
 
 exportedTypeNames :: ModuleBuild a -> [NameInfo]
-exportedTypeNames ModuleBuild{..} = filter (\info -> nameOf info `Set.member` moduleTypeExports) moduleNames
+exportedTypeNames ModuleBuild{..} = filter (memberOf moduleTypeExports) moduleNames
+
+memberOf2 :: (Ord a) => Set a -> (a, b) -> Bool
+memberOf2 s (name, _) = name `Set.member` s
 
 exportedTypeConstructors :: ModuleBuild a -> [TypeConstructorInfo a]
-exportedTypeConstructors ModuleBuild{..} = snd <$> filter (\(name, _) -> name `Set.member` moduleTypeExports) (Environment.toList moduleTypeConstructors)
+exportedTypeConstructors ModuleBuild{..} = snd <$> filter (memberOf2 moduleTypeExports) (Environment.toList moduleTypeConstructors)
 
 exportedCotypeConstructors :: ModuleBuild a -> [CotypeConstructorInfo a]
-exportedCotypeConstructors ModuleBuild{..} = snd <$> filter (\(name, _) -> name `Set.member` moduleTypeExports) (Environment.toList moduleCotypeConstructors)
+exportedCotypeConstructors ModuleBuild{..} = snd <$> filter (memberOf2 moduleTypeExports) (Environment.toList moduleCotypeConstructors)
 
 exportedDataConstructors :: ModuleBuild a -> [DataConstructorInfo a]
-exportedDataConstructors ModuleBuild{..} = snd <$> filter (\(name, _) -> name `Set.member` moduleExports) (Environment.toList moduleDataConstructors)
+exportedDataConstructors ModuleBuild{..} = snd <$> filter (memberOf2 moduleExports) (Environment.toList moduleDataConstructors)
 
 exportedCodataAccessors :: ModuleBuild a -> [CodataAccessorInfo a]
-exportedCodataAccessors ModuleBuild{..} = snd <$> filter (\(name, _) -> name `Set.member` moduleExports) (Environment.toList moduleCodataAccessors)
+exportedCodataAccessors ModuleBuild{..} = snd <$> filter (memberOf2 moduleExports) (Environment.toList moduleCodataAccessors)
 
 exportedTraits :: ModuleBuild a -> Environment (TraitInfo a)
 exportedTraits ModuleBuild{..} = Environment.filterNames (`Set.member` moduleTypeExports) moduleTraits
