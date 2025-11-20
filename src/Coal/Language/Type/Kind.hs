@@ -19,7 +19,7 @@ import Data.List (isPrefixOf)
 import Data.List.NonEmpty (NonEmpty (..), (<|))
 import Extras.Prettyprinter (parensIf)
 import GHC.Generics (Generic)
-import Prettyprinter
+import Prettyprinter ( Doc, (<+>), group, Pretty(..) )
 
 import qualified Data.List.NonEmpty as NonEmpty
 
