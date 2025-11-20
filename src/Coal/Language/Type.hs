@@ -51,7 +51,8 @@ data Type o k
   = TApplication k (Type o k) (NonEmpty (Type o k))
   | TArrow (Type o k) (Type o k)
   | TConstructor k Name
-  | TIntrinsic (Intrinsic (Type o k))
+  | TIntrinsic Intrinsic
+  | TRecord (Type o k)
   | TRow (Row o k (Type o k))
   | TVariable (o k)
   | TAlias Name [Type o k] (Type o k)
@@ -147,7 +148,7 @@ tupleTypeCons n = "#Tuple" <> showt n
 
 {-# INLINE recordType #-}
 recordType :: Row o k (Type o k) -> Type o k
-recordType = TIntrinsic . IRecord . TRow
+recordType = TRecord . TRow
 
 fieldsRecordType :: Dictionary (Type o k) -> Row o k (Type o k) -> Type o k
 fieldsRecordType fields row = recordType (fromDictionary fields row)
@@ -190,7 +191,9 @@ prettyTypePrec prec =
     TVariable v ->
       pretty v
     TIntrinsic i ->
-      prettyIntrinsic (prettyTypePrec precAtom) i
+      prettyIntrinsic i
+    TRecord t ->
+      braces $ enclose space space (prettyTypePrec precAtom t)
     TRow row ->
       prettyRow (prettyTypePrec precAtom) row
     TAlias name args t ->
@@ -205,8 +208,8 @@ prettyTypePrec prec =
         | null args = ""
         | otherwise = typeBrackets (map (prettyTypePrec 0) args)
 
-prettyIntrinsic :: (t -> Doc ann) -> Intrinsic t -> Doc ann
-prettyIntrinsic prettyT =
+prettyIntrinsic :: Intrinsic -> Doc ann
+prettyIntrinsic =
   \case
     IBool ->
       "bool"
@@ -230,8 +233,6 @@ prettyIntrinsic prettyT =
       "unit"
     IVoid ->
       "void"
-    IRecord t ->
-      braces $ enclose space space (prettyT t)
 
 prettyRow :: (Pretty (o k)) => (t -> Doc ann) -> Row o k t -> Doc ann
 prettyRow prettyT = fields

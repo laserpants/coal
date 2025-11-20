@@ -88,7 +88,9 @@ instantiate =
         Just k ->
           pure (TConstructor k name)
     TIntrinsic t ->
-      TIntrinsic <$> traverse instantiate t
+      pure (TIntrinsic t)
+    TRecord t ->
+      TRecord <$> instantiate t
     TRow row ->
       TRow <$> instantiateRow row
     TAlias name ts t ->

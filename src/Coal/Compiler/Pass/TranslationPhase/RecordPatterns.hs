@@ -88,7 +88,7 @@ instance (Data a, Monoid a) => RecordDesugarable a (Pattern a IndexedType) where
         PAnnotation a t <$> desugarRecordPatterns p
       PConstructor a ll ps ->
         PConstructor a ll <$> desugarRecordPatterns ps
-      PRecord _ t@(TIntrinsic (IRecord r)) d p -> do
+      PRecord _ t@(TRecord r) d p -> do
         name <- supplied (freshName "row")
         tellRecordInfo [(name, d, p)]
         pure (PConstructor mempty (Label t "$Record") [PVariable mempty (Label r name)])
@@ -104,7 +104,7 @@ instance (Data a, Monoid a) => RecordDesugarable a (Pattern a IndexedType) where
 extractRow :: (HasType o k t) => t -> Row o k (Type o k)
 extractRow e =
   case typeOf e of
-    TIntrinsic (IRecord (TRow r)) ->
+    TRecord (TRow r) ->
       r
     _ ->
       error "Implementation error"
@@ -123,7 +123,7 @@ desugar (name, dict, p1) expr = do
   names <- replicateM (length fields - 1) (supplied (freshName "row"))
   let r1 = maybe RNil extractRow p1
       v1 = extractVarName p1
-      t1 = maybe (TIntrinsic (IRecord (TRow RNil))) typeOf p1
+      t1 = maybe (TRecord (TRow RNil)) typeOf p1
       e2 = ELet mempty (BPattern mempty (PVariable mempty (Label t1 v1)) (EVariable mempty (Label t1 (name <> ".tail"))) :| [])
   (_, _, e1) <- foldrM (go v1) (v1, r1, e2 expr) (zip fields (name : names))
   pure e1
@@ -136,7 +136,7 @@ go n ((fname, p), prefix) (var, row, expr) = do
   let t1 = typeOf expr
       t2 = typeOf p
       ll1 = Label t2 (prefix <> ".field." <> fname)
-      ll2 = Label (TIntrinsic (IRecord (TRow row))) (prefix <> ".tail")
+      ll2 = Label (TRecord (TRow row)) (prefix <> ".tail")
       var1 = EVariable mempty (Label (TRow (RExtend fname t2 row)) prefix)
       var2 = EVariable mempty ll2
 
@@ -163,7 +163,7 @@ go n ((fname, p), prefix) (var, row, expr) = do
               mempty
               ( PConstructor
                   mempty
-                  (Label (TIntrinsic (IRecord (TRow row))) "$Record")
+                  (Label (TRecord (TRow row)) "$Record")
                   [PVariable mempty (Label (TRow row) var)]
               )
               (CPlain mempty [] e2 :| [])

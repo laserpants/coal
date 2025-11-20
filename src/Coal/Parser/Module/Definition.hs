@@ -264,6 +264,8 @@ instance Parameterized (Type Parameter ()) where
         params t1 <> params t2
       TIntrinsic t ->
         params t
+      TRecord t ->
+        params t
       TRow r ->
         params r
       TAlias _ _ t ->
@@ -271,13 +273,8 @@ instance Parameterized (Type Parameter ()) where
       TConstructor{} ->
         []
 
-instance Parameterized (Intrinsic (Type Parameter ())) where
-  params =
-    \case
-      IRecord t ->
-        params t
-      _ ->
-        []
+instance Parameterized Intrinsic where
+  params _ = []
 
 instance Parameterized (Row Parameter () (Type Parameter ())) where
   params =

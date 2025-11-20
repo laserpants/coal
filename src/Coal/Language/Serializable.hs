@@ -55,7 +55,7 @@ instance (Serializable s1, Serializable s2, Serializable s3) => Serializable (s1
   serialize (a1, a2, a3) =
     "(" <> serialize a1 <> "," <> serialize a2 <> "," <> serialize a3 <> ")"
 
-instance (Serializable s) => Serializable (Intrinsic s) where
+instance Serializable Intrinsic where
   serialize =
     \case
       IBool ->
@@ -76,8 +76,6 @@ instance (Serializable s) => Serializable (Intrinsic s) where
         "String"
       INat ->
         "Nat"
-      IRecord t ->
-        "Record" <> parenthesized t
       _ ->
         error "Not implemented"
 
@@ -92,6 +90,8 @@ instance (Serializable (s k)) => Serializable (Type s k) where
         "Constructor" <> parenthesized name
       TIntrinsic t ->
         "Intrinsic" <> parenthesized t
+      TRecord t ->
+        "Record" <> parenthesized t
       TRow r ->
         "Row" <> parenthesized r
       TVariable t ->

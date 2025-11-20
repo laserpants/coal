@@ -43,10 +43,8 @@ fixture1 =
             ()
             ( PAnnotation
                 ()
-                ( TIntrinsic
-                    ( IRecord
-                        ( TRow (RExtend "name" (TIntrinsic IString) (RVariable (Parameter () "q")))
-                        )
+                ( TRecord
+                    ( TRow (RExtend "name" (TIntrinsic IString) (RVariable (Parameter () "q")))
                     )
                 )
                 (PVariable () (Label (TVariable (TypeIndex KType 1)) "b"))
@@ -72,11 +70,8 @@ fixture1 =
         (TVariable (TypeIndex KType 6))
         ( EAnnotation
             ()
-            ( TIntrinsic
-                ( IRecord
-                    ( TRow (RExtend "name" (TIntrinsic IString) (RVariable (Parameter () "r")))
-                    )
-                )
+            ( TRecord
+                (TRow (RExtend "name" (TIntrinsic IString) (RVariable (Parameter () "r"))))
             )
             (EVariable () (Label (TVariable (TypeIndex KType 7)) "a"))
         )

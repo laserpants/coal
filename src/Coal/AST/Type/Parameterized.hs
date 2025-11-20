@@ -49,7 +49,9 @@ instantiateTypeVars =
     TArrow t1 t2 ->
       TArrow <$> instantiateTypeVars t1 <*> instantiateTypeVars t2
     TIntrinsic t ->
-      TIntrinsic <$> traverse instantiateTypeVars t
+      pure (TIntrinsic t)
+    TRecord t ->
+      TRecord <$> instantiateTypeVars t
     TRow r ->
       TRow <$> instantiateRowVars r
     TAlias name ts t ->
@@ -99,7 +101,7 @@ instance Parameterized (Type Parameter ()) where
       TArrow t1 t2 -> do
         instantiateTypeIndexes t1
         instantiateTypeIndexes t2
-      TIntrinsic t ->
+      TRecord t ->
         instantiateTypeIndexes t
       TRow r ->
         instantiateTypeIndexes r
@@ -107,13 +109,7 @@ instance Parameterized (Type Parameter ()) where
         instantiateTypeIndexes t
       TConstructor{} ->
         pure ()
-
-instance Parameterized (Intrinsic (Type Parameter ())) where
-  instantiateTypeIndexes =
-    \case
-      IRecord t ->
-        instantiateTypeIndexes t
-      _ ->
+      TIntrinsic{} ->
         pure ()
 
 instance Parameterized (Row Parameter () (Type Parameter ())) where

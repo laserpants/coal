@@ -28,5 +28,7 @@ instance (Data (o Kind), Typeable o) => HasKind (Type o Kind) where
         KType
       TIntrinsic{} ->
         KType
+      TRecord{} ->
+        KType
       k ->
         head (universeBi k)

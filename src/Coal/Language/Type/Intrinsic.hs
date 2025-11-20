@@ -1,6 +1,5 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE StrictData #-}
 
 module Coal.Language.Type.Intrinsic (Intrinsic (..)) where
@@ -9,7 +8,7 @@ import Data.Data (Data, Typeable)
 import GHC.Generics (Generic)
 
 -- | Built-in types
-data Intrinsic t
+data Intrinsic
   = IBool
   | IChar
   | IDouble
@@ -18,8 +17,7 @@ data Intrinsic t
   | IInt64
   | IBignum
   | INat
-  | IRecord t -- TODO: Move to Type?
   | IString
   | IUnit
   | IVoid
-  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable, Generic)
+  deriving (Show, Eq, Ord, Read, Data, Typeable, Generic)

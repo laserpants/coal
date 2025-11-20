@@ -172,8 +172,8 @@ unifyTestCases =
   , -- record { x : int32 } ~ record { x : int32 }
     -- Substitution []
     UnifyTestCase
-      (TIntrinsic (IRecord (TRow (RExtend "x" (TIntrinsic IInt32) RNil))))
-      (TIntrinsic (IRecord (TRow (RExtend "x" (TIntrinsic IInt32) RNil))))
+      (TRecord (TRow (RExtend "x" (TIntrinsic IInt32) RNil)))
+      (TRecord (TRow (RExtend "x" (TIntrinsic IInt32) RNil)))
       (Right mempty)
   , -- int32 -> string ~ int32 -> int32
     -- ECannotUnify

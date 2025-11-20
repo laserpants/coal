@@ -103,8 +103,8 @@ instance (Substitutable s) => Substitutable (Trait s) where
 instance (Ord s, Substitutable s) => Substitutable (Set s) where
   apply = Set.map . apply
 
-instance (Data s) => Substitutable (Intrinsic s) where
-  apply = transformBi . applyT
+instance Substitutable Intrinsic where
+  apply _ s = s
 
 instance (Data a) => Substitutable (Pattern a IndexedType) where
   apply = transformBi . applyT

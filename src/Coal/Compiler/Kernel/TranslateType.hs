@@ -24,7 +24,7 @@ natTCon = Kernel.TCon "nat" []
 voidTCon :: Kernel.Type
 voidTCon = Kernel.TCon "void" []
 
-translateIntrinsicType :: Intrinsic (Type o k) -> Kernel.Type
+translateIntrinsicType :: Intrinsic -> Kernel.Type
 translateIntrinsicType =
   \case
     IBool ->
@@ -45,8 +45,6 @@ translateIntrinsicType =
       Kernel.string
     IUnit ->
       Kernel.unit
-    IRecord t ->
-      Kernel.record (translateType t)
     INat ->
       natTCon
     IVoid ->
@@ -82,6 +80,8 @@ translateType =
       Kernel.TCon name []
     TIntrinsic t ->
       translateIntrinsicType t
+    TRecord t ->
+      Kernel.record (translateType t)
     TRow r ->
       translateRow r
     TVariable{} ->

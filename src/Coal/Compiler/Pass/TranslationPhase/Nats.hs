@@ -46,7 +46,7 @@ convertConstructor =
     TIntrinsic INat ->
       pure $ TConstructor KType "$Nat"
     TIntrinsic t ->
-      TIntrinsic <$> traverse convertConstructor t
+      pure (TIntrinsic t)
     TArrow t1 t2 ->
       TArrow <$> convertConstructor t1 <*> convertConstructor t2
     TApplication k t ts ->

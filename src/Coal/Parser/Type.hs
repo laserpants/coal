@@ -14,40 +14,40 @@ import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
 import Text.Megaparsec (option, optional, try, (<|>))
 
-parseInt32 :: Parser (Intrinsic (Type Parameter ()))
+parseInt32 :: Parser Intrinsic
 parseInt32 = lexeme "int32" $> IInt32
 
-parseInt64 :: Parser (Intrinsic (Type Parameter ()))
+parseInt64 :: Parser Intrinsic
 parseInt64 = lexeme "int64" $> IInt64
 
-parseBool :: Parser (Intrinsic (Type Parameter ()))
+parseBool :: Parser Intrinsic
 parseBool = lexeme "bool" $> IBool
 
-parseChar :: Parser (Intrinsic (Type Parameter ()))
+parseChar :: Parser Intrinsic
 parseChar = lexeme "char" $> IChar
 
-parseDouble :: Parser (Intrinsic (Type Parameter ()))
+parseDouble :: Parser Intrinsic
 parseDouble = lexeme "double" $> IDouble
 
-parseFloat :: Parser (Intrinsic (Type Parameter ()))
+parseFloat :: Parser Intrinsic
 parseFloat = lexeme "float" $> IFloat
 
-parseBignum :: Parser (Intrinsic (Type Parameter ()))
+parseBignum :: Parser Intrinsic
 parseBignum = lexeme "bignum" $> IBignum
 
-parseNat :: Parser (Intrinsic (Type Parameter ()))
+parseNat :: Parser Intrinsic
 parseNat = lexeme "nat" $> INat
 
-parseString :: Parser (Intrinsic (Type Parameter ()))
+parseString :: Parser Intrinsic
 parseString = lexeme "string" $> IString
 
-parseUnit :: Parser (Intrinsic (Type Parameter ()))
+parseUnit :: Parser Intrinsic
 parseUnit = lexeme "unit" $> IUnit
 
-parseVoid :: Parser (Intrinsic (Type Parameter ()))
+parseVoid :: Parser Intrinsic
 parseVoid = lexeme "void" $> IVoid
 
-parseIntrinsic :: Parser (Intrinsic (Type Parameter ()))
+parseIntrinsic :: Parser Intrinsic
 parseIntrinsic =
   parseInt32
     <|> parseInt64
@@ -95,7 +95,7 @@ parseRecordType =
     fields <- optional (fieldList parseType ":")
     let dict = maybe mempty Map.fromList fields
     param <- optional rest
-    pure (TIntrinsic (IRecord (TRow (Row.fromDictionary dict (maybe RNil RVariable param)))))
+    pure (TRecord (TRow (Row.fromDictionary dict (maybe RNil RVariable param))))
  where
   rest = pipe >> Parameter () <$> name
 

@@ -117,7 +117,9 @@ instance TransformContext ParameterizedType where
       TAlias name ts t ->
         TAlias name <$> expandAliases ts <*> expandAliases t
       TIntrinsic t ->
-        TIntrinsic <$> traverse expandAliases t
+        pure (TIntrinsic t)
+      TRecord t ->
+        TRecord <$> expandAliases t
       TRow row ->
         TRow <$> traverse expandAliases row
       t@(TVariable (Parameter _ name)) ->

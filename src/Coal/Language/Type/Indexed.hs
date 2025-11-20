@@ -66,7 +66,7 @@ instance (Ord k, Data t, Data k) => TypeIndexed k (Label t) where
 instance (Ord k, Data t, Data k) => TypeIndexed k (Row TypeIndex k t) where
   typeIndexesIn = Set.fromList . universeBi
 
-instance (Ord k, Data t, Data k) => TypeIndexed k (Intrinsic t) where
+instance (Ord k, Data k) => TypeIndexed k Intrinsic where
   typeIndexesIn = Set.fromList . universeBi
 
 instance (Ord k, Data k) => TypeIndexed k (Type TypeIndex k) where

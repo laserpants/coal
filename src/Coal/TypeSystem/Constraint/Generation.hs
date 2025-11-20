@@ -258,7 +258,7 @@ emitERecordConstraints _ t fields expr = do
   ms1 <- concatMapM emitConstraints expr
   ms2 <- concatMapM emitConstraints fields
   r1 <- tailRow expr
-  let t1 = TIntrinsic (IRecord (TRow (fromDictionary (typeOf <$> fields) r1)))
+  let t1 = TRecord (TRow (fromDictionary (typeOf <$> fields) r1))
   tellRight [Equality (InferenceRulePlaceholder "emitERecordConstraints.1") [t, t1]]
   case r1 of
     r@RVariable{} ->
@@ -276,7 +276,7 @@ tailRow =
       pure RNil
     Just t -> do
       r <- supplied (RVariable . TypeIndex KRow)
-      tellRight [Equality (InferenceRulePlaceholder "tailRow") [TIntrinsic (IRecord (TRow r)), typeOf t]]
+      tellRight [Equality (InferenceRulePlaceholder "tailRow") [TRecord (TRow r), typeOf t]]
       pure r
 
 emitEIfConstraints :: (Show a, Data a) => a -> IndexedType -> Expression a IndexedType -> Expression a IndexedType -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]

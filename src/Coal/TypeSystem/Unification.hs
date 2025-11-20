@@ -74,17 +74,13 @@ instance (Substitutable u, Unifiable u, Data u) => Unifiable (NonEmpty u) where
   unify t1 t2 = unify (NonEmpty.toList t1) (NonEmpty.toList t2)
   match t1 t2 = match (NonEmpty.toList t1) (NonEmpty.toList t2)
 
-instance Unifiable (Intrinsic IndexedType) where
-  unify (IRecord t1) (IRecord t2) =
-    unify t1 t2
+instance Unifiable Intrinsic where
   unify t1 t2
     | t1 == t2 =
         pure mempty
   unify _ _ =
     throwError ECannotUnify
 
-  match (IRecord t1) (IRecord t2) =
-    match t1 t2
   match t1 t2
     | t1 == t2 =
         pure mempty
@@ -165,6 +161,8 @@ instance Unifiable IndexedType where
   unify (TConstructor _ c1) (TConstructor _ c2)
     | c1 == c2 =
         pure mempty
+  unify (TRecord r1) (TRecord r2) =
+    unify r1 r2
   unify (TRow r1) (TRow r2) =
     unify r1 r2
   unify (TIntrinsic t1) (TIntrinsic t2) =
@@ -182,6 +180,8 @@ instance Unifiable IndexedType where
     match [t1, u1] [t2, u2]
   match (TApplication _ t1 ts1) (TApplication _ t2 ts2) = do
     match (t1 <| ts1) (t2 <| ts2)
+  match (TRecord r1) (TRecord r2) =
+    unify r1 r2
   match (TRow r1) (TRow r2) =
     match r1 r2
   match (TConstructor _ c1) (TConstructor _ c2)
