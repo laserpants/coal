@@ -30,7 +30,7 @@ import Data.List.NonEmpty (NonEmpty (..), toList)
 import Data.Set (Set)
 import qualified Data.Set as Set
 import GHC.Generics (Generic)
-import Prettyprinter
+import Prettyprinter (Pretty (..), hsep)
 
 data Scheme o k t = Forall (Set (o k)) [Trait t] t
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable, Generic)
