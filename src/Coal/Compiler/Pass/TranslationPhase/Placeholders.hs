@@ -13,16 +13,16 @@ import Coal.AST.Metadata (Metadata (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (supplied)
-import Coal.Compiler.Build
+import Coal.Compiler.Build (InstanceInfo (..))
 import Coal.Compiler.Environment (overCompilerDictionaryNameEnvironment)
 import Coal.Compiler.Journal (censorDictionaryTraits, listenDictionaryTraits, tellDictionaryTraits, tellErrors)
-import Coal.Compiler.Pass
+import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module
 import Coal.TypeSystem.Substitution
 import Coal.TypeSystem.Unification
-import Control.Monad.Except
+import Control.Monad.Except (MonadError (throwError), forM)
 import Control.Monad.Reader (asks, local)
 import Control.Monad.State (gets)
 import Data.Data (Data)
