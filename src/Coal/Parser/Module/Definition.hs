@@ -7,13 +7,12 @@ module Coal.Parser.Module.Definition (parseDefinition) where
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Language
 import Coal.Language.Module
-import Coal.Language.Module.Definition (Import (..))
 import Coal.Parser.Core
 import Coal.Parser.Expression (parseExpression, parseMatchClause)
 import Coal.Parser.Identifier
 import Coal.Parser.Pattern (parsePattern, parseUnitPattern)
 import Coal.Parser.Symbol
-import Coal.Parser.Type
+import Coal.Parser.Type ( parseType, parseKind )
 import Coal.Parser.Utils (fieldListWithKey)
 import Control.Monad (void)
 import Data.List.NonEmpty (NonEmpty (..))
