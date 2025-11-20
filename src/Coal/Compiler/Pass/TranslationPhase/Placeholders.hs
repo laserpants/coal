@@ -20,7 +20,7 @@ import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module
-import Coal.TypeSystem.Substitution
+import Coal.TypeSystem.Substitution (Substitutable (apply), Substitution, mapsTo)
 import Coal.TypeSystem.Unification
 import Control.Monad.Except (MonadError (throwError), forM)
 import Control.Monad.Reader (asks, local)
