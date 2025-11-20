@@ -18,8 +18,8 @@ import Text.Megaparsec (option, optional, try, (<|>))
 parseIntrinsicType :: Parser (Type Parameter ())
 parseIntrinsicType = TIntrinsic <$> parseIntrinsic
 
-parseAtomType :: Parser (Type Parameter ())
-parseAtomType =
+parseTypeAtom :: Parser (Type Parameter ())
+parseTypeAtom =
   try parseTypeApplication
     <|> try parseTupleType
     <|> parseRecordType
@@ -28,7 +28,7 @@ parseAtomType =
     <|> parens parseType
 
 parseType :: Parser (Type Parameter ())
-parseType = makeExprParser parseAtomType typeOperator
+parseType = makeExprParser parseTypeAtom typeOperator
 
 {-# INLINE parseTypeParameter #-}
 parseTypeParameter :: Parser (Type Parameter ())
