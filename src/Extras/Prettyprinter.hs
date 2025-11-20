@@ -1,6 +1,6 @@
 module Extras.Prettyprinter (parensIf) where
 
-import Prettyprinter
+import Prettyprinter (Doc, parens)
 
 parensIf :: Bool -> Doc ann -> Doc ann
 parensIf True = parens
