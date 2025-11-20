@@ -104,6 +104,8 @@ prettyConstraintsGenError =
       "Codata type field mismatch"
     EFoldPatternInRegularMatch _ ->
       "Fold patterns are not allowed in regular match clauses"
+    ENoDataConstructor _ name ->
+      "Data constructor '" <> name <> "' not in scope"
     e ->
       Text.pack ("TODO:" <> show e)
 

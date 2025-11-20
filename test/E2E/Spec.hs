@@ -637,6 +637,17 @@ e2eSpec = do
           ]
       res `shouldBe` Left TraitError
 
+  describe "140" $ do
+    it "is TypeError" $ do
+      res <-
+        runSpec
+          [ "./test/Coal/examples/140/Eq.coal"
+          , "./test/Coal/examples/140/Stuff.coal"
+          , "./test/Coal/examples/140/Main.coal"
+          , "./lang/Coal/Combinators.coal"
+          ]
+      res `shouldBe` Left TypeError
+
 expectOutput :: String -> [FilePath] -> Spec
 expectOutput expt files =
   it ("\"" <> expt <> "\"") $ do
