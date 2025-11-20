@@ -18,7 +18,7 @@ import Data.Text (Text)
 import qualified Data.Text as Text
 import Data.Void (Void)
 import Extras (Name)
-import Text.Megaparsec
+import Text.Megaparsec (MonadParsec (try), ParseErrorBundle, Parsec)
 import Text.Megaparsec.Char (space1)
 import qualified Text.Megaparsec.Char.Lexer as Lexer
 

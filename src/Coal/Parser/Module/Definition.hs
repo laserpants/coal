@@ -12,7 +12,7 @@ import Coal.Parser.Expression (parseExpression, parseMatchClause)
 import Coal.Parser.Identifier
 import Coal.Parser.Pattern (parsePattern, parseUnitPattern)
 import Coal.Parser.Symbol
-import Coal.Parser.Type ( parseType, parseKind )
+import Coal.Parser.Type (parseKind, parseType)
 import Coal.Parser.Utils (fieldListWithKey)
 import Control.Monad (void)
 import Data.List.NonEmpty (NonEmpty (..))
