@@ -22,7 +22,7 @@ module Coal.AST.Shorthand (
 
 import Coal.Common.Label (Label (..))
 import Coal.Language
-import Coal.Language.Module
+import Coal.Language.Module (FunctionDef (..))
 import Data.List.NonEmpty (NonEmpty (..))
 import Extras (Name)
 
