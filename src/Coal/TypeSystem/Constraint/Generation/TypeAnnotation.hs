@@ -10,6 +10,7 @@ module Coal.TypeSystem.Constraint.Generation.TypeAnnotation (
   runTypeAnnotation,
 ) where
 
+import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build (CotypeConstructorInfo (..), ModuleBuild (..), TypeConstructorInfo (..))
 import Coal.Language
 import Coal.TypeSystem.Constraint.Generation.Internal
@@ -21,15 +22,8 @@ import Control.Monad.RWS (MonadReader, asks, get)
 import Control.Monad.State (MonadState, StateT, modify, runStateT)
 import Control.Monad.Writer (MonadWriter, tell)
 import Data.List.Extra (groupSortOn)
-import Extras (
-  Dictionary,
-  Name,
-  concatMapM,
-  forM_,
- )
-
-import qualified Coal.Common.Environment as Environment
 import qualified Data.Map.Strict as Map
+import Extras (Dictionary, Name, concatMapM, forM_)
 
 type TypeAnnotationContext a = ConstraintsGenContext a TypeIndex Kind IndexedType
 
