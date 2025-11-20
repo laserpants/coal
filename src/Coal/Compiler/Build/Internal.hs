@@ -714,7 +714,7 @@ prepareBuild (Module path exports defs) = do
         setExports (nameExports exports `union` Set.toList exps)
           . setTypeExports (typeExports exports `union` Set.toList typeExps)
 
-    return (Module path exports (defs <> defs1))
+    return (Module path exports (defs1 <> defs))
  where
   builtin =
     Set.fromList
