@@ -627,7 +627,7 @@ e2eSpec = do
       ]
 
   describe "139" $ do
-    it "is PreflightFailure" $ do
+    it "is TraitError" $ do
       res <-
         runSpec
           [ "./test/Coal/examples/139/Eq.coal"

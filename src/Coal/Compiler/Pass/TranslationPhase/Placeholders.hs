@@ -31,7 +31,7 @@ import Data.Generics.Uniplate.Data (descendM)
 import Data.List (nub)
 import Data.List.NonEmpty (NonEmpty (..), toList)
 import qualified Data.Map.Strict as Map
-import Data.Maybe (catMaybes, fromJust, isNothing)
+import Data.Maybe (catMaybes, fromJust)
 import Data.Text (isPrefixOf)
 import Extras (Dictionary, Name)
 
@@ -179,6 +179,10 @@ applyTraits loc (Label t name) =
       insert_ trait = do
         fields <- lookupTraitInstance loc trait
         case fields of
+          Nothing | not (isVariable trait) -> do
+            path <- gets compilerCurrentModule
+            tellErrors [MissingInstance trait (ErrorLocation (principalPath path) loc)]
+            throwError TraitError
           Nothing -> do
             tellDictionaryTraits [trait]
             pure (ETraitDictionary mempty (typeOf trait) trait)
@@ -265,12 +269,6 @@ expandConstantDefTraits name =
           pure $ ConstantDef loc with (With [] t) expr
         tr : trs -> do
           path <- gets compilerCurrentModule
-          forM_ (filter (not . isVariable) (tr : trs)) $
-            \tr1 -> do
-              m <- findFirstMatch tr1
-              when (isNothing m) $ do
-                tellErrors [MissingInstance tr1 (ErrorLocation (principalPath path) loc)]
-                throwError TraitError
           -- Insert default instance for Numeric trait, which is int32
           if "main" == name && Path ["Main"] == path && isNumericTrait tr
             then do
